@@ -105,18 +105,31 @@ public:
 
   virtual std::string focusingRunNo() const;
 
-  virtual int focusingBank() const;
+  virtual std::string focusingCroppedRunNo() const;
+
+  virtual std::string focusingTextureRunNo() const;
+
+  virtual std::vector<bool> focusingBanks() const;
+
+  virtual std::string focusingCroppedSpectrumIDs() const;
+
+  virtual std::string focusingTextureGroupingFile() const;
 
   virtual bool focusedOutWorkspace() const;
+
+  virtual void resetFocus();
 
   virtual void plotFocusedSpectrum();
 
 private slots:
-  /// for buttons, do calibrate and similar
+  /// for buttons, do calibrate, focus and similar
   void loadCalibrationClicked();
   void calibrateClicked();
   void focusClicked();
+  void focusCroppedClicked();
+  void focusTextureClicked();
 
+  void focusResetClicked();
 
   // slots of the settings tab/section of the interface
   void browseInputDirCalib();

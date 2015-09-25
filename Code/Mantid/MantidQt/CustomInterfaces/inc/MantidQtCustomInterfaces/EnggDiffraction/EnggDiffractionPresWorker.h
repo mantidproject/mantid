@@ -41,15 +41,15 @@ public:
   /// for calibration
   EnggDiffWorker(EnggDiffractionPresenter *pres, const std::string &outFilename,
                  const std::string &vanNo, const std::string &ceriaNo)
-      : m_pres(pres), m_outFilename(outFilename), m_vanNo(vanNo),
-        m_ceriaNo(ceriaNo), m_bank(-1) {}
+      : m_pres(pres), m_outFilenames(), m_outCalibFilename(outFilename),
+        m_vanNo(vanNo), m_ceriaNo(ceriaNo), m_banks() {}
 
   /// for focusing
   EnggDiffWorker(EnggDiffractionPresenter *pres, const std::string &outDir,
-                 const std::string &outFilename, const std::string &runNo,
-                 int bank)
-      : m_pres(pres), m_outFilename(outFilename), m_runNo(runNo),
-        m_outDir(outDir), m_bank(bank) {}
+                 const std::vector<std::string> &outFilenames,
+                 const std::string &runNo, const std::vector<bool> &banks)
+      : m_pres(pres), m_outFilenames(outFilenames), m_outCalibFilename(),
+        m_runNo(runNo), m_outDir(outDir), m_banks(banks) {}
 
 private slots:
 
@@ -58,7 +58,7 @@ private slots:
    * signal.
    */
   void calibrate() {
-    m_pres->doNewCalibration(m_outFilename, m_vanNo, m_ceriaNo);
+    m_pres->doNewCalibration(m_outCalibFilename, m_vanNo, m_ceriaNo);
     emit finished();
   }
 
@@ -67,7 +67,7 @@ private slots:
    * signal.
    */
   void focus() {
-    m_pres->doFocusRun(m_outDir, m_outFilename, m_runNo, m_bank);
+    m_pres->doFocusRun(m_outDir, m_outFilenames, m_runNo, m_banks);
     emit finished();
   }
 
@@ -77,13 +77,14 @@ signals:
 private:
   EnggDiffractionPresenter *m_pres;
   /// parameters for calibration
-  std::string m_outFilename, m_vanNo, m_ceriaNo;
+  const std::vector<std::string> m_outFilenames;
+  const std::string m_outCalibFilename, m_vanNo, m_ceriaNo;
   /// sample run to process
   const std::string m_runNo;
   /// Output directory
   const std::string m_outDir;
-  /// instrument bank
-  int m_bank;
+  /// instrument banks: do focus/don't
+  const std::vector<bool> m_banks;
 };
 
 } // namespace CustomInterfaces

@@ -53,8 +53,7 @@ void EnggDiffractionPresenter::cleanup() {
   if (m_workerThread) {
     if (m_workerThread->isRunning()) {
       g_log.notice() << "A calibration process is currently running, shutting "
-                        "it down immediately..."
-                     << std::endl;
+                        "it down immediately..." << std::endl;
       m_workerThread->wait(10);
     }
     delete m_workerThread;
@@ -80,7 +79,19 @@ void EnggDiffractionPresenter::notify(
     break;
 
   case IEnggDiffractionPresenter::FocusRun:
-    processFocusRun();
+    processFocusBasic();
+    break;
+
+  case IEnggDiffractionPresenter::FocusCropped:
+    processFocusCropped();
+    break;
+
+  case IEnggDiffractionPresenter::FocusTexture:
+    processFocusTexture();
+    break;
+
+  case IEnggDiffractionPresenter::ResetFocus:
+    processResetFocus();
     break;
 
   case IEnggDiffractionPresenter::LogMsg:
@@ -130,10 +141,8 @@ void EnggDiffractionPresenter::processCalcCalib() {
                         ia.what());
     return;
   }
-
   g_log.notice() << "EnggDiffraction GUI: starting new calibration. This may "
-                    "take a few seconds... "
-                 << std::endl;
+                    "take a few seconds... " << std::endl;
 
   const std::string outFilename = outputCalibFilename(vanNo, ceriaNo);
 
@@ -144,30 +153,95 @@ void EnggDiffractionPresenter::processCalcCalib() {
   startAsyncCalibWorker(outFilename, vanNo, ceriaNo);
 }
 
-void EnggDiffractionPresenter::processFocusRun() {
-  std::string runNo = m_view->focusingRunNo();
-  int bank = m_view->focusingBank();
+void EnggDiffractionPresenter::processFocusBasic() {
+  const std::string runNo = m_view->focusingRunNo();
+  const std::vector<bool> banks = m_view->focusingBanks();
+
   try {
-    inputChecksBeforeFocus(runNo, bank);
+    inputChecksBeforeFocusBasic(runNo, banks);
   } catch (std::invalid_argument &ia) {
     m_view->userWarning("Error in the inputs required to focus a run",
                         ia.what());
     return;
   }
 
-  g_log.notice() << "EnggDiffraction GUI: starting new focusing. This may take "
-                    "some seconds... "
-                 << std::endl;
+  startFocusing(runNo, banks, "", "");
+}
+
+void EnggDiffractionPresenter::processFocusCropped() {
+  const std::string runNo = m_view->focusingCroppedRunNo();
+  const std::vector<bool> banks = m_view->focusingBanks();
+  const std::string specIDs = m_view->focusingCroppedSpectrumIDs();
+
+  try {
+    inputChecksBeforeFocusCropped(runNo, banks, specIDs);
+  } catch (std::invalid_argument &ia) {
+    m_view->userWarning(
+        "Error in the inputs required to focus a run in cropped mode",
+        ia.what());
+    return;
+  }
+
+  startFocusing(runNo, banks, specIDs, "");
+}
+
+void EnggDiffractionPresenter::processFocusTexture() {
+  std::string runNo = m_view->focusingTextureRunNo();
+  const std::vector<bool> banks = m_view->focusingBanks();
+  std::string dgFile = m_view->focusingTextureGroupingFile();
+
+  try {
+    inputChecksBeforeFocusTexture(runNo, dgFile);
+  } catch (std::invalid_argument &ia) {
+    m_view->userWarning(
+        "Error in the inputs required to focus a run in texture mode",
+        ia.what());
+    return;
+  }
+
+  startFocusing(runNo, banks, "", dgFile);
+}
+
+/**
+ * Starts a focusing worker, for different modes depending on the
+ * inputs provided. Assumes that the inputs have been checked by the
+ * respective specific processFocus methods (for normal, cropped,
+ * texture, etc. focusing).
+ *
+ * @param runNo run/file number to focus
+ * @param banks banks to include in the focusing, processed one at a time
+ *
+ * @param specIDs list of spectra to use when focusing. If not empty
+ * this is focusing in cropped mode.
+ *
+ * @param dgFile detector grouping file to define banks (texture). If
+ * not empty, this is focusing in texture mode.
+ */
+void EnggDiffractionPresenter::startFocusing(const std::string &runNo,
+                                             const std::vector<bool> banks,
+                                             const std::string &specIDs,
+                                             const std::string &dgFile) {
+  std::string optMsg = "";
+  if (!specIDs.empty()) {
+    optMsg = " (cropped)";
+  } else if (!dgFile.empty()) {
+    optMsg = " (texture)";
+  }
+  g_log.notice() << "EnggDiffraction GUI: starting new focusing" << optMsg
+                 << ". This may take some seconds... " << std::endl;
 
   const std::string focusDir = m_view->focusingDir();
-  const std::string outFilename = outputFocusFilename(runNo, bank);
+  const std::vector<std::string> outFilenames =
+      outputFocusFilename(runNo, banks);
 
   m_view->enableCalibrateAndFocusActions(false);
   // GUI-blocking alternative:
-  // doFocusRun(focusDir, outFilename, runNo, bank)
+  // doFocusRun(focusDir, outFilenames, runNo, banks)
   // focusingFinished()
-  startAsyncFocusWorker(focusDir, outFilename, runNo, bank);
+  startAsyncFocusWorker(focusDir, outFilenames, runNo, banks);
 }
+
+void EnggDiffractionPresenter::processResetFocus() { m_view->resetFocus(); }
 
 void EnggDiffractionPresenter::processLogMsg() {
   std::vector<std::string> msgs = m_view->logMsgs();
@@ -336,9 +410,10 @@ void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
  * @param vanNo vanadium run number
  * @param ceriaNo ceria run number
  */
-void EnggDiffractionPresenter::startAsyncCalibWorker(
-    const std::string &outFilename, const std::string &vanNo,
-    const std::string &ceriaNo) {
+void
+EnggDiffractionPresenter::startAsyncCalibWorker(const std::string &outFilename,
+                                                const std::string &vanNo,
+                                                const std::string &ceriaNo) {
   delete m_workerThread;
   m_workerThread = new QThread(this);
   EnggDiffWorker *worker =
@@ -387,13 +462,11 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
   } catch (std::runtime_error &) {
     g_log.error() << "The calibration calculations failed. One of the "
                      "algorithms did not execute correctly. See log messages "
-                     "for details. "
-                  << std::endl;
+                     "for details. " << std::endl;
   } catch (std::invalid_argument &) {
     g_log.error()
         << "The calibration calculations failed. Some input properties "
-           "were not valid. See log messages for details. "
-        << std::endl;
+           "were not valid. See log messages for details. " << std::endl;
   }
   // restore normal data search paths
   conf.setDataSearchDirs(tmpDirs);
@@ -548,26 +621,111 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
 }
 
 /**
+ * Perform checks specific to normal/basic run focusing in addition to
+ * the general checks for any focusing (as done by
+ * inputChecksBeforeFocus() which is called from this method). Use
+ * always before running 'Focus'
+ *
+ * @param runNo run number to focus
+ * @param banks which banks to consider in the focusing
+ *
+ * @throws std::invalid_argument with an informative message.
+ */
+void EnggDiffractionPresenter::inputChecksBeforeFocusBasic(
+    const std::string &runNo, const std::vector<bool> &banks) {
+  if (runNo.empty()) {
+    const std::string msg = "The sample run number to focus cannot be "
+                            "empty and must be an integer number.";
+    throw std::invalid_argument(msg);
+  }
+
+  inputChecksBanks(banks);
+
+  inputChecksBeforeFocus();
+}
+
+/**
+ * Perform checks specific to focusing in "cropped" mode, in addition
+ * to the general checks for any focusing (as done by
+ * inputChecksBeforeFocus() which is called from this method). Use
+ * always before running 'FocusCropped'
+ *
+ * @param runNo run number to focus
+ * @param banks which banks to consider in the focusing
+ * @param specIDs list of spectra (as usual csv list of spectra in Mantid)
+ *
+ * @throws std::invalid_argument with an informative message.
+ */
+void EnggDiffractionPresenter::inputChecksBeforeFocusCropped(
+    const std::string &runNo, const std::vector<bool> &banks,
+    const std::string &specIDs) {
+  if (runNo.empty()) {
+    throw std::invalid_argument("To focus cropped the sample run number cannot "
+                                "be empty and must be an integer number.");
+  }
+
+  if (specIDs.empty()) {
+    throw std::invalid_argument("The list of spectrum IDs cannot be empty when "
+                                "focusing in 'cropped' mode.");
+  }
+
+  inputChecksBanks(banks);
+
+  inputChecksBeforeFocus();
+}
+
+/**
+ * Perform checks specific to focusing in "texture" mode, in addition
+ * to the general checks for any focusing (as done by
+ * inputChecksBeforeFocus() which is called from this method). Use
+ * always before running 'FocusCropped'
+ *
+ * @param runNo run number to focus
+ * @param dgFile file with detector grouping info
+ *
+ * @throws std::invalid_argument with an informative message.
+ */
+void EnggDiffractionPresenter::inputChecksBeforeFocusTexture(
+    const std::string &runNo, const std::string &dgFile) {
+  if (runNo.empty()) {
+    throw std::invalid_argument("To focus texture banks the sample run number "
+                                "cannot be empty and must be an integer "
+                                "number.");
+  }
+
+  if (dgFile.empty()) {
+    throw std::invalid_argument("A detector grouping file needs to be "
+                                "specified when focusing texture banks.");
+  }
+  inputChecksBeforeFocus();
+}
+
+void EnggDiffractionPresenter::inputChecksBanks(const std::vector<bool> &banks) {
+  if (0 == banks.size()) {
+    const std::string msg =
+        "Error in specification of banks found when starting the "
+        "focusing process. Cannot continue.";
+    g_log.error() << msg << std::endl;
+    throw std::invalid_argument(msg);
+  }
+  if (banks.end() == std::find(banks.begin(), banks.end(), true)) {
+    const std::string msg =
+        "EnggDiffraction GUI: not focusing, as all the banks "
+        "have been unselected. You probably forgot to select at least one.";
+    g_log.warning() << msg << std::endl;
+    throw std::invalid_argument(msg);
+  }
+}
+
+/**
  * Performs several checks on the current focusing inputs and
  * settings. This should be done before starting any focus work. The
  * message return should be shown to the user as a visible message
  * (pop-up, error log, etc.)
  *
- * @param runNo run number to focus
- * @param bank bank to focus
- *
  * @throws std::invalid_argument with an informative message.
  */
-void EnggDiffractionPresenter::inputChecksBeforeFocus(const std::string &runNo,
-                                                      int bank) {
-  if (runNo.empty()) {
-    throw std::invalid_argument(
-        "The sample run number cannot be empty and must be an integer number.");
-  }
-  if (bank < 1) {
-    throw std::invalid_argument("The bank number must be a positive integer.");
-  }
-
+void EnggDiffractionPresenter::inputChecksBeforeFocus() {
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
   const std::string pixelCalib = cs.m_pixelCalibFilename;
   if (pixelCalib.empty()) {
@@ -577,23 +735,28 @@ void EnggDiffractionPresenter::inputChecksBeforeFocus(const std::string &runNo,
 }
 
 /**
- * Builds the name of the output focused file, given the sample run
- * number and the bank to focus.
+ * Builds the names of the output focused files (one per bank), given
+ * the sample run number and which banks should be focused.
  *
  * @param runNo number of the run for which we want a focused output
  * file name
  *
- * @param bank bank number which is normally used as a suffix
+ * @param banks for every bank, (true/false) to consider it or not for
+ * the focusing
  *
- * @return filename (without the full path)
+ * @return filenames (without the full path)
  */
-std::string
+std::vector<std::string>
 EnggDiffractionPresenter::outputFocusFilename(const std::string &runNo,
-                                              int bank) {
+                                              const std::vector<bool> &banks) {
   const std::string instStr = m_view->currentInstrument();
 
-  return instStr + runNo + "_focused_bank_" +
-         boost::lexical_cast<std::string>(bank);
+  std::vector<std::string> res;
+  for (size_t b = 1; b <= banks.size(); b++) {
+    res.push_back(instStr + runNo + "_focused_bank_" +
+                  boost::lexical_cast<std::string>(banks[b]));
+  }
+  return res;
 }
 
 /**
@@ -603,17 +766,17 @@ EnggDiffractionPresenter::outputFocusFilename(const std::string &runNo,
  * Q_OBJECT.
  *
  * @param dir directory (full path) for the focused output files
- * @param outFilename full name for the output focused run
-o * @param runNo input run number
+ * @param outFilenames full names for the output focused runs
+ * @param runNo input run number
  * @param bank instrument bank to focus
  */
 void EnggDiffractionPresenter::startAsyncFocusWorker(
-    const std::string &dir, const std::string &outFilename,
-    const std::string &runNo, int bank) {
+    const std::string &dir, const std::vector<std::string> &outFilenames,
+    const std::string &runNo, const std::vector<bool> &banks) {
   delete m_workerThread;
   m_workerThread = new QThread(this);
   EnggDiffWorker *worker =
-      new EnggDiffWorker(this, dir, outFilename, runNo, bank);
+      new EnggDiffWorker(this, dir, outFilenames, runNo, banks);
   worker->moveToThread(m_workerThread);
 
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(focus()));
@@ -631,20 +794,19 @@ void EnggDiffractionPresenter::startAsyncFocusWorker(
  * push or similar from the user.
  *
  * @param dir directory (full path) for the output focused files
- * @param outFilename name for the output focused file
+ * @param outFilenames names for the output focused files (one per bank)
  * @param runNo input run number
- * @param bank bank number for the focusing
+ *
+ * @param banks for every bank, (true/false) to consider it or not for
+ * the focusing
  */
-void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
-                                          const std::string &outFilename,
-                                          const std::string &runNo, int bank) {
-  g_log.notice() << "Generating new focused file (bank " +
-                        boost::lexical_cast<std::string>(bank) + ") for run " +
-                        runNo + " into: "
-                 << outFilename << std::endl;
+void EnggDiffractionPresenter::doFocusRun(
+    const std::string &dir, const std::vector<std::string> &outFilenames,
+    const std::string &runNo, const std::vector<bool> &banks) {
+  g_log.notice() << "Generating new focusing workspace(s) and file(s) "
+                 << std::endl;
 
   Poco::Path fpath(dir);
-  const std::string fullFilename = fpath.append(outFilename).toString();
 
   // TODO: this is almost 100% common with doNewCalibrate() - refactor
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
@@ -660,18 +822,30 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
     conf.appendDataSearchDir(cs.m_inputDirRaw);
   }
 
-  try {
-    doFocusing(cs, fullFilename, runNo, bank);
-    m_focusFinishedOK = true;
-  } catch (std::runtime_error &) {
-    g_log.error() << "The focusing calculations failed. One of the algorithms"
-                     "did not execute correctly. See log messages for details."
-                  << std::endl;
-  } catch (std::invalid_argument &ia) {
-    g_log.error()
-        << "The focusing failed. Some input properties were not valid. "
-           "See log messages for details. Error: "
-        << ia.what() << std::endl;
+  // focus all requested banks
+  for (size_t bidx = 0; bidx < banks.size(); bidx++) {
+    if (!banks[bidx])
+      continue;
+
+    const std::string fullFilename =
+        fpath.append(outFilenames[bidx]).toString();
+    g_log.notice() << "Generating new focused file (bank " +
+                          boost::lexical_cast<std::string>(bidx + 1) +
+                          ") for run " + runNo +
+                          " into: " << outFilenames[bidx] << std::endl;
+    try {
+      doFocusing(cs, fullFilename, runNo, bidx + 1);
+      m_focusFinishedOK = true;
+    } catch (std::runtime_error &) {
+      g_log.error()
+          << "The focusing calculations failed. One of the algorithms"
+             "did not execute correctly. See log messages for details."
+          << std::endl;
+    } catch (std::invalid_argument &ia) {
+      g_log.error()
+          << "The focusing failed. Some input properties were not valid. "
+             "See log messages for details. Error: " << ia.what() << std::endl;
+    }
   }
 
   // restore initial data search paths
@@ -707,13 +881,14 @@ void EnggDiffractionPresenter::focusingFinished() {
  * @param cs user settings for calibration (this does not calibrate but
  * uses calibration input files such as vanadium runs
  *
- * @param fullFilename full paht for the output (focused) filename
+ * @param fullFilename full path for the output (focused) filename
  * @param runNo input run to focus
  * @param bank instrument bank to focus
  */
 void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
                                           const std::string &fullFilename,
-                                          const std::string &runNo, int bank) {
+                                          const std::string &runNo,
+                                          size_t bank) {
   ITableWorkspace_sptr vanIntegWS;
   MatrixWorkspace_sptr vanCurvesWS;
   MatrixWorkspace_sptr inWS;
@@ -833,8 +1008,7 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                        "This is possibly because some of the settings are not "
                        "consistent. Please check the log messages for "
                        "details. Details: " +
-                           std::string(ia.what())
-                    << std::endl;
+                           std::string(ia.what()) << std::endl;
       throw;
     } catch (std::runtime_error &re) {
       g_log.error() << "Failed to calculate Vanadium corrections. "
@@ -843,8 +1017,7 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                        "There was no obvious error in the input properties "
                        "but the algorithm failed. Please check the log "
                        "messages for details." +
-                           std::string(re.what())
-                    << std::endl;
+                           std::string(re.what()) << std::endl;
       throw;
     }
   } else {

@@ -41,7 +41,10 @@ public:
     Start,                 ///< Start and setup interface
     LoadExistingCalib,     ///< Load a calibration already availble on disk
     CalcCalib,             ///< Calculate a (new) calibration
-    FocusRun,              ///< Focus a run file
+    FocusRun,              ///< Focus one or more run files
+    FocusCropped,          ///< Focus one or more run files, cropped variant
+    FocusTexture,          ///< Focus one or more run files, texture variant
+    ResetFocus,            ///< Re-set / clear all focus inputs and options
     LogMsg,                ///< need to send a message to the Mantid log system
     InstrumentChange,      ///< Instrument selection updated
     ShutDown               ///< closing the interface
