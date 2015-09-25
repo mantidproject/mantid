@@ -220,28 +220,6 @@ void ApplyPaalmanPings::absCorComplete(bool error) {
   if (save)
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
 
-  IAlgorithm_sptr addLogCorr =
-      AlgorithmManager::Instance().create("AddSampleLog");
-  addLogCorr->initialize();
-  addLogCorr->setProperty("Workspace", m_pythonExportWsName);
-  addLogCorr->setProperty("LogName", "correction_filename");
-  addLogCorr->setProperty(
-      "LogText", m_uiForm.dsCorrections->getCurrentDataName().toStdString());
-  addLogCorr->setProperty("LogType", "String");
-
-  m_batchAlgoRunner->addAlgorithm(addLogCorr);
-
-  IAlgorithm_sptr addLogSample =
-      AlgorithmManager::Instance().create("AddSampleLog");
-  addLogSample->initialize();
-  addLogSample->setProperty("Workspace", m_pythonExportWsName);
-  addLogSample->setProperty("LogName", "sample_filename");
-  addLogSample->setProperty(
-      "LogText", m_uiForm.dsSample->getCurrentDataName().toStdString());
-  addLogSample->setProperty("LogType", "String");
-
-  m_batchAlgoRunner->addAlgorithm(addLogSample);
-
   // Run algorithm queue
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(postProcessComplete(bool)));
