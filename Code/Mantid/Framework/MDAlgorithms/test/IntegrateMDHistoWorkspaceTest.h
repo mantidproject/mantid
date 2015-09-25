@@ -106,60 +106,8 @@ public:
     TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
     TSM_ASSERT_THROWS("Step has been specified", alg.execute(), std::runtime_error&);
   }
-  void test_binning_when_similar_with_extents_as_pbins(){
-#if 0
-      using namespace Mantid::DataObjects;
-      MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 7); //3 dimensions, 10 bins
-      IntegrateMDHistoWorkspace alg;
-      alg.setChild(true);
-      alg.setRethrows(true);
-      alg.initialize();
-      alg.setProperty("InputWorkspace", ws);
-      alg.setPropertyValue("OutputWorkspace", "output_ws");
-      double max_first_dim = ws->getDimension(0)->getMaximum();
-      double min_first_dim = ws->getDimension(0)->getMinimum();
-      double max_second_dim = ws->getDimension(1)->getMaximum();
-      double min_second_dim = ws->getDimension(1)->getMinimum();
-      double max_third_dim = ws->getDimension(2)->getMaximum();
-      double min_third_dim = ws->getDimension(2)->getMinimum();
-      double step = 0.0;
-      alg.setProperty("P1Bin", boost::assign::list_of(min_first_dim)(step)(max_first_dim).convert_to_container<std::vector<double> >());
-      alg.setProperty("P2Bin", boost::assign::list_of(min_second_dim)(step)(max_second_dim).convert_to_container<std::vector<double> >());
-      alg.setProperty("P3Bin", boost::assign::list_of(min_third_dim)(step)(max_third_dim).convert_to_container<std::vector<double> >());
-      TSM_ASSERT_THROWS_NOTHING("Shouldn't Throw an error: ", alg.execute());
 
-      //checking the extents of the output workspace from the integration alg
-      IMDHistoWorkspace_sptr output = alg.getProperty("OutputWorkspace");
-      /*TS_ASSERT_EQUALS(output->getNumDims(), ws->getNumDims());
-      TS_ASSERT_EQUALS(output->getNPoints(), ws->getNPoints());
-      TS_ASSERT_EQUALS(output->getSignalAt(0), ws->getSignalAt(0));
-      TS_ASSERT_EQUALS(output->getSignalAt(1), ws->getSignalAt(1));*/
 
-      // Because we integrated with similar binning method from min to max extents, nothing should happen.
-      //extents for first dimension
-      TS_ASSERT_EQUALS(output->getDimension(0)->getMinimum(),ws->getDimension(0)->getMinimum());
-      TS_ASSERT_EQUALS(output->getDimension(0)->getMaximum(),ws->getDimension(0)->getMaximum());
-      std::cout << "COMPARE MIN EXTENTS DIMENSION 1: " << "out: " << output->getDimension(0)->getMinimum();
-      std::cout << " input: " << ws->getDimension(0)->getMinimum() << "\n";
-      std::cout << "COMPARE MAX EXTENTS DIMENSION 1: " << "out: " << output->getDimension(0)->getMaximum();
-      std::cout << " input: " << ws->getDimension(0)->getMaximum() << "\n";
-      //extents for second dimension
-      TS_ASSERT_EQUALS(output->getDimension(1)->getMinimum(),ws->getDimension(1)->getMinimum());
-      TS_ASSERT_EQUALS(output->getDimension(1)->getMaximum(),ws->getDimension(1)->getMaximum());
-      std::cout << "COMPARE MIN EXTENTS DIMENSION 2: " << "out: " << output->getDimension(1)->getMinimum();
-      std::cout << " input: " << ws->getDimension(1)->getMinimum() << "\n";
-      std::cout << "COMPARE MAX EXTENTS DIMENSION 2: " << "out: " << output->getDimension(1)->getMaximum();
-      std::cout << " input: " << ws->getDimension(1)->getMaximum() << "\n";
-      //extents for third dimension
-      TS_ASSERT_EQUALS(output->getDimension(2)->getMinimum(),ws->getDimension(2)->getMinimum());
-      TS_ASSERT_EQUALS(output->getDimension(2)->getMaximum(),ws->getDimension(2)->getMaximum());
-      std::cout << "COMPARE MIN EXTENTS DIMENSION 3: " << "out: " << output->getDimension(2)->getMinimum();
-      std::cout << " input: " << ws->getDimension(2)->getMinimum() << "\n";
-      std::cout << "COMPARE MAX EXTENTS DIMENSION 3: " << "out: " << output->getDimension(2)->getMaximum();
-      std::cout << " input: " << ws->getDimension(2)->getMaximum() << "\n";
-
-#endif
-  }
   // Users may set all binning parameter to [] i.e. direct copy, no integration.
   void test_exec_do_nothing_but_clone()
   {
