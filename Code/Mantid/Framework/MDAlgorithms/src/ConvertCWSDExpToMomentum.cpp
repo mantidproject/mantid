@@ -83,8 +83,6 @@ void ConvertCWSDExpToMomentum::exec() {
     throw std::runtime_error(errmsg);
   }
 
-  g_log.notice("[DB] Inputs are examined.");
-
   // Create output MDEventWorkspace
   m_outputWS = createExperimentMDWorkspace();
 
@@ -387,9 +385,9 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
     ++nummdevents;
   }
 
-  g_log.notice() << "[DB] New Matrixworkspace: Max. Signal = " << maxsignal
-                 << ", Add " << nummdevents << " MDEvents "
-                 << "\n";
+  g_log.information() << "Imported Matrixworkspace: Max. Signal = " << maxsignal
+                      << ", Add " << nummdevents << " MDEvents "
+                      << "\n";
 
   // Add experiment info including instrument, goniometer and run number
   ExperimentInfo_sptr expinfo = boost::make_shared<ExperimentInfo>();
@@ -450,8 +448,8 @@ bool ConvertCWSDExpToMomentum::getInputs(bool virtualinstrument,
     m_detectorListTableWS = getProperty("DetectorTableWorkspace");
     const std::vector<std::string> detcolnames =
         m_detectorListTableWS->getColumnNames();
-    if (detcolnames.size() != 4) {
-      errss << "Detector table (DetectorTableWorkspace) must have 4 columns"
+    if (detcolnames.size() != 5) {
+      errss << "Detector table (DetectorTableWorkspace) must have 5 columns"
             << "\n";
     }
 
@@ -482,7 +480,6 @@ bool ConvertCWSDExpToMomentum::getInputs(bool virtualinstrument,
     m_dataDir = getPropertyValue("Directory");
 
   errmsg = errss.str();
-  g_log.notice() << "[DB] Error message of size " << errmsg.size() << "\n";
 
   return (errmsg.size() == 0);
 }

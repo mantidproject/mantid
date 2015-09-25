@@ -154,13 +154,15 @@ private:
     dettable->addColumn("double", "X");
     dettable->addColumn("double", "Y");
     dettable->addColumn("double", "Z");
+    dettable->addColumn("int", "OriginalDetID");
     for (size_t i = 0; i < 256; ++i)
     {
       TableRow detrow = dettable->appendRow();
       double x = 0.38+static_cast<double>(i-128)*0.001;
       double y = 0;
       double z = 0.38+static_cast<double>(i-128)*0.001;
-      detrow << static_cast<int>(i) + 1 << x << y << z;
+      int detid = static_cast<int>(i) + 1;
+      detrow << detid << x << y << z << detid;
     }
 
     m_detectorTableWS = boost::dynamic_pointer_cast<ITableWorkspace>(dettable);

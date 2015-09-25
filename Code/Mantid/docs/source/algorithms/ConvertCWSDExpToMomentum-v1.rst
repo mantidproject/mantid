@@ -103,6 +103,21 @@ MDEventWorkspace
 There is only one *virtual* instrument and *N* ExperimentInfo.  
 *N* is the total number of experiment points in the *experiment*. 
 
+Inconsistency between using virtual instrument and copying instrument
+=====================================================================
+
+Result can be seen from FindPeaksMD().
+Instruments are different.
+Virtual instrument:  CompAssembly::testIntersectionWithChildren()
+Copying instrument:  RectangularDetector::testIntersectionWithChildren()
+
+Use cases
+---------
+
+2theta scan... virtual instrument
+omega scan, phi scan... copy instrument
+
+
 
 Usage
 -----
