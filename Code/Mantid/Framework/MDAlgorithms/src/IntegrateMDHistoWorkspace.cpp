@@ -191,13 +191,11 @@ createShapedOutput(IMDHistoWorkspace const *const inWS,
               binning.back()) /*max*/); // Set custom min, max and nbins.
     } else if( i < pbins.size() && similarBinning(pbins[i]) ) {
       auto binning = pbins[i];
-      const double width = inDim->getBinWidth(); // Take the width from the input dimension
       Mantid::coord_t pMin = static_cast<Mantid::coord_t>(binning.front());
       Mantid::coord_t pMax = static_cast<Mantid::coord_t>(binning.back());
       size_t numberOfBins;
 
       setMinMaxBins(pMin, pMax, numberOfBins, inDim, logger);
-
       outDim->setRange(
           numberOfBins,
           static_cast<Mantid::coord_t>(pMin) /*min*/,
