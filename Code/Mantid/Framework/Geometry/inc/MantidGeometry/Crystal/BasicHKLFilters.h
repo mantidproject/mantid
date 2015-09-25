@@ -93,7 +93,9 @@ public:
   std::string getDescription() const;
   bool isAllowed(const Kernel::V3D &hkl) const;
 
-protected:
+private:
+  void checkProperDRangeValues();
+
   UnitCell m_cell;
   double m_dmin, m_dmax;
 };

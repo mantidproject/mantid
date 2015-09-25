@@ -7,11 +7,15 @@ namespace Geometry {
 HKLFilterDRange::HKLFilterDRange(const UnitCell &cell, double dMin)
     : m_cell(cell), m_dmin(dMin) {
   m_dmax = std::max(m_cell.a(), std::max(m_cell.b(), m_cell.c()));
+
+  checkProperDRangeValues();
 }
 
 /// Constructor with explicit dMax.
 HKLFilterDRange::HKLFilterDRange(const UnitCell &cell, double dMin, double dMax)
-    : m_cell(cell), m_dmin(dMin), m_dmax(dMax) {}
+    : m_cell(cell), m_dmin(dMin), m_dmax(dMax) {
+  checkProperDRangeValues();
+}
 
 /// Returns a description containing the parameters of the filter.
 std::string HKLFilterDRange::getDescription() const {
@@ -26,6 +30,21 @@ bool HKLFilterDRange::isAllowed(const Kernel::V3D &hkl) const {
   double d = m_cell.d(hkl);
 
   return d >= m_dmin && d <= m_dmax;
+}
+
+/// Throws exception if m_dMin or m_dMax is <= 0 or if m_dMax < m_dMin.
+void HKLFilterDRange::checkProperDRangeValues() {
+  if (m_dmin <= 0.0) {
+    throw std::range_error("dMin cannot be <= 0.");
+  }
+
+  if (m_dmax <= 0.0) {
+    throw std::range_error("dMax cannot be <= 0.");
+  }
+
+  if (m_dmax <= m_dmin) {
+    throw std::range_error("dMax cannot be smaller than dMin.");
+  }
 }
 
 /// Constructor, throws exception if the supplied pointer is invalid.
