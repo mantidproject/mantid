@@ -76,6 +76,7 @@ void MultiDatasetFit::initLayout()
   connect(m_dataController,SIGNAL(dataTableUpdated()),m_plotController,SLOT(tableUpdated()));
   connect(m_dataController,SIGNAL(dataSetUpdated(int)),m_plotController,SLOT(updateRange(int)));
   connect(m_dataController,SIGNAL(dataTableUpdated()),this,SLOT(setLogNames()));
+  connect(m_dataController,SIGNAL(dataTableUpdated()),this,SLOT(invalidateOutput()));
   connect(m_plotController,SIGNAL(fittingRangeChanged(int, double, double)),m_dataController,SLOT(setFittingRange(int, double, double)));
   connect(m_uiForm.cbShowDataErrors,SIGNAL(toggled(bool)),m_plotController,SLOT(showDataErrors(bool)));
   connect(m_uiForm.btnToVisibleRange,SIGNAL(clicked()),m_plotController,SLOT(resetRange()));
@@ -148,6 +149,12 @@ void MultiDatasetFit::createPlotToolbar()
 
   m_uiForm.horizontalLayout->insertWidget(3,toolBar);
 
+}
+
+/// Get the name of the output workspace
+QString MultiDatasetFit::getOutputWorkspaceName() const
+{
+  return QString::fromStdString(m_outputWorkspaceName);
 }
 
 /// Create a multi-domain function to fit all the spectra in the data table.
@@ -236,7 +243,14 @@ void MultiDatasetFit::fitSimultaneous()
       fit->setPropertyValue("Output",m_outputWorkspaceName);
       m_fitOptionsBrowser->setProperty("Output","out");
     }
-    m_outputWorkspaceName += "_Workspaces";
+    if (n == 1)
+    {
+      m_outputWorkspaceName += "_Workspace";
+    }
+    else
+    {
+      m_outputWorkspaceName += "_Workspaces";
+    }
 
     m_fitRunner.reset( new API::AlgorithmRunner() );
     connect( m_fitRunner.get(),SIGNAL(algorithmComplete(bool)), this, SLOT(finishFit(bool)), Qt::QueuedConnection );
@@ -597,6 +611,14 @@ void MultiDatasetFit::setLogNames()
     catch (...) 
     {/*Maybe the data table hasn't updated yet*/}
   }
+}
+
+/// Invalidate the previous fit output
+void MultiDatasetFit::invalidateOutput()
+{
+  m_outputWorkspaceName = "";
+  m_plotController->clear();
+  m_plotController->update();
 }
 
 } // CustomInterfaces
