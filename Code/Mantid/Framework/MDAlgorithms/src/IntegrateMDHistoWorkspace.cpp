@@ -126,7 +126,6 @@ void setMinMaxBins(Mantid::coord_t &pMin, Mantid::coord_t &pMax,
   // Get workspace extents
   const Mantid::coord_t width = dimension->getBinWidth();
   const Mantid::coord_t max = dimension->getMaximum();
-  const Mantid::coord_t min = dimension->getMinimum();
 
   // Get offset between origin and next bin boundary towards the max value
   const Mantid::coord_t offset = fmod(max,width);
