@@ -38,26 +38,6 @@
   </component>
   <type name="chopper-position" is="ChopperPos"></type>  
   
-  <component type="fermi-chopper">
-    <location y="0." z="-2." />
-    <parameter name="Speed (Hz)">
-      <logfile id="chopper_speed" extract-single-value-as="last_value" />
-    </parameter>
-    <parameter name="Delay (us)">
-      <logfile id="chopper_delay" extract-single-value-as="last_value" />
-      <description is="Delay is the time between the moment when beam hits moderator and the moment, 
-	  when neutron passes through chopper for the first time."/>
-    </parameter>
-  </component>
-  <type name="fermi-chopper" is="chopper">
-    <cylinder id="body">
-        <centre-of-bottom-base x="0.0" y="0.0" z="0.0" />
-        <axis x="0.0" y="1.0" z="0.0" /> 
-        <radius val="0.13" />
-        <height val="0.2" />
-    </cylinder>
-  </type>  
-  
 
   
   <!--  SOURCE AND SAMPLE POSITION -->
