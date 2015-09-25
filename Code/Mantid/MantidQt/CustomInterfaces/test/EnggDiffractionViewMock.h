@@ -80,8 +80,20 @@ public:
   // virtual std::string focusingRunNo() const;
   MOCK_CONST_METHOD0(focusingRunNo, std::string());
 
+  // virtual std::string focusingCroppedRunNo() const;
+  MOCK_CONST_METHOD0(focusingCroppedRunNo, std::string());
+
+  // virtual std::string focusingTextureRunNo() const;
+  MOCK_CONST_METHOD0(focusingTextureRunNo, std::string());
+
   // virtual int focusingBank() const;
-  MOCK_CONST_METHOD0(focusingBank, int());
+  MOCK_CONST_METHOD0(focusingBanks, std::vector<bool>());
+
+  // virtual std::string focusingCroppedSpectrumIDs() const;
+  MOCK_CONST_METHOD0(focusingCroppedSpectrumIDs, std::string());
+
+  // virtual std::string focusingTextureGroupingFile() const;
+  MOCK_CONST_METHOD0(focusingTextureGroupingFile, std::string());
 
   // virtual bool focusedOutWorkspace() const;
   MOCK_CONST_METHOD0(focusedOutWorkspace, bool());

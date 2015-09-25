@@ -23,16 +23,17 @@ public:
 private:
   // not async at all
   void startAsyncCalibWorker(const std::string &outFilename,
-                            const std::string &vanNo,
-                            const std::string &ceriaNo) {
+                             const std::string &vanNo,
+                             const std::string &ceriaNo) {
     doNewCalibration(outFilename, vanNo, ceriaNo);
     calibrationFinished();
   }
 
   void startAsyncFocusWorker(const std::string &dir,
-                             const std::string &outFilename,
-                             const std::string &runNo, int bank) {
-    doFocusRun(dir, outFilename, runNo, bank);
+                             const std::vector<std::string> &outFilenames,
+                             const std::string &runNo,
+                             const std::vector<bool> banks) {
+    doFocusRun(dir, outFilenames, runNo, banks);
     focusingFinished();
   }
 };
@@ -59,6 +60,9 @@ public:
     m_view.reset(new testing::NiceMock<MockEnggDiffractionView>());
     m_presenter.reset(
         new MantidQt::CustomInterfaces::EnggDiffractionPresenter(m_view.get()));
+
+    m_ex_enginx_banks.push_back(true);
+    m_ex_enginx_banks.push_back(false);
   }
 
   void tearDown() {
@@ -223,6 +227,13 @@ public:
                               "_both_banks.prm")).Times(0);
     //  .WillOnce(Return(filename)); // if enabled ask user output filename
 
+    // Should not try to use options for focusing
+    EXPECT_CALL(mockView, focusingRunNo()).Times(0);
+    EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
+    EXPECT_CALL(mockView, focusingTextureRunNo()).Times(0);
+    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
+    EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
+
     // should disable actions at the beginning of the calculations
     EXPECT_CALL(mockView, enableCalibrateAndFocusActions(false)).Times(1);
 
@@ -240,7 +251,7 @@ public:
     EXPECT_CALL(mockView, newCalibLoaded(testing::_, testing::_, testing::_))
         .Times(0);
 
-    //TS_ASSERT_THROWS_NOTHING(pres.notify(IEnggDiffractionPresenter::CalcCalib));
+    // TS_ASSERT_THROWS_NOTHING(pres.notify(IEnggDiffractionPresenter::CalcCalib));
     pres.notify(IEnggDiffractionPresenter::CalcCalib);
   }
 
@@ -267,8 +278,7 @@ public:
 
     // empty run number!
     EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return(""));
-    // any bank will do
-    EXPECT_CALL(mockView, focusingBank()).Times(1).WillOnce(Return(1));
+    EXPECT_CALL(mockView, focusingBanks()).Times(0);
 
     // should not get that far that it tries to get these parameters
     EXPECT_CALL(mockView, currentInstrument()).Times(0);
@@ -281,17 +291,21 @@ public:
     pres.notify(IEnggDiffractionPresenter::FocusRun);
   }
 
-  void test_focusWithRunNumberButWrongBank() {
+  void test_focusWithRunNumberButWrongBanks() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
     EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return("999999"));
-    // negative bank number!
-    EXPECT_CALL(mockView, focusingBank()).Times(1).WillOnce(Return(-34));
+    // missing bank on/off vector!
+    EXPECT_CALL(mockView, focusingBanks()).Times(0);
+
+    // needs basic calibration settings from the user to start focusing
+    EnggDiffCalibSettings calibSettings;
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(1).WillOnce(
+        Return(calibSettings));
 
     // should not get that far that it tries to get these parameters
     EXPECT_CALL(mockView, currentInstrument()).Times(0);
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
 
     // 1 warning pop-up to user, 0 errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -310,15 +324,20 @@ public:
     // pres(&mockView);
     EnggDiffPresenterNoThread pres(&mockView);
 
-    // empty run number!
+    // wrong run number!
     EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return("999999"));
-    // any bank will do
-    EXPECT_CALL(mockView, focusingBank()).Times(1).WillOnce(Return(1));
+    EXPECT_CALL(mockView, focusingBanks()).Times(0);
 
     // needs basic calibration settings from the user to start focusing
     EnggDiffCalibSettings calibSettings;
     EXPECT_CALL(mockView, currentCalibSettings()).Times(1).WillOnce(
         Return(calibSettings));
+
+    // Should not try to use options for other types of focusing
+    EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
+    EXPECT_CALL(mockView, focusingTextureRunNo()).Times(0);
+    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
+    EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
 
     // it should not get there
     EXPECT_CALL(mockView, enableCalibrateAndFocusActions(false)).Times(0);
@@ -338,7 +357,38 @@ public:
 
     // an example run available in unit test data:
     EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return("228061"));
-    EXPECT_CALL(mockView, focusingBank()).Times(1).WillOnce(Return(1));
+    EXPECT_CALL(mockView, focusingBanks()).Times(1).WillOnce(
+        Return(m_ex_enginx_banks));
+
+    // will need basic calibration settings from the user
+    EnggDiffCalibSettings calibSettings;
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(1).WillOnce(
+        Return(calibSettings));
+
+    // Should not try to use options for other types of focusing
+    EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
+    EXPECT_CALL(mockView, focusingTextureRunNo()).Times(0);
+    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
+    EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
+
+    // No errors/warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IEnggDiffractionPresenter::FocusRun);
+  }
+
+  void disabled_test_focusOK_allBanksOff() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+    // an example run available in unit test data:
+    EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return("228061"));
+    std::vector<bool> banks;
+    banks.push_back(false);
+    banks.push_back(false);
+    EXPECT_CALL(mockView, focusingBanks()).Times(1).WillOnce(
+        Return(banks));
 
     // will need basic calibration settings from the user
     EnggDiffCalibSettings calibSettings;
@@ -394,6 +444,8 @@ private:
   boost::scoped_ptr<testing::NiceMock<MockEnggDiffractionView>> m_view;
   boost::scoped_ptr<MantidQt::CustomInterfaces::EnggDiffractionPresenter>
       m_presenter;
+
+  std::vector<bool> m_ex_enginx_banks;
 };
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONPRESENTERTEST_H
