@@ -119,7 +119,7 @@ public:
 
   virtual void resetFocus();
 
-  virtual void plotFocusedSpectrum();
+  virtual void plotFocusedSpectrum(size_t bank, const std::string &suffix="bank");
 
 private slots:
   /// for buttons, do calibrate, focus and similar

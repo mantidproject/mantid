@@ -355,8 +355,9 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabFocus.pushButton_focus_texture->setEnabled(enable);
 }
 
-void EnggDiffractionViewQtGUI::plotFocusedSpectrum() {
-  std::string pyCode = "plotSpectrum('engggui_focusing_output_ws', 0)";
+void EnggDiffractionViewQtGUI::plotFocusedSpectrum(size_t bank, const std::string &suffix) {
+  std::string pyCode = "plotSpectrum('engggui_focusing_output_ws_" + suffix +"_" +
+                       boost::lexical_cast<std::string>(bank) + "', 0)";
 
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
@@ -383,7 +384,8 @@ EnggDiffractionViewQtGUI::writeOutCalibFile(const std::string &outFilename,
                                             const std::vector<double> &tzero) {
   // TODO: this is horrible and should not last much here.
   // Avoid running Python code
-  // Update this as soon as we have a more stable way of generating IPARM files
+  // Update this as soon as we have a more stable way of generating IPARM
+  // files
   // Writes a file doing this:
   // write_ENGINX_GSAS_iparam_file(output_file, difc, zero, ceria_run=241391,
   // vanadium_run=236516, template_file=None):

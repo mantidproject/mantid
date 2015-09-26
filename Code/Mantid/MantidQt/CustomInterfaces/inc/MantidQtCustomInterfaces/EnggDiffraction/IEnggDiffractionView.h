@@ -264,9 +264,14 @@ public:
 
   /**
   * Runs plotSpectrum function via python
+  *
+  * @param bank number of the focused workspace to plot
+  * @param suffix suffix used in the name of the output plot, for example: focused_ws_bank_1,
+  * focused_ws_texture_4, focused_ws_cropped_1
+  *
   * @returns single spectrum graph for focused output
   */
-  virtual void plotFocusedSpectrum() = 0;
+  virtual void plotFocusedSpectrum(size_t bank, const std::string &suffix="bank") = 0;
 };
 
 } // namespace CustomInterfaces

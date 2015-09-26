@@ -95,17 +95,17 @@ public:
   // virtual std::string focusingTextureGroupingFile() const;
   MOCK_CONST_METHOD0(focusingTextureGroupingFile, std::string());
 
-  // virtual bool focusedOutWorkspace() const;
-  MOCK_CONST_METHOD0(focusedOutWorkspace, bool());
-
-  // virtual void plotFocusedSpectrum();
-  MOCK_METHOD0(plotFocusedSpectrum, void());
-
   // virtual void resetFocus();
   MOCK_METHOD0(resetFocus, void());
 
+  // virtual bool focusedOutWorkspace() const;
+  MOCK_CONST_METHOD0(focusedOutWorkspace, bool());
+
   // void saveSettings() const;
   MOCK_CONST_METHOD0(saveSettings, void());
+
+  // virtual void plotFocusedSpectrum();
+  MOCK_METHOD2(plotFocusedSpectrum, void(size_t, const std::string&));
 };
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H

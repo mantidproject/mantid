@@ -716,8 +716,8 @@ EnggDiffractionPresenter::inputChecksBanks(const std::vector<bool> &banks) {
   }
   if (banks.end() == std::find(banks.begin(), banks.end(), true)) {
     const std::string msg =
-        "EnggDiffraction GUI: not focusing, as all the banks "
-        "have been unselected. You probably forgot to select at least one.";
+        "EnggDiffraction GUI: not focusing, as none of the banks "
+        "have been selected. You probably forgot to select at least one.";
     g_log.warning() << msg << std::endl;
     throw std::invalid_argument(msg);
   }
@@ -760,8 +760,12 @@ EnggDiffractionPresenter::outputFocusFilename(const std::string &runNo,
   std::vector<std::string> res;
   for (size_t b = 1; b <= banks.size(); b++) {
     res.push_back(instStr + runNo + "_focused_bank_" +
-                  boost::lexical_cast<std::string>(banks[b]));
+                  boost::lexical_cast<std::string>(b) + ".nxs");
   }
+
+  g_log.warning() << "Generatted file names: " << res[0] << " - " << res[1]
+                  << std::endl;
+
   return res;
 }
 
@@ -809,10 +813,8 @@ void EnggDiffractionPresenter::startAsyncFocusWorker(
 void EnggDiffractionPresenter::doFocusRun(
     const std::string &dir, const std::vector<std::string> &outFilenames,
     const std::string &runNo, const std::vector<bool> &banks) {
-  g_log.notice() << "Generating new focusing workspace(s) and file(s) "
-                 << std::endl;
-
-  Poco::Path fpath(dir);
+  g_log.notice() << "Generating new focusing workspace(s) and file(s) into "
+                    "this directory: " << dir << std::endl;
 
   // TODO: this is almost 100% common with doNewCalibrate() - refactor
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
@@ -833,6 +835,7 @@ void EnggDiffractionPresenter::doFocusRun(
     if (!banks[bidx])
       continue;
 
+    Poco::Path fpath(dir);
     const std::string fullFilename =
         fpath.append(outFilenames[bidx]).toString();
     g_log.notice() << "Generating new focused file (bank " +
@@ -924,7 +927,8 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     throw;
   }
 
-  const std::string outWSName = "engggui_focusing_output_ws";
+  const std::string outWSName = "engggui_focusing_output_ws_bank_" +
+                                boost::lexical_cast<std::string>(bank);
   try {
     auto alg = Algorithm::fromString("EnggFocus");
     alg->initialize();
@@ -937,9 +941,9 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     // alg->setProperty(DetectorPositions, TableWorkspace)
     alg->execute();
 
-    bool plotFocusedWS = m_view->focusedOutWorkspace();
+    const bool plotFocusedWS = m_view->focusedOutWorkspace();
     if (plotFocusedWS == true) {
-      m_view->plotFocusedSpectrum();
+      m_view->plotFocusedSpectrum(bank, "bank");
     }
 
   } catch (std::runtime_error &re) {
