@@ -8,10 +8,10 @@ Overview
 --------
 
 This custom interface integrates several tasks related to engineeering
-diffraction. The interface is under heavy development, and at the
-moment it only provides calibration related functionality. The
-following sections will describe the different sections or tabs of the
-interface.
+diffraction. It provides calibration and focusing functionality which
+can be expected to expand for next releases as it is under active
+development. The following sections describe the different tabs or
+functionality areas of the interface.
 
 .. interface:: Engineering Diffraction
   :align: center
@@ -63,8 +63,8 @@ The interface will also create workspaces that can be inspected in the
 workspaces window:
 
 1. The *engg_focusing_input_ws workspace* for the data being focused
-2. The *engg_focusing_input_ws workspace* for the corresponding
-   focused data
+2. The *engg_focusing_output_ws... workspace* for the corresponding
+   focused data (where the ... denotes a suffix explained below).
 
 Three focusing alternatives are provided:
 
@@ -75,11 +75,18 @@ Three focusing alternatives are provided:
    in a Detector Gropuing File.
 
 Depending on the alternative chosen, the focusing operation will
-include all the selected banks and all the spectra present in the
-input runs (first alternative: normal focusing), all the banks but
-only a list of spectra provided manually (second alternative: cropped
-focusing), or a user-defined list of banks provided in a file (third
-alternative: texture focusing)
+include different banks and/or combinations of spectra (detectors). In
+the firs option, normal focusing, all the selected banks and all the
+spectra present in the input runs are considered. In the second
+alternative, cropped focusing, all the banks are considered in
+principle but only a list of spectra provided manually are
+processed. In the third option, *texture focusing*, the banks are
+defined by a user-defined list of banks and corresponding spectrum IDs
+provided in a file. For these alternatives, the output focused
+workspace will take different suffixes: *_bank_1, _bank_2*, and so on
+for normal focusing, *_cropped* for cropped focusing, and
+*_texture_bank_1, _texture_bank_2*, and so on for texture focusing
+(using the bank IDs given in the detector grouping file).
 
 For texture focusing, the detector grouping file is a text (csv) file
 with one line per bank. Each line must contain at least two numeric

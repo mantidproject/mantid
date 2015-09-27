@@ -175,10 +175,10 @@ void EnggDiffractionPresenter::processFocusBasic() {
 void EnggDiffractionPresenter::processFocusCropped() {
   const std::string runNo = m_view->focusingCroppedRunNo();
   const std::vector<bool> banks = m_view->focusingBanks();
-  const std::string specIDs = m_view->focusingCroppedSpectrumIDs();
+  const std::string specNos = m_view->focusingCroppedSpectrumIDs();
 
   try {
-    inputChecksBeforeFocusCropped(runNo, banks, specIDs);
+    inputChecksBeforeFocusCropped(runNo, banks, specNos);
   } catch (std::invalid_argument &ia) {
     m_view->userWarning(
         "Error in the inputs required to focus a run (in cropped mode)",
@@ -186,7 +186,7 @@ void EnggDiffractionPresenter::processFocusCropped() {
     return;
   }
 
-  startFocusing(runNo, banks, specIDs, "");
+  startFocusing(runNo, banks, specNos, "");
 }
 
 void EnggDiffractionPresenter::processFocusTexture() {
@@ -214,7 +214,7 @@ void EnggDiffractionPresenter::processFocusTexture() {
  * @param runNo run/file number to focus
  * @param banks banks to include in the focusing, processed one at a time
  *
- * @param specIDs list of spectra to use when focusing. If not empty
+ * @param specNos list of spectra to use when focusing. If not empty
  * this implies focusing in cropped mode.
  *
  * @param dgFile detector grouping file to define banks (texture). If
@@ -222,11 +222,11 @@ void EnggDiffractionPresenter::processFocusTexture() {
  */
 void EnggDiffractionPresenter::startFocusing(const std::string &runNo,
                                              const std::vector<bool> &banks,
-                                             const std::string &specIDs,
+                                             const std::string &specNos,
                                              const std::string &dgFile) {
 
   std::string optMsg = "";
-  if (!specIDs.empty()) {
+  if (!specNos.empty()) {
     optMsg = " (cropped)";
   } else if (!dgFile.empty()) {
     optMsg = " (texture)";
@@ -240,9 +240,9 @@ void EnggDiffractionPresenter::startFocusing(const std::string &runNo,
 
   m_view->enableCalibrateAndFocusActions(false);
   // GUI-blocking alternative:
-  // doFocusRun(focusDir, outFilenames, runNo, banks, specIDs, dgFile)
+  // doFocusRun(focusDir, outFilenames, runNo, banks, specNos, dgFile)
   // focusingFinished()
-  startAsyncFocusWorker(focusDir, outFilenames, runNo, banks, specIDs, dgFile);
+  startAsyncFocusWorker(focusDir, outFilenames, runNo, banks, specNos, dgFile);
 }
 
 void EnggDiffractionPresenter::processResetFocus() { m_view->resetFocus(); }
@@ -656,19 +656,19 @@ void EnggDiffractionPresenter::inputChecksBeforeFocusBasic(
  *
  * @param runNo run number to focus
  * @param banks which banks to consider in the focusing
- * @param specIDs list of spectra (as usual csv list of spectra in Mantid)
+ * @param specNos list of spectra (as usual csv list of spectra in Mantid)
  *
  * @throws std::invalid_argument with an informative message.
  */
 void EnggDiffractionPresenter::inputChecksBeforeFocusCropped(
     const std::string &runNo, const std::vector<bool> &banks,
-    const std::string &specIDs) {
+    const std::string &specNos) {
   if (runNo.empty()) {
     throw std::invalid_argument("To focus cropped the sample run number cannot "
                                 "be empty and must be an integer number.");
   }
 
-  if (specIDs.empty()) {
+  if (specNos.empty()) {
     throw std::invalid_argument("The list of spectrum IDs cannot be empty when "
                                 "focusing in 'cropped' mode.");
   }
@@ -805,12 +805,12 @@ std::vector<std::string> EnggDiffractionPresenter::outputFocusTextureFilenames(
 void EnggDiffractionPresenter::startAsyncFocusWorker(
     const std::string &dir, const std::vector<std::string> &outFilenames,
     const std::string &runNo, const std::vector<bool> &banks,
-    const std::string &specIDs, const std::string &dgFile) {
+    const std::string &specNos, const std::string &dgFile) {
 
   delete m_workerThread;
   m_workerThread = new QThread(this);
   EnggDiffWorker *worker = new EnggDiffWorker(this, dir, outFilenames, runNo,
-                                              banks, specIDs, dgFile);
+                                              banks, specNos, dgFile);
   worker->moveToThread(m_workerThread);
 
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(focus()));
@@ -831,7 +831,7 @@ void EnggDiffractionPresenter::startAsyncFocusWorker(
  * @param outFilenames names for the output focused files (one per bank)
  * @param runNo input run number
  *
- * @param specIDs list of spectra to use when focusing. Not empty
+ * @param specNos list of spectra to use when focusing. Not empty
  * implies focusing in cropped mode.
  *
  * @param dgFile detector grouping file to define banks (texture). Not
@@ -843,7 +843,7 @@ void EnggDiffractionPresenter::startAsyncFocusWorker(
 void EnggDiffractionPresenter::doFocusRun(
     const std::string &dir, const std::vector<std::string> &outFilenames,
     const std::string &runNo, const std::vector<bool> &banks,
-    const std::string &specIDs, const std::string &dgFile) {
+    const std::string &specNos, const std::string &dgFile) {
 
   g_log.notice() << "Generating new focusing workspace(s) and file(s) into "
                     "this directory: " << dir << std::endl;
@@ -866,10 +866,10 @@ void EnggDiffractionPresenter::doFocusRun(
   std::vector<size_t> bankIDs;
   std::vector<std::string> effectiveFilenames;
   std::vector<std::string> specs;
-  if (!specIDs.empty()) {
+  if (!specNos.empty()) {
     // just to iterate once, but there's no real bank here
     bankIDs.push_back(0);
-    specs.push_back(specIDs); // one spectrum IDs list given by the user
+    specs.push_back(specNos); // one spectrum IDs list given by the user
     effectiveFilenames.push_back(outputFocusCroppedFilename(runNo));
   } else {
     if (dgFile.empty()) {
@@ -1013,13 +1013,13 @@ void EnggDiffractionPresenter::focusingFinished() {
  *
  * @param bank instrument bank number to focus
  *
- * @param specIDs string specifying a list of spectra (for cropped
+ * @param specNos string specifying a list of spectra (for cropped
  * focusing)
  */
 void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
                                           const std::string &fullFilename,
                                           const std::string &runNo, size_t bank,
-                                          const std::string &specIDs,
+                                          const std::string &specNos,
                                           const std::string &dgFile) {
   ITableWorkspace_sptr vanIntegWS;
   MatrixWorkspace_sptr vanCurvesWS;
@@ -1054,7 +1054,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   if (!dgFile.empty()) {
     outWSName = "engggui_focusing_output_ws_texture_bank_" +
                 boost::lexical_cast<std::string>(bank);
-  } else if (specIDs.empty()) {
+  } else if (specNos.empty()) {
     outWSName = "engggui_focusing_output_ws_bank_" +
                 boost::lexical_cast<std::string>(bank);
   } else {
@@ -1069,10 +1069,10 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     alg->setProperty("VanIntegrationWorkspace", vanIntegWS);
     alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
     // cropped / normal focusing
-    if (specIDs.empty()) {
+    if (specNos.empty()) {
       alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(bank));
     } else {
-      alg->setPropertyValue("SpectrumNumbers", specIDs);
+      alg->setPropertyValue("SpectrumNumbers", specNos);
     }
     // TODO: use detector positions (from calibrate full) when available
     // alg->setProperty(DetectorPositions, TableWorkspace)

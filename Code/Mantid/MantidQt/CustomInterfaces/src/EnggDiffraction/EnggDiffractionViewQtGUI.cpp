@@ -197,9 +197,43 @@ void EnggDiffractionViewQtGUI::readSettings() {
   m_uiTabCalib.lineEdit_new_ceria_num->setText(
       qs.value("user-params-new-ceria-num", "").toString());
 
+  m_uiTabCalib.lineEdit_new_vanadium_num->setText(
+      qs.value("user-params-new-vanadium-num", "").toString());
+
+  m_uiTabCalib.lineEdit_new_ceria_num->setText(
+      qs.value("user-params-new-ceria-num", "").toString());
+
+  // user params - focusing
+  m_uiTabFocus.lineEdit_run_num->setText(
+      qs.value("user-params-focus-runno", "").toString());
+
+  qs.beginReadArray("user-params-focus-bank_i");
+  qs.setArrayIndex(0);
+  m_uiTabFocus.checkBox_focus_bank1->setChecked(qs.value("value", true).toBool());
+  qs.setArrayIndex(1);
+  m_uiTabFocus.checkBox_focus_bank2->setChecked(qs.value("value", true).toBool());
+  qs.endArray();
+
+  m_uiTabFocus.lineEdit_cropped_run_num->setText(
+      qs.value("user-params-focus-cropped-runno", "").toString());
+
+  m_uiTabFocus.lineEdit_cropped_spec_ids->setText(
+      qs.value("user-params-focus-cropped-spectrum-nos", "").toString());
+
+  m_uiTabFocus.lineEdit_texture_run_num->setText(
+      qs.value("user-params-focus-texture-runno", "").toString());
+
+  m_uiTabFocus.lineEdit_texture_grouping_file->setText(
+      qs.value("user-params-focus-texture-detector-grouping-file", "")
+          .toString());
+
+  m_uiTabFocus.checkBox_FocusedWS->setChecked(
+      qs.value("user-params-focus-plot-ws", true).toBool());
+
   QString lastPath =
       MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
-  // TODO: this should become << >> operators on EnggDiffCalibSettings
+  // TODO: this should become << >> operators on
+  // EnggDiffCalibSettings
   m_calibSettings.m_inputDirCalib =
       qs.value("input-dir-calib-files", lastPath).toString().toStdString();
   m_calibSettings.m_inputDirRaw =
@@ -241,6 +275,29 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
               m_uiTabCalib.lineEdit_new_vanadium_num->text());
   qs.setValue("user-params-new-ceria-num",
               m_uiTabCalib.lineEdit_new_ceria_num->text());
+
+  // user params - focusing
+  qs.setValue("user-params-focus-runno", m_uiTabFocus.lineEdit_run_num->text());
+
+  qs.beginWriteArray("user-params-focus-bank_i");
+  qs.setArrayIndex(0);
+  qs.setValue("value", m_uiTabFocus.checkBox_focus_bank1->isChecked());
+  qs.setArrayIndex(1);
+  qs.setValue("value", m_uiTabFocus.checkBox_focus_bank2->isChecked());
+  qs.endArray();
+
+  qs.setValue("user-params-focus-cropped-runno",
+              m_uiTabFocus.lineEdit_cropped_run_num->text());
+  qs.setValue("user-params-focus-cropped-spectrum-nos",
+              m_uiTabFocus.lineEdit_cropped_spec_ids->text());
+
+  qs.setValue("user-params-focus-texture-runno",
+              m_uiTabFocus.lineEdit_texture_run_num->text());
+  qs.setValue("user-params-focus-texture-detector-grouping-file",
+              m_uiTabFocus.lineEdit_texture_grouping_file->text());
+
+  qs.setValue("user-params-focus-plot-ws",
+              m_uiTabFocus.checkBox_FocusedWS->checkState());
 
   // TODO: this should become << >> operators on EnggDiffCalibSettings
   qs.setValue("input-dir-calib-files",

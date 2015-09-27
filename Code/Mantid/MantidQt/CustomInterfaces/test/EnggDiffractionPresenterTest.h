@@ -287,6 +287,8 @@ public:
     EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
     EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
     EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
+    EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
+    EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
 
     // should not get that far that it tries to get these parameters
     EXPECT_CALL(mockView, currentInstrument()).Times(0);
@@ -316,6 +318,8 @@ public:
 
     // should not get that far that it tries to get these parameters
     EXPECT_CALL(mockView, currentInstrument()).Times(0);
+    EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
+    EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
 
     // 1 warning pop-up to user, 0 errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -349,6 +353,8 @@ public:
     EXPECT_CALL(mockView, focusingTextureRunNo()).Times(0);
     EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
     EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
+    EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
+    EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
 
     // it should not get there
     EXPECT_CALL(mockView, enableCalibrateAndFocusActions(false)).Times(0);
@@ -375,6 +381,10 @@ public:
     EnggDiffCalibSettings calibSettings;
     EXPECT_CALL(mockView, currentCalibSettings()).Times(1).WillOnce(
         Return(calibSettings));
+
+    // check automatic plotting
+    EXPECT_CALL(mockView, focusedOutWorkspace()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(1);
 
     // Should not try to use options for other types of focusing
     EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
@@ -405,6 +415,9 @@ public:
     EXPECT_CALL(mockView, currentCalibSettings()).Times(1).WillOnce(
         Return(calibSettings));
 
+    EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
+    EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
+
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
@@ -431,6 +444,8 @@ public:
     // should not get that far that it tries to get these parameters
     EXPECT_CALL(mockView, currentInstrument()).Times(0);
     EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
+    EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
+    EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
 
     // 1 warning pop-up to user, 0 errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -455,6 +470,8 @@ public:
     EXPECT_CALL(mockView, focusingRunNo()).Times(0);
     EXPECT_CALL(mockView, focusingTextureRunNo()).Times(0);
     EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
+    EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
+    EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
 
     // should not get that far that it tries to get these parameters
     EXPECT_CALL(mockView, currentInstrument()).Times(0);
@@ -483,6 +500,8 @@ public:
     EXPECT_CALL(mockView, focusingRunNo()).Times(0);
     EXPECT_CALL(mockView, focusingTextureRunNo()).Times(0);
     EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
+    EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
+    EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
 
     // should not get that far that it tries to get these parameters
     EXPECT_CALL(mockView, currentInstrument()).Times(0);
@@ -511,6 +530,9 @@ public:
     EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
     EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
 
+    EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
+    EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
+
     // 1 warning pop-up to user, 0 errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
@@ -535,6 +557,9 @@ public:
     EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
     EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
 
+    EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
+    EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
+
     // 1 warning pop-up to user, 0 errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
@@ -558,6 +583,9 @@ public:
 
     EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
     EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
+
+    EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
+    EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
 
     // 1 warning pop-up to user, 0 errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);

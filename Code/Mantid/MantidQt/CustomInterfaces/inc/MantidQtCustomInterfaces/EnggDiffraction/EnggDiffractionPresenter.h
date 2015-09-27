@@ -67,7 +67,7 @@ public:
   void doFocusRun(const std::string &dir,
                   const std::vector<std::string> &outFilenames,
                   const std::string &runNo, const std::vector<bool> &banks,
-                  const std::string &specIDs, const std::string &dgFile);
+                  const std::string &specNos, const std::string &dgFile);
 
 protected:
   void initialize();
@@ -118,21 +118,21 @@ private:
   //@{
   /// this may also need to be mocked up in tests
   void startFocusing(const std::string &runNo, const std::vector<bool> &banks,
-                     const std::string &specIDs = "",
+                     const std::string &specNos = "",
                      const std::string &dgFile = "");
 
   void startAsyncFocusWorker(const std::string &dir,
                              const std::vector<std::string> &outFilenames,
                              const std::string &runNo,
                              const std::vector<bool> &banks,
-                             const std::string &specIDs,
+                             const std::string &specNos,
                              const std::string &dgFile);
 
   void inputChecksBeforeFocusBasic(const std::string &runNo,
                                    const std::vector<bool> &banks);
   void inputChecksBeforeFocusCropped(const std::string &runNo,
                                      const std::vector<bool> &banks,
-                                     const std::string &specIDs);
+                                     const std::string &specNos);
   void inputChecksBeforeFocusTexture(const std::string &runNo,
                                      const std::string &dgfile);
   void inputChecksBeforeFocus();
@@ -153,7 +153,7 @@ private:
 
   void doFocusing(const EnggDiffCalibSettings &cs,
                   const std::string &fullFilename, const std::string &runNo,
-                  size_t bank, const std::string &specIDs,
+                  size_t bank, const std::string &specNos,
                   const std::string &dgFile);
 
   void loadOrCalcVanadiumWorkspaces(
