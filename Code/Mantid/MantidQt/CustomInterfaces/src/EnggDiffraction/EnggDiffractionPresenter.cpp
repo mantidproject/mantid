@@ -800,7 +800,7 @@ std::vector<std::string> EnggDiffractionPresenter::outputFocusTextureFilenames(
  * @param dir directory (full path) for the focused output files
  * @param outFilenames full names for the output focused runs
  * @param runNo input run number
- * @param bank instrument bank to focus
+ * @param banks instrument bank to focus
  * @param specNos list of spectra (as usual csv list of spectra in Mantid)
  * @param dgFile detector grouping file name
  */
