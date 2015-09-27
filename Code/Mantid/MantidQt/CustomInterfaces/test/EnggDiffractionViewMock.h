@@ -105,7 +105,7 @@ public:
   MOCK_CONST_METHOD0(saveSettings, void());
 
   // virtual void plotFocusedSpectrum();
-  MOCK_METHOD2(plotFocusedSpectrum, void(size_t, const std::string&));
+  MOCK_METHOD1(plotFocusedSpectrum, void(const std::string&));
 };
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H

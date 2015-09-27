@@ -119,7 +119,7 @@ public:
 
   virtual void resetFocus();
 
-  virtual void plotFocusedSpectrum(size_t bank, const std::string &suffix="bank");
+  virtual void plotFocusedSpectrum(const std::string &wsName);
 
 private slots:
   /// for buttons, do calibrate, focus and similar
@@ -129,14 +129,17 @@ private slots:
   void focusCroppedClicked();
   void focusTextureClicked();
 
-  void focusResetClicked();
-
   // slots of the settings tab/section of the interface
   void browseInputDirCalib();
   void browseInputDirRaw();
   void browsePixelCalibFilename();
   void browseTemplateGSAS_PRM();
   void browseDirFocusing();
+
+  // slots for the focusing options
+  void browseTextureDetGroupingFile();
+  void focusResetClicked();
+
   // slots of the calibration tab/section of the interface
 
   // slots of the general part of the interface
@@ -197,6 +200,9 @@ private:
   static const std::string g_iparmExtStr;
   /// supported file extensions string for the pixel (full) claibration
   static const std::string g_pixelCalibExt;
+  /// supported/suggested file extensions for the detector groups file
+  /// (focusing)
+  static const std::string g_DetGrpExtStr;
 
   /// presenter as in the model-view-presenter
   boost::scoped_ptr<IEnggDiffractionPresenter> m_presenter;

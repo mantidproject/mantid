@@ -8,6 +8,8 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
 
+#include <fstream>
+
 #include <boost/lexical_cast.hpp>
 
 #include <Poco/File.h>
@@ -28,6 +30,8 @@ Mantid::Kernel::Logger g_log("EngineeringDiffractionGUI");
 const std::string EnggDiffractionPresenter::g_enginxStr = "ENGINX";
 // discouraged at the moment
 const bool EnggDiffractionPresenter::g_askUserCalibFilename = false;
+const std::string EnggDiffractionPresenter::g_vanIntegrationWSName =
+    "engggui_vanadium_integration_ws";
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(NULL), m_calibFinishedOK(false), m_focusFinishedOK(false),
@@ -211,15 +215,16 @@ void EnggDiffractionPresenter::processFocusTexture() {
  * @param banks banks to include in the focusing, processed one at a time
  *
  * @param specIDs list of spectra to use when focusing. If not empty
- * this is focusing in cropped mode.
+ * this implies focusing in cropped mode.
  *
  * @param dgFile detector grouping file to define banks (texture). If
- * not empty, this is focusing in texture mode.
+ * not empty, this implies focusing in texture mode.
  */
 void EnggDiffractionPresenter::startFocusing(const std::string &runNo,
-                                             const std::vector<bool> banks,
+                                             const std::vector<bool> &banks,
                                              const std::string &specIDs,
                                              const std::string &dgFile) {
+
   std::string optMsg = "";
   if (!specIDs.empty()) {
     optMsg = " (cropped)";
@@ -231,13 +236,13 @@ void EnggDiffractionPresenter::startFocusing(const std::string &runNo,
 
   const std::string focusDir = m_view->focusingDir();
   const std::vector<std::string> outFilenames =
-      outputFocusFilename(runNo, banks);
+      outputFocusFilenames(runNo, banks);
 
   m_view->enableCalibrateAndFocusActions(false);
   // GUI-blocking alternative:
-  // doFocusRun(focusDir, outFilenames, runNo, banks)
+  // doFocusRun(focusDir, outFilenames, runNo, banks, specIDs, dgFile)
   // focusingFinished()
-  startAsyncFocusWorker(focusDir, outFilenames, runNo, banks);
+  startAsyncFocusWorker(focusDir, outFilenames, runNo, banks, specIDs, dgFile);
 }
 
 void EnggDiffractionPresenter::processResetFocus() { m_view->resetFocus(); }
@@ -753,18 +758,35 @@ void EnggDiffractionPresenter::inputChecksBeforeFocus() {
  * @return filenames (without the full path)
  */
 std::vector<std::string>
-EnggDiffractionPresenter::outputFocusFilename(const std::string &runNo,
-                                              const std::vector<bool> &banks) {
+EnggDiffractionPresenter::outputFocusFilenames(const std::string &runNo,
+                                               const std::vector<bool> &banks) {
   const std::string instStr = m_view->currentInstrument();
 
   std::vector<std::string> res;
   for (size_t b = 1; b <= banks.size(); b++) {
-    res.push_back(instStr + runNo + "_focused_bank_" +
+    res.push_back(instStr + "_" + runNo + "_focused_bank_" +
                   boost::lexical_cast<std::string>(b) + ".nxs");
   }
 
-  g_log.warning() << "Generatted file names: " << res[0] << " - " << res[1]
-                  << std::endl;
+  return res;
+}
+
+std::string
+EnggDiffractionPresenter::outputFocusCroppedFilename(const std::string &runNo) {
+  const std::string instStr = m_view->currentInstrument();
+
+  return instStr + "_" + runNo + "_focused_cropped.nxs";
+}
+
+std::vector<std::string> EnggDiffractionPresenter::outputFocusTextureFilenames(
+    const std::string &runNo, const std::vector<size_t> &bankIDs) {
+  const std::string instStr = m_view->currentInstrument();
+
+  std::vector<std::string> res;
+  for (size_t b = 0; b < bankIDs.size(); b++) {
+    res.push_back(instStr + "_" + runNo + "_focused_texture_bank_" +
+                  boost::lexical_cast<std::string>(bankIDs[b]) + ".nxs");
+  }
 
   return res;
 }
@@ -782,11 +804,13 @@ EnggDiffractionPresenter::outputFocusFilename(const std::string &runNo,
  */
 void EnggDiffractionPresenter::startAsyncFocusWorker(
     const std::string &dir, const std::vector<std::string> &outFilenames,
-    const std::string &runNo, const std::vector<bool> &banks) {
+    const std::string &runNo, const std::vector<bool> &banks,
+    const std::string &specIDs, const std::string &dgFile) {
+
   delete m_workerThread;
   m_workerThread = new QThread(this);
-  EnggDiffWorker *worker =
-      new EnggDiffWorker(this, dir, outFilenames, runNo, banks);
+  EnggDiffWorker *worker = new EnggDiffWorker(this, dir, outFilenames, runNo,
+                                              banks, specIDs, dgFile);
   worker->moveToThread(m_workerThread);
 
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(focus()));
@@ -807,12 +831,20 @@ void EnggDiffractionPresenter::startAsyncFocusWorker(
  * @param outFilenames names for the output focused files (one per bank)
  * @param runNo input run number
  *
+ * @param specIDs list of spectra to use when focusing. Not empty
+ * implies focusing in cropped mode.
+ *
+ * @param dgFile detector grouping file to define banks (texture). Not
+ * empty implies focusing in texture mode.
+ *
  * @param banks for every bank, (true/false) to consider it or not for
  * the focusing
  */
 void EnggDiffractionPresenter::doFocusRun(
     const std::string &dir, const std::vector<std::string> &outFilenames,
-    const std::string &runNo, const std::vector<bool> &banks) {
+    const std::string &runNo, const std::vector<bool> &banks,
+    const std::string &specIDs, const std::string &dgFile) {
+
   g_log.notice() << "Generating new focusing workspace(s) and file(s) into "
                     "this directory: " << dir << std::endl;
 
@@ -830,20 +862,49 @@ void EnggDiffractionPresenter::doFocusRun(
     conf.appendDataSearchDir(cs.m_inputDirRaw);
   }
 
+  // Prepare special inputs for "texture" focusing
+  std::vector<size_t> bankIDs;
+  std::vector<std::string> effectiveFilenames;
+  std::vector<std::string> specs;
+  if (!specIDs.empty()) {
+    // just to iterate once, but there's no real bank here
+    bankIDs.push_back(0);
+    specs.push_back(specIDs); // one spectrum IDs list given by the user
+    effectiveFilenames.push_back(outputFocusCroppedFilename(runNo));
+  } else {
+    if (dgFile.empty()) {
+      for (size_t bidx = 0; bidx < banks.size(); bidx++) {
+        if (banks[bidx]) {
+          bankIDs.push_back(bidx + 1);
+          specs.push_back("");
+          effectiveFilenames.push_back(outFilenames[bidx]);
+        }
+      }
+    } else {
+      try {
+        loadDetectorGroupingCSV(dgFile, bankIDs, specs);
+      } catch (std::runtime_error &re) {
+        g_log.error() << "Error loading detector grouping file: " + dgFile +
+                             ". Detailed error: " + re.what() << std::endl;
+        bankIDs.clear();
+        specs.clear();
+      }
+      effectiveFilenames = outputFocusTextureFilenames(runNo, bankIDs);
+    }
+  }
+
   // focus all requested banks
-  for (size_t bidx = 0; bidx < banks.size(); bidx++) {
-    if (!banks[bidx])
-      continue;
+  for (size_t idx = 0; idx < bankIDs.size(); idx++) {
 
     Poco::Path fpath(dir);
     const std::string fullFilename =
-        fpath.append(outFilenames[bidx]).toString();
+        fpath.append(effectiveFilenames[idx]).toString();
     g_log.notice() << "Generating new focused file (bank " +
-                          boost::lexical_cast<std::string>(bidx + 1) +
+                          boost::lexical_cast<std::string>(bankIDs[idx]) +
                           ") for run " + runNo +
-                          " into: " << outFilenames[bidx] << std::endl;
+                          " into: " << effectiveFilenames[idx] << std::endl;
     try {
-      doFocusing(cs, fullFilename, runNo, bidx + 1);
+      doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
       m_focusFinishedOK = true;
     } catch (std::runtime_error &) {
       g_log.error()
@@ -861,6 +922,61 @@ void EnggDiffractionPresenter::doFocusRun(
   conf.setDataSearchDirs(tmpDirs);
 }
 
+void EnggDiffractionPresenter::loadDetectorGroupingCSV(
+    const std::string &dgFile, std::vector<size_t> &bankIDs,
+    std::vector<std::string> &specs) {
+  const char commentChar = '#';
+  const std::string delim = ",";
+
+  std::ifstream file(dgFile.c_str());
+  if (!file.is_open()) {
+    throw std::runtime_error("Failed to open file.");
+  }
+
+  bankIDs.clear();
+  specs.clear();
+  std::string line;
+  for (size_t li = 1; getline(file, line); li++) {
+    if (line.empty() || commentChar == line[0])
+      continue;
+
+    auto delimPos = line.find_first_of(delim);
+    if (std::string::npos == delimPos) {
+      throw std::runtime_error(
+          "In file '" + dgFile + "', wrong format in line: " +
+          boost::lexical_cast<std::string>(li) +
+          " which does not containe any delimiters (comma, etc.)");
+    }
+
+    try {
+      const std::string bstr = line.substr(0, delimPos);
+      const std::string spec = line.substr(delimPos + 1, std::string::npos);
+
+      if (bstr.empty()) {
+        throw std::runtime_error(
+            "In file '" + dgFile + "', wrong format in line: " +
+            boost::lexical_cast<std::string>(li) + ", the bank ID is empty!");
+      }
+      if (spec.empty()) {
+        throw std::runtime_error("In file '" + dgFile +
+                                 "', wrong format in line: " +
+                                 boost::lexical_cast<std::string>(li) +
+                                 ", the list of spectrum IDs is empty!");
+      }
+
+      size_t bankID = boost::lexical_cast<size_t>(bstr);
+      bankIDs.push_back(bankID);
+      specs.push_back(spec);
+    } catch (std::runtime_error &re) {
+      throw std::runtime_error(
+          "In file '" + dgFile +
+          "', issue found when trying to interpret line: " +
+          boost::lexical_cast<std::string>(li) + ". Error description: " +
+          re.what());
+    }
+  }
+}
+
 /**
  * Method (Qt slot) to call when the focusing work has finished,
  * possibly from a separate thread but sometimes not (as in this
@@ -875,7 +991,8 @@ void EnggDiffractionPresenter::focusingFinished() {
     g_log.warning() << "The cablibration did not finished correctly."
                     << std::endl;
   } else {
-    g_log.notice() << "Focusing finished - focused run ready." << std::endl;
+    g_log.notice() << "Focusing finished - focused run(s) are ready."
+                   << std::endl;
   }
   if (m_workerThread) {
     delete m_workerThread;
@@ -891,13 +1008,19 @@ void EnggDiffractionPresenter::focusingFinished() {
  * uses calibration input files such as vanadium runs
  *
  * @param fullFilename full path for the output (focused) filename
+ *
  * @param runNo input run to focus
- * @param bank instrument bank to focus
+ *
+ * @param bank instrument bank number to focus
+ *
+ * @param specIDs string specifying a list of spectra (for cropped
+ * focusing)
  */
 void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
                                           const std::string &fullFilename,
-                                          const std::string &runNo,
-                                          size_t bank) {
+                                          const std::string &runNo, size_t bank,
+                                          const std::string &specIDs,
+                                          const std::string &dgFile) {
   ITableWorkspace_sptr vanIntegWS;
   MatrixWorkspace_sptr vanCurvesWS;
   MatrixWorkspace_sptr inWS;
@@ -927,8 +1050,17 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     throw;
   }
 
-  const std::string outWSName = "engggui_focusing_output_ws_bank_" +
-                                boost::lexical_cast<std::string>(bank);
+  std::string outWSName;
+  if (!dgFile.empty()) {
+    outWSName = "engggui_focusing_output_ws_texture_bank_" +
+                boost::lexical_cast<std::string>(bank);
+  } else if (specIDs.empty()) {
+    outWSName = "engggui_focusing_output_ws_bank_" +
+                boost::lexical_cast<std::string>(bank);
+  } else {
+    outWSName = "engggui_focusing_output_ws_cropped";
+  }
+
   try {
     auto alg = Algorithm::fromString("EnggFocus");
     alg->initialize();
@@ -936,14 +1068,19 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     alg->setProperty("OutputWorkspace", outWSName);
     alg->setProperty("VanIntegrationWorkspace", vanIntegWS);
     alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
-    alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(bank));
+    // cropped / normal focusing
+    if (specIDs.empty()) {
+      alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(bank));
+    } else {
+      alg->setPropertyValue("SpectrumNumbers", specIDs);
+    }
     // TODO: use detector positions (from calibrate full) when available
     // alg->setProperty(DetectorPositions, TableWorkspace)
     alg->execute();
 
     const bool plotFocusedWS = m_view->focusedOutWorkspace();
     if (plotFocusedWS == true) {
-      m_view->plotFocusedSpectrum(bank, "bank");
+      m_view->plotFocusedSpectrum(outWSName);
     }
 
   } catch (std::runtime_error &re) {
@@ -1125,7 +1262,7 @@ void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
   auto alg = Algorithm::fromString("LoadNexus");
   alg->initialize();
   alg->setPropertyValue("Filename", preIntegFilename);
-  std::string integWSName = "engggui_vanadium_integration_ws";
+  std::string integWSName = g_vanIntegrationWSName;
   alg->setPropertyValue("OutputWorkspace", integWSName);
   alg->execute();
   // alg->getProperty("OutputWorkspace");
@@ -1166,15 +1303,15 @@ void EnggDiffractionPresenter::calcVanadiumWorkspaces(
   load->execute();
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   MatrixWorkspace_sptr vanWS = ADS.retrieveWS<MatrixWorkspace>(vanWSName);
-  // TODO: maybe use setChild() and then load->getProperty("OutputWorkspace");
+  // TODO?: maybe use setChild() and then load->getProperty("OutputWorkspace");
 
   auto alg = Algorithm::fromString("EnggVanadiumCorrections");
   alg->initialize();
   alg->setProperty("VanadiumWorkspace", vanWS);
-  std::string integName = "engggui_van_integration_ws";
-  alg->setPropertyValue("IntegrationWorkspace", integName);
+  std::string integName = g_vanIntegrationWSName;
+  alg->setPropertyValue("OutIntegrationWorkspace", integName);
   std::string curvesName = "engggui_van_curves_ws";
-  alg->setPropertyValue("CurvesWorkspace", curvesName);
+  alg->setPropertyValue("OutCurvesWorkspace", curvesName);
   alg->execute();
 
   ADS.remove(vanWSName);

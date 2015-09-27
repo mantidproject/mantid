@@ -40,6 +40,11 @@ const std::string EnggDiffractionViewQtGUI::g_pixelCalibExt =
     "(*.csv *.nxs *.nexus);;"
     "Other extensions/all files (*.*)";
 
+const std::string EnggDiffractionViewQtGUI::g_DetGrpExtStr =
+    "Detector Grouping File: CSV "
+    "(*.csv *.txt);;"
+    "Other extensions/all files (*.*)";
+
 const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
     "CustomInterfaces/EnggDiffractionView";
 
@@ -149,6 +154,9 @@ void EnggDiffractionViewQtGUI::doSetupTabFocus() {
 
   connect(m_uiTabFocus.pushButton_focus_cropped, SIGNAL(released()), this,
           SLOT(focusCroppedClicked()));
+
+  connect(m_uiTabFocus.pushButton_texture_browse_grouping_file,
+          SIGNAL(released()), this, SLOT(browseTextureDetGroupingFile()));
 
   connect(m_uiTabFocus.pushButton_focus_texture, SIGNAL(released()), this,
           SLOT(focusTextureClicked()));
@@ -355,9 +363,8 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabFocus.pushButton_focus_texture->setEnabled(enable);
 }
 
-void EnggDiffractionViewQtGUI::plotFocusedSpectrum(size_t bank, const std::string &suffix) {
-  std::string pyCode = "plotSpectrum('engggui_focusing_output_ws_" + suffix +"_" +
-                       boost::lexical_cast<std::string>(bank) + "', 0)";
+void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
+  std::string pyCode = "plotSpectrum('" + wsName + "', 0)";
 
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
@@ -559,6 +566,25 @@ void EnggDiffractionViewQtGUI::browseDirFocusing() {
       QString::fromStdString(m_focusDir));
 }
 
+void EnggDiffractionViewQtGUI::browseTextureDetGroupingFile() {
+  QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirRaw);
+  if (prevPath.isEmpty()) {
+    prevPath =
+        MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  }
+
+  QString path(QFileDialog::getOpenFileName(
+      this, tr("Open detector grouping file"), prevPath,
+      QString::fromStdString(g_DetGrpExtStr)));
+
+  if (path.isEmpty()) {
+    return;
+  }
+
+  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
+  m_uiTabFocus.lineEdit_texture_grouping_file->setText(path);
+}
+
 std::string EnggDiffractionViewQtGUI::focusingRunNo() const {
   return m_uiTabFocus.lineEdit_run_num->text().toStdString();
 }
@@ -578,7 +604,7 @@ std::string EnggDiffractionViewQtGUI::focusingDir() const {
 std::vector<bool> EnggDiffractionViewQtGUI::focusingBanks() const {
   std::vector<bool> res;
   res.push_back(m_uiTabFocus.checkBox_focus_bank1->isChecked());
-  res.push_back(m_uiTabFocus.checkBox_focus_bank1->isChecked());
+  res.push_back(m_uiTabFocus.checkBox_focus_bank2->isChecked());
   return res;
 }
 

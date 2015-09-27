@@ -66,7 +66,8 @@ public:
   /// the focusing hard work that a worker / thread will run
   void doFocusRun(const std::string &dir,
                   const std::vector<std::string> &outFilenames,
-                  const std::string &runNo, const std::vector<bool> &banks);
+                  const std::string &runNo, const std::vector<bool> &banks,
+                  const std::string &specIDs, const std::string &dgFile);
 
 protected:
   void initialize();
@@ -116,12 +117,16 @@ private:
   /// @name Focusing related private methods
   //@{
   /// this may also need to be mocked up in tests
-  void startFocusing(const std::string &runNo, const std::vector<bool> banks,
-                const std::string &specIDs, const std::string &dgFile);
+  void startFocusing(const std::string &runNo, const std::vector<bool> &banks,
+                     const std::string &specIDs = "",
+                     const std::string &dgFile = "");
 
   void startAsyncFocusWorker(const std::string &dir,
-                        const std::vector<std::string> &outFilenames,
-                        const std::string &runNo, const std::vector<bool> &banks);
+                             const std::vector<std::string> &outFilenames,
+                             const std::string &runNo,
+                             const std::vector<bool> &banks,
+                             const std::string &specIDs,
+                             const std::string &dgFile);
 
   void inputChecksBeforeFocusBasic(const std::string &runNo,
                                    const std::vector<bool> &banks);
@@ -133,12 +138,23 @@ private:
   void inputChecksBeforeFocus();
   void inputChecksBanks(const std::vector<bool> &banks);
 
-  std::vector<std::string> outputFocusFilename(const std::string &runNo,
-                                               const std::vector<bool> &banks);
+  std::vector<std::string> outputFocusFilenames(const std::string &runNo,
+                                                const std::vector<bool> &banks);
+
+  std::string outputFocusCroppedFilename(const std::string &runNo);
+
+  std::vector<std::string>
+  outputFocusTextureFilenames(const std::string &runNo,
+                              const std::vector<size_t> &bankIDs);
+
+  void loadDetectorGroupingCSV(const std::string &dgFile,
+                               std::vector<size_t> &bankIDs,
+                               std::vector<std::string> &specs);
 
   void doFocusing(const EnggDiffCalibSettings &cs,
                   const std::string &fullFilename, const std::string &runNo,
-                  size_t bank);
+                  size_t bank, const std::string &specIDs,
+                  const std::string &dgFile);
 
   void loadOrCalcVanadiumWorkspaces(
       const std::string &vanNo, const std::string &inputDirCalib,
@@ -165,6 +181,9 @@ private:
 
   /// whether to allow users to give the output calibration filename
   const static bool g_askUserCalibFilename;
+
+  // name of the workspace with the vanadium integration (of spectra)
+  static const std::string g_vanIntegrationWSName;
 
   QThread *m_workerThread;
 
