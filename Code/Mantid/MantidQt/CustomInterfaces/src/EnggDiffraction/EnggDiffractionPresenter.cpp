@@ -801,6 +801,8 @@ std::vector<std::string> EnggDiffractionPresenter::outputFocusTextureFilenames(
  * @param outFilenames full names for the output focused runs
  * @param runNo input run number
  * @param bank instrument bank to focus
+ * @param specNos list of spectra (as usual csv list of spectra in Mantid)
+ * @param dgFile detector grouping file name
  */
 void EnggDiffractionPresenter::startAsyncFocusWorker(
     const std::string &dir, const std::vector<std::string> &outFilenames,
@@ -1014,7 +1016,10 @@ void EnggDiffractionPresenter::focusingFinished() {
  * @param bank instrument bank number to focus
  *
  * @param specNos string specifying a list of spectra (for cropped
- * focusing)
+ * focusing), only considered if not empty
+ *
+ * @param dgFile detector grouping file name. If not empty implies
+ * texture focusing
  */
 void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
                                           const std::string &fullFilename,
