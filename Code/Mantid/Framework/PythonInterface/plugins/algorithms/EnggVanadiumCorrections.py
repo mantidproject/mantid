@@ -186,7 +186,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
                                (integWS.blocksize(), integWS.getNumberHistograms(),
                                 vanWS.getNumberHistograms()))
 
-        integTbl = sapi.CreateEmptyTableWorkspace()
+        integTbl = sapi.CreateEmptyTableWorkspace(OutputWorkspace='__vanIntegTbl')
         integTbl.addColumn('double', 'Spectra Integration')
         for i in range(integWS.getNumberHistograms()):
             integTbl.addRow([integWS.readY(i)[0]])
