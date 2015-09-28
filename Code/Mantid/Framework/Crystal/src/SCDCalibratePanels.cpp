@@ -11,6 +11,7 @@
 #include <fstream>
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include <Poco/File.h>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -911,7 +912,7 @@ void SCDCalibratePanels::exec() {
 
   //--------------------- Create Result Table Workspace-------------------
   this->progress(.92, "Creating Results table");
-  createResultWorkspace(NGroups, names, params, errs);
+  createResultWorkspace((int)Groups.size(), iGr+1, names, params, errs);
 
   //---------------- Create new instrument with ------------------------
   //--------------new parameters to SAVE to files---------------------
@@ -962,7 +963,7 @@ void SCDCalibratePanels::exec() {
     MyBankNames.insert(banksVec[0]);
   this->progress(.94, "Saving detcal file");
   string DetCalFileName = getProperty("DetCalFilename");
-  DetCalFileName += banksVec[0];
+  Poco::File(DetCalFileName).remove();
   saveIsawDetCal(NewInstrument, MyBankNames, result["t0"], DetCalFileName);
 
   this->progress(.96, "Saving xml param file");
@@ -1155,20 +1156,30 @@ void SCDCalibratePanels::LoadISawDetCal(
   } // While reading thru file
 }
 
-void SCDCalibratePanels::createResultWorkspace(const int numGroups,
+void SCDCalibratePanels::createResultWorkspace(const int numGroups, const int colNum,
                                                const vector<string> &names,
                                                const vector<double> &params,
                                                const vector<double> &errs) {
-  // create the results table
-  ITableWorkspace_sptr Result =
-      Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+  // make the table the correct size
+  int nn(0);
+  if (getProperty("AllowSampleShift"))
+    nn = 3;
+  if(!Result)
+  {
+      // create the results table
+    Result =
+        Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
 
-  // column for the field names
-  Result->addColumn("str", "Field");
-  // and one for each group
-  for (int g = 0; g < numGroups; ++g) {
-    string GroupName = string("Group") + boost::lexical_cast<string>(g);
-    Result->addColumn("double", GroupName);
+    // column for the field names
+    Result->addColumn("str", "Field");
+    // and one for each group
+    for (int g = 0; g < numGroups; ++g) {
+      string GroupName = string("Group") + boost::lexical_cast<string>(g);
+      Result->addColumn("double", GroupName);
+    }
+    Result->setRowCount(2 * (10 + nn));
+    Result->setComment(
+        string("t0(microseconds),l0 & offsets(meters),rot(degrees"));
   }
 
   // determine the field names, the leading '_' is the break point
@@ -1185,12 +1196,6 @@ void SCDCalibratePanels::createResultWorkspace(const int numGroups,
       TableFieldNames.push_back(fieldName);
   }
 
-  // make the tabel the corect size
-  int nn(0);
-  if (getProperty("AllowSampleShift"))
-    nn = 3;
-  Result->setRowCount(2 * (10 + nn));
-
   // create the row labels
   for (size_t p = 0; p < TableFieldNames.size(); p++) {
     Result->cell<string>(p, 0) = TableFieldNames[p];
@@ -1203,10 +1208,10 @@ void SCDCalibratePanels::createResultWorkspace(const int numGroups,
     // get the column to update and the name of the field
     string fieldName = names[p];
     size_t dotPos = fieldName.find('_');
-    int colNum = 1;
+    //int colNum = 1;
     if (dotPos < fieldName.size()) {
       // the 1 is to skip the leading 'f'
-      colNum = atoi(fieldName.substr(1, dotPos).c_str()) + 1;
+      //colNum = atoi(fieldName.substr(1, dotPos).c_str()) + 1;
       // everything after is the field name
       fieldName = fieldName.substr(dotPos + 1);
     }
@@ -1223,9 +1228,6 @@ void SCDCalibratePanels::createResultWorkspace(const int numGroups,
     Result->cell<double>(rowNum, colNum) = params[p];
     Result->cell<double>(rowNum + 10 + nn, colNum) = errs[p];
   }
-
-  Result->setComment(
-      string("t0(microseconds),l0 & offsets(meters),rot(degrees"));
 
   setProperty("ResultWorkspace", Result);
 }
@@ -1267,6 +1269,7 @@ void SCDCalibratePanels::saveIsawDetCal(
   alg->setProperty("Filename", filename);
   alg->setProperty("TimeOffset", T0);
   alg->setProperty("BankNames", banknames);
+  alg->setProperty("AppendFile", true);
   alg->executeAsChildAlg();
 }
 

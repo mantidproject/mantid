@@ -230,7 +230,7 @@ private:
                       std::set<std::string> &AllBankName, double T0,
                       std::string filename);
 
-  void createResultWorkspace(const int numGroups,
+  void createResultWorkspace(const int numGroups, const int colNum,
                              const std::vector<std::string> &names,
                              const std::vector<double> &params,
                              const std::vector<double> &errs);
@@ -238,6 +238,9 @@ private:
   void exec();
 
   void init();
+
+  API::ITableWorkspace_sptr Result;
+
 
   /**
    * Creates a new instrument when a calibration file( .xml or .detcal)
