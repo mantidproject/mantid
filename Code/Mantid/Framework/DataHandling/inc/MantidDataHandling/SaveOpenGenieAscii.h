@@ -7,6 +7,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/cow_ptr.h"
 
+#include "MantidKernel/TimeSeriesProperty.h"
+
 namespace Mantid {
 namespace DatHandling {
 
@@ -41,6 +43,9 @@ private:
   /// Execution code
   void exec();
 
+  // write file header
+  void SaveOpenGenieAscii::writeFileHeader(std::ofstream &outfile);
+
   /// Uses AxisHeader and WriteAxisValues to write out file
   void writeToFile(const std::string alpha, std::ofstream &outfile,
                    const std::string comment, const std::string fourspc,
@@ -54,6 +59,11 @@ private:
   /// Reads if alpha is e then reads the E values accordingly
   void writeAxisValues(std::string alpha, std::ofstream &outfile, int bin,
                        const std::string singleSpc);
+
+  /// Generates the header which saves to the openGenie file
+  void writeSampleLogs(std::ofstream &outfile, std::string fourspc);
+
+
 
   /// Workspace
   API::MatrixWorkspace_sptr ws;

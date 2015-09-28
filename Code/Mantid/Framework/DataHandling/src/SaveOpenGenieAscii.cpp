@@ -6,10 +6,13 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <fstream>
 #include <exception>
+
+#include <vector>
 
 #include <list>
 
@@ -47,6 +50,8 @@ void SaveOpenGenieAscii::init() {
   declareProperty(
       new API::FileProperty("Filename", "", API::FileProperty::Save, his_exts),
       "The filename to use for the saved data");
+  declareProperty("IncludeHeader", true,
+                  "Whether to include the header lines (default: true)");
 }
 
 void SaveOpenGenieAscii::exec() {
@@ -77,23 +82,48 @@ void SaveOpenGenieAscii::exec() {
   // Axis alphabets
   const std::string Alpha[] = {"\"e\"", "\"x\"", "\"y\""};
 
+  const bool headers = getProperty("IncludeHeader");
+  // if true write file header
+  if (headers) {
+    writeFileHeader(outfile);
+  }
+
   bool isHistogram = ws->isHistogramData();
   Progress progress(this, 0, 1, nBins);
   std::string alpha;
-  outfile << "# Open Genie ASCII File #" << std::endl
-          << "# label " << std::endl
-          // 3 is the number of entries
-          << "GXWorkspace" << std::endl
-          << 3 << std::endl;
   for (int Num = 0; Num < 3; Num++) {
     alpha = Alpha[Num];
     writeToFile(alpha, outfile, singleSpc, fourspc, nBins, isHistogram);
   }
+
+  // outfile << std::endl;
+
+  writeSampleLogs(outfile, fourspc);
+
   progress.report();
   return;
 }
 
-//----------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+/** generates the OpenGenie file header
+   *  @param outfile :: File it will save it out to
+   */
+void SaveOpenGenieAscii::writeFileHeader(std::ofstream &outfile) {
+
+  const std::vector<Property *> &logData = ws->run().getLogData();
+  auto &log = logData;
+  // get total number of sample logs
+  auto samplenumber = (&log)->size();
+  samplenumber += 3; // x, y, e
+
+  outfile << "# Open Genie ASCII File #" << std::endl
+          << "# label " << std::endl
+          << "GXWorkspace" << std::endl
+          // number of entries
+          << samplenumber << std::endl;
+}
+
+//------------------------------------------------------------------------------
 /** generates the header for the axis which saves to file
    *  @param alpha ::   onstant string Axis letter that is being used
    *  @param outfile :: File it will save it out to
@@ -115,7 +145,7 @@ void SaveOpenGenieAscii::writeAxisHeader(const std::string alpha,
   outfile << fourspc << nBins << std::endl;
 }
 
-//----------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 /** Uses AxisHeader and WriteAxisValues to write out file
    *  @param alpha ::   Axis letter that is being used
    *  @param outfile :: File it will save it out to
@@ -149,7 +179,7 @@ void SaveOpenGenieAscii::writeToFile(const std::string alpha,
   outfile << std::endl;
 }
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------
 /** Reads if alpha is e then reads the E values accordingly
    *  @param alpha ::   Axis letter that is being used
    *  @param outfile :: File it will save it out to
@@ -167,6 +197,82 @@ void SaveOpenGenieAscii::writeAxisValues(std::string alpha,
   }
   if (alpha == "\"y\"") {
     outfile << ws->readY(0)[bin] << singleSpc;
+  }
+}
+
+//-----------------------------------------------------------------------
+/** Reads the sample logs
+   *  @param outfile :: File it will save it out to
+   *  @param fourspc :: Constant string for four spaces
+   */
+void SaveOpenGenieAscii::writeSampleLogs(std::ofstream &outfile,
+                                         std::string fourspc) {
+  const std::vector<Property *> &logData = ws->run().getLogData();
+
+  std::vector<std::string> myVector;
+  for (auto log = logData.begin(); log != logData.end(); ++log) {
+    std::string name = (*log)->name();
+    std::string type = (*log)->type();
+    std::string value = (*log)->value();
+
+    if (type.std::string::find("vector") &&
+        type.std::string::find("double") != std::string::npos) {
+
+      auto tsp = ws->run().getTimeSeriesProperty<double>(name);
+      value = std::to_string(tsp->timeAverageValue());
+    }
+
+    if (type.std::string::find("vector") &&
+        type.std::string::find("int") != std::string::npos) {
+
+      auto tsp = ws->run().getTimeSeriesProperty<int>(name);
+      value = std::to_string(tsp->timeAverageValue());
+    }
+
+    if (type.std::string::find("vector") &&
+        type.std::string::find("bool") != std::string::npos) {
+
+      auto tsp = ws->run().getTimeSeriesProperty<bool>(name);
+      value = std::to_string(tsp->timeAverageValue());
+    }
+
+    if (type.std::string::find("vector") &&
+        type.std::string::find("char") != std::string::npos) {
+
+      auto tsp = ws->run().getTimeSeriesProperty<std::string>(name);
+      value = (tsp->lastValue());
+    }
+
+    if (type.std::string::find("number") != std::string::npos) {
+      type = "Float";
+    }
+
+    if (type.std::string::find("double") != std::string::npos) {
+      type = "Float";
+    }
+
+    if (type.std::string::find("TimeValueUnit<bool>") != std::string::npos) {
+      type = "Integer";
+    }
+
+    if (type.std::string::find("TimeValueUnit<int>") != std::string::npos) {
+      type = "Integer";
+    }
+
+    if (type.std::string::find("string") != std::string::npos) {
+      type = "String";
+    }
+
+    sort(&logData.begin(), &logData.end());
+
+    if ((name.std::string::find("x") != std::string::npos) ||
+        (name.std::string::find("y") != std::string::npos) ||
+        (name.std::string::find("") != std::string::npos)) {
+
+      outfile << "  \"" << name << "\"" << std::endl
+              << fourspc << type << std::endl
+              << fourspc << value << std::endl;
+    }
   }
 }
 
