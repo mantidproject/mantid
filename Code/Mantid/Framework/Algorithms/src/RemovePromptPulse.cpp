@@ -136,14 +136,18 @@ void RemovePromptPulse::exec() {
 
     // run maskbins to do the work on the first prompt pulse
     IAlgorithm_sptr algo = this->createChildAlgorithm("MaskBins");
-    if (outputWS)
+    if (outputWS) {
       algo->setProperty<MatrixWorkspace_sptr>(
           "InputWorkspace",
           boost::const_pointer_cast<MatrixWorkspace>(outputWS));
-    else
+    } else { // should only be first time
       algo->setProperty<MatrixWorkspace_sptr>(
           "InputWorkspace",
           boost::const_pointer_cast<MatrixWorkspace>(inputWS));
+      outputWS = this->getProperty("OutputWorkspace");
+    }
+    // always write to correct output workspace
+    algo->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
     algo->setProperty<double>("XMin", *left);
     algo->setProperty<double>("XMax", right);
     algo->executeAsChildAlg();
