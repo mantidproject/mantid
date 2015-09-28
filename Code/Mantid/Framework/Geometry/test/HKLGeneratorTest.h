@@ -39,8 +39,8 @@ public:
   }
 
   void test_HKLGeneratorReturnsCorrectSizeOne() {
-      HKLGenerator gen(V3D(-2, -1, -5), V3D(-2, -1, -5));
-      TS_ASSERT_EQUALS(gen.size(), 1);
+    HKLGenerator gen(V3D(-2, -1, -5), V3D(-2, -1, -5));
+    TS_ASSERT_EQUALS(gen.size(), 1);
   }
 
   void test_beginIterator() {
@@ -126,7 +126,7 @@ public:
 
     Timer t;
     for (size_t i = 0; i < N; ++i) {
-        HKLGenerator gen(20, 20, 20);
+      HKLGenerator gen(20, 20, 20);
 
       std::vector<V3D> hkls;
       hkls.reserve(gen.size());
@@ -182,9 +182,11 @@ public:
       std::vector<V3D> hkls;
       hkls.reserve(gen.size());
 
-      HKLFilter_const_sptr dFilter = boost::make_shared<HKLFilterDRange>(cell, dMin, 200.0);
+      HKLFilter_const_sptr dFilter =
+          boost::make_shared<HKLFilterDRange>(cell, dMin, 200.0);
 
-      std::remove_copy_if(gen.begin(), gen.end(), std::back_inserter(hkls), (~dFilter)->fn());
+      std::remove_copy_if(gen.begin(), gen.end(), std::back_inserter(hkls),
+                          (~dFilter)->fn());
 
       // TS_ASSERT_EQUALS(hkls.size(), gen.size());
       TS_ASSERT_DIFFERS(hkls.size(), 0);

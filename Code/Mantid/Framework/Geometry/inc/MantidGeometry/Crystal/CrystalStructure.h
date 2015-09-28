@@ -142,8 +142,6 @@ class StructureFactorCalculator;
   */
 class DLLExport CrystalStructure {
 public:
-  enum ReflectionConditionMethod { UseCentering, UseStructureFactor };
-
   CrystalStructure(const UnitCell &unitCell,
                    const SpaceGroup_const_sptr &spaceGroup,
                    const CompositeBraggScatterer_sptr &scatterers);
@@ -162,41 +160,19 @@ public:
   void setScatterers(const CompositeBraggScatterer_sptr &scatterers);
   void addScatterers(const CompositeBraggScatterer_sptr &scatterers);
 
-  std::vector<Kernel::V3D>
-  getHKLs(double dMin, double dMax,
-          ReflectionConditionMethod method = UseCentering) const;
-  std::vector<Kernel::V3D>
-  getUniqueHKLs(double dMin, double dMax,
-                ReflectionConditionMethod method = UseCentering) const;
-
-  std::vector<double> getDValues(const std::vector<Kernel::V3D> &hkls) const;
-  std::vector<double> getFSquared(const std::vector<Kernel::V3D> &hkls) const;
-
 protected:
   void assignUnitCellToScatterers(const UnitCell &unitCell);
 
   void
   setReflectionConditionFromSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
 
-  bool isStateSufficientForHKLGeneration(
-      CrystalStructure::ReflectionConditionMethod method) const;
-
   void initializeScatterers();
   void updateStructureFactorCalculator();
-
-  void throwIfRangeUnacceptable(double dMin, double dMax) const;
-
-  double getDValue(const Kernel::V3D &hkl) const;
-  double getFSquared(const Kernel::V3D &hkl) const;
-
-  HKLFilter_const_sptr
-  getFilterForMethod(CrystalStructure::ReflectionConditionMethod method) const;
 
   UnitCell m_cell;
   SpaceGroup_const_sptr m_spaceGroup;
   ReflectionCondition_sptr m_centering;
   CompositeBraggScatterer_sptr m_scatterers;
-  boost::shared_ptr<StructureFactorCalculator> m_calculator;
 };
 
 typedef boost::shared_ptr<CrystalStructure> CrystalStructure_sptr;
