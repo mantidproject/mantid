@@ -32,7 +32,7 @@ SaveGSS::SaveGSS() : Mantid::API::Algorithm(), m_useSpecAsBank(false) {}
 bool isEqual(const double left, const double right) {
   if (left == right)
     return true;
-  return (std::abs((left - right) / right) <= (TOLERANCE * right));
+  return (std::fabs(left - right) <= std::fabs(TOLERANCE * right));
 }
 
 bool isConstantDelta(const MantidVec &xAxis) {
