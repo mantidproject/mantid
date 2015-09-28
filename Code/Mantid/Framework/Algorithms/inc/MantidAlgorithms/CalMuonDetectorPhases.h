@@ -51,6 +51,9 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
+  API::MatrixWorkspace_sptr
+  prepareWorkspace(const API::MatrixWorkspace_sptr &ws, double startTime,
+                   double endTime);
 };
 } // namespace Algorithms
 } // namespace Mantid
