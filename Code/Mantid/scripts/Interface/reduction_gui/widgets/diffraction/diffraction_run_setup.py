@@ -211,6 +211,7 @@ class RunSetupWidget(BaseWidget):
         s.calibfilename = self._content.calfile_edit.text()
         s.charfilename = self._content.charfile_edit.text()
         s.dosum = self._content.sum_checkbox.isChecked()
+
         s.binning = self._content.binning_edit.text()
         bintypestr = self._content.bintype_combo.currentText()
         if s.binning != "" and s.binning is not None:
@@ -219,7 +220,10 @@ class RunSetupWidget(BaseWidget):
             else:
                 s.binning = -1.*abs(float(s.binning))
         s.binindspace = self._content.binind_checkbox.isChecked()
-        s.resamplex = int(self._content.resamplex_edit.text())
+        if self._content.resamplex_button.isChecked() is True:
+            s.resamplex = int(self._content.resamplex_edit.text())
+        else:
+            s.resamplex = ''
         s.outputdir = self._content.outputdir_edit.text()
         s.saveas = str(self._content.saveas_combo.currentText())
         s.finalunits = str(self._content.unit_combo.currentText())
@@ -232,10 +236,6 @@ class RunSetupWidget(BaseWidget):
 
         s.vanbkgdrunnumber = self._content.vanbkgdrun_edit.text()
         s.disablevanbkgdcorrection = self._content.disablevanbkgdcorr_chkbox.isChecked()
-
-        s.dosamplex = self._content.resamplex_button.isChecked()
-
-        #s.vannoiserunnumber = self._content.vannoiserun_edit.text()
 
         return s
 
