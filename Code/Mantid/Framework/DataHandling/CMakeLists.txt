@@ -139,6 +139,7 @@ set ( SRC_FILES
 	src/SaveNXTomo.cpp
 	src/SaveNexus.cpp
 	src/SaveNexusProcessed.cpp
+	src/SaveOpenGenieAscii.cpp
 	src/SavePAR.cpp
 	src/SavePDFGui.cpp
 	src/SavePHX.cpp
@@ -293,6 +294,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveNXTomo.h
 	inc/MantidDataHandling/SaveNexus.h
 	inc/MantidDataHandling/SaveNexusProcessed.h
+	inc/MantidDataHandling/SaveOpenGenieAscii.h
 	inc/MantidDataHandling/SavePAR.h
 	inc/MantidDataHandling/SavePDFGui.h
 	inc/MantidDataHandling/SavePHX.h
