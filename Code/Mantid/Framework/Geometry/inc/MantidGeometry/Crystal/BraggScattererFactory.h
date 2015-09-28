@@ -4,7 +4,9 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
+
 #include "MantidGeometry/Crystal/BraggScatterer.h"
+#include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -67,7 +69,10 @@ class MANTID_GEOMETRY_DLL BraggScattererFactoryImpl
     : public Kernel::DynamicFactory<BraggScatterer> {
 public:
   BraggScatterer_sptr createScatterer(const std::string &name,
-                                      const std::string &properties = "");
+                                      const std::string &properties = "") const;
+
+  CompositeBraggScatterer_sptr
+  createIsotropicScatterers(const std::string &scattererString) const;
 
   /// Subscribes a scatterer class into the factory.
   template <class C> void subscribeScatterer() {
@@ -82,16 +87,23 @@ private:
   friend struct Mantid::Kernel::CreateUsingNew<BraggScattererFactoryImpl>;
 
   BraggScattererFactoryImpl();
+
+  CompositeBraggScatterer_sptr
+  getScatterers(const std::string &scattererString) const;
+  BraggScatterer_sptr
+  getScatterer(const std::string &singleScatterer) const;
+  std::vector<std::string>
+  getCleanScattererTokens(const std::vector<std::string> &tokens) const;
 };
 
 // This is taken from FuncMinimizerFactory
 #ifdef _WIN32
 template class MANTID_GEOMETRY_DLL
-    Mantid::Kernel::SingletonHolder<BraggScattererFactoryImpl>;
+Mantid::Kernel::SingletonHolder<BraggScattererFactoryImpl>;
 #endif
 
 typedef Mantid::Kernel::SingletonHolder<BraggScattererFactoryImpl>
-    BraggScattererFactory;
+BraggScattererFactory;
 
 } // namespace Geometry
 } // namespace Mantid
