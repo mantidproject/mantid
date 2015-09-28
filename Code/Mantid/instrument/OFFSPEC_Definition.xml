@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- For help on the notation used to specify an Instrument Definition File 
+<!-- For help on the notation used to specify an Instrument Definition File
      see http://www.mantidproject.org/IDF -->
-<instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="OFFSPEC" valid-from   ="2012-07-10 22:00:00"
+name="OFFSPEC" valid-from   ="2012-07-10 22:00:00"
                            valid-to     ="2100-01-31 23:59:59"
-		           last-modified="2012-07-26 15:00:00">
-
+                                           last-modified="2015-06-01 11:00:00">
+ 
   <defaults>
     <length unit="meter" />
     <angle unit="degree" />
@@ -18,370 +18,410 @@
     </reference-frame>
     <components-are-facing x="0.0" y="0.0" z="0.0" />
   </defaults>
- 
   <!-- source and sample-position components -->
-
+ 
   <component type="source">
    <!-- <location z="-23.7" /> -->
     <location z="-23.83" />
   </component>
   <type name="source" is="Source"/>
-   
+  
   <component type="some-surface-holder">
     <location x="0.0" y="0.0" z="0.0" />
   </component>
   <type name="some-surface-holder" is="SamplePos"/>
-  
+ 
   <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+ 
+ 
+  <component name="slit1" type="slit1">
+    <location z="-5.6398"/> <!-- From survey,  28/11/2014  -->
+     <!-- This log file stores the vertical opening of slit -->
+    <parameter name="vertical gap">
+      <logfile id="s1vgap" extract-single-value-as="last_value" />
+    </parameter>
+                  </component>
+  
+  <component name="slit2" type="slit2"> 
+    <location z="-0.67045"/> <!-- x=18.1902+4.9693   -->
+    <!-- This log file stores the vertical opening of this. Note this
+     slit can also be translated in the z. However this info not stored
+     in log file since it is not used in the data analysis process. -->
+    <parameter name="vertical gap">
+      <logfile id="s2vgap" extract-single-value-as="last_value" />        
+    </parameter> 
+  </component>   
+  
+  <component name="slit3" type="slit3">  
+    <location z="0.6"/> <!-- estimated from MagC position, not accurate   -->
+    <!-- This log file stores the vertical opening of slit --> 
+    <parameter name="vertical gap">
+      <logfile id="s3vgap" extract-single-value-as="last_value" />       
+    </parameter>
+  </component>   
+  
+  <component name="slit4" type="slit4">   
+    <location z="2.64"/>     <!-- estimated from MagD position, not accurate   -->
+    <!-- This log file stores the vertical opening of slit. Note this slit
+     is fixed to the point detector. -->
+    <parameter name="vertical gap">
+      <logfile id="s4vgap" extract-single-value-as="last_value" />   
+    </parameter>
+  </component>
+ 
+  <type name="slit1"></type>
+  <type name="slit2"></type>
+  <type name="slit3"></type>
+  <type name="slit4"></type>
   
   <!-- detector components (including monitors) -->
-  
+ 
   <component type="monitor1" idlist="monitor1">
   <!--  <location r="11.387" t="180.0" /> -->
     <location r="11.38" t="180.0" />
   </component>
-  
+ 
   <type name="monitor1" is="monitor">
     <percent-transparency val="95" />
     <cylinder id="shape">
       <centre-of-bottom-base x="0.0" y="-0.02" z="0.0" />
-      <axis x="0.0" y="1.0" z="0.0" /> 
+      <axis x="0.0" y="1.0" z="0.0" />
       <radius val="0.015" />
       <height val="0.04" />
-    </cylinder> 
+    </cylinder>
     <algebra val="shape" />
-  </type>  
+  </type> 
   
   <component type="monitor2" idlist="monitor2">
   <!--  <location r="5.65" t="180.0" />  -->
     <location r="5.62" t="180.0" />
-  </component>  
+  </component> 
   
   <type name="monitor2" is="monitor">
     <percent-transparency val="95" />
     <cylinder id="shape">
       <centre-of-bottom-base x="-0.02" y="0.0" z="0.0" />
-      <axis x="1.0" y="0.0" z="0.0" /> 
+      <axis x="1.0" y="0.0" z="0.0" />
       <radius val="0.015" />
       <height val="0.04" />
-    </cylinder> 
+    </cylinder>
     <algebra val="shape" />
-  </type>  
+  </type> 
   
   <component type="monitor3" idlist="monitor3">
   <!--  <location r="0.4" t="180.0" /> -->
     <location r="0.55" t="180.0" />
-  </component>  
+  </component> 
   
   <type name="monitor3" is="monitor">
     <percent-transparency val="95" />
-	<cylinder id="top">
+                <cylinder id="top">
       <centre-of-bottom-base x="0.0" y="-0.05" z="0.0" />
-      <axis x="0.0" y="1.0" z="0.0" /> 
+      <axis x="0.0" y="1.0" z="0.0" />
       <radius val="0.04" />
       <height val="0.1" />
-    </cylinder> 
+    </cylinder>
         
     <cylinder id="base">
       <centre-of-bottom-base x="0.0" y="-0.15" z="0.0" />
-      <axis x="0.0" y="1.0" z="0.0" /> 
+      <axis x="0.0" y="1.0" z="0.0" />
       <radius val="0.02" />
       <height val="0.1" />
-    </cylinder> 
+    </cylinder>
     
     <algebra val="base : top" />
-  </type>  
+  </type> 
   
   <component type="DetectorBench" idlist="DetectorBench">
     <location r="0.0" t="0.0"> <facing x="0" y="0" z="0"/> </location>
   </component>
-
+ 
   <type name="DetectorBench">
    <component type="point-detector">
     <!-- <location z="3.2" />  -->
-     <location z="3.19" /> 
-   </component>   
+     <location z="3.19" />
+   </component>  
    <component type="LinearDetector">
    <!--  <location z="3.65" />  -->
-     <location z="3.63" /> 
-   </component>    
+     <location z="3.63" />
+   </component>   
    <component type="LarmorDetectorSection">
      <location  z=" 3.52 " />
    </component>
   </type>
-
+ 
   <type name="point-detector" is="detector">
     <cylinder id="shape">
       <centre-of-bottom-base x="-0.05" y="0.0" z="0.0" />
-      <axis x="1.0" y="0.0" z="0.0" /> 
+      <axis x="1.0" y="0.0" z="0.0" />
       <radius val="0.005" />
       <height val="0.1" />
-    </cylinder> 
-	<algebra val="shape" />
- </type>    
-
+    </cylinder>
+                <algebra val="shape" />
+</type>   
+ 
   <type name="LinearDetector">
     <component type="pixel" >
-		<location y="-0.1440" />
-		<location y="-0.1428" />
-		<location y="-0.1416" />
-		<location y="-0.1404" />
-		<location y="-0.1392" />
-		<location y="-0.1380" />
-		<location y="-0.1368" />
-		<location y="-0.1356" />
-		<location y="-0.1344" />
-		<location y="-0.1332" />
-		<location y="-0.1320" />
-		<location y="-0.1308" />
-		<location y="-0.1296" />
-		<location y="-0.1284" />
-		<location y="-0.1272" />
-		<location y="-0.1260" />
-		<location y="-0.1248" />
-		<location y="-0.1236" />
-		<location y="-0.1224" />
-		<location y="-0.1212" />
-		<location y="-0.1200" />
-		<location y="-0.1188" />
-		<location y="-0.1176" />
-		<location y="-0.1164" />
-		<location y="-0.1152" />
-		<location y="-0.1140" />
-		<location y="-0.1128" />
-		<location y="-0.1116" />
-		<location y="-0.1104" />
-		<location y="-0.1092" />
-		<location y="-0.1080" />
-		<location y="-0.1068" />
-		<location y="-0.1056" />
-		<location y="-0.1044" />
-		<location y="-0.1032" />
-		<location y="-0.1020" />
-		<location y="-0.1008" />
-		<location y="-0.0996" />
-		<location y="-0.0984" />
-		<location y="-0.0972" />
-		<location y="-0.0960" />
-		<location y="-0.0948" />
-		<location y="-0.0936" />
-		<location y="-0.0924" />
-		<location y="-0.0912" />
-		<location y="-0.0900" />
-		<location y="-0.0888" />
-		<location y="-0.0876" />
-		<location y="-0.0864" />
-		<location y="-0.0852" />
-		<location y="-0.0840" />
-		<location y="-0.0828" />
-		<location y="-0.0816" />
-		<location y="-0.0804" />
-		<location y="-0.0792" />
-		<location y="-0.0780" />
-		<location y="-0.0768" />
-		<location y="-0.0756" />
-		<location y="-0.0744" />
-		<location y="-0.0732" />
-		<location y="-0.0720" />
-		<location y="-0.0708" />
-		<location y="-0.0696" />
-		<location y="-0.0684" />
-		<location y="-0.0672" />
-		<location y="-0.0660" />
-		<location y="-0.0648" />
-		<location y="-0.0636" />
-		<location y="-0.0624" />
-		<location y="-0.0612" />
-		<location y="-0.0600" />
-		<location y="-0.0588" />
-		<location y="-0.0576" />
-		<location y="-0.0564" />
-		<location y="-0.0552" />
-		<location y="-0.0540" />
-		<location y="-0.0528" />
-		<location y="-0.0516" />
-		<location y="-0.0504" />
-		<location y="-0.0492" />
-		<location y="-0.0480" />
-		<location y="-0.0468" />
-		<location y="-0.0456" />
-		<location y="-0.0444" />
-		<location y="-0.0432" />
-		<location y="-0.0420" />
-		<location y="-0.0408" />
-		<location y="-0.0396" />
-		<location y="-0.0384" />
-		<location y="-0.0372" />
-		<location y="-0.0360" />
-		<location y="-0.0348" />
-		<location y="-0.0336" />
-		<location y="-0.0324" />
-		<location y="-0.0312" />
-		<location y="-0.0300" />
-		<location y="-0.0288" />
-		<location y="-0.0276" />
-		<location y="-0.0264" />
-		<location y="-0.0252" />
-		<location y="-0.0240" />
-		<location y="-0.0228" />
-		<location y="-0.0216" />
-		<location y="-0.0204" />
-		<location y="-0.0192" />
-		<location y="-0.0180" />
-		<location y="-0.0168" />
-		<location y="-0.0156" />
-		<location y="-0.0144" />
-		<location y="-0.0132" />
-		<location y="-0.0120" />
-		<location y="-0.0108" />
-		<location y="-0.0096" />
-		<location y="-0.0084" />
-		<location y="-0.0072" />
-		<location y="-0.0060" />
-		<location y="-0.0048" />
-		<location y="-0.0036" />
-		<location y="-0.0024" />
-		<location y="-0.0012" />
-		<location y="0.0000" />
-		<location y="0.0012" />
-		<location y="0.0024" />
-		<location y="0.0036" />
-		<location y="0.0048" />
-		<location y="0.0060" />
-		<location y="0.0072" />
-		<location y="0.0084" />
-		<location y="0.0096" />
-		<location y="0.0108" />
-		<location y="0.0120" />
-		<location y="0.0132" />
-		<location y="0.0144" />
-		<location y="0.0156" />
-		<location y="0.0168" />
-		<location y="0.0180" />
-		<location y="0.0192" />
-		<location y="0.0204" />
-		<location y="0.0216" />
-		<location y="0.0228" />
-		<location y="0.0240" />
-		<location y="0.0252" />
-		<location y="0.0264" />
-		<location y="0.0276" />
-		<location y="0.0288" />
-		<location y="0.0300" />
-		<location y="0.0312" />
-		<location y="0.0324" />
-		<location y="0.0336" />
-		<location y="0.0348" />
-		<location y="0.0360" />
-		<location y="0.0372" />
-		<location y="0.0384" />
-		<location y="0.0396" />
-		<location y="0.0408" />
-		<location y="0.0420" />
-		<location y="0.0432" />
-		<location y="0.0444" />
-		<location y="0.0456" />
-		<location y="0.0468" />
-		<location y="0.0480" />
-		<location y="0.0492" />
-		<location y="0.0504" />
-		<location y="0.0516" />
-		<location y="0.0528" />
-		<location y="0.0540" />
-		<location y="0.0552" />
-		<location y="0.0564" />
-		<location y="0.0576" />
-		<location y="0.0588" />
-		<location y="0.0600" />
-		<location y="0.0612" />
-		<location y="0.0624" />
-		<location y="0.0636" />
-		<location y="0.0648" />
-		<location y="0.0660" />
-		<location y="0.0672" />
-		<location y="0.0684" />
-		<location y="0.0696" />
-		<location y="0.0708" />
-		<location y="0.0720" />
-		<location y="0.0732" />
-		<location y="0.0744" />
-		<location y="0.0756" />
-		<location y="0.0768" />
-		<location y="0.0780" />
-		<location y="0.0792" />
-		<location y="0.0804" />
-		<location y="0.0816" />
-		<location y="0.0828" />
-		<location y="0.0840" />
-		<location y="0.0852" />
-		<location y="0.0864" />
-		<location y="0.0876" />
-		<location y="0.0888" />
-		<location y="0.0900" />
-		<location y="0.0912" />
-		<location y="0.0924" />
-		<location y="0.0936" />
-		<location y="0.0948" />
-		<location y="0.0960" />
-		<location y="0.0972" />
-		<location y="0.0984" />
-		<location y="0.0996" />
-		<location y="0.1008" />
-		<location y="0.1020" />
-		<location y="0.1032" />
-		<location y="0.1044" />
-		<location y="0.1056" />
-		<location y="0.1068" />
-		<location y="0.1080" />
-		<location y="0.1092" />
-		<location y="0.1104" />
-		<location y="0.1116" />
-		<location y="0.1128" />
-		<location y="0.1140" />
-		<location y="0.1152" />
-		<location y="0.1164" />
-		<location y="0.1176" />
-		<location y="0.1188" />
-		<location y="0.1200" />
-		<location y="0.1212" />
-		<location y="0.1224" />
-		<location y="0.1236" />
-		<location y="0.1248" />
-		<location y="0.1260" />
-		<location y="0.1272" />
-		<location y="0.1284" />
-		<location y="0.1296" />
-		<location y="0.1308" />
-		<location y="0.1320" />
-		<location y="0.1332" />
-		<location y="0.1344" />
-		<location y="0.1356" />
-		<location y="0.1368" />
-		<location y="0.1380" />
-		<location y="0.1392" />
-		<location y="0.1404" />
-		<location y="0.1416" />
-		<location y="0.1428" />
-		<!--  Now add the weird junk channels from the detector table 2501-2516-->
-		<location y="0.1440" />
-		<location y="0.1440" />
-		<location y="0.1440" />
-		<location y="0.1440" />
-		<location y="0.1440" />
-		<location y="0.1440" />
-		<location y="0.1440" />
-		<location y="0.1440" />
-		<location y="0.1440" />
-		<location y="0.1440" />
-		<location y="0.1440" />
-		<location y="0.1440" />
-		<location y="0.1440" />
-		<location y="0.1440" />
-		<location y="0.1440" />
-		<location y="0.1440" />
+                                <location y="-0.1440" />
+                                <location y="-0.1428" />
+                                <location y="-0.1416" />
+                                <location y="-0.1404" />
+                                <location y="-0.1392" />
+                                <location y="-0.1380" />
+                                <location y="-0.1368" />
+                                <location y="-0.1356" />
+                                <location y="-0.1344" />
+                                <location y="-0.1332" />
+                                <location y="-0.1320" />
+                                <location y="-0.1308" />
+                                <location y="-0.1296" />
+                                <location y="-0.1284" />
+                                <location y="-0.1272" />
+                                <location y="-0.1260" />
+                                <location y="-0.1248" />
+                                <location y="-0.1236" />
+                                <location y="-0.1224" />
+                                <location y="-0.1212" />
+                                <location y="-0.1200" />
+                                <location y="-0.1188" />
+                                <location y="-0.1176" />
+                                <location y="-0.1164" />
+                                <location y="-0.1152" />
+                                <location y="-0.1140" />
+                                <location y="-0.1128" />
+                                <location y="-0.1116" />
+                                <location y="-0.1104" />
+                                <location y="-0.1092" />
+                                <location y="-0.1080" />
+                                <location y="-0.1068" />
+                                <location y="-0.1056" />
+                                <location y="-0.1044" />
+                                <location y="-0.1032" />
+                                <location y="-0.1020" />
+                                <location y="-0.1008" />
+                                <location y="-0.0996" />
+                                <location y="-0.0984" />
+                                <location y="-0.0972" />
+                                <location y="-0.0960" />
+                                <location y="-0.0948" />
+                                <location y="-0.0936" />
+                                <location y="-0.0924" />
+                                <location y="-0.0912" />
+                                <location y="-0.0900" />
+                                <location y="-0.0888" />
+                                <location y="-0.0876" />
+                                <location y="-0.0864" />
+                                <location y="-0.0852" />
+                                <location y="-0.0840" />
+                                <location y="-0.0828" />
+                                <location y="-0.0816" />
+                                <location y="-0.0804" />
+                                <location y="-0.0792" />
+                                <location y="-0.0780" />
+                                <location y="-0.0768" />
+                                <location y="-0.0756" />
+                                <location y="-0.0744" />
+                                <location y="-0.0732" />
+                                <location y="-0.0720" />
+                                <location y="-0.0708" />
+                                <location y="-0.0696" />
+                                <location y="-0.0684" />
+                                <location y="-0.0672" />
+                                <location y="-0.0660" />
+                                <location y="-0.0648" />
+                                <location y="-0.0636" />
+                                <location y="-0.0624" />
+                                <location y="-0.0612" />
+                                <location y="-0.0600" />
+                                <location y="-0.0588" />
+                                <location y="-0.0576" />
+                                <location y="-0.0564" />
+                                <location y="-0.0552" />
+                                <location y="-0.0540" />
+                                <location y="-0.0528" />
+                                <location y="-0.0516" />
+                                <location y="-0.0504" />
+                                <location y="-0.0492" />
+                                <location y="-0.0480" />
+                                <location y="-0.0468" />
+                                <location y="-0.0456" />
+                                <location y="-0.0444" />
+                                <location y="-0.0432" />
+                                <location y="-0.0420" />
+                                <location y="-0.0408" />
+                                <location y="-0.0396" />
+                                <location y="-0.0384" />
+                                <location y="-0.0372" />
+                                <location y="-0.0360" />
+                                <location y="-0.0348" />
+                                <location y="-0.0336" />
+                                <location y="-0.0324" />
+                                <location y="-0.0312" />
+                                <location y="-0.0300" />
+                                <location y="-0.0288" />
+                                <location y="-0.0276" />
+                                <location y="-0.0264" />
+                                <location y="-0.0252" />
+                                <location y="-0.0240" />
+                                <location y="-0.0228" />
+                                <location y="-0.0216" />
+                                <location y="-0.0204" />
+                                <location y="-0.0192" />
+                                <location y="-0.0180" />
+                                <location y="-0.0168" />
+                                <location y="-0.0156" />
+                                <location y="-0.0144" />
+                                <location y="-0.0132" />
+                                <location y="-0.0120" />
+                                <location y="-0.0108" />
+                                <location y="-0.0096" />
+                                <location y="-0.0084" />
+                                <location y="-0.0072" />
+                                <location y="-0.0060" />
+                                <location y="-0.0048" />
+                                <location y="-0.0036" />
+                                <location y="-0.0024" />
+                                <location y="-0.0012" />
+                                <location y="0.0000" />
+                                <location y="0.0012" />
+                                <location y="0.0024" />
+                                <location y="0.0036" />
+                                <location y="0.0048" />
+                                <location y="0.0060" />
+                                <location y="0.0072" />
+                                <location y="0.0084" />
+                                <location y="0.0096" />
+                                <location y="0.0108" />
+                                <location y="0.0120" />
+                                <location y="0.0132" />
+                                <location y="0.0144" />
+                                <location y="0.0156" />
+                                <location y="0.0168" />
+                                <location y="0.0180" />
+                                <location y="0.0192" />
+                                <location y="0.0204" />
+                                <location y="0.0216" />
+                                <location y="0.0228" />
+                                <location y="0.0240" />
+                                <location y="0.0252" />
+                                <location y="0.0264" />
+                                <location y="0.0276" />
+                                <location y="0.0288" />
+                                <location y="0.0300" />
+                                <location y="0.0312" />
+                                <location y="0.0324" />
+                                <location y="0.0336" />
+                                <location y="0.0348" />
+                                <location y="0.0360" />
+                                <location y="0.0372" />
+                                <location y="0.0384" />
+                                <location y="0.0396" />
+                                <location y="0.0408" />
+                                <location y="0.0420" />
+                                <location y="0.0432" />
+                                <location y="0.0444" />
+                                <location y="0.0456" />
+                                <location y="0.0468" />
+                                <location y="0.0480" />
+                                <location y="0.0492" />
+                                <location y="0.0504" />
+                                <location y="0.0516" />
+                                <location y="0.0528" />
+                                <location y="0.0540" />
+                                <location y="0.0552" />
+                                <location y="0.0564" />
+                                <location y="0.0576" />
+                                <location y="0.0588" />
+                                <location y="0.0600" />
+                                <location y="0.0612" />
+                                <location y="0.0624" />
+                                <location y="0.0636" />
+                                <location y="0.0648" />
+                                <location y="0.0660" />
+                                <location y="0.0672" />
+                                <location y="0.0684" />
+                                <location y="0.0696" />
+                                <location y="0.0708" />
+                                <location y="0.0720" />
+                                <location y="0.0732" />
+                                <location y="0.0744" />
+                                <location y="0.0756" />
+                                <location y="0.0768" />
+                                <location y="0.0780" />
+                                <location y="0.0792" />
+                                <location y="0.0804" />
+                                <location y="0.0816" />
+                                <location y="0.0828" />
+                                <location y="0.0840" />
+                                <location y="0.0852" />
+                                <location y="0.0864" />
+                                <location y="0.0876" />
+                                <location y="0.0888" />
+                                <location y="0.0900" />
+                                <location y="0.0912" />
+                                <location y="0.0924" />
+                                <location y="0.0936" />
+                                <location y="0.0948" />
+                                <location y="0.0960" />
+                                <location y="0.0972" />
+                                <location y="0.0984" />
+                                <location y="0.0996" />
+                                <location y="0.1008" />
+                                <location y="0.1020" />
+                                <location y="0.1032" />
+                                <location y="0.1044" />
+                                <location y="0.1056" />
+                                <location y="0.1068" />
+                                <location y="0.1080" />
+                                <location y="0.1092" />
+                                <location y="0.1104" />
+                                <location y="0.1116" />
+                                <location y="0.1128" />
+                                <location y="0.1140" />
+                                <location y="0.1152" />
+                                <location y="0.1164" />
+                                <location y="0.1176" />
+                                <location y="0.1188" />
+                                <location y="0.1200" />
+                                <location y="0.1212" />
+                                <location y="0.1224" />
+                                <location y="0.1236" />
+                                <location y="0.1248" />
+                                <location y="0.1260" />
+                                <location y="0.1272" />
+                                <location y="0.1284" />
+                                <location y="0.1296" />
+                                <location y="0.1308" />
+                                <location y="0.1320" />
+                                <location y="0.1332" />
+                                <location y="0.1344" />
+                                <location y="0.1356" />
+                                <location y="0.1368" />
+                                <location y="0.1380" />
+                                <location y="0.1392" />
+                                <location y="0.1404" />
+                                <location y="0.1416" />
+                                <location y="0.1428" />
+                                <!--  Now add the weird junk channels from the detector table 2501-2516-->
+                                <location y="0.1440" />
+                                <location y="0.1440" />
+                                <location y="0.1440" />
+                                <location y="0.1440" />
+                                <location y="0.1440" />
+                                <location y="0.1440" />
+                                <location y="0.1440" />
+                                <location y="0.1440" />
+                                <location y="0.1440" />
+                                <location y="0.1440" />
+                                <location y="0.1440" />
+                                <location y="0.1440" />
+                                <location y="0.1440" />
+                                <location y="0.1440" />
+                                <location y="0.1440" />
+                                <location y="0.1440" />
     </component>
   </type>
-  
+ 
   <type name="pixel" is="detector">
     <cuboid id="shape">
       <left-front-bottom-point x="-0.025" y="-0.0006" z="0.0"  />
@@ -390,13 +430,13 @@
       <right-front-bottom-point  x="0.025" y="-0.0006" z="0.0"  />
     </cuboid>
     <algebra val="shape" />
-  </type>    
+  </type>   
   
   <!-- Larmor Detector Section 8 tubes -->
-  
+ 
 <type name="LarmorDetectorSection">
- <properties />
- <component type="tube">
+<properties />
+<component type="tube">
 <location  x="   0.0028    "  y="-0.00703125" name="tube001" />
 <location  x="   0.0020    "  y="0.000234375"  name="tube002" />
 <location  x="   0.0012    "  y="-0.00703125"  name="tube003" />
@@ -405,11 +445,10 @@
 <location  x="   -0.0012    "  y="0.000234375"  name="tube006" />
 <location  x="   -0.0020    "  y="-0.000234375"  name="tube007" />
 <location  x="   -0.0028    "  y="0.00703125"  name="tube008" />
- </component>
- </type>
- 
+</component>
+</type>
  <type name="tube" outline="yes">
- <component type="tubepixel">
+<component type="tubepixel">
    <location y="    -0.2133  "/>
    <location y="-0.21212813  "/>
    <location y="-0.21095625  "/>
@@ -922,10 +961,10 @@
    <location y="0.383184375  "/>
    <location y=" 0.38435625  "/>
    <location y="0.385528125  "/>
- </component>
- </type>
-
- <type name="tubepixel" is="detector">
+</component>
+</type>
+ 
+<type name="tubepixel" is="detector">
     <cylinder id="cyl-approx">
       <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
       <axis x="0.0" y="0.2" z="0.0" />
@@ -934,25 +973,25 @@
     </cylinder>
     <algebra val="cyl-approx" />
   </type>
-   
-  <!-- other components -->  
+  
+  <!-- other components --> 
   
   <!-- DETECTOR and MONITOR ID LISTS -->
-
+ 
   <idlist idname="monitor1">
-    <id val="1" />  
+    <id val="1" /> 
   </idlist>
-  
+ 
   <idlist idname="monitor2">
-    <id val="2" />  
+    <id val="2" /> 
   </idlist>
-
+ 
   <idlist idname="monitor3">
-    <id val="3" />  
+    <id val="3" /> 
   </idlist>
-
+ 
   <!-- detector IDs required NOT spectrum numbers (See documentation) -->
-
+ 
   <idlist idname="DetectorBench">
     <id val="4" />
     <id start="2001" end="2240" />
@@ -966,5 +1005,4 @@
     <id start="1114000" end="1114511" />
     <id start="1116000" end="1116511" />
   </idlist>
- 
 </instrument>

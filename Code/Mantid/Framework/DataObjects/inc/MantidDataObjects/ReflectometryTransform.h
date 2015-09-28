@@ -7,6 +7,7 @@
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 
 #include "MantidDataObjects/MDEventFactory.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace API {
@@ -15,6 +16,7 @@ class MatrixWorkspace;
 namespace DataObjects {
 
 class CalculateReflectometry;
+class TableWorkspace;
 
 /** ReflectometryMDTransform : Abstract type for reflectometry transforms to
  MDWorkspaces. This is a Strategy Design Pattern.
@@ -82,7 +84,7 @@ public:
 
   /// Execuate transformation using normalised polynomial binning
   Mantid::API::MatrixWorkspace_sptr
-  executeNormPoly(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
+  executeNormPoly(Mantid::API::MatrixWorkspace_const_sptr inputWs, boost::shared_ptr<Mantid::DataObjects::TableWorkspace> & vertexes, bool dumpVertexes, std::string outputDimensions) const;
 
   virtual ~ReflectometryTransform();
   ReflectometryTransform(const std::string &d0Label, const std::string &d0ID,
@@ -90,6 +92,7 @@ public:
                          const std::string &d1ID, double d1Min, double d1Max,
                          size_t d0NumBins, size_t d1NumBins,
                          CalculateReflectometry *calc);
+
 };
 
 /// Create a new x-axis for the output workspace

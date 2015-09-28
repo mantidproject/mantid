@@ -8,7 +8,7 @@ project ( QtPropertyBrowser )
 if ( NOT QT_FOUND )
   find_package( Qt4 COMPONENTS QtCore QtGui REQUIRED )
 endif ()
-include ( UseSystemQt4 )
+include ( UseQt4 )
 
 # Add the sources
 set( QTPROPERTYBROWSER_SRCS
@@ -131,7 +131,7 @@ if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( ${PROJECT_NAME} PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
 
-target_link_libraries ( ${PROJECT_NAME} LINK_PRIVATE ${QT_LIBRARIES} )
+target_link_libraries ( ${PROJECT_NAME} LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${QT_LIBRARIES} )
 
 if ( WIN32 )
   add_definitions ( -DQT_QTPROPERTYBROWSER_EXPORT )

@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	src/AlignAndFocusPowder.cpp
 	src/ComputeSensitivity.cpp
+	src/ConvolutionFitSequential.cpp
 	src/DgsAbsoluteUnitsReduction.cpp
 	src/DgsConvertToEnergyTransfer.cpp
 	src/DgsDiagnose.cpp
@@ -9,6 +10,7 @@ set ( SRC_FILES
 	src/DgsReduction.cpp
 	src/DgsRemap.cpp
 	src/EQSANSDarkCurrentSubtraction.cpp
+	src/EQSANSDarkCurrentSubtraction2.cpp
 	src/EQSANSInstrument.cpp
 	src/EQSANSLoad.cpp
 	src/EQSANSMonitorTOF.cpp
@@ -18,8 +20,10 @@ set ( SRC_FILES
 	src/HFIRInstrument.cpp
 	src/HFIRLoad.cpp
 	src/HFIRSANSNormalise.cpp
+	src/LoadEventAndCompress.cpp
 	src/MuonCalculateAsymmetry.cpp
 	src/MuonLoad.cpp
+	src/ProcessIndirectFitParameters.cpp
 	src/RefReduction.cpp
 	src/RefRoi.cpp
 	src/SANSBeamFinder.cpp
@@ -40,6 +44,7 @@ set ( SRC_UNITY_IGNORE_FILES
 set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/AlignAndFocusPowder.h
 	inc/MantidWorkflowAlgorithms/ComputeSensitivity.h
+	inc/MantidWorkflowAlgorithms/ConvolutionFitSequential.h
 	inc/MantidWorkflowAlgorithms/DgsAbsoluteUnitsReduction.h
 	inc/MantidWorkflowAlgorithms/DgsConvertToEnergyTransfer.h
 	inc/MantidWorkflowAlgorithms/DgsDiagnose.h
@@ -48,6 +53,7 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/DgsReduction.h
 	inc/MantidWorkflowAlgorithms/DgsRemap.h
 	inc/MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction.h
+	inc/MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction2.h
 	inc/MantidWorkflowAlgorithms/EQSANSInstrument.h
 	inc/MantidWorkflowAlgorithms/EQSANSLoad.h
 	inc/MantidWorkflowAlgorithms/EQSANSMonitorTOF.h
@@ -57,8 +63,10 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/HFIRInstrument.h
 	inc/MantidWorkflowAlgorithms/HFIRLoad.h
 	inc/MantidWorkflowAlgorithms/HFIRSANSNormalise.h
+	inc/MantidWorkflowAlgorithms/LoadEventAndCompress.h
 	inc/MantidWorkflowAlgorithms/MuonCalculateAsymmetry.h
 	inc/MantidWorkflowAlgorithms/MuonLoad.h
+	inc/MantidWorkflowAlgorithms/ProcessIndirectFitParameters.h
 	inc/MantidWorkflowAlgorithms/RefReduction.h
 	inc/MantidWorkflowAlgorithms/RefRoi.h
 	inc/MantidWorkflowAlgorithms/SANSBeamFinder.h
@@ -74,8 +82,11 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
+    ConvolutionFitSequentialTest.h
+	LoadEventAndCompressTest.h
 	MuonCalculateAsymmetryTest.h
 	MuonLoadTest.h
+	ProcessIndirectFitParametersTest.h
 	SANSSolidAngleCorrectionTest.h
 	SendUsageTest.h
 	StepScanTest.h
@@ -114,7 +125,7 @@ set_property ( TARGET WorkflowAlgorithms PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc ../Nexus/inc )
 
-target_link_libraries ( WorkflowAlgorithms LINK_PRIVATE ${MANTIDLIBS} Nexus ${GSL_LIBRARIES} )
+target_link_libraries ( WorkflowAlgorithms LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} Nexus ${GSL_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

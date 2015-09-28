@@ -16,15 +16,9 @@ set ( SRC_FILES
 	src/FractionalRebinning.cpp
 	src/GroupingWorkspace.cpp
 	src/Histogram1D.cpp
-	src/MDBin.cpp
-	src/MDBox.cpp
-	src/MDBoxBase.cpp
 	src/MDBoxFlatTree.cpp
-	src/MDBoxIterator.cpp
 	src/MDBoxSaveable.cpp
 	src/MDEventFactory.cpp
-	src/MDEventWorkspace.cpp
-	src/MDGridBox.cpp
 	src/MDHistoWorkspace.cpp
 	src/MDHistoWorkspaceIterator.cpp
 	src/MDLeanEvent.cpp
@@ -63,7 +57,9 @@ set ( INC_FILES
 	inc/MantidDataObjects/AffineMatrixParameterParser.h
 	inc/MantidDataObjects/BoxControllerNeXusIO.h
 	inc/MantidDataObjects/CalculateReflectometry.h
+    inc/MantidDataObjects/CalculateReflectometryKiKf.h
 	inc/MantidDataObjects/CalculateReflectometryQxQz.h
+    inc/MantidDataObjects/CalculateReflectometryP.h
 	inc/MantidDataObjects/CoordTransformAffine.h
 	inc/MantidDataObjects/CoordTransformAffineParser.h
 	inc/MantidDataObjects/CoordTransformAligned.h
@@ -80,16 +76,22 @@ set ( INC_FILES
 	inc/MantidDataObjects/GroupingWorkspace.h
 	inc/MantidDataObjects/Histogram1D.h
 	inc/MantidDataObjects/MDBin.h
+	inc/MantidDataObjects/MDBin.tcc
 	inc/MantidDataObjects/MDBox.h
+	inc/MantidDataObjects/MDBox.tcc
 	inc/MantidDataObjects/MDBoxBase.h
+	inc/MantidDataObjects/MDBoxBase.tcc
 	inc/MantidDataObjects/MDBoxFlatTree.h
 	inc/MantidDataObjects/MDBoxIterator.h
+	inc/MantidDataObjects/MDBoxIterator.tcc
 	inc/MantidDataObjects/MDBoxSaveable.h
 	inc/MantidDataObjects/MDDimensionStats.h
 	inc/MantidDataObjects/MDEventFactory.h
 	inc/MantidDataObjects/MDEventInserter.h
 	inc/MantidDataObjects/MDEventWorkspace.h
+	inc/MantidDataObjects/MDEventWorkspace.tcc
 	inc/MantidDataObjects/MDGridBox.h
+	inc/MantidDataObjects/MDGridBox.tcc
 	inc/MantidDataObjects/MDHistoWorkspace.h
 	inc/MantidDataObjects/MDHistoWorkspaceIterator.h
 	inc/MantidDataObjects/MDLeanEvent.h
@@ -116,6 +118,7 @@ set ( INC_FILES
 	inc/MantidDataObjects/VectorColumn.h
 	inc/MantidDataObjects/Workspace2D.h
 	inc/MantidDataObjects/WorkspaceSingleValue.h
+
 )
 
 set ( TEST_FILES
@@ -211,7 +214,7 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataObjects PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( DataObjects LINK_PRIVATE ${MANTIDLIBS} ${JSONCPP_LIBRARIES} ${NEXUS_LIBRARIES} )
+target_link_libraries ( DataObjects LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${JSONCPP_LIBRARIES} ${NEXUS_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )
@@ -220,10 +223,5 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-if ( WIN32 )
-  install ( TARGETS DataObjects ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
-else()
-  install ( TARGETS DataObjects DESTINATION ${LIB_DIR} )
-endif ()
-
+install ( TARGETS DataObjects ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 

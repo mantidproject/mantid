@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name
+#pylint: disable=no-init,invalid-name,too-few-public-methods
 """
 These system tests are to verify that the IDF and parameter files for POLREF, CRISP, INTER and SURF are read properly
 """

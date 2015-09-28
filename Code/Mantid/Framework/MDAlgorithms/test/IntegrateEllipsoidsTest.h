@@ -253,17 +253,17 @@ public:
                       m_peaksWS->getNumberPeaks());
 
     TSM_ASSERT_DELTA("Wrong intensity for peak 0",
-          integratedPeaksWS->getPeak(0).getIntensity(), -2, 0.01);
+          integratedPeaksWS->getPeak(0).getIntensity(), -1, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 1",
-          integratedPeaksWS->getPeak(1).getIntensity(), 2, 0.01);
+          integratedPeaksWS->getPeak(1).getIntensity(), 3, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 2",
-          integratedPeaksWS->getPeak(2).getIntensity(), -2, 0.01);
+          integratedPeaksWS->getPeak(2).getIntensity(), -1, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 3",
           integratedPeaksWS->getPeak(3).getIntensity(), 15, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 4",
-          integratedPeaksWS->getPeak(4).getIntensity(), 11, 0.01);
+          integratedPeaksWS->getPeak(4).getIntensity(), 12, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 5",
-          integratedPeaksWS->getPeak(5).getIntensity(), 10, 0.01);
+          integratedPeaksWS->getPeak(5).getIntensity(), 11, 0.01);
 
   }
 
@@ -283,17 +283,17 @@ public:
                       integratedPeaksWS->getNumberPeaks(),
                       m_peaksWS->getNumberPeaks());
     TSM_ASSERT_DELTA("Wrong intensity for peak 0",
-          integratedPeaksWS->getPeak(0).getIntensity(), 1.0, 0.01);
+          integratedPeaksWS->getPeak(0).getIntensity(), 2.0, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 1",
-          integratedPeaksWS->getPeak(1).getIntensity(), 0, 0.01);
+          integratedPeaksWS->getPeak(1).getIntensity(), 1.0, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 2",
-          integratedPeaksWS->getPeak(2).getIntensity(), 1.0, 0.01);
+          integratedPeaksWS->getPeak(2).getIntensity(), 2.0, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 3",
-          integratedPeaksWS->getPeak(3).getIntensity(), 10, 0.01);
+          integratedPeaksWS->getPeak(3).getIntensity(), 11, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 4",
-          integratedPeaksWS->getPeak(4).getIntensity(), 13, 0.01);
+          integratedPeaksWS->getPeak(4).getIntensity(), 14, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 5",
-          integratedPeaksWS->getPeak(5).getIntensity(), 12, 0.01);
+          integratedPeaksWS->getPeak(5).getIntensity(), 13, 0.01);
 
   }
 };

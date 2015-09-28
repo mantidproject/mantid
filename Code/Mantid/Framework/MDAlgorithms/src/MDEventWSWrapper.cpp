@@ -1,4 +1,5 @@
 #include "MantidMDAlgorithms/MDEventWSWrapper.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -8,60 +9,52 @@ namespace MDAlgorithms {
   template parameter:
   * nd -- number of dimensions
 
- *@param  targ_dim_names -- size-nd vector of string containing names of nd
- dimensions of the wrapped workspace
- *@param  targ_dim_ID    -- size-nd vector of strings containing id of the
- wrapped workspace dimensions
- *@param  targ_dim_units -- size-nd vector of strings containing units of the
- wrapped workspace dimensions
- *
- *@param  dimMin         -- size-nd vector of min values of dimensions of the
- target workspace
- *@param  dimMax         -- size-nd vector of max values of dimensions of the
- target workspace
- *@param  numBins        -- size-nd vector of number of bins, each dimension is
- split on single level          */
+ *@param  description : MDWorkspaceDescription memento.
+*/
 template <size_t nd>
-void MDEventWSWrapper::createEmptyEventWS(const Strings &targ_dim_names,
-                                          const Strings &targ_dim_ID,
-                                          const Strings &targ_dim_units,
-                                          const std::vector<double> &dimMin,
-                                          const std::vector<double> &dimMax,
-                                          const std::vector<size_t> &numBins) {
+void MDEventWSWrapper::createEmptyEventWS(const MDWSDescription &description) {
 
-  boost::shared_ptr<DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd>> ws =
-      boost::shared_ptr<DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd>>(
+  boost::shared_ptr<DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd>>
+      ws = boost::shared_ptr<
+          DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd>>(
           new DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd>());
 
-  size_t nBins(10);
+  auto numBins = description.getNBins();
+  size_t nBins(10); // HACK. this means we have 10 bins artificially. This can't
+                    // be right.
   // Give all the dimensions
   for (size_t d = 0; d < nd; d++) {
     if (!numBins.empty())
       nBins = numBins[d];
 
-    Geometry::MDHistoDimension *dim = new Geometry::MDHistoDimension(
-        targ_dim_names[d], targ_dim_ID[d], targ_dim_units[d],
-        coord_t(dimMin[d]), coord_t(dimMax[d]), nBins);
+    Geometry::MDHistoDimension *dim = NULL;
+    if (d < 3 && description.isQ3DMode()) {
+      // We should have frame and scale information that we can use correctly
+      // for our Q dimensions.
+      auto mdFrame = description.getFrame(d);
+
+      dim = new Geometry::MDHistoDimension(
+          description.getDimNames()[d], description.getDimIDs()[d], *mdFrame,
+          Mantid::coord_t(description.getDimMin()[d]),
+          Mantid::coord_t(description.getDimMax()[d]), nBins);
+
+    } else {
+      dim = new Geometry::MDHistoDimension(
+          description.getDimNames()[d], description.getDimIDs()[d],
+          description.getDimUnits()[d],
+          Mantid::coord_t(description.getDimMin()[d]),
+          Mantid::coord_t(description.getDimMax()[d]), nBins);
+    }
+
     ws->addDimension(Geometry::MDHistoDimension_sptr(dim));
   }
   ws->initialize();
 
-  // Build up the box controller
-  // bc = ws->getBoxController();
-  // Build up the box controller, using the properties in
-  // BoxControllerSettingsAlgorithm
-  //     this->setBoxController(bc);
-  // We always want the box to be split (it will reject bad ones)
-  // ws->splitBox();
   m_Workspace = ws;
 }
 /// terminator for attempting initiate 0 dimensions workspace, will throw.
 template <>
-void MDEventWSWrapper::createEmptyEventWS<0>(const Strings &, const Strings &,
-                                             const Strings &,
-                                             const std::vector<double> &,
-                                             const std::vector<double> &,
-                                             const std::vector<size_t> &) {
+void MDEventWSWrapper::createEmptyEventWS<0>(const MDWSDescription &) {
   throw(std::invalid_argument("MDEventWSWrapper:createEmptyEventWS can not be "
                               "initiated with 0 dimensions"));
 }
@@ -90,7 +83,8 @@ void MDEventWSWrapper::addMDDataND(float *sigErr, uint16_t *runIndex,
                                    size_t dataSize) const {
 
   DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *const pWs =
-      dynamic_cast<DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(
+      dynamic_cast<
+          DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(
           m_Workspace.get());
   if (pWs) {
     for (size_t i = 0; i < dataSize; i++) {
@@ -99,8 +93,8 @@ void MDEventWSWrapper::addMDDataND(float *sigErr, uint16_t *runIndex,
           *(detId + i), (Coord + i * nd)));
     }
   } else {
-    DataObjects::MDEventWorkspace<DataObjects::MDLeanEvent<nd>, nd> *const pLWs =
-        dynamic_cast<
+    DataObjects::MDEventWorkspace<DataObjects::MDLeanEvent<nd>, nd> *const
+        pLWs = dynamic_cast<
             DataObjects::MDEventWorkspace<DataObjects::MDLeanEvent<nd>, nd> *>(
             m_Workspace.get());
 
@@ -126,31 +120,14 @@ void MDEventWSWrapper::addMDDataND<0>(float *, uint16_t *, uint32_t *,
 }
 
 /***/
-// void MDEventWSWrapper::splitBoxList(Kernel::ThreadScheduler * ts)
 template <size_t nd> void MDEventWSWrapper::splitBoxList() {
   DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *const pWs =
-      dynamic_cast<DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(
+      dynamic_cast<
+          DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(
           m_Workspace.get());
   if (!pWs)
     throw(std::bad_cast());
 
-  // std::vector<API::splitBoxList> &BoxList =
-  // pWs->getBoxController()->getBoxesToSplit();
-  // API::splitBoxList RootBox;
-  //  for(size_t i=0;i<BoxList.size();i++)
-  //  {
-  // bool
-  // rootFolderReplaced=DataObjects::MDBox<DataObjects::MDEvent<nd>,nd>::splitAllIfNeeded(BoxList[i],NULL);
-  // if(rootFolderReplaced)
-  // {
-  //   RootBox = BoxList[i];
-  // }
-
-  //  }
-  //   if(RootBox.boxPointer)pWs->setBox(reinterpret_cast<DataObjects::MDBoxBase<DataObjects::MDEvent<nd>,nd>
-  //   *>(RootBox.boxPointer));
-
-  //    BoxList.clear();
   m_needSplitting = false;
 }
 
@@ -163,7 +140,8 @@ template <> void MDEventWSWrapper::splitBoxList<0>() {
 template <size_t nd> void MDEventWSWrapper::calcCentroidND(void) {
 
   DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *const pWs =
-      dynamic_cast<DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(
+      dynamic_cast<
+          DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(
           this->m_Workspace.get());
   if (!pWs)
     throw(std::bad_cast());
@@ -207,9 +185,7 @@ MDEventWSWrapper::createEmptyMDWS(const MDWSDescription &WSD) {
 
   m_NDimensions = (int)WSD.nDimensions();
   // call the particular function, which creates the workspace with n_dimensions
-  (this->*(wsCreator[m_NDimensions]))(WSD.getDimNames(), WSD.getDimIDs(),
-                                      WSD.getDimUnits(), WSD.getDimMin(),
-                                      WSD.getDimMax(), WSD.getNBins());
+  (this->*(wsCreator[m_NDimensions]))(WSD);
 
   // set up the matrix, which convert momentums from Q in orthogonal crystal
   // coordinate system and units of Angstrom^-1 to hkl or orthogonal hkl or

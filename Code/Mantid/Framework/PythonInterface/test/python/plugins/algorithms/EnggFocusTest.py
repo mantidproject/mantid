@@ -5,12 +5,14 @@ from mantid.api import *
 class EnggFocusTest(unittest.TestCase):
 
     _data_ws = None
+    _van_curves_ws = None
+    _van_integ_tbl = None
 
-    _expected_yvals_bank1  = [0.0037582279159681957, 0.00751645583194, 0.0231963801368,
-                              0.0720786940576, 0.0615909620868, 0.00987979301753]
+    _expected_yvals_bank1  = [0.016676032919961604, 0.015995344072536975, 0.047449159145519233,
+                              0.15629648148139513, 0.11018845452876322, 0.017291707350351286]
 
-    _expected_yvals_bank2 = [0, 0.0112746837479, 0.0394536605073, 0.0362013481777,
-                    0.0728500403862, 0.000870882282987]
+    _expected_yvals_bank2 = [0.0, 0.018310873111703541, 0.071387646720910913,
+                             0.061783574337739511, 0.13102948781549345, 0.001766956921862095]
 
     # Note not using @classmethod setUpClass / tearDownClass because that's not supported in the old
     # unittest of rhel6
@@ -19,7 +21,19 @@ class EnggFocusTest(unittest.TestCase):
         Set up dependencies for one or more of the tests below.
         """
         if not self.__class__._data_ws:
-            self.__class__._data_ws = LoadNexus("ENGINX00228061.nxs", OutputWorkspace='ENGIN-X_test_ws')
+            self.__class__._data_ws = LoadNexus(Filename='ENGINX00228061.nxs',
+                                                OutputWorkspace='ENGIN-X_test_ws')
+
+        if not self.__class__._van_curves_ws:
+            # Note the pre-calculated file instead of the too big vanadium run
+            # self.__class__._van_ws = LoadNexus("ENGINX00236516.nxs", OutputWorkspace='ENGIN-X_test_vanadium_ws')
+            self.__class__._van_curves_ws = LoadNexus(Filename=
+                                               'ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs',
+                                               OutputWorkspace='ENGIN-X_vanadium_curves_test_ws')
+        if not self.__class__._van_integ_tbl:
+            self.__class__._van_integ_tbl = LoadNexus(Filename=
+                                                      'ENGINX_precalculated_vanadium_run000236516_integration.nxs',
+                                                      OutputWorkspace='ENGIN-X_vanadium_integ_test_ws')
 
     def test_wrong_properties(self):
         """
@@ -105,17 +119,23 @@ class EnggFocusTest(unittest.TestCase):
         """
 
         out_name = 'out'
-        out = EnggFocus(InputWorkspace=self.__class__._data_ws, Bank='1', OutputWorkspace=out_name)
+        out = EnggFocus(InputWorkspace=self.__class__._data_ws,
+                        VanIntegrationWorkspace=self.__class__._van_integ_tbl,
+                        VanCurvesWorkspace=self.__class__._van_curves_ws,
+                        Bank='1', OutputWorkspace=out_name)
 
         self._check_output_ok(ws=out, ws_name=out_name, y_dim_max=1, yvalues=self._expected_yvals_bank1)
 
-    def test_runs_ok_south(self):
+    def test_runs_ok_north(self):
         """
-        Same as before but with Bank='South' - equivalent to Bank='1'
+        Same as before but with Bank='North' - equivalent to Bank='1'
         """
 
         out_name = 'out'
-        out = EnggFocus(InputWorkspace=self.__class__._data_ws, Bank='North', OutputWorkspace=out_name)
+        out = EnggFocus(InputWorkspace=self.__class__._data_ws,
+                        VanIntegrationWorkspace=self.__class__._van_integ_tbl,
+                        VanCurvesWorkspace=self.__class__._van_curves_ws,
+                        Bank='North', OutputWorkspace=out_name)
 
         self._check_output_ok(ws=out, ws_name=out_name, y_dim_max=1, yvalues=self._expected_yvals_bank1)
 
@@ -124,8 +144,12 @@ class EnggFocusTest(unittest.TestCase):
         Same as above but with detector (workspace) indices equivalent to bank 1
         """
         out_idx_name = 'out_idx'
-        out_idx = EnggFocus(InputWorkspace=self.__class__._data_ws, SpectrumNumbers='1-1200',
-                              OutputWorkspace=out_idx_name)
+        out_idx = EnggFocus(InputWorkspace=self.__class__._data_ws,
+                            VanIntegrationWorkspace=self.__class__._van_integ_tbl,
+                            VanCurvesWorkspace=self.__class__._van_curves_ws,
+                            SpectrumNumbers='1-1200',
+                            OutputWorkspace=out_idx_name)
+
         self._check_output_ok(ws=out_idx, ws_name=out_idx_name, y_dim_max=1,
                               yvalues=self._expected_yvals_bank1)
 
@@ -135,8 +159,10 @@ class EnggFocusTest(unittest.TestCase):
         """
         out_idx_name = 'out_idx'
         out_idx = EnggFocus(InputWorkspace=self.__class__._data_ws,
-                              SpectrumNumbers='1-100, 101-500, 400-1200',
-                              OutputWorkspace=out_idx_name)
+                            VanIntegrationWorkspace=self.__class__._van_integ_tbl,
+                            VanCurvesWorkspace=self.__class__._van_curves_ws,
+                            SpectrumNumbers='1-100, 101-500, 400-1200',
+                            OutputWorkspace=out_idx_name)
         self._check_output_ok(ws=out_idx, ws_name=out_idx_name, y_dim_max=1,
                               yvalues=self._expected_yvals_bank1)
 
@@ -147,7 +173,9 @@ class EnggFocusTest(unittest.TestCase):
 
         out_name = 'out_bank2'
         out_bank2 = EnggFocus(InputWorkspace=self.__class__._data_ws, Bank='2',
-                                OutputWorkspace=out_name)
+                              VanCurvesWorkspace=self.__class__._van_curves_ws,
+                              VanIntegrationWorkspace=self.__class__._van_integ_tbl,
+                              OutputWorkspace=out_name)
 
         self._check_output_ok(ws=out_bank2, ws_name=out_name, y_dim_max=1201,
                               yvalues=self._expected_yvals_bank2)
@@ -157,8 +185,10 @@ class EnggFocusTest(unittest.TestCase):
         As before but using the Bank='South' alias. Should produce the same results.
         """
         out_name = 'out_bank_south'
-        out_bank_south = EnggFocus(InputWorkspace=self.__class__._data_ws, Bank='South',
-                                OutputWorkspace=out_name)
+        out_bank_south = EnggFocus(InputWorkspace=self.__class__._data_ws,
+                                   VanIntegrationWorkspace=self.__class__._van_integ_tbl,
+                                   VanCurvesWorkspace=self.__class__._van_curves_ws,
+                                   Bank='South', OutputWorkspace=out_name)
 
         self._check_output_ok(ws=out_bank_south, ws_name=out_name, y_dim_max=1201,
                               yvalues=self._expected_yvals_bank2)

@@ -1,4 +1,4 @@
-#include "PythonThreading.h"
+#include "MantidQtAPI/PythonThreading.h"
 
 #include "MantidVatesSimpleGuiViewWidgets/VatesParaViewApplication.h"
 #include "MantidKernel/ConfigService.h"
@@ -23,6 +23,7 @@
 #include "pqCollaborationBehavior.h"
 #include "pqViewStreamingBehavior.h"
 #include "pqPluginSettingsBehavior.h"
+#include "pqModelTransformSupportBehavior.h"
 
 #include <Poco/Path.h>
 
@@ -50,7 +51,7 @@ namespace Mantid
                                    "set this variable.");
         }
 
-        GlobalInterpreterLock gil;
+        ScopedPythonGIL gil;
         Q_ASSERT(pqApplicationCore::instance()==NULL);
 
         // Provide ParaView's application core with a path to the running executable
@@ -112,11 +113,11 @@ namespace Mantid
         new pqCollaborationBehavior(this);
         new pqViewStreamingBehavior(this);
         new pqPluginSettingsBehavior(this);
+        new pqModelTransformSupportBehavior(this);
       }
 
       VatesParaViewApplication::~VatesParaViewApplication()
       {
-
       }
 
       VatesParaViewApplication* VatesParaViewApplication::instance()

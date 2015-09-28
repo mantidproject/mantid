@@ -25,6 +25,7 @@ set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/ViewBase.h
   inc/MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h
+  inc/MantidVatesSimpleGuiViewWidgets/VsiApplyBehaviour.h
 )
 
 set( SOURCE_FILES
@@ -49,6 +50,7 @@ set( SOURCE_FILES
   src/TimeControlWidget.cpp
   src/VatesParaViewApplication.cpp
   src/ViewBase.cpp
+  src/VsiApplyBehaviour.cpp
 )
 
 set( TEST_FILES
@@ -73,6 +75,7 @@ qt4_wrap_cpp( MOC_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/VatesParaViewApplication.h
   inc/MantidVatesSimpleGuiViewWidgets/ViewBase.h
+  inc/MantidVatesSimpleGuiViewWidgets/VsiApplyBehaviour.h
 )
 
 # These are the ui files to be processed using
@@ -134,7 +137,7 @@ set_property( TARGET VatesSimpleGuiViewWidgets PROPERTY FOLDER MantidVatesSimple
 
 include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 
-target_link_libraries( VatesSimpleGuiViewWidgets LINK_PRIVATE 
+target_link_libraries( VatesSimpleGuiViewWidgets LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
 pqApplicationComponents
 pqComponents
 vtkPVServerManagerRendering
@@ -168,7 +171,7 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
                         ../../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
   cxxtest_add_test( VatesSimpleGuiViewWidgetsTest ${TEST_FILES} )
   
-  target_link_libraries( VatesSimpleGuiViewWidgetsTest LINK_PRIVATE 
+  target_link_libraries( VatesSimpleGuiViewWidgetsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
   VatesSimpleGuiViewWidgets 
   DataHandling 
   Kernel 

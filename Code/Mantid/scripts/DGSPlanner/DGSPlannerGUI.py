@@ -98,6 +98,9 @@ class DGSPlannerGUI(QtGui.QWidget):
         version = ".".join(mantid.__version__.split(".")[:2])
         self.qtUrl='qthelp://org.sphinx.mantidproject.'+version+'/doc/interfaces/DGSPlanner.html'
         self.externalUrl='http://docs.mantidproject.org/nightly/interfaces/DGSPlanner.html'
+        #control for cancel button
+        self.iterations=0
+        self.progress_canceled=False
 
     @QtCore.pyqtSlot(mantid.geometry.OrientedLattice)
     def updateUB(self,ol):
@@ -116,27 +119,32 @@ class DGSPlannerGUI(QtGui.QWidget):
         self.masterDict.update(copy.deepcopy(d))
 
     def help(self):
-        #TODO: at some point use the internal mantid help, if exposed to python
-        self.assistantProcess.close()
-        self.assistantProcess.waitForFinished()
-        helpapp = QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.BinariesPath) + QtCore.QDir.separator()
-        helpapp += 'assistant'
-        args = ['-enableRemoteControl', '-collectionFile',self.collectionFile,'-showUrl',self.qtUrl]
-        if os.path.isfile(helpapp):
+        try:
+            import pymantidplot
+            pymantidplot.proxies.showCustomInterfaceHelp('DGSReduction')
+        except ImportError:
             self.assistantProcess.close()
             self.assistantProcess.waitForFinished()
-            self.assistantProcess.start(helpapp, args)
-        else:
-            QtGui.QDesktopServices.openUrl(QtCore.QUrl(self.externalUrl))
+            helpapp = QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.BinariesPath) + QtCore.QDir.separator()
+            helpapp += 'assistant'
+            args = ['-enableRemoteControl', '-collectionFile',self.collectionFile,'-showUrl',self.qtUrl]
+            if os.path.isfile(helpapp):
+                self.assistantProcess.close()
+                self.assistantProcess.waitForFinished()
+                self.assistantProcess.start(helpapp, args)
+            else:
+                QtGui.QDesktopServices.openUrl(QtCore.QUrl(self.externalUrl))
 
     def closeEvent(self,event):
         self.assistantProcess.close()
         self.assistantProcess.waitForFinished()
         event.accept()
 
+    # pylint: disable=too-many-locals
     def updateFigure(self):
         # pylint: disable=too-many-branches
-        if self.updatedInstrument:
+        if self.updatedInstrument or self.progress_canceled:
+            self.progress_canceled=False
             #get goniometer settings first
             gonioAxis0values=numpy.arange(self.masterDict['gonioMinvals'][0],self.masterDict['gonioMaxvals'][0]
                                           +0.1*self.masterDict['gonioSteps'][0],self.masterDict['gonioSteps'][0])
@@ -144,7 +152,8 @@ class DGSPlannerGUI(QtGui.QWidget):
                                           +0.1*self.masterDict['gonioSteps'][1],self.masterDict['gonioSteps'][1])
             gonioAxis2values=numpy.arange(self.masterDict['gonioMinvals'][2],self.masterDict['gonioMaxvals'][2]
                                           +0.1*self.masterDict['gonioSteps'][2],self.masterDict['gonioSteps'][2])
-            if len(gonioAxis0values)*len(gonioAxis1values)*len(gonioAxis2values)>10:
+            self.iterations=len(gonioAxis0values)*len(gonioAxis1values)*len(gonioAxis2values)
+            if self.iterations>10:
                 reply = QtGui.QMessageBox.warning(self, 'Goniometer',"More than 10 goniometer settings. This might be long.\n"
                                                   "Are you sure you want to proceed?", QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
                                                   QtGui.QMessageBox.No)
@@ -160,17 +169,39 @@ class DGSPlannerGUI(QtGui.QWidget):
                                               LogText=str(self.masterDict['S2']),LogType='Number Series')
                 mantid.simpleapi.LoadInstrument(Workspace="__temp_instrument",InstrumentName="HYSPEC")
             #masking
+            if self.masterDict.has_key('maskFilename') and len(self.masterDict['maskFilename'].strip())>0:
+                try:
+                    __maskWS=mantid.simpleapi.Load(self.masterDict['maskFilename'])
+                    mantid.simpleapi.MaskDetectors(Workspace="__temp_instrument",MaskedWorkspace=__maskWS)
+                except (ValueError,RuntimeError) as e:
+                    reply = QtGui.QMessageBox.critical(self, 'Error',"The following error has occured in loading the mask:\n"+
+                                                       str(e)+"\nDo you want to continue without mask?",
+                                                       QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+                    if reply==QtGui.QMessageBox.No:
+                        return
             if self.masterDict['makeFast']:
                 sp=range(mantid.mtd["__temp_instrument"].getNumberHistograms())
                 tomask=sp[::4]+sp[1::4]+sp[2::4]
                 mantid.simpleapi.MaskDetectors("__temp_instrument",SpectraList=tomask)
             i=0
             groupingStrings=[]
+            progressDialog = QtGui.QProgressDialog(self)
+            progressDialog.setMinimumDuration(0)
+            progressDialog.setCancelButtonText("&Cancel")
+            progressDialog.setRange(0, self.iterations)
+            progressDialog.setWindowTitle("DGSPlanner progress")
             for g0 in gonioAxis0values:
                 for g1 in gonioAxis1values:
                     for g2 in gonioAxis2values:
                         name="__temp_instrument"+str(i)
                         i+=1
+                        progressDialog.setValue(i)
+                        progressDialog.setLabelText("Creating workspace %d of %d..." % (i, self.iterations))
+                        QtGui.qApp.processEvents()
+                        if progressDialog.wasCanceled():
+                            self.progress_canceled=True
+                            progressDialog.close()
+                            return
                         groupingStrings.append(name)
                         mantid.simpleapi.CloneWorkspace("__temp_instrument",OutputWorkspace=name)
                         mantid.simpleapi.SetGoniometer(Workspace=name,
@@ -180,6 +211,7 @@ class DGSPlannerGUI(QtGui.QWidget):
                                                        ","+str(self.masterDict['gonioSenses'][1]),
                                                        Axis2=str(g2)+","+self.masterDict['gonioDirs'][2]+
                                                        ","+str(self.masterDict['gonioSenses'][2]))
+            progressDialog.close()
             mantid.simpleapi.DeleteWorkspace("__temp_instrument")
             self.wg=mantid.simpleapi.GroupWorkspaces(groupingStrings,OutputWorkspace="__temp_instrument")
             self.updatedInstrument=False
@@ -189,40 +221,55 @@ class DGSPlannerGUI(QtGui.QWidget):
             self.updatedOL=False
         #calculate coverage
         dimensions=['Q1','Q2','Q3','DeltaE']
-        __mdws=mantid.simpleapi.CalculateCoverageDGS(self.wg,
-                                                     Q1Basis=self.masterDict['dimBasis'][0],
-                                                     Q2Basis=self.masterDict['dimBasis'][1],
-                                                     Q3Basis=self.masterDict['dimBasis'][2],
-                                                     IncidentEnergy=self.masterDict['Ei'],
-                                                     Dimension1=dimensions[self.masterDict['dimIndex'][0]],
-                                                     Dimension1Min=float2Input(self.masterDict['dimMin'][0]),
-                                                     Dimension1Max=float2Input(self.masterDict['dimMax'][0]),
-                                                     Dimension1Step=float2Input(self.masterDict['dimStep'][0]),
-                                                     Dimension2=dimensions[self.masterDict['dimIndex'][1]],
-                                                     Dimension2Min=float2Input(self.masterDict['dimMin'][1]),
-                                                     Dimension2Max=float2Input(self.masterDict['dimMax'][1]),
-                                                     Dimension2Step=float2Input(self.masterDict['dimStep'][1]),
-                                                     Dimension3=dimensions[self.masterDict['dimIndex'][2]],
-                                                     Dimension3Min=float2Input(self.masterDict['dimMin'][2]),
-                                                     Dimension3Max=float2Input(self.masterDict['dimMax'][2]),
-                                                     Dimension4=dimensions[self.masterDict['dimIndex'][3]],
-                                                     Dimension4Min=float2Input(self.masterDict['dimMin'][3]),
-                                                     Dimension4Max=float2Input(self.masterDict['dimMax'][3]))
-        intensity=__mdws[0].getSignalArray()[0,0,:,:]*1. #to make it writeable
-        if self.colorButton.isChecked():
-            for i in range(__mdws.getNumberOfEntries())[1:]:
-                tempintensity=  __mdws[i].getSignalArray()[0,0,:,:]
-                intensity[numpy.where( tempintensity>0)]=i+1.
-        else:
-            for i in range(__mdws.getNumberOfEntries())[1:]:
-                tempintensity=  __mdws[i].getSignalArray()[0,0,:,:]
-                intensity[numpy.where( tempintensity>0)]=1.
-        Z = numpy.transpose(intensity)
-        x = numpy.linspace(__mdws[0].getDimension(0).getMinimum(), __mdws[0].getDimension(0).getMaximum(),intensity.shape[1] )
-        y = numpy.linspace(__mdws[0].getDimension(1).getMinimum(), __mdws[0].getDimension(1).getMaximum(),intensity.shape[0] )
+        progressDialog = QtGui.QProgressDialog(self)
+        progressDialog.setMinimumDuration(0)
+        progressDialog.setCancelButtonText("&Cancel")
+        progressDialog.setRange(0, self.iterations)
+        progressDialog.setWindowTitle("DGSPlanner progress")
+        for i in range(self.iterations):
+            progressDialog.setValue(i)
+            progressDialog.setLabelText("Calculating orientation %d of %d..." % (i, self.iterations))
+            QtGui.qApp.processEvents()
+            if progressDialog.wasCanceled():
+                self.progress_canceled=True
+                progressDialog.close()
+                return
+
+            __mdws=mantid.simpleapi.CalculateCoverageDGS(self.wg[i],
+                                                         Q1Basis=self.masterDict['dimBasis'][0],
+                                                         Q2Basis=self.masterDict['dimBasis'][1],
+                                                         Q3Basis=self.masterDict['dimBasis'][2],
+                                                         IncidentEnergy=self.masterDict['Ei'],
+                                                         Dimension1=dimensions[self.masterDict['dimIndex'][0]],
+                                                         Dimension1Min=float2Input(self.masterDict['dimMin'][0]),
+                                                         Dimension1Max=float2Input(self.masterDict['dimMax'][0]),
+                                                         Dimension1Step=float2Input(self.masterDict['dimStep'][0]),
+                                                         Dimension2=dimensions[self.masterDict['dimIndex'][1]],
+                                                         Dimension2Min=float2Input(self.masterDict['dimMin'][1]),
+                                                         Dimension2Max=float2Input(self.masterDict['dimMax'][1]),
+                                                         Dimension2Step=float2Input(self.masterDict['dimStep'][1]),
+                                                         Dimension3=dimensions[self.masterDict['dimIndex'][2]],
+                                                         Dimension3Min=float2Input(self.masterDict['dimMin'][2]),
+                                                         Dimension3Max=float2Input(self.masterDict['dimMax'][2]),
+                                                         Dimension4=dimensions[self.masterDict['dimIndex'][3]],
+                                                         Dimension4Min=float2Input(self.masterDict['dimMin'][3]),
+                                                         Dimension4Max=float2Input(self.masterDict['dimMax'][3]))
+
+            if i==0:
+                intensity=__mdws.getSignalArray()[:,:,0,0]*1. #to make it writeable
+            else:
+                if self.colorButton.isChecked():
+                    tempintensity=  __mdws.getSignalArray()[:,:,0,0]
+                    intensity[numpy.where( tempintensity>0)]=i+1.
+                else:
+                    tempintensity=  __mdws.getSignalArray()[:,:,0,0]
+                    intensity[numpy.where( tempintensity>0)]=1.
+        progressDialog.close()
+        x = numpy.linspace(__mdws.getDimension(0).getMinimum(), __mdws.getDimension(0).getMaximum(),intensity.shape[0] )
+        y = numpy.linspace(__mdws.getDimension(1).getMinimum(), __mdws.getDimension(1).getMaximum(),intensity.shape[1] )
         Y,X = numpy.meshgrid(y,x)
         xx, yy = self.tr(X, Y)
-        Z=numpy.ma.masked_array(Z,Z==0)
+        Z=numpy.ma.masked_array(intensity,intensity==0)
         Z = Z[:-1, :-1]
         #plotting
         if self.sender() is self.plotButton or self.needToClear:
@@ -241,6 +288,7 @@ class DGSPlannerGUI(QtGui.QWidget):
         self.trajfig.grid(True)
         self.canvas.draw()
         mantid.simpleapi.DeleteWorkspace(__mdws)
+
 
     def save(self):
         fileName = str(QtGui.QFileDialog.getSaveFileName(self, 'Save Plot', self.saveDir,'*.png'))

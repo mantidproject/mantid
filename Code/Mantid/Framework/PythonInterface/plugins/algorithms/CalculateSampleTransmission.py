@@ -23,14 +23,16 @@ class CalculateSampleTransmission(PythonAlgorithm):
 
 
     def PyInit(self):
-        self.declareProperty(name='WavelengthRange', defaultValue='', validator=StringMandatoryValidator(),
+        self.declareProperty(name='WavelengthRange', defaultValue='',
+                             validator=StringMandatoryValidator(),
                              doc='Wavelength range to calculate transmission for.')
 
-        self.declareProperty(name='ChemicalFormula', defaultValue='', validator=StringMandatoryValidator(),
+        self.declareProperty(name='ChemicalFormula', defaultValue='',
+                             validator=StringMandatoryValidator(),
                              doc='Sample chemical formula')
 
         self.declareProperty(name='NumberDensity', defaultValue=0.1,
-                             doc='Number denisty (atoms/Angstrom^3). Default=0.1')
+                             doc='Number denisty per atom (atoms/Angstrom^3). Default=0.1')
 
         self.declareProperty(name='Thickness', defaultValue=0.1,
                              doc='Sample thickness (cm). Default=0.1')
@@ -61,7 +63,7 @@ class CalculateSampleTransmission(PythonAlgorithm):
                         VerticalAxisUnit='Text', VerticalAxisValues='Transmission,Scattering')
         Rebin(InputWorkspace=self._output_ws, OutputWorkspace=self._output_ws,
               Params=self._bin_params)
-        SetSampleMaterial(InputWorkspace=self._output_ws, ChemicalFormula=self._chemical_formula)
+        SetSampleMaterial(InputWorkspace=self._output_ws, ChemicalFormula=self._chemical_formula, SampleNumberDensity=self._density)
         ConvertToPointData(InputWorkspace=self._output_ws, OutputWorkspace=self._output_ws)
 
         ws = mtd[self._output_ws]

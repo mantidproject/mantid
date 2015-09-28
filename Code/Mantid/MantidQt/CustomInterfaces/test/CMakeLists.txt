@@ -11,7 +11,7 @@ if ( CXXTEST_FOUND )
 
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( CustomInterfacesTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
-    target_link_libraries( CustomInterfacesTest LINK_PRIVATE 
+    target_link_libraries( CustomInterfacesTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             CustomInterfaces
             API
             DataObjects

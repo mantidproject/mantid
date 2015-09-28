@@ -429,18 +429,16 @@ class ISISInstrument(BaseInstrument):
            #logger.warning("Failed to find centre-finder-step-size2")
             self.cen_find_step2 = self.cen_find_step
 
-        logger.warning("Trying to find beam-centre-scale-factor1")
         try:
             self.beam_centre_scale_factor1 = float(self.definition.getNumberParameter('beam-centre-scale-factor1')[0])
         except:
-            logger.warning("Failed to find beam-centre-scale-factor1")
+            logger.information("Setting beam-centre-scale-factor1 to default (1000).")
             self.beam_centre_scale_factor1 = 1000.0
 
-        logger.warning("Trying to find beam-centre-scale-factor2")
         try:
             self.beam_centre_scale_factor2 = float(self.definition.getNumberParameter('beam-centre-scale-factor2')[0])
         except:
-            logger.warning("Failed to find beam-centre-scale-factor2")
+            logger.information("Setting beam-centre-scale-factor1 to default (1000).")
             self.beam_centre_scale_factor2 = 1000.0
 
         firstDetect = DetectorBank(self.definition, 'low-angle')
@@ -728,7 +726,7 @@ class ISISInstrument(BaseInstrument):
         try:
             run_num = ws_ref.getRun().getLogData('run_number').value
         except:
-            run_num = int(re.findall(r'\d+',str(ws_name))[-1])
+            run_num = int(re.findall(r'\d+',str(ws_name))[0])
 
         if isSample:
             self.set_up_for_run(run_num)
@@ -1393,7 +1391,7 @@ class LARMOR(ISISInstrument):
         try:
             run_num = ws_ref.getRun().getLogData('run_number').value
         except:
-            run_num = int(re.findall(r'\d+',str(ws_name))[-1])
+            run_num = int(re.findall(r'\d+',str(ws))[0])
 
         # The angle value
         # Note that the x position gets converted from mm to m when read from the user file so we need to reverse this if X is now an angle
@@ -1460,7 +1458,7 @@ class LARMOR(ISISInstrument):
         try:
             run_num = ws_ref.getRun().getLogData('run_number').value
         except:
-            run_num = int(re.findall(r'\d+',str(ws_name))[-1])
+            run_num = int(re.findall(r'\d+',str(ws_name))[0])
         if int(run_num) >= 2217:
             try:
                 #logger.warning("Trying get_detector_log")

@@ -352,7 +352,7 @@ parameters are defined
 * @param dimMax     -- the vector of maximal values for all dimensions of the
 workspace; is set up similarly to dimMin
 * @param QFrame      -- in Q3D case this describes target coordinate system and
-is ignored in any other caste
+is ignored in any other case
 * @param convertTo_  -- The parameter describing Q-scaling transformations
 * @param targWSDescr -- the resulting class used to interpret all parameters
 together and used to describe selected transformation.

@@ -10,13 +10,15 @@
 if ( CMAKE_COMPILER_IS_GNUCXX )
   set( GCC_COMPILER_VERSION ${CMAKE_CXX_COMPILER_VERSION} CACHE INTERNAL "")
   message( STATUS "gcc version: ${GCC_COMPILER_VERSION}" )
+  if ( GCC_COMPILER_VERSION VERSION_LESS "5.1.0" )
+    # Add an option to use the old C++ ABI if gcc is 5 series
+    option ( USE_CXX98_ABI "If enabled, sets the _GLIBCXX_USE_CXX11_ABI=0 compiler flag" OFF)
+    if ( USE_CXX98_ABI )
+      add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
+    endif()
+  endif()
 elseif ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
   message( STATUS "clang version ${CMAKE_CXX_COMPILER_VERSION}" )
-endif()
-
-#Use the old ABI until the dust has settled and all dependencies are built with the new ABI.
-if ( CMAKE_COMPILER_IS_GNUCXX AND NOT (GCC_COMPILER_VERSION VERSION_LESS "5.1.0"))
-  add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
 endif()
 
 # Global warning flags.

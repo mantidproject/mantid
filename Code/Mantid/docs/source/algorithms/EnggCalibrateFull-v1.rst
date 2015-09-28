@@ -11,8 +11,9 @@ Description
 
 .. warning::
 
-   This algorithm is being developed for a specific instrument. It might get changed or even 
-   removed without a notification, should instrument scientists decide to do so.
+   This algorithm is being developed for a specific instrument. It
+   might get changed or even removed without a notification, should
+   instrument scientists decide to do so.
 
 
 Allows to calibrate or correct for variations in detector position
@@ -43,7 +44,7 @@ OutDetPosTable) is accepted by both :ref:`algm-EnggCalibrate` and
 'Detector Position' of the table to correct the detector positions
 before focussing. The OutDetPosTable output table can also be used
 to apply the calibration calculated by this algorithm on any other
-workspace by using the algorithm :ref:`algm-AppplyCalibration`.
+workspace by using the algorithm :ref:`algm-ApplyCalibration`.
 
 In the output table the calibrated positions for every detector are
 found by calculating the *L2* values from the *difc* values as
@@ -57,7 +58,14 @@ peaks. See the algorithm :ref:`algm-EnggFitPeaks` for details on how
 
 This algorithm expects as input/output workspace the *long*
 calibration run, which provides a decent pattern for every detector or
-pixel.
+pixel. The spectra of the workspace are corrected using data from a
+Vanadium run (passed in the VanadiumWorkspace property). These
+corrections include two steps: detector sensitivity correction and
+pixel-by-pixel correction on a per-bank basis. See also
+:ref:`algm-EnggFocus` where the same correction is applied. Similarly
+as in :ref:`algm-EnggFocus`, it is possible to retrieve the curves
+fitted to the Vanadium run data for every bank by using the
+OutVanadiumCurveFits property.
 
 .. categories::
 
@@ -72,11 +80,19 @@ Usage
 
 .. testcode:: ExCalFull
 
+   # Using a workspace with only one spectrum to keep this test small and fast.
+   # Normally you would use a long Ceria run file or similar
    ws_name = 'ws_focussed'
    Load('ENGINX00213855focussed.nxs', OutputWorkspace=ws_name)
 
+   # Using precalculated Vanadium corrections. To calculate from scrach see EnggVanadiumCorrections
+   van_integ_ws = Load('ENGINX_precalculated_vanadium_run000236516_integration.nxs')
+   van_curves_ws = Load('ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs')
+
    posTable = EnggCalibrateFull(Workspace=ws_name,
-                                  ExpectedPeaks=[1.097, 2.1], Bank='1')
+                                VanIntegrationWorkspace=van_integ_ws,
+                                VanCurvesWorkspace=van_curves_ws,
+                                ExpectedPeaks=[1.097, 2.1], Bank='1')
 
    detID = posTable.column(0)[0]
    calPos =  posTable.column(2)[0]
@@ -89,6 +105,8 @@ Usage
 .. testcleanup:: ExCalFull
 
    DeleteWorkspace(ws_name)
+   DeleteWorkspace(van_integ_ws)
+   DeleteWorkspace(van_curves_ws)
 
 Output:
 
@@ -106,10 +124,19 @@ Output:
 
    ws_name = 'ws_focussed'
    pos_filename = 'detectors_pos.csv'
+   # Note that this is a small file which is not very meaningful but simple enough for
+   # this test to run fast. Please user your (proper) run file.
    Load('ENGINX00213855focussed.nxs', OutputWorkspace=ws_name)
+
+   # Using precalculated Vanadium corrections. To calculate from scrach see EnggVanadiumCorrections
+   van_integ_ws = Load('ENGINX_precalculated_vanadium_run000236516_integration.nxs')
+   van_curves_ws = Load('ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs')
+
    posTable = EnggCalibrateFull(Workspace=ws_name,
-                                  ExpectedPeaks=[1.097, 2.1], Bank='1',
-                                  OutDetPosFilename=pos_filename)
+                                VanIntegrationWorkspace=van_integ_ws,
+                                VanCurvesWorkspace=van_curves_ws,
+                                ExpectedPeaks=[1.097, 2.1], Bank='1',
+                                OutDetPosFilename=pos_filename)
 
    detID = posTable.column(0)[0]
    pos =  posTable.column(2)[0]
@@ -131,6 +158,8 @@ Output:
 .. testcleanup:: ExCalFullWithOutputFile
 
    DeleteWorkspace(ws_name)
+   DeleteWorkspace(van_integ_ws)
+   DeleteWorkspace(van_curves_ws)
    import os
    os.remove(pos_filename)
 

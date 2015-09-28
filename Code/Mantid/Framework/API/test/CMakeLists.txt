@@ -10,11 +10,12 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/NexusTestHelper.cpp
       )
   cxxtest_add_test ( APITest ${TEST_FILES} ${GMOCK_TEST_FILES})
-  target_link_libraries( APITest LINK_PRIVATE 
+  target_link_libraries( APITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             API
             Geometry
             Kernel
             Nexus
+            ${JSONCPP_LIBRARIES}
             ${NEXUS_LIBRARIES}
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}

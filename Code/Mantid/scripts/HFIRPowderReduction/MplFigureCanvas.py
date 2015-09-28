@@ -1,51 +1,52 @@
-#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called
+#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called, too-many-branches
 import os
+import numpy as np
 
 from PyQt4 import QtGui
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 from matplotlib.figure import Figure
+import matplotlib.image
 
 MplLineStyles = ['-' , '--' , '-.' , ':' , 'None' , ' ' , '']
 MplLineMarkers = [
-        ". (point         )",
-        "* (star          )",
-        "x (x             )",
-        "o (circle        )",
-        "s (square        )",
-        "D (diamond       )",
-        ", (pixel         )",
-        "v (triangle_down )",
-        "^ (triangle_up   )",
-        "< (triangle_left )",
-        "> (triangle_right)",
-        "1 (tri_down      )",
-        "2 (tri_up        )",
-        "3 (tri_left      )",
-        "4 (tri_right     )",
-        "8 (octagon       )",
-        "p (pentagon      )",
-        "h (hexagon1      )",
-        "H (hexagon2      )",
-        "+ (plus          )",
-        "d (thin_diamond  )",
-        "| (vline         )",
-        "_ (hline         )",
-        "None (nothing    )"]
+    ". (point         )",
+    "* (star          )",
+    "x (x             )",
+    "o (circle        )",
+    "s (square        )",
+    "D (diamond       )",
+    ", (pixel         )",
+    "v (triangle_down )",
+    "^ (triangle_up   )",
+    "< (triangle_left )",
+    "> (triangle_right)",
+    "1 (tri_down      )",
+    "2 (tri_up        )",
+    "3 (tri_left      )",
+    "4 (tri_right     )",
+    "8 (octagon       )",
+    "p (pentagon      )",
+    "h (hexagon1      )",
+    "H (hexagon2      )",
+    "+ (plus          )",
+    "d (thin_diamond  )",
+    "| (vline         )",
+    "_ (hline         )",
+    "None (nothing    )"]
 
 MplBasicColors = [
-        "black",
-        "red",
-        "blue",
-        "green",
-        "cyan",
-        "magenta",
-        "yellow",
-        "white"]
+    "black",
+    "red",
+    "blue",
+    "green",
+    "cyan",
+    "magenta",
+    "yellow"] #"white"]
 
 
-class Qt4MplPlotView(QtGui.QWidget):
+class MplFigureCanvas(QtGui.QWidget):
     """ A combined graphics view including matplotlib canvas and
     a navigation tool bar
     """
@@ -71,10 +72,21 @@ class Qt4MplPlotView(QtGui.QWidget):
 
         return
 
-    def addPlot(self, x, y, color=None, label="", xlabel=None, ylabel=None, marker=None, linestyle=None, linewidth=1):
-        """ Add a new plot
+    def add_plot1d(self, x, y, color=None, label="", x_label=None, y_label=None, marker=None,
+                   linestyle=None, linewidth=1, y_err=None):
+        """ Add a 1D plot to
+        :param x:
+        :param y:
+        :param color:
+        :param label:
+        :param x_label:
+        :param y_label:
+        :param marker:
+        :param linestyle:
+        :param linewidth:
+        :return:
         """
-        self.canvas.addPlot(x, y, color, label, xlabel, ylabel, marker, linestyle, linewidth)
+        self.canvas.add_plot1d(x, y, color, label, x_label, y_label, marker, linestyle, linewidth, y_err)
 
         return
 
@@ -191,7 +203,13 @@ class Qt4MplPlotView(QtGui.QWidget):
         if self._myLineMarkerColorIndex == len(self._myLineMarkerColorList):
             self._myLineMarkerColorIndex = 0
 
-        return (marker, color)
+        return marker, color
+
+    def resetLineColorStyle(self):
+        """ Reset the auto index for line's color and style
+        """
+        self._myLineMarkerColorIndex = 0
+        return
 
     def setXYLimit(self, xmin, xmax, ymin, ymax):
         """ Set X-Y limit automatically
@@ -227,7 +245,7 @@ class Qt4MplCanvas(FigureCanvas):
     def __init__(self, parent):
         """  Initialization
         """
-        # Instantialize matplotlib Figure
+        # Instantiate matplotlib Figure
         self.fig = Figure()
         self.fig.patch.set_facecolor('white')
         self.axes = self.fig.add_subplot(111) # return: matplotlib.axes.AxesSubplot
@@ -237,8 +255,7 @@ class Qt4MplCanvas(FigureCanvas):
         self.setParent(parent)
 
         # Set size policy to be able to expanding and resizable with frame
-        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,\
-                QtGui.QSizePolicy.Expanding)
+        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
 
         FigureCanvas.updateGeometry(self)
 
@@ -246,50 +263,87 @@ class Qt4MplCanvas(FigureCanvas):
         self._lineDict = {}
         self._lineIndex = 0
 
-        self.colorbar = None
+        # legend and color bar
+        self.colorBar = None
+        # self._myLegend = None
 
         return
 
-    def addPlot(self, x, y, color=None, label="", xlabel=None, ylabel=None, marker=None, linestyle=None, linewidth=1):
-        """ Plot a set of data
-        Argument:
-        - x: numpy array X
-        - y: numpy array Y
+    def add_plot1d(self, vec_x, vec_y, color=None, label="", x_label=None, y_label=None,
+                   marker=None, line_style=None, line_width=1, y_err=None):
+        """ Add a 1D plot (line) to canvas
+        :param vec_x:
+        :param vec_y:
+        :param color:
+        :param label:
+        :param x_label:
+        :param y_label:
+        :param marker:
+        :param line_style:
+        :param line_width:
+        :param y_err:
+        :return:
         """
+        # Check input
+        if isinstance(vec_x, np.ndarray) is False or isinstance(vec_y, np.ndarray) is False:
+            raise NotImplementedError('Input vec_x or vec_y for addPlot() must be numpy.array.')
+        plot_error = y_err is not None
+        if plot_error is True:
+            if isinstance(y_err, np.ndarray) is False:
+                raise NotImplementedError('Input y_err must be either None or numpy.array.')
+
+        if len(vec_x) != len(vec_y):
+            raise NotImplementedError('Input vec_x and vec_y must have same size.')
+        if plot_error is True and len(y_err) != len(vec_x):
+            raise NotImplementedError('Input vec_x, vec_y and y_error must have same size.')
+
         # Hold previous data
         self.axes.hold(True)
 
         # process inputs and defaults
-        self.x = x
-        self.y = y
+        # self.x = vec_x
+        # self.y = vec_y
 
         if color is None:
             color = (0,1,0,1)
         if marker is None:
             marker = 'o'
-        if linestyle is None:
-            linestyle = '-'
+        if line_style is None:
+            line_style = '-'
 
         # color must be RGBA (4-tuple)
-        r = self.axes.plot(x, y, color=color, marker=marker, linestyle=linestyle,
-                label=label, linewidth=linewidth) # return: list of matplotlib.lines.Line2D object
+        if plot_error is False:
+            r = self.axes.plot(vec_x, vec_y, color=color, marker=marker, linestyle=line_style,
+                               label=label, linewidth=line_width)
+            # return: list of matplotlib.lines.Line2D object
+        else:
+            r = self.axes.errorbar(vec_x, vec_y, yerr=y_err, color=color, marker=marker, linestyle=line_style,
+                                   label=label, linewidth=line_width)
 
         self.axes.set_aspect('auto')
 
         # set x-axis and y-axis label
-        if xlabel is not None:
-            self.axes.set_xlabel(xlabel, fontsize=20)
-        if ylabel is not None:
-            self.axes.set_ylabel(ylabel, fontsize=20)
+        if x_label is not None:
+            self.axes.set_xlabel(x_label, fontsize=20)
+        if y_label is not None:
+            self.axes.set_ylabel(y_label, fontsize=20)
 
         # set/update legend
         self._setupLegend()
 
         # Register
-        if len(r) == 1:
+        if plot_error is True and len(r) == 3:
+            # plot line with error bar.  r[1] contains all lines
+            self._lineDict[self._lineIndex] = r
+        elif plot_error is False and len(r) == 1:
+            # regular line
             self._lineDict[self._lineIndex] = r[0]
         else:
-            print "Impoooooooooooooooosible!"
+            print "Impoooooooooooooooosible! Number of returned tuple is %d"%(len(r))
+            dbmsg = ''
+            for sub_r in r:
+                dbmsg += 'Type: %s, Value: %s\n' % (str(type(sub_r)), str(sub_r))
+            print dbmsg
         self._lineIndex += 1
 
         # Flush/commit
@@ -312,8 +366,12 @@ class Qt4MplCanvas(FigureCanvas):
         # yticks = [1, 4, 23, 24, 30]
         # self.axes.set_yticks(yticks)
 
+        print "[DBNOW] Before imshow(), number of axes = %d" % (len(self.fig.axes))
+
         # show image
         imgplot = self.axes.imshow(array2d, extent=[xmin,xmax,ymin,ymax], interpolation='none')
+        print "[DBNOW] After imshow(), number of axes = %d" % (len(self.fig.axes))
+
         # set y ticks as an option:
         if yticklabels is not None:
             # it will always label the first N ticks even image is zoomed in
@@ -324,12 +382,13 @@ class Qt4MplCanvas(FigureCanvas):
         self.axes.set_aspect('auto')
 
         # Set color bar.  plt.colorbar() does not work!
-        if self.colorbar is None:
+        if self.colorBar is None:
             # set color map type
             imgplot.set_cmap('spectral')
-            self.colorbar = self.fig.colorbar(imgplot)
+            self.colorBar = self.fig.colorbar(imgplot)
         else:
-            self.colorbar.update_bruteforce(imgplot)
+            self.colorBar.update_bruteforce(imgplot)
+        print "[DBNOW] After colorbar is added, number of axes = %d" % (len(self.fig.axes))
 
         # Flush...
         self._flush()
@@ -344,18 +403,18 @@ class Qt4MplCanvas(FigureCanvas):
         # set aspect to auto mode
         self.axes.set_aspect('auto')
 
-        img = mpimg.imread(str(imagefilename))
+        img = matplotlib.image.imread(str(imagefilename))
         # lum_img = img[:,:,0]
         # FUTURE : refactor for image size, interpolation and origin
         imgplot = self.axes.imshow(img, extent=[0, 1000, 800, 0], interpolation='none', origin='lower')
 
         # Set color bar.  plt.colorbar() does not work!
-        if self.colorbar is None:
+        if self.colorBar is None:
             # set color map type
             imgplot.set_cmap('spectral')
-            self.colorbar = self.fig.colorbar(imgplot)
+            self.colorBar = self.fig.colorbar(imgplot)
         else:
-            self.colorbar.update_bruteforce(imgplot)
+            self.colorBar.update_bruteforce(imgplot)
 
         self._flush()
 
@@ -367,25 +426,58 @@ class Qt4MplCanvas(FigureCanvas):
         """
         for ikey in self._lineDict.keys():
             plot = self._lineDict[ikey]
-            if plot is not None:
-                self.axes.lines.remove(plot)
+            if plot is None:
+                continue
+            if isinstance(plot, tuple) is False:
+                try:
+                    self.axes.lines.remove(plot)
+                except ValueError as e:
+                    print "[Error] Plot %s is not in axes.lines which has %d lines. Error mesage: %s" % (
+                        str(plot), len(self.axes.lines), str(e))
+                self._lineDict[ikey] = None
+            else:
+                # error bar
+                plot[0].remove()
+                for line in plot[1]:
+                    line.remove()
+                for line in plot[2]:
+                    line.remove()
                 self._lineDict[ikey] = None
             # ENDIF(plot)
         # ENDFOR
+
+        # Remove legend
+        # only appied in new version of matplotlib
+        # if self._myLegend is not None:
+        #     self._myLegend.remove()
+
+        self._setupLegend()
 
         self.draw()
 
         return
 
-
     def clearCanvas(self):
-        """ Clear data from canvas
+        """ Clear data including lines and image from canvas
         """
         # clear the image for next operation
         self.axes.hold(False)
 
+        # Clear all lines
+        self.clearAllLines()
+
         # clear image
         self.axes.cla()
+        # Try to clear the color bar
+        if len(self.fig.axes) > 1:
+            self.fig.delaxes(self.fig.axes[1])
+            self.colorBar = None
+            # This clears the space claimed by color bar but destroys sub_plot too.
+            self.fig.clear()
+            # Re-create subplot
+            self.axes = self.fig.add_subplot(111)
+        if len(self.fig.axes) > 0:
+            print "[DBNOW] Type of axes[0] = %s" % (str(type(self.fig.axes[0])))
 
         # flush/commit
         self._flush()
@@ -553,6 +645,7 @@ class Qt4MplCanvas(FigureCanvas):
             location = 'best'
 
         handles, labels = self.axes.get_legend_handles_labels()
+        # self._myLegend =
         self.axes.legend(handles, labels, loc=location)
         # print handles
         # print labels

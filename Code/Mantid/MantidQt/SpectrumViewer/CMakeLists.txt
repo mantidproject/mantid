@@ -14,7 +14,7 @@ set ( SRC_FILES
        src/SpectrumDataSource.cpp
        src/SVConnections.cpp
        src/MatrixWSDataSource.cpp
-       src/MatrixWSSpectrumView.cpp
+       #src/MatrixWSSpectrumView.cpp
        src/ArrayDataSource.cpp
 )
 
@@ -37,11 +37,12 @@ set ( INC_FILES
        inc/MantidQtSpectrumViewer/RangeHandler.h
        inc/MantidQtSpectrumViewer/EModeHandler.h
        inc/MantidQtSpectrumViewer/MatrixWSDataSource.h
-       inc/MantidQtSpectrumViewer/MatrixWSSpectrumView.h
+       #inc/MantidQtSpectrumViewer/MatrixWSSpectrumView.h
        inc/MantidQtSpectrumViewer/ArrayDataSource.h
 )
 
 set ( MOC_FILES
+       inc/MantidQtSpectrumViewer/SpectrumDisplay.h
        inc/MantidQtSpectrumViewer/SpectrumView.h
        inc/MantidQtSpectrumViewer/SVConnections.h
        inc/MantidQtSpectrumViewer/TrackingPicker.h
@@ -82,7 +83,7 @@ if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidQtSpectrumViewer PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
 # ... and links to other required libs
-target_link_libraries ( MantidQtSpectrumViewer LINK_PRIVATE 
+target_link_libraries ( MantidQtSpectrumViewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             MantidQtAPI
             MantidWidgets
             ${CORE_MANTIDLIBS}

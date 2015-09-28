@@ -965,6 +965,13 @@ T Matrix<T>::Invert()
   if (nx != ny && nx < 1)
     return 0;
 
+  if(nx==1)
+  {
+      T det=V[0][0];
+      if(V[0][0]!=static_cast<T>(0.))
+          V[0][0]=static_cast<T>(1.)/V[0][0];
+      return det;
+  }
   int *indx = new int[nx]; // Set in lubcmp
 
   double *col = new double[nx];
@@ -1096,7 +1103,7 @@ void Matrix<T>::lubcmp(int *rowperm, int &interchange)
   Find biggest pivot and move to top row. Then
   divide by pivot.
   @param interchange :: odd/even nterchange (+/-1)
-  @param rowperm :: row permuations [nx values]
+  @param rowperm :: row permutations [nx values]
 */
 {
   double sum, dum, big, temp;
@@ -1115,6 +1122,9 @@ void Matrix<T>::lubcmp(int *rowperm, int &interchange)
 
     if (big == 0.0) {
       delete[] vv;
+      for (int j=0;j<static_cast<int>(nx); j++){
+        rowperm[j] = j;
+      }
       return;
     }
     vv[i] = 1.0 / big;

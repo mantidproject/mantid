@@ -3,7 +3,7 @@
 
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/IFunction.h"
-#include <gsl/gsl_matrix.h>
+#include "MantidCurveFitting/GSLMatrix.h"
 
 #include <vector>
 #include <stdexcept>
@@ -39,7 +39,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class GSLJacobian : public API::Jacobian {
   /// The pointer to the GSL's internal jacobian matrix
-  gsl_matrix *m_J;
+  GSLMatrix m_J;
   /// Maps declared indeces to active. For fixed (tied) parameters holds -1
   std::vector<int> m_index;
 
@@ -55,14 +55,16 @@ public:
       if (fun->isActive(i))
         ++np;
     }
-    m_J = gsl_matrix_alloc(ny, np);
+    m_J.resize(ny, np);
   }
 
   /// Destructor.
-  ~GSLJacobian() { gsl_matrix_free(m_J); }
+  ~GSLJacobian() { }
+
+  GSLMatrix& matrix() {return m_J;}
 
   /// Get the pointer to the GSL's jacobian
-  gsl_matrix *getJ() { return m_J; }
+  gsl_matrix *getJ() { return m_J.gsl(); }
 
   /// overwrite base method
   /// @param value :: the value
@@ -70,12 +72,12 @@ public:
   ///  @throw runtime_error Thrown if column of Jacobian to add number to does
   ///  not exist
   void addNumberToColumn(const double &value, const size_t &iActiveP) {
-    if (iActiveP < m_J->size2) {
+    if (iActiveP < m_J.size2()) {
       // add penalty to first and last point and every 10th point in between
-      m_J->data[iActiveP] += value;
-      m_J->data[(m_J->size1 - 1) * m_J->size2 + iActiveP] += value;
-      for (size_t iY = 9; iY < m_J->size1 - 1; iY += 10)
-        m_J->data[iY * m_J->size2 + iActiveP] += value;
+      m_J.gsl()->data[iActiveP] += value;
+      m_J.gsl()->data[(m_J.size1() - 1) * m_J.size2() + iActiveP] += value;
+      for (size_t iY = 9; iY < m_J.size1() - 1; iY += 10)
+        m_J.gsl()->data[iY * m_J.size2() + iActiveP] += value;
     } else {
       throw std::runtime_error("Try to add number to column of Jacobian matrix "
                                "which does not exist.");
@@ -85,13 +87,13 @@ public:
   void set(size_t iY, size_t iP, double value) {
     int j = m_index[iP];
     if (j >= 0)
-      gsl_matrix_set(m_J, iY, j, value);
+      m_J.set(iY, j, value);
   }
   /// overwrite base method
   double get(size_t iY, size_t iP) {
     int j = m_index[iP];
     if (j >= 0)
-      return gsl_matrix_get(m_J, iY, j);
+      return m_J.get(iY, j);
     return 0.0;
   }
 };

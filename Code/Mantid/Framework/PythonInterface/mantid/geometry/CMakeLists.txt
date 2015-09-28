@@ -20,6 +20,7 @@ set ( EXPORT_FILES
   src/Exports/RectangularDetector.cpp
   src/Exports/Instrument.cpp
   src/Exports/UnitCell.cpp
+  src/Exports/MDFrame.cpp
   src/Exports/OrientedLattice.cpp
   src/Exports/ReferenceFrame.cpp
   src/Exports/Goniometer.cpp
@@ -76,7 +77,7 @@ add_library ( PythonGeometryModule ${EXPORT_FILES} ${MODULE_DEFINITION} ${SRC_FI
 set_python_properties( PythonGeometryModule _geometry )
 set_target_output_directory ( PythonGeometryModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies
-target_link_libraries ( PythonGeometryModule LINK_PRIVATE
+target_link_libraries ( PythonGeometryModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             PythonKernelModule
             Geometry
             Kernel

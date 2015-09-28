@@ -6,6 +6,7 @@
 #include <boost/shared_ptr.hpp>
 #include <set>
 #include <string>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -49,12 +50,17 @@ public:
   /// Set / remove masks of all detectors in a set
   virtual void setMasked(const std::set<detid_t> &detectorIDs,
                          const bool mask = true) = 0;
-
+  /// Returns a clone of the workspace
+  std::unique_ptr<IMaskWorkspace> clone() const {
+    return std::unique_ptr<IMaskWorkspace>(doInterfaceClone());
+  }
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   IMaskWorkspace(const IMaskWorkspace &other) { (void)other; }
   /// Protected copy assignment operator. Assignment not implemented.
   IMaskWorkspace &operator=(const IMaskWorkspace &other);
+  /// returns a clone of the workspace as the interface
+  virtual IMaskWorkspace* doInterfaceClone() const = 0;
 };
 
 /// shared pointer to the matrix workspace base class

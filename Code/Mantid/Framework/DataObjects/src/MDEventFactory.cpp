@@ -11,16 +11,16 @@
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDLeanEvent.h"
-
+ 
 // We need to include the .cpp files so that the declarations are picked up
 // correctly. Weird, I know.
 // See http://www.parashift.com/c++-faq-lite/templates.html#faq-35.13
-#include "MDBoxBase.cpp"
-#include "MDBox.cpp"
-#include "MDEventWorkspace.cpp"
-#include "MDGridBox.cpp"
-#include "MDBin.cpp"
-#include "MDBoxIterator.cpp"
+#include "MantidDataObjects/MDBoxBase.tcc"
+#include "MantidDataObjects/MDBox.tcc"
+#include "MantidDataObjects/MDEventWorkspace.tcc"
+#include "MantidDataObjects/MDGridBox.tcc"
+#include "MantidDataObjects/MDBin.tcc"
+#include "MantidDataObjects/MDBoxIterator.tcc"
 
 namespace Mantid {
 namespace DataObjects {

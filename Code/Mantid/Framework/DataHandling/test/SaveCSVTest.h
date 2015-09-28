@@ -23,6 +23,11 @@ using namespace Mantid::DataObjects;
 // Notice also that currently no tests have been added to test
 // this class when trying to save a 2D workspace with SaveCSV. 
 
+namespace {
+  const size_t nBins = 3;
+}
+
+
 class SaveCSVTest : public CxxTest::TestSuite
 {
 public: 
@@ -46,8 +51,7 @@ public:
     
     AnalysisDataService::Instance().add("SAVECSVTEST-testSpace", localWorkspace);
   }
-  
-  
+
   void testInit()
   {
     TS_ASSERT_THROWS_NOTHING(algToBeTested.initialize());
@@ -104,19 +108,156 @@ public:
     TS_ASSERT_DELTA(d2, 0.1, 1e-5);
     TS_ASSERT_DELTA(d3, 0.2, 1e-5);
     TS_ASSERT_EQUALS( number_plus_comma, "0.3," );
-    
-    
+
     // remove file created by this algorithm
     Poco::File(outputFile).remove();
     AnalysisDataService::Instance().remove("SAVECSVTEST-testSpace");
-  
   }
 
-  
+
+  void test_saving_1D_error_with_x_error() {
+    std::string fileName = "test_save_csv_with_x_errors_1D.csv";
+    const size_t numberOfSpectra = 1;
+    runTestWithDx(fileName, numberOfSpectra);
+  }
+
+  void test_saving_2D_error_with_x_error() {
+    std::string fileName = "test_save_csv_with_x_errors_2D.csv";
+    const size_t numberOfSpectra = 3;
+    runTestWithDx(fileName, numberOfSpectra);
+  }
+
 private:
   SaveCSV algToBeTested;
   std::string outputFile;
-  
+
+  MatrixWorkspace_sptr createWorkspaceWithDxValues(const size_t nSpec) const {
+    auto ws = WorkspaceFactory::Instance().create("Workspace2D", nSpec, nBins+1, nBins);
+    for (size_t j = 0; j < nSpec; ++j) {
+      for (size_t k = 0; k < nBins + 1; ++k) {
+        ws->dataX(j)[k] = double(k);
+      }
+      ws->dataY(j).assign(nBins, double(j));
+      ws->dataE(j).assign(nBins, sqrt(double(j)));
+      ws->dataDx(j).assign(nBins + 1, sqrt(double(j)));
+    }
+    return ws;
+  }
+
+  void runTestWithDx(std::string fileName, const size_t nSpec) {
+     // Arrange
+    auto ws = createWorkspaceWithDxValues(nSpec);
+
+    // Act
+    SaveCSV saveCSV;
+    TS_ASSERT_THROWS_NOTHING(saveCSV.initialize());
+    TS_ASSERT(saveCSV.isInitialized());
+    saveCSV.setProperty("InputWorkspace", ws);
+    saveCSV.setProperty("SaveXerrors", true);
+    saveCSV.setPropertyValue("Filename", fileName);
+    fileName = saveCSV.getPropertyValue("Filename");
+
+    TS_ASSERT_THROWS_NOTHING(saveCSV.execute());
+    TS_ASSERT(saveCSV.isExecuted() );  
+
+    // Assert
+    TS_ASSERT( Poco::File(fileName).exists() );
+    evaluateFileWithDX(fileName, nSpec);
+
+    // Clean up
+    Poco::File(fileName).remove();
+  }
+
+  void evaluateFileWithDX(std::string fileName, const size_t nSpec) const {
+    std::ifstream stream(fileName.c_str());
+    std::istringstream dataStream;
+    std::string line;
+
+    std::string stringMarker;
+    double indexMarker;
+    double d1, d2, d3, dEnd; // There are 3 bins
+    std::string separator;
+
+    // Evalute the first line. We are expecting only one line for the Xvalues here.
+    getline(stream, line);
+    dataStream.str(std::string());
+    dataStream.clear();
+    dataStream.str(line);
+    dataStream >> stringMarker >> d1 >> separator >> d2 >> separator >> d3 >> separator >> dEnd >> separator;
+
+    TS_ASSERT_EQUALS(stringMarker,"A" );
+    TS_ASSERT_EQUALS(separator,"," );
+    TS_ASSERT_DELTA(d1, 0.0, 1e-5);
+    TS_ASSERT_DELTA(d2, 1.0, 1e-5);
+    TS_ASSERT_DELTA(d3, 2.0, 1e-5);
+    TS_ASSERT_DELTA(dEnd, 3.0, 1e-5);
+
+    // Now evaluate the Y value entries which follow directly after
+    for (size_t spec = 0; spec < nSpec; ++spec) {
+      getline(stream, line);
+      dataStream.str(std::string());
+      dataStream.clear();
+      dataStream.str(line);
+      dataStream >> indexMarker >> d1 >> separator >> d2 >> separator >> d3 >> separator;
+      TS_ASSERT_EQUALS(indexMarker, double(spec));
+      TS_ASSERT_EQUALS(separator,"," );
+      TS_ASSERT_DELTA(d1, double(spec), 1e-5);
+      TS_ASSERT_DELTA(d2, double(spec), 1e-5);
+      TS_ASSERT_DELTA(d3, double(spec), 1e-5);
+    }
+
+    // We expect an empty line here
+    getline(stream, line);
+
+    // Check the ERROR identifier
+    getline(stream, line);
+    dataStream.str(std::string());
+    dataStream.clear();
+    dataStream.str(line);
+    dataStream >> stringMarker;
+    TS_ASSERT_EQUALS(stringMarker,"ERRORS" );
+
+    // Check the y errors
+    for (size_t spec = 0; spec < nSpec; ++spec) {
+      getline(stream, line);
+      dataStream.str(std::string());
+      dataStream.clear();
+      dataStream.str(line);
+      dataStream >> indexMarker >> d1 >> separator >> d2 >> separator >> d3 >> separator;
+      TS_ASSERT_EQUALS(indexMarker, spec);
+      TS_ASSERT_EQUALS(separator,"," );
+      TS_ASSERT_DELTA(d1, sqrt(double(spec)), 1e-5);
+      TS_ASSERT_DELTA(d2, sqrt(double(spec)), 1e-5);
+      TS_ASSERT_DELTA(d3, sqrt(double(spec)), 1e-5);
+    }
+
+    // We expect an empty line here
+    getline(stream, line);
+
+    // Check the XERROR identifier
+    getline(stream, line);
+    dataStream.str(std::string());
+    dataStream.clear();
+    dataStream.str(line);
+    dataStream >> stringMarker;
+    TS_ASSERT_EQUALS(stringMarker,"XERRORS" );
+
+    // Check the x errors
+    for (size_t spec = 0; spec < nSpec; ++spec) {
+      getline(stream, line);
+      dataStream.str(std::string());
+      dataStream.clear();
+      dataStream.str(line);
+      dataStream >> indexMarker >> d1 >> separator >> d2 >> separator >> d3 >> separator >> dEnd >> separator;
+      TS_ASSERT_EQUALS(indexMarker, spec);
+      TS_ASSERT_EQUALS(separator,"," );
+      TS_ASSERT_DELTA(d1, sqrt(double(spec)), 1e-5);
+      TS_ASSERT_DELTA(d2, sqrt(double(spec)), 1e-5);
+      TS_ASSERT_DELTA(d3, sqrt(double(spec)), 1e-5);
+      TS_ASSERT_DELTA(dEnd, sqrt(double(spec)), 1e-5);
+    }
+    stream.close();
+  }
 };
   
 #endif /*SAVECSVTEST_H_*/

@@ -10,6 +10,8 @@ namespace CurveFitting {
 /**
 
   Calculate chi squared for a function and a data set in a workspace.
+  Optionally outputs slices of the chi^2 along the parameter axes
+  and estimates the standard deviations.
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -34,9 +36,6 @@ namespace CurveFitting {
 */
 class DLLExport CalculateChiSquared : public IFittingAlgorithm {
 public:
-  CalculateChiSquared();
-  virtual ~CalculateChiSquared();
-
   virtual const std::string name() const;
   virtual int version() const;
   virtual const std::string summary() const;
@@ -44,6 +43,12 @@ public:
 private:
   void initConcrete();
   void execConcrete();
+  void estimateErrors();
+  void unfixParameters();
+  void refixParameters();
+
+  /// Cache indices of fixed parameters
+  std::vector<size_t> m_fixedParameters;
 };
 
 } // namespace CurveFitting

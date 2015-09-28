@@ -23,7 +23,8 @@ def write_header(subproject, classname, filename, args):
     print "Writing header file to %s" % filename
     f = open(filename, 'w')
 
-    guard = "MANTID_%s_%s_H_" % (subproject.upper(), classname.upper())
+    subproject_upper = subproject.upper()
+    guard = "MANTID_%s_%s_H_" % (subproject_upper, classname.upper())
 
     # Create an Algorithm header; will not use it if not an algo
     algorithm_header = """
@@ -37,13 +38,6 @@ private:
   void exec();
 """
 
-    # ---- Find the author, default to blank string ----
-    author = ""
-    try:
-        author = commands.getoutput('git config user.name')
-    except:
-        pass
-
     alg_class_declare = " : public API::Algorithm"
     alg_include = '#include "MantidAPI/Algorithm.h"'
 
@@ -56,7 +50,7 @@ private:
     s = """#ifndef %s
 #define %s
 
-#include "MantidKernel/System.h"
+#include "Mantid%s/DllConfig.h"
 %s
 namespace Mantid {
 namespace %s {
@@ -84,7 +78,7 @@ namespace %s {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport %s%s {
+class MANTID_%s_DLL %s%s {
 public:
   %s();
   virtual ~%s();
@@ -93,9 +87,9 @@ public:
 } // namespace %s
 } // namespace Mantid
 
-#endif /* %s */""" % (guard, guard,
+#endif /* %s */""" % (guard, guard, subproject,
        alg_include, subproject, classname,
-       datetime.datetime.now().date().year, classname, alg_class_declare,
+       datetime.datetime.now().date().year, subproject_upper, classname, alg_class_declare,
        classname, classname, algorithm_header, subproject, guard)
 
     f.write(s)
@@ -179,7 +173,8 @@ namespace %s {
 %s::~%s() {}
 %s
 } // namespace %s
-} // namespace Mantid""" % (
+} // namespace Mantid
+""" % (
         subproject, args.subfolder, classname, subproject, algorithm_top,
         classname, classname, classname, classname, algorithm_source, subproject)
     f.write(s)
@@ -204,29 +199,27 @@ def write_test(subproject, classname, filename, args):
 
   void test_exec()
   {
-    // Name of the output workspace.
-    std::string outWSName("%sTest_OutputWS");
+    // Create test input if necessary
+    MatrixWorkspace_sptr inputWS = //-- Fill in appropriate code. Consider using TestHelpers/WorkspaceCreationHelpers.h --
 
     %s alg;
+    // Don't put output in ADS by default
+    alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inputWS) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "_unused_for_child") );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
-    // Retrieve the workspace from data service. TODO: Change to your desired type
-    Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName) );
-    TS_ASSERT(ws);
-    if (!ws) return;
-
-    // TODO: Check the results
-
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSName);
+    // Retrieve the workspace from the algorithm. The type here will probably need to change. It should
+    // be the type using in declareProperty for the "OutputWorkspace" type.
+    // We can't use auto as it's an implicit conversion.
+    Workspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+    TS_FAIL("TODO: Check the results and remove this line");
   }
-  """ % (classname,classname,classname);
+  """ % (classname,classname);
 
     if not args.alg:
         algorithm_test = ""
@@ -239,7 +232,6 @@ def write_test(subproject, classname, filename, args):
 #include "Mantid%s/%s%s.h"
 
 using Mantid::%s::%s;
-using namespace Mantid::API;
 
 class %sTest : public CxxTest::TestSuite {
 public:
@@ -251,7 +243,7 @@ public:
 %s
   void test_Something()
   {
-    TSM_ASSERT( "You forgot to write a test!", 0);
+    TS_FAIL( "You forgot to write a test!");
   }
 
 

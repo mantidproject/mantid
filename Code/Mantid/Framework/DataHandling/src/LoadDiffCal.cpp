@@ -359,8 +359,8 @@ void LoadDiffCal::runLoadCalFile() {
   alg->setPropertyValue("InstrumentFilename",
                         getPropertyValue("InstrumentFilename"));
   alg->setProperty<bool>("MakeOffsetsWorkspace", makeCalWS);
-  alg->setProperty<bool>("MakeGroupingWorkspace", makeMaskWS);
-  alg->setProperty<bool>("MakeMaskWorkspace", makeGroupWS);
+  alg->setProperty<bool>("MakeGroupingWorkspace", makeGroupWS);
+  alg->setProperty<bool>("MakeMaskWorkspace", makeMaskWS);
   alg->setPropertyValue("WorkspaceName", m_workspaceName);
   alg->executeAsChildAlg();
 

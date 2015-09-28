@@ -25,7 +25,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include "qwt_compat.h"
+#include "MantidQtAPI/qwt_compat.h"
 #include "Spectrogram.h"
 #include <math.h>
 #include <QPen>
@@ -400,6 +400,7 @@ Spectrogram* Spectrogram::copy()
   new_s->setLevelsNumber(levels());
 
   new_s->mutableColorMap().changeScaleType(getColorMap().getScaleType());
+  new_s->mutableColorMap().setNthPower(getColorMap().getNthPower());
   return new_s;
 }
 

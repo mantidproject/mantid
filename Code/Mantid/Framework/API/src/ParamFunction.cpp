@@ -63,10 +63,10 @@ void ParamFunction::setParameter(size_t i, const double &value,
   if (i >= nParams()) {
     throw std::out_of_range("ParamFunction parameter index out of range.");
   }
-  m_parameters[i] = value;
-  if (explicitlySet) {
+  if (explicitlySet && value != m_parameters[i]) {
     m_explicitlySet[i] = true;
   }
+  m_parameters[i] = value;
 }
 
 /** Sets a new parameter description to the i-th parameter.

@@ -22,7 +22,7 @@ class ReflectometryQuickCombineMulti(stresstesting.MantidStressTest):
             for transmissionNumber in transmissionNumbers:
                 LoadISISNexus(Filename=str(transmissionNumber), OutputWorkspace=str(transmissionNumber))
 
-            transmissionRuns = ",".join(map(str, transmissionNumbers))
+            transmissionRuns = ",".join([str(tn) for tn in transmissionNumbers])
             # Run quick
             quick.quick(str(runNumber), trans=transmissionRuns, theta=incidentAngle)
         finally:

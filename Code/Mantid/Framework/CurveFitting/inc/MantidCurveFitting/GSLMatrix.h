@@ -101,168 +101,80 @@ class MANTID_CURVEFITTING_DLL GSLMatrix {
   gsl_matrix *m_matrix;
 public:
   /// Constructor
-  GSLMatrix() : m_matrix(NULL) {}
+  GSLMatrix();
   /// Constructor
-  /// @param nx :: First dimension
-  /// @param ny :: Second dimension
-  GSLMatrix(const size_t nx, const size_t ny) {
-    m_matrix = gsl_matrix_alloc(nx, ny);
-  }
-
+  GSLMatrix(const size_t nx, const size_t ny);
   /// Copy constructor
-  /// @param M :: The other matrix.
-  GSLMatrix(const GSLMatrix &M) {
-    m_matrix = gsl_matrix_alloc(M.size1(), M.size2());
-    gsl_matrix_memcpy(m_matrix, M.gsl());
-  }
-
-  /// Create a submatrix. A submatrix is a view into the parent matrix.
-  /// Lifetime of a submatrix cannot exceed the lifetime of the parent.
-  /// @param M :: The parent matrix.
-  /// @param row :: The first row in the submatrix.
-  /// @param col :: The first column in the submatrix.
-  /// @param nRows :: The number of rows in the submatrix.
-  /// @param nCols :: The number of columns in the submatrix.
-  GSLMatrix(const GSLMatrix &M, size_t row, size_t col, size_t nRows, size_t nCols) {
-    if ( row + nRows > M.size1() || col + nCols > M.size2() )
-    {
-      throw std::runtime_error("Submatrix exceeds matrix size.");
-    }
-    auto view = gsl_matrix_const_submatrix(M.gsl(), row, col, nRows, nCols);
-    m_matrix = gsl_matrix_alloc(nRows, nCols);
-    gsl_matrix_memcpy(m_matrix, &view.matrix);
-  }
-
+  GSLMatrix(const GSLMatrix &M);
+  /// Create a submatrix. 
+  GSLMatrix(const GSLMatrix &M, size_t row, size_t col, size_t nRows, size_t nCols);
   /// Constructor
-  /// @param M :: A matrix to copy.
-  GSLMatrix(const Kernel::Matrix<double>& M) {
-    m_matrix = gsl_matrix_alloc(M.numRows(), M.numCols());
-    for(size_t i = 0; i < size1(); ++i)
-    for(size_t j = 0; j < size2(); ++j){
-      set(i,j, M[i][j]);
-    }
-  }
-
+  GSLMatrix(const Kernel::Matrix<double>& M);
   /// Create this matrix from a product of two other matrices
-  /// @param mult2 :: Matrix multiplication helper object.
-  GSLMatrix(const GSLMatrixMult2 &mult2) : m_matrix(NULL) {*this = mult2;}
-
+  GSLMatrix(const GSLMatrixMult2 &mult2);
   /// Create this matrix from a product of three other matrices
-  /// @param mult3 :: Matrix multiplication helper object.
-  GSLMatrix(const GSLMatrixMult3 &mult3) : m_matrix(NULL) {*this = mult3;}
-
+  GSLMatrix(const GSLMatrixMult3 &mult3);
   /// Destructor.
-  ~GSLMatrix() {
-    if (m_matrix) {
-      gsl_matrix_free(m_matrix);
-    }
-  }
+  ~GSLMatrix();
 
   /// Copy assignment operator
-  GSLMatrix &operator=(const GSLMatrix &M) {
-    resize(M.size1(), M.size2());
-    gsl_matrix_memcpy(m_matrix, M.gsl());
-    return *this;
-  }
+  GSLMatrix &operator=(const GSLMatrix &M);
 
   /// Get the pointer to the GSL matrix
   gsl_matrix *gsl() { return m_matrix; }
-
   /// Get the const pointer to the GSL matrix
   const gsl_matrix *gsl() const { return m_matrix; }
 
   /// Is matrix empty
-  bool isEmpty() const { return m_matrix == NULL; }
-
+  bool isEmpty() const;
   /// Resize the matrix
-  /// @param nx :: New first dimension
-  /// @param ny :: New second dimension
-  void resize(const size_t nx, const size_t ny) {
-    if (m_matrix) {
-      gsl_matrix_free(m_matrix);
-    }
-    m_matrix = gsl_matrix_alloc(nx, ny);
-  }
-
+  void resize(const size_t nx, const size_t ny);
   /// First size of the matrix
-  size_t size1() const { return m_matrix ? m_matrix->size1 : 0; }
-
+  size_t size1() const;
   /// Second size of the matrix
-  size_t size2() const { return m_matrix ? m_matrix->size2 : 0; }
-
-  /// set an element
-  /// @param i :: The row
-  /// @param j :: The column
-  /// @param value :: The new vaule
-  void set(size_t i, size_t j, double value) {
-    if (i < m_matrix->size1 && j < m_matrix->size2)
-      gsl_matrix_set(m_matrix, i, j, value);
-    else {
-      throw std::out_of_range("GSLMatrix indices are out of range.");
-    }
-  }
-  /// get an element
-  /// @param i :: The row
-  /// @param j :: The column
-  double get(size_t i, size_t j) const {
-    if (i < m_matrix->size1 && j < m_matrix->size2)
-      return gsl_matrix_get(m_matrix, i, j);
-    throw std::out_of_range("GSLMatrix indices are out of range.");
-  }
+  size_t size2() const;
+  /// Set an element
+  void set(size_t i, size_t j, double value);
+  /// Get an element
+  double get(size_t i, size_t j) const;
 
   /// Set this matrix to identity matrix
-  void identity() { gsl_matrix_set_identity(m_matrix); }
-
+  void identity();
   /// Set all elements to zero
-  void zero() { gsl_matrix_set_zero(m_matrix); }
-
-  /// add a matrix to this
-  /// @param M :: A matrix
-  GSLMatrix &operator+=(const GSLMatrix &M) {
-    gsl_matrix_add(m_matrix, M.gsl());
-    return *this;
-  }
-
-  /// add a constant to this matrix
-  /// @param d :: A number
-  GSLMatrix &operator+=(const double &d) {
-    gsl_matrix_add_constant(m_matrix, d);
-    return *this;
-  }
-
-  /// subtract a matrix from this
-  /// @param M :: A matrix
-  GSLMatrix &operator-=(const GSLMatrix &M) {
-    gsl_matrix_sub(m_matrix, M.gsl());
-    return *this;
-  }
-
-  /// multiply this matrix by a number
-  /// @param d :: A number
-  GSLMatrix &operator*=(const double &d) {
-    gsl_matrix_scale(m_matrix, d);
-    return *this;
-  }
-
+  void zero();
+  /// Set the matrix to be diagonal.
+  void diag(const GSLVector& d);
+  /// Add a matrix to this
+  GSLMatrix &operator+=(const GSLMatrix &M);
+  /// Add a constant to this matrix
+  GSLMatrix &operator+=(const double &d);
+  /// Subtract a matrix from this
+  GSLMatrix &operator-=(const GSLMatrix &M);
+  /// Multiply this matrix by a number
+  GSLMatrix &operator*=(const double &d);
   /// Assign this matrix to a product of two other matrices
   /// @param mult2 :: Matrix multiplication helper object.
   GSLMatrix &operator=(const GSLMatrixMult2 &mult2);
-
   /// Assign this matrix to a product of three other matrices
   /// @param mult3 :: Matrix multiplication helper object.
   GSLMatrix &operator=(const GSLMatrixMult3 &mult3);
+
+  /// Copy a row into a GSLVector
+  GSLVector copyRow(size_t i) const;
+  /// Copy a column into a GSLVector
+  GSLVector copyColumn(size_t i) const;
 
   /// Solve system of linear equations M*x == rhs, M is this matrix
   /// This matrix is destroyed.
   /// @param rhs :: The right-hand-side vector
   /// @param x :: The solution vector
   void solve(const GSLVector &rhs, GSLVector &x);
-
   /// Invert this matrix
   void invert();
-
   /// Calculate the determinant
   double det();
+  /// Calculate the eigensystem of a symmetric matrix
+  void eigenSystem(GSLVector& eigenValues, GSLMatrix& eigenVectors);
 };
 
 /// Overloaded operator for matrix multiplication
