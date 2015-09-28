@@ -209,7 +209,7 @@ void SaveOpenGenieAscii::writeSampleLogs(std::ofstream &outfile,
                                          std::string fourspc) {
   const std::vector<Property *> &logData = ws->run().getLogData();
 
-  std::vector<std::string> myVector;
+  // std::vector<std::string> myVector;
   for (auto log = logData.begin(); log != logData.end(); ++log) {
     std::string name = (*log)->name();
     std::string type = (*log)->type();
@@ -243,19 +243,14 @@ void SaveOpenGenieAscii::writeSampleLogs(std::ofstream &outfile,
       value = (tsp->lastValue());
     }
 
-    if (type.std::string::find("number") != std::string::npos) {
+    if ((type.std::string::find("number") != std::string::npos) ||
+        (type.std::string::find("double") != std::string::npos) ||
+        (type.std::string::find("dbl list") != std::string::npos)) {
       type = "Float";
     }
 
-    if (type.std::string::find("double") != std::string::npos) {
-      type = "Float";
-    }
-
-    if (type.std::string::find("TimeValueUnit<bool>") != std::string::npos) {
-      type = "Integer";
-    }
-
-    if (type.std::string::find("TimeValueUnit<int>") != std::string::npos) {
+    if ((type.std::string::find("TimeValueUnit<bool>") != std::string::npos) ||
+        (type.std::string::find("TimeValueUnit<int>") != std::string::npos)) {
       type = "Integer";
     }
 
@@ -263,12 +258,9 @@ void SaveOpenGenieAscii::writeSampleLogs(std::ofstream &outfile,
       type = "String";
     }
 
-    sort(&logData.begin(), &logData.end());
+    // sort(&logData.begin(), &logData.end());
 
-    if ((name.std::string::find("x") != std::string::npos) ||
-        (name.std::string::find("y") != std::string::npos) ||
-        (name.std::string::find("") != std::string::npos)) {
-
+	if(name != "x" && name != "y" && name != "e" ) {
       outfile << "  \"" << name << "\"" << std::endl
               << fourspc << type << std::endl
               << fourspc << value << std::endl;

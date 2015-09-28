@@ -44,7 +44,7 @@ private:
   void exec();
 
   // write file header
-  void SaveOpenGenieAscii::writeFileHeader(std::ofstream &outfile);
+  void writeFileHeader(std::ofstream &outfile);
 
   /// Uses AxisHeader and WriteAxisValues to write out file
   void writeToFile(const std::string alpha, std::ofstream &outfile,
