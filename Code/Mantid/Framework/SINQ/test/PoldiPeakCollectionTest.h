@@ -351,7 +351,8 @@ public:
         TS_ASSERT_LESS_THAN(poldiPeaks[68]->d(), poldiPeaks[0]->d());
     }
 
-    void testSetPeaks()
+    /*
+    void xtestSetPeaks()
     {
         CrystalStructure_sptr structure = getCsClStructure();
 
@@ -369,7 +370,7 @@ public:
 
         dValues.pop_back();
         TS_ASSERT_THROWS(p.setPeaks(hkls, dValues, fSquared), std::invalid_argument);
-    }
+    }*/
 
 private:
     CrystalStructure_sptr getCsClStructure()

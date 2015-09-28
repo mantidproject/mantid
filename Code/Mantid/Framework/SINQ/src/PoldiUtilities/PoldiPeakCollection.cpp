@@ -4,6 +4,10 @@
 #include "MantidAPI/LogManager.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 
+#include "MantidGeometry/Crystal/StructureFactorCalculatorSummation.h"
+#include "MantidGeometry/Crystal/HKLGenerator.h"
+#include "MantidGeometry/Crystal/BasicHKLFilters.h"
+
 #include "boost/format.hpp"
 #include "boost/algorithm/string/join.hpp"
 
@@ -17,6 +21,15 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+
+class DValueCalculator {
+public:
+  DValueCalculator(const UnitCell &cell) : m_cell(cell) {}
+  double operator()(const V3D &hkl) const { return m_cell.d(hkl); }
+
+private:
+  UnitCell m_cell;
+};
 
 PoldiPeakCollection::PoldiPeakCollection(IntensityType intensityType)
     : m_peaks(), m_intensityType(intensityType), m_profileFunctionName(),
@@ -47,11 +60,32 @@ PoldiPeakCollection::PoldiPeakCollection(
 
   m_unitCell = crystalStructure->cell();
 
-  std::vector<V3D> uniqueHKL = crystalStructure->getUniqueHKLs(
-      dMin, dMax, Geometry::CrystalStructure::UseStructureFactor);
-  std::vector<double> dValues = crystalStructure->getDValues(uniqueHKL);
-  std::vector<double> structureFactors =
-      crystalStructure->getFSquared(uniqueHKL);
+  auto sfCalculator = StructureFactorCalculatorFactory::create<
+      StructureFactorCalculatorSummation>(*crystalStructure);
+
+  auto filter = boost::make_shared<HKLFilterDRange>(m_unitCell, dMin, dMax) &
+                boost::make_shared<HKLFilterStructureFactor>(sfCalculator);
+
+  HKLGenerator generator(m_unitCell, dMin);
+
+  std::vector<V3D> uniqueHKL;
+  uniqueHKL.reserve(generator.size());
+  for (auto hkl = generator.begin(); hkl != generator.end(); ++hkl) {
+    if (filter->isAllowed(*hkl)) {
+      uniqueHKL.push_back(m_pointGroup->getReflectionFamily(*hkl));
+    }
+  }
+
+  std::sort(uniqueHKL.begin(), uniqueHKL.end());
+  uniqueHKL.erase(std::unique(uniqueHKL.begin(), uniqueHKL.end()),
+                  uniqueHKL.end());
+
+  std::vector<double> dValues;
+  dValues.reserve(uniqueHKL.size());
+  std::transform(uniqueHKL.begin(), uniqueHKL.end(),
+                 std::back_inserter(dValues), DValueCalculator(m_unitCell));
+
+  std::vector<double> structureFactors = sfCalculator->getFsSquared(uniqueHKL);
 
   setPeaks(uniqueHKL, dValues, structureFactors);
 }
