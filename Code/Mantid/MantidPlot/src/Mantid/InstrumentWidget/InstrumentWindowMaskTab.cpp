@@ -120,6 +120,13 @@ m_left(NULL), m_top(NULL), m_right(NULL), m_bottom(NULL)
   m_ring_rectangle->setToolTip("Draw a rectangular ring (Shift+Alt+R)");
   m_ring_rectangle->setShortcut(QKeySequence("Shift+Alt+R"));
 
+  m_free_draw = new QPushButton();
+  m_free_draw->setCheckable(true);
+  m_free_draw->setAutoExclusive(true);
+  m_free_draw->setIcon(QIcon(":/MaskTools/selection-box-ring.png"));
+  m_free_draw->setToolTip("Draw a free shape (Shift+Alt+F)");
+  m_free_draw->setShortcut(QKeySequence("Shift+Alt+F"));
+
   QHBoxLayout* toolBox = new QHBoxLayout();
   toolBox->addWidget(m_move);
   toolBox->addWidget(m_pointer);
@@ -127,6 +134,7 @@ m_left(NULL), m_top(NULL), m_right(NULL), m_bottom(NULL)
   toolBox->addWidget(m_rectangle);
   toolBox->addWidget(m_ring_ellipse);
   toolBox->addWidget(m_ring_rectangle);
+  toolBox->addWidget(m_free_draw);
   toolBox->addStretch();
   toolBox->setSpacing(2);
   toolBox->setMargin(0);
@@ -137,6 +145,7 @@ m_left(NULL), m_top(NULL), m_right(NULL), m_bottom(NULL)
   connect(m_rectangle,SIGNAL(clicked()),this,SLOT(setActivity()));
   connect(m_ring_ellipse,SIGNAL(clicked()),this,SLOT(setActivity()));
   connect(m_ring_rectangle,SIGNAL(clicked()),this,SLOT(setActivity()));
+  connect(m_free_draw,SIGNAL(clicked()),this,SLOT(setActivity()));
   m_move->setChecked(true);
   QFrame* toolGroup = new QFrame();
   toolGroup->setLayout(toolBox);
@@ -362,36 +371,43 @@ void InstrumentWindowMaskTab::setActivity()
   else if (m_pointer->isChecked())
   {
     m_activity = Select;
-    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
+    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
     m_activeTool->setText("Tool: Shape editing");
   }
   else if (m_ellipse->isChecked())
   {
     m_activity = DrawEllipse;
     m_instrWindow->getSurface()->startCreatingShape2D("ellipse",borderColor,fillColor);
-    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
+    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
     m_activeTool->setText("Tool: Ellipse");
   }
   else if (m_rectangle->isChecked())
   {
     m_activity = DrawRectangle;
     m_instrWindow->getSurface()->startCreatingShape2D("rectangle",borderColor,fillColor);
-    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
+    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
     m_activeTool->setText("Tool: Rectangle");
   }
   else if (m_ring_ellipse->isChecked())
   {
     m_activity = DrawEllipticalRing;
     m_instrWindow->getSurface()->startCreatingShape2D("ring ellipse",borderColor,fillColor);
-    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
+    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
     m_activeTool->setText("Tool: Elliptical ring");
   }
   else if (m_ring_rectangle->isChecked())
   {
     m_activity = DrawRectangularRing;
     m_instrWindow->getSurface()->startCreatingShape2D("ring rectangle",borderColor,fillColor);
-    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
+    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
     m_activeTool->setText("Tool: Rectangular ring");
+  }
+  else if (m_free_draw->isChecked())
+  {
+    m_activity = DrawFree;
+    m_instrWindow->getSurface()->startCreatingShape2D("free",borderColor,fillColor);
+    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawFreeMode);
+    m_activeTool->setText("Tool: Free draw");
   }
   m_instrWindow->updateInfoText();
 }

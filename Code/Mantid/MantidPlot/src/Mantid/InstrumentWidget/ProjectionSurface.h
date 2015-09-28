@@ -56,7 +56,17 @@ class ProjectionSurface: public QObject
 {
   Q_OBJECT
 public:
-  enum InteractionMode {MoveMode = 0, PickSingleMode, PickTubeMode, AddPeakMode, DrawMode, EraseMode, InteractionModeSize };
+  enum InteractionMode {
+    MoveMode = 0,
+    PickSingleMode,
+    PickTubeMode,
+    AddPeakMode,
+    DrawRegularMode,
+    DrawFreeMode,
+    EraseMode,
+    ErasePeakMode,
+    InteractionModeSize
+  };
   /// Constructor
   ProjectionSurface(const InstrumentActor* rootActor);
   /// Destructor

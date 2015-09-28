@@ -404,13 +404,13 @@ void InstrumentWindowPickTab::setSelectionType()
   {
     m_selectionType = ErasePeak;
     m_activeTool->setText("Tool: Erase crystal peak(s)");
-    surfaceMode = ProjectionSurface::EraseMode;
+    surfaceMode = ProjectionSurface::ErasePeakMode;
   }
   else if (m_rectangle->isChecked())
   {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Rectangle");
-    surfaceMode = ProjectionSurface::DrawMode;
+    surfaceMode = ProjectionSurface::DrawRegularMode;
     plotType = DetectorPlotController::Single;
     m_instrWindow->getSurface()->startCreatingShape2D("rectangle",Qt::green,QColor(255,255,255,80));
   }
@@ -418,7 +418,7 @@ void InstrumentWindowPickTab::setSelectionType()
   {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Ellipse");
-    surfaceMode = ProjectionSurface::DrawMode;
+    surfaceMode = ProjectionSurface::DrawRegularMode;
     plotType = DetectorPlotController::Single;
     m_instrWindow->getSurface()->startCreatingShape2D("ellipse",Qt::green,QColor(255,255,255,80));
   }
@@ -426,7 +426,7 @@ void InstrumentWindowPickTab::setSelectionType()
   {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Elliptical ring");
-    surfaceMode = ProjectionSurface::DrawMode;
+    surfaceMode = ProjectionSurface::DrawRegularMode;
     plotType = DetectorPlotController::Single;
     m_instrWindow->getSurface()->startCreatingShape2D("ring ellipse",Qt::green,QColor(255,255,255,80));
   }
@@ -434,7 +434,7 @@ void InstrumentWindowPickTab::setSelectionType()
   {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Rectangular ring");
-    surfaceMode = ProjectionSurface::DrawMode;
+    surfaceMode = ProjectionSurface::DrawRegularMode;
     plotType = DetectorPlotController::Single;
     m_instrWindow->getSurface()->startCreatingShape2D("ring rectangle",Qt::green,QColor(255,255,255,80));
   }
@@ -442,7 +442,7 @@ void InstrumentWindowPickTab::setSelectionType()
   {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Shape editing");
-    surfaceMode = ProjectionSurface::DrawMode;
+    surfaceMode = ProjectionSurface::DrawRegularMode;
     plotType = DetectorPlotController::Single;
   }
   m_plotController->setPlotType( plotType );
@@ -451,7 +451,7 @@ void InstrumentWindowPickTab::setSelectionType()
   {
     surface->setInteractionMode( surfaceMode );
     auto interactionMode = surface->getInteractionMode();
-    if ( interactionMode == ProjectionSurface::DrawMode || interactionMode == ProjectionSurface::MoveMode )
+    if ( interactionMode == ProjectionSurface::DrawRegularMode || interactionMode == ProjectionSurface::MoveMode )
     {
         updatePlotMultipleDetectors();
     }
@@ -529,7 +529,7 @@ void InstrumentWindowPickTab::changedIntegrationRange(double,double)
   if ( surface )
   {
     auto interactionMode = surface->getInteractionMode();
-    if ( interactionMode == ProjectionSurface::DrawMode || interactionMode == ProjectionSurface::MoveMode )
+    if ( interactionMode == ProjectionSurface::DrawRegularMode || interactionMode == ProjectionSurface::MoveMode )
     {
         updatePlotMultipleDetectors();
     }

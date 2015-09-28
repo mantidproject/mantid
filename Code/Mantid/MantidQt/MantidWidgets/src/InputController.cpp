@@ -315,96 +315,121 @@ void InputControllerMoveUnwrapped::mouseReleaseEvent(QMouseEvent *)
 /**
   * Constructor.
   */
-InputControllerErase::InputControllerErase(QObject *parent):
+InputControllerDraw::InputControllerDraw(QObject *parent):
 InputController(parent),
 m_max_size(32),
 m_size(30),
 m_isButtonPressed(false),
 m_isActive(false),
-m_rect( 0, 0, m_size, m_size )
+m_cursor(NULL)
 {
-    m_cursor = new QPixmap(m_max_size,m_max_size);
-    drawCursor();
-    m_image = new QPixmap(":/PickTools/eraser.png");
 }
 
-InputControllerErase::~InputControllerErase()
+InputControllerDraw::~InputControllerDraw()
 {
     delete m_cursor;
-    delete m_image;
 }
 
 /**
   * Process the mouse press event.
   */
-void InputControllerErase::mousePressEvent(QMouseEvent *event)
+void InputControllerDraw::mousePressEvent(QMouseEvent *event)
 {
     m_isActive = true;
-    m_rect.moveTopLeft(QPoint(event->x(),event->y()));
+    setPosition(QPoint(event->x(),event->y()));
     if (event->button() == Qt::LeftButton)
     {
         m_isButtonPressed = true;
-        emit erase( m_rect );
+        signalLeftClick();
     }
 }
 
 /**
   * Process the mouse move event.
   */
-void InputControllerErase::mouseMoveEvent(QMouseEvent *event)
+void InputControllerDraw::mouseMoveEvent(QMouseEvent *event)
 {
     m_isActive = true;
-    m_rect.moveTopLeft(QPoint(event->x(),event->y()));
+    setPosition(QPoint(event->x(),event->y()));
     if ( m_isButtonPressed )
     {
-        emit erase( m_rect );
+        signalLeftClick();
     }
 }
 
 /**
   * Process the mouse button release event.
   */
-void InputControllerErase::mouseReleaseEvent(QMouseEvent *)
+void InputControllerDraw::mouseReleaseEvent(QMouseEvent *)
 {
     m_isButtonPressed = false;
 }
 
-void InputControllerErase::wheelEvent(QWheelEvent *event)
+void InputControllerDraw::wheelEvent(QWheelEvent *event)
 {
     int d = m_size + ( event->delta() > 0 ? 4 : -4 );
     if ( d > 2 && d < m_max_size )
     {
         m_size = d;
-        drawCursor();
+        redrawCursor();
         QApplication::restoreOverrideCursor();
         QApplication::setOverrideCursor(QCursor( *m_cursor, 0, 0 ));
     }
 }
 
-void InputControllerErase::onPaint(QPainter& painter)
+void InputControllerDraw::enterEvent(QEvent *)
 {
-    if ( m_isActive && !m_isButtonPressed )
-    {
-        painter.drawPixmap(m_rect.bottomRight(),*m_image);
-    }
-}
-
-void InputControllerErase::enterEvent(QEvent *)
-{
+    redrawCursor();
     QApplication::setOverrideCursor(QCursor( *m_cursor, 0, 0 ));
     m_isActive = true;
 }
 
-void InputControllerErase::leaveEvent(QEvent *)
+void InputControllerDraw::leaveEvent(QEvent *)
 {
     QApplication::restoreOverrideCursor();
     m_isActive = false;
 }
 
-void InputControllerErase::drawCursor()
+void InputControllerDraw::redrawCursor()
 {
-    m_cursor->fill(QColor(255,255,255,0));
-    QPainter painter( m_cursor );
+  if (!m_cursor)
+  {
+    m_cursor = new QPixmap(m_max_size,m_max_size);
+  }
+  drawCursor(m_cursor);
+}
+
+//--------------------------------------------------------------------------------
+
+InputControllerErase::InputControllerErase(QObject *parent): InputControllerDraw(parent),
+  m_rect( 0, 0, cursorSize(), cursorSize() ) 
+{
+  m_image = new QPixmap(":/PickTools/eraser.png");
+}
+
+InputControllerErase::~InputControllerErase()
+{
+  delete m_image;
+}
+
+void InputControllerErase::signalLeftClick()
+{
+  emit erase(m_rect);
+}
+
+void InputControllerErase::onPaint(QPainter& painter)
+{
+    if ( isActive() && !isButtonPressed() )
+    {
+        painter.drawPixmap(m_rect.bottomRight(),*m_image);
+    }
+}
+
+void InputControllerErase::drawCursor(QPixmap *cursor)
+{
+    cursor->fill(QColor(255,255,255,0));
+    QPainter painter( cursor );
+    auto size = cursorSize();
 
     auto pen = QPen(Qt::DashLine);
     QVector<qreal> dashPattern;
@@ -412,15 +437,25 @@ void InputControllerErase::drawCursor()
     pen.setDashPattern(dashPattern);
     pen.setColor(QColor(0,0,0));
     painter.setPen(pen);
-    painter.drawRect( QRect( 0, 0, m_size, m_size ) );
+    painter.drawRect( QRect( 0, 0, size, size ) );
 
     pen.setColor(QColor(255,255,255));
     pen.setDashOffset(4);
     painter.setPen(pen);
-    painter.drawRect( QRect( 0, 0, m_size, m_size ) );
-
-    m_rect.setSize( QSize(m_size,m_size) );
+    painter.drawRect( QRect( 0, 0, size, size ) );
 }
+
+void InputControllerErase::setPosition(const QPoint &pos)
+{
+  m_rect.moveTopLeft(pos);
+}
+
+void InputControllerErase::resize()
+{
+    auto size = cursorSize();
+    m_rect.setSize( QSize(size, size) );
+}
+
 }
 }
 
