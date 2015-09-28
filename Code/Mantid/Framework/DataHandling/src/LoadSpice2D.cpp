@@ -373,10 +373,6 @@ void LoadSpice2D::exec() {
     ipixel++;
   }
 
-  // run load instrument
-  runLoadInstrument(instrument, ws);
-  runLoadMappingTable(ws, numberXPixels, numberYPixels);
-
   // Set the run properties
   ws->mutableRun().addProperty("sample-detector-distance", distance, "mm",
                                true);
@@ -398,6 +394,10 @@ void LoadSpice2D::exec() {
   ws->mutableRun().addProperty("monitor", monitorCounts, "", true);
   ws->mutableRun().addProperty("start_time", start_time, "", true);
   ws->mutableRun().addProperty("run_start", start_time, "", true);
+
+  // run load instrument
+  runLoadInstrument(instrument, ws);
+  runLoadMappingTable(ws, numberXPixels, numberYPixels);
 
   // Move the detector to the right position
   API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
