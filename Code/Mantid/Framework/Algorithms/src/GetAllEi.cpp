@@ -19,7 +19,9 @@ namespace Mantid {
 
     /// Empty default constructor
     GetAllEi::GetAllEi() : Algorithm(),
-      m_useFilterLog(true),m_min_Eresolution(0.08),
+      m_useFilterLog(true),m_FilterWithDerivative(true),
+      // minimal resolution for all instruments
+      m_min_Eresolution(0.08),
       // half maximal resolution for LET
       m_max_Eresolution(0.5e-3),
       m_peakEnergyRatio2reject(0.1){}
@@ -52,6 +54,13 @@ namespace Mantid {
         " chopper speed and chopper delay which matter.\n"
         "If such log is not present, log values are calculated "
         "from experiment start&end times.");
+      declareProperty("FilterWithDerivative", true, "Use derivative of 'FilterBaseLog' "
+        "rather then log values itself to filter invalid time intervals.\n"
+        "Invalid values are then the "
+        "values where the derivative of the log turns zero.\n"
+        "E.g. would be 'proton_chage' log which grows for each frame "
+        "when instrument is counting and constant otherwise.");
+
 
       auto maxInRange = boost::make_shared<Kernel::BoundedValidator<double>>();
       maxInRange->setLower(1.e-6);
@@ -121,11 +130,21 @@ namespace Mantid {
         }
       };
 
+      struct peakKeeper2{
+        double left_rng;
+        double right_rng;
+        peakKeeper2(){};
+        peakKeeper2(double left,double right):
+          left_rng(left),right_rng(right)
+        {}
+      };
+
+
     /** Executes the algorithm -- found all existing monitor peaks. */
     void GetAllEi::exec() {
       // Get pointers to the workspace, parameter map and table
       API::MatrixWorkspace_sptr inputWS = getProperty("Workspace");
-
+      m_FilterWithDerivative = getProperty("FilterWithDerivative");
       m_min_Eresolution = getProperty("MinInstrResolution");
       m_max_Eresolution = getProperty("MaxInstrResolution");
       m_peakEnergyRatio2reject = getProperty("PeaksRatioToReject");
@@ -333,7 +352,7 @@ namespace Mantid {
           double SmoothRange = 2*maxSigma;
 
           std::vector<double> SAvrg,binsAvrg;
-          Kernel::VectorHelper::smoothAtNPoints(S,SAvrg,SmoothRange,&X,
+          Kernel::VectorHelper::smoothInRange(S,SAvrg,SmoothRange,&X,
             ind_min,ind_max,&binsAvrg);
 
           double realPeakPos; // this position is less shifted due to the skew in averaging formula
@@ -349,7 +368,7 @@ namespace Mantid {
 
           size_t ic(0);
           while((nPeaks>1 || nHills>2)&&(nPrevHills!=nHills) && ic<50){
-            Kernel::VectorHelper::smoothAtNPoints(SAvrg,SAvrg1,SmoothRange,&binsAvrg,
+            Kernel::VectorHelper::smoothInRange(SAvrg,SAvrg1,SmoothRange,&binsAvrg,
             0,ind_max-ind_min,&binsAvrg1);
             nPrevHills=nHills;
 
@@ -497,11 +516,12 @@ namespace Mantid {
       std::vector<size_t> & irangeMax, std::vector<bool> &guessValid){
 
 
-        size_t index_min,index_max;
         size_t nBins = eBins.size();
         guessValid.resize(guess_energy.size());
-        // get bin range corresponding to energy range
-        auto getBinRange=[&](double eMin,double eMax){
+        // get bin range corresponding to the energy range
+        auto getBinRange=[&](double eMin,double eMax,
+                  size_t &index_min,size_t &index_max)
+        {
           if(eMin<=eBins[0]){ 
             index_min =0;
           }else{
@@ -509,18 +529,18 @@ namespace Mantid {
           }
 
           if(eMax>=eBins[nBins-1]){
-            index_max =nBins+1;
+            index_max =nBins-1;
           }else{
             index_max = Kernel::VectorHelper::getBinIndex(eBins,eMax)+1;
-            if(index_max>=nBins)index_max=nBins-1;
+            if(index_max>=nBins)index_max=nBins-1; // last bin range anyway. Should not happen
           }
-
         };
         // refine bin range. May need better procedure for this. 
-        auto refineEGuess =[&](double &eGuess){
+        auto refineEGuess =[&](double &eGuess,size_t index_min,size_t index_max)
+        {
           size_t ind_Emax=index_min;
           double SMax(0);
-          for(size_t i=index_min;i<index_max-1;i++){
+          for(size_t i=index_min;i<index_max;i++){
             double dX = eBins[i+1]-eBins[i];
             double sig = signal[i]/dX;
             if(sig>SMax){
@@ -538,16 +558,38 @@ namespace Mantid {
         };
 
         // Do the job
+        size_t ind_min,ind_max;
+        irangeMin.resize(0);
+        irangeMax.resize(0);
+
+        // identify guess bin ranges
+        std::vector<peakKeeper2> guess_peak(guess_energy.size());
+        for(size_t nGuess = 0;nGuess<guess_energy.size();nGuess++){
+          double eGuess = guess_energy[nGuess];
+          getBinRange(eGuess*(1-4*Eresolution),eGuess*(1+4*Eresolution),ind_min,ind_max);
+          guess_peak[nGuess] = peakKeeper2(eBins[ind_min],eBins[ind_max]);
+        }
+        // verify that the ranges not intercept and refine interceptions
+        for(size_t i = 1;i<guess_energy.size();i++){
+          if(guess_peak[i-1].right_rng>guess_peak[i].left_rng){
+            double mid_pnt = 0.5*(guess_peak[i-1].right_rng+guess_peak[i].left_rng);
+            guess_peak[i-1].right_rng = mid_pnt;
+            guess_peak[i].left_rng = mid_pnt;
+          }
+        }
+        // identify final bin ranges
         for(size_t nGuess = 0;nGuess<guess_energy.size();nGuess++){
 
           double eGuess = guess_energy[nGuess];
-          getBinRange(eGuess*(1-4*Eresolution),eGuess*(1+4*Eresolution));
+          getBinRange(guess_peak[nGuess].left_rng,guess_peak[nGuess].right_rng,ind_min,ind_max);
 
-          if(refineEGuess(eGuess)){
+          if(refineEGuess(eGuess,ind_min,ind_max)){
 
-              getBinRange(eGuess*(1-3*Eresolution),eGuess*(1+3*Eresolution));
-              irangeMin.push_back(index_min);
-              irangeMax.push_back(index_max);
+              getBinRange(std::max(guess_peak[nGuess].left_rng,eGuess*(1-3*Eresolution)),
+                          std::max(guess_peak[nGuess].right_rng,eGuess*(1+3*Eresolution)),
+                          ind_min,ind_max);
+              irangeMin.push_back(ind_min);
+              irangeMax.push_back(ind_max);
               guessValid[nGuess]=true;
           }else{
               guessValid[nGuess]=false;

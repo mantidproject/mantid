@@ -534,8 +534,10 @@ void linearlyInterpolateY(const std::vector<double> &x, std::vector<double> &y,
     step++;
   }
 }
-/**Basic running averaging procedure with possibility to account for
- * variable bin ranges.
+/** Basic running average of input vector within specified range, considering variable bin-boundaries
+ *  if such boundaries are provided.
+ *  The algorithm is trapezium integration, so some peak shift related to first derivative of the
+ *  integrated function does happen.
  *
  * @param input::   input vector to smooth
  * @param output::  resulting vector (can not coincide with input)
@@ -554,7 +556,7 @@ void linearlyInterpolateY(const std::vector<double> &x, std::vector<double> &y,
  * @param outBins ::   if present, pointer to a vector to return
 *                      bin boundaries for output array.
 */
-void smoothAtNPoints(const std::vector<double> &input,
+void smoothInRange(const std::vector<double> &input,
                    std::vector<double> &output,
                    double avrgInterval,
                    std::vector<double> const * const binBndrs,

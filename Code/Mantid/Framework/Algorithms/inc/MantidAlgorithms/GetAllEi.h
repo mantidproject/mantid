@@ -87,7 +87,9 @@ protected: // for testing, private otherwise.
 
   /// if log, which identifies that instrument is running is available on workspace.
   /// The log should be positive when instrument is running and negative or 0 otherwise.
-  bool m_useFilterLog; 
+  bool m_useFilterLog;
+  /// if true, take derivate of the filter log to identify interval when instrument is running.
+  bool m_FilterWithDerivative;
   /// maximal relative peak width to consider acceptable. Defined by minimal instrument resolution
   /// and does not exceed 0.08
   double m_min_Eresolution;
