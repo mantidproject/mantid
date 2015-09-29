@@ -77,7 +77,7 @@ void DisplayNormalizationSetter::setNormalizationMDEvent(
 
 /**
  * Apply the normalization to an MDEvent Workspace
- * @param workspace: the workspace which gets its normalization tags set
+ * @param mdWorkspace: the workspace which gets its normalization tags set
  * @param displayNormalization: the display normalization for the MDEvent
  * workspace
  * @param displayNormalizationHisto: the display normalization for derived

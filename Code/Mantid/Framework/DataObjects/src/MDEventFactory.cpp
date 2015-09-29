@@ -267,7 +267,7 @@ std::vector<MDEventFactory::fpCreateMDWS>
  * @param eventType -- type of event (lean or full) to generate workspace for
  * @param preferredNormalization: the preferred normalization for the event
  * workspace
- * @param preferredNormalization: the preferred normalization for a derived
+ * @param preferredNormalizationHisto: the preferred normalization for a derived
  * histo workspace
 */
 template <size_t nd>
@@ -290,6 +290,8 @@ API::IMDEventWorkspace *MDEventFactory::createMDWorkspaceND(
  * number
  * @param eventType -- type of event (lean or full) to generate workspace for -
  * -does not actually used.
+ * @param preferredNormalization: the preferred normalization of the workspace
+ * @param preferredNormalizationHisto: the preferred normalization of the derived histo workspace
 */
 template <>
 API::IMDEventWorkspace *MDEventFactory::createMDWorkspaceND<0>(
