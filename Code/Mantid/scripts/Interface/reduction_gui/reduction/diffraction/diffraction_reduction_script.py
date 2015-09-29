@@ -334,10 +334,13 @@ class DiffractionReductionScripter(BaseReductionScripter):
         if int(runsetupdict["DisableVanadiumBackgroundCorrection"]) == 1:
             runsetupdict["VanadiumBackgroundNumber"] = -1
 
-        # b) do sample X
+        # b) do resample X or binning
         if int(runsetupdict["DoReSampleX"]) == 0:
             # turn off the option of SampleX
-            runsetupdict["ReSampleX"] = ""
+            runsetupdict["ResampleX"] = ''
+        else:
+            # turn off the binning
+            runsetupdict["Binning"] = ''
 
         # c) all properties
         for propname in runsetupdict.keys():
@@ -350,7 +353,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
 
             propvalue = runsetupdict[propname]
 
-            if propvalue == "" or propvalue is None:
+            if propvalue == '' or propvalue is None:
                 # Skip not-defined value
                 continue
 
