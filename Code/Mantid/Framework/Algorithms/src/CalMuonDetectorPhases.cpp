@@ -64,35 +64,7 @@ void CalMuonDetectorPhases::exec() {
   // removes exponential decay
   API::MatrixWorkspace_sptr tempWS = prepareWorkspace(inputWS, startTime, endTime);
 
-  int nspec = static_cast<int>(inputWS->getNumberHistograms());
-
-  // Create the fitting function f(x) = A * sin ( w * x + p )
-  std::string funcStr = createFittingFunction(nspec, freq);
-  // Create the function from string
-  API::IFunction_sptr func =
-      API::FunctionFactory::Instance().createInitialized(funcStr);
-  // Create the multi domain function
-  boost::shared_ptr<API::MultiDomainFunction> multi =
-      boost::dynamic_pointer_cast<API::MultiDomainFunction>(func);
-  // Set the domain indices
-  for (int i = 0; i < nspec; ++i) {
-    multi->setDomainIndex(i, i);
-  }
-
-  API::IAlgorithm_sptr fit = createChildAlgorithm("Fit");
-  fit->initialize();
-  fit->setProperty("Function",
-                   boost::dynamic_pointer_cast<API::IFunction>(multi));
-  fit->setProperty("InputWorkspace", inputWS);
-  fit->setProperty("WorkspaceIndex", 0);
-  for (int s = 1; s < nspec; s++) {
-    std::string suffix = boost::lexical_cast<std::string>(s);
-    fit->setProperty("InputWorkspace_" + suffix, inputWS);
-    fit->setProperty("WorkspaceIndex_" + suffix, s);
-  }
-  fit->setProperty("CreateOutput", true);
-  fit->execute();
-  API::ITableWorkspace_sptr tab = fit->getProperty("OutputParameters");
+  auto tab = fitWorkspace(tempWS, freq);
 
   // Set the result table
   setProperty("DetectorTable", tab);
