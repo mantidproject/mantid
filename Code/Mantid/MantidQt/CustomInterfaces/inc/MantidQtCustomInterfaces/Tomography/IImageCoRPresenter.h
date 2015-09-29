@@ -53,7 +53,10 @@ public:
     SelectNormalization,  ///< Start selection of the normalization region
     FinishedCoR,          ///< A CoR has been picked
     FinishedROI,          ///< The ROI is selected
-    FinishedNormalization,///< The normalization regions is selected
+    FinishedNormalization,///< The normalization region is selected
+    ResetCoR,             ///< Reset CoR to default/none/middle
+    ResetROI,             ///< Reset ROI to default/empty
+    ResetNormalization,   ///< Reet the normalization region to default/empty
     ShutDown              ///< The widget is being closed/destroyed
   };
 

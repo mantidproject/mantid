@@ -65,6 +65,18 @@ void ImageCoRPresenter::notify(Notification notif) {
     processFinishedNormalization();
     break;
 
+  case IImageCoRPresenter::ResetCoR:
+    processResetCoR();
+    break;
+
+  case IImageCoRPresenter::ResetROI:
+    processResetROI();
+    break;
+
+  case IImageCoRPresenter::ResetNormalization:
+    processResetNormalization();
+    break;
+
   case IImageCoRPresenter::ShutDown:
     processShutDown();
     break;
@@ -73,7 +85,13 @@ void ImageCoRPresenter::notify(Notification notif) {
 
 void ImageCoRPresenter::processInit() {}
 
-void ImageCoRPresenter::processBrowseImg() {}
+void ImageCoRPresenter::processBrowseImg() {
+  const std::string path = m_view->askImgOrStackPath();
+
+  if (!path.empty()) {
+    processNewStack();
+  }
+}
 
 void ImageCoRPresenter::processNewStack() {
   const std::string pstr = m_view->stackPath();
@@ -129,6 +147,12 @@ void ImageCoRPresenter::processFinishedCoR() {}
 void ImageCoRPresenter::processFinishedROI() {}
 
 void ImageCoRPresenter::processFinishedNormalization() {}
+
+void ImageCoRPresenter::processResetCoR() {}
+
+void ImageCoRPresenter::processResetROI() {}
+
+void ImageCoRPresenter::processResetNormalization() {}
 
 void ImageCoRPresenter::processShutDown() { m_view->saveSettings(); }
 

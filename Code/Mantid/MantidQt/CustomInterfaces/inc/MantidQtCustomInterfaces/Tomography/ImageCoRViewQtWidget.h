@@ -69,6 +69,8 @@ public:
 
   void userError(const std::string &err, const std::string &description);
 
+  std::string askImgOrStackPath();
+
   void saveSettings() const;
 
 protected:
@@ -78,7 +80,14 @@ protected:
 private slots:
   void browseImgClicked();
 
-private:
+  void corClicked();
+  void corResetClicked();
+  void roiClicked();
+  void roiResetClicked();
+  void normAreaClicked();
+  void normAreaResetClicked();
+
+ private:
   void setupConnections();
 
   void readSettings();

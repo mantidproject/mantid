@@ -120,6 +120,15 @@ public:
                          const std::string &description) = 0;
 
   /**
+   * Get from the user the path/location of a stack of images (or
+   * single image as a particular case).
+   *
+   * @return location (can be a directory, file, etc.) that needs to
+   * be figured out
+   */
+  virtual std::string askImgOrStackPath() = 0;
+
+  /**
    * Save settings (normally when closing this widget).
    */
   virtual void saveSettings() const = 0;

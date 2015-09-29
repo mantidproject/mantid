@@ -58,6 +58,19 @@ void ImageCoRViewQtWidget::setupConnections() {
   // 'browse' buttons
   connect(m_ui.pushButton_browse_img, SIGNAL(released()), this,
           SLOT(browseImgClicked()));
+
+  connect(m_ui.pushButton_cor, SIGNAL(released()), this, SLOT(corClicked()));
+  connect(m_ui.pushButton_cor_reset, SIGNAL(released()), this,
+          SLOT(corResetClicked()));
+
+  connect(m_ui.pushButton_roi, SIGNAL(released()), this, SLOT(roiClicked()));
+  connect(m_ui.pushButton_roi_reset, SIGNAL(released()), this,
+          SLOT(roiResetClicked()));
+
+  connect(m_ui.pushButton_norm_area, SIGNAL(released()), this,
+          SLOT(normAreaClicked()));
+  connect(m_ui.pushButton_norm_area_reset, SIGNAL(released()), this,
+          SLOT(normAreaResetClicked()));
 }
 
 void ImageCoRViewQtWidget::initParams(ImageStackPreParams &params) {
@@ -68,8 +81,32 @@ ImageStackPreParams ImageCoRViewQtWidget::userSelection() const {
   return m_params;
 }
 
+void ImageCoRViewQtWidget::corClicked() {
+  m_presenter->notify(IImageCoRPresenter::SelectCoR);
+}
+void ImageCoRViewQtWidget::corResetClicked() {
+  m_presenter->notify(IImageCoRPresenter::ResetCoR);
+}
+
+void ImageCoRViewQtWidget::roiClicked() {
+  m_presenter->notify(IImageCoRPresenter::SelectROI);
+}
+void ImageCoRViewQtWidget::roiResetClicked() {
+  m_presenter->notify(IImageCoRPresenter::ResetROI);
+}
+
+void ImageCoRViewQtWidget::normAreaClicked() {
+  m_presenter->notify(IImageCoRPresenter::SelectROI);
+}
+void ImageCoRViewQtWidget::normAreaResetClicked() {
+  m_presenter->notify(IImageCoRPresenter::ResetROI);
+}
+
 void ImageCoRViewQtWidget::browseImgClicked() {
   m_presenter->notify(IImageCoRPresenter::BrowseImgOrStack);
+}
+
+std::string ImageCoRViewQtWidget::askImgOrStackPath() {
   // get path
   QString fitsStr = QString("Supported formats: FITS, TIFF and PNG "
                             "(*.fits *.fit *.tiff *.tif *.png);;"
@@ -86,12 +123,10 @@ void ImageCoRViewQtWidget::browseImgClicked() {
       this, tr("Open stack of images"), prevPath, QFileDialog::ShowDirsOnly));
   if (!path.isEmpty()) {
     MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
-  } else {
-    return;
   }
 
   m_stackPath = path.toStdString();
-  m_presenter->notify(IImageCoRPresenter::NewImgOrStack);
+  return m_stackPath;
 }
 
 void ImageCoRViewQtWidget::showStack(const std::string & /*path*/) {

@@ -62,6 +62,9 @@ protected:
   void processFinishedCoR();
   void processFinishedROI();
   void processFinishedNormalization();
+  void processResetCoR();
+  void processResetROI();
+  void processResetNormalization();
   void processShutDown();
 
 private:
