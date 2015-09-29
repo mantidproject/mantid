@@ -54,6 +54,9 @@ private:
   API::MatrixWorkspace_sptr
   prepareWorkspace(const API::MatrixWorkspace_sptr &ws, double startTime,
                    double endTime);
+  API::ITableWorkspace_sptr fitWorkspace(const API::MatrixWorkspace_sptr &ws,
+                                         double freq);
+  std::string createFittingFunction(int nspec, double freq);
 };
 } // namespace Algorithms
 } // namespace Mantid
