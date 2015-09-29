@@ -21,7 +21,8 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         self._tol2Theta = None
         self._dataDir = None
         self._ptListList = None
-
+        self._doGenerateVirtualInstrument = False
+        
         # Define class variable Scan-Pt. dictionary: Key scan number, Value list of pt numbers
         self._scanPtDict = {}
         self._spiceTableDict = {}
@@ -55,8 +56,6 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
 
         scanlistprop = mantid.kernel.IntArrayProperty("ScanList", [])
         self.declareProperty(scanlistprop, "List of scans of the experiment to be loaded.  It cannot be left blank")
-        #self.declareProperty(IntArrayProperty("ScanList", [], Direction.Input),
-        #        "List of scans of the experiment to be loaded.  It cannot be left blank.")
 
         pd = "List of Pts to be loaded for scans specified by 'ScanList'. \
                 Each scan's Pt. must be started with -1 as a flag.  \
@@ -74,6 +73,9 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
 
         tableprop2 = mantid.api.ITableWorkspaceProperty("DetectorTableWorkspace", "", mantid.kernel.Direction.Output)
         self.declareProperty(tableprop2, "TableWorkspace for detector Id and information.")
+
+        self.declareProperty('GenerateVirtualInstrument', True, 
+                'If True, then the geometry of all the detectors will be written to DetectorTableWorkspace')
 
 
         return
@@ -95,7 +97,8 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         self._getDetectorPositionScanPtDict()
 
         # Determine the pixels' positions
-        self._collectPixelsPositions()
+        if self._doGenerateVirtualInstrument is True: 
+            self._collectPixelsPositions()
 
         # Set up ScanPtFileTable
         for scannumber in sorted(self._scanPtDict.keys()):
@@ -166,6 +169,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         rawptlist = self.getProperty("PtLists").value
         self._tol2Theta = self.getProperty("Detector2ThetaTolerance").value
         self._dataDir = self.getProperty("DataDirectory").value
+        self._doGenerateVirtualInstrument = self.getProperty('GenerateVirtualInstrument').value
 
         # process Pt number
         self._ptListList = []
