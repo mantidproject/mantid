@@ -24,7 +24,7 @@ DECLARE_ALGORITHM(ConvertCWSDExpToMomentum)
 /** Constructor
  */
 ConvertCWSDExpToMomentum::ConvertCWSDExpToMomentum()
-    : m_iColFilename(2), m_iColStartDetID(3) {}
+    : m_iColFilename(2), m_iColStartDetID(3), m_setQRange(true) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -94,6 +94,12 @@ void ConvertCWSDExpToMomentum::exec() {
 
   setProperty("OutputWorkspace", m_outputWS);
 
+  // Output
+  for (size_t i = 0; i < 3; ++i) {
+    g_log.notice() << "Q-sample at dimension " << i << ": " << m_minQVec[i]
+                   << ", " << m_maxQVec[i] << "\n";
+  }
+
   return;
 }
 
@@ -157,6 +163,10 @@ ConvertCWSDExpToMomentum::createExperimentMDWorkspace() {
     m_extentMaxs.resize(3, 10.0);
     m_numBins.resize(3, 100);
   }
+  // Sample-Q range
+  m_minQVec.resize(3);
+  m_maxQVec.resize(3);
+
   for (size_t d = 0; d < 3; ++d)
     g_log.debug() << "Direction " << d << ", Range = " << m_extentMins[d]
                   << ", " << m_extentMaxs[d] << "\n";
@@ -373,6 +383,7 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
     inserter.insertMDEvent(
         static_cast<float>(signal), static_cast<float>(error * error),
         static_cast<uint16_t>(runnumber), detid, q_sample.data());
+    updateQRange(q_sample);
 
     g_log.debug() << "Q-lab = " << qlab.toString() << "\n";
     g_log.debug() << "Insert DetID " << detid << ", signal = " << signal
@@ -580,6 +591,27 @@ void ConvertCWSDExpToMomentum::parseDetectorTable(
     double z = m_detectorListTableWS->cell<double>(i, 3);
     Kernel::V3D detpos(x, y, z);
     vec_detpos[i] = detpos;
+  }
+
+  return;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Update (sample) Q range
+ * @brief ConvertCWSDExpToMomentum::updateQRange
+ * @param vec_q
+ */
+void ConvertCWSDExpToMomentum::updateQRange(
+    const std::vector<Mantid::coord_t> &vec_q) {
+  for (size_t i = 0; i < vec_q.size(); ++i) {
+    if (m_setQRange) {
+      m_minQVec[i] = vec_q[i];
+      m_maxQVec[i] = vec_q[i];
+      m_setQRange = false;
+    } else if (vec_q[i] < m_minQVec[i])
+      m_minQVec[i] = vec_q[i];
+    else if (vec_q[i] > m_maxQVec[i])
+      m_maxQVec[i] = vec_q[i];
   }
 
   return;

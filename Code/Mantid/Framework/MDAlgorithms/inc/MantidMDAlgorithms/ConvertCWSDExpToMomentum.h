@@ -88,6 +88,8 @@ private:
 
   void createVirtualInstrument();
 
+  void updateQRange(const std::vector<Mantid::coord_t> &vec_q);
+
   API::ITableWorkspace_sptr m_expDataTableWS;
   API::ITableWorkspace_sptr m_detectorListTableWS;
   API::IMDEventWorkspace_sptr m_outputWS;
@@ -102,6 +104,10 @@ private:
   std::vector<double> m_extentMins;
   std::vector<double> m_extentMaxs;
   std::vector<size_t> m_numBins;
+
+  std::vector<coord_t> m_minQVec;
+  std::vector<coord_t> m_maxQVec;
+  bool m_setQRange;
 
   /// Data directory
   std::string m_dataDir;
