@@ -6,7 +6,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** CalMuonDetectorPhases : TODO: DESCRIPTION
+/** CalMuonDetectorPhases : Calculate asymmetry and phase for each spectra in a workspace
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -39,7 +39,7 @@ public:
   virtual const std::string name() const { return "CalMuonDetectorPhases"; }
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
-    return "Calculate Muon deadtime for each spectra in a workspace.";
+    return "Calculate asymmetry and phase for each spectra in a workspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
@@ -48,16 +48,22 @@ public:
   virtual const std::string category() const { return "Muon"; }
 
 private:
-  // Overridden Algorithm methods
+  /// Initialise the algorithm
   void init();
+  /// Execute the algorithm
   void exec();
+  /// Validate the inputs
   std::map<std::string, std::string> validateInputs();
+  /// Prepare workspace for fit
   API::MatrixWorkspace_sptr
   prepareWorkspace(const API::MatrixWorkspace_sptr &ws, double startTime,
                    double endTime);
+  /// Fit the workspace
   API::ITableWorkspace_sptr fitWorkspace(const API::MatrixWorkspace_sptr &ws,
                                          double freq);
+  /// Create the fitting function as string
   std::string createFittingFunction(int nspec, double freq);
+  /// Extract asymmetry and phase from fitting results
   API::ITableWorkspace_sptr
   extractDetectorInfo(const API::ITableWorkspace_sptr &paramTab, size_t nspec);
 };

@@ -17,7 +17,7 @@ using API::Progress;
 DECLARE_ALGORITHM(CalMuonDetectorPhases)
 
 //----------------------------------------------------------------------------------------------
-/** Initialize the algorithm's properties.
+/** Initializes the algorithm's properties.
  */
 void CalMuonDetectorPhases::init() {
 
@@ -65,7 +65,7 @@ std::map<std::string, std::string> CalMuonDetectorPhases::validateInputs() {
   return result;
 }
 //----------------------------------------------------------------------------------------------
-/** Execute the algorithm.
+/** Executes the algorithm.
  */
 void CalMuonDetectorPhases::exec() {
 
@@ -89,7 +89,10 @@ void CalMuonDetectorPhases::exec() {
   setProperty("DetectorTable", tab);
 }
 
-/** TODO Description
+/** Fits each spectrum in the workspace to f(x) = A * sin( w * x + p)
+* @param ws :: [input] The workspace to fit
+* @param freq :: [input] Hint for the frequency (w)
+* @return :: The table workspace storing the asymmetries and phases
 */
 API::ITableWorkspace_sptr CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws, double freq) {
 
@@ -131,7 +134,10 @@ API::ITableWorkspace_sptr CalMuonDetectorPhases::fitWorkspace(const API::MatrixW
   return results;
 }
 
-/** TODO Description
+/** Extracts detector asymmetries and phases from fitting results
+* @param paramTable :: [input] Output parameter table resulting from the fit
+* @param nspec :: [input] Number of detectors/spectra
+* @return :: A new table workspace storing the asymmetries and phases
 */
 API::ITableWorkspace_sptr CalMuonDetectorPhases::extractDetectorInfo(
     const API::ITableWorkspace_sptr &paramTab, size_t nspec) {
@@ -153,6 +159,12 @@ API::ITableWorkspace_sptr CalMuonDetectorPhases::extractDetectorInfo(
     size_t specRow = s * 3;
     double asym = paramTab->Double(specRow,1);
     double phase = paramTab->Double(specRow+2,1);
+    // Handle phases greather (less) than 2*PI (-2*PI)
+    if (phase > 2 * M_PI) {
+      phase = phase - 2 * M_PI;
+    } else if (phase < -2 * M_PI) {
+      phase = phase + 2 * M_PI;
+    }
     // If asym<0, take the absolute value and add \pi to phase
     // f(x) = A * sin( w * x + p) = -A * sin( w * x + p + PI)
     if (asym<0) {
@@ -167,7 +179,10 @@ API::ITableWorkspace_sptr CalMuonDetectorPhases::extractDetectorInfo(
   return tab;
 }
 
-/** TODO Description
+/** Creates the fitting function f(x) = A * sin( w*x + p) as string
+* @param nspec :: [input] The number of domains (spectra)
+* @param freq :: [input] Hint for the frequency (w)
+* @returns :: The fitting function as a string
 */
 std::string CalMuonDetectorPhases::createFittingFunction(int nspec, double freq) {
 
@@ -196,7 +211,11 @@ std::string CalMuonDetectorPhases::createFittingFunction(int nspec, double freq)
   return ss.str();
 }
 
-/** TODO Description
+/** Extracts relevant data from a workspace and removes exponential decay
+* @param ws :: [input] The input workspace
+* @param startTime :: [input] First X value to consider
+* @param endTime :: [input] Last X value to consider
+* @return :: Pre-processed workspace to fit
 */
 API::MatrixWorkspace_sptr
 CalMuonDetectorPhases::prepareWorkspace(const API::MatrixWorkspace_sptr &ws,
