@@ -78,11 +78,21 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 # Use sample factor only
                 self._correct_sample()
                 correction_type = 'sample_corrections_only'
+                # Add corrections filename to log values
+                AddSampleLog(Workspace=self._output_ws_name,
+                             LogName='corrections_filename',
+                             LogType='String',
+                             LogText=self._corrections_ws_name)
 
         else:
             # Do simple subtraction
             self._subtract()
             correction_type = 'can_subtraction'
+            # Add container filename to log values
+            AddSampleLog(Workspace=self._output_ws_name,
+                         LogName='container_filename',
+                         LogType='String',
+                         LogText=self._can_ws_name)
 
         # Record the container scale factor
         if self._use_can and self._scale_can:
@@ -96,6 +106,12 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                      LogName='corrections_type',
                      LogType='String',
                      LogText=correction_type)
+
+        # Add original sample as log entry
+        AddSampleLog(Workspace=self._output_ws_name,
+                     LogName='sample_filename',
+                     LogType='String',
+                     LogText=self._sample_ws_name)
 
         self.setPropertyValue('OutputWorkspace', self._output_ws_name)
 
