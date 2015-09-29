@@ -187,10 +187,10 @@ void ConvolutionFitSequential::exec() {
   const std::string tempFitWsName = "__convfit_fit_ws";
   auto tempFitWs = convertInputToElasticQ(inputWs, tempFitWsName);
 
-  Progress plotPeakStringProg(this, 0.0, 0.05, specMax);
+  Progress plotPeakStringProg(this, 0.0, 0.05, specMax-specMin);
   // Construct plotpeak string
   std::string plotPeakInput = "";
-  for (int i = 0; i < specMax + 1; i++) {
+  for (int i = specMin; i < specMax + 1; i++) {
     std::string nextWs = tempFitWsName + ",i";
     nextWs += boost::lexical_cast<std::string>(i);
     plotPeakInput += nextWs + ";";
@@ -240,22 +240,26 @@ void ConvolutionFitSequential::exec() {
   // Construct output workspace
   std::string resultWsName = outputWsName + "_Result";
 
+  Progress workflowProg(this, 0.91, 0.94, 4);
   auto paramNames = std::vector<std::string>();
-  auto func = FunctionFactory::Instance().createFunction(funcName);
-  if (delta) {
+  if (funcName.compare("DeltaFunction") == 0) {
     paramNames.push_back("Height");
-  }
-  Progress workflowProg(this, 0.91, 0.94, (func->nParams() * 2));
-  for (size_t i = 0; i < func->nParams(); i++) {
-    paramNames.push_back(func->parameterName(i));
-    workflowProg.report();
-  }
-  if (funcName.compare("Lorentzian") == 0) {
-    // remove peak centre
-    size_t pos = find(paramNames.begin(), paramNames.end(), "PeakCentre") -
-                 paramNames.begin();
-    paramNames.erase(paramNames.begin() + pos);
-    paramNames.push_back("EISF");
+  } else {
+    auto func = FunctionFactory::Instance().createFunction(funcName);
+    if (delta) {
+      paramNames.push_back("Height");
+    }
+    for (size_t i = 0; i < func->nParams(); i++) {
+      paramNames.push_back(func->parameterName(i));
+      workflowProg.report();
+    }
+    if (funcName.compare("Lorentzian") == 0) {
+      // remove peak centre
+      size_t pos = find(paramNames.begin(), paramNames.end(), "PeakCentre") -
+                   paramNames.begin();
+      paramNames.erase(paramNames.begin() + pos);
+      paramNames.push_back("EISF");
+    }
   }
 
   // Run calcEISF if Delta
@@ -342,7 +346,7 @@ void ConvolutionFitSequential::exec() {
   auto renamer = createChildAlgorithm("RenameWorkspace");
   Progress renamerProg(this, 0.98, 1.0, specMax + 1);
   for (int i = specMin; i < specMax + 1; i++) {
-    renamer->setProperty("InputWorkspace", groupWsNames.at(i));
+    renamer->setProperty("InputWorkspace", groupWsNames.at(i - specMin));
     std::string outName = outputWsName + "_";
     outName += boost::lexical_cast<std::string>(i);
     outName += "_Workspace";
@@ -362,15 +366,9 @@ void ConvolutionFitSequential::exec() {
  */
 bool ConvolutionFitSequential::checkForTwoLorentz(
     const std::string &subFunction) {
-  std::string fitType = "";
-  auto pos = subFunction.rfind("name=");
+  auto pos = subFunction.rfind("Lorentzian");
   if (pos != std::string::npos) {
-    fitType = subFunction.substr(pos, subFunction.size());
-    pos = fitType.find_first_of(",");
-    fitType = fitType.substr(5, pos - 5);
-    if (fitType.compare("Lorentzian") == 0) {
       return true;
-    }
   }
   return false;
 }
@@ -624,18 +622,20 @@ ConvolutionFitSequential::convertBackToShort(const std::string &original) {
 std::string
 ConvolutionFitSequential::convertFuncToShort(const std::string &original) {
   std::string result = "";
-  if (original.at(0) == 'E') {
-    result += "E";
-  } else if (original.at(0) == 'I') {
-    result += "I";
-  } else {
-    return "SFT";
-  }
-  auto pos = original.find("Circle");
-  if (pos != std::string::npos) {
-    result += "DC";
-  } else {
-    result += "DS";
+  if (original.compare("DeltaFunction") != 0) {
+    if (original.at(0) == 'E') {
+      result += "E";
+    } else if (original.at(0) == 'I') {
+      result += "I";
+    } else {
+      return "SFT";
+    }
+    auto pos = original.find("Circle");
+    if (pos != std::string::npos) {
+      result += "DC";
+    } else {
+      result += "DS";
+    }
   }
   return result;
 }

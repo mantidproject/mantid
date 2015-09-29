@@ -22,6 +22,7 @@ MatrixWSSpectrumView::MatrixWSSpectrumView( MatrixWorkspace_const_sptr mat_ws )
   QString qtitle = QString::fromStdString(title);
   spectrum_view->setCaption( qtitle );
   spectrum_view->renderWorkspace(mat_ws);
+  std::cerr << "MatrixWSSpectrumView?" << std::endl;
 }
 
 

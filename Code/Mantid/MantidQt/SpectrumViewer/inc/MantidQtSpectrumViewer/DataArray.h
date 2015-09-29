@@ -52,7 +52,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER DataArray
                double yMin,    double yMax,
                bool   isLogX,
                size_t nRows,   size_t nCols,
-               std::vector<float> data );
+               const std::vector<float>& data );
 
     ~DataArray();
 
