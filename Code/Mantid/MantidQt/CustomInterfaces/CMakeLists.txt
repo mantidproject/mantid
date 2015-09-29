@@ -398,6 +398,7 @@ set ( TEST_FILES
   ALCPeakFittingModelTest.h
   ALCPeakFittingPresenterTest.h
   EnggDiffractionPresenterTest.h
+  ImageCoRPresenterTest.h
   IO_MuonGroupingTest.h
   MuonAnalysisHelperTest.h
   ParseKeyValueStringTest.h
