@@ -124,6 +124,9 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
 
   API::IAlgorithm_sptr fit = createChildAlgorithm("Fit");
   fit->initialize();
+  fit->addObserver(this->progressObserver());
+  setChildStartProgress(0.);
+  setChildEndProgress(1.);
   fit->setProperty("Function",
                    boost::dynamic_pointer_cast<API::IFunction>(multi));
   fit->setProperty("InputWorkspace", ws);
