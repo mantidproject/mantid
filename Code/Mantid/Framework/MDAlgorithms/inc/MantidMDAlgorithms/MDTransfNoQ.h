@@ -86,6 +86,9 @@ public:
   const std::string inputUnitID(Kernel::DeltaEMode::Type mode,
                                 API::MatrixWorkspace_const_sptr inWS) const;
 
+  virtual void setDisplayNormalization(
+      Mantid::API::IMDWorkspace_sptr mdWorkspace,
+      Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const;
 private:
   unsigned int m_NMatrixDim;
   // the variables used for exchange data between different specific parts of

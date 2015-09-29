@@ -162,6 +162,7 @@ void LoadMD::exec() {
 
   // Open the entry
   m_file->openGroup(entryName, "NXentry");
+  const std::map<std::string, std::string> levelEntries = m_file->getEntries();
 
   // Check is SaveMD version 2 was used
   m_saveMDVersion = 0;
@@ -187,14 +188,29 @@ void LoadMD::exec() {
   // Coordinate system
   this->loadCoordinateSystem();
 
+  // Display normalization settting
+  if(levelEntries.find(VISUAL_NORMALIZATION_KEY) != levelEntries.end()){
+      this->loadVisualNormalization(VISUAL_NORMALIZATION_KEY, m_visualNormalization);
+  }
+
   if (entryName == "MDEventWorkspace") {
     // The type of event
     std::string eventType;
     m_file->getAttr("event_type", eventType);
 
+    if(levelEntries.find(VISUAL_NORMALIZATION_KEY_HISTO) != levelEntries.end()){
+      this->loadVisualNormalization(VISUAL_NORMALIZATION_KEY_HISTO, m_visualNormalizationHisto);
+    }
+
     // Use the factory to make the workspace of the right type
-    IMDEventWorkspace_sptr ws =
-        MDEventFactory::CreateMDWorkspace(m_numDims, eventType);
+    IMDEventWorkspace_sptr ws;
+    if (m_visualNormalizationHisto && m_visualNormalization) {
+      ws = MDEventFactory::CreateMDWorkspace(m_numDims, eventType,
+                                             m_visualNormalization.get(),
+                                             m_visualNormalizationHisto.get());
+    } else {
+      ws = MDEventFactory::CreateMDWorkspace(m_numDims, eventType);
+    }
 
     // Now the ExperimentInfo
     bool lazyLoadExpt = fileBacked;
@@ -253,7 +269,13 @@ void LoadMD::loadSlab(std::string name, void *data, MDHistoWorkspace_sptr ws,
 */
 void LoadMD::loadHisto() {
   // Create the initial MDHisto.
-  MDHistoWorkspace_sptr ws(new MDHistoWorkspace(m_dims));
+  MDHistoWorkspace_sptr ws;
+  // If display normalization has been provided. Use that.
+  if(m_visualNormalization){
+      ws = boost::make_shared<MDHistoWorkspace>(m_dims, m_visualNormalization.get());
+  } else {
+      ws = boost::make_shared<MDHistoWorkspace>(m_dims); // Whatever MDHistoWorkspace defaults to.
+  }
 
   // Now the ExperimentInfo
   MDBoxFlatTree::loadExperimentInfos(m_file.get(), m_filename, ws);
@@ -338,6 +360,19 @@ void LoadMD::loadDimensions2() {
   }
   m_file->closeGroup();
 }
+
+void LoadMD::loadVisualNormalization(const std::string& key, boost::optional<Mantid::API::MDNormalization>& normalization) {
+  try {
+    uint32_t readVisualNormalization(0);
+    m_file->readData(key, readVisualNormalization);
+    normalization =
+        static_cast<Mantid::API::MDNormalization>(readVisualNormalization);
+  } catch (::NeXus::Exception &) {
+
+  } catch (std::exception &) {
+  }
+}
+
 
 /** Load the coordinate system **/
 void LoadMD::loadCoordinateSystem() {
@@ -558,6 +593,9 @@ CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name) {
   }
   return transform;
 }
+
+const std::string LoadMD::VISUAL_NORMALIZATION_KEY="visual_normalization";
+const std::string LoadMD::VISUAL_NORMALIZATION_KEY_HISTO="visual_normalization_histo";
 
 } // namespace Mantid
 } // namespace DataObjects

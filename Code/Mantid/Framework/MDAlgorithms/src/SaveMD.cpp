@@ -241,6 +241,10 @@ void SaveMD::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
   file->writeData("coordinate_system",
                   static_cast<uint32_t>(ws->getSpecialCoordinateSystem()));
 
+  // Write out the set display normalization
+  file->writeData("visual_normalization",
+                  static_cast<uint32_t>(ws->displayNormalization()));
+
   // Save the algorithm history under "process"
   ws->getHistory().saveNexus(file);
 

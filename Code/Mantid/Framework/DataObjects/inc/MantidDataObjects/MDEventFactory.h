@@ -46,9 +46,14 @@ public:
   };
   MDEventFactory() {}
   ~MDEventFactory() {}
+
   // create MD workspace factory call
   static API::IMDEventWorkspace_sptr
-  CreateMDWorkspace(size_t nd, const std::string &eventType = "MDLeanEvent");
+  CreateMDWorkspace(size_t nd, const std::string &eventType = "MDLeanEvent",
+                    const Mantid::API::MDNormalization& preferredNormalization =
+                        Mantid::API::MDNormalization::VolumeNormalization,
+                    const Mantid::API::MDNormalization& preferredNormalizationHisto =
+                        Mantid::API::MDNormalization::VolumeNormalization);
 
   // create MDBox factory call
   static API::IMDNode *
@@ -73,7 +78,10 @@ private:
 
   // typedef for the class function pointer to the function, which creates MD
   // Workspaces
-  typedef API::IMDEventWorkspace *(*fpCreateMDWS)(const std::string &eventType);
+  typedef API::IMDEventWorkspace *(*fpCreateMDWS)(
+      const std::string &eventType,
+      const Mantid::API::MDNormalization &preferredNormalization,
+      const Mantid::API::MDNormalization &preferredNormalizationHisto);
   // vector of function pointers to the funcions
   static std::vector<fpCreateMDWS> wsCreatorFP;
 
@@ -82,7 +90,9 @@ private:
   // custom memory allocator
   template <size_t nd>
   static API::IMDEventWorkspace *
-  createMDWorkspaceND(const std::string &eventType);
+  createMDWorkspaceND(const std::string &eventType,
+                      const Mantid::API::MDNormalization& preferredNormalization,
+                      const Mantid::API::MDNormalization& preferredNormalizationHisto);
 
   // local wrappers around the MDBox/MDGridBox constructors as the constructor's
   // address can not be taken. This can also help in a future when writing

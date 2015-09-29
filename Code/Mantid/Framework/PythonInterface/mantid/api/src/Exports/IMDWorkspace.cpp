@@ -31,7 +31,12 @@ void export_IMDWorkspace() {
            "Returns the total number of events, contributed to the workspace")
       .def("getSpecialCoordinateSystem",
            &IMDWorkspace::getSpecialCoordinateSystem, args("self"),
-           "Returns the special coordinate system of the workspace");
+           "Returns the special coordinate system of the workspace")
+      .def("displayNormalization", &IMDWorkspace::displayNormalization, args("self"),
+           "Returns the visual normalization of the workspace.")
+      .def("displayNormalizationHisto", &IMDWorkspace::displayNormalizationHisto, args("self"),
+           "For MDEventWorkspaces returns the visual normalization of dervied MDHistoWorkspaces."
+           "For all others returns the same as displayNormalization.");
 
   RegisterWorkspacePtrToPython<IMDWorkspace>();
 }

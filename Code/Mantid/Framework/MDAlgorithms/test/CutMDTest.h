@@ -20,11 +20,25 @@ using namespace Mantid::Kernel;
 
 namespace {
 const std::string sharedWSName = "__CutMDTest_dataWS";
+const Mantid::API::MDNormalization eventNorm = Mantid::API::MDNormalization::VolumeNormalization;
+const Mantid::API::MDNormalization histoNorm = Mantid::API::MDNormalization::NumEventsNormalization;
 }
 
 class CutMDTest : public CxxTest::TestSuite {
 private:
   IMDWorkspace_sptr m_inWS;
+
+  void addNormalization(std::string wsName) {
+    auto ws = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(wsName);
+    auto eventWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(ws);
+    auto histoWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(ws);
+    if (eventWS) {
+      eventWS->setDisplayNormalization(eventNorm);
+      eventWS->setDisplayNormalizationHisto(histoNorm);
+    } else {
+      eventWS->setDisplayNormalization(histoNorm);
+    }
+  }
 
 public:
   CutMDTest() {
@@ -54,6 +68,9 @@ public:
 
     m_inWS =
       AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(sharedWSName);
+    auto eventWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_inWS);
+    eventWS->setDisplayNormalization(eventNorm);
+    eventWS->setDisplayNormalizationHisto(histoNorm);
   }
 
   virtual ~CutMDTest() { AnalysisDataService::Instance().remove(sharedWSName); }
@@ -82,7 +99,6 @@ public:
     FrameworkManager::Instance().exec("SetSpecialCoordinates", 4,
         "InputWorkspace", wsName.c_str(),
         "SpecialCoordinates", "HKL");
-
     auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
@@ -138,6 +154,9 @@ public:
     TS_ASSERT_EQUALS("[0, 'eta', 0]", outWS->getDimension(1)->getName());
     TS_ASSERT_EQUALS("[0, 0, 'xi']", outWS->getDimension(2)->getName());
 
+    TSM_ASSERT_EQUALS("Should have num events normalization",
+                      outWS->displayNormalizationHisto(), histoNorm);
+
     AnalysisDataService::Instance().remove(wsName);
   }
 
@@ -164,6 +183,9 @@ public:
     TS_ASSERT_DELTA(outWS->getDimension(0)->getMaximum(), 0.6, 1E-6);
     TS_ASSERT_EQUALS(outWS->getDimension(0)->getNBins(), 2);
 
+    TSM_ASSERT_EQUALS("Should have num events normalization",
+                      outWS->displayNormalizationHisto(), histoNorm);
+
     AnalysisDataService::Instance().remove(wsName);
   }
 
@@ -188,6 +210,9 @@ public:
 
     TS_ASSERT_EQUALS(outWS->getDimension(0)->getNBins(), 1);
     TS_ASSERT_EQUALS(outWS->getDimension(1)->getNBins(), 1);
+
+    TSM_ASSERT_EQUALS("Should have num events normalization",
+                      outWS->displayNormalizationHisto(), histoNorm);
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -224,6 +249,8 @@ public:
     vRow << "v" << V3D(0,1,0) << 0.0 << "r";
     wRow << "w" << V3D(0,0,1) << 0.0 << "r";
 
+    addNormalization(wsName);
+
     auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
@@ -250,6 +277,9 @@ public:
     TS_ASSERT_EQUALS("['zeta', 0, 0]", outWS->getDimension(0)->getName());
     TS_ASSERT_EQUALS("[0, 'eta', 0]", outWS->getDimension(1)->getName());
     TS_ASSERT_EQUALS("[0, 0, 'xi']", outWS->getDimension(2)->getName());
+
+    TSM_ASSERT_EQUALS("Should have num events normalization",
+                      outWS->displayNormalizationHisto(), histoNorm);
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -286,6 +316,8 @@ public:
     vRow << "v" << V3D(-1,1,0) << 0.0 << "r";
     wRow << "w" << V3D(0,0,1) << 0.0 << "r";
 
+    addNormalization(wsName);
+
     auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
@@ -312,6 +344,9 @@ public:
     TS_ASSERT_EQUALS("['zeta', 'zeta', 0]", outWS->getDimension(0)->getName());
     TS_ASSERT_EQUALS("['-eta', 'eta', 0]", outWS->getDimension(1)->getName());
     TS_ASSERT_EQUALS("[0, 0, 'xi']", outWS->getDimension(2)->getName());
+
+    TSM_ASSERT_EQUALS("Should have num events normalization",
+                      outWS->displayNormalizationHisto(), histoNorm);
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -348,6 +383,8 @@ public:
     vRow << "v" << V3D(0,1,0) << 0.0 << "r";
     wRow << "w" << V3D(0,0,1) << 0.0 << "r";
 
+    addNormalization(wsName);
+
     auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
@@ -375,6 +412,8 @@ public:
     TS_ASSERT_EQUALS("[0, 'eta', 0]", outWS->getDimension(1)->getName());
     TS_ASSERT_EQUALS("[0, 0, 'xi']", outWS->getDimension(2)->getName());
 
+    TSM_ASSERT_EQUALS("Should have num events normalization",
+                      outWS->displayNormalizationHisto(), histoNorm);
     AnalysisDataService::Instance().remove(wsName);
   }
 
@@ -397,6 +436,8 @@ public:
     FrameworkManager::Instance().exec("SetSpecialCoordinates", 4,
         "InputWorkspace", wsName.c_str(),
         "SpecialCoordinates", "HKL");
+
+    addNormalization(wsName);
 
     auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
     algCutMD->initialize();
@@ -439,6 +480,8 @@ public:
       AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(wsOutName);
     TS_ASSERT_EQUALS(16, outWS->getDimension(3)->getNBins());
 
+    TSM_ASSERT_EQUALS("Should have num events normalization",
+                      outWS->displayNormalizationHisto(), histoNorm);
     AnalysisDataService::Instance().remove(wsName);
     AnalysisDataService::Instance().remove(wsOutName);
   }

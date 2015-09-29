@@ -223,6 +223,16 @@ public:
   virtual unsigned int
   getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
                        API::MatrixWorkspace_const_sptr inWS) const = 0;
+
+  /**
+   * Sets the display normalization
+   * @param mdWorkspace: the workspace on which the display normalizations should
+   * @param underlyingWorkspace: the original workspace
+   * be set
+   */
+  virtual void setDisplayNormalization(
+      Mantid::API::IMDWorkspace_sptr mdWorkspace,
+      Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const = 0;
 };
 
 typedef boost::shared_ptr<MDTransfInterface> MDTransf_sptr;

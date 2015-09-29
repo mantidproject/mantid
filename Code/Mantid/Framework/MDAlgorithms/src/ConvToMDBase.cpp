@@ -106,5 +106,16 @@ ConvToMDBase::ConvToMDBase()
       m_ignoreZeros(false), // 0-s added to workspace
       m_coordinateSystem(Mantid::Kernel::None) {}
 
+/**
+ * Set the normalization options
+ */
+void ConvToMDBase::setDisplayNormalization(
+    Mantid::API::IMDEventWorkspace_sptr mdWorkspace,
+    const Mantid::API::MatrixWorkspace_sptr& underlyingWorkspace) {
+  if (m_QConverter) {
+    m_QConverter->setDisplayNormalization(mdWorkspace, underlyingWorkspace);
+  }
+}
+
 } // endNamespace MDAlgorithms
 }

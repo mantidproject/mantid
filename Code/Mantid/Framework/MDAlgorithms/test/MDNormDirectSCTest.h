@@ -20,7 +20,6 @@ public:
   static MDNormDirectSCTest *createSuite() { return new MDNormDirectSCTest(); }
   static void destroySuite( MDNormDirectSCTest *suite ) { delete suite; }
 
-
   void test_Init()
   {
     MDNormDirectSC alg;

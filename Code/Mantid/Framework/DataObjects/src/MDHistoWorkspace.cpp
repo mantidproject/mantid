@@ -26,14 +26,17 @@ namespace DataObjects {
  * @param dimY :: Y dimension binning parameters
  * @param dimZ :: Z dimension binning parameters
  * @param dimT :: T (time) dimension binning parameters
+ * @param displayNormalization :: optional display normalization to use as the default.
  */
 MDHistoWorkspace::MDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX,
                                    Mantid::Geometry::MDHistoDimension_sptr dimY,
                                    Mantid::Geometry::MDHistoDimension_sptr dimZ,
-                                   Mantid::Geometry::MDHistoDimension_sptr dimT)
+                                   Mantid::Geometry::MDHistoDimension_sptr dimT,
+                                   Mantid::API::MDNormalization displayNormalization
+                                   )
     : IMDHistoWorkspace(), numDimensions(0),
       m_nEventsContributed(std::numeric_limits<uint64_t>::quiet_NaN()),
-      m_coordSystem(None) {
+      m_coordSystem(None), m_displayNormalization(displayNormalization) {
   std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
   if (dimX)
     dimensions.push_back(dimX);
@@ -49,24 +52,28 @@ MDHistoWorkspace::MDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX,
 //----------------------------------------------------------------------------------------------
 /** Constructor given a vector of dimensions
  * @param dimensions :: vector of MDHistoDimension; no limit to how many.
+ * @param displayNormalization :: optional display normalization to use as the default.
  */
 MDHistoWorkspace::MDHistoWorkspace(
-    std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions)
+    std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions,
+        Mantid::API::MDNormalization displayNormalization)
     : IMDHistoWorkspace(), numDimensions(0), m_numEvents(NULL),
       m_nEventsContributed(std::numeric_limits<uint64_t>::quiet_NaN()),
-      m_coordSystem(None) {
+      m_coordSystem(None), m_displayNormalization(displayNormalization) {
   this->init(dimensions);
 }
 
 //----------------------------------------------------------------------------------------------
 /** Constructor given a vector of dimensions
  * @param dimensions :: vector of MDHistoDimension; no limit to how many.
+ * @param displayNormalization :: optional display normalization to use as the default.
  */
 MDHistoWorkspace::MDHistoWorkspace(
-    std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions)
+    std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions,
+        Mantid::API::MDNormalization displayNormalization)
     : IMDHistoWorkspace(), numDimensions(0), m_numEvents(NULL),
       m_nEventsContributed(std::numeric_limits<uint64_t>::quiet_NaN()),
-      m_coordSystem(None) {
+      m_coordSystem(None), m_displayNormalization(displayNormalization) {
   this->init(dimensions);
 }
 
@@ -86,6 +93,7 @@ MDHistoWorkspace::MDHistoWorkspace(const MDHistoWorkspace &other)
   m_masks = new bool[m_length];
   m_nEventsContributed = other.m_nEventsContributed;
   this->setCoordinateSystem(other.getSpecialCoordinateSystem());
+  m_displayNormalization = other.displayNormalization();
   // Now copy all the data
   for (size_t i = 0; i < m_length; ++i) {
     m_signals[i] = other.m_signals[i];
@@ -1229,7 +1237,18 @@ size_t MDHistoWorkspace::sizeOfElement() {
 Preferred normalization to use for visual purposes.
 */
 MDNormalization MDHistoWorkspace::displayNormalization() const {
-  return NumEventsNormalization; // Normalize by the number of events.
+  return m_displayNormalization;// Normalize by the number of events.
+}
+
+/**
+Preferred normalization to use for visual purposes.
+*/
+MDNormalization MDHistoWorkspace::displayNormalizationHisto() const {
+  return displayNormalization();// Normalize by the number of events.
+}
+
+void MDHistoWorkspace::setDisplayNormalization(const Mantid::API::MDNormalization& preferredNormalization) {
+  m_displayNormalization = preferredNormalization;
 }
 
 } // namespace Mantid

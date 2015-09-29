@@ -23,10 +23,16 @@ public:
     IMDEventWorkspace_sptr ew;
     ew = MDEventFactory::CreateMDWorkspace(4, "MDLeanEvent");
     TS_ASSERT_EQUALS( ew->getNumDims(), 4);
+    TSM_ASSERT_EQUALS("Should have volume normalization as a default", ew->displayNormalization(), Mantid::API::VolumeNormalization);
+    TSM_ASSERT_EQUALS("Should have volume normalization as a default", ew->displayNormalizationHisto(), Mantid::API::VolumeNormalization);
 
     size_t n = 9;
-    ew = MDEventFactory::CreateMDWorkspace(n);
+    auto eventNormalization =  Mantid::API::NoNormalization;
+    auto histoNormalization = Mantid::API::NumEventsNormalization;
+    ew = MDEventFactory::CreateMDWorkspace(n, "MDLeanEvent", eventNormalization, histoNormalization);
     TS_ASSERT_EQUALS( ew->getNumDims(), n);
+    TSM_ASSERT_EQUALS("Should have no normalization set.", ew->displayNormalization(), eventNormalization);
+    TSM_ASSERT_EQUALS("Should have number of events set.", ew->displayNormalizationHisto(), histoNormalization);
 
     TS_ASSERT_THROWS( ew = MDEventFactory::CreateMDWorkspace(0), std::invalid_argument);
   }

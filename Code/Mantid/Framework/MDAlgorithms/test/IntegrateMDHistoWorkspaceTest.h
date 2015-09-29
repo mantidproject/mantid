@@ -113,7 +113,8 @@ public:
   {
     using namespace Mantid::DataObjects;
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1 /*nd*/, 10);
-
+    auto histNorm = Mantid::API::MDNormalization::NumEventsNormalization;
+    ws->setDisplayNormalization(histNorm);
     IntegrateMDHistoWorkspace alg;
     alg.setChild(true);
     alg.setRethrows(true);
@@ -128,6 +129,7 @@ public:
     TS_ASSERT_EQUALS(outWS->getNumDims(), ws->getNumDims());
     TS_ASSERT_EQUALS(outWS->getSignalAt(0), ws->getSignalAt(0));
     TS_ASSERT_EQUALS(outWS->getSignalAt(1), ws->getSignalAt(1));
+    TSM_ASSERT_EQUALS("Should have a num events normalization", outWS->displayNormalization(), histNorm);
   }
 
   void test_1D_integration_exact_binning()
@@ -148,6 +150,8 @@ public:
 
       using namespace Mantid::DataObjects;
       MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0 /*signal*/, 1 /*nd*/, 10 /*nbins*/, 10 /*max*/, 1.0 /*error sq*/);
+      auto histNorm = Mantid::API::MDNormalization::NumEventsNormalization;
+      ws->setDisplayNormalization(histNorm);
 
       IntegrateMDHistoWorkspace alg;
       alg.setChild(true);
@@ -170,6 +174,7 @@ public:
       // Check the data.
       TSM_ASSERT_DELTA("Wrong integrated value", 5.0, outWS->getSignalAt(0), 1e-4);
       TSM_ASSERT_DELTA("Wrong error value", std::sqrt(5 * (ws->getErrorAt(0) * ws->getErrorAt(0))), outWS->getErrorAt(0), 1e-4);
+      TSM_ASSERT_EQUALS("Should have a num events normalization", outWS->displayNormalization(), histNorm);
   }
 
 

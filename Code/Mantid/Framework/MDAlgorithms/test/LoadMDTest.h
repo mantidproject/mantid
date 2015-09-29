@@ -499,6 +499,7 @@ public:
 
     TS_ASSERT_EQUALS( ws->getNPoints(), newWS->getNPoints());
     TS_ASSERT_EQUALS( ws->getNumDims(), newWS->getNumDims());
+    TS_ASSERT_EQUALS( ws->displayNormalization(), newWS->displayNormalization());
     for (size_t i=0; i<ws->getNPoints(); i++)
     {
       TS_ASSERT_DELTA(ws->getSignalAt(i), newWS->getSignalAt(i), 1e-6);
@@ -539,6 +540,7 @@ public:
 
     TS_ASSERT_EQUALS( ws->getNPoints(), newWS->getNPoints());
     TS_ASSERT_EQUALS( ws->getNumDims(), newWS->getNumDims());
+    TS_ASSERT_EQUALS( ws->displayNormalization(), newWS->displayNormalization());
     for (size_t i=0; i<ws->getNPoints(); i++)
     {
       TS_ASSERT_DELTA(ws->getSignalAt(i), newWS->getSignalAt(i), 1e-6);
@@ -551,14 +553,25 @@ public:
       Poco::File(filename).remove();
   }
 
-  void test_histo2() 
+  void test_histo1D()
+  {
+    Mantid::coord_t min(-10.0);
+    Mantid::coord_t max(10.0);
+    std::vector<Geometry::IMDDimension_sptr> dims(1, boost::make_shared<Geometry::MDHistoDimension>("X", "x", "m", min, max, 5));
+    MDHistoWorkspace_sptr ws = boost::make_shared<MDHistoWorkspace>(dims, API::VolumeNormalization);
+    ws->setTo(1.0, 1.0, 1);
+    doTestHistoV1(ws);
+    doTestHisto(ws);
+  }
+
+  void test_histo2D()
   {
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.5, 2, 10, 10.0, 3.5, "histo2", 4.5);
     doTestHistoV1(ws);
     doTestHisto(ws);
   }
 
-  void test_histo3()
+  void test_histo3D()
   {
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.5, 3, 4, 10.0, 3.5, "histo3", 4.5);
     doTestHistoV1(ws);
@@ -736,6 +749,50 @@ public:
     AnalysisDataService::Instance().remove("OutputWorkspace");
   }
 
+  void test_MDEventWorkspace_contains_normalization_flags() {
+    // Arrange
+    std::string filename("SaveMDEventNormalizationFlagTest.nxs");
+    MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(10, 0.0, 10.0, 2);
+    AnalysisDataService::Instance().addOrReplace("SaveMDEventNormalizationFlagTest_ws", ws);
+
+    auto eventNormalization = Mantid::API::NoNormalization;
+    auto histoNormalization = Mantid::API::NumEventsNormalization;
+    ws->setDisplayNormalization(eventNormalization);
+    ws->setDisplayNormalizationHisto(histoNormalization);
+
+    // Act
+    SaveMD2 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "SaveMDEventNormalizationFlagTest_ws");
+    alg.setPropertyValue("Filename", filename);
+    alg.setProperty("MakeFileBacked","0");
+    alg.execute();
+    TS_ASSERT( alg.isExecuted() );
+    std::string this_filename = alg.getProperty("Filename");
+
+    LoadMD loadAlg;
+    loadAlg.initialize();
+    loadAlg.isInitialized();
+    loadAlg.setPropertyValue("Filename", filename);
+    loadAlg.setProperty("FileBackEnd", false);
+    loadAlg.setPropertyValue("OutputWorkspace", "reloaded_MDEventNormalization");
+    loadAlg.execute();
+    TS_ASSERT( loadAlg.isExecuted() );
+    auto newWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("reloaded_MDEventNormalization");
+
+    // Assert
+    TSM_ASSERT_EQUALS("Should have no normalization set", newWS->displayNormalization(), eventNormalization); 
+    TSM_ASSERT_EQUALS("Should have number events normalization set", newWS->displayNormalizationHisto(), histoNormalization); 
+
+    // Clean up
+    if (Poco::File(this_filename).exists())
+    {
+      Poco::File(this_filename).remove();
+    }
+
+    AnalysisDataService::Instance().remove("SaveMDEventNormalizationFlagTest_ws");
+    AnalysisDataService::Instance().remove("reloaded_MDEventNormalization");
+  }
 };
 
 #endif /* MANTID_MDEVENTS_LOADMDEWTEST_H_ */
