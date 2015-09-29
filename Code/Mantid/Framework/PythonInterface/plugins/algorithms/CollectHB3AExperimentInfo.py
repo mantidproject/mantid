@@ -22,7 +22,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         self._dataDir = None
         self._ptListList = None
         self._doGenerateVirtualInstrument = False
-        
+
         # Define class variable Scan-Pt. dictionary: Key scan number, Value list of pt numbers
         self._scanPtDict = {}
         self._spiceTableDict = {}
@@ -74,7 +74,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         tableprop2 = mantid.api.ITableWorkspaceProperty("DetectorTableWorkspace", "", mantid.kernel.Direction.Output)
         self.declareProperty(tableprop2, "TableWorkspace for detector Id and information.")
 
-        self.declareProperty('GenerateVirtualInstrument', True, 
+        self.declareProperty('GenerateVirtualInstrument', True,
                 'If True, then the geometry of all the detectors will be written to DetectorTableWorkspace')
 
 
@@ -97,7 +97,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         self._getDetectorPositionScanPtDict()
 
         # Determine the pixels' positions
-        if self._doGenerateVirtualInstrument is True: 
+        if self._doGenerateVirtualInstrument is True:
             self._collectPixelsPositions()
 
         # Set up ScanPtFileTable
