@@ -119,6 +119,8 @@ public:
     m_getAllEi.setProperty("OutputWorkspace","monitor_peaks");
     m_getAllEi.setProperty("Monitor1SpecID",1);
     m_getAllEi.setProperty("Monitor2SpecID",2);
+    m_getAllEi.setProperty("FilterWithDerivative",false);
+
 
     for(int i=0;i<10;i++){
       chopSpeed->addValue( Kernel::DateAndTime(10000+10*i, 0), 1.);
@@ -188,6 +190,50 @@ public:
     TSM_ASSERT_DELTA("Chopper delay should have special speed",0.1, chop_delay,1.e-6);
 
   }
+  void test_get_chopper_speed_filter_derivative(){
+
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",2, 11, 10);
+    m_getAllEi.initialize();
+    m_getAllEi.setProperty("Workspace",ws);
+    m_getAllEi.setProperty("OutputWorkspace","monitor_peaks");
+    m_getAllEi.setProperty("Monitor1SpecID",1);
+    m_getAllEi.setProperty("Monitor2SpecID",2);
+    m_getAllEi.setProperty("FilterWithDerivative",true);
+
+    // Test select log by log derivative
+    std::unique_ptr<Kernel::TimeSeriesProperty<double> > chopDelay(new Kernel::TimeSeriesProperty<double>("Chopper_Delay"));
+    std::unique_ptr<Kernel::TimeSeriesProperty<double> > chopSpeed(new Kernel::TimeSeriesProperty<double>("Chopper_Speed"));
+    std::unique_ptr<Kernel::TimeSeriesProperty<double> > protCharge(new Kernel::TimeSeriesProperty<double>("proton_charge"));
+
+
+    double gf(0);
+    for(int i=0;i<50;i++){
+      auto time =  Kernel::DateAndTime(10*i, 0);
+      if(i>10 && i<20){
+        chopDelay->addValue(time , 100.);
+        chopSpeed->addValue(time,0.);
+        protCharge->addValue(time,gf);
+      }else{
+        chopDelay->addValue(time , 10.);
+        chopSpeed->addValue(time,50.);
+        protCharge->addValue(time,gf);
+        gf++;
+      }
+    }
+    ws->mutableRun().addLogData(chopSpeed.release());
+    ws->mutableRun().addLogData(chopDelay.release());
+    ws->mutableRun().addLogData(goodFram.release());
+    // Run validate as this will set up property, which indicates filter log presence
+    auto errors  = m_getAllEi.validateInputs();
+    TSM_ASSERT_EQUALS("All logs are defined now",errors.size(),0);
+
+    double chop_speed,chop_delay;
+    m_getAllEi.find_chop_speed_and_delay(ws,chop_speed,chop_delay);
+    TSM_ASSERT_DELTA("Chopper delay should have defined value ",10., chop_delay,1.e-6);
+    TSM_ASSERT_DELTA("Chopper speed should have defined speed",50., chop_speed,1.e-6);
+
+  }
+
   void test_guess_opening_times(){
 
     std::pair<double,double> TOF_range(5,100);
