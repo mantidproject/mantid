@@ -145,7 +145,7 @@ def lineStartsBlock( line ):
 
 test_re = re.compile( r'^([^/]|/[^/])*\bvoid\s+([Tt]est\w+)\s*\(\s*(void)?\s*\)' )
 void_re = re.compile( r'^([^/]|/[^/])*\bvoid\s*$' )
-test_novoid_re = re.compile( r'^([^/]|/[^/])*([Tt]est\w+)\s*\(\s*(void)?\s*\)' )
+test_novoid_re = re.compile( r'^([^/]|/[^/])*\b([Tt]est\w+)\s*\(\s*(void)?\s*\)' )
 def scanLineForTest( suite, lineNo, line ):
     '''Check if current line starts a test'''
     global lastLineVoid
