@@ -168,11 +168,19 @@ API::ITableWorkspace_sptr CalMuonDetectorPhases::extractDetectorInfo(
   tab->addColumn("double", "Asymmetry");
   tab->addColumn("double", "Phase");
 
+  // Reference frequency, all w values should be the same
+  double omegaRef = paramTab->Double(1,1);
+
   for (int s = 0; s < nspec; s++) {
     // The following '3' factor corresponds to the number of function params
     size_t specRow = s * 3;
-    double asym = paramTab->Double(specRow,1);
-    double phase = paramTab->Double(specRow+2,1);
+    double asym = paramTab->Double(specRow, 1);
+    double omega = paramTab->Double(specRow + 1, 1);
+    double phase = paramTab->Double(specRow + 2, 1);
+    // If omega != omegaRef something went wrong with the fit
+    if (omega != omegaRef) {
+      throw std::runtime_error("Fit failed");
+    }
     // If asym<0, take the absolute value and add \pi to phase
     // f(x) = A * sin( w * x + p) = -A * sin( w * x + p + PI)
     if (asym<0) {
