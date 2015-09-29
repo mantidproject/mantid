@@ -4,6 +4,8 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/V2D.h"
 
+#include <utility>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -47,9 +49,11 @@ public:
 
   ImageStackPreParams();
 
+  typedef std::pair<Mantid::Kernel::V2D, Mantid::Kernel::V2D> Box2D;
+
   Mantid::Kernel::V2D cor;
-  Mantid::Kernel::V2D roi;
-  Mantid::Kernel::V2D normalizationRegion;  //< also known as 'air'
+  Box2D roi;
+  Box2D normalizationRegion;  //< also known as 'air' region
   bool medianFilter;
 };
 

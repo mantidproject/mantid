@@ -39,7 +39,10 @@ public:
   /// constructor from a path (to a directory)
   StackOfImagesDirs(const std::string &path);
 
+  /// The current (simple) concept of valid is: there at least a
+  /// sample/data directory with at least one file in it.
   bool isValid() const { return m_valid; }
+
   // human readable description of the expected structure of directories
   std::string description() const { return g_descr; }
 
@@ -60,7 +63,11 @@ private:
   /// finds images in a directory
   std::vector<std::string> findImgFiles(const std::string &path) const;
 
+  /// passes basic validity checks
   bool m_valid;
+  /// string with informative messages specially when not valid
+  std::string m_statusDescStr;
+
   std::string m_sampleDir;
   std::string m_flatDir;
   std::string m_darkDir;

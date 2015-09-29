@@ -5,6 +5,7 @@
 #include "MantidQtCustomInterfaces/Tomography/IImageCoRPresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/IImageCoRView.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
+#include "MantidQtCustomInterfaces/Tomography/StackOfImagesDirs.h"
 
 #include <boost/scoped_ptr.hpp>
 
@@ -68,8 +69,13 @@ protected:
   void processShutDown();
 
 private:
-  Mantid::API::WorkspaceGroup_sptr loadFITSStack(const std::string &path);
-  Mantid::API::WorkspaceGroup_sptr loadFITSImage(const std::string &path);
+  StackOfImagesDirs checkInputStack(const std::string &path);
+
+  /// loads a list of images from a stack, from their individual paths
+  Mantid::API::WorkspaceGroup_sptr
+    loadFITSStack(const std::vector<std::string> &imgs);
+
+  void loadFITSImage(const std::string &path, const std::string &wsName);
 
   /// Associated view for this presenter (MVP pattern)
   IImageCoRView *const m_view;

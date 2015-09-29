@@ -5,7 +5,6 @@
 #include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageCoRPresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/IImageCoRView.h"
-#include "MantidQtCustomInterfaces/Tomography/StackOfImagesDirs.h"
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -93,29 +92,50 @@ void ImageCoRPresenter::processBrowseImg() {
   }
 }
 
-void ImageCoRPresenter::processNewStack() {
-  const std::string pstr = m_view->stackPath();
-
-  StackOfImagesDirs soid(pstr);
+/**
+ * Validates the input stack of images (directories and files), and
+ * shows warning/error messages as needed. The outocome of the
+ * validation can be checkec via isValid() on the returned stack of
+ * images object.
+ *
+ * @param path user provided path to the stack of images
+ *
+ * @return a stack of images built from the path passed, not
+ * necessarily correct (check with isValid())
+ */
+StackOfImagesDirs ImageCoRPresenter::checkInputStack(const std::string &path) {
+  StackOfImagesDirs soid(path);
 
   const std::string soiPath = soid.sampleImagesDir();
   if (soiPath.empty()) {
     m_view->userWarning("Error trying to find image stack",
                         "Could not find the sample images directory. The stack "
-                        "of images is expected as: \n\n" + soid.description());
-    return;
+                        "of images is expected as: \n\n" +
+                            soid.description());
+  } else if (!soid.isValid()) {
+    m_view->userWarning("Error while checking/validating the image stack",
+                        "The stack of images could not be loaded correctly. " +
+                            soid.status());
   }
+
+  return soid;
+}
+
+void ImageCoRPresenter::processNewStack() {
+  const std::string pstr = m_view->stackPath();
+
+  StackOfImagesDirs soid = checkInputStack(pstr);
 
   std::vector<std::string> imgs = soid.sampleFiles();
   if (0 >= imgs.size()) {
-    m_view->userWarning("Error trying to find image/projection files in the stack directories",
-                        "Could not find any image file in the samples subdirectory: " + soiPath);
+    m_view->userWarning(
+        "Error trying to find image/projection files in the stack directories",
+        "Could not find any image file in the samples subdirectory: " +
+            soid.sampleImagesDir());
     return;
   }
 
-  const std::string imgPath = imgs.front();
-
-  Mantid::API::WorkspaceGroup_sptr wsg = loadFITSStack(imgPath);
+  Mantid::API::WorkspaceGroup_sptr wsg = loadFITSStack(imgs);
   if (!wsg)
     return;
 
@@ -123,16 +143,17 @@ void ImageCoRPresenter::processNewStack() {
   if (0 == imgCount) {
     m_view->userWarning(
         "Failed to load any FITS images - directory structure issue",
-        "Even though a directory apprently holding a stack of images was found, "
+        "Even though a directory apparently holding a stack of images was "
+        "found, "
         "it was not possible to load any image file correctly from: " +
-                        soiPath);
+            pstr);
     return;
   }
 
   m_view->showStack(wsg);
 
-  // clean-up container group workspace
-  if (wsg)
+  // clean-up container group workspace? Not for now
+  if (false && wsg)
     Mantid::API::AnalysisDataService::Instance().remove(wsg->getName());
 }
 
@@ -157,21 +178,51 @@ void ImageCoRPresenter::processResetNormalization() {}
 void ImageCoRPresenter::processShutDown() { m_view->saveSettings(); }
 
 Mantid::API::WorkspaceGroup_sptr
-ImageCoRPresenter::loadFITSStack(const std::string &path) {
+ImageCoRPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
   // TODO: go through directory
-  return loadFITSImage(path);
+  const std::string imgPath = imgs.front();
+
+  const std::string wsName = "__fits_ws_tomography_gui";
+  for (size_t i = 0; i < imgs.size(); ++i) {
+    loadFITSImage(imgPath, wsName);
+  }
+
+  Mantid::API::WorkspaceGroup_sptr wsg;
+  try {
+    const auto &ads = Mantid::API::AnalysisDataService::Instance();
+    wsg = ads.retrieveWS<Mantid::API::WorkspaceGroup>(wsName);
+  } catch (std::exception &e) {
+    throw std::runtime_error(
+        "Could not produce a workspace group for the stack images. Cannot "
+        "display it. Error details: " +
+        std::string(e.what()));
+  }
+
+  if (wsg &&
+      Mantid::API::AnalysisDataService::Instance().doesExist(wsg->name()) &&
+      imgs.size() == wsg->size()) {
+    return wsg;
+  } else {
+    return Mantid::API::WorkspaceGroup_sptr();
+  }
 }
 
-Mantid::API::WorkspaceGroup_sptr
-ImageCoRPresenter::loadFITSImage(const std::string &path) {
+void ImageCoRPresenter::loadFITSImage(const std::string &path,
+                                      const std::string &wsName) {
   // get fits file into workspace and retrieve it from the ADS
   auto alg = Mantid::API::AlgorithmManager::Instance().create("LoadFITS");
-  alg->initialize();
-  alg->setPropertyValue("Filename", path);
-  std::string wsName = "__fits_ws_tomography_gui";
-  alg->setProperty("OutputWorkspace", wsName);
-  // this is way faster when loading into a MatrixWorkspace
-  alg->setProperty("LoadAsRectImg", true);
+  try {
+    alg->initialize();
+    alg->setPropertyValue("Filename", path);
+    alg->setProperty("OutputWorkspace", wsName);
+    // this is way faster when loading into a MatrixWorkspace
+    alg->setProperty("LoadAsRectImg", true);
+  } catch (std::exception &e) {
+    throw std::runtime_error("Failed to initialize the mantid algorithm to "
+                             "load images. Error description: " +
+                             std::string(e.what()));
+  }
+
   try {
     alg->execute();
   } catch (std::exception &e) {
@@ -179,33 +230,27 @@ ImageCoRPresenter::loadFITSImage(const std::string &path) {
         "Failed to load image. Could not load this file as a "
         "FITS image: " +
         std::string(e.what()));
-    return Mantid::API::WorkspaceGroup_sptr();
   }
+
   if (!alg->isExecuted()) {
     throw std::runtime_error(
         "Failed to load image correctly. Note that even though "
         "the image file has been loaded it seems to contain errors.");
   }
-  Mantid::API::WorkspaceGroup_sptr wsg;
-  Mantid::API::MatrixWorkspace_sptr ws;
+
   try {
+    Mantid::API::WorkspaceGroup_sptr wsg;
+    Mantid::API::MatrixWorkspace_sptr ws;
     const auto &ads = Mantid::API::AnalysisDataService::Instance();
     wsg = ads.retrieveWS<Mantid::API::WorkspaceGroup>(wsName);
     ws = ads.retrieveWS<Mantid::API::MatrixWorkspace>(wsg->getNames()[0]);
   } catch (std::exception &e) {
     throw std::runtime_error(
-        "Could not load image contents. An unrecoverable error "
+        "Could not load image contents for file '" + path +
+        "'. An unrecoverable error "
         "happened when trying to load the image contents. Cannot "
         "display it. Error details: " +
         std::string(e.what()));
-  }
-
-  // draw image from workspace
-  if (wsg && ws &&
-      Mantid::API::AnalysisDataService::Instance().doesExist(ws->name())) {
-    return wsg;
-  } else {
-    return Mantid::API::WorkspaceGroup_sptr();
   }
 }
 

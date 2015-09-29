@@ -130,8 +130,11 @@ std::string ImageCoRViewQtWidget::askImgOrStackPath() {
 }
 
 void ImageCoRViewQtWidget::showStack(const std::string & /*path*/) {
-  // TODO: a) load as proper stack of images workspace, b) load as workspace
-  // group
+  // TODO:
+  // a) load as proper stack of images workspace - this can only be done when
+  //    we have a firt working version of the "lean MD workspace". This method
+  //    would then load into one workspace of such type.
+  // b) load as workspace group - this is done in the overloaded method below
 }
 
 void
