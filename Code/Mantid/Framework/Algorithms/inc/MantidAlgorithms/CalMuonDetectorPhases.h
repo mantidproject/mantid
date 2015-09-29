@@ -51,6 +51,7 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
+  std::map<std::string, std::string> validateInputs();
   API::MatrixWorkspace_sptr
   prepareWorkspace(const API::MatrixWorkspace_sptr &ws, double startTime,
                    double endTime);

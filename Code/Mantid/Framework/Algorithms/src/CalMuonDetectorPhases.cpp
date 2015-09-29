@@ -48,6 +48,23 @@ void CalMuonDetectorPhases::init() {
 }
 
 //----------------------------------------------------------------------------------------------
+/** Validates the inputs.
+ */
+std::map<std::string, std::string> CalMuonDetectorPhases::validateInputs() {
+
+  std::map<std::string, std::string> result;
+
+  API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+
+  // Check units, should be microseconds
+  Unit_const_sptr unit = inputWS->getAxis(0)->unit();
+  if ((unit->caption() != "Time") || (unit->label().ascii() != "microsecond")) {
+    result["InputWorkspace"] = "InputWorkspace units must be microseconds";
+  }
+
+  return result;
+}
+//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void CalMuonDetectorPhases::exec() {
@@ -162,9 +179,9 @@ std::string CalMuonDetectorPhases::createFittingFunction(int nspec, double freq)
   for (int s = 0; s < nspec; s++) {
     ss << "name=UserFunction,";
     ss << "Formula=A*sin(w*x+p),";
-    ss << "A=1.0,";
+    ss << "A=0.5,";
     ss << "w=" << freq << ",";
-    ss << "p=1.0;";
+    ss << "p=0.;";
   }
   ss << "ties=(";
   for (int s = 1; s < nspec - 1; s++) {
