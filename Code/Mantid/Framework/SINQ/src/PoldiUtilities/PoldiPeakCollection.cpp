@@ -4,9 +4,7 @@
 #include "MantidAPI/LogManager.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 
-#include "MantidGeometry/Crystal/StructureFactorCalculatorSummation.h"
-#include "MantidGeometry/Crystal/HKLGenerator.h"
-#include "MantidGeometry/Crystal/BasicHKLFilters.h"
+#include "MantidGeometry/Crystal/ReflectionGenerator.h"
 
 #include "boost/format.hpp"
 #include "boost/algorithm/string/join.hpp"
@@ -21,15 +19,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-
-class DValueCalculator {
-public:
-  DValueCalculator(const UnitCell &cell) : m_cell(cell) {}
-  double operator()(const V3D &hkl) const { return m_cell.d(hkl); }
-
-private:
-  UnitCell m_cell;
-};
 
 PoldiPeakCollection::PoldiPeakCollection(IntensityType intensityType)
     : m_peaks(), m_intensityType(intensityType), m_profileFunctionName(),
@@ -46,48 +35,23 @@ PoldiPeakCollection::PoldiPeakCollection(const TableWorkspace_sptr &workspace)
 }
 
 PoldiPeakCollection::PoldiPeakCollection(
-    const Geometry::CrystalStructure_sptr &crystalStructure, double dMin,
-    double dMax)
+    const CrystalStructure &crystalStructure, double dMin, double dMax)
     : m_peaks(), m_intensityType(Integral), m_profileFunctionName(),
       m_pointGroup() {
-  if (!crystalStructure) {
-    throw std::invalid_argument(
-        "Cannot create PoldiPeakCollection from invalid CrystalStructure.");
-  }
-
   m_pointGroup = PointGroupFactory::Instance().createPointGroupFromSpaceGroup(
-      crystalStructure->spaceGroup());
+      crystalStructure.spaceGroup());
 
-  m_unitCell = crystalStructure->cell();
+  m_unitCell = crystalStructure.cell();
 
-  auto sfCalculator = StructureFactorCalculatorFactory::create<
-      StructureFactorCalculatorSummation>(*crystalStructure);
+  ReflectionGenerator generator(
+      crystalStructure,
+      ReflectionGenerator::DefaultReflectionConditionFilter::StructureFactor);
 
-  auto filter = boost::make_shared<HKLFilterDRange>(m_unitCell, dMin, dMax) &
-                boost::make_shared<HKLFilterStructureFactor>(sfCalculator);
+  std::vector<V3D> hkls = generator.getUniqueHKLs(dMin, dMax);
+  std::vector<double> dValues = generator.getDValues(hkls);
+  std::vector<double> structureFactors = generator.getFsSquared(hkls);
 
-  HKLGenerator generator(m_unitCell, dMin);
-
-  std::vector<V3D> uniqueHKL;
-  uniqueHKL.reserve(generator.size());
-  for (auto hkl = generator.begin(); hkl != generator.end(); ++hkl) {
-    if (filter->isAllowed(*hkl)) {
-      uniqueHKL.push_back(m_pointGroup->getReflectionFamily(*hkl));
-    }
-  }
-
-  std::sort(uniqueHKL.begin(), uniqueHKL.end());
-  uniqueHKL.erase(std::unique(uniqueHKL.begin(), uniqueHKL.end()),
-                  uniqueHKL.end());
-
-  std::vector<double> dValues;
-  dValues.reserve(uniqueHKL.size());
-  std::transform(uniqueHKL.begin(), uniqueHKL.end(),
-                 std::back_inserter(dValues), DValueCalculator(m_unitCell));
-
-  std::vector<double> structureFactors = sfCalculator->getFsSquared(uniqueHKL);
-
-  setPeaks(uniqueHKL, dValues, structureFactors);
+  setPeaks(hkls, dValues, structureFactors);
 }
 
 PoldiPeakCollection_sptr PoldiPeakCollection::clone() {
