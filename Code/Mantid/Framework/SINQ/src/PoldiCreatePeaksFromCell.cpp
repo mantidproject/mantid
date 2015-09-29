@@ -226,8 +226,7 @@ void PoldiCreatePeaksFromCell::exec() {
           getProperty("Atoms"));
 
   // Create a CrystalStructure-object for use with PoldiPeakCollection
-  CrystalStructure_sptr crystalStructure =
-      boost::make_shared<CrystalStructure>(unitCell, spaceGroup, scatterers);
+  CrystalStructure crystalStructure(unitCell, spaceGroup, scatterers);
 
   double dMin = getProperty("LatticeSpacingMin");
   double dMax = getDMaxValue(unitCell);

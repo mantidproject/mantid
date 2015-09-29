@@ -150,6 +150,9 @@ public:
                    const std::string &spaceGroupString,
                    const std::string &scattererString);
 
+  CrystalStructure(const CrystalStructure &other);
+  CrystalStructure &operator=(const CrystalStructure &other);
+
   virtual ~CrystalStructure() {}
 
   UnitCell cell() const;

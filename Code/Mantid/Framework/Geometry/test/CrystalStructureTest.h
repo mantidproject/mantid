@@ -76,6 +76,30 @@ public:
     TS_ASSERT_EQUALS(structure.getScatterers()->nScatterers(), 1);
   }
 
+  void testCopyConstructor() {
+    CrystalStructure one("1.2 2.3 3.4", "F d d d", "Fe 1/8 1/8 1/8 1.0 0.001");
+
+    CrystalStructure two(one);
+
+    TS_ASSERT_EQUALS(two.getScatterers()->nScatterers(),
+                     one.getScatterers()->nScatterers());
+    TS_ASSERT_EQUALS(two.spaceGroup()->hmSymbol(),
+                     one.spaceGroup()->hmSymbol());
+    TS_ASSERT_EQUALS(unitCellToStr(two.cell()), unitCellToStr(one.cell()));
+  }
+
+  void testAssignmentOperator() {
+    CrystalStructure one("1.2 2.3 3.4", "F d d d", "Fe 1/8 1/8 1/8 1.0 0.001");
+
+    CrystalStructure two = one;
+
+    TS_ASSERT_EQUALS(two.getScatterers()->nScatterers(),
+                     one.getScatterers()->nScatterers());
+    TS_ASSERT_EQUALS(two.spaceGroup()->hmSymbol(),
+                     one.spaceGroup()->hmSymbol());
+    TS_ASSERT_EQUALS(unitCellToStr(two.cell()), unitCellToStr(one.cell()));
+  }
+
 private:
   UnitCell m_CsCl;
   SpaceGroup_const_sptr m_spaceGroup;

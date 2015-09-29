@@ -30,6 +30,7 @@ CrystalStructure::CrystalStructure(
   setSpaceGroup(spaceGroup);
 }
 
+/// String-based constructor
 CrystalStructure::CrystalStructure(const std::string &unitCellString,
                                    const std::string &spaceGroupString,
                                    const std::string &scattererString) {
@@ -40,6 +41,25 @@ CrystalStructure::CrystalStructure(const std::string &unitCellString,
   setCell(strToUnitCell(unitCellString));
   setSpaceGroup(
       SpaceGroupFactory::Instance().createSpaceGroup(spaceGroupString));
+}
+
+/// Copy constructor
+CrystalStructure::CrystalStructure(const CrystalStructure &other) {
+  initializeScatterers();
+  setScatterers(other.getScatterers());
+  setCell(other.cell());
+  setSpaceGroup(other.spaceGroup());
+}
+
+/// Assignment operator
+CrystalStructure &CrystalStructure::operator=(const CrystalStructure &other) {
+  if (&other != this) {
+    setScatterers(other.getScatterers());
+    setCell(other.cell());
+    setSpaceGroup(other.spaceGroup());
+  }
+
+  return *this;
 }
 
 /// Returns the unit cell of the structure

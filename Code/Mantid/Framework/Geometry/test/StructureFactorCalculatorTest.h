@@ -26,15 +26,14 @@ public:
   }
 
   void testCrystalStructureSetHookIsCalled() {
-    CrystalStructure_sptr cs = boost::make_shared<CrystalStructure>(
-        UnitCell(1, 2, 3),
-        SpaceGroupFactory::Instance().createSpaceGroup("P -1"),
-        CompositeBraggScatterer::create());
+    CrystalStructure cs(UnitCell(1, 2, 3),
+                        SpaceGroupFactory::Instance().createSpaceGroup("P -1"),
+                        CompositeBraggScatterer::create());
 
     MockStructureFactorCalculator calculator;
     EXPECT_CALL(calculator, crystalStructureSetHook(_)).Times(1);
 
-    calculator.setCrystalStructure(*cs);
+    calculator.setCrystalStructure(cs);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&calculator));
   }

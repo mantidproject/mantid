@@ -85,13 +85,13 @@ protected:
 
 public:
   MockChopper() : PoldiAbstractChopper() {
-    double slits[] = {0.000000, 0.162156, 0.250867, 0.3704,
-                      0.439811, 0.588455, 0.761389, 0.895667};
+    double slits[] = { 0.000000, 0.162156, 0.250867, 0.3704,
+                       0.439811, 0.588455, 0.761389, 0.895667 };
     m_slitPositions =
         std::vector<double>(slits, slits + sizeof(slits) / sizeof(slits[0]));
 
-    double times[] = {0.000000, 243.234, 376.3,   555.6,
-                      659.716,  882.682, 1142.08, 1343.5};
+    double times[] = { 0.000000, 243.234, 376.3,   555.6,
+                       659.716,  882.682, 1142.08, 1343.5 };
     m_slitTimes =
         std::vector<double>(times, times + sizeof(times) / sizeof(times[0]));
   }
@@ -421,31 +421,19 @@ public:
                                               "Gaussian");
 
     API::TableRow newRow = tableWs->appendRow();
-    newRow << "0 0 0"
-           << 1.108644 << 0.0
-           << 5.667449 << 0.0
-           << 3286.152 << 0.0
+    newRow << "0 0 0" << 1.108644 << 0.0 << 5.667449 << 0.0 << 3286.152 << 0.0
            << 0.002475747 << 0.0;
 
     newRow = tableWs->appendRow();
-    newRow << "0 0 0"
-           << 1.637539 << 0.0
-           << 3.836968 << 0.0
-           << 2951.696 << 0.0
+    newRow << "0 0 0" << 1.637539 << 0.0 << 3.836968 << 0.0 << 2951.696 << 0.0
            << 0.002516417 << 0.0;
 
     newRow = tableWs->appendRow();
-    newRow << "0 0 0"
-           << 1.920200 << 0.0
-           << 3.272152 << 0.0
-           << 3238.473 << 0.0
+    newRow << "0 0 0" << 1.920200 << 0.0 << 3.272152 << 0.0 << 3238.473 << 0.0
            << 0.002444439 << 0.0;
 
     newRow = tableWs->appendRow();
-    newRow << "0 0 0"
-           << 1.245958 << 0.0
-           << 5.042856 << 0.0
-           << 2219.592 << 0.0
+    newRow << "0 0 0" << 1.245958 << 0.0 << 5.042856 << 0.0 << 2219.592 << 0.0
            << 0.002696334 << 0.0;
 
     return tableWs;
@@ -544,9 +532,9 @@ public:
     CompositeBraggScatterer_sptr atoms = CompositeBraggScatterer::create();
     atoms->addScatterer(atomSi);
 
-    CrystalStructure_sptr Si(new CrystalStructure(
+    CrystalStructure Si(
         UnitCell(5.43071, 5.43071, 5.43071),
-        SpaceGroupFactory::Instance().createSpaceGroup("P m -3 m"), atoms));
+        SpaceGroupFactory::Instance().createSpaceGroup("P m -3 m"), atoms);
 
     return PoldiPeakCollection_sptr(new PoldiPeakCollection(Si, 1.1, 1.95));
   }
