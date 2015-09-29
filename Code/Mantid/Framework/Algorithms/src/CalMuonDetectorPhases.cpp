@@ -5,7 +5,6 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -174,17 +173,16 @@ API::ITableWorkspace_sptr CalMuonDetectorPhases::extractDetectorInfo(
     size_t specRow = s * 3;
     double asym = paramTab->Double(specRow,1);
     double phase = paramTab->Double(specRow+2,1);
-    // Handle phases greather (less) than 2*PI (-2*PI)
-    if (phase > 2 * M_PI) {
-      phase = phase - 2 * M_PI;
-    } else if (phase < -2 * M_PI) {
-      phase = phase + 2 * M_PI;
-    }
     // If asym<0, take the absolute value and add \pi to phase
     // f(x) = A * sin( w * x + p) = -A * sin( w * x + p + PI)
     if (asym<0) {
       asym = -asym;
       phase = phase + M_PI;
+    }
+    // Now convert phases to interval [0, 2PI)
+    int factor = static_cast<int>(floor(phase / 2 / M_PI));
+    if (factor) {
+      phase = phase - factor * 2 * M_PI;
     }
     // Copy parameters to new table
     API::TableRow row = tab->appendRow();
