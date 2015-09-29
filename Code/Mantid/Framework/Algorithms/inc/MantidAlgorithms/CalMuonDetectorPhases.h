@@ -59,8 +59,9 @@ private:
   prepareWorkspace(const API::MatrixWorkspace_sptr &ws, double startTime,
                    double endTime);
   /// Fit the workspace
-  API::ITableWorkspace_sptr fitWorkspace(const API::MatrixWorkspace_sptr &ws,
-                                         double freq);
+  void fitWorkspace(const API::MatrixWorkspace_sptr &ws, double freq,
+                    API::ITableWorkspace_sptr &resTab,
+                    API::WorkspaceGroup_sptr &resGroup);
   /// Create the fitting function as string
   std::string createFittingFunction(int nspec, double freq);
   /// Extract asymmetry and phase from fitting results

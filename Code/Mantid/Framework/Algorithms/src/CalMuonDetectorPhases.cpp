@@ -45,6 +45,9 @@ void CalMuonDetectorPhases::init() {
                   "The name of the TableWorkspace in which to store the list "
                   "of phases and asymmetries for each detector");
 
+  declareProperty(new API::WorkspaceProperty<API::WorkspaceGroup>(
+                      "DataFitted", "", Direction::Output),
+                  "Name of the output workspace holding fitting results");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -83,18 +86,27 @@ void CalMuonDetectorPhases::exec() {
   // removes exponential decay
   API::MatrixWorkspace_sptr tempWS = prepareWorkspace(inputWS, startTime, endTime);
 
-  auto tab = fitWorkspace(tempWS, freq);
+  auto tab = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+  auto group = API::WorkspaceGroup_sptr(new API::WorkspaceGroup());
 
-  // Set the result table
+  fitWorkspace(tempWS, freq, tab, group);
+
+  // Set the table
   setProperty("DetectorTable", tab);
+  // Set the group
+  setProperty("DataFitted", group);
 }
 
 /** Fits each spectrum in the workspace to f(x) = A * sin( w * x + p)
 * @param ws :: [input] The workspace to fit
 * @param freq :: [input] Hint for the frequency (w)
-* @return :: The table workspace storing the asymmetries and phases
+* @param resTab :: [output] Table workspace storing the asymmetries and phases
+* @param resGroup :: [output] Workspace group storing the fitting results
 */
-API::ITableWorkspace_sptr CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws, double freq) {
+void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
+                                         double freq,
+                                         API::ITableWorkspace_sptr &resTab,
+                                         API::WorkspaceGroup_sptr &resGroup) {
 
   int nspec = static_cast<int>(ws->getNumberHistograms());
 
@@ -124,14 +136,17 @@ API::ITableWorkspace_sptr CalMuonDetectorPhases::fitWorkspace(const API::MatrixW
   }
   fit->setProperty("CreateOutput", true);
   fit->execute();
-  API::ITableWorkspace_sptr tab = fit->getProperty("OutputParameters");
 
+  // Get the parameter table
+  API::ITableWorkspace_sptr tab = fit->getProperty("OutputParameters");
   // Now we have our fitting results stored in tab
   // but we need to extract the relevant information, i.e.
   // the detector phases (parameter 'p') and asymmetries ('A')
-  auto results = extractDetectorInfo(tab, static_cast<size_t>(nspec));
+  resTab = extractDetectorInfo(tab, static_cast<size_t>(nspec));
 
-  return results;
+  // Get the fitting results
+  resGroup = fit->getProperty("OutputWorkspace");
+
 }
 
 /** Extracts detector asymmetries and phases from fitting results
