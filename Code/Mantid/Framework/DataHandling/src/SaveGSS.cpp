@@ -21,10 +21,29 @@ using namespace Mantid::API;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveGSS)
 
+namespace {
 const std::string RALF("RALF");
 const std::string SLOG("SLOG");
+const double TOLERANCE = 1.e-10;
+}
 
 SaveGSS::SaveGSS() : Mantid::API::Algorithm(), m_useSpecAsBank(false) {}
+
+bool isEqual(const double left, const double right) {
+  if (left == right)
+    return true;
+  return (2.*std::fabs(left - right) <= std::fabs(TOLERANCE * (right+left)));
+}
+
+bool isConstantDelta(const MantidVec &xAxis) {
+  const double deltaX = (xAxis[1] - xAxis[0]);
+  for (std::size_t i = 1; i < xAxis.size(); ++i) {
+    if (!isEqual(xAxis[i] - xAxis[i - 1], deltaX)) {
+      return false;
+    }
+  }
+  return true;
+}
 
 //---------------------------------------------------
 // Private member functions
@@ -550,6 +569,12 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
   if (bc1 <= 0.) {
     throw std::runtime_error(
         "Cannot write out logarithmic data starting at zero");
+  }
+  if (isConstantDelta(X)) {
+    std::stringstream msg;
+    msg << "While writing SLOG format: Found constant delta-T binning for bank "
+        << bank;
+    throw std::runtime_error(msg.str());
   }
   double bc2 = 0.5 * (*(X.rbegin()) +
                       *(X.rbegin() + 1));      // maximum TOF (in microseconds?)
