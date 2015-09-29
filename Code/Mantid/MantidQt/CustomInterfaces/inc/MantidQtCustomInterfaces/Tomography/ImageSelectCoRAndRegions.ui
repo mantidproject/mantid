@@ -19,22 +19,34 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_5">
+  <layout class="QGridLayout" name="gridLayout_8">
    <item row="0" column="0">
     <widget class="QSplitter" name="splitter_main_horiz">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>1</horstretch>
+       <verstretch>1</verstretch>
+      </sizepolicy>
+     </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
      <widget class="QSplitter" name="splitter_img_vertical">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <horstretch>2</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
       <widget class="QWidget" name="layoutWidget">
-       <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <layout class="QGridLayout" name="gridLayout_5">
         <property name="sizeConstraint">
-         <enum>QLayout::SetDefaultConstraint</enum>
+         <enum>QLayout::SetMinimumSize</enum>
         </property>
-        <item>
+        <item row="0" column="0">
          <widget class="QLabel" name="label_img_seq">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -48,12 +60,18 @@
             <height>28</height>
            </size>
           </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>28</height>
+           </size>
+          </property>
           <property name="text">
            <string>Image:</string>
           </property>
          </widget>
         </item>
-        <item>
+        <item row="0" column="1">
          <widget class="QLineEdit" name="lineEdit_img_seq">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -64,6 +82,12 @@
           <property name="minimumSize">
            <size>
             <width>0</width>
+            <height>28</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
             <height>28</height>
            </size>
           </property>
@@ -78,7 +102,7 @@
           </property>
          </widget>
         </item>
-        <item>
+        <item row="0" column="2">
          <widget class="QLabel" name="label_img_name">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -92,12 +116,18 @@
             <height>28</height>
            </size>
           </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>28</height>
+           </size>
+          </property>
           <property name="text">
            <string>none</string>
           </property>
          </widget>
         </item>
-        <item>
+        <item row="0" column="3">
          <widget class="QPushButton" name="pushButton_browse_img">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -111,6 +141,12 @@
             <height>28</height>
            </size>
           </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>28</height>
+           </size>
+          </property>
           <property name="text">
            <string>Browse</string>
           </property>
@@ -119,14 +155,17 @@
        </layout>
       </widget>
       <widget class="QWidget" name="layoutWidget">
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <layout class="QGridLayout" name="gridLayout_7" rowstretch="0,1">
         <property name="sizeConstraint">
          <enum>QLayout::SetMaximumSize</enum>
         </property>
-        <item>
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <item row="0" column="0">
          <widget class="QScrollArea" name="scrollArea">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>2</horstretch>
             <verstretch>2</verstretch>
            </sizepolicy>
@@ -139,23 +178,29 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>454</width>
-             <height>520</height>
+             <width>510</width>
+             <height>402</height>
             </rect>
            </property>
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>2</horstretch>
              <verstretch>2</verstretch>
             </sizepolicy>
            </property>
-           <layout class="QGridLayout" name="gridLayout">
+           <layout class="QGridLayout" name="gridLayout" rowstretch="0" columnstretch="0">
+            <property name="margin">
+             <number>0</number>
+            </property>
+            <property name="spacing">
+             <number>1</number>
+            </property>
             <item row="0" column="0">
              <widget class="QLabel" name="label_img">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                <horstretch>3</horstretch>
-                <verstretch>3</verstretch>
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>2</horstretch>
+                <verstretch>2</verstretch>
                </sizepolicy>
               </property>
               <property name="text">
@@ -167,7 +212,7 @@
           </widget>
          </widget>
         </item>
-        <item>
+        <item row="1" column="0">
          <widget class="QScrollBar" name="horizontalScrollBar_img_stack">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -178,15 +223,21 @@
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
+          <property name="invertedControls">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
        </layout>
       </widget>
      </widget>
      <widget class="QWidget" name="layoutWidget_2">
-      <layout class="QGridLayout" name="gridLayout_6">
+      <layout class="QGridLayout" name="gridLayout_6" columnminimumwidth="0">
        <property name="sizeConstraint">
         <enum>QLayout::SetDefaultConstraint</enum>
+       </property>
+       <property name="spacing">
+        <number>4</number>
        </property>
        <item row="0" column="0">
         <widget class="QGroupBox" name="groupBox_cor">
@@ -568,7 +619,7 @@
              </spacer>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_norm_reset">
+             <widget class="QPushButton" name="pushButton_norm_area_reset">
               <property name="text">
                <string>Reset</string>
               </property>
