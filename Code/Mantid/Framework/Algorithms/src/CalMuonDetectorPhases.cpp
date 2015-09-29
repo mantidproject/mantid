@@ -4,6 +4,8 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -103,6 +105,41 @@ API::ITableWorkspace_sptr CalMuonDetectorPhases::fitWorkspace(const API::MatrixW
   fit->setProperty("CreateOutput", true);
   fit->execute();
   API::ITableWorkspace_sptr tab = fit->getProperty("OutputParameters");
+
+  // Now we have our fitting results stored in tab
+  // but we need to extract the relevant information, i.e.
+  // the detector phases (parameter 'p') and asymmetries ('A')
+  auto results = extractDetectorInfo(tab, static_cast<size_t>(nspec));
+
+  return results;
+}
+
+/** TODO Description
+*/
+API::ITableWorkspace_sptr CalMuonDetectorPhases::extractDetectorInfo(
+    const API::ITableWorkspace_sptr &paramTab, size_t nspec) {
+
+  // Make sure paramTable is the right size
+  // It should contain three parameters per detector/spectrum plus 'const function value'
+  if (paramTab->rowCount() != nspec * 3 + 1) {
+    throw std::invalid_argument("Can't extract detector parameters from fit results");
+  }
+
+  // Create the table to store detector info
+  auto tab = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+  tab->addColumn("int", "Detector");
+  tab->addColumn("double", "Asymmetry");
+  tab->addColumn("double", "Phase");
+
+  for (int s = 0; s < nspec; s++) {
+    // The following '3' corresponds to the number of function params
+    size_t specRow = s * 3;
+    double asym = paramTab->Double(specRow,1);
+    double phase = paramTab->Double(specRow+2,1);
+    // Copy parameters to new table
+    API::TableRow row = tab->appendRow();
+    row << s << asym << phase;
+  }
 
   return tab;
 }

@@ -57,6 +57,8 @@ private:
   API::ITableWorkspace_sptr fitWorkspace(const API::MatrixWorkspace_sptr &ws,
                                          double freq);
   std::string createFittingFunction(int nspec, double freq);
+  API::ITableWorkspace_sptr
+  extractDetectorInfo(const API::ITableWorkspace_sptr &paramTab, size_t nspec);
 };
 } // namespace Algorithms
 } // namespace Mantid
