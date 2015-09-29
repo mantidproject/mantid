@@ -143,11 +143,13 @@ public:
   /// Select conventional cell using the cell type and centering
   bool selectCellOfType( const std::string & peaks_ws_name,
                          const std::string & cell_type,
-                         const std::string & centering );
+                         const std::string & centering,
+                         bool          allow_perm);
 
   /// Select conventional cell using the form number from the Mighell paper
   bool selectCellWithForm( const std::string & peaks_ws_name,
-                                 size_t        form_num );
+                                 size_t        form_num,
+                                 bool          allow_perm);
 
   /// Apply a mapping to the h,k,l indices and the UB matrix 
   bool changeHKL( const std::string & peaks_ws_name,

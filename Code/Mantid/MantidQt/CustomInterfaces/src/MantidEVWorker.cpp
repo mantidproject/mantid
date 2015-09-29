@@ -711,12 +711,16 @@ bool MantidEVWorker::showCells( const std::string & peaks_ws_name,
  *  @param peaks_ws_name     The name of the peaks workspace.
  *  @param cell_type         String with the cell type, such as "Cubic".
  *  @param centering         String with the centering such as "F".
+ *  @param allow_perm        If true, permutations are used to find the
+ *                           best fitting cell of any
+ *                           particular type.
  *
  *  @return true if the SelectCellOfType algorithm completes successfully.
  */
 bool MantidEVWorker::selectCellOfType( const std::string & peaks_ws_name,
                                        const std::string & cell_type,
-                                       const std::string & centering )
+                                       const std::string & centering, 
+                                       bool          allow_perm)
 {
   if ( !isPeaksWorkspace( peaks_ws_name ) )
     return false;
@@ -727,6 +731,7 @@ bool MantidEVWorker::selectCellOfType( const std::string & peaks_ws_name,
   alg->setProperty("Centering",centering);
   alg->setProperty("Apply",true);
   alg->setProperty("tolerance",0.12);
+  alg->setProperty("AllowPermutations",allow_perm);
 
   if ( alg->execute() )
     return true;
@@ -743,11 +748,15 @@ bool MantidEVWorker::selectCellOfType( const std::string & peaks_ws_name,
  *
  *  @param peaks_ws_name     The name of the peaks workspace.
  *  @param form_num          The form number, 1..44.
+ *  @param allow_perm        If true, permutations are used to find the
+ *                           best fitting cell of any
+ *                           particular type.
  *
  *  @return true if the SelectCellWithForm algorithm completes successfully.
  */
 bool MantidEVWorker::selectCellWithForm(  const std::string & peaks_ws_name,
-                                                size_t        form_num )
+                                                size_t        form_num,
+                                                bool          allow_perm)
 {
   if ( !isPeaksWorkspace( peaks_ws_name ) )
     return false;
@@ -757,6 +766,7 @@ bool MantidEVWorker::selectCellWithForm(  const std::string & peaks_ws_name,
   alg->setProperty("FormNumber",(int)form_num);
   alg->setProperty("Apply",true);
   alg->setProperty("tolerance",0.12);
+  alg->setProperty("AllowPermutations",allow_perm);
   
   if ( alg->execute() )
     return true;
