@@ -757,10 +757,15 @@ namespace Mantid {
 
         std::vector<Kernel::SplittingInterval> splitter;
         if(m_useFilterLog){
+          std::unique_ptr<Kernel::TimeSeriesProperty<double> > pDerivative;
           const std::string FilterLogName = this->getProperty("FilterBaseLog");
           // pointer will not be null as this has been verified in validators
           auto pTimeSeries = dynamic_cast<Kernel::TimeSeriesProperty<double> *>
             (inputWS->run().getProperty(FilterLogName));
+          if(m_FilterWithDerivative){
+            pDerivative = pTimeSeries->getDerivative();
+            pTimeSeries = pDerivative.get();
+          }
 
           // Define selecting function
           bool inSelection(false);
