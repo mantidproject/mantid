@@ -43,6 +43,9 @@ public:
   void setResolution(double newResolution){
     this->m_max_Eresolution = newResolution;
   }
+  void setFilterWithDerivative(bool yesOrNot){
+    this->m_FilterWithDerivative = yesOrNot;
+  }
   size_t calcDerivativeAndCountZeros(const std::vector<double> &bins,const std::vector<double> &signal,
     std::vector<double> &deriv,std::vector<double> &zeros){
       return GetAllEi::calcDerivativeAndCountZeros(bins,signal,deriv,zeros);
@@ -119,7 +122,8 @@ public:
     m_getAllEi.setProperty("OutputWorkspace","monitor_peaks");
     m_getAllEi.setProperty("Monitor1SpecID",1);
     m_getAllEi.setProperty("Monitor2SpecID",2);
-    m_getAllEi.setProperty("FilterWithDerivative",false);
+    //m_getAllEi.setProperty("FilterWithDerivative",false);
+    m_getAllEi.setFilterWithDerivative(false);
 
 
     for(int i=0;i<10;i++){
@@ -199,6 +203,8 @@ public:
     m_getAllEi.setProperty("Monitor1SpecID",1);
     m_getAllEi.setProperty("Monitor2SpecID",2);
     m_getAllEi.setProperty("FilterWithDerivative",true);
+    m_getAllEi.setFilterWithDerivative(true);
+
 
     // Test select log by log derivative
     std::unique_ptr<Kernel::TimeSeriesProperty<double> > chopDelay(new Kernel::TimeSeriesProperty<double>("Chopper_Delay"));
@@ -222,7 +228,7 @@ public:
     }
     ws->mutableRun().addLogData(chopSpeed.release());
     ws->mutableRun().addLogData(chopDelay.release());
-    ws->mutableRun().addLogData(goodFram.release());
+    ws->mutableRun().addLogData(protCharge.release());
     // Run validate as this will set up property, which indicates filter log presence
     auto errors  = m_getAllEi.validateInputs();
     TSM_ASSERT_EQUALS("All logs are defined now",errors.size(),0);
@@ -400,10 +406,40 @@ public:
      TS_ASSERT(!guessValid[0]);
    }
 
+   void test_getAllEiSmooth(){
+     auto ws=createTestingWS();
+
+   }
+
 
 
 private:
   GetAllEiTester m_getAllEi;
+
+  DataObjects::Workspace2D_sptr createTestingWS(){
+    double delay(10),speed(50);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2,2000,true);
+    std::unique_ptr<Kernel::TimeSeriesProperty<double> > chopDelay(new Kernel::TimeSeriesProperty<double>("Chopper_Delay"));
+    std::unique_ptr<Kernel::TimeSeriesProperty<double> > chopSpeed(new Kernel::TimeSeriesProperty<double>("Chopper_Speed"));
+    std::unique_ptr<Kernel::TimeSeriesProperty<double> > protCharge(new Kernel::TimeSeriesProperty<double>("proton_charge"));
+
+
+    for(int i=0;i<10;i++){
+      auto time =  Kernel::DateAndTime(10*i, 0);
+      chopDelay->addValue(time , delay);
+      chopSpeed->addValue(time,speed);
+      protCharge->addValue(time,1.);
+    }
+    ws->mutableRun().addLogData(chopSpeed.release());
+    ws->mutableRun().addLogData(chopDelay.release());
+    ws->mutableRun().addLogData(protCharge.release());
+
+    auto & x = ws->dataX(0);
+    auto & y = ws->dataY(0);
+    for(size_t i=0;i<y.size();i++){
+    }
+    return ws;
+  }
 
 };
 
