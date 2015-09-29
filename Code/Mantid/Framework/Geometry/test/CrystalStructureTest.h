@@ -64,6 +64,18 @@ public:
     TS_ASSERT_EQUALS(structure.cell().a(), Si.a());
   }
 
+  void testCrystalStructureFromStrings() {
+    CrystalStructure structure("5.431 5.431 5.431", "F d -3 m",
+                               "Si 0 0 0 1.0 0.02");
+
+    TS_ASSERT_EQUALS(structure.cell().a(), 5.431);
+    TS_ASSERT_EQUALS(structure.cell().b(), 5.431);
+    TS_ASSERT_EQUALS(structure.cell().c(), 5.431);
+
+    TS_ASSERT_EQUALS(structure.spaceGroup()->hmSymbol(), "F d -3 m");
+    TS_ASSERT_EQUALS(structure.getScatterers()->nScatterers(), 1);
+  }
+
 private:
   UnitCell m_CsCl;
   SpaceGroup_const_sptr m_spaceGroup;

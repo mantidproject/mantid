@@ -146,6 +146,10 @@ public:
                    const SpaceGroup_const_sptr &spaceGroup,
                    const CompositeBraggScatterer_sptr &scatterers);
 
+  CrystalStructure(const std::string &unitCellString,
+                   const std::string &spaceGroupString,
+                   const std::string &scattererString);
+
   virtual ~CrystalStructure() {}
 
   UnitCell cell() const;
@@ -167,7 +171,6 @@ protected:
   setReflectionConditionFromSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
 
   void initializeScatterers();
-  void updateStructureFactorCalculator();
 
   UnitCell m_cell;
   SpaceGroup_const_sptr m_spaceGroup;
