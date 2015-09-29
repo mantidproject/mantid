@@ -22,6 +22,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         self._dataDir = None
         self._ptListList = None
         self._doGenerateVirtualInstrument = False
+        self._numPixelsDetector = -1
 
         # Define class variable Scan-Pt. dictionary: Key scan number, Value list of pt numbers
         self._scanPtDict = {}
@@ -291,7 +292,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
             else:
                 # No need to generate virtual instrument information.
                 maxdetid = self._numPixelsDetector
-                
+
             # END-IF-ELSE
 
             # Update start ID
