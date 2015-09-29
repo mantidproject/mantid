@@ -132,10 +132,16 @@ API::ITableWorkspace_sptr CalMuonDetectorPhases::extractDetectorInfo(
   tab->addColumn("double", "Phase");
 
   for (int s = 0; s < nspec; s++) {
-    // The following '3' corresponds to the number of function params
+    // The following '3' factor corresponds to the number of function params
     size_t specRow = s * 3;
     double asym = paramTab->Double(specRow,1);
     double phase = paramTab->Double(specRow+2,1);
+    // If asym<0, take the absolute value and add \pi to phase
+    // f(x) = A * sin( w * x + p) = -A * sin( w * x + p + PI)
+    if (asym<0) {
+      asym = -asym;
+      phase = phase + M_PI;
+    }
     // Copy parameters to new table
     API::TableRow row = tab->appendRow();
     row << s << asym << phase;
