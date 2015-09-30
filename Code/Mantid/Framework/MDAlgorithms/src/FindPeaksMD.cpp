@@ -412,7 +412,11 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           }
           addDetectors(*p, *mdBox);
         }
-        if (p->getDetectorID() != -1) peakWS->addPeak(*p);
+        if (p->getDetectorID() != -1) {
+          peakWS->addPeak(*p);
+          g_log.information() << "Add new peak with Q-center = " << Q[0] << ", "
+                              << Q[1] << ", " << Q[2] << "\n";
+        }
       } catch (std::exception &e) {
         g_log.notice() << "Error creating peak at " << Q << " because of '"
                        << e.what() << "'. Peak will be skipped." << std::endl;
