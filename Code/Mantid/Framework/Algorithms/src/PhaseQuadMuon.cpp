@@ -164,8 +164,8 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   // Get the maximum asymmetry
   double maxAsym = 0.;
   for (size_t h = 0; h < nspec; h++) {
-    if (phase->Double(h, 2) > maxAsym) {
-      maxAsym = phase->Double(h, 2);
+    if (phase->Double(h, 1) > maxAsym) {
+      maxAsym = phase->Double(h, 1);
     }
   }
   if (!maxAsym) {
@@ -181,8 +181,8 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     double sxy = 0;
 
     for (size_t h = 0; h < nspec; h++) {
-      double phi = phase->Double(h, 1);
-      double asym = phase->Double(h, 2) / maxAsym;
+      double asym = phase->Double(h, 1) / maxAsym;
+      double phi = phase->Double(h, 2);
       double X = n0[h] * asym * cos(phi);
       double Y = n0[h] * asym * sin(phi);
       sxx += X * X;
@@ -195,14 +195,17 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     double lam2 = 2 * sxy / (sxy * sxy - sxx * syy);
     double mu2 = 2 * sxx / (sxx * syy - sxy * sxy);
     for (size_t h = 0; h < nspec; h++) {
-      double phi = phase->Double(h, 1);
-      double asym = phase->Double(h, 2) / maxAsym;
+      double asym = phase->Double(h, 1) / maxAsym;
+      double phi = phase->Double(h, 2);
       double X = n0[h] * asym * cos(phi);
       double Y = n0[h] * asym * sin(phi);
       aj.push_back((lam1 * X + mu1 * Y) * 0.5);
       bj.push_back((lam2 * X + mu2 * Y) * 0.5);
     }
   }
+
+  // First X value
+  double X0 = ws->readX(0).front();
 
   // Phase quadrature
   std::vector<double> realY(npoints, 0), imagY(npoints, 0);
@@ -212,9 +215,10 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
 
       // (X,Y,E) with exponential decay removed
       double X = ws->readX(h)[i];
-      double Y = ws->readY(h)[i] - n0[h] * exp(-X / muLife);
-      double E =
-          (Y > poissonLimit) ? ws->readE(h)[i] : sqrt(n0[h] * exp(-X / muLife));
+      double Y = ws->readY(h)[i] - n0[h] * exp(-(X-X0) / muLife);
+      double E = (ws->readY(h)[i] > poissonLimit)
+                     ? ws->readE(h)[i]
+                     : sqrt(n0[h] * exp(-(X - X0) / muLife));
 
       realY[i] += aj[h] * Y;
       imagY[i] += bj[h] * Y;
@@ -225,8 +229,8 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     imagE[i] = sqrt(imagE[i]);
 
     // Regain exponential decay
-    double x = ws->getSpectrum(0)->readX()[i];
-    double e = exp(-x / muLife);
+    double X = ws->getSpectrum(0)->readX()[i];
+    double e = exp(-(X-X0) / muLife);
     realY[i] /= e;
     imagY[i] /= e;
     realE[i] /= e;

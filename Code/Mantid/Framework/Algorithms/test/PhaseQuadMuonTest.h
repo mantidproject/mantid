@@ -60,33 +60,33 @@ public:
     auto specImY = outputWs->getSpectrum(1)->readY();
     auto specImE = outputWs->getSpectrum(1)->readE();
     // Check real Y values
-    TS_ASSERT_DELTA ( specReY[ 0], -0.9984, 0.0001 );
-    TS_ASSERT_DELTA ( specReY[20], -0.1316, 0.0001 );
-    TS_ASSERT_DELTA ( specReY[50], -0.0856, 0.0001 );
+    TS_ASSERT_DELTA ( specReY[ 0], -0.9982, 0.0001 );
+    TS_ASSERT_DELTA ( specReY[20], -0.0251, 0.0001 );
+    TS_ASSERT_DELTA ( specReY[50],  0.0264, 0.0001 );
     // Check real E values
-    TS_ASSERT_DELTA ( specReE[ 0], 0.0019, 0.0001);
-    TS_ASSERT_DELTA ( specReE[20], 0.0020, 0.0001 );
-    TS_ASSERT_DELTA ( specReE[50], 0.0022, 0.0001 );
+    TS_ASSERT_DELTA ( specReE[ 0], 0.0010, 0.0001);
+    TS_ASSERT_DELTA ( specReE[20], 0.0021, 0.0001 );
+    TS_ASSERT_DELTA ( specReE[50], 0.0024, 0.0001 );
     // Check imaginary Y values
-    TS_ASSERT_DELTA ( specImY[ 0], -0.9976, 0.0001 );
-    TS_ASSERT_DELTA ( specImY[20], -0.0988, 0.0001 );
-    TS_ASSERT_DELTA ( specImY[50], -0.0808, 0.0001 );
+    TS_ASSERT_DELTA ( specImY[ 0], -0.9974, 0.0001 );
+    TS_ASSERT_DELTA ( specImY[20],  0.0115, 0.0001 );
+    TS_ASSERT_DELTA ( specImY[50],  0.0316, 0.0001 );
     // Check imaginary E values
-    TS_ASSERT_DELTA ( specImE[ 0], 0.0027, 0.0001 );
-    TS_ASSERT_DELTA ( specImE[20], 0.0029, 0.0001 );
-    TS_ASSERT_DELTA ( specImE[50], 0.0033, 0.0001 );
+    TS_ASSERT_DELTA ( specImE[ 0], 0.0029, 0.0001 );
+    TS_ASSERT_DELTA ( specImE[20], 0.0031, 0.0001 );
+    TS_ASSERT_DELTA ( specImE[50], 0.0035, 0.0001 );
   }
 
   void populatePhaseTable (ITableWorkspace_sptr phaseTable)
   {
     phaseTable->addColumn("int","DetectorID");
-    phaseTable->addColumn("double","DetectorPhase");
     phaseTable->addColumn("double", "DetectorAsymmetry");
+    phaseTable->addColumn("double","DetectorPhase");
     for (int i = 0; i < 16; i++) {
       TableRow phaseRow1 = phaseTable->appendRow();
-      phaseRow1 << i << 0.0 << 1.;
+      phaseRow1 << i << 1. << 0.;
       TableRow phaseRow2 = phaseTable->appendRow();
-      phaseRow2 << i << 1.57 << 1.;
+      phaseRow2 << i << 1. << 1.57;
     }
   }
 };
