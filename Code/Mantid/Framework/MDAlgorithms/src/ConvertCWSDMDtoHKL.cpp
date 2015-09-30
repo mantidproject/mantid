@@ -81,7 +81,13 @@ void ConvertCWSDMDtoHKL::init() {
 void ConvertCWSDMDtoHKL::exec() {
   // Get inputs
   IMDEventWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  assert(inputWS->getSpecialCoordinateSystem() == Mantid::Kernel::QSample);
+  if (inputWS->getSpecialCoordinateSystem() != Mantid::Kernel::QSample)
+  {
+    std::stringstream errmsg;
+    errmsg << "Input MDEventWorkspace's coordinate system is not QSample but "
+           << inputWS->getSpecialCoordinateSystem() << ".";
+    throw std::invalid_argument(errmsg.str());
+  }
 
   getUBMatrix();
 
