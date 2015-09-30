@@ -7,9 +7,30 @@
 #include "MantidMDAlgorithms/IntegrateMDHistoWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-
 using Mantid::MDAlgorithms::IntegrateMDHistoWorkspace;
 using namespace Mantid::API;
+
+namespace {
+
+size_t getTheTotalNumberOfBins(IMDHistoWorkspace_sptr ws) {
+  size_t numberOfIndices = 1;
+  for (int i = 0; i < ws->getNumDims(); ++i) {
+    auto dim = ws->getDimension(i);
+    numberOfIndices *= dim->getNBins();
+  }
+  return numberOfIndices;
+}
+
+// This helper sets the signal values to the linear index to have some
+// variety
+void resetSignalsToLinearIndexValue(IMDHistoWorkspace_sptr ws) {
+  auto numberOfIndices = getTheTotalNumberOfBins(ws);
+  for (int i = 0; i < numberOfIndices; ++i) {
+    auto& signal = ws->signalAt(i);
+    signal = static_cast<Mantid::signal_t>(i);
+  }
+}
+}
 
 //=====================================================================================
 // Functional Tests
@@ -422,6 +443,7 @@ public:
     auto ws = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(numDims, signal, errorSquared, numBins, min, max, name);
     const double pMin = -1.6799;
     const double pMax = 1.3441;
+    resetSignalsToLinearIndexValue(ws);
 
     // Act
     IntegrateMDHistoWorkspace alg;
@@ -438,6 +460,21 @@ public:
     // At this point we need to take into account the precision of a float value
     TSM_ASSERT_DELTA("Should have a lower bound set to exactly PMIN", outWS->getDimension(0)->getMinimum(), static_cast<Mantid::coord_t>(pMin), 1e-6);
     TSM_ASSERT_DELTA("Should have an upper bound set to exactly PMAX", outWS->getDimension(0)->getMaximum(), static_cast<Mantid::coord_t>(pMax), 1e-6);
+
+    // Confirm that the old workspace has signals of 0,1,2,3,4,5
+    TSM_ASSERT_DELTA("Should have a signal value of 0", ws->getSignalAt(0), static_cast<Mantid::signal_t>(0.0), 1e-4);
+    TSM_ASSERT_DELTA("Should have a signal value of 1", ws->getSignalAt(1), static_cast<Mantid::signal_t>(1.0), 1e-4);
+    TSM_ASSERT_DELTA("Should have a signal value of 2", ws->getSignalAt(2), static_cast<Mantid::signal_t>(2.0), 1e-4);
+    TSM_ASSERT_DELTA("Should have a signal value of 3", ws->getSignalAt(3), static_cast<Mantid::signal_t>(3.0), 1e-4);
+    TSM_ASSERT_DELTA("Should have a signal value of 4", ws->getSignalAt(4), static_cast<Mantid::signal_t>(4.0), 1e-4);
+    TSM_ASSERT_DELTA("Should have a signal value of 5", ws->getSignalAt(5), static_cast<Mantid::signal_t>(5.0), 1e-4);
+
+    // We expect that the signals have not chagned. The first bin and the last bin of the original workspace were trimmed, hence
+    // we expect to have signal values of 1, 2, 3, 4 for the new workspace 
+    TSM_ASSERT_DELTA("Should have a signal value of 1", outWS->getSignalAt(0), static_cast<Mantid::signal_t>(1.0), 1e-4);
+    TSM_ASSERT_DELTA("Should have a signal value of 2", outWS->getSignalAt(1), static_cast<Mantid::signal_t>(2.0), 1e-4);
+    TSM_ASSERT_DELTA("Should have a signal value of 3", outWS->getSignalAt(2), static_cast<Mantid::signal_t>(3.0), 1e-4);
+    TSM_ASSERT_DELTA("Should have a signal value of 4", outWS->getSignalAt(3), static_cast<Mantid::signal_t>(4.0), 1e-4);
   }
     void test_that_PBin_between_extent_and_bin_boundary_floors_when_pmin_not_contained_in_threshold(){
      /*
