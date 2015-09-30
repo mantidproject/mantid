@@ -40,6 +40,10 @@ void ImageCoRPresenter::notify(Notification notif) {
     processNewStack();
     break;
 
+  case IImageCoRPresenter::UpdateImgIndex:
+    processUpdateImgIndex();
+    break;
+
   case IImageCoRPresenter::SelectCoR:
     processSelectCoR();
     break;
@@ -82,7 +86,10 @@ void ImageCoRPresenter::notify(Notification notif) {
   }
 }
 
-void ImageCoRPresenter::processInit() {}
+void ImageCoRPresenter::processInit() {
+  ImageStackPreParams p;
+  m_view->setParams(p);
+}
 
 void ImageCoRPresenter::processBrowseImg() {
   const std::string path = m_view->askImgOrStackPath();
@@ -157,6 +164,10 @@ void ImageCoRPresenter::processNewStack() {
     Mantid::API::AnalysisDataService::Instance().remove(wsg->getName());
 }
 
+void ImageCoRPresenter::processUpdateImgIndex() {
+  m_view->updateImgWithIndex(m_view->currentImgIndex());
+}
+
 void ImageCoRPresenter::processSelectCoR() {}
 
 void ImageCoRPresenter::processSelectROI() {}
@@ -180,16 +191,17 @@ void ImageCoRPresenter::processShutDown() { m_view->saveSettings(); }
 Mantid::API::WorkspaceGroup_sptr
 ImageCoRPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
   // TODO: go through directory
-  const std::string imgPath = imgs.front();
-
-  const std::string wsName = "__fits_ws_tomography_gui";
+  const std::string wsName = "__stack_fits_viewer_tomography_gui";
+  auto &ads = Mantid::API::AnalysisDataService::Instance();
+  if (ads.doesExist(wsName)) {
+    ads.remove(wsName);
+  }
   for (size_t i = 0; i < imgs.size(); ++i) {
-    loadFITSImage(imgPath, wsName);
+    loadFITSImage(imgs[i], wsName);
   }
 
   Mantid::API::WorkspaceGroup_sptr wsg;
   try {
-    const auto &ads = Mantid::API::AnalysisDataService::Instance();
     wsg = ads.retrieveWS<Mantid::API::WorkspaceGroup>(wsName);
   } catch (std::exception &e) {
     throw std::runtime_error(

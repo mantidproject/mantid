@@ -41,8 +41,11 @@ void ImageCoRViewQtWidget::initLayout() {
   sizes.push_back(1000);
   m_ui.splitter_img_vertical->setSizes(sizes);
   m_ui.horizontalScrollBar_img_stack->setEnabled(false);
+  m_ui.lineEdit_img_seq->setText("---");
 
   setupConnections();
+
+  initParamWidgets(1, 1);
 
   // presenter that knows how to handle a IImageCoRView should take care
   // of all the logic. Note the view needs to now the concrete presenter here
@@ -71,10 +74,136 @@ void ImageCoRViewQtWidget::setupConnections() {
           SLOT(normAreaClicked()));
   connect(m_ui.pushButton_norm_area_reset, SIGNAL(released()), this,
           SLOT(normAreaResetClicked()));
+
+  // image sequence scroll/slide:
+  connect(m_ui.horizontalScrollBar_img_stack, SIGNAL(valueChanged(int)), this,
+          SLOT(updateFromImagesSlider(int)));
+
+  // parameter (points) widgets
+  connect(m_ui.spinBox_cor_x, SIGNAL(valueChanged(int)), this,
+          SLOT(valueUpdateCoR(int)));
+  connect(m_ui.spinBox_cor_y, SIGNAL(valueChanged(int)), this,
+          SLOT(valueUpdateCoR(int)));
+
+  connect(m_ui.spinBox_roi_top_x, SIGNAL(valueChanged(int)), this,
+          SLOT(valueUpdateROI(int)));
+  connect(m_ui.spinBox_roi_top_y, SIGNAL(valueChanged(int)), this,
+          SLOT(valueUpdateROI(int)));
+  connect(m_ui.spinBox_roi_bottom_x, SIGNAL(valueChanged(int)), this,
+          SLOT(valueUpdateROI(int)));
+  connect(m_ui.spinBox_roi_bottom_y, SIGNAL(valueChanged(int)), this,
+          SLOT(valueUpdateROI(int)));
+
+  connect(m_ui.spinBox_norm_top_x, SIGNAL(valueChanged(int)), this,
+          SLOT(valueUpdateNormArea(int)));
+  connect(m_ui.spinBox_norm_top_y, SIGNAL(valueChanged(int)), this,
+          SLOT(valueUpdateNormArea(int)));
+  connect(m_ui.spinBox_norm_bottom_x, SIGNAL(valueChanged(int)), this,
+          SLOT(valueUpdateNormArea(int)));
+  connect(m_ui.spinBox_norm_bottom_y, SIGNAL(valueChanged(int)), this,
+          SLOT(valueUpdateNormArea(int)));
 }
 
-void ImageCoRViewQtWidget::initParams(ImageStackPreParams &params) {
+void ImageCoRViewQtWidget::valueUpdatedCoR(int) {
+  m_params.cor = Mantid::Kernel::V2D(m_ui.spinBox_cor_x->value(),
+                                     m_ui.spinBox_cor_y->value());
+  refreshCoR();
+}
+
+void ImageCoRViewQtWidget::valueUpdatedROI(int) {
+  m_params.roi =
+      std::make_pair(Mantid::Kernel::V2D(m_ui.spinBox_roi_top_x->value(),
+                                         m_ui.spinBox_roi_top_y->value()),
+                     Mantid::Kernel::V2D(m_ui.spinBox_roi_bottom_x->value(),
+                                         m_ui.spinBox_roi_bottom_y->value()));
+  refreshROI();
+}
+
+void ImageCoRViewQtWidget::valueUpdatedNormArea(int) {
+  m_params.normalizationRegion =
+      std::make_pair(Mantid::Kernel::V2D(m_ui.spinBox_norm_top_x->value(),
+                                         m_ui.spinBox_norm_top_y->value()),
+                     Mantid::Kernel::V2D(m_ui.spinBox_norm_bottom_x->value(),
+                                         m_ui.spinBox_norm_bottom_y->value()));
+  refreshNormArea();
+}
+
+void ImageCoRViewQtWidget::refreshCoR() {
+  // TODO: display proper symbol
+}
+
+void ImageCoRViewQtWidget::refreshROI() {
+  // TODO: display proper symbol
+}
+
+void ImageCoRViewQtWidget::refreshNormArea() {
+  // TODO: display proper symbol
+}
+
+void ImageCoRViewQtWidget::setParams(ImageStackPreParams &params) {
   m_params = params;
+  setParamWidgets(m_params);
+}
+
+void ImageCoRViewQtWidget::initParamWidgets(size_t maxWidth, size_t maxHeight) {
+  int width = static_cast<int>(maxWidth);
+  int height = static_cast<int>(maxHeight);
+
+  m_ui.spinBox_cor_x->setMinimum(0);
+  m_ui.spinBox_cor_x->setMaximum(width - 1);
+  m_ui.spinBox_cor_x->setValue(0);
+  m_ui.spinBox_cor_y->setMinimum(0);
+  m_ui.spinBox_cor_y->setMaximum(height - 1);
+  m_ui.spinBox_cor_y->setValue(0);
+
+  m_ui.spinBox_roi_bottom_x->setMinimum(0);
+  m_ui.spinBox_roi_bottom_x->setMaximum(width - 1);
+  m_ui.spinBox_roi_bottom_x->setValue(0);
+  m_ui.spinBox_roi_bottom_y->setMinimum(0);
+  m_ui.spinBox_roi_bottom_y->setMaximum(height - 1);
+  m_ui.spinBox_roi_bottom_y->setValue(0);
+
+  m_ui.spinBox_roi_top_x->setMinimum(0);
+  m_ui.spinBox_roi_top_x->setMaximum(width - 1);
+  m_ui.spinBox_roi_top_x->setValue(0);
+  m_ui.spinBox_roi_top_y->setMinimum(0);
+  m_ui.spinBox_roi_top_y->setMaximum(height - 1);
+  m_ui.spinBox_roi_top_y->setValue(0);
+
+  m_ui.spinBox_norm_bottom_x->setMinimum(0);
+  m_ui.spinBox_norm_bottom_x->setMaximum(width - 1);
+  m_ui.spinBox_norm_bottom_x->setValue(0);
+  m_ui.spinBox_norm_bottom_y->setMinimum(0);
+  m_ui.spinBox_norm_bottom_y->setMaximum(height - 1);
+  m_ui.spinBox_norm_bottom_y->setValue(0);
+
+  m_ui.spinBox_norm_top_x->setMinimum(0);
+  m_ui.spinBox_norm_top_x->setMaximum(width - 1);
+  m_ui.spinBox_norm_top_x->setValue(0);
+  m_ui.spinBox_norm_top_y->setMinimum(0);
+  m_ui.spinBox_norm_top_y->setMaximum(height - 1);
+  m_ui.spinBox_norm_top_y->setValue(0);
+}
+
+void ImageCoRViewQtWidget::setParamWidgets(ImageStackPreParams &params) {
+  m_ui.spinBox_cor_x->setValue(static_cast<int>(params.cor.X()));
+  m_ui.spinBox_cor_y->setValue(static_cast<int>(params.cor.Y()));
+
+  m_ui.spinBox_roi_top_x->setValue(static_cast<int>(params.roi.first.X()));
+  m_ui.spinBox_roi_top_y->setValue(static_cast<int>(params.roi.first.Y()));
+
+  m_ui.spinBox_roi_bottom_x->setValue(static_cast<int>(params.roi.second.X()));
+  m_ui.spinBox_roi_bottom_y->setValue(static_cast<int>(params.roi.second.Y()));
+
+  m_ui.spinBox_norm_top_x->setValue(
+      static_cast<int>(params.normalizationRegion.first.X()));
+  m_ui.spinBox_norm_top_y->setValue(
+      static_cast<int>(params.normalizationRegion.first.Y()));
+
+  m_ui.spinBox_norm_bottom_x->setValue(
+      static_cast<int>(params.normalizationRegion.second.X()));
+  m_ui.spinBox_norm_bottom_y->setValue(
+      static_cast<int>(params.normalizationRegion.second.Y()));
 }
 
 ImageStackPreParams ImageCoRViewQtWidget::userSelection() const {
@@ -104,6 +233,24 @@ void ImageCoRViewQtWidget::normAreaResetClicked() {
 
 void ImageCoRViewQtWidget::browseImgClicked() {
   m_presenter->notify(IImageCoRPresenter::BrowseImgOrStack);
+}
+
+void ImageCoRViewQtWidget::updateFromImagesSlider(int /* current */) {
+  m_presenter->notify(IImageCoRPresenter::UpdateImgIndex);
+}
+
+size_t ImageCoRViewQtWidget::currentImgIndex() const {
+  return m_ui.horizontalScrollBar_img_stack->value();
+}
+
+void ImageCoRViewQtWidget::updateImgWithIndex(size_t idx) {
+  int max = m_ui.horizontalScrollBar_img_stack->maximum();
+  int current = m_ui.horizontalScrollBar_img_stack->value();
+
+  showProjection(m_stack, idx);
+  m_ui.lineEdit_img_seq->setText(
+      QString::fromStdString(boost::lexical_cast<std::string>(current + 1) +
+                             "/" + boost::lexical_cast<std::string>(max + 1)));
 }
 
 std::string ImageCoRViewQtWidget::askImgOrStackPath() {
@@ -137,12 +284,78 @@ void ImageCoRViewQtWidget::showStack(const std::string & /*path*/) {
   // b) load as workspace group - this is done in the overloaded method below
 }
 
-void
-ImageCoRViewQtWidget::showStack(const Mantid::API::WorkspaceGroup_sptr &wsg) {
-  MatrixWorkspace_sptr ws =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(0));
-  if (!ws)
+void ImageCoRViewQtWidget::showStack(Mantid::API::WorkspaceGroup_sptr &wsg) {
+  if (0 == wsg->size())
     return;
+
+  m_stack = wsg;
+
+  m_ui.horizontalScrollBar_img_stack->setEnabled(true);
+  m_ui.horizontalScrollBar_img_stack->setMinimum(0);
+  m_ui.horizontalScrollBar_img_stack->setMaximum(
+      static_cast<int>(m_stack->size() - 1));
+
+  showProjection(m_stack, 0);
+
+  size_t width = 0, height = 0;
+  try {
+    MatrixWorkspace_sptr ws =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(0));
+    if (!ws)
+      return;
+    width = ws->blocksize();
+    height = ws->getNumberHistograms();
+  } catch (std::exception &e) {
+    QMessageBox::warning(this, "Cannot load image information",
+                         "There was a problem while "
+                         " trying to find the size of the image: " +
+                             QString::fromStdString(e.what()));
+  }
+
+  initParamWidgets(width, height);
+}
+
+void ImageCoRViewQtWidget::showProjection(
+    const Mantid::API::WorkspaceGroup_sptr &wsg, size_t idx) {
+
+  showProjectionImage(wsg, idx);
+
+  // give name, set up scroll/slider
+  std::string name;
+  try {
+    MatrixWorkspace_sptr ws =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(idx));
+    if (!ws)
+      return;
+    name = ws->run().getLogData("run_title")->value();
+  } catch (std::exception &e) {
+    QMessageBox::warning(this, "Cannot load image information",
+                         "There was a problem while "
+                         " trying to find the name of the image: " +
+                             QString::fromStdString(e.what()));
+  }
+  m_ui.label_img_name->setText(QString::fromStdString(name));
+
+  const size_t numPics = wsg->size();
+  m_ui.lineEdit_img_seq->setText(
+      QString::fromStdString("1/" + boost::lexical_cast<std::string>(numPics)));
+  m_ui.horizontalScrollBar_img_stack->setValue(static_cast<int>(idx));
+}
+
+void ImageCoRViewQtWidget::showProjectionImage(
+    const Mantid::API::WorkspaceGroup_sptr &wsg, size_t idx) {
+
+  MatrixWorkspace_sptr ws;
+  try {
+    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(idx));
+    if (!ws)
+      return;
+  } catch (std::exception &e) {
+    QMessageBox::warning(
+        this, "Cannot load image",
+        "There was a problem while trying to find the image data: " +
+            QString::fromStdString(e.what()));
+  }
 
   const size_t MAXDIM = 2048 * 16;
   size_t width;
@@ -172,16 +385,6 @@ ImageCoRViewQtWidget::showStack(const Mantid::API::WorkspaceGroup_sptr &wsg) {
                           "find the height of the image: " +
                               QString::fromStdString(e.what()));
     return;
-  }
-
-  std::string name;
-  try {
-    name = ws->run().getLogData("run_title")->value();
-  } catch (std::exception &e) {
-    QMessageBox::warning(this, "Cannot load image information",
-                         "There was a problem while "
-                         " trying to find the name of the image: " +
-                             QString::fromStdString(e.what()));
   }
 
   // images are loaded as 1 histogram == 1 pixel (1 bin per histogram):
@@ -241,8 +444,6 @@ ImageCoRViewQtWidget::showStack(const Mantid::API::WorkspaceGroup_sptr &wsg) {
   painter.end();
   m_ui.label_img->setPixmap(pix);
   m_ui.label_img->show();
-
-  m_ui.label_img_name->setText(QString::fromStdString(name));
 }
 
 void ImageCoRViewQtWidget::readSettings() {

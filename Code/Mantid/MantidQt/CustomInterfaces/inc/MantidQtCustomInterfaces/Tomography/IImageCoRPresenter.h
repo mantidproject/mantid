@@ -48,6 +48,7 @@ public:
     Init,                 ///< interface is initing (set, defaults, etc.)
     BrowseImgOrStack,     ///< User browses for an image file or stack
     NewImgOrStack,        ///< A new image or stack needs to be loaded
+    UpdateImgIndex,       ///< Sliding/scrolling through the stack
     SelectCoR,            ///< Start picking of the center of rotation
     SelectROI,            ///< Start selection of the region of interest
     SelectNormalization,  ///< Start selection of the normalization region

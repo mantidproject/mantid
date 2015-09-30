@@ -53,7 +53,7 @@ public:
    * Order matters
    *
    */
-  virtual void initParams(ImageStackPreParams &params) = 0;
+  virtual void setParams(ImageStackPreParams &params) = 0;
 
   /**
    * Provides the current user selection.
@@ -95,7 +95,20 @@ public:
    * similar image that has been loaded with LoadFITS or similar
    * algorithm.
    */
-  virtual void showStack(const Mantid::API::WorkspaceGroup_sptr &ws) = 0;
+  virtual void showStack(Mantid::API::WorkspaceGroup_sptr &ws) = 0;
+
+  /**
+   * Normally one image (projection for tomography stacks) will be
+   * shown on a 2D display. Show there a particular projection from a
+   * stack contained in a workspace group.
+   *
+   * @param wsg workspace holding a stack of images
+   *
+   * @param idx index (in the group) of the image to show
+   *
+   */
+  virtual void showProjection(const Mantid::API::WorkspaceGroup_sptr &wsg,
+                              size_t idx) = 0;
 
   /**
    * Display a warning to the user (for example as a pop-up window).
@@ -118,6 +131,23 @@ public:
    */
   virtual void userError(const std::string &err,
                          const std::string &description) = 0;
+
+  /**
+   * The index of the image currently shown (from the current stack if there's
+   * any).
+   *
+   * @return index from 0 to the total number of images in the
+   * stack-1, as used for example when indexing workspaces in
+   * workspacegroups
+   */
+  virtual size_t currentImgIndex() const = 0;
+
+  /**
+   * Display now this image (idx) from the stack.
+   *
+   * @param idx index of the image to display.
+   */
+  virtual void updateImgWithIndex(size_t idx) = 0;
 
   /**
    * Get from the user the path/location of a stack of images (or

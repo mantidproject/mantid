@@ -63,6 +63,9 @@ StackOfImagesDirs::findImgFiles(const std::string &path) const {
     ++it;
   }
 
+  // this assumes the usual sorting of images of a stack (directory): a prefix,
+  // and a sequence number (with a fixed number of digits).
+  std::sort(fnames.begin(), fnames.end());
   return fnames;
 }
 

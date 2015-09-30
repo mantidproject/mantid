@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGECORVIEWQTWIDGET_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGECORVIEWQTWIDGET_H_
 
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/Tomography/IImageCoRPresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/IImageCoRView.h"
@@ -53,7 +54,7 @@ public:
   ImageCoRViewQtWidget(QWidget *parent = 0);
   virtual ~ImageCoRViewQtWidget(){};
 
-  void initParams(ImageStackPreParams &params);
+  void setParams(ImageStackPreParams &params);
 
   ImageStackPreParams userSelection() const;
 
@@ -63,11 +64,17 @@ public:
   void showStack(const std::string &path);
 
   /// show a stack of images that have been loaded into a group of workspaces
-  void showStack(const Mantid::API::WorkspaceGroup_sptr &ws);
+  void showStack(Mantid::API::WorkspaceGroup_sptr &ws);
+
+  void showProjection(const Mantid::API::WorkspaceGroup_sptr &wsg, size_t idx);
 
   void userWarning(const std::string &warn, const std::string &description);
 
   void userError(const std::string &err, const std::string &description);
+
+  size_t currentImgIndex() const;
+
+  void updateImgWithIndex(size_t idx);
 
   std::string askImgOrStackPath();
 
@@ -87,7 +94,13 @@ private slots:
   void normAreaClicked();
   void normAreaResetClicked();
 
- private:
+  void updateFromImagesSlider(int current);
+
+  void valueUpdatedCoR(int v);
+  void valueUpdatedROI(int v);
+  void valueUpdatedNormArea(int v);
+
+private:
   void setupConnections();
 
   void readSettings();
@@ -95,7 +108,21 @@ private slots:
   // widget closing
   virtual void closeEvent(QCloseEvent *ev);
 
+  void initParamWidgets(size_t maxWidth, size_t maxHeight);
+
+  void setParamWidgets(ImageStackPreParams &params);
+
+  // shows the image in a widget
+  void showProjectionImage(const Mantid::API::WorkspaceGroup_sptr &wsg,
+                           size_t idx);
+
+  void refreshCoR();
+  void refreshROI();
+  void refreshNormArea();
+
   Ui::ImageSelectCoRAndRegions m_ui;
+
+  Mantid::API::WorkspaceGroup_sptr m_stack;
 
   /// persistent settings
   static const std::string m_settingsGroup;

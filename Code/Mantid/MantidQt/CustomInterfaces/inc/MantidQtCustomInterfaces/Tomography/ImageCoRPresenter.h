@@ -57,6 +57,7 @@ protected:
   void processInit();
   void processBrowseImg();
   void processNewStack();
+  void processUpdateImgIndex();
   void processSelectCoR();
   void processSelectROI();
   void processSelectNormalization();
@@ -73,7 +74,7 @@ private:
 
   /// loads a list of images from a stack, from their individual paths
   Mantid::API::WorkspaceGroup_sptr
-    loadFITSStack(const std::vector<std::string> &imgs);
+  loadFITSStack(const std::vector<std::string> &imgs);
 
   void loadFITSImage(const std::string &path, const std::string &wsName);
 
