@@ -204,6 +204,9 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     }
   }
 
+  // First X value
+  double X0 = ws->readX(0).front();
+
   // Phase quadrature
   std::vector<double> realY(npoints, 0), imagY(npoints, 0);
   std::vector<double> realE(npoints, 0), imagE(npoints, 0);
@@ -212,9 +215,10 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
 
       // (X,Y,E) with exponential decay removed
       double X = ws->readX(h)[i];
-      double Y = ws->readY(h)[i] - n0[h] * exp(-X / muLife);
-      double E =
-          (Y > poissonLimit) ? ws->readE(h)[i] : sqrt(n0[h] * exp(-X / muLife));
+      double Y = ws->readY(h)[i] - n0[h] * exp(-(X-X0) / muLife);
+      double E = (ws->readY(h)[i] > poissonLimit)
+                     ? ws->readE(h)[i]
+                     : sqrt(n0[h] * exp(-(X - X0) / muLife));
 
       realY[i] += aj[h] * Y;
       imagY[i] += bj[h] * Y;
@@ -225,8 +229,8 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     imagE[i] = sqrt(imagE[i]);
 
     // Regain exponential decay
-    double x = ws->getSpectrum(0)->readX()[i];
-    double e = exp(-x / muLife);
+    double X = ws->getSpectrum(0)->readX()[i];
+    double e = exp(-(X-X0) / muLife);
     realY[i] /= e;
     imagY[i] /= e;
     realE[i] /= e;
