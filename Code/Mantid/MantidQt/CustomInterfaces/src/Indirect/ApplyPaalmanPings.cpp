@@ -1,3 +1,4 @@
+
 #include "MantidQtCustomInterfaces/Indirect/ApplyPaalmanPings.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -68,50 +69,97 @@ void ApplyPaalmanPings::run() {
     absCorProps["SampleWorkspace"] = sampleWsName.toStdString();
   }
 
-  QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
+  bool useCan = m_uiForm.ckUseCan->isChecked();
+  if (useCan) {
+    QString canWsName = m_uiForm.dsContainer->getCurrentDataName();
+    MatrixWorkspace_sptr canWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            canWsName.toStdString());
 
-  WorkspaceGroup_sptr corrections =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          correctionsWsName.toStdString());
-  bool interpolateAll = false;
-  for (size_t i = 0; i < corrections->size(); i++) {
-    MatrixWorkspace_sptr factorWs =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
+    // If not in wavelength then do conversion
+    std::string originalCanUnits = canWs->getAxis(0)->unit()->unitID();
+    if (originalCanUnits != "Wavelength") {
+      g_log.information("Container workspace not in wavelength, need to "
+                        "convert to continue.");
+      absCorProps["CanWorkspace"] = addConvertUnitsStep(canWs, "Wavelength");
+    } else {
+      absCorProps["CanWorkspace"] = canWsName.toStdString();
+    }
 
-    // Check for matching binning
-    if (sampleWs && (sampleWs->blocksize() != factorWs->blocksize())) {
-      int result;
-      if (interpolateAll) {
-        result = QMessageBox::Yes;
+    bool useCanScale = m_uiForm.ckScaleCan->isChecked();
+    if (useCanScale) {
+      double canScaleFactor = m_uiForm.spCanScale->value();
+      applyCorrAlg->setProperty("CanScaleFactor", canScaleFactor);
+    }
+
+    // Check for same binning across sample and container
+    if (!checkWorkspaceBinningMatches(sampleWs, canWs)) {
+      QString text =
+          "Binning on sample and container does not match."
+          "Would you like to rebin the sample to match the container?";
+
+      int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
+                                         QMessageBox::Yes, QMessageBox::No,
+                                         QMessageBox::NoButton);
+
+      if (result == QMessageBox::Yes) {
+        addRebinStep(sampleWsName, canWsName);
       } else {
-        QString text = "Number of bins on sample and " +
-                       QString::fromStdString(factorWs->name()) +
-                       " workspace does not match.\n" +
-                       "Would you like to interpolate this workspace to "
-                       "match the sample?";
-
-        result = QMessageBox::question(NULL, tr("Interpolate corrections?"),
-                                       tr(text), QMessageBox::YesToAll,
-                                       QMessageBox::Yes, QMessageBox::No);
-      }
-
-      switch (result) {
-      case QMessageBox::YesToAll:
-        interpolateAll = true;
-      case QMessageBox::Yes:
-        addInterpolationStep(factorWs, absCorProps["SampleWorkspace"]);
-        break;
-      default:
         m_batchAlgoRunner->clearQueue();
-        g_log.error("ApplyPaalmanPings cannot run with corrections that do "
-                    "not match sample binning.");
+        g_log.error("Cannot apply absorption corrections using a sample and "
+                    "container with different binning.");
         return;
       }
     }
   }
 
-  applyCorrAlg->setProperty("CorrectionsWorkspace",
-                            correctionsWsName.toStdString());
+  bool useCorrections = m_uiForm.ckUseCorrections->isChecked();
+  if (useCorrections) {
+    QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
+
+    WorkspaceGroup_sptr corrections =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            correctionsWsName.toStdString());
+    bool interpolateAll = false;
+    for (size_t i = 0; i < corrections->size(); i++) {
+      MatrixWorkspace_sptr factorWs =
+          boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
+
+      // Check for matching binning
+      if (sampleWs && (sampleWs->blocksize() != factorWs->blocksize())) {
+        int result;
+        if (interpolateAll) {
+          result = QMessageBox::Yes;
+        } else {
+          QString text = "Number of bins on sample and " +
+                         QString::fromStdString(factorWs->name()) +
+                         " workspace does not match.\n" +
+                         "Would you like to interpolate this workspace to "
+                         "match the sample?";
+
+          result = QMessageBox::question(NULL, tr("Interpolate corrections?"),
+                                         tr(text), QMessageBox::YesToAll,
+                                         QMessageBox::Yes, QMessageBox::No);
+        }
+
+        switch (result) {
+        case QMessageBox::YesToAll:
+          interpolateAll = true;
+        case QMessageBox::Yes:
+          addInterpolationStep(factorWs, absCorProps["SampleWorkspace"]);
+          break;
+        default:
+          m_batchAlgoRunner->clearQueue();
+          g_log.error("ApplyPaalmanPings cannot run with corrections that do "
+                      "not match sample binning.");
+          return;
+        }
+      }
+    }
+
+    applyCorrAlg->setProperty("CorrectionsWorkspace",
+                              correctionsWsName.toStdString());
+  }
 
   // Generate output workspace name
   int nameCutIndex = sampleWsName.lastIndexOf("_");
@@ -261,33 +309,63 @@ bool ApplyPaalmanPings::validate() {
 
   MatrixWorkspace_sptr sampleWs;
 
-  if (m_uiForm.dsCorrections->getCurrentDataName().compare("") == 0) {
-    uiv.addErrorMessage(
-        "Use Correction must contain a corrections file or workspace.");
-  } else {
+  bool useCan = m_uiForm.ckUseCan->isChecked();
+  bool useCorrections = m_uiForm.ckUseCorrections->isChecked();
 
-    QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
-    WorkspaceGroup_sptr corrections =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            correctionsWsName.toStdString());
-    for (size_t i = 0; i < corrections->size(); i++) {
-      // Check it is a MatrixWorkspace
-      MatrixWorkspace_sptr factorWs =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
-      if (!factorWs) {
-        QString msg = "Correction factor workspace " + QString::number(i) +
-                      " is not a MatrixWorkspace";
-        uiv.addErrorMessage(msg);
-        continue;
-      }
+  if (!(useCan || useCorrections))
+    uiv.addErrorMessage("Must use either container subtraction or corrections");
 
-      // Check X unit is wavelength
-      Mantid::Kernel::Unit_sptr xUnit = factorWs->getAxis(0)->unit();
-      if (xUnit->caption() != "Wavelength") {
-        QString msg = "Correction factor workspace " +
-                      QString::fromStdString(factorWs->name()) +
-                      " is not in wavelength";
-        uiv.addErrorMessage(msg);
+  if (useCan) {
+    uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
+
+    // Check can and sample workspaces are the same "type" (reduced or S(Q, w))
+    QString sample = m_uiForm.dsSample->getCurrentDataName();
+    QString sampleType =
+        sample.right(sample.length() - sample.lastIndexOf("_"));
+    QString container = m_uiForm.dsContainer->getCurrentDataName();
+    QString containerType =
+        container.right(container.length() - container.lastIndexOf("_"));
+
+    g_log.debug() << "Sample type is: " << sampleType.toStdString()
+                  << std::endl;
+    g_log.debug() << "Can type is: " << containerType.toStdString()
+                  << std::endl;
+
+    if (containerType != sampleType)
+      uiv.addErrorMessage(
+          "Sample and can workspaces must contain the same type of data.");
+  }
+
+  if (useCorrections) {
+    if (m_uiForm.dsCorrections->getCurrentDataName().compare("") == 0) {
+      uiv.addErrorMessage(
+          "Use Correction must contain a corrections file or workspace.");
+    } else {
+
+      QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
+      WorkspaceGroup_sptr corrections =
+          AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+              correctionsWsName.toStdString());
+      for (size_t i = 0; i < corrections->size(); i++) {
+        // Check it is a MatrixWorkspace
+        MatrixWorkspace_sptr factorWs =
+            boost::dynamic_pointer_cast<MatrixWorkspace>(
+                corrections->getItem(i));
+        if (!factorWs) {
+          QString msg = "Correction factor workspace " + QString::number(i) +
+                        " is not a MatrixWorkspace";
+          uiv.addErrorMessage(msg);
+          continue;
+        }
+
+        // Check X unit is wavelength
+        Mantid::Kernel::Unit_sptr xUnit = factorWs->getAxis(0)->unit();
+        if (xUnit->caption() != "Wavelength") {
+          QString msg = "Correction factor workspace " +
+                        QString::fromStdString(factorWs->name()) +
+                        " is not in wavelength";
+          uiv.addErrorMessage(msg);
+        }
       }
     }
   }
@@ -301,6 +379,7 @@ bool ApplyPaalmanPings::validate() {
 
 void ApplyPaalmanPings::loadSettings(const QSettings &settings) {
   m_uiForm.dsCorrections->readSettings(settings.group());
+  m_uiForm.dsContainer->readSettings(settings.group());
   m_uiForm.dsSample->readSettings(settings.group());
 }
 
@@ -335,6 +414,7 @@ void ApplyPaalmanPings::handleGeometryChange(int index) {
  * @param specIndex Spectrum index to plot
  */
 void ApplyPaalmanPings::plotPreview(int specIndex) {
+  bool useCan = m_uiForm.ckUseCan->isChecked();
 
   m_uiForm.ppPreview->clear();
 
@@ -347,6 +427,11 @@ void ApplyPaalmanPings::plotPreview(int specIndex) {
     m_uiForm.ppPreview->addSpectrum(
         "Corrected", QString::fromStdString(m_pythonExportWsName), specIndex,
         Qt::green);
+
+  // Plot can
+  if (useCan)
+    m_uiForm.ppPreview->addSpectrum(
+        "Can", m_uiForm.dsContainer->getCurrentDataName(), specIndex, Qt::red);
 }
 
 } // namespace CustomInterfaces
