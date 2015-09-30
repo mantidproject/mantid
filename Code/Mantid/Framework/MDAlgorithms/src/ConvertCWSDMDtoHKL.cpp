@@ -359,9 +359,11 @@ API::IMDEventWorkspace_sptr ConvertCWSDMDtoHKL::createHKLMDWorkspace(
   // Go though each spectrum to conver to MDEvent
   for (size_t iq = 0; iq < vec_hkl.size(); ++iq) {
     Kernel::V3D hkl = vec_hkl[iq];
-    std::vector<Mantid::coord_t> millerindex = { static_cast<float>(hkl.X()),
-                                                 static_cast<float>(hkl.Y()),
-                                                 static_cast<float>(hkl.Z()) };
+    std::vector<Mantid::coord_t> millerindex(3);
+    millerindex[0] = static_cast<float>(hkl.X());
+    millerindex[1] = static_cast<float>(hkl.Y());
+    millerindex[2] = static_cast<float>(hkl.Z());
+
     signal_t signal = vec_signal[iq];
     signal_t error = std::sqrt(signal);
     uint16_t runnumber = 1;
