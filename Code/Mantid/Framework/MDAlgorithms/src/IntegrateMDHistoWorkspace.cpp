@@ -349,6 +349,7 @@ void IntegrateMDHistoWorkspace::exec() {
     // Outer loop over the output workspace iterator poistions.
     const int nThreads = Mantid::API::FrameworkManager::Instance()
                              .getNumOMPThreads(); // NThreads to Request
+
     auto outIterators = outWS->createIterators(nThreads, NULL);
 
     PARALLEL_FOR_NO_WSP_CHECK()
@@ -388,11 +389,11 @@ void IntegrateMDHistoWorkspace::exec() {
         /*
         We jump to the iterator position which is closest in the model
         coordinates
-        to the minimum of our output iterator. This allows us to consider a much
+        to the centre of our output iterator. This allows us to consider a much
         smaller region of space as part of our inner loop
         rather than iterating over the full set of boxes of the input workspace.
         */
-        inIterator->jumpToNearest(mins);
+        inIterator->jumpToNearest(outIteratorCenter);
         performWeightedSum(inIterator.get(), box, sumSignal,
                            sumSQErrors, sumNEvents); // Use the present position. neighbours
                                          // below exclude the current position.
