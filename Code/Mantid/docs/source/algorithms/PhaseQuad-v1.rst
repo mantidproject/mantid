@@ -26,8 +26,8 @@ Description
 Assuming that the *InputWorkspace* contains measured counts as a function of time,
 and *PhaseTable* contains the detector phases and asymmetries, the algorithm returns a workspace
 containing two spectra (squashograms) as a function of the same time binning.
-*PhaseTable* is expected to have three columns, corresponding to the detector id, the
-corresponding phase and its asymmetry.
+*PhaseTable* is expected to have three columns, corresponding to the detector id, its asymmetry
+and its phase.
 
 Usage
 -----
@@ -49,10 +49,10 @@ Usage
    tab.addColumn('double', 'Asym')
    for i in range(0,32):
        phi = 2*pi*i/32.
-       tab.addRow([1, phi, 0.2])
+       tab.addRow([1, 0.2, phi])
    for i in range(0,32):
        phi = 2*pi*i/32.
-       tab.addRow([1, phi, 0.2])
+       tab.addRow([1, 0.2, phi])
    ows = PhaseQuad(InputWorkspace='MUSR00022725', PhaseTable='tab')
    print "Output workspace has", ows.getNumberHistograms(), "histograms"
 
