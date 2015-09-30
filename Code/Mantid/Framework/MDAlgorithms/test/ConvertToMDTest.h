@@ -30,7 +30,6 @@ public:
     {
       m_InWS2D = InWS2D;
     }
-
 };
 // helper function to provide list of names to test:
 std::vector<std::string> dim_availible()
