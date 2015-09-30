@@ -102,42 +102,42 @@ namespace Mantid {
     */
     template<class T>
     void removeInvalidValues(const std::vector<bool> &guessValid,std::vector<T> &guess){
-        std::vector<T> new_guess;
-        new_guess.reserve(guess.size());
+      std::vector<T> new_guess;
+      new_guess.reserve(guess.size());
 
-        for(size_t i= 0;i<guessValid.size();i++){
-          if(guessValid[i]){
-            new_guess.push_back(guess[i]);
-          }
+      for(size_t i= 0;i<guessValid.size();i++){
+        if(guessValid[i]){
+          new_guess.push_back(guess[i]);
         }
-        new_guess.swap(guess);
-      };
-      /**Internal class to contain peak information */
-      struct peakKeeper{
-        double position;
-        double height;
-        double sigma;
-        double energy;
+      }
+      new_guess.swap(guess);
+    };
+    /**Internal class to contain peak information */
+    struct peakKeeper{
+      double position;
+      double height;
+      double sigma;
+      double energy;
 
-        peakKeeper(double pos, double heigh,double sig):
-          position(pos),height(heigh),sigma(sig)
-        {
-          this->energy = std::sqrt(2*M_PI)*height*sigma;
-        }
-        // to sort peaks
-        bool operator < (const peakKeeper& str) const{
-            return (energy > str.energy);
-        }
-      };
+      peakKeeper(double pos, double heigh,double sig):
+        position(pos),height(heigh),sigma(sig)
+      {
+        this->energy = std::sqrt(2*M_PI)*height*sigma;
+      }
+      // to sort peaks
+      bool operator < (const peakKeeper& str) const{
+        return (energy > str.energy);
+      }
+    };
 
-      struct peakKeeper2{
-        double left_rng;
-        double right_rng;
-        peakKeeper2(){};
-        peakKeeper2(double left,double right):
-          left_rng(left),right_rng(right)
-        {}
-      };
+    struct peakKeeper2{
+      double left_rng;
+      double right_rng;
+      peakKeeper2(){};
+      peakKeeper2(double left,double right):
+        left_rng(left),right_rng(right)
+      {}
+    };
 
 
     /** Executes the algorithm -- found all existing monitor peaks. */
@@ -220,8 +220,8 @@ namespace Mantid {
       std::vector<bool> guessValid;
       // preprocess first monitors peaks;
       findBinRanges(monitorWS->readX(0),monitorWS->readY(0),guess_ei,
-                    this->m_min_Eresolution/(2*std::sqrt(2*std::log(2.))),
-                    irange_min,irange_max,guessValid);
+        this->m_min_Eresolution/(2*std::sqrt(2*std::log(2.))),
+        irange_min,irange_max,guessValid);
 
       // remove invalid guess values
       removeInvalidValues<double>(guessValid,guess_ei);
@@ -229,8 +229,8 @@ namespace Mantid {
       // preprocess second monitors peaks
       std::vector<size_t> irange1_min,irange1_max;
       findBinRanges(monitorWS->readX(1),monitorWS->readY(1),guess_ei,
-                    this->m_min_Eresolution/(2*std::sqrt(2*std::log(2.))),
-                    irange1_min,irange1_max,guessValid);
+        this->m_min_Eresolution/(2*std::sqrt(2*std::log(2.))),
+        irange1_min,irange1_max,guessValid);
       removeInvalidValues<double>(guessValid,guess_ei);
       removeInvalidValues<size_t>(guessValid,irange_min);
       removeInvalidValues<size_t>(guessValid,irange_max);
@@ -248,9 +248,9 @@ namespace Mantid {
 
         double energy,height,twoSigma;
         bool found =findMonitorPeak(monitorWS,
-                    guess_ei[i],
-                    monsRangeMin,monsRangeMax,
-                    energy,height,twoSigma);
+          guess_ei[i],
+          monsRangeMin,monsRangeMax,
+          energy,height,twoSigma);
         if(found){
           peaks.push_back(peakKeeper(energy,height,0.5*twoSigma));
           if(peaks.back().energy>maxPeakEnergy)maxPeakEnergy=peaks.back().energy;
@@ -269,12 +269,12 @@ namespace Mantid {
       for(size_t i=0;i<nPeaks;i++){
         peaks[i].energy/=maxPeakEnergy;
         if(peaks[i].energy<m_peakEnergyRatio2reject){
-           guessValid[i]=false;
-           g_log.debug()<<" Rejecting peak at Ei="+std::to_string(peaks[i].position)+
-             " as its total energy lower then the threshold\n";
+          guessValid[i]=false;
+          g_log.debug()<<" Rejecting peak at Ei="+std::to_string(peaks[i].position)+
+            " as its total energy lower then the threshold\n";
           needsRemoval = true;
         }else{
-           guessValid[i]=true;
+          guessValid[i]=true;
         }
       }
       if(needsRemoval) 
@@ -314,99 +314,103 @@ namespace Mantid {
 
 
         /**Lambda to identify guess values for a peak at given index
-          and set up these parameters as input for fitting algorithm   */
+        and set up these parameters as input for fitting algorithm   */
         auto peakGuess =[&](size_t index,double &peakPos,
-                            double &peakHeight,double &peakTwoSigma){
+          double &peakHeight,double &peakTwoSigma){
 
-          double sMin(std::numeric_limits<double>::max());
-          double sMax(-sMin);
-          double xOfMax,dXmax;
-          double ncMax(0),Intensity(0);
+            double sMin(std::numeric_limits<double>::max());
+            double sMax(-sMin);
+            double xOfMax,dXmax;
+            double ncMax(0),Intensity(0);
 
-          auto X = inputWS->readX(index);
-          auto S = inputWS->readY(index);
-          size_t ind_min = monsRangeMin[index];
-          size_t ind_max = monsRangeMax[index];
-          // interval too small -- not interested in a peak there
-          if(std::fabs(double(ind_max-ind_min))<5)return false;
+            auto X = inputWS->readX(index);
+            auto S = inputWS->readY(index);
+            size_t ind_min = monsRangeMin[index];
+            size_t ind_max = monsRangeMax[index];
+            // interval too small -- not interested in a peak there
+            if(std::fabs(double(ind_max-ind_min))<5)return false;
 
-          double xMin  = X[ind_min];
-          double xMax  = X[ind_max];
+            double xMin  = X[ind_min];
+            double xMax  = X[ind_max];
 
-          for(size_t i=ind_min;i<ind_max;i++){
-            double dX = X[i+1]-X[i];
-            double signal = S[i]/dX;
-            if(signal<sMin)sMin=signal;
-            if(signal>sMax){
-              sMax = signal;
-              dXmax = dX;
-              xOfMax=X[i];
+            for(size_t i=ind_min;i<ind_max;i++){
+              double dX = X[i+1]-X[i];
+              double signal = S[i]/dX;
+              if(signal<sMin)sMin=signal;
+              if(signal>sMax){
+                sMax = signal;
+                dXmax = dX;
+                xOfMax=X[i];
+              }
+              Intensity+=S[i];
             }
-            Intensity+=S[i];
-          }
-          // monitor peak should not have just two counts in it.
-          if(sMax*dXmax <= 2)return false;
-          //
-          size_t SearchAreaSize = ind_max-ind_min;
+            // monitor peak should not have just two counts in it.
+            if(sMax*dXmax <= 2)return false;
+            //
+            size_t SearchAreaSize = ind_max-ind_min;
 
-          double SmoothRange = 2*maxSigma;
+            double SmoothRange = 2*maxSigma;
 
-          std::vector<double> SAvrg,binsAvrg;
-          Kernel::VectorHelper::smoothInRange(S,SAvrg,SmoothRange,&X,
-            ind_min,ind_max,&binsAvrg);
+            std::vector<double> SAvrg,binsAvrg;
+            Kernel::VectorHelper::smoothInRange(S,SAvrg,SmoothRange,&X,
+              ind_min,ind_max,&binsAvrg);
 
-          double realPeakPos; // this position is less shifted due to the skew in averaging formula
-          bool foundRealPeakPos(false);
-          std::vector<double> der1Avrg,der2Avrg,peaks,hillsPos,SAvrg1,binsAvrg1;
-          size_t nPeaks = calcDerivativeAndCountZeros(binsAvrg,SAvrg,der1Avrg,peaks);
-          size_t nHills = calcDerivativeAndCountZeros(binsAvrg,der1Avrg,der2Avrg,hillsPos);
-          size_t nPrevHills = 2*nHills;
-          if (nPeaks==1){
-              foundRealPeakPos = true;
-              realPeakPos      = peaks[0];
-          }
-
-          size_t ic(0);
-          while((nPeaks>1 || nHills>2)&&(nPrevHills!=nHills) && ic<50){
-            Kernel::VectorHelper::smoothInRange(SAvrg,SAvrg1,SmoothRange,&binsAvrg,
-            0,ind_max-ind_min,&binsAvrg1);
-            nPrevHills=nHills;
-
-            nPeaks = calcDerivativeAndCountZeros(binsAvrg1,SAvrg1,der1Avrg,peaks);
-            nHills = calcDerivativeAndCountZeros(binsAvrg1,der1Avrg,der2Avrg,hillsPos);
-            SAvrg.swap(SAvrg1);
-            binsAvrg.swap(binsAvrg1);
-            if (nPeaks==1 && !foundRealPeakPos){
+            double realPeakPos; // this position is less shifted due to the skew in averaging formula
+            bool foundRealPeakPos(false);
+            std::vector<double> der1Avrg,der2Avrg,peaks,hillsPos,SAvrg1,binsAvrg1;
+            size_t nPeaks = calcDerivativeAndCountZeros(binsAvrg,SAvrg,der1Avrg,peaks);
+            size_t nHills = calcDerivativeAndCountZeros(binsAvrg,der1Avrg,der2Avrg,hillsPos);
+            size_t nPrevHills = 2*nHills;
+            if (nPeaks==1){
               foundRealPeakPos = true;
               realPeakPos      = peaks[0];
             }
-            ic++;
 
-          }
-          if(ic>=50){
-            g_log.information()<<"No peak search convergence after 50 smoothing iterations. Something is wrong";
-          }
-          g_log.debug()<<"Performed: "+std::to_string(ic)+ " averages for spectra "
-            +std::to_string(index)+" at energy: "+std::to_string(Ei)
-            +"\n and found: "+std::to_string(nPeaks)+"peaks and "+std::to_string(nHills)+" hills\n";
-          if(nPeaks!=1)return false;
+            size_t ic(0);
+            while((nPeaks>1 || nHills>2)&&(nPrevHills!=nHills) && ic<50){
+              Kernel::VectorHelper::smoothInRange(SAvrg,SAvrg1,SmoothRange,&binsAvrg,
+                0,ind_max-ind_min,&binsAvrg1);
+              nPrevHills=nHills;
 
-          peakPos = peaks[0];
-          if(nHills>2){
-            size_t peakIndex = Kernel::VectorHelper::getBinIndex(hillsPos,peaks[0]);
-            peakTwoSigma = hillsPos[peakIndex+1]-hillsPos[peakIndex];
-          }else{
-            if(hillsPos.size()==2){
-              peakTwoSigma = hillsPos[1]-hillsPos[0];
+              nPeaks = calcDerivativeAndCountZeros(binsAvrg1,SAvrg1,der1Avrg,peaks);
+              nHills = calcDerivativeAndCountZeros(binsAvrg1,der1Avrg,der2Avrg,hillsPos);
+              SAvrg.swap(SAvrg1);
+              binsAvrg.swap(binsAvrg1);
+              if (nPeaks==1 && !foundRealPeakPos){
+                foundRealPeakPos = true;
+                realPeakPos      = peaks[0];
+              }
+              ic++;
+
+            }
+            if(ic>=50){
+              g_log.information()<<"No peak search convergence after 50 smoothing iterations. Something is wrong";
+            }
+            g_log.debug()<<"Performed: "+std::to_string(ic)+ " averages for spectra "
+              +std::to_string(index)+" at energy: "+std::to_string(Ei)
+              +"\n and found: "+std::to_string(nPeaks)+"peaks and "+std::to_string(nHills)+" hills\n";
+            if(nPeaks!=1)return false;
+
+            peakPos = peaks[0];
+            if(nHills>2){
+              size_t peakIndex = Kernel::VectorHelper::getBinIndex(hillsPos,peaks[0]);
+              peakTwoSigma = hillsPos[peakIndex+1]-hillsPos[peakIndex];
             }else{
-              return false;
-            }
-          }
-          // assuming that averaging conserves intensity and removing linear background:
-          peakHeight = Intensity/(0.5*std::sqrt(2.*M_PI)*peakTwoSigma)-sMin;
-          peakPos   = realPeakPos;
+              if(hillsPos.size()==2){
+                peakTwoSigma = hillsPos[1]-hillsPos[0];
+              }else{
+                g_log.debug()<<"Rejected averaged peak at energy: "+std::to_string(Ei)+ 
+                  " as it have: "+std::to_string(nPeaks)+" peaks and "+ 
+                  std::to_string(nHills)+" heals\n";
 
-          return true;
+                return false;
+              }
+            }
+            // assuming that averaging conserves intensity and removing linear background:
+            peakHeight = Intensity/(0.5*std::sqrt(2.*M_PI)*peakTwoSigma)-sMin;
+            peakPos   = realPeakPos;
+
+            return true;
         };
         //--------------------------------------------------------------------
         double peak1Pos,peak1TwoSigma,peak1Height;
@@ -443,65 +447,65 @@ namespace Mantid {
     }
 
     /**Bare-bone function to calculate numerical derivative, and estimate number of zeros
-     * this derivative has. No checks are performed for simplicity, 
-     * so data have to be correct form at input.
-     *@param bins -- vector of bin boundaries.
-     *@param signal  -- vector of signal size of bins.size()-1
-     *@param deriv   -- output vector of numerical derivative
-     *@param zeros   -- coordinates of found zeros
+    * this derivative has. No checks are performed for simplicity, 
+    * so data have to be correct form at input.
+    *@param bins -- vector of bin boundaries.
+    *@param signal  -- vector of signal size of bins.size()-1
+    *@param deriv   -- output vector of numerical derivative
+    *@param zeros   -- coordinates of found zeros
 
-     *@return -- number of zeros, the derivative has in the interval provided.
+    *@return -- number of zeros, the derivative has in the interval provided.
     */
     size_t GetAllEi::calcDerivativeAndCountZeros(const std::vector<double> &bins,const std::vector<double> &signal,
-    std::vector<double> &deriv,std::vector<double> &zeros){
-      size_t nPoints = signal.size();
-      deriv.resize(nPoints);
-      zeros.resize(0);
+      std::vector<double> &deriv,std::vector<double> &zeros){
+        size_t nPoints = signal.size();
+        deriv.resize(nPoints);
+        zeros.resize(0);
 
 
-      std::list<double> funVal,binVal;
-      double bin0 = bins[1]-bins[0];
-      double f0   = signal[0]/bin0; 
-      double bin1 = bins[2]-bins[1];
-      double f1   = signal[1]/bin1;
+        std::list<double> funVal,binVal;
+        double bin0 = bins[1]-bins[0];
+        double f0   = signal[0]/bin0; 
+        double bin1 = bins[2]-bins[1];
+        double f1   = signal[1]/bin1;
 
-      size_t nZeros(0);
-      int prevSign = (f1>=0?1:-1);
-      /**Estimate if sign have changed from its previous value*/
-      auto signChanged = [&](double x){
-        int curSign = (x>=0?1:-1);
-        bool changed = curSign!=prevSign;
-        prevSign = curSign;
-        return changed;
-      };
+        size_t nZeros(0);
+        int prevSign = (f1>=0?1:-1);
+        /**Estimate if sign have changed from its previous value*/
+        auto signChanged = [&](double x){
+          int curSign = (x>=0?1:-1);
+          bool changed = curSign!=prevSign;
+          prevSign = curSign;
+          return changed;
+        };
 
-      funVal.push_front(f1);
-      binVal.push_front(bin1);
-      deriv[0] = 2*(f1-f0)/(bin0+bin1);
-      for(size_t i=1;i<nPoints-1;i++){
-        bin1=(bins[i+2]-bins[i+1]);
-        f1=signal[i+1]/bin1;
-        deriv[i]=(f1-f0)/(bins[i+1]-bins[i]+0.5*(bin1+bin0));
-        f0   = funVal.back();
-        bin0 = binVal.back();
-        funVal.pop_back();
-        binVal.pop_back();
         funVal.push_front(f1);
         binVal.push_front(bin1);
+        deriv[0] = 2*(f1-f0)/(bin0+bin1);
+        for(size_t i=1;i<nPoints-1;i++){
+          bin1=(bins[i+2]-bins[i+1]);
+          f1=signal[i+1]/bin1;
+          deriv[i]=(f1-f0)/(bins[i+1]-bins[i]+0.5*(bin1+bin0));
+          f0   = funVal.back();
+          bin0 = binVal.back();
+          funVal.pop_back();
+          binVal.pop_back();
+          funVal.push_front(f1);
+          binVal.push_front(bin1);
 
-        if(signChanged(deriv[i])){
-          nZeros++;
-          zeros.push_back(0.5*(bins[i+1]+bins[i]));
+          if(signChanged(deriv[i])){
+            nZeros++;
+            zeros.push_back(0.5*(bins[i+1]+bins[i]));
+          }
         }
-      }
-      deriv[nPoints-1] = 2*(f1-f0)/(bin1+bin0);
-      if(signChanged(deriv[nPoints-1])){
-        zeros.push_back(bins[nPoints-1]);
-        nZeros++;
-      }
+        deriv[nPoints-1] = 2*(f1-f0)/(bin1+bin0);
+        if(signChanged(deriv[nPoints-1])){
+          zeros.push_back(bins[nPoints-1]);
+          nZeros++;
+        }
 
 
-      return nZeros;
+        return nZeros;
     }
 
     /**Find indexes of each expected peak intervals from monotonous array of ranges.
@@ -520,7 +524,7 @@ namespace Mantid {
         guessValid.resize(guess_energy.size());
         // get bin range corresponding to the energy range
         auto getBinRange=[&](double eMin,double eMax,
-                  size_t &index_min,size_t &index_max)
+          size_t &index_min,size_t &index_max)
         {
           if(eMin<=eBins[0]){ 
             index_min =0;
@@ -585,14 +589,14 @@ namespace Mantid {
 
           if(refineEGuess(eGuess,ind_min,ind_max)){
 
-              getBinRange(std::max(guess_peak[nGuess].left_rng,eGuess*(1-3*Eresolution)),
-                          std::max(guess_peak[nGuess].right_rng,eGuess*(1+3*Eresolution)),
-                          ind_min,ind_max);
-              irangeMin.push_back(ind_min);
-              irangeMax.push_back(ind_max);
-              guessValid[nGuess]=true;
+            getBinRange(std::max(guess_peak[nGuess].left_rng,eGuess*(1-3*Eresolution)),
+              std::max(guess_peak[nGuess].right_rng,eGuess*(1+3*Eresolution)),
+              ind_min,ind_max);
+            irangeMin.push_back(ind_min);
+            irangeMax.push_back(ind_max);
+            guessValid[nGuess]=true;
           }else{
-              guessValid[nGuess]=false;
+            guessValid[nGuess]=false;
           }
         }
         // if array decreasing rather then increasing, indexes behave differently. Will it still work?
@@ -752,8 +756,6 @@ namespace Mantid {
       double &chop_speed,double &chop_delay){
 
         //TODO: Make it dependent on inputWS time range
-        //const double tolerance(1.e-6);
-        const double tolerance(0);
 
         std::vector<Kernel::SplittingInterval> splitter;
         if(m_useFilterLog){
@@ -762,22 +764,18 @@ namespace Mantid {
           // pointer will not be null as this has been verified in validators
           auto pTimeSeries = dynamic_cast<Kernel::TimeSeriesProperty<double> *>
             (inputWS->run().getProperty(FilterLogName));
-          if(m_FilterWithDerivative){
-            pDerivative = pTimeSeries->getDerivative();
-            pTimeSeries = pDerivative.get();
-          }
 
           // Define selecting function
           bool inSelection(false);
           // time interval to select (start-end)
           Kernel::DateAndTime startTime,endTime;
           /**Select time interval on the basis of previous time interval state */
-          auto SelectInterval = [&](const Kernel::DateAndTime &time, double value){
+          auto SelectInterval = [&startTime,&endTime,&inSelection]
+          (const Kernel::DateAndTime &t_beg,const Kernel::DateAndTime &t_end, double value){
 
-            endTime = time;
             if(value>0){
               if (!inSelection){
-                startTime = time+tolerance;
+                startTime = t_beg;
               }
               inSelection = true;
             }else{
@@ -786,35 +784,52 @@ namespace Mantid {
                 if(endTime>startTime) return true;
               }
             }
+            endTime = t_end;
             return false;
           };
           //
           // Analyze filtering log
           auto dateAndTimes = pTimeSeries->valueAsCorrectMap();
           auto it = dateAndTimes.begin();
+          auto next=it;
+          next++;
+          std::map<Kernel::DateAndTime, double> derivMap;
+          auto itder= it;
+          if(m_FilterWithDerivative){
+            pDerivative = pTimeSeries->getDerivative();
+            derivMap = pDerivative->valueAsCorrectMap();
+            itder=derivMap.begin();
+          }
+
           // initialize selection log
-          SelectInterval(it->first,it->second);
-          if(dateAndTimes.size()==1){
+          if(dateAndTimes.size()<=1){
+            SelectInterval(it->first,it->first,itder->second);
             if(inSelection){
               startTime = inputWS->run().startTime();
               endTime    = inputWS->run().endTime();
               Kernel::SplittingInterval interval(startTime, endTime, 0);
               splitter.push_back(interval);
             }else{
-              throw std::runtime_error("filter log :"+FilterLogName+" filters all data points. Nothing to do");
+              throw std::runtime_error("filter log :"+FilterLogName+
+                " filters all data points. Nothing to do");
             }
+          }else{
+            SelectInterval(it->first,next->first,itder->second);
           }
 
-          it++;
-          for (; it != dateAndTimes.end(); ++it) {
-            if(SelectInterval(it->first,it->second)){
-              Kernel::SplittingInterval interval(startTime, endTime - tolerance, 0);
+          // if its filtered using log, both iterator walk through the same values
+          // if use derivative, derivative's values are used for filtering 
+          // and derivative assumed in a center of an interval
+          for (; next != dateAndTimes.end(); ++next,++itder) {
+            if(SelectInterval(it->first,next->first,itder->second)){
+              Kernel::SplittingInterval interval(startTime, endTime, 0);
               splitter.push_back(interval);
             }
+            it = next;
           }
           // final interval
           if(inSelection && (endTime>startTime)){
-            Kernel::SplittingInterval interval(startTime, endTime - tolerance, 0);
+            Kernel::SplittingInterval interval(startTime, endTime, 0);
             splitter.push_back(interval);
           }
         }
@@ -827,6 +842,7 @@ namespace Mantid {
         }
         chop_delay = std::fabs(this->getAvrgLogValue(inputWS,"ChopperDelayLog",splitter));
 
+
         // process chopper delay in the units of degree (phase)
         auto pProperty  = (inputWS->run().getProperty(this->getProperty("ChopperDelayLog")));
         std::string units = pProperty->units();
@@ -834,6 +850,10 @@ namespace Mantid {
         if (units=="deg" || units.c_str()[0] == -80){
           chop_delay*=1.e+6/(360.*chop_speed); // convert in uSec
         }
+        double alpha = -401*(2448-1518.);
+        alpha  = 0;
+        chop_delay += alpha/chop_speed;
+
 
     }
 

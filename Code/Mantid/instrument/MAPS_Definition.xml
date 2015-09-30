@@ -43,7 +43,7 @@
 
 <!-- Chopper position -->
  <component type="chopper-position">
-    <location z="-3.45"/>
+    <location z="-1.895"/>
 	<description is="The component provides sample-choper distance, used
 	in conjuction with chopper delay time to estimate average energy of neutrons
 	hitting the sample. This parameter is present until full chopper description 
