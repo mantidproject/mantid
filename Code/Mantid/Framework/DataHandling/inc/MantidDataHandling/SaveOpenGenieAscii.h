@@ -46,23 +46,29 @@ private:
   void writeFileHeader(std::ofstream &outfile);
 
   /// Uses AxisHeader and WriteAxisValues to write out file
-  void writeToFile(const std::string alpha, const std::string singleSpc,
-                   const std::string fourspc, int nBins, bool isHistogram);
+  void axisToFile(const std::string alpha, const std::string singleSpc,
+                  const std::string fourspc, int nBins, bool isHistogram);
 
   /// Generates the header for the axis which saves to file
-  std::string writeAxisHeader(const std::string alpha,
-                              const std::string singleSpc,
-                              const std::string fourspc, int nBins);
+  std::string getAxisHeader(const std::string alpha,
+                            const std::string singleSpc,
+                            const std::string fourspc, int nBins);
 
   /// Reads if alpha is e then reads the E values accordingly
-  std::string writeAxisValues(std::string alpha, int bin,
-                              const std::string singleSpc);
+  std::string getAxisValues(std::string alpha, int bin,
+                            const std::string singleSpc);
 
   /// Generates the header which saves to the openGenie file
-  void writeSampleLogs(std::ofstream &outfile, std::string fourspc);
+  void getSampleLogs(std::string fourspc);
 
-  // vector
-  std::vector<std::string> myVector;
+  /// sort and write out the sample logs
+  void writeSampleLogs(std::ofstream &outfile);
+
+  /// add ntc field which is required for OpenGenie
+  void addNtc(const std::string fourspc, int nBins);
+
+  /// Vector to safe sample log
+  std::vector<std::string> logVector;
   /// Workspace
   API::MatrixWorkspace_sptr ws;
 };
