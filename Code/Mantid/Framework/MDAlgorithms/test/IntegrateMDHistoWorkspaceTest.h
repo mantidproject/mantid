@@ -14,7 +14,7 @@ namespace {
 
 size_t getTheTotalNumberOfBins(IMDHistoWorkspace_sptr ws) {
   size_t numberOfIndices = 1;
-  for (int i = 0; i < ws->getNumDims(); ++i) {
+  for (size_t i = 0; i < ws->getNumDims(); ++i) {
     auto dim = ws->getDimension(i);
     numberOfIndices *= dim->getNBins();
   }
@@ -25,7 +25,7 @@ size_t getTheTotalNumberOfBins(IMDHistoWorkspace_sptr ws) {
 // variety
 void resetSignalsToLinearIndexValue(IMDHistoWorkspace_sptr ws) {
   auto numberOfIndices = getTheTotalNumberOfBins(ws);
-  for (int i = 0; i < numberOfIndices; ++i) {
+  for (size_t i = 0; i < numberOfIndices; ++i) {
     auto& signal = ws->signalAt(i);
     signal = static_cast<Mantid::signal_t>(i);
   }
@@ -476,7 +476,8 @@ public:
     TSM_ASSERT_DELTA("Should have a signal value of 3", outWS->getSignalAt(2), static_cast<Mantid::signal_t>(3.0), 1e-4);
     TSM_ASSERT_DELTA("Should have a signal value of 4", outWS->getSignalAt(3), static_cast<Mantid::signal_t>(4.0), 1e-4);
   }
-    void test_that_PBin_between_extent_and_bin_boundary_floors_when_pmin_not_contained_in_threshold(){
+
+  void test_that_PBin_between_extent_and_bin_boundary_floors_when_pmin_not_contained_in_threshold(){
      /*
      Input workspace: Is asymmetric about the origina and the origin does not lie on a bin boundary and
      the PMIN and PMAX do not lie on bin boundaries.PMin is defined to be at a greater distance than 1e-06 of a bin boundary
@@ -627,6 +628,11 @@ public:
     TSM_ASSERT_DELTA("Should snap to the second bin boundary.", minimumDim, static_cast<Mantid::coord_t>(secondBinBoundary), 1e-6);
     TSM_ASSERT_DELTA("Should snap to the last bin boundary", maximumDim, static_cast<Mantid::coord_t>(max[0]), 1e-6);
   }
+
+  void test_that_signals_of_workspace_shifted_by_half_a_bin_width_is_correct() {
+
+  }
+
 };
 
 //=====================================================================================
