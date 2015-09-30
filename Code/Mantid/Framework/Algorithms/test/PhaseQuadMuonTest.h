@@ -60,21 +60,21 @@ public:
     auto specImY = outputWs->getSpectrum(1)->readY();
     auto specImE = outputWs->getSpectrum(1)->readE();
     // Check real Y values
-    TS_ASSERT_DELTA ( specReY[ 0], -0.9984, 0.0001 );
-    TS_ASSERT_DELTA ( specReY[20], -0.1316, 0.0001 );
-    TS_ASSERT_DELTA ( specReY[50], -0.0856, 0.0001 );
+    TS_ASSERT_DELTA ( specReY[ 0], -0.7964, 0.0001 );
+    TS_ASSERT_DELTA ( specReY[20],  0.0104, 0.0001 );
+    TS_ASSERT_DELTA ( specReY[50],  0.0257, 0.0001 );
     // Check real E values
-    TS_ASSERT_DELTA ( specReE[ 0], 0.0019, 0.0001);
-    TS_ASSERT_DELTA ( specReE[20], 0.0020, 0.0001 );
-    TS_ASSERT_DELTA ( specReE[50], 0.0022, 0.0001 );
+    TS_ASSERT_DELTA ( specReE[ 0], 0.0024, 0.0001);
+    TS_ASSERT_DELTA ( specReE[20], 0.0026, 0.0001 );
+    TS_ASSERT_DELTA ( specReE[50], 0.0029, 0.0001 );
     // Check imaginary Y values
-    TS_ASSERT_DELTA ( specImY[ 0], -0.9976, 0.0001 );
-    TS_ASSERT_DELTA ( specImY[20], -0.0988, 0.0001 );
-    TS_ASSERT_DELTA ( specImY[50], -0.0808, 0.0001 );
+    TS_ASSERT_DELTA ( specImY[ 0], -0.5219, 0.0001 );
+    TS_ASSERT_DELTA ( specImY[20],  0.0058, 0.0001 );
+    TS_ASSERT_DELTA ( specImY[50],  0.0163, 0.0001 );
     // Check imaginary E values
-    TS_ASSERT_DELTA ( specImE[ 0], 0.0027, 0.0001 );
-    TS_ASSERT_DELTA ( specImE[20], 0.0029, 0.0001 );
-    TS_ASSERT_DELTA ( specImE[50], 0.0033, 0.0001 );
+    TS_ASSERT_DELTA ( specImE[ 0], 0.0016, 0.0001 );
+    TS_ASSERT_DELTA ( specImE[20], 0.0017, 0.0001 );
+    TS_ASSERT_DELTA ( specImE[50], 0.0019, 0.0001 );
   }
 
   void populatePhaseTable (ITableWorkspace_sptr phaseTable)
