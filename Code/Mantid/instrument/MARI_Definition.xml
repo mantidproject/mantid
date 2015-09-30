@@ -47,11 +47,14 @@
     <location z="-1.689"/>
 	<description is="The component provides sample-choper distance, used
 	in conjuction with chopper delay time to estimate average energy of neutrons
-	hitting the sample. This parameter is present until full chopper description 
-	is availibe, which will be then used to estimate this and other choper parameters
-	with better accuracy."/>
+	hitting the sample. "/>
+	<parameter name="initial_phase">
+		<value val="0."/>
+		<description is="The initial rotation phase of the disk used to caluclate the time
+		for neutrons passing the chopper according to formulae time = delay + initial_phase/Speed"/>	
+    </parameter>
   </component>
-  <type name="chopper-position" is="ChopperPos"></type>
+  <type name="chopper-position" is="ChopperPos"></type>  
   
   
   <component type="fermi-chopper">
@@ -64,7 +67,7 @@
       <description is="Delay is the time between the moment when beam hits moderator and the moment, 
 	  when neutron passes through chopper for the first time."/>
     </parameter>
-  </component>
+  </component>  
   <type name="fermi-chopper" is="chopper">
     <cylinder id="body">
         <centre-of-bottom-base x="0.0" y="0.0" z="0.0" />

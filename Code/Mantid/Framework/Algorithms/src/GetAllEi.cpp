@@ -24,7 +24,8 @@ namespace Mantid {
       m_min_Eresolution(0.08),
       // half maximal resolution for LET
       m_max_Eresolution(0.5e-3),
-      m_peakEnergyRatio2reject(0.1){}
+      m_peakEnergyRatio2reject(0.1),
+      m_phase(0){}
 
     /// Initialization method.
     void GetAllEi::init() {
@@ -149,18 +150,28 @@ namespace Mantid {
       m_max_Eresolution = getProperty("MaxInstrResolution");
       m_peakEnergyRatio2reject = getProperty("PeaksRatioToReject");
 
+
+      ////---> recalculate chopper delay to monitor position:
+      auto pInstrument = inputWS->getInstrument();
+     // auto lastChopPositionComponent = pInstrument->getComponentByName("chopper-position");
+      //auto chopPoint = pInstrument->getChopperPoint(0);
+      auto chopPoint  = pInstrument->getComponentByName("chopper-position");
+      auto phase = chopPoint->getNumberParameter("initial_phase");
+      if(phase.size()==0){
+         throw std::runtime_error("Can not find initial_phase parameter attached to the chopper-position component");
+      }
+      if(phase.size()>1){
+        throw std::runtime_error("Can not deal with multiple phases for initial_phase parameter attached to the chopper-position component");
+      }
+      m_phase = phase[0];
+      //auto chopPoint1  = pInstrument->getComponentByName("fermi-chopper");
+      //auto par = chopPoint1->getDoubleParameter("Delay (us)");
       double chopSpeed,chopDelay;
       findChopSpeedAndDelay(inputWS,chopSpeed,chopDelay);
 
-      ////---> recalculate chopper delay to monitor position:
-      //TODO: until chopper class is fully defined use light-weight chopper-position component
-      auto pInstrument = inputWS->getInstrument();
-      auto lastChopPositionComponent = pInstrument->getComponentByName("chopper-position");
-      if(!lastChopPositionComponent){
-        throw std::runtime_error("Instrument does not have chopper position component named 'chopper-position'");
-      }
+      
       auto moderator       = pInstrument->getSource();
-      double chopDistance  = lastChopPositionComponent->getDistance(*moderator);
+      double chopDistance  = chopPoint->getDistance(*moderator); //location[0].distance(moderator->getPos());
       double velocity  = chopDistance/chopDelay;
 
       // build workspace to find monitor's peaks
@@ -303,6 +314,7 @@ namespace Mantid {
 
 
     }
+
     /**Get energy of monitor peak if one is present*/
     bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
       double Ei,const std::vector<size_t> & monsRangeMin,
@@ -850,9 +862,7 @@ namespace Mantid {
         if (units=="deg" || units.c_str()[0] == -80){
           chop_delay*=1.e+6/(360.*chop_speed); // convert in uSec
         }
-        double alpha = -401*(2448-1518.);
-        alpha  = 0;
-        chop_delay += alpha/chop_speed;
+        chop_delay += m_phase/chop_speed;
 
 
     }

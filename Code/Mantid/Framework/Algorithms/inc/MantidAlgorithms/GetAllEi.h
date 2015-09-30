@@ -96,6 +96,8 @@ protected: // for testing, private otherwise.
   // set as half max LET resolution at 20mev at 5e-4
   double m_max_Eresolution;
   double m_peakEnergyRatio2reject;
+
+  double m_phase;
 };
 
 } // namespace Algorithms
