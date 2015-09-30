@@ -32,6 +32,7 @@ set ( SRC_FILES
 	src/CreateMDHistoWorkspace.cpp
 	src/CreateMDWorkspace.cpp
 	src/CutMD.cpp
+	src/DisplayNormalizationSetter.cpp	
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
 	src/EvaluateMDFunction.cpp
@@ -99,6 +100,7 @@ set ( SRC_FILES
 	src/ReflectometryTransformKiKf.cpp
 	src/ReflectometryTransformP.cpp
 	src/ReflectometryTransformQxQz.cpp
+	src/ReplicateMD.cpp
 	src/SaveIsawQvector.cpp
 	src/SaveMD.cpp
 	src/SaveMD2.cpp
@@ -149,6 +151,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/CreateMDWorkspace.h
 	inc/MantidMDAlgorithms/CutMD.h
+	inc/MantidMDAlgorithms/DisplayNormalizationSetter.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/DllConfig.h
 	inc/MantidMDAlgorithms/EqualToMD.h
@@ -218,6 +221,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ReflectometryTransformKiKf.h
 	inc/MantidMDAlgorithms/ReflectometryTransformP.h
 	inc/MantidMDAlgorithms/ReflectometryTransformQxQz.h
+	inc/MantidMDAlgorithms/ReplicateMD.h
 	inc/MantidMDAlgorithms/SaveIsawQvector.h
 	inc/MantidMDAlgorithms/SaveMD.h
 	inc/MantidMDAlgorithms/SaveMD2.h
@@ -268,6 +272,7 @@ set ( TEST_FILES
 	CreateMDHistoWorkspaceTest.h
 	CreateMDWorkspaceTest.h
 	CutMDTest.h
+	DisplayNormalizationSetterTest.h
 	DivideMDTest.h
 	EqualToMDTest.h
 	EvaluateMDFunctionTest.h
@@ -320,6 +325,7 @@ set ( TEST_FILES
 	ReflectometryTransformKiKfTest.h
 	ReflectometryTransformPTest.h
 	ReflectometryTransformQxQzTest.h
+	ReplicateMDTest.h
 	ResolutionConvolvedCrossSectionTest.h
 	SaveIsawQvectorTest.h
 	SaveMD2Test.h

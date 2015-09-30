@@ -496,6 +496,62 @@ public:
     TS_ASSERT_EQUALS(Mantid::Kernel::QLab, ws->getSpecialCoordinateSystem());
   }
 
+  void test_getLinePlot()
+  {
+    MDEventWorkspace3Lean::sptr ew = MDEventsTestHelper::makeMDEW<3>(4, 0.0, 7.0, 3);
+
+    double volume = pow(7.0 / 4.0, 3);
+    double signal = 3.0;
+
+    Mantid::Kernel::VMD start(0,0,0);
+    Mantid::Kernel::VMD end(2,0,0);
+    std::vector<coord_t> x;
+    std::vector<signal_t> y, e;
+    ew->getLinePlot(start, end, NoNormalization, x, y, e);
+    for(size_t i = 0; i < y.size(); i+=10) {
+      TS_ASSERT_EQUALS(y[i], signal);
+    }
+    ew->getLinePlot(start, end, VolumeNormalization, x, y, e);
+    for(size_t i = 0; i < y.size(); i+=10) {
+      TS_ASSERT_DELTA(y[i], signal / volume, 1e-7);
+    }
+    ew->getLinePlot(start, end, NumEventsNormalization, x, y, e);
+    for(size_t i = 0; i < y.size(); i+=10) {
+      TS_ASSERT_EQUALS(y[i], 1.0);
+    }
+  }
+
+  void test_that_sets_default_normalization_flags_to_volume_normalization() {
+    // Arrange + Act
+    MDEventWorkspace3Lean::sptr ew = MDEventsTestHelper::makeMDEW<3>(4, 0.0, 7.0, 3);
+    // Assert
+    TSM_ASSERT_EQUALS("Should default to volume normalization", ew->displayNormalization(), Mantid::API::VolumeNormalization);
+    TSM_ASSERT_EQUALS("Should default to volume normalization", ew->displayNormalizationHisto(), Mantid::API::VolumeNormalization);
+  }
+
+  void test_can_set_normalization_in_constructor() {
+    // Arrange
+    auto eventSetting = Mantid::API::NoNormalization;
+    auto histoSetting = Mantid::API::NumEventsNormalization;
+    // Act
+    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDLeanEvent<3>, 3>> ew(new Mantid::DataObjects::MDEventWorkspace<MDLeanEvent<3>, 3>(eventSetting, histoSetting));
+    // Assert
+    TSM_ASSERT_EQUALS("Should be set to nonormalization", ew->displayNormalization(), eventSetting);
+    TSM_ASSERT_EQUALS("Should be set to number of events normalizationnormalization", ew->displayNormalizationHisto(), histoSetting);
+  }
+
+  void test_that_sets_normalization_correctly() {
+    // Arrange
+    MDEventWorkspace3Lean::sptr ew = MDEventsTestHelper::makeMDEW<3>(4, 0.0, 7.0, 3);
+    auto eventSetting = Mantid::API::NoNormalization;
+    auto histoSetting = Mantid::API::NumEventsNormalization;
+    // Act
+    ew->setDisplayNormalization(eventSetting);
+    ew->setDisplayNormalizationHisto(histoSetting);
+    // Assert
+    TSM_ASSERT_EQUALS("Should be set to nonormalization", ew->displayNormalization(), eventSetting);
+    TSM_ASSERT_EQUALS("Should be set to number of events normalizationnormalization", ew->displayNormalizationHisto(), histoSetting);
+  }
 };
 
 

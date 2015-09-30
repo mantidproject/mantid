@@ -3,7 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Gaussian.h"
 #include "MantidAPI/FunctionFactory.h"
+
 #include <cmath>
+#include <numeric>
 
 namespace Mantid {
 namespace CurveFitting {

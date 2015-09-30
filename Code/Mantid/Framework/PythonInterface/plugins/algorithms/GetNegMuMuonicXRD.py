@@ -55,8 +55,7 @@ class GetNegMuMuonicXRD(PythonAlgorithm):
             curr_workspace = self.create_muonic_xr_ws(element, y_position)
             workspace_list[idx] = curr_workspace
 
-        muonic_xr_group = GroupWorkspaces(workspace_list)
-        self.setProperty('OutputWorkspace', muonic_xr_group)
-        self.log().information(str("Created Group: "+muonic_xr_group.name()))
+        self.setProperty("OutputWorkspace", GroupWorkspaces(workspace_list))
+        self.log().information(str("Created Group: "+ self.getPropertyValue("OutputWorkspace")))
 
 AlgorithmFactory.subscribe(GetNegMuMuonicXRD)

@@ -7,7 +7,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/AutoScaleRangeGenerator.h"
-
+#include "MantidVatesAPI/ColorScaleGuard.h"
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
@@ -326,8 +326,10 @@ void ColorUpdater::observeColorScaleEdited(pqPipelineRepresentation *repr, Color
   // install callback
   vtkSMDoubleVectorProperty *points =
     vtkSMDoubleVectorProperty::SafeDownCast(lutProxy->GetProperty("RGBPoints"));
-  if (points)
+
+  if (points) {
     points->AddObserver(vtkCommand::ModifiedEvent, CRChangeCallback);
+  }
 
   // User clicks on the log-scale tick box
   vtkSmartPointer<vtkCallbackCommand> LogScaleCallback = vtkSmartPointer<vtkCallbackCommand>::New();
@@ -388,7 +390,7 @@ void ColorUpdater::colorScaleEditedCallbackFunc(vtkObject *caller, long unsigned
   //
   // B) We are in the middle of an operation where we don't want callbacks to update the
   // color map (for example when switching views or doing several view updates in a row)
-  if (csel->inProcessUserRequestedAutoScale() || csel->isIgnoringColorCallbacks()) {
+  if (csel->inProcessUserRequestedAutoScale() || csel->isIgnoringColorCallbacks() || csel->isColorScaleLocked() ) {
     return;
   }
 
@@ -407,6 +409,7 @@ void ColorUpdater::colorScaleEditedCallbackFunc(vtkObject *caller, long unsigned
 
   double newMin = elems[0];
   double newMax = elems[noe-subtract];
+
   if ((std::fabs(newMin - csel->getMinRange()) > 1e-14) ||
       (std::fabs(csel->getMaxRange() - newMax) > 1e-14)
       ) {

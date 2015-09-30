@@ -370,12 +370,40 @@ void Cone::getBoundingBox(double &xmax, double &ymax, double &zmax,
    ///TODO: its bit difficult to find resonable AABB
    ///For now it will return the same bounding box as input
    */
-  UNUSED_ARG(xmax);
-  UNUSED_ARG(ymax);
-  UNUSED_ARG(zmax);
-  UNUSED_ARG(xmin);
-  UNUSED_ARG(ymin);
-  UNUSED_ARG(zmin);
+  if (Normal.X() != 0 && Normal.Y() == 0 && Normal.Z() == 0) {
+    if (Normal.X() < 0) {
+      xmin = std::max(Centre.X(),ymin);
+    } else {
+      xmax = std::min(Centre.X(),ymax);
+    }
+    double radius = fabs(xmax - xmin) * sin((M_PI * alpha) / 180.0);
+    ymin = Centre.Y() - radius;
+    ymax = Centre.Y() + radius;
+    zmin = Centre.Z() - radius;
+    zmax = Centre.Z() + radius;
+  } else if (Normal.X() == 0 && Normal.Y() != 0 && Normal.Z() == 0) {
+    if (Normal.Y() < 0) {
+      ymin = std::max(Centre.Y(),ymin);
+    } else {
+      ymax = std::min(Centre.Y(),ymax);
+    }
+    double radius = fabs(ymax - ymin) * sin((M_PI * alpha) / 180.0);
+    xmin = Centre.X() - radius;
+    xmax = Centre.X() + radius;
+    zmin = Centre.Z() - radius;
+    zmax = Centre.Z() + radius;
+  } else if (Normal.X() == 0 && Normal.Y() == 0 && Normal.Z() != 0) {
+    if (Normal.Z() < 0) {
+      zmin = std::max(Centre.Z(),ymin);
+    } else {
+      zmax = std::min(Centre.Z(),ymax);
+    }
+    double radius = fabs(zmax - zmin) * sin((M_PI * alpha) / 180.0);
+    xmin = Centre.X() - radius;
+    xmax = Centre.X() + radius;
+    ymin = Centre.Y() - radius;
+    ymax = Centre.Y() + radius;
+  }
 }
 
 } // NAMESPACE Geometry

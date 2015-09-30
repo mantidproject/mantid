@@ -40,7 +40,13 @@ const std::string EnggDiffractionViewQtGUI::g_pixelCalibExt =
     "(*.csv *.nxs *.nexus);;"
     "Other extensions/all files (*.*)";
 
-const std::string EnggDiffractionViewQtGUI::m_settingsGroup = "CustomInterfaces/EnggDiffractionView";
+const std::string EnggDiffractionViewQtGUI::g_DetGrpExtStr =
+    "Detector Grouping File: CSV "
+    "(*.csv *.txt);;"
+    "Other extensions/all files (*.*)";
+
+const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
+    "CustomInterfaces/EnggDiffractionView";
 
 /**
  * Default constructor.
@@ -60,6 +66,11 @@ void EnggDiffractionViewQtGUI::initLayout() {
   QWidget *wCalib = new QWidget(m_ui.tabMain);
   m_uiTabCalib.setupUi(wCalib);
   m_ui.tabMain->addTab(wCalib, QString("Calibration"));
+
+  QWidget *wFocus = new QWidget(m_ui.tabMain);
+  m_uiTabFocus.setupUi(wFocus);
+  m_ui.tabMain->addTab(wFocus, QString("Focus"));
+
   QWidget *wSettings = new QWidget(m_ui.tabMain);
   m_uiTabSettings.setupUi(wSettings);
   m_ui.tabMain->addTab(wSettings, QString("Settings"));
@@ -69,6 +80,7 @@ void EnggDiffractionViewQtGUI::initLayout() {
   // basic UI setup, connect signals, etc.
   doSetupGeneralWidgets();
   doSetupTabCalib();
+  doSetupTabFocus();
   doSetupTabSettings();
 
   // presenter that knows how to handle a IEnggDiffractionView should take care
@@ -99,7 +111,7 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
   connect(m_uiTabCalib.pushButton_new_calib, SIGNAL(released()), this,
           SLOT(calibrateClicked()));
 
-  enableCalibrateActions(true);
+  enableCalibrateAndFocusActions(true);
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -116,6 +128,9 @@ void EnggDiffractionViewQtGUI::doSetupTabSettings() {
   m_uiTabSettings.checkBox_force_recalculate_overwrite->setChecked(
       m_calibSettings.m_forceRecalcOverwrite);
 
+  m_uiTabSettings.lineEdit_dir_focusing->setText(
+      QString::fromStdString(m_focusDir));
+
   // push button signals/slots
   connect(m_uiTabSettings.pushButton_browse_input_dir_calib, SIGNAL(released()),
           this, SLOT(browseInputDirCalib()));
@@ -128,6 +143,26 @@ void EnggDiffractionViewQtGUI::doSetupTabSettings() {
 
   connect(m_uiTabSettings.pushButton_browse_template_gsas_prm,
           SIGNAL(released()), this, SLOT(browseTemplateGSAS_PRM()));
+
+  connect(m_uiTabSettings.pushButton_browse_dir_focusing, SIGNAL(released()),
+          this, SLOT(browseDirFocusing()));
+}
+
+void EnggDiffractionViewQtGUI::doSetupTabFocus() {
+  connect(m_uiTabFocus.pushButton_focus, SIGNAL(released()), this,
+          SLOT(focusClicked()));
+
+  connect(m_uiTabFocus.pushButton_focus_cropped, SIGNAL(released()), this,
+          SLOT(focusCroppedClicked()));
+
+  connect(m_uiTabFocus.pushButton_texture_browse_grouping_file,
+          SIGNAL(released()), this, SLOT(browseTextureDetGroupingFile()));
+
+  connect(m_uiTabFocus.pushButton_focus_texture, SIGNAL(released()), this,
+          SLOT(focusTextureClicked()));
+
+  connect(m_uiTabFocus.pushButton_reset, SIGNAL(released()), this,
+          SLOT(focusResetClicked()));
 }
 
 void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
@@ -162,9 +197,43 @@ void EnggDiffractionViewQtGUI::readSettings() {
   m_uiTabCalib.lineEdit_new_ceria_num->setText(
       qs.value("user-params-new-ceria-num", "").toString());
 
+  m_uiTabCalib.lineEdit_new_vanadium_num->setText(
+      qs.value("user-params-new-vanadium-num", "").toString());
+
+  m_uiTabCalib.lineEdit_new_ceria_num->setText(
+      qs.value("user-params-new-ceria-num", "").toString());
+
+  // user params - focusing
+  m_uiTabFocus.lineEdit_run_num->setText(
+      qs.value("user-params-focus-runno", "").toString());
+
+  qs.beginReadArray("user-params-focus-bank_i");
+  qs.setArrayIndex(0);
+  m_uiTabFocus.checkBox_focus_bank1->setChecked(qs.value("value", true).toBool());
+  qs.setArrayIndex(1);
+  m_uiTabFocus.checkBox_focus_bank2->setChecked(qs.value("value", true).toBool());
+  qs.endArray();
+
+  m_uiTabFocus.lineEdit_cropped_run_num->setText(
+      qs.value("user-params-focus-cropped-runno", "").toString());
+
+  m_uiTabFocus.lineEdit_cropped_spec_ids->setText(
+      qs.value("user-params-focus-cropped-spectrum-nos", "").toString());
+
+  m_uiTabFocus.lineEdit_texture_run_num->setText(
+      qs.value("user-params-focus-texture-runno", "").toString());
+
+  m_uiTabFocus.lineEdit_texture_grouping_file->setText(
+      qs.value("user-params-focus-texture-detector-grouping-file", "")
+          .toString());
+
+  m_uiTabFocus.checkBox_FocusedWS->setChecked(
+      qs.value("user-params-focus-plot-ws", true).toBool());
+
   QString lastPath =
       MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
-  // TODO: this should become << >> operators on EnggDiffCalibSettings
+  // TODO: this should become << >> operators on
+  // EnggDiffCalibSettings
   m_calibSettings.m_inputDirCalib =
       qs.value("input-dir-calib-files", lastPath).toString().toStdString();
   m_calibSettings.m_inputDirRaw =
@@ -181,6 +250,9 @@ void EnggDiffractionViewQtGUI::readSettings() {
           .toStdString();
   m_calibSettings.m_forceRecalcOverwrite =
       qs.value("rebin-calib", g_defaultRebinWidth).toFloat();
+
+  // 'focusing' block
+  m_focusDir = qs.value("focus-dir").toString().toStdString();
 
   restoreGeometry(qs.value("interface-win-geometry").toByteArray());
   qs.endGroup();
@@ -204,6 +276,29 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
   qs.setValue("user-params-new-ceria-num",
               m_uiTabCalib.lineEdit_new_ceria_num->text());
 
+  // user params - focusing
+  qs.setValue("user-params-focus-runno", m_uiTabFocus.lineEdit_run_num->text());
+
+  qs.beginWriteArray("user-params-focus-bank_i");
+  qs.setArrayIndex(0);
+  qs.setValue("value", m_uiTabFocus.checkBox_focus_bank1->isChecked());
+  qs.setArrayIndex(1);
+  qs.setValue("value", m_uiTabFocus.checkBox_focus_bank2->isChecked());
+  qs.endArray();
+
+  qs.setValue("user-params-focus-cropped-runno",
+              m_uiTabFocus.lineEdit_cropped_run_num->text());
+  qs.setValue("user-params-focus-cropped-spectrum-nos",
+              m_uiTabFocus.lineEdit_cropped_spec_ids->text());
+
+  qs.setValue("user-params-focus-texture-runno",
+              m_uiTabFocus.lineEdit_texture_run_num->text());
+  qs.setValue("user-params-focus-texture-detector-grouping-file",
+              m_uiTabFocus.lineEdit_texture_grouping_file->text());
+
+  qs.setValue("user-params-focus-plot-ws",
+              m_uiTabFocus.checkBox_FocusedWS->checkState());
+
   // TODO: this should become << >> operators on EnggDiffCalibSettings
   qs.setValue("input-dir-calib-files",
               QString::fromStdString(m_calibSettings.m_inputDirCalib));
@@ -216,6 +311,9 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
   qs.setValue("template-gsas-prm",
               QString::fromStdString(m_calibSettings.m_templateGSAS_PRM));
   qs.setValue("rebin-calib", m_calibSettings.m_rebinCalibrate);
+
+  // 'focusing' block
+  qs.setValue("focus-dir", QString::fromStdString(m_focusDir));
 
   qs.setValue("interface-win-geometry", saveGeometry());
   qs.endGroup();
@@ -304,12 +402,44 @@ void EnggDiffractionViewQtGUI::newCalibLoaded(const std::string &vanadiumNo,
   }
 }
 
-void EnggDiffractionViewQtGUI::enableCalibrateActions(bool enable) {
+void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
+  // calibrate
   m_uiTabCalib.lineEdit_RBNumber->setEnabled(enable);
   m_uiTabCalib.groupBox_make_new_calib->setEnabled(enable);
   m_uiTabCalib.groupBox_current_calib->setEnabled(enable);
 
   m_ui.pushButton_close->setEnabled(enable);
+
+  // focus
+  m_uiTabFocus.lineEdit_run_num->setEnabled(enable);
+  m_uiTabFocus.pushButton_focus->setEnabled(enable);
+  m_uiTabFocus.checkBox_FocusedWS->setEnabled(enable);
+
+  m_uiTabFocus.pushButton_focus->setEnabled(enable);
+  m_uiTabFocus.pushButton_focus_cropped->setEnabled(enable);
+  m_uiTabFocus.pushButton_focus_texture->setEnabled(enable);
+}
+
+void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
+  std::string pyCode = "plotSpectrum('" + wsName + "', 0)";
+
+  std::string status =
+      runPythonCode(QString::fromStdString(pyCode), false).toStdString();
+  m_logMsgs.push_back("Plotted output focused data, with status string " +
+                      status);
+  m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
+}
+
+void EnggDiffractionViewQtGUI::resetFocus() {
+  m_uiTabFocus.lineEdit_run_num->setText("");
+  m_uiTabFocus.checkBox_focus_bank1->setChecked(true);
+  m_uiTabFocus.checkBox_focus_bank2->setChecked(true);
+
+  m_uiTabFocus.lineEdit_cropped_run_num->setText("");
+  m_uiTabFocus.lineEdit_cropped_spec_ids->setText("");
+
+  m_uiTabFocus.lineEdit_texture_run_num->setText("");
+  m_uiTabFocus.lineEdit_texture_grouping_file->setText("");
 }
 
 void
@@ -318,13 +448,15 @@ EnggDiffractionViewQtGUI::writeOutCalibFile(const std::string &outFilename,
                                             const std::vector<double> &tzero) {
   // TODO: this is horrible and should not last much here.
   // Avoid running Python code
-  // Update this as soon as we have a more stable way of generating IPARM files
+  // Update this as soon as we have a more stable way of generating IPARM
+  // files
   // Writes a file doing this:
   // write_ENGINX_GSAS_iparam_file(output_file, difc, zero, ceria_run=241391,
   // vanadium_run=236516, template_file=None):
 
   // this replace is to prevent issues with network drives on windows:
-  const std::string  safeOutFname= boost::replace_all_copy(outFilename, "\\","/");
+  const std::string safeOutFname =
+      boost::replace_all_copy(outFilename, "\\", "/");
   std::string pyCode = "import EnggUtils\n";
   pyCode += "import os\n";
   // normalize apparently not needed after the replace, but to be double-safe:
@@ -376,6 +508,23 @@ void EnggDiffractionViewQtGUI::loadCalibrationClicked() {
 
 void EnggDiffractionViewQtGUI::calibrateClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::CalcCalib);
+}
+
+void EnggDiffractionViewQtGUI::focusClicked() {
+  m_presenter->notify(IEnggDiffractionPresenter::FocusRun);
+}
+
+void EnggDiffractionViewQtGUI::focusCroppedClicked() {
+  m_presenter->notify(IEnggDiffractionPresenter::FocusCropped);
+}
+
+void EnggDiffractionViewQtGUI::focusTextureClicked() {
+  m_presenter->notify(IEnggDiffractionPresenter::FocusTexture);
+}
+
+void EnggDiffractionViewQtGUI::focusResetClicked() {
+  m_presenter->notify(IEnggDiffractionPresenter::ResetFocus);
+  // TODO
 }
 
 void EnggDiffractionViewQtGUI::browseInputDirCalib() {
@@ -452,6 +601,80 @@ void EnggDiffractionViewQtGUI::browseTemplateGSAS_PRM() {
   m_calibSettings.m_templateGSAS_PRM = path.toStdString();
   m_uiTabSettings.lineEdit_template_gsas_prm->setText(
       QString::fromStdString(m_calibSettings.m_templateGSAS_PRM));
+}
+
+void EnggDiffractionViewQtGUI::browseDirFocusing() {
+  QString prevPath = QString::fromStdString(m_focusDir);
+  if (prevPath.isEmpty()) {
+    prevPath =
+        MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  }
+  QString dir = QFileDialog::getExistingDirectory(
+      this, tr("Open Directory"), prevPath,
+      QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+  if (dir.isEmpty()) {
+    return;
+  }
+
+  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(dir);
+  m_focusDir = dir.toStdString();
+  m_uiTabSettings.lineEdit_dir_focusing->setText(
+      QString::fromStdString(m_focusDir));
+}
+
+void EnggDiffractionViewQtGUI::browseTextureDetGroupingFile() {
+  QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirRaw);
+  if (prevPath.isEmpty()) {
+    prevPath =
+        MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  }
+
+  QString path(QFileDialog::getOpenFileName(
+      this, tr("Open detector grouping file"), prevPath,
+      QString::fromStdString(g_DetGrpExtStr)));
+
+  if (path.isEmpty()) {
+    return;
+  }
+
+  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
+  m_uiTabFocus.lineEdit_texture_grouping_file->setText(path);
+}
+
+std::string EnggDiffractionViewQtGUI::focusingRunNo() const {
+  return m_uiTabFocus.lineEdit_run_num->text().toStdString();
+}
+
+std::string EnggDiffractionViewQtGUI::focusingCroppedRunNo() const {
+  return m_uiTabFocus.lineEdit_cropped_run_num->text().toStdString();
+}
+
+std::string EnggDiffractionViewQtGUI::focusingTextureRunNo() const {
+  return m_uiTabFocus.lineEdit_texture_run_num->text().toStdString();
+}
+
+std::string EnggDiffractionViewQtGUI::focusingDir() const {
+  return m_uiTabSettings.lineEdit_dir_focusing->text().toStdString();
+}
+
+std::vector<bool> EnggDiffractionViewQtGUI::focusingBanks() const {
+  std::vector<bool> res;
+  res.push_back(m_uiTabFocus.checkBox_focus_bank1->isChecked());
+  res.push_back(m_uiTabFocus.checkBox_focus_bank2->isChecked());
+  return res;
+}
+
+std::string EnggDiffractionViewQtGUI::focusingCroppedSpectrumIDs() const {
+  return m_uiTabFocus.lineEdit_cropped_spec_ids->text().toStdString();
+}
+
+std::string EnggDiffractionViewQtGUI::focusingTextureGroupingFile() const {
+  return m_uiTabFocus.lineEdit_texture_grouping_file->text().toStdString();
+}
+
+bool EnggDiffractionViewQtGUI::focusedOutWorkspace() const {
+  return m_uiTabFocus.checkBox_FocusedWS->checkState();
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {

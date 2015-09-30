@@ -50,6 +50,7 @@ private:
   void exec();
   void readFocusInfo(std::ifstream &file);
   void readCharInfo(std::ifstream &file, API::ITableWorkspace_sptr &wksp);
+  void readExpIni(const std::string &filename, API::ITableWorkspace_sptr &wksp);
 };
 
 } // namespace DataHandling

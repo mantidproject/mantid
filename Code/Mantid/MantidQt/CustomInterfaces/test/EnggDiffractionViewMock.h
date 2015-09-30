@@ -71,11 +71,41 @@ public:
                void(const std::string &, const std::vector<double> &,
                     const std::vector<double> &));
 
-  // virtual void enableCalibrateActions(bool enable);
-  MOCK_METHOD1(enableCalibrateActions, void(bool));
+  // virtual void enableCalibrateAndFocusActions(bool enable);
+  MOCK_METHOD1(enableCalibrateAndFocusActions, void(bool));
+
+  // virtual std::string focusingDir() const;
+  MOCK_CONST_METHOD0(focusingDir, std::string());
+
+  // virtual std::string focusingRunNo() const;
+  MOCK_CONST_METHOD0(focusingRunNo, std::string());
+
+  // virtual std::string focusingCroppedRunNo() const;
+  MOCK_CONST_METHOD0(focusingCroppedRunNo, std::string());
+
+  // virtual std::string focusingTextureRunNo() const;
+  MOCK_CONST_METHOD0(focusingTextureRunNo, std::string());
+
+  // virtual int focusingBank() const;
+  MOCK_CONST_METHOD0(focusingBanks, std::vector<bool>());
+
+  // virtual std::string focusingCroppedSpectrumIDs() const;
+  MOCK_CONST_METHOD0(focusingCroppedSpectrumIDs, std::string());
+
+  // virtual std::string focusingTextureGroupingFile() const;
+  MOCK_CONST_METHOD0(focusingTextureGroupingFile, std::string());
+
+  // virtual void resetFocus();
+  MOCK_METHOD0(resetFocus, void());
+
+  // virtual bool focusedOutWorkspace() const;
+  MOCK_CONST_METHOD0(focusedOutWorkspace, bool());
 
   // void saveSettings() const;
   MOCK_CONST_METHOD0(saveSettings, void());
+
+  // virtual void plotFocusedSpectrum();
+  MOCK_METHOD1(plotFocusedSpectrum, void(const std::string&));
 };
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H

@@ -226,6 +226,35 @@ class TestEventWorkspaceCheck(unittest.TestCase):
         self.assertFalse(result)
         # Clean Up
         self._clean_up(file_name)
+        DeleteWorkspace(ws)
+
+class TestFitRescaleAndShift(unittest.TestCase):
+    def _create_workspace(self, ws_name):
+        CreateSampleWorkspace(OutputWorkspace = ws_name)
+    def test_that_2D_workspace_is_caught(self):
+        #Arrange
+        ws_name1 = "ws_fit_and_shift_test_1"
+        ws_name2 = "ws_fit_and_shift_test_2"
+        self._create_workspace(ws_name1)
+        self._create_workspace(ws_name2)
+        ws1 = mtd[ws_name1]
+        ws2 = mtd[ws_name2]
+
+        scale = 2.4
+        shift = 1.1
+        rAnds = instruments.DetectorBank._RescaleAndShift(scale, shift)
+
+        # Act
+        ret_scale, ret_shift = command_iface._fitRescaleAndShift(rAnds,ws1,ws2)
+
+        # Assert
+        self.assertTrue(ret_scale == scale)
+        self.assertTrue(ret_shift == shift)
+
+        # Clean up
+        DeleteWorkspace(ws1)
+        DeleteWorkspace(ws2)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -6,6 +6,7 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
+
 // #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionModel.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -58,9 +59,15 @@ public:
 
   virtual void notify(IEnggDiffractionPresenter::Notification notif);
 
-  // this is the calibration hard work that a worker / thread will run
+  /// the calibration hard work that a worker / thread will run
   void doNewCalibration(const std::string &outFilename,
                         const std::string &vanNo, const std::string &ceriaNo);
+
+  /// the focusing hard work that a worker / thread will run
+  void doFocusRun(const std::string &dir,
+                  const std::vector<std::string> &outFilenames,
+                  const std::string &runNo, const std::vector<bool> &banks,
+                  const std::string &specNos, const std::string &dgFile);
 
 protected:
   void initialize();
@@ -71,14 +78,21 @@ protected:
   void processStart();
   void processLoadExistingCalib();
   void processCalcCalib();
+  void processFocusBasic();
+  void processFocusCropped();
+  void processFocusTexture();
+  void processResetFocus();
   void processLogMsg();
   void processInstChange();
   void processShutDown();
 
 protected slots:
   void calibrationFinished();
+  void focusingFinished();
 
 private:
+  /// @name Calibration related private methods
+  //@{
   void inputChecksBeforeCalibrate(const std::string &newVanNo,
                                   const std::string &newCeriaNo);
 
@@ -89,15 +103,58 @@ private:
                               std::string &vanNo, std::string &ceriaNo);
 
   // this may need to be mocked up in tests
-  virtual void startAsynCalibWorker(const std::string &outFilename,
-                                    const std::string &vanNo,
-                                    const std::string &ceriaNo);
+  virtual void startAsyncCalibWorker(const std::string &outFilename,
+                                     const std::string &vanNo,
+                                     const std::string &ceriaNo);
 
   void doCalib(const EnggDiffCalibSettings &cs, const std::string &vanNo,
                const std::string &ceriaNo, const std::string &outFilename);
 
   std::string buildCalibrateSuggestedFilename(const std::string &vanNo,
                                               const std::string &ceriaNo) const;
+  //@}
+
+  /// @name Focusing related private methods
+  //@{
+  /// this may also need to be mocked up in tests
+  void startFocusing(const std::string &runNo, const std::vector<bool> &banks,
+                     const std::string &specNos = "",
+                     const std::string &dgFile = "");
+
+  void startAsyncFocusWorker(const std::string &dir,
+                             const std::vector<std::string> &outFilenames,
+                             const std::string &runNo,
+                             const std::vector<bool> &banks,
+                             const std::string &specNos,
+                             const std::string &dgFile);
+
+  void inputChecksBeforeFocusBasic(const std::string &runNo,
+                                   const std::vector<bool> &banks);
+  void inputChecksBeforeFocusCropped(const std::string &runNo,
+                                     const std::vector<bool> &banks,
+                                     const std::string &specNos);
+  void inputChecksBeforeFocusTexture(const std::string &runNo,
+                                     const std::string &dgfile);
+  void inputChecksBeforeFocus();
+  void inputChecksBanks(const std::vector<bool> &banks);
+
+  std::vector<std::string> outputFocusFilenames(const std::string &runNo,
+                                                const std::vector<bool> &banks);
+
+  std::string outputFocusCroppedFilename(const std::string &runNo);
+
+  std::vector<std::string>
+  outputFocusTextureFilenames(const std::string &runNo,
+                              const std::vector<size_t> &bankIDs);
+
+  void loadDetectorGroupingCSV(const std::string &dgFile,
+                               std::vector<size_t> &bankIDs,
+                               std::vector<std::string> &specs);
+
+  void doFocusing(const EnggDiffCalibSettings &cs,
+                  const std::string &fullFilename, const std::string &runNo,
+                  size_t bank, const std::string &specNos,
+                  const std::string &dgFile);
 
   void loadOrCalcVanadiumWorkspaces(
       const std::string &vanNo, const std::string &inputDirCalib,
@@ -125,10 +182,15 @@ private:
   /// whether to allow users to give the output calibration filename
   const static bool g_askUserCalibFilename;
 
+  // name of the workspace with the vanadium integration (of spectra)
+  static const std::string g_vanIntegrationWSName;
+
   QThread *m_workerThread;
 
   /// true if the last calibration completed successfully
   bool m_calibFinishedOK;
+  /// true if the last focusing completed successfully
+  bool m_focusFinishedOK;
 
   /// Associated view for this presenter (MVP pattern)
   IEnggDiffractionView *const m_view;

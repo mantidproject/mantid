@@ -416,7 +416,7 @@ public:
   void test_getDetectorsInBank2()
   {
     // 5 banks with 9 pixels each
-    Instrument_const_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5, false);
+    Instrument_const_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     std::vector<IDetector_const_sptr> dets;
     inst->getDetectorsInBank(dets, "bank2");
     TS_ASSERT_EQUALS(dets.size(), 9);
@@ -501,7 +501,7 @@ public:
 
 
     Instrument_sptr instrNone 
-      = ComponentCreationHelper::createTestInstrumentCylindrical(5, false);
+      = ComponentCreationHelper::createTestInstrumentCylindrical(5);
 
     TS_ASSERT_EQUALS(instrNone->containsRectDetectors(),
                      Instrument::ContainsState::None);

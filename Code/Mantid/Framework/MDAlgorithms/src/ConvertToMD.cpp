@@ -201,6 +201,7 @@ void ConvertToMD::exec() {
   // initiate conversion and estimate amount of job to do
   size_t n_steps =
       this->m_Convertor->initialize(targWSDescr, m_OutWSWrapper, ignoreZeros);
+
   // copy the metadata, necessary for resolution corrections
   copyMetaData(spws);
 
@@ -210,6 +211,9 @@ void ConvertToMD::exec() {
   g_log.information() << " conversion started\n";
   // DO THE JOB:
   this->m_Convertor->runConversion(m_Progress.get());
+
+  // Set the normalization of the event workspace
+  m_Convertor->setDisplayNormalization(spws, m_InWS2D);
 
   // JOB COMPLETED:
   setProperty("OutputWorkspace",

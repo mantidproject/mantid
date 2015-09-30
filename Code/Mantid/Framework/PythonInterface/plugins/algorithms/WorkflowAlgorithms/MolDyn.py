@@ -55,15 +55,11 @@ class MolDyn(PythonAlgorithm):
         except ValueError, vex:
             issues['Data'] = str(vex)
 
-        symm = self.getProperty('SymmetriseEnergy').value
         res_ws = self.getPropertyValue('Resolution')
         max_energy = self.getPropertyValue('MaxEnergy')
 
         if res_ws != '' and max_energy == Property.EMPTY_DBL:
             issues['MaxEnergy'] = 'MaxEnergy must be set when convolving with an instrument resolution'
-
-        if res_ws != '' and not symm:
-            issues['SymmetriseEnergy'] = 'Must symmetrise energy when convolving with instrument resolution'
 
         return issues
 
@@ -118,17 +114,18 @@ class MolDyn(PythonAlgorithm):
                     elif max_energy_param != Property.EMPTY_DBL:
                         CropWorkspace(InputWorkspace=ws_name,
                                       OutputWorkspace=ws_name,
+                                      XMin=-max_energy,
                                       XMax=max_energy)
 
         # Do convolution if given a resolution workspace
-        if self.getPropertyValue('Resolution') is not '':
+        if self.getPropertyValue('Resolution') != '':
             # Create a workspace with enough spectra for convolution
             num_sample_hist = mtd[output_ws_name].getItem(0).getNumberHistograms()
             resolution_ws = self._create_res_ws(num_sample_hist)
 
             # Convolve all workspaces in output group
             for ws_name in mtd[output_ws_name].getNames():
-                if ws_name.lower().find('sqw') != -1:
+                if 'Energy' in mtd[ws_name].getAxis(0).getUnit().unitID():
                     self._convolve_with_res(resolution_ws, ws_name)
                 else:
                     logger.information('Ignoring workspace %s in convolution step' % ws_name)

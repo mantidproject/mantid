@@ -24,9 +24,9 @@ isotopes have been taken from
 
 Chemical Composition with Examples
 ##################################
-- ``H2 O``
-- ``(H2)2 O``
-- ``D2 O``
+- ``H2 O`` - Isotopically averaged Hydrogen
+- ``(H2)2 O`` - Heavy water
+- ``D2 O`` - Another way to specify heavy water
 
 Enter a composition as a molecular formula of elements or isotopes. 
 For example, basic elements might be ``H``, ``Fe`` or ``Si``, etc. 

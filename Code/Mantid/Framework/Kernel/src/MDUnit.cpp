@@ -1,5 +1,7 @@
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/UnitLabelTypes.h"
+#include <boost/regex.hpp>
+
 
 namespace Mantid {
 namespace Kernel {
@@ -40,7 +42,9 @@ bool ReciprocalLatticeUnit::canConvertTo(const MDUnit &other) const {
   return other.isQUnit();
 }
 
-ReciprocalLatticeUnit* ReciprocalLatticeUnit::clone() const {return new ReciprocalLatticeUnit;}
+ReciprocalLatticeUnit *ReciprocalLatticeUnit::clone() const {
+  return new ReciprocalLatticeUnit;
+}
 
 ReciprocalLatticeUnit::~ReciprocalLatticeUnit() {}
 //----------------------------------------------------------------------------------------------
@@ -61,7 +65,9 @@ bool InverseAngstromsUnit::canConvertTo(const MDUnit &other) const {
 
 InverseAngstromsUnit::~InverseAngstromsUnit() {}
 
-InverseAngstromsUnit* InverseAngstromsUnit::clone() const {return new InverseAngstromsUnit;}
+InverseAngstromsUnit *InverseAngstromsUnit::clone() const {
+  return new InverseAngstromsUnit;
+}
 
 //----------------------------------------------------------------------------------------------
 // Inverse Angstrom Unit
@@ -71,7 +77,7 @@ InverseAngstromsUnit* InverseAngstromsUnit::clone() const {return new InverseAng
 //  LabelUnit
 //----------------------------------------------------------------------------------------------
 
-LabelUnit::LabelUnit(const UnitLabel& unitLabel): m_unitLabel(unitLabel) {}
+LabelUnit::LabelUnit(const UnitLabel &unitLabel) : m_unitLabel(unitLabel) {}
 
 UnitLabel LabelUnit::getUnitLabel() const { return m_unitLabel; }
 
@@ -79,11 +85,15 @@ bool LabelUnit::canConvertTo(const MDUnit &other) const {
   return this->getUnitLabel() == other.getUnitLabel();
 }
 
-bool LabelUnit::isQUnit() const { return false; }
+bool LabelUnit::isQUnit() const {
+  boost::regex pattern("(A\\^-1)");
+  boost::smatch match; // Unused.
+  return boost::regex_search(m_unitLabel.ascii(), match, pattern);
+}
 
 LabelUnit::~LabelUnit() {}
 
-LabelUnit* LabelUnit::clone() const {return new LabelUnit(m_unitLabel);}
+LabelUnit *LabelUnit::clone() const { return new LabelUnit(m_unitLabel); }
 
 //----------------------------------------------------------------------------------------------
 // End RLU

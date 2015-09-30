@@ -1800,7 +1800,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   }
 
   prog->report("Initializing all pixels");
-  // Remove used banks if parameter is set
+
+  // Remove unused banks if parameter is set
   if (m_ws->getInstrument()->hasParameter("remove-unused-banks")) {
     std::vector<double> instrumentUnused =
         m_ws->getInstrument()->getNumberParameter("remove-unused-banks", true);
@@ -1941,6 +1942,28 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
                                                "may indicate errors in the raw "
                                                "TOF data." << std::endl;
 
+  // Use T0 offset from TOPAZ Parameter file if it exists
+  if (m_ws->getInstrument()->hasParameter("T0")) {
+    std::vector<double> instrumentT0 =
+        m_ws->getInstrument()->getNumberParameter("T0", true);
+    if (!instrumentT0.empty()) {
+      const double mT0 = instrumentT0.front();
+      if (mT0 != 0.0) {
+        int64_t numHistograms = static_cast<int64_t>(m_ws->getNumberHistograms());
+        PARALLEL_FOR1(m_ws)
+        for (int64_t i = 0; i < numHistograms; ++i) {
+          PARALLEL_START_INTERUPT_REGION
+          // Do the offsetting
+          m_ws->getEventList(i).addTof(mT0);
+          PARALLEL_END_INTERUPT_REGION
+        }
+        PARALLEL_CHECK_INTERUPT_REGION
+        // set T0 in the run parameters
+        API::Run &run = m_ws->mutableRun();
+        run.addProperty<double>("T0", mT0, true);
+      }
+    }
+  }
   // Now, create a default X-vector for histogramming, with just 2 bins.
   Kernel::cow_ptr<MantidVec> axis;
   MantidVec &xRef = axis.access();

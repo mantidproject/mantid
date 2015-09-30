@@ -48,6 +48,12 @@ class StatisticsTest(unittest.TestCase):
         self.assertAlmostEqual(1.23658, modZ[4], places = 4)
         self.assertAlmostEqual(0.33725, modZ[6], places = 4)
 
+        # Test the sorted argument still works. Remove this when the function is removed
+        # sorted=True only ever affected the order
+        zscore = Stats.getZscore(arr, sorted=True)
+        self.assertAlmostEqual(1.63977, zscore[4], places = 4)
+        self.assertAlmostEqual(0.32235, zscore[6], places = 4)
+
     def test_getMoments(self):
         mean = 5.
         sigma = 4.

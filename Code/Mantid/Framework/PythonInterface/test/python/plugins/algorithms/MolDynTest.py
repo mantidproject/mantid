@@ -44,7 +44,7 @@ class MolDynTest(unittest.TestCase):
                              Functions=['fqt_total'],
                              OutputWorkspace='__LoadNMoldyn4Ascii_test')
 
-        self.assertTrue(isinstance(function_ws, MatrixWorkspace))
+        self.assertTrue(isinstance(function_ws, WorkspaceGroup))
 
 
     def test_loadSqwWithEMax(self):
@@ -103,27 +103,6 @@ class MolDynTest(unittest.TestCase):
         self.assertTrue(isinstance(moldyn_group, WorkspaceGroup))
         self.assertEqual(len(moldyn_group), 1)
         self.assertEqual(moldyn_group[0].name(), 'NaF_DISF_Sqw-total')
-
-
-    def test_loadSqwWithResWithNoEMaxFails(self):
-        """
-        Tests that trying to use an instrument resolution without a Max Energy will fail.
-        """
-
-        # Create a sample workspace thet looks like an instrument resolution
-        sample_res = CreateSampleWorkspace(NumBanks=1,
-                                           BankPixelWidth=1,
-                                           XUnit='Energy',
-                                           XMin=-10,
-                                           XMax=10,
-                                           BinWidth=0.1)
-
-        # Load an Sqw function from a nMOLDYN file
-        self.assertRaises(RuntimeError, MolDyn,
-                          Data='NaF_DISF.cdl',
-                          Functions=['Sqw-total'],
-                          Resolution=sample_res,
-                          OutputWorkspace='moldyn_group')
 
 
 if __name__ == '__main__':

@@ -9,6 +9,7 @@
 #include "vtkUnstructuredGrid.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 
+
 #include "MantidVatesAPI/MDHWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
@@ -213,6 +214,8 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     std::string error = e.what();
       vtkDebugMacro(<< "Workspace does not have correct information to "
                     << "plot non-orthogonal axes. " << error);
+      // Add the standard change of basis matrix and set the boundaries
+      m_presenter->setDefaultCOBandBoundaries(output);
     }
     m_presenter->setAxisLabels(output);
   }
@@ -341,3 +344,5 @@ const char* vtkMDHWSource::GetWorkspaceName()
 {
   return m_wsName.c_str();
 }
+
+

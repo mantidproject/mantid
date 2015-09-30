@@ -11,16 +11,16 @@
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDLeanEvent.h"
-
+ 
 // We need to include the .cpp files so that the declarations are picked up
 // correctly. Weird, I know.
 // See http://www.parashift.com/c++-faq-lite/templates.html#faq-35.13
-#include "MDBoxBase.cpp"
-#include "MDBox.cpp"
-#include "MDEventWorkspace.cpp"
-#include "MDGridBox.cpp"
-#include "MDBin.cpp"
-#include "MDBoxIterator.cpp"
+#include "MantidDataObjects/MDBoxBase.tcc"
+#include "MantidDataObjects/MDBox.tcc"
+#include "MantidDataObjects/MDEventWorkspace.tcc"
+#include "MantidDataObjects/MDGridBox.tcc"
+#include "MantidDataObjects/MDBin.tcc"
+#include "MantidDataObjects/MDBoxIterator.tcc"
 
 namespace Mantid {
 namespace DataObjects {
@@ -184,19 +184,23 @@ template DLLExport class MDBoxIterator<MDLeanEvent<9>, 9>;
 /** Create a MDEventWorkspace of the given type
 @param nd :: number of dimensions
 @param eventType :: string describing the event type (MDEvent or MDLeanEvent)
+@param preferredNormalization: the preferred normalization for the event workspace
+@param preferredNormalizationHisto: preferred normalization for histo workspaces which derive
+                                    from this event workspace
 @return shared pointer to the MDEventWorkspace created (as a IMDEventWorkspace).
 */
-API::IMDEventWorkspace_sptr
-MDEventFactory::CreateMDWorkspace(size_t nd, const std::string &eventType) {
-
+API::IMDEventWorkspace_sptr MDEventFactory::CreateMDWorkspace(
+    size_t nd, const std::string &eventType,
+    const Mantid::API::MDNormalization& preferredNormalization,
+    const Mantid::API::MDNormalization& preferredNormalizationHisto) {
   if (nd > MAX_MD_DIMENSIONS_NUM)
     throw std::invalid_argument(
         " there are more dimensions requested then instantiated");
-
-  API::IMDEventWorkspace *pWs = (*(wsCreatorFP[nd]))(eventType);
-
+  API::IMDEventWorkspace *pWs = (*(wsCreatorFP[nd]))(
+      eventType, preferredNormalization, preferredNormalizationHisto);
   return boost::shared_ptr<API::IMDEventWorkspace>(pWs);
 }
+
 /** Create a MDBox or MDGridBoxof the given type
 @param nDimensions  :: number of dimensions
 @param Type         :: enum descibing the box (MDBox or MDGridBox) and the event
@@ -259,32 +263,47 @@ std::vector<MDEventFactory::fpCreateMDWS>
 
 //-------------------------------------------------------------- MD Workspace
 // constructor wrapper
-/** Template to create md workspace with specific number of dimentisons
+/** Template to create md workspace with specific number of dimensions
  * @param eventType -- type of event (lean or full) to generate workspace for
+ * @param preferredNormalization: the preferred normalization for the event
+ * workspace
+ * @param preferredNormalizationHisto: the preferred normalization for a derived
+ * histo workspace
 */
 template <size_t nd>
-API::IMDEventWorkspace *
-MDEventFactory::createMDWorkspaceND(const std::string &eventType) {
+API::IMDEventWorkspace *MDEventFactory::createMDWorkspaceND(
+    const std::string &eventType,
+    const Mantid::API::MDNormalization& preferredNormalization,
+    const Mantid::API::MDNormalization& preferredNormalizationHisto) {
   if (eventType == "MDEvent")
-    return new MDEventWorkspace<MDEvent<nd>, nd>;
+    return new MDEventWorkspace<MDEvent<nd>, nd>(preferredNormalization,
+                                                 preferredNormalizationHisto);
   else if (eventType == "MDLeanEvent")
-    return new MDEventWorkspace<MDLeanEvent<nd>, nd>;
+    return new MDEventWorkspace<MDLeanEvent<nd>, nd>(
+        preferredNormalization, preferredNormalizationHisto);
   else
     throw std::invalid_argument("Unknown event type " + eventType +
                                 " passed to CreateMDWorkspace.");
 }
-/** Template to create md workspace with 0 number of dimentisons. As this is
+/** Template to create md workspace w ith 0 number of dimentisons. As this is
  * wrong, just throws. Used as terminator and check for the wrong dimensions
  * number
  * @param eventType -- type of event (lean or full) to generate workspace for -
  * -does not actually used.
+ * @param preferredNormalization: the preferred normalization of the workspace
+ * @param preferredNormalizationHisto: the preferred normalization of the derived histo workspace
 */
 template <>
-API::IMDEventWorkspace *
-MDEventFactory::createMDWorkspaceND<0>(const std::string &eventType) {
+API::IMDEventWorkspace *MDEventFactory::createMDWorkspaceND<0>(
+    const std::string &eventType,
+    const Mantid::API::MDNormalization& preferredNormalization,
+    const Mantid::API::MDNormalization& preferredNormalizationHisto) {
   UNUSED_ARG(eventType);
+  UNUSED_ARG(preferredNormalization);
+  UNUSED_ARG(preferredNormalizationHisto);
   throw std::invalid_argument("Workspace can not have 0 dimensions");
 }
+
 //-------------------------------------------------------------- MD BOX
 // constructor wrapper
 /** Method to create any MDBox type with 0 number of dimensions. As it is wrong,

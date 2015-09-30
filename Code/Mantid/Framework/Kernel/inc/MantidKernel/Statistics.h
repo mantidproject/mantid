@@ -1,6 +1,27 @@
 #ifndef MANTID_KERNEL_STATISTICS_H_
 #define MANTID_KERNEL_STATISTICS_H_
+/**
+   Copyright &copy; 2010-2012 ISIS Rutherford Appleton Laboratory, NScD Oak
+   Ridge National Laboratory & European Spallation Source
 
+   This file is part of Mantid.
+
+   Mantid is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   Mantid is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   File change history is stored at: <https://github.com/mantidproject/mantid>.
+   Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
 #include "MantidKernel/DllConfig.h"
 #include <vector>
 
@@ -24,26 +45,6 @@ enum StatisticType {
 /**
    Simple struct to store statistics.
 
-   Copyright &copy; 2010-2012 ISIS Rutherford Appleton Laboratory, NScD Oak
-   Ridge National Laboratory & European Spallation Source
-
-   This file is part of Mantid.
-
-   Mantid is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
-
-   Mantid is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-   File change history is stored at: <https://github.com/mantidproject/mantid>.
-   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 struct Statistics {
   /// Minimum value
@@ -56,6 +57,18 @@ struct Statistics {
   double median;
   /// standard_deviation of the values
   double standard_deviation;
+};
+
+/// Controls the computation of statisical data
+struct StatOptions {
+  enum Flag {
+    SortedData = 1,        // is the data sorted?
+    Mean = 2,              // calculate the mean
+    UncorrectedStdDev = 4, // calculate the s.d. using N dofs
+    CorrectedStdDev = 8,   // calculate the s.d. using N-1 dofs
+    Median = 16,           // calculate the median
+    AllStats = (Mean | UncorrectedStdDev | Median)
+  };
 };
 
 /** R factor for powder data analysis
@@ -76,11 +89,10 @@ struct Rfactor {
 /// Return a statistics object for the given data set
 template <typename TYPE>
 Statistics getStatistics(const std::vector<TYPE> &data,
-                         const bool sorted = false);
+                         const unsigned int flags = StatOptions::AllStats);
 /// Return the Z score values for a dataset
 template <typename TYPE>
-std::vector<double> getZscore(const std::vector<TYPE> &data,
-                              const bool sorted = false);
+std::vector<double> getZscore(const std::vector<TYPE> &data);
 /// Return the modified Z score values for a dataset
 template <typename TYPE>
 std::vector<double> getModifiedZscore(const std::vector<TYPE> &data,

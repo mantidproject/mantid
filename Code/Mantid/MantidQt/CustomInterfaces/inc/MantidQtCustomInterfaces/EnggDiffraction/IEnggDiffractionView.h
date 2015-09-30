@@ -183,13 +183,77 @@ public:
                                  const std::vector<double> &tzero) = 0;
 
   /**
-   * Enable/disable calibrate actions. The idea is that actions /
-   * buttons like 'calibrate' or 'load calibration' can be disabled
-   * while a calibration is being calculated.
+   * Enable/disable calibrate+focus actions. The idea is that actions
+   * / buttons like 'calibrate', 'load calibration', or 'focus' can be
+   * disabled while a calibration of a focusing is being calculated.
    *
    * @param enable true to enable actions (default initial state)
    */
-  virtual void enableCalibrateActions(bool enable) = 0;
+  virtual void enableCalibrateAndFocusActions(bool enable) = 0;
+
+  /**
+   * Directory set for focusing outputs
+   *
+   * @return directory path as a string
+   */
+  virtual std::string focusingDir() const = 0;
+
+  /**
+   * A (sample) run to focus
+   *
+   * @return run number, as a string
+   */
+  virtual std::string focusingRunNo() const = 0;
+
+  /**
+   * A (sample) run to focus, in "cropped" mode
+   *
+   * @return run number, as a string
+   */
+  virtual std::string focusingCroppedRunNo() const = 0;
+
+  /**
+   * A (sample) run to focus, in "texture" mode
+   *
+   * @return run number, as a string
+   */
+  virtual std::string focusingTextureRunNo() const = 0;
+
+  /**
+   * Banks to consider when focusing
+   *
+   * @return vector with a boolean value that tells if the
+   * corresponding instrument bank numbers should be focused
+   */
+  virtual std::vector<bool> focusingBanks() const = 0;
+
+  /**
+   * Specification of spectrum IDs for focus in "cropped" mode.
+   *
+   * @return spectrum IDs, expected as a comma separated list of
+   * integers or ranges of integers.
+   */
+  virtual std::string focusingCroppedSpectrumIDs() const = 0;
+
+  /**
+   * Detector grouping file, used when focusing in "texture" mode.
+   *
+   * @return name of the grouping file with texture bank definitions
+   */
+  virtual std::string focusingTextureGroupingFile() const = 0;
+
+  /**
+   * Check box to consider when focusing
+   * whether to plot focused workspace
+   *
+   * @return bool
+   */
+  virtual bool focusedOutWorkspace() const = 0;
+
+  /**
+   * Reset all focus inputs/options
+   */
+  virtual void resetFocus() = 0;
 
   /**
    * Save settings (normally when closing the interface). This
@@ -197,6 +261,14 @@ public:
    * geometry, preferences etc. of the user interface.
    */
   virtual void saveSettings() const = 0;
+
+  /**
+  * Produces a single spectrum graph for focused output. Runs
+  * plotSpectrum function via python.
+  *
+  * @param wsName name of the workspace to plot (must be in the ADS)
+  */
+  virtual void plotFocusedSpectrum(const std::string &wsName) = 0;
 };
 
 } // namespace CustomInterfaces

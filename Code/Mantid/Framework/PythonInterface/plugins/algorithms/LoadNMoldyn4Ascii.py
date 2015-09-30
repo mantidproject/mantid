@@ -111,12 +111,8 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
         out_ws_name = self.getPropertyValue('OutputWorkspace')
         if len(loaded_function_workspaces) == 0:
             raise RuntimeError('Failed to load any functions for data')
-        elif len(functions) == 1:
-            RenameWorkspace(InputWorkspace=loaded_function_workspaces[0],
-                            OutputWorkspace=out_ws_name)
-        else:
-            GroupWorkspaces(InputWorkspaces=loaded_function_workspaces,
-                            OutputWorkspace=out_ws_name)
+        GroupWorkspaces(InputWorkspaces=loaded_function_workspaces,
+                        OutputWorkspace=out_ws_name)
 
         # Set the output workspace
         self.setProperty('OutputWorkspace', out_ws_name)

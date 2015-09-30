@@ -31,11 +31,17 @@ namespace Mantid {
 namespace DataObjects {
 
 //-----------------------------------------------------------------------------------------------
-/** Default constructor
+/** Constructor
  */
-TMDE(MDEventWorkspace)::MDEventWorkspace()
+
+TMDE(MDEventWorkspace)::MDEventWorkspace(
+    Mantid::API::MDNormalization preferredNormalization,
+    Mantid::API::MDNormalization preferredNormalizationHisto)
     : API::IMDEventWorkspace(), data(NULL),
-      m_BoxController(new BoxController(nd)), m_coordSystem(None) {
+      m_BoxController(new BoxController(nd)),
+      m_displayNormalization(preferredNormalization),
+      m_displayNormalizationHisto(preferredNormalizationHisto),
+      m_coordSystem(None) {
   // First box is at depth 0, and has this default boxController
   data = new MDBox<MDE, nd>(m_BoxController.get(), 0);
 }
@@ -45,7 +51,10 @@ TMDE(MDEventWorkspace)::MDEventWorkspace()
  */
 TMDE(MDEventWorkspace)::MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other)
     : IMDEventWorkspace(other), data(NULL),
-      m_BoxController(other.m_BoxController->clone()), m_coordSystem(other.m_coordSystem) {
+      m_BoxController(other.m_BoxController->clone()),
+      m_displayNormalization(other.m_displayNormalization),
+      m_displayNormalizationHisto(other.m_displayNormalizationHisto),
+      m_coordSystem(other.m_coordSystem) {
 
   const MDBox<MDE, nd> *mdbox =
       dynamic_cast<const MDBox<MDE, nd> *>(other.data);
@@ -729,7 +738,7 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
           normalizer = box->getInverseVolume();
           break;
         case NumEventsNormalization:
-          normalizer = double(box->getNPoints());
+          normalizer = 1.0 / double(box->getNPoints());
           break;
         }
 
@@ -799,12 +808,42 @@ TMDE(void MDEventWorkspace)::setCoordinateSystem(
   m_coordSystem = coordSystem;
 }
 
+
+/**
+  Set the display normalization for any subsequently generated histoworkspaces.
+  @param preferredNormalization : Display normalization preference to pass on to generated histo workspaces.
+*/
+TMDE(void MDEventWorkspace)::setDisplayNormalizationHisto(
+     const Mantid::API::MDNormalization preferredNormalizationHisto) {
+  m_displayNormalizationHisto = preferredNormalizationHisto;
+}
+
+/**
+Return the preferred normalization preference for subsequent histoworkspaces.
+*/
+TMDE(MDNormalization MDEventWorkspace)::displayNormalizationHisto() const {
+  return m_displayNormalizationHisto;
+}
+
+
+/**
+  Set the display normalization
+  @param preferredNormalization : Display normalization preference.
+*/
+TMDE(void MDEventWorkspace)::setDisplayNormalization(
+     const Mantid::API::MDNormalization preferredNormalization) {
+  m_displayNormalization = preferredNormalization;
+}
+
+
 /**
 Return the preferred normalization to use for visualization.
 */
 TMDE(MDNormalization MDEventWorkspace)::displayNormalization() const {
-  return VolumeNormalization; // volume normalization preferred for display purposes.
+  return m_displayNormalization ;
 }
+
+
 
 } // namespace DataObjects
 

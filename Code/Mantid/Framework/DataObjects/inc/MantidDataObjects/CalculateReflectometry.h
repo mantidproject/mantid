@@ -1,6 +1,7 @@
 #ifndef MANTID_DATAOBJECTS_CALCULATEREFLECTOMETRY_H_
 #define MANTID_DATAOBJECTS_CALCULATEREFLECTOMETRY_H_
 
+#include "MantidGeometry/Math/Quadrilateral.h"
 #include <cmath>
 
 namespace Mantid {
@@ -45,6 +46,8 @@ public:
    @param wavelength : wavelength in Angstroms
    */
   virtual double calculateDim1(double wavelength) const = 0;
+
+  virtual Mantid::Geometry::Quadrilateral createQuad(double lamLower, double lamUpper, double thetaLower, double thetaUpper) = 0;
 };
 }
 }

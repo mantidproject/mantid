@@ -98,7 +98,7 @@ PythonScripting::~PythonScripting()
  */
 void PythonScripting::setSysArgs(const QStringList &args)
 {
-  GlobalInterpreterLock gil;
+  ScopedPythonGIL gil;
 
   PyObject *argv = toPyList(args);
   if(argv && m_sys)
@@ -250,11 +250,11 @@ bool PythonScripting::start()
     PyEval_InitThreads();
     // We immediately release the lock and threadstate so that other points in
     // the code can simply use the PyGILstate_Ensure/PyGILstate_Release()
-    // mechanism (through the GlobalInterpreterLock class) and they don't
+    // mechanism (through the ScopedPythonGIL class) and they don't
     // need to worry about swapping out the threadstate before hand.
-    // It would be better if the GlobalInterpreterLock handled this but
+    // It would be better if the ScopedPythonGIL handled this but
     // PyEval_SaveThread() needs to be called in the thread that spawns the
-    // new C thread meaning that GlobalInterpreterLock could no longer
+    // new C thread meaning that ScopedPythonGIL could no longer
     // be used as a simple RAII class on the stack from within the new thread.
     m_mainThreadState = PyEval_SaveThread();
   }

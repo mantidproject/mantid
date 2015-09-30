@@ -20,20 +20,20 @@ namespace FractionalRebinning {
 
 /**
  * Find the possible region of intersection on the output workspace for the
- * given polygon
+ * given polygon. The given polygon must have a CLOCKWISE winding.
  * @param outputWS A pointer to the output workspace
  * @param verticalAxis A vector containing the output vertical axis edges
- * @param inputQ The input polygon
+ * @param inputQ The input polygon (Polygon winding must be clockwise)
  * @param qstart An output giving the starting index in the Q direction
  * @param qend An output giving the end index in the Q direction
- * @param en_start An output giving the start index in the dE direction
- * @param en_end An output giving the end index in the dE direction
+ * @param x_start An output giving the start index in the dX direction
+ * @param x_end An output giving the end index in the dX direction
  * @return True if an intersecition is possible
  */
 bool getIntersectionRegion(MatrixWorkspace_const_sptr outputWS,
                            const std::vector<double> &verticalAxis,
                            const Quadrilateral &inputQ, size_t &qstart,
-                           size_t &qend, size_t &en_start, size_t &en_end) {
+                           size_t &qend, size_t &x_start, size_t &x_end) {
   const MantidVec &xAxis = outputWS->readX(0);
   const double xn_lo(inputQ.minX()), xn_hi(inputQ.maxX());
   const double yn_lo(inputQ.minY()), yn_hi(inputQ.maxY());
@@ -46,13 +46,13 @@ bool getIntersectionRegion(MatrixWorkspace_const_sptr outputWS,
       std::upper_bound(xAxis.begin(), xAxis.end(), xn_lo);
   MantidVec::const_iterator end_it =
       std::upper_bound(xAxis.begin(), xAxis.end(), xn_hi);
-  en_start = 0;
-  en_end = xAxis.size() - 1;
+  x_start = 0;
+  x_end = xAxis.size() - 1;
   if (start_it != xAxis.begin()) {
-    en_start = (start_it - xAxis.begin() - 1);
+    x_start = (start_it - xAxis.begin() - 1);
   }
   if (end_it != xAxis.end()) {
-    en_end = end_it - xAxis.begin();
+    x_end = end_it - xAxis.begin();
   }
 
   // Q region
@@ -103,8 +103,9 @@ void normaliseOutput(MatrixWorkspace_sptr outputWS,
 }
 
 /**
- * Rebin the input quadrilateral to the output grid
- * @param inputQ The input polygon
+ * Rebin the input quadrilateral to the output grid. 
+ * The quadrilateral must have a CLOCKWISE winding.
+ * @param inputQ The input polygon (Polygon winding must be Clockwise)
  * @param inputWS The input workspace containing the input intensity values
  * @param i The index in the vertical axis direction that inputQ references
  * @param j The index in the horizontal axis direction that inputQ references
@@ -117,10 +118,10 @@ void rebinToOutput(const Quadrilateral &inputQ,
                    const size_t j, MatrixWorkspace_sptr outputWS,
                    const std::vector<double> &verticalAxis) {
   const MantidVec &X = outputWS->readX(0);
-  size_t qstart(0), qend(verticalAxis.size() - 1), en_start(0),
-      en_end(X.size() - 1);
+  size_t qstart(0), qend(verticalAxis.size() - 1), x_start(0),
+      x_end(X.size() - 1);
   if (!getIntersectionRegion(outputWS, verticalAxis, inputQ, qstart, qend,
-                             en_start, en_end))
+                             x_start, x_end))
     return;
 
   const auto &inY = inputWS->readY(i);
@@ -129,14 +130,14 @@ void rebinToOutput(const Quadrilateral &inputQ,
   // each calculation
   // in the loop
   ConvexPolygon intersectOverlap;
-  for (size_t qi = qstart; qi < qend; ++qi) {
-    const double vlo = verticalAxis[qi];
-    const double vhi = verticalAxis[qi + 1];
-    for (size_t ei = en_start; ei < en_end; ++ei) {
-      const V2D ll(X[ei], vlo);
-      const V2D lr(X[ei + 1], vlo);
-      const V2D ur(X[ei + 1], vhi);
-      const V2D ul(X[ei], vhi);
+  for (size_t y = qstart; y < qend; ++y) {
+    const double vlo = verticalAxis[y];
+    const double vhi = verticalAxis[y + 1];
+    for (size_t xi = x_start; xi < x_end; ++xi) {
+      const V2D ll(X[xi], vlo);
+      const V2D lr(X[xi + 1], vlo);
+      const V2D ur(X[xi + 1], vhi);
+      const V2D ul(X[xi], vhi);
       const Quadrilateral outputQ(ll, lr, ur, ul);
 
       double yValue = inY[j];
@@ -156,8 +157,8 @@ void rebinToOutput(const Quadrilateral &inputQ,
         }
         eValue = eValue * eValue;
         PARALLEL_CRITICAL(overlap_sum) {
-          outputWS->dataY(qi)[ei] += yValue;
-          outputWS->dataE(qi)[ei] += eValue;
+          outputWS->dataY(y)[xi] += yValue;
+          outputWS->dataE(y)[xi] += eValue;
         }
       }
     }
@@ -166,9 +167,10 @@ void rebinToOutput(const Quadrilateral &inputQ,
 
 /**
  * Rebin the input quadrilateral to the output grid
- * @param inputQ The input polygon
+ * The quadrilateral must have a CLOCKWISE winding.
+ * @param inputQ The input polygon (Polygon winding must be clockwise)
  * @param inputWS The input workspace containing the input intensity values
- * @param i The index in the vertical axis direction that inputQ references
+ * @param i The indexiin the vertical axis direction that inputQ references
  * @param j The index in the horizontal axis direction that inputQ references
  * @param outputWS A pointer to the output workspace that accumulates the data
  * @param verticalAxis A vector containing the output vertical axis bin
@@ -179,10 +181,10 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
                              const size_t j, RebinnedOutput_sptr outputWS,
                              const std::vector<double> &verticalAxis) {
   const MantidVec &X = outputWS->readX(0);
-  size_t qstart(0), qend(verticalAxis.size() - 1), en_start(0),
-      en_end(X.size() - 1);
+  size_t qstart(0), qend(verticalAxis.size() - 1), x_start(0),
+      x_end(X.size() - 1);
   if (!getIntersectionRegion(outputWS, verticalAxis, inputQ, qstart, qend,
-                             en_start, en_end))
+                             x_start, x_end))
     return;
 
   const auto &inY = inputWS->readY(i);
@@ -195,14 +197,14 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
   // each calculation
   // in the loop
   ConvexPolygon intersectOverlap;
-  for (size_t qi = qstart; qi < qend; ++qi) {
-    const double vlo = verticalAxis[qi];
-    const double vhi = verticalAxis[qi + 1];
-    for (size_t ei = en_start; ei < en_end; ++ei) {
-      const V2D ll(X[ei], vlo);
-      const V2D lr(X[ei + 1], vlo);
-      const V2D ur(X[ei + 1], vhi);
-      const V2D ul(X[ei], vhi);
+  for (size_t yi = qstart; yi < qend; ++yi) {
+    const double vlo = verticalAxis[yi];
+    const double vhi = verticalAxis[yi + 1];
+    for (size_t xi = x_start; xi < x_end; ++xi) {
+      const V2D ll(X[xi], vlo);
+      const V2D lr(X[xi+ 1], vlo);
+      const V2D ur(X[xi+ 1], vhi);
+      const V2D ul(X[xi], vhi);
       const Quadrilateral outputQ(ll, lr, ur, ul);
 
       double yValue = inY[j];
@@ -222,9 +224,9 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
         }
         eValue *= eValue;
         PARALLEL_CRITICAL(overlap) {
-          outputWS->dataY(qi)[ei] += yValue;
-          outputWS->dataE(qi)[ei] += eValue;
-          outputWS->dataF(qi)[ei] += weight;
+          outputWS->dataY(yi)[xi] += yValue;
+          outputWS->dataE(yi)[xi] += eValue;
+          outputWS->dataF(yi)[xi] += weight;
         }
       }
     }

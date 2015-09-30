@@ -103,8 +103,8 @@ void CalculateZscore::exec() {
     MantidVec &vecY = outWS->dataY(i);
     MantidVec &vecE = outWS->dataE(i);
 
-    vector<double> yzscores = getZscore(inpY, false);
-    vector<double> ezscores = getZscore(inpE, false);
+    vector<double> yzscores = getZscore(inpY);
+    vector<double> ezscores = getZscore(inpE);
 
     vecX = inpX;
     vecY = yzscores;

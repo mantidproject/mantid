@@ -69,7 +69,7 @@ protected:
 
 private:
   // instrument creation
-  Geometry::Instrument_sptr createInstrument(ANSTO::Tar::File &tarFile);
+  Geometry::Instrument_sptr createInstrument(ANSTO::Tar::File &tarFile, size_t pixelsCutOffL, size_t pixelsCutOffH, size_t tubeBinning, size_t finalBinsY);
 
   // load nx dataset
   template <class T>

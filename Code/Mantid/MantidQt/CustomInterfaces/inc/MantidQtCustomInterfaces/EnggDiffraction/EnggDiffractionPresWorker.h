@@ -38,11 +38,20 @@ class EnggDiffWorker : public QObject {
   Q_OBJECT
 
 public:
-  EnggDiffWorker(EnggDiffractionPresenter *pres,
-                  const std::string &outFilename, const std::string &vanNo,
-                  const std::string &ceriaNo)
-      : m_pres(pres), m_outFilename(outFilename), m_vanNo(vanNo),
-        m_ceriaNo(ceriaNo) {}
+  /// for calibration
+  EnggDiffWorker(EnggDiffractionPresenter *pres, const std::string &outFilename,
+                 const std::string &vanNo, const std::string &ceriaNo)
+      : m_pres(pres), m_outFilenames(), m_outCalibFilename(outFilename),
+        m_vanNo(vanNo), m_ceriaNo(ceriaNo), m_banks() {}
+
+  /// for focusing
+  EnggDiffWorker(EnggDiffractionPresenter *pres, const std::string &outDir,
+                 const std::vector<std::string> &outFilenames,
+                 const std::string &runNo, const std::vector<bool> &banks,
+                 const std::string &specIDs, const std::string &dgFile)
+      : m_pres(pres), m_outFilenames(outFilenames), m_outCalibFilename(),
+        m_runNo(runNo), m_outDir(outDir), m_banks(banks), m_specIDs(specIDs),
+        m_dgFile(dgFile) {}
 
 private slots:
 
@@ -51,7 +60,17 @@ private slots:
    * signal.
    */
   void calibrate() {
-    m_pres->doNewCalibration(m_outFilename, m_vanNo, m_ceriaNo);
+    m_pres->doNewCalibration(m_outCalibFilename, m_vanNo, m_ceriaNo);
+    emit finished();
+  }
+
+  /**
+   * Focus a run. You must connect this from a thread started()
+   * signal.
+   */
+  void focus() {
+    m_pres->doFocusRun(m_outDir, m_outFilenames, m_runNo, m_banks, m_specIDs,
+                       m_dgFile);
     emit finished();
   }
 
@@ -60,8 +79,20 @@ signals:
 
 private:
   EnggDiffractionPresenter *m_pres;
+
   /// parameters for calibration
-  std::string m_outFilename, m_vanNo, m_ceriaNo;
+  const std::vector<std::string> m_outFilenames;
+  const std::string m_outCalibFilename, m_vanNo, m_ceriaNo;
+  /// sample run to process
+  const std::string m_runNo;
+  /// Output directory
+  const std::string m_outDir;
+  /// instrument banks: do focus/don't
+  const std::vector<bool> m_banks;
+  // parameters for specific types of focusing: "cropped"
+  const std::string m_specIDs;
+  // for focusing "texture"
+  const std::string m_dgFile;
 };
 
 } // namespace CustomInterfaces

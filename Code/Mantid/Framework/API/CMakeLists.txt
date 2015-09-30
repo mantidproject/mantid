@@ -93,6 +93,8 @@ set ( SRC_FILES
 	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
 	src/NullCoordTransform.cpp
+        src/NotebookBuilder.cpp
+      	src/NotebookWriter.cpp 
 	src/NumericAxis.cpp
 	src/ParamFunction.cpp
 	src/ParameterReference.cpp
@@ -123,6 +125,7 @@ set ( SRC_FILES
 	src/WorkspaceHistory.cpp
 	src/WorkspaceOpOverloads.cpp
 	src/WorkspaceProperty.cpp
+        src/WorkspaceValidators.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/CompositeFunction.cpp
@@ -259,6 +262,8 @@ set ( INC_FILES
 	inc/MantidAPI/MultiPeriodGroupWorker.h
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
+        inc/MantidAPI/NotebookBuilder.h
+        inc/MantidAPI/NotebookWriter.h  
 	inc/MantidAPI/NullCoordTransform.h
 	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/ParamFunction.h
@@ -359,6 +364,8 @@ set ( TEST_FILES
 	MultiPeriodGroupWorkerTest.h
 	MultipleExperimentInfosTest.h
 	MultipleFilePropertyTest.h
+	NotebookBuilderTest.h
+	NotebookWriterTest.h
 	NumericAxisTest.h
 	ParamFunctionAttributeHolderTest.h
 	ParameterReferenceTest.h
@@ -424,7 +431,7 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET API PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( API LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${WINSOCK} )
+target_link_libraries ( API LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${JSONCPP_LIBRARIES} ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${WINSOCK} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

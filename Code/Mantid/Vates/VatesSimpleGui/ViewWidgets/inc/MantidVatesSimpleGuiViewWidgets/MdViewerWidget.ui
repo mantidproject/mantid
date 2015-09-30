@@ -124,7 +124,7 @@
         <enum>Qt::Horizontal</enum>
        </property>
        <property name="sizeType">
-         <enum>QSizePolicy::Minimum</enum>
+        <enum>QSizePolicy::Minimum</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>

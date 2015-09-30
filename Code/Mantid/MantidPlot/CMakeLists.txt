@@ -176,7 +176,10 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/MantidDock.cpp
                    src/Mantid/MantidMatrix.cpp
                    src/Mantid/MantidMatrixCurve.cpp
+		   src/Mantid/MantidMatrixDxExtensionHandler.cpp
+		   src/Mantid/MantidMatrixExtensionRequest.cpp
                    src/Mantid/MantidMatrixFunction.cpp
+		   src/Mantid/MantidMatrixModel.cpp
                    src/Mantid/MantidMDCurve.cpp
                    src/Mantid/MantidMDCurveDialog.cpp
                    src/Mantid/MantidMatrixDialog.cpp
@@ -397,6 +400,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/FlowLayout.h
                    src/Mantid/IFunctionWrapper.h
                    src/Mantid/ImportWorkspaceDlg.h
+		   src/Mantid/IMantidMatrixExtensionHandler.h
                    src/Mantid/InputHistory.h
                    src/Mantid/LoadDAEDlg.h
                    src/Mantid/ManageCustomMenus.h
@@ -406,6 +410,11 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/MantidCurve.h
                    src/Mantid/MantidDock.h
                    src/Mantid/MantidMatrixCurve.h
+		   src/Mantid/MantidMatrixDxExtensionHandler.h
+		   src/Mantid/MantidMatrixExtensionRequest.h
+		   src/Mantid/MantidMatrixModel.h
+		   src/Mantid/MantidMatrixNullExtensionHandler.h
+		   src/Mantid/MantidMatrixTabExtension.h
                    src/Mantid/MantidMDCurve.h
                    src/Mantid/MantidMDCurveDialog.h
                    src/Mantid/MantidMatrixDialog.h
@@ -474,7 +483,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
 # Add Qt to the include path
 ###########################################################################
 
-include ( UseSystemQt4 )
+include ( UseQt4 )
 
 ###########################################################################
 # Do the sip generation.
@@ -685,6 +694,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/MantidMatrixDialog.h
                        src/Mantid/MantidMatrix.h
                        src/Mantid/MantidMatrixFunction.h
+		       src/Mantid/MantidMatrixModel.h
                        src/Mantid/MantidSampleLogDialog.h
                        src/Mantid/MantidSampleMaterialDialog.h
                        src/Mantid/MantidUI.h

@@ -91,7 +91,7 @@ PythonScript::PythonScript(PythonScripting *env, const QString &name, const Inte
  */
 PythonScript::~PythonScript()
 {
-  GlobalInterpreterLock lock;
+  ScopedPythonGIL lock;
   this->abort();
   observeAdd(false);
   observeAfterReplace(false);
@@ -149,7 +149,7 @@ PyObject * PythonScript::createSipInstanceFromMe()
 bool PythonScript::compilesToCompleteStatement(const QString & code) const
 {
   bool result(false);
-  GlobalInterpreterLock gil;
+  ScopedPythonGIL gil;
   PyObject *compiledCode = Py_CompileString(code.toAscii(), "", Py_file_input);
   if( PyObject *exception = PyErr_Occurred() )
   {
@@ -206,7 +206,7 @@ void PythonScript::sendLineChangeSignal(int lineNo, bool error)
  */
 void PythonScript::generateAutoCompleteList()
 {
-  GlobalInterpreterLock gil;
+  ScopedPythonGIL gil;
 
   PyObject *main_module = PyImport_AddModule("__main__");
   PyObject *method = PyString_FromString("_ScopeInspector_GetFunctionAttributes");
@@ -239,7 +239,7 @@ void PythonScript::generateAutoCompleteList()
 void PythonScript::emit_error()
 {
   // gil is necessary so other things don't continue
-  GlobalInterpreterLock gil;
+  ScopedPythonGIL gil;
 
   // return early if nothing happened
   if (!PyErr_Occurred())
@@ -431,7 +431,7 @@ void PythonScript::setContext(QObject *context)
  */
 void PythonScript::clearLocals()
 {
-  GlobalInterpreterLock pythonLock;
+  ScopedPythonGIL pythonLock;
 
   PyObject *mainModule = PyImport_AddModule("__main__");
   PyObject *cleanLocals = PyDict_Copy(PyModule_GetDict(mainModule));
@@ -458,7 +458,7 @@ void PythonScript::initialize(const QString & name, QObject *context)
 {
   clearLocals(); // holds and releases GIL
 
-  GlobalInterpreterLock pythonlock;
+  ScopedPythonGIL pythonlock;
   PythonScript::setIdentifier(name);
   setContext(context);
 
@@ -523,7 +523,7 @@ bool PythonScript::compileImpl()
  */
 QVariant PythonScript::evaluateImpl()
 {
-  GlobalInterpreterLock gil;
+  ScopedPythonGIL gil;
   PyObject *compiledCode = this->compileToByteCode(true);
   if(!compiledCode)
   {
@@ -660,7 +660,7 @@ void PythonScript::abortImpl()
   // In both situations we issue a KeyboardInterrupt just in case the algorithm
   // hasn't implemented cancel() checking so that when control returns the Python the
   // interrupt should be picked up.
-  GlobalInterpreterLock lock;
+  ScopedPythonGIL lock;
   m_pythonEnv->raiseAsyncException(m_threadID, PyExc_KeyboardInterrupt);
   PyObject *curAlg = PyObject_CallFunction(m_algorithmInThread, STR_LITERAL("l"), m_threadID);
   if(curAlg && curAlg != Py_None){
@@ -675,7 +675,7 @@ void PythonScript::abortImpl()
  */
 long PythonScript::getThreadID()
 {
-  GlobalInterpreterLock lock;
+  ScopedPythonGIL lock;
   return PyThreadState_Get()->thread_id;
 }
 
@@ -685,7 +685,7 @@ bool PythonScript::executeString()
 {
   emit started(MSG_STARTED);
   bool success(false);
-  GlobalInterpreterLock gil;
+  ScopedPythonGIL gil;
 
   PyObject * compiledCode = compileToByteCode(false);
   PyObject *result(NULL);

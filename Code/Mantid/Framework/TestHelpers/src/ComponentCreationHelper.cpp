@@ -258,10 +258,10 @@ boost::shared_ptr<DetectorGroup> createGroupOfTwoMonitors() {
 }
 
 //----------------------------------------------------------------------------------------------
-
-Instrument_sptr createTestInstrumentCylindrical(int num_banks, bool verbose,
-                                                const double cylRadius,
-                                                const double cylHeight) {
+Instrument_sptr createTestInstrumentCylindrical(
+    int num_banks, const Mantid::Kernel::V3D &sourcePos,
+    const Mantid::Kernel::V3D &samplePos, const double cylRadius,
+    const double cylHeight) {
   boost::shared_ptr<Instrument> testInst(new Instrument("basic"));
 
   // One object
@@ -301,7 +301,7 @@ Instrument_sptr createTestInstrumentCylindrical(int num_banks, bool verbose,
   // Define a source component
   ObjComponent *source =
       new ObjComponent("moderator", Object_sptr(new Object), testInst.get());
-  source->setPos(V3D(0.0, 0.0, -10.));
+  source->setPos(sourcePos);
   testInst->add(source);
   testInst->markAsSource(source);
 
@@ -310,26 +310,9 @@ Instrument_sptr createTestInstrumentCylindrical(int num_banks, bool verbose,
       createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
   ObjComponent *sample =
       new ObjComponent("sample", sampleSphere, testInst.get());
-  testInst->setPos(0.0, 0.0, 0.0);
+  testInst->setPos(samplePos);
   testInst->add(sample);
   testInst->markAsSamplePos(sample);
-
-  if (verbose) {
-    std::cout << "\n\n=== Testing bank positions ==\n";
-    const int nchilds = testInst->nelements();
-    for (int i = 0; i < nchilds; ++i) {
-      boost::shared_ptr<IComponent> child = testInst->getChild(i);
-      std::cout << "Component " << i << " at pos " << child->getPos() << "\n";
-      if (boost::shared_ptr<ICompAssembly> assem =
-              boost::dynamic_pointer_cast<ICompAssembly>(child)) {
-        for (int j = 0; j < assem->nelements(); ++j) {
-          boost::shared_ptr<IComponent> comp = assem->getChild(j);
-          std::cout << "Child " << j << " at pos " << comp->getPos() << "\n";
-        }
-      }
-    }
-    std::cout << "==================================\n";
-  }
 
   return testInst;
 }
@@ -442,7 +425,8 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
  * @param bankDistanceFromSample :: How far the bank is from the sample
  */
 Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
-                                                double pixelSpacing, double bankDistanceFromSample) {
+                                                double pixelSpacing,
+                                                double bankDistanceFromSample) {
   boost::shared_ptr<Instrument> testInst(new Instrument("basic_rect"));
 
   const double cylRadius(pixelSpacing / 2);
@@ -475,8 +459,8 @@ Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
   }
 
   // Define a source component
-  ObjComponent *source =
-      new ObjComponent("source", createSphere(0.01 /*1cm*/, V3D(0,0,0), "1"), testInst.get());
+  ObjComponent *source = new ObjComponent(
+      "source", createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"), testInst.get());
   source->setPos(V3D(0.0, 0.0, -10.));
   testInst->add(source);
   testInst->markAsSource(source);
@@ -564,7 +548,9 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
 }
 
 /**
- * createOneDetectorInstrument, creates the most simple possible definition of an instrument in which we can extract a valid L1 and L2 distance for unit calculations.
+ * createOneDetectorInstrument, creates the most simple possible definition of
+ *an instrument in which we can extract a valid L1 and L2 distance for unit
+ *calculations.
  *
  * Beam direction is along X,
  * Up direction is Y
@@ -574,33 +560,36 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
  * @param detectorPos : V3D detector position
  * @return Instrument generated.
  */
-Instrument_sptr createMinimalInstrument(const Mantid::Kernel::V3D& sourcePos, const Mantid::Kernel::V3D& samplePos, const Mantid::Kernel::V3D& detectorPos )
-{
-    Instrument_sptr instrument = boost::make_shared<Instrument>();
-    instrument->setReferenceFrame(
-        boost::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::X /*along*/, Left, "0,0,0"));
+Instrument_sptr
+createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
+                        const Mantid::Kernel::V3D &samplePos,
+                        const Mantid::Kernel::V3D &detectorPos) {
+  Instrument_sptr instrument = boost::make_shared<Instrument>();
+  instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+      Mantid::Geometry::Y /*up*/, Mantid::Geometry::X /*along*/, Left,
+      "0,0,0"));
 
-    // A source
-    ObjComponent *source = new ObjComponent("source");
-    source->setPos(sourcePos);
-    source->setShape(createSphere(0.01 /*1cm*/, V3D(0,0,0), "1"));
-    instrument->add(source);
-    instrument->markAsSource(source);
+  // A source
+  ObjComponent *source = new ObjComponent("source");
+  source->setPos(sourcePos);
+  source->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  instrument->add(source);
+  instrument->markAsSource(source);
 
-    // A sample
-    ObjComponent *sample = new ObjComponent("some-surface-holder");
-    sample->setPos(samplePos);
-    sample->setShape(createSphere(0.01 /*1cm*/, V3D(0,0,0), "1"));
-    instrument->add(sample);
-    instrument->markAsSamplePos(sample);
+  // A sample
+  ObjComponent *sample = new ObjComponent("some-surface-holder");
+  sample->setPos(samplePos);
+  sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  instrument->add(sample);
+  instrument->markAsSamplePos(sample);
 
-    // A detector
-    Detector *det = new Detector("point-detector", 1 /*detector id*/, NULL);
-    det->setPos(detectorPos);
-    det->setShape(createSphere(0.01 /*1cm*/, V3D(0,0,0), "1"));
-    instrument->add(det);
-    instrument->markAsDetector(det);
+  // A detector
+  Detector *det = new Detector("point-detector", 1 /*detector id*/, NULL);
+  det->setPos(detectorPos);
+  det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  instrument->add(det);
+  instrument->markAsDetector(det);
 
-    return instrument;
+  return instrument;
 }
 }

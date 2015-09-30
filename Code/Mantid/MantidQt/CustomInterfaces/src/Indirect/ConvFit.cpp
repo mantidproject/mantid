@@ -7,6 +7,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/TextAxis.h"
 
 #include <QDoubleValidator>
 #include <QFileInfo>
@@ -92,7 +93,7 @@ void ConvFit::setup() {
   m_properties["OutputFABADAChain"] = m_blnManager->addProperty("Output Chain");
   m_properties["FABADAChainLength"] = m_dblManager->addProperty("Chain Length");
   m_dblManager->setDecimals(m_properties["FABADAChainLength"], 0);
-  m_dblManager->setValue(m_properties["FABADAChainLength"], 10000);
+  m_dblManager->setValue(m_properties["FABADAChainLength"], 1000000);
   m_properties["FABADAConvergenceCriteria"] =
       m_dblManager->addProperty("Convergence Criteria");
   m_dblManager->setValue(m_properties["FABADAConvergenceCriteria"], 0.1);
@@ -207,11 +208,14 @@ void ConvFit::setup() {
           SLOT(showTieCheckbox(QString)));
   showTieCheckbox(m_uiForm.cbFitType->currentText());
 
+  m_previousFit = m_uiForm.cbFitType->currentText();
+
   updatePlotOptions();
 }
 
 /**
- * Converts data into a python script which prodcues the output workspace
+ * Handles the initial set up and running of the ConvolutionFitSequential
+ * algorithm
  */
 void ConvFit::run() {
   if (m_cfInputWS == NULL) {
@@ -231,67 +235,145 @@ void ConvFit::run() {
 
   CompositeFunction_sptr func = createFunction(useTies);
   std::string function = std::string(func->asString());
-  QString stX = m_properties["StartX"]->valueText();
-  QString enX = m_properties["EndX"]->valueText();
-  QString specMin = m_uiForm.spSpectraMin->text();
-  QString specMax = m_uiForm.spSpectraMax->text();
+  std::string stX = m_properties["StartX"]->valueText().toStdString();
+  std::string enX = m_properties["EndX"]->valueText().toStdString();
+  std::string specMin = m_uiForm.spSpectraMin->text().toStdString();
+  std::string specMax = m_uiForm.spSpectraMax->text().toStdString();
   int maxIterations =
       static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
 
-  QString pyInput = "from IndirectDataAnalysis import confitSeq\n"
-                    "input = '" +
-                    m_cfInputWSName + "'\n"
-                                      "func = r'" +
-                    QString::fromStdString(function) + "'\n"
-                                                       "startx = " +
-                    stX + "\n"
-                          "endx = " +
-                    enX + "\n"
-                          "plot = '" +
-                    m_uiForm.cbPlotType->currentText() + "'\n"
-                                                         "ties = " +
-                    ties + "\n"
-                           "specMin = " +
-                    specMin + "\n"
-                              "specMax = " +
-                    specMax + "\n"
-                              "max_iterations = " +
-                    QString::number(maxIterations) + "\n"
-                                                     "minimizer = '" +
-                    minimizerString("$outputname_$wsindex") + "'\n"
-                                                              "save = " +
-                    (m_uiForm.ckSave->isChecked() ? "True\n" : "False\n");
-
-  if (m_blnManager->value(m_properties["Convolve"]))
-    pyInput += "convolve = True\n";
-  else
-    pyInput += "convolve = False\n";
-
-  QString temperature = m_uiForm.leTempCorrection->text();
-  bool useTempCorrection =
-      (!temperature.isEmpty() && m_uiForm.ckTempCorrection->isChecked());
-  if (useTempCorrection) {
-    pyInput += "temp=" + temperature + "\n";
+  // Construct expected name
+  m_baseName = QString::fromStdString(m_cfInputWS->getName());
+  int pos = m_baseName.lastIndexOf("_");
+  if (pos != -1) {
+    m_baseName = m_baseName.left(pos + 1);
+  }
+  m_baseName += "conv_";
+  if (m_blnManager->value(m_properties["UseDeltaFunc"])) {
+    m_baseName += "Delta";
+  }
+  int fitIndex = m_uiForm.cbFitType->currentIndex();
+  if (fitIndex < 3 && fitIndex != 0) {
+    m_baseName += QString::number(fitIndex);
+    m_baseName += "L";
   } else {
-    pyInput += "temp=None\n";
+    m_baseName += convertFuncToShort(m_uiForm.cbFitType->currentText());
+  }
+  m_baseName +=
+      convertBackToShort(m_uiForm.cbBackground->currentText().toStdString()) +
+      "_s";
+  m_baseName += QString::fromStdString(specMin);
+  m_baseName += "_to_";
+  m_baseName += QString::fromStdString(specMax);
+
+  // Run ConvolutionFitSequential Algorithm
+  IAlgorithm_sptr cfs =
+      AlgorithmManager::Instance().create("ConvolutionFitSequential");
+  cfs->initialize();
+
+  cfs->setProperty("InputWorkspace", m_cfInputWS->getName());
+  cfs->setProperty("Function", function);
+  cfs->setProperty("BackgroundType",
+                   m_uiForm.cbBackground->currentText().toStdString());
+  cfs->setProperty("StartX", stX);
+  cfs->setProperty("EndX", enX);
+  cfs->setProperty("SpecMin", specMin);
+  cfs->setProperty("SpecMax", specMax);
+  cfs->setProperty("Convolve", true);
+  cfs->setProperty("Minimizer",
+                   minimizerString("$outputname_$wsindex").toStdString());
+  cfs->setProperty("MaxIterations", maxIterations);
+  m_batchAlgoRunner->addAlgorithm(cfs);
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(algorithmComplete(bool)));
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+ * Handles completion of the ConvolutionFitSequential algorithm.
+ *
+ * @param error True if the algorithm was stopped due to error, false otherwise
+ */
+void ConvFit::algorithmComplete(bool error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(algorithmComplete(bool)));
+
+  if (error)
+    return;
+
+  std::string resultName = m_baseName.toStdString() + "_Result";
+  MatrixWorkspace_sptr resultWs =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
+
+  const bool save = m_uiForm.ckSave->isChecked();
+
+  // Handle Save file
+  if (save) {
+    QString saveDir = QString::fromStdString(
+        Mantid::Kernel::ConfigService::Instance().getString(
+            "defaultsave.directory"));
+    // Check validity of save path
+    QString QresultWsName = QString::fromStdString(resultWs->getName());
+    QString fullPath = saveDir.append(QresultWsName).append(".nxs");
+    addSaveWorkspaceToQueue(QresultWsName, fullPath);
   }
 
-  pyInput += "bg = '" + bgType + "'\n"
-                                 "ftype = '" +
-             fitType +
-             "'\n"
-             "rws = confitSeq(input, func, startx, endx, ftype, bg, temp, "
-             "specMin, specMax, convolve, max_iterations=max_iterations, "
-             "minimizer=minimizer, Plot=plot, Save=save)\n"
-             "AddSampleLog(Workspace=rws, LogName='res_workspace', LogText='" +
-             m_uiForm.dsResInput->getCurrentDataName() + "')\n"
-                                                         "print rws\n";
+  std::string plot = m_uiForm.cbPlotType->currentText().toStdString();
 
-  QString pyOutput = runPythonCode(pyInput);
+  // Handle plot result
+  if (!(plot.compare("None") == 0)) {
+    if (plot.compare("All") == 0) {
+      int specEnd = (int)resultWs->getNumberHistograms();
+      for (int i = 0; i < specEnd; i++) {
+        IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
+                                  i, i);
+      }
+    } else {
+      // -1 to account for None in dropDown
+      int specNumber = m_uiForm.cbPlotType->currentIndex() - 1;
+      IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
+                                specNumber, specNumber);
+    }
+  }
 
-  // Set the result workspace for Python script export
-  m_pythonExportWsName = pyOutput.toStdString();
+  // Handle Temperature logs
+  if (m_uiForm.ckTempCorrection->isChecked()) {
+    QString temperature = m_uiForm.leTempCorrection->text();
+    double temp = 0.0;
+    if (temperature.toStdString().compare("") != 0) {
+      temp = temperature.toDouble();
+    }
 
+    if (temp != 0.0) {
+      // Obtain WorkspaceGroup from ADS
+      std::string groupName = m_baseName.toStdString() + "_Workspaces";
+      WorkspaceGroup_sptr groupWs =
+          AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
+
+      auto addSample = AlgorithmManager::Instance().create("AddSampleLog");
+      addSample->setProperty("Workspace", resultWs);
+      addSample->setProperty("LogName", "temperature_value");
+      addSample->setProperty("LogText", temperature.toStdString());
+      addSample->setProperty("LogType", "Number");
+      addSample->execute();
+      addSample->setProperty("Workspace", resultWs);
+      addSample->setProperty("LogName", "temperature_correction");
+      addSample->setProperty("LogText", "true");
+      addSample->setProperty("LogType", "String");
+      addSample->execute();
+      addSample->setProperty("Workspace", groupWs);
+      addSample->setProperty("LogName", "temperature_value");
+      addSample->setProperty("LogText", temperature.toStdString());
+      addSample->setProperty("LogType", "Number");
+      addSample->execute();
+      addSample->setProperty("Workspace", groupWs);
+      addSample->setProperty("LogName", "temperature_correction");
+      addSample->setProperty("LogText", "true");
+      addSample->setProperty("LogType", "String");
+      addSample->execute();
+    }
+  }
+  m_batchAlgoRunner->executeBatchAsync();
   updatePlot();
 }
 
@@ -370,7 +452,6 @@ void ConvFit::newDataLoaded(const QString wsName) {
 void ConvFit::extendResolutionWorkspace() {
   if (m_cfInputWS && m_uiForm.dsResInput->isValid()) {
     const QString resWsName = m_uiForm.dsResInput->getCurrentDataName();
-
     API::BatchAlgorithmRunner::AlgorithmRuntimeProps appendProps;
     appendProps["InputWorkspace1"] = "__ConvFit_Resolution";
 
@@ -459,7 +540,8 @@ std::string createParName(size_t index, size_t subIndex,
  *					+- Temperature Correction(yes/no)
  *				+- ProductFunction
  *					|
- *					+- InelasticDiffRotDiscreteCircle(yes/no)
+ *					+-
+ *InelasticDiffRotDiscreteCircle(yes/no)
  *					+- Temperature Correction(yes/no)
  *
  * @param tieCentres :: whether to tie centres of the two lorentzians.
@@ -902,10 +984,11 @@ void ConvFit::updatePlot() {
   }
 
   // If there is a result plot then plot it
-  if (AnalysisDataService::Instance().doesExist(m_pythonExportWsName)) {
+  std::string groupName =  m_baseName.toStdString() + "_Workspaces";
+  if (AnalysisDataService::Instance().doesExist(groupName)) {
     WorkspaceGroup_sptr outputGroup =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            m_pythonExportWsName);
+            groupName);
     if (specNo >= static_cast<int>(outputGroup->size()))
       return;
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
@@ -1374,7 +1457,18 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
  * @param functionName Name of new fit function
  */
 void ConvFit::fitFunctionSelected(const QString &functionName) {
-  // remove previous parameters from tree
+  double oneLValues[3] = {0.0, 0.0, 0.0};
+  bool previouslyOneL = false;
+  if (m_previousFit.compare("One Lorentzian") == 0 &&
+      m_uiForm.cbFitType->currentText().compare("Two Lorentzians") == 0) {
+    previouslyOneL = true;
+    oneLValues[0] = m_dblManager->value(m_properties["Lorentzian 1.Amplitude"]);
+    oneLValues[1] =
+        m_dblManager->value(m_properties["Lorentzian 1.PeakCentre"]);
+    oneLValues[2] = m_dblManager->value(m_properties["Lorentzian 1.FWHM"]);
+  }
+
+  // Remove previous parameters from tree
   m_cfTree->removeProperty(m_properties["FitFunction1"]);
   m_cfTree->removeProperty(m_properties["FitFunction2"]);
 
@@ -1386,7 +1480,7 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
   QStringList parameters = getFunctionParameters(functionName);
   updatePlotOptions();
 
-  // Two Loremtzians Fit
+  // Two Lorentzians Fit
   if (fitFunctionIndex == 2) {
     m_properties["FitFunction1"] = m_grpManager->addProperty("Lorentzian 1");
     m_cfTree->addProperty(m_properties["FitFunction1"]);
@@ -1412,13 +1506,25 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         m_properties[name] = m_dblManager->addProperty(*it);
 
         if (QString(*it).compare("FWHM") == 0) {
-          m_dblManager->setValue(m_properties[name], 0.0175);
+          if (previouslyOneL && count < 3) {
+            m_dblManager->setValue(m_properties[name], oneLValues[2]);
+          } else {
+            m_dblManager->setValue(m_properties[name], 0.0175);
+          }
+        } else if (QString(*it).compare("Amplitude") == 0) {
+          if (previouslyOneL && count < 3) {
+            m_dblManager->setValue(m_properties[name], oneLValues[0]);
+          } else {
+            m_dblManager->setValue(m_properties[name], 1.0);
+          }
+        } else if (QString(*it).compare("PeakCentre") == 0) {
+          if (previouslyOneL && count < 3) {
+            m_dblManager->setValue(m_properties[name], oneLValues[1]);
+          } else {
+            m_dblManager->setValue(m_properties[name], 0.0);
+          }
         } else {
           m_dblManager->setValue(m_properties[name], 0.0);
-        }
-        if (QString(*it).compare("Amplitude") == 0 ||
-            QString(*it).compare("Intensity") == 0) {
-          m_dblManager->setValue(m_properties[name], 1.0);
         }
 
         m_dblManager->setDecimals(m_properties[name], NUM_DECIMALS);
@@ -1441,12 +1547,11 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
 
         if (QString(*it).compare("FWHM") == 0) {
           m_dblManager->setValue(m_properties[name], 0.0175);
+        } else if (QString(*it).compare("Amplitude") == 0 ||
+                   QString(*it).compare("Intensity") == 0) {
+          m_dblManager->setValue(m_properties[name], 1.0);
         } else {
           m_dblManager->setValue(m_properties[name], 0.0);
-        }
-        if (QString(*it).compare("Amplitude") == 0 ||
-            QString(*it).compare("Intensity") == 0) {
-          m_dblManager->setValue(m_properties[name], 1.0);
         }
 
         m_dblManager->setDecimals(m_properties[name], NUM_DECIMALS);
@@ -1454,6 +1559,7 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
       }
     }
   }
+  m_previousFit = m_uiForm.cbFitType->currentText();
 }
 
 /**
@@ -1478,6 +1584,9 @@ void ConvFit::updatePlotOptions() {
   } else {
     params = getFunctionParameters(QString("One Lorentzian"));
   }
+  if (fitFunctionType < 3 && fitFunctionType != 0) {
+    params.removeAll("PeakCentre");
+  }
   if (fitFunctionType != 0) {
     plotOptions.append(params);
   }
@@ -1486,6 +1595,47 @@ void ConvFit::updatePlotOptions() {
     plotOptions << "All";
   }
   m_uiForm.cbPlotType->addItems(plotOptions);
+}
+
+/**
+ * Converts the user input for function into short hand for use in the workspace
+ * naming
+ * @param original - The original user input to the function
+ * @return The short hand of the users input
+ */
+QString ConvFit::convertFuncToShort(const QString &original) {
+  QString result = "";
+  if (m_uiForm.cbFitType->currentIndex() != 0) {
+    if (original.at(0) == 'E') {
+      result += "E";
+    } else if (original.at(0) == 'I') {
+      result += "I";
+    } else {
+      return "SFT";
+    }
+    auto pos = original.find("Circle");
+    if (pos != -1) {
+      result += "DC";
+    } else {
+      result += "DS";
+    }
+  }
+  return result;
+}
+
+/**
+ * Converts the user input for background into short hand for use in the
+ * workspace naming
+ * @param original - The original user input to the function
+ * @return The short hand of the users input
+ */
+QString ConvFit::convertBackToShort(const std::string &original) {
+  QString result = QString::fromStdString(original.substr(0, 3));
+  auto pos = original.find(" ");
+  if (pos != std::string::npos) {
+    result += original.at(pos + 1);
+  }
+  return result;
 }
 
 } // namespace IDA

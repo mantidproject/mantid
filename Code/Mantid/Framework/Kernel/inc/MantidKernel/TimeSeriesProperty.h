@@ -146,7 +146,7 @@ public:
 
   /// Split out a time series property by time intervals.
   void splitByTime(std::vector<SplittingInterval> &splitter,
-                   std::vector<Property *> outputs) const;
+                   std::vector<Property *> outputs, bool isPeriodic) const;
   /// Fill a TimeSplitterType that will filter the events by matching
   void makeFilterByValue(std::vector<SplittingInterval> &split, double min,
                          double max, double TimeTolerance = 0.0,

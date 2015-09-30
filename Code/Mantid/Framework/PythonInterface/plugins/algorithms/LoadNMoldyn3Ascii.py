@@ -197,7 +197,7 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
         lq2 = _find_starts(data, ' q =', lq1 - 1)
         Qlist = _make_list(data, lq1, lq2)
         if num_spec != len(Qlist):
-            raise RUntimeError('Error reading Q values')
+            raise RuntimeError('Error reading Q values')
         Qf = Qlist[0].split()
         Q = [float(Qf[2]) / 10.0]
         for m in range(1, num_spec - 1):

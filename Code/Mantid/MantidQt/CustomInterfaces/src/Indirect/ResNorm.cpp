@@ -53,6 +53,33 @@ void ResNorm::setup() {}
  */
 bool ResNorm::validate() {
   UserInputValidator uiv;
+
+  // Check vanadium input is _red ws
+  QString vanadiumName = m_uiForm.dsVanadium->getCurrentDataName();
+  int cutIndex = vanadiumName.lastIndexOf("_");
+  QString vanadiumSuffix =
+      vanadiumName.right(vanadiumName.size() - (cutIndex + 1));
+  if (vanadiumSuffix.compare("red") != 0) {
+    uiv.addErrorMessage("The Vanadium run is not a reduction (_red) workspace");
+  }
+
+  // Check Res and Vanadium are the same Run
+
+  // Check that Res file is still in ADS if not, load it
+  auto resolutionWs =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          m_uiForm.dsResolution->getCurrentDataName().toStdString());
+  auto vanadiumWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      vanadiumName.toStdString());
+
+  const int resRun = resolutionWs->getRunNumber();
+  const int vanRun = vanadiumWs->getRunNumber();
+
+  if (resRun != vanRun) {
+    uiv.addErrorMessage("The provided Vanadium and Resolution do not have "
+                        "matching run numbers");
+  }
+
   uiv.checkDataSelectorIsValid("Vanadium", m_uiForm.dsVanadium);
   uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
@@ -94,6 +121,8 @@ void ResNorm::run() {
 
   m_pythonExportWsName = outputWsName.toStdString();
   m_batchAlgoRunner->executeBatchAsync();
+
+
 }
 
 /**
@@ -105,9 +134,16 @@ void ResNorm::handleAlgorithmComplete(bool error) {
   if (error)
     return;
 
+  QString outputBase = (m_uiForm.dsVanadium->getCurrentDataName()).toLower();
+  const int indexCut = outputBase.lastIndexOf("_");
+  outputBase = outputBase.left(indexCut);
+  outputBase += "_ResNorm";
+
+  std::string outputBaseStr = outputBase.toStdString();
+
   WorkspaceGroup_sptr fitWorkspaces =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          m_pythonExportWsName + "_Fit_Workspaces");
+          outputBaseStr + "_Fit_Workspaces");
   QString fitWsName("");
   if (fitWorkspaces)
     fitWsName =
@@ -120,7 +156,10 @@ void ResNorm::handleAlgorithmComplete(bool error) {
   if (plotOptions == "Stretch" || plotOptions == "All")
     plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_Stretch");
   if (plotOptions == "Fit" || plotOptions == "All")
-    plotSpectrum(fitWsName);
+    plotSpectrum(fitWsName, 0, 1);
+
+  loadFile(m_uiForm.dsResolution->getFullFilePath(),
+           m_uiForm.dsResolution->getCurrentDataName());
 
   // Update preview plot
   previewSpecChanged(m_previewSpec);

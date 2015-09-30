@@ -3,6 +3,7 @@
 
 #include "MantidVatesAPI/Normalization.h"
 #include "vtkStructuredGridAlgorithm.h"
+
 #include <string>
 
 namespace Mantid

@@ -7,6 +7,7 @@
 #include "MantidAPI/IDomainCreator.h"
 #include "MantidKernel/cow_ptr.h"
 
+#include <boost/weak_ptr.hpp>
 #include <list>
 
 namespace Mantid {
@@ -18,6 +19,8 @@ class MatrixWorkspace;
 }
 
 namespace CurveFitting {
+
+class SimpleChebfun;
 /**
 Creates FunctionDomain1D form a spectrum in a MatrixWorkspace.
 Declares WorkspaceIndex, StartX, and EndX input properties.
@@ -124,6 +127,8 @@ private:
       boost::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
       const boost::shared_ptr<API::FunctionDomain> &domain,
       boost::shared_ptr<API::FunctionValues> resultValues) const;
+  /// Set initial values for parameters with default values. 
+  void setInitialValues(API::IFunction& function);
 
   /// Store workspace property name
   std::string m_workspacePropertyName;
@@ -150,6 +155,9 @@ private:
   mutable size_t m_maxSize;
   /// Option to normalise the data
   mutable bool m_normalise;
+  /// Store the created domain and values
+  mutable boost::weak_ptr<API::FunctionDomain1D> m_domain;
+  mutable boost::weak_ptr<API::FunctionValues> m_values;
   size_t m_startIndex;
 };
 

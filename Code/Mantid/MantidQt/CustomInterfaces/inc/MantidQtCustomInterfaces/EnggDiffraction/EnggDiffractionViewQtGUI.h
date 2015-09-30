@@ -8,6 +8,7 @@
 
 #include "ui_EnggDiffractionQtGUI.h"
 #include "ui_EnggDiffractionQtTabCalib.h"
+#include "ui_EnggDiffractionQtTabFocus.h"
 #include "ui_EnggDiffractionQtTabSettings.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -98,23 +99,52 @@ public:
                          const std::vector<double> &difc,
                          const std::vector<double> &tzero);
 
-  virtual void enableCalibrateActions(bool enable);
+  virtual void enableCalibrateAndFocusActions(bool enable);
+
+  virtual std::string focusingDir() const;
+
+  virtual std::string focusingRunNo() const;
+
+  virtual std::string focusingCroppedRunNo() const;
+
+  virtual std::string focusingTextureRunNo() const;
+
+  virtual std::vector<bool> focusingBanks() const;
+
+  virtual std::string focusingCroppedSpectrumIDs() const;
+
+  virtual std::string focusingTextureGroupingFile() const;
+
+  virtual bool focusedOutWorkspace() const;
+
+  virtual void resetFocus();
+
+  virtual void plotFocusedSpectrum(const std::string &wsName);
 
 private slots:
-  /// for buttons, do calibrate and similar
+  /// for buttons, do calibrate, focus and similar
   void loadCalibrationClicked();
   void calibrateClicked();
+  void focusClicked();
+  void focusCroppedClicked();
+  void focusTextureClicked();
 
   // slots of the settings tab/section of the interface
   void browseInputDirCalib();
   void browseInputDirRaw();
   void browsePixelCalibFilename();
   void browseTemplateGSAS_PRM();
+  void browseDirFocusing();
+
+  // slots for the focusing options
+  void browseTextureDetGroupingFile();
+  void focusResetClicked();
 
   // slots of the calibration tab/section of the interface
 
   // slots of the general part of the interface
   void instrumentChanged(int idx);
+
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
 
@@ -124,6 +154,7 @@ private:
   void doSetupGeneralWidgets();
   void doSetupTabCalib();
   void doSetupTabSettings();
+  void doSetupTabFocus();
 
   std::string guessGSASTemplatePath() const;
 
@@ -147,6 +178,7 @@ private:
   // 'tabs'
   // but they could be separate dialogs, widgets, etc.
   Ui::EnggDiffractionQtTabCalib m_uiTabCalib;
+  Ui::EnggDiffractionQtTabFocus m_uiTabFocus;
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
 
   /// instrument selected (ENGIN-X, etc.)
@@ -157,6 +189,9 @@ private:
   EnggDiffCalibSettings m_calibSettings;
   std::string m_outCalibFilename;
 
+  /// This is in principle the only settings for 'focus'
+  std::string m_focusDir;
+
   /// for the 'Rebin' parameter of some Engg* algorithms
   static const double g_defaultRebinWidth;
 
@@ -165,6 +200,9 @@ private:
   static const std::string g_iparmExtStr;
   /// supported file extensions string for the pixel (full) claibration
   static const std::string g_pixelCalibExt;
+  /// supported/suggested file extensions for the detector groups file
+  /// (focusing)
+  static const std::string g_DetGrpExtStr;
 
   /// presenter as in the model-view-presenter
   boost::scoped_ptr<IEnggDiffractionPresenter> m_presenter;
