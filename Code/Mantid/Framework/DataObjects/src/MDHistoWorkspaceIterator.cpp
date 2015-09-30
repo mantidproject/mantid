@@ -215,7 +215,6 @@ void MDHistoWorkspaceIterator::jumpTo(size_t index) {
  */
 Mantid::coord_t MDHistoWorkspaceIterator::jumpToNearest(const VMD& fromLocation)
 {
-
     std::vector<size_t> indexes(m_nd);
     coord_t sqDiff = 0;
     for(size_t d = 0; d < m_nd; ++d) {

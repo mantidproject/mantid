@@ -484,8 +484,6 @@ public:
     // Assert
     Mantid::coord_t minimumDim = outWS->getDimension(0)->getMinimum();
     Mantid::coord_t maximumDim = outWS->getDimension(0)->getMaximum();
-    std::cerr << std::setprecision(10) <<minimumDim << "   " << std::setprecision(10)<< static_cast<Mantid::coord_t>(secondBinBoundary) << "    " << std::setprecision(10)<< secondBinBoundary <<std::endl;
-    std::cerr << std::setprecision(10) <<maximumDim << "   " << std::setprecision(10) << static_cast<Mantid::coord_t>(max[0]) << "    " << std::setprecision(10) << max[0] <<std::endl;
 
     TSM_ASSERT_DELTA("Should snap to the second bin boundary.", minimumDim, static_cast<Mantid::coord_t>(secondBinBoundary), 1e-6);
     TSM_ASSERT_DELTA("Should snap to the last bin boundary", maximumDim, static_cast<Mantid::coord_t>(max[0]), 1e-6);
