@@ -24,11 +24,11 @@ Outline of algorithm
 Inputs
 ######
 
-**InputWorkspace** is an MDEventWorkspace... 
+**InputWorkspace** is an MDEventWorkspace ???.
 
 **PeakWorkspace** is an optional input as in many cases especially after calculating UB matrix, ... 
 
-**UBMatrix**
+**UBMatrix** is ???. 
 
 
 Outputs
@@ -40,9 +40,9 @@ MDEvent
 +++++++
 
 Each MDEvent in output MDEventWorkspace contain 
-* *Kx*
-* *Ky*
-* *Kz*
+* *H*
+* *K*
+* *L*
 * Signal
 * Error
 * Detector ID
@@ -51,8 +51,7 @@ Each MDEvent in output MDEventWorkspace contain
 Compare with ConvertMD
 ======================
 
-... ...
-
+Comparing with ????
 
 Usage
 -----
@@ -64,11 +63,12 @@ Usage
   # Create input table workspaces for experiment information and virtual instrument parameters
   CollectHB3AExperimentInfo(ExperimentNumber='355', ScanList='11', PtLists='-1,11', 
       DataDirectory='',
+      GenerateVirtualInstrument=False,
       OutputWorkspace='ExpInfoTable', DetectorTableWorkspace='VirtualInstrumentTable')
 
   # Convert to MDWorkspace
-  ConvertCWSDExpToMomentum(InputWorkspace='ExpInfoTable', DetectorTableWorkspace='VirtualInstrumentTable', 
-      OutputWorkspace='QSampleMD', SourcePosition='0,0,2', SamplePosition='0,0,0', PixelDimension='1,2,2,3,3,4,3,3', 
+  ConvertCWSDExpToMomentum(InputWorkspace='ExpInfoTable', CreateVirtualInstrument=False, 
+      OutputWorkspace='QSampleMD',
       Directory='')
 
   # Find peak in the MDEventWorkspace
@@ -98,7 +98,7 @@ Output:
 
   Output MDEventWorkspace has 397 events.
   There are 1 peaks found in output MDWorkspace
-  In Q-sample frame, center of peak 0 is at (-6.95467, -0.06937, 8.14106) at detector with ID 29072
+  In Q-sample frame, center of peak 0 is at (-3.57179, -4.37952, -3.01737) at detector with ID 32626
 
 .. categories::
 
