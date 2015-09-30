@@ -8,7 +8,7 @@
 class MockImageCoRView : public MantidQt::CustomInterfaces::IImageCoRView {
 public:
   // void initParams(ImageStackPreParams &params)
-  MOCK_METHOD1(initParams,
+  MOCK_METHOD1(setParams,
                void(MantidQt::CustomInterfaces::ImageStackPreParams &));
 
   // ImageStackPreParams userSelection() const;
@@ -22,7 +22,10 @@ public:
   MOCK_METHOD1(showStack, void(const std::string &));
 
   // void showStack(const Mantid::API::WorkspaceGroup_sptr &ws);
-  MOCK_METHOD1(showStack, void(const Mantid::API::WorkspaceGroup_sptr &));
+  MOCK_METHOD1(showStack, void(Mantid::API::WorkspaceGroup_sptr &));
+
+  // void showProjection(const Mantid::API::WorkspaceGroup_sptr &wsg, size_t idx);
+  MOCK_METHOD2(showProjection, void(const Mantid::API::WorkspaceGroup_sptr &wsg, size_t idx));
 
   // void userWarning(const std::string &warn, const std::string &description)
   MOCK_METHOD2(userWarning,
@@ -32,7 +35,13 @@ public:
   MOCK_METHOD2(userError,
                void(const std::string &err, const std::string &description));
 
-  // virtual std::string askImgOrStackPath() = 0;
+  // size_t currentImgIndex() const;
+  MOCK_CONST_METHOD0(currentImgIndex, size_t());
+
+  // void updateImgWithIndex(size_t idx)
+  MOCK_METHOD1(updateImgWithIndex, void(size_t));
+
+  // std::string askImgOrStackPath() = 0;
   MOCK_METHOD0(askImgOrStackPath, std::string());
 
   // void saveSettings() const {}

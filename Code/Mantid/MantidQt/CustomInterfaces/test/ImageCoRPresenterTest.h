@@ -42,6 +42,8 @@ public:
     testing::NiceMock<MockImageCoRView> mockView;
     MantidQt::CustomInterfaces::ImageCoRPresenter pres(&mockView);
 
+    EXPECT_CALL(mockView, setParams(testing::_)).Times(1);
+
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
@@ -53,11 +55,35 @@ public:
     testing::NiceMock<MockImageCoRView> mockView;
     MantidQt::CustomInterfaces::ImageCoRPresenter pres(&mockView);
 
+    EXPECT_CALL(mockView, setParams(testing::_)).Times(1);
+
     // One error, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(ImageCoRPresenter::Init);
+  }
+
+  void test_browseImgEmptyPath() {
+    testing::NiceMock<MockImageCoRView> mockView;
+    MantidQt::CustomInterfaces::ImageCoRPresenter pres(&mockView);
+
+    EXPECT_CALL(mockView, askImgOrStackPath()).Times(1).WillOnce(Return(""));
+
+    // No error, no warnings, just ignored
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    // should not get there:
+    EXPECT_CALL(mockView, stackPath()).Times(0);
+    EXPECT_CALL(mockView, showStack(testing::An<const std::string &>()))
+        .Times(0);
+    EXPECT_CALL(mockView,
+                showStack(testing::An<Mantid::API::WorkspaceGroup_sptr &>()))
+        .Times(0);
+    EXPECT_CALL(mockView, updateImgWithIndex(testing::_)).Times(0);
+
+    pres.notify(IImageCoRPresenter::BrowseImgOrStack);
   }
 
   void test_shutDown() {
@@ -75,8 +101,7 @@ public:
 private:
   // boost::shared_ptr
   boost::scoped_ptr<testing::NiceMock<MockImageCoRView>> m_view;
-  boost::scoped_ptr<MantidQt::CustomInterfaces::ImageCoRPresenter>
-      m_presenter;
+  boost::scoped_ptr<MantidQt::CustomInterfaces::ImageCoRPresenter> m_presenter;
 
   // To have one FITS, etc.
   Mantid::API::MatrixWorkspace_sptr m_ws;
