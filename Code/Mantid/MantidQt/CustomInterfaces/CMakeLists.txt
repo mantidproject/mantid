@@ -405,6 +405,7 @@ set ( TEST_FILES
   ReflGenerateNotebookTest.h
   ReflLegacyTransferStrategyTest.h
   ReflMainViewPresenterTest.h
+  StackOfImagesDirsTest.h
   TomographyIfacePresenterTest.h
   UserInputValidatorTest.h
 )

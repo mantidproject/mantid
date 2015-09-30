@@ -70,6 +70,9 @@ StackOfImagesDirs::findImgFiles(const std::string &path) const {
 }
 
 void StackOfImagesDirs::findStackDirs(const std::string &path) {
+  if (path.empty())
+    return;
+
   Poco::File dir(path);
   if (!dir.isDirectory() || !dir.exists())
     return;
