@@ -56,6 +56,26 @@ MatrixWSDataSource::MatrixWSDataSource( MatrixWorkspace_const_sptr matWs ) :
 
   m_totalRows = matWs->getNumberHistograms();
   m_totalCols = 1000000;  // Default data resolution
+
+  m_instrument = m_matWs->getInstrument();
+  if ( m_instrument )
+  {
+    m_source = m_instrument->getSource();
+    if ( !m_source )
+    {
+      g_log.debug("No SOURCE on instrument in MatrixWorkspace");
+    }
+
+    m_sample = m_instrument->getSample();
+    if ( !m_sample )
+    {
+      g_log.debug("No SAMPLE on instrument in MatrixWorkspace");
+    }
+  }
+  else
+  {
+    g_log.debug("No INSTRUMENT on MatrixWorkspace");
+  }
 }
 
 
@@ -277,7 +297,11 @@ void MatrixWSDataSource::getInfoList( double x,
 
   /* Now try to do various unit conversions to get equivalent info */
   /* first make sure we can get the needed information */
-  IDetector_const_sptr det;
+  if ( !(m_instrument && m_source && m_sample) )
+  {
+    return;
+  }
+
   try
   {
 
@@ -287,46 +311,25 @@ void MatrixWSDataSource::getInfoList( double x,
       return;
     }
 
-    Instrument_const_sptr instrument = m_matWs->getInstrument();
-    if ( instrument == 0 )
-    {
-      g_log.debug("No INSTRUMENT on MatrixWorkspace");
-      return;
-    }
-
-    IComponent_const_sptr source = instrument->getSource();
-    if ( source == 0 )
-    {
-      g_log.debug("No SOURCE on instrument in MatrixWorkspace");
-      return;
-    }
-
-    IComponent_const_sptr sample = instrument->getSample();
-    if ( sample == 0 )
-    {
-      g_log.debug("No SAMPLE on instrument in MatrixWorkspace");
-      return;
-    }
-
-    det = m_matWs->getDetector( row );
+    auto det = m_matWs->getDetector( row );
     if ( det == 0 )
     {
       g_log.debug() << "No DETECTOR for row " << row << " in MatrixWorkspace" << std::endl;
       return;
     }
 
-    double l1        = source->getDistance(*sample);
+    double l1        = m_source->getDistance(*m_sample);
     double l2        = 0.0;
     double two_theta = 0.0;
     double azi       = 0.0;
     if ( det->isMonitor() )
     {
-      l2 = det->getDistance(*source);
+      l2 = det->getDistance(*m_source);
       l2 = l2-l1;
     }
     else
     {
-      l2 = det->getDistance(*sample);
+      l2 = det->getDistance(*m_sample);
       two_theta = m_matWs->detectorTwoTheta(det);
       azi = det->getPhi();
     }

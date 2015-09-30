@@ -59,6 +59,7 @@ std::vector<double> ChebyshevPolyFitImpl::fit(const std::vector<double> &x,
   auto *work = gsl_multifit_linear_alloc (npts, degp1);
   double chisq(0.0);
   gsl_multifit_linear (MX, yw, c, cov, &chisq, work);
+  gsl_vector_free(yw);
   gsl_matrix_free(cov);
   gsl_matrix_free(MX);
   gsl_multifit_linear_free(work);

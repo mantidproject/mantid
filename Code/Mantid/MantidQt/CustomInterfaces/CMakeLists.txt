@@ -73,10 +73,12 @@ set ( SRC_FILES
   src/Muon/MuonAnalysisHelper.cpp
   src/Muon/MuonAnalysisOptionTab.cpp
   src/Muon/MuonAnalysisResultTableTab.cpp
+  src/ParseKeyValueString.cpp
   src/QReflTableModel.cpp
   src/QtReflMainView.cpp
   src/QtReflOptionsDialog.cpp
   src/ReflCatalogSearcher.cpp
+  src/ReflGenerateNotebook.cpp
   src/ReflLegacyTransferStrategy.cpp
   src/ReflMainViewPresenter.cpp
   src/ReflSearchModel.cpp
@@ -217,6 +219,9 @@ set ( INC_FILES
   inc/MantidQtCustomInterfaces/Tomography/ToolConfigTomoPy.h
   inc/MantidQtCustomInterfaces/Updateable.h
   inc/MantidQtCustomInterfaces/UserInputValidator.h
+  inc/MantidQtCustomInterfaces/ReflGenerateNotebook.h
+  inc/MantidQtCustomInterfaces/ParseKeyValueString.h
+  inc/MantidQtCustomInterfaces/ReflVectorString.h
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
@@ -383,6 +388,8 @@ set ( TEST_FILES
   EnggDiffractionPresenterTest.h
   IO_MuonGroupingTest.h
   MuonAnalysisHelperTest.h
+  ParseKeyValueStringTest.h
+  ReflGenerateNotebookTest.h
   ReflLegacyTransferStrategyTest.h
   ReflMainViewPresenterTest.h
   TomographyIfacePresenterTest.h

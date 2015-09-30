@@ -59,9 +59,10 @@ private:
   void init();
   void exec();
 
-  void addMDEvents();
+  void addMDEvents(bool usevirtual);
 
   void convertSpiceMatrixToMomentumMDEvents(API::MatrixWorkspace_sptr dataws,
+                                            bool usevirtual,
                                             const detid_t &startdetid,
                                             const int runnumber);
 
@@ -74,7 +75,7 @@ private:
 
   API::IMDEventWorkspace_sptr createExperimentMDWorkspace();
 
-  bool getInputs(std::string &errmsg);
+  bool getInputs(bool virtualinstrument, std::string &errmsg);
 
   API::MatrixWorkspace_sptr loadSpiceData(const std::string &filename,
                                           bool &loaded, std::string &errmsg);
@@ -84,6 +85,10 @@ private:
 
   void setupTransferMatrix(API::MatrixWorkspace_sptr dataws,
                            Kernel::DblMatrix &rotationMatrix);
+
+  void createVirtualInstrument();
+
+  void updateQRange(const std::vector<Mantid::coord_t> &vec_q);
 
   API::ITableWorkspace_sptr m_expDataTableWS;
   API::ITableWorkspace_sptr m_detectorListTableWS;
@@ -99,6 +104,10 @@ private:
   std::vector<double> m_extentMins;
   std::vector<double> m_extentMaxs;
   std::vector<size_t> m_numBins;
+
+  std::vector<coord_t> m_minQVec;
+  std::vector<coord_t> m_maxQVec;
+  bool m_setQRange;
 
   /// Data directory
   std::string m_dataDir;

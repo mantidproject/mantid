@@ -6,6 +6,7 @@
 #include <QRect>
 #include <QTableWidget>
 #include <qwt_plot.h>
+#include <boost/weak_ptr.hpp>
 
 #include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 #include "MantidQtSpectrumViewer/GraphDisplay.h"
@@ -49,8 +50,12 @@ namespace MantidQt
 namespace SpectrumView
 {
 
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
+class TrackingPicker;
+
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay: public QObject
 {
+    Q_OBJECT
+
   public:
 
      /// Make an SpectrumDisplay to display with the given widgets and controls
@@ -89,13 +94,16 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      void setIntensity( double controlParameter );
 
      /// Record the point that the user is currently pointing at with the mouse
-     virtual QPair<double,double> setPointedAtPoint( QPoint point, int mouseClick = 2 );
+     virtual QPair<double,double> setPointedAtPoint( QPoint point, int mouseClick = 2, bool isFront = true);
+
+     /// Record the point that the user is currently pointing in the scales coordinates
+     virtual void setPointedAtXY( double x, double y, bool isFront = true );
 
      /// Set horizontal graph wit data from the array at the specified y value
-     void setHGraph( double y );
+     void setHGraph( double y, bool isFront = true );
 
      /// Set vertical graph with data from the array at the specified x value
-     void setVGraph( double x );
+     void setVGraph( double x, bool isFront = true );
 
      /// Show information about the point (x, y) on the image in the table
      std::vector<std::string> showInfoList( double x, double y );
@@ -112,8 +120,18 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      // Gets the Y value pointed at
      double getPointedAtY();
 
+     QwtPlot* spectrumPlot() const {return m_spectrumPlot;}
+
+     void addOther(const boost::shared_ptr<SpectrumDisplay>& other);
+     void addOthers(const QList<boost::shared_ptr<SpectrumDisplay>>& others);
+     void removeOther(const boost::shared_ptr<SpectrumDisplay>& other);
+
   protected:
      SpectrumPlotItem*    m_spectrumPlotItem;
+
+  private slots:
+
+    void imagePickerMoved(const QPoint &point);
 
   private:
      /// Check if the DataSource has been changed under us
@@ -150,6 +168,8 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      double m_totalYMin;
      double m_totalYMax;
 
+     QList<boost::weak_ptr<SpectrumDisplay>> m_otherDisplays;
+     TrackingPicker* m_imagePicker;
 };
 
 } // namespace SpectrumView

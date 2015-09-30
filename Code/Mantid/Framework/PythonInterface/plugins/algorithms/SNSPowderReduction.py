@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,no-init
+#pylint: disable=invalid-name,no-init,too-many-lines
 import mantid
 import mantid.api
 import mantid.simpleapi as api
@@ -24,6 +24,14 @@ def noRunSpecified(runs):
         return runs[0] <= 0
     return False
 
+def allEventWorkspaces(*args):
+    result = True
+
+    for arg in args:
+        result = result and (arg.id() == EVENT_WORKSPACE_ID)
+
+    return result
+
 #pylint: disable=too-many-instance-attributes
 class SNSPowderReduction(DataProcessorAlgorithm):
     COMPRESS_TOL_TOF = .01
@@ -44,7 +52,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
     _outDir = None
     _outPrefix = None
     _outTypes = None
-    _infodict = None
     _chunks = None
     _splitws = None
     _splitinfotablews = None
@@ -101,6 +108,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                       extensions = [".h5", ".hd5", ".hdf", ".cal"]))
         self.declareProperty(FileProperty(name="CharacterizationRunsFile",defaultValue="",action=FileAction.OptionalLoad,\
                                       extensions = ["txt"]),"File with characterization runs denoted")
+        self.declareProperty(FileProperty(name="ExpIniFilename", defaultValue="", action=FileAction.OptionalLoad,
+                                          extensions=[".ini"]))
         self.declareProperty("UnwrapRef", 0.,
                              "Reference total flight path for frame unwrapping. Zero skips the correction")
         self.declareProperty("LowResRef", 0.,
@@ -169,7 +178,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         """
         # get generic information
         SUFFIX = self.getProperty("Extension").value
-        self._loadCharacterizations(self.getProperty("CharacterizationRunsFile").value)
+        self._loadCharacterizations()
         self._resampleX = self.getProperty("ResampleX").value
         if self._resampleX != 0.:
             self._binning = [0.]
@@ -196,7 +205,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         calib = self.getProperty("CalibrationFile").value
         self._scaleFactor = self.getProperty("ScaleData").value
         self._outDir = self.getProperty("OutputDirectory").value
-        self._outPrefix = self.getProperty("OutputFilePrefix").value
+        self._outPrefix = self.getProperty("OutputFilePrefix").value.strip()
         self._outTypes = self.getProperty("SaveAs").value.lower()
         samRuns = self.getProperty("RunNumber").value
         preserveEvents = self.getProperty("PreserveEvents").value
@@ -204,7 +213,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             self.log().warning("preserveEvents set to False for MPI tasks.")
             preserveEvents = False
         self._info = None
-        self._infodict = {}
         self._chunks = self.getProperty("MaxChunkSize").value
 
         self._splitws = self.getProperty("SplittersWorkspace").value
@@ -304,13 +312,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 self.log().information("Unable to get number of events of sample run %s.  Error message: %s" % (str(samRun), str(e)))
 
             # Get run number
-            runnumber = samRun.getRunNumber()
-            if self._infodict.has_key(runnumber):
-                self.log().debug("[F1022A] Found run number %d in info dict." % (runnumber))
-                self._info = self._infodict[runnumber]
-            else:
-                self.log().debug("[F1022B] Unable to find _info for run number %d in info dict. "% (runnumber))
-                self._info = self._getinfo(samRun)
+            self._info = self._getinfo(samRun)
 
             # process the container
             canRuns = self._info["container"].value
@@ -322,15 +324,19 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 else:
                     canFilterWall = (0., 0.)
 
-                if "%s_%d" % (self._instrument, canRuns[samRunIndex]) in mtd:
-                    canRun = mtd["%s_%d" % (self._instrument, canRuns[samRunIndex])]
+                if len(canRuns) == 1:
+                    canRun = canRuns[0]
+                else:
+                    canRun = canRuns[samRunIndex]
+                if "%s_%d" % (self._instrument, canRun) in mtd:
+                    canRun = mtd["%s_%d" % (self._instrument, canRun)]
                     canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
                 else:
                     if self.getProperty("Sum").value:
                         canRun = self._focusAndSum(canRuns, SUFFIX, canFilterWall, calib,\
                                preserveEvents=preserveEvents)
                     else:
-                        canRun = self._focusChunks(canRuns[samRunIndex], SUFFIX, canFilterWall, calib,\
+                        canRun = self._focusChunks(canRun, SUFFIX, canFilterWall, calib,\
                                                    normalisebycurrent=self._normalisebycurrent,
                                                    preserveEvents=preserveEvents)
                     canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
@@ -343,7 +349,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             # process the vanadium run
             vanRuns = self._info["vanadium"].value
             if not noRunSpecified(vanRuns):
-                vanRun = vanRuns[samRunIndex]
+                if len(vanRuns) == 1:
+                    vanRun = vanRuns[0]
+                else:
+                    vanRun = vanRuns[samRunIndex]
                 if self.getProperty("FilterCharacterizations").value:
                     vanFilterWall = {'FilterByTimeStart':timeFilterWall[0], 'FilterByTimeStop':timeFilterWall[1]}
                 else:
@@ -362,16 +371,21 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     # load the vanadium background (if appropriate)
                     vbackRuns = self._info["empty"].value
                     if not noRunSpecified(vbackRuns):
-                        name = "%s_%d" % (self._instrument, vbackRuns[samRunIndex])
+                        if len(vbackRuns) == 1:
+                            vbackRun = vbackRuns[0]
+                        else:
+                            vbackRun = vbackRuns[samRunIndex]
+                        name = "%s_%d" % (self._instrument, vbackRun)
                         if self.getProperty("Sum").value:
                             vbackRun = self._loadAndSum(vbackRuns, name, **vanFilterWall)
                         else:
-                            vbackRun = self._loadAndSum([vbackRuns[samRunIndex]], name, **vanFilterWall)
+                            vbackRun = self._loadAndSum([vbackRun], name, **vanFilterWall)
 
                         if vbackRun.id() == EVENT_WORKSPACE_ID and vbackRun.getNumberEvents() <= 0:
                             pass
                         else:
-                            vanRun = api.Minus(LHSWorkspace=vanRun, RHSWorkspace=vbackRun, OutputWorkspace=vanRun)
+                            vanRun = api.Minus(LHSWorkspace=vanRun, RHSWorkspace=vbackRun, OutputWorkspace=vanRun,
+                                               ClearRHSWorkspace=allEventWorkspaces(vanRun, vbackRun))
 
                         api.DeleteWorkspace(Workspace=vbackRun)
 
@@ -464,12 +478,17 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         return
 
-    def _loadCharacterizations(self, filename):
+    def _loadCharacterizations(self):
         self._focusPos = {}
-        if filename is None or len(filename) <= 0:
+        charFilename = self.getProperty("CharacterizationRunsFile").value
+        expIniFilename = self.getProperty("ExpIniFilename").value
+
+        if charFilename is None or len(charFilename) <= 0:
             self.iparmFile = None
             return
-        results = api.PDLoadCharacterizations(Filename=filename,
+
+        results = api.PDLoadCharacterizations(Filename=charFilename,
+                                              ExpIniFilename=expIniFilename,
                                               OutputWorkspace="characterizations")
         self._charTable = results[0]
         self.iparmFile = results[1]
@@ -591,7 +610,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             else:
                 self.checkInfoMatch(info, tempinfo)
 
-                sumRun = api.Plus(LHSWorkspace=sumRun, RHSWorkspace=temp, OutputWorkspace=sumRun)
+                sumRun = api.Plus(LHSWorkspace=sumRun, RHSWorkspace=temp, OutputWorkspace=sumRun,
+                                  ClearRHSWorkspace=allEventWorkspaces(sumRun, temp))
                 if sumRun.id() == EVENT_WORKSPACE_ID:
                     sumRun = api.CompressEvents(InputWorkspace=sumRun, OutputWorkspace=sumRun,\
                                                 Tolerance=self.COMPRESS_TOL_TOF) # 10ns
@@ -632,7 +652,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             else:
                 self.checkInfoMatch(info, tempinfo)
 
-                sumRun = api.Plus(LHSWorkspace=sumRun, RHSWorkspace=temp, OutputWorkspace=sumRun)
+                sumRun = api.Plus(LHSWorkspace=sumRun, RHSWorkspace=temp, OutputWorkspace=sumRun,
+                                  ClearRHSWorkspace=allEventWorkspaces(sumRun, temp))
                 if sumRun.id() == EVENT_WORKSPACE_ID:
                     sumRun = api.CompressEvents(InputWorkspace=sumRun, OutputWorkspace=sumRun,\
                                                 Tolerance=self.COMPRESS_TOL_TOF) # 10ns
@@ -713,10 +734,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     temp.getNumberEvents(), str(temp)))
 
             if self._info is None:
-                if not self._infodict.has_key(int(runnumber)):
-                    self._info = self._getinfo(temp)
-                    self._infodict[int(runnumber)] = self._info
-                    self.log().debug("[F1012] Add info for run number %d." % (int(runnumber)))
+                self._info = self._getinfo(temp)
 
             # Filtering...
             tempwslist = []
@@ -804,7 +822,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     wksplist[itemp] = api.RenameWorkspace(InputWorkspace=temp, OutputWorkspace=wkspname)
                     firstChunkList[itemp] = False
                 else:
-                    wksplist[itemp] = api.Plus(LHSWorkspace=wksplist[itemp], RHSWorkspace=temp, OutputWorkspace=wksplist[itemp])
+                    wksplist[itemp] = api.Plus(LHSWorkspace=wksplist[itemp], RHSWorkspace=temp,
+                                               OutputWorkspace=wksplist[itemp],
+                                               ClearRHSWorkspace=allEventWorkspaces(wksplist[itemp], temp))
                     api.DeleteWorkspace(temp)
                 # ENDIF
             # ENDFOR (spliited workspaces)

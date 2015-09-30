@@ -15,6 +15,7 @@ if ( CXXTEST_FOUND )
             Geometry
             Kernel
             Nexus
+            ${JSONCPP_LIBRARIES}
             ${NEXUS_LIBRARIES}
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}

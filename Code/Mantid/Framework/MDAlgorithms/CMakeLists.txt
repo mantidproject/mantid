@@ -33,6 +33,7 @@ set ( SRC_FILES
 	src/CreateMDHistoWorkspace.cpp
 	src/CreateMDWorkspace.cpp
 	src/CutMD.cpp
+	src/DisplayNormalizationSetter.cpp	
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
 	src/EvaluateMDFunction.cpp
@@ -152,6 +153,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/CreateMDWorkspace.h
 	inc/MantidMDAlgorithms/CutMD.h
+	inc/MantidMDAlgorithms/DisplayNormalizationSetter.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/DllConfig.h
 	inc/MantidMDAlgorithms/EqualToMD.h
@@ -273,6 +275,7 @@ set ( TEST_FILES
 	CreateMDHistoWorkspaceTest.h
 	CreateMDWorkspaceTest.h
 	CutMDTest.h
+	DisplayNormalizationSetterTest.h
 	DivideMDTest.h
 	EqualToMDTest.h
 	EvaluateMDFunctionTest.h

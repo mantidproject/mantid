@@ -34,12 +34,15 @@ class LoadVisionInelastic(PythonAlgorithm):
         banks = banks.lower().replace("all", "forward,backward")
         banks = banks.lower().replace("forward", self.__forward)
         banks = banks.lower().replace("backward", self.__backward)
-        
-        # Let's make sure we have a unique list
-        banks_list = banks.split(",")
-        banks = ",".join(set(banks_list))
+        banks = banks.lower()
 
-        self.getLogger().information('Loading data from banks:' + banks.replace("bank", ""))
+        # Let's make sure we have a unique and sorted list
+        banks_integers = banks.replace("bank", "")
+        banks_list_integers = banks_integers.split(",")
+        banks_list_integers = list(set(banks_list_integers))
+        banks_list_integers.sort(key=int)
+        banks_list = ['bank{0}'.format(i) for i in banks_list_integers]
+        banks = ",".join(banks_list)
 
         wksp_name = "__tmp"
         ws = mantid.simpleapi.LoadEventNexus(Filename=filename, BankName=banks, OutputWorkspace=wksp_name)
