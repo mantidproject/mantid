@@ -164,8 +164,8 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   // Get the maximum asymmetry
   double maxAsym = 0.;
   for (size_t h = 0; h < nspec; h++) {
-    if (phase->Double(h, 2) > maxAsym) {
-      maxAsym = phase->Double(h, 2);
+    if (phase->Double(h, 1) > maxAsym) {
+      maxAsym = phase->Double(h, 1);
     }
   }
   if (!maxAsym) {
@@ -181,8 +181,8 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     double sxy = 0;
 
     for (size_t h = 0; h < nspec; h++) {
-      double phi = phase->Double(h, 1);
-      double asym = phase->Double(h, 2) / maxAsym;
+      double asym = phase->Double(h, 1) / maxAsym;
+      double phi = phase->Double(h, 2);
       double X = n0[h] * asym * cos(phi);
       double Y = n0[h] * asym * sin(phi);
       sxx += X * X;
@@ -195,8 +195,8 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     double lam2 = 2 * sxy / (sxy * sxy - sxx * syy);
     double mu2 = 2 * sxx / (sxx * syy - sxy * sxy);
     for (size_t h = 0; h < nspec; h++) {
-      double phi = phase->Double(h, 1);
-      double asym = phase->Double(h, 2) / maxAsym;
+      double asym = phase->Double(h, 1) / maxAsym;
+      double phi = phase->Double(h, 2);
       double X = n0[h] * asym * cos(phi);
       double Y = n0[h] * asym * sin(phi);
       aj.push_back((lam1 * X + mu1 * Y) * 0.5);
