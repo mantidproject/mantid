@@ -76,10 +76,8 @@ void SetUncertainties::exec() {
       std::size_t numE = E.size();
       for (std::size_t j = 0; j < numE; j++) {
         const double y_val = fabs(Y[j]);
-        if (y_val < TOLERANCE)
-            E[j] = 0.;
-        else
-            E[j] = sqrt(y_val);
+        if (y_val > TOLERANCE)
+          E[j] = sqrt(y_val);
       }
     }
 
