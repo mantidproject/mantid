@@ -216,19 +216,22 @@ public:
 
 protected:
   int cursorSize() const {return m_size;}
-  bool isButtonPressed() const {return m_isButtonPressed;}
+  bool isLeftButtonPressed() const {return m_isLeftButtonPressed;}
+  bool isRightButtonPressed() const {return m_isRightButtonPressed;}
   bool isActive() const {return m_isActive;}
 
 private:
   void redrawCursor();
   virtual void signalLeftClick() = 0;
+  virtual void signalRightClick();
   virtual void drawCursor(QPixmap *cursor) = 0;
   virtual void setPosition(const QPoint &pos) = 0;
   virtual void resize() = 0;
 
   const int m_max_size;
   int m_size; ///< Size of the cursor
-  bool m_isButtonPressed;
+  bool m_isLeftButtonPressed;
+  bool m_isRightButtonPressed;
   bool m_isActive;
   QPixmap *m_cursor;
 };
@@ -255,6 +258,38 @@ private:
 
   QRect m_rect;
   QPixmap *m_image;
+};
+
+/**
+    Controller for drawing and erasing arbitrary shapes on an unwrapped surface.
+  */
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerDrawAndErase : public InputControllerDraw {
+  Q_OBJECT
+
+public:
+  InputControllerDrawAndErase(QObject *parent);
+
+signals:
+  void draw(const QPolygonF &);
+  void erase(const QPolygonF &);
+  void addShape(const QPolygonF &poly, const QColor &borderColor,
+                const QColor &fillColor);
+
+public slots:
+  void startCreatingShape2D(const QColor &borderColor, const QColor &fillColor);
+
+private:
+  void drawCursor(QPixmap *cursor);
+  void signalLeftClick();
+  void signalRightClick();
+  void setPosition(const QPoint &pos);
+  void resize();
+  void makePolygon();
+
+  QPoint m_pos;
+  QPolygonF m_rect;
+  QColor m_borderColor, m_fillColor;
+  bool m_creating;
 };
 
 }

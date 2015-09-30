@@ -668,7 +668,8 @@ void InstrumentWindowPickTab::updateSelectionInfoDisplay()
  */
 void InstrumentWindowPickTab::shapeCreated()
 {
-    selectTool( EditShape );
+  if ( !isVisible() ) return;
+  selectTool( EditShape );
 }
 
 /**

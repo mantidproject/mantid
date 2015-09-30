@@ -150,6 +150,11 @@ public:
   /// @param fillColor :: The fill color.
   void startCreatingShape2D(const QString& type,const QColor& borderColor,const QColor& fillColor = QColor());
 
+  /// Initialize interactive creation of a free draw shape.
+  /// @param borderColor :: The color of the shape outline.
+  /// @param fillColor :: The fill color.
+  void startCreatingFreeShape(const QColor& borderColor,const QColor& fillColor = QColor());
+
   // Properties methods which allow the mask shapes to be modified with a property browser.
 
   /// Return a list of all properties of type double of the currently selected shape.
@@ -210,6 +215,7 @@ signals:
 
   // shape manipulation
   void signalToStartCreatingShape2D(const QString& type,const QColor& borderColor,const QColor& fillColor);
+  void signalToStartCreatingFreeShape(const QColor& borderColor,const QColor& fillColor);
   void shapeCreated();
   void shapeSelected();
   void shapesDeselected();

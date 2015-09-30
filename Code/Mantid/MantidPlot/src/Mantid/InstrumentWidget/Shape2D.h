@@ -216,5 +216,23 @@ protected:
   double m_yWidth;
 };
 
+class Shape2DFree: public Shape2D
+{
+public:
+  Shape2DFree(const QPointF& p);
+  virtual Shape2D* clone()const{return new Shape2DFree(*this);}
+  virtual bool selectAt(const QPointF& p)const;
+  virtual bool contains(const QPointF& p)const;
+  virtual void addToPath(QPainterPath& path) const;
+  void addPolygon(const QPolygonF& polygon);
+protected:
+  virtual void drawShape(QPainter& painter) const;
+  virtual void refit();
+  virtual void resetBoundingRect();
+private:
+  RectF getPolygonBoundingRect() const;
+  QPolygonF m_polygon;
+};
+
 
 #endif /*MANTIDPLOT_SHAPE2D_H_*/

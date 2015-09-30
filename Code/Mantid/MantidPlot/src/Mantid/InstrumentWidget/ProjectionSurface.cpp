@@ -78,7 +78,13 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor):
   connect(drawController,SIGNAL(finishSelection(QRect)),this,SLOT(selectMultipleMasks(QRect)));
   connect(drawController,SIGNAL(finishSelection(QRect)),this,SIGNAL(shapeChangeFinished()));
 
-  setInputController(DrawFreeMode, NULL);
+  InputControllerDrawAndErase* freeDrawController = new InputControllerDrawAndErase(this);
+  setInputController(DrawFreeMode, freeDrawController);
+  connect(this,SIGNAL(signalToStartCreatingFreeShape(QColor,QColor)),freeDrawController,SLOT(startCreatingShape2D(QColor,QColor)));
+  connect(freeDrawController,SIGNAL(addShape(const QPolygonF&,QColor,QColor)),&m_maskShapes,SLOT(addFreeShape(const QPolygonF&,QColor,QColor)));
+  connect(freeDrawController,SIGNAL(draw(const QPolygonF&)),&m_maskShapes,SLOT(drawFree(const QPolygonF&)));
+
+
   setInputController(EraseMode, NULL);
 
   // create and connect the peak eraser controller
@@ -567,6 +573,11 @@ InputController *ProjectionSurface::getController() const
 void ProjectionSurface::startCreatingShape2D(const QString& type,const QColor& borderColor,const QColor& fillColor)
 {
   emit signalToStartCreatingShape2D(type,borderColor,fillColor);
+}
+
+void ProjectionSurface::startCreatingFreeShape(const QColor& borderColor,const QColor& fillColor)
+{
+  emit signalToStartCreatingFreeShape(borderColor,fillColor);
 }
 
 /**

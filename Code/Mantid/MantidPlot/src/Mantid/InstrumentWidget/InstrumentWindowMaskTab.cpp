@@ -349,6 +349,8 @@ void InstrumentWindowMaskTab::selectTool(Activity tool)
     break;
   case DrawRectangularRing: m_ring_rectangle->setChecked(true);
     break;
+  case DrawFree: m_free_draw->setChecked(true);
+    break;
   default: throw std::invalid_argument("Invalid tool type.");
   }
   setActivity();
@@ -405,7 +407,7 @@ void InstrumentWindowMaskTab::setActivity()
   else if (m_free_draw->isChecked())
   {
     m_activity = DrawFree;
-    m_instrWindow->getSurface()->startCreatingShape2D("free",borderColor,fillColor);
+    m_instrWindow->getSurface()->startCreatingFreeShape(borderColor,fillColor);
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawFreeMode);
     m_activeTool->setText("Tool: Free draw");
   }
@@ -417,8 +419,11 @@ void InstrumentWindowMaskTab::setActivity()
   */
 void InstrumentWindowMaskTab::shapeCreated()
 {
-  setSelectActivity();
-  enableApplyButtons();
+  if (m_activity != DrawFree)
+  {
+    setSelectActivity();
+    enableApplyButtons();
+  }
 }
 
 /**

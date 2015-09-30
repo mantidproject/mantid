@@ -319,7 +319,8 @@ InputControllerDraw::InputControllerDraw(QObject *parent):
 InputController(parent),
 m_max_size(32),
 m_size(30),
-m_isButtonPressed(false),
+m_isLeftButtonPressed(false),
+m_isRightButtonPressed(false),
 m_isActive(false),
 m_cursor(NULL)
 {
@@ -339,8 +340,13 @@ void InputControllerDraw::mousePressEvent(QMouseEvent *event)
     setPosition(QPoint(event->x(),event->y()));
     if (event->button() == Qt::LeftButton)
     {
-        m_isButtonPressed = true;
+        m_isLeftButtonPressed = true;
         signalLeftClick();
+    }
+    else if (event->button() == Qt::RightButton)
+    {
+        m_isRightButtonPressed = true;
+        signalRightClick();
     }
 }
 
@@ -351,18 +357,29 @@ void InputControllerDraw::mouseMoveEvent(QMouseEvent *event)
 {
     m_isActive = true;
     setPosition(QPoint(event->x(),event->y()));
-    if ( m_isButtonPressed )
+    if ( m_isLeftButtonPressed )
     {
         signalLeftClick();
+    }
+    else if ( m_isRightButtonPressed )
+    {
+        signalRightClick();
     }
 }
 
 /**
   * Process the mouse button release event.
   */
-void InputControllerDraw::mouseReleaseEvent(QMouseEvent *)
+void InputControllerDraw::mouseReleaseEvent(QMouseEvent *event)
 {
-    m_isButtonPressed = false;
+    if (event->button() == Qt::LeftButton)
+    {
+        m_isLeftButtonPressed = false;
+    }
+    else if (event->button() == Qt::RightButton)
+    {
+        m_isRightButtonPressed = false;
+    }
 }
 
 void InputControllerDraw::wheelEvent(QWheelEvent *event)
@@ -371,6 +388,7 @@ void InputControllerDraw::wheelEvent(QWheelEvent *event)
     if ( d > 2 && d < m_max_size )
     {
         m_size = d;
+        resize();
         redrawCursor();
         QApplication::restoreOverrideCursor();
         QApplication::setOverrideCursor(QCursor( *m_cursor, 0, 0 ));
@@ -399,6 +417,10 @@ void InputControllerDraw::redrawCursor()
   drawCursor(m_cursor);
 }
 
+void InputControllerDraw::signalRightClick()
+{
+}
+
 //--------------------------------------------------------------------------------
 
 InputControllerErase::InputControllerErase(QObject *parent): InputControllerDraw(parent),
@@ -419,7 +441,7 @@ void InputControllerErase::signalLeftClick()
 
 void InputControllerErase::onPaint(QPainter& painter)
 {
-    if ( isActive() && !isButtonPressed() )
+    if ( isActive() && !isLeftButtonPressed() )
     {
         painter.drawPixmap(m_rect.bottomRight(),*m_image);
     }
@@ -454,6 +476,91 @@ void InputControllerErase::resize()
 {
     auto size = cursorSize();
     m_rect.setSize( QSize(size, size) );
+}
+
+//--------------------------------------------------------------------------------
+
+InputControllerDrawAndErase::InputControllerDrawAndErase(QObject *parent): InputControllerDraw(parent),
+  m_pos(0,0), m_rect(8), m_creating(false)
+{
+  makePolygon();
+}
+
+void InputControllerDrawAndErase::makePolygon()
+{
+  auto r = double(cursorSize()) / 2.0;
+  double a = 2.0 * M_PI / double(m_rect.size());
+  for(int i = 0; i < m_rect.size(); ++i)
+  {
+    double ia = double(i) * a;
+    auto x = r + static_cast<int>(r * cos(ia));
+    auto y = r + static_cast<int>(r * sin(ia));
+    m_rect[i] = QPointF(x, y);
+  }
+}
+
+void InputControllerDrawAndErase::signalLeftClick()
+{
+  auto poly = m_rect.translated(m_pos);
+  if (m_creating)
+  {
+    m_creating = false;
+    emit addShape(poly, m_borderColor, m_fillColor);
+  }
+  else
+  {
+    //auto br = poly.boundingRect();
+    //std::cerr << "Draw " << br.left() << ' ' << br.top() << ' ' << br.right() << ' ' << br.bottom() << std::endl;
+    emit draw(poly);
+  }
+}
+
+void InputControllerDrawAndErase::signalRightClick()
+{
+  auto poly = m_rect.translated(m_pos);
+  //auto br = poly.boundingRect();
+  //std::cerr << "Erase " << br.left() << ' ' << br.top() << ' ' << br.right() << ' ' << br.bottom() << std::endl;
+  emit erase(poly);
+}
+
+void InputControllerDrawAndErase::drawCursor(QPixmap *cursor)
+{
+    cursor->fill(QColor(255,255,255,0));
+    QPainter painter( cursor );
+
+    auto bRect = m_rect.boundingRect();
+    auto poly = m_rect.translated(-bRect.topLeft());
+
+    auto pen = QPen(Qt::DashLine);
+    QVector<qreal> dashPattern;
+    qreal dashLength = cursorSize() < 10 ? 1 : 2;
+    dashPattern << dashLength << dashLength;
+    pen.setDashPattern(dashPattern);
+    pen.setColor(QColor(0,0,0));
+    painter.setPen(pen);
+    painter.drawPolygon(poly);
+
+    pen.setColor(QColor(255,255,255));
+    pen.setDashOffset(dashLength);
+    painter.setPen(pen);
+    painter.drawPolygon(poly);
+}
+
+void InputControllerDrawAndErase::setPosition(const QPoint &pos)
+{
+  m_pos = pos;
+}
+
+void InputControllerDrawAndErase::resize()
+{
+  makePolygon();
+}
+
+void InputControllerDrawAndErase::startCreatingShape2D(const QColor &borderColor, const QColor &fillColor)
+{
+  m_borderColor = borderColor;
+  m_fillColor = fillColor;
+  m_creating = true;
 }
 
 }

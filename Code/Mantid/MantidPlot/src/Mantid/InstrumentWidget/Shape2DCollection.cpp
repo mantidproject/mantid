@@ -204,6 +204,10 @@ Shape2D* Shape2DCollection::createShape(const QString& type,int x,int y) const
   {
      return new Shape2DRectangle(p,QSizeF(0,0));
   }
+  else if (type.toLower() == "free")
+  {
+     return new Shape2DFree(p);
+  }
 
   QStringList complexType = type.split(' ',QString::SkipEmptyParts);
 
@@ -735,3 +739,20 @@ void Shape2DCollection::changeBorderColor(const QColor &color)
     }
 }
 
+void Shape2DCollection::addFreeShape(const QPolygonF& poly,const QColor& borderColor,const QColor& fillColor)
+{
+  if (poly.isEmpty()) throw std::logic_error("Cannot create a shape from empty polygon.");
+  auto p = m_transform.inverted().map(poly[0]);
+  addShape("free", p.x(), p.y(), borderColor, fillColor);
+  drawFree(poly);
+}
+
+void Shape2DCollection::drawFree(const QPolygonF& polygon)
+{
+  auto freeShape = dynamic_cast<Shape2DFree*>(m_currentShape);
+  if (freeShape)
+  {
+    auto transform = m_transform.inverted();
+    freeShape->addPolygon(transform.map(polygon));
+  }
+}

@@ -487,3 +487,71 @@ void Shape2DRing::setColor(const QColor &color)
     m_outer_shape->setColor(color);
 }
 
+//------------------------------------------------------------------------------
+
+Shape2DFree::Shape2DFree(const QPointF& p):
+  m_polygon(QRectF(p,p))
+{
+  resetBoundingRect();
+}
+
+bool Shape2DFree::selectAt(const QPointF& p)const
+{
+  return contains(p);
+}
+
+bool Shape2DFree::contains(const QPointF& p)const
+{
+  return m_polygon.containsPoint(p,Qt::OddEvenFill);
+}
+
+void Shape2DFree::addToPath(QPainterPath& path) const
+{
+  path.addPolygon(m_polygon);
+}
+
+void Shape2DFree::drawShape(QPainter& painter) const
+{
+  QPainterPath path;
+  path.addPolygon(m_polygon);
+  painter.fillPath(path, m_fill_color);
+  painter.drawPolygon(m_polygon);
+}
+
+void Shape2DFree::refit()
+{
+  auto brOld = getPolygonBoundingRect();
+  auto &brNew = m_boundingRect;
+
+  auto xs0 = brNew.x0();
+  auto x0 = brOld.x0();
+  auto xScale = brNew.width() / brOld.width();
+
+  auto ys0 = brNew.y0();
+  auto y0 = brOld.y0();
+  auto yScale = brNew.height() / brOld.height();
+  for(int i = 0; i < m_polygon.size(); ++i)
+  {
+    auto &p = m_polygon[i];
+    p.rx() = xs0 + xScale * (p.x() - x0);
+    p.ry() = ys0 + yScale * (p.y() - y0);
+  }
+
+}
+
+void Shape2DFree::resetBoundingRect()
+{
+  m_boundingRect = getPolygonBoundingRect();
+}
+
+RectF Shape2DFree::getPolygonBoundingRect() const
+{
+  auto br = m_polygon.boundingRect();
+  return RectF(br.bottomLeft(), br.topRight());
+}
+
+void Shape2DFree::addPolygon(const QPolygonF& polygon)
+{
+  m_polygon = m_polygon.united(polygon);
+  resetBoundingRect();
+}
