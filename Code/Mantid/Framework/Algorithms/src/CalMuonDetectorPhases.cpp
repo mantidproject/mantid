@@ -36,7 +36,7 @@ void CalMuonDetectorPhases::init() {
                   "zero",
                   Direction::Input);
 
-  declareProperty("Frequency", EMPTY_DBL(), "Starting hing for the frequency",
+  declareProperty("Frequency", EMPTY_DBL(), "Starting hint for the frequency",
                   Direction::Input);
 
   declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(

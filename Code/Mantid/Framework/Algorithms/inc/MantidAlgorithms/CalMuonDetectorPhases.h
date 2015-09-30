@@ -39,7 +39,7 @@ public:
   virtual const std::string name() const { return "CalMuonDetectorPhases"; }
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
-    return "Calculate asymmetry and phase for each spectra in a workspace.";
+    return "Calculates the asymmetry and phase for each detector in a workspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
