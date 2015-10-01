@@ -112,6 +112,22 @@ bool ISISEnergyTransfer::validate() {
     }
   }
 
+  // Spectra Number check
+  const int specMin = m_uiForm.spSpectraMin->value();
+  const int specMax = m_uiForm.spSpectraMax->value();
+  if(specMin > specMax){
+	uiv.addErrorMessage("Spectra Min must be less than Spectra Max");
+  }
+
+  // Background Removal (TOF)
+  if(m_uiForm.ckBackgroundRemoval->isChecked()){
+	  const int start = m_uiForm.spBackgroundStart->value();
+	  const int end = m_uiForm.spBackgroundEnd->value();
+	  if(start > end){
+		  uiv.addErrorMessage("Background Start must be less than Background End");
+	  }
+  }
+
   QString error = uiv.generateErrorMessage();
   showMessageBox(error);
 
@@ -422,10 +438,8 @@ void ISISEnergyTransfer::plotRaw() {
     return;
   }
 
-  specid_t detectorMin =
-      static_cast<specid_t>(m_uiForm.spPlotTimeSpecMin->value());
-  specid_t detectorMax =
-      static_cast<specid_t>(m_uiForm.spPlotTimeSpecMax->value());
+  int detectorMin = m_uiForm.spPlotTimeSpecMin->value();
+  int detectorMax = m_uiForm.spPlotTimeSpecMax->value();
 
   if (detectorMin > detectorMax) {
     emit showMessageBox(
@@ -434,15 +448,26 @@ void ISISEnergyTransfer::plotRaw() {
   }
 
   QString rawFile = m_uiForm.dsRunFiles->getFirstFilename();
+  auto pos = rawFile.lastIndexOf(".");
+  auto extension = rawFile.right(rawFile.length() - pos);
   QFileInfo rawFileInfo(rawFile);
   std::string name = rawFileInfo.baseName().toStdString();
 
-  IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("Load");
+   IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("Load");
   loadAlg->initialize();
   loadAlg->setProperty("Filename", rawFile.toStdString());
   loadAlg->setProperty("OutputWorkspace", name);
-  loadAlg->setProperty("SpectrumMin", detectorMin);
-  loadAlg->setProperty("SpectrumMax", detectorMax);
+  if (extension.compare(".nxs") == 0) {
+    int64_t detectorMin =
+        static_cast<int64_t>(m_uiForm.spPlotTimeSpecMin->value());
+    int64_t detectorMax =
+        static_cast<int64_t>(m_uiForm.spPlotTimeSpecMax->value());
+    loadAlg->setProperty("SpectrumMin", detectorMin);
+    loadAlg->setProperty("SpectrumMax", detectorMax);
+  } else {
+    loadAlg->setProperty("SpectrumMin", detectorMin);
+    loadAlg->setProperty("SpectrumMax", detectorMax);
+  }
   m_batchAlgoRunner->addAlgorithm(loadAlg);
 
   // Rebin the workspace to its self to ensure constant binning
