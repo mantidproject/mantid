@@ -53,10 +53,19 @@
 	     if chopper "s": t_offset = -3326.8/SPEED + 7.7
 	-->
 	<parameter name="initial_phase">    
-		<value val="3000."/>
+		<value val="-3000."/>
 		<description is="The initial rotation phase of the disk used to caluclate the time
 		for neutrons arriving at the chopper according to the formula time = delay + initial_phase/Speed"/>	
     </parameter>
+	<parameter name="ChopperDelayLog" type="string">
+		<value val="fermi_delay"/>	
+	</parameter>
+	<parameter name="ChopperSpeedLog" type="string">
+		<value val="fermi_speed"/>	
+	</parameter>
+	<parameter name="FilterBaseLog" type="string">
+		<value val="good_uah_log"/>	
+	</parameter>	
   </component>
   <type name="chopper-position" is="ChopperPos"></type>  
   
@@ -70,11 +79,6 @@
       <logfile id="fermi_delay" extract-single-value-as="last_value" />
       <description is="Delay is the time between the moment when beam hits moderator and the moment, 
 	  when neutron passes through chopper for the first time."/>
-    </parameter>
-	<parameter name="initial_phase1">    
-		<value val="3002."/>
-		<description is="The initial rotation phase of the disk used to caluclate the time
-		for neutrons arriving at the chopper according to the formula time = delay + initial_phase/Speed"/>	
     </parameter>
 	
   </component>  

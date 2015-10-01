@@ -57,6 +57,8 @@ private:
   // Implement abstract Algorithm methods
   void init();
   void exec();
+  Kernel::Property * getPLogForProperty(const API::MatrixWorkspace_sptr &inputWS,
+    const std::string &name);
 protected: // for testing, private otherwise.
   // prepare working workspace with appropriate monitor spectra for fitting 
  API::MatrixWorkspace_sptr 

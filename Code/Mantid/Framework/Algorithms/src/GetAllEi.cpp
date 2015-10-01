@@ -44,11 +44,13 @@ namespace Mantid {
         "The workspace index (ID) of the spectra, containing second monitor's"
         "signal to analyze.");
 
-      declareProperty("ChopperSpeedLog", "Chopper_Speed","Name of the instrument log,"
-        "containing chopper angular velocity.");
-      declareProperty("ChopperDelayLog", "Chopper_Delay", "Name of the instrument log, "
-        "containing chopper delay time or chopper phase v.r.t. pulse time.");
-      declareProperty("FilterBaseLog", "proton_charge", "Name of the instrument log,"
+      declareProperty("ChopperSpeedLog", "Defined in IDF","Name of the instrument log,"
+        "containing chopper angular velocity. If 'Defined in IDF', "
+        "then the log name will be read from IDF");
+      declareProperty("ChopperDelayLog", "Defined in IDF", "Name of the instrument log, "
+        "containing chopper delay time or chopper phase v.r.t. pulse time. If 'Defined in IDF', "
+        "then the log name will be read from IDF");
+      declareProperty("FilterBaseLog", "Defined in IDF", "Name of the instrument log,"
         "with positive values indicating that instrument is running\n"
         "and 0 or negative that it is not.\n"
         "The log is used to identify time interval to evaluate"
@@ -163,16 +165,22 @@ namespace Mantid {
       auto phase = chopPoint->getNumberParameter("initial_phase");
 
       if(phase.size()==0){
-         throw std::runtime_error("Can not find initial_phase parameter attached to the chopper-position component");
+         throw std::runtime_error("Can not find initial_phase parameter"
+           " attached to the chopper-position component");
       }
       if(phase.size()>1){
-        throw std::runtime_error("Can not deal with multiple phases for initial_phase parameter attached to the chopper-position component");
+        throw std::runtime_error("Can not deal with multiple phases for initial_phase"
+          " parameter attached to the chopper-position component");
       }
       m_phase = phase[0];
       //auto chopPoint1  = pInstrument->getComponentByName("fermi-chopper");
       //auto par = chopPoint1->getDoubleParameter("Delay (us)");
       double chopSpeed,chopDelay;
       findChopSpeedAndDelay(inputWS,chopSpeed,chopDelay);
+      g_log.debug()<<
+       boost::str(boost::format("*Identified avrg ChopSpeed: %8.2f and Delay: %8.2f\n") % chopSpeed % chopDelay);
+
+
 
       
       auto moderator       = pInstrument->getSource();
@@ -212,6 +220,11 @@ namespace Mantid {
         g_log.debug()<<"*Found : "<<guess_opening.size()<<
           " chopper prospective opening within time frame: "
           <<TOF_range.first<<" to: "<<TOF_range.second<<std::endl;
+        g_log.debug()<<" Timings are:\n";
+        for(size_t i=0;i<guess_opening.size();i++){
+          g_log.debug()<<boost::str(boost::format(" %8.2f; ") % guess_opening[i]);
+        }
+        g_log.debug()<<std::endl;
       }
       std::pair<double,double> Mon1_Erange  = monitorWS->getSpectrum(0)->getXDataRange();
       std::pair<double,double> Mon2_Erange  = monitorWS->getSpectrum(1)->getXDataRange();
@@ -230,9 +243,17 @@ namespace Mantid {
           guess_ei.push_back(eGuess);
         }
       }
-      std::sort(guess_ei.begin(),guess_ei.end());
       g_log.debug()<<"*From all chopper opening only: "+std::to_string(guess_ei.size())+
-                    " fell within both monitor's recorded energy range\n";
+                    " fell within both monitor's recording energy range\n";
+      g_log.debug()<<" Guess Energies are:\n";
+      for(size_t i=0;i<guess_ei.size();i++){
+         g_log.debug()<<boost::str(boost::format(" %8.2f; ") % guess_ei[i]);
+      }
+      g_log.debug()<<std::endl;
+
+      std::sort(guess_ei.begin(),guess_ei.end());
+
+
       std::vector<size_t> irange_min,irange_max;
       std::vector<bool> guessValid;
       // preprocess first monitors peaks;
@@ -756,6 +777,29 @@ namespace Mantid {
           guess_opening_times[i-n_start]= ChopDelay + static_cast<double>(i)*Period;
         }
     }
+    /**Return pointer to log value for property with specified name
+    *@param -- inputWS workspace with logs attached
+    *@param -- propertyName name of the property to find log for
+    *
+    *@return -- pointer to property which contain the log requested or nullptr if
+    *           no log found or othr errors identified.
+    */
+    Kernel::Property *  GetAllEi::getPLogForProperty(const API::MatrixWorkspace_sptr &inputWS,
+    const std::string &propertyName){
+
+        std::string LogName = this->getProperty(propertyName);
+        if(LogName == "Defined in IDF"){
+            auto chopper = inputWS->getInstrument()->getComponentByName("chopper-position");
+            if(!chopper)return nullptr;
+            auto AllNames = chopper->getStringParameter(propertyName);
+            if(AllNames.size()!=1)return nullptr;
+            LogName = AllNames[0];
+        }
+        auto pIProperty  = (inputWS->run().getProperty(LogName));
+
+        return pIProperty;
+    }
+
 
     /**Return average time series log value for the appropriately filtered log
     * @param inputWS      -- shared pointer to the input workspace containing
@@ -768,8 +812,7 @@ namespace Mantid {
     double GetAllEi::getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS,
       const std::string &propertyName,std::vector<Kernel::SplittingInterval> &splitter){
 
-        const std::string LogName = this->getProperty(propertyName);
-        auto pIProperty  = (inputWS->run().getProperty(LogName));
+        auto pIProperty  =getPLogForProperty(inputWS,propertyName);
 
         // this will always provide a defined pointer as this has been verified in validator.
         auto pTimeSeries = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pIProperty);
@@ -782,8 +825,8 @@ namespace Mantid {
           pTimeSeries->filterByTimes(splitter);
         }
         if(pTimeSeries->size() == 0){
-          throw std::runtime_error("Can not find average value for log: "+LogName+
-            " As no valid log values are found.");
+          throw std::runtime_error("Can not find average value for log defined by property"
+            +propertyName+ " As no valid log values are found.");
         }
 
         return pTimeSeries->getStatistics().mean;
@@ -885,7 +928,9 @@ namespace Mantid {
 
 
         // process chopper delay in the units of degree (phase)
-        auto pProperty  = (inputWS->run().getProperty(this->getProperty("ChopperDelayLog")));
+        auto pProperty  = getPLogForProperty(inputWS,"ChopperDelayLog");
+        if(!pProperty)
+          throw std::runtime_error("ChopperDelayLog has been removed from workspace during the algorithm execution");
         std::string units = pProperty->units();
         // its chopper phase provided
         if (units=="deg" || units.c_str()[0] == -80){
@@ -927,6 +972,13 @@ namespace Mantid {
       }catch(std::runtime_error &){
         result["Monitor2SpecID"] = "Input workspace does not contain spectra with ID: "+boost::lexical_cast<std::string>(specNum2);
       }
+      //
+      auto chopper = inputWS->getInstrument()->getComponentByName("chopper-position");
+      if(!chopper){
+        result["Workspace_chopper"]=" For this algorithm to work workspace has"
+          " to contain well defined 'chopper-position' component";
+        return result;
+      }
 
 
       /** Lambda to validate if appropriate log is present in workspace
@@ -944,7 +996,22 @@ namespace Mantid {
       auto check_time_series_property = [&](const std::string &prop_name,
         const std::string &err_presence,const std::string &err_type, bool fail)
       {
-        const std::string LogName = this->getProperty(prop_name);
+        std::string LogName = this->getProperty(prop_name);
+        if(LogName == "Defined in IDF"){
+          try{
+            auto theLogs = chopper->getStringParameter(prop_name);
+            if(theLogs.size()==0){
+              if(fail)result[prop_name] = "Can not retrieve parameter " + prop_name+
+                " from the instrument definition file.";
+              return true;
+            }
+            LogName = theLogs[0];
+          }catch(...){
+            result[prop_name] = "Can not retrieve parameter " + prop_name+
+              " from the instrument definition file.";
+            return true;
+          }
+        }
         try{
           Kernel::Property * pProp = inputWS->run().getProperty(LogName);
           auto pTSProp  = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pProp);
@@ -970,6 +1037,7 @@ namespace Mantid {
       if(failed){
         g_log.warning()<<" Can not find a log to identify good DAE operations.\n"
           " Assuming that good operations start from experiment time=0";
+       // result.erase("FilterBaseLog");
         m_useFilterLog = false;
       }else{
         m_useFilterLog = true;
