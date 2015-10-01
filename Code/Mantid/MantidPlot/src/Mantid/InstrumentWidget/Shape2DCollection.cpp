@@ -739,6 +739,12 @@ void Shape2DCollection::changeBorderColor(const QColor &color)
     }
 }
 
+/**
+ * Add a Shape2D object allowing free drawing.
+ * @param poly :: Initial shape.
+ * @param borderColor :: The border colour.
+ * @param fillColor :: The fill colour.
+ */
 void Shape2DCollection::addFreeShape(const QPolygonF& poly,const QColor& borderColor,const QColor& fillColor)
 {
   auto freeShape = dynamic_cast<Shape2DFree*>(m_currentShape);
@@ -751,6 +757,9 @@ void Shape2DCollection::addFreeShape(const QPolygonF& poly,const QColor& borderC
   drawFree(poly);
 }
 
+/**
+ * Draw the shape by adding a polygon to it.
+ */
 void Shape2DCollection::drawFree(const QPolygonF& polygon)
 {
   auto freeShape = dynamic_cast<Shape2DFree*>(m_currentShape);
@@ -762,6 +771,9 @@ void Shape2DCollection::drawFree(const QPolygonF& polygon)
   }
 }
 
+/**
+ * Erase part of the shape by subtracting a polygon from it.
+ */
 void Shape2DCollection::eraseFree(const QPolygonF& polygon)
 {
   auto freeShape = dynamic_cast<Shape2DFree*>(m_currentShape);

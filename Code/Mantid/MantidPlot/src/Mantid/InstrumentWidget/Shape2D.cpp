@@ -492,27 +492,32 @@ void Shape2DRing::setColor(const QColor &color)
 
 //------------------------------------------------------------------------------
 
+/// Construct a zero-sized shape.
 Shape2DFree::Shape2DFree(const QPointF& p):
   m_polygon(QRectF(p,p))
 {
   resetBoundingRect();
 }
 
+/// The shape can be selected if it contains the point.
 bool Shape2DFree::selectAt(const QPointF& p)const
 {
   return contains(p);
 }
 
+/// Check if a point is inside the shape.
 bool Shape2DFree::contains(const QPointF& p)const
 {
   return m_polygon.containsPoint(p,Qt::OddEvenFill);
 }
 
+/// Add to a larger shape.
 void Shape2DFree::addToPath(QPainterPath& path) const
 {
   path.addPolygon(m_polygon);
 }
 
+/// Draw.
 void Shape2DFree::drawShape(QPainter& painter) const
 {
   QPainterPath path;
@@ -521,6 +526,7 @@ void Shape2DFree::drawShape(QPainter& painter) const
   painter.drawPath(m_outline);
 }
 
+/// Rescale polygon's verices to fit to the new bounding rect.
 void Shape2DFree::refit()
 {
   auto brOld = getPolygonBoundingRect();
@@ -544,10 +550,20 @@ void Shape2DFree::refit()
   resetBoundingRect();
 }
 
+/// Recalculate the bounding rect.
+/// Also make the new border outline.
+/// QPolygonF cannot have holes or disjointed parts,
+/// it's a single closed line. The outline (implemented as a QPainterPath)
+/// makes it look like it have holes.
 void Shape2DFree::resetBoundingRect()
 {
   m_boundingRect = getPolygonBoundingRect();
+  // If the polygon has apparent holes/discontinuities
+  // it will have extra pairs of edges which we don't want
+  // to draw.
   auto n = m_polygon.size() - 1;
+  // Find those vertices at which we must break the polygon
+  // to get rid of these extra edges.
   QList<int> breaks;
   breaks.push_back(0);
   for(int i = 1; i < m_polygon.size() - 1; ++i)
@@ -572,9 +588,12 @@ void Shape2DFree::resetBoundingRect()
     breaks.push_back(n);
   }
   qSort(breaks);
+  // Clear the outline path.
   m_outline = QPainterPath();
   m_outline.moveTo(m_polygon[0]);
   int j1 = 0;
+  // Add contiguous portions of the polygon to the outline
+  // and break at points from breaks list.
   for(int i = 0; i < breaks.size(); ++i)
   {
     auto j = breaks[i];
@@ -593,6 +612,7 @@ void Shape2DFree::resetBoundingRect()
   }
 }
 
+/// Convert the bounding rect computed by QPolygonF to RectF
 RectF Shape2DFree::getPolygonBoundingRect() const
 {
   auto br = m_polygon.boundingRect();
@@ -605,12 +625,14 @@ RectF Shape2DFree::getPolygonBoundingRect() const
   return RectF(QPointF(x0,y0), QPointF(x1,y1));
 }
 
+/// Add a polygon to this shape.
 void Shape2DFree::addPolygon(const QPolygonF& polygon)
 {
   m_polygon = m_polygon.united(polygon);
   resetBoundingRect();
 }
 
+/// Subtract a polygon from this shape.
 void Shape2DFree::subtractPolygon(const QPolygonF& polygon)
 {
   m_polygon = m_polygon.subtracted(polygon);

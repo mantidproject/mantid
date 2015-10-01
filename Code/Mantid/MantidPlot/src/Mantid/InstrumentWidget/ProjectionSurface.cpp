@@ -482,6 +482,9 @@ QString ProjectionSurface::getInfoText() const
     case DrawRegularMode:
         return "Select a tool button to draw a new shape. "
                 "Click on shapes to select. Click and move to edit.";
+    case DrawFreeMode:
+        return "Draw by holding the left button down. "
+                "Erase with the right button.";
     case ErasePeakMode:
         return "Click and move the mouse to erase peaks. "
                 "Rotate the wheel to resize the cursor.";
