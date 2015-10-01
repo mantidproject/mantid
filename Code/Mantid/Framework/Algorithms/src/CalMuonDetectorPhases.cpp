@@ -245,11 +245,19 @@ API::MatrixWorkspace_sptr
 CalMuonDetectorPhases::prepareWorkspace(const API::MatrixWorkspace_sptr &ws,
                                         double startTime, double endTime) {
 
-  // If startTime and/or endTime are EMPTY_DBL():
+  // If startTime is EMPTY_DBL():
   if (startTime == EMPTY_DBL()) {
-    // TODO set to zero for now, it should be read from FirstGoodBin
-    startTime = 0.;
+    try {
+      // Read FirstGoodData from workspace logs if possible
+      double firstGoodData = ws->run().getLogAsSingleValue("FirstGoodData");
+      startTime = firstGoodData;
+    } catch (...) {
+      g_log.warning("Couldn't read FirstGoodData, setting to 0");
+      // Set startTime to 0
+      startTime = 0.;
+    }
   }
+  // If endTime is EMPTY_DBL():
   if (endTime == EMPTY_DBL()) {
     // Last available time
     endTime = ws->readX(0).back();
