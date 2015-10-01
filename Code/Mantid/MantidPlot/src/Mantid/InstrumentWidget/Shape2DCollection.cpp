@@ -758,6 +758,7 @@ void Shape2DCollection::drawFree(const QPolygonF& polygon)
   {
     auto transform = m_transform.inverted();
     freeShape->addPolygon(transform.map(polygon));
+    emit shapeChanged();
   }
 }
 
@@ -768,5 +769,6 @@ void Shape2DCollection::eraseFree(const QPolygonF& polygon)
   {
     auto transform = m_transform.inverted();
     freeShape->subtractPolygon(transform.map(polygon));
+    emit shapeChanged();
   }
 }

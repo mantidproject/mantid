@@ -525,6 +525,8 @@ void Shape2DFree::refit()
 {
   auto brOld = getPolygonBoundingRect();
   auto &brNew = m_boundingRect;
+  if (brNew.xSpan() < 0.0) brNew.xFlip();
+  if (brNew.ySpan() < 0.0) brNew.yFlip();
 
   auto xs0 = brNew.x0();
   auto x0 = brOld.x0();
