@@ -188,6 +188,48 @@ class SANS2DAddedEventFilesWithoutOverlay(sansgui.SANS2DGUIReduction):
         os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028793-add.nxs'))
         os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028797-add.nxs'))
 
+class SANS2DAddedEventFilesWithoutOverlayWithISISCommandInterface(sansgui.SANS2DGUIReduction):
+    def runTest(self):
+
+        i.SANS2DTUBES()
+        i.MaskFile('USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt')
+        i.SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
+        i.SetDetectorOffsets('FRONT', -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
+        i.Gravity(False)
+        i.Set1D()
+
+        # add files (SAMPLE and CAN) using the ISISCommandInterface
+        runs_sample = ('28827','28797')
+        i.AddRuns(runs, instrumet = 'SANS2DTUBES', saveAsEvent=True)
+        runs_can = ('28823','28793')
+        i.AddRuns(runs, instrumet = 'SANS2DTUBES', saveAsEvent=True)
+
+        i.AssignSample(r'SANS2D00028797-add.nxs', reload = True)
+        i.AssignCan(r'SANS2D00028793-add.nxs', reload = True)
+        i.TransmissionSample(r'SANS2D00028808.nxs', r'SANS2D00028784.nxs')
+        i.TransmissionCan(r'SANS2D00028823.nxs', r'SANS2D00028784.nxs')
+
+        i.WavRangeReduction()
+
+
+    def validate(self):
+        # we have double the sample and the can, this means that the reduced data will be
+        # almost the same
+        self.tolerance = 0.01
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Axes')
+        self.disableChecking.append('Instrument')
+        return '28797rear_1D_1.75_16.5', 'SANS2DTUBES_AddedEventFilesWithoutOverlay.nxs'
+
+    def cleanup(self):
+        # Delete all workspaces
+        for ws in mtd.getObjectNames():
+            DeleteWorkspace(Workspace=ws)
+        # Delete the stored files
+        os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028793-add.nxs'))
+        os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028797-add.nxs'))
+
+
 if __name__ == "__main__":
     test = SANS2DReductionGUIAddedFiles()
     test.execute()

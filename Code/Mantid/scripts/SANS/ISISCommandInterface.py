@@ -1377,6 +1377,26 @@ def SetTransmissionMask(trans_mask_files):
     else:
         sanslog.warning('Warning: The mask file list does not seem to be valid.')
 
+
+def AddRuns(runs, instrument, binning = "Monitors", saveAsEvent=False, isOverlay = False, time_shifts = []):
+    '''
+    Method to expose the add_runs functionality for custom scripting.
+    @param runs: a list with the requested run numbers
+    @param instrument: the name of the selected instrument
+    @param binning: the where to get the binnings from. This can either be "Monitors
+    '''
+    # Need at least two runs to work
+    if len(runs) < 1:
+        issueWarning("AddRuns issue: A list with at least two runs needs to be provided.")
+        return
+
+    add_runs(runs = runs,
+             inst = instrument,
+             binning = binning,
+             saveAsEvent = saveAsEvent,
+             isOverlay = isOverlay,
+             time_shifts = time_shifts)
+
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################
