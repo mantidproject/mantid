@@ -200,6 +200,13 @@ void LoadMuonNexus1::exec() {
   localWorkspace->setComment(notes);
   localWorkspace->mutableRun().addLogData(
       new PropertyWithValue<std::string>("run_number", run_num));
+
+  // Add 'FirstGoodData' to list of logs if possible
+  if ( existsProperty("FirstGoodData") && existsProperty("TimeZero")) {
+    double fgd = getProperty("FirstGoodData");
+    double tz = getProperty("TimeZero");
+    localWorkspace->mutableRun().addLogData(new PropertyWithValue<double>("FirstGoodData",fgd-tz));
+  }
   // Set the unit on the workspace to muon time, for now in the form of a Label
   // Unit
   boost::shared_ptr<Kernel::Units::Label> lblUnit =
