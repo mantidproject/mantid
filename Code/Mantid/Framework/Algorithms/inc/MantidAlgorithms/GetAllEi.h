@@ -96,7 +96,8 @@ protected: // for testing, private otherwise.
   // set as half max LET resolution at 20mev at 5e-4
   double m_max_Eresolution;
   double m_peakEnergyRatio2reject;
-
+  // the value of constant phase shift on the chopper used to calculate
+  // tof at chopper from recorded delay.
   double m_phase;
 };
 

@@ -89,6 +89,10 @@ namespace Mantid {
         "peak is treated as insignificant one and is rejected.\n"
         "Accepted limits are:0.0 (All accepted) to 1 -- only one peak \n"
         "(or peaks with max and equal intensity) are accepted.");
+      declareProperty("IgnoreSecondMonitor",false,"Usually peaks are analyzed and accepted "
+        "only if identified on both monitors. If this property is set to true, only first "
+        "monitor peaks are analyzed.\n"
+        "This is usually debugging option as getEi has to use both monitors.");
 
       declareProperty(new API::WorkspaceProperty<API::Workspace>("OutputWorkspace","",
         Kernel::Direction::Output),
@@ -153,10 +157,11 @@ namespace Mantid {
 
       ////---> recalculate chopper delay to monitor position:
       auto pInstrument = inputWS->getInstrument();
-     // auto lastChopPositionComponent = pInstrument->getComponentByName("chopper-position");
-      //auto chopPoint = pInstrument->getChopperPoint(0);
+      //auto lastChopPositionComponent = pInstrument->getComponentByName("chopper-position");
+      //auto chopPoint1 = pInstrument->getChopperPoint(0); ->BUG! this operation loses parameters map.
       auto chopPoint  = pInstrument->getComponentByName("chopper-position");
       auto phase = chopPoint->getNumberParameter("initial_phase");
+
       if(phase.size()==0){
          throw std::runtime_error("Can not find initial_phase parameter attached to the chopper-position component");
       }
@@ -204,7 +209,7 @@ namespace Mantid {
         throw std::runtime_error("Can not find any chopper opening time within TOF range: "
           +std::to_string(TOF_range.first)+':'+std::to_string(TOF_range.second));
       }else{
-        g_log.debug()<<" Found : "<<guess_opening.size()<<
+        g_log.debug()<<"*Found : "<<guess_opening.size()<<
           " chopper prospective opening within time frame: "
           <<TOF_range.first<<" to: "<<TOF_range.second<<std::endl;
       }
@@ -226,10 +231,12 @@ namespace Mantid {
         }
       }
       std::sort(guess_ei.begin(),guess_ei.end());
-
+      g_log.debug()<<"*From all chopper opening only: "+std::to_string(guess_ei.size())+
+                    " fell within both monitor's recorded energy range\n";
       std::vector<size_t> irange_min,irange_max;
       std::vector<bool> guessValid;
       // preprocess first monitors peaks;
+      g_log.debug()<<"*Looking for real energy peaks on first monitor\n";
       findBinRanges(monitorWS->readX(0),monitorWS->readY(0),guess_ei,
         this->m_min_Eresolution/(2*std::sqrt(2*std::log(2.))),
         irange_min,irange_max,guessValid);
@@ -239,12 +246,22 @@ namespace Mantid {
 
       // preprocess second monitors peaks
       std::vector<size_t> irange1_min,irange1_max;
-      findBinRanges(monitorWS->readX(1),monitorWS->readY(1),guess_ei,
-        this->m_min_Eresolution/(2*std::sqrt(2*std::log(2.))),
-        irange1_min,irange1_max,guessValid);
-      removeInvalidValues<double>(guessValid,guess_ei);
-      removeInvalidValues<size_t>(guessValid,irange_min);
-      removeInvalidValues<size_t>(guessValid,irange_max);
+      if(!this->getProperty("IgnoreSecondMonitor")){
+        g_log.debug()<<"*Looking for real energy peaks on second monitor\n";
+        findBinRanges(monitorWS->readX(1),monitorWS->readY(1),guess_ei,
+          this->m_min_Eresolution/(2*std::sqrt(2*std::log(2.))),
+          irange1_min,irange1_max,guessValid);
+        removeInvalidValues<double>(guessValid,guess_ei);
+        removeInvalidValues<size_t>(guessValid,irange_min);
+        removeInvalidValues<size_t>(guessValid,irange_max);
+      }else{
+        // this is wrong but will not be used anyway
+        // (except formally looping through vector)
+        irange1_min.assign(irange_min.begin(),irange_min.end());
+        irange1_max.assign(irange_max.begin(),irange_max.end());
+      }
+      g_log.debug()<<"*Identified: "+std::to_string(guess_ei.size())+
+          " peaks with sufficient signal around guess chopper opening\n";
 
 
       std::vector<peakKeeper> peaks;
@@ -281,7 +298,7 @@ namespace Mantid {
         peaks[i].energy/=maxPeakEnergy;
         if(peaks[i].energy<m_peakEnergyRatio2reject){
           guessValid[i]=false;
-          g_log.debug()<<" Rejecting peak at Ei="+std::to_string(peaks[i].position)+
+          g_log.debug()<<"*Rejecting peak at Ei="+std::to_string(peaks[i].position)+
             " as its total energy lower then the threshold\n";
           needsRemoval = true;
         }else{
@@ -378,8 +395,9 @@ namespace Mantid {
               realPeakPos      = peaks[0];
             }
 
-            size_t ic(0);
-            while((nPeaks>1 || nHills>2)&&(nPrevHills!=nHills) && ic<50){
+            size_t ic(0),stay_still_count(0);
+            bool iterations_fail(false);
+            while((nPeaks>1 || nHills>2)&&(!iterations_fail)){
               Kernel::VectorHelper::smoothInRange(SAvrg,SAvrg1,SmoothRange,&binsAvrg,
                 0,ind_max-ind_min,&binsAvrg1);
               nPrevHills=nHills;
@@ -388,20 +406,28 @@ namespace Mantid {
               nHills = calcDerivativeAndCountZeros(binsAvrg1,der1Avrg,der2Avrg,hillsPos);
               SAvrg.swap(SAvrg1);
               binsAvrg.swap(binsAvrg1);
-              if (nPeaks==1 && !foundRealPeakPos){
-                foundRealPeakPos = true;
-                realPeakPos      = peaks[0];
+              if (nPeaks==1 && !foundRealPeakPos){ // fix first peak position found
+                foundRealPeakPos = true;           // as averaging shift peaks on 
+                realPeakPos      = peaks[0];       // irregular grid.
               }
               ic++;
+              if(nPrevHills<=nHills){stay_still_count++;
+              }else{stay_still_count=0;}
+              if(ic>50 || stay_still_count>3)iterations_fail=true;
 
             }
-            if(ic>=50){
-              g_log.information()<<"No peak search convergence after 50 smoothing iterations. Something is wrong";
+            if(iterations_fail){
+              g_log.information()<<"*No peak search convergence after "
+                +std::to_string(ic)+ " smoothing iterations at still_count: "
+                +std::to_string(stay_still_count)+" Something is wrong\n";
             }
-            g_log.debug()<<"Performed: "+std::to_string(ic)+ " averages for spectra "
+            g_log.debug()<<"*Performed: "+std::to_string(ic)+ " averages for spectra "
               +std::to_string(index)+" at energy: "+std::to_string(Ei)
               +"\n and found: "+std::to_string(nPeaks)+"peaks and "+std::to_string(nHills)+" hills\n";
-            if(nPeaks!=1)return false;
+            if(nPeaks!=1){
+              g_log.debug()<<"*Peak rejected as n-peaks !=1 after averaging\n";
+              return false;
+            }
 
             peakPos = peaks[0];
             if(nHills>2){
@@ -411,9 +437,9 @@ namespace Mantid {
               if(hillsPos.size()==2){
                 peakTwoSigma = hillsPos[1]-hillsPos[0];
               }else{
-                g_log.debug()<<"Rejected averaged peak at energy: "+std::to_string(Ei)+ 
-                  " as it have: "+std::to_string(nPeaks)+" peaks and "+ 
-                  std::to_string(nHills)+" heals\n";
+                g_log.debug()<<"*Peak rejected as averaging gives: "
+                  +std::to_string(nPeaks)+" peaks and "+ 
+                  std::to_string(nHills) +" heals\n";
 
                 return false;
               }
@@ -428,26 +454,29 @@ namespace Mantid {
         double peak1Pos,peak1TwoSigma,peak1Height;
         if(!peakGuess(0,peak1Pos,peak1Height,peak1TwoSigma))return false;
         if(0.25*peak1TwoSigma>maxSigma||peak1TwoSigma<minSigma){
-          g_log.debug()<<"Rejecting due to width: Peak at mon1 Ei="+std::to_string(peak1Pos)+" with Height:"
+          g_log.debug()<<"*Rejecting due to width: Peak at mon1 Ei="+std::to_string(peak1Pos)+" with Height:"
             +std::to_string(peak1Height)+" and 2*Sigma: "+std::to_string(peak1TwoSigma)<<std::endl;
           return false;
         }
 
-        double peak2Pos,peak2TwoSigma,peak2Height;
-        if(!peakGuess(1,peak2Pos,peak2Height,peak2TwoSigma))return false;
-        // Let's not check anything except peak position for monitor2, as 
-        // its intensity may be very low for some instruments. 
-        //if(0.25*peak2TwoSigma>maxSigma||peak2TwoSigma<minSigma)return false;
+        if(!this->getProperty("IgnoreSecondMonitor")){
+          double peak2Pos,peak2TwoSigma,peak2Height;
+          if(!peakGuess(1,peak2Pos,peak2Height,peak2TwoSigma))return false;
+          // Let's not check anything except peak position for monitor2, as 
+          // its intensity may be very low for some instruments. 
+          //if(0.25*peak2TwoSigma>maxSigma||peak2TwoSigma<minSigma)return false;
 
-        // peak in first and second monitors are too far from each other. May be the instrument
-        // is ill-calibrated but GetEi will probably not find this peak anyway.
-        if(std::fabs(peak1Pos-peak2Pos)>0.25*(peak1TwoSigma+peak2TwoSigma)){
-          g_log.debug()<<"Rejecting due to displacement: Peak at mon1 Ei="+std::to_string(peak1Pos)
-            +" with Height:"
-            +std::to_string(peak1Height)+" and 2*Sigma: "+std::to_string(peak1TwoSigma)
-            +" peak at mon2 at: "+std::to_string(peak1Height) <<std::endl;
+          // peak in first and second monitors are too far from each other. May be the instrument
+          // is ill-calibrated but GetEi will probably not find this peak anyway.
+          if(std::fabs(peak1Pos-peak2Pos)>0.25*(peak1TwoSigma+peak2TwoSigma)){
+            g_log.debug()<<"*Rejecting due to displacement between Peak at mon1: Ei="
+              +std::to_string(peak1Pos)+" with Height:"
+              +std::to_string(peak1Height)+" and 2*Sigma: "+std::to_string(peak1TwoSigma)
+              +"\n and Peak at mon2: Ei= "+std::to_string(peak2Pos)
+              + "and height: "+std::to_string(peak1Height) <<std::endl;
 
-          return false;
+            return false;
+          }
         }
 
         position = peak1Pos;
@@ -565,7 +594,7 @@ namespace Mantid {
             }
           }
           if(ind_Emax == index_min || ind_Emax==index_max){
-            g_log.warning()<<"Incorrect guess energy: "<<std::to_string(eGuess)<<
+            g_log.debug()<<"*Incorrect guess energy: "<<std::to_string(eGuess)<<
               " no energy peak found in 4*Sigma range\n";
             return false;
           }
