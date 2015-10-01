@@ -43,9 +43,8 @@ PoldiPeakCollection::PoldiPeakCollection(
 
   m_unitCell = crystalStructure.cell();
 
-  ReflectionGenerator generator(
-      crystalStructure,
-      ReflectionGenerator::DefaultReflectionConditionFilter::StructureFactor);
+  ReflectionGenerator generator(crystalStructure,
+                                ReflectionConditionFilter::StructureFactor);
 
   std::vector<V3D> hkls = generator.getUniqueHKLs(dMin, dMax);
   std::vector<double> dValues = generator.getDValues(hkls);
@@ -90,8 +89,8 @@ PoldiPeakCollection::IntensityType PoldiPeakCollection::intensityType() const {
   return m_intensityType;
 }
 
-void
-PoldiPeakCollection::setProfileFunctionName(std::string newProfileFunction) {
+void PoldiPeakCollection::setProfileFunctionName(
+    std::string newProfileFunction) {
   m_profileFunctionName = newProfileFunction;
 }
 
@@ -194,8 +193,8 @@ void PoldiPeakCollection::constructFromTableWorkspace(
   }
 }
 
-bool
-PoldiPeakCollection::checkColumns(const TableWorkspace_sptr &tableWorkspace) {
+bool PoldiPeakCollection::checkColumns(
+    const TableWorkspace_sptr &tableWorkspace) {
   if (tableWorkspace->columnCount() != 9) {
     return false;
   }
@@ -328,8 +327,7 @@ UnitCell PoldiPeakCollection::unitCellFromString(
 
   try {
     cell = strToUnitCell(unitCellString);
-  }
-  catch (std::runtime_error) {
+  } catch (std::runtime_error) {
     // do nothing
   }
 

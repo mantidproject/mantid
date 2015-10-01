@@ -9,7 +9,43 @@
 namespace Mantid {
 namespace Geometry {
 
-/** ReflectionGenerator : TODO: DESCRIPTION
+enum struct ReflectionConditionFilter {
+  None,
+  Centering,
+  SpaceGroup,
+  StructureFactor
+};
+
+/** ReflectionGenerator
+
+  ReflectionGenerator is a class that provides the means to perform some
+  common tasks involving generation of reflections. While the combination
+  of HKLGenerator and HKLFilter is very flexible, very often a limited set
+  of operations has to be performed repeatedly, involving the crystal
+  structure.
+
+  ReflectionGenerator is constructed from a CrystalStructure object, which
+  is then stored internally. Additionally, a default filter for reflection
+  conditions can be set, which is applied for HKL-generation in addition
+  to a DRangeFilter. For more flexibility, a method is provided that accepts
+  an HKLFilter as additional argument, this filter is then added to the
+  DRangeFilter.
+
+  This way it's very simple to obtain for example a list of unique reflections
+  for a given crystal structure:
+
+    CrystalStructure structure("5.43 5.43 5.43",
+                               "F d -3 m", "Si 0 0 0 1.0 0.05");
+    ReflectionGenerator generator(structure);
+
+    // Get all unique HKLs between 0.5 and 5.0 Angstrom
+    std::vector<V3D> hkls = generator.getUniqueHKLs(0.5, 5.0);
+
+  Additionally there are methods to obtain structure factors and d-values
+  for a given list of HKLs.
+
+      @author Michael Wedel, ESS
+      @date 30/09/2015
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -34,19 +70,16 @@ namespace Geometry {
 */
 class MANTID_GEOMETRY_DLL ReflectionGenerator {
 public:
-  enum struct DefaultReflectionConditionFilter {
-    None,
-    Centering,
-    SpaceGroup,
-    StructureFactor
-  };
-
   ReflectionGenerator(const CrystalStructure &crystalStructure,
-                      DefaultReflectionConditionFilter defaultFilter =
-                          DefaultReflectionConditionFilter::SpaceGroup);
+                      ReflectionConditionFilter defaultFilter =
+                          ReflectionConditionFilter::SpaceGroup);
   ~ReflectionGenerator() {}
 
   const CrystalStructure &getCrystalStructure() const;
+
+  HKLFilter_const_sptr getDRangeFilter(double dMin, double dMax) const;
+  HKLFilter_const_sptr
+  getReflectionConditionFilter(ReflectionConditionFilter filter);
 
   std::vector<Kernel::V3D> getHKLs(double dMin, double dMax) const;
   std::vector<Kernel::V3D>
@@ -62,11 +95,6 @@ public:
   std::vector<double> getFsSquared(const std::vector<Kernel::V3D> &hkls) const;
 
 private:
-  HKLFilter_const_sptr getDRangeFilter(double dMin, double dMax) const;
-  HKLFilter_const_sptr
-  getReflectionConditionFilter(DefaultReflectionConditionFilter filter);
-
-  double getD(const Kernel::V3D &hkl) const;
 
   CrystalStructure m_crystalStructure;
   StructureFactorCalculator_sptr m_sfCalculator;

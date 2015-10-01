@@ -24,7 +24,7 @@ public:
 
     ReflectionGenerator generator(
         CrystalStructure("4.126 4.126 4.126", "P m -3 m", "Si 0 0 0 1.0 0.01"),
-        ReflectionGenerator::DefaultReflectionConditionFilter::Centering);
+        ReflectionConditionFilter::Centering);
 
     TS_ASSERT_THROWS_NOTHING(generator.getUniqueHKLs(dMin, dMax));
 
@@ -51,7 +51,7 @@ public:
     // make a structure with P-1
     ReflectionGenerator generator(
         CrystalStructure("4.126 4.126 4.126", "P -1", "Si 0 0 0 1.0 0.01"),
-        ReflectionGenerator::DefaultReflectionConditionFilter::Centering);
+        ReflectionConditionFilter::Centering);
 
     std::vector<V3D> unique = generator.getUniqueHKLs(dMin, dMax);
     std::vector<V3D> peaks = generator.getHKLs(dMin, dMax);
@@ -81,8 +81,7 @@ public:
                         "Si 0.3 0.3 0.3 1.0 0.05");
 
     ReflectionGenerator generator(
-        si,
-        ReflectionGenerator::DefaultReflectionConditionFilter::StructureFactor);
+        si, ReflectionConditionFilter::StructureFactor);
 
     std::vector<V3D> hklsCentering = generator.getUniqueHKLs(
         0.6, 10.0, boost::make_shared<HKLFilterCentering>(si.centering()));
@@ -100,7 +99,7 @@ public:
     ReflectionGenerator generator(
         CrystalStructure("3.2094 3.2094 5.2108 90.0 90.0 120.0", "P 63/m m c",
                          "Mg 1/3 2/3 1/4 1.0 0.005"),
-        ReflectionGenerator::DefaultReflectionConditionFilter::StructureFactor);
+        ReflectionConditionFilter::StructureFactor);
 
     std::vector<V3D> hkls = generator.getUniqueHKLs(0.5, 10.0);
 
@@ -116,7 +115,7 @@ public:
     ReflectionGenerator generator(
         CrystalStructure("4.759355 4.759355 12.99231 90.0 90.0 120.0", "R -3 c",
                          "Al 0 0 0.35217 1.0 0.005; O 0.69365 0 1/4 1.0 0.005"),
-        ReflectionGenerator::DefaultReflectionConditionFilter::StructureFactor);
+        ReflectionConditionFilter::StructureFactor);
 
     std::vector<V3D> hkls = generator.getUniqueHKLs(0.885, 10.0);
 
