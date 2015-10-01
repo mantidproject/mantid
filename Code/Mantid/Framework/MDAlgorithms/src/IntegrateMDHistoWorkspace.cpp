@@ -94,7 +94,7 @@ std::string checkBinning(const std::vector<double> &binning) {
  * @param position: a position
  * @returns: a precision corrected position or the original position
  */
-Mantid::coord_t getPrecisionCorrectedCoordinate(Mantid::coord_t position) {
+Mantid::coord_t getPrecisionCorrectedCoordinate(Mantid::coord_t position, Mantid::coord_t binWidth) {
   // Find the closest integer value
   const auto up = std::ceil(position);
   const auto down = std::floor(position);
@@ -103,7 +103,7 @@ Mantid::coord_t getPrecisionCorrectedCoordinate(Mantid::coord_t position) {
   const auto nearest = diffUp < diffDown ? up : down;
 
   // Check if the relative deviation is larger than 1e-6
-  const auto deviation = fabs(nearest - position)/nearest;
+  const auto deviation = fabs((nearest - position)/binWidth);
   const auto tolerance = 1e-6;
   Mantid::coord_t coordinate(position);
   if (deviation < tolerance) {
@@ -138,8 +138,8 @@ void setMinMaxBins(Mantid::coord_t &pMin, Mantid::coord_t &pMax,
 
   // Make sure that we don't snap to the wrong value
   // because of the precision of floats (which coord_t is)
-  minBin = getPrecisionCorrectedCoordinate(minBin);
-  maxBin = getPrecisionCorrectedCoordinate(maxBin);
+  minBin = getPrecisionCorrectedCoordinate(minBin, width);
+  maxBin = getPrecisionCorrectedCoordinate(maxBin, width);
   auto snappedPMin = width * std::floor(minBin);
   auto snappedPMax = width * std::ceil(maxBin);
 
@@ -197,6 +197,7 @@ createShapedOutput(IMDHistoWorkspace const *const inWS,
       size_t numberOfBins;
 
       setMinMaxBins(pMin, pMax, numberOfBins, inDim, logger);
+
       outDim->setRange(
           numberOfBins,
           static_cast<Mantid::coord_t>(pMin) /*min*/,
@@ -393,7 +394,6 @@ void IntegrateMDHistoWorkspace::exec() {
         rather than iterating over the full set of boxes of the input workspace.
         */
         inIterator->jumpToNearest(outIteratorCenter);
-
         performWeightedSum(inIterator.get(), box, sumSignal,
                            sumSQErrors, sumNEvents); // Use the present position. neighbours
                                          // below exclude the current position.
