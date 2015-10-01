@@ -34,6 +34,7 @@ class LoadVisionInelastic(PythonAlgorithm):
         banks = banks.lower().replace("all", "forward,backward")
         banks = banks.lower().replace("forward", self.__forward)
         banks = banks.lower().replace("backward", self.__backward)
+        banks = banks.lower()
 
         # Let's make sure we have a unique and sorted list
         banks_integers = banks.replace("bank", "")

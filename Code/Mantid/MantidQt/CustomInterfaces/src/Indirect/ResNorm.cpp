@@ -122,8 +122,7 @@ void ResNorm::run() {
   m_pythonExportWsName = outputWsName.toStdString();
   m_batchAlgoRunner->executeBatchAsync();
 
-  loadFile(m_uiForm.dsResolution->getFullFilePath(),
-           m_uiForm.dsResolution->getCurrentDataName());
+
 }
 
 /**
@@ -135,9 +134,16 @@ void ResNorm::handleAlgorithmComplete(bool error) {
   if (error)
     return;
 
+  QString outputBase = (m_uiForm.dsVanadium->getCurrentDataName()).toLower();
+  const int indexCut = outputBase.lastIndexOf("_");
+  outputBase = outputBase.left(indexCut);
+  outputBase += "_ResNorm";
+
+  std::string outputBaseStr = outputBase.toStdString();
+
   WorkspaceGroup_sptr fitWorkspaces =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          m_pythonExportWsName + "_Fit_Workspaces");
+          outputBaseStr + "_Fit_Workspaces");
   QString fitWsName("");
   if (fitWorkspaces)
     fitWsName =
@@ -151,6 +157,9 @@ void ResNorm::handleAlgorithmComplete(bool error) {
     plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_Stretch");
   if (plotOptions == "Fit" || plotOptions == "All")
     plotSpectrum(fitWsName, 0, 1);
+
+  loadFile(m_uiForm.dsResolution->getFullFilePath(),
+           m_uiForm.dsResolution->getCurrentDataName());
 
   // Update preview plot
   previewSpecChanged(m_previewSpec);
