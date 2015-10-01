@@ -251,10 +251,16 @@ class MainWindow(QtGui.QMainWindow):
 
     def do_add_peak_to_find(self):
         """
-        TODO/FIXME
+        Add the scan/pt to the next
         :return:
         """
-        raise RuntimeError('ASAP: Tab-1, Button Use')
+        scan_no = self.ui.lineEdit_run.text()
+        pt_no = self.ui.lineEdit_rawDataPtNo.text()
+
+        self.ui.lineEdit_scanNumber.setText(scan_no)
+        self.ui.lineEdit_ptNumber.setText(pt_no)
+
+        self.ui.tabWidget.setCurrentIndex(2)
 
     def do_browse_local_cache_dir(self):
         """ Browse local cache directory
@@ -680,11 +686,15 @@ class MainWindow(QtGui.QMainWindow):
         # Set up dictionary
         save_dict = dict()
 
-        save_dict['lineEdit_exp'] = str(self.ui.lineEdit_exp.text())
+        # Setup
         save_dict['lineEdit_localSpiceDir'] = str(self.ui.lineEdit_localSpiceDir.text())
-        save_dict['comboBox_mode'] = self.ui.comboBox_mode.currentIndex()
+        save_dict['lineEdit_url'] = str(self.ui.lineEdit_url.text())
+        save_dict['lineEdit_workDir']= str(self.ui.lineEdit_workDir.text())
 
-        # TODO - Need to save more!
+        # Experiment
+        save_dict['lineEdit_exp'] = str(self.ui.lineEdit_exp.text())
+        save_dict['lineEdit_scanNumber'] = self.ui.lineEdit_scanNumber.text()
+        save_dict['lineEdit_ptNumber'] = str(self.ui.lineEdit_ptNumber.text())
 
         # Save to csv file
         if filename is None:
@@ -849,24 +859,6 @@ class MainWindow(QtGui.QMainWindow):
                                          hold_prev_image=False)
 
         return
-
-    """
-    def _set_data_access_info(self):
-
-        :return:
-
-        raise NotImplementedError('Intended to remove!')
-        cache_dir = str(self.ui.lineEdit_localSrcDir.text())
-        self._myControl.set_local_data_dir(cache_dir)
-
-        working_dir = str(self.ui.lineEdit_workDir.text())
-        self._myControl.set_working_directory(working_dir)
-
-        data_server = str(self.ui.lineEdit_url.text())
-        self._myControl.set_server_url(data_server)
-
-        return
-    """
 
     def _show_ub_matrix(self, ubmatrix):
         """ Show UB matrix

@@ -478,17 +478,6 @@ class CWSCDReductionControl(object):
             OutputWorkspace=exp_info_ws_name,
             DetectorTableWorkspace=virtual_instrument_info_table_name)
 
-        # get raw data workspace
-        """ TODO - Find out whether the raw matrix workspace is needed or not!
-        raw_data_ws_name = get_raw_data_workspace_name(exp_number, scan_number, pt_number)
-        if AnalysisDataService.doesExist(raw_data_ws_name):
-            raw_data_ws = AnalysisDataService.retrieve(raw_data_ws_name)
-            self._add_raw_workspace(exp_number, scan_number, pt_number, raw_data_ws)
-        else:
-            raise RuntimeError('Unable to find workspace %s. It is very likely that'
-                               'Mantid algorithm CollectHB3AExperimentInfo changes the '
-                               'output raw data matrix workspace\'s name convention.' % raw_data_ws_name)
-        """
 
         # Load XML file to MD
         pt_md_ws_name = get_single_pt_md_name(exp_number, scan_number, pt_number)
@@ -686,12 +675,13 @@ class CWSCDReductionControl(object):
 
         # Download SPICE file if necessary
         if os.path.exists(spice_file_name) is False:
-            self.download_spice_file(exp_no, scan_no)
+            self.download_spice_file(exp_no, scan_no, over_write=True)
 
         try:
             spice_table_ws, info_matrix_ws = api.LoadSpiceAscii(Filename=spice_file_name,
                                                                 OutputWorkspace=out_ws_name,
                                                                 RunInfoWorkspace='TempInfo')
+            api.DeleteWorkspace(Workspace=info_matrix_ws)
         except RuntimeError as run_err:
             return False, 'Unable to load SPICE data %s due to %s' % (spice_file_name, str(run_err))
 
