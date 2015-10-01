@@ -27,36 +27,38 @@ There are three optional input properties: *FirstGoodData* and *LastGoodData* de
 When left blank, *FirstGoodData* is set to the value stored in the input workspace and *LastGoodData*
 is set to the last available bin. The optional property *Frequency* allows the user to select an
 initial value for :math:`\omega`. If this property is not supplied, the algortihm takes this
-value from the *sample_magn_field* log multiplied by :math:`0.01355` MHz/G.
+value from the *sample_magn_field* log multiplied by :math:`2*\pi *0.01355` MHz/G.
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
+
+.. include:: ../usagedata-note.txt
 
 **Example - CalMuonDetectorPhases**
 
 .. testcode:: CalMuonDetectorPhasesExample
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
-
-   wsOut = CalMuonDetectorPhases()
+   # Load four spectra from a muon nexus file
+   ws = Load(Filename='MUSR00022725.nxs', SpectrumMin=1, SpectrumMax=4)
+   # Calibrate the phases and amplituds
+   detectorTable, fittingResults = CalMuonDetectorPhases(InputWorkspace='ws', LastGoodData=4)
 
    # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
+   print "Detector 1 has phase %f and amplitude %f" % (detectorTable.cell(0,2), detectorTable.cell(0,1))
+   print "Detector 2 has phase %f and amplitude %f" % (detectorTable.cell(1,2), detectorTable.cell(1,1))
+   print "Detector 3 has phase %f and amplitude %f" % (detectorTable.cell(2,2), detectorTable.cell(2,1))
+   print "Detector 4 has phase %f and amplitude %f" % (detectorTable.cell(3,2), detectorTable.cell(3,1))
 
 Output:
 
 .. testoutput:: CalMuonDetectorPhasesExample
 
-  The output workspace has ?? spectra
+  Detector 1 has phase 0.673839 and amplitude 0.133418
+  Detector 2 has phase 0.451991 and amplitude 0.134742
+  Detector 3 has phase 0.269082 and amplitude 0.149763
+  Detector 4 has phase 0.140398 and amplitude 0.153004
 
 .. categories::
 
 .. sourcelink::
-
+    :filename: CalMuonDetectorPhases
