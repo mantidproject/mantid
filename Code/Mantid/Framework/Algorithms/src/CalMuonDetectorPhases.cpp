@@ -78,8 +78,40 @@ void CalMuonDetectorPhases::exec() {
   double startTime = getProperty("FirstGoodData");
   double endTime = getProperty("LastGoodData");
 
+  // If startTime is EMPTY_DBL():
+  if (startTime == EMPTY_DBL()) {
+    try {
+      // Read FirstGoodData from workspace logs if possible
+      double firstGoodData = inputWS->run().getLogAsSingleValue("FirstGoodData");
+      startTime = firstGoodData;
+    } catch (...) {
+      g_log.warning("Couldn't read FirstGoodData, setting to 0");
+      // Set startTime to 0
+      startTime = 0.;
+    }
+  }
+  // If endTime is EMPTY_DBL():
+  if (endTime == EMPTY_DBL()) {
+    // Last available time
+    endTime = inputWS->readX(0).back();
+  }
+
   // Get the frequency
   double freq = getProperty("Frequency");
+
+  // If frequency is EMPTY_DBL():
+  if (freq == EMPTY_DBL()) {
+    try {
+      // Read sample_magn_field from workspace logs
+      freq = inputWS->run().getLogAsSingleValue("sample_magn_field");
+      // Multiply by muon gyromagnetic ratio: 0.01355 MHz/G
+      freq *= 2 * M_PI * 0.01355;
+    } catch (...) {
+      throw std::runtime_error(
+          "Couldn't read sample_magn_field. Please provide a value for "
+          "the frequency");
+    }
+  }
 
   // Prepares the workspaces: extracts data from [startTime, endTime] and
   // removes exponential decay
@@ -244,24 +276,6 @@ std::string CalMuonDetectorPhases::createFittingFunction(int nspec, double freq)
 API::MatrixWorkspace_sptr
 CalMuonDetectorPhases::prepareWorkspace(const API::MatrixWorkspace_sptr &ws,
                                         double startTime, double endTime) {
-
-  // If startTime is EMPTY_DBL():
-  if (startTime == EMPTY_DBL()) {
-    try {
-      // Read FirstGoodData from workspace logs if possible
-      double firstGoodData = ws->run().getLogAsSingleValue("FirstGoodData");
-      startTime = firstGoodData;
-    } catch (...) {
-      g_log.warning("Couldn't read FirstGoodData, setting to 0");
-      // Set startTime to 0
-      startTime = 0.;
-    }
-  }
-  // If endTime is EMPTY_DBL():
-  if (endTime == EMPTY_DBL()) {
-    // Last available time
-    endTime = ws->readX(0).back();
-  }
 
   // Extract counts from startTime to endTime
   API::IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
