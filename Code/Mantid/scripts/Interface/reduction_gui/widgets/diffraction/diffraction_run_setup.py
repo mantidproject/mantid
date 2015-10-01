@@ -199,6 +199,7 @@ class RunSetupWidget(BaseWidget):
     def get_state(self):
         """ Returns a RunSetupScript with the state of Run_Setup_Interface
         Set up all the class parameters in RunSetupScrpt with values in the content
+        i.e., get the all parameters from GUI
         """
         s = RunSetupScript(self._instrument_name)
 
@@ -211,15 +212,29 @@ class RunSetupWidget(BaseWidget):
         s.calibfilename = self._content.calfile_edit.text()
         s.charfilename = self._content.charfile_edit.text()
         s.dosum = self._content.sum_checkbox.isChecked()
-        s.binning = self._content.binning_edit.text()
+
         bintypestr = self._content.bintype_combo.currentText()
-        if s.binning != "" and s.binning is not None:
-            if bintypestr.count("Linear") == 1:
-                s.binning = abs(float(s.binning))
-            else:
-                s.binning = -1.*abs(float(s.binning))
         s.binindspace = self._content.binind_checkbox.isChecked()
-        s.resamplex = int(self._content.resamplex_edit.text())
+
+        if self._content.resamplex_button.isChecked() is True:
+            # use ResampleX
+            s.resamplex = int(self._content.resamplex_edit.text())
+            s.doresamplex = True
+            if s.resamplex <= 0:
+                raise RuntimeError('ResampleX\'s parameter must be larger than 0!')
+            # s.binning = ''
+        else:
+            # use binning
+            s.doresamplex = False
+            # s.resamplex = ''
+            s.binning = str(self._content.binning_edit.text())
+            if len(s.binning) > 0:
+                if bintypestr.count("Linear") == 1:
+                    s.binning = abs(float(s.binning))
+                else:
+                    s.binning = -1.*abs(float(s.binning))
+            else:
+                raise RuntimeError('Binning parameter is not given!')
         s.outputdir = self._content.outputdir_edit.text()
         s.saveas = str(self._content.saveas_combo.currentText())
         s.finalunits = str(self._content.unit_combo.currentText())
@@ -232,10 +247,6 @@ class RunSetupWidget(BaseWidget):
 
         s.vanbkgdrunnumber = self._content.vanbkgdrun_edit.text()
         s.disablevanbkgdcorrection = self._content.disablevanbkgdcorr_chkbox.isChecked()
-
-        s.dosamplex = self._content.resamplex_button.isChecked()
-
-        #s.vannoiserunnumber = self._content.vannoiserun_edit.text()
 
         return s
 

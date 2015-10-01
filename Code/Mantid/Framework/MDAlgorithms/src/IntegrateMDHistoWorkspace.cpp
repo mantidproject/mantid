@@ -88,6 +88,84 @@ std::string checkBinning(const std::vector<double> &binning) {
   return error;
 }
 
+
+/**
+ * Provide a precision correction for Mantid coordinates
+ * @param position: a position
+ * @returns: a precision corrected position or the original position
+ */
+Mantid::coord_t getPrecisionCorrectedCoordinate(Mantid::coord_t position) {
+  // Find the closest integer value
+  const auto up = std::ceil(position);
+  const auto down = std::floor(position);
+  const auto diffUp = fabs(up - position);
+  const auto diffDown = fabs(down - position);
+  const auto nearest = diffUp < diffDown ? up : down;
+
+  // Check if the relative deviation is larger than 1e-6
+  const auto deviation = fabs(nearest - position)/nearest;
+  const auto tolerance = 1e-6;
+  Mantid::coord_t coordinate(position);
+  if (deviation < tolerance) {
+    coordinate = nearest;
+  }
+  return coordinate;
+}
+
+/**
+ * Sets the min, max and number of bins
+ * @param pMin: set minimum value passed by reference
+ * @param pMax: set maximum value passed by reference
+ * @param numberOfBins: the number of bins passed by reference
+ * @param dimension: the dimension information
+ * @param logger: a logger object
+ */
+void setMinMaxBins(Mantid::coord_t &pMin, Mantid::coord_t &pMax,
+                   size_t &numberOfBins,
+                   const IMDDimension_const_sptr &dimension,Logger& logger) {
+  // Get workspace extents
+  const Mantid::coord_t width = dimension->getBinWidth();
+  const Mantid::coord_t max = dimension->getMaximum();
+
+  // Get offset between origin and next bin boundary towards the max value
+  // NOTE: GCC shows a conversion warning from double to float here. This
+  // is incorrect. Silence warning with explicit cast.
+  const Mantid::coord_t offset = static_cast<Mantid::coord_t>(fmod(max,width));
+
+  // Create the shifted pMax and pMin
+  auto minBin = (pMin - offset) / width;
+  auto maxBin = (pMax - offset) / width;
+
+  // Make sure that we don't snap to the wrong value
+  // because of the precision of floats (which coord_t is)
+  minBin = getPrecisionCorrectedCoordinate(minBin);
+  maxBin = getPrecisionCorrectedCoordinate(maxBin);
+  auto snappedPMin = width * std::floor(minBin);
+  auto snappedPMax = width * std::ceil(maxBin);
+
+  // Shift the snappedPMax/snappedPMin values back
+  snappedPMax += offset;
+  snappedPMin += offset;
+
+   if(pMin != snappedPMin) {
+      std::stringstream buffer;
+      buffer << "Rounding min from: " << pMin << " to the nearest whole width at: " << snappedPMin;
+      logger.warning(buffer.str());
+   }
+   if(pMax != snappedPMax) {
+      std::stringstream buffer;
+      buffer << "Rounding max from: " << pMax << " to the nearest whole width at: " << snappedPMax;
+      logger.warning(buffer.str());
+   }
+
+  pMin = snappedPMin;
+  pMax = snappedPMax;
+
+  // Bins
+  numberOfBins = static_cast<size_t>((pMax-pMin)/width+0.5); // round up to a whole number of bins.
+}
+}
+
 /**
  * Create the output workspace in the right shape.
  * @param inWS : Input workspace for dimensionality
@@ -114,29 +192,15 @@ createShapedOutput(IMDHistoWorkspace const *const inWS,
               binning.back()) /*max*/); // Set custom min, max and nbins.
     } else if( i < pbins.size() && similarBinning(pbins[i]) ) {
       auto binning = pbins[i];
-      const double width = inDim->getBinWidth(); // Take the width from the input dimension
-      double min = binning.front();
-      double max = binning.back();
+      Mantid::coord_t pMin = static_cast<Mantid::coord_t>(binning.front());
+      Mantid::coord_t pMax = static_cast<Mantid::coord_t>(binning.back());
+      size_t numberOfBins;
 
-      // Correct users, input, output and rounded to the nearest whole width.
-      min = width * std::floor(min/width); // Rounded down
-      max = width * std::ceil(max/width); // Rounded up
-
-      if(min != binning.front()) {
-          std::stringstream buffer;
-          buffer << "Rounding min from: " << binning.front() << " to the nearest whole width at: " << min;
-          logger.warning(buffer.str());
-      }
-      if(max != binning.back()) {
-          std::stringstream buffer;
-          buffer << "Rounding max from: " << binning.back() << " to the nearest whole width at: " << max;
-          logger.warning(buffer.str());
-      }
-      const size_t roundedNBins = static_cast<size_t>((max-min)/width+0.5); // round up to a whole number of bins.
+      setMinMaxBins(pMin, pMax, numberOfBins, inDim, logger);
       outDim->setRange(
-          roundedNBins,
-          static_cast<Mantid::coord_t>(min) /*min*/,
-          static_cast<Mantid::coord_t>(max) /*max*/); // Set custom min, max and nbins.
+          numberOfBins,
+          static_cast<Mantid::coord_t>(pMin) /*min*/,
+          static_cast<Mantid::coord_t>(pMax) /*max*/); // Set custom min, max and nbins.
     }
     dimensions[i] = outDim;
   }
@@ -161,7 +225,7 @@ void performWeightedSum(MDHistoWorkspaceIterator const *const iterator,
   sumSQErrors += weight * (error * error);
   sumNEvents += weight * double(iterator->getNumEventsFraction());
 }
-}
+
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -353,6 +417,7 @@ void IntegrateMDHistoWorkspace::exec() {
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
+    outWS->setDisplayNormalization(inWS->displayNormalizationHisto());
     this->setProperty("OutputWorkspace", outWS);
   }
 }

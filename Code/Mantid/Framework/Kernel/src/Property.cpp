@@ -214,11 +214,15 @@ void Property::filterByTime(const Kernel::DateAndTime &start,
  * For any other property type, this does nothing.
  * @param splitter :: time splitter
  * @param outputs :: holder for splitter output
+ * @param isProtonCharge :: a flag to tell whether the property is periodic or
+ * not
  */
 void Property::splitByTime(std::vector<SplittingInterval> &splitter,
-                           std::vector<Property *> outputs) const {
+                           std::vector<Property *> outputs,
+                           bool isProtonCharge) const {
   UNUSED_ARG(splitter);
   UNUSED_ARG(outputs);
+  UNUSED_ARG(isProtonCharge);
   return;
 }
 

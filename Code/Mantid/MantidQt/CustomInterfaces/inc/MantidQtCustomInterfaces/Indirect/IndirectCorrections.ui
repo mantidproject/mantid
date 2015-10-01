@@ -26,6 +26,11 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
+       <widget class="QWidget" name="tabContainerSubtraction">
+         <attribute name="title">
+           <string>Container Subtraction</string>
+         </attribute>
+       </widget>
       <widget class="QWidget" name="tabCalculatePaalmanPings">
        <attribute name="title">
         <string>Calculate Paalman Pings</string>
@@ -40,11 +45,6 @@
        <attribute name="title">
         <string>Absorption</string>
        </attribute>
-      </widget>
-      <widget class="QWidget" name="tabContainerSubtraction">
-        <attribute name="title">
-          <string>Container Subtraction</string>
-        </attribute>
       </widget>
      </widget>
     </item>

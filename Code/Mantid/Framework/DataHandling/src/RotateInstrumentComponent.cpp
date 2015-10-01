@@ -5,6 +5,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -23,7 +24,7 @@ RotateInstrumentComponent::RotateInstrumentComponent() {}
 void RotateInstrumentComponent::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(new WorkspaceProperty<Workspace>(
                       "Workspace", "Anonymous", Direction::InOut),
                   "The name of the workspace for which the new instrument "
                   "configuration will have an effect. Any other workspaces "
@@ -49,8 +50,20 @@ void RotateInstrumentComponent::init() {
  *  @throw std::runtime_error Thrown with Workspace problems
  */
 void RotateInstrumentComponent::exec() {
-  // Get the workspace
-  MatrixWorkspace_sptr WS = getProperty("Workspace");
+  // Get the input workspace
+  Workspace_sptr ws = getProperty("Workspace");
+  MatrixWorkspace_sptr inputW = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  DataObjects::PeaksWorkspace_sptr inputP = boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
+
+  // Get some stuff from the input workspace
+  Instrument_sptr inst;
+  if (inputW) {
+    inst= boost::const_pointer_cast<Instrument>(inputW->getInstrument());
+  }
+  else if (inputP) {
+    inst= boost::const_pointer_cast<Instrument>(inputP->getInstrument());
+  }
+
   const std::string ComponentName = getProperty("ComponentName");
   const int DetID = getProperty("DetectorID");
   const double X = getProperty("X");
@@ -62,10 +75,7 @@ void RotateInstrumentComponent::exec() {
   if (X + Y + Z == 0.0)
     throw std::invalid_argument("The rotation axis must not be a zero vector");
 
-  // Get the ParameterMap reference before the instrument so that
-  // we avoid a copy
-  Geometry::ParameterMap &pmap = WS->instrumentParameters();
-  Instrument_const_sptr inst = WS->getInstrument();
+
   IComponent_const_sptr comp;
 
   // Find the component to move
@@ -95,8 +105,17 @@ void RotateInstrumentComponent::exec() {
   TransformType rotType = Absolute;
   if (relativeRotation)
     rotType = Relative;
-  Geometry::ComponentHelper::rotateComponent(
-      *comp, pmap, Quat(angle, V3D(X, Y, Z)), rotType);
+  if (inputW) {
+    Geometry::ParameterMap &pmap = inputW->instrumentParameters();
+    Geometry::ComponentHelper::rotateComponent(
+        *comp, pmap, Quat(angle, V3D(X, Y, Z)), rotType);
+  }
+  else if (inputP) {
+    Geometry::ParameterMap &pmap = inputP->instrumentParameters();
+    Geometry::ComponentHelper::rotateComponent(
+        *comp, pmap, Quat(angle, V3D(X, Y, Z)), rotType);
+  }
+
 }
 
 } // namespace DataHandling

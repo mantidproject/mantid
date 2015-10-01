@@ -13,9 +13,16 @@ class SANSConstants
 public:
   SANSConstants();
   ~SANSConstants();
+
+  // Python related
   QString getPythonSuccessKeyword();
   QString getPythonEmptyKeyword();
   QString getPythonTrueKeyword();
+
+  // Input related
+  double getMaxDoubleValue();
+  int getMaxIntValue();
+  int getDecimals();
 };
 
 }

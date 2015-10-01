@@ -8,7 +8,7 @@ namespace SimpleGui
 {
 
 
-VsiApplyBehaviour::VsiApplyBehaviour(Mantid::VATES::ColorScaleLock* lock, QObject* parent) : pqApplyBehavior(parent) {
+VsiApplyBehaviour::VsiApplyBehaviour(Mantid::VATES::ColorScaleLock* lock, QObject* parent) : pqApplyBehavior(parent), m_colorScaleLock(NULL) {
   if (lock != NULL) {
     m_colorScaleLock = lock;
   }
