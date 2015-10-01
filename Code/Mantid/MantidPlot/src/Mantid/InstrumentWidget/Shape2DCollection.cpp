@@ -741,9 +741,13 @@ void Shape2DCollection::changeBorderColor(const QColor &color)
 
 void Shape2DCollection::addFreeShape(const QPolygonF& poly,const QColor& borderColor,const QColor& fillColor)
 {
-  if (poly.isEmpty()) throw std::logic_error("Cannot create a shape from empty polygon.");
-  auto p = m_transform.inverted().map(poly[0]);
-  addShape("free", p.x(), p.y(), borderColor, fillColor);
+  auto freeShape = dynamic_cast<Shape2DFree*>(m_currentShape);
+  if (!freeShape)
+  {
+    if (poly.isEmpty()) throw std::logic_error("Cannot create a shape from empty polygon.");
+    auto p = m_transform.inverted().map(poly[0]);
+    addShape("free", p.x(), p.y(), borderColor, fillColor);
+  }
   drawFree(poly);
 }
 
@@ -754,5 +758,15 @@ void Shape2DCollection::drawFree(const QPolygonF& polygon)
   {
     auto transform = m_transform.inverted();
     freeShape->addPolygon(transform.map(polygon));
+  }
+}
+
+void Shape2DCollection::eraseFree(const QPolygonF& polygon)
+{
+  auto freeShape = dynamic_cast<Shape2DFree*>(m_currentShape);
+  if (freeShape)
+  {
+    auto transform = m_transform.inverted();
+    freeShape->subtractPolygon(transform.map(polygon));
   }
 }

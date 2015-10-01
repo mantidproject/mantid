@@ -225,6 +225,7 @@ public:
   virtual bool contains(const QPointF& p)const;
   virtual void addToPath(QPainterPath& path) const;
   void addPolygon(const QPolygonF& polygon);
+  void subtractPolygon(const QPolygonF& polygon);
 protected:
   virtual void drawShape(QPainter& painter) const;
   virtual void refit();
@@ -232,6 +233,7 @@ protected:
 private:
   RectF getPolygonBoundingRect() const;
   QPolygonF m_polygon;
+  QPainterPath m_outline;
 };
 
 

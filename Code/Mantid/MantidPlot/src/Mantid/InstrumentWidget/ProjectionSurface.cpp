@@ -70,7 +70,6 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor):
   connect(drawController,SIGNAL(selectCtrlAt(int,int)),&m_maskShapes,SLOT(addToSelectionShapeAt(int,int)));
   connect(drawController,SIGNAL(moveBy(int,int)),&m_maskShapes,SLOT(moveShapeOrControlPointBy(int,int)));
   connect(drawController,SIGNAL(touchPointAt(int,int)),&m_maskShapes,SLOT(touchShapeOrControlPointAt(int,int)));
-  connect(drawController,SIGNAL(disabled()),&m_maskShapes,SLOT(deselectAll()));
   connect(drawController,SIGNAL(removeSelectedShapes()),&m_maskShapes,SLOT(removeSelectedShapes()));
   connect(drawController,SIGNAL(deselectAll()),&m_maskShapes,SLOT(deselectAll()));
   connect(drawController,SIGNAL(restoreOverrideCursor()),&m_maskShapes,SLOT(restoreOverrideCursor()));
@@ -83,9 +82,7 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor):
   connect(this,SIGNAL(signalToStartCreatingFreeShape(QColor,QColor)),freeDrawController,SLOT(startCreatingShape2D(QColor,QColor)));
   connect(freeDrawController,SIGNAL(addShape(const QPolygonF&,QColor,QColor)),&m_maskShapes,SLOT(addFreeShape(const QPolygonF&,QColor,QColor)));
   connect(freeDrawController,SIGNAL(draw(const QPolygonF&)),&m_maskShapes,SLOT(drawFree(const QPolygonF&)));
-
-
-  setInputController(EraseMode, NULL);
+  connect(freeDrawController,SIGNAL(erase(const QPolygonF&)),&m_maskShapes,SLOT(eraseFree(const QPolygonF&)));
 
   // create and connect the peak eraser controller
   InputControllerErase* eraseController = new InputControllerErase(this);
@@ -444,7 +441,7 @@ void ProjectionSurface::setInteractionMode(int mode)
     controller = m_inputControllers[m_interactionMode];
     if ( !controller ) throw std::logic_error("Input controller doesn't exist.");
     controller->onEnabled();
-    if ( mode != DrawRegularMode )
+    if ( mode != DrawRegularMode && mode != DrawFreeMode )
     {
         m_maskShapes.deselectAll();
         foreach(PeakOverlay* po, m_peakShapes)

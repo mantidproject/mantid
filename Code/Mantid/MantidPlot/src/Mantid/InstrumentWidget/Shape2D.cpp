@@ -5,6 +5,9 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 
+#include <QLine>
+#include <QMap>
+
 #include <iostream>
 #include <algorithm>
 #include <stdexcept>
@@ -515,7 +518,7 @@ void Shape2DFree::drawShape(QPainter& painter) const
   QPainterPath path;
   path.addPolygon(m_polygon);
   painter.fillPath(path, m_fill_color);
-  painter.drawPolygon(m_polygon);
+  painter.drawPath(m_outline);
 }
 
 void Shape2DFree::refit()
@@ -536,22 +539,78 @@ void Shape2DFree::refit()
     p.rx() = xs0 + xScale * (p.x() - x0);
     p.ry() = ys0 + yScale * (p.y() - y0);
   }
-
+  resetBoundingRect();
 }
 
 void Shape2DFree::resetBoundingRect()
 {
   m_boundingRect = getPolygonBoundingRect();
+  auto n = m_polygon.size() - 1;
+  QList<int> breaks;
+  breaks.push_back(0);
+  for(int i = 1; i < m_polygon.size() - 1; ++i)
+  {
+    auto p = m_polygon[i];
+    auto j = m_polygon.indexOf(p, i + 1);
+    if (j != -1)
+    {
+      auto i1 = i + 1;
+      auto j1 = j - 1;
+      if (m_polygon[i1] == m_polygon[j1])
+      {
+        breaks.push_back(i);
+        breaks.push_back(i1);
+        breaks.push_back(j1);
+        breaks.push_back(j);
+      }
+    }
+  }
+  if (breaks.back() != n)
+  {
+    breaks.push_back(n);
+  }
+  qSort(breaks);
+  m_outline = QPainterPath();
+  m_outline.moveTo(m_polygon[0]);
+  int j1 = 0;
+  for(int i = 0; i < breaks.size(); ++i)
+  {
+    auto j = breaks[i];
+    if (j == j1 + 1)
+    {
+      m_outline.moveTo(m_polygon[j]);
+    }
+    else
+    {
+      for(auto k = j1; k <= j; ++k)
+      {
+        m_outline.lineTo(m_polygon[k]);
+      }
+    }
+    j1 = j;
+  }
 }
 
 RectF Shape2DFree::getPolygonBoundingRect() const
 {
   auto br = m_polygon.boundingRect();
-  return RectF(br.bottomLeft(), br.topRight());
+  auto x0 = br.left();
+  auto x1 = br.right();
+  if (x0 > x1) std::swap(x0, x1);
+  auto y0 = br.bottom();
+  auto y1 = br.top();
+  if (y0 > y1) std::swap(y0, y1);
+  return RectF(QPointF(x0,y0), QPointF(x1,y1));
 }
 
 void Shape2DFree::addPolygon(const QPolygonF& polygon)
 {
   m_polygon = m_polygon.united(polygon);
+  resetBoundingRect();
+}
+
+void Shape2DFree::subtractPolygon(const QPolygonF& polygon)
+{
+  m_polygon = m_polygon.subtracted(polygon);
   resetBoundingRect();
 }

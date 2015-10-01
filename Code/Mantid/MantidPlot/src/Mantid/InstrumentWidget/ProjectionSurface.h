@@ -63,7 +63,6 @@ public:
     AddPeakMode,
     DrawRegularMode,
     DrawFreeMode,
-    EraseMode,
     ErasePeakMode,
     InteractionModeSize
   };

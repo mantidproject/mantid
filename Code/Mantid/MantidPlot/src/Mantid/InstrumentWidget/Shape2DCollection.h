@@ -98,6 +98,7 @@ public slots:
   void removeSelectedShapes();
   void restoreOverrideCursor();
   void drawFree(const QPolygonF& polygon);
+  void eraseFree(const QPolygonF& polygon);
 
 protected:
   virtual void drawShape(QPainter& ) const{} // never called

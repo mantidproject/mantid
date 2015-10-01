@@ -422,8 +422,8 @@ void InstrumentWindowMaskTab::shapeCreated()
   if (m_activity != DrawFree)
   {
     setSelectActivity();
-    enableApplyButtons();
   }
+  enableApplyButtons();
 }
 
 /**
@@ -484,6 +484,7 @@ void InstrumentWindowMaskTab::shapesCleared()
 void InstrumentWindowMaskTab::clearShapes()
 {
     m_instrWindow->getSurface()->clearMask();
+    setSelectActivity();
 }
 
 void InstrumentWindowMaskTab::showEvent (QShowEvent *)
