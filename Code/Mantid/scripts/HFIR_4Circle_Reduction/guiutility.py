@@ -74,7 +74,6 @@ def parse_integers_editors(line_edits):
                 error_message += 'Value %s is not a proper integer.\n' % str_value
             else:
                 integer_list.append(int_value)
-                print 'Value %s to %d' % (str_value, int_value)
         # END-TRY
     # END-FOR
 

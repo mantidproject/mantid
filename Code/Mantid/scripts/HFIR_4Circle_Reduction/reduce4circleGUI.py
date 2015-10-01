@@ -43,7 +43,13 @@ class MainWindow(QtGui.QMainWindow):
         # self._instrument = config["default.instrument"]
 
         # Event handling definitions
+        # Top
+        self.connect(self.ui.pushButton_setExp, QtCore.SIGNAL('clicked()'),
+                     self.do_set_experiment)
+
         # Tab 'Data Access'
+        self.connect(self.ui.pushButton_applySetup, QtCore.SIGNAL('clicked()'),
+                     self.do_apply_setup)
         self.connect(self.ui.pushButton_browseLocalDataDir, QtCore.SIGNAL('clicked()'),
                      self.do_browse_local_spice_data)
         self.connect(self.ui.pushButton_testURLs, QtCore.SIGNAL('clicked()'),
@@ -56,6 +62,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.change_data_access_mode)
 
         # Tab 'View Raw Data'
+        self.connect(self.ui.pushButton_setScanInfo, QtCore.SIGNAL('clicked()'),
+                     self.do_load_scan_info)
         self.connect(self.ui.pushButton_plotRawPt, QtCore.SIGNAL('clicked()'),
                      self.do_plot_pt_raw)
         self.connect(self.ui.pushButton_prevPtNumber, QtCore.SIGNAL('clicked()'),
@@ -64,6 +72,20 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_plot_next_pt_raw)
         self.connect(self.ui.pushButton_showPtList, QtCore.SIGNAL('clicked()'),
                      self.show_scan_pt_list)
+        self.connect(self.ui.pushButton_usePt4UB, QtCore.SIGNAL('clicked()'),
+                     self.do_add_peak_to_find)
+
+        # Tab 'calculate ub matrix'
+        self.connect(self.ui.pushButton_findPeak, QtCore.SIGNAL('clicked()'),
+                     self.do_find_peak)
+        self.connect(self.ui.pushButton_addPeakToCalUB, QtCore.SIGNAL('clicked()'),
+                     self.do_add_ub_peak)
+        self.connect(self.ui.pushButton_calUB, QtCore.SIGNAL('clicked()'),
+                     self.do_cal_ub_matrix)
+        self.connect(self.ui.pushButton_acceptUB, QtCore.SIGNAL('clicked()'),
+                     self.doAcceptCalUB)
+        self.connect(self.ui.pushButton_resetCalUB, QtCore.SIGNAL('clicked()'),
+                     self.doResetCalUB)
 
         # Tab 'Advanced'
         self.connect(self.ui.pushButton_useDefaultDir, QtCore.SIGNAL('clicked()'),
@@ -84,25 +106,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.actionLoad_Session, QtCore.SIGNAL('triggered()'),
                      self.load_session)
 
-        # Tab 'calculate ub matrix'
-        self.connect(self.ui.pushButton_findPeak, QtCore.SIGNAL('clicked()'),
-                     self.do_find_peak)
-
-        self.connect(self.ui.pushButton_addPeakToCalUB, QtCore.SIGNAL('clicked()'),
-                     self.do_add_ub_peak)
-
-        self.connect(self.ui.pushButton_calUB, QtCore.SIGNAL('clicked()'),
-                self.do_cal_ub_matrix)
-
-        self.connect(self.ui.pushButton_acceptUB, QtCore.SIGNAL('clicked()'),
-                self.doAcceptCalUB)
-
-        self.connect(self.ui.pushButton_resetCalUB, QtCore.SIGNAL('clicked()'),
-                self.doResetCalUB)
-
         # Event handling for tab 'refine ub matrix'
         self.connect(self.ui.pushButton_addToRefine, QtCore.SIGNAL('clicked()'),
-                self.doAddScanPtToRefineUB)
+                     self.doAddScanPtToRefineUB)
 
         # Validator ... (NEXT)
 
@@ -129,8 +135,8 @@ class MainWindow(QtGui.QMainWindow):
         # Tab 'Access'
         self.ui.lineEdit_url.setText('http://neutron.ornl.gov/user_data/hb3a/')
         self.ui.comboBox_mode.setCurrentIndex(0)
-        self.ui.lineEdit_localSpiceDir.setEnabled(False)
-        self.ui.pushButton_browseLocalDataDir.setEnabled(False)
+        self.ui.lineEdit_localSpiceDir.setEnabled(True)
+        self.ui.pushButton_browseLocalDataDir.setEnabled(True)
 
         return
 
@@ -242,6 +248,13 @@ class MainWindow(QtGui.QMainWindow):
 
         """
         raise RuntimeError("ASAP")
+
+    def do_add_peak_to_find(self):
+        """
+        TODO/FIXME
+        :return:
+        """
+        raise RuntimeError('ASAP: Tab-1, Button Use')
 
     def do_browse_local_cache_dir(self):
         """ Browse local cache directory
@@ -382,9 +395,6 @@ class MainWindow(QtGui.QMainWindow):
     def do_find_peak(self):
         """ Find peak in a given scan/pt and record it
         """
-        # Set/re-set directory
-        self._set_data_access_info()
-
         # Get experiment, scan and pt
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
                                                         self.ui.lineEdit_scanNumber,
@@ -399,6 +409,11 @@ class MainWindow(QtGui.QMainWindow):
         status, err_msg = self._myControl.find_peak(exp_no, scan_no, pt_no)
         if status is False:
             self.pop_one_button_dialog(ret_obj)
+            return
+        if self.ui.checkBox_loadHKLfromFile.isChecked() is True:
+            status, err_msg = self._myControl.set_hkl_to_peak(exp_no, scan_no, pt_no)
+            if status is False:
+                self.pop_one_button_dialog('Unable to locate peak info due to %s.' % err_msg)
 
         # Set up correct values to table tableWidget_peaksCalUB
         self._myControl.add_peak_info(exp_no, scan_no, pt_no)
@@ -438,6 +453,25 @@ class MainWindow(QtGui.QMainWindow):
             message = fcutil.get_scans_list(url, exp_no)
 
         self.pop_one_button_dialog(message)
+
+        return
+
+    def do_load_scan_info(self):
+        """ Load SIICE's scan file
+        :return:
+        """
+        # Get scan number
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_run])
+        if status is True:
+            scan_no = ret_obj[0]
+        else:
+            err_msg = ret_obj
+            self.pop_one_button_dialog('Unable to get scan number in raw data tab due to %s.' % err_msg)
+            return
+
+        status, err_msg = self._myControl.load_spice_scan_file(exp_no=None, scan_no=scan_no)
+        if status is False:
+            self.pop_one_button_dialog(err_msg)
 
         return
 
@@ -529,25 +563,91 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_set_experiment(self):
+        """ Set experiment
+        :return:
+        """
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp])
+        if status is True:
+            exp_number = ret_obj[0]
+            curr_exp_number = self._myControl.get_experiment()
+            if curr_exp_number is not None and exp_number != curr_exp_number:
+                self.pop_one_button_dialog('Changing experiment to %d.  Clean previous experiment %d\'s result'
+                                           ' in Mantid manually.' % (exp_number, curr_exp_number))
+            self._myControl.set_exp_number(exp_number)
+            self.ui.lineEdit_exp.setStyleSheet('color: black')
+        else:
+            err_msg = ret_obj
+            self.pop_one_button_dialog('Unable to set experiment as %s' % err_msg)
+            self.ui.lineEdit_exp.setStyleSheet('color: red')
+
+        self.ui.tabWidget.setCurrentIndex(0)
+
+        return
+
     def do_setup_dir_default(self):
         """
         Set up default directory for storing data and working
         :return:
         """
         home_dir = os.path.expanduser('~')
+
         # Data cache directory
         data_cache_dir = os.path.join(home_dir, 'Temp/HB3ATest')
-        if os.path.exists(data_cache_dir) is False:
-            os.mkdir(data_cache_dir)
+        self.ui.lineEdit_localSpiceDir.setText(data_cache_dir)
+        self.ui.lineEdit_localSrcDir.setText(data_cache_dir)
+
+        work_dir = os.path.join(data_cache_dir, 'Workspace')
+        self.ui.lineEdit_workDir.setText(work_dir)
+
+        return
+
+    def do_apply_setup(self):
+        """
+        Apply set up ...
+        :return:
+        """
+        # Local data directory
+        local_data_dir = str(self.ui.lineEdit_localSpiceDir.text())
+        if os.path.exists(local_data_dir) is False:
+            try:
+                os.mkdir(local_data_dir)
+            except OSError as os_error:
+                self.pop_one_button_dialog('Unable to create local data directory %s due to %s.' % (
+                    local_data_dir, str(os_error)))
+                self.ui.lineEdit_localSpiceDir.setStyleSheet("color: red;")
+                return
+            else:
+                self.ui.lineEdit_localSpiceDir.setStyleSheet("color: black;")
+        # END-IF
 
         # Working directory
-        work_dir = os.path.join(data_cache_dir, 'Workspace')
-        if os.path.exists(work_dir) is False:
-            os.mkdir(work_dir)
+        working_dir = str(self.ui.lineEdit_workDir.text())
+        if os.path.exists(working_dir) is False:
+            try:
+                os.mkdir(working_dir)
+            except OSError as os_error:
+                self.pop_one_button_dialog('Unable to create working directory %s due to %s.' % (
+                    working_dir, str(os_error)))
+                self.ui.lineEdit_workDir.setStyleSheet("color: red;")
+                return
+            else:
+                self.ui.lineEdit_workDir.setStyleSheet("color: black;")
+        # END-IF
 
-        # Set to line edit
-        self.ui.lineEdit_localSrcDir.setText(data_cache_dir)
-        self.ui.lineEdit_workDir.setText(work_dir)
+        # Server URL
+        data_server = str(self.ui.lineEdit_url.text())
+        url_is_good = self.do_test_url()
+        if url_is_good is False:
+            self.ui.lineEdit_url.setStyleSheet("color: red;")
+            return
+        else:
+            self.ui.lineEdit_url.setStyleSheet("color: black;")
+
+        # Set to control
+        self._myControl.set_local_data_dir(local_data_dir)
+        self._myControl.set_working_directory(working_dir)
+        self._myControl.set_server_url(data_server)
 
         return
 
@@ -556,13 +656,13 @@ class MainWindow(QtGui.QMainWindow):
         """
         url = str(self.ui.lineEdit_url.text())
 
-        url_is_good = fcutil.check_url(url)
+        url_is_good, err_msg = fcutil.check_url(url)
         if url_is_good is True:
             self.pop_one_button_dialog("URL %s is valid." % url)
         else:
-            self.pop_one_button_dialog("Unable to access %s.  Check internet access." % url)
+            self.pop_one_button_dialog(err_msg)
 
-        return
+        return url_is_good
 
     def pop_one_button_dialog(self, message):
         """ Pop up a one-button dialog
@@ -583,6 +683,8 @@ class MainWindow(QtGui.QMainWindow):
         save_dict['lineEdit_exp'] = str(self.ui.lineEdit_exp.text())
         save_dict['lineEdit_localSpiceDir'] = str(self.ui.lineEdit_localSpiceDir.text())
         save_dict['comboBox_mode'] = self.ui.comboBox_mode.currentIndex()
+
+        # TODO - Need to save more!
 
         # Save to csv file
         if filename is None:
@@ -712,8 +814,6 @@ class MainWindow(QtGui.QMainWindow):
         # Check and load SPICE table file
         does_exist = self._myControl.does_spice_loaded(exp_no, scan_no)
         if does_exist is False:
-            # Reset the data and working direction
-            self._set_data_access_info()
             # Download data
             status, error_message = self._myControl.download_spice_file(exp_no, scan_no, over_write=False)
             if status is True:
@@ -725,8 +825,6 @@ class MainWindow(QtGui.QMainWindow):
                 self.pop_one_button_dialog(error_message)
                 return
         # END-IF(does_exist)
-
-        # NEXT - Clean up rest of the codes to mimic how to deal with SPICE file
 
         # Load Data for Pt's xml file
         does_exist = self._myControl.does_raw_loaded(exp_no, scan_no, pt_no)
@@ -752,11 +850,12 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    """
     def _set_data_access_info(self):
-        """
 
         :return:
-        """
+
+        raise NotImplementedError('Intended to remove!')
         cache_dir = str(self.ui.lineEdit_localSrcDir.text())
         self._myControl.set_local_data_dir(cache_dir)
 
@@ -767,6 +866,7 @@ class MainWindow(QtGui.QMainWindow):
         self._myControl.set_server_url(data_server)
 
         return
+    """
 
     def _show_ub_matrix(self, ubmatrix):
         """ Show UB matrix

@@ -469,6 +469,7 @@ class CWSCDReductionControl(object):
         virtual_instrument_info_table_name = get_virtual_instrument_table_name(exp_number, scan_number, pt_number)
         api.CollectHB3AExperimentInfo(
             ExperimentNumber=exp_number,
+            GenerateVirtualInstrument=False,
             ScanList=[scan_number],
             PtLists=[-1, pt_number],
             DataDirectory=self._dataDir,
@@ -478,22 +479,22 @@ class CWSCDReductionControl(object):
             DetectorTableWorkspace=virtual_instrument_info_table_name)
 
         # get raw data workspace
+        """ TODO - Find out whether the raw matrix workspace is needed or not!
         raw_data_ws_name = get_raw_data_workspace_name(exp_number, scan_number, pt_number)
         if AnalysisDataService.doesExist(raw_data_ws_name):
             raw_data_ws = AnalysisDataService.retrieve(raw_data_ws_name)
             self._add_raw_workspace(exp_number, scan_number, pt_number, raw_data_ws)
         else:
-            raise RuntimeError('Mantid algorithm CollectHB3AExperimentInfo changes the '
-                               'output raw data matrix workspace\'s name convention.')
+            raise RuntimeError('Unable to find workspace %s. It is very likely that'
+                               'Mantid algorithm CollectHB3AExperimentInfo changes the '
+                               'output raw data matrix workspace\'s name convention.' % raw_data_ws_name)
+        """
 
         # Load XML file to MD
         pt_md_ws_name = get_single_pt_md_name(exp_number, scan_number, pt_number)
-        api.ConvertCWSDExpToMomentum(InputWorkspace=exp_info_ws_name ,
-                                     DetectorTableWorkspace=virtual_instrument_info_table_name,
+        api.ConvertCWSDExpToMomentum(InputWorkspace=exp_info_ws_name,
+                                     CreateVirtualInstrument=False,
                                      OutputWorkspace=pt_md_ws_name,
-                                     SourcePosition=[0, 0, -2],
-                                     SamplePosition=[0, 0, 0],
-                                     PixelDimension=[1, 1, 2, 2, 3, 3, 4, 4],
                                      Directory=self._dataDir)
 
         # Find peak in Q-space
@@ -511,6 +512,13 @@ class CWSCDReductionControl(object):
             self._add_ub_peak_ws(exp_number, scan_number, pt_number, peak_ws)
 
         return True, ''
+
+    def get_experiment(self):
+        """
+        Get experiment number
+        :return:
+        """
+        return self._expNumber
 
     def get_pt_numbers(self, exp_no, scan_no, load_spice_scan=False):
         """ Get Pt numbers (as a list) for a scan in an experiment
@@ -654,13 +662,17 @@ class CWSCDReductionControl(object):
 
         return True, ""
 
-    def load_spice_scan_file(self, exp_no, scan_no=None, spice_file_name=None):
+    def load_spice_scan_file(self, exp_no, scan_no, spice_file_name=None):
         """
         Load a SPICE scan file to table workspace and run information matrix workspace.
         :param scan_no:
         :param spice_file_name:
         :return: status (boolean), error message (string)
         """
+        # Default for exp_no
+        if exp_no is None:
+            exp_no = self._expNumber
+
         # Check whether the workspace has been loaded
         assert isinstance(exp_no, int)
         assert isinstance(scan_no, int)
@@ -672,7 +684,10 @@ class CWSCDReductionControl(object):
         if spice_file_name is None:
             spice_file_name = os.path.join(self._dataDir, get_spice_file_name(exp_no, scan_no))
 
-        # Load SPICE file
+        # Download SPICE file if necessary
+        if os.path.exists(spice_file_name) is False:
+            self.download_spice_file(exp_no, scan_no)
+
         try:
             spice_table_ws, info_matrix_ws = api.LoadSpiceAscii(Filename=spice_file_name,
                                                                 OutputWorkspace=out_ws_name,
@@ -869,18 +884,26 @@ class CWSCDReductionControl(object):
 
     def set_hkl_to_peak(self, exp_number, scan_number, pt_number):
         """
-
+        # TODO/DOC!
         :return:
         """
+        print '[DB] It is called to set HKL to peak!'
+
         status, peak_info = self.get_peak_info(exp_number, scan_number, pt_number)
         if status is False:
             err_msg = peak_info
             return False, err_msg
 
-        matrix_ws = peak_info.get_raw_data_ws()
-        m_h = float(int(matrix_ws.run().getProperty('_h').value))
-        m_k = float(int(matrix_ws.run().getProperty('_k').value))
-        m_l = float(int(matrix_ws.run().getProperty('_l').value))
+        md_ws = peak_info.get_md_ws()
+        assert md_ws.getNumExperimentInfo == 1
+        exp_info = md_ws.getExperimentInfo(0)
+
+        try:
+            m_h = float(int(exp_info.run().getProperty('_h').value))
+            m_k = float(int(exp_info.run().getProperty('_k').value))
+            m_l = float(int(exp_info.run().getProperty('_l').value))
+        except RuntimeError as error:
+            return False, 'Unable to retrieve HKL due to %s.' % (str(error))
 
         peak_ws = peak_info.get_peak_workspace()
         peak = peak_ws.getPeak(0)

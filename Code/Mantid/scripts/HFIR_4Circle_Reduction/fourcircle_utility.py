@@ -3,12 +3,13 @@ __author__ = 'wzz'
 
 import os
 import urllib2
+import socket
 
 
 def check_url(url, read_lines=False):
     """ Check whether a URL is valid
     :param url:
-    :return: boolean
+    :return: boolean, error message
     """
     lines = None
     try:
@@ -20,6 +21,8 @@ def check_url(url, read_lines=False):
             lines = url_stream.readlines()
     except urllib2.URLError as url_error:
         url_stream = url_error
+    except socket.timeout:
+        return False, 'Time out. Try again!'
 
     # Return result
     if url_stream.code in (200, 401):
@@ -33,8 +36,12 @@ def check_url(url, read_lines=False):
     # Return
     if read_lines is True:
         return url_good, lines
+    if url_good is False:
+        error_message = 'Unable to access %s.  Check internet access. Code %d' % (url, url_stream.code)
+    else:
+        error_message = ''
 
-    return url_good
+    return url_good, error_message
 
 
 def get_scans_list(server_url, exp_no, return_list=False):
