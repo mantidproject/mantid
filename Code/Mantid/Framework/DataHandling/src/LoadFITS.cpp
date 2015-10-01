@@ -17,9 +17,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace std;
-using namespace boost;
-
-namespace {}
 
 namespace Mantid {
 namespace DataHandling {
@@ -335,7 +332,7 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
       }
 
       try {
-        headers[i].bitsPerPixel = lexical_cast<int>(tmpBitPix);
+        headers[i].bitsPerPixel = boost::lexical_cast<int>(tmpBitPix);
       } catch (std::exception &e) {
         throw std::runtime_error(
             "Coult not interpret the entry number of bits per pixel (" +
@@ -376,7 +373,7 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
       headers[i].numberOfAxis = static_cast<int>(m_headerAxisNameKeys.size());
 
       for (int j = 0; headers.size() > i && j < headers[i].numberOfAxis; ++j) {
-        headers[i].axisPixelLengths.push_back(lexical_cast<size_t>(
+        headers[i].axisPixelLengths.push_back(boost::lexical_cast<size_t>(
             headers[i].headerKeys[m_headerAxisNameKeys[j]]));
         g_log.information()
             << "Found axis length header entry: " << m_headerAxisNameKeys[j]
@@ -400,7 +397,7 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
     } else {
       try {
         headers[i].scale =
-            lexical_cast<double>(headers[i].headerKeys[m_headerScaleKey]);
+          boost::lexical_cast<double>(headers[i].headerKeys[m_headerScaleKey]);
       } catch (std::exception &e) {
         throw std::runtime_error(
             "Coult not interpret the entry number of bits per pixel (" +
@@ -416,14 +413,14 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
     } else {
       try {
         headers[i].offset =
-            lexical_cast<int>(headers[i].headerKeys[m_headerOffsetKey]);
+          boost::lexical_cast<int>(headers[i].headerKeys[m_headerOffsetKey]);
       } catch (std::exception & /*e*/) {
         // still, second try with floating point format (as used for example
         // by
         // Starlight XPRESS cameras)
         try {
           double doff =
-              lexical_cast<double>(headers[i].headerKeys[m_headerOffsetKey]);
+            boost::lexical_cast<double>(headers[i].headerKeys[m_headerOffsetKey]);
           double intPart;
           if (0 != modf(doff, &intPart)) {
             // anyway we'll do a cast, but warn if there was a fraction
@@ -952,7 +949,7 @@ size_t LoadFITS::fetchNumber(const std::string &name) {
   while (tmpStr.length() > 0 && tmpStr[0] == '0') {
     tmpStr.erase(tmpStr.begin());
   }
-  return (tmpStr.length() > 0) ? lexical_cast<size_t>(tmpStr) : 0;
+  return (tmpStr.length() > 0) ? boost::lexical_cast<size_t>(tmpStr) : 0;
 }
 
 /**
