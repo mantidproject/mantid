@@ -123,9 +123,9 @@ m_left(NULL), m_top(NULL), m_right(NULL), m_bottom(NULL)
   m_free_draw = new QPushButton();
   m_free_draw->setCheckable(true);
   m_free_draw->setAutoExclusive(true);
-  m_free_draw->setIcon(QIcon(":/MaskTools/selection-box-ring.png"));
-  m_free_draw->setToolTip("Draw a free shape (Shift+Alt+F)");
-  m_free_draw->setShortcut(QKeySequence("Shift+Alt+F"));
+  m_free_draw->setIcon(QIcon(":/MaskTools/brush.png"));
+  m_free_draw->setToolTip("Draw an arbitrary shape (Shift+Alt+A)");
+  m_free_draw->setShortcut(QKeySequence("Shift+Alt+A"));
 
   QHBoxLayout* toolBox = new QHBoxLayout();
   toolBox->addWidget(m_move);
@@ -419,6 +419,7 @@ void InstrumentWindowMaskTab::setActivity()
   */
 void InstrumentWindowMaskTab::shapeCreated()
 {
+  if (!isVisible()) return;
   if (m_activity != DrawFree)
   {
     setSelectActivity();

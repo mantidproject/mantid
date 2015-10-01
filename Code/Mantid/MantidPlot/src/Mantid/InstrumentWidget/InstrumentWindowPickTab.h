@@ -47,7 +47,7 @@ public:
   ///   SelectPeak: click on a peak marker or draw a rubber-band selector to select peak
   ///               markers. Selected peaks can be deleted by pressing the Delete key.
   enum SelectionType {Single=0,AddPeak,ErasePeak,SingleDetectorSelection,Tube, Draw};
-  enum ToolType {Zoom,PixelSelect,TubeSelect,PeakSelect,PeakErase, DrawEllipse, DrawRectangle, EditShape};
+  enum ToolType {Zoom,PixelSelect,TubeSelect,PeakSelect,PeakErase, DrawEllipse, DrawRectangle, DrawFree, EditShape};
 
   InstrumentWindowPickTab(InstrumentWindow* instrWindow);
   bool canUpdateTouchedDetector()const;
@@ -91,6 +91,7 @@ private:
   QPushButton *m_ellipse;      ///< Button switching on drawing a elliptical selection region
   QPushButton *m_ring_ellipse; ///< Button switching on drawing a elliptical ring selection region
   QPushButton *m_ring_rectangle; ///< Button switching on drawing a rectangular ring selection region
+  QPushButton *m_free_draw;      ///< Button switching on drawing a region of arbitrary shape
   QPushButton *m_edit;           ///< Button switching on edditing the selection region
   bool m_plotSum;
 
