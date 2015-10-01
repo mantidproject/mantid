@@ -7,8 +7,7 @@
 #include "MantidGeometry/Crystal/HKLGenerator.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
-#include "MantidGeometry/Crystal/BraggScattererInCrystalStructure.h"
-#include "MantidGeometry/Crystal/BraggScattererFactory.h"
+#include "MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h"
 #include "MantidGeometry/Crystal/StructureFactorCalculatorSummation.h"
 
 #include <iostream>
@@ -36,8 +35,8 @@ CrystalStructure::CrystalStructure(const std::string &unitCellString,
                                    const std::string &scattererString) {
   initializeScatterers();
 
-  addScatterers(BraggScattererFactory::Instance().createIsotropicScatterers(
-      scattererString));
+  addScatterers(CompositeBraggScatterer::create(
+      IsotropicAtomBraggScattererParser(scattererString)()));
   setCell(strToUnitCell(unitCellString));
   setSpaceGroup(
       SpaceGroupFactory::Instance().createSpaceGroup(spaceGroupString));

@@ -1,10 +1,6 @@
 #include "MantidGeometry/Crystal/BraggScattererFactory.h"
 #include "MantidKernel/LibraryManager.h"
 
-#include <boost/tokenizer.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/assign.hpp>
-
 namespace Mantid {
 namespace Geometry {
 
@@ -33,84 +29,6 @@ BraggScatterer_sptr BraggScattererFactoryImpl::createScatterer(
   }
 
   return scatterer;
-}
-
-/**
- * Returns a CompositeBraggScatterer with IsotropicAtomBraggScatterers
- *
- * The function expects a string in the following format:
- *
- *  Element x y z occupancy u_iso; Element x y z occupancy u_iso; ...
- *
- * It generates an IsotropicAtomBraggScatterer for each specified atom.
- *
- * @param scattererString :: String in the format specified above
- * @return CompositeBraggScatterer with specified scatterers
- */
-CompositeBraggScatterer_sptr
-BraggScattererFactoryImpl::createIsotropicScatterers(
-    const std::string &scattererString) const {
-  return getScatterers(scattererString);
-}
-
-CompositeBraggScatterer_sptr BraggScattererFactoryImpl::getScatterers(
-    const std::string &scattererString) const {
-  boost::char_separator<char> atomSep(";");
-  boost::tokenizer<boost::char_separator<char> > tokens(scattererString,
-                                                        atomSep);
-
-  std::vector<BraggScatterer_sptr> scatterers;
-
-  for (auto it = tokens.begin(); it != tokens.end(); ++it) {
-    scatterers.push_back(getScatterer(boost::trim_copy(*it)));
-  }
-
-  return CompositeBraggScatterer::create(scatterers);
-}
-
-/// Returns IsotropicAtomBraggScatterer for string with format "Element x y z
-/// occupancy u_iso".
-BraggScatterer_sptr BraggScattererFactoryImpl::getScatterer(
-    const std::string &singleScatterer) const {
-  std::vector<std::string> tokens;
-  boost::split(tokens, singleScatterer, boost::is_any_of(" "));
-
-  if (tokens.size() < 4 || tokens.size() > 6) {
-    throw std::invalid_argument("Could not parse scatterer string: " +
-                                singleScatterer);
-  }
-
-  std::vector<std::string> cleanScattererTokens =
-      getCleanScattererTokens(tokens);
-  std::vector<std::string> properties =
-      boost::assign::list_of("Element")("Position")("Occupancy")("U")
-          .convert_to_container<std::vector<std::string> >();
-
-  std::string initString;
-  for (size_t i = 0; i < cleanScattererTokens.size(); ++i) {
-    initString += properties[i] + "=" + cleanScattererTokens[i] + ";";
-  }
-
-  return createScatterer("IsotropicAtomBraggScatterer", initString);
-}
-
-/// Converts tokens for getScatterer method so they can be processed by factory.
-std::vector<std::string> BraggScattererFactoryImpl::getCleanScattererTokens(
-    const std::vector<std::string> &tokens) const {
-  std::vector<std::string> cleanTokens;
-
-  // Element
-  cleanTokens.push_back(tokens[0]);
-
-  // X, Y, Z
-  cleanTokens.push_back("[" + tokens[1] + "," + tokens[2] + "," + tokens[3] +
-                        "]");
-
-  for (size_t i = 4; i < tokens.size(); ++i) {
-    cleanTokens.push_back(tokens[i]);
-  }
-
-  return cleanTokens;
 }
 
 /// Private constructor.

@@ -67,19 +67,8 @@ void BraggScattererInCrystalStructure::declareProperties() {
 
 V3D BraggScattererInCrystalStructure::getPositionFromString(
     const std::string &positionString) const {
-  std::string positionStringClean = positionString;
-  positionStringClean.erase(std::remove_if(positionStringClean.begin(),
-                                           positionStringClean.end(),
-                                           boost::is_any_of("[]")),
-                            positionStringClean.end());
-
-  std::vector<std::string> numberParts;
-  boost::split(numberParts, positionStringClean, boost::is_any_of(","));
-
-  if (numberParts.size() != 3) {
-    throw std::invalid_argument("Cannot parse '" + positionString +
-                                "' as a position.");
-  }
+  std::vector<std::string> numberParts =
+      getTokenizedPositionString(positionString);
 
   mu::Parser parser;
 
@@ -131,6 +120,26 @@ std::string UnitCellStringValidator::checkValidity(
   }
 
   return "";
+}
+
+/// Returns components of comma-separated position string, cleaned from [ and ].
+std::vector<std::string>
+getTokenizedPositionString(const std::string &position) {
+  std::string positionStringClean = position;
+  positionStringClean.erase(std::remove_if(positionStringClean.begin(),
+                                           positionStringClean.end(),
+                                           boost::is_any_of("[]")),
+                            positionStringClean.end());
+
+  std::vector<std::string> numberParts;
+  boost::split(numberParts, positionStringClean, boost::is_any_of(","));
+
+  if (numberParts.size() != 3) {
+    throw std::invalid_argument("Cannot parse '" + position +
+                                "' as a position.");
+  }
+
+  return numberParts;
 }
 
 } // namespace Geometry

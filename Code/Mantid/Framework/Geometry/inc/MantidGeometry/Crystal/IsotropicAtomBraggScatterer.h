@@ -124,6 +124,23 @@ protected:
 typedef boost::shared_ptr<IsotropicAtomBraggScatterer>
     IsotropicAtomBraggScatterer_sptr;
 
+class MANTID_GEOMETRY_DLL IsotropicAtomBraggScattererParser {
+public:
+  IsotropicAtomBraggScattererParser(const std::string &scattererString);
+
+  std::vector<BraggScatterer_sptr> operator()() const;
+
+private:
+  BraggScatterer_sptr getScatterer(const std::string &singleScatterer) const;
+  std::vector<std::string>
+  getCleanScattererTokens(const std::vector<std::string> &tokens) const;
+
+  std::string m_scattererString;
+};
+
+MANTID_GEOMETRY_DLL std::string
+getIsotropicAtomBraggScattererString(const BraggScatterer_sptr &scatterer);
+
 } // namespace Geometry
 } // namespace Mantid
 

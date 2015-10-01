@@ -6,7 +6,8 @@
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
-#include "MantidGeometry/Crystal/BraggScattererFactory.h"
+#include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
+#include "MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h"
 
 namespace Mantid {
 namespace Poldi {
@@ -174,8 +175,8 @@ void PoldiCreatePeaksFromCell::init() {
   declareProperty("Atoms", "", "Atoms in the asymmetric unit. Format: \n"
                                "Element x y z Occupancy U; ... ");
 
-  boost::shared_ptr<BoundedValidator<double> > latticeParameterEdgeValidator =
-      boost::make_shared<BoundedValidator<double> >(0.0, 0.0);
+  boost::shared_ptr<BoundedValidator<double>> latticeParameterEdgeValidator =
+      boost::make_shared<BoundedValidator<double>>(0.0, 0.0);
   latticeParameterEdgeValidator->clearUpper();
   declareProperty("a", 1.0, latticeParameterEdgeValidator,
                   "Lattice parameter a");
@@ -184,8 +185,8 @@ void PoldiCreatePeaksFromCell::init() {
   declareProperty("c", 1.0, latticeParameterEdgeValidator->clone(),
                   "Lattice parameter c");
 
-  boost::shared_ptr<BoundedValidator<double> > latticeParameterAngleValidator =
-      boost::make_shared<BoundedValidator<double> >(0.0, 180.0);
+  boost::shared_ptr<BoundedValidator<double>> latticeParameterAngleValidator =
+      boost::make_shared<BoundedValidator<double>>(0.0, 180.0);
   declareProperty("alpha", 90.0, latticeParameterAngleValidator,
                   "Lattice parameter alpha");
   declareProperty("beta", 90.0, latticeParameterAngleValidator->clone(),
@@ -193,8 +194,8 @@ void PoldiCreatePeaksFromCell::init() {
   declareProperty("gamma", 90.0, latticeParameterAngleValidator->clone(),
                   "Lattice parameter gamma");
 
-  boost::shared_ptr<BoundedValidator<double> > dValidator =
-      boost::make_shared<BoundedValidator<double> >(0.01, 0.0);
+  boost::shared_ptr<BoundedValidator<double>> dValidator =
+      boost::make_shared<BoundedValidator<double>>(0.01, 0.0);
   dValidator->clearUpper();
 
   declareProperty("LatticeSpacingMin", 0.5, dValidator,
@@ -221,9 +222,8 @@ void PoldiCreatePeaksFromCell::exec() {
   g_log.information() << "Constrained unit cell is: " << unitCellToStr(unitCell)
                       << std::endl;
 
-  CompositeBraggScatterer_sptr scatterers =
-      BraggScattererFactory::Instance().createIsotropicScatterers(
-          getProperty("Atoms"));
+  CompositeBraggScatterer_sptr scatterers = CompositeBraggScatterer::create(
+      IsotropicAtomBraggScattererParser(getProperty("Atoms"))());
 
   // Create a CrystalStructure-object for use with PoldiPeakCollection
   CrystalStructure crystalStructure(unitCell, spaceGroup, scatterers);

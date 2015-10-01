@@ -90,6 +90,9 @@ protected:
   virtual std::string checkValidity(const std::string &unitCellString) const;
 };
 
+MANTID_GEOMETRY_DLL std::vector<std::string>
+getTokenizedPositionString(const std::string &position);
+
 } // namespace Geometry
 } // namespace Mantid
 
