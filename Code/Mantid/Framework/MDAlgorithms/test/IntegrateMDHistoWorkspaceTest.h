@@ -12,19 +12,10 @@ using namespace Mantid::API;
 
 namespace {
 
-size_t getTheTotalNumberOfBins(IMDHistoWorkspace_sptr ws) {
-  size_t numberOfIndices = 1;
-  for (size_t i = 0; i < ws->getNumDims(); ++i) {
-    auto dim = ws->getDimension(i);
-    numberOfIndices *= dim->getNBins();
-  }
-  return numberOfIndices;
-}
-
 // This helper sets the signal values to the linear index to have some
 // variety
 void resetSignalsToLinearIndexValue(IMDHistoWorkspace_sptr ws) {
-  auto numberOfIndices = getTheTotalNumberOfBins(ws);
+  auto numberOfIndices = static_cast<size_t>(ws->getNPoints());
   for (size_t i = 0; i < numberOfIndices; ++i) {
     auto& signal = ws->signalAt(i);
     signal = static_cast<Mantid::signal_t>(i);
