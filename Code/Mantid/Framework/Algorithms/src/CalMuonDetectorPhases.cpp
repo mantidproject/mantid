@@ -117,10 +117,15 @@ void CalMuonDetectorPhases::exec() {
   // removes exponential decay
   API::MatrixWorkspace_sptr tempWS = prepareWorkspace(inputWS, startTime, endTime);
 
+  // Create the output workspaces
   auto tab = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
   auto group = API::WorkspaceGroup_sptr(new API::WorkspaceGroup());
 
-  fitWorkspace(tempWS, freq, tab, group);
+  // Get the name of 'DataFitted'
+  std::string groupName = getPropertyValue("DataFitted");
+
+  // Fit the workspace
+  fitWorkspace(tempWS, freq, groupName, tab, group);
 
   // Set the table
   setProperty("DetectorTable", tab);
@@ -131,11 +136,12 @@ void CalMuonDetectorPhases::exec() {
 /** Fits each spectrum in the workspace to f(x) = A * sin( w * x + p)
 * @param ws :: [input] The workspace to fit
 * @param freq :: [input] Hint for the frequency (w)
+* @param groupName :: [input] The name of the output workspace group
 * @param resTab :: [output] Table workspace storing the asymmetries and phases
 * @param resGroup :: [output] Workspace group storing the fitting results
 */
 void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
-                                         double freq,
+                                         double freq, std::string groupName,
                                          API::ITableWorkspace_sptr &resTab,
                                          API::WorkspaceGroup_sptr &resGroup) {
 
@@ -169,6 +175,7 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
     fit->setProperty("WorkspaceIndex_" + suffix, s);
   }
   fit->setProperty("CreateOutput", true);
+  fit->setProperty("Output", groupName);
   fit->execute();
 
   // Get the parameter table

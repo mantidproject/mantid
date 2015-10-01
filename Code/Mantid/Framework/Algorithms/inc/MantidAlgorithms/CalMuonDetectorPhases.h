@@ -60,7 +60,7 @@ private:
                    double endTime);
   /// Fit the workspace
   void fitWorkspace(const API::MatrixWorkspace_sptr &ws, double freq,
-                    API::ITableWorkspace_sptr &resTab,
+                    std::string groupName, API::ITableWorkspace_sptr &resTab,
                     API::WorkspaceGroup_sptr &resGroup);
   /// Create the fitting function as string
   std::string createFittingFunction(int nspec, double freq);
