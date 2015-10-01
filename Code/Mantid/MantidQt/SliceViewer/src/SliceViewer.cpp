@@ -87,7 +87,8 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   ui.setupUi(this);
   //set to disabled state by default.
-  currentState = boost::make_shared<RebinDisabledState>();
+  setCurrentState(boost::make_shared<RebinDisabledState>());
+  currentState->apply(this);
   m_inf = std::numeric_limits<double>::infinity();
   //Rebinning overlay workspace
   // Point m_plot to the plot created in QtDesigner
@@ -2275,7 +2276,7 @@ void SliceViewer::autoRebinIfRequired() {
   }
 }
 
-bool SliceViewer::m_WS_is_EventWorkspace(){
+bool SliceViewer::m_ws_is_EventWorkspace(){
     return boost::dynamic_pointer_cast<IMDEventWorkspace>(m_ws);
 }
 /************************************/
@@ -2557,10 +2558,6 @@ void SliceViewer::dropEvent(QDropEvent *e) {
   }
 }
 
-<<<<<<< HEAD
 
-
-=======
->>>>>>> a144951270daefc167c8bdd1938f68d3bfaf2fa1
 } // namespace
 }
