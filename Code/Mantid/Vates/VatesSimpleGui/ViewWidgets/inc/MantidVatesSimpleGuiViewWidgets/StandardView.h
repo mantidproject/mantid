@@ -91,6 +91,8 @@ protected slots:
   void onScaleButtonClicked();
   /// On BinMD button clicked
   void onRebin();
+  /// On scale completed
+  void onScaleRepresentationAdded(pqPipelineSource *, pqDataRepresentation* , int);
 
 private:
   Q_DISABLE_COPY(StandardView)
@@ -128,8 +130,11 @@ private:
   static QString g_binMDToolTipTxt;
   static QString g_sliceMDToolTipTxt;
   static QString g_cutMDToolTipTxt;
-
   static QMap<QString, QString> g_actionToAlgName;
+  /// wire frame representation key
+  static const std::string SurfaceRepresentation;
+  /// surface representation key
+  static const std::string WireFrameRepresentation;
 };
 
 } // SimpleGui

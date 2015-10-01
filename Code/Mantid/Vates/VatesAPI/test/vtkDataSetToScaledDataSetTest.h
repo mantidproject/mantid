@@ -22,6 +22,7 @@
 #include <vtkSmartPointer.h>
 #include <vtkUnsignedCharArray.h>
 #include <vtkUnstructuredGrid.h>
+#include <vtkPointSet.h>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::VATES;
@@ -36,6 +37,23 @@ private:
                             VolumeNormalization);
     factory.initialize(ws);
     return vtkUnstructuredGrid::SafeDownCast(factory.create(progressUpdate));
+  }
+
+  vtkUnstructuredGrid *makeDataSetWithNonOrthogonal() {
+    auto grid = makeDataSet();
+    auto u = vtkVector3d(4, 4, 0);
+    auto v = vtkVector3d(-2, 2, 0);
+    auto w = vtkVector3d(0, 0, 8);
+
+    vtkSmartPointer<vtkMatrix4x4> cobMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
+    cobMatrix->Identity();
+    std::copy(u.GetData(), u.GetData() + 3, cobMatrix->Element[0]);
+    std::copy(v.GetData(), v.GetData() + 3, cobMatrix->Element[1]);
+    std::copy(w.GetData(), w.GetData() + 3, cobMatrix->Element[2]);
+    cobMatrix->Transpose();
+
+    vtkPVChangeOfBasisHelper::AddChangeOfBasisMatrixToFieldData(grid, cobMatrix);
+    return grid;
   }
 
   vtkUnstructuredGrid *makeDataSetWithJsonMetadata() {
@@ -68,31 +86,18 @@ public:
 
   void testThrowIfInputNull() {
     vtkUnstructuredGrid *in = NULL;
-    vtkUnstructuredGrid *out = vtkUnstructuredGrid::New();
-    TS_ASSERT_THROWS(vtkDataSetToScaledDataSet scaler(in, out),
-                     std::runtime_error);
-  }
 
-  void testThrowIfOutputNull() {
-    vtkUnstructuredGrid *in = vtkUnstructuredGrid::New();
-    vtkUnstructuredGrid *out = NULL;
-    TS_ASSERT_THROWS(vtkDataSetToScaledDataSet scaler(in, out),
-                     std::runtime_error);
-  }
+    vtkDataSetToScaledDataSet scaler;
 
-  void testExecThrowIfNoInit() {
-    vtkUnstructuredGrid *in = vtkUnstructuredGrid::New();
-    vtkUnstructuredGrid *out = vtkUnstructuredGrid::New();
-    vtkDataSetToScaledDataSet scaler(in, out);
-    TS_ASSERT_THROWS(scaler.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(scaler.execute(1, 1, 1, in),
+                     std::runtime_error);
   }
 
   void testExecution() {
+
+    vtkDataSetToScaledDataSet scaler;
     vtkUnstructuredGrid *in = makeDataSet();
-    vtkUnstructuredGrid *out = vtkUnstructuredGrid::New();
-    vtkDataSetToScaledDataSet scaler(in, out);
-    scaler.initialize(0.1, 0.5, 0.2);
-    TS_ASSERT_THROWS_NOTHING(scaler.execute());
+    vtkPointSet* out = scaler.execute(0.1, 0.5, 0.2,in);
 
     // Check bounds are scaled
     double *bb = out->GetBounds();
@@ -144,12 +149,10 @@ public:
   void testJsonMetadataExtractionFromScaledDataSet() {
     // Arrange
     vtkUnstructuredGrid *in = makeDataSetWithJsonMetadata();
-    vtkUnstructuredGrid *out = vtkUnstructuredGrid::New();
 
     // Act
-    vtkDataSetToScaledDataSet scaler(in, out);
-    scaler.initialize(0.1, 0.5, 0.2);
-    TS_ASSERT_THROWS_NOTHING(scaler.execute());
+    vtkDataSetToScaledDataSet scaler;
+    vtkPointSet* out = scaler.execute(0.1, 0.5, 0.2, in);
 
     vtkFieldData *fieldData = out->GetFieldData();
     MetadataJsonManager manager;
@@ -165,6 +168,59 @@ public:
     in->Delete();
     out->Delete();
   }
+
+  void testExecutionWithNonOrthogonalDataSet() {
+
+    vtkDataSetToScaledDataSet scaler;
+    vtkUnstructuredGrid *in = makeDataSetWithNonOrthogonal();
+    vtkPointSet* out = scaler.execute(0.25, 0.5, 0.125, in);
+
+    // Check bounds are scaled
+    double *bb = out->GetBounds();
+    TS_ASSERT_EQUALS(-10.0/4, bb[0]);
+    TS_ASSERT_EQUALS(10.0/4, bb[1]);
+    TS_ASSERT_EQUALS(-10.0/2, bb[2]);
+    TS_ASSERT_EQUALS(10.0/2, bb[3]);
+    TS_ASSERT_EQUALS(-10.0/8, bb[4]);
+    TS_ASSERT_EQUALS(10.0/8, bb[5]);
+
+    auto cobMatrix = vtkPVChangeOfBasisHelper::GetChangeOfBasisMatrix(out);
+
+    TS_ASSERT_EQUALS(1.0, cobMatrix->Element[0][0])
+    TS_ASSERT_EQUALS(-1.0, cobMatrix->Element[0][1])
+    TS_ASSERT_EQUALS(0.0, cobMatrix->Element[0][2])
+    TS_ASSERT_EQUALS(0.0, cobMatrix->Element[0][3])
+
+    TS_ASSERT_EQUALS(1.0, cobMatrix->Element[1][0])
+    TS_ASSERT_EQUALS(1.0, cobMatrix->Element[1][1])
+    TS_ASSERT_EQUALS(0.0, cobMatrix->Element[1][2])
+    TS_ASSERT_EQUALS(0.0, cobMatrix->Element[1][3])
+
+    TS_ASSERT_EQUALS(0.0, cobMatrix->Element[2][0])
+    TS_ASSERT_EQUALS(0.0, cobMatrix->Element[2][1])
+    TS_ASSERT_EQUALS(1.0, cobMatrix->Element[2][2])
+    TS_ASSERT_EQUALS(0.0, cobMatrix->Element[2][3])
+
+    TS_ASSERT_EQUALS(0.0, cobMatrix->Element[3][0])
+    TS_ASSERT_EQUALS(0.0, cobMatrix->Element[3][1])
+    TS_ASSERT_EQUALS(0.0, cobMatrix->Element[3][2])
+    TS_ASSERT_EQUALS(1.0, cobMatrix->Element[3][3])
+
+    // Check the bounding box element for axes
+    double bounds[6] = {0, 0, 0, 0, 0, 0};
+    vtkPVChangeOfBasisHelper::GetBoundingBoxInBasis(out, bounds);
+
+    TS_ASSERT_EQUALS(-10.0, bounds[0]);
+    TS_ASSERT_EQUALS(10.0, bounds[1]);
+    TS_ASSERT_EQUALS(-10.0, bounds[2]);
+    TS_ASSERT_EQUALS(10.0, bounds[3]);
+    TS_ASSERT_EQUALS(-10.0, bounds[4]);
+    TS_ASSERT_EQUALS(10.0, bounds[5]);
+
+    in->Delete();
+    out->Delete();
+  }
+
 };
 
 #endif /* MANTID_VATESAPI_VTKDATASETTOSCALEDDATASETTEST_H_ */

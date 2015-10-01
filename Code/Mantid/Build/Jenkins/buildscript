@@ -4,10 +4,10 @@
 #
 # Notes:
 #
-# WORKSPACE, JOB_NAME, NODE_LABEL GIT_COMMIT are environment variables that
-# are set by Jenkins. The last one corresponds to any labels set on a slave.
-# BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each
-# slave.
+# WORKSPACE, JOB_NAME, NODE_LABEL, PACKAGE_SUFFIX, GIT_COMMIT are
+# environment variables that are set by Jenkins. The last one
+# corresponds to any labels set on a slave.  BUILD_THREADS &
+# PARAVIEW_DIR should be set in the configuration of each slave.
 ###############################################################################
 SCRIPT_DIR=$(dirname "$0")
 # Package by default
@@ -142,21 +142,30 @@ fi
 # Packaging options
 ###############################################################################
 if [[ "$BUILDPKG" == true ]]; then
+  PACKAGINGVARS="-DPACKAGE_DOCS=ON"
   # Set some variables relating to the linux packages
   if [[ $(uname) != 'Darwin' ]]; then
     # Use different suffix for linux builds
     if [[ ${JOB_NAME} == *release* ]]; then
-      PACKAGINGVARS="-DENVVARS_ON_INSTALL=True -DCPACK_SET_DESTDIR=ON -DPACKAGE_DOCS=ON"
+      echo "Performing release build" # do nothing
     elif [[ ${JOB_NAME} == *master* ]]; then
-      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidnightly -DCPACK_PACKAGE_SUFFIX=nightly -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=ON"
+      PACKAGE_SUFFIX="nightly"
     elif [[ ${JOB_NAME} == *pvnext* ]]; then
-      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable-pvnext -DCPACK_PACKAGE_SUFFIX=unstable-pvnext -DCPACK_SET_DESTDIR=OFF"
+      PACKAGE_SUFFIX="mantidunstable-pvnext"
     else
-      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable -DCPACK_PACKAGE_SUFFIX=unstable -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=ON"
+      PACKAGE_SUFFIX="unstable"
     fi
-  else
-    # Mac packaging
-    PACKAGINGVARS="-DPACKAGE_DOCS=ON"
+
+    # Only unsuffixed release builds create envvars scripts
+    if [[ ${JOB_NAME} == *release* && -z "$PACKAGE_SUFFIX" ]]; then
+      PACKAGINGVARS="${PACKAGINGVARS} -DENVVARS_ON_INSTALL=True -DCPACK_SET_DESTDIR=ON"
+    else
+      PACKAGINGVARS="${PACKAGINGVARS} -DENVVARS_ON_INSTALL=False -DCPACK_SET_DESTDIR=OFF"
+    fi
+
+    if [ ! -z "$PACKAGE_SUFFIX" ]; then
+      PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/mantid${PACKAGE_SUFFIX} -DCPACK_PACKAGE_SUFFIX=${PACKAGE_SUFFIX}"
+    fi
   fi
 fi
 
@@ -212,6 +221,11 @@ $SCL_ON_RHEL6 "ctest -j$BUILD_THREADS --schedule-random --output-on-failure"
 # Run the documentation tests on Ubuntu when doing a pull request build.
 ###############################################################################
 if [[ "${ON_UBUNTU}" == true ]] && [[ ${JOB_NAME} == *pull_requests* ]]; then
+  # Remove doctrees directory so it forces a full reparse. It seems that
+  # without this newly added doctests are not executed
+  if [ -d $BUILD_DIR/docs/doctrees ]; then
+    rm -rf $BUILD_DIR/docs/doctrees/*
+  fi
   $SCL_ON_RHEL6 "cmake --build . --target docs-test"
 fi
 

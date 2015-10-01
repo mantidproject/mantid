@@ -79,7 +79,7 @@ private:
   /// Correct the given spectra index for efficiency
   void correctForEfficiency(std::size_t spectraIndex);
   /// Sets the detector geometry cache if necessary
-  void getDetectorGeometry(boost::shared_ptr<const Geometry::IDetector> det,
+  void getDetectorGeometry(const boost::shared_ptr<const Geometry::IDetector> &det,
                            double &detRadius, Kernel::V3D &detAxis);
   /// Computes the distance to the given shape from a starting point
   double distToSurface(const Kernel::V3D start,

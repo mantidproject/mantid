@@ -102,6 +102,7 @@ public:
   void populateInstrumentParameters();
   void setTitle(std::string title);
   void applyFilter(boost::function<void (API::MatrixWorkspace_sptr)> filter);
+  virtual bool threadSafe() const;
 };
 
 typedef boost::shared_ptr<EventWorkspaceCollection> EventWorkspaceCollection_sptr;

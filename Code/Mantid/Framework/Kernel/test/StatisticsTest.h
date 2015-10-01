@@ -1,11 +1,13 @@
 #ifndef STATISTICSTEST_H_
 #define STATISTICSTEST_H_
 
+#include "MantidKernel/Statistics.h"
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <cxxtest/TestSuite.h>
+#include <algorithm>
 #include <cmath>
 #include <vector>
 #include <string>
-#include "MantidKernel/Statistics.h"
 
 using namespace Mantid::Kernel;
 using std::string;
@@ -14,7 +16,7 @@ using std::vector;
 class StatisticsTest : public CxxTest::TestSuite
 {
 public:
-  void testDoubleOdd()
+  void test_Doubles_And_Default_Flags_Calculates_All_Stats()
   {
     vector<double> data;
     data.push_back(17.2);
@@ -30,8 +32,80 @@ public:
     TS_ASSERT_EQUALS(stats.minimum, 12.6);
     TS_ASSERT_EQUALS(stats.maximum, 18.3);
     TS_ASSERT_EQUALS(stats.median, 17.2);
-
   }
+
+  void test_Doubles_With_Sorted_Data()
+  {
+    vector<double> data;
+    data.push_back(17.2);
+    data.push_back(18.1);
+    data.push_back(16.5);
+    data.push_back(18.3);
+    data.push_back(12.6);
+    sort(data.begin(), data.end());
+
+    Statistics stats = getStatistics(data, (StatOptions::Median|StatOptions::SortedData));
+
+    TS_ASSERT(boost::math::isnan(stats.mean));
+    TS_ASSERT(boost::math::isnan(stats.standard_deviation));
+    TS_ASSERT(boost::math::isnan(stats.minimum));
+    TS_ASSERT(boost::math::isnan(stats.maximum));
+    TS_ASSERT_EQUALS(stats.median, 17.2);
+  }
+
+  void test_Unsorted_Data_With_Sorted_Flag_Gives_Expected_Incorrect_Result_For_Median()
+  {
+    vector<double> data;
+    data.push_back(17.2);
+    data.push_back(18.1);
+    data.push_back(16.5);
+    data.push_back(18.3);
+    data.push_back(12.6);
+
+    Statistics stats = getStatistics(data, (StatOptions::Median|StatOptions::SortedData));
+
+    TS_ASSERT(boost::math::isnan(stats.mean));
+    TS_ASSERT(boost::math::isnan(stats.standard_deviation));
+    TS_ASSERT(boost::math::isnan(stats.minimum));
+    TS_ASSERT(boost::math::isnan(stats.maximum));
+    TS_ASSERT_EQUALS(stats.median, 16.5);
+  }
+  
+  void test_Doubles_With_Corrected_StdDev_Calculates_Mean()
+  {
+    vector<double> data;
+    data.push_back(17.2);
+    data.push_back(18.1);
+    data.push_back(16.5);
+    data.push_back(18.3);
+    data.push_back(12.6);
+    sort(data.begin(), data.end());
+
+    Statistics stats = getStatistics(data, StatOptions::CorrectedStdDev);
+
+    TS_ASSERT_EQUALS(stats.mean, 16.54);
+    TS_ASSERT_DELTA(stats.standard_deviation, 2.3179, 0.0001);
+    TS_ASSERT_EQUALS(stats.minimum, 12.6);
+    TS_ASSERT_EQUALS(stats.maximum, 18.3);
+    TS_ASSERT(boost::math::isnan(stats.median));
+  }
+
+  void test_Types_Can_Be_Disabled_With_Flags() {
+    vector<double> data;
+    data.push_back(17.2);
+    data.push_back(18.1);
+    data.push_back(16.5);
+    data.push_back(18.3);
+    data.push_back(12.6);
+
+    Statistics justMean = getStatistics(data, StatOptions::Mean);
+    TS_ASSERT_EQUALS(justMean.mean, 16.54);
+    TS_ASSERT(boost::math::isnan(justMean.standard_deviation));
+    TS_ASSERT(boost::math::isnan(justMean.minimum));
+    TS_ASSERT(boost::math::isnan(justMean.maximum));
+    TS_ASSERT(boost::math::isnan(justMean.median));
+  }
+  
   void testZscores()
   {
     vector<double> data;
@@ -62,7 +136,6 @@ public:
     std::vector<double> ZModscore = getModifiedZscore(data);
     TS_ASSERT_DELTA(ZModscore[4], 1.2365, 0.0001);
     TS_ASSERT_DELTA(ZModscore[6], 0.3372, 0.0001);
-    
   }
 
   void testDoubleSingle()

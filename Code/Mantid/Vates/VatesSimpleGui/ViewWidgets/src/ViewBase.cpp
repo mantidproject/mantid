@@ -5,6 +5,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
+#include "MantidVatesAPI/ColorScaleGuard.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidVatesAPI/BoxInfo.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -28,7 +29,10 @@
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
 #include <pqView.h>
+#include <QVTKWidget.h>
 #include <vtkEventQtSlotConnect.h>
+#include <vtkRendererCollection.h>
+#include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
@@ -37,6 +41,7 @@
 #include <vtkSMRenderViewProxy.h>
 #include <vtkSMSourceProxy.h>
 
+#include <pqMultiSliceAxisWidget.h>
 
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1170
@@ -46,6 +51,8 @@
 #include <QPointer>
 #include <QThread>
 #include <QSet>
+
+#include <typeinfo>
 
 namespace Mantid
 {
@@ -63,7 +70,7 @@ ViewBase::ViewBase(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManag
   QWidget(parent), m_rebinnedSourcesManager(rebinnedSourcesManager),
   m_currentColorMapModel(NULL), m_internallyRebinnedWorkspaceIdentifier("rebinned_vsi"),
   m_vtkConnections(vtkSmartPointer<vtkEventQtSlotConnect>::New()),
-  m_gilStateStore()
+  m_pythonGIL(), m_colorScaleLock(NULL)
 {
 }
 
@@ -93,28 +100,8 @@ pqRenderView* ViewBase::createRenderView(QWidget* widget, QString viewName)
   // Place the widget for the render view in the frame provided.
   hbox->addWidget(view->widget());
 
-  // Make sure the Python threadstate is correct before and after rendering
-  // Direct connections so that the Python code runs in the activating thread
-  QObject::connect(view, SIGNAL(beginRender()), this, SLOT(lockPyGIL()),
-                   Qt::DirectConnection);
-  QObject::connect(view, SIGNAL(endRender()), this, SLOT(releasePyGIL()),
-                   Qt::DirectConnection);
+  this->setupVTKEventConnections(view);
 
-  // get right mouse pressed with high priority
-  m_vtkConnections->Connect(view->getRenderViewProxy()->GetInteractor(),
-                            vtkCommand::RightButtonPressEvent,
-                            this,
-                            SLOT(lockPyGIL()),
-                            NULL, 1.0f, Qt::DirectConnection);
-  m_vtkConnections->Connect(view->getRenderViewProxy()->GetInteractor(),
-                            vtkCommand::RightButtonReleaseEvent,
-                            this,
-                            SLOT(releasePyGIL()),
-                            NULL, 1.0f, Qt::DirectConnection);
-
-  // Make a connection to the view's endRender signal for later checking.
-  QObject::connect(view, SIGNAL(endRender()),
-                   this, SIGNAL(renderingDone()));
   return view;
 }
 
@@ -180,17 +167,95 @@ void ViewBase::setAutoColorScale()
   emit this->setLogScale(colorScale.useLogScale);
 }
 
+/**
+ * Connect the relevant VTK signals to the appropriate slots
+ * @param view A pointer to the view to connect
+ */
+void ViewBase::setupVTKEventConnections(pqRenderView* view) {
+  // @todo This needs factoring out to put the widget specfic stuff in the
+  // right class.
+  // Python locks
+  QObject::connect(view, SIGNAL(beginRender()), this, SLOT(lockPyGIL()),
+                   Qt::DirectConnection);
+  QObject::connect(view, SIGNAL(endRender()), this, SLOT(releasePyGIL()),
+                   Qt::DirectConnection);
+  vtkRenderWindow *renderWindow = view->getViewProxy()->GetRenderWindow();
+  m_vtkConnections->Connect(renderWindow,
+                            vtkCommand::StartEvent,
+                            this,
+                            SLOT(lockPyGIL()),
+                            NULL, 1.0f, Qt::DirectConnection);
+  m_vtkConnections->Connect(renderWindow,
+                            vtkCommand::EndEvent,
+                            this,
+                            SLOT(releasePyGIL()),
+                            NULL, 1.0f, Qt::DirectConnection);
+    QGridLayout *layout = dynamic_cast<QGridLayout*>(view->widget()->layout());
+    if(layout) {
+      for(int i = 0; i < layout->count(); ++i) {
+        if(auto *axisWidget = qobject_cast<pqMultiSliceAxisWidget*>(layout->itemAt(i)->widget())) {
+          renderWindow = axisWidget->getVTKWidget()->GetRenderWindow();
+          m_vtkConnections->Connect(renderWindow,
+                                    vtkCommand::StartEvent,
+                                    this,
+                                    SLOT(lockPyGIL()),
+                                    NULL, 1.0f, Qt::DirectConnection);
+          m_vtkConnections->Connect(renderWindow,
+                                    vtkCommand::EndEvent,
+                                    this,
+                                    SLOT(releasePyGIL()),
+                                    NULL, 1.0f, Qt::DirectConnection);
+        }
+      }
+    }
+
+   m_vtkConnections->Connect(view->getRenderViewProxy()->GetInteractor(),
+                             vtkCommand::StartEvent,
+                             this,
+                             SLOT(lockPyGIL()),
+                             NULL, 1.0f, Qt::DirectConnection);
+   m_vtkConnections->Connect(view->getRenderViewProxy()->GetInteractor(),
+                             vtkCommand::EndEvent,
+                             this,
+                             SLOT(releasePyGIL()),
+                             NULL, 1.0f, Qt::DirectConnection);
+  m_vtkConnections->Connect(view->getRenderViewProxy()->GetInteractor(),
+                            vtkCommand::LeftButtonPressEvent,
+                            this,
+                            SLOT(lockPyGIL()),
+                            NULL, 1.0f, Qt::DirectConnection);
+  m_vtkConnections->Connect(view->getRenderViewProxy()->GetInteractor(),
+                            vtkCommand::LeftButtonReleaseEvent,
+                            this,
+                            SLOT(releasePyGIL()),
+                            NULL, 1.0f, Qt::DirectConnection);
+  // get right mouse pressed with high priority
+  m_vtkConnections->Connect(view->getRenderViewProxy()->GetInteractor(),
+                            vtkCommand::RightButtonPressEvent,
+                            this,
+                            SLOT(lockPyGIL()),
+                            NULL, 1.0f, Qt::DirectConnection);
+  m_vtkConnections->Connect(view->getRenderViewProxy()->GetInteractor(),
+                            vtkCommand::RightButtonReleaseEvent,
+                            this,
+                            SLOT(releasePyGIL()),
+                            NULL, 1.0f, Qt::DirectConnection);
+
+  // Make a connection to the view's endRender signal for later checking.
+  QObject::connect(view, SIGNAL(endRender()),
+                   this, SIGNAL(renderingDone()));
+  
+}
+
 /// Called when the rendering begins
 void ViewBase::lockPyGIL() {
-  PyGILStateService::acquireAndStore(this->m_gilStateStore);
+  m_pythonGIL.acquire();
 }
 
 /// Called when the rendering finishes
 void ViewBase::releasePyGIL() {
-  PyGILStateService::dropAndRelease(this->m_gilStateStore);
+  m_pythonGIL.release();
 }
-
-
 
 /**
  * This function sets the requested color map on the data.
@@ -330,8 +395,10 @@ GCC_DIAG_OFF(strict-aliasing)
  * workspace name. This is used in the plugin mode of the simple interface.
  * @param pluginName name of the ParaView plugin
  * @param wsName name of the Mantid workspace to pass to the plugin
+ * @param axesGridOn: if the axes grid should be on
+ * @returns a pointer to the newly created pipeline source
  */
-pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName)
+pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName, bool axesGridOn)
 {
   // Create the source from the plugin
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
@@ -351,6 +418,9 @@ pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName)
               "Recursion Depth").Set(split.get());
   }
   // WORKAROUND END
+
+  // Set the Axes Grid to On if required
+  setAxesGrid(axesGridOn);
 
   // Update the source so that it retrieves the data from the Mantid workspace
   src->getProxy()->UpdateVTKObjects(); // Updates all the proxies
@@ -835,6 +905,15 @@ void ViewBase::setColorForBackground(bool useCurrentColorSettings)
   backgroundRgbProvider.observe(this->getView());
 }
 
+
+/**
+ * Set color scale lock
+ * @param colorScaleLock: the color scale lock
+ */
+void ViewBase::setColorScaleLock(Mantid::VATES::ColorScaleLock* colorScaleLock) {
+  m_colorScaleLock = colorScaleLock;
+}
+
 /**
  * React to a change of the visibility of a representation of a source.
  * This can be a change of the status if the "eye" symbol in the PipelineBrowserWidget
@@ -844,6 +923,7 @@ void ViewBase::setColorForBackground(bool useCurrentColorSettings)
  */
 void ViewBase::onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)
 {
+  Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(m_colorScaleLock);
   // Reset the colorscale if it is set to autoscale
   if (colorUpdater.isAutoScale())
   {
@@ -957,6 +1037,20 @@ void ViewBase::removeVisibilityListener() {
                          this, SLOT(onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)));
   }
 }
+
+/**
+ * Sets the axes grid if the user has this enabled
+ */
+void ViewBase::setAxesGrid(bool on) {
+  if (on) {
+    if (auto renderView = getView()) {
+      vtkSMProxy *gridAxes3DActor = vtkSMPropertyHelper(renderView->getProxy(), "AxesGrid", true).GetAsProxy();
+      vtkSMPropertyHelper(gridAxes3DActor, "Visibility").Set(1);
+      gridAxes3DActor->UpdateProperty("Visibility");
+    }
+  }
+}
+
 
 } // namespace SimpleGui
 } // namespace Vates

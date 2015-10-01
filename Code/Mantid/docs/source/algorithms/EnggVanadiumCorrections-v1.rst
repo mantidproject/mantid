@@ -53,6 +53,7 @@ can be re-used for as long as the same reference Vanadium diffraction
 data is still valid.
 
 Normally this algorithm can be used in two different ways:
+
 1. Pre-calculate correction features from a Vanadium data workspace.
 2. Apply Vanadium corrections once the correction features have been
    calculated.

@@ -11,7 +11,6 @@
 #include <stdexcept>
 #include <functional>
 
-
 namespace Mantid {
 namespace Kernel {
 
@@ -87,14 +86,13 @@ double getMedian(const vector<TYPE> &data, const size_t num_data,
  * put it in a single function.
  */
 template <typename TYPE>
-std::vector<double> getZscore(const vector<TYPE> &data, const bool sorted) {
+std::vector<double> getZscore(const vector<TYPE> &data) {
   if (data.size() < 3) {
     std::vector<double> Zscore(data.size(), 0.);
     return Zscore;
   }
   std::vector<double> Zscore;
-
-  Statistics stats = getStatistics(data, sorted);
+  Statistics stats = getStatistics(data);
   if (stats.standard_deviation == 0.) {
     std::vector<double> Zscore(data.size(), 0.);
     return Zscore;
@@ -145,47 +143,55 @@ std::vector<double> getModifiedZscore(const vector<TYPE> &data,
 /**
  * Determine the statistics for a vector of data. If it is sorted then let the
  * function know so it won't make a copy of the data for determining the median.
+ * @param data Data points whose statistics are to be evaluated
+ * @param flags A set of flags to control the computation of the stats
  */
 template <typename TYPE>
-Statistics getStatistics(const vector<TYPE> &data, const bool sorted) {
+Statistics getStatistics(const vector<TYPE> &data, const unsigned int flags) {
   Statistics stats = getNanStatistics();
   size_t num_data = data.size(); // cache since it is frequently used
-
-  if (num_data == 0) { // don't do anything
+  if (num_data == 0) {           // don't do anything
     return stats;
   }
 
-  // calculate the mean
-  const TYPE sum = std::accumulate(data.begin(), data.end(),
-                                   static_cast<TYPE>(0), std::plus<TYPE>());
-  stats.mean = static_cast<double>(sum) / (static_cast<double>(num_data));
-
-  // calculate the standard deviation, min, max
-  stats.minimum = stats.mean;
-  stats.maximum = stats.mean;
-  double stddev = 0.;
-  typename vector<TYPE>::const_iterator it = data.begin();
-  for (; it != data.end(); ++it) {
-    double temp = static_cast<double>(*it);
-    stddev += ((temp - stats.mean) * (temp - stats.mean));
-    if (temp > stats.maximum)
-      stats.maximum = temp;
-    if (temp < stats.minimum)
-      stats.minimum = temp;
+  // calculate the mean if this or the stddev is requested
+  const bool stddev = ((flags & StatOptions::UncorrectedStdDev) ||
+                       (flags & StatOptions::CorrectedStdDev));
+  if ((flags & StatOptions::Mean) || stddev) {
+    const TYPE sum = std::accumulate(data.begin(), data.end(),
+                                     static_cast<TYPE>(0), std::plus<TYPE>());
+    stats.mean = static_cast<double>(sum) / (static_cast<double>(num_data));
+    if (stddev) {
+      // calculate the standard deviation, min, max
+      stats.minimum = stats.mean;
+      stats.maximum = stats.mean;
+      double stddev = 0.;
+      typename vector<TYPE>::const_iterator it = data.begin();
+      for (; it != data.end(); ++it) {
+        double temp = static_cast<double>(*it);
+        stddev += ((temp - stats.mean) * (temp - stats.mean));
+        if (temp > stats.maximum)
+          stats.maximum = temp;
+        if (temp < stats.minimum)
+          stats.minimum = temp;
+      }
+      size_t ndofs =
+          (flags & StatOptions::CorrectedStdDev) ? num_data - 1 : num_data;
+      stats.standard_deviation = sqrt(stddev / (static_cast<double>(ndofs)));
+    }
   }
-  stats.standard_deviation = sqrt(stddev / (static_cast<double>(num_data)));
-
-  // calculate the median
-  stats.median = getMedian(data, num_data, sorted);
-
+  // calculate the median if requested
+  if (flags & StatOptions::Median) {
+    stats.median = getMedian(data, num_data, flags & StatOptions::SortedData);
+  }
   return stats;
 }
 
 /// Getting statistics of a string array should just give a bunch of NaNs
 template <>
 DLLExport Statistics
-    getStatistics<string>(const vector<string> &data, const bool sorted) {
-  UNUSED_ARG(sorted);
+getStatistics<string>(const vector<string> &data, const unsigned int flags) {
+  UNUSED_ARG(flags);
   UNUSED_ARG(data);
   return getNanStatistics();
 }
@@ -193,8 +199,8 @@ DLLExport Statistics
 /// Getting statistics of a boolean array should just give a bunch of NaNs
 template <>
 DLLExport Statistics
-    getStatistics<bool>(const vector<bool> &data, const bool sorted) {
-  UNUSED_ARG(sorted);
+getStatistics<bool>(const vector<bool> &data, const unsigned int flags) {
+  UNUSED_ARG(flags);
   UNUSED_ARG(data);
   return getNanStatistics();
 }
@@ -300,7 +306,8 @@ std::vector<double> getMomentsAboutOrigin(const std::vector<TYPE> &x,
     numPoints = x.size() - 1;
 
   // densities are calculated using Newton's method for numerical integration
-  // as backwards as it sounds, the outer loop should be the points rather than
+  // as backwards as it sounds, the outer loop should be the points rather
+  // than
   // the moments
   for (size_t j = 0; j < numPoints; ++j) {
     // reduce item lookup - and central x for histogram
@@ -359,7 +366,8 @@ std::vector<double> getMomentsAboutMean(const std::vector<TYPE> &x,
     numPoints = x.size() - 1;
 
   // densities are calculated using Newton's method for numerical integration
-  // as backwards as it sounds, the outer loop should be the points rather than
+  // as backwards as it sounds, the outer loop should be the points rather
+  // than
   // the moments
   for (size_t j = 0; j < numPoints; ++j) {
     // central x in histogram with a change of variables - and just change for
@@ -391,9 +399,9 @@ std::vector<double> getMomentsAboutMean(const std::vector<TYPE> &x,
 // --------------------------------
 #define INSTANTIATE(TYPE)                                                      \
   template MANTID_KERNEL_DLL Statistics                                        \
-      getStatistics<TYPE>(const vector<TYPE> &, const bool);                   \
+  getStatistics<TYPE>(const vector<TYPE> &, const unsigned int);               \
   template MANTID_KERNEL_DLL std::vector<double> getZscore<TYPE>(              \
-      const vector<TYPE> &, const bool);                                       \
+      const vector<TYPE> &);                                       \
   template MANTID_KERNEL_DLL std::vector<double> getModifiedZscore<TYPE>(      \
       const vector<TYPE> &, const bool);                                       \
   template MANTID_KERNEL_DLL std::vector<double> getMomentsAboutOrigin<TYPE>(  \

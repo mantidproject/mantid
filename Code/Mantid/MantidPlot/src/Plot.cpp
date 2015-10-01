@@ -26,7 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include "qwt_compat.h"
+#include "MantidQtAPI/qwt_compat.h"
 #include "Plot.h"
 #include "Graph.h"
 #include "Grid.h"
@@ -34,7 +34,7 @@
 #include "Spectrogram.h"
 #include "PlotCurve.h"
 #include "LegendWidget.h"
-#include "plot2D/ScaleEngine.h"
+#include "MantidQtAPI/ScaleEngine.h"
 
 #include <qwt_plot.h>
 #include <qwt_painter.h>

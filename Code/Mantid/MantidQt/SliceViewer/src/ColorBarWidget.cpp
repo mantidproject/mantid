@@ -2,6 +2,7 @@
 #include "MantidQtSliceViewer/ColorBarWidget.h"
 #include "MantidQtSliceViewer/QScienceSpinBox.h"
 #include "qwt_scale_div.h"
+#include "MantidQtAPI/PowerScaleEngine.h"
 #include <iosfwd>
 #include <iostream>
 #include <qwt_scale_map.h>
@@ -27,7 +28,14 @@ ColorBarWidget::ColorBarWidget(QWidget *parent)
   m_max = 1000;
   m_showTooltip = false;
   m_log = false;
+
+  // Scales
+  ui.cmbScaleType->addItem(tr("linear"));
+  ui.cmbScaleType->addItem(tr("logarithmic"));
+  ui.cmbScaleType->addItem(tr("power"));
   m_colorMap.changeScaleType( GraphOptions::Linear );
+  ui.dspnN->setMinimum(-100.0);
+  ui.dspnN->setEnabled(false);
 
   // Create and add the color bar
   m_colorBar = new QwtScaleWidgetExtended();
@@ -40,7 +48,8 @@ ColorBarWidget::ColorBarWidget(QWidget *parent)
   ui.verticalLayout->insertWidget(2,m_colorBar, 1,0 );
 
   // Hook up signals
-  QObject::connect(ui.checkLog, SIGNAL(stateChanged(int)), this, SLOT(changedLogState(int)));
+  QObject::connect(ui.dspnN, SIGNAL(valueChanged(double)), this, SLOT(changedExponent(double)));
+  QObject::connect(ui.cmbScaleType,SIGNAL(currentIndexChanged(int)), this, SLOT(changedScaleType(int)));
   QObject::connect(ui.valMin, SIGNAL(editingFinished()), this, SLOT(changedMinimum()));
   QObject::connect(ui.valMax, SIGNAL(editingFinished()), this, SLOT(changedMaximum()));
   QObject::connect(ui.valMin, SIGNAL(valueChangedFromArrows()), this, SLOT(changedMinimum()));
@@ -60,10 +69,6 @@ double ColorBarWidget::getMinimum() const
 /// @return the maximum value of the max of the color scale
 double ColorBarWidget::getMaximum() const
 { return m_max; }
-
-/// @return true if the color scale is logarithmic.
-bool ColorBarWidget::getLog() const
-{ return m_log; }
 
 /// @return then min/max range currently viewed
 QwtDoubleInterval ColorBarWidget::getViewRange() const
@@ -85,10 +90,60 @@ void ColorBarWidget::setRenderMode(bool rendering)
   bool visible = !rendering;
   this->ui.valMin->setVisible(visible);
   this->ui.valMax->setVisible(visible);
-  this->ui.checkLog->setVisible(visible);
-
+  this->ui.cmbScaleType->setVisible(visible);
+  this->ui.lblN->setVisible(visible);
+  this->ui.dspnN->setVisible(visible);
 }
 
+// Get the current colorbar scaling type
+int ColorBarWidget::getScale()
+{
+  // Get value from GUI
+  return ui.cmbScaleType->currentIndex();
+}
+
+// Set the current colorbar scaling type
+void ColorBarWidget::setScale(int type)
+{
+  // Set scale in GUI
+  ui.cmbScaleType->setCurrentIndex(type);
+  // Update plot
+  changedScaleType(type);
+}
+
+bool ColorBarWidget::getLog()
+{
+  if (getScale() == 1)
+  {
+    return true;
+  }
+  else return false;
+}
+
+// Set exponent value for power scale
+void ColorBarWidget::setExponent(double nth_power)
+{
+  // Set value in GUI
+  ui.dspnN->setValue(nth_power);
+  // Update plot
+  changedExponent(nth_power);
+}
+
+// Get exponent value for power scale
+double ColorBarWidget::getExponent()
+{
+  // Get value from GUI
+  return ui.dspnN->value();
+}
+
+// Change the colormap to match new exponent value
+void ColorBarWidget::changedExponent(double nth_power)
+{
+  m_colorMap.setNthPower(nth_power);
+  updateColorMap();
+
+  emit changedColorRange(m_min,m_max,m_log);
+}
 
 //-------------------------------------------------------------------------------------------------
 /** Send a double-clicked event but only when clicking the color bar */
@@ -200,27 +255,24 @@ void ColorBarWidget::setViewRange(QwtDoubleInterval range)
 { this->setViewRange(range.minValue(), range.maxValue()); }
 
 //-------------------------------------------------------------------------------------------------
-/** SLOT called when clicking the log button */
-void ColorBarWidget::changedLogState(int log)
-{
-  this->setLog(log);
-  emit changedColorRange(m_min,m_max,m_log);
-}
-
-//-------------------------------------------------------------------------------------------------
-/** Set the color bar to use log scale
- *
- * @param log :: true to use log scale
+/*
+ * Update display if different scale type is selected
  */
-void ColorBarWidget::setLog(bool log)
+void ColorBarWidget::changedScaleType(int type)
 {
-  m_log = log;
-  m_colorMap.changeScaleType( m_log ? GraphOptions::Log10 : GraphOptions::Linear );
-  ui.checkLog->setChecked( m_log );
+  // If power scale option is selected, enable "n =" widget
+  ui.dspnN->setEnabled(type == 2);
+
+  // Record if log scale option is selected
+  m_log = (type == 1);
+
+  m_colorMap.changeScaleType( GraphOptions::ScaleType(type) );
   ui.valMin->setLogSteps( m_log );
   ui.valMax->setLogSteps( m_log );
   setSpinBoxesSteps();
   updateColorMap();
+
+  emit changedColorRange(m_min,m_max,m_log);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -272,7 +324,7 @@ void ColorBarWidget::colorBarMouseMoved(QPoint globalPos, double fraction)
 /** Update the widget when the color map is changed */
 void ColorBarWidget::updateColorMap()
 {
-  // The color bar alway shows the same range. Doesn't matter since the ticks don't show up
+  // The color bar always shows the same range. Doesn't matter since the ticks don't show up
   QwtDoubleInterval range(1.0, 100.0);
   m_colorBar->setColorBarEnabled(true);
   m_colorBar->setColorMap( range, m_colorMap);
@@ -293,6 +345,11 @@ void ColorBarWidget::updateColorMap()
     QwtLinearScaleEngine linScaler;
     m_colorBar->setScaleDiv(linScaler.transformation(), linScaler.divideScale(minValue, maxValue, maxMajorSteps, 5));
     m_colorBar->setColorMap(QwtDoubleInterval(minValue, maxValue),m_colorMap);
+  }
+  else if ( type == GraphOptions::Power ) {
+    PowerScaleEngine powScaler;
+    m_colorBar->setScaleDiv(powScaler.transformation(), powScaler.divideScale(minValue, maxValue, maxMajorSteps, 5));
+    m_colorBar->setColorMap(QwtDoubleInterval(minValue, maxValue), m_colorMap);
   }
   else
  {

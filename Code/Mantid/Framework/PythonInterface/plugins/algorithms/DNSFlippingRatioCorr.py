@@ -4,6 +4,8 @@ from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspacePropert
 from mantid.kernel import Direction, FloatBoundedValidator
 import numpy as np
 
+import mlzutils
+
 
 class DNSFlippingRatioCorr(PythonAlgorithm):
     """
@@ -63,51 +65,6 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
 
         return
 
-    def _dimensions_valid(self):
-        """
-        Checks validity of the workspace dimensions:
-        all given workspaces must have the same number of dimensions
-        and the same number of histograms
-        and the same number of bins
-        """
-        ndims = []
-        nhists = []
-        nbins = []
-        for wsname in self.input_workspaces.values():
-            wks = api.AnalysisDataService.retrieve(wsname)
-            ndims.append(wks.getNumDims())
-            nhists.append(wks.getNumberHistograms())
-            nbins.append(wks.blocksize())
-
-        ndi = ndims[0]
-        nhi = nhists[0]
-        nbi = nbins[0]
-        if ndims.count(ndi) == len(ndims) and nhists.count(nhi) == len(nhists) and nbins.count(nbi) == len(nbins):
-            return True
-        else:
-            message = "Input workspaces have different dimensions. Cannot correct flipping ratio."
-            self.log().error(message)
-            raise RuntimeError(message)
-
-    def _ws_exist(self):
-        """
-        Checks whether the workspaces and their normalization workspaces exist
-        """
-        # normws for data workspaces are not required
-        dataws_names = [self.input_workspaces['SF_Data'], self.input_workspaces['NSF_Data']]
-        for wsname in self.input_workspaces.values():
-            if not api.AnalysisDataService.doesExist(wsname):
-                message = "Workspace " + wsname + " does not exist! Cannot correct flipping ratio."
-                self.log().error(message)
-                raise RuntimeError(message)
-            if not api.AnalysisDataService.doesExist(wsname + '_NORM'):
-                if wsname not in dataws_names:
-                    message = "Workspace " + wsname + "_NORM does not exist! Cannot correct flipping ratio."
-                    self.log().error(message)
-                    raise RuntimeError(message)
-
-        return True
-
     def _same_polarisation(self):
         """
         Checks whether all workspaces have the same polarisation.
@@ -132,14 +89,6 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
             message = "Cannot apply correction to workspaces with different polarisation!"
             self.log().error(message)
             raise RuntimeError(message)
-
-    def _cleanup(self, wslist):
-        """
-        deletes workspaces from list
-        """
-        for wsname in wslist:
-            api.DeleteWorkspace(wsname)
-        return
 
     def _flipper_valid(self):
         """
@@ -180,10 +129,17 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
             self.log().error(message)
             raise RuntimeError(message)
         # workspaces and normalization workspaces must exist
-        self._ws_exist()
+        wslist = self.input_workspaces.values()
+        # for data workspaces normalization is not mandatory
+        dataws_names = [self.input_workspaces['SF_Data'], self.input_workspaces['NSF_Data']]
+        for wsname in self.input_workspaces.values():
+            if wsname not in dataws_names:
+                wslist.append(wsname + '_NORM')
+
+        mlzutils.ws_exist(wslist, self.log())
 
         # they must have the same dimensions
-        self._dimensions_valid()
+        mlzutils.same_dimensions(self.input_workspaces.values())
 
         # and the same polarisation
         self._same_polarisation()
@@ -197,7 +153,7 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         for wsname in self.input_workspaces.values()[1:]:
             wks = api.AnalysisDataService.retrieve(wsname)
             run = wks.getRun()
-            self._check_properties(run1, run)
+            mlzutils.compare_properties(run1, run, self.properties_to_compare, self.log())
         return True
 
     def _fr_correction(self):
@@ -238,7 +194,7 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         sf_neg_values = np.where(sf_arr < 0)[0]
         nsf_neg_values = np.where(nsf_arr < 0)[0]
         if len(sf_neg_values) or len(nsf_neg_values):
-            self._cleanup(wslist)
+            mlzutils.cleanup(wslist)
             message = "Background is higher than NiCr signal!"
             self.log().error(message)
             raise RuntimeError(message)
@@ -250,12 +206,14 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         sf_data_ws = api.AnalysisDataService.retrieve(self.input_workspaces['SF_Data'])
         nsf_data_ws = api.AnalysisDataService.retrieve(self.input_workspaces['NSF_Data'])
         # NSF_corr[i] = NSF[i] - SF[i]/c[i]
-        _tmp_ws_ = api.Divide(LHSWorkspace=sf_data_ws, RHSWorkspace=_coef_ws_, WarnOnZeroDivide=True,)
+        _tmp_ws_ = api.Divide(LHSWorkspace=sf_data_ws, RHSWorkspace=_coef_ws_, WarnOnZeroDivide=True)
+        _tmp_ws_.setYUnit(nsf_data_ws.YUnit())
         api.Minus(LHSWorkspace=nsf_data_ws, RHSWorkspace=_tmp_ws_, OutputWorkspace=self.nsf_outws_name)
         nsf_outws = api.AnalysisDataService.retrieve(self.nsf_outws_name)
         api.DeleteWorkspace(_tmp_ws_)
         # SF_corr[i] = SF[i] - NSF[i]/c[i]
         _tmp_ws_ = api.Divide(LHSWorkspace=nsf_data_ws, RHSWorkspace=_coef_ws_, WarnOnZeroDivide=True)
+        _tmp_ws_.setYUnit(sf_data_ws.YUnit())
         api.Minus(LHSWorkspace=sf_data_ws, RHSWorkspace=_tmp_ws_, OutputWorkspace=self.sf_outws_name)
         sf_outws = api.AnalysisDataService.retrieve(self.sf_outws_name)
         api.DeleteWorkspace(_tmp_ws_)
@@ -263,52 +221,14 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         # 5. Apply correction for a double spin-flip scattering
         if self.dfr > 1e-7:
             _tmp_ws_ = sf_outws * self.dfr
+            _tmp_ws_.setYUnit(nsf_outws.YUnit())
             wslist.append(_tmp_ws_.getName())
             # NSF_corr[i] = NSF_prev_corr[i] - SF_prev_corr*dfr, SF_corr = SF_prev_corr
             api.Minus(LHSWorkspace=nsf_outws, RHSWorkspace=_tmp_ws_, OutputWorkspace=self.nsf_outws_name)
 
         # cleanup
-        self._cleanup(wslist)
+        mlzutils.cleanup(wslist)
         return
-
-    def _check_properties(self, lhs_run, rhs_run):
-        """
-        checks whether properties match
-        """
-        lhs_title = ""
-        rhs_title = ""
-        if lhs_run.hasProperty('run_title'):
-            lhs_title = lhs_run.getProperty('run_title').value
-        if rhs_run.hasProperty('run_title'):
-            rhs_title = rhs_run.getProperty('run_title').value
-
-        for property_name in self.properties_to_compare:
-            if lhs_run.hasProperty(property_name) and rhs_run.hasProperty(property_name):
-                lhs_property = lhs_run.getProperty(property_name)
-                rhs_property = rhs_run.getProperty(property_name)
-                if lhs_property.type == rhs_property.type:
-                    if lhs_property.type == 'string':
-                        if lhs_property.value != rhs_property.value:
-                            message = "Property " + property_name + " does not match! " + \
-                                lhs_title + ": " + lhs_property.value + ", but " + \
-                                rhs_title + ": " + rhs_property.value
-                            self.log().warning(message)
-                    if lhs_property.type == 'number':
-                        if abs(lhs_property.value - rhs_property.value) > 5e-3:
-                            message = "Property " + property_name + " does not match! " + \
-                                lhs_title + ": " + str(lhs_property.value) + ", but " + \
-                                rhs_title + ": " + str(rhs_property.value)
-                            self.log().warning(message)
-                else:
-                    message = "Property " + property_name + " does not match! " + \
-                        lhs_title + ": " + str(lhs_property.value) + ", but " + \
-                        rhs_title + ": " + str(rhs_property.value)
-                    self.log().warning(message)
-            else:
-                message = "Property " + property_name + " is not present in " +\
-                    lhs_title + " or " + rhs_title + " - skipping comparison."
-                self.log().warning(message)
-        return True
 
     def PyExec(self):
         # Input

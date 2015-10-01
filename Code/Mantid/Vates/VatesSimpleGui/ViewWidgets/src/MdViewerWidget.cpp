@@ -28,6 +28,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/ThreesliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/VatesParaViewApplication.h"
+#include "MantidVatesSimpleGuiViewWidgets/VsiApplyBehaviour.h"
 
 #include "boost/shared_ptr.hpp"
 #include "boost/scoped_ptr.hpp"
@@ -165,7 +166,7 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
   screenShot(NULL), viewLayout(NULL), viewSettings(NULL),
   useCurrentColorSettings(false), initialView(ModeControlWidget::STANDARD),
   m_rebinAlgorithmDialogProvider(this), m_rebinnedWorkspaceIdentifier("_tempvsi"),
-  m_colorMapEditorPanel(NULL), m_allViews()
+  m_colorMapEditorPanel(NULL), m_gridAxesStartUpOn(true), m_allViews()
 {
   //this will initialize the ParaView application if needed.
   VatesParaViewApplication::instance();
@@ -181,6 +182,8 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
   // Connect the rebinned sources manager
   QObject::connect(&m_rebinnedSourcesManager, SIGNAL(switchSources(std::string, std::string)),
                    this, SLOT(onSwitchSources(std::string, std::string)));
+
+
 }
 
 /**
@@ -260,7 +263,9 @@ void MdViewerWidget::setupUiAndConnections()
   pqDeleteReaction* deleteHandler = new pqDeleteReaction(temp);
   deleteHandler->connect(this->ui.propertiesPanel,SIGNAL(deleteRequested(pqPipelineSource*)),SLOT(deleteSource(pqPipelineSource*)));
 
-  pqApplyBehavior* applyBehavior = new pqApplyBehavior(this);
+  //pqApplyBehavior* applyBehavior = new pqApplyBehavior(this);
+  VsiApplyBehaviour* applyBehavior = new VsiApplyBehaviour(&m_colorScaleLock, this);
+
   applyBehavior->registerPanel(this->ui.propertiesPanel);
   VatesParaViewApplication::instance()->setupParaViewBehaviors();
   //this->ui.pipelineBrowser->enableAnnotationFilter(m_widgetName);
@@ -274,6 +279,10 @@ void MdViewerWidget::setupUiAndConnections()
                    SIGNAL(triggerAcceptForNewFilters()),
                    this->ui.propertiesPanel,
                    SLOT(apply()));
+
+  // Add the color scale lock to the ColoSelectionWidget, which should
+  // now be initialized
+  ui.colorSelectionWidget->setColorScaleLock(&m_colorScaleLock);
 }
 
 void MdViewerWidget::panelChanged()
@@ -357,6 +366,9 @@ ViewBase* MdViewerWidget::createAndSetMainViewWidget(QWidget *container,
     view = NULL;
     break;
   }
+
+  // Set the colorscale lock
+  view->setColorScaleLock(&m_colorScaleLock);
 
   return view;
 }
@@ -538,7 +550,10 @@ void MdViewerWidget::onResetViewsStateToAllData()
 pqPipelineSource* MdViewerWidget::prepareRebinnedWorkspace(const std::string rebinnedWorkspaceName, std::string sourceType)
 {
   // Load a new source plugin
-  pqPipelineSource* newRebinnedSource = this->currentView->setPluginSource(QString::fromStdString(sourceType), QString::fromStdString(rebinnedWorkspaceName));
+  auto gridAxesOn = areGridAxesOn();
+  pqPipelineSource *newRebinnedSource = this->currentView->setPluginSource(
+      QString::fromStdString(sourceType),
+      QString::fromStdString(rebinnedWorkspaceName), gridAxesOn);
 
   // It seems that the new source gets set as active before it is fully constructed. We therefore reset it.
   pqActiveObjects::instance().setActiveSource(NULL);
@@ -562,7 +577,9 @@ pqPipelineSource* MdViewerWidget::renderOriginalWorkspace(const std::string orig
 {
   // Load a new source plugin
   QString sourcePlugin = "MDEW Source";
-  pqPipelineSource* source = this->currentView->setPluginSource(sourcePlugin, QString::fromStdString(originalWorkspaceName));
+  auto gridAxesOn = areGridAxesOn();
+  pqPipelineSource *source = this->currentView->setPluginSource(
+      sourcePlugin, QString::fromStdString(originalWorkspaceName), gridAxesOn);
 
   // Render and final setup
   this->renderAndFinalSetup();
@@ -694,6 +711,7 @@ void MdViewerWidget::renderingDone()
 {
   if (this->viewSwitched)
   {
+    Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(&m_colorScaleLock);
     this->setColorMap(); // Load the default color map
     this->currentView->setColorsForView(this->ui.colorSelectionWidget);
     this->viewSwitched = false;
@@ -709,7 +727,8 @@ void MdViewerWidget::renderingDone()
  */
 void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, std::string instrumentName)
 {
-  GlobalInterpreterLock gil;
+  ScopedPythonGIL gil;
+  Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(&m_colorScaleLock);
   // Workaround: Note that setting to the standard view was part of the eventFilter. This causes the
   //             VSI window to not close properly. Moving it here ensures that we have the switch, but
   //             after the window is started again.
@@ -722,6 +741,9 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
     this->currentView->hide();
     // Set the auto log scale state
     this->currentView->initializeColorScale();
+
+    // Set the grid axs to on. This should be set whenever we have 0 sources in the view.
+    m_gridAxesStartUpOn = true;
   }
 
   // Set usage of current color settings to true, since we have loade the VSI
@@ -745,8 +767,11 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
   }
 
   // Load a new source plugin
-  pqPipelineSource* source = this->currentView->setPluginSource(sourcePlugin, workspaceName);
+  auto gridAxesOn = areGridAxesOn();
+  pqPipelineSource *source = this->currentView->setPluginSource(
+      sourcePlugin, workspaceName, gridAxesOn);
   source->getProxy()->SetAnnotation(this->m_widgetName.toLatin1().data(), "1");
+
   this->renderAndFinalSetup();
 
   // Reset the current view to the correct initial view
@@ -959,7 +984,7 @@ ModeControlWidget::Views MdViewerWidget::checkViewAgainstWorkspace(ModeControlWi
  */
 void MdViewerWidget::setupPluginMode()
 {
-  GlobalInterpreterLock gil;
+  ScopedPythonGIL gil;
   this->useCurrentColorSettings = false; // Don't use the current color map at start up.
   this->setupUiAndConnections();
   this->createMenus();
@@ -973,6 +998,7 @@ void MdViewerWidget::setupPluginMode()
  */
 void MdViewerWidget::renderAndFinalSetup()
 {
+  Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(&m_colorScaleLock);
   this->setColorForBackground();
   this->currentView->render();
   this->setColorMap();
@@ -1009,6 +1035,7 @@ void MdViewerWidget::setColorForBackground()
  */
 void MdViewerWidget::checkForUpdates()
 {
+  Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(&m_colorScaleLock);
   pqPipelineSource *src = pqActiveObjects::instance().activeSource();
   if (NULL == src)
   {
@@ -1049,11 +1076,13 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->viewSwitched = true;
 
   // normally it will just close child SliceView windows
+  auto axesGridOn = areGridAxesOn();
   this->currentView->closeSubWindows();
   this->disconnectDialogs();
   this->hiddenView = this->createAndSetMainViewWidget(this->ui.viewWidget, v);
   this->ui.colorSelectionWidget->ignoreColorChangeCallbacks(true);
   this->hiddenView->setColorScaleState(this->ui.colorSelectionWidget);
+  auto viewSize = this->hiddenView->size();
   this->hiddenView->hide();
   this->viewLayout->removeWidget(this->currentView);
 
@@ -1071,7 +1100,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->hiddenView->close();
   this->hiddenView->destroyView();
   this->hiddenView->deleteLater();
-
+  this->currentView->setAxesGrid(axesGridOn);
   // Currently this render will do one or more resetCamera() and even
   // resetDisplay() for different views, see for example
   // StandardView::onRenderDone().
@@ -1090,6 +1119,10 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
 
   this->setDestroyedListener();
   this->currentView->setVisibilityListener();
+
+  // A workaround to make the view redraw itself properly
+  // after switching from a resized view
+  this->currentView->resize(viewSize);
 
   // ignore callbacks until as late as possible to keep desired state
   // regardless of what the Paraview widgets are doing
@@ -1173,7 +1206,7 @@ void MdViewerWidget::shutdown()
 {
   // This seems to cure a XInitThreads error.
   pqPVApplicationCore::instance()->deleteLater();
-  GlobalInterpreterLock gil;
+  ScopedPythonGIL gil;
   // Ensure that the MathText utilties are cleaned up as they call Python cleanup code
   // and we need to make sure this can happen before MantidPlot shuts down the interpreter
   vtkMathTextUtilitiesCleanup();
@@ -1648,6 +1681,31 @@ void MdViewerWidget::restoreViewState(ViewBase *view, ModeControlWidget::Views v
   if (!loaded)
     g_log.warning() << "Failed to restore the state of the current view even though I thought I had "
       "a state saved from before. The current state may not be consistent.";
+}
+
+/**
+ * Get the current grid axes setting
+ * @returns the true if the grid axes are on, else false
+ */
+bool MdViewerWidget::areGridAxesOn() {
+  // If we start up then we want to have the grid axes on
+  if (m_gridAxesStartUpOn) {
+    m_gridAxesStartUpOn = false;
+    return true;
+  }
+
+  // Get the state of the Grid Axes
+  auto renderView = this->currentView->getView();
+  vtkSMProxy *gridAxes3DActor =
+      vtkSMPropertyHelper(renderView->getProxy(), "AxesGrid", true)
+          .GetAsProxy();
+  auto gridAxesSetting =
+      vtkSMPropertyHelper(gridAxes3DActor, "Visibility").GetAsInt();
+  if (gridAxesSetting == 0) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
 } // namespace SimpleGui

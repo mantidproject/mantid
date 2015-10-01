@@ -9,7 +9,6 @@ src/BoxInfo.cpp
 src/Common.cpp
 src/CompositePeaksPresenterVsi.cpp
 src/ConcretePeaksPresenterVsi.cpp
-src/DimensionPresenter.cpp
 src/EventNexusLoadingPresenter.cpp
 src/FieldDataToMetadata.cpp
 src/IgnoreZerosThresholdRange.cpp
@@ -26,10 +25,10 @@ src/MetadataToFieldData.cpp
 src/MetadataToFieldData.cpp
 src/MetaDataExtractorUtils.cpp
 src/MetadataJsonManager.cpp
+src/MDLoadingPresenter.cpp
 src/Normalization.cpp
 src/NoThresholdRange.cpp
 src/ProgressAction.cpp
-src/SynchronisingGeometryPresenter.cpp
 src/TimeStepToTimeStep.cpp
 src/TimeToTimeStep.cpp
 src/UserDefinedThresholdRange.cpp
@@ -68,13 +67,11 @@ inc/MantidVatesAPI/BoxInfo.h
 inc/MantidVatesAPI/Common.h
 inc/MantidVatesAPI/CompositePeaksPresenterVsi.h
 inc/MantidVatesAPI/ConcretePeaksPresenterVsi.h
-inc/MantidVatesAPI/DimensionPresenter.h
-inc/MantidVatesAPI/DimensionView.h
+inc/MantidVatesAPI/ColorScaleGuard.h
 inc/MantidVatesAPI/DimensionViewFactory.h
 inc/MantidVatesAPI/EventNexusLoadingPresenter.h
 inc/MantidVatesAPI/FieldDataToMetadata.h
 inc/MantidVatesAPI/FilteringUpdateProgressAction.h
-inc/MantidVatesAPI/GeometryPresenter.h
 inc/MantidVatesAPI/GeometryView.h
 inc/MantidVatesAPI/LoadVTK.h
 inc/MantidVatesAPI/MDEWEventNexusLoadingPresenter.h
@@ -98,7 +95,6 @@ inc/MantidVatesAPI/NullPeaksPresenterVsi.h
 inc/MantidVatesAPI/PeaksPresenterVsi.h
 inc/MantidVatesAPI/ProgressAction.h
 inc/MantidVatesAPI/SQWLoadingPresenter.h
-inc/MantidVatesAPI/SynchronisingGeometryPresenter.h
 inc/MantidVatesAPI/ThresholdRange.h
 inc/MantidVatesAPI/TimeStepToTimeStep.h
 inc/MantidVatesAPI/TimeToTimeStep.h
@@ -139,7 +135,6 @@ test/vtkDataSetToWsNameTest.h
 test/vtkDataSetToWsLocationTest.h
 test/ADSWorkspaceProviderTest.h
 test/BoxInfoTest.h
-test/DimensionPresenterTest.h
 test/EventNexusLoadingPresenterTest.h
 test/vtkDataSetFactoryTest.h
 test/vtkDataSetToGeometryTest.h
@@ -163,12 +158,12 @@ test/MDEWLoadingPresenterTest.h
 test/MDHWInMemoryLoadingPresenterTest.h
 test/MDHWLoadingPresenterTest.h
 test/MDHWNexusLoadingPresenterTest.h
+test/MDLoadingPresenterTest.h
 test/MetaDataExtractorUtilsTest.h
 test/MetadataJsonManagerTest.h
 test/MetadataToFieldDataTest.h
 test/NormalizationTest.h
 test/SQWLoadingPresenterTest.h
-test/SynchronisingGeometryPresenterTest.h
 test/TimeStepToTimeStepTest.h
 test/TimeToTimeStepTest.h
 test/UserDefinedThresholdRangeTest.h

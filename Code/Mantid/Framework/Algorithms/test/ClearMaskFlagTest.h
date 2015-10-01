@@ -35,7 +35,7 @@ public:
     // create a workspace
     const int numspec = 9;
     const int nummask = 5;
-    Instrument_sptr instr = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(1, false));
+    Instrument_sptr instr = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(1));
     Detector *d = new Detector("det",0,0);
     instr->markAsDetector(d);
 

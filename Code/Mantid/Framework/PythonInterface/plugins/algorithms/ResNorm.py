@@ -90,7 +90,7 @@ class ResNorm(PythonAlgorithm):
             Rmessage = 'Resolution from Workspace : '+rname
         logger.information(Vmessage)
         logger.information(Rmessage)
-        Main.ResNormRun(vname,rname,erange,nbin,True,plotOp,saveOp)
+        Main.ResNormRun(vname,rname,erange,nbin,plotOp,saveOp)
 
 
 # Register algorithm with Mantid

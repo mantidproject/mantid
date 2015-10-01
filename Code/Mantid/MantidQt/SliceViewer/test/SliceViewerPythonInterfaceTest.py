@@ -279,10 +279,17 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertEqual(sv.getColorScaleMin(), 10)
         self.assertEqual(sv.getColorScaleMax(), 30)
         self.assertEqual(sv.getColorScaleLog(), False)
+	self.assertEqual(sv.getColorScaleType(), 0)
         sv.setColorScale(20, 1000, True)
         self.assertEqual(sv.getColorScaleMin(), 20)
         self.assertEqual(sv.getColorScaleMax(), 1000)
         self.assertEqual(sv.getColorScaleLog(), True)
+	self.assertEqual(sv.getColorScaleType(), 1)
+	sv.setColorScale(30, 75, 2)
+	self.assertEqual(sv.getColorScaleMin(), 30)
+        self.assertEqual(sv.getColorScaleMax(), 75)
+        self.assertEqual(sv.getColorScaleLog(), False)
+	self.assertEqual(sv.getColorScaleType(), 2)
 
     def test_setColorScale_throwsOnBadInputs(self):
         sv = self.sv

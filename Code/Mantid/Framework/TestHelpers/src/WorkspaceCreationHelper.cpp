@@ -90,6 +90,16 @@ Workspace2D_sptr Create1DWorkspaceConstant(int size, double value,
   return retVal;
 }
 
+Workspace2D_sptr Create1DWorkspaceConstantWithXerror(int size, double value,
+                                                     double error,
+                                                     double xError) {
+  auto ws = Create1DWorkspaceConstant(size, value, error);
+  MantidVecPtr dx1;
+  dx1.access().resize(size, xError);
+  ws->setDx(0, dx1);
+  return ws;
+}
+
 Workspace2D_sptr Create1DWorkspaceFib(int size) {
   MantidVecPtr x1, y1, e1;
   x1.access().resize(size, 1);
@@ -106,6 +116,7 @@ Workspace2D_sptr Create1DWorkspaceFib(int size) {
 Workspace2D_sptr Create2DWorkspace(int nhist, int numBoundaries) {
   return Create2DWorkspaceBinned(nhist, numBoundaries);
 }
+
 
 /** Create a Workspace2D where the Y value at each bin is
  * == to the workspace index
@@ -153,6 +164,21 @@ Create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool isHist,
   }
   retVal = maskSpectra(retVal, maskedWorkspaceIndices);
   return retVal;
+}
+
+
+Workspace2D_sptr Create2DWorkspaceWithValuesAndXerror(
+    int64_t nHist, int64_t nBins, bool isHist, double xVal, double yVal,
+    double eVal, double dxVal,
+    const std::set<int64_t> &maskedWorkspaceIndices) {
+  auto ws = Create2DWorkspaceWithValues(
+      nHist, nBins, isHist, maskedWorkspaceIndices, xVal, yVal, eVal);
+  MantidVecPtr dx1;
+  dx1.access().resize(isHist ? nBins + 1 : nBins, dxVal);
+  for (int i = 0; i < nHist; i++) {
+    ws->setDx(i, dx1);
+  }
+  return ws;
 }
 
 Workspace2D_sptr
@@ -363,15 +389,19 @@ create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
 
   // Define a source and sample position
   // Define a source component
-  ObjComponent *source =
-      new ObjComponent("moderator", ComponentCreationHelper::createSphere(0.1, V3D(0,0,0), "1"), testInst.get());
+  ObjComponent *source = new ObjComponent(
+      "moderator",
+      ComponentCreationHelper::createSphere(0.1, V3D(0, 0, 0), "1"),
+      testInst.get());
   source->setPos(V3D(-20, 0.0, 0.0));
   testInst->add(source);
   testInst->markAsSource(source);
 
   // Define a sample as a simple sphere
-  ObjComponent *sample =
-      new ObjComponent("samplePos", ComponentCreationHelper::createSphere(0.1, V3D(0,0,0), "1"), testInst.get());
+  ObjComponent *sample = new ObjComponent(
+      "samplePos",
+      ComponentCreationHelper::createSphere(0.1, V3D(0, 0, 0), "1"),
+      testInst.get());
   testInst->setPos(0.0, 0.0, 0.0);
   testInst->add(sample);
   testInst->markAsSamplePos(sample);
@@ -453,9 +483,10 @@ createEventWorkspaceWithNonUniformInstrument(int numBanks, bool clearEvents) {
   // Number of detectors in a bank as created by createTestInstrumentCylindrical
   const int DETECTORS_PER_BANK(9);
 
+  V3D srcPos(0., 0., -10.), samplePos;
   Instrument_sptr inst =
-      ComponentCreationHelper::createTestInstrumentCylindrical(numBanks, false,
-                                                               0.0025, 0.005);
+      ComponentCreationHelper::createTestInstrumentCylindrical(
+          numBanks, srcPos, samplePos, 0.0025, 0.005);
   EventWorkspace_sptr ws =
       CreateEventWorkspace2(numBanks * DETECTORS_PER_BANK, 100);
   ws->setInstrument(inst);
@@ -598,19 +629,18 @@ EventWorkspace_sptr CreateEventWorkspace(int numPixels, int numBins,
                                          int numEvents, double x0,
                                          double binDelta, int eventPattern,
                                          int start_at_pixelID) {
-  return CreateEventWorkspaceWithStartTime(numPixels, numBins, numEvents, x0,
-                          binDelta, eventPattern, start_at_pixelID,
-                          DateAndTime("2010-01-01T00:00:00"));
+  return CreateEventWorkspaceWithStartTime(
+      numPixels, numBins, numEvents, x0, binDelta, eventPattern,
+      start_at_pixelID, DateAndTime("2010-01-01T00:00:00"));
 }
 
 /**
  * Create event workspace with defined start date time
  */
-EventWorkspace_sptr CreateEventWorkspaceWithStartTime(int numPixels, int numBins,
-                                                      int numEvents, double x0,
-                                                      double binDelta, int eventPattern,
-                                                      int start_at_pixelID,
-                                                      DateAndTime run_start) {
+EventWorkspace_sptr
+CreateEventWorkspaceWithStartTime(int numPixels, int numBins, int numEvents,
+                                  double x0, double binDelta, int eventPattern,
+                                  int start_at_pixelID, DateAndTime run_start) {
 
   // add one to the number of bins as this is histogram
   numBins++;
@@ -1202,7 +1232,7 @@ createPeaksWorkspace(const int numPeaks, const bool createOrientedLattice) {
     peaksWS->addPeak(peak);
   }
 
-  if(createOrientedLattice) {
+  if (createOrientedLattice) {
     Mantid::Geometry::OrientedLattice lattice;
     peaksWS->mutableSample().setOrientedLattice(&lattice);
   }

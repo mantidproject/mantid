@@ -18,6 +18,9 @@ data is being processed, and easy to adjust any of the options used.
 Integration with data archives is also provided, allowing for data to
 be located and prepared for reduction automatically.
 
+IPython notebooks which document the processing steps and output 
+relevant plots can also be produced from the interface.
+
 Information on how to resolve common problems can be found in the
 `Troubleshooting`_ section of this document.
 
@@ -151,9 +154,15 @@ Above the processing table is a tool bar containing various actions for
 manipulating the processing table.
 
 Below the table is a progress bar, which shows the current progress of any
-processing that is in progress. And at the bottom right, by the **Process**
+processing that is in progress. And at the bottom, near the **Process**
 button is the processing instrument selector. The processing instrument is
 used to help identify the correct data to load when processing runs.
+
+Next to the **Process** button there is a checkbox which allows enabling and 
+disabling output to an ipython notebook. If the checkbox is enabled, a dialog 
+window will ask for a save location for the notebook after processing is 
+complete. A generated notebook contains python code to repeat the processing 
+steps and output relevant plots.
 
 Tool Bar
 ~~~~~~~~

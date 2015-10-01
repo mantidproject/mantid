@@ -285,8 +285,6 @@ public:
     specaxisalg->initialize();
     specaxisalg->setPropertyValue("InputWorkspace", "testws");
     specaxisalg->setPropertyValue("OutputWorkspace", "testws");
-    specaxisalg->setPropertyValue("OutputVertexes", "vertexes");
-    
     specaxisalg->setPropertyValue("Target", "signed_theta");
     specaxisalg->execute();
     

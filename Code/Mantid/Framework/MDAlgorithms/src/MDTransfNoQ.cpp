@@ -1,4 +1,5 @@
 #include "MantidMDAlgorithms/MDTransfNoQ.h"
+#include "MantidMDAlgorithms/DisplayNormalizationSetter.h"
 //
 namespace Mantid {
 namespace MDAlgorithms {
@@ -67,11 +68,13 @@ void MDTransfNoQ::initialize(const MDWSDescription &ConvParams) {
 */
 bool MDTransfNoQ::calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) {
   if (m_YAxis) {
+    Coord[1] = (coord_t)(m_YAxis->operator()(i));
     if (Coord[1] < m_DimMin[1] || Coord[1] >= m_DimMax[1])
       return false;
-    Coord[1] = (coord_t)(m_YAxis->operator()(i));
+    else
+      return true;
   }
-  return true;
+  return false;
 }
 bool MDTransfNoQ::calcMatrixCoord(const double &X, std::vector<coord_t> &Coord,
                                   double & /*s*/, double & /*errSq*/) const {
@@ -178,6 +181,19 @@ MDTransfNoQ::inputUnitID(Kernel::DeltaEMode::Type mode,
 }
 
 MDTransfNoQ::MDTransfNoQ() : m_NMatrixDim(0), m_YAxis(NULL), m_Det(NULL){}
+
+/**
+ * Set the display normalization for no Q
+ * @param mdWorkspace: the md workspace
+ * @param underlyingWorkspace: the underlying workspace
+ */
+void MDTransfNoQ::setDisplayNormalization(
+      Mantid::API::IMDWorkspace_sptr mdWorkspace,
+      Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const {
+  DisplayNormalizationSetter setter;
+  auto isQ = false;
+  setter(mdWorkspace, underlyingWorkspace, isQ);
+}
 
 } // End MDAlgorighms namespace
 } // End Mantid namespace

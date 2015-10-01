@@ -44,6 +44,7 @@ private slots:
   void showTieCheckbox(QString);
   void singleFitComplete(bool error);
   void fitFunctionSelected(const QString &);
+  void algorithmComplete(bool error);
 
 
 private:
@@ -61,6 +62,8 @@ private:
   QString minimizerString(QString outputName) const;
   QStringList getFunctionParameters(QString);
   void updatePlotOptions();
+  QString convertFuncToShort(const QString &);
+  QString convertBackToShort(const std::string &original);
 
   Ui::ConvFit m_uiForm;
   QtStringPropertyManager *m_stringManager;
@@ -72,6 +75,8 @@ private:
   Mantid::API::IAlgorithm_sptr m_singleFitAlg;
   QString m_singleFitOutputName;
   QStringList m_fitStrings;
+  QString m_previousFit;
+  QString m_baseName;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

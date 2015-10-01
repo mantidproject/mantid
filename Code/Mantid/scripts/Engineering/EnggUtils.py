@@ -1,6 +1,6 @@
 #pylint: disable=invalid-name
 #pylint: disable=too-many-arguments
-# R0913: Too many arguments - strictly for write_GSAS_iparam_file()
+# R0913: Too many arguments - strictly for write_ENGINX_GSAS_iparam_file()
 from mantid.api import *
 import mantid.simpleapi as sapi
 
@@ -148,6 +148,8 @@ def getDetIDsForBank(bank):
                                     'Grouping', 'ENGINX_Grouping.xml')
 
     alg = AlgorithmManager.create('LoadDetectorsGroupingFile')
+    alg.initialize()
+    alg.setLogging(False)
     alg.setProperty('InputFile', groupingFilePath)
     grpName = '__EnginXGrouping'
     alg.setProperty('OutputWorkspace', grpName)
@@ -188,7 +190,7 @@ def  generateOutputParTable(name, difc, zero):
     tbl.addColumn('double', 'zero')
     tbl.addRow([float(difc), float(zero)])
 
-def applyVanadiumCorrections(self, ws, indices, vanWS, vanIntegWS, vanCurvesWS):
+def applyVanadiumCorrections(parent, ws, indices, vanWS, vanIntegWS, vanCurvesWS):
     """
     Apply the EnggVanadiumCorrections algorithm on the workspace given, by using the algorithm
     EnggVanadiumCorrections
@@ -206,7 +208,7 @@ def applyVanadiumCorrections(self, ws, indices, vanWS, vanIntegWS, vanCurvesWS):
                          (vanWS.getNumberHistograms(),len(indices)))
     elif vanIntegWS and vanCurvesWS:
         # filter only indices from vanIntegWS (crop the table)
-        tbl = sapi.CreateEmptyTableWorkspace()
+        tbl = sapi.CreateEmptyTableWorkspace(OutputWorkspace="__vanadium_integration_ws")
         tbl.addColumn('double', 'Spectra Integration')
         for i in indices:
             tbl.addRow([vanIntegWS.cell(i,0)])
@@ -216,7 +218,7 @@ def applyVanadiumCorrections(self, ws, indices, vanWS, vanIntegWS, vanCurvesWS):
     # sapi.EnggVanadiumCorrections(Workspace=ws, VanadiumWorkspace=vanWS,
     #                              IntegrationWorkspace=vanIntegWS,
     #                              CurvesWorkspace=vanCurvesWS)
-    alg = self.createChildAlgorithm('EnggVanadiumCorrections')
+    alg = parent.createChildAlgorithm('EnggVanadiumCorrections')
     if ws:
         alg.setProperty('Workspace', ws)
     if vanWS:

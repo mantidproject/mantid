@@ -44,6 +44,8 @@ public:
   virtual QString filename() const;
   ///
   inline ScriptEditor *editor() const { return m_editor; }
+  ///
+  inline ScriptOutputDisplay *messages() const { return m_messages; }
   /// Has the script text been modified
   virtual bool isScriptModified() const;
   /// Is the script running
@@ -119,6 +121,10 @@ signals:
   void executionStarted();
   /// Emitted when a script stops executing
   void executionStopped();
+  /// Emitted when a zoom in has occurred
+  void textZoomedIn();
+  /// Emitted when a zoom out has occurred
+  void textZoomedOut();
 
 private slots:
   /// Popup a context menu
@@ -127,6 +133,11 @@ private slots:
   void setExecutingStatus();
   /// Update the status bar when the script has stopped
   void setStoppedStatus();
+  //capture zoom in signals from either widget an emit our own
+  void emitZoomIn();
+  //capture zoom out signals from either widget an emit our own
+  void emitZoomOut();
+
 
 private:
   friend class ScriptCloseDialog;
@@ -143,6 +154,8 @@ private:
   void toggleComment(bool addComment);
   // Replaces the currently selected text in the editor
   inline void replaceSelectedText(const ScriptEditor *editor, const QString &text);
+
+
 
   QSplitter *m_splitter;
   ScriptEditor *m_editor;

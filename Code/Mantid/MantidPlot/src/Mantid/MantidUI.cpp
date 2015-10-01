@@ -2141,7 +2141,7 @@ void MantidUI::clearAllMemory(const bool prompt)
   }
   // If any python objects need to be cleared away then the GIL needs to be held. This doesn't feel like
   // it is in the right place but it will do no harm
-  GlobalInterpreterLock gil;
+  ScopedPythonGIL gil;
   // Relevant notifications are connected to signals that will close all dependent windows
   Mantid::API::FrameworkManager::Instance().clear();
 }

@@ -28,7 +28,7 @@
  ***************************************************************************/
 #include "ScaleDraw.h"
 #include "MyParser.h"
-#include "plot2D/ScaleEngine.h"
+#include "MantidQtAPI/ScaleEngine.h"
 #include "Graph.h"
 
 #include <QDateTime>

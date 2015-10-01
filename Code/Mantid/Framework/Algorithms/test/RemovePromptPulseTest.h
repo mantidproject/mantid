@@ -36,7 +36,7 @@ private:
     EventWorkspace_sptr test_in = WorkspaceCreationHelper::CreateEventWorkspace(NUMPIXELS, NUMBINS, NUMEVENTS, 1000., BIN_DELTA, 2);
     //Fake a TOF unit in the data.
     test_in->getAxis(0)->unit() =UnitFactory::Instance().create("TOF");
-    test_in->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(NUMPIXELS/9, false) );
+    test_in->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(NUMPIXELS/9) );
     // Make sure the detector IDs are ok
     for (int i = 0; i < NUMPIXELS; i++)
       test_in->getSpectrum(i)->setDetectorID(i+1);

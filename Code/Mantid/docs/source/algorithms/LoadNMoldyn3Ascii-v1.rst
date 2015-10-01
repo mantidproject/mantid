@@ -13,6 +13,10 @@ This algorithm is a loader from simulation data saved by version 3 of the
 nMOLDYN package, simulations can be loaded form either a plain ASCII (``.dat``)
 file or ``.cdl`` file.
 
+Currently this supports loading :math:`S(Q, \omega)` and :math:`F(Q, t)`
+functions from ``.cdl`` files, :math:`F(Q, t)` from ``.dat`` files and any 2D
+function (such as density of states) from ``.dat`` files.
+
 Usage
 -----
 

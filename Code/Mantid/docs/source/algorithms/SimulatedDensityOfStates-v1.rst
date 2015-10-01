@@ -87,7 +87,7 @@ Output:
 
     ion_ws = SimulatedDensityOfStates(PHONONFile='squaricn.phonon',
                                       SpectrumType='IonTable')
-    print ','.join(ion_ws.column('Species'))
+    print ', '.join(ion_ws.column('Species'))
 
 Output:
 

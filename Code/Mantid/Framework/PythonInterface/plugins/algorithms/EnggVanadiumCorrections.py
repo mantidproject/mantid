@@ -13,7 +13,8 @@ class EnggVanadiumCorrections(PythonAlgorithm):
 
 
     def category(self):
-        return "Diffraction\\Engineering;PythonAlgorithms"
+        return ("Diffraction\\Engineering;PythonAlgorithms;CorrectionFunctions\\BackgroundCorrections;"
+                "CorrectionFunctions\\EfficiencyCorrections;CorrectionFunctions\\NormalisationCorrections")
 
     def name(self):
         return "EnggVanadiumCorrections"
@@ -185,7 +186,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
                                (integWS.blocksize(), integWS.getNumberHistograms(),
                                 vanWS.getNumberHistograms()))
 
-        integTbl = sapi.CreateEmptyTableWorkspace()
+        integTbl = sapi.CreateEmptyTableWorkspace(OutputWorkspace='__vanIntegTbl')
         integTbl.addColumn('double', 'Spectra Integration')
         for i in range(integWS.getNumberHistograms()):
             integTbl.addRow([integWS.readY(i)[0]])

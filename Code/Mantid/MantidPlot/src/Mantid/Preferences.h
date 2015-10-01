@@ -41,25 +41,31 @@ public:
     static int MantidMatrixColumnWidthY();
     static int MantidMatrixColumnWidthX();
     static int MantidMatrixColumnWidthE();
+    static int MantidMatrixColumnWidthDx();
     static void MantidMatrixColumnWidthY(int width);
     static void MantidMatrixColumnWidthX(int width);
     static void MantidMatrixColumnWidthE(int width);
+    static void MantidMatrixColumnWidthDx(int width);
     static void MantidMatrixColumnWidth(int width);
 
     static QChar MantidMatrixNumberFormatY();
     static QChar MantidMatrixNumberFormatX();
     static QChar MantidMatrixNumberFormatE();
+    static QChar MantidMatrixNumberFormatDx();
     static void MantidMatrixNumberFormatY(const QChar& f);
     static void MantidMatrixNumberFormatX(const QChar& f);
     static void MantidMatrixNumberFormatE(const QChar& f);
+    static void MantidMatrixNumberFormatDx(const QChar& f);
     static void MantidMatrixNumberFormat(const QChar& f);
 
     static int MantidMatrixNumberPrecisionY();
     static int MantidMatrixNumberPrecisionX();
     static int MantidMatrixNumberPrecisionE();
+    static int MantidMatrixNumberPrecisionDx();
     static void MantidMatrixNumberPrecisionY(int p);
     static void MantidMatrixNumberPrecisionX(int p);
     static void MantidMatrixNumberPrecisionE(int p);
+    static void MantidMatrixNumberPrecisionDx(int p);
     static void MantidMatrixNumberPrecision(int p);
 
 

@@ -3,14 +3,15 @@
 
 #include "MantidKernel/System.h"
 
-class vtkUnstructuredGrid;
+class vtkPointSet;
+class vtkInformation;
 namespace Mantid
 {
 namespace VATES
 {
 
   /**
-   *Class that handles scaling a given vtkDataSet and setting appropriate
+   *Functor class that handles scaling a given vtkDataSet and setting appropriate
    *metadata on output vtkDataSet so that original extents will be shown.
     
     @date 22/02/2013
@@ -39,25 +40,18 @@ namespace VATES
   {
   public:
     /// Constructor
-    vtkDataSetToScaledDataSet(vtkUnstructuredGrid *input,
-                              vtkUnstructuredGrid *output);
+    vtkDataSetToScaledDataSet();
     /// Destructor
     virtual ~vtkDataSetToScaledDataSet();
-    /// Set the scaling factors
-    void initialize(double xScale, double yScale, double zScale);
     /// Apply the scaling and add metadata
-    void execute();
+    vtkPointSet* execute(double xScale, double yScale, double zScale, vtkPointSet * inputData, vtkInformation* info);
+    /// Apply the scaling and add metadata
+    vtkPointSet* execute(double xScale, double yScale, double zScale, vtkPointSet * inputData, vtkPointSet * outputData = NULL);
   private:
     vtkDataSetToScaledDataSet& operator=(const vtkDataSetToScaledDataSet& other);
     /// Set metadata on the dataset to handle scaling
-    void updateMetaData();
-
-    vtkUnstructuredGrid *m_inputData; ///< Data to scale
-    vtkUnstructuredGrid *m_outputData; ///< Scaled data
-    double m_xScaling; ///< The scale factor in the X direction
-    double m_yScaling; ///< The scale factor in the Y direction
-    double m_zScaling; ///< The scale factor in the Z direction
-    bool m_isInitialised; ///< Flag to declare object initialised
+    void updateMetaData(double xScale, double yScale,
+                        double zScale, vtkPointSet* inputData, vtkPointSet * outputData);
   };
 
 } // namespace VATES

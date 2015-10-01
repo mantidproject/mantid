@@ -1583,9 +1583,18 @@ void Algorithm::reportCompleted(const double &duration,
 
   if (!m_isChildAlgorithm || m_alwaysStoreInADS) {
     if (m_isAlgStartupLoggingEnabled) {
-      getLogger().notice() << name() << " successful, Duration " << std::fixed
-                           << std::setprecision(2) << duration << " seconds"
-                           << optionalMessage << std::endl;
+
+      std::stringstream msg;
+      msg << name() << " successful, Duration ";
+      double seconds = duration;
+      if (seconds > 60.) {
+        int minutes = static_cast<int>(seconds / 60.);
+        msg << minutes << " minutes ";
+        seconds = seconds - static_cast<double>(minutes) * 60.;
+      }
+      msg << std::fixed << std::setprecision(2) << seconds << " seconds"
+          << optionalMessage;
+      getLogger().notice(msg.str());
     }
   }
 

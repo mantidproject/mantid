@@ -298,7 +298,7 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
     histX.resize(currentX.size() + 1);
     Mantid::Kernel::VectorHelper::convertToBinBoundary(currentX, histX);
     Mantid::Kernel::VectorHelper::rebin(histX, currentY, currentE, X, Y, E,
-                                        this->isDistribution());
+                                        true);
   } else // assume x_size = y_size + 1
   {
     Mantid::Kernel::VectorHelper::rebin(currentX, currentY, currentE, X, Y, E,

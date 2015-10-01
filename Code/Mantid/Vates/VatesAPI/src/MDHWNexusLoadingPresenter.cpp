@@ -158,7 +158,11 @@ void MDHWNexusLoadingPresenter::loadWorkspace()
   alg->setProperty("FileBackEnd", !this->m_view->getLoadInMemory()); //Load from file by default.
   alg->execute();
   Workspace_sptr result = AnalysisDataService::Instance().retrieve("MD_HISTO_WS_ID");
-  m_histoWs = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(result);
+  auto preTranspose = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(result);
+  // Perform any necessary transpose.
+  MDHWLoadingPresenter::transposeWs(preTranspose, m_histoWs);
+
+
 }
 
 void MDHWNexusLoadingPresenter::loadWorkspace( ProgressAction& loadingProgressUpdate)

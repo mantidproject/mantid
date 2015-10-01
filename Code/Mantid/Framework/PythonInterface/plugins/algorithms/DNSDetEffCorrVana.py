@@ -1,8 +1,9 @@
-# pylint: disable=no-init
 import mantid.simpleapi as api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty
 from mantid.kernel import Direction
 import numpy as np
+
+import mlzutils
 
 
 class DNSDetEffCorrVana(PythonAlgorithm):
@@ -15,11 +16,17 @@ class DNSDetEffCorrVana(PythonAlgorithm):
     properties_to_compare = ['deterota', 'wavelength', 'slit_i_left_blade_position',
                              'slit_i_right_blade_position', 'slit_i_lower_blade_position',
                              'slit_i_upper_blade_position', 'polarisation', 'flipper']
-    dataws = None
-    outws_name = None
-    vanaws = None
-    bkgws = None
-    vana_mean_name = None
+
+    def __init__(self):
+        """
+        Init
+        """
+        PythonAlgorithm.__init__(self)
+        self.dataws = None
+        self.outws_name = None
+        self.vanaws = None
+        self.bkgws = None
+        self.vana_mean_name = None
 
     def category(self):
         """
@@ -51,42 +58,6 @@ class DNSDetEffCorrVana(PythonAlgorithm):
 
         return
 
-    def _dimensions_valid(self):
-        """
-        Checks validity of the workspace dimensions:
-        all given workspaces must have the same number of dimensions
-        and the same number of histograms
-        and the same number of bins
-        """
-        ndim = self.dataws.getNumDims()
-        nhist = self.dataws.getNumberHistograms()
-        nbin = self.dataws.blocksize()
-
-        if self.vanaws.getNumDims() != ndim or self.vanaws.getNumberHistograms() != nhist or self.vanaws.blocksize() != nbin:
-            self.log().error("The dimensions of Vanadium workspace are not valid.")
-            return False
-
-        if self.bkgws.getNumDims() != ndim or self.bkgws.getNumberHistograms() != nhist or self.bkgws.blocksize() != nbin:
-            self.log().error("The dimensions of Background workspace are not valid.")
-            return False
-
-        return True
-
-    def _norm_ws_exist(self):
-        """
-        Checks whether the normalization workspaces exist
-        normalization workspaces are created by the loader,
-        but could be ocasionally deleted by the user
-        """
-        if not api.mtd.doesExist(self.bkgws.getName() + '_NORM'):
-            self.log().error("Normalization workspace for " + self.bkgws.getName() + " is not found!")
-            return False
-        if not api.mtd.doesExist(self.vanaws.getName() + '_NORM'):
-            self.log().error("Normalization workspace for " + self.vanaws.getName() + " is not found!")
-            return False
-
-        return True
-
     def _vana_mean(self, vanaws):
         """
         checks whether the workspace with mean counts for Vanadium exists
@@ -116,15 +87,6 @@ class DNSDetEffCorrVana(PythonAlgorithm):
 
         return vmean
 
-    def _cleanup(self, wslist):
-        """
-        deletes workspaces from list
-            @param wslist List of names of workspaces to delete.
-        """
-        for wsname in wslist:
-            api.DeleteWorkspace(wsname)
-        return
-
     def _vana_correct(self):
         """
         creates the corrected workspace
@@ -144,7 +106,7 @@ class DNSDetEffCorrVana(PythonAlgorithm):
         arr = np.array(_vana_bg_.extractY()).flatten()
         neg_values = np.where(arr < 0)[0]
         if len(neg_values):
-            self._cleanup(wslist)
+            mlzutils.cleanup(wslist)
             message = "Background " + self.bkgws.getName() + " is higher than Vanadium " + \
                 self.vanaws.getName() + " signal!"
             self.log().error(message)
@@ -153,61 +115,19 @@ class DNSDetEffCorrVana(PythonAlgorithm):
         # 3. calculate correction coefficients
         _vana_mean_ws_ = self._vana_mean(_vana_bg_)
         if not _vana_mean_ws_:
-            self._cleanup(wslist)
+            mlzutils.cleanup(wslist)
             return None
         if not self.vana_mean_name:
-            wslist.append(_vana_mean_ws_)
+            wslist.append(_vana_mean_ws_.getName())
         _coef_ws_ = api.Divide(LHSWorkspace=_vana_bg_, RHSWorkspace=_vana_mean_ws_, WarnOnZeroDivide=True)
-        wslist.append(_coef_ws_)
+        wslist.append(_coef_ws_.getName())
         # 4. correct raw data (not normalized!)
         api.Divide(LHSWorkspace=self.dataws, RHSWorkspace=_coef_ws_, WarnOnZeroDivide=True,
                    OutputWorkspace=self.outws_name)
         outws = api.mtd[self.outws_name]
         # cleanup
-        self._cleanup(wslist)
+        mlzutils.cleanup(wslist)
         return outws
-
-    def _check_properties(self, lhs_run, rhs_run):
-        """
-        checks whether properties match in the given runs, produces warnings
-            @param lhs_run Left-hand-side run
-            @param rhs_run Right-hand-side run
-        """
-        lhs_title = ""
-        rhs_title = ""
-        if lhs_run.hasProperty('run_title'):
-            lhs_title = lhs_run.getProperty('run_title').value
-        if rhs_run.hasProperty('run_title'):
-            rhs_title = rhs_run.getProperty('run_title').value
-
-        for property_name in self.properties_to_compare:
-            if lhs_run.hasProperty(property_name) and rhs_run.hasProperty(property_name):
-                lhs_property = lhs_run.getProperty(property_name)
-                rhs_property = rhs_run.getProperty(property_name)
-                if lhs_property.type == rhs_property.type:
-                    if lhs_property.type == 'string':
-                        if lhs_property.value != rhs_property.value:
-                            message = "Property " + property_name + " does not match! " + \
-                                lhs_title + ": " + lhs_property.value + ", but " + \
-                                rhs_title + ": " + rhs_property.value
-                            self.log().warning(message)
-                    if lhs_property.type == 'number':
-                        if abs(lhs_property.value - rhs_property.value) > 5e-3:
-                            message = "Property " + property_name + " does not match! " + \
-                                lhs_title + ": " + str(lhs_property.value) + ", but " + \
-                                rhs_title + ": " + str(rhs_property.value)
-                            self.log().warning(message)
-                else:
-                    message = "Property " + property_name + " does not match! " + \
-                        lhs_title + ": " + str(lhs_property.value) + " has type " + \
-                        str(lhs_property.type) + ", but " + rhs_title + ": " + \
-                        str(rhs_property.value) + " has type " + str(rhs_property.type)
-                    self.log().warning(message)
-            else:
-                message = "Property " + property_name + " is not present in " +\
-                    lhs_title + " or " + rhs_title + " - skipping comparison."
-                self.log().warning(message)
-        return
 
     def PyExec(self):
         # Input
@@ -217,18 +137,19 @@ class DNSDetEffCorrVana(PythonAlgorithm):
         self.bkgws = api.mtd[self.getPropertyValue("BkgWorkspace")]
         self.vana_mean_name = self.getPropertyValue("VanadiumMean")
 
-        if not self._dimensions_valid():
-            raise RuntimeError("Error: all input workspaces must have the same dimensions!.")
+        # check dimensions
+        wslist = [self.dataws.getName(), self.vanaws.getName(), self.bkgws.getName()]
+        mlzutils.same_dimensions(wslist)
         # check if the _NORM workspaces exist
-        if not self._norm_ws_exist():
-            message = "Normalization workspace is not found!"
-            raise RuntimeError(message)
+        wslist = [self.vanaws.getName() + '_NORM', self.bkgws.getName() + '_NORM']
+        mlzutils.ws_exist(wslist, self.log())
+
         # check sample logs, produce warnings if different
         drun = self.dataws.getRun()
         vrun = self.vanaws.getRun()
         brun = self.bkgws.getRun()
-        self._check_properties(drun, vrun)
-        self._check_properties(vrun, brun)
+        mlzutils.compare_properties(drun, vrun, self.properties_to_compare, self.log())
+        mlzutils.compare_properties(vrun, brun, self.properties_to_compare, self.log())
         # apply correction
         outws = self._vana_correct()
         if not outws:

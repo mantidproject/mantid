@@ -1,7 +1,7 @@
 #include "ColorMapWidget.h"
 #include "MantidQtAPI/MantidColorMap.h"
 #include "MantidQtAPI/GraphOptions.h"
-#include "plot2D/PowerScaleEngine.h"
+#include "MantidQtAPI/PowerScaleEngine.h"
 
 #include <QVBoxLayout>
 #include <QGridLayout>

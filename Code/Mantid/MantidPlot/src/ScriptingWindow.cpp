@@ -757,24 +757,42 @@ bool ScriptingWindow::shouldEnableAbort() const {
 }
 
 /**
+ * Opens a script providing a copy is not already open
+ * @param newTabName The name of the newTab to open
+ */
+void ScriptingWindow::openUnique(const QString &newTabName) {
+  auto openFiles = m_manager->fileNamesToQStringList();
+  auto position = openFiles.contains(newTabName);
+  if (!position) {
+    m_manager->newTab(openFiles.size(), newTabName);
+  }
+}
+
+/**
  * Opens a set of files in new tabs
  * @param tabsToOpen A list of filenames to open in new tabs
  */
 void ScriptingWindow::openPreviousTabs(const QStringList &tabsToOpen) {
   const int totalFiles = tabsToOpen.size();
-  QStringList validFiles = QStringList();
+  QStringList files = QStringList();
+  // Check files can be opened
   for (int i = 0; i < totalFiles; i++) {
     if (FILE *file = fopen(tabsToOpen[i].toStdString().c_str(), "r")) {
       fclose(file);
-      validFiles.append(tabsToOpen[i]);
+      files.append(tabsToOpen[i]);
     }
   }
-  const int validTotal = validFiles.size();
+
+  // Remove duplicates
+  files.removeDuplicates();
+
+  // opens files providing there are more than 0
+  const int validTotal = files.size();
   if (validTotal == 0) {
     m_manager->newTab();
   } else {
     for (int i = 0; i < validTotal; i++) {
-      m_manager->newTab(i, validFiles[i]);
+      m_manager->newTab(i, files[i]);
     }
   }
 }

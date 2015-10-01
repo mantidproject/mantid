@@ -297,8 +297,6 @@ void ConvertToReflectometryQ::exec() {
   checkOutputDimensionalityChoice(outputDimensions); // TODO: This check can be
                                                      // retired as soon as all
                                                      // transforms have been
-                                                     // implemented.
-
   // Extract the incient theta angle from the logs if a user provided one is not
   // given.
   if (!bUseOwnIncidentTheta) {
@@ -375,7 +373,7 @@ void ConvertToReflectometryQ::exec() {
       const bool dumpVertexes = this->getProperty("DumpVertexes");
       auto vertexesTable = vertexes;
       
-      auto outputWSRB = transform->executeNormPoly(inputWs, vertexesTable, dumpVertexes);
+      auto outputWSRB = transform->executeNormPoly(inputWs, vertexesTable, dumpVertexes, outputDimensions);
       outputWSRB->copyExperimentInfoFrom(inputWs.get());
       outputWS = outputWSRB;
     } else {

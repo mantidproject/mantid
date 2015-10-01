@@ -4,13 +4,11 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/FakeObjects.h"
 
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidCurveFitting/Fit.h"
+#include "FitTestHelpers.h"
 
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
@@ -137,103 +135,98 @@ public:
   static void destroySuite(FitTestPerformance *suite) { delete suite; }
 
   FitTestPerformance() {
-    m_smoothWS = generateSmoothCurveWorkspace();
-    m_onePeakWS = generatePeaksCurveWorkspace();
+    m_smoothWS = FitTestHelpers::generateCurveDataForFit(
+        FitTestHelpers::SmoothishGaussians);
+
+    m_onePeakWS =
+        FitTestHelpers::generateCurveDataForFit(FitTestHelpers::SingleB2BPeak);
   }
 
-  // Equivalent Python script. Fit a back-to-back exponential:
-  // Fit(InputWorkspace=pws, Function='name=BackToBackExponential')
-  void test_peaks_fit() {
-    Fit fit;
-    fit.setChild(true);
-    fit.initialize();
+  // tests for a single peak (BackToBackExponential)
 
-    // example X0, S values after a good fit are 10079.0, 404.5
-    fit.setProperty("Function", "name=BackToBackExponential, X0=8500, S=800");
-    fit.setProperty("InputWorkspace", m_onePeakWS);
-    // fit.setProperty("MaxIterations", 99);
-    fit.setProperty("CreateOutput", true);
-
-    fit.execute();
+  // LM for Levenberg-Marquardt hereafter
+  void test_fit_peaks_LM() {
+    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak,
+                    "Levenberg-MarquardtMD");
   }
 
-  // Equivalent Python script. Fit with a BSpline function:
-  // Fit(InputWorkspace=ws, Function='name=BSpline, Order=40')
-  void test_smooth_curve_fit() {
-    Fit fit;
-    fit.setChild(true);
-    fit.initialize();
+  void test_fit_peaks_Simplex() {
+    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak, "Simplex");
+  }
 
-    // From a quick test, order 30 => ~2.5s; order 40 => ~6s; order 50 =>
-    // ~14s
-    fit.setProperty("Function", "name=BSpline, Order=20, StartX=0, EndX=10");
-    fit.setProperty("InputWorkspace", m_smoothWS);
-    fit.setProperty("CreateOutput", true);
+  void test_fit_peaks_ConjG_FR() {
+    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak,
+                    "Conjugate gradient (Fletcher-Reeves imp.)");
+  }
 
-    fit.execute();
+  void test_fit_peaks_ConjG_PR() {
+    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak,
+                    "Conjugate gradient (Polak-Ribiere imp.)");
+  }
+
+  void test_fit_peaks_BFGS() {
+    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak, "BFGS");
+  }
+
+  void test_fit_peaks_Damping() {
+    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak, "Damping");
+  }
+
+  void test_fit_peaks_SteepestDescent() {
+    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak,
+                    "SteepestDescent");
+  }
+
+  // Note: does not converge unless you give a better initial guess of
+  // parameters. So this is testing 500 iterations but not convergence.
+  void test_fit_peaks_FABADA() {
+    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak, "FABADA");
+  }
+
+  // tests for a smooth function (2 Gaussians + linear background)
+
+  void test_fit_smooth_LM() {
+    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians,
+                    "Levenberg-MarquardtMD");
+  }
+
+  void test_fit_smooth_Simplex() {
+    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians, "Simplex");
+  }
+
+  // disabled because it is awfully slow: ~20s while others take <1s
+  void disabled_test_fit_smooth_ConjG_FR() {
+    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians,
+                    "Conjugate gradient (Fletcher-Reeves imp.)");
+  }
+
+  // disabled: awfully slow: ~20s
+  void disabled_test_fit_smooth_ConjG_PR() {
+    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians,
+                    "Conjugate gradient (Polak-Ribiere imp.)");
+  }
+
+  // disabled: slow: ~5s
+  void disabled_test_fit_smooth_BFGS() {
+    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians, "BFGS");
+  }
+
+  void test_fit_smooth_Damping() {
+    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians, "Damping");
+  }
+
+  // disabled: too slow: ~17s
+  void disabled_test_fit_smooth_SteepestDescent() {
+    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians,
+                    "SteepestDescent");
+  }
+
+  // disabled: too slow: ~10s (and it doesn't converge)
+  void disabled_test_fit_smooth_FABADA() {
+    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians, "FABADA");
   }
 
 private:
-  // Equivalent python script. Create data with a peak and a bit of noise:
-  // pws = CreateSampleWorkspace(Function="User Defined",
-  // UserDefinedFunction="name=BackToBackExponential, I=15000, A=1, B=1.2,
-  // X0=10000, S=400", NumBanks=1, BankPixelWidth=1, Random=True)
-  API::MatrixWorkspace_sptr generatePeaksCurveWorkspace() {
-    Mantid::API::IAlgorithm_sptr sampleAlg =
-        Mantid::API::AlgorithmManager::Instance().create(
-            "CreateSampleWorkspace");
-    sampleAlg->initialize();
-    sampleAlg->setChild(true);
-    sampleAlg->setProperty("Function", "User Defined");
-    sampleAlg->setProperty(
-        "UserDefinedFunction",
-        "name=BackToBackExponential, I=15000, A=1, B=1.2, X0=10000, S=400");
-    sampleAlg->setProperty("NumBanks", 1);
-    sampleAlg->setProperty("BankPixelWidth", 1);
-    sampleAlg->setProperty("XMin", 0.0);
-    sampleAlg->setProperty("XMax", 100.0);
-    sampleAlg->setProperty("BinWidth", 0.1);
-    sampleAlg->setProperty("Random", true);
-    sampleAlg->setPropertyValue("OutputWorkspace", "sample_peak_curve_ws");
-
-    sampleAlg->execute();
-    API::MatrixWorkspace_sptr ws = sampleAlg->getProperty("OutputWorkspace");
-
-    return ws;
-  }
-
-  // Equivalent python script. Create smooth-ish data curve:
-  // ws = CreateSampleWorkspace(Function="User Defined",
-  // UserDefinedFunction="name=LinearBackground, A0=0.4, A1=0.4; name=Gaussian,
-  // PeakCentre=1.3, Height=7, Sigma=1.7; name=Gaussian, PeakCentre=5,
-  // Height=10, Sigma=0.7; name=Gaussian, PeakCentre=8, Height=9, Sigma=1.8",
-  // NumBanks=1, BankPixelWidth=1, XMin=0, XMax=10, BinWidth=0.01, Random=True)
-  API::MatrixWorkspace_sptr generateSmoothCurveWorkspace() {
-    Mantid::API::IAlgorithm_sptr sampleAlg =
-        Mantid::API::AlgorithmManager::Instance().create(
-            "CreateSampleWorkspace");
-    sampleAlg->initialize();
-    sampleAlg->setChild(true);
-    sampleAlg->setProperty("Function", "User Defined");
-    sampleAlg->setProperty(
-        "UserDefinedFunction",
-        "name=LinearBackground, A0=0.4, A1=0.4; name=Gaussian, PeakCentre=1.3, "
-        "Height=7, Sigma=1.7; name=Gaussian, PeakCentre=5, Height=10, "
-        "Sigma=0.7; name=Gaussian, PeakCentre=8, Height=9, Sigma=1.8");
-    sampleAlg->setProperty("NumBanks", 1);
-    sampleAlg->setProperty("BankPixelWidth", 1);
-    sampleAlg->setProperty("XMin", 0.0);
-    sampleAlg->setProperty("XMax", 10.0);
-    sampleAlg->setProperty("BinWidth", 0.01);
-    sampleAlg->setProperty("Random", true);
-    sampleAlg->setPropertyValue("OutputWorkspace", "sample_smooth_curve_ws");
-
-    sampleAlg->execute();
-    API::MatrixWorkspace_sptr ws = sampleAlg->getProperty("OutputWorkspace");
-
-    return ws;
-  }
-
   API::MatrixWorkspace_sptr m_smoothWS;
   API::MatrixWorkspace_sptr m_onePeakWS;
 };

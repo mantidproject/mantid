@@ -3,7 +3,7 @@
 # non-parent-init-called is disabled to remove false positives from a bug in pyLint < 1.4
 # abstract-mehod checking seems to ignore the fact some classes are declared abstract using abc
 
-"""
+'''
 - TOSCA only supported by "Reduction" (the Energy Transfer tab of C2E).
 - OSIRIS/IRIS supported by all tabs / interfaces.
 - VESUVIO is not supported by any interface as of yet.
@@ -65,7 +65,7 @@ stresstesting.MantidStressTest
      |   +--IRISConvFit
      |   +--OSIRISConvFit
      |
-"""
+'''
 
 import stresstesting
 import os
@@ -78,7 +78,7 @@ from mantid.simpleapi import *
 from mantid.api import FileFinder
 
 # Import our workflows.
-from IndirectDataAnalysis import furyfitSeq, furyfitMult, confitSeq
+from IndirectDataAnalysis import furyfitSeq, furyfitMult
 
 class ISISIndirectInelasticBase(stresstesting.MantidStressTest):
     '''
@@ -1073,17 +1073,14 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
         LoadNexus(self.sample, OutputWorkspace=self.sample)
         LoadNexus(self.resolution, OutputWorkspace=self.resolution)
 
-        confitSeq(
-            self.sample,
-            self.func,
-            self.startx,
-            self.endx,
-            self.ftype,
-            self.bg,
-            specMin=self.spectra_min,
-            specMax=self.spectra_max,
-            Plot='None',
-            Save=False)
+        ConvolutionFitSequential(
+            InputWorkspace=self.sample,
+            Function=self.func,
+            StartX=self.startx,
+            EndX=self.endx,
+            BackgroundType=self.bg,
+            SpecMin=self.spectra_min,
+            SpecMax=self.spectra_max)
 
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''
@@ -1096,8 +1093,6 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
             raise RuntimeError("Function should be a string.")
         if type(self.bg) != str:
             raise RuntimeError("Background type should be a string.")
-        if type(self.ftype) != str:
-            raise RuntimeError("Function type should be a string.")
         if type(self.startx) != float:
             raise RuntimeError("startx should be a float")
         if type(self.endx) != float:
@@ -1120,10 +1115,9 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
         #ConvFit fit function
         self.func = 'name=LinearBackground,A0=0,A1=0;(composite=Convolution,FixResolution=true,NumDeriv=true;'\
                     'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=2,PeakCentre=0,FWHM=0.05)' % self.resolution
-        self.ftype = '1L'
         self.startx = -0.2
         self.endx = 0.2
-        self.bg = 'FitL_s'
+        self.bg = 'Fit Linear'
         self.spectra_min = 0
         self.spectra_max = 41
         self.ties = False
@@ -1145,10 +1139,9 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
         self.func = 'name=LinearBackground,A0=0.060623,A1=0.001343;(composite=Convolution,FixResolution=true,NumDeriv=true;'\
                     'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=1.033150,PeakCentre=-0.000841,FWHM=0.001576)'\
                     % (self.resolution)
-        self.ftype = '1L'
         self.startx = -0.2
         self.endx = 0.2
-        self.bg = 'FitL_s'
+        self.bg = 'Fit Linear'
         self.spectra_min = 0
         self.spectra_max = 50
         self.ties = False

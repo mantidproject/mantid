@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>64</width>
+    <width>102</width>
     <height>286</height>
    </rect>
   </property>
@@ -26,14 +26,24 @@
       <number>3</number>
      </property>
      <item>
-      <widget class="QCheckBox" name="checkLog">
-       <property name="toolTip">
-        <string>Use a logarithmic color scale (when checked)</string>
-       </property>
-       <property name="text">
-        <string>Log</string>
-       </property>
-      </widget>
+      <widget class="QComboBox" name="cmbScaleType"/>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLabel" name="lblN">
+         <property name="text">
+          <string>n =</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="dspnN"/>
+       </item>
+      </layout>
      </item>
      <item>
       <widget class="QScienceSpinBox" name="valMax">

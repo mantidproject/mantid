@@ -32,7 +32,7 @@
 #include "SymbolBox.h"
 #include "Graph.h"
 #include "PatternBox.h"
-#include "plot2D/ScaleEngine.h"
+#include "MantidQtAPI/ScaleEngine.h"
 #include "Mantid/ErrorBarSettings.h"
 #include <QDateTime>
 #include <QMessageBox>

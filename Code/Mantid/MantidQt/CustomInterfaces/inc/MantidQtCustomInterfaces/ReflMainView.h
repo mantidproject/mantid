@@ -65,6 +65,9 @@ namespace MantidQt
       virtual void setProgressRange(int min, int max) = 0;
       virtual void setProgress(int progress) = 0;
 
+      //Get status of the checkbox which dictates whether an ipython notebook is produced
+      virtual bool getEnableNotebook() = 0;
+
       //Settor methods
       virtual void setSelection(const std::set<int>& rows) = 0;
       virtual void setTableList(const std::set<std::string>& tables) = 0;

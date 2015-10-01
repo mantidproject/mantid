@@ -60,7 +60,8 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER GraphDisplay
    /// Set the actual data that will be displayed on the graph
    void setData( const QVector<double> & xData,
                  const QVector<double> & yData,
-                       double            cutValue );
+                 double cutValue,
+                 bool   isFront = true);
 
    /// Clear the graph(s) off the display
    void clear();
@@ -77,9 +78,11 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER GraphDisplay
   private:
    /// Show information about the point (x, y) on the graph, in the info table
    void showInfoList( double x, double y );
+   /// Remove all curves.
+   void clearCurves();
 
    QwtPlot            * m_graphPlot;
-   QwtPlotCurve       * m_curve;
+   QList<QwtPlotCurve*> m_curves;
    QTableWidget       * m_graphTable;
    SpectrumDataSource_sptr m_dataSource;
 
@@ -92,6 +95,8 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER GraphDisplay
    double m_maxX;
    double m_minY;
    double m_maxY;
+
+   static QColor g_curveColors[];
 
 };
 

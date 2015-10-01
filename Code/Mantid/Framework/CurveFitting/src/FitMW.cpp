@@ -3,6 +3,7 @@
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/SeqDomain.h"
 #include "MantidCurveFitting/Convolution.h"
+#include "MantidCurveFitting/ParameterEstimator.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -261,6 +262,8 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
     values->setFitData(j, y);
     values->setFitWeight(j, weight);
   }
+  m_domain = boost::dynamic_pointer_cast<API::FunctionDomain1D>(domain);
+  m_values = values;
 }
 
 /**
@@ -432,6 +435,7 @@ void FitMW::initFunction(API::IFunction_sptr function) {
   function->setWorkspace(m_matrixWorkspace);
   function->setMatrixWorkspace(m_matrixWorkspace, m_workspaceIndex, m_startX,
                                m_endX);
+  setInitialValues(*function);
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -614,6 +618,18 @@ void FitMW::addFunctionValuesToWS(
       }
       eValues[i] = std::sqrt(err);
     }
+  }
+}
+
+/**
+ * Set initial values for parameters with default values.
+ * @param function : A function to set parameters for.
+ */
+void FitMW::setInitialValues(API::IFunction& function) {
+  auto domain = m_domain.lock();
+  auto values = m_values.lock();
+  if (domain && values) {
+    ParameterEstimator::estimate(function, *domain, *values);
   }
 }
 

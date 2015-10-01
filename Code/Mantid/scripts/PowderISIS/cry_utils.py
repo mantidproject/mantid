@@ -3,12 +3,13 @@
 from mantid.simpleapi import *
 from types import *
 import re
+import os
 
 def get_sample_list(basefile, listText, direct=""):
     raw = True
     thedir = ""
-    # if direct<>"":
-    #	thedir=direct+"/"
+    if direct:
+        thedir = direct
     samfillist = []
     p_list = re.compile("s([0-9]+)[ ]+(.+)")
     m_list = p_list.match(listText)
@@ -23,14 +24,14 @@ def get_sample_list(basefile, listText, direct=""):
             if sam == 0:
                 return [["none"]]
             if raw:
-                fname = thedir + basefile + str(sam) + ".raw"
+                fname = os.path.join(thedir, basefile) + str(sam) + ".raw"
                 samfil.append(fname)
             else:
                 if sam < 10:
                     sav = "0" + str(sam)
                 else:
                     sav = str(sam)
-                fname = thedir + basefile + str(runno) + ".s" + sav
+                fname = os.path.join(thedir, basefile) + str(runno) + ".s" + sav
                 samfil.append(fname)
         samfillist.append(samfil)
     return samfillist

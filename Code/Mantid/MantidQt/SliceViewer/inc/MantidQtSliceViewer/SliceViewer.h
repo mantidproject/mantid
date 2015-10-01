@@ -28,6 +28,7 @@
 
 class QDragEnterEvent;
 class QDropEvent;
+class QwtPlotRescaler;
 
 namespace Mantid
 {
@@ -97,7 +98,9 @@ public:
   void setColorScaleMin(double min);
   void setColorScaleMax(double max);
   void setColorScaleLog(bool log);
+  int getColorScaleType();
   void setColorScale(double min, double max, bool log);
+  void setColorScale(double min, double max, int type);
   void setColorMapBackground(int r, int g, int b);
   double getColorScaleMin() const;
   double getColorScaleMax() const;
@@ -205,6 +208,10 @@ public slots:
   void dynamicRebinComplete(bool error);
   // Peaks overlay
   void peakOverlay_clicked();
+  // Aspect ratios
+  void changeAspectRatioGuess();
+  void changeAspectRatioAll();
+  void changeAspectRatioUnlock();
 
 protected:
 
@@ -212,6 +219,7 @@ protected:
   void dropEvent(QDropEvent *e);
 
 private:
+  enum AspectRatioType{Guess=0, All=1, Unlock=2};
   void loadSettings();
   void saveSettings();
   void setIconFromString(QAction* action, const std::string& iconName,
@@ -239,6 +247,12 @@ private:
   void autoRebinIfRequired();
   // helper for saveImage
   QString ensurePngExtension(const QString& fname) const;
+
+  // Rescaler methods
+  void updateAspectRatios();
+
+  // Set aspect ratio type.
+  void setAspectRatio(AspectRatioType type);
 
 private:
   
@@ -323,6 +337,10 @@ private:
   QAction *m_actionNormalizeVolume;
   QAction *m_actionNormalizeNumEvents;
   QAction *m_actionRefreshRebin;
+  QAction *m_lockAspectRatiosActionGuess;
+  QAction *m_lockAspectRatiosActionAll;
+  QAction *m_lockAspectRatiosActionUnlock;
+
 
   /// Synced menu/buttons
   MantidQt::API::SyncedCheckboxes *m_syncLineMode, *m_syncSnapToGrid,
@@ -363,9 +381,14 @@ private:
   /// Object for choosing a PeakTransformFactory based on the workspace type.
   Mantid::Geometry::PeakTransformSelector m_peakTransformSelector;
 
+  /// Plot rescaler. For fixed aspect ratios.
+  QwtPlotRescaler* m_rescaler;
+
   static const QString NoNormalizationKey;
   static const QString VolumeNormalizationKey;
   static const QString NumEventsNormalizationKey;
+
+  AspectRatioType m_aspectRatioType;
 
 };
 

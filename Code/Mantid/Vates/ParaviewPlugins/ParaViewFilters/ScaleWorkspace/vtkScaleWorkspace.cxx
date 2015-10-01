@@ -10,10 +10,9 @@
 #include <vtkObjectFactory.h>
 #include <vtkUnstructuredGridAlgorithm.h>
 #include <vtkUnstructuredGrid.h>
-
 #include <vtkSmartPointer.h>
-#include <vtkPolyData.h>
-#include <vtkAppendFilter.h>
+
+
 
 vtkStandardNewMacro(vtkScaleWorkspace)
 
@@ -43,24 +42,11 @@ int vtkScaleWorkspace::RequestData(vtkInformation*, vtkInformationVector **input
   vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
   
   // Try to cast to vktUnstructuredGrid, if this fails then cast it to vtkPolyData
-  vtkUnstructuredGrid* inputDataSet = vtkUnstructuredGrid::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
-
-  // This follows the example given here:
-  // http://www.vtk.org/Wiki/VTK/Examples/Cxx/PolyData/PolyDataToUnstructuredGrid
-  auto appendFilter = vtkSmartPointer<vtkAppendFilter>::New();
-  if (!inputDataSet) {
-    auto polyDataSet = vtkPolyData::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
-    appendFilter->AddInputData(polyDataSet);
-    appendFilter->Update();
-    inputDataSet = appendFilter->GetOutput();
-  }
+ vtkSmartPointer<vtkPointSet> inputDataSet = vtkSmartPointer<vtkPointSet>(vtkPointSet::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT())));
 
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
-  vtkUnstructuredGrid *outputDataSet = vtkUnstructuredGrid::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
-
-  vtkDataSetToScaledDataSet scaler(inputDataSet, outputDataSet);
-  scaler.initialize(m_xScaling, m_yScaling, m_zScaling);
-  scaler.execute();
+  vtkDataSetToScaledDataSet scaler;
+  scaler.execute(m_xScaling, m_yScaling, m_zScaling, inputDataSet, outInfo);
 
   // Need to call an update on the meta data, as it is not guaranteed that RequestInformation will be called
   // before we access the metadata.
@@ -72,16 +58,8 @@ int vtkScaleWorkspace::RequestInformation(vtkInformation*, vtkInformationVector*
 {
   // Set the meta data 
   vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
-  vtkSmartPointer<vtkUnstructuredGrid> inputDataSet = vtkSmartPointer<vtkUnstructuredGrid>(vtkUnstructuredGrid::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT())));
-  // This follows the example given here:
-  // http://www.vtk.org/Wiki/VTK/Examples/Cxx/PolyData/PolyDataToUnstructuredGrid
-  auto appendFilter = vtkSmartPointer<vtkAppendFilter>::New();
-  if (!inputDataSet) {
-    auto polyDataSet = vtkPolyData::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
-    appendFilter->AddInputData(polyDataSet);
-    appendFilter->Update();
-    inputDataSet = appendFilter->GetOutput();
-  }
+  vtkSmartPointer<vtkPointSet> inputDataSet = vtkSmartPointer<vtkPointSet>(vtkPointSet::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT())));
+
   updateMetaData(inputDataSet);
   return 1;
 }
@@ -168,7 +146,7 @@ int vtkScaleWorkspace::GetSpecialCoordinates()
  * Update the metadata fields of the plugin based on the information of the inputDataSet
  * @param inputDataSet :: the input data set.
  */
-void vtkScaleWorkspace::updateMetaData(vtkUnstructuredGrid *inputDataSet) {
+void vtkScaleWorkspace::updateMetaData(vtkPointSet *inputDataSet) {
   vtkFieldData* fieldData = inputDataSet->GetFieldData();
   
   // Extract information for meta data in Json format.
@@ -187,19 +165,9 @@ void vtkScaleWorkspace::updateMetaData(vtkUnstructuredGrid *inputDataSet) {
  * Set the input types that we expect for this algorithm. These are naturally
  * vtkUnstructredGrid data sets. In order to accomodate for the cut filter's
  * output we need to allow also for vtkPolyData data sets.
- * @param port: the input port
- * @param info: the information object
  * @retuns either success flag (1) or a failure flag (0)
  */
-int vtkScaleWorkspace::FillInputPortInformation (int port, vtkInformation *info) {
-    // We only have port 0 as an input
-    if (port == 0)
-    {
-      info->Remove(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE());
-      info->Append(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(),"vtkUnstructuredGrid");
-      info->Append(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(),"vtkPolyData");
-      return 1;
-    }
+int vtkScaleWorkspace::FillInputPortInformation (int, vtkInformation *) {
   return 0;
 }
 

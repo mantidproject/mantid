@@ -3,10 +3,13 @@ set ( SRC_FILES
   src/DataComparison.cpp
   src/deltaECalc.cpp
   src/DirectConvertToEnergy.cpp
+  src/EnggDiffraction/EnggDiffractionPresenter.cpp
+  src/EnggDiffraction/EnggDiffractionViewQtGUI.cpp
   src/Homer.cpp
   src/Indirect/AbsorptionCorrections.cpp
   src/Indirect/ApplyPaalmanPings.cpp
   src/Indirect/CalculatePaalmanPings.cpp
+  src/Indirect/ContainerSubtraction.cpp
   src/Indirect/ConvFit.cpp
   src/Indirect/CorrectionsTab.cpp
   src/Indirect/DensityOfStates.cpp
@@ -70,10 +73,12 @@ set ( SRC_FILES
   src/Muon/MuonAnalysisHelper.cpp
   src/Muon/MuonAnalysisOptionTab.cpp
   src/Muon/MuonAnalysisResultTableTab.cpp
+  src/ParseKeyValueString.cpp
   src/QReflTableModel.cpp
   src/QtReflMainView.cpp
   src/QtReflOptionsDialog.cpp
   src/ReflCatalogSearcher.cpp
+  src/ReflGenerateNotebook.cpp
   src/ReflLegacyTransferStrategy.cpp
   src/ReflMainViewPresenter.cpp
   src/ReflSearchModel.cpp
@@ -102,10 +107,17 @@ set ( INC_FILES
   inc/MantidQtCustomInterfaces/deltaECalc.h
   inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
   inc/MantidQtCustomInterfaces/DllConfig.h
+  inc/MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h
+  inc/MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h
+  inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h
+  inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h
+  inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h
+  inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h
   inc/MantidQtCustomInterfaces/Homer.h
   inc/MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.h
   inc/MantidQtCustomInterfaces/Indirect/ApplyPaalmanPings.h
   inc/MantidQtCustomInterfaces/Indirect/CalculatePaalmanPings.h
+  inc/MantidQtCustomInterfaces/Indirect/ContainerSubtraction.h
   inc/MantidQtCustomInterfaces/Indirect/ConvFit.h
   inc/MantidQtCustomInterfaces/Indirect/CorrectionsTab.h
   inc/MantidQtCustomInterfaces/Indirect/DensityOfStates.h
@@ -207,6 +219,9 @@ set ( INC_FILES
   inc/MantidQtCustomInterfaces/Tomography/ToolConfigTomoPy.h
   inc/MantidQtCustomInterfaces/Updateable.h
   inc/MantidQtCustomInterfaces/UserInputValidator.h
+  inc/MantidQtCustomInterfaces/ReflGenerateNotebook.h
+  inc/MantidQtCustomInterfaces/ParseKeyValueString.h
+  inc/MantidQtCustomInterfaces/ReflVectorString.h
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
@@ -214,10 +229,14 @@ set ( SRC_UNITY_IGNORE_FILES )
 set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/DataComparison.h
                 inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
+                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h
+                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h
+                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h
                 inc/MantidQtCustomInterfaces/Homer.h
                 inc/MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.h
                 inc/MantidQtCustomInterfaces/Indirect/ApplyPaalmanPings.h
                 inc/MantidQtCustomInterfaces/Indirect/CalculatePaalmanPings.h
+                inc/MantidQtCustomInterfaces/Indirect/ContainerSubtraction.h
                 inc/MantidQtCustomInterfaces/Indirect/ConvFit.h
                 inc/MantidQtCustomInterfaces/Indirect/CorrectionsTab.h
                 inc/MantidQtCustomInterfaces/Indirect/DensityOfStates.h
@@ -296,9 +315,14 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/DirectConvertToEnergy.ui
+               inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtGUI.ui
+               inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtTabCalib.ui
+               inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtTabFocus.ui
+               inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtTabSettings.ui
                inc/MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.ui
                inc/MantidQtCustomInterfaces/Indirect/ApplyPaalmanPings.ui
                inc/MantidQtCustomInterfaces/Indirect/CalculatePaalmanPings.ui
+               inc/MantidQtCustomInterfaces/Indirect/ContainerSubtraction.ui
                inc/MantidQtCustomInterfaces/Indirect/ConvFit.ui
                inc/MantidQtCustomInterfaces/Indirect/DensityOfStates.ui
                inc/MantidQtCustomInterfaces/Indirect/Elwin.ui
@@ -361,8 +385,11 @@ set ( TEST_FILES
   ALCDataLoadingPresenterTest.h
   ALCPeakFittingModelTest.h
   ALCPeakFittingPresenterTest.h
+  EnggDiffractionPresenterTest.h
   IO_MuonGroupingTest.h
   MuonAnalysisHelperTest.h
+  ParseKeyValueStringTest.h
+  ReflGenerateNotebookTest.h
   ReflLegacyTransferStrategyTest.h
   ReflMainViewPresenterTest.h
   TomographyIfacePresenterTest.h
