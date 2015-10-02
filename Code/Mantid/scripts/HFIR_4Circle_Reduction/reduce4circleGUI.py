@@ -87,6 +87,10 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_resetCalUB, QtCore.SIGNAL('clicked()'),
                      self.doResetCalUB)
 
+        # Tab 'Slice View'
+        self.connect(self.ui.pushButton_process4SliceView, QtCore.SIGNAL('clicked()'),
+                     self.do_process_for_sv)
+
         # Tab 'Advanced'
         self.connect(self.ui.pushButton_useDefaultDir, QtCore.SIGNAL('clicked()'),
                      self.do_setup_dir_default)
@@ -566,6 +570,35 @@ class MainWindow(QtGui.QMainWindow):
     def doResetCalUB(self):
         """ Reset/reject the UB matrix calculation
         """
+        raise RuntimeError('ASAP')
+
+    def do_process_for_sv(self):
+        """ Process data for slicing view
+        :return:
+        """
+        # Get UB matrix
+        ubmatrix = self._read_matrix(self.ui.tableWidget_ubSiceView)
+        self._myControl.set_ub_matrix(exp_number=None, ub=ubmatrix)
+
+        # Get list of scans
+        scan_list = gutil.parse_integer_list(self.ui.lineEdit_listScansSliceView)
+        if len(scan_list) == 0:
+            self.pop_one_button_dialog('Scan list is empty.')
+
+        # Set table
+        self.ui.tableWidget_sliceViewProgress.append_rows(column=0, value_list=scan_list)
+
+        # Warning
+        self.pop_one_button_dialog('Data processing is long. Be patient!')
+
+        # Process
+        base_name = str(self.ui.lineEdit_baseMergeMDName.text())
+        scan_list.sort()
+        for scan_no in scan_list:
+            out_ws_name = base_name + '%04d' % scan_no
+            status = self._myControl.merge_pts_in_scan(scan_no=scan_no)
+            self.ui.tableWidget_sliceViewProgress.set_status(status)
+        # END-FOR
 
         return
 
