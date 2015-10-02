@@ -1191,15 +1191,16 @@ void AlgorithmDialog::errorHandle(const IAlgorithm *alg, const std::string &what
  * Only allow close when close is enabled
  */
 void AlgorithmDialog::closeEvent(QCloseEvent *evt) {
-  if(m_exitButton->isEnabled()) {
-    evt->accept();
-  }
-  else {
-    evt->ignore();
+  if (m_exitButton) {
+    if (m_exitButton->isEnabled()) {
+      evt->accept();
+    } else {
+      evt->ignore();
+    }
+  } else {
+    QDialog::closeEvent(evt);
   }
 }
-
-
 
 /**Handle completion of algorithm started while staying open.
  * reenables the OK button when the algorithms finishes.
