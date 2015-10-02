@@ -146,7 +146,8 @@ PropertyManager::splitByTime(std::vector<SplittingInterval> &splitter,
     }
 
     // Now the property does the splitting.
-    prop->splitByTime(splitter, output_properties);
+    bool isProtonCharge = prop->name().compare("proton_charge") == 0;
+    prop->splitByTime(splitter, output_properties, isProtonCharge);
 
   } // for each property
 }

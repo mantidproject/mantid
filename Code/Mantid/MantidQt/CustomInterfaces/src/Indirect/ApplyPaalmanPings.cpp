@@ -1,3 +1,4 @@
+
 #include "MantidQtCustomInterfaces/Indirect/ApplyPaalmanPings.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
