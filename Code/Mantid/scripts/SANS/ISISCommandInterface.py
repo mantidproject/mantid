@@ -1380,36 +1380,6 @@ def SetTransmissionMask(trans_mask_files):
         sanslog.warning('Warning: The mask file list does not seem to be valid.')
 
 
-def MatchIDFInReducerAndWorkspace(file_name):
-    '''
-    This method checks if the IDF which gets loaded with the workspace associated
-    with the file name and the current instrument in the reducer singleton refer
-    to the same IDF. If not then switch the IDF in the reducer.
-    '''
-    is_matched = True
-
-    # Get measurement time from file
-    measurement_time = su.get_measurement_time_from_file(file_name)
-
-    # Get current instrument type
-    instrument_name = ReductionSingleton().get_instrument_name()
-
-    # Get the path to the instrument definition file
-    idf_path_workspace = ExperimentInfo.getInstrumentFilename(instrument_name, measurement_time)
-    idf_path_workspace = os.path.normpath(idf_path_workspace)
-
-    # Get the idf from the reducer
-    idf_path_reducer = ReductionSingleton().get_idf_file_path()
-    idf_path_reducer = os.path.normpath(idf_path_reducer)
-
-    if ((idf_path_reducer == idf_path_workspace) and
-        su.are_two_files_identical(idf_path_reducer, idf_path_reducer)):
-        is_matched = True
-    else:
-        is_matched = False
-
-    return is_matched
-
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################
