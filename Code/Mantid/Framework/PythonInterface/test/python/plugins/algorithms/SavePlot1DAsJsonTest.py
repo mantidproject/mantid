@@ -26,8 +26,7 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
         # executed?
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
-        d = json.load(open(out_path))
-        self.assertEqual(d['name'], datawsname)
+        d = json.load(open(out_path))[datawsname]
         self.assertEqual(d['type'], 'point')
         self._checkData(d, E, I, err)
         # Delete the output file
@@ -50,7 +49,7 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
         # Executed?
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
-        d = json.load(open(out_path))
+        d = json.load(open(out_path))[datawsname]
         self._checkData(d, E, I, err)
         # test overwrite
         alg_test = run_algorithm(
@@ -76,7 +75,7 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
         # executed?
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
-        d = json.load(open(out_path))
+        d = json.load(open(out_path))[datawsname]
         self._checkData(d, E, I, err)
         self._checkData(d, E, I2, err2, ID="2")
         # Delete the output file
@@ -88,6 +87,7 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
         """ Test to Save one curve with a name specified by client
         """
         datawsname = "TestOneCurve"
+        plotname = "myplot"
         E, I, err = self._createOneCurve(datawsname)
         # Execute
         out_path = "tempout_curve_withname.json"
@@ -95,11 +95,11 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
             "SavePlot1DAsJson",
             InputWorkspace = datawsname,
             JsonFilename = out_path,
-            PlotName = "myplot")
+            PlotName = plotname)
         # executed?
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
-        d = json.load(open(out_path))
+        d = json.load(open(out_path))[plotname]
         self._checkData(d, E, I, err)
         # Delete the output file
         os.remove(out_path)

@@ -76,20 +76,19 @@ class SavePlot1DAsJson(PythonAlgorithm):
         return
 
     def _serialize(self, workspace, plotname):
-        wname = plotname or workspace.getName()
+        pname = plotname or workspace.getName()
         # init dictionary
         ishist = workspace.isHistogramData()
         plottype = "histogram" if ishist else "point"
         serialized = dict(
             type = plottype,
             data = dict(),
-            name = wname,
             )
         # loop over spectra
         for i in range(workspace.getNumberHistograms()):
             spectrum_no = workspace.getSpectrum(i).getSpectrumNo()
             # Why do we need label?
-            # label = "%s_spectrum_%d" % (wname, spectrum_no)
+            # label = "%s_spectrum_%d" % (pname, spectrum_no)
             # labels.append(label)
             # or title?
             # title = "%s - spectrum %d" % (workspace.getTitle(), spectrum_no)
@@ -116,7 +115,7 @@ class SavePlot1DAsJson(PythonAlgorithm):
             yunit = unit(workspace.getAxis(1)),
             )
         serialized['axes'] = axes
-        return serialized
+        return {pname: serialized}
 
 
 # Register algorithm with Mantid
