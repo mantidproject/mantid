@@ -4530,23 +4530,34 @@ ApplicationWindow *ApplicationWindow::open(const QString &fn,
 
 void ApplicationWindow::openRecentFile(int index) {
   QString fn = recentFilesMenu->text(index);
-  int pos = fn.find(" ", 0);
-  fn = fn.right(fn.length() - pos - 1);
 
-  QFile f(fn);
-  if (!f.exists()) {
-    QMessageBox::critical(
-        this, tr("MantidPlot - File Open Error"), // Mantid
-        tr("The file: <b> %1 </b> <p>is not there anymore!"
-           "<p>It will be removed from the list of recent files.")
-            .arg(fn));
-
-    recentFiles.remove(fn);
-    updateRecentFilesList();
-    return;
+  if (fn.find(",", 0) != std::string::npos) {
+    try {
+      int pos = fn.find(" ", 0);
+      fn = fn.right(fn.length() - pos - 1);
+      loadDataFileByName(fn);
+    } catch (Mantid::Kernel::Exception::NotFoundError &) {
+      throw;
+    }
   }
 
-  loadDataFileByName(fn);
+  else {
+    int pos = fn.find(" ", 0);
+    fn = fn.right(fn.length() - pos - 1);
+    QFile f(fn);
+    if (!f.exists()) {
+      QMessageBox::critical(
+          this, tr("MantidPlot - File Open Error"), // Mantid
+          tr("The file: <b> %1 </b> <p>is not there anymore!"
+             "<p>It will be removed from the list of recent files.")
+              .arg(fn));
+
+      recentFiles.remove(fn);
+      updateRecentFilesList();
+      return;
+    }
+    loadDataFileByName(fn);
+  }
   saveSettings(); // save new list of recent files
 }
 
