@@ -874,7 +874,7 @@ class CWSCDReductionControl(object):
 
     def set_hkl_to_peak(self, exp_number, scan_number, pt_number):
         """
-        # TODO/DOC!
+        Get HKL as _h, _k, _l from MDEventWorkspace.  It is for HB3A only
         :return:
         """
         print '[DB] It is called to set HKL to peak!'
