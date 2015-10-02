@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QRect>
 #include <QColor>
+#include <QPolygonF>
 
 class QMouseEvent;
 class QWheelEvent;
