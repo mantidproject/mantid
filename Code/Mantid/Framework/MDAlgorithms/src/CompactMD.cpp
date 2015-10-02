@@ -5,10 +5,14 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
 namespace {
+// helper method to create a string from min and max extents (with non-zero
+// signals)
+// ready to be used as the PBins for IntegrateMDHistoWorkspace algorithm in
+// exec.
 std::vector<std::string>
 createPBinStringVector(std::vector<Mantid::coord_t> minVector,
-                 std::vector<Mantid::coord_t> maxVector,
-                 IMDHistoWorkspace_sptr inputWs) {
+                       std::vector<Mantid::coord_t> maxVector,
+                       IMDHistoWorkspace_sptr inputWs) {
   size_t numDims = inputWs->getNumDims();
   std::vector<std::string> pBinStrVector;
   for (size_t iter = 0; iter < numDims; iter++) {
@@ -31,7 +35,32 @@ namespace MDAlgorithms {
 
 DECLARE_ALGORITHM(CompactMD)
 
-const std::string CompactMD::name() const { return "CompactMD"; }
+void CompactMD::findFirstNonZeroMinMaxExtents(
+    IMDHistoWorkspace_sptr inputWs, std::vector<Mantid::coord_t> &minVec,
+    std::vector<Mantid::coord_t> &maxVec) {
+  auto ws_iter = inputWs->createIterator();
+  while (ws_iter->next()) {
+    if (ws_iter->getSignal() == 0) {
+      // if signal is 0 then go to next index
+      continue;
+    } else {
+      // we have found a non-zero signal we need to compare
+      // the position of the bin with our Min and Max values
+      auto current_index = ws_iter->getLinearIndex();
+      auto current_center = inputWs->getCenter(current_index);
+      for (size_t index = 0; index < inputWs->getNumDims(); index++) {
+        if (current_center[index] > maxVec[index]) {
+          // set new maximum
+          maxVec[index] = current_center[index];
+        }
+        if (current_center[index] < minVec[index]) {
+          // set new minimum
+          minVec[index] = current_center[index];
+        }
+      }
+    }
+  }
+}
 
 void CompactMD::init() {
   // input workspace to compact
@@ -39,8 +68,8 @@ void CompactMD::init() {
                                                            Direction::Input),
                   "MDHistoWorkspace to compact");
   // output workspace that will have been compacted
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace", "",
-                                                      Direction::Output),
+  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Output compacted workspace");
 }
 void CompactMD::exec() {
@@ -52,52 +81,33 @@ void CompactMD::exec() {
   std::vector<Mantid::coord_t> maxVector;
 
   // fill the min/max vectors with values per dimension.
-  for (auto index = 0; index < nDimensions; index++) {
+  for (size_t index = 0; index < nDimensions; index++) {
     minVector.push_back(input_ws->getDimension(index)->getMaximum());
     maxVector.push_back(input_ws->getDimension(index)->getMinimum());
   }
   // start our search for the first non-zero signal index.
-  auto ws_iter = input_ws->createIterator();
-  while (ws_iter->next()) {
-    if (ws_iter->getSignal() == 0) {
-      continue;
-    } else {
-      auto current_index = ws_iter->getLinearIndex();
-      auto current_center = input_ws->getCenter(current_index);
-      for (auto index = 0; index < input_ws->getNumDims(); index++) {
-        if (current_center[index] > maxVector[index]) {
-          maxVector[index] = current_center[index];
-        }
-        if (current_center[index] < minVector[index]) {
-          minVector[index] = current_center[index];
-        }
-      }
-    }
-  }
-  std::cout << "minX : " << minVector[0] << " maxX : " << maxVector[0] << "\n";
-  std::cout << "minY : " << minVector[1] << " maxY : " << maxVector[1] << "\n";
-  std::cout << "minZ : " << minVector[2] << " maxZ : " << maxVector[2] << "\n";
+  findFirstNonZeroMinMaxExtents(input_ws, minVector, maxVector);
 
   auto pBinStrings = createPBinStringVector(minVector, maxVector, input_ws);
-  
-  auto cut_alg = this->createChildAlgorithm("CutMD");
+
+  // creating IntegrateMDHistoWorkspace algorithm to crop our workspace.
+  auto cut_alg = this->createChildAlgorithm("IntegrateMDHistoWorkspace");
   cut_alg->setProperty("InputWorkspace", input_ws);
   cut_alg->setProperty("OutputWorkspace", "temp");
-  for (size_t iter = 0; iter < input_ws->getNumDims(); iter++){
-      std::string propertyString = "P" + boost::lexical_cast<std::string>(iter+1) + "Bin";
-      cut_alg->setProperty(propertyString, pBinStrings[iter]);
+  // setting property PxBin depending on the number of dimensions the
+  // input workspace has.
+  for (size_t iter = 0; iter < input_ws->getNumDims(); iter++) {
+    std::string propertyString =
+        "P" + boost::lexical_cast<std::string>(iter + 1) + "Bin";
+    cut_alg->setProperty(propertyString, pBinStrings[iter]);
   }
   cut_alg->execute();
 
-  IMDWorkspace_sptr temp = cut_alg->getProperty("OutputWorkspace");
+  // retrieve the output workspace from IntegrateMDHistoWorkspace
+  IMDHistoWorkspace_sptr temp = cut_alg->getProperty("OutputWorkspace");
   out_ws = temp;
-
+  // set output workspace of CompactMD to output of IntegrateMDHistoWorkspace
   this->setProperty("OutputWorkspace", out_ws);
-}
-
-IMDHistoWorkspace_sptr
-CompactMD::compactWorkspace(IMDHistoWorkspace_sptr workspace) {
-  return workspace;
 }
 }
 }
