@@ -107,10 +107,13 @@ public:
     MantidVec E;
     for (size_t s = 0; s < nspec; s++) {
       for (size_t t = 0; t < maxt; t++) {
-        double x = static_cast<double>(t) / maxt;
+        double x = static_cast<double>(t) / static_cast<double>(maxt);
         double e = exp(-x / tau);
         X.push_back(x);
-        Y.push_back(a * sin(w * x + static_cast<double>(s) * M_PI / nspec) * e +
+        Y.push_back(a * sin(w * x +
+                            static_cast<double>(s) * M_PI /
+                                static_cast<double>(nspec)) *
+                        e +
                     e);
         E.push_back(0.005);
       }

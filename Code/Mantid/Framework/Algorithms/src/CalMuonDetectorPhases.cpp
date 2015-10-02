@@ -233,7 +233,7 @@ API::ITableWorkspace_sptr CalMuonDetectorPhases::extractDetectorInfo(
     }
     // Copy parameters to new table
     API::TableRow row = tab->appendRow();
-    row << s << asym << phase;
+    row << static_cast<int>(s) << asym << phase;
   }
 
   return tab;
