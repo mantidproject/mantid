@@ -162,6 +162,24 @@ public:
    * Save settings (normally when closing this widget).
    */
   virtual void saveSettings() const = 0;
+
+  /**
+   * Forget the current center-of-rotation selection and set to
+   * default.
+   */
+  virtual void resetCoR() = 0;
+
+  /**
+   * Forget the current region-of-interest selection and set to
+   * default (all).
+   */
+  virtual void resetROI() = 0;
+
+  /**
+   * Forget the current selection of region-for-normalization and set
+   * to default (none).
+   */
+  virtual void resetNormArea() = 0;
 };
 
 } // namespace CustomInterfaces

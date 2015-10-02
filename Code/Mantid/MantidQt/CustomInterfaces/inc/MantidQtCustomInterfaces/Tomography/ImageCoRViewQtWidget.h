@@ -12,6 +12,7 @@
 
 // forward declarations for Qt
 class QWidget;
+class QPixmap;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -80,9 +81,17 @@ public:
 
   void saveSettings() const;
 
+  void resetCoR();
+  void resetROI();
+  void resetNormArea();
+
 protected:
   void initLayout();
   void showImg();
+
+  void grabCoRFromWidgets();
+  void grabROIFromWidgets();
+  void grabNormAreaFromWidgets();
 
 private slots:
   void browseImgClicked();
@@ -116,6 +125,7 @@ private:
   void showProjectionImage(const Mantid::API::WorkspaceGroup_sptr &wsg,
                            size_t idx);
 
+  void refreshROIetAl();
   void refreshCoR();
   void refreshROI();
   void refreshNormArea();
@@ -123,6 +133,10 @@ private:
   Ui::ImageSelectCoRAndRegions m_ui;
 
   Mantid::API::WorkspaceGroup_sptr m_stack;
+
+  /// this holds the base image on top of which rectangles and other
+  /// objects are drawn
+  boost::scoped_ptr<QPixmap> m_basePixmap;
 
   /// persistent settings
   static const std::string m_settingsGroup;

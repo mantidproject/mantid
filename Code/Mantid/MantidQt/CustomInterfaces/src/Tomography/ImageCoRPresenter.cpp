@@ -180,17 +180,22 @@ void ImageCoRPresenter::processFinishedROI() {}
 
 void ImageCoRPresenter::processFinishedNormalization() {}
 
-void ImageCoRPresenter::processResetCoR() {}
+void ImageCoRPresenter::processResetCoR() {
+  m_view->resetCoR();
+}
 
-void ImageCoRPresenter::processResetROI() {}
+void ImageCoRPresenter::processResetROI() {
+  m_view->resetROI();
+}
 
-void ImageCoRPresenter::processResetNormalization() {}
+void ImageCoRPresenter::processResetNormalization() {
+  m_view->resetNormArea();
+}
 
 void ImageCoRPresenter::processShutDown() { m_view->saveSettings(); }
 
 Mantid::API::WorkspaceGroup_sptr
 ImageCoRPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
-  // TODO: go through directory
   const std::string wsName = "__stack_fits_viewer_tomography_gui";
   auto &ads = Mantid::API::AnalysisDataService::Instance();
   if (ads.doesExist(wsName)) {

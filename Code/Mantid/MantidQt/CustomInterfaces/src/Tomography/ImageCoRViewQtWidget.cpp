@@ -46,6 +46,9 @@ void ImageCoRViewQtWidget::initLayout() {
   setupConnections();
 
   initParamWidgets(1, 1);
+  grabCoRFromWidgets();
+  grabROIFromWidgets();
+  grabNormAreaFromWidgets();
 
   // presenter that knows how to handle a IImageCoRView should take care
   // of all the logic. Note the view needs to now the concrete presenter here
@@ -81,63 +84,161 @@ void ImageCoRViewQtWidget::setupConnections() {
 
   // parameter (points) widgets
   connect(m_ui.spinBox_cor_x, SIGNAL(valueChanged(int)), this,
-          SLOT(valueUpdateCoR(int)));
+          SLOT(valueUpdatedCoR(int)));
   connect(m_ui.spinBox_cor_y, SIGNAL(valueChanged(int)), this,
-          SLOT(valueUpdateCoR(int)));
+          SLOT(valueUpdatedCoR(int)));
 
   connect(m_ui.spinBox_roi_top_x, SIGNAL(valueChanged(int)), this,
-          SLOT(valueUpdateROI(int)));
+          SLOT(valueUpdatedROI(int)));
   connect(m_ui.spinBox_roi_top_y, SIGNAL(valueChanged(int)), this,
-          SLOT(valueUpdateROI(int)));
+          SLOT(valueUpdatedROI(int)));
   connect(m_ui.spinBox_roi_bottom_x, SIGNAL(valueChanged(int)), this,
-          SLOT(valueUpdateROI(int)));
+          SLOT(valueUpdatedROI(int)));
   connect(m_ui.spinBox_roi_bottom_y, SIGNAL(valueChanged(int)), this,
-          SLOT(valueUpdateROI(int)));
+          SLOT(valueUpdatedROI(int)));
 
   connect(m_ui.spinBox_norm_top_x, SIGNAL(valueChanged(int)), this,
-          SLOT(valueUpdateNormArea(int)));
+          SLOT(valueUpdatedNormArea(int)));
   connect(m_ui.spinBox_norm_top_y, SIGNAL(valueChanged(int)), this,
-          SLOT(valueUpdateNormArea(int)));
+          SLOT(valueUpdatedNormArea(int)));
   connect(m_ui.spinBox_norm_bottom_x, SIGNAL(valueChanged(int)), this,
-          SLOT(valueUpdateNormArea(int)));
+          SLOT(valueUpdatedNormArea(int)));
   connect(m_ui.spinBox_norm_bottom_y, SIGNAL(valueChanged(int)), this,
-          SLOT(valueUpdateNormArea(int)));
+          SLOT(valueUpdatedNormArea(int)));
 }
 
 void ImageCoRViewQtWidget::valueUpdatedCoR(int) {
-  m_params.cor = Mantid::Kernel::V2D(m_ui.spinBox_cor_x->value(),
-                                     m_ui.spinBox_cor_y->value());
-  refreshCoR();
+  grabCoRFromWidgets();
+  refreshROIetAl();
 }
 
 void ImageCoRViewQtWidget::valueUpdatedROI(int) {
+  grabCoRFromWidgets();
+  refreshROIetAl();
+}
+
+void ImageCoRViewQtWidget::valueUpdatedNormArea(int) {
+  grabNormAreaFromWidgets();
+  refreshROIetAl();
+}
+
+void ImageCoRViewQtWidget::grabCoRFromWidgets() {
+  m_params.cor = Mantid::Kernel::V2D(m_ui.spinBox_cor_x->value(),
+                                     m_ui.spinBox_cor_y->value());
+}
+
+void ImageCoRViewQtWidget::grabROIFromWidgets() {
   m_params.roi =
       std::make_pair(Mantid::Kernel::V2D(m_ui.spinBox_roi_top_x->value(),
                                          m_ui.spinBox_roi_top_y->value()),
                      Mantid::Kernel::V2D(m_ui.spinBox_roi_bottom_x->value(),
                                          m_ui.spinBox_roi_bottom_y->value()));
-  refreshROI();
 }
 
-void ImageCoRViewQtWidget::valueUpdatedNormArea(int) {
+void ImageCoRViewQtWidget::grabNormAreaFromWidgets() {
   m_params.normalizationRegion =
       std::make_pair(Mantid::Kernel::V2D(m_ui.spinBox_norm_top_x->value(),
                                          m_ui.spinBox_norm_top_y->value()),
                      Mantid::Kernel::V2D(m_ui.spinBox_norm_bottom_x->value(),
                                          m_ui.spinBox_norm_bottom_y->value()));
-  refreshNormArea();
 }
 
 void ImageCoRViewQtWidget::refreshCoR() {
-  // TODO: display proper symbol
+  const QPixmap *pp = m_ui.label_img->pixmap();
+  if (!pp)
+    return;
+
+  grabCoRFromWidgets();
+  // TODO: display nicer symbol?
+
+  QPixmap toDisplay(*m_basePixmap.get());
+  QPainter painter(&toDisplay);
+  QPen pen(Qt::red);
+  painter.setPen(pen);
+  painter.drawLine(m_params.cor.X() - 5, m_params.cor.Y(), m_params.cor.X() + 5,
+                   m_params.cor.Y());
+  painter.drawLine(m_params.cor.X(), m_params.cor.Y() - 5, m_params.cor.X(),
+                   m_params.cor.Y() + 5);
+  m_ui.label_img->setPixmap(toDisplay);
+}
+
+void ImageCoRViewQtWidget::refreshROIetAl() {
+
+  const QPixmap *pp = m_ui.label_img->pixmap();
+  if (!pp)
+    return;
+
+  grabCoRFromWidgets();
+  grabROIFromWidgets();
+  grabNormAreaFromWidgets();
+
+  QPixmap toDisplay(*m_basePixmap.get());
+  QPainter painter(&toDisplay);
+
+  QPen penCoR(Qt::red);
+  painter.setPen(penCoR);
+  painter.drawLine(m_params.cor.X() - 5, m_params.cor.Y(), m_params.cor.X() + 5,
+                   m_params.cor.Y());
+  painter.drawLine(m_params.cor.X(), m_params.cor.Y() - 5, m_params.cor.X(),
+                   m_params.cor.Y() + 5);
+
+  QPen penROI(Qt::green);
+  painter.setPen(penROI);
+  painter.drawRect(m_params.roi.first.X(), m_params.roi.first.Y(),
+                   m_params.roi.second.X() - m_params.roi.first.X(),
+                   m_params.roi.second.Y() - m_params.roi.first.Y());
+
+  QPen penNA(Qt::yellow);
+  painter.setPen(penNA);
+  painter.drawRect(m_params.normalizationRegion.first.X(),
+                   m_params.normalizationRegion.first.Y(),
+                   m_params.normalizationRegion.second.X() -
+                       m_params.normalizationRegion.first.X(),
+                   m_params.normalizationRegion.second.Y() -
+                       m_params.normalizationRegion.first.Y());
+
+  m_ui.label_img->setPixmap(toDisplay);
 }
 
 void ImageCoRViewQtWidget::refreshROI() {
+  const QPixmap *pp = m_ui.label_img->pixmap();
+  if (!pp)
+    return;
+
+  grabROIFromWidgets();
   // TODO: display proper symbol
+
+  // QPixmap const *pm = m_ui.label_img->pixmap();
+  QPixmap toDisplay(*m_basePixmap.get());
+  QPainter painter(&toDisplay);
+  QPen pen(Qt::green);
+  painter.setPen(pen);
+  painter.drawRect(m_params.roi.first.X(), m_params.roi.first.Y(),
+                   m_params.roi.second.X() - m_params.roi.first.X(),
+                   m_params.roi.second.Y() - m_params.roi.first.Y());
+  m_ui.label_img->setPixmap(toDisplay);
 }
 
 void ImageCoRViewQtWidget::refreshNormArea() {
   // TODO: display proper symbol
+  const QPixmap *pp = m_ui.label_img->pixmap();
+  if (!pp)
+    return;
+
+  grabNormAreaFromWidgets();
+
+  // QPixmap const *pm = m_ui.label_img->pixmap();
+  QPixmap toDisplay(*m_basePixmap.get());
+  QPainter painter(&toDisplay);
+  QPen pen(Qt::yellow);
+  painter.setPen(pen);
+  painter.drawRect(m_params.normalizationRegion.first.X(),
+                   m_params.normalizationRegion.first.Y(),
+                   m_params.normalizationRegion.second.X() -
+                       m_params.normalizationRegion.first.X(),
+                   m_params.normalizationRegion.second.Y() -
+                       m_params.normalizationRegion.first.Y());
+  m_ui.label_img->setPixmap(toDisplay);
 }
 
 void ImageCoRViewQtWidget::setParams(ImageStackPreParams &params) {
@@ -151,38 +252,33 @@ void ImageCoRViewQtWidget::initParamWidgets(size_t maxWidth, size_t maxHeight) {
 
   m_ui.spinBox_cor_x->setMinimum(0);
   m_ui.spinBox_cor_x->setMaximum(width - 1);
-  m_ui.spinBox_cor_x->setValue(0);
   m_ui.spinBox_cor_y->setMinimum(0);
   m_ui.spinBox_cor_y->setMaximum(height - 1);
-  m_ui.spinBox_cor_y->setValue(0);
-
-  m_ui.spinBox_roi_bottom_x->setMinimum(0);
-  m_ui.spinBox_roi_bottom_x->setMaximum(width - 1);
-  m_ui.spinBox_roi_bottom_x->setValue(0);
-  m_ui.spinBox_roi_bottom_y->setMinimum(0);
-  m_ui.spinBox_roi_bottom_y->setMaximum(height - 1);
-  m_ui.spinBox_roi_bottom_y->setValue(0);
+  resetCoR();
 
   m_ui.spinBox_roi_top_x->setMinimum(0);
   m_ui.spinBox_roi_top_x->setMaximum(width - 1);
-  m_ui.spinBox_roi_top_x->setValue(0);
   m_ui.spinBox_roi_top_y->setMinimum(0);
   m_ui.spinBox_roi_top_y->setMaximum(height - 1);
-  m_ui.spinBox_roi_top_y->setValue(0);
 
-  m_ui.spinBox_norm_bottom_x->setMinimum(0);
-  m_ui.spinBox_norm_bottom_x->setMaximum(width - 1);
-  m_ui.spinBox_norm_bottom_x->setValue(0);
-  m_ui.spinBox_norm_bottom_y->setMinimum(0);
-  m_ui.spinBox_norm_bottom_y->setMaximum(height - 1);
-  m_ui.spinBox_norm_bottom_y->setValue(0);
+  m_ui.spinBox_roi_bottom_x->setMinimum(0);
+  m_ui.spinBox_roi_bottom_x->setMaximum(width - 1);
+  m_ui.spinBox_roi_bottom_y->setMinimum(0);
+  m_ui.spinBox_roi_bottom_y->setMaximum(height - 1);
+
+  resetROI();
 
   m_ui.spinBox_norm_top_x->setMinimum(0);
   m_ui.spinBox_norm_top_x->setMaximum(width - 1);
-  m_ui.spinBox_norm_top_x->setValue(0);
   m_ui.spinBox_norm_top_y->setMinimum(0);
   m_ui.spinBox_norm_top_y->setMaximum(height - 1);
-  m_ui.spinBox_norm_top_y->setValue(0);
+
+  m_ui.spinBox_norm_bottom_x->setMinimum(0);
+  m_ui.spinBox_norm_bottom_x->setMaximum(width - 1);
+  m_ui.spinBox_norm_bottom_y->setMinimum(0);
+  m_ui.spinBox_norm_bottom_y->setMaximum(height - 1);
+
+  resetNormArea();
 }
 
 void ImageCoRViewQtWidget::setParamWidgets(ImageStackPreParams &params) {
@@ -237,6 +333,29 @@ void ImageCoRViewQtWidget::browseImgClicked() {
 
 void ImageCoRViewQtWidget::updateFromImagesSlider(int /* current */) {
   m_presenter->notify(IImageCoRPresenter::UpdateImgIndex);
+}
+
+void ImageCoRViewQtWidget::resetCoR() {
+  int midx =
+      (m_ui.spinBox_cor_x->minimum() + m_ui.spinBox_cor_x->maximum()) / 2;
+  m_ui.spinBox_cor_x->setValue(midx);
+  int midy =
+      (m_ui.spinBox_cor_y->minimum() + m_ui.spinBox_cor_y->maximum()) / 2;
+  m_ui.spinBox_cor_y->setValue(midy);
+}
+
+void ImageCoRViewQtWidget::resetROI() {
+  m_ui.spinBox_roi_top_x->setValue(0);
+  m_ui.spinBox_roi_top_y->setValue(0);
+  m_ui.spinBox_roi_bottom_x->setValue(m_ui.spinBox_roi_bottom_x->maximum());
+  m_ui.spinBox_roi_bottom_y->setValue(m_ui.spinBox_roi_bottom_y->maximum());
+}
+
+void ImageCoRViewQtWidget::resetNormArea() {
+  m_ui.spinBox_norm_top_x->setValue(0);
+  m_ui.spinBox_norm_top_y->setValue(0);
+  m_ui.spinBox_norm_bottom_x->setValue(0);
+  m_ui.spinBox_norm_bottom_y->setValue(0);
 }
 
 size_t ImageCoRViewQtWidget::currentImgIndex() const {
@@ -417,6 +536,7 @@ void ImageCoRViewQtWidget::showProjectionImage(
     pix.fill(QColor(0, 0, 0));
     m_ui.label_img->setPixmap(pix);
     m_ui.label_img->show();
+    m_basePixmap.reset(new QPixmap(pix));
     return;
   }
 
@@ -437,13 +557,20 @@ void ImageCoRViewQtWidget::showProjectionImage(
   }
 
   // paint and show image
-  QPainter painter;
-  QPixmap pix(static_cast<int>(width), static_cast<int>(height));
-  painter.begin(&pix);
-  painter.drawImage(0, 0, rawImg);
-  painter.end();
+  // direct from image
+  QPixmap pix = QPixmap::fromImage(rawImg);
   m_ui.label_img->setPixmap(pix);
   m_ui.label_img->show();
+  m_basePixmap.reset(new QPixmap(pix));
+  // Alternative, drawing with a painter:
+  // QPixmap pix(static_cast<int>(width), static_cast<int>(height));
+  // QPainter painter;
+  // painter.begin(&pix);
+  // painter.drawImage(0, 0, rawImg);
+  // painter.end();
+  // m_ui.label_img->setPixmap(pix);
+  // m_ui.label_img->show();
+  // m_basePixmap.reset(new QPixmap(pix));
 }
 
 void ImageCoRViewQtWidget::readSettings() {
