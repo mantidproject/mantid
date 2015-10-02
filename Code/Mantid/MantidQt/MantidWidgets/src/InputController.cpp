@@ -6,7 +6,7 @@
 #include <QCursor>
 #include <QApplication>
 
-#include <iostream>
+#include <cmath>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -509,8 +509,6 @@ void InputControllerDrawAndErase::signalLeftClick()
   }
   else
   {
-    //auto br = poly.boundingRect();
-    //std::cerr << "Draw " << br.left() << ' ' << br.top() << ' ' << br.right() << ' ' << br.bottom() << std::endl;
     emit draw(poly);
   }
 }
@@ -518,8 +516,6 @@ void InputControllerDrawAndErase::signalLeftClick()
 void InputControllerDrawAndErase::signalRightClick()
 {
   auto poly = m_rect.translated(m_pos);
-  //auto br = poly.boundingRect();
-  //std::cerr << "Erase " << br.left() << ' ' << br.top() << ' ' << br.right() << ' ' << br.bottom() << std::endl;
   emit erase(poly);
 }
 
