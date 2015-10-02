@@ -44,7 +44,7 @@ public:
   virtual void init();
   virtual void exec();
   /// Algorithm's name for identification
-  const std::string CompactMD::name() const { return "CompactMD"; }
+  const std::string name() const { return "CompactMD"; }
   /// Summary of algorithms purpose
   const std::string summary() const {
     return "Crops an MDHistoWorkspace based on the first non-zero signals "
