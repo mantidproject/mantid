@@ -56,9 +56,11 @@ AlgorithmDialog::AlgorithmDialog(QWidget* parent) :
 AlgorithmDialog::~AlgorithmDialog()
 {
   m_observers.clear();
-  if(!m_okButton->isEnabled()) {
-    // Keep open was checked but closing while algorithm is running
-    this->stopObserving(m_algorithm);
+  if(isShowKeepOpen() && m_okButton) {
+    if(!m_okButton->isEnabled()) {
+      // Keep open was checked but closing while algorithm is running
+      this->stopObserving(m_algorithm);
+    }
   }
 }
 
