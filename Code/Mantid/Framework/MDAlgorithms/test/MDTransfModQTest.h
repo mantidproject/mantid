@@ -4,6 +4,7 @@
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -187,9 +188,12 @@ public:
 
     TSM_ASSERT_EQUALS(convResult,0,convResult.size());
 
+    // Check if the correct display normalization is set
+    auto mdEventWorkspace = Mantid::DataObjects::MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
+    ModQTransf.setDisplayNormalization(mdEventWorkspace, ws2Dbig);
+    TSM_ASSERT_EQUALS("Should be set to number events normalization", mdEventWorkspace->displayNormalization(), Mantid::API::VolumeNormalization);
+    TSM_ASSERT_EQUALS("Should be set to number events normalization", mdEventWorkspace->displayNormalizationHisto(), Mantid::API::NumEventsNormalization);
   }
-
-
 
   MDTransfModQTest()
   {

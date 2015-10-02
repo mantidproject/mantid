@@ -64,8 +64,10 @@ public:
                         const std::string &vanNo, const std::string &ceriaNo);
 
   /// the focusing hard work that a worker / thread will run
-  void doFocusRun(const std::string &dir, const std::string &outFilename,
-                  const std::string &runNo, int bank);
+  void doFocusRun(const std::string &dir,
+                  const std::vector<std::string> &outFilenames,
+                  const std::string &runNo, const std::vector<bool> &banks,
+                  const std::string &specNos, const std::string &dgFile);
 
 protected:
   void initialize();
@@ -76,7 +78,10 @@ protected:
   void processStart();
   void processLoadExistingCalib();
   void processCalcCalib();
-  void processFocusRun();
+  void processFocusBasic();
+  void processFocusCropped();
+  void processFocusTexture();
+  void processResetFocus();
   void processLogMsg();
   void processInstChange();
   void processShutDown();
@@ -112,17 +117,44 @@ private:
   /// @name Focusing related private methods
   //@{
   /// this may also need to be mocked up in tests
-  virtual void startAsyncFocusWorker(const std::string &dir,
-                                     const std::string &outFilename,
-                                     const std::string &runNo, int bank);
+  void startFocusing(const std::string &runNo, const std::vector<bool> &banks,
+                     const std::string &specNos = "",
+                     const std::string &dgFile = "");
 
-  void inputChecksBeforeFocus(const std::string &runNo, int bank);
+  void startAsyncFocusWorker(const std::string &dir,
+                             const std::vector<std::string> &outFilenames,
+                             const std::string &runNo,
+                             const std::vector<bool> &banks,
+                             const std::string &specNos,
+                             const std::string &dgFile);
 
-  std::string outputFocusFilename(const std::string &runNo, int bank);
+  void inputChecksBeforeFocusBasic(const std::string &runNo,
+                                   const std::vector<bool> &banks);
+  void inputChecksBeforeFocusCropped(const std::string &runNo,
+                                     const std::vector<bool> &banks,
+                                     const std::string &specNos);
+  void inputChecksBeforeFocusTexture(const std::string &runNo,
+                                     const std::string &dgfile);
+  void inputChecksBeforeFocus();
+  void inputChecksBanks(const std::vector<bool> &banks);
+
+  std::vector<std::string> outputFocusFilenames(const std::string &runNo,
+                                                const std::vector<bool> &banks);
+
+  std::string outputFocusCroppedFilename(const std::string &runNo);
+
+  std::vector<std::string>
+  outputFocusTextureFilenames(const std::string &runNo,
+                              const std::vector<size_t> &bankIDs);
+
+  void loadDetectorGroupingCSV(const std::string &dgFile,
+                               std::vector<size_t> &bankIDs,
+                               std::vector<std::string> &specs);
 
   void doFocusing(const EnggDiffCalibSettings &cs,
                   const std::string &fullFilename, const std::string &runNo,
-                  int bank);
+                  size_t bank, const std::string &specNos,
+                  const std::string &dgFile);
 
   void loadOrCalcVanadiumWorkspaces(
       const std::string &vanNo, const std::string &inputDirCalib,
@@ -150,6 +182,9 @@ private:
   /// whether to allow users to give the output calibration filename
   const static bool g_askUserCalibFilename;
 
+  // name of the workspace with the vanadium integration (of spectra)
+  static const std::string g_vanIntegrationWSName;
+
   QThread *m_workerThread;
 
   /// true if the last calibration completed successfully
@@ -167,4 +202,4 @@ private:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-# endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESENTER_H_
+#endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESENTER_H_

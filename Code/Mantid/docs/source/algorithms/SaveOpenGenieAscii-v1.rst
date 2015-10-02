@@ -16,9 +16,14 @@ OpenGenie ASCII file with data saved inside. The algorithm will
 assume focused data (which contains single spectrum) has been
 provided, but if a workspace with multiple spectra is passed, the
 algorithm will save the first spectrum, while ignoring the rest.
-The algorithms will write out the x, y and e axis for each spectra.
-The x, y, e axis are sorted by ascending alphabetical order within
-the file, which matches the format of OpenGenie ASCII file.
+The algorithms will write out the x, y and e axis for each spectra
+along with all the sample logs which are available in the nexus
+file which is provided. The x, y, e axis and the sample logs are
+sorted by ascending alphabetical order within the file, which
+matches the format of OpenGenie ASCII file. The`ntc` field is
+also included, which is required in order to run the generated
+file on OpenGenie, the value for `ntc` is the number of bins of
+the provided workspace.
 
 Usage
 -----
