@@ -46,7 +46,7 @@ AlgorithmDialog::AlgorithmDialog(QWidget* parent) :
   m_enabled(), m_disabled(), m_strMessage(""), m_keepOpen(false), 
   m_msgAvailable(false), m_isInitialized(false),   m_autoParseOnInit(true),  m_validators(), 
   m_noValidation(), m_inputws_opts(), m_outputws_fields(), m_wsbtn_tracker(), 
-  m_keepOpenCheckBox(NULL), m_okButton(NULL)
+  m_keepOpenCheckBox(NULL), m_okButton(NULL), m_observers()
 {
 }
 
@@ -56,7 +56,6 @@ AlgorithmDialog::AlgorithmDialog(QWidget* parent) :
 AlgorithmDialog::~AlgorithmDialog()
 {
   m_observers.clear();
-  this->stopObserving(m_algorithm);
 }
 
 /**
@@ -820,6 +819,7 @@ void AlgorithmDialog::keepOpenChanged(int state)
 
 
 //-------------------------------------------------------------------------------------------------
+
 /**
  * Execute the underlying algorithm
  */
@@ -829,13 +829,20 @@ void AlgorithmDialog::executeAlgorithmAsync()
   try
   {
     // Add any custom AlgorithmObservers to the algorithm
-    for(auto it = m_observers.begin(); it != m_observers.end(); ++it)
+    for(auto it = m_observers.begin(); it != m_observers.end(); ++it) {
       (*it)->observeAll(algToExec);
+    }
 
-    this->observeFinish(algToExec);
-    this->observeError(algToExec);
-
+    // Only need to observe finish events if we are staying open
+    if(isShowKeepOpen()) {
+      this->observeFinish(algToExec);
+      this->observeError(algToExec);
+    }
+    else {
+      this->stopObserving(algToExec);
+    }
     algToExec->executeAsync();
+
     if (m_okButton) {
       m_okButton->setEnabled(false);
     }
