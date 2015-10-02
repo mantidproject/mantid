@@ -65,7 +65,37 @@ public:
 
   }
 
-  MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt, std::string units) {
+  void testBadWorkspaceUnits() {
+
+    auto ws = createWorkspace(1, 4, "Wavelength");
+    auto calc = AlgorithmManager::Instance().create("CalMuonDetectorPhases");
+    calc->initialize();
+    calc->setChild(true);
+    calc->setProperty("InputWorkspace", ws);
+    calc->setPropertyValue("Frequency", "25");
+    calc->setPropertyValue("DataFitted", "fit");
+    calc->setPropertyValue("DetectorTable", "tab");
+
+    TS_ASSERT_THROWS(calc->execute(), std::runtime_error);
+    TS_ASSERT(!calc->isExecuted());
+  }
+
+  void testNoFrequencySupplied() {
+
+    auto ws = createWorkspace(1, 4, "Microseconds");
+    auto calc = AlgorithmManager::Instance().create("CalMuonDetectorPhases");
+    calc->initialize();
+    calc->setChild(true);
+    calc->setProperty("InputWorkspace", ws);
+    calc->setPropertyValue("DataFitted", "fit");
+    calc->setPropertyValue("DetectorTable", "tab");
+
+    TS_ASSERT_THROWS(calc->execute(), std::runtime_error);
+    TS_ASSERT(!calc->isExecuted());
+  }
+
+  MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt,
+                                       std::string units) {
 
     // Create a fake muon dataset
     double a = 0.1; // Amplitude of the oscillations
