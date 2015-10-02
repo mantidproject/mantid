@@ -49,13 +49,14 @@ class PeakInfo(object):
         # Define class variable
         self._myParent = parent
 
-        self._myPeakWSKey = (None, None, None)
-        self._myPeakIndex = None
-        self._myPeak = None
-
         self._myExpNumber = None
         self._myScanNumber = None
         self._myPtNumber = None
+
+        self._myPeakWSKey = (None, None, None)
+        self._myPeakIndex = None
+        # FIXME/TODO Get rid of holding of peak workspace instance
+        self._myPeak = None
 
         self._myLastPeakUB = None
 
@@ -75,6 +76,7 @@ class PeakInfo(object):
 
         :return:
         """
+        raise RuntimeError('Raw data workspace shall not be called.  Method will be removed after testing.')
         assert isinstance(self._myPeakWSKey, tuple)
         exp_number, scan_number, pt_number = self._myPeakWSKey
         data_ws = self._myParent.get_raw_data_workspace(exp_number, scan_number, pt_number)
@@ -128,6 +130,17 @@ class PeakInfo(object):
             raise RuntimeError(run_err)
 
         self._myPeak = peak
+
+        return
+
+    def set_md_ws(self, md_ws):
+        """
+        TODO / DOC
+        :param md_ws:
+        :return:
+        """
+        print '[DB] Type of input MD workspace is %s' % (str(type(md_ws)))
+        self._myMdWs = md_ws
 
         return
 
@@ -478,7 +491,6 @@ class CWSCDReductionControl(object):
             OutputWorkspace=exp_info_ws_name,
             DetectorTableWorkspace=virtual_instrument_info_table_name)
 
-
         # Load XML file to MD
         pt_md_ws_name = get_single_pt_md_name(exp_number, scan_number, pt_number)
         api.ConvertCWSDExpToMomentum(InputWorkspace=exp_info_ws_name,
@@ -491,6 +503,8 @@ class CWSCDReductionControl(object):
         api.FindPeaksMD(InputWorkspace=pt_md_ws_name, MaxPeaks=10,
                         DensityThresholdFactor=0.01, OutputWorkspace=pt_peak_ws_name)
         peak_ws = AnalysisDataService.retrieve(pt_peak_ws_name)
+        pt_md_ws = AnalysisDataService.retrieve(pt_md_ws_name)
+        self._myPtMDDict[(exp_number, scan_number, pt_number)] = pt_md_ws
 
         num_peaks = peak_ws.getNumberPeaks()
         if num_peaks != 1:
@@ -499,6 +513,14 @@ class CWSCDReductionControl(object):
             return False, err_msg
         else:
             self._add_ub_peak_ws(exp_number, scan_number, pt_number, peak_ws)
+            status, ret_obj = self.add_peak_info(exp_number, scan_number, pt_number)
+            if status is True:
+                pass
+                # peak_info = ret_obj
+                # peak_info.set_md_ws(pt_md_ws)
+            else:
+                err_msg = ret_obj
+                return False, err_msg
 
         return True, ''
 
@@ -564,6 +586,26 @@ class CWSCDReductionControl(object):
 
         return array2d
 
+    def get_sample_log_value(self, exp_number, scan_number, pt_number, log_name):
+        """
+        TODO/DOC
+        :param exp_number:
+        :param scan_number:167
+        :param pt_number:
+        :param log_name:
+        :return:
+        """
+        assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int)
+        assert isinstance(pt_number, int)
+        assert isinstance(log_name, str)
+        try:
+            md_ws = self._myPtMDDict[(exp_number, scan_number, pt_number)]
+        except KeyError as ke:
+            return 'Unable to find log value %s due to %s.' % (log_name, str(ke))
+
+        return md_ws.getExperimentInfo(0).run().getProperty(log_name).value
+
     def get_peak_info(self, exp_number, scan_number, pt_number):
         """
         DOC!
@@ -572,10 +614,10 @@ class CWSCDReductionControl(object):
         :param pt_number:
         :return:
         """
-        if (exp_number, scan_number, pt_number) not in self._myPeakInfoDict:
+        if (exp_number, scan_number, pt_number) not in self._myUBPeakWSDict:  # self._myPeakInfoDict:
             err_msg = 'Unable to find PeakInfo for Exp %d Scan %d Pt %d. ' \
                       'Existing keys are %s' % (exp_number, scan_number, pt_number,
-                                                str(self._myPeakInfoDict.keys()))
+                                                str(self._myUBPeakWSDict.keys()))
             return False, err_msg
 
         return True, self._myPeakInfoDict[(exp_number, scan_number, pt_number)]
@@ -643,7 +685,12 @@ class CWSCDReductionControl(object):
         api.CopySample(InputWorkspace=ub_peak_ws,
                        OutputWorkspace=target_peak_ws.name(),
                        CopyName=False, CopyMaterial=False, CopyEnvironment=False,
-                       CopyShape=False,CopyLattice=True, CopyOrientationOnly=False)
+                       CopyShape=False, CopyLattice=True, CopyOrientationOnly=False)
+        also()
+
+        # numpy.ndarray (3, 3)
+        ub = srcpeak.sample().getOrientedLattice().getUB()
+        api.SetUB(Workspace=target_peak_ws, UB=numpy.array([1, 0, 0, 0, 2, 0, 0, 0, 3]))
 
         numindexed = api.CalculatePeaksHKL(PeaksWorkspace=target_peak_ws, Overwrite=True)
 
@@ -884,8 +931,8 @@ class CWSCDReductionControl(object):
             err_msg = peak_info
             return False, err_msg
 
-        md_ws = peak_info.get_md_ws()
-        assert md_ws.getNumExperimentInfo == 1
+        md_ws = self._myPtMDDict[(exp_number, scan_number, pt_number)]
+        assert md_ws.getNumExperimentInfo() == 1
         exp_info = md_ws.getExperimentInfo(0)
 
         try:

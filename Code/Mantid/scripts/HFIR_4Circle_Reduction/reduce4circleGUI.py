@@ -84,10 +84,12 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_cal_ub_matrix)
         self.connect(self.ui.pushButton_acceptUB, QtCore.SIGNAL('clicked()'),
                      self.doAcceptCalUB)
-        self.connect(self.ui.pushButton_resetCalUB, QtCore.SIGNAL('clicked()'),
-                     self.doResetCalUB)
+        self.connect(self.ui.pushButton_indexUBPeaks, QtCore.SIGNAL('clicked()'),
+                     self.do_index_ub_peaks)
 
         # Tab 'Slice View'
+        self.connect(self.ui.pushButton_setUBSliceView, QtCore.SIGNAL('clicked()'),
+                     self.do_set_ub_sv)
         self.connect(self.ui.pushButton_process4SliceView, QtCore.SIGNAL('clicked()'),
                      self.do_process_for_sv)
 
@@ -117,12 +119,7 @@ class MainWindow(QtGui.QMainWindow):
         # Validator ... (NEXT)
 
         # Declaration of class variable
-        self._runID = None
-        self._expID = None
-        self._currPt = None
-        self._xmlwsbasename = None
-
-        # Some configuration
+        # some configuration
         self._homeSrcDir = os.getcwd()
         self._homeDir = os.getcwd()
 
@@ -341,7 +338,13 @@ class MainWindow(QtGui.QMainWindow):
         # END-FOR
 
         # Get lattice
-        a, b, c, alpha, beta, gamma = self._get_lattice_parameters()
+        status, ret_obj = self._get_lattice_parameters()
+        if status is True:
+            a, b, c, alpha, beta, gamma = ret_obj
+        else:
+            err_msg = ret_obj
+            self.pop_one_button_dialog(err_msg)
+            return
 
         # Calculate UB matrix
         status, ub_matrix = self._myControl.calculate_ub_matrix(peak_info_list, a, b, c, alpha, beta, gamma)
@@ -446,6 +449,12 @@ class MainWindow(QtGui.QMainWindow):
         # self.set_ub_peak_table(peak_info)
 
         return
+
+    def do_index_ub_peaks(self):
+        """ TODO/DOC
+        :return:
+        """
+        self._myControl.index_peak_ws(ub_peak_ws, target_peak_ws)
 
     def do_list_scans(self):
         """ List all scans available
@@ -567,11 +576,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def doResetCalUB(self):
-        """ Reset/reject the UB matrix calculation
-        """
-        raise RuntimeError('ASAP')
-
     def do_process_for_sv(self):
         """ Process data for slicing view
         :return:
@@ -621,6 +625,27 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_exp.setStyleSheet('color: red')
 
         self.ui.tabWidget.setCurrentIndex(0)
+
+        return
+
+    def do_set_ub_sv(self):
+        """ Set UB matrix in Slice view
+        :return:
+        """
+        if self.ui.radioButton_ubFromTab1.isChecked():
+            self.ui.tableWidget_ubSiceView.set_from_matrix(self.ui.tableWidget_ubMatrix.get_matrix())
+        elif self.ui.radioButton_ubFromTab3.isChecked():
+            self.ui.tableWidget_ubSiceView.set_from_matrix(self.ui.tableWidget_refinedUB.get_matrix())
+        elif self.ui.radioButton_ubFromList.isChecked():
+            status, ret_obj = gutil.parse_float_array(str(self.ui.plainTextEdit_ubInput.toPlainText()))
+            if status is False:
+                self.pop_one_button_dialog(ret_obj)
+            elif len(ret_obj) != 9:
+                self.pop_one_button_dialog('Requiring 9 floats for UB matrix.  Only %d are given.' % len(ret_obj))
+            else:
+                self.ui.tableWidget_ubSiceView.set_from_list(ret_obj)
+        else:
+            self.pop_one_button_dialog('None is selected to set UB matrix.')
 
         return
 
@@ -708,6 +733,7 @@ class MainWindow(QtGui.QMainWindow):
         :param message:
         :return:
         """
+        assert isinstance(message, str)
         QtGui.QMessageBox.information(self, '4-circle Data Reduction', message)
 
         return
@@ -728,6 +754,14 @@ class MainWindow(QtGui.QMainWindow):
         save_dict['lineEdit_exp'] = str(self.ui.lineEdit_exp.text())
         save_dict['lineEdit_scanNumber'] = self.ui.lineEdit_scanNumber.text()
         save_dict['lineEdit_ptNumber'] = str(self.ui.lineEdit_ptNumber.text())
+
+        # Lattice
+        save_dict['lineEdit_a'] = str(self.ui.lineEdit_a.text())
+        save_dict['lineEdit_b'] = str(self.ui.lineEdit_b.text())
+        save_dict['lineEdit_c'] = str(self.ui.lineEdit_c.text())
+        save_dict['lineEdit_alpha'] = str(self.ui.lineEdit_alpha.text())
+        save_dict['lineEdit_beta'] = str(self.ui.lineEdit_beta.text())
+        save_dict['lineEdit_gamma'] = str(self.ui.lineEdit_gamma.text())
 
         # Save to csv file
         if filename is None:
@@ -821,13 +855,11 @@ class MainWindow(QtGui.QMainWindow):
         exp_number, scan_number, pt_number = peakinfo.getExpInfo()
         h, k, l = peakinfo.getHKL()
         q_sample = peakinfo.getQSample()
-
-        print '[DB Exp/Scan/Pt] ', exp_number, scan_number, pt_number, '[HKL]', h, k, l,\
-            '[QSample] ', q_sample, type(q_sample)
+        m1 = self._myControl.get_sample_log_value(exp_number, scan_number, pt_number, '_m1')
 
         # Set to table
         status, err_msg = self.ui.tableWidget_peaksCalUB.append_row(
-            [scan_number, pt_number, h, k, l, q_sample[0], q_sample[1], q_sample[2], False])
+            [scan_number, pt_number, h, k, l, q_sample[0], q_sample[1], q_sample[2], False, m1])
         if status is False:
             self.pop_one_button_dialog(err_msg)
 
@@ -835,8 +867,9 @@ class MainWindow(QtGui.QMainWindow):
 
     def _get_lattice_parameters(self):
         """
-
-        :return:
+        Get lattice parameters from GUI
+        :return: (Boolean, Object).  True, 6-tuple as a, b, c, alpha, beta, gamm
+                                     False: error message
         """
         status, ret_list = gutil.parse_float_editors([self.ui.lineEdit_a,
                                                       self.ui.lineEdit_b,
@@ -845,11 +878,13 @@ class MainWindow(QtGui.QMainWindow):
                                                       self.ui.lineEdit_beta,
                                                       self.ui.lineEdit_gamma])
         if status is False:
-            raise TypeError('Unable to parse unit cell due to %s' % ret_list)
+            err_msg = ret_list
+            err_msg = 'Unable to parse unit cell due to %s' % err_msg
+            return False, err_msg
 
         a, b, c, alpha, beta, gamma = ret_list
 
-        return a, b, c, alpha, beta, gamma
+        return True, (a, b, c, alpha, beta, gamma)
 
     def _plot_raw_xml_2d(self, exp_no, scan_no, pt_no):
         """ Plot raw workspace from XML file for a measurement/pt.

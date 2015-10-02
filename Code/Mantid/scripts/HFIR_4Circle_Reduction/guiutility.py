@@ -4,6 +4,33 @@
 from PyQt4 import QtGui
 
 
+def parse_float_array(array_str):
+    """ Parse a string to an array of float
+    :param array_str:
+    :return: boolean, list of floats/error message
+    """
+    print array_str
+    assert isinstance(array_str, str)
+    array_str = array_str.replace(',', ' ')
+    array_str = array_str.replace('\n', ' ')
+    array_str = array_str.replace('\t ', ' ')
+    array_str = array_str.strip()
+    print '[DB] After processing: ', array_str
+
+    float_str_list = array_str.split()
+    float_list = list()
+    for float_str in float_str_list:
+        try:
+            value = float(float_str)
+        except ValueError as value_error:
+            return False, 'Unable to parse %s due to %s.' % (float_str, str(value_error))
+        else:
+            float_list.append(value)
+    # END-FOR
+
+    return True, float_list
+
+
 def parse_float_editors(line_edits):
     """
     :param line_edit_list:
