@@ -35,6 +35,8 @@ set ( EXPORT_FILES
   src/Exports/SymmetryElementFactory.cpp
   src/Exports/SymmetryOperation.cpp
   src/Exports/SymmetryOperationFactory.cpp
+  src/Exports/CrystalStructure.cpp
+  src/Exports/ReflectionGenerator.cpp
 )
 
 #############################################################################################
