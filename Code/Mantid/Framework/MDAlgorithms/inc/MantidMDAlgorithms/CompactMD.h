@@ -36,7 +36,7 @@
 #include "boost/shared_ptr.hpp"
 namespace Mantid {
 namespace MDAlgorithms {
-class DLLExport CompactMD : public API::DataProcessorAlgorithm {
+class DLLExport CompactMD : public API::Algorithm {
 public:
   CompactMD(){};
   ~CompactMD(){};
