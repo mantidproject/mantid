@@ -46,6 +46,15 @@ public:
 
   // void saveSettings() const {}
   MOCK_CONST_METHOD0(saveSettings, void());
+
+  // void resetCoR()
+  MOCK_METHOD0(resetCoR, void());
+
+  // void resetROI()
+  MOCK_METHOD0(resetROI, void());
+
+  // void resetNormArea()
+  MOCK_METHOD0(resetNormArea, void());
 };
 
 #endif // MANTID_CUSTOMINTERFACES_IMAGECORVIEWMOCK_H

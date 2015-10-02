@@ -6,6 +6,7 @@
 #include "MantidQtCustomInterfaces/Tomography/ImageCoRPresenter.h"
 
 #include <cxxtest/TestSuite.h>
+
 #include "ImageCoRViewMock.h"
 
 using namespace MantidQt::CustomInterfaces;

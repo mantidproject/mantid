@@ -33,17 +33,11 @@ public:
 
   void tearDown() {}
 
-  void test_fail() {
-    StackOfImagesDirs obj("");
-
-    TSM_ASSERT("Fail",
-               obj.isValid());
-  }
-
   void test_construct() {
     StackOfImagesDirs obj("");
 
-    TSM_ASSERT("A stack just constructed with an empty path string should not be valid",
+    TSM_ASSERT("A stack just constructed with an empty path string should not "
+               "be valid",
                !obj.isValid());
   }
 
@@ -51,7 +45,8 @@ public:
     StackOfImagesDirs obj("");
 
     TS_ASSERT_THROWS_NOTHING(obj.description());
-    TSM_ASSERT("A description string should be produced", "" != obj.description());
+    TSM_ASSERT("A description string should be produced",
+               "" != obj.description());
   }
 
   void test_status() {
@@ -61,11 +56,52 @@ public:
     TSM_ASSERT("A status string should be produced", "" != obj.status());
   }
 
+  void test_sampleImagesDir() {
+    StackOfImagesDirs obj("");
+
+    TS_ASSERT_THROWS_NOTHING(obj.description());
+    TSM_ASSERT("The sample images directory of an empty stack should be empty",
+               "" == obj.sampleImagesDir());
+  }
+
+  void test_flatImagesDir() {
+    StackOfImagesDirs obj("");
+
+    TS_ASSERT_THROWS_NOTHING(obj.description());
+    TSM_ASSERT("The flat images directory of an empty stack should be empty",
+               "" == obj.flatImagesDir());
+  }
+
+  void test_darkImagesDir() {
+    StackOfImagesDirs obj("");
+
+    TS_ASSERT_THROWS_NOTHING(obj.description());
+    TSM_ASSERT("The dark images directory of an empty stack should be empty",
+               "" == obj.flatImagesDir());
+  }
+
   void test_sampleFiles() {
     StackOfImagesDirs obj("");
 
     TS_ASSERT_THROWS_NOTHING(obj.description());
-    TSM_ASSERT("There should not be any sample files in an empty stack", 0 == obj.sampleImagesDir().size());
+    TSM_ASSERT("There should not be any sample files in an empty stack",
+               0 == obj.sampleImagesDir().size());
+  }
+
+  void test_flatFiles() {
+    StackOfImagesDirs obj("");
+
+    TS_ASSERT_THROWS_NOTHING(obj.description());
+    TSM_ASSERT("There should not be any flat image files in an empty stack",
+               0 == obj.flatImagesDir().size());
+  }
+
+  void test_darkFiles() {
+    StackOfImagesDirs obj("");
+
+    TS_ASSERT_THROWS_NOTHING(obj.description());
+    TSM_ASSERT("There should not be any dark image files in an empty stack",
+               0 == obj.darkImagesDir().size());
   }
 
 private:
