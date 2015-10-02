@@ -110,7 +110,8 @@ public:
         double x = static_cast<double>(t) / maxt;
         double e = exp(-x / tau);
         X.push_back(x);
-        Y.push_back(a * sin(w * x + s * M_PI / nspec) * e + e);
+        Y.push_back(a * sin(w * x + static_cast<double>(s) * M_PI / nspec) * e +
+                    e);
         E.push_back(0.005);
       }
     }

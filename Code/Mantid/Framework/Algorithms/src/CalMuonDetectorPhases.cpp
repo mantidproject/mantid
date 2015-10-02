@@ -188,7 +188,7 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
 }
 
 /** Extracts detector asymmetries and phases from fitting results
-* @param paramTable :: [input] Output parameter table resulting from the fit
+* @param paramTab :: [input] Output parameter table resulting from the fit
 * @param nspec :: [input] Number of detectors/spectra
 * @return :: A new table workspace storing the asymmetries and phases
 */
@@ -210,7 +210,7 @@ API::ITableWorkspace_sptr CalMuonDetectorPhases::extractDetectorInfo(
   // Reference frequency, all w values should be the same
   double omegaRef = paramTab->Double(1,1);
 
-  for (int s = 0; s < nspec; s++) {
+  for (size_t s = 0; s < nspec; s++) {
     // The following '3' factor corresponds to the number of function params
     size_t specRow = s * 3;
     double asym = paramTab->Double(specRow, 1);
