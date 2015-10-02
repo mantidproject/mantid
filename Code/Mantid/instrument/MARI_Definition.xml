@@ -46,8 +46,7 @@
  <component type="chopper-position">
     <location z="-1.689"/>
 	<description is="The component provides sample-choper distance, used
-	in conjuction with chopper delay time to estimate average energy of neutrons
-	hitting the sample. "/>
+	to estimate chopper delay time and Tobyfit resolution calculations."/>
 	<!-- if chopper "a": t_offset = -3281.8/SPEED + 16.2; 
 	     if chopper "g": t_offset = -2822.5/SPEED + 9.7
 	     if chopper "s": t_offset = -3326.8/SPEED + 7.7
@@ -65,7 +64,13 @@
 	</parameter>
 	<parameter name="FilterBaseLog" type="string">
 		<value val="good_uah_log"/>	
+	</parameter>
+	<!-- if the log above should be used as it is or 
+	one should calculate its derivative -->
+    <parameter name="filter_with_derivative" type="bool">
+		<value val="True"/>	
 	</parameter>	
+
   </component>
   <type name="chopper-position" is="ChopperPos"></type>  
   

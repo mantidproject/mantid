@@ -87,9 +87,10 @@ protected: // for testing, private otherwise.
   size_t calcDerivativeAndCountZeros(const std::vector<double> &bins,const std::vector<double> &signal,
     std::vector<double> &deriv,std::vector<double> &zeros);
 
-  /// if log, which identifies that instrument is running is available on workspace.
-  /// The log should be positive when instrument is running and negative or 0 otherwise.
-  bool m_useFilterLog;
+  /// name of the log, which identifies that instrument is running .
+  /// The log values should be positive when instrument is running and negative or 0 otherwise
+  /// or see next property -- filter with derivative
+  std::string m_FilterLogName;
   /// if true, take derivate of the filter log to identify interval when instrument is running.
   bool m_FilterWithDerivative;
   /// maximal relative peak width to consider acceptable. Defined by minimal instrument resolution

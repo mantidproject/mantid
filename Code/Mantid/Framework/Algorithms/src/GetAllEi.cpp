@@ -2,11 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include <boost/format.hpp>
+#include <boost/algorithm/string.hpp>
 #include <string>
 
 #include "MantidAlgorithms/GetAllEi.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
@@ -19,7 +21,7 @@ namespace Mantid {
 
     /// Empty default constructor
     GetAllEi::GetAllEi() : Algorithm(),
-      m_useFilterLog(true),m_FilterWithDerivative(true),
+      m_FilterLogName(""),m_FilterWithDerivative(true),
       // minimal resolution for all instruments
       m_min_Eresolution(0.08),
       // half maximal resolution for LET
@@ -34,13 +36,13 @@ namespace Mantid {
         new API::WorkspaceProperty<API::MatrixWorkspace>("Workspace", "",
         Kernel::Direction::Input),
         "The input workspace containing the monitor's spectra measured after the last chopper");
-      auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
-      mustBePositive->setLower(1);
+      auto nonNegative = boost::make_shared<Kernel::BoundedValidator<int>>();
+      nonNegative->setLower(0);
 
-      declareProperty("Monitor1SpecID", EMPTY_INT(), mustBePositive,
+      declareProperty("Monitor1SpecID", EMPTY_INT(), nonNegative,
         "The workspace index (ID) of the spectra, containing first monitor's"
         "signal to analyze.");
-      declareProperty("Monitor2SpecID", EMPTY_INT(), mustBePositive,
+      declareProperty("Monitor2SpecID", EMPTY_INT(), nonNegative,
         "The workspace index (ID) of the spectra, containing second monitor's"
         "signal to analyze.");
 
@@ -63,6 +65,8 @@ namespace Mantid {
         "values where the derivative of the log turns zero.\n"
         "E.g. would be 'proton_chage' log which grows for each frame "
         "when instrument is counting and constant otherwise.");
+      setPropertySettings("FilterWithDerivative", new Kernel::EnabledWhenProperty(
+                                              "FilterBaseLog", Kernel::ePropertyCriterion::IS_DEFAULT));
 
 
       auto maxInRange = boost::make_shared<Kernel::BoundedValidator<double>>();
@@ -151,7 +155,6 @@ namespace Mantid {
     void GetAllEi::exec() {
       // Get pointers to the workspace, parameter map and table
       API::MatrixWorkspace_sptr inputWS = getProperty("Workspace");
-      m_FilterWithDerivative = getProperty("FilterWithDerivative");
       m_min_Eresolution = getProperty("MinInstrResolution");
       m_max_Eresolution = getProperty("MaxInstrResolution");
       m_peakEnergyRatio2reject = getProperty("PeaksRatioToReject");
@@ -160,7 +163,7 @@ namespace Mantid {
       ////---> recalculate chopper delay to monitor position:
       auto pInstrument = inputWS->getInstrument();
       //auto lastChopPositionComponent = pInstrument->getComponentByName("chopper-position");
-      //auto chopPoint1 = pInstrument->getChopperPoint(0); ->BUG! this operation loses parameters map.
+      //auto chopPoint1 = pInstrument->getChopperPoint(0); ->TODO: BUG! this operation loses parameters map.
       auto chopPoint  = pInstrument->getComponentByName("chopper-position");
       auto phase = chopPoint->getNumberParameter("initial_phase");
 
@@ -173,6 +176,14 @@ namespace Mantid {
           " parameter attached to the chopper-position component");
       }
       m_phase = phase[0];
+      std::string filterBase = getProperty("FilterBaseLog");
+      if(boost::iequals(filterBase, "Defined in IDF")){
+        m_FilterLogName        = chopPoint->getStringParameter("FilterBaseLog")[0];
+        m_FilterWithDerivative = chopPoint->getBoolParameter("filter_with_derivative")[0];
+      }else{
+        m_FilterLogName        = filterBase;
+        m_FilterWithDerivative = getProperty("FilterWithDerivative");
+      }
       //auto chopPoint1  = pInstrument->getComponentByName("fermi-chopper");
       //auto par = chopPoint1->getDoubleParameter("Delay (us)");
       double chopSpeed,chopDelay;
@@ -230,6 +241,9 @@ namespace Mantid {
       std::pair<double,double> Mon2_Erange  = monitorWS->getSpectrum(1)->getXDataRange();
       double eMin = std::max(Mon1_Erange.first,Mon2_Erange.first);
       double eMax = std::min(Mon1_Erange.second,Mon2_Erange.second);
+      g_log.debug()<<boost::str(
+        boost::format("Monitors record data in energy range Emin=%8.2f; Emax=%8.2f\n") % eMin % eMax);
+
 
       // convert to energy
       std::vector<double> guess_ei;
@@ -788,7 +802,7 @@ namespace Mantid {
     const std::string &propertyName){
 
         std::string LogName = this->getProperty(propertyName);
-        if(LogName == "Defined in IDF"){
+        if(boost::iequals(LogName, "Defined in IDF")){
             auto chopper = inputWS->getInstrument()->getComponentByName("chopper-position");
             if(!chopper)return nullptr;
             auto AllNames = chopper->getStringParameter(propertyName);
@@ -842,12 +856,11 @@ namespace Mantid {
         //TODO: Make it dependent on inputWS time range
 
         std::vector<Kernel::SplittingInterval> splitter;
-        if(m_useFilterLog){
+        if(m_FilterLogName.size()>0){
           std::unique_ptr<Kernel::TimeSeriesProperty<double> > pDerivative;
-          const std::string FilterLogName = this->getProperty("FilterBaseLog");
           // pointer will not be null as this has been verified in validators
           auto pTimeSeries = dynamic_cast<Kernel::TimeSeriesProperty<double> *>
-            (inputWS->run().getProperty(FilterLogName));
+            (inputWS->run().getProperty(m_FilterLogName));
 
           // Define selecting function
           bool inSelection(false);
@@ -894,7 +907,7 @@ namespace Mantid {
               Kernel::SplittingInterval interval(startTime, endTime, 0);
               splitter.push_back(interval);
             }else{
-              throw std::runtime_error("filter log :"+FilterLogName+
+              throw std::runtime_error("filter log :"+m_FilterLogName+
                 " filters all data points. Nothing to do");
             }
           }else{
@@ -997,7 +1010,7 @@ namespace Mantid {
         const std::string &err_presence,const std::string &err_type, bool fail)
       {
         std::string LogName = this->getProperty(prop_name);
-        if(LogName == "Defined in IDF"){
+        if(boost::iequals(LogName, "Defined in IDF")){
           try{
             auto theLogs = chopper->getStringParameter(prop_name);
             if(theLogs.size()==0){
@@ -1038,9 +1051,7 @@ namespace Mantid {
         g_log.warning()<<" Can not find a log to identify good DAE operations.\n"
           " Assuming that good operations start from experiment time=0";
        // result.erase("FilterBaseLog");
-        m_useFilterLog = false;
-      }else{
-        m_useFilterLog = true;
+        m_FilterLogName = "";
       }
 
       return result;
