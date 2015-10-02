@@ -1,57 +1,85 @@
-#ifndef MANTID_ALGORITHMS_CALMUONDETECTORPHASESTEST_H_
-#define MANTID_ALGORITHMS_CALMUONDETECTORPHASESTEST_H_
+#ifndef CALMUONDETECTORPHASESTEST_H_
+#define CALMUONDETECTORPHASESTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CalMuonDetectorPhases.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include <boost/assign/list_of.hpp>
 
-using Mantid::Algorithms::CalMuonDetectorPhases;
+using namespace Mantid::API;
+using Mantid::MantidVec;
 
-class CalMuonDetectorPhasesTest : public CxxTest::TestSuite {
+const std::string outputName = "MuonRemoveExpDecay_Output";
+
+class CalMuonDetectorPhasesTest : public CxxTest::TestSuite
+{
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static CalMuonDetectorPhasesTest *createSuite() { return new CalMuonDetectorPhasesTest(); }
   static void destroySuite( CalMuonDetectorPhasesTest *suite ) { delete suite; }
 
-
-  void test_Init()
-  {
-    CalMuonDetectorPhases alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-  }
-
-  void test_exec()
-  {
-    // Create test input if necessary
-    MatrixWorkspace_sptr inputWS = //-- Fill in appropriate code. Consider using TestHelpers/WorkspaceCreationHelpers.h --
-
-    CalMuonDetectorPhases alg;
-    // Don't put output in ADS by default
-    alg.setChild(true);
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inputWS) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "_unused_for_child") );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
-
-    // Retrieve the workspace from the algorithm. The type here will probably need to change. It should
-    // be the type using in declareProperty for the "OutputWorkspace" type.
-    // We can't use auto as it's an implicit conversion.
-    Workspace_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS);
-    TS_FAIL("TODO: Check the results and remove this line");
-  }
-  
-  void test_Something()
-  {
-    TS_FAIL( "You forgot to write a test!");
+  CalMuonDetectorPhasesTest() {
+    FrameworkManager::Instance();
   }
 
 
+  void testInit()
+  {
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("CalMuonDetectorPhases");
+    alg->initialize();
+    TS_ASSERT(alg->isInitialized())
+  }
+
+  void testExecute()
+  {
+    auto ws = createWorkspace("Microseconds");
+    auto calc = AlgorithmManager::Instance().create("CalMuonDetectorPhases");
+    calc->initialize();
+    calc->setChild(true);
+    calc->setProperty("InputWorkspace", ws);
+    calc->setProperty("Frequency", 25.);
+    calc->setPropertyValue("DataFitted", "fit");
+    calc->setPropertyValue("DetectorTable", "tab");
+
+    TS_ASSERT_THROWS_NOTHING(calc->execute());
+
+    WorkspaceGroup_sptr fitResults = calc->getProperty("DataFitted");
+    ITableWorkspace_sptr detTab = calc->getProperty("DetectorTable");
+  }
+
+  MatrixWorkspace_sptr createWorkspace(std::string units) {
+
+    // Create a fake muon dataset
+    double a = 0.1; // Amplitude of the oscillations
+    double w = 25.; // Frequency of the oscillations
+    double tau = 2.2; // Muon life time
+    size_t maxt = 100; // Maximum time
+
+    MantidVec X(maxt);
+    MantidVec Y(maxt);
+    for (size_t s = 0; s < 4; s++) {
+      for (size_t t = 0; t < maxt; t++) {
+        double x = static_cast<double>(t) / maxt;
+        double e = exp(-x / tau);
+        X.push_back(x);
+        Y.push_back(a * sin(w * t + s * M_PI / 4.) * e + e);
+      }
+    }
+    auto createWS = AlgorithmManager::Instance().create("CreateWorkspace");
+    createWS->initialize();
+    createWS->setChild(true);
+    createWS->setProperty("UnitX", units);
+    createWS->setProperty("DataX", X);
+    createWS->setProperty("DataY", Y);
+    createWS->setProperty("NSpec", 4);
+    createWS->setPropertyValue("OutputWorkspace", "ws");
+    createWS->execute();
+    MatrixWorkspace_sptr ws = createWS->getProperty("OutputWorkspace");
+
+    return ws;
+  }
 };
 
-
-#endif /* MANTID_ALGORITHMS_CALMUONDETECTORPHASESTEST_H_ */
+#endif /*CALMUONDETECTORPHASESTEST_H_*/
