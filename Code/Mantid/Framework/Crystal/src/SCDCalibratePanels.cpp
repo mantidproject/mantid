@@ -571,6 +571,8 @@ void SCDCalibratePanels::exec() {
   }
   double tolerance = getProperty("tolerance");
 
+  string DetCalFileName = getProperty("DetCalFilename");
+  if (Poco::File(DetCalFileName).exists())Poco::File(DetCalFileName).remove();
 
   bool useL0 = getProperty("useL0");
   bool useTimeOffset = getProperty("useTimeOffset");
@@ -962,8 +964,6 @@ void SCDCalibratePanels::exec() {
   for (int i = 0; i < peaksWs->getNumberPeaks(); ++i)
     MyBankNames.insert(banksVec[0]);
   this->progress(.94, "Saving detcal file");
-  string DetCalFileName = getProperty("DetCalFilename");
-  Poco::File(DetCalFileName).remove();
   saveIsawDetCal(NewInstrument, MyBankNames, result["t0"], DetCalFileName);
 
   this->progress(.96, "Saving xml param file");
