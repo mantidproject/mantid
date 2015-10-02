@@ -12,6 +12,50 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::Geometry::IMDDimension_const_sptr;
 
+
+namespace {
+  //To get the rounded difference, we need to take into account precision issues which arise when
+  // the bin centres match
+Mantid::coord_t getDExact(Mantid::coord_t location, Mantid::coord_t origin, Mantid::coord_t binWidth) {
+  auto dExact = (location - origin) / binWidth;
+  const Mantid::coord_t tolerance = Mantid::coord_t(1e-5);
+
+  // Expl. of the steps below
+  // -1     -0.5       0      0.5        1   where integer values are bin boundaries and half-values
+  //  |       |        |       |         |   are bin centres
+  //                               |
+  //                              Location
+  // Goal: Find distance to closest bin centre:
+  // 1. Get the predecimal value of the location: here 0
+  // 2. Add and subtract 0.5 to find two possible centres: here -0.5 adn + 0.5
+  // 3. Find the centre which minimizes the difference to the location
+  // 4. Keep the difference (distance) that was calculation in the step above
+
+  // Get the two centre indices which are the closest to dExact.
+  const auto centre1 = static_cast<Mantid::coord_t>(size_t(dExact)) + 0.5;
+  const auto centre2 = static_cast<Mantid::coord_t>(size_t(dExact)) - 0.5;
+
+  // Calculate the distance of the location to the centres
+  const auto diff1 = static_cast<Mantid::coord_t>(fabs(centre1 - dExact));
+  const auto diff2 = static_cast<Mantid::coord_t>(fabs(centre2 - dExact));
+
+  const auto difference = diff1 < diff2 ? diff1 : diff2;
+
+  // If the differnce is within the tolerance, ie the location is essentially on the centre, then
+  // we want to be on the left of that centre. The correct index for when we are on the centre,
+  // is the lower next integer value.
+  if (difference < tolerance) {
+    if (difference == 0.0f) {
+      dExact -= tolerance; // When we have an exact hit in the centre, give it a nudge to the lower bin boundary
+    } else {
+      dExact -= 2*difference; // Need to subtract twice the differnce, in order to be guaranteed below the centre
+    }
+  }
+  return dExact;
+}
+}
+
+
 namespace Mantid {
 namespace DataObjects {
 
@@ -215,11 +259,10 @@ void MDHistoWorkspaceIterator::jumpTo(size_t index) {
  */
 Mantid::coord_t MDHistoWorkspaceIterator::jumpToNearest(const VMD& fromLocation)
 {
-
     std::vector<size_t> indexes(m_nd);
     coord_t sqDiff = 0;
     for(size_t d = 0; d < m_nd; ++d) {
-        coord_t dExact = (fromLocation[d] - m_origin[d]) / m_binWidth[d]; // Index position in this space.
+        coord_t dExact =  getDExact(fromLocation[d], m_origin[d], m_binWidth[d]);
         size_t dRound = size_t(dExact + 0.5); // Round to nearest bin edge.
         sqDiff += (dExact - coord_t(dRound)) * (dExact - coord_t(dRound)) * m_binWidth[d] * m_binWidth[d];
         indexes[d] = dRound;
