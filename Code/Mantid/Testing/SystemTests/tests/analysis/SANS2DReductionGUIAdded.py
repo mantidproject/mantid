@@ -200,9 +200,9 @@ class SANS2DAddedEventFilesWithoutOverlayWithISISCommandInterface(sansgui.SANS2D
 
         # add files (SAMPLE and CAN) using the ISISCommandInterface
         runs_sample = ('28827','28797')
-        i.AddRuns(runs, instrumet = 'SANS2DTUBES', saveAsEvent=True)
+        i.AddRuns(runs_sample, instrument = 'SANS2DTUBES', saveAsEvent=True)
         runs_can = ('28823','28793')
-        i.AddRuns(runs, instrumet = 'SANS2DTUBES', saveAsEvent=True)
+        i.AddRuns(runs_can, instrument = 'SANS2DTUBES', saveAsEvent=True)
 
         i.AssignSample(r'SANS2D00028797-add.nxs', reload = True)
         i.AssignCan(r'SANS2D00028793-add.nxs', reload = True)
