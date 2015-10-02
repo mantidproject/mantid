@@ -752,7 +752,7 @@ void Shape2DCollection::addFreeShape(const QPolygonF& poly,const QColor& borderC
   {
     if (poly.isEmpty()) throw std::logic_error("Cannot create a shape from empty polygon.");
     auto p = m_transform.inverted().map(poly[0]);
-    addShape("free", p.x(), p.y(), borderColor, fillColor);
+    addShape("free", static_cast<int>(p.x()), static_cast<int>(p.y()), borderColor, fillColor);
   }
   drawFree(poly);
 }
