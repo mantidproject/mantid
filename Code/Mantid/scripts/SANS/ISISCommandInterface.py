@@ -90,14 +90,16 @@ def SANS2DTUBES():
     """
     return SANS2D("SANS2D_Definition_Tubes.xml")
 
-def LOQ():
+def LOQ(idf_path='LOQ_Definition_20020226-.xml'):
     """
         Initialises the instrument settings for LOQ
+        @param idf_path :: optionally specify the path to the LARMOR IDF to use.
+                           Uses default if none specified.
         @return True on success
     """
     _printMessage('LOQ()')
     try:
-        instrument = isis_instrument.LOQ()
+        instrument = isis_instrument.LOQ(idf_path)
 
         ReductionSingleton().set_instrument(instrument)
         config['default.instrument']='LOQ'
