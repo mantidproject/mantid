@@ -13,7 +13,7 @@ class RebinOffState;
         }
 }
 void RebinDisabledState::apply(SliceViewer* sliceViewer){
-    sliceViewer->RebinMode_toggled(false); //Rebin mode button is now enabled
+    sliceViewer->setRebinBtnState(false); //Rebin mode button is now enabled
     //update gui
 
 }

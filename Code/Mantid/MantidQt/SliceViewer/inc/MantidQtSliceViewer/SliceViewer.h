@@ -122,7 +122,7 @@ public:
   void refreshRebin();
   // Methods related to SliceViewerState
   SliceViewerState_sptr currentState; //initialised to RebinDisabledState
-  void setRebinBtnState();
+  void setRebinBtnState(bool state);
   void setOverlayPipeline( Mantid::API::IMDWorkspace_sptr current_overlayWS);
   bool m_ws_is_EventWorkspace();
   //returning the current state of slice viewer.
