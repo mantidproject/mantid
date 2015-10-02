@@ -861,6 +861,8 @@ namespace Mantid {
           // pointer will not be null as this has been verified in validators
           auto pTimeSeries = dynamic_cast<Kernel::TimeSeriesProperty<double> *>
             (inputWS->run().getProperty(m_FilterLogName));
+          if(!pTimeSeries)throw std::runtime_error("findChopSpeedAndDelay: filtering log: "+
+          m_FilterLogName+" can not be interpreted as time series property of type 'double'");
 
           // Define selecting function
           bool inSelection(false);
