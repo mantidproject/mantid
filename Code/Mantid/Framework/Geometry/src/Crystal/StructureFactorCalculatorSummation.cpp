@@ -42,6 +42,10 @@ void StructureFactorCalculatorSummation::updateUnitCellScatterers(
   SpaceGroup_const_sptr spaceGroup = crystalStructure.spaceGroup();
 
   if (spaceGroup) {
+    std::vector<BraggScatterer_sptr> braggScatterers;
+    braggScatterers.reserve(scatterersInAsymmetricUnit->nScatterers() *
+                            spaceGroup->order());
+
     for (size_t i = 0; i < scatterersInAsymmetricUnit->nScatterers(); ++i) {
       BraggScattererInCrystalStructure_sptr current =
           boost::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
@@ -55,10 +59,12 @@ void StructureFactorCalculatorSummation::updateUnitCellScatterers(
           BraggScatterer_sptr clone = current->clone();
           clone->setProperty("Position", getV3DasString(*pos));
 
-          m_unitCellScatterers->addScatterer(clone);
+          braggScatterers.push_back(clone);
         }
       }
     }
+
+    m_unitCellScatterers->setScatterers(braggScatterers);
   }
 }
 

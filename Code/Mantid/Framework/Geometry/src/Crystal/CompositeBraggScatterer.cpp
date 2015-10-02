@@ -27,9 +27,7 @@ CompositeBraggScatterer_sptr CompositeBraggScatterer::create(
     const std::vector<BraggScatterer_sptr> &scatterers) {
   CompositeBraggScatterer_sptr collection = CompositeBraggScatterer::create();
 
-  for (auto it = scatterers.begin(); it != scatterers.end(); ++it) {
-    collection->addScatterer(*it);
-  }
+  collection->setScatterers(scatterers);
 
   return collection;
 }
@@ -41,9 +39,7 @@ BraggScatterer_sptr CompositeBraggScatterer::clone() const {
       boost::make_shared<CompositeBraggScatterer>();
   clone->initialize();
 
-  for (auto it = m_scatterers.begin(); it != m_scatterers.end(); ++it) {
-    clone->addScatterer(*it);
-  }
+  clone->setScatterers(m_scatterers);
 
   clone->setProperties(this->asString(false, ';'));
 
@@ -52,15 +48,20 @@ BraggScatterer_sptr CompositeBraggScatterer::clone() const {
 
 /// Clones the supplied scatterer, assigns the internal space group and unit
 /// cell to the clone and adds it to the composite.
-void
-CompositeBraggScatterer::addScatterer(const BraggScatterer_sptr &scatterer) {
-  if (!scatterer) {
-    throw std::invalid_argument("Cannot process null-scatterer.");
+void CompositeBraggScatterer::addScatterer(
+    const BraggScatterer_sptr &scatterer) {
+  addScattererImplementation(scatterer);
+  redeclareProperties();
+}
+
+/// Clears all scatterers and assigns clones of the supplied ones.
+void CompositeBraggScatterer::setScatterers(
+    const std::vector<BraggScatterer_sptr> &scatterers) {
+  removeAllScatterers();
+
+  for (auto it = scatterers.begin(); it != scatterers.end(); ++it) {
+    addScattererImplementation(*it);
   }
-
-  BraggScatterer_sptr localScatterer = scatterer->clone();
-
-  m_scatterers.push_back(localScatterer);
 
   redeclareProperties();
 }
@@ -82,20 +83,27 @@ BraggScatterer_sptr CompositeBraggScatterer::getScatterer(size_t i) const {
 /// Removes the i-th scatterer from the composite or throws an std::out_of_range
 /// exception.
 void CompositeBraggScatterer::removeScatterer(size_t i) {
+  removeScattererImplementation(i);
+
+  redeclareProperties();
+}
+
+/// This method performs the actual removal of the i-th scatterer.
+void CompositeBraggScatterer::removeScattererImplementation(size_t i) {
   if (i >= nScatterers()) {
     throw std::out_of_range("Index is out of range.");
   }
 
   m_scatterers.erase(m_scatterers.begin() + i);
-
-  redeclareProperties();
 }
 
 /// Removes all scatterers.
 void CompositeBraggScatterer::removeAllScatterers() {
   while (nScatterers() > 0) {
-    removeScatterer(0);
+    removeScattererImplementation(0);
   }
+
+  redeclareProperties();
 }
 
 /// Calculates the structure factor for the given HKL by summing all
@@ -113,15 +121,15 @@ StructureFactor CompositeBraggScatterer::calculateStructureFactor(
 
 /// Makes sure that space group and unit cell are propagated to all stored
 /// scatterers.
-void
-CompositeBraggScatterer::afterPropertySet(const std::string &propertyName) {
+void CompositeBraggScatterer::afterPropertySet(
+    const std::string &propertyName) {
   propagateProperty(propertyName);
 }
 
 /// Propagates the given property to all contained scatterers that have this
 /// property.
-void
-CompositeBraggScatterer::propagateProperty(const std::string &propertyName) {
+void CompositeBraggScatterer::propagateProperty(
+    const std::string &propertyName) {
   std::string propertyValue = getPropertyValue(propertyName);
 
   for (auto it = m_scatterers.begin(); it != m_scatterers.end(); ++it) {
@@ -137,6 +145,17 @@ void CompositeBraggScatterer::propagatePropertyToScatterer(
   } catch (Kernel::Exception::NotFoundError) {
     // do nothing.
   }
+}
+
+/// This method performs the actual cloning and adding of a new scatterer.
+void CompositeBraggScatterer::addScattererImplementation(
+    const BraggScatterer_sptr &scatterer) {
+  if (!scatterer) {
+    throw std::invalid_argument("Cannot process null-scatterer.");
+  }
+
+  BraggScatterer_sptr localScatterer = scatterer->clone();
+  m_scatterers.push_back(localScatterer);
 }
 
 /**
