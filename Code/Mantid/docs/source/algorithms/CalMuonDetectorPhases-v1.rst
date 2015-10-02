@@ -27,7 +27,8 @@ There are three optional input properties: *FirstGoodData* and *LastGoodData* de
 When left blank, *FirstGoodData* is set to the value stored in the input workspace and *LastGoodData*
 is set to the last available bin. The optional property *Frequency* allows the user to select an
 initial value for :math:`\omega`. If this property is not supplied, the algortihm takes this
-value from the *sample_magn_field* log multiplied by :math:`2*\pi *0.01355` MHz/G.
+value from the *sample_magn_field* log multiplied by :math:`2\pi\cdot g_\mu`, where :math:`g_\mu` is
+the muon gyromagnetic ratio (0.01355 MHz/G).
 
 Usage
 -----

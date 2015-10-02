@@ -25,15 +25,11 @@ void CalMuonDetectorPhases::init() {
       "Name of the reference input workspace");
 
   declareProperty("FirstGoodData", EMPTY_DBL(),
-                  "The first good data point in units of "
-                  "micro-seconds as measured from time "
-                  "zero",
+                  "The first good data point in units of micro-seconds",
                   Direction::Input);
 
   declareProperty("LastGoodData", EMPTY_DBL(),
-                  "The last good data point in units of "
-                  "micro-seconds as measured from time "
-                  "zero",
+                  "The last good data point in units of micro-seconds",
                   Direction::Input);
 
   declareProperty("Frequency", EMPTY_DBL(), "Starting hint for the frequency",
@@ -41,8 +37,8 @@ void CalMuonDetectorPhases::init() {
 
   declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
                       "DetectorTable", "", Direction::Output),
-                  "The name of the TableWorkspace in which to store the list "
-                  "of phases and asymmetries for each detector");
+                  "Name of the TableWorkspace in which to store the list "
+                  "of phases and asymmetries");
 
   declareProperty(new API::WorkspaceProperty<API::WorkspaceGroup>(
                       "DataFitted", "", Direction::Output),
@@ -60,7 +56,8 @@ std::map<std::string, std::string> CalMuonDetectorPhases::validateInputs() {
 
   // Check units, should be microseconds
   Unit_const_sptr unit = inputWS->getAxis(0)->unit();
-  if ((unit->caption() != "Time") || (unit->label().ascii() != "microsecond")) {
+  if ((unit->label().ascii() != "Microseconds") &&
+      (unit->label().ascii() != "microsecond")) {
     result["InputWorkspace"] = "InputWorkspace units must be microseconds";
   }
 
