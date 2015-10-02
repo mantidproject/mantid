@@ -39,6 +39,7 @@ class GeneralSettings(QtCore.QObject):
     _instrument_name = ''
     _facility_name = ''
     _data_output_dir = None
+    _catalog_data_path = '.'
 
     # User information for remote submission
     cluster_user = None
@@ -150,6 +151,19 @@ class GeneralSettings(QtCore.QObject):
         self._settings.setValue("data_output_dir", val)
         self._data_output_dir = val
     
+    @property
+    def catalog_data_path(self):
+        self._catalog_data_path = unicode(self._settings.value("catalog_data_path", self.data_path ))
+        logger.debug("Getter catalog_data_path = %s"%str(self._catalog_data_path))
+        return self._catalog_data_path
+    
+    @catalog_data_path.setter
+    def catalog_data_path(self, val):
+        val = str(val)
+        logger.debug("Setter catalog_data_path = %s"%val)
+        self._settings.setValue("catalog_data_path", val)
+        self._data_path = val
+        
     def _log_dump_settings(self,settings):
         keys = settings.allKeys();
         for k in keys:
