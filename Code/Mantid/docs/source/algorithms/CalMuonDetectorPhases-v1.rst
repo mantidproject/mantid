@@ -21,7 +21,7 @@ spectrum index), the asymmetry and the phase. This table is intended to be used 
 *PhaseTable* to :ref:`PhaseQuad <algm-PhaseQuad>`. In addition, the fitting results are returned
 in a workspace group, where each of the items stores the original data (after removing the
 exponential decay), the data simulated with the fitting function and the difference between data
-and fit as spectrum 0, 1 and 2 respectively.
+and fit as spectra 0, 1 and 2 respectively.
 
 There are three optional input properties: *FirstGoodData* and *LastGoodData* define the fitting range.
 When left blank, *FirstGoodData* is set to the value stored in the input workspace and *LastGoodData*

@@ -25,11 +25,11 @@ void CalMuonDetectorPhases::init() {
       "Name of the reference input workspace");
 
   declareProperty("FirstGoodData", EMPTY_DBL(),
-                  "The first good data point in units of micro-seconds",
+                  "First good data point in units of micro-seconds",
                   Direction::Input);
 
   declareProperty("LastGoodData", EMPTY_DBL(),
-                  "The last good data point in units of micro-seconds",
+                  "Last good data point in units of micro-seconds",
                   Direction::Input);
 
   declareProperty("Frequency", EMPTY_DBL(), "Starting hint for the frequency",

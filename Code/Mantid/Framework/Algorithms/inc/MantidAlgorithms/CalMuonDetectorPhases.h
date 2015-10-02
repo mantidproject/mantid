@@ -6,7 +6,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** CalMuonDetectorPhases : Calculate asymmetry and phase for each spectra in a workspace
+/** CalMuonDetectorPhases : Calculates asymmetry and phase for each spectra in a workspace
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
