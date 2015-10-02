@@ -345,6 +345,8 @@ protected:
 
   /// Enable the close button when the timer fires
   QTimer m_btnTimer;
+  /// A flag to track whether the status of the algorithm is being tracked
+  bool m_statusTracked;
   //@}
 };
 

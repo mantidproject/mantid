@@ -46,7 +46,8 @@ AlgorithmDialog::AlgorithmDialog(QWidget* parent) :
   m_enabled(), m_disabled(), m_strMessage(""), m_keepOpen(false), 
   m_msgAvailable(false), m_isInitialized(false),   m_autoParseOnInit(true),  m_validators(), 
   m_noValidation(), m_inputws_opts(), m_outputws_fields(), m_wsbtn_tracker(), 
-  m_keepOpenCheckBox(NULL), m_okButton(NULL), m_exitButton(NULL), m_observers(), m_btnTimer()
+  m_keepOpenCheckBox(NULL), m_okButton(NULL), m_exitButton(NULL), m_observers(), m_btnTimer(),
+  m_statusTracked(false)
 {
   m_btnTimer.setSingleShot(true);
 }
@@ -57,11 +58,8 @@ AlgorithmDialog::AlgorithmDialog(QWidget* parent) :
 AlgorithmDialog::~AlgorithmDialog()
 {
   m_observers.clear();
-  if(isShowKeepOpen() && m_okButton) {
-    if(!m_okButton->isEnabled()) {
-      // Keep open was checked but closing while algorithm is running
-      this->stopObserving(m_algorithm);
-    }
+  if(m_statusTracked) {
+    this->stopObserving(m_algorithm);
   }
 }
 
@@ -833,6 +831,9 @@ void AlgorithmDialog::keepOpenChanged(int state)
 void AlgorithmDialog::executeAlgorithmAsync()
 {
   Mantid::API::IAlgorithm_sptr algToExec = m_algorithm;
+  // Clear any previous trackers so we know what state we are in
+  this->stopObserving(algToExec);
+
   try
   {
     // Add any custom AlgorithmObservers to the algorithm
@@ -841,9 +842,10 @@ void AlgorithmDialog::executeAlgorithmAsync()
     }
 
     // Only need to observe finish events if we are staying open
-    if(isShowKeepOpen()) {
+    if(m_keepOpenCheckBox->isChecked()) {
       this->observeFinish(algToExec);
       this->observeError(algToExec);
+      m_statusTracked = true;
       // Disable close button for a short period. If it is clicked to soon then
       // Mantid crashes - https://github.com/mantidproject/mantid/issues/13836
       if(m_exitButton) {
@@ -851,10 +853,9 @@ void AlgorithmDialog::executeAlgorithmAsync()
         m_btnTimer.setInterval(1000);
         connect(&m_btnTimer, SIGNAL(timeout()), this,
           SLOT(enableExitButton()));
+      } else {
+        m_statusTracked = false;
       }
-    }
-    else {
-      this->stopObserving(algToExec);
     }
     algToExec->executeAsync();
     m_btnTimer.start();
