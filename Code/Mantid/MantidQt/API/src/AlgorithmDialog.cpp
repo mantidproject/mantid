@@ -46,8 +46,9 @@ AlgorithmDialog::AlgorithmDialog(QWidget* parent) :
   m_enabled(), m_disabled(), m_strMessage(""), m_keepOpen(false), 
   m_msgAvailable(false), m_isInitialized(false),   m_autoParseOnInit(true),  m_validators(), 
   m_noValidation(), m_inputws_opts(), m_outputws_fields(), m_wsbtn_tracker(), 
-  m_keepOpenCheckBox(NULL), m_okButton(NULL), m_observers()
+  m_keepOpenCheckBox(NULL), m_okButton(NULL), m_exitButton(NULL), m_observers(), m_btnTimer()
 {
+  m_btnTimer.setSingleShot(true);
 }
 
 /**
@@ -717,8 +718,8 @@ AlgorithmDialog::createDefaultButtonLayout(const QString & helpText,
   connect(m_okButton, SIGNAL(clicked()), this, SLOT(accept()));
   m_okButton->setDefault(true);
 
-  QPushButton *exitButton = new QPushButton(cancelText);
-  connect(exitButton, SIGNAL(clicked()), this, SLOT(close()));
+  m_exitButton = new QPushButton(cancelText);
+  connect(m_exitButton, SIGNAL(clicked()), this, SLOT(close()));
   
 
   QHBoxLayout *buttonRowLayout = new QHBoxLayout;
@@ -735,7 +736,7 @@ AlgorithmDialog::createDefaultButtonLayout(const QString & helpText,
   }
 
   buttonRowLayout->addWidget(m_okButton);
-  buttonRowLayout->addWidget(exitButton);
+  buttonRowLayout->addWidget(m_exitButton);
 
   return buttonRowLayout;
 }
@@ -843,11 +844,20 @@ void AlgorithmDialog::executeAlgorithmAsync()
     if(isShowKeepOpen()) {
       this->observeFinish(algToExec);
       this->observeError(algToExec);
+      // Disable close button for a short period. If it is clicked to soon then
+      // Mantid crashes - https://github.com/mantidproject/mantid/issues/13836
+      if(m_exitButton) {
+        m_exitButton->setEnabled(false);
+        m_btnTimer.setInterval(1000);
+        connect(&m_btnTimer, SIGNAL(timeout()), this,
+          SLOT(enableExitButton()));
+      }
     }
     else {
       this->stopObserving(algToExec);
     }
     algToExec->executeAsync();
+    m_btnTimer.start();
 
     if (m_okButton) {
       m_okButton->setEnabled(false);
@@ -866,6 +876,12 @@ void AlgorithmDialog::removeAlgorithmFromManager()
 {
   using namespace Mantid::API;
   AlgorithmManager::Instance().removeById(m_algorithm->getAlgorithmID());
+}
+
+/**
+ */
+void AlgorithmDialog::enableExitButton() {
+  m_exitButton->setEnabled(true);
 }
 
 //------------------------------------------------------
@@ -1170,6 +1186,19 @@ void AlgorithmDialog::errorHandle(const IAlgorithm *alg, const std::string &what
   UNUSED_ARG(what);
   emit algCompletedSignal();
 }
+
+/**
+ * Only allow close when close is enabled
+ */
+void AlgorithmDialog::closeEvent(QCloseEvent *evt) {
+  if(m_exitButton->isEnabled()) {
+    evt->accept();
+  }
+  else {
+    evt->ignore();
+  }
+}
+
 
 
 /**Handle completion of algorithm started while staying open.
