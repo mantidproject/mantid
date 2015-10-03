@@ -454,7 +454,9 @@ class MainWindow(QtGui.QMainWindow):
         """ TODO/DOC
         :return:
         """
-        self._myControl.index_peak_ws(ub_peak_ws, target_peak_ws)
+        self._myControl.index_peak(ub_matrix, scan_no, pt_no)
+
+        return
 
     def do_list_scans(self):
         """ List all scans available

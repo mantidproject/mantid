@@ -641,28 +641,33 @@ class CWSCDReductionControl(object):
 
         return True, self._myUBPeakWSDict[(exp_number, scan_number, pt_number)]
 
-    def index_peak(self, exp_number, scan_number, pt_number, ub_peak_ws):
+    def index_peak(self, ub_matrix, scan_number, pt_number):
         """ Index peaks in a Pt.
-        :param exp_number:
+        :param ub_matrix: numpy.ndarray (3, 3)
         :param scan_number:
         :param pt_number:
-        :param ub_peak_ws:
         :return:
         """
-        # Load data and reduce
-        status, peak_ws = self.get_ub_peak_ws(exp_number, scan_number, pt_number)
-        if status is False:
-            # not exist, then load
-            status, ret_obj = self.find_peak(exp_number, scan_number, pt_number)
-            if status is False:
-                err_msg = ret_obj
-                return False, err_msg
-            peak_ws = ret_obj
+        # Check
+        assert isinstance(ub_matrix, numpy.ndarray)
+        assert ub_matrix.shape == (3, 3)
+        assert isinstance(scan_number, int)
+        assert isinstance(pt_number, int)
 
-        # Index
-        num_peak_indexed = self.index_peak_ws(ub_peak_ws, peak_ws)
-        if num_peak_indexed != peak_ws.rowCount():
-            raise RuntimeError('Number of peaks indexed is not same as number of peaks!')
+        # Find out the peak workspace
+        exp_num = self._expNumber
+        if self._myUBPeakWSDict.has_key((exp_num, scan_number, pt_number)) is False:
+            return False, 'No PeakWorkspace is found for exp %d scan %d pt %d' % (exp_num,
+                                                                                  scan_number,
+                                                                                  pt_number)
+        peak_ws = self._myRawDataWSDict[(exp_num, scan_number, pt_number)]
+        ub_1d = ub_matrix.reshape(9,)
+
+        # Set UB
+        # ub = srcpeak.sample().getOrientedLattice().getUB()
+        api.SetUB(Workspace=peak_ws, UB=ub_1d)
+        num_indexed = api.CalculatePeaksHKL(PeaksWorkspace=peak_ws, Overwrite=True)
+        # FIXME/TODO: What is the difference between CalcualtePeaksHKL or IndexPeak?
 
         return True, ''
 
@@ -686,11 +691,6 @@ class CWSCDReductionControl(object):
                        OutputWorkspace=target_peak_ws.name(),
                        CopyName=False, CopyMaterial=False, CopyEnvironment=False,
                        CopyShape=False, CopyLattice=True, CopyOrientationOnly=False)
-        also()
-
-        # numpy.ndarray (3, 3)
-        ub = srcpeak.sample().getOrientedLattice().getUB()
-        api.SetUB(Workspace=target_peak_ws, UB=numpy.array([1, 0, 0, 0, 2, 0, 0, 0, 3]))
 
         numindexed = api.CalculatePeaksHKL(PeaksWorkspace=target_peak_ws, Overwrite=True)
 
