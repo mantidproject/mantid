@@ -515,7 +515,9 @@ class PythonTestRunner(object):
         self._mtdpy_header = ''
         self._test_dir = ''
         # Get the path that this module resides in so that the tests know about it
-        self._framework_path = THIS_MODULE_DIR
+        # Some windows paths can contain sequences such as \r, e.g. \release_systemtests
+        # that need to be escaped or the module cannot be found
+        self._framework_path = THIS_MODULE_DIR.replace('\\', '\\\\')
         # A string to prefix the code with
         self._code_prefix = ''
         self._using_escape = need_escaping
