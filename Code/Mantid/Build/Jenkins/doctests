@@ -18,7 +18,10 @@ cmake --version
 #####################################################################################
 # Find and install package
 #####################################################################################
-python $WORKSPACE/Code/Mantid/Testing/SystemTests/scripts/mantidinstaller.py install $WORKSPACE
+INSTALLER_SCRIPT=$WORKSPACE/Code/Mantid/Testing/SystemTests/scripts/mantidinstaller.py
+EXE_PATH_FILE=$PWD/mantidplotpath.txt
+python ${INSTALLER_SCRIPT} install $WORKSPACE --dump-exe-path=${EXE_PATH_FILE}
+MANTIDPLOT_EXE=$(cat ${EXE_PATH_FILE})
 
 ###############################################################################
 # Set up the location for the local object store outside of the build and
@@ -72,13 +75,13 @@ echo "UpdateInstrumentDefinitions.OnStartup = 0" >> $userprops
 echo "usagereports.enabled = 0" >> $userprops
 
 set +e #don't immediately exit on failure so that we can remove the package
-/opt/mantidnightly/bin/MantidPlot -xq docs/runsphinx_doctest.py
+${MANTIDPLOT_EXE} -xq docs/runsphinx_doctest.py
 status=$?
 set -e #exit on failures from now on
 
 #####################################################################################
 # Remove package
 #####################################################################################
-python $WORKSPACE/Code/Mantid/Testing/SystemTests/scripts/mantidinstaller.py uninstall $WORKSPACE
+python ${INSTALLER_SCRIPT} uninstall $WORKSPACE
 
 exit $status
