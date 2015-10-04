@@ -785,14 +785,12 @@ bool SANSRunWindow::loadUserFile()
 
   QString pyCode = "i.Clean()";
   pyCode += "\ni." + getInstrumentClass();
-  pyCode += "\ni.ReductionSingleton().user_settings =";
-  // Use python function to read the settings file and then extract the fields
-  pyCode += "isis_reduction_steps.UserFile(r'"+filetext+"')";
-
   runReduceScriptFunction(pyCode);
 
-  QString errors = runReduceScriptFunction(
-    "print i.ReductionSingleton().user_settings.execute(i.ReductionSingleton())").trimmed();
+
+  QString pyReadUserFile = "\ni.SetAndExecuteUserFile(r'" + filetext + "')";
+  QString errors = runReduceScriptFunction(pyReadUserFile).trimmed();
+
   // create a string list with a string for each line
   const QStringList allOutput = errors.split("\n");
   errors.clear();
@@ -818,27 +816,27 @@ bool SANSRunWindow::loadUserFile()
   const auto settings = getReductionSettings();
 
   const double unit_conv(1000.);
-  // Radius
-  double dbl_param = runReduceScriptFunction(
-      "print i.ReductionSingleton().mask.min_radius").toDouble();
+  
+  // Mask Radius Minimum
+  double dbl_param = runReduceScriptFunction("i.GetMaskMinRadius()").toDouble();
   m_uiForm.rad_min->setText(QString::number(dbl_param*unit_conv));
-  dbl_param = runReduceScriptFunction(
-      "print i.ReductionSingleton().mask.max_radius").toDouble();
+
+  // Mask Radius Maximum
+  dbl_param = runReduceScriptFunction("i.GetMaskMaxRadius()").toDouble();
   m_uiForm.rad_max->setText(QString::number(dbl_param*unit_conv));
+
   //EventsTime
   m_uiForm.l_events_binning->setText(getSettingWithDefault("events.binning", "").trimmed());
+  
   //Wavelength
-  m_uiForm.wav_min->setText(runReduceScriptFunction(
-      "print i.ReductionSingleton().to_wavelen.wav_low"));
-  m_uiForm.wav_max->setText(runReduceScriptFunction(
-      "print i.ReductionSingleton().to_wavelen.wav_high").trimmed());
-  const QString wav_step = runReduceScriptFunction(
-      "print i.ReductionSingleton().to_wavelen.wav_step").trimmed();
+  m_uiForm.wav_min->setText(runReduceScriptFunction("i.GetWavelengthMin()").trimmed());
+  m_uiForm.wav_max->setText(runReduceScriptFunction("i.GetWavelengthMax()").trimmed());
+  const QString wav_step = runReduceScriptFunction("i.GetWavelengthStep()").trimmed();
   setLimitStepParameter("wavelength", wav_step, m_uiForm.wav_dw,
                         m_uiForm.wav_dw_opt);
+
   //Q
-  QString text = runReduceScriptFunction(
-      "print i.ReductionSingleton().to_Q.binning");
+  QString text = runReduceScriptFunction("i.GetQBinning()");
   QStringList values = text.split(",");
   if( values.count() == 3 )
   {
@@ -854,23 +852,20 @@ bool SANSRunWindow::loadUserFile()
   }
 
   //Qxy
-  m_uiForm.qy_max->setText(runReduceScriptFunction(
-      "print i.ReductionSingleton().QXY2"));
-  setLimitStepParameter("Qxy", runReduceScriptFunction(
-      "print i.ReductionSingleton().DQXY"), m_uiForm.qy_dqy,
-      m_uiForm.qy_dqy_opt);
+  m_uiForm.qy_max->setText(runReduceScriptFunction("i.GetQXYMax()"));
+  const auto dqxy = runReduceScriptFunction("i.GetDQXY()");
+  setLimitStepParameter("Qxy",dqxy , m_uiForm.qy_dqy,
+                         m_uiForm.qy_dqy_opt);
 
   // The tramission line of the Limits section (read settings for sample and can) 
   loadTransmissionSettings(); 
 
   // The front rescale/shift section
-  m_uiForm.frontDetRescale->setText(runReduceScriptFunction(
-     "print i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale").trimmed());
-  m_uiForm.frontDetShift->setText(runReduceScriptFunction(
-     "print i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift").trimmed());
+  m_uiForm.frontDetRescale->setText(runReduceScriptFunction("i.GetStitchingFrontScale()").trimmed());
+  m_uiForm.frontDetShift->setText(runReduceScriptFunction("i.GetStitchingFrontShift()").trimmed());
 
-  QString fitScale = runReduceScriptFunction("print i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.fitScale").trimmed();
-  QString fitShift = runReduceScriptFunction("print i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.fitShift").trimmed();
+  QString fitScale = runReduceScriptFunction("i.DoWeFitFrontScale()").trimmed();
+  QString fitShift = runReduceScriptFunction("i.DoWeFitFrontShift()").trimmed();
 
   if ( fitScale == "True" )
     m_uiForm.frontDetRescaleCB->setChecked(true);
@@ -882,41 +877,32 @@ bool SANSRunWindow::loadUserFile()
   else
     m_uiForm.frontDetShiftCB->setChecked(false);
 
-  QString qRangeUserSelected = runReduceScriptFunction("print i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.qRangeUserSelected").trimmed();
+  QString qRangeUserSelected = runReduceScriptFunction("i.UseQRangeForStichingFront()").trimmed();
   if ( qRangeUserSelected == "True" )
   {
      m_uiForm.frontDetQrangeOnOff->setChecked(true); 
-     m_uiForm.frontDetQmin->setText(runReduceScriptFunction(
-      "print i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.qMin").trimmed());
-     m_uiForm.frontDetQmax->setText(runReduceScriptFunction(
-      "print i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.qMax").trimmed());   
+     m_uiForm.frontDetQmin->setText(runReduceScriptFunction("i.GetStitchingQMin()").trimmed());
+     m_uiForm.frontDetQmax->setText(runReduceScriptFunction("i.GetStitchingQMax()").trimmed());   
   }
   else
      m_uiForm.frontDetQrangeOnOff->setChecked(false);
 
 
   //Monitor spectra
-  m_uiForm.monitor_spec->setText(runReduceScriptFunction(
-    "print i.ReductionSingleton().instrument.get_incident_mon()").trimmed());
-  m_uiForm.trans_monitor->setText(runReduceScriptFunction(
-    "print i.ReductionSingleton().instrument.incid_mon_4_trans_calc").trimmed());
-  m_uiForm.monitor_interp->setChecked(runReduceScriptFunction(
-    "print i.ReductionSingleton().instrument.is_interpolating_norm()").trimmed() == "True");
-  m_uiForm.trans_interp->setChecked(runReduceScriptFunction(
-    "print i.ReductionSingleton().transmission_calculator.interpolate"
-    ).trimmed() == "True");
+  m_uiForm.monitor_spec->setText(runReduceScriptFunction("i.GetIncidentMonitor()").trimmed());
+  m_uiForm.trans_monitor->setText(runReduceScriptFunction("i.GetIncidentMonitorForTransmissionCalculation()").trimmed());
+
+  m_uiForm.monitor_interp->setChecked(runReduceScriptFunction("i.IsInterpolatingNorm()").trimmed() == "True");
+  m_uiForm.trans_interp->setChecked(runReduceScriptFunction("i.IsTransmissionInterpolating()").trimmed() == "True");
 
   // Transmission settings
   setTransmissionSettingsFromUserFile();
 
   //Direct efficiency correction
-  m_uiForm.direct_file->setText(runReduceScriptFunction(
-    "print i.ReductionSingleton().instrument.detector_file('rear')"));
-  m_uiForm.front_direct_file->setText(runReduceScriptFunction(
-    "print i.ReductionSingleton().instrument.detector_file('front')"));
+  m_uiForm.direct_file->setText(runReduceScriptFunction("i.GetDetectorEfficiencyRear()"));
+  m_uiForm.front_direct_file->setText(runReduceScriptFunction("i.GetDetectorEfficiencyFront()"));
 
-  QString file = runReduceScriptFunction(
-    "print i.ReductionSingleton().prep_normalize.getPixelCorrFile('REAR')");
+  QString file = runReduceScriptFunction("i.GetPixelCorrectionRear()");
   file = file.trimmed();
   //Check if the file name is set to Python's None object and then adjust the controls if there is an empty entry
 
@@ -924,51 +910,44 @@ bool SANSRunWindow::loadUserFile()
   m_uiForm.enableRearFlood_ck->setChecked( ! m_uiForm.floodRearFile->isEmpty() );
   m_uiForm.floodRearFile->setEnabled(m_uiForm.enableRearFlood_ck->checkState()
                                      == Qt::Checked);
-  file = runReduceScriptFunction(
-    "print i.ReductionSingleton().prep_normalize.getPixelCorrFile('FRONT')");
+  file = runReduceScriptFunction("i.GetPixelCorrectionFront()");
   file = file.trimmed();
+
   m_uiForm.floodFrontFile->setFileTextWithSearch(file == "None" ? "" : file);  
   m_uiForm.enableFrontFlood_ck->setChecked( ! m_uiForm.floodFrontFile->isEmpty() );
   m_uiForm.floodFrontFile->setEnabled(m_uiForm.enableFrontFlood_ck->checkState()
                                      == Qt::Checked);
 
   //Scale factor
-  dbl_param = runReduceScriptFunction(
-    "print i.ReductionSingleton()._corr_and_scale.rescale").toDouble();
+  dbl_param = runReduceScriptFunction("i.GetScale()").toDouble();
   m_uiForm.scale_factor->setText(QString::number(dbl_param/100.));
 
   //Sample offset if one has been specified
-  dbl_param = runReduceScriptFunction(
-    "print i.ReductionSingleton().instrument.SAMPLE_Z_CORR").toDouble();
+  dbl_param = runReduceScriptFunction("i.GetSampleOffset()").toDouble();
   m_uiForm.smpl_offset->setText(QString::number(dbl_param*unit_conv));
 
   //Centre coordinates
   // from the ticket #5942 both detectors have center coordinates
-  dbl_param = runReduceScriptFunction(
-    "print i.ReductionSingleton().get_beam_center('rear')[0]").toDouble();
+  dbl_param = runReduceScriptFunction("i.GetBeamCentreRearCoord1()").toDouble();
+
   // get the scale factor1 for the beam centre to scale it correctly
-  double dbl_paramsf = runReduceScriptFunction(
-    "print i.ReductionSingleton().get_beam_center_scale_factor1()").toDouble();
+  double dbl_paramsf = runReduceScriptFunction("i.GetBeamCentreScaleFactor1()").toDouble();
   m_uiForm.rear_beam_x->setText(QString::number(dbl_param*dbl_paramsf));
   // get scale factor2 for the beam centre to scale it correctly
-  dbl_paramsf = runReduceScriptFunction(
-    "print i.ReductionSingleton().get_beam_center_scale_factor2()").toDouble();
-  dbl_param = runReduceScriptFunction(
-    "print i.ReductionSingleton().get_beam_center('rear')[1]").toDouble();
+  dbl_paramsf = runReduceScriptFunction("i.GetBeamCentreScaleFactor2()").toDouble();
+  dbl_param = runReduceScriptFunction("i.GetBeamCentreRearCoord2()").toDouble();
   m_uiForm.rear_beam_y->setText(QString::number(dbl_param*dbl_paramsf));
+
   // front
-  dbl_param = runReduceScriptFunction(
-    "print i.ReductionSingleton().get_beam_center('front')[0]").toDouble();
+  dbl_param = runReduceScriptFunction("i.GetBeamCentreFrontCoord1()").toDouble();
   m_uiForm.front_beam_x->setText(QString::number(dbl_param*1000.0));
-  dbl_param = runReduceScriptFunction(
-    "print i.ReductionSingleton().get_beam_center('front')[1]").toDouble();
+  dbl_param = runReduceScriptFunction("i.GetBeamCentreFrontCoord2()").toDouble();
   m_uiForm.front_beam_y->setText(QString::number(dbl_param*1000.0));
 
 
 
   //Gravity switch
-  QString param = runReduceScriptFunction(
-    "print i.ReductionSingleton().to_Q.get_gravity()").trimmed();
+  QString param = runReduceScriptFunction("i.UseGravity())").trimmed();
   if( param == "True" )
   {
     m_uiForm.gravity_check->setChecked(true);
@@ -980,12 +959,11 @@ bool SANSRunWindow::loadUserFile()
 
   // Read the extra length for the gravity correction
   const double extraLengthParam =  runReduceScriptFunction(
-    "print i.ReductionSingleton().to_Q.get_extra_length()").toDouble();
+    "print i.GetGravityExtraLength()").toDouble();
   m_uiForm.gravity_extra_length_line_edit->setText(QString::number(extraLengthParam));
 
   ////Detector bank: support REAR, FRONT, HAB, BOTH, MERGED, MERGE options
-  QString detName = runReduceScriptFunction(
-    "print i.ReductionSingleton().instrument.det_selection").trimmed();
+  QString detName = runReduceScriptFunction("i.GetDetectorSelection()").trimmed();
 
   if (detName == "REAR" || detName == "MAIN"){
      m_uiForm.detbank_sel->setCurrentIndex(0);
@@ -998,16 +976,13 @@ bool SANSRunWindow::loadUserFile()
   }
  
   // Phi values 
-  m_uiForm.phi_min->setText(runReduceScriptFunction(
-    "print i.ReductionSingleton().mask.phi_min"));
-  m_uiForm.phi_max->setText(runReduceScriptFunction(
-    "print i.ReductionSingleton().mask.phi_max"));
+  m_uiForm.phi_min->setText(runReduceScriptFunction("i.GetPhiMin()"));
+  m_uiForm.phi_max->setText(runReduceScriptFunction("i.GetPhiMax()"));
 
   //Masking table
   updateMaskTable();
 
-  if ( runReduceScriptFunction(
-    "print i.ReductionSingleton().mask.phi_mirror").trimmed() == "True" )
+  if ( runReduceScriptFunction("i.IsPhiMirror()").trimmed() == "True" )
   {
     m_uiForm.mirror_phi->setChecked(true);
   }
