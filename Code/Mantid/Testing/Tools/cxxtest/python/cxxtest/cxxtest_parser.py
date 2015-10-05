@@ -10,6 +10,7 @@ suites = []
 suite = None
 inBlock = 0
 options=None
+lastLineVoid = False
 
 def scanInputFiles(files, _options):
     '''Scan all input files for test suites'''
@@ -143,11 +144,24 @@ def lineStartsBlock( line ):
     return re.search( r'\bCXXTEST_CODE\s*\(', line ) is not None
 
 test_re = re.compile( r'^([^/]|/[^/])*\bvoid\s+([Tt]est\w+)\s*\(\s*(void)?\s*\)' )
+void_re = re.compile( r'^([^/]|/[^/])*\bvoid\s*$' )
+test_novoid_re = re.compile( r'^([^/]|/[^/])*\b([Tt]est\w+)\s*\(\s*(void)?\s*\)' )
 def scanLineForTest( suite, lineNo, line ):
     '''Check if current line starts a test'''
+    global lastLineVoid
     m = test_re.search( line )
     if m:
         addTest( suite, m.group(2), lineNo )
+        lastLineVoid = False
+    elif lastLineVoid:
+        m2 = test_novoid_re.search(line)
+        if m2:
+            addTest( suite, m2.group(2), lineNo )
+        lastLineVoid = False
+    else:
+        m3 = void_re.search(line)
+        if m3:
+            lastLineVoid = True
 
 def addTest( suite, name, line ):
     '''Add a test function to the current suite'''

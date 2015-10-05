@@ -187,12 +187,14 @@ void ConvolutionFitSequential::exec() {
   const std::string tempFitWsName = "__convfit_fit_ws";
   auto tempFitWs = convertInputToElasticQ(inputWs, tempFitWsName);
 
-  // Fit all spectra in workspace
+  Progress plotPeakStringProg(this, 0.0, 0.05, specMax-specMin);
+  // Construct plotpeak string
   std::string plotPeakInput = "";
-  for (int i = 0; i < specMax + 1; i++) {
+  for (int i = specMin; i < specMax + 1; i++) {
     std::string nextWs = tempFitWsName + ",i";
     nextWs += boost::lexical_cast<std::string>(i);
     plotPeakInput += nextWs + ";";
+    plotPeakStringProg.report();
   }
 
   // passWSIndex
@@ -203,7 +205,7 @@ void ConvolutionFitSequential::exec() {
   }
 
   // Run PlotPeaksByLogValue
-  auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", 0.0, 0.70, true);
+  auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", 0.05, 0.90, true);
   plotPeaks->setProperty("Input", plotPeakInput);
   plotPeaks->setProperty("OutputWorkspace", outputWsName);
   plotPeaks->setProperty("Function", function);
@@ -220,13 +222,17 @@ void ConvolutionFitSequential::exec() {
   ITableWorkspace_sptr outputWs = plotPeaks->getProperty("OutputWorkspace");
 
   // Delete workspaces
-  auto deleter = createChildAlgorithm("DeleteWorkspace", 0.70, 0.73, true);
+  Progress deleteProgress(this, 0.90, 0.91, 2);
+  auto deleter = createChildAlgorithm("DeleteWorkspace");
   deleter->setProperty("WorkSpace",
                        outputWsName + "_NormalisedCovarianceMatrices");
   deleter->executeAsChildAlg();
-  deleter = createChildAlgorithm("DeleteWorkspace", 0.70, 0.73, true);
+  deleteProgress.report();
+
+  deleter = createChildAlgorithm("DeleteWorkspace");
   deleter->setProperty("WorkSpace", outputWsName + "_Parameters");
   deleter->executeAsChildAlg();
+  deleteProgress.report();
 
   std::string paramTableName = outputWsName + "_Parameters";
   AnalysisDataService::Instance().add(paramTableName, outputWs);
@@ -234,20 +240,26 @@ void ConvolutionFitSequential::exec() {
   // Construct output workspace
   std::string resultWsName = outputWsName + "_Result";
 
+  Progress workflowProg(this, 0.91, 0.94, 4);
   auto paramNames = std::vector<std::string>();
-  auto func = FunctionFactory::Instance().createFunction(funcName);
-  if (delta) {
+  if (funcName.compare("DeltaFunction") == 0) {
     paramNames.push_back("Height");
-  }
-  for (size_t i = 0; i < func->nParams(); i++) {
-    paramNames.push_back(func->parameterName(i));
-  }
-  if (funcName.compare("Lorentzian") == 0) {
-    // remove peak centre
-    size_t pos = find(paramNames.begin(), paramNames.end(), "PeakCentre") -
-                 paramNames.begin();
-    paramNames.erase(paramNames.begin() + pos);
-    paramNames.push_back("EISF");
+  } else {
+    auto func = FunctionFactory::Instance().createFunction(funcName);
+    if (delta) {
+      paramNames.push_back("Height");
+    }
+    for (size_t i = 0; i < func->nParams(); i++) {
+      paramNames.push_back(func->parameterName(i));
+      workflowProg.report();
+    }
+    if (funcName.compare("Lorentzian") == 0) {
+      // remove peak centre
+      size_t pos = find(paramNames.begin(), paramNames.end(), "PeakCentre") -
+                   paramNames.begin();
+      paramNames.erase(paramNames.begin() + pos);
+      paramNames.push_back("EISF");
+    }
   }
 
   // Run calcEISF if Delta
@@ -264,11 +276,12 @@ void ConvolutionFitSequential::exec() {
     if (i != (maxNames - 1)) {
       paramNamesList += ",";
     }
+    workflowProg.report();
   }
 
   // Run ProcessIndirectFitParameters
   auto pifp =
-      createChildAlgorithm("ProcessIndirectFitParameters", 0.73, 0.80, true);
+      createChildAlgorithm("ProcessIndirectFitParameters", 0.94, 0.96, true);
   pifp->setProperty("InputWorkspace", outputWs);
   pifp->setProperty("ColumnX", "axis-1");
   pifp->setProperty("XAxisUnit", "MomentumTransfer");
@@ -279,7 +292,7 @@ void ConvolutionFitSequential::exec() {
   MatrixWorkspace_sptr resultWs = pifp->getProperty("OutputWorkspace");
 
   // Handle sample logs
-  auto logCopier = createChildAlgorithm("CopyLogs", 0.80, 0.85, true);
+  auto logCopier = createChildAlgorithm("CopyLogs");
   logCopier->setProperty("InputWorkspace", inputWs);
   logCopier->setProperty("OutputWorkspace", resultWs);
   logCopier->executeAsChildAlg();
@@ -297,15 +310,18 @@ void ConvolutionFitSequential::exec() {
   sampleLogNumeric["lorentzians"] =
       boost::lexical_cast<std::string>(LorentzNum);
 
+  Progress logAdderProg(this, 0.96, 0.97, 6);
   // Add String Logs
-  auto logAdder = createChildAlgorithm("AddSampleLog", 0.85, 0.90, true);
+  auto logAdder = createChildAlgorithm("AddSampleLog");
   for (auto it = sampleLogStrings.begin(); it != sampleLogStrings.end(); ++it) {
     logAdder->setProperty("Workspace", resultWs);
     logAdder->setProperty("LogName", it->first);
     logAdder->setProperty("LogText", it->second);
     logAdder->setProperty("LogType", "String");
     logAdder->executeAsChildAlg();
+    logAdderProg.report();
   }
+
   // Add Numeric Logs
   for (auto it = sampleLogNumeric.begin(); it != sampleLogNumeric.end(); it++) {
     logAdder->setProperty("Workspace", resultWs);
@@ -313,9 +329,10 @@ void ConvolutionFitSequential::exec() {
     logAdder->setProperty("LogText", it->second);
     logAdder->setProperty("LogType", "Number");
     logAdder->executeAsChildAlg();
+    logAdderProg.report();
   }
   // Copy Logs to GroupWorkspace
-  logCopier = createChildAlgorithm("CopyLogs", 0.90, 0.93, true);
+  logCopier = createChildAlgorithm("CopyLogs", 0.97, 0.98, true);
   logCopier->setProperty("InputWorkspace", resultWs);
   std::string groupName = outputWsName + "_Workspaces";
   logCopier->setProperty("OutputWorkspace", groupName);
@@ -326,14 +343,16 @@ void ConvolutionFitSequential::exec() {
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputWsName +
                                                                  "_Workspaces");
   auto groupWsNames = groupWs->getNames();
-  auto renamer = createChildAlgorithm("RenameWorkspace", 0.93, 1., true);
+  auto renamer = createChildAlgorithm("RenameWorkspace");
+  Progress renamerProg(this, 0.98, 1.0, specMax + 1);
   for (int i = specMin; i < specMax + 1; i++) {
-    renamer->setProperty("InputWorkspace", groupWsNames.at(i));
+    renamer->setProperty("InputWorkspace", groupWsNames.at(i - specMin));
     std::string outName = outputWsName + "_";
     outName += boost::lexical_cast<std::string>(i);
     outName += "_Workspace";
     renamer->setProperty("OutputWorkspace", outName);
     renamer->executeAsChildAlg();
+    renamerProg.report();
   }
 
   AnalysisDataService::Instance().addOrReplace(resultWsName, resultWs);
@@ -347,15 +366,9 @@ void ConvolutionFitSequential::exec() {
  */
 bool ConvolutionFitSequential::checkForTwoLorentz(
     const std::string &subFunction) {
-  std::string fitType = "";
-  auto pos = subFunction.rfind("name=");
+  auto pos = subFunction.rfind("Lorentzian");
   if (pos != std::string::npos) {
-    fitType = subFunction.substr(pos, subFunction.size());
-    pos = fitType.find_first_of(",");
-    fitType = fitType.substr(5, pos - 5);
-    if (fitType.compare("Lorentzian") == 0) {
       return true;
-    }
   }
   return false;
 }
@@ -452,7 +465,7 @@ API::MatrixWorkspace_sptr ConvolutionFitSequential::convertInputToElasticQ(
       "Workspace2D", inputWs->getNumberHistograms(), 2, 1);
   auto axis = inputWs->getAxis(1);
   if (axis->isSpectra()) {
-    auto convSpec = createChildAlgorithm("ConvertSpectrumAxis", -1, -1, true);
+    auto convSpec = createChildAlgorithm("ConvertSpectrumAxis");
     // remains in ADS for use in embedded algorithm call
     convSpec->setAlwaysStoreInADS(true);
     convSpec->setProperty("InputWorkSpace", inputWs);
@@ -465,7 +478,7 @@ API::MatrixWorkspace_sptr ConvolutionFitSequential::convertInputToElasticQ(
     if (axis->unit()->unitID() != "MomentumTransfer") {
       throw std::runtime_error("Input must have axis values of Q");
     }
-    auto cloneWs = createChildAlgorithm("CloneWorkspace", -1, -1, true);
+    auto cloneWs = createChildAlgorithm("CloneWorkspace");
     cloneWs->setProperty("InputWorkspace", inputWs);
     cloneWs->setProperty("OutputWorkspace", wsName);
     cloneWs->executeAsChildAlg();
@@ -609,18 +622,20 @@ ConvolutionFitSequential::convertBackToShort(const std::string &original) {
 std::string
 ConvolutionFitSequential::convertFuncToShort(const std::string &original) {
   std::string result = "";
-  if (original.at(0) == 'E') {
-    result += "E";
-  } else if (original.at(0) == 'I') {
-    result += "I";
-  } else {
-    return "SFT";
-  }
-  auto pos = original.find("Circle");
-  if (pos != std::string::npos) {
-    result += "DC";
-  } else {
-    result += "DS";
+  if (original.compare("DeltaFunction") != 0) {
+    if (original.at(0) == 'E') {
+      result += "E";
+    } else if (original.at(0) == 'I') {
+      result += "I";
+    } else {
+      return "SFT";
+    }
+    auto pos = original.find("Circle");
+    if (pos != std::string::npos) {
+      result += "DC";
+    } else {
+      result += "DS";
+    }
   }
   return result;
 }

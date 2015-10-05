@@ -13,6 +13,8 @@ class SANSConstants
 public:
   SANSConstants();
   ~SANSConstants();
+
+  // Python related
   QString getPythonSuccessKeyword();
   QString getPythonEmptyKeyword();
   QString getPythonTrueKeyword();
@@ -22,6 +24,12 @@ public:
   QString getQResolutionH2ToolTipText();
   QString getQResolutionA1ToolTipText();
   QString getQResolutionA2ToolTipText();
+  
+  // Input related
+  double getMaxDoubleValue();
+  int getMaxIntValue();
+  int getDecimals();
+  
 };
 
 }

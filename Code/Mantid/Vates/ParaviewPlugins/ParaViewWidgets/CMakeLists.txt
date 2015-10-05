@@ -1,4 +1,4 @@
 # Use Qt4 as system package to avoid compiler warnings
-include ( UseSystemQt4 )
+include ( UseQt4 )
 
 add_subdirectory( QtWidgets )

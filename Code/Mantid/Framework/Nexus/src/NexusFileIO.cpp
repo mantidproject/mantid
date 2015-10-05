@@ -476,7 +476,7 @@ int NexusFileIO::writeNexusProcessedData2D(
       textAxis += label + "\n";
     }
     dims_array[0] = static_cast<int>(textAxis.size());
-    NXmakedata(fileID, "axis2", NX_CHAR, 2, dims_array);
+    NXmakedata(fileID, "axis2", NX_CHAR, 1, dims_array);
     NXopendata(fileID, "axis2");
     NXputdata(fileID,
               reinterpret_cast<void *>(const_cast<char *>(textAxis.c_str())));

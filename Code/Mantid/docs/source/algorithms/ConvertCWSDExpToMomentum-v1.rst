@@ -103,21 +103,61 @@ MDEventWorkspace
 There is only one *virtual* instrument and *N* ExperimentInfo.  
 *N* is the total number of experiment points in the *experiment*. 
 
+Inconsistency between using virtual instrument and copying instrument
+=====================================================================
+
+It is found that the results, i.e., the peak's position in sample-momentum
+space, by FindPeaksMD, are different betweent the MDEventWorkspaces 
+output by this algorithm with copying instrument or creating virtual instrument.
+
+It is caused by the difference of the instruments in the MDEventWorkspace.
+The native HB3A's detector is of type *RectangularDetector*,
+while the virtual instrument's detector is just of class *ComAssembly*.
+
+FindPeaksMD calculates the centre of the mass for peak centre,
+and then locates the nearest pixel of the peak center 
+and re-define the position of the pixel as peak center.
+
+For virtual instrument, CompAssembly::testIntersectionWithChildren()
+is used to find the pixel's position;
+while for rectangular detector, RectangularDetector::testIntersectionWithChildren()
+is used.
+Due to the difference in algorithm, there is slightly difference between
+the position of the pixel found.
+
+Use cases
+---------
+
+It is found that creating an instrument with tens of thousands detectors is very
+time consuming in Mantid.
+It is caused by creating a map upon these detectors.  
+With this generation of Mantid, there is no simple solution for it.
+
+For HB3A, there are usually :math:`2\theta` scan, :math:`\omega` scan and :math:`\phi`.
+Only the :math:`2\theta` scan requires to create virtual instrument,
+while the MDEventWorkspace can be created by copying instrument instance
+from parent MatrixWorkspace for the other type of scans.
+
+Therefore, it is suggested to do :math:`\omega` and :math:`\phi` scans for HB3A
+with 2D angular detector.
+
 
 Usage
 -----
 
-**Example - convert SPICE file for HB3A to Fullprof file:**
+**Example - convert an HB3A's experiment to MDWorkspace in sample momentum workspae and creating virtual instrument.:**
 
-.. testcode:: ExConvertHB3AToMD
+.. testcode:: ExConvertHB3AToMDVirtualInstrument
 
   # Create input table workspaces for experiment information and virtual instrument parameters
   CollectHB3AExperimentInfo(ExperimentNumber='355', ScanList='11', PtLists='-1,11', 
       DataDirectory='',
+      GenerateVirtualInstrument = True,
       OutputWorkspace='ExpInfoTable', DetectorTableWorkspace='VirtualInstrumentTable')
 
   # Convert to MDWorkspace
   ConvertCWSDExpToMomentum(InputWorkspace='ExpInfoTable', DetectorTableWorkspace='VirtualInstrumentTable', 
+      CreateVirtualInstrument = True,
       OutputWorkspace='QSampleMD', SourcePosition='0,0,2', SamplePosition='0,0,0', PixelDimension='1,2,2,3,3,4,3,3', 
       Directory='')
 
@@ -135,7 +175,7 @@ Usage
   print 'In Q-sample frame, center of peak 0 is at (%.5f, %.5f, %.5f) at detector with ID %d'%(
       qsample.X(), qsample.Y(), qsample.Z(), peak.getDetectorID())
     
-.. testcleanup::  ExConvertHB3AToMD
+.. testcleanup::  ExConvertHB3AToMDVirtualInstrument
 
   DeleteWorkspace(Workspace='QSampleMD')
   DeleteWorkspace(Workspace='ExpInfoTable')
@@ -144,11 +184,55 @@ Usage
 
 Output:
 
-.. testoutput:: ExConvertHB3AToMD
+.. testoutput:: ExConvertHB3AToMDVirtualInstrument
 
   Output MDEventWorkspace has 397 events.
   There are 1 peaks found in output MDWorkspace
   In Q-sample frame, center of peak 0 is at (-6.95467, -0.06937, 8.14106) at detector with ID 29072
+
+**Example - convert an HB3A experiment to MDEventWorkspace by copying instrument.:**
+
+.. testcode:: ExConvertHB3AToMDCopyInstrument
+
+  # Create input table workspaces for experiment information and virtual instrument parameters
+  CollectHB3AExperimentInfo(ExperimentNumber='355', ScanList='11', PtLists='-1,11', 
+      DataDirectory='',
+      GenerateVirtualInstrument=False,
+      OutputWorkspace='ExpInfoTable', DetectorTableWorkspace='VirtualInstrumentTable')
+
+  # Convert to MDWorkspace
+  ConvertCWSDExpToMomentum(InputWorkspace='ExpInfoTable',
+      CreateVirtualInstrument = False,
+      OutputWorkspace='QSampleMD', Directory='')
+
+  # Find peak in the MDEventWorkspace
+  FindPeaksMD(InputWorkspace='QSampleMD', DensityThresholdFactor=0.10000000000000001, 
+      OutputWorkspace='PeakTable')
+  
+  # Examine
+  mdws = mtd['QSampleMD']
+  print 'Output MDEventWorkspace has %d events.'%(mdws.getNEvents())
+  peakws = mtd['PeakTable']
+  print  'There are %d peaks found in output MDWorkspace'%(peakws.getNumberPeaks())
+  peak = peakws.getPeak(0)
+  qsample = peak.getQSampleFrame()
+  print 'In Q-sample frame, center of peak 0 is at (%.5f, %.5f, %.5f) at detector with ID %d'%(
+      qsample.X(), qsample.Y(), qsample.Z(), peak.getDetectorID())
+    
+.. testcleanup::  ExConvertHB3AToMDCopyInstrument
+
+  DeleteWorkspace(Workspace='QSampleMD')
+  DeleteWorkspace(Workspace='ExpInfoTable')
+  DeleteWorkspace(Workspace='VirtualInstrumentTable')
+  DeleteWorkspace(Workspace='PeakTable')
+
+Output:
+
+.. testoutput:: ExConvertHB3AToMDCopyInstrument
+
+  Output MDEventWorkspace has 397 events.
+  There are 1 peaks found in output MDWorkspace
+  In Q-sample frame, center of peak 0 is at (-3.57179, -4.37952, -3.01737) at detector with ID 32626
 
 .. categories::
 

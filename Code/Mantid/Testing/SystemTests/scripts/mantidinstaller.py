@@ -260,22 +260,26 @@ if __name__ == "__main__":
     import optparse
     parser = optparse.OptionParser("Usage: %prog <command> <pkg directory>",
                                    description="Commands available: install, uninstall")
+    parser.add_option("-d", "--dump-exe-path", dest="dump_exe_path",
+                      help="Filepath to write the full path of the MantidPlot executable")
     (options, args) = parser.parse_args()
     # All arguments are required
     if len(args) != 2:
         parser.print_help()
         sys.exit(1)
-    
+
     command, package_dir = args[0], args[1]
     package_dir = os.path.abspath(package_dir)
-    print package_dir 
+    print "Searching for packages in '%s'" % package_dir
     installer = get_installer(package_dir)
     if command.lower() == "install":
         print "Installing package '%s'" % installer.mantidInstaller
         installer.install()
+        if options.dump_exe_path is not None:
+            with open(options.dump_exe_path, 'w') as f:
+                f.write(installer.mantidPlotPath)
     elif command.lower() == "uninstall":
         print "Removing package '%s'" % installer.mantidInstaller
         installer.uninstall()
     else:
         raise RuntimeError("Invalid command '%s'. Options are: install, uninstall" % command)
-    

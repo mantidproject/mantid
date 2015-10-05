@@ -36,6 +36,10 @@ private:
     alg.initialize();
 
     IMDEventWorkspace_sptr in_ws = MDEventsTestHelper::makeAnyMDEW<MDEvent<3>,3>(10, 0.0, 10.0, 1);
+    auto eventNorm = Mantid::API::MDNormalization::VolumeNormalization;
+    auto histoNorm = Mantid::API::MDNormalization::NumEventsNormalization;
+    in_ws->setDisplayNormalization(eventNorm);
+    in_ws->setDisplayNormalizationHisto(histoNorm);
     AnalysisDataService::Instance().addOrReplace("SliceMDTest_ws", in_ws);
 
     alg.setPropertyValue("InputWorkspace", "SliceMDTest_ws");
@@ -66,7 +70,10 @@ private:
       TSM_ASSERT_EQUALS("MaxRecusionDepth property should be enabled", true,  p->getSettings()->isEnabled(&alg));
       TSM_ASSERT_EQUALS("Should have passed the maxium depth onto the ouput workspace from the input workspace.", size_t(maxDepth), out->getBoxController()->getMaxDepth());
     }
-    
+
+    TSM_ASSERT_EQUALS("Should show volume normalization", out->displayNormalization(), eventNorm);
+    TSM_ASSERT_EQUALS("Should show num event normalization", out->displayNormalizationHisto(), histoNorm);
+
     //Clean up test objects
     AnalysisDataService::Instance().remove("SliceMDTest_ws");
     AnalysisDataService::Instance().remove("SliceMDTest_outWS");

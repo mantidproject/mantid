@@ -129,6 +129,13 @@ void IMDWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
 MDNormalization IMDWorkspace::displayNormalization() const {
   return NoNormalization;
 }
+
+/**
+@return normalization preferred for visualization of histo workspaces. Set to none for the generic case, but overriden elsewhere.
+*/
+MDNormalization IMDWorkspace::displayNormalizationHisto() const {
+  return NoNormalization;
+}
 }
 }
 

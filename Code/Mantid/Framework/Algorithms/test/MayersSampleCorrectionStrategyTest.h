@@ -31,9 +31,7 @@ public:
     TS_ASSERT_DELTA(0.00030887, absFactor, delta);
   }
 
-  // clang-format off
   void test_Multiple_Scattering_With_Fixed_Mur_And_Absorption_Correction_Factor()
-  // clang-format on
   {
     std::vector<double> dummy(2, 0.0);
     dummy[1] = 1.0;
@@ -73,9 +71,7 @@ public:
     TS_ASSERT_DELTA(0.2660792, error.back(), delta);
   }
 
-  // clang-format off
   void test_Corrects_Both_Absorption_And_Multiple_Scattering_For_Histogram_Data()
-  // clang-format on
   {
     using std::sqrt;
     const size_t nypts(100);

@@ -51,6 +51,7 @@
 #include <boost/foreach.hpp>
 #include <boost/function.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <cmath>
 
 #include <fstream>
 
@@ -156,19 +157,19 @@ namespace
 // Public member functions
 //----------------------------------------------
 ///Constructor
-SANSRunWindow::SANSRunWindow(QWidget *parent) :
-  UserSubWindow(parent), m_addFilesTab(NULL), m_displayTab(NULL), m_diagnosticsTab(NULL),
-  m_saveWorkspaces(NULL), m_ins_defdir(""), m_last_dir(""),
-  m_cfg_loaded(true), m_userFname(false), m_sample_file(),
-  m_reducemapper(NULL),
-  m_warnings_issued(false), m_force_reload(false),
-  m_newInDir(*this, &SANSRunWindow::handleInputDirChange),
-  m_delete_observer(*this, &SANSRunWindow::handleMantidDeleteWorkspace),
-  m_s2d_detlabels(), m_loq_detlabels(), m_allowed_batchtags(),
-  m_have_reducemodule(false), m_dirty_batch_grid(false), m_tmp_batchfile(""),
-  m_batch_paste(NULL), m_batch_clear(NULL),
-  slicingWindow(NULL)
-{
+SANSRunWindow::SANSRunWindow(QWidget *parent)
+    : UserSubWindow(parent), m_addFilesTab(NULL), m_displayTab(NULL),
+      m_diagnosticsTab(NULL), m_saveWorkspaces(NULL), m_ins_defdir(""),
+      m_last_dir(""), m_cfg_loaded(true), m_userFname(false), m_sample_file(),
+      m_reducemapper(NULL), m_warnings_issued(false), m_force_reload(false),
+      m_newInDir(*this, &SANSRunWindow::handleInputDirChange),
+      m_delete_observer(*this, &SANSRunWindow::handleMantidDeleteWorkspace),
+      m_s2d_detlabels(), m_loq_detlabels(), m_allowed_batchtags(),
+      m_have_reducemodule(false), m_dirty_batch_grid(false),
+      m_tmp_batchfile(""), m_batch_paste(NULL), m_batch_clear(NULL),
+      m_mustBeDouble(NULL), m_doubleValidatorZeroToMax(NULL),
+      m_intValidatorZeroToMax(NULL),
+      slicingWindow(NULL) {
   ConfigService::Instance().addObserver(m_newInDir);
 }
 
@@ -2373,6 +2374,12 @@ QString SANSRunWindow::readSampleObjectGUIChanges()
 void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
 {
   const States type = typeStr == "1D" ? OneD : TwoD;
+
+  // Make sure that all settings are valid
+  if (!areSettingsValid()){
+    return;
+  }
+
   //new reduction is going to take place, remove the results from the last reduction
   resetDefaultOutput();
 
@@ -3885,10 +3892,81 @@ void SANSRunWindow::openHelpPage()
 void SANSRunWindow::setValidators()
 {
   // Validator policies
-  QDoubleValidator* mustBeDouble = new QDoubleValidator(this);
+  if (!m_mustBeDouble) {
+    m_mustBeDouble = new QDoubleValidator(this);
+  }
 
-  // For gravity extra length
-  m_uiForm.gravity_extra_length_line_edit->setValidator(mustBeDouble);
+  if (!m_doubleValidatorZeroToMax) {
+    m_doubleValidatorZeroToMax = new QDoubleValidator(
+        0.0, m_constants.getMaxDoubleValue(), m_constants.getDecimals(), this);
+  }
+
+  // Range is [0, max]
+  if (!m_intValidatorZeroToMax) {
+    m_intValidatorZeroToMax =
+        new QIntValidator(0, m_constants.getMaxIntValue(), this);
+  }
+
+
+  // Run Numbers tab
+
+  // ----------- Run Settings Tab---------------------------------
+  m_uiForm.gravity_extra_length_line_edit->setValidator(m_mustBeDouble);
+  m_uiForm.rad_min->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.rad_max->setValidator(m_mustBeDouble);
+
+  m_uiForm.wav_min->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.wav_max->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.wav_dw->setValidator(m_doubleValidatorZeroToMax);
+
+  m_uiForm.q_min->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.q_max->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.q_dq->setValidator(m_doubleValidatorZeroToMax);
+
+  m_uiForm.qy_max->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.qy_dqy->setValidator(m_doubleValidatorZeroToMax);
+
+  m_uiForm.trans_min->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.trans_max->setValidator(m_doubleValidatorZeroToMax);
+
+  m_uiForm.trans_min_can->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.trans_max_can->setValidator(m_doubleValidatorZeroToMax);
+
+  m_uiForm.monitor_spec->setValidator(m_intValidatorZeroToMax);
+  m_uiForm.trans_monitor->setValidator(m_intValidatorZeroToMax);
+
+  m_uiForm.trans_M3M4_line_edit->setValidator(m_mustBeDouble);
+  m_uiForm.trans_radius_line_edit->setValidator(m_doubleValidatorZeroToMax);
+
+  m_uiForm.phi_min->setValidator(m_mustBeDouble);
+  m_uiForm.phi_max->setValidator(m_mustBeDouble);
+
+  m_uiForm.frontDetRescale->setValidator(m_mustBeDouble);
+  m_uiForm.frontDetShift->setValidator(m_mustBeDouble);
+  m_uiForm.frontDetQmin->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.frontDetQmax->setValidator(m_doubleValidatorZeroToMax);
+
+  m_uiForm.tof_min->setValidator(m_mustBeDouble);
+  m_uiForm.tof_max->setValidator(m_mustBeDouble);
+  m_uiForm.scale_factor->setValidator(m_mustBeDouble);
+
+  // ----------- Geometry Tab-----------------------------------
+  m_uiForm.rear_beam_x->setValidator(m_mustBeDouble);
+  m_uiForm.rear_beam_y->setValidator(m_mustBeDouble);
+  m_uiForm.front_beam_x->setValidator(m_mustBeDouble);
+  m_uiForm.front_beam_y->setValidator(m_mustBeDouble);
+
+  // Geometry
+  m_uiForm.sample_thick->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.sample_height->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.sample_width->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.smpl_offset->setValidator(m_mustBeDouble);
+
+  // Beam Centre Finder
+  m_uiForm.beam_rmin->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.beam_rmax->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.toleranceLineEdit->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.beam_iter->setValidator(m_intValidatorZeroToMax);
 }
 
 /**
@@ -4242,6 +4320,108 @@ void SANSRunWindow::resetAllTransFields() {
   m_uiForm.trans_radius_check_box->setChecked(state);
 }
 
+/**
+ * Check tha the Settings are valid. We need to do this for inputs which cannot
+ * be checked with simple validators
+ */
+bool SANSRunWindow::areSettingsValid() {
+  bool isValid = true;
+  QString message;
+  // ------------ GUI INPUT CHECKS ------------
+
+  // R_MAX -- can be only >0 or -1
+  auto r_max = m_uiForm.rad_max->text().simplified().toDouble();
+  if ((r_max < 0.0) && (r_max != -1)) {
+    isValid = false;
+    message += "R_max issue: Only values >= 0 and -1 are allowed.\n";
+  }
+
+  // WAVELENGTH
+  checkWaveLengthAndQValues(isValid, message, m_uiForm.wav_min,
+                            m_uiForm.wav_max, m_uiForm.wav_dw_opt,
+                            "Wavelength");
+
+  // QX
+  checkWaveLengthAndQValues(isValid, message, m_uiForm.q_min,
+                            m_uiForm.q_max, m_uiForm.q_dq_opt,
+                            "Qx");
+
+  // TRANS SAMPLE
+  checkWaveLengthAndQValues(isValid, message, m_uiForm.trans_min,
+                            m_uiForm.trans_max, m_uiForm.trans_opt,
+                            "Trans");
+
+  // TRANS CAN
+  if (m_uiForm.trans_selector_opt->currentText().toUpper().contains("SEPARATE")) {
+    checkWaveLengthAndQValues(isValid, message, m_uiForm.trans_min_can,
+                              m_uiForm.trans_max_can, m_uiForm.trans_opt_can,
+                              "Trans Can");
+  }
+
+  // Geometry
+  if (m_uiForm.sample_thick->text().simplified().toDouble() == 0.0) {
+    isValid = false;
+    message += "Sample height issue: Only values > 0 are allowed.\n";
+  }
+
+  if (m_uiForm.sample_height->text().simplified().toDouble() == 0.0) {
+    isValid = false;
+    message += "Sample height issue: Only values > 0 are allowed.\n";
+  }
+
+  if (m_uiForm.sample_width->text().simplified().toDouble() == 0.0) {
+    isValid = false;
+    message += "Sample width issue: Only values > 0 are allowed.\n";
+  }
+
+  // Print the error message if there are any
+  if (!message.isEmpty()) {
+    QString warning = "Please correct these settings before proceeding:\n";
+    warning += message;
+    QMessageBox::warning(this, "Inconsistent input", warning);
+  }
+
+  return isValid;
+}
+
+/**
+ * Check the wavelength and Q values
+ * @param isValid: flag by reference to set the check if invalid
+ * @param message: the message to display
+ * @param min: the min line edit field
+ * @param max: the max line edit field
+ * @param selection: the combo box which is being querried
+ * @param type: message type
+ */
+void SANSRunWindow::checkWaveLengthAndQValues(bool &isValid, QString &message,
+                                              QLineEdit *min, QLineEdit *max,
+                                              QComboBox *selection, QString type) {
+  auto min_value = min->text().simplified().toDouble();
+  auto max_value = max->text().simplified().toDouble();
+
+  // Make sure that min<=max
+  if (min_value > max_value) {
+    isValid = false;
+    message += type;
+    message +=
+        " issue: The min value is larger than the max value. \n";
+  }
+
+  // Make sure that when selecting log, then we don't have 0 values
+  if (selection->currentText().toUpper().contains("LOG") &&
+      (min_value == 0.0 || max_value == 0.0)) {
+    isValid = false;
+    message += type;
+    message +=
+        " issue: Trying to use Logarithmic steps and values which are <= 0.0. \n";
+  }
+}
+   
+   
+   
+   
+   
+   
 /**
  * Retrieves the Q resolution settings and apply them to the GUI
  */

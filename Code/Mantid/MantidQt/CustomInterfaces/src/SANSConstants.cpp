@@ -1,5 +1,5 @@
 #include "MantidQtCustomInterfaces/SANSConstants.h"
-
+#include <limits>
 
 namespace MantidQt
 {
@@ -81,6 +81,30 @@ QString SANSConstants::getQResolutionA2ToolTipText() {
   return qResolutionA2ToolTipText;
 }
 
+
+/**
+ * Gets the max double value
+ * @returns the max double
+ */
+double SANSConstants::getMaxDoubleValue() {
+    return std::numeric_limits<double>::max();
+}
+
+/**
+ * Get the number of decimals
+ * @returns the number of decimals
+ */
+int SANSConstants::getDecimals() {
+  return 6;
+}
+
+/**
+ * Get the max integer value
+ * @returns the max integer value
+ */
+int SANSConstants::getMaxIntValue() {
+  return std::numeric_limits<int>::max();
+}
 
 }
 }
