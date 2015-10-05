@@ -71,7 +71,7 @@ private:
       TSM_ASSERT_EQUALS("Should have passed the maxium depth onto the ouput workspace from the input workspace.", size_t(maxDepth), out->getBoxController()->getMaxDepth());
     }
 
-    TSM_ASSERT_EQUALS("Should show volume normalization", out->displayNormalization(), eventNorm);
+    TSM_ASSERT_EQUALS("Should show num event normalization", out->displayNormalization(), histoNorm);
     TSM_ASSERT_EQUALS("Should show num event normalization", out->displayNormalizationHisto(), histoNorm);
 
     //Clean up test objects
