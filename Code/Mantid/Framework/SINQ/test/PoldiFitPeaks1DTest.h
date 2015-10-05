@@ -20,8 +20,6 @@ using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::Kernel;
 
-class PoldiFitPeaks1D;
-
 class TestablePoldiFitPeaks1D : public Mantid::Poldi::PoldiFitPeaks1D
 {
     friend class PoldiFitPeaks1DTest;
