@@ -4,9 +4,10 @@ Crystal structure and reflections
 =================================
 
 This document describes how crystal structure data can be processed and used in Mantid. For the understanding of the
-concepts of :ref:` <Symmetry groups>` and :ref:`space groups <Point and space groups>` in Mantid it may be useful to
-read those introductory articles before proceeding with this document. While there is a short introduction into
-theoretical aspects this page is not a replacement for proper text books on the subject.
+concepts of :ref:`symmetry <Symmetry groups>` and :ref:`space groups <Point and space groups>` in Mantid it may be
+useful to read those introductory articles before proceeding with this document. While there is a short introduction
+into theoretical aspects this page is not a replacement for proper introductory text books on the subject where all
+these principles are explained in great detail and on a much more general basis.
 
 Theoretical aspects
 ~~~~~~~~~~~~~~~~~~~
@@ -48,30 +49,30 @@ Knowledge of the space group makes it possible to derive all scatterers in the e
 of the space group map each scatterer-position onto a set of equivalent positions that are consequently occupied by the
 same type of scatterer as well. Since the unit cell is repeated infinitely in all three directions of space, it is
 enough to describe one unit cell. Finally, the lattice is described by six parameters as well, the lengths of the three
-lattice vectors (usually given in :math:`\AA{}`) and the three angles (in degree) between these vectors.
+lattice vectors (usually given in :math:`\mathrm{\AA{}}`) and the three angles (in degree) between these vectors.
 
 Reflections and structure factors
 ---------------------------------
 
 In a diffraction experiment the periodic arrangement of atoms is probed using radiation, in this case in the form of
 neutrons, of an appropriate wavelength (on the same scale of interatomic distances, typically between 0.5 and
-5 :math:`\AA{}`). The incident beam interacts with the scatterers and in certain orientations the beam is "reflected"
-by a flock of lattice planes, a phenomenon which is described by Bragg's law:
+5 :math:`\mathrm{\AA{}}`). The incident beam interacts with the scatterers and in certain orientations the beam is
+"reflected" by a flock of lattice planes, a phenomenon which is described by Bragg's law:
 
 .. math::
     2d\sin\theta = \lambda
   
-In this equation :math: `d` is the spacing between the lattice planes, theta is the angle of the incoming beam and the
-lattice plane normal and lambda is the wavelength of the radiation. In an experiment theta and lambda are usually
-limited, thus they are limiting the range of interplanar spacings that can be probed. In Bragg's law the lattice plane
-families are only described by one parameter, the interplanar distance. But each lattice plane family also has an
+In this equation :math: `d` is the spacing between the lattice planes, :math:`\theta` is the angle of the incoming beam
+and the lattice plane normal and lambda is the wavelength of the radiation. In an experiment theta and lambda are
+usually limited, thus they are limiting the range of interplanar spacings that can be probed. In Bragg's law the lattice
+plane families are only described by one parameter, the interplanar distance. But each lattice plane family also has an
 orientation in space which can be described by the plane's normal vector. Usually the vector is given in terms of the
 reciprocal lattice of the structure, where it is reduced to three integers H, K, L, the so called Miller indices. With
-knowledge of the unit cell (and thus the :math:`\mathbf{B}`-matrix), the interplanar spacing can also be
-computed like this:
+knowledge of the :ref:`unit cell <Lattice>` (and thus the :math:`\mathbf{B}`-matrix), the interplanar spacing can also
+be computed like this:
 
 .. math::
-    d = \frac{1}{\mathbf{B}\mathbf{h}}
+    d = \frac{1}{\left|\mathbf{B}\cdot\mathbf{h}\right|}
   
 The parameters taken into account so far determine the geometric characteristics of Bragg-reflections, i.e. their
 position on a detector and their time of flight. But besides these, each reflection also has an intensity. The
@@ -80,19 +81,19 @@ the unit cell. The structure factor is a complex number and can be calculated fo
 contributions of all N atoms j in the unit cell:
 
 .. math::
-    F_{\mathbf{h}} = \Sum\limits_{j}^{N}b_j * \exp\left(2\pi i \mathbf{h} \cdot \mathbf{x}_j\right)
+    F_{\mathbf{h}} = \sum\limits_{j}^{N}b_j\exp\left(2\pi i \mathbf{h} \cdot \mathbf{x}_j\right)
 
 In the above equation :math:`b` is the scattering length, :math:`\mathbf{h}` is the Miller index triplet HKL and
 :math:`\mathbf{x}` contains the fractional coordinates of the j-th atom. To take into account isotropic thermal
 motion of atoms, the term is multiplied with the Debye-Waller factor:
 
 .. math::
-    F_{\mathbf{h}} = \Sum\limits_{j}^{N}b_j * \exp\left(2\pi i \mathbf{h} \cdot \mathbf{x}_j\right)
-                    \exp\left(-2\pi^2 U 1/d_{\mathbf{h}}^2\right)
+    F_{\mathbf{h}} = \sum\limits_{j}^{N}b_j\exp\left(2\pi i \mathbf{h} \cdot \mathbf{x}_j\right)
+                    \exp\left(-2\pi^2 U/d_{\mathbf{h}}^2\right)
 
-Here, :math:`U` is the isotropic atomic displacement parameter, usually given in :math:`\AA{}^2` and :math:`d` is the
-lattice spacing discussed above. There are other, more complex model to describe the movement of atoms, taking into
-account anisotropic movement and also anharmonic effects.
+Here, :math:`U` is the isotropic atomic displacement parameter, usually given in :math:`\mathrm{\AA{}}^2` and
+:math:`d` is the lattice spacing discussed above. There are other, more complex models to describe the movement of
+atoms, taking into account anisotropic movement and also anharmonic effects.
 
 Implementation in Mantid
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -136,8 +137,8 @@ In general, the unit cell must be specified using either 3 or 6 space-separated 
 the three axis lengths and the three angles between them. The list of scatterers is required to be a semi-colon
 separated list of strings which contain the following information: Element symbol, x, y, z (fractional coordinates),
 occupancy (between 0 and 1) and isotropic atomic displacement parameter. The fractional coordinates can also be given
-as fractions (for example 1/2 or 1/3) and for giving the coordinates in hexagonal or trigonal structures this is highly
-recommended as there may be precision problems with decimal numbers.
+as fractions (for example :math:`1/2` or :math:`1/3`) and for giving the coordinates in hexagonal or trigonal structures
+this is highly recommended as there may be precision problems with decimal numbers.
 
 While the CrystalStructure class is storing information, there is another class that makes use of these information to
 generate reflections and calculate structure factors. This class is called ReflectionGenerator and can be constructed
@@ -162,11 +163,11 @@ from a CrystalStructure-object:
     There are 20 unique reflections for Si in the specified resolution range.
     The reflection [222] is contained in the list.
 
-Checking the reflection conditions of space group Fd-3m (origin choice 1) in the International Tables for
-Crystallography shows that if an atom is on the 8a position, additional conditions apply (h=2n+1 or h+k+l=4n for
-general reflections). Using these additional conditions, the 222 reflection should in fact not be in the list. This can
-be verified by calculating structure factors for the list of reflections and check if there are very small values
-present.
+Checking the reflection conditions of space group :math:`Fd\bar{3}m` (origin choice 1) in the International Tables for
+Crystallography shows that if an atom is on the 8a position, additional conditions apply (:math:`h=2n+1` or
+:math:`h+k+l=4n` for general reflections). Using these additional conditions, the 222 reflection should in fact
+not be in the list. This can be verified by calculating structure factors for the list of reflections and check if
+there are very small values present.
 
 .. testcode:: ExReflectionGeneratorViolations
 
@@ -189,8 +190,8 @@ present.
     for hkl, sf in zeroFSquared:
         print hkl, '  ', np.round(sf, 2)
 
-The output of the above script should show three reflections with very small values for F^2. Their indices violate the
-special conditions mentioned in the previous paragraph, so the reflections are actually extinct:
+The output of the above script should show three reflections with very small values for :math:`F^2`. Their indices
+violate the special conditions mentioned in the previous paragraph, so the reflections are actually extinct:
 
 .. testoutput:: ExReflectionGeneratorViolations
 
@@ -228,10 +229,10 @@ is actually checked:
     The reflection [222] is not contained in the list.
 
 Other options for filtering are Centering and None. If the latter one is used the reflections are only filtered
-according to their d-value to fit the specified range.
+according to their :math:`d`-value to fit the specified range.
 
-Another capability of ReflectionGenerator is the calculation of d-values for a list of HKLs, very similar to the process
-for F^2:
+Another capability of ReflectionGenerator is the calculation of :math:`d`-values for a list of HKLs, very similar
+to the process for :math:`F^2`:
 
 .. testcode:: ExReflectionGeneratorCalculateD
 
@@ -258,7 +259,7 @@ for F^2:
     for reflection in reflections:
         print '{0!s:<8}{1:>8.5f}{2:>8.2f}{3:>4}'.format(*reflection)
 
-This script will print a table with the reflections including their d-value, F^2 and multiplicity due to point group
+This script will print a table with the reflections including their :math:`d`-value, :math:`F^2` and multiplicity due to point group
 symmetry:
 
 .. testoutput:: ExReflectionGeneratorCalculateD
@@ -288,3 +289,5 @@ Further reading
 This concept page explains what's available in the Python interface. Some underlying parts may be interesting for C++
 developers, as the concepts of generating and filtering HKLs are pretty much hidden behind the ReflectionGenerator class
 in the Python interface. More detail is available in the generated C++ documentation.
+
+.. categories:: Concepts
