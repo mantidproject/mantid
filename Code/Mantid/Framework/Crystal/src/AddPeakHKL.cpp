@@ -48,10 +48,9 @@ void AddPeakHKL::init() {
   declareProperty(new WorkspaceProperty<Mantid::API::IPeaksWorkspace>(
                       "Workspace", "", Direction::InOut),
                   "An input workspace.");
-  declareProperty(
-      new ArrayProperty<double>(
-          "HKL", boost::make_shared<ArrayLengthValidator<double>>(3)),
-      "HKL point to add");
+  // clang-format off
+    declareProperty(new ArrayProperty<double>("HKL", boost::make_shared<ArrayLengthValidator<double> > (3)), "HKL point to add");
+  // clang-format on
 }
 
 //----------------------------------------------------------------------------------------------

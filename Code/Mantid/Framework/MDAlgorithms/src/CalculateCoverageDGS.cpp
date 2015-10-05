@@ -105,7 +105,9 @@ void CalculateCoverageDGS::init() {
                       boost::make_shared<InstrumentValidator>()),
                   "An input workspace.");
 
-  auto mustBe3D = boost::make_shared<ArrayLengthValidator<double>>(3);
+  // clang-format off
+  auto mustBe3D = boost::make_shared<ArrayLengthValidator<double> >(3);
+  // clang-format on
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 

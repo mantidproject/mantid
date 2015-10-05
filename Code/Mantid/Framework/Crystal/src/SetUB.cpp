@@ -46,8 +46,10 @@ void SetUB::init() {
   auto reasonableAngle = boost::make_shared<BoundedValidator<double>>();
   reasonableAngle->setLower(5.0);
   reasonableAngle->setUpper(175.0);
-  auto mustBe3D = boost::make_shared<ArrayLengthValidator<double>>(3);
-  auto threeVthree = boost::make_shared<ArrayLengthValidator<double>>(9);
+  // clang-format off
+  auto mustBe3D = boost::make_shared<ArrayLengthValidator<double> >(3);
+  auto threeVthree = boost::make_shared<ArrayLengthValidator<double> >(9);
+  // clang-format on
   std::vector<double> zeroes(9, 0.), u0(3, 0), v0(3, 0);
   u0[0] = 1.;
   v0[1] = 1.;
