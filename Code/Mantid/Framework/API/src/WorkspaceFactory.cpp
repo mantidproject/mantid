@@ -60,16 +60,16 @@ MatrixWorkspace_sptr
 WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent,
                              size_t NVectors, size_t XLength,
                              size_t YLength) const {
-  bool differentSize(true);
   // Use the parent sizes if new ones are not specified
   if (NVectors == size_t(-1))
     NVectors = parent->getNumberHistograms();
   if (XLength == size_t(-1))
     XLength = parent->dataX(0).size();
-  if (YLength == size_t(-1)) {
-    differentSize = false;
+  if (YLength == size_t(-1))
     YLength = parent->blocksize();
-  }
+
+  bool differentSize = (NVectors != parent->getNumberHistograms()) ||
+                       (YLength != parent->blocksize());
 
   // If the parent is an EventWorkspace, we want it to spawn a Workspace2D (or
   // managed variant) as a child
@@ -134,17 +134,11 @@ void WorkspaceFactoryImpl::initializeFromParent(
     const size_t oldAxisLength = parent->getAxis(i)->length();
 
     if (!differentSize || newAxisLength == oldAxisLength) {
-      // Need to delete the existing axis created in init above
-      delete child->m_axes[i];
-      // Now set to a copy of the parent workspace's axis
-      child->m_axes[i] = parent->m_axes[i]->clone(child.get());
+      child->replaceAxis(i, parent->getAxis(i)->clone(child.get()));
     } else {
       if (!parent->getAxis(i)->isSpectra()) // WHY???
-      {
-        delete child->m_axes[i];
-        // Call the 'different length' clone variant
-        child->m_axes[i] = parent->m_axes[i]->clone(newAxisLength, child.get());
-      }
+        child->replaceAxis(
+            i, parent->getAxis(i)->clone(newAxisLength, child.get()));
     }
   }
 

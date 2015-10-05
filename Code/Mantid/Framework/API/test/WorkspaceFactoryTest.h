@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
 using Mantid::MantidVec;
@@ -18,7 +19,6 @@ using namespace Mantid::API;
 
 class WorkspaceFactoryTest : public CxxTest::TestSuite
 {
-
 
   class Workspace1DTest: public WorkspaceTester
   {
@@ -69,7 +69,7 @@ public:
 #if __clang__
 #pragma clang diagnostic pop
 #endif
-  
+
   }
 
   /** Make a parent, have the child be created with the same sizes */
@@ -100,7 +100,7 @@ public:
 
     // sample
     TS_ASSERT_EQUALS("MySample", child->sample().getName());
-    
+
     // Test change in child does not affect parent
     child->mutableRun().addProperty("Ei", 15.0, true);
     TS_ASSERT_THROWS_NOTHING(ei = child->run().getPropertyValueAsType<double>("Ei"));
@@ -112,7 +112,7 @@ public:
     child->mutableSample().setName("MySampleChild");
     TS_ASSERT_EQUALS("MySample", ws_child->sample().getName());
     TS_ASSERT_EQUALS("MySampleChild", child->sample().getName());
-   
+
     // Monitor workspace
     TSM_ASSERT( "The workspace factory should not propagate a monitor workspace", ! child->monitorWorkspace() );
 
@@ -145,6 +145,22 @@ public:
     TS_ASSERT_THROWS( WorkspaceFactory::Instance().create("NotInFactory",1,1,1), std::runtime_error );
     TS_ASSERT_THROWS( WorkspaceFactory::Instance().create("NotInFactory",10,10,10), std::runtime_error );
   }
+
+  void testCreateLargerNonSpecVAxisFromParent()
+  {
+    MatrixWorkspace_sptr ws_child(new Workspace1DTest);
+    ws_child->initialize(3,1,1);
+    TextAxis * vAxis = new TextAxis(3);
+    ws_child->replaceAxis(1, vAxis);
+
+    MatrixWorkspace_sptr child;
+    TS_ASSERT_THROWS_NOTHING( child = WorkspaceFactory::Instance().create(ws_child, 10) );
+    TS_ASSERT_EQUALS ( child->getNumberHistograms(), 10 );
+    TS_ASSERT_EQUALS ( child->getAxis(1)->length(), 10 );
+    TextAxis * vAxisChild = dynamic_cast<TextAxis *>(child->getAxis(1));
+    TS_ASSERT( vAxisChild );
+  }
+
 };
 
 #endif /*WORKSPACEFACTORYTEST_H_*/
