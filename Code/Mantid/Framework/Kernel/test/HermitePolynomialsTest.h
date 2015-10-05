@@ -13,9 +13,7 @@ public:
   static HermitePolynomialsTest *createSuite() { return new HermitePolynomialsTest(); }
   static void destroySuite( HermitePolynomialsTest *suite ) { delete suite; }
 
-  // clang-format off
   void test_hermitePoly_With_SingleValue_Returns_Expected_Values_For_First_Few_Terms()
-  // clang-format on
   {
     using namespace Mantid::Kernel;
     static const unsigned int npoly(6);
@@ -30,9 +28,7 @@ public:
     }
   }
 
-  // clang-format off
   void test_hermitePoly_With_Array_Values_Returns_Expected_Values_For_First_Few_Terms()
-  // clang-format on
   {
     using namespace Mantid::Kernel;
 
