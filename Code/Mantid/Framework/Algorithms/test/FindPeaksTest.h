@@ -103,7 +103,7 @@ public:
     getParameterMap(outtablews, 0, parammap);
 
     TS_ASSERT_DELTA(parammap["PeakCentre"], 1.2356, 0.03);
-    TS_ASSERT_DELTA(parammap["Height"], 595., 5.00);
+    TS_ASSERT_DELTA(parammap["Height"], 520.4654, 5.00);
 
     // Clean
     AnalysisDataService::Instance().remove(wsname);

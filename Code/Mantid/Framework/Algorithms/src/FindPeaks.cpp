@@ -335,9 +335,9 @@ void FindPeaks::generateOutputPeakParameterTable() {
   * @param fitwindows :: vector of windows around each peak. Otherwise, windows
  * will be determined automatically.
   */
-void
-FindPeaks::findPeaksGivenStartingPoints(const std::vector<double> &peakcentres,
-                                        const std::vector<double> &fitwindows) {
+void FindPeaks::findPeaksGivenStartingPoints(
+    const std::vector<double> &peakcentres,
+    const std::vector<double> &fitwindows) {
   bool useWindows = (!fitwindows.empty());
   std::size_t numPeaks = peakcentres.size();
 
@@ -1087,14 +1087,15 @@ int FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input,
 
   // Determine whether to use FindPeakBackground's result.
   int fitresult = -1;
-  if (peaklisttablews->columnCount() < 7)
-    throw std::runtime_error(
-        "No 7th column for use FindPeakBackground result or not. ");
-
-  if (peaklisttablews->rowCount() > 0) {
-    int fitresult = peaklisttablews->Int(0, 6);
-    g_log.information() << "fitresult=" << fitresult << "\n";
+  if (peaklisttablews->columnCount() == 7) {
+    fitresult = peaklisttablews->Int(0, 6);
+  } else {
+    std::ostringstream os;
+    os << "Unexpected column count for output table from FindPeakBackground."
+          "Expected 7 columns, found " << peaklisttablews->columnCount();
+    throw std::runtime_error(os.str());
   }
+  g_log.information() << "fitresult=" << fitresult << "\n";
 
   // Local check whether FindPeakBackground gives a reasonable value
   vecpeakrange.resize(2);
