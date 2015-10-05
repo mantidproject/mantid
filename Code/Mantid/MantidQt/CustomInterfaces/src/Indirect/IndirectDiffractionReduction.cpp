@@ -508,8 +508,8 @@ void IndirectDiffractionReduction::instrumentSelected(
     m_uiForm.ckSumFiles->setChecked(false);
 
     // Disable spectra range
-    m_uiForm.spSpecMin->setEnabled(false);
-    m_uiForm.spSpecMax->setEnabled(false);
+    //m_uiForm.spSpecMin->setEnabled(false);
+    //m_uiForm.spSpecMax->setEnabled(false);
   } else {
     // Re-enable sum files
     m_uiForm.ckSumFiles->setToolTip("");
