@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+Megatrain //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include <boost/format.hpp>
@@ -66,7 +66,8 @@ namespace Mantid {
         "E.g. would be 'proton_chage' log which grows for each frame "
         "when instrument is counting and constant otherwise.");
       setPropertySettings("FilterWithDerivative", new Kernel::EnabledWhenProperty(
-                                              "FilterBaseLog", Kernel::ePropertyCriterion::IS_DEFAULT));
+                          "FilterBaseLog", Kernel::ePropertyCriterion::IS_EQUAL_TO,
+                           "Defined in IDF"));
 
 
       auto maxInRange = boost::make_shared<Kernel::BoundedValidator<double>>();
@@ -454,7 +455,8 @@ namespace Mantid {
             if(iterations_fail){
               g_log.information()<<"*No peak search convergence after "
                 +std::to_string(ic)+ " smoothing iterations at still_count: "
-                +std::to_string(stay_still_count)+" Something is wrong\n";
+                +std::to_string(stay_still_count)+" Wrong energy or noisy peak at Ei="
+                +std::to_string(Ei)<<std::endl;
             }
             g_log.debug()<<"*Performed: "+std::to_string(ic)+ " averages for spectra "
               +std::to_string(index)+" at energy: "+std::to_string(Ei)
@@ -931,7 +933,7 @@ namespace Mantid {
             Kernel::SplittingInterval interval(startTime, endTime, 0);
             splitter.push_back(interval);
           }
-        }
+        } // End of USE filter log.
 
 
         chop_speed = this->getAvrgLogValue(inputWS,"ChopperSpeedLog",splitter);
