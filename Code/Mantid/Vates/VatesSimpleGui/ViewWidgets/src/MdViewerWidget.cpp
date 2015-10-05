@@ -286,8 +286,10 @@ void MdViewerWidget::setupUiAndConnections()
   
   // Setup the Default Normalization options
   setupDefaultNormalizations();
-  QObject::connect(ui.defaultNormalization,SIGNAL(currentIndexChanged(const QString&)), 
-                   this, SLOT(onDefaultNormalizationChanged(const QString&)));
+  QObject::connect(ui.defaultNormalizationHisto,SIGNAL(currentIndexChanged(const QString&)), 
+                   this, SLOT(onDefaultNormalizationHistoChanged(const QString&)));
+  QObject::connect(ui.defaultNormalizationEvent,SIGNAL(currentIndexChanged(const QString&)), 
+                  this, SLOT(onDefaultNormalizationEventChanged(const QString&)));
 }
 
 void MdViewerWidget::panelChanged()
@@ -1715,25 +1717,43 @@ bool MdViewerWidget::areGridAxesOn() {
 
 
 /** 
- * React to normalization changes
+ * React to normalization changes for MDHisto workspaces
  */
-void MdViewerWidget::onDefaultNormalizationChanged(const QString& currentText) {
+void MdViewerWidget::onDefaultNormalizationHistoChanged(const QString& currentText) {
   // Get current text and save it.
-  mdSettings.setUserSettingNormalization(currentText);
+  mdSettings.setUserSettingNormalizationHisto(currentText);
 }
 
 /**
- * Setup the default normalization 
+ * React to normalization chagnes for MDEvent workspaces
+ */
+void MdViewerWidget::onDefaultNormalizationEventChanged(const QString& currentText) {
+  // Get current text and save it.
+  mdSettings.setUserSettingNormalizationEvent(currentText);
+}
+
+/**
+ * Setup the default normalization
  */
 void MdViewerWidget::setupDefaultNormalizations() {
   auto normalizations = mdConstants.getAllNormalizations();
-  ui.defaultNormalization->addItems(normalizations);
 
-  auto indexDefaultNormalization = ui.defaultNormalization->findData(mdSettings.getUserSettingNormalization(), Qt::DisplayRole);
+  // Setup the default normalizations for MDHisto workspaces
+  ui.defaultNormalizationHisto->addItems(normalizations);
+  auto indexDefaultNormalizationHisto = ui.defaultNormalizationHisto->findData(mdSettings.getUserSettingNormalizationHisto(), Qt::DisplayRole);
 
-  if (indexDefaultNormalization != -1)
+  if (indexDefaultNormalizationHisto != -1)
   {
-    ui.defaultNormalization->setCurrentIndex(indexDefaultNormalization);
+    ui.defaultNormalizationHisto->setCurrentIndex(indexDefaultNormalizationHisto);
+  }
+
+  // Setup the default normalizations for MDEvent workspaces
+  ui.defaultNormalizationEvent->addItems(normalizations);
+  auto indexDefaultNormalizationEvent = ui.defaultNormalizationEvent->findData(mdSettings.getUserSettingNormalizationEvent(), Qt::DisplayRole);
+
+  if (indexDefaultNormalizationEvent != -1)
+  {
+    ui.defaultNormalizationEvent->setCurrentIndex(indexDefaultNormalizationEvent);
   }
 }
 

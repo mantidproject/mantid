@@ -423,9 +423,14 @@ pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName, 
   setAxesGrid(axesGridOn);
 
   // Set the normalization for MDHisto and MDEvent workspaces
-  if (isMDHistoWorkspace(src) || isMDEventWorkspace(src)) {
-    vtkSMPropertyHelper(src->getProxy(),"Normalization").Set(m_mdSettings.getUserSettingNormalizationAsInteger());
+  if (isMDHistoWorkspace(src)) {
+    vtkSMPropertyHelper(src->getProxy(),"Normalization").Set(m_mdSettings.getUserSettingNormalizationHistoAsInteger());
   }
+
+  if (isMDEventWorkspace(src)) {
+    vtkSMPropertyHelper(src->getProxy(),"Normalization").Set(m_mdSettings.getUserSettingNormalizationEventAsInteger());
+  }
+
 
   // Update the source so that it retrieves the data from the Mantid workspace
   src->getProxy()->UpdateVTKObjects(); // Updates all the proxies

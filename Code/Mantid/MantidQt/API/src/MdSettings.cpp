@@ -20,7 +20,9 @@ MdSettings::MdSettings() : m_vsiGroup("Mantid/MdPlotting/Vsi"),
                            m_lblLastSessionBackgroundColor("lastsessionbackgroundcolor"),
                            m_lblSliceViewerColorMap("ColormapFile"), // This is the same as in Slice Viewer !!,
                            m_lblUserSettingInitialView("initialview"),
-                           m_lblLastSessionLogScale("lastsessionlogscale")
+                           m_lblLastSessionLogScale("lastsessionlogscale"),
+                           m_lblDefaultNormalizationHisto("defaultnormalizationhisto"),
+                           m_lblDefaultNormalizationEvent("defaultnormalizationevent")
 {
   m_mdConstants.initializeSettingsConstants();
 }
@@ -229,19 +231,38 @@ void MdSettings::setUserSettingIntialView(QString initialView)
   settings.endGroup();
 }
 
-void MdSettings::setUserSettingNormalization(QString normalization) {
+void MdSettings::setUserSettingNormalizationHisto(QString normalization) {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  settings.setValue(m_lblDefaultNormalization, normalization);
+  settings.setValue(m_lblDefaultNormalizationHisto, normalization);
   settings.endGroup();
 }
 
-QString MdSettings::getUserSettingNormalization() {
+QString MdSettings::getUserSettingNormalizationHisto() {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  QString defaultNormalization = settings.value(m_lblDefaultNormalization, m_mdConstants.getAutoNormalization()).asString();
+  QString defaultNormalization = settings.value(m_lblDefaultNormalizationHisto, m_mdConstants.getAutoNormalization()).asString();
+  settings.endGroup();
+
+  return defaultNormalization; 
+}
+
+
+void MdSettings::setUserSettingNormalizationEvent(QString normalization) {
+  QSettings settings;
+
+  settings.beginGroup(m_vsiGroup);
+  settings.setValue(m_lblDefaultNormalizationEvent, normalization);
+  settings.endGroup();
+}
+
+QString MdSettings::getUserSettingNormalizationEvent() {
+  QSettings settings;
+
+  settings.beginGroup(m_vsiGroup);
+  QString defaultNormalization = settings.value(m_lblDefaultNormalizationEvent, m_mdConstants.getAutoNormalization()).asString();
   settings.endGroup();
 
   return defaultNormalization; 
@@ -259,7 +280,16 @@ int MdSettings::convertNormalizationToInteger(QString normalization) {
   }
 }
 
-int MdSettings::getUserSettingNormalizationAsInteger() {
-  auto normalization = getUserSettingNormalization();
+int MdSettings::getUserSettingNormalizationHistoAsInteger() {
+  auto normalization = getUserSettingNormalizationHisto();
   return convertNormalizationToInteger(normalization);
 }
+
+int MdSettings::getUserSettingNormalizationEventAsInteger() {
+  auto normalization = getUserSettingNormalizationEvent();
+  return convertNormalizationToInteger(normalization);
+}
+
+
+
+

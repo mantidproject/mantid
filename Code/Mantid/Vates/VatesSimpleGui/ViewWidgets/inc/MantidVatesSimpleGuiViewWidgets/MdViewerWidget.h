@@ -122,8 +122,10 @@ protected slots:
   void onSwitchSources(std::string rebinnedWorkspaceName, std::string sourceType);
   /// reset state of all the views
   void onResetViewsStateToAllData();
-  /// On default normalization changes
-  void onDefaultNormalizationChanged(const QString& currentText);
+  /// On default normalization for MDHisto workspaces changes
+  void onDefaultNormalizationHistoChanged(const QString& currentText);
+  /// On default normalization for MDHisto workspaces changes
+  void onDefaultNormalizationEventChanged(const QString& currentText);
 
 protected:
   /// Handle workspace preDeletion tasks.

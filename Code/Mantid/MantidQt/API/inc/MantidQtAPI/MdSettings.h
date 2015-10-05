@@ -167,22 +167,41 @@ namespace MantidQt
          bool getLastSessionLogScale();
         
         /**
-         * Set the user setting for the default normalization
+         * Set the user setting for the default normalization for histo workspaces
          * @param normalization: the default normalization
          */
-         void setUserSettingNormalization(QString normalization);
+         void setUserSettingNormalizationHisto(QString normalization);
 
         /**
-         * Get the user setting for the default normalization
+         * Get the user setting for the default normalization for histo workspaces
          * @returns the default normalization
          */
-         QString getUserSettingNormalization();
+         QString getUserSettingNormalizationHisto();
 
         /**
-         * Get the normalization as an integer
+         * Get the normalization as an integer for histo workspaces
          * @returns the current user setting as an integer
          */ 
-        int getUserSettingNormalizationAsInteger();
+        int getUserSettingNormalizationHistoAsInteger();
+
+
+        /**
+         * Set the user setting for the default normalization for event workspaces
+         * @param normalization: the default normalization
+         */
+         void setUserSettingNormalizationEvent(QString normalization);
+
+        /**
+         * Get the user setting for the default normalization for event workspaces
+         * @returns the default normalization
+         */
+         QString getUserSettingNormalizationEvent();
+
+        /**
+         * Get the normalization as an integer for event workspaces
+         * @returns the current user setting as an integer
+         */ 
+        int getUserSettingNormalizationEventAsInteger();
 
         /**
          * Convert normalization string to integer
@@ -190,7 +209,7 @@ namespace MantidQt
          * @returns normalization as an integer 
          */
         int convertNormalizationToInteger(QString normalization);
-        
+
       private:
         MdConstants m_mdConstants;
 
@@ -213,8 +232,8 @@ namespace MantidQt
         QString m_lblUserSettingInitialView;
         QString m_lblLastSessionLogScale;
 
-        QString m_lblDefaultNormalization;
-
+        QString m_lblDefaultNormalizationHisto;
+        QString m_lblDefaultNormalizationEvent;
     };
   }
 }
