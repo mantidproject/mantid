@@ -4,8 +4,8 @@ import ast
 import datetime
 import urllib
 
-URL = "http://builds.mantidproject.org/job/master_systemtests/"
-
+URL = "http://builds.mantidproject.org/job/master_systemtests"
+PLATFORMS=['rhel7','rhel6', 'osx', 'win7', 'ubuntu']
 
 class TestCase:
 
@@ -87,16 +87,21 @@ def generateTable(interesting, labels, heading):
             printResultCell(label in interesting[test], len(label))
         print
 
-url = URL+"lastCompletedBuild/testReport/api/python"
-json = ast.literal_eval(urllib.urlopen(url).read())
-
 skipped = {}
 failed = {}
+totalCount = 0
 
-for report in json["childReports"]:
-    (label, jobNum) = getLabel(report["child"]["url"])
-    result = report["result"]
-    for case in result["suites"][0]["cases"]:
+for platform in PLATFORMS:
+    url = URL+"-"+PLATFORMS[0]+"/lastCompletedBuild/testReport/api/python"
+    request=urllib.urlopen(url)
+    if request.getcode() != 200:
+        raise RuntimeError("'%s' returned %d" % (url, request.getcode()))
+    json = ast.literal_eval(request.read())
+
+    label=platform
+    totalCount += int(json['failCount'])+int(json['passCount'])+int(json['skipCount'])
+
+    for case in json["suites"][0]["cases"]:
         case = TestCase(case)
         if case.status != "PASSED":
             if case.status == "SKIPPED":
@@ -116,9 +121,6 @@ for key in failed.keys():
             labels.append(item)
 labels.sort()
 
-# total tests
-totalCount = int(json['totalCount'])
-
 # print out the yaml header so it gets parsed by jekyll
 print '---'
 print 'layout: default'
@@ -130,9 +132,8 @@ print '---'
 print "Summary"
 print "======="
 print
-print "* Job    : [%s](%s)" % (URL.split('/')[-2], URL),
-print datetime.datetime.now().strftime("%Y-%m-%d"),
-print "[#%s](%s%s/)" % (jobNum, URL, jobNum)
+print "* Job    : [%s](%s)" % ('Master Pipeline', 'http://builds.mantidproject.org/view/Master%20Pipeline/'),
+print datetime.datetime.now().strftime("%Y-%m-%d")
 print "* Labels :", ', '.join(labels)
 print "* Failed :", json['failCount'],
 if len(failed.keys()) < 2:
