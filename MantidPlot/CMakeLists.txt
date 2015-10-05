@@ -762,8 +762,8 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 # Internal icon links
 ###########################################################################
 
-qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Images/images.qrc )
-qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Images//fonts/fonts.qrc )
+qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images/images.qrc )
+qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images//fonts/fonts.qrc )
 qt4_add_resources ( RES_FILES ${CMAKE_CURRENT_SOURCE_DIR}/icons/icons.qrc )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/MantidQt/SliceViewer/icons/SliceViewerIcons.qrc )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/MantidQt/CustomInterfaces/icons/CustomInterfacesIcons.qrc )
@@ -821,7 +821,7 @@ if( WIN32 )
 endif( WIN32 )
 
 if ( APPLE )
-  set ( MANTID_RC_FILE ${CMAKE_SOURCE_DIR}/Images/MantidPlot.icns )
+  set ( MANTID_RC_FILE ${CMAKE_SOURCE_DIR}/images/MantidPlot.icns )
   set_source_files_properties(MANTID_RC_FILE PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 endif ()
 
@@ -935,7 +935,7 @@ if( APPLE )
     set ( MAC_BUNDLE_IDENTIFIER "" )
   endif()
 
-  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/../Installers/MacInstaller/Info.plist.in
+  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/../installers/MacInstaller/Info.plist.in
                    ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
                    @ONLY )
 

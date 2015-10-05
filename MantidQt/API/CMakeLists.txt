@@ -149,7 +149,7 @@ target_link_libraries ( MantidQtAPI LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
 # Windows: Generate a qt.conf file so that the dev build finds the qt
 # plugins in third party. Done in two steps to get it into the build
 # directory that is selected at build time.
-# This file is NOT packaged. See Installers/WinInstaller for the package
+# This file is NOT packaged. See installers/WinInstaller for the package
 # version.
 ###########################################################################
 if ( WIN32 )

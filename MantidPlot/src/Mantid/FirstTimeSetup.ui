@@ -149,7 +149,7 @@ font-size: 28px</string>
             <string>Sample Datasets</string>
            </property>
            <property name="icon">
-            <iconset resource="../../../Images/images.qrc">
+            <iconset resource="../../../images/images.qrc">
              <normaloff>:/Icons/download-icon-48x48.png</normaloff>:/Icons/download-icon-48x48.png</iconset>
            </property>
            <property name="iconSize">
@@ -187,7 +187,7 @@ font-size: 28px</string>
             <string>Extending Mantid with Python</string>
            </property>
            <property name="icon">
-            <iconset resource="../../../Images/images.qrc">
+            <iconset resource="../../../images/images.qrc">
              <normaloff>:/Icons/Plugin-Python-icon-48x48.png</normaloff>:/Icons/Plugin-Python-icon-48x48.png</iconset>
            </property>
            <property name="iconSize">
@@ -222,7 +222,7 @@ font-size: 28px</string>
             <string>Python in Mantid</string>
            </property>
            <property name="icon">
-            <iconset resource="../../../Images/images.qrc">
+            <iconset resource="../../../images/images.qrc">
              <normaloff>:/Icons/Circle_cog_48x48.png</normaloff>:/Icons/Circle_cog_48x48.png</iconset>
            </property>
            <property name="iconSize">
@@ -257,7 +257,7 @@ font-size: 28px</string>
             <string>Introduction to Python</string>
            </property>
            <property name="icon">
-            <iconset resource="../../../Images/images.qrc">
+            <iconset resource="../../../images/images.qrc">
              <normaloff>:/Icons/Python-icon-48x48.png</normaloff>:/Icons/Python-icon-48x48.png</iconset>
            </property>
            <property name="iconSize">
@@ -292,7 +292,7 @@ font-size: 28px</string>
             <string>Mantid Introduction</string>
            </property>
            <property name="icon">
-            <iconset resource="../../../Images/images.qrc">
+            <iconset resource="../../../images/images.qrc">
              <normaloff>:/Icons/Misc-Tutorial-icon-48x48.png</normaloff>:/Icons/Misc-Tutorial-icon-48x48.png</iconset>
            </property>
            <property name="iconSize">
@@ -348,7 +348,7 @@ color: rgb(0, 0, 0);</string>
             <string>Release Notes</string>
            </property>
            <property name="icon">
-            <iconset resource="../../../Images/images.qrc">
+            <iconset resource="../../../images/images.qrc">
              <normaloff>:/Icons/Notepad-Bloc-notes-icon-48x48.png</normaloff>:/Icons/Notepad-Bloc-notes-icon-48x48.png</iconset>
            </property>
            <property name="iconSize">
@@ -827,8 +827,8 @@ color: rgb(25,125,25);</string>
   <tabstop>pbConfirm</tabstop>
  </tabstops>
  <resources>
-  <include location="../../../Images/images.qrc"/>
-  <include location="../../../Images/fonts/fonts.qrc"/>
+  <include location="../../../images/images.qrc"/>
+  <include location="../../../images/fonts/fonts.qrc"/>
  </resources>
  <connections/>
 </ui>

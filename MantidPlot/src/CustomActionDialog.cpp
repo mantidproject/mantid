@@ -474,7 +474,7 @@ void CustomActionDialog::saveAction(QAction *action)
 void CustomActionDialog::chooseIcon()
 {
     QList<QByteArray> list = QImageReader::supportedImageFormats();
-	QString filter = tr("Images") + " (", aux1, aux2;
+	QString filter = tr("images") + " (", aux1, aux2;
 	for (int i=0; i<(int)list.count(); i++){
 		aux1 = " *." + list[i] + " ";
 		aux2 += " *." + list[i] + ";;";
