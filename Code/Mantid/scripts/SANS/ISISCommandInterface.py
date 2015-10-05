@@ -1378,7 +1378,8 @@ def SetTransmissionMask(trans_mask_files):
         sanslog.warning('Warning: The mask file list does not seem to be valid.')
 
 
-def AddRuns(runs, instrument, binning = "Monitors", saveAsEvent=False, isOverlay = False, time_shifts = []):
+def AddRuns(runs, instrument ='sans2d', saveAsEvent=False, binning = "Monitors", isOverlay = False, time_shifts = [],
+            defType='.nxs', rawTypes=('.raw', '.s*', 'add','.RAW'), lowMem=False):
     '''
     Method to expose the add_runs functionality for custom scripting.
     @param runs: a list with the requested run numbers
@@ -1389,11 +1390,13 @@ def AddRuns(runs, instrument, binning = "Monitors", saveAsEvent=False, isOverlay
     if len(runs) < 1:
         issueWarning("AddRuns issue: A list with at least two runs needs to be provided.")
         return
-
     add_runs(runs = runs,
              inst = instrument,
+             defType = defType,
+             rawTypes = rawTypes,
+             lowMem = lowMem,
              binning = binning,
-             saveAsEvent = saveAsEvent,
+             saveAsEvent=saveAsEvent,
              isOverlay = isOverlay,
              time_shifts = time_shifts)
 
