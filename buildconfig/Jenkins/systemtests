@@ -45,7 +45,7 @@ cd $WORKSPACE/build
 # We use the special flag that only creates the targets for the data
 ###############################################################################
 if [[ ! -e $WORKSPACE/build/CMakeCache.txt ]]; then
-  $SCL_ON_RHEL6 "cmake -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDATA_TARGETS_ONLY=ON ../Code/Mantid"
+  $SCL_ON_RHEL6 "cmake -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDATA_TARGETS_ONLY=ON .."
 else
   $SCL_ON_RHEL6 "cmake ."
 fi
@@ -69,5 +69,5 @@ echo "usagereports.enabled = 0" >> $userprops
 
 # Run
 PKGDIR=${WORKSPACE}/build
-python $WORKSPACE/Code/Mantid/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR
+python $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR
 
