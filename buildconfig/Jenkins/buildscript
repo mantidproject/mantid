@@ -226,7 +226,8 @@ if [[ "${ON_UBUNTU}" == true ]] && [[ ${JOB_NAME} == *pull_requests* ]]; then
   if [ -d $BUILD_DIR/docs/doctrees ]; then
     rm -rf $BUILD_DIR/docs/doctrees/*
   fi
-  $SCL_ON_RHEL6 "cmake --build . --target docs-test"
+  # FIXME: Needs to be added back in
+  #$SCL_ON_RHEL6 "cmake --build . --target docs-test"
 fi
 
 ###############################################################################
@@ -239,7 +240,8 @@ if [[ "$BUILDPKG" == true ]]; then
   if [[ $(uname) == 'Darwin' ]]; then
     export MANTIDPATH=$PWD/bin
   fi
-  $SCL_ON_RHEL6 "cmake --build . --target docs-qthelp"
+  # FIXME: Needs to be added back in
+  #$SCL_ON_RHEL6 "cmake --build . --target docs-qthelp"
   $SCL_ON_RHEL6 "cpack"
 
   # Source tarball on clean build (arbitrarily choose rhel6)
