@@ -185,19 +185,19 @@ present.
     # Find HKLs with very small structure factors:
     zeroFSquared = [(hkl, sf) for hkl, sf in zip(hkls, fSquared) if sf < 1e-9]
 
-    print 'HKL\tF^2'
+    print 'HKL        F^2'
     for hkl, sf in zeroFSquared:
-        print hkl, '\t', np.round(sf, 2)
+        print hkl, '  ', np.round(sf, 2)
 
 The output of the above script should show three reflections with very small values for F^2. Their indices violate the
 special conditions mentioned in the previous paragraph, so the reflections are actually extinct:
 
 .. testoutput:: ExReflectionGeneratorViolations
 
-    HKL	F^2
-    [2,2,2] 	0.0
-    [4,4,2] 	0.0
-    [6,2,2] 	0.0
+    HKL        F^2
+    [2,2,2]    0.0
+    [4,4,2]    0.0
+    [6,2,2]    0.0
 
 Those three reflections are included in the list of unique HKLs, because the standard method to determine whether a
 reflection is allowed or not uses the space group symmetry which only reflects the general conditions listed in ITA.
@@ -233,7 +233,7 @@ according to their d-value to fit the specified range.
 Another capability of ReflectionGenerator is the calculation of d-values for a list of HKLs, very similar to the process
 for F^2:
 
-.. testoutput:: ExReflectionGeneratorCalculateD
+.. testcode:: ExReflectionGeneratorCalculateD
 
     from mantid.geometry import CrystalStructure, ReflectionGenerator, ReflectionConditionFilter
     import numpy as np
@@ -254,33 +254,33 @@ for F^2:
     reflections = sorted([(hkl, d, fsq, len(pg.getEquivalents(hkl))) for hkl, d, fsq in zip(hkls, dValues, fSquared)],
                                     key=lambda x: x[1], reverse=True)
 
-    print 'HKL\td\tF^2\tMultiplicity'
+    print '{0:<8}{1:>8}{2:>8}{3:>4}'.format('HKL', 'd', 'F^2', 'M')
     for reflection in reflections:
-        print '{0!s}\t{1:.5f}\t{2:>6.2f}\t{3}'.format(*reflection)
+        print '{0!s:<8}{1:>8.5f}{2:>8.2f}{3:>4}'.format(*reflection)
 
 This script will print a table with the reflections including their d-value, F^2 and multiplicity due to point group
 symmetry:
 
 .. testoutput:: ExReflectionGeneratorCalculateD
 
-    HKL	d	F^2	Multiplicity
-    [2,2,0]	1.92015	645.02	12
-    [3,1,1]	1.63751	263.85	24
-    [4,0,0]	1.35775	377.63	6
-    [3,3,1]	1.24596	154.47	24
-    [4,2,2]	1.10860	221.08	24
-    [3,3,3]	1.04520	 90.43	8
-    [5,1,1]	1.04520	 90.43	24
-    [4,4,0]	0.96007	129.43	12
-    [5,3,1]	0.91801	 52.94	48
-    [6,2,0]	0.85872	 75.78	24
-    [5,3,3]	0.82822	 31.00	24
-    [4,4,4]	0.78390	 44.36	8
-    [7,1,1]	0.76049	 18.15	24
-    [5,5,1]	0.76049	 18.15	24
-    [6,4,2]	0.72575	 25.97	48
-    [5,5,3]	0.70706	 10.62	24
-    [7,3,1]	0.70706	 10.62	48
+    HKL            d     F^2   M
+    [2,2,0]  1.92015  645.02  12
+    [3,1,1]  1.63751  263.85  24
+    [4,0,0]  1.35775  377.63   6
+    [3,3,1]  1.24596  154.47  24
+    [4,2,2]  1.10860  221.08  24
+    [3,3,3]  1.04520   90.43   8
+    [5,1,1]  1.04520   90.43  24
+    [4,4,0]  0.96007  129.43  12
+    [5,3,1]  0.91801   52.94  48
+    [6,2,0]  0.85872   75.78  24
+    [5,3,3]  0.82822   31.00  24
+    [4,4,4]  0.78390   44.36   8
+    [5,5,1]  0.76049   18.15  24
+    [7,1,1]  0.76049   18.15  24
+    [6,4,2]  0.72575   25.97  48
+    [5,5,3]  0.70706   10.62  24
+    [7,3,1]  0.70706   10.62  48
 
 Further reading
 ~~~~~~~~~~~~~~~
