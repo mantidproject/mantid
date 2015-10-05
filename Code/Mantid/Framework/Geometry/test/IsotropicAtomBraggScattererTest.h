@@ -86,7 +86,6 @@ public:
 
   void testClone() {
     UnitCell cell(5.43, 5.43, 5.43);
-        SpaceGroupFactory::Instance().createSpaceGroup("P m -3 m");
 
     IsotropicAtomBraggScatterer_sptr scatterer =
         getInitializedScatterer("H", "[1, 0, 0]", 0.0);
@@ -99,11 +98,10 @@ public:
         boost::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
             baseclone);
 
-        TS_ASSERT(clone);
+    TS_ASSERT(clone);
 
     TS_ASSERT_EQUALS(clone->getPosition(), scatterer->getPosition());
     TS_ASSERT_EQUALS(clone->getCell().getG(), scatterer->getCell().getG());
-                     scatterer->getSpaceGroup()->hmSymbol());
 
     IsotropicAtomBraggScatterer_sptr scattererClone =
         boost::dynamic_pointer_cast<IsotropicAtomBraggScatterer>(clone);
@@ -149,70 +147,70 @@ public:
     TS_ASSERT_EQUALS(structureFactor.real(),
                      bSi * 0.5 * 0.96708061593352515459);
 
-        /* Assume a space group with F centering.
-         *
-         * Now there are 4 equivalent positions, the contributions cancel out for (1, 0, 0)
-     *(1, 0, 0)
-     * scalar products are:
-     *   (1,0,0) * (0,0,0) = (1*0 + 1*0 + 1*0)         = 0    cos(0) = 1, sin(0)
-     *= 0
-     *   (1,0,0) * (0,0.5,0.5) = (1*0 + 0*0.5 + 0*0.5) = 0    cos(0) = 1, sin(0)
-     *= 0
+    /* Assume a space group with F centering.
+     *
+     * Now there are 4 equivalent positions, the contributions cancel out for
+     *   (1, 0, 0)
+     * The scalar products are:
+     *   (1,0,0) * (0,0,0) = (1*0 + 1*0 + 1*0)         = 0    cos(0) = 1,
+     *                                                        sin(0) = 0
+     *   (1,0,0) * (0,0.5,0.5) = (1*0 + 0*0.5 + 0*0.5) = 0    cos(0) = 1,
+     *                                                        sin(0) = 0
      *   (1,0,0) * (0.5,0,0.5) = (1*0.5 + 0*0 + 0*0.5) = 0.5  cos(pi) = -1,
-     *sin(pi) = 0
+     *                                                        sin(pi) = 0
      *   (1,0,0) * (0.5,0.5,0) = (1*0.5 + 0*0.5 + 0*0) = 0.5  cos(pi) = -1,
-     *sin(pi) = 0
+     *                                                        sin(pi) = 0
      *
      *   That means 1 * real + 1 * real + (-1 * real) + (-1 * real) = 0
      */
-        StructureFactor totalStructureFactorForbidden;
+    StructureFactor totalStructureFactorForbidden;
 
-        scatterer->setProperty("Position", "[0, 0, 0]");
-        totalStructureFactorForbidden += scatterer->calculateStructureFactor(hkl);
+    scatterer->setProperty("Position", "[0, 0, 0]");
+    totalStructureFactorForbidden += scatterer->calculateStructureFactor(hkl);
 
-        scatterer->setProperty("Position", "[0, 0.5, 0.5]");
-        totalStructureFactorForbidden += scatterer->calculateStructureFactor(hkl);
+    scatterer->setProperty("Position", "[0, 0.5, 0.5]");
+    totalStructureFactorForbidden += scatterer->calculateStructureFactor(hkl);
 
-        scatterer->setProperty("Position", "[0.5, 0, 0.5]");
-        totalStructureFactorForbidden += scatterer->calculateStructureFactor(hkl);
+    scatterer->setProperty("Position", "[0.5, 0, 0.5]");
+    totalStructureFactorForbidden += scatterer->calculateStructureFactor(hkl);
 
-        scatterer->setProperty("Position", "[0.5, 0.5, 0]");
-        totalStructureFactorForbidden += scatterer->calculateStructureFactor(hkl);
-
+    scatterer->setProperty("Position", "[0.5, 0.5, 0]");
+    totalStructureFactorForbidden += scatterer->calculateStructureFactor(hkl);
 
     // It's not always exactly 0 (floating point math), but should not be less
-        TS_ASSERT_LESS_THAN(totalStructureFactorForbidden.real(), 1e-9);
-        TS_ASSERT_LESS_THAN_EQUALS(0, totalStructureFactorForbidden.real());
+    TS_ASSERT_LESS_THAN(totalStructureFactorForbidden.real(), 1e-9);
+    TS_ASSERT_LESS_THAN_EQUALS(0, totalStructureFactorForbidden.real());
 
     // For (1, 1, 1), the value is defined
     hkl = V3D(1, 1, 1);
 
-        StructureFactor totalStructureFactorAllowed;
-        scatterer->setProperty("Position", "[0, 0, 0]");
-        totalStructureFactorAllowed += scatterer->calculateStructureFactor(hkl);
+    StructureFactor totalStructureFactorAllowed;
+    scatterer->setProperty("Position", "[0, 0, 0]");
+    totalStructureFactorAllowed += scatterer->calculateStructureFactor(hkl);
 
-        scatterer->setProperty("Position", "[0, 0.5, 0.5]");
-        totalStructureFactorAllowed += scatterer->calculateStructureFactor(hkl);
+    scatterer->setProperty("Position", "[0, 0.5, 0.5]");
+    totalStructureFactorAllowed += scatterer->calculateStructureFactor(hkl);
 
-        scatterer->setProperty("Position", "[0.5, 0, 0.5]");
-        totalStructureFactorAllowed += scatterer->calculateStructureFactor(hkl);
+    scatterer->setProperty("Position", "[0.5, 0, 0.5]");
+    totalStructureFactorAllowed += scatterer->calculateStructureFactor(hkl);
 
-        scatterer->setProperty("Position", "[0.5, 0.5, 0]");
-        totalStructureFactorAllowed += scatterer->calculateStructureFactor(hkl);
+    scatterer->setProperty("Position", "[0.5, 0.5, 0]");
+    totalStructureFactorAllowed += scatterer->calculateStructureFactor(hkl);
 
     /* scalar products are:
-     *   (1,1,1) * (0,0,0) = (1*0 + 1*0 + 1*0)         = 0  cos(0) = 1, sin(0) =
-     *0
+     *   (1,1,1) * (0,0,0) = (1*0 + 1*0 + 1*0)         = 0  cos(0) = 1
+     *                                                      sin(0) = 0
      *   (1,1,1) * (0,0.5,0.5) = (1*0 + 1*0.5 + 1*0.5) = 1  cos(2pi) = 1,
-     *sin(2pi) = 0
+     *                                                      sin(2pi) = 0
      *   (1,1,1) * (0.5,0,0.5) = (1*0.5 + 1*0 + 1*0.5) = 1  cos(2pi) = 1,
-     *sin(2pi) = 0
+     *                                                      sin(2pi) = 0
      *   (1,1,1) * (0.5,0.5,0) = (1*0.5 + 1*0.5 + 1*0) = 1  cos(2pi) = 1,
-     *sin(2pi) = 0
+     *                                                      sin(2pi) = 0
      *
      * That means 4 * real * debye waller * occupation. d = 3.13...
      */
-        TS_ASSERT_DELTA(totalStructureFactorAllowed.real(), 4.0 * bSi * 0.90445723107190849637 * 0.5, 5e-16);
+    TS_ASSERT_DELTA(totalStructureFactorAllowed.real(),
+                    4.0 * bSi * 0.90445723107190849637 * 0.5, 5e-16);
   }
 
 private:

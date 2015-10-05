@@ -13,6 +13,7 @@
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidGeometry/Crystal/BraggScattererFactory.h"
+#include "MantidGeometry/Crystal/ReflectionGenerator.h"
 
 #include <stdexcept>
 
@@ -356,27 +357,26 @@ public:
     TS_ASSERT_LESS_THAN(poldiPeaks[68]->d(), poldiPeaks[0]->d());
   }
 
-  /*
-  void xtestSetPeaks()
-  {
-      CrystalStructure structure = getCsClStructure();
+  void testSetPeaks() {
+    CrystalStructure structure = getCsClStructure();
+    ReflectionGenerator generator(structure);
 
-      double dMin = 0.55;
-      double dMax = 5.0;
+    double dMin = 0.55;
+    double dMax = 5.0;
 
-      std::vector<V3D> hkls = structure->getUniqueHKLs(dMin, dMax);
-      std::vector<double> dValues = structure->getDValues(hkls);
-      std::vector<double> fSquared(dValues.size(), 0.0);
+    std::vector<V3D> hkls = generator.getUniqueHKLs(dMin, dMax);
+    std::vector<double> dValues = generator.getDValues(hkls);
+    std::vector<double> fSquared(dValues.size(), 0.0);
 
-      TestablePoldiPeakCollection p;
+    TestablePoldiPeakCollection p;
 
-      p.setPointGroup(structure->spaceGroup()->getPointGroup());
-      TS_ASSERT_THROWS_NOTHING(p.setPeaks(hkls, dValues, fSquared));
+    p.setPointGroup(structure.spaceGroup()->getPointGroup());
+    TS_ASSERT_THROWS_NOTHING(p.setPeaks(hkls, dValues, fSquared));
 
-      dValues.pop_back();
-      TS_ASSERT_THROWS(p.setPeaks(hkls, dValues, fSquared),
-  std::invalid_argument);
-  }*/
+    dValues.pop_back();
+    TS_ASSERT_THROWS(p.setPeaks(hkls, dValues, fSquared),
+                     std::invalid_argument);
+  }
 
 private:
   CrystalStructure getCsClStructure() {
