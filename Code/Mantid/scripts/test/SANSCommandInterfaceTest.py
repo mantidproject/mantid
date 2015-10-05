@@ -1,5 +1,6 @@
 import unittest
 import mantid
+import os
 import isis_instrument as instruments
 import ISISCommandInterface as command_iface
 from reducer_singleton import ReductionSingleton
@@ -254,6 +255,45 @@ class TestFitRescaleAndShift(unittest.TestCase):
         # Clean up
         DeleteWorkspace(ws1)
         DeleteWorkspace(ws2)
+
+class TestLARMORCommand(unittest.TestCase):
+    def test_that_default_idf_is_being_selected(self):
+        command_iface.Clean()
+        # Act
+        command_iface.LARMOR()
+        # Assert
+        instrument = ReductionSingleton().get_instrument()
+        idf_file_path = instrument.get_idf_file_path()
+        file_name = os.path.basename(idf_file_path)
+
+        expected_name = "LARMOR_Definition.xml"
+        self.assertEqual(file_name, expected_name)
+
+    def test_that_selected_idf_is_being_selectedI(self):
+        command_iface.Clean()
+        selected_idf = "LARMOR_Definition_8tubes.xml"
+        # Act
+        command_iface.LARMOR(selected_idf)
+        # Assert
+        instrument = ReductionSingleton().get_instrument()
+        idf_file_path = instrument.get_idf_file_path()
+        file_name = os.path.basename(idf_file_path)
+
+        expected_name = selected_idf
+        self.assertEqual(file_name, expected_name)
+
+    def test_that_gets_default_for_non_existing_idf(self):
+        command_iface.Clean()
+        selected_idf = "LARMOR_Definition_NONEXIST.xml"
+        # Act
+        command_iface.LARMOR(selected_idf)
+        # Assert
+        instrument = ReductionSingleton().get_instrument()
+        idf_file_path = instrument.get_idf_file_path()
+        file_name = os.path.basename(idf_file_path)
+
+        expected_name = "LARMOR_Definition.xml"
+        self.assertEqual(file_name, expected_name)
 
 
 if __name__ == "__main__":

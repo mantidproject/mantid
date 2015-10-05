@@ -13,7 +13,7 @@ import isis_reducer
 from centre_finder import CentreFinder as CentreFinder
 #import SANSReduction
 from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup
+from mantid.api import WorkspaceGroup, ExperimentInfo
 import copy
 from SANSadd2 import *
 import SANSUtility as su
@@ -90,14 +90,16 @@ def SANS2DTUBES():
     """
     return SANS2D("SANS2D_Definition_Tubes.xml")
 
-def LOQ():
+def LOQ(idf_path='LOQ_Definition_20020226-.xml'):
     """
         Initialises the instrument settings for LOQ
+        @param idf_path :: optionally specify the path to the LARMOR IDF to use.
+                           Uses default if none specified.
         @return True on success
     """
     _printMessage('LOQ()')
     try:
-        instrument = isis_instrument.LOQ()
+        instrument = isis_instrument.LOQ(idf_path)
 
         ReductionSingleton().set_instrument(instrument)
         config['default.instrument']='LOQ'
@@ -105,20 +107,22 @@ def LOQ():
         return False
     return True
 
-def LARMOR():
+def LARMOR(idf_path = None):
     """
     Initialises the instrument settings for LARMOR
+    @param idf_path :: optionally specify the path to the LARMOR IDF to use.
+                       Uses default if none specified.
     @return True on success
     """
     _printMessage('LARMOR()')
     try:
-        instrument = isis_instrument.LARMOR()
-
+        instrument = isis_instrument.LARMOR(idf_path)
         ReductionSingleton().set_instrument(instrument)
         config['default.instrument']='LARMOR'
     except:
         return False
     return True
+
 
 def Detector(det_name):
     """
@@ -1376,6 +1380,7 @@ def SetTransmissionMask(trans_mask_files):
         ReductionSingleton().transmission_calculator.mask_files = trans_mask_files
     else:
         sanslog.warning('Warning: The mask file list does not seem to be valid.')
+
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################

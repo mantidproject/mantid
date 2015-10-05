@@ -11,7 +11,6 @@ from mantid.kernel import V3D
 import SANSUtility as su
 
 sanslog = Logger("SANS")
-
 class BaseInstrument(object):
     def __init__(self, instr_filen=None):
         """
@@ -27,6 +26,9 @@ class BaseInstrument(object):
 
         inst_ws_name = self.load_empty()
         self.definition = AnalysisDataService.retrieve(inst_ws_name).getInstrument()
+
+    def get_idf_file_path(self):
+        return self._definition_file
 
     def get_default_beam_center(self):
         """
@@ -766,12 +768,12 @@ class LOQ(ISISInstrument):
     #maximum wavelength of neutrons assumed to be measurable by this instrument
     WAV_RANGE_MAX = 10.0
 
-    def __init__(self):
+    def __init__(self, idf_path='LOQ_Definition_20020226-.xml'):
         """
             Reads LOQ's instrument definition xml file
             @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
         """
-        super(LOQ, self).__init__('LOQ_Definition_20020226-.xml')
+        super(LOQ, self).__init__(idf_path)
         #relates the numbers of the monitors to their names in the instrument definition file
         self.monitor_names = {1 : 'monitor1',
                               2 : 'monitor2'}
@@ -1199,8 +1201,8 @@ class LARMOR(ISISInstrument):
     _NAME = 'LARMOR'
     WAV_RANGE_MIN = 0.5
     WAV_RANGE_MAX = 13.5
-    def __init__(self):
-        super(LARMOR,self).__init__('LARMOR_Definition.xml')
+    def __init__(self, idf_path=None):
+        super(LARMOR,self).__init__(idf_path)
         self._marked_dets = []
         # set to true once the detector positions have been moved to the locations given in the sample logs
         self.corrections_applied = False

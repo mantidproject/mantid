@@ -6,7 +6,7 @@
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup, FileLoaderRegistry
 import mantid
-from mantid.kernel import time_duration
+from mantid.kernel import time_duration, DateAndTime
 import inspect
 import math
 import os
@@ -1131,6 +1131,89 @@ def is_1D_workspace(workspace):
         return True
     else:
         return False
+
+def get_measurement_time_from_file(filename):
+    '''
+    This function extracts the measurement time from either a Nexus or a
+    Raw file. In the case of a Nexus file it queries the "end_run" entry,
+    in the case of a raw file it uses the RawFileInfo algorithm to get
+    the relevant dateTime.
+    @param filename: the file to check
+    @returns the measurement time
+    '''
+    def get_month(month_string):
+        month_conversion ={"JAN":"01", "FEB":"02", "MAR":"03", "APR":"04",
+                            "MAY":"05", "JUN":"06", "JUL":"07", "AUG":"08",
+                            "SEP":"09", "OCT":"10", "NOV":"11", "DEC":"12"}
+        month_upper = month_string.upper()
+        if month_upper in month_conversion:
+            return month_conversion[month_upper]
+        else:
+            raise RuntimeError("Cannot get measurement time. Invalid month in Raw file: " + month_upper)
+
+    def get_raw_measurement_time(date, time):
+        '''
+        Takes the date and time from the raw workspace and creates the correct format
+        @param date: the date part
+        @param time: the time part
+        '''
+        year = date[7:(7+4)]
+        day = date[0:2]
+        month_string = date[3:6]
+        month = get_month(month_string)
+
+        date_and_time_string = year + "-" + month + "-" + day + "T" + time
+        date_and_time = DateAndTime(date_and_time_string)
+        return date_and_time.__str__().strip()
+
+    measurement_time = ""
+    filename_capital = filename.upper()
+    filename = FileFinder.getFullPath(filename)
+
+    if filename_capital.endswith(".NXS"):
+        if CAN_IMPORT_NXS:
+            # pylint: disable=bare-except
+            try:
+                nxs_file =nxs.open(filename, 'r')
+                rootKeys =  nxs_file.getentries().keys()
+                nxs_file.opengroup(rootKeys[0])
+                nxs_file.opendata('end_time')
+                measurement_time  = nxs_file.getdata()
+            except:
+                sanslog.warning("Failed to retrieve the measurement time for " + str(filename))
+            finally:
+                nxs_file.close()
+    elif filename_capital.endswith(".RAW"):
+        RawFileInfo(Filename = filename, GetRunParameters = True)
+        time_id = "r_endtime"
+        date_id = "r_enddate"
+        file_info = mtd['Raw_RPB']
+        keys =  file_info.getColumnNames()
+        time = []
+        date = []
+        if time_id  in keys:
+            time = file_info.column(keys.index(time_id))
+        if date_id  in keys:
+            date = file_info.column(keys.index(date_id))
+        time = time[0]
+        date =date[0]
+        measurement_time = get_raw_measurement_time(date, time)
+        DeleteWorkspace(file_info)
+    else:
+        sanslog.warning("Failed to retrieve the measurement time for " + str(filename))
+    return measurement_time
+
+
+def are_two_files_identical(file_path_1, file_path_2):
+    '''
+    We want to make sure that two files are binary identical.
+    @file_path_1
+    @file_path_2
+    @returns True if the files are identical else False
+    '''
+    import filecmp
+    return filecmp.cmp(file_path_1, file_path_2)
+
 
 
 ###############################################################################
