@@ -44,8 +44,8 @@ public:
   virtual const std::string name() const { return "GetAllEi"; };
   /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
   virtual const std::string summary() const{
-    return "Analyze the chopper logs and identify energies to use as incident energies\n"
-           "in an inelastic experiment from the signal registered by the monitors.";
+    return "Analyze the chopper logs and the signal registered by the monitors "
+           "to identify energies used as incident energies in an inelastic experiment.";
   }
   /// Algorithm's version for identification. @see Algorithm::version
   virtual int version() const{ return 1; } ;

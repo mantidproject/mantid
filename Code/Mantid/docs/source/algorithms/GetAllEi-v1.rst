@@ -14,14 +14,18 @@ with the estimates for positions, heights and width of incident energies provide
 :ref:`algm-GetEi` algorithm or as inputs for a peak fitting procedure.
 
 Algorithm performs number of steps to identify the values requested:
+
 * It takes appropriate log names from insrument definition file (IDF), namely chopper-position component and calculates last chopper speed and delay as average
 of the filtered log values. Guess chopper opening times are calculated from chopper speed and delay time. The "chopper-position" component with appopriate properties 
 has to be present in IDF  for this algorithm to work. See ISIS MARI or MAPS instrument definition files for example of "chopper-position" component.
+
 * Algorithm takes mininal instrument resolution estimate and searches for real peaks around guess values above within 4 sigma of this resolution interval.
+
 * If peaks are found, the algorithm performs running averages over signal in the appropriate time interval until first derivative 
 of the signal has only one zero. This value is accepted as the guess energy postion and the the distance between closest to 
 the guess energy zeros of the second derivative are accpted as the guess values for the peak width. The peak amplitude 
 is estimated from the integral intensity of the signal, assuming that the peak shape is Gaussian.
+
 * The similar procedure is performed for second monitors. The peak is accepted as real only if the peak width is within the limits of the instrument resolution and 
 the distance between peaks positions on two monitors (on energy scalse) is smaller then two sigma.
 

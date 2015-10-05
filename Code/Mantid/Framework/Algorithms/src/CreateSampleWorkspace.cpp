@@ -478,6 +478,14 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
   source->setPos(V3D(0.0, 0.0, -sourceSampleDistance));
   testInst->add(source);
   testInst->markAsSource(source);
+  // add chopper
+  ObjComponent *chopper =
+      new ObjComponent("chopper-position", Object_sptr(new Object), testInst.get());
+  chopper->setPos(V3D(0.0, 0.0, -0.25*sourceSampleDistance));
+  testInst->add(chopper);
+  auto ID = chopper->getComponentID();
+  
+
 
   // Define a sample as a simple sphere
   Object_sptr sampleSphere =

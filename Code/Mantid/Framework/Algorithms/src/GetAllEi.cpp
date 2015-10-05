@@ -1,4 +1,4 @@
-Megatrain //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include <boost/format.hpp>
@@ -166,6 +166,9 @@ namespace Mantid {
       //auto lastChopPositionComponent = pInstrument->getComponentByName("chopper-position");
       //auto chopPoint1 = pInstrument->getChopperPoint(0); ->TODO: BUG! this operation loses parameters map.
       auto chopPoint  = pInstrument->getComponentByName("chopper-position");
+      if(!chopPoint)throw std::runtime_error("Instrument "+pInstrument->getName()+
+        " does not have 'chopper-position' component");
+
       auto phase = chopPoint->getNumberParameter("initial_phase");
 
       if(phase.size()==0){
