@@ -842,7 +842,7 @@ void AlgorithmDialog::executeAlgorithmAsync()
     }
 
     // Only need to observe finish events if we are staying open
-    if(m_keepOpenCheckBox->isChecked()) {
+    if(m_keepOpenCheckBox && m_keepOpenCheckBox->isChecked()) {
       this->observeFinish(algToExec);
       this->observeError(algToExec);
       m_statusTracked = true;
