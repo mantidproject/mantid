@@ -207,8 +207,8 @@ if ( NOT NOT_GIT_REPO ) # i.e This is a git repository!
   # The patch number make have been overridden by VersionNumber so create
   # the file used by cpack here
   ###########################################################################
-  configure_file ( ${GIT_TOP_LEVEL}/Code/Mantid/Build/CMake/PatchVersionNumber.cmake.in
-                   ${GIT_TOP_LEVEL}/Code/Mantid/Build/CMake/PatchVersionNumber.cmake )
+  configure_file ( ${GIT_TOP_LEVEL}/buildconfig/CMake/PatchVersionNumber.cmake.in
+                   ${GIT_TOP_LEVEL}/buildconfig/CMake/PatchVersionNumber.cmake )
   include ( PatchVersionNumber )
 endif()
 

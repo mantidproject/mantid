@@ -8,7 +8,7 @@ cmake_minimum_required ( VERSION 2.8.12 )
 set ( SYSTEM_PACKAGE_TARGET "")
 
 # Add the path to our custom 'find' modules
-set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Build/CMake")
+set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 
 # Define the project name.
 project ( Mantid )
@@ -57,7 +57,7 @@ include ( ParaViewSetup )
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
   if ( NOT THIRD_PARTY )
-      set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )
+      set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/Third_Party" )
   endif ()
   # Print out where we think we are looking for 3rd party stuff
   message (STATUS "Setting THIRD_PARTY to be ${THIRD_PARTY}." )
@@ -202,7 +202,7 @@ if (COVERALLS)
   coveralls_setup(
     ${SRCS_FILENAME}
     OFF
-    "${CMAKE_SOURCE_DIR}/Build/CMake"
+    "${CMAKE_SOURCE_DIR}/buildconfig/CMake"
   )
 endif ()
 
