@@ -77,6 +77,10 @@ public:
   bool isLocalParameterFixed(const QString& parName, int i) const;
   /// Fix/unfix local parameter
   void setLocalParameterFixed(const QString& parName, int i, bool fixed);
+  /// Get the tie for a local parameter.
+  QString getLocalParameterTie(const QString& parName, int i) const;
+  /// Set a tie for a local parameter.
+  void setLocalParameterTie(const QString& parName, int i, QString tie);
 
 public slots:
   void reset();

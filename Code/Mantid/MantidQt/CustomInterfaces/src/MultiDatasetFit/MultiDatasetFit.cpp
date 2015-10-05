@@ -337,11 +337,13 @@ void MultiDatasetFit::editLocalParameterValues(const QString& parName)
   {
     auto values = dialog.getValues();
     auto fixes = dialog.getFixes();
+    auto ties = dialog.getTies();
     assert( values.size() == getNumberOfSpectra() );
     for(int i = 0; i < values.size(); ++i)
     {
       setLocalParameterValue(parName, i, values[i]);
       setLocalParameterFixed(parName, i, fixes[i]);
+      setLocalParameterTie(parName, i, ties[i]);
     }
   }
 }
@@ -550,6 +552,23 @@ bool MultiDatasetFit::isLocalParameterFixed(const QString& parName, int i) const
 void MultiDatasetFit::setLocalParameterFixed(const QString& parName, int i, bool fixed)
 {
   m_functionBrowser->setLocalParameterFixed(parName, i, fixed);
+}
+
+/// Get the tie for a local parameter.
+/// @param parName : Name of a local parameter.
+/// @param i :: Index of the dataset (spectrum).
+QString MultiDatasetFit::getLocalParameterTie(const QString& parName, int i) const
+{
+  return m_functionBrowser->getLocalParameterTie(parName, i);
+}
+
+/// Set a tie for a local parameter.
+/// @param parName : Name of a local parameter.
+/// @param i :: Index of the dataset (spectrum).
+/// @param tie :: A tie string to set.
+void MultiDatasetFit::setLocalParameterTie(const QString& parName, int i, QString tie)
+{
+  m_functionBrowser->setLocalParameterTie(parName, i, tie);
 }
 
 /// Load settings
