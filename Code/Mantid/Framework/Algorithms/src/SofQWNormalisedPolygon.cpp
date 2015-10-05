@@ -166,9 +166,9 @@ void SofQWNormalisedPolygon::exec() {
       if (qIndex != 0 && qIndex < static_cast<int>(m_Qout.size())) {
         // Add this spectra-detector pair to the mapping
         PARALLEL_CRITICAL(SofQWNormalisedPolygon_spectramap) {
-        specNumberMapping.push_back(
-            outputWS->getSpectrum(qIndex - 1)->getSpectrumNo());
-        detIDMapping.push_back(detector->getID());
+          specNumberMapping.push_back(
+              outputWS->getSpectrum(qIndex - 1)->getSpectrumNo());
+          detIDMapping.push_back(detector->getID());
         }
       }
     }
@@ -176,7 +176,7 @@ void SofQWNormalisedPolygon::exec() {
       g_log.debug(logStream.str());
     }
 
-     PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
 

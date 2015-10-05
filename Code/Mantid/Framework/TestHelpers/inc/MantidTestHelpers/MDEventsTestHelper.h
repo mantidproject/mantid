@@ -45,7 +45,7 @@ createDiffractionEventWorkspace(int numEvents, int numPixels = 400,
  * @return MDEW sptr
  */
 MDEventWorkspace3Lean::sptr
-makeFakeMDEventWorkspace(const std::string & wsName, long numEvents = 10000,
+makeFakeMDEventWorkspace(const std::string &wsName, long numEvents = 10000,
                          Kernel::SpecialCoordinateSystem coord = Kernel::None);
 
 /// Make a fake n-dimensional MDHistoWorkspace
@@ -138,23 +138,19 @@ makeAnyMDEW(size_t splitInto, coord_t min, coord_t max,
 
 /** Make a MDEventWorkspace with MDLeanEvents */
 template <size_t nd>
-boost::shared_ptr<
-    MDEventWorkspace<MDLeanEvent<nd>, nd>>
+boost::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>, nd>>
 makeMDEW(size_t splitInto, coord_t min, coord_t max,
          size_t numEventsPerBox = 0) {
-  return makeAnyMDEW<MDLeanEvent<nd>, nd>(splitInto, min, max,
-                                          numEventsPerBox);
+  return makeAnyMDEW<MDLeanEvent<nd>, nd>(splitInto, min, max, numEventsPerBox);
 }
 
 /** Make a MDEventWorkspace with MDEvents  - updated to split dims by splitInto,
  * not 10 */
 template <size_t nd>
-boost::shared_ptr<
-    MDEventWorkspace<MDEvent<nd>, nd>>
+boost::shared_ptr<MDEventWorkspace<MDEvent<nd>, nd>>
 makeMDEWFull(size_t splitInto, coord_t min, coord_t max,
              size_t numEventsPerBox = 0) {
-  return makeAnyMDEW<MDEvent<nd>, nd>(splitInto, min, max,
-                                      numEventsPerBox);
+  return makeAnyMDEW<MDEvent<nd>, nd>(splitInto, min, max, numEventsPerBox);
 }
 
 //=====================================================================================

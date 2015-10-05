@@ -1015,8 +1015,6 @@ public:
     // Quick check of clone
     auto clone = ws3.clone();
     TS_ASSERT_EQUALS(targetDisplayNormalization, clone->displayNormalization());
-
-
   }
 };
 

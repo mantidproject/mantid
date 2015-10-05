@@ -21,13 +21,9 @@ using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::DataObjects;
 
-
-class StaticKuboToyabeTest : public CxxTest::TestSuite
-{
+class StaticKuboToyabeTest : public CxxTest::TestSuite {
 public:
-
-  void getMockData(Mantid::MantidVec& y, Mantid::MantidVec& e)
-  {
+  void getMockData(Mantid::MantidVec &y, Mantid::MantidVec &e) {
     // Calculated with A = 0.24 and Delta = 0.16 on an Excel spreadsheet
     y[0] = 0.24;
     y[1] = 0.233921146;
@@ -48,72 +44,67 @@ public:
     y[16] = 0.046457269;
     y[17] = 0.054669182;
 
-    for (int i = 0; i <=17; i++)
-    {
+    for (int i = 0; i <= 17; i++) {
       e[i] = 0.01;
     }
-
   }
 
-  void testAgainstMockData()
-  {
+  void testAgainstMockData() {
     Fit alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
-    TS_ASSERT( alg2.isInitialized() );
+    TS_ASSERT(alg2.isInitialized());
 
     // create mock data to test against
     std::string wsName = "StaticKuboToyabeData";
     int histogramNumber = 1;
     int timechannels = 18;
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
+    Workspace_sptr ws = WorkspaceFactory::Instance().create(
+        "Workspace2D", histogramNumber, timechannels, timechannels);
     Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-    for (int i = 0; i < 18; i++) ws2D->dataX(0)[i] = i;
-    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
-    Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
+    for (int i = 0; i < 18; i++)
+      ws2D->dataX(0)[i] = i;
+    Mantid::MantidVec &y = ws2D->dataY(0); // y-values (counts)
+    Mantid::MantidVec &e = ws2D->dataE(0); // error values of counts
     getMockData(y, e);
 
-    //put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
+    // put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(
+        AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
 
     // set up fitting function
     StaticKuboToyabe fn;
     fn.initialize();
 
-    //alg2.setFunction(fn);
-    alg2.setPropertyValue("Function",fn.asString());
-
+    // alg2.setFunction(fn);
+    alg2.setPropertyValue("Function", fn.asString());
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
-    alg2.setPropertyValue("WorkspaceIndex","0");
-    alg2.setPropertyValue("StartX","0");
-    alg2.setPropertyValue("EndX","17");
+    alg2.setPropertyValue("WorkspaceIndex", "0");
+    alg2.setPropertyValue("StartX", "0");
+    alg2.setPropertyValue("EndX", "17");
 
     // execute fit
-   TS_ASSERT_THROWS_NOTHING(
-      TS_ASSERT( alg2.execute() )
-    )
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(alg2.execute()))
 
-    TS_ASSERT( alg2.isExecuted() );
+    TS_ASSERT(alg2.isExecuted());
 
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 0.0001,0.0001);
+    TS_ASSERT_DELTA(dummy, 0.0001, 0.0001);
 
-    auto out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
-    TS_ASSERT_DELTA( out->getParameter("A"), 0.24 ,0.001);
-    TS_ASSERT_DELTA( out->getParameter("Delta"), 0.16 ,0.001);
+    auto out = FunctionFactory::Instance().createInitialized(
+        alg2.getPropertyValue("Function"));
+    TS_ASSERT_DELTA(out->getParameter("A"), 0.24, 0.001);
+    TS_ASSERT_DELTA(out->getParameter("Delta"), 0.16, 0.001);
 
     // check it categories
     const std::vector<std::string> categories = out->categories();
-    TS_ASSERT( categories.size() == 1 );
-    TS_ASSERT( categories[0] == "Muon" );
+    TS_ASSERT(categories.size() == 1);
+    TS_ASSERT(categories[0] == "Muon");
 
     AnalysisDataService::Instance().remove(wsName);
-
   }
-
-
 };
 
 #endif /*STATICKUBOTOYABETEST_H_*/

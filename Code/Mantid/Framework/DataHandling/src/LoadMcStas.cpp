@@ -62,8 +62,11 @@ void LoadMcStas::init() {
                                                    Direction::Output),
                   "An output workspace.");
   // added to allow control of errorbars
-  declareProperty("ErrorBarsSetTo1",false, "When this property is set to false errors are set equal to data values, "
-                  "and when set to true all errors are set equal to one. This property defaults to false");                
+  declareProperty(
+      "ErrorBarsSetTo1", false,
+      "When this property is set to false errors are set equal to data values, "
+      "and when set to true all errors are set equal to one. This property "
+      "defaults to false");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -191,7 +194,8 @@ void LoadMcStas::readEventData(
     progInitial.report("Loading instrument");
 
     std::string instrumentName = "McStas";
-    Geometry::InstrumentDefinitionParser parser(filename, instrumentName, instrumentXML);
+    Geometry::InstrumentDefinitionParser parser(filename, instrumentName,
+                                                instrumentXML);
     std::string instrumentNameMangled = parser.getMangledName();
 
     // Check whether the instrument is already in the InstrumentDataService
@@ -349,17 +353,17 @@ void LoadMcStas::readEventData(
         // TofEvent(detector_time,pulse_time);
         // eventWS->getEventList(workspaceIndex) += TofEvent(detector_time);
         // The following line puts the events into the weighted event instance
-        //Originally this was coded so the error squared is 1 it should be 
-        //data[numberOfDataColumn * in]*data[numberOfDataColumn * in]
-        //introduced flag to allow old usage 
-        if (errorBarsSetTo1){
+        // Originally this was coded so the error squared is 1 it should be
+        // data[numberOfDataColumn * in]*data[numberOfDataColumn * in]
+        // introduced flag to allow old usage
+        if (errorBarsSetTo1) {
           eventWS->getEventList(workspaceIndex) += WeightedEvent(
               detector_time, pulse_time, data[numberOfDataColumn * in], 1.0);
-        } else{    
+        } else {
           eventWS->getEventList(workspaceIndex) += WeightedEvent(
-            detector_time, pulse_time, data[numberOfDataColumn * in], data[numberOfDataColumn * in]*data[numberOfDataColumn * in]);
+              detector_time, pulse_time, data[numberOfDataColumn * in],
+              data[numberOfDataColumn * in] * data[numberOfDataColumn * in]);
         }
-        
       }
     } // end reading over number of blocks of an event dataset
 
@@ -558,19 +562,20 @@ int LoadMcStas::confidence(Kernel::NexusDescriptor &descriptor) const {
   // look at to see if entry1/simulation/name exist first and then
   // if its value = mccode
   int confidence(0);
-  if(descriptor.pathExists("/entry1/simulation/name")) {
+  if (descriptor.pathExists("/entry1/simulation/name")) {
     try {
-        // need to look inside file to check value of entry1/simulation/name 
-        ::NeXus::File file = ::NeXus::File(descriptor.filename());
-        file.openGroup( descriptor.firstEntryNameType().first, descriptor.firstEntryNameType().second);
-        file.openGroup("simulation", "NXnote");
-        std::string value;
-        // check if entry1/simulation/name equals mccode
-        file.readData("name", value);
-        if (boost::iequals(value, "mccode"))
-          confidence = 98;
-        file.closeGroup();
-        file.closeGroup();
+      // need to look inside file to check value of entry1/simulation/name
+      ::NeXus::File file = ::NeXus::File(descriptor.filename());
+      file.openGroup(descriptor.firstEntryNameType().first,
+                     descriptor.firstEntryNameType().second);
+      file.openGroup("simulation", "NXnote");
+      std::string value;
+      // check if entry1/simulation/name equals mccode
+      file.readData("name", value);
+      if (boost::iequals(value, "mccode"))
+        confidence = 98;
+      file.closeGroup();
+      file.closeGroup();
     } catch (::NeXus::Exception &) {
     }
   }

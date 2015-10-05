@@ -276,8 +276,9 @@ boost::shared_ptr<API::Workspace> FitMD::createHistoOutputWorkspace(
     API::IMDHistoWorkspace_const_sptr inputWorkspace,
     const std::string &outputWorkspacePropertyName) {
   // have to cast const away to be able to pass the workspace to the algorithm
-  API::IMDHistoWorkspace_sptr nonConstInputWS = boost::const_pointer_cast<
-      API::IMDHistoWorkspace, const API::IMDHistoWorkspace>(inputWorkspace);
+  API::IMDHistoWorkspace_sptr nonConstInputWS =
+      boost::const_pointer_cast<API::IMDHistoWorkspace,
+                                const API::IMDHistoWorkspace>(inputWorkspace);
   // evaluate the function on the input workspace
   auto alg = API::AlgorithmFactory::Instance().create("EvaluateMDFunction", -1);
   alg->setChild(true);

@@ -59,9 +59,9 @@ public:
   }
 
   /// Destructor.
-  ~GSLJacobian() { }
+  ~GSLJacobian() {}
 
-  GSLMatrix& matrix() {return m_J;}
+  GSLMatrix &matrix() { return m_J; }
 
   /// Get the pointer to the GSL's jacobian
   gsl_matrix *getJ() { return m_J.gsl(); }

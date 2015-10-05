@@ -31,10 +31,8 @@ public:
     TS_ASSERT_DELTA(0.00030887, absFactor, delta);
   }
 
-  // clang-format off
-  void test_Multiple_Scattering_With_Fixed_Mur_And_Absorption_Correction_Factor()
-  // clang-format on
-  {
+  void
+  test_Multiple_Scattering_With_Fixed_Mur_And_Absorption_Correction_Factor() {
     std::vector<double> dummy(2, 0.0);
     dummy[1] = 1.0;
     MayersSampleCorrectionStrategy mscat(createTestParameters(), dummy, dummy,
@@ -73,10 +71,8 @@ public:
     TS_ASSERT_DELTA(0.2660792, error.back(), delta);
   }
 
-  // clang-format off
-  void test_Corrects_Both_Absorption_And_Multiple_Scattering_For_Histogram_Data()
-  // clang-format on
-  {
+  void
+  test_Corrects_Both_Absorption_And_Multiple_Scattering_For_Histogram_Data() {
     using std::sqrt;
     const size_t nypts(100);
     std::vector<double> signal(nypts, 2.0), tof(nypts + 1), error(nypts);
@@ -137,13 +133,12 @@ public:
     std::transform(signal.begin(), signal.end(), error.begin(),
                    (double (*)(double))sqrt);
     std::generate(tof.begin(), tof.end(), Decrementer(199.5));
-    TS_ASSERT_THROWS(MayersSampleCorrectionStrategy(createTestParameters(),
-                                                    tof, signal, error),
+    TS_ASSERT_THROWS(MayersSampleCorrectionStrategy(createTestParameters(), tof,
+                                                    signal, error),
                      std::invalid_argument);
   }
 
 private:
-
   struct Incrementer {
     Incrementer(double start) : current(start) {}
     double operator()() { return current++; }

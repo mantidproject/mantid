@@ -16,8 +16,8 @@ namespace API {
 /** Constructor
  */
 MDGeometry::MDGeometry()
-    : m_dimensions(), m_originalWorkspaces(), m_origin(), m_transforms_FromOriginal(),
-      m_transforms_ToOriginal(),
+    : m_dimensions(), m_originalWorkspaces(), m_origin(),
+      m_transforms_FromOriginal(), m_transforms_ToOriginal(),
       m_delete_observer(*this, &MDGeometry::deleteNotificationReceived),
       m_observingDelete(false), m_Wtransf(3, 3, true), m_basisVectors() {}
 
@@ -45,7 +45,8 @@ MDGeometry::MDGeometry(const MDGeometry &other)
   for (it = other.m_transforms_FromOriginal.begin();
        it != other.m_transforms_FromOriginal.end(); ++it) {
     if (*it)
-      m_transforms_FromOriginal.push_back(CoordTransform_const_sptr((*it)->clone()));
+      m_transforms_FromOriginal.push_back(
+          CoordTransform_const_sptr((*it)->clone()));
     else
       m_transforms_FromOriginal.push_back(CoordTransform_const_sptr());
   }
@@ -53,7 +54,8 @@ MDGeometry::MDGeometry(const MDGeometry &other)
   for (it = other.m_transforms_ToOriginal.begin();
        it != other.m_transforms_ToOriginal.end(); ++it) {
     if (*it)
-      m_transforms_ToOriginal.push_back(CoordTransform_const_sptr((*it)->clone()));
+      m_transforms_ToOriginal.push_back(
+          CoordTransform_const_sptr((*it)->clone()));
     else
       m_transforms_ToOriginal.push_back(CoordTransform_const_sptr());
   }
@@ -69,16 +71,14 @@ MDGeometry::MDGeometry(const MDGeometry &other)
  * Clear all transforms to and from original workspaces.
  */
 void MDGeometry::clearTransforms() {
-    m_transforms_ToOriginal.clear();
-    m_transforms_FromOriginal.clear();
+  m_transforms_ToOriginal.clear();
+  m_transforms_FromOriginal.clear();
 }
 
 /**
  * Clear the original workspaces
  */
-void MDGeometry::clearOriginalWorkspaces() {
-    m_originalWorkspaces.clear();
-}
+void MDGeometry::clearOriginalWorkspaces() { m_originalWorkspaces.clear(); }
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -285,10 +285,10 @@ void MDGeometry::setBasisVector(size_t index, const Mantid::Kernel::VMD &vec) {
 bool MDGeometry::allBasisNormalized() const {
   bool allNormalized = true;
   for (auto it = m_basisVectors.begin(); it != m_basisVectors.end(); ++it) {
-      if (it->length() != 1.0) {
-        allNormalized = false;
-        break;
-      }
+    if (it->length() != 1.0) {
+      allNormalized = false;
+      break;
+    }
   }
   return allNormalized;
 }
@@ -441,9 +441,8 @@ MDGeometry::getTransformFromOriginal(size_t index) const {
  * @param transform :: CoordTransform pointer (this assumes pointer ownership)
  * @param index :: index into the array of original workspaces
  */
-void
-MDGeometry::setTransformFromOriginal(Mantid::API::CoordTransform *transform,
-                                     size_t index) {
+void MDGeometry::setTransformFromOriginal(
+    Mantid::API::CoordTransform *transform, size_t index) {
   if (index >= m_transforms_FromOriginal.size()) {
     m_transforms_FromOriginal.resize(index + 1);
   }

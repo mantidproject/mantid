@@ -101,12 +101,14 @@ bool FileFinderImpl::getCaseSensitive() const {
 /**
  * Return the full path to the file given its name
  * @param filename :: A file name (without path) including extension
- * @param ignoreDirs :: If true, directories that match are skipped unless the path given is already absolute
+ * @param ignoreDirs :: If true, directories that match are skipped unless the
+ * path given is already absolute
  * @return The full path if the file exists and can be found in one of the
  * search locations
  *  or an empty string otherwise.
  */
-std::string FileFinderImpl::getFullPath(const std::string &filename, const bool ignoreDirs) const {
+std::string FileFinderImpl::getFullPath(const std::string &filename,
+                                        const bool ignoreDirs) const {
   std::string fName = Kernel::Strings::strip(filename);
   g_log.debug() << "getFullPath(" << fName << ")\n";
   // If this is already a full path, nothing to do
@@ -139,19 +141,18 @@ std::string FileFinderImpl::getFullPath(const std::string &filename, const bool 
       Kernel::Glob::glob(pathPattern, files, m_globOption);
       if (!files.empty()) {
         Poco::File matchPath(*files.begin());
-        if(ignoreDirs && matchPath.isDirectory()) {
+        if (ignoreDirs && matchPath.isDirectory()) {
           continue;
         }
         return *files.begin();
-        
       }
 #ifdef _WIN32
     } else {
       Poco::Path path(*it, fName);
       Poco::File file(path);
-	  if (file.exists() && !(ignoreDirs && file.isDirectory())) {
+      if (file.exists() && !(ignoreDirs && file.isDirectory())) {
         return path.toString();
-	  }
+      }
     }
 #endif
   }

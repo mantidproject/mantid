@@ -16,7 +16,6 @@
 #include "MantidCrystal/PeakHKLErrors.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
 
-
 #include <cstdarg>
 
 using namespace Mantid::API;

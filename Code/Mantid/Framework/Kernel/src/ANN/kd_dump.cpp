@@ -75,7 +75,7 @@ static ANNkd_ptr annReadTree( // read tree-part of dump file
 //		Format:
 //		#ANN <version number> <comments> [END_OF_LINE]
 //		points <dim> <n_pts>			(point coordinates: this
-//is
+// is
 // optional)
 //		0 <xxx> <xxx> ... <xxx>			(point indices and
 // coordinates)

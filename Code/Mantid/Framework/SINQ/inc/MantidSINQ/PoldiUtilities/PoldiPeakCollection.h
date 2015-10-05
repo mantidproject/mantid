@@ -46,10 +46,7 @@ typedef boost::shared_ptr<PoldiPeakCollection> PoldiPeakCollection_sptr;
 
 class MANTID_SINQ_DLL PoldiPeakCollection {
 public:
-  enum IntensityType {
-    Maximum,
-    Integral
-  };
+  enum IntensityType { Maximum, Integral };
 
   PoldiPeakCollection(IntensityType intensityType = Maximum);
   PoldiPeakCollection(const DataObjects::TableWorkspace_sptr &workspace);

@@ -92,9 +92,8 @@ void ResolutionConvolvedCrossSection::declareAttributes() {
  */
 void ResolutionConvolvedCrossSection::declareParameters() {}
 
-void
-ResolutionConvolvedCrossSection::function(const API::FunctionDomain &domain,
-                                          API::FunctionValues &values) const {
+void ResolutionConvolvedCrossSection::function(
+    const API::FunctionDomain &domain, API::FunctionValues &values) const {
   const API::FunctionDomainMD *domainMD =
       dynamic_cast<const API::FunctionDomainMD *>(&domain);
   if (!domainMD) {
@@ -197,8 +196,7 @@ double ResolutionConvolvedCrossSection::functionMD(
  */
 void ResolutionConvolvedCrossSection::storeSimulatedEvents(
     const API::IMDEventWorkspace_sptr &resultWS) {
-  auto outputWS =
-      boost::dynamic_pointer_cast<MDEventWorkspace4>(resultWS);
+  auto outputWS = boost::dynamic_pointer_cast<MDEventWorkspace4>(resultWS);
   if (!outputWS) {
     throw std::invalid_argument(
         "ResolutionConvolvedCrossSection currently only supports 4 dimensions");

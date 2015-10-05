@@ -53,7 +53,7 @@ typedef void (MDEventWSWrapper::*fpVoidMethod)();
 typedef void (MDEventWSWrapper::*fpAddData)(float *, uint16_t *, uint32_t *,
                                             coord_t *, size_t) const;
 /// signature for the internal templated function pointer to create workspace
-typedef void (MDEventWSWrapper::*fpCreateWS)(const MDWSDescription& mwsd);
+typedef void (MDEventWSWrapper::*fpCreateWS)(const MDWSDescription &mwsd);
 
 class DLLExport MDEventWSWrapper {
 public:
@@ -131,7 +131,7 @@ private:
   template <size_t nd> void calcCentroidND(void);
 
   template <size_t nd>
-  void createEmptyEventWS(const MDWSDescription& description);
+  void createEmptyEventWS(const MDWSDescription &description);
 
   template <size_t nd> void splitBoxList(void); // for the time being
   // void splitBoxList(Kernel::ThreadScheduler * ts);

@@ -14,53 +14,48 @@ using namespace Mantid::Geometry;
 using Mantid::Algorithms::ClearMaskFlag;
 using Mantid::MantidVecPtr;
 
-class ClearMaskFlagTest : public CxxTest::TestSuite
-{
+class ClearMaskFlagTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static ClearMaskFlagTest *createSuite() { return new ClearMaskFlagTest(); }
-  static void destroySuite( ClearMaskFlagTest *suite ) { delete suite; }
+  static void destroySuite(ClearMaskFlagTest *suite) { delete suite; }
 
-
-  void test_Init()
-  {
+  void test_Init() {
     ClearMaskFlag alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
   }
-  
-  void test_exec()
-  {
+
+  void test_exec() {
     // create a workspace
     const int numspec = 9;
     const int nummask = 5;
-    Instrument_sptr instr = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(1));
-    Detector *d = new Detector("det",0,0);
+    Instrument_sptr instr = boost::dynamic_pointer_cast<Instrument>(
+        ComponentCreationHelper::createTestInstrumentCylindrical(1));
+    Detector *d = new Detector("det", 0, 0);
     instr->markAsDetector(d);
 
     // create the workspace
-    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",numspec,6,5);
+    MatrixWorkspace_sptr space =
+        WorkspaceFactory::Instance().create("Workspace2D", numspec, 6, 5);
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    MantidVecPtr x,vec;
-    x.access().resize(6,10.0);
-    vec.access().resize(5,1.0);
-    for (int j = 0; j < numspec; ++j)
-    {
-      space2D->setX(j,x);
-      space2D->setData(j,vec,vec);
+    MantidVecPtr x, vec;
+    x.access().resize(6, 10.0);
+    vec.access().resize(5, 1.0);
+    for (int j = 0; j < numspec; ++j) {
+      space2D->setX(j, x);
+      space2D->setData(j, vec, vec);
       space2D->getSpectrum(j)->setSpectrumNo(j);
       space2D->getSpectrum(j)->setDetectorID(j);
     }
     space->setInstrument(instr);
 
     // set the mask on a bunch of spectra
-    Mantid::Geometry::ParameterMap& pmap = space->instrumentParameters();
-    for (int j = 0; j < nummask; ++j)
-    {
+    Mantid::Geometry::ParameterMap &pmap = space->instrumentParameters();
+    for (int j = 0; j < nummask; ++j) {
       pmap.addBool(instr->getDetector(j)->getComponentID(), "masked", true);
     }
-
 
     // register the workspace in the data service
     std::string wsName("ClearMaskFlagTest_WS");
@@ -68,30 +63,30 @@ public:
 
     // run the algorithm with nothing masked
     ClearMaskFlag alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Workspace", wsName) );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
-    
-    // retrieve the workspace from data service. TODO: Change to your desired type
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Workspace", wsName));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // retrieve the workspace from data service. TODO: Change to your desired
+    // type
     Workspace2D_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<Workspace2D>(wsName) );
+    TS_ASSERT_THROWS_NOTHING(
+        ws = AnalysisDataService::Instance().retrieveWS<Workspace2D>(wsName));
     TS_ASSERT(ws);
-    if (!ws) return;
-    
+    if (!ws)
+      return;
+
     // check the results
     Instrument_const_sptr out_instr = ws->getInstrument();
-    for (int j = 0; j < numspec; ++j)
-    {
+    for (int j = 0; j < numspec; ++j) {
       TS_ASSERT(!out_instr->isDetectorMasked(j));
     }
-    
+
     // remove workspace from the data service.
     AnalysisDataService::Instance().remove(wsName);
   }
-
 };
-
 
 #endif /* MANTID_ALGORITHMS_CLEARMASKFLAGTEST_H_ */

@@ -15,7 +15,6 @@ namespace ChecksumHelper {
 namespace // anonymous
     {
 
-
 /**
  * Create sha1 out of data and an optional header
  * @param data Contents as a string
@@ -73,10 +72,11 @@ std::string sha1FromString(const std::string &input) {
 * @param unixEOL If true convert all lineendings to Unix-style \n
 * @returns a checksum string
 **/
-std::string sha1FromFile(const std::string &filepath, const bool unixEOL = false) {
+std::string sha1FromFile(const std::string &filepath,
+                         const bool unixEOL = false) {
   if (filepath.empty())
     return "";
-  return ChecksumHelper::createSHA1(loadFile(filepath,unixEOL));
+  return ChecksumHelper::createSHA1(loadFile(filepath, unixEOL));
 }
 
 /** Creates a git checksum from a file (these match the git hash-object
@@ -124,8 +124,6 @@ std::string loadFile(const std::string &filepath, const bool unixEOL = false) {
   }
   return contents;
 }
-
-
 
 } // namespace ChecksumHelper
 } // namespace Kernel

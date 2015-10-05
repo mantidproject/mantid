@@ -34,6 +34,8 @@ public:
   void testConstructionSpaceGroup() {
     TS_ASSERT_THROWS_NOTHING(
         CrystalStructure structure(m_CsCl, m_spaceGroup, m_scatterers));
+
+
     CrystalStructure structure(m_CsCl, m_spaceGroup, m_scatterers);
     TS_ASSERT_EQUALS(structure.cell().getG(), m_CsCl.getG());
     TS_ASSERT_EQUALS(structure.spaceGroup(), m_spaceGroup);
@@ -44,6 +46,7 @@ public:
   void testSetSpaceGroup() {
     CrystalStructure structure(m_CsCl, m_spaceGroup, m_scatterers);
 
+
     TS_ASSERT_EQUALS(structure.spaceGroup()->hmSymbol(),
                      m_spaceGroup->hmSymbol());
     TS_ASSERT_THROWS_NOTHING(structure.setSpaceGroup(
@@ -52,6 +55,10 @@ public:
     // Not null anymore
     TS_ASSERT(structure.spaceGroup());
     TS_ASSERT_EQUALS(structure.spaceGroup()->hmSymbol(), "I a -3 d")
+
+
+
+
   }
 
   void testCellGetSet() {
@@ -68,6 +75,12 @@ public:
     CrystalStructure structure("5.431 5.431 5.431", "F d -3 m",
                                "Si 0 0 0 1.0 0.02");
 
+
+
+
+
+
+
     TS_ASSERT_EQUALS(structure.cell().a(), 5.431);
     TS_ASSERT_EQUALS(structure.cell().b(), 5.431);
     TS_ASSERT_EQUALS(structure.cell().c(), 5.431);
@@ -79,8 +92,8 @@ public:
   void testCopyConstructor() {
     CrystalStructure one("1.2 2.3 3.4", "F d d d", "Fe 1/8 1/8 1/8 1.0 0.001");
 
-    CrystalStructure two(one);
 
+    CrystalStructure two(one);
     TS_ASSERT_EQUALS(two.getScatterers()->nScatterers(),
                      one.getScatterers()->nScatterers());
     TS_ASSERT_EQUALS(two.spaceGroup()->hmSymbol(),
@@ -91,7 +104,9 @@ public:
   void testAssignmentOperator() {
     CrystalStructure one("1.2 2.3 3.4", "F d d d", "Fe 1/8 1/8 1/8 1.0 0.001");
 
+
     CrystalStructure two = one;
+        mg.getUniqueHKLs(0.885, 10.0, CrystalStructure::UseStructureFactor);
 
     TS_ASSERT_EQUALS(two.getScatterers()->nScatterers(),
                      one.getScatterers()->nScatterers());
@@ -104,6 +119,7 @@ private:
   UnitCell m_CsCl;
   SpaceGroup_const_sptr m_spaceGroup;
   CompositeBraggScatterer_sptr m_scatterers;
+
 };
 
 #endif /* MANTID_GEOMETRY_CRYSTALSTRUCTURETEST_H_ */

@@ -21,56 +21,66 @@ using namespace Mantid::DataObjects::MDEventsTestHelper;
 using namespace Mantid::PythonInterface::Policies;
 using namespace WorkspaceCreationHelper;
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(create2DWorkspaceWithFullInstrument_overloads, create2DWorkspaceWithFullInstrument, 2, 4)
+BOOST_PYTHON_FUNCTION_OVERLOADS(create2DWorkspaceWithFullInstrument_overloads,
+                                create2DWorkspaceWithFullInstrument, 2, 4)
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(makeFakeMDHistoWorkspace_overloads, makeFakeMDHistoWorkspace, 2, 7)
+BOOST_PYTHON_FUNCTION_OVERLOADS(makeFakeMDHistoWorkspace_overloads,
+                                makeFakeMDHistoWorkspace, 2, 7)
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(create2DWorkspaceWithRectangularInstrument_overloads, create2DWorkspaceWithRectangularInstrument, 3, 3)
+BOOST_PYTHON_FUNCTION_OVERLOADS(
+    create2DWorkspaceWithRectangularInstrument_overloads,
+    create2DWorkspaceWithRectangularInstrument, 3, 3)
 
-BOOST_PYTHON_MODULE(WorkspaceCreationHelper)
-{
+BOOST_PYTHON_MODULE(WorkspaceCreationHelper) {
   using namespace boost::python;
 
   // Doc string options - User defined, python arguments, C++ call signatures
   docstring_options docstrings(true, true, false);
 
-  //=================================== 2D workspaces ===================================
-
+  //=================================== 2D workspaces
+  //===================================
 
   // Function pointers to disambiguate the calls
-  typedef Workspace2D_sptr (*Signature1_2D)(int nHist, int nBins,
-                                            bool includeMonitors,
-                                            bool startYNegative);
-  typedef Workspace2D_sptr (*Signature2_2D)(int numBanks,
-                                            int numPixels,
+  typedef Workspace2D_sptr (*Signature1_2D)(
+      int nHist, int nBins, bool includeMonitors, bool startYNegative);
+  typedef Workspace2D_sptr (*Signature2_2D)(int numBanks, int numPixels,
                                             int numBins);
 
-  def("create2DWorkspaceWithFullInstrument", (Signature1_2D)&create2DWorkspaceWithFullInstrument,
-      create2DWorkspaceWithFullInstrument_overloads()[return_value_policy<AsType<Workspace_sptr>>()]);
-  def("create2DWorkspaceWithRectangularInstrument", (Signature2_2D)&create2DWorkspaceWithRectangularInstrument,
+  def("create2DWorkspaceWithFullInstrument",
+      (Signature1_2D)&create2DWorkspaceWithFullInstrument,
+      create2DWorkspaceWithFullInstrument_overloads()
+          [return_value_policy<AsType<Workspace_sptr>>()]);
+  def("create2DWorkspaceWithRectangularInstrument",
+      (Signature2_2D)&create2DWorkspaceWithRectangularInstrument,
       create2DWorkspaceWithRectangularInstrument_overloads());
 
-
-  //=================================== Event Workspaces ===================================
+  //=================================== Event Workspaces
+  //===================================
 
   def("CreateEventWorkspace", (EventWorkspace_sptr (*)())CreateEventWorkspace,
       return_value_policy<AsType<Workspace_sptr>>());
   def("CreateEventWorkspace2", &CreateEventWorkspace2,
       return_value_policy<AsType<Workspace_sptr>>());
 
-  //=================================== Peak Workspaces ===================================
+  //=================================== Peak Workspaces
+  //===================================
 
-  def("createPeaksWorkspace", (PeaksWorkspace_sptr (*)(const int))createPeaksWorkspace,
+  def("createPeaksWorkspace",
+      (PeaksWorkspace_sptr (*)(const int))createPeaksWorkspace,
       return_value_policy<AsType<Workspace_sptr>>());
-  def("createPeaksWorkspace", (PeaksWorkspace_sptr (*)(const int, const bool))createPeaksWorkspace,
+  def("createPeaksWorkspace",
+      (PeaksWorkspace_sptr (*)(const int, const bool))createPeaksWorkspace,
       return_value_policy<AsType<Workspace_sptr>>());
 
-  //=================================== MD Workspaces ===================================
+  //=================================== MD Workspaces
+  //===================================
 
   // Typedef for function pointer to disabiguate references
-  typedef MDHistoWorkspace_sptr (*Signature1_MDHisto)(double, size_t, size_t, Mantid::coord_t max,
-                                                      double, std::string name, double);
+  typedef MDHistoWorkspace_sptr (*Signature1_MDHisto)(
+      double, size_t, size_t, Mantid::coord_t max, double, std::string name,
+      double);
 
   def("makeFakeMDHistoWorkspace", (Signature1_MDHisto)&makeFakeMDHistoWorkspace,
-      makeFakeMDHistoWorkspace_overloads()[return_value_policy<AsType<Workspace_sptr>>()]);
+      makeFakeMDHistoWorkspace_overloads()
+          [return_value_policy<AsType<Workspace_sptr>>()]);
 }

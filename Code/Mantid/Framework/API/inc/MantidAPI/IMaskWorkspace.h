@@ -54,13 +54,14 @@ public:
   std::unique_ptr<IMaskWorkspace> clone() const {
     return std::unique_ptr<IMaskWorkspace>(doInterfaceClone());
   }
+
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   IMaskWorkspace(const IMaskWorkspace &other) { (void)other; }
   /// Protected copy assignment operator. Assignment not implemented.
   IMaskWorkspace &operator=(const IMaskWorkspace &other);
   /// returns a clone of the workspace as the interface
-  virtual IMaskWorkspace* doInterfaceClone() const = 0;
+  virtual IMaskWorkspace *doInterfaceClone() const = 0;
 };
 
 /// shared pointer to the matrix workspace base class

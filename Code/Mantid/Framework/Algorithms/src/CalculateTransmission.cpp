@@ -21,182 +21,210 @@
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 
 using namespace Kernel;
 using namespace API;
 
 namespace // anonymous
-{
-  // For LOQ at least, the transmission monitor is 3.  (The incident beam monitor's UDET is 2.)
-  const detid_t LOQ_TRANSMISSION_MONITOR_UDET = 3;
+    {
+// For LOQ at least, the transmission monitor is 3.  (The incident beam
+// monitor's UDET is 2.)
+const detid_t LOQ_TRANSMISSION_MONITOR_UDET = 3;
 
-  /**
-   * Helper function to convert a single detector ID to a workspace index.
-   * Should we just go ahead and add this to the MatrixWorkspace class?
-   *
-   * @param ws    :: workspace containing det ID to ws index mapping
-   * @param detID :: the detector ID to look for
-   *
-   * @returns workspace index corresponding to the given detector ID
-   */
-  size_t getIndexFromDetectorID(MatrixWorkspace_sptr ws, detid_t detid)
-  {
-    const std::vector<detid_t> input = boost::assign::list_of(detid);
-    std::vector<size_t> result;
-    
-    ws->getIndicesFromDetectorIDs(input, result);
-    if( result.empty() )
-      throw std::invalid_argument("Could not find the spectra corresponding to detector ID " + 
+/**
+ * Helper function to convert a single detector ID to a workspace index.
+ * Should we just go ahead and add this to the MatrixWorkspace class?
+ *
+ * @param ws    :: workspace containing det ID to ws index mapping
+ * @param detID :: the detector ID to look for
+ *
+ * @returns workspace index corresponding to the given detector ID
+ */
+size_t getIndexFromDetectorID(MatrixWorkspace_sptr ws, detid_t detid) {
+  const std::vector<detid_t> input = boost::assign::list_of(detid);
+  std::vector<size_t> result;
+
+  ws->getIndicesFromDetectorIDs(input, result);
+  if (result.empty())
+    throw std::invalid_argument(
+        "Could not find the spectra corresponding to detector ID " +
         boost::lexical_cast<std::string>(detid));
 
-    return result[0];
-  }
+  return result[0];
+}
 }
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateTransmission)
 
-CalculateTransmission::CalculateTransmission() : API::Algorithm(), m_done(0.0)
-{}
+CalculateTransmission::CalculateTransmission()
+    : API::Algorithm(), m_done(0.0) {}
 
-CalculateTransmission::~CalculateTransmission()
-{}
+CalculateTransmission::~CalculateTransmission() {}
 
-void CalculateTransmission::init()
-{
+void CalculateTransmission::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<CommonBinsValidator>();
   wsValidator->add<HistogramValidator>();
-  
-  declareProperty(new WorkspaceProperty<>("SampleRunWorkspace","", Direction::Input, wsValidator), "The workspace containing the sample transmission run. Must have common binning and be in units of wavelength.");
-  declareProperty(new WorkspaceProperty<>("DirectRunWorkspace","", Direction::Input, wsValidator), "The workspace containing the direct beam (no sample) transmission run. The units and binning must match those of the SampleRunWorkspace.");
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "The name of the workspace in which to store the fitted transmission fractions.");
 
-  auto zeroOrMore = boost::make_shared<BoundedValidator<int> >();
+  declareProperty(new WorkspaceProperty<>("SampleRunWorkspace", "",
+                                          Direction::Input, wsValidator),
+                  "The workspace containing the sample transmission run. Must "
+                  "have common binning and be in units of wavelength.");
+  declareProperty(new WorkspaceProperty<>("DirectRunWorkspace", "",
+                                          Direction::Input, wsValidator),
+                  "The workspace containing the direct beam (no sample) "
+                  "transmission run. The units and binning must match those of "
+                  "the SampleRunWorkspace.");
+  declareProperty(
+      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      "The name of the workspace in which to store the fitted transmission "
+      "fractions.");
+
+  auto zeroOrMore = boost::make_shared<BoundedValidator<int>>();
   zeroOrMore->setLower(0);
-  
+
   declareProperty("IncidentBeamMonitor", EMPTY_INT(), zeroOrMore,
-    "The UDET of the incident beam monitor");
+                  "The UDET of the incident beam monitor");
   declareProperty("TransmissionMonitor", EMPTY_INT(), zeroOrMore,
-    "The UDET of the transmission monitor");
+                  "The UDET of the transmission monitor");
 
   declareProperty(new ArrayProperty<double>("RebinParams"),
-    "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
-    "this can be followed by a comma and more widths and last boundary pairs.\n"
-    "Negative width values indicate logarithmic binning.");
+                  "A comma separated list of first bin boundary, width, last "
+                  "bin boundary. Optionally\n"
+                  "this can be followed by a comma and more widths and last "
+                  "boundary pairs.\n"
+                  "Negative width values indicate logarithmic binning.");
 
   std::vector<std::string> options(3);
   options[0] = "Linear";
   options[1] = "Log";
-  options[2] = "Polynomial"; 
-   
-  declareProperty("FitMethod","Log",boost::make_shared<StringListValidator>(options),
-    "Whether to fit directly to the transmission curve using Linear, Log or Polynomial.");
-  auto twoOrMore = boost::make_shared<BoundedValidator<int> >();
-  twoOrMore->setLower(2); 
-  declareProperty("PolynomialOrder", 2, twoOrMore, "Order of the polynomial to fit. It is considered only for FitMethod=Polynomial"); 
+  options[2] = "Polynomial";
 
-  declareProperty("OutputUnfittedData",false, "If True, will output an additional workspace called [OutputWorkspace]_unfitted containing the unfitted transmission correction.");
+  declareProperty("FitMethod", "Log",
+                  boost::make_shared<StringListValidator>(options),
+                  "Whether to fit directly to the transmission curve using "
+                  "Linear, Log or Polynomial.");
+  auto twoOrMore = boost::make_shared<BoundedValidator<int>>();
+  twoOrMore->setLower(2);
+  declareProperty("PolynomialOrder", 2, twoOrMore, "Order of the polynomial to "
+                                                   "fit. It is considered only "
+                                                   "for FitMethod=Polynomial");
+
+  declareProperty("OutputUnfittedData", false,
+                  "If True, will output an additional workspace called "
+                  "[OutputWorkspace]_unfitted containing the unfitted "
+                  "transmission correction.");
 
   declareProperty(new ArrayProperty<detid_t>("TransmissionROI"),
-    "An optional ArrayProperty containing a list of detector ID's.  These specify a region of interest "
-    "which is to be summed and then used instead of a tranmission monitor. This allow for a \"beam stop "
-    "out\" method of transmission calculation." );
+                  "An optional ArrayProperty containing a list of detector "
+                  "ID's.  These specify a region of interest "
+                  "which is to be summed and then used instead of a "
+                  "tranmission monitor. This allow for a \"beam stop "
+                  "out\" method of transmission calculation.");
 }
 
-void CalculateTransmission::exec()
-{
+void CalculateTransmission::exec() {
   MatrixWorkspace_sptr sampleWS = getProperty("SampleRunWorkspace");
   MatrixWorkspace_sptr directWS = getProperty("DirectRunWorkspace");
 
-  const detid_t beamMonitorID             = getProperty("IncidentBeamMonitor");
-  detid_t transMonitorID                  = getProperty("TransmissionMonitor");
+  const detid_t beamMonitorID = getProperty("IncidentBeamMonitor");
+  detid_t transMonitorID = getProperty("TransmissionMonitor");
   const std::vector<detid_t> transDetList = getProperty("TransmissionROI");
 
-  const bool usingSameInstrument = sampleWS->getInstrument()->getName() == directWS->getInstrument()->getName();
-  if ( !usingSameInstrument )
-    throw std::invalid_argument("The input workspaces do not come from the same instrument.");
-  if ( !WorkspaceHelpers::matchingBins(sampleWS, directWS) )
-    throw std::invalid_argument("The input workspaces do not have matching bins.");
+  const bool usingSameInstrument = sampleWS->getInstrument()->getName() ==
+                                   directWS->getInstrument()->getName();
+  if (!usingSameInstrument)
+    throw std::invalid_argument(
+        "The input workspaces do not come from the same instrument.");
+  if (!WorkspaceHelpers::matchingBins(sampleWS, directWS))
+    throw std::invalid_argument(
+        "The input workspaces do not have matching bins.");
 
   bool usingMonitor = !isEmpty(transMonitorID);
   const bool usingROI = !transDetList.empty();
-  if( usingMonitor && usingROI )
-    throw std::invalid_argument("Unable to use both a monitor and a region of interest in transmission calculation.");
-  if( !usingMonitor && !usingROI )
-  {
+  if (usingMonitor && usingROI)
+    throw std::invalid_argument("Unable to use both a monitor and a region of "
+                                "interest in transmission calculation.");
+  if (!usingMonitor && !usingROI) {
     transMonitorID = LOQ_TRANSMISSION_MONITOR_UDET;
     usingMonitor = true;
   }
 
-  // Populate transmissionIndices with the workspace indices to use for the transmission.
-  // In the case of TransmissionMonitor this will be a single index corresponding to a
-  // monitor, in the case of TransmissionROI it will be one or more indices corresponding
+  // Populate transmissionIndices with the workspace indices to use for the
+  // transmission.
+  // In the case of TransmissionMonitor this will be a single index
+  // corresponding to a
+  // monitor, in the case of TransmissionROI it will be one or more indices
+  // corresponding
   // to a region of interest on the detector bank(s).
   std::vector<size_t> transmissionIndices;
-  if(usingMonitor)
-  {
-    const size_t transmissionMonitorIndex = getIndexFromDetectorID(sampleWS, transMonitorID);
+  if (usingMonitor) {
+    const size_t transmissionMonitorIndex =
+        getIndexFromDetectorID(sampleWS, transMonitorID);
     transmissionIndices.push_back(transmissionMonitorIndex);
     logIfNotMonitor(sampleWS, directWS, transmissionMonitorIndex);
-  }
-  else if(usingROI)
-  {
+  } else if (usingROI) {
     sampleWS->getIndicesFromDetectorIDs(transDetList, transmissionIndices);
-  }
-  else
+  } else
     assert(false);
-  
-  const std::string transPropName = usingMonitor ? "TransmissionMonitor" : "TransmissionROI";
 
-  if( transmissionIndices.empty() )
+  const std::string transPropName =
+      usingMonitor ? "TransmissionMonitor" : "TransmissionROI";
+
+  if (transmissionIndices.empty())
     throw std::invalid_argument(
-      "The UDET(s) passed to " + transPropName + " do not correspond to spectra in the workspace.");
+        "The UDET(s) passed to " + transPropName +
+        " do not correspond to spectra in the workspace.");
 
   // Check if we're normalising to the incident beam monitor.  If so, then it
   // needs to be a monitor that is not also used for the transmission.
   const bool normaliseToMonitor = !isEmpty(beamMonitorID);
   size_t beamMonitorIndex = 0;
-  if( normaliseToMonitor )
-  {
+  if (normaliseToMonitor) {
     beamMonitorIndex = getIndexFromDetectorID(sampleWS, beamMonitorID);
     logIfNotMonitor(sampleWS, directWS, beamMonitorIndex);
 
-    BOOST_FOREACH( size_t transmissionIndex, transmissionIndices )
-      if( transmissionIndex == beamMonitorIndex )
+    BOOST_FOREACH (size_t transmissionIndex, transmissionIndices)
+      if (transmissionIndex == beamMonitorIndex)
         throw std::invalid_argument(
-          "The IncidentBeamMonitor UDET (" + boost::lexical_cast<std::string>(transmissionIndex) + \
-          ") matches a UDET given in " + transPropName + ".");
+            "The IncidentBeamMonitor UDET (" +
+            boost::lexical_cast<std::string>(transmissionIndex) +
+            ") matches a UDET given in " + transPropName + ".");
   }
-  
+
   MatrixWorkspace_sptr sampleInc;
-  if (normaliseToMonitor) sampleInc = this->extractSpectra(sampleWS, std::vector<size_t>(1, beamMonitorIndex));
-  MatrixWorkspace_sptr sampleTrans = this->extractSpectra(sampleWS, transmissionIndices);
+  if (normaliseToMonitor)
+    sampleInc = this->extractSpectra(sampleWS,
+                                     std::vector<size_t>(1, beamMonitorIndex));
+  MatrixWorkspace_sptr sampleTrans =
+      this->extractSpectra(sampleWS, transmissionIndices);
 
   MatrixWorkspace_sptr directInc;
-  if (normaliseToMonitor) directInc = this->extractSpectra(directWS, std::vector<size_t>(1, beamMonitorIndex));
-  MatrixWorkspace_sptr directTrans = this->extractSpectra(directWS, transmissionIndices);
-  
+  if (normaliseToMonitor)
+    directInc = this->extractSpectra(directWS,
+                                     std::vector<size_t>(1, beamMonitorIndex));
+  MatrixWorkspace_sptr directTrans =
+      this->extractSpectra(directWS, transmissionIndices);
+
   double start = m_done;
   Progress progress(this, start, m_done += 0.2, 2);
   progress.report("CalculateTransmission: Dividing transmission by incident");
 
   // The main calculation
-  MatrixWorkspace_sptr transmission = sampleTrans/directTrans;
-  if (normaliseToMonitor)  transmission = transmission*(directInc/sampleInc);
+  MatrixWorkspace_sptr transmission = sampleTrans / directTrans;
+  if (normaliseToMonitor)
+    transmission = transmission * (directInc / sampleInc);
 
   // This workspace is now a distribution
   progress.report("CalculateTransmission: Dividing transmission by incident");
 
   // Output this data if requested
   const bool outputRaw = getProperty("OutputUnfittedData");
-  if ( outputRaw )
-  {
+  if (outputRaw) {
     IAlgorithm_sptr childAlg = createChildAlgorithm("ReplaceSpecialValues");
     childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", transmission);
     childAlg->setProperty<double>("NaNValue", 0.0);
@@ -207,30 +235,34 @@ void CalculateTransmission::exec()
     transmission = childAlg->getProperty("OutputWorkspace");
     std::string outputWSName = getPropertyValue("OutputWorkspace");
     outputWSName += "_unfitted";
-    declareProperty(new WorkspaceProperty<>("UnfittedData",outputWSName,Direction::Output));
-    setProperty("UnfittedData",transmission);
+    declareProperty(new WorkspaceProperty<>("UnfittedData", outputWSName,
+                                            Direction::Output));
+    setProperty("UnfittedData", transmission);
   }
-  
+
   // Check that there are more than a single bin in the transmission
   // workspace. Skip the fit it there isn't.
-  if ( transmission->dataY(0).size() > 1 )
-  {
-    transmission = fit(transmission, getProperty("RebinParams"), getProperty("FitMethod"));
+  if (transmission->dataY(0).size() > 1) {
+    transmission =
+        fit(transmission, getProperty("RebinParams"), getProperty("FitMethod"));
   }
   setProperty("OutputWorkspace", transmission);
 }
 
 /**
- * Extracts multiple spectra from a Workspace2D into a new workspaces, using SumSpectra.
+ * Extracts multiple spectra from a Workspace2D into a new workspaces, using
+ *SumSpectra.
  *
  * @param ws      :: The workspace containing the spectrum to extract
  * @param indices :: The workspace index of the spectrum to extract
  *
  * @returns a Workspace2D containing the extracted spectrum
- * @throws runtime_error if the ExtractSingleSpectrum algorithm fails during execution
+ * @throws runtime_error if the ExtractSingleSpectrum algorithm fails during
+ *execution
  */
-API::MatrixWorkspace_sptr CalculateTransmission::extractSpectra(API::MatrixWorkspace_sptr ws, const std::vector<size_t> & indices)
-{
+API::MatrixWorkspace_sptr
+CalculateTransmission::extractSpectra(API::MatrixWorkspace_sptr ws,
+                                      const std::vector<size_t> &indices) {
   // Compile a comma separated list of indices that we can pass to SumSpectra.
   std::vector<std::string> indexStrings(indices.size());
   // A bug in boost 1.53: https://svn.boost.org/trac/boost/ticket/7421
@@ -239,14 +271,13 @@ API::MatrixWorkspace_sptr CalculateTransmission::extractSpectra(API::MatrixWorks
   // lexical_cast function
   typedef std::string (*from_size_t)(const size_t &);
 
-  std::transform(
-    indices.begin(), indices.end(),
-    indexStrings.begin(), 
-    (from_size_t)boost::lexical_cast<std::string, size_t>);
+  std::transform(indices.begin(), indices.end(), indexStrings.begin(),
+                 (from_size_t)boost::lexical_cast<std::string, size_t>);
   const std::string commaIndexList = boost::algorithm::join(indexStrings, ",");
 
   double start = m_done;
-  IAlgorithm_sptr childAlg = createChildAlgorithm("SumSpectra", start, m_done += 0.1);
+  IAlgorithm_sptr childAlg =
+      createChildAlgorithm("SumSpectra", start, m_done += 0.1);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", ws);
   childAlg->setPropertyValue("ListOfWorkspaceIndices", commaIndexList);
   childAlg->executeAsChildAlg();
@@ -255,102 +286,101 @@ API::MatrixWorkspace_sptr CalculateTransmission::extractSpectra(API::MatrixWorks
   return childAlg->getProperty("OutputWorkspace");
 }
 
-/** Calculate a workspace that contains the result of the fit to the transmission fraction that was calculated
+/** Calculate a workspace that contains the result of the fit to the
+* transmission fraction that was calculated
 *  @param raw [in] the workspace with the unfitted transmission ratio data
 *  @param rebinParams [in] the parameters for rebinning
-*  @param fitMethod [in] string can be Log, Linear, Poly2, Poly3, Poly4, Poly5, Poly6
+*  @param fitMethod [in] string can be Log, Linear, Poly2, Poly3, Poly4, Poly5,
+* Poly6
 *  @return a workspace that contains the evaluation of the fit
-*  @throw runtime_error if the Linear or ExtractSpectrum algorithm fails during execution
+*  @throw runtime_error if the Linear or ExtractSpectrum algorithm fails during
+* execution
 */
-API::MatrixWorkspace_sptr CalculateTransmission::fit(API::MatrixWorkspace_sptr raw, std::vector<double> rebinParams, const std::string fitMethod)
-{
-  MatrixWorkspace_sptr output = this->extractSpectra(raw, std::vector<size_t>(1, 0));
+API::MatrixWorkspace_sptr
+CalculateTransmission::fit(API::MatrixWorkspace_sptr raw,
+                           std::vector<double> rebinParams,
+                           const std::string fitMethod) {
+  MatrixWorkspace_sptr output =
+      this->extractSpectra(raw, std::vector<size_t>(1, 0));
 
   Progress progress(this, m_done, 1.0, 4);
   progress.report("CalculateTransmission: Performing fit");
 
-  //these are calculated by the call to fit below
+  // these are calculated by the call to fit below
   double grad(0.0), offset(0.0);
   std::vector<double> coeficients;
-  const bool logFit = ( fitMethod == "Log" );
-  if (logFit)
-  {
+  const bool logFit = (fitMethod == "Log");
+  if (logFit) {
     g_log.debug("Fitting to the logarithm of the transmission");
 
-    MantidVec & Y = output->dataY(0);
-    MantidVec & E = output->dataE(0);
+    MantidVec &Y = output->dataY(0);
+    MantidVec &E = output->dataE(0);
     double start = m_done;
-    Progress prog2(this, start, m_done+=0.1 ,Y.size());
-    for (size_t i=0; i < Y.size(); ++i)
-    {
-      // Take the log of each datapoint for fitting. Recalculate errors remembering that d(log(a))/da  = 1/a
-      E[i] = std::abs(E[i]/Y[i]);
+    Progress prog2(this, start, m_done += 0.1, Y.size());
+    for (size_t i = 0; i < Y.size(); ++i) {
+      // Take the log of each datapoint for fitting. Recalculate errors
+      // remembering that d(log(a))/da  = 1/a
+      E[i] = std::abs(E[i] / Y[i]);
       Y[i] = std::log10(Y[i]);
       progress.report("Fitting to the logarithm of the transmission");
     }
-  
+
     // Now fit this to a straight line
     output = fitData(output, grad, offset);
-  } // logFit true
-  else if (fitMethod == "Linear")
-  { // Linear fit
+  }                                 // logFit true
+  else if (fitMethod == "Linear") { // Linear fit
     g_log.debug("Fitting directly to the data (i.e. linearly)");
     output = fitData(output, grad, offset);
-  }else{ // fitMethod Polynomial
+  } else { // fitMethod Polynomial
     int order = getProperty("PolynomialOrder");
-    std::stringstream info; 
-    info << "Fitting the transmission to polynomial order=" << order ; 
+    std::stringstream info;
+    info << "Fitting the transmission to polynomial order=" << order;
     g_log.information(info.str());
     output = fitPolynomial(output, order, coeficients);
   }
 
   progress.report("CalculateTransmission: Performing fit");
 
-  //if no rebin parameters were set the output workspace will have the same binning as the input ones, otherwise rebin
-  if ( ! rebinParams.empty() )
-  {
+  // if no rebin parameters were set the output workspace will have the same
+  // binning as the input ones, otherwise rebin
+  if (!rebinParams.empty()) {
     output = rebin(rebinParams, output);
   }
   progress.report("CalculateTransmission: Performing fit");
 
-  // if there was rebinnning or log fitting we need to recalculate the Ys, otherwise we can just use the workspace kicked out by the fitData()'s call to Linear
-  if ( (! rebinParams.empty()) || logFit)
-  {
-    const MantidVec & X = output->readX(0);
-    MantidVec & Y = output->dataY(0);
-    if (logFit)
-    {
+  // if there was rebinnning or log fitting we need to recalculate the Ys,
+  // otherwise we can just use the workspace kicked out by the fitData()'s call
+  // to Linear
+  if ((!rebinParams.empty()) || logFit) {
+    const MantidVec &X = output->readX(0);
+    MantidVec &Y = output->dataY(0);
+    if (logFit) {
       // Need to transform back to 'unlogged'
-      const double m(std::pow(10,grad));
-      const double factor(std::pow(10,offset));
+      const double m(std::pow(10, grad));
+      const double factor(std::pow(10, offset));
 
-      MantidVec & E = output->dataE(0);
-      for (size_t i = 0; i < Y.size(); ++i)
-      {
-        //the relationship between the grad and interspt of the log fit and the un-logged value of Y contain this dependence on the X (bin center values)
-        Y[i] = factor*(std::pow(m,0.5*(X[i]+X[i+1])));
-        E[i] = std::abs(E[i]*Y[i]);
+      MantidVec &E = output->dataE(0);
+      for (size_t i = 0; i < Y.size(); ++i) {
+        // the relationship between the grad and interspt of the log fit and the
+        // un-logged value of Y contain this dependence on the X (bin center
+        // values)
+        Y[i] = factor * (std::pow(m, 0.5 * (X[i] + X[i + 1])));
+        E[i] = std::abs(E[i] * Y[i]);
         progress.report();
       }
-    }// end logFit
-    else if (fitMethod == "Linear")
-    {
-      //the simpler linear situation
-      for (size_t i = 0; i < Y.size(); ++i)
-      {
-        Y[i] = (grad*0.5*(X[i]+X[i+1]))+offset;
+    } // end logFit
+    else if (fitMethod == "Linear") {
+      // the simpler linear situation
+      for (size_t i = 0; i < Y.size(); ++i) {
+        Y[i] = (grad * 0.5 * (X[i] + X[i + 1])) + offset;
       }
-    }
-    else 
-    { // the polynomial fit
-      for (size_t i=0; i<Y.size(); ++i)
-      {
-        double aux=0;
-        double x_v =0.5*(X[i]+X[i+1]);
+    } else { // the polynomial fit
+      for (size_t i = 0; i < Y.size(); ++i) {
+        double aux = 0;
+        double x_v = 0.5 * (X[i] + X[i + 1]);
 
-        for (int j=0; j<static_cast<int>(coeficients.size()); ++j)
-        {
-          aux += coeficients[j]*std::pow(x_v,j);
+        for (int j = 0; j < static_cast<int>(coeficients.size()); ++j) {
+          aux += coeficients[j] * std::pow(x_v, j);
         }
         Y[i] = aux;
       }
@@ -360,71 +390,76 @@ API::MatrixWorkspace_sptr CalculateTransmission::fit(API::MatrixWorkspace_sptr r
 
   return output;
 }
-/** Uses 'Linear' as a ChildAlgorithm to fit the log of the exponential curve expected for the transmission.
+/** Uses 'Linear' as a ChildAlgorithm to fit the log of the exponential curve
+ * expected for the transmission.
  *  @param[in] WS The single-spectrum workspace to fit
  *  @param[out] grad The single-spectrum workspace to fit
  *  @param[out] offset The single-spectrum workspace to fit
  *  @return A workspace containing the fit
  *  @throw runtime_error if the Linear algorithm fails during execution
  */
-API::MatrixWorkspace_sptr CalculateTransmission::fitData(API::MatrixWorkspace_sptr WS, double & grad, double & offset)
-{
+API::MatrixWorkspace_sptr
+CalculateTransmission::fitData(API::MatrixWorkspace_sptr WS, double &grad,
+                               double &offset) {
   g_log.information("Fitting the experimental transmission curve");
   double start = m_done;
-  IAlgorithm_sptr childAlg = createChildAlgorithm("Fit", start, m_done=0.9);
-  auto linearBack = API::FunctionFactory::Instance().createFunction("LinearBackground");
-  childAlg->setProperty("Function",linearBack);
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Fit", start, m_done = 0.9);
+  auto linearBack =
+      API::FunctionFactory::Instance().createFunction("LinearBackground");
+  childAlg->setProperty("Function", linearBack);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
-  childAlg->setProperty("Minimizer","Levenberg-MarquardtMD");
-  childAlg->setProperty("CreateOutput",true);
-  childAlg->setProperty("IgnoreInvalidData",true);
+  childAlg->setProperty("Minimizer", "Levenberg-MarquardtMD");
+  childAlg->setProperty("CreateOutput", true);
+  childAlg->setProperty("IgnoreInvalidData", true);
   childAlg->executeAsChildAlg();
 
   std::string fitStatus = childAlg->getProperty("OutputStatus");
-  if ( fitStatus != "success" )
-  {
+  if (fitStatus != "success") {
     g_log.error("Unable to successfully fit the data: " + fitStatus);
     throw std::runtime_error("Unable to successfully fit the data");
   }
- 
+
   // Only get to here if successful
   offset = linearBack->getParameter(0);
   grad = linearBack->getParameter(1);
-  return this->extractSpectra(childAlg->getProperty("OutputWorkspace"), std::vector<size_t>(1, 1));
+  return this->extractSpectra(childAlg->getProperty("OutputWorkspace"),
+                              std::vector<size_t>(1, 1));
 }
-/** Uses Polynomial as a ChildAlgorithm to fit the log of the exponential curve expected for the transmission.
+/** Uses Polynomial as a ChildAlgorithm to fit the log of the exponential curve
+ * expected for the transmission.
  * @param[in] WS The single-spectrum workspace to fit
  * @param[in] order The order of the polynomial from 2 to 6
  * @param[out] coeficients of the polynomial. c[0] + c[1]x + c[2]x^2 + ...
  */
-API::MatrixWorkspace_sptr CalculateTransmission::fitPolynomial(API::MatrixWorkspace_sptr WS, int order, std::vector<double> & coeficients)
-{
+API::MatrixWorkspace_sptr
+CalculateTransmission::fitPolynomial(API::MatrixWorkspace_sptr WS, int order,
+                                     std::vector<double> &coeficients) {
   g_log.notice("Fitting the experimental transmission curve fitpolyno");
-  double start = m_done; 
-  IAlgorithm_sptr childAlg = createChildAlgorithm("Fit", start, m_done=0.9); 
-  auto polyfit = API::FunctionFactory::Instance().createFunction("Polynomial"); 
-  polyfit->setAttributeValue("n",order); 
+  double start = m_done;
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Fit", start, m_done = 0.9);
+  auto polyfit = API::FunctionFactory::Instance().createFunction("Polynomial");
+  polyfit->setAttributeValue("n", order);
   polyfit->initialize();
-  childAlg->setProperty("Function",polyfit); 
-  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace",WS);
-  childAlg->setProperty("Minimizer","Levenberg-MarquardtMD");
-  childAlg->setProperty("CreateOutput",true); 
-  childAlg->setProperty("IgnoreInvalidData",true);
+  childAlg->setProperty("Function", polyfit);
+  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
+  childAlg->setProperty("Minimizer", "Levenberg-MarquardtMD");
+  childAlg->setProperty("CreateOutput", true);
+  childAlg->setProperty("IgnoreInvalidData", true);
   childAlg->executeAsChildAlg();
   std::string fitStatus = childAlg->getProperty("OutputStatus");
-  if ( fitStatus != "success" )
-  {
+  if (fitStatus != "success") {
     g_log.error("Unable to successfully fit the data: " + fitStatus);
     throw std::runtime_error("Unable to successfully fit the data");
   }
- 
+
   // Only get to here if successful
-  coeficients.resize(order+1);
-  for (int i = 0; i<=order; i++){
-    coeficients[i] = polyfit->getParameter(i); 
+  coeficients.resize(order + 1);
+  for (int i = 0; i <= order; i++) {
+    coeficients[i] = polyfit->getParameter(i);
   }
-  return this->extractSpectra(childAlg->getProperty("OutputWorkspace"), std::vector<size_t>(1, 1));
-} 
+  return this->extractSpectra(childAlg->getProperty("OutputWorkspace"),
+                              std::vector<size_t>(1, 1));
+}
 
 /** Calls rebin as Child Algorithm
 *  @param binParams this string is passed to rebin as the "Params" property
@@ -432,32 +467,37 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitPolynomial(API::MatrixWorksp
 *  @return the resultant rebinned workspace
 *  @throw runtime_error if the rebin algorithm fails during execution
 */
-API::MatrixWorkspace_sptr CalculateTransmission::rebin(std::vector<double> & binParams, API::MatrixWorkspace_sptr ws)
-{
+API::MatrixWorkspace_sptr
+CalculateTransmission::rebin(std::vector<double> &binParams,
+                             API::MatrixWorkspace_sptr ws) {
   double start = m_done;
-  IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin", start, m_done += 0.05);
+  IAlgorithm_sptr childAlg =
+      createChildAlgorithm("Rebin", start, m_done += 0.05);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", ws);
-  childAlg->setProperty< std::vector<double> >("Params", binParams);
+  childAlg->setProperty<std::vector<double>>("Params", binParams);
   childAlg->executeAsChildAlg();
-  
+
   // Only get to here if successful
   return childAlg->getProperty("OutputWorkspace");
 }
 
 /**
- * Outputs message to log if the detector at the given index is not a monitor in both input workspaces.
+ * Outputs message to log if the detector at the given index is not a monitor in
+ *both input workspaces.
  *
  * @param sampleWS :: the input sample workspace
  * @param directWS :: the input direct workspace
  * @param index    :: the index of the detector to checked
  */
-void CalculateTransmission::logIfNotMonitor(API::MatrixWorkspace_sptr sampleWS, API::MatrixWorkspace_sptr directWS, size_t index)
-{
-  const std::string message = "The detector at index " + boost::lexical_cast<std::string>(index) + \
+void CalculateTransmission::logIfNotMonitor(API::MatrixWorkspace_sptr sampleWS,
+                                            API::MatrixWorkspace_sptr directWS,
+                                            size_t index) {
+  const std::string message = "The detector at index " +
+                              boost::lexical_cast<std::string>(index) +
                               " is not a monitor in the ";
-  if( !sampleWS->getDetector(index)->isMonitor() )
+  if (!sampleWS->getDetector(index)->isMonitor())
     g_log.information(message + "sample workspace.");
-  if( !directWS->getDetector(index)->isMonitor() )
+  if (!directWS->getDetector(index)->isMonitor())
     g_log.information(message + "direct workspace.");
 }
 

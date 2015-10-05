@@ -360,9 +360,8 @@ void AugmentedLagrangianOptimizer::unconstrainedOptimization(
  * must match number of parameters
  *                 where \f$A_{eq} x \geq 0\f$
  */
-void
-AugmentedLagrangianOptimizer::checkConstraints(const DblMatrix &equality,
-                                               const DblMatrix &inequality) {
+void AugmentedLagrangianOptimizer::checkConstraints(
+    const DblMatrix &equality, const DblMatrix &inequality) {
   const size_t totalNumConstr =
       numEqualityConstraints() + numInequalityConstraints();
   if (totalNumConstr == 0)

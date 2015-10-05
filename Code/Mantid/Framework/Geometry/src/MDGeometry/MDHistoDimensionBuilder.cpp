@@ -7,7 +7,8 @@ namespace Geometry {
 
 /// Constructor
 MDHistoDimensionBuilder::MDHistoDimensionBuilder()
-    : m_units(Kernel::Units::Symbol::EmptyLabel), m_min(0), m_max(0), m_nbins(0), m_minSet(false), m_maxSet(false) {}
+    : m_units(Kernel::Units::Symbol::EmptyLabel), m_min(0), m_max(0),
+      m_nbins(0), m_minSet(false), m_maxSet(false) {}
 
 /// Destructor
 MDHistoDimensionBuilder::~MDHistoDimensionBuilder() {}
@@ -60,7 +61,9 @@ void MDHistoDimensionBuilder::setId(std::string id) { m_id = id; }
 Setter for the dimension units
 @param units : unit type of dimension
 */
-void MDHistoDimensionBuilder::setUnits(const Kernel::UnitLabel& units) { m_units = units; }
+void MDHistoDimensionBuilder::setUnits(const Kernel::UnitLabel &units) {
+  m_units = units;
+}
 
 /*
 Setter for the dimension min

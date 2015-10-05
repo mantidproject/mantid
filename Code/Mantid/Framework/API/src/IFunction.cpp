@@ -844,7 +844,7 @@ void IFunction::setMatrixWorkspace(
                   }
                 } // end if
               } // end trying to convert result-unit from formula or y-unit for
-                // lookuptable
+              // lookuptable
 
               setParameter(i, paramValue);
             } // end of update parameter value
@@ -1049,9 +1049,8 @@ void IFunction::setAttribute(const std::string &name,
 * @param name :: The name of the attribute
 * @param defaultValue :: A default value
 */
-void
-IFunction::declareAttribute(const std::string &name,
-                            const API::IFunction::Attribute &defaultValue) {
+void IFunction::declareAttribute(
+    const std::string &name, const API::IFunction::Attribute &defaultValue) {
   m_attrs.insert(std::make_pair(name, defaultValue));
 }
 

@@ -353,8 +353,8 @@ V3D Matrix<T>::operator*(const V3D &Vx) const
     throw Kernel::Exception::MisMatch<size_t>(ny, 3, "Matrix::operator*(V3D)");
 
   V3D v;
-  for(size_t i = 0; i < nx; ++i) {
-      v[i] = V[i][0] * Vx.X() + V[i][1] * Vx.Y() + V[i][2] * Vx.Z();
+  for (size_t i = 0; i < nx; ++i) {
+    v[i] = V[i][0] * Vx.X() + V[i][1] * Vx.Y() + V[i][2] * Vx.Z();
   }
 
   return v;
@@ -965,12 +965,11 @@ T Matrix<T>::Invert()
   if (nx != ny && nx < 1)
     return 0;
 
-  if(nx==1)
-  {
-      T det=V[0][0];
-      if(V[0][0]!=static_cast<T>(0.))
-          V[0][0]=static_cast<T>(1.)/V[0][0];
-      return det;
+  if (nx == 1) {
+    T det = V[0][0];
+    if (V[0][0] != static_cast<T>(0.))
+      V[0][0] = static_cast<T>(1.) / V[0][0];
+    return det;
   }
   int *indx = new int[nx]; // Set in lubcmp
 
@@ -1122,7 +1121,7 @@ void Matrix<T>::lubcmp(int *rowperm, int &interchange)
 
     if (big == 0.0) {
       delete[] vv;
-      for (int j=0;j<static_cast<int>(nx); j++){
+      for (int j = 0; j < static_cast<int>(nx); j++) {
         rowperm[j] = j;
       }
       return;

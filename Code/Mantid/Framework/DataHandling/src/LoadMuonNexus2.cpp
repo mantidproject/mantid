@@ -360,8 +360,8 @@ void LoadMuonNexus2::loadLogs(API::MatrixWorkspace_sptr ws, NXEntry &entry,
 /**  Log the run details from the file
 * @param localWorkspace :: The workspace details to use
 */
-void
-LoadMuonNexus2::loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace) {
+void LoadMuonNexus2::loadRunDetails(
+    DataObjects::Workspace2D_sptr localWorkspace) {
   API::Run &runDetails = localWorkspace->mutableRun();
 
   runDetails.addProperty("run_title", localWorkspace->getTitle(), true);

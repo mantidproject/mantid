@@ -308,7 +308,7 @@ public:
         m_value(extractToValueVector<TYPE>(defaultValueStr)),
         m_initialValue(extractToValueVector<TYPE>(defaultValueStr)),
         m_validator(validator) {
-            UNUSED_ARG(defaultValue);
+    UNUSED_ARG(defaultValue);
   }
 
   /**Copy constructor

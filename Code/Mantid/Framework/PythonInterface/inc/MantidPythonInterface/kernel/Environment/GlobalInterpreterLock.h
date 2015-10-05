@@ -28,7 +28,6 @@
 #include "MantidPythonInterface/kernel/DllConfig.h"
 #include <boost/python/detail/wrap_python.hpp>
 
-
 namespace Mantid {
 namespace PythonInterface {
 namespace Environment {
@@ -42,8 +41,7 @@ namespace Environment {
  * way to share code with that without tight coupling the GUI layer
  * to PythonInterface
  */
-class PYTHON_KERNEL_DLL GlobalInterpreterLock
-{
+class PYTHON_KERNEL_DLL GlobalInterpreterLock {
 public:
   /// @name Static Helpers
   ///@{
@@ -59,11 +57,10 @@ public:
   ~GlobalInterpreterLock();
 
 private:
-  GlobalInterpreterLock(const GlobalInterpreterLock&);
+  GlobalInterpreterLock(const GlobalInterpreterLock &);
   /// Current GIL state
   PyGILState_STATE m_state;
 };
-
 }
 }
 }

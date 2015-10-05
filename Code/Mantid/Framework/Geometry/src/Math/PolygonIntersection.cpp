@@ -23,11 +23,13 @@ namespace {
 /// Static logger
 Kernel::Logger g_log("PolygonIntersection");
 
-// Uncomment this to get detailed statements of the exact progress of the intersection
+// Uncomment this to get detailed statements of the exact progress of the
+// intersection
 // calculation
 //#define DEBUG_INTERSECTION
 
-/// Define a macro to include the logging statements if requested. They hamper performance if
+/// Define a macro to include the logging statements if requested. They hamper
+/// performance if
 /// always included
 #ifdef DEBUG_INTERSECTION
 #define VERBOSE(X) X
@@ -57,7 +59,7 @@ void advanceVertex(ConvexPolygon::Iterator &iter, ConvexPolygon &out,
     // Add an intersection as the point is inside the polygon
     out.insert(curPolyPt);
     VERBOSE(std::cout << "Advance adds cross pt: (" << curPolyPt.X() << ","
-                          << curPolyPt.Y() << ")" << std::endl);
+                      << curPolyPt.Y() << ")" << std::endl);
   }
 }
 
@@ -85,11 +87,10 @@ bool MANTID_GEOMETRY_DLL intersection(const ConvexPolygon &P,
 
   // The algorithm requires that the polygon with the greatest unsigned area
   // be on the "Left"
-  VERBOSE(std::cout << "Area of P (" << P.area() << "). Area of Q ("
-                        << Q.area() << ")\n");
+  VERBOSE(std::cout << "Area of P (" << P.area() << "). Area of Q (" << Q.area()
+                    << ")\n");
   if (P.area() < Q.area()) {
-    VERBOSE(std::cout << "Area of P < Area of Q. Swapping order."
-                          << std::endl);
+    VERBOSE(std::cout << "Area of P < Area of Q. Swapping order." << std::endl);
     return intersection(Q, P, out);
   }
 
@@ -100,33 +101,33 @@ bool MANTID_GEOMETRY_DLL intersection(const ConvexPolygon &P,
   size_t maxItns = 2 * (P.npoints() + Q.npoints());
   for (size_t i = 1; i <= maxItns; ++i) {
     VERBOSE(std::cout << "Iteration " << i << " Phase = " << phase
-                          << std::endl);
+                      << std::endl);
     const PolygonEdge edgeP = pIter.edge();
     const PolygonEdge edgeQ = qIter.edge();
     PointClassification pclass = classify(edgeP.end(), edgeQ);
 
     VERBOSE(std::cout << "Class P Pt" << std::endl);
     VERBOSE(std::cout << "Class Pt: (" << edgeP.end().X() << ","
-                          << edgeP.end().Y() << ")");
+                      << edgeP.end().Y() << ")");
     VERBOSE(std::cout << std::endl);
     VERBOSE(std::cout << "Edge Orig Pt (" << edgeQ.start().X() << ","
-                          << edgeQ.start().Y() << ")");
+                      << edgeQ.start().Y() << ")");
     VERBOSE(std::cout << std::endl);
     VERBOSE(std::cout << "Edge Dest Pt (" << edgeQ.end().X() << ","
-                          << edgeQ.end().Y() << ")");
+                      << edgeQ.end().Y() << ")");
     VERBOSE(std::cout << std::endl);
     VERBOSE(std::cout << "P pt class: " << pclass << std::endl);
 
     PointClassification qclass = classify(edgeQ.end(), edgeP);
     VERBOSE(std::cout << "Class Q Pt" << std::endl);
-    VERBOSE(std::cout << "Class Pt: (" << edgeQ.end().X() << "," << edgeQ.end().Y()
-                  << ")");
+    VERBOSE(std::cout << "Class Pt: (" << edgeQ.end().X() << ","
+                      << edgeQ.end().Y() << ")");
     VERBOSE(std::cout << std::endl);
     VERBOSE(std::cout << "Edge Orig Pt (" << edgeP.start().X() << ","
-                  << edgeP.start().Y() << ")");
+                      << edgeP.start().Y() << ")");
     VERBOSE(std::cout << std::endl);
     VERBOSE(std::cout << "Edge Dest Pt (" << edgeP.end().X() << ","
-                  << edgeP.end().Y() << ")");
+                      << edgeP.end().Y() << ")");
     VERBOSE(std::cout << std::endl);
     VERBOSE(std::cout << "Q pt class: " << qclass << std::endl);
 

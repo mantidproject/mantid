@@ -27,7 +27,7 @@ DECLARE_ALGORITHM(SaveSPE)
 */
 
 // use macro on platforms without variadic templates.
-#if defined(__INTEL_COMPILER) ||  ( defined(_MSC_VER) && _MSC_VER < 1800 )
+#if defined(__INTEL_COMPILER) || (defined(_MSC_VER) && _MSC_VER < 1800)
 
 #define FPRINTF_WITH_EXCEPTION(stream, format, ...)                            \
   if (fprintf(stream, format, ##__VA_ARGS__) <= 0) {                           \

@@ -11,13 +11,13 @@ PoldiDGrid::PoldiDGrid(boost::shared_ptr<PoldiAbstractDetector> detector,
       m_wavelengthRange(wavelengthRange), m_dRangeAsMultiples(), m_deltaD(0.0),
       m_dgrid(), m_hasCachedCalculation(false) {}
 
-void
-PoldiDGrid::setDetector(boost::shared_ptr<PoldiAbstractDetector> newDetector) {
+void PoldiDGrid::setDetector(
+    boost::shared_ptr<PoldiAbstractDetector> newDetector) {
   m_detector = newDetector;
 }
 
-void
-PoldiDGrid::setChopper(boost::shared_ptr<PoldiAbstractChopper> newChopper) {
+void PoldiDGrid::setChopper(
+    boost::shared_ptr<PoldiAbstractChopper> newChopper) {
   m_chopper = newChopper;
 }
 

@@ -12,24 +12,16 @@
 using namespace Mantid;
 using namespace Mantid::DataObjects;
 
-class MDBinTest : public CxxTest::TestSuite
-{
+class MDBinTest : public CxxTest::TestSuite {
 public:
-
-  void test_constructor()
-  {
+  void test_constructor() {
     typedef MDLeanEvent<3> MDE;
-    MDBin<MDE,3> bin;
-    for (size_t d=0; d<3; d++)
-    {
-      TS_ASSERT_EQUALS( bin.m_min[d], -std::numeric_limits<coord_t>::max() );
-      TS_ASSERT_EQUALS( bin.m_max[d], std::numeric_limits<coord_t>::max() );
+    MDBin<MDE, 3> bin;
+    for (size_t d = 0; d < 3; d++) {
+      TS_ASSERT_EQUALS(bin.m_min[d], -std::numeric_limits<coord_t>::max());
+      TS_ASSERT_EQUALS(bin.m_max[d], std::numeric_limits<coord_t>::max());
     }
   }
-
-
 };
 
-
 #endif /* MANTID_DATAOBJECTS_MDBINTEST_H_ */
-

@@ -111,7 +111,7 @@ ConvToMDBase::ConvToMDBase()
  */
 void ConvToMDBase::setDisplayNormalization(
     Mantid::API::IMDEventWorkspace_sptr mdWorkspace,
-    const Mantid::API::MatrixWorkspace_sptr& underlyingWorkspace) {
+    const Mantid::API::MatrixWorkspace_sptr &underlyingWorkspace) {
   if (m_QConverter) {
     m_QConverter->setDisplayNormalization(mdWorkspace, underlyingWorkspace);
   }

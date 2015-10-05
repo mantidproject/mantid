@@ -54,10 +54,9 @@ const std::string DownloadFile::summary() const {
 /** Initialize the algorithm's properties.
  */
 void DownloadFile::init() {
-  declareProperty("Address", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
-                  "The address of the network resource to download.",
-                  Direction::InOut);
+  declareProperty(
+      "Address", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      "The address of the network resource to download.", Direction::InOut);
   declareProperty(new FileProperty("Filename", "", FileProperty::Save),
                   "The filename to save the download to.");
 }

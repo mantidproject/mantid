@@ -357,16 +357,16 @@ void MDNormSCD::cacheDimensionXValues() {
  * @param otherValues
  * @param affineTrans
  */
-void
-MDNormSCD::calculateNormalization(const std::vector<coord_t> &otherValues,
-                                  const Kernel::Matrix<coord_t> &affineTrans) {
+void MDNormSCD::calculateNormalization(
+    const std::vector<coord_t> &otherValues,
+    const Kernel::Matrix<coord_t> &affineTrans) {
   API::MatrixWorkspace_const_sptr integrFlux = getProperty("FluxWorkspace");
   integrFlux->getXMinMax(m_kiMin, m_kiMax);
   API::MatrixWorkspace_const_sptr solidAngleWS =
       getProperty("SolidAngleWorkspace");
 
   const auto &exptInfoZero = *(m_inputWS->getExperimentInfo(0));
-  typedef Kernel::PropertyWithValue<std::vector<double> > VectorDoubleProperty;
+  typedef Kernel::PropertyWithValue<std::vector<double>> VectorDoubleProperty;
   auto *rubwLog =
       dynamic_cast<VectorDoubleProperty *>(exptInfoZero.getLog("RUBW_MATRIX"));
   if (!rubwLog) {
@@ -406,9 +406,9 @@ MDNormSCD::calculateNormalization(const std::vector<coord_t> &otherValues,
       auto spectrum = getThetaPhi(detID, exptInfoZero, theta, phi);
       if (spectrum->isMonitor() || spectrum->isMasked())
         continue;
-    }
-    catch (std::exception &) // detector might not exist or has no been included
-                             // in grouping
+    } catch (
+        std::exception &) // detector might not exist or has no been included
+                          // in grouping
     {
       skip = true; // Intel compiler has a problem with continue inside a catch
                    // inside openmp...
@@ -593,8 +593,7 @@ MDNormSCD::removeGroupedIDs(const ExperimentInfo &exptInfo,
       singleIDs.push_back(members.front());
       std::copy(members.begin() + 1, members.end(),
                 std::inserter(groupedIDs, groupedIDs.begin()));
-    }
-    catch (std::runtime_error &) {
+    } catch (std::runtime_error &) {
       singleIDs.push_back(curID);
     }
   }

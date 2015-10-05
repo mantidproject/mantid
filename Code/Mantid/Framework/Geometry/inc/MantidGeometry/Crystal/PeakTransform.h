@@ -35,7 +35,8 @@ public:
   /// Getter for a friendly name to describe the transform type.
   virtual std::string getFriendlyName() const = 0;
   /// Getter for the special coordinate representation of this transform type.
-  virtual Mantid::Kernel::SpecialCoordinateSystem getCoordinateSystem() const = 0;
+  virtual Mantid::Kernel::SpecialCoordinateSystem
+  getCoordinateSystem() const = 0;
 
 protected:
   PeakTransform(const PeakTransform &other);

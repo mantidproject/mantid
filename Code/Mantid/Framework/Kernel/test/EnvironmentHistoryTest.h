@@ -9,42 +9,38 @@
 
 using namespace Mantid::Kernel;
 
-class EnvironmentHistoryTest : public CxxTest::TestSuite
-{
+class EnvironmentHistoryTest : public CxxTest::TestSuite {
 public:
-
-  void testframeworkVersion()
-  {
+  void testframeworkVersion() {
     EnvironmentHistory EH;
-    TS_ASSERT_EQUALS(EH.frameworkVersion(),MantidVersion::version());
+    TS_ASSERT_EQUALS(EH.frameworkVersion(), MantidVersion::version());
   }
 
-  void testosName()
- {
+  void testosName() {
     EnvironmentHistory EH;
-    TS_ASSERT_EQUALS(EH.osName(),ConfigService::Instance().getOSName());
- }
-
-  void testosVersion()
-  {
-    EnvironmentHistory EH;
-    TS_ASSERT_EQUALS(EH.osVersion(),ConfigService::Instance().getOSVersion());
+    TS_ASSERT_EQUALS(EH.osName(), ConfigService::Instance().getOSName());
   }
-  
-  void testPopulate()
-  {
-    std::string correctOutput = "Framework Version: " + std::string(MantidVersion::version()) + "\n";
+
+  void testosVersion() {
+    EnvironmentHistory EH;
+    TS_ASSERT_EQUALS(EH.osVersion(), ConfigService::Instance().getOSVersion());
+  }
+
+  void testPopulate() {
+    std::string correctOutput =
+        "Framework Version: " + std::string(MantidVersion::version()) + "\n";
     correctOutput += "OS name: " + ConfigService::Instance().getOSName() + "\n";
-    correctOutput += "OS version: " + ConfigService::Instance().getOSVersion() + "\n";
+    correctOutput +=
+        "OS version: " + ConfigService::Instance().getOSVersion() + "\n";
 
     // Not really much to test
     EnvironmentHistory EH;
 
-    //dump output to sting
+    // dump output to sting
     std::ostringstream output;
-    output.exceptions( std::ios::failbit | std::ios::badbit );
+    output.exceptions(std::ios::failbit | std::ios::badbit);
     TS_ASSERT_THROWS_NOTHING(output << EH);
-    TS_ASSERT_EQUALS(output.str(),correctOutput);
+    TS_ASSERT_EQUALS(output.str(), correctOutput);
   }
 };
 

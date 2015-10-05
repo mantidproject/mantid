@@ -74,16 +74,16 @@ void CreatePSDBleedMask::exec() {
   if (!inputWorkspace->run().hasProperty("goodfrm")) {
     throw std::invalid_argument(
         "InputWorkspace does not contain the number of \"good frames\".\n"
-        "(The sample log named: goodfrm with value, specifying number of good frames)");
+        "(The sample log named: goodfrm with value, specifying number of good "
+        "frames)");
   }
   Kernel::PropertyWithValue<int> *frameProp =
       dynamic_cast<Kernel::PropertyWithValue<int> *>(
           inputWorkspace->run().getProperty("goodfrm"));
-  if (!frameProp){
-    throw std::invalid_argument(
-      "InputWorkspace has the number of \"good frames\" property (goodfrm log value)"
-      "but this property value is not integer.");
-
+  if (!frameProp) {
+    throw std::invalid_argument("InputWorkspace has the number of \"good "
+                                "frames\" property (goodfrm log value)"
+                                "but this property value is not integer.");
   }
 
   int goodFrames = (*frameProp)();
@@ -196,9 +196,9 @@ void CreatePSDBleedMask::exec() {
  * @param inputWS :: The workspace containing the rates or counts for each bin
  * @returns True if the tube is to be masked, false otherwise
  */
-bool
-CreatePSDBleedMask::performBleedTest(const std::vector<int> &tubeIndices,
-                                     API::MatrixWorkspace_const_sptr inputWS) {
+bool CreatePSDBleedMask::performBleedTest(
+    const std::vector<int> &tubeIndices,
+    API::MatrixWorkspace_const_sptr inputWS) {
 
   // Require ordered pixels so that we can define the centre.
   // This of course assumes that the pixel IDs increase monotonically with the

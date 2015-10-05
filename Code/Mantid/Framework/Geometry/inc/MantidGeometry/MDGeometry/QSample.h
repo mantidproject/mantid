@@ -43,11 +43,11 @@ public:
   const Kernel::MDUnit &getMDUnit() const;
   bool canConvertTo(const Kernel::MDUnit &otherUnit) const;
   std::string name() const;
-  QSample* clone() const;
+  QSample *clone() const;
+
 private:
   /// immutable unit for qlab.
   const std::unique_ptr<const Mantid::Kernel::InverseAngstromsUnit> m_unit;
-
 };
 
 } // namespace Geometry

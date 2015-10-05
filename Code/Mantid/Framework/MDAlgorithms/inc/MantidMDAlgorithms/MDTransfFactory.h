@@ -17,23 +17,23 @@
  */
 #define DECLARE_MD_TRANSF(classname)                                           \
   namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper                                           \
-      register_alg_##classname(((Mantid::MDAlgorithms::MDTransfFactory::Instance() \
-                                     .subscribe<classname>(#classname)),       \
-                                0));                                           \
+  Mantid::Kernel::RegistrationHelper register_alg_##classname((                \
+      (Mantid::MDAlgorithms::MDTransfFactory::Instance().subscribe<classname>( \
+          #classname)),                                                        \
+      0));                                                                     \
   }                                                                            \
-  const std::string Mantid::MDAlgorithms::classname::transfID() const {            \
+  const std::string Mantid::MDAlgorithms::classname::transfID() const {        \
     return #classname;                                                         \
   }
 
 #define DECLARE_MD_TRANSFID(classname, regID)                                  \
   namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper                                           \
-      register_alg_##classname(((Mantid::MDAlgorithms::MDTransfFactory::Instance() \
-                                     .subscribe<classname>(#regID)),           \
-                                0));                                           \
+  Mantid::Kernel::RegistrationHelper register_alg_##classname((                \
+      (Mantid::MDAlgorithms::MDTransfFactory::Instance().subscribe<classname>( \
+          #regID)),                                                            \
+      0));                                                                     \
   }                                                                            \
-  const std::string Mantid::MDAlgorithms::classname::transfID() const {            \
+  const std::string Mantid::MDAlgorithms::classname::transfID() const {        \
     return #regID;                                                             \
   }
 

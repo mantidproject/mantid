@@ -46,8 +46,8 @@
 #define GCC_DIAG_DO_PRAGMA(x) _Pragma(#x)
 #define GCC_DIAG_PRAGMA(x) GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
 
-// the following were previously defined in Poco/Platform_POSIX.h 
-#ifdef GCC_DIAG_ON 
+// the following were previously defined in Poco/Platform_POSIX.h
+#ifdef GCC_DIAG_ON
 #undef GCC_DIAG_ON
 #endif
 #ifdef GCC_DIAG_OFF

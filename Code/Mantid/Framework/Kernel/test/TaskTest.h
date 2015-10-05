@@ -11,45 +11,32 @@
 
 using namespace Mantid::Kernel;
 
-namespace TaskTestNamespace
-{
+namespace TaskTestNamespace {
 int my_check_value = 0;
 }
 
-
 /** A custom implementation of Task */
-class MyTask : public Task
-{
+class MyTask : public Task {
 public:
-  void run()
-  {
-    TaskTestNamespace::my_check_value = 123;
-  }
+  void run() { TaskTestNamespace::my_check_value = 123; }
 };
 
-
-class TaskTest : public CxxTest::TestSuite
-{
+class TaskTest : public CxxTest::TestSuite {
 public:
-  void test_run()
-  {
+  void test_run() {
     MyTask t;
     TaskTestNamespace::my_check_value = 0;
-    TS_ASSERT_DIFFERS( TaskTestNamespace::my_check_value, 123 );
+    TS_ASSERT_DIFFERS(TaskTestNamespace::my_check_value, 123);
     t.run();
-    TS_ASSERT_EQUALS( TaskTestNamespace::my_check_value, 123 );
+    TS_ASSERT_EQUALS(TaskTestNamespace::my_check_value, 123);
   }
 
-  void test_mutex()
-  {
+  void test_mutex() {
     MyTask t;
     boost::shared_ptr<Mutex> mut(new Mutex());
     t.setMutex(mut);
-    TS_ASSERT_EQUALS( mut, t.getMutex() );
+    TS_ASSERT_EQUALS(mut, t.getMutex());
   }
-
-
-
 };
 
 #endif

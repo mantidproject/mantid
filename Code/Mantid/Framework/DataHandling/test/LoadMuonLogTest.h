@@ -2,7 +2,8 @@
 #define LOADMUONLOGTEST_H_
 
 // These includes seem to make the difference between initialization of the
-// workspace names (workspace2D/1D etc), instrument classes and not for this test case.
+// workspace names (workspace2D/1D etc), instrument classes and not for this
+// test case.
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidDataHandling/LoadInstrument.h"
 //
@@ -27,20 +28,16 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using Mantid::DataHandling::LoadMuonLog;
 
-class LoadMuonLogTest : public CxxTest::TestSuite
-{
+class LoadMuonLogTest : public CxxTest::TestSuite {
 public:
-  void testInit()
-  {
-    TS_ASSERT( !loader.isInitialized() );
+  void testInit() {
+    TS_ASSERT(!loader.isInitialized());
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
-    TS_ASSERT( loader.isInitialized() );
+    TS_ASSERT(loader.isInitialized());
   }
 
-
-  void testExecWithNexusDatafile()
-  {
-    //if ( !loader.isInitialized() ) loader.initialize();
+  void testExecWithNexusDatafile() {
+    // if ( !loader.isInitialized() ) loader.initialize();
 
     LoadMuonLog loaderNexusFile;
     loaderNexusFile.initialize();
@@ -50,34 +47,44 @@ public:
     loaderNexusFile.setPropertyValue("Filename", inputFile);
 
     outputSpace = "LoadMuonLogTest-nexusdatafile";
-    TS_ASSERT_THROWS( loaderNexusFile.setPropertyValue("Workspace", outputSpace), std::invalid_argument )
+    TS_ASSERT_THROWS(loaderNexusFile.setPropertyValue("Workspace", outputSpace),
+                     std::invalid_argument)
     // Create an empty workspace and put it in the AnalysisDataService
-    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+    MatrixWorkspace_sptr ws =
+        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));
+    TS_ASSERT_THROWS_NOTHING(
+        AnalysisDataService::Instance().add(outputSpace, ws));
 
     loaderNexusFile.setChild(true);
     loaderNexusFile.execute();
 
-    TS_ASSERT( loaderNexusFile.isExecuted() );
+    TS_ASSERT(loaderNexusFile.isExecuted());
 
     // Get back the saved workspace
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outputSpace));
 
-   // boost::shared_ptr<Sample> sample = output->getSample();
+    // boost::shared_ptr<Sample> sample = output->getSample();
 
     // obtain the expected log data which was read from the Nexus file (NXlog)
 
-    Property *l_property = output->run().getLogData( std::string("BEAMLOG_CURRENT") );
-    TimeSeriesProperty<double> *l_timeSeriesDouble1 = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
+    Property *l_property =
+        output->run().getLogData(std::string("BEAMLOG_CURRENT"));
+    TimeSeriesProperty<double> *l_timeSeriesDouble1 =
+        dynamic_cast<TimeSeriesProperty<double> *>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble1->value();
-    TS_ASSERT_EQUALS( timeSeriesString.substr(0,27), "2006-Nov-21 07:03:08  182.8" );
+    TS_ASSERT_EQUALS(timeSeriesString.substr(0, 27),
+                     "2006-Nov-21 07:03:08  182.8");
 
-    l_property = output->run().getLogData( std::string("BEAMLOG_FREQ") );
-    TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
+    l_property = output->run().getLogData(std::string("BEAMLOG_FREQ"));
+    TimeSeriesProperty<double> *l_timeSeriesDouble =
+        dynamic_cast<TimeSeriesProperty<double> *>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
-	TS_ASSERT_EQUALS( timeSeriesString.substr(0,24), "2006-Nov-21 07:03:08  50" );
+    TS_ASSERT_EQUALS(timeSeriesString.substr(0, 24),
+                     "2006-Nov-21 07:03:08  50");
   }
 
 private:
@@ -85,6 +92,5 @@ private:
   std::string inputFile;
   std::string outputSpace;
   std::string inputSpace;
-
 };
 #endif /*LOADMUONLOGTEST_H_*/

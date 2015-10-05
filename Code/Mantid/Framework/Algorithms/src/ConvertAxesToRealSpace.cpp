@@ -306,11 +306,10 @@ void ConvertAxesToRealSpace::fillAxisValues(MantidVec &vector,
   * @param caption the caption of the unit
   * @param unit the unit of measure of the unit
   */
-void
-ConvertAxesToRealSpace::fillUnitMap(std::vector<std::string> &orderedVector,
-                                    std::map<std::string, std::string> &unitMap,
-                                    const std::string &caption,
-                                    const std::string &unit) {
+void ConvertAxesToRealSpace::fillUnitMap(
+    std::vector<std::string> &orderedVector,
+    std::map<std::string, std::string> &unitMap, const std::string &caption,
+    const std::string &unit) {
   unitMap.insert(std::make_pair(caption, unit));
   orderedVector.push_back(caption);
 }

@@ -2,7 +2,6 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include <boost/regex.hpp>
 
-
 namespace Mantid {
 namespace Kernel {
 

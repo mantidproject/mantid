@@ -97,7 +97,7 @@ void FilterBadPulses::exec() {
           runlogs.getLogData(LOG_CHARGE_NAME));
   if (!pcharge_log) {
     throw std::logic_error("Failed to find \"" + LOG_CHARGE_NAME +
-                             "\" in sample logs");
+                           "\" in sample logs");
   }
   Kernel::TimeSeriesPropertyStatistics stats = pcharge_log->getStatistics();
 

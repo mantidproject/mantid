@@ -301,8 +301,8 @@ boost::shared_ptr<RemoteJobManager>
 FacilityInfo::getRemoteJobManager(const std::string &name) const {
   auto it = m_computeResources.find(name);
   if (it == m_computeResources.end()) {
-    return boost::shared_ptr<
-        RemoteJobManager>(); // TODO: should we throw an exception instead??
+    return boost::shared_ptr<RemoteJobManager>(); // TODO: should we throw an
+                                                  // exception instead??
   }
   return (*it).second;
 }

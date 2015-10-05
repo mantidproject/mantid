@@ -48,21 +48,21 @@ public:
   ~MDEventFactory() {}
 
   // create MD workspace factory call
-  static API::IMDEventWorkspace_sptr
-  CreateMDWorkspace(size_t nd, const std::string &eventType = "MDLeanEvent",
-                    const Mantid::API::MDNormalization& preferredNormalization =
-                        Mantid::API::MDNormalization::VolumeNormalization,
-                    const Mantid::API::MDNormalization& preferredNormalizationHisto =
-                        Mantid::API::MDNormalization::VolumeNormalization);
+  static API::IMDEventWorkspace_sptr CreateMDWorkspace(
+      size_t nd, const std::string &eventType = "MDLeanEvent",
+      const Mantid::API::MDNormalization &preferredNormalization =
+          Mantid::API::MDNormalization::VolumeNormalization,
+      const Mantid::API::MDNormalization &preferredNormalizationHisto =
+          Mantid::API::MDNormalization::VolumeNormalization);
 
   // create MDBox factory call
-  static API::IMDNode *
-  createBox(size_t nDimensions, BoxType Type, API::BoxController_sptr &splitter,
-            const std::vector<
-                Mantid::Geometry::MDDimensionExtents<coord_t>> &extentsVector =
-                std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>(),
-            const uint32_t depth = 0, const size_t nBoxEvents = UNDEF_SIZET,
-            const size_t boxID = UNDEF_SIZET);
+  static API::IMDNode *createBox(
+      size_t nDimensions, BoxType Type, API::BoxController_sptr &splitter,
+      const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
+          extentsVector =
+              std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>(),
+      const uint32_t depth = 0, const size_t nBoxEvents = UNDEF_SIZET,
+      const size_t boxID = UNDEF_SIZET);
 
   /** Returns max number of MD dimensions allowed by current Mantid version*/
   static size_t getMaxNumDim() { return size_t(MAX_MD_DIMENSIONS_NUM); }
@@ -89,10 +89,10 @@ private:
   // address can not be taken . This can also help in a future when writing
   // custom memory allocator
   template <size_t nd>
-  static API::IMDEventWorkspace *
-  createMDWorkspaceND(const std::string &eventType,
-                      const Mantid::API::MDNormalization& preferredNormalization,
-                      const Mantid::API::MDNormalization& preferredNormalizationHisto);
+  static API::IMDEventWorkspace *createMDWorkspaceND(
+      const std::string &eventType,
+      const Mantid::API::MDNormalization &preferredNormalization,
+      const Mantid::API::MDNormalization &preferredNormalizationHisto);
 
   // local wrappers around the MDBox/MDGridBox constructors as the constructor's
   // address can not be taken. This can also help in a future when writing

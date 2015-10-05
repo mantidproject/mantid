@@ -34,8 +34,9 @@ public:
   MDHistoDimension(std::string name, std::string ID,
                    const Kernel::UnitLabel &units, coord_t min, coord_t max,
                    size_t numBins)
-      : m_name(name), m_dimensionId(ID), m_frame(new GeneralFrame("Unknown frame", units)), m_min(min), m_max(max),
-        m_numBins(numBins),
+      : m_name(name), m_dimensionId(ID),
+        m_frame(new GeneralFrame("Unknown frame", units)), m_min(min),
+        m_max(max), m_numBins(numBins),
         m_binWidth((max - min) / static_cast<coord_t>(numBins)) {
     if (max < min) {
       throw std::invalid_argument("Error making MDHistoDimension. Cannot have "
@@ -51,11 +52,10 @@ public:
   * @param max :: maximum extent
   * @param numBins :: number of bins (evenly spaced)
   */
-  MDHistoDimension(std::string name, std::string ID,
-                   const MDFrame &frame, coord_t min, coord_t max,
-                   size_t numBins)
-      : m_name(name), m_dimensionId(ID), m_frame(frame.clone()), m_min(min), m_max(max),
-        m_numBins(numBins),
+  MDHistoDimension(std::string name, std::string ID, const MDFrame &frame,
+                   coord_t min, coord_t max, size_t numBins)
+      : m_name(name), m_dimensionId(ID), m_frame(frame.clone()), m_min(min),
+        m_max(max), m_numBins(numBins),
         m_binWidth((max - min) / static_cast<coord_t>(numBins)) {
     if (max < min) {
       throw std::invalid_argument("Error making MDHistoDimension. Cannot have "
@@ -79,13 +79,17 @@ public:
   virtual std::string getName() const { return m_name; }
 
   /// Return the md frame
-  const MDFrame &getMDFrame() const {return *m_frame;}
+  const MDFrame &getMDFrame() const { return *m_frame; }
 
   /// Return the units of the dimension as a string
-  virtual const Kernel::UnitLabel getUnits() const { return m_frame->getUnitLabel(); }
+  virtual const Kernel::UnitLabel getUnits() const {
+    return m_frame->getUnitLabel();
+  }
 
   /// Returns the unit
-  virtual const Kernel::MDUnit& getMDUnits() const {return m_frame->getMDUnit();}
+  virtual const Kernel::MDUnit &getMDUnits() const {
+    return m_frame->getMDUnit();
+  }
 
   /** Short name which identify the dimension among other dimension.
    * A dimension can be usually found by its ID and various
@@ -151,7 +155,6 @@ private:
 
   /// Calculated bin size
   coord_t m_binWidth;
-
 };
 
 /// Shared pointer to a MDHistoDimension

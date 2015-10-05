@@ -10,58 +10,49 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 
-class DiffractionFocussingTest : public CxxTest::TestSuite
-{
+class DiffractionFocussingTest : public CxxTest::TestSuite {
 public:
-	void testName()
-	{
-		TS_ASSERT_EQUALS( focus.name(), "DiffractionFocussing" );
-	}
+  void testName() { TS_ASSERT_EQUALS(focus.name(), "DiffractionFocussing"); }
 
-	void testVersion()
-	{
-	  TS_ASSERT_EQUALS( focus.version(), 1 );
-	}
+  void testVersion() { TS_ASSERT_EQUALS(focus.version(), 1); }
 
-	void testCategory()
-	{
-    TS_ASSERT_EQUALS( focus.category(), "Diffraction" );
-	}
+  void testCategory() { TS_ASSERT_EQUALS(focus.category(), "Diffraction"); }
 
-	void testInit()
-	{
-	  focus.initialize();
-	  TS_ASSERT( focus.isInitialized() );
-	}
+  void testInit() {
+    focus.initialize();
+    TS_ASSERT(focus.isInitialized());
+  }
 
-	void testExec()
-	{
-    IAlgorithm* loader = new Mantid::DataHandling::LoadNexus;
+  void testExec() {
+    IAlgorithm *loader = new Mantid::DataHandling::LoadNexus;
     loader->initialize();
-    loader->setPropertyValue("Filename", "HRP38692a.nxs"); // HRP382692.raw spectrum range 320-330
+    loader->setPropertyValue(
+        "Filename", "HRP38692a.nxs"); // HRP382692.raw spectrum range 320-330
 
     std::string outputSpace = "tofocus";
     loader->setPropertyValue("OutputWorkspace", outputSpace);
-    TS_ASSERT_THROWS_NOTHING( loader->execute() );
-    TS_ASSERT( loader->isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(loader->execute());
+    TS_ASSERT(loader->isExecuted());
 
     focus.setPropertyValue("InputWorkspace", outputSpace);
-    focus.setPropertyValue("OutputWorkspace", "focusedWS" );
-    focus.setPropertyValue("GroupingFileName","hrpd_new_072_01.cal");
+    focus.setPropertyValue("OutputWorkspace", "focusedWS");
+    focus.setPropertyValue("GroupingFileName", "hrpd_new_072_01.cal");
 
-	  TS_ASSERT_THROWS_NOTHING( focus.execute() );
-	  TS_ASSERT( focus.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(focus.execute());
+    TS_ASSERT(focus.isExecuted());
 
-		MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("focusedWS") );
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "focusedWS"));
 
-     // only 1 group for this limited range of spectra 
-    TS_ASSERT_EQUALS( output->getNumberHistograms(), 1 );
-    
+    // only 1 group for this limited range of spectra
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
+
     AnalysisDataService::Instance().remove(outputSpace);
     AnalysisDataService::Instance().remove("focusedWS");
     delete loader;
-	}
+  }
 
 private:
   DiffractionFocussing focus;

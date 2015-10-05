@@ -418,7 +418,7 @@ void MDNormDirectSC::calculateNormalization(
                            PhysicalConstants::meV * 1e-20 /
                            (PhysicalConstants::h * PhysicalConstants::h);
   const auto &exptInfoZero = *(m_inputWS->getExperimentInfo(0));
-  typedef Kernel::PropertyWithValue<std::vector<double> > VectorDoubleProperty;
+  typedef Kernel::PropertyWithValue<std::vector<double>> VectorDoubleProperty;
   auto *rubwLog =
       dynamic_cast<VectorDoubleProperty *>(exptInfoZero.getLog("RUBW_MATRIX"));
   if (!rubwLog) {
@@ -462,9 +462,9 @@ void MDNormDirectSC::calculateNormalization(
       auto spectrum = getThetaPhi(detID, exptInfoZero, theta, phi);
       if (spectrum->isMonitor() || spectrum->isMasked())
         continue;
-    }
-    catch (std::exception &) // detector might not exist or has no been included
-                             // in grouping
+    } catch (
+        std::exception &) // detector might not exist or has no been included
+                          // in grouping
     {
       skip = true; // Intel compiler has a problem with continue inside a catch
                    // inside openmp...
@@ -517,8 +517,7 @@ void MDNormDirectSC::calculateNormalization(
       // *PC
       double signal = solid * delta;
 
-      PARALLEL_CRITICAL(updateMD)
-      {
+      PARALLEL_CRITICAL(updateMD) {
         signal += m_normWS->getSignalAt(linIndex);
         m_normWS->setSignalAt(linIndex, signal);
       }
@@ -559,8 +558,7 @@ MDNormDirectSC::removeGroupedIDs(const ExperimentInfo &exptInfo,
       singleIDs.push_back(members.front());
       std::copy(members.begin() + 1, members.end(),
                 std::inserter(groupedIDs, groupedIDs.begin()));
-    }
-    catch (std::runtime_error &) {
+    } catch (std::runtime_error &) {
       singleIDs.push_back(curID);
     }
   }

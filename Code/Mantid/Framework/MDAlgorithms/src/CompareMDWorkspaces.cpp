@@ -132,9 +132,8 @@ void CompareMDWorkspaces::compareTol(T a, T b, const std::string &message) {
 //----------------------------------------------------------------------------------------------
 /** Compare the dimensions etc. of two MDWorkspaces
 */
-void
-CompareMDWorkspaces::compareMDGeometry(Mantid::API::IMDWorkspace_sptr ws1,
-                                       Mantid::API::IMDWorkspace_sptr ws2) {
+void CompareMDWorkspaces::compareMDGeometry(
+    Mantid::API::IMDWorkspace_sptr ws1, Mantid::API::IMDWorkspace_sptr ws2) {
   compare(ws1->getNumDims(), ws2->getNumDims(),
           "Workspaces have a different number of dimensions");
   for (size_t d = 0; d < ws1->getNumDims(); d++) {

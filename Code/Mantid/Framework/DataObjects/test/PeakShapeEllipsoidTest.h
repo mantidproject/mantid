@@ -129,15 +129,14 @@ public:
 
   void test_radius() {
 
-      std::vector<double> radius = list_of(1)(2)(3);
+    std::vector<double> radius = list_of(1)(2)(3);
 
+    PeakShapeEllipsoid shape(list_of(V3D(1, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))
+                                 .convert_to_container<std::vector<V3D>>(),
+                             radius, radius, radius, Mantid::Kernel::HKL);
 
-      PeakShapeEllipsoid shape(list_of(V3D(1, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))
-                                   .convert_to_container<std::vector<V3D>>(),
-                               radius, radius, radius, Mantid::Kernel::HKL);
-
-      TSM_ASSERT_EQUALS("Radius should be taken to be the max of the ABC radii", 3.0, shape.radius());
-
+    TSM_ASSERT_EQUALS("Radius should be taken to be the max of the ABC radii",
+                      3.0, shape.radius());
   }
 
   void test_shape_name() {
@@ -153,18 +152,18 @@ public:
 
   void test_toJSON() {
 
-      auto directions = list_of(V3D(1, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))
-                            .convert_to_container<std::vector<V3D>>();
-      const MantidVec abcRadii = list_of(2)(3)(4);
-      const MantidVec abcInnerRadii = list_of(5)(6)(7);
-      const MantidVec abcOuterRadii = list_of(8)(9)(10);
-      const SpecialCoordinateSystem frame = Mantid::Kernel::HKL;
-      const std::string algorithmName = "foo";
-      const int algorithmVersion = 3;
+    auto directions = list_of(V3D(1, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))
+                          .convert_to_container<std::vector<V3D>>();
+    const MantidVec abcRadii = list_of(2)(3)(4);
+    const MantidVec abcInnerRadii = list_of(5)(6)(7);
+    const MantidVec abcOuterRadii = list_of(8)(9)(10);
+    const SpecialCoordinateSystem frame = Mantid::Kernel::HKL;
+    const std::string algorithmName = "foo";
+    const int algorithmVersion = 3;
 
-      // Construct it.
-      PeakShapeEllipsoid shape(directions, abcRadii, abcInnerRadii, abcOuterRadii,
-                               frame, algorithmName, algorithmVersion);
+    // Construct it.
+    PeakShapeEllipsoid shape(directions, abcRadii, abcInnerRadii, abcOuterRadii,
+                             frame, algorithmName, algorithmVersion);
 
     const std::string json = shape.toJSON();
 
@@ -181,14 +180,15 @@ public:
     TS_ASSERT_EQUALS(abcRadii[0], output["radius0"].asDouble());
     TS_ASSERT_EQUALS(abcRadii[1], output["radius1"].asDouble());
     TS_ASSERT_EQUALS(abcRadii[2], output["radius2"].asDouble());
-    TS_ASSERT_EQUALS(abcOuterRadii[0], output["background_outer_radius0"].asDouble());
-    TS_ASSERT_EQUALS(abcOuterRadii[1], output["background_outer_radius1"].asDouble());
-    TS_ASSERT_EQUALS(abcOuterRadii[2], output["background_outer_radius2"].asDouble());
-
+    TS_ASSERT_EQUALS(abcOuterRadii[0],
+                     output["background_outer_radius0"].asDouble());
+    TS_ASSERT_EQUALS(abcOuterRadii[1],
+                     output["background_outer_radius1"].asDouble());
+    TS_ASSERT_EQUALS(abcOuterRadii[2],
+                     output["background_outer_radius2"].asDouble());
   }
 
-  
-  void test_directionsInSpecificFrameThrowsForMatrixWithInvalidDimensions(){
+  void test_directionsInSpecificFrameThrowsForMatrixWithInvalidDimensions() {
     auto directions = list_of(V3D(1, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))
                           .convert_to_container<std::vector<V3D>>();
     const MantidVec abcRadii = list_of(2)(3)(4);
@@ -201,7 +201,7 @@ public:
     // Construct it.
     PeakShapeEllipsoid a(directions, abcRadii, abcInnerRadii, abcOuterRadii,
                          frame, algorithmName, algorithmVersion);
-    Mantid::Kernel::Matrix<double> matrix(3,2);
+    Mantid::Kernel::Matrix<double> matrix(3, 2);
     std::vector<double> column1;
     column1.push_back(1.0);
     column1.push_back(1.0);
@@ -213,12 +213,13 @@ public:
 
     matrix.setColumn(0, column1);
     matrix.setColumn(1, column2);
-    
+
     TSM_ASSERT_THROWS("Should throw, bad goniometer matrix",
-                       a.getDirectionInSpecificFrame(matrix) , std::invalid_argument &);
+                      a.getDirectionInSpecificFrame(matrix),
+                      std::invalid_argument &);
   }
 
-  void test_directionsInSepcificFrame(){
+  void test_directionsInSepcificFrame() {
     auto directions = list_of(V3D(1, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))
                           .convert_to_container<std::vector<V3D>>();
     const MantidVec abcRadii = list_of(2)(3)(4);
@@ -233,7 +234,7 @@ public:
                          frame, algorithmName, algorithmVersion);
 
     // 90 degree rotation around the z axis
-    Mantid::Kernel::Matrix<double> matrix(3,3);
+    Mantid::Kernel::Matrix<double> matrix(3, 3);
     std::vector<double> column1;
     column1.push_back(0.0);
     column1.push_back(1.0);
@@ -251,23 +252,33 @@ public:
     matrix.setColumn(0, column1);
     matrix.setColumn(1, column2);
     matrix.setColumn(2, column3);
-    
+
     std::vector<Mantid::Kernel::V3D> directionInNewFrame(3);
     TSM_ASSERT_THROWS_NOTHING("Should throw nothing, valid goniometer matrix",
-                       directionInNewFrame = a.getDirectionInSpecificFrame(matrix));
+                              directionInNewFrame =
+                                  a.getDirectionInSpecificFrame(matrix));
 
     const double delta = 1e-6;
-    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[0][0], 0.0, delta);
-    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[0][1], 1.0, delta);
-    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[0][2], 0.0, delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[0][0], 0.0,
+                     delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[0][1], 1.0,
+                     delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[0][2], 0.0,
+                     delta);
 
-    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[1][0], -1.0, delta);
-    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[1][1], 0.0, delta);
-    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[1][2],  0.0, delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[1][0], -1.0,
+                     delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[1][1], 0.0,
+                     delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[1][2], 0.0,
+                     delta);
 
-    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[2][0], 0.0, delta);
-    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[2][1], 0.0, delta);
-    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[2][2], 1.0, delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[2][0], 0.0,
+                     delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[2][1], 0.0,
+                     delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[2][2], 1.0,
+                     delta);
   }
 };
 

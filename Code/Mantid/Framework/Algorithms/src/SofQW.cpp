@@ -109,7 +109,7 @@ void SofQW::exec() {
   // Find the approopriate algorithm
   std::string method = this->getProperty("Method");
   std::string child = "SofQW" + method;
-  
+
   // Setup and run
   Algorithm_sptr childAlg = boost::dynamic_pointer_cast<Algorithm>(
       createChildAlgorithm(child, 0.0, 1.0));

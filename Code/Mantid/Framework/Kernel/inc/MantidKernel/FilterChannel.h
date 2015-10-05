@@ -59,7 +59,7 @@ public:
 
   /// Returns the channel pointer.
   Channel *getChannel() { return _channel; }
-  
+
   /// set the priority cutoff by integer.
   const FilterChannel &setPriority(const int &priority);
   /// Set the priority cutoff by string.

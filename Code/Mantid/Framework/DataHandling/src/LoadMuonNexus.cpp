@@ -54,10 +54,9 @@ void LoadMuonNexus::init() {
   declareProperty("SpectrumMin", (int64_t)EMPTY_INT(), mustBePositive,
                   "Index number of the first spectrum to read\n"
                   "(default 1)");
-  declareProperty(
-      "SpectrumMax", (int64_t)EMPTY_INT(), mustBePositive,
-      "Index of last spectrum to read\n"
-      "(default the last spectrum)");
+  declareProperty("SpectrumMax", (int64_t)EMPTY_INT(), mustBePositive,
+                  "Index of last spectrum to read\n"
+                  "(default the last spectrum)");
 
   declareProperty(new ArrayProperty<specid_t>("SpectrumList"),
                   "Array, or comma separated list, of indexes of spectra to\n"
@@ -70,8 +69,10 @@ void LoadMuonNexus::init() {
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<int64_t>>();
   mustBeNonNegative->setLower(0);
   declareProperty("EntryNumber", (int64_t)0, mustBeNonNegative,
-                  "0 indicates that every entry is loaded, into a separate workspace within a group. "
-                  "A positive number identifies one entry to be loaded, into one worskspace");
+                  "0 indicates that every entry is loaded, into a separate "
+                  "workspace within a group. "
+                  "A positive number identifies one entry to be loaded, into "
+                  "one worskspace");
 
   std::vector<std::string> FieldOptions;
   FieldOptions.push_back("Transverse");
@@ -135,8 +136,8 @@ void LoadMuonNexus::checkOptionalProperties() {
 }
 
 /// Run the Child Algorithm LoadInstrument
-void
-LoadMuonNexus::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace) {
+void LoadMuonNexus::runLoadInstrument(
+    DataObjects::Workspace2D_sptr localWorkspace) {
 
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 

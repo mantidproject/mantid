@@ -12,7 +12,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
 
-
 namespace Mantid {
 namespace DataObjects {
 
@@ -28,7 +27,7 @@ public:
 
   Peak();
   Peak(Geometry::Instrument_const_sptr m_inst, Mantid::Kernel::V3D QLabFrame,
-        boost::optional<double> detectorDistance = boost::optional<double>());
+       boost::optional<double> detectorDistance = boost::optional<double>());
   Peak(Geometry::Instrument_const_sptr m_inst, Mantid::Kernel::V3D QSampleFrame,
        Mantid::Kernel::Matrix<double> goniometer,
        boost::optional<double> detectorDistance = boost::optional<double>());
@@ -43,7 +42,7 @@ public:
        double m_Wavelength);
 
   /// Copy constructor
-  Peak(const Peak& other);
+  Peak(const Peak &other);
 
   // Construct a peak from a reference to the interface
 
@@ -85,10 +84,12 @@ public:
   Mantid::Kernel::V3D getDetectorPosition() const;
   Mantid::Kernel::V3D getDetectorPositionNoCheck() const;
 
-  void setQSampleFrame(Mantid::Kernel::V3D QSampleFrame,
-                       boost::optional<double> detectorDistance = boost::optional<double>());
-  void setQLabFrame(Mantid::Kernel::V3D QLabFrame,
-                    boost::optional<double> detectorDistance = boost::optional<double>());
+  void setQSampleFrame(
+      Mantid::Kernel::V3D QSampleFrame,
+      boost::optional<double> detectorDistance = boost::optional<double>());
+  void setQLabFrame(
+      Mantid::Kernel::V3D QLabFrame,
+      boost::optional<double> detectorDistance = boost::optional<double>());
 
   void setWavelength(double wavelength);
   double getWavelength() const;
@@ -124,19 +125,18 @@ public:
   double getValueByColName(const std::string &name) const;
 
   /// Get the peak shape.
-  const Mantid::Geometry::PeakShape& getPeakShape() const;
+  const Mantid::Geometry::PeakShape &getPeakShape() const;
 
   /// Set the PeakShape
-  void setPeakShape(Mantid::Geometry::PeakShape* shape);
+  void setPeakShape(Mantid::Geometry::PeakShape *shape);
 
   /// Set the PeakShape
   void setPeakShape(Mantid::Geometry::PeakShape_const_sptr shape);
 
   /// Assignment
-  Peak& operator=(const Peak& other);
+  Peak &operator=(const Peak &other);
 
 private:
-
   bool findDetector(const Mantid::Kernel::V3D &beam);
 
   /// Shared pointer to the instrument (for calculating some values )

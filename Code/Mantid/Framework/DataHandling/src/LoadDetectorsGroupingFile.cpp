@@ -33,10 +33,9 @@ DECLARE_ALGORITHM(LoadDetectorsGroupingFile)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadDetectorsGroupingFile::LoadDetectorsGroupingFile(): m_groupWS(), m_instrument(),
-  m_pDoc(NULL), m_pRootElem(NULL), m_groupComponentsMap(), m_groupDetectorsMap(),
-  m_groupSpectraMap() {
-}
+LoadDetectorsGroupingFile::LoadDetectorsGroupingFile()
+    : m_groupWS(), m_instrument(), m_pDoc(NULL), m_pRootElem(NULL),
+      m_groupComponentsMap(), m_groupDetectorsMap(), m_groupSpectraMap() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -67,7 +66,7 @@ void LoadDetectorsGroupingFile::exec() {
 
   // The number of steps depends on the type of input file
   // Set them to zero for the moment
-  Progress progress(this,0,1,0);
+  Progress progress(this, 0, 1, 0);
 
   if (ext == "xml") {
     // Deal with file as xml
@@ -150,7 +149,8 @@ void LoadDetectorsGroupingFile::exec() {
 
     for (auto it = groupNamesMap.begin(); it != groupNamesMap.end(); it++) {
       std::string groupIdStr = boost::lexical_cast<std::string>(it->first);
-      m_groupWS->mutableRun().addProperty("GroupName_" + groupIdStr, it->second);
+      m_groupWS->mutableRun().addProperty("GroupName_" + groupIdStr,
+                                          it->second);
     }
   } else if (ext == "map") {
     // Deal with file as map
@@ -410,13 +410,12 @@ void LoadDetectorsGroupingFile::generateNoInstrumentGroupWorkspace() {
 /*
  * Initialization
  */
-LoadGroupXMLFile::LoadGroupXMLFile(): m_instrumentName(""),
-    m_userGiveInstrument(false), m_date(""), m_userGiveDate(false),
-    m_description(""), m_userGiveDescription(false),
-    m_pDoc(NULL), m_pRootElem(NULL),  m_groupComponentsMap(),
-    m_groupDetectorsMap(), m_groupSpectraMap(), m_startGroupID(1),
-    m_groupNamesMap() {
-}
+LoadGroupXMLFile::LoadGroupXMLFile()
+    : m_instrumentName(""), m_userGiveInstrument(false), m_date(""),
+      m_userGiveDate(false), m_description(""), m_userGiveDescription(false),
+      m_pDoc(NULL), m_pRootElem(NULL), m_groupComponentsMap(),
+      m_groupDetectorsMap(), m_groupSpectraMap(), m_startGroupID(1),
+      m_groupNamesMap() {}
 
 /*
  * Initialization

@@ -82,10 +82,10 @@ void LoadDiffCal::init() {
                   "Set to true to create a GroupingWorkspace with called "
                   "WorkspaceName_group.");
 
-  declareProperty(new PropertyWithValue<bool>("MakeCalWorkspace", true,
-                                              Direction::Input),
-                  "Set to true to create a CalibrationWorkspace with called "
-                  "WorkspaceName_cal.");
+  declareProperty(
+      new PropertyWithValue<bool>("MakeCalWorkspace", true, Direction::Input),
+      "Set to true to create a CalibrationWorkspace with called "
+      "WorkspaceName_cal.");
 
   declareProperty(
       new PropertyWithValue<bool>("MakeMaskWorkspace", true, Direction::Input),
@@ -104,38 +104,39 @@ std::string readString(H5File &file, const std::string &path) {
     std::string value;
     data.read(value, data.getDataType(), data.getSpace());
     return value;
-  } catch (H5::FileIException & e) {
+  } catch (H5::FileIException &e) {
     UNUSED_ARG(e);
     return "";
-  }  catch (H5::GroupIException & e) {
+  } catch (H5::GroupIException &e) {
     UNUSED_ARG(e);
     return "";
   }
 }
 
 template <typename NumT>
-std::vector<NumT> readArrayCoerce(DataSet &dataset, const DataType &desiredDataType) {
-    std::vector<NumT> result;
-    DataType dataType = dataset.getDataType();
-    DataSpace dataSpace = dataset.getSpace();
+std::vector<NumT> readArrayCoerce(DataSet &dataset,
+                                  const DataType &desiredDataType) {
+  std::vector<NumT> result;
+  DataType dataType = dataset.getDataType();
+  DataSpace dataSpace = dataset.getSpace();
 
-    if (desiredDataType == dataType) {
-        result.resize(dataSpace.getSelectNpoints());
-        dataset.read(&result[0], dataType, dataSpace);
-    } else if (PredType::NATIVE_UINT32 == dataType) {
-        std::vector<uint32_t> temp(dataSpace.getSelectNpoints());
-        dataset.read(&temp[0], dataType, dataSpace);
-        result.assign(temp.begin(), temp.end());
-    } else if (PredType::NATIVE_FLOAT == dataType) {
-        std::vector<float> temp(dataSpace.getSelectNpoints());
-        dataset.read(&temp[0], dataType, dataSpace);
-        for( auto it = temp.begin(); it != temp.end(); ++it)
-          result.push_back(static_cast<NumT>(*it));
-    } else {
-        throw DataTypeIException();
-    }
+  if (desiredDataType == dataType) {
+    result.resize(dataSpace.getSelectNpoints());
+    dataset.read(&result[0], dataType, dataSpace);
+  } else if (PredType::NATIVE_UINT32 == dataType) {
+    std::vector<uint32_t> temp(dataSpace.getSelectNpoints());
+    dataset.read(&temp[0], dataType, dataSpace);
+    result.assign(temp.begin(), temp.end());
+  } else if (PredType::NATIVE_FLOAT == dataType) {
+    std::vector<float> temp(dataSpace.getSelectNpoints());
+    dataset.read(&temp[0], dataType, dataSpace);
+    for (auto it = temp.begin(); it != temp.end(); ++it)
+      result.push_back(static_cast<NumT>(*it));
+  } else {
+    throw DataTypeIException();
+  }
 
-    return result;
+  return result;
 }
 
 bool endswith(const std::string &str, const std::string &ending) {
@@ -176,21 +177,23 @@ void setCalWSProperty(API::Algorithm *alg, const std::string &prefix,
 
 } // anonymous namespace
 
-std::vector<double> LoadDiffCal::readDoubleArray(Group & group, const std::string &name) {
+std::vector<double> LoadDiffCal::readDoubleArray(Group &group,
+                                                 const std::string &name) {
   std::vector<double> result;
 
   try {
     DataSet dataset = group.openDataSet(name);
     result = readArrayCoerce<double>(dataset, PredType::NATIVE_DOUBLE);
-  }  catch (H5::GroupIException & e) {
+  } catch (H5::GroupIException &e) {
     UNUSED_ARG(e);
     g_log.information() << "Failed to open dataset \"" << name << "\"\n";
-  } catch (H5::DataTypeIException & e) {
+  } catch (H5::DataTypeIException &e) {
     UNUSED_ARG(e);
-    g_log.information() << "DataSet \"" << name << "\" should be double" << "\n";
+    g_log.information() << "DataSet \"" << name << "\" should be double"
+                        << "\n";
   }
 
-  for (size_t i=0; i<result.size(); ++i) {
+  for (size_t i = 0; i < result.size(); ++i) {
     if (std::abs(result[i]) < 1.e-10) {
       result[i] = 0.;
     } else if (result[i] != result[i]) { // check for NaN
@@ -198,153 +201,164 @@ std::vector<double> LoadDiffCal::readDoubleArray(Group & group, const std::strin
     }
   }
 
-
   return result;
 }
 
-std::vector<int32_t> LoadDiffCal::readInt32Array(Group & group, const std::string &name) {
+std::vector<int32_t> LoadDiffCal::readInt32Array(Group &group,
+                                                 const std::string &name) {
   std::vector<int32_t> result;
 
   try {
     DataSet dataset = group.openDataSet(name);
     result = readArrayCoerce<int32_t>(dataset, PredType::NATIVE_INT32);
-  }  catch (H5::GroupIException & e) {
+  } catch (H5::GroupIException &e) {
     UNUSED_ARG(e);
     g_log.information() << "Failed to open dataset \"" << name << "\"\n";
-  } catch (H5::DataTypeIException & e) {
+  } catch (H5::DataTypeIException &e) {
     UNUSED_ARG(e);
-    g_log.information() << "DataSet \"" << name << "\" should be int32" << "\n";
+    g_log.information() << "DataSet \"" << name << "\" should be int32"
+                        << "\n";
   }
 
   return result;
 }
 
 void LoadDiffCal::getInstrument(H5File &file) {
-    // don't bother if there isn't a mask or grouping requested
-    bool makeMask = getProperty("MakeMaskWorkspace");
-    bool makeGrouping = getProperty("MakeGroupingWorkspace");
-    if ((!makeMask) & (!makeGrouping)) return;
+  // don't bother if there isn't a mask or grouping requested
+  bool makeMask = getProperty("MakeMaskWorkspace");
+  bool makeGrouping = getProperty("MakeGroupingWorkspace");
+  if ((!makeMask) & (!makeGrouping))
+    return;
 
-    // see if the user specified the instrument independently
-    if (LoadCalFile::instrumentIsSpecified(this)) {
-      m_instrument = LoadCalFile::getInstrument3Ways(this);
-      return;
-    }
+  // see if the user specified the instrument independently
+  if (LoadCalFile::instrumentIsSpecified(this)) {
+    m_instrument = LoadCalFile::getInstrument3Ways(this);
+    return;
+  }
 
-    std::string idf = readString(file, "/calibration/instrument/instrument_source");
-    std::string instrumentName = readString(file, "/calibration/instrument/name");
+  std::string idf =
+      readString(file, "/calibration/instrument/instrument_source");
+  std::string instrumentName = readString(file, "/calibration/instrument/name");
 
-    g_log.debug() << "IDF : " << idf << "\n"
-                  << "NAME: " << instrumentName << "\n";
+  g_log.debug() << "IDF : " << idf << "\n"
+                << "NAME: " << instrumentName << "\n";
 
-    API::Algorithm_sptr childAlg =
-        this->createChildAlgorithm("LoadInstrument", 0.0, 0.1);
-    MatrixWorkspace_sptr tempWS(new Workspace2D());
-    childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
-    if (idf.empty()) {
-        childAlg->setPropertyValue("InstrumentName", instrumentName);
-    } else {
-        childAlg->setPropertyValue("Filename", idf);
-    }
-    childAlg->setProperty("RewriteSpectraMap", false);
-    childAlg->executeAsChildAlg();
+  API::Algorithm_sptr childAlg =
+      this->createChildAlgorithm("LoadInstrument", 0.0, 0.1);
+  MatrixWorkspace_sptr tempWS(new Workspace2D());
+  childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
+  if (idf.empty()) {
+    childAlg->setPropertyValue("InstrumentName", instrumentName);
+  } else {
+    childAlg->setPropertyValue("Filename", idf);
+  }
+  childAlg->setProperty("RewriteSpectraMap", false);
+  childAlg->executeAsChildAlg();
 
-    m_instrument = tempWS->getInstrument();
+  m_instrument = tempWS->getInstrument();
 
-    g_log.information() << "Loaded instrument \"" << m_instrument->getName()
-                        << "\" from \"" << m_instrument->getFilename() << "\"\n";
+  g_log.information() << "Loaded instrument \"" << m_instrument->getName()
+                      << "\" from \"" << m_instrument->getFilename() << "\"\n";
 }
 
-void LoadDiffCal::makeGroupingWorkspace(const std::vector<int32_t> &detids, const std::vector<int32_t> &groups) {
-    bool makeWS = getProperty("MakeGroupingWorkspace");
-    if (!makeWS) {
-        g_log.information("Not making a GroupingWorkspace");
-        return;
-    }
+void LoadDiffCal::makeGroupingWorkspace(const std::vector<int32_t> &detids,
+                                        const std::vector<int32_t> &groups) {
+  bool makeWS = getProperty("MakeGroupingWorkspace");
+  if (!makeWS) {
+    g_log.information("Not making a GroupingWorkspace");
+    return;
+  }
 
-    size_t numDet = detids.size();
-    Progress progress(this, .4, .6, numDet);
+  size_t numDet = detids.size();
+  Progress progress(this, .4, .6, numDet);
 
-    GroupingWorkspace_sptr wksp
-            = boost::make_shared<DataObjects::GroupingWorkspace>(m_instrument);
-    wksp->setTitle(m_filename);
-    wksp->mutableRun().addProperty("Filename", m_filename);
+  GroupingWorkspace_sptr wksp =
+      boost::make_shared<DataObjects::GroupingWorkspace>(m_instrument);
+  wksp->setTitle(m_filename);
+  wksp->mutableRun().addProperty("Filename", m_filename);
 
-    for (size_t i=0; i<numDet; ++i) {
-        detid_t detid = static_cast<detid_t>(detids[i]);
-        wksp->setValue(detid, groups[i]);
-        progress.report();
-    }
+  for (size_t i = 0; i < numDet; ++i) {
+    detid_t detid = static_cast<detid_t>(detids[i]);
+    wksp->setValue(detid, groups[i]);
+    progress.report();
+  }
 
-    setGroupWSProperty(this, m_workspaceName, wksp);
+  setGroupWSProperty(this, m_workspaceName, wksp);
 }
 
-void LoadDiffCal::makeMaskWorkspace(const std::vector<int32_t> &detids, const std::vector<int32_t> &use) {
-    bool makeWS = getProperty("MakeMaskWorkspace");
-    if (!makeWS) {
-        g_log.information("Not making a MaskWorkspace");
-        return;
-    }
+void LoadDiffCal::makeMaskWorkspace(const std::vector<int32_t> &detids,
+                                    const std::vector<int32_t> &use) {
+  bool makeWS = getProperty("MakeMaskWorkspace");
+  if (!makeWS) {
+    g_log.information("Not making a MaskWorkspace");
+    return;
+  }
 
-    size_t numDet = detids.size();
-    Progress progress(this, .6, .8, numDet);
+  size_t numDet = detids.size();
+  Progress progress(this, .6, .8, numDet);
 
-    MaskWorkspace_sptr wksp
-            = boost::make_shared<DataObjects::MaskWorkspace>(m_instrument);
-    wksp->setTitle(m_filename);
-    wksp->mutableRun().addProperty("Filename", m_filename);
+  MaskWorkspace_sptr wksp =
+      boost::make_shared<DataObjects::MaskWorkspace>(m_instrument);
+  wksp->setTitle(m_filename);
+  wksp->mutableRun().addProperty("Filename", m_filename);
 
-    for (size_t i=0; i<numDet; ++i) {
-        bool shouldUse = (use[i] > 0);
-        detid_t detid = static_cast<detid_t>(detids[i]);
-        // in maskworkspace 0=use, 1=dontuse
-        wksp->setMasked(detid, !shouldUse);
-        wksp->setValue(detid, (shouldUse ? 0. : 1.));
-        progress.report();
-    }
+  for (size_t i = 0; i < numDet; ++i) {
+    bool shouldUse = (use[i] > 0);
+    detid_t detid = static_cast<detid_t>(detids[i]);
+    // in maskworkspace 0=use, 1=dontuse
+    wksp->setMasked(detid, !shouldUse);
+    wksp->setValue(detid, (shouldUse ? 0. : 1.));
+    progress.report();
+  }
 
-    setMaskWSProperty(this, m_workspaceName, wksp);
+  setMaskWSProperty(this, m_workspaceName, wksp);
 }
 
-void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids, const std::vector<double> &difc,
-                                   const std::vector<double> &difa, const std::vector<double> &tzero,
-                                   const std::vector<int32_t> &dasids, const std::vector<double> &offsets) {
-    bool makeWS = getProperty("MakeCalWorkspace");
-    if (!makeWS) {
-        g_log.information("Not making a calibration workspace");
-        return;
-    }
+void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
+                                   const std::vector<double> &difc,
+                                   const std::vector<double> &difa,
+                                   const std::vector<double> &tzero,
+                                   const std::vector<int32_t> &dasids,
+                                   const std::vector<double> &offsets) {
+  bool makeWS = getProperty("MakeCalWorkspace");
+  if (!makeWS) {
+    g_log.information("Not making a calibration workspace");
+    return;
+  }
 
-    size_t numDet = detids.size();
-    Progress progress(this, .8, 1., numDet);
+  size_t numDet = detids.size();
+  Progress progress(this, .8, 1., numDet);
 
-    bool haveDasids = !dasids.empty();
-    bool haveOffsets = !offsets.empty();
+  bool haveDasids = !dasids.empty();
+  bool haveOffsets = !offsets.empty();
 
-    ITableWorkspace_sptr wksp = boost::make_shared<DataObjects::TableWorkspace>();
-    wksp->setTitle(m_filename);
-    wksp->addColumn("int", "detid");
-    wksp->addColumn("double", "difc");
-    wksp->addColumn("double", "difa");
-    wksp->addColumn("double", "tzero");
-    // only add these columns if they have values
-    if (haveDasids) wksp->addColumn("int", "dasid");
-    if (haveOffsets) wksp->addColumn("double", "offset");
+  ITableWorkspace_sptr wksp = boost::make_shared<DataObjects::TableWorkspace>();
+  wksp->setTitle(m_filename);
+  wksp->addColumn("int", "detid");
+  wksp->addColumn("double", "difc");
+  wksp->addColumn("double", "difa");
+  wksp->addColumn("double", "tzero");
+  // only add these columns if they have values
+  if (haveDasids)
+    wksp->addColumn("int", "dasid");
+  if (haveOffsets)
+    wksp->addColumn("double", "offset");
 
+  for (size_t i = 0; i < numDet; ++i) {
+    API::TableRow newrow = wksp->appendRow();
+    newrow << detids[i];
+    newrow << difc[i];
+    newrow << difa[i];
+    newrow << tzero[i];
+    if (haveDasids)
+      newrow << dasids[i];
+    if (haveOffsets)
+      newrow << offsets[i];
 
-    for (size_t i=0; i<numDet; ++i) {
-        API::TableRow newrow = wksp->appendRow();
-        newrow << detids[i];
-        newrow << difc[i];
-        newrow << difa[i];
-        newrow << tzero[i];
-        if (haveDasids) newrow << dasids[i];
-        if (haveOffsets) newrow << offsets[i];
+    progress.report();
+  }
 
-        progress.report();
-    }
-
-    setCalWSProperty(this, m_workspaceName, wksp);
+  setCalWSProperty(this, m_workspaceName, wksp);
 }
 
 void LoadDiffCal::runLoadCalFile() {
@@ -386,66 +400,72 @@ void LoadDiffCal::runLoadCalFile() {
 /** Execute the algorithm.
  */
 void LoadDiffCal::exec() {
-    m_filename = getPropertyValue("Filename");
-    m_workspaceName = getPropertyValue("WorkspaceName");
+  m_filename = getPropertyValue("Filename");
+  m_workspaceName = getPropertyValue("WorkspaceName");
 
-    if (endswith(m_filename, ".cal")) {
-      runLoadCalFile();
-      return;
-    }
+  if (endswith(m_filename, ".cal")) {
+    runLoadCalFile();
+    return;
+  }
 
-    // read in everything from the file
-    H5File file(m_filename, H5F_ACC_RDONLY);
-    H5::Exception::dontPrint();
-    getInstrument(file);
+  // read in everything from the file
+  H5File file(m_filename, H5F_ACC_RDONLY);
+  H5::Exception::dontPrint();
+  getInstrument(file);
 
-    Progress progress(this, 0.1, 0.4, 8);
-    Group calibrationGroup;
-    try {
-        calibrationGroup = file.openGroup("calibration");
-    } catch (FileIException &e) {
-        e.printError();
-        throw std::runtime_error("Did not find group \"/calibration\"");
-    }
+  Progress progress(this, 0.1, 0.4, 8);
+  Group calibrationGroup;
+  try {
+    calibrationGroup = file.openGroup("calibration");
+  } catch (FileIException &e) {
+    e.printError();
+    throw std::runtime_error("Did not find group \"/calibration\"");
+  }
 
-    progress.report("Reading detid");
-    std::vector<int32_t> detids = readInt32Array(calibrationGroup, "detid");
-    progress.report("Reading dasid");
-    std::vector<int32_t> dasids = readInt32Array(calibrationGroup, "dasid");
-    progress.report("Reading group");
-    std::vector<int32_t> groups = readInt32Array(calibrationGroup, "group");
-    progress.report("Reading use");
-    std::vector<int32_t> use = readInt32Array(calibrationGroup, "use");
+  progress.report("Reading detid");
+  std::vector<int32_t> detids = readInt32Array(calibrationGroup, "detid");
+  progress.report("Reading dasid");
+  std::vector<int32_t> dasids = readInt32Array(calibrationGroup, "dasid");
+  progress.report("Reading group");
+  std::vector<int32_t> groups = readInt32Array(calibrationGroup, "group");
+  progress.report("Reading use");
+  std::vector<int32_t> use = readInt32Array(calibrationGroup, "use");
 
-    progress.report("Reading difc");
-    std::vector<double> difc = readDoubleArray(calibrationGroup, "difc");
-    progress.report("Reading difa");
-    std::vector<double> difa = readDoubleArray(calibrationGroup, "difa");
-    progress.report("Reading tzero");
-    std::vector<double> tzero = readDoubleArray(calibrationGroup, "tzero");
-    progress.report("Reading offset");
-    std::vector<double> offset = readDoubleArray(calibrationGroup, "offset");
+  progress.report("Reading difc");
+  std::vector<double> difc = readDoubleArray(calibrationGroup, "difc");
+  progress.report("Reading difa");
+  std::vector<double> difa = readDoubleArray(calibrationGroup, "difa");
+  progress.report("Reading tzero");
+  std::vector<double> tzero = readDoubleArray(calibrationGroup, "tzero");
+  progress.report("Reading offset");
+  std::vector<double> offset = readDoubleArray(calibrationGroup, "offset");
 
-    file.close();
+  file.close();
 
-    // verify the minimum is present
-    if (detids.empty()) {
-        throw std::runtime_error("File was missing required field \"/calibraion/detid\"");
-    }
-    if (difc.empty()) {
-        throw std::runtime_error("File was missing required field \"/calibraion/difc\"");
-    }
+  // verify the minimum is present
+  if (detids.empty()) {
+    throw std::runtime_error(
+        "File was missing required field \"/calibraion/detid\"");
+  }
+  if (difc.empty()) {
+    throw std::runtime_error(
+        "File was missing required field \"/calibraion/difc\"");
+  }
 
-    // fix up empty arrays
-    if (groups.empty()) groups.assign(detids.size(), 1); // all go to one spectrum
-    if (use.empty()) use.assign(detids.size(), 1); // use everything
-    if (difa.empty()) difa.assign(detids.size(), 0.); // turn off difa
-    if (tzero.empty()) tzero.assign(detids.size(), 0.); // turn off tzero
+  // fix up empty arrays
+  if (groups.empty())
+    groups.assign(detids.size(), 1); // all go to one spectrum
+  if (use.empty())
+    use.assign(detids.size(), 1); // use everything
+  if (difa.empty())
+    difa.assign(detids.size(), 0.); // turn off difa
+  if (tzero.empty())
+    tzero.assign(detids.size(), 0.); // turn off tzero
 
-    // create the appropriate output workspaces
-    makeGroupingWorkspace(detids, groups);
-    makeMaskWorkspace(detids, use);
-    makeCalWorkspace(detids, difc, difa, tzero, dasids, offset);
+  // create the appropriate output workspaces
+  makeGroupingWorkspace(detids, groups);
+  makeMaskWorkspace(detids, use);
+  makeCalWorkspace(detids, difc, difa, tzero, dasids, offset);
 }
 
 } // namespace DataHandling

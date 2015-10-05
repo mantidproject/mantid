@@ -87,10 +87,12 @@ public:
   size_t numOriginalWorkspaces() const;
   boost::shared_ptr<Workspace> getOriginalWorkspace(size_t index = 0) const;
   void setOriginalWorkspace(boost::shared_ptr<Workspace> ws, size_t index = 0);
-  Mantid::API::CoordTransform const *getTransformFromOriginal(size_t index = 0) const;
+  Mantid::API::CoordTransform const *
+  getTransformFromOriginal(size_t index = 0) const;
   void setTransformFromOriginal(Mantid::API::CoordTransform *transform,
                                 size_t index = 0);
-  Mantid::API::CoordTransform const *getTransformToOriginal(size_t index = 0) const;
+  Mantid::API::CoordTransform const *
+  getTransformToOriginal(size_t index = 0) const;
   void setTransformToOriginal(Mantid::API::CoordTransform *transform,
                               size_t index = 0);
 
@@ -145,11 +147,13 @@ protected:
 
   /// Coordinate Transformation that goes from the original workspace to this
   /// workspace's coordinates.
-  std::vector<boost::shared_ptr<const Mantid::API::CoordTransform> > m_transforms_FromOriginal;
+  std::vector<boost::shared_ptr<const Mantid::API::CoordTransform>>
+      m_transforms_FromOriginal;
 
   /// Coordinate Transformation that goes from this workspace's coordinates to
   /// the original workspace coordinates.
-  std::vector<boost::shared_ptr<const Mantid::API::CoordTransform> > m_transforms_ToOriginal;
+  std::vector<boost::shared_ptr<const Mantid::API::CoordTransform>>
+      m_transforms_ToOriginal;
 
   /// Poco delete notification observer object
   Poco::NObserver<MDGeometry, Mantid::API::WorkspacePreDeleteNotification>

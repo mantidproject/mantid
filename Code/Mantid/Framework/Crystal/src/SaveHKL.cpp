@@ -32,7 +32,7 @@ DECLARE_ALGORITHM(SaveHKL)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-SaveHKL::SaveHKL(): m_smu(0.), m_amu(0.), m_radius(0.), m_power_th(0.) {}
+SaveHKL::SaveHKL() : m_smu(0.), m_amu(0.), m_radius(0.), m_power_th(0.) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -94,9 +94,12 @@ void SaveHKL::init() {
   declareProperty("WidthBorder", EMPTY_INT(), "Width of border of detectors");
   declareProperty("MinIntensity", EMPTY_DBL(), mustBePositive,
                   "The minimum Intensity");
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "SaveHKLOutput",
-                                                        Direction::Output), "Output PeaksWorkspace");
-  declareProperty("HKLDecimalPlaces", EMPTY_INT(), "Number of decimal places for fractional HKL.  Default is integer HKL.");
+  declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+                      "OutputWorkspace", "SaveHKLOutput", Direction::Output),
+                  "Output PeaksWorkspace");
+  declareProperty(
+      "HKLDecimalPlaces", EMPTY_INT(),
+      "Number of decimal places for fractional HKL.  Default is integer HKL.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -177,8 +180,9 @@ void SaveHKL::exec() {
       0.0) {
     double rho = sampleMaterial.numberDensity();
     if (m_smu == EMPTY_DBL())
-      m_smu = sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) *
-            rho;
+      m_smu =
+          sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) *
+          rho;
     if (m_amu == EMPTY_DBL())
       m_amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
     g_log.notice() << "Sample number density = " << rho
@@ -193,12 +197,14 @@ void SaveHKL::exec() {
                    << " barns\n"
                    << "    Absorption = " << sampleMaterial.absorbXSection()
                    << " barns\n";
-  } else if (m_smu != EMPTY_DBL() && m_amu != EMPTY_DBL()) // Save input in Sample
-                                                       // with wrong atomic
-                                                       // number and name
+  } else if (m_smu != EMPTY_DBL() &&
+             m_amu != EMPTY_DBL()) // Save input in Sample
+                                   // with wrong atomic
+                                   // number and name
   {
     NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
-                        static_cast<uint16_t>(0), 0.0, 0.0, m_smu, 0.0, m_smu, m_amu);
+                        static_cast<uint16_t>(0), 0.0, 0.0, m_smu, 0.0, m_smu,
+                        m_amu);
     Object shape = peaksW->sample().getShape(); // copy
     shape.setMaterial(Material("SetInSaveHKL", neutron, 1.0));
     peaksW->mutableSample().setShape(shape);
@@ -222,7 +228,7 @@ void SaveHKL::exec() {
     std::ifstream infile;
     std::string spectraFile = getPropertyValue("SpectraFile");
     infile.open(spectraFile.c_str());
-    if (infile.is_open()){
+    if (infile.is_open()) {
       size_t a = 0;
       if (iSpec == 1) {
         while (!infile.eof()) // To get you all the lines.
@@ -267,16 +273,16 @@ void SaveHKL::exec() {
 
     Peak &p = peaks[wi];
     if (p.getIntensity() == 0.0 || boost::math::isnan(p.getIntensity()) ||
-        boost::math::isnan(p.getSigmaIntensity())){
+        boost::math::isnan(p.getSigmaIntensity())) {
       banned.push_back(wi);
       continue;
     }
     if (minIsigI != EMPTY_DBL() &&
-        p.getIntensity() < std::abs(minIsigI * p.getSigmaIntensity())){
+        p.getIntensity() < std::abs(minIsigI * p.getSigmaIntensity())) {
       banned.push_back(wi);
       continue;
     }
-    if (minIntensity != EMPTY_DBL() && p.getIntensity() < minIntensity){
+    if (minIntensity != EMPTY_DBL() && p.getIntensity() < minIntensity) {
       banned.push_back(wi);
       continue;
     }
@@ -289,7 +295,7 @@ void SaveHKL::exec() {
     if (widthBorder != EMPTY_INT() && p.getDetectorID() != -1 &&
         (p.getCol() < widthBorder || p.getRow() < widthBorder ||
          p.getCol() > (nCols - widthBorder) ||
-         p.getRow() > (nRows - widthBorder))){
+         p.getRow() > (nRows - widthBorder))) {
       banned.push_back(wi);
       continue;
     }
@@ -306,7 +312,7 @@ void SaveHKL::exec() {
     double scattering = p.getScattering();
     double lambda = p.getWavelength();
     double dsp = p.getDSpacing();
-    if (dsp < dMin || lambda < wlMin || lambda > wlMax){
+    if (dsp < dMin || lambda < wlMin || lambda > wlMax) {
       banned.push_back(wi);
       continue;
     }
@@ -320,18 +326,20 @@ void SaveHKL::exec() {
     //    % (H, K, L, FSQ, SIGFSQ, hstnum, WL, TBAR, CURHST, SEQNUM,
     //    TRANSMISSION, DN, TWOTH, DSP))
     // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
-    if (p.getH() == 0 && p.getK() == 0 && p.getL() == 0){
+    if (p.getH() == 0 && p.getK() == 0 && p.getL() == 0) {
       banned.push_back(wi);
       continue;
     }
-    if (decimalHKL == EMPTY_INT() )
-      out << std::setw(4) << Utils::round(-p.getH())
-            << std::setw(4) << Utils::round(-p.getK())
-            << std::setw(4) << Utils::round(-p.getL());
+    if (decimalHKL == EMPTY_INT())
+      out << std::setw(4) << Utils::round(-p.getH()) << std::setw(4)
+          << Utils::round(-p.getK()) << std::setw(4) << Utils::round(-p.getL());
     else
-      out << std::setw(5+decimalHKL) << std::fixed << std::setprecision(decimalHKL) << -p.getH()
-            << std::setw(5+decimalHKL) << std::fixed << std::setprecision(decimalHKL) << -p.getK()
-            << std::setw(5+decimalHKL) << std::fixed << std::setprecision(decimalHKL) << -p.getL();
+      out << std::setw(5 + decimalHKL) << std::fixed
+          << std::setprecision(decimalHKL) << -p.getH()
+          << std::setw(5 + decimalHKL) << std::fixed
+          << std::setprecision(decimalHKL) << -p.getK()
+          << std::setw(5 + decimalHKL) << std::fixed
+          << std::setprecision(decimalHKL) << -p.getL();
     double correc = scaleFactor;
     double relSigSpect = 0.0;
     if (bank != bankold)
@@ -345,10 +353,10 @@ void SaveHKL::exec() {
       double eff_center =
           1.0 - std::exp(-mu * depth); // efficiency at center of detector
       IComponent_const_sptr sample = peaksW->getInstrument()->getSample();
-      double cosA =
-          peaksW->getInstrument()->getComponentByName(p.getBankName())->getDistance(
-              *sample) /
-          p.getL2();
+      double cosA = peaksW->getInstrument()
+                        ->getComponentByName(p.getBankName())
+                        ->getDistance(*sample) /
+                    p.getL2();
       double pathlength = depth / cosA;
       double eff_R = 1.0 - exp(-mu * pathlength); // efficiency at point R
       double sp_ratio = eff_center / eff_R;       // slant path efficiency ratio
@@ -388,8 +396,9 @@ void SaveHKL::exec() {
     // SHELX can read data without the space between the l and intensity
     if (p.getDetectorID() != -1) {
       double ckIntensity = correc * p.getIntensity();
-      double cksigI = std::sqrt(std::pow(correc * p.getSigmaIntensity(), 2) +
-          std::pow(relSigSpect * correc * p.getIntensity(), 2));
+      double cksigI =
+          std::sqrt(std::pow(correc * p.getSigmaIntensity(), 2) +
+                    std::pow(relSigSpect * correc * p.getIntensity(), 2));
       p.setIntensity(ckIntensity);
       p.setSigmaIntensity(cksigI);
       if (ckIntensity > 99999.985)
@@ -397,8 +406,7 @@ void SaveHKL::exec() {
                         << " is too large for format.  Decrease ScalePeaks.\n";
       out << std::setw(8) << std::fixed << std::setprecision(2) << ckIntensity;
 
-      out << std::setw(8) << std::fixed << std::setprecision(2)
-          << cksigI;
+      out << std::setw(8) << std::fixed << std::setprecision(2) << cksigI;
     } else {
       // This is data from LoadHKL which is already corrected
       out << std::setw(8) << std::fixed << std::setprecision(2)
@@ -433,14 +441,14 @@ void SaveHKL::exec() {
 
     out << std::endl;
   }
-  if (decimalHKL == EMPTY_INT() )
-    out << std::setw(4) << 0
-          << std::setw(4) << 0
-          << std::setw(4) << 0;
+  if (decimalHKL == EMPTY_INT())
+    out << std::setw(4) << 0 << std::setw(4) << 0 << std::setw(4) << 0;
   else
-    out << std::setw(5+decimalHKL) << std::fixed << std::setprecision(decimalHKL) << 0.0
-          << std::setw(5+decimalHKL) << std::fixed << std::setprecision(decimalHKL) << 0.0
-          << std::setw(5+decimalHKL) << std::fixed << std::setprecision(decimalHKL) << 0.0;
+    out << std::setw(5 + decimalHKL) << std::fixed
+        << std::setprecision(decimalHKL) << 0.0 << std::setw(5 + decimalHKL)
+        << std::fixed << std::setprecision(decimalHKL) << 0.0
+        << std::setw(5 + decimalHKL) << std::fixed
+        << std::setprecision(decimalHKL) << 0.0;
   out << "    0.00    0.00   0  0.0000 0.0000      0      0 0.0000 "
          "  0";
   out << std::endl;

@@ -22,7 +22,7 @@ namespace Algorithms {
  */
 TimeAtSampleStrategyDirect::TimeAtSampleStrategyDirect(
     MatrixWorkspace_const_sptr ws, double ei)
-    :  m_constShift(0) {
+    : m_constShift(0) {
 
   // Get L1
   V3D samplepos = ws->getInstrument()->getSample()->getPos();
@@ -44,9 +44,10 @@ TimeAtSampleStrategyDirect::~TimeAtSampleStrategyDirect() {}
  * @return Correction struct
  */
 Correction Mantid::Algorithms::TimeAtSampleStrategyDirect::calculate(
-    const size_t&) const {
+    const size_t &) const {
 
-  // Correction is L1 and Ei dependent only. Detector positions are not required.
+  // Correction is L1 and Ei dependent only. Detector positions are not
+  // required.
   return Correction(0, m_constShift);
 }
 

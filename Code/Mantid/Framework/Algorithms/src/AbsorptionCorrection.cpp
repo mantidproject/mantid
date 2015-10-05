@@ -316,9 +316,8 @@ void AbsorptionCorrection::constructSample(API::Sample &sample) {
 /// @param detector :: The detector we are working on
 /// @param L2s :: A vector of the sample-detector distance for  each segment of
 /// the sample
-void
-AbsorptionCorrection::calculateDistances(const IDetector_const_sptr &detector,
-                                         std::vector<double> &L2s) const {
+void AbsorptionCorrection::calculateDistances(
+    const IDetector_const_sptr &detector, std::vector<double> &L2s) const {
   V3D detectorPos(detector->getPos());
   if (detector->nDets() > 1) {
     // We need to make sure this is right for grouped detectors - should use

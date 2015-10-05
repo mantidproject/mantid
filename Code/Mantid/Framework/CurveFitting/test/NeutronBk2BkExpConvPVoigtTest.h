@@ -8,20 +8,21 @@
 using namespace std;
 using Mantid::CurveFitting::NeutronBk2BkExpConvPVoigt;
 
-class NeutronBk2BkExpConvPVoigtTest : public CxxTest::TestSuite
-{
+class NeutronBk2BkExpConvPVoigtTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static NeutronBk2BkExpConvPVoigtTest *createSuite() { return new NeutronBk2BkExpConvPVoigtTest(); }
-  static void destroySuite( NeutronBk2BkExpConvPVoigtTest *suite ) { delete suite; }
-
+  static NeutronBk2BkExpConvPVoigtTest *createSuite() {
+    return new NeutronBk2BkExpConvPVoigtTest();
+  }
+  static void destroySuite(NeutronBk2BkExpConvPVoigtTest *suite) {
+    delete suite;
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Set and get parameter
     */
-  void test_accessParameter()
-  {
+  void test_accessParameter() {
     NeutronBk2BkExpConvPVoigt func;
     func.initialize();
 
@@ -41,8 +42,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Calculate peak positions: data is from Fullprof's sample: arg_si
     */
-  void test_calculatePeakPositions()
-  {
+  void test_calculatePeakPositions() {
     // (1,1,1)
     NeutronBk2BkExpConvPVoigt func;
     func.initialize();
@@ -97,15 +97,12 @@ public:
     func222.calculateParameters(false);
     double tofh4 = func222.centre();
     TS_ASSERT_DELTA(tofh4, 11710.0332, 0.01);
-
-
   }
 
   //----------------------------------------------------------------------------------------------
   /** Calculate peak positions: data is from Fullprof's sample: arg_si
     */
-  void test_calculatePeakShape()
-  {
+  void test_calculatePeakShape() {
     NeutronBk2BkExpConvPVoigt func;
     func.initialize();
 
@@ -133,7 +130,7 @@ public:
     TS_ASSERT_DELTA(tofh1, 23421.7207, 0.01);
 
     // Peak shape
-    func.setParameter("Height", (24061.1-114.9)/0.0166701); // TOF=23425.
+    func.setParameter("Height", (24061.1 - 114.9) / 0.0166701); // TOF=23425.
 
     double fwhm = func.fwhm();
     TS_ASSERT_DELTA(fwhm, 47.049, 0.001);
@@ -154,8 +151,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Generate TOF values for peak (111) from Fullprof's arg_si example
     */
-  void genPeak111TOF(vector<double>& vec_x)
-  {
+  void genPeak111TOF(vector<double> &vec_x) {
     vec_x.clear();
     vec_x.push_back(23005.0000);
     vec_x.push_back(23010.0000);
@@ -299,12 +295,10 @@ public:
     vec_x.push_back(23700.0000);
   }
 
-
   //----------------------------------------------------------------------------------------------
   /** Calculate peak positions: data is from Fullprof's sample: arg_si
     */
-  void XcalculateVulcanPeakPositions()
-  {
+  void XcalculateVulcanPeakPositions() {
     // TODO - This will be left to the ticket for VULCAN
     // (2, 2, 0)
     NeutronBk2BkExpConvPVoigt func;
@@ -374,8 +368,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Calculate peak positions: data is from Fullprof's sample: arg_si
     */
-  void Xtest_calculateVulcanProfile()
-  {
+  void Xtest_calculateVulcanProfile() {
     NeutronBk2BkExpConvPVoigt func;
     func.initialize();
 
@@ -412,11 +405,10 @@ public:
     cout << "Peak 220: TOF_h = " << tofh1 << ", FWHM = " << fwhm << ".\n";
 
     vector<double> vecX;
-    double tof = tofh1 - 10*fwhm;
-    while (tof < tofh1 + 10*fwhm)
-    {
+    double tof = tofh1 - 10 * fwhm;
+    while (tof < tofh1 + 10 * fwhm) {
       vecX.push_back(tof);
-      tof += fwhm*0.1;
+      tof += fwhm * 0.1;
     }
     vector<double> vecY(vecX.size(), 0.0);
     func.function(vecY, vecX);
@@ -425,9 +417,6 @@ public:
 
     return;
   }
-
-
 };
-
 
 #endif /* MANTID_CURVEFITTING_NEUTRONBK2BKEXPCONVPVOIGTTEST_H_ */

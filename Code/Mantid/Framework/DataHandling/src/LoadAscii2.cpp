@@ -25,10 +25,10 @@ using namespace Kernel;
 using namespace API;
 
 /// Empty constructor
-LoadAscii2::LoadAscii2() : m_columnSep(), m_separatorIndex(), m_comment(),
-  m_baseCols(0), m_specNo(0), m_lastBins(0), m_curBins(0), m_spectraStart(), 
-  m_spectrumIDcount(0), m_lineNo(0), m_spectra(), m_curSpectra(NULL) {
-}
+LoadAscii2::LoadAscii2()
+    : m_columnSep(), m_separatorIndex(), m_comment(), m_baseCols(0),
+      m_specNo(0), m_lastBins(0), m_curBins(0), m_spectraStart(),
+      m_spectrumIDcount(0), m_lineNo(0), m_spectra(), m_curSpectra(NULL) {}
 
 /**
 * Return the confidence with with this algorithm can load the file
@@ -101,16 +101,16 @@ API::Workspace_sptr LoadAscii2::readData(std::ifstream &file) {
   const size_t numSpectra = m_spectra.size();
   MatrixWorkspace_sptr localWorkspace;
   try {
-    localWorkspace = WorkspaceFactory::Instance().create("Workspace2D",
-      numSpectra, m_lastBins, m_lastBins);
-  } catch(std::exception&) {
+    localWorkspace = WorkspaceFactory::Instance().create(
+        "Workspace2D", numSpectra, m_lastBins, m_lastBins);
+  } catch (std::exception &) {
     throw std::runtime_error("Failed to create a Workspace2D from the "
                              "data found in this file");
   }
 
   try {
     writeToWorkspace(localWorkspace, numSpectra);
-  } catch(std::exception&) {
+  } catch (std::exception &) {
     throw std::runtime_error("Failed to write read data into the "
                              "output Workspace2D");
   }
@@ -707,9 +707,9 @@ void LoadAscii2::exec() {
   API::Workspace_sptr rd;
   try {
     rd = readData(file);
-  } catch(std::exception& e) {
-    g_log.error() << "Failed to read as ASCII this file: '" << filename <<
-      ", error description: " << e.what() << std::endl;
+  } catch (std::exception &e) {
+    g_log.error() << "Failed to read as ASCII this file: '" << filename
+                  << ", error description: " << e.what() << std::endl;
     throw std::runtime_error("Failed to recognize this file as an ASCII file, "
                              "cannot continue.");
   }

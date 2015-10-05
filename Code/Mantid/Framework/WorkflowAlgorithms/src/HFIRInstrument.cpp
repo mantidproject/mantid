@@ -87,7 +87,8 @@ void getDefaultBeamCenter(API::MatrixWorkspace_sptr dataWS, double &pixel_x,
 }
 
 double getSourceToSampleDistance(API::MatrixWorkspace_sptr dataWS) {
-  const int nguides = dataWS->run().getPropertyValueAsType<int>("number-of-guides");
+  const int nguides =
+      dataWS->run().getPropertyValueAsType<int>("number-of-guides");
 
   std::vector<std::string> pars =
       dataWS->getInstrument()->getStringParameter("aperture-distances");

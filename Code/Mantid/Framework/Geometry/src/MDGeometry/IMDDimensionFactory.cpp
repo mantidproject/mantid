@@ -62,8 +62,8 @@ IMDDimension_sptr createDimension(const Poco::XML::Element &dimensionXML) {
 
   Poco::XML::Element *frameElement = dimensionXML.getChildElement("Frame");
   std::string frame = "Unknown frame";
-  if(NULL != frameElement){
-     // Set the frame if it exists
+  if (NULL != frameElement) {
+    // Set the frame if it exists
     frame = frameElement->innerText();
   }
 
@@ -121,8 +121,8 @@ IMDDimension_sptr createDimension(const Poco::XML::Element &dimensionXML) {
   }
 
   // Select the unit.
-  MDFrame_const_uptr mdframe = makeMDFrameFactoryChain()->create(MDFrameArgument(frame, units));
-
+  MDFrame_const_uptr mdframe =
+      makeMDFrameFactoryChain()->create(MDFrameArgument(frame, units));
 
   return boost::make_shared<MDHistoDimension>(
       name, id, *mdframe, static_cast<coord_t>(lowerBounds),

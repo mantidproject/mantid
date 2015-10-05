@@ -52,7 +52,7 @@ void FilterChannel::close() {
 
 const FilterChannel &FilterChannel::setPriority(const int &priority) {
   _priority = priority;
-  
+
   return *this;
 }
 
