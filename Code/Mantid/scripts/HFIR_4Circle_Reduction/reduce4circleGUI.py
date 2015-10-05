@@ -210,6 +210,7 @@ class MainWindow(QtGui.QMainWindow):
         if status is False:
             err_msg = float_list
             self.pop_one_button_dialog(err_msg)
+            return
         h, k, l = float_list
 
         status, peakinfo = self._myControl.get_peak_info(exp_no, scan_no, pt_no)
@@ -218,7 +219,7 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(error_message)
             return
         assert isinstance(peakinfo, r4c.PeakInfo)
-        peakinfo.set_hkl_raw_data(h, k, l)
+        peakinfo.set_hkl(h, k, l)
         self.set_ub_peak_table(peakinfo)
 
         # Clear
@@ -333,7 +334,6 @@ class MainWindow(QtGui.QMainWindow):
                     self.pop_one_button_dialog(peak_info)
                     return
                 assert isinstance(peak_info, r4c.PeakInfo)
-                peak_info.set_hkl_raw_data(h, k, l)
                 peak_info_list.append(peak_info)
         # END-FOR
 
@@ -347,7 +347,8 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         # Calculate UB matrix
-        status, ub_matrix = self._myControl.calculate_ub_matrix(peak_info_list, a, b, c, alpha, beta, gamma)
+        status, ub_matrix = self._myControl.calculate_ub_matrix(peak_info_list, a, b, c,
+                                                                alpha, beta, gamma)
 
         # Deal with result
         if status is True:
@@ -436,7 +437,7 @@ class MainWindow(QtGui.QMainWindow):
             raise KeyError(err_msg)
         assert isinstance(peak_info, r4c.PeakInfo)
 
-        h, k, l = peak_info.getHKL()
+        h, k, l = peak_info.get_hkl_peak_ws()
         self.ui.lineEdit_H.setText('%.2f' % h)
         self.ui.lineEdit_K.setText('%.2f' % k)
         self.ui.lineEdit_L.setText('%.2f' % l)
@@ -451,10 +452,29 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_index_ub_peaks(self):
-        """ TODO/DOC
+        """ Index the peaks in the UB matrix peak table
         :return:
         """
-        self._myControl.index_peak(ub_matrix, scan_no, pt_no)
+        # Get UB matrix
+        ub_matrix = self.ui.tableWidget_ubMatrix.get_matrix()
+        print '[DB] Get UB matrix ', ub_matrix
+
+        # Do it for each peak
+        num_peaks = self.ui.tableWidget_peaksCalUB.rowCount()
+        err_msg = ''
+        for i_peak in xrange(num_peaks):
+            scan_no, pt_no = self.ui.tableWidget_peaksCalUB.get_exp_info(i_peak)
+            status, ret_obj = self._myControl.index_peak(ub_matrix, scan_number=scan_no,
+                                                         pt_number=pt_no)
+            if status is True:
+                new_hkl = ret_obj
+                self.ui.tableWidget_peaksCalUB.set_hkl(i_peak, new_hkl)
+            else:
+                err_msg += ret_obj + '\n'
+        # END-FOR
+
+        if len(err_msg) > 0:
+            self.pop_one_button_dialog(err_msg)
 
         return
 

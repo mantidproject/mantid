@@ -39,6 +39,7 @@ class UBMatrixTable(tableBase.NTableWidget):
         Get the copy of the matrix
         :return:
         """
+        print '[DB] MatrixTable: _Matrix = ', self._matrix
         return self._matrix.copy()
 
     def set_from_list(self, element_array):
@@ -127,7 +128,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
     def get_exp_info(self, row_index):
         """
         Get experiment information from a row
-        :return:
+        :return: scan number, pt number
         """
         assert isinstance(row_index, int)
 
@@ -177,6 +178,25 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
 
         return
 
+    def set_hkl(self, i_row, hkl):
+        """
+        Set HKL to table
+        :param irow:
+        :param hkl:
+        """
+        # Check
+        assert isinstance(i_row, int)
+        assert isinstance(hkl, list)
+
+        i_col_h = UB_Peak_Table_Setup.index(('H', 'float'))
+        i_col_k = UB_Peak_Table_Setup.index(('K', 'float'))
+        i_col_l = UB_Peak_Table_Setup.index(('L', 'float'))
+
+        self.update_cell_value(i_row, i_col_h, hkl[0])
+        self.update_cell_value(i_row, i_col_k, hkl[1])
+        self.update_cell_value(i_row, i_col_h, hkl[2])
+
+        return
 
 # Processing status table
 Process_Table_Setup = [('Scan', 'int'),

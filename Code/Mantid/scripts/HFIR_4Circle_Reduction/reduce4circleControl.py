@@ -48,6 +48,7 @@ class PeakInfo(object):
 
         # Define class variable
         self._myParent = parent
+        self._myHKL = [0, 0, 0]
 
         self._myExpNumber = None
         self._myScanNumber = None
@@ -55,8 +56,7 @@ class PeakInfo(object):
 
         self._myPeakWSKey = (None, None, None)
         self._myPeakIndex = None
-        # FIXME/TODO Get rid of holding of peak workspace instance
-        self._myPeak = None
+        self._myPeakWS = None
 
         self._myLastPeakUB = None
 
@@ -70,23 +70,6 @@ class PeakInfo(object):
         assert isinstance(self._myPeakWSKey, tuple)
         exp_number, scan_number, pt_number = self._myPeakWSKey
         return self._myParent.get_ub_peak_ws(exp_number, scan_number, pt_number)[1]
-
-    def get_raw_data_ws(self):
-        """
-
-        :return:
-        """
-        raise RuntimeError('Raw data workspace shall not be called.  Method will be removed after testing.')
-        assert isinstance(self._myPeakWSKey, tuple)
-        exp_number, scan_number, pt_number = self._myPeakWSKey
-        data_ws = self._myParent.get_raw_data_workspace(exp_number, scan_number, pt_number)
-        if data_ws is None:
-            print "\nRaw data workspace dict keys:", self._myParent._myRawDataWSDict.keys(), '\n'
-            raise RuntimeError('Unable to find raw data workspace of Exp %d Scan %d Pt %d. ' % (
-                exp_number, scan_number, pt_number))
-        assert isinstance(data_ws, mantid.dataobjects.Workspace2D)
-
-        return data_ws
 
     def set_from_run_info(self, exp_number, scan_number, pt_number):
         """ Set from run information with parent
@@ -103,7 +86,7 @@ class PeakInfo(object):
         if status is True:
             self._myPeakWSKey = (exp_number, scan_number, pt_number)
             self._myPeakIndex = 0
-            self._myPeak = peak_ws.getPeak(0)
+            self._myPeakWS = peak_ws.getPeak(0)
         else:
             error_message = peak_ws
             return False, error_message
@@ -129,18 +112,22 @@ class PeakInfo(object):
         except RuntimeError as run_err:
             raise RuntimeError(run_err)
 
-        self._myPeak = peak
+        self._myPeakWS = peak
 
         return
 
-    def set_md_ws(self, md_ws):
+    def set_hkl(self, h, k, l):
         """
-        TODO / DOC
-        :param md_ws:
+        Set HKL to this peak Info
         :return:
         """
-        print '[DB] Type of input MD workspace is %s' % (str(type(md_ws)))
-        self._myMdWs = md_ws
+        assert isinstance(h, float)
+        assert isinstance(k, float)
+        assert isinstance(l, float)
+
+        self._myHKL[0] = h
+        self._myHKL[1] = k
+        self._myHKL[2] = l
 
         return
 
@@ -151,41 +138,30 @@ class PeakInfo(object):
         """
         return self._myExpNumber, self._myScanNumber, self._myPtNumber
 
-    def getHKL(self):
+    def get_hkl_peak_ws(self):
+        """ Get HKL from PeakWorkspace
+        :return:
         """
-
-        :return: 3-tuple of float as (H, K, L)
-        """
-        hkl = self._myPeak.getHKL()
+        hkl = self._myPeakWS.getHKL()
 
         return hkl.getX(), hkl.getY(), hkl.getZ()
+
+    def getHKL(self):
+        """
+        Get HKL set to this object by client
+        :return: 3-tuple of float as (H, K, L)
+        """
+        hkl = self._myHKL
+
+        return hkl[0], hkl[1], hkl[2]
 
     def getQSample(self):
         """
 
         :return: 3-tuple of floats as Qx, Qy, Qz
         """
-        q_sample = self._myPeak.getQSampleFrame()
+        q_sample = self._myPeakWS.getQSampleFrame()
         return q_sample.getX(), q_sample.getY(), q_sample.getZ()
-
-    def set_hkl_raw_data(self, h=None, k=None, l=None):
-        """
-        Set HKL to peak/peak workspace from sample log in raw data file/workspace
-        :param h:
-        :param k:
-        :param l:
-        :return:
-        """
-        if h is None or k is None or l is None:
-            # Set HKL
-            matrix_ws = self.get_raw_data_ws()
-            h = float(int(matrix_ws.run().getProperty('_h').value))
-            k = float(int(matrix_ws.run().getProperty('_k').value))
-            l = float(int(matrix_ws.run().getProperty('_l').value))
-
-        self._myPeak.setHKL(h, k, l)
-
-        return
 
 
 class CWSCDReductionControl(object):
@@ -608,12 +584,21 @@ class CWSCDReductionControl(object):
 
     def get_peak_info(self, exp_number, scan_number, pt_number):
         """
-        DOC!
-        :param exp_number:
+        get peak information instance
+        :param exp_number: experiment number.  if it is None, then use the current exp number
         :param scan_number:
         :param pt_number:
         :return:
         """
+        # Check for type
+        if exp_number is None:
+            exp_number = self._expNumber
+
+        assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int)
+        assert isinstance(pt_number, int)
+
+        # Check for existence
         if (exp_number, scan_number, pt_number) not in self._myUBPeakWSDict:  # self._myPeakInfoDict:
             err_msg = 'Unable to find PeakInfo for Exp %d Scan %d Pt %d. ' \
                       'Existing keys are %s' % (exp_number, scan_number, pt_number,
@@ -624,7 +609,7 @@ class CWSCDReductionControl(object):
 
     def get_ub_peak_ws(self, exp_number, scan_number, pt_number):
         """
-
+        Get peak workspace for the peak picked to calculate UB matrix
         :param exp_number:
         :param scan_number:
         :param pt_number:
@@ -646,7 +631,7 @@ class CWSCDReductionControl(object):
         :param ub_matrix: numpy.ndarray (3, 3)
         :param scan_number:
         :param pt_number:
-        :return:
+        :return: boolean, object (list of HKL or error message)
         """
         # Check
         assert isinstance(ub_matrix, numpy.ndarray)
@@ -657,19 +642,34 @@ class CWSCDReductionControl(object):
         # Find out the peak workspace
         exp_num = self._expNumber
         if self._myUBPeakWSDict.has_key((exp_num, scan_number, pt_number)) is False:
-            return False, 'No PeakWorkspace is found for exp %d scan %d pt %d' % (exp_num,
-                                                                                  scan_number,
-                                                                                  pt_number)
-        peak_ws = self._myRawDataWSDict[(exp_num, scan_number, pt_number)]
+            err_msg = 'No PeakWorkspace is found for exp %d scan %d pt %d' % (
+                exp_num, scan_number, pt_number)
+            return False, err_msg
+
+        peak_ws = self._myUBPeakWSDict[(exp_num, scan_number, pt_number)]
         ub_1d = ub_matrix.reshape(9,)
+        print '[DB] UB matrix = ', ub_1d
 
         # Set UB
         # ub = srcpeak.sample().getOrientedLattice().getUB()
         api.SetUB(Workspace=peak_ws, UB=ub_1d)
-        num_indexed = api.CalculatePeaksHKL(PeaksWorkspace=peak_ws, Overwrite=True)
-        # FIXME/TODO: What is the difference between CalcualtePeaksHKL or IndexPeak?
 
-        return True, ''
+        # Note: IndexPeaks and CalcualtePeaksHKL do the same job
+        #       while IndexPeaks has more control on the output
+        num_peak_index, error = api.IndexPeaks(PeaksWorkspace=peak_ws,
+                                               Tolerance=0.4,
+                                               RoundHKLs=False)
+
+        if num_peak_index == 0:
+            return False, 'No peak can be indexed.'
+        elif num_peak_index > 1:
+            raise RuntimeError('Case for PeaksWorkspace containing more than 1 peak is not '
+                               'considered. Contact developer for this issue.')
+        else:
+            hkl_v3d = peak_ws.getPeak(0).getHKL()
+            hkl = [hkl_v3d.X(), hkl_v3d.Y(), hkl_v3d.Z()]
+
+        return True, hkl
 
     def index_peak_ws(self, ub_peak_ws, target_peak_ws):
         """ Index peaks in a peak workspace by UB matrix
