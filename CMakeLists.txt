@@ -57,7 +57,7 @@ include ( ParaViewSetup )
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
   if ( NOT THIRD_PARTY )
-      set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )
+      set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/Third_Party" )
   endif ()
   # Print out where we think we are looking for 3rd party stuff
   message (STATUS "Setting THIRD_PARTY to be ${THIRD_PARTY}." )
