@@ -108,8 +108,8 @@ public:
   const Peak &getPeak(int peakNum) const;
 
   Geometry::IPeak *createPeak(Kernel::V3D QFrame,
-                         boost::optional<double> detectorDistance =
-                             boost::optional<double>()) const;
+                              boost::optional<double> detectorDistance =
+                                  boost::optional<double>()) const;
   std::vector<std::pair<std::string, std::string>>
   peakInfo(Kernel::V3D qFrame, bool labCoords) const;
 
@@ -187,9 +187,7 @@ protected:
   PeaksWorkspace &operator=(const PeaksWorkspace &other);
 
 private:
-  virtual PeaksWorkspace *doClone() const {
-    return new PeaksWorkspace(*this);
-  }
+  virtual PeaksWorkspace *doClone() const { return new PeaksWorkspace(*this); }
 
   /// Initialize the table structure
   void initColumns();
@@ -282,7 +280,7 @@ private:
 
   /** Column names */
   std::vector<std::string> columnNames;
-  
+
   /// Coordinates
   Kernel::SpecialCoordinateSystem m_coordSystem;
 

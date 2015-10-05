@@ -116,8 +116,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("LinearInterpolateZeroCounts", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ScaleFactor", 10.0));
-    TS_ASSERT_THROWS_NOTHING(
-          alg.setProperty("NeutronWaveLength", 2.41));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NeutronWaveLength", 2.41));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ReducedData"));
 
     // Execute
@@ -186,7 +185,6 @@ public:
 
     // Clean
     AnalysisDataService::Instance().remove("ReducedData");
-
   }
 
   //----------------------------------------------------------------------------------------------

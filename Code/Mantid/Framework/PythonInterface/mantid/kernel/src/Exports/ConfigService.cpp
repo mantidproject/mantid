@@ -72,7 +72,7 @@ void export_ConfigService() {
 
       .def("getFacility",
            (const FacilityInfo &(ConfigServiceImpl::*)(const std::string &)
-            const) &
+                const) &
                ConfigServiceImpl::getFacility,
            (arg("facilityName")),
            return_value_policy<reference_existing_object>(),
@@ -124,10 +124,12 @@ void export_ConfigService() {
            "filename")
 
       .def("setFileLogLevel", &ConfigServiceImpl::setFileLogLevel,
-          "Sets the log level priority for the File log channel, logLevel 1 = Fatal, 6 = information, 7 = Debug")
+           "Sets the log level priority for the File log channel, logLevel 1 = "
+           "Fatal, 6 = information, 7 = Debug")
 
       .def("setConsoleLogLevel", &ConfigServiceImpl::setConsoleLogLevel,
-          "Sets the log level priority for the Console log channel, logLevel 1 = Fatal, 6 = information, 7 = Debug")
+           "Sets the log level priority for the Console log channel, logLevel "
+           "1 = Fatal, 6 = information, 7 = Debug")
 
       .def("keys", &ConfigServiceImpl::keys)
 

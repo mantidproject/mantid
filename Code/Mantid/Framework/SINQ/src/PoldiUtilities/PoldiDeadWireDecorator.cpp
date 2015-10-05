@@ -76,9 +76,8 @@ PoldiDeadWireDecorator::getGoodElements(std::vector<int> rawElements) {
   return rawElements;
 }
 
-bool
-PoldiDeadWireDecorator::detectorIsNotMasked(Instrument_const_sptr instrument,
-                                            detid_t detectorId) {
+bool PoldiDeadWireDecorator::detectorIsNotMasked(
+    Instrument_const_sptr instrument, detid_t detectorId) {
   return !instrument->isDetectorMasked(detectorId);
 }
 

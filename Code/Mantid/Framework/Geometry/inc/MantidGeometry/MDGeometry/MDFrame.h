@@ -10,7 +10,8 @@
 namespace Mantid {
 namespace Geometry {
 
-/** MDFrame : The coordinate frame for a dimension, or set of dimensions in a multidimensional workspace.
+/** MDFrame : The coordinate frame for a dimension, or set of dimensions in a
+  multidimensional workspace.
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -35,17 +36,16 @@ namespace Geometry {
 */
 class DLLExport MDFrame {
 public:
-    virtual Mantid::Kernel::UnitLabel getUnitLabel() const = 0;
-    virtual const Mantid::Kernel::MDUnit& getMDUnit() const = 0;
-    virtual bool canConvertTo(const Mantid::Kernel::MDUnit& otherUnit) const = 0;
-    virtual std::string name() const = 0;
-    virtual MDFrame* clone() const = 0;
-    virtual ~MDFrame(){}
+  virtual Mantid::Kernel::UnitLabel getUnitLabel() const = 0;
+  virtual const Mantid::Kernel::MDUnit &getMDUnit() const = 0;
+  virtual bool canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const = 0;
+  virtual std::string name() const = 0;
+  virtual MDFrame *clone() const = 0;
+  virtual ~MDFrame() {}
 };
 
 typedef std::unique_ptr<MDFrame> MDFrame_uptr;
 typedef std::unique_ptr<const MDFrame> MDFrame_const_uptr;
-
 
 } // namespace Geometry
 } // namespace Mantid

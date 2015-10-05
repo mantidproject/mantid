@@ -240,8 +240,7 @@ std::string SCARFLSFJobManager::urlComponentEncode(const std::string &in) {
 
 std::string
 SCARFLSFJobManager::guessJobSubmissionAppName(const std::string &runnablePath,
-                                              const std::string &jobOptions)
-{
+                                              const std::string &jobOptions) {
   UNUSED_ARG(jobOptions);
 
   // Two applications are for now registered and being used on SCARF:
@@ -250,9 +249,8 @@ SCARFLSFJobManager::guessJobSubmissionAppName(const std::string &runnablePath,
 
   // Basic guess of the app that we might really need. Not
   // fixed/unstable at the moment
-  if (runnablePath.find("astra-2d-FBP") != std::string::npos
-      ||
-      runnablePath.find("astra-3d-SIRT3D") != std::string::npos ) {
+  if (runnablePath.find("astra-2d-FBP") != std::string::npos ||
+      runnablePath.find("astra-3d-SIRT3D") != std::string::npos) {
     appName = "PYASTRATOOLBOX_1_1";
   }
 

@@ -31,7 +31,6 @@ boost::python::list getNonIntegratedDimensionsAsPyList(const MDGeometry &self) {
   }
   return nonIntegrated;
 }
-
 }
 
 void export_MDGeometry() {

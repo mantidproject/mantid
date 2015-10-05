@@ -20,51 +20,52 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-class LoadIsawUBTest : public CxxTest::TestSuite
-{
+class LoadIsawUBTest : public CxxTest::TestSuite {
 public:
-
-    
-  void test_Init()
-  {
+  void test_Init() {
     LoadIsawUB alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
   }
-  
-  void test_exec()
-  {
+
+  void test_exec() {
     // Fake output WS
-    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    MatrixWorkspace_sptr ws =
+        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("LoadIsawUBTest_ws", ws);
-  
+
     LoadIsawUB alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "TOPAZ_3007.mat") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "LoadIsawUBTest_ws") );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
-    
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("Filename", "TOPAZ_3007.mat"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", "LoadIsawUBTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
     TS_ASSERT(ws);
-    if (!ws) return;
-    
+    if (!ws)
+      return;
+
     // Check the results
     OrientedLattice latt;
-    TS_ASSERT_THROWS_NOTHING( latt = ws->mutableSample().getOrientedLattice() );
-    TS_ASSERT_DELTA( latt.a(), 14.1526, 1e-4 );
-    TS_ASSERT_DELTA( latt.b(), 19.2903, 1e-4 );
-    TS_ASSERT_DELTA( latt.c(), 8.5813 , 1e-4 );
-    TS_ASSERT_DELTA( latt.alpha(), 90.0000, 1e-4 );
-    TS_ASSERT_DELTA( latt.beta(), 105.0738, 1e-4 );
-    TS_ASSERT_DELTA( latt.gamma(), 90.0000, 1e-4 );
+    TS_ASSERT_THROWS_NOTHING(latt = ws->mutableSample().getOrientedLattice());
+    TS_ASSERT_DELTA(latt.a(), 14.1526, 1e-4);
+    TS_ASSERT_DELTA(latt.b(), 19.2903, 1e-4);
+    TS_ASSERT_DELTA(latt.c(), 8.5813, 1e-4);
+    TS_ASSERT_DELTA(latt.alpha(), 90.0000, 1e-4);
+    TS_ASSERT_DELTA(latt.beta(), 105.0738, 1e-4);
+    TS_ASSERT_DELTA(latt.gamma(), 90.0000, 1e-4);
 
     Matrix<double> UB = latt.getUB();
-    TS_ASSERT_EQUALS( UB.numRows(), 3);
-    TS_ASSERT_EQUALS( UB.numCols(), 3);
-    TS_ASSERT_DELTA( UB[0][0], -0.0453, 1e-4); // (Values were taken from the result, for consistency)
-    TS_ASSERT_DELTA( UB[1][0],  0.0013, 1e-4);
-    TS_ASSERT_DELTA( UB[2][2],  0.0273, 1e-4);
+    TS_ASSERT_EQUALS(UB.numRows(), 3);
+    TS_ASSERT_EQUALS(UB.numCols(), 3);
+    TS_ASSERT_DELTA(
+        UB[0][0], -0.0453,
+        1e-4); // (Values were taken from the result, for consistency)
+    TS_ASSERT_DELTA(UB[1][0], 0.0013, 1e-4);
+    TS_ASSERT_DELTA(UB[2][2], 0.0273, 1e-4);
 
     AnalysisDataService::Instance().remove("LoadIsawUBTest_ws");
   }
@@ -82,42 +83,39 @@ PredictPeaks(InputWorkspace="TOPAZ_3007",HKLPeaksWorkspace="TOPAZ_3007_peaks",Ou
 MaskPeaksWorkspace("TOPAZ_3007", "peaks")
    *
    */
-  void test_integration()
-  {
-    Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 20);
+  void test_integration() {
+    Workspace2D_sptr ws =
+        WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 20);
     PeaksWorkspace_sptr pw;
     AnalysisDataService::Instance().addOrReplace("TOPAZ_3007", ws);
 
-    FrameworkManager::Instance().exec("LoadInstrument", 4,
-        "Workspace", "TOPAZ_3007",
-        "Filename", "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
+    FrameworkManager::Instance().exec(
+        "LoadInstrument", 4, "Workspace", "TOPAZ_3007", "Filename",
+        "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
 
     // Match the goniometer angles
     WorkspaceCreationHelper::SetGoniometer(ws, 86.92, 135.00, -105.66);
-    //WorkspaceCreationHelper::SetGoniometer(ws, 0, 0, 0);
+    // WorkspaceCreationHelper::SetGoniometer(ws, 0, 0, 0);
 
     // Load the .mat file into it
-    FrameworkManager::Instance().exec("LoadIsawUB", 4,
-        "Filename", "TOPAZ_3007.mat",
-        "InputWorkspace", "TOPAZ_3007");
+    FrameworkManager::Instance().exec("LoadIsawUB", 4, "Filename",
+                                      "TOPAZ_3007.mat", "InputWorkspace",
+                                      "TOPAZ_3007");
 
     // Load the .mat file into it
-    FrameworkManager::Instance().exec("PredictPeaks", 4,
-        "InputWorkspace", "TOPAZ_3007",
-        "OutputWorkspace", "peaks_predicted" );
+    FrameworkManager::Instance().exec("PredictPeaks", 4, "InputWorkspace",
+                                      "TOPAZ_3007", "OutputWorkspace",
+                                      "peaks_predicted");
 
     pw = boost::dynamic_pointer_cast<PeaksWorkspace>(
-        AnalysisDataService::Instance().retrieve("peaks_predicted") );
+        AnalysisDataService::Instance().retrieve("peaks_predicted"));
 
     TS_ASSERT(pw);
-    if (!pw) return;
+    if (!pw)
+      return;
 
-   TS_ASSERT_EQUALS( pw->getNumberPeaks(), 220);
-
-
+    TS_ASSERT_EQUALS(pw->getNumberPeaks(), 220);
   }
 };
 
-
 #endif /* MANTID_CRYSTAL_LOADISAWUBTEST_H_ */
-

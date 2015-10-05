@@ -22,12 +22,12 @@ public:
     // The exapansions for the polynomials were found at
     // http://mathworld.wolfram.com/ChebyshevPolynomialoftheFirstKind.html
     ChebyshevPolynomial chebp;
-    const double x(0.75), xsq(x*x);
+    const double x(0.75), xsq(x * x);
     TS_ASSERT_DELTA(1.0, chebp(0, x), delta);
     TS_ASSERT_DELTA(x, chebp(1, x), delta);
-    TS_ASSERT_DELTA(2.*xsq - 1., chebp(2, x), delta);
-    TS_ASSERT_DELTA(4.*x*xsq - 3.*x, chebp(3, x), delta);
-    TS_ASSERT_DELTA(8.*xsq*xsq - 8.*xsq + 1.0, chebp(4, x), delta);
+    TS_ASSERT_DELTA(2. * xsq - 1., chebp(2, x), delta);
+    TS_ASSERT_DELTA(4. * x * xsq - 3. * x, chebp(3, x), delta);
+    TS_ASSERT_DELTA(8. * xsq * xsq - 8. * xsq + 1.0, chebp(4, x), delta);
   }
 
   // No test for out of range as there is an assert in there..

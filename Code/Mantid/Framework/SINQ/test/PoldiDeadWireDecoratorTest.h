@@ -11,72 +11,64 @@ using namespace Mantid::Poldi;
 using ::testing::Return;
 using ::testing::_;
 
-class PoldiDeadWireDecoratorTest : public CxxTest::TestSuite
-{
+class PoldiDeadWireDecoratorTest : public CxxTest::TestSuite {
 private:
-    boost::shared_ptr<MockDetector> m_detector;
-    std::set<int> m_validDeadWires;
-    std::set<int> m_invalidDeadWires;
+  boost::shared_ptr<MockDetector> m_detector;
+  std::set<int> m_validDeadWires;
+  std::set<int> m_invalidDeadWires;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PoldiDeadWireDecoratorTest *createSuite() { return new PoldiDeadWireDecoratorTest(); }
-  static void destroySuite( PoldiDeadWireDecoratorTest *suite ) { delete suite; }
+  static PoldiDeadWireDecoratorTest *createSuite() {
+    return new PoldiDeadWireDecoratorTest();
+  }
+  static void destroySuite(PoldiDeadWireDecoratorTest *suite) { delete suite; }
 
-  PoldiDeadWireDecoratorTest()
-  {
-      m_detector = boost::shared_ptr<MockDetector>(new MockDetector);
+  PoldiDeadWireDecoratorTest() {
+    m_detector = boost::shared_ptr<MockDetector>(new MockDetector);
 
-      int valid[] = {0, 1, 2, 5, 99, 299, 399};
-      int invalid[] = {0, 1, 400};
+    int valid[] = {0, 1, 2, 5, 99, 299, 399};
+    int invalid[] = {0, 1, 400};
 
-      m_validDeadWires = std::set<int>(valid, valid + 7);
-      m_invalidDeadWires = std::set<int>(invalid, invalid + 3);
+    m_validDeadWires = std::set<int>(valid, valid + 7);
+    m_invalidDeadWires = std::set<int>(invalid, invalid + 3);
   }
 
+  void testInitialization() {
+    PoldiDeadWireDecorator decorator(m_validDeadWires, m_detector);
 
-  void testInitialization()
-  {
-      PoldiDeadWireDecorator decorator(m_validDeadWires, m_detector);
-
-      TS_ASSERT_EQUALS(decorator.deadWires(), m_validDeadWires);
+    TS_ASSERT_EQUALS(decorator.deadWires(), m_validDeadWires);
   }
 
-  void testAssignment()
-  {
-      PoldiDeadWireDecorator decorator(std::set<int>(), m_detector);
+  void testAssignment() {
+    PoldiDeadWireDecorator decorator(std::set<int>(), m_detector);
 
-      decorator.setDeadWires(m_validDeadWires);
-      TS_ASSERT_EQUALS(decorator.deadWires(), m_validDeadWires);
+    decorator.setDeadWires(m_validDeadWires);
+    TS_ASSERT_EQUALS(decorator.deadWires(), m_validDeadWires);
   }
 
-  void testelementCount()
-  {
-      PoldiDeadWireDecorator decorator(m_validDeadWires, m_detector);
+  void testelementCount() {
+    PoldiDeadWireDecorator decorator(m_validDeadWires, m_detector);
 
-      TS_ASSERT_EQUALS(decorator.elementCount(), 393);
+    TS_ASSERT_EQUALS(decorator.elementCount(), 393);
   }
 
-  void testavailableElements()
-  {
-      PoldiDeadWireDecorator decorator(m_validDeadWires, m_detector);
+  void testavailableElements() {
+    PoldiDeadWireDecorator decorator(m_validDeadWires, m_detector);
 
-      const std::vector<int> goodElements = decorator.availableElements();
+    const std::vector<int> goodElements = decorator.availableElements();
 
-      TS_ASSERT_EQUALS(goodElements.front(), 3);
-      TS_ASSERT_EQUALS(goodElements.back(), 398);
+    TS_ASSERT_EQUALS(goodElements.front(), 3);
+    TS_ASSERT_EQUALS(goodElements.back(), 398);
   }
 
-  void testinvalid()
-  {
-      PoldiDeadWireDecorator decorator(std::set<int>(), m_detector);
+  void testinvalid() {
+    PoldiDeadWireDecorator decorator(std::set<int>(), m_detector);
 
-      TS_ASSERT_THROWS(decorator.setDeadWires(m_invalidDeadWires), std::runtime_error);
+    TS_ASSERT_THROWS(decorator.setDeadWires(m_invalidDeadWires),
+                     std::runtime_error);
   }
-
-
 };
-
 
 #endif /* MANTID_SINQ_POLDIDEADWIREDECORATORTEST_H_ */

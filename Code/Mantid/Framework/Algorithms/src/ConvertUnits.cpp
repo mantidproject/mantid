@@ -298,7 +298,7 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS,
       MantidVec::iterator iter;
       for (iter = outputWS->dataX(0).begin(); iter != outputWS->dataX(0).end();
            ++iter) {
-        *iter = factor * std::pow(*iter, power);
+        *iter = factor *std::pow(*iter, power);
       }
 
       MantidVecPtr xVals;
@@ -330,7 +330,7 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS,
       MantidVec::iterator it;
       for (it = outputWS->dataX(k).begin(); it != outputWS->dataX(k).end();
            ++it) {
-        *it = factor * std::pow(*it, power);
+        *it = factor *std::pow(*it, power);
       }
     }
     // Convert the events themselves if necessary. Inefficiently.

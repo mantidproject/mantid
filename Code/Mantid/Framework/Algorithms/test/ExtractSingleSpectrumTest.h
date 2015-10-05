@@ -7,82 +7,74 @@
 
 using Mantid::detid_t;
 
-class ExtractSingleSpectrumTest : public CxxTest::TestSuite
-{
+class ExtractSingleSpectrumTest : public CxxTest::TestSuite {
 public:
-  void testName()
-  {
+  void testName() {
     IAlgorithm *nameTester = createExtractSingleSpectrum();
-	  TS_ASSERT_EQUALS( nameTester->name(), "ExtractSingleSpectrum" );
+    TS_ASSERT_EQUALS(nameTester->name(), "ExtractSingleSpectrum");
   }
 
-  void testVersion()
-  {
+  void testVersion() {
     IAlgorithm *versionTester = createExtractSingleSpectrum();
-    TS_ASSERT_EQUALS( versionTester->version(), 1 );
+    TS_ASSERT_EQUALS(versionTester->version(), 1);
   }
 
-  void testInit()
-  {
+  void testInit() {
     IAlgorithm *initTester = createExtractSingleSpectrum();
-    TS_ASSERT_THROWS_NOTHING( initTester->initialize() );
-    TS_ASSERT( initTester->isInitialized() );
-    TS_ASSERT_EQUALS( initTester->getProperties().size(), 3 );
+    TS_ASSERT_THROWS_NOTHING(initTester->initialize());
+    TS_ASSERT(initTester->isInitialized());
+    TS_ASSERT_EQUALS(initTester->getProperties().size(), 3);
   }
-  
-  void testExec()
-  {
+
+  void testExec() {
     using namespace Mantid::API;
     const int nbins(5);
-    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(5,nbins);
+    MatrixWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(5, nbins);
     const int wsIndex = 2;
-    for (int i=0; i<nbins+1; ++i)
-    {
+    for (int i = 0; i < nbins + 1; ++i) {
       inputWS->dataX(wsIndex)[i] = i;
-      if( i < nbins )
-      {
-        inputWS->dataY(wsIndex)[i] = 20-i;
+      if (i < nbins) {
+        inputWS->dataY(wsIndex)[i] = 20 - i;
         inputWS->dataE(wsIndex)[i] = 7;
       }
     }
     MatrixWorkspace_sptr outputWS = runAlgorithm(inputWS, wsIndex);
 
     TS_ASSERT(outputWS);
-    TS_ASSERT_EQUALS( outputWS->blocksize(), 5 );
-    TS_ASSERT_EQUALS( outputWS->readX(0).size(), nbins+1);
-    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(0), wsIndex + 1);
-    for (int j=0; j<nbins+1; ++j)
-    {
-      TS_ASSERT_EQUALS( outputWS->readX(0)[j], j );
-      if( j < nbins )
-      {
-        TS_ASSERT_EQUALS( outputWS->readY(0)[j], 20-j );
-        TS_ASSERT_EQUALS( outputWS->readE(0)[j], 7 );
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 5);
+    TS_ASSERT_EQUALS(outputWS->readX(0).size(), nbins + 1);
+    TS_ASSERT_EQUALS(outputWS->getAxis(1)->spectraNo(0), wsIndex + 1);
+    for (int j = 0; j < nbins + 1; ++j) {
+      TS_ASSERT_EQUALS(outputWS->readX(0)[j], j);
+      if (j < nbins) {
+        TS_ASSERT_EQUALS(outputWS->readY(0)[j], 20 - j);
+        TS_ASSERT_EQUALS(outputWS->readE(0)[j], 7);
       }
     }
     do_Spectrum_Tests(outputWS, 3, 3);
   }
 
-  void test_Input_With_TextAxis()
-  {
+  void test_Input_With_TextAxis() {
     Algorithm *extractorWithText = new ExtractSingleSpectrum;
     extractorWithText->initialize();
     extractorWithText->setPropertyValue("WorkspaceIndex", "1");
-    CropWorkspaceTest::doTestWithTextAxis(extractorWithText); //Takes ownership
+    CropWorkspaceTest::doTestWithTextAxis(extractorWithText); // Takes ownership
   }
-  
-  void test_Input_With_Event_Workspace()
-  {
+
+  void test_Input_With_Event_Workspace() {
     // Create and input event workspace
     const int eventsPerPixel(25);
     const int numPixels(10);
-    EventWorkspace_sptr eventWS = WorkspaceCreationHelper::CreateEventWorkspace(numPixels,50,eventsPerPixel,0.0, 1.0, 1/*EventPattern=1*/);
+    EventWorkspace_sptr eventWS = WorkspaceCreationHelper::CreateEventWorkspace(
+        numPixels, 50, eventsPerPixel, 0.0, 1.0, 1 /*EventPattern=1*/);
     TS_ASSERT(eventWS);
     const int wsIndex(4);
     MatrixWorkspace_sptr output = runAlgorithm(eventWS, wsIndex);
 
-    EventWorkspace_sptr outputWS = boost::dynamic_pointer_cast<EventWorkspace>(output);
-    TSM_ASSERT("Output should be an event workspace",outputWS);
+    EventWorkspace_sptr outputWS =
+        boost::dynamic_pointer_cast<EventWorkspace>(output);
+    TSM_ASSERT("Output should be an event workspace", outputWS);
     const size_t numEvents = outputWS->getNumberEvents();
     TS_ASSERT_EQUALS(numEvents, eventsPerPixel);
     do_Spectrum_Tests(outputWS, 4, 4);
@@ -92,49 +84,43 @@ public:
   }
 
 private:
-
-  ExtractSingleSpectrum * createExtractSingleSpectrum()
-  {
+  ExtractSingleSpectrum *createExtractSingleSpectrum() {
     return new ExtractSingleSpectrum();
   }
 
-  MatrixWorkspace_sptr runAlgorithm(MatrixWorkspace_sptr inputWS, const int index)
-  {
+  MatrixWorkspace_sptr runAlgorithm(MatrixWorkspace_sptr inputWS,
+                                    const int index) {
     Algorithm *extractor = createExtractSingleSpectrum();
     extractor->initialize();
-    extractor->setChild(true); // Don't add the output to the ADS, then we don't have to clear it
-    TS_ASSERT_THROWS_NOTHING(extractor->setProperty("InputWorkspace",inputWS));
-    TS_ASSERT_THROWS_NOTHING(extractor->setPropertyValue("OutputWorkspace","child_algorithm"));
-    TS_ASSERT_THROWS_NOTHING(extractor->setProperty("WorkspaceIndex",index));
+    extractor->setChild(true); // Don't add the output to the ADS, then we don't
+                               // have to clear it
+    TS_ASSERT_THROWS_NOTHING(extractor->setProperty("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(
+        extractor->setPropertyValue("OutputWorkspace", "child_algorithm"));
+    TS_ASSERT_THROWS_NOTHING(extractor->setProperty("WorkspaceIndex", index));
     TS_ASSERT_THROWS_NOTHING(extractor->execute());
     TS_ASSERT(extractor->isExecuted());
-    if(!extractor->isExecuted())
-    {
+    if (!extractor->isExecuted()) {
       TS_FAIL("Error running algorithm");
     }
     return extractor->getProperty("OutputWorkspace");
   }
 
-  void do_Spectrum_Tests(MatrixWorkspace_sptr outputWS, const specid_t specID, const detid_t detID)
-  {
+  void do_Spectrum_Tests(MatrixWorkspace_sptr outputWS, const specid_t specID,
+                         const detid_t detID) {
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
     const Mantid::API::ISpectrum *spectrum(NULL);
     TS_ASSERT_THROWS_NOTHING(spectrum = outputWS->getSpectrum(0));
-    if( spectrum )
-    {
+    if (spectrum) {
       TS_ASSERT_EQUALS(spectrum->getSpectrumNo(), specID);
       std::set<detid_t> detids = spectrum->getDetectorIDs();
       TS_ASSERT_EQUALS(detids.size(), 1);
       const detid_t id = *(detids.begin());
       TS_ASSERT_EQUALS(id, detID);
-    }
-    else
-    {
+    } else {
       TS_FAIL("No spectra/detectors associated with extracted histogram.");
     }
   }
-
-
 };
 
 #endif /*EXTRACTSINGLESPECTRUMTEST_H_*/

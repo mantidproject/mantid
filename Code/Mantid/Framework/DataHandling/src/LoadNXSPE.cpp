@@ -297,8 +297,7 @@ void LoadNXSPE::exec() {
     itdataend = itdata + numBins;
     iterrorend = iterror + numBins;
     outputWS->dataX(i) = energies;
-    if ((!boost::math::isfinite(*itdata))||
-        (*itdata <= -1e10)) // masked bin
+    if ((!boost::math::isfinite(*itdata)) || (*itdata <= -1e10)) // masked bin
     {
       outputWS->dataY(i) = std::vector<double>(numBins, 0);
       outputWS->dataE(i) = std::vector<double>(numBins, 0);
@@ -311,7 +310,6 @@ void LoadNXSPE::exec() {
     iterror = (iterrorend);
     prog.report();
   }
-
 
   setProperty("OutputWorkspace", outputWS);
 }

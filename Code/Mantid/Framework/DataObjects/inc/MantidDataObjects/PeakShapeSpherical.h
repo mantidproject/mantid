@@ -41,7 +41,8 @@ public:
                      std::string algorithmName = std::string(),
                      int algorithmVersion = -1);
   /// Constructor
-  PeakShapeSpherical(const double &peakRadius, const double& peakInnerRadius, const double& peakOuterRadius,
+  PeakShapeSpherical(const double &peakRadius, const double &peakInnerRadius,
+                     const double &peakOuterRadius,
                      Kernel::SpecialCoordinateSystem frame,
                      std::string algorithmName = std::string(),
                      int algorithmVersion = -1);

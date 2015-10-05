@@ -7,7 +7,8 @@ using Mantid::API::FileLoaderRegistryImpl;
 using namespace boost::python;
 
 void export_FileLoaderRegistry() {
-  class_<FileLoaderRegistryImpl, boost::noncopyable>("FileLoaderRegistryImpl", no_init)
+  class_<FileLoaderRegistryImpl, boost::noncopyable>("FileLoaderRegistryImpl",
+                                                     no_init)
       .def("canLoad", &FileLoaderRegistryImpl::canLoad,
            "Perform a check that that the given algorithm can load the file")
       .def("Instance", &FileLoaderRegistry::Instance,

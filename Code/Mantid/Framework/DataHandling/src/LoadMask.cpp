@@ -44,15 +44,16 @@ DECLARE_ALGORITHM(LoadMask)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadMask::LoadMask(): m_maskWS(), m_instrumentPropValue(""), m_pDoc(NULL),
-  m_pRootElem(NULL), m_defaultToUse(true) {
-}
+LoadMask::LoadMask()
+    : m_maskWS(), m_instrumentPropValue(""), m_pDoc(NULL), m_pRootElem(NULL),
+      m_defaultToUse(true) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
 LoadMask::~LoadMask() {
-  // note Poco::XML::Document and Poco::XML::Element declare their constructors as protected
+  // note Poco::XML::Document and Poco::XML::Element declare their constructors
+  // as protected
   if (m_pDoc)
     m_pDoc->release();
   // note that m_pRootElem does not need a release(), and that can
@@ -839,8 +840,8 @@ void LoadMask::parseISISStringToVector(string ins,
  */
 void LoadMask::intializeMaskWorkspace() {
   const bool ignoreDirs(true);
-  const std::string idfPath =
-    API::FileFinder::Instance().getFullPath(m_instrumentPropValue, ignoreDirs);
+  const std::string idfPath = API::FileFinder::Instance().getFullPath(
+      m_instrumentPropValue, ignoreDirs);
 
   MatrixWorkspace_sptr tempWs(new DataObjects::Workspace2D());
 

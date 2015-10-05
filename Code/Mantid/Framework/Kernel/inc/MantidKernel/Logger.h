@@ -71,7 +71,7 @@ public:
   // Our logger's priority types are the same as POCO's Message's types.
   typedef Poco::Message::Priority Priority;
 
-  static const std::string* PriorityNames;
+  static const std::string *PriorityNames;
 
   /// Constructor giving the logger name
   Logger(const std::string &name);

@@ -22,171 +22,162 @@ using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
 using Mantid::Kernel::DblMatrix;
 
-class PredictPeaksTest : public CxxTest::TestSuite
-{
+class PredictPeaksTest : public CxxTest::TestSuite {
 public:
-
-    
-  void test_Init()
-  {
+  void test_Init() {
     PredictPeaks alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
   }
-  
+
   /** Make a HKL peaks workspace */
-  PeaksWorkspace_sptr getHKLpw(Instrument_sptr inst, std::vector<V3D> hkls, detid_t detid)
-  {
+  PeaksWorkspace_sptr getHKLpw(Instrument_sptr inst, std::vector<V3D> hkls,
+                               detid_t detid) {
     PeaksWorkspace_sptr hklPW;
-    if (hkls.size() > 0)
-    {
+    if (hkls.size() > 0) {
       hklPW = PeaksWorkspace_sptr(new PeaksWorkspace());
-      for (size_t i=0; i<hkls.size(); i++)
-      {
+      for (size_t i = 0; i < hkls.size(); i++) {
         Peak p(inst, detid, 1.0);
-        p.setHKL( hkls[i] );
-        hklPW->addPeak( p );
+        p.setHKL(hkls[i]);
+        hklPW->addPeak(p);
       }
     }
     return hklPW;
   }
 
-
-  void do_test_exec(std::string reflectionCondition, size_t expectedNumber, std::vector<V3D> hkls)
-  {
+  void do_test_exec(std::string reflectionCondition, size_t expectedNumber,
+                    std::vector<V3D> hkls) {
     // Name of the output workspace.
     std::string outWSName("PredictPeaksTest_OutputWS");
 
     // Make the fake input workspace
-    MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::Create2DWorkspace(10000, 1);
-    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
+    MatrixWorkspace_sptr inWS =
+        WorkspaceCreationHelper::Create2DWorkspace(10000, 1);
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
     inWS->setInstrument(inst);
 
-    //Set ub and Goniometer rotation
+    // Set ub and Goniometer rotation
     WorkspaceCreationHelper::SetOrientedLattice(inWS, 12.0, 12.0, 12.0);
     WorkspaceCreationHelper::SetGoniometer(inWS, 0., 0., 0.);
 
     PeaksWorkspace_sptr hklPW = getHKLpw(inst, hkls, 10000);
-  
+
     PredictPeaks alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inWS) ) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("WavelengthMin", "0.1") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("WavelengthMax", "10.0") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("MinDSpacing", "1.0") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("ReflectionCondition", reflectionCondition) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("HKLPeaksWorkspace", hklPW) );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
-    
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+        "InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inWS)));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("WavelengthMin", "0.1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("WavelengthMax", "10.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MinDSpacing", "1.0"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("ReflectionCondition", reflectionCondition));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("HKLPeaksWorkspace", hklPW));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
     // Retrieve the workspace from data service.
     PeaksWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(outWSName) );
+    TS_ASSERT_THROWS_NOTHING(
+        ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(
+            outWSName));
     TS_ASSERT(ws);
-    if (!ws) return;
-    
-    TS_ASSERT_EQUALS( ws->getNumberPeaks(), expectedNumber);
-    //std::cout << ws->getPeak(0).getHKL() << " hkl\n";
-    
+    if (!ws)
+      return;
+
+    TS_ASSERT_EQUALS(ws->getNumberPeaks(), expectedNumber);
+    // std::cout << ws->getPeak(0).getHKL() << " hkl\n";
+
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }
-  
-  void test_exec()
-  {
-    do_test_exec("Primitive", 10, std::vector<V3D>() );
-  }
+
+  void test_exec() { do_test_exec("Primitive", 10, std::vector<V3D>()); }
 
   /** Fewer HKLs if they are not allowed */
-  void test_exec_withReflectionCondition()
-  {
-    do_test_exec("C-face centred", 6, std::vector<V3D>() );
+  void test_exec_withReflectionCondition() {
+    do_test_exec("C-face centred", 6, std::vector<V3D>());
   }
 
-  void test_exec_withInputHKLList()
-  {
+  void test_exec_withInputHKLList() {
     std::vector<V3D> hkls;
-    hkls.push_back(V3D(-6,-9,1));
+    hkls.push_back(V3D(-6, -9, 1));
     do_test_exec("Primitive", 1, hkls);
   }
-
-
 
   /** More manual test of predict peaks where we build a simple UB
    * and see that the peak falls where it should.
    * In this case, hkl 1,0,0 on a crystal rotated 45 deg. relative to +Y
    * should fall on a detector towards (+1.0, 0.0, 0.0)
    */
-  void do_test_manual(double Urotation, double GonioRotation)
-  {
+  void do_test_manual(double Urotation, double GonioRotation) {
     // Name of the output workspace.
     std::string outWSName("PredictPeaksTest_OutputWS");
 
     // Make the fake input workspace
-    MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::Create2DWorkspace(10000, 1);
-    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
+    MatrixWorkspace_sptr inWS =
+        WorkspaceCreationHelper::Create2DWorkspace(10000, 1);
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
     inWS->setInstrument(inst);
 
-    //Set ub and Goniometer rotation
+    // Set ub and Goniometer rotation
     WorkspaceCreationHelper::SetOrientedLattice(inWS, 10.0, 10.0, 10.0);
 
     // Make a U matrix of 22.5 degree rotation around +Y
-    DblMatrix u(3,3);
+    DblMatrix u(3, 3);
     Goniometer gon;
     gon.makeUniversalGoniometer();
     gon.setRotationAngle("phi", Urotation);
     u = gon.getR();
     inWS->mutableSample().getOrientedLattice().setU(u);
 
-    // Final rotation should add up to 45 degrees around +Y so that hkl 1,0,0 goes to +X
+    // Final rotation should add up to 45 degrees around +Y so that hkl 1,0,0
+    // goes to +X
     WorkspaceCreationHelper::SetGoniometer(inWS, GonioRotation, 0., 0.);
 
     DblMatrix ub = inWS->sample().getOrientedLattice().getUB();
 
     std::vector<V3D> hkls;
-    hkls.push_back(V3D(-1,0,0));
+    hkls.push_back(V3D(-1, 0, 0));
     PeaksWorkspace_sptr hklPW = getHKLpw(inst, hkls, 0);
 
     PredictPeaks alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inWS) ) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("HKLPeaksWorkspace", hklPW) );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+        "InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inWS)));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("HKLPeaksWorkspace", hklPW));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     PeaksWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(outWSName) );
+    TS_ASSERT_THROWS_NOTHING(
+        ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(
+            outWSName));
     TS_ASSERT(ws);
-    if (!ws) return;
+    if (!ws)
+      return;
 
-    TS_ASSERT_EQUALS( ws->getNumberPeaks(), 1);
+    TS_ASSERT_EQUALS(ws->getNumberPeaks(), 1);
     // Center of the panel
-    TS_ASSERT_EQUALS( ws->getPeak(0).getDetectorID(), 5050);
+    TS_ASSERT_EQUALS(ws->getPeak(0).getDetectorID(), 5050);
     // Expected wavelength
-    TS_ASSERT_DELTA( ws->getPeak(0).getWavelength(), 14.14, 0.01);
+    TS_ASSERT_DELTA(ws->getPeak(0).getWavelength(), 14.14, 0.01);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }
 
+  void test_manual_goniometer_alone() { do_test_manual(0, 45.0); }
 
-  void test_manual_goniometer_alone()
-  {
-    do_test_manual(0, 45.0);
-  }
-
-  void test_manual_U_and_gonio()
-  {
-    do_test_manual(22.5, 22.5);
-  }
-
+  void test_manual_U_and_gonio() { do_test_manual(22.5, 22.5); }
 };
 
-
 #endif /* MANTID_CRYSTAL_PREDICTPEAKSTEST_H_ */
-

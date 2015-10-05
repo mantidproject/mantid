@@ -13,10 +13,12 @@
 namespace Mantid {
 namespace DataObjects {
 
-// Typedef for a map for mapping width of neighbours (key) to permutations needed in the calcualtion.
-typedef std::map<std::vector<int>, std::vector<int64_t> > PermutationsMap;
+// Typedef for a map for mapping width of neighbours (key) to permutations
+// needed in the calcualtion.
+typedef std::map<std::vector<int>, std::vector<int64_t>> PermutationsMap;
 // Typedef for extents
-typedef boost::tuple<Mantid::coord_t, Mantid::coord_t> MDExtentPair; // Min/Max pair
+typedef boost::tuple<Mantid::coord_t, Mantid::coord_t>
+    MDExtentPair; // Min/Max pair
 // Typedef for vector of extents
 typedef std::vector<MDExtentPair> VecMDExtents;
 
@@ -83,7 +85,7 @@ public:
 
   virtual void jumpTo(size_t index);
 
-  virtual coord_t jumpToNearest(const Mantid::Kernel::VMD& fromLocation);
+  virtual coord_t jumpToNearest(const Mantid::Kernel::VMD &fromLocation);
 
   virtual signal_t getNormalizedSignal() const;
 
@@ -123,9 +125,10 @@ public:
 
   std::vector<size_t> findNeighbourIndexesFaceTouching() const;
 
-  std::vector<size_t> findNeighbourIndexesByWidth(const int& width) const;
+  std::vector<size_t> findNeighbourIndexesByWidth(const int &width) const;
 
-  std::vector<size_t> findNeighbourIndexesByWidth(const std::vector<int>& widths) const;
+  std::vector<size_t>
+  findNeighbourIndexesByWidth(const std::vector<int> &widths) const;
 
   virtual bool isWithinBounds(size_t index) const;
 
@@ -173,14 +176,15 @@ protected:
   /// Neigbour finding permutations for face touching neighbours (3 by 3 width).
   mutable std::vector<int64_t> m_permutationsFaceTouching;
 
-  /// Neighbour finding permutations map for vertex touching. Keyed via the width (n-pixels) of neighbours required.
+  /// Neighbour finding permutations map for vertex touching. Keyed via the
+  /// width (n-pixels) of neighbours required.
   mutable PermutationsMap m_permutationsVertexTouchingMap;
 
   /// Skipping policy.
   SkippingPolicy_scptr m_skippingPolicy;
 
   /// Create or fetch permutations relating to a given neighbour width.
-  std::vector<int64_t> createPermutations(const std::vector<int>& widths) const;
+  std::vector<int64_t> createPermutations(const std::vector<int> &widths) const;
 };
 
 } // namespace DataObjects

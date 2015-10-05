@@ -41,8 +41,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 bool DLLExport typeHasAttribute(PyObject *obj, const char *attr);
 /// An overload for the above taking a wrapper reference
 bool DLLExport
-    typeHasAttribute(const boost::python::detail::wrapper_base &wrapper,
-                     const char *attr);
+typeHasAttribute(const boost::python::detail::wrapper_base &wrapper,
+                 const char *attr);
 
 /**
  * Defines an exception for an undefined attribute

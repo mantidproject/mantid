@@ -123,8 +123,7 @@ void SendUsage::sendReport(const std::string &json) {
     status = helper.sendRequest(URL, responseStream);
     g_log.debug() << "Call to \"" << URL << "\" responded with " << status
                   << "\n" << responseStream.str() << "\n";
-  }
-  catch (Mantid::Kernel::Exception::InternetError &e) {
+  } catch (Mantid::Kernel::Exception::InternetError &e) {
     status = e.errorCode();
     g_log.information() << "Call to \"" << URL << "\" responded with " << status
                         << "\n" << e.what() << "\n";

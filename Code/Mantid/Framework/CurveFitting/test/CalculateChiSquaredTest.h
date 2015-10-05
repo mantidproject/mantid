@@ -97,7 +97,7 @@ public:
   }
 
   void test_1D_values_point_data() {
-    Tester tester(3,10,false);
+    Tester tester(3, 10, false);
     tester.set1DFunction();
     tester.set1DSpectrumValues();
     tester.runAlgorithm();
@@ -144,7 +144,7 @@ public:
   }
 
   void test_1D_values_divide_by_dof_zero() {
-    Tester tester(3,3);
+    Tester tester(3, 3);
     tester.set1DFunction();
     tester.set1DSpectrumValues();
     tester.runAlgorithm();
@@ -153,7 +153,7 @@ public:
   }
 
   void test_1D_values_divide_by_dof_negative() {
-    Tester tester(3,2);
+    Tester tester(3, 2);
     tester.set1DFunction();
     tester.set1DSpectrumValues();
     tester.runAlgorithm();
@@ -165,7 +165,7 @@ public:
     double x[] = {-3.067, -2.981, -2.921, -2.912, -2.840, -2.797, -2.702,
                   -2.699, -2.633, -2.481, -2.363, -2.322, -1.501, -1.460,
                   -1.274, -1.212, -1.100, -1.046, -0.915, -0.714, -0.566,
-                  -0.545,  -0.400, -0.309, -0.109, -0.103, 0.010,  0.119,
+                  -0.545, -0.400, -0.309, -0.109, -0.103, 0.010,  0.119,
                   0.377,  0.790,  0.963,  1.006,  1.115,  1.572,  1.841,
                   2.047,  2.200};
     double y[] = {80.574,   84.248,   87.264,   87.195,   89.076,   89.608,
@@ -181,7 +181,9 @@ public:
                     "b3=5.8323836877E+02, b4=7.5416644291E+01, "
                     "b5=9.6629502864E-01, b6=3.9797285797E-01, "
                     "b7=4.9727297349E-02");
-    double sigma[] = {4.6647963344E+00,3.9571156086E+01,2.8698696102E+01,5.5675370270E+00,3.1333340687E-02,1.4984928198E-02,6.5842344623E-03};
+    double sigma[] = {4.6647963344E+00, 3.9571156086E+01, 2.8698696102E+01,
+                      5.5675370270E+00, 3.1333340687E-02, 1.4984928198E-02,
+                      6.5842344623E-03};
     size_t ndata = sizeof(x) / sizeof(double);
     Tester tester;
     tester.setTestCaseForErrorCalculations(ndata, x, y, fun);
@@ -296,7 +298,8 @@ private:
         EndX = xMax;
       } else {
         auto ix = std::upper_bound(xBins.begin(), xBins.end(), EndX);
-        if (ix != xBins.end()) EndX = *ix;
+        if (ix != xBins.end())
+          EndX = *ix;
         else
           EndX = xMax;
       }
@@ -334,9 +337,11 @@ private:
       TS_ASSERT(alg.isInitialized())
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("Function", function));
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", workspace));
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("IgnoreInvalidData", ignoreInvalidData));
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setProperty("IgnoreInvalidData", ignoreInvalidData));
       if (dynamic_cast<IFunction1D *>(function.get())) {
-        TS_ASSERT_THROWS_NOTHING(alg.setProperty("WorkspaceIndex", workspaceIndex));
+        TS_ASSERT_THROWS_NOTHING(
+            alg.setProperty("WorkspaceIndex", workspaceIndex));
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartX", StartX));
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndX", EndX));
       }
@@ -350,10 +355,13 @@ private:
         chiSquared = alg.getProperty("ChiSquared");
         chiSquaredDividedByDOF = alg.getProperty("ChiSquaredDividedByDOF");
         chiSquaredWeighted = alg.getProperty("ChiSquaredWeighted");
-        chiSquaredWeightedDividedByDOF = alg.getProperty("ChiSquaredWeightedDividedByDOF");
+        chiSquaredWeightedDividedByDOF =
+            alg.getProperty("ChiSquaredWeightedDividedByDOF");
         if (!outputName.empty()) {
-          errors = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("out_errors");
-          pdfs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("out_pdf");
+          errors = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+              "out_errors");
+          pdfs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+              "out_pdf");
         }
       }
     }
@@ -373,15 +381,12 @@ private:
       EndX = xBins[7] + 0.7;
     }
 
-    void setWorkspaceIndex() {
-      workspaceIndex = 3;
-    }
+    void setWorkspaceIndex() { workspaceIndex = 3; }
 
-    void setIgnoreInvalidData() {
-      ignoreInvalidData = true;
-    }
+    void setIgnoreInvalidData() { ignoreInvalidData = true; }
 
-    void set1DFunction(const std::string &fun =
+    void
+    set1DFunction(const std::string &fun =
                       "name=UserFunction,Formula=a+b*x+c*x^2,a=1,b=1,c=1") {
       function = FunctionFactory::Instance().createInitialized(fun);
       if (nParams < function->nParams()) {
@@ -413,7 +418,8 @@ private:
         space->dataX(spec).assign(xBins.begin(), xBins.end());
         for (size_t i = 0; i < nData; ++i) {
           const double x = space->readX(0)[i];
-          space->dataY(spec)[i] = (1.1 + 0.1 * double(spec)) * (1.0 + x + x * x);
+          space->dataY(spec)[i] =
+              (1.1 + 0.1 * double(spec)) * (1.0 + x + x * x);
           space->dataE(spec)[i] = 10.0;
         }
       }
@@ -422,25 +428,29 @@ private:
 
     void set1DSpectrumValuesInvalid() {
       set1DSpectrumValues();
-      auto &yValues = dynamic_cast<MatrixWorkspace&>(*workspace).dataY(workspaceIndex);
+      auto &yValues =
+          dynamic_cast<MatrixWorkspace &>(*workspace).dataY(workspaceIndex);
       yValues[2] = std::numeric_limits<double>::infinity();
       yValues[4] = std::numeric_limits<double>::quiet_NaN();
-      auto &eValues = dynamic_cast<MatrixWorkspace&>(*workspace).dataE(workspaceIndex);
+      auto &eValues =
+          dynamic_cast<MatrixWorkspace &>(*workspace).dataE(workspaceIndex);
       eValues[6] = -1;
     }
 
-
-    void setTestCaseForErrorCalculations(size_t ndata, double *xarray, double *yarray, const std::string& fun) {
+    void setTestCaseForErrorCalculations(size_t ndata, double *xarray,
+                                         double *yarray,
+                                         const std::string &fun) {
       set1DFunction(fun);
       nData = ndata;
       isHisto = false;
       xMin = xarray[0];
-      xMax = xarray[ndata-1];
+      xMax = xarray[ndata - 1];
       xBins.resize(ndata);
       xBins.assign(xarray, xarray + ndata);
       xValues = xBins;
       set1DSpectrumEmpty();
-      auto space = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace);
+      auto space =
+          boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace);
       space->dataY(0).assign(yarray, yarray + ndata);
       space->dataE(0).assign(ndata, 1.0);
       outputName = "out";
@@ -451,17 +461,21 @@ private:
       setDefaultXRange();
       double sum2 = 0.0;
       double sum2w = 0.0;
-      auto &yValues = dynamic_cast<MatrixWorkspace&>(*workspace).readY(workspaceIndex);
-      auto &eValues = dynamic_cast<MatrixWorkspace&>(*workspace).readE(workspaceIndex);
-      double dof = - double(nParams);
+      auto &yValues =
+          dynamic_cast<MatrixWorkspace &>(*workspace).readY(workspaceIndex);
+      auto &eValues =
+          dynamic_cast<MatrixWorkspace &>(*workspace).readE(workspaceIndex);
+      double dof = -double(nParams);
       for (size_t i = 0; i < xValues.size(); ++i) {
         const double xValue = xValues[i];
-        if (xValue >= StartX && xValue <= EndX && isGoodValue(yValues[i],eValues[i])) {
+        if (xValue >= StartX && xValue <= EndX &&
+            isGoodValue(yValues[i], eValues[i])) {
           FunctionDomain1DVector x(xValue);
           FunctionValues y(x);
           function->function(x, y);
           double tmp = yValues[i] - y[0];
-          //std::cerr << "test " << xValue << ' ' << yValues[i] << ' ' << y[0] << std::endl;
+          // std::cerr << "test " << xValue << ' ' << yValues[i] << ' ' << y[0]
+          // << std::endl;
           sum2 += tmp * tmp;
           tmp /= eValues[i];
           sum2w += tmp * tmp;
@@ -471,26 +485,26 @@ private:
       TS_ASSERT_DIFFERS(sum2, 0);
       TS_ASSERT_DELTA(sum2, chiSquared, 1e-10);
       TS_ASSERT_DELTA(sum2w, chiSquaredWeighted, 1e-10);
-      if (dof <= 0.0) dof = 1.0;
+      if (dof <= 0.0)
+        dof = 1.0;
       sum2 /= dof;
       sum2w /= dof;
       TS_ASSERT_DELTA(sum2, chiSquaredDividedByDOF, 1e-10);
       TS_ASSERT_DELTA(sum2w, chiSquaredWeightedDividedByDOF, 1e-10);
     }
 
-    void checkFailed() {
-      TS_ASSERT(!isExecuted);
-    }
+    void checkFailed() { TS_ASSERT(!isExecuted); }
 
     void checkErrors(double *sigma) {
       size_t np = function->nParams();
       TS_ASSERT_EQUALS(np, errors->rowCount());
-      for(size_t i = 0; i < np; ++i)
-      {
-        TS_ASSERT_LESS_THAN(fabs(errors->Double(i,6)), 1e-4);
-        TS_ASSERT_DELTA(errors->Double(i,1) / errors->Double(i,2), 1.0, 1e-5);
-        TS_ASSERT_DELTA(0.5 * (errors->Double(i,4) - errors->Double(i,3)) / errors->Double(i,5), 1.0, 2.0);
-        TS_ASSERT_DELTA(errors->Double(i,5) / sigma[i], 1.0, 0.01);
+      for (size_t i = 0; i < np; ++i) {
+        TS_ASSERT_LESS_THAN(fabs(errors->Double(i, 6)), 1e-4);
+        TS_ASSERT_DELTA(errors->Double(i, 1) / errors->Double(i, 2), 1.0, 1e-5);
+        TS_ASSERT_DELTA(0.5 * (errors->Double(i, 4) - errors->Double(i, 3)) /
+                            errors->Double(i, 5),
+                        1.0, 2.0);
+        TS_ASSERT_DELTA(errors->Double(i, 5) / sigma[i], 1.0, 0.01);
       }
     }
   };

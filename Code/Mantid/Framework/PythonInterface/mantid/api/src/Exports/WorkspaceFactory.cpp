@@ -72,11 +72,13 @@ void export_WorkspaceFactory() {
 
       .def("createTable", &WorkspaceFactoryImpl::createTable,
            createTable_Overload("Creates an empty TableWorkspace",
-                                (arg("className") = "TableWorkspace"))[return_value_policy<AsType<Workspace_sptr>>()])
+                                (arg("className") = "TableWorkspace"))
+               [return_value_policy<AsType<Workspace_sptr>>()])
 
       .def("createPeaks", &WorkspaceFactoryImpl::createPeaks,
            createPeaks_Overload("Creates an empty PeaksWorkspace",
-                                (arg("className") = "PeaksWorkspace"))[return_value_policy<AsType<Workspace_sptr>>()])
+                                (arg("className") = "PeaksWorkspace"))
+               [return_value_policy<AsType<Workspace_sptr>>()])
 
       .def("Instance", &WorkspaceFactory::Instance,
            return_value_policy<reference_existing_object>(),

@@ -24,7 +24,7 @@ void AddSampleLog::init() {
       new WorkspaceProperty<Workspace>("Workspace", "", Direction::InOut),
       "Workspace to add the log entry to");
   declareProperty("LogName", "",
-                  boost::make_shared<MandatoryValidator<std::string> >(),
+                  boost::make_shared<MandatoryValidator<std::string>>(),
                   "The name that will identify the log entry");
 
   declareProperty("LogText", "", "The content of the log");
@@ -82,8 +82,7 @@ void AddSampleLog::exec() {
     Kernel::DateAndTime startTime;
     try {
       startTime = theRun.startTime();
-    }
-    catch (std::runtime_error &) {
+    } catch (std::runtime_error &) {
       // Swallow the error - startTime will just be 0
     }
 

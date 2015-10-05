@@ -24,26 +24,22 @@ using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
-class GeneratePeaksTest : public CxxTest::TestSuite
-{
+class GeneratePeaksTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static GeneratePeaksTest *createSuite() { return new GeneratePeaksTest(); }
-  static void destroySuite( GeneratePeaksTest *suite ) { delete suite; }
+  static void destroySuite(GeneratePeaksTest *suite) { delete suite; }
 
-  GeneratePeaksTest()
-  {
-    FrameworkManager::Instance();
-  }
+  GeneratePeaksTest() { FrameworkManager::Instance(); }
 
-  void test_Init()
-  {
+  void test_Init() {
     GeneratePeaks alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    DataObjects::TableWorkspace_sptr peakparmsws = createTestEffectiveFuncParameters();
+    DataObjects::TableWorkspace_sptr peakparmsws =
+        createTestEffectiveFuncParameters();
 
     TS_ASSERT_EQUALS(peakparmsws->rowCount(), 4);
 
@@ -57,24 +53,29 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Test to use user-provided binning parameters and effective function parameters
+  /** Test to use user-provided binning parameters and effective function
+   * parameters
    */
-  void test_UserBinningParameters()
-  {
+  void test_UserBinningParameters() {
     // Create input parameter table workspace
-    DataObjects::TableWorkspace_sptr peakparmsws = createTestEffectiveFuncParameters();
-    AnalysisDataService::Instance().addOrReplace("TestPeakParameterTable", peakparmsws);
+    DataObjects::TableWorkspace_sptr peakparmsws =
+        createTestEffectiveFuncParameters();
+    AnalysisDataService::Instance().addOrReplace("TestPeakParameterTable",
+                                                 peakparmsws);
 
     // Initialize algorithm GenertePeaks
     GeneratePeaks alg;
     alg.initialize();
 
     // Set value
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakParametersWorkspace", peakparmsws));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("PeakParametersWorkspace", peakparmsws));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakType", "Gaussian"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundType", "Auto"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test01WS"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "Test01WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IsRawParameter", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
@@ -85,7 +86,8 @@ public:
 
     // Get result/output workspace
     API::MatrixWorkspace_const_sptr peaksws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Test01WS"));
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("Test01WS"));
     TS_ASSERT(peaksws);
 
     // Check result
@@ -127,11 +129,11 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test algorithm by using an existing input workspace as X-values
    */
-  void test_FromInputWorkspace()
-  {
+  void test_FromInputWorkspace() {
     // Create input
     DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters2();
-    AnalysisDataService::Instance().addOrReplace("TestParameterTable2", peakparmsws);
+    AnalysisDataService::Instance().addOrReplace("TestParameterTable2",
+                                                 peakparmsws);
     API::MatrixWorkspace_sptr inputws = createTestInputWorkspace();
     AnalysisDataService::Instance().addOrReplace("RawSampleBinWS", inputws);
 
@@ -140,12 +142,15 @@ public:
     alg.initialize();
 
     // Set value
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakParametersWorkspace", peakparmsws));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("PeakParametersWorkspace", peakparmsws));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakType", "Gaussian"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundType", "Quadratic"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputws));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test02WS"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "Test02WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
 
@@ -155,7 +160,8 @@ public:
 
     // Get result
     API::MatrixWorkspace_const_sptr peaksws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Test02WS"));
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("Test02WS"));
     TS_ASSERT(peaksws);
 
     // Check result
@@ -199,22 +205,25 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test to use user-provided binning parameters
    */
-  void test_Background()
-  {
+  void test_Background() {
     // Create input
     DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters3();
-    AnalysisDataService::Instance().addOrReplace("TestParameterTable3", peakparmsws);
+    AnalysisDataService::Instance().addOrReplace("TestParameterTable3",
+                                                 peakparmsws);
 
     // Init algorithm
     GeneratePeaks alg;
     alg.initialize();
 
     // Set value
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakParametersWorkspace", peakparmsws));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("PeakParametersWorkspace", peakparmsws));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakType", "Gaussian"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundType", "Auto"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test03WS"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "Test03WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IsRawParameter", false));
@@ -225,7 +234,8 @@ public:
 
     // Get result
     API::MatrixWorkspace_const_sptr peaksws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Test03WS"));
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("Test03WS"));
     TS_ASSERT(peaksws);
 
     // Check result
@@ -264,8 +274,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test to input parameter values by vectors user-provided binning parameters
    */
-  void test_InputValueViaVector()
-  {
+  void test_InputValueViaVector() {
     // Create vectors for peak and background parameters
     std::string vecpeakvalue("5.0, 2.0, 0.0849322");
     std::string vecbkgdvalue("1.0, 2.0, 0.0");
@@ -275,12 +284,16 @@ public:
     alg.initialize();
 
     // Set value
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakParameterValues", vecpeakvalue));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundParameterValues", vecbkgdvalue));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("PeakParameterValues", vecpeakvalue));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("BackgroundParameterValues", vecbkgdvalue));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakType", "Gaussian"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundType", "Auto"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test04WS"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "Test04WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IsRawParameter", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
@@ -291,7 +304,8 @@ public:
 
     // Get result/output workspace
     API::MatrixWorkspace_const_sptr peaksws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Test04WS"));
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("Test04WS"));
     TS_ASSERT(peaksws);
 
     // Check result
@@ -319,8 +333,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test to input parameter values by vectors user-provided binning parameters
    */
-  void test_InputValueViaVectorEffective()
-  {
+  void test_InputValueViaVectorEffective() {
     // Create vectors for peak and background parameters
     std::string vecpeakvalue("2.0, 5.0, 0.2");
     std::string vecbkgdvalue("1.0, 2.0, 0.0");
@@ -330,12 +343,16 @@ public:
     alg.initialize();
 
     // Set value
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakParameterValues", vecpeakvalue));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundParameterValues", vecbkgdvalue));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("PeakParameterValues", vecpeakvalue));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("BackgroundParameterValues", vecbkgdvalue));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakType", "Gaussian"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundType", "Auto"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test01WS"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "Test01WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IsRawParameter", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
@@ -346,7 +363,8 @@ public:
 
     // Get result/output workspace
     API::MatrixWorkspace_const_sptr peaksws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Test01WS"));
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("Test01WS"));
     TS_ASSERT(peaksws);
 
     // Check result
@@ -372,16 +390,20 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Generate a TableWorkspace containing 3 peaks on 2 spectra by using effective parameters
-   *  spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2 = 0
-   *  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2 = 0
-   *  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2 = 0
+  /** Generate a TableWorkspace containing 3 peaks on 2 spectra by using
+   * effective parameters
+   *  spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2
+   * = 0
+   *  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2
+   * = 0
+   *  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2
+   * = 0
    */
-  DataObjects::TableWorkspace_sptr createTestEffectiveFuncParameters()
-  {
+  DataObjects::TableWorkspace_sptr createTestEffectiveFuncParameters() {
     // 1. Build a TableWorkspace
     DataObjects::TableWorkspace_sptr peakparms =
-        boost::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace);
+        boost::shared_ptr<DataObjects::TableWorkspace>(
+            new DataObjects::TableWorkspace);
     peakparms->addColumn("int", "spectrum");
     peakparms->addColumn("double", "centre");
     peakparms->addColumn("double", "width");
@@ -404,18 +426,21 @@ public:
     return peakparms;
   }
 
-
   //----------------------------------------------------------------------------------------------
-  /** Generate a TableWorkspace containing 3 peaks on 2 spectra by using raw parameters
-   *  spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2 = 0
-   *  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2 = 0
-   *  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2 = 0
+  /** Generate a TableWorkspace containing 3 peaks on 2 spectra by using raw
+   * parameters
+   *  spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2
+   * = 0
+   *  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2
+   * = 0
+   *  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2
+   * = 0
    */
-  DataObjects::TableWorkspace_sptr createTestPeakParameters2()
-  {
+  DataObjects::TableWorkspace_sptr createTestPeakParameters2() {
     // 1. Build a TableWorkspace
     DataObjects::TableWorkspace_sptr peakparms =
-        boost::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace);
+        boost::shared_ptr<DataObjects::TableWorkspace>(
+            new DataObjects::TableWorkspace);
     peakparms->addColumn("int", "spectrum");
     peakparms->addColumn("double", "PeakCentre");
     peakparms->addColumn("double", "Sigma");
@@ -427,7 +452,7 @@ public:
 
     // 2. Add value
     API::TableRow row0 = peakparms->appendRow();
-    row0 << 0 << 2.0 << 0.0849322 <<  5.0 << 1.0 << 2.0 << 0.0 << 0.1;
+    row0 << 0 << 2.0 << 0.0849322 << 5.0 << 1.0 << 2.0 << 0.0 << 0.1;
     API::TableRow row1 = peakparms->appendRow();
     row1 << 0 << 8.0 << 0.0424661 << 10.0 << 2.0 << 1.0 << 0.0 << 0.2;
     API::TableRow row2 = peakparms->appendRow();
@@ -435,22 +460,25 @@ public:
     API::TableRow row3 = peakparms->appendRow();
     row3 << 2 << 4.5 << 0.4 << 20.0 << 1.0 << 9.0 << 0.0 << 1000.2;
 
-
     return peakparms;
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Generate a TableWorkspace containing 3 peaks on 2 spectra by using effective parameters
+  /** Generate a TableWorkspace containing 3 peaks on 2 spectra by using
+   * effective parameters
     * of old style f0., f1.
-   *  spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2 = 0
-   *  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2 = 0
-   *  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2 = 0
+   *  spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2
+   * = 0
+   *  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2
+   * = 0
+   *  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2
+   * = 0
    */
-  DataObjects::TableWorkspace_sptr createTestPeakParameters3()
-  {
+  DataObjects::TableWorkspace_sptr createTestPeakParameters3() {
     // 1. Build a TableWorkspace
     DataObjects::TableWorkspace_sptr peakparms =
-        boost::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace);
+        boost::shared_ptr<DataObjects::TableWorkspace>(
+            new DataObjects::TableWorkspace);
     peakparms->addColumn("int", "spectrum");
     peakparms->addColumn("double", "f0.centre");
     peakparms->addColumn("double", "f0.width");
@@ -462,7 +490,7 @@ public:
 
     // 2. Add value
     API::TableRow row0 = peakparms->appendRow();
-    row0 << 0 << 2.0 << 0.2 <<  5.0 << 1.0 << 2.0 << 0.0 << 0.1;
+    row0 << 0 << 2.0 << 0.2 << 5.0 << 1.0 << 2.0 << 0.0 << 0.1;
     API::TableRow row1 = peakparms->appendRow();
     row1 << 0 << 8.0 << 0.1 << 10.0 << 2.0 << 1.0 << 0.0 << 0.2;
     API::TableRow row2 = peakparms->appendRow();
@@ -477,32 +505,27 @@ public:
   /** Create a MatrixWorkspace containing 5 spectra
    *  Binning parameter = 1.0, 0.02, 9.0
    */
-  API::MatrixWorkspace_sptr createTestInputWorkspace()
-  {
+  API::MatrixWorkspace_sptr createTestInputWorkspace() {
     // 1. Create empty workspace
     double minx = 1.0;
     double maxx = 9.0;
     double dx = 0.02;
-    size_t size = static_cast<size_t>((maxx-minx)/dx)+1;
-    API::MatrixWorkspace_sptr inpWS = API::WorkspaceFactory::Instance().create("Workspace2D", 5, size, size-1);
+    size_t size = static_cast<size_t>((maxx - minx) / dx) + 1;
+    API::MatrixWorkspace_sptr inpWS = API::WorkspaceFactory::Instance().create(
+        "Workspace2D", 5, size, size - 1);
 
     // 2. Put x values and y values
-    for (size_t iw = 0; iw < inpWS->getNumberHistograms(); iw ++)
-    {
-      for (size_t ix = 0; ix < inpWS->dataX(iw).size(); ++ix)
-      {
-        inpWS->dataX(iw)[ix] = minx + double(ix)*dx;
+    for (size_t iw = 0; iw < inpWS->getNumberHistograms(); iw++) {
+      for (size_t ix = 0; ix < inpWS->dataX(iw).size(); ++ix) {
+        inpWS->dataX(iw)[ix] = minx + double(ix) * dx;
       }
-      for (size_t iy = 0; iy < inpWS->dataY(iw).size(); ++iy)
-      {
+      for (size_t iy = 0; iy < inpWS->dataY(iw).size(); ++iy) {
         inpWS->dataY(iw)[iy] = 100.0;
       }
     }
 
     return inpWS;
   }
-
 };
-
 
 #endif /* MANTID_ALGORITHMS_GENERATEPEAKSTEST_H_ */

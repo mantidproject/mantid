@@ -34,8 +34,7 @@ namespace MDAlgorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MergeMD
-    : public BoxControllerSettingsAlgorithm {
+class DLLExport MergeMD : public BoxControllerSettingsAlgorithm {
 public:
   MergeMD();
   virtual ~MergeMD();

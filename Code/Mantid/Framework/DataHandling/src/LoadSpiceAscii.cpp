@@ -171,7 +171,7 @@ void LoadSpiceAscii::exec() {
         "At one log name appears in multiple log type lists");
 
   // Parse
-  std::vector<std::vector<std::string> > datalist;
+  std::vector<std::vector<std::string>> datalist;
   std::vector<std::string> titles;
   std::map<std::string, std::string> runinfodict;
   parseSPICEAscii(filename, datalist, titles, runinfodict);
@@ -203,7 +203,7 @@ bool LoadSpiceAscii::validateLogNamesType(
     const std::vector<std::string> &floatlognames,
     const std::vector<std::string> &intlognames,
     const std::vector<std::string> &strlognames) {
-  std::vector<std::vector<std::string> > vec_lognamelist;
+  std::vector<std::vector<std::string>> vec_lognamelist;
   vec_lognamelist.push_back(floatlognames);
   vec_lognamelist.push_back(intlognames);
   vec_lognamelist.push_back(strlognames);
@@ -235,7 +235,7 @@ bool LoadSpiceAscii::validateLogNamesType(
  */
 void LoadSpiceAscii::parseSPICEAscii(
     const std::string &filename,
-    std::vector<std::vector<std::string> > &datalist,
+    std::vector<std::vector<std::string>> &datalist,
     std::vector<std::string> &titles,
     std::map<std::string, std::string> &runinfodict) {
   // Import file
@@ -331,7 +331,7 @@ Each row is a data point measured in experiment
  * @return
  */
 API::ITableWorkspace_sptr LoadSpiceAscii::createDataWS(
-    const std::vector<std::vector<std::string> > &datalist,
+    const std::vector<std::vector<std::string>> &datalist,
     const std::vector<std::string> &titles) {
   // Create a table workspace with columns defined
   DataObjects::TableWorkspace_sptr outws =
@@ -399,7 +399,8 @@ LoadSpiceAscii::createRunInfoWS(std::map<std::string, std::string> runinfodict,
     g_log.debug() << "Trying to add property " << title << " with value "
                   << strvalue << "\n";
 
-    if (std::binary_search(floatlognamelist.begin(), floatlognamelist.end(), title)){
+    if (std::binary_search(floatlognamelist.begin(), floatlognamelist.end(),
+                           title)) {
       // Case as a double property
       bool adderrorvalue = false;
       double value, error;
@@ -425,11 +426,13 @@ LoadSpiceAscii::createRunInfoWS(std::map<std::string, std::string> runinfodict,
         tss << title << ".error";
         addProperty<double>(infows, tss.str(), error);
       }
-    } else if (std::binary_search(intlognamelist.begin(), intlognamelist.end(), title)) {
+    } else if (std::binary_search(intlognamelist.begin(), intlognamelist.end(),
+                                  title)) {
       // It is an integer log
       addProperty<int>(infows, title, atoi(strvalue.c_str()));
     } else if (!ignoreunlisted ||
-               std::binary_search(strlognamelist.begin(), strlognamelist.end(), title)) {
+               std::binary_search(strlognamelist.begin(), strlognamelist.end(),
+                                  title)) {
       // It is a string log or it is not defined but not ignored either
       addProperty<std::string>(infows, title, strvalue);
     }

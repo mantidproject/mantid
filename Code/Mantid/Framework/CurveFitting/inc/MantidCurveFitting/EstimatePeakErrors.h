@@ -34,7 +34,7 @@ public:
   EstimatePeakErrors();
 
   const std::string name() const;
-  virtual const std::string summary() const ;
+  virtual const std::string summary() const;
 
   int version() const;
   const std::string category() const;

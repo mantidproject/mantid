@@ -85,12 +85,15 @@ public:
   virtual void setCoordinateSystem(
       const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem) = 0;
 
-  /// Preferred visual normalizaiton method for any histo workspaces created from this.
-  virtual void setDisplayNormalizationHisto(Mantid::API::MDNormalization preferredNormalizationHisto) = 0;
+  /// Preferred visual normalizaiton method for any histo workspaces created
+  /// from this.
+  virtual void setDisplayNormalizationHisto(
+      Mantid::API::MDNormalization preferredNormalizationHisto) = 0;
   virtual Mantid::API::MDNormalization displayNormalizationHisto() const = 0;
 
   /// Preferred visual normalization method.
-  virtual void setDisplayNormalization(Mantid::API::MDNormalization preferredNormalization) = 0;
+  virtual void setDisplayNormalization(
+      Mantid::API::MDNormalization preferredNormalization) = 0;
   virtual Mantid::API::MDNormalization displayNormalization() const = 0;
 
 protected:

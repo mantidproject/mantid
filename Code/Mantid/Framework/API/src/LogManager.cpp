@@ -432,7 +432,7 @@ void LogManager::clearLogs() { m_manager.clear(); }
   template MANTID_API_DLL Kernel::TimeSeriesProperty<TYPE> *                   \
   LogManager::getTimeSeriesProperty(const std::string &) const;                \
   template MANTID_API_DLL TYPE                                                 \
-      LogManager::getPropertyValueAsType(const std::string &) const;
+  LogManager::getPropertyValueAsType(const std::string &) const;
 
 INSTANTIATE(double)
 INSTANTIATE(int)
@@ -443,7 +443,7 @@ INSTANTIATE(std::string)
 INSTANTIATE(bool)
 
 template MANTID_API_DLL uint16_t
-    LogManager::getPropertyValueAsType(const std::string &) const;
+LogManager::getPropertyValueAsType(const std::string &) const;
 template MANTID_API_DLL std::vector<double>
 LogManager::getPropertyValueAsType(const std::string &) const;
 template MANTID_API_DLL std::vector<size_t>

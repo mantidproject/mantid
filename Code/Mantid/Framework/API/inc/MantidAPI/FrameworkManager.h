@@ -121,7 +121,7 @@ private:
   void AsynchronousStartupTasks();
   /// Update instrument definitions from github
   void UpdateInstrumentDefinitions();
-  ///check if a newer version of Mantid is available
+  /// check if a newer version of Mantid is available
   void CheckIfNewerVersionIsAvailable();
   /// Sends startup usage information
   void SendStartupUsageInfo();

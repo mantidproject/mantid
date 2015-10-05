@@ -130,8 +130,8 @@ void PDDetermineCharacterizations::init() {
   defaultFrequencyNames.push_back("SpeedRequest1");
   defaultFrequencyNames.push_back("Speed1");
   defaultFrequencyNames.push_back("frequency");
-  declareProperty(new Kernel::ArrayProperty<std::string>(
-                      FREQ_PROP_NAME, defaultFrequencyNames),
+  declareProperty(new Kernel::ArrayProperty<std::string>(FREQ_PROP_NAME,
+                                                         defaultFrequencyNames),
                   "Candidate log names for frequency");
 
   std::vector<std::string> defaultWavelengthNames;
@@ -215,7 +215,7 @@ void PDDetermineCharacterizations::getInformationFromTable(
  * @return
  */
 double PDDetermineCharacterizations::getLogValue(API::Run &run,
-                                                  const std::string &propName) {
+                                                 const std::string &propName) {
   std::vector<std::string> names = getProperty(propName);
 
   std::string label = "frequency";
@@ -285,12 +285,10 @@ void PDDetermineCharacterizations::setDefaultsInPropManager() {
         new ArrayProperty<int32_t>("empty", "0"));
   }
   if (!m_propertyManager->existsProperty("d_min")) {
-    m_propertyManager->declareProperty(
-        new ArrayProperty<double>("d_min"));
+    m_propertyManager->declareProperty(new ArrayProperty<double>("d_min"));
   }
   if (!m_propertyManager->existsProperty("d_max")) {
-    m_propertyManager->declareProperty(
-        new ArrayProperty<double>("d_max"));
+    m_propertyManager->declareProperty(new ArrayProperty<double>("d_max"));
   }
   if (!m_propertyManager->existsProperty("tof_min")) {
     m_propertyManager->declareProperty(

@@ -25,50 +25,56 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
 namespace {
-    /** 
-    *  Writes one row to an existing table
-    *  @param vertexes : The table that the rows will be written to
-    *  @param vertex : The vertex from which the data is retrieved for writing i.e lower left, lower right etc.
-    *  @param nHisto : The number of the histogram
-    *  @param nBins : The number of the bin
-    *  @param signal : The Y value of the bin
-    *  @param error : The E value of the bin
-    */
-    void writeRow(boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes, const V2D &vertex, size_t nHisto, size_t nBins, double signal, double error){
-        TableRow row = vertexes->appendRow();
-        row << vertex.X() << vertex.Y() << int(nHisto) << int(nBins) << signal << error;
-    }
-    /**
-    *  Adds the column headings to a table
-    *  @param vertexes : Table to which the columns are written to.
-    */
-    void addColumnHeadings(boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes, std::string outputDimensions) {
+/**
+*  Writes one row to an existing table
+*  @param vertexes : The table that the rows will be written to
+*  @param vertex : The vertex from which the data is retrieved for writing i.e
+* lower left, lower right etc.
+*  @param nHisto : The number of the histogram
+*  @param nBins : The number of the bin
+*  @param signal : The Y value of the bin
+*  @param error : The E value of the bin
+*/
+void writeRow(boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
+              const V2D &vertex, size_t nHisto, size_t nBins, double signal,
+              double error) {
+  TableRow row = vertexes->appendRow();
+  row << vertex.X() << vertex.Y() << int(nHisto) << int(nBins) << signal
+      << error;
+}
+/**
+*  Adds the column headings to a table
+*  @param vertexes : Table to which the columns are written to.
+*/
+void addColumnHeadings(
+    boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
+    std::string outputDimensions) {
 
-        if (outputDimensions == "Q (lab frame)"){
-        vertexes->addColumn("double", "Qx");
-        vertexes->addColumn("double", "Qy");
-        vertexes->addColumn("int", "OriginIndex");
-        vertexes->addColumn("int", "OriginBin");
-        vertexes->addColumn("double", "CellSignal");
-        vertexes->addColumn("double", "CellError");
-        }
-        if (outputDimensions == "P (lab frame)"){
-        vertexes->addColumn("double", "Pi+Pf");
-        vertexes->addColumn("double", "Pi-Pf");
-        vertexes->addColumn("int", "OriginIndex");
-        vertexes->addColumn("int", "OriginBin");
-        vertexes->addColumn("double", "CellSignal");
-        vertexes->addColumn("double", "CellError");
-        }
-        if (outputDimensions == "K (incident, final)"){
-        vertexes->addColumn("double", "Ki"); 
-        vertexes->addColumn("double", "Kf"); 
-        vertexes->addColumn("int", "OriginIndex");
-        vertexes->addColumn("int", "OriginBin");
-        vertexes->addColumn("double", "CellSignal");
-        vertexes->addColumn("double", "CellError");
-        }
-    }
+  if (outputDimensions == "Q (lab frame)") {
+    vertexes->addColumn("double", "Qx");
+    vertexes->addColumn("double", "Qy");
+    vertexes->addColumn("int", "OriginIndex");
+    vertexes->addColumn("int", "OriginBin");
+    vertexes->addColumn("double", "CellSignal");
+    vertexes->addColumn("double", "CellError");
+  }
+  if (outputDimensions == "P (lab frame)") {
+    vertexes->addColumn("double", "Pi+Pf");
+    vertexes->addColumn("double", "Pi-Pf");
+    vertexes->addColumn("int", "OriginIndex");
+    vertexes->addColumn("int", "OriginBin");
+    vertexes->addColumn("double", "CellSignal");
+    vertexes->addColumn("double", "CellError");
+  }
+  if (outputDimensions == "K (incident, final)") {
+    vertexes->addColumn("double", "Ki");
+    vertexes->addColumn("double", "Kf");
+    vertexes->addColumn("int", "OriginIndex");
+    vertexes->addColumn("int", "OriginBin");
+    vertexes->addColumn("double", "CellSignal");
+    vertexes->addColumn("double", "CellError");
+  }
+}
 }
 namespace Mantid {
 namespace DataObjects {
@@ -303,13 +309,14 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::execute(
  * Execution path for NormalisedPolygon Rebinning
  * @param inputWs : Workspace to be rebinned
  * @param vertexes : TableWorkspace for debugging purposes
- * @param dumpVertexes : determines whether vertexes will be written to for debugging purposes or not
+ * @param dumpVertexes : determines whether vertexes will be written to for
+ * debugging purposes or not
  * @param outputDimensions : used for the column headings for Dump Vertexes
  */
 MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
     MatrixWorkspace_const_sptr inputWS,
-    boost::shared_ptr<Mantid::DataObjects::TableWorkspace>
-        &vertexes, bool dumpVertexes, std::string outputDimensions) const {
+    boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
+    bool dumpVertexes, std::string outputDimensions) const {
   MatrixWorkspace_sptr temp = WorkspaceFactory::Instance().create(
       "RebinnedOutput", m_d1NumBins, m_d0NumBins, m_d0NumBins);
   RebinnedOutput_sptr outWS = boost::static_pointer_cast<RebinnedOutput>(temp);
@@ -380,7 +387,8 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
 
       Quadrilateral inputQ(ll, lr, ur, ul);
       */
-      auto inputQ = m_calculator->createQuad(lamUpper, lamLower, thetaUpper, thetaLower);
+      auto inputQ =
+          m_calculator->createQuad(lamUpper, lamLower, thetaUpper, thetaLower);
       FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j, outWS,
                                                    zBinsVec);
 

@@ -31,9 +31,10 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getRotation,
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getRelativePos,
                                        Component::getRelativePos, 0, 0)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamShortDescription,
-                                        Component::getParamShortDescription,1,2)
+                                       Component::getParamShortDescription, 1,
+                                       2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamDescription,
-                                       Component::getParamDescription,1,2)
+                                       Component::getParamDescription, 1, 2)
 }
 
 void export_Component() {
@@ -53,21 +54,22 @@ void export_Component() {
            Component_getStringParameter())
       .def("getIntParameter", &Component::getIntParameter,
            Component_getIntParameter())
-       //
+      //
       .def("getRotation", &Component::getRotation, Component_getRotation())
       .def("getRelativePos", &Component::getRelativePos,
            Component_getRelativePos())
       //
       .def("getParamShortDescription", &Component::getParamShortDescription,
            Component_getParamShortDescription())
-      .def("getParamDescription", &Component::getParamDescription, 
-            Component_getParamDescription())
+      .def("getParamDescription", &Component::getParamDescription,
+           Component_getParamDescription())
       .def("getShortDescription", &Component::getShortDescription,
            "Return the short description of current parameterized component")
       .def("getDescription", &Component::getDescription,
            "Return the description of current parameterized component")
-      .def("setDescription", &Component::setDescription, 
-           "Set component's description, works only if the component is parameterized component")
+      .def("setDescription", &Component::setDescription,
+           "Set component's description, works only if the component is "
+           "parameterized component")
 
       // HACK -- python should return parameters regardless of type. this is
       // untill rows below do not work
@@ -87,4 +89,3 @@ void export_Component() {
 
       ;
 }
-

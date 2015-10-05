@@ -24,7 +24,8 @@ PeakShapeSphericalFactory::~PeakShapeSphericalFactory() {}
  * @param source : Source JSON
  * @return PeakShape object
  */
-Mantid::Geometry::PeakShape *PeakShapeSphericalFactory::create(const std::string &source) const {
+Mantid::Geometry::PeakShape *
+PeakShapeSphericalFactory::create(const std::string &source) const {
   Json::Reader reader;
   Json::Value root;
   Mantid::Geometry::PeakShape *product = NULL;

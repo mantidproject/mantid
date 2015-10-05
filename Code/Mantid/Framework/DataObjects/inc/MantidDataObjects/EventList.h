@@ -433,7 +433,8 @@ private:
   static double integrateHelper(std::vector<T> &events, const double minX,
                                 const double maxX, const bool entireRange);
   template <class T>
-  void convertTofHelper(std::vector<T> &events, std::function<double(double)> func);
+  void convertTofHelper(std::vector<T> &events,
+                        std::function<double(double)> func);
 
   template <class T>
   void convertTofHelper(std::vector<T> &events, const double factor,

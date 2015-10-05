@@ -16,21 +16,24 @@ namespace ParameterEstimator {
 /// The logger.
 Kernel::Logger g_log("ParameterEstimator");
 
-enum Function {None, Gaussian, Lorentzian, BackToBackExponential};
-typedef std::map<std::string,std::pair<size_t,Function>> FunctionMapType;
+enum Function { None, Gaussian, Lorentzian, BackToBackExponential };
+typedef std::map<std::string, std::pair<size_t, Function>> FunctionMapType;
 
 //----------------------------------------------------------------------------------------------
-/// Return a function code for a function if it needs setting values or None otherwise.
+/// Return a function code for a function if it needs setting values or None
+/// otherwise.
 Function whichFunction(const API::IFunction &function) {
   static FunctionMapType functionMap;
   if (functionMap.empty()) {
     functionMap["Gaussian"] = std::make_pair(2, Gaussian);
-    functionMap["Lorentzian"] = std::make_pair(2,Lorentzian);
-    functionMap["BackToBackExponential"] = std::make_pair(4,BackToBackExponential);
+    functionMap["Lorentzian"] = std::make_pair(2, Lorentzian);
+    functionMap["BackToBackExponential"] =
+        std::make_pair(4, BackToBackExponential);
   }
   auto index = functionMap.find(function.name());
   if (index != functionMap.end()) {
-    if (!function.isExplicitlySet(index->second.first)) return index->second.second;
+    if (!function.isExplicitlySet(index->second.first))
+      return index->second.second;
   }
   return None;
 }
@@ -113,7 +116,7 @@ getPeakLeftRightWidth(double centre, const SimpleChebfun &der2, size_t n = 1) {
       left = roots.back();
       return std::make_pair(left, right);
     }
-    if (static_cast<size_t>(std::distance(roots.begin(),iright)) < n) {
+    if (static_cast<size_t>(std::distance(roots.begin(), iright)) < n) {
       left = xp.front();
       return std::make_pair(left, right);
     }
@@ -140,7 +143,8 @@ std::pair<double, double> getPeakLeftRightExtent(double centre,
 //----------------------------------------------------------------------------------------------
 /// Get displacements from peak centre where peak reaches half the maximum.
 /// @param centre :: Peak centre.
-/// @param height :: Peak height above background. height == fun(centre) - background.
+/// @param height :: Peak height above background. height == fun(centre) -
+/// background.
 /// @param fun :: A function which is expected to be a peak on a background.
 /// @return :: The left and right displacements from peak centre.
 std::pair<double, double> getPeakHWHM(double centre, double height,
@@ -206,10 +210,9 @@ double getPeakCentre(double centre, const SimpleChebfun &der1) {
 /// A linear function.
 class LinearFunction {
 public:
-  LinearFunction(double a0, double a1) :m_a0(a0), m_a1(a1) {}
-  double operator()(double x) const {
-    return m_a0 + m_a1 * x;
-  }
+  LinearFunction(double a0, double a1) : m_a0(a0), m_a1(a1) {}
+  double operator()(double x) const { return m_a0 + m_a1 * x; }
+
 private:
   double m_a0;
   double m_a1;
@@ -222,23 +225,25 @@ private:
 /// @param der1 :: The first derivative of the fitting data.
 /// @param der2 :: The second derivative of the fitting data.
 void setBackToBackExponential(API::IFunction &function,
-                                   const SimpleChebfun &fun,
-                                   const SimpleChebfun &der1,
-                                   const SimpleChebfun &der2) {
+                              const SimpleChebfun &fun,
+                              const SimpleChebfun &der1,
+                              const SimpleChebfun &der2) {
   // Find the actual peak centre and gaussian component of the width
   auto centre = getPeakCentre(function.getParameter("X0"), der1);
   double sigma = getPeakWidth(centre, der2);
-  if (sigma == 0.0) sigma = 1e-06;
+  if (sigma == 0.0)
+    sigma = 1e-06;
   function.setParameter("S", sigma);
 
-  g_log.debug() << "Estimating parameters of BackToBackExponential" << std::endl;
+  g_log.debug() << "Estimating parameters of BackToBackExponential"
+                << std::endl;
   g_log.debug() << "centre= " << centre << std::endl;
   g_log.debug() << "sigma = " << sigma << std::endl;
 
   // Estimate the background level
   auto xlr = getPeakLeftRightExtent(centre, der2);
-  g_log.debug() << "extent: " << xlr.first - centre << ' ' << xlr.second - centre
-            << std::endl;
+  g_log.debug() << "extent: " << xlr.first - centre << ' '
+                << xlr.second - centre << std::endl;
   double yl = fun(xlr.first);
   double yr = fun(xlr.second);
   double slope = (yr - yl) / (xlr.second - xlr.first);
@@ -281,7 +286,7 @@ void setBackToBackExponential(API::IFunction &function,
     double height1 = b2b(centre1);
     auto hwhm1 = getPeakHWHM(centre1, height1, b2b);
     g_log.debug() << "new HWHM: " << hwhm1.first << ' ' << hwhm1.second
-              << std::endl;
+                  << std::endl;
 
     double denom = hwhm.first + sigma;
     double aCorr = denom > 0 ? (hwhm1.first + sigma) / denom : 100.0;
@@ -328,16 +333,14 @@ void setBackToBackExponential(API::IFunction &function,
 /// @param fun :: A smooth approximation of the fitting data.
 /// @param der1 :: The first derivative of the fitting data.
 /// @param der2 :: The second derivative of the fitting data.
-void setValues(API::IFunction &function,
-                                   const SimpleChebfun &fun,
-                                   const SimpleChebfun &der1,
-                                   const SimpleChebfun &der2) {
+void setValues(API::IFunction &function, const SimpleChebfun &fun,
+               const SimpleChebfun &der1, const SimpleChebfun &der2) {
   if (auto cf = dynamic_cast<const API::CompositeFunction *>(&function)) {
     for (size_t i = 0; i < cf->nFunctions(); ++i) {
       setValues(*cf->getFunction(i), fun, der1, der2);
     }
     return;
-  } 
+  }
 
   switch (whichFunction(function)) {
   case Gaussian: {

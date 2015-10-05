@@ -13,28 +13,25 @@ using Mantid::MantidVec;
 
 const std::string outputName = "MuonRemoveExpDecay_Output";
 
-class CalMuonDetectorPhasesTest : public CxxTest::TestSuite
-{
+class CalMuonDetectorPhasesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CalMuonDetectorPhasesTest *createSuite() { return new CalMuonDetectorPhasesTest(); }
-  static void destroySuite( CalMuonDetectorPhasesTest *suite ) { delete suite; }
-
-  CalMuonDetectorPhasesTest() {
-    FrameworkManager::Instance();
+  static CalMuonDetectorPhasesTest *createSuite() {
+    return new CalMuonDetectorPhasesTest();
   }
+  static void destroySuite(CalMuonDetectorPhasesTest *suite) { delete suite; }
 
+  CalMuonDetectorPhasesTest() { FrameworkManager::Instance(); }
 
-  void testInit()
-  {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("CalMuonDetectorPhases");
+  void testInit() {
+    IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().create("CalMuonDetectorPhases");
     alg->initialize();
     TS_ASSERT(alg->isInitialized())
   }
 
-  void testExecute()
-  {
+  void testExecute() {
     auto ws = createWorkspace(4, 100, "Microseconds");
     auto calc = AlgorithmManager::Instance().create("CalMuonDetectorPhases");
     calc->initialize();
@@ -53,16 +50,15 @@ public:
     TS_ASSERT_EQUALS(tab->rowCount(), 4);
     TS_ASSERT_EQUALS(tab->columnCount(), 3);
     // Test asymmetries
-    TS_ASSERT_DELTA(tab->Double(0,1), 0.099, 0.001);
-    TS_ASSERT_DELTA(tab->Double(1,1), 0.099, 0.001);
-    TS_ASSERT_DELTA(tab->Double(2,1), 0.099, 0.001);
-    TS_ASSERT_DELTA(tab->Double(3,1), 0.100, 0.001);
+    TS_ASSERT_DELTA(tab->Double(0, 1), 0.099, 0.001);
+    TS_ASSERT_DELTA(tab->Double(1, 1), 0.099, 0.001);
+    TS_ASSERT_DELTA(tab->Double(2, 1), 0.099, 0.001);
+    TS_ASSERT_DELTA(tab->Double(3, 1), 0.100, 0.001);
     // Test phases
-    TS_ASSERT_DELTA(tab->Double(0,2), 6.281, 0.001);
-    TS_ASSERT_DELTA(tab->Double(1,2), 0.785, 0.001);
-    TS_ASSERT_DELTA(tab->Double(2,2), 1.570, 0.001);
-    TS_ASSERT_DELTA(tab->Double(3,2), 2.354, 0.001);
-
+    TS_ASSERT_DELTA(tab->Double(0, 2), 6.281, 0.001);
+    TS_ASSERT_DELTA(tab->Double(1, 2), 0.785, 0.001);
+    TS_ASSERT_DELTA(tab->Double(2, 2), 1.570, 0.001);
+    TS_ASSERT_DELTA(tab->Double(3, 2), 2.354, 0.001);
   }
 
   void testBadWorkspaceUnits() {
@@ -98,8 +94,8 @@ public:
                                        std::string units) {
 
     // Create a fake muon dataset
-    double a = 0.1; // Amplitude of the oscillations
-    double w = 25.; // Frequency of the oscillations
+    double a = 0.1;   // Amplitude of the oscillations
+    double w = 25.;   // Frequency of the oscillations
     double tau = 2.2; // Muon life time
 
     MantidVec X;

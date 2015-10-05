@@ -46,7 +46,7 @@ public:
   ElasticDiffSphere();
 
   /// Destructor
-  virtual ~ElasticDiffSphere() {};
+  virtual ~ElasticDiffSphere(){};
 
   /// overwrite IFunction base class methods
   virtual std::string name() const { return "ElasticDiffSphere"; }
@@ -141,7 +141,7 @@ class DLLExport DiffSphere : public API::ImmutableCompositeFunction {
 
 public:
   /// Destructor
-  ~DiffSphere() {};
+  ~DiffSphere(){};
 
   /// overwrite IFunction base class methods
   std::string name() const { return "DiffSphere"; }
@@ -167,9 +167,9 @@ public:
 
 private:
   boost::shared_ptr<ElasticDiffSphere>
-  m_elastic; // elastic intensity of the DiffSphere structure factor
+      m_elastic; // elastic intensity of the DiffSphere structure factor
   boost::shared_ptr<InelasticDiffSphere>
-  m_inelastic; // inelastic intensity of the DiffSphere structure factor
+      m_inelastic; // inelastic intensity of the DiffSphere structure factor
 };
 
 } // namespace CurveFitting

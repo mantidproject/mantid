@@ -185,10 +185,10 @@ static const struct sgl_limits_struct {
   struct vax_single s;     ///<vax single struct
   struct ieee_single ieee; ///<ieee single struct
 } sgl_limits[2] = {
-      {{0x7f, 0xff, 0x0, 0xffff}, /* Max Vax */
-       {0x0, 0xff, 0x0}},         /* Max IEEE */
-      {{0x0, 0x0, 0x0, 0x0},      /* Min Vax */
-       {0x0, 0x0, 0x0}}           /* Min IEEE */
+    {{0x7f, 0xff, 0x0, 0xffff}, /* Max Vax */
+     {0x0, 0xff, 0x0}},         /* Max IEEE */
+    {{0x0, 0x0, 0x0, 0x0},      /* Min Vax */
+     {0x0, 0x0, 0x0}}           /* Min IEEE */
 };
 
 #define mmax sgl_limits[0]

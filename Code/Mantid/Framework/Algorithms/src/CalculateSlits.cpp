@@ -26,9 +26,7 @@ CalculateSlits::~CalculateSlits() {}
 //----------------------------------------------------------------------------------------------
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string CalculateSlits::name() const {
-  return "CalculateSlits";
-}
+const std::string CalculateSlits::name() const { return "CalculateSlits"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int CalculateSlits::version() const { return 1; }
@@ -48,16 +46,17 @@ const std::string CalculateSlits::summary() const {
 */
 void CalculateSlits::init() {
   declareProperty("Slit1Slit2", Mantid::EMPTY_DBL(),
-      "Distance between slit 1 and slit 2 in mm");
-  declareProperty("Slit2SA", Mantid::EMPTY_DBL(), "Offset in the beam direction in mm");
+                  "Distance between slit 1 and slit 2 in mm");
+  declareProperty("Slit2SA", Mantid::EMPTY_DBL(),
+                  "Offset in the beam direction in mm");
   declareProperty("Resolution", Mantid::EMPTY_DBL(), "Resolution");
   declareProperty("Footprint", Mantid::EMPTY_DBL(), "Footprint in mm");
   declareProperty("Angle", Mantid::EMPTY_DBL(), "Angle in degrees");
 
   declareProperty("Slit1", Mantid::EMPTY_DBL(), "Slit 1 width in mm",
-      Direction::Output);
+                  Direction::Output);
   declareProperty("Slit2", Mantid::EMPTY_DBL(), "Slit 2 width in mm",
-      Direction::Output);
+                  Direction::Output);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -69,7 +68,6 @@ void CalculateSlits::exec() {
   const double angleDeg = getProperty("Angle");
   const double s1s2 = getProperty("Slit1Slit2");
   const double s2sa = getProperty("Slit2SA");
-
 
   /*
        |←----d-----→|
@@ -111,7 +109,7 @@ void CalculateSlits::exec() {
   then f•sin(α/r) is the length of the side opposite the angle
   */
 
-  //Convert angle to radians for our calculations
+  // Convert angle to radians for our calculations
   const double a = angleDeg * M_PI / 180.0;
 
   const double s2 = (fp * sin(a)) - (2 * s2sa * tan(res * a));

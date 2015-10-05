@@ -75,8 +75,8 @@ PlotAsymmetryByLogValue::PlotAsymmetryByLogValue()
       m_dtcType(), m_dtcFile(), m_forward_list(), m_backward_list(),
       m_int(true), m_red(-1), m_green(-1), m_minTime(-1.0), m_maxTime(-1.0),
       m_logName(), m_logFunc(), m_logValue(), m_redY(), m_redE(), m_greenY(),
-      m_greenE(), m_sumY(), m_sumE(), m_diffY(), m_diffE(), m_allProperties("default"),
-      m_currResName("__PABLV_results") {}
+      m_greenE(), m_sumY(), m_sumE(), m_diffY(), m_diffE(),
+      m_allProperties("default"), m_currResName("__PABLV_results") {}
 
 /** Initialisation method. Declares properties to be used in algorithm.
 *
@@ -195,7 +195,7 @@ void PlotAsymmetryByLogValue::exec() {
   outWS = WorkspaceFactory::Instance().create("Workspace2D", nplots + 1,
                                               npoints, npoints);
   // Populate ws holding current results
-  saveResultsToADS(outWS, nplots+1);
+  saveResultsToADS(outWS, nplots + 1);
 }
 
 /**  Checks input properties and compares them to previous values
@@ -227,7 +227,8 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
   std::string lastFN = getProperty("LastRun");
 
   // Parse run names and get the number of runs
-  parseRunNames(firstFN, lastFN, m_filenameBase, m_filenameExt, m_filenameZeros);
+  parseRunNames(firstFN, lastFN, m_filenameBase, m_filenameExt,
+                m_filenameZeros);
   is = atoi(firstFN.c_str()); // starting run number
   ie = atoi(lastFN.c_str());  // last run number
   if (ie < is) {
@@ -262,13 +263,13 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
         size_t nPoints = prevResults->blocksize();
         size_t nHisto = prevResults->getNumberHistograms();
 
-        if (nHisto==2) {
+        if (nHisto == 2) {
           // Only 'red' data
           for (size_t i = 0; i < nPoints; i++) {
             // The first spectrum contains: X -> run number, Y -> log value
             // The second spectrum contains: Y -> redY, E -> redE
             size_t run = static_cast<size_t>(prevResults->readX(0)[i]);
-            if ( (run>=is) && (run<=ie) ) {
+            if ((run >= is) && (run <= ie)) {
               m_logValue[run] = prevResults->readY(0)[i];
               m_redY[run] = prevResults->readY(1)[i];
               m_redE[run] = prevResults->readE(1)[i];
@@ -385,7 +386,7 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace(
 
   TextAxis *tAxis = new TextAxis(nplots);
   if (nplots == 1) {
-    size_t i=0;
+    size_t i = 0;
     for (auto it = m_logValue.begin(); it != m_logValue.end(); ++it) {
       outWS->dataX(0)[i] = it->second;
       outWS->dataY(0)[i] = m_redY[it->first];
@@ -395,7 +396,7 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace(
     tAxis->setLabel(0, "Asymmetry");
 
   } else {
-    size_t i=0;
+    size_t i = 0;
     for (auto it = m_logValue.begin(); it != m_logValue.end(); ++it) {
       outWS->dataX(0)[i] = it->second;
       outWS->dataY(0)[i] = m_diffY[it->first];
@@ -425,17 +426,17 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace(
 *   @param outWS :: [input/output] Output workspace to populate
 *   @param nplots :: [input] Number of histograms
 */
-void PlotAsymmetryByLogValue::saveResultsToADS(
-    MatrixWorkspace_sptr &outWS, int nplots) {
+void PlotAsymmetryByLogValue::saveResultsToADS(MatrixWorkspace_sptr &outWS,
+                                               int nplots) {
 
   if (nplots == 2) {
     size_t i = 0;
     for (auto it = m_logValue.begin(); it != m_logValue.end(); ++it) {
       size_t run = it->first;
       outWS->dataX(0)[i] = static_cast<double>(run); // run number
-      outWS->dataY(0)[i] = it->second; // log value
-      outWS->dataY(1)[i] = m_redY[run]; // redY
-      outWS->dataE(1)[i] = m_redE[run]; // redE
+      outWS->dataY(0)[i] = it->second;               // log value
+      outWS->dataY(1)[i] = m_redY[run];              // redY
+      outWS->dataE(1)[i] = m_redE[run];              // redE
       i++;
     }
   } else {
@@ -443,15 +444,15 @@ void PlotAsymmetryByLogValue::saveResultsToADS(
     for (auto it = m_logValue.begin(); it != m_logValue.end(); ++it) {
       size_t run = it->first;
       outWS->dataX(0)[i] = static_cast<double>(run); // run number
-      outWS->dataY(0)[i] = it->second; // log value
-      outWS->dataY(1)[i] = m_diffY[run]; // diffY
-      outWS->dataE(1)[i] = m_diffE[run]; // diffE
-      outWS->dataY(2)[i] = m_redY[run]; // redY
-      outWS->dataE(2)[i] = m_redE[run]; // redE
-      outWS->dataY(3)[i] = m_greenY[run]; // greenY
-      outWS->dataE(3)[i] = m_greenE[run]; // greenE
-      outWS->dataY(4)[i] = m_sumY[run]; // sumY
-      outWS->dataE(4)[i] = m_sumE[run]; // sumE
+      outWS->dataY(0)[i] = it->second;               // log value
+      outWS->dataY(1)[i] = m_diffY[run];             // diffY
+      outWS->dataE(1)[i] = m_diffE[run];             // diffE
+      outWS->dataY(2)[i] = m_redY[run];              // redY
+      outWS->dataE(2)[i] = m_redE[run];              // redE
+      outWS->dataY(3)[i] = m_greenY[run];            // greenY
+      outWS->dataE(3)[i] = m_greenE[run];            // greenE
+      outWS->dataY(4)[i] = m_sumY[run];              // sumY
+      outWS->dataE(4)[i] = m_sumE[run];              // sumE
       i++;
     }
   }
@@ -463,7 +464,7 @@ void PlotAsymmetryByLogValue::saveResultsToADS(
   // is executed as a child algorithm in the Muon ALC interface
   // If current results were saved as a property we couln't used
   // the functionality to re-use previous results in ALC
-  AnalysisDataService::Instance().addOrReplace(m_currResName,outWS);
+  AnalysisDataService::Instance().addOrReplace(m_currResName, outWS);
 }
 
 /**  Parse run names

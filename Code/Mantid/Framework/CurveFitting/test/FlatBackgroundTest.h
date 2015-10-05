@@ -13,17 +13,14 @@ using namespace Mantid;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::API;
 
-class FlatBackgroundTest : public CxxTest::TestSuite
-{
+class FlatBackgroundTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static FlatBackgroundTest *createSuite() { return new FlatBackgroundTest(); }
-  static void destroySuite( FlatBackgroundTest *suite ) { delete suite; }
+  static void destroySuite(FlatBackgroundTest *suite) { delete suite; }
 
-
-  void testFunctionMW()
-  {
+  void testFunctionMW() {
     std::size_t numPoints = 100;
     double expValue = 10.;
     std::vector<double> yValues(numPoints);
@@ -34,21 +31,17 @@ public:
     bkgd->function1D(yValues.data(), NULL, numPoints); // don't need x-values
     delete bkgd;
 
-    for (std::size_t i = 0; i < numPoints; i++)
-    {
+    for (std::size_t i = 0; i < numPoints; i++) {
       TS_ASSERT_EQUALS(yValues[i], expValue);
     }
   }
 
-  void testForCategories()
-  {
+  void testForCategories() {
     FlatBackground forCat;
     const std::vector<std::string> categories = forCat.categories();
-    TS_ASSERT( categories.size() == 1 );
-    TS_ASSERT( categories[0] == "Background" );
+    TS_ASSERT(categories.size() == 1);
+    TS_ASSERT(categories[0] == "Background");
   }
-
 };
-
 
 #endif /* MANTID_CURVEFITTING_FLATBACKGROUNDTEST_H_ */

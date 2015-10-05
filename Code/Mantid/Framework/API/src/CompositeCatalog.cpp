@@ -130,8 +130,8 @@ void CompositeCatalog::listInstruments(std::vector<std::string> &instruments) {
  * Obtain a list of investigations from each catalog in the container.
  * @param invstTypes :: A reference to the vector to store the results.
  */
-void
-CompositeCatalog::listInvestigationTypes(std::vector<std::string> &invstTypes) {
+void CompositeCatalog::listInvestigationTypes(
+    std::vector<std::string> &invstTypes) {
   for (auto catalog = m_catalogs.begin(); catalog != m_catalogs.end();
        ++catalog) {
     (*catalog)->listInvestigationTypes(invstTypes);

@@ -7,7 +7,8 @@
 namespace Mantid {
 namespace DataHandling {
 
-/** CheckMantidVersion : Checks if the current version of Mantid is the most recent
+/** CheckMantidVersion : Checks if the current version of Mantid is the most
+  recent
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -39,17 +40,19 @@ public:
   virtual int version() const;
   virtual const std::string category() const;
   virtual const std::string summary() const;
+
 protected:
   virtual std::string getVersionsFromGitHub(const std::string &url);
   virtual std::string getCurrentVersion() const;
+
 private:
   void init();
   void exec();
 
-  std::string cleanVersionTag(const std::string& versionTag) const;
-  std::vector<int> splitVersionString(const std::string& versionString) const;
-  bool isVersionMoreRecent(const std::string& localVersion, const std::string& gitHubVersion) const;
-
+  std::string cleanVersionTag(const std::string &versionTag) const;
+  std::vector<int> splitVersionString(const std::string &versionString) const;
+  bool isVersionMoreRecent(const std::string &localVersion,
+                           const std::string &gitHubVersion) const;
 };
 
 } // namespace DataHandling

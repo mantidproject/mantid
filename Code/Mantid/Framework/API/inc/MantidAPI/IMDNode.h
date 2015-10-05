@@ -53,7 +53,7 @@ class IMDNode {
   */
 
 public:
-  virtual ~IMDNode(){}
+  virtual ~IMDNode() {}
   //---------------- ISAVABLE
   /**Return the pointer to the structure responsible for saving the box on disk
    * if the workspace occupies too much memory */
@@ -284,7 +284,7 @@ public:
   virtual bool isBox() const = 0;
 
   virtual signal_t getSignalByNEvents() const {
-    return this->getSignal()/static_cast<signal_t>(this->getNPoints());
+    return this->getSignal() / static_cast<signal_t>(this->getNPoints());
   }
 
   // ----------------------------- Helper Methods

@@ -722,10 +722,9 @@ ReflectometryReductionOne::algorithmicCorrection(MatrixWorkspace_sptr IvsLam) {
  @param severe: True to indicate that failure to verify should result in an
  exception. Otherwise a warning is generated.
  */
-void
-ReflectometryReductionOne::verifySpectrumMaps(MatrixWorkspace_const_sptr ws1,
-                                              MatrixWorkspace_const_sptr ws2,
-                                              const bool severe) {
+void ReflectometryReductionOne::verifySpectrumMaps(
+    MatrixWorkspace_const_sptr ws1, MatrixWorkspace_const_sptr ws2,
+    const bool severe) {
   auto map1 = ws1->getSpectrumToWorkspaceIndexMap();
   auto map2 = ws2->getSpectrumToWorkspaceIndexMap();
   if (map1 != map2) {

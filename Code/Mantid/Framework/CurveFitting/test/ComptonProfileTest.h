@@ -8,62 +8,61 @@
 
 using Mantid::CurveFitting::ComptonProfile;
 
-class ComptonProfileTest : public CxxTest::TestSuite
-{
+class ComptonProfileTest : public CxxTest::TestSuite {
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static ComptonProfileTest *createSuite() { return new ComptonProfileTest(); }
-  static void destroySuite( ComptonProfileTest *suite ) { delete suite; }
+  static void destroySuite(ComptonProfileTest *suite) { delete suite; }
 
-  void test_initialized_object_has_no_parameters()
-  {
+  void test_initialized_object_has_no_parameters() {
     auto profile = createFunction();
     TS_ASSERT_EQUALS(0, profile->nParams());
   }
 
-  void test_initialized_object_has_expected_attributes()
-  {
+  void test_initialized_object_has_expected_attributes() {
     auto profile = createFunction();
     static const size_t nattrs(1);
-    const char * expectedAttrs[nattrs] = {"Mass"};
+    const char *expectedAttrs[nattrs] = {"Mass"};
 
     TS_ASSERT_EQUALS(nattrs, profile->nAttributes());
 
     // Test names as they are used in scripts
-    if(profile->nAttributes() > 0)
-    {
-      std::set<std::string> expectedAttrSet(expectedAttrs, expectedAttrs + nattrs);
+    if (profile->nAttributes() > 0) {
+      std::set<std::string> expectedAttrSet(expectedAttrs,
+                                            expectedAttrs + nattrs);
       std::vector<std::string> actualNames = profile->getAttributeNames();
 
-      for(size_t i = 0; i < nattrs; ++i)
-      {
-        const std::string & name = actualNames[i];
+      for (size_t i = 0; i < nattrs; ++i) {
+        const std::string &name = actualNames[i];
         size_t keyCount = expectedAttrSet.count(name);
-        TSM_ASSERT_EQUALS("Expected " + name + " to be found as attribute but it was not.", 1, keyCount);
+        TSM_ASSERT_EQUALS("Expected " + name +
+                              " to be found as attribute but it was not.",
+                          1, keyCount);
       }
     }
   }
 
 private:
-  struct FakeComptonProfile : ComptonProfile
-  {
+  struct FakeComptonProfile : ComptonProfile {
     std::string name() const { return "FakeComptonProfile"; }
-    std::vector<size_t> intensityParameterIndices() const { return std::vector<size_t>(); }
-    size_t fillConstraintMatrix(Mantid::Kernel::DblMatrix &,const size_t,const std::vector<double>&) const { return 0; }
+    std::vector<size_t> intensityParameterIndices() const {
+      return std::vector<size_t>();
+    }
+    size_t fillConstraintMatrix(Mantid::Kernel::DblMatrix &, const size_t,
+                                const std::vector<double> &) const {
+      return 0;
+    }
 
-    void massProfile(double *,const size_t) const {}
+    void massProfile(double *, const size_t) const {}
   };
 
-  Mantid::API::IFunction_sptr createFunction()
-  {
+  Mantid::API::IFunction_sptr createFunction() {
     auto profile = boost::make_shared<FakeComptonProfile>();
     profile->initialize();
     return profile;
   }
-
 };
-
 
 #endif /* MANTID_CURVEFITTING_COMPTONPROFILETEST_H_ */

@@ -169,8 +169,8 @@ MANTID_KERNEL_DLL void readToEndOfLine(std::istream &in, bool ConsumeEOL);
 MANTID_KERNEL_DLL std::string getWord(std::istream &in, bool consumeEOL);
 ///  function parses a path, found in input string "path" and returns vector of
 ///  the folders contributed into the path */
-MANTID_KERNEL_DLL size_t split_path(const std::string &path,
-                                    std::vector<std::string> &path_components);
+MANTID_KERNEL_DLL size_t
+split_path(const std::string &path, std::vector<std::string> &path_components);
 
 /// Loads the entire contents of a text file into a string
 MANTID_KERNEL_DLL std::string loadFile(const std::string &filename);

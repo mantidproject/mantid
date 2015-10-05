@@ -204,9 +204,9 @@ void ObjComponent::getBoundingBox(BoundingBox &absoluteBB) const {
   absoluteBB.zMin() *= scaleFactor.Z();
   absoluteBB.zMax() *= scaleFactor.Z();
   // Rotate
-  (this->getRotation()).rotateBB(absoluteBB.xMin(), absoluteBB.yMin(),
-                                 absoluteBB.zMin(), absoluteBB.xMax(),
-                                 absoluteBB.yMax(), absoluteBB.zMax());
+  (this->getRotation())
+      .rotateBB(absoluteBB.xMin(), absoluteBB.yMin(), absoluteBB.zMin(),
+                absoluteBB.xMax(), absoluteBB.yMax(), absoluteBB.zMax());
 
   // Shift
   const V3D localPos = this->getPos();

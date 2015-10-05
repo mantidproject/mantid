@@ -10,18 +10,11 @@
 
 using namespace Mantid;
 
-class ISaveableTest : public CxxTest::TestSuite
-{
+class ISaveableTest : public CxxTest::TestSuite {
 public:
-
-  void test_Something()
-  {
+  void test_Something() {
     // Bare interface, so nothing to test.
   }
-
-
 };
 
-
 #endif /* MANTID_MDEVENTS_ISAVEABLETEST_H_ */
-

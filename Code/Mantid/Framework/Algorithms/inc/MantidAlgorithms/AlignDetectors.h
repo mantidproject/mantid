@@ -58,7 +58,7 @@ public:
   virtual const std::string summary() const;
 
   /// Algorithm's version for identification. @see Algorithm::version
-  virtual int version() const ;
+  virtual int version() const;
   /// Algorithm's category for identification. @see Algorithm::category
   virtual const std::string category() const;
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
@@ -71,14 +71,14 @@ private:
 
   void execEvent();
 
-  void loadCalFile(API::MatrixWorkspace_sptr inputWS, const std::string & filename);
+  void loadCalFile(API::MatrixWorkspace_sptr inputWS,
+                   const std::string &filename);
   void getCalibrationWS(API::MatrixWorkspace_sptr inputWS);
 
   Mantid::API::ITableWorkspace_sptr m_calibrationWS;
 
   /// number of spectra in input workspace
   int64_t m_numberOfSpectra;
-
 
   /// Map of conversion factors for TOF to d-Spacing conversion
   std::map<detid_t, double> *tofToDmap;

@@ -38,7 +38,9 @@ namespace Converters {
  * contain a static const NPY_TYPES definition giving
  * the result of the mapping
  */
-template <typename T> struct PYTHON_KERNEL_DLL NDArrayTypeIndex { static int typenum; };
+template <typename T> struct PYTHON_KERNEL_DLL NDArrayTypeIndex {
+  static int typenum;
+};
 }
 }
 }

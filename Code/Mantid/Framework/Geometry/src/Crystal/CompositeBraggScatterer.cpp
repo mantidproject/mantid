@@ -52,8 +52,8 @@ BraggScatterer_sptr CompositeBraggScatterer::clone() const {
 
 /// Clones the supplied scatterer, assigns the internal space group and unit
 /// cell to the clone and adds it to the composite.
-void
-CompositeBraggScatterer::addScatterer(const BraggScatterer_sptr &scatterer) {
+void CompositeBraggScatterer::addScatterer(
+    const BraggScatterer_sptr &scatterer) {
   if (!scatterer) {
     throw std::invalid_argument("Cannot process null-scatterer.");
   }
@@ -113,15 +113,15 @@ StructureFactor CompositeBraggScatterer::calculateStructureFactor(
 
 /// Makes sure that space group and unit cell are propagated to all stored
 /// scatterers.
-void
-CompositeBraggScatterer::afterPropertySet(const std::string &propertyName) {
+void CompositeBraggScatterer::afterPropertySet(
+    const std::string &propertyName) {
   propagateProperty(propertyName);
 }
 
 /// Propagates the given property to all contained scatterers that have this
 /// property.
-void
-CompositeBraggScatterer::propagateProperty(const std::string &propertyName) {
+void CompositeBraggScatterer::propagateProperty(
+    const std::string &propertyName) {
   std::string propertyValue = getPropertyValue(propertyName);
 
   for (auto it = m_scatterers.begin(); it != m_scatterers.end(); ++it) {

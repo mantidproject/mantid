@@ -97,6 +97,7 @@ public:
   virtual void setDisplayNormalization(
       Mantid::API::IMDWorkspace_sptr mdWorkspace,
       Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const;
+
 protected:
   //  directions to the detectors
   double m_ex, m_ey, m_ez;

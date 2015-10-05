@@ -21,27 +21,30 @@ using namespace Mantid::Geometry;
 
 using namespace std;
 
-class MaskBinsFromTableTest : public CxxTest::TestSuite
-{
+class MaskBinsFromTableTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MaskBinsFromTableTest *createSuite() { return new MaskBinsFromTableTest(); }
-  static void destroySuite( MaskBinsFromTableTest *suite ) { delete suite; }
+  static MaskBinsFromTableTest *createSuite() {
+    return new MaskBinsFromTableTest();
+  }
+  static void destroySuite(MaskBinsFromTableTest *suite) { delete suite; }
 
   /** In-place single mask test.
    * Same as the test in MaskBins()
    */
-  void test_MaskBinWithSingleLine()
-  {
+  void test_MaskBinWithSingleLine() {
     // 1. Create a dummy workspace
     const std::string workspaceName("raggedMask");
     int nBins = 10;
-    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(5, nBins, 0.0);
-    AnalysisDataService::Instance().add(workspaceName,WS);
+    MatrixWorkspace_sptr WS =
+        WorkspaceCreationHelper::Create2DWorkspaceBinned(5, nBins, 0.0);
+    AnalysisDataService::Instance().add(workspaceName, WS);
 
     // 2. Generate a TableWorskpace
-    DataObjects::TableWorkspace_sptr tablews = boost::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace());
+    DataObjects::TableWorkspace_sptr tablews =
+        boost::shared_ptr<DataObjects::TableWorkspace>(
+            new DataObjects::TableWorkspace());
     tablews->addColumn("double", "XMin");
     tablews->addColumn("double", "XMax");
     tablews->addColumn("str", "SpectraList");
@@ -53,19 +56,18 @@ public:
     MaskBinsFromTable maskalg;
     TS_ASSERT_THROWS_NOTHING(maskalg.initialize());
     maskalg.setPropertyValue("InputWorkspace", workspaceName);
-    maskalg.setPropertyValue("OutputWorkspace",workspaceName);
+    maskalg.setPropertyValue("OutputWorkspace", workspaceName);
     maskalg.setProperty("MaskingInformation", tablews);
     TS_ASSERT_THROWS_NOTHING(maskalg.execute());
     TS_ASSERT(maskalg.isExecuted());
 
     // 4. Check
-    WS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve(workspaceName));
+    WS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(workspaceName));
     TS_ASSERT(WS);
-    for (int wi=1; wi<=3; wi++)
-    {
-      for (int bin=3; bin<6;bin++)
-      {
-        TS_ASSERT_EQUALS( WS->dataY(wi)[bin], 0.0 );
+    for (int wi = 1; wi <= 3; wi++) {
+      for (int bin = 3; bin < 6; bin++) {
+        TS_ASSERT_EQUALS(WS->dataY(wi)[bin], 0.0);
       }
     }
 
@@ -78,17 +80,19 @@ public:
   /** Out-of-place single mask test.
    * Same as the test in MaskBins()
    */
-  void test_MaskBinWithSingleLineOutPlace()
-  {
+  void test_MaskBinWithSingleLineOutPlace() {
     // 1. Create a dummy workspace
     const std::string workspaceName("raggedMask");
     const std::string opWSName("maskedWorkspace");
     int nBins = 10;
-    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(5, nBins, 0.0);
-    AnalysisDataService::Instance().add(workspaceName,WS);
+    MatrixWorkspace_sptr WS =
+        WorkspaceCreationHelper::Create2DWorkspaceBinned(5, nBins, 0.0);
+    AnalysisDataService::Instance().add(workspaceName, WS);
 
     // 2. Generate a TableWorskpace
-    DataObjects::TableWorkspace_sptr tablews = boost::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace());
+    DataObjects::TableWorkspace_sptr tablews =
+        boost::shared_ptr<DataObjects::TableWorkspace>(
+            new DataObjects::TableWorkspace());
     tablews->addColumn("double", "XMin");
     tablews->addColumn("double", "XMax");
     tablews->addColumn("str", "SpectraList");
@@ -100,20 +104,19 @@ public:
     MaskBinsFromTable maskalg;
     TS_ASSERT_THROWS_NOTHING(maskalg.initialize());
     maskalg.setPropertyValue("InputWorkspace", workspaceName);
-    maskalg.setPropertyValue("OutputWorkspace",opWSName);
+    maskalg.setPropertyValue("OutputWorkspace", opWSName);
     maskalg.setProperty("MaskingInformation", tablews);
     TS_ASSERT_THROWS_NOTHING(maskalg.execute());
     TS_ASSERT(maskalg.isExecuted());
 
     // 4. Check
     MatrixWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve(opWSName));
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(opWSName));
     TS_ASSERT(outWS);
-    for (int wi=1; wi<=3; wi++)
-    {
-      for (int bin=3; bin<6;bin++)
-      {
-        TS_ASSERT_EQUALS( outWS->dataY(wi)[bin], 0.0 );
+    for (int wi = 1; wi <= 3; wi++) {
+      for (int bin = 3; bin < 6; bin++) {
+        TS_ASSERT_EQUALS(outWS->dataY(wi)[bin], 0.0);
       }
     }
 
@@ -124,21 +127,22 @@ public:
     return;
   }
 
-
   /** Multiple lines out-of-place test.
    * This is a real test
    */
-  void test_MaskBinWithMultiLines()
-  {
+  void test_MaskBinWithMultiLines() {
     // 1. Create a dummy workspace
     const std::string workspaceName("raggedMask");
     int nBins = 10;
     int nHist = 12;
-    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(nHist, nBins, 0.0);
-    AnalysisDataService::Instance().add(workspaceName,WS);
+    MatrixWorkspace_sptr WS =
+        WorkspaceCreationHelper::Create2DWorkspaceBinned(nHist, nBins, 0.0);
+    AnalysisDataService::Instance().add(workspaceName, WS);
 
     // 2. Generate a TableWorskpace
-    DataObjects::TableWorkspace_sptr tablews = boost::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace());
+    DataObjects::TableWorkspace_sptr tablews =
+        boost::shared_ptr<DataObjects::TableWorkspace>(
+            new DataObjects::TableWorkspace());
     tablews->addColumn("double", "XMin");
     tablews->addColumn("double", "XMax");
     tablews->addColumn("str", "SpectraList");
@@ -154,27 +158,23 @@ public:
     MaskBinsFromTable maskalg;
     TS_ASSERT_THROWS_NOTHING(maskalg.initialize());
     maskalg.setPropertyValue("InputWorkspace", workspaceName);
-    maskalg.setPropertyValue("OutputWorkspace",workspaceName);
+    maskalg.setPropertyValue("OutputWorkspace", workspaceName);
     maskalg.setProperty("MaskingInformation", tablews);
     TS_ASSERT_THROWS_NOTHING(maskalg.execute());
     TS_ASSERT(maskalg.isExecuted());
 
     // 4. Check
-    WS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve(workspaceName));
+    WS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(workspaceName));
     TS_ASSERT(WS);
 
     // a) Table Line 0
-    for (int wi=1; wi<=3; wi++)
-    {
-      for (size_t bin = 0; bin < WS->dataY(wi).size(); ++bin)
-      {
-        if (bin >= 3 && bin < 6)
-        {
-          TS_ASSERT_EQUALS( WS->dataY(wi)[bin], 0.0 );
-        }
-        else
-        {
-          TS_ASSERT_EQUALS( WS->dataY(wi)[bin], 2.0 );
+    for (int wi = 1; wi <= 3; wi++) {
+      for (size_t bin = 0; bin < WS->dataY(wi).size(); ++bin) {
+        if (bin >= 3 && bin < 6) {
+          TS_ASSERT_EQUALS(WS->dataY(wi)[bin], 0.0);
+        } else {
+          TS_ASSERT_EQUALS(WS->dataY(wi)[bin], 2.0);
         }
       }
     }
@@ -185,34 +185,24 @@ public:
     speclist.push_back(6);
     speclist.push_back(7);
     speclist.push_back(8);
-    for (size_t iws = 0; iws < speclist.size(); ++iws)
-    {
-      const MantidVec& yvec = WS->readY(speclist[iws]);
-      for (size_t bin = 0; bin < yvec.size(); ++bin)
-      {
-        if (bin >= 4 && bin < 7)
-        {
+    for (size_t iws = 0; iws < speclist.size(); ++iws) {
+      const MantidVec &yvec = WS->readY(speclist[iws]);
+      for (size_t bin = 0; bin < yvec.size(); ++bin) {
+        if (bin >= 4 && bin < 7) {
           TS_ASSERT_EQUALS(yvec[bin], 0.0);
-        }
-        else
-        {
+        } else {
           TS_ASSERT_EQUALS(yvec[bin], 2.0);
         }
       }
     }
 
     // c) Table Line 2
-    for (size_t iws = 9; iws < 10; ++iws)
-    {
-      const MantidVec& yvec = WS->readY(iws);
-      for (size_t bin = 0; bin < yvec.size(); ++bin)
-      {
-        if (bin == 0)
-        {
+    for (size_t iws = 9; iws < 10; ++iws) {
+      const MantidVec &yvec = WS->readY(iws);
+      for (size_t bin = 0; bin < yvec.size(); ++bin) {
+        if (bin == 0) {
           TS_ASSERT_EQUALS(yvec[bin], 0.0);
-        }
-        else
-        {
+        } else {
           TS_ASSERT_EQUALS(yvec[bin], 2.0);
         }
       }
@@ -228,16 +218,18 @@ public:
    * Same as the test in MaskBins()
    * With TableWorkspace of column in different order
    */
-  void test_MaskBinWithSingleLine2()
-  {
+  void test_MaskBinWithSingleLine2() {
     // 1. Create a dummy workspace
     const std::string workspaceName("raggedMask");
     int nBins = 10;
-    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(5, nBins, 0.0);
-    AnalysisDataService::Instance().add(workspaceName,WS);
+    MatrixWorkspace_sptr WS =
+        WorkspaceCreationHelper::Create2DWorkspaceBinned(5, nBins, 0.0);
+    AnalysisDataService::Instance().add(workspaceName, WS);
 
     // 2. Generate a TableWorskpace
-    DataObjects::TableWorkspace_sptr tablews = boost::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace());
+    DataObjects::TableWorkspace_sptr tablews =
+        boost::shared_ptr<DataObjects::TableWorkspace>(
+            new DataObjects::TableWorkspace());
     tablews->addColumn("str", "SpectraList");
     tablews->addColumn("double", "XMin");
     tablews->addColumn("double", "XMax");
@@ -249,19 +241,18 @@ public:
     MaskBinsFromTable maskalg;
     TS_ASSERT_THROWS_NOTHING(maskalg.initialize());
     maskalg.setPropertyValue("InputWorkspace", workspaceName);
-    maskalg.setPropertyValue("OutputWorkspace",workspaceName);
+    maskalg.setPropertyValue("OutputWorkspace", workspaceName);
     maskalg.setProperty("MaskingInformation", tablews);
     TS_ASSERT_THROWS_NOTHING(maskalg.execute());
     TS_ASSERT(maskalg.isExecuted());
 
     // 4. Check
-    WS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve(workspaceName));
+    WS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(workspaceName));
     TS_ASSERT(WS);
-    for (int wi=1; wi<=3; wi++)
-    {
-      for (int bin=3; bin<6;bin++)
-      {
-        TS_ASSERT_EQUALS( WS->dataY(wi)[bin], 0.0 );
+    for (int wi = 1; wi <= 3; wi++) {
+      for (int bin = 3; bin < 6; bin++) {
+        TS_ASSERT_EQUALS(WS->dataY(wi)[bin], 0.0);
       }
     }
 
@@ -274,29 +265,27 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test to mask detectors by detectors IDs
     */
-  void test_maskBinWithDetectorIDsList()
-  {
+  void test_maskBinWithDetectorIDsList() {
     // Create a workspace to mask: 5 spectra, 10 bins
     const std::string workspaceName("raggedMask5");
     int nBins = 10;
-    MatrixWorkspace_sptr dataws = WorkspaceCreationHelper::Create2DWorkspaceBinned(5, nBins, 0.0);
-    AnalysisDataService::Instance().add(workspaceName,dataws);
+    MatrixWorkspace_sptr dataws =
+        WorkspaceCreationHelper::Create2DWorkspaceBinned(5, nBins, 0.0);
+    AnalysisDataService::Instance().add(workspaceName, dataws);
 
     // Find out mapping between spectra/workspace indexes and detectors IDs
-    for (size_t i = 0; i < 5; ++i)
-    {
+    for (size_t i = 0; i < 5; ++i) {
       ISpectrum *spec = dataws->getSpectrum(i);
-      if (!spec)
-      {
-        cout << "There is no spectrum mapping to workspace index " << i << ".\n";
+      if (!spec) {
+        cout << "There is no spectrum mapping to workspace index " << i
+             << ".\n";
         return;
-      }
-      else
-      {
+      } else {
         std::set<detid_t> detidset = spec->getDetectorIDs();
         set<detid_t>::iterator setiter;
         for (setiter = detidset.begin(); setiter != detidset.end(); ++setiter)
-          cout << "WorkspaceIndex = " << i << ":  Detector ID = " << *setiter << ".\n";
+          cout << "WorkspaceIndex = " << i << ":  Detector ID = " << *setiter
+               << ".\n";
       }
     }
 
@@ -314,68 +303,26 @@ public:
     MaskBinsFromTable maskalg;
     TS_ASSERT_THROWS_NOTHING(maskalg.initialize());
     maskalg.setPropertyValue("InputWorkspace", workspaceName);
-    maskalg.setPropertyValue("OutputWorkspace",workspaceName);
+    maskalg.setPropertyValue("OutputWorkspace", workspaceName);
     maskalg.setProperty("MaskingInformation", "MaskInfoTable");
     TS_ASSERT_THROWS_NOTHING(maskalg.execute());
     TS_ASSERT(maskalg.isExecuted());
 
     // Check
-    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-          AnalysisDataService::Instance().retrieve(workspaceName));
+    MatrixWorkspace_sptr outws =
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(workspaceName));
     TS_ASSERT(outws);
-    for (int wi=1; wi<=3; wi++)
-    {
-      for (int bin=3; bin<6;bin++)
-      {
-        TS_ASSERT_EQUALS( outws->dataY(wi)[bin], 0.0 );
+    for (int wi = 1; wi <= 3; wi++) {
+      for (int bin = 3; bin < 6; bin++) {
+        TS_ASSERT_EQUALS(outws->dataY(wi)[bin], 0.0);
       }
     }
 
     // Clean
     AnalysisDataService::Instance().remove("raggedMask5");
     AnalysisDataService::Instance().remove("MaskInfoTable");
-
   }
-
-
-
-
 };
 
-
 #endif /* MANTID_ALGORITHMS_MASKDETECTORBINSTEST_H_ */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

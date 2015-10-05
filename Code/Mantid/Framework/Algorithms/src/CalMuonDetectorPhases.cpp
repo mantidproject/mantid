@@ -79,7 +79,8 @@ void CalMuonDetectorPhases::exec() {
   if (startTime == EMPTY_DBL()) {
     try {
       // Read FirstGoodData from workspace logs if possible
-      double firstGoodData = inputWS->run().getLogAsSingleValue("FirstGoodData");
+      double firstGoodData =
+          inputWS->run().getLogAsSingleValue("FirstGoodData");
       startTime = firstGoodData;
     } catch (...) {
       g_log.warning("Couldn't read FirstGoodData, setting to 0");
@@ -112,7 +113,8 @@ void CalMuonDetectorPhases::exec() {
 
   // Prepares the workspaces: extracts data from [startTime, endTime] and
   // removes exponential decay
-  API::MatrixWorkspace_sptr tempWS = prepareWorkspace(inputWS, startTime, endTime);
+  API::MatrixWorkspace_sptr tempWS =
+      prepareWorkspace(inputWS, startTime, endTime);
 
   // Create the output workspaces
   auto tab = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
@@ -184,7 +186,6 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
 
   // Get the fitting results
   resGroup = fit->getProperty("OutputWorkspace");
-
 }
 
 /** Extracts detector asymmetries and phases from fitting results
@@ -196,9 +197,11 @@ API::ITableWorkspace_sptr CalMuonDetectorPhases::extractDetectorInfo(
     const API::ITableWorkspace_sptr &paramTab, size_t nspec) {
 
   // Make sure paramTable is the right size
-  // It should contain three parameters per detector/spectrum plus 'const function value'
+  // It should contain three parameters per detector/spectrum plus 'const
+  // function value'
   if (paramTab->rowCount() != nspec * 3 + 1) {
-    throw std::invalid_argument("Can't extract detector parameters from fit results");
+    throw std::invalid_argument(
+        "Can't extract detector parameters from fit results");
   }
 
   // Create the table to store detector info
@@ -208,7 +211,7 @@ API::ITableWorkspace_sptr CalMuonDetectorPhases::extractDetectorInfo(
   tab->addColumn("double", "Phase");
 
   // Reference frequency, all w values should be the same
-  double omegaRef = paramTab->Double(1,1);
+  double omegaRef = paramTab->Double(1, 1);
 
   for (size_t s = 0; s < nspec; s++) {
     // The following '3' factor corresponds to the number of function params
@@ -222,7 +225,7 @@ API::ITableWorkspace_sptr CalMuonDetectorPhases::extractDetectorInfo(
     }
     // If asym<0, take the absolute value and add \pi to phase
     // f(x) = A * sin( w * x + p) = -A * sin( w * x + p + PI)
-    if (asym<0) {
+    if (asym < 0) {
       asym = -asym;
       phase = phase + M_PI;
     }
@@ -244,7 +247,8 @@ API::ITableWorkspace_sptr CalMuonDetectorPhases::extractDetectorInfo(
 * @param freq :: [input] Hint for the frequency (w)
 * @returns :: The fitting function as a string
 */
-std::string CalMuonDetectorPhases::createFittingFunction(int nspec, double freq) {
+std::string CalMuonDetectorPhases::createFittingFunction(int nspec,
+                                                         double freq) {
 
   // The fitting function is:
   // f(x) = A * sin ( w * x + p )
@@ -283,22 +287,21 @@ CalMuonDetectorPhases::prepareWorkspace(const API::MatrixWorkspace_sptr &ws,
 
   // Extract counts from startTime to endTime
   API::IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
-  crop->setProperty("InputWorkspace",ws);
-  crop->setProperty("XMin",startTime);
-  crop->setProperty("XMax",endTime);
+  crop->setProperty("InputWorkspace", ws);
+  crop->setProperty("XMin", startTime);
+  crop->setProperty("XMax", endTime);
   crop->executeAsChildAlg();
   boost::shared_ptr<API::MatrixWorkspace> wsCrop =
       crop->getProperty("OutputWorkspace");
 
   // Remove exponential decay
   API::IAlgorithm_sptr remove = createChildAlgorithm("RemoveExpDecay");
-  remove->setProperty("InputWorkspace",wsCrop);
+  remove->setProperty("InputWorkspace", wsCrop);
   remove->executeAsChildAlg();
   boost::shared_ptr<API::MatrixWorkspace> wsRem =
       remove->getProperty("OutputWorkspace");
 
   return wsRem;
-
 }
 
 } // namespace Algorithms

@@ -79,7 +79,7 @@ std::string ISISDataArchive::getPath(const std::string &fName) const {
   Kernel::InternetHelper inetHelper;
   std::ostringstream os;
   try {
-    inetHelper.sendRequest(URL_PREFIX + fName,os);
+    inetHelper.sendRequest(URL_PREFIX + fName, os);
 
     os << Poco::Path::separator() << fName;
     try {
@@ -88,11 +88,8 @@ std::string ISISDataArchive::getPath(const std::string &fName) const {
         return expectedPath;
     } catch (Poco::Exception &) {
     }
-  }
-  catch (Kernel::Exception::InternetError& ie) {
-    g_log.warning() 
-      << "Could not access archive index " 
-      << ie.what();
+  } catch (Kernel::Exception::InternetError &ie) {
+    g_log.warning() << "Could not access archive index " << ie.what();
   }
 
   return "";

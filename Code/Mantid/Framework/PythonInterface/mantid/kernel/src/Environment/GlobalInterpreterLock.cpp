@@ -16,8 +16,10 @@ PyGILState_STATE GlobalInterpreterLock::acquire() {
 }
 
 /**
- * There must be have been a call to acquire() to create the tstate value given here.
- * @param tstate The Python threadstate returned by the matching call to acquire()
+ * There must be have been a call to acquire() to create the tstate value given
+ * here.
+ * @param tstate The Python threadstate returned by the matching call to
+ * acquire()
  */
 void GlobalInterpreterLock::release(PyGILState_STATE tstate) {
   PyGILState_Release(tstate);
@@ -30,18 +32,13 @@ void GlobalInterpreterLock::release(PyGILState_STATE tstate) {
 /**
  * Ensures this thread is ready to call Python code
  */
-GlobalInterpreterLock::GlobalInterpreterLock()
-  : m_state(this->acquire()) {
-}
+GlobalInterpreterLock::GlobalInterpreterLock() : m_state(this->acquire()) {}
 
 /**
  * Resets the Python threadstate to the state before
  * this object was created.
  */
-GlobalInterpreterLock::~GlobalInterpreterLock() {
-  this->release(m_state);
-}
-
+GlobalInterpreterLock::~GlobalInterpreterLock() { this->release(m_state); }
 }
 }
 }

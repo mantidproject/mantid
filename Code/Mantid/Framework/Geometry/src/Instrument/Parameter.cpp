@@ -17,19 +17,18 @@ ParameterFactory::FactoryMap ParameterFactory::s_map;
    If no double LF symbol found in the description string, full string
    is returned.
 */
-std::string Parameter::getShortDescription()const{
+std::string Parameter::getShortDescription() const {
   size_t pos = m_description.find(".");
-  if (pos == std::string::npos){
+  if (pos == std::string::npos) {
     return std::string(m_description);
-  }else{
-    if (pos>0){
-      return m_description.substr(0,pos+1);
-    }else{
+  } else {
+    if (pos > 0) {
+      return m_description.substr(0, pos + 1);
+    } else {
       return std::string("");
     }
   }
 }
-
 
 /**  Creates an instance of a parameter
  *   @param className :: The parameter registered type name

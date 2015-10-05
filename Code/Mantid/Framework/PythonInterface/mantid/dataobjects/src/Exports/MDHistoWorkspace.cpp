@@ -8,11 +8,9 @@ using Mantid::DataObjects::MDHistoWorkspace;
 using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
 
-void export_MDHistoWorkspace()
-{
-  class_<MDHistoWorkspace, bases<IMDHistoWorkspace>,
-         boost::noncopyable>("MDHistoWorkspace", no_init)
-    ;
+void export_MDHistoWorkspace() {
+  class_<MDHistoWorkspace, bases<IMDHistoWorkspace>, boost::noncopyable>(
+      "MDHistoWorkspace", no_init);
 
   // register pointers
   RegisterWorkspacePtrToPython<MDHistoWorkspace>();

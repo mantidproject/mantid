@@ -43,8 +43,10 @@ public:
 
       TS_ASSERT(fn);
       TSM_ASSERT_EQUALS("IPeakFunction " + peakFunctionName + " gave centre"
-                        "parameter '" + fn->getCentreParameterName() + "', "
-                        "should give '" + centreParameterName + "'.",
+                                                              "parameter '" +
+                            fn->getCentreParameterName() + "', "
+                                                           "should give '" +
+                            centreParameterName + "'.",
                         fn->getCentreParameterName(), centreParameterName);
     }
   }

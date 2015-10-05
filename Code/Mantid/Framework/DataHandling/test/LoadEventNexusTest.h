@@ -19,12 +19,10 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 
-class LoadEventNexusTest : public CxxTest::TestSuite
-{
+class LoadEventNexusTest : public CxxTest::TestSuite {
 private:
-
-  void do_test_filtering_start_and_end_filtered_loading(const bool metadataonly)
-  {
+  void
+  do_test_filtering_start_and_end_filtered_loading(const bool metadataonly) {
     const std::string wsName = "test_filtering";
     const double filterStart = 1;
     const double filterEnd = 1000;
@@ -32,126 +30,137 @@ private:
     LoadEventNexus ld;
     ld.initialize();
     ld.setPropertyValue("OutputWorkspace", wsName);
-    ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
+    ld.setPropertyValue("Filename", "CNCS_7860_event.nxs");
     ld.setProperty("FilterByTimeStart", filterStart);
     ld.setProperty("FilterByTimeStop", filterEnd);
     ld.setProperty("MetaDataOnly", metadataonly);
 
-    TS_ASSERT( ld.execute() );
+    TS_ASSERT(ld.execute());
 
-    auto outWs = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName); 
+    auto outWs =
+        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
 
-    Property* prop = outWs->run().getLogData("SampleTemp");
-    TSM_ASSERT_EQUALS("Should have 16 elements after filtering.", 16, prop->size());
-    if(prop->size() != 16)
+    Property *prop = outWs->run().getLogData("SampleTemp");
+    TSM_ASSERT_EQUALS("Should have 16 elements after filtering.", 16,
+                      prop->size());
+    if (prop->size() != 16)
       return;
-    //Further tests
-    TimeSeriesProperty<double>* sampleTemps = dynamic_cast<TimeSeriesProperty<double>* >(prop);
+    // Further tests
+    TimeSeriesProperty<double> *sampleTemps =
+        dynamic_cast<TimeSeriesProperty<double> *>(prop);
     auto filteredLogStartTime = sampleTemps->nthTime(0);
-    auto filteredLogEndTime = sampleTemps->nthTime(sampleTemps->size()-1);
-    TS_ASSERT_EQUALS("2010-Mar-25 16:09:27.620000000",filteredLogStartTime.toSimpleString());
-    TS_ASSERT_EQUALS("2010-Mar-25 16:11:51.558003540",filteredLogEndTime.toSimpleString());
+    auto filteredLogEndTime = sampleTemps->nthTime(sampleTemps->size() - 1);
+    TS_ASSERT_EQUALS("2010-Mar-25 16:09:27.620000000",
+                     filteredLogStartTime.toSimpleString());
+    TS_ASSERT_EQUALS("2010-Mar-25 16:11:51.558003540",
+                     filteredLogEndTime.toSimpleString());
   }
 
 public:
+  void test_SingleBank_PixelsOnlyInThatBank() { doTestSingleBank(true, false); }
 
-  void test_SingleBank_PixelsOnlyInThatBank()
-  {
-    doTestSingleBank(true, false);
-  }
-
-  void test_Normal_vs_Precount()
-  {
+  void test_Normal_vs_Precount() {
     Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;
     std::string outws_name = "cncs_noprecount";
     ld.initialize();
-    ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
-    ld.setPropertyValue("OutputWorkspace",outws_name);
+    ld.setPropertyValue("Filename", "CNCS_7860_event.nxs");
+    ld.setPropertyValue("OutputWorkspace", outws_name);
     ld.setPropertyValue("Precount", "0");
     ld.setProperty<bool>("LoadLogs", false); // Time-saver
     ld.execute();
-    TS_ASSERT( ld.isExecuted() );
+    TS_ASSERT(ld.isExecuted());
 
     EventWorkspace_sptr WS;
     TS_ASSERT_THROWS_NOTHING(
-        WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name) );
-    //Valid WS and it is an EventWorkspace
-    TS_ASSERT( WS );
-    //Pixels have to be padded
-    TS_ASSERT_EQUALS( WS->getNumberHistograms(), 51200);
-    //Events
-    TS_ASSERT_EQUALS( WS->getNumberEvents(), 112266);
-    //TOF limits found. There is a pad of +-1 given around the actual TOF founds.
-    TS_ASSERT_DELTA( (*WS->refX(0))[0],  44162.6, 0.05);
-    TS_ASSERT_DELTA( (*WS->refX(0))[1],  60830.2, 0.05);
+        WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
+            outws_name));
+    // Valid WS and it is an EventWorkspace
+    TS_ASSERT(WS);
+    // Pixels have to be padded
+    TS_ASSERT_EQUALS(WS->getNumberHistograms(), 51200);
+    // Events
+    TS_ASSERT_EQUALS(WS->getNumberEvents(), 112266);
+    // TOF limits found. There is a pad of +-1 given around the actual TOF
+    // founds.
+    TS_ASSERT_DELTA((*WS->refX(0))[0], 44162.6, 0.05);
+    TS_ASSERT_DELTA((*WS->refX(0))[1], 60830.2, 0.05);
     // Valid spectrum info
-    TS_ASSERT_EQUALS( WS->getSpectrum(0)->getSpectrumNo(), 1);
-    TS_ASSERT_EQUALS( WS->getSpectrum(0)->getDetectorIDs().size(), 1);
-    TS_ASSERT_EQUALS( *WS->getSpectrum(0)->getDetectorIDs().begin(), 0);
+    TS_ASSERT_EQUALS(WS->getSpectrum(0)->getSpectrumNo(), 1);
+    TS_ASSERT_EQUALS(WS->getSpectrum(0)->getDetectorIDs().size(), 1);
+    TS_ASSERT_EQUALS(*WS->getSpectrum(0)->getDetectorIDs().begin(), 0);
 
-    //Check one event from one pixel - does it have a reasonable pulse time
-    TS_ASSERT( WS->getEventListPtr(1000)->getEvents()[0].pulseTime() > DateAndTime(int64_t(1e9*365*10)) );
+    // Check one event from one pixel - does it have a reasonable pulse time
+    TS_ASSERT(WS->getEventListPtr(1000)->getEvents()[0].pulseTime() >
+              DateAndTime(int64_t(1e9 * 365 * 10)));
 
-    //Check filename
-    TS_ASSERT_EQUALS(ld.getPropertyValue("Filename"),WS->run().getProperty("Filename")->value());
+    // Check filename
+    TS_ASSERT_EQUALS(ld.getPropertyValue("Filename"),
+                     WS->run().getProperty("Filename")->value());
 
     // Test that asking not to load the logs did what it should
     // Make sure that we throw if we try to read a log (that shouldn't be there)
-    TS_ASSERT_THROWS( WS->getLog("proton_charge"),  std::invalid_argument);
+    TS_ASSERT_THROWS(WS->getLog("proton_charge"), std::invalid_argument);
 
     //----- Now we re-load with precounting and compare memory use ----
     LoadEventNexus ld2;
     std::string outws_name2 = "cncs_precount";
     ld2.initialize();
-    ld2.setPropertyValue("Filename","CNCS_7860_event.nxs");
-    ld2.setPropertyValue("OutputWorkspace",outws_name2);
+    ld2.setPropertyValue("Filename", "CNCS_7860_event.nxs");
+    ld2.setPropertyValue("OutputWorkspace", outws_name2);
     ld2.setPropertyValue("Precount", "1");
     ld2.setProperty<bool>("LoadLogs", false); // Time-saver
     ld2.execute();
-    TS_ASSERT( ld2.isExecuted() );
+    TS_ASSERT(ld2.isExecuted());
 
-    EventWorkspace_sptr WS2 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name2);
-    //Valid WS and it is an EventWorkspace
-    TS_ASSERT( WS2 );
+    EventWorkspace_sptr WS2 =
+        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name2);
+    // Valid WS and it is an EventWorkspace
+    TS_ASSERT(WS2);
 
-    TS_ASSERT_EQUALS( WS->getNumberEvents(), WS2->getNumberEvents() );
+    TS_ASSERT_EQUALS(WS->getNumberEvents(), WS2->getNumberEvents());
     // Memory used should be lower (or the same at worst)
-    TS_ASSERT_LESS_THAN_EQUALS( WS2->getMemorySize(), WS->getMemorySize() );
+    TS_ASSERT_LESS_THAN_EQUALS(WS2->getMemorySize(), WS->getMemorySize());
 
-
-
-    //Longer, more thorough test
-    if (false)
-    {
-      IAlgorithm_sptr load =  AlgorithmManager::Instance().create("LoadEventPreNexus", 1);
+    // Longer, more thorough test
+    if (false) {
+      IAlgorithm_sptr load =
+          AlgorithmManager::Instance().create("LoadEventPreNexus", 1);
       load->setPropertyValue("OutputWorkspace", "cncs_pre");
-      load->setPropertyValue("EventFilename","CNCS_7860_neutron_event.dat");
-      load->setPropertyValue("PulseidFilename","CNCS_7860_pulseid.dat");
-      load->setPropertyValue("MappingFilename","CNCS_TS_2008_08_18.dat");
+      load->setPropertyValue("EventFilename", "CNCS_7860_neutron_event.dat");
+      load->setPropertyValue("PulseidFilename", "CNCS_7860_pulseid.dat");
+      load->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
       load->execute();
-      TS_ASSERT( load->isExecuted() );
-      EventWorkspace_sptr WS2 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("cncs_pre");
-      //Valid WS and it is an EventWorkspace
-      TS_ASSERT( WS2 );
+      TS_ASSERT(load->isExecuted());
+      EventWorkspace_sptr WS2 =
+          AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
+              "cncs_pre");
+      // Valid WS and it is an EventWorkspace
+      TS_ASSERT(WS2);
 
-      //Let's compare the proton_charge logs
-      TimeSeriesProperty<double> * log = dynamic_cast<TimeSeriesProperty<double> *>( WS->mutableRun().getProperty("proton_charge") );
+      // Let's compare the proton_charge logs
+      TimeSeriesProperty<double> *log =
+          dynamic_cast<TimeSeriesProperty<double> *>(
+              WS->mutableRun().getProperty("proton_charge"));
       std::map<DateAndTime, double> logMap = log->valueAsCorrectMap();
-      TimeSeriesProperty<double> * log2 = dynamic_cast<TimeSeriesProperty<double> *>( WS2->mutableRun().getProperty("proton_charge") );
+      TimeSeriesProperty<double> *log2 =
+          dynamic_cast<TimeSeriesProperty<double> *>(
+              WS2->mutableRun().getProperty("proton_charge"));
       std::map<DateAndTime, double> logMap2 = log2->valueAsCorrectMap();
       std::map<DateAndTime, double>::iterator it, it2;
 
       it = logMap.begin();
       it2 = logMap2.begin();
-      for (; it != logMap.end(); )
-      {
-        //Same times within a millisecond
-        //TS_ASSERT_DELTA( it->first, it2->first, DateAndTime::durationFromSeconds(1e-3));
-        //Same times?
-        TS_ASSERT_LESS_THAN( fabs(DateAndTime::secondsFromDuration(it->first - it2->first)), 1); //TODO: Fix the nexus file times here
-        //Same proton charge?
-        TS_ASSERT_DELTA( it->second, it2->second, 1e-5);
+      for (; it != logMap.end();) {
+        // Same times within a millisecond
+        // TS_ASSERT_DELTA( it->first, it2->first,
+        // DateAndTime::durationFromSeconds(1e-3));
+        // Same times?
+        TS_ASSERT_LESS_THAN(
+            fabs(DateAndTime::secondsFromDuration(it->first - it2->first)),
+            1); // TODO: Fix the nexus file times here
+        // Same proton charge?
+        TS_ASSERT_DELTA(it->second, it2->second, 1e-5);
         it++;
         it2++;
       }
@@ -159,27 +168,26 @@ public:
       int pixelID = 2000;
 
       std::vector<TofEvent> events1 = WS->getEventListPtr(pixelID)->getEvents();
-      std::vector<TofEvent> events2 = WS2->getEventListPtr(pixelID)->getEvents();
+      std::vector<TofEvent> events2 =
+          WS2->getEventListPtr(pixelID)->getEvents();
 
-      //std::cout << events1.size() << std::endl;
-      TS_ASSERT_EQUALS( events1.size(), events2.size());
-      if (events1.size() == events2.size())
-      {
-        for (size_t i=0; i < events1.size(); i++)
-        {
-          TS_ASSERT_DELTA( events1[i].tof(), events2[i].tof(), 0.05);
-          TS_ASSERT_DELTA( events1[i].pulseTime(), events2[i].pulseTime(), 1e9); //TODO:: Fix nexus start times
-          //std::cout << (events1[i].pulseTime()-start)/1e9 << " - " << (events2[i].pulseTime()-start)/1e9 << " sec\n";
-          //std::cout << "Pulse time diff " << (events1[i].pulseTime() - events2[i].pulseTime())/1e9 << " sec\n";
+      // std::cout << events1.size() << std::endl;
+      TS_ASSERT_EQUALS(events1.size(), events2.size());
+      if (events1.size() == events2.size()) {
+        for (size_t i = 0; i < events1.size(); i++) {
+          TS_ASSERT_DELTA(events1[i].tof(), events2[i].tof(), 0.05);
+          TS_ASSERT_DELTA(events1[i].pulseTime(), events2[i].pulseTime(),
+                          1e9); // TODO:: Fix nexus start times
+          // std::cout << (events1[i].pulseTime()-start)/1e9 << " - " <<
+          // (events2[i].pulseTime()-start)/1e9 << " sec\n";
+          // std::cout << "Pulse time diff " << (events1[i].pulseTime() -
+          // events2[i].pulseTime())/1e9 << " sec\n";
         }
       }
-
     }
-
   }
 
-  void test_TOF_filtered_loading()
-  {
+  void test_TOF_filtered_loading() {
     const std::string wsName = "test_filtering";
     const double filterStart = 45000;
     const double filterEnd = 59000;
@@ -187,31 +195,34 @@ public:
     LoadEventNexus ld;
     ld.initialize();
     ld.setPropertyValue("OutputWorkspace", wsName);
-    ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
+    ld.setPropertyValue("Filename", "CNCS_7860_event.nxs");
     ld.setProperty("FilterByTofMin", filterStart);
     ld.setProperty("FilterByTofMax", filterEnd);
     ld.setProperty<bool>("LoadLogs", false); // Time-saver
 
-    TS_ASSERT( ld.execute() );
+    TS_ASSERT(ld.execute());
 
-    auto outWs = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName); 
+    auto outWs =
+        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
 
     auto eventList = outWs->getEventList(4348);
     auto events = eventList.getEvents();
 
     double max = events.begin()->tof();
     double min = events.begin()->tof();
-    for(size_t j = 0; j < events.size(); ++j)
-    {
+    for (size_t j = 0; j < events.size(); ++j) {
       max = events[j].tof() > max ? events[j].tof() : max;
       min = events[j].tof() < min ? events[j].tof() : min;
     }
-    TSM_ASSERT("The max TOF in the workspace should be equal to or less than the filtered cut-off", max <= filterEnd);
-    TSM_ASSERT("The min TOF in the workspace should be equal to or greater than the filtered cut-off", min >= filterStart);
+    TSM_ASSERT("The max TOF in the workspace should be equal to or less than "
+               "the filtered cut-off",
+               max <= filterEnd);
+    TSM_ASSERT("The min TOF in the workspace should be equal to or greater "
+               "than the filtered cut-off",
+               min >= filterStart);
   }
 
-  void test_partial_spectra_loading()
-  {
+  void test_partial_spectra_loading() {
     std::string wsName = "test_partial_spectra_loading_SpectrumList";
     std::vector<int32_t> specList;
     specList.push_back(13);
@@ -223,20 +234,26 @@ public:
     LoadEventNexus ld;
     ld.initialize();
     ld.setPropertyValue("OutputWorkspace", wsName);
-    ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
+    ld.setPropertyValue("Filename", "CNCS_7860_event.nxs");
     ld.setProperty("SpectrumList", specList);
     ld.setProperty<bool>("LoadLogs", false); // Time-saver
 
-    TS_ASSERT( ld.execute() );
+    TS_ASSERT(ld.execute());
 
-    auto outWs = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName); 
+    auto outWs =
+        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
 
-    TSM_ASSERT("The number of spectra in the workspace should be equal to the spectra filtered",
-               outWs->getNumberHistograms()==specList.size());
-    TSM_ASSERT("Some spectra were not found in the workspace", outWs->getSpectrum(0)->getSpectrumNo()==13);
-    TSM_ASSERT("Some spectra were not found in the workspace", outWs->getSpectrum(1)->getSpectrumNo()==16);
-    TSM_ASSERT("Some spectra were not found in the workspace", outWs->getSpectrum(2)->getSpectrumNo()==21);
-    TSM_ASSERT("Some spectra were not found in the workspace", outWs->getSpectrum(3)->getSpectrumNo()==28);
+    TSM_ASSERT("The number of spectra in the workspace should be equal to the "
+               "spectra filtered",
+               outWs->getNumberHistograms() == specList.size());
+    TSM_ASSERT("Some spectra were not found in the workspace",
+               outWs->getSpectrum(0)->getSpectrumNo() == 13);
+    TSM_ASSERT("Some spectra were not found in the workspace",
+               outWs->getSpectrum(1)->getSpectrumNo() == 16);
+    TSM_ASSERT("Some spectra were not found in the workspace",
+               outWs->getSpectrum(2)->getSpectrumNo() == 21);
+    TSM_ASSERT("Some spectra were not found in the workspace",
+               outWs->getSpectrum(3)->getSpectrumNo() == 28);
 
     // B) test SpectrumMin and SpectrumMax
     wsName = "test_partial_spectra_loading_SpectrumMin_SpectrumMax";
@@ -245,27 +262,27 @@ public:
     LoadEventNexus ldMinMax;
     ldMinMax.initialize();
     ldMinMax.setPropertyValue("OutputWorkspace", wsName);
-    ldMinMax.setPropertyValue("Filename","CNCS_7860_event.nxs");
+    ldMinMax.setPropertyValue("Filename", "CNCS_7860_event.nxs");
     ldMinMax.setProperty<int>("SpectrumMin", specMin);
     ldMinMax.setProperty<int>("SpectrumMax", specMax);
     ldMinMax.setProperty<bool>("LoadLogs", false); // Time-saver
 
-    TS_ASSERT( ldMinMax.execute() );
+    TS_ASSERT(ldMinMax.execute());
 
     outWs = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
 
     // check number and indices of spectra
-    const size_t numSpecs = specMax - specMin +1;
+    const size_t numSpecs = specMax - specMin + 1;
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(), numSpecs);
-    for (size_t specIdx=0; specIdx < numSpecs; specIdx++) {
+    for (size_t specIdx = 0; specIdx < numSpecs; specIdx++) {
       TS_ASSERT_EQUALS(outWs->getSpectrum(specIdx)->getSpectrumNo(),
-                       static_cast<int>(specMin+specIdx));
+                       static_cast<int>(specMin + specIdx));
     }
 
     // C) test SpectrumList + SpectrumMin and SpectrumMax
     // This will make: 17, 20, 21, 22, 23
     wsSpecFilterAndEventMonitors =
-      "test_partial_spectra_loading_SpectrumList_SpectrumMin_SpectrumMax";
+        "test_partial_spectra_loading_SpectrumList_SpectrumMin_SpectrumMax";
     const size_t sMin = 20;
     const size_t sMax = 22;
     specList.clear();
@@ -274,7 +291,7 @@ public:
     LoadEventNexus ldLMM;
     ldLMM.initialize();
     ldLMM.setPropertyValue("OutputWorkspace", wsSpecFilterAndEventMonitors);
-    ldLMM.setPropertyValue("Filename","CNCS_7860_event.nxs");
+    ldLMM.setPropertyValue("Filename", "CNCS_7860_event.nxs");
     ldLMM.setProperty("SpectrumList", specList);
     ldLMM.setProperty<int>("SpectrumMin", sMin);
     ldLMM.setProperty<int>("SpectrumMax", sMax);
@@ -285,31 +302,32 @@ public:
     ldLMM.setProperty<bool>("LoadMonitors", true);
     ldLMM.setProperty<bool>("MonitorsAsEvents", true);
 
-    TS_ASSERT( ldLMM.execute() );
+    TS_ASSERT(ldLMM.execute());
 
-    outWs =
-      AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsSpecFilterAndEventMonitors);
+    outWs = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
+        wsSpecFilterAndEventMonitors);
 
     // check number and indices of spectra
-    const size_t n = sMax - sMin + 1;  // this n is the 20...22, excluding '17'
-    TS_ASSERT_EQUALS(outWs->getNumberHistograms(), n+1); // +1 is the '17'
+    const size_t n = sMax - sMin + 1; // this n is the 20...22, excluding '17'
+    TS_ASSERT_EQUALS(outWs->getNumberHistograms(), n + 1); // +1 is the '17'
     // 17 should come from SpectrumList
     TS_ASSERT_EQUALS(outWs->getSpectrum(0)->getSpectrumNo(), 17);
     // and then sMin(20)...sMax(22)
-    for (size_t specIdx=0; specIdx < n; specIdx++) {
-      TS_ASSERT_EQUALS(outWs->getSpectrum(specIdx+1)->getSpectrumNo(),
-                       static_cast<int>(sMin+specIdx));
+    for (size_t specIdx = 0; specIdx < n; specIdx++) {
+      TS_ASSERT_EQUALS(outWs->getSpectrum(specIdx + 1)->getSpectrumNo(),
+                       static_cast<int>(sMin + specIdx));
     }
   }
 
-  void test_MonitorsAsEvents()
-  {
+  void test_MonitorsAsEvents() {
     // Re-uses the workspace loaded in the last test to save a load execution
     // This is a very simple test for performance issues. There's no real event
     // data, so this just check that the algorithm creates a consistent output
-    // (monitors) event workspace. Real/intensive testing happens in system tests.
-    const std::string& mon_outws_name = wsSpecFilterAndEventMonitors + "_monitors";
-    auto & ads = AnalysisDataService::Instance();
+    // (monitors) event workspace. Real/intensive testing happens in system
+    // tests.
+    const std::string &mon_outws_name =
+        wsSpecFilterAndEventMonitors + "_monitors";
+    auto &ads = AnalysisDataService::Instance();
 
     // Valid workspace and it is an event workspace
     EventWorkspace_sptr monWS = ads.retrieveWS<EventWorkspace>(mon_outws_name);
@@ -317,8 +335,9 @@ public:
     TS_ASSERT_EQUALS(monWS->getTitle(), "test after manual intervention");
 
     // Check link data --> monitor workspaces
-    TS_ASSERT_EQUALS(monWS,
-                     ads.retrieveWS<MatrixWorkspace>(wsSpecFilterAndEventMonitors)->monitorWorkspace());
+    TS_ASSERT_EQUALS(
+        monWS, ads.retrieveWS<MatrixWorkspace>(wsSpecFilterAndEventMonitors)
+                   ->monitorWorkspace());
 
     // Check basic event props / data
     TS_ASSERT_EQUALS(monWS->getNumberHistograms(), 4);
@@ -328,87 +347,89 @@ public:
     TS_ASSERT_EQUALS(monWS->blocksize(), 1);
 
     TS_ASSERT_EQUALS(monWS->readX(0).size(), 2);
-    TS_ASSERT_DELTA(monWS->readX(0)[0], 0, 1e-6 );
-    TS_ASSERT_DELTA(monWS->readX(0)[1], 0, 1e-6 );
-    TS_ASSERT_EQUALS(monWS->readY(0).size(), 1 );
-    TS_ASSERT_DELTA(monWS->readY(0)[0], 0, 1e-6 );
-    TS_ASSERT_EQUALS(monWS->readE(0).size(), 1 );
-    TS_ASSERT_DELTA(monWS->readE(0)[0], 0, 1e-6 );
+    TS_ASSERT_DELTA(monWS->readX(0)[0], 0, 1e-6);
+    TS_ASSERT_DELTA(monWS->readX(0)[1], 0, 1e-6);
+    TS_ASSERT_EQUALS(monWS->readY(0).size(), 1);
+    TS_ASSERT_DELTA(monWS->readY(0)[0], 0, 1e-6);
+    TS_ASSERT_EQUALS(monWS->readE(0).size(), 1);
+    TS_ASSERT_DELTA(monWS->readE(0)[0], 0, 1e-6);
   }
 
-  void test_Load_And_CompressEvents()
-  {
+  void test_Load_And_CompressEvents() {
     Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;
     std::string outws_name = "cncs_compressed";
     ld.initialize();
-    ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
-    ld.setPropertyValue("OutputWorkspace",outws_name);
+    ld.setPropertyValue("Filename", "CNCS_7860_event.nxs");
+    ld.setPropertyValue("OutputWorkspace", outws_name);
     ld.setPropertyValue("Precount", "0");
     ld.setPropertyValue("CompressTolerance", "0.05");
-    ld.setProperty<bool>("LoadMonitors", true); // For the next test, saving a load
+    ld.setProperty<bool>("LoadMonitors",
+                         true);              // For the next test, saving a load
     ld.setProperty<bool>("LoadLogs", false); // Time-saver
     ld.execute();
-    TS_ASSERT( ld.isExecuted() );
+    TS_ASSERT(ld.isExecuted());
 
     EventWorkspace_sptr WS;
     TS_ASSERT_THROWS_NOTHING(
-        WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name) );
-    //Valid WS and it is an EventWorkspace
-    TS_ASSERT( WS );
-    //Pixels have to be padded
-    TS_ASSERT_EQUALS( WS->getNumberHistograms(), 51200);
-    //Events
-    TS_ASSERT_EQUALS( WS->getNumberEvents(), 111274); // There are (slightly) fewer events
-    for (size_t wi = 0; wi <  WS->getNumberHistograms(); wi++)
-    {
+        WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
+            outws_name));
+    // Valid WS and it is an EventWorkspace
+    TS_ASSERT(WS);
+    // Pixels have to be padded
+    TS_ASSERT_EQUALS(WS->getNumberHistograms(), 51200);
+    // Events
+    TS_ASSERT_EQUALS(WS->getNumberEvents(),
+                     111274); // There are (slightly) fewer events
+    for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++) {
       // Pixels with at least one event will have switched
       if (WS->getEventList(wi).getNumberEvents() > 0)
-        TS_ASSERT_EQUALS( WS->getEventList(wi).getEventType(), WEIGHTED_NOTIME)
+        TS_ASSERT_EQUALS(WS->getEventList(wi).getEventType(), WEIGHTED_NOTIME)
     }
-
   }
 
-  void test_Monitors()
-  {
+  void test_Monitors() {
     // Uses the workspace loaded in the last test to save a load execution
     std::string mon_outws_name = "cncs_compressed_monitors";
-    auto & ads = AnalysisDataService::Instance();
+    auto &ads = AnalysisDataService::Instance();
     MatrixWorkspace_sptr WS = ads.retrieveWS<MatrixWorkspace>(mon_outws_name);
-    //Valid WS and it is an MatrixWorkspace
-    TS_ASSERT( WS );
-    //Correct number of monitors found
-    TS_ASSERT_EQUALS( WS->getNumberHistograms(), 3 );
+    // Valid WS and it is an MatrixWorkspace
+    TS_ASSERT(WS);
+    // Correct number of monitors found
+    TS_ASSERT_EQUALS(WS->getNumberHistograms(), 3);
     // Check some histogram data
     // TOF
-    TS_ASSERT_EQUALS( (*WS->refX(0)).size(), 200002 );
-    TS_ASSERT_DELTA( (*WS->refX(0))[1], 1.0, 1e-6 );
+    TS_ASSERT_EQUALS((*WS->refX(0)).size(), 200002);
+    TS_ASSERT_DELTA((*WS->refX(0))[1], 1.0, 1e-6);
     // Data
-    TS_ASSERT_EQUALS( WS->dataY(0).size(), 200001 );
-    TS_ASSERT_DELTA( WS->dataY(0)[12], 0.0, 1e-6 );
+    TS_ASSERT_EQUALS(WS->dataY(0).size(), 200001);
+    TS_ASSERT_DELTA(WS->dataY(0)[12], 0.0, 1e-6);
     // Error
-    TS_ASSERT_EQUALS( WS->dataE(0).size(), 200001 );
-    TS_ASSERT_DELTA( WS->dataE(0)[12], 0.0, 1e-6 );
+    TS_ASSERT_EQUALS(WS->dataE(0).size(), 200001);
+    TS_ASSERT_DELTA(WS->dataE(0)[12], 0.0, 1e-6);
     // Check geometry for a monitor
     IDetector_const_sptr mon = WS->getDetector(2);
-    TS_ASSERT( mon->isMonitor() );
-    TS_ASSERT_EQUALS( mon->getID(), -3 );
-    boost::shared_ptr<const IComponent> sample = WS->getInstrument()->getSample();
-    TS_ASSERT_DELTA( mon->getDistance(*sample), 1.426, 1e-6 );
+    TS_ASSERT(mon->isMonitor());
+    TS_ASSERT_EQUALS(mon->getID(), -3);
+    boost::shared_ptr<const IComponent> sample =
+        WS->getInstrument()->getSample();
+    TS_ASSERT_DELTA(mon->getDistance(*sample), 1.426, 1e-6);
 
     // Check monitor workspace pointer held in main workspace
-    TS_ASSERT_EQUALS( WS, ads.retrieveWS<MatrixWorkspace>("cncs_compressed")->monitorWorkspace() );
+    TS_ASSERT_EQUALS(WS, ads.retrieveWS<MatrixWorkspace>("cncs_compressed")
+                             ->monitorWorkspace());
   }
 
-  void doTestSingleBank(bool SingleBankPixelsOnly, bool Precount, std::string BankName = "bank36", bool willFail=false)
-  {
+  void doTestSingleBank(bool SingleBankPixelsOnly, bool Precount,
+                        std::string BankName = "bank36",
+                        bool willFail = false) {
     Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;
     std::string outws_name = "cncs";
     AnalysisDataService::Instance().remove(outws_name);
     ld.initialize();
-    ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
-    ld.setPropertyValue("OutputWorkspace",outws_name);
+    ld.setPropertyValue("Filename", "CNCS_7860_event.nxs");
+    ld.setPropertyValue("OutputWorkspace", outws_name);
     ld.setPropertyValue("BankName", BankName);
     ld.setProperty<bool>("SingleBankPixelsOnly", SingleBankPixelsOnly);
     ld.setProperty<bool>("Precount", Precount);
@@ -416,246 +437,251 @@ public:
     ld.execute();
 
     EventWorkspace_sptr WS;
-    if (willFail)
-    {
-      TS_ASSERT( !ld.isExecuted() );
+    if (willFail) {
+      TS_ASSERT(!ld.isExecuted());
       return;
     }
 
-    TS_ASSERT( ld.isExecuted() );
-    TS_ASSERT_THROWS_NOTHING( WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name));
-    //Valid WS and it is an EventWorkspace
-    TS_ASSERT( WS );
-    if (!WS) return;
-    //Pixels have to be padded
-    TS_ASSERT_EQUALS( WS->getNumberHistograms(), SingleBankPixelsOnly ? 1024 : 51200);
-    //Events - there are fewer now.
-    TS_ASSERT_EQUALS( WS->getNumberEvents(), 7274);
+    TS_ASSERT(ld.isExecuted());
+    TS_ASSERT_THROWS_NOTHING(
+        WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
+            outws_name));
+    // Valid WS and it is an EventWorkspace
+    TS_ASSERT(WS);
+    if (!WS)
+      return;
+    // Pixels have to be padded
+    TS_ASSERT_EQUALS(WS->getNumberHistograms(),
+                     SingleBankPixelsOnly ? 1024 : 51200);
+    // Events - there are fewer now.
+    TS_ASSERT_EQUALS(WS->getNumberEvents(), 7274);
   }
 
-  void test_SingleBank_AllPixels()
-  {
-    doTestSingleBank(false, false);
-  }
+  void test_SingleBank_AllPixels() { doTestSingleBank(false, false); }
 
+  void test_SingleBank_AllPixels_Precount() { doTestSingleBank(false, true); }
 
-  void test_SingleBank_AllPixels_Precount()
-  {
-    doTestSingleBank(false, true);
-  }
-
-  void test_SingleBank_PixelsOnlyInThatBank_Precount()
-  {
+  void test_SingleBank_PixelsOnlyInThatBank_Precount() {
     doTestSingleBank(true, true);
   }
 
-  void test_SingleBank_ThatDoesntExist()
-  {
+  void test_SingleBank_ThatDoesntExist() {
     doTestSingleBank(false, false, "bankDoesNotExist", true);
   }
 
-  void test_SingleBank_with_no_events()
-  {
+  void test_SingleBank_with_no_events() {
     LoadEventNexus load;
-    TS_ASSERT_THROWS_NOTHING( load.initialize() );
-    TS_ASSERT_THROWS_NOTHING( load.setPropertyValue("Filename", "HYSA_12509.nxs.h5") );
-    TS_ASSERT_THROWS_NOTHING( load.setPropertyValue("BankName", "bank10") );
+    TS_ASSERT_THROWS_NOTHING(load.initialize());
+    TS_ASSERT_THROWS_NOTHING(
+        load.setPropertyValue("Filename", "HYSA_12509.nxs.h5"));
+    TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("BankName", "bank10"));
     const std::string outws("AnEmptyWS");
-    TS_ASSERT_THROWS_NOTHING( load.setPropertyValue("OutputWorkspace", outws) );
-    if ( !load.execute() )
-    {
+    TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("OutputWorkspace", outws));
+    if (!load.execute()) {
       TS_FAIL("LoadEventNexus shouldn't fail to load an empty bank");
       return;
     }
 
     auto ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws);
-    TS_ASSERT_EQUALS( ws->getNumberEvents(), 0 );
+    TS_ASSERT_EQUALS(ws->getNumberEvents(), 0);
   }
 
-  void test_instrument_inside_nexus_file()
-  {
+  void test_instrument_inside_nexus_file() {
     LoadEventNexus load;
-    TS_ASSERT_THROWS_NOTHING( load.initialize() );
-    TS_ASSERT_THROWS_NOTHING( load.setPropertyValue("Filename", "HYSA_12509.nxs.h5") );
+    TS_ASSERT_THROWS_NOTHING(load.initialize());
+    TS_ASSERT_THROWS_NOTHING(
+        load.setPropertyValue("Filename", "HYSA_12509.nxs.h5"));
     const std::string outws("InstInNexus");
-    TS_ASSERT_THROWS_NOTHING( load.setPropertyValue("OutputWorkspace", outws) );
-    TS_ASSERT( load.execute() );
+    TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("OutputWorkspace", outws));
+    TS_ASSERT(load.execute());
 
     auto ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws);
     auto inst = ws->getInstrument();
-    TS_ASSERT_EQUALS( inst->getName(), "HYSPECA" );
-    TS_ASSERT_EQUALS( inst->getValidFromDate(), std::string("2011-Jul-20 17:02:48.437294000") );
-    TS_ASSERT_EQUALS( inst->getNumberDetectors(), 20483 );
-    TS_ASSERT_EQUALS( inst->baseInstrument()->numMonitors(), 3 );
+    TS_ASSERT_EQUALS(inst->getName(), "HYSPECA");
+    TS_ASSERT_EQUALS(inst->getValidFromDate(),
+                     std::string("2011-Jul-20 17:02:48.437294000"));
+    TS_ASSERT_EQUALS(inst->getNumberDetectors(), 20483);
+    TS_ASSERT_EQUALS(inst->baseInstrument()->numMonitors(), 3);
     auto params = inst->getParameterMap();
-    TS_ASSERT_EQUALS( params->size(), 49);
-    TS_ASSERT_EQUALS( params->getString(inst.get(), "deltaE-mode"), "direct");
+    TS_ASSERT_EQUALS(params->size(), 49);
+    TS_ASSERT_EQUALS(params->getString(inst.get(), "deltaE-mode"), "direct");
   }
 
-  void test_instrument_and_default_param_loaded_when_inst_not_in_nexus_file()
-  {
+  void test_instrument_and_default_param_loaded_when_inst_not_in_nexus_file() {
     LoadEventNexus load;
-    TS_ASSERT_THROWS_NOTHING( load.initialize() );
-    TS_ASSERT_THROWS_NOTHING( load.setPropertyValue("Filename", "CNCS_7860_event.nxs") );
+    TS_ASSERT_THROWS_NOTHING(load.initialize());
+    TS_ASSERT_THROWS_NOTHING(
+        load.setPropertyValue("Filename", "CNCS_7860_event.nxs"));
     load.setProperty<bool>("LoadLogs", false); // Time-saver
     const std::string outws("InstNotInNexus");
-    TS_ASSERT_THROWS_NOTHING( load.setPropertyValue("OutputWorkspace", outws) );
-    TS_ASSERT( load.execute() );
+    TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("OutputWorkspace", outws));
+    TS_ASSERT(load.execute());
 
     auto ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws);
     auto inst = ws->getInstrument();
-    TS_ASSERT( !inst->getFilename().empty()); // This is how we know we didn't get it from inside the nexus file
-    TS_ASSERT_EQUALS( inst->getName(), "CNCS" );
-    TS_ASSERT_EQUALS( inst->getNumberDetectors(), 51203 );
-    TS_ASSERT_EQUALS( inst->baseInstrument()->numMonitors(), 3 );
+    TS_ASSERT(!inst->getFilename().empty()); // This is how we know we didn't
+                                             // get it from inside the nexus
+                                             // file
+    TS_ASSERT_EQUALS(inst->getName(), "CNCS");
+    TS_ASSERT_EQUALS(inst->getNumberDetectors(), 51203);
+    TS_ASSERT_EQUALS(inst->baseInstrument()->numMonitors(), 3);
 
     // check that CNCS_Parameters.xml has been loaded
     auto params = inst->getParameterMap();
-    TS_ASSERT_EQUALS( params->getString(inst.get(), "deltaE-mode"), "direct");
+    TS_ASSERT_EQUALS(params->getString(inst.get(), "deltaE-mode"), "direct");
   }
 
   /** Test with a particular ARCS file that has 2 preprocessors,
    * meaning different-sized pulse ID files.
    * DISABLED AS THE FILE ISN'T IN THE REPOSITORY
    */
-  void xtest_MultiplePreprocessors()
-  {
+  void xtest_MultiplePreprocessors() {
     Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;
     std::string outws_name = "arcs";
     ld.initialize();
-    try
-    {
-      ld.setPropertyValue("Filename","ARCS_12954_event.nxs");
-    }
-    catch (...)
-    {
+    try {
+      ld.setPropertyValue("Filename", "ARCS_12954_event.nxs");
+    } catch (...) {
       std::cout << "Skipping test since file does not exist.";
       return;
     }
-    ld.setPropertyValue("OutputWorkspace",outws_name);
+    ld.setPropertyValue("OutputWorkspace", outws_name);
     ld.setPropertyValue("CompressTolerance", "-1");
     ld.execute();
-    TS_ASSERT( ld.isExecuted() );
+    TS_ASSERT(ld.isExecuted());
 
     EventWorkspace_sptr WS;
     TS_ASSERT_THROWS_NOTHING(
-        WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name) );
-    //Valid WS and it is an EventWorkspace
-    TS_ASSERT( WS );
-    if (!WS) return;
-    TS_ASSERT_EQUALS( WS->getNumberHistograms(), 117760);
-    TS_ASSERT_EQUALS( WS->getNumberEvents(), 10730347);
-    for (size_t wi = 0; wi <  WS->getNumberHistograms(); wi++)
-    {
+        WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
+            outws_name));
+    // Valid WS and it is an EventWorkspace
+    TS_ASSERT(WS);
+    if (!WS)
+      return;
+    TS_ASSERT_EQUALS(WS->getNumberHistograms(), 117760);
+    TS_ASSERT_EQUALS(WS->getNumberEvents(), 10730347);
+    for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++) {
       // Times are NON-zero for ALL pixels.
-      if (WS->getEventList(wi).getNumberEvents() > 0)
-      {
-        int64_t nanosec = WS->getEventList(wi).getEvents()[0].pulseTime().totalNanoseconds();
-        TS_ASSERT_DIFFERS( nanosec, 0)
-        if (nanosec==0) { std::cout << "Failure at WI " << wi << std::endl; return; }
+      if (WS->getEventList(wi).getNumberEvents() > 0) {
+        int64_t nanosec =
+            WS->getEventList(wi).getEvents()[0].pulseTime().totalNanoseconds();
+        TS_ASSERT_DIFFERS(nanosec, 0)
+        if (nanosec == 0) {
+          std::cout << "Failure at WI " << wi << std::endl;
+          return;
+        }
       }
     }
   }
 
-  void test_start_and_end_time_filtered_loading_meta_data_only()
-  {
+  void test_start_and_end_time_filtered_loading_meta_data_only() {
     const bool metadataonly = true;
     do_test_filtering_start_and_end_filtered_loading(metadataonly);
   }
 
-  void test_start_and_end_time_filtered_loading()
-  {
+  void test_start_and_end_time_filtered_loading() {
     const bool metadataonly = false;
     do_test_filtering_start_and_end_filtered_loading(metadataonly);
   }
 
-  void testSimulatedFile()
-  {
+  void testSimulatedFile() {
     Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;
     std::string wsname = "ARCS_sim";
     ld.initialize();
     ld.setPropertyValue("Filename", "ARCS_sim_event.nxs");
     ld.setPropertyValue("OutputWorkspace", wsname);
-    ld.setProperty("BankName","bank27");
-    ld.setProperty("SingleBankPixelsOnly",false);
-    ld.setProperty("LoadLogs",false);
-    TS_ASSERT( ld.execute() );
+    ld.setProperty("BankName", "bank27");
+    ld.setProperty("SingleBankPixelsOnly", false);
+    ld.setProperty("LoadLogs", false);
+    TS_ASSERT(ld.execute());
 
     EventWorkspace_sptr WS;
     TS_ASSERT_THROWS_NOTHING(
-        WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsname) );
-    //Valid WS and it is an EventWorkspace
-    TS_ASSERT( WS );
-    if (!WS) return;
+        WS =
+            AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsname));
+    // Valid WS and it is an EventWorkspace
+    TS_ASSERT(WS);
+    if (!WS)
+      return;
     const auto numHist = WS->getNumberHistograms();
-    TS_ASSERT_EQUALS( numHist, 117760);
-    TS_ASSERT_EQUALS( WS->getNumberEvents(), 2);
-    for (size_t wi = 0; wi <  numHist; wi+=5000)
-    {
+    TS_ASSERT_EQUALS(numHist, 117760);
+    TS_ASSERT_EQUALS(WS->getNumberEvents(), 2);
+    for (size_t wi = 0; wi < numHist; wi += 5000) {
       // All events should be weighted events for simulated data
-      TS_ASSERT_EQUALS( WS->getEventList(wi).getEventType(), WEIGHTED);
+      TS_ASSERT_EQUALS(WS->getEventList(wi).getEventType(), WEIGHTED);
     }
     // Check one event
     TS_ASSERT_DELTA(WS->getEventList(26798).getWeightedEvents()[0].weight(),
-        1.8124e-11, 1.0e-4);
-    TS_ASSERT_EQUALS(WS->getEventList(26798).getWeightedEvents()[0].tof(), 1476.0);
+                    1.8124e-11, 1.0e-4);
+    TS_ASSERT_EQUALS(WS->getEventList(26798).getWeightedEvents()[0].tof(),
+                     1476.0);
   }
 
-void test_extract_nperiod_data() {
-  LoadEventNexus loader;
+  void test_extract_nperiod_data() {
+    LoadEventNexus loader;
 
-  loader.setChild(true);
-  loader.initialize();
-  loader.setPropertyValue("OutputWorkspace", "dummy");
-  loader.setPropertyValue("Filename", "LARMOR00003368.nxs");
-  loader.execute();
-  Workspace_sptr outWS = loader.getProperty("OutputWorkspace");
-  WorkspaceGroup_sptr outGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(outWS);
-  TSM_ASSERT("Invalid Output Workspace Type", outGroup);
+    loader.setChild(true);
+    loader.initialize();
+    loader.setPropertyValue("OutputWorkspace", "dummy");
+    loader.setPropertyValue("Filename", "LARMOR00003368.nxs");
+    loader.execute();
+    Workspace_sptr outWS = loader.getProperty("OutputWorkspace");
+    WorkspaceGroup_sptr outGroup =
+        boost::dynamic_pointer_cast<WorkspaceGroup>(outWS);
+    TSM_ASSERT("Invalid Output Workspace Type", outGroup);
 
-  IEventWorkspace_sptr firstWS = boost::dynamic_pointer_cast<IEventWorkspace>(outGroup->getItem(0));
-  auto run = firstWS->run();
-  const int nPeriods = run.getPropertyValueAsType<int>("nperiods");
-  TSM_ASSERT_EQUALS("Wrong number of periods extracted", nPeriods, 4);
-  TSM_ASSERT_EQUALS("Groups size should be same as nperiods", outGroup->size(), nPeriods);
+    IEventWorkspace_sptr firstWS =
+        boost::dynamic_pointer_cast<IEventWorkspace>(outGroup->getItem(0));
+    auto run = firstWS->run();
+    const int nPeriods = run.getPropertyValueAsType<int>("nperiods");
+    TSM_ASSERT_EQUALS("Wrong number of periods extracted", nPeriods, 4);
+    TSM_ASSERT_EQUALS("Groups size should be same as nperiods",
+                      outGroup->size(), nPeriods);
 
-  for(size_t i = 0; i < outGroup->size(); ++i){
-      EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
+    for (size_t i = 0; i < outGroup->size(); ++i) {
+      EventWorkspace_sptr ws =
+          boost::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
       TS_ASSERT(ws);
       TSM_ASSERT("Non-zero events in each period", ws->getNumberEvents() > 0);
 
       std::stringstream buffer;
-      buffer << "period " << i+1;
+      buffer << "period " << i + 1;
       std::string periodBoolLog = buffer.str();
 
-      const int currentPeriod = ws->run().getPropertyValueAsType<int>("current_period");
+      const int currentPeriod =
+          ws->run().getPropertyValueAsType<int>("current_period");
 
-      TSM_ASSERT("Each period should have a boolean array for masking period numbers", ws->run().hasProperty(periodBoolLog));
-      TSM_ASSERT_EQUALS("Current period is not what was expected.", currentPeriod, i+1);
-
-  }
-  // Make sure that the spectraNo are equal for all child workspaces.
-  auto isFirstChildWorkspace = true;
-  std::vector<Mantid::specid_t> specids;
-
-  for(size_t i = 0; i < outGroup->size(); ++i) {
-    EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
-    if (isFirstChildWorkspace){
-      specids.reserve(ws->getNumberHistograms());
+      TSM_ASSERT(
+          "Each period should have a boolean array for masking period numbers",
+          ws->run().hasProperty(periodBoolLog));
+      TSM_ASSERT_EQUALS("Current period is not what was expected.",
+                        currentPeriod, i + 1);
     }
-    for (size_t index = 0; index < ws->getNumberHistograms(); ++index) {
+    // Make sure that the spectraNo are equal for all child workspaces.
+    auto isFirstChildWorkspace = true;
+    std::vector<Mantid::specid_t> specids;
+
+    for (size_t i = 0; i < outGroup->size(); ++i) {
+      EventWorkspace_sptr ws =
+          boost::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
       if (isFirstChildWorkspace) {
-        specids.push_back(ws->getSpectrum(index)->getSpectrumNo());
-      } else {
-        TSM_ASSERT_EQUALS("The spectrNo should be the same for all child workspaces.",specids[index], ws->getSpectrum(index)->getSpectrumNo());
+        specids.reserve(ws->getNumberHistograms());
       }
-    }
+      for (size_t index = 0; index < ws->getNumberHistograms(); ++index) {
+        if (isFirstChildWorkspace) {
+          specids.push_back(ws->getSpectrum(index)->getSpectrumNo());
+        } else {
+          TSM_ASSERT_EQUALS(
+              "The spectrNo should be the same for all child workspaces.",
+              specids[index], ws->getSpectrum(index)->getSpectrumNo());
+        }
+      }
 
-    isFirstChildWorkspace = false;
+      isFirstChildWorkspace = false;
+    }
   }
-}
 
 private:
   std::string wsSpecFilterAndEventMonitors;
@@ -665,20 +691,15 @@ private:
 // Performance test
 //------------------------------------------------------------------------------
 
-class LoadEventNexusTestPerformance : public CxxTest::TestSuite
-{
+class LoadEventNexusTestPerformance : public CxxTest::TestSuite {
 public:
-  void testDefaultLoad()
-  {
+  void testDefaultLoad() {
     LoadEventNexus loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "CNCS_7860_event.nxs");
     loader.setPropertyValue("OutputWorkspace", "ws");
-    TS_ASSERT( loader.execute() );
+    TS_ASSERT(loader.execute());
   }
 };
 
 #endif /*LOADEVENTNEXUSTEST_H_*/
-
-
-

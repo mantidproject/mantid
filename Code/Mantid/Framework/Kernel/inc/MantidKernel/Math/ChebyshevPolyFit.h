@@ -44,13 +44,13 @@ class ChebyshevPolyFitImpl;
 class MANTID_KERNEL_DLL ChebyshevPolyFit {
 public:
   ChebyshevPolyFit(const size_t n);
-  // Implemented in cpp so a unique_ptr member doesn't need to 
+  // Implemented in cpp so a unique_ptr member doesn't need to
   // see full ChebyshevPolyFitPrivate implementation
   ~ChebyshevPolyFit();
 
-  std::vector<double> operator()(const std::vector<double> & xs,
-                                 const std::vector<double> & ys,
-                                 const std::vector<double> & wgts);
+  std::vector<double> operator()(const std::vector<double> &xs,
+                                 const std::vector<double> &ys,
+                                 const std::vector<double> &wgts);
 
 private:
   std::unique_ptr<ChebyshevPolyFitImpl> m_impl;

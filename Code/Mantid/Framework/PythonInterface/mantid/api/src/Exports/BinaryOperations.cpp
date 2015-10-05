@@ -117,13 +117,13 @@ ResultType performBinaryOp(const LHSType lhs, const RHSType rhs,
   std::string error("");
   try {
     if (reverse) {
-      result = API::OperatorOverloads::executeBinaryOperation<
-          RHSType, LHSType, ResultType>(algoName, rhs, lhs, inplace, false,
-                                        name, true);
+      result = API::OperatorOverloads::executeBinaryOperation<RHSType, LHSType,
+                                                              ResultType>(
+          algoName, rhs, lhs, inplace, false, name, true);
     } else {
-      result = API::OperatorOverloads::executeBinaryOperation<
-          LHSType, RHSType, ResultType>(algoName, lhs, rhs, inplace, false,
-                                        name, true);
+      result = API::OperatorOverloads::executeBinaryOperation<LHSType, RHSType,
+                                                              ResultType>(
+          algoName, lhs, rhs, inplace, false, name, true);
     }
   } catch (std::runtime_error &exc) {
     error = exc.what();

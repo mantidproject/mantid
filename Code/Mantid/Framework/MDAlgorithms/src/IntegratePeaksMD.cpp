@@ -168,13 +168,16 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   /// Value of the CoordinatesToUse property.
   std::string CoordinatesToUseStr = getPropertyValue("CoordinatesToUse");
-  Kernel::SpecialCoordinateSystem CoordinatesToUse = ws->getSpecialCoordinateSystem();
+  Kernel::SpecialCoordinateSystem CoordinatesToUse =
+      ws->getSpecialCoordinateSystem();
   g_log.warning() << " Warning" << CoordinatesToUse << std::endl;
-  if (CoordinatesToUse == Kernel::QLab && CoordinatesToUseStr != "Q (lab frame)")
+  if (CoordinatesToUse == Kernel::QLab &&
+      CoordinatesToUseStr != "Q (lab frame)")
     g_log.warning() << "Warning: used Q (lab frame) coordinates for MD "
                        "workspace, not CoordinatesToUse from input "
                     << std::endl;
-  else if (CoordinatesToUse == Kernel::QSample && CoordinatesToUseStr != "Q (sample frame)")
+  else if (CoordinatesToUse == Kernel::QSample &&
+           CoordinatesToUseStr != "Q (sample frame)")
     g_log.warning() << "Warning: used Q (sample frame) coordinates for MD "
                        "workspace, not CoordinatesToUse from input "
                     << std::endl;
@@ -330,11 +333,13 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       BackgroundOuterRadiusVector[i] = lenQpeak * BackgroundOuterRadius;
       CoordTransformDistance sphere(nd, center, dimensionsUsed);
 
-      if(Peak* shapeablePeak = dynamic_cast<Peak*>(&p)){
+      if (Peak *shapeablePeak = dynamic_cast<Peak *>(&p)) {
 
-          PeakShape* sphere = new PeakShapeSpherical(PeakRadiusVector[i], BackgroundInnerRadiusVector[i],
-                                                     BackgroundOuterRadiusVector[i], CoordinatesToUse, this->name(), this->version());
-          shapeablePeak->setPeakShape(sphere);
+        PeakShape *sphere = new PeakShapeSpherical(
+            PeakRadiusVector[i], BackgroundInnerRadiusVector[i],
+            BackgroundOuterRadiusVector[i], CoordinatesToUse, this->name(),
+            this->version());
+        shapeablePeak->setPeakShape(sphere);
       }
 
       // Perform the integration into whatever box is contained within.

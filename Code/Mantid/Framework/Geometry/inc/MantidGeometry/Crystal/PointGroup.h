@@ -72,7 +72,7 @@ typedef boost::shared_ptr<PointGroup> PointGroup_sptr;
 MANTID_GEOMETRY_DLL std::vector<PointGroup_sptr> getAllPointGroups();
 
 typedef std::multimap<PointGroup::CrystalSystem, PointGroup_sptr>
-PointGroupCrystalSystemMap;
+    PointGroupCrystalSystemMap;
 MANTID_GEOMETRY_DLL PointGroupCrystalSystemMap getPointGroupsByCrystalSystem();
 
 MANTID_GEOMETRY_DLL

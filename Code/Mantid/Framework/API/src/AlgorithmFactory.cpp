@@ -222,8 +222,8 @@ AlgorithmFactoryImpl::getKeys(bool includeHidden) const {
  * @return An integer corresponding to the highest version registered
  * @throw std::invalid_argument if the algorithm cannot be found
  */
-int
-AlgorithmFactoryImpl::highestVersion(const std::string &algorithmName) const {
+int AlgorithmFactoryImpl::highestVersion(
+    const std::string &algorithmName) const {
   VersionMap::const_iterator viter = m_vmap.find(algorithmName);
   if (viter != m_vmap.end())
     return viter->second;

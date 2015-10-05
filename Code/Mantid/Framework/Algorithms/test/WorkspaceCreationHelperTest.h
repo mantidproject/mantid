@@ -14,35 +14,30 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
 /** Test class for the helpers in MantidTestHelpers/WorkspaceCreationHelper.h */
-class WorkspaceCreationHelperTest : public CxxTest::TestSuite
-{
+class WorkspaceCreationHelperTest : public CxxTest::TestSuite {
 public:
-
-  void test_create2DWorkspaceWithRectangularInstrument()
-  {
-    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(2, 10, 20);
+  void test_create2DWorkspaceWithRectangularInstrument() {
+    Workspace2D_sptr ws =
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
+            2, 10, 20);
     TS_ASSERT(ws);
-    TS_ASSERT( ws->getInstrument() );
-    TS_ASSERT_EQUALS( ws->getNumberHistograms(), 2*100);
-    TS_ASSERT_EQUALS( ws->blocksize(), 20);
-    TS_ASSERT( ws->getSpectrum(0)->hasDetectorID(100) );
-    TS_ASSERT( ws->getSpectrum(1)->hasDetectorID(101) );
-    TS_ASSERT_DELTA( ws->dataY(5)[0], 2.0, 1e-5);
+    TS_ASSERT(ws->getInstrument());
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2 * 100);
+    TS_ASSERT_EQUALS(ws->blocksize(), 20);
+    TS_ASSERT(ws->getSpectrum(0)->hasDetectorID(100));
+    TS_ASSERT(ws->getSpectrum(1)->hasDetectorID(101));
+    TS_ASSERT_DELTA(ws->dataY(5)[0], 2.0, 1e-5);
   }
 
-  void test_createEventWorkspaceWithFullInstrument()
-  {
-    EventWorkspace_sptr ws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 10);
+  void test_createEventWorkspaceWithFullInstrument() {
+    EventWorkspace_sptr ws =
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 10);
     TS_ASSERT(ws);
-    TS_ASSERT( ws->getInstrument() );
-    TS_ASSERT_EQUALS( ws->getNumberHistograms(), 2*100);
-    TS_ASSERT( ws->getSpectrum(0)->hasDetectorID(100) );
-    TS_ASSERT( ws->getSpectrum(1)->hasDetectorID(101) );
+    TS_ASSERT(ws->getInstrument());
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2 * 100);
+    TS_ASSERT(ws->getSpectrum(0)->hasDetectorID(100));
+    TS_ASSERT(ws->getSpectrum(1)->hasDetectorID(101));
   }
-
-
 };
 
-
 #endif /* MANTID_ALGORITHMS_WORKSPACECREATIONHELPERTEST_H_ */
-

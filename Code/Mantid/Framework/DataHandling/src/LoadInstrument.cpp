@@ -114,7 +114,7 @@ void LoadInstrument::exec() {
     // Initialize the parser. Avoid copying the xmltext out of the property
     // here.
     const PropertyWithValue<std::string> *xml =
-      dynamic_cast<const PropertyWithValue<std::string> *>(InstrumentXML);
+        dynamic_cast<const PropertyWithValue<std::string> *>(InstrumentXML);
     if (xml) {
       parser = InstrumentDefinitionParser(m_filename, m_instName, *xml);
     } else {
@@ -154,7 +154,8 @@ void LoadInstrument::exec() {
     m_instName = instrumentFile.substr(0, instrumentFile.find("_Def"));
 
     // Initialize the parser with the the XML text loaded from the IDF file
-    parser = InstrumentDefinitionParser(m_filename, m_instName, Strings::loadFile(m_filename));
+    parser = InstrumentDefinitionParser(m_filename, m_instName,
+                                        Strings::loadFile(m_filename));
   }
 
   // Find the mangled instrument name that includes the modified date
@@ -169,7 +170,7 @@ void LoadInstrument::exec() {
     if (InstrumentDataService::Instance().doesExist(instrumentNameMangled)) {
       // If it does, just use the one from the one stored there
       instrument =
-        InstrumentDataService::Instance().retrieve(instrumentNameMangled);
+          InstrumentDataService::Instance().retrieve(instrumentNameMangled);
     } else {
       // Really create the instrument
       Progress *prog = new Progress(this, 0, 1, 100);
@@ -261,10 +262,10 @@ void LoadInstrument::runLoadParameterFile() {
 /// found, else return "".
 //  directoryName must include a final '/'.
 std::string LoadInstrument::getFullPathParamIDF(std::string directoryName) {
-  Poco::Path directoryPath (directoryName);
+  Poco::Path directoryPath(directoryName);
   directoryPath.makeDirectory();
   // Remove the path from the filename
-  Poco::Path filePath (m_filename);
+  Poco::Path filePath(m_filename);
   std::string instrumentFile = filePath.getFileName();
 
   // First check whether there is a parameter file whose name is the same as the
@@ -289,7 +290,8 @@ std::string LoadInstrument::getFullPathParamIDF(std::string directoryName) {
   if (Poco::File(fullPathParamIDF).exists() ==
       false) { // No such file exists, so look for file based on instrument ID
                // given by the prefix
-    fullPathParamIDF = directoryPath.setFileName(prefix + "_Parameters.xml").toString();
+    fullPathParamIDF =
+        directoryPath.setFileName(prefix + "_Parameters.xml").toString();
   }
 
   if (Poco::File(fullPathParamIDF).exists() ==

@@ -26,121 +26,117 @@ DECLARE_ALGORITHM(AlignDetectors)
 
 namespace { // anonymous namespace
 
-    /// Applies the equation d=(TOF-tzero)/difc
-    struct func_difc_only {
-      func_difc_only(const double difc) : factor(1./difc){
+/// Applies the equation d=(TOF-tzero)/difc
+struct func_difc_only {
+  func_difc_only(const double difc) : factor(1. / difc) {}
+
+  double operator()(const double tof) const { return factor * tof; }
+
+  /// 1./difc
+  double factor;
+};
+
+/// Applies the equation d=(TOF-tzero)/difc
+struct func_difc_and_tzero {
+  func_difc_and_tzero(const double difc, const double tzero)
+      : factor(1. / difc), offset(-1. * tzero / difc) {}
+
+  double operator()(const double tof) const { return factor * tof + offset; }
+
+  /// 1./difc
+  double factor;
+  /// -tzero/difc
+  double offset;
+};
+
+struct func_difa {
+  func_difa(const double difc, const double difa, const double tzero) {
+    factor1 = -0.5 * difc / difa;
+    factor2 = 1. / difa;
+    factor3 = (factor1 * factor1) - (tzero / difa);
+  }
+
+  double operator()(const double tof) const {
+    double second = std::sqrt((tof * factor2) + factor3);
+    if (second < factor1)
+      return factor1 - second;
+    else {
+      return factor1 + second;
+    }
+  }
+
+  /// -0.5*difc/difa
+  double factor1;
+  /// 1/difa
+  double factor2;
+  /// (0.5*difc/difa)^2 - (tzero/difa)
+  double factor3;
+};
+
+class ConversionFactors {
+public:
+  ConversionFactors(ITableWorkspace_const_sptr table) {
+    m_difcCol = table->getColumn("difc");
+    m_difaCol = table->getColumn("difa");
+    m_tzeroCol = table->getColumn("tzero");
+
+    this->generateDetidToRow(table);
+  }
+
+  std::function<double(double)>
+  getConversionFunc(const std::set<detid_t> &detIds) {
+    const std::set<size_t> rows = this->getRow(detIds);
+    double difc = 0.;
+    double difa = 0.;
+    double tzero = 0.;
+    for (auto row = rows.begin(); row != rows.end(); ++row) {
+      difc += m_difcCol->toDouble(*row);
+      difa += m_difaCol->toDouble(*row);
+      tzero += m_tzeroCol->toDouble(*row);
+    }
+    if (rows.size() > 1) {
+      double norm = 1. / static_cast<double>(rows.size());
+      difc = norm * difc;
+      difa = norm * difa;
+      tzero = norm * tzero;
+    }
+
+    if (difa == 0.) {
+      if (tzero == 0.) {
+        return func_difc_only(difc);
+      } else {
+        return func_difc_and_tzero(difc, tzero);
       }
+    } else { // difa != 0.
+      return func_difa(difc, difa, tzero);
+    }
+  }
 
-      double operator()(const double tof) const {
-        return factor*tof;
+private:
+  void generateDetidToRow(ITableWorkspace_const_sptr table) {
+    ConstColumnVector<int> detIDs = table->getVector("detid");
+    const size_t numDets = detIDs.size();
+    for (size_t i = 0; i < numDets; ++i) {
+      m_detidToRow[static_cast<detid_t>(detIDs[i])] = i;
+    }
+  }
+
+  std::set<size_t> getRow(const std::set<detid_t> &detIds) {
+    std::set<size_t> rows;
+    for (auto detId = detIds.begin(); detId != detIds.end(); ++detId) {
+      auto rowIter = m_detidToRow.find(*detId);
+      if (rowIter != m_detidToRow.end()) { // skip if not found
+        rows.insert(rowIter->second);
       }
+    }
+    return rows;
+  }
 
-      /// 1./difc
-      double factor;
-    };
-
-    /// Applies the equation d=(TOF-tzero)/difc
-    struct func_difc_and_tzero {
-      func_difc_and_tzero(const double difc, const double tzero) : factor(1./difc), offset(-1.*tzero/difc){
-      }
-
-      double operator()(const double tof) const {
-        return factor*tof+offset;
-      }
-
-      /// 1./difc
-      double factor;
-      /// -tzero/difc
-      double offset;
-    };
-
-    struct func_difa {
-      func_difa(const double difc, const double difa, const double tzero) {
-          factor1 = -0.5 * difc / difa;
-          factor2 = 1. / difa;
-          factor3 = (factor1 * factor1) - (tzero / difa);
-      }
-
-      double operator()(const double tof) const {
-        double second = std::sqrt((tof*factor2) + factor3);
-        if (second < factor1)
-            return factor1-second;
-        else {
-            return factor1+second;
-        }
-      }
-
-      /// -0.5*difc/difa
-      double factor1;
-      /// 1/difa
-      double factor2;
-      /// (0.5*difc/difa)^2 - (tzero/difa)
-      double factor3;
-    };
-
-    class ConversionFactors {
-    public:
-        ConversionFactors(ITableWorkspace_const_sptr table) {
-            m_difcCol = table->getColumn("difc");
-            m_difaCol = table->getColumn("difa");
-            m_tzeroCol = table->getColumn("tzero");
-
-            this->generateDetidToRow(table);
-        }
-
-        std::function<double(double)> getConversionFunc(const std::set<detid_t> & detIds) {
-            const std::set<size_t> rows = this->getRow(detIds);
-            double difc = 0.;
-            double difa = 0.;
-            double tzero = 0.;
-            for (auto row = rows.begin(); row != rows.end(); ++row) {
-                difc += m_difcCol->toDouble(*row);
-                difa += m_difaCol->toDouble(*row);
-                tzero += m_tzeroCol->toDouble(*row);
-            }
-            if (rows.size() > 1) {
-                double norm = 1./static_cast<double>(rows.size());
-                difc = norm * difc;
-                difa = norm * difa;
-                tzero = norm * tzero;
-            }
-
-            if (difa == 0.) {
-                if (tzero == 0.) {
-                    return func_difc_only(difc);
-                } else {
-                    return func_difc_and_tzero(difc, tzero);
-                }
-            } else { // difa != 0.
-                return func_difa(difc, difa, tzero);
-            }
-        }
-
-    private:
-        void generateDetidToRow(ITableWorkspace_const_sptr table) {
-            ConstColumnVector<int> detIDs = table->getVector("detid");
-            const size_t numDets = detIDs.size();
-            for (size_t i=0; i<numDets; ++i) {
-                m_detidToRow[static_cast<detid_t>(detIDs[i])]=i;
-            }
-        }
-
-        std::set<size_t> getRow(const std::set<detid_t> & detIds) {
-            std::set<size_t> rows;
-            for (auto detId = detIds.begin(); detId != detIds.end(); ++detId) {
-                auto rowIter = m_detidToRow.find(*detId);
-                if (rowIter != m_detidToRow.end()) { // skip if not found
-                    rows.insert(rowIter->second);
-                }
-            }
-            return rows;
-        }
-
-        std::map<detid_t, size_t> m_detidToRow;
-        Column_const_sptr m_difcCol;
-        Column_const_sptr m_difaCol;
-        Column_const_sptr m_tzeroCol;
-    };
+  std::map<detid_t, size_t> m_detidToRow;
+  Column_const_sptr m_difcCol;
+  Column_const_sptr m_difaCol;
+  Column_const_sptr m_tzeroCol;
+};
 } // anonymous namespace
 
 const std::string AlignDetectors::name() const { return "AlignDetectors"; }
@@ -205,38 +201,43 @@ void AlignDetectors::init() {
 }
 
 std::map<std::string, std::string> AlignDetectors::validateInputs() {
-    std::map<std::string, std::string> result;
+  std::map<std::string, std::string> result;
 
-    int numWays = 0;
+  int numWays = 0;
 
-    const std::string calFileName = getProperty("CalibrationFile");
-    if (!calFileName.empty()) numWays+=1;
+  const std::string calFileName = getProperty("CalibrationFile");
+  if (!calFileName.empty())
+    numWays += 1;
 
-    ITableWorkspace_const_sptr calibrationWS = getProperty("CalibrationWorkspace");
-    if(bool(calibrationWS)) numWays+=1;
+  ITableWorkspace_const_sptr calibrationWS =
+      getProperty("CalibrationWorkspace");
+  if (bool(calibrationWS))
+    numWays += 1;
 
-    OffsetsWorkspace_const_sptr offsetsWS = getProperty("OffsetsWorkspace");
-    if(bool(offsetsWS)) numWays+=1;
+  OffsetsWorkspace_const_sptr offsetsWS = getProperty("OffsetsWorkspace");
+  if (bool(offsetsWS))
+    numWays += 1;
 
-    std::string message;
-    if (numWays == 0) {
-        message = "You must specify only one of CalibrationFile, "
-                  "CalibrationWorkspace, OffsetsWorkspace.";
-    }
-    if (numWays > 1) {
-        message = "You must specify one of CalibrationFile, "
-                  "CalibrationWorkspace, OffsetsWorkspace.";
-    }
+  std::string message;
+  if (numWays == 0) {
+    message = "You must specify only one of CalibrationFile, "
+              "CalibrationWorkspace, OffsetsWorkspace.";
+  }
+  if (numWays > 1) {
+    message = "You must specify one of CalibrationFile, "
+              "CalibrationWorkspace, OffsetsWorkspace.";
+  }
 
-    if (!message.empty()) {
-        result["CalibrationFile"] = message;
-        result["CalibrationWorkspace"] = message;
-    }
+  if (!message.empty()) {
+    result["CalibrationFile"] = message;
+    result["CalibrationWorkspace"] = message;
+  }
 
-    return result;
+  return result;
 }
 
-void AlignDetectors::loadCalFile(MatrixWorkspace_sptr inputWS, const std::string & filename) {
+void AlignDetectors::loadCalFile(MatrixWorkspace_sptr inputWS,
+                                 const std::string &filename) {
   IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
   alg->setProperty("InputWorkspace", inputWS);
   alg->setPropertyValue("Filename", filename);
@@ -275,7 +276,7 @@ void AlignDetectors::getCalibrationWS(MatrixWorkspace_sptr inputWS) {
 }
 
 void setXAxisUnits(API::MatrixWorkspace_sptr outputWS) {
-    outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
+  outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
 }
 
 //-----------------------------------------------------------------------
@@ -335,7 +336,7 @@ void AlignDetectors::exec() {
       // vectors were shared.
       const MantidVec &xIn = inSpec->readX();
 
-       std::transform( xIn.begin(), xIn.end(), xOut.begin(), toDspacing);
+      std::transform(xIn.begin(), xIn.end(), xOut.begin(), toDspacing);
 
       // Copy the Y&E data
       outputWS->dataY(i) = inSpec->readY();
@@ -401,7 +402,8 @@ void AlignDetectors::execEvent() {
   for (int64_t i = 0; i < m_numberOfSpectra; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    auto toDspacing = converter.getConversionFunc(inputWS->getSpectrum(size_t(i))->getDetectorIDs());
+    auto toDspacing = converter.getConversionFunc(
+        inputWS->getSpectrum(size_t(i))->getDetectorIDs());
     outputWS->getEventList(i).convertTof(toDspacing);
 
     progress.report();

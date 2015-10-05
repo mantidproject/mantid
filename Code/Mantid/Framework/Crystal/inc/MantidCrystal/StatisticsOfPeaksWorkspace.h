@@ -20,7 +20,9 @@ public:
   ~StatisticsOfPeaksWorkspace();
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "StatisticsOfPeaksWorkspace"; };
+  virtual const std::string name() const {
+    return "StatisticsOfPeaksWorkspace";
+  };
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
     return "Statistics of a PeaksWorkspace.";

@@ -53,9 +53,9 @@ void ParDomain::leastSquaresVal(const CostFuncLeastSquares &leastSquares) {
  * @param evalDeriv :: Flag to evaluate the first derivatives
  * @param evalHessian :: Flag to evaluate the Hessian (second derivatives)
  */
-void
-ParDomain::leastSquaresValDerivHessian(const CostFuncLeastSquares &leastSquares,
-                                       bool evalDeriv, bool evalHessian) {
+void ParDomain::leastSquaresValDerivHessian(
+    const CostFuncLeastSquares &leastSquares, bool evalDeriv,
+    bool evalHessian) {
   const int n = static_cast<int>(getNDomains());
   PARALLEL_SET_DYNAMIC(0);
   std::vector<API::IFunction_sptr> funs;

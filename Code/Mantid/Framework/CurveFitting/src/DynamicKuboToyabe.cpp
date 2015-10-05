@@ -7,24 +7,20 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include <vector>
 
-namespace Mantid
-{
-namespace CurveFitting
-{
+namespace Mantid {
+namespace CurveFitting {
 
 using namespace Kernel;
 using namespace API;
 
 DECLARE_FUNCTION(DynamicKuboToyabe)
 
-void DynamicKuboToyabe::init()
-{
-  declareParameter("Asym",  0.2, "Amplitude at time 0");
+void DynamicKuboToyabe::init() {
+  declareParameter("Asym", 0.2, "Amplitude at time 0");
   declareParameter("Delta", 0.2, "Local field");
   declareParameter("Field", 0.0, "External field");
-  declareParameter("Nu",    0.0, "Hopping rate");
+  declareParameter("Nu", 0.0, "Hopping rate");
 }
-
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 // From Numerical Recipes
@@ -62,7 +58,7 @@ double midpnt(double func(const double, const double, const double),
 }
 
 // Polynomial interpolation
-void polint (double xa[], double ya[], int n, double x, double& y, double& dy) {
+void polint(double xa[], double ya[], int n, double x, double &y, double &dy) {
   int i, m, ns = 1;
   double dif;
 
@@ -125,177 +121,173 @@ double integral(double func(const double, const double, const double),
 // End of Numerical Recipes routines
 //--------------------------------------------------------------------------------------------------------------------------------------
 
-
 // f1: function to integrate
 double f1(const double x, const double G, const double w0) {
-  return( exp(-G*G*x*x/2)*sin(w0*x));
+  return (exp(-G * G * x * x / 2) * sin(w0 * x));
 }
 
 // Static Zero Field Kubo Toyabe relaxation function
-double ZFKT (const double x, const double G){
+double ZFKT(const double x, const double G) {
 
-  const double q = G*G*x*x;
-  return (0.3333333333 + 0.6666666667*exp(-0.5*q)*(1-q));
+  const double q = G * G * x * x;
+  return (0.3333333333 + 0.6666666667 * exp(-0.5 * q) * (1 - q));
 }
 
 // Static non-zero field Kubo Toyabe relaxation function
-double HKT (const double x, const double G, const double F) {
+double HKT(const double x, const double G, const double F) {
 
-  const double q = G*G*x*x;
-  const double gm = 2*M_PI*0.01355342; // Muon gyromagnetic ratio * 2 * PI
-  
+  const double q = G * G * x * x;
+  const double gm = 2 * M_PI * 0.01355342; // Muon gyromagnetic ratio * 2 * PI
+
   double w;
-  if (F>2*G) {
+  if (F > 2 * G) {
     // Use F
     w = gm * F;
   } else {
     // Use G
     w = gm * 2 * G;
   }
-  
-  const double r = G*G/w/w;
-  
+
+  const double r = G * G / w / w;
+
   double ig;
-  if ( x>0 && r>0 ) {
+  if (x > 0 && r > 0) {
     // Compute integral
-    ig = integral(f1,0.0,x,G,w);
+    ig = integral(f1, 0.0, x, G, w);
   } else {
     // Integral is 0
     ig = 0;
   }
-  
-  const double ktb=(1-2*r*(1-exp(-q/2)*cos(w*x))+2*r*r*w*ig);
-  
-  if ( F>2*G ) {
+
+  const double ktb =
+      (1 - 2 * r * (1 - exp(-q / 2) * cos(w * x)) + 2 * r * r * w * ig);
+
+  if (F > 2 * G) {
     return ktb;
   } else {
-    const double kz = ZFKT(x,G);
-    return kz+F/2/G*(ktb-kz);
+    const double kz = ZFKT(x, G);
+    return kz + F / 2 / G * (ktb - kz);
   }
-  
 }
 
 // Dynamic Kubo-Toyabe
-double DynamicKuboToyabe::getDKT (double t, double G, double F, double v, double eps) const {
+double DynamicKuboToyabe::getDKT(double t, double G, double F, double v,
+                                 double eps) const {
 
-  const int tsmax = static_cast<int>(std::ceil(32.768/eps));
+  const int tsmax = static_cast<int>(std::ceil(32.768 / eps));
 
-  static double oldG=-1., oldV=-1., oldF=-1., oldEps=-1.;
+  static double oldG = -1., oldV = -1., oldF = -1., oldEps = -1.;
 
-  const int maxTsmax = static_cast<int>(std::ceil(32.768/m_minEps));
+  const int maxTsmax = static_cast<int>(std::ceil(32.768 / m_minEps));
   static std::vector<double> gStat(maxTsmax), gDyn(maxTsmax);
 
-  if ( (G != oldG) || (v != oldV) || (F != oldF) || (eps != oldEps)){
+  if ((G != oldG) || (v != oldV) || (F != oldF) || (eps != oldEps)) {
 
     // If G or v or F or eps have changed with respect to the
     // previous call, we need to re-do the computations
 
-
-    if ( G != oldG || (F != oldF) ){
+    if (G != oldG || (F != oldF)) {
 
       // But we only need to
       // re-compute gStat if G or F have changed
 
       // Generate static Kubo-Toyabe
       if (F == 0) {
-        for (int k=0; k<tsmax; k++){
-          gStat[k]= ZFKT(k*eps,G);
+        for (int k = 0; k < tsmax; k++) {
+          gStat[k] = ZFKT(k * eps, G);
         }
       } else {
-        for (int k=0; k<tsmax; k++){
-          gStat[k]= HKT(k*eps,G,F);
+        for (int k = 0; k < tsmax; k++) {
+          gStat[k] = HKT(k * eps, G, F);
         }
       }
       // Store new G value
-      oldG =G;
+      oldG = G;
       // Store new F value
-      oldF =F;
+      oldF = F;
     }
 
     // Store new v value
-    oldV =v;
+    oldV = v;
     // Store new eps value
-    oldEps =eps;
+    oldEps = eps;
 
-    double hop = v*eps;
+    double hop = v * eps;
 
     // Generate dynamic Kubo Toyabe
-    for (int k=0; k<tsmax; k++){
-      double y=gStat[k];
-      for (int j=k-1; j>0; j--){
-        y=y*(1-hop)+hop*gDyn[k-j]*gStat[j];
+    for (int k = 0; k < tsmax; k++) {
+      double y = gStat[k];
+      for (int j = k - 1; j > 0; j--) {
+        y = y * (1 - hop) + hop * gDyn[k - j] * gStat[j];
       }
-      gDyn[k]=y;
+      gDyn[k] = y;
     }
   }
 
-  // Interpolate table 
+  // Interpolate table
   // If beyond end, extrapolate
-  int x=int(fabs(t)/eps);
-  if (x>tsmax-2)
-    x = tsmax-2;
-  double xe=(fabs(t)/eps)-x;
-  return gDyn[x]*(1-xe)+xe*gDyn[x+1];
-
+  int x = int(fabs(t) / eps);
+  if (x > tsmax - 2)
+    x = tsmax - 2;
+  double xe = (fabs(t) / eps) - x;
+  return gDyn[x] * (1 - xe) + xe * gDyn[x + 1];
 }
 
 // Dynamic Kubo Toyabe function
-void DynamicKuboToyabe::function1D(double* out, const double* xValues, const size_t nData)const
-{
-  const double& A = getParameter("Asym");
-  const double& G = fabs(getParameter("Delta"));
-  const double& F = fabs(getParameter("Field"));
-  const double& v = fabs(getParameter("Nu"));
-
+void DynamicKuboToyabe::function1D(double *out, const double *xValues,
+                                   const size_t nData) const {
+  const double &A = getParameter("Asym");
+  const double &G = fabs(getParameter("Delta"));
+  const double &F = fabs(getParameter("Field"));
+  const double &v = fabs(getParameter("Nu"));
 
   // Zero hopping rate
   if (v == 0.0) {
 
     // Zero external field
-    if ( F == 0.0 ){
+    if (F == 0.0) {
       for (size_t i = 0; i < nData; i++) {
-        out[i] = A*ZFKT(xValues[i],G);
+        out[i] = A * ZFKT(xValues[i], G);
       }
     }
     // Non-zero external field
-    else{
+    else {
       for (size_t i = 0; i < nData; i++) {
-        out[i] = A*HKT(xValues[i],G,F);
+        out[i] = A * HKT(xValues[i], G, F);
       }
     }
-  } 
+  }
 
   // Non-zero hopping rate
   else {
 
-    for (size_t i = 0; i<nData; i++){
-      out[i] = A*getDKT(xValues[i],G,F,v,m_eps);
+    for (size_t i = 0; i < nData; i++) {
+      out[i] = A * getDKT(xValues[i], G, F, v, m_eps);
     }
   }
-
-
 }
-
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-DynamicKuboToyabe::DynamicKuboToyabe() : m_eps(0.05), m_minEps(0.001), m_maxEps(0.1) {}
+DynamicKuboToyabe::DynamicKuboToyabe()
+    : m_eps(0.05), m_minEps(0.001), m_maxEps(0.1) {}
 
 //----------------------------------------------------------------------------------------------
 /** Function to calculate derivative numerically
  */
-void DynamicKuboToyabe::functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian)
-{
+void DynamicKuboToyabe::functionDeriv(const API::FunctionDomain &domain,
+                                      API::Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
 }
 
 //----------------------------------------------------------------------------------------------
 /** Function to calculate derivative analytically
  */
-void DynamicKuboToyabe::functionDeriv1D(API::Jacobian* , const double* , const size_t )
-{
-  throw Mantid::Kernel::Exception::NotImplementedError("functionDeriv1D is not implemented for DynamicKuboToyabe.");
+void DynamicKuboToyabe::functionDeriv1D(API::Jacobian *, const double *,
+                                        const size_t) {
+  throw Mantid::Kernel::Exception::NotImplementedError(
+      "functionDeriv1D is not implemented for DynamicKuboToyabe.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -305,8 +297,7 @@ void DynamicKuboToyabe::functionDeriv1D(API::Jacobian* , const double* , const s
  */
 void DynamicKuboToyabe::setActiveParameter(size_t i, double value) {
 
-  setParameter( i, fabs(value), false);
-
+  setParameter(i, fabs(value), false);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -324,12 +315,14 @@ std::vector<std::string> DynamicKuboToyabe::getAttributeNames() const {
  * @param attName :: Attribute name. If it is not "eps" an exception is thrown.
  * @return a value of attribute attName
  */
-API::IFunction::Attribute DynamicKuboToyabe::getAttribute(const std::string &attName) const {
+API::IFunction::Attribute
+DynamicKuboToyabe::getAttribute(const std::string &attName) const {
 
   if (attName == "BinWidth") {
     return Attribute(m_eps);
   }
-  throw std::invalid_argument("DynamicKuboToyabe: Unknown attribute " + attName);
+  throw std::invalid_argument("DynamicKuboToyabe: Unknown attribute " +
+                              attName);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -338,35 +331,39 @@ API::IFunction::Attribute DynamicKuboToyabe::getAttribute(const std::string &att
  * @param att :: A double attribute containing a new positive value.
  */
 void DynamicKuboToyabe::setAttribute(const std::string &attName,
-                              const API::IFunction::Attribute &att) {
+                                     const API::IFunction::Attribute &att) {
   if (attName == "BinWidth") {
 
     double newVal = att.asDouble();
 
     if (newVal < 0) {
       clearAllParameters();
-      throw std::invalid_argument("DKT: Attribute BinWidth cannot be negative.");
+      throw std::invalid_argument(
+          "DKT: Attribute BinWidth cannot be negative.");
 
     } else if (newVal < m_minEps) {
       clearAllParameters();
       std::stringstream ss;
-      ss << "DKT: Attribute BinWidth too small (BinWidth < " << std::setprecision(3) << m_minEps << ")";
+      ss << "DKT: Attribute BinWidth too small (BinWidth < "
+         << std::setprecision(3) << m_minEps << ")";
       throw std::invalid_argument(ss.str());
 
     } else if (newVal > m_maxEps) {
       clearAllParameters();
       std::stringstream ss;
-      ss << "DKT: Attribute BinWidth too large (BinWidth > " << std::setprecision(3) << m_maxEps << ")";
+      ss << "DKT: Attribute BinWidth too large (BinWidth > "
+         << std::setprecision(3) << m_maxEps << ")";
       throw std::invalid_argument(ss.str());
     }
 
-    if ( !nParams() ) {
+    if (!nParams()) {
       init();
     }
     m_eps = newVal;
 
   } else {
-    throw std::invalid_argument("DynamicKuboToyabe: Unknown attribute " + attName);
+    throw std::invalid_argument("DynamicKuboToyabe: Unknown attribute " +
+                                attName);
   }
 }
 
@@ -377,7 +374,6 @@ void DynamicKuboToyabe::setAttribute(const std::string &attName,
 bool DynamicKuboToyabe::hasAttribute(const std::string &attName) const {
   return attName == "BinWidth";
 }
-
 
 } // namespace CurveFitting
 } // namespace Mantid

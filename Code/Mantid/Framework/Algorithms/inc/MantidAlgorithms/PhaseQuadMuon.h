@@ -37,7 +37,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport PhaseQuadMuon : public API::Algorithm {
 public:
   /// Default constructor
-  PhaseQuadMuon() {};
+  PhaseQuadMuon(){};
   /// Destructor
   virtual ~PhaseQuadMuon(){};
   /// Algorithm's name for identification overriding a virtual method

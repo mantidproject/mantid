@@ -72,7 +72,8 @@ void SaveCSV::init() {
                   "character)");
   declareProperty(
       new PropertyWithValue<bool>("SaveXerrors", 0, Direction::Input),
-      "This option saves out the x errors if any are present. If you have x errors\n"
+      "This option saves out the x errors if any are present. If you have x "
+      "errors\n"
       "in your workspace and you do not select this option, then the x errors\n"
       "are not saved to the file.");
 }
@@ -199,8 +200,9 @@ void SaveCSV::exec() {
   return;
 }
 
-
-void SaveCSV::saveXerrors(std::ofstream& stream, const Mantid::DataObjects::Workspace2D_sptr workspace, const size_t numberOfHist) {
+void SaveCSV::saveXerrors(std::ofstream &stream,
+                          const Mantid::DataObjects::Workspace2D_sptr workspace,
+                          const size_t numberOfHist) {
   // If there isn't a dx values present in the first entry then return
   if (!workspace->hasDx(0)) {
     return;
@@ -213,7 +215,7 @@ void SaveCSV::saveXerrors(std::ofstream& stream, const Mantid::DataObjects::Work
     stream << i;
 
     for (int j = 0; j < (int)dXvalue.size(); j++) {
-      stream<< std::setw(15) << dXvalue[j] << m_separator;
+      stream << std::setw(15) << dXvalue[j] << m_separator;
     }
     stream << m_lineSeparator;
     p.report("Saving x errors...");

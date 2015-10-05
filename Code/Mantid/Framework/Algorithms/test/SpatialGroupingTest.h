@@ -15,39 +15,40 @@
 #include <Poco/File.h>
 #include <fstream>
 
-class SpatialGroupingTest : public CxxTest::TestSuite
-{
+class SpatialGroupingTest : public CxxTest::TestSuite {
 public:
-  void testMetaInfo()
-  {
+  void testMetaInfo() {
     alg = new Mantid::Algorithms::SpatialGrouping();
     TS_ASSERT_EQUALS(alg->name(), "SpatialGrouping");
     TS_ASSERT_EQUALS(alg->version(), 1);
     delete alg;
   }
 
-  void testInit()
-  {
+  void testInit() {
     alg = new Mantid::Algorithms::SpatialGrouping();
-    TS_ASSERT(! alg->isInitialized() );
+    TS_ASSERT(!alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
     TS_ASSERT(alg->isInitialized());
     delete alg;
   }
 
-  void testExec()
-  {
+  void testExec() {
     // Test the algorithm
     // Create a workspace
     const int nhist(18);
-    Mantid::API::MatrixWorkspace_sptr workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, 1));
+    Mantid::API::MatrixWorkspace_sptr workspace =
+        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, 1));
     // Create a parameterised instrument
-    Mantid::Geometry::Instrument_sptr instrument = boost::dynamic_pointer_cast<Mantid::Geometry::Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(2));
+    Mantid::Geometry::Instrument_sptr instrument =
+        boost::dynamic_pointer_cast<Mantid::Geometry::Instrument>(
+            ComponentCreationHelper::createTestInstrumentCylindrical(2));
     workspace->setInstrument(instrument);
 
     alg = new Mantid::Algorithms::SpatialGrouping();
     alg->initialize();
-    alg->setProperty<Mantid::API::MatrixWorkspace_sptr>("InputWorkspace", workspace);
+    alg->setProperty<Mantid::API::MatrixWorkspace_sptr>("InputWorkspace",
+                                                        workspace);
     alg->setProperty("Filename", "test_SpatialGrouping");
     alg->execute();
 
@@ -58,8 +59,8 @@ public:
     Poco::File fileobj(file);
     const bool fileExists = fileobj.exists();
 
-    TSM_ASSERT(fileobj.path(),fileExists);
-    
+    TSM_ASSERT(fileobj.path(), fileExists);
+
     std::ifstream input;
     input.open(file.c_str());
 
@@ -71,24 +72,26 @@ public:
     <group name="group1"><detids val="1,2,3,4,5,6,7,8,9"/></group>
     <group name="group2"><detids val="10,11,12,13,14,15,16,17,18"/></group>
     </detector-grouping>
-    
+
     */
 
-    TS_ASSERT( input.is_open() );
+    TS_ASSERT(input.is_open());
 
     // Testing file
     std::vector<std::string> expected;
     expected.push_back("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
-    expected.push_back("<!-- XML Grouping File created by SpatialGrouping Algorithm -->");
+    expected.push_back(
+        "<!-- XML Grouping File created by SpatialGrouping Algorithm -->");
     expected.push_back("<detector-grouping>");
-    expected.push_back("<group name=\"group1\"><detids val=\"1,2,3,4,5,6,7,8,9\"/></group>");
-    expected.push_back("<group name=\"group2\"><detids val=\"10,11,12,13,14,15,16,17,18\"/></group>");
+    expected.push_back(
+        "<group name=\"group1\"><detids val=\"1,2,3,4,5,6,7,8,9\"/></group>");
+    expected.push_back("<group name=\"group2\"><detids "
+                       "val=\"10,11,12,13,14,15,16,17,18\"/></group>");
     expected.push_back("</detector-grouping>");
 
     std::vector<std::string>::iterator iter = expected.begin();
 
-    while ( input.good() && iter != expected.end() )
-    {
+    while (input.good() && iter != expected.end()) {
       std::string received;
       getline(input, received);
 
@@ -102,8 +105,8 @@ public:
     // delete file
     remove(file.c_str());
   }
-private:
-  Mantid::Algorithms::SpatialGrouping* alg;
 
+private:
+  Mantid::Algorithms::SpatialGrouping *alg;
 };
 #endif

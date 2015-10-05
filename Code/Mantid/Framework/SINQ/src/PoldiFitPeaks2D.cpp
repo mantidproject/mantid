@@ -104,8 +104,7 @@ PoldiFitPeaks2D::getPeakCollectionsFromInput() const {
   if (peakTable) {
     try {
       peakCollections.push_back(getPeakCollection(peakTable));
-    }
-    catch (std::runtime_error) {
+    } catch (std::runtime_error) {
       // do nothing
     }
 
@@ -125,8 +124,7 @@ PoldiFitPeaks2D::getPeakCollectionsFromInput() const {
       if (peakTable) {
         try {
           peakCollections.push_back(getPeakCollection(peakTable));
-        }
-        catch (std::runtime_error) {
+        } catch (std::runtime_error) {
           // do nothing
         }
       }
@@ -149,8 +147,7 @@ PoldiPeakCollection_sptr
 PoldiFitPeaks2D::getPeakCollection(const TableWorkspace_sptr &peakTable) const {
   try {
     return boost::make_shared<PoldiPeakCollection>(peakTable);
-  }
-  catch (...) {
+  } catch (...) {
     throw std::runtime_error("Could not initialize peak collection.");
   }
 }
@@ -332,8 +329,7 @@ std::vector<PoldiPeakCollection_sptr> PoldiFitPeaks2D::getCountPeakCollections(
           getPeakCollectionFromFunction(localFunction);
 
       countPeakCollections.push_back(getCountPeakCollection(normalizedPeaks));
-    }
-    catch (std::invalid_argument) {
+    } catch (std::invalid_argument) {
       // not a Poldi2DFunction - skip (the background functions)
     }
 
@@ -1036,8 +1032,8 @@ PoldiFitPeaks2D::getFunction(const IAlgorithm_sptr &fitAlgorithm) const {
  *
  * @param poldi2DFunction :: Poldi2DFunction to which the background is added.
  */
-void PoldiFitPeaks2D::addBackgroundTerms(Poldi2DFunction_sptr poldi2DFunction)
-    const {
+void PoldiFitPeaks2D::addBackgroundTerms(
+    Poldi2DFunction_sptr poldi2DFunction) const {
   bool addConstantBackground = getProperty("FitConstantBackground");
   if (addConstantBackground) {
     IFunction_sptr constantBackground =
@@ -1310,8 +1306,7 @@ void PoldiFitPeaks2D::exec() {
           ITableWorkspace_sptr cell =
               getRefinedCellParameters(poldi2DFunction->getFunction(i));
           cells.push_back(cell);
-        }
-        catch (std::invalid_argument) {
+        } catch (std::invalid_argument) {
           // do nothing
         }
       }

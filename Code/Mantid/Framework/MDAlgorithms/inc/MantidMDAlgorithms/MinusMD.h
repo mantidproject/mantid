@@ -54,7 +54,8 @@ private:
   void checkInputs();
 
   template <typename MDE, size_t nd>
-  void doMinus(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  void
+  doMinus(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   /// Run the algorithm with an MDEventWorkspace as output
   void execEvent();

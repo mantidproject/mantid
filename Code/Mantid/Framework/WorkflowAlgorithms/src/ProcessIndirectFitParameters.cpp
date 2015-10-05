@@ -55,8 +55,8 @@ void ProcessIndirectFitParameters::init() {
   std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
   unitOptions.push_back("");
 
-  declareProperty(new WorkspaceProperty<ITableWorkspace>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(new WorkspaceProperty<ITableWorkspace>("InputWorkspace", "",
+                                                         Direction::Input),
                   "The table workspace to convert to a MatrixWorkspace.");
 
   declareProperty(
@@ -68,7 +68,7 @@ void ProcessIndirectFitParameters::init() {
                   "List of the parameter names to add to the workspace.",
                   Direction::Input);
 
-    declareProperty("XAxisUnit", "",
+  declareProperty("XAxisUnit", "",
                   boost::make_shared<StringListValidator>(unitOptions),
                   "The unit to assign to the X Axis");
 
@@ -174,10 +174,10 @@ void ProcessIndirectFitParameters::exec() {
   outputWs->replaceAxis(1, axis);
 
   // Set units for the xAxis
-  if(xUnit.compare("") != 0){
-	outputWs->getAxis(0)->setUnit(xUnit);
+  if (xUnit.compare("") != 0) {
+    outputWs->getAxis(0)->setUnit(xUnit);
   }
-  
+
   setProperty("OutputWorkspace", outputWs);
 }
 

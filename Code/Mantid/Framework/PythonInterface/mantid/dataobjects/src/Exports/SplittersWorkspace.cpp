@@ -10,10 +10,8 @@ using namespace boost::python;
 
 void export_SplittersWorkspace() {
   class_<SplittersWorkspace, bases<TableWorkspace, ISplittersWorkspace>,
-         boost::noncopyable>("SplittersWorkspace", no_init)
-    ;
+         boost::noncopyable>("SplittersWorkspace", no_init);
 
   // register pointers
   RegisterWorkspacePtrToPython<SplittersWorkspace>();
-
 }

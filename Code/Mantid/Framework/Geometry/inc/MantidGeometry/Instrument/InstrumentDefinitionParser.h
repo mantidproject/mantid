@@ -58,11 +58,13 @@ class Object;
 class DLLExport InstrumentDefinitionParser {
 public:
   InstrumentDefinitionParser();
-  InstrumentDefinitionParser(const std::string &filename, const std::string &instName,
-                  const std::string &xmlText);
-  InstrumentDefinitionParser(const IDFObject_const_sptr xmlFile, 
-                  const IDFObject_const_sptr expectedCacheFile, 
-                  const std::string& instName, const std::string& xmlText);
+  InstrumentDefinitionParser(const std::string &filename,
+                             const std::string &instName,
+                             const std::string &xmlText);
+  InstrumentDefinitionParser(const IDFObject_const_sptr xmlFile,
+                             const IDFObject_const_sptr expectedCacheFile,
+                             const std::string &instName,
+                             const std::string &xmlText);
   ~InstrumentDefinitionParser();
 
   /// Caching
@@ -100,17 +102,15 @@ public:
   /// Getter the the applied caching option.
   CachingOption getAppliedCachingOption() const;
 
-  ///creates a vtp filename from a given xml filename
+  /// creates a vtp filename from a given xml filename
   const std::string createVTPFileName();
 
 private:
-  ///shared Constructor logic
-  void initialise(const std::string &filename, 
-                  const std::string &instName,
-                  const std::string &xmlText,
-                  const std::string &vtpFilename);
+  /// shared Constructor logic
+  void initialise(const std::string &filename, const std::string &instName,
+                  const std::string &xmlText, const std::string &vtpFilename);
 
-  ///lazy loads the document and returns a pointer
+  /// lazy loads the document and returns a pointer
   Poco::AutoPtr<Poco::XML::Document> getDocument();
 
   /// Set location (position) of comp as specified in XML location element
@@ -219,6 +219,7 @@ private:
   /// This method return this sequence as a xml string
   Poco::AutoPtr<Poco::XML::Document>
   convertLocationsElement(const Poco::XML::Element *pElem);
+
 public: // for testing
   /// return absolute position of point which is set relative to the
   /// coordinate system of the input component
@@ -231,7 +232,7 @@ private:
 
   /// Write out a cache file.
   CachingOption writeAndApplyCache(IDFObject_const_sptr firstChoiceCache,
-    IDFObject_const_sptr usedCache);
+                                   IDFObject_const_sptr usedCache);
 
   /// This method returns the parent appended which its child components and
   /// also name of type of the last child component

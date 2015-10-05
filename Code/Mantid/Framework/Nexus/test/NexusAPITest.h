@@ -31,12 +31,9 @@ using std::map;
 using std::string;
 using std::vector;
 
-
-class NexusAPITest : public CxxTest::TestSuite
-{
+class NexusAPITest : public CxxTest::TestSuite {
 public:
-
-  //Various data types that will be written
+  // Various data types that will be written
   vector<int> array_dims;
   vector<uint8_t> i1_array;
   vector<int16_t> i2_array;
@@ -48,10 +45,9 @@ public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static NexusAPITest *createSuite() { return new NexusAPITest(); }
-  static void destroySuite( NexusAPITest *suite ) { delete suite; }
+  static void destroySuite(NexusAPITest *suite) { delete suite; }
 
-  NexusAPITest()
-  {
+  NexusAPITest() {
 
     // 2d array
     array_dims.push_back(5);
@@ -59,37 +55,35 @@ public:
 
     // 1d uint8 array
     for (size_t i = 0; i < 4; i++) {
-      i1_array.push_back(static_cast<uint8_t>(i+1));
+      i1_array.push_back(static_cast<uint8_t>(i + 1));
     }
     // 1d int16 array
     for (size_t i = 0; i < 4; i++) {
-      i2_array.push_back(static_cast<int16_t>(1000*(i+1)));
+      i2_array.push_back(static_cast<int16_t>(1000 * (i + 1)));
     }
     // 1d int32 data
     for (size_t i = 0; i < 4; i++) {
-      i4_array.push_back(static_cast<int32_t>(1000000*(i+1)));
+      i4_array.push_back(static_cast<int32_t>(1000000 * (i + 1)));
     }
     // 1d int64 data
     for (size_t i = 0; i < 4; i++) {
-      i8_array.push_back(1000000000*(i+1));
+      i8_array.push_back(1000000000 * (i + 1));
     }
     // 2d float data
-    for (size_t i = 0; i < 5*4; i++) {
+    for (size_t i = 0; i < 5 * 4; i++) {
       r4_array.push_back(static_cast<float>(i));
     }
-    for (size_t i = 0; i < 5*4; i++) {
-      r8_array.push_back(static_cast<double>(i+20));
+    for (size_t i = 0; i < 5 * 4; i++) {
+      r8_array.push_back(static_cast<double>(i + 20));
     }
-
-
   }
 
   /** Write out a test NXS file
-   * Taken from napi_test_cpp.cxx  at http://download.nexusformat.org/doxygen/html-cpp/napi__test__cpp_8cxx-example.html
+   * Taken from napi_test_cpp.cxx  at
+   * http://download.nexusformat.org/doxygen/html-cpp/napi__test__cpp_8cxx-example.html
    * on Sep 22, 2010
    */
-  int writeTest(const string& filename, NXaccess create_code)
-  {
+  int writeTest(const string &filename, NXaccess create_code) {
     ::NeXus::File file(filename, create_code);
     // create group
     file.makeGroup("entry", "NXentry", true);
@@ -98,14 +92,16 @@ public:
     file.putAttr("cucumber", "passion");
     // put string
     file.writeData("ch_data", "NeXus_data");
-    char c1_array[5][4] = {{'a', 'b', 'c' ,'d'}, {'e', 'f', 'g' ,'h'},
-                           {'i', 'j', 'k', 'l'}, {'m', 'n', 'o', 'p'},
-                           {'q', 'r', 's' , 't'}};
+    char c1_array[5][4] = {{'a', 'b', 'c', 'd'},
+                           {'e', 'f', 'g', 'h'},
+                           {'i', 'j', 'k', 'l'},
+                           {'m', 'n', 'o', 'p'},
+                           {'q', 'r', 's', 't'}};
     file.makeData("c1_data", ::NeXus::CHAR, array_dims, true);
     file.putData(c1_array);
     file.closeData();
 
-    //Write various types of data
+    // Write various types of data
     file.writeData("i1_data", i1_array);
 
     file.writeData("i2_data", i2_array);
@@ -129,8 +125,8 @@ public:
     file.putSlab(&(r8_array[16]), slab_start, slab_size);
     slab_start[0] = 0;
     slab_start[1] = 0;
-    slab_size[0]=4;
-    slab_size[1]=4;
+    slab_size[0] = 4;
+    slab_size[1] = 4;
     file.putSlab(&(r8_array[0]), slab_start, slab_size);
 
     // add some attributes
@@ -144,17 +140,17 @@ public:
 
     // int64 tests
     vector<int64_t> grossezahl;
-  #if HAVE_LONG_LONG_INT
+#if HAVE_LONG_LONG_INT
     grossezahl.push_back(12);
     grossezahl.push_back(555555555555LL);
     grossezahl.push_back(23);
     grossezahl.push_back(777777777777LL);
-  #else
+#else
     grossezahl.push_back(12);
     grossezahl.push_back(555555);
     grossezahl.push_back(23);
     grossezahl.push_back(77777);
-  #endif
+#endif
     if (create_code != NXACC_CREATE) {
       file.writeData("grosszahl", grossezahl);
     }
@@ -177,18 +173,16 @@ public:
     vector<int> cdims;
     cdims.push_back(20);
     cdims.push_back(20);
-    file.writeCompData("comp_data", comp_array, array_dims, ::NeXus::LZW, cdims);
+    file.writeCompData("comp_data", comp_array, array_dims, ::NeXus::LZW,
+                       cdims);
 
     return 0;
   }
 
-
-  void testGetDataCoerce()
-  {
-    //First, write out a test file (HDF5)s
+  void testGetDataCoerce() {
+    // First, write out a test file (HDF5)s
     std::string filename("NexusAPITest.hdf");
-    writeTest(filename,  NXACC_CREATE5);
-
+    writeTest(filename, NXACC_CREATE5);
 
     const string SDS("SDS");
     // top level file information
@@ -199,34 +193,34 @@ public:
     // check group attributes
     file.openGroup("entry", "NXentry");
 
-    //int num = 4;
+    // int num = 4;
     std::vector<int> ires;
     std::vector<double> dres;
 
     ires.clear();
     file.openData("i1_data");
-    TS_ASSERT( file.isDataInt() );
+    TS_ASSERT(file.isDataInt());
     file.getDataCoerce(ires);
     TS_ASSERT_EQUALS(ires.size(), i1_array.size());
-    for (std::size_t i=0; i<ires.size();i++)
+    for (std::size_t i = 0; i < ires.size(); i++)
       TS_ASSERT_EQUALS(ires[i], i1_array[i]);
     file.closeData();
 
     ires.clear();
     file.openData("i2_data");
-    TS_ASSERT( file.isDataInt() );
+    TS_ASSERT(file.isDataInt());
     file.getDataCoerce(ires);
     TS_ASSERT_EQUALS(ires.size(), i2_array.size());
-    for (std::size_t i=0; i<ires.size();i++)
+    for (std::size_t i = 0; i < ires.size(); i++)
       TS_ASSERT_EQUALS(ires[i], i2_array[i]);
     file.closeData();
 
     ires.clear();
     file.openData("i4_data");
-    TS_ASSERT( file.isDataInt() );
+    TS_ASSERT(file.isDataInt());
     file.getDataCoerce(ires);
     TS_ASSERT_EQUALS(ires.size(), i4_array.size());
-    for (std::size_t i=0; i<ires.size();i++)
+    for (std::size_t i = 0; i < ires.size(); i++)
       TS_ASSERT_EQUALS(ires[i], i4_array[i]);
     file.closeData();
 
@@ -234,7 +228,7 @@ public:
     file.openData("r4_data");
     file.getDataCoerce(dres);
     TS_ASSERT_EQUALS(dres.size(), r4_array.size());
-    for (std::size_t i=0; i<dres.size();i++)
+    for (std::size_t i = 0; i < dres.size(); i++)
       TS_ASSERT_EQUALS(dres[i], r4_array[i]);
     file.closeData();
 
@@ -242,18 +236,18 @@ public:
     file.openData("r8_data");
     file.getDataCoerce(dres);
     TS_ASSERT_EQUALS(dres.size(), r8_array.size());
-    for (std::size_t i=0; i<dres.size();i++)
+    for (std::size_t i = 0; i < dres.size(); i++)
       TS_ASSERT_EQUALS(dres[i], r8_array[i]);
     file.closeData();
 
-    //Now make it throw Exception by trying to put a double in an int.
+    // Now make it throw Exception by trying to put a double in an int.
     file.openData("r8_data");
-    TS_ASSERT( !file.isDataInt() );
+    TS_ASSERT(!file.isDataInt());
     TS_ASSERT_THROWS(file.getDataCoerce(ires), ::NeXus::Exception);
     file.closeData();
 
     file.openData("r4_data");
-    TS_ASSERT( !file.isDataInt() );
+    TS_ASSERT(!file.isDataInt());
     TS_ASSERT_THROWS(file.getDataCoerce(ires), ::NeXus::Exception);
     file.closeData();
 
@@ -262,10 +256,9 @@ public:
     Poco::File(filename).remove();
   }
 
-  void test_writeData()
-  {
+  void test_writeData() {
     std::string filename("NexusAPITest1.hdf");
-    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_CREATE5);
+    ::NeXus::File *file = new ::NeXus::File(filename, NXACC_CREATE5);
     std::vector<int> data(10, 123);
     file->makeGroup("data", "NXdata", 1);
     file->writeData("mydata", data);
@@ -273,10 +266,9 @@ public:
     file->close();
   }
 
-  void test_writeExtendibleData_writeUpdatedData()
-  {
+  void test_writeExtendibleData_writeUpdatedData() {
     std::string filename("NexusAPITest2.hdf");
-    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_CREATE5);
+    ::NeXus::File *file = new ::NeXus::File(filename, NXACC_CREATE5);
     std::vector<int> data(10, 123);
     file->makeGroup("data", "NXdata", 1);
     file->writeExtendibleData("mydata1", data);
@@ -290,9 +282,9 @@ public:
     file->close();
 
     // Data vector can grow
-    for (size_t i=0; i<6; i++)
+    for (size_t i = 0; i < 6; i++)
       data.push_back(456);
-    data[0]=789;
+    data[0] = 789;
     file = new ::NeXus::File(filename, NXACC_RDWR);
     file->openGroup("data", "NXdata");
     file->writeUpdatedData("mydata1", data);
@@ -307,15 +299,11 @@ public:
     file->writeUpdatedData("mydata2", data);
 
     // Also a string
-    file->putAttr("string_attrib", "some much longer string filled with interesting comments that I'm sure you are glad you are reading right now 42.");
+    file->putAttr("string_attrib", "some much longer string filled with "
+                                   "interesting comments that I'm sure you are "
+                                   "glad you are reading right now 42.");
     file->close();
   }
-
 };
 
-
 #endif
-
-
-
-

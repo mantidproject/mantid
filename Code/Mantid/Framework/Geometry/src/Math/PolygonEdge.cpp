@@ -9,10 +9,9 @@ namespace Mantid {
 namespace Geometry {
 using Kernel::V2D;
 
-namespace
-{
-  // Smallest possible double value
-  const double EPSILON = std::numeric_limits<double>::epsilon();
+namespace {
+// Smallest possible double value
+const double EPSILON = std::numeric_limits<double>::epsilon();
 }
 
 //-----------------------------------------------------------------------------
@@ -22,7 +21,7 @@ namespace
  * Contructor taking two points, start and end
  */
 PolygonEdge::PolygonEdge(const Kernel::V2D &start, const Kernel::V2D &end)
-    : m_start(start), m_end(end), m_dir(m_end-m_start) {}
+    : m_start(start), m_end(end), m_dir(m_end - m_start) {}
 
 /**
  * Create a point a given fraction along this edge
@@ -147,8 +146,8 @@ PolygonEdge::Orientation crossingPoint(const PolygonEdge &edgeOne,
 bool edgeAimsAt(const PolygonEdge &a, const PolygonEdge &b,
                 PointClassification aclass,
                 PolygonEdge::Orientation crossType) {
-  const auto & va = a.direction();
-  const auto & vb = b.direction();
+  const auto &va = a.direction();
+  const auto &vb = b.direction();
   if (crossType != PolygonEdge::Collinear) {
     double ca = va.X() * vb.Y();
     double cb = vb.X() * va.Y();

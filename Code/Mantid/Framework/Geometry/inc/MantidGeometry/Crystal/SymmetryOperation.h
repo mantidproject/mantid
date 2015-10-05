@@ -174,8 +174,8 @@ protected:
   std::string m_identifier;
 };
 
-MANTID_GEOMETRY_DLL std::ostream &operator<<(
-    std::ostream &stream, const SymmetryOperation &operation);
+MANTID_GEOMETRY_DLL std::ostream &
+operator<<(std::ostream &stream, const SymmetryOperation &operation);
 MANTID_GEOMETRY_DLL std::istream &operator>>(std::istream &stream,
                                              SymmetryOperation &operation);
 

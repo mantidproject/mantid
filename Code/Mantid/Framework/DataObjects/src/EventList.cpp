@@ -1681,10 +1681,9 @@ EventList::compressEventsHelper(const std::vector<T> &events,
  */
 
 template <class T>
-void
-EventList::compressEventsParallelHelper(const std::vector<T> &events,
-                                        std::vector<WeightedEventNoTime> &out,
-                                        double tolerance) {
+void EventList::compressEventsParallelHelper(
+    const std::vector<T> &events, std::vector<WeightedEventNoTime> &out,
+    double tolerance) {
   // Create a local output vector for each thread
   int numThreads = PARALLEL_GET_MAX_THREADS;
   std::vector<std::vector<WeightedEventNoTime>> outputs(numThreads);
@@ -2232,10 +2231,9 @@ void EventList::generateCountsHistogramPulseTime(const MantidVec &X,
  * @param tofFactor :: time of flight factor
  * @param tofOffset :: time of flight offset
  */
-void
-EventList::generateCountsHistogramTimeAtSample(const MantidVec &X, MantidVec &Y,
-                                               const double &tofFactor,
-                                               const double &tofOffset) const {
+void EventList::generateCountsHistogramTimeAtSample(
+    const MantidVec &X, MantidVec &Y, const double &tofFactor,
+    const double &tofOffset) const {
   // For slight speed=up.
   size_t x_size = X.size();
 
@@ -2514,36 +2512,38 @@ void EventList::integrate(const double minX, const double maxX,
 
 /**
  * @param func Function to do the conversion.
- * @param sorting How the events are sorted after the operation. 0 = unsorted (default),
+ * @param sorting How the events are sorted after the operation. 0 = unsorted
+ * (default),
  * positive = unchanged, negative = reverse.
  */
-void EventList::convertTof(std::function<double(double)> func, const int sorting) {
-    // fix the histogram parameter
-    MantidVec &x = this->refX.access();
-    transform(x.begin(), x.end(), x.begin(), func);
+void EventList::convertTof(std::function<double(double)> func,
+                           const int sorting) {
+  // fix the histogram parameter
+  MantidVec &x = this->refX.access();
+  transform(x.begin(), x.end(), x.begin(), func);
 
-    // do nothing if sorting > 0
-    if (sorting == 0) {
-        this->setSortOrder(UNSORTED);
-    } else if ((sorting < 0) && (this->getSortType() == TOF_SORT)) {
-        this->reverse();
-    }
+  // do nothing if sorting > 0
+  if (sorting == 0) {
+    this->setSortOrder(UNSORTED);
+  } else if ((sorting < 0) && (this->getSortType() == TOF_SORT)) {
+    this->reverse();
+  }
 
-    if (this->getNumberEvents() <= 0)
-      return;
+  if (this->getNumberEvents() <= 0)
+    return;
 
-    // Convert the list
-    switch (eventType) {
-    case TOF:
-      this->convertTofHelper(this->events, func);
-      break;
-    case WEIGHTED:
-      this->convertTofHelper(this->weightedEvents, func);
-      break;
-    case WEIGHTED_NOTIME:
-      this->convertTofHelper(this->weightedEventsNoTime, func);
-      break;
-    }
+  // Convert the list
+  switch (eventType) {
+  case TOF:
+    this->convertTofHelper(this->events, func);
+    break;
+  case WEIGHTED:
+    this->convertTofHelper(this->weightedEvents, func);
+    break;
+  case WEIGHTED_NOTIME:
+    this->convertTofHelper(this->weightedEventsNoTime, func);
+    break;
+  }
 }
 
 /**
@@ -2551,12 +2551,13 @@ void EventList::convertTof(std::function<double(double)> func, const int sorting
  * @param func
  */
 template <class T>
-void EventList::convertTofHelper(std::vector<T> &events, std::function<double(double)> func) {
-    // iterate through all events
-    typename std::vector<T>::iterator itev;
-    typename std::vector<T>::iterator itev_end = events.end(); // cache for speed
-    for (itev = events.begin(); itev != itev_end; itev++)
-      itev->m_tof = func(itev->m_tof);
+void EventList::convertTofHelper(std::vector<T> &events,
+                                 std::function<double(double)> func) {
+  // iterate through all events
+  typename std::vector<T>::iterator itev;
+  typename std::vector<T>::iterator itev_end = events.end(); // cache for speed
+  for (itev = events.begin(); itev != itev_end; itev++)
+    itev->m_tof = func(itev->m_tof);
 }
 
 // --------------------------------------------------------------------------

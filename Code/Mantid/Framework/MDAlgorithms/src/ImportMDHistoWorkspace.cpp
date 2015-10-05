@@ -14,7 +14,6 @@ using namespace DataObjects;
 using namespace Kernel;
 using namespace Geometry;
 
-
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ImportMDHistoWorkspace)
 

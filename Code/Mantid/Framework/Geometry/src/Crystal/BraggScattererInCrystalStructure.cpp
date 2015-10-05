@@ -18,7 +18,6 @@
 #pragma warning(pop)
 #endif
 
-
 namespace Mantid {
 namespace Geometry {
 
@@ -31,8 +30,8 @@ BraggScattererInCrystalStructure::BraggScattererInCrystalStructure()
 
 /// Sets the position of the scatterer to the supplied coordinates - vector is
 /// wrapped to [0, 1) and equivalent positions are recalculated.
-void
-BraggScattererInCrystalStructure::setPosition(const Kernel::V3D &position) {
+void BraggScattererInCrystalStructure::setPosition(
+    const Kernel::V3D &position) {
   m_position = getWrappedVector(position);
 
   recalculateEquivalentPositions();
@@ -94,7 +93,7 @@ void BraggScattererInCrystalStructure::declareProperties() {
   exposePropertyToComposite("UnitCell");
 
   IValidator_sptr spaceGroupValidator =
-      boost::make_shared<ListValidator<std::string> >(
+      boost::make_shared<ListValidator<std::string>>(
           SpaceGroupFactory::Instance().subscribedSpaceGroupSymbols());
   declareProperty(new Kernel::PropertyWithValue<std::string>(
                       "SpaceGroup", "P 1", spaceGroupValidator),

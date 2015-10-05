@@ -40,28 +40,28 @@
 namespace Mantid {
 namespace API {
 
-
 class MANTID_API_DLL NotebookBuilder {
 public:
-    NotebookBuilder(boost::shared_ptr<HistoryView> view,
+  NotebookBuilder(boost::shared_ptr<HistoryView> view,
                   std::string versionSpecificity = "old");
-    virtual ~NotebookBuilder(){};
+  virtual ~NotebookBuilder(){};
 
-    /// build an ipython notebook from the history view
-    const std::string build(std::string ws_name, std::string ws_title, std::string ws_comment);
+  /// build an ipython notebook from the history view
+  const std::string build(std::string ws_name, std::string ws_title,
+                          std::string ws_comment);
 
 private:
-    void writeHistoryToStream(std::vector<HistoryItem>::const_iterator &iter);
-    void buildChildren(std::vector<HistoryItem>::const_iterator &iter);
-    const std::string
-        buildAlgorithmString(AlgorithmHistory_const_sptr algHistory);
-    const std::string
-        buildPropertyString(Mantid::Kernel::PropertyHistory_const_sptr propHistory);
+  void writeHistoryToStream(std::vector<HistoryItem>::const_iterator &iter);
+  void buildChildren(std::vector<HistoryItem>::const_iterator &iter);
+  const std::string
+  buildAlgorithmString(AlgorithmHistory_const_sptr algHistory);
+  const std::string
+  buildPropertyString(Mantid::Kernel::PropertyHistory_const_sptr propHistory);
 
-    const std::vector<HistoryItem> m_historyItems;
-    std::string m_output;
-    std::string m_versionSpecificity;
-    std::unique_ptr<NotebookWriter> m_nb_writer;
+  const std::vector<HistoryItem> m_historyItems;
+  std::string m_output;
+  std::string m_versionSpecificity;
+  std::unique_ptr<NotebookWriter> m_nb_writer;
 };
 
 } // namespace API

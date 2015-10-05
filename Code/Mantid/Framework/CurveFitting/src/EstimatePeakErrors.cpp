@@ -108,9 +108,9 @@ void calculatePeakValues(IPeakFunction &peak, ITableWorkspace &results,
 /// Initialize
 void EstimatePeakErrors::init() {
 
-  declareProperty(
-      new FunctionProperty("Function"),
-      "Fitting function containing peaks. Must have a covariance matrix attached.");
+  declareProperty(new FunctionProperty("Function"),
+                  "Fitting function containing peaks. Must have a covariance "
+                  "matrix attached.");
 
   declareProperty(
       new API::WorkspaceProperty<API::ITableWorkspace>(
@@ -130,8 +130,7 @@ void EstimatePeakErrors::exec() {
   results->addColumn("double", "Error");
 
   auto matrix = function->getCovarianceMatrix();
-  if ( !matrix )
-  {
+  if (!matrix) {
     g_log.warning() << "Function doesn't have covariance matrix." << std::endl;
     setProperty("OutputWorkspace", results);
     return;

@@ -64,7 +64,7 @@ void ApplyDetailedBalance::exec() {
   try {
     if (inputWS->run().hasProperty(Tstring)) {
       if (auto log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-                  inputWS->run().getProperty(Tstring)) ) {
+              inputWS->run().getProperty(Tstring))) {
         Temp = log->getStatistics().mean;
       } else {
         throw std::invalid_argument(Tstring + " is not a double-valued log.");

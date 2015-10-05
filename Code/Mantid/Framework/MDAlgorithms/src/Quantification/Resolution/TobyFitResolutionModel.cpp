@@ -246,9 +246,8 @@ void TobyFitResolutionModel::declareParameters() {}
  * @param name :: The name of the attribute
  * @param value :: It's value
  */
-void
-TobyFitResolutionModel::setAttribute(const std::string &name,
-                                     const API::IFunction::Attribute &value) {
+void TobyFitResolutionModel::setAttribute(
+    const std::string &name, const API::IFunction::Attribute &value) {
   MDResolutionConvolution::setAttribute(name, value);
   if (name == MC_MIN_NAME)
     m_mcLoopMin = value.asInt();

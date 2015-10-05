@@ -9,11 +9,9 @@
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 
-class IdentifyNoisyDetectorsTest : public CxxTest::TestSuite
-{
+class IdentifyNoisyDetectorsTest : public CxxTest::TestSuite {
 public:
-  void testMetaInfo()
-  {
+  void testMetaInfo() {
     alg = new IdentifyNoisyDetectors();
     TS_ASSERT_EQUALS(alg->name(), "IdentifyNoisyDetectors");
     TS_ASSERT_EQUALS(alg->version(), 1);
@@ -21,18 +19,16 @@ public:
     delete alg;
   }
 
-  void testInit()
-  {
+  void testInit() {
     alg = new IdentifyNoisyDetectors();
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
     TS_ASSERT(alg->isInitialized());
     delete alg;
   }
 
-  void testExec()
-  {
+  void testExec() {
     // Load Data for Test
-    IAlgorithm* loader;
+    IAlgorithm *loader;
     loader = new Mantid::DataHandling::LoadRaw3;
     loader->initialize();
     loader->setPropertyValue("Filename", "TSC10076.raw");
@@ -47,15 +43,19 @@ public:
 
     alg = new IdentifyNoisyDetectors();
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("InputWorkspace", "identifynoisydetectors_input"));
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "identifynoisydetectors_output"));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue(
+        "InputWorkspace", "identifynoisydetectors_input"));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue(
+        "OutputWorkspace", "identifynoisydetectors_output"));
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 
     // identifynoisydetectors_output
     MatrixWorkspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("identifynoisydetectors_output"));
-    
+    TS_ASSERT_THROWS_NOTHING(
+        workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "identifynoisydetectors_output"));
+
     // Check that it's got all the bad ones
     TS_ASSERT_EQUALS(workspace->readY(0)[0], 0.0);
     TS_ASSERT_EQUALS(workspace->readY(1)[0], 0.0);
@@ -88,8 +88,7 @@ public:
   }
 
 private:
-  IdentifyNoisyDetectors* alg;
-
+  IdentifyNoisyDetectors *alg;
 };
 
 #endif /* IDENTIFYNOISYDETECTORSTEST_H_ */

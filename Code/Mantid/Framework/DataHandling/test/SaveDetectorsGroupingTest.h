@@ -15,24 +15,22 @@ using namespace Mantid;
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 
-class SaveDetectorsGroupingTest : public CxxTest::TestSuite
-{
+class SaveDetectorsGroupingTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SaveDetectorsGroupingTest *createSuite() { return new SaveDetectorsGroupingTest(); }
-  static void destroySuite( SaveDetectorsGroupingTest *suite ) { delete suite; }
+  static SaveDetectorsGroupingTest *createSuite() {
+    return new SaveDetectorsGroupingTest();
+  }
+  static void destroySuite(SaveDetectorsGroupingTest *suite) { delete suite; }
 
-
-  void test_Initialize()
-  {
+  void test_Initialize() {
     SaveDetectorsGrouping savegroup;
     savegroup.initialize();
     TS_ASSERT(savegroup.isInitialized());
-
   }
 
-  void test_SaveXMLFile(){
+  void test_SaveXMLFile() {
 
     // 1. Get an object for SaveDetectorsGrouping
     SaveDetectorsGrouping savegroup;
@@ -48,7 +46,9 @@ public:
     load.execute();
     TS_ASSERT(load.isExecuted());
 
-    DataObjects::GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve("Vulcan_Group"));
+    DataObjects::GroupingWorkspace_sptr gws =
+        boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(
+            API::AnalysisDataService::Instance().retrieve("Vulcan_Group"));
 
     // 3. Save
     savegroup.setProperty("InputWorkspace", gws);
@@ -70,9 +70,11 @@ public:
     load2.execute();
     TS_ASSERT(load2.isExecuted());
 
-    DataObjects::GroupingWorkspace_sptr gws2 = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve("Vulcan_Group2"));
+    DataObjects::GroupingWorkspace_sptr gws2 =
+        boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(
+            API::AnalysisDataService::Instance().retrieve("Vulcan_Group2"));
 
-    TS_ASSERT_DELTA(gws2->dataY(0)[0],    1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws2->dataY(0)[0], 1.0, 1.0E-5);
     TS_ASSERT_DELTA(gws2->dataY(3695)[0], 1.0, 1.0E-5);
     TS_ASSERT_DELTA(gws2->dataY(3696)[0], 2.0, 1.0E-5);
     TS_ASSERT_DELTA(gws2->dataY(7000)[0], 2.0, 1.0E-5);
@@ -83,11 +85,9 @@ public:
 
     API::AnalysisDataService::Instance().remove("Vulcan_Group");
     API::AnalysisDataService::Instance().remove("Vulcan_Group2");
-
   }
 
-  void test_SaveNamingAndDescription()
-  {
+  void test_SaveNamingAndDescription() {
     std::string testWs = "GroupingWorkspace";
 
     // Load the grouping to test with
@@ -127,10 +127,12 @@ public:
     TS_ASSERT(load2.isExecuted());
 
     // Get GroupingWorkspace instance
-    auto gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(testWs));
+    auto gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(
+        API::AnalysisDataService::Instance().retrieve(testWs));
 
     // Check that description was saved
-    TS_ASSERT_EQUALS(gws->run().getProperty("Description")->value(), "musr longitudinal (64 detectors)");
+    TS_ASSERT_EQUALS(gws->run().getProperty("Description")->value(),
+                     "musr longitudinal (64 detectors)");
 
     // Check that group names were saved
     TS_ASSERT_EQUALS(gws->run().getProperty("GroupName_1")->value(), "fwd");
@@ -142,8 +144,6 @@ public:
     Poco::File file(testFile);
     file.remove();
   }
-
 };
-
 
 #endif /* MANTID_DATAHANDLING_SAVEDETECTORSGROUPINGTEST_H_ */

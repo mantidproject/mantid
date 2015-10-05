@@ -14,10 +14,10 @@ namespace ADARA {
 class DLLExport PacketHeader {
 public:
   PacketHeader(const uint8_t *data) {
-  const uint32_t *field = (const uint32_t *) data;
+    const uint32_t *field = (const uint32_t *)data;
 
     m_payload_len = field[0];
-  m_type = (PacketType::Enum) field[1];
+    m_type = (PacketType::Enum)field[1];
 
 #if 0
 // NOTE: Windows doesn't have struct timespec and Mantid doesn't really need this,
@@ -29,7 +29,7 @@ public:
 		m_timestamp.tv_nsec = field[3];
 #endif
 
-    m_pulseId = ((uint64_t) field[2]) << 32;
+    m_pulseId = ((uint64_t)field[2]) << 32;
     m_pulseId |= field[3];
   }
 
@@ -64,12 +64,10 @@ public:
   virtual ~Packet();
 
   const uint8_t *packet(void) const { return m_data; }
-	const uint8_t *payload(void) const {
-		return m_data + header_length();
-	}
+  const uint8_t *payload(void) const { return m_data + header_length(); }
 
 protected:
-	const uint8_t *	m_data;
+  const uint8_t *m_data;
   uint32_t m_len;
   bool m_allocated;
 
@@ -88,15 +86,12 @@ public:
   uint16_t pktSeq(void) const { return (m_fields[1] >> 16) & 0x7fff; }
   uint16_t dspSeq(void) const { return m_fields[1] & 0x7fff; }
   PulseFlavor::Enum flavor(void) const {
-    return static_cast<PulseFlavor::Enum>
-                    ((m_fields[2] >> 24) & 0x7);
+    return static_cast<PulseFlavor::Enum>((m_fields[2] >> 24) & 0x7);
   }
   uint32_t pulseCharge(void) const { return m_fields[2] & 0x00ffffff; }
   bool badVeto(void) const { return !!(m_fields[3] & 0x80000000); }
   bool badCycle(void) const { return !!(m_fields[3] & 0x40000000); }
-  uint8_t timingStatus(void) const {
-    return (uint8_t) (m_fields[3] >> 22);
-  }
+  uint8_t timingStatus(void) const { return (uint8_t)(m_fields[3] >> 22); }
   uint16_t vetoFlags(void) const { return (m_fields[3] >> 10) & 0xfff; }
   uint16_t cycle(void) const { return m_fields[3] & 0x3ff; }
   uint32_t intraPulseTime(void) const { return m_fields[4]; }
@@ -104,9 +99,9 @@ public:
   uint32_t tofOffset(void) const { return m_fields[5] & 0x7fffffff; }
   uint32_t tofField(void) const { return m_fields[5]; }
 
-  const Event *events(void) const { return (const Event *) &m_fields[6]; }
+  const Event *events(void) const { return (const Event *)&m_fields[6]; }
   uint32_t num_events(void) const {
-  return (m_payload_len - 24) / (uint32_t) (2 * sizeof(uint32_t));
+    return (m_payload_len - 24) / (uint32_t)(2 * sizeof(uint32_t));
   }
 
 private:
@@ -121,6 +116,7 @@ private:
 class DLLExport MappedDataPkt : public RawDataPkt {
 public:
   MappedDataPkt(const MappedDataPkt &pkt);
+
 private:
   MappedDataPkt(const uint8_t *data, uint32_t len);
 
@@ -132,15 +128,12 @@ public:
   RTDLPkt(const RTDLPkt &pkt);
 
   PulseFlavor::Enum flavor(void) const {
-    return static_cast<PulseFlavor::Enum>
-                      ((m_fields[0] >> 24) & 0x7);
+    return static_cast<PulseFlavor::Enum>((m_fields[0] >> 24) & 0x7);
   }
   uint32_t pulseCharge(void) const { return m_fields[0] & 0x00ffffff; }
   bool badVeto(void) const { return !!(m_fields[1] & 0x80000000); }
   bool badCycle(void) const { return !!(m_fields[1] & 0x40000000); }
-  uint8_t timingStatus(void) const {
-    return (uint8_t) (m_fields[1] >> 22);
-  }
+  uint8_t timingStatus(void) const { return (uint8_t)(m_fields[1] >> 22); }
   uint16_t vetoFlags(void) const { return (m_fields[1] >> 10) & 0xfff; }
   uint16_t cycle(void) const { return m_fields[1] & 0x3ff; }
   uint32_t intraPulseTime(void) const { return m_fields[2]; }
@@ -150,22 +143,20 @@ public:
 
   // accessor methods for optional FNA/Frame Data fields
 
-  uint32_t FNA(uint32_t index) const
-  {
+  uint32_t FNA(uint32_t index) const {
     // If out of bounds, just return "0" for "Unused Frame"... ;-D
-    if ( index > 24 )
-      return( 0 );
+    if (index > 24)
+      return (0);
     else
-      return ( m_fields[ 5 + index ] >> 24 ) & 0xff;
+      return (m_fields[5 + index] >> 24) & 0xff;
   }
 
-  uint32_t frameData(uint32_t index) const
-  {
+  uint32_t frameData(uint32_t index) const {
     // Out of bounds, return "-1" (0xffffff) for Bogus "Frame Data" ;-b
-    if ( index > 24 )
-      return( -1 );
+    if (index > 24)
+      return (-1);
     else
-      return m_fields[ 5 + index ] & 0xffffff;
+      return m_fields[5 + index] & 0xffffff;
   }
 
 private:
@@ -180,9 +171,9 @@ class DLLExport SourceListPkt : public Packet {
 public:
   SourceListPkt(const SourceListPkt &pkt);
 
-  const uint32_t *ids(void) const { return (const uint32_t *) payload(); }
+  const uint32_t *ids(void) const { return (const uint32_t *)payload(); }
   uint32_t num_ids(void) const {
-    return (uint32_t) payload_length() / (uint32_t) sizeof(uint32_t);
+    return (uint32_t)payload_length() / (uint32_t)sizeof(uint32_t);
   }
 
 private:
@@ -372,15 +363,14 @@ public:
   AnnotationPkt(const AnnotationPkt &pkt);
 
   bool resetHint(void) const { return !!(m_fields[0] & 0x80000000); }
-	MarkerType::Enum marker_type(void) const {
+  MarkerType::Enum marker_type(void) const {
     uint16_t type = (m_fields[0] >> 16) & 0x7fff;
     return static_cast<MarkerType::Enum>(type);
   }
   uint32_t scanIndex(void) const { return m_fields[1]; }
   const std::string &comment(void) const {
     if (!m_comment.length() && (m_fields[0] & 0xffff)) {
-      m_comment.assign((const char *) &m_fields[2],
-                        m_fields[0] & 0xffff);
+      m_comment.assign((const char *)&m_fields[2], m_fields[0] & 0xffff);
     }
 
     return m_comment;
@@ -434,14 +424,14 @@ class DLLExport BeamlineInfoPkt : public Packet {
 public:
   BeamlineInfoPkt(const BeamlineInfoPkt &pkt);
 
-	const uint32_t &targetNumber(void) const { return m_targetNumber; }
+  const uint32_t &targetNumber(void) const { return m_targetNumber; }
 
   const std::string &id(void) const { return m_id; }
   const std::string &shortName(void) const { return m_shortName; }
   const std::string &longName(void) const { return m_longName; }
 
 private:
-	uint32_t m_targetNumber;
+  uint32_t m_targetNumber;
 
   std::string m_id;
   std::string m_shortName;
@@ -458,44 +448,39 @@ public:
 
   uint32_t beamMonCount(void) const { return m_fields[0]; }
 
-  uint32_t bmonId(uint32_t index) const
-  {
-    if ( index < beamMonCount() )
+  uint32_t bmonId(uint32_t index) const {
+    if (index < beamMonCount())
       return m_fields[(index * 6) + 1];
     else
-      return( 0 );
+      return (0);
   }
 
-  uint32_t tofOffset(uint32_t index) const
-  {
-    if ( index < beamMonCount() )
+  uint32_t tofOffset(uint32_t index) const {
+    if (index < beamMonCount())
       return m_fields[(index * 6) + 2];
     else
-      return( 0 );
+      return (0);
   }
 
-  uint32_t tofMax(uint32_t index) const
-  {
-    if ( index < beamMonCount() )
+  uint32_t tofMax(uint32_t index) const {
+    if (index < beamMonCount())
       return m_fields[(index * 6) + 3];
     else
-      return( 0 );
+      return (0);
   }
 
-  uint32_t tofBin(uint32_t index) const
-  {
-    if ( index < beamMonCount() )
+  uint32_t tofBin(uint32_t index) const {
+    if (index < beamMonCount())
       return m_fields[(index * 6) + 4];
     else
-      return( 0 );
+      return (0);
   }
 
-  double distance(uint32_t index) const
-  {
-    if ( index < beamMonCount() )
-      return *(const double *) &m_fields[(index * 6) + 5];
+  double distance(uint32_t index) const {
+    if (index < beamMonCount())
+      return *(const double *)&m_fields[(index * 6) + 5];
     else
-      return( 0.0 );
+      return (0.0);
   }
 
 private:
@@ -509,7 +494,7 @@ private:
 class DLLExport DetectorBankSetsPkt : public Packet {
 public:
   DetectorBankSetsPkt(const DetectorBankSetsPkt &pkt);
-  
+
   virtual ~DetectorBankSetsPkt();
 
   // Detector Bank Set Name, alphanumeric characters...
@@ -519,129 +504,114 @@ public:
   static const size_t THROTTLE_SUFFIX_SIZE = 16;
 
   enum Flags {
-    EVENT_FORMAT    = 0x0001,
-    HISTO_FORMAT    = 0x0002,
+    EVENT_FORMAT = 0x0001,
+    HISTO_FORMAT = 0x0002,
   };
 
   uint32_t detBankSetCount(void) const { return m_fields[0]; }
 
-  uint32_t sectionOffset(uint32_t index) const
-  {
-    if ( index < detBankSetCount() )
-      return( m_sectionOffsets[index] );
+  uint32_t sectionOffset(uint32_t index) const {
+    if (index < detBankSetCount())
+      return (m_sectionOffsets[index]);
     else
-      return( 0 );   // Minimum Valid offset is always past Header...
+      return (0); // Minimum Valid offset is always past Header...
   }
 
-  std::string name(uint32_t index) const
-  {
-    if ( index < detBankSetCount() ) {
-      char name_c[SET_NAME_SIZE + 1];   // give them an inch...
-      memset( (void *) name_c, '\0', SET_NAME_SIZE + 1 );
-      strncpy(name_c,
-              (const char *) &(m_fields[ m_sectionOffsets[index] ]),
+  std::string name(uint32_t index) const {
+    if (index < detBankSetCount()) {
+      char name_c[SET_NAME_SIZE + 1]; // give them an inch...
+      memset((void *)name_c, '\0', SET_NAME_SIZE + 1);
+      strncpy(name_c, (const char *)&(m_fields[m_sectionOffsets[index]]),
               SET_NAME_SIZE);
-      return( std::string(name_c) );
+      return (std::string(name_c));
     } else {
-      return( "<Out Of Range!>" );
+      return ("<Out Of Range!>");
     }
   }
 
-  uint32_t flags(uint32_t index) const
-  {
-    if ( index < detBankSetCount() )
-      return m_fields[ m_sectionOffsets[index] + m_name_offset ];
+  uint32_t flags(uint32_t index) const {
+    if (index < detBankSetCount())
+      return m_fields[m_sectionOffsets[index] + m_name_offset];
     else
-      return( 0 );
+      return (0);
   }
 
-  uint32_t bankCount(uint32_t index) const
-  {
-    if ( index < detBankSetCount() )
-      return m_fields[ m_sectionOffsets[index] + m_name_offset + 1 ];
+  uint32_t bankCount(uint32_t index) const {
+    if (index < detBankSetCount())
+      return m_fields[m_sectionOffsets[index] + m_name_offset + 1];
     else
-      return( 0 );
+      return (0);
   }
 
-  const uint32_t *banklist(uint32_t index) const
-  {
-    if ( index < detBankSetCount() ) {
-      return (const uint32_t *) &m_fields[ m_sectionOffsets[index]
-                                          + m_name_offset + 2 ];
-    }
-    else {
+  const uint32_t *banklist(uint32_t index) const {
+    if (index < detBankSetCount()) {
+      return (const uint32_t *)&m_fields[m_sectionOffsets[index] +
+                                         m_name_offset + 2];
+    } else {
       // Shouldn't be asking for this if bankCount() returned 0...!
-      return( (const uint32_t *) NULL );
+      return ((const uint32_t *)NULL);
     }
   }
 
-  uint32_t tofOffset(uint32_t index) const
-  {
-    if ( index < detBankSetCount() )
-      return m_fields[ m_after_banks_offset[index] ];
+  uint32_t tofOffset(uint32_t index) const {
+    if (index < detBankSetCount())
+      return m_fields[m_after_banks_offset[index]];
     else
-      return( 0 );
+      return (0);
   }
 
-  uint32_t tofMax(uint32_t index) const
-  {
-    if ( index < detBankSetCount() )
-      return m_fields[ m_after_banks_offset[index] + 1 ];
+  uint32_t tofMax(uint32_t index) const {
+    if (index < detBankSetCount())
+      return m_fields[m_after_banks_offset[index] + 1];
     else
-      return( 0 );
+      return (0);
   }
 
-  uint32_t tofBin(uint32_t index) const
-  {
-    if ( index < detBankSetCount() )
-      return m_fields[ m_after_banks_offset[index] + 2 ];
+  uint32_t tofBin(uint32_t index) const {
+    if (index < detBankSetCount())
+      return m_fields[m_after_banks_offset[index] + 2];
     else
-      return( 0 );
+      return (0);
   }
 
-  double throttle(uint32_t index) const
-  {
-    if ( index < detBankSetCount() ) {
-      return *(const double *) &m_fields[
-            m_after_banks_offset[index] + 3 ];
-    }
-    else
-      return( 0.0 );
+  double throttle(uint32_t index) const {
+    if (index < detBankSetCount()) {
+      return *(const double *)&m_fields[m_after_banks_offset[index] + 3];
+    } else
+      return (0.0);
   }
 
-  std::string suffix(uint32_t index) const
-  {
-    if ( index < detBankSetCount() ) {
-      char suffix_c[THROTTLE_SUFFIX_SIZE + 1];   // give them an inch
-      memset( (void *) suffix_c, '\0', THROTTLE_SUFFIX_SIZE + 1 );
+  std::string suffix(uint32_t index) const {
+    if (index < detBankSetCount()) {
+      char suffix_c[THROTTLE_SUFFIX_SIZE + 1]; // give them an inch
+      memset((void *)suffix_c, '\0', THROTTLE_SUFFIX_SIZE + 1);
       strncpy(suffix_c,
-          (const char *) &(m_fields[m_after_banks_offset[index] + 5]),
-          THROTTLE_SUFFIX_SIZE);
-      return( std::string(suffix_c) );
+              (const char *)&(m_fields[m_after_banks_offset[index] + 5]),
+              THROTTLE_SUFFIX_SIZE);
+      return (std::string(suffix_c));
     } else {
       std::stringstream ss;
       ss << "out-of-range-";
       ss << index;
-      return( ss.str() );
+      return (ss.str());
     }
   }
 
 private:
-    const uint32_t *m_fields;
+  const uint32_t *m_fields;
 
-    static const uint32_t m_name_offset =
-        SET_NAME_SIZE / sizeof(uint32_t);
+  static const uint32_t m_name_offset = SET_NAME_SIZE / sizeof(uint32_t);
 
-    static const uint32_t m_suffix_offset =
-        THROTTLE_SUFFIX_SIZE / sizeof(uint32_t);
+  static const uint32_t m_suffix_offset =
+      THROTTLE_SUFFIX_SIZE / sizeof(uint32_t);
 
-    uint32_t *m_sectionOffsets;
+  uint32_t *m_sectionOffsets;
 
-    uint32_t *m_after_banks_offset;
+  uint32_t *m_after_banks_offset;
 
-    DetectorBankSetsPkt(const uint8_t *data, uint32_t len);
+  DetectorBankSetsPkt(const uint8_t *data, uint32_t len);
 
-    friend class Parser;
+  friend class Parser;
 };
 
 class DLLExport DataDonePkt : public Packet {
@@ -683,11 +653,10 @@ public:
   uint32_t devId(void) const { return m_fields[0]; }
   uint32_t varId(void) const { return m_fields[1]; }
   VariableStatus::Enum status(void) const {
-      return static_cast<VariableStatus::Enum> (m_fields[2] >> 16);
+    return static_cast<VariableStatus::Enum>(m_fields[2] >> 16);
   }
   VariableSeverity::Enum severity(void) const {
-    return static_cast<VariableSeverity::Enum>
-                        (m_fields[2] & 0xffff);
+    return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff);
   }
   uint32_t value(void) const { return m_fields[3]; }
 
@@ -711,13 +680,12 @@ public:
   uint32_t devId(void) const { return m_fields[0]; }
   uint32_t varId(void) const { return m_fields[1]; }
   VariableStatus::Enum status(void) const {
-    return static_cast<VariableStatus::Enum> (m_fields[2] >> 16);
+    return static_cast<VariableStatus::Enum>(m_fields[2] >> 16);
   }
   VariableSeverity::Enum severity(void) const {
-    return static_cast<VariableSeverity::Enum>
-                                (m_fields[2] & 0xffff);
+    return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff);
   }
-  double value(void) const { return *(const double *) &m_fields[3]; }
+  double value(void) const { return *(const double *)&m_fields[3]; }
 
   void remapDevice(uint32_t dev) {
     uint32_t *fields = (uint32_t *)const_cast<uint8_t *>(payload());
@@ -739,11 +707,10 @@ public:
   uint32_t devId(void) const { return m_fields[0]; }
   uint32_t varId(void) const { return m_fields[1]; }
   VariableStatus::Enum status(void) const {
-    return static_cast<VariableStatus::Enum> (m_fields[2] >> 16);
+    return static_cast<VariableStatus::Enum>(m_fields[2] >> 16);
   }
   VariableSeverity::Enum severity(void) const {
-    return static_cast<VariableSeverity::Enum>
-                              (m_fields[2] & 0xffff);
+    return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff);
   }
   const std::string &value(void) const { return m_val; }
 

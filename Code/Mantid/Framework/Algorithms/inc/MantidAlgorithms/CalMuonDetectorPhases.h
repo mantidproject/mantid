@@ -6,7 +6,8 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** CalMuonDetectorPhases : Calculates asymmetry and phase for each spectra in a workspace
+/** CalMuonDetectorPhases : Calculates asymmetry and phase for each spectra in a
+  workspace
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -39,7 +40,8 @@ public:
   virtual const std::string name() const { return "CalMuonDetectorPhases"; }
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
-    return "Calculates the asymmetry and phase for each detector in a workspace.";
+    return "Calculates the asymmetry and phase for each detector in a "
+           "workspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method

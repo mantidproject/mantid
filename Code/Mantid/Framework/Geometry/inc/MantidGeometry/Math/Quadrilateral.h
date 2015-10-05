@@ -42,8 +42,8 @@ public:
   Quadrilateral(const Kernel::V2D &lowerLeft, const Kernel::V2D &lowerRight,
                 const Kernel::V2D &upperRight, const Kernel::V2D &upperLeft);
   /// Special constructor for a rectangle
-  Quadrilateral(const double lowerX, const double upperX,
-                const double lowerY, const double upperY);
+  Quadrilateral(const double lowerX, const double upperX, const double lowerY,
+                const double upperY);
   /// Copy constructor
   Quadrilateral(const Quadrilateral &other);
   /// Copy-assignment operator

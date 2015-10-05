@@ -198,12 +198,11 @@ void ConvertToReflectometryQ::init() {
   transOptions.push_back(centerTransform());
   transOptions.push_back(normPolyTransform());
 
-  declareProperty(
-      "Method", centerTransform(),
-      boost::make_shared<StringListValidator>(transOptions),
-      "What method should be used for the axis transformation?\n"
-      "  Centre: Use center point rebinning.\n"
-      "  NormalisedPolygon: Use normalised polygon rebinning.");
+  declareProperty("Method", centerTransform(),
+                  boost::make_shared<StringListValidator>(transOptions),
+                  "What method should be used for the axis transformation?\n"
+                  "  Centre: Use center point rebinning.\n"
+                  "  NormalisedPolygon: Use normalised polygon rebinning.");
 
   declareProperty(
       new Kernel::PropertyWithValue<bool>("OverrideIncidentTheta", false),
@@ -238,10 +237,11 @@ void ConvertToReflectometryQ::init() {
   declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace", "",
                                                       Direction::Output),
                   "Output 2D Workspace.");
-                  
+
   declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputVertexes", "",
-                                                      Direction::Output),
-                  "Output TableWorkspace with vertex information. See DumpVertexes property.");
+                                                         Direction::Output),
+                  "Output TableWorkspace with vertex information. See "
+                  "DumpVertexes property.");
 
   declareProperty(new Kernel::PropertyWithValue<int>("NumberBinsQx", 100),
                   "The number of bins along the qx axis. Optional and only "
@@ -249,11 +249,12 @@ void ConvertToReflectometryQ::init() {
   declareProperty(new Kernel::PropertyWithValue<int>("NumberBinsQz", 100),
                   "The number of bins along the qx axis. Optional and only "
                   "applies to 2D workspaces. Defaults to 100.");
-                  
-  declareProperty(
-      new Kernel::PropertyWithValue<bool>("DumpVertexes", false),
-      "If set, with 2D rebinning, the intermediate vertexes for each polygon will be written out for debugging purposes. Creates a second output table workspace.");
-      
+
+  declareProperty(new Kernel::PropertyWithValue<bool>("DumpVertexes", false),
+                  "If set, with 2D rebinning, the intermediate vertexes for "
+                  "each polygon will be written out for debugging purposes. "
+                  "Creates a second output table workspace.");
+
   setPropertySettings(
       "NumberBinsQx",
       new EnabledWhenProperty("OutputAsMDWorkspace", IS_NOT_DEFAULT));
@@ -272,8 +273,6 @@ void ConvertToReflectometryQ::init() {
   setPropertySettings(
       "MaxRecursionDepth",
       new EnabledWhenProperty("OutputAsMDWorkspace", IS_DEFAULT));
-      
-   
 }
 
 //----------------------------------------------------------------------------------------------
@@ -350,7 +349,8 @@ void ConvertToReflectometryQ::exec() {
 
   IMDWorkspace_sptr outputWS;
 
-  TableWorkspace_sptr vertexes = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
+  TableWorkspace_sptr vertexes =
+      boost::make_shared<Mantid::DataObjects::TableWorkspace>();
 
   if (outputAsMDWorkspace) {
     if (transMethod == centerTransform()) {
@@ -360,7 +360,8 @@ void ConvertToReflectometryQ::exec() {
       outputMDWS->addExperimentInfo(ei);
       outputWS = outputMDWS;
     } else if (transMethod == normPolyTransform()) {
-      throw std::runtime_error("Normalised Polynomial rebinning not supported for multidimensional output.");
+      throw std::runtime_error("Normalised Polynomial rebinning not supported "
+                               "for multidimensional output.");
     } else {
       throw std::runtime_error("Unknown rebinning method: " + transMethod);
     }
@@ -372,8 +373,9 @@ void ConvertToReflectometryQ::exec() {
     } else if (transMethod == normPolyTransform()) {
       const bool dumpVertexes = this->getProperty("DumpVertexes");
       auto vertexesTable = vertexes;
-      
-      auto outputWSRB = transform->executeNormPoly(inputWs, vertexesTable, dumpVertexes, outputDimensions);
+
+      auto outputWSRB = transform->executeNormPoly(
+          inputWs, vertexesTable, dumpVertexes, outputDimensions);
       outputWSRB->copyExperimentInfoFrom(inputWs.get());
       outputWS = outputWSRB;
     } else {

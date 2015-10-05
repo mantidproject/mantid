@@ -118,8 +118,7 @@ public: // for the time being
   void buildFromMDWS(const API::IMDEventWorkspace_const_sptr &pWS);
   /// copy some parameters from the input workspace, as target md WS do not have
   /// all information about the algorithm.
-  void setUpMissingParameters(
-      const MDWSDescription &SourceMatrixWorkspace);
+  void setUpMissingParameters(const MDWSDescription &SourceMatrixWorkspace);
 
   /// method builds MD Event ws description from a matrix workspace and the
   /// transformations, requested to be performed on the workspace
@@ -154,14 +153,14 @@ public: // for the time being
   getOrientedLattice(Mantid::API::MatrixWorkspace_const_sptr inWS2D);
 
   /// Set the special coordinate system if any.
-  void setCoordinateSystem(const Mantid::Kernel::SpecialCoordinateSystem system);
+  void
+  setCoordinateSystem(const Mantid::Kernel::SpecialCoordinateSystem system);
   /// @return the special coordinate system if any.
   Mantid::Kernel::SpecialCoordinateSystem getCoordinateSystem() const;
   /// Set the md frame
   void setFrame(const std::string frameKey);
   /// Retrieve the md frame
   Geometry::MDFrame_uptr getFrame(size_t d) const;
-
 
   /// sets number of bins each dimension is split
   void setNumBins(const std::vector<int> &nBins);

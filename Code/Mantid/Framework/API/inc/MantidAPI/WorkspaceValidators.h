@@ -337,7 +337,6 @@ public:
   checkValidity(const boost::shared_ptr<ExperimentInfo> &value) const;
 
 private:
-
   unsigned int m_requires;
 };
 

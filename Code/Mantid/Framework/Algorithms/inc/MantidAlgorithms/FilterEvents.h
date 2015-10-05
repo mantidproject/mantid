@@ -94,15 +94,15 @@ private:
   void setupDetectorTOFCalibration();
 
   /// Set up detector calibration parameters for elastic scattering instrument
-  TimeAtSampleStrategy* setupElasticTOFCorrection() const;
+  TimeAtSampleStrategy *setupElasticTOFCorrection() const;
 
   /// Set up detector calibration parmaeters for direct inelastic scattering
   /// instrument
-  TimeAtSampleStrategy* setupDirectTOFCorrection() const;
+  TimeAtSampleStrategy *setupDirectTOFCorrection() const;
 
   /// Set up detector calibration parameters for indirect inelastic scattering
   /// instrument
-  TimeAtSampleStrategy* setupIndirectTOFCorrection() const;
+  TimeAtSampleStrategy *setupIndirectTOFCorrection() const;
 
   /// Set up detector calibration parameters from customized values
   void setupCustomizedTOFCorrection();

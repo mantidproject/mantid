@@ -224,18 +224,16 @@ int LoadEventPreNexus2::confidence(Kernel::FileDescriptor &descriptor) const {
 /** Constructor
  */
 LoadEventPreNexus2::LoadEventPreNexus2()
-  : Mantid::API::IFileLoader<Kernel::FileDescriptor>(),
-  prog(NULL), spectra_list(), pulsetimes(), event_indices(), proton_charge(),
-  proton_charge_tot(0), pixel_to_wkspindex(), pixelmap(), detid_max(),
-  eventfile(NULL), num_events(0), num_pulses(0), numpixel(0),
-  num_good_events(0), num_error_events(0), num_bad_events(0),
-  num_wrongdetid_events(0), num_ignored_events(0),
-  first_event(0), max_events(0), using_mapping_file(false),
-  loadOnlySomeSpectra(false), spectraLoadMap(), longest_tof(0),
-  shortest_tof(0), parallelProcessing(false), pulsetimesincreasing(false),
-  m_dbOutput(false), m_dbOpBlockNumber(0), m_dbOpNumEvents(0),
-  m_dbOpNumPulses(0) {
-}
+    : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), prog(NULL),
+      spectra_list(), pulsetimes(), event_indices(), proton_charge(),
+      proton_charge_tot(0), pixel_to_wkspindex(), pixelmap(), detid_max(),
+      eventfile(NULL), num_events(0), num_pulses(0), numpixel(0),
+      num_good_events(0), num_error_events(0), num_bad_events(0),
+      num_wrongdetid_events(0), num_ignored_events(0), first_event(0),
+      max_events(0), using_mapping_file(false), loadOnlySomeSpectra(false),
+      spectraLoadMap(), longest_tof(0), shortest_tof(0),
+      parallelProcessing(false), pulsetimesincreasing(false), m_dbOutput(false),
+      m_dbOpBlockNumber(0), m_dbOpNumEvents(0), m_dbOpNumPulses(0) {}
 
 //----------------------------------------------------------------------------------------------
 /** Desctructor
@@ -408,8 +406,8 @@ void LoadEventPreNexus2::exec() {
 //------------------------------------------------------------------------------------------------
 /** Create and set up output Event Workspace
   */
-void
-LoadEventPreNexus2::createOutputWorkspace(const std::string event_filename) {
+void LoadEventPreNexus2::createOutputWorkspace(
+    const std::string event_filename) {
   // Create the output workspace
   localWorkspace = EventWorkspace_sptr(new EventWorkspace());
 
@@ -607,9 +605,8 @@ void LoadEventPreNexus2::addToWorkspaceLog(std::string logtitle,
  *  @param localWorkspace :: MatrixWorkspace in which to put the instrument
  * geometry
  */
-void
-LoadEventPreNexus2::runLoadInstrument(const std::string &eventfilename,
-                                      MatrixWorkspace_sptr localWorkspace) {
+void LoadEventPreNexus2::runLoadInstrument(
+    const std::string &eventfilename, MatrixWorkspace_sptr localWorkspace) {
   // start by getting just the filename
   string instrument = Poco::Path(eventfilename).getFileName();
 
@@ -663,8 +660,8 @@ inline void LoadEventPreNexus2::fixPixelId(PixelType &pixel,
 /** Process the event file properly in parallel
   * @param workspace :: EventWorkspace to write to.
   */
-void
-LoadEventPreNexus2::procEvents(DataObjects::EventWorkspace_sptr &workspace) {
+void LoadEventPreNexus2::procEvents(
+    DataObjects::EventWorkspace_sptr &workspace) {
   //-------------------------------------------------------------------------
   // Initialize statistic counters
   //-------------------------------------------------------------------------

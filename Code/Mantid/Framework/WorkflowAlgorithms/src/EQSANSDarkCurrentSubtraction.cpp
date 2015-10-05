@@ -141,7 +141,9 @@ void EQSANSDarkCurrentSubtraction::exec() {
     scaling_factor = duration / dark_duration;
   } else if (inputWS->run().hasProperty("timer")) {
     double duration = inputWS->run().getPropertyValueAsType<double>("timer");
-    double dark_duration = darkWS->run().getPropertyValueAsType<double>("timer");;
+    double dark_duration =
+        darkWS->run().getPropertyValueAsType<double>("timer");
+    ;
     scaling_factor = duration / dark_duration;
   } else {
     output_message +=
