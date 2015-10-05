@@ -6,10 +6,18 @@
 """
 import os
 import sqlite3
-import re
-import time
 import sys
 import traceback
+
+# Only way that I have found to use the logger from both the command line
+# and mantiplot
+try:
+    import mantidplot
+    from mantid.kernel import logger
+except ImportError:
+    import logging
+    logging.basicConfig()#level=logging.DEBUG)
+    logger = logging.getLogger("data_cat")
 
 class DataType(object):
     TABLE_NAME = "datatype"
@@ -27,7 +35,8 @@ class DataType(object):
                             id integer primary key,
                             type_id integer,
                             dataset_id integer,
-                            foreign key(dataset_id) references %s(id))""" % (cls.TABLE_NAME, data_set_table))
+                            foreign key(dataset_id) references %s(id))""" \
+                            % (cls.TABLE_NAME, data_set_table))
 
     @classmethod
     def add(cls, dataset_id, type_id, cursor):
@@ -35,10 +44,11 @@ class DataType(object):
             Add a data type entry to the datatype table
         """
         if not type_id in cls.DATA_TYPES.keys():
-            raise RuntimeError, "DataType got an unknown type ID: %s" % type_id
+            raise RuntimeError("DataType got an unknown type ID: %s" % type_id)
 
         t = (type_id, dataset_id,)
-        cursor.execute("insert into %s(type_id, dataset_id) values (?,?)" % cls.TABLE_NAME, t)
+        cursor.execute("insert into %s(type_id, dataset_id) values (?,?)" \
+        % cls.TABLE_NAME, t)
 
     @classmethod
     def get_likely_type(cls, dataset_id, cursor):
@@ -133,7 +143,7 @@ class DataSet(object):
                 if cls.load_meta_data(file_path, outputWorkspace=log_ws):
                     try:
                         return cls.read_properties(log_ws, run, cursor)
-                    except:
+                    except Exception:
                         return None
                 else:
                     return None
@@ -177,8 +187,9 @@ class DataCatalog(object):
 
         try:
             self._create_db(db_path, replace_db)
-        except:
-            print "DataCatalog: Could not access local data catalog\n%s" % sys.exc_value
+        except Exception, msg:
+            logger.error("DataCatalog: Could not access local data catalog\n%s" % sys.exc_value)
+            logger.exception(msg)
 
     def _create_db(self, db_path, replace_db):
         """
@@ -278,5 +289,6 @@ class DataCatalog(object):
 
             self.db.commit()
             c.close()
-        except:
-            print "DataCatalog: Error working with the local data catalog\n%s" % str(traceback.format_exc())
+        except Exception, msg:
+            logger.error("DataCatalog: Error working with the local data catalog\n%s" % str(traceback.format_exc()))
+            logger.exception(msg)
