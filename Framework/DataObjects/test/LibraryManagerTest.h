@@ -13,7 +13,7 @@ public:
     using namespace Mantid::Kernel;
     // This first line can go once scons does
     int libsOpened = LibraryManager::Instance().OpenAllLibraries(
-        "../../Build/Plugins/", false);
+        "../../buildconfig/Plugins/", false);
     std::string exeDir = ConfigService::Instance().getDirectoryOfExecutable();
     libsOpened += LibraryManager::Instance().OpenAllLibraries(exeDir, false);
 
