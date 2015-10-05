@@ -525,15 +525,17 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
   file.getDataCoerce(duration);
   if (duration.size() == 1) {
     // get the units
-    std::vector<::NeXus::AttrInfo> infos = file.getAttrInfos();
+    // clang-format off
+    std::vector< ::NeXus::AttrInfo> infos = file.getAttrInfos();
     std::string units("");
-    for (std::vector<::NeXus::AttrInfo>::const_iterator it = infos.begin();
+    for (std::vector< ::NeXus::AttrInfo>::const_iterator it = infos.begin();
          it != infos.end(); ++it) {
       if (it->name.compare("units") == 0) {
         units = file.getStrAttr(*it);
         break;
       }
     }
+    // clang-format on
 
     // set the property
     WS->mutableRun().addProperty("duration", duration[0], units);
