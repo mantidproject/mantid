@@ -2,14 +2,14 @@
 cmake_minimum_required (VERSION 2.8.12)
 
 # Add the path to our custom 'find' modules
-set ( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../Build/CMake")
+set ( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../buildconfig/CMake")
 
 # Define the project name. Allows building framework as a separate project.
 project ( MantidFramework )
 
 # Set paths to Third_Party for Windows and Mac builds
 if ( NOT THIRD_PARTY )
-  set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../../Third_Party" )
+  set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )
   if ( WIN32 )
     include ( WindowsSetup )
   elseif ( APPLE )
