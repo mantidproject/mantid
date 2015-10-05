@@ -4,8 +4,8 @@
 # MainWindow application for reducing HFIR 4-circle
 #
 ################################################################################
-import sys
 import os
+import math
 import csv
 
 from PyQt4 import QtCore, QtGui
@@ -219,6 +219,12 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(error_message)
             return
         assert isinstance(peakinfo, r4c.PeakInfo)
+
+        # h, k, l = peak_info.get_hkl_peak_ws()
+        if self.ui.checkBox_roundHKLInt.isChecked():
+            h = math.copysign(1, h)*int(abs(h)+0.5)
+            k = math.copysign(1, k)*int(abs(k)+0.5)
+            l = math.copysign(1, l)*int(abs(l)+0.5)
         peakinfo.set_hkl(h, k, l)
         self.set_ub_peak_table(peakinfo)
 
@@ -328,7 +334,7 @@ class MainWindow(QtGui.QMainWindow):
         for i_row in xrange(num_rows):
             if self.ui.tableWidget_peaksCalUB.is_selected(i_row) is True:
                 scan_num, pt_num = self.ui.tableWidget_peaksCalUB.get_exp_info(i_row)
-                h, k, l = self.ui.tableWidget_peaksCalUB.get_hkl(i_row)
+                # h, k, l = self.ui.tableWidget_peaksCalUB.get_hkl(i_row)
                 status, peak_info = self._myControl.add_peak_info(exp_number, scan_num, pt_num)
                 if status is False:
                     self.pop_one_button_dialog(peak_info)
@@ -425,6 +431,7 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(ret_obj)
             return
         if self.ui.checkBox_loadHKLfromFile.isChecked() is True:
+            # This is the first time that in the workflow to get HKL from MD workspace
             status, err_msg = self._myControl.set_hkl_to_peak(exp_no, scan_no, pt_no)
             if status is False:
                 self.pop_one_button_dialog('Unable to locate peak info due to %s.' % err_msg)
@@ -437,6 +444,7 @@ class MainWindow(QtGui.QMainWindow):
             raise KeyError(err_msg)
         assert isinstance(peak_info, r4c.PeakInfo)
 
+        # Set the HKL value from PeakInfo directly
         h, k, l = peak_info.get_hkl_peak_ws()
         self.ui.lineEdit_H.setText('%.2f' % h)
         self.ui.lineEdit_K.setText('%.2f' % k)
@@ -468,6 +476,7 @@ class MainWindow(QtGui.QMainWindow):
                                                          pt_number=pt_no)
             if status is True:
                 new_hkl = ret_obj
+                print '[DB] Indexed HKL for peak No.%d is %s' % (i_peak, str(new_hkl))
                 self.ui.tableWidget_peaksCalUB.set_hkl(i_peak, new_hkl)
             else:
                 err_msg += ret_obj + '\n'
@@ -957,8 +966,12 @@ class MainWindow(QtGui.QMainWindow):
         """
         assert ubmatrix.shape == (3, 3)
 
+        self.ui.tableWidget_ubMatrix.set_from_matrix(ubmatrix)
+
+        """
         for i in xrange(3):
             for j in xrange(3):
                 self.ui.tableWidget_ubMatrix.update_cell_value(i, j, ubmatrix[i][j])
+        """
 
         return

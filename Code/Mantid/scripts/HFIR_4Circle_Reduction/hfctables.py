@@ -194,7 +194,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
 
         self.update_cell_value(i_row, i_col_h, hkl[0])
         self.update_cell_value(i_row, i_col_k, hkl[1])
-        self.update_cell_value(i_row, i_col_h, hkl[2])
+        self.update_cell_value(i_row, i_col_l, hkl[2])
 
         return
 

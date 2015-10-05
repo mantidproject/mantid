@@ -924,8 +924,6 @@ class CWSCDReductionControl(object):
         Get HKL as _h, _k, _l from MDEventWorkspace.  It is for HB3A only
         :return:
         """
-        print '[DB] It is called to set HKL to peak!'
-
         status, peak_info = self.get_peak_info(exp_number, scan_number, pt_number)
         if status is False:
             err_msg = peak_info
@@ -936,9 +934,9 @@ class CWSCDReductionControl(object):
         exp_info = md_ws.getExperimentInfo(0)
 
         try:
-            m_h = float(int(exp_info.run().getProperty('_h').value))
-            m_k = float(int(exp_info.run().getProperty('_k').value))
-            m_l = float(int(exp_info.run().getProperty('_l').value))
+            m_h = float(exp_info.run().getProperty('_h').value)
+            m_k = float(exp_info.run().getProperty('_k').value)
+            m_l = float(exp_info.run().getProperty('_l').value)
         except RuntimeError as error:
             return False, 'Unable to retrieve HKL due to %s.' % (str(error))
 

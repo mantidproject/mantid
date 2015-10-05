@@ -1122,6 +1122,18 @@
                    </widget>
                   </item>
                   <item>
+                   <widget class="QCheckBox" name="checkBox_roundHKLInt">
+                    <property name="font">
+                     <font>
+                      <pointsize>9</pointsize>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>RoundHKL to int</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
                    <spacer name="verticalSpacer_11">
                     <property name="orientation">
                      <enum>Qt::Vertical</enum>
@@ -1144,7 +1156,7 @@
                     </property>
                     <property name="maximumSize">
                      <size>
-                      <width>100</width>
+                      <width>200</width>
                       <height>16777215</height>
                      </size>
                     </property>
