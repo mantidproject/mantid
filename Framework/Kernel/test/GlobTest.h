@@ -27,7 +27,6 @@ public:
   }
 
   void test_Glob() {
-    TS_ASSERT_EQUALS(base[base.depth() - 1], "Mantid");
     std::string pattern = base.toString() + "Framework/*/CMakeLists.*t";
 
     std::set<std::string> files;
@@ -90,7 +89,6 @@ public:
   }
 
   void test_double_dots_in_pattern() {
-    TS_ASSERT_EQUALS(base[base.depth() - 1], "Mantid");
     std::string pattern =
         base.toString() + "../Mantid/Framework/*/CMakeLists.*t";
 
