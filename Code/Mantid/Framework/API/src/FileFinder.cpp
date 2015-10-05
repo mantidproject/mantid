@@ -692,6 +692,10 @@ FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
       if (!path.empty()) {
         return path;
       }
+    } catch (Kernel::Exception::InternetError&) {
+      // If it's a timeout error and it is caught here
+      // it may take a few minutes to abort the operation.
+      throw;
     } catch (...) {
     }
   }

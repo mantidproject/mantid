@@ -98,6 +98,8 @@ std::string MultipleFileProperty::setValue(const std::string &propValue) {
   } catch (const std::range_error &re) {
     // it was a valid multi file string but for too many files.
     return std::string(re.what());
+  } catch (Kernel::Exception::InternetError&) {
+    return "";
   } catch (const std::runtime_error &re) {
     g_log.debug(
         "MultiFile loading has failed. Trying as standard FileProperty.");
