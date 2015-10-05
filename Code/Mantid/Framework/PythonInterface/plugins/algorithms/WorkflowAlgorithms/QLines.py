@@ -122,6 +122,6 @@ class QLines(PythonAlgorithm):
 
         rsname = rsname[:-6]
 
-        Main.QLRun(prog,sname,rname,rsname,erange,nbins,fitOp,wfile,loopOp,verbOp,plotOp,saveOp)
+        Main.QLRun(prog,sname,rname,rsname,erange,nbins,fitOp,wfile,loopOp,plotOp,saveOp)
 
 AlgorithmFactory.subscribe(QLines)         # Register algorithm with Mantid

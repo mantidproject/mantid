@@ -7,23 +7,20 @@
     <x>0</x>
     <y>0</y>
     <width>1251</width>
-    <height>712</height>
+    <height>794</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Image Viewer</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_5">
-    <item row="0" column="0">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
      <widget class="QSplitter" name="left_right_splitter">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
       <widget class="QSplitter" name="vgraphSplitter">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
@@ -63,9 +60,6 @@
        </property>
        <widget class="QWidget" name="layoutWidget">
         <layout class="QGridLayout" name="gridLayout">
-         <item row="0" column="0">
-          <widget class="QwtPlot" name="spectrumPlot"/>
-         </item>
          <item row="0" column="1">
           <widget class="QScrollBar" name="imageVerticalScrollBar">
            <property name="orientation">
@@ -73,11 +67,31 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
+         <item row="2" column="0">
           <widget class="QScrollBar" name="imageHorizontalScrollBar">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QTabWidget" name="imageTabs">
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
+           <property name="tabsClosable">
+            <bool>false</bool>
+           </property>
+           <widget class="QWidget" name="tab">
+            <attribute name="title">
+             <string>Tab 1</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout">
+             <item>
+              <widget class="QwtPlot" name="spectrumPlot"/>
+             </item>
+            </layout>
+           </widget>
           </widget>
          </item>
         </layout>
@@ -118,7 +132,11 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="x_min_input"/>
+           <widget class="QLineEdit" name="x_min_input">
+            <property name="acceptDrops">
+             <bool>false</bool>
+            </property>
+           </widget>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="X_Max_label">
@@ -128,7 +146,11 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLineEdit" name="x_max_input"/>
+           <widget class="QLineEdit" name="x_max_input">
+            <property name="acceptDrops">
+             <bool>false</bool>
+            </property>
+           </widget>
           </item>
           <item row="2" column="0">
            <widget class="QLabel" name="Step_Label">
@@ -138,7 +160,11 @@
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QLineEdit" name="step_input"/>
+           <widget class="QLineEdit" name="step_input">
+            <property name="acceptDrops">
+             <bool>false</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -252,6 +278,9 @@
           </item>
           <item row="0" column="1">
            <widget class="QLineEdit" name="efixed_control">
+            <property name="acceptDrops">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string> 0.0</string>
             </property>
@@ -271,7 +300,7 @@
      <x>0</x>
      <y>0</y>
      <width>1251</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

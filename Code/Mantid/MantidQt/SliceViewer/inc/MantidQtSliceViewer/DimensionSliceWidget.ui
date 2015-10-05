@@ -141,7 +141,7 @@
     </spacer>
    </item>
    <item>
-    <widget class="QwtSlider" name="horizontalSlider"/>
+    <widget class="QwtSlider" name="horizontalSlider" native="true"/>
    </item>
    <item>
     <widget class="QDoubleSpinBox" name="doubleSpinBox">

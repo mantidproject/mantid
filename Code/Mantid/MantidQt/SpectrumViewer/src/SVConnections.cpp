@@ -38,11 +38,12 @@ SVConnections::SVConnections( Ui_SpectrumViewer* ui,
                               GraphDisplay*      vGraphDisplay ) :
   m_svUI(ui),
   m_svMainWindow(spectrumView),
-  m_spectrumDisplay(spectrumDisplay),
+  m_currentSpectrumDisplay(spectrumDisplay),
   m_hGraphDisplay(hGraphDisplay),
   m_vGraphDisplay(vGraphDisplay),
   m_pickerX(-1), m_pickerY(-1)
 {
+  m_spectrumDisplays.append(spectrumDisplay);
   // First disable a few un-implemented controls
   m_svUI->menuGraph_Selected->setDisabled(true);
   m_svUI->actionClear_Selections->setDisabled(true);
@@ -95,9 +96,9 @@ SVConnections::SVConnections( Ui_SpectrumViewer* ui,
   m_svUI->imageHorizontalScrollBar->setEnabled(false);
 
   m_svUI->action_Vscroll->setCheckable(true);
-  m_svUI->action_Vscroll->setChecked(true);
+  m_svUI->action_Vscroll->setChecked(false);
   m_svUI->imageVerticalScrollBar->show();
-  m_svUI->imageVerticalScrollBar->setEnabled(true);
+  m_svUI->imageVerticalScrollBar->setEnabled(false);
 
   m_svUI->intensity_slider->setTickInterval(10);
   m_svUI->intensity_slider->setTickPosition(QSlider::TicksBelow);
@@ -107,62 +108,20 @@ SVConnections::SVConnections( Ui_SpectrumViewer* ui,
   m_svUI->graph_max_slider->setTickPosition(QSlider::TicksBelow);
   m_svUI->graph_max_slider->setSliderPosition(100);
 
-  m_imagePicker = new TrackingPicker( m_svUI->spectrumPlot->canvas() );
-  m_imagePicker->setMousePattern(QwtPicker::MouseSelect1, Qt::LeftButton);
-  m_imagePicker->setTrackerMode(QwtPicker::ActiveOnly);
-  m_imagePicker->setRubberBandPen(QColor(Qt::gray));
-
-/* // point selections & connection works on mouse release
-*/
-  m_imagePicker->setRubberBand(QwtPicker::CrossRubberBand);
-  m_imagePicker->setSelectionFlags(QwtPicker::PointSelection |
-                                  QwtPicker::DragSelection  );
-/*
-  QObject::connect( m_imagePicker, SIGNAL(selected(const QwtPolygon &)),
-                    this, SLOT(imagePickerSelectedPoint()) );
-*/
-
-/*  // point selection works on mouse click, NO CROSSHAIRS...
-
-  m_imagePicker->setRubberBand(QwtPicker::CrossRubberBand);
-  m_imagePicker->setSelectionFlags(QwtPicker::PointSelection |
-                                  QwtPicker::ClickSelection  );
-  QObject::connect( m_imagePicker, SIGNAL(selected(const QwtPolygon &)),
-                    this, SLOT(imagePickerSelectedPoint()) );
-*/
-
-/*  // rect selection calls SLOT on mouse release
-
-  m_imagePicker->setMousePattern(QwtPicker::MouseSelect1, Qt::MidButton);
-  m_imagePicker->setRubberBand(QwtPicker::RectRubberBand);
-  m_imagePicker->setSelectionFlags(QwtPicker::RectSelection |
-                                  QwtPicker::DragSelection  );
-  QObject::connect( m_imagePicker, SIGNAL(selected(const QwtPolygon &)),
-                    this, SLOT(imagePickerSelectedPoint()) );
-*/
-
-/*
-  m_imagePicker->setRubberBand(QwtPicker::CrossRubberBand);
-  m_imagePicker->setSelectionFlags(QwtPicker::PointSelection |
-                                  QwtPicker::ClickSelection  );
-*/
-  QObject::connect( m_imagePicker, SIGNAL(mouseMoved(const QPoint &)),
-                    this, SLOT(imagePickerMoved(const QPoint &)) );
-
   QObject::connect(m_svUI->imageSplitter, SIGNAL(splitterMoved(int, int)),
                    this, SLOT(imageSplitterMoved()) );
 
   QObject::connect(m_svUI->vgraphSplitter, SIGNAL(splitterMoved(int, int)),
                    this, SLOT(vgraphSplitterMoved()) );
 
-  QObject::connect(m_svUI->x_min_input, SIGNAL( returnPressed() ),
-                   this, SLOT(imageHorizontalRangeChanged()) );
+  //QObject::connect(m_svUI->x_min_input, SIGNAL( returnPressed() ),
+  //                 this, SLOT(imageHorizontalRangeChanged()) );
 
-  QObject::connect(m_svUI->x_max_input, SIGNAL( returnPressed() ),
-                   this, SLOT(imageHorizontalRangeChanged()) );
+  //QObject::connect(m_svUI->x_max_input, SIGNAL( returnPressed() ),
+  //                 this, SLOT(imageHorizontalRangeChanged()) );
 
-  QObject::connect(m_svUI->step_input, SIGNAL( returnPressed() ),
-                   this, SLOT(imageHorizontalRangeChanged()) );
+  //QObject::connect(m_svUI->step_input, SIGNAL( returnPressed() ),
+  //                 this, SLOT(imageHorizontalRangeChanged()) );
 
   QObject::connect(m_svUI->imageVerticalScrollBar, SIGNAL(valueChanged(int)),
                    this, SLOT(scrollBarMoved()) );
@@ -311,7 +270,7 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event)
 
     // Convert Y position to values so that a change of 1 corresponds to a change in spec. no by 1
     int newX = m_pickerX;
-    double lastY = m_spectrumDisplay->getPointedAtY();
+    double lastY = m_currentSpectrumDisplay->getPointedAtY();
 
     QKeyEvent *keyEvent = dynamic_cast<QKeyEvent *>(event);
     if(!keyEvent) return false;
@@ -336,13 +295,13 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event)
     }
 
     // Convert Y position back to unsigned pixel position
-    QPoint newPoint = m_spectrumDisplay->getPlotTransform(qMakePair(0.0, lastY));
+    QPoint newPoint = m_currentSpectrumDisplay->getPlotTransform(qMakePair(0.0, lastY));
     int newY = newPoint.y();
 
     // Ignore the event if the position is outside of the plot area
     if (newX < 0) return false;
     if (newY < 0) return false;
-    const QSize canvasSize = m_svUI->spectrumPlot->canvas()->size();
+    const QSize canvasSize = m_currentSpectrumDisplay->spectrumPlot()->canvas()->size();
     if (newX > canvasSize.width()) return false;
     if (newY > canvasSize.height()) return false;
 
@@ -353,14 +312,14 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event)
     // determine where the canvas is in global coords
     QPoint canvasPos = m_svUI->spectrumPlot->canvas()->mapToGlobal(QPoint(0,0));
     // move the cursor to the correct position
-    m_svUI->spectrumPlot->canvas()->cursor().setPos(QPoint(canvasPos.x()+m_pickerX, canvasPos.y()+m_pickerY));
+    m_currentSpectrumDisplay->spectrumPlot()->canvas()->cursor().setPos(QPoint(canvasPos.x()+m_pickerX, canvasPos.y()+m_pickerY));
 
-    QPair<double, double> transPoints = m_spectrumDisplay->getPlotInvTransform(QPoint(newX, newY));
+    QPair<double, double> transPoints = m_currentSpectrumDisplay->getPlotInvTransform(QPoint(newX, newY));
 
-    m_spectrumDisplay->setHGraph( lastY );
-    m_spectrumDisplay->setVGraph( transPoints.first );
+    m_currentSpectrumDisplay->setHGraph( lastY );
+    m_currentSpectrumDisplay->setVGraph( transPoints.first );
 
-    m_spectrumDisplay->showInfoList( transPoints.first, lastY );
+    m_currentSpectrumDisplay->showInfoList( transPoints.first, lastY );
 
     // consume the event
     return true;
@@ -388,8 +347,10 @@ void SVConnections::toggleHScroll()
   bool is_on = m_svUI->action_Hscroll->isChecked();
   m_svUI->imageHorizontalScrollBar->setVisible( is_on );
   m_svUI->imageHorizontalScrollBar->setEnabled( is_on );
-  m_spectrumDisplay->updateImage();
-  m_spectrumDisplay->handleResize();
+  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
+    (**displ).updateImage();
+    (**displ).handleResize();
+  }
 }
 
 
@@ -401,8 +362,10 @@ void SVConnections::toggleVScroll()
   bool is_on = m_svUI->action_Vscroll->isChecked();
   m_svUI->imageVerticalScrollBar->setVisible( is_on );
   m_svUI->imageVerticalScrollBar->setEnabled( is_on );
-  m_spectrumDisplay->updateImage();
-  m_spectrumDisplay->handleResize();
+  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
+    (**displ).updateImage();
+    (**displ).handleResize();
+  }
 }
 
 
@@ -411,7 +374,9 @@ void SVConnections::toggleVScroll()
  */
 void SVConnections::imageHorizontalRangeChanged()
 {
-  m_spectrumDisplay->updateRange();
+  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
+    (**displ).updateRange();
+  }
 }
 
 
@@ -435,7 +400,9 @@ void SVConnections::graphRangeChanged()
  */
 void SVConnections::scrollBarMoved()
 {
-  m_spectrumDisplay->updateImage();
+  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
+    (**displ).updateImage();
+  }
 }
 
 
@@ -455,8 +422,10 @@ void SVConnections::imageSplitterMoved()
 
   m_svUI->vgraphSplitter->setSizes( vgraph_sizes );
 
-  m_spectrumDisplay->updateImage();
-  m_spectrumDisplay->handleResize();
+  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
+    (**displ).updateImage();
+    (**displ).handleResize();
+  }
 }
 
 
@@ -476,22 +445,12 @@ void SVConnections::vgraphSplitterMoved()
 
   m_svUI->imageSplitter->setSizes( vgraph_sizes );
 
-  m_spectrumDisplay->updateImage();
-  m_spectrumDisplay->handleResize();
+  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
+    (**displ).updateImage();
+    (**displ).handleResize();
+  }
 }
 
-
-/**
- * Update the pointed at position for the m_imagePicker.
- *
- * @param point The position moved to.
- */
-void SVConnections::imagePickerMoved(const QPoint & point)
-{
-  m_pickerX = point.x();
-  m_pickerY = point.y();
-  m_spectrumDisplay->setPointedAtPoint( point );
-}
 
 
 /**
@@ -526,7 +485,9 @@ void SVConnections::intensitySliderMoved()
   double max   = (double)m_svUI->intensity_slider->maximum();
 
   double scaled_value = 100.0*(value - min)/(max - min);
-  m_spectrumDisplay->setIntensity( scaled_value );
+  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
+    (**displ).setIntensity( scaled_value );
+  }
 }
 
 
@@ -541,7 +502,9 @@ void SVConnections::heatColorScale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
-  m_spectrumDisplay->setColorScales( positive_color_table, negative_color_table );
+  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
+    (**displ).setColorScales( positive_color_table, negative_color_table );
+  }
   showColorScale( positive_color_table, negative_color_table );
 }
 
@@ -557,7 +520,9 @@ void SVConnections::grayColorScale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::HEAT, 256, negative_color_table );
 
-  m_spectrumDisplay->setColorScales( positive_color_table, negative_color_table );
+  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
+    (**displ).setColorScales( positive_color_table, negative_color_table );
+  }
   showColorScale( positive_color_table, negative_color_table );
 }
 
@@ -573,7 +538,9 @@ void SVConnections::negativeGrayColorScale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::HEAT, 256, negative_color_table );
 
-  m_spectrumDisplay->setColorScales( positive_color_table, negative_color_table );
+  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
+    (**displ).setColorScales( positive_color_table, negative_color_table );
+  }
   showColorScale( positive_color_table, negative_color_table );
 }
 
@@ -589,7 +556,9 @@ void SVConnections::greenYellowColorScale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
-  m_spectrumDisplay->setColorScales( positive_color_table, negative_color_table );
+  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
+    (**displ).setColorScales( positive_color_table, negative_color_table );
+  }
   showColorScale( positive_color_table, negative_color_table );
 }
 
@@ -605,7 +574,9 @@ void SVConnections::rainbowColorScale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
-  m_spectrumDisplay->setColorScales( positive_color_table, negative_color_table );
+  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
+    (**displ).setColorScales( positive_color_table, negative_color_table );
+  }
   showColorScale( positive_color_table, negative_color_table );
 }
 
@@ -621,7 +592,9 @@ void SVConnections::optimalColorScale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
-  m_spectrumDisplay->setColorScales( positive_color_table, negative_color_table );
+  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
+    (**displ).setColorScales( positive_color_table, negative_color_table );
+  }
   showColorScale( positive_color_table, negative_color_table );
 }
 
@@ -637,7 +610,9 @@ void SVConnections::multiColorScale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
-  m_spectrumDisplay->setColorScales( positive_color_table, negative_color_table );
+  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
+    (**displ).setColorScales( positive_color_table, negative_color_table );
+  }
   showColorScale( positive_color_table, negative_color_table );
 }
 
@@ -653,7 +628,9 @@ void SVConnections::spectrumColorScale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
-  m_spectrumDisplay->setColorScales( positive_color_table, negative_color_table );
+  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
+    (**displ).setColorScales( positive_color_table, negative_color_table );
+  }
   showColorScale( positive_color_table, negative_color_table );
 }
 
@@ -681,7 +658,9 @@ void SVConnections::loadColorMap()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, n_colors, negative_color_table );
 
-  m_spectrumDisplay->setColorScales( positive_color_table, negative_color_table );
+  for(auto displ = m_spectrumDisplays.begin(); displ != m_spectrumDisplays.end(); ++displ) {
+    (**displ).setColorScales( positive_color_table, negative_color_table );
+  }
   showColorScale( positive_color_table, negative_color_table );
 }
 
@@ -732,6 +711,30 @@ void SVConnections::showColorScale( std::vector<QRgb> & positiveColorTable,
 void SVConnections::openOnlineHelp()
 {
   MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("SpectrumViewer"));
+}
+
+/// Set the display which is currently visible 
+void SVConnections::setSpectrumDisplay(SpectrumDisplay* spectrumDisplay)
+{
+  if (!m_spectrumDisplays.contains(spectrumDisplay)) {
+    m_spectrumDisplays.append(spectrumDisplay);
+  }
+  m_currentSpectrumDisplay = spectrumDisplay;
+}
+/// Get the currently visible display
+SpectrumDisplay* SVConnections::getCurrentSpectrumDisplay() const {
+  return m_currentSpectrumDisplay;
+}
+
+void SVConnections::removeSpectrumDisplay(SpectrumDisplay* spectrumDisplay) {
+  if (m_spectrumDisplays.contains(spectrumDisplay)) {
+    m_spectrumDisplays.remove(spectrumDisplay);
+  }
+  if (m_spectrumDisplays.isEmpty()) {
+    m_currentSpectrumDisplay = NULL;
+  } else {
+    m_currentSpectrumDisplay = m_spectrumDisplays.back();
+  }
 }
 
 } // namespace SpectrumView

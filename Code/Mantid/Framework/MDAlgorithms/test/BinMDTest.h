@@ -128,6 +128,10 @@ public:
     IMDEventWorkspace_sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, numEventsPerBox);
     Mantid::Kernel::SpecialCoordinateSystem appliedCoord = Mantid::Kernel::QSample;
     in_ws->setCoordinateSystem(appliedCoord);
+    auto eventNorm = Mantid::API::MDNormalization::VolumeNormalization;
+    auto histoNorm = Mantid::API::MDNormalization::NumEventsNormalization;
+    in_ws->setDisplayNormalization(eventNorm);
+    in_ws->setDisplayNormalizationHisto(histoNorm);
     AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
     
     // 1000 boxes with 1 event each
@@ -179,7 +183,7 @@ public:
     TS_ASSERT(ctFrom);
     // Experiment Infos were copied
     TS_ASSERT_EQUALS( out->getNumExperimentInfo(), in_ws->getNumExperimentInfo());
-
+    TSM_ASSERT_EQUALS("Should have num events normalization", out->displayNormalization(), histoNorm);
     AnalysisDataService::Instance().remove("BinMDTest_ws");
   }
 
