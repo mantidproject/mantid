@@ -5,6 +5,7 @@
 #include "MantidDataHandling/SaveOpenGenieAscii.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/Property.h"
 
 #include <exception>
@@ -50,6 +51,20 @@ void SaveOpenGenieAscii::init() {
       "The filename to use for the saved data");
   declareProperty("IncludeHeader", true,
                   "Whether to include the header lines (default: true)");
+  std::vector<std::string> header(2);
+  header[0] = "ENGIN-X Format";
+  header[1] = "Basic Format";
+  declareProperty("OpenGenieFormat", "ENGIN-X Format",
+                  boost::make_shared<Kernel::StringListValidator>(header),
+                  "The format required to succesfully load the file to "
+                  "OpenGnie: ENGIN-X Format (default)");
+  declareProperty(
+      "SpecNumberField", "",
+      "Spec number is a required field for ENGIN-X format of OpenGenie,"
+      "an example of spec number would be: 1201 - 1400");
+  setPropertySettings("SpecNumberField",
+                      new VisibleWhenProperty("OpenGenieFormat", IS_EQUAL_TO,
+                                              "ENGIN-X Format"));
 }
 
 void SaveOpenGenieAscii::exec() {
@@ -80,6 +95,7 @@ void SaveOpenGenieAscii::exec() {
   // Axis alphabets
   const std::string Alpha[] = {"\"e\"", "\"x\"", "\"y\""};
 
+  // Get IncludeHeader property
   const bool headers = getProperty("IncludeHeader");
   // if true write file header
   if (headers) {
@@ -101,6 +117,17 @@ void SaveOpenGenieAscii::exec() {
 
   // add ntc sample log
   addNtc(fourspc, nBins);
+
+  // Getting the format property
+  std::string formatType = getProperty("OpenGenieFormat");
+  if (formatType == "ENGIN-X Format") {
+    // Apply EnginX format if selected
+    applyEnginxFormat(fourspc);
+  } else {
+    std::stringstream msg;
+    msg << "Unrecognized format \"" << formatType << "\"";
+    throw std::runtime_error(msg.str());
+  }
 
   // write out all samples in the vector
   writeSampleLogs(outfile);
@@ -263,7 +290,19 @@ void SaveOpenGenieAscii::getSampleLogs(std::string fourspc) {
       type = "String";
     }
 
+    if (name == "run_number") {
+      name = "run_no";
+      value = "\"" + value + "\"";
+    }
+
+    if (name == "run_title") {
+      name = "title";
+      value = "\"" + value + "\"";
+    }
+
+    // if name != x y or e push str to vector; to avoid any duplication
     if (name != "x" && name != "y" && name != "e") {
+
       std::string outStr = ("  \"" + name + "\"" + "\n" + fourspc + type +
                             "\n" + fourspc + value + "\n");
 
@@ -298,6 +337,59 @@ void SaveOpenGenieAscii::addNtc(const std::string fourspc, int nBins) {
              boost::lexical_cast<std::string>(nBins) + "\n");
 
   logVector.push_back(outStr);
+}
+
+//------------------------------------------------------------------------------
+/** Apply enginX format field which is required for OpenGenie
+   *  @param fourspc :: Constant string for four spaces
+   */
+void SaveOpenGenieAscii::applyEnginxFormat(const std::string fourspc) {
+  std::string typeStr = "String";
+
+  // xunit & xlabel put in OpenGenie format
+  std::string xunits = "xunits";
+  std::string xlabel = "xlabel";
+  std::string xunitsVal = "\"Time-of-Flight (\\gms)\"";
+  auto xunitsOut = ("  \"" + xunits + "\"" + "\n" + fourspc + typeStr + "\n" +
+                    fourspc + xunitsVal + "\n");
+  auto xlabelOut = ("  \"" + xlabel + "\"" + "\n" + fourspc + typeStr + "\n" +
+                    fourspc + xunitsVal + "\n");
+
+  // yunit & ylabel put in OpenGenie format
+  std::string yunits = "yunits";
+  std::string ylabel = "ylabel";
+  std::string yunitsVal = "\"Neutron counts / \\gms\"";
+  // Assign it to a string
+  auto yunitsOut = ("  \"" + yunits + "\"" + "\n" + fourspc + typeStr + "\n" +
+                    fourspc + yunitsVal + "\n");
+
+  auto ylabelOut = ("  \"" + ylabel + "\"" + "\n" + fourspc + typeStr + "\n" +
+                    fourspc + yunitsVal + "\n");
+
+  // Get property SpecNumberField
+  std::string SpecNumberField = getProperty("SpecNumberField");
+  // while field is not empty
+  if (SpecNumberField != "") {
+    if (SpecNumberField.std::string::find("-") != std::string::npos) {
+      std::string specNum = "spec_no";
+
+      auto specNumOut = ("  \"" + specNum + "\"" + "\n" + fourspc + typeStr +
+                         "\n" + fourspc + "\"" + SpecNumberField + "\"" + "\n");
+
+      logVector.push_back(specNumOut);
+    } else {
+      std::string message =
+          "Invalid value of specNumVal = " + SpecNumberField +
+          " entered, please use the following format \"200 - 700\" ";
+      throw std::runtime_error(message);
+    }
+  }
+
+  // Push to vector
+  logVector.push_back(xunitsOut);
+  logVector.push_back(xlabelOut);
+  logVector.push_back(yunitsOut);
+  logVector.push_back(ylabelOut);
 }
 
 } // namespace DataHandling
