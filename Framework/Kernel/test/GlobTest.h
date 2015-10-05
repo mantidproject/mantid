@@ -89,8 +89,7 @@ public:
   }
 
   void test_double_dots_in_pattern() {
-    std::string pattern =
-        base.toString() + "Framework/*/CMakeLists.*t";
+    std::string pattern = base.toString() + "Framework/*/CMakeLists.*t";
 
     std::set<std::string> files;
     Glob::glob(pattern, files);
