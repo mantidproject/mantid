@@ -56,7 +56,7 @@ public:
   /// Destructor
   ~MultiDatasetFit();
   /// Get the name of the output workspace
-  QString getOutputWorkspaceName() const {return QString::fromStdString(m_outputWorkspaceName);}
+  QString getOutputWorkspaceName() const;
   /// Workspace name for the i-th spectrum
   std::string getWorkspaceName(int i) const;
   /// Workspace index of the i-th spectrum
@@ -90,6 +90,7 @@ private slots:
   void enableRange();
   void checkFittingType();
   void setLogNames();
+  void invalidateOutput();
 
 protected:
   virtual void initLayout();
