@@ -1715,11 +1715,11 @@ bool MdViewerWidget::areGridAxesOn() {
   }
 }
 
-
-/** 
+/**
  * React to normalization changes for MDHisto workspaces
  */
-void MdViewerWidget::onDefaultNormalizationHistoChanged(const QString& currentText) {
+void MdViewerWidget::onDefaultNormalizationHistoChanged(
+    const QString &currentText) {
   // Get current text and save it.
   mdSettings.setUserSettingNormalizationHisto(currentText);
 }
@@ -1727,7 +1727,8 @@ void MdViewerWidget::onDefaultNormalizationHistoChanged(const QString& currentTe
 /**
  * React to normalization chagnes for MDEvent workspaces
  */
-void MdViewerWidget::onDefaultNormalizationEventChanged(const QString& currentText) {
+void MdViewerWidget::onDefaultNormalizationEventChanged(
+    const QString &currentText) {
   // Get current text and save it.
   mdSettings.setUserSettingNormalizationEvent(currentText);
 }
@@ -1740,23 +1741,24 @@ void MdViewerWidget::setupDefaultNormalizations() {
 
   // Setup the default normalizations for MDHisto workspaces
   ui.defaultNormalizationHisto->addItems(normalizations);
-  auto indexDefaultNormalizationHisto = ui.defaultNormalizationHisto->findData(mdSettings.getUserSettingNormalizationHisto(), Qt::DisplayRole);
+  auto indexDefaultNormalizationHisto = ui.defaultNormalizationHisto->findData(
+      mdSettings.getUserSettingNormalizationHisto(), Qt::DisplayRole);
 
-  if (indexDefaultNormalizationHisto != -1)
-  {
-    ui.defaultNormalizationHisto->setCurrentIndex(indexDefaultNormalizationHisto);
+  if (indexDefaultNormalizationHisto != -1) {
+    ui.defaultNormalizationHisto->setCurrentIndex(
+        indexDefaultNormalizationHisto);
   }
 
   // Setup the default normalizations for MDEvent workspaces
   ui.defaultNormalizationEvent->addItems(normalizations);
-  auto indexDefaultNormalizationEvent = ui.defaultNormalizationEvent->findData(mdSettings.getUserSettingNormalizationEvent(), Qt::DisplayRole);
+  auto indexDefaultNormalizationEvent = ui.defaultNormalizationEvent->findData(
+      mdSettings.getUserSettingNormalizationEvent(), Qt::DisplayRole);
 
-  if (indexDefaultNormalizationEvent != -1)
-  {
-    ui.defaultNormalizationEvent->setCurrentIndex(indexDefaultNormalizationEvent);
+  if (indexDefaultNormalizationEvent != -1) {
+    ui.defaultNormalizationEvent->setCurrentIndex(
+        indexDefaultNormalizationEvent);
   }
 }
-
 
 } // namespace SimpleGui
 } // namespace Vates

@@ -99,7 +99,7 @@
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_2">
+      <spacer name="horizontalSpacer_8">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -110,6 +110,26 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="lbl_normalizationHisto">
+       <property name="toolTip">
+        <string extracomment="Select the default initial normalization when MDHisto workspaces are loaded"/>
+       </property>
+       <property name="text">
+        <string>Initial MDHisto Norm:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="defaultNormalizationHisto">
+       <property name="toolTip">
+        <string extracomment="Select the default initial normalization when MDHisto workspaces are loaded"/>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -168,61 +188,6 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Initial Normalization:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="normalizationHistoLayout">
-       <item>
-        <widget class="QLabel" name="lbl_normalizationHisto">
-         <property name="toolTip">
-          <string extracomment="Select the default initial normalization when MDHisto workspaces are loaded"/>
-         </property>
-         <property name="text">
-          <string>MDHisto</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="defaultNormalizationHisto">
-         <property name="toolTip">
-          <string extracomment="Select the default initial normalization when MDHisto workspaces are loaded"/>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="normalizationEventLayout">
-       <item>
-        <widget class="QLabel" name="lbl_normalizationEvent">
-         <property name="toolTip">
-          <string extracomment="Select the default initial normalization when MDEvent workspaces are loaded"/>
-         </property>
-         <property name="text">
-          <string>MDEvent</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="defaultNormalizationEvent">
-         <property name="toolTip">
-          <string extracomment="Select the default initial normalization when MDEvent workspaces are loaded"/>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
       <spacer name="horizontalSpacer_5">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -256,7 +221,7 @@
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_6">
+      <spacer name="horizontalSpacer_7">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -267,6 +232,26 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="lbl_normalizationEvent">
+       <property name="toolTip">
+        <string extracomment="Select the default initial normalization when MDEvent workspaces are loaded"/>
+       </property>
+       <property name="text">
+        <string>Initial MDEvent Norm:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="defaultNormalizationEvent">
+       <property name="toolTip">
+        <string extracomment="Select the default initial normalization when MDEvent workspaces are loaded"/>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -326,8 +311,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>324</width>
-               <height>370</height>
+               <width>98</width>
+               <height>28</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout">
