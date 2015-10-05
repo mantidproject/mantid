@@ -14,6 +14,11 @@ DECLARE_ALGORITHM(SetUncertainties)
 using namespace Kernel;
 using namespace API;
 
+namespace {
+/// Used to compare signal to zero
+const double TOLERANCE=1.e-10;
+}
+
 /// (Empty) Constructor
 SetUncertainties::SetUncertainties() : API::Algorithm() {}
 
@@ -70,7 +75,9 @@ void SetUncertainties::exec() {
       MantidVec &E = outputWorkspace->dataE(i);
       std::size_t numE = E.size();
       for (std::size_t j = 0; j < numE; j++) {
-        E[j] = sqrt(fabs(Y[j]));
+        const double y_val = fabs(Y[j]);
+        if (y_val > TOLERANCE)
+          E[j] = sqrt(y_val);
       }
     }
 

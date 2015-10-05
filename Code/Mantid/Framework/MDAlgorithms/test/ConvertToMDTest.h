@@ -30,7 +30,6 @@ public:
     {
       m_InWS2D = InWS2D;
     }
-
 };
 // helper function to provide list of names to test:
 std::vector<std::string> dim_availible()
@@ -106,6 +105,10 @@ void testExecNoQ()
     auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS3DNoQ");
     TS_ASSERT_EQUALS(Mantid::Kernel::None, outWS->getSpecialCoordinateSystem());
 
+    // Check that the display normalization is set correctly -- NoQ
+    TSM_ASSERT_EQUALS("Should be set to volume normalization", outWS->displayNormalization(), Mantid::API::VolumeNormalization);
+    TSM_ASSERT_EQUALS("Should be set to volume normalization", outWS->displayNormalizationHisto(), Mantid::API::VolumeNormalization);
+
     AnalysisDataService::Instance().remove("WS3DNoQ");
 }
 
@@ -134,6 +137,10 @@ void testExecModQ()
     auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS3DmodQ");
     TS_ASSERT_EQUALS(Mantid::Kernel::None, outWS->getSpecialCoordinateSystem());
 
+     // Check that the display normalization is set correctly -- Q with Elasticevent
+    TSM_ASSERT_EQUALS("Should be set to volume normalization", outWS->displayNormalization(), Mantid::API::VolumeNormalization);
+    TSM_ASSERT_EQUALS("Should be set to volume normalization", outWS->displayNormalizationHisto(), Mantid::API::VolumeNormalization);
+
     AnalysisDataService::Instance().remove("WS3DmodQ");
 }
 
@@ -154,7 +161,6 @@ void testExecQ3D()
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
     pAlg->setPropertyValue("MinValues","-10,-10,-10,  0,-10,-10");
     pAlg->setPropertyValue("MaxValues"," 10, 10, 10, 20, 40, 20");
-
     pAlg->setRethrows(false);
     pAlg->execute();
     TSM_ASSERT("Should finish successfully",pAlg->isExecuted());
@@ -172,6 +178,9 @@ void testExecQ3D()
     TS_ASSERT_EQUALS(true, outWS->getDimension(2)->getMDUnits().isQUnit());
     TS_ASSERT_EQUALS(false, outWS->getDimension(3)->getMDUnits().isQUnit());
 
+    // Check that the display normalization is set correctly -- WS2D with inelastic and Q
+    TSM_ASSERT_EQUALS("Should be set to num events normalization", outWS->displayNormalization(), Mantid::API::VolumeNormalization);
+    TSM_ASSERT_EQUALS("Should be set to num events normalization", outWS->displayNormalizationHisto(), Mantid::API::NumEventsNormalization);
     AnalysisDataService::Instance().remove("WS5DQ3D");
 }
 
@@ -221,6 +230,10 @@ void testInitialSplittingEnabled()
   TSM_ASSERT_EQUALS("Should be set to 5", 5, boxController->getSplitInto(1));
   TSM_ASSERT_EQUALS("Should be set to 5", 5, boxController->getSplitInto(2));
   TSM_ASSERT_EQUALS("Should be set to 5", 5, boxController->getSplitInto(3));
+
+  // Check that the display normalization is set correctly -- EventWS with inelastic and Q
+  TSM_ASSERT_EQUALS("Should be set to num events normalization", outEventWS->displayNormalization(), Mantid::API::VolumeNormalization);
+  TSM_ASSERT_EQUALS("Should be set to num events normalization", outEventWS->displayNormalizationHisto(), Mantid::API::NoNormalization);
 }
 
 void testInitialSplittingDisabled()

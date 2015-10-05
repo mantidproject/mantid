@@ -183,8 +183,11 @@ class RunSetupScript(BaseScriptElement):
                     "binindspace", default=str(int(RunSetupScript.binindspace)))
             self.binindspace = bool(int(tempbool))
 
-            self.resamplex = BaseScriptElement.getIntElement(instrument_dom,\
-                    "resamplex", default=RunSetupScript.resamplex)
+            try:
+                self.resamplex = BaseScriptElement.getIntElement(instrument_dom,\
+                        "resamplex", default=RunSetupScript.resamplex)
+            except ValueError:
+                self.resamplex = 0
 
             self.saveas = BaseScriptElement.getStringElement(instrument_dom,\
                     "saveas",  default=RunSetupScript.saveas)

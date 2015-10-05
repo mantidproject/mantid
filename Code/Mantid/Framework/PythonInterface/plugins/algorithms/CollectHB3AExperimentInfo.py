@@ -21,6 +21,8 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         self._tol2Theta = None
         self._dataDir = None
         self._ptListList = None
+        self._doGenerateVirtualInstrument = False
+        self._numPixelsDetector = -1
 
         # Define class variable Scan-Pt. dictionary: Key scan number, Value list of pt numbers
         self._scanPtDict = {}
@@ -55,8 +57,6 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
 
         scanlistprop = mantid.kernel.IntArrayProperty("ScanList", [])
         self.declareProperty(scanlistprop, "List of scans of the experiment to be loaded.  It cannot be left blank")
-        #self.declareProperty(IntArrayProperty("ScanList", [], Direction.Input),
-        #        "List of scans of the experiment to be loaded.  It cannot be left blank.")
 
         pd = "List of Pts to be loaded for scans specified by 'ScanList'. \
                 Each scan's Pt. must be started with -1 as a flag.  \
@@ -67,7 +67,8 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
 
         self.declareProperty("GetFileFromServer", False, "Obtain data file directly from neutrons.ornl.gov.")
 
-        self.declareProperty("Detector2ThetaTolerance", 0.01, "Tolerance of 2 detector's 2theta to consider as being at same position.")
+        self.declareProperty("Detector2ThetaTolerance", 0.01,
+                             "Tolerance of 2 detector's 2theta to consider as being at same position.")
 
         tableprop = mantid.api.ITableWorkspaceProperty("OutputWorkspace", "", mantid.kernel.Direction.Output)
         self.declareProperty(tableprop, "TableWorkspace for experiment number, scan, file name and starting detector IDs.")
@@ -75,9 +76,17 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         tableprop2 = mantid.api.ITableWorkspaceProperty("DetectorTableWorkspace", "", mantid.kernel.Direction.Output)
         self.declareProperty(tableprop2, "TableWorkspace for detector Id and information.")
 
+        self.declareProperty('GenerateVirtualInstrument', True,
+                             'If True, then the geometry of all the detectors will be written '
+                             'to DetectorTableWorkspace')
+
+        default_num_dets = 256 * 256
+        self.declareProperty('DetectorNumberPixels',
+                             default_num_dets,
+                             'Number of pixels on the detector. \
+                             It is only required if GenerateVirtualInstrument is set to False.')
 
         return
-
 
     def PyExec(self):
         """ Main executor
@@ -166,6 +175,8 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         rawptlist = self.getProperty("PtLists").value
         self._tol2Theta = self.getProperty("Detector2ThetaTolerance").value
         self._dataDir = self.getProperty("DataDirectory").value
+        self._doGenerateVirtualInstrument = self.getProperty('GenerateVirtualInstrument').value
+        self._numPixelsDetector = self.getProperty('DetectorNumberPixels').value
 
         # process Pt number
         self._ptListList = []
@@ -185,9 +196,16 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         if len(self._ptListList) != len(self._scanList):
             raise RuntimeError("Number of sub Pt. list is not equal to number of scans.")
 
+        if self._doGenerateVirtualInstrument is False:
+            self._numPixelsDetector = int(self._numPixelsDetector)
+            if self._numPixelsDetector < 0:
+                raise RuntimeError('In case that virtual instrument is not created, number of pixels on '
+                                   'detector must be given. %d is not a valid number.' % self._numPixelsDetector)
+            elif self._numPixelsDetector < 256 * 256:
+                self.log().warning('User defined number of detectors is less than 256 * 256. ')
+        # END-IF
 
         return
-
 
     def _getDetectorPositionScanPtDict(self):
         """ Get detector position (2theta) - Scan and pt number dictionary
@@ -248,31 +266,40 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
             else:
                 self.log().notice("[DB] Process pixels of detector centered at 2theta = %.5f." % (twotheta))
 
-            # Load detector counts file (.xml)
+            # Get scan/pt and set dictionary
             self.log().debug("Processing detector @ 2theta = %.5f, " % (twotheta))
             scannumber, ptnumber = self._2thetaScanPtDict[twotheta][0]
-            self.log().debug("self._2thetaScanPtDict: %s"%(self._2thetaScanPtDict[twotheta]))
-            dataws = self._loadHB3ADetCountFile(scannumber, ptnumber)
+            self.log().debug("self._2thetaScanPtDict: %s" % (self._2thetaScanPtDict[twotheta]))
 
             self._scanPt2ThetaDict[(scannumber, ptnumber)] = twotheta
-
             self._detStartID[twotheta] = self._currStartDetID
 
-            maxdetid = 0
-            for iws in xrange(dataws.getNumberHistograms()):
-                detector = dataws.getDetector(iws)
-                detpos = detector.getPos()
-                newdetid = self._currStartDetID + detector.getID()
-                if detector.getID() > maxdetid:
-                    maxdetid = detector.getID()
-                self._myPixelInfoTableWS.addRow([newdetid, detpos.X(), detpos.Y(), detpos.Z(), detector.getID()])
-            # ENDFOR (iws)
+            if self._doGenerateVirtualInstrument is True:
+                # Load detector counts file (.xml)
+                dataws = self._loadHB3ADetCountFile(scannumber, ptnumber)
 
+                # write each detector's position and ID to table workspace
+                maxdetid = 0
+                for iws in xrange(dataws.getNumberHistograms()):
+                    detector = dataws.getDetector(iws)
+                    detpos = detector.getPos()
+                    newdetid = self._currStartDetID + detector.getID()
+                    if detector.getID() > maxdetid:
+                        maxdetid = detector.getID()
+                    self._myPixelInfoTableWS.addRow([newdetid, detpos.X(), detpos.Y(), detpos.Z(), detector.getID()])
+                # ENDFOR (iws)
+
+            else:
+                # No need to generate virtual instrument information.
+                maxdetid = self._numPixelsDetector
+
+            # END-IF-ELSE
+
+            # Update start ID
             self._currStartDetID += maxdetid
         # ENDFOR
 
         return
-
 
     def _getAllPtFromTable(self, spicetablews):
         """ Get all Pt. from a table
@@ -286,7 +313,6 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
 
         return ptlist
 
-
     def _loadSpiceFile(self, spicefilename):
         """ Load SPICE file
         """
@@ -297,7 +323,6 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         self.log().debug("SPICE matrix workspace %s is ignored."%(str(spicematrixws)))
 
         return spicetablews
-
 
     def _loadHB3ADetCountFile(self, scannumber, ptnumber):
         """ Load Spice XML file
@@ -310,8 +335,6 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
                                        OutputWorkspace=outwsname, DetectorGeometry='256,256')
 
         return dataws
-
-
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(CollectHB3AExperimentInfo)

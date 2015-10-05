@@ -373,6 +373,7 @@ void ConvFit::algorithmComplete(bool error) {
       addSample->execute();
     }
   }
+  m_batchAlgoRunner->executeBatchAsync();
   updatePlot();
 }
 
@@ -983,10 +984,11 @@ void ConvFit::updatePlot() {
   }
 
   // If there is a result plot then plot it
-  if (AnalysisDataService::Instance().doesExist(m_pythonExportWsName)) {
+  std::string groupName =  m_baseName.toStdString() + "_Workspaces";
+  if (AnalysisDataService::Instance().doesExist(groupName)) {
     WorkspaceGroup_sptr outputGroup =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            m_pythonExportWsName);
+            groupName);
     if (specNo >= static_cast<int>(outputGroup->size()))
       return;
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
