@@ -38,7 +38,6 @@ namespace DataHandling {
 
 DECLARE_ALGORITHM(LoadGSASInstrumentFile)
 
-
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
@@ -65,28 +64,38 @@ void LoadGSASInstrumentFile::init() {
   declareProperty(wsprop, "Name of the output TableWorkspace containing "
                           "instrument parameter information read from file. ");
 
-    // Use bank numbers as given in file
-    declareProperty(
-        new PropertyWithValue<bool>("UseBankIDsInFile", true, Direction::Input),
-        "Use bank IDs as given in file rather than ordinal number of bank. "
-        "If the bank IDs in the file are not unique, it is advised to set this to false." );
+  // Use bank numbers as given in file
+  declareProperty(
+      new PropertyWithValue<bool>("UseBankIDsInFile", true, Direction::Input),
+      "Use bank IDs as given in file rather than ordinal number of bank. "
+      "If the bank IDs in the file are not unique, it is advised to set this "
+      "to false.");
 
-    // Bank to import
-    declareProperty(new ArrayProperty<int>("Banks"), "ID(s) of specified bank(s) to load, "
-                    "The IDs are as specified by UseBankIDsInFile. " 
-                    "Default is all banks contained in input .prm file.");
+  // Bank to import
+  declareProperty(new ArrayProperty<int>("Banks"),
+                  "ID(s) of specified bank(s) to load, "
+                  "The IDs are as specified by UseBankIDsInFile. "
+                  "Default is all banks contained in input .prm file.");
 
-    // Workspace to put parameters into. It must be a workspace group with one worskpace per bank from the prm file
-    declareProperty(new WorkspaceProperty<WorkspaceGroup>("Workspace","",Direction::InOut, PropertyMode::Optional),
-        "A workspace group with the instrument to which we add the parameters from the GSAS instrument file, with one workspace for each bank of the .prm file");
+  // Workspace to put parameters into. It must be a workspace group with one
+  // worskpace per bank from the prm file
+  declareProperty(new WorkspaceProperty<WorkspaceGroup>("Workspace", "",
+                                                        Direction::InOut,
+                                                        PropertyMode::Optional),
+                  "A workspace group with the instrument to which we add the "
+                  "parameters from the GSAS instrument file, with one "
+                  "workspace for each bank of the .prm file");
 
-   // Workspaces for each bank
-    declareProperty(new ArrayProperty<int>("WorkspacesForBanks"), "For each bank,"
-                    " the ID of the corresponding workspace in same order as the banks are specified. "
-                    "ID=1 refers to the first workspace in the workspace group, "
-                    "ID=2 refers to the second workspace and so on. "
-                    "Default is all workspaces in numerical order. "
-                    "If default banks are specified, they too are taken to be in numerical order" );
+  // Workspaces for each bank
+  declareProperty(new ArrayProperty<int>("WorkspacesForBanks"),
+                  "For each bank,"
+                  " the ID of the corresponding workspace in same order as the "
+                  "banks are specified. "
+                  "ID=1 refers to the first workspace in the workspace group, "
+                  "ID=2 refers to the second workspace and so on. "
+                  "Default is all workspaces in numerical order. "
+                  "If default banks are specified, they too are taken to be in "
+                  "numerical order");
 
   return;
 }
@@ -147,63 +156,61 @@ void LoadGSASInstrumentFile::exec() {
     g_log.debug() << "Bank starts at line" << bankStartIndex[i] + 1 << "\n";
   }
 
-    // Get Workspace property
-    WorkspaceGroup_sptr wsg = getProperty("Workspace");
+  // Get Workspace property
+  WorkspaceGroup_sptr wsg = getProperty("Workspace");
   // Generate output table workspace
   API::ITableWorkspace_sptr outTabWs = genTableWorkspace(bankparammap);
   if (getPropertyValue("OutputTableWorkspace") != "") {
     // Output the output table workspace
     setProperty("OutputTableWorkspace", outTabWs);
   }
-    if ( wsg )
-    {
-      vector<int> bankIds = getProperty("Banks");
-      vector<int> workspaceIds = getProperty("WorkspacesForBanks");
-      map < int, size_t > workspaceOfBank;
+  if (wsg) {
+    vector<int> bankIds = getProperty("Banks");
+    vector<int> workspaceIds = getProperty("WorkspacesForBanks");
+    map<int, size_t> workspaceOfBank;
 
-      // Deal with bankIds
-      if ( bankIds.size() )
-      {
-        // If user provided a list of banks, check that they exist in the .prm file
-        for (size_t i=0; i<bankIds.size(); i++)
-        {
-          if ( !bankparammap.count(bankIds[i]) )
-          {
-            std::stringstream errorString;
-            errorString << "Bank " << bankIds[i] << " not found in .prm file";
-            throw runtime_error(errorString.str());
-          }
+    // Deal with bankIds
+    if (bankIds.size()) {
+      // If user provided a list of banks, check that they exist in the .prm
+      // file
+      for (size_t i = 0; i < bankIds.size(); i++) {
+        if (!bankparammap.count(bankIds[i])) {
+          std::stringstream errorString;
+          errorString << "Bank " << bankIds[i] << " not found in .prm file";
+          throw runtime_error(errorString.str());
         }
       }
-      else
-      {
-        // Else, use all available banks
-        for(map<size_t,map<string,double> >::iterator it=bankparammap.begin(); it!=bankparammap.end(); ++it)
-        {
-          bankIds.push_back(static_cast<int>(it->first));
-        }
+    } else {
+      // Else, use all available banks
+      for (map<size_t, map<string, double>>::iterator it = bankparammap.begin();
+           it != bankparammap.end(); ++it) {
+        bankIds.push_back(static_cast<int>(it->first));
       }
+    }
 
-      // Generate workspaceOfBank
-      LoadFullprofResolution::createBankToWorkspaceMap ( bankIds, workspaceIds, workspaceOfBank);
-      // Put parameters into workspace group
-      LoadFullprofResolution::getTableRowNumbers( outTabWs, LoadFullprofResolution::m_rowNumbers);
-      for (size_t i=0; i < bankIds.size(); ++i)
-      {
-        int bankId = bankIds[i];
-        size_t wsId = workspaceOfBank[bankId];
-        Workspace_sptr wsi = wsg->getItem(wsId-1); 
-        auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
-        // Get column from table workspace
-        API::Column_const_sptr OutTabColumn = outTabWs->getColumn( i+1 );
-        std::string parameterXMLString;
-        LoadFullprofResolution::putParametersIntoWorkspace( OutTabColumn, workspace, static_cast<int>(bankparammap[i]["NPROF"]), parameterXMLString );  
-        // Load the string into the workspace
-        Algorithm_sptr loadParamAlg = createChildAlgorithm("LoadParameterFile");
-        loadParamAlg->setProperty("ParameterXML", parameterXMLString);
-        loadParamAlg->setProperty("Workspace", workspace);
-        loadParamAlg->execute();
-      }
+    // Generate workspaceOfBank
+    LoadFullprofResolution::createBankToWorkspaceMap(bankIds, workspaceIds,
+                                                     workspaceOfBank);
+    // Put parameters into workspace group
+    LoadFullprofResolution::getTableRowNumbers(
+        outTabWs, LoadFullprofResolution::m_rowNumbers);
+    for (size_t i = 0; i < bankIds.size(); ++i) {
+      int bankId = bankIds[i];
+      size_t wsId = workspaceOfBank[bankId];
+      Workspace_sptr wsi = wsg->getItem(wsId - 1);
+      auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
+      // Get column from table workspace
+      API::Column_const_sptr OutTabColumn = outTabWs->getColumn(i + 1);
+      std::string parameterXMLString;
+      LoadFullprofResolution::putParametersIntoWorkspace(
+          OutTabColumn, workspace, static_cast<int>(bankparammap[i]["NPROF"]),
+          parameterXMLString);
+      // Load the string into the workspace
+      Algorithm_sptr loadParamAlg = createChildAlgorithm("LoadParameterFile");
+      loadParamAlg->setProperty("ParameterXML", parameterXMLString);
+      loadParamAlg->setProperty("Workspace", workspace);
+      loadParamAlg->execute();
+    }
   }
 
   return;
@@ -317,49 +324,52 @@ void LoadGSASInstrumentFile::scanBanks(const std::vector<std::string> &lines,
 * @param parammap :: [output] parameter name and value map
 * @param lines :: [input] vector of lines from .irf file;
 * @param bankid :: [input] ID of the bank to get parsed
-* @param startlineindex :: [input] index of the first line of the bank in vector of lines
-*/  
-void LoadGSASInstrumentFile::parseBank(std::map<std::string, double>& parammap, const std::vector<std::string>& lines, size_t bankid, size_t startlineindex)
-{
+* @param startlineindex :: [input] index of the first line of the bank in vector
+* of lines
+*/
+void LoadGSASInstrumentFile::parseBank(std::map<std::string, double> &parammap,
+                                       const std::vector<std::string> &lines,
+                                       size_t bankid, size_t startlineindex) {
   double param1, param2, param3, param4;
 
   // We ignore the first lines of the bank
   // The first useful line starts with "INS  nPRCF", where n is the bank number
   // From this line we get the profile function and number of parameters
-  size_t currentLineIndex = findINSPRCFLine(lines, startlineindex,param1,param2,param3,param4);
+  size_t currentLineIndex =
+      findINSPRCFLine(lines, startlineindex, param1, param2, param3, param4);
 
   parammap["NPROF"] = param2;
 
   // Ikeda-Carpenter PV
   // Then read 15 parameters from the next four INS lines.
-  currentLineIndex = findINSPRCFLine(lines, currentLineIndex+1,param1,param2,param3,param4);
+  currentLineIndex = findINSPRCFLine(lines, currentLineIndex + 1, param1,
+                                     param2, param3, param4);
   parammap["Alph0"] = param1;
   parammap["Alph1"] = param2;
   parammap["Beta0"] = param3;
   parammap["Beta1"] = param4; // Kappa
 
-  currentLineIndex = findINSPRCFLine(lines, currentLineIndex+1,param1,param2,param3,param4);
+  currentLineIndex = findINSPRCFLine(lines, currentLineIndex + 1, param1,
+                                     param2, param3, param4);
   parammap["Sig0"] = param1;
   parammap["Sig1"] = param2;
   parammap["Sig2"] = param3;
   parammap["Gam0"] = param4;
 
-  currentLineIndex = findINSPRCFLine(lines, currentLineIndex+1,param1,param2,param3,param4);
+  currentLineIndex = findINSPRCFLine(lines, currentLineIndex + 1, param1,
+                                     param2, param3, param4);
   parammap["Gam1"] = param1;
   parammap["Gam2"] = param2;
-  if( param3 != 0.0)
-  {
+  if (param3 != 0.0) {
     g_log.warning() << "Bank" << bankid << "stec not 0, but " << param3;
   }
-  if( param4 != 0.0)
-  {
+  if (param4 != 0.0) {
     g_log.warning() << "Bank" << bankid << "ptec not 0, but " << param4;
   }
-
 }
 
 //----------------------------------------------------------------------------------------------
-/** Get next INS line of .prm file at or after given line index 
+/** Get next INS line of .prm file at or after given line index
 * @param lines :: [input] vector of lines from .irf file;
 * @param lineIndex :: [input] index of line to search from
 * @param param1 :: [output] first parameter in line
@@ -368,21 +378,21 @@ void LoadGSASInstrumentFile::parseBank(std::map<std::string, double>& parammap, 
 * @param param4 :: [output] fourth parameter in line
 * @return line index for INS file
 * @throw end of file error
-*/ 
-size_t LoadGSASInstrumentFile::findINSPRCFLine(const std::vector<std::string>& lines, size_t lineIndex, double& param1, double& param2, double& param3, double& param4)
-{
-  for (size_t i = lineIndex; i < lines.size(); ++i)
-  {
+*/
+size_t LoadGSASInstrumentFile::findINSPRCFLine(
+    const std::vector<std::string> &lines, size_t lineIndex, double &param1,
+    double &param2, double &param3, double &param4) {
+  for (size_t i = lineIndex; i < lines.size(); ++i) {
     string line = lines[i];
-    if( (line.substr(0,3) == "INS") && (line.substr(6,4) == "PRCF") )
-    {
+    if ((line.substr(0, 3) == "INS") && (line.substr(6, 4) == "PRCF")) {
       std::istringstream paramLine;
-      paramLine.str( lines[i].substr(15) );
+      paramLine.str(lines[i].substr(15));
       paramLine >> param1 >> param2 >> param3 >> param4;
       return i;
     }
-  } 
-  throw std::runtime_error("Unexpected end of file reached while searching for INS line. \n");
+  }
+  throw std::runtime_error(
+      "Unexpected end of file reached while searching for INS line. \n");
 }
 
 //----------------------------------------------------------------------------------------------

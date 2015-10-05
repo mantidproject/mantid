@@ -61,9 +61,10 @@ void QueryAllRemoteJobs2::init() {
                       "CompletionDate", nullValidator, Direction::Output),
                   "The date & time the job finished");
 
-  declareProperty(new ArrayProperty<std::string>(
-                      "CommandLine", nullValidator, Direction::Output),
-                  "The command line run by this job on the remote compute resource machine(s)");
+  declareProperty(new ArrayProperty<std::string>("CommandLine", nullValidator,
+                                                 Direction::Output),
+                  "The command line run by this job on the remote compute "
+                  "resource machine(s)");
 }
 
 void QueryAllRemoteJobs2::exec() {

@@ -7,77 +7,72 @@
 #include <gmock/gmock.h>
 #include <boost/make_shared.hpp>
 
-class MockModerator : public Mantid::API::ModeratorModel
-{
+class MockModerator : public Mantid::API::ModeratorModel {
 public:
-  boost::shared_ptr<ModeratorModel> clone() const { return boost::shared_ptr<MockModerator>(); }
+  boost::shared_ptr<ModeratorModel> clone() const {
+    return boost::shared_ptr<MockModerator>();
+  }
   MOCK_CONST_METHOD0(emissionTimeMean, double());
   MOCK_CONST_METHOD0(emissionTimeVariance, double());
   MOCK_CONST_METHOD1(sampleTimeDistribution, double(const double));
-  MOCK_METHOD2(setParameterValue, void(const std::string &, const std::string &));
+  MOCK_METHOD2(setParameterValue,
+               void(const std::string &, const std::string &));
 };
 
-class ModeratorModelTest : public CxxTest::TestSuite
-{
+class ModeratorModelTest : public CxxTest::TestSuite {
 
 public:
-
-  void test_Default_Object_Has_Zero_Tilt_Angle()
-  {
+  void test_Default_Object_Has_Zero_Tilt_Angle() {
     using namespace Mantid::API;
-    ModeratorModel * moderator = new MockModerator;
+    ModeratorModel *moderator = new MockModerator;
 
     TS_ASSERT_DELTA(moderator->getTiltAngleInRadians(), 0.0, 1e-12);
 
     delete moderator;
   }
 
-  void test_Setting_Zero_Tilt_Angle_Gives_Back_Angle_Converted_To_Radians()
-  {
+  void test_Setting_Zero_Tilt_Angle_Gives_Back_Angle_Converted_To_Radians() {
     using namespace Mantid::API;
 
-    ModeratorModel * moderator = new MockModerator;
+    ModeratorModel *moderator = new MockModerator;
     const double tilt(0.6);
     moderator->setTiltAngleInDegrees(tilt);
 
-    TS_ASSERT_DELTA(moderator->getTiltAngleInRadians(), tilt*M_PI/180.0, 1e-12);
+    TS_ASSERT_DELTA(moderator->getTiltAngleInRadians(), tilt * M_PI / 180.0,
+                    1e-12);
 
     delete moderator;
   }
 
-  void test_emissionTimeMean_Is_Called_Expectedly()
-  {
+  void test_emissionTimeMean_Is_Called_Expectedly() {
     MockModerator mockModerator;
 
     EXPECT_CALL(mockModerator, emissionTimeMean()).Times(1);
-    const Mantid::API::ModeratorModel & moderator = mockModerator;
+    const Mantid::API::ModeratorModel &moderator = mockModerator;
     moderator.emissionTimeMean();
 
     TS_ASSERT(::testing::Mock::VerifyAndClearExpectations(&mockModerator));
   }
 
-  void test_emissionTimeVariance_Is_Called_Expectedly()
-  {
+  void test_emissionTimeVariance_Is_Called_Expectedly() {
     MockModerator mockModerator;
 
     EXPECT_CALL(mockModerator, emissionTimeVariance()).Times(1);
-    const Mantid::API::ModeratorModel & moderator = mockModerator;
+    const Mantid::API::ModeratorModel &moderator = mockModerator;
     moderator.emissionTimeVariance();
 
     TS_ASSERT(::testing::Mock::VerifyAndClearExpectations(&mockModerator));
   }
 
-  void test_sampleTimeDistribution_Is_Called_Expectedly()
-  {
+  void test_sampleTimeDistribution_Is_Called_Expectedly() {
     MockModerator mockModerator;
 
     EXPECT_CALL(mockModerator, sampleTimeDistribution(0.5)).Times(1);
-    const Mantid::API::ModeratorModel & moderator = mockModerator;
+    const Mantid::API::ModeratorModel &moderator = mockModerator;
     moderator.sampleTimeDistribution(0.5);
 
     TS_ASSERT(::testing::Mock::VerifyAndClearExpectations(&mockModerator));
   }
-
 };
 
 #endif /* MODERATORMODELTEST_H_ */

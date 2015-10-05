@@ -70,10 +70,12 @@ void RemoveMaskedSpectra::exec() {
   MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
   MatrixWorkspace_sptr maskedWorkspace = getProperty("MaskedWorkspace");
 
-  if (!maskedWorkspace){
+  if (!maskedWorkspace) {
     maskedWorkspace = inputWorkspace;
-  } else if (inputWorkspace->getNumberHistograms() != maskedWorkspace->getNumberHistograms()) {
-    throw std::runtime_error("Masked workspace has a different number of spectra.");
+  } else if (inputWorkspace->getNumberHistograms() !=
+             maskedWorkspace->getNumberHistograms()) {
+    throw std::runtime_error(
+        "Masked workspace has a different number of spectra.");
   }
 
   // Find indices of the unmasked spectra.
@@ -89,7 +91,8 @@ void RemoveMaskedSpectra::exec() {
 
   extract->execute();
 
-  MatrixWorkspace_sptr outputWorkspace = extract->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr outputWorkspace =
+      extract->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", outputWorkspace);
 }
 

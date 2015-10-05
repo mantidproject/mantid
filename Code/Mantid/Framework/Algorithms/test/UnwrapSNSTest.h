@@ -20,21 +20,22 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 
-class UnwrapSNSTest : public CxxTest::TestSuite
-{
+class UnwrapSNSTest : public CxxTest::TestSuite {
 private:
   double BIN_DELTA;
   int NUMPIXELS;
   int NUMBINS;
 
-  void makeFakeEventWorkspace(std::string wsName)
-  {
-    //Make an event workspace with 2 events in each bin.
-    EventWorkspace_sptr test_in = WorkspaceCreationHelper::CreateEventWorkspace(NUMPIXELS, NUMBINS, NUMBINS, 0.0, BIN_DELTA, 2);
-    //Fake a d-spacing unit in the data.
-    test_in->getAxis(0)->unit() =UnitFactory::Instance().create("TOF");
-    test_in->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(NUMPIXELS/9) );
-    //Add it to the workspace
+  void makeFakeEventWorkspace(std::string wsName) {
+    // Make an event workspace with 2 events in each bin.
+    EventWorkspace_sptr test_in = WorkspaceCreationHelper::CreateEventWorkspace(
+        NUMPIXELS, NUMBINS, NUMBINS, 0.0, BIN_DELTA, 2);
+    // Fake a d-spacing unit in the data.
+    test_in->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    test_in->setInstrument(
+        ComponentCreationHelper::createTestInstrumentCylindrical(NUMPIXELS /
+                                                                 9));
+    // Add it to the workspace
     AnalysisDataService::Instance().add(wsName, test_in);
   }
 
@@ -42,22 +43,20 @@ public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static UnwrapSNSTest *createSuite() { return new UnwrapSNSTest(); }
-  static void destroySuite( UnwrapSNSTest *suite ) { delete suite; }
+  static void destroySuite(UnwrapSNSTest *suite) { delete suite; }
 
-  UnwrapSNSTest()
-  {
+  UnwrapSNSTest() {
     BIN_DELTA = 2.;
     NUMPIXELS = 36;
     NUMBINS = 50;
   }
 
-  void test_UnwrapSNSEventsInplace()
-  {
+  void test_UnwrapSNSEventsInplace() {
     // setup
     std::string name("UnwrapSNS");
     this->makeFakeEventWorkspace(name);
-    EventWorkspace_sptr ws
-         = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(name);
+    EventWorkspace_sptr ws =
+        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(name);
     size_t num_events = ws->getNumberEvents();
     double min_event0 = ws->getEventList(0).getTofMin();
     double max_event0 = ws->getEventList(0).getTofMax();
@@ -66,7 +65,8 @@ public:
 
     // run the algorithm
     UnwrapSNS algo;
-    if (!algo.isInitialized()) algo.initialize();
+    if (!algo.isInitialized())
+      algo.initialize();
     algo.setPropertyValue("InputWorkspace", name);
     algo.setPropertyValue("OutputWorkspace", name);
     algo.setProperty("LRef", 10.);
@@ -75,8 +75,10 @@ public:
 
     // verify the output workspace
     ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(name);
-    TS_ASSERT_EQUALS(NUMPIXELS, ws->getNumberHistograms()); // shouldn't drop histograms
-    TS_ASSERT_EQUALS(num_events, ws->getNumberEvents()); // shouldn't drop events
+    TS_ASSERT_EQUALS(NUMPIXELS,
+                     ws->getNumberHistograms()); // shouldn't drop histograms
+    TS_ASSERT_EQUALS(num_events,
+                     ws->getNumberEvents()); // shouldn't drop events
 
     // pixel 0 shouldn't be adjusted
     TS_ASSERT_EQUALS(min_event0, ws->getEventList(0).getTofMin());
@@ -89,10 +91,7 @@ public:
     TS_ASSERT_EQUALS(ws->getEventList(0).dataX()[0], 0.0);
     TS_ASSERT_EQUALS(ws->getEventList(0).dataX()[1], 2.0);
     TS_ASSERT_EQUALS(ws->getEventList(0).dataX()[2], 4.0);
-
   }
 };
 
-
 #endif /* MANTID_ALGORITHMS_UNWRAPSNSTEST_H_ */
-

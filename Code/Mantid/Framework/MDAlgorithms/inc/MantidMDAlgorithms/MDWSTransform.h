@@ -126,9 +126,9 @@ private:
 protected: // for testing
   /// function generates "Kind of" W transformation matrix for different
   /// Q-conversion modes;
-  Kernel::DblMatrix buildQTrahsf(MDAlgorithms::MDWSDescription &TargWSDescription,
-                                 CnvrtToMD::CoordScaling scaling,
-                                 bool UnitUB = false) const;
+  Kernel::DblMatrix
+  buildQTrahsf(MDAlgorithms::MDWSDescription &TargWSDescription,
+               CnvrtToMD::CoordScaling scaling, bool UnitUB = false) const;
   /// build orthogonal coordinate around two input vecotors u and v expressed in
   /// rlu;
   // std::vector<Kernel::V3D> buildOrtho3D(const Kernel::DblMatrix &BM,const

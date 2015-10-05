@@ -25,12 +25,11 @@ namespace DataHandling {
  */
 class BankPulseTimes {
 public:
-
   /// Starting number for assigning periods.
   static const unsigned int FirstPeriod;
 
   /// Constructor with NeXus::File
-  BankPulseTimes(::NeXus::File &file, const std::vector<int>& pNumbers);
+  BankPulseTimes(::NeXus::File &file, const std::vector<int> &pNumbers);
 
   /// Constructor with vector of DateAndTime
   BankPulseTimes(const std::vector<Kernel::DateAndTime> &times);
@@ -115,43 +114,36 @@ public:
    * @param value :: true if you want to precount. */
   void setPrecount(bool value) { precount = value; }
 
-  template<typename T>
-  static boost::shared_ptr<BankPulseTimes> runLoadNexusLogs(const std::string &nexusfilename,
-                   T localWorkspace, Algorithm &alg,
-                   bool returnpulsetimes, int& size_t, std::unique_ptr<const Kernel::TimeSeriesProperty<int> >& periodLog);
-  
-  template<typename T>
-  static void loadEntryMetadata(const std::string &nexusfilename,
-                                T WS,
+  template <typename T>
+  static boost::shared_ptr<BankPulseTimes> runLoadNexusLogs(
+      const std::string &nexusfilename, T localWorkspace, Algorithm &alg,
+      bool returnpulsetimes, int &size_t,
+      std::unique_ptr<const Kernel::TimeSeriesProperty<int>> &periodLog);
+
+  template <typename T>
+  static void loadEntryMetadata(const std::string &nexusfilename, T WS,
                                 const std::string &entry_name);
 
   /// Load instrument from Nexus file if possible, else from IDF spacified by
   /// Nexus file
-  template<typename T>
-  static bool loadInstrument(const std::string &nexusfilename,
-                             T localWorkspace,
+  template <typename T>
+  static bool loadInstrument(const std::string &nexusfilename, T localWorkspace,
                              const std::string &top_entry_name, Algorithm *alg);
 
-
-
-
   /// Load instrument for Nexus file
-  template<typename T>
-  static bool runLoadIDFFromNexus(const std::string &nexusfilename,
-                                  T localWorkspace,
-                                  const std::string &top_entry_name,
-                                  Algorithm *alg);
+  template <typename T>
+  static bool
+  runLoadIDFFromNexus(const std::string &nexusfilename, T localWorkspace,
+                      const std::string &top_entry_name, Algorithm *alg);
 
   /// Load instrument from IDF file specified by Nexus file
-  template<typename T>
-  static bool runLoadInstrument(const std::string &nexusfilename,
-                                T localWorkspace,
-                                const std::string &top_entry_name,
-                                Algorithm *alg);
+  template <typename T>
+  static bool
+  runLoadInstrument(const std::string &nexusfilename, T localWorkspace,
+                    const std::string &top_entry_name, Algorithm *alg);
 
-  static void
-  loadSampleDataISIScompatibility(::NeXus::File &file,
-  EventWorkspaceCollection& WS);
+  static void loadSampleDataISIScompatibility(::NeXus::File &file,
+                                              EventWorkspaceCollection &WS);
 
   /// method used to return instrument name for some old ISIS files where it is
   /// not written properly within the instrument
@@ -214,7 +206,7 @@ public:
 
   /// Vector where index = event_id; value = ptr to std::vector<TofEvent> in the
   /// event list.
-  std::vector<std::vector<EventVector_pt> > eventVectors;
+  std::vector<std::vector<EventVector_pt>> eventVectors;
 
   /// Mutex to protect eventVectors from each task
   Poco::Mutex m_eventVectorMutex;
@@ -251,7 +243,7 @@ public:
 
   /// Vector where index = event_id; value = ptr to std::vector<WeightedEvent>
   /// in the event list.
-  std::vector<std::vector<WeightedEventVector_pt> > weightedEventVectors;
+  std::vector<std::vector<WeightedEventVector_pt>> weightedEventVectors;
 
 private:
   /// Intialisation code
@@ -263,9 +255,11 @@ private:
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
 
   /// Map detector IDs to event lists.
-  template <class T> void makeMapToEventLists(std::vector<std::vector<T> > &vectors);
+  template <class T>
+  void makeMapToEventLists(std::vector<std::vector<T>> &vectors);
 
-  void createWorkspaceIndexMaps(const bool monitors, const std::vector<std::string> &bankNames);
+  void createWorkspaceIndexMaps(const bool monitors,
+                                const std::vector<std::string> &bankNames);
   void loadEvents(API::Progress *const prog, const bool monitors);
   void createSpectraMapping(
       const std::string &nxsfile, const bool monitorsOnly,
@@ -288,11 +282,10 @@ private:
                         const std::string &classType);
 
   void loadTimeOfFlightData(::NeXus::File &file,
-                                   EventWorkspaceCollection_sptr WS,
-                                   const std::string &binsName,
-                                   size_t start_wi = 0, size_t end_wi = 0);
-  template<typename T>
-  void filterDuringPause(T workspace);
+                            EventWorkspaceCollection_sptr WS,
+                            const std::string &binsName, size_t start_wi = 0,
+                            size_t end_wi = 0);
+  template <typename T> void filterDuringPause(T workspace);
 
   // Validate the optional spectra input properties and initialize m_specList
   void createSpectraList(int32_t min, int32_t max);
@@ -315,7 +308,6 @@ private:
   bool event_id_is_spec;
 };
 
-
 //-----------------------------------------------------------------------------
 /** Load the instrument definition file specified by info in the NXS file.
 *
@@ -326,7 +318,7 @@ private:
 *  @param alg :: Handle of the algorithm
 *  @return true if successful
 */
-template<typename T>
+template <typename T>
 bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
                                        T localWorkspace,
                                        const std::string &top_entry_name,
@@ -377,13 +369,15 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
   nxfile.close();
 
   // do the actual work
-  Mantid::API::IAlgorithm_sptr loadInst = alg->createChildAlgorithm("LoadInstrument");
+  Mantid::API::IAlgorithm_sptr loadInst =
+      alg->createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   bool executionSuccessful(true);
   try {
     loadInst->setPropertyValue("InstrumentName", instrument);
-    loadInst->setProperty<Mantid::API::MatrixWorkspace_sptr>("Workspace", localWorkspace);
+    loadInst->setProperty<Mantid::API::MatrixWorkspace_sptr>("Workspace",
+                                                             localWorkspace);
     loadInst->setProperty("RewriteSpectraMap", false);
     loadInst->execute();
 
@@ -421,7 +415,8 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
   if (value.substr(0, 8) == "datafile") {
     Mantid::API::IAlgorithm_sptr updateInst =
         alg->createChildAlgorithm("UpdateInstrumentFromFile");
-    updateInst->setProperty<Mantid::API::MatrixWorkspace_sptr>("Workspace", localWorkspace);
+    updateInst->setProperty<Mantid::API::MatrixWorkspace_sptr>("Workspace",
+                                                               localWorkspace);
     updateInst->setPropertyValue("Filename", nexusfilename);
     if (value == "datafile-ignore-phi") {
       updateInst->setProperty("IgnorePhi", true);
@@ -440,29 +435,26 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
   return executionSuccessful;
 }
 
-
 //-----------------------------------------------------------------------------
 /** Load the run number and other meta data from the given bank */
-  template<typename T>
-  void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename,
-                                         T WS,
-                                         const std::string &entry_name) {
+template <typename T>
+void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
+                                       const std::string &entry_name) {
   // Open the file
   ::NeXus::File file(nexusfilename);
   file.openGroup(entry_name, "NXentry");
 
   // get the title
   try {
-  file.openData("title");
-  if (file.getInfo().type == ::NeXus::CHAR) {
-    std::string title = file.getStrData();
-    if (!title.empty())
-      WS->setTitle(title);
-  }
-  file.closeData();
-  } catch (std::exception&)
-  {
-    //don't set the title if the field is not loaded
+    file.openData("title");
+    if (file.getInfo().type == ::NeXus::CHAR) {
+      std::string title = file.getStrData();
+      if (!title.empty())
+        WS->setTitle(title);
+    }
+    file.closeData();
+  } catch (std::exception &) {
+    // don't set the title if the field is not loaded
   }
 
   // get the notes
@@ -533,9 +525,9 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
   file.getDataCoerce(duration);
   if (duration.size() == 1) {
     // get the units
-    std::vector< ::NeXus::AttrInfo> infos = file.getAttrInfos();
+    std::vector<::NeXus::AttrInfo> infos = file.getAttrInfos();
     std::string units("");
-    for (std::vector< ::NeXus::AttrInfo>::const_iterator it = infos.begin();
+    for (std::vector<::NeXus::AttrInfo>::const_iterator it = infos.begin();
          it != infos.end(); ++it) {
       if (it->name.compare("units") == 0) {
         units = file.getStrAttr(*it);
@@ -552,7 +544,6 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
   file.close();
 }
 
-
 //-----------------------------------------------------------------------------
 /** Load the instrument from the nexus file or if not found from the IDF file
 *  specified by the info in the Nexus file
@@ -564,19 +555,18 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
 *  @param alg :: Handle of the algorithm
 *  @return true if successful
 */
-template<typename T>
+template <typename T>
 bool LoadEventNexus::loadInstrument(const std::string &nexusfilename,
                                     T localWorkspace,
                                     const std::string &top_entry_name,
                                     Algorithm *alg) {
-  bool foundInstrument =
-      runLoadIDFFromNexus<T>(nexusfilename, localWorkspace, top_entry_name, alg);
+  bool foundInstrument = runLoadIDFFromNexus<T>(nexusfilename, localWorkspace,
+                                                top_entry_name, alg);
   if (!foundInstrument)
-    foundInstrument =
-        runLoadInstrument<T>(nexusfilename, localWorkspace, top_entry_name, alg);
+    foundInstrument = runLoadInstrument<T>(nexusfilename, localWorkspace,
+                                           top_entry_name, alg);
   return foundInstrument;
 }
-
 
 //-----------------------------------------------------------------------------
 /** Load the instrument from the nexus file
@@ -588,10 +578,11 @@ bool LoadEventNexus::loadInstrument(const std::string &nexusfilename,
 *  @param alg :: Handle of the algorithm
 *  @return true if successful
 */
-template<typename T>
-bool LoadEventNexus::runLoadIDFFromNexus(
-    const std::string &nexusfilename, T localWorkspace,
-    const std::string &top_entry_name, Algorithm *alg) {
+template <typename T>
+bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename,
+                                         T localWorkspace,
+                                         const std::string &top_entry_name,
+                                         Algorithm *alg) {
   // Test if IDF exists in file, move on quickly if not
   try {
     ::NeXus::File nxsfile(nexusfilename);
@@ -603,12 +594,14 @@ bool LoadEventNexus::runLoadIDFFromNexus(
     return false;
   }
 
-  Mantid::API::IAlgorithm_sptr loadInst = alg->createChildAlgorithm("LoadIDFFromNexus");
+  Mantid::API::IAlgorithm_sptr loadInst =
+      alg->createChildAlgorithm("LoadIDFFromNexus");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {
     loadInst->setPropertyValue("Filename", nexusfilename);
-    loadInst->setProperty<Mantid::API::MatrixWorkspace_sptr>("Workspace", localWorkspace);
+    loadInst->setProperty<Mantid::API::MatrixWorkspace_sptr>("Workspace",
+                                                             localWorkspace);
     loadInst->setPropertyValue("InstrumentParentPath", top_entry_name);
     loadInst->execute();
   } catch (std::invalid_argument &) {

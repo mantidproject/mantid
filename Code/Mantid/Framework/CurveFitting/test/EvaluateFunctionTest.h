@@ -84,38 +84,44 @@ public:
   void test_MD_histo() {
     int nx = 5;
     int ny = 6;
-    std::vector<double> signal(nx*ny);
+    std::vector<double> signal(nx * ny);
     std::vector<double> extents(4);
-    extents[0] = -3; extents[1] = 3;
-    extents[2] = -3; extents[3] = 3;
+    extents[0] = -3;
+    extents[1] = 3;
+    extents[2] = -3;
+    extents[3] = 3;
     std::vector<int> nBins(2);
     nBins[0] = nx;
     nBins[1] = ny;
 
     auto alg = AlgorithmManager::Instance().create("CreateMDHistoWorkspace");
     alg->initialize();
-    alg->setProperty("Dimensionality",2);
-    alg->setProperty("SignalInput",signal);
-    alg->setProperty("ErrorInput",signal);
-    alg->setProperty("Extents",extents);
-    alg->setProperty("NumberOfBins",nBins);
-    alg->setProperty("Names","x,y");
-    alg->setProperty("Units","U,V");
-    alg->setProperty("OutputWorkspace","EvaluateFunction_inWS");
+    alg->setProperty("Dimensionality", 2);
+    alg->setProperty("SignalInput", signal);
+    alg->setProperty("ErrorInput", signal);
+    alg->setProperty("Extents", extents);
+    alg->setProperty("NumberOfBins", nBins);
+    alg->setProperty("Names", "x,y");
+    alg->setProperty("Units", "U,V");
+    alg->setProperty("OutputWorkspace", "EvaluateFunction_inWS");
     alg->execute();
-    auto inWS = AnalysisDataService::Instance().retrieve("EvaluateFunction_inWS");
+    auto inWS =
+        AnalysisDataService::Instance().retrieve("EvaluateFunction_inWS");
     TS_ASSERT(inWS);
 
     alg = AlgorithmManager::Instance().create("EvaluateFunction");
     alg->initialize();
-    alg->setPropertyValue("Function", "name=UserFunctionMD,Formula=sin(x)*sin(y)");
+    alg->setPropertyValue("Function",
+                          "name=UserFunctionMD,Formula=sin(x)*sin(y)");
     alg->setProperty("InputWorkspace", "EvaluateFunction_inWS");
     alg->setProperty("OutputWorkspace", "EvaluateFunction_outWS");
     alg->execute();
-    auto outWS = AnalysisDataService::Instance().retrieve("EvaluateFunction_outWS");
+    auto outWS =
+        AnalysisDataService::Instance().retrieve("EvaluateFunction_outWS");
     TS_ASSERT(outWS);
 
-    auto mdws =  AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>("EvaluateFunction_outWS");
+    auto mdws = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
+        "EvaluateFunction_outWS");
     TS_ASSERT(mdws);
 
     auto iter = mdws->createIterator();
@@ -125,19 +131,18 @@ public:
     do {
       auto xy = iter->getCenter();
       auto signal = iter->getSignal();
-      double value = sin(xy[0])*sin(xy[1]);
+      double value = sin(xy[0]) * sin(xy[1]);
       if (value == 0.0) {
         TS_ASSERT_DELTA(signal, 0.0, 1e-14);
       } else {
         // Precision is lost due to the use of floats in MD workspaces.
-        TS_ASSERT_DELTA((signal-value)/value, 0.0, 1e-6);
+        TS_ASSERT_DELTA((signal - value) / value, 0.0, 1e-6);
       }
     } while (iter->next());
     delete iter;
   }
 
 private:
-
   class Tester1D {
     // values defining the workspace
     size_t nSpec;
@@ -166,9 +171,10 @@ private:
         xBins[i] = xMin + double(i) * dx;
       }
 
-      if ( workspaceIndex > 0 ) {
-        std::transform(xBins.begin(), xBins.end(), xBins.begin(),
-                       std::bind2nd(std::plus<double>(), double(workspaceIndex)));
+      if (workspaceIndex > 0) {
+        std::transform(
+            xBins.begin(), xBins.end(), xBins.begin(),
+            std::bind2nd(std::plus<double>(), double(workspaceIndex)));
       }
 
       if (isHisto) {
@@ -181,18 +187,18 @@ private:
     }
 
     void makeWorkspace() {
-        size_t dn = isHisto ? 1 : 0;
-        workspace = WorkspaceFactory::Instance().create("Workspace2D", nSpec,
-                                                         nData + dn, nData);
-        workspace->dataX(workspaceIndex).assign(xBins.begin(), xBins.end());
+      size_t dn = isHisto ? 1 : 0;
+      workspace = WorkspaceFactory::Instance().create("Workspace2D", nSpec,
+                                                      nData + dn, nData);
+      workspace->dataX(workspaceIndex).assign(xBins.begin(), xBins.end());
     }
 
     void makeFunction() {
-      const std::string fun =
-          "name=ExpDecay,Height=50,Lifetime=1";
-      function = boost::dynamic_pointer_cast<IFunction1D>(FunctionFactory::Instance().createInitialized(fun));
-      if ( !function ) {
-        TS_FAIL( "A 1D function is expected." );
+      const std::string fun = "name=ExpDecay,Height=50,Lifetime=1";
+      function = boost::dynamic_pointer_cast<IFunction1D>(
+          FunctionFactory::Instance().createInitialized(fun));
+      if (!function) {
+        TS_FAIL("A 1D function is expected.");
       }
     }
 
@@ -209,26 +215,20 @@ private:
     bool isExecuted;
     MatrixWorkspace_sptr outputWorkspace;
 
-    Tester1D() :nSpec(2), nData(100), isHisto(true),xMin(0.0),xMax(30),
-      workspaceIndex(0), StartX(EMPTY_DBL()), EndX(EMPTY_DBL())
-    {}
+    Tester1D()
+        : nSpec(2), nData(100), isHisto(true), xMin(0.0), xMax(30),
+          workspaceIndex(0), StartX(EMPTY_DBL()), EndX(EMPTY_DBL()) {}
 
-    void setHistograms() {
-      isHisto = true;
-    }
+    void setHistograms() { isHisto = true; }
 
-    void setPointData() {
-      isHisto = false;
-    }
+    void setPointData() { isHisto = false; }
 
     void setRange() {
       StartX = 2.3;
       EndX = 10;
     }
 
-    void setWorkspaceIndex() {
-      workspaceIndex = 1;
-    }
+    void setWorkspaceIndex() { workspaceIndex = 1; }
 
     void runAlgorithm() {
       makeXValues();
@@ -238,39 +238,45 @@ private:
       EvaluateFunction alg;
       TS_ASSERT_THROWS_NOTHING(alg.initialize())
       TS_ASSERT(alg.isInitialized())
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("Function", boost::dynamic_pointer_cast<IFunction>(function)));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+          "Function", boost::dynamic_pointer_cast<IFunction>(function)));
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", workspace));
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("WorkspaceIndex", workspaceIndex));
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setProperty("WorkspaceIndex", workspaceIndex));
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartX", StartX));
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndX", EndX));
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "EvaluateFunction_outWS"));
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setProperty("OutputWorkspace", "EvaluateFunction_outWS"));
       TS_ASSERT_THROWS_NOTHING(alg.execute());
       isExecuted = alg.isExecuted();
       if (isExecuted) {
-        outputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("EvaluateFunction_outWS");
+        outputWorkspace =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+                "EvaluateFunction_outWS");
       }
       AnalysisDataService::Instance().clear();
     }
 
     void checkResult() {
-      TS_ASSERT( isExecuted );
-      if (!isExecuted) return;
+      TS_ASSERT(isExecuted);
+      if (!isExecuted)
+        return;
       setDefaultXRange();
-      TS_ASSERT_DIFFERS( nData, 0 );
+      TS_ASSERT_DIFFERS(nData, 0);
       auto &Y = outputWorkspace->readY(1);
       size_t j = 0;
-      for(size_t i = 0; i < nData; ++i) {
-        if (xValues[i] <= StartX || xValues[i] >= EndX ) continue;
+      for (size_t i = 0; i < nData; ++i) {
+        if (xValues[i] <= StartX || xValues[i] >= EndX)
+          continue;
         FunctionDomain1DVector x(xValues[i]);
         FunctionValues y(x);
         function->function(x, y);
-        TS_ASSERT_DIFFERS( y[0], 0.0 );
-        double tmp = (y[0] - Y[j])/y[0];
-        TS_ASSERT_DELTA( tmp, 0.0, 1e-14 );
+        TS_ASSERT_DIFFERS(y[0], 0.0);
+        double tmp = (y[0] - Y[j]) / y[0];
+        TS_ASSERT_DELTA(tmp, 0.0, 1e-14);
         ++j;
       }
     }
-
   };
 };
 

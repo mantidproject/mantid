@@ -10,42 +10,40 @@
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
 
-class SaveNISTDATTest : public CxxTest::TestSuite
-{
+class SaveNISTDATTest : public CxxTest::TestSuite {
 public:
-
-  void test_writer()
-  {
+  void test_writer() {
     std::string outputFile = "SaveNISTDAT_Output.dat";
 
     Load loader;
     loader.initialize();
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "saveNISTDAT_data.nxs"));
-    loader.setPropertyValue("OutputWorkspace","SaveNISTDAT_Input");
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("Filename", "saveNISTDAT_data.nxs"));
+    loader.setPropertyValue("OutputWorkspace", "SaveNISTDAT_Input");
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     SaveNISTDAT writer;
     writer.initialize();
-    writer.setPropertyValue("InputWorkspace","SaveNISTDAT_Input");
-    writer.setPropertyValue("Filename",outputFile);
+    writer.setPropertyValue("InputWorkspace", "SaveNISTDAT_Input");
+    writer.setPropertyValue("Filename", outputFile);
     outputFile = writer.getPropertyValue("Filename");
     TS_ASSERT_THROWS_NOTHING(writer.execute());
 
-    TS_ASSERT( Poco::File(outputFile).exists() );
+    TS_ASSERT(Poco::File(outputFile).exists());
 
     std::ifstream testFile(outputFile.c_str(), std::ios::in);
-    TS_ASSERT ( testFile );
+    TS_ASSERT(testFile);
 
     std::string fileLine;
-    std::getline( testFile, fileLine );
-    TS_ASSERT_EQUALS ( fileLine, "Data columns Qx - Qy - I(Qx,Qy) - err(I)\r" );
-    std::getline( testFile, fileLine );
-    TS_ASSERT_EQUALS ( fileLine, "ASCII data\r" );
-    std::getline( testFile, fileLine );
-    TS_ASSERT (( fileLine == "-0.0105  -0.0735  6.13876e+08  6.1697e+07\r" )
-             || (fileLine == "-0.0105  -0.0735  6.13876e+008  6.1697e+007\r"))
+    std::getline(testFile, fileLine);
+    TS_ASSERT_EQUALS(fileLine, "Data columns Qx - Qy - I(Qx,Qy) - err(I)\r");
+    std::getline(testFile, fileLine);
+    TS_ASSERT_EQUALS(fileLine, "ASCII data\r");
+    std::getline(testFile, fileLine);
+    TS_ASSERT((fileLine == "-0.0105  -0.0735  6.13876e+08  6.1697e+07\r") ||
+              (fileLine == "-0.0105  -0.0735  6.13876e+008  6.1697e+007\r"))
 
-
-    // remove file created by this algorithm, closing it first as Windows gets tetchy about this
+    // remove file created by this algorithm, closing it first as Windows gets
+    // tetchy about this
     testFile.close();
     Poco::File(outputFile).remove();
   }

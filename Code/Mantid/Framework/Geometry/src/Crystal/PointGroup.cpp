@@ -116,7 +116,7 @@ std::vector<V3D> PointGroup::getEquivalentSet(const Kernel::V3D &hkl) const {
 }
 
 PointGroup::CrystalSystem PointGroup::getCrystalSystemFromGroup() const {
-  std::map<std::string, std::set<V3D> > symbolMap;
+  std::map<std::string, std::set<V3D>> symbolMap;
 
   for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
     SymmetryElementWithAxis_sptr element =

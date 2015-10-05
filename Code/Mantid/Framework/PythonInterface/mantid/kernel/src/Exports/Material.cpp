@@ -26,11 +26,11 @@ void export_Material() {
            (arg("lambda") = (double)NeutronAtom::ReferenceLambda),
            "Coherent Scattering Cross-Section")
       .def("incohScatterXSection", (double (Material::*)(double)
-                                    const)(&Material::incohScatterXSection),
+                                        const)(&Material::incohScatterXSection),
            (arg("lambda") = (double)NeutronAtom::ReferenceLambda),
            "Incoherent Scattering Cross-Section")
       .def("totalScatterXSection", (double (Material::*)(double)
-                                    const)(&Material::totalScatterXSection),
+                                        const)(&Material::totalScatterXSection),
            (arg("lambda") = (double)NeutronAtom::ReferenceLambda),
            "Total Scattering Cross-Section")
       .def("absorbXSection",

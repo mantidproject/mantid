@@ -556,8 +556,8 @@ void ICat4Catalog::listInstruments(std::vector<std::string> &instruments) {
  * Returns the list of investigation types.
  * @param invstTypes :: investigation types list
  */
-void
-ICat4Catalog::listInvestigationTypes(std::vector<std::string> &invstTypes) {
+void ICat4Catalog::listInvestigationTypes(
+    std::vector<std::string> &invstTypes) {
   ICATPortBindingProxy icat;
   setICATProxySettings(icat);
 

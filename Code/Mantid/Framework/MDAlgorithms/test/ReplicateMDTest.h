@@ -19,7 +19,8 @@ using namespace Mantid::API;
 
 namespace {
 
-MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape, bool transpose = false) {
+MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape,
+                                         bool transpose = false) {
 
   IAlgorithm *create =
       FrameworkManager::Instance().createAlgorithm("CreateMDHistoWorkspace");
@@ -53,33 +54,33 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape, bool tra
   create->execute();
   IMDHistoWorkspace_sptr outWs = create->getProperty("OutputWorkspace");
 
-  if(transpose){
+  if (transpose) {
 
-      class Decreasing{
-      private:
-          size_t m_current;
-      public:
-          Decreasing(size_t start) : m_current(start){}
-          size_t operator()() {return --m_current;}
-      };
+    class Decreasing {
+    private:
+      size_t m_current;
 
-      // Generate the axis order 0, 1, 2 ... in reverse
-      std::vector<int> axes(outWs->getNumDims());
-      Decreasing op(outWs->getNumDims());
-      for(auto it = axes.begin(); it != axes.end(); ++it){
-          *it = static_cast<int>(op());
-      }
+    public:
+      Decreasing(size_t start) : m_current(start) {}
+      size_t operator()() { return --m_current; }
+    };
 
-      IAlgorithm *transpose =
-          FrameworkManager::Instance().createAlgorithm("TransposeMD");
-      transpose->setChild(true);
-      transpose->initialize();
-      transpose->setProperty("InputWorkspace", outWs);
-      transpose->setProperty("Axes", axes);
-      transpose->setPropertyValue("OutputWorkspace", "dummy");
-      transpose->execute();
-      outWs = transpose->getProperty("OutputWorkspace");
+    // Generate the axis order 0, 1, 2 ... in reverse
+    std::vector<int> axes(outWs->getNumDims());
+    Decreasing op(outWs->getNumDims());
+    for (auto it = axes.begin(); it != axes.end(); ++it) {
+      *it = static_cast<int>(op());
+    }
 
+    IAlgorithm *transpose =
+        FrameworkManager::Instance().createAlgorithm("TransposeMD");
+    transpose->setChild(true);
+    transpose->initialize();
+    transpose->setProperty("InputWorkspace", outWs);
+    transpose->setProperty("Axes", axes);
+    transpose->setPropertyValue("OutputWorkspace", "dummy");
+    transpose->execute();
+    outWs = transpose->getProperty("OutputWorkspace");
   }
 
   return boost::dynamic_pointer_cast<MDHistoWorkspace>(outWs);
@@ -266,8 +267,8 @@ public:
     auto shapeWS = makeHistoWorkspace(shapeShape);
 
     std::vector<int> dataShapePreTranspose = boost::assign::list_of(10)(20);
-    auto dataWSTranspose = makeHistoWorkspace(dataShapePreTranspose, true /*transpose it to make it 20 by 10*/);
-
+    auto dataWSTranspose = makeHistoWorkspace(
+        dataShapePreTranspose, true /*transpose it to make it 20 by 10*/);
 
     ReplicateMD alg;
     alg.setRethrows(true);
@@ -284,7 +285,6 @@ public:
     TS_ASSERT_EQUALS(shapeWS->getNumDims(), outWS->getNumDims());
     TS_ASSERT_EQUALS(shapeWS->getNPoints(), outWS->getNPoints());
   }
-
 };
 
 //=====================================================================================

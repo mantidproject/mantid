@@ -76,21 +76,20 @@ public:
   }
 
   void test_width_vector_must_not_be_arbitrary_size() {
-      auto toSmooth = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-          1 /*signal*/, 2 /*numDims*/, 3 /*numBins in each dimension*/);
+    auto toSmooth = MDEventsTestHelper::makeFakeMDHistoWorkspace(
+        1 /*signal*/, 2 /*numDims*/, 3 /*numBins in each dimension*/);
 
-      std::vector<int> badWidths(11, 3); // odd number value = 3, but size of 11 has no meaning
+    std::vector<int> badWidths(
+        11, 3); // odd number value = 3, but size of 11 has no meaning
 
-      SmoothMD alg;
-      alg.setChild(true);
-      alg.initialize();
-      alg.setPropertyValue("OutputWorkspace", "dummy");
-      alg.setProperty("InputWorkspace", toSmooth);
-      alg.setProperty(
-          "WidthVector",
-          badWidths); // Width vector is the wrong size
-      TSM_ASSERT_THROWS("Size of with vector is wrong should throw.", alg.execute(),
-                        std::runtime_error &);
+    SmoothMD alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.setProperty("InputWorkspace", toSmooth);
+    alg.setProperty("WidthVector", badWidths); // Width vector is the wrong size
+    TSM_ASSERT_THROWS("Size of with vector is wrong should throw.",
+                      alg.execute(), std::runtime_error &);
   }
 
   void test_simple_smooth_hat_function() {
@@ -225,7 +224,6 @@ public:
     TS_ASSERT_EQUALS(z, out->getSignalAt(12));
   }
 
-
   void test_smooth_hat_function_mixed_widths() {
 
     auto toSmooth = MDEventsTestHelper::makeFakeMDHistoWorkspace(
@@ -272,58 +270,55 @@ public:
     */
 
     // Check vertexes
-    double expectedSmoothedValue  = 28.0 / 15;
+    double expectedSmoothedValue = 28.0 / 15;
 
     TS_ASSERT_EQUALS(expectedSmoothedValue, out->getSignalAt(12));
   }
 
-
   void test_dimensional_check_of_weight_ws() {
 
-      MDHistoWorkspace_sptr a =
-          MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0 /*signal value*/, 1 /*dimensionality*/,
-                                                       9);
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(
+        1.0 /*signal value*/, 1 /*dimensionality*/, 9);
 
-      MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-          1.0 /*signal value*/,  2 /*dimensionality*/, 9); // one dimension larger
+    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(
+        1.0 /*signal value*/, 2 /*dimensionality*/, 9); // one dimension larger
 
-      SmoothMD alg;
-      alg.setChild(true);
-      alg.initialize();
-      std::vector<int> widthVector(1, 3); // Smooth with width == 3
-      alg.setProperty("WidthVector", widthVector);
-      alg.setProperty("InputWorkspace", a);
-      alg.setProperty("InputNormalizationWorkspace", b);
-      alg.setPropertyValue("OutputWorkspace", "dummy");
+    SmoothMD alg;
+    alg.setChild(true);
+    alg.initialize();
+    std::vector<int> widthVector(1, 3); // Smooth with width == 3
+    alg.setProperty("WidthVector", widthVector);
+    alg.setProperty("InputWorkspace", a);
+    alg.setProperty("InputNormalizationWorkspace", b);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
 
-      TSM_ASSERT_THROWS("Input unsmoothed and input Normalisation workspaces must have the same dimensionality",
-                        alg.execute(), std::runtime_error &);
-
+    TSM_ASSERT_THROWS("Input unsmoothed and input Normalisation workspaces "
+                      "must have the same dimensionality",
+                      alg.execute(), std::runtime_error &);
   }
 
   void test_shape_check_of_weight_ws() {
 
-      const size_t nd = 1;
+    const size_t nd = 1;
 
-      MDHistoWorkspace_sptr a =
-          MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0 /*signal value*/, nd,
-                                                       10);
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(
+        1.0 /*signal value*/, nd, 10);
 
-      MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-          1.0 /*signal value*/, nd, 10 + 1); // one bin longer
+    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(
+        1.0 /*signal value*/, nd, 10 + 1); // one bin longer
 
-      SmoothMD alg;
-      alg.setChild(true);
-      alg.initialize();
-      std::vector<int> widthVector(1, 3); // Smooth with width == 3
-      alg.setProperty("WidthVector", widthVector);
-      alg.setProperty("InputWorkspace", a);
-      alg.setProperty("InputNormalizationWorkspace", b);
-      alg.setPropertyValue("OutputWorkspace", "dummy");
+    SmoothMD alg;
+    alg.setChild(true);
+    alg.initialize();
+    std::vector<int> widthVector(1, 3); // Smooth with width == 3
+    alg.setProperty("WidthVector", widthVector);
+    alg.setProperty("InputWorkspace", a);
+    alg.setProperty("InputNormalizationWorkspace", b);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
 
-      TSM_ASSERT_THROWS("Input unsmoothed and input Normalisation workspaces must have the same shape",
-                        alg.execute(), std::runtime_error &);
-
+    TSM_ASSERT_THROWS("Input unsmoothed and input Normalisation workspaces "
+                      "must have the same shape",
+                      alg.execute(), std::runtime_error &);
   }
 
   void test_smooth_with_normalization_guidance() {
@@ -361,9 +356,10 @@ public:
 
     TSM_ASSERT_EQUALS("Second index should have a smoothed using 2 "
                       "neighbours nothing ignored",
-                      (toSmooth->getSignalAt(0) + toSmooth->getSignalAt(1) + toSmooth->getSignalAt(2)) / 3,
+                      (toSmooth->getSignalAt(0) + toSmooth->getSignalAt(1) +
+                       toSmooth->getSignalAt(2)) /
+                          3,
                       out->getSignalAt(1));
-
 
     TSM_ASSERT_EQUALS("Second to last index should have a smoothed using 1 "
                       "neighbour only neighour at 9 should be ignored",

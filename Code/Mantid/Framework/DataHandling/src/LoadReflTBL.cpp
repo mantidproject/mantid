@@ -122,9 +122,9 @@ size_t LoadReflTBL::findQuotePairs(
 * @throws std::length_error if anything other than 17 columns (or 16
 * cell-delimiting commas) is found
 */
-void
-LoadReflTBL::csvParse(std::string line, std::vector<std::string> &cols,
-                      std::vector<std::vector<size_t>> &quoteBounds) const {
+void LoadReflTBL::csvParse(
+    std::string line, std::vector<std::string> &cols,
+    std::vector<std::vector<size_t>> &quoteBounds) const {
   size_t pairID = 0;
   size_t valsFound = 0;
   size_t lastComma = 0;

@@ -62,7 +62,8 @@ void CreateDummyCalFile::exec() {
   // Get some stuff from the input workspace
   Instrument_const_sptr inst = inputW->getInstrument();
   if (!inst)
-    throw std::invalid_argument("The InputWorkspace does not have an instrument definition");
+    throw std::invalid_argument(
+        "The InputWorkspace does not have an instrument definition");
 
   std::string instname = inst->getName();
 
@@ -156,8 +157,8 @@ void CreateDummyCalFile::exec() {
   return;
 }
 
-bool
-CreateDummyCalFile::groupingFileDoesExist(const std::string &filename) const {
+bool CreateDummyCalFile::groupingFileDoesExist(
+    const std::string &filename) const {
   std::ifstream file(filename.c_str());
   // Check if the file already exists
   if (!file)

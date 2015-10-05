@@ -36,10 +36,10 @@ using API::FileProperty;
 DECLARE_ALGORITHM(AlignAndFocusPowder)
 
 AlignAndFocusPowder::AlignAndFocusPowder()
-    : API::DataProcessorAlgorithm(), m_l1(0.0), m_resampleX(0), dspace(false), xmin(0.0),
-      xmax(0.0), LRef(0.0), DIFCref(0.0), minwl(0.0), maxwl(0.), tmin(0.0), tmax(0.0),
-      m_preserveEvents(false), m_processLowResTOF(false), m_lowResSpecOffset(0),
-      m_progress(NULL) {}
+    : API::DataProcessorAlgorithm(), m_l1(0.0), m_resampleX(0), dspace(false),
+      xmin(0.0), xmax(0.0), LRef(0.0), DIFCref(0.0), minwl(0.0), maxwl(0.),
+      tmin(0.0), tmax(0.0), m_preserveEvents(false), m_processLowResTOF(false),
+      m_lowResSpecOffset(0), m_progress(NULL) {}
 
 AlignAndFocusPowder::~AlignAndFocusPowder() {
   if (m_progress)
@@ -145,9 +145,9 @@ void AlignAndFocusPowder::init() {
   declareProperty(
       "CropWavelengthMin", 0.,
       "Crop the data at this minimum wavelength. Overrides LowResRef.");
-  declareProperty(
-      "CropWavelengthMax", EMPTY_DBL(),
-      "Crop the data at this maximum wavelength. Forces use of CropWavelengthMin.");
+  declareProperty("CropWavelengthMax", EMPTY_DBL(),
+                  "Crop the data at this maximum wavelength. Forces use of "
+                  "CropWavelengthMin.");
   declareProperty("PrimaryFlightPath", -1.0,
                   "If positive, focus positions are changed.  (Default -1) ");
   declareProperty(new ArrayProperty<int32_t>("SpectrumIDs"),
@@ -212,8 +212,9 @@ void splitVectors(const std::vector<NumT> &orig, const size_t numVal,
  * @param avec : The vector to hold the property value.
  * @return : The default value of the requested property.
  */
-double AlignAndFocusPowder::getVecPropertyFromPmOrSelf(
-    const std::string &name, std::vector<double> &avec) {
+double
+AlignAndFocusPowder::getVecPropertyFromPmOrSelf(const std::string &name,
+                                                std::vector<double> &avec) {
   avec = getProperty(name);
   if (!avec.empty()) {
     return avec[0];
@@ -248,15 +249,14 @@ void AlignAndFocusPowder::exec() {
   phis = getProperty("Azimuthal");
   m_params = getProperty("Params");
   dspace = getProperty("DSpacing");
-  auto dmin =
-      getVecPropertyFromPmOrSelf("DMin", m_dmins);
-  auto dmax =
-      getVecPropertyFromPmOrSelf("DMax", m_dmaxs);
+  auto dmin = getVecPropertyFromPmOrSelf("DMin", m_dmins);
+  auto dmax = getVecPropertyFromPmOrSelf("DMax", m_dmaxs);
   LRef = getProperty("UnwrapRef");
   DIFCref = getProperty("LowResRef");
   minwl = getProperty("CropWavelengthMin");
   maxwl = getProperty("CropWavelengthMax");
-  if (maxwl == 0.) maxwl = EMPTY_DBL(); // python can only specify 0 for unused
+  if (maxwl == 0.)
+    maxwl = EMPTY_DBL(); // python can only specify 0 for unused
   tmin = getProperty("TMin");
   tmax = getProperty("TMax");
   m_preserveEvents = getProperty("PreserveEvents");
@@ -496,7 +496,7 @@ void AlignAndFocusPowder::exec() {
 
     g_log.information() << "running CropWorkspace(MinWavelength=" << minwl;
     if (!isEmpty(maxwl))
-        g_log.information() << ", MaxWavelength=" << maxwl;
+      g_log.information() << ", MaxWavelength=" << maxwl;
     g_log.information() << ")\n";
 
     EventWorkspace_sptr ews =
@@ -839,7 +839,7 @@ AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
   // Rename spectrum number
   if (offset >= 1) {
     for (size_t i = 0; i < nspec2; ++i) {
-      specid_t newspecid = maxspecid1 + static_cast<specid_t>((i)+offset);
+      specid_t newspecid = maxspecid1 + static_cast<specid_t>((i) + offset);
       outws->getSpectrum(nspec1 + i)->setSpectrumNo(newspecid);
       // ISpectrum* spec = outws->getSpectrum(nspec1+i);
       // if (spec)

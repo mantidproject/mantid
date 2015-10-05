@@ -69,7 +69,8 @@ createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
   // --------- Load the instrument -----------
   const std::string filename = FileFinder::Instance().getFullPath(
       "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
-  InstrumentDefinitionParser parser(filename, "MINITOPAZ", Strings::loadFile(filename));
+  InstrumentDefinitionParser parser(filename, "MINITOPAZ",
+                                    Strings::loadFile(filename));
   auto instrument = parser.parseXML(NULL);
   retVal->populateInstrumentParameters();
   retVal->setInstrument(instrument);
@@ -128,8 +129,9 @@ createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
  * @param coord :: Required coordinate system
  * @return MDEW sptr
  */
-MDEventWorkspace3Lean::sptr makeFakeMDEventWorkspace(const std::string &wsName,
-                                                     long numEvents, Kernel::SpecialCoordinateSystem coord) {
+MDEventWorkspace3Lean::sptr
+makeFakeMDEventWorkspace(const std::string &wsName, long numEvents,
+                         Kernel::SpecialCoordinateSystem coord) {
   // ---------- Make a file-backed MDEventWorkspace -----------------------
   MDEventWorkspace3Lean::sptr ws1 =
       MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);

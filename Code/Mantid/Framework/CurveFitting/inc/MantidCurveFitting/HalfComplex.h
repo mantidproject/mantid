@@ -16,10 +16,9 @@ class HalfComplex {
   double *m_data; ///< pointer to the transformed data
   bool m_even;    ///< true if the size of the original data is even
 public:
-
-   /// Constructor.
-   /// @param data :: A pointer to the transformed complex data
-   /// @param n :: The size of untransformed real data
+  /// Constructor.
+  /// @param data :: A pointer to the transformed complex data
+  /// @param n :: The size of untransformed real data
   HalfComplex(double *data, const size_t &n)
       : m_size(n / 2 + 1), m_data(data), m_even(n / 2 * 2 == n) {}
   /// Returns the size of the transform
@@ -47,7 +46,7 @@ public:
       return 0;
     return m_data[2 * i];
   }
-  
+
   /// Set a new value for i-th complex coefficient
   /// @param i :: The index of the coefficient
   /// @param re :: The real part of the new value

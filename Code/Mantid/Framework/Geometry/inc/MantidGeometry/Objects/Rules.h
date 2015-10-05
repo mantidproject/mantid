@@ -46,8 +46,8 @@ private:
 
   static int addToKey(std::vector<int> &AV, const int passN = -1);
 
-  int
-  getBaseKeys(std::vector<int> &) const; ///< Fills the vector with the surfaces
+  int getBaseKeys(
+      std::vector<int> &) const; ///< Fills the vector with the surfaces
 
 public:
   static int makeCNFcopy(Rule *&); ///< Make Rule into a CNF format (slow)

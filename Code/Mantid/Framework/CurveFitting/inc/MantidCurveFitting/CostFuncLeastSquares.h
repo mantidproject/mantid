@@ -84,8 +84,7 @@ protected:
   void addValDerivHessian(API::IFunction_sptr function,
                           API::FunctionDomain_sptr domain,
                           API::FunctionValues_sptr values,
-                          bool evalDeriv = true,
-                          bool evalHessian = true) const;
+                          bool evalDeriv = true, bool evalHessian = true) const;
 
   /// Get mapped weights from FunctionValues
   virtual std::vector<double>

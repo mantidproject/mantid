@@ -40,7 +40,7 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
     // We require the same number of histograms
     if (qResolution->getNumberHistograms() != dataWS->getNumberHistograms()) {
       throw std::invalid_argument("The QResolution should have one spectrum"
-                                   "per spectrum of the input workspace");
+                                  "per spectrum of the input workspace");
     }
 
     // We require the same binning for the input workspace and the q resolution
@@ -49,13 +49,13 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
     MantidVec::const_iterator qResX = qResolution->readX(0).begin();
     for (; reqX != dataWS->readX(0).end(); ++reqX, ++qResX) {
       if (*reqX != *qResX) {
-        throw std::invalid_argument("The QResolution needs to have the same binning as"
-                                    "as the input workspace.");
+        throw std::invalid_argument(
+            "The QResolution needs to have the same binning as"
+            "as the input workspace.");
       }
     }
   }
 }
-
 
 /** Checks if workspaces input to Q1D or Qxy are reasonable
   @param dataWS data workspace
@@ -142,7 +142,6 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
     }
   }
 }
-
 
 /** Finds the first index number of the first wavelength bin that should
 * included based on the

@@ -35,13 +35,12 @@ using namespace Mantid::Kernel;
 
 //---- Constructors
 //-------------------------------------------------------------------
-EventWorkspace::EventWorkspace() : data(), m_noVectors(),
-  mru(new EventWorkspaceMRU) {
-}
+EventWorkspace::EventWorkspace()
+    : data(), m_noVectors(), mru(new EventWorkspaceMRU) {}
 
 EventWorkspace::EventWorkspace(const EventWorkspace &other)
     : IEventWorkspace(other), mru(new EventWorkspaceMRU) {
-    copyDataFrom(other);
+  copyDataFrom(other);
 }
 
 EventWorkspace::~EventWorkspace() {

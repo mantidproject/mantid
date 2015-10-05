@@ -94,11 +94,14 @@ public:
                             boost::lexical_cast<std::string>(i),
                         *inSpec->getDetectorIDs().begin(),
                         *outSpec->getDetectorIDs().begin());
-      TSM_ASSERT_EQUALS("Failed on readX for Histogram: " + boost::lexical_cast<std::string>(i),
+      TSM_ASSERT_EQUALS("Failed on readX for Histogram: " +
+                            boost::lexical_cast<std::string>(i),
                         in->readX(i), out->readX(i));
-      TSM_ASSERT_EQUALS("Failed on readY for Histogram: " + boost::lexical_cast<std::string>(i),
+      TSM_ASSERT_EQUALS("Failed on readY for Histogram: " +
+                            boost::lexical_cast<std::string>(i),
                         in->readY(i), out->readY(i));
-      TSM_ASSERT_EQUALS("Failed on readE for Histogram: " + boost::lexical_cast<std::string>(i),
+      TSM_ASSERT_EQUALS("Failed on readE for Histogram: " +
+                            boost::lexical_cast<std::string>(i),
                         in->readE(i), out->readE(i));
     }
   }

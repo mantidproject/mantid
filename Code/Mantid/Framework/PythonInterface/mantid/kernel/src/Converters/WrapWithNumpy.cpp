@@ -47,9 +47,8 @@ PyObject *wrapWithNDArray(const ElementType *carray, const int ndims,
                           Py_intptr_t *dims, const NumpyWrapMode mode) {
   int datatype = NDArrayTypeIndex<ElementType>::typenum;
   PyArrayObject *nparray = (PyArrayObject *)PyArray_SimpleNewFromData(
-        ndims, dims, datatype,
-        static_cast<void *>(const_cast<ElementType *>(carray)));
-
+      ndims, dims, datatype,
+      static_cast<void *>(const_cast<ElementType *>(carray)));
 
   if (mode == ReadOnly)
     markReadOnly(nparray);

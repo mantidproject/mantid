@@ -314,8 +314,8 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr &WS,
 /** Find all detectors in the comp and push the IComp pointers onto m_vectDet
  * @param comp :: The component to search
  */
-void
-SetScalingPSD::findAll(boost::shared_ptr<const Geometry::IComponent> comp) {
+void SetScalingPSD::findAll(
+    boost::shared_ptr<const Geometry::IComponent> comp) {
   boost::shared_ptr<const IDetector> det =
       boost::dynamic_pointer_cast<const IDetector>(comp);
   if (det) {

@@ -46,8 +46,8 @@ void PoldiFitPeaks1D::init() {
       new WorkspaceProperty<Workspace2D>("InputWorkspace", "",
                                          Direction::Input),
       "An input workspace containing a POLDI auto-correlation spectrum.");
-  boost::shared_ptr<BoundedValidator<double> > minFwhmPerDirection =
-      boost::make_shared<BoundedValidator<double> >();
+  boost::shared_ptr<BoundedValidator<double>> minFwhmPerDirection =
+      boost::make_shared<BoundedValidator<double>>();
   minFwhmPerDirection->setLower(2.0);
   declareProperty(
       "FwhmMultiples", 2.0, minFwhmPerDirection,
@@ -56,7 +56,7 @@ void PoldiFitPeaks1D::init() {
 
   std::vector<std::string> peakFunctions =
       FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
-  boost::shared_ptr<ListValidator<std::string> > peakFunctionNames(
+  boost::shared_ptr<ListValidator<std::string>> peakFunctionNames(
       new ListValidator<std::string>(peakFunctions));
   declareProperty("PeakFunction", "Gaussian", peakFunctionNames,
                   "Peak function that will be fitted to all peaks.",

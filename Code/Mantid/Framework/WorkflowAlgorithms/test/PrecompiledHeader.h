@@ -9,4 +9,4 @@
 #include <set>
 #include <string>
 
-#endif //MANTID_WORKFLOWALGORITHMS
+#endif // MANTID_WORKFLOWALGORITHMS

@@ -47,7 +47,8 @@ public:
   }
 
   void do_test_exec(size_t numPerBox, std::string filename,
-                    bool MakeFileBacked = false, bool UpdateFileBackEnd = false) {
+                    bool MakeFileBacked = false,
+                    bool UpdateFileBackEnd = false) {
 
     // Make a 1D MDEventWorkspace
     MDEventWorkspace1Lean::sptr ws =

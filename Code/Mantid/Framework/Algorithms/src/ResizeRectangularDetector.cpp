@@ -49,8 +49,8 @@ const std::string ResizeRectangularDetector::category() const {
 void ResizeRectangularDetector::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(new WorkspaceProperty<Workspace>(
-      "Workspace", "Anonymous", Direction::InOut));
+  declareProperty(new WorkspaceProperty<Workspace>("Workspace", "Anonymous",
+                                                   Direction::InOut));
   declareProperty("ComponentName", "",
                   "The name of the RectangularDetector to resize.");
   declareProperty("ScaleX", 1.0,
@@ -65,16 +65,17 @@ void ResizeRectangularDetector::init() {
 void ResizeRectangularDetector::exec() {
   // Get the input workspace
   Workspace_sptr ws = getProperty("Workspace");
-  MatrixWorkspace_sptr inputW = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
-  DataObjects::PeaksWorkspace_sptr inputP = boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
+  MatrixWorkspace_sptr inputW =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  DataObjects::PeaksWorkspace_sptr inputP =
+      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
 
   // Get some stuff from the input workspace
   Instrument_sptr inst;
   if (inputW) {
-    inst= boost::const_pointer_cast<Instrument>(inputW->getInstrument());
-  }
-  else if (inputP) {
-    inst= boost::const_pointer_cast<Instrument>(inputP->getInstrument());
+    inst = boost::const_pointer_cast<Instrument>(inputW->getInstrument());
+  } else if (inputP) {
+    inst = boost::const_pointer_cast<Instrument>(inputP->getInstrument());
   }
 
   std::string ComponentName = getPropertyValue("ComponentName");
@@ -103,8 +104,7 @@ void ResizeRectangularDetector::exec() {
     pmap.addDouble(det->getComponentID(), "scaley", ScaleY);
 
     pmap.clearPositionSensitiveCaches();
-  }
-  else if (inputP) {
+  } else if (inputP) {
     Geometry::ParameterMap &pmap = inputP->instrumentParameters();
     // Add a parameter for the new scale factors
     pmap.addDouble(det->getComponentID(), "scalex", ScaleX);
@@ -112,7 +112,6 @@ void ResizeRectangularDetector::exec() {
 
     pmap.clearPositionSensitiveCaches();
   }
-
 }
 
 } // namespace Mantid

@@ -120,8 +120,8 @@ void CompositeCluster::findMinimum() const {
  * Convert the disjointSet to a uniform minimum value
  * @param disjointSet : DisjointSets to adapt.
  */
-void
-CompositeCluster::toUniformMinimum(std::vector<DisjointElement> &disjointSet) {
+void CompositeCluster::toUniformMinimum(
+    std::vector<DisjointElement> &disjointSet) {
   if (!m_ownedClusters.empty()) {
     ICluster *minCluster = m_ownedClusters.front().get();
     size_t minLabel = minCluster->getLabel();

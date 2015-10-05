@@ -10,8 +10,8 @@ PeakTransformSelector::PeakTransformSelector() {}
 Register a peak transform factory as a candidate.
 @param candidate : candidate peak transform factory
 */
-void
-PeakTransformSelector::registerCandidate(PeakTransformFactory_sptr candidate) {
+void PeakTransformSelector::registerCandidate(
+    PeakTransformFactory_sptr candidate) {
   m_candidateFactories.insert(candidate);
 }
 
@@ -98,9 +98,8 @@ transformation.
 @param labelY: Y-label to use in determining selection.
 @return TRUE only if such a factory is available.
 */
-bool
-PeakTransformSelector::hasFactoryForTransform(const std::string labelX,
-                                              const std::string labelY) const {
+bool PeakTransformSelector::hasFactoryForTransform(
+    const std::string labelX, const std::string labelY) const {
   bool hasFactoryForTransform = true;
   try {
     this->makeChoice(labelX, labelY);

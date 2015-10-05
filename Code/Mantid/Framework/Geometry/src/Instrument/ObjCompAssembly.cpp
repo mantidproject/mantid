@@ -11,7 +11,7 @@
 #include <iostream>
 
 namespace {
-  Mantid::Kernel::Logger g_log("ObjCompAssembly");
+Mantid::Kernel::Logger g_log("ObjCompAssembly");
 }
 
 namespace Mantid {
@@ -366,7 +366,8 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline() {
   }
 
   if (nelements() < 2) {
-    g_log.warning("Creating outline with fewer than 2 elements. The outline displayed may be inaccurate.");
+    g_log.warning("Creating outline with fewer than 2 elements. The outline "
+                  "displayed may be inaccurate.");
   }
 
   // Get information about the shape and size of a detector

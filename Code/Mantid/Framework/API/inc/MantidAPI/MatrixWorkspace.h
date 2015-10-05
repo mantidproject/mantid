@@ -135,7 +135,7 @@ public:
   getDetectorIDToWorkspaceIndexVector(std::vector<size_t> &out, detid_t &offset,
                                       bool throwIfMultipleDets = false) const;
   virtual void getSpectrumToWorkspaceIndexVector(std::vector<size_t> &out,
-                                         specid_t &offset) const;
+                                                 specid_t &offset) const;
   void getIndicesFromSpectra(const std::vector<specid_t> &spectraList,
                              std::vector<size_t> &indexList) const;
   size_t getIndexFromSpectrumNumber(const specid_t specNo) const;
@@ -283,7 +283,8 @@ public:
   }
 
   /// Set the specified Dx (X Error) array to point to the given existing array
-  virtual void setDx(const std::size_t index, const MantidVecPtr::ptr_type &Dx) {
+  virtual void setDx(const std::size_t index,
+                     const MantidVecPtr::ptr_type &Dx) {
     getSpectrum(index)->setX(Dx);
     invalidateCommonBinsFlag();
   }
@@ -373,7 +374,8 @@ public:
   const MaskList &maskedBins(const size_t &spectrumIndex) const;
 
   // Methods handling the internal monitor workspace
-  virtual void setMonitorWorkspace(const boost::shared_ptr<MatrixWorkspace> &monitorWS);
+  virtual void
+  setMonitorWorkspace(const boost::shared_ptr<MatrixWorkspace> &monitorWS);
   boost::shared_ptr<MatrixWorkspace> monitorWorkspace() const;
 
   void saveInstrumentNexus(::NeXus::File *file) const;

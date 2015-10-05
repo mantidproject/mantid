@@ -1686,10 +1686,9 @@ int GenerateEventsFilter::determineChangingDirection(int startindex) {
 //----------------------------------------------------------------------------------------------
 /** Add a new splitter to vector of splitters.  It is used by FilterByTime only.
   */
-void
-GenerateEventsFilter::addNewTimeFilterSplitter(Kernel::DateAndTime starttime,
-                                               Kernel::DateAndTime stoptime,
-                                               int wsindex, string info) {
+void GenerateEventsFilter::addNewTimeFilterSplitter(
+    Kernel::DateAndTime starttime, Kernel::DateAndTime stoptime, int wsindex,
+    string info) {
   if (m_forFastLog) {
     // For MatrixWorkspace splitter
     // Start of splitter

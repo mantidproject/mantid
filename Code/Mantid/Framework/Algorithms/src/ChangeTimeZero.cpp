@@ -24,7 +24,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using std::size_t;
 
-
 namespace {
 /**
  * General check if we are dealing with a time series
@@ -81,7 +80,7 @@ void ChangeTimeZero::exec() {
   // Create a new target workspace if it does not exist
   const double progressStartCreateOutputWs = 0.0;
   const double progressStopCreateOutputWs = 0.3;
-   
+
   MatrixWorkspace_sptr out_ws = createOutputWS(
       in_ws, progressStartCreateOutputWs, progressStopCreateOutputWs);
 

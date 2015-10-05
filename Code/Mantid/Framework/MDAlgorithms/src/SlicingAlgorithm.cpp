@@ -26,8 +26,7 @@ SlicingAlgorithm::SlicingAlgorithm()
     : m_transform(), m_transformFromOriginal(), m_transformToOriginal(),
       m_transformFromIntermediate(), m_transformToIntermediate(),
       m_axisAligned(true), m_outD(0), // unititialized and should be invalid
-      m_NormalizeBasisVectors(false)
-{}
+      m_NormalizeBasisVectors(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -379,7 +378,7 @@ void SlicingAlgorithm::createGeneralTransform() {
   // Now, convert the original vector to the coordinates of the ORIGNAL ws, if
   // any
   if (m_originalWS) {
-    CoordTransform const*toOrig = m_inWS->getTransformToOriginal();
+    CoordTransform const *toOrig = m_inWS->getTransformToOriginal();
     m_translation = toOrig->applyVMD(m_translation);
   }
 
@@ -394,19 +393,19 @@ void SlicingAlgorithm::createGeneralTransform() {
   DataObjects::CoordTransformAffine *ct =
       new DataObjects::CoordTransformAffine(inD, m_outD);
   // Note: the scaling makes the coordinate correspond to a bin index
-  //ct->buildOrthogonal(m_inputMinPoint, this->m_bases,
+  // ct->buildOrthogonal(m_inputMinPoint, this->m_bases,
   //                    VMD(this->m_binningScaling));
   ct->buildNonOrthogonal(m_inputMinPoint, this->m_bases,
-                          VMD(this->m_binningScaling)/VMD(m_transformScaling));
+                         VMD(this->m_binningScaling) / VMD(m_transformScaling));
   this->m_transform = ct;
 
   // Transformation original->binned
   DataObjects::CoordTransformAffine *ctFrom =
       new DataObjects::CoordTransformAffine(inD, m_outD);
-  //ctFrom->buildOrthogonal(m_translation, this->m_bases,
+  // ctFrom->buildOrthogonal(m_translation, this->m_bases,
   //                        VMD(m_transformScaling));
   ctFrom->buildNonOrthogonal(m_translation, this->m_bases,
-                             VMD(m_transformScaling)/VMD(m_transformScaling));
+                             VMD(m_transformScaling) / VMD(m_transformScaling));
   m_transformFromOriginal = ctFrom;
 
   // Validate
@@ -600,9 +599,10 @@ void SlicingAlgorithm::createAlignedTransform() {
   } else {
     // Changed # of dimensions - can't reverse the transform
     m_transformToOriginal = NULL;
-    g_log.warning("SlicingAlgorithm: Your slice will cause the output workspace to have less dimensions than the input. This will affect your ability to create subsequent slices.");
+    g_log.warning("SlicingAlgorithm: Your slice will cause the output "
+                  "workspace to have less dimensions than the input. This will "
+                  "affect your ability to create subsequent slices.");
   }
-   
 }
 
 //-----------------------------------------------------------------------------------------------

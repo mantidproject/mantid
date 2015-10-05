@@ -165,8 +165,8 @@ private:
   /// typedef for Scoped Lock
   typedef Poco::FastMutex::ScopedLock MutexLocker;
   /// iterator typedef
-  typedef typename std::map<const KEYTYPE, VALUETYPE>::iterator
-      CacheMapIterator;
+  typedef
+      typename std::map<const KEYTYPE, VALUETYPE>::iterator CacheMapIterator;
   /// const_iterator typedef
   typedef typename std::map<const KEYTYPE, VALUETYPE>::const_iterator
       CacheMapConstIterator;

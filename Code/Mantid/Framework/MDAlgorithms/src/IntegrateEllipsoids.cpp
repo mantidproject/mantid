@@ -44,9 +44,11 @@ const std::size_t DIMS(3);
  * @param UBinv : inverse of UB matrix
  * @param hkl_integ ; boolean for integrating in HKL space
  */
-void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator, Progress &prog,
-                      EventWorkspace_sptr &wksp,
-                      DblMatrix const &UBinv, bool hkl_integ) {
+void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator,
+                                           Progress &prog,
+                                           EventWorkspace_sptr &wksp,
+                                           DblMatrix const &UBinv,
+                                           bool hkl_integ) {
   // loop through the eventlists
 
   int numSpectra = static_cast<int>(wksp->getNumberHistograms());
@@ -93,12 +95,11 @@ void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator, Progre
         buffer[dim] = locCoord[dim];
       }
       V3D qVec(buffer[0], buffer[1], buffer[2]);
-      if (hkl_integ) qVec = UBinv * qVec;
+      if (hkl_integ)
+        qVec = UBinv * qVec;
       qList.push_back(std::make_pair(event->m_weight, qVec));
     } // end of loop over events in list
-    PARALLEL_CRITICAL(addEvents){
-      integrator.addEvents(qList, hkl_integ);
-    }
+    PARALLEL_CRITICAL(addEvents) { integrator.addEvents(qList, hkl_integ); }
 
     prog.report();
     PARALLEL_END_INTERUPT_REGION
@@ -115,9 +116,11 @@ void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator, Progre
  * @param UBinv : inverse of UB matrix
  * @param hkl_integ ; boolean for integrating in HKL space
  */
-void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator, Progress &prog,
-                      Workspace2D_sptr &wksp,
-                      DblMatrix const &UBinv, bool hkl_integ) {
+void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
+                                           Progress &prog,
+                                           Workspace2D_sptr &wksp,
+                                           DblMatrix const &UBinv,
+                                           bool hkl_integ) {
 
   // loop through the eventlists
 
@@ -170,16 +173,15 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator, Progre
                                        // qVec
         }
         V3D qVec(buffer[0], buffer[1], buffer[2]);
-        if (hkl_integ) qVec = UBinv * qVec;
+        if (hkl_integ)
+          qVec = UBinv * qVec;
 
         // Account for counts in histograms by increasing the qList with the
         // same q-point
         qList.push_back(std::make_pair(yVal, qVec));
       }
     }
-    PARALLEL_CRITICAL(addHisto) {
-      integrator.addEvents(qList, hkl_integ);
-    }
+    PARALLEL_CRITICAL(addHisto) { integrator.addEvents(qList, hkl_integ); }
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   } // end of loop over spectra
@@ -273,9 +275,8 @@ void IntegrateEllipsoids::init() {
                   "Number of sigmas to add to mean of half-length of "
                   "major radius for second pass when SpecifySize is false.");
 
-  declareProperty(
-      "IntegrateInHKL", false,
-      "If true, integrate in HKL space not Q space.");
+  declareProperty("IntegrateInHKL", false,
+                  "If true, integrate in HKL space not Q space.");
 
   declareProperty(
       "IntegrateIfOnEdge", true,
@@ -318,26 +319,26 @@ void IntegrateEllipsoids::exec() {
   double back_outer_radius = getProperty("BackgroundOuterSize");
   bool hkl_integ = getProperty("IntegrateInHKL");
   bool integrateEdge = getProperty("IntegrateIfOnEdge");
-   if (!integrateEdge)
-   {
-     // This only fails in the unit tests which say that MaskBTP is not registered
-     try {
-       runMaskDetectors(in_peak_ws, "Tube", "edges");
-       runMaskDetectors(in_peak_ws, "Pixel", "edges");
-     } catch (...) {
-       g_log.error("Can't execute MaskBTP algorithm for this instrument to set "
-                   "edge for IntegrateIfOnEdge option");
-     }
+  if (!integrateEdge) {
+    // This only fails in the unit tests which say that MaskBTP is not
+    // registered
+    try {
+      runMaskDetectors(in_peak_ws, "Tube", "edges");
+      runMaskDetectors(in_peak_ws, "Pixel", "edges");
+    } catch (...) {
+      g_log.error("Can't execute MaskBTP algorithm for this instrument to set "
+                  "edge for IntegrateIfOnEdge option");
+    }
     // Get the instrument and its detectors
     Geometry::Instrument_const_sptr inst = in_peak_ws->getInstrument();
-    calculateE1(inst);  //fill E1Vec for use in detectorQ
-   }
+    calculateE1(inst); // fill E1Vec for use in detectorQ
+  }
 
-   Mantid::DataObjects::PeaksWorkspace_sptr peak_ws =
-       getProperty("OutputWorkspace");
-   if (peak_ws != in_peak_ws) {
-     peak_ws.reset(in_peak_ws->clone().release());
-   }
+  Mantid::DataObjects::PeaksWorkspace_sptr peak_ws =
+      getProperty("OutputWorkspace");
+  if (peak_ws != in_peak_ws) {
+    peak_ws.reset(in_peak_ws->clone().release());
+  }
 
   // get UBinv and the list of
   // peak Q's for the integrator
@@ -422,8 +423,8 @@ void IntegrateEllipsoids::exec() {
       peak_q = peaks[i].getQLabFrame();
       std::vector<double> axes_radii;
       Mantid::Geometry::PeakShape_const_sptr shape =
-          integrator.ellipseIntegrateEvents(E1Vec,
-              peak_q, specify_size, peak_radius, back_inner_radius,
+          integrator.ellipseIntegrateEvents(
+              E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
               back_outer_radius, axes_radii, inti, sigi);
       peaks[i].setIntensity(inti);
       peaks[i].setSigmaIntensity(sigi);
@@ -497,8 +498,8 @@ void IntegrateEllipsoids::exec() {
         if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
           peak_q = peaks[i].getQLabFrame();
           std::vector<double> axes_radii;
-          integrator.ellipseIntegrateEvents(E1Vec,
-              peak_q, specify_size, peak_radius, back_inner_radius,
+          integrator.ellipseIntegrateEvents(
+              E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
               back_outer_radius, axes_radii, inti, sigi);
           peaks[i].setIntensity(inti);
           peaks[i].setSigmaIntensity(sigi);
@@ -604,8 +605,8 @@ void IntegrateEllipsoids::calculateE1(Geometry::Instrument_const_sptr inst) {
                  1. - std::cos(tt1)); // end of trajectory
     E1 = E1 * (1. / E1.norm());       // normalize
     E1Vec.push_back(E1);
-    }
   }
+}
 
 void IntegrateEllipsoids::runMaskDetectors(
     Mantid::DataObjects::PeaksWorkspace_sptr peakWS, std::string property,

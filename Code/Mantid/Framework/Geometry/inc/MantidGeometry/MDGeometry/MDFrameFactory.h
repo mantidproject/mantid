@@ -14,15 +14,15 @@ namespace Mantid {
 namespace Geometry {
 
 /// Input argument type for MDFrameFactory chainable factory
-class MANTID_GEOMETRY_DLL MDFrameArgument{
+class MANTID_GEOMETRY_DLL MDFrameArgument {
 public:
-    const std::string unitString;
-    const std::string frameString;
-    MDFrameArgument(const std::string& _frameString, const std::string& _unitString) :
-        unitString(_unitString), frameString(_frameString){}
-    MDFrameArgument(const std::string& _frameString) :
-        unitString(""), frameString(_frameString){}
-
+  const std::string unitString;
+  const std::string frameString;
+  MDFrameArgument(const std::string &_frameString,
+                  const std::string &_unitString)
+      : unitString(_unitString), frameString(_frameString) {}
+  MDFrameArgument(const std::string &_frameString)
+      : unitString(""), frameString(_frameString) {}
 };
 
 /** MDFrameFactory.h : Chain of repsonsibility factory for the MDFrameFactory
@@ -49,9 +49,10 @@ public:
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_GEOMETRY_DLL MDFrameFactory
-    : public Kernel::ChainableFactory<MDFrameFactory, MDFrame, MDFrameArgument> {
+    : public Kernel::ChainableFactory<MDFrameFactory, MDFrame,
+                                      MDFrameArgument> {
 public:
-  virtual ~MDFrameFactory(){}
+  virtual ~MDFrameFactory() {}
 };
 
 /// Helper typedef
@@ -64,37 +65,38 @@ typedef std::unique_ptr<MDFrameFactory> MDFrameFactory_uptr;
 /// GeneralFrameFactory derived MDFrameFactory type
 class MANTID_GEOMETRY_DLL GeneralFrameFactory : public MDFrameFactory {
 private:
-  GeneralFrame* createRaw(const MDFrameArgument &argument) const;
+  GeneralFrame *createRaw(const MDFrameArgument &argument) const;
+
 public:
   bool canInterpret(const MDFrameArgument &) const;
 };
 
 /// QLabFrameFactory derived MDFrameFactory type
 class MANTID_GEOMETRY_DLL QLabFrameFactory : public MDFrameFactory {
-  private:
-    QLab*   createRaw(const MDFrameArgument& argument) const;
-  public:
-    bool canInterpret(const MDFrameArgument& argument) const;
+private:
+  QLab *createRaw(const MDFrameArgument &argument) const;
+
+public:
+  bool canInterpret(const MDFrameArgument &argument) const;
 };
 
 /// QSampleFrameFactory derived MDFrameFactory type
 class MANTID_GEOMETRY_DLL QSampleFrameFactory : public MDFrameFactory {
-  private:
-    QSample*   createRaw(const MDFrameArgument& argument) const;
-  public:
-    bool canInterpret(const MDFrameArgument& argument) const;
+private:
+  QSample *createRaw(const MDFrameArgument &argument) const;
+
+public:
+  bool canInterpret(const MDFrameArgument &argument) const;
 };
 
 /// HKLFrame derived MDFrameFactory type
 class MANTID_GEOMETRY_DLL HKLFrameFactory : public MDFrameFactory {
-  private:
-    HKL*   createRaw(const MDFrameArgument& argument) const;
-  public:
-    bool canInterpret(const MDFrameArgument& argument) const;
+private:
+  HKL *createRaw(const MDFrameArgument &argument) const;
+
+public:
+  bool canInterpret(const MDFrameArgument &argument) const;
 };
-
-
-
 
 /// Make a complete factory chain
 MDFrameFactory_uptr MANTID_GEOMETRY_DLL makeMDFrameFactoryChain();

@@ -170,7 +170,7 @@ void LoadILLAscii::exec() {
     // debugging
     //		std::stringstream outWorkspaceNameStream;
     //		outWorkspaceNameStream << "test" <<
-    //std::distance(spectraList.begin(),
+    // std::distance(spectraList.begin(),
     // iSpectra);
     //		AnalysisDataService::Instance().addOrReplace(outWorkspaceNameStream.str(),
     // thisWorkspace);

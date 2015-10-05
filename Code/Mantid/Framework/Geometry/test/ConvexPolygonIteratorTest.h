@@ -48,21 +48,21 @@ public:
     ConvexPolygon::Iterator iter(poly);
     auto p01 = iter.edge();
     TS_ASSERT_EQUALS(V2D(), p01.start());
-    TS_ASSERT_EQUALS(V2D(0.0,1.0), p01.end());
+    TS_ASSERT_EQUALS(V2D(0.0, 1.0), p01.end());
 
     ++iter;
     auto p12 = iter.edge();
-    TS_ASSERT_EQUALS(V2D(0.0,1.0), p12.start());
-    TS_ASSERT_EQUALS(V2D(2.0,1.0), p12.end());
-    
+    TS_ASSERT_EQUALS(V2D(0.0, 1.0), p12.start());
+    TS_ASSERT_EQUALS(V2D(2.0, 1.0), p12.end());
+
     // Check final has first as end point
     ++iter;
     ++iter;
     auto p40 = iter.edge();
-    TS_ASSERT_EQUALS(V2D(2.0,0.0), p40.start());
+    TS_ASSERT_EQUALS(V2D(2.0, 0.0), p40.start());
     TS_ASSERT_EQUALS(V2D(), p40.end());
   }
-  
+
   // --------------------- Failure cases --------------------------------------
 
   void test_Invalid_Polygon_Theows_Error_On_Construction() {

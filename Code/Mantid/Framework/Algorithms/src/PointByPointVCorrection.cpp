@@ -137,10 +137,9 @@ void PointByPointVCorrection::exec() {
  *  @param w2 ::  The second input workspace
  *  @param out :: Pointer to the output workspace
  */
-void
-PointByPointVCorrection::check_validity(API::MatrixWorkspace_const_sptr &w1,
-                                        API::MatrixWorkspace_const_sptr &w2,
-                                        API::MatrixWorkspace_sptr &out) {
+void PointByPointVCorrection::check_validity(
+    API::MatrixWorkspace_const_sptr &w1, API::MatrixWorkspace_const_sptr &w2,
+    API::MatrixWorkspace_sptr &out) {
   // First check that the instrument matches for both input workspaces
   if (w1->getInstrument()->getName() != w2->getInstrument()->getName()) {
     g_log.error("The input workspaces have different instrument definitions");
@@ -185,10 +184,9 @@ PointByPointVCorrection::check_validity(API::MatrixWorkspace_const_sptr &w1,
  *  @param w2 :: The second (vanadium) input workspace
  *  @param index :: The workspace index to check
  */
-void
-PointByPointVCorrection::check_masks(const API::MatrixWorkspace_const_sptr &w1,
-                                     const API::MatrixWorkspace_const_sptr &w2,
-                                     const int &index) const {
+void PointByPointVCorrection::check_masks(
+    const API::MatrixWorkspace_const_sptr &w1,
+    const API::MatrixWorkspace_const_sptr &w2, const int &index) const {
   static bool warned = false;
   if (!warned) {
     const bool w1masked = w1->hasMaskedBins(index);

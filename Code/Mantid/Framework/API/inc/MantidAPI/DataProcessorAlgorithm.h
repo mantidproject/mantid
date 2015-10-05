@@ -55,16 +55,17 @@ protected:
   void setLoadAlgFileProp(const std::string &filePropName);
   void setAccumAlg(const std::string &alg);
   void setPropManagerPropName(const std::string &propName);
-  void mapPropertyName(const std::string &nameInProp, const std::string &nameInPropManager);
-  void copyProperty(API::Algorithm_sptr alg, const std::string& name);
+  void mapPropertyName(const std::string &nameInProp,
+                       const std::string &nameInPropManager);
+  void copyProperty(API::Algorithm_sptr alg, const std::string &name);
   virtual ITableWorkspace_sptr determineChunk(const std::string &filename);
   virtual MatrixWorkspace_sptr loadChunk(const size_t rowIndex);
   Workspace_sptr load(const std::string &inputData,
                       const bool loadQuiet = false);
   std::vector<std::string> splitInput(const std::string &input);
   void forwardProperties();
-  boost::shared_ptr<Kernel::PropertyManager>
-  getProcessProperties(const std::string &propertyManager=std::string()) const;
+  boost::shared_ptr<Kernel::PropertyManager> getProcessProperties(
+      const std::string &propertyManager = std::string()) const;
   /// MPI option. If false, we will use one job event if MPI is available
   bool m_useMPI;
   Workspace_sptr assemble(Workspace_sptr partialWS);

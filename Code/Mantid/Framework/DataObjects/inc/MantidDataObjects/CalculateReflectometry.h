@@ -47,7 +47,10 @@ public:
    */
   virtual double calculateDim1(double wavelength) const = 0;
 
-  virtual Mantid::Geometry::Quadrilateral createQuad(double lamLower, double lamUpper, double thetaLower, double thetaUpper) = 0;
+  virtual Mantid::Geometry::Quadrilateral createQuad(double lamLower,
+                                                     double lamUpper,
+                                                     double thetaLower,
+                                                     double thetaUpper) = 0;
 };
 }
 }

@@ -7,8 +7,6 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-
-
 /** ReflectometryTransformP : Calculates workspace(s) of Pi and Pf based on the
   input workspace and incident theta angle.
 

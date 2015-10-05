@@ -94,8 +94,8 @@ void ComptonPeakProfile::setUpForFit() {
  * Throws if it is not a MatrixWorkspace
  * @param ws The workspace set as input
  */
-void
-ComptonPeakProfile::setWorkspace(boost::shared_ptr<const API::Workspace> ws) {
+void ComptonPeakProfile::setWorkspace(
+    boost::shared_ptr<const API::Workspace> ws) {
   auto workspace = boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws);
   if (!workspace) {
     throw std::invalid_argument(

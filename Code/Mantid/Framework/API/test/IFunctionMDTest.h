@@ -8,12 +8,9 @@
 using namespace Mantid;
 using namespace Mantid::API;
 
-class IFunctionMDTest : public CxxTest::TestSuite
-{
+class IFunctionMDTest : public CxxTest::TestSuite {
 public:
-
-  void testIFunction()
-  {
+  void testIFunction() {
     // What does this test do??
     int i = 1;
     TS_ASSERT(i);
@@ -31,7 +28,6 @@ public:
 
     // std::cerr<<"\nn="<<ws->axes()<<"\n";
   }
-
 };
 
 #endif /*IFUNCTIONMDTEST_H_*/

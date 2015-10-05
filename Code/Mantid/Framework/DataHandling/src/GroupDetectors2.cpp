@@ -659,10 +659,9 @@ void GroupDetectors2::processGroupingWorkspace(
 * in
 * a group (so far)
 */
-void
-GroupDetectors2::processMatrixWorkspace(MatrixWorkspace_const_sptr groupWS,
-                                        MatrixWorkspace_const_sptr workspace,
-                                        std::vector<int64_t> &unUsedSpec) {
+void GroupDetectors2::processMatrixWorkspace(
+    MatrixWorkspace_const_sptr groupWS, MatrixWorkspace_const_sptr workspace,
+    std::vector<int64_t> &unUsedSpec) {
   detid2index_map detIdToWiMap = workspace->getDetectorIDToWorkspaceIndexMap();
 
   typedef std::map<size_t, std::set<size_t>> Group2SetMapType;
@@ -1189,11 +1188,10 @@ void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet,
 *  @param outputWS :: user selected output workspace for the algorithm
 *  @param outIndex :: the next spectra index available after the grouped spectra
 */
-void
-GroupDetectors2::moveOthersEvent(const std::set<int64_t> &unGroupedSet,
-                                 DataObjects::EventWorkspace_const_sptr inputWS,
-                                 DataObjects::EventWorkspace_sptr outputWS,
-                                 size_t outIndex) {
+void GroupDetectors2::moveOthersEvent(
+    const std::set<int64_t> &unGroupedSet,
+    DataObjects::EventWorkspace_const_sptr inputWS,
+    DataObjects::EventWorkspace_sptr outputWS, size_t outIndex) {
   g_log.debug() << "Starting to copy the ungrouped spectra" << std::endl;
   double prog4Copy = (1. - 1. * static_cast<double>(m_FracCompl)) /
                      static_cast<double>(unGroupedSet.size());

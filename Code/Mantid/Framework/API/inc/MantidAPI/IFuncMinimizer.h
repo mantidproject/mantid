@@ -72,7 +72,6 @@ public:
   /// Finalize minimization, eg store additional outputs
   virtual void finalize() {}
 
-
 protected:
   /// Error string.
   std::string m_errorString;

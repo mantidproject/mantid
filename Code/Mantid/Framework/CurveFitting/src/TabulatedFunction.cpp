@@ -37,8 +37,9 @@ TabulatedFunction::TabulatedFunction() : m_setupFinished(false) {
 }
 
 /// Evaluate the function for a list of arguments and given scaling factor
-void TabulatedFunction::eval(double scaling, double xshift, double xscale, double *out,
-                             const double *xValues, const size_t nData) const {
+void TabulatedFunction::eval(double scaling, double xshift, double xscale,
+                             double *out, const double *xValues,
+                             const size_t nData) const {
   if (nData == 0)
     return;
 

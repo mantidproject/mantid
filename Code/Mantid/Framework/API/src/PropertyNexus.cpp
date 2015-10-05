@@ -186,8 +186,7 @@ Property *loadProperty(::NeXus::File *file, const std::string &group) {
     break;
   }
 
-  if(file->hasAttr("units"))
-  {
+  if (file->hasAttr("units")) {
     try {
       file->getAttr("units", unitsStr);
     } catch (::NeXus::Exception &) {

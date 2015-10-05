@@ -8,7 +8,7 @@
 namespace Mantid {
 
 namespace API {
-  class IFunction;
+class IFunction;
 }
 
 namespace CurveFitting {

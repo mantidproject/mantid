@@ -45,8 +45,7 @@ Kernel::Logger g_log("ISISHistoDataListener");
 /// Constructor
 ISISHistoDataListener::ISISHistoDataListener()
     : ILiveListener(), isInitilized(false), m_daeHandle(NULL),
-      m_numberOfPeriods(0), m_totalNumberOfSpectra(0),
-      m_timeRegime(-1) {
+      m_numberOfPeriods(0), m_totalNumberOfSpectra(0), m_timeRegime(-1) {
   declareProperty(new Kernel::ArrayProperty<specid_t>("SpectraList"),
                   "An optional list of spectra to load. If blank, all "
                   "available spectra will be loaded.");
@@ -292,8 +291,8 @@ void ISISHistoDataListener::setSpectra(const std::vector<specid_t> &specList) {
  * periods.
   * @param periodList :: A vector with period numbers.
   */
-void
-ISISHistoDataListener::setPeriods(const std::vector<specid_t> &periodList) {
+void ISISHistoDataListener::setPeriods(
+    const std::vector<specid_t> &periodList) {
   // after listener has created its first workspace the period numbers cannot be
   // changed
   if (!isInitilized) {
@@ -348,9 +347,8 @@ void ISISHistoDataListener::getIntArray(const std::string &par,
  * @param index :: Vector of first indices of a chunk.
  * @param count :: Numbers of spectra in each chunk.
  */
-void
-ISISHistoDataListener::calculateIndicesForReading(std::vector<int> &index,
-                                                  std::vector<int> &count) {
+void ISISHistoDataListener::calculateIndicesForReading(
+    std::vector<int> &index, std::vector<int> &count) {
   const int numberOfBins = m_numberOfBins[m_timeRegime];
   const int numberOfSpectra = m_numberOfSpectra[m_timeRegime];
   // max number of spectra that could be read in in one go
@@ -449,9 +447,8 @@ void ISISHistoDataListener::loadSpectraMap() {
  *  @param localWorkspace :: The workspace
  *  @param iName :: The instrument name
  */
-void
-ISISHistoDataListener::runLoadInstrument(MatrixWorkspace_sptr localWorkspace,
-                                         const std::string &iName) {
+void ISISHistoDataListener::runLoadInstrument(
+    MatrixWorkspace_sptr localWorkspace, const std::string &iName) {
   auto loadInst =
       API::AlgorithmFactory::Instance().create("LoadInstrument", -1);
   if (!loadInst)

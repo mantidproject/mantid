@@ -24,7 +24,7 @@ public:
   ~MDHistoDimensionBuilder();
   void setName(std::string name);
   void setId(std::string id);
-  void setUnits(const Kernel::UnitLabel& units);
+  void setUnits(const Kernel::UnitLabel &units);
   void setMin(double min);
   void setMax(double max);
   void setNumBins(size_t nbins);

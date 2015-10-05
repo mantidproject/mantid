@@ -52,17 +52,17 @@ LoadIsawDetCal::~LoadIsawDetCal() {}
  */
 
 void LoadIsawDetCal::center(double x, double y, double z, std::string detname,
-    API::Workspace_sptr ws) {
-  MatrixWorkspace_sptr inputW = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+                            API::Workspace_sptr ws) {
+  MatrixWorkspace_sptr inputW =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
   PeaksWorkspace_sptr inputP = boost::dynamic_pointer_cast<PeaksWorkspace>(ws);
 
   // Get some stuff from the input workspace
   Instrument_sptr inst;
   if (inputW) {
-    inst= boost::const_pointer_cast<Instrument>(inputW->getInstrument());
-  }
-  else if (inputP) {
-    inst= boost::const_pointer_cast<Instrument>(inputP->getInstrument());
+    inst = boost::const_pointer_cast<Instrument>(inputW->getInstrument());
+  } else if (inputP) {
+    inst = boost::const_pointer_cast<Instrument>(inputP->getInstrument());
   }
 
   IComponent_const_sptr comp = inst->getComponentByName(detname);
@@ -80,8 +80,7 @@ void LoadIsawDetCal::center(double x, double y, double z, std::string detname,
     Geometry::ParameterMap &pmap = inputW->instrumentParameters();
     Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(x, y, z),
                                              positionType);
-  }
-  else if (inputP) {
+  } else if (inputP) {
     Geometry::ParameterMap &pmap = inputP->instrumentParameters();
     Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(x, y, z),
                                              positionType);
@@ -116,16 +115,16 @@ void LoadIsawDetCal::init() {
 void LoadIsawDetCal::exec() {
   // Get the input workspace
   Workspace_sptr ws = getProperty("InputWorkspace");
-  MatrixWorkspace_sptr inputW = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  MatrixWorkspace_sptr inputW =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
   PeaksWorkspace_sptr inputP = boost::dynamic_pointer_cast<PeaksWorkspace>(ws);
 
   // Get some stuff from the input workspace
   Instrument_sptr inst;
   if (inputW) {
-    inst= boost::const_pointer_cast<Instrument>(inputW->getInstrument());
-  }
-  else if (inputP) {
-    inst= boost::const_pointer_cast<Instrument>(inputP->getInstrument());
+    inst = boost::const_pointer_cast<Instrument>(inputW->getInstrument());
+  } else if (inputP) {
+    inst = boost::const_pointer_cast<Instrument>(inputP->getInstrument());
   }
 
   std::string instname = inst->getName();
@@ -185,9 +184,9 @@ void LoadIsawDetCal::exec() {
   }
   std::set<int> uniqueBanks; // for CORELLI and WISH
   std::string bankPart = "bank";
-  if (instname .compare("WISH") == 0) bankPart = "WISHpanel";
-  if (detList.empty())
-  {
+  if (instname.compare("WISH") == 0)
+    bankPart = "WISHpanel";
+  if (detList.empty()) {
     // Get all children
     std::vector<IComponent_const_sptr> comps;
     inst->getChildren(comps, true);
@@ -195,10 +194,11 @@ void LoadIsawDetCal::exec() {
     for (size_t i = 0; i < comps.size(); i++) {
       std::string bankName = comps[i]->getName();
       boost::trim(bankName);
-      boost::erase_all(bankName,bankPart);
+      boost::erase_all(bankName, bankPart);
       int bank = 0;
       Strings::convert(bankName, bank);
-      if (bank == 0)continue;
+      if (bank == 0)
+        continue;
       // Track unique bank numbers
       uniqueBanks.insert(bank);
     }
@@ -210,13 +210,15 @@ void LoadIsawDetCal::exec() {
       std::stringstream(line) >> count >> mL1 >> mT0;
       setProperty("TimeOffset", mT0);
       // Convert from cm to m
-      if (instname .compare("WISH") == 0) center(0.0, 0.0, -0.01 * mL1, "undulator", ws);
-      else center(0.0, 0.0, -0.01 * mL1, "moderator", ws);
+      if (instname.compare("WISH") == 0)
+        center(0.0, 0.0, -0.01 * mL1, "undulator", ws);
+      else
+        center(0.0, 0.0, -0.01 * mL1, "moderator", ws);
       // mT0 and time of flight are both in microsec
       if (inputW) {
-      API::Run &run = inputW->mutableRun();
-      // Check to see if LoadEventNexus had T0 from TOPAZ Parameter file
-      if (!run.hasProperty("T0")) {
+        API::Run &run = inputW->mutableRun();
+        // Check to see if LoadEventNexus had T0 from TOPAZ Parameter file
+        if (!run.hasProperty("T0")) {
           IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
           alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
           alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
@@ -257,7 +259,8 @@ void LoadIsawDetCal::exec() {
     for (int i = 0; i < static_cast<int>(detList.size()); i++)
       if (detList[i]->getName().compare(Detbank.str()) == 0)
         idnum = i;
-    if (idnum >= 0) det = detList[idnum];
+    if (idnum >= 0)
+      det = detList[idnum];
     if (det) {
       detname = det->getName();
       IAlgorithm_sptr alg1 = createChildAlgorithm("ResizeRectangularDetector");
@@ -326,22 +329,23 @@ void LoadIsawDetCal::exec() {
         Geometry::ParameterMap &pmap = inputW->instrumentParameters();
         // Set or overwrite "rot" instrument parameter.
         pmap.addQuat(comp.get(), "rot", Rot);
-      }
-      else if (inputP) {
+      } else if (inputP) {
         Geometry::ParameterMap &pmap = inputP->instrumentParameters();
-         // Set or overwrite "rot" instrument parameter.
-         pmap.addQuat(comp.get(), "rot", Rot);
+        // Set or overwrite "rot" instrument parameter.
+        pmap.addQuat(comp.get(), "rot", Rot);
       }
     }
     // Loop through tube detectors to match names with number from DetCal file
     idnum = -1;
     std::set<int>::iterator it;
-     for (it = uniqueBanks.begin(); it != uniqueBanks.end(); ++it)
-      if (*it == id) idnum = *it;
-    if (idnum < 0) continue;
+    for (it = uniqueBanks.begin(); it != uniqueBanks.end(); ++it)
+      if (*it == id)
+        idnum = *it;
+    if (idnum < 0)
+      continue;
     std::ostringstream mess;
     if (bankPart == "WISHpanel" && idnum < 10)
-        mess << bankPart << "0" << idnum;
+      mess << bankPart << "0" << idnum;
     else
       mess << bankPart << idnum;
 
@@ -349,16 +353,18 @@ void LoadIsawDetCal::exec() {
     // Retrieve it
     boost::shared_ptr<const IComponent> comp =
         inst->getComponentByName(bankName);
-    if (instname .compare("CORELLI") == 0) // for Corelli with sixteenpack under bank
+    if (instname.compare("CORELLI") ==
+        0) // for Corelli with sixteenpack under bank
     {
       std::vector<Geometry::IComponent_const_sptr> children;
       boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-          boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst->getComponentByName(bankName));
+          boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+              inst->getComponentByName(bankName));
       asmb->getChildren(children, false);
       comp = children[0];
     }
     if (comp) {
-     // Omitted resizing tubes
+      // Omitted resizing tubes
 
       // Convert from cm to m
       x *= 0.01;
@@ -384,8 +390,9 @@ void LoadIsawDetCal::exec() {
       // Rotation angle from oX to rX
       double angle1 = oX.angle(rX);
       angle1 *= 180.0 / M_PI;
-      //TODO: find out why this is needed for WISH
-      if (instname == "WISH") angle1 += 180.0;
+      // TODO: find out why this is needed for WISH
+      if (instname == "WISH")
+        angle1 += 180.0;
       // Create the first quaternion
       Quat Q1(angle1, ax1);
 
@@ -418,11 +425,10 @@ void LoadIsawDetCal::exec() {
         Geometry::ParameterMap &pmap = inputW->instrumentParameters();
         // Set or overwrite "rot" instrument parameter.
         pmap.addQuat(comp.get(), "rot", Rot);
-      }
-      else if (inputP) {
+      } else if (inputP) {
         Geometry::ParameterMap &pmap = inputP->instrumentParameters();
-         // Set or overwrite "rot" instrument parameter.
-         pmap.addQuat(comp.get(), "rot", Rot);
+        // Set or overwrite "rot" instrument parameter.
+        pmap.addQuat(comp.get(), "rot", Rot);
       }
     }
   }

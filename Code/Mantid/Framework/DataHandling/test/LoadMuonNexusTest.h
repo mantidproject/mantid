@@ -7,14 +7,9 @@
 
 using namespace Mantid::DataHandling;
 
-class LoadMuonNexusTest : public CxxTest::TestSuite
-{
+class LoadMuonNexusTest : public CxxTest::TestSuite {
 public:
-  
-  void testExec()
-  {
-  }
-
+  void testExec() {}
 };
 
 #endif /*LOADMUONNEXUSTEST_H_*/

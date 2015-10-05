@@ -31,9 +31,10 @@ void LoadISISNexus::init() {
   declareProperty("SpectrumMin", 0);
   declareProperty("SpectrumMax", Mantid::EMPTY_INT());
   declareProperty(new ArrayProperty<int>("SpectrumList"));
-  declareProperty("EntryNumber", 0, 
-                  "0 indicates that every entry is loaded into a separate workspace within a group. "
-                  "A positive number identifies one entry to be loaded into one worskspace");
+  declareProperty("EntryNumber", 0, "0 indicates that every entry is loaded "
+                                    "into a separate workspace within a group. "
+                                    "A positive number identifies one entry to "
+                                    "be loaded into one worskspace");
 }
 
 /** Prints a message indicating that this algorithm has been removed.

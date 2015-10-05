@@ -38,7 +38,7 @@ void Scale::exec() {
 
   auto hasDx = inputWS->hasDx(0);
 
-  // We require a copy of the workspace if the 
+  // We require a copy of the workspace if the
   auto inPlace = outputWS == inputWS;
   MatrixWorkspace_sptr bufferWS;
 
@@ -48,8 +48,7 @@ void Scale::exec() {
         bufferWS = MatrixWorkspace_sptr(inputWS->clone().release());
       }
       inputWS *= factor;
-    }
-    else {
+    } else {
       outputWS = inputWS * factor;
     }
   } else {
@@ -58,8 +57,7 @@ void Scale::exec() {
         bufferWS = MatrixWorkspace_sptr(inputWS->clone().release());
       }
       inputWS += factor;
-    }
-    else {
+    } else {
       outputWS = inputWS + factor;
     }
   }
@@ -71,7 +69,7 @@ void Scale::exec() {
       bufferWS = inputWS;
     }
     for (size_t index = 0; index < bufferWS->getNumberHistograms(); ++index) {
-      outputWS->setDx(0,bufferWS->dataDx(0));
+      outputWS->setDx(0, bufferWS->dataDx(0));
     }
   }
 

@@ -59,10 +59,12 @@ const std::string CheckMantidVersion::summary() const {
 void CheckMantidVersion::init() {
   declareProperty("CurrentVersion", "", Direction::Output);
   declareProperty("MostRecentVersion", "", Direction::Output);
-  declareProperty("IsNewVersionAvailable", false,"True if a newer version is available, otherwise false", Direction::Output);
+  declareProperty("IsNewVersionAvailable", false,
+                  "True if a newer version is available, otherwise false",
+                  Direction::Output);
 }
 
-  //----------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void CheckMantidVersion::exec() {
@@ -88,13 +90,14 @@ void CheckMantidVersion::exec() {
   } catch (Exception::InternetError &ex) {
     if (ex.errorCode() == InternetHelper::HTTP_NOT_MODIFIED) {
       // No changes since last release
-      //mostRecentVersion = getCurrentVersion();
-      mostRecentVersion = "No new versions since " + 
-        std::string(MantidVersion::releaseDate());
+      // mostRecentVersion = getCurrentVersion();
+      mostRecentVersion =
+          "No new versions since " + std::string(MantidVersion::releaseDate());
     } else {
       // any other exception just log quietly and return
       g_log.debug("Cannot get latest version details from " + gitHubReleaseUrl);
-      g_log.debug("The address can be changed using the property CheckMantidVersion.GitHubReleaseURL");
+      g_log.debug("The address can be changed using the property "
+                  "CheckMantidVersion.GitHubReleaseURL");
       g_log.debug(ex.what());
       return;
     }
@@ -108,8 +111,9 @@ void CheckMantidVersion::exec() {
 
     std::string gitHubVersionTag = root["tag_name"].asString();
     mostRecentVersion = cleanVersionTag(gitHubVersionTag);
-  
-    isNewVersionAvailable = isVersionMoreRecent(currentVersion, mostRecentVersion);
+
+    isNewVersionAvailable =
+        isVersionMoreRecent(currentVersion, mostRecentVersion);
     if (isNewVersionAvailable) {
       // output a notice level log
       g_log.notice("A new version of Mantid(" + mostRecentVersion +
@@ -225,8 +229,7 @@ std::string CheckMantidVersion::getVersionsFromGitHub(const std::string &url) {
 /** Gets the version of this Mantid
 @returns a string of the form "1.2.3[.4]"
 */
-std::string CheckMantidVersion::getCurrentVersion() const
-{
+std::string CheckMantidVersion::getCurrentVersion() const {
   return Mantid::Kernel::MantidVersion::version();
 }
 

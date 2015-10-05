@@ -11,80 +11,64 @@
 #include "MantidAPI/ImplicitFunctionBuilder.h"
 #include "MantidAPI/ImplicitFunctionParameter.h"
 
-class CompositeBuilderTest : public CxxTest::TestSuite
-{
+class CompositeBuilderTest : public CxxTest::TestSuite {
 
 private:
+  class FakeParameter : public Mantid::API::ImplicitFunctionParameter {
+  public:
+    bool isValid() const { return false; }
+    MOCK_CONST_METHOD0(getName, std::string());
+    MOCK_CONST_METHOD0(toXMLString, std::string());
+    ~FakeParameter() { ; }
 
-    class FakeParameter : public Mantid::API::ImplicitFunctionParameter
-    {
-    public:
-        bool isValid() const
-        {
-            return false;
-        }
-		 MOCK_CONST_METHOD0(getName, std::string());
-         MOCK_CONST_METHOD0(toXMLString, std::string());
-        ~FakeParameter(){;} 
+  protected:
+    virtual Mantid::API::ImplicitFunctionParameter *clone() const {
+      return new FakeParameter;
+    }
+  };
 
-    protected:
-        virtual Mantid::API::ImplicitFunctionParameter* clone() const
-        {
-            return new FakeParameter;
-        }
-    };
+  class FakeImplicitFunction : public Mantid::Geometry::MDImplicitFunction {
+  public:
+    using MDImplicitFunction::isPointContained; // Avoids Intel compiler
+                                                // warning.
+    bool isPointContained(const Mantid::coord_t *) { return false; }
+    MOCK_CONST_METHOD0(getName, std::string());
+    MOCK_CONST_METHOD0(toXMLString, std::string());
+  };
 
+  class FakeFunctionBuilder : public Mantid::API::ImplicitFunctionBuilder {
+  public:
+    mutable bool isInvoked;
 
-
-    class FakeImplicitFunction : public Mantid::Geometry::MDImplicitFunction
-    {
-    public:
-      using MDImplicitFunction::isPointContained; // Avoids Intel compiler warning.
-      bool isPointContained(const Mantid::coord_t*)
-      {
-        return false;
-      }
-      MOCK_CONST_METHOD0(getName, std::string());
-      MOCK_CONST_METHOD0(toXMLString, std::string());
-    };
-
-    class FakeFunctionBuilder : public Mantid::API::ImplicitFunctionBuilder
-    {
-    public:
-        mutable bool isInvoked;
-
-        Mantid::Geometry::MDImplicitFunction* create() const
-        {
-            isInvoked = true;
-            return new FakeImplicitFunction;
-        }
-    };
+    Mantid::Geometry::MDImplicitFunction *create() const {
+      isInvoked = true;
+      return new FakeImplicitFunction;
+    }
+  };
 
 public:
+  void testCreate() {
 
-    void testCreate()
-    {
+    using namespace Mantid::MDAlgorithms;
 
-        using namespace Mantid::MDAlgorithms;
+    FakeFunctionBuilder *builderA = new FakeFunctionBuilder;
+    FakeFunctionBuilder *builderB = new FakeFunctionBuilder;
+    CompositeFunctionBuilder *innerCompBuilder = new CompositeFunctionBuilder;
+    innerCompBuilder->addFunctionBuilder(builderA);
+    innerCompBuilder->addFunctionBuilder(builderB);
+    boost::scoped_ptr<CompositeFunctionBuilder> outterCompBuilder(
+        new CompositeFunctionBuilder);
+    outterCompBuilder->addFunctionBuilder(innerCompBuilder);
+    Mantid::Geometry::MDImplicitFunction_sptr topFunc(
+        outterCompBuilder->create());
+    // CompositeImplicitFunction* topCompFunc =
+    // dynamic_cast<CompositeImplicitFunction*>(topFunc.get());
 
-        FakeFunctionBuilder* builderA = new FakeFunctionBuilder;
-        FakeFunctionBuilder* builderB = new FakeFunctionBuilder;
-        CompositeFunctionBuilder* innerCompBuilder = new CompositeFunctionBuilder;
-        innerCompBuilder->addFunctionBuilder(builderA);
-        innerCompBuilder->addFunctionBuilder(builderB);
-        boost::scoped_ptr<CompositeFunctionBuilder> outterCompBuilder(new CompositeFunctionBuilder);
-        outterCompBuilder->addFunctionBuilder(innerCompBuilder);
-        Mantid::Geometry::MDImplicitFunction_sptr topFunc(outterCompBuilder->create());
-        //CompositeImplicitFunction* topCompFunc = dynamic_cast<CompositeImplicitFunction*>(topFunc.get());
-
-        TSM_ASSERT("Nested builder not called by composite", builderA->isInvoked);
-        TSM_ASSERT("Nested builder not called by composite", builderB->isInvoked);
-        //TSM_ASSERT("Top level function generated, should have been a composite function instance.", topCompFunc != NULL);
-
-    }
-
+    TSM_ASSERT("Nested builder not called by composite", builderA->isInvoked);
+    TSM_ASSERT("Nested builder not called by composite", builderB->isInvoked);
+    // TSM_ASSERT("Top level function generated, should have been a composite
+    // function instance.", topCompFunc != NULL);
+  }
 };
-
-
 
 #endif

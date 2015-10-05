@@ -18,8 +18,8 @@ PoldiHeliumDetector::PoldiHeliumDetector()
       m_distanceFromSample(0.0), m_calibratedCenterTwoTheta(0.0),
       m_phiCenter(0.0), m_phiStart(0.0) {}
 
-void
-PoldiHeliumDetector::loadConfiguration(Instrument_const_sptr poldiInstrument) {
+void PoldiHeliumDetector::loadConfiguration(
+    Instrument_const_sptr poldiInstrument) {
   IComponent_const_sptr detector =
       poldiInstrument->getComponentByName("detector");
   double radius = detector->getNumberParameter("radius").front() * 1000.0;
@@ -98,9 +98,8 @@ void PoldiHeliumDetector::initializeFixedParameters(double radius,
       static_cast<double>(m_elementCount) * m_angularResolution;
 }
 
-void
-PoldiHeliumDetector::initializeCalibratedParameters(Kernel::V2D position,
-                                                    double centerTwoTheta) {
+void PoldiHeliumDetector::initializeCalibratedParameters(
+    Kernel::V2D position, double centerTwoTheta) {
   m_calibratedPosition = position;
   m_vectorAngle = atan(m_calibratedPosition.Y() / m_calibratedPosition.X());
   m_distanceFromSample = m_calibratedPosition.norm();

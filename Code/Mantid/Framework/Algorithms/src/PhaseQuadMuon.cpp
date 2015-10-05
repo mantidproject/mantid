@@ -146,7 +146,8 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
                       const API::ITableWorkspace_sptr &phase,
                       const std::vector<double> &n0) {
 
-  // Poisson limit: below this number we consider we don't have enough statistics
+  // Poisson limit: below this number we consider we don't have enough
+  // statistics
   // to apply sqrt(N). This is an arbitrary number used in the original code
   // provided by scientists
   double poissonLimit = 30.;
@@ -215,7 +216,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
 
       // (X,Y,E) with exponential decay removed
       double X = ws->readX(h)[i];
-      double Y = ws->readY(h)[i] - n0[h] * exp(-(X-X0) / muLife);
+      double Y = ws->readY(h)[i] - n0[h] * exp(-(X - X0) / muLife);
       double E = (ws->readY(h)[i] > poissonLimit)
                      ? ws->readE(h)[i]
                      : sqrt(n0[h] * exp(-(X - X0) / muLife));
@@ -230,7 +231,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
 
     // Regain exponential decay
     double X = ws->getSpectrum(0)->readX()[i];
-    double e = exp(-(X-X0) / muLife);
+    double e = exp(-(X - X0) / muLife);
     realY[i] /= e;
     imagY[i] /= e;
     realE[i] /= e;
@@ -249,7 +250,6 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   ows->dataX(0).assign(x.begin(), x.end());
   ows->dataX(1).assign(x.begin(), x.end());
   return ows;
-
 }
 }
 }

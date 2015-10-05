@@ -54,8 +54,10 @@ void CreateMDHistoWorkspace::init() {
   declareProperty(new ArrayProperty<double>("ErrorInput"),
                   "Error array for n-dimensional workspace");
 
-  declareProperty(new ArrayProperty<double>("NumberOfEvents", std::vector<double>(0)),
-                  "Number of pixels array for n-dimensional workspace. Optional, defaults to 1 per bin.");
+  declareProperty(
+      new ArrayProperty<double>("NumberOfEvents", std::vector<double>(0)),
+      "Number of pixels array for n-dimensional workspace. Optional, defaults "
+      "to 1 per bin.");
 
   // Declare all the generic properties required.
   this->initGenericImportProps();
@@ -87,11 +89,12 @@ void CreateMDHistoWorkspace::exec() {
   }
   if (!numberOfEvents.empty() && binProduct != numberOfEvents.size()) {
     throw std::invalid_argument("Expected size of the NumberOfEvents is: " +
-                                stream.str() + ". Leave empty to auto fill with 1.0");
+                                stream.str() +
+                                ". Leave empty to auto fill with 1.0");
   }
 
   // Auto fill number of events.
-  if(numberOfEvents.empty()) {
+  if (numberOfEvents.empty()) {
     numberOfEvents = std::vector<double>(binProduct, 1.0);
   }
 

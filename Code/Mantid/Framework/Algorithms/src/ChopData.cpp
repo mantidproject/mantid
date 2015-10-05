@@ -118,8 +118,7 @@ void ChopData::exec() {
     // Copy over X, Y and E data
     PARALLEL_FOR2(inputWS, workspace)
     for (int j = 0; j < nHist; j++) {
-      PARALLEL_START_INTERUPT_REGION
-      ;
+      PARALLEL_START_INTERUPT_REGION;
       for (size_t k = 0; k < nbins; k++) {
         size_t oldbin = indexLow + k;
         workspace->dataY(j)[k] = inputWS->readY(j)[oldbin];
@@ -129,11 +128,9 @@ void ChopData::exec() {
       workspace->dataX(j)[nbins] =
           inputWS->readX(j)[indexLow + nbins] - stepDiff;
 
-      PARALLEL_END_INTERUPT_REGION
-      ;
+      PARALLEL_END_INTERUPT_REGION;
     }
-    PARALLEL_CHECK_INTERUPT_REGION
-    ;
+    PARALLEL_CHECK_INTERUPT_REGION;
 
     // add the workspace to the AnalysisDataService
     std::stringstream name;

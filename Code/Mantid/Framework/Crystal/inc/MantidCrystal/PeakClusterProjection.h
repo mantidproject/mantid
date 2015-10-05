@@ -7,7 +7,7 @@
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
-namespace Geometry{
+namespace Geometry {
 class IPeak;
 class PeakTransform;
 }

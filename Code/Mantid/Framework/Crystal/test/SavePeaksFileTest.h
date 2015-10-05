@@ -17,27 +17,17 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Crystal;
 
-
-class SavePeaksFileTest : public CxxTest::TestSuite
-{
+class SavePeaksFileTest : public CxxTest::TestSuite {
 public:
-
-    
-  void test_Init()
-  {
+  void test_Init() {
     SavePeaksFile alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
   }
-  
-  void test_exec()
-  {
+
+  void test_exec() {
     // TODO: Write a test when the algo is complete
   }
-
-
 };
 
-
 #endif /* MANTID_CRYSTAL_SAVEPEAKSFILETEST_H_ */
-

@@ -19,44 +19,36 @@ using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
 using namespace boost::assign;
 
-namespace
-{
-  class PropertyFinder
-  {
-  private:
-    const std::string m_propertyName;
-  public:
-    PropertyFinder(const std::string& propertyName) :
-        m_propertyName(propertyName)
-    {
-    }
-    bool operator()(const PropertyHistories::value_type& candidate) const
-    {
-      return candidate->name() == m_propertyName;
-    }
-  };
+namespace {
+class PropertyFinder {
+private:
+  const std::string m_propertyName;
 
-  template<typename T>
-  T findPropertyValue(PropertyHistories& histories, const std::string& propertyName)
-  {
-    PropertyFinder finder(propertyName);
-    auto it = std::find_if(histories.begin(), histories.end(), finder);
-    return boost::lexical_cast<T>((*it)->value());
+public:
+  PropertyFinder(const std::string &propertyName)
+      : m_propertyName(propertyName) {}
+  bool operator()(const PropertyHistories::value_type &candidate) const {
+    return candidate->name() == m_propertyName;
   }
+};
 
+template <typename T>
+T findPropertyValue(PropertyHistories &histories,
+                    const std::string &propertyName) {
+  PropertyFinder finder(propertyName);
+  auto it = std::find_if(histories.begin(), histories.end(), finder);
+  return boost::lexical_cast<T>((*it)->value());
+}
 }
 
-class ReflectometryReductionOneAutoTest: public CxxTest::TestSuite
-{
+class ReflectometryReductionOneAutoTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ReflectometryReductionOneAutoTest *createSuite()
-  {
+  static ReflectometryReductionOneAutoTest *createSuite() {
     return new ReflectometryReductionOneAutoTest();
   }
-  static void destroySuite(ReflectometryReductionOneAutoTest *suite)
-  {
+  static void destroySuite(ReflectometryReductionOneAutoTest *suite) {
     delete suite;
   }
 
@@ -71,16 +63,18 @@ public:
   const std::string inWSName;
   const std::string transWSName;
 
-  ReflectometryReductionOneAutoTest() :
-      outWSQName("ReflectometryReductionOneAutoTest_OutputWS_Q"), outWSLamName(
-          "ReflectometryReductionOneAutoTest_OutputWS_Lam"), inWSName(
-          "ReflectometryReductionOneAutoTest_InputWS"), transWSName(
-          "ReflectometryReductionOneAutoTest_TransWS")
-  {
-    MantidVec xData = boost::assign::list_of(0)(0)(0)(0).convert_to_container<MantidVec>();
-    MantidVec yData = boost::assign::list_of(0)(0)(0).convert_to_container<MantidVec>();
+  ReflectometryReductionOneAutoTest()
+      : outWSQName("ReflectometryReductionOneAutoTest_OutputWS_Q"),
+        outWSLamName("ReflectometryReductionOneAutoTest_OutputWS_Lam"),
+        inWSName("ReflectometryReductionOneAutoTest_InputWS"),
+        transWSName("ReflectometryReductionOneAutoTest_TransWS") {
+    MantidVec xData =
+        boost::assign::list_of(0)(0)(0)(0).convert_to_container<MantidVec>();
+    MantidVec yData =
+        boost::assign::list_of(0)(0)(0).convert_to_container<MantidVec>();
 
-    auto createWorkspace = AlgorithmManager::Instance().create("CreateWorkspace");
+    auto createWorkspace =
+        AlgorithmManager::Instance().create("CreateWorkspace");
     createWorkspace->initialize();
     createWorkspace->setProperty("UnitX", "1/q");
     createWorkspace->setProperty("DataX", xData);
@@ -88,7 +82,8 @@ public:
     createWorkspace->setProperty("NSpec", 1);
     createWorkspace->setPropertyValue("OutputWorkspace", "NotTOF");
     createWorkspace->execute();
-    m_NotTOF = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("NotTOF");
+    m_NotTOF =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("NotTOF");
 
     createWorkspace->setProperty("UnitX", "TOF");
     createWorkspace->setProperty("DataX", xData);
@@ -106,38 +101,43 @@ public:
     lAlg->execute();
     Workspace_sptr temp = lAlg->getProperty("OutputWorkspace");
     m_dataWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
-    //m_dataWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("data_ws");
+    // m_dataWorkspace =
+    // AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("data_ws");
 
     lAlg->setProperty("Filename", "INTER00013463.nxs");
     lAlg->setPropertyValue("OutputWorkspace", "trans_ws_1");
     lAlg->execute();
     temp = lAlg->getProperty("OutputWorkspace");
     m_transWorkspace1 = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
-    //m_transWorkspace1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("trans_ws_1");
+    // m_transWorkspace1 =
+    // AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("trans_ws_1");
 
     lAlg->setProperty("Filename", "INTER00013464.nxs");
     lAlg->setPropertyValue("OutputWorkspace", "trans_ws_2");
     lAlg->execute();
     temp = lAlg->getProperty("OutputWorkspace");
     m_transWorkspace2 = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
-    //m_transWorkspace2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("trans_ws_2");
+    // m_transWorkspace2 =
+    // AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("trans_ws_2");
 
     lAlg->setPropertyValue("Filename", "POLREF00004699.nxs");
     lAlg->setPropertyValue("OutputWorkspace", "multidetector_ws_1");
     lAlg->execute();
     temp = lAlg->getProperty("OutputWorkspace");
-    m_multiDetectorWorkspace = boost::dynamic_pointer_cast<WorkspaceGroup>(temp);
-    //m_multiDetectorWorkspace = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>( "multidetector_ws_1");
+    m_multiDetectorWorkspace =
+        boost::dynamic_pointer_cast<WorkspaceGroup>(temp);
+    // m_multiDetectorWorkspace =
+    // AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+    // "multidetector_ws_1");
   }
-  ~ReflectometryReductionOneAutoTest()
-  {
+  ~ReflectometryReductionOneAutoTest() {
     AnalysisDataService::Instance().remove("TOF");
     AnalysisDataService::Instance().remove("NotTOF");
   }
 
-  IAlgorithm_sptr construct_standard_algorithm()
-  {
-    auto alg = AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+  IAlgorithm_sptr construct_standard_algorithm() {
+    auto alg =
+        AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
     alg->initialize();
     alg->setProperty("InputWorkspace", m_TOF);
     alg->setProperty("WavelengthMin", 0.0);
@@ -154,55 +154,51 @@ public:
     return alg;
   }
 
-  void test_Init()
-  {
+  void test_Init() {
     ReflectometryReductionOneAuto alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize());
-    TS_ASSERT( alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
   }
 
-  void test_check_input_workpace_not_tof_or_wavelength_throws()
-  {
+  void test_check_input_workpace_not_tof_or_wavelength_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("InputWorkspace", m_NotTOF);
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
-  void test_check_first_transmission_workspace_not_tof_or_wavelength_throws()
-  {
+  void test_check_first_transmission_workspace_not_tof_or_wavelength_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("FirstTransmissionRun", m_NotTOF);
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
-  void test_check_second_transmission_workspace_not_tof_throws()
-  {
+  void test_check_second_transmission_workspace_not_tof_throws() {
     auto alg = construct_standard_algorithm();
-    TS_ASSERT_THROWS(alg->setProperty("SecondTransmissionRun", m_NotTOF), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->setProperty("SecondTransmissionRun", m_NotTOF),
+                     std::invalid_argument);
   }
 
-  void test_proivde_second_transmission_run_without_first_throws()
-  {
+  void test_proivde_second_transmission_run_without_first_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("SecondTransmissionRun", m_TOF);
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
-  void test_end_overlap_must_be_greater_than_start_overlap_or_throw()
-  {
+  void test_end_overlap_must_be_greater_than_start_overlap_or_throw() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("FirstTransmissionRun", m_TOF);
     alg->setProperty("SecondTransmissionRun", m_TOF);
-    MantidVec params = boost::assign::list_of(0.0)(0.1)(1.0).convert_to_container<MantidVec>();
+    MantidVec params =
+        boost::assign::list_of(0.0)(0.1)(1.0).convert_to_container<MantidVec>();
     alg->setProperty("Params", params);
     alg->setProperty("StartOverlap", 0.6);
     alg->setProperty("EndOverlap", 0.4);
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
-  void test_must_provide_wavelengths()
-  {
-    auto alg = AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+  void test_must_provide_wavelengths() {
+    auto alg =
+        AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
     alg->initialize();
     alg->setProperty("InputWorkspace", m_TOF);
     alg->setProperty("FirstTransmissionRun", m_TOF);
@@ -223,94 +219,94 @@ public:
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
-  void test_wavelength_min_greater_wavelength_max_throws()
-  {
+  void test_wavelength_min_greater_wavelength_max_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("WavelengthMin", 1.0);
     alg->setProperty("WavelengthMax", 0.0);
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
-  void test_monitor_background_wavelength_min_greater_monitor_background_wavelength_max_throws()
-  {
+  void
+  test_monitor_background_wavelength_min_greater_monitor_background_wavelength_max_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("MonitorBackgroundWavelengthMin", 1.0);
     alg->setProperty("MonitorBackgroundWavelengthMax", 0.0);
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
-  void test_monitor_integration_wavelength_min_greater_monitor_integration_wavelength_max_throws()
-  {
+  void
+  test_monitor_integration_wavelength_min_greater_monitor_integration_wavelength_max_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("MonitorIntegrationWavelengthMin", 1.0);
     alg->setProperty("MonitorIntegrationWavelengthMax", 0.0);
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
-  void test_monitor_index_positive()
-  {
+  void test_monitor_index_positive() {
     auto alg = construct_standard_algorithm();
-    TS_ASSERT_THROWS(alg->setProperty("I0MonitorIndex", -1), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->setProperty("I0MonitorIndex", -1),
+                     std::invalid_argument);
   }
 
-  void test_cannot_set_direct_beam_region_of_interest_without_multidetector_run()
-  {
+  void
+  test_cannot_set_direct_beam_region_of_interest_without_multidetector_run() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("AnalysisMode", "PointDetectorAnalysis");
-    std::vector<int> RegionOfDirectBeam = boost::assign::list_of(1)(2).convert_to_container<
-        std::vector<int> >();
+    std::vector<int> RegionOfDirectBeam =
+        boost::assign::list_of(1)(2).convert_to_container<std::vector<int>>();
     alg->setProperty("RegionOfDirectBeam", RegionOfDirectBeam);
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
-  void test_region_of_direct_beam_indexes_cannot_be_negative_or_throws()
-  {
+  void test_region_of_direct_beam_indexes_cannot_be_negative_or_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("AnalysisMode", "MultiDetectorAnalysis");
-    std::vector<int> RegionOfDirectBeam = boost::assign::list_of(0)(-1).convert_to_container<
-        std::vector<int> >();
+    std::vector<int> RegionOfDirectBeam =
+        boost::assign::list_of(0)(-1).convert_to_container<std::vector<int>>();
     alg->setProperty("RegionOfDirectBeam", RegionOfDirectBeam);
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
-  void test_region_of_direct_beam_indexes_must_be_provided_as_min_max_order_or_throws()
-  {
+  void
+  test_region_of_direct_beam_indexes_must_be_provided_as_min_max_order_or_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("AnalysisMode", "MultiDetectorAnalysis");
-    std::vector<int> RegionOfDirectBeam = boost::assign::list_of(1)(0).convert_to_container<
-        std::vector<int> >();
+    std::vector<int> RegionOfDirectBeam =
+        boost::assign::list_of(1)(0).convert_to_container<std::vector<int>>();
     alg->setProperty("RegionOfDirectBeam", RegionOfDirectBeam);
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
-  void test_bad_detector_component_name_throws()
-  {
+  void test_bad_detector_component_name_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("DetectorComponentName", "made-up");
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
-  void test_bad_sample_component_name_throws()
-  {
+  void test_bad_sample_component_name_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("SampleComponentName", "made-up");
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
-
-  void test_exec()
-  {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+  void test_exec() {
+    IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
     alg->setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING( alg->initialize());
-    TS_ASSERT_THROWS_NOTHING( alg->setProperty("InputWorkspace", m_dataWorkspace));
-    TS_ASSERT_THROWS_NOTHING( alg->setProperty("AnalysisMode", "PointDetectorAnalysis"));
-    TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspace", outWSQName));
-    TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName));
+    TS_ASSERT_THROWS_NOTHING(alg->initialize());
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("InputWorkspace", m_dataWorkspace));
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("AnalysisMode", "PointDetectorAnalysis"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setPropertyValue("OutputWorkspace", outWSQName));
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName));
     alg->execute();
-    TS_ASSERT( alg->isExecuted());
+    TS_ASSERT(alg->isExecuted());
 
-    MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSQName);
+    MatrixWorkspace_sptr outWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSQName);
 
     auto inst = m_dataWorkspace->getInstrument();
     auto workspaceHistory = outWS->getHistory();
@@ -318,58 +314,69 @@ public:
         workspaceHistory.getAlgorithmHistory(0)->getChildAlgorithmHistory(0);
     auto vecPropertyHistories = workerAlgHistory->getProperties();
 
-    const double wavelengthMin = findPropertyValue<double>(vecPropertyHistories, "WavelengthMin");
-    const double wavelengthMax = findPropertyValue<double>(vecPropertyHistories, "WavelengthMax");
-    const double monitorBackgroundWavelengthMin = findPropertyValue<double>(vecPropertyHistories,
-        "MonitorBackgroundWavelengthMin");
-    const double monitorBackgroundWavelengthMax = findPropertyValue<double>(vecPropertyHistories,
-        "MonitorBackgroundWavelengthMax");
-    const double monitorIntegrationWavelengthMin = findPropertyValue<double>(vecPropertyHistories,
-        "MonitorIntegrationWavelengthMin");
-    const double monitorIntegrationWavelengthMax = findPropertyValue<double>(vecPropertyHistories,
-        "MonitorIntegrationWavelengthMax");
-    const int i0MonitorIndex = findPropertyValue<int>(vecPropertyHistories, "I0MonitorIndex");
-    std::string processingInstructions = findPropertyValue<std::string>(vecPropertyHistories,
-        "ProcessingInstructions");
+    const double wavelengthMin =
+        findPropertyValue<double>(vecPropertyHistories, "WavelengthMin");
+    const double wavelengthMax =
+        findPropertyValue<double>(vecPropertyHistories, "WavelengthMax");
+    const double monitorBackgroundWavelengthMin = findPropertyValue<double>(
+        vecPropertyHistories, "MonitorBackgroundWavelengthMin");
+    const double monitorBackgroundWavelengthMax = findPropertyValue<double>(
+        vecPropertyHistories, "MonitorBackgroundWavelengthMax");
+    const double monitorIntegrationWavelengthMin = findPropertyValue<double>(
+        vecPropertyHistories, "MonitorIntegrationWavelengthMin");
+    const double monitorIntegrationWavelengthMax = findPropertyValue<double>(
+        vecPropertyHistories, "MonitorIntegrationWavelengthMax");
+    const int i0MonitorIndex =
+        findPropertyValue<int>(vecPropertyHistories, "I0MonitorIndex");
+    std::string processingInstructions = findPropertyValue<std::string>(
+        vecPropertyHistories, "ProcessingInstructions");
     std::vector<std::string> pointDetectorStartStop;
-    boost::split(pointDetectorStartStop, processingInstructions, boost::is_any_of(":"));
+    boost::split(pointDetectorStartStop, processingInstructions,
+                 boost::is_any_of(":"));
 
     TS_ASSERT_EQUALS(inst->getNumberParameter("LambdaMin")[0], wavelengthMin);
     TS_ASSERT_EQUALS(inst->getNumberParameter("LambdaMax")[0], wavelengthMax);
     TS_ASSERT_EQUALS(inst->getNumberParameter("MonitorBackgroundMin")[0],
-        monitorBackgroundWavelengthMin);
+                     monitorBackgroundWavelengthMin);
     TS_ASSERT_EQUALS(inst->getNumberParameter("MonitorBackgroundMax")[0],
-        monitorBackgroundWavelengthMax);
-    TS_ASSERT_EQUALS(inst->getNumberParameter("MonitorIntegralMin")[0], monitorIntegrationWavelengthMin);
-    TS_ASSERT_EQUALS(inst->getNumberParameter("MonitorIntegralMax")[0], monitorIntegrationWavelengthMax);
-    TS_ASSERT_EQUALS(inst->getNumberParameter("I0MonitorIndex")[0], i0MonitorIndex);
+                     monitorBackgroundWavelengthMax);
+    TS_ASSERT_EQUALS(inst->getNumberParameter("MonitorIntegralMin")[0],
+                     monitorIntegrationWavelengthMin);
+    TS_ASSERT_EQUALS(inst->getNumberParameter("MonitorIntegralMax")[0],
+                     monitorIntegrationWavelengthMax);
+    TS_ASSERT_EQUALS(inst->getNumberParameter("I0MonitorIndex")[0],
+                     i0MonitorIndex);
     TS_ASSERT_EQUALS(inst->getNumberParameter("PointDetectorStart")[0],
-        boost::lexical_cast<double>(pointDetectorStartStop[0]));
+                     boost::lexical_cast<double>(pointDetectorStartStop[0]));
     TS_ASSERT_EQUALS(inst->getNumberParameter("PointDetectorStop")[0],
-        boost::lexical_cast<double>(pointDetectorStartStop[1]));
+                     boost::lexical_cast<double>(pointDetectorStartStop[1]));
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSQName);
     AnalysisDataService::Instance().remove(outWSLamName);
-
   }
 
-  void test_missing_instrument_parameters_throws()
-  {
-    auto tinyWS = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
+  void test_missing_instrument_parameters_throws() {
+    auto tinyWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
     auto inst = tinyWS->getInstrument();
 
     inst->getParameterMap()->addDouble(inst.get(), "I0MonitorIndex", 1.0);
 
-    tinyWS->mutableRun().addLogData(new PropertyWithValue<double>("Theta", 0.12345));
-    tinyWS->mutableRun().addLogData(new PropertyWithValue<std::string>("run_number", "12345"));
+    tinyWS->mutableRun().addLogData(
+        new PropertyWithValue<double>("Theta", 0.12345));
+    tinyWS->mutableRun().addLogData(
+        new PropertyWithValue<std::string>("run_number", "12345"));
 
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+    IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
     alg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", tinyWS));
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", outWSQName));
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName));
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setPropertyValue("OutputWorkspace", outWSQName));
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName));
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
 
     // Remove workspace from the data service.
@@ -377,20 +384,19 @@ public:
     AnalysisDataService::Instance().remove(outWSLamName);
   }
 
-  void test_normalize_by_detmon()
-  {
-    //Prepare workspace
+  void test_normalize_by_detmon() {
+    // Prepare workspace
     //-----------------
     MantidVecPtr x, e, detData, monData;
 
-    //Single bin from 0->1
+    // Single bin from 0->1
     x.access().resize(2);
     x.access()[0] = 0;
     x.access()[1] = 1;
-    //No error at all
+    // No error at all
     e.access().resize(1, 0.0);
 
-    //Set the detector and monitor y values
+    // Set the detector and monitor y values
     detData.access().resize(1, 10);
     monData.access().resize(1, 5);
 
@@ -406,8 +412,7 @@ public:
     tinyWS->getAxis(0)->setUnit("Wavelength");
     tinyWS->setYUnit("Counts");
 
-
-    //Prepare instrument
+    // Prepare instrument
     //------------------
     Instrument_sptr instrument = boost::make_shared<Instrument>();
     instrument->setReferenceFrame(
@@ -417,7 +422,6 @@ public:
     source->setPos(V3D(0, 0, 0));
     instrument->add(source);
     instrument->markAsSource(source);
-
 
     ObjComponent *sample = new ObjComponent("some-surface-holder");
     source->setPos(V3D(15, 0, 0));
@@ -434,12 +438,12 @@ public:
     instrument->add(monitor);
     instrument->markAsMonitor(monitor);
 
-    //Add instrument to workspace
+    // Add instrument to workspace
     tinyWS->setInstrument(instrument);
     tinyWS->getSpectrum(0)->addDetectorID(det->getID());
     tinyWS->getSpectrum(1)->addDetectorID(monitor->getID());
 
-    //Now we can parameterize the instrument
+    // Now we can parameterize the instrument
     auto tinyInst = tinyWS->getInstrument();
     ParameterMap_sptr params = tinyInst->getParameterMap();
     params->addDouble(tinyInst.get(), "PointDetectorStart", 0.0);
@@ -452,12 +456,13 @@ public:
     params->addDouble(tinyInst.get(), "MonitorIntegralMin", 0.0);
     params->addDouble(tinyInst.get(), "MonitorIntegralMax", 10.0);
 
-    tinyWS->mutableRun().addLogData(new PropertyWithValue<double>("Theta", 0.1));
+    tinyWS->mutableRun().addLogData(
+        new PropertyWithValue<double>("Theta", 0.1));
 
-    //Run the required algorithms
+    // Run the required algorithms
     //---------------------------
 
-    //Convert units
+    // Convert units
     IAlgorithm_sptr conv = AlgorithmManager::Instance().create("ConvertUnits");
     conv->initialize();
     conv->setProperty("InputWorkspace", tinyWS);
@@ -466,22 +471,28 @@ public:
     conv->execute();
     TS_ASSERT(conv->isExecuted());
 
-    //Reduce
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+    // Reduce
+    IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
     alg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inWSName));
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NormalizeByIntegratedMonitors", false));
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("NormalizeByIntegratedMonitors", false));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("WavelengthStep", 1.0));
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", outWSQName));
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName));
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setPropertyValue("OutputWorkspace", outWSQName));
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName));
     alg->execute();
     TS_ASSERT(alg->isExecuted());
 
-    //Get results
-    MatrixWorkspace_sptr outWSLam = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSLamName);
+    // Get results
+    MatrixWorkspace_sptr outWSLam =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outWSLamName);
 
-    //Check results (10 / 5 = 2)
+    // Check results (10 / 5 = 2)
     TS_ASSERT_DELTA(outWSLam->readY(0)[0], 2, 1e-5);
     TS_ASSERT_DELTA(outWSLam->readX(0)[0], 0, 1e-5);
     TS_ASSERT_DELTA(outWSLam->readX(0)[1], 1, 1e-5);

@@ -4,7 +4,7 @@
 // cxxtest
 #include <cxxtest/WrappedTestSuite.h>
 
-//Mantid
+// Mantid
 #include "MantidKernel/System.h"
 
 // STL

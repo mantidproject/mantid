@@ -24,8 +24,8 @@ RotateInstrumentComponent::RotateInstrumentComponent() {}
 void RotateInstrumentComponent::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(new WorkspaceProperty<Workspace>(
-                      "Workspace", "Anonymous", Direction::InOut),
+  declareProperty(new WorkspaceProperty<Workspace>("Workspace", "Anonymous",
+                                                   Direction::InOut),
                   "The name of the workspace for which the new instrument "
                   "configuration will have an effect. Any other workspaces "
                   "stored in the analysis data service will be unaffected.");
@@ -52,16 +52,17 @@ void RotateInstrumentComponent::init() {
 void RotateInstrumentComponent::exec() {
   // Get the input workspace
   Workspace_sptr ws = getProperty("Workspace");
-  MatrixWorkspace_sptr inputW = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
-  DataObjects::PeaksWorkspace_sptr inputP = boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
+  MatrixWorkspace_sptr inputW =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  DataObjects::PeaksWorkspace_sptr inputP =
+      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
 
   // Get some stuff from the input workspace
   Instrument_sptr inst;
   if (inputW) {
-    inst= boost::const_pointer_cast<Instrument>(inputW->getInstrument());
-  }
-  else if (inputP) {
-    inst= boost::const_pointer_cast<Instrument>(inputP->getInstrument());
+    inst = boost::const_pointer_cast<Instrument>(inputW->getInstrument());
+  } else if (inputP) {
+    inst = boost::const_pointer_cast<Instrument>(inputP->getInstrument());
   }
 
   const std::string ComponentName = getProperty("ComponentName");
@@ -74,7 +75,6 @@ void RotateInstrumentComponent::exec() {
 
   if (X + Y + Z == 0.0)
     throw std::invalid_argument("The rotation axis must not be a zero vector");
-
 
   IComponent_const_sptr comp;
 
@@ -109,13 +109,11 @@ void RotateInstrumentComponent::exec() {
     Geometry::ParameterMap &pmap = inputW->instrumentParameters();
     Geometry::ComponentHelper::rotateComponent(
         *comp, pmap, Quat(angle, V3D(X, Y, Z)), rotType);
-  }
-  else if (inputP) {
+  } else if (inputP) {
     Geometry::ParameterMap &pmap = inputP->instrumentParameters();
     Geometry::ComponentHelper::rotateComponent(
         *comp, pmap, Quat(angle, V3D(X, Y, Z)), rotType);
   }
-
 }
 
 } // namespace DataHandling

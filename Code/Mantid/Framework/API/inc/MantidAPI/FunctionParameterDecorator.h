@@ -157,7 +157,7 @@ protected:
 };
 
 typedef boost::shared_ptr<FunctionParameterDecorator>
-FunctionParameterDecorator_sptr;
+    FunctionParameterDecorator_sptr;
 
 } // namespace API
 } // namespace Mantid

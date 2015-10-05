@@ -129,9 +129,9 @@ void MinusMD::execEvent() {
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and operand
-void
-MinusMD::execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
-                        Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
+void MinusMD::execHistoHisto(
+    Mantid::DataObjects::MDHistoWorkspace_sptr out,
+    Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
   out->subtract(*operand);
 }
 

@@ -144,7 +144,6 @@ private:
   }
 
 public:
-
   static void destroySuite(IntegrateEllipsoidsTest *suite) { delete suite; }
 
   // This pair of boilerplate methods prevent the suite being created statically
@@ -189,16 +188,16 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
   }
 
-  void test_ws_has_instrument()
-  {
-      auto inputWorkspaceNoInstrument =
-          boost::make_shared<EventWorkspace>();
+  void test_ws_has_instrument() {
+    auto inputWorkspaceNoInstrument = boost::make_shared<EventWorkspace>();
 
-      IntegrateEllipsoids alg;
-      alg.setChild(true);
-      alg.setRethrows(true);
-      alg.initialize();
-      TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", inputWorkspaceNoInstrument), std::invalid_argument&);
+    IntegrateEllipsoids alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    TS_ASSERT_THROWS(
+        alg.setProperty("InputWorkspace", inputWorkspaceNoInstrument),
+        std::invalid_argument &);
   }
 
   void test_execution_events() {
@@ -253,18 +252,17 @@ public:
                       m_peaksWS->getNumberPeaks());
 
     TSM_ASSERT_DELTA("Wrong intensity for peak 0",
-          integratedPeaksWS->getPeak(0).getIntensity(), -1, 0.01);
+                     integratedPeaksWS->getPeak(0).getIntensity(), -1, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 1",
-          integratedPeaksWS->getPeak(1).getIntensity(), 3, 0.01);
+                     integratedPeaksWS->getPeak(1).getIntensity(), 3, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 2",
-          integratedPeaksWS->getPeak(2).getIntensity(), -1, 0.01);
+                     integratedPeaksWS->getPeak(2).getIntensity(), -1, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 3",
-          integratedPeaksWS->getPeak(3).getIntensity(), 15, 0.01);
+                     integratedPeaksWS->getPeak(3).getIntensity(), 15, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 4",
-          integratedPeaksWS->getPeak(4).getIntensity(), 12, 0.01);
+                     integratedPeaksWS->getPeak(4).getIntensity(), 12, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 5",
-          integratedPeaksWS->getPeak(5).getIntensity(), 11, 0.01);
-
+                     integratedPeaksWS->getPeak(5).getIntensity(), 11, 0.01);
   }
 
   void test_execution_histograms_hkl() {
@@ -283,35 +281,31 @@ public:
                       integratedPeaksWS->getNumberPeaks(),
                       m_peaksWS->getNumberPeaks());
     TSM_ASSERT_DELTA("Wrong intensity for peak 0",
-          integratedPeaksWS->getPeak(0).getIntensity(), 2.0, 0.01);
+                     integratedPeaksWS->getPeak(0).getIntensity(), 2.0, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 1",
-          integratedPeaksWS->getPeak(1).getIntensity(), 1.0, 0.01);
+                     integratedPeaksWS->getPeak(1).getIntensity(), 1.0, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 2",
-          integratedPeaksWS->getPeak(2).getIntensity(), 2.0, 0.01);
+                     integratedPeaksWS->getPeak(2).getIntensity(), 2.0, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 3",
-          integratedPeaksWS->getPeak(3).getIntensity(), 11, 0.01);
+                     integratedPeaksWS->getPeak(3).getIntensity(), 11, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 4",
-          integratedPeaksWS->getPeak(4).getIntensity(), 14, 0.01);
+                     integratedPeaksWS->getPeak(4).getIntensity(), 14, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 5",
-          integratedPeaksWS->getPeak(5).getIntensity(), 13, 0.01);
-
+                     integratedPeaksWS->getPeak(5).getIntensity(), 13, 0.01);
   }
 };
 
 class IntegrateEllipsoidsTestPerformance : public CxxTest::TestSuite {
 
 private:
-
   Mantid::API::MatrixWorkspace_sptr m_eventWS;
   Mantid::DataObjects::PeaksWorkspace_sptr m_peaksWS;
   Mantid::API::MatrixWorkspace_sptr m_histoWS;
 
 public:
-
   static void destroySuite(IntegrateEllipsoidsTestPerformance *suite) {
     delete suite;
   }
-
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests

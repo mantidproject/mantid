@@ -66,9 +66,9 @@ public:
   /// Get an element
   double get(size_t i) const;
   /// Get a const reference to an element
-  const double& operator[](size_t i) const {return m_data[i];}
+  const double &operator[](size_t i) const { return m_data[i]; }
   /// Get a reference to an element
-  double& operator[](size_t i) {return m_data[i];}
+  double &operator[](size_t i) { return m_data[i]; }
   // Set all elements to zero
   void zero();
   /// Normalise this vector
@@ -95,7 +95,8 @@ private:
 };
 
 /// The << operator.
-MANTID_CURVEFITTING_DLL std::ostream &operator<<(std::ostream &ostr, const GSLVector &v);
+MANTID_CURVEFITTING_DLL std::ostream &operator<<(std::ostream &ostr,
+                                                 const GSLVector &v);
 
 } // namespace CurveFitting
 } // namespace Mantid

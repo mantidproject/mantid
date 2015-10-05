@@ -101,7 +101,7 @@ struct GSL_FitData {
   JacobianImpl1 J;
 
   // this is presently commented out in the implementation
-  //gsl_matrix *holdCalculatedJacobian; ///< cache of the claculated jacobian
+  // gsl_matrix *holdCalculatedJacobian; ///< cache of the claculated jacobian
 };
 
 int gsl_f(const gsl_vector *x, void *params, gsl_vector *f);

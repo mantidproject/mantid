@@ -57,7 +57,7 @@ namespace Algorithms {
 class DLLExport MaxMin : public API::Algorithm {
 public:
   /// Default constructor
-  MaxMin() : API::Algorithm() {};
+  MaxMin() : API::Algorithm(){};
   /// Destructor
   virtual ~MaxMin(){};
   /// Algorithm's name for identification overriding a virtual method

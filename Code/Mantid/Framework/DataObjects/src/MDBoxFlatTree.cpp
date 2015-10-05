@@ -395,15 +395,16 @@ void MDBoxFlatTree::saveExperimentInfos(::NeXus::File *const file,
 *
 * @param file :: the pointer to the properly opened nexus data file where the
 *experiment info groups can be found.
-* @param filename :: the filename of the opened NeXus file. Use for the file-backed case
+* @param filename :: the filename of the opened NeXus file. Use for the
+*file-backed case
 * @param mei :: MDEventWorkspace/MDHisto to load experiment infos to or rather
 *pointer to the base class of this workspaces (which is an experimentInfo)
 * @param lazy :: If true, use the FileBackedExperimentInfo class to only load
 * the data from the file when it is requested
 */
-void MDBoxFlatTree::loadExperimentInfos(::NeXus::File *const file, const std::string &filename,
-    boost::shared_ptr<Mantid::API::MultipleExperimentInfos> mei,
-    bool lazy) {
+void MDBoxFlatTree::loadExperimentInfos(
+    ::NeXus::File *const file, const std::string &filename,
+    boost::shared_ptr<Mantid::API::MultipleExperimentInfos> mei, bool lazy) {
   // First, find how many experimentX blocks there are
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
@@ -449,11 +450,10 @@ void MDBoxFlatTree::loadExperimentInfos(::NeXus::File *const file, const std::st
     std::string groupName = "experiment" + Kernel::Strings::toString(*itr);
     if (lazy) {
       auto ei = boost::make_shared<API::FileBackedExperimentInfo>(
-        filename, file->getPath() + "/" + groupName);
+          filename, file->getPath() + "/" + groupName);
       // And add it to the mutliple experiment info.
       mei->addExperimentInfo(ei);
-     }
-    else {
+    } else {
       auto ei = boost::make_shared<API::ExperimentInfo>();
       file->openGroup(groupName, "NXgroup");
       std::string parameterStr;
@@ -475,8 +475,8 @@ void MDBoxFlatTree::loadExperimentInfos(::NeXus::File *const file, const std::st
 }
 /**Export existing experiment info defined in the box structure to target
  * workspace (or other experiment info as workspace is an experiment info) */
-void
-MDBoxFlatTree::exportExperiment(Mantid::API::IMDEventWorkspace_sptr &targetWS) {
+void MDBoxFlatTree::exportExperiment(
+    Mantid::API::IMDEventWorkspace_sptr &targetWS) {
   // copy experiment infos
   targetWS->copyExperimentInfos(*m_mEI);
   // free this Experiment info as it has been already exported
@@ -753,7 +753,8 @@ void MDBoxFlatTree::saveWSGenericInfo(::NeXus::File *const file,
   file->writeData("visual_normalization",
                   static_cast<uint32_t>(ws->displayNormalization()));
 
-  // Write out the set display normalization carried for spawned histo workspaces.
+  // Write out the set display normalization carried for spawned histo
+  // workspaces.
   file->writeData("visual_normalization_histo",
                   static_cast<uint32_t>(ws->displayNormalizationHisto()));
 
@@ -783,9 +784,8 @@ void MDBoxFlatTree::saveWSGenericInfo(::NeXus::File *const file,
  * @param file : pointer to the NeXus file
  * @param ws : workspace to get matrix from
  */
-void
-MDBoxFlatTree::saveAffineTransformMatricies(::NeXus::File *const file,
-                                            API::IMDWorkspace_const_sptr ws) {
+void MDBoxFlatTree::saveAffineTransformMatricies(
+    ::NeXus::File *const file, API::IMDWorkspace_const_sptr ws) {
   try {
     saveAffineTransformMatrix(file, ws->getTransformToOriginal(),
                               "transform_to_orig");
@@ -805,9 +805,9 @@ MDBoxFlatTree::saveAffineTransformMatricies(::NeXus::File *const file,
  * @param transform : the object to extract the affine matrix from
  * @param entry_name : the tag in the NeXus file to save under
  */
-void MDBoxFlatTree::saveAffineTransformMatrix(::NeXus::File *const file,
-                                              API::CoordTransform const *transform,
-                                              std::string entry_name) {
+void MDBoxFlatTree::saveAffineTransformMatrix(
+    ::NeXus::File *const file, API::CoordTransform const *transform,
+    std::string entry_name) {
   Kernel::Matrix<coord_t> matrix = transform->makeAffineMatrix();
   g_log.debug() << "TRFM: " << matrix.str() << std::endl;
   saveMatrix<coord_t>(file, entry_name, matrix, ::NeXus::FLOAT32,

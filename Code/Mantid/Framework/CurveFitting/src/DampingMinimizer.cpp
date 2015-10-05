@@ -86,7 +86,8 @@ bool DampingMinimizer::iterate(size_t) {
     for (size_t j = 0; j < n; ++j) {
       std::cerr << dx.get(j) << ' ';
     }
-    std::cerr << std::endl << std::endl;
+    std::cerr << std::endl
+              << std::endl;
   }
 
   // Update the parameters of the cost function.

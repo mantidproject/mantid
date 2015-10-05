@@ -184,11 +184,13 @@ void SaveIsawPeaks::exec() {
         // Retrieve it
         boost::shared_ptr<const IComponent> det =
             inst->getComponentByName(bankName);
-        if (inst->getName() .compare("CORELLI") == 0) // for Corelli with sixteenpack under bank
+        if (inst->getName().compare("CORELLI") ==
+            0) // for Corelli with sixteenpack under bank
         {
           std::vector<Geometry::IComponent_const_sptr> children;
           boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-              boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst->getComponentByName(bankName));
+              boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+                  inst->getComponentByName(bankName));
           asmb->getChildren(children, false);
           det = children[0];
         }
@@ -202,14 +204,15 @@ void SaveIsawPeaks::exec() {
           double xsize, ysize;
           sizeBanks(bankName, NCOLS, NROWS, xsize, ysize);
           // Base unit vector (along the horizontal, X axis)
-          int midX = NCOLS/2;
-          int midY = NROWS/2;
-          V3D base =
-              findPixelPos(bankName, midX + 1, midY) - findPixelPos(bankName, midX, midY);
+          int midX = NCOLS / 2;
+          int midY = NROWS / 2;
+          V3D base = findPixelPos(bankName, midX + 1, midY) -
+                     findPixelPos(bankName, midX, midY);
           base.normalize();
 
           // Up unit vector (along the vertical, Y axis)
-          V3D up = findPixelPos(bankName, midX, midY + 1) - findPixelPos(bankName, midX, midY);
+          V3D up = findPixelPos(bankName, midX, midY + 1) -
+                   findPixelPos(bankName, midX, midY);
           up.normalize();
 
           // Write the line
@@ -397,13 +400,14 @@ V3D SaveIsawPeaks::findPixelPos(std::string bankName, int col, int row) {
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
-    if(children[0]->getName().compare("sixteenpack") == 0){
-      asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+    if (children[0]->getName().compare("sixteenpack") == 0) {
+      asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+          children[0]);
       children.clear();
       asmb->getChildren(children, false);
     }
     int col0 = col - 1;
-    //WISH detectors are in bank in this order in instrument
+    // WISH detectors are in bank in this order in instrument
     if (inst->getName() == "WISH")
       col0 = (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
     boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
@@ -434,8 +438,9 @@ void SaveIsawPeaks::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
-    if(children[0]->getName().compare("sixteenpack") == 0){
-      asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+    if (children[0]->getName().compare("sixteenpack") == 0) {
+      asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+          children[0]);
       children.clear();
       asmb->getChildren(children, false);
     }

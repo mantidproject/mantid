@@ -67,14 +67,13 @@ double CostFuncUnweightedLeastSquares::getResidualVariance() const {
     std::ios::fmtflags prevState = g_log.debug().flags();
     g_log.debug() << std::left << std::fixed << std::setw(10);
     g_log.debug() << "Residual sum of squares: " << sum << std::endl;
-    g_log.debug() << "Residual variance: " << residualVariance
-                        << std::endl;
-    g_log.debug() << "Residual standard deviation: "
-                        << sqrt(residualVariance) << std::endl;
+    g_log.debug() << "Residual variance: " << residualVariance << std::endl;
+    g_log.debug() << "Residual standard deviation: " << sqrt(residualVariance)
+                  << std::endl;
     g_log.debug() << "Degrees of freedom: "
-                        << static_cast<size_t>(degreesOfFreedom) << std::endl;
+                  << static_cast<size_t>(degreesOfFreedom) << std::endl;
     g_log.debug() << "Number of observations: " << m_values->size()
-                        << std::endl;
+                  << std::endl;
     g_log.debug().flags(prevState);
   }
 

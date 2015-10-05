@@ -18,24 +18,20 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using Mantid::DataHandling::SaveGSS;
 
-class SaveGSSTest : public CxxTest::TestSuite
-{
+class SaveGSSTest : public CxxTest::TestSuite {
 public:
-
-  void test_TheBasics()
-  {
+  void test_TheBasics() {
     Mantid::DataHandling::SaveGSS saver;
-    TS_ASSERT_THROWS_NOTHING( saver.initialize() )
-    TS_ASSERT_EQUALS( saver.name(), "SaveGSS" )
-    TS_ASSERT_EQUALS( saver.category(), "Diffraction;DataHandling\\Text" )
-    TS_ASSERT_EQUALS( saver.version(), 1 )
+    TS_ASSERT_THROWS_NOTHING(saver.initialize())
+    TS_ASSERT_EQUALS(saver.name(), "SaveGSS")
+    TS_ASSERT_EQUALS(saver.category(), "Diffraction;DataHandling\\Text")
+    TS_ASSERT_EQUALS(saver.version(), 1)
   }
 
   //----------------------------------------------------------------------------------------------
   /** Save a 2 banks diffraction data with instrument
     */
-  void test_2BankInstrument()
-  {
+  void test_2BankInstrument() {
     // Create a workspace for writing out
     MatrixWorkspace_sptr dataws = generateTestMatrixWorkspace();
     AnalysisDataService::Instance().addOrReplace("Test2BankWS", dataws);
@@ -44,12 +40,13 @@ public:
     saver.initialize();
 
     // Set properties
-    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("InputWorkspace", "Test2BankWS") );
-    TS_ASSERT_THROWS_NOTHING( saver.setProperty("Filename", "test1.gsa") );
-    TS_ASSERT_THROWS_NOTHING( saver.setProperty("Format", "SLOG") );
-    TS_ASSERT_THROWS_NOTHING( saver.setProperty("SplitFiles", false) );
-    TS_ASSERT_THROWS_NOTHING( saver.setProperty("MultiplyByBinWidth", false) );
-    TS_ASSERT_THROWS_NOTHING( saver.setProperty("Append", false) );
+    TS_ASSERT_THROWS_NOTHING(
+        saver.setPropertyValue("InputWorkspace", "Test2BankWS"));
+    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Filename", "test1.gsa"));
+    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Format", "SLOG"));
+    TS_ASSERT_THROWS_NOTHING(saver.setProperty("SplitFiles", false));
+    TS_ASSERT_THROWS_NOTHING(saver.setProperty("MultiplyByBinWidth", false));
+    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Append", false));
 
     // Execute
     saver.execute();
@@ -64,41 +61,32 @@ public:
     TS_ASSERT(gsasfile.exists());
 
     // check file
-    if (gsasfile.exists())
-    {
+    if (gsasfile.exists()) {
       size_t numlines = 0;
       std::ifstream fs_gsas(outfilepath.c_str());
       std::string line;
-      while (std::getline(fs_gsas, line))
-      {
+      while (std::getline(fs_gsas, line)) {
         size_t linenumber = numlines;
         std::stringstream liness(line);
-        if (linenumber == 11)
-        {
+        if (linenumber == 11) {
           std::string bank;
           int banknumber;
           liness >> bank >> banknumber;
           TS_ASSERT_EQUALS(bank, "BANK");
           TS_ASSERT_EQUALS(banknumber, 1);
-        }
-        else if (linenumber == 60)
-        {
+        } else if (linenumber == 60) {
           double x, y, e;
           liness >> x >> y >> e;
           TS_ASSERT_DELTA(x, 8101.43, 0.01);
           TS_ASSERT_DELTA(y, 688.18, 0.01);
           TS_ASSERT_DELTA(e, 26.23, 0.01);
-        }
-        else if (linenumber == 114)
-        {
+        } else if (linenumber == 114) {
           std::string bank;
           int banknumber;
           liness >> bank >> banknumber;
           TS_ASSERT_EQUALS(bank, "BANK");
           TS_ASSERT_EQUALS(banknumber, 2);
-        }
-        else if (linenumber == 173)
-        {
+        } else if (linenumber == 173) {
           double x, y, e;
           liness >> x >> y >> e;
           TS_ASSERT_DELTA(x, 8949.02, 0.01);
@@ -106,7 +94,7 @@ public:
           TS_ASSERT_DELTA(e, 39.90, 0.01);
         }
 
-        ++ numlines;
+        ++numlines;
       }
 
       TS_ASSERT_EQUALS(numlines, 215);
@@ -123,8 +111,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Save a 2 banks diffraction data with instrument
     */
-  void test_2BankInstrumentRALF()
-  {
+  void test_2BankInstrumentRALF() {
     // Create a workspace for writing out
     MatrixWorkspace_sptr dataws = generateTestMatrixWorkspace();
     AnalysisDataService::Instance().addOrReplace("Test2BankWS", dataws);
@@ -133,12 +120,13 @@ public:
     saver.initialize();
 
     // Set properties
-    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("InputWorkspace", "Test2BankWS") );
-    TS_ASSERT_THROWS_NOTHING( saver.setProperty("Filename", "test1r.gsa") );
-    TS_ASSERT_THROWS_NOTHING( saver.setProperty("Format", "RALF") );
-    TS_ASSERT_THROWS_NOTHING( saver.setProperty("SplitFiles", false) );
-    TS_ASSERT_THROWS_NOTHING( saver.setProperty("MultiplyByBinWidth", false) );
-    TS_ASSERT_THROWS_NOTHING( saver.setProperty("Append", false) );
+    TS_ASSERT_THROWS_NOTHING(
+        saver.setPropertyValue("InputWorkspace", "Test2BankWS"));
+    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Filename", "test1r.gsa"));
+    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Format", "RALF"));
+    TS_ASSERT_THROWS_NOTHING(saver.setProperty("SplitFiles", false));
+    TS_ASSERT_THROWS_NOTHING(saver.setProperty("MultiplyByBinWidth", false));
+    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Append", false));
 
     // Execute
     saver.execute();
@@ -153,41 +141,32 @@ public:
     TS_ASSERT(gsasfile.exists());
 
     // check file
-    if (gsasfile.exists())
-    {
+    if (gsasfile.exists()) {
       size_t numlines = 0;
       std::ifstream fs_gsas(outfilepath.c_str());
       std::string line;
-      while (std::getline(fs_gsas, line))
-      {
+      while (std::getline(fs_gsas, line)) {
         size_t linenumber = numlines;
         std::stringstream liness(line);
-        if (linenumber == 8)
-        {
+        if (linenumber == 8) {
           std::string bank;
           int banknumber;
           liness >> bank >> banknumber;
           TS_ASSERT_EQUALS(bank, "BANK");
           TS_ASSERT_EQUALS(banknumber, 1);
-        }
-        else if (linenumber == 57)
-        {
+        } else if (linenumber == 57) {
           double x, y, e;
           liness >> x >> y >> e;
           TS_ASSERT_DELTA(x, 8101.43, 0.01);
           TS_ASSERT_DELTA(y, 688.18, 0.01);
           TS_ASSERT_DELTA(e, 26.23, 0.01);
-        }
-        else if (linenumber == 111)
-        {
+        } else if (linenumber == 111) {
           std::string bank;
           int banknumber;
           liness >> bank >> banknumber;
           TS_ASSERT_EQUALS(bank, "BANK");
           TS_ASSERT_EQUALS(banknumber, 2);
-        }
-        else if (linenumber == 170)
-        {
+        } else if (linenumber == 170) {
           double x, y, e;
           liness >> x >> y >> e;
           TS_ASSERT_DELTA(x, 8949.02, 0.01);
@@ -195,7 +174,7 @@ public:
           TS_ASSERT_DELTA(e, 39.90, 0.01);
         }
 
-        ++ numlines;
+        ++numlines;
       }
 
       TS_ASSERT_EQUALS(numlines, 212);
@@ -212,8 +191,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Save a 2 bank workspace in point data format and without instrument
     */
-  void test_2BankNoInstrumentData()
-  {
+  void test_2BankNoInstrumentData() {
     MatrixWorkspace_sptr dataws = generateNoInstrumentWorkspace();
 
     AnalysisDataService::Instance().addOrReplace("TestNoInstWS", dataws);
@@ -222,12 +200,13 @@ public:
     saver.initialize();
 
     // Set properties
-    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("InputWorkspace", "TestNoInstWS") );
-    TS_ASSERT_THROWS_NOTHING( saver.setProperty("Filename", "test2.gsa") );
-    TS_ASSERT_THROWS_NOTHING( saver.setProperty("Format", "SLOG") );
-    TS_ASSERT_THROWS_NOTHING( saver.setProperty("SplitFiles", false) );
-    TS_ASSERT_THROWS_NOTHING( saver.setProperty("MultiplyByBinWidth", false) );
-    TS_ASSERT_THROWS_NOTHING( saver.setProperty("Append", false) );
+    TS_ASSERT_THROWS_NOTHING(
+        saver.setPropertyValue("InputWorkspace", "TestNoInstWS"));
+    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Filename", "test2.gsa"));
+    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Format", "SLOG"));
+    TS_ASSERT_THROWS_NOTHING(saver.setProperty("SplitFiles", false));
+    TS_ASSERT_THROWS_NOTHING(saver.setProperty("MultiplyByBinWidth", false));
+    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Append", false));
 
     // Execute
     saver.execute();
@@ -242,41 +221,32 @@ public:
     TS_ASSERT(gsasfile.exists());
 
     // check file
-    if (gsasfile.exists())
-    {
+    if (gsasfile.exists()) {
       size_t numlines = 0;
       std::ifstream fs_gsas(outfilepath.c_str());
       std::string line;
-      while (std::getline(fs_gsas, line))
-      {
+      while (std::getline(fs_gsas, line)) {
         size_t linenumber = numlines;
         std::stringstream liness(line);
-        if (linenumber == 10)
-        {
+        if (linenumber == 10) {
           std::string bank;
           int banknumber;
           liness >> bank >> banknumber;
           TS_ASSERT_EQUALS(bank, "BANK");
           TS_ASSERT_EQUALS(banknumber, 1);
-        }
-        else if (linenumber == 59)
-        {
+        } else if (linenumber == 59) {
           double x, y, e;
           liness >> x >> y >> e;
           TS_ASSERT_DELTA(x, 8101.43, 0.01);
           TS_ASSERT_DELTA(y, 688.18, 0.01);
           TS_ASSERT_DELTA(e, 26.23, 0.01);
-        }
-        else if (linenumber == 112)
-        {
+        } else if (linenumber == 112) {
           std::string bank;
           int banknumber;
           liness >> bank >> banknumber;
           TS_ASSERT_EQUALS(bank, "BANK");
           TS_ASSERT_EQUALS(banknumber, 2);
-        }
-        else if (linenumber == 171)
-        {
+        } else if (linenumber == 171) {
           double x, y, e;
           liness >> x >> y >> e;
           TS_ASSERT_DELTA(x, 8949.02, 0.01);
@@ -284,12 +254,11 @@ public:
           TS_ASSERT_DELTA(e, 39.90, 0.01);
         }
 
-        ++ numlines;
+        ++numlines;
       }
 
       TS_ASSERT_EQUALS(numlines, 213);
     }
-
 
     // Clean
     AnalysisDataService::Instance().remove("TestNoInstWS");
@@ -300,37 +269,35 @@ public:
   }
 
 private:
-
   //----------------------------------------------------------------------------------------------
   /**
     */
-  API::MatrixWorkspace_sptr generateNoInstrumentWorkspace()
-  {
-    MatrixWorkspace_sptr dataws = WorkspaceCreationHelper::Create2DWorkspace(2, 100);
+  API::MatrixWorkspace_sptr generateNoInstrumentWorkspace() {
+    MatrixWorkspace_sptr dataws =
+        WorkspaceCreationHelper::Create2DWorkspace(2, 100);
     dataws->getAxis(0)->setUnit("TOF");
 
     // Set data with logarithm bin
     double t0 = 5000.;
     double dt = 0.01;
     size_t numhist = dataws->getNumberHistograms();
-    for (size_t iws = 0; iws < numhist; ++iws)
-    {
-      MantidVec& dataX = dataws->dataX(iws);
+    for (size_t iws = 0; iws < numhist; ++iws) {
+      MantidVec &dataX = dataws->dataX(iws);
       dataX[0] = t0;
       for (size_t i = 1; i < dataX.size(); ++i)
-        dataX[i] = (1+dt)*dataX[i-1];
+        dataX[i] = (1 + dt) * dataX[i - 1];
     }
 
     // Set y and e
-    for (size_t iws = 0; iws < numhist; ++iws)
-    {
-      const MantidVec& vecX = dataws->readX(iws);
-      MantidVec& dataY = dataws->dataY(iws);
-      MantidVec& dataE = dataws->dataE(iws);
-      double factor = (static_cast<double>(iws)+1)*1000.;
-      for (size_t i = 0; i < dataY.size(); ++i)
-      {
-        dataY[i] = factor*std::exp(-(vecX[i] - 7000. - factor)*(vecX[i] - 7000. - factor)/(0.01*factor*factor));
+    for (size_t iws = 0; iws < numhist; ++iws) {
+      const MantidVec &vecX = dataws->readX(iws);
+      MantidVec &dataY = dataws->dataY(iws);
+      MantidVec &dataE = dataws->dataE(iws);
+      double factor = (static_cast<double>(iws) + 1) * 1000.;
+      for (size_t i = 0; i < dataY.size(); ++i) {
+        dataY[i] = factor * std::exp(-(vecX[i] - 7000. - factor) *
+                                     (vecX[i] - 7000. - factor) /
+                                     (0.01 * factor * factor));
         if (dataY[i] < 0.01)
           dataE[i] = 0.1;
         else
@@ -344,35 +311,34 @@ private:
   //----------------------------------------------------------------------------------------------
   /** Generate a matrix workspace for writing to gsas file
     */
-  API::MatrixWorkspace_sptr generateTestMatrixWorkspace()
-  {
+  API::MatrixWorkspace_sptr generateTestMatrixWorkspace() {
     // Create workspace
     MatrixWorkspace_sptr dataws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-          WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 100, false, false, true, "TestFake"));
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+            2, 100, false, false, true, "TestFake"));
     dataws->getAxis(0)->setUnit("TOF");
 
     // Set data with logarithm bin
     double t0 = 5000.;
     double dt = 0.01;
     size_t numhist = dataws->getNumberHistograms();
-    for (size_t iws = 0; iws < numhist; ++iws)
-    {
-      MantidVec& dataX = dataws->dataX(iws);
+    for (size_t iws = 0; iws < numhist; ++iws) {
+      MantidVec &dataX = dataws->dataX(iws);
       dataX[0] = t0;
       for (size_t i = 1; i < dataX.size(); ++i)
-        dataX[i] = (1+dt)*dataX[i-1];
+        dataX[i] = (1 + dt) * dataX[i - 1];
     }
 
     // Set y and e
-    for (size_t iws = 0; iws < numhist; ++iws)
-    {
-      const MantidVec& vecX = dataws->readX(iws);
-      MantidVec& dataY = dataws->dataY(iws);
-      MantidVec& dataE = dataws->dataE(iws);
-      double factor = (static_cast<double>(iws)+1)*1000.;
-      for (size_t i = 0; i < dataY.size(); ++i)
-      {
-        dataY[i] = factor*std::exp(-(vecX[i] - 7000. - factor)*(vecX[i] - 7000. - factor)/(0.01*factor*factor));
+    for (size_t iws = 0; iws < numhist; ++iws) {
+      const MantidVec &vecX = dataws->readX(iws);
+      MantidVec &dataY = dataws->dataY(iws);
+      MantidVec &dataE = dataws->dataE(iws);
+      double factor = (static_cast<double>(iws) + 1) * 1000.;
+      for (size_t i = 0; i < dataY.size(); ++i) {
+        dataY[i] = factor * std::exp(-(vecX[i] - 7000. - factor) *
+                                     (vecX[i] - 7000. - factor) /
+                                     (0.01 * factor * factor));
         if (dataY[i] < 0.01)
           dataE[i] = 0.1;
         else
@@ -382,8 +348,6 @@ private:
 
     return dataws;
   }
-
 };
 
-
-#endif //SAVEGSSTEST_H_
+#endif // SAVEGSSTEST_H_

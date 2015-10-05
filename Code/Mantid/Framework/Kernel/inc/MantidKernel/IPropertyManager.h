@@ -435,7 +435,7 @@ private:
   namespace Kernel {                                                           \
   template <>                                                                  \
   DLLExport type                                                               \
-      IPropertyManager::getValue<type>(const std::string &name) const {        \
+  IPropertyManager::getValue<type>(const std::string &name) const {            \
     PropertyWithValue<type> *prop =                                            \
         dynamic_cast<PropertyWithValue<type> *>(getPointerToProperty(name));   \
     if (prop) {                                                                \

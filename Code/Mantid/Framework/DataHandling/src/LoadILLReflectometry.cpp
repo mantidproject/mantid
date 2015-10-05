@@ -63,8 +63,8 @@ const std::string LoadILLReflectometry::category() const {
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int
-LoadILLReflectometry::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadILLReflectometry::confidence(
+    Kernel::NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL
   if (descriptor.pathExists("/entry0/wavelength")               // ILL
@@ -175,9 +175,8 @@ void LoadILLReflectometry::exec() {
 /**
  * Set member variable with the instrument name
  */
-void
-LoadILLReflectometry::setInstrumentName(const NeXus::NXEntry &firstEntry,
-                                        const std::string &instrumentNamePath) {
+void LoadILLReflectometry::setInstrumentName(
+    const NeXus::NXEntry &firstEntry, const std::string &instrumentNamePath) {
 
   if (instrumentNamePath == "") {
     std::string message("Cannot set the instrument name from the Nexus file!");
@@ -311,7 +310,7 @@ void LoadILLReflectometry::loadDataIntoTheWorkSpace(
   if (!tof_channel_width_prop)
     throw std::runtime_error("Could not cast (interpret) the property " +
                              propTOF0 + " (channel width) as a floating point "
-                             "value.");
+                                        "value.");
   m_channelWidth = *tof_channel_width_prop; /* PAR1[95] */
 
   const std::string propTOF2 = "monitor1.time_of_flight_2";
@@ -319,7 +318,8 @@ void LoadILLReflectometry::loadDataIntoTheWorkSpace(
       m_localWorkspace->run().getProperty(propTOF2));
   if (!tof_delay_prop)
     throw std::runtime_error("Could not cast (interpret) the property " +
-                             propTOF2 + " (ToF delay) as a floating point value.");
+                             propTOF2 +
+                             " (ToF delay) as a floating point value.");
   double tof_delay = *tof_delay_prop; /* PAR1[96] */
 
   double POFF = entry.getFloat("instrument/VirtualChopper/poff"); /* par1[54] */

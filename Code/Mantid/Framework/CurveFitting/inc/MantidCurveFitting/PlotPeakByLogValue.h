@@ -117,7 +117,6 @@ private:
 
   /// Record of workspaces output by the minimizer
   std::map<std::string, std::vector<std::string>> m_minimizerWorkspaces;
-
 };
 
 } // namespace CurveFitting

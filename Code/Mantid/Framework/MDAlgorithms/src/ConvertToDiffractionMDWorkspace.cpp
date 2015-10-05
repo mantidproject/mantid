@@ -364,7 +364,8 @@ void ConvertToDiffractionMDWorkspace::exec() {
 
   std::string dimensionNames[3] = {"Q_lab_x", "Q_lab_y", "Q_lab_z"};
   std::string dimensionUnits = "Angstroms^-1";
-  Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = Mantid::Kernel::QLab;
+  Mantid::Kernel::SpecialCoordinateSystem coordinateSystem =
+      Mantid::Kernel::QLab;
   if (OutputDimensions == "Q (sample frame)") {
     // Set the matrix based on goniometer angles
     mat = m_inWS->mutableRun().getGoniometerMatrix();

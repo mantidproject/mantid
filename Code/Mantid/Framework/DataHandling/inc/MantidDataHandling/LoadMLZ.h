@@ -10,10 +10,11 @@
 
 namespace Mantid {
 namespace DataHandling {
-/** 
+/**
     LoadMLZ : Loads MLZ nexus or hdf file into a Mantid workspace.
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge
+   National Laboratory
 
     This file is part of Mantid.
 
@@ -33,86 +34,84 @@ namespace DataHandling {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-  class DLLExport LoadMLZ  : public API::IFileLoader<Kernel::NexusDescriptor>
-  {
-  public:
-    LoadMLZ();
-    virtual ~LoadMLZ();
-    
-    virtual const std::string name() const;
-    virtual int version() const;
-    virtual const std::string category() const;
+class DLLExport LoadMLZ : public API::IFileLoader<Kernel::NexusDescriptor> {
+public:
+  LoadMLZ();
+  virtual ~LoadMLZ();
 
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {
-      return "Loads a nexus file from MLZ facility.";
-    }
+  virtual const std::string name() const;
+  virtual int version() const;
+  virtual const std::string category() const;
 
-    /// Returns a confidence value that this algorithm can load a file
-    int confidence(Kernel::NexusDescriptor & descriptor) const;
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Loads a nexus file from MLZ facility.";
+  }
 
-  private:
-    void init();
-    void exec();
+  /// Returns a confidence value that this algorithm can load a file
+  int confidence(Kernel::NexusDescriptor &descriptor) const;
 
-    //int getEPPFromVanadium(const std::string &,Mantid::API::MatrixWorkspace_sptr);
-    void loadInstrumentDetails(NeXus::NXEntry&);
-    void loadTimeDetails(NeXus::NXEntry& entry);
+private:
+  void init();
+  void exec();
 
-    std::vector<std::vector<int> > getMonitorInfo(NeXus::NXEntry& firstEntry);
+  // int getEPPFromVanadium(const std::string
+  // &,Mantid::API::MatrixWorkspace_sptr);
+  void loadInstrumentDetails(NeXus::NXEntry &);
+  void loadTimeDetails(NeXus::NXEntry &entry);
 
-    //void initWorkSpace(NeXus::NXEntry& entry, const std::vector<std::vector<int> >&);
-    void initWorkSpace(NeXus::NXEntry& entry);
-    void initInstrumentSpecific();
-    void loadRunDetails(NeXus::NXEntry & entry);
-    void loadExperimentDetails(NeXus::NXEntry & entry);
-    //int getDetectorElasticPeakPosition(const NeXus::NXInt &data);
+  std::vector<std::vector<int>> getMonitorInfo(NeXus::NXEntry &firstEntry);
 
-    NeXus::NXData loadNexusFileData(NeXus::NXEntry& entry);
-    void maskDetectors(NeXus::NXEntry& entry);
-    void loadDataIntoTheWorkSpace(NeXus::NXEntry& entry);//, int ElasticPeakPosition = -1);
+  // void initWorkSpace(NeXus::NXEntry& entry, const
+  // std::vector<std::vector<int> >&);
+  void initWorkSpace(NeXus::NXEntry &entry);
+  void initInstrumentSpecific();
+  void loadRunDetails(NeXus::NXEntry &entry);
+  void loadExperimentDetails(NeXus::NXEntry &entry);
+  // int getDetectorElasticPeakPosition(const NeXus::NXInt &data);
 
-    void runLoadInstrument();
+  NeXus::NXData loadNexusFileData(NeXus::NXEntry &entry);
+  void maskDetectors(NeXus::NXEntry &entry);
+  void loadDataIntoTheWorkSpace(
+      NeXus::NXEntry &entry); //, int ElasticPeakPosition = -1);
 
-    /// Calculate error for y
-    static double calculateError(double in) {
-        return sqrt(in);
-    }
-    //int validateVanadium(const std::string &);
+  void runLoadInstrument();
 
-    API::MatrixWorkspace_sptr m_localWorkspace;
+  /// Calculate error for y
+  static double calculateError(double in) { return sqrt(in); }
+  // int validateVanadium(const std::string &);
 
-//	NeXus::NXRoot m_dataRoot;
-//	NeXus::NXRoot m_vanaRoot;
+  API::MatrixWorkspace_sptr m_localWorkspace;
 
-    std::string m_instrumentName; ///< Name of the instrument
-    std::string m_instrumentPath; ///< Name of the instrument path
+  //	NeXus::NXRoot m_dataRoot;
+  //	NeXus::NXRoot m_vanaRoot;
 
-    // Variables describing the data in the detector
-    size_t m_numberOfTubes; // number of tubes - X
-    size_t m_numberOfPixelsPerTube; //number of pixels per tube - Y
-    size_t m_numberOfChannels; // time channels - Z
-    size_t m_numberOfHistograms;
+  std::string m_instrumentName; ///< Name of the instrument
+  std::string m_instrumentPath; ///< Name of the instrument path
 
-    /* Values parsed from the nexus file */
-    int m_monitorElasticPeakPosition;
-    double m_wavelength;
-    double m_channelWidth;
-    double m_timeOfFlightDelay;
-    int m_monitorCounts;
-    double m_chopper_speed;
-    int m_chopper_ratio;
+  // Variables describing the data in the detector
+  size_t m_numberOfTubes;         // number of tubes - X
+  size_t m_numberOfPixelsPerTube; // number of pixels per tube - Y
+  size_t m_numberOfChannels;      // time channels - Z
+  size_t m_numberOfHistograms;
 
-    double m_l1;
-    double m_l2;
+  /* Values parsed from the nexus file */
+  int m_monitorElasticPeakPosition;
+  double m_wavelength;
+  double m_channelWidth;
+  double m_timeOfFlightDelay;
+  int m_monitorCounts;
+  double m_chopper_speed;
+  int m_chopper_ratio;
 
-    std::vector<std::string> m_supportedInstruments;
-    LoadHelper m_mlzloader;
+  double m_l1;
+  double m_l2;
 
-  };
-
+  std::vector<std::string> m_supportedInstruments;
+  LoadHelper m_mlzloader;
+};
 
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_LOADMLZ_H_ */
+#endif /* MANTID_DATAHANDLING_LOADMLZ_H_ */

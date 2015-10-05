@@ -43,22 +43,22 @@ std::vector<double> ChebyshevPolyFitImpl::fit(const std::vector<double> &x,
   gsl_matrix *MX = gsl_matrix_alloc(npts, degp1);
   auto *yw = gsl_vector_alloc(npts);
   ChebyshevPolynomial chebyp;
-  for(size_t i = 0; i < npts; ++i) {
+  for (size_t i = 0; i < npts; ++i) {
     const auto xi = x[i];
     const auto wi = w[i];
-    const auto xbar = ((xi - xmin) - (xmax - xi))/(xmax-xmin);
-    gsl_vector_set(yw, i, wi*y[i]);
-    for(size_t j = 0; j < degp1; ++j) {
-      gsl_matrix_set(MX, i, j, wi*chebyp(j, xbar));
+    const auto xbar = ((xi - xmin) - (xmax - xi)) / (xmax - xmin);
+    gsl_vector_set(yw, i, wi * y[i]);
+    for (size_t j = 0; j < degp1; ++j) {
+      gsl_matrix_set(MX, i, j, wi * chebyp(j, xbar));
     }
   }
 
   // Least-squares fit to determine c
   auto *c = gsl_vector_alloc(degp1);
   auto *cov = gsl_matrix_alloc(degp1, degp1);
-  auto *work = gsl_multifit_linear_alloc (npts, degp1);
+  auto *work = gsl_multifit_linear_alloc(npts, degp1);
   double chisq(0.0);
-  gsl_multifit_linear (MX, yw, c, cov, &chisq, work);
+  gsl_multifit_linear(MX, yw, c, cov, &chisq, work);
   gsl_vector_free(yw);
   gsl_matrix_free(cov);
   gsl_matrix_free(MX);

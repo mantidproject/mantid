@@ -28,8 +28,8 @@ void Muon_ExpDecayOscTest::functionLocal(double *out, const double *xValues,
   const double &gphi = getParameter("phi");
 
   for (size_t i = 0; i < nData; i++) {
-    out[i] = gA0 * exp(-gs * xValues[i]) *
-             cos(2 * M_PI * gf * xValues[i] + gphi);
+    out[i] =
+        gA0 * exp(-gs * xValues[i]) * cos(2 * M_PI * gf * xValues[i] + gphi);
   }
 }
 void Muon_ExpDecayOscTest::functionDeriv(const API::FunctionDomain &domain,

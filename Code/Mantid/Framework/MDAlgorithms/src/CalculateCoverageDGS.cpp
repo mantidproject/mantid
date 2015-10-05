@@ -105,8 +105,8 @@ void CalculateCoverageDGS::init() {
                       boost::make_shared<InstrumentValidator>()),
                   "An input workspace.");
 
-  auto mustBe3D = boost::make_shared<ArrayLengthValidator<double> >(3);
-  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
+  auto mustBe3D = boost::make_shared<ArrayLengthValidator<double>>(3);
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
   std::vector<double> Q1(3, 0.), Q2(3, 0), Q3(3, 0);
@@ -171,9 +171,9 @@ void CalculateCoverageDGS::exec() {
   std::vector<double> tt, phi;
   for (int i = 0; i < static_cast<int>(detIDS.size()); i++) {
     auto detector = instrument->getDetector(detIDS[i]);
-    if(!detector->isMasked()){
-        tt.push_back(detector->getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)));
-        phi.push_back(detector->getPhi());
+    if (!detector->isMasked()) {
+      tt.push_back(detector->getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)));
+      phi.push_back(detector->getPhi());
     }
   }
 

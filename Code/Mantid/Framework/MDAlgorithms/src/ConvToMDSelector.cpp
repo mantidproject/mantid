@@ -33,9 +33,10 @@ boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
     inputWSType = Matrix2DWS;
 
   if (inputWSType == Undefined)
-    throw(std::invalid_argument("ConvToDataObjectsSelector::got a workspace which "
-                                "is neither matrix nor event workspace; Can "
-                                "not deal with it"));
+    throw(std::invalid_argument(
+        "ConvToDataObjectsSelector::got a workspace which "
+        "is neither matrix nor event workspace; Can "
+        "not deal with it"));
 
   // identify what converter (if any) is currently initialized;
   wsType existingWsConvType(Undefined);
@@ -56,8 +57,8 @@ boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
     case (Matrix2DWS):
       return boost::shared_ptr<ConvToMDBase>(new ConvToMDHistoWS());
     default:
-      throw(std::logic_error(
-          "ConvToDataObjectsSelector: requested converter for unknown ws type"));
+      throw(std::logic_error("ConvToDataObjectsSelector: requested converter "
+                             "for unknown ws type"));
     }
 
   } else { // existing converter is suitable for the workspace

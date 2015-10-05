@@ -72,8 +72,6 @@ private:
   void init();
   /// Execution code
   void exec();
-
-
 };
 
 } // namespace Algorithms

@@ -223,9 +223,9 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
     row << boost::lexical_cast<double>(splitted[0]);  // frequency
     row << boost::lexical_cast<double>(splitted[1]);  // wavelength
     row << boost::lexical_cast<int32_t>(splitted[2]); // bank
-    row << splitted[3]; // vanadium
-    row << splitted[4]; // container
-    row << splitted[5]; // empty
+    row << splitted[3];                               // vanadium
+    row << splitted[4];                               // container
+    row << splitted[5];                               // empty
     row << splitted[6];                               // d_min
     row << splitted[7];                               // d_max
     row << boost::lexical_cast<double>(splitted[8]);  // tof_min

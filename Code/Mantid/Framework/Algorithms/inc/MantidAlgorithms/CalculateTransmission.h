@@ -74,7 +74,7 @@ public:
   virtual ~CalculateTransmission();
   /// Algorithm's name
   virtual const std::string name() const { return "CalculateTransmission"; }
-  ///Summary of algorithms purpose
+  /// Summary of algorithms purpose
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
     return "Calculates the transmission correction, as a function of "
@@ -99,7 +99,8 @@ private:
   void exec();
 
   /// Pull out a single spectrum from a 2D workspace
-  API::MatrixWorkspace_sptr extractSpectra(API::MatrixWorkspace_sptr ws, const std::vector<size_t> & indices);
+  API::MatrixWorkspace_sptr extractSpectra(API::MatrixWorkspace_sptr ws,
+                                           const std::vector<size_t> &indices);
   /// Returns a workspace with the evaulation of the fit to the calculated
   /// transmission fraction
   API::MatrixWorkspace_sptr fit(API::MatrixWorkspace_sptr raw,
@@ -115,8 +116,10 @@ private:
   /// Calls the rebin algorithm
   API::MatrixWorkspace_sptr rebin(std::vector<double> &binParams,
                                   API::MatrixWorkspace_sptr output);
-  /// Outpus message to log if the detector at the given index is not a monitor in both input workspaces.
-  void logIfNotMonitor(API::MatrixWorkspace_sptr sampleWS, API::MatrixWorkspace_sptr directWS, size_t index);
+  /// Outpus message to log if the detector at the given index is not a monitor
+  /// in both input workspaces.
+  void logIfNotMonitor(API::MatrixWorkspace_sptr sampleWS,
+                       API::MatrixWorkspace_sptr directWS, size_t index);
 };
 
 } // namespace Algorithm

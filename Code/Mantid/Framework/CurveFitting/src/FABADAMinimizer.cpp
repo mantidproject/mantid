@@ -197,8 +197,9 @@ bool FABADAMinimizer::iterate(size_t) {
       mt.seed(123 * (int(m_counter) +
                      45 * int(i))); // Numeros inventados para la seed
       boost::normal_distribution<double> distr(0.0, std::abs(m_jump[i]));
-      boost::variate_generator<
-          boost::mt19937, boost::normal_distribution<double>> gen(mt, distr);
+      boost::variate_generator<boost::mt19937,
+                               boost::normal_distribution<double>> gen(mt,
+                                                                       distr);
       step = gen();
     } else {
       step = m_jump[i];
