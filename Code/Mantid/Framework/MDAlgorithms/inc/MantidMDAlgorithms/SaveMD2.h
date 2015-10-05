@@ -11,7 +11,8 @@ namespace MDAlgorithms {
 
 /** Save a MDEventWorkspace to a .nxs file.
 
-  Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 

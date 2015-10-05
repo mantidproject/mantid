@@ -6,16 +6,14 @@
 #include "MantidKernel/DataItem.h"
 #include <cxxtest/TestSuite.h>
 
-
 using namespace Mantid;
 using namespace Mantid::Kernel;
 
-class MockDataItem : public DataItem
-{
+class MockDataItem : public DataItem {
 public:
   virtual const std::string id() const { return "MockDataItem"; }
   /// The name of the object
-  virtual const std::string name() const{ return "Noone"; }
+  virtual const std::string name() const { return "Noone"; }
   /// Can this object be accessed from multiple threads safely
   virtual bool threadSafe() const { return true; }
   /// Serializes the object to a string
@@ -23,27 +21,19 @@ public:
   friend class WriteLockTest;
 };
 
-
-
-class WriteLockTest : public CxxTest::TestSuite
-{
+class WriteLockTest : public CxxTest::TestSuite {
 public:
-
-  void test_Scoped_WriteLock()
-  {
+  void test_Scoped_WriteLock() {
     MockDataItem item;
     WriteLock lock(item);
     // Can't directly check the underlying lock object as it is private...
   }
 
-  void test_new_doesNotCompile()
-  {
+  void test_new_doesNotCompile() {
     MockDataItem item;
     // The next line does not compile, which is what we want!
-//    WriteLock * lock = new WriteLock(item);
+    //    WriteLock * lock = new WriteLock(item);
   }
-
 };
-
 
 #endif /* MANTID_KERNEL_READLOCKTEST_H_ */

@@ -174,12 +174,12 @@ size_t FunctionParameterDecorator::getParameterIndex(
     const ParameterReference &ref) const {
   throwIfNoFunctionSet();
 
-  if(boost::dynamic_pointer_cast<CompositeFunction>(m_wrappedFunction)) {
-      return m_wrappedFunction->getParameterIndex(ref);
+  if (boost::dynamic_pointer_cast<CompositeFunction>(m_wrappedFunction)) {
+    return m_wrappedFunction->getParameterIndex(ref);
   }
 
-  if(ref.getFunction() == this && ref.getIndex() < nParams()) {
-      return ref.getIndex();
+  if (ref.getFunction() == this && ref.getIndex() < nParams()) {
+    return ref.getIndex();
   }
 
   return nParams();
@@ -206,16 +206,15 @@ FunctionParameterDecorator::getAttribute(const std::string &attName) const {
   return m_wrappedFunction->getAttribute(attName);
 }
 
-void
-FunctionParameterDecorator::setAttribute(const std::string &attName,
-                                         const IFunction::Attribute &attValue) {
+void FunctionParameterDecorator::setAttribute(
+    const std::string &attName, const IFunction::Attribute &attValue) {
   throwIfNoFunctionSet();
 
   m_wrappedFunction->setAttribute(attName, attValue);
 }
 
-bool
-FunctionParameterDecorator::hasAttribute(const std::string &attName) const {
+bool FunctionParameterDecorator::hasAttribute(
+    const std::string &attName) const {
   throwIfNoFunctionSet();
 
   return m_wrappedFunction->hasAttribute(attName);
@@ -300,9 +299,9 @@ void FunctionParameterDecorator::declareParameter(
 
 /// Forwads addTie-call to the decorated function.
 void FunctionParameterDecorator::addTie(ParameterTie *tie) {
-    throwIfNoFunctionSet();
+  throwIfNoFunctionSet();
 
-    m_wrappedFunction->addTie(tie);
+  m_wrappedFunction->addTie(tie);
 }
 
 /**

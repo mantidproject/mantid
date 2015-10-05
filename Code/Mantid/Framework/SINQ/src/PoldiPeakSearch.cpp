@@ -305,9 +305,8 @@ PoldiPeakSearch::getFWHMEstimate(const MantidVec::const_iterator &baseListStart,
   *on which the peak search was performed.
   * @param error :: Error that is set on the workspace.
   */
-void
-PoldiPeakSearch::setErrorsOnWorkspace(Workspace2D_sptr correlationWorkspace,
-                                      double error) const {
+void PoldiPeakSearch::setErrorsOnWorkspace(
+    Workspace2D_sptr correlationWorkspace, double error) const {
   MantidVec &errors = correlationWorkspace->dataE(0);
 
   std::fill(errors.begin(), errors.end(), error);
@@ -516,9 +515,8 @@ void PoldiPeakSearch::setMaximumPeakNumber(int newMaximumPeakNumber) {
   m_maximumPeakNumber = newMaximumPeakNumber;
 }
 
-bool
-PoldiPeakSearch::vectorElementGreaterThan(MantidVec::const_iterator first,
-                                          MantidVec::const_iterator second) {
+bool PoldiPeakSearch::vectorElementGreaterThan(
+    MantidVec::const_iterator first, MantidVec::const_iterator second) {
   return *first > *second;
 }
 
@@ -531,16 +529,16 @@ void PoldiPeakSearch::init() {
                                                      Direction::InOut),
                   "Workspace containing a POLDI auto-correlation spectrum.");
 
-  boost::shared_ptr<BoundedValidator<int> > minPeakSeparationValidator =
-      boost::make_shared<BoundedValidator<int> >();
+  boost::shared_ptr<BoundedValidator<int>> minPeakSeparationValidator =
+      boost::make_shared<BoundedValidator<int>>();
   minPeakSeparationValidator->setLower(1);
   declareProperty("MinimumPeakSeparation", 15, minPeakSeparationValidator,
                   "Minimum number of points in the spectrum by which two peaks "
                   "have to be separated.",
                   Direction::Input);
 
-  boost::shared_ptr<BoundedValidator<int> > maxPeakNumberValidator =
-      boost::make_shared<BoundedValidator<int> >();
+  boost::shared_ptr<BoundedValidator<int>> maxPeakNumberValidator =
+      boost::make_shared<BoundedValidator<int>>();
   maxPeakNumberValidator->setLower(1);
   declareProperty("MaximumPeakNumber", 24, maxPeakNumberValidator,
                   "Maximum number of peaks to be detected.", Direction::Input);

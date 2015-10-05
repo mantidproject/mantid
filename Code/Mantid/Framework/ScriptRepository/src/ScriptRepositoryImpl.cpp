@@ -563,8 +563,8 @@ void ScriptRepositoryImpl::download(const std::string &input_path) {
 
  @param directory_path : the path for the directory.
  */
-void
-ScriptRepositoryImpl::download_directory(const std::string &directory_path) {
+void ScriptRepositoryImpl::download_directory(
+    const std::string &directory_path) {
   std::string directory_path_with_slash =
       std::string(directory_path).append("/");
   bool found = false;
@@ -768,7 +768,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
                    << std::endl;
 
     Kernel::InternetHelper inetHelper;
-    
+
     HTMLForm form(HTMLForm::ENCODING_MULTIPART);
 
     // add the fields author, email and comment
@@ -797,13 +797,12 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
 
     int status;
     try {
-      status = inetHelper.sendRequest(remote_upload,server_reply);
+      status = inetHelper.sendRequest(remote_upload, server_reply);
     } catch (Kernel::Exception::InternetError &ie) {
       status = ie.errorCode();
     }
-      
-    g_log.information() << "ScriptRepository upload status: "
-                        << status
+
+    g_log.information() << "ScriptRepository upload status: " << status
                         << std::endl;
     std::stringstream answer;
     { // remove the status message from the end of the reply, in order not to
@@ -865,9 +864,10 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
       // So add to the file locally to avoid race condition.
       RepositoryEntry &remote_entry = repo.at(file_path);
       if (!published_date.empty())
-          remote_entry.pub_date = DateAndTime(published_date);
+        remote_entry.pub_date = DateAndTime(published_date);
       remote_entry.status = BOTH_UNCHANGED;
-      g_log.debug() << "ScriptRepository updating repository json " << std::endl;
+      g_log.debug() << "ScriptRepository updating repository json "
+                    << std::endl;
       updateRepositoryJson(file_path, remote_entry);
 
     } else
@@ -888,41 +888,38 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
 * @param entry: the entry to add to the json file
 */
 void ScriptRepositoryImpl::updateRepositoryJson(const std::string &path,
-                                               const RepositoryEntry &entry) {
-                                           
+                                                const RepositoryEntry &entry) {
+
   ptree repository_json;
-  std::string filename = std::string(local_repository).append(".repository.json");
+  std::string filename =
+      std::string(local_repository).append(".repository.json");
   read_json(filename, repository_json);
 
   ptree::const_assoc_iterator it = repository_json.find(path);
   if (it == repository_json.not_found()) {
     boost::property_tree::ptree array;
-    array.put(std::string("author"),
-              entry.author);
-    array.put(std::string("description"),
-              entry.description);
+    array.put(std::string("author"), entry.author);
+    array.put(std::string("description"), entry.description);
     std::string directory =
         (const char *)((entry.directory) ? "true" : "false");
-    array.put(std::string("directory"),
-              directory);
-    array.put(std::string("pub_date"),
-              entry.pub_date.toFormattedString());
+    array.put(std::string("directory"), directory);
+    array.put(std::string("pub_date"), entry.pub_date.toFormattedString());
     repository_json.push_back(
         std::pair<std::string,
                   boost::property_tree::basic_ptree<std::string, std::string>>(
             path, array));
   }
-  
+
   g_log.debug() << "Update LOCAL JSON FILE" << std::endl;
-  #if defined(_WIN32) || defined(_WIN64)
-    // set the .repository.json and .local.json not hidden to be able to edit it
-    SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_NORMAL);
-  #endif
-    write_json(filename, repository_json);
-  #if defined(_WIN32) || defined(_WIN64)
-    // set the .repository.json and .local.json hidden
-    SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_HIDDEN);
-  #endif
+#if defined(_WIN32) || defined(_WIN64)
+  // set the .repository.json and .local.json not hidden to be able to edit it
+  SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_NORMAL);
+#endif
+  write_json(filename, repository_json);
+#if defined(_WIN32) || defined(_WIN64)
+  // set the .repository.json and .local.json hidden
+  SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_HIDDEN);
+#endif
 }
 
 /**
@@ -1135,15 +1132,12 @@ std::string ScriptRepositoryImpl::doDeleteRemoteFile(
     std::stringstream server_reply;
     int status;
     try {
-      status = inetHelper.sendRequest(url,server_reply);
-    } catch (Kernel::Exception::InternetError &ie)
-    {
+      status = inetHelper.sendRequest(url, server_reply);
+    } catch (Kernel::Exception::InternetError &ie) {
       status = ie.errorCode();
     }
 
-
-    g_log.debug() << "ScriptRepository delete status: " << status
-                  << std::endl;
+    g_log.debug() << "ScriptRepository delete status: " << status << std::endl;
 
     {
       // get the answer from the server
@@ -1348,7 +1342,6 @@ void ScriptRepositoryImpl::doDownloadFile(const std::string &url_file,
   g_log.debug() << "DoDownloadFile : " << url_file
                 << " to file: " << local_file_path << std::endl;
 
-
   // get the information from url_file
   std::string path(url_file);
   if (path.empty())
@@ -1364,26 +1357,26 @@ void ScriptRepositoryImpl::doDownloadFile(const std::string &url_file,
   try {
     Kernel::InternetHelper inetHelper;
     int timeout;
-    if (!ConfigService::Instance().getValue("network.scriptrepo.timeout",timeout)) {
+    if (!ConfigService::Instance().getValue("network.scriptrepo.timeout",
+                                            timeout)) {
       timeout = 5; // the default value if the key is not found
     }
     inetHelper.setTimeout(timeout);
-    
-    //std::stringstream ss;
-    int status = inetHelper.downloadFile(url_file,local_file_path);
+
+    // std::stringstream ss;
+    int status = inetHelper.downloadFile(url_file, local_file_path);
 
     g_log.debug() << "Answer from mantid web: " << status << std::endl;
-  }
-  catch (Kernel::Exception::InternetError &ie) {
+  } catch (Kernel::Exception::InternetError &ie) {
     std::stringstream info;
     info << "Failed to download " << given_path
-          << " because it failed to find this file at the link "
-          << "<a href=\"" << url_file << "\">" << url_file << "</a>.\n"
-          << "Hint. Check that link is correct and points to the correct "
+         << " because it failed to find this file at the link "
+         << "<a href=\"" << url_file << "\">" << url_file << "</a>.\n"
+         << "Hint. Check that link is correct and points to the correct "
             "server "
-          << "which you can find at <a "
+         << "which you can find at <a "
             "href=\"http://www.mantidproject.org/ScriptRepository\">"
-          << "Script Repository Help Page</a>";
+         << "Script Repository Help Page</a>";
     throw ScriptRepoException(info.str(), ie.what());
   }
 }
@@ -1744,7 +1737,6 @@ std::string ScriptRepositoryImpl::convertPath(const std::string &path) {
   }
   return path;
 }
-
 
 } // END API
 

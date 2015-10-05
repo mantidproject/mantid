@@ -9,4 +9,4 @@
 #include <set>
 #include <string>
 
-#endif //MANTID_GEOMETRYTEST_PRECOMPILED_HEADER_H_
+#endif // MANTID_GEOMETRYTEST_PRECOMPILED_HEADER_H_

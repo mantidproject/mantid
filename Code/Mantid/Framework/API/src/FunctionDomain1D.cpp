@@ -8,11 +8,10 @@ namespace Mantid {
 namespace API {
 
 /// Convert to a vector
-std::vector<double> FunctionDomain1D::toVector() const 
-{
+std::vector<double> FunctionDomain1D::toVector() const {
   std::vector<double> res;
-  if ( m_n > 0 ){
-    res.assign(m_data, m_data+m_n);
+  if (m_n > 0) {
+    res.assign(m_data, m_data + m_n);
   }
   return res;
 }

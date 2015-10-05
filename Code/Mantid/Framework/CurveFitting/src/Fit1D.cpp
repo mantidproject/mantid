@@ -34,9 +34,8 @@ using API::Jacobian;
 /// The implementation of Jacobian
 class JacobianImpl : public Jacobian {
 public:
-
   /// Default constructor
-  JacobianImpl() : Jacobian(), m_J(NULL) {};
+  JacobianImpl() : Jacobian(), m_J(NULL){};
 
   /// The index map
   std::map<int, int> m_map;
@@ -111,9 +110,10 @@ static int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
     if (((struct FitData *)params)->active[i])
       ((struct FitData *)params)->parameters[i] = x->data[j++];
 
-  ((struct FitData *)params)->fit1D->function(
-      ((struct FitData *)params)->parameters, f->data,
-      ((struct FitData *)params)->X, ((struct FitData *)params)->n);
+  ((struct FitData *)params)
+      ->fit1D->function(((struct FitData *)params)->parameters, f->data,
+                        ((struct FitData *)params)->X,
+                        ((struct FitData *)params)->n);
 
   // function() return calculated data values. Need to convert this values into
   // calculated-observed devided by error values used by GSL
@@ -141,9 +141,11 @@ static int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
 
   ((struct FitData *)params)->J.setJ(J);
 
-  ((struct FitData *)params)->fit1D->functionDeriv(
-      ((struct FitData *)params)->parameters, &((struct FitData *)params)->J,
-      ((struct FitData *)params)->X, ((struct FitData *)params)->n);
+  ((struct FitData *)params)
+      ->fit1D->functionDeriv(((struct FitData *)params)->parameters,
+                             &((struct FitData *)params)->J,
+                             ((struct FitData *)params)->X,
+                             ((struct FitData *)params)->n);
 
   // functionDeriv() return derivatives of calculated data values. Need to
   // convert this values into
@@ -186,9 +188,10 @@ static double gsl_costFunction(const gsl_vector *x, void *params) {
     if (((struct FitData *)params)->active[i])
       ((struct FitData *)params)->parameters[i] = x->data[j++];
 
-  ((struct FitData *)params)->fit1D->function(
-      ((struct FitData *)params)->parameters, l_forSimplexLSwrap,
-      ((struct FitData *)params)->X, ((struct FitData *)params)->n);
+  ((struct FitData *)params)
+      ->fit1D->function(((struct FitData *)params)->parameters,
+                        l_forSimplexLSwrap, ((struct FitData *)params)->X,
+                        ((struct FitData *)params)->n);
 
   // function() return calculated data values. Need to convert this values into
   // calculated-observed devided by error values used by GSL
@@ -237,8 +240,8 @@ modifyFinalFittedParameters()
 * @param fittedParameter :: Values of fitting parameters in the order listed in
 declareParameters()
  */
-void
-Fit1D::modifyInitialFittedParameters(std::vector<double> &fittedParameter) {
+void Fit1D::modifyInitialFittedParameters(
+    std::vector<double> &fittedParameter) {
   (void)fittedParameter; // Avoid compiler warning
 }
 

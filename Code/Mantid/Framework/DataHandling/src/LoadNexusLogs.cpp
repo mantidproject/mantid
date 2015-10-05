@@ -119,8 +119,8 @@ void LoadNexusLogs::exec() {
         group_class == "IXselog" || group_name == "framelog") {
       loadLogs(file, group_name, group_class, workspace);
     }
-    if(group_class == "IXperiods") {
-        loadNPeriods(file, workspace);
+    if (group_class == "IXperiods") {
+      loadNPeriods(file, workspace);
     }
   }
 
@@ -171,8 +171,9 @@ void LoadNexusLogs::exec() {
           dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
               workspace->mutableRun().getProperty("proton_log"));
       if (!plog)
-        throw std::runtime_error("Could not cast (interpret) proton_log as a time "
-                                 "series property. Cannot continue.");
+        throw std::runtime_error(
+            "Could not cast (interpret) proton_log as a time "
+            "series property. Cannot continue.");
       Kernel::TimeSeriesProperty<double> *pcharge =
           new Kernel::TimeSeriesProperty<double>("proton_charge");
       std::vector<double> pval;
@@ -282,13 +283,13 @@ void LoadNexusLogs::loadNPeriods(
     file.closeGroup();
   } catch (::NeXus::Exception &) {
     // Likely missing IXperiods.
-      return;
+    return;
   }
 
-  API::Run& run = workspace->mutableRun();
+  API::Run &run = workspace->mutableRun();
   const std::string nPeriodsLabel = "nperiods";
-  if(!run.hasProperty(nPeriodsLabel)){
-      run.addProperty(new PropertyWithValue<int>(nPeriodsLabel, value));
+  if (!run.hasProperty(nPeriodsLabel)) {
+    run.addProperty(new PropertyWithValue<int>(nPeriodsLabel, value));
   }
 }
 
@@ -314,17 +315,15 @@ void LoadNexusLogs::loadLogs(
       loadNXLog(file, itr->first, log_class, workspace);
     } else if (log_class == "IXseblock") {
       loadSELog(file, itr->first, workspace);
-    }
-    else if(log_class == "NXcollection"){
-        int jj = 0;
-        ++jj;
+    } else if (log_class == "NXcollection") {
+      int jj = 0;
+      ++jj;
     }
   }
   loadVetoPulses(file, workspace);
 
   file.closeGroup();
 }
-
 
 /**
  * Load an NX log entry a group type that has value and time entries.

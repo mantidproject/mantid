@@ -11,7 +11,7 @@
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDLeanEvent.h"
- 
+
 // We need to include the .cpp files so that the declarations are picked up
 // correctly. Weird, I know.
 // See http://www.parashift.com/c++-faq-lite/templates.html#faq-35.13
@@ -184,15 +184,17 @@ template DLLExport class MDBoxIterator<MDLeanEvent<9>, 9>;
 /** Create a MDEventWorkspace of the given type
 @param nd :: number of dimensions
 @param eventType :: string describing the event type (MDEvent or MDLeanEvent)
-@param preferredNormalization: the preferred normalization for the event workspace
-@param preferredNormalizationHisto: preferred normalization for histo workspaces which derive
+@param preferredNormalization: the preferred normalization for the event
+workspace
+@param preferredNormalizationHisto: preferred normalization for histo workspaces
+which derive
                                     from this event workspace
 @return shared pointer to the MDEventWorkspace created (as a IMDEventWorkspace).
 */
 API::IMDEventWorkspace_sptr MDEventFactory::CreateMDWorkspace(
     size_t nd, const std::string &eventType,
-    const Mantid::API::MDNormalization& preferredNormalization,
-    const Mantid::API::MDNormalization& preferredNormalizationHisto) {
+    const Mantid::API::MDNormalization &preferredNormalization,
+    const Mantid::API::MDNormalization &preferredNormalizationHisto) {
   if (nd > MAX_MD_DIMENSIONS_NUM)
     throw std::invalid_argument(
         " there are more dimensions requested then instantiated");
@@ -273,8 +275,8 @@ std::vector<MDEventFactory::fpCreateMDWS>
 template <size_t nd>
 API::IMDEventWorkspace *MDEventFactory::createMDWorkspaceND(
     const std::string &eventType,
-    const Mantid::API::MDNormalization& preferredNormalization,
-    const Mantid::API::MDNormalization& preferredNormalizationHisto) {
+    const Mantid::API::MDNormalization &preferredNormalization,
+    const Mantid::API::MDNormalization &preferredNormalizationHisto) {
   if (eventType == "MDEvent")
     return new MDEventWorkspace<MDEvent<nd>, nd>(preferredNormalization,
                                                  preferredNormalizationHisto);
@@ -291,13 +293,14 @@ API::IMDEventWorkspace *MDEventFactory::createMDWorkspaceND(
  * @param eventType -- type of event (lean or full) to generate workspace for -
  * -does not actually used.
  * @param preferredNormalization: the preferred normalization of the workspace
- * @param preferredNormalizationHisto: the preferred normalization of the derived histo workspace
+ * @param preferredNormalizationHisto: the preferred normalization of the
+ * derived histo workspace
 */
 template <>
 API::IMDEventWorkspace *MDEventFactory::createMDWorkspaceND<0>(
     const std::string &eventType,
-    const Mantid::API::MDNormalization& preferredNormalization,
-    const Mantid::API::MDNormalization& preferredNormalizationHisto) {
+    const Mantid::API::MDNormalization &preferredNormalization,
+    const Mantid::API::MDNormalization &preferredNormalizationHisto) {
   UNUSED_ARG(eventType);
   UNUSED_ARG(preferredNormalization);
   UNUSED_ARG(preferredNormalizationHisto);

@@ -183,12 +183,11 @@ void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping &map) {
   for (size_t j = 0; j < getNumberHistograms(); ++j) {
     auto spec = getSpectrum(j);
     try {
-      if(map.indexIsSpecNumber())
+      if (map.indexIsSpecNumber())
         spec->setDetectorIDs(
             map.getDetectorIDsForSpectrumNo(spec->getSpectrumNo()));
       else
-        spec->setDetectorIDs(
-            map.getDetectorIDsForSpectrumIndex(j));
+        spec->setDetectorIDs(map.getDetectorIDsForSpectrumIndex(j));
     } catch (std::out_of_range &e) {
       // Get here if the spectrum number is not in the map.
       spec->clearDetectorIDs();
@@ -381,9 +380,8 @@ spec2index_map MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const {
 *  @param offset :: add this to the detector ID to get the index into the
 *vector.
 */
-void
-MatrixWorkspace::getSpectrumToWorkspaceIndexVector(std::vector<size_t> &out,
-                                                   specid_t &offset) const {
+void MatrixWorkspace::getSpectrumToWorkspaceIndexVector(
+    std::vector<size_t> &out, specid_t &offset) const {
   SpectraAxis *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1]);
   if (!ax)
     throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: "
@@ -391,11 +389,11 @@ MatrixWorkspace::getSpectrumToWorkspaceIndexVector(std::vector<size_t> &out,
                              "generate a map.");
 
   // Find the min/max spectra IDs
-  specid_t min = std::numeric_limits<
-      specid_t>::max(); // So that any number will be less than this
-  specid_t max =
-      -std::numeric_limits<
-          specid_t>::max(); // So that any number will be greater than this
+  specid_t min = std::numeric_limits<specid_t>::max(); // So that any number
+                                                       // will be less than this
+  specid_t max = -std::numeric_limits<specid_t>::max(); // So that any number
+                                                        // will be greater than
+                                                        // this
   size_t length = ax->length();
   for (size_t i = 0; i < length; i++) {
     specid_t spec = ax->spectraNo(i);
@@ -545,9 +543,9 @@ void MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
 *  @param indexList ::   Returns a reference to the vector of indices (empty if
 *not a Workspace2D)
 */
-void
-MatrixWorkspace::getIndicesFromSpectra(const std::vector<specid_t> &spectraList,
-                                       std::vector<size_t> &indexList) const {
+void MatrixWorkspace::getIndicesFromSpectra(
+    const std::vector<specid_t> &spectraList,
+    std::vector<size_t> &indexList) const {
   // Clear the output index list
   indexList.clear();
   indexList.reserve(this->getNumberHistograms());
@@ -583,8 +581,10 @@ MatrixWorkspace::getIndexFromSpectrumNumber(const specid_t specNo) const {
 //---------------------------------------------------------------------------------------
 /** Converts a list of detector IDs to the corresponding workspace indices.
 *
-     *  Note that only known detector IDs are converted (so an empty vector will be returned
-     *  if none of the IDs are recognised), and that the returned workspace indices are
+     *  Note that only known detector IDs are converted (so an empty vector will
+*be returned
+     *  if none of the IDs are recognised), and that the returned workspace
+*indices are
      *  effectively a set (i.e. there are no duplicates).
      *
 *  @param detIdList :: The list of detector IDs required
@@ -847,8 +847,6 @@ MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) const {
 
   return det->getTwoTheta(samplePos, beamLine);
 }
-
-
 
 //---------------------------------------------------------------------------------------
 /** Add parameters to the instrument parameter map that are defined in
@@ -1280,7 +1278,9 @@ class MWDimension : public Mantid::Geometry::IMDDimension {
 public:
   MWDimension(const Axis *axis, const std::string &dimensionId)
       : m_axis(*axis), m_dimensionId(dimensionId),
-        m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != NULL), m_frame(new Geometry::GeneralFrame(m_axis.unit()->label(), m_axis.unit()->label())) {}
+        m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != NULL),
+        m_frame(new Geometry::GeneralFrame(m_axis.unit()->label(),
+                                           m_axis.unit()->label())) {}
 
   /// the name of the dimennlsion as can be displayed along the axis
   virtual std::string getName() const {
@@ -1342,12 +1342,8 @@ public:
     throw std::runtime_error("Not implemented");
   }
 
-  const Kernel::MDUnit &getMDUnits() const{
-      return m_frame->getMDUnit();
-  }
-  const Geometry::MDFrame& getMDFrame() const{
-      return *m_frame;
-  }
+  const Kernel::MDUnit &getMDUnits() const { return m_frame->getMDUnit(); }
+  const Geometry::MDFrame &getMDFrame() const { return *m_frame; }
 
   virtual ~MWDimension() {}
 
@@ -1356,7 +1352,6 @@ private:
   const std::string m_dimensionId;
   const bool m_haveEdges;
   const Geometry::MDFrame_const_uptr m_frame;
-
 };
 
 //===============================================================================
@@ -1366,7 +1361,9 @@ private:
 class MWXDimension : public Mantid::Geometry::IMDDimension {
 public:
   MWXDimension(const MatrixWorkspace *ws, const std::string &dimensionId)
-      : m_ws(ws), m_dimensionId(dimensionId), m_frame(new Geometry::GeneralFrame(m_ws->getAxis(0)->unit()->label(), m_ws->getAxis(0)->unit()->label())) {
+      : m_ws(ws), m_dimensionId(dimensionId),
+        m_frame(new Geometry::GeneralFrame(m_ws->getAxis(0)->unit()->label(),
+                                           m_ws->getAxis(0)->unit()->label())) {
     m_X = ws->readX(0);
   }
 
@@ -1419,12 +1416,8 @@ public:
   virtual std::string toXMLString() const {
     throw std::runtime_error("Not implemented");
   }
-  const Kernel::MDUnit &getMDUnits() const{
-      return m_frame->getMDUnit();
-  }
-  const Geometry::MDFrame& getMDFrame() const{
-      return *m_frame;
-  }
+  const Kernel::MDUnit &getMDUnits() const { return m_frame->getMDUnit(); }
+  const Geometry::MDFrame &getMDFrame() const { return *m_frame; }
 
 private:
   /// Workspace we refer to

@@ -115,8 +115,8 @@ void ChopperModel::setJitterFWHH(const double value) {
  * here
  * are also removed
  */
-void
-ChopperModel::setBaseParameters(std::map<std::string, std::string> &keyValues) {
+void ChopperModel::setBaseParameters(
+    std::map<std::string, std::string> &keyValues) {
   auto iter = keyValues.find(ANGULAR_VEL);
   if (iter != keyValues.end()) {
     try {

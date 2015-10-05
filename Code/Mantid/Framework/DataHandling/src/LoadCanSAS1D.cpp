@@ -16,7 +16,6 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/SAX/InputSource.h>
 
-
 #include <boost/lexical_cast.hpp>
 //-----------------------------------------------------------------------
 
@@ -119,7 +118,8 @@ void LoadCanSAS1D::exec() {
   std::string runName;
   switch (numEntries) {
   case 0:
-    throw Exception::NotFoundError("No <SASentry>s were found in the file", fileName);
+    throw Exception::NotFoundError("No <SASentry>s were found in the file",
+                                   fileName);
     break;
   case 1:
     // the value of the string runName is unused in this case
@@ -215,8 +215,10 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
       Element *iElem = elem->getChildElement("I");
       check(qElem, "I");
       const std::string unit = iElem->getAttribute("unit");
-      if (index == 0) yUnit = unit;
-      else if (unit != yUnit) isCommon = false;
+      if (index == 0)
+        yUnit = unit;
+      else if (unit != yUnit)
+        isCommon = false;
       nodeVal = iElem->innerText();
       std::stringstream y(nodeVal);
       y >> d;
@@ -243,7 +245,8 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
   runLoadInstrument(instname, dataWS);
 
   dataWS->getAxis(0)->setUnit("MomentumTransfer");
-  if (isCommon == true) dataWS->setYUnitLabel(yUnit);
+  if (isCommon == true)
+    dataWS->setYUnitLabel(yUnit);
   return dataWS;
 }
 /* This method throws not found error if a element is not found in the xml file

@@ -39,7 +39,8 @@ using namespace DataObjects;
 using namespace Geometry;
 
 /// Empty default constructor
-SaveToSNSHistogramNexus::SaveToSNSHistogramNexus() : Algorithm(), prog(), m_compress(false), links_count(0), inId(), outId() {}
+SaveToSNSHistogramNexus::SaveToSNSHistogramNexus()
+    : Algorithm(), prog(), m_compress(false), links_count(0), inId(), outId() {}
 
 /** Initialisation method.
  *

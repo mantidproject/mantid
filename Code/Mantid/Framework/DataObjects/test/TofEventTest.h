@@ -16,8 +16,7 @@ using std::size_t;
 using std::vector;
 
 //==========================================================================================
-class TofEventTest : public CxxTest::TestSuite
-{
+class TofEventTest : public CxxTest::TestSuite {
 private:
   TofEvent e;
 
@@ -25,29 +24,23 @@ public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static TofEventTest *createSuite() { return new TofEventTest(); }
-  static void destroySuite( TofEventTest *suite ) { delete suite; }
+  static void destroySuite(TofEventTest *suite) { delete suite; }
 
-  TofEventTest()
-  {
-    e = TofEvent(123, 456);
-  }
+  TofEventTest() { e = TofEvent(123, 456); }
 
-  void testInit()
-  {
+  void testInit() {
     TS_ASSERT_EQUALS(e.tof(), 123);
     TS_ASSERT_EQUALS(e.pulseTime(), 456);
   }
 
-  void testAssign()
-  {
+  void testAssign() {
     TofEvent e2;
     e2 = e;
     TS_ASSERT_EQUALS(e2.tof(), 123);
     TS_ASSERT_EQUALS(e2.pulseTime(), 456);
   }
 
-  void testConstructors()
-  {
+  void testConstructors() {
     TofEvent e2 = TofEvent(e);
     TS_ASSERT_EQUALS(e2.tof(), 123);
     TS_ASSERT_EQUALS(e2.pulseTime(), 456);
@@ -56,9 +49,6 @@ public:
     TS_ASSERT_EQUALS(e3.tof(), 890.234);
     TS_ASSERT_EQUALS(e3.pulseTime(), 321);
   }
-
 };
 
-
 #endif
-

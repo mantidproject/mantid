@@ -95,10 +95,10 @@ private:
 
 public:
   // construction
-  EventAssigner(std::vector<EventVector_pt> &eventVectors, const std::vector<bool> &mask,
-                const std::vector<int> &offsets, size_t stride,
-                size_t pixelsCutOffL, size_t tubeBinning, size_t finalBinsY,
-                double periode, double phase);
+  EventAssigner(std::vector<EventVector_pt> &eventVectors,
+                const std::vector<bool> &mask, const std::vector<int> &offsets,
+                size_t stride, size_t pixelsCutOffL, size_t tubeBinning,
+                size_t finalBinsY, double periode, double phase);
 
   // methods
   void addEvent(size_t x, size_t y, double tof);
@@ -158,7 +158,7 @@ struct EntryHeader {
   char FilenamePrefix[155];
 };
 
-template <size_t N> int64_t octalToInt(char (&str)[N]);
+template <size_t N> int64_t octalToInt(char(&str)[N]);
 
 class File {
 
@@ -206,7 +206,6 @@ public:
   size_t read(void *dst, size_t size);
   int read_byte();
 };
-
 }
 }
 }

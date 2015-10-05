@@ -226,7 +226,8 @@ public:
 
   /**
    * Sets the display normalization
-   * @param mdWorkspace: the workspace on which the display normalizations should
+   * @param mdWorkspace: the workspace on which the display normalizations
+   * should
    * @param underlyingWorkspace: the original workspace
    * be set
    */

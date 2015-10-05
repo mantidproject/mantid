@@ -13,16 +13,9 @@ using namespace Mantid;
 using namespace Mantid::GPUAlgorithms;
 using namespace Mantid::API;
 
-class GPUAlgorithmTest : public CxxTest::TestSuite
-{
+class GPUAlgorithmTest : public CxxTest::TestSuite {
 public:
-
-  void test_1()
-  {}
-
-
+  void test_1() {}
 };
 
-
 #endif /* MANTID_GPUALGORITHMS_GPUALGORITHMTEST_H_ */
-

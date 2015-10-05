@@ -8,8 +8,7 @@ using Mantid::DataObjects::PeaksWorkspace;
 using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
 
-void export_PeaksWorkspace()
-{
+void export_PeaksWorkspace() {
 
   class_<PeaksWorkspace, bases<IPeaksWorkspace>, boost::noncopyable>(
       "PeaksWorkspace", no_init);

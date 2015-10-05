@@ -108,9 +108,9 @@ operator*(const double left, const NeutronAtom &right);
 MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &out,
                                            const NeutronAtom &atom);
 MANTID_KERNEL_DLL NeutronAtom
-    getNeutronAtom(const uint16_t z_number, const uint16_t a_number = 0);
+getNeutronAtom(const uint16_t z_number, const uint16_t a_number = 0);
 MANTID_KERNEL_DLL const NeutronAtom
-    getNeutronNoExceptions(const uint16_t z_number, const uint16_t a_number);
+getNeutronNoExceptions(const uint16_t z_number, const uint16_t a_number);
 
 } // Namespace PhysicalConstants
 } // Namespace Mantid

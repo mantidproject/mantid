@@ -33,7 +33,9 @@ LoadEventAndCompress::~LoadEventAndCompress() {}
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const string LoadEventAndCompress::name() const { return "LoadEventAndCompress"; }
+const string LoadEventAndCompress::name() const {
+  return "LoadEventAndCompress";
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
 int LoadEventAndCompress::version() const { return 1; }
@@ -53,58 +55,59 @@ const string LoadEventAndCompress::summary() const {
  */
 void LoadEventAndCompress::init() {
   // algorithms to copy properties from
-    auto algLoadEventNexus = AlgorithmManager::Instance().createUnmanaged("LoadEventNexus");
-    algLoadEventNexus->initialize();
-    auto algDetermineChunking =
-        AlgorithmManager::Instance().createUnmanaged("DetermineChunking");
-    algDetermineChunking->initialize();
+  auto algLoadEventNexus =
+      AlgorithmManager::Instance().createUnmanaged("LoadEventNexus");
+  algLoadEventNexus->initialize();
+  auto algDetermineChunking =
+      AlgorithmManager::Instance().createUnmanaged("DetermineChunking");
+  algDetermineChunking->initialize();
 
-    // declare properties
-    copyProperty(algLoadEventNexus, "Filename");
-    copyProperty(algLoadEventNexus, "OutputWorkspace");
-    copyProperty(algDetermineChunking, "MaxChunkSize");
-    declareProperty("CompressTOFTolerance", .01);
+  // declare properties
+  copyProperty(algLoadEventNexus, "Filename");
+  copyProperty(algLoadEventNexus, "OutputWorkspace");
+  copyProperty(algDetermineChunking, "MaxChunkSize");
+  declareProperty("CompressTOFTolerance", .01);
 
-    copyProperty(algLoadEventNexus, "FilterByTofMin");
-    copyProperty(algLoadEventNexus, "FilterByTofMax");
-    copyProperty(algLoadEventNexus, "FilterByTimeStart");
-    copyProperty(algLoadEventNexus, "FilterByTimeStop");
+  copyProperty(algLoadEventNexus, "FilterByTofMin");
+  copyProperty(algLoadEventNexus, "FilterByTofMax");
+  copyProperty(algLoadEventNexus, "FilterByTimeStart");
+  copyProperty(algLoadEventNexus, "FilterByTimeStop");
 
-    std::string grp1 = "Filter Events";
-    setPropertyGroup("FilterByTofMin", grp1);
-    setPropertyGroup("FilterByTofMax", grp1);
-    setPropertyGroup("FilterByTimeStart", grp1);
-    setPropertyGroup("FilterByTimeStop", grp1);
+  std::string grp1 = "Filter Events";
+  setPropertyGroup("FilterByTofMin", grp1);
+  setPropertyGroup("FilterByTofMax", grp1);
+  setPropertyGroup("FilterByTimeStart", grp1);
+  setPropertyGroup("FilterByTimeStop", grp1);
 
-    copyProperty(algLoadEventNexus, "NXentryName");
-    copyProperty(algLoadEventNexus, "LoadMonitors");
-    copyProperty(algLoadEventNexus, "MonitorsAsEvents");
-    copyProperty(algLoadEventNexus, "FilterMonByTofMin");
-    copyProperty(algLoadEventNexus, "FilterMonByTofMax");
-    copyProperty(algLoadEventNexus, "FilterMonByTimeStart");
-    copyProperty(algLoadEventNexus, "FilterMonByTimeStop");
+  copyProperty(algLoadEventNexus, "NXentryName");
+  copyProperty(algLoadEventNexus, "LoadMonitors");
+  copyProperty(algLoadEventNexus, "MonitorsAsEvents");
+  copyProperty(algLoadEventNexus, "FilterMonByTofMin");
+  copyProperty(algLoadEventNexus, "FilterMonByTofMax");
+  copyProperty(algLoadEventNexus, "FilterMonByTimeStart");
+  copyProperty(algLoadEventNexus, "FilterMonByTimeStop");
 
-    setPropertySettings(
-        "MonitorsAsEvents",
-        new VisibleWhenProperty("LoadMonitors", IS_EQUAL_TO, "1"));
-    IPropertySettings *asEventsIsOn =
-        new VisibleWhenProperty("MonitorsAsEvents", IS_EQUAL_TO, "1");
-    setPropertySettings("FilterMonByTofMin", asEventsIsOn);
-    setPropertySettings("FilterMonByTofMax", asEventsIsOn->clone());
-    setPropertySettings("FilterMonByTimeStart", asEventsIsOn->clone());
-    setPropertySettings("FilterMonByTimeStop", asEventsIsOn->clone());
+  setPropertySettings(
+      "MonitorsAsEvents",
+      new VisibleWhenProperty("LoadMonitors", IS_EQUAL_TO, "1"));
+  IPropertySettings *asEventsIsOn =
+      new VisibleWhenProperty("MonitorsAsEvents", IS_EQUAL_TO, "1");
+  setPropertySettings("FilterMonByTofMin", asEventsIsOn);
+  setPropertySettings("FilterMonByTofMax", asEventsIsOn->clone());
+  setPropertySettings("FilterMonByTimeStart", asEventsIsOn->clone());
+  setPropertySettings("FilterMonByTimeStop", asEventsIsOn->clone());
 
-    std::string grp4 = "Monitors";
-    setPropertyGroup("LoadMonitors", grp4);
-    setPropertyGroup("MonitorsAsEvents", grp4);
-    setPropertyGroup("FilterMonByTofMin", grp4);
-    setPropertyGroup("FilterMonByTofMax", grp4);
-    setPropertyGroup("FilterMonByTimeStart", grp4);
-    setPropertyGroup("FilterMonByTimeStop", grp4);
+  std::string grp4 = "Monitors";
+  setPropertyGroup("LoadMonitors", grp4);
+  setPropertyGroup("MonitorsAsEvents", grp4);
+  setPropertyGroup("FilterMonByTofMin", grp4);
+  setPropertyGroup("FilterMonByTofMax", grp4);
+  setPropertyGroup("FilterMonByTimeStart", grp4);
+  setPropertyGroup("FilterMonByTimeStop", grp4);
 
-    auto range = boost::make_shared<BoundedValidator<double>>();
-    range->setBounds(0., 100.);
-    declareProperty("FilterBadPulses", 95., range);
+  auto range = boost::make_shared<BoundedValidator<double>>();
+  range->setBounds(0., 100.);
+  declareProperty("FilterBadPulses", 95., range);
 }
 
 /// @see DataProcessorAlgorithm::determineChunk(const std::string &)
@@ -190,7 +193,8 @@ LoadEventAndCompress::processChunk(API::MatrixWorkspace_sptr wksp) {
   auto compressEvents = createChildAlgorithm("CompressEvents");
   compressEvents->setProperty("InputWorkspace", eventWS);
   compressEvents->setProperty("OutputWorkspace", eventWS);
-  compressEvents->setProperty<double>("Tolerance", getProperty("CompressTOFTolerance"));
+  compressEvents->setProperty<double>("Tolerance",
+                                      getProperty("CompressTOFTolerance"));
   compressEvents->executeAsChildAlg();
   eventWS = compressEvents->getProperty("OutputWorkspace");
 
@@ -215,7 +219,7 @@ void LoadEventAndCompress::exec() {
   for (size_t i = 1; i < numRows; ++i) {
     MatrixWorkspace_sptr temp = loadChunk(i);
     temp = processChunk(temp);
-    resultWS = plus(resultWS,temp);
+    resultWS = plus(resultWS, temp);
   }
   Workspace_sptr total = assemble(resultWS);
 

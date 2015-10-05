@@ -128,9 +128,9 @@ void ExtractMaskToTable::exec() {
   * @param masktablews :: TableWorkspace containing masking information
   * @param maskeddetectorids :: (output) vector of detector IDs that are masked
   */
-void
-ExtractMaskToTable::parseMaskTable(DataObjects::TableWorkspace_sptr masktablews,
-                                   std::vector<detid_t> &maskeddetectorids) {
+void ExtractMaskToTable::parseMaskTable(
+    DataObjects::TableWorkspace_sptr masktablews,
+    std::vector<detid_t> &maskeddetectorids) {
   // Clear input
   maskeddetectorids.clear();
 
@@ -285,9 +285,8 @@ void ExtractMaskToTable::extractMaskFromMaskWorkspace(
   * @param sourceWS :: table workspace from which the content is copied;
   * @param targetWS :: table workspace to which the content is copied;
   */
-void
-ExtractMaskToTable::copyTableWorkspaceContent(TableWorkspace_sptr sourceWS,
-                                              TableWorkspace_sptr targetWS) {
+void ExtractMaskToTable::copyTableWorkspaceContent(
+    TableWorkspace_sptr sourceWS, TableWorkspace_sptr targetWS) {
   // Compare the column names.  They must be exactly the same
   vector<string> sourcecolnames = sourceWS->getColumnNames();
   vector<string> targetcolnames = targetWS->getColumnNames();

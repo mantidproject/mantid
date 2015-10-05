@@ -7,13 +7,10 @@ using Mantid::DataObjects::SpecialWorkspace2D;
 using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
 
-void export_GroupingWorkspace()
-{
-  class_<GroupingWorkspace, bases<SpecialWorkspace2D>,
-         boost::noncopyable>("GroupingWorkspace", no_init)
-    ;
+void export_GroupingWorkspace() {
+  class_<GroupingWorkspace, bases<SpecialWorkspace2D>, boost::noncopyable>(
+      "GroupingWorkspace", no_init);
 
   // register pointers
   RegisterWorkspacePtrToPython<GroupingWorkspace>();
-
 }

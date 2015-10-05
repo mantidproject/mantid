@@ -202,11 +202,11 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(
 
     m_logger.information() << "  Correcting intensities..." << std::endl;
     std::vector<double> correctedCorrelatedIntensities(dValues.size());
-    std::transform(
-        rawCorrelatedIntensities.begin(), rawCorrelatedIntensities.end(),
-        m_weightsForD.begin(), correctedCorrelatedIntensities.rbegin(),
-        boost::bind(&PoldiAutoCorrelationCore::correctedIntensity, this,
-                            _1, _2));
+    std::transform(rawCorrelatedIntensities.begin(),
+                   rawCorrelatedIntensities.end(), m_weightsForD.begin(),
+                   correctedCorrelatedIntensities.rbegin(),
+                   boost::bind(&PoldiAutoCorrelationCore::correctedIntensity,
+                               this, _1, _2));
 
     /* The algorithm performs some finalization. In the default case the
      * spectrum is
@@ -315,9 +315,8 @@ PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue,
        */
       std::vector<UncertainValue> cmess(m_detector->elementCount());
       std::transform(m_indices.begin(), m_indices.end(), cmess.begin(),
-                     boost::bind(
-                         &PoldiAutoCorrelationCore::getCMessAndCSigma, this,
-                         dValue, *slitOffset, _1));
+                     boost::bind(&PoldiAutoCorrelationCore::getCMessAndCSigma,
+                                 this, dValue, *slitOffset, _1));
 
       UncertainValue sum =
           std::accumulate(cmess.begin(), cmess.end(), UncertainValue(0.0, 0.0),
@@ -587,9 +586,8 @@ std::vector<double> PoldiAutoCorrelationCore::getTofsFor1Angstrom(
     const std::vector<int> &elements) const {
   // Map element indices to 2Theta-Values
   std::vector<double> twoThetas(elements.size());
-  std::transform(
-      elements.begin(), elements.end(), twoThetas.begin(),
-      boost::bind(&PoldiAbstractDetector::twoTheta, m_detector, _1));
+  std::transform(elements.begin(), elements.end(), twoThetas.begin(),
+                 boost::bind(&PoldiAbstractDetector::twoTheta, m_detector, _1));
 
   // We will need sin(Theta) anyway, so we might just calculate those as well
   std::vector<double> sinThetas;

@@ -8,7 +8,6 @@
 #include <set>
 #include <stdexcept>
 
-
 namespace {
 template <typename T> std::pair<T, T> ordered_pair(const T &a, const T &b) {
   T min = std::min(a, b);

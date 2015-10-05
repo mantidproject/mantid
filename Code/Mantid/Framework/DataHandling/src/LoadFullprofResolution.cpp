@@ -889,10 +889,9 @@ void LoadFullprofResolution::addALFBEParameter(
 * according to the table workspace
 * for the bank at the given column of the table workspace
 */
-void
-LoadFullprofResolution::addSigmaParameters(const API::Column_const_sptr column,
-                                           Poco::XML::Document *mDoc,
-                                           Poco::XML::Element *parent) {
+void LoadFullprofResolution::addSigmaParameters(
+    const API::Column_const_sptr column, Poco::XML::Document *mDoc,
+    Poco::XML::Element *parent) {
   AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
   parameterElem->setAttribute("name", "IkedaCarpenterPV:SigmaSquared");
   parameterElem->setAttribute("type", "fitting");
@@ -912,10 +911,9 @@ LoadFullprofResolution::addSigmaParameters(const API::Column_const_sptr column,
 * according to the table workspace
 * for the bank at the given column of the table workspace
 */
-void
-LoadFullprofResolution::addGammaParameters(const API::Column_const_sptr column,
-                                           Poco::XML::Document *mDoc,
-                                           Poco::XML::Element *parent) {
+void LoadFullprofResolution::addGammaParameters(
+    const API::Column_const_sptr column, Poco::XML::Document *mDoc,
+    Poco::XML::Element *parent) {
   AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
   parameterElem->setAttribute("name", "IkedaCarpenterPV:Gamma");
   parameterElem->setAttribute("type", "fitting");
@@ -934,10 +932,9 @@ LoadFullprofResolution::addGammaParameters(const API::Column_const_sptr column,
 * to the table workspace
 * for the bank at the given column of the table workspace
 */
-void
-LoadFullprofResolution::addBBX_S_Parameters(const API::Column_const_sptr column,
-                                            Poco::XML::Document *mDoc,
-                                            Poco::XML::Element *parent) {
+void LoadFullprofResolution::addBBX_S_Parameters(
+    const API::Column_const_sptr column, Poco::XML::Document *mDoc,
+    Poco::XML::Element *parent) {
   AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
   parameterElem->setAttribute("name", "BackToBackExponential:S");
   parameterElem->setAttribute("type", "fitting");
@@ -959,10 +956,9 @@ LoadFullprofResolution::addBBX_S_Parameters(const API::Column_const_sptr column,
 * to the table workspace
 * for the bank at the given column of the table workspace
 */
-void
-LoadFullprofResolution::addBBX_A_Parameters(const API::Column_const_sptr column,
-                                            Poco::XML::Document *mDoc,
-                                            Poco::XML::Element *parent) {
+void LoadFullprofResolution::addBBX_A_Parameters(
+    const API::Column_const_sptr column, Poco::XML::Document *mDoc,
+    Poco::XML::Element *parent) {
   AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
   parameterElem->setAttribute("name", "BackToBackExponential:A");
   parameterElem->setAttribute("type", "fitting");
@@ -985,10 +981,9 @@ LoadFullprofResolution::addBBX_A_Parameters(const API::Column_const_sptr column,
 * to the table workspace
 * for the bank at the given column of the table workspace
 */
-void
-LoadFullprofResolution::addBBX_B_Parameters(const API::Column_const_sptr column,
-                                            Poco::XML::Document *mDoc,
-                                            Poco::XML::Element *parent) {
+void LoadFullprofResolution::addBBX_B_Parameters(
+    const API::Column_const_sptr column, Poco::XML::Document *mDoc,
+    Poco::XML::Element *parent) {
   AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
   parameterElem->setAttribute("name", "BackToBackExponential:B");
   parameterElem->setAttribute("type", "fitting");

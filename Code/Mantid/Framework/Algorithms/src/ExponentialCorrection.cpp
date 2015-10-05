@@ -22,8 +22,9 @@ void ExponentialCorrection::defineProperties() {
   declareProperty(
       "C1", 0.0,
       "The value by which the x value is multiplied prior to exponentiation.");
-  getPointerToProperty("InputWorkspace")->setDocumentation(
-      "The name of the workspace to apply the correction to.");
+  getPointerToProperty("InputWorkspace")
+      ->setDocumentation(
+          "The name of the workspace to apply the correction to.");
   getPointerToProperty("OutputWorkspace")
       ->setDocumentation("The name to use for the corrected workspace (can be "
                          "the same as the input one).");

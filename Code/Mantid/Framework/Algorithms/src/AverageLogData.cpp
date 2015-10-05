@@ -119,8 +119,9 @@ void AverageLogData::exec() {
         << "Proton charge is 0. Average and standard deviations are NANs"
         << std::endl;
   }
-  g_log.debug() << "Sum = " << average << std::endl << "Sum squares = " << error
-                << std::endl << "PC = " << protoncharge << std::endl;
+  g_log.debug() << "Sum = " << average << std::endl
+                << "Sum squares = " << error << std::endl
+                << "PC = " << protoncharge << std::endl;
   average /= protoncharge;
   error /= protoncharge;
   error = std::sqrt(std::fabs(error - average * average));

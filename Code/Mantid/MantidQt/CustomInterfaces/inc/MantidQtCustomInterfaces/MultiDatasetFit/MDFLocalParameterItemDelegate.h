@@ -34,6 +34,8 @@ signals:
   void setAllValues(double);
   void fixParameter(int,bool);
   void setAllFixed(bool);
+  void setTie(int,QString);
+  void setTieAll(QString);
 protected:
   void paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const;
 private:

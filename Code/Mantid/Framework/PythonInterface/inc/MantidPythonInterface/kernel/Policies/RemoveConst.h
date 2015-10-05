@@ -103,8 +103,8 @@ template <typename T> struct RemoveConst_Requires_Pointer_Return_Value {};
 // call to this struct
 template <typename ConstSharedPtr> struct RemoveConstSharedPtrImpl {
   typedef typename ConstSharedPtr::element_type ConstElementType;
-  typedef typename boost::remove_const<ConstElementType>::type
-      NonConstElementType;
+  typedef
+      typename boost::remove_const<ConstElementType>::type NonConstElementType;
   typedef typename boost::shared_ptr<NonConstElementType> NonConstSharedPtr;
 
   inline PyObject *operator()(const ConstSharedPtr &p) const {

@@ -25,7 +25,9 @@ DECLARE_ALGORITHM(StatisticsOfPeaksWorkspace)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-StatisticsOfPeaksWorkspace::StatisticsOfPeaksWorkspace() { m_pointGroups = getAllPointGroups(); }
+StatisticsOfPeaksWorkspace::StatisticsOfPeaksWorkspace() {
+  m_pointGroups = getAllPointGroups();
+}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -61,7 +63,8 @@ void StatisticsOfPeaksWorkspace::init() {
   sortTypes.push_back("Overall");
   declareProperty("SortBy", sortTypes[0],
                   boost::make_shared<StringListValidator>(sortTypes),
-                  "Sort the peaks by bank, run number(default) or only overall statistics.");
+                  "Sort the peaks by bank, run number(default) or only overall "
+                  "statistics.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -87,49 +90,60 @@ void StatisticsOfPeaksWorkspace::exec() {
   criteria.push_back(std::pair<std::string, bool>("l", true));
   ws->sort(criteria);
 
-
-
   // =========================================
   std::vector<Peak> peaks = ws->getPeaks();
   doSortHKL(ws, "Overall");
-  if (sortType.compare(0, 2, "Ov") == 0) return;
+  if (sortType.compare(0, 2, "Ov") == 0)
+    return;
   // run number
   std::string oldSequence;
-  if (sortType.compare(0, 2, "Re") == 0)
-  {
+  if (sortType.compare(0, 2, "Re") == 0) {
     double wavelength = peaks[0].getWavelength();
-    if (wavelength > 3.0) oldSequence = "first";
-    else if (wavelength > 2.5) oldSequence = "second";
-    else if (wavelength > 2.0) oldSequence = "third";
-    else if (wavelength > 1.5) oldSequence = "fourth";
-    else if (wavelength > 1.0) oldSequence = "fifth";
-    else if (wavelength > 0.5) oldSequence = "sixth";
-    else oldSequence = "seventh";
-  }
-  else if (sortType.compare(0, 2, "Ru") == 0)
+    if (wavelength > 3.0)
+      oldSequence = "first";
+    else if (wavelength > 2.5)
+      oldSequence = "second";
+    else if (wavelength > 2.0)
+      oldSequence = "third";
+    else if (wavelength > 1.5)
+      oldSequence = "fourth";
+    else if (wavelength > 1.0)
+      oldSequence = "fifth";
+    else if (wavelength > 0.5)
+      oldSequence = "sixth";
+    else
+      oldSequence = "seventh";
+  } else if (sortType.compare(0, 2, "Ru") == 0)
     oldSequence = boost::lexical_cast<std::string>(peaks[0].getRunNumber());
-  else oldSequence= peaks[0].getBankName();
+  else
+    oldSequence = peaks[0].getBankName();
   // Go through each peak at this run / bank
   for (int wi = 0; wi < ws->getNumberPeaks(); wi++) {
 
     Peak &p = peaks[wi];
     std::string sequence;
-    if (sortType.compare(0, 2, "Re") == 0)
-    {
-          double wavelength = p.getWavelength();
-          if (wavelength > 3.0) sequence = "first";
-          else if (wavelength > 2.5) sequence = "second";
-          else if (wavelength > 2.0) sequence = "third";
-          else if (wavelength > 1.5) sequence = "fourth";
-          else if (wavelength > 1.0) sequence = "fifth";
-          else if (wavelength > 0.5) sequence = "sixth";
-          else sequence = "seventh";
-    }
-    else if (sortType.compare(0, 2, "Ru") == 0)
+    if (sortType.compare(0, 2, "Re") == 0) {
+      double wavelength = p.getWavelength();
+      if (wavelength > 3.0)
+        sequence = "first";
+      else if (wavelength > 2.5)
+        sequence = "second";
+      else if (wavelength > 2.0)
+        sequence = "third";
+      else if (wavelength > 1.5)
+        sequence = "fourth";
+      else if (wavelength > 1.0)
+        sequence = "fifth";
+      else if (wavelength > 0.5)
+        sequence = "sixth";
+      else
+        sequence = "seventh";
+    } else if (sortType.compare(0, 2, "Ru") == 0)
       sequence = boost::lexical_cast<std::string>(p.getRunNumber());
-    else sequence= p.getBankName();
+    else
+      sequence = p.getBankName();
 
-    if (sequence.compare(oldSequence) !=0 && tempWS->getNumberPeaks()>0) {
+    if (sequence.compare(oldSequence) != 0 && tempWS->getNumberPeaks() > 0) {
       doSortHKL(tempWS, oldSequence);
       tempWS = WorkspaceFactory::Instance().createPeaks();
       // Copy over ExperimentInfo from input workspace
@@ -146,7 +160,8 @@ void StatisticsOfPeaksWorkspace::exec() {
  * @param ws :: any PeaksWorkspace
  * @param runName :: string to put in statistics table
  */
-void StatisticsOfPeaksWorkspace::doSortHKL(Mantid::API::Workspace_sptr ws, std::string runName){
+void StatisticsOfPeaksWorkspace::doSortHKL(Mantid::API::Workspace_sptr ws,
+                                           std::string runName) {
   std::string pointGroup = getPropertyValue("PointGroup");
   std::string wkspName = getPropertyValue("OutputWorkspace");
   std::string tableName = getPropertyValue("StatisticsTable");
@@ -159,10 +174,8 @@ void StatisticsOfPeaksWorkspace::doSortHKL(Mantid::API::Workspace_sptr ws, std::
   if (runName.compare("Overall") != 0)
     statsAlg->setProperty("Append", true);
   statsAlg->executeAsChildAlg();
-  PeaksWorkspace_sptr statsWksp =
-      statsAlg->getProperty("OutputWorkspace");
-  ITableWorkspace_sptr  tablews =
-      statsAlg->getProperty("StatisticsTable");
+  PeaksWorkspace_sptr statsWksp = statsAlg->getProperty("OutputWorkspace");
+  ITableWorkspace_sptr tablews = statsAlg->getProperty("StatisticsTable");
   if (runName.compare("Overall") == 0)
     setProperty("OutputWorkspace", statsWksp);
   setProperty("StatisticsTable", tablews);

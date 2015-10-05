@@ -8,6 +8,7 @@
 #include <QDoubleValidator>
 #include <QEvent>
 #include <QKeyEvent>
+#include <QInputDialog>
 
 namespace MantidQt
 {
@@ -19,8 +20,9 @@ namespace MDF
 /// @param parent :: Parent widget.
 /// @param index :: Index of the spectrum which parameter is edited.
 /// @param fixed :: Is the parameter fixed initially?
-LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index, bool fixed):
-  QWidget(parent), m_index(index),m_fixed(fixed)
+/// @param tie :: Parameter's current tie (or empty string).
+LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index, bool fixed, QString tie):
+  QWidget(parent), m_index(index),m_fixed(fixed), m_tie(tie)
 {
   auto layout = new QHBoxLayout(this);
   layout->setMargin(0);
@@ -52,6 +54,7 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index, bool fixe
   connect(action,SIGNAL(activated()),this,SLOT(setAll()));
   setMenu->addAction(action);
 
+  setMenu->addSeparator();
   m_fixAction = new QAction(m_fixed? "Unfix" : "Fix", this);
   m_fixAction->setToolTip("Fix value of this parameter");
   connect(m_fixAction,SIGNAL(activated()),this,SLOT(fixParameter()));
@@ -65,6 +68,27 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index, bool fixe
   action = new QAction("Unfix all",this);
   action->setToolTip("Unfix all parameters.");
   connect(action,SIGNAL(activated()),this,SLOT(unfixAll()));
+  setMenu->addAction(action);
+
+  setMenu->addSeparator();
+  action = new QAction("Set tie",this);
+  action->setToolTip("Set a tie for this parameter.");
+  connect(action,SIGNAL(activated()),this,SLOT(setTie()));
+  setMenu->addAction(action);
+
+  action = new QAction("Remove tie",this);
+  action->setToolTip("Remove the tie for this parameter.");
+  connect(action,SIGNAL(activated()),this,SLOT(removeTie()));
+  setMenu->addAction(action);
+
+  action = new QAction("Set tie to all",this);
+  action->setToolTip("Set this tie for all parameters.");
+  connect(action,SIGNAL(activated()),this,SLOT(setTieAll()));
+  setMenu->addAction(action);
+
+  action = new QAction("Remove all ties",this);
+  action->setToolTip("Remove ties for all parameters.");
+  connect(action,SIGNAL(activated()),this,SLOT(removeAllTies()));
   setMenu->addAction(action);
 
   button->setMenu(setMenu);
@@ -97,6 +121,36 @@ void LocalParameterEditor::fixAll()
 void LocalParameterEditor::unfixAll()
 {
   emit setAllFixed(false);
+}
+
+/// Send a signal to tie a parameter.
+void LocalParameterEditor::setTie()
+{
+  QInputDialog input;
+  input.setWindowTitle("Set a tie.");
+  input.setTextValue(m_tie);
+  if (input.exec() == QDialog::Accepted) {
+    auto tie = input.textValue();
+    emit setTie(m_index, tie);
+  }
+}
+
+/// Send a signal to remove a tie.
+void LocalParameterEditor::removeTie()
+{
+  emit setTie(m_index, "");
+}
+
+/// Set all ties for all parameters
+void LocalParameterEditor::setTieAll()
+{
+  emit setTieAll(m_tie);
+}
+
+/// Remove ties form all parameters
+void LocalParameterEditor::removeAllTies()
+{
+  emit setTieAll("");
 }
 
 /// Filter events in the line editor to emulate a shortcut (F to fix/unfix).

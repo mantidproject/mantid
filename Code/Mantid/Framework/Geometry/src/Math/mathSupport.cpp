@@ -10,9 +10,9 @@
 namespace Mantid {
 
 template <typename InputIter>
-int
-solveQuadratic(const InputIter Coef,
-               std::pair<std::complex<double>, std::complex<double>> &OutAns)
+int solveQuadratic(
+    const InputIter Coef,
+    std::pair<std::complex<double>, std::complex<double>> &OutAns)
 /**
   Solves Complex Quadratic
   @param Coef :: iterator over all the coefients in the order

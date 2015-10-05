@@ -94,14 +94,12 @@ double GSLVector::get(size_t i) const {
 }
 
 // Set all elements to zero
-void GSLVector::zero() {
-  m_data.assign(m_data.size(), 0.0);
-}
+void GSLVector::zero() { m_data.assign(m_data.size(), 0.0); }
 
 /// Add a vector
 /// @param v :: The other vector
 GSLVector &GSLVector::operator+=(const GSLVector &v) {
-  if (size() != v.size()){
+  if (size() != v.size()) {
     throw std::runtime_error("GSLVectors have different sizes.");
   }
   gsl_vector_add(gsl(), v.gsl());
@@ -111,7 +109,7 @@ GSLVector &GSLVector::operator+=(const GSLVector &v) {
 /// Subtract a vector
 /// @param v :: The other vector
 GSLVector &GSLVector::operator-=(const GSLVector &v) {
-  if (size() != v.size()){
+  if (size() != v.size()) {
     throw std::runtime_error("GSLVectors have different sizes.");
   }
   gsl_vector_sub(gsl(), v.gsl());
@@ -126,26 +124,21 @@ GSLVector &GSLVector::operator*=(const double d) {
 }
 
 /// Normalise this vector
-void GSLVector::normalize(){
+void GSLVector::normalize() {
   double N = norm();
-  if (N == 0.0)
-  {
+  if (N == 0.0) {
     throw std::runtime_error("Cannot normalize null vector.");
   }
   *this *= 1.0 / N;
 }
 
 /// Get vector norm (length)
-double GSLVector::norm() const
-{
-  return sqrt(norm2());
-}
+double GSLVector::norm() const { return sqrt(norm2()); }
 
 /// Get vector's norm squared
-double GSLVector::norm2() const
-{
+double GSLVector::norm2() const {
   double res = 0.0;
-  for(auto el = m_data.begin(); el != m_data.end(); ++el) {
+  for (auto el = m_data.begin(); el != m_data.end(); ++el) {
     res += (*el) * (*el);
   }
   return res;

@@ -241,13 +241,14 @@ public:
       TS_ASSERT_THROWS_NOTHING(
           ws = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
 
-      TS_ASSERT_EQUALS(ws->getNumberHistograms(), SPECTRA_COUNT_ASRECT / binSize);
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(),
+                       SPECTRA_COUNT_ASRECT / binSize);
     }
 
     // try 8, 512x512 => 64x64 image
     binSize = 8;
     testAlg =
-      Mantid::API::AlgorithmManager::Instance().create("LoadFITS" /*, 1*/);
+        Mantid::API::AlgorithmManager::Instance().create("LoadFITS" /*, 1*/);
 
     TS_ASSERT_THROWS_NOTHING(testAlg->initialize());
     TS_ASSERT(testAlg->isInitialized());
@@ -272,9 +273,9 @@ public:
       TS_ASSERT_THROWS_NOTHING(
           ws = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
 
-      TS_ASSERT_EQUALS(ws->getNumberHistograms(), SPECTRA_COUNT_ASRECT / binSize);
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(),
+                       SPECTRA_COUNT_ASRECT / binSize);
     }
-
   }
 
   void test_loadAsRect() {

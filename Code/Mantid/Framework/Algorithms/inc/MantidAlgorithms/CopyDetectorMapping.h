@@ -46,15 +46,14 @@ public:
   virtual const std::string name() const { return "CopyDetectorMapping"; }
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
-    return "Copies spectra to detector mapping from one Matrix Workspace to another.";
+    return "Copies spectra to detector mapping from one Matrix Workspace to "
+           "another.";
   }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
-    return "DataHandling";
-  }
+  virtual const std::string category() const { return "DataHandling"; }
 
   /// Input property validation
   virtual std::map<std::string, std::string> validateInputs();

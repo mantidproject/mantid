@@ -16,7 +16,6 @@ class IPeak;
 }
 namespace API {
 
-
 //==========================================================================================
 /** Interface to the class Mantid::DataObjects::PeaksWorkspace
 
@@ -95,7 +94,9 @@ public:
    * @param peakNum :: index of the peak to get.
    * @return a pointer to a Peak object.
    */
-  Mantid::Geometry::IPeak *getPeakPtr(const int peakNum) { return &this->getPeak(peakNum); }
+  Mantid::Geometry::IPeak *getPeakPtr(const int peakNum) {
+    return &this->getPeak(peakNum);
+  }
 
   //---------------------------------------------------------------------------------------------
   /** Create an instance of a Peak
@@ -105,15 +106,17 @@ public:
    * detector. Calculated if not provided.
    * @return a pointer to a new Peak object.
    */
-  virtual Mantid::Geometry::IPeak *createPeak(Mantid::Kernel::V3D QLabFrame,
-                            boost::optional<double> detectorDistance) const = 0;
+  virtual Mantid::Geometry::IPeak *
+  createPeak(Mantid::Kernel::V3D QLabFrame,
+             boost::optional<double> detectorDistance) const = 0;
 
   /**
    * Create an instance of a peak using a V3D
    * @param HKL V3D
    * @return a pointer to a new Peak object.
    */
-  virtual Mantid::Geometry::IPeak *createPeakHKL(Mantid::Kernel::V3D HKL) const = 0;
+  virtual Mantid::Geometry::IPeak *
+  createPeakHKL(Mantid::Kernel::V3D HKL) const = 0;
 
   //---------------------------------------------------------------------------------------------
   /** Determine if the workspace has been integrated using a peaks integration
@@ -163,7 +166,6 @@ protected:
 private:
   virtual IPeaksWorkspace *doClone() const = 0;
 };
-
 }
 }
 #endif

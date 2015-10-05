@@ -19,9 +19,12 @@ void export_PropertyManager() {
   typedef boost::shared_ptr<PropertyManager> PropertyManager_sptr;
 
   // The second argument defines the actual type held within the Python object.
-  // This means that when a PropertyManager is constructed in Python it actually used
-  // a shared_ptr to the object rather than a raw pointer. This knowledge is used by
-  // DataServiceExporter::extractCppValue to assume that it can always extract a shared_ptr
+  // This means that when a PropertyManager is constructed in Python it actually
+  // used
+  // a shared_ptr to the object rather than a raw pointer. This knowledge is
+  // used by
+  // DataServiceExporter::extractCppValue to assume that it can always extract a
+  // shared_ptr
   // type
   class_<PropertyManager, PropertyManager_sptr, bases<IPropertyManager>,
          boost::noncopyable>("PropertyManager");

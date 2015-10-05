@@ -33,8 +33,9 @@ public:
    * @return BoxController instance
    */
   BoxController(size_t nd)
-      : nd(nd), m_maxId(0), m_SplitThreshold(1024), m_splitTopInto(boost::none), m_numSplit(1), m_numTopSplit(1),
-      m_fileIO(boost::shared_ptr<API::IBoxControllerIO>()) {
+      : nd(nd), m_maxId(0), m_SplitThreshold(1024), m_splitTopInto(boost::none),
+        m_numSplit(1), m_numTopSplit(1),
+        m_fileIO(boost::shared_ptr<API::IBoxControllerIO>()) {
     // TODO: Smarter ways to determine all of these values
     m_maxDepth = 5;
     m_numEventsAtMax = 0;
@@ -130,7 +131,6 @@ public:
     return m_splitTopInto;
   }
 
-
   /// Return how many boxes (total) a MDGridBox will contain.
   size_t getNumSplit() const { return m_numSplit; }
 
@@ -158,7 +158,6 @@ public:
     calcNumSplit();
   }
 
-
   //-----------------------------------------------------------------------------------
   /** Set the way splitting will be done for the top level
    *
@@ -167,11 +166,12 @@ public:
    */
   void setSplitTopInto(size_t dim, size_t num) {
     if (dim >= nd)
-      throw std::invalid_argument("BoxController::setSplitTopInto() called with "
-                                  "too high of a dimension index.");
+      throw std::invalid_argument(
+          "BoxController::setSplitTopInto() called with "
+          "too high of a dimension index.");
     // If the vector is not created, then create it
     if (!m_splitTopInto) {
-      m_splitTopInto = std::vector<size_t>(nd,1);
+      m_splitTopInto = std::vector<size_t>(nd, 1);
     }
     m_splitTopInto.get()[dim] = num;
     calcNumTopSplit();
@@ -294,14 +294,13 @@ public:
 
     // We need to account for optional top level splitting
     if (depth == 0 && m_splitTopInto) {
-      
+
       size_t numSplitTop = 1;
       for (size_t d = 0; d < m_splitTopInto.get().size(); d++)
         numSplitTop *= m_splitTopInto.get()[d];
 
       m_numMDBoxes[depth + 1] += numSplitTop;
-    }
-    else {
+    } else {
       m_numMDBoxes[depth + 1] += m_numSplit;
     }
     m_mutexNumMDBoxes.unlock();
@@ -310,8 +309,11 @@ public:
   /** Return the vector giving the number of MD Boxes as a function of depth */
   const std::vector<size_t> &getNumMDBoxes() const { return m_numMDBoxes; }
 
-  /** Return the vector giving the number of MD Grid Boxes as a function of depth */
-  const std::vector<size_t> &getNumMDGridBoxes() const { return m_numMDGridBoxes; }
+  /** Return the vector giving the number of MD Grid Boxes as a function of
+   * depth */
+  const std::vector<size_t> &getNumMDGridBoxes() const {
+    return m_numMDGridBoxes;
+  }
 
   /** Return the vector giving the MAXIMUM number of MD Boxes as a function of
    * depth */
@@ -420,15 +422,13 @@ private:
     // Now calculate the max # of boxes
     m_maxNumMDBoxes.resize(m_maxDepth + 1, 0); // Reset to 0
     m_maxNumMDBoxes[0] = 1;
-    for (size_t depth = 1; depth < m_maxNumMDBoxes.size(); depth++)
-    {
-      if (depth ==1 && m_splitTopInto)
-      {
-        m_maxNumMDBoxes[depth] = m_maxNumMDBoxes[depth - 1] * double(m_numTopSplit);
-      }
-      else 
-      {
-        m_maxNumMDBoxes[depth] = m_maxNumMDBoxes[depth - 1] * double(m_numSplit);
+    for (size_t depth = 1; depth < m_maxNumMDBoxes.size(); depth++) {
+      if (depth == 1 && m_splitTopInto) {
+        m_maxNumMDBoxes[depth] =
+            m_maxNumMDBoxes[depth - 1] * double(m_numTopSplit);
+      } else {
+        m_maxNumMDBoxes[depth] =
+            m_maxNumMDBoxes[depth - 1] * double(m_numSplit);
       }
     }
   }

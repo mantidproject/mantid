@@ -144,7 +144,8 @@ DateAndTime::DateAndTime(const int64_t total_nanoseconds) {
 /** Construct a time from an ISO8601 string
  *
  * @param ISO8601_string: and ISO8601 formatted string.
- *    "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz"; although the T can be replaced by a space.
+ *    "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz"; although the T can be replaced by a
+ *space.
  *    The time must included, but the time-zone specification is optional.
  */
 DateAndTime::DateAndTime(const std::string ISO8601_string) : _nanoseconds(0) {
@@ -208,8 +209,8 @@ DateAndTime::DateAndTime(const int32_t seconds, const int32_t nanoseconds) {
   else if (seconds_64bit <= MIN_SECONDS)
     _nanoseconds = MIN_NANOSECONDS;
   else
-    _nanoseconds = seconds_64bit * NANO_PER_SEC +
-                   static_cast<int64_t>(nanoseconds);
+    _nanoseconds =
+        seconds_64bit * NANO_PER_SEC + static_cast<int64_t>(nanoseconds);
 }
 
 //===========================================================================================

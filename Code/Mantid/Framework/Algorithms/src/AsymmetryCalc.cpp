@@ -53,7 +53,8 @@ void AsymmetryCalc::exec() {
   // Make an intermediate workspace and prepare it for asymmetry calculation
   API::MatrixWorkspace_sptr tmpWS;
   if (forward_list.size() > 1 || backward_list.size() > 1) {
-    // If forward or backward lists have more than 1 entries spectra need to be grouped
+    // If forward or backward lists have more than 1 entries spectra need to be
+    // grouped
 
     // First group spectra from the backward list leaving the rest ungrouped
     API::IAlgorithm_sptr group = createChildAlgorithm("GroupDetectors");
@@ -71,7 +72,8 @@ void AsymmetryCalc::exec() {
     group->execute();
     tmpWS = group->getProperty("OutputWorkspace");
 
-    // The order of grouping leaves the forward spectra group in the first histogram
+    // The order of grouping leaves the forward spectra group in the first
+    // histogram
     // and the barckward one is the second
     forward = 0;
     backward = 1;
@@ -98,7 +100,7 @@ void AsymmetryCalc::exec() {
   }
 
   const size_t blocksize = inputWS->blocksize();
-  assert( tmpWS->blocksize() == blocksize );
+  assert(tmpWS->blocksize() == blocksize);
   const bool isInputHistogram = inputWS->isHistogramData();
 
   // Create a point data workspace with only one spectra for forward
@@ -106,7 +108,7 @@ void AsymmetryCalc::exec() {
       inputWS, 1, blocksize, blocksize);
 
   // Get the reference to the input x values.
-  auto& tmpX = tmpWS->readX(forward);
+  auto &tmpX = tmpWS->readX(forward);
 
   // Calculate asymmetry for each time bin
   // F-aB / F+aB
@@ -140,24 +142,21 @@ void AsymmetryCalc::exec() {
     outputWS->dataE(0)[j] = error;
 
     // set the x values
-    if ( isInputHistogram )
-    {
-      outputWS->dataX(0)[j] = ( tmpX[j] + tmpX[j+1] ) / 2;
-    }
-    else
-    {
+    if (isInputHistogram) {
+      outputWS->dataX(0)[j] = (tmpX[j] + tmpX[j + 1]) / 2;
+    } else {
       outputWS->dataX(0)[j] = tmpX[j];
     }
 
     prog.report();
   }
 
-  assert( outputWS->dataX(0).size() == blocksize );
+  assert(outputWS->dataX(0).size() == blocksize);
 
   // Update Y axis units
   outputWS->setYUnit("Asymmetry");
 
-  setProperty("OutputWorkspace", outputWS); 
+  setProperty("OutputWorkspace", outputWS);
 }
 
 } // namespace Algorithm

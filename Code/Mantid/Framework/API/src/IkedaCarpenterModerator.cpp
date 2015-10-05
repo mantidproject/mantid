@@ -431,8 +431,8 @@ double IkedaCarpenterModerator::area(const double x) const {
                                                         ax * (c12 +
                                                               ax * c13)))))))));
       } else
-        funAx =
-            (1.0 - exp(-(ax)) * (1.0 + (ax)+0.5 * (ax * ax))) / (ax * ax * ax);
+        funAx = (1.0 - exp(-(ax)) * (1.0 + (ax) + 0.5 * (ax * ax))) /
+                (ax * ax * ax);
       if (m_tau_s != 0. && m_r != 0.) {
         double funGx;
         const double gx = x * (1.0 / m_tau_f - 1.0 / m_tau_s);
@@ -456,7 +456,7 @@ double IkedaCarpenterModerator::area(const double x) const {
                                                         gx * (c12 +
                                                               gx * c13)))))))));
         else
-          funGx = (1.0 - exp(-(gx)) * (1.0 + (gx)+0.5 * (gx * gx))) /
+          funGx = (1.0 - exp(-(gx)) * (1.0 + (gx) + 0.5 * (gx * gx))) /
                   (gx * gx * gx);
         return ((ax * ax * ax) *
                 (funAx - m_r * funGx * std::exp(-(x / m_tau_s))));

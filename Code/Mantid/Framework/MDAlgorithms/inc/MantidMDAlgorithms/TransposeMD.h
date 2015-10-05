@@ -6,7 +6,8 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-/** TransposeMD : Transpose an MDWorkspace. Allows dimensions to be collapsed down.
+/** TransposeMD : Transpose an MDWorkspace. Allows dimensions to be collapsed
+  down.
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source

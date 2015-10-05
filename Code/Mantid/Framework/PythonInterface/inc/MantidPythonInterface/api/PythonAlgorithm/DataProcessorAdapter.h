@@ -79,15 +79,16 @@ public:
 
   void forwardPropertiesProxy() { this->forwardProperties(); }
 
-  boost::shared_ptr<Kernel::PropertyManager>
-  getProcessPropertiesProxy(const std::string &propertyManager=std::string()) {
+  boost::shared_ptr<Kernel::PropertyManager> getProcessPropertiesProxy(
+      const std::string &propertyManager = std::string()) {
     return this->getProcessProperties(propertyManager);
   }
   void setPropManagerPropName(const std::string &propName) {
     this->setPropManagerPropName(propName);
   }
 
-  void mapPropertyName(const std::string &nameInProp, const std::string &nameInPropManager) {
+  void mapPropertyName(const std::string &nameInProp,
+                       const std::string &nameInPropManager) {
     this->mapPropertyName(nameInProp, nameInPropManager);
   }
 

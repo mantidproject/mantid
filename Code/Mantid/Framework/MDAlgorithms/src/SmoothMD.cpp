@@ -256,8 +256,7 @@ void SmoothMD::exec() {
   if (widthVector.size() == 1) {
     // Pad the width vector out to the right size if only one entry has been
     // provided.
-    widthVector =
-        std::vector<int>(toSmooth->getNumDims(), widthVector.front());
+    widthVector = std::vector<int>(toSmooth->getNumDims(), widthVector.front());
   }
 
   // Find the choosen smooth operation
@@ -284,7 +283,8 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
   const std::string widthVectorPropertyName = "WidthVector";
   std::vector<int> widthVector = this->getProperty(widthVectorPropertyName);
 
-  if (widthVector.size() != 1 && widthVector.size() != toSmoothWs->getNumDims()) {
+  if (widthVector.size() != 1 &&
+      widthVector.size() != toSmoothWs->getNumDims()) {
     product.insert(std::make_pair(widthVectorPropertyName,
                                   widthVectorPropertyName +
                                       " can either have one entry or needs to "

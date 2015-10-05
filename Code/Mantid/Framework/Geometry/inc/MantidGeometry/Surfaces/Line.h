@@ -58,10 +58,10 @@ private:
   Kernel::V3D Origin; ///< Orign point (on plane)
   Kernel::V3D Direct; ///< Direction of outer surface (Unit Vector)
 
-  int
-  lambdaPair(const int ix,
-             const std::pair<std::complex<double>, std::complex<double>> &SQ,
-             std::list<Kernel::V3D> &PntOut) const;
+  int lambdaPair(
+      const int ix,
+      const std::pair<std::complex<double>, std::complex<double>> &SQ,
+      std::list<Kernel::V3D> &PntOut) const;
 
 public:
   Line();

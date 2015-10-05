@@ -11,23 +11,17 @@
 using namespace Mantid::Crystal;
 using namespace testing;
 
-class ClusterRegisterTest: public CxxTest::TestSuite
-{
+class ClusterRegisterTest : public CxxTest::TestSuite {
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ClusterRegisterTest *createSuite()
-  {
+  static ClusterRegisterTest *createSuite() {
     return new ClusterRegisterTest();
   }
-  static void destroySuite(ClusterRegisterTest *suite)
-  {
-    delete suite;
-  }
+  static void destroySuite(ClusterRegisterTest *suite) { delete suite; }
 
-  void test_addClusters()
-  {
+  void test_addClusters() {
     ClusterRegister cRegister;
     cRegister.add(1, boost::make_shared<MockICluster>());
     cRegister.add(2, boost::make_shared<MockICluster>());
@@ -36,8 +30,7 @@ public:
     TS_ASSERT_EQUALS(2, clusters.size());
   }
 
-  void test_try_addClusters_with_duplicate_keys()
-  {
+  void test_try_addClusters_with_duplicate_keys() {
     ClusterRegister cRegister;
     cRegister.add(1, boost::make_shared<MockICluster>());
     cRegister.add(1, boost::make_shared<MockICluster>());
@@ -46,8 +39,7 @@ public:
     TS_ASSERT_EQUALS(1, clusters.size());
   }
 
-  void test_simple_merge()
-  {
+  void test_simple_merge() {
     ClusterRegister cRegister;
     auto a = boost::make_shared<Cluster>(1);
     auto b = boost::make_shared<Cluster>(2);
@@ -58,7 +50,8 @@ public:
     cRegister.add(1, a);
     cRegister.add(2, b);
     cRegister.add(3, c);
-    cRegister.merge(DisjointElement(2), DisjointElement(3)); // Merge clusters 2 and 3
+    cRegister.merge(DisjointElement(2),
+                    DisjointElement(3)); // Merge clusters 2 and 3
 
     auto combined = cRegister.clusters();
     TS_ASSERT_EQUALS(2, combined.size());
@@ -68,8 +61,7 @@ public:
     TS_ASSERT(boost::dynamic_pointer_cast<CompositeCluster>(combined[2]));
   }
 
-  void test_simple_merge_repeat()
-  {
+  void test_simple_merge_repeat() {
     ClusterRegister cRegister;
     auto a = boost::make_shared<Cluster>(1);
     auto b = boost::make_shared<Cluster>(2);
@@ -80,8 +72,11 @@ public:
     cRegister.add(1, a);
     cRegister.add(2, b);
     cRegister.add(3, c);
-    cRegister.merge(DisjointElement(2), DisjointElement(3)); // Merge clusters 2 and 3
-    cRegister.merge(DisjointElement(3), DisjointElement(2)); // This is a duplicate call that should be ignored.
+    cRegister.merge(DisjointElement(2),
+                    DisjointElement(3)); // Merge clusters 2 and 3
+    cRegister.merge(
+        DisjointElement(3),
+        DisjointElement(2)); // This is a duplicate call that should be ignored.
 
     auto combined = cRegister.clusters();
     TS_ASSERT_EQUALS(2, combined.size());
@@ -91,8 +86,7 @@ public:
     TS_ASSERT(boost::dynamic_pointer_cast<CompositeCluster>(combined[2]));
   }
 
-  void test_multi_merge()
-  {
+  void test_multi_merge() {
     ClusterRegister cRegister;
     auto a = boost::make_shared<Cluster>(1);
     auto b = boost::make_shared<Cluster>(2);
@@ -103,17 +97,19 @@ public:
     cRegister.add(1, a);
     cRegister.add(2, b);
     cRegister.add(3, c);
-    cRegister.merge(DisjointElement(2), DisjointElement(3)); // Merge clusters 2 and 3
-    cRegister.merge(DisjointElement(1), DisjointElement(2)); // Merge clusters 1 and 2
+    cRegister.merge(DisjointElement(2),
+                    DisjointElement(3)); // Merge clusters 2 and 3
+    cRegister.merge(DisjointElement(1),
+                    DisjointElement(2)); // Merge clusters 1 and 2
 
     auto combined = cRegister.clusters();
     TS_ASSERT_EQUALS(1, combined.size());
-    TSM_ASSERT("Combined all clusters, so should have a single Composite cluster. Composite should be labelled with the lowest label.",
-        boost::dynamic_pointer_cast<CompositeCluster>(combined[1]));
+    TSM_ASSERT("Combined all clusters, so should have a single Composite "
+               "cluster. Composite should be labelled with the lowest label.",
+               boost::dynamic_pointer_cast<CompositeCluster>(combined[1]));
   }
 
-  void test_complex_merge()
-  {
+  void test_complex_merge() {
     // Merge (1,2)  (3,4) then (2, 3), we should get one big cluster at the end.
 
     auto one = boost::make_shared<Cluster>(1);
@@ -137,14 +133,14 @@ public:
     cRegister.merge(DisjointElement(2), DisjointElement(3));
 
     auto clusters = cRegister.clusters();
-    
+
     TSM_ASSERT_EQUALS("One big cluster", clusters.size(), 1);
-    TSM_ASSERT_EQUALS("All four Clusters registered under big composite.", clusters[1]->size(), 4);
+    TSM_ASSERT_EQUALS("All four Clusters registered under big composite.",
+                      clusters[1]->size(), 4);
 
     auto label = clusters[1]->getLabel();
     TSM_ASSERT_EQUALS("Entire clustere labeled as minimum (1)", label, 1);
   }
-
 };
 
 #endif /* MANTID_CRYSTAL_CLUSTERREGISTERTEST_H_ */

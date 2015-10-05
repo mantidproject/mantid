@@ -11,7 +11,7 @@
 #include <gsl/gsl_fft_complex.h>
 
 #define REAL(z, i) ((z)[2 * (i)])
-#define IMAG(z, i) ((z)[2 * (i)+1])
+#define IMAG(z, i) ((z)[2 * (i) + 1])
 
 #include <sstream>
 #include <numeric>
@@ -148,15 +148,20 @@ void FFT::exec() {
         df /= 2.418e2;
       } else if (inputUnit->caption() == "Time" && inputUnit->label() == "s") {
         lblUnit->setLabel("Frequency", "Hz");
-      } else if (inputUnit->caption() == "Frequency" && inputUnit->label() == "Hz") {
+      } else if (inputUnit->caption() == "Frequency" &&
+                 inputUnit->label() == "Hz") {
         lblUnit->setLabel("Time", "s");
-      } else if (inputUnit->caption() == "Time" && inputUnit->label() == "microsecond") {
+      } else if (inputUnit->caption() == "Time" &&
+                 inputUnit->label() == "microsecond") {
         lblUnit->setLabel("Frequency", "MHz");
-      } else if (inputUnit->caption() == "Frequency" && inputUnit->label() == "MHz") {
+      } else if (inputUnit->caption() == "Frequency" &&
+                 inputUnit->label() == "MHz") {
         lblUnit->setLabel("Time", Units::Symbol::Microsecond);
-      } else if (inputUnit->caption() == "d-Spacing" && inputUnit->label() == "Angstrom") {
+      } else if (inputUnit->caption() == "d-Spacing" &&
+                 inputUnit->label() == "Angstrom") {
         lblUnit->setLabel("q", Units::Symbol::InverseAngstrom);
-      } else if (inputUnit->caption() == "q" && inputUnit->label() == "Angstrom^-1") {
+      } else if (inputUnit->caption() == "q" &&
+                 inputUnit->label() == "Angstrom^-1") {
         lblUnit->setLabel("d-Spacing", Units::Symbol::Angstrom);
       }
 

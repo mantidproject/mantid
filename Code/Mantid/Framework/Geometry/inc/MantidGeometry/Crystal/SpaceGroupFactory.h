@@ -58,7 +58,7 @@ private:
 };
 
 typedef boost::shared_ptr<AbstractSpaceGroupGenerator>
-AbstractSpaceGroupGenerator_sptr;
+    AbstractSpaceGroupGenerator_sptr;
 
 /// Concrete space group generator that uses space group generators as given in
 /// ITA.
@@ -189,11 +189,11 @@ private:
 // This is taken from FuncMinimizerFactory
 #ifdef _WIN32
 template class MANTID_GEOMETRY_DLL
-Mantid::Kernel::SingletonHolder<SpaceGroupFactoryImpl>;
+    Mantid::Kernel::SingletonHolder<SpaceGroupFactoryImpl>;
 #endif
 
 typedef Mantid::Kernel::SingletonHolder<SpaceGroupFactoryImpl>
-SpaceGroupFactory;
+    SpaceGroupFactory;
 
 } // namespace Geometry
 } // namespace Mantid

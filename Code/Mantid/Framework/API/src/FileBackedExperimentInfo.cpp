@@ -8,7 +8,6 @@
 #include <nexus/NeXusException.hpp>
 #include <nexus/NeXusFile.hpp>
 
-
 namespace Mantid {
 namespace API {
 
@@ -25,10 +24,11 @@ Kernel::Logger g_log("FileBackedExperimentInfo");
   */
 FileBackedExperimentInfo::FileBackedExperimentInfo(const std::string &filename,
                                                    const std::string &nxpath)
-    : ExperimentInfo(), m_loaded(false), m_filename(filename), m_nxpath(nxpath) {}
+    : ExperimentInfo(), m_loaded(false), m_filename(filename),
+      m_nxpath(nxpath) {}
 
 /**
- * This clones the FileBackedExperimentInfo and will not cause a load 
+ * This clones the FileBackedExperimentInfo and will not cause a load
  * of the information.
  * @return A clone of the object.
  */
@@ -107,8 +107,8 @@ void FileBackedExperimentInfo::swapInstrumentParameters(
  * Populate the object and cache the groupings
  * @param mapping A set of the detector mappings
  */
-void
-FileBackedExperimentInfo::cacheDetectorGroupings(const det2group_map &mapping) {
+void FileBackedExperimentInfo::cacheDetectorGroupings(
+    const det2group_map &mapping) {
   populateIfNotLoaded();
   ExperimentInfo::cacheDetectorGroupings(mapping);
 }

@@ -94,34 +94,29 @@ void PawleyParameterFunction::setParametersFromUnitCell(const UnitCell &cell) {
 
   try {
     setParameter("b", cell.b());
-  }
-  catch (std::invalid_argument) {
+  } catch (std::invalid_argument) {
     // do nothing.
   }
 
   try {
     setParameter("c", cell.c());
-  }
-  catch (std::invalid_argument) {
+  } catch (std::invalid_argument) {
     // do nothing
   }
 
   try {
     setParameter("Alpha", cell.alpha());
-  }
-  catch (std::invalid_argument) {
+  } catch (std::invalid_argument) {
     // do nothing.
   }
   try {
     setParameter("Beta", cell.beta());
-  }
-  catch (std::invalid_argument) {
+  } catch (std::invalid_argument) {
     // do nothing.
   }
   try {
     setParameter("Gamma", cell.gamma());
-  }
-  catch (std::invalid_argument) {
+  } catch (std::invalid_argument) {
     // do nothing.
   }
 }
@@ -182,8 +177,8 @@ void PawleyParameterFunction::setProfileFunction(
  *
  * @param crystalSystem :: Crystal system, case insensitive.
  */
-void
-PawleyParameterFunction::setCrystalSystem(const std::string &crystalSystem) {
+void PawleyParameterFunction::setCrystalSystem(
+    const std::string &crystalSystem) {
   m_crystalSystem = Geometry::getCrystalSystemFromString(crystalSystem);
 
   createCrystalSystemParameters(m_crystalSystem);
@@ -259,8 +254,8 @@ void PawleyParameterFunction::createCrystalSystemParameters(
 }
 
 /// Adds a default constraint so that cell edge lengths can not be less than 0.
-void
-PawleyParameterFunction::addLengthConstraint(const std::string &parameterName) {
+void PawleyParameterFunction::addLengthConstraint(
+    const std::string &parameterName) {
   BoundaryConstraint *cellEdgeConstraint =
       new BoundaryConstraint(this, parameterName, 0.0, true);
   cellEdgeConstraint->setPenaltyFactor(1e12);
@@ -268,8 +263,8 @@ PawleyParameterFunction::addLengthConstraint(const std::string &parameterName) {
 }
 
 /// Adds a default constraint so cell angles are in the range 0 to 180.
-void
-PawleyParameterFunction::addAngleConstraint(const std::string &parameterName) {
+void PawleyParameterFunction::addAngleConstraint(
+    const std::string &parameterName) {
   BoundaryConstraint *cellAngleConstraint =
       new BoundaryConstraint(this, parameterName, 0.0, 180.0, true);
   cellAngleConstraint->setPenaltyFactor(1e12);
@@ -350,8 +345,7 @@ void PawleyFunction::setProfileFunction(const std::string &profileFunction) {
     newFunction->setCentre(oldFunction->centre());
     try {
       newFunction->setFwhm(oldFunction->fwhm());
-    }
-    catch (...) {
+    } catch (...) {
       // do nothing.
     }
     newFunction->setHeight(oldFunction->height());
@@ -452,15 +446,13 @@ void PawleyFunction::function(const FunctionDomain &domain,
       try {
         size_t offset = calculateFunctionValues(peak, domain1D, localValues);
         values.addToCalculated(offset, localValues);
-      }
-      catch (std::invalid_argument) {
+      } catch (std::invalid_argument) {
         // do nothing
       }
     }
 
     setPeakPositions(centreName, 0.0, cell);
-  }
-  catch (std::bad_cast) {
+  } catch (std::bad_cast) {
     // do nothing
   }
 }
@@ -498,8 +490,7 @@ void PawleyFunction::addPeak(const Kernel::V3D &hkl, double fwhm,
 
   try {
     peak->setFwhm(fwhm);
-  }
-  catch (...) {
+  } catch (...) {
     // do nothing.
   }
 

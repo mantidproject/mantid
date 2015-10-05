@@ -30,8 +30,8 @@ DECLARE_ALGORITHM(ExtractSpectra)
 /** Constructor
  */
 ExtractSpectra::ExtractSpectra()
-    : Algorithm(), m_minX(0), m_maxX(0),
-      m_commonBoundaries(false), m_histogram(false), m_croppingInX(false) {}
+    : Algorithm(), m_minX(0), m_maxX(0), m_commonBoundaries(false),
+      m_histogram(false), m_croppingInX(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -87,16 +87,18 @@ void ExtractSpectra::init() {
       "EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
       "The index number of the last entry in the Workspace to be loaded\n"
       "(default: last entry in the Workspace)");
-  declareProperty(
-      new ArrayProperty<size_t>("WorkspaceIndexList"),
-      "A comma-separated list of individual workspace indices to read.  Only used if\n"
-      "explicitly set. The WorkspaceIndexList is only used if the DetectorList is empty.");
+  declareProperty(new ArrayProperty<size_t>("WorkspaceIndexList"),
+                  "A comma-separated list of individual workspace indices to "
+                  "read.  Only used if\n"
+                  "explicitly set. The WorkspaceIndexList is only used if the "
+                  "DetectorList is empty.");
 
-    declareProperty(
-      new ArrayProperty<detid_t>("DetectorList"),
-      "A comma-separated list of individual detector IDs to read.  Only used if\n"
-      "explicitly set. When specifying the WorkspaceIndexList and DetectorList property,\n"
-      "the latter is being selected.");
+  declareProperty(new ArrayProperty<detid_t>("DetectorList"),
+                  "A comma-separated list of individual detector IDs to read.  "
+                  "Only used if\n"
+                  "explicitly set. When specifying the WorkspaceIndexList and "
+                  "DetectorList property,\n"
+                  "the latter is being selected.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -129,7 +131,7 @@ void ExtractSpectra::execHistogram() {
 
   // Create the output workspace
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
-    m_inputWorkspace, m_workspaceIndexList.size(), m_maxX - m_minX,
+      m_inputWorkspace, m_workspaceIndexList.size(), m_maxX - m_minX,
       m_maxX - m_minX - m_histogram);
 
   // If this is a Workspace2D, get the spectra axes for copying in the spectraNo
@@ -141,12 +143,14 @@ void ExtractSpectra::execHistogram() {
     inAxis1 = m_inputWorkspace->getAxis(1);
     auto outAxis1 = outputWorkspace->getAxis(1);
     outTxtAxis = dynamic_cast<TextAxis *>(outAxis1);
-    if (!outTxtAxis) outNumAxis = dynamic_cast<NumericAxis *>(outAxis1);
+    if (!outTxtAxis)
+      outNumAxis = dynamic_cast<NumericAxis *>(outAxis1);
   }
 
   cow_ptr<MantidVec> newX;
   if (m_commonBoundaries) {
-    const MantidVec &oldX = m_inputWorkspace->readX(m_workspaceIndexList.front());
+    const MantidVec &oldX =
+        m_inputWorkspace->readX(m_workspaceIndexList.front());
     newX.access().assign(oldX.begin() + m_minX, oldX.begin() + m_maxX);
   }
 
@@ -162,7 +166,8 @@ void ExtractSpectra::execHistogram() {
       outputWorkspace->setX(j, newX);
       if (hasDx) {
         const MantidVec &oldDx = m_inputWorkspace->readDx(i);
-        outputWorkspace->dataDx(j).assign(oldDx.begin() + m_minX, oldDx.begin() + m_maxX);
+        outputWorkspace->dataDx(j)
+            .assign(oldDx.begin() + m_minX, oldDx.begin() + m_maxX);
       }
     } else {
       // Safe to just copy whole vector 'cos can't be cropping in X if not
@@ -216,26 +221,26 @@ void ExtractSpectra::execHistogram() {
 
 namespace { // anonymous namespace
 
-template <class T>
-struct eventFilter {
-    eventFilter(const double minValue, const double maxValue):
-        minValue(minValue), maxValue(maxValue)
-    {}
+template <class T> struct eventFilter {
+  eventFilter(const double minValue, const double maxValue)
+      : minValue(minValue), maxValue(maxValue) {}
 
-    bool operator()(const T &value) {
-        const double tof = value.tof();
-        return (tof <= maxValue && tof >= minValue);
-    }
+  bool operator()(const T &value) {
+    const double tof = value.tof();
+    return (tof <= maxValue && tof >= minValue);
+  }
 
-    double minValue;
-    double maxValue;
+  double minValue;
+  double maxValue;
 };
 
 template <class T>
-void copyEventsHelper(const std::vector<T> &inputEvents, std::vector<T> &outputEvents, const double xmin, const double xmax) {
-    copy_if(inputEvents.begin(), inputEvents.end(), std::back_inserter(outputEvents), eventFilter<T>(xmin, xmax));
+void copyEventsHelper(const std::vector<T> &inputEvents,
+                      std::vector<T> &outputEvents, const double xmin,
+                      const double xmax) {
+  copy_if(inputEvents.begin(), inputEvents.end(),
+          std::back_inserter(outputEvents), eventFilter<T>(xmin, xmax));
 }
-
 }
 
 /** Executes the algorithm
@@ -258,7 +263,8 @@ void ExtractSpectra::execEvent() {
   this->checkProperties();
   cow_ptr<MantidVec> XValues_new;
   if (m_commonBoundaries) {
-    const MantidVec &oldX = m_inputWorkspace->readX(m_workspaceIndexList.front());
+    const MantidVec &oldX =
+        m_inputWorkspace->readX(m_workspaceIndexList.front());
     XValues_new.access().assign(oldX.begin() + m_minX, oldX.begin() + m_maxX);
   }
   size_t ntcnew = m_maxX - m_minX;
@@ -324,7 +330,8 @@ void ExtractSpectra::execEvent() {
     case WEIGHTED_NOTIME: {
       std::vector<WeightedEventNoTime> moreevents;
       moreevents.reserve(el.getNumberEvents()); // assume all will make it
-      copyEventsHelper(el.getWeightedEventsNoTime(), moreevents, minX_val, maxX_val);
+      copyEventsHelper(el.getWeightedEventsNoTime(), moreevents, minX_val,
+                       maxX_val);
       outEL += moreevents;
       break;
     }
@@ -343,14 +350,14 @@ void ExtractSpectra::execEvent() {
       if (hasDx) {
         outEL.setDx(el.dataDx());
       }
-    }
-    else {
+    } else {
       // Common bin boundaries get all set to the same value
       outEL.setX(XValues_new);
       if (hasDx) {
         const MantidVec &oldDx = m_inputWorkspace->readDx(i);
         cow_ptr<MantidVec> DxValues_new;
-        DxValues_new.access().assign(oldDx.begin() + m_minX, oldDx.begin() + m_maxX);
+        DxValues_new.access().assign(oldDx.begin() + m_minX,
+                                     oldDx.begin() + m_maxX);
         outEL.setDx(DxValues_new);
       }
     }
@@ -415,7 +422,8 @@ void ExtractSpectra::checkProperties() {
   // 3. Start and stop index
   std::vector<detid_t> detectorList = getProperty("DetectorList");
   if (!detectorList.empty()) {
-    m_inputWorkspace->getIndicesFromDetectorIDs(detectorList, m_workspaceIndexList);
+    m_inputWorkspace->getIndicesFromDetectorIDs(detectorList,
+                                                m_workspaceIndexList);
   } else {
     m_workspaceIndexList = getProperty("WorkspaceIndexList");
 
@@ -439,11 +447,13 @@ void ExtractSpectra::checkProperties() {
       if (maxSpec < minSpec) {
         g_log.error("StartWorkspaceIndex must be less than or equal to "
                     "EndWorkspaceIndex");
-        throw std::out_of_range("StartWorkspaceIndex must be less than or equal "
-                                "to EndWorkspaceIndex");
+        throw std::out_of_range(
+            "StartWorkspaceIndex must be less than or equal "
+            "to EndWorkspaceIndex");
       }
       m_workspaceIndexList.reserve(maxSpec - minSpec + 1);
-      for (size_t i = static_cast<size_t>(minSpec); i <= static_cast<size_t>(maxSpec); ++i) {
+      for (size_t i = static_cast<size_t>(minSpec);
+           i <= static_cast<size_t>(maxSpec); ++i) {
         m_workspaceIndexList.push_back(i);
       }
     }

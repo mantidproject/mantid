@@ -44,7 +44,7 @@ dict THREAD_ID_MAP;
  * @param threadID The current Python thread ID
  * @param alg A Python reference to the algorithm object
  */
-void _trackAlgorithmInThread(long threadID, const object & alg) {
+void _trackAlgorithmInThread(long threadID, const object &alg) {
   THREAD_ID_MAP[threadID] = alg;
 }
 
@@ -55,7 +55,8 @@ void _trackAlgorithmInThread(long threadID, const object & alg) {
  */
 object _algorithmInThread(long threadID) {
   auto value = THREAD_ID_MAP.get(threadID);
-  if(value) api::delitem(THREAD_ID_MAP, threadID);
+  if (value)
+    api::delitem(THREAD_ID_MAP, threadID);
   return value;
 }
 
@@ -205,15 +206,14 @@ std::string createDocString(IAlgorithm &self) {
  * detailed explanation
  */
 struct AllowCThreads {
-  AllowCThreads(const object & algm)
-    : m_tracefunc(NULL), m_tracearg(NULL), m_saved(NULL),
-      m_tracking(false) {
+  AllowCThreads(const object &algm)
+      : m_tracefunc(NULL), m_tracearg(NULL), m_saved(NULL), m_tracking(false) {
     PyThreadState *curThreadState = PyThreadState_GET();
     m_tracefunc = curThreadState->c_tracefunc;
     m_tracearg = curThreadState->c_traceobj;
     Py_XINCREF(m_tracearg);
     PyEval_SetTrace(NULL, NULL);
-    if(!isNone(algm)) {
+    if (!isNone(algm)) {
       _trackAlgorithmInThread(curThreadState->thread_id, algm);
       m_tracking = true;
     }
@@ -221,10 +221,10 @@ struct AllowCThreads {
   }
   ~AllowCThreads() {
     PyEval_RestoreThread(m_saved);
-    if(m_tracking) {
+    if (m_tracking) {
       try {
         api::delitem(THREAD_ID_MAP, m_saved->thread_id);
-      } catch(error_already_set&) {
+      } catch (error_already_set &) {
         PyErr_Clear();
       }
     }
@@ -247,12 +247,13 @@ bool executeProxy(object &self) {
   // We need to do 2 things before we execute the algorthm:
   //   1. store a reference to this algorithm mapped to the current thread ID to
   //      allow it to be looked up when an abort request is received
-  //   2. release the GIL, drop the Python threadstate and reset anything installed
+  //   2. release the GIL, drop the Python threadstate and reset anything
+  //   installed
   //      via PyEval_SetTrace while we execute the C++ code - AllowCThreads()
   //      does this for us
 
   // Extract this before dropping GIL as I'm not sure if it calls any Python
-  auto & calg = extract<IAlgorithm&>(self)();
+  auto &calg = extract<IAlgorithm &>(self)();
   AllowCThreads threadStateHolder((!calg.isChild()) ? self : object());
   return calg.execute();
 }

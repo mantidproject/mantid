@@ -14,59 +14,57 @@ using namespace Mantid::Kernel::VectorHelper;
 using Mantid::Algorithms::StripVanadiumPeaks;
 using Mantid::MantidVec;
 
-class StripVanadiumPeaksTest : public CxxTest::TestSuite
-{
+class StripVanadiumPeaksTest : public CxxTest::TestSuite {
 public:
-
-  void testTheBasics()
-  {
+  void testTheBasics() {
     StripVanadiumPeaks strip;
-    TS_ASSERT_EQUALS( strip.name(), "StripVanadiumPeaks" );
-    TS_ASSERT_EQUALS( strip.version(), 1 );
+    TS_ASSERT_EQUALS(strip.name(), "StripVanadiumPeaks");
+    TS_ASSERT_EQUALS(strip.version(), 1);
   }
 
-  void testInit()
-  {
+  void testInit() {
     StripVanadiumPeaks strip;
-    TS_ASSERT_THROWS_NOTHING( strip.initialize() );
-    TS_ASSERT( strip.isInitialized() );
+    TS_ASSERT_THROWS_NOTHING(strip.initialize());
+    TS_ASSERT(strip.isInitialized());
   }
 
-  void testExec()
-  {
+  void testExec() {
     std::string inputWSName("PG3_733");
     std::string outputWSName("PG3_733_stripped");
 
     // Start by loading our NXS file
-    IAlgorithm* loader = Mantid::API::FrameworkManager::Instance().createAlgorithm("LoadNexus");
-    loader->setPropertyValue("Filename","PG3_733.nxs");
+    IAlgorithm *loader =
+        Mantid::API::FrameworkManager::Instance().createAlgorithm("LoadNexus");
+    loader->setPropertyValue("Filename", "PG3_733.nxs");
     loader->setPropertyValue("OutputWorkspace", inputWSName);
     loader->execute();
-    TS_ASSERT( loader->isExecuted());
+    TS_ASSERT(loader->isExecuted());
 
     StripVanadiumPeaks strip;
-    if ( !strip.isInitialized() ) strip.initialize();
+    if (!strip.isInitialized())
+      strip.initialize();
 
-    strip.setPropertyValue("InputWorkspace",inputWSName);
-    strip.setPropertyValue("OutputWorkspace",outputWSName);
+    strip.setPropertyValue("InputWorkspace", inputWSName);
+    strip.setPropertyValue("OutputWorkspace", outputWSName);
     strip.setPropertyValue("PeakWidthPercent", "3.0");
     strip.setPropertyValue("AlternativePeakPositions", "");
     strip.execute();
-    TS_ASSERT( strip.isExecuted() );
+    TS_ASSERT(strip.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWSName);
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        outputWSName);
 
-    //Get a spectrum
+    // Get a spectrum
     MantidVec X = output->dataX(2);
     MantidVec Y = output->dataX(2);
 
-    //Check the height at a couple of peak position
+    // Check the height at a couple of peak position
     int bin;
     bin = getBinIndex(X, 0.8113);
-    TS_ASSERT_LESS_THAN( Y[bin], 11407);
+    TS_ASSERT_LESS_THAN(Y[bin], 11407);
     bin = getBinIndex(X, 0.8758);
-    TS_ASSERT_LESS_THAN( Y[bin], 10850);
+    TS_ASSERT_LESS_THAN(Y[bin], 10850);
 
     AnalysisDataService::Instance().remove(outputWSName);
     AnalysisDataService::Instance().remove(inputWSName);
@@ -76,4 +74,3 @@ private:
 };
 
 #endif /*STRIPVANADIUMPEAKSTEST_H_*/
-

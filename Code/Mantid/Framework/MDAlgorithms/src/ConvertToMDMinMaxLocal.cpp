@@ -125,11 +125,11 @@ void ConvertToMDMinMaxLocal::exec() {
   setProperty("MaxValues", MaxValues);
 }
 
-void ConvertToMDMinMaxLocal::findMinMaxValues(
-    MDWSDescription &WSDescription,
-    MDTransfInterface *const pQtransf,
-    Kernel::DeltaEMode::Type iEMode, std::vector<double> &MinValues,
-    std::vector<double> &MaxValues) {
+void ConvertToMDMinMaxLocal::findMinMaxValues(MDWSDescription &WSDescription,
+                                              MDTransfInterface *const pQtransf,
+                                              Kernel::DeltaEMode::Type iEMode,
+                                              std::vector<double> &MinValues,
+                                              std::vector<double> &MaxValues) {
 
   MDAlgorithms::UnitsConversionHelper unitsConverter;
   double signal(1), errorSq(1);

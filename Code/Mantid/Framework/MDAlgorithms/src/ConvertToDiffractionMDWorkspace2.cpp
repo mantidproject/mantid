@@ -29,7 +29,7 @@ DECLARE_ALGORITHM(ConvertToDiffractionMDWorkspace2)
 /**Small class to diable propery on interface */
 class DisabledProperty : public EnabledWhenProperty {
 public:
-  DisabledProperty() : EnabledWhenProperty("NonExistingProperty", IS_DEFAULT){}
+  DisabledProperty() : EnabledWhenProperty("NonExistingProperty", IS_DEFAULT) {}
   virtual bool fulfillsCriterion(const IPropertyManager * /*algo*/) const {
     return false;
   }
@@ -134,15 +134,17 @@ void ConvertToDiffractionMDWorkspace2::convertFramePropertyNames(
     TargFrameName =
         QSclAndFrames.getTargetFrame(MDAlgorithms::CnvrtToMD::SampleFrame);
     ScalingName = QSclAndFrames.getQScaling(
-        MDAlgorithms::CnvrtToMD::NoScaling);   //< momentums in A^-1
-  } else if (TargFrame == frameOptions[1]) //     "Q (lab frame)"
+        MDAlgorithms::CnvrtToMD::NoScaling); //< momentums in A^-1
+  } else if (TargFrame == frameOptions[1])   //     "Q (lab frame)"
   {
-    TargFrameName = QSclAndFrames.getTargetFrame(MDAlgorithms::CnvrtToMD::LabFrame);
+    TargFrameName =
+        QSclAndFrames.getTargetFrame(MDAlgorithms::CnvrtToMD::LabFrame);
     ScalingName = QSclAndFrames.getQScaling(
-        MDAlgorithms::CnvrtToMD::NoScaling);   //< momentums in A^-1
-  } else if (TargFrame == frameOptions[2]) // "HKL"
+        MDAlgorithms::CnvrtToMD::NoScaling); //< momentums in A^-1
+  } else if (TargFrame == frameOptions[2])   // "HKL"
   {
-    TargFrameName = QSclAndFrames.getTargetFrame(MDAlgorithms::CnvrtToMD::HKLFrame);
+    TargFrameName =
+        QSclAndFrames.getTargetFrame(MDAlgorithms::CnvrtToMD::HKLFrame);
     ScalingName = QSclAndFrames.getQScaling(
         MDAlgorithms::CnvrtToMD::HKLScale); //< momentums in A^-1
   } else {

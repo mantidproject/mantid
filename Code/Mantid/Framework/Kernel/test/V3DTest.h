@@ -13,44 +13,37 @@
 
 using Mantid::Kernel::V3D;
 
-class V3DTest: public CxxTest::TestSuite
-{
+class V3DTest : public CxxTest::TestSuite {
 private:
-
   Mantid::Kernel::V3D a, b, c, d;
 
 public:
-  void testEmptyConstructor()
-  {
+  void testEmptyConstructor() {
     // very important as a MD geometry rely on it later
     TS_ASSERT_EQUALS(a.X(), 0.0);
     TS_ASSERT_EQUALS(a.Y(), 0.0);
     TS_ASSERT_EQUALS(a.Z(), 0.0);
   }
-  void testDefaultConstructor()
-  {
+  void testDefaultConstructor() {
     Mantid::Kernel::V3D d(1.0, 2.0, 3.0);
     TS_ASSERT_EQUALS(d.X(), 1.0);
     TS_ASSERT_EQUALS(d.Y(), 2.0);
     TS_ASSERT_EQUALS(d.Z(), 3.0);
   }
-  void testAssignment()
-  {
+  void testAssignment() {
     a(1.0, 1.0, 1.0);
     TS_ASSERT_EQUALS(a.X(), 1.0);
     TS_ASSERT_EQUALS(a.Y(), 1.0);
     TS_ASSERT_EQUALS(a.Z(), 1.0);
   }
-  void testcopyConstructor()
-  {
+  void testcopyConstructor() {
     a(2.0, 2.0, 2.0);
     Mantid::Kernel::V3D d(a);
     TS_ASSERT_EQUALS(d.X(), 2.0);
     TS_ASSERT_EQUALS(d.Y(), 2.0);
     TS_ASSERT_EQUALS(d.Z(), 2.0);
   }
-  void testOperatorEqual()
-  {
+  void testOperatorEqual() {
     a(-1.0, -1.0, -1.0);
     b = a;
     TS_ASSERT_EQUALS(b.X(), -1.0);
@@ -58,8 +51,7 @@ public:
     TS_ASSERT_EQUALS(b.Z(), -1.0);
   }
 
-  void testPlusOperation()
-  {
+  void testPlusOperation() {
     a(1.0, 1.0, 1.0);
     b(2.0, 3.0, 4.0);
     c = a + b;
@@ -67,8 +59,7 @@ public:
     TS_ASSERT_EQUALS(c.Y(), 4.0);
     TS_ASSERT_EQUALS(c.Z(), 5.0);
   }
-  void testMinusOperation()
-  {
+  void testMinusOperation() {
     a(1.0, 2.0, 3.0);
     b(1.0, 2.0, 3.0);
     c = a - b;
@@ -76,8 +67,7 @@ public:
     TS_ASSERT_EQUALS(c.Y(), 0.0);
     TS_ASSERT_EQUALS(c.Z(), 0.0);
   }
-  void testMultipliesOperation()
-  {
+  void testMultipliesOperation() {
     a(1.0, 2.0, 3.0);
     b(1.0, 2.0, 3.0);
     c = a * b;
@@ -87,8 +77,7 @@ public:
     a *= a;
     // I want a TS_ASSERT here... a==c
   }
-  void testDividesOperation()
-  {
+  void testDividesOperation() {
     a(1.0, 2.0, 3.0);
     b(1.0, 2.0, 3.0);
     c = a / b;
@@ -96,8 +85,7 @@ public:
     TS_ASSERT_EQUALS(c.Y(), 1.0);
     TS_ASSERT_EQUALS(c.Z(), 1.0);
   }
-  void testPlusEqualOperation()
-  {
+  void testPlusEqualOperation() {
     a(1.0, 2.0, 3.0);
     b(0.0, 0.0, 0.0);
     b += a;
@@ -105,8 +93,7 @@ public:
     TS_ASSERT_EQUALS(b.Y(), 2.0);
     TS_ASSERT_EQUALS(b.Z(), 3.0);
   }
-  void testMinusEqualOperation()
-  {
+  void testMinusEqualOperation() {
     a(1.0, 2.0, 3.0);
     b(0.0, 0.0, 0.0);
     b -= a;
@@ -114,8 +101,7 @@ public:
     TS_ASSERT_EQUALS(b.Y(), -2.0);
     TS_ASSERT_EQUALS(b.Z(), -3.0);
   }
-  void testMultipliesEqualOperation()
-  {
+  void testMultipliesEqualOperation() {
     a(1.0, 2.0, 3.0);
     b(2.0, 2.0, 2.0);
     b *= a;
@@ -123,84 +109,73 @@ public:
     TS_ASSERT_EQUALS(b.Y(), 4.0);
     TS_ASSERT_EQUALS(b.Z(), 6.0);
   }
-  void testDividesEqualOperation()
-  {
+  void testDividesEqualOperation() {
     a(1.0, 2.0, 3.0);
     b(2.0, 2.0, 2.0);
     b /= a;
     TS_ASSERT_EQUALS(b.X(), 2.0);
     TS_ASSERT_EQUALS(b.Y(), 1.0);
-    TS_ASSERT_EQUALS(b.Z(), 2.0/3.0);
+    TS_ASSERT_EQUALS(b.Z(), 2.0 / 3.0);
   }
-  void testScaleMultiplies()
-  {
+  void testScaleMultiplies() {
     a(1.0, 2.0, 3.0);
     b = a * -2.0;
     TS_ASSERT_EQUALS(b.X(), -2.0);
     TS_ASSERT_EQUALS(b.Y(), -4.0);
     TS_ASSERT_EQUALS(b.Z(), -6.0);
   }
-  void testScaleMultipliesEqual()
-  {
+  void testScaleMultipliesEqual() {
     a(1.0, 2.0, 3.0);
     a *= 2.0;
     TS_ASSERT_EQUALS(a.X(), 2.0);
     TS_ASSERT_EQUALS(a.Y(), 4.0);
     TS_ASSERT_EQUALS(a.Z(), 6.0);
   }
-  void testScaleDivides()
-  {
+  void testScaleDivides() {
     a(1.0, 2.0, 3.0);
     b = a / 2.0;
     TS_ASSERT_EQUALS(b.X(), 0.5);
     TS_ASSERT_EQUALS(b.Y(), 1.0);
     TS_ASSERT_EQUALS(b.Z(), 1.5);
   }
-  void testScaleDividesEqual()
-  {
+  void testScaleDividesEqual() {
     a(1.0, 2.0, 3.0);
     a /= 2.0;
     TS_ASSERT_EQUALS(a.X(), 0.5);
     TS_ASSERT_EQUALS(a.Y(), 1.0);
     TS_ASSERT_EQUALS(a.Z(), 1.5);
   }
-  void testEqualEqualOperator()
-  {
+  void testEqualEqualOperator() {
     a(1.0, 1.0, 1.0);
     b = a;
-    TS_ASSERT(a==b);
+    TS_ASSERT(a == b);
   }
-  void testLessStrictOperator()
-  {
+  void testLessStrictOperator() {
     a(1.0, 1.0, 1.0);
     b(2.0, 1.0, 0.0);
-    TS_ASSERT(a<b);
+    TS_ASSERT(a < b);
     a(1.0, 1.0, 1.0);
     b(1.0, 2.0, 0.0);
-    TS_ASSERT(a<b);
+    TS_ASSERT(a < b);
     a(1.0, 1.0, 1.0);
     b(1.0, 1.0, 2.0);
-    TS_ASSERT(a<b);
+    TS_ASSERT(a < b);
     b = a;
-    TS_ASSERT(!(a<b));
+    TS_ASSERT(!(a < b));
   }
-  void testGetX()
-  {
+  void testGetX() {
     a(1.0, 0.0, 0.0);
     TS_ASSERT_EQUALS(a.X(), 1.0);
   }
-  void testGetY()
-  {
+  void testGetY() {
     a(1.0, 2.0, 0.0);
     TS_ASSERT_EQUALS(a.Y(), 2.0);
   }
-  void testGetZ()
-  {
+  void testGetZ() {
     a(1.0, 0.0, 3.0);
     TS_ASSERT_EQUALS(a.Z(), 3.0);
   }
-  void testOperatorBracketNonConst()
-  {
+  void testOperatorBracketNonConst() {
     a(1.0, 2.0, 3.0);
     TS_ASSERT_EQUALS(a[0], 1.0);
     TS_ASSERT_EQUALS(a[1], 2.0);
@@ -212,52 +187,44 @@ public:
     TS_ASSERT_EQUALS(a[1], -2.0);
     TS_ASSERT_EQUALS(a[2], -3.0);
   }
-  void testOperatorBracketConst()
-  {
+  void testOperatorBracketConst() {
     const Mantid::Kernel::V3D d(1.0, 2.0, 3.0);
     TS_ASSERT_EQUALS(d[0], 1.0);
     TS_ASSERT_EQUALS(d[1], 2.0);
     TS_ASSERT_EQUALS(d[2], 3.0);
   }
-  void testOperatorBracketNonConstThrows()
-  {
-    TS_ASSERT_THROWS(a[-1], std::runtime_error&);
-    TS_ASSERT_THROWS(a[3], std::runtime_error&);
+  void testOperatorBracketNonConstThrows() {
+    TS_ASSERT_THROWS(a[-1], std::runtime_error &);
+    TS_ASSERT_THROWS(a[3], std::runtime_error &);
   }
-  void testOperatorBracketConstThrows()
-  {
+  void testOperatorBracketConstThrows() {
     const Mantid::Kernel::V3D d(1.0, 2.0, 3.0);
-    TS_ASSERT_THROWS(d[-1], std::runtime_error&);
-    TS_ASSERT_THROWS(d[3], std::runtime_error&);
+    TS_ASSERT_THROWS(d[-1], std::runtime_error &);
+    TS_ASSERT_THROWS(d[3], std::runtime_error &);
   }
-  void testNorm()
-  {
+  void testNorm() {
     a(1.0, -5.0, 8.0);
     TS_ASSERT_EQUALS(a.norm(), sqrt(90.0));
   }
-  void testNorm2()
-  {
+  void testNorm2() {
     a(1.0, -5.0, 8.0);
     TS_ASSERT_EQUALS(a.norm2(), 90.0);
   }
-  void testNormalize()
-  {
+  void testNormalize() {
     a(1.0, 1.0, 1.0);
     b = a;
     b.normalize();
-    TS_ASSERT_EQUALS(b[0], 1.0/sqrt(3.0));
-    TS_ASSERT_EQUALS(b[1], 1.0/sqrt(3.0));
-    TS_ASSERT_EQUALS(b[2], 1.0/sqrt(3.0));
+    TS_ASSERT_EQUALS(b[0], 1.0 / sqrt(3.0));
+    TS_ASSERT_EQUALS(b[1], 1.0 / sqrt(3.0));
+    TS_ASSERT_EQUALS(b[2], 1.0 / sqrt(3.0));
   }
-  void testScalarProduct()
-  {
+  void testScalarProduct() {
     a(1.0, 2.0, 1.0);
     b(1.0, -2.0, -1.0);
     double sp = a.scalar_prod(b);
     TS_ASSERT_EQUALS(sp, -4.0);
   }
-  void testCrossProduct()
-  {
+  void testCrossProduct() {
     a(1.0, 0.0, 0.0);
     b(0.0, 1.0, 0.0);
     c = a.cross_prod(b);
@@ -265,50 +232,46 @@ public:
     TS_ASSERT_EQUALS(c[1], 0.0);
     TS_ASSERT_EQUALS(c[2], 1.0);
   }
-  void testDistance()
-  {
+  void testDistance() {
     a(0.0, 0.0, 0.0);
     b(2.0, 2.0, 2.0);
     double d = a.distance(b);
-    TS_ASSERT_EQUALS(d, 2.0*sqrt(3.0));
+    TS_ASSERT_EQUALS(d, 2.0 * sqrt(3.0));
   }
 
-  void testZenith()
-  {
+  void testZenith() {
     b(0.0, 0.0, 0.0);
     a(9.9, 7.6, 0.0);
-    TS_ASSERT_EQUALS( a.zenith(a), 0.0);
-    TS_ASSERT_DELTA( a.zenith(b), M_PI/2.0, 0.0001);
+    TS_ASSERT_EQUALS(a.zenith(a), 0.0);
+    TS_ASSERT_DELTA(a.zenith(b), M_PI / 2.0, 0.0001);
     a(-1.1, 0.0, 0.0);
-    TS_ASSERT_DELTA( a.zenith(b), M_PI/2.0, 0.0001);
+    TS_ASSERT_DELTA(a.zenith(b), M_PI / 2.0, 0.0001);
     a(0.0, 0.0, 1.0);
-    TS_ASSERT_EQUALS( a.zenith(b), 0.0);
+    TS_ASSERT_EQUALS(a.zenith(b), 0.0);
     a(1.0, 0.0, 1.0);
-    TS_ASSERT_DELTA( a.zenith(b), M_PI/4.0, 0.0001);
+    TS_ASSERT_DELTA(a.zenith(b), M_PI / 4.0, 0.0001);
     a(1.0, 0.0, -1.0);
-    TS_ASSERT_DELTA( a.zenith(b), 3.0*M_PI/4.0, 0.0001);
+    TS_ASSERT_DELTA(a.zenith(b), 3.0 * M_PI / 4.0, 0.0001);
   }
 
-  void testAngle()
-  {
+  void testAngle() {
     a(2.0, 0.0, 0.0);
     b(0.0, 1.0, 0.0);
     c(1.0, 1.0, 0.0);
     d(-1.0, 0.0, 0.0);
-    TS_ASSERT_DELTA( a.angle(a), 0.0, 0.0001);
-    TS_ASSERT_DELTA( a.angle(b), M_PI/2.0, 0.0001);
-    TS_ASSERT_DELTA( a.angle(c), M_PI/4.0, 0.0001);
-    TS_ASSERT_DELTA( a.angle(d), M_PI, 0.0001);
+    TS_ASSERT_DELTA(a.angle(a), 0.0, 0.0001);
+    TS_ASSERT_DELTA(a.angle(b), M_PI / 2.0, 0.0001);
+    TS_ASSERT_DELTA(a.angle(c), M_PI / 4.0, 0.0001);
+    TS_ASSERT_DELTA(a.angle(d), M_PI, 0.0001);
   }
 
-  void testRotate()
-  {
-    V3D direc(1,1,1);
-    const double theta = 45.0*M_PI/180.0;
-    const double invRt2(1.0/sqrt(2.0));
+  void testRotate() {
+    V3D direc(1, 1, 1);
+    const double theta = 45.0 * M_PI / 180.0;
+    const double invRt2(1.0 / sqrt(2.0));
 
     // rotate around X
-    Mantid::Kernel::Matrix<double> rx(3,3);
+    Mantid::Kernel::Matrix<double> rx(3, 3);
     rx[0][0] = 1.0;
     rx[1][1] = cos(theta);
     rx[1][2] = -sin(theta);
@@ -318,11 +281,11 @@ public:
 
     TS_ASSERT_DELTA(direc.X(), 1.0, 1e-08);
     TS_ASSERT_DELTA(direc.Y(), 0.0, 1e-08);
-    TS_ASSERT_DELTA(direc.Z(), 2.0*invRt2, 1e-08);
+    TS_ASSERT_DELTA(direc.Z(), 2.0 * invRt2, 1e-08);
 
     // rotate around Y
-    direc = V3D(1,1,1);
-    Mantid::Kernel::Matrix<double> ry(3,3);
+    direc = V3D(1, 1, 1);
+    Mantid::Kernel::Matrix<double> ry(3, 3);
     ry[0][0] = cos(theta);
     ry[0][2] = sin(theta);
     ry[1][1] = 1.0;
@@ -330,13 +293,13 @@ public:
     ry[2][2] = cos(theta);
     direc.rotate(ry);
 
-    TS_ASSERT_DELTA(direc.X(), 2.0*invRt2, 1e-08);
+    TS_ASSERT_DELTA(direc.X(), 2.0 * invRt2, 1e-08);
     TS_ASSERT_DELTA(direc.Y(), 1.0, 1e-08);
     TS_ASSERT_DELTA(direc.Z(), 0.0, 1e-08);
 
     // rotate around Z
-    direc = V3D(1,1,1);
-    Mantid::Kernel::Matrix<double> rz(3,3);
+    direc = V3D(1, 1, 1);
+    Mantid::Kernel::Matrix<double> rz(3, 3);
     rz[0][0] = cos(theta);
     rz[0][1] = -sin(theta);
     rz[1][0] = sin(theta);
@@ -345,21 +308,20 @@ public:
     direc.rotate(rz);
 
     TS_ASSERT_DELTA(direc.X(), 0.0, 1e-08);
-    TS_ASSERT_DELTA(direc.Y(), 2.0*invRt2, 1e-08);
+    TS_ASSERT_DELTA(direc.Y(), 2.0 * invRt2, 1e-08);
     TS_ASSERT_DELTA(direc.Z(), 1.0, 1e-08);
 
     // General rotation
-    Mantid::Kernel::Matrix<double> Rt = rz*ry*rx;
-    direc = V3D(1,1,1);
+    Mantid::Kernel::Matrix<double> Rt = rz * ry * rx;
+    direc = V3D(1, 1, 1);
     direc.rotate(Rt);
 
-    TS_ASSERT_DELTA(direc.X(), invRt2*(1+invRt2), 1e-08);
-    TS_ASSERT_DELTA(direc.Y(), invRt2*(1+invRt2), 1e-08);
-    TS_ASSERT_DELTA(direc.Z(), 1.0-invRt2, 1e-08);
+    TS_ASSERT_DELTA(direc.X(), invRt2 * (1 + invRt2), 1e-08);
+    TS_ASSERT_DELTA(direc.Y(), invRt2 * (1 + invRt2), 1e-08);
+    TS_ASSERT_DELTA(direc.Z(), 1.0 - invRt2, 1e-08);
   }
 
-  void testSpherical()
-  {
+  void testSpherical() {
     double r = 3, theta = 45.0, phi = 45.0;
     a(0.0, 0.0, 0.0);
     b(0.0, 0.0, 0.0);
@@ -368,16 +330,15 @@ public:
     TS_ASSERT_DELTA(d, r, 0.0001);
     TS_ASSERT_DELTA(b.X(), 1.5, 0.0001);
     TS_ASSERT_DELTA(b.Y(), 1.5, 0.0001);
-    TS_ASSERT_DELTA(b.Z(), 3.0/sqrt(2.0), 0.0001);
+    TS_ASSERT_DELTA(b.Z(), 3.0 / sqrt(2.0), 0.0001);
     // Test getSpherical returns the original values
-    TS_ASSERT_THROWS_NOTHING( b.getSpherical(r,theta,phi));
-    TS_ASSERT_EQUALS( r, 3.0);
-    TS_ASSERT_EQUALS( theta, 45.0);
-    TS_ASSERT_EQUALS( phi, 45.0);
+    TS_ASSERT_THROWS_NOTHING(b.getSpherical(r, theta, phi));
+    TS_ASSERT_EQUALS(r, 3.0);
+    TS_ASSERT_EQUALS(theta, 45.0);
+    TS_ASSERT_EQUALS(phi, 45.0);
   }
 
-  void test_spherical_rad()
-  {
+  void test_spherical_rad() {
     a(0.0, 0.0, 0.0);
     a.spherical_rad(1, 0, 0);
     TS_ASSERT(a == V3D(0, 0, 1));
@@ -391,8 +352,7 @@ public:
     TS_ASSERT(a == V3D(sqrt(2.0), 0, sqrt(2.0)));
   }
 
-  void test_azimuth_polar_SNS()
-  {
+  void test_azimuth_polar_SNS() {
     a(0.0, 0.0, 0.0);
     a.azimuth_polar_SNS(1.0, 0, M_PI / 2);
     TS_ASSERT(a == V3D(1.0, 0, 0));
@@ -407,8 +367,7 @@ public:
   }
 
   /** Round each component to the nearest integer */
-  void test_round()
-  {
+  void test_round() {
     a(1.2, 0.9, 4.34);
     a.round();
     TS_ASSERT(a == V3D(1.0, 1.0, 4.0));
@@ -418,17 +377,15 @@ public:
     TS_ASSERT(a == V3D(-1.0, -2.0, -4.0));
   }
 
-  void test_toString()
-  {
+  void test_toString() {
     V3D a(1, 2, 3);
-    TS_ASSERT_EQUALS( a.toString(), "1 2 3");
+    TS_ASSERT_EQUALS(a.toString(), "1 2 3");
     V3D b;
     b.fromString("4 5 6");
-    TS_ASSERT_EQUALS( b, V3D(4,5,6));
+    TS_ASSERT_EQUALS(b, V3D(4, 5, 6));
   }
 
-  void test_nexus()
-  {
+  void test_nexus() {
     NexusTestHelper th(true);
     th.createFile("V3DTest.nxs");
     V3D a(1, 2, 3);
@@ -436,58 +393,54 @@ public:
     th.reopenFile();
     V3D b;
     b.loadNexus(th.file, "vector");
-    TS_ASSERT_EQUALS( a, b);
+    TS_ASSERT_EQUALS(a, b);
   }
 
-  void test_makeVectorsOrthogonal()
-  {
+  void test_makeVectorsOrthogonal() {
     std::vector<V3D> in, out;
     // Simple case
     in.clear();
     in.push_back(V3D(1, 0, 0));
     in.push_back(V3D(0, 1, 0));
     out = V3D::makeVectorsOrthogonal(in);
-    TS_ASSERT( out[0] == V3D(1,0,0));
-    TS_ASSERT( out[1] == V3D(0,1,0));
-    TS_ASSERT( out[2] == V3D(0,0,1));
+    TS_ASSERT(out[0] == V3D(1, 0, 0));
+    TS_ASSERT(out[1] == V3D(0, 1, 0));
+    TS_ASSERT(out[2] == V3D(0, 0, 1));
 
     // Non-unit vectors
     in.clear();
     in.push_back(V3D(0.5, 0, 0));
     in.push_back(V3D(0.5, 1.23, 0));
     out = V3D::makeVectorsOrthogonal(in);
-    TS_ASSERT( out[0] == V3D(1,0,0));
-    TS_ASSERT( out[1] == V3D(0,1,0));
-    TS_ASSERT( out[2] == V3D(0,0,1));
+    TS_ASSERT(out[0] == V3D(1, 0, 0));
+    TS_ASSERT(out[1] == V3D(0, 1, 0));
+    TS_ASSERT(out[2] == V3D(0, 0, 1));
 
     // Flip it over
     in.clear();
     in.push_back(V3D(0.5, 0, 0));
     in.push_back(V3D(0.5, -1.23, 0));
     out = V3D::makeVectorsOrthogonal(in);
-    TS_ASSERT( out[0] == V3D(1,0,0));
-    TS_ASSERT( out[1] == V3D(0,-1,0));
-    TS_ASSERT( out[2] == V3D(0,0,-1));
+    TS_ASSERT(out[0] == V3D(1, 0, 0));
+    TS_ASSERT(out[1] == V3D(0, -1, 0));
+    TS_ASSERT(out[2] == V3D(0, 0, -1));
   }
 
-  void test_to_ostream()
-  {
+  void test_to_ostream() {
     V3D a(1, 2, 3);
     std::ostringstream ostr;
     ostr << a;
-    TS_ASSERT_EQUALS( ostr.str(), "[1,2,3]");
+    TS_ASSERT_EQUALS(ostr.str(), "[1,2,3]");
   }
 
-  void test_from_istream()
-  {
+  void test_from_istream() {
     V3D a;
     std::istringstream istr("[4,5,6]");
     istr >> a;
-    TS_ASSERT_EQUALS( a, V3D(4,5,6));
+    TS_ASSERT_EQUALS(a, V3D(4, 5, 6));
   }
 
-  void test_toCrystllographic()
-  {
+  void test_toCrystllographic() {
     V3D a0;
     TS_ASSERT_THROWS(a0.toMillerIndexes(), std::invalid_argument);
 
@@ -530,21 +483,21 @@ public:
     TS_ASSERT_THROWS_NOTHING(a6.toMillerIndexes(0.001));
 
     TS_ASSERT_DELTA(-3, a6[0], 1.e-3);
-    TS_ASSERT_DELTA( 5, a6[1], 1.e-3);
+    TS_ASSERT_DELTA(5, a6[1], 1.e-3);
     TS_ASSERT_DELTA(-6, a6[2], 1.e-3);
 
     V3D a7(-3, 0.5, -6);
     TS_ASSERT_THROWS_NOTHING(a7.toMillerIndexes(0.001));
 
     TS_ASSERT_DELTA(-6, a7[0], 1.e-3);
-    TS_ASSERT_DELTA( 1, a7[1], 1.e-3);
+    TS_ASSERT_DELTA(1, a7[1], 1.e-3);
     TS_ASSERT_DELTA(-12, a7[2], 1.e-3);
 
     V3D a8(-3, 0.3333, -6);
     TS_ASSERT_THROWS_NOTHING(a8.toMillerIndexes(0.1));
 
     TS_ASSERT_DELTA(-9, a8[0], 1.e-2);
-    TS_ASSERT_DELTA( 1, a8[1], 1.e-2);
+    TS_ASSERT_DELTA(1, a8[1], 1.e-2);
     TS_ASSERT_DELTA(-18, a8[2], 1.e-2);
 
     /*    V3D a9(-3,5,-6);
@@ -554,11 +507,9 @@ public:
      TS_ASSERT_DELTA(-3,a9[0],1.e-3);
      TS_ASSERT_DELTA( 5,a9[1],1.e-3);
      TS_ASSERT_DELTA(-6,a9[2],1.e-3);*/
-
   }
 
-  void test_directionAngles_cubic_default()
-  {
+  void test_directionAngles_cubic_default() {
     const V3D orthoNormal(1.0, 1.0, 1.0);
     const V3D angles = orthoNormal.directionAngles();
     const double expectedAngle = acos(1.0 / sqrt(3.0)) * 180 / M_PI;
@@ -567,8 +518,7 @@ public:
     TS_ASSERT_DELTA(expectedAngle, angles[2], 1e-6);
   }
 
-  void test_directionAngles_cubic_radians()
-  {
+  void test_directionAngles_cubic_radians() {
     const V3D orthoNormal(1.0, 1.0, 1.0);
     const bool inDegrees = false;
     const V3D angles = orthoNormal.directionAngles(inDegrees);
@@ -578,8 +528,7 @@ public:
     TS_ASSERT_DELTA(expectedAngle, angles[2], 1e-6);
   }
 
-  void test_directionAngles_orthorombic()
-  {
+  void test_directionAngles_orthorombic() {
     const V3D v1(1.0, 1.0, 2.0);
     V3D angles = v1.directionAngles();
     const double modv1 = v1.norm();
@@ -594,27 +543,24 @@ public:
     TS_ASSERT_DELTA(acos(3.0 / modv2) * 180 / M_PI, angles[1], 1e-6);
     TS_ASSERT_DELTA(acos(4.0 / modv2) * 180 / M_PI, angles[2], 1e-6);
   }
-
 };
 
 //---------------------------------------------------------------------------
 // Performance tests
 //---------------------------------------------------------------------------
 
-class V3DTestPerformance : public CxxTest::TestSuite
-{
+class V3DTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static V3DTestPerformance *createSuite() { return new V3DTestPerformance(); }
-  static void destroySuite( V3DTestPerformance *suite ) { delete suite; }
+  static void destroySuite(V3DTestPerformance *suite) { delete suite; }
 
-  V3DTestPerformance()
-  {
-    const double theta = 45.0*M_PI/180.0;
+  V3DTestPerformance() {
+    const double theta = 45.0 * M_PI / 180.0;
 
     // rotate around X
-    m_rotx = Mantid::Kernel::Matrix<double>(3,3);
+    m_rotx = Mantid::Kernel::Matrix<double>(3, 3);
     m_rotx[0][0] = 1.0;
     m_rotx[1][1] = cos(theta);
     m_rotx[1][2] = -sin(theta);
@@ -622,12 +568,10 @@ public:
     m_rotx[2][1] = sin(theta);
   }
 
-  void testRotate()
-  {
-    V3D direction(1.0,1.0,1.0);
-    for(size_t i = 0; i < 100000; ++i)
-    {
-      direction = V3D(1.0,1.0,1.0);
+  void testRotate() {
+    V3D direction(1.0, 1.0, 1.0);
+    for (size_t i = 0; i < 100000; ++i) {
+      direction = V3D(1.0, 1.0, 1.0);
       direction.rotate(m_rotx);
     }
     // Do something so the compiler doesn't optimise the loop away

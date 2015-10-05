@@ -229,7 +229,7 @@ bool FileProperty::extsMatchRunFiles() {
     }
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
   } // facility could not be found, do nothing this will return the default
-    // match of false
+  // match of false
 
   return match;
 }

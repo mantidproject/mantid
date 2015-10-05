@@ -77,7 +77,7 @@ void subscribe(AlgorithmFactoryImpl &self, const boost::python::object &obj) {
 
   static PyObject *const pyAlgClass =
       (PyObject *)
-      converter::registered<Algorithm>::converters.to_python_target_type();
+          converter::registered<Algorithm>::converters.to_python_target_type();
   // obj could be or instance/class, check instance first
   PyObject *classObject(NULL);
   if (PyObject_IsInstance(obj.ptr(), pyAlgClass)) {

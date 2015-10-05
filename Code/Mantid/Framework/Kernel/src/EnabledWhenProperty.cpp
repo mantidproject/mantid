@@ -12,8 +12,8 @@ EnabledWhenProperty::EnabledWhenProperty(std::string otherPropName,
 
 EnabledWhenProperty::~EnabledWhenProperty() {}
 
-bool
-EnabledWhenProperty::fulfillsCriterion(const IPropertyManager *algo) const {
+bool EnabledWhenProperty::fulfillsCriterion(
+    const IPropertyManager *algo) const {
   // Find the property
   if (algo == NULL)
     return true;

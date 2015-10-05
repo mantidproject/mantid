@@ -13,7 +13,6 @@
 
 #include "MantidKernel/ListValidator.h"
 
-
 namespace Mantid {
 namespace CurveFitting {
 
@@ -25,23 +24,22 @@ namespace {
 /// Create a domain creator for a particular function and workspace pair.
 IDomainCreator *createDomainCreator(const IFunction *fun, const Workspace *ws,
                                     const std::string &workspacePropertyName,
-                                    IPropertyManager* manager,
-                                    IDomainCreator::DomainType domainType
-                                    ) {
+                                    IPropertyManager *manager,
+                                    IDomainCreator::DomainType domainType) {
 
   IDomainCreator *creator = NULL;
 
   // ILatticeFunction requires API::LatticeDomain.
-  if (dynamic_cast<const ILatticeFunction*>(fun)) {
+  if (dynamic_cast<const ILatticeFunction *>(fun)) {
     creator = new LatticeDomainCreator(manager, workspacePropertyName);
   } else {
-    if (dynamic_cast<const API::MatrixWorkspace*>(ws) &&
-        !dynamic_cast<const IFunctionMD*>(fun)) {
+    if (dynamic_cast<const API::MatrixWorkspace *>(ws) &&
+        !dynamic_cast<const IFunctionMD *>(fun)) {
       /* IFunction1DSpectrum needs a different domain creator. If a function
        * implements that type, we need to react appropriately at this point.
        * Otherwise, the default creator FitMW is used.
        */
-      if (dynamic_cast<const IFunction1DSpectrum*>(fun)) {
+      if (dynamic_cast<const IFunction1DSpectrum *>(fun)) {
         creator = new SeqDomainSpectrumCreator(manager, workspacePropertyName);
       } else {
         creator = new FitMW(manager, workspacePropertyName, domainType);
@@ -50,8 +48,7 @@ IDomainCreator *createDomainCreator(const IFunction *fun, const Workspace *ws,
       try {
         creator = API::DomainCreatorFactory::Instance().createDomainCreator(
             "FitMD", manager, workspacePropertyName, domainType);
-      }
-      catch (Kernel::Exception::NotFoundError &) {
+      } catch (Kernel::Exception::NotFoundError &) {
         throw std::invalid_argument("Unsupported workspace type" + ws->id());
       }
     }
@@ -135,17 +132,17 @@ void IFittingAlgorithm::setDomainType() {
   } else {
     m_domainType = IDomainCreator::Simple;
   }
-  //Kernel::Property *prop = getPointerToProperty("Minimizer");
-  //auto minimizerProperty =
+  // Kernel::Property *prop = getPointerToProperty("Minimizer");
+  // auto minimizerProperty =
   //    dynamic_cast<Kernel::PropertyWithValue<std::string> *>(prop);
-  //std::vector<std::string> minimizerOptions =
+  // std::vector<std::string> minimizerOptions =
   //    API::FuncMinimizerFactory::Instance().getKeys();
-  //if (m_domainType != IDomainCreator::Simple) {
+  // if (m_domainType != IDomainCreator::Simple) {
   //  auto it = std::find(minimizerOptions.begin(), minimizerOptions.end(),
   //                      "Levenberg-Marquardt");
   //  minimizerOptions.erase(it);
   //}
-  //minimizerProperty->replaceValidator(Kernel::IValidator_sptr(
+  // minimizerProperty->replaceValidator(Kernel::IValidator_sptr(
   //    new Kernel::StartsWithValidator(minimizerOptions)));
 }
 
@@ -182,7 +179,7 @@ void IFittingAlgorithm::setFunction() {
  *   dataset within the workspace to fit to.
  */
 void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName,
-                       bool addProperties) {
+                                     bool addProperties) {
   // get the workspace
   API::Workspace_const_sptr ws = getProperty(workspacePropertyName);
   // m_function->setWorkspace(ws);

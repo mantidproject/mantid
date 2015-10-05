@@ -49,20 +49,20 @@ Mantid::API::CoordTransform *CoordTransformAffineParser::createTransform(
   InDimParameterParser inDimParser;
   Poco::XML::Element *parameter =
       dynamic_cast<Poco::XML::Element *>(parameters->item(0));
-  boost::shared_ptr<Mantid::API::InDimParameter>
-    inDim(inDimParser.createWithoutDelegation(parameter));
+  boost::shared_ptr<Mantid::API::InDimParameter> inDim(
+      inDimParser.createWithoutDelegation(parameter));
 
   // Add output dimension parameter.
   OutDimParameterParser outDimParser;
   parameter = dynamic_cast<Poco::XML::Element *>(parameters->item(1));
-  boost::shared_ptr<Mantid::API::OutDimParameter>
-    outDim(outDimParser.createWithoutDelegation(parameter));
+  boost::shared_ptr<Mantid::API::OutDimParameter> outDim(
+      outDimParser.createWithoutDelegation(parameter));
 
   // Add affine matrix parameter.
   AffineMatrixParameterParser affineMatrixDimParser;
   parameter = dynamic_cast<Poco::XML::Element *>(parameters->item(2));
-  boost::shared_ptr<AffineMatrixParameter>
-    affineMatrix(affineMatrixDimParser.createParameter(parameter));
+  boost::shared_ptr<AffineMatrixParameter> affineMatrix(
+      affineMatrixDimParser.createParameter(parameter));
 
   // Generate the coordinate transform with the matrix and return.
   CoordTransformAffine *transform =
@@ -76,8 +76,8 @@ Mantid::API::CoordTransform *CoordTransformAffineParser::createTransform(
 Set the successor parser.
 @param other : another parser to use if this one fails.
 */
-void
-CoordTransformAffineParser::setSuccessor(CoordTransformAffineParser *other) {
+void CoordTransformAffineParser::setSuccessor(
+    CoordTransformAffineParser *other) {
   m_successor = SuccessorType_sptr(other);
 }
 

@@ -32,9 +32,7 @@ const Kernel::V2D &ConvexPolygon::Iterator::operator*() const {
   * Advance the iterator to the next point. When the iterator points to the
   * last point the next increment will take it back to the "first" point.
   */
-void ConvexPolygon::Iterator::operator++() {
-  m_index = nextIndex();
-}
+void ConvexPolygon::Iterator::operator++() { m_index = nextIndex(); }
 
 /**
  * @return A PolygonEdge defining the edge with the current point and the next

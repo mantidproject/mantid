@@ -14,11 +14,9 @@ using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
 
-class CompAssemblyTest : public CxxTest::TestSuite
-{
+class CompAssemblyTest : public CxxTest::TestSuite {
 public:
-  void testEmptyConstructor()
-  {
+  void testEmptyConstructor() {
     CompAssembly q;
     TS_ASSERT_EQUALS(q.nelements(), 0);
     TS_ASSERT_THROWS(q[0], std::runtime_error);
@@ -27,12 +25,11 @@ public:
     TS_ASSERT(!q.getParent());
     TS_ASSERT_EQUALS(q.getRelativePos(), V3D(0, 0, 0));
     TS_ASSERT_EQUALS(q.getRelativeRot(), Quat(1, 0, 0, 0));
-    //as there is no parent GetPos should equal getRelativePos
+    // as there is no parent GetPos should equal getRelativePos
     TS_ASSERT_EQUALS(q.getRelativePos(), q.getPos());
   }
 
-  void testNameValueConstructor()
-  {
+  void testNameValueConstructor() {
     CompAssembly q("Name");
     TS_ASSERT_EQUALS(q.nelements(), 0);
     TS_ASSERT_THROWS(q[0], std::runtime_error);
@@ -41,35 +38,33 @@ public:
     TS_ASSERT(!q.getParent());
     TS_ASSERT_EQUALS(q.getRelativePos(), V3D(0, 0, 0));
     TS_ASSERT_EQUALS(q.getRelativeRot(), Quat(1, 0, 0, 0));
-    //as there is no parent GetPos should equal getRelativePos
+    // as there is no parent GetPos should equal getRelativePos
     TS_ASSERT_EQUALS(q.getRelativePos(), q.getPos());
   }
 
-  void testNameParentValueConstructor()
-  {
+  void testNameParentValueConstructor() {
     CompAssembly *parent = new CompAssembly("Parent");
-    //name and parent
+    // name and parent
     CompAssembly *q = new CompAssembly("Child", parent);
     TS_ASSERT_EQUALS(q->getName(), "Child");
     TS_ASSERT_EQUALS(q->nelements(), 0);
     TS_ASSERT_THROWS((*q)[0], std::runtime_error);
-    //check the parent
+    // check the parent
     TS_ASSERT(q->getParent());
     TS_ASSERT_EQUALS(q->getParent()->getName(), parent->getName());
 
     TS_ASSERT_EQUALS(q->getPos(), V3D(0, 0, 0));
     TS_ASSERT_EQUALS(q->getRelativeRot(), Quat(1, 0, 0, 0));
-    //as the parent is at 0,0,0 GetPos should equal getRelativePos
+    // as the parent is at 0,0,0 GetPos should equal getRelativePos
     TS_ASSERT_EQUALS(q->getRelativePos(), q->getPos());
     delete parent;
   }
 
-  void testAdd()
-  {
+  void testAdd() {
     CompAssembly bank("BankName");
-    Component* det1 = new Component("Det1Name");
-    Component* det2 = new Component("Det2Name");
-    Component* det3 = new Component("Det3Name");
+    Component *det1 = new Component("Det1Name");
+    Component *det2 = new Component("Det2Name");
+    Component *det3 = new Component("Det3Name");
     TS_ASSERT_EQUALS(bank.nelements(), 0);
     TS_ASSERT_THROWS(bank[0], std::runtime_error);
     bank.add(det1);
@@ -79,47 +74,42 @@ public:
     boost::shared_ptr<IComponent> det1copy;
     TS_ASSERT_THROWS_NOTHING(det1copy = bank[0]);
     TS_ASSERT_EQUALS(det1->getName(), det1copy->getName());
-    //show that they are the same object
+    // show that they are the same object
     det1->setName("ChangedName");
     TS_ASSERT_EQUALS(det1->getName(), det1copy->getName());
   }
 
-  void testRemove()
-  {
+  void testRemove() {
     CompAssembly bank("BankName");
-    Component* det1 = new Component("Det1Name");
+    Component *det1 = new Component("Det1Name");
     bank.add(det1);
-    TS_ASSERT_EQUALS( bank.nelements(), 1 );
+    TS_ASSERT_EQUALS(bank.nelements(), 1);
     // Throws if you try to remove a component that's not in there
-    Component* det2 = new Component("Det2Name");
-    TS_ASSERT_THROWS( bank.remove(det2), std::runtime_error );
+    Component *det2 = new Component("Det2Name");
+    TS_ASSERT_THROWS(bank.remove(det2), std::runtime_error);
     delete det2;
     // Works on components that are in the assembly
-    TS_ASSERT_EQUALS( bank.remove(det1), 0 );
-    TS_ASSERT_THROWS( bank[0], std::runtime_error );
+    TS_ASSERT_EQUALS(bank.remove(det1), 0);
+    TS_ASSERT_THROWS(bank[0], std::runtime_error);
   }
 
   //-----------------------------------------------------------------------------
-  ICompAssembly_sptr setUpGetChildren()
-  {
-    ICompAssembly_sptr bank( new CompAssembly("BankName") );
-    for (int i=0; i<3; i++)
-    {
-      Component* det1 = new Component("Det1Name");
+  ICompAssembly_sptr setUpGetChildren() {
+    ICompAssembly_sptr bank(new CompAssembly("BankName"));
+    for (int i = 0; i < 3; i++) {
+      Component *det1 = new Component("Det1Name");
       bank->add(det1);
     }
-    CompAssembly * childbank =  new CompAssembly("ChildBank");
-    for (int i=0; i<5; i++)
-    {
-      Component* det1 = new Component("ChildDet1Name");
+    CompAssembly *childbank = new CompAssembly("ChildBank");
+    for (int i = 0; i < 5; i++) {
+      Component *det1 = new Component("ChildDet1Name");
       childbank->add(det1);
     }
     bank->add(childbank);
     return bank;
   }
 
-  void test_GetChildren_NonRecursive()
-  {
+  void test_GetChildren_NonRecursive() {
     ICompAssembly_const_sptr bank = setUpGetChildren();
     TS_ASSERT_EQUALS(bank->nelements(), 4);
     std::vector<IComponent_const_sptr> kids;
@@ -128,8 +118,7 @@ public:
     TS_ASSERT_EQUALS(kids[0]->getName(), "Det1Name");
   }
 
-  void test_GetChildren_Recursive()
-  {
+  void test_GetChildren_Recursive() {
     ICompAssembly_const_sptr bank = setUpGetChildren();
     TS_ASSERT_EQUALS(bank->nelements(), 4);
     std::vector<IComponent_const_sptr> kids;
@@ -139,21 +128,19 @@ public:
     TS_ASSERT_EQUALS(kids[8]->getName(), "ChildDet1Name");
   }
 
-  void testGetComponentByName()
-  {
+  void testGetComponentByName() {
     // put together a bare "deep" instrument
     Instrument_sptr instr(new Instrument("deep_instrument"));
-    CompAssembly * group1 = new CompAssembly("group1");
-    for (int colnum = 1; colnum <= 5; ++colnum)
-    {
+    CompAssembly *group1 = new CompAssembly("group1");
+    for (int colnum = 1; colnum <= 5; ++colnum) {
       std::ostringstream colname;
       colname << "column" << colnum;
-      CompAssembly * column = new CompAssembly(colname.str());
-      for ( int banknum = 5*(colnum-1)+1; banknum <= 5*(colnum); ++banknum)
-      {
+      CompAssembly *column = new CompAssembly(colname.str());
+      for (int banknum = 5 * (colnum - 1) + 1; banknum <= 5 * (colnum);
+           ++banknum) {
         std::ostringstream bankname;
         bankname << "bank" << banknum;
-        CompAssembly * bank = new CompAssembly(bankname.str());
+        CompAssembly *bank = new CompAssembly(bankname.str());
         column->add(bank);
       }
       group1->add(column);
@@ -164,12 +151,11 @@ public:
     std::string bankname;
 
     // look for each bank - recursing down three levels
-    for (int i = 1; i < 26; ++i)
-    {
+    for (int i = 1; i < 26; ++i) {
       std::ostringstream temp_oss;
       temp_oss << "bank" << i;
       bankname = temp_oss.str();
-      auto temp = instr->getComponentByName(bankname,3);
+      auto temp = instr->getComponentByName(bankname, 3);
       TS_ASSERT(bool(temp));
       TS_ASSERT_EQUALS(temp->getName(), bankname);
     }
@@ -181,13 +167,12 @@ public:
     TS_ASSERT_EQUALS(temp->getName(), bankname);
 
     // look for bank13 again - recursing just one level (should fail)
-    temp = instr->getComponentByName(bankname,1);
+    temp = instr->getComponentByName(bankname, 1);
     TS_ASSERT(!bool(temp));
   }
 
   //-----------------------------------------------------------------------------
-  void testAddCopy()
-  {
+  void testAddCopy() {
     CompAssembly bank("BankName");
     Component det1("Det1Name");
     Component det2("Det2Name");
@@ -201,25 +186,24 @@ public:
     boost::shared_ptr<IComponent> detcopy;
     TS_ASSERT_THROWS_NOTHING(detcopy = bank[0]);
     TS_ASSERT_EQUALS(det1.getName(), detcopy->getName());
-    //show that they are NOT the same object
+    // show that they are NOT the same object
     det1.setName("ChangedName");
     TS_ASSERT_DIFFERS(det1.getName(), detcopy->getName());
 
-    //check out the in process rename made to det3 on input
+    // check out the in process rename made to det3 on input
     TS_ASSERT_THROWS_NOTHING(detcopy = bank[0]);
     TS_ASSERT_DIFFERS(det1.getName(), detcopy->getName());
   }
 
-  void testCopyConstructor()
-  {
-    Component* parent = new Component("Parent", V3D(1, 1, 1));
-    //name and parent
+  void testCopyConstructor() {
+    Component *parent = new Component("Parent", V3D(1, 1, 1));
+    // name and parent
     CompAssembly q("Child", parent);
     q.setPos(V3D(5, 6, 7));
     q.setRot(Quat(1, 1, 1, 1));
     Component gc1("Grandchild1");
     q.addCopy(&gc1);
-    Component* gc2 = new Component("Grandchild2");
+    Component *gc2 = new Component("Grandchild2");
     q.add(gc2);
     Component gc3("Grandchild3");
     q.addCopy(&gc3);
@@ -236,22 +220,21 @@ public:
     delete parent;
   }
 
-  void testClone()
-  {
-    Component* parent = new Component("Parent", V3D(1, 1, 1));
-    //name and parent
+  void testClone() {
+    Component *parent = new Component("Parent", V3D(1, 1, 1));
+    // name and parent
     CompAssembly q("Child", parent);
     q.setPos(V3D(5, 6, 7));
     q.setRot(Quat(1, 1, 1, 1));
     Component gc1("Grandchild1");
     q.addCopy(&gc1);
-    Component* gc2 = new Component("Grandchild2");
+    Component *gc2 = new Component("Grandchild2");
     q.add(gc2);
     Component gc3("Grandchild3");
     q.addCopy(&gc3);
     TS_ASSERT_EQUALS(q.nelements(), 3);
-    IComponent* copyAsComponent = q.clone();
-    CompAssembly* copy = dynamic_cast<CompAssembly*>(copyAsComponent);
+    IComponent *copyAsComponent = q.clone();
+    CompAssembly *copy = dynamic_cast<CompAssembly *>(copyAsComponent);
     TS_ASSERT_EQUALS(q.getName(), copy->getName());
     TS_ASSERT_EQUALS(q.getParent()->getName(), copy->getParent()->getName());
     TS_ASSERT_EQUALS(q.nelements(), copy->nelements());
@@ -264,8 +247,7 @@ public:
     delete parent;
   }
 
-  void testGetParent()
-  {
+  void testGetParent() {
     Component parent("Parent", V3D(1, 1, 1), Quat(1, 1, 1, 1));
 
     CompAssembly q("Child", &parent);
@@ -276,8 +258,7 @@ public:
     TS_ASSERT_EQUALS(q.getParent()->getRelativeRot(), Quat(1, 1, 1, 1));
   }
 
-  void testSetParent()
-  {
+  void testSetParent() {
     Component parent("Parent", V3D(1, 1, 1));
     Component parent2("Parent2", V3D(10, 10, 10));
 
@@ -289,20 +270,18 @@ public:
     q.setParent(&parent2);
     TS_ASSERT_DIFFERS(q.getParent()->getName(), parent.getName());
     TS_ASSERT_EQUALS(q.getParent()->getName(), parent2.getName());
-    //check that the absolute pos has moved
+    // check that the absolute pos has moved
     TS_ASSERT_EQUALS(q.getPos(), V3D(15, 16, 17));
   }
 
-  void testSetName()
-  {
+  void testSetName() {
     CompAssembly q("fred");
     TS_ASSERT_EQUALS(q.getName(), "fred");
     q.setName("bertie");
     TS_ASSERT_EQUALS(q.getName(), "bertie");
   }
 
-  void testSetPos()
-  {
+  void testSetPos() {
     V3D pos1(0, 0, 0);
     V3D pos2(5, 6, 7);
     V3D pos3(-999999, 999999, 999999);
@@ -318,8 +297,7 @@ public:
     TS_ASSERT_EQUALS(q.getPos(), pos4);
   }
 
-  void testSetRot()
-  {
+  void testSetRot() {
     Quat rot1(1, 0, 0, 0);
     Quat rot2(-1, 0.01, -0.01, 9999);
     Quat rot3(-999999, 999999, 999999, -9999999);
@@ -333,28 +311,27 @@ public:
     TS_ASSERT_EQUALS(q.getRelativeRot(), rot3);
   }
 
-//  void testCopyRot() //copyRot unused anywhere in code
-//  {
-//    Quat rot1(1, 0, 0, 0);
-//    Quat rot2(-1, 0.01, -0.01, 9999);
-//    CompAssembly p("testSetRot");
-//    p.setPos(V3D(1, 1, 1));
-//    p.setRot(rot1);
-//    CompAssembly q("testCopyRot2");
-//    q.setPos(V3D(2, 2, 2));
-//    q.setRot(rot2);
-//    TS_ASSERT_EQUALS(p.getRelativeRot(), rot1);
-//    TS_ASSERT_EQUALS(q.getRelativeRot(), rot2);
-//    q.copyRot(p);
-//    TS_ASSERT_EQUALS(p.getRelativeRot(), rot1);
-//    TS_ASSERT_EQUALS(q.getRelativeRot(), rot1);
-//    //check it just copied the rotation and not everything else
-//    TS_ASSERT_EQUALS(q.getPos(), V3D(2, 2, 2));
-//    TS_ASSERT_EQUALS(q.getName(), "testCopyRot2");
-//  }
+  //  void testCopyRot() //copyRot unused anywhere in code
+  //  {
+  //    Quat rot1(1, 0, 0, 0);
+  //    Quat rot2(-1, 0.01, -0.01, 9999);
+  //    CompAssembly p("testSetRot");
+  //    p.setPos(V3D(1, 1, 1));
+  //    p.setRot(rot1);
+  //    CompAssembly q("testCopyRot2");
+  //    q.setPos(V3D(2, 2, 2));
+  //    q.setRot(rot2);
+  //    TS_ASSERT_EQUALS(p.getRelativeRot(), rot1);
+  //    TS_ASSERT_EQUALS(q.getRelativeRot(), rot2);
+  //    q.copyRot(p);
+  //    TS_ASSERT_EQUALS(p.getRelativeRot(), rot1);
+  //    TS_ASSERT_EQUALS(q.getRelativeRot(), rot1);
+  //    //check it just copied the rotation and not everything else
+  //    TS_ASSERT_EQUALS(q.getPos(), V3D(2, 2, 2));
+  //    TS_ASSERT_EQUALS(q.getName(), "testCopyRot2");
+  //  }
 
-  void testTranslate()
-  {
+  void testTranslate() {
     V3D pos1(1, 1, 1);
     V3D translate1(5, 6, 7);
     V3D pos2(6, 7, 8);
@@ -370,8 +347,7 @@ public:
     TS_ASSERT_EQUALS(q.getPos(), pos3);
   }
 
-  void testRelativeTranslate()
-  {
+  void testRelativeTranslate() {
     V3D parentPos(100, 100, 100);
     V3D pos1(1, 1, 1);
     V3D translate1(5, 6, 7);
@@ -379,23 +355,22 @@ public:
     V3D translate2(-16, -17, -18);
     V3D pos3(-10, -10, -10);
 
-    CompAssembly* parent = new CompAssembly("testTranslate");
+    CompAssembly *parent = new CompAssembly("testTranslate");
     parent->setPos(parentPos);
-    CompAssembly* child = new CompAssembly("testTranslate", parent);
+    CompAssembly *child = new CompAssembly("testTranslate", parent);
     child->setPos(pos1);
-    TS_ASSERT_EQUALS(child->getPos(), pos1+parentPos);
+    TS_ASSERT_EQUALS(child->getPos(), pos1 + parentPos);
     TS_ASSERT_EQUALS(child->getRelativePos(), pos1);
     child->translate(translate1);
-    TS_ASSERT_EQUALS(child->getPos(), pos2+parentPos);
+    TS_ASSERT_EQUALS(child->getPos(), pos2 + parentPos);
     TS_ASSERT_EQUALS(child->getRelativePos(), pos2);
     child->translate(translate2.X(), translate2.Y(), translate2.Z());
-    TS_ASSERT_EQUALS(child->getPos(), pos3+parentPos);
+    TS_ASSERT_EQUALS(child->getPos(), pos3 + parentPos);
     TS_ASSERT_EQUALS(child->getRelativePos(), pos3);
     delete parent;
   }
 
-  void testRotate()
-  {
+  void testRotate() {
     Quat rot1(1, 1, 1, 1);
     Quat rot2(-1, 2, 1, 3);
     CompAssembly comp("testSetRot");
@@ -403,35 +378,34 @@ public:
     comp.setRot(rot1);
     TS_ASSERT_EQUALS(comp.getRelativeRot(), rot1);
     comp.rotate(rot2);
-    TS_ASSERT_EQUALS(comp.getRelativeRot(), rot1*rot2);
+    TS_ASSERT_EQUALS(comp.getRelativeRot(), rot1 * rot2);
   }
 
-  void testRelativeRotate()
-  {
+  void testRelativeRotate() {
     Quat rot1(1, 1, 1, 1);
     Quat rot2(-1, 2, 1, 3);
-    Quat parentRot(90.0,V3D(0,0,1));
+    Quat parentRot(90.0, V3D(0, 0, 1));
     CompAssembly comp("testSetRot");
     comp.setPos(V3D(1, 1, 1));
     comp.setRot(rot1);
     TS_ASSERT_EQUALS(comp.getRelativeRot(), rot1);
     comp.rotate(rot2);
-    TS_ASSERT_EQUALS(comp.getRelativeRot(), rot1*rot2);
-    //Get the location of the CompAssembly
+    TS_ASSERT_EQUALS(comp.getRelativeRot(), rot1 * rot2);
+    // Get the location of the CompAssembly
     V3D beforeParentPos = comp.getPos();
-    //assign a parent
+    // assign a parent
     Component parent("parent", V3D(0, 0, 0), parentRot);
     comp.setParent(&parent);
-    //check relative values have not moved
-    TS_ASSERT_EQUALS(comp.getRelativeRot(), rot1*rot2);
+    // check relative values have not moved
+    TS_ASSERT_EQUALS(comp.getRelativeRot(), rot1 * rot2);
     TS_ASSERT_EQUALS(comp.getRelativePos(), beforeParentPos);
-    //but the absolute pos should have changed due to the parents roatation (the parent is centered on the origin)
+    // but the absolute pos should have changed due to the parents roatation
+    // (the parent is centered on the origin)
     TS_ASSERT_DIFFERS(comp.getPos(), beforeParentPos);
-    TS_ASSERT_EQUALS(comp.getPos(),V3D(-1,1,1));
+    TS_ASSERT_EQUALS(comp.getPos(), V3D(-1, 1, 1));
   }
 
-  void testGetDistance()
-  {
+  void testGetDistance() {
     V3D origin(0, 0, 0);
     V3D pos1(10, 0, 0);
     V3D pos2(0, -10, 0);
@@ -452,15 +426,15 @@ public:
     TS_ASSERT_DELTA(comp1.getDistance(comp2), 14.1421, 0.001);
   }
 
-  void testType()
-  {
+  void testType() {
     CompAssembly comp;
     TS_ASSERT_EQUALS(comp.type(), "CompAssembly");
   }
 
-  void test_That_The_Bounding_Box_Is_The_Correct_Size_For_All_Of_The_Constituents()
-  {
-    boost::shared_ptr<CompAssembly> bank = ComponentCreationHelper::createTestAssemblyOfFourCylinders();
+  void
+  test_That_The_Bounding_Box_Is_The_Correct_Size_For_All_Of_The_Constituents() {
+    boost::shared_ptr<CompAssembly> bank =
+        ComponentCreationHelper::createTestAssemblyOfFourCylinders();
     TS_ASSERT(bank);
     TS_ASSERT_EQUALS(bank->nelements(), 4);
 
@@ -472,9 +446,7 @@ public:
     TS_ASSERT_DELTA(bbox.yMax(), 1.5, 1e-08);
     TS_ASSERT_DELTA(bbox.zMin(), -0.5, 1e-08);
     TS_ASSERT_DELTA(bbox.zMax(), 0.5, 1e-08);
-
   }
-
 };
 
 #endif

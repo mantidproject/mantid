@@ -11,17 +11,9 @@
 using namespace Mantid;
 using namespace Mantid::Kernel;
 
-class IPropertySettingsTest : public CxxTest::TestSuite
-{
+class IPropertySettingsTest : public CxxTest::TestSuite {
 public:
-
-  void test_Something()
-  {
-  }
-
-
+  void test_Something() {}
 };
 
-
 #endif /* MANTID_KERNEL_IPROPERTYSETTINGSTEST_H_ */
-

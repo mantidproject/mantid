@@ -71,7 +71,8 @@ private:
       boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ws);
 
   void loadSlab(std::string name, void *data,
-                DataObjects::MDHistoWorkspace_sptr ws, NeXus::NXnumtype dataType);
+                DataObjects::MDHistoWorkspace_sptr ws,
+                NeXus::NXnumtype dataType);
   void loadHisto();
 
   void loadDimensions();
@@ -80,8 +81,9 @@ private:
 
   void loadCoordinateSystem();
 
-  void loadVisualNormalization(const std::string &key,
-                               boost::optional<Mantid::API::MDNormalization> &normalization);
+  void loadVisualNormalization(
+      const std::string &key,
+      boost::optional<Mantid::API::MDNormalization> &normalization);
 
   /// Load all the affine matricies
   void loadAffineMatricies(API::IMDWorkspace_sptr ws);
@@ -107,7 +109,7 @@ private:
   bool m_BoxStructureAndMethadata;
 
   /// Version of SaveMD used to save the file
-  int m_saveMDVersion ;
+  int m_saveMDVersion;
 
   /// Visual normalization
   boost::optional<Mantid::API::MDNormalization> m_visualNormalization;

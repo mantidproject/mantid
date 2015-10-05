@@ -140,7 +140,7 @@ private:
   // Names of log values that we need before we can initialize m_buffer.
   // We get the names by parsing m_instrumentXML;
   std::vector<std::string> m_requiredLogs;
-  
+
   // Names of any monitor logs (these must be manually removed during the call
   // to extractData())
   std::vector<std::string> m_monitorLogs;
@@ -151,7 +151,7 @@ private:
   Poco::Thread m_thread;
   Poco::FastMutex m_mutex; // protects m_buffer & m_status
   bool m_pauseNetRead;
-  bool m_stopThread; // background thread checks this periodically.  
+  bool m_stopThread; // background thread checks this periodically.
                      // If true, the thread exits
 
   Kernel::DateAndTime
@@ -166,9 +166,9 @@ private:
 
   // These 2 determine whether or not we filter out events that arrive when
   // the run is paused.
-  bool m_runPaused; // Set to true or false when we receive a pause/resume
-                    // marker in an annotation packet. (See
-                    // rxPacket( const ADARA::AnnotationPkt &pkt))
+  bool m_runPaused;       // Set to true or false when we receive a pause/resume
+                          // marker in an annotation packet. (See
+                          // rxPacket( const ADARA::AnnotationPkt &pkt))
   int m_keepPausedEvents; // Set from a configuration property. (Should be a
                           // bool, but appearantly, we can't read bools from
                           // the config file?!?)

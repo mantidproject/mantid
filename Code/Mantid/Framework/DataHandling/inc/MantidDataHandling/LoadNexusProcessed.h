@@ -11,7 +11,7 @@
 #include "MantidNexus/NexusClasses.h"
 
 namespace NeXus {
-  class File;
+class File;
 }
 
 namespace Mantid {
@@ -132,13 +132,12 @@ private:
                                            Mantid::NeXus::NXDouble &xbins,
                                            const double &progressStart,
                                            const double &progressRange);
-  API::MatrixWorkspace_sptr loadNonEventEntry(Mantid::NeXus::NXData &wksp_cls,
-                                              Mantid::NeXus::NXDouble &xbins,
-                                              const double &progressStart,
-                                              const double &progressRange,
-                                              const Mantid::NeXus::NXEntry &mtd_entry,
-                                              const int xlength,
-                                              std::string &workspaceType);
+  API::MatrixWorkspace_sptr
+  loadNonEventEntry(Mantid::NeXus::NXData &wksp_cls,
+                    Mantid::NeXus::NXDouble &xbins, const double &progressStart,
+                    const double &progressRange,
+                    const Mantid::NeXus::NXEntry &mtd_entry, const int xlength,
+                    std::string &workspaceType);
 
   /// Read the data from the sample group
   void readSampleGroup(Mantid::NeXus::NXEntry &mtd_entry,
@@ -193,7 +192,7 @@ private:
 
   /// calculates the workspace size
   std::size_t calculateWorkspaceSize(const std::size_t numberofspectra,
-                                     bool gen_filtered_list=false);
+                                     bool gen_filtered_list = false);
 
   /// Accellerated multiperiod loading
   Mantid::API::Workspace_sptr doAccelleratedMultiPeriodLoading(

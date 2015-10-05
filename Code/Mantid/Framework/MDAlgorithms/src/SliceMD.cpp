@@ -281,17 +281,18 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     alg->executeAsChildAlg();
   }
 
-  // Pass on the display normalization from the input event workspace to the output event workspace
-  IMDEventWorkspace_sptr outEvent = boost::dynamic_pointer_cast<IMDEventWorkspace>(outWS);
-
-  // Since the output of the SliceMD algorithm has regular binning we set the display normalization
+  // Pass on the display normalization from the input event workspace to the
+  // output event workspace
+  IMDEventWorkspace_sptr outEvent =
+      boost::dynamic_pointer_cast<IMDEventWorkspace>(outWS);
+  // Since the output of the SliceMD algorithm has regular binning we set the
+  // display normalization
   // of the MDEvent output workspace to displayNormalizationHisto.
   outEvent->setDisplayNormalization(ws->displayNormalizationHisto());
   outEvent->setDisplayNormalizationHisto(ws->displayNormalizationHisto());
   // return the size of the input workspace write buffer to its initial value
   // bc->setCacheParameters(sizeof(MDE),writeBufSize);
-  this->setProperty("OutputWorkspace",
-                    outEvent);
+  this->setProperty("OutputWorkspace", outEvent);
   delete prog;
 }
 

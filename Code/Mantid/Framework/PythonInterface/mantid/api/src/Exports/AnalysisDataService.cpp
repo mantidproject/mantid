@@ -8,7 +8,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
-
 void export_AnalysisDataService() {
   typedef DataServiceExporter<AnalysisDataServiceImpl, Workspace_sptr>
       ADSExporter;

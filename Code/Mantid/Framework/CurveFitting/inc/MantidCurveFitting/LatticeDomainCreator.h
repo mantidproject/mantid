@@ -50,12 +50,12 @@ public:
                             boost::shared_ptr<API::FunctionValues> &values,
                             size_t i0);
 
-  virtual API::Workspace_sptr createOutputWorkspace(
-          const std::string &baseName,
-          API::IFunction_sptr function,
-          boost::shared_ptr<API::FunctionDomain> domain,
-          boost::shared_ptr<API::FunctionValues> values,
-          const std::string &outputWorkspacePropertyName);
+  virtual API::Workspace_sptr
+  createOutputWorkspace(const std::string &baseName,
+                        API::IFunction_sptr function,
+                        boost::shared_ptr<API::FunctionDomain> domain,
+                        boost::shared_ptr<API::FunctionValues> values,
+                        const std::string &outputWorkspacePropertyName);
 
   virtual size_t getDomainSize() const;
 

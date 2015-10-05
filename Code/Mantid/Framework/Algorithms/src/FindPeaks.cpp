@@ -335,9 +335,9 @@ void FindPeaks::generateOutputPeakParameterTable() {
   * @param fitwindows :: vector of windows around each peak. Otherwise, windows
  * will be determined automatically.
   */
-void
-FindPeaks::findPeaksGivenStartingPoints(const std::vector<double> &peakcentres,
-                                        const std::vector<double> &fitwindows) {
+void FindPeaks::findPeaksGivenStartingPoints(
+    const std::vector<double> &peakcentres,
+    const std::vector<double> &fitwindows) {
   bool useWindows = (!fitwindows.empty());
   std::size_t numPeaks = peakcentres.size();
 

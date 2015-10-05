@@ -8,41 +8,42 @@
 
 using Mantid::MDAlgorithms::FitResolutionConvolvedModel;
 
-class FitResolutionConvolvedModelTest : public CxxTest::TestSuite
-{
+class FitResolutionConvolvedModelTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FitResolutionConvolvedModelTest *createSuite() { return new FitResolutionConvolvedModelTest(); }
-  static void destroySuite( FitResolutionConvolvedModelTest *suite ) { delete suite; }
-
-  FitResolutionConvolvedModelTest() :
-    m_inputName("FitResolutionConvolvedModelTest")
-  {
+  static FitResolutionConvolvedModelTest *createSuite() {
+    return new FitResolutionConvolvedModelTest();
+  }
+  static void destroySuite(FitResolutionConvolvedModelTest *suite) {
+    delete suite;
   }
 
-  void test_Init_Does_Not_Throw()
-  {
+  FitResolutionConvolvedModelTest()
+      : m_inputName("FitResolutionConvolvedModelTest") {}
+
+  void test_Init_Does_Not_Throw() {
     Mantid::API::IAlgorithm_sptr alg;
     TS_ASSERT_THROWS_NOTHING(alg = createAlgorithm());
     TS_ASSERT(alg->isInitialized());
   }
 
-  void test_Algorithm_Does_Not_Allow_Standard_MatrixWorkspaces()
-  {
+  void test_Algorithm_Does_Not_Allow_Standard_MatrixWorkspaces() {
     using namespace Mantid::API;
     IAlgorithm_sptr alg = createAlgorithm();
-    MatrixWorkspace_sptr testMatrixWS = WorkspaceCreationHelper::Create2DWorkspace(1,10);
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(m_inputName, testMatrixWS);
+    MatrixWorkspace_sptr testMatrixWS =
+        WorkspaceCreationHelper::Create2DWorkspace(1, 10);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(m_inputName,
+                                                              testMatrixWS);
 
-    TS_ASSERT_THROWS(alg->setPropertyValue("InputWorkspace", m_inputName), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->setPropertyValue("InputWorkspace", m_inputName),
+                     std::invalid_argument);
 
     Mantid::API::AnalysisDataService::Instance().remove(m_inputName);
   }
 
 private:
-  Mantid::API::IAlgorithm_sptr createAlgorithm()
-  {
+  Mantid::API::IAlgorithm_sptr createAlgorithm() {
     auto alg = boost::make_shared<FitResolutionConvolvedModel>();
     alg->initialize();
     return alg;
@@ -50,6 +51,5 @@ private:
 
   std::string m_inputName;
 };
-
 
 #endif /* MANTID_MDALGORITHMS_FITRESOLUTIONCONVOLVEDMODELTEST_H_ */

@@ -12,7 +12,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 namespace {
-    Mantid::Kernel::Logger g_log("GenerateIPythonNotebook");
+Mantid::Kernel::Logger g_log("GenerateIPythonNotebook");
 }
 
 namespace Mantid {
@@ -37,7 +37,7 @@ void GenerateIPythonNotebook::init() {
   declareProperty(new API::FileProperty("Filename", "",
                                         API::FileProperty::OptionalSave, exts),
                   "The name of the file into which the workspace history will "
-                      "be generated.");
+                  "be generated.");
   declareProperty("NotebookText", std::string(""),
                   "Saves the history of the workspace to a variable.",
                   Direction::Output);
@@ -76,7 +76,7 @@ void GenerateIPythonNotebook::exec() {
   // Get the algorithm histories of the workspace.
   const WorkspaceHistory wsHistory = ws->getHistory();
   g_log.information() << "Number of history items: " << wsHistory.size()
-  << std::endl;
+                      << std::endl;
 
   auto view = wsHistory.createView();
 
@@ -104,7 +104,8 @@ void GenerateIPythonNotebook::exec() {
 
   NotebookBuilder builder(view, versionSpecificity);
   std::string generatedNotebook = "";
-  generatedNotebook += builder.build(ws->getName(), ws->getTitle(), ws->getComment());
+  generatedNotebook +=
+      builder.build(ws->getName(), ws->getTitle(), ws->getComment());
 
   setPropertyValue("NotebookText", generatedNotebook);
 
@@ -116,7 +117,6 @@ void GenerateIPythonNotebook::exec() {
     file.flush();
     file.close();
   }
-
 }
 
 } // namespace Algorithms
