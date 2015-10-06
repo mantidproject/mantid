@@ -257,6 +257,7 @@ set ( TEST_FILES
 	CentroidPeaksMDTest.h
 	CloneMDWorkspaceTest.h
 	CompareMDWorkspacesTest.h
+    CompactMDTest.h
 	ConvertCWPDMDToSpectraTest.h
 	ConvertCWSDExpToMomentumTest.h
 	ConvertEventsToMDTest.h
