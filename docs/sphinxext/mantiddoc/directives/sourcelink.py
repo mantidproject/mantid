@@ -1,6 +1,6 @@
 from base import AlgorithmBaseDirective
-from os import path, walk
 import mantid
+import os
 
 class SourceLinkError(Exception):
     def __init__(self, value):
@@ -75,8 +75,8 @@ class SourceLinkDirective(AlgorithmBaseDirective):
                 file_paths[extension] = None
             else:
                 #prepend the base framework directory
-                file_paths[extension] = path.join(self.get_mantid_directory(),file_paths[extension])
-                if not path.exists(file_paths[extension]):
+                file_paths[extension] = os.path.join(self.get_mantid_directory(),file_paths[extension])
+                if not os.path.exists(file_paths[extension]):
                     error_string +="Cannot find " + extension + " file at " + file_paths[extension] + "\n"
 
         #throw accumulated errors now if you have any
@@ -134,26 +134,20 @@ class SourceLinkDirective(AlgorithmBaseDirective):
         """
         if self.mantid_directory_cache is None:
             env = self.state.document.settings.env
-            dir = env.srcdir #= C:\Mantid\Code\Mantid\docs\source
-            #go up the path until dir point to the "Mantid" directory
-            (head,tail) = path.split(dir)
-            while tail != "Mantid":
-                dir = head
-                (head,tail) = path.split(head)
-                if len(tail) <= 0 or len(head) <= 0:
-                    raise IOError ("Could not find the 'Mantid' directory in " + env.srcdir)
+            direc = env.srcdir #= C:\Mantid\Code\Mantid\docs\source
+            direc = os.path.join(direc, "..", "..") # assume root is two levels up
+            direc = os.path.abspath(direc)
 
-            self.mantid_directory_cache = dir
+            self.mantid_directory_cache = direc
         return self.mantid_directory_cache
 
     def parse_source_tree(self):
         """
         Fills the file_lookup dictionary after parsing the source code
         """
-        print "parse_source_tree()"
-        for dirName, subdirList, fileList in walk(self.get_mantid_directory()):
+        for dirName, subdirList, fileList in os.walk(self.get_mantid_directory()):
             for fname in fileList:
-                (baseName, fileExtension) = path.splitext(fname)
+                (baseName, fileExtension) = os.path.splitext(fname)
                 #strip the dot from the extension
                 fileExtension = fileExtension[1:]
                 #build the data object that is e.g.
@@ -163,7 +157,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
                         self.file_lookup[baseName] = {}
                     if fileExtension not in self.file_lookup[baseName].keys():
                         self.file_lookup[baseName][fileExtension] = []
-                    self.file_lookup[baseName][fileExtension].append(path.join(dirName,fname))
+                    self.file_lookup[baseName][fileExtension].append(os.path.join(dirName,fname))
         return
 
     def output_to_page(self, file_paths,file_name,sanity_checks):
@@ -207,7 +201,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
         """
         Outputs the source link for a file to the rst page
         """
-        dirName,fName = path.split(filepath)
+        dirName,fName = os.path.split(filepath)
         self.add_rst(self.file_types[extension] + ": `" + fName + " <" + self.convert_path_to_github_url(filepath) + ">`_\n\n")
         return
 
