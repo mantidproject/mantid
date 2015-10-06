@@ -61,44 +61,47 @@ Usage
 .. testcode:: ExConvertHB3AToHKL
 
   # Create input table workspaces for experiment information and virtual instrument parameters
-  CollectHB3AExperimentInfo(ExperimentNumber='355', ScanList='11', PtLists='-1,11', 
-      DataDirectory='',
+  CollectHB3AExperimentInfo(ExperimentNumber='406', ScanList='298', PtLists='-1,22', 
+      DataDirectory='/home/wzz/Temp/HB3ATest',
       GenerateVirtualInstrument=False,
       OutputWorkspace='ExpInfoTable', DetectorTableWorkspace='VirtualInstrumentTable')
 
   # Convert to MDWorkspace
   ConvertCWSDExpToMomentum(InputWorkspace='ExpInfoTable', CreateVirtualInstrument=False, 
       OutputWorkspace='QSampleMD',
-      Directory='')
-
-  # Find peak in the MDEventWorkspace
-  FindPeaksMD(InputWorkspace='QSampleMD', DensityThresholdFactor=0.10000000000000001, 
-      OutputWorkspace='PeakTable')
+      Directory='/home/wzz/Temp/HB3ATest')
+      
+  ConvertCWSDMDtoHKL(InputWorkspace='QSampleMD', 
+                UBMatrix='0.13329061, 0.07152342, -0.04215966, 0.01084569, -0.1620849, 0.0007607, -0.14018499, -0.07841385, -0.04002737',
+                OutputWorkspace='HKLMD')
+              
   
   # Examine
   mdws = mtd['QSampleMD']
   print 'Output MDEventWorkspace has %d events.'%(mdws.getNEvents())
-  peakws = mtd['PeakTable']
-  print  'There are %d peaks found in output MDWorkspace'%(peakws.getNumberPeaks())
-  peak = peakws.getPeak(0)
-  qsample = peak.getQSampleFrame()
-  print 'In Q-sample frame, center of peak 0 is at (%.5f, %.5f, %.5f) at detector with ID %d'%(
-      qsample.X(), qsample.Y(), qsample.Z(), peak.getDetectorID())
-    
+  
+  hklws = mtd['HKLMD']
+  print 'H: range from %.5f to %.5f.' % (hklws.getXDimension().getMinimum(), hklws.getXDimension().getMaximum())
+  print 'K: range from %.5f to %.5f.' % (hklws.getYDimension().getMinimum(), hklws.getYDimension().getMaximum())
+  print 'L: range from %.5f to %.5f.' % (hklws.getZDimension().getMinimum(), hklws.getZDimension().getMaximum())
+
 .. testcleanup::  ExConvertHB3AToHKL
 
   DeleteWorkspace(Workspace='QSampleMD')
   DeleteWorkspace(Workspace='ExpInfoTable')
   DeleteWorkspace(Workspace='VirtualInstrumentTable')
-  DeleteWorkspace(Workspace='PeakTable')
+  DeleteWorkspace(Workspace='HKLMD')
+  DeleteWorkspace(Workspace='HB3A_exp0406_scan0298')
+  DeleteWorkspace(Workspace='spicematrixws')
 
 Output:
 
 .. testoutput:: ExConvertHB3AToHKL
 
-  Output MDEventWorkspace has 397 events.
-  There are 1 peaks found in output MDWorkspace
-  In Q-sample frame, center of peak 0 is at (-3.57179, -4.37952, -3.01737) at detector with ID 32626
+  Output MDEventWorkspace has 1631 events.
+  H: range from -0.24012 to 0.29856.
+  K: range from -0.41417 to 0.42250.
+  L: range from 4.83863 to 7.23861.
 
 .. categories::
 
