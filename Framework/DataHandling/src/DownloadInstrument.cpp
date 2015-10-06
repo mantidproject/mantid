@@ -147,8 +147,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
         "this should point to the location of the instrument "
         "directory in the github API "
         "e.g. "
-        "https://api.github.com/repos/mantidproject/mantid/contents/Code/"
-        "Mantid/instrument.");
+        "https://api.github.com/repos/mantidproject/mantid/contents/instrument.");
   }
   StringToStringMap fileMap;
   try {
