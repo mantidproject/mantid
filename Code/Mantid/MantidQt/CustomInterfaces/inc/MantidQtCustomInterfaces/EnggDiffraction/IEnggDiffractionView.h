@@ -269,6 +269,17 @@ public:
   * @param wsName name of the workspace to plot (must be in the ADS)
   */
   virtual void plotFocusedSpectrum(const std::string &wsName) = 0;
+
+   /*
+  * Selected plot data representation will be applied, which will
+  * ran through python script
+  *
+  * @return which format should to applied for plotting data
+  */
+  virtual std::string currentPlotType() const = 0;
+
+  // virtual std::string plotDataRep() const = 0; // shahroz
+
 };
 
 } // namespace CustomInterfaces

@@ -1084,9 +1084,13 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     alg->execute();
 
     const bool plotFocusedWS = m_view->focusedOutWorkspace();
-    if (plotFocusedWS == true) {
-      m_view->plotFocusedSpectrum(outWSName);
-    }
+	std::string plotType = m_view->currentPlotType(); // shahroz
+
+        if (plotFocusedWS == true && "One Window-Replacing Plots" == plotType) {
+            m_view->plotFocusedSpectrum(outWSName);
+        }
+
+
 
   } catch (std::runtime_error &re) {
     g_log.error() << "Error in calibration. ",
