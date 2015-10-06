@@ -76,12 +76,11 @@ public:
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     // should not get there:
-    EXPECT_CALL(mockView, stackPath()).Times(0);
     EXPECT_CALL(mockView, showStack(testing::An<const std::string &>()))
         .Times(0);
     EXPECT_CALL(mockView,
-                showStack(testing::An<Mantid::API::WorkspaceGroup_sptr &>()))
-        .Times(0);
+                showStack(testing::An<Mantid::API::WorkspaceGroup_sptr &>(),
+                          testing::An<const std::string &>())).Times(0);
     EXPECT_CALL(mockView, updateImgWithIndex(testing::_)).Times(0);
 
     pres.notify(IImageCoRPresenter::BrowseImgOrStack);

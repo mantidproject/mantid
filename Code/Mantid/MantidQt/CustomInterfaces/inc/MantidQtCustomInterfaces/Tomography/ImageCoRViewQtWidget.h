@@ -59,13 +59,15 @@ public:
 
   ImageStackPreParams userSelection() const;
 
-  virtual std::string stackPath() const { return m_stackPath; };
+  void changeSelectionState(const SelectionState state);
 
   /// show a stack of images given the path to the files
   void showStack(const std::string &path);
 
   /// show a stack of images that have been loaded into a group of workspaces
-  void showStack(Mantid::API::WorkspaceGroup_sptr &ws);
+  void showStack(Mantid::API::WorkspaceGroup_sptr &ws, const std::string &path);
+
+  const Mantid::API::WorkspaceGroup_sptr stack() const { return m_stack; }
 
   void showProjection(const Mantid::API::WorkspaceGroup_sptr &wsg, size_t idx);
 
@@ -130,6 +132,8 @@ private:
   void refreshROI();
   void refreshNormArea();
 
+  bool eventFilter(QObject *obj, QEvent *event);
+
   Ui::ImageSelectCoRAndRegions m_ui;
 
   Mantid::API::WorkspaceGroup_sptr m_stack;
@@ -144,8 +148,8 @@ private:
   /// parameters currently set by the user
   ImageStackPreParams m_params;
 
-  /// path to the image stack being visualized
-  std::string m_stackPath;
+  /// are we picking the CoR, or the first point of the ROI, etc.
+  SelectionState m_selectionState;
 
   // presenter as in the model-view-presenter
   boost::scoped_ptr<IImageCoRPresenter> m_presenter;

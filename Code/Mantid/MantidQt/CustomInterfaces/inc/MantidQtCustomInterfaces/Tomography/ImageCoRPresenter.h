@@ -78,6 +78,9 @@ private:
 
   void loadFITSImage(const std::string &path, const std::string &wsName);
 
+  /// path to the image stack being visualized
+  std::string m_stackPath;
+
   /// Associated view for this presenter (MVP pattern)
   IImageCoRView *const m_view;
 

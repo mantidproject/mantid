@@ -44,6 +44,16 @@ public:
   IImageCoRView(){};
   virtual ~IImageCoRView(){};
 
+  // Selection states
+  enum SelectionState {
+    SelectNone,          ///< Init, or after any reset
+    SelectCoR,
+    SelectROIFirst,
+    SelectROISecond,
+    SelectNormAreaFirst,
+    SelectNormAreaSecond
+  };
+
   /**
    * Sets the user selection. This should guarantee that all widgets
    * are updated (including spin boxes, image, slider through the
@@ -63,14 +73,11 @@ public:
   virtual ImageStackPreParams userSelection() const = 0;
 
   /**
-   * Path to a stack of images that the user has requested to
-   * display. The path would be expected to point to a recognized
-   * directory structure (sample/dark/white) or image file (as a
-   * particular case).
+   * Update to a new state (for example select CoR).
    *
-   * @return directory of file path as a string
+   * @param new state we're transitioning into.
    */
-  virtual std::string stackPath() const = 0;
+  virtual void changeSelectionState(const SelectionState state) = 0;
 
   /**
    * Display a special case of stack of images: individual image, from
@@ -94,8 +101,22 @@ public:
    * @param ws Workspace group where every workspace is a FITS or
    * similar image that has been loaded with LoadFITS or similar
    * algorithm.
+   *
+   * @param the (valid) path for this stack, from which it the
+   * workspace group was loaded, in whatever directory layout is being
+   * used (unknown to this view).
    */
-  virtual void showStack(Mantid::API::WorkspaceGroup_sptr &ws) = 0;
+  virtual void showStack(Mantid::API::WorkspaceGroup_sptr &ws,
+                         const std::string &m_stackPath) = 0;
+
+  /**
+   * Get the stack of images currently being displayed (it has been
+   * shown using showStack()), as a workspace group.
+   *
+   * @return workspace group containing the individual images, which
+   * can be empty if no stack has been loaded.
+   */
+  virtual const Mantid::API::WorkspaceGroup_sptr stack() const = 0;
 
   /**
    * Normally one image (projection for tomography stacks) will be
@@ -150,11 +171,14 @@ public:
   virtual void updateImgWithIndex(size_t idx) = 0;
 
   /**
-   * Get from the user the path/location of a stack of images (or
-   * single image as a particular case).
+   * Get the path/location of a stack of images (or single image as a
+   * particular case) that the user is requesting to display.  The
+   * path would be expected to point to a recognized directory
+   * structure (sample/dark/white) or image file (as a particular
+   * case).
    *
    * @return location (can be a directory, file, etc.) that needs to
-   * be figured out
+   * be figured out elsewhere.
    */
   virtual std::string askImgOrStackPath() = 0;
 

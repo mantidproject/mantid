@@ -23,8 +23,14 @@ const std::string ImageCoRViewQtWidget::m_settingsGroup =
     "CustomInterfaces/ImageCoRView";
 
 ImageCoRViewQtWidget::ImageCoRViewQtWidget(QWidget *parent)
-    : QWidget(parent), IImageCoRView(), m_presenter(NULL) {
+    : QWidget(parent), IImageCoRView(), m_selectionState(SelectNone),
+      m_presenter(NULL) {
   initLayout();
+
+  // using an event filter. might be worth refactoring into a specific
+  // QLabel + selection of ROI+NormArea+CoR class
+  // not using Qwt Pickers to avoid Qwt version issues..
+  m_ui.label_img->installEventFilter(this);
 }
 
 void ImageCoRViewQtWidget::initLayout() {
@@ -107,6 +113,17 @@ void ImageCoRViewQtWidget::setupConnections() {
           SLOT(valueUpdatedNormArea(int)));
 }
 
+bool ImageCoRViewQtWidget::eventFilter(QObject *obj, QEvent *event) {
+  if (m_ui.label_img == obj) {
+    if (event->type() == QEvent::MouseButtonPress) {
+    } else if (event->type() == QEvent::MouseButtonRelease) {
+    } else if (event->type() == QEvent::MouseMove) {
+    }
+  }
+  // pass on the event up to the parent class
+  return false;
+}
+
 void ImageCoRViewQtWidget::valueUpdatedCoR(int) {
   grabCoRFromWidgets();
   refreshROIetAl();
@@ -155,10 +172,14 @@ void ImageCoRViewQtWidget::refreshCoR() {
   QPainter painter(&toDisplay);
   QPen pen(Qt::red);
   painter.setPen(pen);
-  painter.drawLine(m_params.cor.X() - 5, m_params.cor.Y(), m_params.cor.X() + 5,
-                   m_params.cor.Y());
-  painter.drawLine(m_params.cor.X(), m_params.cor.Y() - 5, m_params.cor.X(),
-                   m_params.cor.Y() + 5);
+  painter.drawLine(static_cast<int>(m_params.cor.X() - 5),
+                   static_cast<int>(m_params.cor.Y()),
+                   static_cast<int>(m_params.cor.X() + 5),
+                   static_cast<int>(m_params.cor.Y()));
+  painter.drawLine(static_cast<int>(m_params.cor.X()),
+                   static_cast<int>(m_params.cor.Y() - 5),
+                   static_cast<int>(m_params.cor.X()),
+                   static_cast<int>(m_params.cor.Y() + 5));
   m_ui.label_img->setPixmap(toDisplay);
 }
 
@@ -177,25 +198,31 @@ void ImageCoRViewQtWidget::refreshROIetAl() {
 
   QPen penCoR(Qt::red);
   painter.setPen(penCoR);
-  painter.drawLine(m_params.cor.X() - 5, m_params.cor.Y(), m_params.cor.X() + 5,
-                   m_params.cor.Y());
-  painter.drawLine(m_params.cor.X(), m_params.cor.Y() - 5, m_params.cor.X(),
-                   m_params.cor.Y() + 5);
+  painter.drawLine(static_cast<int>(m_params.cor.X() - 5),
+                   static_cast<int>(m_params.cor.Y()),
+                   static_cast<int>(m_params.cor.X() + 5),
+                   static_cast<int>(m_params.cor.Y()));
+  painter.drawLine(static_cast<int>(m_params.cor.X()),
+                   static_cast<int>(m_params.cor.Y() - 5),
+                   static_cast<int>(m_params.cor.X()),
+                   static_cast<int>(m_params.cor.Y() + 5));
 
   QPen penROI(Qt::green);
   painter.setPen(penROI);
-  painter.drawRect(m_params.roi.first.X(), m_params.roi.first.Y(),
-                   m_params.roi.second.X() - m_params.roi.first.X(),
-                   m_params.roi.second.Y() - m_params.roi.first.Y());
+  painter.drawRect(
+      static_cast<int>(m_params.roi.first.X()),
+      static_cast<int>(m_params.roi.first.Y()),
+      static_cast<int>(m_params.roi.second.X() - m_params.roi.first.X()),
+      static_cast<int>(m_params.roi.second.Y() - m_params.roi.first.Y()));
 
   QPen penNA(Qt::yellow);
   painter.setPen(penNA);
-  painter.drawRect(m_params.normalizationRegion.first.X(),
-                   m_params.normalizationRegion.first.Y(),
-                   m_params.normalizationRegion.second.X() -
-                       m_params.normalizationRegion.first.X(),
-                   m_params.normalizationRegion.second.Y() -
-                       m_params.normalizationRegion.first.Y());
+  painter.drawRect(static_cast<int>(m_params.normalizationRegion.first.X()),
+                   static_cast<int>(m_params.normalizationRegion.first.Y()),
+                   static_cast<int>(m_params.normalizationRegion.second.X() -
+                                    m_params.normalizationRegion.first.X()),
+                   static_cast<int>(m_params.normalizationRegion.second.Y() -
+                                    m_params.normalizationRegion.first.Y()));
 
   m_ui.label_img->setPixmap(toDisplay);
 }
@@ -213,9 +240,11 @@ void ImageCoRViewQtWidget::refreshROI() {
   QPainter painter(&toDisplay);
   QPen pen(Qt::green);
   painter.setPen(pen);
-  painter.drawRect(m_params.roi.first.X(), m_params.roi.first.Y(),
-                   m_params.roi.second.X() - m_params.roi.first.X(),
-                   m_params.roi.second.Y() - m_params.roi.first.Y());
+  painter.drawRect(
+      static_cast<int>(m_params.roi.first.X()),
+      static_cast<int>(m_params.roi.first.Y()),
+      static_cast<int>(m_params.roi.second.X() - m_params.roi.first.X()),
+      static_cast<int>(m_params.roi.second.Y() - m_params.roi.first.Y()));
   m_ui.label_img->setPixmap(toDisplay);
 }
 
@@ -232,12 +261,12 @@ void ImageCoRViewQtWidget::refreshNormArea() {
   QPainter painter(&toDisplay);
   QPen pen(Qt::yellow);
   painter.setPen(pen);
-  painter.drawRect(m_params.normalizationRegion.first.X(),
-                   m_params.normalizationRegion.first.Y(),
-                   m_params.normalizationRegion.second.X() -
-                       m_params.normalizationRegion.first.X(),
-                   m_params.normalizationRegion.second.Y() -
-                       m_params.normalizationRegion.first.Y());
+  painter.drawRect(static_cast<int>(m_params.normalizationRegion.first.X()),
+                   static_cast<int>(m_params.normalizationRegion.first.Y()),
+                   static_cast<int>(m_params.normalizationRegion.second.X() -
+                                    m_params.normalizationRegion.first.X()),
+                   static_cast<int>(m_params.normalizationRegion.second.Y() -
+                                    m_params.normalizationRegion.first.Y()));
   m_ui.label_img->setPixmap(toDisplay);
 }
 
@@ -306,6 +335,11 @@ ImageStackPreParams ImageCoRViewQtWidget::userSelection() const {
   return m_params;
 }
 
+void ImageCoRViewQtWidget::changeSelectionState(
+    const IImageCoRView::SelectionState state) {
+  m_selectionState = state;
+}
+
 void ImageCoRViewQtWidget::corClicked() {
   m_presenter->notify(IImageCoRPresenter::SelectCoR);
 }
@@ -324,7 +358,7 @@ void ImageCoRViewQtWidget::normAreaClicked() {
   m_presenter->notify(IImageCoRPresenter::SelectROI);
 }
 void ImageCoRViewQtWidget::normAreaResetClicked() {
-  m_presenter->notify(IImageCoRPresenter::ResetROI);
+  m_presenter->notify(IImageCoRPresenter::ResetNormalization);
 }
 
 void ImageCoRViewQtWidget::browseImgClicked() {
@@ -391,8 +425,7 @@ std::string ImageCoRViewQtWidget::askImgOrStackPath() {
     MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
   }
 
-  m_stackPath = path.toStdString();
-  return m_stackPath;
+  return path.toStdString();
 }
 
 void ImageCoRViewQtWidget::showStack(const std::string & /*path*/) {
@@ -403,7 +436,8 @@ void ImageCoRViewQtWidget::showStack(const std::string & /*path*/) {
   // b) load as workspace group - this is done in the overloaded method below
 }
 
-void ImageCoRViewQtWidget::showStack(Mantid::API::WorkspaceGroup_sptr &wsg) {
+void ImageCoRViewQtWidget::showStack(Mantid::API::WorkspaceGroup_sptr &wsg,
+                                     const std::string &stackPath) {
   if (0 == wsg->size())
     return;
 

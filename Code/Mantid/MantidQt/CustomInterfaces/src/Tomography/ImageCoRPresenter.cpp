@@ -94,9 +94,11 @@ void ImageCoRPresenter::processInit() {
 void ImageCoRPresenter::processBrowseImg() {
   const std::string path = m_view->askImgOrStackPath();
 
-  if (!path.empty()) {
-    processNewStack();
-  }
+  if (path.empty())
+    return;
+
+  m_stackPath = path;
+  processNewStack();
 }
 
 /**
@@ -129,9 +131,7 @@ StackOfImagesDirs ImageCoRPresenter::checkInputStack(const std::string &path) {
 }
 
 void ImageCoRPresenter::processNewStack() {
-  const std::string pstr = m_view->stackPath();
-
-  StackOfImagesDirs soid = checkInputStack(pstr);
+  StackOfImagesDirs soid = checkInputStack(m_stackPath);
 
   std::vector<std::string> imgs = soid.sampleFiles();
   if (0 >= imgs.size()) {
@@ -153,11 +153,11 @@ void ImageCoRPresenter::processNewStack() {
         "Even though a directory apparently holding a stack of images was "
         "found, "
         "it was not possible to load any image file correctly from: " +
-            pstr);
+            m_stackPath);
     return;
   }
 
-  m_view->showStack(wsg);
+  m_view->showStack(wsg, m_stackPath);
 
   // clean-up container group workspace? Not for now
   if (false && wsg)
@@ -168,11 +168,17 @@ void ImageCoRPresenter::processUpdateImgIndex() {
   m_view->updateImgWithIndex(m_view->currentImgIndex());
 }
 
-void ImageCoRPresenter::processSelectCoR() {}
+void ImageCoRPresenter::processSelectCoR() {
+  m_view->changeSelectionState(IImageCoRView::SelectCoR);
+}
 
-void ImageCoRPresenter::processSelectROI() {}
+void ImageCoRPresenter::processSelectROI() {
+  m_view->changeSelectionState(IImageCoRView::SelectROIFirst);
+}
 
-void ImageCoRPresenter::processSelectNormalization() {}
+void ImageCoRPresenter::processSelectNormalization() {
+  m_view->changeSelectionState(IImageCoRView::SelectNormAreaFirst);
+}
 
 void ImageCoRPresenter::processFinishedCoR() {}
 
@@ -182,14 +188,17 @@ void ImageCoRPresenter::processFinishedNormalization() {}
 
 void ImageCoRPresenter::processResetCoR() {
   m_view->resetCoR();
+  m_view->changeSelectionState(IImageCoRView::SelectNone);
 }
 
 void ImageCoRPresenter::processResetROI() {
   m_view->resetROI();
+  m_view->changeSelectionState(IImageCoRView::SelectNone);
 }
 
 void ImageCoRPresenter::processResetNormalization() {
   m_view->resetNormArea();
+  m_view->changeSelectionState(IImageCoRView::SelectNone);
 }
 
 void ImageCoRPresenter::processShutDown() { m_view->saveSettings(); }
