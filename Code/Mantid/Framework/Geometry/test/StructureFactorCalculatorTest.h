@@ -63,8 +63,8 @@ public:
 
     TS_ASSERT_EQUALS(sfs.size(), hkls.size());
 
-    for (auto sf : sfs) {
-      TS_ASSERT_EQUALS(sf, StructureFactor(2.0, 2.0));
+    for (auto sf = sfs.begin(); sf != sfs.end(); ++sf) {
+      TS_ASSERT_EQUALS(*sf, StructureFactor(2.0, 2.0));
     }
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&calculator));
@@ -83,8 +83,8 @@ public:
 
     TS_ASSERT_EQUALS(sfsSquared.size(), hkls.size());
 
-    for (auto sf : sfsSquared) {
-      TS_ASSERT_EQUALS(sf, 8.0);
+    for (auto sf = sfsSquared.begin(); sf != sfsSquared.end(); ++sf) {
+      TS_ASSERT_EQUALS(*sf, 8.0);
     }
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&calculator));
