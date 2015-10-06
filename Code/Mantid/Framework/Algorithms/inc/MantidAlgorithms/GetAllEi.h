@@ -7,7 +7,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 //#include "MantidAPI/IAlgorithm.h"
 
-
 namespace Mantid {
 
 namespace Algorithms {
@@ -43,57 +42,68 @@ public:
   /// Algorithms name for identification. @see Algorithm::name
   virtual const std::string name() const { return "GetAllEi"; };
   /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-  virtual const std::string summary() const{
+  virtual const std::string summary() const {
     return "Analyze the chopper logs and the signal registered by the monitors "
-           "to identify energies used as incident energies in an inelastic experiment.";
+           "to identify energies used as incident energies in an inelastic "
+           "experiment.";
   }
   /// Algorithm's version for identification. @see Algorithm::version
-  virtual int version() const{ return 1; } ;
+  virtual int version() const { return 1; };
   /// Algorithm's category for identification. @see Algorithm::category
-  virtual const std::string category()const { return "Direct\\Inelastic"; };
+  virtual const std::string category() const { return "Direct\\Inelastic"; };
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
   virtual std::map<std::string, std::string> validateInputs();
+
 private:
   // Implement abstract Algorithm methods
   void init();
   void exec();
-  Kernel::Property * getPLogForProperty(const API::MatrixWorkspace_sptr &inputWS,
-    const std::string &name);
-protected: // for testing, private otherwise.
-  // prepare working workspace with appropriate monitor spectra for fitting 
- API::MatrixWorkspace_sptr 
-    GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
-    size_t &wsIndex0);
+  Kernel::Property *getPLogForProperty(const API::MatrixWorkspace_sptr &inputWS,
+                                       const std::string &name);
 
-   /**Return average time series log value for the appropriately filtered log*/
-   double getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS, const std::string &propertyName,
-          std::vector<Kernel::SplittingInterval> &splitter);
+protected: // for testing, private otherwise.
+  // prepare working workspace with appropriate monitor spectra for fitting
+  API::MatrixWorkspace_sptr
+  GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
+                                size_t &wsIndex0);
+
+  /**Return average time series log value for the appropriately filtered log*/
+  double getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS,
+                         const std::string &propertyName,
+                         std::vector<Kernel::SplittingInterval> &splitter);
   /**process logs and retrieve chopper speed and chopper delay*/
   void findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
-       double &chop_speed,double &chop_delay);
-  void findGuessOpeningTimes(const std::pair<double,double> &TOF_range,
-      double ChopDelay,double Period,std::vector<double > & guess_opening_times);
+                             double &chop_speed, double &chop_delay);
+  void findGuessOpeningTimes(const std::pair<double, double> &TOF_range,
+                             double ChopDelay, double Period,
+                             std::vector<double> &guess_opening_times);
   /**Get energy of monitor peak if one is present*/
-  bool findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
-       double Ei,const std::vector<size_t> & monsRangeMin,
-      const std::vector<size_t> & monsRangeMax,
-      double & energy,double & height,double &width);
+  bool findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS, double Ei,
+                       const std::vector<size_t> &monsRangeMin,
+                       const std::vector<size_t> &monsRangeMax, double &energy,
+                       double &height, double &width);
   /**Find indexes of each expected peak intervals */
-  void findBinRanges(const MantidVec & eBins,const MantidVec & signal,
-      const std::vector<double> & guess_energies,
-      double Eresolution,std::vector<size_t> & irangeMin,
-      std::vector<size_t> & irangeMax, std::vector<bool> &guessValid);
+  void findBinRanges(const MantidVec &eBins, const MantidVec &signal,
+                     const std::vector<double> &guess_energies,
+                     double Eresolution, std::vector<size_t> &irangeMin,
+                     std::vector<size_t> &irangeMax,
+                     std::vector<bool> &guessValid);
 
-  size_t calcDerivativeAndCountZeros(const std::vector<double> &bins,const std::vector<double> &signal,
-    std::vector<double> &deriv,std::vector<double> &zeros);
+  size_t calcDerivativeAndCountZeros(const std::vector<double> &bins,
+                                     const std::vector<double> &signal,
+                                     std::vector<double> &deriv,
+                                     std::vector<double> &zeros);
 
   /// name of the log, which identifies that instrument is running .
-  /// The log values should be positive when instrument is running and negative or 0 otherwise
+  /// The log values should be positive when instrument is running and negative
+  /// or 0 otherwise
   /// or see next property -- filter with derivative
   std::string m_FilterLogName;
-  /// if true, take derivate of the filter log to identify interval when instrument is running.
+  /// if true, take derivate of the filter log to identify interval when
+  /// instrument is running.
   bool m_FilterWithDerivative;
-  /// maximal relative peak width to consider acceptable. Defined by minimal instrument resolution
+  /// maximal relative peak width to consider acceptable. Defined by minimal
+  /// instrument resolution
   /// and does not exceed 0.08
   double m_min_Eresolution;
   // set as half max LET resolution at 20mev at 5e-4

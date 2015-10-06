@@ -122,33 +122,35 @@ public:
     TS_ASSERT_EQUALS(twoVals[1], threeVals[2]);
     TS_ASSERT_EQUALS(newVal, threeVals[1]);
   }
- void test_GetDerivative()
-  {
-    dProp->addValue("2007-11-30T16:17:10",10);
-    dProp->addValue("2007-11-30T16:17:12",12);
-    dProp->addValue("2007-11-30T16:17:01",01);
-    dProp->addValue("2007-11-30T16:17:05",05);
+  void test_GetDerivative() {
+    dProp->addValue("2007-11-30T16:17:10", 10);
+    dProp->addValue("2007-11-30T16:17:12", 12);
+    dProp->addValue("2007-11-30T16:17:01", 01);
+    dProp->addValue("2007-11-30T16:17:05", 05);
 
     auto derProp = dProp->getDerivative();
-    TS_ASSERT(dynamic_cast<TimeSeriesProperty<double>* >(derProp.get()))
+    TS_ASSERT(dynamic_cast<TimeSeriesProperty<double> *>(derProp.get()))
 
-    TS_ASSERT_EQUALS(derProp->size(),3);
+    TS_ASSERT_EQUALS(derProp->size(), 3);
     auto derValues = derProp->valuesAsVector();
 
-    TS_ASSERT_EQUALS(derValues[0],1);
-    TS_ASSERT_EQUALS(derValues[1],1);
-    TS_ASSERT_EQUALS(derValues[2],1);
+    TS_ASSERT_EQUALS(derValues[0], 1);
+    TS_ASSERT_EQUALS(derValues[1], 1);
+    TS_ASSERT_EQUALS(derValues[2], 1);
 
-    TSM_ASSERT_THROWS("derivative undefined for string property",sProp->getDerivative(),std::runtime_error);
+    TSM_ASSERT_THROWS("derivative undefined for string property",
+                      sProp->getDerivative(), std::runtime_error);
 
-    iProp->addValue("2007-11-30T16:17:10",10);
-    TSM_ASSERT_THROWS("derivative undefined for property with less then 2 values",iProp->getDerivative(),std::runtime_error);
-    iProp->addValue("2007-11-30T16:17:12",12);
+    iProp->addValue("2007-11-30T16:17:10", 10);
+    TSM_ASSERT_THROWS(
+        "derivative undefined for property with less then 2 values",
+        iProp->getDerivative(), std::runtime_error);
+    iProp->addValue("2007-11-30T16:17:12", 12);
 
     derProp = iProp->getDerivative();
-    TS_ASSERT_EQUALS(derProp->size(),1);
+    TS_ASSERT_EQUALS(derProp->size(), 1);
     derValues = derProp->valuesAsVector();
-    TS_ASSERT_EQUALS(derValues[0],1);
+    TS_ASSERT_EQUALS(derValues[0], 1);
   }
   void test_timesAsVector() {
     TimeSeriesProperty<double> *p =
@@ -549,7 +551,7 @@ public:
     auto intLog = createIntegerTSP(5);
 
     TS_ASSERT_DELTA(dblLog->timeAverageValue(), 7.6966, .0001);
-    TS_ASSERT_DELTA(intLog->timeAverageValue(), 2.5,    .0001);
+    TS_ASSERT_DELTA(intLog->timeAverageValue(), 2.5, .0001);
 
     // Clean up
     delete dblLog;
@@ -1109,7 +1111,7 @@ public:
       std::vector<Mantid::Kernel::DateAndTime> times0 = p->timesAsVector();
       std::vector<Mantid::Kernel::DateAndTime> times1 = p2->timesAsVector();
       for (size_t i = 0; i < static_cast<size_t>(p->size()); i++) {
-          TS_ASSERT_EQUALS(times0[i], times1[i]);
+        TS_ASSERT_EQUALS(times0[i], times1[i]);
         TS_ASSERT_DELTA(p->getSingleValue(times0[i]),
                         p2->getSingleValue(times1[i]), 1.0E-9);
       }
@@ -1590,165 +1592,165 @@ public:
     * Filter_T0 < Log_T0 < LogTf < Filter_Tf, F... T... F... T... F...
     */
   void test_filterBoundary2() {
-     // 1. Create a base property
-     Mantid::Kernel::DateAndTime tStart("2007-11-30T16:17:00");
-     std::vector<double> deltaTs;
-     std::vector<double> valueXs;
+    // 1. Create a base property
+    Mantid::Kernel::DateAndTime tStart("2007-11-30T16:17:00");
+    std::vector<double> deltaTs;
+    std::vector<double> valueXs;
     for (int i = 0; i < 20; i++) {
       deltaTs.push_back(static_cast<double>(i) * 10.0);
       valueXs.push_back(static_cast<double>(i) + 1.0);
-     }
+    }
     TimeSeriesProperty<double> *p1 =
         new TimeSeriesProperty<double>("BaseProperty");
-     p1->create(tStart, deltaTs, valueXs);
+    p1->create(tStart, deltaTs, valueXs);
 
-     std::vector<Mantid::Kernel::DateAndTime> times = p1->timesAsVector();
-     std::vector<double> values = p1->valuesAsVector();
+    std::vector<Mantid::Kernel::DateAndTime> times = p1->timesAsVector();
+    std::vector<double> values = p1->valuesAsVector();
 
-     // 2. Create a filter for T. F. T. F...
-     TimeSeriesProperty<bool> *filter = new TimeSeriesProperty<bool>("Filter");
-     filter->addValue("2007-11-30T16:16:06", false);
-     filter->addValue("2007-11-30T16:17:16", true);
-     filter->addValue("2007-11-30T16:18:40", false);
-     filter->addValue("2007-11-30T17:19:30", true);
+    // 2. Create a filter for T. F. T. F...
+    TimeSeriesProperty<bool> *filter = new TimeSeriesProperty<bool>("Filter");
+    filter->addValue("2007-11-30T16:16:06", false);
+    filter->addValue("2007-11-30T16:17:16", true);
+    filter->addValue("2007-11-30T16:18:40", false);
+    filter->addValue("2007-11-30T17:19:30", true);
 
-     p1->filterWith(filter);
+    p1->filterWith(filter);
 
-     // 3. Check size
-     p1->countSize();
-     TS_ASSERT_EQUALS(p1->size(), 10);
+    // 3. Check size
+    p1->countSize();
+    TS_ASSERT_EQUALS(p1->size(), 10);
 
-     // 4. Check interval
-     Mantid::Kernel::TimeInterval dt0 = p1->nthInterval(0);
+    // 4. Check interval
+    Mantid::Kernel::TimeInterval dt0 = p1->nthInterval(0);
     TS_ASSERT_EQUALS(dt0.begin(),
                      Mantid::Kernel::DateAndTime("2007-11-30T16:17:16"));
     TS_ASSERT_EQUALS(dt0.end(),
                      Mantid::Kernel::DateAndTime("2007-11-30T16:17:20"));
-     double v0 = p1->nthValue(0);
-     TS_ASSERT_DELTA(v0, 2, 1.0E-8);
+    double v0 = p1->nthValue(0);
+    TS_ASSERT_DELTA(v0, 2, 1.0E-8);
 
-     // 5. Clear filter
-     p1->clearFilter();
+    // 5. Clear filter
+    p1->clearFilter();
 
-     // -1. Clean
-     delete p1;
-     delete filter;
+    // -1. Clean
+    delete p1;
+    delete filter;
 
-     return;
-   }
+    return;
+  }
 
-   /*
-     * Test filterWith() on different boundary conditions
-     * Log_T0 < Filter_T0 <  < Filter_Tf  LogTf, T... F... T... F...
-     */
+  /*
+    * Test filterWith() on different boundary conditions
+    * Log_T0 < Filter_T0 <  < Filter_Tf  LogTf, T... F... T... F...
+    */
   void test_filterBoundary3() {
-      // 1. Create a base property
-      Mantid::Kernel::DateAndTime tStart("2007-11-30T16:17:00");
-      std::vector<double> deltaTs;
-      std::vector<double> valueXs;
+    // 1. Create a base property
+    Mantid::Kernel::DateAndTime tStart("2007-11-30T16:17:00");
+    std::vector<double> deltaTs;
+    std::vector<double> valueXs;
     for (int i = 0; i < 20; i++) {
       deltaTs.push_back(static_cast<double>(i) * 10.0);
       valueXs.push_back(static_cast<double>(i) + 1.0);
-      }
+    }
     TimeSeriesProperty<double> *p1 =
         new TimeSeriesProperty<double>("BaseProperty");
-      p1->create(tStart, deltaTs, valueXs);
+    p1->create(tStart, deltaTs, valueXs);
 
-      std::vector<Mantid::Kernel::DateAndTime> times = p1->timesAsVector();
-      std::vector<double> values = p1->valuesAsVector();
+    std::vector<Mantid::Kernel::DateAndTime> times = p1->timesAsVector();
+    std::vector<double> values = p1->valuesAsVector();
 
-      // 2. Create a filter for T. F. T. F...
-      TimeSeriesProperty<bool> *filter = new TimeSeriesProperty<bool>("Filter");
-      filter->addValue("2007-11-30T16:17:06", true);
-      filter->addValue("2007-11-30T16:17:16", false);
-      filter->addValue("2007-11-30T16:18:40", true);
-      filter->addValue("2007-11-30T16:19:30", false);
+    // 2. Create a filter for T. F. T. F...
+    TimeSeriesProperty<bool> *filter = new TimeSeriesProperty<bool>("Filter");
+    filter->addValue("2007-11-30T16:17:06", true);
+    filter->addValue("2007-11-30T16:17:16", false);
+    filter->addValue("2007-11-30T16:18:40", true);
+    filter->addValue("2007-11-30T16:19:30", false);
 
-      p1->filterWith(filter);
+    p1->filterWith(filter);
 
-      // 3. Check size
-      p1->countSize();
-      TS_ASSERT_EQUALS(p1->size(), 7);
+    // 3. Check size
+    p1->countSize();
+    TS_ASSERT_EQUALS(p1->size(), 7);
 
-      // 4. Check interval
-      Mantid::Kernel::TimeInterval dt1 = p1->nthInterval(1);
+    // 4. Check interval
+    Mantid::Kernel::TimeInterval dt1 = p1->nthInterval(1);
     TS_ASSERT_EQUALS(dt1.begin(),
                      Mantid::Kernel::DateAndTime("2007-11-30T16:17:10"));
     TS_ASSERT_EQUALS(dt1.end(),
                      Mantid::Kernel::DateAndTime("2007-11-30T16:17:16"));
-      double v1 = p1->nthValue(1);
-      TS_ASSERT_DELTA(v1, 2, 1.0E-8);
+    double v1 = p1->nthValue(1);
+    TS_ASSERT_DELTA(v1, 2, 1.0E-8);
 
-      Mantid::Kernel::TimeInterval dt2 = p1->nthInterval(2);
+    Mantid::Kernel::TimeInterval dt2 = p1->nthInterval(2);
     TS_ASSERT_EQUALS(dt2.begin(),
                      Mantid::Kernel::DateAndTime("2007-11-30T16:18:40"));
     TS_ASSERT_EQUALS(dt2.end(),
                      Mantid::Kernel::DateAndTime("2007-11-30T16:18:50"));
-      double v2 = p1->nthValue(2);
-      TS_ASSERT_DELTA(v2, 11, 1.0E-8);
+    double v2 = p1->nthValue(2);
+    TS_ASSERT_DELTA(v2, 11, 1.0E-8);
 
-      // 5. Clear filter
-      p1->clearFilter();
+    // 5. Clear filter
+    p1->clearFilter();
 
-      // -1. Clean
-      delete p1;
-      delete filter;
+    // -1. Clean
+    delete p1;
+    delete filter;
 
-      return;
-    }
+    return;
+  }
 
-    /*
-     * Test filterWith() on different boundary conditions
-     * Log_T0 < Filter_T0 <  < Filter_Tf  LogTf,  F... T... F... T... F...
-    */
+  /*
+   * Test filterWith() on different boundary conditions
+   * Log_T0 < Filter_T0 <  < Filter_Tf  LogTf,  F... T... F... T... F...
+  */
 
   void test_filterBoundary4() {
-      // 1. Create a base property
-      Mantid::Kernel::DateAndTime tStart("2007-11-30T16:17:00");
-      std::vector<double> deltaTs;
-      std::vector<double> valueXs;
+    // 1. Create a base property
+    Mantid::Kernel::DateAndTime tStart("2007-11-30T16:17:00");
+    std::vector<double> deltaTs;
+    std::vector<double> valueXs;
     for (int i = 0; i < 20; i++) {
       deltaTs.push_back(static_cast<double>(i) * 10.0);
       valueXs.push_back(static_cast<double>(i) + 1.0);
-      }
+    }
     TimeSeriesProperty<double> *p1 =
         new TimeSeriesProperty<double>("BaseProperty");
-      p1->create(tStart, deltaTs, valueXs);
+    p1->create(tStart, deltaTs, valueXs);
 
-      std::vector<Mantid::Kernel::DateAndTime> times = p1->timesAsVector();
-      std::vector<double> values = p1->valuesAsVector();
+    std::vector<Mantid::Kernel::DateAndTime> times = p1->timesAsVector();
+    std::vector<double> values = p1->valuesAsVector();
 
-      // 2. Create a filter for T. F. T. F...
-      TimeSeriesProperty<bool> *filter = new TimeSeriesProperty<bool>("Filter");
-      filter->addValue("2007-11-30T16:17:06", false);
-      filter->addValue("2007-11-30T16:17:16", true);
-      filter->addValue("2007-11-30T16:18:40", false);
-      filter->addValue("2007-11-30T16:19:30", true);
+    // 2. Create a filter for T. F. T. F...
+    TimeSeriesProperty<bool> *filter = new TimeSeriesProperty<bool>("Filter");
+    filter->addValue("2007-11-30T16:17:06", false);
+    filter->addValue("2007-11-30T16:17:16", true);
+    filter->addValue("2007-11-30T16:18:40", false);
+    filter->addValue("2007-11-30T16:19:30", true);
 
-      p1->filterWith(filter);
+    p1->filterWith(filter);
 
-      // 3. Check size
-      p1->countSize();
-      TS_ASSERT_EQUALS(p1->size(), 14);
+    // 3. Check size
+    p1->countSize();
+    TS_ASSERT_EQUALS(p1->size(), 14);
 
-      // 4. Check interval
-      Mantid::Kernel::TimeInterval dt0 = p1->nthInterval(0);
+    // 4. Check interval
+    Mantid::Kernel::TimeInterval dt0 = p1->nthInterval(0);
     TS_ASSERT_EQUALS(dt0.begin(),
                      Mantid::Kernel::DateAndTime("2007-11-30T16:17:16"));
     TS_ASSERT_EQUALS(dt0.end(),
                      Mantid::Kernel::DateAndTime("2007-11-30T16:17:20"));
-      double v0 = p1->nthValue(0);
-      TS_ASSERT_DELTA(v0, 2, 1.0E-8);
+    double v0 = p1->nthValue(0);
+    TS_ASSERT_DELTA(v0, 2, 1.0E-8);
 
-      // 5. Clear filter
-      p1->clearFilter();
+    // 5. Clear filter
+    p1->clearFilter();
 
-      // -1. Clean
-      delete p1;
-      delete filter;
+    // -1. Clean
+    delete p1;
+    delete filter;
 
-      return;
-    }
+    return;
+  }
 
   /*
    * Test getMemorySize()

@@ -116,9 +116,10 @@ public:
   virtual ~TimeSeriesProperty();
   /// "Virtual" copy constructor
   TimeSeriesProperty<TYPE> *clone() const;
-  // 
-  /// Return time series property, containing time derivative of current property
-  std::unique_ptr<TimeSeriesProperty<double> > getDerivative() const;
+  //
+  /// Return time series property, containing time derivative of current
+  /// property
+  std::unique_ptr<TimeSeriesProperty<double>> getDerivative() const;
 
   /// "Virtual" copy constructor with a time shift in seconds
   virtual Property *cloneWithTimeShift(const double timeShift) const;
@@ -280,9 +281,8 @@ public:
   /**Reserve memory for efficient adding values to existing property
     * makes sense only when you have reasonably precise estimate of the
     * total size you'll need easily available in advance.  */
-  void reserve(size_t size){
-    m_values.reserve(size);
-  };
+  void reserve(size_t size) { m_values.reserve(size); };
+
 private:
   /// Sort the property into increasing times
   void sort() const;

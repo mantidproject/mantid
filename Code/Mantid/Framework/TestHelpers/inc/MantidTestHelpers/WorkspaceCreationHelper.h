@@ -179,7 +179,7 @@ void addNoise(Mantid::API::MatrixWorkspace_sptr ws, double noise,
  * Create a test workspace with a fully defined instrument
  * Each spectra will have a cylindrical detector defined 2*cylinder_radius away
  * from the centre of the previous.
- * 
+ *
  * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0
  */
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithFullInstrument(

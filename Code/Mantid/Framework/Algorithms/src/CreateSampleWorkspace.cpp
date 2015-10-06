@@ -251,24 +251,32 @@ void CreateSampleWorkspace::exec() {
   ;
 }
 /** Add chopper to the existing matrix workspace
-@param ws  -- shared pointer to existing matrix workspace which has instrument and chopper
+@param ws  -- shared pointer to existing matrix workspace which has instrument
+and chopper
 
-@returns workspace modified to have Fermi chopper added to it. 
+@returns workspace modified to have Fermi chopper added to it.
 */
-void CreateSampleWorkspace::addChopperParameters(API::MatrixWorkspace_sptr &ws){
+void CreateSampleWorkspace::addChopperParameters(
+    API::MatrixWorkspace_sptr &ws) {
 
   auto testInst = ws->getInstrument();
   auto chopper = testInst->getComponentByName("chopper-position");
 
   // add chopper parameters
   auto &paramMap = ws->instrumentParameters();
-  const std::string description("The initial rotation phase of the disk used to calculate the time"
-  " for neutrons arriving at the chopper according to the formula time = delay + initial_phase/Speed");
-  paramMap.add<double>("double", chopper.get(),"initial_phase",-3000.,&description);
-  paramMap.add<std::string>("string",chopper.get(),"ChopperDelayLog","fermi_delay");
-  paramMap.add<std::string>("string",chopper.get(),"ChopperSpeedLog","fermi_speed");
-  paramMap.add<std::string>("string",chopper.get(),"FilterBaseLog","is_running");
-  paramMap.add<bool>("bool",chopper.get(),"filter_with_derivative",false);
+  const std::string description(
+      "The initial rotation phase of the disk used to calculate the time"
+      " for neutrons arriving at the chopper according to the formula time = "
+      "delay + initial_phase/Speed");
+  paramMap.add<double>("double", chopper.get(), "initial_phase", -3000.,
+                       &description);
+  paramMap.add<std::string>("string", chopper.get(), "ChopperDelayLog",
+                            "fermi_delay");
+  paramMap.add<std::string>("string", chopper.get(), "ChopperSpeedLog",
+                            "fermi_speed");
+  paramMap.add<std::string>("string", chopper.get(), "FilterBaseLog",
+                            "is_running");
+  paramMap.add<bool>("bool", chopper.get(), "filter_with_derivative", false);
 }
 
 /** Create histogram workspace
@@ -499,14 +507,12 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
   source->setPos(V3D(0.0, 0.0, -sourceSampleDistance));
   testInst->add(source);
   testInst->markAsSource(source);
- 
+
   // Add chopper
-  ObjComponent *chopper = 
-      new ObjComponent("chopper-position", Object_sptr(new Object), testInst.get());
-  chopper->setPos(V3D(0.0, 0.0, -0.25*sourceSampleDistance));
+  ObjComponent *chopper = new ObjComponent(
+      "chopper-position", Object_sptr(new Object), testInst.get());
+  chopper->setPos(V3D(0.0, 0.0, -0.25 * sourceSampleDistance));
   testInst->add(chopper);
-
-
 
   // Define a sample as a simple sphere
   Object_sptr sampleSphere =
