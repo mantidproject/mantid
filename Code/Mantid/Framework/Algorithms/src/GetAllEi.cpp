@@ -27,7 +27,7 @@ namespace Mantid {
       // half maximal resolution for LET
       m_max_Eresolution(0.5e-3),
       m_peakEnergyRatio2reject(0.1),
-      m_phase(0){}
+      m_phase(0),m_chopper(){}
 
     /// Initialization method.
     void GetAllEi::init() {
@@ -165,11 +165,11 @@ namespace Mantid {
       auto pInstrument = inputWS->getInstrument();
       //auto lastChopPositionComponent = pInstrument->getComponentByName("chopper-position");
       //auto chopPoint1 = pInstrument->getChopperPoint(0); ->TODO: BUG! this operation loses parameters map.
-      auto chopPoint  = pInstrument->getComponentByName("chopper-position");
-      if(!chopPoint)throw std::runtime_error("Instrument "+pInstrument->getName()+
+      m_chopper = pInstrument->getComponentByName("chopper-position");
+      if(!m_chopper)throw std::runtime_error("Instrument "+pInstrument->getName()+
         " does not have 'chopper-position' component");
 
-      auto phase = chopPoint->getNumberParameter("initial_phase");
+      auto phase = m_chopper->getNumberParameter("initial_phase");
 
       if(phase.size()==0){
          throw std::runtime_error("Can not find initial_phase parameter"
@@ -182,12 +182,22 @@ namespace Mantid {
       m_phase = phase[0];
       std::string filterBase = getProperty("FilterBaseLog");
       if(boost::iequals(filterBase, "Defined in IDF")){
-        m_FilterLogName        = chopPoint->getStringParameter("FilterBaseLog")[0];
-        m_FilterWithDerivative = chopPoint->getBoolParameter("filter_with_derivative")[0];
+        m_FilterLogName        = m_chopper->getStringParameter("FilterBaseLog")[0];
+        m_FilterWithDerivative = m_chopper->getBoolParameter("filter_with_derivative")[0];
       }else{
         m_FilterLogName        = filterBase;
         m_FilterWithDerivative = getProperty("FilterWithDerivative");
       }
+      try{
+        auto pTimeSeries = dynamic_cast<Kernel::TimeSeriesProperty<double> *>
+            (inputWS->run().getProperty(m_FilterLogName));
+      }catch(std::runtime_error &){
+        g_log.warning()<<" Can not retrieve (double) filtering log: "+m_FilterLogName+" from current workspace\n"
+          " Using total experiment range to find logs averages for chopper parameters\n";
+        m_FilterLogName="";
+        m_FilterWithDerivative=false;
+      }
+
       //auto chopPoint1  = pInstrument->getComponentByName("fermi-chopper");
       //auto par = chopPoint1->getDoubleParameter("Delay (us)");
       double chopSpeed,chopDelay;
@@ -199,8 +209,8 @@ namespace Mantid {
 
       
       auto moderator       = pInstrument->getSource();
-      double chopDistance  = chopPoint->getDistance(*moderator); //location[0].distance(moderator->getPos());
-      double velocity  = chopDistance/chopDelay;
+      double chopDistance  = m_chopper->getDistance(*moderator); //location[0].distance(moderator->getPos());
+      double velocity      = chopDistance/chopDelay;
 
       // build workspace to find monitor's peaks
       size_t det1WSIndex;
@@ -801,16 +811,14 @@ namespace Mantid {
     *@param -- propertyName name of the property to find log for
     *
     *@return -- pointer to property which contain the log requested or nullptr if
-    *           no log found or othr errors identified.
+    *           no log found or other errors identified.
     */
     Kernel::Property *  GetAllEi::getPLogForProperty(const API::MatrixWorkspace_sptr &inputWS,
     const std::string &propertyName){
 
         std::string LogName = this->getProperty(propertyName);
         if(boost::iequals(LogName, "Defined in IDF")){
-            auto chopper = inputWS->getInstrument()->getComponentByName("chopper-position");
-            if(!chopper)return nullptr;
-            auto AllNames = chopper->getStringParameter(propertyName);
+            auto AllNames = m_chopper->getStringParameter(propertyName);
             if(AllNames.size()!=1)return nullptr;
             LogName = AllNames[0];
         }

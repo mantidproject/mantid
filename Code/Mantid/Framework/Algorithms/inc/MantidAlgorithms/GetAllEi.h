@@ -102,6 +102,8 @@ protected: // for testing, private otherwise.
   // the value of constant phase shift on the chopper used to calculate
   // tof at chopper from recorded delay.
   double m_phase;
+  // internal poínter to accelerate access to chopper
+  boost::shared_ptr<const Geometry::IComponent> m_chopper;
 };
 
 } // namespace Algorithms
