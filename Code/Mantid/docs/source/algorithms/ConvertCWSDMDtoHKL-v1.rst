@@ -62,14 +62,14 @@ Usage
 
   # Create input table workspaces for experiment information and virtual instrument parameters
   CollectHB3AExperimentInfo(ExperimentNumber='406', ScanList='298', PtLists='-1,22', 
-      DataDirectory='/home/wzz/Temp/HB3ATest',
+      DataDirectory='',
       GenerateVirtualInstrument=False,
       OutputWorkspace='ExpInfoTable', DetectorTableWorkspace='VirtualInstrumentTable')
 
   # Convert to MDWorkspace
   ConvertCWSDExpToMomentum(InputWorkspace='ExpInfoTable', CreateVirtualInstrument=False, 
       OutputWorkspace='QSampleMD',
-      Directory='/home/wzz/Temp/HB3ATest')
+      Directory='')
       
   ConvertCWSDMDtoHKL(InputWorkspace='QSampleMD', 
                 UBMatrix='0.13329061, 0.07152342, -0.04215966, 0.01084569, -0.1620849, 0.0007607, -0.14018499, -0.07841385, -0.04002737',
