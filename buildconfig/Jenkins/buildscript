@@ -97,12 +97,12 @@ fi
 ###############################################################################
 if [[ $(uname) == 'Darwin' ]] && [[ ! $USE_CLANG ]]; then
   # Assuming we are using the Intel compiler
-  cd $WORKSPACE/Code
+  cd $WORKSPACE
   ./fetch_Third_Party.sh
   cd $WORKSPACE
   # Setup environment variables
   source /opt/intel/bin/iccvars.sh intel64
-  export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$WORKSPACE/Code/Third_Party/lib/mac64:/Library/Frameworks
+  export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$WORKSPACE/Third_Party/lib/mac64:/Library/Frameworks
   # Make sure we pick up the Intel compiler
   export CC=icc
   export CXX=icpc
@@ -183,7 +183,7 @@ rm -f *.dmg *.rpm *.deb *.tar.gz
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON ${PACKAGINGVARS} ../Code/Mantid"
+$SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON ${PACKAGINGVARS} .."
 
 ###############################################################################
 # Coverity build should exit early
@@ -260,4 +260,4 @@ fi
 ###############################################################################
 if [[ "${ON_RHEL7}" == true ]] && [[ ${JOB_NAME} == *pull_requests* ]]; then
   $SCRIPT_DIR/systemtests
-fi
+	fi

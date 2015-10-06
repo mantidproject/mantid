@@ -1,27 +1,18 @@
 #!/bin/bash -ex
 ###############################################################################
-# LINUX/MAC SCRIPT TO DRIVE THE JENKINS DOCUMENTATION TESTS OF MANTID.
+# LINUX/MAC SCRIPT TO DRIVE THE SYSTEM TESTS OF MANTID
 #
 # Notes:
 #
-# WORKSPACE, JOB_NAME, NODE_LABEL GIT_COMMIT are environment variables that
+# WORKSPACE, JOB_NAME, NODE_LABEL GIT_COMMIT are environment variables that 
 # are set by Jenkins. The last one corresponds to any labels set on a slave.
-# MANTID_DATA_STORE should be set in the configuration of each
-# slave.
 ###############################################################################
 
 ###############################################################################
 # Print out the versions of things we are using
 ###############################################################################
 cmake --version
-
-#####################################################################################
-# Find and install package
-#####################################################################################
-INSTALLER_SCRIPT=$WORKSPACE/Code/Mantid/Testing/SystemTests/scripts/mantidinstaller.py
-EXE_PATH_FILE=$PWD/mantidplotpath.txt
-python ${INSTALLER_SCRIPT} install $WORKSPACE --dump-exe-path=${EXE_PATH_FILE}
-MANTIDPLOT_EXE=$(cat ${EXE_PATH_FILE})
+echo "SHA1=${sha1}"
 
 ###############################################################################
 # Set up the location for the local object store outside of the build and
@@ -50,38 +41,33 @@ fi
 cd $WORKSPACE/build
 
 ###############################################################################
-# CMake configuration. We only need a minimal configuration as we will actually
-# just run from the package
+# CMake configuration if it has not already been configured.
+# We use the special flag that only creates the targets for the data
 ###############################################################################
-$SCL_ON_RHEL6 "cmake -DMANTID_DATA_STORE=${MANTID_DATA_STORE} ../Code/Mantid"
+if [[ ! -e $WORKSPACE/build/CMakeCache.txt ]]; then
+  $SCL_ON_RHEL6 "cmake -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDATA_TARGETS_ONLY=ON .."
+else
+  $SCL_ON_RHEL6 "cmake ."
+fi
 
 ###############################################################################
 # Build step
 ###############################################################################
 $SCL_ON_RHEL6 "cmake --build . -- StandardTestData"
+$SCL_ON_RHEL6 "cmake --build . -- SystemTestData"
 
-#####################################################################################
-# Run tests
-#####################################################################################
-# Create clean user properties with UsageData search path
+###############################################################################
+# Run the tests
+###############################################################################
+# Remove any Mantid.user.properties file
 userprops=~/.mantid/Mantid.user.properties
 rm -f $userprops
-
-data_binary_root=${WORKSPACE}/build/ExternalData
-testdata_dir=${data_binary_root}/Testing/Data
-instrument_dir=${WORKSPACE}/Code/Mantid/instrument
-echo "datasearch.directories=${testdata_dir}/DocTest;${testdata_dir}/UnitTest;${instrument_dir}" > $userprops
-echo "UpdateInstrumentDefinitions.OnStartup = 0" >> $userprops
+# Turn off usage reports and instrument downloading for the mantid call
+# that creates the properties file
+echo "UpdateInstrumentDefinitions.OnStartup = 0" > $userprops
 echo "usagereports.enabled = 0" >> $userprops
 
-set +e #don't immediately exit on failure so that we can remove the package
-${MANTIDPLOT_EXE} -xq docs/runsphinx_doctest.py
-status=$?
-set -e #exit on failures from now on
+# Run
+PKGDIR=${WORKSPACE}/build
+python $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR
 
-#####################################################################################
-# Remove package
-#####################################################################################
-python ${INSTALLER_SCRIPT} uninstall $WORKSPACE
-
-exit $status
