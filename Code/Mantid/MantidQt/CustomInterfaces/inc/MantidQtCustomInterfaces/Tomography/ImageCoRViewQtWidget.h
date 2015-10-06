@@ -59,13 +59,15 @@ public:
 
   ImageStackPreParams userSelection() const;
 
-  void changeSelectionState(const SelectionState state);
+  SelectionState selectionState() const { return m_selectionState; }
+
+  void changeSelectionState(const SelectionState& state);
 
   /// show a stack of images given the path to the files
   void showStack(const std::string &path);
 
   /// show a stack of images that have been loaded into a group of workspaces
-  void showStack(Mantid::API::WorkspaceGroup_sptr &ws, const std::string &path);
+  void showStack(Mantid::API::WorkspaceGroup_sptr &ws);
 
   const Mantid::API::WorkspaceGroup_sptr stack() const { return m_stack; }
 
@@ -95,6 +97,20 @@ protected:
   void grabROIFromWidgets();
   void grabNormAreaFromWidgets();
 
+  void grabCoRFromMousePoint(int x, int y);
+  void grabROICorner1FromMousePoint(int x, int y);
+  void grabROICorner2FromMousePoint(int x, int y);
+  void grabNormAreaCorner1FromMousePoint(int x, int y);
+  void grabNormAreaCorner2FromMousePoint(int x, int y);
+
+  void mouseUpdateCoR(int x, int y);
+  void mouseUpdateROICorners12(int x, int y);
+  void mouseUpdateROICorner2(int x, int y);
+  void mouseFinishROI(int x, int y);
+  void mouseUpdateNormAreaCorners12(int x, int y);
+  void mouseUpdateNormAreaCorner2(int x, int y);
+  void mouseFinishNormArea(int x, int y);
+
 private slots:
   void browseImgClicked();
 
@@ -119,6 +135,9 @@ private:
   // widget closing
   virtual void closeEvent(QCloseEvent *ev);
 
+  /// enable/disable the groups with spin boxes for the center and corners
+  void enableParamWidgets(bool enable);
+  /// initialize values to defaults and set max/min for the spin boxes
   void initParamWidgets(size_t maxWidth, size_t maxHeight);
 
   void setParamWidgets(ImageStackPreParams &params);
@@ -147,6 +166,9 @@ private:
 
   /// parameters currently set by the user
   ImageStackPreParams m_params;
+
+  /// max image size for the current stack
+  int m_imgWidth, m_imgHeight;
 
   /// are we picking the CoR, or the first point of the ROI, etc.
   SelectionState m_selectionState;

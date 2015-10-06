@@ -73,11 +73,20 @@ public:
   virtual ImageStackPreParams userSelection() const = 0;
 
   /**
+   * The current selection state. For example: nothin/initialized,
+   * selecting CoR, selecting second corner of the normalization area,
+   * selecting first corner of the ROI.
+   *
+   * @return current state
+   */
+  virtual SelectionState selectionState() const = 0;
+
+  /**
    * Update to a new state (for example select CoR).
    *
    * @param new state we're transitioning into.
    */
-  virtual void changeSelectionState(const SelectionState state) = 0;
+  virtual void changeSelectionState(const SelectionState& state) = 0;
 
   /**
    * Display a special case of stack of images: individual image, from
@@ -106,8 +115,7 @@ public:
    * workspace group was loaded, in whatever directory layout is being
    * used (unknown to this view).
    */
-  virtual void showStack(Mantid::API::WorkspaceGroup_sptr &ws,
-                         const std::string &m_stackPath) = 0;
+  virtual void showStack(Mantid::API::WorkspaceGroup_sptr &ws) = 0;
 
   /**
    * Get the stack of images currently being displayed (it has been

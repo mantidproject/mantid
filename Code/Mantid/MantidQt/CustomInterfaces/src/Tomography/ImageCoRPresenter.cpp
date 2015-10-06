@@ -157,7 +157,7 @@ void ImageCoRPresenter::processNewStack() {
     return;
   }
 
-  m_view->showStack(wsg, m_stackPath);
+  m_view->showStack(wsg);
 
   // clean-up container group workspace? Not for now
   if (false && wsg)
@@ -180,11 +180,17 @@ void ImageCoRPresenter::processSelectNormalization() {
   m_view->changeSelectionState(IImageCoRView::SelectNormAreaFirst);
 }
 
-void ImageCoRPresenter::processFinishedCoR() {}
+void ImageCoRPresenter::processFinishedCoR() {
+  m_view->changeSelectionState(IImageCoRView::SelectNone);
+}
 
-void ImageCoRPresenter::processFinishedROI() {}
+void ImageCoRPresenter::processFinishedROI() {
+  m_view->changeSelectionState(IImageCoRView::SelectNone);
+}
 
-void ImageCoRPresenter::processFinishedNormalization() {}
+void ImageCoRPresenter::processFinishedNormalization() {
+  m_view->changeSelectionState(IImageCoRView::SelectNone);
+}
 
 void ImageCoRPresenter::processResetCoR() {
   m_view->resetCoR();

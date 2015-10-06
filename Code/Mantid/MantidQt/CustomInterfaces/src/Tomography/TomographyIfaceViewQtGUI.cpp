@@ -74,7 +74,7 @@ void TomographyIfaceViewQtGUI::initLayout() {
   m_ui.tabMain->addTab(tabSetupW, QString("Setup"));
 
   ImageCoRViewQtWidget *tabCoRW = new ImageCoRViewQtWidget(m_ui.tabMain);
-  m_ui.tabMain->addTab(tabCoRW, QString("Center && ROI"));
+  m_ui.tabMain->addTab(tabCoRW, QString("ROI etc."));
 
   QWidget *tabFiltersW = new QWidget();
   m_ui.tabMain->addTab(tabFiltersW, QString("Filters"));
