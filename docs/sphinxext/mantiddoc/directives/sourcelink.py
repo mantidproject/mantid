@@ -142,7 +142,14 @@ class SourceLinkDirective(AlgorithmBaseDirective):
         """
         Fills the file_lookup dictionary after parsing the source code
         """
+        env = self.state.document.settings.env
+        builddir = env.doctreedir # there should be a better setting option
+        builddir = os.path.join(builddir, "..", "..")
+        builddir = os.path.abspath(builddir)
+
         for dirName, subdirList, fileList in os.walk(self.source_root):
+            if dirName.startswith(builddir):
+                continue # don't check or add to the cache
             for fname in fileList:
                 (baseName, fileExtension) = os.path.splitext(fname)
                 #strip the dot from the extension
