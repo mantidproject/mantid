@@ -80,8 +80,8 @@ public:
     CrystalStructure si("5.43 5.43 5.43", "F m -3 m",
                         "Si 0.3 0.3 0.3 1.0 0.05");
 
-    ReflectionGenerator generator(
-        si, ReflectionConditionFilter::StructureFactor);
+    ReflectionGenerator generator(si,
+                                  ReflectionConditionFilter::StructureFactor);
 
     std::vector<V3D> hklsCentering = generator.getUniqueHKLs(
         0.6, 10.0, boost::make_shared<HKLFilterCentering>(si.centering()));

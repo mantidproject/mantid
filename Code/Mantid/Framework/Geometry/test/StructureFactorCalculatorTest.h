@@ -54,8 +54,9 @@ public:
     MockStructureFactorCalculator calculator;
 
     int numHKLs = 10;
-    EXPECT_CALL(calculator, getF(_)).Times(numHKLs).WillRepeatedly(
-        Return(StructureFactor(2.0, 2.0)));
+    EXPECT_CALL(calculator, getF(_))
+        .Times(numHKLs)
+        .WillRepeatedly(Return(StructureFactor(2.0, 2.0)));
 
     std::vector<V3D> hkls(numHKLs);
     std::vector<StructureFactor> sfs = calculator.getFs(hkls);
@@ -73,8 +74,9 @@ public:
     MockStructureFactorCalculator calculator;
 
     int numHKLs = 10;
-    EXPECT_CALL(calculator, getF(_)).Times(numHKLs).WillRepeatedly(
-        Return(StructureFactor(2.0, 2.0)));
+    EXPECT_CALL(calculator, getF(_))
+        .Times(numHKLs)
+        .WillRepeatedly(Return(StructureFactor(2.0, 2.0)));
 
     std::vector<V3D> hkls(numHKLs);
     std::vector<double> sfsSquared = calculator.getFsSquared(hkls);

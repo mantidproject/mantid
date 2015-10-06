@@ -85,13 +85,13 @@ protected:
 
 public:
   MockChopper() : PoldiAbstractChopper() {
-    double slits[] = { 0.000000, 0.162156, 0.250867, 0.3704,
-                       0.439811, 0.588455, 0.761389, 0.895667 };
+    double slits[] = {0.000000, 0.162156, 0.250867, 0.3704,
+                      0.439811, 0.588455, 0.761389, 0.895667};
     m_slitPositions =
         std::vector<double>(slits, slits + sizeof(slits) / sizeof(slits[0]));
 
-    double times[] = { 0.000000, 243.234, 376.3,   555.6,
-                       659.716,  882.682, 1142.08, 1343.5 };
+    double times[] = {0.000000, 243.234, 376.3,   555.6,
+                      659.716,  882.682, 1142.08, 1343.5};
     m_slitTimes =
         std::vector<double>(times, times + sizeof(times) / sizeof(times[0]));
   }

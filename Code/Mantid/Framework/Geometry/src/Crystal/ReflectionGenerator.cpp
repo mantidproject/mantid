@@ -25,7 +25,7 @@ ReflectionGenerator::ReflectionGenerator(
     ReflectionConditionFilter defaultFilter)
     : m_crystalStructure(crystalStructure),
       m_sfCalculator(StructureFactorCalculatorFactory::create<
-                     StructureFactorCalculatorSummation>(m_crystalStructure)),
+          StructureFactorCalculatorSummation>(m_crystalStructure)),
       m_defaultHKLFilter(getReflectionConditionFilter(defaultFilter)) {}
 
 /// Returns the internally stored crystal structure

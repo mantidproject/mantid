@@ -56,7 +56,7 @@ protected:
 };
 
 typedef boost::shared_ptr<StructureFactorCalculatorSummation>
-StructureFactorSummation_sptr;
+    StructureFactorSummation_sptr;
 
 } // namespace Geometry
 } // namespace Mantid

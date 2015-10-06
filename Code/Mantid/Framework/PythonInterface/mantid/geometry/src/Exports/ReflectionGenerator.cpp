@@ -66,8 +66,8 @@ void export_ReflectionGenerator() {
       .export_values();
 
   class_<ReflectionGenerator>("ReflectionGenerator", no_init)
-      .def(init<const CrystalStructure &, optional<ReflectionConditionFilter> >(
-           (arg("crystalStructure"), arg("defaultFilter"))))
+      .def(init<const CrystalStructure &, optional<ReflectionConditionFilter>>(
+          (arg("crystalStructure"), arg("defaultFilter"))))
       .def("getHKLs", &getHKLsDefaultFilter)
       .def("getHKLsUsingFilter", &getHKLsUsingFilter)
       .def("getUniqueHKLs", &getUniqueHKLsDefaultFilter)
