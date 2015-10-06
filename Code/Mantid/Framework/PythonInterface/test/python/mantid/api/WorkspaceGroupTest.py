@@ -60,11 +60,8 @@ class WorkspaceGroupTest(unittest.TestCase):
         group = mtd['group']
         self.assertEquals(group.getName(), "group")
         self.assertEquals(type(group), WorkspaceGroup)
-        try:
-            w = Scale(group, 1.5)
-            mtd.remove(str(w))
-        except Exception, exc:
-            self.fail("Algorithm raised an exception with input as WorkspaceGroup: '" + str(exc) + "'")
+        w = Scale(group, 1.5)
+        mtd.remove(str(w))
         mtd.remove(str(group))
 
     def test_complex_binary_operations_with_group_do_not_leave_temporary_workspaces_in_ADS(self):

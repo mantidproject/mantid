@@ -1,8 +1,12 @@
-import unittest
-from mantid.api import (AlgorithmFactory, AlgorithmProxy, IAlgorithm, IEventWorkspace, ITableWorkspace,
-                        PythonAlgorithm, MatrixWorkspace, mtd, WorkspaceGroup)
-import mantid.simpleapi as simpleapi
 import numpy
+import unittest
+from mantid.api import (AlgorithmFactory, AlgorithmManager, AlgorithmProxy, AnalysisDataService,
+                        IAlgorithm, IEventWorkspace, ITableWorkspace, PropertyMode,
+                        PythonAlgorithm, MatrixWorkspace, MatrixWorkspaceProperty, mtd,
+                        WorkspaceFactory, WorkspaceGroup)
+from mantid.kernel import Direction
+import mantid.simpleapi as simpleapi
+from testhelpers import WorkspaceCreationHelper
 
 #======================================================================================================================
 
@@ -59,6 +63,33 @@ FullBinsOnly(Input) *boolean*       Omit the final bin if it's width is smaller 
         wavelength = simpleapi.CreateWorkspace(data,data,NSpec=3,UnitX='Wavelength')
         simpleapi.MaskDetectors(wavelength,WorkspaceIndexList=[1,2])
         
+    def test_function_call_accepts_workspace_not_in_ADS_for_top_level_call(self):
+        test_ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(1, 10)
+        simpleapitest_rebinned = simpleapi.Rebin(test_ws, Params=[0.0,2.0,10.0])
+        self.assertTrue(isinstance(simpleapitest_rebinned, MatrixWorkspace))
+        self.assertEquals("simpleapitest_rebinned", simpleapitest_rebinned.name())
+        AnalysisDataService.remove("simpleapitest_rebinned")
+
+    def test_function_call_accepts_workspace_not_in_ADS_for_call_as_child(self):
+        class FooAlgorithm(PythonAlgorithm):
+            def PyInit(self):
+              pass
+            def PyExec(self):
+                test_ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(1, 10)
+                simpleapitest_rebinned2 = simpleapi.Rebin(test_ws, Params=[0.0,2.0,10.0])
+        #end
+        AlgorithmFactory.subscribe(FooAlgorithm)
+        # temporarily attach it to simpleapi module
+        name="FooAlgorithm"
+        algm_object = AlgorithmManager.createUnmanaged(name, 1)
+        algm_object.initialize()
+        simpleapi._create_algorithm_function(name, 1, algm_object) # Create the wrapper
+        # execute
+        simpleapi.FooAlgorithm()
+        self.assertTrue("simpleapitest_rebinned2" in AnalysisDataService)
+        AnalysisDataService.remove("simpleapitest_rebinned2")
+
+
     def test_function_accepts_EnableLogging_keyword(self):
         # The test here is that the algorithm runs without falling over about the EnableLogging keyword being a property
         wsname = 'test_function_call_executes_correct_algorithm_when_passed_correct_args'
@@ -218,8 +249,6 @@ FullBinsOnly(Input) *boolean*       Omit the final bin if it's width is smaller 
 
     def test_optional_workspaces_are_ignored_if_not_present_in_output_even_if_given_as_input(self):
         # Test algorithm
-        from mantid.api import AlgorithmManager,PropertyMode,PythonAlgorithm,MatrixWorkspaceProperty,WorkspaceFactory
-        from mantid.kernel import Direction
         class OptionalWorkspace(PythonAlgorithm):
             def PyInit(self):
                 self.declareProperty(MatrixWorkspaceProperty("RequiredWorkspace", "", Direction.Output))

@@ -30,6 +30,8 @@ from mantid import apiVersion, __gui__
 from mantid.kernel._aliases import *
 from mantid.api._aliases import *
 
+import sys
+
 #------------------------ Specialized function calls --------------------------
 # List of specialized algorithms
 __SPECIALIZED_FUNCTIONS__ = ["Load", "CutMD"]
@@ -707,14 +709,22 @@ def set_properties(alg_object, *args, **kwargs):
         value = kwargs[key]
         if value is None:
             continue
-        # The correct parent/child relationship is not quite set up yet: #5157
-        # ChildAlgorithms in Python are marked as children but their output is in the
-        # ADS meaning we cannot just set DataItem properties by value. At the moment
-        # they are just set with strings
-        if isinstance(value, _kernel.DataItem):
+        # This is unpleasant. A WorkspaceGroup object is currently required to be in the ADS
+        # so we have to set it by string value
+        # Also, any DataItem that 'could' be in the ADS needs to have its string value set
+        # as well otherwise it can't be added to the ADS at the end as the required name
+        # will be empty
+        if isinstance(value, _api.WorkspaceGroup):
             alg_object.setPropertyValue(key, value.name())
         else:
+            # Use the actual object type first
             alg_object.setProperty(key, value)
+            # Only try a string if its a dataobject and the string is not empty as
+            # the WorkspaceProperty will throw and clear the pointer!
+            if isinstance(value, _kernel.DataItem):
+                name = value.name()
+                if name:
+                    alg_object.setPropertyValue(key, name)
 
 def _create_algorithm_function(algorithm, version, _algm_object):
     """
