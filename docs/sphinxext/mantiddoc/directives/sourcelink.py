@@ -45,7 +45,10 @@ class SourceLinkDirective(AlgorithmBaseDirective):
     file_types = {"h":"C++ header", "cpp":"C++ source","py":"Python"}
     file_lookup = {}
 
-    mantid_directory_cache=None
+
+    # will be filled in
+    __source_root=None
+
 
     def execute(self):
         """
@@ -121,24 +124,25 @@ class SourceLinkDirective(AlgorithmBaseDirective):
             #value is not present
             return None
 
-    def get_mantid_directory(self):
+    @property
+    def source_root(self):
         """
-        returns the Code\Mantid directory
+        returns the root source directory
         """
-        if self.mantid_directory_cache is None:
+        if self.__source_root is None:
             env = self.state.document.settings.env
             direc = env.srcdir #= C:\Mantid\Code\Mantid\docs\source
             direc = os.path.join(direc, "..", "..") # assume root is two levels up
             direc = os.path.abspath(direc)
 
-            self.mantid_directory_cache = direc
-        return self.mantid_directory_cache
+            self.__source_root = direc
+        return self.__source_root
 
     def parse_source_tree(self):
         """
         Fills the file_lookup dictionary after parsing the source code
         """
-        for dirName, subdirList, fileList in os.walk(self.get_mantid_directory()):
+        for dirName, subdirList, fileList in os.walk(self.source_root):
             for fname in fileList:
                 (baseName, fileExtension) = os.path.splitext(fname)
                 #strip the dot from the extension
@@ -208,7 +212,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
 
         url = file_path
         # remove the directory path
-        url = url.replace(self.get_mantid_directory(), "")
+        url = url.replace(self.source_root, "")
         #harmonize slashes
         url = url.replace("\\","/")
         #prepend the github part
