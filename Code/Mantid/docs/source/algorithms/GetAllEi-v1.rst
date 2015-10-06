@@ -16,21 +16,22 @@ These estimates can be used as guess value for  :ref:`algm-GetEi` algorithm or a
 Algorithm performs number of steps to identify the values requested:
 
 #. It takes appropriate log names from instrument definition file (IDF), namely chopper-position component and calculates last chopper speed and delay as average
-of the filtered log values. Guess chopper opening times are calculated from chopper speed and delay time. The "chopper-position" component with appropriate properties 
-has to be present in IDF for this algorithm to work. See ISIS MARI or MAPS instrument definition files for example of "chopper-position" component.
+   of the filtered log values. Guess chopper opening times are calculated from chopper speed and delay time. The "chopper-position" component with appropriate properties 
+   has to be present in IDF for this algorithm to work. See ISIS MARI or MAPS instrument definition files for example of "chopper-position" component.
 
 #. Algorithm uses estimate for the minimal energy resolution of an instrument and searches for real peaks around guess values obtained 
-earlier within 4 sigma of this resolution interval.
+   earlier within 4 sigma of this resolution interval.
 
 #. If peaks are found, the algorithm performs running averages over signal in the appropriate time interval until first derivative 
-of the signal has only one zero. This value is returned as the guess energy and the distance between closest to 
-the guess energy zeros of the second derivative are returned as the guess values for the peak width. The peak amplitude 
-is estimated from the total intensity of the signal within the search interval, assuming that the peak shape is Gaussian.
+   of the signal has only one zero. The position of this zero is returned as the guess energy and the distance between closest to 
+   the guess energy zeros of the second derivative are returned as the guess values for the peak width. The peak amplitude 
+   is estimated from the total intensity of the signal within the search interval, assuming that the peak shape is Gaussian.
 
-#. Similar procedure is performed for second monitors. The peak is accepted only if the peak width is between the minimal and maximal instrument resolution and 
-the distance between peaks positions on two monitors (on energy scale) is smaller then two sigma.
+#. Similar procedure is performed for second monitor. The peak is accepted only if the peak width lies between the minimal and maximal instrument resolution values 
+   and the distance between peaks positions on two monitors (on energy scale) is smaller then two sigma.
 
-Algorithm returns matrix workspace containing single spectrum, with x-values representing peak positions, y-values: peak heights and the error: peak width.
+Algorithm returns matrix workspace containing single spectrum, with x-values representing peak positions, y-values: peak heights and the error: peak width. X-values are
+sorted according to energy in peaks (peaks with maximal energy are returned first).
 
 Used Subalgorithms
 ------------------

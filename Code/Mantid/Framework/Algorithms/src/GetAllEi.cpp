@@ -41,30 +41,31 @@ namespace Mantid {
 
       declareProperty("Monitor1SpecID", EMPTY_INT(), nonNegative,
         "The workspace index (ID) of the spectra, containing first monitor's"
-        "signal to analyze.");
+        " signal to analyze.");
       declareProperty("Monitor2SpecID", EMPTY_INT(), nonNegative,
         "The workspace index (ID) of the spectra, containing second monitor's"
-        "signal to analyze.");
+        " signal to analyze.");
 
-      declareProperty("ChopperSpeedLog", "Defined in IDF","Name of the instrument log,"
-        "containing chopper angular velocity. If 'Defined in IDF', "
-        "then the log name will be read from IDF");
+      declareProperty("ChopperSpeedLog", "Defined in IDF","Name of the instrument log, "
+        "containing chopper angular velocity. If 'Defined in IDF' option is specified, "
+        "the log name is obtained from the IDF");
       declareProperty("ChopperDelayLog", "Defined in IDF", "Name of the instrument log, "
-        "containing chopper delay time or chopper phase v.r.t. pulse time. If 'Defined in IDF', "
-        "then the log name will be read from IDF");
-      declareProperty("FilterBaseLog", "Defined in IDF", "Name of the instrument log,"
-        "with positive values indicating that instrument is running\n"
+        "containing chopper delay time or chopper phase v.r.t. the pulse time. "
+        "If 'Defined in IDF'  option is specified, "
+        "the log name is obtained from IDF");
+      declareProperty("FilterBaseLog", "Defined in IDF", "Name of the instrument log, "
+        "with positive values indicating that instrument is running\n "
         "and 0 or negative that it is not.\n"
         "The log is used to identify time interval to evaluate"
         " chopper speed and chopper delay which matter.\n"
-        "If such log is not present, log values are calculated "
-        "from experiment start&end times.");
+        "If such log is not present, average log values are calculated "
+        "within experiment start&end time range.");
       declareProperty("FilterWithDerivative", true, "Use derivative of 'FilterBaseLog' "
         "rather then log values itself to filter invalid time intervals.\n"
         "Invalid values are then the "
         "values where the derivative of the log turns zero.\n"
-        "E.g. would be 'proton_chage' log which grows for each frame "
-        "when instrument is counting and constant otherwise.");
+        "E.g. the 'proton_chage' log grows for each frame "
+        "when instrument is counting and is constant otherwise.");
       setPropertySettings("FilterWithDerivative", new Kernel::EnabledWhenProperty(
                           "FilterBaseLog", Kernel::ePropertyCriterion::IS_EQUAL_TO,
                            "Defined in IDF"));
@@ -75,31 +76,31 @@ namespace Mantid {
       maxInRange->setUpper(0.1);
 
       declareProperty("MaxInstrResolution",0.0005,maxInRange,
-        "The maximal energy resolution possible for an"
-        "instrument at some energies (full width at half maximum). \nPeaks, sharper then"
-        "this width are rejected. Accepted limits are:1e-6/0.1");
+        "The maximal energy resolution possible for an "
+        "instrument at working energies (full width at half maximum). \nPeaks, sharper then "
+        "this width are rejected. Accepted limits are: 1e^(-6)-0.1");
 
       auto minInRange = boost::make_shared<Kernel::BoundedValidator<double>>();
       minInRange->setLower(0.001);
       minInRange->setUpper(0.5);
       declareProperty("MinInstrResolution",0.08,minInRange,
-        "The minimal energy resolution possible for an"
-        "instrument at some energies (full width at half maximum). \n"
-        "Peaks broader then this width are rejected. Accepted limits are:0.001/0.5");
+        "The minimal energy resolution possible for an "
+        "instrument at working energies (full width at half maximum).\n"
+        "Peaks broader then this width are rejected. Accepted limits are: 0.001-0.5");
 
       auto peakInRange = boost::make_shared<Kernel::BoundedValidator<double>>();
       peakInRange->setLower(0.0);
       minInRange->setUpper(1.);
       declareProperty("PeaksRatioToReject",0.1,peakInRange,
-        "Ratio of a peak energy to the maximal energy in a peak. "
+        "Ratio of a peak energy to the maximal energy among all peaks. "
         "If the ratio is lower then the value specified here, "
-        "peak is treated as insignificant one and is rejected.\n"
+        "peak is treated as insignificant and rejected.\n"
         "Accepted limits are:0.0 (All accepted) to 1 -- only one peak \n"
         "(or peaks with max and equal intensity) are accepted.");
       declareProperty("IgnoreSecondMonitor",false,"Usually peaks are analyzed and accepted "
         "only if identified on both monitors. If this property is set to true, only first "
         "monitor peaks are analyzed.\n"
-        "This is usually debugging option as getEi has to use both monitors.");
+        "This is debugging option as getEi has to use both monitors.");
 
       declareProperty(new API::WorkspaceProperty<API::Workspace>("OutputWorkspace","",
         Kernel::Direction::Output),
