@@ -78,7 +78,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
                 file_paths[extension] = None
             else:
                 #prepend the base framework directory
-                file_paths[extension] = os.path.join(self.get_mantid_directory(),file_paths[extension])
+                file_paths[extension] = os.path.join(self.source_root, file_paths[extension])
                 if not os.path.exists(file_paths[extension]):
                     error_string +="Cannot find " + extension + " file at " + file_paths[extension] + "\n"
 
@@ -111,7 +111,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
             else:
                 suggested_path = "os_agnostic_path_to_file_from_source_root"
                 if len(path_list) > 1:
-                    suggested_path = path_list[0].replace(self.get_mantid_directory(), "")
+                    suggested_path = path_list[0].replace(self.source_root, "")
                 raise SourceLinkError("Found multiple possibilities for " + file_name + "." + extension + "\n" +
                 "Possible matches" +  str(path_list) + "\n" +
                 "Specify one using the " + extension + " option\n" +
