@@ -1,9 +1,11 @@
-#pylint: disable=no-init,invalid-name,too-many-locals,too-many-lines
+#pylint: disable=no-init,invalid-name,too-many-locals,too-many-lines,too-many-arguments
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 
+from operator import itemgetter
 import numpy as np
+import copy
 import re
 import os.path
 import math
@@ -61,7 +63,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                              doc='Set Gaussian/Lorentzian FWHM for broadening. Default is 10')
 
         self.declareProperty(name='SpectrumType', defaultValue='DOS',
-                             validator=StringListValidator(['IonTable', 'DOS', 'IR_Active', 'Raman_Active', 'BondTable']),
+                             validator=StringListValidator(['IonTable', 'DOS', 'IR_Active', 'Raman_Active', 'BondTable', 'BondAnalysis']),
                              doc="Type of intensities to extract and model (fundamentals-only) from .phonon.")
 
         self.declareProperty(name='StickHeight', defaultValue=0.01,
@@ -191,7 +193,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             for ion in ions:
                 ion_table.addRow([ion['species'],
                                   ion['index'],
-                                  ion['bond_number'],
+                                  ion['number'],
                                   ion['fract_coord'][0],
                                   ion['fract_coord'][1],
                                   ion['fract_coord'][2],
@@ -207,9 +209,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
             bond_table = CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
             bond_table.addColumn('str', 'SpeciesA')
-            bond_table.addColumn('int', 'NumberA')
+            bond_table.addColumn('int', 'SpeciesNumberA')
             bond_table.addColumn('str', 'SpeciesB')
-            bond_table.addColumn('int', 'NumberB')
+            bond_table.addColumn('int', 'SpeciesNumberB')
             bond_table.addColumn('float', 'Length')
             bond_table.addColumn('float', 'Population')
 
@@ -299,6 +301,18 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             mtd[self._out_ws_name].setYUnit('A^4')
             mtd[self._out_ws_name].setYUnitLabel('Intensity')
 
+        # We want to perform bond analysis
+        elif self._spec_type == 'BondAnalysis':
+            logger.notice('Performing bond analysis')
+            prog_reporter.report('Performing bond analysis')
+
+            bonds = self._read_data_from_file(castep_filename).get('bonds', None)
+            if bonds is None or len(bonds) == 0:
+                raise RuntimeError('No bonds found in CASTEP file')
+
+            self._bond_analysis(unit_cell, ions, bonds, eigenvectors[0])
+
+
         self.setProperty('OutputWorkspace', self._out_ws_name)
 
 #----------------------------------------------------------------------------------------
@@ -322,6 +336,59 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
 #----------------------------------------------------------------------------------------
 
+    def _get_all_bonded_atoms(self, atom, bonds, ions, unit_cell, cells=None):
+        """
+        Gets the atoms bonded to a given atom and their bond length in a given
+        cell.
+
+        @param atom Details of atom
+        @param bonds List of all bonds
+        @param ions List of all ions
+        @param unit_cell Unit cell vectors
+        @param cells Cells to look in as list of offsets to fractional
+                     coordinates
+        @return List of bonded atoms
+        """
+        if cells is None:
+            # The "central" cell only
+            cells = [[0, 0, 0]]
+
+        bonded_to = self._get_bonded_atoms((atom['species'], atom['number']), bonds)
+
+        bonded = []
+        for cell in cells:
+            # Prepare the ions in the cell
+            cell_ions = copy.deepcopy(ions)
+            for ion in cell_ions:
+                ion['fract_coord'] += np.array(cell)
+            self._convert_to_cartesian_coordinates(unit_cell, cell_ions)
+
+            # Add the ions
+            for ion in bonded_to:
+                ion_details = self._find_ion(cell_ions, *ion)
+                ion_details['length'] = np.linalg.norm(atom['cartesian_coord'] - ion_details['cartesian_coord'])
+                bonded.append(ion_details)
+
+        return bonded
+
+#----------------------------------------------------------------------------------------
+
+    def _get_bonded_atoms(self, atom, bonds):
+        """
+        Gets a list of all atoms, tuple(species, number), which are bonded to a
+        given atom.
+
+        @param atom Atom to be bonded with, tuple(species, number)
+        @param bonds List of all bonds
+        @return List of bonded atoms
+        """
+        bonded_to = []
+        bonded_to.extend([b['atom_a'] for b in bonds if b['atom_b'] == atom])
+        bonded_to.extend([b['atom_b'] for b in bonds if b['atom_a'] == atom])
+        return bonded_to
+
+#----------------------------------------------------------------------------------------
+
     def _convert_to_cartesian_coordinates(self, unit_cell, ions):
         """
         Converts fractional coordinates to Cartesian coordinates given the unit
@@ -333,6 +400,146 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         for ion in ions:
             cell_pos = ion['fract_coord'] * unit_cell
             ion['cartesian_coord'] = np.apply_along_axis(np.sum, 0, cell_pos)
+
+#----------------------------------------------------------------------------------------
+
+    def _find_ion(self, ions, species, number=None):
+        """
+        Finds a specific ion or set of ions in the list of ions.
+
+        @param ions List of ions
+        @param species Atomic species
+        @param number (optional) Search for a specific ion in a bond
+        @return List of multiple ions or single ion, None if no ions found
+        """
+        if number is None:
+            valid = lambda i: i['species'] == species
+        else:
+            valid = lambda i: i['species'] == species and i['number'] == number
+
+        results = [i for i in ions if valid(i)]
+
+        if len(results) == 0:
+            return None
+        elif len(results) == 1:
+            return results[0]
+        else:
+            return results
+
+#----------------------------------------------------------------------------------------
+
+    def _calculate_bond_vectors(self, bonds, ions):
+        """
+        Calculate the vectors for a list of bonds, using the Cartesian postions
+        of each atom in the bond.
+
+        @param bonds List of bonds
+        @param ions List of ions in bonds
+        """
+        for bond in bonds:
+            atom_a = self._find_ion(ions, *bond['atom_a'])
+            atom_b = self._find_ion(ions, *bond['atom_b'])
+            bond['vector'] = atom_a['cartesian_coord'] - atom_b['cartesian_coord']
+
+#----------------------------------------------------------------------------------------
+
+    def _bond_analysis(self, unit_cell, ions, bonds, eigenvectors):
+        """
+        Perform bond analysis to determine the mode of each bond with
+        significant relative motions between the bonded atoms.
+
+        @param unit_cell Unit cell vectors
+        @param ions List of all ions
+        @param bonds List of all bonds
+        @param eigenvectors List of eigenvectors
+        """
+        prog_reporter = Progress(self, 0.0, 1.0, self._num_branches * self._num_ions)
+
+        self._convert_to_cartesian_coordinates(unit_cell, ions)
+        self._calculate_bond_vectors(bonds, ions)
+
+        output_ws = CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
+        output_ws.addColumn('int', 'Mode')
+        output_ws.addColumn('str', 'SpeciesA')
+        output_ws.addColumn('int', 'SpeciesNumberA')
+        output_ws.addColumn('str', 'SpeciesB')
+        output_ws.addColumn('int', 'SpeciesNumberB')
+        output_ws.addColumn('str', 'SpeciesC')
+        output_ws.addColumn('int', 'SpeciesNumberC')
+        output_ws.addColumn('str', 'BondMode')
+
+        for mode in range(self._num_branches):
+            for ion_b in ions:
+                prog_reporter.report('Bond analysis (ion {0}, mode {1})'.format(ion_b['index'], mode))
+
+                ion_wavevector = lambda ion: eigenvectors[mode * self._num_ions + ion['index']]
+
+                cells = [[0, 0, 0], [-1, 0, 0], [1, 0, 0], [0, -1, 0], [0, 1, 0], [0, 0, -1], [0, 0, 1]]
+                bonded = self._get_all_bonded_atoms(ion_b, bonds, ions, unit_cell, cells)
+                bonded = sorted(bonded, key=itemgetter('length'))
+
+                # Get ions A and B and wavevectors for all ions
+                ion_a = bonded[0]
+                ion_a_vector = ion_wavevector(ion_a)
+
+                ion_b_vector = ion_wavevector(ion_b)
+
+                ion_c = bonded[1]
+                ion_c_vector = ion_wavevector(ion_c)
+
+                ab_bond_q = Quat(V3D(*ion_a['cartesian_coord']), V3D(*ion_b['cartesian_coord']))
+                bc_bond_q = Quat(V3D(*ion_b['cartesian_coord']), V3D(*ion_c['cartesian_coord']))
+                ac_vect = Quat(V3D(*ion_a['cartesian_coord']), V3D(*ion_c['cartesian_coord']))
+
+                ab_motion_ion_a = V3D(*ion_a_vector)
+                ab_motion_ion_b = V3D(*ion_b_vector)
+                ab_bond_q.rotate(ab_motion_ion_a)
+                ab_bond_q.rotate(ab_motion_ion_b)
+
+                bc_motion_ion_b = V3D(*ion_b_vector)
+                bc_motion_ion_c = V3D(*ion_c_vector)
+                bc_bond_q.rotate(bc_motion_ion_b)
+                bc_bond_q.rotate(bc_motion_ion_c)
+
+                ac_motion_ion_a = V3D(*ion_a_vector)
+                ac_motion_ion_c = V3D(*ion_c_vector)
+                ac_vect.rotate(ac_motion_ion_a)
+                ac_vect.rotate(ac_motion_ion_c)
+
+                ab = ab_motion_ion_a + ab_motion_ion_b
+                bc = bc_motion_ion_b + bc_motion_ion_c
+                ac = ac_motion_ion_a + ac_motion_ion_c
+
+                x = np.array([ab.X(), bc.X(), ac.X()])
+                y = np.array([ab.Y(), bc.Y(), ac.Y()])
+                z = np.array([ab.Z(), bc.Z(), ac.Z()])
+
+                a = np.array([x, y, z])
+                b = np.array([1.0, 1.0, 1.0])
+
+                try:
+                    fitted = np.abs(np.linalg.solve(a, b))
+                except np.linalg.LinAlgError as lae:
+                    logger.warning(str(lae))
+                    continue
+
+                fitted /= np.linalg.norm(fitted)
+
+                row_details = {
+                        'Mode': mode,
+                        'SpeciesA': ion_a['species'],
+                        'SpeciesB': ion_b['species'],
+                        'SpeciesC': ion_c['species'],
+                        'SpeciesNumberA': ion_a['number'],
+                        'SpeciesNumberB': ion_b['number'],
+                        'SpeciesNumberC': ion_c['number']
+                    }
+
+                dimension = ['AB Stretch', 'BC Stretch', 'Bend']
+                for idx, dim in enumerate(dimension):
+                    if fitted[idx] > 0.7:
+                        row_details['BondMode'] = dim
+                        output_ws.addRow(row_details)
 
 #----------------------------------------------------------------------------------------
 
@@ -702,7 +909,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                     ion['fract_coord'] = np.array([float(line_data[1]), float(line_data[2]), float(line_data[3])])
                     # -1 to convert to zero based indexing
                     ion['index'] = int(line_data[0]) - 1
-                    ion['bond_number'] = len([i for i in file_data['ions'] if i['species'] == species]) + 1
+                    ion['number'] = len([i for i in file_data['ions'] if i['species'] == species]) + 1
                     file_data['ions'].append(ion)
 
                 logger.debug('All ions: ' + str(file_data['ions']))
@@ -957,7 +1164,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         # Atom bond regex. Looks for lines in the following format:
         #   H 006 --    O 012               0.46        1.04206
-        bond_regex_str = r" +([A-z])+ +([0-9]+) +-- +([A-z]+) +([0-9]+) +(%(s)s) +(%(s)s)" % {'s': self._float_regex}
+        bond_regex_str = r"\s+([A-z]+)\s+([0-9]+)\s+--\s+([A-z]+)\s+([0-9]+)\s+(%(s)s)\s+(%(s)s)" % {'s': self._float_regex}
         bond_regex = re.compile(bond_regex_str)
 
         block_count = 0

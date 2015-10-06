@@ -2,7 +2,7 @@
 
 import unittest
 from mantid import logger
-from mantid.api import ITableWorkspace
+from mantid.api import (ITableWorkspace, WorkspaceGroup)
 from mantid.simpleapi import (SimulatedDensityOfStates, CheckWorkspacesMatch,
                               Scale, CreateEmptyTableWorkspace)
 
@@ -223,6 +223,24 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
         self.assertRaises(RuntimeError, SimulatedDensityOfStates,
                           PHONONFile=self._phonon_file,
                           SpectrumType='IonTable')
+
+    def test_bond_analysis_file_error(self):
+        """
+        Bond analysis requires both a CASTEP and PHONON file.
+        """
+        self.assertRaises(RuntimeError, SimulatedDensityOfStates,
+                          PHONONFile=self._phonon_file,
+                          SpectrumType='BondAnalysis')
+        self.assertRaises(RuntimeError, SimulatedDensityOfStates,
+                          CASTEPFile=self._castep_file,
+                          SpectrumType='BondAnalysis')
+
+    def test_bond_analysis_happy_case(self):
+        ws = SimulatedDensityOfStates(PHONONFile=self._phonon_file,
+                                      CASTEPFile=self._castep_file,
+                                      SpectrumType='BondAnalysis')
+
+        self.assertTrue(isinstance(ws, ITableWorkspace))
 
 
 if __name__=="__main__":

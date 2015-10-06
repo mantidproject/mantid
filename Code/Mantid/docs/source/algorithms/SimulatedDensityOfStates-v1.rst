@@ -25,6 +25,11 @@ If the BondTable spectrum type is used then the output workspace will be
 a table workspace containing details of the bonds defined in the *.castep*
 file.
 
+.. note::
+  The BondAnalysis mode is an experimental feature which currently can not be
+  compared to alternative software (e.g. Crystal), this mode should be used for
+  quick approximations only.
+
 Usage
 -----
 
