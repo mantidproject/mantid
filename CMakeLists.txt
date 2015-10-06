@@ -211,11 +211,11 @@ endif ()
 ###########################################################################
 
 # N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)
-install ( DIRECTORY Installers/colormaps/ DESTINATION ${INBUNDLE}colormaps PATTERN ".svn" EXCLUDE )
+install ( DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps PATTERN ".svn" EXCLUDE )
 
 # Install the files (.desktop and icon) to create a menu item, but only if installing to /opt/Mantid
 if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND CMAKE_INSTALL_PREFIX STREQUAL "/opt/Mantid" )
-  install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Installers/LinuxInstaller/mantidplot.desktop
+  install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/installers/LinuxInstaller/mantidplot.desktop
             DESTINATION /usr/share/applications )
   install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Images/MantidPlot_Icon_32offset.png
             DESTINATION /usr/share/pixmaps
@@ -236,7 +236,7 @@ if ( ENABLE_CPACK )
     include ( CPackCommon )
 
     # Mac package settings
-    set ( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/Installers/WinInstaller/License.txt )
+    set ( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/installers/WinInstaller/License.txt )
 
     IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
       include ( CPackLinuxSetup )

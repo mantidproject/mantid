@@ -199,12 +199,12 @@ install ( DIRECTORY ${QT_PLUGINS_DIR}/imageformats DESTINATION MantidPlot.app/Co
 install ( DIRECTORY ${QT_PLUGINS_DIR}/sqldrivers DESTINATION MantidPlot.app/Contents/Frameworks/plugins )
 
 install ( FILES ${CMAKE_SOURCE_DIR}/Images/MantidPlot.icns
-                ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/qt.conf
+                ${CMAKE_SOURCE_DIR}/installers/MacInstaller/qt.conf
           DESTINATION MantidPlot.app/Contents/Resources/
 )
 
 set ( CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/Images/osx-bundle-background.png )
-set ( CPACK_DMG_DS_STORE ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/osx_DS_Store)
+set ( CPACK_DMG_DS_STORE ${CMAKE_SOURCE_DIR}/installers/MacInstaller/osx_DS_Store)
 set ( MACOSX_BUNDLE_ICON_FILE MantidPlot.icns )
 
 string (REPLACE " " "" CPACK_SYSTEM_NAME ${OSX_CODENAME})

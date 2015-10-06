@@ -120,7 +120,7 @@ endforeach()
 ###########################################################################
 # Qt Plugins + qt.conf file
 ###########################################################################
-install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Installers/WinInstaller/qt.conf DESTINATION bin )
+install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/installers/WinInstaller/qt.conf DESTINATION bin )
 # imageformats
 set ( QT_PLUGINS_IMAGEFORMAT qgif4.dll qico4.dll qjpeg4.dll qmng4.dll qsvg4.dll qtga4.dll qtiff4.dll )
 foreach( DLL ${QT_PLUGINS_IMAGEFORMAT} )
@@ -143,7 +143,7 @@ install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/Geometry/inc/MantidGeo
 install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/API/inc/MantidAPI DESTINATION include
           PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
 # scons
-install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Installers/WinInstaller/scons-local/ DESTINATION scons-local
+install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/installers/WinInstaller/scons-local/ DESTINATION scons-local
           PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
 # user algorithms
 install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/UserAlgorithms/ DESTINATION UserAlgorithms FILES_MATCHING PATTERN "*.h" )

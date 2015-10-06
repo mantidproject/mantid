@@ -935,7 +935,7 @@ if( APPLE )
     set ( MAC_BUNDLE_IDENTIFIER "" )
   endif()
 
-  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/../Installers/MacInstaller/Info.plist.in
+  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/../installers/MacInstaller/Info.plist.in
                    ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
                    @ONLY )
 
