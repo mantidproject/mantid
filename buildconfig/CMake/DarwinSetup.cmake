@@ -198,12 +198,12 @@ endif ()
 install ( DIRECTORY ${QT_PLUGINS_DIR}/imageformats DESTINATION MantidPlot.app/Contents/Frameworks/plugins )
 install ( DIRECTORY ${QT_PLUGINS_DIR}/sqldrivers DESTINATION MantidPlot.app/Contents/Frameworks/plugins )
 
-install ( FILES ${CMAKE_SOURCE_DIR}/Images/MantidPlot.icns
+install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidPlot.icns
                 ${CMAKE_SOURCE_DIR}/installers/MacInstaller/qt.conf
           DESTINATION MantidPlot.app/Contents/Resources/
 )
 
-set ( CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/Images/osx-bundle-background.png )
+set ( CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/images/osx-bundle-background.png )
 set ( CPACK_DMG_DS_STORE ${CMAKE_SOURCE_DIR}/installers/MacInstaller/osx_DS_Store)
 set ( MACOSX_BUNDLE_ICON_FILE MantidPlot.icns )
 

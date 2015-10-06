@@ -217,7 +217,7 @@ install ( DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps PATTE
 if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND CMAKE_INSTALL_PREFIX STREQUAL "/opt/Mantid" )
   install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/installers/LinuxInstaller/mantidplot.desktop
             DESTINATION /usr/share/applications )
-  install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Images/MantidPlot_Icon_32offset.png
+  install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/MantidPlot_Icon_32offset.png
             DESTINATION /usr/share/pixmaps
             RENAME mantidplot.png )
 endif()
