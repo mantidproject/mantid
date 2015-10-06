@@ -23,7 +23,7 @@ The code is configured using he following Mantid.Property, or Mantid.User.Proper
 UpdateInstrumentDefinitions.OnStartup = 1
    This controls wether this algorithm is run on startup of Mantid.  1 = Run on startup, 0 = don't.
 
-UpdateInstrumentDefinitions.URL = https://api.github.com/repos/mantidproject/mantid/contents/Code/Mantid/instrument
+UpdateInstrumentDefinitions.URL = https://api.github.com/repos/mantidproject/mantid/contents/instrument
    This stores the url used to access the contents of the Mantid Instrument Definition Repository.
 
 Output Messages
