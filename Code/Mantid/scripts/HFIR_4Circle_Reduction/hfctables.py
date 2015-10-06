@@ -218,6 +218,21 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return
 
+    def append_scans(self, scans):
+        """ Append rows
+        :param scans:
+        :return:
+        """
+        # Check
+        assert isinstance(scans, list)
+
+        # Append rows
+        for scan in scans:
+            row_value_list = [scan, 0, 'In Queue']
+            self.append_row(row_value_list)
+
+        return
+
     def setup(self):
         """
         Init setup
@@ -226,3 +241,51 @@ class ProcessTableWidget(tableBase.NTableWidget):
         self.init_setup(Process_Table_Setup)
 
         return
+
+    def set_scan_pt(self, scan_no, pt_list):
+        """
+        :param scan_no:
+        :param pt_list:
+        :return:
+        """
+        # Check
+        assert isinstance(scan_no, int)
+
+        num_rows = self.rowCount()
+        set_done = False
+        for i_row in xrange(num_rows):
+            tmp_scan_no = self.get_cell_value(i_row, 0)
+            if scan_no == tmp_scan_no:
+                self.update_cell_value(i_row, 1, len(pt_list))
+                set_done = True
+                break
+        # END-FOR
+
+        if set_done is False:
+            return 'Unable to find scan %d in table.' % scan_no
+
+        return ''
+
+    def set_status(self, scan_no, status):
+        """
+        TODO/Doc
+        :param status:
+        :return:
+        """
+        # Check
+        assert isinstance(scan_no, int)
+
+        num_rows = self.rowCount()
+        set_done = False
+        for i_row in xrange(num_rows):
+            tmp_scan_no = self.get_cell_value(i_row, 0)
+            if scan_no == tmp_scan_no:
+                self.update_cell_value(i_row, 2, status)
+                set_done = True
+                break
+        # END-FOR
+
+        if set_done is False:
+            return 'Unable to find scan %d in table.' % scan_no
+
+        return ''

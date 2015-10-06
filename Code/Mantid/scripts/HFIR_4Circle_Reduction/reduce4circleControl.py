@@ -197,6 +197,9 @@ class CWSCDReductionControl(object):
         self._myRawDataWSDict = dict()
         # Container for PeakWorkspaces for calculating UB matrix
         self._myUBPeakWSDict = dict()
+        # Container for UB  matrix
+        self._myUBMatrixDict = dict()
+
         # Peak Info
         self._myPeakInfoDict = dict()
         # Last UB matrix calculated
@@ -312,6 +315,12 @@ class CWSCDReductionControl(object):
         :param scan_number:
         :return:
         """
+        # Check
+        if exp_number is None:
+            exp_number = self._expNumber
+        assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int)
+
         # Generate the URL for SPICE data file
         file_url = '%sexp%d/Datafiles/HB3A_exp%04d_scan%04d.dat' % (self._myServerURL, exp_number,
                                                                     exp_number, scan_number)
@@ -512,9 +521,15 @@ class CWSCDReductionControl(object):
         :param exp_no:
         :param scan_no:
         :param load_spice_scan:
-        :return:
+        :return: (Boolean, Object) as (status, pt number list/error message)
         """
-        print '[DB] Get Pt. for Exp %d Scan %d' % (exp_no, scan_no)
+        # Check
+        if exp_no is None:
+            exp_no = self._expNumber
+        assert isinstance(exp_no, int)
+        assert isinstance(scan_no, int)
+
+        # Get workspace
         table_ws = self._get_spice_workspace(exp_no, scan_no)
         if table_ws is None:
             if load_spice_scan is False:
@@ -801,6 +816,95 @@ class CWSCDReductionControl(object):
 
         return
 
+    def merge_pts_in_scan(self, exp_no, scan_no, target_ws_name, target_frame):
+        """
+        Merge Pts in Scan
+        :param exp_no:
+        :param scan_no:
+        :param target_ws_name:
+        :param target_frame:
+        :return:
+        """
+        # Check
+        if exp_no is None:
+            exp_no = self._expNumber
+        assert isinstance(exp_no, int)
+        assert isinstance(scan_no, int)
+        assert isinstance(target_frame, str)
+        assert isinstance(target_ws_name, str)
+
+        ub_matrix_1d = None
+
+        # Target frame
+        if target_frame.lower().startswith('hkl'):
+            target_frame = 'hkl'
+            ub_matrix_1d = self._myUBMatrixDict[self._expNumber].reshape(9,)
+        elif target_frame.lower().startswith('q-sample'):
+            target_frame = 'qsample'
+
+        else:
+            raise RuntimeError('Target frame %s is not supported.' % target_frame)
+
+        # Process data and save
+        status, pt_num_list = self.get_pt_numbers(exp_no, scan_no, True)
+        if status is False:
+            err_msg = pt_num_list
+            return False, err_msg
+        else:
+            print '[DB] Number of Pts for Scan %d is %d' % (scan_no, len(pt_num_list))
+            print '[DB] Data directory: %s' % self._dataDir
+        max_pts = 0
+        ws_names_str = ''
+
+
+        for pt in pt_num_list:
+            try:
+                self.download_spice_xml_file(scan_no, pt, overwrite=False)
+                api.CollectHB3AExperimentInfo(ExperimentNumber=exp_no, ScanList='%d' % scan_no, PtLists='-1,%d' % pt,
+                                              DataDirectory=self._dataDir,
+                                              GenerateVirtualInstrument=False,
+                                              OutputWorkspace='ScanPtInfo_Exp%d_Scan%d' % (exp_no, scan_no),
+                                              DetectorTableWorkspace='MockDetTable')
+
+                out_q_name = 'HB3A_Exp%d_Scan%d_Pt%d_MD' % (exp_no, scan_no, pt)
+                api.ConvertCWSDExpToMomentum(InputWorkspace='ScanPtInfo_Exp406_Scan%d' % scan_no,
+                                             CreateVirtualInstrument=False,
+                                             OutputWorkspace=out_q_name,
+                                             Directory=self._dataDir)
+
+                if target_frame == 'hkl':
+                    out_hkl_name = 'HKL_Scan%d_Pt%d' % (scan_no, pt)
+                    api.ConvertCWSDMDtoHKL(InputWorkspace=out_q_name,
+                                           UBMatrix=ub_matrix_1d,
+                                           OutputWorkspace=out_hkl_name)
+                    ws_names_str += out_hkl_name + ','
+                else:
+                    ws_names_str += out_q_name + ','
+
+            except RuntimeError as e:
+                print '[Error] Reducing scan %d pt %d due to %s' % (scan_no, pt, str(e))
+                continue
+
+            else:
+                max_pts = pt
+        # END-FOR
+
+        # Merge
+        if target_frame == 'qsample':
+            out_ws_name = target_ws_name + '_QSample'
+        elif target_frame == 'hkl':
+            out_ws_name = target_ws_name + '_HKL'
+
+        ws_names_str = ws_names_str[:-1]
+        print '[DB] Input workspace names for merge: %s' % ws_names_str
+
+        api.MergeMD(InputWorkspaces=ws_names_str, OutputWorkspace=out_ws_name, SplitInto=max_pts)
+
+        # Group workspaces
+        api.GroupWorkspaces(InputWorkspaces=ws_names_str, OutputWorkspace='Group_Exp406_Scan%d' % scan_no)
+
+        return
+
     def set_server_url(self, server_url):
         """
         Set URL for server to download the data
@@ -875,6 +979,24 @@ class CWSCDReductionControl(object):
         self._dataDir = local_dir
 
         return True, ''
+
+    def set_ub_matrix(self, exp_number, ub_matrix):
+        """
+        TODO/DOC
+        :param exp_number:
+        :param ub_matrix:
+        :return:
+        """
+        # Check
+        if exp_number is None:
+            exp_number = self._expNumber
+
+        assert isinstance(exp_number, int)
+        assert isinstance(ub_matrix, numpy.ndarray)
+        assert ub_matrix.shape == (3, 3)
+
+        # Set up
+        self._myUBMatrixDict[exp_number] = ub_matrix
 
     def set_working_directory(self, work_dir):
         """

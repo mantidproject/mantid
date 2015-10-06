@@ -151,6 +151,10 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.tableWidget_peaksCalUB.setup()
 
         self.ui.tableWidget_ubMatrix.setup()
+        self.ui.tableWidget_ubSiceView.setup()
+        self.ui.tableWidget_refinedUB.setup()
+
+        self.ui.tableWidget_sliceViewProgress.setup()
 
         return
 
@@ -612,16 +616,16 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # Get UB matrix
-        ubmatrix = self._read_matrix(self.ui.tableWidget_ubSiceView)
-        self._myControl.set_ub_matrix(exp_number=None, ub=ubmatrix)
+        ub_matrix = self.ui.tableWidget_ubSiceView.get_matrix()
+        self._myControl.set_ub_matrix(exp_number=None, ub_matrix=ub_matrix)
 
         # Get list of scans
-        scan_list = gutil.parse_integer_list(self.ui.lineEdit_listScansSliceView)
+        scan_list = gutil.parse_integer_list(str(self.ui.lineEdit_listScansSliceView.text()))
         if len(scan_list) == 0:
             self.pop_one_button_dialog('Scan list is empty.')
 
         # Set table
-        self.ui.tableWidget_sliceViewProgress.append_rows(column=0, value_list=scan_list)
+        self.ui.tableWidget_sliceViewProgress.append_scans(scans=scan_list)
 
         # Warning
         self.pop_one_button_dialog('Data processing is long. Be patient!')
@@ -629,10 +633,34 @@ class MainWindow(QtGui.QMainWindow):
         # Process
         base_name = str(self.ui.lineEdit_baseMergeMDName.text())
         scan_list.sort()
+        frame = str(self.ui.comboBox_mergeScanFrame.currentText())
         for scan_no in scan_list:
+            # Download/check SPICE file
+            self._myControl.download_spice_file(None, scan_no, over_write=False)
+
+            # Get some information
+            status, pt_list = self._myControl.get_pt_numbers(None, scan_no, load_spice_scan=True)
+            if status is False:
+                err_msg = pt_list
+                self.pop_one_button_dialog('Failed to get Pt. number: %s' % err_msg)
+                return
+            else:
+                # Set information to table
+                err_msg = self.ui.tableWidget_sliceViewProgress.set_scan_pt(scan_no, pt_list)
+                if len(err_msg) > 0:
+                    self.pop_one_button_dialog(err_msg)
+
             out_ws_name = base_name + '%04d' % scan_no
-            status = self._myControl.merge_pts_in_scan(scan_no=scan_no)
-            self.ui.tableWidget_sliceViewProgress.set_status(status)
+            self.ui.tableWidget_sliceViewProgress.set_scan_pt(scan_no, 'In Processing')
+            try:
+                self._myControl.merge_pts_in_scan(exp_no=None, scan_no=scan_no,
+                                                  target_ws_name=out_ws_name,
+                                                  target_frame=frame)
+                merge_status = 'Done'
+            except RuntimeError as e:
+                merge_status = 'Failed. Reason: %s' % str(e)
+            finally:
+                self.ui.tableWidget_sliceViewProgress.set_status(scan_no, merge_status)
         # END-FOR
 
         return
@@ -794,6 +822,11 @@ class MainWindow(QtGui.QMainWindow):
         save_dict['lineEdit_beta'] = str(self.ui.lineEdit_beta.text())
         save_dict['lineEdit_gamma'] = str(self.ui.lineEdit_gamma.text())
 
+        # Merge scan
+        save_dict['plainTextEdit_ubInput'] = str(self.ui.plainTextEdit_ubInput.toPlainText())
+        save_dict['lineEdit_listScansSliceView'] = str(self.ui.lineEdit_listScansSliceView.text())
+        save_dict['lineEdit_baseMergeMDName'] = str(self.ui.lineEdit_baseMergeMDName.text())
+
         # Save to csv file
         if filename is None:
             filename = 'session_backup.csv'
@@ -822,6 +855,8 @@ class MainWindow(QtGui.QMainWindow):
         for key, value in my_dict.items():
             if key.startswith('lineEdit') is True:
                 self.ui.__getattribute__(key).setText(value)
+            elif key.startswith('plainText') is True:
+                self.ui.__getattribute__(key).setPlainText(value)
             elif key.startswith('comboBox') is True:
                 self.ui.__getattribute__(key).setCurrentIndex(int(value))
             else:

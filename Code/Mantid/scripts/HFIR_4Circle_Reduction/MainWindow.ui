@@ -190,7 +190,7 @@
         <item>
          <widget class="QTabWidget" name="tabWidget">
           <property name="currentIndex">
-           <number>2</number>
+           <number>3</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -1446,7 +1446,7 @@
           </widget>
           <widget class="QWidget" name="tab_advsetup">
            <attribute name="title">
-            <string>Slice View</string>
+            <string>Merge Scan</string>
            </attribute>
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
@@ -1684,12 +1684,45 @@
                  <item row="1" column="1">
                   <layout class="QHBoxLayout" name="horizontalLayout">
                    <item>
-                    <widget class="QLineEdit" name="lineEdit_baseMergeMDName"/>
+                    <widget class="QLineEdit" name="lineEdit_baseMergeMDName">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QComboBox" name="comboBox_mergeScanFrame">
+                     <property name="minimumSize">
+                      <size>
+                       <width>140</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Type of frame that the final merged scan will be in.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                     <item>
+                      <property name="text">
+                       <string>HKL-Space</string>
+                      </property>
+                     </item>
+                     <item>
+                      <property name="text">
+                       <string>Q-Sample-Space</string>
+                      </property>
+                     </item>
+                    </widget>
                    </item>
                    <item>
                     <spacer name="horizontalSpacer_10">
                      <property name="orientation">
                       <enum>Qt::Horizontal</enum>
+                     </property>
+                     <property name="sizeType">
+                      <enum>QSizePolicy::Expanding</enum>
                      </property>
                      <property name="sizeHint" stdset="0">
                       <size>
@@ -1806,7 +1839,38 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_15">
                 <item>
-                 <widget class="UBMatrixTable" name="tableWidget_refinedUB"/>
+                 <widget class="UBMatrixTable" name="tableWidget_refinedUB">
+                  <row>
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </row>
+                  <row>
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </row>
+                  <row>
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </row>
+                  <column>
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </column>
+                  <column>
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </column>
+                  <column>
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </column>
+                 </widget>
                 </item>
                 <item>
                  <layout class="QVBoxLayout" name="verticalLayout_7"/>
