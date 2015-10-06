@@ -16,7 +16,8 @@ class MDHistoWorkspace;
 }
 namespace MDAlgorithms {
 
-/** ReplicateMD : Algorithm header for ReplicateMD. An algorithm to create a higher dimensionality MDWorkspace from a 
+/** ReplicateMD : Algorithm header for ReplicateMD. An algorithm to create a
+  higher dimensionality MDWorkspace from a
   lower dimensionality one.
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -53,11 +54,13 @@ public:
   virtual std::map<std::string, std::string> validateInputs();
 
 private:
-  boost::shared_ptr<const Mantid::DataObjects::MDHistoWorkspace>
-  transposeMD(boost::shared_ptr<Mantid::DataObjects::MDHistoWorkspace>& toTranspose,
-              const std::vector<int> &axes);
-  boost::shared_ptr<Mantid::DataObjects::MDHistoWorkspace> getDataWorkspace() const;
-  boost::shared_ptr<Mantid::DataObjects::MDHistoWorkspace> getShapeWorkspace() const;
+  boost::shared_ptr<const Mantid::DataObjects::MDHistoWorkspace> transposeMD(
+      boost::shared_ptr<Mantid::DataObjects::MDHistoWorkspace> &toTranspose,
+      const std::vector<int> &axes);
+  boost::shared_ptr<Mantid::DataObjects::MDHistoWorkspace>
+  getDataWorkspace() const;
+  boost::shared_ptr<Mantid::DataObjects::MDHistoWorkspace>
+  getShapeWorkspace() const;
   void init();
   void exec();
 };

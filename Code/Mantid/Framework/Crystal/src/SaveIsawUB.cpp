@@ -146,7 +146,8 @@ void SaveIsawUB::exec() {
         << lattice.errorgamma() << setw(12) << setprecision(4) << ErrorVolume
         << " " << endl;
 
-    out << endl << endl;
+    out << endl
+        << endl;
 
     out << "The above matrix is the Transpose of the UB Matrix. ";
     out << "The UB matrix maps the column" << endl;

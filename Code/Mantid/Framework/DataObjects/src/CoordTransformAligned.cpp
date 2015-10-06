@@ -39,9 +39,9 @@ CoordTransformAligned::CoordTransformAligned(const size_t inD,
   for (size_t d = 0; d < outD; d++) {
     m_dimensionToBinFrom[d] = dimensionToBinFrom[d];
     if (m_dimensionToBinFrom[d] >= inD) {
-      delete [] m_dimensionToBinFrom;
-      delete [] m_origin;
-      delete [] m_scaling;
+      delete[] m_dimensionToBinFrom;
+      delete[] m_origin;
+      delete[] m_scaling;
       throw std::runtime_error(
           "CoordTransformAligned::ctor(): invalid entry in "
           "dimensionToBinFrom[" +
@@ -83,9 +83,9 @@ CoordTransformAligned::CoordTransformAligned(
   for (size_t d = 0; d < outD; d++) {
     m_dimensionToBinFrom[d] = dimensionToBinFrom[d];
     if (m_dimensionToBinFrom[d] >= inD) {
-      delete [] m_dimensionToBinFrom;
-      delete [] m_origin;
-      delete [] m_scaling;
+      delete[] m_dimensionToBinFrom;
+      delete[] m_origin;
+      delete[] m_scaling;
       throw std::runtime_error(
           "CoordTransformAligned::ctor(): invalid entry in "
           "dimensionToBinFrom[" +

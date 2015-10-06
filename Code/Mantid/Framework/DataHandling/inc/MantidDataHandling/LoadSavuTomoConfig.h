@@ -5,7 +5,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 
 namespace NeXus {
-  class File;
+class File;
 }
 
 namespace Mantid {
@@ -48,7 +48,7 @@ public:
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
     return "Load configuration parameters from a tomographic "
-      "reconstruction parameter file.";
+           "reconstruction parameter file.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
@@ -56,22 +56,21 @@ public:
 
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const {
-    return "DataHandling\\Tomography"; }
+    return "DataHandling\\Tomography";
+  }
 
 private:
-
   /// Implement abstract Algorithm methods
   void init();
   /// Implement abstract Algorithm methods
   void exec();
 
   // do the real loading
-  Mantid::API::ITableWorkspace_sptr loadFile(std::string& fname,
-                                             std::string& wsName);
+  Mantid::API::ITableWorkspace_sptr loadFile(std::string &fname,
+                                             std::string &wsName);
 
   // open file safely and carefully checking potential issues
-  bool checkOpenFile(std::string fname,
-                     boost::shared_ptr<NeXus::File> &f);
+  bool checkOpenFile(std::string fname, boost::shared_ptr<NeXus::File> &f);
 };
 
 } // namespace DataHandling

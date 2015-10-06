@@ -27,6 +27,7 @@
 
 #include <QDialog>
 #include <QString>
+#include <QTimer>
 #include <QHash>
 #include <QVBoxLayout>
 
@@ -240,6 +241,8 @@ protected slots:
   virtual void executeAlgorithmAsync();
   /// Removes the algorithm from the manager.
   virtual void removeAlgorithmFromManager();
+  /// Enable to exit button
+  void enableExitButton();
 
 protected:
 
@@ -257,6 +260,7 @@ protected:
   virtual void finishHandle(const Mantid::API::IAlgorithm *alg);
   /// Handle completion of algorithm started while staying open
   virtual void errorHandle(const Mantid::API::IAlgorithm *alg, const std::string &what);
+  virtual void closeEvent(QCloseEvent *evt);
 
 /// The following methods were made public for testing in GenericDialogDemo.cpp
 public:
@@ -334,10 +338,15 @@ protected:
   //the keep open checkbox control
   QCheckBox* m_keepOpenCheckBox;
 
-  QPushButton* m_okButton;
+  QPushButton* m_okButton, *m_exitButton;
 
   /// A list of AlgorithmObservers to add to the algorithm prior to execution
   std::vector<Mantid::API::AlgorithmObserver *> m_observers;
+
+  /// Enable the close button when the timer fires
+  QTimer m_btnTimer;
+  /// A flag to track whether the status of the algorithm is being tracked
+  bool m_statusTracked;
   //@}
 };
 

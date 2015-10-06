@@ -83,14 +83,12 @@ void Q1D2::init() {
                   "_sumOfCounts and _sumOfNormFactors equals the workspace"
                   " returned by the property OutputWorkspace "
                   "(default is false).");
-  declareProperty(
-      "ExtraLength", 0.0, mustBePositive,
-      "Additional length for gravity correction.");
+  declareProperty("ExtraLength", 0.0, mustBePositive,
+                  "Additional length for gravity correction.");
 
-  declareProperty(
-      new WorkspaceProperty<>("QResolution", "", Direction::Input,
-                              PropertyMode::Optional, dataVal),
-      "Workspace to calculate the Q resolution.\n");
+  declareProperty(new WorkspaceProperty<>("QResolution", "", Direction::Input,
+                                          PropertyMode::Optional, dataVal),
+                  "Workspace to calculate the Q resolution.\n");
 }
 /**
   @ throw invalid_argument if the workspaces are not mututially compatible
@@ -136,7 +134,7 @@ void Q1D2::exec() {
   Progress progress(this, 0.05, 1.0, numSpec + 1);
 
   // Flag to decide if Q Resolution is to be used
-  auto useQResolution = qResolution ? true : false; 
+  auto useQResolution = qResolution ? true : false;
 
   PARALLEL_FOR3(m_dataWS, outputWS, pixelAdj)
   for (int i = 0; i < numSpec; ++i) {
@@ -172,7 +170,6 @@ void Q1D2::exec() {
       continue;
     }
 
-
     const size_t numWavbins = m_dataWS->readY(i).size() - wavStart;
     // make just one call to new to reduce CPU overhead on each thread, access
     // to these
@@ -197,11 +194,14 @@ void Q1D2::exec() {
     MantidVec::const_iterator YIn = m_dataWS->readY(i).begin() + wavStart;
     MantidVec::const_iterator EIn = m_dataWS->readE(i).begin() + wavStart;
 
-    // Pointers to the QResolution data. Note that the xdata was initially the same, hence
+    // Pointers to the QResolution data. Note that the xdata was initially the
+    // same, hence
     // the same indexing applies to the y values of m_dataWS and qResolution
-    // If we want to use it set it to the correct value, else to YIN, although that does not matter, as
+    // If we want to use it set it to the correct value, else to YIN, although
+    // that does not matter, as
     // we won't use it
-    MantidVec::const_iterator QResIn = useQResolution ? (qResolution->readY(i).begin() + wavStart) : YIn;
+    MantidVec::const_iterator QResIn =
+        useQResolution ? (qResolution->readY(i).begin() + wavStart) : YIn;
 
     // when finding the output Q bin remember that the input Q bins (from the
     // convert to wavelength) start high and reduce
@@ -249,17 +249,21 @@ void Q1D2::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   if (useQResolution) {
-    // The number of Q (x)_ values is N, while the number of DeltaQ values is N-1,
+    // The number of Q (x)_ values is N, while the number of DeltaQ values is
+    // N-1,
     // Richard Heenan suggested to duplicate the last entry of DeltaQ
     Mantid::MantidVec::const_iterator countsIterator = YOut.begin();
     Mantid::MantidVec::iterator qResolutionIterator = qResolutionOut.begin();
-    for (;countsIterator!= YOut.end(); ++countsIterator, ++qResolutionIterator) {
-      // Divide by the counts of the Qbin, if the counts are 0, the the qresolution will also be 0
+    for (; countsIterator != YOut.end();
+         ++countsIterator, ++qResolutionIterator) {
+      // Divide by the counts of the Qbin, if the counts are 0, the the
+      // qresolution will also be 0
       if ((*countsIterator) > 0.0) {
-        *qResolutionIterator = (*qResolutionIterator)/(*countsIterator);
+        *qResolutionIterator = (*qResolutionIterator) / (*countsIterator);
       }
     }
-    // Now duplicate write the second to last element into the last element of the deltaQ vector
+    // Now duplicate write the second to last element into the last element of
+    // the deltaQ vector
     if (qResolutionOut.size() > 1) {
       qResolutionOut.rbegin()[0] = qResolutionOut.rbegin()[1];
     }
@@ -353,7 +357,7 @@ void Q1D2::calculateNormalization(const size_t wavStart, const size_t specInd,
   // use that the normalization array ends at the start of the error array
   for (MantidVec::iterator n = norm, e = normETo2; n != normETo2; ++n, ++e) {
     *n = detectorAdj;
-    *e = detAdjErr * detAdjErr;
+    *e = detAdjErr *detAdjErr;
   }
 
   if (binNorms && binNormEs) {
@@ -560,7 +564,7 @@ void Q1D2::convertWavetoQ(const size_t specInd, const bool doGravity,
       // different for each bin with each detector
       const double sinTheta = grav.calcSinTheta(lambda);
       // Now we're ready to go to Q
-      *Qs = FOUR_PI * sinTheta / lambda;
+      *Qs = FOUR_PI *sinTheta / lambda;
     }
   } else {
     // Calculate the Q values for the current spectrum, using Q =

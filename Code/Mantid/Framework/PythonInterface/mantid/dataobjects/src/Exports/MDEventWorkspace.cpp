@@ -14,27 +14,24 @@ using namespace boost::python;
 
 namespace {
 
-  /**
-   * @tparam MDE The event type
-   * @tparam nd The number of dimensions
-   * @param className Name of the class in Python
-   */
-  template<typename MDE, size_t nd>
-  void MDEventWorkspaceExportImpl(const char *className) {
-    typedef MDEventWorkspace<MDE, nd> ExportType;
+/**
+ * @tparam MDE The event type
+ * @tparam nd The number of dimensions
+ * @param className Name of the class in Python
+ */
+template <typename MDE, size_t nd>
+void MDEventWorkspaceExportImpl(const char *className) {
+  typedef MDEventWorkspace<MDE, nd> ExportType;
 
-    class_<ExportType, bases<IMDEventWorkspace>,
-           boost::noncopyable>(className, no_init)
-      ;
+  class_<ExportType, bases<IMDEventWorkspace>, boost::noncopyable>(className,
+                                                                   no_init);
 
-    // register pointers
-    RegisterWorkspacePtrToPython<ExportType>();
-  }
-
+  // register pointers
+  RegisterWorkspacePtrToPython<ExportType>();
+}
 }
 
-void export_MDEventWorkspaces()
-{
+void export_MDEventWorkspaces() {
   // The maximum number of dimensions is defined in the MDWorkspaceFactory
   MDEventWorkspaceExportImpl<MDEvent<1>, 1>("MDEventWorkspace1D");
   MDEventWorkspaceExportImpl<MDLeanEvent<1>, 1>("MDLeanEventWorkspace1D");

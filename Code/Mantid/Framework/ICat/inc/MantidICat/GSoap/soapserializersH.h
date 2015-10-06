@@ -30,7 +30,7 @@ extern "C" {
 #endif
 SOAP_FMAC3 void *SOAP_FMAC4 soap_getelement(struct soap *, int *);
 SOAP_FMAC3 int SOAP_FMAC4
-    soap_putelement(struct soap *, const void *, const char *, int, int);
+soap_putelement(struct soap *, const void *, const char *, int, int);
 
 #ifdef __cplusplus
 }
@@ -52,12 +52,12 @@ SOAP_FMAC3 void *SOAP_FMAC4 soap_class_id_enter(struct soap *, const char *,
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_byte(struct soap *, char *);
 SOAP_FMAC3 int SOAP_FMAC4
-    soap_out_byte(struct soap *, const char *, int, const char *, const char *);
+soap_out_byte(struct soap *, const char *, int, const char *, const char *);
 SOAP_FMAC3 char *SOAP_FMAC4
-    soap_in_byte(struct soap *, const char *, char *, const char *);
+soap_in_byte(struct soap *, const char *, char *, const char *);
 
 SOAP_FMAC3 int SOAP_FMAC4
-    soap_put_byte(struct soap *, const char *, const char *, const char *);
+soap_put_byte(struct soap *, const char *, const char *, const char *);
 
 #ifndef soap_write_byte
 #define soap_write_byte(soap, data)                                            \
@@ -68,7 +68,7 @@ SOAP_FMAC3 int SOAP_FMAC4
 #endif
 
 SOAP_FMAC3 char *SOAP_FMAC4
-    soap_get_byte(struct soap *, char *, const char *, const char *);
+soap_get_byte(struct soap *, char *, const char *, const char *);
 
 #ifndef soap_read_byte
 #define soap_read_byte(soap, data)                                             \
@@ -82,12 +82,12 @@ SOAP_FMAC3 char *SOAP_FMAC4
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_int(struct soap *, int *);
 SOAP_FMAC3 int SOAP_FMAC4
-    soap_out_int(struct soap *, const char *, int, const int *, const char *);
+soap_out_int(struct soap *, const char *, int, const int *, const char *);
 SOAP_FMAC3 int *SOAP_FMAC4
-    soap_in_int(struct soap *, const char *, int *, const char *);
+soap_in_int(struct soap *, const char *, int *, const char *);
 
 SOAP_FMAC3 int SOAP_FMAC4
-    soap_put_int(struct soap *, const int *, const char *, const char *);
+soap_put_int(struct soap *, const int *, const char *, const char *);
 
 #ifndef soap_write_int
 #define soap_write_int(soap, data)                                             \
@@ -98,7 +98,7 @@ SOAP_FMAC3 int SOAP_FMAC4
 #endif
 
 SOAP_FMAC3 int *SOAP_FMAC4
-    soap_get_int(struct soap *, int *, const char *, const char *);
+soap_get_int(struct soap *, int *, const char *, const char *);
 
 #ifndef soap_read_int
 #define soap_read_int(soap, data)                                              \
@@ -113,20 +113,19 @@ SOAP_FMAC3 int *SOAP_FMAC4
 #define SOAP_TYPE_SOAP_ENV__Fault (14)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4
-    soap_default_SOAP_ENV__Fault(struct soap *, struct SOAP_ENV__Fault *);
+soap_default_SOAP_ENV__Fault(struct soap *, struct SOAP_ENV__Fault *);
 SOAP_FMAC3 void SOAP_FMAC4
-    soap_serialize_SOAP_ENV__Fault(struct soap *,
-                                   const struct SOAP_ENV__Fault *);
+soap_serialize_SOAP_ENV__Fault(struct soap *, const struct SOAP_ENV__Fault *);
 SOAP_FMAC3 int SOAP_FMAC4
-    soap_out_SOAP_ENV__Fault(struct soap *, const char *, int,
-                             const struct SOAP_ENV__Fault *, const char *);
+soap_out_SOAP_ENV__Fault(struct soap *, const char *, int,
+                         const struct SOAP_ENV__Fault *, const char *);
 SOAP_FMAC3 struct SOAP_ENV__Fault *SOAP_FMAC4
-    soap_in_SOAP_ENV__Fault(struct soap *, const char *,
-                            struct SOAP_ENV__Fault *, const char *);
+soap_in_SOAP_ENV__Fault(struct soap *, const char *, struct SOAP_ENV__Fault *,
+                        const char *);
 
 SOAP_FMAC3 int SOAP_FMAC4
-    soap_put_SOAP_ENV__Fault(struct soap *, const struct SOAP_ENV__Fault *,
-                             const char *, const char *);
+soap_put_SOAP_ENV__Fault(struct soap *, const struct SOAP_ENV__Fault *,
+                         const char *, const char *);
 
 #ifndef soap_write_SOAP_ENV__Fault
 #define soap_write_SOAP_ENV__Fault(soap, data)                                 \
@@ -138,8 +137,8 @@ SOAP_FMAC3 int SOAP_FMAC4
 #endif
 
 SOAP_FMAC3 struct SOAP_ENV__Fault *SOAP_FMAC4
-    soap_get_SOAP_ENV__Fault(struct soap *, struct SOAP_ENV__Fault *,
-                             const char *, const char *);
+soap_get_SOAP_ENV__Fault(struct soap *, struct SOAP_ENV__Fault *, const char *,
+                         const char *);
 
 #ifndef soap_read_SOAP_ENV__Fault
 #define soap_read_SOAP_ENV__Fault(soap, data)                                  \
@@ -150,8 +149,8 @@ SOAP_FMAC3 struct SOAP_ENV__Fault *SOAP_FMAC4
 #endif
 
 SOAP_FMAC1 struct SOAP_ENV__Fault *SOAP_FMAC2
-    soap_instantiate_SOAP_ENV__Fault(struct soap *, int, const char *,
-                                     const char *, size_t *);
+soap_instantiate_SOAP_ENV__Fault(struct soap *, int, const char *, const char *,
+                                 size_t *);
 
 inline struct SOAP_ENV__Fault *soap_new_SOAP_ENV__Fault(struct soap *soap,
                                                         int n = -1) {
@@ -206,20 +205,19 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Fault(struct soap *, int, int,
 #define SOAP_TYPE_SOAP_ENV__Reason (13)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4
-    soap_default_SOAP_ENV__Reason(struct soap *, struct SOAP_ENV__Reason *);
+soap_default_SOAP_ENV__Reason(struct soap *, struct SOAP_ENV__Reason *);
 SOAP_FMAC3 void SOAP_FMAC4
-    soap_serialize_SOAP_ENV__Reason(struct soap *,
-                                    const struct SOAP_ENV__Reason *);
+soap_serialize_SOAP_ENV__Reason(struct soap *, const struct SOAP_ENV__Reason *);
 SOAP_FMAC3 int SOAP_FMAC4
-    soap_out_SOAP_ENV__Reason(struct soap *, const char *, int,
-                              const struct SOAP_ENV__Reason *, const char *);
+soap_out_SOAP_ENV__Reason(struct soap *, const char *, int,
+                          const struct SOAP_ENV__Reason *, const char *);
 SOAP_FMAC3 struct SOAP_ENV__Reason *SOAP_FMAC4
-    soap_in_SOAP_ENV__Reason(struct soap *, const char *,
-                             struct SOAP_ENV__Reason *, const char *);
+soap_in_SOAP_ENV__Reason(struct soap *, const char *, struct SOAP_ENV__Reason *,
+                         const char *);
 
 SOAP_FMAC3 int SOAP_FMAC4
-    soap_put_SOAP_ENV__Reason(struct soap *, const struct SOAP_ENV__Reason *,
-                              const char *, const char *);
+soap_put_SOAP_ENV__Reason(struct soap *, const struct SOAP_ENV__Reason *,
+                          const char *, const char *);
 
 #ifndef soap_write_SOAP_ENV__Reason
 #define soap_write_SOAP_ENV__Reason(soap, data)                                \
@@ -231,8 +229,8 @@ SOAP_FMAC3 int SOAP_FMAC4
 #endif
 
 SOAP_FMAC3 struct SOAP_ENV__Reason *SOAP_FMAC4
-    soap_get_SOAP_ENV__Reason(struct soap *, struct SOAP_ENV__Reason *,
-                              const char *, const char *);
+soap_get_SOAP_ENV__Reason(struct soap *, struct SOAP_ENV__Reason *,
+                          const char *, const char *);
 
 #ifndef soap_read_SOAP_ENV__Reason
 #define soap_read_SOAP_ENV__Reason(soap, data)                                 \
@@ -243,8 +241,8 @@ SOAP_FMAC3 struct SOAP_ENV__Reason *SOAP_FMAC4
 #endif
 
 SOAP_FMAC1 struct SOAP_ENV__Reason *SOAP_FMAC2
-    soap_instantiate_SOAP_ENV__Reason(struct soap *, int, const char *,
-                                      const char *, size_t *);
+soap_instantiate_SOAP_ENV__Reason(struct soap *, int, const char *,
+                                  const char *, size_t *);
 
 inline struct SOAP_ENV__Reason *soap_new_SOAP_ENV__Reason(struct soap *soap,
                                                           int n = -1) {
@@ -289,20 +287,19 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Reason(struct soap *, int, int,
 #define SOAP_TYPE_SOAP_ENV__Detail (10)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4
-    soap_default_SOAP_ENV__Detail(struct soap *, struct SOAP_ENV__Detail *);
+soap_default_SOAP_ENV__Detail(struct soap *, struct SOAP_ENV__Detail *);
 SOAP_FMAC3 void SOAP_FMAC4
-    soap_serialize_SOAP_ENV__Detail(struct soap *,
-                                    const struct SOAP_ENV__Detail *);
+soap_serialize_SOAP_ENV__Detail(struct soap *, const struct SOAP_ENV__Detail *);
 SOAP_FMAC3 int SOAP_FMAC4
-    soap_out_SOAP_ENV__Detail(struct soap *, const char *, int,
-                              const struct SOAP_ENV__Detail *, const char *);
+soap_out_SOAP_ENV__Detail(struct soap *, const char *, int,
+                          const struct SOAP_ENV__Detail *, const char *);
 SOAP_FMAC3 struct SOAP_ENV__Detail *SOAP_FMAC4
-    soap_in_SOAP_ENV__Detail(struct soap *, const char *,
-                             struct SOAP_ENV__Detail *, const char *);
+soap_in_SOAP_ENV__Detail(struct soap *, const char *, struct SOAP_ENV__Detail *,
+                         const char *);
 
 SOAP_FMAC3 int SOAP_FMAC4
-    soap_put_SOAP_ENV__Detail(struct soap *, const struct SOAP_ENV__Detail *,
-                              const char *, const char *);
+soap_put_SOAP_ENV__Detail(struct soap *, const struct SOAP_ENV__Detail *,
+                          const char *, const char *);
 
 #ifndef soap_write_SOAP_ENV__Detail
 #define soap_write_SOAP_ENV__Detail(soap, data)                                \
@@ -314,8 +311,8 @@ SOAP_FMAC3 int SOAP_FMAC4
 #endif
 
 SOAP_FMAC3 struct SOAP_ENV__Detail *SOAP_FMAC4
-    soap_get_SOAP_ENV__Detail(struct soap *, struct SOAP_ENV__Detail *,
-                              const char *, const char *);
+soap_get_SOAP_ENV__Detail(struct soap *, struct SOAP_ENV__Detail *,
+                          const char *, const char *);
 
 #ifndef soap_read_SOAP_ENV__Detail
 #define soap_read_SOAP_ENV__Detail(soap, data)                                 \
@@ -326,8 +323,8 @@ SOAP_FMAC3 struct SOAP_ENV__Detail *SOAP_FMAC4
 #endif
 
 SOAP_FMAC1 struct SOAP_ENV__Detail *SOAP_FMAC2
-    soap_instantiate_SOAP_ENV__Detail(struct soap *, int, const char *,
-                                      const char *, size_t *);
+soap_instantiate_SOAP_ENV__Detail(struct soap *, int, const char *,
+                                  const char *, size_t *);
 
 inline struct SOAP_ENV__Detail *soap_new_SOAP_ENV__Detail(struct soap *soap,
                                                           int n = -1) {
@@ -378,15 +375,15 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Detail(struct soap *, int, int,
 #define SOAP_TYPE_SOAP_ENV__Code (8)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4
-    soap_default_SOAP_ENV__Code(struct soap *, struct SOAP_ENV__Code *);
+soap_default_SOAP_ENV__Code(struct soap *, struct SOAP_ENV__Code *);
 SOAP_FMAC3 void SOAP_FMAC4
-    soap_serialize_SOAP_ENV__Code(struct soap *, const struct SOAP_ENV__Code *);
+soap_serialize_SOAP_ENV__Code(struct soap *, const struct SOAP_ENV__Code *);
 SOAP_FMAC3 int SOAP_FMAC4
-    soap_out_SOAP_ENV__Code(struct soap *, const char *, int,
-                            const struct SOAP_ENV__Code *, const char *);
+soap_out_SOAP_ENV__Code(struct soap *, const char *, int,
+                        const struct SOAP_ENV__Code *, const char *);
 SOAP_FMAC3 struct SOAP_ENV__Code *SOAP_FMAC4
-    soap_in_SOAP_ENV__Code(struct soap *, const char *, struct SOAP_ENV__Code *,
-                           const char *);
+soap_in_SOAP_ENV__Code(struct soap *, const char *, struct SOAP_ENV__Code *,
+                       const char *);
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_SOAP_ENV__Code(struct soap *,
                                                   const struct SOAP_ENV__Code *,
@@ -402,8 +399,8 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put_SOAP_ENV__Code(struct soap *,
 #endif
 
 SOAP_FMAC3 struct SOAP_ENV__Code *SOAP_FMAC4
-    soap_get_SOAP_ENV__Code(struct soap *, struct SOAP_ENV__Code *,
-                            const char *, const char *);
+soap_get_SOAP_ENV__Code(struct soap *, struct SOAP_ENV__Code *, const char *,
+                        const char *);
 
 #ifndef soap_read_SOAP_ENV__Code
 #define soap_read_SOAP_ENV__Code(soap, data)                                   \
@@ -414,8 +411,8 @@ SOAP_FMAC3 struct SOAP_ENV__Code *SOAP_FMAC4
 #endif
 
 SOAP_FMAC1 struct SOAP_ENV__Code *SOAP_FMAC2
-    soap_instantiate_SOAP_ENV__Code(struct soap *, int, const char *,
-                                    const char *, size_t *);
+soap_instantiate_SOAP_ENV__Code(struct soap *, int, const char *, const char *,
+                                size_t *);
 
 inline struct SOAP_ENV__Code *soap_new_SOAP_ENV__Code(struct soap *soap,
                                                       int n = -1) {
@@ -461,20 +458,19 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Code(struct soap *, int, int,
 #define SOAP_TYPE_SOAP_ENV__Header (7)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4
-    soap_default_SOAP_ENV__Header(struct soap *, struct SOAP_ENV__Header *);
+soap_default_SOAP_ENV__Header(struct soap *, struct SOAP_ENV__Header *);
 SOAP_FMAC3 void SOAP_FMAC4
-    soap_serialize_SOAP_ENV__Header(struct soap *,
-                                    const struct SOAP_ENV__Header *);
+soap_serialize_SOAP_ENV__Header(struct soap *, const struct SOAP_ENV__Header *);
 SOAP_FMAC3 int SOAP_FMAC4
-    soap_out_SOAP_ENV__Header(struct soap *, const char *, int,
-                              const struct SOAP_ENV__Header *, const char *);
+soap_out_SOAP_ENV__Header(struct soap *, const char *, int,
+                          const struct SOAP_ENV__Header *, const char *);
 SOAP_FMAC3 struct SOAP_ENV__Header *SOAP_FMAC4
-    soap_in_SOAP_ENV__Header(struct soap *, const char *,
-                             struct SOAP_ENV__Header *, const char *);
+soap_in_SOAP_ENV__Header(struct soap *, const char *, struct SOAP_ENV__Header *,
+                         const char *);
 
 SOAP_FMAC3 int SOAP_FMAC4
-    soap_put_SOAP_ENV__Header(struct soap *, const struct SOAP_ENV__Header *,
-                              const char *, const char *);
+soap_put_SOAP_ENV__Header(struct soap *, const struct SOAP_ENV__Header *,
+                          const char *, const char *);
 
 #ifndef soap_write_SOAP_ENV__Header
 #define soap_write_SOAP_ENV__Header(soap, data)                                \
@@ -486,8 +482,8 @@ SOAP_FMAC3 int SOAP_FMAC4
 #endif
 
 SOAP_FMAC3 struct SOAP_ENV__Header *SOAP_FMAC4
-    soap_get_SOAP_ENV__Header(struct soap *, struct SOAP_ENV__Header *,
-                              const char *, const char *);
+soap_get_SOAP_ENV__Header(struct soap *, struct SOAP_ENV__Header *,
+                          const char *, const char *);
 
 #ifndef soap_read_SOAP_ENV__Header
 #define soap_read_SOAP_ENV__Header(soap, data)                                 \
@@ -498,8 +494,8 @@ SOAP_FMAC3 struct SOAP_ENV__Header *SOAP_FMAC4
 #endif
 
 SOAP_FMAC1 struct SOAP_ENV__Header *SOAP_FMAC2
-    soap_instantiate_SOAP_ENV__Header(struct soap *, int, const char *,
-                                      const char *, size_t *);
+soap_instantiate_SOAP_ENV__Header(struct soap *, int, const char *,
+                                  const char *, size_t *);
 
 inline struct SOAP_ENV__Header *soap_new_SOAP_ENV__Header(struct soap *soap,
                                                           int n = -1) {
@@ -543,19 +539,19 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Header(struct soap *, int, int,
 #define SOAP_TYPE_PointerToSOAP_ENV__Reason (16)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4
-    soap_serialize_PointerToSOAP_ENV__Reason(struct soap *,
-                                             struct SOAP_ENV__Reason *const *);
+soap_serialize_PointerToSOAP_ENV__Reason(struct soap *,
+                                         struct SOAP_ENV__Reason *const *);
 SOAP_FMAC3 int SOAP_FMAC4
-    soap_out_PointerToSOAP_ENV__Reason(struct soap *, const char *, int,
-                                       struct SOAP_ENV__Reason *const *,
-                                       const char *);
+soap_out_PointerToSOAP_ENV__Reason(struct soap *, const char *, int,
+                                   struct SOAP_ENV__Reason *const *,
+                                   const char *);
 SOAP_FMAC3 struct SOAP_ENV__Reason **SOAP_FMAC4
-    soap_in_PointerToSOAP_ENV__Reason(struct soap *, const char *,
-                                      struct SOAP_ENV__Reason **, const char *);
+soap_in_PointerToSOAP_ENV__Reason(struct soap *, const char *,
+                                  struct SOAP_ENV__Reason **, const char *);
 SOAP_FMAC3 int SOAP_FMAC4
-    soap_put_PointerToSOAP_ENV__Reason(struct soap *,
-                                       struct SOAP_ENV__Reason *const *,
-                                       const char *, const char *);
+soap_put_PointerToSOAP_ENV__Reason(struct soap *,
+                                   struct SOAP_ENV__Reason *const *,
+                                   const char *, const char *);
 
 #ifndef soap_write_PointerToSOAP_ENV__Reason
 #define soap_write_PointerToSOAP_ENV__Reason(soap, data)                       \
@@ -567,9 +563,8 @@ SOAP_FMAC3 int SOAP_FMAC4
 #endif
 
 SOAP_FMAC3 struct SOAP_ENV__Reason **SOAP_FMAC4
-    soap_get_PointerToSOAP_ENV__Reason(struct soap *,
-                                       struct SOAP_ENV__Reason **, const char *,
-                                       const char *);
+soap_get_PointerToSOAP_ENV__Reason(struct soap *, struct SOAP_ENV__Reason **,
+                                   const char *, const char *);
 
 #ifndef soap_read_PointerToSOAP_ENV__Reason
 #define soap_read_PointerToSOAP_ENV__Reason(soap, data)                        \
@@ -587,19 +582,19 @@ SOAP_FMAC3 struct SOAP_ENV__Reason **SOAP_FMAC4
 #define SOAP_TYPE_PointerToSOAP_ENV__Detail (15)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4
-    soap_serialize_PointerToSOAP_ENV__Detail(struct soap *,
-                                             struct SOAP_ENV__Detail *const *);
+soap_serialize_PointerToSOAP_ENV__Detail(struct soap *,
+                                         struct SOAP_ENV__Detail *const *);
 SOAP_FMAC3 int SOAP_FMAC4
-    soap_out_PointerToSOAP_ENV__Detail(struct soap *, const char *, int,
-                                       struct SOAP_ENV__Detail *const *,
-                                       const char *);
+soap_out_PointerToSOAP_ENV__Detail(struct soap *, const char *, int,
+                                   struct SOAP_ENV__Detail *const *,
+                                   const char *);
 SOAP_FMAC3 struct SOAP_ENV__Detail **SOAP_FMAC4
-    soap_in_PointerToSOAP_ENV__Detail(struct soap *, const char *,
-                                      struct SOAP_ENV__Detail **, const char *);
+soap_in_PointerToSOAP_ENV__Detail(struct soap *, const char *,
+                                  struct SOAP_ENV__Detail **, const char *);
 SOAP_FMAC3 int SOAP_FMAC4
-    soap_put_PointerToSOAP_ENV__Detail(struct soap *,
-                                       struct SOAP_ENV__Detail *const *,
-                                       const char *, const char *);
+soap_put_PointerToSOAP_ENV__Detail(struct soap *,
+                                   struct SOAP_ENV__Detail *const *,
+                                   const char *, const char *);
 
 #ifndef soap_write_PointerToSOAP_ENV__Detail
 #define soap_write_PointerToSOAP_ENV__Detail(soap, data)                       \
@@ -611,9 +606,8 @@ SOAP_FMAC3 int SOAP_FMAC4
 #endif
 
 SOAP_FMAC3 struct SOAP_ENV__Detail **SOAP_FMAC4
-    soap_get_PointerToSOAP_ENV__Detail(struct soap *,
-                                       struct SOAP_ENV__Detail **, const char *,
-                                       const char *);
+soap_get_PointerToSOAP_ENV__Detail(struct soap *, struct SOAP_ENV__Detail **,
+                                   const char *, const char *);
 
 #ifndef soap_read_PointerToSOAP_ENV__Detail
 #define soap_read_PointerToSOAP_ENV__Detail(soap, data)                        \
@@ -631,19 +625,17 @@ SOAP_FMAC3 struct SOAP_ENV__Detail **SOAP_FMAC4
 #define SOAP_TYPE_PointerToSOAP_ENV__Code (9)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4
-    soap_serialize_PointerToSOAP_ENV__Code(struct soap *,
-                                           struct SOAP_ENV__Code *const *);
+soap_serialize_PointerToSOAP_ENV__Code(struct soap *,
+                                       struct SOAP_ENV__Code *const *);
 SOAP_FMAC3 int SOAP_FMAC4
-    soap_out_PointerToSOAP_ENV__Code(struct soap *, const char *, int,
-                                     struct SOAP_ENV__Code *const *,
-                                     const char *);
+soap_out_PointerToSOAP_ENV__Code(struct soap *, const char *, int,
+                                 struct SOAP_ENV__Code *const *, const char *);
 SOAP_FMAC3 struct SOAP_ENV__Code **SOAP_FMAC4
-    soap_in_PointerToSOAP_ENV__Code(struct soap *, const char *,
-                                    struct SOAP_ENV__Code **, const char *);
+soap_in_PointerToSOAP_ENV__Code(struct soap *, const char *,
+                                struct SOAP_ENV__Code **, const char *);
 SOAP_FMAC3 int SOAP_FMAC4
-    soap_put_PointerToSOAP_ENV__Code(struct soap *,
-                                     struct SOAP_ENV__Code *const *,
-                                     const char *, const char *);
+soap_put_PointerToSOAP_ENV__Code(struct soap *, struct SOAP_ENV__Code *const *,
+                                 const char *, const char *);
 
 #ifndef soap_write_PointerToSOAP_ENV__Code
 #define soap_write_PointerToSOAP_ENV__Code(soap, data)                         \
@@ -655,8 +647,8 @@ SOAP_FMAC3 int SOAP_FMAC4
 #endif
 
 SOAP_FMAC3 struct SOAP_ENV__Code **SOAP_FMAC4
-    soap_get_PointerToSOAP_ENV__Code(struct soap *, struct SOAP_ENV__Code **,
-                                     const char *, const char *);
+soap_get_PointerToSOAP_ENV__Code(struct soap *, struct SOAP_ENV__Code **,
+                                 const char *, const char *);
 
 #ifndef soap_read_PointerToSOAP_ENV__Code
 #define soap_read_PointerToSOAP_ENV__Code(soap, data)                          \
@@ -675,12 +667,12 @@ SOAP_FMAC3 struct SOAP_ENV__Code **SOAP_FMAC4
 #define soap_default__QName(soap, a) soap_default_string(soap, a)
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize__QName(struct soap *, char *const *);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out__QName(struct soap *, const char *, int,
-                                          char *const *, const char *);
-SOAP_FMAC3 char **SOAP_FMAC4
-    soap_in__QName(struct soap *, const char *, char **, const char *);
 SOAP_FMAC3 int SOAP_FMAC4
-    soap_put__QName(struct soap *, char *const *, const char *, const char *);
+soap_out__QName(struct soap *, const char *, int, char *const *, const char *);
+SOAP_FMAC3 char **SOAP_FMAC4
+soap_in__QName(struct soap *, const char *, char **, const char *);
+SOAP_FMAC3 int SOAP_FMAC4
+soap_put__QName(struct soap *, char *const *, const char *, const char *);
 
 #ifndef soap_write__QName
 #define soap_write__QName(soap, data)                                          \
@@ -691,7 +683,7 @@ SOAP_FMAC3 int SOAP_FMAC4
 #endif
 
 SOAP_FMAC3 char **SOAP_FMAC4
-    soap_get__QName(struct soap *, char **, const char *, const char *);
+soap_get__QName(struct soap *, char **, const char *, const char *);
 
 #ifndef soap_read__QName
 #define soap_read__QName(soap, data)                                           \
@@ -705,12 +697,12 @@ SOAP_FMAC3 char **SOAP_FMAC4
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_string(struct soap *, char **);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_string(struct soap *, char *const *);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_string(struct soap *, const char *, int,
-                                          char *const *, const char *);
-SOAP_FMAC3 char **SOAP_FMAC4
-    soap_in_string(struct soap *, const char *, char **, const char *);
 SOAP_FMAC3 int SOAP_FMAC4
-    soap_put_string(struct soap *, char *const *, const char *, const char *);
+soap_out_string(struct soap *, const char *, int, char *const *, const char *);
+SOAP_FMAC3 char **SOAP_FMAC4
+soap_in_string(struct soap *, const char *, char **, const char *);
+SOAP_FMAC3 int SOAP_FMAC4
+soap_put_string(struct soap *, char *const *, const char *, const char *);
 
 #ifndef soap_write_string
 #define soap_write_string(soap, data)                                          \
@@ -721,7 +713,7 @@ SOAP_FMAC3 int SOAP_FMAC4
 #endif
 
 SOAP_FMAC3 char **SOAP_FMAC4
-    soap_get_string(struct soap *, char **, const char *, const char *);
+soap_get_string(struct soap *, char **, const char *, const char *);
 
 #ifndef soap_read_string
 #define soap_read_string(soap, data)                                           \

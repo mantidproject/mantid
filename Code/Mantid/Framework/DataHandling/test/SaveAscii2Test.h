@@ -17,26 +17,20 @@ using namespace Mantid::DataObjects;
 // The test LoadSaveAscii does that and should be run in addition to this test
 // if you modify SaveAscii.
 
-class SaveAscii2Test : public CxxTest::TestSuite
-{
+class SaveAscii2Test : public CxxTest::TestSuite {
 
 public:
-
   static SaveAscii2Test *createSuite() { return new SaveAscii2Test(); }
   static void destroySuite(SaveAscii2Test *suite) { delete suite; }
 
-  SaveAscii2Test()
-  {
+  SaveAscii2Test() {
     m_filename = "SaveAscii2TestFile.dat";
     m_filename_nohead = "SaveAsciiTest2FileWithoutHeader.dat";
     m_name = "SaveAscii2WS";
   }
-  ~SaveAscii2Test()
-  {
-  }
+  ~SaveAscii2Test() {}
 
-  void testExec()
-  {
+  void testExec() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
 
@@ -46,46 +40,46 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT( Poco::File(filename).exists() );
+    TS_ASSERT(Poco::File(filename).exists());
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
     int specID;
     std::string header1, header2, header3, separator, comment;
-    // Test that the first few column headers, separator and first two bins are as expected
-    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> specID;
-    TS_ASSERT_EQUALS(specID, 1 );
-    TS_ASSERT_EQUALS(comment,"#" );
-    TS_ASSERT_EQUALS(separator,"," );
-    TS_ASSERT_EQUALS(header1,"X" );
-    TS_ASSERT_EQUALS(header2,"Y" );
-    TS_ASSERT_EQUALS(header3,"E" );
+    // Test that the first few column headers, separator and first two bins are
+    // as expected
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
+        specID;
+    TS_ASSERT_EQUALS(specID, 1);
+    TS_ASSERT_EQUALS(comment, "#");
+    TS_ASSERT_EQUALS(separator, ",");
+    TS_ASSERT_EQUALS(header1, "X");
+    TS_ASSERT_EQUALS(header2, "Y");
+    TS_ASSERT_EQUALS(header3, "E");
 
     std::string binlines;
     std::vector<std::string> binstr;
     std::vector<double> bins;
-    std::getline(in,binlines);
-    std::getline(in,binlines);
+    std::getline(in, binlines);
+    std::getline(in, binlines);
 
-    boost::split(binstr, binlines,boost::is_any_of(","));
-    for (size_t i = 0; i < binstr.size(); i++)
-    {
+    boost::split(binstr, binlines, boost::is_any_of(","));
+    for (size_t i = 0; i < binstr.size(); i++) {
       bins.push_back(boost::lexical_cast<double>(binstr.at(i)));
     }
-    TS_ASSERT_EQUALS(bins[0], 0 );
-    TS_ASSERT_EQUALS(bins[1], 2 );
-    TS_ASSERT_EQUALS(bins[2], 1 );
+    TS_ASSERT_EQUALS(bins[0], 0);
+    TS_ASSERT_EQUALS(bins[1], 2);
+    TS_ASSERT_EQUALS(bins[2], 1);
 
-    std::getline(in,binlines);
+    std::getline(in, binlines);
     bins.clear();
-    boost::split(binstr, binlines,boost::is_any_of(","));
-    for (size_t i = 0; i < binstr.size(); i++)
-    {
+    boost::split(binstr, binlines, boost::is_any_of(","));
+    for (size_t i = 0; i < binstr.size(); i++) {
       bins.push_back(boost::lexical_cast<double>(binstr.at(i)));
     }
-    TS_ASSERT_EQUALS(bins[0], 1.66667 );
-    TS_ASSERT_EQUALS(bins[1], 8.66667 );
-    TS_ASSERT_EQUALS(bins[2], 1 );
+    TS_ASSERT_EQUALS(bins[0], 1.66667);
+    TS_ASSERT_EQUALS(bins[1], 8.66667);
+    TS_ASSERT_EQUALS(bins[2], 1);
 
     in.close();
 
@@ -93,18 +87,16 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void testExec_DX()
-  {
-    Mantid::DataObjects::Workspace2D_sptr wsToSave = boost::dynamic_pointer_cast<
-      Mantid::DataObjects::Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
-    for (int i = 0; i < 2; i++)
-    {
-      std::vector<double>& X = wsToSave->dataX(i);
-      std::vector<double>& Y = wsToSave->dataY(i);
-      std::vector<double>& E = wsToSave->dataE(i);
-      std::vector<double>& DX = wsToSave->dataDx(i);
-      for (int j = 0; j < 3; j++)
-      {
+  void testExec_DX() {
+    Mantid::DataObjects::Workspace2D_sptr wsToSave =
+        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+            WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
+    for (int i = 0; i < 2; i++) {
+      std::vector<double> &X = wsToSave->dataX(i);
+      std::vector<double> &Y = wsToSave->dataY(i);
+      std::vector<double> &E = wsToSave->dataE(i);
+      std::vector<double> &DX = wsToSave->dataDx(i);
+      for (int j = 0; j < 3; j++) {
         X[j] = 1.5 * j / 0.9;
         Y[j] = (i + 1) * (2. + 4. * X[j]);
         E[j] = 1.;
@@ -120,16 +112,18 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT( Poco::File(filename).exists() );
+    TS_ASSERT(Poco::File(filename).exists());
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
     int specID;
     std::string header1, header2, header3, header4, separator, comment;
 
-    // Test that the first few column headers, separator and first two bins are as expected
-    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> separator >> header4 >> specID;
-    TS_ASSERT_EQUALS(specID, 1 );
+    // Test that the first few column headers, separator and first two bins are
+    // as expected
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
+        separator >> header4 >> specID;
+    TS_ASSERT_EQUALS(specID, 1);
     TS_ASSERT_EQUALS(comment, "#");
     TS_ASSERT_EQUALS(separator, ",");
     TS_ASSERT_EQUALS(header1, "X");
@@ -140,28 +134,26 @@ public:
     std::string binlines;
     std::vector<std::string> binstr;
     std::vector<double> bins;
-    std::getline(in,binlines);
-    std::getline(in,binlines);
+    std::getline(in, binlines);
+    std::getline(in, binlines);
 
-    boost::split(binstr, binlines,boost::is_any_of(","));
-    for (size_t i = 0; i < binstr.size(); i++)
-    {
+    boost::split(binstr, binlines, boost::is_any_of(","));
+    for (size_t i = 0; i < binstr.size(); i++) {
       bins.push_back(boost::lexical_cast<double>(binstr.at(i)));
     }
-    TS_ASSERT_EQUALS(bins[0], 0 );
-    TS_ASSERT_EQUALS(bins[1], 2 );
-    TS_ASSERT_EQUALS(bins[2], 1 );
+    TS_ASSERT_EQUALS(bins[0], 0);
+    TS_ASSERT_EQUALS(bins[1], 2);
+    TS_ASSERT_EQUALS(bins[2], 1);
 
-    std::getline(in,binlines);
+    std::getline(in, binlines);
     bins.clear();
-    boost::split(binstr, binlines,boost::is_any_of(","));
-    for (size_t i = 0; i < binstr.size(); i++)
-    {
+    boost::split(binstr, binlines, boost::is_any_of(","));
+    for (size_t i = 0; i < binstr.size(); i++) {
       bins.push_back(boost::lexical_cast<double>(binstr.at(i)));
     }
-    TS_ASSERT_EQUALS(bins[0], 1.66667 );
-    TS_ASSERT_EQUALS(bins[1], 8.66667 );
-    TS_ASSERT_EQUALS(bins[2], 1 );
+    TS_ASSERT_EQUALS(bins[0], 1.66667);
+    TS_ASSERT_EQUALS(bins[1], 8.66667);
+    TS_ASSERT_EQUALS(bins[2], 1);
 
     in.close();
 
@@ -169,8 +161,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void testExec_no_header()
-  {
+  void testExec_no_header() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
 
@@ -180,28 +171,30 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT( Poco::File(filename).exists() );
+    TS_ASSERT(Poco::File(filename).exists());
 
     save.setPropertyValue("Filename", m_filename_nohead);
     save.setPropertyValue("InputWorkspace", m_name);
     TS_ASSERT_THROWS_NOTHING(save.setProperty("ColumnHeader", false));
-    std::string filename_nohead = save.getPropertyValue("Filename"); //Get absolute path
+    std::string filename_nohead =
+        save.getPropertyValue("Filename"); // Get absolute path
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT( Poco::File(filename_nohead).exists() );
+    TS_ASSERT(Poco::File(filename_nohead).exists());
 
-    // Now we check that the first line of the file without header matches the second line of the file with header
+    // Now we check that the first line of the file without header matches the
+    // second line of the file with header
     std::ifstream in1(filename.c_str());
     std::string line2header;
     std::ifstream in2(filename_nohead.c_str());
     std::string line1noheader;
-    getline(in1,line2header);
-    getline(in1,line2header);
-    getline(in1,line2header); // 3rd line of file with header
-    getline(in2,line1noheader);
-    getline(in2,line1noheader); // 2nd line of file without header
-    TS_ASSERT_EQUALS(line1noheader,line2header);
+    getline(in1, line2header);
+    getline(in1, line2header);
+    getline(in1, line2header); // 3rd line of file with header
+    getline(in2, line1noheader);
+    getline(in2, line1noheader); // 2nd line of file without header
+    TS_ASSERT_EQUALS(line1noheader, line2header);
     in1.close();
     in2.close();
     // Remove files
@@ -210,36 +203,39 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_CustomSeparator_override()
-  {
+  void test_CustomSeparator_override() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
 
     SaveAscii2 save;
     std::string filename = initSaveAscii2(save);
 
-    //Separator is left at default on purpouse to see if Customseparator overrides it
-    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("CustomSeparator", "/" ));
+    // Separator is left at default on purpouse to see if Customseparator
+    // overrides it
+    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("CustomSeparator", "/"));
 
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // has the algorithm written a file to disk?
-    TS_ASSERT( Poco::File(filename).exists() );
+    TS_ASSERT(Poco::File(filename).exists());
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
     int specID;
     std::string header1, header2, header3, separator, comment;
 
-    // Test that the first few column headers, separator and first two bins are as expected
-    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> specID;
-    TS_ASSERT_EQUALS(specID, 1 );
-    TS_ASSERT_EQUALS(comment,"#" );
-    //the algorithm will use a custom one if supplied even if the type selected is not "UserDefined"
-    TS_ASSERT_EQUALS(separator,"/" );
-    TS_ASSERT_EQUALS(header1,"X" );
-    TS_ASSERT_EQUALS(header2,"Y" );
-    TS_ASSERT_EQUALS(header3,"E" );
+    // Test that the first few column headers, separator and first two bins are
+    // as expected
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
+        specID;
+    TS_ASSERT_EQUALS(specID, 1);
+    TS_ASSERT_EQUALS(comment, "#");
+    // the algorithm will use a custom one if supplied even if the type selected
+    // is not "UserDefined"
+    TS_ASSERT_EQUALS(separator, "/");
+    TS_ASSERT_EQUALS(header1, "X");
+    TS_ASSERT_EQUALS(header2, "Y");
+    TS_ASSERT_EQUALS(header3, "E");
 
     in.close();
     Poco::File(filename).remove();
@@ -247,8 +243,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_SpectrumList()
-  {
+  void test_SpectrumList() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
 
@@ -260,28 +255,28 @@ public:
     TS_ASSERT_THROWS_ANYTHING(save.execute());
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT( !Poco::File(filename).exists() );
+    TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_workspace()
-  {
+  void test_fail_invalid_workspace() {
     SaveAscii2 save;
     save.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(save.initialize());
     TS_ASSERT(save.isInitialized());
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("Filename", m_filename));
-    std::string filename = save.getPropertyValue("Filename"); //Get absolute path
-    TS_ASSERT_THROWS_ANYTHING(save.setPropertyValue("InputWorkspace", "NotARealWS"));
+    std::string filename =
+        save.getPropertyValue("Filename"); // Get absolute path
+    TS_ASSERT_THROWS_ANYTHING(
+        save.setPropertyValue("InputWorkspace", "NotARealWS"));
     TS_ASSERT_THROWS_ANYTHING(save.execute());
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT( !Poco::File(filename).exists() );
+    TS_ASSERT(!Poco::File(filename).exists());
   }
 
-  void test_fail_invalid_IndexMax()
-  {
+  void test_fail_invalid_IndexMax() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
 
@@ -289,46 +284,47 @@ public:
     std::string filename = initSaveAscii2(save);
 
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMin", "1"));
-    //first check the validator
+    // first check the validator
     TS_ASSERT_THROWS_ANYTHING(save.setProperty("WorkspaceIndexMax", -1));
-    //then check the workspace bounds testing
+    // then check the workspace bounds testing
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMax", "5"));
 
     TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT( !Poco::File(filename).exists() );
+    TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_IndexMin()
-  {
+  void test_fail_invalid_IndexMin() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
 
     SaveAscii2 save;
     std::string filename = initSaveAscii2(save);
-    //first check the validator
+    // first check the validator
     TS_ASSERT_THROWS_ANYTHING(save.setProperty("WorkspaceIndexMin", -1));
-    //then check the workspace bounds testing
+    // then check the workspace bounds testing
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMin", "5"));
-    //the problem is that this'll throw regardless as no numbers below zero can get in so i have to go over the bounds
-    //so i have to either force Max higher or overlap, and both are tested separatly
-    //the validator seems to replace "-1" with the same as EMPTY_INT() so the bounds aren't checked
+    // the problem is that this'll throw regardless as no numbers below zero can
+    // get in so i have to go over the bounds
+    // so i have to either force Max higher or overlap, and both are tested
+    // separatly
+    // the validator seems to replace "-1" with the same as EMPTY_INT() so the
+    // bounds aren't checked
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMax", "7"));
-    
+
     TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
 
     // the algorithm didn't run so there should be no file
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT( !Poco::File(filename).exists() );
+    TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_IndexMin_Max_Overlap()
-  {
+  void test_fail_invalid_IndexMin_Max_Overlap() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
 
@@ -341,13 +337,12 @@ public:
     TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT( !Poco::File(filename).exists() );
+    TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_SpectrumList()
-  {
+  void test_fail_invalid_SpectrumList() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
 
@@ -359,14 +354,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // the algorithm will have used a defualt and written a file to disk
-    TS_ASSERT( Poco::File(filename).exists() );
+    TS_ASSERT(Poco::File(filename).exists());
     Poco::File(filename).remove();
 
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_SpectrumList_exceeds()
-  {
+  void test_fail_SpectrumList_exceeds() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
 
@@ -375,16 +369,15 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("SpectrumList", "2, 3, 1"));
 
-    TS_ASSERT_THROWS(save.execute(),std::invalid_argument);
+    TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT( !Poco::File(filename).exists() );
+    TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_Precision()
-  {
+  void test_fail_invalid_Precision() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
 
@@ -396,50 +389,47 @@ public:
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // the algorithm will have used a defualt and written a file to disk
-    TS_ASSERT( Poco::File(filename).exists() );
+    TS_ASSERT(Poco::File(filename).exists());
     Poco::File(filename).remove();
 
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_CommentIndicator_number()
-  {
+  void test_fail_invalid_CommentIndicator_number() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
 
     SaveAscii2 save;
     std::string filename = initSaveAscii2(save);
 
-    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("CommentIndicator", "3" ));
+    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("CommentIndicator", "3"));
 
     TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT( !Poco::File(filename).exists() );
+    TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_CommentIndicator_e()
-  {
+  void test_fail_invalid_CommentIndicator_e() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
 
     SaveAscii2 save;
     std::string filename = initSaveAscii2(save);
 
-    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("CommentIndicator", "e" ));
+    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("CommentIndicator", "e"));
 
     TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT( !Poco::File(filename).exists() );
+    TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_CommentIndicator_hyphen()
-  {
+  void test_fail_invalid_CommentIndicator_hyphen() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
 
@@ -451,13 +441,12 @@ public:
     TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT( !Poco::File(filename).exists() );
+    TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_CommentIndicator_plus()
-  {
+  void test_fail_invalid_CommentIndicator_plus() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
 
@@ -469,108 +458,103 @@ public:
     TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT( !Poco::File(filename).exists() );
+    TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_Separator_e()
-  {
+  void test_fail_invalid_Separator_e() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
 
     SaveAscii2 save;
     std::string filename = initSaveAscii2(save);
 
-    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("Separator","UserDefined"));
-    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("CustomSeparator","e"));
+    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("Separator", "UserDefined"));
+    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("CustomSeparator", "e"));
 
     TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT( !Poco::File(filename).exists() );
+    TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_Separator_number()
-  {
+  void test_fail_invalid_Separator_number() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
 
     SaveAscii2 save;
     std::string filename = initSaveAscii2(save);
 
-    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("Separator","UserDefined"));
-    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("CustomSeparator","3"));
+    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("Separator", "UserDefined"));
+    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("CustomSeparator", "3"));
 
     TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT( !Poco::File(filename).exists() );
+    TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_Separator_plus()
-  {
+  void test_fail_invalid_Separator_plus() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
 
     SaveAscii2 save;
     std::string filename = initSaveAscii2(save);
 
-    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("Separator","UserDefined"));
-    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("CustomSeparator","+"));
+    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("Separator", "UserDefined"));
+    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("CustomSeparator", "+"));
 
     TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT( !Poco::File(filename).exists() );
+    TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_Separator_hyphen()
-  {
+  void test_fail_invalid_Separator_hyphen() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
 
     SaveAscii2 save;
     std::string filename = initSaveAscii2(save);
 
-    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("Separator","UserDefined"));
-    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("CustomSeparator","-"));
+    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("Separator", "UserDefined"));
+    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("CustomSeparator", "-"));
 
     TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT( !Poco::File(filename).exists() );
+    TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_Separator()
-  {
+  void test_fail_invalid_Separator() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
 
     SaveAscii2 save;
     std::string filename = initSaveAscii2(save);
 
-    TS_ASSERT_THROWS_ANYTHING(save.setPropertyValue("Separator", "NotAValidChoice"));
+    TS_ASSERT_THROWS_ANYTHING(
+        save.setPropertyValue("Separator", "NotAValidChoice"));
 
     TS_ASSERT_THROWS_NOTHING(save.execute());
 
     // the algorithm will have used a defualt and written a file to disk
-    TS_ASSERT( Poco::File(filename).exists() );
+    TS_ASSERT(Poco::File(filename).exists());
     Poco::File(filename).remove();
 
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_clash_CustomSeparator_CustomComment()
-  {
+  void test_fail_clash_CustomSeparator_CustomComment() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
 
@@ -584,23 +568,20 @@ public:
     TS_ASSERT_THROWS_ANYTHING(save.execute());
 
     // the algorithm shouldn't have written a file to disk
-    TS_ASSERT( !Poco::File(filename).exists() );
+    TS_ASSERT(!Poco::File(filename).exists());
 
     AnalysisDataService::Instance().remove(m_name);
   }
-private:
 
-  void writeSampleWS(Mantid::DataObjects::Workspace2D_sptr & wsToSave)
-  {
-    wsToSave = boost::dynamic_pointer_cast<
-      Mantid::DataObjects::Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
-    for (int i = 0; i < 2; i++)
-    {
-      std::vector<double>& X = wsToSave->dataX(i);
-      std::vector<double>& Y = wsToSave->dataY(i);
-      std::vector<double>& E = wsToSave->dataE(i);
-      for (int j = 0; j < 3; j++)
-      {
+private:
+  void writeSampleWS(Mantid::DataObjects::Workspace2D_sptr &wsToSave) {
+    wsToSave = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
+    for (int i = 0; i < 2; i++) {
+      std::vector<double> &X = wsToSave->dataX(i);
+      std::vector<double> &Y = wsToSave->dataY(i);
+      std::vector<double> &E = wsToSave->dataE(i);
+      for (int j = 0; j < 3; j++) {
         X[j] = 1.5 * j / 0.9;
         Y[j] = (i + 1) * (2. + 4. * X[j]);
         E[j] = 1.;
@@ -610,20 +591,18 @@ private:
     AnalysisDataService::Instance().add(m_name, wsToSave);
   }
 
-  std::string initSaveAscii2(SaveAscii2 & save)
-  {
+  std::string initSaveAscii2(SaveAscii2 &save) {
     save.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(save.initialize());
     TS_ASSERT(save.isInitialized());
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("Filename", m_filename));
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("InputWorkspace", m_name));
-    return save.getPropertyValue("Filename"); //return absolute path
+    return save.getPropertyValue("Filename"); // return absolute path
   }
 
   std::string m_filename;
   std::string m_filename_nohead;
   std::string m_name;
 };
-
 
 #endif /*SAVEASCIITEST_H_*/

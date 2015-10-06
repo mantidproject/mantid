@@ -38,19 +38,21 @@ public:
   /// Constructor.
   SimpleChebfun(size_t n, ChebfunFunctionType fun, double start, double end);
   /// Constructor.
-  SimpleChebfun(size_t n, const API::IFunction& fun, double start, double end);
+  SimpleChebfun(size_t n, const API::IFunction &fun, double start, double end);
   /// Constructor.
-  SimpleChebfun(ChebfunFunctionType fun, double start, double end, double accuracy = 0.0, size_t badSize = 10);
+  SimpleChebfun(ChebfunFunctionType fun, double start, double end,
+                double accuracy = 0.0, size_t badSize = 10);
   /// Constructor.
-  SimpleChebfun(const API::IFunction& fun, double start, double end, double accuracy = 0.0, size_t badSize = 10);
+  SimpleChebfun(const API::IFunction &fun, double start, double end,
+                double accuracy = 0.0, size_t badSize = 10);
   /// Constructor.
-  SimpleChebfun(const std::vector<double>& x, const std::vector<double>& y);
+  SimpleChebfun(const std::vector<double> &x, const std::vector<double> &y);
   /// Number of points in the approximation.
-  size_t size() const {return m_base->size();}
+  size_t size() const { return m_base->size(); }
   /// Order of the approximating polynomial.
-  size_t order() const {return m_base->order();}
+  size_t order() const { return m_base->order(); }
   /// Check if approximation is good.
-  bool isGood() const {return !m_badFit;}
+  bool isGood() const { return !m_badFit; }
   /// Start of the interval
   double startX() const { return m_base->startX(); }
   /// End of the interval
@@ -66,7 +68,7 @@ public:
   /// Evaluate the function.
   double operator()(double x) const;
   /// Evaluate the function.
-  std::vector<double> operator()(const std::vector<double>& x) const;
+  std::vector<double> operator()(const std::vector<double> &x) const;
   /// Create a vector of x values linearly spaced on the approximation interval
   std::vector<double> linspace(size_t n) const;
   /// Create a derivative of this function.
@@ -76,7 +78,8 @@ public:
   /// Get rough estimates of the roots
   std::vector<double> roughRoots(double level = 0.0) const;
   /// Add a C++ function to the function
-  SimpleChebfun& operator+=(ChebfunFunctionType fun);
+  SimpleChebfun &operator+=(ChebfunFunctionType fun);
+
 private:
   /// Constructor
   SimpleChebfun(ChebfunBase_sptr base);

@@ -241,10 +241,9 @@ void SplineInterpolation::calculateDerivatives(
  * @param outputWorkspace :: The output workspace
  * @param row :: The row of spectra to use
  */
-void
-SplineInterpolation::calculateSpline(MatrixWorkspace_const_sptr inputWorkspace,
-                                     MatrixWorkspace_sptr outputWorkspace,
-                                     int row) const {
+void SplineInterpolation::calculateSpline(
+    MatrixWorkspace_const_sptr inputWorkspace,
+    MatrixWorkspace_sptr outputWorkspace, int row) const {
   // setup input parameters
   size_t nData = inputWorkspace->readY(0).size();
   const double *xValues = inputWorkspace->readX(0).data();

@@ -179,7 +179,8 @@ void PredictPeaks::exec() {
       gonioVec.push_back(m_gonio);
     } catch (std::runtime_error &e) {
       g_log.error() << "Error getting the goniometer rotation matrix from the "
-                       "InputWorkspace." << std::endl << e.what() << std::endl;
+                       "InputWorkspace." << std::endl
+                    << e.what() << std::endl;
       g_log.warning() << "Using identity goniometer rotation matrix instead."
                       << std::endl;
     }
@@ -213,7 +214,7 @@ void PredictPeaks::exec() {
     }
   }
   // Find the run number
-  if (inWS ) {
+  if (inWS) {
     m_runNumber = inWS->getRunNumber();
   } else {
     throw std::runtime_error("Failed to get run number");

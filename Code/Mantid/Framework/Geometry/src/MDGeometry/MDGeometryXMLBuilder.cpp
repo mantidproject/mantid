@@ -295,8 +295,8 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::hasTDimension() const {
 }
 
 template <typename CheckDimensionPolicy>
-bool
-MDGeometryBuilderXML<CheckDimensionPolicy>::hasIntegratedTDimension() const {
+bool MDGeometryBuilderXML<CheckDimensionPolicy>::hasIntegratedTDimension()
+    const {
   return hasTDimension() && this->m_spTDimension->getIsIntegrated();
 }
 

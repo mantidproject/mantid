@@ -153,7 +153,8 @@ void TransposeMD::exec() {
       outWS->setSignalAt(index, inIterator->getSignal());
       const signal_t error = inIterator->getError();
       outWS->setErrorSquaredAt(index, error * error);
-      outWS->setNumEventsAt(index, Mantid::signal_t(inIterator->getNumEvents()));
+      outWS->setNumEventsAt(index,
+                            Mantid::signal_t(inIterator->getNumEvents()));
       outWS->setMDMaskAt(index, inIterator->getIsMasked());
       progress.report();
     } while (inIterator->next());

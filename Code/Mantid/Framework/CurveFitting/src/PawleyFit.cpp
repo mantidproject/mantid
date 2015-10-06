@@ -92,13 +92,11 @@ void PawleyFit::addHKLsToFunction(PawleyFunction_sptr &pawleyFn,
         if (center > startX && center < endX) {
           pawleyFn->addPeak(hkl, fwhm, height);
         }
-      }
-      catch (std::bad_alloc) {
+      } catch (std::bad_alloc) {
         // do nothing.
       }
     }
-  }
-  catch (std::runtime_error) {
+  } catch (std::runtime_error) {
     // Column does not exist
     throw std::runtime_error("Can not process table, the following columns are "
                              "required: HKL, d, Intensity, FWHM (rel.)");
@@ -398,8 +396,8 @@ V3D V3DFromHKLColumnExtractor::getHKLFromStringColumn(
 }
 
 /// Try to extract a V3D from the given string with different separators.
-V3D V3DFromHKLColumnExtractor::getHKLFromString(const std::string &hklString)
-    const {
+V3D V3DFromHKLColumnExtractor::getHKLFromString(
+    const std::string &hklString) const {
   auto delimiters = boost::is_any_of(" ,[];");
 
   std::string workingCopy = boost::trim_copy_if(hklString, delimiters);

@@ -46,11 +46,11 @@ template <typename T> T interpretAs(std::vector<char> &Buf, size_t ind = 0) {
 DECLARE_FILELOADER_ALGORITHM(LoadSQW)
 
 /// Constructor
-LoadSQW::LoadSQW() : m_fileName(""), m_fileStream(),
-    m_prog(new Mantid::API::Progress(this, 0.05, 0.95, 100)), m_outputFile(""),
-    m_dataPositions(), m_boxSizes(), m_nDataPoints(0), m_mdImageSize(0),
-    m_nDims(0), m_nBins() {
-}
+LoadSQW::LoadSQW()
+    : m_fileName(""), m_fileStream(),
+      m_prog(new Mantid::API::Progress(this, 0.05, 0.95, 100)),
+      m_outputFile(""), m_dataPositions(), m_boxSizes(), m_nDataPoints(0),
+      m_mdImageSize(0), m_nDims(0), m_nBins() {}
 
 /**
 * Return the confidence with this algorithm can load the file
@@ -207,8 +207,8 @@ void LoadSQW::exec() {
 }
 
 /// Add events after reading pixels/datapoints from file.
-void
-    LoadSQW::readEvents(Mantid::DataObjects::MDEventWorkspace<MDEvent<4>, 4> *ws) {
+void LoadSQW::readEvents(
+    Mantid::DataObjects::MDEventWorkspace<MDEvent<4>, 4> *ws) {
   CPUTimer tim;
 
   size_t maxNPix = ~size_t(0);
@@ -276,10 +276,11 @@ void
           interpretAs<float>(Buffer, current_pix + column_size),
           interpretAs<float>(Buffer, current_pix + column_size_2),
           interpretAs<float>(Buffer, current_pix + column_size_3)};
-      const float errorSQ = interpretAs<float>(Buffer, current_pix + column_size_8);
+      const float errorSQ =
+          interpretAs<float>(Buffer, current_pix + column_size_8);
       ws->addEvent(MDEvent<4>(
           interpretAs<float>(Buffer, current_pix + column_size_7), // Signal
-          errorSQ,                                           // Error sq
+          errorSQ,                                                 // Error sq
           static_cast<uint16_t>(interpretAs<float>(
               Buffer, current_pix + column_size_6)), // run Index
           static_cast<int32_t>(interpretAs<float>(
@@ -379,8 +380,8 @@ Extract the b-matrix from a SQW file. Create experiment info with oriented
 lattice and add to workspace.
 @param ws : Workspace to modify.
 */
-void
-    LoadSQW::addLattice(Mantid::DataObjects::MDEventWorkspace<MDEvent<4>, 4> *ws) {
+void LoadSQW::addLattice(
+    Mantid::DataObjects::MDEventWorkspace<MDEvent<4>, 4> *ws) {
   std::vector<char> buf(
       4 * (3 + 3)); // Where 4 = size_of(float) and 3 * 3 is size of b-matrix.
   this->m_fileStream.seekg(this->m_dataPositions.geom_start, std::ios::beg);

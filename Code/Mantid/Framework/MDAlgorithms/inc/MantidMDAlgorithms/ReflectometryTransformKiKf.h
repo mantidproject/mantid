@@ -1,7 +1,6 @@
 #ifndef MANTID_MDALGORITHMS_REFLECTOMETRYTRANSFORMKIKF_H_
 #define MANTID_MDALGORITHMS_REFLECTOMETRYTRANSFORMKIKF_H_
 
-
 #include "MantidKernel/ClassMacros.h"
 
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
@@ -45,6 +44,7 @@ public:
                              int numberOfBinsQx = 100,
                              int numberOfBinsQz = 100);
   virtual ~ReflectometryTransformKiKf();
+
 private:
   DISABLE_DEFAULT_CONSTRUCT(ReflectometryTransformKiKf)
   DISABLE_COPY_AND_ASSIGN(ReflectometryTransformKiKf)

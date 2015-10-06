@@ -486,8 +486,7 @@ void IntegratePeakTimeSlices::exec() {
             done = false;
 
             int chanMin, chanMax;
-            if ((dir == 1 && chan == 0) ||
-                lastAttributeList->CellHeight <= 0) {
+            if ((dir == 1 && chan == 0) || lastAttributeList->CellHeight <= 0) {
               chanMin = xchan;
               chanMax = xchan + 1;
               if (dir < 0)
@@ -758,8 +757,9 @@ bool IntegratePeakTimeSlices::updateNeighbors(
  * NOTE: differentials of Q =mv*sin(scatAng/2)/2 were used to calculate this
  *  Also s=r*theta was used to transfer d ScatAng to distance on a bank.
  */
-double IntegratePeakTimeSlices::CalculatePositionSpan(Geometry::IPeak const &peak,
-                                                      const double dQ) {
+double
+IntegratePeakTimeSlices::CalculatePositionSpan(Geometry::IPeak const &peak,
+                                               const double dQ) {
 
   try {
     double Q = 0, ScatAngle = 0, dScatAngle = 0, DetSpan = 0;
@@ -1200,14 +1200,14 @@ double DataModeHandler::getNewRCRadius() {
 
   double DD = max<double>(sqrt(Vy) * CellHeight, sqrt(Vx) * CellWidth);
   double NewRadius =
-      1.4 * max<double>(MinRowColSpan * max<double>(CellWidth, CellHeight),
-                        4.5 * DD);
+      1.4 *
+      max<double>(MinRowColSpan * max<double>(CellWidth, CellHeight), 4.5 * DD);
   NewRadius = mult * min<double>(baseRCRadius, NewRadius);
   // 1.4 is needed to get more background cells. In rectangle the corners were
   // background
 
-  NewRadius = min<double>(
-      MaxRowColSpan * max<double>(CellWidth, CellHeight), NewRadius);
+  NewRadius = min<double>(MaxRowColSpan * max<double>(CellWidth, CellHeight),
+                          NewRadius);
 
   return NewRadius;
 }

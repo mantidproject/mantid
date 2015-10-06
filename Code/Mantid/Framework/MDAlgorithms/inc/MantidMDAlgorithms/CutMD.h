@@ -48,13 +48,12 @@ public:
 
   virtual void init();
   virtual void exec();
-  
+
   static const std::string InvAngstromSymbol;
   static const std::string RLUSymbol;
   static const std::string AutoMethod;
   static const std::string RLUMethod;
   static const std::string InvAngstromMethod;
-  
 };
 
 } // namespace MDAlgorithms

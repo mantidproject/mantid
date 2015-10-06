@@ -111,11 +111,10 @@ void EQSANSTofStructure::exec() {
                   tmp_frame_width, frame_skipping);
 }
 
-void
-EQSANSTofStructure::execEvent(Mantid::DataObjects::EventWorkspace_sptr inputWS,
-                              double threshold, double frame_offset,
-                              double tof_frame_width, double tmp_frame_width,
-                              bool frame_skipping) {
+void EQSANSTofStructure::execEvent(
+    Mantid::DataObjects::EventWorkspace_sptr inputWS, double threshold,
+    double frame_offset, double tof_frame_width, double tmp_frame_width,
+    bool frame_skipping) {
   const size_t numHists = inputWS->getNumberHistograms();
   Progress progress(this, 0.0, 1.0, numHists);
 

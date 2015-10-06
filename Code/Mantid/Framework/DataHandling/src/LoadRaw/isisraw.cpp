@@ -296,7 +296,7 @@ int ISISRAW::updateFromCRPT() {
   code = m_crpt->code; // code for UTn tables (size NDET)
   tthe = m_crpt->tthe; // 2theta scattering angle (size NDET)
   ut = (float *)
-       m_crpt->ut; // nuse UT* user tables (total size NUSE*NDET) ut01=phi
+           m_crpt->ut; // nuse UT* user tables (total size NUSE*NDET) ut01=phi
 
   // section 4
   ver4 = 2;  // SE section version number (=2)
@@ -847,11 +847,11 @@ int ISISRAW::ioRAW(FILE *file, LOG_LINE **s, int len, bool from_file) {
 /// stuff
 int ISISRAW::size_check() {
   static int size_check_array[] = {
-      sizeof(HDR_STRUCT),  80,     sizeof(ADD_STRUCT),  9 * 4,
-      sizeof(USER_STRUCT), 8 * 20, sizeof(RPB_STRUCT),  32 * 4,
-      sizeof(IVPB_STRUCT), 64 * 4, sizeof(SPB_STRUCT),  64 * 4,
-      sizeof(SE_STRUCT),   32 * 4, sizeof(DAEP_STRUCT), 64 * 4,
-      sizeof(DHDR_STRUCT), 32 * 4, sizeof(DDES_STRUCT), 2 * 4};
+      sizeof(HDR_STRUCT), 80, sizeof(ADD_STRUCT), 9 * 4, sizeof(USER_STRUCT),
+      8 * 20, sizeof(RPB_STRUCT), 32 * 4, sizeof(IVPB_STRUCT), 64 * 4,
+      sizeof(SPB_STRUCT), 64 * 4, sizeof(SE_STRUCT), 32 * 4,
+      sizeof(DAEP_STRUCT), 64 * 4, sizeof(DHDR_STRUCT), 32 * 4,
+      sizeof(DDES_STRUCT), 2 * 4};
   for (unsigned i = 0; i < sizeof(size_check_array) / sizeof(int); i += 2) {
     if (size_check_array[i] != size_check_array[i + 1]) {
       std::cerr << "size check failed" << std::endl;

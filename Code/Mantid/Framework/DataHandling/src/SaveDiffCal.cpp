@@ -78,30 +78,33 @@ void SaveDiffCal::init() {
 }
 
 std::map<std::string, std::string> SaveDiffCal::validateInputs() {
-    std::map<std::string, std::string> result;
+  std::map<std::string, std::string> result;
 
-    ITableWorkspace_const_sptr calibrationWS = getProperty("CalibrationWorkspace");
-    if (!bool(calibrationWS)) {
-        result["CalibrationWorkspace"] = "Cannot save empty table";
+  ITableWorkspace_const_sptr calibrationWS =
+      getProperty("CalibrationWorkspace");
+  if (!bool(calibrationWS)) {
+    result["CalibrationWorkspace"] = "Cannot save empty table";
+  } else {
+    size_t numRows = calibrationWS->rowCount();
+    if (numRows == 0) {
+      result["CalibrationWorkspace"] = "Cannot save empty table";
     } else {
-      size_t numRows = calibrationWS->rowCount();
-      if (numRows == 0) {
-        result["CalibrationWorkspace"] = "Cannot save empty table";
-      } else {
-        GroupingWorkspace_const_sptr groupingWS = getProperty("GroupingWorkspace");
-        if (bool(groupingWS) && numRows < groupingWS->getNumberHistograms()) {
-          result["GroupingWorkspace"] = "Must have same number of spectra as the table has rows";
-        }
-        MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace");
-        if (bool(maskWS) && numRows < maskWS->getNumberHistograms()) {
-          result["MaskWorkspace"] = "Must have same number of spectra as the table has rows";
-        }
+      GroupingWorkspace_const_sptr groupingWS =
+          getProperty("GroupingWorkspace");
+      if (bool(groupingWS) && numRows < groupingWS->getNumberHistograms()) {
+        result["GroupingWorkspace"] =
+            "Must have same number of spectra as the table has rows";
+      }
+      MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace");
+      if (bool(maskWS) && numRows < maskWS->getNumberHistograms()) {
+        result["MaskWorkspace"] =
+            "Must have same number of spectra as the table has rows";
       }
     }
+  }
 
-    return result;
+  return result;
 }
-
 
 namespace { // anonymous
 
@@ -172,7 +175,7 @@ void SaveDiffCal::writeDoubleFieldFromTable(H5::Group &group,
   auto column = m_calibrationWS->getColumn(name);
   std::vector<double> data;
   column->numeric_fill(data);
-  data.erase(data.begin()+m_numValues, data.end());
+  data.erase(data.begin() + m_numValues, data.end());
   writeArray(group, name, std::vector<double>(data));
 }
 
@@ -181,7 +184,7 @@ void SaveDiffCal::writeIntFieldFromTable(H5::Group &group,
   auto column = m_calibrationWS->getColumn(name);
   std::vector<int32_t> data;
   column->numeric_fill(data);
-  data.erase(data.begin()+m_numValues, data.end());
+  data.erase(data.begin() + m_numValues, data.end());
   writeArray(group, name, std::vector<int32_t>(data));
 }
 
@@ -233,12 +236,13 @@ void SaveDiffCal::generateDetidToIndex() {
 }
 
 bool SaveDiffCal::tableHasColumn(const std::string name) const {
-    const std::vector<std::string> names = m_calibrationWS->getColumnNames();
-    for (auto it = names.begin(); it != names.end(); ++it) {
-      if (name == (*it)) return true;
-    }
+  const std::vector<std::string> names = m_calibrationWS->getColumnNames();
+  for (auto it = names.begin(); it != names.end(); ++it) {
+    if (name == (*it))
+      return true;
+  }
 
-    return false;
+  return false;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -275,17 +279,17 @@ void SaveDiffCal::exec() {
 
   this->writeIntFieldFromTable(calibrationGroup, "detid");
   if (this->tableHasColumn("dasid")) // optional field
-      this->writeIntFieldFromTable(calibrationGroup, "dasid");
+    this->writeIntFieldFromTable(calibrationGroup, "dasid");
   else
-      g_log.information("Not writing out values for \"dasid\"");
+    g_log.information("Not writing out values for \"dasid\"");
 
   this->writeIntFieldFromSVWS(calibrationGroup, "group", groupingWS);
   this->writeIntFieldFromSVWS(calibrationGroup, "use", maskWS);
 
   if (this->tableHasColumn("offset")) // optional field
-      this->writeDoubleFieldFromTable(calibrationGroup, "offset");
+    this->writeDoubleFieldFromTable(calibrationGroup, "offset");
   else
-      g_log.information("Not writing out values for \"offset\"");
+    g_log.information("Not writing out values for \"offset\"");
 
   // get the instrument information
   std::string instrumentName;

@@ -146,8 +146,8 @@ void AlgorithmProxy::addObserver(const Poco::AbstractObserver &observer) const {
 /** Remove an observer.
 *  @param observer :: Observer
 */
-void
-AlgorithmProxy::removeObserver(const Poco::AbstractObserver &observer) const {
+void AlgorithmProxy::removeObserver(
+    const Poco::AbstractObserver &observer) const {
   std::vector<const Poco::AbstractObserver *>::iterator o = std::find(
       m_externalObservers.begin(), m_externalObservers.end(), &observer);
   if (o != m_externalObservers.end())
@@ -229,12 +229,10 @@ void AlgorithmProxy::afterPropertySet(const std::string &name) {
 * also be added and rethrows will be true
 */
 void AlgorithmProxy::createConcreteAlg(bool initOnly) {
-  if ((m_alg) && initOnly)
-  {
-    //the cached algorithm exists and is not going to be executed,
-    //use that one
-  }
-  else {
+  if ((m_alg) && initOnly) {
+    // the cached algorithm exists and is not going to be executed,
+    // use that one
+  } else {
     m_alg = boost::dynamic_pointer_cast<Algorithm>(
         AlgorithmManager::Instance().createUnmanaged(name(), version()));
     m_alg->initializeFromProxy(*this);

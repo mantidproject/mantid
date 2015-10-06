@@ -97,7 +97,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport Fit : public IFittingAlgorithm {
 public:
   /// Default constructor
-  Fit() : IFittingAlgorithm(){}
+  Fit() : IFittingAlgorithm() {}
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "Fit"; }
   /// Summary of algorithms purpose

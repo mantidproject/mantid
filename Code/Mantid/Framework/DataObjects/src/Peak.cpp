@@ -288,11 +288,10 @@ void Peak::setDetectorID(int id) {
   // Use the grand-parent whenever possible
   m_bankName = parent->getName();
   // For CORELLI, one level above sixteenpack
-  if(m_bankName.compare("sixteenpack") == 0){
+  if (m_bankName.compare("sixteenpack") == 0) {
     parent = parent->getParent();
     m_bankName = parent->getName();
   }
-
 
   // Special for rectangular detectors: find the row and column.
   RectangularDetector_const_sptr retDet =
@@ -779,8 +778,8 @@ Mantid::Kernel::Matrix<double> Peak::getGoniometerMatrix() const {
  * @param goniometerMatrix :: 3x3 matrix that represents the rotation matrix of
  * the goniometer
  * @throw std::invalid_argument if matrix is not 3x3*/
-void
-Peak::setGoniometerMatrix(Mantid::Kernel::Matrix<double> goniometerMatrix) {
+void Peak::setGoniometerMatrix(
+    Mantid::Kernel::Matrix<double> goniometerMatrix) {
   if ((goniometerMatrix.numCols() != 3) || (goniometerMatrix.numRows() != 3))
     throw std::invalid_argument(
         "Peak::setGoniometerMatrix(): Goniometer matrix must be 3x3.");

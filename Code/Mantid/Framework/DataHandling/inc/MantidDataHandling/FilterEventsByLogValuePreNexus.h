@@ -180,7 +180,7 @@ private:
   Mantid::API::Progress *m_prog;
 
   DataObjects::EventWorkspace_sptr m_localWorkspace; //< Output EventWorkspace
-  std::vector<int64_t> m_spectraList;               ///<the list of Spectra
+  std::vector<int64_t> m_spectraList;                ///<the list of Spectra
 
   /// The times for each pulse.
   std::vector<Kernel::DateAndTime> pulsetimes;
@@ -218,7 +218,7 @@ private:
   /// the number of events that were ignored (not loaded) because, e.g. of only
   /// loading some spectra.
   std::size_t m_numIgnoredEvents;
-  std::size_t m_firstEvent;    ///< The first event to load (count from zero)
+  std::size_t m_firstEvent;   ///< The first event to load (count from zero)
   std::size_t m_maxNumEvents; ///< Number of events to load
 
   /// Set to true if a valid Mapping file was provided.

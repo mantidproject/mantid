@@ -86,7 +86,8 @@ void ConvertToMD::init() {
 
   declareProperty(
       new PropertyWithValue<bool>("TopLevelSplitting", 0, Direction::Input),
-      "This option causes a split of the top level, i.e. level0, of 50 for the first four dimensions.");
+      "This option causes a split of the top level, i.e. level0, of 50 for the "
+      "first four dimensions.");
 }
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -139,8 +140,8 @@ void ConvertToMD::exec() {
   // initiate class which would deal with any dimension workspaces requested by
   // algorithm parameters
   if (!m_OutWSWrapper)
-    m_OutWSWrapper = boost::shared_ptr<MDEventWSWrapper>(
-        new MDEventWSWrapper());
+    m_OutWSWrapper =
+        boost::shared_ptr<MDEventWSWrapper>(new MDEventWSWrapper());
 
   // -------- get Input workspace
   m_InWS2D = getProperty("InputWorkspace");
@@ -201,6 +202,7 @@ void ConvertToMD::exec() {
   // initiate conversion and estimate amount of job to do
   size_t n_steps =
       this->m_Convertor->initialize(targWSDescr, m_OutWSWrapper, ignoreZeros);
+
   // copy the metadata, necessary for resolution corrections
   copyMetaData(spws);
 
@@ -210,6 +212,9 @@ void ConvertToMD::exec() {
   g_log.information() << " conversion started\n";
   // DO THE JOB:
   this->m_Convertor->runConversion(m_Progress.get());
+
+  // Set the normalization of the event workspace
+  m_Convertor->setDisplayNormalization(spws, m_InWS2D);
 
   // JOB COMPLETED:
   setProperty("OutputWorkspace",
@@ -232,9 +237,8 @@ void ConvertToMD::exec() {
  * @return  :: modified targWSDescription containing the number of experiment
  *info added from the current MD workspace
  */
-void
-ConvertToMD::addExperimentInfo(API::IMDEventWorkspace_sptr &mdEventWS,
-                               MDWSDescription &targWSDescr) const {
+void ConvertToMD::addExperimentInfo(API::IMDEventWorkspace_sptr &mdEventWS,
+                                    MDWSDescription &targWSDescr) const {
   // Copy ExperimentInfo (instrument, run, sample) to the output WS
   API::ExperimentInfo_sptr ei(m_InWS2D->cloneExperimentInfo());
 
@@ -452,8 +456,8 @@ bool ConvertToMD::buildTargetWSDescription(
 * @param targWSDescr
 * @return
 */
-API::IMDEventWorkspace_sptr ConvertToMD::createNewMDWorkspace(
-    const MDWSDescription &targWSDescr) {
+API::IMDEventWorkspace_sptr
+ConvertToMD::createNewMDWorkspace(const MDWSDescription &targWSDescr) {
   // create new md workspace and set internal shared pointer of m_OutWSWrapper
   // to this workspace
   API::IMDEventWorkspace_sptr spws =
@@ -501,13 +505,11 @@ void ConvertToMD::setupTopLevelSplitting(Mantid::API::BoxController_sptr bc) {
   const size_t topLevelSplitSetting = 50;
   const size_t dimCutoff = 4;
 
-  // Set the Top level splitting 
+  // Set the Top level splitting
   for (size_t dim = 0; dim < bc->getNDims(); dim++) {
     if (dim < dimCutoff) {
       bc->setSplitTopInto(dim, topLevelSplitSetting);
-    }
-    else
-    {
+    } else {
       bc->setSplitTopInto(dim, bc->getSplitInto(dim));
     }
   }

@@ -16,40 +16,35 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace WorkspaceCreationHelper;
 
-class ReflectometryReductionOneTest: public CxxTest::TestSuite
-{
+class ReflectometryReductionOneTest : public CxxTest::TestSuite {
 private:
-
   MatrixWorkspace_sptr m_tinyReflWS;
 
 public:
-
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ReflectometryReductionOneTest *createSuite()
-  {
+  static ReflectometryReductionOneTest *createSuite() {
     return new ReflectometryReductionOneTest();
   }
-  static void destroySuite(ReflectometryReductionOneTest *suite)
-  {
+  static void destroySuite(ReflectometryReductionOneTest *suite) {
     delete suite;
   }
 
-  ReflectometryReductionOneTest()
-  {
+  ReflectometryReductionOneTest() {
     FrameworkManager::Instance();
     m_tinyReflWS = create2DWorkspaceWithReflectometryInstrument();
   }
 
-  void test_tolam()
-  {
+  void test_tolam() {
     MatrixWorkspace_sptr toConvert = m_tinyReflWS;
     std::vector<int> detectorIndexRange;
     size_t workspaceIndexToKeep1 = 1;
     const int monitorIndex = 0;
 
-    specid_t specId1 = toConvert->getSpectrum(workspaceIndexToKeep1)->getSpectrumNo();
-    specid_t monitorSpecId = toConvert->getSpectrum(monitorIndex)->getSpectrumNo();
+    specid_t specId1 =
+        toConvert->getSpectrum(workspaceIndexToKeep1)->getSpectrumNo();
+    specid_t monitorSpecId =
+        toConvert->getSpectrum(monitorIndex)->getSpectrumNo();
 
     // Define one spectra to keep
     detectorIndexRange.push_back(static_cast<int>(workspaceIndexToKeep1));
@@ -67,9 +62,12 @@ public:
     ReflectometryReductionOne alg;
 
     // Run the conversion.
-    ReflectometryWorkflowBase::DetectorMonitorWorkspacePair inLam = alg.toLam(toConvert,
-        detectorIndexRangesStr, monitorIndex, boost::tuple<double, double>(wavelengthMin, wavelengthMax),
-        boost::tuple<double, double>(backgroundWavelengthMin, backgroundWavelengthMax), wavelengthStep);
+    ReflectometryWorkflowBase::DetectorMonitorWorkspacePair inLam =
+        alg.toLam(toConvert, detectorIndexRangesStr, monitorIndex,
+                  boost::tuple<double, double>(wavelengthMin, wavelengthMax),
+                  boost::tuple<double, double>(backgroundWavelengthMin,
+                                               backgroundWavelengthMax),
+                  wavelengthStep);
 
     // Unpack the results
     MatrixWorkspace_sptr detectorWS = inLam.get<0>();
@@ -103,11 +101,9 @@ public:
     map = monitorWS->getSpectrumToWorkspaceIndexMap();
     // Check the spectrum ids retained.
     TS_ASSERT_EQUALS(map[monitorSpecId], 0);
-
   }
 
-  IAlgorithm_sptr construct_standard_algorithm()
-  {
+  IAlgorithm_sptr construct_standard_algorithm() {
     auto alg = AlgorithmManager::Instance().create("ReflectometryReductionOne");
     alg->setRethrows(true);
     alg->setChild(true);
@@ -127,20 +123,19 @@ public:
     return alg;
   }
 
-  void test_execute()
-  {
+  void test_execute() {
     auto alg = construct_standard_algorithm();
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     MatrixWorkspace_sptr workspaceInQ = alg->getProperty("OutputWorkspace");
-    MatrixWorkspace_sptr workspaceInLam = alg->getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr workspaceInLam =
+        alg->getProperty("OutputWorkspaceWavelength");
     const double theta = alg->getProperty("ThetaOut");
     UNUSED_ARG(theta)
     UNUSED_ARG(workspaceInQ)
     UNUSED_ARG(workspaceInLam)
   }
 
-  void test_calculate_theta()
-  {
+  void test_calculate_theta() {
 
     auto alg = construct_standard_algorithm();
 
@@ -149,9 +144,8 @@ public:
 
     const double outTheta = alg->getProperty("ThetaOut");
 
-    TS_ASSERT_DELTA(45.0/2, outTheta, 0.00001);
+    TS_ASSERT_DELTA(45.0 / 2, outTheta, 0.00001);
   }
-
 };
 
 #endif /* ALGORITHMS_TEST_REFLECTOMETRYREDUCTIONONETEST_H_ */

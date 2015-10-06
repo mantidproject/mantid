@@ -214,7 +214,7 @@ void SetSampleMaterial::exec() {
   const int z_number = getProperty("AtomicNumber");
   const int a_number = getProperty("MassNumber");
 
-  double b_avg = 0.; // to accumulate <b>
+  double b_avg = 0.;    // to accumulate <b>
   double b_sq_avg = 0.; // to accumulate <b^2>
 
   boost::scoped_ptr<Material> mat;
@@ -223,7 +223,7 @@ void SetSampleMaterial::exec() {
     Material::ChemicalFormula CF;
     try {
       CF = Material::parseChemicalFormula(chemicalSymbol);
-    } catch(std::runtime_error &ex) {
+    } catch (std::runtime_error &ex) {
       UNUSED_ARG(ex);
       std::stringstream msg;
       msg << "Could not parse chemical formula: " << chemicalSymbol
@@ -239,16 +239,20 @@ void SetSampleMaterial::exec() {
       mat.reset(new Material(chemicalSymbol, CF.atoms[0]->neutron,
                              CF.atoms[0]->number_density));
       // can be directly calculated from the one atom
-      b_sq_avg = (CF.atoms[0]->neutron.coh_scatt_length_real*CF.atoms[0]->neutron.coh_scatt_length_real)
-              + (CF.atoms[0]->neutron.coh_scatt_length_img*CF.atoms[0]->neutron.coh_scatt_length_img);
+      b_sq_avg = (CF.atoms[0]->neutron.coh_scatt_length_real *
+                  CF.atoms[0]->neutron.coh_scatt_length_real) +
+                 (CF.atoms[0]->neutron.coh_scatt_length_img *
+                  CF.atoms[0]->neutron.coh_scatt_length_img);
       b_avg = sqrt(b_sq_avg);
     } else {
       double numAtoms = 0.; // number of atoms in formula
       for (size_t i = 0; i < CF.atoms.size(); i++) {
         neutron = neutron + CF.numberAtoms[i] * CF.atoms[i]->neutron;
 
-        double b_magnitude_sqrd = (CF.atoms[i]->neutron.coh_scatt_length_real*CF.atoms[i]->neutron.coh_scatt_length_real)
-                + (CF.atoms[i]->neutron.coh_scatt_length_img*CF.atoms[i]->neutron.coh_scatt_length_img);
+        double b_magnitude_sqrd = (CF.atoms[i]->neutron.coh_scatt_length_real *
+                                   CF.atoms[i]->neutron.coh_scatt_length_real) +
+                                  (CF.atoms[i]->neutron.coh_scatt_length_img *
+                                   CF.atoms[i]->neutron.coh_scatt_length_img);
         b_sq_avg += b_magnitude_sqrd;
         b_avg += sqrt(b_magnitude_sqrd);
 
@@ -307,8 +311,9 @@ void SetSampleMaterial::exec() {
     mat.reset(new Material(chemicalSymbol, neutron, rho));
   }
 
-  double normalizedLaue = (b_sq_avg-b_avg*b_avg)/(b_avg*b_avg);
-  if (b_sq_avg == b_avg*b_avg) normalizedLaue = 0.;
+  double normalizedLaue = (b_sq_avg - b_avg * b_avg) / (b_avg * b_avg);
+  if (b_sq_avg == b_avg * b_avg)
+    normalizedLaue = 0.;
 
   // set the material but leave the geometry unchanged
   auto shapeObject = expInfo->sample().getShape(); // copy
@@ -330,7 +335,7 @@ void SetSampleMaterial::exec() {
                  << "    Total " << mat->totalScatterXSection() << " barns\n"
                  << "    Absorption " << mat->absorbXSection() << " barns\n"
                  << "PDF terms\n"
-                 << "    <b>^2 = " << (b_avg*b_avg) << "\n"
+                 << "    <b>^2 = " << (b_avg * b_avg) << "\n"
                  << "    <b^2> = " << b_sq_avg << "\n"
                  << "    L     = " << normalizedLaue << "\n";
   setProperty("CoherentXSectionResult", mat->cohScatterXSection()); // in barns

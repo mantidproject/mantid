@@ -20,9 +20,9 @@ class DLLExport ConvertToDiffractionMDWorkspace2
     : public MDAlgorithms::BoxControllerSettingsAlgorithm {
 public:
   /** Constructor   */
-  ConvertToDiffractionMDWorkspace2(){}
+  ConvertToDiffractionMDWorkspace2() {}
   /** Destructor   */
-  virtual ~ConvertToDiffractionMDWorkspace2(){}
+  virtual ~ConvertToDiffractionMDWorkspace2() {}
 
   /// Algorithm's name for identification
   virtual const std::string name() const {

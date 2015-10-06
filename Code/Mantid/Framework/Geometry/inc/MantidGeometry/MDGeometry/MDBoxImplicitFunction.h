@@ -41,7 +41,6 @@ namespace Geometry {
 */
 class DLLExport MDBoxImplicitFunction : public MDImplicitFunction {
 public:
-
   MDBoxImplicitFunction(const Mantid::Kernel::VMD &min,
                         const Mantid::Kernel::VMD &max);
 
@@ -50,14 +49,15 @@ public:
 
   double volume() const;
 
-  double fraction(const std::vector<boost::tuple<Mantid::coord_t, Mantid::coord_t> >& extents) const;
+  double
+  fraction(const std::vector<boost::tuple<Mantid::coord_t, Mantid::coord_t>> &
+               extents) const;
 
   virtual ~MDBoxImplicitFunction();
 
 private:
-
   void construct(const Mantid::Kernel::VMD &min,
-                         const Mantid::Kernel::VMD &max);
+                 const Mantid::Kernel::VMD &max);
 
   /// Maximum extents of MDBox
   const Mantid::Kernel::VMD m_max;
@@ -65,7 +65,6 @@ private:
   const Mantid::Kernel::VMD m_min;
   /// Box volume
   double m_volume;
-
 };
 
 } // namespace Geometry

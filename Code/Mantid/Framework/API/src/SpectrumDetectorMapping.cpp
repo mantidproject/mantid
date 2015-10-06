@@ -63,10 +63,9 @@ SpectrumDetectorMapping::SpectrumDetectorMapping(
 }
 
 /// Called by the c-array constructors to do the actual filling
-void
-SpectrumDetectorMapping::fillMapFromArray(const specid_t *const spectrumNumbers,
-                                          const detid_t *const detectorIDs,
-                                          const size_t arrayLengths) {
+void SpectrumDetectorMapping::fillMapFromArray(
+    const specid_t *const spectrumNumbers, const detid_t *const detectorIDs,
+    const size_t arrayLengths) {
   for (size_t i = 0; i < arrayLengths; ++i) {
     m_mapping[spectrumNumbers[i]].insert(detectorIDs[i]);
   }

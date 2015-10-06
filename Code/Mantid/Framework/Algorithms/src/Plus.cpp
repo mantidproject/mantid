@@ -140,9 +140,9 @@ void Plus::checkRequirements() {
  *  @param rhs :: second workspace to check for compatibility
  *  @return workspace unit compatibility flag
  */
-bool
-Plus::checkUnitCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                             const API::MatrixWorkspace_const_sptr rhs) const {
+bool Plus::checkUnitCompatibility(
+    const API::MatrixWorkspace_const_sptr lhs,
+    const API::MatrixWorkspace_const_sptr rhs) const {
   if (lhs->size() > 1 && rhs->size() > 1) {
     if (lhs->YUnit() != rhs->YUnit()) {
       g_log.error("The two workspaces are not compatible because they have "

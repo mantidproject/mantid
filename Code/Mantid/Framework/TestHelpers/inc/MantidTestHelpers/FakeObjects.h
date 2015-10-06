@@ -151,23 +151,21 @@ public:
     throw std::runtime_error("getMemorySize not implemented");
   }
 
-  Column_sptr addColumn(const std::string&, const std::string&) {
+  Column_sptr addColumn(const std::string &, const std::string &) {
     throw std::runtime_error("addColumn not implemented");
   }
 
-  LogManager_sptr logs() {
-    throw std::runtime_error("logs not implemented");
-  }
+  LogManager_sptr logs() { throw std::runtime_error("logs not implemented"); }
 
   LogManager_const_sptr getLogs() const {
     throw std::runtime_error("getLogs not implemented");
   }
 
-  void removeColumn(const std::string&) {
+  void removeColumn(const std::string &) {
     throw std::runtime_error("removeColumn not implemented");
   }
 
-  ITableWorkspace* clone() const {
+  ITableWorkspace *clone() const {
     throw std::runtime_error("removeColumn not implemented");
   }
 
@@ -175,11 +173,11 @@ public:
     throw std::runtime_error("columnCount not implemented");
   }
 
-  Column_sptr getColumn(const std::string&) {
+  Column_sptr getColumn(const std::string &) {
     throw std::runtime_error("getColumn(str) not implemented");
   }
 
-  Column_const_sptr getColumn(const std::string&) const {
+  Column_const_sptr getColumn(const std::string &) const {
     throw std::runtime_error("getColumn(str) const not implemented");
   }
 
@@ -211,27 +209,27 @@ public:
     throw std::runtime_error("removeRow not implemented");
   }
 
-  void find(size_t, size_t&, const size_t&) {
+  void find(size_t, size_t &, const size_t &) {
     throw std::runtime_error("find not implemented");
   }
 
-  void find(double, size_t&, const size_t&) {
+  void find(double, size_t &, const size_t &) {
     throw std::runtime_error("find not implemented");
   }
 
-  void find(float, size_t&, const size_t&) {
+  void find(float, size_t &, const size_t &) {
     throw std::runtime_error("find not implemented");
   }
 
-  void find(Boolean, size_t&, const size_t&) {
+  void find(Boolean, size_t &, const size_t &) {
     throw std::runtime_error("find not implemented");
   }
 
-  void find(std::string, size_t&, const size_t&) {
+  void find(std::string, size_t &, const size_t &) {
     throw std::runtime_error("find not implemented");
   }
 
-  void find(V3D, size_t&, const size_t&) {
+  void find(V3D, size_t &, const size_t &) {
     throw std::runtime_error("find not implemented");
   }
 
@@ -244,9 +242,7 @@ private:
 
 //===================================================================================================================
 class ColumnTester : public Column {
-  size_t size() const {
-    throw std::runtime_error("size not implemented");
-  }
+  size_t size() const { throw std::runtime_error("size not implemented"); }
 
   std::type_info &get_type_info() const {
     throw std::runtime_error("get_type_info not implemented");
@@ -256,46 +252,35 @@ class ColumnTester : public Column {
     throw std::runtime_error("get_pointer_type_info not implemented");
   }
 
-  void print(size_t, std::ostream&) const {
+  void print(size_t, std::ostream &) const {
     throw std::runtime_error("print not implemented");
   }
 
-  bool isBool() const {
-    throw std::runtime_error("isBool not implemented");
-  }
+  bool isBool() const { throw std::runtime_error("isBool not implemented"); }
 
   long int sizeOfData() const {
     throw std::runtime_error("sizeOfData not implemented");
   }
 
-  Column* clone() const {
-    throw std::runtime_error("clone not implemented");
-  }
+  Column *clone() const { throw std::runtime_error("clone not implemented"); }
 
   double toDouble(size_t) const {
     throw std::runtime_error("toDouble not implemented");
   }
 
-  void fromDouble(size_t,double) {
+  void fromDouble(size_t, double) {
     throw std::runtime_error("fromDouble not implemented");
   }
 
 protected:
-  void resize(size_t) {
-    throw std::runtime_error("resize not implemented");
-  }
-  void insert(size_t) {
-    throw std::runtime_error("insert not implemented");
-  }
-  void remove(size_t) {
-    throw std::runtime_error("remove not implemented");
-  }
-  void* void_pointer(size_t) {
+  void resize(size_t) { throw std::runtime_error("resize not implemented"); }
+  void insert(size_t) { throw std::runtime_error("insert not implemented"); }
+  void remove(size_t) { throw std::runtime_error("remove not implemented"); }
+  void *void_pointer(size_t) {
     throw std::runtime_error("void_pointer not implemented");
   }
-  const void* void_pointer(size_t) const {
+  const void *void_pointer(size_t) const {
     throw std::runtime_error("void_pointer const not implemented");
   }
-
 };
 #endif /* FAKEOBJECTS_H_ */

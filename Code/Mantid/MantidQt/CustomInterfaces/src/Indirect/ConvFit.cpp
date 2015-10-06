@@ -214,7 +214,8 @@ void ConvFit::setup() {
 }
 
 /**
- * Converts data into a python script which prodcues the output workspace
+ * Handles the initial set up and running of the ConvolutionFitSequential
+ * algorithm
  */
 void ConvFit::run() {
   if (m_cfInputWS == NULL) {
@@ -240,12 +241,36 @@ void ConvFit::run() {
   std::string specMax = m_uiForm.spSpectraMax->text().toStdString();
   int maxIterations =
       static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
-  QString temperature = m_uiForm.leTempCorrection->text();
-  std::string plot = m_uiForm.cbPlotType->currentText().toStdString();
-  const bool save = m_uiForm.ckSave->isChecked();
+
+  // Construct expected name
+  m_baseName = QString::fromStdString(m_cfInputWS->getName());
+  int pos = m_baseName.lastIndexOf("_");
+  if (pos != -1) {
+    m_baseName = m_baseName.left(pos + 1);
+  }
+  m_baseName += "conv_";
+  if (m_blnManager->value(m_properties["UseDeltaFunc"])) {
+    m_baseName += "Delta";
+  }
+  int fitIndex = m_uiForm.cbFitType->currentIndex();
+  if (fitIndex < 3 && fitIndex != 0) {
+    m_baseName += QString::number(fitIndex);
+    m_baseName += "L";
+  } else {
+    m_baseName += convertFuncToShort(m_uiForm.cbFitType->currentText());
+  }
+  m_baseName +=
+      convertBackToShort(m_uiForm.cbBackground->currentText().toStdString()) +
+      "_s";
+  m_baseName += QString::fromStdString(specMin);
+  m_baseName += "_to_";
+  m_baseName += QString::fromStdString(specMax);
 
   // Run ConvolutionFitSequential Algorithm
-  auto cfs = AlgorithmManager::Instance().create("ConvolutionFitSequential");
+  IAlgorithm_sptr cfs =
+      AlgorithmManager::Instance().create("ConvolutionFitSequential");
+  cfs->initialize();
+
   cfs->setProperty("InputWorkspace", m_cfInputWS->getName());
   cfs->setProperty("Function", function);
   cfs->setProperty("BackgroundType",
@@ -258,52 +283,31 @@ void ConvFit::run() {
   cfs->setProperty("Minimizer",
                    minimizerString("$outputname_$wsindex").toStdString());
   cfs->setProperty("MaxIterations", maxIterations);
-  cfs->execute();
+  m_batchAlgoRunner->addAlgorithm(cfs);
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(algorithmComplete(bool)));
+  m_batchAlgoRunner->executeBatchAsync();
+}
 
-  double temp = 0.0;
-  if (temperature.toStdString().compare("") != 0) {
-    temp = temperature.toDouble();
-  }
+/**
+ * Handles completion of the ConvolutionFitSequential algorithm.
+ *
+ * @param error True if the algorithm was stopped due to error, false otherwise
+ */
+void ConvFit::algorithmComplete(bool error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(algorithmComplete(bool)));
 
-  std::string baseWsName = cfs->getProperty("OutputWorkspace");
-  auto pos = baseWsName.rfind("_");
-  baseWsName = baseWsName.substr(0, pos + 1);
+  if (error)
+    return;
 
-  std::string resultName = baseWsName + "Result";
+  std::string resultName = m_baseName.toStdString() + "_Result";
   MatrixWorkspace_sptr resultWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
 
-  std::string groupName = baseWsName + "Workspaces";
-  WorkspaceGroup_sptr groupWs =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
+  const bool save = m_uiForm.ckSave->isChecked();
 
-  if (temp != 0.0) {
-    const int maxSpec = boost::lexical_cast<int>(specMax) + 1;
-    auto addSample = AlgorithmManager::Instance().create("AddSampleLog");
-    addSample->setProperty("Workspace", resultWs);
-    addSample->setProperty("LogName", "temperature_value");
-    addSample->setProperty("LogText", temperature.toStdString());
-    addSample->setProperty("LogType", "Number");
-    addSample->execute();
-    addSample->setProperty("Workspace", resultWs);
-    addSample->setProperty("LogName", "temperature_correction");
-    addSample->setProperty("LogText", "True");
-    addSample->setProperty("LogType", "String");
-    addSample->execute();
-    for (int i = 0; i < maxSpec; i++) {
-      addSample->setProperty("Workspace", groupWs);
-      addSample->setProperty("LogName", "temperature_value");
-      addSample->setProperty("LogText", temperature.toStdString());
-      addSample->setProperty("LogType", "Number");
-      addSample->execute();
-      addSample->setProperty("Workspace", groupWs);
-      addSample->setProperty("LogName", "temperature_correction");
-      addSample->setProperty("LogText", "True");
-      addSample->setProperty("LogType", "String");
-      addSample->execute();
-    }
-  }
-
+  // Handle Save file
   if (save) {
     QString saveDir = QString::fromStdString(
         Mantid::Kernel::ConfigService::Instance().getString(
@@ -314,6 +318,9 @@ void ConvFit::run() {
     addSaveWorkspaceToQueue(QresultWsName, fullPath);
   }
 
+  std::string plot = m_uiForm.cbPlotType->currentText().toStdString();
+
+  // Handle plot result
   if (!(plot.compare("None") == 0)) {
     if (plot.compare("All") == 0) {
       int specEnd = (int)resultWs->getNumberHistograms();
@@ -326,6 +333,44 @@ void ConvFit::run() {
       int specNumber = m_uiForm.cbPlotType->currentIndex() - 1;
       IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
                                 specNumber, specNumber);
+    }
+  }
+
+  // Handle Temperature logs
+  if (m_uiForm.ckTempCorrection->isChecked()) {
+    QString temperature = m_uiForm.leTempCorrection->text();
+    double temp = 0.0;
+    if (temperature.toStdString().compare("") != 0) {
+      temp = temperature.toDouble();
+    }
+
+    if (temp != 0.0) {
+      // Obtain WorkspaceGroup from ADS
+      std::string groupName = m_baseName.toStdString() + "_Workspaces";
+      WorkspaceGroup_sptr groupWs =
+          AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
+
+      auto addSample = AlgorithmManager::Instance().create("AddSampleLog");
+      addSample->setProperty("Workspace", resultWs);
+      addSample->setProperty("LogName", "temperature_value");
+      addSample->setProperty("LogText", temperature.toStdString());
+      addSample->setProperty("LogType", "Number");
+      addSample->execute();
+      addSample->setProperty("Workspace", resultWs);
+      addSample->setProperty("LogName", "temperature_correction");
+      addSample->setProperty("LogText", "true");
+      addSample->setProperty("LogType", "String");
+      addSample->execute();
+      addSample->setProperty("Workspace", groupWs);
+      addSample->setProperty("LogName", "temperature_value");
+      addSample->setProperty("LogText", temperature.toStdString());
+      addSample->setProperty("LogType", "Number");
+      addSample->execute();
+      addSample->setProperty("Workspace", groupWs);
+      addSample->setProperty("LogName", "temperature_correction");
+      addSample->setProperty("LogText", "true");
+      addSample->setProperty("LogType", "String");
+      addSample->execute();
     }
   }
   m_batchAlgoRunner->executeBatchAsync();
@@ -939,10 +984,11 @@ void ConvFit::updatePlot() {
   }
 
   // If there is a result plot then plot it
-  if (AnalysisDataService::Instance().doesExist(m_pythonExportWsName)) {
+  std::string groupName =  m_baseName.toStdString() + "_Workspaces";
+  if (AnalysisDataService::Instance().doesExist(groupName)) {
     WorkspaceGroup_sptr outputGroup =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            m_pythonExportWsName);
+            groupName);
     if (specNo >= static_cast<int>(outputGroup->size()))
       return;
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
@@ -1549,6 +1595,47 @@ void ConvFit::updatePlotOptions() {
     plotOptions << "All";
   }
   m_uiForm.cbPlotType->addItems(plotOptions);
+}
+
+/**
+ * Converts the user input for function into short hand for use in the workspace
+ * naming
+ * @param original - The original user input to the function
+ * @return The short hand of the users input
+ */
+QString ConvFit::convertFuncToShort(const QString &original) {
+  QString result = "";
+  if (m_uiForm.cbFitType->currentIndex() != 0) {
+    if (original.at(0) == 'E') {
+      result += "E";
+    } else if (original.at(0) == 'I') {
+      result += "I";
+    } else {
+      return "SFT";
+    }
+    auto pos = original.find("Circle");
+    if (pos != -1) {
+      result += "DC";
+    } else {
+      result += "DS";
+    }
+  }
+  return result;
+}
+
+/**
+ * Converts the user input for background into short hand for use in the
+ * workspace naming
+ * @param original - The original user input to the function
+ * @return The short hand of the users input
+ */
+QString ConvFit::convertBackToShort(const std::string &original) {
+  QString result = QString::fromStdString(original.substr(0, 3));
+  auto pos = original.find(" ");
+  if (pos != std::string::npos) {
+    result += original.at(pos + 1);
+  }
+  return result;
 }
 
 } // namespace IDA

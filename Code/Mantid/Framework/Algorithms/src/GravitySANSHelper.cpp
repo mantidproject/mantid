@@ -84,7 +84,6 @@ double GravitySANSHelper::calcSinTheta() const {
   return sqrt(0.5 - halfcosTheta);
 }
 
-
 /**Calculates the distance a neutron coming from the sample will have deviated
 * from a
 *  straight tragetory before hitting a detector. If calling this function many
@@ -102,8 +101,8 @@ double GravitySANSHelper::calcSinTheta() const {
 */
 double GravitySANSHelper::gravitationalDrop(API::MatrixWorkspace_const_sptr ws,
                                             Geometry::IDetector_const_sptr det,
-                                           const double waveLength,
-                                           const double extraLength) const {
+                                            const double waveLength,
+                                            const double extraLength) const {
   using namespace PhysicalConstants;
   /// Pre-factor in gravity calculation: gm^2/2h^2
   static const double gm2_OVER_2h2 =
@@ -115,5 +114,6 @@ double GravitySANSHelper::gravitationalDrop(API::MatrixWorkspace_const_sptr ws,
   const double L2 = gm2_OVER_2h2 * std::pow(pathLength, 2);
 
   return waveLength * waveLength * L2;
-}}
+}
+}
 }

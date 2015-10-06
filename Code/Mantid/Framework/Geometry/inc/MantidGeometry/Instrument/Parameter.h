@@ -92,12 +92,13 @@ public:
   /// ParameterType<T>
   template <class T> const T &value();
   /// set description:
-  virtual void setDescription(const std::string &source)
-  {m_description.assign(source);}
+  virtual void setDescription(const std::string &source) {
+    m_description.assign(source);
+  }
   /// get description
-  virtual const std::string & getDescription()const{return m_description;}
-  /// get short description 
-  virtual std::string getShortDescription()const;
+  virtual const std::string &getDescription() const { return m_description; }
+  /// get short description
+  virtual std::string getShortDescription() const;
   /// Equality operator
   bool operator==(const Parameter &rhs) const {
     if (this->name() == rhs.name() && this->type() == rhs.type() &&
@@ -118,7 +119,7 @@ protected:
 
   friend class ParameterFactory;
   /// Constructor
-  Parameter() : m_type(""), m_name(""), m_str_value(""),m_description("") {}
+  Parameter() : m_type(""), m_name(""), m_str_value(""), m_description("") {}
 
 private:
   /// The type of the property
@@ -130,7 +131,6 @@ private:
   /// of this parameter
   std::string m_description;
 };
-
 
 /// Templated class for parameters of type \c Type
 template <class Type> class DLLExport ParameterType : public Parameter {

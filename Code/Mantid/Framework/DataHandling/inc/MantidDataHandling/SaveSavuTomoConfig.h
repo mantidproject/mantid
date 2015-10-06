@@ -60,7 +60,8 @@ public:
 
   /// Algorithm's category for identification
   virtual const std::string category() const {
-    return "DataHandling\\Tomography;"; }
+    return "DataHandling\\Tomography;";
+  }
 
 private:
   /// Initialisation code
@@ -72,8 +73,8 @@ private:
   bool tableLooksGenuine(const API::ITableWorkspace_sptr &tws);
 
   /// get table workspaces (checking the workspace names given)
-  std::vector<API::ITableWorkspace_sptr> checkTables(
-      const std::vector<std::string> &workspaces);
+  std::vector<API::ITableWorkspace_sptr>
+  checkTables(const std::vector<std::string> &workspaces);
   /// write savu tomo config file
   void saveFile(const std::string fname,
                 const std::vector<API::ITableWorkspace_sptr> &wss);

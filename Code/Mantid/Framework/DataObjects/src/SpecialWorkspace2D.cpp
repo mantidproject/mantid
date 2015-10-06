@@ -264,8 +264,8 @@ void SpecialWorkspace2D::binaryOperation(const unsigned int operatortype) {
 /** AND operator
  *
  */
-void
-SpecialWorkspace2D::binaryAND(boost::shared_ptr<const SpecialWorkspace2D> ws) {
+void SpecialWorkspace2D::binaryAND(
+    boost::shared_ptr<const SpecialWorkspace2D> ws) {
 
   for (size_t i = 0; i < this->getNumberHistograms(); i++) {
     double y1 = this->dataY(i)[0];
@@ -284,8 +284,8 @@ SpecialWorkspace2D::binaryAND(boost::shared_ptr<const SpecialWorkspace2D> ws) {
 /** OR operator
  *
  */
-void
-SpecialWorkspace2D::binaryOR(boost::shared_ptr<const SpecialWorkspace2D> ws) {
+void SpecialWorkspace2D::binaryOR(
+    boost::shared_ptr<const SpecialWorkspace2D> ws) {
 
   for (size_t i = 0; i < this->getNumberHistograms(); i++) {
     double y1 = this->dataY(i)[0];
@@ -312,8 +312,8 @@ if (y1 < 1.0E-10 && y2 < 1.0E-10){
 /** Excluded Or operator
  *
  */
-void
-SpecialWorkspace2D::binaryXOR(boost::shared_ptr<const SpecialWorkspace2D> ws) {
+void SpecialWorkspace2D::binaryXOR(
+    boost::shared_ptr<const SpecialWorkspace2D> ws) {
 
   for (size_t i = 0; i < this->getNumberHistograms(); i++) {
     double y1 = this->dataY(i)[0];

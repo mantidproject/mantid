@@ -7,25 +7,18 @@
 
 using namespace Mantid::Kernel;
 
-class NullValidatorTest : public CxxTest::TestSuite
-{
+class NullValidatorTest : public CxxTest::TestSuite {
 public:
+  void testConstructor() { TS_ASSERT_THROWS_NOTHING(NullValidator()); }
 
-  void testConstructor()
-  {
-    TS_ASSERT_THROWS_NOTHING(NullValidator());
-  }
-
-  void testClone()
-  {
+  void testClone() {
     IValidator_sptr v = boost::make_shared<NullValidator>();
     IValidator_sptr vv = v->clone();
-    TS_ASSERT_DIFFERS( v, vv )
-    TS_ASSERT( boost::dynamic_pointer_cast<NullValidator>(vv) )
+    TS_ASSERT_DIFFERS(v, vv)
+    TS_ASSERT(boost::dynamic_pointer_cast<NullValidator>(vv))
   }
 
-  void testNullValidatorWithInts()
-  {
+  void testNullValidatorWithInts() {
     NullValidator p;
     TS_ASSERT_EQUALS(p.isValid(0), "");
     TS_ASSERT_EQUALS(p.isValid(1), "");
@@ -33,8 +26,7 @@ public:
     TS_ASSERT_EQUALS(p.isValid(-11), "");
   }
 
-  void testDoubleNullValidatorWithDoubles()
-  {
+  void testDoubleNullValidatorWithDoubles() {
     NullValidator p;
     TS_ASSERT_EQUALS(p.isValid(0.0), "");
     TS_ASSERT_EQUALS(p.isValid(1.0), "");
@@ -42,15 +34,13 @@ public:
     TS_ASSERT_EQUALS(p.isValid(-10.1), "");
   }
 
-  void testStringNullValidatorWithStrings()
-  {
+  void testStringNullValidatorWithStrings() {
     NullValidator p;
     TS_ASSERT_EQUALS(p.isValid("AZ"), "");
     TS_ASSERT_EQUALS(p.isValid("B"), "");
     TS_ASSERT_EQUALS(p.isValid(""), "");
     TS_ASSERT_EQUALS(p.isValid("ta"), "");
   }
-
 };
 
 #endif /*NULLVALIDATORTEST_H_*/

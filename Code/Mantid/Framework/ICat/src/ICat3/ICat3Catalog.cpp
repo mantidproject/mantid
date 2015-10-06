@@ -43,9 +43,9 @@ void ICat3Catalog::myData(Mantid::API::ITableWorkspace_sptr &mydataws_sptr) {
  *@param investigationId :: unique identifier of the investigation
  *@param datasetsws_sptr :: shared pointer to datasets
  */
-void
-ICat3Catalog::getDataSets(const std::string &investigationId,
-                          Mantid::API::ITableWorkspace_sptr &datasetsws_sptr) {
+void ICat3Catalog::getDataSets(
+    const std::string &investigationId,
+    Mantid::API::ITableWorkspace_sptr &datasetsws_sptr) {
   // search datasets for a given investigation id using ICat api.
   m_helper->doDataSetsSearch(
       boost::lexical_cast<int64_t>(investigationId),
@@ -77,8 +77,8 @@ void ICat3Catalog::listInstruments(std::vector<std::string> &instruments) {
 /**This method returns the list of investigationtypes
  *@param invstTypes :: investigation types list
  */
-void
-ICat3Catalog::listInvestigationTypes(std::vector<std::string> &invstTypes) {
+void ICat3Catalog::listInvestigationTypes(
+    std::vector<std::string> &invstTypes) {
   m_helper->listInvestigationTypes(invstTypes);
 }
 

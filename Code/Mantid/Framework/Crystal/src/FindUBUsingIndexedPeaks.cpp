@@ -15,7 +15,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-#define round(x) ((x) >= 0 ? (int)((x)+0.5) : (int)((x)-0.5))
+#define round(x) ((x) >= 0 ? (int)((x) + 0.5) : (int)((x)-0.5))
 
 //--------------------------------------------------------------------------
 /** Constructor

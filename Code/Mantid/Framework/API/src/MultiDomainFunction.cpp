@@ -56,8 +56,8 @@ void MultiDomainFunction::countNumberOfDomains() {
 /**
  * Count value offsets for each member domain in a CompositeDomain.
  */
-void
-MultiDomainFunction::countValueOffsets(const CompositeDomain &domain) const {
+void MultiDomainFunction::countValueOffsets(
+    const CompositeDomain &domain) const {
   m_valueOffsets.clear();
   m_valueOffsets.push_back(0);
   for (size_t i = 0; i < domain.getNParts(); ++i) {

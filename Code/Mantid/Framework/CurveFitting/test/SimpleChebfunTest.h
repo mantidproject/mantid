@@ -11,9 +11,9 @@ using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 
 namespace {
-  double Sin(double x) {return sin(x);}
-  double Cos(double x) {return cos(x);}
-  double Exp(double x) {return exp(-x*x/2);}
+double Sin(double x) { return sin(x); }
+double Cos(double x) { return cos(x); }
+double Exp(double x) { return exp(-x * x / 2); }
 }
 
 class SimpleChebfunTest : public CxxTest::TestSuite {
@@ -21,41 +21,35 @@ public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static SimpleChebfunTest *createSuite() { return new SimpleChebfunTest(); }
-  static void destroySuite( SimpleChebfunTest *suite ) { delete suite; }
+  static void destroySuite(SimpleChebfunTest *suite) { delete suite; }
 
-
-  void test_constructor_low_accuracy()
-  {
+  void test_constructor_low_accuracy() {
     SimpleChebfun cheb(5, Sin, -M_PI, M_PI);
     do_test_values(cheb, Sin, 0.02);
     TS_ASSERT(cheb.isGood());
   }
 
-  void test_constructor_high_accuracy()
-  {
+  void test_constructor_high_accuracy() {
     SimpleChebfun cheb(21, Sin, -M_PI, M_PI);
     do_test_values(cheb, Sin, 1e-15);
     TS_ASSERT(cheb.isGood());
   }
 
-  void test_constructor_best_fit()
-  {
+  void test_constructor_best_fit() {
     SimpleChebfun cheb(Sin, -M_PI, M_PI);
     do_test_values(cheb, Sin, 2e-15);
     TS_ASSERT_EQUALS(cheb.size(), 20);
     TS_ASSERT(cheb.isGood());
   }
 
-  void test_constructor_bad_fit()
-  {
+  void test_constructor_bad_fit() {
     SimpleChebfun cheb(Sin, -1000, 1000);
     do_test_values(cheb, Sin, 2e-15);
     TS_ASSERT_EQUALS(cheb.size(), 10);
     TS_ASSERT(!cheb.isGood());
   }
 
-  void test_constructor_smooth()
-  {
+  void test_constructor_smooth() {
     double xa[] = {
         -10, -9.7979797979798, -9.5959595959596, -9.39393939393939,
         -9.19191919191919, -8.98989898989899, -8.78787878787879,
@@ -137,38 +131,38 @@ public:
   }
 
   void test_roughRoots() {
-    SimpleChebfun cheb(Sin, -2*M_PI - 0.1, 2*M_PI + 0.1);
+    SimpleChebfun cheb(Sin, -2 * M_PI - 0.1, 2 * M_PI + 0.1);
     auto roots = cheb.roughRoots();
     TS_ASSERT_EQUALS(roots.size(), 5);
     if (roots.size() == 5) {
-      TS_ASSERT_DELTA(roots[0], -2*M_PI, 1e-4);
+      TS_ASSERT_DELTA(roots[0], -2 * M_PI, 1e-4);
       TS_ASSERT_DELTA(roots[1], -M_PI, 1e-2);
       TS_ASSERT_DELTA(roots[2], 0, 1e-9);
       TS_ASSERT_DELTA(roots[3], M_PI, 1e-2);
-      TS_ASSERT_DELTA(roots[4], 2*M_PI, 1e-4);
+      TS_ASSERT_DELTA(roots[4], 2 * M_PI, 1e-4);
     }
   }
 
 private:
-
-  void do_test_values(const SimpleChebfun& cheb, std::function<double(double)> fun, double accur1 = 1e-14, double accur2 = 1e-14) {
+  void do_test_values(const SimpleChebfun &cheb,
+                      std::function<double(double)> fun, double accur1 = 1e-14,
+                      double accur2 = 1e-14) {
     TS_ASSERT(cheb.size() > 0);
     TS_ASSERT(cheb.width() > 0.0);
     if (cheb.isGood()) {
       size_t n = static_cast<size_t>(1.3 * static_cast<double>(cheb.size()));
       auto x = cheb.linspace(n);
-      for(size_t i = 0; i < n; ++i) {
-        //std::cerr << x[i] << ' ' << cheb(x[i]) - fun(x[i]) << std::endl;
+      for (size_t i = 0; i < n; ++i) {
+        // std::cerr << x[i] << ' ' << cheb(x[i]) - fun(x[i]) << std::endl;
         TS_ASSERT_DELTA(cheb(x[i]), fun(x[i]), accur1);
       }
     }
     auto &xp = cheb.xPoints();
-    for(size_t i = 0; i < xp.size(); ++i) {
-      //std::cerr << xp[i] << ' ' << cheb(xp[i]) - fun(xp[i]) << std::endl;
+    for (size_t i = 0; i < xp.size(); ++i) {
+      // std::cerr << xp[i] << ' ' << cheb(xp[i]) - fun(xp[i]) << std::endl;
       TS_ASSERT_DELTA(cheb(xp[i]), fun(xp[i]), accur2);
     }
   }
 };
-
 
 #endif /* MANTID_CURVEFITTING_SIMPLECHEBFUNTEST_H_ */

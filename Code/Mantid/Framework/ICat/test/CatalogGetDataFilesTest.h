@@ -11,35 +11,33 @@
 using namespace Mantid;
 using namespace Mantid::ICat;
 
-class CatalogGetDataFilesTest: public CxxTest::TestSuite
-{
+class CatalogGetDataFilesTest : public CxxTest::TestSuite {
 public:
   /// Skip all unit tests if ICat server is down
-  bool skipTests()
-  {
-    return ICatTestHelper::skipTests();
+  bool skipTests() { return ICatTestHelper::skipTests(); }
+
+  void testInit() {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility",
+                                                        "ISIS");
+    TS_ASSERT_THROWS_NOTHING(invstObj.initialize());
+    TS_ASSERT(invstObj.isInitialized());
   }
 
-  void testInit()
-  {
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
-    TS_ASSERT_THROWS_NOTHING( invstObj.initialize());
-    TS_ASSERT( invstObj.isInitialized() );
-  }
+  void testgetDataFilesExecutes() {
+    TS_ASSERT(ICatTestHelper::login());
 
-  void testgetDataFilesExecutes()
-  {
-    TS_ASSERT( ICatTestHelper::login() );
-
-    if (!invstObj.isInitialized() ) invstObj.initialize();
-    invstObj.setPropertyValue("InvestigationId","12576918");
-    invstObj.setPropertyValue("OutputWorkspace","investigation");//selected invesigation data files
+    if (!invstObj.isInitialized())
+      invstObj.initialize();
+    invstObj.setPropertyValue("InvestigationId", "12576918");
+    invstObj.setPropertyValue(
+        "OutputWorkspace", "investigation"); // selected invesigation data files
 
     TS_ASSERT_THROWS_NOTHING(invstObj.execute());
-    TS_ASSERT( invstObj.isExecuted() );
+    TS_ASSERT(invstObj.isExecuted());
 
     ICatTestHelper::logout();
   }
+
 private:
   CatalogGetDataFiles invstObj;
 };

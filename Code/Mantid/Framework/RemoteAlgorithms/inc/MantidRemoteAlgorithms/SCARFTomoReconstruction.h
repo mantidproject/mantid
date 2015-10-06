@@ -49,7 +49,7 @@ public:
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
     return "Perform a control action on jobs running on the SCARF computer "
-      "cluster at RAL, STFC (http://www.scarf.rl.ac.uk/)";
+           "cluster at RAL, STFC (http://www.scarf.rl.ac.uk/)";
   }
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -58,20 +58,19 @@ public:
 
 protected:
   /// different methods (HTTP requests) to process reconstruction job commands
-  virtual void doLogin(const std::string &username, const std::string &password);
+  virtual void doLogin(const std::string &username,
+                       const std::string &password);
   virtual void doLogout(const std::string &username);
   virtual bool doPing();
   virtual void doSubmit(const std::string &username);
   virtual void doQueryStatus(const std::string &username);
   virtual void doQueryStatusById(const std::string &username,
                                  const std::string &jobId);
-  virtual void doCancel(const std::string &username,
-                        const std::string& jobId);
+  virtual void doCancel(const std::string &username, const std::string &jobId);
   virtual void doUploadFile(const std::string &username,
                             const std::string &destDir,
                             const std::string &filename);
-  virtual void doDownload(const std::string &username,
-                          const std::string &jobId,
+  virtual void doDownload(const std::string &username, const std::string &jobId,
                           const std::string &fname,
                           const std::string &localDir);
 
@@ -79,12 +78,10 @@ protected:
 
   /// method that deals with the actual HTTP(S) connection (convenient to
   /// mock up all inet messaging)
-  virtual int doSendRequestGetResponse(const std::string &url,
-                                       std::ostream &response,
-                                       const StringToStringMap &headers =
-                                       StringToStringMap(),
-                                       const std::string &method = std::string(),
-                                       const std::string &body = "");
+  virtual int doSendRequestGetResponse(
+      const std::string &url, std::ostream &response,
+      const StringToStringMap &headers = StringToStringMap(),
+      const std::string &method = std::string(), const std::string &body = "");
 
 private:
   void init();
@@ -108,15 +105,16 @@ private:
                               const std::string &filename);
 
   /// fill in output properties with job status and info
-  void genOutputStatusInfo(const std::string &resp, const std::string &jobID =
-                           std::string());
+  void genOutputStatusInfo(const std::string &resp,
+                           const std::string &jobID = std::string());
 
-  /// Job sequence number (from here, nothing to do with the job id on the cluster)
+  /// Job sequence number (from here, nothing to do with the job id on the
+  /// cluster)
   int jobSeqNo();
 
   // cookie obtained after logging in
   struct Token {
-    Token(std::string& u, std::string& t): m_url(u), m_token_str(t) {};
+    Token(std::string &u, std::string &t) : m_url(u), m_token_str(t){};
     std::string m_url;
     std::string m_token_str;
   };
@@ -124,8 +122,18 @@ private:
 
   class Action {
   public:
-    typedef enum {LOGIN=0, LOGOUT, SUBMIT, QUERYSTATUS, QUERYSTATUSBYID,
-                  PING, CANCEL, UPLOAD, DOWNLOAD, UNDEF} Type;
+    typedef enum {
+      LOGIN = 0,
+      LOGOUT,
+      SUBMIT,
+      QUERYSTATUS,
+      QUERYSTATUSBYID,
+      PING,
+      CANCEL,
+      UPLOAD,
+      DOWNLOAD,
+      UNDEF
+    } Type;
   };
 
   /// helper to filter the action given by the user

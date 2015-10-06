@@ -45,7 +45,7 @@ public:
   // Provide a new instance of the ITimeSeriesProperty with shifted time values
   // After trying to use return type covariance, but that showed Error C2908
   // Using property seemed to be the most straightforward solution.
-  virtual Property* cloneWithTimeShift(const double timeShift) const = 0;
+  virtual Property *cloneWithTimeShift(const double timeShift) const = 0;
   /// Calculate the time-weighted average of a property in a filtered range
   virtual double
   averageValueInFilter(const std::vector<SplittingInterval> &filter) const = 0;

@@ -16,8 +16,10 @@ class ParameterEstimatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ParameterEstimatorTest *createSuite() { return new ParameterEstimatorTest(); }
-  static void destroySuite( ParameterEstimatorTest *suite ) { delete suite; }
+  static ParameterEstimatorTest *createSuite() {
+    return new ParameterEstimatorTest();
+  }
+  static void destroySuite(ParameterEstimatorTest *suite) { delete suite; }
 
   void test_BackToBackExponential() {
 
@@ -31,8 +33,9 @@ public:
         2.847186128946,     1.726807862958,     1.047276595461,
         0.6351380161499,    0.3851804649058,    0.1957211887562,
     };
-    auto function = FunctionFactory::Instance().createFunction("BackToBackExponential");
-    estimate(*function, x, y, sizeof(x)/sizeof(double));
+    auto function =
+        FunctionFactory::Instance().createFunction("BackToBackExponential");
+    estimate(*function, x, y, sizeof(x) / sizeof(double));
 
     TS_ASSERT_DELTA(function->getParameter("I"), 130.8, 0.1);
     TS_ASSERT_DELTA(function->getParameter("X0"), -2.65, 0.1);
@@ -67,8 +70,7 @@ public:
         7.171717171717, 7.373737373737, 7.575757575758, 7.777777777778,
         7.979797979798, 8.181818181818, 8.383838383838, 8.585858585859,
         8.787878787879, 8.989898989899, 9.191919191919, 9.393939393939,
-        9.59595959596, 9.79797979798, 10
-    };
+        9.59595959596, 9.79797979798, 10};
     double y[] = {-0.01679832208748,   0.003061949355257,   0.002644253505334,
                   0.007151032498319,   -0.001642868594606,  0.007460481779797,
                   -0.007876121307695,  -0.02170221181184,   -0.007135245496128,
@@ -104,7 +106,7 @@ public:
                   0.006035919625726,   0.008680619609555,   -0.02007425237712,
                   0.009870974433398};
     auto function = FunctionFactory::Instance().createFunction("Gaussian");
-    estimate(*function, x, y, sizeof(x)/sizeof(double));
+    estimate(*function, x, y, sizeof(x) / sizeof(double));
     TS_ASSERT_DELTA(function->getParameter("Height"), 0, 0.1);
     TS_ASSERT_DELTA(function->getParameter("PeakCentre"), 0, 0.1);
     TS_ASSERT_DELTA(function->getParameter("Sigma"), 1.0, 0.1);
@@ -172,22 +174,21 @@ public:
                   0.007696360084717, 0.007425655429154, 0.007168951084961,
                   0.006925300301337};
     auto function = FunctionFactory::Instance().createFunction("Lorentzian");
-    estimate(*function, x, y, sizeof(x)/sizeof(double));
+    estimate(*function, x, y, sizeof(x) / sizeof(double));
     TS_ASSERT_DELTA(function->getParameter("Amplitude"), 1.0, 0.1);
     TS_ASSERT_DELTA(function->getParameter("PeakCentre"), 0.0, 0.1);
     TS_ASSERT_DELTA(function->getParameter("FWHM"), 2.2, 0.1);
   }
+
 private:
   void estimate(IFunction &function, double x[], double y[], size_t n) {
     FunctionDomain1DView domain(x, n);
     FunctionValues values(domain);
-    for(size_t i = 0; i < n; ++i)
-    {
+    for (size_t i = 0; i < n; ++i) {
       values.setFitData(i, y[i]);
     }
     ParameterEstimator::estimate(function, domain, values);
   }
 };
-
 
 #endif /* MANTID_CURVEFITTING_PARAMETERESTIMATORTEST_H_ */

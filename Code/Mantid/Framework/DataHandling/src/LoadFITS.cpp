@@ -16,10 +16,6 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace std;
-using namespace boost;
-
-namespace {}
 
 namespace Mantid {
 namespace DataHandling {
@@ -203,9 +199,9 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
   }
 
   MantidImage imageY(headers[0].axisPixelLengths[1],
-                     vector<double>(headers[0].axisPixelLengths[0]));
+                     std::vector<double>(headers[0].axisPixelLengths[0]));
   MantidImage imageE(headers[0].axisPixelLengths[1],
-                     vector<double>(headers[0].axisPixelLengths[0]));
+                     std::vector<double>(headers[0].axisPixelLengths[0]));
 
   size_t bytes = (headers[0].bitsPerPixel / 8) * m_pixelCount;
   std::vector<char> buffer;
@@ -219,7 +215,7 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
 
   // Create a group for these new workspaces, if the group already exists, add
   // to it.
-  string groupName = outWSName;
+  std::string groupName = outWSName;
 
   // This forms the name of the group
   m_baseName = getPropertyValue("OutputWorkspace") + "_";
@@ -266,11 +262,11 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
       directoryName = directoryName + "/IMAT_Definition.xml";
       loadInst->setPropertyValue("Filename", directoryName);
       loadInst->setProperty<MatrixWorkspace_sptr>(
-          "Workspace", dynamic_pointer_cast<MatrixWorkspace>(latestWS));
+          "Workspace", boost::dynamic_pointer_cast<MatrixWorkspace>(latestWS));
       loadInst->execute();
     } catch (std::exception &ex) {
       g_log.information("Cannot load the instrument definition. " +
-                        string(ex.what()));
+                        std::string(ex.what()));
     }
   }
 
@@ -335,7 +331,7 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
       }
 
       try {
-        headers[i].bitsPerPixel = lexical_cast<int>(tmpBitPix);
+        headers[i].bitsPerPixel = boost::lexical_cast<int>(tmpBitPix);
       } catch (std::exception &e) {
         throw std::runtime_error(
             "Coult not interpret the entry number of bits per pixel (" +
@@ -376,7 +372,7 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
       headers[i].numberOfAxis = static_cast<int>(m_headerAxisNameKeys.size());
 
       for (int j = 0; headers.size() > i && j < headers[i].numberOfAxis; ++j) {
-        headers[i].axisPixelLengths.push_back(lexical_cast<size_t>(
+        headers[i].axisPixelLengths.push_back(boost::lexical_cast<size_t>(
             headers[i].headerKeys[m_headerAxisNameKeys[j]]));
         g_log.information()
             << "Found axis length header entry: " << m_headerAxisNameKeys[j]
@@ -399,8 +395,8 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
       headers[i].scale = 1;
     } else {
       try {
-        headers[i].scale =
-            lexical_cast<double>(headers[i].headerKeys[m_headerScaleKey]);
+        headers[i].scale = boost::lexical_cast<double>(
+            headers[i].headerKeys[m_headerScaleKey]);
       } catch (std::exception &e) {
         throw std::runtime_error(
             "Coult not interpret the entry number of bits per pixel (" +
@@ -416,14 +412,14 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
     } else {
       try {
         headers[i].offset =
-            lexical_cast<int>(headers[i].headerKeys[m_headerOffsetKey]);
+            boost::lexical_cast<int>(headers[i].headerKeys[m_headerOffsetKey]);
       } catch (std::exception & /*e*/) {
         // still, second try with floating point format (as used for example
         // by
         // Starlight XPRESS cameras)
         try {
-          double doff =
-              lexical_cast<double>(headers[i].headerKeys[m_headerOffsetKey]);
+          double doff = boost::lexical_cast<double>(
+              headers[i].headerKeys[m_headerOffsetKey]);
           double intPart;
           if (0 != modf(doff, &intPart)) {
             // anyway we'll do a cast, but warn if there was a fraction
@@ -465,7 +461,7 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
 */
 void LoadFITS::parseHeader(FITSInfo &headerInfo) {
   headerInfo.headerSizeMultiplier = 0;
-  ifstream istr(headerInfo.filePath.c_str(), ios::binary);
+  std::ifstream istr(headerInfo.filePath.c_str(), std::ios::binary);
   Poco::BinaryReader reader(istr);
 
   // Iterate 80 bytes at a time until header is parsed | 2880 bytes is the
@@ -477,7 +473,7 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
     for (int i = 0; i < 36; ++i) {
       // Keep vect of each header item, including comments, and also keep a
       // map of individual keys.
-      string part;
+      std::string part;
       reader.readRaw(80, part);
       headerInfo.headerItems.push_back(part);
 
@@ -486,8 +482,8 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
       // unique
       auto eqPos = part.find('=');
       if (eqPos > 0) {
-        string key = part.substr(0, eqPos);
-        string value = part.substr(eqPos + 1);
+        std::string key = part.substr(0, eqPos);
+        std::string value = part.substr(eqPos + 1);
 
         // Comments are added after the value separated by a / symbol. Remove.
         auto slashPos = value.find('/');
@@ -534,10 +530,10 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
                         MantidImage &imageE, const Workspace2D_sptr parent,
                         bool loadAsRectImg) {
 
-  string currNumberS = padZeros(newFileNumber, g_DIGIT_SIZE_APPEND);
+  std::string currNumberS = padZeros(newFileNumber, g_DIGIT_SIZE_APPEND);
   ++newFileNumber;
 
-  string baseName = m_baseName + currNumberS;
+  std::string baseName = m_baseName + currNumberS;
 
   // set data
   readDataToImgs(fileInfo, imageY, imageE, buffer);
@@ -547,12 +543,12 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
   if (!parent) {
     if (!loadAsRectImg) {
       size_t finalPixelCount = m_pixelCount / m_rebin * m_rebin;
-      ws =
-          dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create(
-              "Workspace2D", finalPixelCount, 2, 1));
+      ws = boost::dynamic_pointer_cast<Workspace2D>(
+          WorkspaceFactory::Instance().create("Workspace2D", finalPixelCount, 2,
+                                              1));
     } else {
-      ws =
-          dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create(
+      ws = boost::dynamic_pointer_cast<Workspace2D>(
+          WorkspaceFactory::Instance().create(
               "Workspace2D",
               fileInfo.axisPixelLengths[1] / m_rebin, // one bin per column
               fileInfo.axisPixelLengths[0] / m_rebin +
@@ -560,7 +556,7 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
               fileInfo.axisPixelLengths[0] / m_rebin));
     }
   } else {
-    ws = dynamic_pointer_cast<Workspace2D>(
+    ws = boost::dynamic_pointer_cast<Workspace2D>(
         WorkspaceFactory::Instance().create(parent));
   }
 
@@ -634,7 +630,7 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
        ++it) {
     ws->mutableRun().removeLogData(it->first, true);
     ws->mutableRun().addLogData(
-        new PropertyWithValue<string>(it->first, it->second));
+        new PropertyWithValue<std::string>(it->first, it->second));
   }
 
   // Add rotational data to log. Clear first from copied WS
@@ -828,8 +824,8 @@ void LoadFITS::doRebin(size_t rebin, MantidImage &imageY, MantidImage &imageE,
     for (size_t i = 0; i < (rebinnedY[0].size() - rebin + 1); ++i) {
       double accumY = 0.0;
       double accumE = 0.0;
-      size_t origJ = j*rebin;
-      size_t origI = i*rebin;
+      size_t origJ = j * rebin;
+      size_t origI = i * rebin;
       for (size_t k = 0; k < rebin; ++k) {
         for (size_t l = 0; l < rebin; ++l) {
           accumY += imageY[origJ + k][origI + l];
@@ -945,14 +941,14 @@ bool LoadFITS::isInstrOtherThanIMAT(FITSInfo &hdr) {
  * and leading 0's
  */
 size_t LoadFITS::fetchNumber(const std::string &name) {
-  string tmpStr = "";
+  std::string tmpStr = "";
   for (auto it = name.end() - 1; isdigit(*it); --it) {
     tmpStr.insert(0, 1, *it);
   }
   while (tmpStr.length() > 0 && tmpStr[0] == '0') {
     tmpStr.erase(tmpStr.begin());
   }
-  return (tmpStr.length() > 0) ? lexical_cast<size_t>(tmpStr) : 0;
+  return (tmpStr.length() > 0) ? boost::lexical_cast<size_t>(tmpStr) : 0;
 }
 
 /**
@@ -984,14 +980,14 @@ void LoadFITS::mapHeaderKeys() {
 
   // If a map file is selected, use that.
   std::string name = getPropertyValue(g_HEADER_MAP_NAME);
-  ifstream fStream(name.c_str());
+  std::ifstream fStream(name.c_str());
 
   try {
     // Ensure valid file
     if (fStream.good()) {
       // Get lines, split words, verify and add to map.
       std::string line;
-      vector<std::string> lineSplit;
+      std::vector<std::string> lineSplit;
       while (getline(fStream, line)) {
         boost::split(lineSplit, line, boost::is_any_of("="));
 

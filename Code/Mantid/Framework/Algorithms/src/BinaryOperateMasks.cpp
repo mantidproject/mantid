@@ -64,13 +64,13 @@ void BinaryOperateMasks::exec() {
   std::string op = getProperty("OperationType");
 
   // 2. Output
-  DataObjects::MaskWorkspace_sptr outputws =
-      getProperty("OutputWorkspace");
+  DataObjects::MaskWorkspace_sptr outputws = getProperty("OutputWorkspace");
 
   if (outputws != inputws1) {
     // if the input and output are not the same, then create a new workspace for
     // the output.
-    outputws = boost::make_shared<DataObjects::MaskWorkspace>(inputws1->getInstrument());
+    outputws = boost::make_shared<DataObjects::MaskWorkspace>(
+        inputws1->getInstrument());
     outputws->copyFrom(inputws1);
   }
 

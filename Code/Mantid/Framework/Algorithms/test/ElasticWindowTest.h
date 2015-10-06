@@ -21,26 +21,24 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Kernel::Units;
 
-class ElasticWindowTest : public CxxTest::TestSuite
-{
+class ElasticWindowTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static ElasticWindowTest *createSuite() { return new ElasticWindowTest(); }
-  static void destroySuite( ElasticWindowTest *suite ) { delete suite; }
+  static void destroySuite(ElasticWindowTest *suite) { delete suite; }
 
-  ElasticWindowTest() {
-    FrameworkManager::Instance();
-  }
+  ElasticWindowTest() { FrameworkManager::Instance(); }
 
-  void setUp()
-  {
+  void setUp() {
     // Create a workspace and format it for the ElasticWindow algorithm
 
     CreateSampleWorkspace createAlg;
     createAlg.initialize();
     createAlg.setProperty("Function", "User Defined");
-    createAlg.setProperty("UserDefinedFunction", "name=Lorentzian,Amplitude=100,PeakCentre=12700,FWHM=20;name=LinearBackground,A0=0.01");
+    createAlg.setProperty("UserDefinedFunction",
+                          "name=Lorentzian,Amplitude=100,PeakCentre=12700,FWHM="
+                          "20;name=LinearBackground,A0=0.01");
     createAlg.setProperty("XMin", 27000.0);
     createAlg.setProperty("XMax", 28000.0);
     createAlg.setProperty("BinWidth", 10.0);
@@ -54,7 +52,8 @@ public:
     convertUnitsAlg.setProperty("Target", "DeltaE");
     convertUnitsAlg.setProperty("EMode", "Indirect");
     convertUnitsAlg.setProperty("Efixed", 1.555);
-    convertUnitsAlg.setProperty("OutputWorkspace", "__ElasticWindowTest_sample");
+    convertUnitsAlg.setProperty("OutputWorkspace",
+                                "__ElasticWindowTest_sample");
     convertUnitsAlg.execute();
 
     Rebin rebinAlg;
@@ -76,110 +75,130 @@ public:
   /**
    * Converts the generated sample workspace spectra axis to Q.
    */
-  void convertSampleWsToQ()
-  {
+  void convertSampleWsToQ() {
     ConvertSpectrumAxis convQAlg;
     convQAlg.initialize();
 
-    TS_ASSERT_THROWS_NOTHING( convQAlg.setProperty("InputWorkspace", "__ElasticWindowTest_sample") );
-    TS_ASSERT_THROWS_NOTHING( convQAlg.setProperty("Target", "MomentumTransfer") );
-    TS_ASSERT_THROWS_NOTHING( convQAlg.setProperty("EMode", "Indirect") );
-    TS_ASSERT_THROWS_NOTHING( convQAlg.setProperty("OutputWorkspace", "__ElasticWindowTest_sample") );
+    TS_ASSERT_THROWS_NOTHING(
+        convQAlg.setProperty("InputWorkspace", "__ElasticWindowTest_sample"));
+    TS_ASSERT_THROWS_NOTHING(
+        convQAlg.setProperty("Target", "MomentumTransfer"));
+    TS_ASSERT_THROWS_NOTHING(convQAlg.setProperty("EMode", "Indirect"));
+    TS_ASSERT_THROWS_NOTHING(
+        convQAlg.setProperty("OutputWorkspace", "__ElasticWindowTest_sample"));
 
-    TS_ASSERT_THROWS_NOTHING( convQAlg.execute() );
-    TS_ASSERT( convQAlg.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(convQAlg.execute());
+    TS_ASSERT(convQAlg.isExecuted());
   }
 
   /**
    * Test initialization of the algorithm is successful.
    */
-  void test_init()
-  {
+  void test_init() {
     ElasticWindow alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
   }
 
   /**
-   * Test running ElasticWindow with just the peak range defined using reduced data.
+   * Test running ElasticWindow with just the peak range defined using reduced
+   * data.
    */
-  void test_redPeakOnly()
-  {
+  void test_redPeakOnly() {
     ElasticWindow elwinAlg;
     elwinAlg.initialize();
 
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("InputWorkspace", "__ElasticWindowTest_sample") );
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("IntegrationRangeStart", -0.1) );
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("IntegrationRangeEnd", 0.1) );
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("OutputInQ", "__ElasticWindowTest_outputQ") );
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("OutputInQSquared", "__ElasticWindowTest_outputQsq") );
+    TS_ASSERT_THROWS_NOTHING(
+        elwinAlg.setProperty("InputWorkspace", "__ElasticWindowTest_sample"));
+    TS_ASSERT_THROWS_NOTHING(
+        elwinAlg.setProperty("IntegrationRangeStart", -0.1));
+    TS_ASSERT_THROWS_NOTHING(elwinAlg.setProperty("IntegrationRangeEnd", 0.1));
+    TS_ASSERT_THROWS_NOTHING(
+        elwinAlg.setProperty("OutputInQ", "__ElasticWindowTest_outputQ"));
+    TS_ASSERT_THROWS_NOTHING(elwinAlg.setProperty(
+        "OutputInQSquared", "__ElasticWindowTest_outputQsq"));
 
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.execute() );
-    TS_ASSERT( elwinAlg.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(elwinAlg.execute());
+    TS_ASSERT(elwinAlg.isExecuted());
 
-    MatrixWorkspace_sptr qWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__ElasticWindowTest_outputQ");
+    MatrixWorkspace_sptr qWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "__ElasticWindowTest_outputQ");
     verifyQworkspace(qWs);
   }
 
   /**
-   * Test running ElasticWindow with just the peak range defined using S(Q,w) data.
+   * Test running ElasticWindow with just the peak range defined using S(Q,w)
+   * data.
    */
-  void test_sqwPeakOnly()
-  {
+  void test_sqwPeakOnly() {
     // First convert the sample workspace from spectra number to elastic Q
     convertSampleWsToQ();
 
     ElasticWindow elwinAlg;
     elwinAlg.initialize();
 
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("InputWorkspace", "__ElasticWindowTest_sample") );
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("IntegrationRangeStart", -0.1) );
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("IntegrationRangeEnd", 0.1) );
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("OutputInQ", "__ElasticWindowTest_outputQ") );
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("OutputInQSquared", "__ElasticWindowTest_outputQsq") );
+    TS_ASSERT_THROWS_NOTHING(
+        elwinAlg.setProperty("InputWorkspace", "__ElasticWindowTest_sample"));
+    TS_ASSERT_THROWS_NOTHING(
+        elwinAlg.setProperty("IntegrationRangeStart", -0.1));
+    TS_ASSERT_THROWS_NOTHING(elwinAlg.setProperty("IntegrationRangeEnd", 0.1));
+    TS_ASSERT_THROWS_NOTHING(
+        elwinAlg.setProperty("OutputInQ", "__ElasticWindowTest_outputQ"));
+    TS_ASSERT_THROWS_NOTHING(elwinAlg.setProperty(
+        "OutputInQSquared", "__ElasticWindowTest_outputQsq"));
 
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.execute() );
-    TS_ASSERT( elwinAlg.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(elwinAlg.execute());
+    TS_ASSERT(elwinAlg.isExecuted());
 
-    MatrixWorkspace_sptr qWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__ElasticWindowTest_outputQ");
+    MatrixWorkspace_sptr qWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "__ElasticWindowTest_outputQ");
     verifyQworkspace(qWs);
   }
 
   /**
-   * Test running ElasticWindow with both the peak and background ranges defined using reduced data.
+   * Test running ElasticWindow with both the peak and background ranges defined
+   * using reduced data.
    */
-  void test_redPeakAndBackground()
-  {
+  void test_redPeakAndBackground() {
     ElasticWindow elwinAlg;
     elwinAlg.initialize();
 
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("InputWorkspace", "__ElasticWindowTest_sample") );
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("IntegrationRangeStart", -0.04) );
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("IntegrationRangeEnd", 0.04) );
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("BackgroundRangeStart", 0.05) );
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("BackgroundRangeEnd", 0.06) );
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("OutputInQ", "__ElasticWindowTest_outputQ") );
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("OutputInQSquared", "__ElasticWindowTest_outputQsq") );
+    TS_ASSERT_THROWS_NOTHING(
+        elwinAlg.setProperty("InputWorkspace", "__ElasticWindowTest_sample"));
+    TS_ASSERT_THROWS_NOTHING(
+        elwinAlg.setProperty("IntegrationRangeStart", -0.04));
+    TS_ASSERT_THROWS_NOTHING(elwinAlg.setProperty("IntegrationRangeEnd", 0.04));
+    TS_ASSERT_THROWS_NOTHING(
+        elwinAlg.setProperty("BackgroundRangeStart", 0.05));
+    TS_ASSERT_THROWS_NOTHING(elwinAlg.setProperty("BackgroundRangeEnd", 0.06));
+    TS_ASSERT_THROWS_NOTHING(
+        elwinAlg.setProperty("OutputInQ", "__ElasticWindowTest_outputQ"));
+    TS_ASSERT_THROWS_NOTHING(elwinAlg.setProperty(
+        "OutputInQSquared", "__ElasticWindowTest_outputQsq"));
 
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.execute() );
-    TS_ASSERT( elwinAlg.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(elwinAlg.execute());
+    TS_ASSERT(elwinAlg.isExecuted());
 
-    MatrixWorkspace_sptr qWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__ElasticWindowTest_outputQ");
+    MatrixWorkspace_sptr qWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "__ElasticWindowTest_outputQ");
     verifyQworkspace(qWs);
 
-    MatrixWorkspace_sptr q2Ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__ElasticWindowTest_outputQsq");
+    MatrixWorkspace_sptr q2Ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "__ElasticWindowTest_outputQsq");
     verifyQ2workspace(q2Ws);
   }
 
 private:
-
   /**
    * Ensures that a workspace is valid output in Q.
    *
    * @param ws Workspace to test
    */
-  void verifyQworkspace(MatrixWorkspace_sptr ws)
-  {
+  void verifyQworkspace(MatrixWorkspace_sptr ws) {
     std::string unitID = ws->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unitID, "MomentumTransfer");
   }
@@ -189,12 +208,10 @@ private:
    *
    * @param ws Workspace to test
    */
-  void verifyQ2workspace(MatrixWorkspace_sptr ws)
-  {
+  void verifyQ2workspace(MatrixWorkspace_sptr ws) {
     std::string unitID = ws->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unitID, "QSquared");
   }
-
 };
 
 #endif /* MANTID_ALGORITHMS_ELASTICWINDOWTEST_H_ */

@@ -9,6 +9,7 @@
 #include "MantidMDAlgorithms/MDTransfInterface.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -36,6 +37,15 @@ private:
   void qListFromHistoWS(Integrate3DEvents &integrator, API::Progress &prog,
                         DataObjects::Workspace2D_sptr &wksp,
                         Kernel::DblMatrix const &UBinv, bool hkl_integ);
+
+  /// Calculate if this Q is on a detector
+  void calculateE1(Geometry::Instrument_const_sptr inst);
+
+  void runMaskDetectors(Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
+                        std::string property, std::string values);
+
+  /// save for all detector pixels
+  std::vector<Kernel::V3D> E1Vec;
 
   MDWSDescription m_targWSDescr;
 

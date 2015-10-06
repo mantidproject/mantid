@@ -354,7 +354,8 @@ void MergeMDFiles::exec() {
   MultipleFileProperty *multiFileProp =
       dynamic_cast<MultipleFileProperty *>(getPointerToProperty("Filenames"));
   if (!multiFileProp) {
-    throw std::logic_error("Filenames property must have MultipleFileProperty type.");
+    throw std::logic_error(
+        "Filenames property must have MultipleFileProperty type.");
   }
   m_Filenames =
       MultipleFileProperty::flattenFileNames(multiFileProp->operator()());

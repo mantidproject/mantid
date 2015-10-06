@@ -135,7 +135,7 @@ double CostFuncLeastSquares::valDerivHessian(bool evalDeriv,
     return val();
   }
 
-  if (!m_dirtyVal && !m_dirtyDeriv && !m_dirtyHessian){
+  if (!m_dirtyVal && !m_dirtyDeriv && !m_dirtyHessian) {
     return m_value;
   }
 

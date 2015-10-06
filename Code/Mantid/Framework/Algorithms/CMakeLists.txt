@@ -22,6 +22,7 @@ set ( SRC_FILES
 	src/BinaryOperateMasks.cpp
 	src/BinaryOperation.cpp
 	src/CalMuonDeadTime.cpp
+	src/CalMuonDetectorPhases.cpp
 	src/CalculateDIFC.cpp
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
@@ -155,7 +156,7 @@ set ( SRC_FILES
 	src/Minus.cpp
 	src/ModeratorTzero.cpp
 	src/ModeratorTzeroLinear.cpp
-        src/MonitorEfficiencyCorUser.cpp
+	src/MonitorEfficiencyCorUser.cpp
 	src/MonteCarloAbsorption.cpp
 	src/MultipleScatteringCylinderAbsorption.cpp
 	src/Multiply.cpp
@@ -295,6 +296,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
 	inc/MantidAlgorithms/CalMuonDeadTime.h
+	inc/MantidAlgorithms/CalMuonDetectorPhases.h
 	inc/MantidAlgorithms/CalculateDIFC.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
@@ -429,7 +431,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Minus.h
 	inc/MantidAlgorithms/ModeratorTzero.h
 	inc/MantidAlgorithms/ModeratorTzeroLinear.h
-        inc/MantidAlgorithms/MonitorEfficiencyCorUser.h
+	inc/MantidAlgorithms/MonitorEfficiencyCorUser.h
 	inc/MantidAlgorithms/MonteCarloAbsorption.h
 	inc/MantidAlgorithms/MultipleScatteringCylinderAbsorption.h
 	inc/MantidAlgorithms/Multiply.h
@@ -580,6 +582,7 @@ set ( TEST_FILES
 	BinaryOperateMasksTest.h
 	BinaryOperationTest.h
 	CalMuonDeadTimeTest.h
+	CalMuonDetectorPhasesTest.h
 	CalculateDIFCTest.h
 	CalculateEfficiencyTest.h
 	CalculateFlatBackgroundTest.h
@@ -706,7 +709,7 @@ set ( TEST_FILES
 	MinusTest.h
 	ModeratorTzeroLinearTest.h
 	ModeratorTzeroTest.h
-        MonitorEfficiencyCorUserTest.h
+	MonitorEfficiencyCorUserTest.h
 	MonteCarloAbsorptionTest.h
 	MultipleScatteringCylinderAbsorptionTest.h
 	MultiplyRangeTest.h

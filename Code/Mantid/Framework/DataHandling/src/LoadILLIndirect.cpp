@@ -189,9 +189,8 @@ LoadILLIndirect::loadMonitors(NeXus::NXEntry &entry) {
    * @param monitorsData :: Monitors data already loaded
    *
    */
-void
-LoadILLIndirect::initWorkSpace(NeXus::NXEntry & /*entry*/,
-                               std::vector<std::vector<int>> monitorsData) {
+void LoadILLIndirect::initWorkSpace(
+    NeXus::NXEntry & /*entry*/, std::vector<std::vector<int>> monitorsData) {
 
   // dim0 * m_numberOfPixelsPerTube is the total number of detectors
   m_numberOfHistograms = m_numberOfTubes * m_numberOfPixelsPerTube;
@@ -310,8 +309,8 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
 
 } // LoadILLIndirect::loadDataIntoTheWorkSpace
 
-void
-LoadILLIndirect::loadNexusEntriesIntoProperties(std::string nexusfilename) {
+void LoadILLIndirect::loadNexusEntriesIntoProperties(
+    std::string nexusfilename) {
 
   API::Run &runDetails = m_localWorkspace->mutableRun();
 

@@ -39,8 +39,7 @@ PointGroup_sptr PointGroupFactoryImpl::createPointGroupFromSpaceGroup(
     }
 
     return pointGroup;
-  }
-  catch (std::invalid_argument) {
+  } catch (std::invalid_argument) {
     if (spaceGroup.getCoordinateSystem() !=
         Group::CoordinateSystem::Hexagonal) {
       pointGroupSymbol.append(" r");
@@ -83,10 +82,9 @@ std::vector<std::string> PointGroupFactoryImpl::getPointGroupSymbols(
   return pointGroups;
 }
 
-void
-PointGroupFactoryImpl::subscribePointGroup(const std::string &hmSymbol,
-                                           const std::string &generatorString,
-                                           const std::string &description) {
+void PointGroupFactoryImpl::subscribePointGroup(
+    const std::string &hmSymbol, const std::string &generatorString,
+    const std::string &description) {
   if (isSubscribed(hmSymbol)) {
     throw std::invalid_argument(
         "Point group with this symbol is already registered.");
@@ -105,7 +103,8 @@ PointGroupFactoryImpl::subscribePointGroup(const std::string &hmSymbol,
  * space groups. Point groups don't have translational symmetry, which
  * is reflected in the symbol as well. To get the symbol of the point group
  * a certain space group belongs to, some simple string replacements are enough:
- *  1. Replace screw axes ( (2|3|4|6)[1|2|3|4|5] ) with rotations (first number).
+ *  1. Replace screw axes ( (2|3|4|6)[1|2|3|4|5] ) with rotations (first
+ *number).
  *  2. Replace glide planes (a|b|c|d|e|g|n) with mirror planes (m)
  *  3. Remove centering symbol.
  *  4. Remove origin choice ( :(1|2) )
@@ -145,8 +144,8 @@ PointGroupFactoryImpl::getPrototype(const std::string &hmSymbol) {
   return generator->getPrototype();
 }
 
-void
-PointGroupFactoryImpl::subscribe(const PointGroupGenerator_sptr &generator) {
+void PointGroupFactoryImpl::subscribe(
+    const PointGroupGenerator_sptr &generator) {
   if (!generator) {
     throw std::runtime_error("Cannot register null-generator.");
   }

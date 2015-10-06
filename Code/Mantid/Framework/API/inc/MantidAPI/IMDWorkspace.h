@@ -137,6 +137,9 @@ public:
   // Preferred normalization to use for display
   virtual MDNormalization displayNormalization() const;
 
+  // Preferred normalization to use for displaying histo workspaces
+  virtual MDNormalization displayNormalizationHisto() const;
+
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   IMDWorkspace(const IMDWorkspace &other);

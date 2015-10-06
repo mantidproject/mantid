@@ -71,8 +71,10 @@ Gets the idf file as a mangled name.
 @return the idf file as a mangled name.
 */
 std::string IDFObject::getMangledName() const {
-  std::string idfText = Kernel::ChecksumHelper::loadFile(getFileFullPathStr(),true);
-  std::string checksum = Kernel::ChecksumHelper::sha1FromString(Poco::trim(idfText));
+  std::string idfText =
+      Kernel::ChecksumHelper::loadFile(getFileFullPathStr(), true);
+  std::string checksum =
+      Kernel::ChecksumHelper::sha1FromString(Poco::trim(idfText));
   return this->getFileNameOnly() + checksum;
 }
 

@@ -325,9 +325,8 @@ void SaveCanSAS1D::searchandreplaceSpecialChars(std::string &input) {
  *  @param input :: -input string
  *  @param index ::  position of the special character in the input string
  */
-void
-SaveCanSAS1D::replacewithEntityReference(std::string &input,
-                                         const std::string::size_type &index) {
+void SaveCanSAS1D::replacewithEntityReference(
+    std::string &input, const std::string::size_type &index) {
   std::basic_string<char>::reference str = input.at(index);
   switch (str) {
   case '&':

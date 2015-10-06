@@ -22,16 +22,16 @@ public:
                       std::invalid_argument &);
   }
 
-  void test_check_unit_compatibility_unique_ptr(){
-      std::unique_ptr<Mantid::Kernel::MDUnit> badUnit(new Mantid::Kernel::LabelUnit("MeV"));
+  void test_check_unit_compatibility_unique_ptr() {
+    std::unique_ptr<Mantid::Kernel::MDUnit> badUnit(
+        new Mantid::Kernel::LabelUnit("MeV"));
 
-
-      HKL* testHKL = NULL;
-      TSM_ASSERT_THROWS("Input unit for this frame must be a QUnit",
-                        testHKL = new HKL(badUnit),
-                        std::invalid_argument&);
-      TSM_ASSERT("Construction should not have succeeded", testHKL == NULL );
-      TSM_ASSERT("Ownership of input should not have changed", badUnit.get() != NULL );
+    HKL *testHKL = NULL;
+    TSM_ASSERT_THROWS("Input unit for this frame must be a QUnit",
+                      testHKL = new HKL(badUnit), std::invalid_argument &);
+    TSM_ASSERT("Construction should not have succeeded", testHKL == NULL);
+    TSM_ASSERT("Ownership of input should not have changed",
+               badUnit.get() != NULL);
   }
 
   void test_name() {

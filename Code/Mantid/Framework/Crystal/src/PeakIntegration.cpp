@@ -192,8 +192,8 @@ void PeakIntegration::exec() {
     // double pktime = 0.0;
 
     // for (iTOF = TOFmin; iTOF < TOFmax; iTOF++) pktime+= X[iTOF];
-    if (n >= 8 &&
-        m_IC) // Number of fitting parameters large enough if Ikeda-Carpenter fit
+    if (n >= 8 && m_IC) // Number of fitting parameters large enough if
+                        // Ikeda-Carpenter fit
     {
       for (iTOF = TOFmin; iTOF <= TOFmax; iTOF++) {
         if (((Y[iTOF] - Y[TOFPeak] / 2.) * (Y[iTOF + 1] - Y[TOFPeak] / 2.)) <

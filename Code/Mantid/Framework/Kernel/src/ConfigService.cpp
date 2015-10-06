@@ -971,9 +971,8 @@ ConfigServiceImpl::getKeys(const std::string &keyName) const {
  *
  * @return Vector containing all config options
  */
-void
-ConfigServiceImpl::getKeysRecursive(const std::string &root,
-                                    std::vector<std::string> &allKeys) const {
+void ConfigServiceImpl::getKeysRecursive(
+    const std::string &root, std::vector<std::string> &allKeys) const {
   std::vector<std::string> rootKeys = getKeys(root);
 
   if (rootKeys.empty())
@@ -1882,8 +1881,8 @@ void ConfigServiceImpl::setFacility(const std::string &facilityName) {
 /**  Add an observer to a notification
  @param observer :: Reference to the observer to add
  */
-void
-ConfigServiceImpl::addObserver(const Poco::AbstractObserver &observer) const {
+void ConfigServiceImpl::addObserver(
+    const Poco::AbstractObserver &observer) const {
   m_notificationCenter.addObserver(observer);
 }
 

@@ -20,7 +20,6 @@
 #include <Poco/SAX/InputSource.h>
 #include <Poco/DOM/NodeList.h>
 
-
 namespace Mantid {
 namespace DataHandling {
 namespace {
@@ -56,13 +55,10 @@ SNSDataArchive::getArchivePath(const std::set<std::string> &filenames,
   const std::string URL(BASE_URL + filename);
   g_log.debug() << "URL: " << URL << "\n";
 
-
   Kernel::InternetHelper inetHelper;
   std::ostringstream rs;
 
-
-  int status = inetHelper.sendRequest(URL,rs);
-
+  int status = inetHelper.sendRequest(URL, rs);
 
   // Create a DOM document from the response.
   Poco::XML::DOMParser parser;

@@ -1040,11 +1040,11 @@ void MantidEV::chooseCell_slot()
    bool show_cells       = m_uiForm.ShowPossibleCells_rbtn->isChecked();
    bool select_cell_type = m_uiForm.SelectCellOfType_rbtn->isChecked();
    bool select_cell_form = m_uiForm.SelectCellWithForm_rbtn->isChecked();
+   bool allow_perm          = m_uiForm.AllowPermutations_ckbx->isChecked();
 
    if ( show_cells )
    {
      bool best_only          = m_uiForm.BestCellOnly_ckbx->isChecked();
-     bool allow_perm          = m_uiForm.AllowPermutations_ckbx->isChecked();
      double max_scalar_error = 0;
      if ( !getPositiveDouble( m_uiForm.MaxScalarError_ledt, max_scalar_error ) )
        return;
@@ -1058,7 +1058,7 @@ void MantidEV::chooseCell_slot()
    {
      std::string cell_type = m_uiForm.CellType_cmbx->currentText().toStdString();
      std::string centering = m_uiForm.CellCentering_cmbx->currentText().toStdString();
-     if ( !worker->selectCellOfType( peaks_ws_name, cell_type, centering ) )
+     if ( !worker->selectCellOfType( peaks_ws_name, cell_type, centering, allow_perm ) )
      {
        errorMessage("Failed to Select Specified Conventional Cell");
      }
@@ -1069,7 +1069,7 @@ void MantidEV::chooseCell_slot()
      std::string form = m_uiForm.CellFormNumber_cmbx->currentText().toStdString();
      double form_num = 0;
      getDouble( form, form_num );
-     if ( !worker->selectCellWithForm( peaks_ws_name, (size_t)form_num ) )
+     if ( !worker->selectCellWithForm( peaks_ws_name, (size_t)form_num, allow_perm ) )
      {
        errorMessage("Failed to Select the Requested Form Number");
      }

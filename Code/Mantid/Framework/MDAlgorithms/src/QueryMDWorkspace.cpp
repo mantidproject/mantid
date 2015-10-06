@@ -103,7 +103,9 @@ void QueryMDWorkspace::init() {
                   "  volume: Normalise by the volume.\n"
                   "  number of events: Normalise by the number of events.");
 
-  declareProperty("TransformCoordsToOriginal", true, "Output box coordinates in terms of original workspace coordinates");
+  declareProperty(
+      "TransformCoordsToOriginal", true,
+      "Output box coordinates in terms of original workspace coordinates");
 
   declareProperty(
       new WorkspaceProperty<ITableWorkspace>(
@@ -194,7 +196,8 @@ void QueryMDWorkspace::exec() {
 
   IMDWorkspace_sptr input = getProperty("InputWorkspace");
 
-  const bool transformCoordsToOriginal = getProperty("TransformCoordsToOriginal");
+  const bool transformCoordsToOriginal =
+      getProperty("TransformCoordsToOriginal");
 
   // Define a table workspace with a specific column schema.
   ITableWorkspace_sptr output = WorkspaceFactory::Instance().createTable();

@@ -245,14 +245,13 @@ Mantid::DataObjects::EventWorkspace_sptr
 CreateEventWorkspace(int numPixels, int numBins, int numEvents = 100,
                      double x0 = 0.0, double binDelta = 1.0,
                      int eventPattern = 1, int start_at_pixelID = 0);
-                     
-Mantid::DataObjects::EventWorkspace_sptr
-CreateEventWorkspaceWithStartTime(int numPixels, int numBins, int numEvents = 100,
-                     double x0 = 0.0, double binDelta = 1.0,
-                     int eventPattern = 1, int start_at_pixelID = 0,
-                     Mantid::Kernel::DateAndTime run_start = Mantid::Kernel::DateAndTime("2010-01-01T00:00:00"));
 
-                     
+Mantid::DataObjects::EventWorkspace_sptr CreateEventWorkspaceWithStartTime(
+    int numPixels, int numBins, int numEvents = 100, double x0 = 0.0,
+    double binDelta = 1.0, int eventPattern = 1, int start_at_pixelID = 0,
+    Mantid::Kernel::DateAndTime run_start =
+        Mantid::Kernel::DateAndTime("2010-01-01T00:00:00"));
+
 Mantid::DataObjects::EventWorkspace_sptr
 CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
                             double binDelta = 1.0);
@@ -308,7 +307,8 @@ Mantid::DataObjects::RebinnedOutput_sptr CreateRebinnedOutputWorkspace();
 
 /// Create a simple peaks workspace containing the given number of peaks
 boost::shared_ptr<Mantid::DataObjects::PeaksWorkspace>
-createPeaksWorkspace(const int numPeaks = 2, const bool createOrientedLattice=false);
+createPeaksWorkspace(const int numPeaks = 2,
+                     const bool createOrientedLattice = false);
 /**Build table workspace with preprocessed detectors for existign worksapce with
  * instrument */
 boost::shared_ptr<Mantid::DataObjects::TableWorkspace>

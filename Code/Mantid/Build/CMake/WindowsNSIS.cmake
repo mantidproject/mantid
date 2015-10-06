@@ -174,20 +174,25 @@ install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Build/CMake/Packaging/mantidpython.b
 ###########################################################################
 # On install. The blank lines seem to be required or it doesn't create the shortcut
 set (CPACK_NSIS_CREATE_ICONS_EXTRA "
-  CreateShortCut \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidPlot.lnk\\\" \\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\" \\\"\\\" \\\"$INSTDIR\\\\bin\\\\MantidPlot.exe\\\" 0
-
+  CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidPlot.lnk' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\MantidPlot.exe' 0
+  
   CreateShortCut \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidPython.lnk\\\" \\\"$INSTDIR\\\\bin\\\\mantidpython.bat\\\"
+  
+  CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidIPythonNotebook.lnk' '$INSTDIR\\\\bin\\\\mantidpython.bat' 'notebook --notebook-dir=%userprofile%'
 ")
 set (CPACK_NSIS_DELETE_ICONS_EXTRA "
   Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\MantidPlot.lnk\\\"
   Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\MantidPython.lnk\\\"
+  Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\MantidIPythonNotebook.lnk\\\"
 ")
 # The blank lines seem to be required or it doesn't create the shortcut
 set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
-  CreateShortCut \\\"$DESKTOP\\\\MantidPlot.lnk\\\" \\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\" \\\"\\\" \\\"$INSTDIR\\\\bin\\\\MantidPlot.exe\\\" 0
+  CreateShortCut '$DESKTOP\\\\MantidPlot.lnk' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\MantidPlot.exe' 0
 
   CreateShortCut \\\"$DESKTOP\\\\MantidPython.lnk\\\" \\\"$INSTDIR\\\\bin\\\\mantidpython.bat\\\"
-
+  
+  CreateShortCut '$DESKTOP\\\\MantidIPythonNotebook.lnk' '$INSTDIR\\\\bin\\\\mantidpython.bat' 'notebook --notebook-dir=%userprofile%'
+  
   CreateDirectory \\\"$INSTDIR\\\\logs\\\"
 
   CreateDirectory \\\"$INSTDIR\\\\docs\\\"
@@ -196,6 +201,7 @@ set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
 set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
   Delete \\\"$DESKTOP\\\\MantidPlot.lnk\\\"
   Delete \\\"$DESKTOP\\\\MantidPython.lnk\\\"
+  Delete \\\"$DESKTOP\\\\MantidIPythonNotebook.lnk\\\"
   RMDir \\\"$INSTDIR\\\\logs\\\"
   RMDir \\\"$INSTDIR\\\\docs\\\"
 ")

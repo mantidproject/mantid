@@ -56,17 +56,18 @@ Quadrilateral &Quadrilateral::operator=(const Quadrilateral &rhs) {
  * @throws Exception::IndexError if the index is out of range
  */
 const V2D &Quadrilateral::operator[](const size_t index) const {
-    switch (index) {
-    case 0:
-      return m_lowerLeft;
-    case 1:
-      return m_upperLeft;
-    case 2:
-      return m_upperRight;
-    case 3:
-      return m_lowerRight;
-    default: throw Kernel::Exception::IndexError(index, npoints(),
-                                                 "Quadrilateral::operator[]");
+  switch (index) {
+  case 0:
+    return m_lowerLeft;
+  case 1:
+    return m_upperLeft;
+  case 2:
+    return m_upperRight;
+  case 3:
+    return m_lowerRight;
+  default:
+    throw Kernel::Exception::IndexError(index, npoints(),
+                                        "Quadrilateral::operator[]");
   }
 }
 
@@ -76,8 +77,7 @@ const V2D &Quadrilateral::operator[](const size_t index) const {
  * @returns A reference to the polygon at that index
  * @throws Exception::IndexError if the index is out of range
  */
-const Kernel::V2D &Quadrilateral::at(const size_t index) const
-{
+const Kernel::V2D &Quadrilateral::at(const size_t index) const {
   return (*this)[index];
 }
 

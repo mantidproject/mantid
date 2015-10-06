@@ -181,7 +181,7 @@ public:
     TS_ASSERT_DELTA(v.norm(), 1.0, 1e-10);
   }
 
-  void test_dot() { 
+  void test_dot() {
     auto v1 = makeVector1();
     auto v2 = makeVector2();
     TS_ASSERT_DELTA(v1.dot(v2), 3.0 * 5.0 + 33.0 * 55.0 + 333.0 * 555.0, 1e-10);

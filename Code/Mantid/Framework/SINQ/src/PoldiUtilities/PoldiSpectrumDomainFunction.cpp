@@ -153,10 +153,9 @@ void PoldiSpectrumDomainFunction::functionDeriv1DSpectrum(
   }
 }
 
-void
-PoldiSpectrumDomainFunction::poldiFunction1D(const std::vector<int> &indices,
-                                             const FunctionDomain1D &domain,
-                                             FunctionValues &values) const {
+void PoldiSpectrumDomainFunction::poldiFunction1D(
+    const std::vector<int> &indices, const FunctionDomain1D &domain,
+    FunctionValues &values) const {
 
   FunctionValues localValues(domain);
 

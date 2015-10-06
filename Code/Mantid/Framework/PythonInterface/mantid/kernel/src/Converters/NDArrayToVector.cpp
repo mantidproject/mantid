@@ -109,7 +109,7 @@ const std::vector<DestElementType> NDArrayToVector<DestElementType>::
 operator()() {
   npy_intp length = PyArray_SIZE(
       (PyArrayObject *)
-      m_arr.ptr()); // Returns the total number of elements in the array
+          m_arr.ptr()); // Returns the total number of elements in the array
   std::vector<DestElementType> cvector(length);
   if (length > 0) {
     fill_vector<DestElementType>()((PyArrayObject *)m_arr.ptr(), cvector);

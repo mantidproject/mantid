@@ -78,7 +78,7 @@ private:
   std::vector<API::MatrixWorkspace_sptr> convertToMatrixWorkspace(
       DataObjects::TableWorkspace_sptr tablews,
       API::MatrixWorkspace_const_sptr parentws, Kernel::DateAndTime runstart,
-      std::map<std::string, std::vector<double> > &logvecmap,
+      std::map<std::string, std::vector<double>> &logvecmap,
       std::vector<Kernel::DateAndTime> &vectimes);
 
   /// Create an MDEventWorspace by converting vector of matrix workspace data
@@ -93,22 +93,20 @@ private:
   /// Read parameter information from table workspace
   void readTableInfo(DataObjects::TableWorkspace_const_sptr tablews,
                      size_t &ipt, size_t &irotangle, size_t &itime,
-                     std::vector<std::pair<size_t, size_t> > &anodelist,
+                     std::vector<std::pair<size_t, size_t>> &anodelist,
                      std::map<std::string, size_t> &samplenameindexmap);
 
   /// Return sample logs
   void parseSampleLogs(DataObjects::TableWorkspace_sptr tablews,
                        const std::map<std::string, size_t> &indexlist,
-                       std::map<std::string, std::vector<double> > &logvecmap);
+                       std::map<std::string, std::vector<double>> &logvecmap);
 
   /// Load one run (one pt.) to a matrix workspace
-  API::MatrixWorkspace_sptr
-  loadRunToMatrixWS(DataObjects::TableWorkspace_sptr tablews, size_t irow,
-                    API::MatrixWorkspace_const_sptr parentws,
-                    Kernel::DateAndTime runstart, size_t ipt, size_t irotangle,
-                    size_t itime,
-                    const std::vector<std::pair<size_t, size_t> > anodelist,
-                    double &duration);
+  API::MatrixWorkspace_sptr loadRunToMatrixWS(
+      DataObjects::TableWorkspace_sptr tablews, size_t irow,
+      API::MatrixWorkspace_const_sptr parentws, Kernel::DateAndTime runstart,
+      size_t ipt, size_t irotangle, size_t itime,
+      const std::vector<std::pair<size_t, size_t>> anodelist, double &duration);
 
   /// Append Experiment Info
   void
@@ -118,7 +116,7 @@ private:
   /// Append sample logs to MD workspace
   void
   appendSampleLogs(API::IMDEventWorkspace_sptr mdws,
-                   const std::map<std::string, std::vector<double> > &logvecmap,
+                   const std::map<std::string, std::vector<double>> &logvecmap,
                    const std::vector<Kernel::DateAndTime> &vectimes);
 
   /// Parse detector efficiency table workspace to map

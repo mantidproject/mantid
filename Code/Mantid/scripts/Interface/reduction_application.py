@@ -413,9 +413,6 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             settings.setValue("last_directory", str(self._last_directory))
             settings.setValue("last_export_directory", str(self._last_export_directory))
 
-            # General settings
-            self.general_settings.to_settings(settings)
-
     def reduce_clicked(self):
         """
             Create an object capable of using the information in the

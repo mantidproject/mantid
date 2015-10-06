@@ -76,9 +76,8 @@ void GroupingWorkspace::makeDetectorIDToGroupMap(
  * @param[out] ngroups :: the number of groups found (equal to the largest group
  *number found)
  */
-void
-GroupingWorkspace::makeDetectorIDToGroupVector(std::vector<int> &detIDToGroup,
-                                               int64_t &ngroups) const {
+void GroupingWorkspace::makeDetectorIDToGroupVector(
+    std::vector<int> &detIDToGroup, int64_t &ngroups) const {
   ngroups = 0;
   for (size_t wi = 0; wi < this->m_noVectors; ++wi) {
     // Convert the Y value to a group number

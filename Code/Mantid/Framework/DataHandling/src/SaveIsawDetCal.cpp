@@ -83,7 +83,8 @@ void SaveIsawDetCal::exec() {
   // We cannot assume the peaks have bank type detector modules, so we have a
   // string to check this
   std::string bankPart = "bank";
-  if (inst->getName() .compare("WISH") == 0) bankPart = "WISHpanel";
+  if (inst->getName().compare("WISH") == 0)
+    bankPart = "WISHpanel";
 
   std::set<int> uniqueBanks;
   if (bankNames.empty()) {
@@ -94,22 +95,23 @@ void SaveIsawDetCal::exec() {
     for (size_t i = 0; i < comps.size(); i++) {
       std::string bankName = comps[i]->getName();
       boost::trim(bankName);
-      boost::erase_all(bankName,bankPart);
+      boost::erase_all(bankName, bankPart);
       int bank = 0;
       Strings::convert(bankName, bank);
-      if (bank == 0)continue;
+      if (bank == 0)
+        continue;
       // Track unique bank numbers
       uniqueBanks.insert(bank);
     }
-  }
-  else {
+  } else {
     for (size_t i = 0; i < bankNames.size(); i++) {
       std::string bankName = bankNames[i];
       boost::trim(bankName);
-      boost::erase_all(bankName,bankPart);
+      boost::erase_all(bankName, bankPart);
       int bank = 0;
       Strings::convert(bankName, bank);
-      if (bank == 0)continue;
+      if (bank == 0)
+        continue;
       // Track unique bank numbers
       uniqueBanks.insert(bank);
     }
@@ -148,7 +150,7 @@ void SaveIsawDetCal::exec() {
     int bank = *it;
     std::ostringstream mess;
     if (bankPart == "WISHpanel" && bank < 10)
-        mess << bankPart << "0" << bank;
+      mess << bankPart << "0" << bank;
     else
       mess << bankPart << bank;
 
@@ -156,11 +158,13 @@ void SaveIsawDetCal::exec() {
     // Retrieve it
     boost::shared_ptr<const IComponent> det =
         inst->getComponentByName(bankName);
-    if (inst->getName() .compare("CORELLI") == 0) // for Corelli with sixteenpack under bank
+    if (inst->getName().compare("CORELLI") ==
+        0) // for Corelli with sixteenpack under bank
     {
       std::vector<Geometry::IComponent_const_sptr> children;
       boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-          boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst->getComponentByName(bankName));
+          boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+              inst->getComponentByName(bankName));
       asmb->getChildren(children, false);
       det = children[0];
     }
@@ -175,40 +179,39 @@ void SaveIsawDetCal::exec() {
       sizeBanks(bankName, NCOLS, NROWS, xsize, ysize);
       // Base unit vector (along the horizontal, X axis)
       // Since WISH banks are curved use center and increment 2 for tubedown
-      int midX = NCOLS/2;
-      int midY = NROWS/2;
-      V3D base =
-          findPixelPos(bankName, midX + 2, midY) - findPixelPos(bankName, midX, midY);
+      int midX = NCOLS / 2;
+      int midY = NROWS / 2;
+      V3D base = findPixelPos(bankName, midX + 2, midY) -
+                 findPixelPos(bankName, midX, midY);
       base.normalize();
 
       // Up unit vector (along the vertical, Y axis)
-      V3D up = findPixelPos(bankName, midX, midY + 1) - findPixelPos(bankName, midX, midY);
+      V3D up = findPixelPos(bankName, midX, midY + 1) -
+               findPixelPos(bankName, midX, midY);
       up.normalize();
 
       // Write the line
-      out << "5 " << std::setw(6) << std::right << bank << " "
-          << std::setw(6) << std::right << NROWS << " " << std::setw(6)
-          << std::right << NCOLS << " " << std::setw(7) << std::right
-          << std::fixed << std::setprecision(4) << 100.0 * xsize << " "
-          << std::setw(7) << std::right << std::fixed
-          << std::setprecision(4) << 100.0 * ysize << " "
+      out << "5 " << std::setw(6) << std::right << bank << " " << std::setw(6)
+          << std::right << NROWS << " " << std::setw(6) << std::right << NCOLS
+          << " " << std::setw(7) << std::right << std::fixed
+          << std::setprecision(4) << 100.0 * xsize << " " << std::setw(7)
+          << std::right << std::fixed << std::setprecision(4) << 100.0 * ysize
+          << " "
           << "  0.2000 " << std::setw(6) << std::right << std::fixed
           << std::setprecision(2) << 100.0 * detd << " " << std::setw(9)
           << std::right << std::fixed << std::setprecision(4)
           << 100.0 * center.X() << " " << std::setw(9) << std::right
           << std::fixed << std::setprecision(4) << 100.0 * center.Y() << " "
-          << std::setw(9) << std::right << std::fixed
-          << std::setprecision(4) << 100.0 * center.Z() << " "
-          << std::setw(8) << std::right << std::fixed
-          << std::setprecision(5) << base.X() << " " << std::setw(8)
-          << std::right << std::fixed << std::setprecision(5) << base.Y()
-          << " " << std::setw(8) << std::right << std::fixed
+          << std::setw(9) << std::right << std::fixed << std::setprecision(4)
+          << 100.0 * center.Z() << " " << std::setw(8) << std::right
+          << std::fixed << std::setprecision(5) << base.X() << " "
+          << std::setw(8) << std::right << std::fixed << std::setprecision(5)
+          << base.Y() << " " << std::setw(8) << std::right << std::fixed
           << std::setprecision(5) << base.Z() << " " << std::setw(8)
-          << std::right << std::fixed << std::setprecision(5) << up.X()
-          << " " << std::setw(8) << std::right << std::fixed
-          << std::setprecision(5) << up.Y() << " " << std::setw(8)
-          << std::right << std::fixed << std::setprecision(5) << up.Z()
-          << " " << std::endl;
+          << std::right << std::fixed << std::setprecision(5) << up.X() << " "
+          << std::setw(8) << std::right << std::fixed << std::setprecision(5)
+          << up.Y() << " " << std::setw(8) << std::right << std::fixed
+          << std::setprecision(5) << up.Z() << " " << std::endl;
 
     } else
       g_log.warning() << "Information about detector module " << bankName
@@ -232,13 +235,14 @@ V3D SaveIsawDetCal::findPixelPos(std::string bankName, int col, int row) {
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
-    if(children[0]->getName().compare("sixteenpack") == 0){
-      asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+    if (children[0]->getName().compare("sixteenpack") == 0) {
+      asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+          children[0]);
       children.clear();
       asmb->getChildren(children, false);
     }
     int col0 = col - 1;
-    //WISH detectors are in bank in this order in instrument
+    // WISH detectors are in bank in this order in instrument
     if (inst->getName() == "WISH")
       col0 = (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
     boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
@@ -246,13 +250,13 @@ V3D SaveIsawDetCal::findPixelPos(std::string bankName, int col, int row) {
             children[col0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
     asmb2->getChildren(grandchildren, false);
-    Geometry::IComponent_const_sptr first = grandchildren[row-1];
+    Geometry::IComponent_const_sptr first = grandchildren[row - 1];
     return first->getPos();
   }
 }
 
 void SaveIsawDetCal::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
-                              double &xsize, double &ysize) {
+                               double &xsize, double &ysize) {
   if (bankName.compare("None") == 0)
     return;
   boost::shared_ptr<const IComponent> parent =
@@ -270,8 +274,9 @@ void SaveIsawDetCal::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
-    if(children[0]->getName().compare("sixteenpack") == 0){
-      asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+    if (children[0]->getName().compare("sixteenpack") == 0) {
+      asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+          children[0]);
       children.clear();
       asmb->getChildren(children, false);
     }
