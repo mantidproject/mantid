@@ -43,7 +43,8 @@ void export_IEventList() {
       .def("integrate", &IEventList::integrate,
            args("self", "minX", "maxX", "entireRange"),
            "Integrate the events between a range of X values, or all events.")
-      .def("convertTof", (void (IEventList::*)(const double, const double))&IEventList::convertTof,
+      .def("convertTof", (void (IEventList::*)(const double, const double)) &
+                             IEventList::convertTof,
            args("self", "factor", "offset"),
            "Convert the time of flight by tof'=tof*factor+offset")
       .def("scaleTof", &IEventList::scaleTof, args("self", "factor"),

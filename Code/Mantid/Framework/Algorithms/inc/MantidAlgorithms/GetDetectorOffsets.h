@@ -69,14 +69,14 @@ private:
 
   API::MatrixWorkspace_sptr inputW; ///< A pointer to the input workspace
   DataObjects::OffsetsWorkspace_sptr
-      outputW;       ///< A pointer to the output workspace
+      outputW;         ///< A pointer to the output workspace
   double m_Xmin;       ///< The start of the X range for fitting
   double m_Xmax;       ///< The end of the X range for fitting
   double m_maxOffset;  ///< The maximum absolute value of offsets
   double m_dreference; ///< The expected peak position in d-spacing (?)
   double m_dideal;     ///< The known peak centre value from the NIST standard
   /// information
-  double m_step;   ///< The step size
+  double m_step; ///< The step size
 };
 
 } // namespace Algorithm

@@ -16,14 +16,14 @@ using Mantid::Kernel::PropertyHistory_sptr;
 using Mantid::Kernel::PropertyHistory_const_sptr;
 
 namespace {
-    Mantid::Kernel::Logger g_log("NotebookBuilder");
+Mantid::Kernel::Logger g_log("NotebookBuilder");
 }
 
 NotebookBuilder::NotebookBuilder(boost::shared_ptr<HistoryView> view,
-                         std::string versionSpecificity)
-: m_historyItems(view->getAlgorithmsList()), m_output(),
-  m_versionSpecificity(versionSpecificity),
-  m_nb_writer(new NotebookWriter()) {}
+                                 std::string versionSpecificity)
+    : m_historyItems(view->getAlgorithmsList()), m_output(),
+      m_versionSpecificity(versionSpecificity),
+      m_nb_writer(new NotebookWriter()) {}
 
 /**
  * Build an ipython notebook for algorithms included in the history view.
@@ -60,17 +60,17 @@ const std::string NotebookBuilder::build(std::string ws_name,
  *items
  */
 void NotebookBuilder::writeHistoryToStream(
-        std::vector<HistoryItem>::const_iterator &iter) {
+    std::vector<HistoryItem>::const_iterator &iter) {
   auto algHistory = iter->getAlgorithmHistory();
   if (iter->isUnrolled()) {
 
-    m_nb_writer->markdownCell(
-        std::string("Child algorithms of ") + algHistory->name());
+    m_nb_writer->markdownCell(std::string("Child algorithms of ") +
+                              algHistory->name());
 
     buildChildren(iter);
 
-    m_nb_writer->markdownCell(
-        std::string("End of child algorithms of ") + algHistory->name());
+    m_nb_writer->markdownCell(std::string("End of child algorithms of ") +
+                              algHistory->name());
 
   } else {
     // create the string for this algorithm
@@ -86,8 +86,8 @@ void NotebookBuilder::writeHistoryToStream(
  * @param iter :: reference to the iterator pointing to the vector of history
  *items
  */
-void
-NotebookBuilder::buildChildren(std::vector<HistoryItem>::const_iterator &iter) {
+void NotebookBuilder::buildChildren(
+    std::vector<HistoryItem>::const_iterator &iter) {
   size_t numChildren = iter->numberOfChildren();
   ++iter; // move to first child
   for (size_t i = 0; i < numChildren && iter != m_historyItems.end();
@@ -176,7 +176,7 @@ NotebookBuilder::buildPropertyString(PropertyHistory_const_sptr propHistory) {
              propHistory->type()) != nonWorkspaceTypes.end() &&
         propHistory->direction() == Direction::Output) {
       g_log.debug() << "Ignoring property " << propHistory->name()
-      << " of type " << propHistory->type() << std::endl;
+                    << " of type " << propHistory->type() << std::endl;
       // Handle numerical properties
     } else if (propHistory->type() == "number") {
       prop = propHistory->name() + "=" + propHistory->value();

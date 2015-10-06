@@ -226,34 +226,33 @@ void CoordTransformAffine::buildNonOrthogonal(
 
   // Start with identity
   m_affineMatrix.identityMatrix();
-  //A matrix is columns of basis vectors
-  Mantid::Kernel::Matrix<coord_t> A(inD,outD);
-  for(size_t i = 0; i < outD; i++){
-      for(size_t j = 0; j < inD; j++){
-          A[j][i]=axes[i][j];
-      }
+  // A matrix is columns of basis vectors
+  Mantid::Kernel::Matrix<coord_t> A(inD, outD);
+  for (size_t i = 0; i < outD; i++) {
+    for (size_t j = 0; j < inD; j++) {
+      A[j][i] = axes[i][j];
+    }
   }
-  Mantid::Kernel::Matrix<coord_t> AT=A;
+  Mantid::Kernel::Matrix<coord_t> AT = A;
   AT.Transpose();
-  Mantid::Kernel::Matrix<coord_t> ATA=AT*A;
+  Mantid::Kernel::Matrix<coord_t> ATA = AT * A;
   ATA.Invert();
-  Mantid::Kernel::Matrix<coord_t> Ainv=ATA*AT;
-  Mantid::Kernel::Matrix<coord_t> offset(inD,1);
-  for(size_t j = 0; j < inD; j++){
-      offset[j][0]=origin[j];
+  Mantid::Kernel::Matrix<coord_t> Ainv = ATA * AT;
+  Mantid::Kernel::Matrix<coord_t> offset(inD, 1);
+  for (size_t j = 0; j < inD; j++) {
+    offset[j][0] = origin[j];
   }
-  Mantid::Kernel::Matrix<coord_t> outoffset=Ainv*offset;
+  Mantid::Kernel::Matrix<coord_t> outoffset = Ainv * offset;
 
-  for(size_t i = 0; i < outD; i++){
-      for(size_t j = 0; j < inD; j++){
-          m_affineMatrix[i][j]=Ainv[i][j]*scaling[i];
-      }
-      m_affineMatrix[i][inD]=-outoffset[i][0]*scaling[i];
+  for (size_t i = 0; i < outD; i++) {
+    for (size_t j = 0; j < inD; j++) {
+      m_affineMatrix[i][j] = Ainv[i][j] * scaling[i];
+    }
+    m_affineMatrix[i][inD] = -outoffset[i][0] * scaling[i];
   }
   // Copy into the raw matrix (for speed)
   copyRawMatrix();
 }
-
 
 //----------------------------------------------------------------------------------------------
 /** Apply the coordinate transformation
@@ -295,7 +294,7 @@ std::string CoordTransformAffine::toXMLString() const {
 
   AutoPtr<Element> coordTransformTypeElement = pDoc->createElement("Type");
   coordTransformTypeElement->appendChild(
-     AutoPtr<Node>(pDoc->createTextNode("CoordTransformAffine")));
+      AutoPtr<Node>(pDoc->createTextNode("CoordTransformAffine")));
   coordTransformElement->appendChild(coordTransformTypeElement);
 
   AutoPtr<Element> paramListElement = pDoc->createElement("ParameterList");
@@ -385,8 +384,10 @@ CoordTransformAffine::combineTransformations(CoordTransform *first,
   // Set in the output
   out->setMatrix(outMat);
   // Clean up
-  if(ownFirstAff) delete firstAff;
-  if(ownSecondAff) delete secondAff;
+  if (ownFirstAff)
+    delete firstAff;
+  if (ownSecondAff)
+    delete secondAff;
   return out;
 }
 

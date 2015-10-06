@@ -89,9 +89,8 @@ void CopyLogs::exec() {
  * Copy logs from the input workspace to the output workspace
  * and replace any matching logs with the ones from the input workspace.
  */
-void
-CopyLogs::mergeReplaceExisting(const std::vector<Kernel::Property *> &inputLogs,
-                               Run &outputRun) {
+void CopyLogs::mergeReplaceExisting(
+    const std::vector<Kernel::Property *> &inputLogs, Run &outputRun) {
   for (auto iter = inputLogs.begin(); iter != inputLogs.end(); ++iter) {
     Kernel::Property *prop = *iter;
     // if the log exists, remove and replace it
@@ -106,9 +105,8 @@ CopyLogs::mergeReplaceExisting(const std::vector<Kernel::Property *> &inputLogs,
  * Copy logs from the input workspace to the output workspace
  * and don't replace any mathcing logs in the output workspace.
  */
-void
-CopyLogs::mergeKeepExisting(const std::vector<Kernel::Property *> &inputLogs,
-                            Run &outputRun) {
+void CopyLogs::mergeKeepExisting(
+    const std::vector<Kernel::Property *> &inputLogs, Run &outputRun) {
   for (auto iter = inputLogs.begin(); iter != inputLogs.end(); ++iter) {
     Kernel::Property *prop = *iter;
     // add the log only if it doesn't already exist

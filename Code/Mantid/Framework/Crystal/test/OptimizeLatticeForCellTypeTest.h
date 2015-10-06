@@ -20,74 +20,69 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 
-class OptimizeLatticeForCellTypeTest : public CxxTest::TestSuite
-{
+class OptimizeLatticeForCellTypeTest : public CxxTest::TestSuite {
 public:
-    
-  void test_Init()
-  {
+  void test_Init() {
     OptimizeLatticeForCellType alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
   }
-  
-  void test_exec()
-  {
+
+  void test_exec() {
     // Name of the output workspace.
     std::string WSName("peaks");
     LoadIsawPeaks loader;
-    TS_ASSERT_THROWS_NOTHING( loader.initialize() );
-    TS_ASSERT( loader.isInitialized() );
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT(loader.isInitialized());
     loader.setPropertyValue("Filename", "TOPAZ_3007.peaks");
     loader.setPropertyValue("OutputWorkspace", WSName);
 
-    TS_ASSERT( loader.execute() );
-    TS_ASSERT( loader.isExecuted() );
+    TS_ASSERT(loader.execute());
+    TS_ASSERT(loader.isExecuted());
 
     PeaksWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-        AnalysisDataService::Instance().retrieve(WSName) ) );
+    TS_ASSERT_THROWS_NOTHING(
+        ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+            AnalysisDataService::Instance().retrieve(WSName)));
     TS_ASSERT(ws);
-    if (!ws) return;
+    if (!ws)
+      return;
     FindUBUsingFFT alg_fft;
-    TS_ASSERT_THROWS_NOTHING( alg_fft.initialize() )
-    TS_ASSERT( alg_fft.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg_fft.setPropertyValue("PeaksWorkspace", WSName) );
-    TS_ASSERT_THROWS_NOTHING( alg_fft.setPropertyValue("MinD","8.0") );
-    TS_ASSERT_THROWS_NOTHING( alg_fft.setPropertyValue("MaxD","13.0") );
-    TS_ASSERT_THROWS_NOTHING( alg_fft.setPropertyValue("Tolerance","0.15") );
-    TS_ASSERT_THROWS_NOTHING( alg_fft.execute(); );
-    TS_ASSERT( alg_fft.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(alg_fft.initialize())
+    TS_ASSERT(alg_fft.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        alg_fft.setPropertyValue("PeaksWorkspace", WSName));
+    TS_ASSERT_THROWS_NOTHING(alg_fft.setPropertyValue("MinD", "8.0"));
+    TS_ASSERT_THROWS_NOTHING(alg_fft.setPropertyValue("MaxD", "13.0"));
+    TS_ASSERT_THROWS_NOTHING(alg_fft.setPropertyValue("Tolerance", "0.15"));
+    TS_ASSERT_THROWS_NOTHING(alg_fft.execute(););
+    TS_ASSERT(alg_fft.isExecuted());
     OptimizeLatticeForCellType alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", WSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CellType","Monoclinic ( a unique )") );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", WSName));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("CellType", "Monoclinic ( a unique )"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
 
     // Check that we set an oriented lattice
     TS_ASSERT(ws->mutableSample().hasOrientedLattice());
     // Check that the UB matrix is the same as in TOPAZ_3007.mat
-    OrientedLattice latt=ws->mutableSample().getOrientedLattice();
+    OrientedLattice latt = ws->mutableSample().getOrientedLattice();
 
-    double correct_UB[] = { -0.0477,  0.0413,  -0.0005,
-                            -0.0055,  -0.0090, 0.1250,
-                             0.0610, 0.0314, 0.0110 };
-                            
+    double correct_UB[] = {-0.0477, 0.0413, -0.0005, -0.0055, -0.0090,
+                           0.1250,  0.0610, 0.0314,  0.0110};
+
     std::vector<double> UB_calculated = latt.getUB().getVector();
 
-    for ( size_t i = 0; i < 9; i++ )
-    {
-      TS_ASSERT_DELTA( correct_UB[i], UB_calculated[i], 5e-4 );
+    for (size_t i = 0; i < 9; i++) {
+      TS_ASSERT_DELTA(correct_UB[i], UB_calculated[i], 5e-4);
     }
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(WSName);
   }
-
 };
 
-
 #endif /* MANTID_CRYSTAL_OptimizeLatticeForCellType_TEST_H_ */
-

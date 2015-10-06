@@ -30,10 +30,9 @@ std::string getUnitsAsStr(IMDDimension &self) {
  * @param self : A reference to the calling object
  * @return cloned MDFrame wrapped as a shared pointer.
  */
-boost::shared_ptr<MDFrame> getMDFrame(const IMDDimension& self){
-    return boost::shared_ptr<MDFrame>(self.getMDFrame().clone());
+boost::shared_ptr<MDFrame> getMDFrame(const IMDDimension &self) {
+  return boost::shared_ptr<MDFrame>(self.getMDFrame().clone());
 }
-
 }
 
 void export_IMDDimension() {

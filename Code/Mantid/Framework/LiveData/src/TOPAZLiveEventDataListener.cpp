@@ -201,8 +201,8 @@ TOPAZLiveEventDataListener::~TOPAZLiveEventDataListener() {
 /// events).
 /// @param address The address to attempt to connect to
 /// @return Returns true if the connection succeeds.  False otherwise.
-bool
-TOPAZLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
+bool TOPAZLiveEventDataListener::connect(
+    const Poco::Net::SocketAddress &address)
 // The SocketAddress class will throw various exceptions if it encounters an
 // error.  We're assuming the calling function will catch any exceptions that
 // are important

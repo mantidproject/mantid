@@ -13,7 +13,6 @@
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 
-
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -268,17 +267,18 @@ void CutMD::init() {
   propOptions.push_back(RLUMethod);
   propOptions.push_back(InvAngstromMethod);
   char buffer[1024];
-  std::sprintf(buffer, "How will the Q units of the input workspace be interpreted? This property will disappear in future versions of Mantid\n"
-      "%s : Figure it out based on the label units\n"
-      "%s : Force them to be rlu\n"
-      "%s : Force them to be inverse angstroms", AutoMethod.c_str(), RLUMethod.c_str(), InvAngstromMethod.c_str());
+  std::sprintf(
+      buffer, "How will the Q units of the input workspace be interpreted? "
+              "This property will disappear in future versions of Mantid\n"
+              "%s : Figure it out based on the label units\n"
+              "%s : Force them to be rlu\n"
+              "%s : Force them to be inverse angstroms",
+      AutoMethod.c_str(), RLUMethod.c_str(), InvAngstromMethod.c_str());
 
   std::string help(buffer);
   boost::algorithm::trim(help);
-  declareProperty(
-    "InterpretQDimensionUnits", AutoMethod,
-      boost::make_shared<StringListValidator>(propOptions), help
-      );
+  declareProperty("InterpretQDimensionUnits", AutoMethod,
+                  boost::make_shared<StringListValidator>(propOptions), help);
 }
 
 void CutMD::exec() {
@@ -353,14 +353,15 @@ void CutMD::exec() {
     for (size_t i = 0; i < 3; ++i)
       targetUnits[i] =
           projection.getUnit(i) == RLU ? RLUSymbol : InvAngstromSymbol;
-    
-    const std::string determineUnitsMethod = this->getProperty("InterpretQDimensionUnits");
-    std::vector<std::string> originUnits; 
-    if ( determineUnitsMethod == AutoMethod ) {
-        originUnits = findOriginalQUnits(inWS.get(), g_log);
-    } else if (determineUnitsMethod == RLUMethod ) {
+
+    const std::string determineUnitsMethod =
+        this->getProperty("InterpretQDimensionUnits");
+    std::vector<std::string> originUnits;
+    if (determineUnitsMethod == AutoMethod) {
+      originUnits = findOriginalQUnits(inWS.get(), g_log);
+    } else if (determineUnitsMethod == RLUMethod) {
       originUnits = std::vector<std::string>(3, RLUSymbol);
-    } else{
+    } else {
       originUnits = std::vector<std::string>(3, InvAngstromSymbol);
     }
 

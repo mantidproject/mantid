@@ -652,7 +652,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
 
   // Coordinate system
   file->writeData("coordinate_system", static_cast<uint32_t>(m_coordSystem));
-  
+
   // Detectors column
   file->writeData("column_1", detectorID);
   file->openData("column_1");

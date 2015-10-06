@@ -116,8 +116,8 @@ public:
   int isSingle() const; ///< only one part
   int contains(const Acomp &) const;
   int isInter() const { return Intersect; } ///< Deterimine if inter/union
-  int
-  isTrue(const std::map<int, int> &) const; ///< Determine if the rule is true.
+  int isTrue(
+      const std::map<int, int> &) const; ///< Determine if the rule is true.
 
   void Sort(); ///< Sort the Units+Comp items
   void

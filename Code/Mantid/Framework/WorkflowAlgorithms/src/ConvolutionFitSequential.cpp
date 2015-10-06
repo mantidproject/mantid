@@ -187,7 +187,7 @@ void ConvolutionFitSequential::exec() {
   const std::string tempFitWsName = "__convfit_fit_ws";
   auto tempFitWs = convertInputToElasticQ(inputWs, tempFitWsName);
 
-  Progress plotPeakStringProg(this, 0.0, 0.05, specMax-specMin);
+  Progress plotPeakStringProg(this, 0.0, 0.05, specMax - specMin);
   // Construct plotpeak string
   std::string plotPeakInput = "";
   for (int i = specMin; i < specMax + 1; i++) {
@@ -368,7 +368,7 @@ bool ConvolutionFitSequential::checkForTwoLorentz(
     const std::string &subFunction) {
   auto pos = subFunction.rfind("Lorentzian");
   if (pos != std::string::npos) {
-      return true;
+    return true;
   }
   return false;
 }

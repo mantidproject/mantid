@@ -33,8 +33,8 @@ void ShowPeakHKLOffsets::init() {
                   "Workspace of Peaks with UB loaded");
 
   declareProperty(new WorkspaceProperty<ITableWorkspace>("HKLIntegerOffsets",
-                                                        "HKLIntegerOffsets",
-                                                        Direction::Output),
+                                                         "HKLIntegerOffsets",
+                                                         Direction::Output),
                   "Workspace with the Results");
 }
 

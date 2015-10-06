@@ -27,8 +27,10 @@ using namespace Mantid::Kernel;
 DECLARE_FILELOADER_ALGORITHM(LoadRKH)
 
 namespace {
-void readLinesForRKH1D(std::istream& stream, int readStart, int readEnd, std::vector<double>& columnOne,
-                       std::vector<double>& ydata, std::vector<double>& errdata, Progress& prog) {
+void readLinesForRKH1D(std::istream &stream, int readStart, int readEnd,
+                       std::vector<double> &columnOne,
+                       std::vector<double> &ydata, std::vector<double> &errdata,
+                       Progress &prog) {
   std::string fileline = "";
   for (int index = 1; index <= readEnd; ++index) {
     getline(stream, fileline);
@@ -44,9 +46,11 @@ void readLinesForRKH1D(std::istream& stream, int readStart, int readEnd, std::ve
   }
 }
 
-void readLinesWithXErrorForRKH1D(std::istream& stream, int readStart, int readEnd, std::vector<double>& columnOne,
-                                 std::vector<double>& ydata, std::vector<double>& errdata, std::vector<double>& xError,
-                                 Progress& prog) {
+void readLinesWithXErrorForRKH1D(std::istream &stream, int readStart,
+                                 int readEnd, std::vector<double> &columnOne,
+                                 std::vector<double> &ydata,
+                                 std::vector<double> &errdata,
+                                 std::vector<double> &xError, Progress &prog) {
   std::string fileline = "";
   for (int index = 1; index <= readEnd; ++index) {
     getline(stream, fileline);
@@ -54,7 +58,7 @@ void readLinesWithXErrorForRKH1D(std::istream& stream, int readStart, int readEn
       continue;
     double x(0.), y(0.), yerr(0.), xerr(0.);
     std::istringstream datastr(fileline);
-    datastr >> x >> y >> yerr>>xerr;
+    datastr >> x >> y >> yerr >> xerr;
     columnOne.push_back(x);
     ydata.push_back(y);
     errdata.push_back(yerr);
@@ -63,7 +67,6 @@ void readLinesWithXErrorForRKH1D(std::istream& stream, int readStart, int readEn
   }
 }
 }
-
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -271,11 +274,11 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
 
   if (hasXError) {
     xError.reserve(readEnd);
-    readLinesWithXErrorForRKH1D(m_fileIn, readStart, readEnd,
-                                columnOne, ydata, errdata, xError,  prog);
+    readLinesWithXErrorForRKH1D(m_fileIn, readStart, readEnd, columnOne, ydata,
+                                errdata, xError, prog);
   } else {
-    readLinesForRKH1D(m_fileIn, readStart, readEnd,
-                      columnOne, ydata, errdata, prog);
+    readLinesForRKH1D(m_fileIn, readStart, readEnd, columnOne, ydata, errdata,
+                      prog);
   }
   m_fileIn.close();
 
@@ -532,7 +535,7 @@ void LoadRKH::binCenter(const MantidVec oldBoundaries,
 
 /**
  * Checks if there is an x error present in the data set
- * @param stream:: the stream object 
+ * @param stream:: the stream object
  */
 bool LoadRKH::hasXerror(std::ifstream &stream) {
   auto containsXerror = false;
@@ -540,7 +543,7 @@ bool LoadRKH::hasXerror(std::ifstream &stream) {
   std::string line;
   getline(stream, line);
 
-  std::string x,y, yerr, xerr;
+  std::string x, y, yerr, xerr;
   std::istringstream datastr(line);
   datastr >> x >> y >> yerr >> xerr;
   if (!xerr.empty()) {
@@ -550,6 +553,5 @@ bool LoadRKH::hasXerror(std::ifstream &stream) {
   stream.seekg(currentPutLocation, stream.beg);
   return containsXerror;
 }
-
 }
 }

@@ -35,14 +35,14 @@ Logger g_log("NexusFileIO");
 }
 
 /// Empty default constructor
-NexusFileIO::NexusFileIO() : fileID(), m_filehandle(),
-    m_nexuscompression(NX_COMP_LZW), m_progress(0), m_filename() {
-}
+NexusFileIO::NexusFileIO()
+    : fileID(), m_filehandle(), m_nexuscompression(NX_COMP_LZW), m_progress(0),
+      m_filename() {}
 
 /// Constructor that supplies a progress object
-NexusFileIO::NexusFileIO(Progress *prog) : fileID(), m_filehandle(),
-    m_nexuscompression(NX_COMP_LZW), m_progress(prog), m_filename() {
-}
+NexusFileIO::NexusFileIO(Progress *prog)
+    : fileID(), m_filehandle(), m_nexuscompression(NX_COMP_LZW),
+      m_progress(prog), m_filename() {}
 
 void NexusFileIO::resetProgress(Progress *prog) { m_progress = prog; }
 
@@ -197,11 +197,10 @@ int NexusFileIO::writeNexusProcessedHeader(const std::string &title,
 //
 // write an NXdata entry with Float array values
 //
-void
-NexusFileIO::writeNxFloatArray(const std::string &name,
-                               const std::vector<double> &values,
-                               const std::vector<std::string> &attributes,
-                               const std::vector<std::string> &avalues) const {
+void NexusFileIO::writeNxFloatArray(
+    const std::string &name, const std::vector<double> &values,
+    const std::vector<std::string> &attributes,
+    const std::vector<std::string> &avalues) const {
   m_filehandle->writeData(name, values);
   m_filehandle->openData(name);
   for (size_t it = 0; it < attributes.size(); ++it)
@@ -213,11 +212,10 @@ NexusFileIO::writeNxFloatArray(const std::string &name,
 //
 // write an NXdata entry with String array values
 //
-bool
-NexusFileIO::writeNxStringArray(const std::string &name,
-                                const std::vector<std::string> &values,
-                                const std::vector<std::string> &attributes,
-                                const std::vector<std::string> &avalues) const {
+bool NexusFileIO::writeNxStringArray(
+    const std::string &name, const std::vector<std::string> &values,
+    const std::vector<std::string> &attributes,
+    const std::vector<std::string> &avalues) const {
   int dimensions[2];
   size_t maxlen = 0;
   dimensions[0] = static_cast<int>(values.size());
@@ -1167,8 +1165,8 @@ bool NexusFileIO::checkEntryAtLevelByAttribute(const std::string &attribute,
  * @param ws :: The workspace
  * @return true for OK, false for error
  */
-bool
-NexusFileIO::writeNexusBinMasking(API::MatrixWorkspace_const_sptr ws) const {
+bool NexusFileIO::writeNexusBinMasking(
+    API::MatrixWorkspace_const_sptr ws) const {
   std::vector<int> spectra;
   std::vector<std::size_t> bins;
   std::vector<double> weights;

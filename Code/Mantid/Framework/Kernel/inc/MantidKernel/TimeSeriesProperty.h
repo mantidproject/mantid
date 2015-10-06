@@ -121,7 +121,7 @@ public:
   std::unique_ptr<TimeSeriesProperty<double> > getDerivative() const;
 
   /// "Virtual" copy constructor with a time shift in seconds
-  virtual Property* cloneWithTimeShift(const double timeShift) const;
+  virtual Property *cloneWithTimeShift(const double timeShift) const;
   /// Return the memory used by the property, in bytes
   size_t getMemorySize() const;
   /// Merge the given property with this one
@@ -316,14 +316,11 @@ private:
   mutable bool m_filterApplied;
 };
 
-
 /// Function filtering double TimeSeriesProperties according to the requested
 /// statistics.
 double DLLExport
-    filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilter,
-                      Kernel::Math::StatisticType statistic_type);
-
-
+filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilter,
+                  Kernel::Math::StatisticType statistic_type);
 
 } // namespace Kernel
 } // namespace Mantid

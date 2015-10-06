@@ -207,7 +207,7 @@ public:
   const std::vector<std::string> &getInstrumentDirectories() const;
   /// Get instrument search directory
   const std::string getInstrumentDirectory() const;
-  ///get the vtp file directory
+  /// get the vtp file directory
   const std::string getVTPFileDirectory();
   //@}
 
@@ -224,13 +224,13 @@ public:
   /// Set the default facility
   void setFacility(const std::string &facilityName);
 
-  
-  ///Sets the log level priority for the File log channel
+  /// Sets the log level priority for the File log channel
   void setFileLogLevel(int logLevel);
-  ///Sets the log level priority for the Console log channel
+  /// Sets the log level priority for the Console log channel
   void setConsoleLogLevel(int logLevel);
-  ///Sets the log level priority for the selected Filter log channel
-  void setFilterChannelLogLevel(const std::string& filterChannelName, int logLevel);
+  /// Sets the log level priority for the selected Filter log channel
+  void setFilterChannelLogLevel(const std::string &filterChannelName,
+                                int logLevel);
 
   /// Look for an instrument
   const InstrumentInfo &
@@ -253,7 +253,6 @@ public:
 
   /// Gets the proxy for the system
   Kernel::ProxyInfo &getProxy(const std::string &url);
-
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<ConfigServiceImpl>;
@@ -333,7 +332,7 @@ private:
   /// Store a list of instrument directory paths
   std::vector<std::string> m_InstrumentDirs;
   /// A map of facilities to instruments
-  std::map<std::string, std::vector<std::string> > m_instr_prefixes;
+  std::map<std::string, std::vector<std::string>> m_instr_prefixes;
 
   /// The list of available facilities
   std::vector<FacilityInfo *> m_facilities;
@@ -350,14 +349,14 @@ private:
 inline
 #endif
     template class MANTID_KERNEL_DLL
-Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;
+        Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;
 typedef MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<ConfigServiceImpl>
-ConfigService;
+    ConfigService;
 
 typedef Mantid::Kernel::ConfigServiceImpl::ValueChanged
-ConfigValChangeNotification;
+    ConfigValChangeNotification;
 typedef const Poco::AutoPtr<Mantid::Kernel::ConfigServiceImpl::ValueChanged> &
-ConfigValChangeNotification_ptr;
+    ConfigValChangeNotification_ptr;
 
 } // namespace Kernel
 } // namespace Mantid

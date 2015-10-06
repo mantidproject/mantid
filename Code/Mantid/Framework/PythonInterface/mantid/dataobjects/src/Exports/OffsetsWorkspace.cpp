@@ -7,13 +7,10 @@ using Mantid::DataObjects::SpecialWorkspace2D;
 using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
 
-void export_OffsetsWorkspace()
-{
-  class_<OffsetsWorkspace, bases<SpecialWorkspace2D>,
-         boost::noncopyable>("OffsetsWorkspace", no_init)
-    ;
+void export_OffsetsWorkspace() {
+  class_<OffsetsWorkspace, bases<SpecialWorkspace2D>, boost::noncopyable>(
+      "OffsetsWorkspace", no_init);
 
   // register pointers
   RegisterWorkspacePtrToPython<OffsetsWorkspace>();
-
 }

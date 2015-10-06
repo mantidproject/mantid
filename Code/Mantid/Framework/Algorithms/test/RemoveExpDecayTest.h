@@ -11,29 +11,23 @@ using namespace Mantid::API;
 
 const std::string outputName = "MuonRemoveExpDecay_Output";
 
-class RemoveExpDecayTest : public CxxTest::TestSuite
-{
+class RemoveExpDecayTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static RemoveExpDecayTest *createSuite() { return new RemoveExpDecayTest(); }
-  static void destroySuite( RemoveExpDecayTest *suite ) { delete suite; }
+  static void destroySuite(RemoveExpDecayTest *suite) { delete suite; }
 
-  RemoveExpDecayTest() {
-    FrameworkManager::Instance();
-  }
+  RemoveExpDecayTest() { FrameworkManager::Instance(); }
 
-
-  void testInit()
-  {
+  void testInit() {
     MuonRemoveExpDecay alg;
     alg.initialize();
     TS_ASSERT(alg.isInitialized())
   }
 
-  void testExecute()
-  {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1,1);
+  void testExecute() {
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
 
     MuonRemoveExpDecay alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -46,9 +40,8 @@ public:
     TS_ASSERT(alg.isExecuted())
   }
 
-  void testExecuteWhereSepctraNotSet()
-  {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1,1);
+  void testExecuteWhereSepctraNotSet() {
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
 
     MuonRemoveExpDecay alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -60,9 +53,8 @@ public:
     TS_ASSERT(alg.isExecuted())
   }
 
-  void test_yUnitLabel()
-  {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1,1);
+  void test_yUnitLabel() {
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
 
     MuonRemoveExpDecay alg;
     alg.initialize();

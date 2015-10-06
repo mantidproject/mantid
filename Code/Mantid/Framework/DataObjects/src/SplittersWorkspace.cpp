@@ -29,8 +29,8 @@ SplittersWorkspace::~SplittersWorkspace() {}
 /*
  * Add a Splitter to
  */
-void
-SplittersWorkspace::addSplitter(Mantid::Kernel::SplittingInterval splitter) {
+void SplittersWorkspace::addSplitter(
+    Mantid::Kernel::SplittingInterval splitter) {
   Mantid::API::TableRow row = this->appendRow();
   row << splitter.start().totalNanoseconds();
   row << splitter.stop().totalNanoseconds();

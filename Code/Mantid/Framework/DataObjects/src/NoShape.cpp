@@ -21,12 +21,12 @@ NoShape::~NoShape() {}
  */
 std::string NoShape::toJSON() const {
 
-    Json::Value root;
-    Json::Value shape(this->shapeName());
-    root["shape"] = shape;
+  Json::Value root;
+  Json::Value shape(this->shapeName());
+  root["shape"] = shape;
 
-    Json::StyledWriter writer;
-    return writer.write(root);
+  Json::StyledWriter writer;
+  return writer.write(root);
 }
 
 /**
@@ -35,15 +35,9 @@ std::string NoShape::toJSON() const {
  */
 NoShape *NoShape::clone() const { return new NoShape; }
 
-std::string NoShape::algorithmName() const
-{
-    return std::string();
-}
+std::string NoShape::algorithmName() const { return std::string(); }
 
-int NoShape::algorithmVersion() const
-{
-    return -1;
-}
+int NoShape::algorithmVersion() const { return -1; }
 
 /**
  * @brief Return the unique shape name associated with this type
@@ -51,11 +45,7 @@ int NoShape::algorithmVersion() const
  */
 std::string NoShape::shapeName() const { return "none"; }
 
-Kernel::SpecialCoordinateSystem NoShape::frame() const
-{
-    return Kernel::None;
-}
-
+Kernel::SpecialCoordinateSystem NoShape::frame() const { return Kernel::None; }
 
 } // namespace DataObjects
 } // namespace Mantid

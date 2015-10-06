@@ -22,7 +22,7 @@ using Mantid::Kernel::Matrix;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::Quat;
 
-#define round(x) ((x) >= 0 ? (int)((x)+0.5) : (int)((x)-0.5))
+#define round(x) ((x) >= 0 ? (int)((x) + 0.5) : (int)((x)-0.5))
 namespace {
 const double DEG_TO_RAD = M_PI / 180.;
 const double RAD_TO_DEG = 180. / M_PI;

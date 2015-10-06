@@ -47,7 +47,7 @@ private:
   Mantid::API::IMDEventWorkspace_sptr inWS;
 
   /// Calculate if this Q is on a detector
-  void calculateE1(Geometry::Instrument_const_sptr inst) ;
+  void calculateE1(Geometry::Instrument_const_sptr inst);
   bool detectorQ(Mantid::Kernel::V3D QLabFrame, double PeakRadius);
   void runMaskDetectors(Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
                         std::string property, std::string values);
@@ -57,7 +57,8 @@ private:
 
   /// Check if peaks overlap
   void checkOverlap(int i, Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
-                    Mantid::Kernel::SpecialCoordinateSystem CoordinatesToUse, double radius);
+                    Mantid::Kernel::SpecialCoordinateSystem CoordinatesToUse,
+                    double radius);
 };
 
 } // namespace Mantid

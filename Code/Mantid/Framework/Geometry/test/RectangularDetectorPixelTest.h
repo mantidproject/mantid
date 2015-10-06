@@ -12,17 +12,11 @@
 using namespace Mantid;
 using namespace Mantid::Geometry;
 
-class RectangularDetectorPixelTest : public CxxTest::TestSuite
-{
+class RectangularDetectorPixelTest : public CxxTest::TestSuite {
 public:
-
-  /// This test properly requires a RectangularDetector. See RectangularDetectorTest.
-  void test_nothing()
-  {
-  }
-
-
+  /// This test properly requires a RectangularDetector. See
+  /// RectangularDetectorTest.
+  void test_nothing() {}
 };
-
 
 #endif /* MANTID_GEOMETRY_RECTANGULARDETECTORPIXELTEST_H_ */

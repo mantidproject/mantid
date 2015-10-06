@@ -4,6 +4,7 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFEditLocalParameterDialog.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -76,6 +77,7 @@ void MultiDatasetFit::initLayout()
   connect(m_dataController,SIGNAL(dataTableUpdated()),m_plotController,SLOT(tableUpdated()));
   connect(m_dataController,SIGNAL(dataSetUpdated(int)),m_plotController,SLOT(updateRange(int)));
   connect(m_dataController,SIGNAL(dataTableUpdated()),this,SLOT(setLogNames()));
+  connect(m_dataController,SIGNAL(dataTableUpdated()),this,SLOT(invalidateOutput()));
   connect(m_plotController,SIGNAL(fittingRangeChanged(int, double, double)),m_dataController,SLOT(setFittingRange(int, double, double)));
   connect(m_uiForm.cbShowDataErrors,SIGNAL(toggled(bool)),m_plotController,SLOT(showDataErrors(bool)));
   connect(m_uiForm.btnToVisibleRange,SIGNAL(clicked()),m_plotController,SLOT(resetRange()));
@@ -150,6 +152,12 @@ void MultiDatasetFit::createPlotToolbar()
 
 }
 
+/// Get the name of the output workspace
+QString MultiDatasetFit::getOutputWorkspaceName() const
+{
+  return QString::fromStdString(m_outputWorkspaceName);
+}
+
 /// Create a multi-domain function to fit all the spectra in the data table.
 boost::shared_ptr<Mantid::API::IFunction> MultiDatasetFit::createFunction() const
 {
@@ -181,6 +189,8 @@ void MultiDatasetFit::fitSequential()
     m_fitOptionsBrowser->copyPropertiesToAlgorithm(*fit);
 
     m_outputWorkspaceName = m_fitOptionsBrowser->getProperty("OutputWorkspace").toStdString() + "_Workspaces";
+
+    removeOldOutput();
 
     m_fitRunner.reset( new API::AlgorithmRunner() );
     connect( m_fitRunner.get(),SIGNAL(algorithmComplete(bool)), this, SLOT(finishFit(bool)), Qt::QueuedConnection );
@@ -236,7 +246,16 @@ void MultiDatasetFit::fitSimultaneous()
       fit->setPropertyValue("Output",m_outputWorkspaceName);
       m_fitOptionsBrowser->setProperty("Output","out");
     }
-    m_outputWorkspaceName += "_Workspaces";
+    if (n == 1)
+    {
+      m_outputWorkspaceName += "_Workspace";
+    }
+    else
+    {
+      m_outputWorkspaceName += "_Workspaces";
+    }
+
+    removeOldOutput();
 
     m_fitRunner.reset( new API::AlgorithmRunner() );
     connect( m_fitRunner.get(),SIGNAL(algorithmComplete(bool)), this, SLOT(finishFit(bool)), Qt::QueuedConnection );
@@ -318,11 +337,13 @@ void MultiDatasetFit::editLocalParameterValues(const QString& parName)
   {
     auto values = dialog.getValues();
     auto fixes = dialog.getFixes();
+    auto ties = dialog.getTies();
     assert( values.size() == getNumberOfSpectra() );
     for(int i = 0; i < values.size(); ++i)
     {
       setLocalParameterValue(parName, i, values[i]);
       setLocalParameterFixed(parName, i, fixes[i]);
+      setLocalParameterTie(parName, i, ties[i]);
     }
   }
 }
@@ -533,6 +554,23 @@ void MultiDatasetFit::setLocalParameterFixed(const QString& parName, int i, bool
   m_functionBrowser->setLocalParameterFixed(parName, i, fixed);
 }
 
+/// Get the tie for a local parameter.
+/// @param parName : Name of a local parameter.
+/// @param i :: Index of the dataset (spectrum).
+QString MultiDatasetFit::getLocalParameterTie(const QString& parName, int i) const
+{
+  return m_functionBrowser->getLocalParameterTie(parName, i);
+}
+
+/// Set a tie for a local parameter.
+/// @param parName : Name of a local parameter.
+/// @param i :: Index of the dataset (spectrum).
+/// @param tie :: A tie string to set.
+void MultiDatasetFit::setLocalParameterTie(const QString& parName, int i, QString tie)
+{
+  m_functionBrowser->setLocalParameterTie(parName, i, tie);
+}
+
 /// Load settings
 void MultiDatasetFit::loadSettings()
 {
@@ -597,6 +635,27 @@ void MultiDatasetFit::setLogNames()
     catch (...) 
     {/*Maybe the data table hasn't updated yet*/}
   }
+}
+
+/// Remove old output from Fit.
+void MultiDatasetFit::removeOldOutput()
+{
+  if (Mantid::API::AnalysisDataService::Instance().doesExist(
+          m_outputWorkspaceName) &&
+      Mantid::API::AnalysisDataService::Instance()
+          .retrieveWS<Mantid::API::WorkspaceGroup>(m_outputWorkspaceName)) 
+  {
+    Mantid::API::AnalysisDataService::Instance().deepRemoveGroup(
+        m_outputWorkspaceName);
+  }
+}
+
+/// Invalidate the previous fit output
+void MultiDatasetFit::invalidateOutput()
+{
+  m_outputWorkspaceName = "";
+  m_plotController->clear();
+  m_plotController->update();
 }
 
 } // CustomInterfaces

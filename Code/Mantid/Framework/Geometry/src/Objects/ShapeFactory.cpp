@@ -1315,10 +1315,11 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
     Element *pElemHeight = getShapeElement(pElem, "height");
     V3D normVec = parsePosition(pElemAxis);
     normVec.normalize();
-    ((GluGeometryHandler *)(handler.get()))->setSegmentedCylinder(
-        parsePosition(pElemCentre), normVec,
-        atof((pElemRadius->getAttribute("val")).c_str()),
-        atof((pElemHeight->getAttribute("val")).c_str()));
+    ((GluGeometryHandler *)(handler.get()))
+        ->setSegmentedCylinder(
+            parsePosition(pElemCentre), normVec,
+            atof((pElemRadius->getAttribute("val")).c_str()),
+            atof((pElemHeight->getAttribute("val")).c_str()));
   } else if (pElem->tagName() == "cone") {
     boost::shared_ptr<GeometryHandler> handler(new GluGeometryHandler(Obj));
     Obj->setGeometryHandler(handler);

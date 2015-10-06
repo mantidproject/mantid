@@ -39,8 +39,10 @@ public:
   /// Typedef to access the MDEventType.
   typedef MDE MDEventType;
 
-  MDEventWorkspace(Mantid::API::MDNormalization preferredNormalization = Mantid::API::MDNormalization::VolumeNormalization,
-                   Mantid::API::MDNormalization preferredNormalizationHisto = Mantid::API::MDNormalization::VolumeNormalization);
+  MDEventWorkspace(Mantid::API::MDNormalization preferredNormalization =
+                       Mantid::API::MDNormalization::VolumeNormalization,
+                   Mantid::API::MDNormalization preferredNormalizationHisto =
+                       Mantid::API::MDNormalization::VolumeNormalization);
 
   virtual ~MDEventWorkspace();
 
@@ -168,12 +170,15 @@ public:
   /// and close back-up files.
   virtual void clearFileBacked(bool LoadFileBackedData);
 
-  /// Preferred visual normalizaiton method for any histo workspaces created from this.
-  virtual void setDisplayNormalizationHisto(Mantid::API::MDNormalization preferredNormalizationHisto);
+  /// Preferred visual normalizaiton method for any histo workspaces created
+  /// from this.
+  virtual void setDisplayNormalizationHisto(
+      Mantid::API::MDNormalization preferredNormalizationHisto);
   virtual Mantid::API::MDNormalization displayNormalizationHisto() const;
 
   /// Preferred visual normalization method.
-  virtual void setDisplayNormalization(Mantid::API::MDNormalization preferredNormalization);
+  virtual void
+  setDisplayNormalization(Mantid::API::MDNormalization preferredNormalization);
   virtual Mantid::API::MDNormalization displayNormalization() const;
 
 protected:

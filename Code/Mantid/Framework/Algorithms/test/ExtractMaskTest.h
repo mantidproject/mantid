@@ -15,34 +15,31 @@ using namespace Mantid::Geometry;
 using Mantid::Algorithms::ExtractMask;
 using Mantid::Kernel::Property;
 
-class ExtractMaskTest : public CxxTest::TestSuite
-{
+class ExtractMaskTest : public CxxTest::TestSuite {
 
 public:
-  
-  void test_Init_Gives_An_Input_And_An_Output_Workspace_Property()
-  {
+  void test_Init_Gives_An_Input_And_An_Output_Workspace_Property() {
     ExtractMask maskExtractor;
     maskExtractor.initialize();
-    std::vector<Property*> properties = maskExtractor.getProperties();
+    std::vector<Property *> properties = maskExtractor.getProperties();
     TS_ASSERT_EQUALS(properties.size(), 3);
-    if( properties.size() == 3 )
-    {
+    if (properties.size() == 3) {
       TS_ASSERT_EQUALS(properties[0]->name(), "InputWorkspace");
       TS_ASSERT_EQUALS(properties[1]->name(), "OutputWorkspace");
     }
   }
 
-  // Commenting out test because I am not sure that this is indeed the correct behaviour.
-  void xtest_That_Input_Masked_Spectra_Are_Assigned_Zero_And_Remain_Masked_On_Output()
-  {
+  // Commenting out test because I am not sure that this is indeed the correct
+  // behaviour.
+  void
+  xtest_That_Input_Masked_Spectra_Are_Assigned_Zero_And_Remain_Masked_On_Output() {
     // Create a simple test workspace
     const int nvectors(50), nbins(10);
-    Workspace2D_sptr inputWS = WorkspaceCreationHelper::Create2DWorkspace(nvectors,nbins);
+    Workspace2D_sptr inputWS =
+        WorkspaceCreationHelper::Create2DWorkspace(nvectors, nbins);
     // Mask every 10th spectra
     std::set<int64_t> maskedIndices;
-    for( int i = 0; i < 50; i += 10 )
-    {
+    for (int i = 0; i < 50; i += 10) {
       maskedIndices.insert(i);
     }
     // A few randoms
@@ -56,8 +53,7 @@ public:
     MaskWorkspace_sptr outputWS;
     TS_ASSERT_THROWS_NOTHING(outputWS = runExtractMask(inputName));
     TS_ASSERT(outputWS);
-    if( outputWS )
-    {
+    if (outputWS) {
       doTest(inputWS, outputWS);
     }
 
@@ -66,10 +62,8 @@ public:
   }
 
 private:
-  
   // The input workspace should be in the analysis data service
-  MaskWorkspace_sptr runExtractMask(const std::string & inputName)
-  {
+  MaskWorkspace_sptr runExtractMask(const std::string &inputName) {
     ExtractMask maskExtractor;
     maskExtractor.initialize();
     maskExtractor.setPropertyValue("InputWorkspace", inputName);
@@ -78,27 +72,24 @@ private:
     maskExtractor.setRethrows(true);
     maskExtractor.execute();
 
-    Workspace_sptr workspace = AnalysisDataService::Instance().retrieve(outputName);
-    if( workspace )
-    {
+    Workspace_sptr workspace =
+        AnalysisDataService::Instance().retrieve(outputName);
+    if (workspace) {
       // output should be a MaskWorkspace
-      MaskWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MaskWorkspace>(workspace);
+      MaskWorkspace_sptr outputWS =
+          boost::dynamic_pointer_cast<MaskWorkspace>(workspace);
       return outputWS;
-    }
-    else
-    {
+    } else {
       return MaskWorkspace_sptr();
     }
- 
   }
 
-  void doTest(MatrixWorkspace_const_sptr inputWS, MaskWorkspace_const_sptr outputWS)
-  {
+  void doTest(MatrixWorkspace_const_sptr inputWS,
+              MaskWorkspace_const_sptr outputWS) {
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1);
     size_t nOutputHists(outputWS->getNumberHistograms());
     TS_ASSERT_EQUALS(nOutputHists, inputWS->getNumberHistograms());
-    for( size_t i = 0; i < nOutputHists; ++i )
-    {
+    for (size_t i = 0; i < nOutputHists; ++i) {
       // Sizes
       TS_ASSERT_EQUALS(outputWS->readX(i).size(), 1);
       TS_ASSERT_EQUALS(outputWS->readY(i).size(), 1);
@@ -107,41 +98,31 @@ private:
       double expectedValue(-1.0);
       bool outputMasked(false);
       IDetector_const_sptr inputDet, outputDet;
-      try
-      {
+      try {
         inputDet = inputWS->getDetector(i);
         outputDet = outputWS->getDetector(i);
-      }
-      catch(Mantid::Kernel::Exception::NotFoundError&)
-      {
+      } catch (Mantid::Kernel::Exception::NotFoundError &) {
         expectedValue = 1.0;
         inputDet = IDetector_sptr();
         outputDet = IDetector_sptr();
       }
-      
-      if( inputDet && inputDet->isMasked() )
-      {
+
+      if (inputDet && inputDet->isMasked()) {
         expectedValue = 1.0;
         outputMasked = true;
-      }
-      else
-      {
+      } else {
         expectedValue = 0.0;
         outputMasked = false;
       }
-      
+
       TS_ASSERT_EQUALS(outputWS->dataY(i)[0], expectedValue);
       TS_ASSERT_EQUALS(outputWS->dataE(i)[0], expectedValue);
       TS_ASSERT_EQUALS(outputWS->dataX(i)[0], 0.0);
-      if( inputDet )
-      {
+      if (inputDet) {
         TS_ASSERT_EQUALS(outputDet->isMasked(), outputMasked);
-      }      
+      }
     }
-    
   }
-
 };
 
-
-#endif //EXTRACTMASKINGTEST_H_
+#endif // EXTRACTMASKINGTEST_H_

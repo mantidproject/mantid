@@ -136,9 +136,9 @@ public:
     size_t nbins[3] = {3, 3, 1}; // last dimension integrated out
     Mantid::coord_t min[3] = {0, 0, 0};
     Mantid::coord_t max[3] = {10, 10, 5};
-    auto inputWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(3 /*ndims*/, 1 /*signal*/,
-                                                   1 /*errorSquared*/,
-                                                   nbins /*numBins*/, min, max);
+    auto inputWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
+        3 /*ndims*/, 1 /*signal*/, 1 /*errorSquared*/, nbins /*numBins*/, min,
+        max);
     // Set some values. If transposed then these should end up elsewhere.
     inputWS->setSignalAt(0, 2);
     inputWS->setSignalAt(1, 2);

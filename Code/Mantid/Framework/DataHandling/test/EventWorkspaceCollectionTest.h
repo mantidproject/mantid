@@ -18,7 +18,8 @@ using namespace Mantid::Kernel;
 
 namespace {
 
-EventWorkspaceCollection_uptr makeEventWorkspaceCollection(unsigned int decoratorSize) {
+EventWorkspaceCollection_uptr
+makeEventWorkspaceCollection(unsigned int decoratorSize) {
 
   EventWorkspaceCollection_uptr decorator(new EventWorkspaceCollection);
 
@@ -38,7 +39,9 @@ public:
   static EventWorkspaceCollectionTest *createSuite() {
     return new EventWorkspaceCollectionTest();
   }
-  static void destroySuite(EventWorkspaceCollectionTest *suite) { delete suite; }
+  static void destroySuite(EventWorkspaceCollectionTest *suite) {
+    delete suite;
+  }
 
   void test_constructor() {
     EventWorkspaceCollection decorator;
@@ -136,8 +139,8 @@ public:
     for (size_t i = 0; i < outWS->size(); ++i) {
       auto memberWS =
           boost::dynamic_pointer_cast<EventWorkspace>(outWS->getItem(i));
-      TSM_ASSERT_EQUALS("Child workspaces should all have the width set",
-                        width, memberWS->sample().getWidth());
+      TSM_ASSERT_EQUALS("Child workspaces should all have the width set", width,
+                        memberWS->sample().getWidth());
     }
   }
 };

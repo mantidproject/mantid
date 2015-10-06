@@ -67,6 +67,9 @@ private:
   /// add ntc field which is required for OpenGenie
   void addNtc(const std::string fourspc, int nBins);
 
+  /// apply enginX format field which is required for OpenGenie
+  void applyEnginxFormat(const std::string fourspc);
+
   /// Vector to safe sample log
   std::vector<std::string> logVector;
   /// Workspace

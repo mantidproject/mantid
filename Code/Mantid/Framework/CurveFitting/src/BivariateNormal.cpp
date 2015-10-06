@@ -151,8 +151,8 @@ void BivariateNormal::function1D(double *out, const double *xValues,
       inf << i << "=" << constr->check() << ";";
   }
   inf << std::endl;
-  inf << std::endl << "    chiSq =" << chiSq << "     nData " << nData
-      << std::endl;
+  inf << std::endl
+      << "    chiSq =" << chiSq << "     nData " << nData << std::endl;
   g_log.debug(inf.str());
 }
 

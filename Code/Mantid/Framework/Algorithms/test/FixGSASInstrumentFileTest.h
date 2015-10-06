@@ -13,17 +13,16 @@ using namespace std;
 
 using Mantid::Algorithms::FixGSASInstrumentFile;
 
-class FixGSASInstrumentFileTest : public CxxTest::TestSuite
-{
+class FixGSASInstrumentFileTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FixGSASInstrumentFileTest *createSuite() { return new FixGSASInstrumentFileTest(); }
-  static void destroySuite( FixGSASInstrumentFileTest *suite ) { delete suite; }
+  static FixGSASInstrumentFileTest *createSuite() {
+    return new FixGSASInstrumentFileTest();
+  }
+  static void destroySuite(FixGSASInstrumentFileTest *suite) { delete suite; }
 
-
-  void test_fixGSASPrmFileTest()
-  {
+  void test_fixGSASPrmFileTest() {
     string prmfilename("Test.prm");
     createFaultFile(prmfilename);
 
@@ -49,11 +48,9 @@ public:
     // Check each line
     ifstream chkfile;
     chkfile.open(prmfilename.c_str(), ios::in);
-    if (chkfile.is_open())
-    {
+    if (chkfile.is_open()) {
       string line;
-      while(getline(chkfile, line))
-      {
+      while (getline(chkfile, line)) {
         // char lineend = line[line.size()-1];
         // TS_ASSERT_EQUALS(lineend, '\n');
         TS_ASSERT_EQUALS(line.size(), 80);
@@ -63,31 +60,39 @@ public:
 
     // Clean
     file.remove();
-
   }
 
-  void createFaultFile(std::string prmfilename)
-  {
+  void createFaultFile(std::string prmfilename) {
     ofstream ofile;
     ofile.open(prmfilename.c_str(), ios::out);
-    ofile << "            12345678901234567890123456789012345678901234567890123456789012345678\n";
+    ofile << "            "
+             "12345678901234567890123456789012345678901234567890123456789012345"
+             "678\n";
     ofile << "ID    TEST \n";
     ofile << "INS   BANK      5\n";
     ofile << "INS   FPATH1     60.000000 \n";
     ofile << "INS   HTYPE   PNTR\n";
-    ofile << "INS  1 ICONS 22565.814     0.000     0.000               0.000    0     0.000\n";
-    ofile << "INS  1BNKPAR     3.180    90.000     0.000     0.000     0.200    1    1\n";
+    ofile << "INS  1 ICONS 22565.814     0.000     0.000               0.000   "
+             " 0     0.000\n";
+    ofile << "INS  1BNKPAR     3.180    90.000     0.000     0.000     0.200   "
+             " 1    1\n";
     ofile << "INS  1BAKGD     1    4    Y    0    Y\n";
     ofile << "INS  1I HEAD LaB6 60Hz CW=0.9\n";
     ofile << "INS  1I ITYP    0    4.9944   93.0000     92690\n";
     ofile << "INS  1INAME   powgen\n";
     ofile << "INS  1PRCF1    -3   21   0.00200\n";
-    ofile << "INS  1PRCF11       0.000000       0.000000       0.000000       0.000000\n";
-    ofile << "INS  1PRCF12      12.930000     219.063000       0.000000       1.926000\n";
-    ofile << "INS  1PRCF13       0.000000       0.000000       0.000000       0.000000\n";
-    ofile << "INS  1PRCF14       0.000000       0.000000       0.000000       0.000000\n";
-    ofile << "INS  1PRCF15       0.000000       0.000000       0.000000       0.000000\n";
-    ofile << "INS  1PRCF16       0.000000                                             \n";
+    ofile << "INS  1PRCF11       0.000000       0.000000       0.000000       "
+             "0.000000\n";
+    ofile << "INS  1PRCF12      12.930000     219.063000       0.000000       "
+             "1.926000\n";
+    ofile << "INS  1PRCF13       0.000000       0.000000       0.000000       "
+             "0.000000\n";
+    ofile << "INS  1PRCF14       0.000000       0.000000       0.000000       "
+             "0.000000\n";
+    ofile << "INS  1PRCF15       0.000000       0.000000       0.000000       "
+             "0.000000\n";
+    ofile << "INS  1PRCF16       0.000000                                      "
+             "       \n";
     ofile << "INS  1PAB3     90 \n";
     ofile << "INS  1PAB3 1   0.19921   5.02811   0.38462   0.14101\n";
     ofile << "INS  1PAB3 2   0.24503   6.18457   0.35559   0.13738\n";
@@ -130,9 +135,6 @@ public:
 
     return;
   }
-
-
 };
-
 
 #endif /* MANTID_ALGORITHMS_FIXGSASINSTRUMENTFILETEST_H_ */

@@ -171,8 +171,8 @@ bool PoldiAnalyseResiduals::nextIterationAllowed(int iterations,
 }
 
 /// Returns true if the number is larger than the MaxRelativeChange-property
-bool
-PoldiAnalyseResiduals::relativeChangeIsLargerThanLimit(double relativeChange) {
+bool PoldiAnalyseResiduals::relativeChangeIsLargerThanLimit(
+    double relativeChange) {
   double maxRelativeChange = getProperty("MaxRelativeChange");
 
   return relativeChange > maxRelativeChange;

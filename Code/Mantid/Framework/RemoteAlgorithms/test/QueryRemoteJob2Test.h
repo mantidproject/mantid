@@ -14,7 +14,9 @@ class QueryRemoteJob2Test : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static QueryRemoteJob2Test *createSuite() { return new QueryRemoteJob2Test(); }
+  static QueryRemoteJob2Test *createSuite() {
+    return new QueryRemoteJob2Test();
+  }
   static void destroySuite(QueryRemoteJob2Test *suite) { delete suite; }
 
   void test_algorithm() {

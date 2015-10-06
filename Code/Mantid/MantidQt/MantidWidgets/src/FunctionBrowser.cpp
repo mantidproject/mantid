@@ -1243,6 +1243,7 @@ void FunctionBrowser::popupMenu(const QPoint &)
   }
   else if (isParameter(prop))
   {// parameters
+    if ( prop->hasOption(globalOptionName) && !prop->checkOption(globalOptionName) ) return;
     QMenu context(this);
     if ( hasTie(prop) )
     {
@@ -2128,7 +2129,15 @@ Mantid::API::IFunction_sptr FunctionBrowser::getGlobalFunction()
       }
       else
       {
-        fun1->setParameter(j, getLocalParameterValue(parName,i));
+        auto tie = getLocalParameterTie(parName, i);
+        if ( !tie.isEmpty() )
+        {
+          fun1->tie(parName.toStdString(), tie.toStdString());
+        }
+        else
+        {
+          fun1->setParameter(j, getLocalParameterValue(parName,i));
+        }
       }
     }
   }
@@ -2147,9 +2156,18 @@ void FunctionBrowser::updateLocalTie(const QString& parName)
       auto tieProp = getTieProperty(prop);
       removeProperty(tieProp);
     }
-    if ( m_localParameterValues[parName][m_currentDataset].fixed )
+    auto &localParam = m_localParameterValues[parName][m_currentDataset];
+    if ( localParam.fixed )
     {
       auto ap = addTieProperty(prop, QString::number(m_localParameterValues[parName][m_currentDataset].value));
+      if (ap.prop)
+      {
+        ap.prop->setEnabled(false);
+      }
+    }
+    else if (!localParam.tie.isEmpty())
+    {
+      auto ap = addTieProperty(prop, localParam.tie);
       if (ap.prop)
       {
         ap.prop->setEnabled(false);
@@ -2180,6 +2198,31 @@ bool FunctionBrowser::isLocalParameterFixed(const QString& parName, int i) const
   checkLocalParameter(parName);
   return m_localParameterValues[parName][i].fixed;
 }
+
+
+/// Get the tie for a local parameter.
+/// @param parName :: Parameter name
+/// @param i :: Index of a dataset.
+QString FunctionBrowser::getLocalParameterTie(const QString& parName, int i) const
+{
+  checkLocalParameter(parName);
+  return m_localParameterValues[parName][i].tie;
+}
+
+/// Set a tie for a local parameter.
+/// @param parName :: Parameter name
+/// @param i :: Index of a dataset.
+/// @param tie :: A tie string.
+void FunctionBrowser::setLocalParameterTie(const QString& parName, int i, QString tie)
+{
+  checkLocalParameter(parName);
+  m_localParameterValues[parName][i].tie = tie;
+  if ( i == m_currentDataset )
+  {
+    updateLocalTie(parName);
+  }
+}
+
 
 /// Update the interface to have the same parameter values as in a function.
 /// @param fun :: A function to get parameter values from.

@@ -38,7 +38,8 @@ namespace PythonInterface {
 /**
  * A helper struct to export PropertyWithValue<> types to Python.
  */
-template <typename HeldType, typename ValueReturnPolicy=boost::python::return_by_value>
+template <typename HeldType,
+          typename ValueReturnPolicy = boost::python::return_by_value>
 struct PropertyWithValueExporter {
   static void define(const char *pythonClassName) {
     using namespace boost::python;

@@ -31,7 +31,8 @@ public:
     delete suite;
   }
 
-  void createLogWksp(const std::string &frequency, const std::string &wavelength) {
+  void createLogWksp(const std::string &frequency,
+                     const std::string &wavelength) {
     m_logWSName = "_det_char_log";
 
     {
@@ -82,19 +83,19 @@ public:
   }
 
   ITableWorkspace_sptr createEmptyTableWksp() {
-      ITableWorkspace_sptr wksp = WorkspaceFactory::Instance().createTable();
-      wksp->addColumn("double", "frequency");
-      wksp->addColumn("double", "wavelength");
-      wksp->addColumn("int", "bank");
-      wksp->addColumn("str", "vanadium");
-      wksp->addColumn("str", "container");
-      wksp->addColumn("str", "empty");
-      wksp->addColumn("str", "d_min"); // b/c it is an array for NOMAD
-      wksp->addColumn("str", "d_max"); // b/c it is an array for NOMAD
-      wksp->addColumn("double", "tof_min");
-      wksp->addColumn("double", "tof_max");
+    ITableWorkspace_sptr wksp = WorkspaceFactory::Instance().createTable();
+    wksp->addColumn("double", "frequency");
+    wksp->addColumn("double", "wavelength");
+    wksp->addColumn("int", "bank");
+    wksp->addColumn("str", "vanadium");
+    wksp->addColumn("str", "container");
+    wksp->addColumn("str", "empty");
+    wksp->addColumn("str", "d_min"); // b/c it is an array for NOMAD
+    wksp->addColumn("str", "d_max"); // b/c it is an array for NOMAD
+    wksp->addColumn("double", "tof_min");
+    wksp->addColumn("double", "tof_max");
 
-      return wksp;
+    return wksp;
   }
 
   ITableWorkspace_sptr createTableWkspPG3() {
@@ -253,25 +254,25 @@ public:
   }
 
   void testFullCharNom() {
-      createLogWksp("60.", "1.4");
-      auto tableWS = createTableWkspNOM();
+    createLogWksp("60.", "1.4");
+    auto tableWS = createTableWkspNOM();
 
-      PDDetermineCharacterizations alg;
-      TS_ASSERT_THROWS_NOTHING(alg.initialize());
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setPropertyValue("InputWorkspace", m_logWSName));
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("Characterizations", tableWS));
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setPropertyValue("ReductionProperties", PROPERTY_MANAGER_NAME));
-      TS_ASSERT_THROWS_NOTHING(alg.execute(););
-      TS_ASSERT(alg.isExecuted());
+    PDDetermineCharacterizations alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", m_logWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Characterizations", tableWS));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("ReductionProperties", PROPERTY_MANAGER_NAME));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
 
-      auto expectedInfo = createExpectedInfo(
-          60., 1.4, 1, "0", "0", "0", ".31,.25,.13,.13,.13,.42",
-          "13.66,5.83,3.93,2.09,1.57,31.42", 300.00, 16666.67);
+    auto expectedInfo = createExpectedInfo(
+        60., 1.4, 1, "0", "0", "0", ".31,.25,.13,.13,.13,.42",
+        "13.66,5.83,3.93,2.09,1.57,31.42", 300.00, 16666.67);
 
-      compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
-                                      PROPERTY_MANAGER_NAME));
+    compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
+                                    PROPERTY_MANAGER_NAME));
   }
 
   void testFullCharNomMultiChar() {

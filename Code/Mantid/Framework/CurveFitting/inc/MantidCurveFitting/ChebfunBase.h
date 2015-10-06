@@ -138,16 +138,19 @@ public:
   /// Tolerance for comparing doubles
   double tolerance() { return m_tolerance; }
 
-  /// Find best fit with highest possible tolerance (to be used with noisy data).
+  /// Find best fit with highest possible tolerance (to be used with noisy
+  /// data).
   template <class FunctionType>
   static boost::shared_ptr<ChebfunBase>
   bestFitAnyTolerance(double start, double end, FunctionType f,
                       std::vector<double> &p, std::vector<double> &a,
-                      double maxA = 0.0, double tolerance = 0.0, size_t maxSize = 0);
+                      double maxA = 0.0, double tolerance = 0.0,
+                      size_t maxSize = 0);
 
   /// Create a vector of x values linearly spaced on the approximation interval
   std::vector<double> linspace(size_t n) const;
-  std::vector<double> smooth(const std::vector<double> &xvalues, const std::vector<double> &yvalues) const;
+  std::vector<double> smooth(const std::vector<double> &xvalues,
+                             const std::vector<double> &yvalues) const;
 
 private:
   /// Private assingment operator to stress the immutability of ChebfunBase.
@@ -195,20 +198,17 @@ private:
 
 typedef boost::shared_ptr<ChebfunBase> ChebfunBase_sptr;
 
-
 /// Find best fit with highest possible tolerance (to be used with noisy data).
 template <class FunctionType>
-boost::shared_ptr<ChebfunBase>
-ChebfunBase::bestFitAnyTolerance(double start, double end, FunctionType f,
-                    std::vector<double> &p, std::vector<double> &a,
-                    double maxA, double tolerance, size_t maxSize)
-{
+boost::shared_ptr<ChebfunBase> ChebfunBase::bestFitAnyTolerance(
+    double start, double end, FunctionType f, std::vector<double> &p,
+    std::vector<double> &a, double maxA, double tolerance, size_t maxSize) {
   if (tolerance == 0.0)
     tolerance = g_tolerance;
-  for(double tol = tolerance; tol < 0.1; tol *= 100)
-  {
+  for (double tol = tolerance; tol < 0.1; tol *= 100) {
     auto base = bestFit(start, end, f, p, a, maxA, tol, maxSize);
-    if (base) return base;
+    if (base)
+      return base;
   }
   return ChebfunBase_sptr();
 }

@@ -140,8 +140,9 @@ private:
   /// Calculate the peaks intensities in same group
   bool calculateGroupPeakIntensities(
       std::vector<std::pair<double, API::IPowderDiffPeakFunction_sptr>>
-          peakgroup, const std::vector<double> &vecX,
-      const std::vector<double> &vecY, std::vector<double> &vec_summedpeaks);
+          peakgroup,
+      const std::vector<double> &vecX, const std::vector<double> &vecY,
+      std::vector<double> &vec_summedpeaks);
 
   /// Group close peaks together
   void groupPeaks(

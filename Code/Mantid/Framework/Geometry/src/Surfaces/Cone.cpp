@@ -372,9 +372,9 @@ void Cone::getBoundingBox(double &xmax, double &ymax, double &zmax,
    */
   if (Normal.X() != 0 && Normal.Y() == 0 && Normal.Z() == 0) {
     if (Normal.X() < 0) {
-      xmin = std::max(Centre.X(),ymin);
+      xmin = std::max(Centre.X(), ymin);
     } else {
-      xmax = std::min(Centre.X(),ymax);
+      xmax = std::min(Centre.X(), ymax);
     }
     double radius = fabs(xmax - xmin) * sin((M_PI * alpha) / 180.0);
     ymin = Centre.Y() - radius;
@@ -383,9 +383,9 @@ void Cone::getBoundingBox(double &xmax, double &ymax, double &zmax,
     zmax = Centre.Z() + radius;
   } else if (Normal.X() == 0 && Normal.Y() != 0 && Normal.Z() == 0) {
     if (Normal.Y() < 0) {
-      ymin = std::max(Centre.Y(),ymin);
+      ymin = std::max(Centre.Y(), ymin);
     } else {
-      ymax = std::min(Centre.Y(),ymax);
+      ymax = std::min(Centre.Y(), ymax);
     }
     double radius = fabs(ymax - ymin) * sin((M_PI * alpha) / 180.0);
     xmin = Centre.X() - radius;
@@ -394,9 +394,9 @@ void Cone::getBoundingBox(double &xmax, double &ymax, double &zmax,
     zmax = Centre.Z() + radius;
   } else if (Normal.X() == 0 && Normal.Y() == 0 && Normal.Z() != 0) {
     if (Normal.Z() < 0) {
-      zmin = std::max(Centre.Z(),ymin);
+      zmin = std::max(Centre.Z(), ymin);
     } else {
-      zmax = std::min(Centre.Z(),ymax);
+      zmax = std::min(Centre.Z(), ymax);
     }
     double radius = fabs(zmax - zmin) * sin((M_PI * alpha) / 180.0);
     xmin = Centre.X() - radius;

@@ -721,9 +721,8 @@ bool CheckWorkspacesMatch::checkSpectraMap(MatrixWorkspace_const_sptr ws1,
 /// @param ws2 :: the second workspace
 /// @retval true The instruments match
 /// @retval false The instruments do not match
-bool
-CheckWorkspacesMatch::checkInstrument(API::MatrixWorkspace_const_sptr ws1,
-                                      API::MatrixWorkspace_const_sptr ws2) {
+bool CheckWorkspacesMatch::checkInstrument(
+    API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2) {
   // First check the name matches
   if (ws1->getInstrument()->getName() != ws2->getInstrument()->getName()) {
     g_log.debug() << "Instrument names: WS1 = "
@@ -810,14 +809,12 @@ bool CheckWorkspacesMatch::checkRunProperties(const API::Run &run1,
   double run1Charge(-1.0);
   try {
     run1Charge = run1.getProtonCharge();
-  }
-  catch (Exception::NotFoundError &) {
+  } catch (Exception::NotFoundError &) {
   }
   double run2Charge(-1.0);
   try {
     run2Charge = run2.getProtonCharge();
-  }
-  catch (Exception::NotFoundError &) {
+  } catch (Exception::NotFoundError &) {
   }
 
   if (run1Charge != run2Charge) {
@@ -1038,9 +1035,9 @@ void CheckWorkspacesMatch::doPeaksComparison(API::IPeaksWorkspace_sptr tws1,
   return;
 }
 
-void
-CheckWorkspacesMatch::doTableComparison(API::ITableWorkspace_const_sptr tws1,
-                                        API::ITableWorkspace_const_sptr tws2) {
+void CheckWorkspacesMatch::doTableComparison(
+    API::ITableWorkspace_const_sptr tws1,
+    API::ITableWorkspace_const_sptr tws2) {
   // First the easy things
   const auto numCols = tws1->columnCount();
   if (numCols != tws2->columnCount()) {

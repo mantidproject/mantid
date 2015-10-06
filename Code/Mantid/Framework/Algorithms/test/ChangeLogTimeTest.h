@@ -12,30 +12,23 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 
-class ChangeLogTimeTest : public CxxTest::TestSuite
-{
+class ChangeLogTimeTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static ChangeLogTimeTest *createSuite() { return new ChangeLogTimeTest(); }
-  static void destroySuite( ChangeLogTimeTest *suite ) { delete suite; }
+  static void destroySuite(ChangeLogTimeTest *suite) { delete suite; }
 
   /// Set up the parameters for what the tests do.
-  ChangeLogTimeTest()
-  {
+  ChangeLogTimeTest() {
     length = 10;
     logname = "fakelog";
     start_str = "2011-07-14T12:00Z"; // Noon on Bastille day 2011.
   }
 
-  void testCopyHist()
-  {
-    this->verify("ChangeLogTime_in", "ChangeLogTime_out");
-  }
+  void testCopyHist() { this->verify("ChangeLogTime_in", "ChangeLogTime_out"); }
 
-  void testInplace() {
-    this->verify("ChangeLogTime", "ChangeLogTime");
-  }
+  void testInplace() { this->verify("ChangeLogTime", "ChangeLogTime"); }
 
 private:
   /// Name of the log to create/modify.
@@ -51,26 +44,23 @@ private:
    * @param in_name Name of the input workspace.
    * @param out_name Name of the output workspace.
    */
-  void verify(const std::string in_name, const std::string out_name)
-  {
+  void verify(const std::string in_name, const std::string out_name) {
     DateAndTime start(start_str);
 
     // create a workspace to mess with
     Workspace2D_sptr testWorkspace(new Workspace2D);
     testWorkspace->setTitle("input2D");
-    testWorkspace->initialize(5,2,2);
-    int jj=0;
-    for (int i =0; i < 2; ++i)
-    {
-      for (jj=0; jj<4; ++jj)
-      testWorkspace->dataX(jj)[i] = 1.0*i;
-      testWorkspace->dataY(jj)[i] = 2.0*i;
+    testWorkspace->initialize(5, 2, 2);
+    int jj = 0;
+    for (int i = 0; i < 2; ++i) {
+      for (jj = 0; jj < 4; ++jj)
+        testWorkspace->dataX(jj)[i] = 1.0 * i;
+      testWorkspace->dataY(jj)[i] = 2.0 * i;
     }
-    TimeSeriesProperty<double>* log = new TimeSeriesProperty<double>(logname);
+    TimeSeriesProperty<double> *log = new TimeSeriesProperty<double>(logname);
     log->setUnits("furlongs");
-    for (int i = 0; i < length; i++)
-    {
-      log->addValue(start+static_cast<double>(i), static_cast<double>(i));
+    for (int i = 0; i < length; i++) {
+      log->addValue(start + static_cast<double>(i), static_cast<double>(i));
     }
     testWorkspace->mutableRun().addProperty(log, true);
     AnalysisDataService::Instance().add(in_name, testWorkspace);
@@ -89,14 +79,15 @@ private:
     TS_ASSERT(alg.isExecuted());
 
     // verify the results
-    Workspace2D_sptr outWorkspace
-      = AnalysisDataService::Instance().retrieveWS<Workspace2D>(out_name);
-    TimeSeriesProperty<double> *newlog
-      = dynamic_cast<TimeSeriesProperty<double> *>(outWorkspace->run().getLogData(logname));
+    Workspace2D_sptr outWorkspace =
+        AnalysisDataService::Instance().retrieveWS<Workspace2D>(out_name);
+    TimeSeriesProperty<double> *newlog =
+        dynamic_cast<TimeSeriesProperty<double> *>(
+            outWorkspace->run().getLogData(logname));
     TS_ASSERT(newlog);
     TS_ASSERT(!newlog->units().empty());
     TS_ASSERT_EQUALS(length, newlog->size());
-    TS_ASSERT_EQUALS(start+.1 , newlog->firstTime());
+    TS_ASSERT_EQUALS(start + .1, newlog->firstTime());
 
     // cleanup
     AnalysisDataService::Instance().remove(in_name);

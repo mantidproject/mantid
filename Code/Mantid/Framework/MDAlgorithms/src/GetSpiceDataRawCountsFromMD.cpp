@@ -5,10 +5,8 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/IMDIterator.h"
 
-namespace Mantid
-{
-namespace MDAlgorithms
-{
+namespace Mantid {
+namespace MDAlgorithms {
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -49,7 +47,7 @@ void GetSpiceDataRawCountsFromMD::init() {
   vecmode.push_back("Pt.");
   vecmode.push_back("Detector");
   vecmode.push_back("Sample Log");
-  auto modevalidator = boost::make_shared<ListValidator<std::string> >(vecmode);
+  auto modevalidator = boost::make_shared<ListValidator<std::string>>(vecmode);
   declareProperty(
       "Mode", "Detector", modevalidator,
       "Mode selector.  (1) Pt.: get the raw detectors' signal of the "
@@ -190,7 +188,7 @@ void GetSpiceDataRawCountsFromMD::exportDetCountsOfRun(
 
   // Sort and output
   const size_t numdets = vecDetCounts.size();
-  std::vector<std::pair<double, double> > vecPair(numdets);
+  std::vector<std::pair<double, double>> vecPair(numdets);
   for (size_t i = 0; i < numdets; ++i) {
     vecPair[i] = std::make_pair(vec2theta[i], vecDetCounts[i]);
   }
@@ -272,7 +270,7 @@ void GetSpiceDataRawCountsFromMD::exportIndividualDetCounts(
 
   // Sort and output
   const size_t numpts = vecDetCounts.size();
-  std::vector<std::pair<double, double> > vecPair(numpts);
+  std::vector<std::pair<double, double>> vecPair(numpts);
   for (size_t i = 0; i < numpts; ++i) {
     vecPair[i] = std::make_pair(vecSampleLog[i], vecDetCounts[i]);
   }
@@ -331,7 +329,7 @@ void GetSpiceDataRawCountsFromMD::exportSampleLogValue(
 
   // Sort
   const size_t numpts = vecX.size();
-  std::vector<std::pair<double, double> > vecPair(numpts);
+  std::vector<std::pair<double, double>> vecPair(numpts);
   for (size_t i = 0; i < numpts; ++i) {
     vecPair[i] = std::make_pair(vecX[i], vecY[i]);
   }
@@ -536,8 +534,7 @@ MatrixWorkspace_sptr GetSpiceDataRawCountsFromMD::createOutputWorkspace(
   if (xlabel.size() != 0) {
     try {
       outws->getAxis(0)->setUnit(xlabel);
-    }
-    catch (...) {
+    } catch (...) {
       g_log.information() << "Label " << xlabel << " for X-axis is not a unit "
                                                    "registered."
                           << "\n";

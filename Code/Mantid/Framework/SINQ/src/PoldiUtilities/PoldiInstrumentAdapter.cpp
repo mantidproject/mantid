@@ -219,9 +219,8 @@ double PoldiInstrumentAdapter::getChopperSpeedTargetFromRun(
  * @return True if speed matches target or information is absent, false
  *otherwise.
  */
-bool
-PoldiInstrumentAdapter::chopperSpeedMatchesTarget(const Run &runInformation,
-                                                  double chopperSpeed) const {
+bool PoldiInstrumentAdapter::chopperSpeedMatchesTarget(
+    const Run &runInformation, double chopperSpeed) const {
   try {
     double targetChopperSpeed = getChopperSpeedTargetFromRun(runInformation);
 

@@ -33,308 +33,316 @@ using namespace Mantid::Geometry;
 using namespace Mantid::MDAlgorithms;
 using Mantid::Kernel::V3D;
 
-
-class IntegratePeaksMDTest : public CxxTest::TestSuite
-{
+class IntegratePeaksMDTest : public CxxTest::TestSuite {
 public:
-  IntegratePeaksMDTest()
-  {
+  IntegratePeaksMDTest() { Mantid::API::FrameworkManager::Instance(); }
+  ~IntegratePeaksMDTest() {}
 
-	Mantid::API::FrameworkManager::Instance();
-  }
-  ~IntegratePeaksMDTest()
-  {
-
-  }
-
-  void test_Init()
-  {
+  void test_Init() {
     IntegratePeaksMD alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
   }
 
   //-------------------------------------------------------------------------------
   /** Run the IntegratePeaksMD with the given peak radius integration param */
   static void doRun(double PeakRadius, double BackgroundRadius,
-      std::string OutputWorkspace = "IntegratePeaksMDTest_peaks",
-      double BackgroundStartRadius = 0.0, bool edge = true, bool cyl = false, std::string fnct = "NoFit")
-  {
+                    std::string OutputWorkspace = "IntegratePeaksMDTest_peaks",
+                    double BackgroundStartRadius = 0.0, bool edge = true,
+                    bool cyl = false, std::string fnct = "NoFit") {
     IntegratePeaksMD alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "IntegratePeaksMDTest_MDEWS" ) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("PeakRadius", PeakRadius ) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("BackgroundOuterRadius", BackgroundRadius ) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("BackgroundInnerRadius", BackgroundStartRadius ) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("IntegrateIfOnEdge", edge ) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", "IntegratePeaksMDTest_peaks" ) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", OutputWorkspace) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Cylinder", cyl ) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("CylinderLength", 4.0 ) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("PercentBackground", 20.0 ) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("ProfileFunction", fnct ) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("IntegrationOption", "Sum" ) );
-    TS_ASSERT_THROWS_NOTHING( alg.execute() );
-    TS_ASSERT( alg.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", "IntegratePeaksMDTest_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakRadius", PeakRadius));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("BackgroundOuterRadius", BackgroundRadius));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("BackgroundInnerRadius", BackgroundStartRadius));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IntegrateIfOnEdge", edge));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("PeaksWorkspace", "IntegratePeaksMDTest_peaks"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", OutputWorkspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Cylinder", cyl));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CylinderLength", 4.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PercentBackground", 20.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ProfileFunction", fnct));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IntegrationOption", "Sum"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
   }
-
 
   //-------------------------------------------------------------------------------
   /** Create the (blank) MDEW */
-  static void createMDEW()
-  {
+  static void createMDEW() {
     // ---- Start with empty MDEW ----
 
     CreateMDWorkspace algC;
-    TS_ASSERT_THROWS_NOTHING( algC.initialize() )
-    TS_ASSERT( algC.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( algC.setProperty("Dimensions", "3") );
-    TS_ASSERT_THROWS_NOTHING( algC.setProperty("Extents", "-10,10,-10,10,-10,10") );
-    TS_ASSERT_THROWS_NOTHING( algC.setProperty("Names", "h,k,l") );
-    TS_ASSERT_THROWS_NOTHING( algC.setProperty("Units", "-,-,-") );
-    TS_ASSERT_THROWS_NOTHING( algC.setProperty("SplitInto", "5") );
-    TS_ASSERT_THROWS_NOTHING( algC.setProperty("MaxRecursionDepth", "2") );
-    TS_ASSERT_THROWS_NOTHING( algC.setPropertyValue("OutputWorkspace", "IntegratePeaksMDTest_MDEWS" ) );
-    TS_ASSERT_THROWS_NOTHING( algC.execute() );
-    TS_ASSERT( algC.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(algC.initialize())
+    TS_ASSERT(algC.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Dimensions", "3"));
+    TS_ASSERT_THROWS_NOTHING(
+        algC.setProperty("Extents", "-10,10,-10,10,-10,10"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Names", "h,k,l"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Units", "-,-,-"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("SplitInto", "5"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("MaxRecursionDepth", "2"));
+    TS_ASSERT_THROWS_NOTHING(
+        algC.setPropertyValue("OutputWorkspace", "IntegratePeaksMDTest_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(algC.execute());
+    TS_ASSERT(algC.isExecuted());
   }
-
 
   //-------------------------------------------------------------------------------
   /** Add a fake peak */
-  static void addPeak(size_t num, double x, double y, double z, double radius)
-  {
+  static void addPeak(size_t num, double x, double y, double z, double radius) {
     std::ostringstream mess;
     mess << num << ", " << x << ", " << y << ", " << z << ", " << radius;
     FakeMDEventData algF;
-    TS_ASSERT_THROWS_NOTHING( algF.initialize() )
-    TS_ASSERT( algF.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( algF.setPropertyValue("InputWorkspace", "IntegratePeaksMDTest_MDEWS" ) );
-    TS_ASSERT_THROWS_NOTHING( algF.setProperty("PeakParams",mess.str().c_str() ) );
-    TS_ASSERT_THROWS_NOTHING( algF.execute() );
-    TS_ASSERT( algF.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(algF.initialize())
+    TS_ASSERT(algF.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        algF.setPropertyValue("InputWorkspace", "IntegratePeaksMDTest_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(
+        algF.setProperty("PeakParams", mess.str().c_str()));
+    TS_ASSERT_THROWS_NOTHING(algF.execute());
+    TS_ASSERT(algF.isExecuted());
   }
-
 
   //-------------------------------------------------------------------------------
   /** Full test using faked-out peak data */
-  void test_exec()
-  {
+  void test_exec() {
     // --- Fake workspace with 3 peaks ------
     createMDEW();
-    addPeak(1000, 0.,0.,0., 1.0);
-    addPeak(1000, 2.,3.,4., 0.5);
-    addPeak(1000, 6.,6.,6., 2.0);
+    addPeak(1000, 0., 0., 0., 1.0);
+    addPeak(1000, 2., 3., 4., 0.5);
+    addPeak(1000, 6., 6., 6., 2.0);
 
     MDEventWorkspace3Lean::sptr mdews =
-        AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("IntegratePeaksMDTest_MDEWS");
+        AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(
+            "IntegratePeaksMDTest_MDEWS");
     mdews->setCoordinateSystem(Mantid::Kernel::HKL);
-    TS_ASSERT_EQUALS( mdews->getNPoints(), 3000);
-    TS_ASSERT_DELTA( mdews->getBox()->getSignal(), 3000.0, 1e-2);
+    TS_ASSERT_EQUALS(mdews->getNPoints(), 3000);
+    TS_ASSERT_DELTA(mdews->getBox()->getSignal(), 3000.0, 1e-2);
 
     // Make a fake instrument - doesn't matter, we won't use it really
-    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
 
     // --- Make a fake PeaksWorkspace ---
     PeaksWorkspace_sptr peakWS0(new PeaksWorkspace());
     peakWS0->setInstrument(inst);
-    peakWS0->addPeak( Peak(inst, 15050, 1.0 ) );
+    peakWS0->addPeak(Peak(inst, 15050, 1.0));
 
-    TS_ASSERT_EQUALS( peakWS0->getPeak(0).getIntensity(), 0.0);
-    AnalysisDataService::Instance().add("IntegratePeaksMDTest_peaks",peakWS0);
+    TS_ASSERT_EQUALS(peakWS0->getPeak(0).getIntensity(), 0.0);
+    AnalysisDataService::Instance().add("IntegratePeaksMDTest_peaks", peakWS0);
 
     // ------------- Integrating with cylinder ------------------------
-    doRun(0.1,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true);
+    doRun(0.1, 0.0, "IntegratePeaksMDTest_peaks", 0.0, true, true);
 
-    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
+    TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
 
     // Error is also calculated
-    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
+    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
 
     // Test profile Gaussian
     std::string fnct = "Gaussian";
-    doRun(0.1,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true,fnct);
+    doRun(0.1, 0.0, "IntegratePeaksMDTest_peaks", 0.0, true, true, fnct);
     // More accurate integration changed values
-    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
+    TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
     // Error is also calculated
-    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
-    Poco::File(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory") + "IntegratePeaksMDTest_MDEWSGaussian.dat").remove();
+    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
+    Poco::File(Mantid::Kernel::ConfigService::Instance().getString(
+                   "defaultsave.directory") +
+               "IntegratePeaksMDTest_MDEWSGaussian.dat").remove();
 
     // Test profile back to back exponential
     fnct = "BackToBackExponential";
-    doRun(0.1,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true,fnct);
+    doRun(0.1, 0.0, "IntegratePeaksMDTest_peaks", 0.0, true, true, fnct);
 
     // TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 0.2);
     // Error is also calculated
-    // TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 0.2);
-    Poco::File(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory") + "IntegratePeaksMDTest_MDEWSBackToBackExponential.dat").remove();
+    // TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0),
+    // 0.2);
+    Poco::File(Mantid::Kernel::ConfigService::Instance().getString(
+                   "defaultsave.directory") +
+               "IntegratePeaksMDTest_MDEWSBackToBackExponential.dat").remove();
     /*fnct = "ConvolutionExpGaussian";
     doRun(0.1,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true,fnct);
 
     TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
 
     // Error is also calculated
-    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);*/
-    // ------------- Integrate with 0.1 radius but IntegrateIfOnEdge false------------------------
-    doRun(0.1,0.0,"IntegratePeaksMDTest_peaks",0.0,false);
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0),
+    1e-2);*/
+    // ------------- Integrate with 0.1 radius but IntegrateIfOnEdge
+    // false------------------------
+    doRun(0.1, 0.0, "IntegratePeaksMDTest_peaks", 0.0, false);
 
-    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
+    TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
 
     // Error is also calculated
-    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
-    
+    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
+
     AnalysisDataService::Instance().remove("IntegratePeaksMDTest_peaks");
 
     // --- Make a fake PeaksWorkspace ---
     PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
-    peakWS->addPeak( Peak(inst, 15050, 1.0, V3D(0., 0., 0.) ) );
-    peakWS->addPeak( Peak(inst, 15050, 1.0, V3D(2., 3., 4.) ) );
-    peakWS->addPeak( Peak(inst, 15050, 1.0, V3D(6., 6., 6.) ) );
+    peakWS->addPeak(Peak(inst, 15050, 1.0, V3D(0., 0., 0.)));
+    peakWS->addPeak(Peak(inst, 15050, 1.0, V3D(2., 3., 4.)));
+    peakWS->addPeak(Peak(inst, 15050, 1.0, V3D(6., 6., 6.)));
 
-    TS_ASSERT_EQUALS( peakWS->getPeak(0).getIntensity(), 0.0);
-    AnalysisDataService::Instance().add("IntegratePeaksMDTest_peaks",peakWS);
+    TS_ASSERT_EQUALS(peakWS->getPeak(0).getIntensity(), 0.0);
+    AnalysisDataService::Instance().add("IntegratePeaksMDTest_peaks", peakWS);
 
     // ------------- Integrate with 1.0 radius ------------------------
-    doRun(1.0,0.0);
+    doRun(1.0, 0.0);
 
-    TS_ASSERT_DELTA( peakWS->getPeak(0).getIntensity(), 1000.0, 1e-2);
-    TS_ASSERT_DELTA( peakWS->getPeak(1).getIntensity(), 1000.0, 1e-2);
+    TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1000.0, 1e-2);
+    TS_ASSERT_DELTA(peakWS->getPeak(1).getIntensity(), 1000.0, 1e-2);
     // Peak is of radius 2.0, but we get half that radius = ~1/8th the volume
-    TS_ASSERT_DELTA( peakWS->getPeak(2).getIntensity(),  125.0, 10.0);
+    TS_ASSERT_DELTA(peakWS->getPeak(2).getIntensity(), 125.0, 10.0);
 
     // Error is also calculated
-    TS_ASSERT_DELTA( peakWS->getPeak(0).getSigmaIntensity(), sqrt(1000.0), 1e-2);
-    TS_ASSERT_DELTA( peakWS->getPeak(1).getSigmaIntensity(), sqrt(1000.0), 1e-2);
-    TS_ASSERT_DELTA( peakWS->getPeak(2).getSigmaIntensity(), sqrt(peakWS->getPeak(2).getIntensity()), 1e-2);
-
+    TS_ASSERT_DELTA(peakWS->getPeak(0).getSigmaIntensity(), sqrt(1000.0), 1e-2);
+    TS_ASSERT_DELTA(peakWS->getPeak(1).getSigmaIntensity(), sqrt(1000.0), 1e-2);
+    TS_ASSERT_DELTA(peakWS->getPeak(2).getSigmaIntensity(),
+                    sqrt(peakWS->getPeak(2).getIntensity()), 1e-2);
 
     // ------------- Let's do it again with 2.0 radius ------------------------
-    doRun(2.0,0.0);
+    doRun(2.0, 0.0);
 
     // All peaks are fully contained
-    TS_ASSERT_DELTA( peakWS->getPeak(0).getIntensity(), 1000.0, 1e-2);
-    TS_ASSERT_DELTA( peakWS->getPeak(1).getIntensity(), 1000.0, 1e-2);
-    TS_ASSERT_DELTA( peakWS->getPeak(2).getIntensity(), 1000.0, 1e-2);
+    TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1000.0, 1e-2);
+    TS_ASSERT_DELTA(peakWS->getPeak(1).getIntensity(), 1000.0, 1e-2);
+    TS_ASSERT_DELTA(peakWS->getPeak(2).getIntensity(), 1000.0, 1e-2);
 
     // ------------- Let's do it again with 0.5 radius ------------------------
-    doRun(0.5,0.0);
+    doRun(0.5, 0.0);
 
-    TS_ASSERT_DELTA( peakWS->getPeak(0).getIntensity(), 125.0, 10.0);
-    TS_ASSERT_DELTA( peakWS->getPeak(1).getIntensity(), 1000.0, 1e-2);
-    TS_ASSERT_DELTA( peakWS->getPeak(2).getIntensity(), 15.0, 10.0);
+    TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 125.0, 10.0);
+    TS_ASSERT_DELTA(peakWS->getPeak(1).getIntensity(), 1000.0, 1e-2);
+    TS_ASSERT_DELTA(peakWS->getPeak(2).getIntensity(), 15.0, 10.0);
 
     // ===============================================================================
     // ---- Now add a background signal over one peak--------------
-    addPeak(1000, 0.,0.,0., 2.0);
+    addPeak(1000, 0., 0., 0., 2.0);
 
-    // ------------- Integrate with 1.0 radius and 2.0 background------------------------
+    // ------------- Integrate with 1.0 radius and 2.0
+    // background------------------------
     doRun(1.0, 2.0);
-    // Same 1000 since the background (~125) was subtracted, with some random variation of the BG around
-//    TS_ASSERT_DELTA( peakWS->getPeak(0).getIntensity(), 1000.0, 10.0);
-    // Error on peak is the SUM of the error of peak and the subtracted background
-    TS_ASSERT_DELTA( peakWS->getPeak(0).getSigmaIntensity(), sqrt(1125.0 + 125.0), 2.0);
+    // Same 1000 since the background (~125) was subtracted, with some random
+    // variation of the BG around
+    //    TS_ASSERT_DELTA( peakWS->getPeak(0).getIntensity(), 1000.0, 10.0);
+    // Error on peak is the SUM of the error of peak and the subtracted
+    // background
+    TS_ASSERT_DELTA(peakWS->getPeak(0).getSigmaIntensity(),
+                    sqrt(1125.0 + 125.0), 2.0);
 
     // Had no bg, so they are the same
-    TS_ASSERT_DELTA( peakWS->getPeak(1).getIntensity(), 1000.0, 1e-2);
-    TS_ASSERT_DELTA( peakWS->getPeak(1).getSigmaIntensity(), sqrt(1000.0), 1e-1);
+    TS_ASSERT_DELTA(peakWS->getPeak(1).getIntensity(), 1000.0, 1e-2);
+    TS_ASSERT_DELTA(peakWS->getPeak(1).getSigmaIntensity(), sqrt(1000.0), 1e-1);
 
-    // This one is a 2.0 radius fake peak, so the background and peak have ~ the same density! So ~0 total intensity.
-    TS_ASSERT_DELTA( peakWS->getPeak(2).getIntensity(), 0.0, 12.0);
+    // This one is a 2.0 radius fake peak, so the background and peak have ~ the
+    // same density! So ~0 total intensity.
+    TS_ASSERT_DELTA(peakWS->getPeak(2).getIntensity(), 0.0, 12.0);
     // But the error is large since it is 125 - 125 (with errors)
-    TS_ASSERT_DELTA( peakWS->getPeak(2).getSigmaIntensity(), sqrt(150.0), 2.);
+    TS_ASSERT_DELTA(peakWS->getPeak(2).getSigmaIntensity(), sqrt(150.0), 2.);
 
-
-    // ------------- Integrating without the background gives higher counts ------------------------
+    // ------------- Integrating without the background gives higher counts
+    // ------------------------
     doRun(1.0, 0.0);
 
     // +125 counts due to background
-    TS_ASSERT_DELTA( peakWS->getPeak(0).getIntensity(), 1125.0, 10.0);
+    TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1125.0, 10.0);
 
     // These had no bg, so they are the same
-    TS_ASSERT_DELTA( peakWS->getPeak(1).getIntensity(), 1000.0, 1e-2);
-    TS_ASSERT_DELTA( peakWS->getPeak(2).getIntensity(), 125.0, 10.0);
-    
+    TS_ASSERT_DELTA(peakWS->getPeak(1).getIntensity(), 1000.0, 1e-2);
+    TS_ASSERT_DELTA(peakWS->getPeak(2).getIntensity(), 125.0, 10.0);
+
     AnalysisDataService::Instance().remove("IntegratePeaksMDTest_MDEWS");
     AnalysisDataService::Instance().remove("IntegratePeaksMDTest_peaks");
-
   }
-
-
 
   //-------------------------------------------------------------------------------
-  void test_exec_NotInPlace()
-  {
+  void test_exec_NotInPlace() {
     // --- Fake workspace with 3 peaks ------
     createMDEW();
-    addPeak(1000, 0.,0.,0., 1.0);
+    addPeak(1000, 0., 0., 0., 1.0);
 
     // Make a fake instrument - doesn't matter, we won't use it really
-    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentCylindrical(5);
     // --- Make a fake PeaksWorkspace ---
     PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
-    peakWS->addPeak( Peak(inst, 1, 1.0, V3D(0., 0., 0.) ) );
-    AnalysisDataService::Instance().add("IntegratePeaksMDTest_peaks",peakWS);
+    peakWS->addPeak(Peak(inst, 1, 1.0, V3D(0., 0., 0.)));
+    AnalysisDataService::Instance().add("IntegratePeaksMDTest_peaks", peakWS);
 
     // Integrate and copy to a new peaks workspace
-    doRun(1.0,0.0, "IntegratePeaksMDTest_peaks_out");
+    doRun(1.0, 0.0, "IntegratePeaksMDTest_peaks_out");
 
     // Old workspace is unchanged
-    TS_ASSERT_EQUALS( peakWS->getPeak(0).getIntensity(), 0.0);
+    TS_ASSERT_EQUALS(peakWS->getPeak(0).getIntensity(), 0.0);
 
     PeaksWorkspace_sptr newPW = boost::dynamic_pointer_cast<PeaksWorkspace>(
-        AnalysisDataService::Instance().retrieve("IntegratePeaksMDTest_peaks_out"));
-    TS_ASSERT( newPW );
+        AnalysisDataService::Instance().retrieve(
+            "IntegratePeaksMDTest_peaks_out"));
+    TS_ASSERT(newPW);
 
-    TS_ASSERT_DELTA( newPW->getPeak(0).getIntensity(), 1000.0, 1e-2);
+    TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(), 1000.0, 1e-2);
   }
-
 
   //-------------------------------------------------------------------------------
   /// Integrate background between start/end background radius
-  void test_exec_shellBackground()
-  {
+  void test_exec_shellBackground() {
     createMDEW();
     /* Create 3 overlapping shells so that density goes like this:
      * r < 1 : density 1.0
      * 1 < r < 2 : density 1/2
      * 2 < r < 3 : density 1/3
      */
-    addPeak(1000, 0.,0.,0., 1.0);
-    addPeak(1000 * 4, 0.,0.,0., 2.0); // 8 times the volume / 4 times the counts = 1/2 density
-    addPeak(1000 * 9, 0.,0.,0., 3.0); // 27 times the volume / 9 times the counts = 1/3 density
+    addPeak(1000, 0., 0., 0., 1.0);
+    addPeak(1000 * 4, 0., 0., 0.,
+            2.0); // 8 times the volume / 4 times the counts = 1/2 density
+    addPeak(1000 * 9, 0., 0., 0.,
+            3.0); // 27 times the volume / 9 times the counts = 1/3 density
 
     // --- Make a fake PeaksWorkspace ---
     PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
-    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
-    peakWS->addPeak( Peak(inst, 1, 1.0, V3D(0., 0., 0.) ) );
-    TS_ASSERT_EQUALS( peakWS->getPeak(0).getIntensity(), 0.0);
-    AnalysisDataService::Instance().addOrReplace("IntegratePeaksMDTest_peaks",peakWS);
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    peakWS->addPeak(Peak(inst, 1, 1.0, V3D(0., 0., 0.)));
+    TS_ASSERT_EQUALS(peakWS->getPeak(0).getIntensity(), 0.0);
+    AnalysisDataService::Instance().addOrReplace("IntegratePeaksMDTest_peaks",
+                                                 peakWS);
 
     // First, a check with no background
     doRun(1.0, 0.0, "IntegratePeaksMDTest_peaks", 0.0);
     // approx. + 500 + 333 counts due to 2 backgrounds
-    TS_ASSERT_DELTA( peakWS->getPeak(0).getIntensity(), 1000 + 500 + 333, 30.0);
-    TSM_ASSERT_DELTA( "Simple sqrt() error", peakWS->getPeak(0).getSigmaIntensity(), sqrt(1833.0), 2);
+    TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1000 + 500 + 333, 30.0);
+    TSM_ASSERT_DELTA("Simple sqrt() error",
+                     peakWS->getPeak(0).getSigmaIntensity(), sqrt(1833.0), 2);
 
     // Set background from 2.0 to 3.0.
-    // So the 1/2 density background remains, we subtract the 1/3 density = about 1500 counts
+    // So the 1/2 density background remains, we subtract the 1/3 density =
+    // about 1500 counts
     doRun(1.0, 3.0, "IntegratePeaksMDTest_peaks", 2.0);
-    TS_ASSERT_DELTA( peakWS->getPeak(0).getIntensity(), 1000 + 500, 80.0);
+    TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1000 + 500, 80.0);
     // Error is larger, since it is error of peak + error of background
-    TSM_ASSERT_DELTA( "Error has increased", peakWS->getPeak(0).getSigmaIntensity(), sqrt(1830.0), 2);
+    TSM_ASSERT_DELTA("Error has increased",
+                     peakWS->getPeak(0).getSigmaIntensity(), sqrt(1830.0), 2);
 
     // Now do the same without the background start radius
     // So we subtract both densities = a lower count
     doRun(1.0, 3.0);
-    TSM_ASSERT_LESS_THAN( "Peak intensity is lower if you do not include the spacer shell (higher background)",
-                          peakWS->getPeak(0).getIntensity(), 1500);
-
-
+    TSM_ASSERT_LESS_THAN("Peak intensity is lower if you do not include the "
+                         "spacer shell (higher background)",
+                         peakWS->getPeak(0).getIntensity(), 1500);
   }
 
-  void test_writes_out_selected_algorithm_parameters()
-  {
+  void test_writes_out_selected_algorithm_parameters() {
     createMDEW();
     const double peakRadius = 2;
     const double backgroundOutterRadius = 3;
@@ -342,11 +350,21 @@ public:
 
     doRun(peakRadius, backgroundOutterRadius, "OutWS", backgroundInnerRadius);
 
-    auto outWS = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("OutWS");
+    auto outWS =
+        AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("OutWS");
 
-    double actualPeakRadius = atof(outWS->mutableRun().getProperty("PeakRadius")->value().c_str());
-    double actualBackgroundOutterRadius= atof(outWS->mutableRun().getProperty("BackgroundOuterRadius")->value().c_str());
-    double actualBackgroundInnerRadius = atof(outWS->mutableRun().getProperty("BackgroundInnerRadius")->value().c_str());
+    double actualPeakRadius =
+        atof(outWS->mutableRun().getProperty("PeakRadius")->value().c_str());
+    double actualBackgroundOutterRadius =
+        atof(outWS->mutableRun()
+                 .getProperty("BackgroundOuterRadius")
+                 ->value()
+                 .c_str());
+    double actualBackgroundInnerRadius =
+        atof(outWS->mutableRun()
+                 .getProperty("BackgroundInnerRadius")
+                 ->value()
+                 .c_str());
 
     TS_ASSERT_EQUALS(peakRadius, actualPeakRadius);
     TS_ASSERT_EQUALS(backgroundOutterRadius, actualBackgroundOutterRadius);
@@ -354,8 +372,7 @@ public:
     TS_ASSERT(outWS->hasIntegratedPeaks());
   }
 
-  void test_writes_out_peak_shape()
-  {
+  void test_writes_out_peak_shape() {
     createMDEW();
     const double peakRadius = 2;
     const double backgroundOuterRadius = 3;
@@ -363,41 +380,44 @@ public:
 
     doRun(peakRadius, backgroundOuterRadius, "OutWS", backgroundInnerRadius);
 
-    PeaksWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("OutWS");
+    PeaksWorkspace_sptr outWS =
+        AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("OutWS");
 
     // Get a peak.
-    IPeak& iPeak = outWS->getPeak(0);
-    Peak * const peak = dynamic_cast<Peak*>(&iPeak);
+    IPeak &iPeak = outWS->getPeak(0);
+    Peak *const peak = dynamic_cast<Peak *>(&iPeak);
     TS_ASSERT(peak);
     // Get the peak's shape
-    const PeakShape& shape = peak->getPeakShape();
-    PeakShapeSpherical const * const sphericalShape = dynamic_cast<PeakShapeSpherical*>(const_cast<PeakShape*>(&shape));
+    const PeakShape &shape = peak->getPeakShape();
+    PeakShapeSpherical const *const sphericalShape =
+        dynamic_cast<PeakShapeSpherical *>(const_cast<PeakShape *>(&shape));
     TSM_ASSERT("Wrong sort of peak", sphericalShape);
 
     // Check the shape is what we expect
     TS_ASSERT_EQUALS(peakRadius, sphericalShape->radius());
-    TS_ASSERT_EQUALS(backgroundOuterRadius, sphericalShape->backgroundOuterRadius().get());
-    TS_ASSERT_EQUALS(backgroundInnerRadius, sphericalShape->backgroundInnerRadius().get());
+    TS_ASSERT_EQUALS(backgroundOuterRadius,
+                     sphericalShape->backgroundOuterRadius().get());
+    TS_ASSERT_EQUALS(backgroundInnerRadius,
+                     sphericalShape->backgroundInnerRadius().get());
   }
-
 };
 
-
 //=========================================================================================
-class IntegratePeaksMDTestPerformance : public CxxTest::TestSuite
-{
+class IntegratePeaksMDTestPerformance : public CxxTest::TestSuite {
 public:
   size_t numPeaks;
   PeaksWorkspace_sptr peakWS;
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static IntegratePeaksMDTestPerformance *createSuite() { return new IntegratePeaksMDTestPerformance(); }
-  static void destroySuite( IntegratePeaksMDTestPerformance *suite ) { delete suite; }
+  static IntegratePeaksMDTestPerformance *createSuite() {
+    return new IntegratePeaksMDTestPerformance();
+  }
+  static void destroySuite(IntegratePeaksMDTestPerformance *suite) {
+    delete suite;
+  }
 
-
-  IntegratePeaksMDTestPerformance()
-  {
+  IntegratePeaksMDTestPerformance() {
     numPeaks = 1000;
     // Original MDEW.
     IntegratePeaksMDTest::createMDEW();
@@ -405,95 +425,81 @@ public:
     // Add a uniform, random background.
 
     FakeMDEventData algF2;
-    TS_ASSERT_THROWS_NOTHING( algF2.initialize() )
-    TS_ASSERT( algF2.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( algF2.setPropertyValue("InputWorkspace", "IntegratePeaksMDTest_MDEWS" ) );
-    TS_ASSERT_THROWS_NOTHING( algF2.setProperty("UniformParams","100000" ) );
-    TS_ASSERT_THROWS_NOTHING( algF2.execute() );
-    TS_ASSERT( algF2.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(algF2.initialize())
+    TS_ASSERT(algF2.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        algF2.setPropertyValue("InputWorkspace", "IntegratePeaksMDTest_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(algF2.setProperty("UniformParams", "100000"));
+    TS_ASSERT_THROWS_NOTHING(algF2.execute());
+    TS_ASSERT(algF2.isExecuted());
 
     MDEventWorkspace3Lean::sptr mdews =
-        AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("IntegratePeaksMDTest_MDEWS");
+        AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(
+            "IntegratePeaksMDTest_MDEWS");
     mdews->setCoordinateSystem(Mantid::Kernel::HKL);
 
-
     // Make a fake instrument - doesn't matter, we won't use it really
-    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentCylindrical(5);
 
     boost::mt19937 rng;
     boost::uniform_real<double> u(-9.0, 9.0); // Random from -9 to 9.0
-    boost::variate_generator<boost::mt19937&, boost::uniform_real<double> > gen(rng, u);
+    boost::variate_generator<boost::mt19937 &, boost::uniform_real<double>> gen(
+        rng, u);
 
     peakWS = PeaksWorkspace_sptr(new PeaksWorkspace());
-    for (size_t i=0; i < numPeaks; ++i)
-    {
+    for (size_t i = 0; i < numPeaks; ++i) {
       // Random peak center
       double x = gen();
       double y = gen();
       double z = gen();
 
       // Make the peak
-      IntegratePeaksMDTest::addPeak(1000, x,y,z, 0.02);
+      IntegratePeaksMDTest::addPeak(1000, x, y, z, 0.02);
       // With a center with higher density. 2000 events total.
-      IntegratePeaksMDTest::addPeak(1000, x,y,z, 0.005);
+      IntegratePeaksMDTest::addPeak(1000, x, y, z, 0.005);
 
       // Make a few very strong peaks
-      if (i%21 == 0)
-        IntegratePeaksMDTest::addPeak(10000, x,y,z, 0.015);
+      if (i % 21 == 0)
+        IntegratePeaksMDTest::addPeak(10000, x, y, z, 0.015);
 
       // Add to peaks workspace
-      peakWS->addPeak( Peak(inst, 1, 1.0, V3D(x, y, z) ) );
+      peakWS->addPeak(Peak(inst, 1, 1.0, V3D(x, y, z)));
 
-      if (i%100==0)
+      if (i % 100 == 0)
         std::cout << "Peak " << i << " added\n";
     }
-    AnalysisDataService::Instance().add("IntegratePeaksMDTest_peaks",peakWS);
-
+    AnalysisDataService::Instance().add("IntegratePeaksMDTest_peaks", peakWS);
   }
 
-  ~IntegratePeaksMDTestPerformance()
-  {
+  ~IntegratePeaksMDTestPerformance() {
     AnalysisDataService::Instance().remove("IntegratePeaksMDTest_MDEWS");
     AnalysisDataService::Instance().remove("IntegratePeaksMDTest_peaks");
   }
 
+  void setUp() {}
 
-  void setUp()
-  {
+  void tearDown() {}
 
-  }
-
-  void tearDown()
-  {
-  }
-
-
-  void test_performance_NoBackground()
-  {
-    for (size_t i=0; i<10; i++)
-    {
+  void test_performance_NoBackground() {
+    for (size_t i = 0; i < 10; i++) {
       IntegratePeaksMDTest::doRun(0.02, 0.0);
     }
-    // All peaks should be at least 1000 counts (some might be more if they overla)
-    for (size_t i=0; i<numPeaks; i += 7)
-    {
-      double expected=2000.0;
+    // All peaks should be at least 1000 counts (some might be more if they
+    // overla)
+    for (size_t i = 0; i < numPeaks; i += 7) {
+      double expected = 2000.0;
       if ((i % 21) == 0)
-          expected += 10000.0;
-      TS_ASSERT_LESS_THAN(expected-1, peakWS->getPeak(int(i)).getIntensity());
+        expected += 10000.0;
+      TS_ASSERT_LESS_THAN(expected - 1, peakWS->getPeak(int(i)).getIntensity());
     }
   }
 
-  void test_performance_WithBackground()
-  {
-    for (size_t i=0; i<10; i++)
-    {
+  void test_performance_WithBackground() {
+    for (size_t i = 0; i < 10; i++) {
       IntegratePeaksMDTest::doRun(0.02, 0.03);
     }
   }
 };
 
-
-
 #endif /* MANTID_MDEVENTS_MDEWPEAKINTEGRATIONTEST_H_ */
-

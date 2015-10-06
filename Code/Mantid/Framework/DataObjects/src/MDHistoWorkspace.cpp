@@ -26,14 +26,15 @@ namespace DataObjects {
  * @param dimY :: Y dimension binning parameters
  * @param dimZ :: Z dimension binning parameters
  * @param dimT :: T (time) dimension binning parameters
- * @param displayNormalization :: optional display normalization to use as the default.
+ * @param displayNormalization :: optional display normalization to use as the
+ * default.
  */
-MDHistoWorkspace::MDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX,
-                                   Mantid::Geometry::MDHistoDimension_sptr dimY,
-                                   Mantid::Geometry::MDHistoDimension_sptr dimZ,
-                                   Mantid::Geometry::MDHistoDimension_sptr dimT,
-                                   Mantid::API::MDNormalization displayNormalization
-                                   )
+MDHistoWorkspace::MDHistoWorkspace(
+    Mantid::Geometry::MDHistoDimension_sptr dimX,
+    Mantid::Geometry::MDHistoDimension_sptr dimY,
+    Mantid::Geometry::MDHistoDimension_sptr dimZ,
+    Mantid::Geometry::MDHistoDimension_sptr dimT,
+    Mantid::API::MDNormalization displayNormalization)
     : IMDHistoWorkspace(), numDimensions(0),
       m_nEventsContributed(std::numeric_limits<uint64_t>::quiet_NaN()),
       m_coordSystem(None), m_displayNormalization(displayNormalization) {
@@ -52,11 +53,12 @@ MDHistoWorkspace::MDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX,
 //----------------------------------------------------------------------------------------------
 /** Constructor given a vector of dimensions
  * @param dimensions :: vector of MDHistoDimension; no limit to how many.
- * @param displayNormalization :: optional display normalization to use as the default.
+ * @param displayNormalization :: optional display normalization to use as the
+ * default.
  */
 MDHistoWorkspace::MDHistoWorkspace(
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions,
-        Mantid::API::MDNormalization displayNormalization)
+    Mantid::API::MDNormalization displayNormalization)
     : IMDHistoWorkspace(), numDimensions(0), m_numEvents(NULL),
       m_nEventsContributed(std::numeric_limits<uint64_t>::quiet_NaN()),
       m_coordSystem(None), m_displayNormalization(displayNormalization) {
@@ -66,11 +68,12 @@ MDHistoWorkspace::MDHistoWorkspace(
 //----------------------------------------------------------------------------------------------
 /** Constructor given a vector of dimensions
  * @param dimensions :: vector of MDHistoDimension; no limit to how many.
- * @param displayNormalization :: optional display normalization to use as the default.
+ * @param displayNormalization :: optional display normalization to use as the
+ * default.
  */
 MDHistoWorkspace::MDHistoWorkspace(
     std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions,
-        Mantid::API::MDNormalization displayNormalization)
+    Mantid::API::MDNormalization displayNormalization)
     : IMDHistoWorkspace(), numDimensions(0), m_numEvents(NULL),
       m_nEventsContributed(std::numeric_limits<uint64_t>::quiet_NaN()),
       m_coordSystem(None), m_displayNormalization(displayNormalization) {
@@ -610,7 +613,7 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
         }
         // And add the normalized signal/error to the list too
         auto signal = this->getSignalAt(linearIndex) * normalizer;
-        if (boost::math::isinf(signal)){
+        if (boost::math::isinf(signal)) {
           // The plotting library (qwt) doesn't like infs.
           signal = std::numeric_limits<signal_t>::quiet_NaN();
         }
@@ -1178,8 +1181,8 @@ void MDHistoWorkspace::setMDMasking(
  * @param index : linear index to mask
  * @param mask : True to mask. False to clear.
  */
-void MDHistoWorkspace::setMDMaskAt(const size_t& index, bool mask){
-    m_masks[index] = mask;
+void MDHistoWorkspace::setMDMaskAt(const size_t &index, bool mask) {
+  m_masks[index] = mask;
 }
 
 /// Clear any existing masking.
@@ -1237,17 +1240,18 @@ size_t MDHistoWorkspace::sizeOfElement() {
 Preferred normalization to use for visual purposes.
 */
 MDNormalization MDHistoWorkspace::displayNormalization() const {
-  return m_displayNormalization;// Normalize by the number of events.
+  return m_displayNormalization; // Normalize by the number of events.
 }
 
 /**
 Preferred normalization to use for visual purposes.
 */
 MDNormalization MDHistoWorkspace::displayNormalizationHisto() const {
-  return displayNormalization();// Normalize by the number of events.
+  return displayNormalization(); // Normalize by the number of events.
 }
 
-void MDHistoWorkspace::setDisplayNormalization(const Mantid::API::MDNormalization& preferredNormalization) {
+void MDHistoWorkspace::setDisplayNormalization(
+    const Mantid::API::MDNormalization &preferredNormalization) {
   m_displayNormalization = preferredNormalization;
 }
 

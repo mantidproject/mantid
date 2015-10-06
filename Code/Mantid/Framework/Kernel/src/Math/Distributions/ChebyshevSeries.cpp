@@ -20,8 +20,7 @@ namespace Kernel {
  * @param degree Degree of polynomial required. It will require degree+1
  * coefficients to evaluate.
  */
-ChebyshevSeries::ChebyshevSeries(const size_t degree)
-  : m_bk(degree + 3, 0.0) {
+ChebyshevSeries::ChebyshevSeries(const size_t degree) : m_bk(degree + 3, 0.0) {
   // The algorithm requires computing upto n+2 terms so space is
   // reserved for (n+1)+2 values.
 }
@@ -46,7 +45,7 @@ double ChebyshevSeries::operator()(const std::vector<double> &c,
     const size_t k = degree - i;
     m_bk[k] = c[k] + 2. * x * m_bk[k + 1] - m_bk[k + 2];
   }
-  return m_bk[0] - x*m_bk[1];
+  return m_bk[0] - x * m_bk[1];
 }
 
 } // namespace Kernel

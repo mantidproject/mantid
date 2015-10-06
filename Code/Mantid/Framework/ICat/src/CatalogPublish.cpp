@@ -216,8 +216,8 @@ bool CatalogPublish::isDataFile(const std::string &filePath) {
  * This is then used to publish the workspace (as a file) for ease of use later.
  * @param workspace :: The workspace to save to a file.
  */
-void
-CatalogPublish::saveWorkspaceToNexus(Mantid::API::Workspace_sptr &workspace) {
+void CatalogPublish::saveWorkspaceToNexus(
+    Mantid::API::Workspace_sptr &workspace) {
   // Create the save nexus algorithm to use.
   auto saveNexus =
       Mantid::API::AlgorithmManager::Instance().create("SaveNexus");

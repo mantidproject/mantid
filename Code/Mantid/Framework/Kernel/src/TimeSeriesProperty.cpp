@@ -24,7 +24,7 @@ Logger g_log("TimeSeriesProperty");
  */
 template <typename TYPE>
 TimeSeriesProperty<TYPE>::TimeSeriesProperty(const std::string &name)
-    : Property(name, typeid(std::vector<TimeValueUnit<TYPE> >)), m_values(),
+    : Property(name, typeid(std::vector<TimeValueUnit<TYPE>>)), m_values(),
       m_size(), m_propSortedFlag(), m_filterApplied() {}
 
 /// Virtual destructor
@@ -266,7 +266,7 @@ void TimeSeriesProperty<TYPE>::filterByTime(const Kernel::DateAndTime &start,
   if (m_values.size() <= 1)
     return;
 
-  typename std::vector<TimeValueUnit<TYPE> >::iterator iterhead, iterend;
+  typename std::vector<TimeValueUnit<TYPE>>::iterator iterhead, iterend;
 
   // 2. Determine index for start and remove  Note erase is [...)
   int istart = this->findIndex(start);
@@ -333,7 +333,7 @@ void TimeSeriesProperty<TYPE>::filterByTimes(
   }
 
   // 3. Prepare a copy
-  std::vector<TimeValueUnit<TYPE> > mp_copy;
+  std::vector<TimeValueUnit<TYPE>> mp_copy;
 
   g_log.debug() << "DB541  mp_copy Size = " << mp_copy.size()
                 << "  Original MP Size = " << m_values.size() << "\n";
@@ -413,10 +413,9 @@ void TimeSeriesProperty<TYPE>::filterByTimes(
  *                    proton-charge is periodic log.
  */
 template <typename TYPE>
-void
-TimeSeriesProperty<TYPE>::splitByTime(std::vector<SplittingInterval> &splitter,
-                                      std::vector<Property *> outputs,
-                                      bool isPeriodic) const {
+void TimeSeriesProperty<TYPE>::splitByTime(
+    std::vector<SplittingInterval> &splitter, std::vector<Property *> outputs,
+    bool isPeriodic) const {
   // 0. Sort if necessary
   sort();
 
@@ -786,8 +785,7 @@ double TimeSeriesProperty<TYPE>::timeAverageValue() const {
     TimeSplitterType filter;
     filter.push_back(SplittingInterval(this->firstTime(), this->lastTime()));
     retVal = this->averageValueInFilter(filter);
-  }
-  catch (exception &) {
+  } catch (exception &) {
     // just return nan
     retVal = std::numeric_limits<double>::quiet_NaN();
   }
@@ -1101,8 +1099,7 @@ template <typename TYPE> std::string TimeSeriesProperty<TYPE>::value() const {
     try {
       ins << m_values[i].time().toSimpleString();
       ins << "  " << m_values[i].value() << "\n";
-    }
-    catch (...) {
+    } catch (...) {
       // Some kind of error; for example, invalid year, can occur when
       // converting boost time.
       ins << "Error Error"
@@ -1591,8 +1588,8 @@ Kernel::DateAndTime TimeSeriesProperty<TYPE>::nthTime(int n) const {
    @param filter :: The filter mask to apply
  */
 template <typename TYPE>
-void
-TimeSeriesProperty<TYPE>::filterWith(const TimeSeriesProperty<bool> *filter) {
+void TimeSeriesProperty<TYPE>::filterWith(
+    const TimeSeriesProperty<bool> *filter) {
   // 1. Clear the current
   m_filter.clear();
   m_filterQuickRef.clear();
@@ -1789,7 +1786,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::eliminateDuplicates() {
   // 2. Detect and Remove Duplicated
   size_t numremoved = 0;
 
-  typename std::vector<TimeValueUnit<TYPE> >::iterator vit;
+  typename std::vector<TimeValueUnit<TYPE>>::iterator vit;
   vit = m_values.begin() + 1;
   Kernel::DateAndTime prevtime = m_values.begin()->time();
   while (vit != m_values.end()) {
@@ -1889,7 +1886,7 @@ int TimeSeriesProperty<TYPE>::findIndex(Kernel::DateAndTime t) const {
   }
 
   // 3. Find by lower_bound()
-  typename std::vector<TimeValueUnit<TYPE> >::const_iterator fid;
+  typename std::vector<TimeValueUnit<TYPE>>::const_iterator fid;
   TimeValueUnit<TYPE> temp(t, m_values[0].value());
   fid = std::lower_bound(m_values.begin(), m_values.end(), temp);
 
@@ -1933,7 +1930,7 @@ int TimeSeriesProperty<TYPE>::upperBound(Kernel::DateAndTime t, int istart,
 
   // 3. Construct the pair for comparison and do lower_bound()
   TimeValueUnit<TYPE> temppair(t, m_values[0].value());
-  typename std::vector<TimeValueUnit<TYPE> >::iterator fid;
+  typename std::vector<TimeValueUnit<TYPE>>::iterator fid;
   fid = std::lower_bound((m_values.begin() + istart),
                          (m_values.begin() + iend + 1), temppair);
   if (fid == m_values.end())

@@ -17,7 +17,6 @@ Kernel::Logger g_Log("MDWSTransform");
 }
 using namespace CnvrtToMD;
 
-
 /** method to build the Q-coordinates transformation.
  *
  * @param TargWSDescription -- the class which describes target MD workspace. In
@@ -66,8 +65,8 @@ MDWSTransform::getTransfMatrix(MDWSDescription &TargWSDescription,
   *Lab frame -- if goniometer is Unit and UB is unit matrix or not present
   *Sample frame -- otherwise
   */
-CnvrtToMD::TargetFrame MDWSTransform::findTargetFrame(
-    MDWSDescription &TargWSDescription) const {
+CnvrtToMD::TargetFrame
+MDWSTransform::findTargetFrame(MDWSDescription &TargWSDescription) const {
 
   bool hasGoniometer = TargWSDescription.hasGoniometer();
   bool hasLattice = TargWSDescription.hasLattice();
@@ -299,8 +298,8 @@ MDWSTransform::buildQTrahsf(MDWSDescription &TargWSDescription,
 
 */
 void MDWSTransform::setQ3DDimensionsNames(
-    MDWSDescription &TargWSDescription,
-    CnvrtToMD::TargetFrame FrameID, CnvrtToMD::CoordScaling ScaleID) const {
+    MDWSDescription &TargWSDescription, CnvrtToMD::TargetFrame FrameID,
+    CnvrtToMD::CoordScaling ScaleID) const {
 
   std::vector<Kernel::V3D> dimDirections;
   // set default dimension names:

@@ -12,7 +12,7 @@
 #include <gsl/gsl_fft_halfcomplex.h>
 
 #define REAL(z, i) ((z)[2 * (i)])
-#define IMAG(z, i) ((z)[2 * (i)+1])
+#define IMAG(z, i) ((z)[2 * (i) + 1])
 
 #include <sstream>
 #include <numeric>

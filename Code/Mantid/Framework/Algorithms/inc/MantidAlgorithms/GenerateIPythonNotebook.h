@@ -67,4 +67,4 @@ protected:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif //MANTID_ALGORITHMS_GENERATEIPYTHONNOTEBOOK_H
+#endif // MANTID_ALGORITHMS_GENERATEIPYTHONNOTEBOOK_H

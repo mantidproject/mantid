@@ -47,19 +47,17 @@ namespace {
 // initialize the static logger
 Kernel::Logger g_log("InstrumentDefinitionParser");
 }
-  //----------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------
 /** Default Constructor - not very functional in this state
  */
-  InstrumentDefinitionParser::InstrumentDefinitionParser():
-      m_xmlFile(boost::make_shared<NullIDFObject>()),
+InstrumentDefinitionParser::InstrumentDefinitionParser()
+    : m_xmlFile(boost::make_shared<NullIDFObject>()),
       m_cacheFile(boost::make_shared<NullIDFObject>()), m_pDoc(NULL),
-      m_hasParameterElement_beenSet(false),
-      m_haveDefaultFacing(false), m_deltaOffsets(false),
-      m_angleConvertConst(1.0), m_indirectPositions(false),
-      m_cachingOption(NoneApplied)
-  {
-    initialise("","","","");
-  }
+      m_hasParameterElement_beenSet(false), m_haveDefaultFacing(false),
+      m_deltaOffsets(false), m_angleConvertConst(1.0),
+      m_indirectPositions(false), m_cachingOption(NoneApplied) {
+  initialise("", "", "", "");
+}
 //----------------------------------------------------------------------------------------------
 /** Constructor
  * @param filename :: IDF .xml path (full). This is needed mostly to find the
@@ -67,17 +65,15 @@ Kernel::Logger g_log("InstrumentDefinitionParser");
  * @param instName :: name of the instrument
  * @param xmlText :: XML contents of IDF
  */
-InstrumentDefinitionParser::InstrumentDefinitionParser(const std::string &filename, 
-                                                       const std::string &instName,
-                                                       const std::string &xmlText)
+InstrumentDefinitionParser::InstrumentDefinitionParser(
+    const std::string &filename, const std::string &instName,
+    const std::string &xmlText)
     : m_xmlFile(boost::make_shared<NullIDFObject>()),
       m_cacheFile(boost::make_shared<NullIDFObject>()), m_pDoc(NULL),
-      m_hasParameterElement_beenSet(false),
-      m_haveDefaultFacing(false), m_deltaOffsets(false),
-      m_angleConvertConst(1.0), m_indirectPositions(false),
-      m_cachingOption(NoneApplied)
-{
-  initialise(filename,instName,xmlText,"");
+      m_hasParameterElement_beenSet(false), m_haveDefaultFacing(false),
+      m_deltaOffsets(false), m_angleConvertConst(1.0),
+      m_indirectPositions(false), m_cachingOption(NoneApplied) {
+  initialise(filename, instName, xmlText, "");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -88,48 +84,46 @@ InstrumentDefinitionParser::InstrumentDefinitionParser(const std::string &filena
  * @param instName :: Instrument name
  * @param xmlText :: XML contents of IDF
  */
-InstrumentDefinitionParser::InstrumentDefinitionParser (
+InstrumentDefinitionParser::InstrumentDefinitionParser(
     const IDFObject_const_sptr xmlFile,
-    const IDFObject_const_sptr expectedCacheFile, 
-    const std::string &instName,
-    const std::string &xmlText) 
+    const IDFObject_const_sptr expectedCacheFile, const std::string &instName,
+    const std::string &xmlText)
     : m_xmlFile(boost::make_shared<NullIDFObject>()),
       m_cacheFile(boost::make_shared<NullIDFObject>()), m_pDoc(NULL),
-      m_hasParameterElement_beenSet(false),
-      m_haveDefaultFacing(false), m_deltaOffsets(false),
-      m_angleConvertConst(1.0), m_indirectPositions(false),
-      m_cachingOption(NoneApplied) 
-{
-  initialise(xmlFile->getFileFullPathStr(),instName,xmlText,expectedCacheFile->getFileFullPathStr());
+      m_hasParameterElement_beenSet(false), m_haveDefaultFacing(false),
+      m_deltaOffsets(false), m_angleConvertConst(1.0),
+      m_indirectPositions(false), m_cachingOption(NoneApplied) {
+  initialise(xmlFile->getFileFullPathStr(), instName, xmlText,
+             expectedCacheFile->getFileFullPathStr());
 
   m_cacheFile = expectedCacheFile;
 }
 
-  //----------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------
 /** Initialise method used in Constructor
  * @param filename :: IDF .xml path (full). This is needed mostly to find the
  *instrument geometry cache.
  * @param instName :: name of the instrument
  * @param xmlText :: XML contents of IDF
- * @param vtpFilename :: the path to the vtp file if you want to override the default
+ * @param vtpFilename :: the path to the vtp file if you want to override the
+ *default
  */
-void InstrumentDefinitionParser::initialise(const std::string &filename, 
-                                                       const std::string &instName,
-                                                       const std::string &xmlText,
-                                                       const std::string &vtpFilename) 
-{
-  
+void InstrumentDefinitionParser::initialise(const std::string &filename,
+                                            const std::string &instName,
+                                            const std::string &xmlText,
+                                            const std::string &vtpFilename) {
+
   IDFObject_const_sptr xmlFile = boost::make_shared<const IDFObject>(filename);
-  
+
   // Handle the parameters
   m_instName = instName;
   m_xmlFile = xmlFile;
-  
+
   // Create our new instrument
   // We don't want the instrument name taken out of the XML file itself, it
   // should come from the filename (or the property)
   m_instrument = boost::make_shared<Instrument>(m_instName);
-  
+
   // Save the XML file path and contents
   m_instrument->setFilename(filename);
   m_instrument->setXmlText(xmlText);
@@ -138,12 +132,9 @@ void InstrumentDefinitionParser::initialise(const std::string &filename,
   // between a definition file & cache
   if (vtpFilename.empty()) {
     m_cacheFile = boost::make_shared<const IDFObject>(createVTPFileName());
-  }
-  else
-  {
+  } else {
     m_cacheFile = boost::make_shared<const IDFObject>(vtpFilename);
   }
-
 }
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -162,20 +153,18 @@ InstrumentDefinitionParser::~InstrumentDefinitionParser() {}
  *attribute of the XML contents
  * */
 std::string InstrumentDefinitionParser::getMangledName() {
-  
+
   std::string retVal = "";
-  //use the xml in preference if available
+  // use the xml in preference if available
   auto xml = Poco::trim(m_instrument->getXmlText());
   if (!(xml.empty())) {
     std::string checksum = Kernel::ChecksumHelper::sha1FromString(xml);
-    retVal = m_instName + checksum; 
-  } 
-  else if (this->m_xmlFile->exists()) {// Use the file
-    retVal =  m_xmlFile->getMangledName();
-  } 
+    retVal = m_instName + checksum;
+  } else if (this->m_xmlFile->exists()) { // Use the file
+    retVal = m_xmlFile->getMangledName();
+  }
 
   return retVal;
-
 }
 
 //----------------------------------------------------------------------------------------------
@@ -183,12 +172,10 @@ std::string InstrumentDefinitionParser::getMangledName() {
  *
  * @return an autopointer to the xml document
  */
-Poco::AutoPtr<Poco::XML::Document> InstrumentDefinitionParser::getDocument()
-{
+Poco::AutoPtr<Poco::XML::Document> InstrumentDefinitionParser::getDocument() {
   if (!m_pDoc) {
-    //instantiate if not created
-    if (m_instrument->getXmlText().empty())
-    {
+    // instantiate if not created
+    if (m_instrument->getXmlText().empty()) {
       throw std::invalid_argument("Instrument XML string is empty");
     }
     // Set up the DOM parser and parse xml file
@@ -196,8 +183,7 @@ Poco::AutoPtr<Poco::XML::Document> InstrumentDefinitionParser::getDocument()
     try {
       m_pDoc = pParser.parseString(m_instrument->getXmlText());
     } catch (Poco::Exception &exc) {
-      throw std::invalid_argument(
-          exc.displayText() + ". Unable to parse XML");
+      throw std::invalid_argument(exc.displayText() + ". Unable to parse XML");
     } catch (...) {
       throw std::invalid_argument("Unable to parse XML");
     }
@@ -217,8 +203,8 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
   auto pDoc = getDocument();
 
   // Get pointer to root element
-  Poco::XML::Element * pRootElem = pDoc->documentElement();
-  
+  Poco::XML::Element *pRootElem = pDoc->documentElement();
+
   if (!pRootElem->hasChildNodes()) {
     g_log.error("Instrument XML contains no root element.");
     throw Kernel::Exception::InstrumentDefinitionError(
@@ -233,12 +219,12 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
   const std::string filename = m_xmlFile->getFileFullPathStr();
 
   // Get all the type and component element pointers.
-  std::vector<Element*> typeElems;
-  std::vector<Element*> compElems;
+  std::vector<Element *> typeElems;
+  std::vector<Element *> compElems;
   for (Node *pNode = pRootElem->firstChild(); pNode != 0;
        pNode = pNode->nextSibling()) {
-    auto pElem = dynamic_cast<Element*>(pNode);
-    if(pElem) {
+    auto pElem = dynamic_cast<Element *>(pNode);
+    if (pElem) {
       if (pElem->tagName() == "type")
         typeElems.push_back(pElem);
       else if (pElem->tagName() == "component")
@@ -410,8 +396,8 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
       // assigned
       // as expected
       for (Node *pNode = pElem->firstChild(); pNode != 0;
-          pNode = pNode->nextSibling()) {
-        auto pChildElem = dynamic_cast<Element*>(pNode);
+           pNode = pNode->nextSibling()) {
+        auto pChildElem = dynamic_cast<Element *>(pNode);
         if (!pChildElem)
           continue;
         if (pChildElem->tagName() == "location") {
@@ -503,11 +489,11 @@ void InstrumentDefinitionParser::appendLocations(
   const bool assembly = isAssembly(pCompElem->getAttribute("type"));
 
   Poco::XML::Element *pElem =
-    dynamic_cast<Poco::XML::Element*>(pRootLocationsElem->firstChild());
+      dynamic_cast<Poco::XML::Element *>(pRootLocationsElem->firstChild());
 
   while (pElem) {
     if (pElem->tagName() != "location") {
-      pElem = dynamic_cast<Poco::XML::Element*>(pElem->nextSibling());
+      pElem = dynamic_cast<Poco::XML::Element *>(pElem->nextSibling());
       continue;
     }
 
@@ -517,7 +503,7 @@ void InstrumentDefinitionParser::appendLocations(
       appendLeaf(parent, pElem, pCompElem, idList);
     }
 
-    pElem = dynamic_cast<Poco::XML::Element*>(pElem->nextSibling());
+    pElem = dynamic_cast<Poco::XML::Element *>(pElem->nextSibling());
   }
 }
 
@@ -535,7 +521,7 @@ void InstrumentDefinitionParser::saveDOM_Tree(std::string &outFilename) {
   Poco::XML::DOMWriter writer;
   writer.setNewLine("\n");
   writer.setOptions(Poco::XML::XMLWriter::PRETTY_PRINT);
-  
+
   auto pDoc = getDocument();
   std::ofstream outFile(outFilename.c_str());
   writer.writeNode(outFile, pDoc);
@@ -979,7 +965,8 @@ void InstrumentDefinitionParser::readDefaults(Poco::XML::Element *defaults) {
     Handedness handedness = s_handedness.compare("right") == 0 ? Right : Left;
 
     // Overwrite the default reference frame.
-    m_instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(pointingUp, alongBeam, handedness, s_origin));
+    m_instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+        pointingUp, alongBeam, handedness, s_origin));
   }
 }
 
@@ -1325,7 +1312,8 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
               boost::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
           if (detector) {
             // Make default facing for the pixel
-            Geometry::IComponent *comp = static_cast<IComponent *>(detector.get());
+            Geometry::IComponent *comp =
+                static_cast<IComponent *>(detector.get());
             if (m_haveDefaultFacing)
               makeXYplaneFaceComponent(comp, m_defaultFacing);
             // Mark it as a detector (add to the instrument cache)
@@ -1791,10 +1779,9 @@ void InstrumentDefinitionParser::setFacing(Geometry::IComponent *comp,
 *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
 *instrument file
 */
-void
-InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp,
-                                       const Poco::XML::Element *pElem,
-                                       InstrumentParameterCache &logfileCache) {
+void InstrumentDefinitionParser::setLogfile(
+    const Geometry::IComponent *comp, const Poco::XML::Element *pElem,
+    InstrumentParameterCache &logfileCache) {
   const std::string filename = m_xmlFile->getFileFullPathStr();
 
   // The purpose below is to have a quicker way to judge if pElem contains a
@@ -1814,29 +1801,28 @@ InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp,
     // we are only interest in the top level parameter elements hence
     // the reason for the if statement below
     if (!((pNL_comp->item(i))->nodeType() == Node::ELEMENT_NODE &&
-      ((pNL_comp->item(i))->nodeName()).compare("parameter") == 0))
+          ((pNL_comp->item(i))->nodeName()).compare("parameter") == 0))
       continue;
 
     Element *pParamElem = static_cast<Element *>(pNL_comp->item(i));
 
     if (!pParamElem->hasAttribute("name"))
       throw Kernel::Exception::InstrumentDefinitionError(
-      "XML element with name or type = " + comp->getName() +
-      " contain <parameter> element with no name attribute in XML "
-      "instrument file",
-      filename);
+          "XML element with name or type = " + comp->getName() +
+              " contain <parameter> element with no name attribute in XML "
+              "instrument file",
+          filename);
 
     std::string paramName = pParamElem->getAttribute("name");
 
     if (paramName.compare("rot") == 0 || paramName.compare("pos") == 0) {
       g_log.error()
-        << "XML element with name or type = " << comp->getName()
-        << " contains <parameter> element with name=\"" << paramName
-        << "\"."
-        << " This is a reserved Mantid keyword. Please use other name, "
-        << "and see www.mantidproject.org/IDF for list of reserved "
-        "keywords."
-        << " This parameter is ignored";
+          << "XML element with name or type = " << comp->getName()
+          << " contains <parameter> element with name=\"" << paramName << "\"."
+          << " This is a reserved Mantid keyword. Please use other name, "
+          << "and see www.mantidproject.org/IDF for list of reserved "
+             "keywords."
+          << " This parameter is ignored";
       continue;
     }
 
@@ -1848,40 +1834,38 @@ InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp,
     std::string eq = "";
 
     Poco::AutoPtr<NodeList> pNLvalue =
-      pParamElem->getElementsByTagName("value");
+        pParamElem->getElementsByTagName("value");
     size_t numberValueEle = pNLvalue->length();
     Element *pValueElem;
 
     Poco::AutoPtr<NodeList> pNLlogfile =
-      pParamElem->getElementsByTagName("logfile");
+        pParamElem->getElementsByTagName("logfile");
     size_t numberLogfileEle = pNLlogfile->length();
     Element *pLogfileElem;
 
     Poco::AutoPtr<NodeList> pNLLookUp =
-      pParamElem->getElementsByTagName("lookuptable");
+        pParamElem->getElementsByTagName("lookuptable");
     size_t numberLookUp = pNLLookUp->length();
 
     Poco::AutoPtr<NodeList> pNLFormula =
-      pParamElem->getElementsByTagName("formula");
+        pParamElem->getElementsByTagName("formula");
     size_t numberFormula = pNLFormula->length();
 
-
-    if(numberValueEle+ numberLogfileEle + numberLookUp + numberFormula > 1){
+    if (numberValueEle + numberLogfileEle + numberLookUp + numberFormula > 1) {
       g_log.warning() << "XML element with name or type = " << comp->getName()
-          << " contains <parameter> element where the value of "
-          "the parameter has been specified"
-          << " more than once. See www.mantidproject.org/IDF for "
-          "how the value"
-          << " of the parameter is set in this case.";
+                      << " contains <parameter> element where the value of "
+                         "the parameter has been specified"
+                      << " more than once. See www.mantidproject.org/IDF for "
+                         "how the value"
+                      << " of the parameter is set in this case.";
     }
 
-    if(numberValueEle + numberLogfileEle + numberLookUp + numberFormula == 0){
-        g_log.error()
-          << "XML element with name or type = " << comp->getName()
-          << " contains <parameter> for which no value is specified."
-          << " See www.mantidproject.org/IDF for how to set the value"
-          << " of a parameter. This parameter is ignored.";
-        continue;
+    if (numberValueEle + numberLogfileEle + numberLookUp + numberFormula == 0) {
+      g_log.error() << "XML element with name or type = " << comp->getName()
+                    << " contains <parameter> for which no value is specified."
+                    << " See www.mantidproject.org/IDF for how to set the value"
+                    << " of a parameter. This parameter is ignored.";
+      continue;
     }
 
     // if more than one <value> specified for a parameter use only the first
@@ -1890,29 +1874,29 @@ InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp,
       pValueElem = static_cast<Element *>(pNLvalue->item(0));
       if (!pValueElem->hasAttribute("val"))
         throw Kernel::Exception::InstrumentDefinitionError(
-        "XML element with name or type = " + comp->getName() +
-        " contains <parameter> element with invalid syntax for its "
-        "subelement <value>." +
-        " Correct syntax is <value val=\"\"/>",
-        filename);
+            "XML element with name or type = " + comp->getName() +
+                " contains <parameter> element with invalid syntax for its "
+                "subelement <value>." +
+                " Correct syntax is <value val=\"\"/>",
+            filename);
       value = pValueElem->getAttribute("val");
     } else if (numberLogfileEle >= 1) {
       // <logfile > tag was used at least once.
       pLogfileElem = static_cast<Element *>(pNLlogfile->item(0));
       if (!pLogfileElem->hasAttribute("id"))
         throw Kernel::Exception::InstrumentDefinitionError(
-        "XML element with name or type = " + comp->getName() +
-        " contains <parameter> element with invalid syntax for its "
-        "subelement logfile>." +
-        " Correct syntax is <logfile id=\"\"/>",
-        filename);
+            "XML element with name or type = " + comp->getName() +
+                " contains <parameter> element with invalid syntax for its "
+                "subelement logfile>." +
+                " Correct syntax is <logfile id=\"\"/>",
+            filename);
       logfileID = pLogfileElem->getAttribute("id");
 
       if (pLogfileElem->hasAttribute("eq"))
         eq = pLogfileElem->getAttribute("eq");
       if (pLogfileElem->hasAttribute("extract-single-value-as"))
         extractSingleValueAs =
-        pLogfileElem->getAttribute("extract-single-value-as");
+            pLogfileElem->getAttribute("extract-single-value-as");
     }
 
     if (pParamElem->hasAttribute("type"))
@@ -1922,7 +1906,7 @@ InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp,
 
     bool fixed = false;
     Poco::AutoPtr<NodeList> pNLFixed =
-      pParamElem->getElementsByTagName("fixed");
+        pParamElem->getElementsByTagName("fixed");
     size_t numberFixed = pNLFixed->length();
     if (numberFixed >= 1) {
       fixed = true;
@@ -1940,9 +1924,9 @@ InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp,
         size_t index = paramName.find(":", found + 1);
         if (index != std::string::npos) {
           g_log.error()
-            << "Fitting <parameter> in instrument definition file defined "
-            "with"
-            << " more than one column character :. One must used.\n";
+              << "Fitting <parameter> in instrument definition file defined "
+                 "with"
+              << " more than one column character :. One must used.\n";
         } else {
           fittingFunction = paramName.substr(0, found);
           paramName = paramName.substr(found + 1, paramName.size());
@@ -1979,15 +1963,14 @@ InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp,
     std::string penaltyFactor;
 
     Poco::AutoPtr<NodeList> pNL_penaltyFactor =
-      pParamElem->getElementsByTagName("penalty-factor");
+        pParamElem->getElementsByTagName("penalty-factor");
     size_t numberPenaltyFactor = pNL_penaltyFactor->length();
 
     if (numberPenaltyFactor >= 1) {
       Element *pPenaltyFactor =
-        static_cast<Element *>(pNL_penaltyFactor->item(0));
+          static_cast<Element *>(pNL_penaltyFactor->item(0));
       penaltyFactor = pPenaltyFactor->getAttribute("val");
     }
-
 
     // Check if look up table is specified
 
@@ -2003,28 +1986,27 @@ InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp,
       if (pLookUp->hasAttribute("x-unit")) {
         std::vector<std::string>::iterator it;
         it = find(allowedUnits.begin(), allowedUnits.end(),
-          pLookUp->getAttribute("x-unit"));
+                  pLookUp->getAttribute("x-unit"));
         if (it == allowedUnits.end()) {
           g_log.warning() << "x-unit used with interpolation table must be "
-            "one of the recognised units "
-            << " see http://www.mantidproject.org/Unit_Factory";
+                             "one of the recognised units "
+                          << " see http://www.mantidproject.org/Unit_Factory";
         } else
           interpolation->setXUnit(pLookUp->getAttribute("x-unit"));
       }
       if (pLookUp->hasAttribute("y-unit")) {
         std::vector<std::string>::iterator it;
         it = find(allowedUnits.begin(), allowedUnits.end(),
-          pLookUp->getAttribute("y-unit"));
+                  pLookUp->getAttribute("y-unit"));
         if (it == allowedUnits.end()) {
           g_log.warning() << "y-unit used with interpolation table must be "
-            "one of the recognised units "
-            << " see http://www.mantidproject.org/Unit_Factory";
+                             "one of the recognised units "
+                          << " see http://www.mantidproject.org/Unit_Factory";
         } else
           interpolation->setYUnit(pLookUp->getAttribute("y-unit"));
       }
 
-      Poco::AutoPtr<NodeList> pNLpoint =
-        pLookUp->getElementsByTagName("point");
+      Poco::AutoPtr<NodeList> pNLpoint = pLookUp->getElementsByTagName("point");
       unsigned long numberPoint = pNLpoint->length();
 
       for (unsigned long i = 0; i < numberPoint; i++) {
@@ -2047,37 +2029,36 @@ InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp,
       if (pFormula->hasAttribute("unit")) {
         std::vector<std::string>::iterator it;
         it = find(allowedUnits.begin(), allowedUnits.end(),
-          pFormula->getAttribute("unit"));
+                  pFormula->getAttribute("unit"));
         if (it == allowedUnits.end()) {
           g_log.warning() << "unit attribute used with formula must be one "
-            "of the recognized units "
-            << " see http://www.mantidproject.org/Unit_Factory";
+                             "of the recognized units "
+                          << " see http://www.mantidproject.org/Unit_Factory";
         } else
           formulaUnit = pFormula->getAttribute("unit");
       }
       if (pFormula->hasAttribute("result-unit"))
         resultUnit = pFormula->getAttribute("result-unit");
     }
-    // Check if parameter description is 
+    // Check if parameter description is
     std::string description = "";
 
     Poco::AutoPtr<NodeList> pNLDescription =
         pParamElem->getElementsByTagName("description");
-    size_t numberDescription = pNLDescription ->length();
+    size_t numberDescription = pNLDescription->length();
 
-    if (numberDescription >= 1){
+    if (numberDescription >= 1) {
       // use only first description from a list
-      Element *pDescription =
-        static_cast<Element *>(pNLDescription->item(0));
+      Element *pDescription = static_cast<Element *>(pNLDescription->item(0));
       description = pDescription->getAttribute("is");
     }
 
     auto cacheKey = std::make_pair(paramName, comp);
     auto cacheValue =
-      boost::shared_ptr<XMLInstrumentParameter>(new XMLInstrumentParameter(
-      logfileID, value, interpolation, formula, formulaUnit, resultUnit,
-      paramName, type, tie, constraint, penaltyFactor, fittingFunction,
-      extractSingleValueAs, eq, comp, m_angleConvertConst,description));
+        boost::shared_ptr<XMLInstrumentParameter>(new XMLInstrumentParameter(
+            logfileID, value, interpolation, formula, formulaUnit, resultUnit,
+            paramName, type, tie, constraint, penaltyFactor, fittingFunction,
+            extractSingleValueAs, eq, comp, m_angleConvertConst, description));
     auto inserted = logfileCache.insert(std::make_pair(cacheKey, cacheValue));
     if (!inserted.second) {
       logfileCache[cacheKey] = cacheValue;
@@ -2205,7 +2186,6 @@ void InstrumentDefinitionParser::setComponentLinks(
   }
 }
 
-
 /**
 Apply the cache.
 @param cacheToApply : Cache file object to use the the geometries.
@@ -2226,11 +2206,11 @@ void InstrumentDefinitionParser::applyCache(IDFObject_const_sptr cacheToApply) {
 /**
 Write the cache file from the IDF file and apply it.
 @param firstChoiceCache : File location for a first choice cache.
-@param fallBackCache : File location for a fallback cache if required. 
+@param fallBackCache : File location for a fallback cache if required.
 */
 InstrumentDefinitionParser::CachingOption
-InstrumentDefinitionParser::writeAndApplyCache(IDFObject_const_sptr firstChoiceCache,
-    IDFObject_const_sptr fallBackCache) {
+InstrumentDefinitionParser::writeAndApplyCache(
+    IDFObject_const_sptr firstChoiceCache, IDFObject_const_sptr fallBackCache) {
   IDFObject_const_sptr usedCache = firstChoiceCache;
   auto cachingOption = WroteGeomCache;
 
@@ -2240,8 +2220,9 @@ InstrumentDefinitionParser::writeAndApplyCache(IDFObject_const_sptr firstChoiceC
     if (dir.path().empty() || !dir.exists() || !dir.canWrite()) {
       usedCache = fallBackCache;
       cachingOption = WroteCacheTemp;
-      g_log.information() << "Geometrycache directory is read only, writing cache "
-                             "to system temp.\n";
+      g_log.information()
+          << "Geometrycache directory is read only, writing cache "
+             "to system temp.\n";
     }
   } catch (Poco::FileNotFoundException &) {
     g_log.error() << "Unable to find instrument definition while attempting to "
@@ -2273,7 +2254,7 @@ InstrumentDefinitionParser::setupGeometryCache() {
   // directory.
   IDFObject_const_sptr fallBackCache = boost::make_shared<const IDFObject>(
       Poco::Path(ConfigService::Instance().getTempDir())
-          .append(this->getMangledName()+".vtp")
+          .append(this->getMangledName() + ".vtp")
           .toString());
   CachingOption cachingOption = NoneApplied;
   if (m_cacheFile->exists()) {
@@ -2283,7 +2264,7 @@ InstrumentDefinitionParser::setupGeometryCache() {
     applyCache(fallBackCache);
     cachingOption = ReadFallBack;
   } else {
-    cachingOption = writeAndApplyCache(m_cacheFile,fallBackCache);
+    cachingOption = writeAndApplyCache(m_cacheFile, fallBackCache);
   }
   return cachingOption;
 }
@@ -2488,9 +2469,8 @@ void InstrumentDefinitionParser::adjust(
 /// @param comp Reference coordinate system
 /// @param pos A position relative to the coord. sys. of comp
 /// @return absolute position
-V3D
-InstrumentDefinitionParser::getAbsolutPositionInCompCoorSys(ICompAssembly *comp,
-                                                            V3D pos) {
+V3D InstrumentDefinitionParser::getAbsolutPositionInCompCoorSys(
+    ICompAssembly *comp, V3D pos) {
   Component *dummyComp = new Component("dummy", comp);
   comp->add(dummyComp);
 
@@ -2668,7 +2648,8 @@ InstrumentDefinitionParser::convertLocationsElement(
   }
 
   Poco::AutoPtr<Document> pDoc = new Document;
-  Poco::AutoPtr<Element> pRoot = pDoc->createElement("expansion-of-locations-element");
+  Poco::AutoPtr<Element> pRoot =
+      pDoc->createElement("expansion-of-locations-element");
   pDoc->appendChild(pRoot);
 
   for (size_t i = 0; i < nElements; ++i) {
@@ -2676,14 +2657,14 @@ InstrumentDefinitionParser::convertLocationsElement(
 
     if (!name.empty()) {
       // Add name with appropriate numeric postfix
-      pLoc->setAttribute("name",
-          name + boost::lexical_cast<std::string>(nameCountStart + i));
+      pLoc->setAttribute(
+          "name", name + boost::lexical_cast<std::string>(nameCountStart + i));
     }
 
     // Copy values of all the attributes set
     for (auto it = attrValues.begin(); it != attrValues.end(); ++it) {
       pLoc->setAttribute(it->first,
-                        boost::lexical_cast<std::string>(it->second));
+                         boost::lexical_cast<std::string>(it->second));
 
       // If attribute has a step, increase the value by the step
       if (rangeAttrSteps.find(it->first) != rangeAttrSteps.end()) {
@@ -2697,16 +2678,15 @@ InstrumentDefinitionParser::convertLocationsElement(
   return pDoc;
 }
 
- /** Generates a vtp filename from a xml filename
- *
- *  @return The vtp filename
- *
- */
-const std::string InstrumentDefinitionParser::createVTPFileName()
-{
+/** Generates a vtp filename from a xml filename
+*
+*  @return The vtp filename
+*
+*/
+const std::string InstrumentDefinitionParser::createVTPFileName() {
   std::string retVal;
   std::string filename = getMangledName();
-  if (!filename.empty())  {
+  if (!filename.empty()) {
     Poco::Path path(ConfigService::Instance().getVTPFileDirectory());
     path.makeDirectory();
     path.append(filename + ".vtp");

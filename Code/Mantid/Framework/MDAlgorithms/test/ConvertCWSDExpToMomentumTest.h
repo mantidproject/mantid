@@ -20,12 +20,14 @@ class ConvertCWSDExpToMomentumTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvertCWSDExpToMomentumTest *createSuite() { return new ConvertCWSDExpToMomentumTest(); }
-  static void destroySuite( ConvertCWSDExpToMomentumTest *suite ) { delete suite; }
+  static ConvertCWSDExpToMomentumTest *createSuite() {
+    return new ConvertCWSDExpToMomentumTest();
+  }
+  static void destroySuite(ConvertCWSDExpToMomentumTest *suite) {
+    delete suite;
+  }
 
-
-  void test_Init()
-  {
+  void test_Init() {
     // Create tableworkspaces as inputs
     generateTestInputs();
 
@@ -34,8 +36,7 @@ public:
     TS_ASSERT(testalg.isInitialized());
   }
 
-  void test_LoadConvert1File()
-  {
+  void test_LoadConvert1File() {
     // Init and set up
     ConvertCWSDExpToMomentum testalg;
     testalg.initialize();
@@ -53,8 +54,9 @@ public:
     testalg.execute();
     TS_ASSERT(testalg.isExecuted());
 
-    API::IMDEventWorkspace_sptr outws = boost::dynamic_pointer_cast<IMDEventWorkspace>(
-          AnalysisDataService::Instance().retrieve("QSampleMDEvents"));
+    API::IMDEventWorkspace_sptr outws =
+        boost::dynamic_pointer_cast<IMDEventWorkspace>(
+            AnalysisDataService::Instance().retrieve("QSampleMDEvents"));
     TS_ASSERT(outws);
 
     IMDIterator *mditer = outws->createIterator();
@@ -135,32 +137,32 @@ private:
     return virtualInstrument;
   }
 
-  void generateTestInputs()
-  {
+  void generateTestInputs() {
     // Create data table
-    DataObjects::TableWorkspace_sptr datatable = boost::make_shared<DataObjects::TableWorkspace>();
+    DataObjects::TableWorkspace_sptr datatable =
+        boost::make_shared<DataObjects::TableWorkspace>();
     datatable->addColumn("int", "Scan No");
     datatable->addColumn("int", "Pt. No");
     datatable->addColumn("str", "File Name");
     datatable->addColumn("int", "Starting DetID");
     TableRow row0 = datatable->appendRow();
-    row0 << 1 << 522 << "HB3A_exp355_scan0001_0522.xml" << 256*256;
+    row0 << 1 << 522 << "HB3A_exp355_scan0001_0522.xml" << 256 * 256;
     m_dataTableWS = boost::dynamic_pointer_cast<ITableWorkspace>(datatable);
     TS_ASSERT(m_dataTableWS);
 
     // Create detector table
-    DataObjects::TableWorkspace_sptr dettable = boost::make_shared<DataObjects::TableWorkspace>();
+    DataObjects::TableWorkspace_sptr dettable =
+        boost::make_shared<DataObjects::TableWorkspace>();
     dettable->addColumn("int", "DetID");
     dettable->addColumn("double", "X");
     dettable->addColumn("double", "Y");
     dettable->addColumn("double", "Z");
     dettable->addColumn("int", "OriginalDetID");
-    for (size_t i = 0; i < 256; ++i)
-    {
+    for (size_t i = 0; i < 256; ++i) {
       TableRow detrow = dettable->appendRow();
-      double x = 0.38+static_cast<double>(i-128)*0.001;
+      double x = 0.38 + static_cast<double>(i - 128) * 0.001;
       double y = 0;
-      double z = 0.38+static_cast<double>(i-128)*0.001;
+      double z = 0.38 + static_cast<double>(i - 128) * 0.001;
       int detid = static_cast<int>(i) + 1;
       detrow << detid << x << y << z << detid;
     }
@@ -168,8 +170,10 @@ private:
     m_detectorTableWS = boost::dynamic_pointer_cast<ITableWorkspace>(dettable);
     TS_ASSERT(m_detectorTableWS);
 
-    AnalysisDataService::Instance().addOrReplace("DataFileTable", m_dataTableWS);
-    AnalysisDataService::Instance().addOrReplace("DetectorTable", m_detectorTableWS);
+    AnalysisDataService::Instance().addOrReplace("DataFileTable",
+                                                 m_dataTableWS);
+    AnalysisDataService::Instance().addOrReplace("DetectorTable",
+                                                 m_detectorTableWS);
 
     // Source and sample position
     m_sourcePos.resize(3, 0.0);
@@ -179,9 +183,6 @@ private:
 
     m_pixelDimension.resize(8, 0.0);
   }
-
-
 };
-
 
 #endif /* MANTID_MDALGORITHMS_CONVERTCWSDEXPTOMOMENTUMTEST_H_ */

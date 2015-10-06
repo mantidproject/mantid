@@ -41,24 +41,23 @@ namespace Kernel {
  */
 namespace VectorHelper {
 int MANTID_KERNEL_DLL
-    createAxisFromRebinParams(const std::vector<double> &params,
-                              std::vector<double> &xnew,
-                              const bool resize_xnew = true,
-                              const bool full_bins_only = false);
+createAxisFromRebinParams(const std::vector<double> &params,
+                          std::vector<double> &xnew,
+                          const bool resize_xnew = true,
+                          const bool full_bins_only = false);
 
 void MANTID_KERNEL_DLL
-    rebin(const std::vector<double> &xold, const std::vector<double> &yold,
-          const std::vector<double> &eold, const std::vector<double> &xnew,
-          std::vector<double> &ynew, std::vector<double> &enew,
-          bool distribution, bool addition = false);
+rebin(const std::vector<double> &xold, const std::vector<double> &yold,
+      const std::vector<double> &eold, const std::vector<double> &xnew,
+      std::vector<double> &ynew, std::vector<double> &enew, bool distribution,
+      bool addition = false);
 
 // New method to rebin Histogram data, should be faster than previous one
-void MANTID_KERNEL_DLL rebinHistogram(const std::vector<double> &xold,
-                                      const std::vector<double> &yold,
-                                      const std::vector<double> &eold,
-                                      const std::vector<double> &xnew,
-                                      std::vector<double> &ynew,
-                                      std::vector<double> &enew, bool addition);
+void MANTID_KERNEL_DLL
+rebinHistogram(const std::vector<double> &xold, const std::vector<double> &yold,
+               const std::vector<double> &eold, const std::vector<double> &xnew,
+               std::vector<double> &ynew, std::vector<double> &enew,
+               bool addition);
 
 /// Convert an array of bin boundaries to bin centre values.
 void MANTID_KERNEL_DLL convertToBinCentre(const std::vector<double> &bin_edges,
@@ -66,8 +65,8 @@ void MANTID_KERNEL_DLL convertToBinCentre(const std::vector<double> &bin_edges,
 
 /// Convert an array of bin centers to bin boundary values.
 void MANTID_KERNEL_DLL
-    convertToBinBoundary(const std::vector<double> &bin_centers,
-                         std::vector<double> &bin_edges);
+convertToBinBoundary(const std::vector<double> &bin_centers,
+                     std::vector<double> &bin_edges);
 
 bool MANTID_KERNEL_DLL isConstantValue(const std::vector<double> &arra);
 

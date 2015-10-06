@@ -11,18 +11,9 @@
 
 using namespace Mantid::DataObjects;
 
-
-class EventWorkspaceMRUTest : public CxxTest::TestSuite
-{
+class EventWorkspaceMRUTest : public CxxTest::TestSuite {
 public:
-
-  void test_Something()
-  {
-  }
-
-
+  void test_Something() {}
 };
 
-
 #endif /* MANTID_DATAOBJECTS_EVENTWORKSPACEMRUTEST_H_ */
-

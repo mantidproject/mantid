@@ -135,11 +135,10 @@ public:
                                   API::IMDEventWorkspace_const_sptr ws);
   // load experiment infos, previously saved through the the saveExperimentInfo
   // function
-  static void loadExperimentInfos(
-      ::NeXus::File *const file,
-      const std::string & filename,
-      boost::shared_ptr<API::MultipleExperimentInfos> mei,
-      bool lazy = false);
+  static void
+  loadExperimentInfos(::NeXus::File *const file, const std::string &filename,
+                      boost::shared_ptr<API::MultipleExperimentInfos> mei,
+                      bool lazy = false);
 
   static void saveAffineTransformMatricies(::NeXus::File *const file,
                                            API::IMDWorkspace_const_sptr ws);

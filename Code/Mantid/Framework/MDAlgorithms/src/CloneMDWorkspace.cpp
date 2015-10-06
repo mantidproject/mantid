@@ -58,8 +58,8 @@ void CloneMDWorkspace::init() {
  * @param ws ::  MDEventWorkspace to clone
  */
 template <typename MDE, size_t nd>
-void
-CloneMDWorkspace::doClone(const typename MDEventWorkspace<MDE, nd>::sptr ws) {
+void CloneMDWorkspace::doClone(
+    const typename MDEventWorkspace<MDE, nd>::sptr ws) {
   Progress prog(this, 0.0, 10.0, 100);
   BoxController_sptr bc = ws->getBoxController();
 

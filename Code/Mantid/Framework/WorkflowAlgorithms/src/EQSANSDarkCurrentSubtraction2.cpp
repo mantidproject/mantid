@@ -72,7 +72,7 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   Progress progress(this, 0.0, 1.0, 10);
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  
+
   // This version of dark current subtraction only works on histograms.
   // Users need to either make sure the EQSANSLoad algorithm produces
   // histograms, or turn off the dark current subtraction.
@@ -81,8 +81,10 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   if (inputEventWS) {
     g_log.error() << "To use this version of EQSANSDarkCurrentSubtraction, "
                   << "you need to make sure EQSANSLoad produces histograms. "
-                  << "You can also turn the dark current subtraction off." << std::endl;
-    throw std::invalid_argument("EQSANSDarkCurrentSubtraction-v2 only works on histograms.");
+                  << "You can also turn the dark current subtraction off."
+                  << std::endl;
+    throw std::invalid_argument(
+        "EQSANSDarkCurrentSubtraction-v2 only works on histograms.");
   }
 
   const std::string fileName = getPropertyValue("Filename");
@@ -145,9 +147,11 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   // Normalize the dark current and data to counting time
   double scaling_factor = 1.0;
   if (inputWS->run().hasProperty("duration")) {
-      double duration = inputWS->run().getPropertyValueAsType<double>("duration");
-      double dark_duration = darkWS->run().getPropertyValueAsType<double>("duration");;
-      scaling_factor = duration / dark_duration;
+    double duration = inputWS->run().getPropertyValueAsType<double>("duration");
+    double dark_duration =
+        darkWS->run().getPropertyValueAsType<double>("duration");
+    ;
+    scaling_factor = duration / dark_duration;
   } else if (inputWS->run().hasProperty("proton_charge")) {
     auto dp = inputWS->run().getTimeSeriesProperty<double>("proton_charge");
     double duration = dp->getStatistics().duration;
@@ -157,7 +161,9 @@ void EQSANSDarkCurrentSubtraction2::exec() {
     scaling_factor = duration / dark_duration;
   } else if (inputWS->run().hasProperty("timer")) {
     double duration = inputWS->run().getPropertyValueAsType<double>("timer");
-    double dark_duration = darkWS->run().getPropertyValueAsType<double>("timer");;
+    double dark_duration =
+        darkWS->run().getPropertyValueAsType<double>("timer");
+    ;
     scaling_factor = duration / dark_duration;
   } else {
     output_message +=
@@ -168,7 +174,8 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   };
   // The scaling factor should account for the TOF cuts on each side of a frame
   // The EQSANSLoad algorithm cuts the beginning and end of the TOF distribution
-  // so we don't need to correct the scaling factor here. When using LoadEventNexus
+  // so we don't need to correct the scaling factor here. When using
+  // LoadEventNexus
   // we have to scale by (t_frame-t_low_cut-t_high_cut)/t_frame.
 
   progress.report("Scaling dark current");
@@ -178,7 +185,7 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   rebinAlg->setProperty("InputWorkspace", darkWS);
   rebinAlg->setProperty("OutputWorkspace", darkWS);
   rebinAlg->executeAsChildAlg();
-  MatrixWorkspace_sptr scaledDarkWS = rebinAlg->getProperty("OutputWorkspace");  
+  MatrixWorkspace_sptr scaledDarkWS = rebinAlg->getProperty("OutputWorkspace");
 
   // Scale the dark current
   IAlgorithm_sptr scaleAlg = createChildAlgorithm("Scale", 0.5, 0.6);
@@ -188,17 +195,21 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   scaleAlg->setProperty("Operation", "Multiply");
   scaleAlg->executeAsChildAlg();
   scaledDarkWS = rebinAlg->getProperty("OutputWorkspace");
-  
+
   // Scale the dark counts to the bin width and perform subtraction
   const int numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
-  const int numberOfDarkSpectra = static_cast<int>(scaledDarkWS->getNumberHistograms());
+  const int numberOfDarkSpectra =
+      static_cast<int>(scaledDarkWS->getNumberHistograms());
   if (numberOfSpectra != numberOfDarkSpectra) {
-    g_log.error() << "Incompatible number of pixels between sample run and dark current" << std::endl;
+    g_log.error()
+        << "Incompatible number of pixels between sample run and dark current"
+        << std::endl;
   }
   const int nBins = static_cast<int>(inputWS->readY(0).size());
   const int xLength = static_cast<int>(inputWS->readX(0).size());
   if (xLength != nBins + 1) {
-    g_log.error() << "The input workspaces are expected to be histograms" << std::endl;
+    g_log.error() << "The input workspaces are expected to be histograms"
+                  << std::endl;
   }
 
   progress.report("Subtracting dark current");
@@ -215,9 +226,12 @@ void EQSANSDarkCurrentSubtraction2::exec() {
     MantidVec &YValues = inputWS->dataY(i);
     MantidVec &YErrors = inputWS->dataE(i);
     for (int j = 0; j < nBins; j++) {
-      double bin_scale = (XValues[j+1] - XValues[j]) / (XValues[nBins] - XValues[0]);
+      double bin_scale =
+          (XValues[j + 1] - XValues[j]) / (XValues[nBins] - XValues[0]);
       YValues[j] -= YDarkValues[0] * bin_scale;
-      YErrors[j] = sqrt(YErrors[j] * YErrors[j] + YDarkErrors[0] * YDarkErrors[0] * bin_scale * bin_scale);
+      YErrors[j] =
+          sqrt(YErrors[j] * YErrors[j] +
+               YDarkErrors[0] * YDarkErrors[0] * bin_scale * bin_scale);
     }
   }
   setProperty("OutputWorkspace", inputWS);

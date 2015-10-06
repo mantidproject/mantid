@@ -44,9 +44,7 @@ const std::string ConvertDiffCal::name() const { return "ConvertDiffCal"; }
 int ConvertDiffCal::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ConvertDiffCal::category() const {
-  return "Diffraction";
-}
+const std::string ConvertDiffCal::category() const { return "Diffraction"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ConvertDiffCal::summary() const {
@@ -57,13 +55,12 @@ const std::string ConvertDiffCal::summary() const {
 /** Initialize the algorithm's properties.
  */
 void ConvertDiffCal::init() {
-  declareProperty(
-              new WorkspaceProperty<OffsetsWorkspace>(
-            "OffsetsWorkspace", "", Direction::Input),
-              "OffsetsWorkspace containing the calibration offsets.");
-  declareProperty(
-      new WorkspaceProperty<ITableWorkspace>("OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+  declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OffsetsWorkspace",
+                                                          "", Direction::Input),
+                  "OffsetsWorkspace containing the calibration offsets.");
+  declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace", "",
+                                                         Direction::Output),
+                  "An output workspace.");
 }
 
 /**
@@ -74,14 +71,14 @@ void ConvertDiffCal::init() {
  * @return The proper detector id.
  */
 detid_t getDetID(OffsetsWorkspace_const_sptr offsetsWS, const size_t index) {
-    auto detIDs = offsetsWS->getSpectrum(index)->getDetectorIDs();
-    if (detIDs.size() != 1) {
-        std::stringstream msg;
-        msg << "Encountered spectrum with multiple detector ids (size="
-            << detIDs.size() << ")";
-        throw std::logic_error(msg.str());
-    }
-    return (*(detIDs.begin()));
+  auto detIDs = offsetsWS->getSpectrum(index)->getDetectorIDs();
+  if (detIDs.size() != 1) {
+    std::stringstream msg;
+    msg << "Encountered spectrum with multiple detector ids (size="
+        << detIDs.size() << ")";
+    throw std::logic_error(msg.str());
+  }
+  return (*(detIDs.begin()));
 }
 
 /**
@@ -95,8 +92,8 @@ double getOffset(OffsetsWorkspace_const_sptr offsetsWS, const detid_t detid) {
   if (offset <= -1.) { // non-physical
     std::stringstream msg;
     msg << "Encountered offset of " << offset
-        << " which converts data to negative d-spacing for detectorID "
-        << detid << "\n";
+        << " which converts data to negative d-spacing for detectorID " << detid
+        << "\n";
     throw std::logic_error(msg.str());
   }
   return offset;
@@ -107,24 +104,25 @@ double getOffset(OffsetsWorkspace_const_sptr offsetsWS, const detid_t detid) {
  * @param index
  * @return The offset adjusted value of DIFC
  */
-double calculateDIFC(OffsetsWorkspace_const_sptr offsetsWS, const size_t index) {
-    Instrument_const_sptr instrument = offsetsWS->getInstrument();
+double calculateDIFC(OffsetsWorkspace_const_sptr offsetsWS,
+                     const size_t index) {
+  Instrument_const_sptr instrument = offsetsWS->getInstrument();
 
-    const detid_t detid = getDetID(offsetsWS, index);
-    const double offset = getOffset(offsetsWS, detid);
+  const detid_t detid = getDetID(offsetsWS, index);
+  const double offset = getOffset(offsetsWS, detid);
 
-    double l1;
-    Kernel::V3D beamline, samplePos;
-    double beamline_norm;
-    instrument->getInstrumentParameters(l1, beamline, beamline_norm, samplePos);
+  double l1;
+  Kernel::V3D beamline, samplePos;
+  double beamline_norm;
+  instrument->getInstrumentParameters(l1, beamline, beamline_norm, samplePos);
 
-    Geometry::IDetector_const_sptr detector = instrument->getDetector(detid);
+  Geometry::IDetector_const_sptr detector = instrument->getDetector(detid);
 
-    // the factor returned is what is needed to convert TOF->d-spacing
-    // the table is supposed to be filled with DIFC which goes the other way
-    const double factor = Instrument::calcConversion(l1, beamline, beamline_norm,
-                                      samplePos, detector, offset);
-    return 1./factor;
+  // the factor returned is what is needed to convert TOF->d-spacing
+  // the table is supposed to be filled with DIFC which goes the other way
+  const double factor = Instrument::calcConversion(l1, beamline, beamline_norm,
+                                                   samplePos, detector, offset);
+  return 1. / factor;
 }
 
 //----------------------------------------------------------------------------------------------

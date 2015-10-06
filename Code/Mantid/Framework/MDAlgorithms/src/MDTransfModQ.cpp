@@ -417,8 +417,8 @@ std::vector<std::string> MDTransfModQ::getEmodes() const {
  * @param underlyingWorkspace: the underlying workspace
  */
 void MDTransfModQ::setDisplayNormalization(
-      Mantid::API::IMDWorkspace_sptr mdWorkspace,
-      Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const {
+    Mantid::API::IMDWorkspace_sptr mdWorkspace,
+    Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const {
   DisplayNormalizationSetter setter;
   auto isQ = true;
   setter(mdWorkspace, underlyingWorkspace, isQ, m_Emode);

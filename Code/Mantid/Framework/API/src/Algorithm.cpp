@@ -42,8 +42,7 @@ const std::string WORKSPACE_TYPES_SEPARATOR = ";";
 
 class WorkspacePropertyValueIs {
 public:
-  WorkspacePropertyValueIs(const std::string &value)
-      : m_value(value) {};
+  WorkspacePropertyValueIs(const std::string &value) : m_value(value){};
   bool operator()(IWorkspaceProperty *property) {
     Property *prop = dynamic_cast<Property *>(property);
     if (!prop)
@@ -52,7 +51,7 @@ public:
   }
 
 private:
-  const std::string& m_value;
+  const std::string &m_value;
 };
 }
 
@@ -615,8 +614,8 @@ bool Algorithm::execute() {
         throw;
       else {
         getLogger().error() << "Error in execution of algorithm "
-                            << this->name() << std::endl << ex.what()
-                            << std::endl;
+                            << this->name() << std::endl
+                            << ex.what() << std::endl;
       }
       notificationCenter().postNotification(
           new ErrorNotification(this, ex.what()));
@@ -627,8 +626,8 @@ bool Algorithm::execute() {
         throw;
       else {
         getLogger().error() << "Logic Error in execution of algorithm "
-                            << this->name() << std::endl << ex.what()
-                            << std::endl;
+                            << this->name() << std::endl
+                            << ex.what() << std::endl;
       }
       notificationCenter().postNotification(
           new ErrorNotification(this, ex.what()));
@@ -1346,15 +1345,18 @@ bool Algorithm::processGroups() {
           outName = outputBaseName + "_" + inName;
 
         auto inputProp = std::find_if(m_inputWorkspaceProps.begin(),
-                                      m_inputWorkspaceProps.end(), WorkspacePropertyValueIs(inName));
+                                      m_inputWorkspaceProps.end(),
+                                      WorkspacePropertyValueIs(inName));
 
         // Overwrite workspaces in any input property if they have the same
         // name as an output (i.e. copy name button in algorithm dialog used)
         // (only need to do this for a single input, multiple will be handled
         // by ADS)
         if (inputProp != m_inputWorkspaceProps.end()) {
-          const auto & inputGroup = m_groups[inputProp - m_inputWorkspaceProps.begin()];
-          if ( !inputGroup.empty()) outName = inputGroup[entry]->name();
+          const auto &inputGroup =
+              m_groups[inputProp - m_inputWorkspaceProps.begin()];
+          if (!inputGroup.empty())
+            outName = inputGroup[entry]->name();
         }
         // Except if all inputs had similar names, then the name is "out_1"
 

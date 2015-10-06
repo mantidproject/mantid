@@ -99,6 +99,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_CURVEFITTING_DLL GSLMatrix {
   /// The pointer to the GSL matrix
   gsl_matrix *m_matrix;
+
 public:
   /// Constructor
   GSLMatrix();
@@ -106,10 +107,11 @@ public:
   GSLMatrix(const size_t nx, const size_t ny);
   /// Copy constructor
   GSLMatrix(const GSLMatrix &M);
-  /// Create a submatrix. 
-  GSLMatrix(const GSLMatrix &M, size_t row, size_t col, size_t nRows, size_t nCols);
+  /// Create a submatrix.
+  GSLMatrix(const GSLMatrix &M, size_t row, size_t col, size_t nRows,
+            size_t nCols);
   /// Constructor
-  GSLMatrix(const Kernel::Matrix<double>& M);
+  GSLMatrix(const Kernel::Matrix<double> &M);
   /// Create this matrix from a product of two other matrices
   GSLMatrix(const GSLMatrixMult2 &mult2);
   /// Create this matrix from a product of three other matrices
@@ -143,7 +145,7 @@ public:
   /// Set all elements to zero
   void zero();
   /// Set the matrix to be diagonal.
-  void diag(const GSLVector& d);
+  void diag(const GSLVector &d);
   /// Add a matrix to this
   GSLMatrix &operator+=(const GSLMatrix &M);
   /// Add a constant to this matrix
@@ -174,7 +176,7 @@ public:
   /// Calculate the determinant
   double det();
   /// Calculate the eigensystem of a symmetric matrix
-  void eigenSystem(GSLVector& eigenValues, GSLMatrix& eigenVectors);
+  void eigenSystem(GSLVector &eigenValues, GSLMatrix &eigenVectors);
 };
 
 /// Overloaded operator for matrix multiplication

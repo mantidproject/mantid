@@ -47,24 +47,20 @@ public:
 class TempJacobian : public Jacobian {
 public:
   TempJacobian(size_t y, size_t p) : m_y(y), m_p(p), m_J(y * p) {}
-  void set(size_t iY, size_t iP, double value) {
-      m_J[iY * m_p + iP] = value;
-  }
-  double get(size_t iY, size_t iP) {
-      return m_J[iY * m_p + iP];
-  }
+  void set(size_t iY, size_t iP, double value) { m_J[iY * m_p + iP] = value; }
+  double get(size_t iY, size_t iP) { return m_J[iY * m_p + iP]; }
   size_t maxParam(size_t iY) {
-      double max = -DBL_MAX;
-      size_t maxIndex = 0;
-      for(size_t i = 0; i < m_p; ++i) {
-          double current = get(iY, i);
-          if(current > max) {
-              maxIndex = i;
-              max = current;
-          }
+    double max = -DBL_MAX;
+    size_t maxIndex = 0;
+    for (size_t i = 0; i < m_p; ++i) {
+      double current = get(iY, i);
+      if (current > max) {
+        maxIndex = i;
+        max = current;
       }
+    }
 
-      return maxIndex;
+    return maxIndex;
   }
 
 protected:

@@ -9,13 +9,9 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-
-class NotebookWriterTest : public CxxTest::TestSuite
-{
+class NotebookWriterTest : public CxxTest::TestSuite {
 public:
-
-  void test_writeNotebook()
-  {
+  void test_writeNotebook() {
     std::unique_ptr<NotebookWriter> notebook(new NotebookWriter());
 
     std::string notebookText = notebook->writeNotebook();
@@ -27,8 +23,7 @@ public:
     TS_ASSERT_EQUALS(notebookLines[2], "      \"name\" : \"Mantid Notebook\"")
   }
 
-  void test_markdownCell()
-  {
+  void test_markdownCell() {
     std::unique_ptr<NotebookWriter> notebook(new NotebookWriter());
     std::string test_data = "Test markdown cell";
     std::string notebookText = notebook->markdownCell(test_data);
@@ -42,8 +37,7 @@ public:
     TS_ASSERT_EQUALS(notebookLines[3], "   \"source\" : \"" + test_data + "\"")
   }
 
-  void test_codeCell()
-  {
+  void test_codeCell() {
     std::unique_ptr<NotebookWriter> notebook(new NotebookWriter());
     std::string test_data = "print 'Test code cell'";
     std::string notebookText = notebook->codeCell(test_data);
@@ -54,9 +48,8 @@ public:
     // Test if the code cell is present in the output notebook text
     TS_ASSERT_EQUALS(notebookLines[1], "   \"cell_type\" : \"code\",")
     // Test if the test_data string is present in the output notebook text
-    TS_ASSERT_EQUALS(notebookLines[3], "   \"input\" : \""+ test_data + "\",")
+    TS_ASSERT_EQUALS(notebookLines[3], "   \"input\" : \"" + test_data + "\",")
   }
-
 };
 
 #endif // MANTID_NOTEBOOKWRITERTEST_H_

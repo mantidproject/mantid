@@ -72,9 +72,8 @@ std::vector<int> MaskDetectorsInShape::runFindDetectorsInShape(
   return alg->getProperty("DetectorList");
 }
 
-void
-MaskDetectorsInShape::runMaskDetectors(API::MatrixWorkspace_sptr workspace,
-                                       const std::vector<int> detectorIds) {
+void MaskDetectorsInShape::runMaskDetectors(
+    API::MatrixWorkspace_sptr workspace, const std::vector<int> detectorIds) {
   IAlgorithm_sptr alg = createChildAlgorithm("MaskDetectors", 0.85, 1.0);
   alg->setProperty<std::vector<int>>("DetectorList", detectorIds);
   alg->setProperty<MatrixWorkspace_sptr>("Workspace", workspace);

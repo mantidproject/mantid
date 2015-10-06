@@ -265,23 +265,19 @@ void LoadSpiceXML2DDet::exec() {
   // Set up log
   if (spicetablewsname.size() > 0) {
     setupSampleLogFromSpiceTable(outws, spicetablews, ptnumber);
-  }
-  else
-  {
+  } else {
     // Set up 2theta from _2theta
-    if (outws->run().hasProperty("_2theta"))
-    {
+    if (outws->run().hasProperty("_2theta")) {
       Kernel::DateAndTime anytime(1000);
-      double logvalue = atof(outws->run().getProperty("_2theta")->value().c_str());
+      double logvalue =
+          atof(outws->run().getProperty("_2theta")->value().c_str());
       g_log.information() << "Set 2theta from _2theta with value " << logvalue
                           << "\n";
       TimeSeriesProperty<double> *newlogproperty =
           new TimeSeriesProperty<double>("2theta");
       newlogproperty->addValue(anytime, logvalue);
       outws->mutableRun().addProperty(newlogproperty);
-    }
-    else
-    {
+    } else {
       g_log.warning("No 2theta is set up for loading instrument.");
     }
   }

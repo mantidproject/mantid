@@ -89,30 +89,26 @@ FrameworkManagerImpl::FrameworkManagerImpl()
 FrameworkManagerImpl::~FrameworkManagerImpl() {}
 
 /// Starts asynchronous tasks that are done as part of Start-up.
-void FrameworkManagerImpl::AsynchronousStartupTasks()
-{
+void FrameworkManagerImpl::AsynchronousStartupTasks() {
   int updateInstrumentDefinitions = 0;
   int retVal = Kernel::ConfigService::Instance().getValue(
-    "UpdateInstrumentDefinitions.OnStartup", updateInstrumentDefinitions);
+      "UpdateInstrumentDefinitions.OnStartup", updateInstrumentDefinitions);
   if ((retVal == 1) && (updateInstrumentDefinitions == 1)) {
     UpdateInstrumentDefinitions();
   } else {
     g_log.information()
-      << "Instrument updates disabled - cannot update instrument definitions."
-      << std::endl;
+        << "Instrument updates disabled - cannot update instrument definitions."
+        << std::endl;
   }
 
-  int checkIfNewerVersionIsAvailable= 0;
+  int checkIfNewerVersionIsAvailable = 0;
   int retValVersionCheck = Kernel::ConfigService::Instance().getValue(
-    "CheckMantidVersion.OnStartup", checkIfNewerVersionIsAvailable);
+      "CheckMantidVersion.OnStartup", checkIfNewerVersionIsAvailable);
   if ((retValVersionCheck == 1) && (checkIfNewerVersionIsAvailable == 1)) {
     CheckIfNewerVersionIsAvailable();
   } else {
-    g_log.information()
-      << "Version check disabled."
-      << std::endl;
+    g_log.information() << "Version check disabled." << std::endl;
   }
-
 
   // the algorithm will see if it should run
 
@@ -132,12 +128,10 @@ void FrameworkManagerImpl::UpdateInstrumentDefinitions() {
   }
 }
 
-
 /// Check if a newer release of Mantid is available
 void FrameworkManagerImpl::CheckIfNewerVersionIsAvailable() {
   try {
-    IAlgorithm *algCheckVersion =
-        this->createAlgorithm("CheckMantidVersion");
+    IAlgorithm *algCheckVersion = this->createAlgorithm("CheckMantidVersion");
     algCheckVersion->setAlgStartupLogging(false);
     Poco::ActiveResult<bool> result = algCheckVersion->executeAsync();
   } catch (Kernel::Exception::NotFoundError &) {
@@ -147,8 +141,7 @@ void FrameworkManagerImpl::CheckIfNewerVersionIsAvailable() {
 }
 
 /// Sends startup information about OS and Mantid version
-void FrameworkManagerImpl::SendStartupUsageInfo()
-{
+void FrameworkManagerImpl::SendStartupUsageInfo() {
   // see whether or not to send
   int sendStartupUsageInfo = 0;
   int retVal = Kernel::ConfigService::Instance().getValue(
@@ -158,9 +151,8 @@ void FrameworkManagerImpl::SendStartupUsageInfo()
   }
 
   // do it
-  try
-  {
-    IAlgorithm* algSendStartupUsage = this->createAlgorithm("SendUsage");
+  try {
+    IAlgorithm *algSendStartupUsage = this->createAlgorithm("SendUsage");
     algSendStartupUsage->setAlgStartupLogging(false);
     Poco::ActiveResult<bool> result = algSendStartupUsage->executeAsync();
   } catch (Kernel::Exception::NotFoundError &) {

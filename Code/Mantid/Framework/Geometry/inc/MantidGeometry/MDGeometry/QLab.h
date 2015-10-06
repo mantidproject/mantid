@@ -34,14 +34,13 @@ namespace Geometry {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_GEOMETRY_DLL QLab : public MDFrame{
+class MANTID_GEOMETRY_DLL QLab : public MDFrame {
 public:
-
   QLab();
   virtual ~QLab();
   Mantid::Kernel::UnitLabel getUnitLabel() const;
-  const Mantid::Kernel::MDUnit& getMDUnit() const;
-  bool canConvertTo(const Mantid::Kernel::MDUnit& otherUnit) const;
+  const Mantid::Kernel::MDUnit &getMDUnit() const;
+  bool canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const;
   virtual std::string name() const;
   QLab *clone() const;
 
@@ -49,10 +48,8 @@ public:
   static const std::string QLabName;
 
 private:
-
   /// Fixed to be inverse angstroms
   const std::unique_ptr<const Mantid::Kernel::MDUnit> m_unit;
-
 };
 
 } // namespace Geometry

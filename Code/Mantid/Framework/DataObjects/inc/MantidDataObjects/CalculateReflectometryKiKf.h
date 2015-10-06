@@ -4,9 +4,10 @@
 #include <cmath>
 
 namespace Mantid {
-namespace DataObjects{
+namespace DataObjects {
 /**
-class CalculateReflectometryKiKf: Calculation type for converting to ki or kf given
+class CalculateReflectometryKiKf: Calculation type for converting to ki or kf
+given
 a theta value (in degrees) and a wavelength
 */
 class CalculateReflectometryKiKf : public CalculateReflectometry {
@@ -60,22 +61,24 @@ public:
     double wavenumber = 2 * M_PI / wavelength;
     return wavenumber * m_sin_theta_f;
   }
-  Mantid::Geometry::Quadrilateral createQuad(double lamUpper, double lamLower, double thetaUpper, double thetaLower){
+  Mantid::Geometry::Quadrilateral createQuad(double lamUpper, double lamLower,
+                                             double thetaUpper,
+                                             double thetaLower) {
     /**THIS IS NOT CORRECT FOR KiKf TRANSFORMATION**/
-      setThetaFinal(thetaLower);
-      const Mantid::Kernel::V2D ur(calculateDim0(lamLower), // highest qx
-                   calculateDim1(lamLower));
-      const Mantid::Kernel::V2D lr(calculateDim0(lamUpper),
-                   calculateDim1(lamUpper)); // lowest qz
+    setThetaFinal(thetaLower);
+    const Mantid::Kernel::V2D ur(calculateDim0(lamLower), // highest qx
+                                 calculateDim1(lamLower));
+    const Mantid::Kernel::V2D lr(calculateDim0(lamUpper),
+                                 calculateDim1(lamUpper)); // lowest qz
 
-      setThetaFinal(thetaUpper);
-      const Mantid::Kernel::V2D ul(calculateDim0(lamLower),
-                   calculateDim1(lamLower)); // highest qz
-      const Mantid::Kernel::V2D ll(calculateDim0(lamUpper), // lowest qx
-                   calculateDim1(lamUpper));
+    setThetaFinal(thetaUpper);
+    const Mantid::Kernel::V2D ul(calculateDim0(lamLower),
+                                 calculateDim1(lamLower)); // highest qz
+    const Mantid::Kernel::V2D ll(calculateDim0(lamUpper),  // lowest qx
+                                 calculateDim1(lamUpper));
 
-      Mantid::Geometry::Quadrilateral quad(ll, lr, ur, ul);
-      return quad;
+    Mantid::Geometry::Quadrilateral quad(ll, lr, ur, ul);
+    return quad;
   }
 };
 }

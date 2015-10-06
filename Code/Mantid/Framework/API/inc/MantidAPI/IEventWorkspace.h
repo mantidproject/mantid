@@ -73,7 +73,6 @@ protected:
 
 private:
   virtual IEventWorkspace *doClone() const = 0;
-
 };
 }
 }

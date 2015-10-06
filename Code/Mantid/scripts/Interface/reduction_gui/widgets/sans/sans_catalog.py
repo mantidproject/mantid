@@ -51,7 +51,8 @@ class SANSCatalogWidget(BaseWidget):
         self.connect(self._content.refresh_button, QtCore.SIGNAL("clicked()"), self._update_content)
         self.connect(self._content.browse_button, QtCore.SIGNAL("clicked()"), self._browse_directory)
         self.connect(self._content.directory_edit, QtCore.SIGNAL("returnPressed()"), self._update_content)
-        self._content.directory_edit.setText(self._settings.data_path)
+        self._content.directory_edit.setText(self._settings.catalog_data_path)
+        self._content.directory_edit.setToolTip("Use a path of the form: /SNS/<instrument>/IPTS-<number>/data\nE.g.: /SNS/EQSANS/IPTS-1234/data")
         self._update_content(False)
 
     def tableWidgetContext(self, point):
@@ -111,7 +112,7 @@ class SANSCatalogWidget(BaseWidget):
         QtGui.QApplication.clipboard().setText(selected_text)
 
     def _update_content(self, process_files=True):
-        self._settings.data_path = str(self._content.directory_edit.text())
+        self._settings.catalog_data_path = str(self._content.directory_edit.text())
         self._content.data_set_table.clear()
         self._content.data_set_table.setSortingEnabled(False)
         self._content.data_set_table.setRowCount(0)
@@ -134,7 +135,7 @@ class SANSCatalogWidget(BaseWidget):
                         item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
                         self._content.data_set_table.setItem(row, i, item)
 
-            dc.list_data_sets(self._settings.data_path, call_back=_add_item, process_files=process_files)
+            dc.list_data_sets(self._settings.catalog_data_path, call_back=_add_item, process_files=process_files)
 
         self._content.data_set_table.setSortingEnabled(True)
         self._content.data_set_table.resizeColumnsToContents()
@@ -175,9 +176,9 @@ class SANSCatalogWidget(BaseWidget):
         """
             Update the catalog according to the new data path
         """
-        if not self._settings.data_path == str(self._content.directory_edit.text())\
+        if not self._settings.catalog_data_path == str(self._content.directory_edit.text())\
             and len(self._settings.data_path)>0:
-            self._content.directory_edit.setText(self._settings.data_path)
+            self._content.directory_edit.setText(self._settings.catalog_data_path)
             self._update_content(False)
 
     def get_state(self):

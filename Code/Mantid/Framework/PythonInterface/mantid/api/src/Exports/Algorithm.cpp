@@ -60,7 +60,6 @@ void translateCancel(const Algorithm::CancelException &exc) {
   UNUSED_ARG(exc);
   PyErr_SetString(PyExc_KeyboardInterrupt, "");
 }
-
 }
 
 void export_leaf_classes() {

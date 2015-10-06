@@ -41,15 +41,16 @@ public:
                        Mantid::Geometry::MDHistoDimension_sptr(),
                    Mantid::Geometry::MDHistoDimension_sptr dimT =
                        Mantid::Geometry::MDHistoDimension_sptr(),
-                   Mantid::API::MDNormalization displayNormalization
-                   = Mantid::API::NoNormalization);
+                   Mantid::API::MDNormalization displayNormalization =
+                       Mantid::API::NoNormalization);
 
   MDHistoWorkspace(
-      std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions, Mantid::API::MDNormalization displayNormalization
-          = Mantid::API::NoNormalization);
-  MDHistoWorkspace(
-      std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions, Mantid::API::MDNormalization displayNormalization
-          = Mantid::API::NoNormalization);
+      std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions,
+      Mantid::API::MDNormalization displayNormalization =
+          Mantid::API::NoNormalization);
+  MDHistoWorkspace(std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions,
+                   Mantid::API::MDNormalization displayNormalization =
+                       Mantid::API::NoNormalization);
 
   virtual ~MDHistoWorkspace();
 
@@ -376,7 +377,7 @@ public:
   /// Apply masking.
   void setMDMasking(Mantid::Geometry::MDImplicitFunction *maskingRegion);
   /// Apply masking.
-  void setMDMaskAt(const size_t& index, bool mask);
+  void setMDMaskAt(const size_t &index, bool mask);
 
   /// Clear masking.
   void clearMDMasking();
@@ -393,7 +394,8 @@ public:
   /// Preferred visual normalization method.
   virtual Mantid::API::MDNormalization displayNormalizationHisto() const;
 
-  virtual void setDisplayNormalization(const Mantid::API::MDNormalization& preferredNormalization);
+  virtual void setDisplayNormalization(
+      const Mantid::API::MDNormalization &preferredNormalization);
 
 private:
   virtual MDHistoWorkspace *doClone() const {

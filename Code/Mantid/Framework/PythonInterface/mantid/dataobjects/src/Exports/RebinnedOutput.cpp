@@ -8,11 +8,9 @@ using Mantid::DataObjects::RebinnedOutput;
 using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
 
-void export_RebinnedOutput()
-{
-  class_<RebinnedOutput, bases<Workspace2D>,
-         boost::noncopyable>("RebinnedOutput", no_init)
-    ;
+void export_RebinnedOutput() {
+  class_<RebinnedOutput, bases<Workspace2D>, boost::noncopyable>(
+      "RebinnedOutput", no_init);
 
   // register pointers
   RegisterWorkspacePtrToPython<RebinnedOutput>();

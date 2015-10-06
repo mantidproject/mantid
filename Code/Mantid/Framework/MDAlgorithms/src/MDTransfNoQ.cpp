@@ -180,7 +180,7 @@ MDTransfNoQ::inputUnitID(Kernel::DeltaEMode::Type mode,
   return pXAxis->unit()->unitID();
 }
 
-MDTransfNoQ::MDTransfNoQ() : m_NMatrixDim(0), m_YAxis(NULL), m_Det(NULL){}
+MDTransfNoQ::MDTransfNoQ() : m_NMatrixDim(0), m_YAxis(NULL), m_Det(NULL) {}
 
 /**
  * Set the display normalization for no Q
@@ -188,8 +188,8 @@ MDTransfNoQ::MDTransfNoQ() : m_NMatrixDim(0), m_YAxis(NULL), m_Det(NULL){}
  * @param underlyingWorkspace: the underlying workspace
  */
 void MDTransfNoQ::setDisplayNormalization(
-      Mantid::API::IMDWorkspace_sptr mdWorkspace,
-      Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const {
+    Mantid::API::IMDWorkspace_sptr mdWorkspace,
+    Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const {
   DisplayNormalizationSetter setter;
   auto isQ = false;
   setter(mdWorkspace, underlyingWorkspace, isQ);

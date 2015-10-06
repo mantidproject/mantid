@@ -33,22 +33,22 @@ namespace DataObjects {
 class DLLExport NoShape : public Mantid::Geometry::PeakShape {
 
 public:
-    /// Constructor
-    NoShape();
-    /// Destructor
-    virtual ~NoShape();
-    /// Serialize
-    std::string toJSON() const;
-    /// Clone
-    NoShape *clone() const;
-    /// Return the algorithn name
-    std::string algorithmName() const;
-    /// Return the algorithm version
-    int algorithmVersion() const;
-    /// Return the shape name
-    std::string shapeName() const;
-    /// Get the coordinate frame
-    Kernel::SpecialCoordinateSystem frame() const;
+  /// Constructor
+  NoShape();
+  /// Destructor
+  virtual ~NoShape();
+  /// Serialize
+  std::string toJSON() const;
+  /// Clone
+  NoShape *clone() const;
+  /// Return the algorithn name
+  std::string algorithmName() const;
+  /// Return the algorithm version
+  int algorithmVersion() const;
+  /// Return the shape name
+  std::string shapeName() const;
+  /// Get the coordinate frame
+  Kernel::SpecialCoordinateSystem frame() const;
 };
 
 } // namespace DataObjects

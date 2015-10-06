@@ -243,9 +243,8 @@ void ProcessDasNexusLog::exportErrorLog(
  * Output distributions in order for a better understanding of the log
  * @param dts: d(T) in second
  */
-void
-ProcessDasNexusLog::calDistributions(std::vector<Kernel::DateAndTime> timevec,
-                                     double dts) {
+void ProcessDasNexusLog::calDistributions(
+    std::vector<Kernel::DateAndTime> timevec, double dts) {
   // 1. Calculate percent deviation vs. number of cases
   std::vector<double> x1, y1;
   for (int i = -99; i < 100; i++) {

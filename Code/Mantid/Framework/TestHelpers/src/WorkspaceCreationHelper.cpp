@@ -118,7 +118,6 @@ Workspace2D_sptr Create2DWorkspace(int nhist, int numBoundaries) {
   return Create2DWorkspaceBinned(nhist, numBoundaries);
 }
 
-
 /** Create a Workspace2D where the Y value at each bin is
  * == to the workspace index
  * @param nhist :: # histograms
@@ -166,7 +165,6 @@ Create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool isHist,
   retVal = maskSpectra(retVal, maskedWorkspaceIndices);
   return retVal;
 }
-
 
 Workspace2D_sptr Create2DWorkspaceWithValuesAndXerror(
     int64_t nHist, int64_t nBins, bool isHist, double xVal, double yVal,

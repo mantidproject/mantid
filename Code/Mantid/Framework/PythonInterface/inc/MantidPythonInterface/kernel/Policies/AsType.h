@@ -69,13 +69,15 @@ struct AsType_Requires_New_Type_Automatically_Convertible_To_Original {};
 /**
  * Implements the AsType policy.
  */
-template<class ReturnType>
-struct AsType {
+template <class ReturnType> struct AsType {
   template <class InputType> struct apply {
-    // Deduce if type is correct for policy, needs to be convertible to ReturnType
+    // Deduce if type is correct for policy, needs to be convertible to
+    // ReturnType
     typedef typename boost::mpl::if_c<
-      boost::is_convertible<InputType, ReturnType>::value, AsTypeImpl<ReturnType, InputType>,
-        AsType_Requires_New_Type_Automatically_Convertible_To_Original<InputType>>::type type;
+        boost::is_convertible<InputType, ReturnType>::value,
+        AsTypeImpl<ReturnType, InputType>,
+        AsType_Requires_New_Type_Automatically_Convertible_To_Original<
+            InputType>>::type type;
   };
 };
 
