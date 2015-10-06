@@ -356,45 +356,43 @@ void ConvertToReflectometryQ::exec() {
 
   if (outputAsMDWorkspace) {
     if (transMethod == centerTransform()) {
-        auto outputMDWS = transform->executeMD(inputWs, bc);
+      auto outputMDWS = transform->executeMD(inputWs, bc);
       // Copy ExperimentInfo (instrument, run, sample) to the output WS
       ExperimentInfo_sptr ei(inputWs->cloneExperimentInfo());
       outputMDWS->addExperimentInfo(ei);
       outputWS = outputMDWS;
+    } else if (transMethod == normPolyTransform()) {
+      const bool dumpVertexes = this->getProperty("DumpVertexes");
+      auto vertexesTable = vertexes;
+      // perform the normalised polygon transformation
+      auto normPolyTrans = transform->executeNormPoly(
+          inputWs, vertexesTable, dumpVertexes, outputDimensions);
+      // copy any experiment info from input workspace
+      normPolyTrans->copyExperimentInfoFrom(inputWs.get());
+      // produce MDHistoWorkspace from normPolyTrans workspace.
+      auto outputMDWS = transform->executeMDNormPoly(normPolyTrans);
+      ExperimentInfo_sptr ei(normPolyTrans->cloneExperimentInfo());
+      outputMDWS->addExperimentInfo(ei);
+      outputWS = outputMDWS;
+    } else {
+      throw std::runtime_error("Unknown rebinning method: " + transMethod);
     }
-    else if(transMethod == normPolyTransform()){
-        const bool dumpVertexes = this->getProperty("DumpVertexes");
-        auto vertexesTable = vertexes;
-        //perform the normalised polygon transformation
-        auto normPolyTrans = transform->executeNormPoly(inputWs, vertexesTable, dumpVertexes, outputDimensions);
-        //copy any experiment info from input workspace
-        normPolyTrans->copyExperimentInfoFrom(inputWs.get());
-        // produce MDHistoWorkspace from normPolyTrans workspace.
-        auto outputMDWS = transform->executeMDNormPoly(normPolyTrans);
-        ExperimentInfo_sptr ei(normPolyTrans->cloneExperimentInfo());
-        outputMDWS->addExperimentInfo(ei);
-        outputWS = outputMDWS;
-    }
-    else{
-        throw std::runtime_error("Unknown rebinning method: " + transMethod);
-    }
-    }
-    else if (transMethod == normPolyTransform()) {
-        const bool dumpVertexes = this->getProperty("DumpVertexes");
-        auto vertexesTable = vertexes;
-        //perform the normalised polygon transformation
-        auto output2DWS = transform->executeNormPoly(inputWs, vertexesTable, dumpVertexes, outputDimensions);
-        //copy any experiment info from input workspace
-        output2DWS->copyExperimentInfoFrom(inputWs.get());
-        outputWS = output2DWS;
-    } else if(transMethod == centerTransform()){
-      auto output2DWS = transform->execute(inputWs);
-      output2DWS->copyExperimentInfoFrom(inputWs.get());
-      outputWS = output2DWS;
-    }
-    else{
-        throw std::runtime_error("Unknown rebinning method: " + transMethod);
-    }
+  } else if (transMethod == normPolyTransform()) {
+    const bool dumpVertexes = this->getProperty("DumpVertexes");
+    auto vertexesTable = vertexes;
+    // perform the normalised polygon transformation
+    auto output2DWS = transform->executeNormPoly(
+        inputWs, vertexesTable, dumpVertexes, outputDimensions);
+    // copy any experiment info from input workspace
+    output2DWS->copyExperimentInfoFrom(inputWs.get());
+    outputWS = output2DWS;
+  } else if (transMethod == centerTransform()) {
+    auto output2DWS = transform->execute(inputWs);
+    output2DWS->copyExperimentInfoFrom(inputWs.get());
+    outputWS = output2DWS;
+  } else {
+    throw std::runtime_error("Unknown rebinning method: " + transMethod);
+  }
 
   // Execute the transform and bind to the output.
   setProperty("OutputWorkspace", outputWS);
