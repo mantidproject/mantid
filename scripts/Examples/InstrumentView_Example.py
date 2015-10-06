@@ -8,7 +8,7 @@ LoadRaw("LOQ48094.raw","LOQTest")
 
 insView = getInstrumentView("LOQTest")
 
-#insView.changeColorMap("../../../repo/Code/Mantid/Installers/colormaps/Jet.map")   # Change to the correct path
+#insView.changeColorMap("../../../repo/installers/colormaps/Jet.map")   # Change to the correct path
 
 insView.setColorMapRange(0.,195)
 # Or can set a minimum and maximum separately

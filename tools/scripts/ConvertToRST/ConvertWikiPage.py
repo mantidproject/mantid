@@ -2,7 +2,7 @@
 # Converts mediawiki pages to rst pages for sphinx.
 # run with -h for command line arguments
 #
-# sample command C:\MantidInstall\bin\python.exe C:/Mantid/Code/Tools/scripts/ConvertToRST/ConvertWikiPage.py
+# sample command C:\MantidInstall\bin\python.exe C:/Mantid/tools/scripts/ConvertToRST/ConvertWikiPage.py
 #                       -o C:/Mantid/Code/Mantid/docs/source/training/MBC_Displaying_data_Formatting.rst
 #
 # pandoc must be installed an in the path

@@ -42,7 +42,7 @@ set ( INSTALL_ROOT ${CMAKE_INSTALL_PREFIX} CACHE PATH "The location you intend t
 # Remove old module file
 execute_process ( COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/modulefile )
 # Create new module file
-configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/../Installers/LinuxInstaller/modulefile.template
+configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/../installers/LinuxInstaller/modulefile.template
                 ${CMAKE_BINARY_DIR}/modulefile/${CPACK_PACKAGE_VERSION}
 )
 
