@@ -10,9 +10,9 @@ void export_IPropertySettings() {
   register_ptr_to_python<IPropertySettings *>();
 
   class_<IPropertySettings, boost::noncopyable>("IPropertySettings", no_init)
-      .def("isEnabled", &IPropertySettings::isEnabled,
+      .def("isEnabled", &IPropertySettings::isEnabled,(arg("self"),arg("alg")),
            "Is the property to be shown as enabled in the GUI. Default true.")
 
-      .def("isVisible", &IPropertySettings::isVisible,
+      .def("isVisible", &IPropertySettings::isVisible,(arg("self"),arg("alg")),
            "Is the property to be shown in the GUI? Default true.");
 }

@@ -11,26 +11,26 @@ namespace {
 #define EXPORT_ARRAYBOUNDEDVALIDATOR(type, prefix)                             \
   class_<ArrayBoundedValidator<type>, bases<IValidator>, boost::noncopyable>(  \
       #prefix "ArrayBoundedValidator")                                         \
-      .def(init<type, type>(                                                   \
-          (arg("lowerBound"), arg("upperBound")),                              \
+      .def(init<type, type>(                                                  \
+          (arg("self"),arg("lowerBound"), arg("upperBound")),                              \
           "A validator to ensure each value is in the given range"))           \
-      .def("hasLower", &ArrayBoundedValidator<type>::hasLower,                 \
+      .def("hasLower", &ArrayBoundedValidator<type>::hasLower, arg("self"),                 \
            "Returns true if a lower bound has been set")                       \
-      .def("hasUpper", &ArrayBoundedValidator<type>::hasUpper,                 \
+      .def("hasUpper", &ArrayBoundedValidator<type>::hasUpper, arg("self"),               \
            "Returns true if an upper bound has been set")                      \
-      .def("lower", &ArrayBoundedValidator<type>::lower,                       \
+      .def("lower", &ArrayBoundedValidator<type>::lower, arg("self"),                      \
            return_value_policy<copy_const_reference>(),                        \
            "Returns the lower bound")                                          \
-      .def("upper", &ArrayBoundedValidator<type>::upper,                       \
+      .def("upper", &ArrayBoundedValidator<type>::upper, arg("self"),                      \
            return_value_policy<copy_const_reference>(),                        \
            "Returns the upper bound")                                          \
-      .def("setLower", &ArrayBoundedValidator<type>::setLower,                 \
+      .def("setLower", &ArrayBoundedValidator<type>::setLower,  (arg("self"),arg("lower")),               \
            "Sets the lower bound")                                             \
-      .def("setUpper", &ArrayBoundedValidator<type>::setUpper,                 \
+      .def("setUpper", &ArrayBoundedValidator<type>::setUpper, (arg("self"),arg("upper")),               \
            "Sets the upper bound")                                             \
-      .def("clearLower", &ArrayBoundedValidator<type>::clearLower,             \
+      .def("clearLower", &ArrayBoundedValidator<type>::clearLower, arg("self"),             \
            "Clear any set lower bound")                                        \
-      .def("clearUpper", &ArrayBoundedValidator<type>::clearUpper,             \
+      .def("clearUpper", &ArrayBoundedValidator<type>::clearUpper, arg("self"),           \
            "Clear any set upper bound");
 }
 
