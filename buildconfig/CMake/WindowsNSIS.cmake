@@ -163,9 +163,9 @@ install ( FILES ${CMAKE_LIBRARY_PATH}/boost_date_time-vc110-mt-1_52.lib DESTINAT
 ###########################################################################
 # Startup files
 ###########################################################################
-install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Build/CMake/Packaging/launch_mantidplot.bat DESTINATION bin )
-install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Build/CMake/Packaging/launch_mantidplot.vbs DESTINATION bin )
-install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Build/CMake/Packaging/mantidpython.bat DESTINATION bin )
+install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.bat DESTINATION bin )
+install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.vbs DESTINATION bin )
+install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/mantidpython.bat DESTINATION bin )
 
 ###########################################################################
 # Extra NSIS commands for shortcuts, start menu items etc
