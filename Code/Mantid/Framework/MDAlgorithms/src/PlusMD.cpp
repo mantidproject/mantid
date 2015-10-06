@@ -149,9 +149,9 @@ void PlusMD::checkInputs() {
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and operand
-void
-PlusMD::execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
-                       Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
+void PlusMD::execHistoHisto(
+    Mantid::DataObjects::MDHistoWorkspace_sptr out,
+    Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
   out->add(*operand);
 }
 

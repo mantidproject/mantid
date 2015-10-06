@@ -197,8 +197,7 @@ void StandardView::render()
     return;
   }
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
-
-  //setRebinAndUnbinButtons();
+  activeSourceChangeListener(this->origSrc);
 
   if (this->isPeaksWorkspace(this->origSrc))
   {

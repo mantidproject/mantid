@@ -165,9 +165,11 @@ void SaveRKH::write1D() {
     }
 
     auto hasDx = m_workspace->hasDx(i);
-    //hasDx = false;
-    // We only want to access the dx values if they exist. In case they don't exist
-    // set the dXData const reference to the X value. The value will not be used later on.
+    // hasDx = false;
+    // We only want to access the dx values if they exist. In case they don't
+    // exist
+    // set the dXData const reference to the X value. The value will not be used
+    // later on.
     const auto &dXdata = hasDx ? m_workspace->readDx(i) : m_workspace->readX(i);
 
     for (size_t j = 0; j < nbins; ++j) {

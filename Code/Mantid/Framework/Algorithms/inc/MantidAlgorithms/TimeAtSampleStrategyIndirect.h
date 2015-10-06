@@ -13,7 +13,8 @@ class MatrixWorkspace;
 
 namespace Algorithms {
 
-/** TimeAtSampleStrategyIndirect : Determine Time At Sample for an indirect instrument setup.
+/** TimeAtSampleStrategyIndirect : Determine Time At Sample for an indirect
+  instrument setup.
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -38,9 +39,11 @@ namespace Algorithms {
 */
 class DLLExport TimeAtSampleStrategyIndirect : public TimeAtSampleStrategy {
 public:
-  TimeAtSampleStrategyIndirect(boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
+  TimeAtSampleStrategyIndirect(
+      boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
   virtual ~TimeAtSampleStrategyIndirect();
   virtual Correction calculate(const size_t &workspace_index) const;
+
 private:
   /// Workspace to operate on
   boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_ws;

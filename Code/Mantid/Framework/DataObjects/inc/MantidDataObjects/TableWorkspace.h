@@ -76,8 +76,7 @@ namespace DataObjects {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class MANTID_DATAOBJECTS_DLL TableWorkspace
-    : public API::ITableWorkspace {
+class MANTID_DATAOBJECTS_DLL TableWorkspace : public API::ITableWorkspace {
 public:
   /// Constructor.
   TableWorkspace(size_t nrows = 0);
@@ -296,9 +295,7 @@ protected:
   TableWorkspace &operator=(const TableWorkspace &other);
 
 private:
-  virtual TableWorkspace *doClone() const {
-    return new TableWorkspace(*this);
-  }
+  virtual TableWorkspace *doClone() const { return new TableWorkspace(*this); }
 
   /// template method to find a given value in a table.
   template <typename Type>

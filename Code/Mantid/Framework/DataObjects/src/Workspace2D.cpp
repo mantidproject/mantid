@@ -17,7 +17,7 @@ using std::size_t;
 DECLARE_WORKSPACE(Workspace2D)
 
 /// Constructor
-Workspace2D::Workspace2D(): m_noVectors(0) {}
+Workspace2D::Workspace2D() : m_noVectors(0) {}
 
 Workspace2D::Workspace2D(const Workspace2D &other)
     : MatrixWorkspace(other), m_noVectors(other.m_noVectors),
@@ -34,7 +34,7 @@ Workspace2D::Workspace2D(const Workspace2D &other)
 
 /// Destructor
 Workspace2D::~Workspace2D() {
-// Clear out the memory
+  // Clear out the memory
   for (size_t i = 0; i < m_noVectors; i++) {
     delete data[i];
   }

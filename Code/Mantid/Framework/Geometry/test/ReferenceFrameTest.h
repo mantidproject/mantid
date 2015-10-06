@@ -14,47 +14,45 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-class ReferenceFrameTest : public CxxTest::TestSuite
-{
+class ReferenceFrameTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static ReferenceFrameTest *createSuite() { return new ReferenceFrameTest(); }
-  static void destroySuite( ReferenceFrameTest *suite ) { delete suite; }
+  static void destroySuite(ReferenceFrameTest *suite) { delete suite; }
 
-  void testDefaultSettings()
-  {
+  void testDefaultSettings() {
     ReferenceFrame defaultInstance;
-    TSM_ASSERT_EQUALS("Anticipated default from default constructor.", Y, defaultInstance.pointingUp());
-    TSM_ASSERT_EQUALS("Anticipated default from default constructor.", Z, defaultInstance.pointingAlongBeam());
-    TSM_ASSERT_EQUALS("Anticipated default from default constructor.", Right, defaultInstance.getHandedness());
-    TSM_ASSERT_EQUALS("Anticipated default from default constructor.", "source", defaultInstance.origin());
+    TSM_ASSERT_EQUALS("Anticipated default from default constructor.", Y,
+                      defaultInstance.pointingUp());
+    TSM_ASSERT_EQUALS("Anticipated default from default constructor.", Z,
+                      defaultInstance.pointingAlongBeam());
+    TSM_ASSERT_EQUALS("Anticipated default from default constructor.", Right,
+                      defaultInstance.getHandedness());
+    TSM_ASSERT_EQUALS("Anticipated default from default constructor.", "source",
+                      defaultInstance.origin());
   }
 
-  void testGetUp()
-  {
+  void testGetUp() {
     ReferenceFrame frame1(X, Y, Right, "source");
     ReferenceFrame frame2(Z, Y, Right, "source");
     TS_ASSERT_EQUALS(X, frame1.pointingUp());
     TS_ASSERT_EQUALS(Z, frame2.pointingUp());
   }
 
-  void testGetAlongBeam()
-  {
+  void testGetAlongBeam() {
     ReferenceFrame frame1(X, Y, Right, "source");
     ReferenceFrame frame2(Z, X, Right, "source");
     TS_ASSERT_EQUALS(Y, frame1.pointingAlongBeam());
     TS_ASSERT_EQUALS(X, frame2.pointingAlongBeam());
   }
 
-  void testGetHorizontal()
-  {
+  void testGetHorizontal() {
     doGetHorizontalTest(Right);
     doGetHorizontalTest(Left);
   }
 
-  void doGetHorizontalTest(Mantid::Geometry::Handedness handed)
-  {
+  void doGetHorizontalTest(Mantid::Geometry::Handedness handed) {
     ReferenceFrame frame1(X, Y, handed, "source"); // X up, Y along beam
     TS_ASSERT_EQUALS(Z, frame1.pointingHorizontal());
 
@@ -74,70 +72,64 @@ public:
     TS_ASSERT_EQUALS(X, frame6.pointingHorizontal());
   }
 
-
-  void testGetHandedNess()
-  {
+  void testGetHandedNess() {
     ReferenceFrame frameRight(X, Y, Right, "source");
     ReferenceFrame frameLeft(X, Y, Left, "source");
     TS_ASSERT_EQUALS(Right, frameRight.getHandedness());
     TS_ASSERT_EQUALS(Left, frameLeft.getHandedness());
   }
 
-  void testGetOrigin()
-  {
+  void testGetOrigin() {
     ReferenceFrame frame(X, Y, Right, "source");
     TS_ASSERT_EQUALS("source", frame.origin());
   }
 
-  void testIdenticalUpAndBeamDirectionsThrow()
-  {
-    TS_ASSERT_THROWS(ReferenceFrame(X, X, Right, "source"), std::invalid_argument);
+  void testIdenticalUpAndBeamDirectionsThrow() {
+    TS_ASSERT_THROWS(ReferenceFrame(X, X, Right, "source"),
+                     std::invalid_argument);
   }
 
-  void testGetUpDirectionVector()
-  {
-    ReferenceFrame x(X, Y, Right,"source");
+  void testGetUpDirectionVector() {
+    ReferenceFrame x(X, Y, Right, "source");
     V3D x_vec = x.vecPointingUp();
     TS_ASSERT_EQUALS(1, x_vec[0]);
     TS_ASSERT_EQUALS(0, x_vec[1]);
     TS_ASSERT_EQUALS(0, x_vec[2]);
 
-    ReferenceFrame y(Y, X, Right,"source");
+    ReferenceFrame y(Y, X, Right, "source");
     V3D y_vec = y.vecPointingUp();
     TS_ASSERT_EQUALS(0, y_vec[0]);
     TS_ASSERT_EQUALS(1, y_vec[1]);
     TS_ASSERT_EQUALS(0, y_vec[2]);
 
-    ReferenceFrame z(Z, Y, Right,"source");
+    ReferenceFrame z(Z, Y, Right, "source");
     V3D z_vec = z.vecPointingUp();
     TS_ASSERT_EQUALS(0, z_vec[0]);
     TS_ASSERT_EQUALS(0, z_vec[1]);
     TS_ASSERT_EQUALS(1, z_vec[2]);
   }
 
-  void testGetAlongBeamDirectionVector()
-  {
-    ReferenceFrame x(Y, X, Right,"source");
+  void testGetAlongBeamDirectionVector() {
+    ReferenceFrame x(Y, X, Right, "source");
     V3D x_vec = x.vecPointingAlongBeam();
     TS_ASSERT_EQUALS(1, x_vec[0]);
     TS_ASSERT_EQUALS(0, x_vec[1]);
     TS_ASSERT_EQUALS(0, x_vec[2]);
 
-    ReferenceFrame y(X, Y, Right,"source");
+    ReferenceFrame y(X, Y, Right, "source");
     V3D y_vec = y.vecPointingAlongBeam();
     TS_ASSERT_EQUALS(0, y_vec[0]);
     TS_ASSERT_EQUALS(1, y_vec[1]);
     TS_ASSERT_EQUALS(0, y_vec[2]);
 
-    ReferenceFrame z(X, Z, Right,"source");
+    ReferenceFrame z(X, Z, Right, "source");
     V3D z_vec = z.vecPointingAlongBeam();
     TS_ASSERT_EQUALS(0, z_vec[0]);
     TS_ASSERT_EQUALS(0, z_vec[1]);
     TS_ASSERT_EQUALS(1, z_vec[2]);
   }
 
-  void testAxisLabelReturns()
-  {
+  void testAxisLabelReturns() {
     ReferenceFrame x(Y, X, Right, "source");
     TS_ASSERT_EQUALS("Y", x.pointingUpAxis());
     TS_ASSERT_EQUALS("X", x.pointingAlongBeamAxis());
@@ -152,10 +144,7 @@ public:
     TS_ASSERT_EQUALS("X", z.pointingUpAxis());
     TS_ASSERT_EQUALS("Z", z.pointingAlongBeamAxis());
     TS_ASSERT_EQUALS("Y", z.pointingHorizontalAxis());
-
   }
-
 };
-
 
 #endif /* MANTID_GEOMETRY_REFERENCEFRAMETEST_H_ */

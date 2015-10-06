@@ -36,12 +36,12 @@ namespace Geometry {
  */
 
 MANTID_GEOMETRY_DLL IMDDimension_sptr
-    createDimension(const std::string &dimensionXMLString);
+createDimension(const std::string &dimensionXMLString);
 MANTID_GEOMETRY_DLL IMDDimension_sptr
-    createDimension(const Poco::XML::Element &dimensionXML);
+createDimension(const Poco::XML::Element &dimensionXML);
 MANTID_GEOMETRY_DLL IMDDimension_sptr
-    createDimension(const std::string &dimensionXMLString, int nBins,
-                    coord_t min, coord_t max);
+createDimension(const std::string &dimensionXMLString, int nBins, coord_t min,
+                coord_t max);
 }
 }
 

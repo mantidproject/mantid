@@ -350,8 +350,8 @@ void ComptonScatteringCountRate::cacheBackground(
  * Also creates the inequality matrix
  * @param xValues The xdata from the workspace
  */
-void
-ComptonScatteringCountRate::createConstraintMatrices(const MantidVec &xValues) {
+void ComptonScatteringCountRate::createConstraintMatrices(
+    const MantidVec &xValues) {
   const size_t nmasses = m_profiles.size();
 
   // Sanity check that equality constraints matrix has the same number of

@@ -70,11 +70,12 @@ void GatherWorkspaces::init() {
   // Output is optional - only the root process will output a workspace
   declareProperty(new WorkspaceProperty<>(
       "OutputWorkspace", "", Direction::Output, PropertyMode::Optional));
-  declareProperty("PreserveEvents", false,
-                  "Keep the output workspace as an EventWorkspace, if the "
-                  "input has events.\n"
-                  "If false, then the workspace gets converted to a "
-                  "Workspace2D histogram(default to save memory for reduced data)");
+  declareProperty(
+      "PreserveEvents", false,
+      "Keep the output workspace as an EventWorkspace, if the "
+      "input has events.\n"
+      "If false, then the workspace gets converted to a "
+      "Workspace2D histogram(default to save memory for reduced data)");
   std::vector<std::string> propOptions;
   propOptions.push_back("Add");
   // propOptions.push_back("Replace");

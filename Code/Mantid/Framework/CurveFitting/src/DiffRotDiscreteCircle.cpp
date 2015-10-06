@@ -169,8 +169,7 @@ void InelasticDiffRotDiscreteCircle::setWorkspace(
     IDetector_const_sptr det;
     try {
       det = workspace->getDetector(idx);
-    }
-    catch (Kernel::Exception::NotFoundError &) {
+    } catch (Kernel::Exception::NotFoundError &) {
       m_qValueCache.clear();
       g_log.information("Cannot populate Q values from workspace");
       break;
@@ -183,8 +182,7 @@ void InelasticDiffRotDiscreteCircle::setWorkspace(
       double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
 
       m_qValueCache.push_back(q);
-    }
-    catch (std::runtime_error &) {
+    } catch (std::runtime_error &) {
       m_qValueCache.clear();
       g_log.information("Cannot populate Q values from workspace");
       return;

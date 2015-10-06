@@ -49,7 +49,8 @@ private:
 
 typedef boost::shared_ptr<RefinedRange> RefinedRange_sptr;
 
-bool MANTID_SINQ_DLL operator<(const RefinedRange_sptr &lhs, const RefinedRange_sptr &rhs);
+bool MANTID_SINQ_DLL
+operator<(const RefinedRange_sptr &lhs, const RefinedRange_sptr &rhs);
 
 /** PoldiFitPeaks1D2 :
 

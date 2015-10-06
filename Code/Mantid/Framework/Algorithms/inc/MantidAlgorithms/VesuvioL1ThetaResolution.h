@@ -49,8 +49,12 @@ private:
   void exec();
   void loadInstrument();
 
-  void calculateDetector(Mantid::Geometry::IDetector_const_sptr detector, std::vector<double>& l1Values, std::vector<double>& thetaValues);
-  Mantid::API::MatrixWorkspace_sptr processDistribution(Mantid::API::MatrixWorkspace_sptr ws, const double binWidth);
+  void calculateDetector(Mantid::Geometry::IDetector_const_sptr detector,
+                         std::vector<double> &l1Values,
+                         std::vector<double> &thetaValues);
+  Mantid::API::MatrixWorkspace_sptr
+  processDistribution(Mantid::API::MatrixWorkspace_sptr ws,
+                      const double binWidth);
   double random();
 
   Mantid::API::MatrixWorkspace_sptr m_instWorkspace;

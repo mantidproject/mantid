@@ -311,26 +311,30 @@ ANNkd_tree::ANNkd_tree( // basic constructor
 //
 //				void split(
 //						ANNpointArray pa,  // complete
-//point
+// point
 // array
 //						ANNidxArray pidx,  // point
-//array
+// array
 //(permuted on return)
 //						ANNorthRect &bnds, // bounds of
-//current
+// current
 // cell
-//						int n,			   // number
-//of
+//						int n,			   //
+// number
+// of
 // points
-//						int dim,		   // dimension
-//of
+//						int dim,		   //
+// dimension
+// of
 // space
 //						int &cut_dim,	   // cutting
 // dimension
 //						ANNcoord &cut_val, // cutting
 // value
-//						int &n_lo)		   // no. of
-//points
+//						int &n_lo)		   //
+// no.
+// of
+// points
 // on low side of cut
 //
 //		This procedure selects a cutting dimension and cutting value,

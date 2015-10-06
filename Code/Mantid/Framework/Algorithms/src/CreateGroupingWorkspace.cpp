@@ -94,7 +94,7 @@ void CreateGroupingWorkspace::init() {
                   "Number of levels to search into the instrument (default=5)");
 
   declareProperty("FixedGroupCount", 0,
-                  boost::make_shared<BoundedValidator<int> >(0, INT_MAX),
+                  boost::make_shared<BoundedValidator<int>>(0, INT_MAX),
                   "Used to distribute the detectors of a given component into "
                   "a fixed number of groups");
   declareProperty("ComponentName", "", "Specify the instrument component to "
@@ -174,7 +174,7 @@ void makeGroupingByNumGroups(const std::string compName, int numGroups,
   size_t numDetectors = detectors.size();
 
   // Sanity check for following calculation
-  if(numGroups > static_cast<int>(numDetectors))
+  if (numGroups > static_cast<int>(numDetectors))
     throw std::runtime_error("Number of groups must be less than or "
                              "equal to number of detectors");
 

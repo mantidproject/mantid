@@ -19,8 +19,8 @@ PeakShapeBase::~PeakShapeBase() {}
  * @brief Copy constructor
  * @param other : source of the copy
  */
-PeakShapeBase::PeakShapeBase(const PeakShapeBase &other): m_frame(other.frame()),
-      m_algorithmName(other.algorithmName()),
+PeakShapeBase::PeakShapeBase(const PeakShapeBase &other)
+    : m_frame(other.frame()), m_algorithmName(other.algorithmName()),
       m_algorithmVersion(other.algorithmVersion()) {}
 
 /**
@@ -74,7 +74,6 @@ int PeakShapeBase::algorithmVersion() const { return m_algorithmVersion; }
 bool PeakShapeBase::operator==(const PeakShapeBase &other) const {
   return other.frame() == this->frame();
 }
-
 
 } // namespace DataObjects
 } // namespace Mantid

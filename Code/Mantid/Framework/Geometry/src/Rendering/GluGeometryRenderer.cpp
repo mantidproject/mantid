@@ -130,8 +130,9 @@ void GluGeometryRenderer::CreateCube(const V3D &Point1, const V3D &Point2,
   // first face
   glBegin(GL_QUADS);
   for (int i = 0; i < 6; i++) {
-    normal = (vertex[faceindex[i][0]] - vertex[faceindex[i][1]]).cross_prod(
-        (vertex[faceindex[i][0]] - vertex[faceindex[i][2]]));
+    normal =
+        (vertex[faceindex[i][0]] - vertex[faceindex[i][1]])
+            .cross_prod((vertex[faceindex[i][0]] - vertex[faceindex[i][2]]));
     normal.normalize();
     glNormal3d(normal[0], normal[1], normal[2]);
     for (int j = 0; j < 4; j++) {

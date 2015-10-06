@@ -36,14 +36,17 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport DisplayNormalizationSetter {
 public:
   void operator()(Mantid::API::IMDWorkspace_sptr workspace,
-                  const Mantid::API::MatrixWorkspace_sptr &workspaceToCheck, bool isQ = false,
-                  const Mantid::Kernel::DeltaEMode::Type &mode = Mantid::Kernel::DeltaEMode::Elastic);
+                  const Mantid::API::MatrixWorkspace_sptr &workspaceToCheck,
+                  bool isQ = false,
+                  const Mantid::Kernel::DeltaEMode::Type &mode =
+                      Mantid::Kernel::DeltaEMode::Elastic);
 
 private:
   void setNormalizationMDEvent(
       Mantid::API::IMDWorkspace_sptr workspace,
-      const Mantid::API::MatrixWorkspace_sptr &underlyingWorkspace, bool isQ = false,
-      const Mantid::Kernel::DeltaEMode::Type &mode = Mantid::Kernel::DeltaEMode::Elastic);
+      const Mantid::API::MatrixWorkspace_sptr &underlyingWorkspace,
+      bool isQ = false, const Mantid::Kernel::DeltaEMode::Type &mode =
+                            Mantid::Kernel::DeltaEMode::Elastic);
 
   void applyNormalizationMDEvent(
       Mantid::API::IMDWorkspace_sptr workspace,

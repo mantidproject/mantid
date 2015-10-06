@@ -48,6 +48,7 @@ public:
                              int numberOfBinsQz = 100);
   /// Destructor
   virtual ~ReflectometryTransformQxQz();
+
 private:
   DISABLE_DEFAULT_CONSTRUCT(ReflectometryTransformQxQz)
   DISABLE_COPY_AND_ASSIGN(ReflectometryTransformQxQz)

@@ -85,10 +85,9 @@ private:
  * @param seedValue :: A seed value
  */
 template <typename SingleValueGenerator>
-NDPseudoRandomNumberGenerator<
-    SingleValueGenerator>::NDPseudoRandomNumberGenerator(const unsigned int
-                                                             ndims,
-                                                         const size_t seedValue)
+NDPseudoRandomNumberGenerator<SingleValueGenerator>::
+    NDPseudoRandomNumberGenerator(const unsigned int ndims,
+                                  const size_t seedValue)
     : NDRandomNumberGenerator(ndims), m_singleValueGen(seedValue) {}
 
 /**

@@ -116,8 +116,7 @@ void SANSSolidAngleCorrection::exec() {
     IDetector_const_sptr det;
     try {
       det = inputWS->getDetector(i);
-    }
-    catch (Exception::NotFoundError &) {
+    } catch (Exception::NotFoundError &) {
       g_log.warning() << "Spectrum index " << i
                       << " has no detector assigned to it - discarding"
                       << std::endl;
@@ -204,8 +203,7 @@ void SANSSolidAngleCorrection::execEvent() {
     IDetector_const_sptr det;
     try {
       det = inputEventWS->getDetector(i);
-    }
-    catch (Exception::NotFoundError &) {
+    } catch (Exception::NotFoundError &) {
       g_log.warning() << "Spectrum index " << i
                       << " has no detector assigned to it - discarding"
                       << std::endl;

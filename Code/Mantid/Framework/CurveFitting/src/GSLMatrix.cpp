@@ -7,7 +7,6 @@
 namespace Mantid {
 namespace CurveFitting {
 
-
 /// Constructor
 GSLMatrix::GSLMatrix() : m_matrix(NULL) {}
 /// Constructor
@@ -31,9 +30,9 @@ GSLMatrix::GSLMatrix(const GSLMatrix &M) {
 /// @param col :: The first column in the submatrix.
 /// @param nRows :: The number of rows in the submatrix.
 /// @param nCols :: The number of columns in the submatrix.
-GSLMatrix::GSLMatrix(const GSLMatrix &M, size_t row, size_t col, size_t nRows, size_t nCols) {
-  if ( row + nRows > M.size1() || col + nCols > M.size2() )
-  {
+GSLMatrix::GSLMatrix(const GSLMatrix &M, size_t row, size_t col, size_t nRows,
+                     size_t nCols) {
+  if (row + nRows > M.size1() || col + nCols > M.size2()) {
     throw std::runtime_error("Submatrix exceeds matrix size.");
   }
   auto view = gsl_matrix_const_submatrix(M.gsl(), row, col, nRows, nCols);
@@ -43,21 +42,25 @@ GSLMatrix::GSLMatrix(const GSLMatrix &M, size_t row, size_t col, size_t nRows, s
 
 /// Constructor
 /// @param M :: A matrix to copy.
-GSLMatrix::GSLMatrix(const Kernel::Matrix<double>& M) {
+GSLMatrix::GSLMatrix(const Kernel::Matrix<double> &M) {
   m_matrix = gsl_matrix_alloc(M.numRows(), M.numCols());
-  for(size_t i = 0; i < size1(); ++i)
-  for(size_t j = 0; j < size2(); ++j){
-    set(i,j, M[i][j]);
-  }
+  for (size_t i = 0; i < size1(); ++i)
+    for (size_t j = 0; j < size2(); ++j) {
+      set(i, j, M[i][j]);
+    }
 }
 
 /// Create this matrix from a product of two other matrices
 /// @param mult2 :: Matrix multiplication helper object.
-GSLMatrix::GSLMatrix(const GSLMatrixMult2 &mult2) : m_matrix(NULL) {*this = mult2;}
+GSLMatrix::GSLMatrix(const GSLMatrixMult2 &mult2) : m_matrix(NULL) {
+  *this = mult2;
+}
 
 /// Create this matrix from a product of three other matrices
 /// @param mult3 :: Matrix multiplication helper object.
-GSLMatrix::GSLMatrix(const GSLMatrixMult3 &mult3) : m_matrix(NULL) {*this = mult3;}
+GSLMatrix::GSLMatrix(const GSLMatrixMult3 &mult3) : m_matrix(NULL) {
+  *this = mult3;
+}
 
 /// Destructor.
 GSLMatrix::~GSLMatrix() {
@@ -121,11 +124,11 @@ void GSLMatrix::zero() { gsl_matrix_set_zero(m_matrix); }
 
 /// Set the matrix to be diagonal.
 /// @param d :: Values on the diagonal.
-void GSLMatrix::diag(const GSLVector& d) {
+void GSLMatrix::diag(const GSLVector &d) {
   const auto n = d.size();
   resize(n, n);
   zero();
-  for(size_t i = 0; i < n; ++i) {
+  for (size_t i = 0; i < n; ++i) {
     set(i, i, d.get(i));
   }
 }
@@ -251,15 +254,17 @@ double GSLMatrix::det() {
 }
 
 /// Calculate the eigensystem of a symmetric matrix
-/// @param eigenValues :: Output variable that receives the eigenvalues of this matrix.
-/// @param eigenVectors :: Output variable that receives the eigenvectors of this matrix.
-void GSLMatrix::eigenSystem(GSLVector& eigenValues, GSLMatrix& eigenVectors) {
+/// @param eigenValues :: Output variable that receives the eigenvalues of this
+/// matrix.
+/// @param eigenVectors :: Output variable that receives the eigenvectors of
+/// this matrix.
+void GSLMatrix::eigenSystem(GSLVector &eigenValues, GSLMatrix &eigenVectors) {
   size_t n = size1();
   if (n != size2()) {
     throw std::runtime_error("Matrix eigenSystem: the matrix must be square.");
   }
   eigenValues.resize(n);
-  eigenVectors.resize(n,n);
+  eigenVectors.resize(n, n);
   auto workspace = gsl_eigen_symmv_alloc(n);
   gsl_eigen_symmv(gsl(), eigenValues.gsl(), eigenVectors.gsl(), workspace);
   gsl_eigen_symmv_free(workspace);
@@ -268,7 +273,7 @@ void GSLMatrix::eigenSystem(GSLVector& eigenValues, GSLMatrix& eigenVectors) {
 /// Copy a row into a GSLVector
 /// @param i :: A row index.
 GSLVector GSLMatrix::copyRow(size_t i) const {
-  if (i >= size1()){
+  if (i >= size1()) {
     throw std::out_of_range("GSLMatrix row index is out of range.");
   }
   auto rowView = gsl_matrix_const_row(gsl(), i);
@@ -278,13 +283,12 @@ GSLVector GSLMatrix::copyRow(size_t i) const {
 /// Copy a column into a GSLVector
 /// @param i :: A column index.
 GSLVector GSLMatrix::copyColumn(size_t i) const {
-  if (i >= size2()){
+  if (i >= size2()) {
     throw std::out_of_range("GSLMatrix column index is out of range.");
   }
   auto columnView = gsl_matrix_const_column(gsl(), i);
   return GSLVector(&columnView.vector);
 }
-
 
 } // namespace CurveFitting
 } // namespace Mantid

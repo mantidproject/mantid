@@ -344,10 +344,9 @@ IPowderDiffPeakFunction_sptr LeBailFunction::generatePeak(int h, int k, int l) {
 *
 * Return: True if all peaks' height are physical.  False otherwise
 */
-bool
-LeBailFunction::calculatePeaksIntensities(const vector<double> &vecX,
-                                          const vector<double> &vecY,
-                                          vector<double> &vec_summedpeaks) {
+bool LeBailFunction::calculatePeaksIntensities(
+    const vector<double> &vecX, const vector<double> &vecY,
+    vector<double> &vec_summedpeaks) {
   // Clear inputs
   std::fill(vec_summedpeaks.begin(), vec_summedpeaks.end(), 0.0);
 
@@ -685,8 +684,8 @@ void LeBailFunction::setPeakParameters(IPowderDiffPeakFunction_sptr peak,
   *
   * @param parammap: map of Parameters to set to peak
  */
-void
-LeBailFunction::setProfileParameterValues(map<std::string, double> parammap) {
+void LeBailFunction::setProfileParameterValues(
+    map<std::string, double> parammap) {
   const double MINDIFF = 1.0E-10;
 
   map<std::string, double>::iterator inpiter, curiter;

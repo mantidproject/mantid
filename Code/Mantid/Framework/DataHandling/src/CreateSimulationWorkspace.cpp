@@ -185,8 +185,8 @@ void CreateSimulationWorkspace::createOneToOneMapping() {
  * Load the detector mapping from a file
  * @param filename :: The name of the file to pull the UDET/SPEC tables from
  */
-void
-CreateSimulationWorkspace::loadMappingFromFile(const std::string &filename) {
+void CreateSimulationWorkspace::loadMappingFromFile(
+    const std::string &filename) {
   if (boost::algorithm::ends_with(filename, ".raw") ||
       boost::algorithm::ends_with(filename, ".RAW")) {
     loadMappingFromRAW(filename);
@@ -200,8 +200,8 @@ CreateSimulationWorkspace::loadMappingFromFile(const std::string &filename) {
  * Load the detector mapping from a RAW file
  * @param filename :: The name of the RAW file to pull the UDET/SPEC tables from
  */
-void
-CreateSimulationWorkspace::loadMappingFromRAW(const std::string &filename) {
+void CreateSimulationWorkspace::loadMappingFromRAW(
+    const std::string &filename) {
   FILE *rawFile = fopen(filename.c_str(), "rb");
   if (!rawFile)
     throw std::runtime_error("Cannot open RAW file for reading: " + filename);
@@ -224,8 +224,8 @@ CreateSimulationWorkspace::loadMappingFromRAW(const std::string &filename) {
  * @param filename :: The name of the ISIS raw NeXus file to pull the UDET/SPEC
  * tables from
  */
-void
-CreateSimulationWorkspace::loadMappingFromISISNXS(const std::string &filename) {
+void CreateSimulationWorkspace::loadMappingFromISISNXS(
+    const std::string &filename) {
   ::NeXus::File nxsFile(filename);
   try {
     nxsFile.openPath("/raw_data_1/isis_vms_compat");

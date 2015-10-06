@@ -12,27 +12,21 @@
 
 using namespace Mantid::Kernel;
 
-class ProgressTextTest : public CxxTest::TestSuite
-{
+class ProgressTextTest : public CxxTest::TestSuite {
 public:
-
-  void test_setNumSteps()
-  {
+  void test_setNumSteps() {
     ProgressText p(0.5, 1.0, 10);
     TS_ASSERT_THROWS_NOTHING(p.setNumSteps(100));
   }
 
-  void test_constructors()
-  {
+  void test_constructors() {
     // No steps?
-    TS_ASSERT_THROWS_NOTHING(ProgressText(0.0, 1.0, 0); );
+    TS_ASSERT_THROWS_NOTHING(ProgressText(0.0, 1.0, 0););
     // Max is < min
-    TS_ASSERT_THROWS_NOTHING(ProgressText(0.0, 1.0, 2, true); );
+    TS_ASSERT_THROWS_NOTHING(ProgressText(0.0, 1.0, 2, true););
   }
 
-
-  void test_with_stdout()
-  {
+  void test_with_stdout() {
     ProgressText p(0.5, 1.0, 10);
     // 4 outputs
     p.report();
@@ -51,24 +45,15 @@ public:
     p.report();
   }
 
-
-  void test_on_one_line()
-  {
+  void test_on_one_line() {
     ProgressText p(0.0, 1.0, 100, false);
-    for (int i=0; i<100; i++)
-    {
+    for (int i = 0; i < 100; i++) {
       std::string msg = "";
-      for (int i = 0; i < std::rand() %10; i++)
+      for (int i = 0; i < std::rand() % 10; i++)
         msg += "bla";
       p.report(msg);
     }
   }
-
-
-
-
 };
 
-
 #endif
-

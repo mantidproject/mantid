@@ -61,13 +61,13 @@ public:
   virtual std::string getName() const = 0;
 
   /// @return the MDFrame
-  virtual const Geometry::MDFrame& getMDFrame() const = 0;
+  virtual const Geometry::MDFrame &getMDFrame() const = 0;
 
   /// @return the units of the dimension as a string
   virtual const Kernel::UnitLabel getUnits() const = 0;
 
   /// @return the mdunits of the dimension
-  virtual const Kernel::MDUnit& getMDUnits() const = 0;
+  virtual const Kernel::MDUnit &getMDUnits() const = 0;
 
   /// short name which identify the dimension among other dimension. A dimension
   /// can be usually find by its ID and various

@@ -11,12 +11,15 @@ namespace Kernel {
 
  CRTP class
 
- Chainable gives the ability to set successors, but chainable items do not define create. This is important
- because the return from setSuccessor should not be the factory directly. Otherwise you could do this
+ Chainable gives the ability to set successors, but chainable items do not
+define create. This is important
+ because the return from setSuccessor should not be the factory directly.
+Otherwise you could do this
 
  factory.setSuccessor(new Factory).create()
 
- and create would be bypass the chain of resposibility, which should be executed along the chain top to bottom.
+ and create would be bypass the chain of resposibility, which should be executed
+along the chain top to bottom.
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -43,15 +46,16 @@ namespace Kernel {
 template <typename ChainableType> class DLLExport Chainable {
 protected:
   /// Successor factory
-  ///boost::optional<std::unique_ptr<ChainableType>> m_successor;
+  /// boost::optional<std::unique_ptr<ChainableType>> m_successor;
   std::unique_ptr<ChainableType> m_successor;
+
 public:
   /// Set the successor
-  Chainable &setSuccessor(std::unique_ptr<ChainableType>& successor) {
+  Chainable &setSuccessor(std::unique_ptr<ChainableType> &successor) {
     m_successor = std::move(successor);
     return *m_successor;
   }
-  Chainable &setSuccessor(std::unique_ptr<ChainableType>&& successor) {
+  Chainable &setSuccessor(std::unique_ptr<ChainableType> &&successor) {
     m_successor = std::move(successor);
     return *m_successor;
   }

@@ -293,8 +293,8 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   for (size_t i = 0; i < dataWS->readX(0).size(); ++i)
     outss << dataWS->readX(0)[i] << "\t\t" << dataWS->readY(0)[i] << "\t\t"
           << dataWS->readE(0)[i] << endl;
-  cout << "Input Peak Position Workspace To Fit: " << endl << outss.str()
-       << endl;
+  cout << "Input Peak Position Workspace To Fit: " << endl
+       << outss.str() << endl;
 
   API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
   fitalg->initialize();
@@ -375,7 +375,8 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
     zss << setw(20) << d_h << setw(20) << zdatay << setw(20) << zmodely
         << setw(20) << zdiffy << setw(20) << diffy << endl;
   }
-  cout << "Zscore Survey: " << endl << zss.str();
+  cout << "Zscore Survey: " << endl
+       << zss.str();
 
   return;
 }
@@ -473,7 +474,8 @@ void RefinePowderInstrumentParameters::refineInstrumentParametersMC(
          << setprecision(6) << upperbounds[i] << ", Step Size = " << setw(15)
          << setprecision(6) << stepsizes[i] << endl;
   }
-  g_log.notice() << "Monte Carlo Parameters: " << endl << dbss.str();
+  g_log.notice() << "Monte Carlo Parameters: " << endl
+                 << dbss.str();
 
   // 3. Maximum step size
   size_t maxsteps;
@@ -1142,9 +1144,8 @@ void RefinePowderInstrumentParameters::calculateThermalNeutronSpecial(
   * Arguments:
   * Output: outWS  1 spectrum .  dspacing - peak center
  */
-void
-RefinePowderInstrumentParameters::genPeakCentersWorkspace(bool montecarlo,
-                                                          size_t numbestfit) {
+void RefinePowderInstrumentParameters::genPeakCentersWorkspace(
+    bool montecarlo, size_t numbestfit) {
   // 1. Collect values in a vector for sorting
   double lattice = mFuncParameters["LatticeConstant"];
   if (lattice < 1.0E-5) {

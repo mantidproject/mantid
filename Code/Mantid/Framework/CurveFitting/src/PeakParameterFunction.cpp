@@ -29,8 +29,8 @@ void PeakParameterFunction::function1D(double *out, const double *xValues,
     throw std::invalid_argument("Can only work with domain of size 4.");
   }
 
-  if(!m_peakFunction) {
-      throw std::runtime_error("IPeakFunction has not been set.");
+  if (!m_peakFunction) {
+    throw std::runtime_error("IPeakFunction has not been set.");
   }
 
   out[0] = m_peakFunction->centre();
@@ -46,8 +46,8 @@ void PeakParameterFunction::functionDeriv(const FunctionDomain &domain,
 }
 
 /// Make sure the decorated function is IPeakFunction and store it.
-void
-PeakParameterFunction::beforeDecoratedFunctionSet(const IFunction_sptr &fn) {
+void PeakParameterFunction::beforeDecoratedFunctionSet(
+    const IFunction_sptr &fn) {
   boost::shared_ptr<IPeakFunction> peakFunction =
       boost::dynamic_pointer_cast<IPeakFunction>(fn);
 

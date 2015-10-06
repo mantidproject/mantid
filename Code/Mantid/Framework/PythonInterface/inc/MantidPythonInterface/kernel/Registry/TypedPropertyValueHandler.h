@@ -91,7 +91,8 @@ struct DLLExport TypedPropertyValueHandler : public PropertyValueHandler {
 };
 
 //
-// Specialization for shared_ptr types. They need special handling for workspaces
+// Specialization for shared_ptr types. They need special handling for
+// workspaces
 //
 template <typename T>
 struct DLLExport TypedPropertyValueHandler<boost::shared_ptr<T>>
@@ -112,7 +113,8 @@ struct DLLExport TypedPropertyValueHandler<boost::shared_ptr<T>>
    */
   void set(Kernel::IPropertyManager *alg, const std::string &name,
            const boost::python::object &value) const {
-    alg->setProperty<HeldType>(name, boost::dynamic_pointer_cast<T>(ExtractWorkspace(value)()));
+    alg->setProperty<HeldType>(
+        name, boost::dynamic_pointer_cast<T>(ExtractWorkspace(value)()));
   }
 
   /**
@@ -145,7 +147,6 @@ struct DLLExport TypedPropertyValueHandler<boost::shared_ptr<T>>
     }
     return valueProp;
   }
-
 };
 }
 }

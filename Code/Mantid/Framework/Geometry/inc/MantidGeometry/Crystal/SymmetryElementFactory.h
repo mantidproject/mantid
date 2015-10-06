@@ -41,7 +41,7 @@ public:
 };
 
 typedef boost::shared_ptr<AbstractSymmetryElementGenerator>
-AbstractSymmetryElementGenerator_sptr;
+    AbstractSymmetryElementGenerator_sptr;
 
 /** @class SymmetryElementIdentityGenerator
 
@@ -277,11 +277,11 @@ private:
 
 #ifdef _WIN32
 template class MANTID_GEOMETRY_DLL
-Mantid::Kernel::SingletonHolder<SymmetryElementFactoryImpl>;
+    Mantid::Kernel::SingletonHolder<SymmetryElementFactoryImpl>;
 #endif
 
 typedef Mantid::Kernel::SingletonHolder<SymmetryElementFactoryImpl>
-SymmetryElementFactory;
+    SymmetryElementFactory;
 
 } // namespace Geometry
 } // namespace Mantid
@@ -289,10 +289,10 @@ SymmetryElementFactory;
 #define DECLARE_SYMMETRY_ELEMENT_GENERATOR(classname)                          \
   namespace {                                                                  \
   Mantid::Kernel::RegistrationHelper                                           \
-  register_symmetry_element_generator_##classname(                             \
-      ((Mantid::Geometry::SymmetryElementFactory::Instance()                   \
-            .subscribeSymmetryElementGenerator<classname>(#classname)),        \
-       0));                                                                    \
+      register_symmetry_element_generator_##classname(                         \
+          ((Mantid::Geometry::SymmetryElementFactory::Instance()               \
+                .subscribeSymmetryElementGenerator<classname>(#classname)),    \
+           0));                                                                \
   }
 
 #endif /* MANTID_GEOMETRY_SYMMETRYELEMENTFACTORY_H_ */

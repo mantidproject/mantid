@@ -132,10 +132,9 @@ void AnvredCorrection::exec() {
       bool lorentzDone = boost::lexical_cast<bool, std::string>(prop->value());
       if (lorentzDone) {
         m_onlySphericalAbsorption = true;
-        g_log.warning()
-            << "Lorentz Correction was already done for this "
-               "workspace.  OnlySphericalAbsorption was changed to "
-               "true." << std::endl;
+        g_log.warning() << "Lorentz Correction was already done for this "
+                           "workspace.  OnlySphericalAbsorption was changed to "
+                           "true." << std::endl;
       }
     }
   }

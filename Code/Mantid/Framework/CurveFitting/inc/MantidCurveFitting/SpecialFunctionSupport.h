@@ -44,7 +44,7 @@ namespace SpecialFunctionSupport {
 /// Compute exp(z)*E1(z) where z is complex and E1(z) is the Exponential
 /// Integral
 std::complex<double> DLLExport
-    exponentialIntegral(const std::complex<double> &z);
+exponentialIntegral(const std::complex<double> &z);
 
 } // namespace SpecialFunctionSupport
 } // namespace CurveFitting

@@ -45,14 +45,15 @@
 // finding
 //				best matches in logarithmic expected time,'' ACM
 //				Transactions on Mathematical Software,
-//3(3):209-226,
+// 3(3):209-226,
 // 1977.
 //
 //		Priority search in kd-trees:
 //			Arya and Mount, ``Algorithms for fast vector
 // quantization,''
-//				Proc. of DCC '93: Data Compression Conference, eds.
-//J.
+//				Proc. of DCC '93: Data Compression Conference,
+// eds.
+// J.
 // A.
 //				Storer and M. Cohn, IEEE Press, 1993, 381-390.
 //
@@ -341,10 +342,10 @@ const ANNbool ANN_ALLOW_SELF_MATCH = ANNfalse;
 //				-------------------------
 //------------------------
 //				POW(v)			= v^p
-//POW(v)
+// POW(v)
 //= |v|^p
 //				ROOT(x)			= x^(1/p)
-//ROOT(x)
+// ROOT(x)
 //= x^(1/p)
 //				#				= +
 //#
@@ -433,19 +434,19 @@ typedef ANNidx *ANNidxArray;     // an array of point indices
 //
 //		annAllocPt() and annDeallocPt():
 //				Allocate a deallocate storage for a single
-//point,
+// point,
 // and
 //				return a pointer to it.  The argument to
-//AllocPt()
+// AllocPt()
 // is
 //				used to initialize all components.
 //
 //		annAllocPts() and annDeallocPts():
 //				Allocate and deallocate an array of points as
-//well
+// well
 // a
 //				place to store their coordinates, and
-//initializes
+// initializes
 // the
 //				points to point to their respective coordinates.
 // It
@@ -456,7 +457,7 @@ typedef ANNidx *ANNidxArray;     // an array of point indices
 //
 //		annCopyPt():
 //				Creates a copy of a given point, allocating
-//space
+// space
 // for
 //				the new point.  It returns a pointer to the
 // newly
@@ -687,7 +688,7 @@ const int ANN_N_SHRINK_RULES = 4; // number of shrink rules
 //				the closer child first.
 //			Priority search (annkPriSearch()):
 //				Searches nodes in order of increasing distance
-//of
+// of
 // the
 //				associated cell from the query point.  For many
 //				distributions the standard search seems to work
@@ -742,15 +743,17 @@ const int ANN_N_SHRINK_RULES = 4; // number of shrink rules
 //
 //		dim						Dimension of
 // space
-//		n_pts					Number of points currently
-//in
+//		n_pts					Number of points
+// currently
+// in
 // the tree
 //		n_max					Maximum number of points
-//that
+// that
 // are allowed
 //								in the tree
-//		bkt_size				Maximum bucket size (no. of
-//points
+//		bkt_size				Maximum bucket size (no.
+// of
+// points
 // per leaf)
 //		bnd_box_lo				Bounding box low point
 //		bnd_box_hi				Bounding box high point

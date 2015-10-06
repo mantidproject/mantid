@@ -104,9 +104,8 @@ private:
                                            std::vector<double> l2s,
                                            std::vector<double> phis);
   void convertOffsetsToCal(DataObjects::OffsetsWorkspace_sptr &offsetsWS);
-  double
-  getVecPropertyFromPmOrSelf(const std::string &name,
-                             std::vector<double> &avec);
+  double getVecPropertyFromPmOrSelf(const std::string &name,
+                                    std::vector<double> &avec);
 
   API::MatrixWorkspace_sptr m_inputW;
   API::MatrixWorkspace_sptr m_outputW;

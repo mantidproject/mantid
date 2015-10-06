@@ -22,10 +22,13 @@ LocalParameterItemDelegate::LocalParameterItemDelegate(EditLocalParameterDialog 
 /// Create a custom editor LocalParameterEditor.
 QWidget* LocalParameterItemDelegate::createEditor(QWidget * parent, const QStyleOptionViewItem &, const QModelIndex & index) const
 {
-  m_currentEditor = new LocalParameterEditor(parent,index.row(), owner()->isFixed(index.row()));
+  auto row = index.row();
+  m_currentEditor = new LocalParameterEditor(parent,row, owner()->isFixed(row), owner()->getTie(row));
   connect(m_currentEditor,SIGNAL(setAllValues(double)),this,SIGNAL(setAllValues(double)));
   connect(m_currentEditor,SIGNAL(fixParameter(int,bool)),this,SIGNAL(fixParameter(int,bool)));
   connect(m_currentEditor,SIGNAL(setAllFixed(bool)),this,SIGNAL(setAllFixed(bool)));
+  connect(m_currentEditor,SIGNAL(setTie(int,QString)),this,SIGNAL(setTie(int,QString)));
+  connect(m_currentEditor,SIGNAL(setTieAll(QString)),this,SIGNAL(setTieAll(QString)));
   m_currentEditor->installEventFilter(const_cast<LocalParameterItemDelegate*>(this));
  return m_currentEditor;
 }
@@ -58,26 +61,38 @@ bool LocalParameterItemDelegate::eventFilter(QObject * obj, QEvent * ev)
 /// Paint the table cell.
 void LocalParameterItemDelegate::paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const
 {
-  QStyledItemDelegate::paint(painter, option, index);
+  auto tie = owner()->getTie(index.row());
 
-  if ( owner()->isFixed(index.row()) )
+  if (!tie.isEmpty())
   {
     auto rect = option.rect;
-
-    auto text = index.model()->data(index).asString();
-    int textWidth = option.fontMetrics.width(text);
-
-    QString fixedStr(" (fixed)");
-    int fWidth = option.fontMetrics.width(fixedStr);
-    if ( textWidth + fWidth > rect.width() )
-    {
-      fixedStr = "(f)";
-      fWidth = option.fontMetrics.width(fixedStr);
-    }
-
     auto dHeight = (option.rect.height() - option.fontMetrics.height()) / 2;
-    rect.adjust(rect.width() - fWidth, dHeight, 0 ,-dHeight);
-    painter->drawText(rect,fixedStr);
+    rect.adjust(0, dHeight, 0 ,-dHeight);
+    painter->drawText(rect, tie);
+  }
+  else
+  {
+    QStyledItemDelegate::paint(painter, option, index);
+
+    if ( owner()->isFixed(index.row()) )
+    {
+      auto rect = option.rect;
+
+      auto text = index.model()->data(index).asString();
+      int textWidth = option.fontMetrics.width(text);
+
+      QString fixedStr(" (fixed)");
+      int fWidth = option.fontMetrics.width(fixedStr);
+      if ( textWidth + fWidth > rect.width() )
+      {
+        fixedStr = "(f)";
+        fWidth = option.fontMetrics.width(fixedStr);
+      }
+
+      auto dHeight = (option.rect.height() - option.fontMetrics.height()) / 2;
+      rect.adjust(rect.width() - fWidth, dHeight, 0 ,-dHeight);
+      painter->drawText(rect,fixedStr);
+    }
   }
 }
 

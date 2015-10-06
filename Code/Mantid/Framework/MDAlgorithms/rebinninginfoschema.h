@@ -315,13 +315,13 @@ public:
 
       public
       :[
-         System::Diagnostics::DebuggerNonUserCodeAttribute,
-         System::CodeDom::Compiler::GeneratedCodeAttribute(
-             L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-         System::ComponentModel::Browsable(false),
-         System::ComponentModel::DesignerSerializationVisibility(
-             ::System::ComponentModel::DesignerSerializationVisibility::Content)
-       ] property NewDataSet::ParameterListDataTable ^
+        System::Diagnostics::DebuggerNonUserCodeAttribute,
+        System::CodeDom::Compiler::GeneratedCodeAttribute(
+            L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
+        System::ComponentModel::Browsable(false),
+        System::ComponentModel::DesignerSerializationVisibility(
+            ::System::ComponentModel::DesignerSerializationVisibility::Content)
+      ] property NewDataSet::ParameterListDataTable ^
        ParameterList { NewDataSet::ParameterListDataTable ^ get(); }
 
        public :
@@ -335,8 +335,8 @@ public:
        ] property NewDataSet::ParameterDataTable ^
        Parameter { NewDataSet::ParameterDataTable ^ get(); }
 
-       public :
-       [
+       public
+       :[
          System::Diagnostics::DebuggerNonUserCodeAttribute,
          System::CodeDom::Compiler::GeneratedCodeAttribute(
              L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
@@ -344,108 +344,200 @@ public:
          System::ComponentModel::DesignerSerializationVisibility(
              ::System::ComponentModel::DesignerSerializationVisibility::Content)
        ] property NewDataSet::DimensionDataTable ^
-       Dimension { NewDataSet::DimensionDataTable ^ get(); }
+        Dimension { NewDataSet::DimensionDataTable ^ get(); }
 
-       public :
-       [
-         System::Diagnostics::DebuggerNonUserCodeAttribute,
-         System::CodeDom::Compiler::GeneratedCodeAttribute(
-             L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-         System::ComponentModel::Browsable(false),
-         System::ComponentModel::DesignerSerializationVisibility(
-             ::System::ComponentModel::DesignerSerializationVisibility::Content)
-       ] property NewDataSet::IntegratedDataTable ^
-       Integrated { NewDataSet::IntegratedDataTable ^ get(); }
+        public :[
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
+          System::ComponentModel::Browsable(false),
+          System::ComponentModel::DesignerSerializationVisibility(
+              ::System::ComponentModel::DesignerSerializationVisibility::
+                  Content)
+        ] property NewDataSet::IntegratedDataTable ^
+                Integrated { NewDataSet::IntegratedDataTable ^ get(); }
 
-       public :
-       [
-         System::Diagnostics::DebuggerNonUserCodeAttribute,
-         System::CodeDom::Compiler::GeneratedCodeAttribute(
-             L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-         System::ComponentModel::Browsable(false),
-         System::ComponentModel::DesignerSerializationVisibility(
-             ::System::ComponentModel::DesignerSerializationVisibility::Content)
-       ] property NewDataSet::CompositeInstructionDataTable ^
-       CompositeInstruction {
-         NewDataSet::CompositeInstructionDataTable ^ get();
-       }
+                public
+                :[
+                  System::Diagnostics::DebuggerNonUserCodeAttribute,
+                  System::CodeDom::Compiler::GeneratedCodeAttribute(
+                      L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
+                  System::ComponentModel::Browsable(false),
+                  System::ComponentModel::DesignerSerializationVisibility(
+                      ::System::ComponentModel::
+                          DesignerSerializationVisibility::Content)
+                ] property NewDataSet::CompositeInstructionDataTable ^
+                 CompositeInstruction {
+                   NewDataSet::CompositeInstructionDataTable ^ get();
+                 }
 
-       public :
-       [
-         System::Diagnostics::DebuggerNonUserCodeAttribute,
-         System::CodeDom::Compiler::GeneratedCodeAttribute(
-             L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-         System::ComponentModel::Browsable(false),
-         System::ComponentModel::DesignerSerializationVisibility(
-             ::System::ComponentModel::DesignerSerializationVisibility::Content)
-       ] property NewDataSet::GeometryDataTable ^
-       Geometry { NewDataSet::GeometryDataTable ^ get(); }
+                 public :[
+                   System::Diagnostics::DebuggerNonUserCodeAttribute,
+                   System::CodeDom::Compiler::GeneratedCodeAttribute(
+                       L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
+                   System::ComponentModel::Browsable(false),
+                   System::ComponentModel::DesignerSerializationVisibility(
+                       ::System::ComponentModel::
+                           DesignerSerializationVisibility::Content)
+                 ] property NewDataSet::GeometryDataTable ^
+                         Geometry { NewDataSet::GeometryDataTable ^ get(); }
 
-       public :
-       [
-         System::Diagnostics::DebuggerNonUserCodeAttribute,
-         System::CodeDom::Compiler::GeneratedCodeAttribute(
-             L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-         System::ComponentModel::Browsable(false),
-         System::ComponentModel::DesignerSerializationVisibility(
-             ::System::ComponentModel::DesignerSerializationVisibility::Content)
-       ] property NewDataSet::XDimensionDataTable ^
-       XDimension { NewDataSet::XDimensionDataTable ^ get(); }
+                         public :[
+                           System::Diagnostics::DebuggerNonUserCodeAttribute,
+                           System::CodeDom::Compiler::GeneratedCodeAttribute(
+                               L"System.Data.Design.TypedDataSetGenerator",
+                               L"4.0.0.0"),
+                           System::ComponentModel::Browsable(false),
+                           System::ComponentModel::
+                               DesignerSerializationVisibility(
+                                   ::System::ComponentModel::
+                                       DesignerSerializationVisibility::Content)
+                         ] property NewDataSet::XDimensionDataTable ^
+                                 XDimension {
+                                   NewDataSet::XDimensionDataTable ^ get();
+                                 }
 
-       public :
-       [
-         System::Diagnostics::DebuggerNonUserCodeAttribute,
-         System::CodeDom::Compiler::GeneratedCodeAttribute(
-             L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-         System::ComponentModel::Browsable(false),
-         System::ComponentModel::DesignerSerializationVisibility(
-             ::System::ComponentModel::DesignerSerializationVisibility::Content)
-       ] property NewDataSet::YDimensionDataTable ^
-       YDimension { NewDataSet::YDimensionDataTable ^ get(); }
+                                 public :[
+                                   System::Diagnostics::
+                                       DebuggerNonUserCodeAttribute,
+                                   System::CodeDom::Compiler::
+                                       GeneratedCodeAttribute(
+                                           L"System.Data.Design."
+                                           L"TypedDataSetGenerator",
+                                           L"4.0.0.0"),
+                                   System::ComponentModel::Browsable(false),
+                                   System::ComponentModel::
+                                       DesignerSerializationVisibility(
+                                           ::System::ComponentModel::
+                                               DesignerSerializationVisibility::
+                                                   Content)
+                                 ] property NewDataSet::YDimensionDataTable ^
+                                         YDimension {
+                                           NewDataSet::YDimensionDataTable ^
+                                               get();
+                                         }
 
-       public :
-       [
-         System::Diagnostics::DebuggerNonUserCodeAttribute,
-         System::CodeDom::Compiler::GeneratedCodeAttribute(
-             L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-         System::ComponentModel::Browsable(false),
-         System::ComponentModel::DesignerSerializationVisibility(
-             ::System::ComponentModel::DesignerSerializationVisibility::Content)
-       ] property NewDataSet::ZDimensionDataTable ^
-       ZDimension { NewDataSet::ZDimensionDataTable ^ get(); }
+                                         public :[
+                                           System::Diagnostics::
+                                               DebuggerNonUserCodeAttribute,
+                                           System::CodeDom::Compiler::
+                                               GeneratedCodeAttribute(
+                                                   L"System.Data.Design."
+                                                   L"TypedDataSetGenerator",
+                                                   L"4.0.0.0"),
+                                           System::ComponentModel::Browsable(
+                                               false),
+                                           System::ComponentModel::
+                                               DesignerSerializationVisibility(
+                                                   ::System::ComponentModel::
+                                                       DesignerSerializationVisibility::
+                                                           Content)
+                                         ] property NewDataSet::
+                                                     ZDimensionDataTable ^
+                                                 ZDimension {
+                                                   NewDataSet::
+                                                           ZDimensionDataTable ^
+                                                       get();
+                                                 }
 
-       public :
-       [
-         System::Diagnostics::DebuggerNonUserCodeAttribute,
-         System::CodeDom::Compiler::GeneratedCodeAttribute(
-             L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-         System::ComponentModel::Browsable(false),
-         System::ComponentModel::DesignerSerializationVisibility(
-             ::System::ComponentModel::DesignerSerializationVisibility::Content)
-       ] property NewDataSet::TDimensionDataTable ^
-       TDimension { NewDataSet::TDimensionDataTable ^ get(); }
+                                                 public :[
+                                                   System::Diagnostics::
+                                                       DebuggerNonUserCodeAttribute,
+                                                   System::CodeDom::Compiler::
+                                                       GeneratedCodeAttribute(
+                                                           L"System.Data."
+                                                           L"Design."
+                                                           L"TypedDataSetGenera"
+                                                           L"tor",
+                                                           L"4.0.0.0"),
+                                                   System::ComponentModel::
+                                                       Browsable(false),
+                                                   System::ComponentModel::
+                                                       DesignerSerializationVisibility(
+                                                           ::System::ComponentModel::
+                                                               DesignerSerializationVisibility::
+                                                                   Content)
+                                                 ] property NewDataSet::
+                                                             TDimensionDataTable ^
+                                                         TDimension {
+                                                           NewDataSet::
+                                                                   TDimensionDataTable ^
+                                                               get();
+                                                         }
 
-       public :
-       [
-         System::Diagnostics::DebuggerNonUserCodeAttribute,
-         System::CodeDom::Compiler::GeneratedCodeAttribute(
-             L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-         System::ComponentModel::Browsable(false),
-         System::ComponentModel::DesignerSerializationVisibility(
-             ::System::ComponentModel::DesignerSerializationVisibility::Content)
-       ] property NewDataSet::OperationDataTable ^
-       Operation { NewDataSet::OperationDataTable ^ get(); }
+                                                         public :[
+                                                           System::Diagnostics::
+                                                               DebuggerNonUserCodeAttribute,
+                                                           System::CodeDom::
+                                                               Compiler::
+                                                                   GeneratedCodeAttribute(
+                                                                       L"System"
+                                                                       L".Data."
+                                                                       L"Design"
+                                                                       L".Typed"
+                                                                       L"DataSe"
+                                                                       L"tGener"
+                                                                       L"ator",
+                                                                       L"4.0.0."
+                                                                       L"0"),
+                                                           System::
+                                                               ComponentModel::
+                                                                   Browsable(
+                                                                       false),
+                                                           System::ComponentModel::
+                                                               DesignerSerializationVisibility(
+                                                                   ::System::ComponentModel::
+                                                                       DesignerSerializationVisibility::
+                                                                           Content)
+                                                         ] property NewDataSet::
+                                                                     OperationDataTable ^
+                                                                 Operation {
+                                                                   NewDataSet::
+                                                                           OperationDataTable ^
+                                                                       get();
+                                                                 }
 
-       public :
-       [
-         System::Diagnostics::DebuggerNonUserCodeAttribute,
-         System::CodeDom::Compiler::GeneratedCodeAttribute(
-             L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-         System::ComponentModel::BrowsableAttribute(true),
-         System::ComponentModel::DesignerSerializationVisibilityAttribute(
-             ::System::ComponentModel::DesignerSerializationVisibility::Visible)
-       ] virtual property::System::Data::SchemaSerializationMode
-           SchemaSerializationMode {
+                                                                 public :[
+                                                                   System::Diagnostics::
+                                                                       DebuggerNonUserCodeAttribute,
+                                                                   System::CodeDom::
+                                                                       Compiler::GeneratedCodeAttribute(
+                                                                           L"Sy"
+                                                                           L"st"
+                                                                           L"em"
+                                                                           L".D"
+                                                                           L"at"
+                                                                           L"a."
+                                                                           L"De"
+                                                                           L"si"
+                                                                           L"gn"
+                                                                           L".T"
+                                                                           L"yp"
+                                                                           L"ed"
+                                                                           L"Da"
+                                                                           L"ta"
+                                                                           L"Se"
+                                                                           L"tG"
+                                                                           L"en"
+                                                                           L"er"
+                                                                           L"at"
+                                                                           L"o"
+                                                                           L"r",
+                                                                           L"4."
+                                                                           L"0."
+                                                                           L"0."
+                                                                           L"0"),
+                                                                   System::ComponentModel::
+                                                                       BrowsableAttribute(
+                                                                           true),
+                                                                   System::ComponentModel::
+                                                                       DesignerSerializationVisibilityAttribute(
+                                                                           ::System::ComponentModel::
+                                                                               DesignerSerializationVisibility::
+                                                                                   Visible)
+                                                                 ] virtual property::System::
+                                                                             Data::SchemaSerializationMode
+                                                                                 SchemaSerializationMode {
     ::System::Data::SchemaSerializationMode get() override;
     System::Void set(::System::Data::SchemaSerializationMode value) override;
   }
@@ -460,21 +552,21 @@ public:
   ] property::System::Data::DataTableCollection ^
       Tables { ::System::Data::DataTableCollection ^ get() new; }
 
-      public
-      :[
-         System::Diagnostics::DebuggerNonUserCodeAttribute,
-         System::CodeDom::Compiler::GeneratedCodeAttribute(
-             L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-         System::ComponentModel::DesignerSerializationVisibilityAttribute(
-             ::System::ComponentModel::DesignerSerializationVisibility::Hidden)
-       ] property::System::Data::DataRelationCollection ^
-       Relations { ::System::Data::DataRelationCollection ^ get() new; }
+      public :[
+        System::Diagnostics::DebuggerNonUserCodeAttribute,
+        System::CodeDom::Compiler::GeneratedCodeAttribute(
+            L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
+        System::ComponentModel::DesignerSerializationVisibilityAttribute(
+            ::System::ComponentModel::DesignerSerializationVisibility::Hidden)
+      ] property::System::Data::DataRelationCollection ^
+              Relations { ::System::Data::DataRelationCollection ^ get() new; }
 
-       protected : [System::Diagnostics::DebuggerNonUserCodeAttribute]
-                       [System::CodeDom::Compiler::GeneratedCodeAttribute(
-                           L"System.Data.Design.TypedDataSetGenerator",
-                           L"4.0.0.0")] virtual ::System::Void
-                       InitializeDerivedDataSet() override;
+              protected :
+              [System::Diagnostics::DebuggerNonUserCodeAttribute]
+                  [System::CodeDom::Compiler::GeneratedCodeAttribute(
+                      L"System.Data.Design.TypedDataSetGenerator",
+                      L"4.0.0.0")] virtual ::System::Void
+                  InitializeDerivedDataSet() override;
 
 public:
   [System::Diagnostics::DebuggerNonUserCodeAttribute]
@@ -709,38 +801,37 @@ public: /// <summary>
 
         public
         :[
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataColumn ^
+         Function_IdColumn { ::System::Data::DataColumn ^ get(); }
+
+         public
+         :[
            System::Diagnostics::DebuggerNonUserCodeAttribute,
            System::CodeDom::Compiler::GeneratedCodeAttribute(
                L"System.Data.Design.TypedDataSetGenerator",
                L"4.0.0.0")
          ] property::System::Data::DataColumn ^
-         Function_IdColumn { ::System::Data::DataColumn ^ get(); }
+          Function_Id_0Column { ::System::Data::DataColumn ^ get(); }
 
-         public
-         :[
+          public
+          :[
             System::Diagnostics::DebuggerNonUserCodeAttribute,
             System::CodeDom::Compiler::GeneratedCodeAttribute(
                 L"System.Data.Design.TypedDataSetGenerator",
                 L"4.0.0.0")
           ] property::System::Data::DataColumn ^
-          Function_Id_0Column { ::System::Data::DataColumn ^ get(); }
-
-          public
-          :[
-             System::Diagnostics::DebuggerNonUserCodeAttribute,
-             System::CodeDom::Compiler::GeneratedCodeAttribute(
-                 L"System.Data.Design.TypedDataSetGenerator",
-                 L"4.0.0.0")
-           ] property::System::Data::DataColumn ^
            CompositeInstruction_IdColumn { ::System::Data::DataColumn ^ get(); }
 
-           public
-           :[
-              System::Diagnostics::DebuggerNonUserCodeAttribute,
-              System::CodeDom::Compiler::GeneratedCodeAttribute(
-                  L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-              System::ComponentModel::Browsable(false)
-            ] property::System::Int32 Count {
+           public :[
+             System::Diagnostics::DebuggerNonUserCodeAttribute,
+             System::CodeDom::Compiler::GeneratedCodeAttribute(
+                 L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
+             System::ComponentModel::Browsable(false)
+           ] property::System::Int32 Count {
       ::System::Int32 get();
     }
 
@@ -947,20 +1038,19 @@ public: /// <summary>
         ParameterList_IdColumn { ::System::Data::DataColumn ^ get(); }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property::System::Data::DataColumn ^
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataColumn ^
                 Function_IdColumn { ::System::Data::DataColumn ^ get(); }
 
-                public
-                :[
-                   System::Diagnostics::DebuggerNonUserCodeAttribute,
-                   System::CodeDom::Compiler::GeneratedCodeAttribute(
-                       L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-                   System::ComponentModel::Browsable(false)
-                 ] property::System::Int32 Count {
+                public :[
+                  System::Diagnostics::DebuggerNonUserCodeAttribute,
+                  System::CodeDom::Compiler::GeneratedCodeAttribute(
+                      L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
+                  System::ComponentModel::Browsable(false)
+                ] property::System::Int32 Count {
       ::System::Int32 get();
     }
 
@@ -1166,38 +1256,37 @@ public: /// <summary>
 
         public
         :[
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataColumn ^
+         TypeColumn { ::System::Data::DataColumn ^ get(); }
+
+         public
+         :[
            System::Diagnostics::DebuggerNonUserCodeAttribute,
            System::CodeDom::Compiler::GeneratedCodeAttribute(
                L"System.Data.Design.TypedDataSetGenerator",
                L"4.0.0.0")
          ] property::System::Data::DataColumn ^
-         TypeColumn { ::System::Data::DataColumn ^ get(); }
+          ValueColumn { ::System::Data::DataColumn ^ get(); }
 
-         public
-         :[
+          public
+          :[
             System::Diagnostics::DebuggerNonUserCodeAttribute,
             System::CodeDom::Compiler::GeneratedCodeAttribute(
                 L"System.Data.Design.TypedDataSetGenerator",
                 L"4.0.0.0")
           ] property::System::Data::DataColumn ^
-          ValueColumn { ::System::Data::DataColumn ^ get(); }
-
-          public
-          :[
-             System::Diagnostics::DebuggerNonUserCodeAttribute,
-             System::CodeDom::Compiler::GeneratedCodeAttribute(
-                 L"System.Data.Design.TypedDataSetGenerator",
-                 L"4.0.0.0")
-           ] property::System::Data::DataColumn ^
            ParameterList_IdColumn { ::System::Data::DataColumn ^ get(); }
 
-           public
-           :[
-              System::Diagnostics::DebuggerNonUserCodeAttribute,
-              System::CodeDom::Compiler::GeneratedCodeAttribute(
-                  L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-              System::ComponentModel::Browsable(false)
-            ] property::System::Int32 Count {
+           public :[
+             System::Diagnostics::DebuggerNonUserCodeAttribute,
+             System::CodeDom::Compiler::GeneratedCodeAttribute(
+                 L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
+             System::ComponentModel::Browsable(false)
+           ] property::System::Int32 Count {
       ::System::Int32 get();
     }
 
@@ -1411,56 +1500,55 @@ public: /// <summary>
 
         public
         :[
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataColumn ^
+         NameColumn { ::System::Data::DataColumn ^ get(); }
+
+         public
+         :[
            System::Diagnostics::DebuggerNonUserCodeAttribute,
            System::CodeDom::Compiler::GeneratedCodeAttribute(
                L"System.Data.Design.TypedDataSetGenerator",
                L"4.0.0.0")
          ] property::System::Data::DataColumn ^
-         NameColumn { ::System::Data::DataColumn ^ get(); }
+          UpperBoundsColumn { ::System::Data::DataColumn ^ get(); }
 
-         public
-         :[
+          public
+          :[
             System::Diagnostics::DebuggerNonUserCodeAttribute,
             System::CodeDom::Compiler::GeneratedCodeAttribute(
                 L"System.Data.Design.TypedDataSetGenerator",
                 L"4.0.0.0")
           ] property::System::Data::DataColumn ^
-          UpperBoundsColumn { ::System::Data::DataColumn ^ get(); }
+           LowerBoundsColumn { ::System::Data::DataColumn ^ get(); }
 
-          public
-          :[
+           public
+           :[
              System::Diagnostics::DebuggerNonUserCodeAttribute,
              System::CodeDom::Compiler::GeneratedCodeAttribute(
                  L"System.Data.Design.TypedDataSetGenerator",
                  L"4.0.0.0")
            ] property::System::Data::DataColumn ^
-           LowerBoundsColumn { ::System::Data::DataColumn ^ get(); }
+            Dimension_IdColumn { ::System::Data::DataColumn ^ get(); }
 
-           public
-           :[
+            public
+            :[
               System::Diagnostics::DebuggerNonUserCodeAttribute,
               System::CodeDom::Compiler::GeneratedCodeAttribute(
                   L"System.Data.Design.TypedDataSetGenerator",
                   L"4.0.0.0")
             ] property::System::Data::DataColumn ^
-            Dimension_IdColumn { ::System::Data::DataColumn ^ get(); }
-
-            public
-            :[
-               System::Diagnostics::DebuggerNonUserCodeAttribute,
-               System::CodeDom::Compiler::GeneratedCodeAttribute(
-                   L"System.Data.Design.TypedDataSetGenerator",
-                   L"4.0.0.0")
-             ] property::System::Data::DataColumn ^
              Geometry_IdColumn { ::System::Data::DataColumn ^ get(); }
 
-             public
-             :[
-                System::Diagnostics::DebuggerNonUserCodeAttribute,
-                System::CodeDom::Compiler::GeneratedCodeAttribute(
-                    L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-                System::ComponentModel::Browsable(false)
-              ] property::System::Int32 Count {
+             public :[
+               System::Diagnostics::DebuggerNonUserCodeAttribute,
+               System::CodeDom::Compiler::GeneratedCodeAttribute(
+                   L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
+               System::ComponentModel::Browsable(false)
+             ] property::System::Int32 Count {
       ::System::Int32 get();
     }
 
@@ -1663,31 +1751,29 @@ public: /// <summary>
     ] property::System::Data::DataColumn ^
         UpperLimitColumn { ::System::Data::DataColumn ^ get(); }
 
-        public
-        :[
-           System::Diagnostics::DebuggerNonUserCodeAttribute,
-           System::CodeDom::Compiler::GeneratedCodeAttribute(
-               L"System.Data.Design.TypedDataSetGenerator",
-               L"4.0.0.0")
-         ] property::System::Data::DataColumn ^
-         LowerLimitColumn { ::System::Data::DataColumn ^ get(); }
+        public :[
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataColumn ^
+                LowerLimitColumn { ::System::Data::DataColumn ^ get(); }
 
-         public
-         :[
-            System::Diagnostics::DebuggerNonUserCodeAttribute,
-            System::CodeDom::Compiler::GeneratedCodeAttribute(
-                L"System.Data.Design.TypedDataSetGenerator",
-                L"4.0.0.0")
-          ] property::System::Data::DataColumn ^
-          Dimension_IdColumn { ::System::Data::DataColumn ^ get(); }
+                public
+                :[
+                  System::Diagnostics::DebuggerNonUserCodeAttribute,
+                  System::CodeDom::Compiler::GeneratedCodeAttribute(
+                      L"System.Data.Design.TypedDataSetGenerator",
+                      L"4.0.0.0")
+                ] property::System::Data::DataColumn ^
+                 Dimension_IdColumn { ::System::Data::DataColumn ^ get(); }
 
-          public
-          :[
-             System::Diagnostics::DebuggerNonUserCodeAttribute,
-             System::CodeDom::Compiler::GeneratedCodeAttribute(
-                 L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-             System::ComponentModel::Browsable(false)
-           ] property::System::Int32 Count {
+                 public :[
+                   System::Diagnostics::DebuggerNonUserCodeAttribute,
+                   System::CodeDom::Compiler::GeneratedCodeAttribute(
+                       L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
+                   System::ComponentModel::Browsable(false)
+                 ] property::System::Int32 Count {
       ::System::Int32 get();
     }
 
@@ -1897,29 +1983,28 @@ public: /// <summary>
 
         public
         :[
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataColumn ^
+         MDWorkspaceLocationColumn { ::System::Data::DataColumn ^ get(); }
+
+         public
+         :[
            System::Diagnostics::DebuggerNonUserCodeAttribute,
            System::CodeDom::Compiler::GeneratedCodeAttribute(
                L"System.Data.Design.TypedDataSetGenerator",
                L"4.0.0.0")
          ] property::System::Data::DataColumn ^
-         MDWorkspaceLocationColumn { ::System::Data::DataColumn ^ get(); }
-
-         public
-         :[
-            System::Diagnostics::DebuggerNonUserCodeAttribute,
-            System::CodeDom::Compiler::GeneratedCodeAttribute(
-                L"System.Data.Design.TypedDataSetGenerator",
-                L"4.0.0.0")
-          ] property::System::Data::DataColumn ^
           CompositeInstruction_IdColumn { ::System::Data::DataColumn ^ get(); }
 
-          public
-          :[
-             System::Diagnostics::DebuggerNonUserCodeAttribute,
-             System::CodeDom::Compiler::GeneratedCodeAttribute(
-                 L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-             System::ComponentModel::Browsable(false)
-           ] property::System::Int32 Count {
+          public :[
+            System::Diagnostics::DebuggerNonUserCodeAttribute,
+            System::CodeDom::Compiler::GeneratedCodeAttribute(
+                L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
+            System::ComponentModel::Browsable(false)
+          ] property::System::Int32 Count {
       ::System::Int32 get();
     }
 
@@ -2121,19 +2206,19 @@ public: /// <summary>
 
         public
         :[
-           System::Diagnostics::DebuggerNonUserCodeAttribute,
-           System::CodeDom::Compiler::GeneratedCodeAttribute(
-               L"System.Data.Design.TypedDataSetGenerator",
-               L"4.0.0.0")
-         ] property::System::Data::DataColumn ^
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataColumn ^
          CompositeInstruction_IdColumn { ::System::Data::DataColumn ^ get(); }
 
          public :[
-                   System::Diagnostics::DebuggerNonUserCodeAttribute,
-                   System::CodeDom::Compiler::GeneratedCodeAttribute(
-                       L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-                   System::ComponentModel::Browsable(false)
-                 ] property::System::Int32 Count {
+           System::Diagnostics::DebuggerNonUserCodeAttribute,
+           System::CodeDom::Compiler::GeneratedCodeAttribute(
+               L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
+           System::ComponentModel::Browsable(false)
+         ] property::System::Int32 Count {
       ::System::Int32 get();
     }
 
@@ -2333,20 +2418,19 @@ public: /// <summary>
         RefDimensionIdColumn { ::System::Data::DataColumn ^ get(); }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property::System::Data::DataColumn ^
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataColumn ^
                 Geometry_IdColumn { ::System::Data::DataColumn ^ get(); }
 
-                public
-                :[
-                   System::Diagnostics::DebuggerNonUserCodeAttribute,
-                   System::CodeDom::Compiler::GeneratedCodeAttribute(
-                       L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-                   System::ComponentModel::Browsable(false)
-                 ] property::System::Int32 Count {
+                public :[
+                  System::Diagnostics::DebuggerNonUserCodeAttribute,
+                  System::CodeDom::Compiler::GeneratedCodeAttribute(
+                      L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
+                  System::ComponentModel::Browsable(false)
+                ] property::System::Int32 Count {
       ::System::Int32 get();
     }
 
@@ -2546,20 +2630,19 @@ public: /// <summary>
         RefDimensionIdColumn { ::System::Data::DataColumn ^ get(); }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property::System::Data::DataColumn ^
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataColumn ^
                 Geometry_IdColumn { ::System::Data::DataColumn ^ get(); }
 
-                public
-                :[
-                   System::Diagnostics::DebuggerNonUserCodeAttribute,
-                   System::CodeDom::Compiler::GeneratedCodeAttribute(
-                       L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-                   System::ComponentModel::Browsable(false)
-                 ] property::System::Int32 Count {
+                public :[
+                  System::Diagnostics::DebuggerNonUserCodeAttribute,
+                  System::CodeDom::Compiler::GeneratedCodeAttribute(
+                      L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
+                  System::ComponentModel::Browsable(false)
+                ] property::System::Int32 Count {
       ::System::Int32 get();
     }
 
@@ -2759,20 +2842,19 @@ public: /// <summary>
         RefDimensionIdColumn { ::System::Data::DataColumn ^ get(); }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property::System::Data::DataColumn ^
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataColumn ^
                 Geometry_IdColumn { ::System::Data::DataColumn ^ get(); }
 
-                public
-                :[
-                   System::Diagnostics::DebuggerNonUserCodeAttribute,
-                   System::CodeDom::Compiler::GeneratedCodeAttribute(
-                       L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-                   System::ComponentModel::Browsable(false)
-                 ] property::System::Int32 Count {
+                public :[
+                  System::Diagnostics::DebuggerNonUserCodeAttribute,
+                  System::CodeDom::Compiler::GeneratedCodeAttribute(
+                      L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
+                  System::ComponentModel::Browsable(false)
+                ] property::System::Int32 Count {
       ::System::Int32 get();
     }
 
@@ -2972,20 +3054,19 @@ public: /// <summary>
         RefDimensionIdColumn { ::System::Data::DataColumn ^ get(); }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property::System::Data::DataColumn ^
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataColumn ^
                 Geometry_IdColumn { ::System::Data::DataColumn ^ get(); }
 
-                public
-                :[
-                   System::Diagnostics::DebuggerNonUserCodeAttribute,
-                   System::CodeDom::Compiler::GeneratedCodeAttribute(
-                       L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-                   System::ComponentModel::Browsable(false)
-                 ] property::System::Int32 Count {
+                public :[
+                  System::Diagnostics::DebuggerNonUserCodeAttribute,
+                  System::CodeDom::Compiler::GeneratedCodeAttribute(
+                      L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
+                  System::ComponentModel::Browsable(false)
+                ] property::System::Int32 Count {
       ::System::Int32 get();
     }
 
@@ -3186,19 +3267,19 @@ public: /// <summary>
 
         public
         :[
-           System::Diagnostics::DebuggerNonUserCodeAttribute,
-           System::CodeDom::Compiler::GeneratedCodeAttribute(
-               L"System.Data.Design.TypedDataSetGenerator",
-               L"4.0.0.0")
-         ] property::System::Data::DataColumn ^
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataColumn ^
          CompositeInstruction_IdColumn { ::System::Data::DataColumn ^ get(); }
 
          public :[
-                   System::Diagnostics::DebuggerNonUserCodeAttribute,
-                   System::CodeDom::Compiler::GeneratedCodeAttribute(
-                       L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
-                   System::ComponentModel::Browsable(false)
-                 ] property::System::Int32 Count {
+           System::Diagnostics::DebuggerNonUserCodeAttribute,
+           System::CodeDom::Compiler::GeneratedCodeAttribute(
+               L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
+           System::ComponentModel::Browsable(false)
+         ] property::System::Int32 Count {
       ::System::Int32 get();
     }
 
@@ -3355,11 +3436,11 @@ public: /// <summary>
         }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property System::Int32 Function_Id {
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property System::Int32 Function_Id {
       System::Int32 get();
       System::Void set(System::Int32 value);
     }
@@ -3396,11 +3477,11 @@ public: /// <summary>
         }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property NewDataSet::CompositeInstructionRow ^
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property NewDataSet::CompositeInstructionRow ^
                 CompositeInstructionRow {
                   NewDataSet::CompositeInstructionRow ^ get();
                   System::Void set(NewDataSet::CompositeInstructionRow ^ value);
@@ -3437,14 +3518,14 @@ public: /// <summary>
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
             [System::CodeDom::Compiler::GeneratedCodeAttribute(
                 L"System.Data.Design.TypedDataSetGenerator",
-                L"4.0.0.0")] cli::array<NewDataSet::ParameterListRow ^ > ^
+                L"4.0.0.0")] cli::array<NewDataSet::ParameterListRow ^> ^
         GetParameterListRows();
 
   public:
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
             [System::CodeDom::Compiler::GeneratedCodeAttribute(
                 L"System.Data.Design.TypedDataSetGenerator",
-                L"4.0.0.0")] cli::array<NewDataSet::FunctionRow ^ > ^
+                L"4.0.0.0")] cli::array<NewDataSet::FunctionRow ^> ^
         GetFunctionRows();
   };
 
@@ -3510,7 +3591,7 @@ public: /// <summary>
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
             [System::CodeDom::Compiler::GeneratedCodeAttribute(
                 L"System.Data.Design.TypedDataSetGenerator",
-                L"4.0.0.0")] cli::array<NewDataSet::ParameterRow ^ > ^
+                L"4.0.0.0")] cli::array<NewDataSet::ParameterRow ^> ^
         GetParameterRows();
   };
 
@@ -3540,34 +3621,33 @@ public: /// <summary>
         }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property System::String ^
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property System::String ^
                 Type {
                   System::String ^ get();
                   System::Void set(System::String ^ value);
                 }
 
                 public :[
-                          System::Diagnostics::DebuggerNonUserCodeAttribute,
-                          System::CodeDom::Compiler::GeneratedCodeAttribute(
-                              L"System.Data.Design.TypedDataSetGenerator",
-                              L"4.0.0.0")
-                        ] property System::String ^
+                  System::Diagnostics::DebuggerNonUserCodeAttribute,
+                  System::CodeDom::Compiler::GeneratedCodeAttribute(
+                      L"System.Data.Design.TypedDataSetGenerator",
+                      L"4.0.0.0")
+                ] property System::String ^
                         Value {
                           System::String ^ get();
                           System::Void set(System::String ^ value);
                         }
 
-                        public
-                        :[
-                           System::Diagnostics::DebuggerNonUserCodeAttribute,
-                           System::CodeDom::Compiler::GeneratedCodeAttribute(
-                               L"System.Data.Design.TypedDataSetGenerator",
-                               L"4.0.0.0")
-                         ] property System::Int32 ParameterList_Id {
+                        public :[
+                          System::Diagnostics::DebuggerNonUserCodeAttribute,
+                          System::CodeDom::Compiler::GeneratedCodeAttribute(
+                              L"System.Data.Design.TypedDataSetGenerator",
+                              L"4.0.0.0")
+                        ] property System::Int32 ParameterList_Id {
       System::Int32 get();
       System::Void set(System::Int32 value);
     }
@@ -3633,11 +3713,11 @@ public: /// <summary>
         }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property System::Int64 UpperBounds {
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property System::Int64 UpperBounds {
       System::Int64 get();
       System::Void set(System::Int64 value);
     }
@@ -3700,7 +3780,7 @@ public: /// <summary>
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
             [System::CodeDom::Compiler::GeneratedCodeAttribute(
                 L"System.Data.Design.TypedDataSetGenerator",
-                L"4.0.0.0")] cli::array<NewDataSet::IntegratedRow ^ > ^
+                L"4.0.0.0")] cli::array<NewDataSet::IntegratedRow ^> ^
         GetIntegratedRows();
   };
 
@@ -3801,22 +3881,22 @@ public: /// <summary>
         }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property System::String ^
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property System::String ^
                 MDWorkspaceLocation {
                   System::String ^ get();
                   System::Void set(System::String ^ value);
                 }
 
                 public :[
-                          System::Diagnostics::DebuggerNonUserCodeAttribute,
-                          System::CodeDom::Compiler::GeneratedCodeAttribute(
-                              L"System.Data.Design.TypedDataSetGenerator",
-                              L"4.0.0.0")
-                        ] property System::Int32 CompositeInstruction_Id {
+                  System::Diagnostics::DebuggerNonUserCodeAttribute,
+                  System::CodeDom::Compiler::GeneratedCodeAttribute(
+                      L"System.Data.Design.TypedDataSetGenerator",
+                      L"4.0.0.0")
+                ] property System::Int32 CompositeInstruction_Id {
       System::Int32 get();
       System::Void set(System::Int32 value);
     }
@@ -3825,21 +3905,21 @@ public: /// <summary>
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
             [System::CodeDom::Compiler::GeneratedCodeAttribute(
                 L"System.Data.Design.TypedDataSetGenerator",
-                L"4.0.0.0")] cli::array<NewDataSet::GeometryRow ^ > ^
+                L"4.0.0.0")] cli::array<NewDataSet::GeometryRow ^> ^
         GetGeometryRows();
 
   public:
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
             [System::CodeDom::Compiler::GeneratedCodeAttribute(
                 L"System.Data.Design.TypedDataSetGenerator",
-                L"4.0.0.0")] cli::array<NewDataSet::OperationRow ^ > ^
+                L"4.0.0.0")] cli::array<NewDataSet::OperationRow ^> ^
         GetOperationRows();
 
   public:
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
             [System::CodeDom::Compiler::GeneratedCodeAttribute(
                 L"System.Data.Design.TypedDataSetGenerator",
-                L"4.0.0.0")] cli::array<NewDataSet::FunctionRow ^ > ^
+                L"4.0.0.0")] cli::array<NewDataSet::FunctionRow ^> ^
         GetFunctionRows();
   };
 
@@ -3905,35 +3985,35 @@ public: /// <summary>
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
             [System::CodeDom::Compiler::GeneratedCodeAttribute(
                 L"System.Data.Design.TypedDataSetGenerator",
-                L"4.0.0.0")] cli::array<NewDataSet::DimensionRow ^ > ^
+                L"4.0.0.0")] cli::array<NewDataSet::DimensionRow ^> ^
         GetDimensionRows();
 
   public:
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
             [System::CodeDom::Compiler::GeneratedCodeAttribute(
                 L"System.Data.Design.TypedDataSetGenerator",
-                L"4.0.0.0")] cli::array<NewDataSet::XDimensionRow ^ > ^
+                L"4.0.0.0")] cli::array<NewDataSet::XDimensionRow ^> ^
         GetXDimensionRows();
 
   public:
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
             [System::CodeDom::Compiler::GeneratedCodeAttribute(
                 L"System.Data.Design.TypedDataSetGenerator",
-                L"4.0.0.0")] cli::array<NewDataSet::YDimensionRow ^ > ^
+                L"4.0.0.0")] cli::array<NewDataSet::YDimensionRow ^> ^
         GetYDimensionRows();
 
   public:
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
             [System::CodeDom::Compiler::GeneratedCodeAttribute(
                 L"System.Data.Design.TypedDataSetGenerator",
-                L"4.0.0.0")] cli::array<NewDataSet::ZDimensionRow ^ > ^
+                L"4.0.0.0")] cli::array<NewDataSet::ZDimensionRow ^> ^
         GetZDimensionRows();
 
   public:
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
             [System::CodeDom::Compiler::GeneratedCodeAttribute(
                 L"System.Data.Design.TypedDataSetGenerator",
-                L"4.0.0.0")] cli::array<NewDataSet::TDimensionRow ^ > ^
+                L"4.0.0.0")] cli::array<NewDataSet::TDimensionRow ^> ^
         GetTDimensionRows();
   };
 
@@ -4255,11 +4335,11 @@ public: /// <summary>
         }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property System::Int32 CompositeInstruction_Id {
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property System::Int32 CompositeInstruction_Id {
       System::Int32 get();
       System::Void set(System::Int32 value);
     }
@@ -4320,11 +4400,11 @@ public: /// <summary>
         Row { NewDataSet::FunctionRow ^ get(); }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property::System::Data::DataRowAction Action {
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataRowAction Action {
       ::System::Data::DataRowAction get();
     }
   };
@@ -4362,11 +4442,11 @@ public: /// <summary>
         Row { NewDataSet::ParameterListRow ^ get(); }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property::System::Data::DataRowAction Action {
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataRowAction Action {
       ::System::Data::DataRowAction get();
     }
   };
@@ -4402,11 +4482,11 @@ public: /// <summary>
         Row { NewDataSet::ParameterRow ^ get(); }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property::System::Data::DataRowAction Action {
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataRowAction Action {
       ::System::Data::DataRowAction get();
     }
   };
@@ -4442,11 +4522,11 @@ public: /// <summary>
         Row { NewDataSet::DimensionRow ^ get(); }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property::System::Data::DataRowAction Action {
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataRowAction Action {
       ::System::Data::DataRowAction get();
     }
   };
@@ -4483,11 +4563,11 @@ public: /// <summary>
         Row { NewDataSet::IntegratedRow ^ get(); }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property::System::Data::DataRowAction Action {
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataRowAction Action {
       ::System::Data::DataRowAction get();
     }
   };
@@ -4526,11 +4606,11 @@ public: /// <summary>
         Row { NewDataSet::CompositeInstructionRow ^ get(); }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property::System::Data::DataRowAction Action {
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataRowAction Action {
       ::System::Data::DataRowAction get();
     }
   };
@@ -4566,11 +4646,11 @@ public: /// <summary>
         Row { NewDataSet::GeometryRow ^ get(); }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property::System::Data::DataRowAction Action {
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataRowAction Action {
       ::System::Data::DataRowAction get();
     }
   };
@@ -4607,11 +4687,11 @@ public: /// <summary>
         Row { NewDataSet::XDimensionRow ^ get(); }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property::System::Data::DataRowAction Action {
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataRowAction Action {
       ::System::Data::DataRowAction get();
     }
   };
@@ -4648,11 +4728,11 @@ public: /// <summary>
         Row { NewDataSet::YDimensionRow ^ get(); }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property::System::Data::DataRowAction Action {
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataRowAction Action {
       ::System::Data::DataRowAction get();
     }
   };
@@ -4689,11 +4769,11 @@ public: /// <summary>
         Row { NewDataSet::ZDimensionRow ^ get(); }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property::System::Data::DataRowAction Action {
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataRowAction Action {
       ::System::Data::DataRowAction get();
     }
   };
@@ -4730,11 +4810,11 @@ public: /// <summary>
         Row { NewDataSet::TDimensionRow ^ get(); }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property::System::Data::DataRowAction Action {
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataRowAction Action {
       ::System::Data::DataRowAction get();
     }
   };
@@ -4770,11 +4850,11 @@ public: /// <summary>
         Row { NewDataSet::OperationRow ^ get(); }
 
         public :[
-                  System::Diagnostics::DebuggerNonUserCodeAttribute,
-                  System::CodeDom::Compiler::GeneratedCodeAttribute(
-                      L"System.Data.Design.TypedDataSetGenerator",
-                      L"4.0.0.0")
-                ] property::System::Data::DataRowAction Action {
+          System::Diagnostics::DebuggerNonUserCodeAttribute,
+          System::CodeDom::Compiler::GeneratedCodeAttribute(
+              L"System.Data.Design.TypedDataSetGenerator",
+              L"4.0.0.0")
+        ] property::System::Data::DataRowAction Action {
       ::System::Data::DataRowAction get();
     }
   };
@@ -4806,7 +4886,7 @@ inline NewDataSet::NewDataSet(
     this->Relations->CollectionChanged += schemaChangedHandler1;
     return;
   }
-  ::System::String ^ strSchema = (cli::safe_cast<::System::String ^ >(
+  ::System::String ^ strSchema = (cli::safe_cast<::System::String ^>(
       info->GetValue(L"XmlSchema", ::System::String::typeid)));
   if (this->DetermineSchemaSerializationMode(info, context) ==
       ::System::Data::SchemaSerializationMode::IncludeSchema) {
@@ -4955,7 +5035,7 @@ inline ::System::Void NewDataSet::InitializeDerivedDataSet() {
 }
 
 inline ::System::Data::DataSet ^ NewDataSet::Clone() {
-  NewDataSet ^ cln = (cli::safe_cast<NewDataSet ^ >(__super::Clone()));
+  NewDataSet ^ cln = (cli::safe_cast<NewDataSet ^>(__super::Clone()));
   cln->InitVars();
   cln->SchemaSerializationMode = this->SchemaSerializationMode;
   return cln;
@@ -5047,7 +5127,7 @@ inline ::System::Xml::Schema::XmlSchema ^ NewDataSet::GetSchemaSerializable() {
 inline ::System::Void NewDataSet::InitVars() { this->InitVars(true); }
 
 inline ::System::Void NewDataSet::InitVars(::System::Boolean initTable) {
-  this->tableFunction = (cli::safe_cast<NewDataSet::FunctionDataTable ^ >(
+  this->tableFunction = (cli::safe_cast<NewDataSet::FunctionDataTable ^>(
       __super::Tables[L"Function"]));
   if (initTable == true) {
     if (this->tableFunction != nullptr) {
@@ -5055,28 +5135,28 @@ inline ::System::Void NewDataSet::InitVars(::System::Boolean initTable) {
     }
   }
   this->tableParameterList =
-      (cli::safe_cast<NewDataSet::ParameterListDataTable ^ >(
+      (cli::safe_cast<NewDataSet::ParameterListDataTable ^>(
           __super::Tables[L"ParameterList"]));
   if (initTable == true) {
     if (this->tableParameterList != nullptr) {
       this->tableParameterList->InitVars();
     }
   }
-  this->tableParameter = (cli::safe_cast<NewDataSet::ParameterDataTable ^ >(
+  this->tableParameter = (cli::safe_cast<NewDataSet::ParameterDataTable ^>(
       __super::Tables[L"Parameter"]));
   if (initTable == true) {
     if (this->tableParameter != nullptr) {
       this->tableParameter->InitVars();
     }
   }
-  this->tableDimension = (cli::safe_cast<NewDataSet::DimensionDataTable ^ >(
+  this->tableDimension = (cli::safe_cast<NewDataSet::DimensionDataTable ^>(
       __super::Tables[L"Dimension"]));
   if (initTable == true) {
     if (this->tableDimension != nullptr) {
       this->tableDimension->InitVars();
     }
   }
-  this->tableIntegrated = (cli::safe_cast<NewDataSet::IntegratedDataTable ^ >(
+  this->tableIntegrated = (cli::safe_cast<NewDataSet::IntegratedDataTable ^>(
       __super::Tables[L"Integrated"]));
   if (initTable == true) {
     if (this->tableIntegrated != nullptr) {
@@ -5084,49 +5164,49 @@ inline ::System::Void NewDataSet::InitVars(::System::Boolean initTable) {
     }
   }
   this->tableCompositeInstruction =
-      (cli::safe_cast<NewDataSet::CompositeInstructionDataTable ^ >(
+      (cli::safe_cast<NewDataSet::CompositeInstructionDataTable ^>(
           __super::Tables[L"CompositeInstruction"]));
   if (initTable == true) {
     if (this->tableCompositeInstruction != nullptr) {
       this->tableCompositeInstruction->InitVars();
     }
   }
-  this->tableGeometry = (cli::safe_cast<NewDataSet::GeometryDataTable ^ >(
+  this->tableGeometry = (cli::safe_cast<NewDataSet::GeometryDataTable ^>(
       __super::Tables[L"Geometry"]));
   if (initTable == true) {
     if (this->tableGeometry != nullptr) {
       this->tableGeometry->InitVars();
     }
   }
-  this->tableXDimension = (cli::safe_cast<NewDataSet::XDimensionDataTable ^ >(
+  this->tableXDimension = (cli::safe_cast<NewDataSet::XDimensionDataTable ^>(
       __super::Tables[L"XDimension"]));
   if (initTable == true) {
     if (this->tableXDimension != nullptr) {
       this->tableXDimension->InitVars();
     }
   }
-  this->tableYDimension = (cli::safe_cast<NewDataSet::YDimensionDataTable ^ >(
+  this->tableYDimension = (cli::safe_cast<NewDataSet::YDimensionDataTable ^>(
       __super::Tables[L"YDimension"]));
   if (initTable == true) {
     if (this->tableYDimension != nullptr) {
       this->tableYDimension->InitVars();
     }
   }
-  this->tableZDimension = (cli::safe_cast<NewDataSet::ZDimensionDataTable ^ >(
+  this->tableZDimension = (cli::safe_cast<NewDataSet::ZDimensionDataTable ^>(
       __super::Tables[L"ZDimension"]));
   if (initTable == true) {
     if (this->tableZDimension != nullptr) {
       this->tableZDimension->InitVars();
     }
   }
-  this->tableTDimension = (cli::safe_cast<NewDataSet::TDimensionDataTable ^ >(
+  this->tableTDimension = (cli::safe_cast<NewDataSet::TDimensionDataTable ^>(
       __super::Tables[L"TDimension"]));
   if (initTable == true) {
     if (this->tableTDimension != nullptr) {
       this->tableTDimension->InitVars();
     }
   }
-  this->tableOperation = (cli::safe_cast<NewDataSet::OperationDataTable ^ >(
+  this->tableOperation = (cli::safe_cast<NewDataSet::OperationDataTable ^>(
       __super::Tables[L"Operation"]));
   if (initTable == true) {
     if (this->tableOperation != nullptr) {
@@ -5186,9 +5266,9 @@ inline ::System::Void NewDataSet::InitClass() {
   __super::Tables->Add(this->tableOperation);
   ::System::Data::ForeignKeyConstraint ^ fkc;
   fkc = (gcnew::System::Data::ForeignKeyConstraint(
-      L"Function_Function", gcnew cli::array<::System::Data::DataColumn ^ >(1){
-                                this->tableFunction->Function_IdColumn},
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      L"Function_Function", gcnew cli::array<::System::Data::DataColumn ^>(
+                                1){this->tableFunction->Function_IdColumn},
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableFunction->Function_Id_0Column}));
   this->tableFunction->Constraints->Add(fkc);
   fkc->AcceptRejectRule = ::System::Data::AcceptRejectRule::None;
@@ -5196,19 +5276,18 @@ inline ::System::Void NewDataSet::InitClass() {
   fkc->UpdateRule = ::System::Data::Rule::Cascade;
   fkc = (gcnew::System::Data::ForeignKeyConstraint(
       L"CompositeInstruction_Function",
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableCompositeInstruction->CompositeInstruction_IdColumn},
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableFunction->CompositeInstruction_IdColumn}));
   this->tableFunction->Constraints->Add(fkc);
   fkc->AcceptRejectRule = ::System::Data::AcceptRejectRule::None;
   fkc->DeleteRule = ::System::Data::Rule::Cascade;
   fkc->UpdateRule = ::System::Data::Rule::Cascade;
   fkc = (gcnew::System::Data::ForeignKeyConstraint(
-      L"Function_ParameterList",
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
-          this->tableFunction->Function_IdColumn},
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      L"Function_ParameterList", gcnew cli::array<::System::Data::DataColumn ^>(
+                                     1){this->tableFunction->Function_IdColumn},
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableParameterList->Function_IdColumn}));
   this->tableParameterList->Constraints->Add(fkc);
   fkc->AcceptRejectRule = ::System::Data::AcceptRejectRule::None;
@@ -5216,27 +5295,27 @@ inline ::System::Void NewDataSet::InitClass() {
   fkc->UpdateRule = ::System::Data::Rule::Cascade;
   fkc = (gcnew::System::Data::ForeignKeyConstraint(
       L"ParameterList_Parameter",
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableParameterList->ParameterList_IdColumn},
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableParameter->ParameterList_IdColumn}));
   this->tableParameter->Constraints->Add(fkc);
   fkc->AcceptRejectRule = ::System::Data::AcceptRejectRule::None;
   fkc->DeleteRule = ::System::Data::Rule::Cascade;
   fkc->UpdateRule = ::System::Data::Rule::Cascade;
   fkc = (gcnew::System::Data::ForeignKeyConstraint(
-      L"Geometry_Dimension", gcnew cli::array<::System::Data::DataColumn ^ >(1){
-                                 this->tableGeometry->Geometry_IdColumn},
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      L"Geometry_Dimension", gcnew cli::array<::System::Data::DataColumn ^>(
+                                 1){this->tableGeometry->Geometry_IdColumn},
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableDimension->Geometry_IdColumn}));
   this->tableDimension->Constraints->Add(fkc);
   fkc->AcceptRejectRule = ::System::Data::AcceptRejectRule::None;
   fkc->DeleteRule = ::System::Data::Rule::Cascade;
   fkc->UpdateRule = ::System::Data::Rule::Cascade;
   fkc = (gcnew::System::Data::ForeignKeyConstraint(
-      L"Dimension_Integrated", gcnew cli::array<::System::Data::DataColumn ^ >(
+      L"Dimension_Integrated", gcnew cli::array<::System::Data::DataColumn ^>(
                                    1){this->tableDimension->Dimension_IdColumn},
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableIntegrated->Dimension_IdColumn}));
   this->tableIntegrated->Constraints->Add(fkc);
   fkc->AcceptRejectRule = ::System::Data::AcceptRejectRule::None;
@@ -5244,45 +5323,45 @@ inline ::System::Void NewDataSet::InitClass() {
   fkc->UpdateRule = ::System::Data::Rule::Cascade;
   fkc = (gcnew::System::Data::ForeignKeyConstraint(
       L"CompositeInstruction_Geometry",
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableCompositeInstruction->CompositeInstruction_IdColumn},
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableGeometry->CompositeInstruction_IdColumn}));
   this->tableGeometry->Constraints->Add(fkc);
   fkc->AcceptRejectRule = ::System::Data::AcceptRejectRule::None;
   fkc->DeleteRule = ::System::Data::Rule::Cascade;
   fkc->UpdateRule = ::System::Data::Rule::Cascade;
   fkc = (gcnew::System::Data::ForeignKeyConstraint(
-      L"Geometry_XDimension", gcnew cli::array<::System::Data::DataColumn ^ >(
+      L"Geometry_XDimension", gcnew cli::array<::System::Data::DataColumn ^>(
                                   1){this->tableGeometry->Geometry_IdColumn},
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableXDimension->Geometry_IdColumn}));
   this->tableXDimension->Constraints->Add(fkc);
   fkc->AcceptRejectRule = ::System::Data::AcceptRejectRule::None;
   fkc->DeleteRule = ::System::Data::Rule::Cascade;
   fkc->UpdateRule = ::System::Data::Rule::Cascade;
   fkc = (gcnew::System::Data::ForeignKeyConstraint(
-      L"Geometry_YDimension", gcnew cli::array<::System::Data::DataColumn ^ >(
+      L"Geometry_YDimension", gcnew cli::array<::System::Data::DataColumn ^>(
                                   1){this->tableGeometry->Geometry_IdColumn},
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableYDimension->Geometry_IdColumn}));
   this->tableYDimension->Constraints->Add(fkc);
   fkc->AcceptRejectRule = ::System::Data::AcceptRejectRule::None;
   fkc->DeleteRule = ::System::Data::Rule::Cascade;
   fkc->UpdateRule = ::System::Data::Rule::Cascade;
   fkc = (gcnew::System::Data::ForeignKeyConstraint(
-      L"Geometry_ZDimension", gcnew cli::array<::System::Data::DataColumn ^ >(
+      L"Geometry_ZDimension", gcnew cli::array<::System::Data::DataColumn ^>(
                                   1){this->tableGeometry->Geometry_IdColumn},
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableZDimension->Geometry_IdColumn}));
   this->tableZDimension->Constraints->Add(fkc);
   fkc->AcceptRejectRule = ::System::Data::AcceptRejectRule::None;
   fkc->DeleteRule = ::System::Data::Rule::Cascade;
   fkc->UpdateRule = ::System::Data::Rule::Cascade;
   fkc = (gcnew::System::Data::ForeignKeyConstraint(
-      L"Geometry_TDimension", gcnew cli::array<::System::Data::DataColumn ^ >(
+      L"Geometry_TDimension", gcnew cli::array<::System::Data::DataColumn ^>(
                                   1){this->tableGeometry->Geometry_IdColumn},
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableTDimension->Geometry_IdColumn}));
   this->tableTDimension->Constraints->Add(fkc);
   fkc->AcceptRejectRule = ::System::Data::AcceptRejectRule::None;
@@ -5290,18 +5369,18 @@ inline ::System::Void NewDataSet::InitClass() {
   fkc->UpdateRule = ::System::Data::Rule::Cascade;
   fkc = (gcnew::System::Data::ForeignKeyConstraint(
       L"CompositeInstruction_Operation",
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableCompositeInstruction->CompositeInstruction_IdColumn},
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableOperation->CompositeInstruction_IdColumn}));
   this->tableOperation->Constraints->Add(fkc);
   fkc->AcceptRejectRule = ::System::Data::AcceptRejectRule::None;
   fkc->DeleteRule = ::System::Data::Rule::Cascade;
   fkc->UpdateRule = ::System::Data::Rule::Cascade;
   this->relationFunction_Function = (gcnew::System::Data::DataRelation(
-      L"Function_Function", gcnew cli::array<::System::Data::DataColumn ^ >(1){
-                                this->tableFunction->Function_IdColumn},
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      L"Function_Function", gcnew cli::array<::System::Data::DataColumn ^>(
+                                1){this->tableFunction->Function_IdColumn},
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableFunction->Function_Id_0Column},
       false));
   this->relationFunction_Function->Nested = true;
@@ -5309,43 +5388,42 @@ inline ::System::Void NewDataSet::InitClass() {
   this->relationCompositeInstruction_Function =
       (gcnew::System::Data::DataRelation(
           L"CompositeInstruction_Function",
-          gcnew cli::array<::System::Data::DataColumn ^ >(1){
+          gcnew cli::array<::System::Data::DataColumn ^>(1){
               this->tableCompositeInstruction->CompositeInstruction_IdColumn},
-          gcnew cli::array<::System::Data::DataColumn ^ >(1){
+          gcnew cli::array<::System::Data::DataColumn ^>(1){
               this->tableFunction->CompositeInstruction_IdColumn},
           false));
   this->relationCompositeInstruction_Function->Nested = true;
   this->Relations->Add(this->relationCompositeInstruction_Function);
   this->relationFunction_ParameterList = (gcnew::System::Data::DataRelation(
-      L"Function_ParameterList",
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
-          this->tableFunction->Function_IdColumn},
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      L"Function_ParameterList", gcnew cli::array<::System::Data::DataColumn ^>(
+                                     1){this->tableFunction->Function_IdColumn},
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableParameterList->Function_IdColumn},
       false));
   this->relationFunction_ParameterList->Nested = true;
   this->Relations->Add(this->relationFunction_ParameterList);
   this->relationParameterList_Parameter = (gcnew::System::Data::DataRelation(
       L"ParameterList_Parameter",
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableParameterList->ParameterList_IdColumn},
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableParameter->ParameterList_IdColumn},
       false));
   this->relationParameterList_Parameter->Nested = true;
   this->Relations->Add(this->relationParameterList_Parameter);
   this->relationGeometry_Dimension = (gcnew::System::Data::DataRelation(
-      L"Geometry_Dimension", gcnew cli::array<::System::Data::DataColumn ^ >(1){
-                                 this->tableGeometry->Geometry_IdColumn},
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      L"Geometry_Dimension", gcnew cli::array<::System::Data::DataColumn ^>(
+                                 1){this->tableGeometry->Geometry_IdColumn},
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableDimension->Geometry_IdColumn},
       false));
   this->relationGeometry_Dimension->Nested = true;
   this->Relations->Add(this->relationGeometry_Dimension);
   this->relationDimension_Integrated = (gcnew::System::Data::DataRelation(
-      L"Dimension_Integrated", gcnew cli::array<::System::Data::DataColumn ^ >(
+      L"Dimension_Integrated", gcnew cli::array<::System::Data::DataColumn ^>(
                                    1){this->tableDimension->Dimension_IdColumn},
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableIntegrated->Dimension_IdColumn},
       false));
   this->relationDimension_Integrated->Nested = true;
@@ -5353,41 +5431,41 @@ inline ::System::Void NewDataSet::InitClass() {
   this->relationCompositeInstruction_Geometry =
       (gcnew::System::Data::DataRelation(
           L"CompositeInstruction_Geometry",
-          gcnew cli::array<::System::Data::DataColumn ^ >(1){
+          gcnew cli::array<::System::Data::DataColumn ^>(1){
               this->tableCompositeInstruction->CompositeInstruction_IdColumn},
-          gcnew cli::array<::System::Data::DataColumn ^ >(1){
+          gcnew cli::array<::System::Data::DataColumn ^>(1){
               this->tableGeometry->CompositeInstruction_IdColumn},
           false));
   this->relationCompositeInstruction_Geometry->Nested = true;
   this->Relations->Add(this->relationCompositeInstruction_Geometry);
   this->relationGeometry_XDimension = (gcnew::System::Data::DataRelation(
-      L"Geometry_XDimension", gcnew cli::array<::System::Data::DataColumn ^ >(
+      L"Geometry_XDimension", gcnew cli::array<::System::Data::DataColumn ^>(
                                   1){this->tableGeometry->Geometry_IdColumn},
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableXDimension->Geometry_IdColumn},
       false));
   this->relationGeometry_XDimension->Nested = true;
   this->Relations->Add(this->relationGeometry_XDimension);
   this->relationGeometry_YDimension = (gcnew::System::Data::DataRelation(
-      L"Geometry_YDimension", gcnew cli::array<::System::Data::DataColumn ^ >(
+      L"Geometry_YDimension", gcnew cli::array<::System::Data::DataColumn ^>(
                                   1){this->tableGeometry->Geometry_IdColumn},
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableYDimension->Geometry_IdColumn},
       false));
   this->relationGeometry_YDimension->Nested = true;
   this->Relations->Add(this->relationGeometry_YDimension);
   this->relationGeometry_ZDimension = (gcnew::System::Data::DataRelation(
-      L"Geometry_ZDimension", gcnew cli::array<::System::Data::DataColumn ^ >(
+      L"Geometry_ZDimension", gcnew cli::array<::System::Data::DataColumn ^>(
                                   1){this->tableGeometry->Geometry_IdColumn},
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableZDimension->Geometry_IdColumn},
       false));
   this->relationGeometry_ZDimension->Nested = true;
   this->Relations->Add(this->relationGeometry_ZDimension);
   this->relationGeometry_TDimension = (gcnew::System::Data::DataRelation(
-      L"Geometry_TDimension", gcnew cli::array<::System::Data::DataColumn ^ >(
+      L"Geometry_TDimension", gcnew cli::array<::System::Data::DataColumn ^>(
                                   1){this->tableGeometry->Geometry_IdColumn},
-      gcnew cli::array<::System::Data::DataColumn ^ >(1){
+      gcnew cli::array<::System::Data::DataColumn ^>(1){
           this->tableTDimension->Geometry_IdColumn},
       false));
   this->relationGeometry_TDimension->Nested = true;
@@ -5395,9 +5473,9 @@ inline ::System::Void NewDataSet::InitClass() {
   this->relationCompositeInstruction_Operation =
       (gcnew::System::Data::DataRelation(
           L"CompositeInstruction_Operation",
-          gcnew cli::array<::System::Data::DataColumn ^ >(1){
+          gcnew cli::array<::System::Data::DataColumn ^>(1){
               this->tableCompositeInstruction->CompositeInstruction_IdColumn},
-          gcnew cli::array<::System::Data::DataColumn ^ >(1){
+          gcnew cli::array<::System::Data::DataColumn ^>(1){
               this->tableOperation->CompositeInstruction_IdColumn},
           false));
   this->relationCompositeInstruction_Operation->Nested = true;
@@ -5479,7 +5557,7 @@ inline ::System::Xml::Schema::XmlSchemaComplexType ^
       for (::System::Collections::IEnumerator ^ schemas =
                xs->Schemas(dsSchema->TargetNamespace)->GetEnumerator();
            schemas->MoveNext();) {
-        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^ >(
+        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^>(
             schemas->Current));
         s2->SetLength(0);
         schema->Write(s2);
@@ -5565,7 +5643,7 @@ inline ::System::Int32 NewDataSet::FunctionDataTable::Count::get() {
 
 inline NewDataSet::FunctionRow ^
     NewDataSet::FunctionDataTable::default ::get(::System::Int32 index) {
-  return (cli::safe_cast<NewDataSet::FunctionRow ^ >(this->Rows[index]));
+  return (cli::safe_cast<NewDataSet::FunctionRow ^>(this->Rows[index]));
 }
 
 inline ::System::Void NewDataSet::FunctionDataTable::AddFunctionRow(
@@ -5580,9 +5658,9 @@ inline NewDataSet::FunctionRow ^
         NewDataSet::CompositeInstructionRow ^
             parentCompositeInstructionRowByCompositeInstruction_Function) {
   NewDataSet::FunctionRow ^ rowFunctionRow =
-      (cli::safe_cast<NewDataSet::FunctionRow ^ >(this->NewRow()));
-  cli::array<::System::Object ^ > ^ columnValuesArray =
-      gcnew cli::array<::System::Object ^ >(4){Name, nullptr, nullptr, nullptr};
+      (cli::safe_cast<NewDataSet::FunctionRow ^>(this->NewRow()));
+  cli::array<::System::Object ^> ^ columnValuesArray =
+      gcnew cli::array<::System::Object ^>(4){Name, nullptr, nullptr, nullptr};
   if (parentFunctionRowByFunction_Function != nullptr) {
     columnValuesArray[2] = parentFunctionRowByFunction_Function[1];
   }
@@ -5602,7 +5680,7 @@ inline ::System::Collections::IEnumerator ^
 
 inline ::System::Data::DataTable ^ NewDataSet::FunctionDataTable::Clone() {
   NewDataSet::FunctionDataTable ^ cln =
-      (cli::safe_cast<NewDataSet::FunctionDataTable ^ >(__super::Clone()));
+      (cli::safe_cast<NewDataSet::FunctionDataTable ^>(__super::Clone()));
   cln->InitVars();
   return cln;
 }
@@ -5638,8 +5716,8 @@ inline ::System::Void NewDataSet::FunctionDataTable::InitClass() {
       ::System::Data::MappingType::Hidden));
   __super::Columns->Add(this->columnCompositeInstruction_Id);
   this->Constraints->Add((gcnew::System::Data::UniqueConstraint(
-      L"Constraint1", gcnew cli::array<::System::Data::DataColumn ^ >(1){
-                          this->columnFunction_Id},
+      L"Constraint1", gcnew cli::array<::System::Data::DataColumn ^>(
+                          1){this->columnFunction_Id},
       true)));
   this->columnName->AllowDBNull = false;
   this->columnFunction_Id->AutoIncrement = true;
@@ -5649,7 +5727,7 @@ inline ::System::Void NewDataSet::FunctionDataTable::InitClass() {
 
 inline NewDataSet::FunctionRow ^
     NewDataSet::FunctionDataTable::NewFunctionRow() {
-  return (cli::safe_cast<NewDataSet::FunctionRow ^ >(this->NewRow()));
+  return (cli::safe_cast<NewDataSet::FunctionRow ^>(this->NewRow()));
 }
 
 inline ::System::Data::DataRow ^
@@ -5669,7 +5747,7 @@ inline ::System::Void NewDataSet::FunctionDataTable::OnRowChanged(
     this->FunctionRowChanged(
         this,
         (gcnew NewDataSet::FunctionRowChangeEvent(
-            (cli::safe_cast<NewDataSet::FunctionRow ^ >(e->Row)), e->Action)));
+            (cli::safe_cast<NewDataSet::FunctionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -5680,7 +5758,7 @@ inline ::System::Void NewDataSet::FunctionDataTable::OnRowChanging(
     this->FunctionRowChanging(
         this,
         (gcnew NewDataSet::FunctionRowChangeEvent(
-            (cli::safe_cast<NewDataSet::FunctionRow ^ >(e->Row)), e->Action)));
+            (cli::safe_cast<NewDataSet::FunctionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -5691,7 +5769,7 @@ inline ::System::Void NewDataSet::FunctionDataTable::OnRowDeleted(
     this->FunctionRowDeleted(
         this,
         (gcnew NewDataSet::FunctionRowChangeEvent(
-            (cli::safe_cast<NewDataSet::FunctionRow ^ >(e->Row)), e->Action)));
+            (cli::safe_cast<NewDataSet::FunctionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -5702,7 +5780,7 @@ inline ::System::Void NewDataSet::FunctionDataTable::OnRowDeleting(
     this->FunctionRowDeleting(
         this,
         (gcnew NewDataSet::FunctionRowChangeEvent(
-            (cli::safe_cast<NewDataSet::FunctionRow ^ >(e->Row)), e->Action)));
+            (cli::safe_cast<NewDataSet::FunctionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -5755,7 +5833,7 @@ inline ::System::Xml::Schema::XmlSchemaComplexType ^
       for (::System::Collections::IEnumerator ^ schemas =
                xs->Schemas(dsSchema->TargetNamespace)->GetEnumerator();
            schemas->MoveNext();) {
-        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^ >(
+        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^>(
             schemas->Current));
         s2->SetLength(0);
         schema->Write(s2);
@@ -5831,7 +5909,7 @@ inline ::System::Int32 NewDataSet::ParameterListDataTable::Count::get() {
 
 inline NewDataSet::ParameterListRow ^
     NewDataSet::ParameterListDataTable::default ::get(::System::Int32 index) {
-  return (cli::safe_cast<NewDataSet::ParameterListRow ^ >(this->Rows[index]));
+  return (cli::safe_cast<NewDataSet::ParameterListRow ^>(this->Rows[index]));
 }
 
 inline ::System::Void NewDataSet::ParameterListDataTable::AddParameterListRow(
@@ -5843,9 +5921,9 @@ inline NewDataSet::ParameterListRow ^
     NewDataSet::ParameterListDataTable::AddParameterListRow(
         NewDataSet::FunctionRow ^ parentFunctionRowByFunction_ParameterList) {
   NewDataSet::ParameterListRow ^ rowParameterListRow =
-      (cli::safe_cast<NewDataSet::ParameterListRow ^ >(this->NewRow()));
-  cli::array<::System::Object ^ > ^ columnValuesArray =
-      gcnew cli::array<::System::Object ^ >(2){nullptr, nullptr};
+      (cli::safe_cast<NewDataSet::ParameterListRow ^>(this->NewRow()));
+  cli::array<::System::Object ^> ^ columnValuesArray =
+      gcnew cli::array<::System::Object ^>(2){nullptr, nullptr};
   if (parentFunctionRowByFunction_ParameterList != nullptr) {
     columnValuesArray[1] = parentFunctionRowByFunction_ParameterList[1];
   }
@@ -5861,7 +5939,7 @@ inline ::System::Collections::IEnumerator ^
 
 inline ::System::Data::DataTable ^ NewDataSet::ParameterListDataTable::Clone() {
   NewDataSet::ParameterListDataTable ^ cln =
-      (cli::safe_cast<NewDataSet::ParameterListDataTable ^ >(__super::Clone()));
+      (cli::safe_cast<NewDataSet::ParameterListDataTable ^>(__super::Clone()));
   cln->InitVars();
   return cln;
 }
@@ -5886,8 +5964,8 @@ inline ::System::Void NewDataSet::ParameterListDataTable::InitClass() {
       ::System::Data::MappingType::Hidden));
   __super::Columns->Add(this->columnFunction_Id);
   this->Constraints->Add((gcnew::System::Data::UniqueConstraint(
-      L"Constraint1", gcnew cli::array<::System::Data::DataColumn ^ >(1){
-                          this->columnParameterList_Id},
+      L"Constraint1", gcnew cli::array<::System::Data::DataColumn ^>(
+                          1){this->columnParameterList_Id},
       true)));
   this->columnParameterList_Id->AutoIncrement = true;
   this->columnParameterList_Id->AllowDBNull = false;
@@ -5896,7 +5974,7 @@ inline ::System::Void NewDataSet::ParameterListDataTable::InitClass() {
 
 inline NewDataSet::ParameterListRow ^
     NewDataSet::ParameterListDataTable::NewParameterListRow() {
-  return (cli::safe_cast<NewDataSet::ParameterListRow ^ >(this->NewRow()));
+  return (cli::safe_cast<NewDataSet::ParameterListRow ^>(this->NewRow()));
 }
 
 inline ::System::Data::DataRow ^
@@ -5915,7 +5993,7 @@ inline ::System::Void NewDataSet::ParameterListDataTable::OnRowChanged(
   {
     this->ParameterListRowChanged(
         this, (gcnew NewDataSet::ParameterListRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::ParameterListRow ^ >(e->Row)),
+                  (cli::safe_cast<NewDataSet::ParameterListRow ^>(e->Row)),
                   e->Action)));
   }
 }
@@ -5926,7 +6004,7 @@ inline ::System::Void NewDataSet::ParameterListDataTable::OnRowChanging(
   {
     this->ParameterListRowChanging(
         this, (gcnew NewDataSet::ParameterListRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::ParameterListRow ^ >(e->Row)),
+                  (cli::safe_cast<NewDataSet::ParameterListRow ^>(e->Row)),
                   e->Action)));
   }
 }
@@ -5937,7 +6015,7 @@ inline ::System::Void NewDataSet::ParameterListDataTable::OnRowDeleted(
   {
     this->ParameterListRowDeleted(
         this, (gcnew NewDataSet::ParameterListRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::ParameterListRow ^ >(e->Row)),
+                  (cli::safe_cast<NewDataSet::ParameterListRow ^>(e->Row)),
                   e->Action)));
   }
 }
@@ -5948,7 +6026,7 @@ inline ::System::Void NewDataSet::ParameterListDataTable::OnRowDeleting(
   {
     this->ParameterListRowDeleting(
         this, (gcnew NewDataSet::ParameterListRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::ParameterListRow ^ >(e->Row)),
+                  (cli::safe_cast<NewDataSet::ParameterListRow ^>(e->Row)),
                   e->Action)));
   }
 }
@@ -6003,7 +6081,7 @@ inline ::System::Xml::Schema::XmlSchemaComplexType ^
       for (::System::Collections::IEnumerator ^ schemas =
                xs->Schemas(dsSchema->TargetNamespace)->GetEnumerator();
            schemas->MoveNext();) {
-        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^ >(
+        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^>(
             schemas->Current));
         s2->SetLength(0);
         schema->Write(s2);
@@ -6089,7 +6167,7 @@ inline ::System::Int32 NewDataSet::ParameterDataTable::Count::get() {
 
 inline NewDataSet::ParameterRow ^
     NewDataSet::ParameterDataTable::default ::get(::System::Int32 index) {
-  return (cli::safe_cast<NewDataSet::ParameterRow ^ >(this->Rows[index]));
+  return (cli::safe_cast<NewDataSet::ParameterRow ^>(this->Rows[index]));
 }
 
 inline ::System::Void NewDataSet::ParameterDataTable::AddParameterRow(
@@ -6103,9 +6181,9 @@ inline NewDataSet::ParameterRow ^
         NewDataSet::ParameterListRow ^
             parentParameterListRowByParameterList_Parameter) {
   NewDataSet::ParameterRow ^ rowParameterRow =
-      (cli::safe_cast<NewDataSet::ParameterRow ^ >(this->NewRow()));
-  cli::array<::System::Object ^ > ^ columnValuesArray =
-      gcnew cli::array<::System::Object ^ >(4){Name, Type, Value, nullptr};
+      (cli::safe_cast<NewDataSet::ParameterRow ^>(this->NewRow()));
+  cli::array<::System::Object ^> ^ columnValuesArray =
+      gcnew cli::array<::System::Object ^>(4){Name, Type, Value, nullptr};
   if (parentParameterListRowByParameterList_Parameter != nullptr) {
     columnValuesArray[3] = parentParameterListRowByParameterList_Parameter[0];
   }
@@ -6121,7 +6199,7 @@ inline ::System::Collections::IEnumerator ^
 
 inline ::System::Data::DataTable ^ NewDataSet::ParameterDataTable::Clone() {
   NewDataSet::ParameterDataTable ^ cln =
-      (cli::safe_cast<NewDataSet::ParameterDataTable ^ >(__super::Clone()));
+      (cli::safe_cast<NewDataSet::ParameterDataTable ^>(__super::Clone()));
   cln->InitVars();
   return cln;
 }
@@ -6162,7 +6240,7 @@ inline ::System::Void NewDataSet::ParameterDataTable::InitClass() {
 
 inline NewDataSet::ParameterRow ^
     NewDataSet::ParameterDataTable::NewParameterRow() {
-  return (cli::safe_cast<NewDataSet::ParameterRow ^ >(this->NewRow()));
+  return (cli::safe_cast<NewDataSet::ParameterRow ^>(this->NewRow()));
 }
 
 inline ::System::Data::DataRow ^
@@ -6182,7 +6260,7 @@ inline ::System::Void NewDataSet::ParameterDataTable::OnRowChanged(
     this->ParameterRowChanged(
         this,
         (gcnew NewDataSet::ParameterRowChangeEvent(
-            (cli::safe_cast<NewDataSet::ParameterRow ^ >(e->Row)), e->Action)));
+            (cli::safe_cast<NewDataSet::ParameterRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -6193,7 +6271,7 @@ inline ::System::Void NewDataSet::ParameterDataTable::OnRowChanging(
     this->ParameterRowChanging(
         this,
         (gcnew NewDataSet::ParameterRowChangeEvent(
-            (cli::safe_cast<NewDataSet::ParameterRow ^ >(e->Row)), e->Action)));
+            (cli::safe_cast<NewDataSet::ParameterRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -6204,7 +6282,7 @@ inline ::System::Void NewDataSet::ParameterDataTable::OnRowDeleted(
     this->ParameterRowDeleted(
         this,
         (gcnew NewDataSet::ParameterRowChangeEvent(
-            (cli::safe_cast<NewDataSet::ParameterRow ^ >(e->Row)), e->Action)));
+            (cli::safe_cast<NewDataSet::ParameterRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -6215,7 +6293,7 @@ inline ::System::Void NewDataSet::ParameterDataTable::OnRowDeleting(
     this->ParameterRowDeleting(
         this,
         (gcnew NewDataSet::ParameterRowChangeEvent(
-            (cli::safe_cast<NewDataSet::ParameterRow ^ >(e->Row)), e->Action)));
+            (cli::safe_cast<NewDataSet::ParameterRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -6268,7 +6346,7 @@ inline ::System::Xml::Schema::XmlSchemaComplexType ^
       for (::System::Collections::IEnumerator ^ schemas =
                xs->Schemas(dsSchema->TargetNamespace)->GetEnumerator();
            schemas->MoveNext();) {
-        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^ >(
+        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^>(
             schemas->Current));
         s2->SetLength(0);
         schema->Write(s2);
@@ -6364,7 +6442,7 @@ inline ::System::Int32 NewDataSet::DimensionDataTable::Count::get() {
 
 inline NewDataSet::DimensionRow ^
     NewDataSet::DimensionDataTable::default ::get(::System::Int32 index) {
-  return (cli::safe_cast<NewDataSet::DimensionRow ^ >(this->Rows[index]));
+  return (cli::safe_cast<NewDataSet::DimensionRow ^>(this->Rows[index]));
 }
 
 inline ::System::Void NewDataSet::DimensionDataTable::AddDimensionRow(
@@ -6378,10 +6456,10 @@ inline NewDataSet::DimensionRow ^
         System::Int64 LowerBounds,
         NewDataSet::GeometryRow ^ parentGeometryRowByGeometry_Dimension) {
   NewDataSet::DimensionRow ^ rowDimensionRow =
-      (cli::safe_cast<NewDataSet::DimensionRow ^ >(this->NewRow()));
-  cli::array<::System::Object ^ > ^ columnValuesArray =
-      gcnew cli::array<::System::Object ^ >(6){
-          ID, Name, UpperBounds, LowerBounds, nullptr, nullptr};
+      (cli::safe_cast<NewDataSet::DimensionRow ^>(this->NewRow()));
+  cli::array<::System::Object ^> ^ columnValuesArray =
+      gcnew cli::array<::System::Object ^>(6){ID,          Name,    UpperBounds,
+                                              LowerBounds, nullptr, nullptr};
   if (parentGeometryRowByGeometry_Dimension != nullptr) {
     columnValuesArray[5] = parentGeometryRowByGeometry_Dimension[0];
   }
@@ -6397,7 +6475,7 @@ inline ::System::Collections::IEnumerator ^
 
 inline ::System::Data::DataTable ^ NewDataSet::DimensionDataTable::Clone() {
   NewDataSet::DimensionDataTable ^ cln =
-      (cli::safe_cast<NewDataSet::DimensionDataTable ^ >(__super::Clone()));
+      (cli::safe_cast<NewDataSet::DimensionDataTable ^>(__super::Clone()));
   cln->InitVars();
   return cln;
 }
@@ -6442,8 +6520,8 @@ inline ::System::Void NewDataSet::DimensionDataTable::InitClass() {
       ::System::Data::MappingType::Hidden));
   __super::Columns->Add(this->columnGeometry_Id);
   this->Constraints->Add((gcnew::System::Data::UniqueConstraint(
-      L"Constraint1", gcnew cli::array<::System::Data::DataColumn ^ >(1){
-                          this->columnDimension_Id},
+      L"Constraint1", gcnew cli::array<::System::Data::DataColumn ^>(
+                          1){this->columnDimension_Id},
       true)));
   this->columnID->AllowDBNull = false;
   this->columnID->Namespace = L"";
@@ -6457,7 +6535,7 @@ inline ::System::Void NewDataSet::DimensionDataTable::InitClass() {
 
 inline NewDataSet::DimensionRow ^
     NewDataSet::DimensionDataTable::NewDimensionRow() {
-  return (cli::safe_cast<NewDataSet::DimensionRow ^ >(this->NewRow()));
+  return (cli::safe_cast<NewDataSet::DimensionRow ^>(this->NewRow()));
 }
 
 inline ::System::Data::DataRow ^
@@ -6477,7 +6555,7 @@ inline ::System::Void NewDataSet::DimensionDataTable::OnRowChanged(
     this->DimensionRowChanged(
         this,
         (gcnew NewDataSet::DimensionRowChangeEvent(
-            (cli::safe_cast<NewDataSet::DimensionRow ^ >(e->Row)), e->Action)));
+            (cli::safe_cast<NewDataSet::DimensionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -6488,7 +6566,7 @@ inline ::System::Void NewDataSet::DimensionDataTable::OnRowChanging(
     this->DimensionRowChanging(
         this,
         (gcnew NewDataSet::DimensionRowChangeEvent(
-            (cli::safe_cast<NewDataSet::DimensionRow ^ >(e->Row)), e->Action)));
+            (cli::safe_cast<NewDataSet::DimensionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -6499,7 +6577,7 @@ inline ::System::Void NewDataSet::DimensionDataTable::OnRowDeleted(
     this->DimensionRowDeleted(
         this,
         (gcnew NewDataSet::DimensionRowChangeEvent(
-            (cli::safe_cast<NewDataSet::DimensionRow ^ >(e->Row)), e->Action)));
+            (cli::safe_cast<NewDataSet::DimensionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -6510,7 +6588,7 @@ inline ::System::Void NewDataSet::DimensionDataTable::OnRowDeleting(
     this->DimensionRowDeleting(
         this,
         (gcnew NewDataSet::DimensionRowChangeEvent(
-            (cli::safe_cast<NewDataSet::DimensionRow ^ >(e->Row)), e->Action)));
+            (cli::safe_cast<NewDataSet::DimensionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -6563,7 +6641,7 @@ inline ::System::Xml::Schema::XmlSchemaComplexType ^
       for (::System::Collections::IEnumerator ^ schemas =
                xs->Schemas(dsSchema->TargetNamespace)->GetEnumerator();
            schemas->MoveNext();) {
-        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^ >(
+        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^>(
             schemas->Current));
         s2->SetLength(0);
         schema->Write(s2);
@@ -6644,7 +6722,7 @@ inline ::System::Int32 NewDataSet::IntegratedDataTable::Count::get() {
 
 inline NewDataSet::IntegratedRow ^
     NewDataSet::IntegratedDataTable::default ::get(::System::Int32 index) {
-  return (cli::safe_cast<NewDataSet::IntegratedRow ^ >(this->Rows[index]));
+  return (cli::safe_cast<NewDataSet::IntegratedRow ^>(this->Rows[index]));
 }
 
 inline ::System::Void NewDataSet::IntegratedDataTable::AddIntegratedRow(
@@ -6657,9 +6735,9 @@ inline NewDataSet::IntegratedRow ^
         System::Int64 UpperLimit, System::Int64 LowerLimit,
         NewDataSet::DimensionRow ^ parentDimensionRowByDimension_Integrated) {
   NewDataSet::IntegratedRow ^ rowIntegratedRow =
-      (cli::safe_cast<NewDataSet::IntegratedRow ^ >(this->NewRow()));
-  cli::array<::System::Object ^ > ^ columnValuesArray =
-      gcnew cli::array<::System::Object ^ >(3){UpperLimit, LowerLimit, nullptr};
+      (cli::safe_cast<NewDataSet::IntegratedRow ^>(this->NewRow()));
+  cli::array<::System::Object ^> ^ columnValuesArray =
+      gcnew cli::array<::System::Object ^>(3){UpperLimit, LowerLimit, nullptr};
   if (parentDimensionRowByDimension_Integrated != nullptr) {
     columnValuesArray[2] = parentDimensionRowByDimension_Integrated[4];
   }
@@ -6675,7 +6753,7 @@ inline ::System::Collections::IEnumerator ^
 
 inline ::System::Data::DataTable ^ NewDataSet::IntegratedDataTable::Clone() {
   NewDataSet::IntegratedDataTable ^ cln =
-      (cli::safe_cast<NewDataSet::IntegratedDataTable ^ >(__super::Clone()));
+      (cli::safe_cast<NewDataSet::IntegratedDataTable ^>(__super::Clone()));
   cln->InitVars();
   return cln;
 }
@@ -6710,7 +6788,7 @@ inline ::System::Void NewDataSet::IntegratedDataTable::InitClass() {
 
 inline NewDataSet::IntegratedRow ^
     NewDataSet::IntegratedDataTable::NewIntegratedRow() {
-  return (cli::safe_cast<NewDataSet::IntegratedRow ^ >(this->NewRow()));
+  return (cli::safe_cast<NewDataSet::IntegratedRow ^>(this->NewRow()));
 }
 
 inline ::System::Data::DataRow ^
@@ -6728,9 +6806,9 @@ inline ::System::Void NewDataSet::IntegratedDataTable::OnRowChanged(
   __super::OnRowChanged(e);
   {
     this->IntegratedRowChanged(
-        this, (gcnew NewDataSet::IntegratedRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::IntegratedRow ^ >(e->Row)),
-                  e->Action)));
+        this,
+        (gcnew NewDataSet::IntegratedRowChangeEvent(
+            (cli::safe_cast<NewDataSet::IntegratedRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -6739,9 +6817,9 @@ inline ::System::Void NewDataSet::IntegratedDataTable::OnRowChanging(
   __super::OnRowChanging(e);
   {
     this->IntegratedRowChanging(
-        this, (gcnew NewDataSet::IntegratedRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::IntegratedRow ^ >(e->Row)),
-                  e->Action)));
+        this,
+        (gcnew NewDataSet::IntegratedRowChangeEvent(
+            (cli::safe_cast<NewDataSet::IntegratedRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -6750,9 +6828,9 @@ inline ::System::Void NewDataSet::IntegratedDataTable::OnRowDeleted(
   __super::OnRowDeleted(e);
   {
     this->IntegratedRowDeleted(
-        this, (gcnew NewDataSet::IntegratedRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::IntegratedRow ^ >(e->Row)),
-                  e->Action)));
+        this,
+        (gcnew NewDataSet::IntegratedRowChangeEvent(
+            (cli::safe_cast<NewDataSet::IntegratedRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -6761,9 +6839,9 @@ inline ::System::Void NewDataSet::IntegratedDataTable::OnRowDeleting(
   __super::OnRowDeleting(e);
   {
     this->IntegratedRowDeleting(
-        this, (gcnew NewDataSet::IntegratedRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::IntegratedRow ^ >(e->Row)),
-                  e->Action)));
+        this,
+        (gcnew NewDataSet::IntegratedRowChangeEvent(
+            (cli::safe_cast<NewDataSet::IntegratedRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -6816,7 +6894,7 @@ inline ::System::Xml::Schema::XmlSchemaComplexType ^
       for (::System::Collections::IEnumerator ^ schemas =
                xs->Schemas(dsSchema->TargetNamespace)->GetEnumerator();
            schemas->MoveNext();) {
-        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^ >(
+        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^>(
             schemas->Current));
         s2->SetLength(0);
         schema->Write(s2);
@@ -6899,8 +6977,8 @@ inline ::System::Int32 NewDataSet::CompositeInstructionDataTable::Count::get() {
 inline NewDataSet::CompositeInstructionRow ^
     NewDataSet::CompositeInstructionDataTable::default ::get(
         ::System::Int32 index) {
-  return (cli::safe_cast<NewDataSet::CompositeInstructionRow ^ >(
-      this->Rows[index]));
+  return (
+      cli::safe_cast<NewDataSet::CompositeInstructionRow ^>(this->Rows[index]));
 }
 
 inline ::System::Void
@@ -6914,10 +6992,10 @@ inline NewDataSet::CompositeInstructionRow ^
         System::String ^ MDWorkspaceName,
         System::String ^ MDWorkspaceLocation) {
   NewDataSet::CompositeInstructionRow ^ rowCompositeInstructionRow =
-      (cli::safe_cast<NewDataSet::CompositeInstructionRow ^ >(this->NewRow()));
-  cli::array<::System::Object ^ > ^ columnValuesArray =
-      gcnew cli::array<::System::Object ^ >(3){MDWorkspaceName,
-                                               MDWorkspaceLocation, nullptr};
+      (cli::safe_cast<NewDataSet::CompositeInstructionRow ^>(this->NewRow()));
+  cli::array<::System::Object ^> ^ columnValuesArray =
+      gcnew cli::array<::System::Object ^>(3){MDWorkspaceName,
+                                              MDWorkspaceLocation, nullptr};
   rowCompositeInstructionRow->ItemArray = columnValuesArray;
   this->Rows->Add(rowCompositeInstructionRow);
   return rowCompositeInstructionRow;
@@ -6931,7 +7009,7 @@ inline ::System::Collections::IEnumerator ^
 inline ::System::Data::DataTable ^
     NewDataSet::CompositeInstructionDataTable::Clone() {
   NewDataSet::CompositeInstructionDataTable ^ cln =
-      (cli::safe_cast<NewDataSet::CompositeInstructionDataTable ^ >(
+      (cli::safe_cast<NewDataSet::CompositeInstructionDataTable ^>(
           __super::Clone()));
   cln->InitVars();
   return cln;
@@ -6963,8 +7041,8 @@ inline ::System::Void NewDataSet::CompositeInstructionDataTable::InitClass() {
       ::System::Data::MappingType::Hidden));
   __super::Columns->Add(this->columnCompositeInstruction_Id);
   this->Constraints->Add((gcnew::System::Data::UniqueConstraint(
-      L"Constraint1", gcnew cli::array<::System::Data::DataColumn ^ >(1){
-                          this->columnCompositeInstruction_Id},
+      L"Constraint1", gcnew cli::array<::System::Data::DataColumn ^>(
+                          1){this->columnCompositeInstruction_Id},
       true)));
   this->columnMDWorkspaceName->AllowDBNull = false;
   this->columnMDWorkspaceLocation->AllowDBNull = false;
@@ -6976,7 +7054,7 @@ inline ::System::Void NewDataSet::CompositeInstructionDataTable::InitClass() {
 inline NewDataSet::CompositeInstructionRow ^
     NewDataSet::CompositeInstructionDataTable::NewCompositeInstructionRow() {
   return (
-      cli::safe_cast<NewDataSet::CompositeInstructionRow ^ >(this->NewRow()));
+      cli::safe_cast<NewDataSet::CompositeInstructionRow ^>(this->NewRow()));
 }
 
 inline ::System::Data::DataRow ^
@@ -6997,7 +7075,7 @@ inline ::System::Void NewDataSet::CompositeInstructionDataTable::OnRowChanged(
     this->CompositeInstructionRowChanged(
         this,
         (gcnew NewDataSet::CompositeInstructionRowChangeEvent(
-            (cli::safe_cast<NewDataSet::CompositeInstructionRow ^ >(e->Row)),
+            (cli::safe_cast<NewDataSet::CompositeInstructionRow ^>(e->Row)),
             e->Action)));
   }
 }
@@ -7009,7 +7087,7 @@ inline ::System::Void NewDataSet::CompositeInstructionDataTable::OnRowChanging(
     this->CompositeInstructionRowChanging(
         this,
         (gcnew NewDataSet::CompositeInstructionRowChangeEvent(
-            (cli::safe_cast<NewDataSet::CompositeInstructionRow ^ >(e->Row)),
+            (cli::safe_cast<NewDataSet::CompositeInstructionRow ^>(e->Row)),
             e->Action)));
   }
 }
@@ -7021,7 +7099,7 @@ inline ::System::Void NewDataSet::CompositeInstructionDataTable::OnRowDeleted(
     this->CompositeInstructionRowDeleted(
         this,
         (gcnew NewDataSet::CompositeInstructionRowChangeEvent(
-            (cli::safe_cast<NewDataSet::CompositeInstructionRow ^ >(e->Row)),
+            (cli::safe_cast<NewDataSet::CompositeInstructionRow ^>(e->Row)),
             e->Action)));
   }
 }
@@ -7033,7 +7111,7 @@ inline ::System::Void NewDataSet::CompositeInstructionDataTable::OnRowDeleting(
     this->CompositeInstructionRowDeleting(
         this,
         (gcnew NewDataSet::CompositeInstructionRowChangeEvent(
-            (cli::safe_cast<NewDataSet::CompositeInstructionRow ^ >(e->Row)),
+            (cli::safe_cast<NewDataSet::CompositeInstructionRow ^>(e->Row)),
             e->Action)));
   }
 }
@@ -7088,7 +7166,7 @@ inline ::System::Xml::Schema::XmlSchemaComplexType ^
       for (::System::Collections::IEnumerator ^ schemas =
                xs->Schemas(dsSchema->TargetNamespace)->GetEnumerator();
            schemas->MoveNext();) {
-        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^ >(
+        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^>(
             schemas->Current));
         s2->SetLength(0);
         schema->Write(s2);
@@ -7164,7 +7242,7 @@ inline ::System::Int32 NewDataSet::GeometryDataTable::Count::get() {
 
 inline NewDataSet::GeometryRow ^
     NewDataSet::GeometryDataTable::default ::get(::System::Int32 index) {
-  return (cli::safe_cast<NewDataSet::GeometryRow ^ >(this->Rows[index]));
+  return (cli::safe_cast<NewDataSet::GeometryRow ^>(this->Rows[index]));
 }
 
 inline ::System::Void NewDataSet::GeometryDataTable::AddGeometryRow(
@@ -7177,9 +7255,9 @@ inline NewDataSet::GeometryRow ^
         NewDataSet::CompositeInstructionRow ^
         parentCompositeInstructionRowByCompositeInstruction_Geometry) {
   NewDataSet::GeometryRow ^ rowGeometryRow =
-      (cli::safe_cast<NewDataSet::GeometryRow ^ >(this->NewRow()));
-  cli::array<::System::Object ^ > ^ columnValuesArray =
-      gcnew cli::array<::System::Object ^ >(2){nullptr, nullptr};
+      (cli::safe_cast<NewDataSet::GeometryRow ^>(this->NewRow()));
+  cli::array<::System::Object ^> ^ columnValuesArray =
+      gcnew cli::array<::System::Object ^>(2){nullptr, nullptr};
   if (parentCompositeInstructionRowByCompositeInstruction_Geometry != nullptr) {
     columnValuesArray[1] =
         parentCompositeInstructionRowByCompositeInstruction_Geometry[2];
@@ -7196,7 +7274,7 @@ inline ::System::Collections::IEnumerator ^
 
 inline ::System::Data::DataTable ^ NewDataSet::GeometryDataTable::Clone() {
   NewDataSet::GeometryDataTable ^ cln =
-      (cli::safe_cast<NewDataSet::GeometryDataTable ^ >(__super::Clone()));
+      (cli::safe_cast<NewDataSet::GeometryDataTable ^>(__super::Clone()));
   cln->InitVars();
   return cln;
 }
@@ -7222,8 +7300,8 @@ inline ::System::Void NewDataSet::GeometryDataTable::InitClass() {
       ::System::Data::MappingType::Hidden));
   __super::Columns->Add(this->columnCompositeInstruction_Id);
   this->Constraints->Add((gcnew::System::Data::UniqueConstraint(
-      L"Constraint1", gcnew cli::array<::System::Data::DataColumn ^ >(1){
-                          this->columnGeometry_Id},
+      L"Constraint1", gcnew cli::array<::System::Data::DataColumn ^>(
+                          1){this->columnGeometry_Id},
       true)));
   this->columnGeometry_Id->AutoIncrement = true;
   this->columnGeometry_Id->AllowDBNull = false;
@@ -7232,7 +7310,7 @@ inline ::System::Void NewDataSet::GeometryDataTable::InitClass() {
 
 inline NewDataSet::GeometryRow ^
     NewDataSet::GeometryDataTable::NewGeometryRow() {
-  return (cli::safe_cast<NewDataSet::GeometryRow ^ >(this->NewRow()));
+  return (cli::safe_cast<NewDataSet::GeometryRow ^>(this->NewRow()));
 }
 
 inline ::System::Data::DataRow ^
@@ -7252,7 +7330,7 @@ inline ::System::Void NewDataSet::GeometryDataTable::OnRowChanged(
     this->GeometryRowChanged(
         this,
         (gcnew NewDataSet::GeometryRowChangeEvent(
-            (cli::safe_cast<NewDataSet::GeometryRow ^ >(e->Row)), e->Action)));
+            (cli::safe_cast<NewDataSet::GeometryRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -7263,7 +7341,7 @@ inline ::System::Void NewDataSet::GeometryDataTable::OnRowChanging(
     this->GeometryRowChanging(
         this,
         (gcnew NewDataSet::GeometryRowChangeEvent(
-            (cli::safe_cast<NewDataSet::GeometryRow ^ >(e->Row)), e->Action)));
+            (cli::safe_cast<NewDataSet::GeometryRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -7274,7 +7352,7 @@ inline ::System::Void NewDataSet::GeometryDataTable::OnRowDeleted(
     this->GeometryRowDeleted(
         this,
         (gcnew NewDataSet::GeometryRowChangeEvent(
-            (cli::safe_cast<NewDataSet::GeometryRow ^ >(e->Row)), e->Action)));
+            (cli::safe_cast<NewDataSet::GeometryRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -7285,7 +7363,7 @@ inline ::System::Void NewDataSet::GeometryDataTable::OnRowDeleting(
     this->GeometryRowDeleting(
         this,
         (gcnew NewDataSet::GeometryRowChangeEvent(
-            (cli::safe_cast<NewDataSet::GeometryRow ^ >(e->Row)), e->Action)));
+            (cli::safe_cast<NewDataSet::GeometryRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -7338,7 +7416,7 @@ inline ::System::Xml::Schema::XmlSchemaComplexType ^
       for (::System::Collections::IEnumerator ^ schemas =
                xs->Schemas(dsSchema->TargetNamespace)->GetEnumerator();
            schemas->MoveNext();) {
-        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^ >(
+        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^>(
             schemas->Current));
         s2->SetLength(0);
         schema->Write(s2);
@@ -7414,7 +7492,7 @@ inline ::System::Int32 NewDataSet::XDimensionDataTable::Count::get() {
 
 inline NewDataSet::XDimensionRow ^
     NewDataSet::XDimensionDataTable::default ::get(::System::Int32 index) {
-  return (cli::safe_cast<NewDataSet::XDimensionRow ^ >(this->Rows[index]));
+  return (cli::safe_cast<NewDataSet::XDimensionRow ^>(this->Rows[index]));
 }
 
 inline ::System::Void NewDataSet::XDimensionDataTable::AddXDimensionRow(
@@ -7427,9 +7505,9 @@ inline NewDataSet::XDimensionRow ^
         System::Int64 RefDimensionId,
         NewDataSet::GeometryRow ^ parentGeometryRowByGeometry_XDimension) {
   NewDataSet::XDimensionRow ^ rowXDimensionRow =
-      (cli::safe_cast<NewDataSet::XDimensionRow ^ >(this->NewRow()));
-  cli::array<::System::Object ^ > ^ columnValuesArray =
-      gcnew cli::array<::System::Object ^ >(2){RefDimensionId, nullptr};
+      (cli::safe_cast<NewDataSet::XDimensionRow ^>(this->NewRow()));
+  cli::array<::System::Object ^> ^ columnValuesArray =
+      gcnew cli::array<::System::Object ^>(2){RefDimensionId, nullptr};
   if (parentGeometryRowByGeometry_XDimension != nullptr) {
     columnValuesArray[1] = parentGeometryRowByGeometry_XDimension[0];
   }
@@ -7445,7 +7523,7 @@ inline ::System::Collections::IEnumerator ^
 
 inline ::System::Data::DataTable ^ NewDataSet::XDimensionDataTable::Clone() {
   NewDataSet::XDimensionDataTable ^ cln =
-      (cli::safe_cast<NewDataSet::XDimensionDataTable ^ >(__super::Clone()));
+      (cli::safe_cast<NewDataSet::XDimensionDataTable ^>(__super::Clone()));
   cln->InitVars();
   return cln;
 }
@@ -7473,7 +7551,7 @@ inline ::System::Void NewDataSet::XDimensionDataTable::InitClass() {
 
 inline NewDataSet::XDimensionRow ^
     NewDataSet::XDimensionDataTable::NewXDimensionRow() {
-  return (cli::safe_cast<NewDataSet::XDimensionRow ^ >(this->NewRow()));
+  return (cli::safe_cast<NewDataSet::XDimensionRow ^>(this->NewRow()));
 }
 
 inline ::System::Data::DataRow ^
@@ -7491,9 +7569,9 @@ inline ::System::Void NewDataSet::XDimensionDataTable::OnRowChanged(
   __super::OnRowChanged(e);
   {
     this->XDimensionRowChanged(
-        this, (gcnew NewDataSet::XDimensionRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::XDimensionRow ^ >(e->Row)),
-                  e->Action)));
+        this,
+        (gcnew NewDataSet::XDimensionRowChangeEvent(
+            (cli::safe_cast<NewDataSet::XDimensionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -7502,9 +7580,9 @@ inline ::System::Void NewDataSet::XDimensionDataTable::OnRowChanging(
   __super::OnRowChanging(e);
   {
     this->XDimensionRowChanging(
-        this, (gcnew NewDataSet::XDimensionRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::XDimensionRow ^ >(e->Row)),
-                  e->Action)));
+        this,
+        (gcnew NewDataSet::XDimensionRowChangeEvent(
+            (cli::safe_cast<NewDataSet::XDimensionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -7513,9 +7591,9 @@ inline ::System::Void NewDataSet::XDimensionDataTable::OnRowDeleted(
   __super::OnRowDeleted(e);
   {
     this->XDimensionRowDeleted(
-        this, (gcnew NewDataSet::XDimensionRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::XDimensionRow ^ >(e->Row)),
-                  e->Action)));
+        this,
+        (gcnew NewDataSet::XDimensionRowChangeEvent(
+            (cli::safe_cast<NewDataSet::XDimensionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -7524,9 +7602,9 @@ inline ::System::Void NewDataSet::XDimensionDataTable::OnRowDeleting(
   __super::OnRowDeleting(e);
   {
     this->XDimensionRowDeleting(
-        this, (gcnew NewDataSet::XDimensionRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::XDimensionRow ^ >(e->Row)),
-                  e->Action)));
+        this,
+        (gcnew NewDataSet::XDimensionRowChangeEvent(
+            (cli::safe_cast<NewDataSet::XDimensionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -7579,7 +7657,7 @@ inline ::System::Xml::Schema::XmlSchemaComplexType ^
       for (::System::Collections::IEnumerator ^ schemas =
                xs->Schemas(dsSchema->TargetNamespace)->GetEnumerator();
            schemas->MoveNext();) {
-        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^ >(
+        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^>(
             schemas->Current));
         s2->SetLength(0);
         schema->Write(s2);
@@ -7655,7 +7733,7 @@ inline ::System::Int32 NewDataSet::YDimensionDataTable::Count::get() {
 
 inline NewDataSet::YDimensionRow ^
     NewDataSet::YDimensionDataTable::default ::get(::System::Int32 index) {
-  return (cli::safe_cast<NewDataSet::YDimensionRow ^ >(this->Rows[index]));
+  return (cli::safe_cast<NewDataSet::YDimensionRow ^>(this->Rows[index]));
 }
 
 inline ::System::Void NewDataSet::YDimensionDataTable::AddYDimensionRow(
@@ -7668,9 +7746,9 @@ inline NewDataSet::YDimensionRow ^
         System::Int64 RefDimensionId,
         NewDataSet::GeometryRow ^ parentGeometryRowByGeometry_YDimension) {
   NewDataSet::YDimensionRow ^ rowYDimensionRow =
-      (cli::safe_cast<NewDataSet::YDimensionRow ^ >(this->NewRow()));
-  cli::array<::System::Object ^ > ^ columnValuesArray =
-      gcnew cli::array<::System::Object ^ >(2){RefDimensionId, nullptr};
+      (cli::safe_cast<NewDataSet::YDimensionRow ^>(this->NewRow()));
+  cli::array<::System::Object ^> ^ columnValuesArray =
+      gcnew cli::array<::System::Object ^>(2){RefDimensionId, nullptr};
   if (parentGeometryRowByGeometry_YDimension != nullptr) {
     columnValuesArray[1] = parentGeometryRowByGeometry_YDimension[0];
   }
@@ -7686,7 +7764,7 @@ inline ::System::Collections::IEnumerator ^
 
 inline ::System::Data::DataTable ^ NewDataSet::YDimensionDataTable::Clone() {
   NewDataSet::YDimensionDataTable ^ cln =
-      (cli::safe_cast<NewDataSet::YDimensionDataTable ^ >(__super::Clone()));
+      (cli::safe_cast<NewDataSet::YDimensionDataTable ^>(__super::Clone()));
   cln->InitVars();
   return cln;
 }
@@ -7714,7 +7792,7 @@ inline ::System::Void NewDataSet::YDimensionDataTable::InitClass() {
 
 inline NewDataSet::YDimensionRow ^
     NewDataSet::YDimensionDataTable::NewYDimensionRow() {
-  return (cli::safe_cast<NewDataSet::YDimensionRow ^ >(this->NewRow()));
+  return (cli::safe_cast<NewDataSet::YDimensionRow ^>(this->NewRow()));
 }
 
 inline ::System::Data::DataRow ^
@@ -7732,9 +7810,9 @@ inline ::System::Void NewDataSet::YDimensionDataTable::OnRowChanged(
   __super::OnRowChanged(e);
   {
     this->YDimensionRowChanged(
-        this, (gcnew NewDataSet::YDimensionRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::YDimensionRow ^ >(e->Row)),
-                  e->Action)));
+        this,
+        (gcnew NewDataSet::YDimensionRowChangeEvent(
+            (cli::safe_cast<NewDataSet::YDimensionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -7743,9 +7821,9 @@ inline ::System::Void NewDataSet::YDimensionDataTable::OnRowChanging(
   __super::OnRowChanging(e);
   {
     this->YDimensionRowChanging(
-        this, (gcnew NewDataSet::YDimensionRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::YDimensionRow ^ >(e->Row)),
-                  e->Action)));
+        this,
+        (gcnew NewDataSet::YDimensionRowChangeEvent(
+            (cli::safe_cast<NewDataSet::YDimensionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -7754,9 +7832,9 @@ inline ::System::Void NewDataSet::YDimensionDataTable::OnRowDeleted(
   __super::OnRowDeleted(e);
   {
     this->YDimensionRowDeleted(
-        this, (gcnew NewDataSet::YDimensionRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::YDimensionRow ^ >(e->Row)),
-                  e->Action)));
+        this,
+        (gcnew NewDataSet::YDimensionRowChangeEvent(
+            (cli::safe_cast<NewDataSet::YDimensionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -7765,9 +7843,9 @@ inline ::System::Void NewDataSet::YDimensionDataTable::OnRowDeleting(
   __super::OnRowDeleting(e);
   {
     this->YDimensionRowDeleting(
-        this, (gcnew NewDataSet::YDimensionRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::YDimensionRow ^ >(e->Row)),
-                  e->Action)));
+        this,
+        (gcnew NewDataSet::YDimensionRowChangeEvent(
+            (cli::safe_cast<NewDataSet::YDimensionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -7820,7 +7898,7 @@ inline ::System::Xml::Schema::XmlSchemaComplexType ^
       for (::System::Collections::IEnumerator ^ schemas =
                xs->Schemas(dsSchema->TargetNamespace)->GetEnumerator();
            schemas->MoveNext();) {
-        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^ >(
+        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^>(
             schemas->Current));
         s2->SetLength(0);
         schema->Write(s2);
@@ -7896,7 +7974,7 @@ inline ::System::Int32 NewDataSet::ZDimensionDataTable::Count::get() {
 
 inline NewDataSet::ZDimensionRow ^
     NewDataSet::ZDimensionDataTable::default ::get(::System::Int32 index) {
-  return (cli::safe_cast<NewDataSet::ZDimensionRow ^ >(this->Rows[index]));
+  return (cli::safe_cast<NewDataSet::ZDimensionRow ^>(this->Rows[index]));
 }
 
 inline ::System::Void NewDataSet::ZDimensionDataTable::AddZDimensionRow(
@@ -7909,9 +7987,9 @@ inline NewDataSet::ZDimensionRow ^
         System::Int64 RefDimensionId,
         NewDataSet::GeometryRow ^ parentGeometryRowByGeometry_ZDimension) {
   NewDataSet::ZDimensionRow ^ rowZDimensionRow =
-      (cli::safe_cast<NewDataSet::ZDimensionRow ^ >(this->NewRow()));
-  cli::array<::System::Object ^ > ^ columnValuesArray =
-      gcnew cli::array<::System::Object ^ >(2){RefDimensionId, nullptr};
+      (cli::safe_cast<NewDataSet::ZDimensionRow ^>(this->NewRow()));
+  cli::array<::System::Object ^> ^ columnValuesArray =
+      gcnew cli::array<::System::Object ^>(2){RefDimensionId, nullptr};
   if (parentGeometryRowByGeometry_ZDimension != nullptr) {
     columnValuesArray[1] = parentGeometryRowByGeometry_ZDimension[0];
   }
@@ -7927,7 +8005,7 @@ inline ::System::Collections::IEnumerator ^
 
 inline ::System::Data::DataTable ^ NewDataSet::ZDimensionDataTable::Clone() {
   NewDataSet::ZDimensionDataTable ^ cln =
-      (cli::safe_cast<NewDataSet::ZDimensionDataTable ^ >(__super::Clone()));
+      (cli::safe_cast<NewDataSet::ZDimensionDataTable ^>(__super::Clone()));
   cln->InitVars();
   return cln;
 }
@@ -7955,7 +8033,7 @@ inline ::System::Void NewDataSet::ZDimensionDataTable::InitClass() {
 
 inline NewDataSet::ZDimensionRow ^
     NewDataSet::ZDimensionDataTable::NewZDimensionRow() {
-  return (cli::safe_cast<NewDataSet::ZDimensionRow ^ >(this->NewRow()));
+  return (cli::safe_cast<NewDataSet::ZDimensionRow ^>(this->NewRow()));
 }
 
 inline ::System::Data::DataRow ^
@@ -7973,9 +8051,9 @@ inline ::System::Void NewDataSet::ZDimensionDataTable::OnRowChanged(
   __super::OnRowChanged(e);
   {
     this->ZDimensionRowChanged(
-        this, (gcnew NewDataSet::ZDimensionRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::ZDimensionRow ^ >(e->Row)),
-                  e->Action)));
+        this,
+        (gcnew NewDataSet::ZDimensionRowChangeEvent(
+            (cli::safe_cast<NewDataSet::ZDimensionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -7984,9 +8062,9 @@ inline ::System::Void NewDataSet::ZDimensionDataTable::OnRowChanging(
   __super::OnRowChanging(e);
   {
     this->ZDimensionRowChanging(
-        this, (gcnew NewDataSet::ZDimensionRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::ZDimensionRow ^ >(e->Row)),
-                  e->Action)));
+        this,
+        (gcnew NewDataSet::ZDimensionRowChangeEvent(
+            (cli::safe_cast<NewDataSet::ZDimensionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -7995,9 +8073,9 @@ inline ::System::Void NewDataSet::ZDimensionDataTable::OnRowDeleted(
   __super::OnRowDeleted(e);
   {
     this->ZDimensionRowDeleted(
-        this, (gcnew NewDataSet::ZDimensionRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::ZDimensionRow ^ >(e->Row)),
-                  e->Action)));
+        this,
+        (gcnew NewDataSet::ZDimensionRowChangeEvent(
+            (cli::safe_cast<NewDataSet::ZDimensionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -8006,9 +8084,9 @@ inline ::System::Void NewDataSet::ZDimensionDataTable::OnRowDeleting(
   __super::OnRowDeleting(e);
   {
     this->ZDimensionRowDeleting(
-        this, (gcnew NewDataSet::ZDimensionRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::ZDimensionRow ^ >(e->Row)),
-                  e->Action)));
+        this,
+        (gcnew NewDataSet::ZDimensionRowChangeEvent(
+            (cli::safe_cast<NewDataSet::ZDimensionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -8061,7 +8139,7 @@ inline ::System::Xml::Schema::XmlSchemaComplexType ^
       for (::System::Collections::IEnumerator ^ schemas =
                xs->Schemas(dsSchema->TargetNamespace)->GetEnumerator();
            schemas->MoveNext();) {
-        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^ >(
+        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^>(
             schemas->Current));
         s2->SetLength(0);
         schema->Write(s2);
@@ -8137,7 +8215,7 @@ inline ::System::Int32 NewDataSet::TDimensionDataTable::Count::get() {
 
 inline NewDataSet::TDimensionRow ^
     NewDataSet::TDimensionDataTable::default ::get(::System::Int32 index) {
-  return (cli::safe_cast<NewDataSet::TDimensionRow ^ >(this->Rows[index]));
+  return (cli::safe_cast<NewDataSet::TDimensionRow ^>(this->Rows[index]));
 }
 
 inline ::System::Void NewDataSet::TDimensionDataTable::AddTDimensionRow(
@@ -8150,9 +8228,9 @@ inline NewDataSet::TDimensionRow ^
         System::Int64 RefDimensionId,
         NewDataSet::GeometryRow ^ parentGeometryRowByGeometry_TDimension) {
   NewDataSet::TDimensionRow ^ rowTDimensionRow =
-      (cli::safe_cast<NewDataSet::TDimensionRow ^ >(this->NewRow()));
-  cli::array<::System::Object ^ > ^ columnValuesArray =
-      gcnew cli::array<::System::Object ^ >(2){RefDimensionId, nullptr};
+      (cli::safe_cast<NewDataSet::TDimensionRow ^>(this->NewRow()));
+  cli::array<::System::Object ^> ^ columnValuesArray =
+      gcnew cli::array<::System::Object ^>(2){RefDimensionId, nullptr};
   if (parentGeometryRowByGeometry_TDimension != nullptr) {
     columnValuesArray[1] = parentGeometryRowByGeometry_TDimension[0];
   }
@@ -8168,7 +8246,7 @@ inline ::System::Collections::IEnumerator ^
 
 inline ::System::Data::DataTable ^ NewDataSet::TDimensionDataTable::Clone() {
   NewDataSet::TDimensionDataTable ^ cln =
-      (cli::safe_cast<NewDataSet::TDimensionDataTable ^ >(__super::Clone()));
+      (cli::safe_cast<NewDataSet::TDimensionDataTable ^>(__super::Clone()));
   cln->InitVars();
   return cln;
 }
@@ -8196,7 +8274,7 @@ inline ::System::Void NewDataSet::TDimensionDataTable::InitClass() {
 
 inline NewDataSet::TDimensionRow ^
     NewDataSet::TDimensionDataTable::NewTDimensionRow() {
-  return (cli::safe_cast<NewDataSet::TDimensionRow ^ >(this->NewRow()));
+  return (cli::safe_cast<NewDataSet::TDimensionRow ^>(this->NewRow()));
 }
 
 inline ::System::Data::DataRow ^
@@ -8214,9 +8292,9 @@ inline ::System::Void NewDataSet::TDimensionDataTable::OnRowChanged(
   __super::OnRowChanged(e);
   {
     this->TDimensionRowChanged(
-        this, (gcnew NewDataSet::TDimensionRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::TDimensionRow ^ >(e->Row)),
-                  e->Action)));
+        this,
+        (gcnew NewDataSet::TDimensionRowChangeEvent(
+            (cli::safe_cast<NewDataSet::TDimensionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -8225,9 +8303,9 @@ inline ::System::Void NewDataSet::TDimensionDataTable::OnRowChanging(
   __super::OnRowChanging(e);
   {
     this->TDimensionRowChanging(
-        this, (gcnew NewDataSet::TDimensionRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::TDimensionRow ^ >(e->Row)),
-                  e->Action)));
+        this,
+        (gcnew NewDataSet::TDimensionRowChangeEvent(
+            (cli::safe_cast<NewDataSet::TDimensionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -8236,9 +8314,9 @@ inline ::System::Void NewDataSet::TDimensionDataTable::OnRowDeleted(
   __super::OnRowDeleted(e);
   {
     this->TDimensionRowDeleted(
-        this, (gcnew NewDataSet::TDimensionRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::TDimensionRow ^ >(e->Row)),
-                  e->Action)));
+        this,
+        (gcnew NewDataSet::TDimensionRowChangeEvent(
+            (cli::safe_cast<NewDataSet::TDimensionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -8247,9 +8325,9 @@ inline ::System::Void NewDataSet::TDimensionDataTable::OnRowDeleting(
   __super::OnRowDeleting(e);
   {
     this->TDimensionRowDeleting(
-        this, (gcnew NewDataSet::TDimensionRowChangeEvent(
-                  (cli::safe_cast<NewDataSet::TDimensionRow ^ >(e->Row)),
-                  e->Action)));
+        this,
+        (gcnew NewDataSet::TDimensionRowChangeEvent(
+            (cli::safe_cast<NewDataSet::TDimensionRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -8302,7 +8380,7 @@ inline ::System::Xml::Schema::XmlSchemaComplexType ^
       for (::System::Collections::IEnumerator ^ schemas =
                xs->Schemas(dsSchema->TargetNamespace)->GetEnumerator();
            schemas->MoveNext();) {
-        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^ >(
+        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^>(
             schemas->Current));
         s2->SetLength(0);
         schema->Write(s2);
@@ -8378,7 +8456,7 @@ inline ::System::Int32 NewDataSet::OperationDataTable::Count::get() {
 
 inline NewDataSet::OperationRow ^
     NewDataSet::OperationDataTable::default ::get(::System::Int32 index) {
-  return (cli::safe_cast<NewDataSet::OperationRow ^ >(this->Rows[index]));
+  return (cli::safe_cast<NewDataSet::OperationRow ^>(this->Rows[index]));
 }
 
 inline ::System::Void NewDataSet::OperationDataTable::AddOperationRow(
@@ -8392,9 +8470,9 @@ inline NewDataSet::OperationRow ^
         NewDataSet::CompositeInstructionRow ^
             parentCompositeInstructionRowByCompositeInstruction_Operation) {
   NewDataSet::OperationRow ^ rowOperationRow =
-      (cli::safe_cast<NewDataSet::OperationRow ^ >(this->NewRow()));
-  cli::array<::System::Object ^ > ^ columnValuesArray =
-      gcnew cli::array<::System::Object ^ >(2){Type, nullptr};
+      (cli::safe_cast<NewDataSet::OperationRow ^>(this->NewRow()));
+  cli::array<::System::Object ^> ^ columnValuesArray =
+      gcnew cli::array<::System::Object ^>(2){Type, nullptr};
   if (parentCompositeInstructionRowByCompositeInstruction_Operation !=
       nullptr) {
     columnValuesArray[1] =
@@ -8412,7 +8490,7 @@ inline ::System::Collections::IEnumerator ^
 
 inline ::System::Data::DataTable ^ NewDataSet::OperationDataTable::Clone() {
   NewDataSet::OperationDataTable ^ cln =
-      (cli::safe_cast<NewDataSet::OperationDataTable ^ >(__super::Clone()));
+      (cli::safe_cast<NewDataSet::OperationDataTable ^>(__super::Clone()));
   cln->InitVars();
   return cln;
 }
@@ -8442,7 +8520,7 @@ inline ::System::Void NewDataSet::OperationDataTable::InitClass() {
 
 inline NewDataSet::OperationRow ^
     NewDataSet::OperationDataTable::NewOperationRow() {
-  return (cli::safe_cast<NewDataSet::OperationRow ^ >(this->NewRow()));
+  return (cli::safe_cast<NewDataSet::OperationRow ^>(this->NewRow()));
 }
 
 inline ::System::Data::DataRow ^
@@ -8462,7 +8540,7 @@ inline ::System::Void NewDataSet::OperationDataTable::OnRowChanged(
     this->OperationRowChanged(
         this,
         (gcnew NewDataSet::OperationRowChangeEvent(
-            (cli::safe_cast<NewDataSet::OperationRow ^ >(e->Row)), e->Action)));
+            (cli::safe_cast<NewDataSet::OperationRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -8473,7 +8551,7 @@ inline ::System::Void NewDataSet::OperationDataTable::OnRowChanging(
     this->OperationRowChanging(
         this,
         (gcnew NewDataSet::OperationRowChangeEvent(
-            (cli::safe_cast<NewDataSet::OperationRow ^ >(e->Row)), e->Action)));
+            (cli::safe_cast<NewDataSet::OperationRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -8484,7 +8562,7 @@ inline ::System::Void NewDataSet::OperationDataTable::OnRowDeleted(
     this->OperationRowDeleted(
         this,
         (gcnew NewDataSet::OperationRowChangeEvent(
-            (cli::safe_cast<NewDataSet::OperationRow ^ >(e->Row)), e->Action)));
+            (cli::safe_cast<NewDataSet::OperationRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -8495,7 +8573,7 @@ inline ::System::Void NewDataSet::OperationDataTable::OnRowDeleting(
     this->OperationRowDeleting(
         this,
         (gcnew NewDataSet::OperationRowChangeEvent(
-            (cli::safe_cast<NewDataSet::OperationRow ^ >(e->Row)), e->Action)));
+            (cli::safe_cast<NewDataSet::OperationRow ^>(e->Row)), e->Action)));
   }
 }
 
@@ -8548,7 +8626,7 @@ inline ::System::Xml::Schema::XmlSchemaComplexType ^
       for (::System::Collections::IEnumerator ^ schemas =
                xs->Schemas(dsSchema->TargetNamespace)->GetEnumerator();
            schemas->MoveNext();) {
-        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^ >(
+        schema = (cli::safe_cast<::System::Xml::Schema::XmlSchema ^>(
             schemas->Current));
         s2->SetLength(0);
         schema->Write(s2);
@@ -8581,11 +8659,11 @@ inline ::System::Xml::Schema::XmlSchemaComplexType ^
 inline NewDataSet::FunctionRow::FunctionRow(::System::Data::DataRowBuilder ^ rb)
     : ::System::Data::DataRow(rb) {
   this->tableFunction =
-      (cli::safe_cast<NewDataSet::FunctionDataTable ^ >(this->Table));
+      (cli::safe_cast<NewDataSet::FunctionDataTable ^>(this->Table));
 }
 
 inline System::String ^ NewDataSet::FunctionRow::Name::get() {
-  return (cli::safe_cast<::System::String ^ >(
+  return (cli::safe_cast<::System::String ^>(
       this[this->tableFunction->NameColumn]));
 }
 inline System::Void NewDataSet::FunctionRow::Name::set(System::String ^ value) {
@@ -8635,7 +8713,7 @@ NewDataSet::FunctionRow::CompositeInstruction_Id::set(System::Int32 value) {
 
 inline NewDataSet::FunctionRow ^
     NewDataSet::FunctionRow::FunctionRowParent::get() {
-  return (cli::safe_cast<NewDataSet::FunctionRow ^ >(
+  return (cli::safe_cast<NewDataSet::FunctionRow ^>(
       this->GetParentRow(this->Table->ParentRelations[L"Function_Function"])));
 }
 inline System::Void NewDataSet::FunctionRow::FunctionRowParent::set(
@@ -8646,7 +8724,7 @@ inline System::Void NewDataSet::FunctionRow::FunctionRowParent::set(
 inline NewDataSet::CompositeInstructionRow ^
     NewDataSet::FunctionRow::CompositeInstructionRow::get() {
   return (
-      cli::safe_cast<NewDataSet::CompositeInstructionRow ^ >(this->GetParentRow(
+      cli::safe_cast<NewDataSet::CompositeInstructionRow ^>(this->GetParentRow(
           this->Table->ParentRelations[L"CompositeInstruction_Function"])));
 }
 inline System::Void NewDataSet::FunctionRow::CompositeInstructionRow::set(
@@ -8674,23 +8752,23 @@ NewDataSet::FunctionRow::SetCompositeInstruction_IdNull() {
       ::System::Convert::DBNull;
 }
 
-inline cli::array<NewDataSet::ParameterListRow ^ > ^
+inline cli::array<NewDataSet::ParameterListRow ^> ^
     NewDataSet::FunctionRow::GetParameterListRows() {
   if (this->Table->ChildRelations[L"Function_ParameterList"] == nullptr) {
-    return gcnew cli::array<NewDataSet::ParameterListRow ^ >(0);
+    return gcnew cli::array<NewDataSet::ParameterListRow ^>(0);
   } else {
-    return (cli::safe_cast<cli::array<NewDataSet::ParameterListRow ^ > ^ >(
+    return (cli::safe_cast<cli::array<NewDataSet::ParameterListRow ^> ^>(
         __super::GetChildRows(
             this->Table->ChildRelations[L"Function_ParameterList"])));
   }
 }
 
-inline cli::array<NewDataSet::FunctionRow ^ > ^
+inline cli::array<NewDataSet::FunctionRow ^> ^
     NewDataSet::FunctionRow::GetFunctionRows() {
   if (this->Table->ChildRelations[L"Function_Function"] == nullptr) {
-    return gcnew cli::array<NewDataSet::FunctionRow ^ >(0);
+    return gcnew cli::array<NewDataSet::FunctionRow ^>(0);
   } else {
-    return (cli::safe_cast<cli::array<NewDataSet::FunctionRow ^ > ^ >(
+    return (cli::safe_cast<cli::array<NewDataSet::FunctionRow ^> ^>(
         __super::GetChildRows(
             this->Table->ChildRelations[L"Function_Function"])));
   }
@@ -8700,7 +8778,7 @@ inline NewDataSet::ParameterListRow::ParameterListRow(
     ::System::Data::DataRowBuilder ^ rb)
     : ::System::Data::DataRow(rb) {
   this->tableParameterList =
-      (cli::safe_cast<NewDataSet::ParameterListDataTable ^ >(this->Table));
+      (cli::safe_cast<NewDataSet::ParameterListDataTable ^>(this->Table));
 }
 
 inline System::Int32 NewDataSet::ParameterListRow::ParameterList_Id::get() {
@@ -8730,7 +8808,7 @@ NewDataSet::ParameterListRow::Function_Id::set(System::Int32 value) {
 
 inline NewDataSet::FunctionRow ^
     NewDataSet::ParameterListRow::FunctionRow::get() {
-  return (cli::safe_cast<NewDataSet::FunctionRow ^ >(this->GetParentRow(
+  return (cli::safe_cast<NewDataSet::FunctionRow ^>(this->GetParentRow(
       this->Table->ParentRelations[L"Function_ParameterList"])));
 }
 inline System::Void NewDataSet::ParameterListRow::FunctionRow::set(
@@ -8747,12 +8825,12 @@ inline ::System::Void NewDataSet::ParameterListRow::SetFunction_IdNull() {
   this[this->tableParameterList->Function_IdColumn] = ::System::Convert::DBNull;
 }
 
-inline cli::array<NewDataSet::ParameterRow ^ > ^
+inline cli::array<NewDataSet::ParameterRow ^> ^
     NewDataSet::ParameterListRow::GetParameterRows() {
   if (this->Table->ChildRelations[L"ParameterList_Parameter"] == nullptr) {
-    return gcnew cli::array<NewDataSet::ParameterRow ^ >(0);
+    return gcnew cli::array<NewDataSet::ParameterRow ^>(0);
   } else {
-    return (cli::safe_cast<cli::array<NewDataSet::ParameterRow ^ > ^ >(
+    return (cli::safe_cast<cli::array<NewDataSet::ParameterRow ^> ^>(
         __super::GetChildRows(
             this->Table->ChildRelations[L"ParameterList_Parameter"])));
   }
@@ -8762,11 +8840,11 @@ inline NewDataSet::ParameterRow::ParameterRow(::System::Data::DataRowBuilder ^
                                               rb)
     : ::System::Data::DataRow(rb) {
   this->tableParameter =
-      (cli::safe_cast<NewDataSet::ParameterDataTable ^ >(this->Table));
+      (cli::safe_cast<NewDataSet::ParameterDataTable ^>(this->Table));
 }
 
 inline System::String ^ NewDataSet::ParameterRow::Name::get() {
-  return (cli::safe_cast<::System::String ^ >(
+  return (cli::safe_cast<::System::String ^>(
       this[this->tableParameter->NameColumn]));
 }
 inline System::Void NewDataSet::ParameterRow::Name::set(System::String ^
@@ -8775,7 +8853,7 @@ inline System::Void NewDataSet::ParameterRow::Name::set(System::String ^
 }
 
 inline System::String ^ NewDataSet::ParameterRow::Type::get() {
-  return (cli::safe_cast<::System::String ^ >(
+  return (cli::safe_cast<::System::String ^>(
       this[this->tableParameter->TypeColumn]));
 }
 inline System::Void NewDataSet::ParameterRow::Type::set(System::String ^
@@ -8784,7 +8862,7 @@ inline System::Void NewDataSet::ParameterRow::Type::set(System::String ^
 }
 
 inline System::String ^ NewDataSet::ParameterRow::Value::get() {
-  return (cli::safe_cast<::System::String ^ >(
+  return (cli::safe_cast<::System::String ^>(
       this[this->tableParameter->ValueColumn]));
 }
 inline System::Void NewDataSet::ParameterRow::Value::set(System::String ^
@@ -8810,7 +8888,7 @@ NewDataSet::ParameterRow::ParameterList_Id::set(System::Int32 value) {
 
 inline NewDataSet::ParameterListRow ^
     NewDataSet::ParameterRow::ParameterListRow::get() {
-  return (cli::safe_cast<NewDataSet::ParameterListRow ^ >(this->GetParentRow(
+  return (cli::safe_cast<NewDataSet::ParameterListRow ^>(this->GetParentRow(
       this->Table->ParentRelations[L"ParameterList_Parameter"])));
 }
 inline System::Void NewDataSet::ParameterRow::ParameterListRow::set(
@@ -8832,7 +8910,7 @@ inline NewDataSet::DimensionRow::DimensionRow(::System::Data::DataRowBuilder ^
                                               rb)
     : ::System::Data::DataRow(rb) {
   this->tableDimension =
-      (cli::safe_cast<NewDataSet::DimensionDataTable ^ >(this->Table));
+      (cli::safe_cast<NewDataSet::DimensionDataTable ^>(this->Table));
 }
 
 inline System::Int64 NewDataSet::DimensionRow::ID::get() {
@@ -8844,7 +8922,7 @@ inline System::Void NewDataSet::DimensionRow::ID::set(System::Int64 value) {
 }
 
 inline System::String ^ NewDataSet::DimensionRow::Name::get() {
-  return (cli::safe_cast<::System::String ^ >(
+  return (cli::safe_cast<::System::String ^>(
       this[this->tableDimension->NameColumn]));
 }
 inline System::Void NewDataSet::DimensionRow::Name::set(System::String ^
@@ -8896,7 +8974,7 @@ NewDataSet::DimensionRow::Geometry_Id::set(System::Int32 value) {
 }
 
 inline NewDataSet::GeometryRow ^ NewDataSet::DimensionRow::GeometryRow::get() {
-  return (cli::safe_cast<NewDataSet::GeometryRow ^ >(
+  return (cli::safe_cast<NewDataSet::GeometryRow ^>(
       this->GetParentRow(this->Table->ParentRelations[L"Geometry_Dimension"])));
 }
 inline System::Void NewDataSet::DimensionRow::GeometryRow::set(
@@ -8913,12 +8991,12 @@ inline ::System::Void NewDataSet::DimensionRow::SetGeometry_IdNull() {
   this[this->tableDimension->Geometry_IdColumn] = ::System::Convert::DBNull;
 }
 
-inline cli::array<NewDataSet::IntegratedRow ^ > ^
+inline cli::array<NewDataSet::IntegratedRow ^> ^
     NewDataSet::DimensionRow::GetIntegratedRows() {
   if (this->Table->ChildRelations[L"Dimension_Integrated"] == nullptr) {
-    return gcnew cli::array<NewDataSet::IntegratedRow ^ >(0);
+    return gcnew cli::array<NewDataSet::IntegratedRow ^>(0);
   } else {
-    return (cli::safe_cast<cli::array<NewDataSet::IntegratedRow ^ > ^ >(
+    return (cli::safe_cast<cli::array<NewDataSet::IntegratedRow ^> ^>(
         __super::GetChildRows(
             this->Table->ChildRelations[L"Dimension_Integrated"])));
   }
@@ -8928,7 +9006,7 @@ inline NewDataSet::IntegratedRow::IntegratedRow(::System::Data::DataRowBuilder ^
                                                 rb)
     : ::System::Data::DataRow(rb) {
   this->tableIntegrated =
-      (cli::safe_cast<NewDataSet::IntegratedDataTable ^ >(this->Table));
+      (cli::safe_cast<NewDataSet::IntegratedDataTable ^>(this->Table));
 }
 
 inline System::Int64 NewDataSet::IntegratedRow::UpperLimit::get() {
@@ -8967,7 +9045,7 @@ NewDataSet::IntegratedRow::Dimension_Id::set(System::Int32 value) {
 
 inline NewDataSet::DimensionRow ^
     NewDataSet::IntegratedRow::DimensionRow::get() {
-  return (cli::safe_cast<NewDataSet::DimensionRow ^ >(this->GetParentRow(
+  return (cli::safe_cast<NewDataSet::DimensionRow ^>(this->GetParentRow(
       this->Table->ParentRelations[L"Dimension_Integrated"])));
 }
 inline System::Void NewDataSet::IntegratedRow::DimensionRow::set(
@@ -8988,13 +9066,13 @@ inline NewDataSet::CompositeInstructionRow::CompositeInstructionRow(
     ::System::Data::DataRowBuilder ^ rb)
     : ::System::Data::DataRow(rb) {
   this->tableCompositeInstruction =
-      (cli::safe_cast<NewDataSet::CompositeInstructionDataTable ^ >(
+      (cli::safe_cast<NewDataSet::CompositeInstructionDataTable ^>(
           this->Table));
 }
 
 inline System::String ^
     NewDataSet::CompositeInstructionRow::MDWorkspaceName::get() {
-  return (cli::safe_cast<::System::String ^ >(
+  return (cli::safe_cast<::System::String ^>(
       this[this->tableCompositeInstruction->MDWorkspaceNameColumn]));
 }
 inline System::Void NewDataSet::CompositeInstructionRow::MDWorkspaceName::set(
@@ -9004,7 +9082,7 @@ inline System::Void NewDataSet::CompositeInstructionRow::MDWorkspaceName::set(
 
 inline System::String ^
     NewDataSet::CompositeInstructionRow::MDWorkspaceLocation::get() {
-  return (cli::safe_cast<::System::String ^ >(
+  return (cli::safe_cast<::System::String ^>(
       this[this->tableCompositeInstruction->MDWorkspaceLocationColumn]));
 }
 inline System::Void
@@ -9024,37 +9102,37 @@ NewDataSet::CompositeInstructionRow::CompositeInstruction_Id::set(
   this[this->tableCompositeInstruction->CompositeInstruction_IdColumn] = value;
 }
 
-inline cli::array<NewDataSet::GeometryRow ^ > ^
+inline cli::array<NewDataSet::GeometryRow ^> ^
     NewDataSet::CompositeInstructionRow::GetGeometryRows() {
   if (this->Table->ChildRelations[L"CompositeInstruction_Geometry"] ==
       nullptr) {
-    return gcnew cli::array<NewDataSet::GeometryRow ^ >(0);
+    return gcnew cli::array<NewDataSet::GeometryRow ^>(0);
   } else {
-    return (cli::safe_cast<cli::array<NewDataSet::GeometryRow ^ > ^ >(
+    return (cli::safe_cast<cli::array<NewDataSet::GeometryRow ^> ^>(
         __super::GetChildRows(
             this->Table->ChildRelations[L"CompositeInstruction_Geometry"])));
   }
 }
 
-inline cli::array<NewDataSet::OperationRow ^ > ^
+inline cli::array<NewDataSet::OperationRow ^> ^
     NewDataSet::CompositeInstructionRow::GetOperationRows() {
   if (this->Table->ChildRelations[L"CompositeInstruction_Operation"] ==
       nullptr) {
-    return gcnew cli::array<NewDataSet::OperationRow ^ >(0);
+    return gcnew cli::array<NewDataSet::OperationRow ^>(0);
   } else {
-    return (cli::safe_cast<cli::array<NewDataSet::OperationRow ^ > ^ >(
+    return (cli::safe_cast<cli::array<NewDataSet::OperationRow ^> ^>(
         __super::GetChildRows(
             this->Table->ChildRelations[L"CompositeInstruction_Operation"])));
   }
 }
 
-inline cli::array<NewDataSet::FunctionRow ^ > ^
+inline cli::array<NewDataSet::FunctionRow ^> ^
     NewDataSet::CompositeInstructionRow::GetFunctionRows() {
   if (this->Table->ChildRelations[L"CompositeInstruction_Function"] ==
       nullptr) {
-    return gcnew cli::array<NewDataSet::FunctionRow ^ >(0);
+    return gcnew cli::array<NewDataSet::FunctionRow ^>(0);
   } else {
-    return (cli::safe_cast<cli::array<NewDataSet::FunctionRow ^ > ^ >(
+    return (cli::safe_cast<cli::array<NewDataSet::FunctionRow ^> ^>(
         __super::GetChildRows(
             this->Table->ChildRelations[L"CompositeInstruction_Function"])));
   }
@@ -9063,7 +9141,7 @@ inline cli::array<NewDataSet::FunctionRow ^ > ^
 inline NewDataSet::GeometryRow::GeometryRow(::System::Data::DataRowBuilder ^ rb)
     : ::System::Data::DataRow(rb) {
   this->tableGeometry =
-      (cli::safe_cast<NewDataSet::GeometryDataTable ^ >(this->Table));
+      (cli::safe_cast<NewDataSet::GeometryDataTable ^>(this->Table));
 }
 
 inline System::Int32 NewDataSet::GeometryRow::Geometry_Id::get() {
@@ -9094,7 +9172,7 @@ NewDataSet::GeometryRow::CompositeInstruction_Id::set(System::Int32 value) {
 inline NewDataSet::CompositeInstructionRow ^
     NewDataSet::GeometryRow::CompositeInstructionRow::get() {
   return (
-      cli::safe_cast<NewDataSet::CompositeInstructionRow ^ >(this->GetParentRow(
+      cli::safe_cast<NewDataSet::CompositeInstructionRow ^>(this->GetParentRow(
           this->Table->ParentRelations[L"CompositeInstruction_Geometry"])));
 }
 inline System::Void NewDataSet::GeometryRow::CompositeInstructionRow::set(
@@ -9114,56 +9192,56 @@ NewDataSet::GeometryRow::SetCompositeInstruction_IdNull() {
       ::System::Convert::DBNull;
 }
 
-inline cli::array<NewDataSet::DimensionRow ^ > ^
+inline cli::array<NewDataSet::DimensionRow ^> ^
     NewDataSet::GeometryRow::GetDimensionRows() {
   if (this->Table->ChildRelations[L"Geometry_Dimension"] == nullptr) {
-    return gcnew cli::array<NewDataSet::DimensionRow ^ >(0);
+    return gcnew cli::array<NewDataSet::DimensionRow ^>(0);
   } else {
-    return (cli::safe_cast<cli::array<NewDataSet::DimensionRow ^ > ^ >(
+    return (cli::safe_cast<cli::array<NewDataSet::DimensionRow ^> ^>(
         __super::GetChildRows(
             this->Table->ChildRelations[L"Geometry_Dimension"])));
   }
 }
 
-inline cli::array<NewDataSet::XDimensionRow ^ > ^
+inline cli::array<NewDataSet::XDimensionRow ^> ^
     NewDataSet::GeometryRow::GetXDimensionRows() {
   if (this->Table->ChildRelations[L"Geometry_XDimension"] == nullptr) {
-    return gcnew cli::array<NewDataSet::XDimensionRow ^ >(0);
+    return gcnew cli::array<NewDataSet::XDimensionRow ^>(0);
   } else {
-    return (cli::safe_cast<cli::array<NewDataSet::XDimensionRow ^ > ^ >(
+    return (cli::safe_cast<cli::array<NewDataSet::XDimensionRow ^> ^>(
         __super::GetChildRows(
             this->Table->ChildRelations[L"Geometry_XDimension"])));
   }
 }
 
-inline cli::array<NewDataSet::YDimensionRow ^ > ^
+inline cli::array<NewDataSet::YDimensionRow ^> ^
     NewDataSet::GeometryRow::GetYDimensionRows() {
   if (this->Table->ChildRelations[L"Geometry_YDimension"] == nullptr) {
-    return gcnew cli::array<NewDataSet::YDimensionRow ^ >(0);
+    return gcnew cli::array<NewDataSet::YDimensionRow ^>(0);
   } else {
-    return (cli::safe_cast<cli::array<NewDataSet::YDimensionRow ^ > ^ >(
+    return (cli::safe_cast<cli::array<NewDataSet::YDimensionRow ^> ^>(
         __super::GetChildRows(
             this->Table->ChildRelations[L"Geometry_YDimension"])));
   }
 }
 
-inline cli::array<NewDataSet::ZDimensionRow ^ > ^
+inline cli::array<NewDataSet::ZDimensionRow ^> ^
     NewDataSet::GeometryRow::GetZDimensionRows() {
   if (this->Table->ChildRelations[L"Geometry_ZDimension"] == nullptr) {
-    return gcnew cli::array<NewDataSet::ZDimensionRow ^ >(0);
+    return gcnew cli::array<NewDataSet::ZDimensionRow ^>(0);
   } else {
-    return (cli::safe_cast<cli::array<NewDataSet::ZDimensionRow ^ > ^ >(
+    return (cli::safe_cast<cli::array<NewDataSet::ZDimensionRow ^> ^>(
         __super::GetChildRows(
             this->Table->ChildRelations[L"Geometry_ZDimension"])));
   }
 }
 
-inline cli::array<NewDataSet::TDimensionRow ^ > ^
+inline cli::array<NewDataSet::TDimensionRow ^> ^
     NewDataSet::GeometryRow::GetTDimensionRows() {
   if (this->Table->ChildRelations[L"Geometry_TDimension"] == nullptr) {
-    return gcnew cli::array<NewDataSet::TDimensionRow ^ >(0);
+    return gcnew cli::array<NewDataSet::TDimensionRow ^>(0);
   } else {
-    return (cli::safe_cast<cli::array<NewDataSet::TDimensionRow ^ > ^ >(
+    return (cli::safe_cast<cli::array<NewDataSet::TDimensionRow ^> ^>(
         __super::GetChildRows(
             this->Table->ChildRelations[L"Geometry_TDimension"])));
   }
@@ -9173,7 +9251,7 @@ inline NewDataSet::XDimensionRow::XDimensionRow(::System::Data::DataRowBuilder ^
                                                 rb)
     : ::System::Data::DataRow(rb) {
   this->tableXDimension =
-      (cli::safe_cast<NewDataSet::XDimensionDataTable ^ >(this->Table));
+      (cli::safe_cast<NewDataSet::XDimensionDataTable ^>(this->Table));
 }
 
 inline System::Int64 NewDataSet::XDimensionRow::RefDimensionId::get() {
@@ -9209,7 +9287,7 @@ NewDataSet::XDimensionRow::Geometry_Id::set(System::Int32 value) {
 }
 
 inline NewDataSet::GeometryRow ^ NewDataSet::XDimensionRow::GeometryRow::get() {
-  return (cli::safe_cast<NewDataSet::GeometryRow ^ >(this->GetParentRow(
+  return (cli::safe_cast<NewDataSet::GeometryRow ^>(this->GetParentRow(
       this->Table->ParentRelations[L"Geometry_XDimension"])));
 }
 inline System::Void NewDataSet::XDimensionRow::GeometryRow::set(
@@ -9238,7 +9316,7 @@ inline NewDataSet::YDimensionRow::YDimensionRow(::System::Data::DataRowBuilder ^
                                                 rb)
     : ::System::Data::DataRow(rb) {
   this->tableYDimension =
-      (cli::safe_cast<NewDataSet::YDimensionDataTable ^ >(this->Table));
+      (cli::safe_cast<NewDataSet::YDimensionDataTable ^>(this->Table));
 }
 
 inline System::Int64 NewDataSet::YDimensionRow::RefDimensionId::get() {
@@ -9274,7 +9352,7 @@ NewDataSet::YDimensionRow::Geometry_Id::set(System::Int32 value) {
 }
 
 inline NewDataSet::GeometryRow ^ NewDataSet::YDimensionRow::GeometryRow::get() {
-  return (cli::safe_cast<NewDataSet::GeometryRow ^ >(this->GetParentRow(
+  return (cli::safe_cast<NewDataSet::GeometryRow ^>(this->GetParentRow(
       this->Table->ParentRelations[L"Geometry_YDimension"])));
 }
 inline System::Void NewDataSet::YDimensionRow::GeometryRow::set(
@@ -9303,7 +9381,7 @@ inline NewDataSet::ZDimensionRow::ZDimensionRow(::System::Data::DataRowBuilder ^
                                                 rb)
     : ::System::Data::DataRow(rb) {
   this->tableZDimension =
-      (cli::safe_cast<NewDataSet::ZDimensionDataTable ^ >(this->Table));
+      (cli::safe_cast<NewDataSet::ZDimensionDataTable ^>(this->Table));
 }
 
 inline System::Int64 NewDataSet::ZDimensionRow::RefDimensionId::get() {
@@ -9339,7 +9417,7 @@ NewDataSet::ZDimensionRow::Geometry_Id::set(System::Int32 value) {
 }
 
 inline NewDataSet::GeometryRow ^ NewDataSet::ZDimensionRow::GeometryRow::get() {
-  return (cli::safe_cast<NewDataSet::GeometryRow ^ >(this->GetParentRow(
+  return (cli::safe_cast<NewDataSet::GeometryRow ^>(this->GetParentRow(
       this->Table->ParentRelations[L"Geometry_ZDimension"])));
 }
 inline System::Void NewDataSet::ZDimensionRow::GeometryRow::set(
@@ -9368,7 +9446,7 @@ inline NewDataSet::TDimensionRow::TDimensionRow(::System::Data::DataRowBuilder ^
                                                 rb)
     : ::System::Data::DataRow(rb) {
   this->tableTDimension =
-      (cli::safe_cast<NewDataSet::TDimensionDataTable ^ >(this->Table));
+      (cli::safe_cast<NewDataSet::TDimensionDataTable ^>(this->Table));
 }
 
 inline System::Int64 NewDataSet::TDimensionRow::RefDimensionId::get() {
@@ -9404,7 +9482,7 @@ NewDataSet::TDimensionRow::Geometry_Id::set(System::Int32 value) {
 }
 
 inline NewDataSet::GeometryRow ^ NewDataSet::TDimensionRow::GeometryRow::get() {
-  return (cli::safe_cast<NewDataSet::GeometryRow ^ >(this->GetParentRow(
+  return (cli::safe_cast<NewDataSet::GeometryRow ^>(this->GetParentRow(
       this->Table->ParentRelations[L"Geometry_TDimension"])));
 }
 inline System::Void NewDataSet::TDimensionRow::GeometryRow::set(
@@ -9433,11 +9511,11 @@ inline NewDataSet::OperationRow::OperationRow(::System::Data::DataRowBuilder ^
                                               rb)
     : ::System::Data::DataRow(rb) {
   this->tableOperation =
-      (cli::safe_cast<NewDataSet::OperationDataTable ^ >(this->Table));
+      (cli::safe_cast<NewDataSet::OperationDataTable ^>(this->Table));
 }
 
 inline System::String ^ NewDataSet::OperationRow::Type::get() {
-  return (cli::safe_cast<::System::String ^ >(
+  return (cli::safe_cast<::System::String ^>(
       this[this->tableOperation->TypeColumn]));
 }
 inline System::Void NewDataSet::OperationRow::Type::set(System::String ^
@@ -9464,7 +9542,7 @@ NewDataSet::OperationRow::CompositeInstruction_Id::set(System::Int32 value) {
 inline NewDataSet::CompositeInstructionRow ^
     NewDataSet::OperationRow::CompositeInstructionRow::get() {
   return (
-      cli::safe_cast<NewDataSet::CompositeInstructionRow ^ >(this->GetParentRow(
+      cli::safe_cast<NewDataSet::CompositeInstructionRow ^>(this->GetParentRow(
           this->Table->ParentRelations[L"CompositeInstruction_Operation"])));
 }
 inline System::Void NewDataSet::OperationRow::CompositeInstructionRow::set(

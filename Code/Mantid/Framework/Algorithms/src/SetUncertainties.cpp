@@ -16,7 +16,7 @@ using namespace API;
 
 namespace {
 /// Used to compare signal to zero
-const double TOLERANCE=1.e-10;
+const double TOLERANCE = 1.e-10;
 }
 
 /// (Empty) Constructor

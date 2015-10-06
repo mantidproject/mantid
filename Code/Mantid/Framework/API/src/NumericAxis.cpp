@@ -14,7 +14,7 @@ Mantid::Kernel::Logger g_log("NumericAxis");
 
 class EqualWithinTolerance {
 public:
-  EqualWithinTolerance(double tolerance) : m_tolerance(tolerance) {};
+  EqualWithinTolerance(double tolerance) : m_tolerance(tolerance){};
   bool operator()(double a, double b) {
     if (boost::math::isnan(a) && boost::math::isnan(b))
       return true;

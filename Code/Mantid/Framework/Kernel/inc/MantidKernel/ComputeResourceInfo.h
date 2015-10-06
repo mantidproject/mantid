@@ -57,7 +57,7 @@ public:
   std::string name() const;
 
   /// Base URL the compute resource
-  std::string baseURL() const ;
+  std::string baseURL() const;
 
   /// Type/class of remote job manager required to handle this resource
   std::string remoteJobManagerType() const;
@@ -73,8 +73,8 @@ private:
 };
 
 /// output to stream operator for compute resource info objects
-MANTID_KERNEL_DLL std::ostream &
-operator<<(std::ostream &buffer, const  ComputeResourceInfo &cr);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &buffer,
+                                           const ComputeResourceInfo &cr);
 
 } // namespace Kernel
 } // namespace Mantid

@@ -199,8 +199,8 @@ AlgorithmAdapter<BaseAlgorithm>::validateInputs() {
 /// Set the summary text
 /// @param summary Wiki text
 template <typename BaseAlgorithm>
-void
-AlgorithmAdapter<BaseAlgorithm>::setWikiSummary(const std::string &summary) {
+void AlgorithmAdapter<BaseAlgorithm>::setWikiSummary(
+    const std::string &summary) {
   std::string msg =
       "self.setWikiSummary() is deprecated and will be removed in a future "
       "release.\n"

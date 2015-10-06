@@ -107,9 +107,8 @@ void VesuvioResolution::setMatrixWorkspace(
  * @param detpar Structure containing detector parameters
  * @param respar Structure containing resolution parameters
  */
-void
-VesuvioResolution::cacheResolutionComponents(const DetectorParams &detpar,
-                                             const ResolutionParams &respar) {
+void VesuvioResolution::cacheResolutionComponents(
+    const DetectorParams &detpar, const ResolutionParams &respar) {
   // geometry
   double theta = detpar.theta; // cache for frequent access
   double hwhmLorentzE = respar.dEnLorentz;

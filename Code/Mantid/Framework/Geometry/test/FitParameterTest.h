@@ -11,27 +11,23 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-class FitParameterTest : public CxxTest::TestSuite
-{
+class FitParameterTest : public CxxTest::TestSuite {
 public:
-
-
-	void test1()
-	{
+  void test1() {
     FitParameter fitP;
 
     fitP.setValue() = 9.1;
     fitP.setTie() = "bob";
 
-    TS_ASSERT_DELTA( fitP.getValue(), 9.1 ,0.0001);
-    TS_ASSERT( fitP.getTie().compare("bob")==0 );
-	}
+    TS_ASSERT_DELTA(fitP.getValue(), 9.1, 0.0001);
+    TS_ASSERT(fitP.getTie().compare("bob") == 0);
+  }
 
-	void testReadInOut()
-	{
+  void testReadInOut() {
     FitParameter fitP1;
 
-    std::istringstream input("9.1 , fido , , , , 8.2 , tie , formula, TOF , dSpacing,");
+    std::istringstream input(
+        "9.1 , fido , , , , 8.2 , tie , formula, TOF , dSpacing,");
     input >> fitP1;
     std::stringstream inout;
     inout << fitP1;
@@ -39,94 +35,87 @@ public:
     FitParameter fitP;
     inout >> fitP;
 
+    TS_ASSERT_DELTA(fitP.getValue(), 9.1, 0.0001);
+    TS_ASSERT(fitP.getFunction().compare("fido") == 0);
+    TS_ASSERT(fitP.getName().compare("") == 0);
+    TS_ASSERT(fitP.getConstraintPenaltyFactor().compare("8.2") == 0);
+    TS_ASSERT(fitP.getTie().compare("tie") == 0);
+    TS_ASSERT(fitP.getFormula().compare("formula") == 0);
+    TS_ASSERT(fitP.getFormulaUnit().compare("TOF") == 0);
+    TS_ASSERT(fitP.getResultUnit().compare("dSpacing") == 0);
+  }
 
-    TS_ASSERT_DELTA( fitP.getValue(), 9.1 ,0.0001);
-    TS_ASSERT( fitP.getFunction().compare("fido")==0 );
-    TS_ASSERT( fitP.getName().compare("")==0 );
-    TS_ASSERT( fitP.getConstraintPenaltyFactor().compare("8.2")==0 );
-    TS_ASSERT( fitP.getTie().compare("tie")==0 );
-    TS_ASSERT( fitP.getFormula().compare("formula")==0 );
-    TS_ASSERT( fitP.getFormulaUnit().compare("TOF")==0 );
-    TS_ASSERT( fitP.getResultUnit().compare("dSpacing")==0 );
-	}
-	
-	void test2()
-	{
+  void test2() {
     FitParameter fitP;
 
-    std::istringstream input("9.1 , fido , , , , , tie , formula, TOF, dSpacing ,");
+    std::istringstream input(
+        "9.1 , fido , , , , , tie , formula, TOF, dSpacing ,");
 
     input >> fitP;
 
-    TS_ASSERT_DELTA( fitP.getValue(), 9.1 ,0.0001);
-    TS_ASSERT( fitP.getFunction().compare("fido")==0 );
-    TS_ASSERT( fitP.getTie().compare("tie")==0 );
-    TS_ASSERT( fitP.getFormula().compare("formula")==0 );
-    TS_ASSERT( fitP.getFormulaUnit().compare("TOF")==0 );
-	}
+    TS_ASSERT_DELTA(fitP.getValue(), 9.1, 0.0001);
+    TS_ASSERT(fitP.getFunction().compare("fido") == 0);
+    TS_ASSERT(fitP.getTie().compare("tie") == 0);
+    TS_ASSERT(fitP.getFormula().compare("formula") == 0);
+    TS_ASSERT(fitP.getFormulaUnit().compare("TOF") == 0);
+  }
 
-	void test3()
-	{
+  void test3() {
     FitParameter fitP;
 
     std::istringstream input("9.1 , , , , , , , , ");
 
     input >> fitP;
 
-    TS_ASSERT_DELTA( fitP.getValue(), 9.1 ,0.0001);
-    TS_ASSERT( fitP.getTie().compare("")==0 );
-	}
+    TS_ASSERT_DELTA(fitP.getValue(), 9.1, 0.0001);
+    TS_ASSERT(fitP.getTie().compare("") == 0);
+  }
 
-	void test4()
-	{
+  void test4() {
     FitParameter fitP;
 
     std::istringstream input("bob , , , , , , ,  ");
 
     input >> fitP;
 
-    TS_ASSERT_DELTA( fitP.getValue(), 0.0 ,0.0001);
-    TS_ASSERT( fitP.getTie().compare("")==0 );
-	}
+    TS_ASSERT_DELTA(fitP.getValue(), 0.0, 0.0001);
+    TS_ASSERT(fitP.getTie().compare("") == 0);
+  }
 
-	void test5()
-	{
+  void test5() {
     FitParameter fitP;
 
     std::istringstream input("9.1 , , , , , , , ");
 
     input >> fitP;
 
-    TS_ASSERT_DELTA( fitP.getValue(), 9.1 ,0.0001);
-    TS_ASSERT( fitP.getTie().compare("")==0 );
-	}
+    TS_ASSERT_DELTA(fitP.getValue(), 9.1, 0.0001);
+    TS_ASSERT(fitP.getTie().compare("") == 0);
+  }
 
-	void test6()
-	{
+  void test6() {
     FitParameter fitP;
 
     std::istringstream input("9.1 , , ,  , , , ,   ");
 
     input >> fitP;
 
-    TS_ASSERT_DELTA( fitP.getValue(), 9.1 ,0.0001);
-    TS_ASSERT( fitP.getTie().compare("")==0 );
-	}
+    TS_ASSERT_DELTA(fitP.getValue(), 9.1, 0.0001);
+    TS_ASSERT(fitP.getTie().compare("") == 0);
+  }
 
-	void test7()
-	{
+  void test7() {
     FitParameter fitP;
 
     std::istringstream input("9.1 , function , name , 3, 8 , , , , ,    ");
 
     input >> fitP;
 
-    TS_ASSERT_DELTA( fitP.getValue(), 9.1 ,0.0001);
-    TS_ASSERT( fitP.getName().compare("name")==0 );
-    TS_ASSERT( fitP.getTie().compare("")==0 );
-    TS_ASSERT( fitP.getConstraint().compare("3 < name < 8")==0 );
-	}
-
+    TS_ASSERT_DELTA(fitP.getValue(), 9.1, 0.0001);
+    TS_ASSERT(fitP.getName().compare("name") == 0);
+    TS_ASSERT(fitP.getTie().compare("") == 0);
+    TS_ASSERT(fitP.getConstraint().compare("3 < name < 8") == 0);
+  }
 };
 
 #endif /*FITPARAMETERTEST_H_*/

@@ -115,8 +115,7 @@ private:
       // for Ikeda-Carpenter it's not allowed to set Fwhm
       try {
         (*it)->setFwhm(parameters.fwhm);
-      }
-      catch (std::invalid_argument) {
+      } catch (std::invalid_argument) {
       }
 
       (*it)->setHeight(parameters.height);

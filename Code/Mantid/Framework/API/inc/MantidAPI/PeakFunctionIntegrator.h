@@ -57,14 +57,11 @@ public:
   void setRequiredRelativePrecision(double newPrecision);
   double requiredRelativePrecision() const;
 
-  IntegrationResult
-  integrateInfinity(const IPeakFunction &peakFunction) const;
-  IntegrationResult
-  integratePositiveInfinity(const IPeakFunction &peakFunction,
-                            double lowerLimit) const;
-  IntegrationResult
-  integrateNegativeInfinity(const IPeakFunction &peakFunction,
-                            double upperLimit) const;
+  IntegrationResult integrateInfinity(const IPeakFunction &peakFunction) const;
+  IntegrationResult integratePositiveInfinity(const IPeakFunction &peakFunction,
+                                              double lowerLimit) const;
+  IntegrationResult integrateNegativeInfinity(const IPeakFunction &peakFunction,
+                                              double upperLimit) const;
 
   IntegrationResult integrate(const IPeakFunction &peakFunction,
                               double lowerLimit, double upperLimit) const;

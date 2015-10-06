@@ -12,16 +12,18 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::Geometry::IMDDimension_const_sptr;
 
-
 namespace {
-  //To get the rounded difference, we need to take into account precision issues which arise when
-  // the bin centres match
-Mantid::coord_t getDExact(Mantid::coord_t location, Mantid::coord_t origin, Mantid::coord_t binWidth) {
+// To get the rounded difference, we need to take into account precision issues
+// which arise when
+// the bin centres match
+Mantid::coord_t getDExact(Mantid::coord_t location, Mantid::coord_t origin,
+                          Mantid::coord_t binWidth) {
   auto dExact = (location - origin) / binWidth;
   const Mantid::coord_t tolerance = Mantid::coord_t(1e-5);
 
   // Expl. of the steps below
-  // -1     -0.5       0      0.5        1   where integer values are bin boundaries and half-values
+  // -1     -0.5       0      0.5        1   where integer values are bin
+  // boundaries and half-values
   //  |       |        |       |         |   are bin centres
   //                               |
   //                              Location
@@ -41,24 +43,26 @@ Mantid::coord_t getDExact(Mantid::coord_t location, Mantid::coord_t origin, Mant
 
   const auto difference = diff1 < diff2 ? diff1 : diff2;
 
-  // If the differnce is within the tolerance, ie the location is essentially on the centre, then
-  // we want to be on the left of that centre. The correct index for when we are on the centre,
+  // If the differnce is within the tolerance, ie the location is essentially on
+  // the centre, then
+  // we want to be on the left of that centre. The correct index for when we are
+  // on the centre,
   // is the lower next integer value.
   if (difference < tolerance) {
     if (difference == 0.0f) {
-      dExact -= tolerance; // When we have an exact hit in the centre, give it a nudge to the lower bin boundary
+      dExact -= tolerance; // When we have an exact hit in the centre, give it a
+                           // nudge to the lower bin boundary
     } else {
-      dExact -= 2*difference; // Need to subtract twice the differnce, in order to be guaranteed below the centre
+      dExact -= 2 * difference; // Need to subtract twice the differnce, in
+                                // order to be guaranteed below the centre
     }
   }
   return dExact;
 }
 }
 
-
 namespace Mantid {
 namespace DataObjects {
-
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -146,10 +150,10 @@ MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(
  * @param beginPos :: Start position
  * @param endPos :: End position
  */
-void
-MDHistoWorkspaceIterator::init(const MDHistoWorkspace *workspace,
-                               Mantid::Geometry::MDImplicitFunction *function,
-                               size_t beginPos, size_t endPos) {
+void MDHistoWorkspaceIterator::init(
+    const MDHistoWorkspace *workspace,
+    Mantid::Geometry::MDImplicitFunction *function, size_t beginPos,
+    size_t endPos) {
   m_ws = workspace;
   if (m_ws == NULL)
     throw std::invalid_argument(
@@ -216,7 +220,6 @@ MDHistoWorkspaceIterator::init(const MDHistoWorkspace *workspace,
 
     m_permutationsFaceTouching[j * 2] = offset;
     m_permutationsFaceTouching[(j * 2) + 1] = -offset;
-
   }
 }
 
@@ -249,29 +252,31 @@ size_t MDHistoWorkspaceIterator::getDataSize() const {
  * @param index :: point to jump to. Must be 0 <= index < getDataSize().
  */
 void MDHistoWorkspaceIterator::jumpTo(size_t index) {
-    m_pos = uint64_t(index + m_begin);
+  m_pos = uint64_t(index + m_begin);
 }
 
 /**
- * Jump the iterator to the nearest valid position correspoinding to the centre current position of the desired iterator position.
+ * Jump the iterator to the nearest valid position correspoinding to the centre
+ * current position of the desired iterator position.
  * @param fromLocation : destination or nearest to.
  * @return absolute distance of end position from requested position.
  */
-Mantid::coord_t MDHistoWorkspaceIterator::jumpToNearest(const VMD& fromLocation)
-{
-    std::vector<size_t> indexes(m_nd);
-    coord_t sqDiff = 0;
-    for(size_t d = 0; d < m_nd; ++d) {
-        coord_t dExact =  getDExact(fromLocation[d], m_origin[d], m_binWidth[d]);
-        size_t dRound = size_t(dExact + 0.5); // Round to nearest bin edge.
-        sqDiff += (dExact - coord_t(dRound)) * (dExact - coord_t(dRound)) * m_binWidth[d] * m_binWidth[d];
-        indexes[d] = dRound;
-    }
+Mantid::coord_t
+MDHistoWorkspaceIterator::jumpToNearest(const VMD &fromLocation) {
+  std::vector<size_t> indexes(m_nd);
+  coord_t sqDiff = 0;
+  for (size_t d = 0; d < m_nd; ++d) {
+    coord_t dExact = getDExact(fromLocation[d], m_origin[d], m_binWidth[d]);
+    size_t dRound = size_t(dExact + 0.5); // Round to nearest bin edge.
+    sqDiff += (dExact - coord_t(dRound)) * (dExact - coord_t(dRound)) *
+              m_binWidth[d] * m_binWidth[d];
+    indexes[d] = dRound;
+  }
 
-    const size_t linearIndex = Utils::NestedForLoop::GetLinearIndex(m_nd, &indexes[0],
-                                  m_indexMaker);
-    this->jumpTo(linearIndex);
-    return std::sqrt(sqDiff);
+  const size_t linearIndex =
+      Utils::NestedForLoop::GetLinearIndex(m_nd, &indexes[0], m_indexMaker);
+  this->jumpTo(linearIndex);
+  return std::sqrt(sqDiff);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -304,7 +309,7 @@ bool MDHistoWorkspaceIterator::next() {
     ++m_pos;
   }
   bool ret = m_pos < m_max;
-  if(ret) {
+  if (ret) {
     // Keep calling next if the current position is masked and still valid.
     while (m_skippingPolicy->keepGoing()) {
       ret = this->next();
@@ -398,24 +403,25 @@ Mantid::Kernel::VMD MDHistoWorkspaceIterator::getCenter() const {
 }
 
 /**
- * Get the extents in n-dimensions corresponding to the position of the box of the current iterator.
+ * Get the extents in n-dimensions corresponding to the position of the box of
+ * the current iterator.
  * @return pairs of min/max extents.
  */
-VecMDExtents MDHistoWorkspaceIterator::getBoxExtents() const
-{
+VecMDExtents MDHistoWorkspaceIterator::getBoxExtents() const {
 
-    // Get the indexes.
-    Utils::NestedForLoop::GetIndicesFromLinearIndex(m_nd, m_pos, m_indexMaker,
-                                                    m_indexMax, m_index);
-    VecMDExtents extents(m_nd);
-    // Find the extents.
-    for (size_t d = 0; d < m_nd; ++d) {
-      const coord_t min = m_origin[d] + coord_t(m_index[d]) * m_binWidth[d]; // Min in d
-      const coord_t max = min + m_binWidth[d]; // Max in d
-      extents[d] = MDExtentPair(min, max);
-    }
+  // Get the indexes.
+  Utils::NestedForLoop::GetIndicesFromLinearIndex(m_nd, m_pos, m_indexMaker,
+                                                  m_indexMax, m_index);
+  VecMDExtents extents(m_nd);
+  // Find the extents.
+  for (size_t d = 0; d < m_nd; ++d) {
+    const coord_t min =
+        m_origin[d] + coord_t(m_index[d]) * m_binWidth[d]; // Min in d
+    const coord_t max = min + m_binWidth[d];               // Max in d
+    extents[d] = MDExtentPair(min, max);
+  }
 
-    return extents;
+  return extents;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -509,7 +515,8 @@ MDHistoWorkspaceIterator::findNeighbourIndexesFaceTouching() const {
                                                   m_indexMax, m_index);
 
   std::vector<size_t> neighbourIndexes; // Accumulate neighbour indexes.
-  std::vector<int> widths(m_nd, 3); // Face touching width is always 3 in each dimension
+  std::vector<int> widths(
+      m_nd, 3); // Face touching width is always 3 in each dimension
   for (size_t i = 0; i < m_permutationsFaceTouching.size(); ++i) {
     if (m_permutationsFaceTouching[i] == 0) {
       continue;
@@ -544,8 +551,8 @@ bool MDHistoWorkspaceIterator::isWithinBounds(size_t index) const {
  * @param widths : vector of integer widths.
  * @return index permutations
  */
-std::vector<int64_t>
-MDHistoWorkspaceIterator::createPermutations(const std::vector<int>& widths) const {
+std::vector<int64_t> MDHistoWorkspaceIterator::createPermutations(
+    const std::vector<int> &widths) const {
   // look-up
   PermutationsMap::iterator it = m_permutationsVertexTouchingMap.find(widths);
   if (it == m_permutationsVertexTouchingMap.end()) {
@@ -556,8 +563,10 @@ MDHistoWorkspaceIterator::createPermutations(const std::vector<int>& widths) con
                                   "always be an even number");
     }
     if (widths.size() != m_nd) {
-        throw std::invalid_argument("MDHistoWorkspaceIterator::"
-                                    "findNeighbourIndexesByWidth, size of widths must be the same as the number of dimensions.");
+      throw std::invalid_argument("MDHistoWorkspaceIterator::"
+                                  "findNeighbourIndexesByWidth, size of widths "
+                                  "must be the same as the number of "
+                                  "dimensions.");
     }
 
     int64_t offset = 1;
@@ -565,10 +574,12 @@ MDHistoWorkspaceIterator::createPermutations(const std::vector<int>& widths) con
     // Size of block will be width ^ nd
     std::vector<int64_t> permutationsVertexTouching;
     // Calculate maximum permutations size.
-    int product = std::accumulate(widths.begin(), widths.end(), 1, std::multiplies<int>());
+    int product = std::accumulate(widths.begin(), widths.end(), 1,
+                                  std::multiplies<int>());
     permutationsVertexTouching.reserve(product);
 
-    int centreIndex = widths[0] / 2; // Deliberately truncate to get centre index
+    int centreIndex =
+        widths[0] / 2; // Deliberately truncate to get centre index
 
     for (int i = 0; i < widths[0]; ++i) {
       // for width = 3 : -1, 0, 1
@@ -593,7 +604,8 @@ MDHistoWorkspaceIterator::createPermutations(const std::vector<int>& widths) con
       }
     }
 
-    m_permutationsVertexTouchingMap.insert(std::make_pair(widths, permutationsVertexTouching));
+    m_permutationsVertexTouchingMap.insert(
+        std::make_pair(widths, permutationsVertexTouching));
   }
 
   // In either case, get the result.
@@ -603,25 +615,26 @@ MDHistoWorkspaceIterator::createPermutations(const std::vector<int>& widths) con
 /**
  * Find vertex-touching neighbours.
  *
- * Expands out the width to make a n-dimensional vector filled with the requested width.
+ * Expands out the width to make a n-dimensional vector filled with the
+ *requested width.
  *
  * @param width : Odd number of pixels for all dimensions.
  * @return collection of indexes.
  */
 std::vector<size_t>
-MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(const int & width) const {
+MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(const int &width) const {
 
-    return this->findNeighbourIndexesByWidth(std::vector<int>(m_nd, width));
+  return this->findNeighbourIndexesByWidth(std::vector<int>(m_nd, width));
 }
-
 
 /**
  * Find vertex-touching neighbours.
- * @param widths : Vector containing odd number of pixels per dimension. Entries match dimensions of iterator.
+ * @param widths : Vector containing odd number of pixels per dimension. Entries
+ * match dimensions of iterator.
  * @return collection of indexes.
  */
-std::vector<size_t>
-MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(const std::vector<int>& widths) const {
+std::vector<size_t> MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(
+    const std::vector<int> &widths) const {
 
   // Find existing or create required index permutations.
   std::vector<int64_t> permutationsVertexTouching = createPermutations(widths);
@@ -641,7 +654,7 @@ MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(const std::vector<int>& wi
     size_t neighbour_index = m_pos + permutationsVertexTouching[i];
     if (neighbour_index < m_ws->getNPoints() &&
         Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index,
-                                    m_indexMaker, m_indexMax, widths) ) {
+                                    m_indexMaker, m_indexMax, widths)) {
       neighbourIndexes[nextFree++] = neighbour_index;
     }
   }
@@ -659,9 +672,8 @@ MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(const std::vector<int>& wi
  *
  * @return The size of the permutation cache.
  */
-size_t MDHistoWorkspaceIterator::permutationCacheSize() const
-{
-    return m_permutationsVertexTouchingMap.size();
+size_t MDHistoWorkspaceIterator::permutationCacheSize() const {
+  return m_permutationsVertexTouchingMap.size();
 }
 
 } // namespace Mantid

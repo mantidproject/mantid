@@ -38,7 +38,6 @@ namespace API {
 class MANTID_API_DLL NotebookWriter {
 
 public:
-
   NotebookWriter();
   virtual ~NotebookWriter(){};
 
@@ -47,7 +46,6 @@ public:
   std::string writeNotebook();
 
 private:
-
   void headerComment();
   void headerCode();
 
@@ -58,8 +56,7 @@ private:
 
   Json::Value m_cell_buffer;
 };
-
 }
 }
 
-#endif //MANTID_NOTEBOOKWRITER_H
+#endif // MANTID_NOTEBOOKWRITER_H

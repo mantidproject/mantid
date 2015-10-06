@@ -149,9 +149,9 @@ private:
 
   /// Find peak background
   int findPeakBackground(const API::MatrixWorkspace_sptr &input, int spectrum,
-                          size_t i_min, size_t i_max,
-                          std::vector<double> &vecBkgdParamValues,
-                          std::vector<double> &vecpeakrange);
+                         size_t i_min, size_t i_max,
+                         std::vector<double> &vecBkgdParamValues,
+                         std::vector<double> &vecpeakrange);
 
   /// Estimate background of a given range
   void estimateBackground(const MantidVec &X, const MantidVec &Y,
@@ -183,7 +183,7 @@ private:
                      const std::vector<double> &vec_fitwindow,
                      const std::vector<double> &vec_peakrange,
                      int minGuessedFWHM, int maxGuessFWHM, int guessedFWHMStep,
-                     int estBackResult=0);
+                     int estBackResult = 0);
 
   std::vector<std::string> m_peakParameterNames;
   std::vector<std::string> m_bkgdParameterNames;
@@ -209,7 +209,7 @@ private:
   /// parameters or effective (centre, width, height)
   std::size_t
       m_numTableParams; //<Number of parameters in the output table workspace
-  std::size_t m_centreIndex; //< Column in output table of peak centre
+  std::size_t m_centreIndex;    //< Column in output table of peak centre
   std::string m_peakFuncType;   //< The name of the peak function to fit
   std::string m_backgroundType; //< The type of background to fit
 

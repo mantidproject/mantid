@@ -168,8 +168,7 @@ void HFIRLoad::exec() {
     sdd = sample_det_dist;
   } else {
     const std::string sddName = "sample-detector-distance";
-    Mantid::Kernel::Property *prop =
-        dataWS->run().getProperty(sddName);
+    Mantid::Kernel::Property *prop = dataWS->run().getProperty(sddName);
     Mantid::Kernel::PropertyWithValue<double> *dp =
         dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
     if (!dp) {
@@ -221,13 +220,13 @@ void HFIRLoad::exec() {
   };
 
   const std::string sampleADName = "sample-aperture-diameter";
-  Mantid::Kernel::Property *prop =
-      dataWS->run().getProperty(sampleADName);
+  Mantid::Kernel::Property *prop = dataWS->run().getProperty(sampleADName);
   Mantid::Kernel::PropertyWithValue<double> *dp =
       dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
   if (!dp) {
     throw std::runtime_error("Could not cast (interpret) the property " +
-                             sampleADName + " as a floating point numeric value.");
+                             sampleADName +
+                             " as a floating point numeric value.");
   }
   double sample_apert = *dp;
 
@@ -236,7 +235,8 @@ void HFIRLoad::exec() {
   dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
   if (!dp) {
     throw std::runtime_error("Could not cast (interpret) the property " +
-                             sourceADName + " as a floating point numeric value.");
+                             sourceADName +
+                             " as a floating point numeric value.");
   }
   double source_apert = *dp;
 

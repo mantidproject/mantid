@@ -14,67 +14,53 @@ using namespace Mantid::Kernel;
 
 int ThreadPoolRunnableTest_value;
 
-class ThreadPoolRunnableTest : public CxxTest::TestSuite
-{
+class ThreadPoolRunnableTest : public CxxTest::TestSuite {
 public:
-
-
-
-
-  void test_constructor()
-  {
-    TS_ASSERT_THROWS( new ThreadPoolRunnable(0, NULL), std::invalid_argument);
+  void test_constructor() {
+    TS_ASSERT_THROWS(new ThreadPoolRunnable(0, NULL), std::invalid_argument);
   }
 
   //=======================================================================================
-  class SimpleTask : public Task
-  {
-    void run()
-    {
-      ThreadPoolRunnableTest_value = 1234;
-    }
+  class SimpleTask : public Task {
+    void run() { ThreadPoolRunnableTest_value = 1234; }
   };
 
-  void test_run()
-  {
-    ThreadPoolRunnable * tpr;
-    ThreadScheduler * sc = new ThreadSchedulerFIFO();
+  void test_run() {
+    ThreadPoolRunnable *tpr;
+    ThreadScheduler *sc = new ThreadSchedulerFIFO();
     tpr = new ThreadPoolRunnable(0, sc);
     sc->push(new SimpleTask());
-    TS_ASSERT_EQUALS( sc->size(), 1 );
+    TS_ASSERT_EQUALS(sc->size(), 1);
 
     // Run it
     ThreadPoolRunnableTest_value = 0;
     tpr->run();
 
     // The task worked
-    TS_ASSERT_EQUALS( ThreadPoolRunnableTest_value, 1234);
+    TS_ASSERT_EQUALS(ThreadPoolRunnableTest_value, 1234);
     // Nothing more in the queue.
-    TS_ASSERT_EQUALS( sc->size(), 0 );
+    TS_ASSERT_EQUALS(sc->size(), 0);
     delete tpr;
     delete sc;
   }
 
-
   //=======================================================================================
   /** Class that throws an exception */
-  class TaskThatThrows : public Task
-  {
-    void run()
-    {
+  class TaskThatThrows : public Task {
+    void run() {
       ThreadPoolRunnableTest_value += 1;
-      throw Mantid::Kernel::Exception::NotImplementedError("Test exception from TaskThatThrows.");
+      throw Mantid::Kernel::Exception::NotImplementedError(
+          "Test exception from TaskThatThrows.");
     }
   };
 
-  void test_run_throws()
-  {
-    ThreadPoolRunnable * tpr;
-    ThreadScheduler * sc = new ThreadSchedulerFIFO();
+  void test_run_throws() {
+    ThreadPoolRunnable *tpr;
+    ThreadScheduler *sc = new ThreadSchedulerFIFO();
     tpr = new ThreadPoolRunnable(0, sc);
 
     // Put 10 tasks in
-    for (size_t i=0; i<10; i++)
+    for (size_t i = 0; i < 10; i++)
       sc->push(new TaskThatThrows());
 
     // The task throws but the runnable just aborts instead
@@ -82,11 +68,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(tpr->run());
 
     // Nothing more in the queue.
-    TS_ASSERT_EQUALS( sc->size(), 0 );
+    TS_ASSERT_EQUALS(sc->size(), 0);
     // Yet only one task actually ran.
-    TS_ASSERT_EQUALS( ThreadPoolRunnableTest_value, 1 );
+    TS_ASSERT_EQUALS(ThreadPoolRunnableTest_value, 1);
 
-    TS_ASSERT( sc->getAborted() );
+    TS_ASSERT(sc->getAborted());
     // Get the reason for aborting
     std::runtime_error e = sc->getAbortException();
     std::string what = e.what();
@@ -95,12 +81,6 @@ public:
     delete tpr;
     delete sc;
   }
-
-
-
-
 };
 
-
 #endif /* MANTID_KERNEL_THREADPOOLRUNNABLETEST_H_ */
-

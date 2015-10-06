@@ -360,9 +360,7 @@ public:
     AnalysisDataService::Instance().remove("Exp0335_S0038");
   }
 
-
-  void test_LoadHB3AXMLInstrumentNoTable()
-  {
+  void test_LoadHB3AXMLInstrumentNoTable() {
     // Test 2theta = 15 degree
     LoadSpiceXML2DDet loader;
     loader.initialize();
@@ -370,7 +368,7 @@ public:
     const std::string filename("HB3A_exp355_scan0001_0522.xml");
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(
-          loader.setProperty("OutputWorkspace", "Exp0335_S0038"));
+        loader.setProperty("OutputWorkspace", "Exp0335_S0038"));
     std::vector<size_t> sizelist(2);
     sizelist[0] = 256;
     sizelist[1] = 256;
@@ -382,7 +380,7 @@ public:
 
     // Get data
     MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-          AnalysisDataService::Instance().retrieve("Exp0335_S0038"));
+        AnalysisDataService::Instance().retrieve("Exp0335_S0038"));
     TS_ASSERT(outws);
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
 
@@ -432,13 +430,11 @@ public:
     std::cout << "Sample - Source = " << sample_source.X() << ", "
               << sample_source.Y() << ", " << sample_source.Z() << "\n";
 
-
     Kernel::V3D detmid_sample = detmiddle - sample;
     double twotheta_middle =
         detmid_sample.angle(sample_source) * 180. / 3.1415926;
     TS_ASSERT_DELTA(twotheta_middle, 42.70975, 0.02);
   }
-
 };
 
 #endif /* MANTID_DATAHANDLING_LOADSPICEXML2DDETTEST_H_ */

@@ -108,11 +108,11 @@ private:
   /// Calculate emission time from the moderator for a given
   /// detector (L1, t2) and TOF when Emode==Inelastic
   double CalculateT0indirect(const double &tof, const double &L1,
-    const double &t2, double &E1, mu::Parser &parser);
+                             const double &t2, double &E1, mu::Parser &parser);
   /// Calculate emission time from the moderator for a given
   /// detector (L1, t2) and TOF when Emode==Elastic
-  double CalculateT0elastic(const double &tof, const double &L12,
-    double &E1, mu::Parser &parser);
+  double CalculateT0elastic(const double &tof, const double &L12, double &E1,
+                            mu::Parser &parser);
   const double m_convfactor;
   /// Maximum number of iterations when calculating the emission time from the
   /// moderator

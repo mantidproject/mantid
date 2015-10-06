@@ -99,10 +99,10 @@ workspaces
 @param inWSWrapper -- the class wrapping the target MD workspace
 @param ignoreZeros  -- if zero value signals should be rejected
 */
-size_t ConvToMDEventsWS::initialize(
-    const MDWSDescription &WSD,
-    boost::shared_ptr<MDEventWSWrapper> inWSWrapper,
-    bool ignoreZeros) {
+size_t
+ConvToMDEventsWS::initialize(const MDWSDescription &WSD,
+                             boost::shared_ptr<MDEventWSWrapper> inWSWrapper,
+                             bool ignoreZeros) {
   size_t numSpec = ConvToMDBase::initialize(WSD, inWSWrapper, ignoreZeros);
 
   m_EventWS =

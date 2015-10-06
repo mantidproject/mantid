@@ -127,8 +127,8 @@ private:
       boost::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
       const boost::shared_ptr<API::FunctionDomain> &domain,
       boost::shared_ptr<API::FunctionValues> resultValues) const;
-  /// Set initial values for parameters with default values. 
-  void setInitialValues(API::IFunction& function);
+  /// Set initial values for parameters with default values.
+  void setInitialValues(API::IFunction &function);
 
   /// Store workspace property name
   std::string m_workspacePropertyName;

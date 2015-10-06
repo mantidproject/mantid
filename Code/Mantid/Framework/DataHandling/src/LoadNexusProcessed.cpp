@@ -243,8 +243,10 @@ void LoadNexusProcessed::init() {
   declareProperty(new ArrayProperty<int64_t>("SpectrumList"),
                   "List of spectrum numbers to read.");
   declareProperty("EntryNumber", (int64_t)0, mustBePositive,
-                  "0 indicates that every entry is loaded, into a separate workspace within a group. "
-                  "A positive number identifies one entry to be loaded, into one worskspace");
+                  "0 indicates that every entry is loaded, into a separate "
+                  "workspace within a group. "
+                  "A positive number identifies one entry to be loaded, into "
+                  "one worskspace");
   declareProperty("LoadHistory", true,
                   "If true, the workspace history will be loaded");
   declareProperty(
@@ -280,7 +282,8 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
   // We avoid using `openEntry` or similar here because they're just wrappers
   // around `open`. `open` is slow for large multiperiod datasets, because it
   // does a search upon the entire HDF5 tree. `openLocal` is *much* quicker, as
-  // it only searches the current group. It does, however, require that the parent
+  // it only searches the current group. It does, however, require that the
+  // parent
   // group is currently open.
   NXEntry mtdEntry(root, entryName);
   mtdEntry.openLocal();
@@ -603,9 +606,8 @@ void LoadNexusProcessed::correctForWorkspaceNameClash(std::string &wsName) {
  * @param names :: vector to store the names to be loaded.
  * @return Whether there was a common stem.
  */
-bool
-LoadNexusProcessed::checkForCommonNameStem(NXRoot &root,
-                                           std::vector<std::string> &names) {
+bool LoadNexusProcessed::checkForCommonNameStem(
+    NXRoot &root, std::vector<std::string> &names) {
   bool success(true);
   int64_t nWorkspaceEntries = static_cast<int64_t>(root.groups().size());
   for (int64_t p = 1; p <= nWorkspaceEntries; ++p) {
@@ -952,9 +954,8 @@ void LoadNexusProcessed::loadVectorColumn(const NXData &tableData,
  * @param data   :: Table data to load from
  * @param tableWs     :: Workspace to add column to
  */
-void
-LoadNexusProcessed::loadV3DColumn(Mantid::NeXus::NXDouble &data,
-                                  const API::ITableWorkspace_sptr &tableWs) {
+void LoadNexusProcessed::loadV3DColumn(
+    Mantid::NeXus::NXDouble &data, const API::ITableWorkspace_sptr &tableWs) {
   std::string columnTitle = data.attributes("name");
   if (!columnTitle.empty()) {
     ColumnVector<V3D> col = tableWs->addColumn("V3D", columnTitle);
@@ -1567,8 +1568,9 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
   m_cppFile->openPath(mtd_entry.path());
   try {
     // This loads logs, sample, and instrument.
-    local_workspace->loadExperimentInfoNexus(getPropertyValue("Filename"), 
-        m_cppFile, parameterStr); // REQUIRED PER PERIOD
+    local_workspace->loadExperimentInfoNexus(
+        getPropertyValue("Filename"), m_cppFile,
+        parameterStr); // REQUIRED PER PERIOD
   } catch (std::exception &e) {
     g_log.information("Error loading Instrument section of nxs file");
     g_log.information(e.what());
@@ -1778,9 +1780,8 @@ void LoadNexusProcessed::getWordsInString(const std::string &words4,
  * @param wksp_cls :: The data group
  * @param local_workspace :: The workspace to read into
  */
-void
-LoadNexusProcessed::readBinMasking(NXData &wksp_cls,
-                                   API::MatrixWorkspace_sptr local_workspace) {
+void LoadNexusProcessed::readBinMasking(
+    NXData &wksp_cls, API::MatrixWorkspace_sptr local_workspace) {
   if (wksp_cls.getDataSetInfo("masked_spectra").stat == NX_ERROR) {
     return;
   }
@@ -1988,8 +1989,8 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
  *Validates the optional 'spectra to read' properties, if they have been set
  * @param numberofspectra :: number of spectrum
  */
-void
-LoadNexusProcessed::checkOptionalProperties(const std::size_t numberofspectra) {
+void LoadNexusProcessed::checkOptionalProperties(
+    const std::size_t numberofspectra) {
   // read in the settings passed to the algorithm
   m_spec_list = getProperty("SpectrumList");
   m_spec_max = getProperty("SpectrumMax");

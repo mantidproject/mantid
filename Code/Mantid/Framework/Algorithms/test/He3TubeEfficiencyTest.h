@@ -20,32 +20,31 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace std;
 
-class He3TubeEfficiencyTest : public CxxTest::TestSuite
-{
+class He3TubeEfficiencyTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static He3TubeEfficiencyTest *createSuite() { return new He3TubeEfficiencyTest(); }
-  static void destroySuite( He3TubeEfficiencyTest *suite ) { delete suite; }
-
-  He3TubeEfficiencyTest() : inputWS("testInput"), inputEvWS("testEvInput")
-  {
+  static He3TubeEfficiencyTest *createSuite() {
+    return new He3TubeEfficiencyTest();
   }
+  static void destroySuite(He3TubeEfficiencyTest *suite) { delete suite; }
 
-  void testCorrection()
-  {
+  He3TubeEfficiencyTest() : inputWS("testInput"), inputEvWS("testEvInput") {}
+
+  void testCorrection() {
     createWorkspace2D();
     He3TubeEfficiency alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-    TS_ASSERT( alg.isInitialized() );
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
 
     alg.setPropertyValue("InputWorkspace", inputWS);
     alg.setPropertyValue("OutputWorkspace", inputWS);
 
     alg.execute();
-    TS_ASSERT( alg.isExecuted() );
+    TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS);
+    MatrixWorkspace_sptr result =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS);
 
     // Monitor should be untouched
     TS_ASSERT_DELTA(result->readY(0).front(), 10.0, 1e-6);
@@ -57,21 +56,22 @@ public:
     AnalysisDataService::Instance().remove(inputWS);
   }
 
-  void testEventCorrection()
-  {
+  void testEventCorrection() {
     createEventWorkspace();
     He3TubeEfficiency alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-    TS_ASSERT( alg.isInitialized() );
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
 
     alg.setPropertyValue("InputWorkspace", inputEvWS);
     alg.setPropertyValue("OutputWorkspace", inputEvWS);
 
     alg.execute();
-    TS_ASSERT( alg.isExecuted() );
+    TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputEvWS);
-    EventWorkspace_sptr ev_result = boost::dynamic_pointer_cast<EventWorkspace>(result);
+    MatrixWorkspace_sptr result =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputEvWS);
+    EventWorkspace_sptr ev_result =
+        boost::dynamic_pointer_cast<EventWorkspace>(result);
 
     // Monitor events should be untouched
     EventList mon_ev = ev_result->getEventList(0);
@@ -86,37 +86,36 @@ public:
     AnalysisDataService::Instance().remove(inputEvWS);
   }
 
-  void testBadOverrideParameters()
-  {
+  void testBadOverrideParameters() {
     createWorkspace2D();
     He3TubeEfficiency alg;
     alg.initialize();
 
     TS_ASSERT_THROWS(alg.setPropertyValue("TubePressure", "-10"),
-        invalid_argument);
+                     invalid_argument);
     TS_ASSERT_THROWS(alg.setPropertyValue("TubeThickness", "-0.08"),
-        invalid_argument);
+                     invalid_argument);
     TS_ASSERT_THROWS(alg.setPropertyValue("TubeTemperature", "-100"),
-        invalid_argument);
+                     invalid_argument);
 
     AnalysisDataService::Instance().remove(inputWS);
   }
 
-  void testBadTubeThickness()
-  {
+  void testBadTubeThickness() {
     createWorkspace2D();
     He3TubeEfficiency alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-    TS_ASSERT( alg.isInitialized() );
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
 
     alg.setPropertyValue("InputWorkspace", inputWS);
     alg.setPropertyValue("OutputWorkspace", inputWS);
     alg.setPropertyValue("TubeThickness", "0.0127");
 
     alg.execute();
-    TS_ASSERT( alg.isExecuted() );
+    TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS);
+    MatrixWorkspace_sptr result =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS);
 
     // Monitor should be untouched
     TS_ASSERT_DELTA(result->readY(0).front(), 10.0, 1e-6);
@@ -128,22 +127,23 @@ public:
     AnalysisDataService::Instance().remove(inputWS);
   }
 
-  void testBadTubeThicknessEvents()
-  {
+  void testBadTubeThicknessEvents() {
     createEventWorkspace();
     He3TubeEfficiency alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-    TS_ASSERT( alg.isInitialized() );
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
 
     alg.setPropertyValue("InputWorkspace", inputEvWS);
     alg.setPropertyValue("OutputWorkspace", inputEvWS);
     alg.setPropertyValue("TubeThickness", "0.0127");
 
     alg.execute();
-    TS_ASSERT( alg.isExecuted() );
+    TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputEvWS);
-    EventWorkspace_sptr ev_result = boost::dynamic_pointer_cast<EventWorkspace>(result);
+    MatrixWorkspace_sptr result =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputEvWS);
+    EventWorkspace_sptr ev_result =
+        boost::dynamic_pointer_cast<EventWorkspace>(result);
 
     // Monitor should be untouched
     EventList mon_ev = ev_result->getEventList(0);
@@ -161,30 +161,27 @@ private:
   const std::string inputWS;
   const std::string inputEvWS;
 
-  void createWorkspace2D()
-  {
+  void createWorkspace2D() {
     const int nspecs(4);
     const int nbins(5);
 
-    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",
-        nspecs, nbins + 1, nbins);
+    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create(
+        "Workspace2D", nspecs, nbins + 1, nbins);
     space->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
 
-    Mantid::MantidVecPtr x,y,e;
+    Mantid::MantidVecPtr x, y, e;
     x.access().resize(nbins + 1, 0.0);
     y.access().resize(nbins, 0.0);
     e.access().resize(nbins, 0.0);
-    for (int i = 0; i < nbins; ++i)
-    {
+    for (int i = 0; i < nbins; ++i) {
       x.access()[i] = static_cast<double>((1. + i) / 10.);
       y.access()[i] = 10.0;
       e.access()[i] = sqrt(5.0);
     }
     x.access()[nbins] = static_cast<double>((1. + nbins) / 10.);
 
-    for (int i = 0; i < nspecs; i++)
-    {
+    for (int i = 0; i < nspecs; i++) {
       space2D->setX(i, x);
       space2D->setData(i, y, e);
       space2D->getSpectrum(i)->setSpectrumNo(i);
@@ -194,20 +191,22 @@ private:
 
     LoadInstrument loader;
     loader.initialize();
-    loader.setPropertyValue("Filename","IDFs_for_UNIT_TESTING/DUM_Definition.xml");
+    loader.setPropertyValue("Filename",
+                            "IDFs_for_UNIT_TESTING/DUM_Definition.xml");
     loader.setPropertyValue("Workspace", inputWS);
     loader.execute();
   }
 
-  void createEventWorkspace()
-  {
-    EventWorkspace_sptr event = WorkspaceCreationHelper::CreateEventWorkspace(4,5,5,0,0.9,3,0);
+  void createEventWorkspace() {
+    EventWorkspace_sptr event =
+        WorkspaceCreationHelper::CreateEventWorkspace(4, 5, 5, 0, 0.9, 3, 0);
     event->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
     AnalysisDataService::Instance().add(inputEvWS, event);
 
     LoadInstrument loader;
     loader.initialize();
-    loader.setPropertyValue("Filename","IDFs_for_UNIT_TESTING/DUM_Definition.xml");
+    loader.setPropertyValue("Filename",
+                            "IDFs_for_UNIT_TESTING/DUM_Definition.xml");
     loader.setPropertyValue("Workspace", inputEvWS);
     loader.execute();
   }

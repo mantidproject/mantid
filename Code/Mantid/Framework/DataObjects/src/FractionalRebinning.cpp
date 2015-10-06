@@ -103,7 +103,7 @@ void normaliseOutput(MatrixWorkspace_sptr outputWS,
 }
 
 /**
- * Rebin the input quadrilateral to the output grid. 
+ * Rebin the input quadrilateral to the output grid.
  * The quadrilateral must have a CLOCKWISE winding.
  * @param inputQ The input polygon (Polygon winding must be Clockwise)
  * @param inputWS The input workspace containing the input intensity values
@@ -202,8 +202,8 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
     const double vhi = verticalAxis[yi + 1];
     for (size_t xi = x_start; xi < x_end; ++xi) {
       const V2D ll(X[xi], vlo);
-      const V2D lr(X[xi+ 1], vlo);
-      const V2D ur(X[xi+ 1], vhi);
+      const V2D lr(X[xi + 1], vlo);
+      const V2D ur(X[xi + 1], vhi);
       const V2D ul(X[xi], vhi);
       const Quadrilateral outputQ(ll, lr, ur, ul);
 

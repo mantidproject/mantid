@@ -102,8 +102,8 @@ private:
   void clear() const;
 
   /// Evaluate the function for a list of arguments and given scaling factor
-  void eval(double scaling, double shift, double xscale, double *out, const double *xValues,
-            const size_t nData) const;
+  void eval(double scaling, double shift, double xscale, double *out,
+            const double *xValues, const size_t nData) const;
 
   /// Fill in the x and y value containers (m_xData and m_yData)
   void setupData() const;

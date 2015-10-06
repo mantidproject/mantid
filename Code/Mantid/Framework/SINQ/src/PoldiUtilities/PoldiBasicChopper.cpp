@@ -56,10 +56,9 @@ double PoldiBasicChopper::zeroOffset() { return m_zeroOffset; }
 
 double PoldiBasicChopper::distanceFromSample() { return m_distanceFromSample; }
 
-void
-PoldiBasicChopper::initializeFixedParameters(std::vector<double> slitPositions,
-                                             double distanceFromSample,
-                                             double t0, double t0const) {
+void PoldiBasicChopper::initializeFixedParameters(
+    std::vector<double> slitPositions, double distanceFromSample, double t0,
+    double t0const) {
   m_slitPositions.resize(slitPositions.size());
   std::copy(slitPositions.begin(), slitPositions.end(),
             m_slitPositions.begin());
@@ -75,10 +74,9 @@ void PoldiBasicChopper::initializeVariableParameters(double rotationSpeed) {
   m_zeroOffset = m_rawt0 * m_cycleTime + m_rawt0const;
 
   m_slitTimes.resize(m_slitPositions.size());
-  std::transform(m_slitPositions.begin(), m_slitPositions.end(),
-                 m_slitTimes.begin(),
-                 boost::bind(
-                     &PoldiBasicChopper::slitPositionToTimeFraction, this, _1));
+  std::transform(
+      m_slitPositions.begin(), m_slitPositions.end(), m_slitTimes.begin(),
+      boost::bind(&PoldiBasicChopper::slitPositionToTimeFraction, this, _1));
 }
 
 double PoldiBasicChopper::slitPositionToTimeFraction(double slitPosition) {

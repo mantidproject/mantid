@@ -44,7 +44,7 @@ coordinate system.
 size_t findXAxis(const VMD &start, const VMD &end,
                  CoordTransform const *const transform,
                  IMDHistoWorkspace const *const inputWorkspace, Logger &logger,
-                 const size_t id, std::string& xAxisLabel) {
+                 const size_t id, std::string &xAxisLabel) {
 
   // Find the start and end points in the original workspace
   VMD originalStart = transform->applyVMD(start);
@@ -213,7 +213,8 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
   if (autoFind) {
     // We look to the original workspace if possbible to find the dimension of
     // interest to plot against.
-    id = findXAxis(start, end, transform.get(), inputWorkspace.get(), g_log, id, xAxisLabel);
+    id = findXAxis(start, end, transform.get(), inputWorkspace.get(), g_log, id,
+                   xAxisLabel);
   }
 
   for (size_t i = 0; i < X.size(); ++i) {

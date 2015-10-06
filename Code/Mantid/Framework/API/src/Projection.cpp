@@ -59,7 +59,7 @@ Projection::Projection(const ITableWorkspace &ws) {
     const double offset = offsetCol->cell<double>(i);
     const std::string unitStr = unitCol->cell<std::string>(i);
 
-    //Check the name
+    // Check the name
     size_t index;
     if (name == "u") {
       index = 0;
@@ -105,7 +105,7 @@ Projection &Projection::operator=(const Projection &other) {
   return *this;
 }
 
-Projection::~Projection() { }
+Projection::~Projection() {}
 
 double Projection::getOffset(size_t nd) {
   if (nd >= 3)

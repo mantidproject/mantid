@@ -24,8 +24,6 @@ using namespace Mantid::CurveFitting;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 
-class PoldiFitPeaks1D2;
-
 class TestablePoldiFitPeaks1D2 : public Mantid::Poldi::PoldiFitPeaks1D2 {
   friend class PoldiFitPeaks1D2Test;
 
@@ -239,31 +237,31 @@ public:
   }
 
   void testPeakIsAcceptable() {
-      TestablePoldiFitPeaks1D2 poldiPeakFit;
-      poldiPeakFit.m_maxRelativeFwhm = 0.02;
+    TestablePoldiFitPeaks1D2 poldiPeakFit;
+    poldiPeakFit.m_maxRelativeFwhm = 0.02;
 
-      // The testpeak is acceptable
-      TS_ASSERT(poldiPeakFit.peakIsAcceptable(m_testPeak));
+    // The testpeak is acceptable
+    TS_ASSERT(poldiPeakFit.peakIsAcceptable(m_testPeak));
 
-      // Peaks with certain properties are rejected
-      // 1. negative intensity
-      PoldiPeak_sptr negativeIntensity = m_testPeak->clone();
-      negativeIntensity->setIntensity(UncertainValue(-190.0));
-      TS_ASSERT(!poldiPeakFit.peakIsAcceptable(negativeIntensity));
+    // Peaks with certain properties are rejected
+    // 1. negative intensity
+    PoldiPeak_sptr negativeIntensity = m_testPeak->clone();
+    negativeIntensity->setIntensity(UncertainValue(-190.0));
+    TS_ASSERT(!poldiPeakFit.peakIsAcceptable(negativeIntensity));
 
-      // 2a. FWHM too large (rel. > 0.02)
-      PoldiPeak_sptr tooBroad = m_testPeak->clone();
-      tooBroad->setFwhm(UncertainValue(0.021), PoldiPeak::Relative);
-      TS_ASSERT(!poldiPeakFit.peakIsAcceptable(tooBroad));
+    // 2a. FWHM too large (rel. > 0.02)
+    PoldiPeak_sptr tooBroad = m_testPeak->clone();
+    tooBroad->setFwhm(UncertainValue(0.021), PoldiPeak::Relative);
+    TS_ASSERT(!poldiPeakFit.peakIsAcceptable(tooBroad));
 
-      // 2b. Changing acceptable FWHM
-      poldiPeakFit.m_maxRelativeFwhm = 0.03;
-      TS_ASSERT(poldiPeakFit.peakIsAcceptable(tooBroad));
+    // 2b. Changing acceptable FWHM
+    poldiPeakFit.m_maxRelativeFwhm = 0.03;
+    TS_ASSERT(poldiPeakFit.peakIsAcceptable(tooBroad));
 
-      // 3. FWHM too small (rel. < 0.001)
-      PoldiPeak_sptr tooNarrow = m_testPeak->clone();
-      tooNarrow->setFwhm(UncertainValue(0.0009), PoldiPeak::Relative);
-      TS_ASSERT(!poldiPeakFit.peakIsAcceptable(tooNarrow));
+    // 3. FWHM too small (rel. < 0.001)
+    PoldiPeak_sptr tooNarrow = m_testPeak->clone();
+    tooNarrow->setFwhm(UncertainValue(0.0009), PoldiPeak::Relative);
+    TS_ASSERT(!poldiPeakFit.peakIsAcceptable(tooNarrow));
   }
 
   void testGetBestChebyshevPolynomialDegree() {

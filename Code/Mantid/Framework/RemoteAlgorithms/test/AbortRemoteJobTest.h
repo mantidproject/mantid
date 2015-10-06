@@ -18,8 +18,8 @@ public:
   static void destroySuite(AbortRemoteJobTest *suite) { delete suite; }
 
   void test_algorithm() {
-    testAlg = Mantid::API::AlgorithmManager::Instance().create(
-        "AbortRemoteJob", 1);
+    testAlg =
+        Mantid::API::AlgorithmManager::Instance().create("AbortRemoteJob", 1);
     TS_ASSERT(testAlg);
     TS_ASSERT_EQUALS(testAlg->name(), "AbortRemoteJob");
     TS_ASSERT_EQUALS(testAlg->version(), 1);

@@ -9,11 +9,9 @@ using Mantid::DataObjects::EventWorkspace;
 using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
 
-void export_EventWorkspace()
-{
-  class_<EventWorkspace, bases<IEventWorkspace>,
-         boost::noncopyable>("EventWorkspace", no_init)
-    ;
+void export_EventWorkspace() {
+  class_<EventWorkspace, bases<IEventWorkspace>, boost::noncopyable>(
+      "EventWorkspace", no_init);
 
   // register pointers
   RegisterWorkspacePtrToPython<EventWorkspace>();

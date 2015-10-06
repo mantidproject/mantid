@@ -9,7 +9,6 @@
 #include "MantidCurveFitting/Fit.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-
 using Mantid::CurveFitting::FullprofPolynomial;
 
 using namespace Mantid;
@@ -18,47 +17,46 @@ using namespace Mantid::CurveFitting;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 
-class FullprofPolynomialTest : public CxxTest::TestSuite
-{
+class FullprofPolynomialTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FullprofPolynomialTest *createSuite() { return new FullprofPolynomialTest(); }
-  static void destroySuite( FullprofPolynomialTest *suite ) { delete suite; }
+  static FullprofPolynomialTest *createSuite() {
+    return new FullprofPolynomialTest();
+  }
+  static void destroySuite(FullprofPolynomialTest *suite) { delete suite; }
 
-
-  void testForCategories()
-  {
+  void testForCategories() {
     FullprofPolynomial forCat;
     const std::vector<std::string> categories = forCat.categories();
-    TS_ASSERT( categories.size() == 1 );
-    TS_ASSERT( categories[0] == "Background" );
+    TS_ASSERT(categories.size() == 1);
+    TS_ASSERT(categories[0] == "Background");
   }
 
   /** Test function on a Fullprof polynomial function
     */
-  void test_FPPolynomial()
-  {
+  void test_FPPolynomial() {
     // Create a workspace
     std::string wsName = "TOFPolybackgroundBackgroundTest";
     int histogramNumber = 1;
     int timechannels = 1000;
     DataObjects::Workspace2D_sptr ws2D =
         boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-            API::WorkspaceFactory::Instance().create("Workspace2D", histogramNumber, timechannels, timechannels));
+            API::WorkspaceFactory::Instance().create(
+                "Workspace2D", histogramNumber, timechannels, timechannels));
 
     AnalysisDataService::Instance().add(wsName, ws2D);
 
     double tof0 = 8000.;
     double dtof = 5.;
 
-    for (int i = 0; i < timechannels; i++)
-    {
+    for (int i = 0; i < timechannels; i++) {
       ws2D->dataX(0)[i] = static_cast<double>(i) * dtof + tof0;
     }
 
     // Create a function
-    IFunction_sptr tofbkgd = boost::dynamic_pointer_cast<IFunction>(boost::make_shared<FullprofPolynomial>());
+    IFunction_sptr tofbkgd = boost::dynamic_pointer_cast<IFunction>(
+        boost::make_shared<FullprofPolynomial>());
     TS_ASSERT_THROWS_NOTHING(tofbkgd->setAttributeValue("n", 6));
     TS_ASSERT_THROWS_NOTHING(tofbkgd->setAttributeValue("Bkpos", 10000.));
     TS_ASSERT_THROWS_NOTHING(tofbkgd->setParameter("A0", 0.3));
@@ -79,8 +77,7 @@ public:
     TS_ASSERT_DELTA(values[999], 0.55583, 1.0E-5);
 
     // Set the workspace
-    for (size_t i = 0; i < ws2D->readY(0).size(); ++i)
-    {
+    for (size_t i = 0; i < ws2D->readY(0).size(); ++i) {
       ws2D->dataY(0)[i] = values[i];
       ws2D->dataE(0)[i] = sqrt(fabs(values[i]));
     }
@@ -92,32 +89,29 @@ public:
     // Set up fit
     CurveFitting::Fit fitalg;
     TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
-    TS_ASSERT( fitalg.isInitialized() );
+    TS_ASSERT(fitalg.isInitialized());
 
     fitalg.setProperty("Function", tofbkgd);
     fitalg.setPropertyValue("InputWorkspace", wsName);
     fitalg.setPropertyValue("WorkspaceIndex", "0");
 
     // execute fit
-    TS_ASSERT_THROWS_NOTHING(TS_ASSERT( fitalg.execute() ));
-    TS_ASSERT( fitalg.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(fitalg.execute()));
+    TS_ASSERT(fitalg.isExecuted());
 
     // test the output from fit is what you expect
     double chi2 = fitalg.getProperty("OutputChi2overDoF");
 
-    TS_ASSERT_DELTA( chi2, 0.0, 0.1);
-    TS_ASSERT_DELTA( tofbkgd->getParameter("A0"), 0.3, 0.01);
-    TS_ASSERT_DELTA( tofbkgd->getParameter("A1"), 1.0, 0.0003);
-    TS_ASSERT_DELTA( tofbkgd->getParameter("A3"), 0.05, 0.01);
+    TS_ASSERT_DELTA(chi2, 0.0, 0.1);
+    TS_ASSERT_DELTA(tofbkgd->getParameter("A0"), 0.3, 0.01);
+    TS_ASSERT_DELTA(tofbkgd->getParameter("A1"), 1.0, 0.0003);
+    TS_ASSERT_DELTA(tofbkgd->getParameter("A3"), 0.05, 0.01);
 
     // Clean
     AnalysisDataService::Instance().remove(wsName);
 
     return;
   }
-
-
 };
-
 
 #endif /* MANTID_CURVEFITTING_FULLPROFPOLYNOMIALTEST_H_ */

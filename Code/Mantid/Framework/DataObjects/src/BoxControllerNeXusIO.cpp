@@ -326,9 +326,8 @@ void BoxControllerNeXusIO::getDiskBufferFileData() {
   *@param DataBlock     -- the vector with data to write
   *@param blockPosition -- The starting place to save data to   */
 template <typename Type>
-void
-BoxControllerNeXusIO::saveGenericBlock(const std::vector<Type> &DataBlock,
-                                       const uint64_t blockPosition) const {
+void BoxControllerNeXusIO::saveGenericBlock(
+    const std::vector<Type> &DataBlock, const uint64_t blockPosition) const {
   std::vector<int64_t> start(2, 0);
   // Specify the dimensions
   std::vector<int64_t> dims(m_BlockSize);

@@ -104,13 +104,13 @@ void LoadBBY::init() {
   // offsets
   exts.clear();
   exts.push_back(".csv");
-  declareProperty(
-    new API::FileProperty("TubeOffsets", "", API::FileProperty::OptionalLoad, exts),
-    "The input filename of the tube offset data");
-    
+  declareProperty(new API::FileProperty("TubeOffsets", "",
+                                        API::FileProperty::OptionalLoad, exts),
+                  "The input filename of the tube offset data");
+
   declareProperty(new API::WorkspaceProperty<API::IEventWorkspace>(
       "OutputWorkspace", "", Kernel::Direction::Output));
-  
+
   declareProperty(new Kernel::PropertyWithValue<size_t>(
                       "TubeBinning", 1, Kernel::Direction::Input),
                   "Default: 1");
@@ -139,13 +139,13 @@ void LoadBBY::init() {
       "seconds (relative to the start of the run).");
 
   declareProperty(new Kernel::PropertyWithValue<double>(
-                  "PeriodMaster", 0.0, Kernel::Direction::Input),
+                      "PeriodMaster", 0.0, Kernel::Direction::Input),
                   "Optional:");
   declareProperty(new Kernel::PropertyWithValue<double>(
-                  "PeriodSlave", 0.0, Kernel::Direction::Input),
+                      "PeriodSlave", 0.0, Kernel::Direction::Input),
                   "Optional:");
   declareProperty(new Kernel::PropertyWithValue<double>(
-                  "PhaseSlave", 0.0, Kernel::Direction::Input),
+                      "PhaseSlave", 0.0, Kernel::Direction::Input),
                   "Optional:");
 
   std::string grpOptional = "Optional";
@@ -180,23 +180,23 @@ void LoadBBY::exec() {
   bool maskFileLoaded = false;
   std::vector<bool> mask =
       createMaskVector(getPropertyValue("Mask"), maskFileLoaded);
-  
+
   // load tube offsets
   bool offsetFileLoaded = false;
-  std::vector<int> offsets = createOffsetVector(getPropertyValue("TubeOffsets"),
-                                                offsetFileLoaded);
+  std::vector<int> offsets =
+      createOffsetVector(getPropertyValue("TubeOffsets"), offsetFileLoaded);
   for (size_t x = 0; x != HISTO_BINS_X; x++) {
     int offset = offsets[x];
     if (offset != 0) {
       maskFileLoaded = true;
-          
+
       size_t s0 = HISTO_BINS_Y * x;
       if (offset > 0) {
         for (int y = 0; y != offset; y++)
           mask[s0 + (size_t)y] = false;
-      }
-      else { // if (offset < 0)
-        for (size_t y = HISTO_BINS_Y + static_cast<size_t>(offset); y != HISTO_BINS_Y; y++)
+      } else { // if (offset < 0)
+        for (size_t y = HISTO_BINS_Y + static_cast<size_t>(offset);
+             y != HISTO_BINS_Y; y++)
           mask[s0 + y] = false;
       }
     }
@@ -209,7 +209,7 @@ void LoadBBY::exec() {
     tubeBinning = 1;
   else if (tubeBinning > HISTO_BINS_Y)
     tubeBinning = HISTO_BINS_Y;
-  
+
   size_t finalBinsY = HISTO_BINS_Y / tubeBinning;
   size_t pixelsCutOff = HISTO_BINS_Y % tubeBinning;
   size_t pixelsCutOffH = pixelsCutOff / 2;
@@ -228,7 +228,8 @@ void LoadBBY::exec() {
       for (size_t y = HISTO_BINS_Y - pixelsCutOffH; y < HISTO_BINS_Y; y++)
         mask[s0 + y] = false;
 
-      // if one pixel is masked then all pixels in that binning group have to be masked
+      // if one pixel is masked then all pixels in that binning group have to be
+      // masked
       for (size_t j = 0; j < finalBinsY; j++) {
         size_t y0 = j * tubeBinning + pixelsCutOffL;
         for (size_t dy = 0; dy < tubeBinning; dy++)
@@ -287,7 +288,8 @@ void LoadBBY::exec() {
   // eventWS->mutableRun().addProperty("duration", duration[0], units);
 
   // create instrument
-  Geometry::Instrument_sptr instrument = createInstrument(file, pixelsCutOffL, pixelsCutOffH, tubeBinning, finalBinsY);
+  Geometry::Instrument_sptr instrument = createInstrument(
+      file, pixelsCutOffL, pixelsCutOffH, tubeBinning, finalBinsY);
   eventWS->setInstrument(instrument);
 
   // load events
@@ -297,24 +299,26 @@ void LoadBBY::exec() {
   std::vector<EventVector_pt> eventVectors(numberHistograms, NULL);
   std::vector<size_t> eventCounts(numberHistograms, 0);
   std::vector<detid_t> detIDs = instrument->getDetectorIDs();
-  
+
   // phase correction
   double periodMaster = getProperty("PeriodMaster");
   double periodSlave = getProperty("PeriodSlave");
   double phaseSlave = getProperty("PhaseSlave");
 
   if ((periodMaster < 0.0) || (periodSlave < 0.0))
-    throw std::runtime_error("Please specify a positive value for PeriodMaster and PeriodSlave.");
-  
+    throw std::runtime_error(
+        "Please specify a positive value for PeriodMaster and PeriodSlave.");
+
   bool setPeriodMaster = periodMaster > 0.0;
   bool setPeriodSlave = periodSlave > 0.0;
   bool setPhaseSlave = phaseSlave != 0.0;
 
   if ((setPeriodMaster != setPeriodSlave) || setPhaseSlave)
-    throw std::runtime_error("Please specify PeriodMaster, PeriodSlave and PhaseSlave or none of them.");
+    throw std::runtime_error("Please specify PeriodMaster, PeriodSlave and "
+                             "PhaseSlave or none of them.");
 
   double periode = periodSlave > 0.0 ? periodSlave : periodMaster;
-  double shift = -1.0/6.0*periodMaster - periodSlave * phaseSlave / 360.0;
+  double shift = -1.0 / 6.0 * periodMaster - periodSlave * phaseSlave / 360.0;
 
   // count total events per pixel to reserve necessary memory
   ANSTO::EventCounter eventCounter(eventCounts, mask, offsets, HISTO_BINS_Y,
@@ -343,9 +347,8 @@ void LoadBBY::exec() {
   }
   progTracker.complete();
 
-  ANSTO::EventAssigner eventAssigner(eventVectors, mask, offsets,
-                                     HISTO_BINS_Y, pixelsCutOffL,
-                                     tubeBinning, finalBinsY,
+  ANSTO::EventAssigner eventAssigner(eventVectors, mask, offsets, HISTO_BINS_Y,
+                                     pixelsCutOffL, tubeBinning, finalBinsY,
                                      periode, shift);
   loadEvents(prog, "loading neutron events", file, tofMinBoundary,
              tofMaxBoundary, eventAssigner);
@@ -353,7 +356,8 @@ void LoadBBY::exec() {
   Kernel::cow_ptr<MantidVec> axis;
   MantidVec &xRef = axis.access();
   xRef.resize(2, 0.0);
-  xRef[0] = std::max(0.0, eventCounter.tofMin() - 1); // just to make sure the bins hold it all
+  xRef[0] = std::max(0.0, eventCounter.tofMin() -
+                              1); // just to make sure the bins hold it all
   xRef[1] = eventCounter.tofMax() + 1;
   eventWS->setAllX(axis);
 
@@ -377,7 +381,7 @@ void LoadBBY::exec() {
     std::vector<size_t> maskIndexList(maskedBins);
     size_t binIndex = 0;
     size_t maskIndex = 0;
-    
+
     for (size_t x = 0; x != HISTO_BINS_X; x++) {
       size_t s0 = HISTO_BINS_Y * x;
       for (size_t j = 0; j < finalBinsY; j++, binIndex++) {
@@ -400,7 +404,11 @@ void LoadBBY::exec() {
 }
 
 // instrument creation
-Geometry::Instrument_sptr LoadBBY::createInstrument(ANSTO::Tar::File &tarFile, size_t pixelsCutOffL, size_t pixelsCutOffH, size_t tubeBinning, size_t finalBinsY) {
+Geometry::Instrument_sptr LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
+                                                    size_t pixelsCutOffL,
+                                                    size_t pixelsCutOffH,
+                                                    size_t tubeBinning,
+                                                    size_t finalBinsY) {
   // instrument
   Geometry::Instrument_sptr instrument =
       boost::make_shared<Geometry::Instrument>("BILBY");
@@ -497,24 +505,24 @@ Geometry::Instrument_sptr LoadBBY::createInstrument(ANSTO::Tar::File &tarFile, s
 
   source->setPos(0.0, 0.0, -L1_chopper_value);
   samplePos->setPos(0.0, 0.0, 0.0);
-  
+
   // dimensions of the detector (height is in y direction, width is in x
   // direction)
   double width = 336.0 / 1000;  // meters
   double height = 640.0 / 1000; // meters
   double angle = 10.0;          // degree
 
-  // raw data format 
+  // raw data format
   size_t xPixelCount = HISTO_BINS_X / 6;
   size_t yPixelCount = HISTO_BINS_Y;
-  
+
   // we assumed that individual pixels have the same size and shape of a cuboid:
   double pixel_width = width / static_cast<double>(xPixelCount);
   double pixel_height = height / static_cast<double>(yPixelCount);
-  
+
   // adjusting for binning
   auto diffPixelsCutOff = (pixelsCutOffL - pixelsCutOffH);
-  double detectorYOffset = static_cast<double>(diffPixelsCutOff)* pixel_height;
+  double detectorYOffset = static_cast<double>(diffPixelsCutOff) * pixel_height;
 
   yPixelCount = finalBinsY;
   pixel_height *= static_cast<double>(tubeBinning);
@@ -535,12 +543,19 @@ Geometry::Instrument_sptr LoadBBY::createInstrument(ANSTO::Tar::File &tarFile, s
   // http://www.mantidproject.org/HowToDefineGeometricShape for details on
   // shapes in Mantid.
   std::string detXML =
-    "<cuboid id=\"pixel\">"
-      "<left-front-bottom-point   x=\"+"+pixel_width_str+"\" y=\"-"+pixel_height_str+"\" z=\"0\"  />"
-      "<left-front-top-point      x=\"+"+pixel_width_str+"\" y=\"-"+pixel_height_str+"\" z=\""+pixel_depth_str+"\"  />"
-      "<left-back-bottom-point    x=\"-"+pixel_width_str+"\" y=\"-"+pixel_height_str+"\" z=\"0\"  />"
-      "<right-front-bottom-point  x=\"+"+pixel_width_str+"\" y=\"+"+pixel_height_str+"\" z=\"0\"  />"
-    "</cuboid>";
+      "<cuboid id=\"pixel\">"
+      "<left-front-bottom-point   x=\"+" +
+      pixel_width_str + "\" y=\"-" + pixel_height_str +
+      "\" z=\"0\"  />"
+      "<left-front-top-point      x=\"+" +
+      pixel_width_str + "\" y=\"-" + pixel_height_str + "\" z=\"" +
+      pixel_depth_str + "\"  />"
+                        "<left-back-bottom-point    x=\"-" +
+      pixel_width_str + "\" y=\"-" + pixel_height_str +
+      "\" z=\"0\"  />"
+      "<right-front-bottom-point  x=\"+" +
+      pixel_width_str + "\" y=\"+" + pixel_height_str + "\" z=\"0\"  />"
+                                                        "</cuboid>";
 
   // Create a shape object which will be shared by all pixels.
   Geometry::Object_sptr pixelShape =
@@ -549,7 +564,8 @@ Geometry::Instrument_sptr LoadBBY::createInstrument(ANSTO::Tar::File &tarFile, s
   // create detector banks
   BbyDetectorBankFactory factory(
       instrument, pixelShape, xPixelCount, yPixelCount, pixel_width,
-      pixel_height, Kernel::V3D(0, (height - pixel_height) / 2 - detectorYOffset, 0));
+      pixel_height,
+      Kernel::V3D(0, (height - pixel_height) / 2 - detectorYOffset, 0));
 
   // curtain l
   factory.createAndAssign(0 * pixelCount,
@@ -753,7 +769,7 @@ std::vector<bool> LoadBBY::createMaskVector(const std::string &filename,
 std::vector<int> LoadBBY::createOffsetVector(const std::string &filename,
                                              bool &fileLoaded) {
   std::vector<int> result(HISTO_BINS_X, 0);
-      
+
   std::ifstream input(filename.c_str());
   if (input.good()) {
     std::string line;
@@ -765,19 +781,19 @@ std::vector<int> LoadBBY::createOffsetVector(const std::string &filename,
       auto i2 = line.find_first_of(",;", i1 + 1);
       if (i2 == std::string::npos)
         i2 = line.size();
-          
+
       size_t index = boost::lexical_cast<size_t>(line.substr(0, i1));
-      int offset = boost::lexical_cast<int>(line.substr(i1 + 1, line.size() - i1 - 1));
+      int offset =
+          boost::lexical_cast<int>(line.substr(i1 + 1, line.size() - i1 - 1));
 
       if (index < HISTO_BINS_X)
         result[index] = offset;
     }
     fileLoaded = true;
-  }
-  else {
+  } else {
     fileLoaded = false;
   }
-      
+
   return result;
 }
 

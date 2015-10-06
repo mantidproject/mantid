@@ -109,8 +109,8 @@ void CatalogSearchParam::setMyData(bool flag) { m_myData = flag; }
  * Sets the investigation id to search for.
  * @param investigationId :: investigation id to search for.
  */
-void
-CatalogSearchParam::setInvestigationId(const std::string &investigationId) {
+void CatalogSearchParam::setInvestigationId(
+    const std::string &investigationId) {
   m_investigationId = investigationId;
 }
 

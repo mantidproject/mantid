@@ -83,8 +83,7 @@ public:
   PointGroup_sptr createPointGroup(const std::string &hmSymbol);
   PointGroup_sptr
   createPointGroupFromSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
-  PointGroup_sptr
-  createPointGroupFromSpaceGroup(const SpaceGroup &spaceGroup);
+  PointGroup_sptr createPointGroupFromSpaceGroup(const SpaceGroup &spaceGroup);
 
   bool isSubscribed(const std::string &hmSymbol) const;
 
@@ -126,11 +125,11 @@ private:
 // This is taken from FuncMinimizerFactory
 #ifdef _WIN32
 template class MANTID_GEOMETRY_DLL
-Mantid::Kernel::SingletonHolder<PointGroupFactoryImpl>;
+    Mantid::Kernel::SingletonHolder<PointGroupFactoryImpl>;
 #endif
 
 typedef Mantid::Kernel::SingletonHolder<PointGroupFactoryImpl>
-PointGroupFactory;
+    PointGroupFactory;
 
 } // namespace Geometry
 } // namespace Mantid

@@ -217,7 +217,8 @@ public:
   /// @param P :: Output vector with approximation parameters.
   /// @param A :: Output vector with approximation parameters.
   ChebfunBase_sptr makeApprox(double lBound, double rBound,
-                              std::vector<double> &P, std::vector<double> &A, bool &ok) {
+                              std::vector<double> &P, std::vector<double> &A,
+                              bool &ok) {
 
     auto base = ChebfunBase::bestFitAnyTolerance(lBound, rBound, *this, P, A,
                                                  1.0, 1e-4, 129);
@@ -405,7 +406,8 @@ void CalculateChiSquared::estimateErrors() {
     bool ok = true;
     auto base = slice.makeApprox(lBound, rBound, P, A, ok);
     if (!ok) {
-      g_log.warning() << "Approximation failed for parameter " << ip << std::endl;
+      g_log.warning() << "Approximation failed for parameter " << ip
+                      << std::endl;
     }
     if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
       g_log.debug() << "Parameter " << ip << std::endl;
@@ -601,7 +603,8 @@ void CalculateChiSquared::estimateErrors() {
       roots.resize(2);
     }
     if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
-      g_log.debug() << "Roots " << roots[0] << " (" << slice(roots[0]) << ") " << roots[1] << " (" << slice(roots[1]) << ") " << std::endl;
+      g_log.debug() << "Roots " << roots[0] << " (" << slice(roots[0]) << ") "
+                    << roots[1] << " (" << slice(roots[1]) << ") " << std::endl;
     }
     // Loop over the parameters and see if there deviations along
     // this direction is greater than any previous value.
@@ -613,13 +616,15 @@ void CalculateChiSquared::estimateErrors() {
       }
       if (lError < leftErrColumn->toDouble(ip)) {
         if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
-          g_log.debug() << "  left for  " << ip << ' ' << lError << ' ' << leftErrColumn->toDouble(ip) << std::endl;
+          g_log.debug() << "  left for  " << ip << ' ' << lError << ' '
+                        << leftErrColumn->toDouble(ip) << std::endl;
         }
         leftErrColumn->fromDouble(ip, lError);
       }
       if (rError > rightErrColumn->toDouble(ip)) {
         if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
-          g_log.debug() << "  right for " << ip << ' ' << rError << ' ' << rightErrColumn->toDouble(ip) << std::endl;
+          g_log.debug() << "  right for " << ip << ' ' << rError << ' '
+                        << rightErrColumn->toDouble(ip) << std::endl;
         }
         rightErrColumn->fromDouble(ip, rError);
       }
@@ -631,8 +636,7 @@ void CalculateChiSquared::estimateErrors() {
 
 /// Temporary unfix any fixed parameters.
 void CalculateChiSquared::unfixParameters() {
-  for(size_t i = 0; i < m_function->nParams(); ++i)
-  {
+  for (size_t i = 0; i < m_function->nParams(); ++i) {
     if (m_function->isFixed(i)) {
       m_function->unfix(i);
       m_fixedParameters.push_back(i);
@@ -642,7 +646,7 @@ void CalculateChiSquared::unfixParameters() {
 
 /// Restore the "fixed" status of previously unfixed paramters.
 void CalculateChiSquared::refixParameters() {
-  for(auto i = m_fixedParameters.begin(); i != m_fixedParameters.end(); ++i) {
+  for (auto i = m_fixedParameters.begin(); i != m_fixedParameters.end(); ++i) {
     m_function->fix(*i);
   }
 }

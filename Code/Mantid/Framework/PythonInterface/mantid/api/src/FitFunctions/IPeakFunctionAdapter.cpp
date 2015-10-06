@@ -168,9 +168,8 @@ void IPeakFunctionAdapter::functionDerivLocal(API::Jacobian *out,
  *  @param jacobian The Jacobian matrix storing the partial derivatives of the
  * function w.r.t to the parameters
  */
-void
-IPeakFunctionAdapter::functionDerivLocal(const boost::python::object &xvals,
-                                         boost::python::object &jacobian) {
+void IPeakFunctionAdapter::functionDerivLocal(
+    const boost::python::object &xvals, boost::python::object &jacobian) {
   CallMethod2<void, object, object>::dispatchWithException(
       getSelf(), "functionDerivLocal", xvals, jacobian);
 }

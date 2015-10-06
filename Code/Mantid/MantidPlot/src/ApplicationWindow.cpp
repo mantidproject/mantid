@@ -4530,23 +4530,33 @@ ApplicationWindow *ApplicationWindow::open(const QString &fn,
 
 void ApplicationWindow::openRecentFile(int index) {
   QString fn = recentFilesMenu->text(index);
-  int pos = fn.find(" ", 0);
-  fn = fn.right(fn.length() - pos - 1);
 
-  QFile f(fn);
-  if (!f.exists()) {
-    QMessageBox::critical(
-        this, tr("MantidPlot - File Open Error"), // Mantid
-        tr("The file: <b> %1 </b> <p>is not there anymore!"
-           "<p>It will be removed from the list of recent files.")
-            .arg(fn));
+  // if "," found in the QString
+  if (fn.find(",", 0)) {
+    try {
+      int pos = fn.find(" ", 0);
+      fn = fn.right(fn.length() - pos - 1);
+      loadDataFileByName(fn);
+    } catch (Mantid::Kernel::Exception::NotFoundError &) {
+      throw;
+    }
+  } else {
+    int pos = fn.find(" ", 0);
+    fn = fn.right(fn.length() - pos - 1);
+    QFile f(fn);
+    if (!f.exists()) {
+      QMessageBox::critical(
+          this, tr("MantidPlot - File Open Error"), // Mantid
+          tr("The file: <b> %1 </b> <p>is not there anymore!"
+             "<p>It will be removed from the list of recent files.")
+              .arg(fn));
 
-    recentFiles.remove(fn);
-    updateRecentFilesList();
-    return;
+      recentFiles.remove(fn);
+      updateRecentFilesList();
+      return;
+    }
+    loadDataFileByName(fn);
   }
-
-  loadDataFileByName(fn);
   saveSettings(); // save new list of recent files
 }
 
@@ -5369,7 +5379,7 @@ void ApplicationWindow::readSettings() {
   d_export_transparency = settings.value("/ExportTransparency", false).toBool();
   d_export_quality = settings.value("/ImageQuality", 100).toInt();
   //	d_export_resolution = settings.value("/Resolution",
-  //QPrinter().resolution()).toInt();
+  // QPrinter().resolution()).toInt();
   d_export_color = settings.value("/ExportColor", true).toBool();
   d_export_vector_size =
       settings.value("/ExportPageSize", QPrinter::Custom).toInt();
@@ -12959,7 +12969,7 @@ void ApplicationWindow::createActions() {
   // actionHelpForums = new QAction(tr("QtiPlot &Forums"), this); // Mantid
   // change
   //	connect(actionHelpForums, SIGNAL(triggered()), this,
-  //SLOT(showForums())); // Mantid change
+  // SLOT(showForums())); // Mantid change
 
   actionHelpBugReports = new QAction(tr("Report a &Bug"), this);
   connect(actionHelpBugReports, SIGNAL(triggered()), this,
@@ -14297,7 +14307,7 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
     } else if (isSilentStartup(str)) {
       g_log.debug("Starting in Silent mode");
     } // if filename not found yet then these are all program arguments so we
-      // should
+    // should
     // know what they all are
     else if (file_name.isEmpty() &&
              (str.startsWith("-") || str.startsWith("--"))) {

@@ -18,40 +18,39 @@ using namespace Mantid::MDAlgorithms;
 using namespace Mantid::DataObjects::MDEventsTestHelper;
 using Mantid::DataObjects::MDHistoWorkspace_sptr;
 
-class CompareMDWorkspacesTest : public CxxTest::TestSuite
-{
+class CompareMDWorkspacesTest : public CxxTest::TestSuite {
 public:
-  void test_Init()
-  {
+  void test_Init() {
     CompareMDWorkspaces alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
   }
-  
-  void doTest(std::string ws1, std::string ws2, std::string resultExpected="Success!",
-      bool CheckEvents = true,bool IgnoreDifferentID=false)
-  {
+
+  void doTest(std::string ws1, std::string ws2,
+              std::string resultExpected = "Success!", bool CheckEvents = true,
+              bool IgnoreDifferentID = false) {
 
     CompareMDWorkspaces alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Workspace1", ws1) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Workspace2", ws2) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("CheckEvents", CheckEvents) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Tolerance", 1e-5) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("IgnoreBoxID", IgnoreDifferentID) );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Workspace1", ws1));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Workspace2", ws2));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CheckEvents", CheckEvents));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Tolerance", 1e-5));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IgnoreBoxID", IgnoreDifferentID));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
 
     std::string result = alg.getPropertyValue("Result");
     std::cout << result << std::endl;
-    TSM_ASSERT( result.c_str(), boost::starts_with(result, resultExpected));
+    TSM_ASSERT(result.c_str(), boost::starts_with(result, resultExpected));
   }
 
-  void test_histo()
-  {
-    MDHistoWorkspace_sptr A = makeFakeMDHistoWorkspace(1.56, 3, 10, 10.0, 1.57, "A");
-    MDHistoWorkspace_sptr B = makeFakeMDHistoWorkspace(1.56, 3, 10, 10.0, 1.57, "B");
+  void test_histo() {
+    MDHistoWorkspace_sptr A =
+        makeFakeMDHistoWorkspace(1.56, 3, 10, 10.0, 1.57, "A");
+    MDHistoWorkspace_sptr B =
+        makeFakeMDHistoWorkspace(1.56, 3, 10, 10.0, 1.57, "B");
     doTest("A", "B");
     B->setSignalAt(123, 2.34);
     doTest("A", "B", "MDHistoWorkspaces have a different signal at index 123");
@@ -59,19 +58,19 @@ public:
     B->setErrorSquaredAt(123, 2.34);
     doTest("A", "B", "MDHistoWorkspaces have a different error at index 123");
 
-    MDHistoWorkspace_sptr C = makeFakeMDHistoWorkspace(1.56, 3, 9, 10.0, 1.57, "C");
+    MDHistoWorkspace_sptr C =
+        makeFakeMDHistoWorkspace(1.56, 3, 9, 10.0, 1.57, "C");
     doTest("A", "C", "Dimension #0 has a different number of bins");
-    MDHistoWorkspace_sptr C2 = makeFakeMDHistoWorkspace(1.56, 3, 10, 20.0, 1.57, "C2");
+    MDHistoWorkspace_sptr C2 =
+        makeFakeMDHistoWorkspace(1.56, 3, 10, 20.0, 1.57, "C2");
     doTest("A", "C2", "Dimension #0 has a different maximum");
 
-    MDHistoWorkspace_sptr D = makeFakeMDHistoWorkspace(1.56, 2, 10, 10.0, 1.57, "D");
+    MDHistoWorkspace_sptr D =
+        makeFakeMDHistoWorkspace(1.56, 2, 10, 10.0, 1.57, "D");
     doTest("A", "D", "Workspaces have a different number of dimensions");
-
   }
-  
 
-  void test_md()
-  {
+  void test_md() {
     makeAnyMDEW<MDEvent<3>, 3>(2, 0., 10., 1, "A");
     makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0., 10., 1, "mdle3");
     doTest("A", "mdle3", "Workspaces are of different types");
@@ -82,33 +81,31 @@ public:
     makeAnyMDEW<MDEvent<3>, 3>(3, 0., 10., 1, "C");
     doTest("A", "C", "Workspaces do not have the same number of boxes");
 
-    CloneMDWorkspace cloner ;
+    CloneMDWorkspace cloner;
     cloner.initialize();
-    cloner.setPropertyValue("InputWorkspace","A");
-    cloner.setPropertyValue("OutputWorkspace","A1");
+    cloner.setPropertyValue("InputWorkspace", "A");
+    cloner.setPropertyValue("OutputWorkspace", "A1");
     TS_ASSERT_THROWS_NOTHING(cloner.execute());
-    if( !cloner.isExecuted())
+    if (!cloner.isExecuted())
       return;
 
-    doTest("A","A1");
+    doTest("A", "A1");
 
-    auto mdWorkspace = dynamic_cast<IMDEventWorkspace *>(FrameworkManager::Instance().getWorkspace("A1"));
-    TSM_ASSERT("Can not retrieve MD workspace A1 from analysis data service",mdWorkspace );
+    auto mdWorkspace = dynamic_cast<IMDEventWorkspace *>(
+        FrameworkManager::Instance().getWorkspace("A1"));
+    TSM_ASSERT("Can not retrieve MD workspace A1 from analysis data service",
+               mdWorkspace);
 
-    std::vector<IMDNode *> boxes;   
+    std::vector<IMDNode *> boxes;
     mdWorkspace->getBoxes(boxes, 1000, false);
 
     boxes[0]->setID(10000);
 
-    doTest("A","A1","Boxes have different ID (0 vs 10000)");
+    doTest("A", "A1", "Boxes have different ID (0 vs 10000)");
 
     // with ignore box ID the comparison is true
-    doTest("A","A1","Success!",true,true);
-
+    doTest("A", "A1", "Success!", true, true);
   }
-
-
 };
-
 
 #endif /* MANTID_MDALGORITHMS_COMPAREMDWORKSPACESTEST_H_ */

@@ -25,7 +25,8 @@ PeakShapeEllipsoidFactory::~PeakShapeEllipsoidFactory() {}
  * @param source : source JSON
  * @return PeakShape via this factory or it's successors
  */
-Mantid::Geometry::PeakShape *PeakShapeEllipsoidFactory::create(const std::string &source) const {
+Mantid::Geometry::PeakShape *
+PeakShapeEllipsoidFactory::create(const std::string &source) const {
   Json::Reader reader;
   Json::Value root;
   Mantid::Geometry::PeakShape *product = NULL;
@@ -91,7 +92,6 @@ void PeakShapeEllipsoidFactory::setSuccessor(
     boost::shared_ptr<const PeakShapeFactory> successorFactory) {
   this->m_successor = successorFactory;
 }
-
 
 } // namespace DataObjects
 } // namespace Mantid

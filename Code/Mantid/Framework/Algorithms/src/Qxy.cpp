@@ -288,7 +288,7 @@ void Qxy::exec() {
 
     //    PARALLEL_END_INTERUPT_REGION
   } // loop over all spectra
-    //  PARALLEL_CHECK_INTERUPT_REGION
+  //  PARALLEL_CHECK_INTERUPT_REGION
 
   // take sqrt of error weight values
   // left to be executed here for computational efficiency

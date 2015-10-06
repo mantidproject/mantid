@@ -39,8 +39,8 @@ public:
   virtual UnitLabel getUnitLabel() const = 0;
   virtual bool canConvertTo(const MDUnit &other) const = 0;
   virtual bool isQUnit() const = 0;
-  virtual MDUnit* clone() const = 0;
-  bool operator==(const MDUnit& other) const;
+  virtual MDUnit *clone() const = 0;
+  bool operator==(const MDUnit &other) const;
   virtual ~MDUnit();
 };
 
@@ -56,7 +56,7 @@ class DLLExport ReciprocalLatticeUnit : public QUnit {
 public:
   UnitLabel getUnitLabel() const;
   bool canConvertTo(const MDUnit &other) const;
-  ReciprocalLatticeUnit* clone() const;
+  ReciprocalLatticeUnit *clone() const;
   virtual ~ReciprocalLatticeUnit();
 };
 
@@ -65,20 +65,21 @@ class DLLExport InverseAngstromsUnit : public QUnit {
 public:
   UnitLabel getUnitLabel() const;
   bool canConvertTo(const MDUnit &other) const;
-  InverseAngstromsUnit* clone() const;
+  InverseAngstromsUnit *clone() const;
   virtual ~InverseAngstromsUnit();
 };
 
 class DLLExport LabelUnit : public MDUnit {
 private:
   UnitLabel m_unitLabel;
+
 public:
-  LabelUnit(const UnitLabel& unitLabel);
+  LabelUnit(const UnitLabel &unitLabel);
   UnitLabel getUnitLabel() const;
   bool canConvertTo(const MDUnit &other) const;
   bool isQUnit() const;
   virtual ~LabelUnit();
-  LabelUnit* clone() const;
+  LabelUnit *clone() const;
 };
 
 typedef std::unique_ptr<MDUnit> MDUnit_uptr;

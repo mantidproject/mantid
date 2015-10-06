@@ -57,14 +57,14 @@ bool BraggScatterer::isPropertyExposedToComposite(Property *property) const {
  *
  * @param propertyName :: Name of the parameter that should be exposed.
  */
-void
-BraggScatterer::exposePropertyToComposite(const std::string &propertyName) {
+void BraggScatterer::exposePropertyToComposite(
+    const std::string &propertyName) {
   setPropertyGroup(propertyName, m_propagatingGroupName);
 }
 
 /// Removes exposure to composite for specified property.
-void
-BraggScatterer::unexposePropertyFromComposite(const std::string &propertyName) {
+void BraggScatterer::unexposePropertyFromComposite(
+    const std::string &propertyName) {
   setPropertyGroup(propertyName, "");
 }
 

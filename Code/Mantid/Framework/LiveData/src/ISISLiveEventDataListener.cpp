@@ -73,8 +73,8 @@ ISISLiveEventDataListener::~ISISLiveEventDataListener() {
 }
 
 // connect the listener to DAE
-bool
-ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address) {
+bool ISISLiveEventDataListener::connect(
+    const Poco::Net::SocketAddress &address) {
   // If we don't have an address, force a connection to the test server running
   // on
   // localhost on the default port

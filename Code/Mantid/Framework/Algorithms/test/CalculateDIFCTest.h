@@ -14,8 +14,8 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
 namespace {
-  const double OFFSET = .1;
-  const int NUM_SPEC = 3;
+const double OFFSET = .1;
+const int NUM_SPEC = 3;
 }
 
 class CalculateDIFCTest : public CxxTest::TestSuite {

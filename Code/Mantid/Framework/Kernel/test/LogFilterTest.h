@@ -9,112 +9,116 @@
 
 using namespace Mantid::Kernel;
 
-class LogFilterTest : public CxxTest::TestSuite
-{
-  TimeSeriesProperty<double>* p;
+class LogFilterTest : public CxxTest::TestSuite {
+  TimeSeriesProperty<double> *p;
+
 public:
   static LogFilterTest *createSuite() { return new LogFilterTest(); }
   static void destroySuite(LogFilterTest *suite) { delete suite; }
 
-  LogFilterTest()
-  :p(new TimeSeriesProperty<double>("test"))
-  {
-    p->addValue("2007-11-30T16:17:00",1);
-    p->addValue("2007-11-30T16:17:10",2);
-    p->addValue("2007-11-30T16:17:20",3);
-    p->addValue("2007-11-30T16:17:30",4);
-    p->addValue("2007-11-30T16:17:40",5);
+  LogFilterTest() : p(new TimeSeriesProperty<double>("test")) {
+    p->addValue("2007-11-30T16:17:00", 1);
+    p->addValue("2007-11-30T16:17:10", 2);
+    p->addValue("2007-11-30T16:17:20", 3);
+    p->addValue("2007-11-30T16:17:30", 4);
+    p->addValue("2007-11-30T16:17:40", 5);
   }
 
-  ~LogFilterTest()
-  {
-    delete p;
+  ~LogFilterTest() { delete p; }
+
+  void testnthValue() {
+
+    TS_ASSERT_EQUALS(p->size(), 5);
+    TS_ASSERT_EQUALS(p->nthValue(0), 1);
+    TS_ASSERT_EQUALS(p->nthValue(1), 2);
+    TS_ASSERT_EQUALS(p->nthValue(2), 3);
+    TS_ASSERT_EQUALS(p->nthValue(3), 4);
+    TS_ASSERT_EQUALS(p->nthValue(4), 5);
+    TS_ASSERT_EQUALS(p->nthValue(5), 5);
+
+    TS_ASSERT_EQUALS(p->nthInterval(0).begin_str(), "2007-Nov-30 16:17:00");
+    TS_ASSERT_EQUALS(p->nthInterval(0).end_str(), "2007-Nov-30 16:17:10");
+
+    TS_ASSERT_EQUALS(p->nthInterval(1).begin_str(), "2007-Nov-30 16:17:10");
+    TS_ASSERT_EQUALS(p->nthInterval(1).end_str(), "2007-Nov-30 16:17:20");
+
+    TS_ASSERT_EQUALS(p->nthInterval(2).begin_str(), "2007-Nov-30 16:17:20");
+    TS_ASSERT_EQUALS(p->nthInterval(2).end_str(), "2007-Nov-30 16:17:30");
+
+    TS_ASSERT_EQUALS(p->nthInterval(3).begin_str(), "2007-Nov-30 16:17:30");
+    TS_ASSERT_EQUALS(p->nthInterval(3).end_str(), "2007-Nov-30 16:17:40");
+
+    TS_ASSERT_EQUALS(p->nthInterval(4).begin_str(), "2007-Nov-30 16:17:40");
+    TS_ASSERT_EQUALS(p->nthInterval(4).end_str(),
+                     "2007-Nov-30 16:17:50"); // nth interval changed to use
+                                              // previous interval now.
   }
 
-  void testnthValue()
-  {
-
-    TS_ASSERT_EQUALS( p->size(), 5 );
-    TS_ASSERT_EQUALS( p->nthValue(0), 1 );
-    TS_ASSERT_EQUALS( p->nthValue(1), 2 );
-    TS_ASSERT_EQUALS( p->nthValue(2), 3 );
-    TS_ASSERT_EQUALS( p->nthValue(3), 4 );
-    TS_ASSERT_EQUALS( p->nthValue(4), 5 );
-    TS_ASSERT_EQUALS( p->nthValue(5), 5 );
-
-    TS_ASSERT_EQUALS( p->nthInterval(0).begin_str(), "2007-Nov-30 16:17:00" );
-    TS_ASSERT_EQUALS( p->nthInterval(0).end_str(), "2007-Nov-30 16:17:10" );
-
-    TS_ASSERT_EQUALS( p->nthInterval(1).begin_str(), "2007-Nov-30 16:17:10" );
-    TS_ASSERT_EQUALS( p->nthInterval(1).end_str(), "2007-Nov-30 16:17:20" );
-
-    TS_ASSERT_EQUALS( p->nthInterval(2).begin_str(), "2007-Nov-30 16:17:20" );
-    TS_ASSERT_EQUALS( p->nthInterval(2).end_str(), "2007-Nov-30 16:17:30" );
-
-    TS_ASSERT_EQUALS( p->nthInterval(3).begin_str(), "2007-Nov-30 16:17:30" );
-    TS_ASSERT_EQUALS( p->nthInterval(3).end_str(), "2007-Nov-30 16:17:40" );
-
-    TS_ASSERT_EQUALS( p->nthInterval(4).begin_str(), "2007-Nov-30 16:17:40" );
-    TS_ASSERT_EQUALS( p->nthInterval(4).end_str(), "2007-Nov-30 16:17:50" ); //nth interval changed to use previous interval now.
-
-  }
-
-  void testFilterWithTrueAtStart()
-  {
+  void testFilterWithTrueAtStart() {
     auto testFilter = createTestFilter(1);
 
     LogFilter flt(p);
     flt.addFilter(*testFilter);
 
-    TS_ASSERT_EQUALS( flt.data()->size(), 5 );
+    TS_ASSERT_EQUALS(flt.data()->size(), 5);
 
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(0).begin_str(), "2007-Nov-30 16:17:00" );
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(0).end_str(), "2007-Nov-30 16:17:10" );
-    TS_ASSERT_EQUALS( flt.data()->nthValue(0), 1 );
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).begin_str(),
+                     "2007-Nov-30 16:17:00");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).end_str(),
+                     "2007-Nov-30 16:17:10");
+    TS_ASSERT_EQUALS(flt.data()->nthValue(0), 1);
 
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(1).begin_str(), "2007-Nov-30 16:17:10" );
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(1).end_str(), "2007-Nov-30 16:17:20" );
-    TS_ASSERT_EQUALS( flt.data()->nthValue(1), 2 );
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).begin_str(),
+                     "2007-Nov-30 16:17:10");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).end_str(),
+                     "2007-Nov-30 16:17:20");
+    TS_ASSERT_EQUALS(flt.data()->nthValue(1), 2);
 
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(2).begin_str(), "2007-Nov-30 16:17:20" );
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(2).end_str(), "2007-Nov-30 16:17:25" );
-    TS_ASSERT_EQUALS( flt.data()->nthValue(2), 3 );
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(2).begin_str(),
+                     "2007-Nov-30 16:17:20");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(2).end_str(),
+                     "2007-Nov-30 16:17:25");
+    TS_ASSERT_EQUALS(flt.data()->nthValue(2), 3);
 
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(3).begin_str(), "2007-Nov-30 16:17:39" );
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(3).end_str(), "2007-Nov-30 16:17:40" );
-    TS_ASSERT_EQUALS( flt.data()->nthValue(3), 4 );
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(3).begin_str(),
+                     "2007-Nov-30 16:17:39");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(3).end_str(),
+                     "2007-Nov-30 16:17:40");
+    TS_ASSERT_EQUALS(flt.data()->nthValue(3), 4);
 
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(4).begin_str(), "2007-Nov-30 16:17:40" );
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(4).end_str(), "2007-Nov-30 16:17:41" );
-    TS_ASSERT_EQUALS( flt.data()->nthValue(4), 5 );
-
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(4).begin_str(),
+                     "2007-Nov-30 16:17:40");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(4).end_str(),
+                     "2007-Nov-30 16:17:41");
+    TS_ASSERT_EQUALS(flt.data()->nthValue(4), 5);
   }
 
-  void testFilterWithFalseAtStart()
-  {
+  void testFilterWithFalseAtStart() {
     auto testFilter = createTestFilter(2);
 
     LogFilter flt(p);
     flt.addFilter(*testFilter);
 
-    TS_ASSERT_EQUALS( flt.data()->size(), 2 );
+    TS_ASSERT_EQUALS(flt.data()->size(), 2);
 
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(0).begin_str(), "2007-Nov-30 16:17:25" );
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(0).end_str(), "2007-Nov-30 16:17:30" );
-    TS_ASSERT_EQUALS( flt.data()->nthValue(0), 3 );
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).begin_str(),
+                     "2007-Nov-30 16:17:25");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).end_str(),
+                     "2007-Nov-30 16:17:30");
+    TS_ASSERT_EQUALS(flt.data()->nthValue(0), 3);
 
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(1).begin_str(), "2007-Nov-30 16:17:30" );
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(1).end_str(), "2007-Nov-30 16:17:39" );
-    TS_ASSERT_EQUALS( flt.data()->nthValue(1), 4 );
-
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).begin_str(),
+                     "2007-Nov-30 16:17:30");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).end_str(),
+                     "2007-Nov-30 16:17:39");
+    TS_ASSERT_EQUALS(flt.data()->nthValue(1), 4);
   }
 
-
   /*
-   * this is a test for two filters doing "AND" operation according to previous unit test.
+   * this is a test for two filters doing "AND" operation according to previous
+   * unit test.
    */
-  void test_Filters_Combine_Using_AND_Operation()
-  {
+  void test_Filters_Combine_Using_AND_Operation() {
     auto testFilter1 = createTestFilter(1);
     auto testFilter2 = createTestFilter(3);
 
@@ -122,75 +126,96 @@ public:
     flt.addFilter(*testFilter1);
     flt.addFilter(*testFilter2);
 
-    TS_ASSERT_EQUALS( flt.data()->size(), 5 );
+    TS_ASSERT_EQUALS(flt.data()->size(), 5);
 
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(0).begin_str(), "2007-Nov-30 16:17:00" );
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(0).end_str(), "2007-Nov-30 16:17:05" );
-    TS_ASSERT_EQUALS( flt.data()->nthValue(0), 1 );
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).begin_str(),
+                     "2007-Nov-30 16:17:00");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).end_str(),
+                     "2007-Nov-30 16:17:05");
+    TS_ASSERT_EQUALS(flt.data()->nthValue(0), 1);
 
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(1).begin_str(), "2007-Nov-30 16:17:12" );
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(1).end_str(), "2007-Nov-30 16:17:20" );
-    TS_ASSERT_EQUALS( flt.data()->nthValue(1), 2 );
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).begin_str(),
+                     "2007-Nov-30 16:17:12");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).end_str(),
+                     "2007-Nov-30 16:17:20");
+    TS_ASSERT_EQUALS(flt.data()->nthValue(1), 2);
 
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(2).begin_str(), "2007-Nov-30 16:17:20" );
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(2).end_str(), "2007-Nov-30 16:17:25" );
-    TS_ASSERT_EQUALS( flt.data()->nthValue(2), 3 );
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(2).begin_str(),
+                     "2007-Nov-30 16:17:20");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(2).end_str(),
+                     "2007-Nov-30 16:17:25");
+    TS_ASSERT_EQUALS(flt.data()->nthValue(2), 3);
 
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(3).begin_str(), "2007-Nov-30 16:17:39" );
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(3).end_str(), "2007-Nov-30 16:17:40" );
-    TS_ASSERT_EQUALS( flt.data()->nthValue(3), 4 );
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(3).begin_str(),
+                     "2007-Nov-30 16:17:39");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(3).end_str(),
+                     "2007-Nov-30 16:17:40");
+    TS_ASSERT_EQUALS(flt.data()->nthValue(3), 4);
 
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(4).begin_str(), "2007-Nov-30 16:17:40" );
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(4).end_str(), "2007-Nov-30 16:17:41" );
-    TS_ASSERT_EQUALS( flt.data()->nthValue(4), 5 );
-
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(4).begin_str(),
+                     "2007-Nov-30 16:17:40");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(4).end_str(),
+                     "2007-Nov-30 16:17:41");
+    TS_ASSERT_EQUALS(flt.data()->nthValue(4), 5);
   }
 
-  void test_LogFilter_Can_Combine_Filters_When_No_Property_Is_Set()
-  {
+  void test_LogFilter_Can_Combine_Filters_When_No_Property_Is_Set() {
     auto mask1 = createTestFilter(1);
     auto mask2 = createTestFilter(3);
     LogFilter filterer(*mask1);
     filterer.addFilter(*mask2);
-    const TimeSeriesProperty<bool> * finalFilter = filterer.filter();
+    const TimeSeriesProperty<bool> *finalFilter = filterer.filter();
 
     TSM_ASSERT("Filter is NULL", finalFilter);
-    if(!finalFilter) return;
+    if (!finalFilter)
+      return;
 
     TS_ASSERT_EQUALS(6, finalFilter->size());
 
-    TS_ASSERT_EQUALS( finalFilter->nthInterval(0).begin_str(), "2007-Nov-30 16:16:50" );
-    TS_ASSERT_EQUALS( finalFilter->nthInterval(0).end_str(), "2007-Nov-30 16:17:00" );
-    TS_ASSERT_EQUALS( finalFilter->nthValue(0), false );
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(0).begin_str(),
+                     "2007-Nov-30 16:16:50");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(0).end_str(),
+                     "2007-Nov-30 16:17:00");
+    TS_ASSERT_EQUALS(finalFilter->nthValue(0), false);
 
-    TS_ASSERT_EQUALS( finalFilter->nthInterval(1).begin_str(), "2007-Nov-30 16:17:00" );
-    TS_ASSERT_EQUALS( finalFilter->nthInterval(1).end_str(), "2007-Nov-30 16:17:05" );
-    TS_ASSERT_EQUALS( finalFilter->nthValue(1), true );
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(1).begin_str(),
+                     "2007-Nov-30 16:17:00");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(1).end_str(),
+                     "2007-Nov-30 16:17:05");
+    TS_ASSERT_EQUALS(finalFilter->nthValue(1), true);
 
-    TS_ASSERT_EQUALS( finalFilter->nthInterval(2).begin_str(), "2007-Nov-30 16:17:05" );
-    TS_ASSERT_EQUALS( finalFilter->nthInterval(2).end_str(), "2007-Nov-30 16:17:12" );
-    TS_ASSERT_EQUALS( finalFilter->nthValue(2), false );
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(2).begin_str(),
+                     "2007-Nov-30 16:17:05");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(2).end_str(),
+                     "2007-Nov-30 16:17:12");
+    TS_ASSERT_EQUALS(finalFilter->nthValue(2), false);
 
-    TS_ASSERT_EQUALS( finalFilter->nthInterval(3).begin_str(), "2007-Nov-30 16:17:12" );
-    TS_ASSERT_EQUALS( finalFilter->nthInterval(3).end_str(), "2007-Nov-30 16:17:25" );
-    TS_ASSERT_EQUALS( finalFilter->nthValue(3), true );
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(3).begin_str(),
+                     "2007-Nov-30 16:17:12");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(3).end_str(),
+                     "2007-Nov-30 16:17:25");
+    TS_ASSERT_EQUALS(finalFilter->nthValue(3), true);
 
-    TS_ASSERT_EQUALS( finalFilter->nthInterval(4).begin_str(), "2007-Nov-30 16:17:25" );
-    TS_ASSERT_EQUALS( finalFilter->nthInterval(4).end_str(), "2007-Nov-30 16:17:39" );
-    TS_ASSERT_EQUALS( finalFilter->nthValue(4), false );
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(4).begin_str(),
+                     "2007-Nov-30 16:17:25");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(4).end_str(),
+                     "2007-Nov-30 16:17:39");
+    TS_ASSERT_EQUALS(finalFilter->nthValue(4), false);
 
-    TS_ASSERT_EQUALS( finalFilter->nthInterval(5).begin_str(), "2007-Nov-30 16:17:39" );
-    TS_ASSERT_EQUALS( finalFilter->nthInterval(5).end_str(), "2007-Nov-30 16:17:53" );
-    TS_ASSERT_EQUALS( finalFilter->nthValue(5), true );
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(5).begin_str(),
+                     "2007-Nov-30 16:17:39");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(5).end_str(),
+                     "2007-Nov-30 16:17:53");
+    TS_ASSERT_EQUALS(finalFilter->nthValue(5), true);
   }
 
-  void test_filtered_size_when_combined_filter_is_invalid()
-  {
-    TimeSeriesProperty<double> * p = new TimeSeriesProperty<double>("doubleProp");
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2009-Apr-28 09:20:52",-0.00161) );
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2009-Apr-28 09:21:57",-0.00161) );
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2009-Apr-28 09:23:01",-0.00161) );
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2009-Apr-28 09:25:10",-0.00161) );
+  void test_filtered_size_when_combined_filter_is_invalid() {
+    TimeSeriesProperty<double> *p =
+        new TimeSeriesProperty<double>("doubleProp");
+    TS_ASSERT_THROWS_NOTHING(p->addValue("2009-Apr-28 09:20:52", -0.00161));
+    TS_ASSERT_THROWS_NOTHING(p->addValue("2009-Apr-28 09:21:57", -0.00161));
+    TS_ASSERT_THROWS_NOTHING(p->addValue("2009-Apr-28 09:23:01", -0.00161));
+    TS_ASSERT_THROWS_NOTHING(p->addValue("2009-Apr-28 09:25:10", -0.00161));
 
     TimeSeriesProperty<bool> *running = new TimeSeriesProperty<bool>("running");
     running->addValue("2009-Apr-28 09:20:30", true);
@@ -208,24 +233,27 @@ public:
     delete running;
   }
 
-  void testF3()
-  {
+  void testF3() {
     auto testFilter = createTestFilter(4);
 
     LogFilter flt(p);
     flt.addFilter(*testFilter);
 
-    TS_ASSERT_EQUALS( flt.data()->size(), 2);
+    TS_ASSERT_EQUALS(flt.data()->size(), 2);
 
     return;
 
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(0).begin_str(), "2007-Nov-30 16:17:40" );
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(0).end_str(), "2007-Nov-30 16:17:45" );
-    TS_ASSERT_EQUALS( flt.data()->nthValue(0), 5 );
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).begin_str(),
+                     "2007-Nov-30 16:17:40");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).end_str(),
+                     "2007-Nov-30 16:17:45");
+    TS_ASSERT_EQUALS(flt.data()->nthValue(0), 5);
 
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(1).begin_str(), "2007-Nov-30 16:17:50" );
-    TS_ASSERT_EQUALS( flt.data()->nthInterval(1).end_str(), "2007-Nov-30 16:18:00" );
-    TS_ASSERT_EQUALS( flt.data()->nthValue(1), 5 );
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).begin_str(),
+                     "2007-Nov-30 16:17:50");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).end_str(),
+                     "2007-Nov-30 16:18:00");
+    TS_ASSERT_EQUALS(flt.data()->nthValue(1), 5);
 
     return;
   }
@@ -303,45 +331,35 @@ public:
     TS_ASSERT_EQUALS(filteredLog->size(), 6)
   }
 
-
 private:
-
   /// Creates a test boolean filter
   /// @param type :: Which variant to create
-  boost::shared_ptr<TimeSeriesProperty<bool>> createTestFilter(const int type)
-  {
-    boost::shared_ptr<TimeSeriesProperty<bool>> filter(new TimeSeriesProperty<bool>("filter"));
-    if(type == 1)
-    {
-      filter->addValue("2007-11-30T16:16:50",true);
-      filter->addValue("2007-11-30T16:17:25",false);
-      filter->addValue("2007-11-30T16:17:39",true);
-    }
-    else if(type == 2)
-    {
-      filter->addValue("2007-11-30T16:16:50",false);
-      filter->addValue("2007-11-30T16:17:25",true);
-      filter->addValue("2007-11-30T16:17:39",false);
-    }
-    else if(type == 3)
-    {
+  boost::shared_ptr<TimeSeriesProperty<bool>> createTestFilter(const int type) {
+    boost::shared_ptr<TimeSeriesProperty<bool>> filter(
+        new TimeSeriesProperty<bool>("filter"));
+    if (type == 1) {
+      filter->addValue("2007-11-30T16:16:50", true);
+      filter->addValue("2007-11-30T16:17:25", false);
+      filter->addValue("2007-11-30T16:17:39", true);
+    } else if (type == 2) {
+      filter->addValue("2007-11-30T16:16:50", false);
+      filter->addValue("2007-11-30T16:17:25", true);
+      filter->addValue("2007-11-30T16:17:39", false);
+    } else if (type == 3) {
       filter->addValue("2007-11-30T16:17:00", true);
-      filter->addValue("2007-11-30T16:17:05",false);
-      filter->addValue("2007-11-30T16:17:12",true);
-    }
-    else if(type == 4)
-    {
-      filter->addValue("2007-11-30T16:17:00",false);
-      filter->addValue("2007-11-30T16:17:40",true);
-      filter->addValue("2007-11-30T16:17:45",false);
-      filter->addValue("2007-11-30T16:17:50",true);
-      filter->addValue("2007-11-30T16:18:00",false);
+      filter->addValue("2007-11-30T16:17:05", false);
+      filter->addValue("2007-11-30T16:17:12", true);
+    } else if (type == 4) {
+      filter->addValue("2007-11-30T16:17:00", false);
+      filter->addValue("2007-11-30T16:17:40", true);
+      filter->addValue("2007-11-30T16:17:45", false);
+      filter->addValue("2007-11-30T16:17:50", true);
+      filter->addValue("2007-11-30T16:18:00", false);
     }
     return filter;
   }
 
-  std::time_t createTime_t_FromString(const std::string &str)
-  {
+  std::time_t createTime_t_FromString(const std::string &str) {
     std::tm time_since_1900;
     time_since_1900.tm_isdst = -1;
 
@@ -357,6 +375,5 @@ private:
     return std::mktime(&time_since_1900);
   }
 };
-
 
 #endif /*LOGFILTERTEST_H_*/

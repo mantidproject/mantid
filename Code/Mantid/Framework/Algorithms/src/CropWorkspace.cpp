@@ -23,7 +23,7 @@ using namespace Kernel;
 using namespace API;
 
 /// Default constructor
-CropWorkspace::CropWorkspace(): Algorithm() {}
+CropWorkspace::CropWorkspace() : Algorithm() {}
 
 /// Destructor
 CropWorkspace::~CropWorkspace() {}
@@ -85,10 +85,10 @@ void CropWorkspace::exec() {
 
   extract->execute();
 
-  MatrixWorkspace_sptr outputWorkspace = extract->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr outputWorkspace =
+      extract->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", outputWorkspace);
 }
-
 
 } // namespace Algorithms
 } // namespace Mantid

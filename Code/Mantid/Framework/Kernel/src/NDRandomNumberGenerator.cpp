@@ -39,8 +39,8 @@ void NDRandomNumberGenerator::cacheGeneratedValue(const size_t index,
  * Avoids returning the vectors by value and copying.
  * @param nextPoint :: A vector containing the new set of points
  */
-void
-NDRandomNumberGenerator::cacheNextPoint(const std::vector<double> &nextPoint) {
+void NDRandomNumberGenerator::cacheNextPoint(
+    const std::vector<double> &nextPoint) {
   assert(nextPoint.size() == m_ndims);
   m_nextPoint = nextPoint;
 }

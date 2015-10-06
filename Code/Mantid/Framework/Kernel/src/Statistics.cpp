@@ -401,7 +401,7 @@ std::vector<double> getMomentsAboutMean(const std::vector<TYPE> &x,
   template MANTID_KERNEL_DLL Statistics                                        \
   getStatistics<TYPE>(const vector<TYPE> &, const unsigned int);               \
   template MANTID_KERNEL_DLL std::vector<double> getZscore<TYPE>(              \
-      const vector<TYPE> &);                                       \
+      const vector<TYPE> &);                                                   \
   template MANTID_KERNEL_DLL std::vector<double> getModifiedZscore<TYPE>(      \
       const vector<TYPE> &, const bool);                                       \
   template MANTID_KERNEL_DLL std::vector<double> getMomentsAboutOrigin<TYPE>(  \

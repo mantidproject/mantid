@@ -54,10 +54,9 @@ public:
   /// Default constructor
   ConvToMDHistoWS();
 
-  size_t
-  initialize(const MDWSDescription &WSD,
-             boost::shared_ptr<MDEventWSWrapper> inWSWrapper,
-             bool ignoreZeros);
+  size_t initialize(const MDWSDescription &WSD,
+                    boost::shared_ptr<MDEventWSWrapper> inWSWrapper,
+                    bool ignoreZeros);
 
   void runConversion(API::Progress *pProgress);
 

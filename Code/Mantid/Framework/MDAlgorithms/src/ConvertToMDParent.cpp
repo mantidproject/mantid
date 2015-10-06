@@ -34,8 +34,7 @@ void ConvertToMDParent::init() {
                       "InputWorkspace", "", Direction::Input, ws_valid),
                   "An input Matrix Workspace (2DMatrix or Event workspace) ");
 
-  std::vector<std::string> Q_modes =
-      MDTransfFactory::Instance().getKeys();
+  std::vector<std::string> Q_modes = MDTransfFactory::Instance().getKeys();
   // something to do with different moments of time when algorithm or test loads
   // library. To avoid empty factory always do this.
   if (Q_modes.empty())

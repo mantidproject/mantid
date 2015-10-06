@@ -707,8 +707,8 @@ void LeBailFit::storeBackgroundParameters(vector<double> &bkgdparamvec) {
   * @param bkgdparamvec :: vector holding the background parameters whose order
  * is same in background function
   */
-void
-LeBailFit::recoverBackgroundParameters(const vector<double> &bkgdparamvec) {
+void LeBailFit::recoverBackgroundParameters(
+    const vector<double> &bkgdparamvec) {
   for (size_t i = 0; i < m_numberBkgdParameters; ++i) {
     m_backgroundFunction->setParameter(i, bkgdparamvec[i]);
   }

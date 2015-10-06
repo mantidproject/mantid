@@ -40,8 +40,8 @@ void MDResolutionConvolution::setFittingFunction(
  * @param fgModelName :: The name of an existing model. Throws if the model is
  * not known
  */
-void
-MDResolutionConvolution::setForegroundModel(const std::string &fgModelName) {
+void MDResolutionConvolution::setForegroundModel(
+    const std::string &fgModelName) {
   if (m_foreground)
     return; // All ready done
   if (!m_fittingFunction) {
@@ -76,9 +76,8 @@ void MDResolutionConvolution::declareAttributes() {
  * @param name :: The name of the attribute
  * @param value :: The value of the attribute
  */
-void
-MDResolutionConvolution::setAttribute(const std::string &name,
-                                      const API::IFunction::Attribute &value) {
+void MDResolutionConvolution::setAttribute(
+    const std::string &name, const API::IFunction::Attribute &value) {
   if (this->hasAttribute(name)) {
     ParamFunction::setAttribute(name, value);
   } else {

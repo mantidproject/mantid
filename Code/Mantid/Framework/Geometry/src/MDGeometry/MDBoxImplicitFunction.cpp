@@ -103,29 +103,31 @@ double MDBoxImplicitFunction::volume() const { return m_volume; }
  * @param boxExtents to get fraction for
  * @return fraction 0 to 1
  */
-double MDBoxImplicitFunction::fraction(const std::vector<boost::tuple<Mantid::coord_t, Mantid::coord_t> >& boxExtents) const {
+double MDBoxImplicitFunction::fraction(const std::vector<
+    boost::tuple<Mantid::coord_t, Mantid::coord_t>> &boxExtents) const {
 
-    size_t nd = m_min.size();
-    coord_t frac = 1;
+  size_t nd = m_min.size();
+  coord_t frac = 1;
 
-    for (size_t d = 0; d < nd; ++d) {
+  for (size_t d = 0; d < nd; ++d) {
 
-      const coord_t min = boxExtents[d].get<0>();
-      const coord_t max = boxExtents[d].get<1>();
+    const coord_t min = boxExtents[d].get<0>();
+    const coord_t max = boxExtents[d].get<1>();
 
-      // Check that there is overlap at all. There must be overlap in ALL dimensions for the fraction to be > 0, so abort early if not.
-      if( max < m_min[d] || min > m_max[d]) {
-          frac = 0;
-          break;
-      }
-
-      const coord_t dBoxRange = (max - min); // max-min
-      const coord_t dInnerMin = std::max(m_min[d], min);
-      const coord_t dInnerMax = std::min(m_max[d], max);
-      const coord_t dOverlap = dInnerMax - dInnerMin;
-
-      frac *= dOverlap / dBoxRange;
+    // Check that there is overlap at all. There must be overlap in ALL
+    // dimensions for the fraction to be > 0, so abort early if not.
+    if (max < m_min[d] || min > m_max[d]) {
+      frac = 0;
+      break;
     }
+
+    const coord_t dBoxRange = (max - min); // max-min
+    const coord_t dInnerMin = std::max(m_min[d], min);
+    const coord_t dInnerMax = std::min(m_max[d], max);
+    const coord_t dOverlap = dInnerMax - dInnerMin;
+
+    frac *= dOverlap / dBoxRange;
+  }
 
   return frac;
 }

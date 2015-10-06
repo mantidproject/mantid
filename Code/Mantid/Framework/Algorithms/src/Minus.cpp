@@ -133,9 +133,9 @@ void Minus::checkRequirements() {
  *  @param rhs :: second workspace to check for compatibility
  *  @return workspace unit compatibility flag
  */
-bool
-Minus::checkUnitCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                              const API::MatrixWorkspace_const_sptr rhs) const {
+bool Minus::checkUnitCompatibility(
+    const API::MatrixWorkspace_const_sptr lhs,
+    const API::MatrixWorkspace_const_sptr rhs) const {
   if (lhs->size() > 1 && rhs->size() > 1) {
     if (lhs->YUnit() != rhs->YUnit()) {
       g_log.error("The two workspaces are not compatible because they have "
@@ -159,9 +159,9 @@ Minus::checkUnitCompatibility(const API::MatrixWorkspace_const_sptr lhs,
  *  @param rhs :: second workspace to check for compatibility
  *  @return workspace compatibility flag
  */
-bool
-Minus::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                          const API::MatrixWorkspace_const_sptr rhs) const {
+bool Minus::checkCompatibility(
+    const API::MatrixWorkspace_const_sptr lhs,
+    const API::MatrixWorkspace_const_sptr rhs) const {
   // Are we allowing the subtraction of different # of spectra, using detector
   // IDs to match up?
   if (m_AllowDifferentNumberSpectra) {

@@ -462,11 +462,10 @@ std::string BinaryOperation::checkSizeCompatibility(
  * @returns True if further processing is not required on the spectra, false if
  * the binary operation should be performed.
  */
-bool
-BinaryOperation::propagateSpectraMask(const API::MatrixWorkspace_const_sptr lhs,
-                                      const API::MatrixWorkspace_const_sptr rhs,
-                                      const int64_t index,
-                                      API::MatrixWorkspace_sptr out) {
+bool BinaryOperation::propagateSpectraMask(
+    const API::MatrixWorkspace_const_sptr lhs,
+    const API::MatrixWorkspace_const_sptr rhs, const int64_t index,
+    API::MatrixWorkspace_sptr out) {
   bool continueOp(true);
   IDetector_const_sptr det_lhs, det_rhs;
   try {
@@ -820,9 +819,8 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
  *  @param rhs :: The workspace which is the right hand operand
  *  @param out :: The result workspace
  */
-void
-BinaryOperation::propagateBinMasks(const API::MatrixWorkspace_const_sptr rhs,
-                                   API::MatrixWorkspace_sptr out) {
+void BinaryOperation::propagateBinMasks(
+    const API::MatrixWorkspace_const_sptr rhs, API::MatrixWorkspace_sptr out) {
   const int64_t outHists = out->getNumberHistograms();
   const int64_t rhsHists = rhs->getNumberHistograms();
   for (int64_t i = 0; i < outHists; ++i) {
