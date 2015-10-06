@@ -106,16 +106,9 @@ class SourceLinkDirective(AlgorithmBaseDirective):
             if len(path_list) == 1:
                 return path_list[0]
             else:
-                suggested_path = "os_agnostic_path_to_file_from_Code/Mantid"
+                suggested_path = "os_agnostic_path_to_file_from_source_root"
                 if len(path_list) > 1:
-                    suggested_path = path_list[0]
-                    #harmonize slashes
-                    suggested_path = suggested_path.replace("\\","/")
-                    #remove everything before and including the Mantid directory
-                    strip_off_token = "Code/Mantid/"
-                    index = suggested_path.find(strip_off_token)
-                    if index != -1:
-                        suggested_path = suggested_path[index+len(strip_off_token):]
+                    suggested_path = path_list[0].replace(self.get_mantid_directory(), "")
                 raise SourceLinkError("Found multiple possibilities for " + file_name + "." + extension + "\n" +
                 "Possible matches" +  str(path_list) + "\n" +
                 "Specify one using the " + extension + " option\n" +
