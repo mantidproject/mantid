@@ -159,9 +159,10 @@ public:
    * @param i :: The index to an element.
    */
   virtual double toDouble(size_t i) const {
-    typedef typename boost::mpl::if_c<
-        boost::is_convertible<double, Type>::value, Type,
-        InconvertibleToDoubleType>::type DoubleType;
+    typedef
+        typename boost::mpl::if_c<boost::is_convertible<double, Type>::value,
+                                  Type, InconvertibleToDoubleType>::type
+            DoubleType;
     return boost::numeric_cast<double, DoubleType>(m_data[i]);
   }
 
@@ -175,9 +176,10 @@ public:
    * @param value: cast this value
    */
   virtual void fromDouble(size_t i, double value) {
-    typedef typename boost::mpl::if_c<
-        boost::is_convertible<double, Type>::value, Type,
-        InconvertibleToDoubleType>::type DoubleType;
+    typedef
+        typename boost::mpl::if_c<boost::is_convertible<double, Type>::value,
+                                  Type, InconvertibleToDoubleType>::type
+            DoubleType;
     m_data[i] =
         static_cast<Type>(boost::numeric_cast<DoubleType, double>(value));
   }

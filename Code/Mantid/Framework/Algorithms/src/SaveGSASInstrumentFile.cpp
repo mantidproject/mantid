@@ -1117,8 +1117,8 @@ double SaveGSASInstrumentFile::calDspRange(double dtt1, double zero,
   * - set output table workspace to m_inpWS
   * @param irffilename
   */
-void
-SaveGSASInstrumentFile::loadFullprofResolutionFile(std::string irffilename) {
+void SaveGSASInstrumentFile::loadFullprofResolutionFile(
+    std::string irffilename) {
   IAlgorithm_sptr loadfpirf;
   try {
     loadfpirf = createChildAlgorithm("LoadFullprofResolution");

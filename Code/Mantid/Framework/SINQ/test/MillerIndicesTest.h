@@ -9,121 +9,110 @@
 using namespace Mantid::Poldi;
 using namespace Mantid::Kernel;
 
-class MillerIndicesTest : public CxxTest::TestSuite
-{
+class MillerIndicesTest : public CxxTest::TestSuite {
 public:
-    // This pair of boilerplate methods prevent the suite being created statically
-    // This means the constructor isn't called when running other tests
-    static MillerIndicesTest *createSuite() { return new MillerIndicesTest(); }
-    static void destroySuite( MillerIndicesTest *suite ) { delete suite; }
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MillerIndicesTest *createSuite() { return new MillerIndicesTest(); }
+  static void destroySuite(MillerIndicesTest *suite) { delete suite; }
 
-    void testdefaultConstructor()
-    {
-        MillerIndices hkl;
+  void testdefaultConstructor() {
+    MillerIndices hkl;
 
-        TS_ASSERT_EQUALS(hkl.h(), 0);
-        TS_ASSERT_EQUALS(hkl.k(), 0);
-        TS_ASSERT_EQUALS(hkl.l(), 0);
-    }
+    TS_ASSERT_EQUALS(hkl.h(), 0);
+    TS_ASSERT_EQUALS(hkl.k(), 0);
+    TS_ASSERT_EQUALS(hkl.l(), 0);
+  }
 
-    void testvectorConstructor()
-    {
-        std::vector<int> hkl;
-        hkl.push_back(2);
-        hkl.push_back(5);
-        hkl.push_back(4);
+  void testvectorConstructor() {
+    std::vector<int> hkl;
+    hkl.push_back(2);
+    hkl.push_back(5);
+    hkl.push_back(4);
 
-        MillerIndices hklMI(hkl);
-        TS_ASSERT_EQUALS(hklMI.h(), 2);
-        TS_ASSERT_EQUALS(hklMI.k(), 5);
-        TS_ASSERT_EQUALS(hklMI.l(), 4);
+    MillerIndices hklMI(hkl);
+    TS_ASSERT_EQUALS(hklMI.h(), 2);
+    TS_ASSERT_EQUALS(hklMI.k(), 5);
+    TS_ASSERT_EQUALS(hklMI.l(), 4);
 
-        hkl.push_back(3);
+    hkl.push_back(3);
 
-        TS_ASSERT_THROWS(MillerIndices fails(hkl), std::runtime_error);
-    }
+    TS_ASSERT_THROWS(MillerIndices fails(hkl), std::runtime_error);
+  }
 
-    void testdirectAccess()
-    {
-        MillerIndices hkl(1, 1, 0);
+  void testdirectAccess() {
+    MillerIndices hkl(1, 1, 0);
 
-        TS_ASSERT_EQUALS(hkl.h(), 1);
-        TS_ASSERT_EQUALS(hkl.k(), 1);
-        TS_ASSERT_EQUALS(hkl.l(), 0);
-    }
+    TS_ASSERT_EQUALS(hkl.h(), 1);
+    TS_ASSERT_EQUALS(hkl.k(), 1);
+    TS_ASSERT_EQUALS(hkl.l(), 0);
+  }
 
-    void testoperatorAccess()
-    {
-        MillerIndices hkl(1, 1, 0);
+  void testoperatorAccess() {
+    MillerIndices hkl(1, 1, 0);
 
-        TS_ASSERT_EQUALS(hkl[0], 1);
-        TS_ASSERT_EQUALS(hkl[1], 1);
-        TS_ASSERT_EQUALS(hkl[2], 0);
+    TS_ASSERT_EQUALS(hkl[0], 1);
+    TS_ASSERT_EQUALS(hkl[1], 1);
+    TS_ASSERT_EQUALS(hkl[2], 0);
 
-        TS_ASSERT_THROWS(hkl[-2], std::range_error);
-        TS_ASSERT_THROWS(hkl[3], std::range_error);
-    }
+    TS_ASSERT_THROWS(hkl[-2], std::range_error);
+    TS_ASSERT_THROWS(hkl[3], std::range_error);
+  }
 
-    void testvectorAccess()
-    {
-        MillerIndices hkl(1, 1, 0);
+  void testvectorAccess() {
+    MillerIndices hkl(1, 1, 0);
 
-        std::vector<int> hklVector = hkl.asVector();
+    std::vector<int> hklVector = hkl.asVector();
 
-        TS_ASSERT_EQUALS(hklVector.size(), 3);
-        TS_ASSERT_EQUALS(hklVector[0], 1);
-        TS_ASSERT_EQUALS(hklVector[1], 1);
-        TS_ASSERT_EQUALS(hklVector[2], 0);
-    }
+    TS_ASSERT_EQUALS(hklVector.size(), 3);
+    TS_ASSERT_EQUALS(hklVector[0], 1);
+    TS_ASSERT_EQUALS(hklVector[1], 1);
+    TS_ASSERT_EQUALS(hklVector[2], 0);
+  }
 
-    void testcopy()
-    {
-        MillerIndices hkl(1, 1, 0);
-        MillerIndices copy = hkl;
+  void testcopy() {
+    MillerIndices hkl(1, 1, 0);
+    MillerIndices copy = hkl;
 
-        std::vector<int> copyVector = copy.asVector();
+    std::vector<int> copyVector = copy.asVector();
 
-        TS_ASSERT_EQUALS(copyVector.size(), 3);
-        TS_ASSERT_EQUALS(copyVector[0], hkl[0]);
-    }
+    TS_ASSERT_EQUALS(copyVector.size(), 3);
+    TS_ASSERT_EQUALS(copyVector[0], hkl[0]);
+  }
 
-    void testAsV3D()
-    {
-        MillerIndices hkl(1, 1, 0);
-        V3D v3d = hkl.asV3D();
+  void testAsV3D() {
+    MillerIndices hkl(1, 1, 0);
+    V3D v3d = hkl.asV3D();
 
-        TS_ASSERT_EQUALS(v3d, V3D(1, 1, 0));
-    }
+    TS_ASSERT_EQUALS(v3d, V3D(1, 1, 0));
+  }
 
-    void testV3DConstructor()
-    {
-        MillerIndices hkl(V3D(1.0, 2.0, 3.0));
+  void testV3DConstructor() {
+    MillerIndices hkl(V3D(1.0, 2.0, 3.0));
 
-        TS_ASSERT_EQUALS(hkl.h(), 1);
-        TS_ASSERT_EQUALS(hkl.k(), 2);
-        TS_ASSERT_EQUALS(hkl.l(), 3);
-    }
+    TS_ASSERT_EQUALS(hkl.h(), 1);
+    TS_ASSERT_EQUALS(hkl.k(), 2);
+    TS_ASSERT_EQUALS(hkl.l(), 3);
+  }
 
-    void testComparison()
-    {
-        MillerIndices one(1, 1, 0);
-        MillerIndices equal(1, 1, 0);
-        MillerIndices unequal(1, 2, 3);
+  void testComparison() {
+    MillerIndices one(1, 1, 0);
+    MillerIndices equal(1, 1, 0);
+    MillerIndices unequal(1, 2, 3);
 
-        TS_ASSERT(one == equal);
-        TS_ASSERT(one != unequal);
-        TS_ASSERT(equal != unequal);
-    }
+    TS_ASSERT(one == equal);
+    TS_ASSERT(one != unequal);
+    TS_ASSERT(equal != unequal);
+  }
 
-    void testEquality()
-    {
-        MillerIndices hklOne(1, 1, 0);
-        MillerIndices hklTwo(1, 1, 0);
-        MillerIndices hklThree(1, 2, 0);
+  void testEquality() {
+    MillerIndices hklOne(1, 1, 0);
+    MillerIndices hklTwo(1, 1, 0);
+    MillerIndices hklThree(1, 2, 0);
 
-        TS_ASSERT_EQUALS(hklOne, hklTwo);
-        TS_ASSERT_DIFFERS(hklOne, hklThree);
-    }
+    TS_ASSERT_EQUALS(hklOne, hklTwo);
+    TS_ASSERT_DIFFERS(hklOne, hklThree);
+  }
 };
 
 #endif // MANTID_SINQ_MILLERINDICESTEST_H

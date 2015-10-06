@@ -205,14 +205,14 @@ Patch plots can also be produced using the other Transformations :math:`K_i, K_f
 **Patch plot for KiKf Transformation:**
 
 
-.. figure:: /images/ConvertToReflectometryQ_PatchPlotK.png
+.. figure:: /images/ConvertToReflectometryQ_PatchPlotK.PNG
    :alt: patch plot of dumped vertexes using K transformation 
 
 
 **Patch plot for P Transformation:**
 
 
-.. figure:: /images/ConvertToReflectometryQ_PatchPlotP.png
+.. figure:: /images/ConvertToReflectometryQ_PatchPlotP.PNG
    :alt: patch plot of dumped vertexes using P transformation
 
 .. categories::

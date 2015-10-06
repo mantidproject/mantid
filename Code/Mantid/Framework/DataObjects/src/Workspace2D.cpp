@@ -17,7 +17,7 @@ using std::size_t;
 DECLARE_WORKSPACE(Workspace2D)
 
 /// Constructor
-Workspace2D::Workspace2D(): m_noVectors(0) {}
+Workspace2D::Workspace2D() : m_noVectors(0) {}
 
 Workspace2D::Workspace2D(const Workspace2D &other)
     : MatrixWorkspace(other), m_noVectors(other.m_noVectors),
@@ -34,7 +34,7 @@ Workspace2D::Workspace2D(const Workspace2D &other)
 
 /// Destructor
 Workspace2D::~Workspace2D() {
-// Clear out the memory
+  // Clear out the memory
   for (size_t i = 0; i < m_noVectors; i++) {
     delete data[i];
   }
@@ -298,7 +298,7 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
     histX.resize(currentX.size() + 1);
     Mantid::Kernel::VectorHelper::convertToBinBoundary(currentX, histX);
     Mantid::Kernel::VectorHelper::rebin(histX, currentY, currentE, X, Y, E,
-                                        this->isDistribution());
+                                        true);
   } else // assume x_size = y_size + 1
   {
     Mantid::Kernel::VectorHelper::rebin(currentX, currentY, currentE, X, Y, E,

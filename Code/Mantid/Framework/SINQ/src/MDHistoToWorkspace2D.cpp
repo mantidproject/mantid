@@ -108,8 +108,8 @@ void MDHistoToWorkspace2D::recurseData(IMDHistoWorkspace_sptr inWS,
   }
 }
 
-void
-MDHistoToWorkspace2D::checkW2D(Mantid::DataObjects::Workspace2D_sptr outWS) {
+void MDHistoToWorkspace2D::checkW2D(
+    Mantid::DataObjects::Workspace2D_sptr outWS) {
   size_t nSpectra = outWS->getNumberHistograms();
   size_t length = outWS->blocksize();
   MantidVec x, y, e;

@@ -13,26 +13,22 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 
-class ExtractFFTSpectrumTest : public CxxTest::TestSuite
-{
+class ExtractFFTSpectrumTest : public CxxTest::TestSuite {
 
 public:
-  void testMetaInfo()
-  {
+  void testMetaInfo() {
     ExtractFFTSpectrum alg;
     TS_ASSERT_EQUALS(alg.name(), "ExtractFFTSpectrum");
     TS_ASSERT_EQUALS(alg.version(), 1);
   }
 
-  void testInit()
-  {
+  void testInit() {
     ExtractFFTSpectrum alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
   }
 
-  void testExec()
-  {
+  void testExec() {
     Mantid::DataHandling::LoadNexus loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "IRS26176_ipg.nxs");
@@ -41,7 +37,7 @@ public:
     loader.setPropertyValue("SpectrumMax", "3");
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT(loader.isExecuted());
-    
+
     Rebin rebin;
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace", "alg_irs_r");
@@ -50,33 +46,42 @@ public:
     TS_ASSERT_THROWS_NOTHING(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
 
-    MatrixWorkspace_sptr inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("alg_irs_r");
+    MatrixWorkspace_sptr inputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "alg_irs_r");
 
     ExtractFFTSpectrum alg;
     alg.initialize();
 
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error); // check it does output error
+    TS_ASSERT_THROWS(alg.execute(),
+                     std::runtime_error); // check it does output error
     TS_ASSERT(!alg.isExecuted());
 
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "alg_irs_r"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputImagWorkspace", "alg_irs_r")); // use same spectra for the imaginary part (Re==Im)
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "alg_irs_t"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", "alg_irs_r"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
+        "InputImagWorkspace",
+        "alg_irs_r")); // use same spectra for the imaginary part (Re==Im)
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "alg_irs_t"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
     // Get output workspace
     MatrixWorkspace_const_sptr outputWS;
-    TS_ASSERT_THROWS_NOTHING(outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("alg_irs_t"));
+    TS_ASSERT_THROWS_NOTHING(
+        outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "alg_irs_t"));
 
     // Dimensions
-    TS_ASSERT_EQUALS(inputWS->getNumberHistograms(), outputWS->getNumberHistograms());
+    TS_ASSERT_EQUALS(inputWS->getNumberHistograms(),
+                     outputWS->getNumberHistograms());
     TS_ASSERT_EQUALS(inputWS->blocksize(), outputWS->blocksize());
 
     // Units ( Axis 1 should be the same, Axis 0 should be "Time/ns"
-    TS_ASSERT_EQUALS(inputWS->getAxis(1)->unit(),outputWS->getAxis(1)->unit());
+    TS_ASSERT_EQUALS(inputWS->getAxis(1)->unit(), outputWS->getAxis(1)->unit());
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->caption(), "Time");
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->label(), "ns");
   }
-
 };
 #endif // EXTRACTFFTSPECTRUM_H

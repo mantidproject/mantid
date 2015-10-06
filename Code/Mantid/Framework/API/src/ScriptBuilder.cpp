@@ -86,10 +86,9 @@ void ScriptBuilder::writeHistoryToStream(
  *items
  * @param depth :: count of how far we've recursed into the history
  */
-void
-ScriptBuilder::buildChildren(std::ostringstream &os,
-                             std::vector<HistoryItem>::const_iterator &iter,
-                             int depth) {
+void ScriptBuilder::buildChildren(
+    std::ostringstream &os, std::vector<HistoryItem>::const_iterator &iter,
+    int depth) {
   size_t numChildren = iter->numberOfChildren();
   ++iter; // move to first child
   for (size_t i = 0; i < numChildren && iter != m_historyItems.end();

@@ -92,7 +92,7 @@ public:
               CostFunctionTable->Double(0, 1));
     TS_ASSERT(CostFunctionTable->Double(0, 2) <=
               CostFunctionTable->Double(0, 3));
-    //TS_ASSERT_DELTA(CostFunctionTable->Double(0, 0),
+    // TS_ASSERT_DELTA(CostFunctionTable->Double(0, 0),
     //                CostFunctionTable->Double(0, 1), 1.5);
     TS_ASSERT_DELTA(CostFunctionTable->Double(0, 0), 0.0, 1.0);
 

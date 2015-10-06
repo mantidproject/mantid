@@ -14,9 +14,7 @@ Logger g_log("Interpolation");
    the original behavior.
 */
 struct LessOrEqualFunctor {
-    bool operator()(const double &lhs, const double &rhs) {
-        return lhs <= rhs;
-    }
+  bool operator()(const double &lhs, const double &rhs) { return lhs <= rhs; }
 };
 
 /** Constructor default to linear interpolation and x-unit set to TOF
@@ -33,8 +31,8 @@ Interpolation::findIndexOfNextLargerValue(const std::vector<double> &data,
   auto end = data.end();
   auto pos = std::lower_bound(begin, end, key, LessOrEqualFunctor());
 
-  if(pos == end || pos == begin) {
-      throw std::range_error("Value is not in the interpolation range.");
+  if (pos == end || pos == begin) {
+    throw std::range_error("Value is not in the interpolation range.");
   }
 
   return std::distance(begin, pos);

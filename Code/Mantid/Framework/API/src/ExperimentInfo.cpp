@@ -1016,10 +1016,9 @@ void ExperimentInfo::loadInstrumentInfoNexus(const std::string &nxFilename,
  * @param[out] instrumentXml  :: XML string of embedded instrument definition or
  * empty if not found
  */
-void
-ExperimentInfo::loadEmbeddedInstrumentInfoNexus(::NeXus::File *file,
-                                                std::string &instrumentName,
-                                                std::string &instrumentXml) {
+void ExperimentInfo::loadEmbeddedInstrumentInfoNexus(
+    ::NeXus::File *file, std::string &instrumentName,
+    std::string &instrumentXml) {
 
   file->readData("name", instrumentName);
 

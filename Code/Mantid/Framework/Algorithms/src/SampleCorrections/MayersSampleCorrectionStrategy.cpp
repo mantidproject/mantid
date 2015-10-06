@@ -116,11 +116,11 @@ void MayersSampleCorrectionStrategy::apply(std::vector<double> &sigOut,
 
   // Temporary storage
   std::vector<double> xmur(N_MUR_PTS + 1, 0.0),
-      yabs(N_MUR_PTS + 1, 1.0),  // absorption signals
-      wabs(N_MUR_PTS + 1, 1.0),  // absorption weights
-      yms(0),   // multiple scattering signals
-      wms(0); // multiple scattering weights
-  if(m_pars.mscat) {
+      yabs(N_MUR_PTS + 1, 1.0), // absorption signals
+      wabs(N_MUR_PTS + 1, 1.0), // absorption weights
+      yms(0),                   // multiple scattering signals
+      wms(0);                   // multiple scattering weights
+  if (m_pars.mscat) {
     yms.resize(N_MUR_PTS + 1, 0.0);
     wms.resize(N_MUR_PTS + 1, 100.0);
   }
@@ -149,7 +149,8 @@ void MayersSampleCorrectionStrategy::apply(std::vector<double> &sigOut,
   ChebyshevPolyFit polyfit(N_POLY_ORDER);
   auto absCoeffs = polyfit(xmur, yabs, wabs);
   decltype(absCoeffs) msCoeffs(0);
-  if(m_pars.mscat) msCoeffs = polyfit(xmur, yms, wms);
+  if (m_pars.mscat)
+    msCoeffs = polyfit(xmur, yms, wms);
 
   // corrections to input
   const double muMin(xmur.front()), muMax(xmur.back()),
@@ -167,7 +168,7 @@ void MayersSampleCorrectionStrategy::apply(std::vector<double> &sigOut,
     // Varies between [-1,+1]
     const double xcap = ((rmu - muMin) - (muMax - rmu)) / (muMax - muMin);
     double corrfact = chebyPoly(absCoeffs, xcap);
-    if(m_pars.mscat) {
+    if (m_pars.mscat) {
       const double msVal = chebyPoly(msCoeffs, xcap);
       const double beta = m_pars.sigmaSc * msVal / sigt;
       corrfact *= (1.0 - beta) / rns;

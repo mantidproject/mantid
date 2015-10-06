@@ -23,11 +23,11 @@ ExtractWorkspace::ExtractWorkspace(const boost::python::api::object &pyvalue)
     : m_value() {
   // Test for a weak pointer first
   typedef boost::weak_ptr<Workspace> Workspace_wptr;
-  extract<Workspace_wptr&> extractWeak(pyvalue);
+  extract<Workspace_wptr &> extractWeak(pyvalue);
   if (extractWeak.check()) {
     m_value = extractWeak().lock();
   }
-  extract<Workspace_sptr&> extractShared(pyvalue);
+  extract<Workspace_sptr &> extractShared(pyvalue);
   if (extractShared.check()) {
     m_value = extractShared();
   }

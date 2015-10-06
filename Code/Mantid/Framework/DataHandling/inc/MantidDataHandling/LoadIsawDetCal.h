@@ -64,14 +64,12 @@ public:
   }
   /// Function to optimize
   void center(double x, double y, double z, std::string detname,
-              std::string inname);
+              API::Workspace_sptr ws);
 
 private:
   // Overridden Algorithm methods
   void init();
   void exec();
-  // Matrix workspace pointer
-  // API::MatrixWorkspace_sptr inputW;
 };
 
 } // namespace DataHandling

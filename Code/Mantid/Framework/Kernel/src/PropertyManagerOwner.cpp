@@ -166,7 +166,6 @@ bool PropertyManagerOwner::isDefault(const std::string &name) const {
   return m_properties->getPointerToProperty(name)->isDefault();
 }
 
-
 /**
 * Return the property manager serialized as a string.
 * The format is propName=value,propName=value,propName=value

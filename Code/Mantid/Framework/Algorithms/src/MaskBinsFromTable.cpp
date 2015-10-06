@@ -139,9 +139,8 @@ void MaskBinsFromTable::maskBins(API::MatrixWorkspace_sptr dataws) {
   * @param masktblws :: TableWorkspace for mask bins
   * @param dataws :: MatrixWorkspace to mask
   */
-void
-MaskBinsFromTable::processMaskBinWorkspace(TableWorkspace_sptr masktblws,
-                                           API::MatrixWorkspace_sptr dataws) {
+void MaskBinsFromTable::processMaskBinWorkspace(
+    TableWorkspace_sptr masktblws, API::MatrixWorkspace_sptr dataws) {
   // Check input
   if (!masktblws)
     throw std::invalid_argument("Input workspace is not a table workspace.");

@@ -40,11 +40,11 @@ namespace Algorithms {
 FitOneSinglePeak::FitOneSinglePeak()
     : API::Algorithm(), m_fitMethodSet(false), m_peakRangeSet(false),
       m_peakWidthSet(false), m_peakWindowSet(false),
-      m_usePeakPositionTolerance(false), m_peakFunc(), m_bkgdFunc(),
-      m_dataWS(), m_wsIndex(0), m_minFitX(0.), m_maxFitX(0.), i_minFitX(0),
-      i_maxFitX(0), m_minPeakX(0.), m_maxPeakX(0.), i_minPeakX(0),
-      i_maxPeakX(0), m_bestPeakFunc(), m_bestBkgdFunc(), m_bkupPeakFunc(),
-      m_bkupBkgdFunc(), m_fitErrorPeakFunc(), m_fitErrorBkgdFunc(),
+      m_usePeakPositionTolerance(false), m_peakFunc(), m_bkgdFunc(), m_dataWS(),
+      m_wsIndex(0), m_minFitX(0.), m_maxFitX(0.), i_minFitX(0), i_maxFitX(0),
+      m_minPeakX(0.), m_maxPeakX(0.), i_minPeakX(0), i_maxPeakX(0),
+      m_bestPeakFunc(), m_bestBkgdFunc(), m_bkupPeakFunc(), m_bkupBkgdFunc(),
+      m_fitErrorPeakFunc(), m_fitErrorBkgdFunc(),
       m_minimizer("Levenberg-MarquardtMD"), m_costFunction(), m_vecFWHM(),
       m_peakPositionTolerance(0.), m_userPeakCentre(0.), m_bestRwp(0.),
       m_finalGoodnessValue(0.), m_numFitCalls(0), m_sstream("") {}
@@ -996,9 +996,9 @@ double FitOneSinglePeak::getFitCostFunctionValue() { return m_bestRwp; }
 //----------------------------------------------------------------------------------------------
 /** Get the fitting error of both peak function and background function
   */
-void
-FitOneSinglePeak::getFitError(std::map<std::string, double> &peakerrormap,
-                              std::map<std::string, double> &bkgderrormap) {
+void FitOneSinglePeak::getFitError(
+    std::map<std::string, double> &peakerrormap,
+    std::map<std::string, double> &bkgderrormap) {
   peakerrormap.clear();
   bkgderrormap.clear();
 
@@ -1491,9 +1491,9 @@ void FitPeak::prescreenInputData() {
 /** Set up the output workspaces
   * including (1) data workspace (2) function parameter workspace
   */
-void
-FitPeak::setupOutput(const std::map<std::string, double> &m_fitErrorPeakFunc,
-                     const std::map<std::string, double> &m_fitErrorBkgdFunc) {
+void FitPeak::setupOutput(
+    const std::map<std::string, double> &m_fitErrorPeakFunc,
+    const std::map<std::string, double> &m_fitErrorBkgdFunc) {
   // TODO - Need to retrieve useful information from FitOneSinglePeak object
   // (think of how)
   size_t i_minFitX = getVectorIndex(m_dataWS->readX(m_wsIndex), m_minFitX);

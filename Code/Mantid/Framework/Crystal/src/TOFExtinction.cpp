@@ -24,7 +24,7 @@ namespace Crystal {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-  TOFExtinction::TOFExtinction(): m_smu(0.), m_amu(0.), m_radius(0.) {}
+TOFExtinction::TOFExtinction() : m_smu(0.), m_amu(0.), m_radius(0.) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -84,9 +84,11 @@ void TOFExtinction::exec() {
   if (m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) !=
       0.0) {
     double rho = m_sampleMaterial->numberDensity();
-    m_smu = m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) *
-          rho;
-    m_amu = m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda) * rho;
+    m_smu =
+        m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) *
+        rho;
+    m_amu =
+        m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda) * rho;
   } else {
     throw std::invalid_argument(
         "Could not retrieve LinearScatteringCoef from material");
@@ -248,9 +250,9 @@ double TOFExtinction::getLorentzian(double Xqt, double twoth) {
                           (1 + 0.15 * Xqt -
                            0.2 * std::pow((0.75 - std::cos(twoth)), 2) * Xqt));
   else
-    y_ext = std::sqrt(1 + 2 * Xqt + (0.025 + 0.285 * std::cos(twoth)) *
-                                        std::pow(Xqt, 2) /
-                                        (1 - 0.45 * Xqt * std::cos(twoth)));
+    y_ext = std::sqrt(1 + 2 * Xqt +
+                      (0.025 + 0.285 * std::cos(twoth)) * std::pow(Xqt, 2) /
+                          (1 - 0.45 * Xqt * std::cos(twoth)));
   return y_ext;
 }
 double TOFExtinction::getEsLaue(double r, double twoth, double wl) {
@@ -321,9 +323,10 @@ double TOFExtinction::getTypeIILorentzian(double XqtII, double twoth) {
                       (1 + 0.15 * XqtII -
                        0.2 * std::pow((0.75 - std::cos(twoth)), 2) * XqtII));
   else
-    y_ext_II = std::sqrt(
-        1 + 2 * XqtII + (0.025 + 0.285 * std::cos(twoth)) * std::pow(XqtII, 2) /
-                            (1 - 0.45 * XqtII * std::cos(twoth)));
+    y_ext_II =
+        std::sqrt(1 + 2 * XqtII +
+                  (0.025 + 0.285 * std::cos(twoth)) * std::pow(XqtII, 2) /
+                      (1 - 0.45 * XqtII * std::cos(twoth)));
   return y_ext_II;
 }
 double TOFExtinction::getSigFsqr(double Rg, double cellV, double wl,

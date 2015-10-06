@@ -170,8 +170,8 @@ public:
     reference.push_back(0.746498624291666);
     reference.push_back(0.102391587633906);
 
-    for(size_t i = 0; i < reference.size(); ++i) {
-        TS_ASSERT_DELTA(values[479 + i] / reference[i], 1.0, 1e-12);
+    for (size_t i = 0; i < reference.size(); ++i) {
+      TS_ASSERT_DELTA(values[479 + i] / reference[i], 1.0, 1e-12);
     }
   }
 

@@ -38,10 +38,10 @@ using namespace API;
 /// Constructor
 LoadRawHelper::LoadRawHelper()
     : isisRaw(new ISISRAW2), m_list(false), m_interval(false), m_spec_list(),
-      m_spec_min(0), m_spec_max(EMPTY_INT()), m_numberOfPeriods(0), m_cache_options(),
-      m_specTimeRegimes(), m_prog(0.0), m_numberOfSpectra(0), m_monitordetectorList(),
-      m_bmspeclist(false), m_total_specs(0), m_logCreator() {
-}
+      m_spec_min(0), m_spec_max(EMPTY_INT()), m_numberOfPeriods(0),
+      m_cache_options(), m_specTimeRegimes(), m_prog(0.0), m_numberOfSpectra(0),
+      m_monitordetectorList(), m_bmspeclist(false), m_total_specs(0),
+      m_logCreator() {}
 
 LoadRawHelper::~LoadRawHelper() {}
 
@@ -522,10 +522,9 @@ LoadRawHelper::getTimeChannels(const int64_t &regimes,
 /// @param localWorkspace :: The workspace to load the instrument for
 /// @param progStart :: progress at start
 /// @param progEnd :: progress at end
-void
-LoadRawHelper::runLoadInstrument(const std::string &fileName,
-                                 DataObjects::Workspace2D_sptr localWorkspace,
-                                 double progStart, double progEnd) {
+void LoadRawHelper::runLoadInstrument(
+    const std::string &fileName, DataObjects::Workspace2D_sptr localWorkspace,
+    double progStart, double progEnd) {
   g_log.debug("Loading the instrument definition...");
   m_prog = progStart;
   progress(m_prog, "Loading the instrument geometry...");
@@ -752,9 +751,8 @@ std::string LoadRawHelper::extractLogName(const std::string &path) {
  * @param period :: period number
  * @param local_workspace :: workspace to add period log data to.
  */
-void
-LoadRawHelper::createPeriodLogs(int64_t period,
-                                DataObjects::Workspace2D_sptr local_workspace) {
+void LoadRawHelper::createPeriodLogs(
+    int64_t period, DataObjects::Workspace2D_sptr local_workspace) {
   m_logCreator->addPeriodLogs(static_cast<int>(period),
                               local_workspace->mutableRun());
 }
@@ -1079,8 +1077,8 @@ void LoadRawHelper::loadSpectra(
   int64_t noTimeRegimes = getNumberofTimeRegimes();
   int64_t lengthIn = static_cast<int64_t>(isisRaw->t_ntc1 + 1);
 
-  const int64_t periodTimesNSpectraP1 = period *
-    (static_cast<int64_t>(m_numberOfSpectra) + 1);
+  const int64_t periodTimesNSpectraP1 =
+      period * (static_cast<int64_t>(m_numberOfSpectra) + 1);
   // loop through spectra
   for (specid_t i = 1; i <= m_numberOfSpectra; ++i) {
     int64_t histToRead = i + periodTimesNSpectraP1;
@@ -1202,8 +1200,8 @@ LoadRawHelper::searchForLogFiles(const std::string &pathToRawFile) {
 
     // push potential log files from set to list.
     potentialLogFilesList.insert(potentialLogFilesList.begin(),
-                                  potentialLogFiles.begin(),
-                                  potentialLogFiles.end());
+                                 potentialLogFiles.begin(),
+                                 potentialLogFiles.end());
 
     // Remove extension from path, and append .log to path.
     std::string logName =

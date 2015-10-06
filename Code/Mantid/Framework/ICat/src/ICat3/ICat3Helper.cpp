@@ -254,9 +254,9 @@ void CICatHelper::doDataSetsSearch(long long invstId,
  * @param outputws ::  shred pointer to workspace
  * @returns shared pointer to table workspace which stores the data
  */
-void
-CICatHelper::saveDataSets(const ns1__getInvestigationIncludesResponse &response,
-                          API::ITableWorkspace_sptr &outputws) {
+void CICatHelper::saveDataSets(
+    const ns1__getInvestigationIncludesResponse &response,
+    API::ITableWorkspace_sptr &outputws) {
   // create table workspace
   if (outputws->getColumnNames().empty()) {
     outputws->addColumn("str", "Name"); // File name
@@ -325,8 +325,8 @@ void CICatHelper::listInstruments(std::vector<std::string> &instruments) {
  * Updates the list of investigation types.
  * @param investTypes :: The list of investigation types.
  */
-void
-CICatHelper::listInvestigationTypes(std::vector<std::string> &investTypes) {
+void CICatHelper::listInvestigationTypes(
+    std::vector<std::string> &investTypes) {
   ICATPortBindingProxy icat;
   setICATProxySettings(icat);
 

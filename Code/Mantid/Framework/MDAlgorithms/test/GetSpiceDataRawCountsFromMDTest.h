@@ -16,13 +16,16 @@ using Mantid::MDAlgorithms::ConvertSpiceDataToRealSpace;
 
 using namespace Mantid::API;
 
-class GetSpiceDataRawCountsFromMDTest : public CxxTest::TestSuite
-{
+class GetSpiceDataRawCountsFromMDTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static GetSpiceDataRawCountsFromMDTest *createSuite() { return new GetSpiceDataRawCountsFromMDTest(); }
-  static void destroySuite( GetSpiceDataRawCountsFromMDTest *suite ) { delete suite; }
+  static GetSpiceDataRawCountsFromMDTest *createSuite() {
+    return new GetSpiceDataRawCountsFromMDTest();
+  }
+  static void destroySuite(GetSpiceDataRawCountsFromMDTest *suite) {
+    delete suite;
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Test for initialization

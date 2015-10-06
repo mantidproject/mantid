@@ -12,9 +12,7 @@ DECLARE_ALGORITHM(EvaluateFunction)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string EvaluateFunction::name() const {
-  return "EvaluateFunction";
-}
+const std::string EvaluateFunction::name() const { return "EvaluateFunction"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int EvaluateFunction::version() const { return 1; }
@@ -45,12 +43,13 @@ void EvaluateFunction::execConcrete() {
 
   // Do something with the function which may depend on workspace.
   m_domainCreator->initFunction(m_function);
-  
+
   // Calculate function values.
   m_function->function(*domain, *values);
 
   // Gnegerate the output workspace
-  auto outputWS = m_domainCreator->createOutputWorkspace("", m_function, domain, values, "");
+  auto outputWS = m_domainCreator->createOutputWorkspace("", m_function, domain,
+                                                         values, "");
 
   // Store the result.
   setProperty("OutputWorkspace", outputWS);

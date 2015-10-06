@@ -64,8 +64,7 @@ public:
       const std::vector<std::string> &constraint, std::string &penaltyFactor,
       const std::string &fitFunc, const std::string &extractSingleValueAs,
       const std::string &eq, const Geometry::IComponent *comp,
-      double angleConvertConst,
-      const std::string &description);
+      double angleConvertConst, const std::string &description);
 
   /// Destructor
   ~XMLInstrumentParameter() {}

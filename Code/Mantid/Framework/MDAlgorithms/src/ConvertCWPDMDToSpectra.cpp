@@ -57,7 +57,7 @@ void ConvertCWPDMDToSpectra::init() {
   vecunits.push_back("2theta");
   vecunits.push_back("dSpacing");
   vecunits.push_back("Momentum Transfer (Q)");
-  auto unitval = boost::make_shared<ListValidator<std::string> >(vecunits);
+  auto unitval = boost::make_shared<ListValidator<std::string>>(vecunits);
   declareProperty("UnitOutput", "2theta", unitval,
                   "Unit of the output workspace.");
 
@@ -235,8 +235,8 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
   // Create bins in 2theta (degree)
   size_t sizex, sizey;
   sizex = static_cast<size_t>((upperboundary - lowerboundary) / binsize + 1);
-  if (lowerboundary + static_cast<double>(sizex)*binsize < upperboundary)
-    ++ lowerboundary;
+  if (lowerboundary + static_cast<double>(sizex) * binsize < upperboundary)
+    ++lowerboundary;
 
   sizey = sizex - 1;
   g_log.debug() << "Number of events = " << numevents
@@ -354,7 +354,7 @@ void ConvertCWPDMDToSpectra::findXBoundary(
       g_log.debug() << " wavelength = " << wavelength << "\n";
     } else {
       g_log.debug() << " no matched wavelength."
-                     << "\n";
+                    << "\n";
     }
 
     // Get source and sample position
@@ -419,9 +419,9 @@ void ConvertCWPDMDToSpectra::findXBoundary(
     }
   }
 
-
-  g_log.debug() << "Find boundary for unit " << targetunit << ": [" << xmin << ", " << xmax << "]"
-                 << "\n";
+  g_log.debug() << "Find boundary for unit " << targetunit << ": [" << xmin
+                << ", " << xmax << "]"
+                << "\n";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -524,79 +524,66 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
       // get signal and assign signal to bin
       int xindex;
       const double SMALL = 1.0E-5;
-      if (outx+SMALL < vecx.front())
-      {
+      if (outx + SMALL < vecx.front()) {
         // Significantly out of left boundary
         xindex = -1;
-      }
-      else if (fabs(outx - vecx.front()) < SMALL)
-      {
+      } else if (fabs(outx - vecx.front()) < SMALL) {
         // Almost on the left boundary
         xindex = 0;
-      }
-      else if (outx-SMALL > vecx.back())
-      {
+      } else if (outx - SMALL > vecx.back()) {
         // Significantly out of right boundary
         xindex = static_cast<int>(vecx.size());
-      }
-      else if (fabs(outx-vecx.back()) < SMALL)
-      {
+      } else if (fabs(outx - vecx.back()) < SMALL) {
         // Right on the right boundary
-        xindex = static_cast<int>(vecy.size())-1;
-      }
-      else
-      {
+        xindex = static_cast<int>(vecy.size()) - 1;
+      } else {
         // Other situation
         std::vector<double>::const_iterator vfiter =
             std::lower_bound(vecx.begin(), vecx.end(), outx);
         xindex = static_cast<int>(vfiter - vecx.begin());
-        if ( (xindex < static_cast<int>(vecx.size())) && (outx + 1.0E-5 < vecx[xindex]) )
-        {
-          // assume the bin's boundaries are of [...) and consider numerical error
+        if ((xindex < static_cast<int>(vecx.size())) &&
+            (outx + 1.0E-5 < vecx[xindex])) {
+          // assume the bin's boundaries are of [...) and consider numerical
+          // error
           xindex -= 1;
-        }
-        else
-        {
+        } else {
           g_log.debug() << "Case for almost same.  Event X = " << outx
                         << ", Boundary = " << vecx[xindex] << "\n";
         }
-        if (xindex < 0 || xindex >= static_cast<int>(vecy.size()))
-        {
+        if (xindex < 0 || xindex >= static_cast<int>(vecy.size())) {
           g_log.warning() << "Case unexpected:  Event X = " << outx
                           << ", Boundary = " << vecx[xindex] << "\n";
         }
       }
 
       // add signal
-      if (xindex < 0)
-      {
+      if (xindex < 0) {
         // Out of left boundary
         int32_t detid = mditer->getInnerDetectorID(iev);
         uint16_t runid = mditer->getInnerRunIndex(iev);
-        g_log.debug() << "Event is out of user-specified range by " << (outx-vecx.front())
-                       << ", xindex = " << xindex << ", " << unitbit << " = "
-                       << outx << " out of left boundeary [" << vecx.front() << ", "
-                       << vecx.back() << "]. dep pos = " << detpos.X()
-                       << ", " << detpos.Y() << ", " << detpos.Z()
-                       << ", Run = " << runid << ", DetectorID = " << detid << "\n";
+        g_log.debug() << "Event is out of user-specified range by "
+                      << (outx - vecx.front()) << ", xindex = " << xindex
+                      << ", " << unitbit << " = " << outx
+                      << " out of left boundeary [" << vecx.front() << ", "
+                      << vecx.back() << "]. dep pos = " << detpos.X() << ", "
+                      << detpos.Y() << ", " << detpos.Z() << ", Run = " << runid
+                      << ", DetectorID = " << detid << "\n";
         continue;
-      }
-      else if (xindex >= static_cast<int>(vecy.size())) {
+      } else if (xindex >= static_cast<int>(vecy.size())) {
         // Out of right boundary
         int32_t detid = mditer->getInnerDetectorID(iev);
         uint16_t runid = mditer->getInnerRunIndex(iev);
         g_log.debug() << "Event is out of user-specified range "
                       << "xindex = " << xindex << ", " << unitbit << " = "
                       << outx << " out of [" << vecx.front() << ", "
-                      << vecx.back() << "]. dep pos = " << detpos.X()
-                      << ", " << detpos.Y() << ", " << detpos.Z()
+                      << vecx.back() << "]. dep pos = " << detpos.X() << ", "
+                      << detpos.Y() << ", " << detpos.Z()
                       << "; sample pos = " << samplepos.X() << ", "
-                       << samplepos.Y() << ", " << samplepos.Z()
-                       << ", Run = " << runid << ", DetectorID = " << detid << "\n";
+                      << samplepos.Y() << ", " << samplepos.Z()
+                      << ", Run = " << runid << ", DetectorID = " << detid
+                      << "\n";
         continue;
-      }
-      else
-      {
+      } else {
         double signal = mditer->getInnerSignal(iev);
         vecy[xindex] += signal;
       }
@@ -624,9 +611,8 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
  * @param matrixws
  * @param infinitesimal
  */
-void
-ConvertCWPDMDToSpectra::linearInterpolation(API::MatrixWorkspace_sptr matrixws,
-                                            const double &infinitesimal) {
+void ConvertCWPDMDToSpectra::linearInterpolation(
+    API::MatrixWorkspace_sptr matrixws, const double &infinitesimal) {
   g_log.debug() << "Number of spectrum = " << matrixws->getNumberHistograms()
                 << " Infinitesimal = " << infinitesimal << "\n";
   size_t numspec = matrixws->getNumberHistograms();
@@ -659,7 +645,6 @@ ConvertCWPDMDToSpectra::linearInterpolation(API::MatrixWorkspace_sptr matrixws,
                   << ", Y size = " << matrixws->readY(i).size() << "\n";
     if (minNonZeroIndex >= maxNonZeroIndex)
       throw std::runtime_error("It is not right!");
-
 
     // Do linear interpolation for zero count values
     for (size_t j = minNonZeroIndex + 1; j < maxNonZeroIndex; ++j) {
@@ -703,7 +688,8 @@ void ConvertCWPDMDToSpectra::setupSampleLogs(
     API::MatrixWorkspace_sptr matrixws,
     API::IMDEventWorkspace_const_sptr inputmdws) {
   // get hold of the last experiment info from md workspace to copy over
-  uint16_t lastindex = static_cast<uint16_t>(inputmdws->getNumExperimentInfo()-1);
+  uint16_t lastindex =
+      static_cast<uint16_t>(inputmdws->getNumExperimentInfo() - 1);
   ExperimentInfo_const_sptr lastexpinfo =
       inputmdws->getExperimentInfo(lastindex);
 
@@ -728,10 +714,9 @@ void ConvertCWPDMDToSpectra::setupSampleLogs(
  * @param scalefactor
  * @param infinitesimal
  */
-void
-ConvertCWPDMDToSpectra::scaleMatrixWorkspace(API::MatrixWorkspace_sptr matrixws,
-                                             const double &scalefactor,
-                                             const double &infinitesimal) {
+void ConvertCWPDMDToSpectra::scaleMatrixWorkspace(
+    API::MatrixWorkspace_sptr matrixws, const double &scalefactor,
+    const double &infinitesimal) {
   size_t numspec = matrixws->getNumberHistograms();
   for (size_t iws = 0; iws < numspec; ++iws) {
     MantidVec &datay = matrixws->dataY(iws);
@@ -756,9 +741,8 @@ ConvertCWPDMDToSpectra::scaleMatrixWorkspace(API::MatrixWorkspace_sptr matrixws,
  * @param detid
  * @return
  */
-bool
-ConvertCWPDMDToSpectra::isExcluded(const std::vector<detid_t> &vec_excludedet,
-                                   const detid_t detid) {
+bool ConvertCWPDMDToSpectra::isExcluded(
+    const std::vector<detid_t> &vec_excludedet, const detid_t detid) {
 
   return std::find(vec_excludedet.begin(), vec_excludedet.end(), detid) !=
          vec_excludedet.end();

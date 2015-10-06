@@ -10,8 +10,8 @@
 namespace Mantid {
 namespace Kernel {
 
-
-/** MDUnitFactory : Abstract type. Factory method with chain of reponsibility succession for creating MDUnits.
+/** MDUnitFactory : Abstract type. Factory method with chain of reponsibility
+  succession for creating MDUnits.
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -34,20 +34,19 @@ namespace Kernel {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_KERNEL_DLL MDUnitFactory : public ChainableFactory<MDUnitFactory, MDUnit, std::string> {
+class MANTID_KERNEL_DLL MDUnitFactory
+    : public ChainableFactory<MDUnitFactory, MDUnit, std::string> {
 
 public:
-
   /// Destructor
-  virtual ~MDUnitFactory(){}
+  virtual ~MDUnitFactory() {}
 
 private:
-
   /// Create the product
-  virtual MDUnit* createRaw(const std::string& unitString) const = 0;
+  virtual MDUnit *createRaw(const std::string &unitString) const = 0;
 
   /// Indicate an ability to intepret the string
-  virtual bool canInterpret(const std::string& unitString) const = 0;
+  virtual bool canInterpret(const std::string &unitString) const = 0;
 };
 
 //-----------------------------------------------------------------------
@@ -55,18 +54,18 @@ private:
 //-----------------------------------------------------------------------
 
 class MANTID_KERNEL_DLL LabelUnitFactory : public MDUnitFactory {
-    LabelUnit *createRaw(const std::string &unitString) const;
-    bool canInterpret(const std::string &unitString) const;
+  LabelUnit *createRaw(const std::string &unitString) const;
+  bool canInterpret(const std::string &unitString) const;
 };
 
 class MANTID_KERNEL_DLL InverseAngstromsUnitFactory : public MDUnitFactory {
-    InverseAngstromsUnit *createRaw(const std::string &unitString) const;
-    bool canInterpret(const std::string &unitString) const;
+  InverseAngstromsUnit *createRaw(const std::string &unitString) const;
+  bool canInterpret(const std::string &unitString) const;
 };
 
 class MANTID_KERNEL_DLL ReciprocalLatticeUnitFactory : public MDUnitFactory {
-    ReciprocalLatticeUnit *createRaw(const std::string &unitString) const;
-    bool canInterpret(const std::string &unitString) const;
+  ReciprocalLatticeUnit *createRaw(const std::string &unitString) const;
+  bool canInterpret(const std::string &unitString) const;
 };
 
 typedef std::unique_ptr<MDUnitFactory> MDUnitFactory_uptr;
@@ -75,7 +74,6 @@ typedef std::unique_ptr<const MDUnitFactory> MDUnitFactory_const_uptr;
 
 /// Convience method. Pre-constructed builder chain.
 MDUnitFactory_uptr MANTID_KERNEL_DLL makeMDUnitFactoryChain();
-
 
 } // namespace Kernel
 } // namespace Mantid

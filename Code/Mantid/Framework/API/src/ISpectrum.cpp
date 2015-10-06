@@ -7,7 +7,8 @@ namespace API {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ISpectrum::ISpectrum() : m_specNo(0), detectorIDs(), refX(), refDx(),m_hasDx(false) {}
+ISpectrum::ISpectrum()
+    : m_specNo(0), detectorIDs(), refX(), refDx(), m_hasDx(false) {}
 
 /** Constructor with spectrum number
  * @param specNo :: spectrum # of the spectrum
@@ -20,7 +21,7 @@ ISpectrum::ISpectrum(const specid_t specNo)
  */
 ISpectrum::ISpectrum(const ISpectrum &other)
     : m_specNo(other.m_specNo), detectorIDs(other.detectorIDs),
-    refX(other.refX), refDx(other.refDx), m_hasDx(other.m_hasDx) {}
+      refX(other.refX), refDx(other.refDx), m_hasDx(other.m_hasDx) {}
 
 //----------------------------------------------------------------------------------------------
 /** Copy spectrum number and detector IDs, but not X vector, from another
@@ -233,16 +234,12 @@ void ISpectrum::unlockData() const {}
  * Gets the value of the use flag.
  * @returns true if DX has been set, else false
  */
-bool ISpectrum::hasDx() const {
-  return m_hasDx;
-}
+bool ISpectrum::hasDx() const { return m_hasDx; }
 
 /**
  * Resets the hasDx flag
  */
-void ISpectrum::resetHasDx() {
-  m_hasDx = false;
-}
+void ISpectrum::resetHasDx() { m_hasDx = false; }
 
 } // namespace Mantid
 } // namespace API

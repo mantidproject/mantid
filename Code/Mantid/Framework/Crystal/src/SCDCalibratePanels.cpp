@@ -1649,13 +1649,12 @@ void SCDCalibratePanels::FixUpBankParameterMap(
 void writeXmlParameter(ofstream &ostream, const string &name,
                        const double value) {
   ostream << "  <parameter name =\"" << name << "\"><value val=\"" << value
-     << "\" /> </parameter>" << endl;
+          << "\" /> </parameter>" << endl;
 }
 
-void
-SCDCalibratePanels::saveXmlFile(string const FileName,
-                                vector<vector<string>> const Groups,
-                                Instrument_const_sptr const instrument) const {
+void SCDCalibratePanels::saveXmlFile(
+    string const FileName, vector<vector<string>> const Groups,
+    Instrument_const_sptr const instrument) const {
   if (FileName.empty())
     return;
 

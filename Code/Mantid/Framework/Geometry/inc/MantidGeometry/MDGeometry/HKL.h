@@ -36,22 +36,21 @@ namespace Geometry {
 */
 class MANTID_GEOMETRY_DLL HKL : public MDFrame {
 public:
-  HKL(const HKL& other);
-  HKL& operator=(const HKL& other);
-  HKL(std::unique_ptr<Kernel::MDUnit>& unit);
-  HKL(Kernel::MDUnit* unit);
+  HKL(const HKL &other);
+  HKL &operator=(const HKL &other);
+  HKL(std::unique_ptr<Kernel::MDUnit> &unit);
+  HKL(Kernel::MDUnit *unit);
   virtual ~HKL();
   static const std::string HKLName;
 
   // MDFrame interface
   Kernel::UnitLabel getUnitLabel() const;
-  const Kernel::MDUnit& getMDUnit() const;
+  const Kernel::MDUnit &getMDUnit() const;
   bool canConvertTo(const Kernel::MDUnit &otherUnit) const;
   std::string name() const;
-  HKL* clone() const;
+  HKL *clone() const;
 
 private:
-
   std::unique_ptr<Kernel::MDUnit> m_unit;
 };
 

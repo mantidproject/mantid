@@ -8,11 +8,10 @@ using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
 
 void export_ISplittersWorkspace() {
-  class_<ISplittersWorkspace, boost::noncopyable>(
-         "ISplittersWorkspace", no_init)
+  class_<ISplittersWorkspace, boost::noncopyable>("ISplittersWorkspace",
+                                                  no_init)
       .def("getNumberSplitters", &ISplittersWorkspace::getNumberSplitters,
-           "Returns the number of splitters within the workspace")
-  ;
+           "Returns the number of splitters within the workspace");
 
   // register pointers
   RegisterWorkspacePtrToPython<ISplittersWorkspace>();

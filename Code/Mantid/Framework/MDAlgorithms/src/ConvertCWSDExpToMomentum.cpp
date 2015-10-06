@@ -24,7 +24,7 @@ DECLARE_ALGORITHM(ConvertCWSDExpToMomentum)
 /** Constructor
  */
 ConvertCWSDExpToMomentum::ConvertCWSDExpToMomentum()
-    : m_iColFilename(2), m_iColStartDetID(3) {}
+    : m_iColFilename(2), m_iColStartDetID(3), m_setQRange(true) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -40,8 +40,12 @@ void ConvertCWSDExpToMomentum::init() {
                                              Direction::Input),
       "Name of table workspace for data file names in the experiment.");
 
+  declareProperty("CreateVirtualInstrument", false,
+                  "Flag to create virtual instrument.");
+
   declareProperty(new WorkspaceProperty<ITableWorkspace>(
-                      "DetectorTableWorkspace", "", Direction::Input),
+                      "DetectorTableWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
                   "Name of table workspace containing all the detectors.");
 
   declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
@@ -74,30 +78,38 @@ void ConvertCWSDExpToMomentum::init() {
 void ConvertCWSDExpToMomentum::exec() {
   // Parse inputs
   std::string errmsg("");
-  bool inputvalid = getInputs(errmsg);
-  if (!inputvalid)
+  bool createvirtual = getProperty("CreateVirtualInstrument");
+  bool inputvalid = getInputs(createvirtual, errmsg);
+  if (!inputvalid) {
+    g_log.error() << "Importing error: " << errmsg << "\n";
     throw std::runtime_error(errmsg);
-
-  g_log.notice("[DB] Inputs are examined.");
+  }
 
   // Create output MDEventWorkspace
   m_outputWS = createExperimentMDWorkspace();
 
+  if (createvirtual)
+    createVirtualInstrument();
+
   // Add MDEventWorkspace
-  addMDEvents();
+  addMDEvents(createvirtual);
 
   setProperty("OutputWorkspace", m_outputWS);
+
+  // Output
+  for (size_t i = 0; i < 3; ++i) {
+    g_log.notice() << "Q-sample at dimension " << i << ": " << m_minQVec[i]
+                   << ", " << m_maxQVec[i] << "\n";
+  }
 
   return;
 }
 
 //----------------------------------------------------------------------------------------------
-/** Create output workspace
- * @brief ConvertCWSDExpToMomentum::createExperimentMDWorkspace
+/** Create virtual instrument
  * @return
  */
-API::IMDEventWorkspace_sptr
-ConvertCWSDExpToMomentum::createExperimentMDWorkspace() {
+void ConvertCWSDExpToMomentum::createVirtualInstrument() {
   // Get detector list from input table workspace
   std::vector<Kernel::V3D> vec_detpos;
   std::vector<detid_t> vec_detid;
@@ -113,6 +125,17 @@ ConvertCWSDExpToMomentum::createExperimentMDWorkspace() {
   g_log.information() << "Virtual Instrument has "
                       << m_virtualInstrument->getDetectorIDs().size()
                       << "Detectors\n";
+
+  return;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Create output workspace
+ * @brief ConvertCWSDExpToMomentum::createExperimentMDWorkspace
+ * @return
+ */
+API::IMDEventWorkspace_sptr
+ConvertCWSDExpToMomentum::createExperimentMDWorkspace() {
 
   // Create workspace in Q_sample with dimenion as 3
   size_t nDimension = 3;
@@ -142,6 +165,10 @@ ConvertCWSDExpToMomentum::createExperimentMDWorkspace() {
     m_extentMaxs.resize(3, 10.0);
     m_numBins.resize(3, 100);
   }
+  // Sample-Q range
+  m_minQVec.resize(3);
+  m_maxQVec.resize(3);
+
   for (size_t d = 0; d < 3; ++d)
     g_log.debug() << "Direction " << d << ", Range = " << m_extentMins[d]
                   << ", " << m_extentMaxs[d] << "\n";
@@ -166,8 +193,9 @@ ConvertCWSDExpToMomentum::createExperimentMDWorkspace() {
 /** Add MDEvents to MDEventWorkspace from data set in the experiment
  *  Run number is determined by the row of the file in the input table workspace
  * @brief ConvertCWSDExpToMomentum::addMDEvents
+ * @param usevirtual :: flag to use virtual instrument
  */
-void ConvertCWSDExpToMomentum::addMDEvents() {
+void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
   MatrixWorkspace_sptr spicews;
 
   // Check whether to add / or \ to m_dataDir
@@ -188,13 +216,19 @@ void ConvertCWSDExpToMomentum::addMDEvents() {
 
   // Init some variables
   size_t numrows = m_expDataTableWS->rowCount();
+  if (numrows > 1 && !usevirtual) {
+    g_log.warning("There are more than 1 experiment to import. "
+                  "Make sure that all of them have the same instrument.");
+  }
   size_t numFileNotLoaded(0);
 
   // Loop through all data files in the experiment
   for (size_t ir = 0; ir < numrows; ++ir) {
     std::string rawfilename =
         m_expDataTableWS->cell<std::string>(ir, m_iColFilename);
-    detid_t start_detid = m_expDataTableWS->cell<detid_t>(ir, m_iColStartDetID);
+    detid_t start_detid = 0;
+    if (usevirtual)
+      start_detid = m_expDataTableWS->cell<detid_t>(ir, m_iColStartDetID);
 
     // Load data
     bool loaded;
@@ -216,7 +250,10 @@ void ConvertCWSDExpToMomentum::addMDEvents() {
 
     // Convert from MatrixWorkspace to MDEvents and add events to
     int runid = static_cast<int>(ir) + 1;
-    convertSpiceMatrixToMomentumMDEvents(spicews, start_detid, runid);
+    if (!usevirtual)
+      start_detid = 0;
+    convertSpiceMatrixToMomentumMDEvents(spicews, usevirtual, start_detid,
+                                         runid);
   }
 
   // Set box extentes
@@ -285,15 +322,17 @@ void ConvertCWSDExpToMomentum::setupTransferMatrix(
 //----------------------------------------------------------------------------------------------
 /** Convert a SPICE 2D Det MatrixWorkspace to MDEvents and append to an
  * MDEventWorkspace
+ * It is optional to use a virtual instrument or copy from input data workspace
  * @brief ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents
  * @param dataws :: data matrix workspace
+ * @param usevirtual :: boolean flag to use virtual instrument
  * @param startdetid :: starting detid for detectors from this workspace mapping
  * to virtual instrument in MDEventWorkspace
  * @param runnumber :: run number for all MDEvents created from this matrix
  * workspace
  */
 void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
-    MatrixWorkspace_sptr dataws, const detid_t &startdetid,
+    MatrixWorkspace_sptr dataws, bool usevirtual, const detid_t &startdetid,
     const int runnumber) {
   // Create transformation matrix from which the transformation is
   Kernel::DblMatrix rotationMatrix;
@@ -304,7 +343,7 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
 
   // Creates a new instance of the MDEventInserte to output workspace
   MDEventWorkspace<MDEvent<3>, 3>::sptr mdws_mdevt_3 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3> >(m_outputWS);
+      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(m_outputWS);
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
   // Calcualte k_i: it is assumed that all k_i are same for one Pt.
@@ -346,6 +385,7 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
     inserter.insertMDEvent(
         static_cast<float>(signal), static_cast<float>(error * error),
         static_cast<uint16_t>(runnumber), detid, q_sample.data());
+    updateQRange(q_sample);
 
     g_log.debug() << "Q-lab = " << qlab.toString() << "\n";
     g_log.debug() << "Insert DetID " << detid << ", signal = " << signal
@@ -358,13 +398,18 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
     ++nummdevents;
   }
 
-  g_log.notice() << "[DB] New Matrixworkspace: Max. Signal = " << maxsignal
-                 << ", Add " << nummdevents << " MDEvents "
-                 << "\n";
+  g_log.information() << "Imported Matrixworkspace: Max. Signal = " << maxsignal
+                      << ", Add " << nummdevents << " MDEvents "
+                      << "\n";
 
   // Add experiment info including instrument, goniometer and run number
   ExperimentInfo_sptr expinfo = boost::make_shared<ExperimentInfo>();
-  expinfo->setInstrument(m_virtualInstrument);
+  if (usevirtual)
+    expinfo->setInstrument(m_virtualInstrument);
+  else {
+    Geometry::Instrument_const_sptr tmp_inst = dataws->getInstrument();
+    expinfo->setInstrument(tmp_inst);
+  }
   expinfo->mutableRun().setGoniometer(dataws->run().getGoniometer(), false);
   expinfo->mutableRun().addProperty("run_number", runnumber);
   m_outputWS->addExperimentInfo(expinfo);
@@ -375,10 +420,12 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
 //----------------------------------------------------------------------------------------------
 /** Examine input
  * @brief ConvertCWSDExpToMomentum::getInputs
+ * @param virtualinstrument :: boolean flag to use virtual instrument
  * @param errmsg
  * @return
  */
-bool ConvertCWSDExpToMomentum::getInputs(std::string &errmsg) {
+bool ConvertCWSDExpToMomentum::getInputs(bool virtualinstrument,
+                                         std::string &errmsg) {
   std::stringstream errss;
 
   // Table workspace for data file names and starting detector IDs (for virtual
@@ -390,44 +437,55 @@ bool ConvertCWSDExpToMomentum::getInputs(std::string &errmsg) {
     errss << "InputWorkspace must have 4 columns.  But now it has "
           << datacolnames.size() << " columns. \n";
   } else {
-    if (datacolnames[m_iColFilename].compare("File Name") != 0)
+    if (datacolnames[m_iColFilename].compare("File Name") != 0 &&
+        datacolnames[m_iColFilename].compare("Filename") != 0)
       errss << "Data file name Table (InputWorkspace)'s Column "
-            << m_iColFilename << " must be 'File Name'"
+            << m_iColFilename << " must be 'File Name' or 'Filename' but not "
+            << datacolnames[m_iColFilename] << ". "
             << "\n";
-    if (datacolnames[m_iColStartDetID].compare("Starting DetID") != 0)
+    if (datacolnames[m_iColStartDetID].compare("Starting DetID") != 0 &&
+        datacolnames[m_iColStartDetID].compare("StartDetID") != 0)
       errss << "Data file name Table (InputWorkspace)'s Column "
-            << m_iColStartDetID << " must be 'Staring DetID'"
+            << m_iColStartDetID
+            << " must be 'Staring DetID' or 'StartDetID' but not "
+            << datacolnames[m_iColStartDetID] << ". "
             << "\n";
   }
+  g_log.warning("Finished parsing Data Table");
 
-  // Table workspace for detector positions
-  m_detectorListTableWS = getProperty("DetectorTableWorkspace");
-  const std::vector<std::string> detcolnames =
-      m_detectorListTableWS->getColumnNames();
-  if (detcolnames.size() != 5) {
-    errss << "Detector table (DetectorTableWorkspace) must have 5 columns"
-          << "\n";
-  }
+  // Set up parameters for creating virtual instrument
+  g_log.warning() << "About to deal with virtual instrument"
+                  << virtualinstrument << "\n";
+  if (virtualinstrument) {
+    // Table workspace for detector positions
+    m_detectorListTableWS = getProperty("DetectorTableWorkspace");
+    const std::vector<std::string> detcolnames =
+        m_detectorListTableWS->getColumnNames();
+    if (detcolnames.size() != 5) {
+      errss << "Detector table (DetectorTableWorkspace) must have 5 columns"
+            << "\n";
+    }
 
-  // Sample and source position
-  std::vector<double> sourcepos = getProperty("SourcePosition");
-  if (sourcepos.size() != 3)
-    errss << "SourcePosition must have 3 items.  Input has " << sourcepos.size()
-          << " instead.\n";
-  else {
-    m_sourcePos.setX(sourcepos[0]);
-    m_sourcePos.setY(sourcepos[1]);
-    m_sourcePos.setZ(sourcepos[2]);
-  }
+    // Sample and source position
+    std::vector<double> sourcepos = getProperty("SourcePosition");
+    if (sourcepos.size() != 3)
+      errss << "SourcePosition must have 3 items.  Input has "
+            << sourcepos.size() << " instead.\n";
+    else {
+      m_sourcePos.setX(sourcepos[0]);
+      m_sourcePos.setY(sourcepos[1]);
+      m_sourcePos.setZ(sourcepos[2]);
+    }
 
-  std::vector<double> samplepos = getProperty("SamplePosition");
-  if (samplepos.size() != 3) {
-    errss << "SamplePosition must have 3 items.  Input has " << samplepos.size()
-          << " instead.\n";
-  } else {
-    m_samplePos.setX(samplepos[0]);
-    m_samplePos.setY(samplepos[1]);
-    m_samplePos.setZ(samplepos[2]);
+    std::vector<double> samplepos = getProperty("SamplePosition");
+    if (samplepos.size() != 3) {
+      errss << "SamplePosition must have 3 items.  Input has "
+            << samplepos.size() << " instead.\n";
+    } else {
+      m_samplePos.setX(samplepos[0]);
+      m_samplePos.setY(samplepos[1]);
+      m_samplePos.setZ(samplepos[2]);
+    }
   }
 
   m_isBaseName = getProperty("IsBaseName");
@@ -435,7 +493,8 @@ bool ConvertCWSDExpToMomentum::getInputs(std::string &errmsg) {
     m_dataDir = getPropertyValue("Directory");
 
   errmsg = errss.str();
-  return (errmsg.size() > 0);
+
+  return (errmsg.size() == 0);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -502,8 +561,7 @@ ConvertCWSDExpToMomentum::loadSpiceData(const std::string &filename,
       loaded = true;
     else
       loaded = false;
-  }
-  catch (std::runtime_error &runerror) {
+  } catch (std::runtime_error &runerror) {
     loaded = false;
     errmsg = runerror.what();
   }
@@ -534,6 +592,27 @@ void ConvertCWSDExpToMomentum::parseDetectorTable(
     double z = m_detectorListTableWS->cell<double>(i, 3);
     Kernel::V3D detpos(x, y, z);
     vec_detpos[i] = detpos;
+  }
+
+  return;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Update (sample) Q range
+ * @brief ConvertCWSDExpToMomentum::updateQRange
+ * @param vec_q
+ */
+void ConvertCWSDExpToMomentum::updateQRange(
+    const std::vector<Mantid::coord_t> &vec_q) {
+  for (size_t i = 0; i < vec_q.size(); ++i) {
+    if (m_setQRange) {
+      m_minQVec[i] = vec_q[i];
+      m_maxQVec[i] = vec_q[i];
+      m_setQRange = false;
+    } else if (vec_q[i] < m_minQVec[i])
+      m_minQVec[i] = vec_q[i];
+    else if (vec_q[i] > m_maxQVec[i])
+      m_maxQVec[i] = vec_q[i];
   }
 
   return;

@@ -11,8 +11,8 @@ namespace API {
 
 typedef Poco::StringTokenizer tokenizer;
 
-const std::string DEFAULT_OPS_STR[] = {
-    ";", ",", "=", "== != > < <= >=", "&& || ^^", "+ -", "* /", "^"};
+const std::string DEFAULT_OPS_STR[] = {";", ",", "=", "== != > < <= >=",
+                                       "&& || ^^", "+ -", "* /", "^"};
 
 Expression::Expression() {
 

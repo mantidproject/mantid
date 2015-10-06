@@ -122,9 +122,9 @@ void PropertyManager::filterByTime(const Kernel::DateAndTime &start,
  * @param splitter :: TimeSplitterType with the intervals and destinations.
  * @param outputs :: Vector of output runs.
  */
-void
-PropertyManager::splitByTime(std::vector<SplittingInterval> &splitter,
-                             std::vector<PropertyManager *> outputs) const {
+void PropertyManager::splitByTime(
+    std::vector<SplittingInterval> &splitter,
+    std::vector<PropertyManager *> outputs) const {
   size_t n = outputs.size();
 
   // Iterate through all properties
@@ -146,7 +146,8 @@ PropertyManager::splitByTime(std::vector<SplittingInterval> &splitter,
     }
 
     // Now the property does the splitting.
-    prop->splitByTime(splitter, output_properties);
+    bool isProtonCharge = prop->name().compare("proton_charge") == 0;
+    prop->splitByTime(splitter, output_properties, isProtonCharge);
 
   } // for each property
 }

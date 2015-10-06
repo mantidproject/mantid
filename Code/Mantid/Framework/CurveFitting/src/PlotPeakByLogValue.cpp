@@ -230,12 +230,11 @@ void PlotPeakByLogValue::exec() {
       double logValue = 0;
       if (logName.empty()) {
         API::Axis *axis = data.ws->getAxis(1);
-        if(dynamic_cast<BinEdgeAxis *>(axis)) {
+        if (dynamic_cast<BinEdgeAxis *>(axis)) {
           double lowerEdge((*axis)(j));
-          double upperEdge((*axis)(j+1));
+          double upperEdge((*axis)(j + 1));
           logValue = lowerEdge + (upperEdge - lowerEdge) / 2;
-        }
-        else
+        } else
           logValue = (*axis)(j);
       } else if (logName != "SourceName") {
         Kernel::Property *prop = data.ws->run().getLogData(logName);

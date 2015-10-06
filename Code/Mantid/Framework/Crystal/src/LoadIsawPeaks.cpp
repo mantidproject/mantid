@@ -76,8 +76,7 @@ int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
       getWord(in, false);
     readToEndOfLine(in, true);
     confidence = 95;
-  }
-  catch (std::exception &) {
+  } catch (std::exception &) {
   }
   return confidence;
 }
@@ -132,8 +131,7 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
     V3D sampPos = instr->getSample()->getPos();
     SCDCalibratePanels::FixUpSourceParameterMap(instr, L1 / 100, sampPos,
                                                 parMap1);
-  }
-  catch (...) {
+  } catch (...) {
     g_log.error() << "Invalid L1 or Time offset" << std::endl;
     throw std::invalid_argument("Invalid L1 or Time offset");
   }
@@ -176,8 +174,7 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
       iss >> bankNum >> nrows >> ncols >> width >> height >> depth >> detD >>
           Centx >> Centy >> Centz >> Basex >> Basey >> Basez >> Upx >> Upy >>
           Upz;
-    }
-    catch (...) {
+    } catch (...) {
 
       g_log.error() << "incorrect type of data for panel " << std::endl;
       throw std::length_error("incorrect type of data for panel ");
@@ -185,10 +182,11 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
 
     std::string SbankNum = boost::lexical_cast<std::string>(bankNum);
     std::string bankName = "bank";
-    if (instr->getName() == "WISH")
-    {
-      if (bankNum < 10) bankName = "WISHpanel0";
-      else bankName = "WISHpanel";
+    if (instr->getName() == "WISH") {
+      if (bankNum < 10)
+        bankName = "WISHpanel0";
+      else
+        bankName = "WISHpanel";
     }
     bankName += SbankNum;
     boost::shared_ptr<const Geometry::IComponent> bank =
@@ -419,13 +417,14 @@ int LoadIsawPeaks::findPixelID(Instrument_const_sptr inst, std::string bankName,
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
-    if(children[0]->getName().compare("sixteenpack") == 0){
-      asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+    if (children[0]->getName().compare("sixteenpack") == 0) {
+      asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+          children[0]);
       children.clear();
       asmb->getChildren(children, false);
     }
     int col0 = col - 1;
-    //WISH detectors are in bank in this order in instrument
+    // WISH detectors are in bank in this order in instrument
     if (inst->getName() == "WISH")
       col0 = (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
     boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
@@ -530,10 +529,11 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
 
     std::ostringstream oss;
     std::string bankString = "bank";
-    if (outWS->getInstrument()->getName() == "WISH")
-    {
-      if (bankNum < 10) bankString = "WISHpanel0";
-      else bankString = "WISHpanel";
+    if (outWS->getInstrument()->getName() == "WISH") {
+      if (bankNum < 10)
+        bankString = "WISHpanel0";
+      else
+        bankString = "WISHpanel";
     }
     oss << bankString << bankNum;
     std::string bankName = oss.str();
@@ -560,8 +560,7 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
       peak.setWavelength(wl.singleFromTOF(tof));
       // Add the peak to workspace
       outWS->addPeak(peak);
-    }
-    catch (std::runtime_error &e) {
+    } catch (std::runtime_error &e) {
       g_log.warning() << "Error reading peak SEQN " << seqNum << " : "
                       << e.what() << std::endl;
     }

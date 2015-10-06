@@ -8,31 +8,28 @@
 
 using namespace Mantid::Geometry;
 
-class NullImplicitFunctionTest: public CxxTest::TestSuite
-{
+class NullImplicitFunctionTest : public CxxTest::TestSuite {
 
 public:
+  void testGetName() {
+    NullImplicitFunction function;
 
-void testGetName()
-{
-  NullImplicitFunction function;
+    TSM_ASSERT_EQUALS("The static and dynamic names do not align",
+                      NullImplicitFunction::functionName(), function.getName());
+  }
 
-  TSM_ASSERT_EQUALS("The static and dynamic names do not align", NullImplicitFunction::functionName(), function.getName());
-}
+  void testEvaluateReturnsTrue() {
+    NullImplicitFunction function;
+    Mantid::coord_t coord[3] = {0, 0, 0};
+    TS_ASSERT(function.isPointContained(coord));
+  }
 
-void testEvaluateReturnsTrue()
-{
-  NullImplicitFunction function;
-  Mantid::coord_t coord[3] = {0, 0, 0};
-  TS_ASSERT(function.isPointContained(coord));
-}
+  void testToXMLEmpty() {
+    NullImplicitFunction function;
 
-void testToXMLEmpty()
-{
-  NullImplicitFunction function;
-
-  TSM_ASSERT_EQUALS("The xml string should be empty for any instance of this type", std::string() , function.toXMLString());
-}
-
+    TSM_ASSERT_EQUALS(
+        "The xml string should be empty for any instance of this type",
+        std::string(), function.toXMLString());
+  }
 };
 #endif

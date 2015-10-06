@@ -6,6 +6,7 @@
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include <boost/scoped_ptr.hpp>
+#include <boost/optional.hpp>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -70,7 +71,8 @@ private:
       boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ws);
 
   void loadSlab(std::string name, void *data,
-                DataObjects::MDHistoWorkspace_sptr ws, NeXus::NXnumtype dataType);
+                DataObjects::MDHistoWorkspace_sptr ws,
+                NeXus::NXnumtype dataType);
   void loadHisto();
 
   void loadDimensions();
@@ -78,6 +80,10 @@ private:
   void loadDimensions2();
 
   void loadCoordinateSystem();
+
+  void loadVisualNormalization(
+      const std::string &key,
+      boost::optional<Mantid::API::MDNormalization> &normalization);
 
   /// Load all the affine matricies
   void loadAffineMatricies(API::IMDWorkspace_sptr ws);
@@ -103,7 +109,15 @@ private:
   bool m_BoxStructureAndMethadata;
 
   /// Version of SaveMD used to save the file
-  int m_saveMDVersion ;
+  int m_saveMDVersion;
+
+  /// Visual normalization
+  boost::optional<Mantid::API::MDNormalization> m_visualNormalization;
+  boost::optional<Mantid::API::MDNormalization> m_visualNormalizationHisto;
+
+  /// Named entry
+  static const std::string VISUAL_NORMALIZATION_KEY;
+  static const std::string VISUAL_NORMALIZATION_KEY_HISTO;
 };
 
 } // namespace DataObjects

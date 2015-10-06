@@ -354,9 +354,9 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr workspace,
   delete[] dataArr;
 }
 
-void
-SaveNXTomo::writeImageKeyValue(const DataObjects::Workspace2D_sptr workspace,
-                               ::NeXus::File &nxFile, int thisFileInd) {
+void SaveNXTomo::writeImageKeyValue(
+    const DataObjects::Workspace2D_sptr workspace, ::NeXus::File &nxFile,
+    int thisFileInd) {
   // Add ImageKey to instrument/image_key if present, use 0 if not
   try {
     nxFile.openPath("/entry1/tomo_entry/instrument/detector");
@@ -439,9 +439,9 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr workspace,
   }
 }
 
-void
-SaveNXTomo::writeIntensityValue(const DataObjects::Workspace2D_sptr workspace,
-                                ::NeXus::File &nxFile, int thisFileInd) {
+void SaveNXTomo::writeIntensityValue(
+    const DataObjects::Workspace2D_sptr workspace, ::NeXus::File &nxFile,
+    int thisFileInd) {
   // Add Intensity to control if present, use 1 if not
   try {
     nxFile.openPath("/entry1/tomo_entry/control");

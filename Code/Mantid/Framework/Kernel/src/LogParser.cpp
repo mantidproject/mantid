@@ -68,9 +68,9 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
         throw std::logic_error(mess);
       }
       auto range = change_times.equal_range(stime);
-      if ( range.first != range.second ){
+      if (range.first != range.second) {
         auto last = range.first;
-        for(auto it = last; it != range.second; ++it){
+        for (auto it = last; it != range.second; ++it) {
           last = it;
         }
         last->second += std::string(" ") + str;
@@ -91,7 +91,7 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
     isNumeric = !istr.fail();
     old_data = sdata;
 
-    change_times.insert( std::make_pair(stime,sdata) );
+    change_times.insert(std::make_pair(stime, sdata));
   }
 
   if (change_times.empty())

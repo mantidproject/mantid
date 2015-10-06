@@ -10,10 +10,8 @@
 
 using namespace Mantid;
 
-
-class MapSupportTest: public CxxTest::TestSuite{
+class MapSupportTest : public CxxTest::TestSuite {
 public:
-	void testConstructor(){
-	}
+  void testConstructor() {}
 };
 #endif

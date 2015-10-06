@@ -183,8 +183,8 @@ MatrixWorkspace_sptr DiffractionFocussing::convertUnitsToDSpacing(
 }
 
 /// Run Rebin as a Child Algorithm to harmonise the bin boundaries
-void
-DiffractionFocussing::RebinWorkspace(API::MatrixWorkspace_sptr &workspace) {
+void DiffractionFocussing::RebinWorkspace(
+    API::MatrixWorkspace_sptr &workspace) {
 
   double min = 0;
   double max = 0;

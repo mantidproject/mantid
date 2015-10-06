@@ -373,10 +373,6 @@ void LoadSpice2D::exec() {
     ipixel++;
   }
 
-  // run load instrument
-  runLoadInstrument(instrument, ws);
-  runLoadMappingTable(ws, numberXPixels, numberYPixels);
-
   // Set the run properties
   ws->mutableRun().addProperty("sample-detector-distance", distance, "mm",
                                true);
@@ -398,6 +394,10 @@ void LoadSpice2D::exec() {
   ws->mutableRun().addProperty("monitor", monitorCounts, "", true);
   ws->mutableRun().addProperty("start_time", start_time, "", true);
   ws->mutableRun().addProperty("run_start", start_time, "", true);
+
+  // run load instrument
+  runLoadInstrument(instrument, ws);
+  runLoadMappingTable(ws, numberXPixels, numberYPixels);
 
   // Move the detector to the right position
   API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
@@ -426,9 +426,9 @@ void LoadSpice2D::exec() {
  * @param inst_name :: The name written in the Nexus file
  * @param localWorkspace :: The workspace to insert the instrument into
  */
-void
-LoadSpice2D::runLoadInstrument(const std::string &inst_name,
-                               DataObjects::Workspace2D_sptr localWorkspace) {
+void LoadSpice2D::runLoadInstrument(
+    const std::string &inst_name,
+    DataObjects::Workspace2D_sptr localWorkspace) {
 
   API::IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
@@ -456,9 +456,8 @@ LoadSpice2D::runLoadInstrument(const std::string &inst_name,
  * @param nxbins: number of bins in X
  * @param nybins: number of bins in Y
  */
-void
-LoadSpice2D::runLoadMappingTable(DataObjects::Workspace2D_sptr localWorkspace,
-                                 int nxbins, int nybins) {
+void LoadSpice2D::runLoadMappingTable(
+    DataObjects::Workspace2D_sptr localWorkspace, int nxbins, int nybins) {
   // Get the number of monitor channels
   boost::shared_ptr<const Geometry::Instrument> instrument =
       localWorkspace->getInstrument();

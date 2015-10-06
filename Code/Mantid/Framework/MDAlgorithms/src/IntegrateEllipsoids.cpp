@@ -44,9 +44,11 @@ const std::size_t DIMS(3);
  * @param UBinv : inverse of UB matrix
  * @param hkl_integ ; boolean for integrating in HKL space
  */
-void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator, Progress &prog,
-                      EventWorkspace_sptr &wksp,
-                      DblMatrix const &UBinv, bool hkl_integ) {
+void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator,
+                                           Progress &prog,
+                                           EventWorkspace_sptr &wksp,
+                                           DblMatrix const &UBinv,
+                                           bool hkl_integ) {
   // loop through the eventlists
 
   int numSpectra = static_cast<int>(wksp->getNumberHistograms());
@@ -67,6 +69,7 @@ void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator, Progre
     EventList &events = wksp->getEventList(i);
 
     events.switchTo(WEIGHTED_NOTIME);
+    events.compressEvents(1e-5, &events);
 
     // check to see if the event list is empty
     if (events.empty()) {
@@ -92,12 +95,11 @@ void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator, Progre
         buffer[dim] = locCoord[dim];
       }
       V3D qVec(buffer[0], buffer[1], buffer[2]);
-      if (hkl_integ) qVec = UBinv * qVec;
+      if (hkl_integ)
+        qVec = UBinv * qVec;
       qList.push_back(std::make_pair(event->m_weight, qVec));
     } // end of loop over events in list
-    PARALLEL_CRITICAL(addEvents){
-      integrator.addEvents(qList, hkl_integ);
-    }
+    PARALLEL_CRITICAL(addEvents) { integrator.addEvents(qList, hkl_integ); }
 
     prog.report();
     PARALLEL_END_INTERUPT_REGION
@@ -114,9 +116,11 @@ void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator, Progre
  * @param UBinv : inverse of UB matrix
  * @param hkl_integ ; boolean for integrating in HKL space
  */
-void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator, Progress &prog,
-                      Workspace2D_sptr &wksp,
-                      DblMatrix const &UBinv, bool hkl_integ) {
+void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
+                                           Progress &prog,
+                                           Workspace2D_sptr &wksp,
+                                           DblMatrix const &UBinv,
+                                           bool hkl_integ) {
 
   // loop through the eventlists
 
@@ -169,16 +173,15 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator, Progre
                                        // qVec
         }
         V3D qVec(buffer[0], buffer[1], buffer[2]);
-        if (hkl_integ) qVec = UBinv * qVec;
+        if (hkl_integ)
+          qVec = UBinv * qVec;
 
         // Account for counts in histograms by increasing the qList with the
         // same q-point
         qList.push_back(std::make_pair(yVal, qVec));
       }
     }
-    PARALLEL_CRITICAL(addHisto) {
-      integrator.addEvents(qList, hkl_integ);
-    }
+    PARALLEL_CRITICAL(addHisto) { integrator.addEvents(qList, hkl_integ); }
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   } // end of loop over spectra
@@ -272,9 +275,13 @@ void IntegrateEllipsoids::init() {
                   "Number of sigmas to add to mean of half-length of "
                   "major radius for second pass when SpecifySize is false.");
 
+  declareProperty("IntegrateInHKL", false,
+                  "If true, integrate in HKL space not Q space.");
+
   declareProperty(
-      "IntegrateInHKL", false,
-      "If true, integrate in HKL space not Q space.");
+      "IntegrateIfOnEdge", true,
+      "Set to false to not integrate if peak radius is off edge of detector."
+      "Background will be scaled if background radius is off edge.");
 }
 
 //---------------------------------------------------------------------
@@ -303,11 +310,6 @@ void IntegrateEllipsoids::exec() {
     throw std::runtime_error("Could not read the peaks workspace");
   }
 
-  Mantid::DataObjects::PeaksWorkspace_sptr peak_ws =
-      getProperty("OutputWorkspace");
-  if (peak_ws != in_peak_ws) {
-    peak_ws.reset(in_peak_ws->clone().release());
-  }
   double radius = getProperty("RegionRadius");
   int numSigmas = getProperty("NumSigmas");
   double cutoffIsigI = getProperty("CutoffIsigI");
@@ -316,6 +318,28 @@ void IntegrateEllipsoids::exec() {
   double back_inner_radius = getProperty("BackgroundInnerSize");
   double back_outer_radius = getProperty("BackgroundOuterSize");
   bool hkl_integ = getProperty("IntegrateInHKL");
+  bool integrateEdge = getProperty("IntegrateIfOnEdge");
+  if (!integrateEdge) {
+    // This only fails in the unit tests which say that MaskBTP is not
+    // registered
+    try {
+      runMaskDetectors(in_peak_ws, "Tube", "edges");
+      runMaskDetectors(in_peak_ws, "Pixel", "edges");
+    } catch (...) {
+      g_log.error("Can't execute MaskBTP algorithm for this instrument to set "
+                  "edge for IntegrateIfOnEdge option");
+    }
+    // Get the instrument and its detectors
+    Geometry::Instrument_const_sptr inst = in_peak_ws->getInstrument();
+    calculateE1(inst); // fill E1Vec for use in detectorQ
+  }
+
+  Mantid::DataObjects::PeaksWorkspace_sptr peak_ws =
+      getProperty("OutputWorkspace");
+  if (peak_ws != in_peak_ws) {
+    peak_ws.reset(in_peak_ws->clone().release());
+  }
+
   // get UBinv and the list of
   // peak Q's for the integrator
   std::vector<Peak> &peaks = peak_ws->getPeaks();
@@ -400,7 +424,7 @@ void IntegrateEllipsoids::exec() {
       std::vector<double> axes_radii;
       Mantid::Geometry::PeakShape_const_sptr shape =
           integrator.ellipseIntegrateEvents(
-              peak_q, specify_size, peak_radius, back_inner_radius,
+              E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
               back_outer_radius, axes_radii, inti, sigi);
       peaks[i].setIntensity(inti);
       peaks[i].setSigmaIntensity(sigi);
@@ -475,7 +499,7 @@ void IntegrateEllipsoids::exec() {
           peak_q = peaks[i].getQLabFrame();
           std::vector<double> axes_radii;
           integrator.ellipseIntegrateEvents(
-              peak_q, specify_size, peak_radius, back_inner_radius,
+              E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
               back_outer_radius, axes_radii, inti, sigi);
           peaks[i].setIntensity(inti);
           peaks[i].setSigmaIntensity(sigi);
@@ -554,5 +578,45 @@ void IntegrateEllipsoids::initTargetWSDescr(MatrixWorkspace_sptr &wksp) {
     m_targWSDescr.m_PreprDetTable = table;
 }
 
+/*
+ * Define edges for each instrument by masking. For CORELLI, tubes 1 and 16, and
+ *pixels 0 and 255.
+ * Get Q in the lab frame for every peak, call it C
+ * For every point on the edge, the trajectory in reciprocal space is a straight
+ *line, going through O=V3D(0,0,0).
+ * Calculate a point at a fixed momentum, say k=1. Q in the lab frame
+ *E=V3D(-k*sin(tt)*cos(ph),-k*sin(tt)*sin(ph),k-k*cos(ph)).
+ * Normalize E to 1: E=E*(1./E.norm())
+ *
+ * @param inst: instrument
+ */
+void IntegrateEllipsoids::calculateE1(Geometry::Instrument_const_sptr inst) {
+  std::vector<detid_t> detectorIDs = inst->getDetectorIDs();
+
+  for (auto detID = detectorIDs.begin(); detID != detectorIDs.end(); ++detID) {
+    Mantid::Geometry::IDetector_const_sptr det = inst->getDetector(*detID);
+    if (det->isMonitor())
+      continue; // skip monitor
+    if (!det->isMasked())
+      continue; // edge is masked so don't check if not masked
+    double tt1 = det->getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)); // two theta
+    double ph1 = det->getPhi();                                // phi
+    V3D E1 = V3D(-std::sin(tt1) * std::cos(ph1), -std::sin(tt1) * std::sin(ph1),
+                 1. - std::cos(tt1)); // end of trajectory
+    E1 = E1 * (1. / E1.norm());       // normalize
+    E1Vec.push_back(E1);
+  }
+}
+
+void IntegrateEllipsoids::runMaskDetectors(
+    Mantid::DataObjects::PeaksWorkspace_sptr peakWS, std::string property,
+    std::string values) {
+  IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
+  alg->setProperty<Workspace_sptr>("Workspace", peakWS);
+  alg->setProperty(property, values);
+  if (!alg->execute())
+    throw std::runtime_error(
+        "MaskDetectors Child Algorithm has not executed successfully");
+}
 } // namespace MDAlgorithms
 } // namespace Mantid

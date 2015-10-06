@@ -26,17 +26,16 @@ public:
     // Construct it.
     NoShape shape;
 
-
     TS_ASSERT_EQUALS(Mantid::Kernel::None, shape.frame());
     TS_ASSERT_EQUALS(std::string(), shape.algorithmName());
     TS_ASSERT_EQUALS(-1, shape.algorithmVersion());
   }
 
-
   void test_toJSON() {
 
     // Construct it.
-    NoShape shape;;
+    NoShape shape;
+    ;
     const std::string json = shape.toJSON();
 
     Json::Reader reader;
@@ -45,7 +44,6 @@ public:
 
     TS_ASSERT_EQUALS("none", output["shape"].asString());
   }
-
 
   void test_shape_name() {
 

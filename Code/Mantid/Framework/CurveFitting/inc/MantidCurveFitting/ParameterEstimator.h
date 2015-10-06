@@ -18,8 +18,9 @@ namespace ParameterEstimator {
 
 /// ParameterEstimator estimates parameter values of some fitting functions
 ///  from fitting data.
-void DLLExport estimate(API::IFunction &function, const API::FunctionDomain1D &domain,
-              const API::FunctionValues &values);
+void DLLExport estimate(API::IFunction &function,
+                        const API::FunctionDomain1D &domain,
+                        const API::FunctionValues &values);
 
 } // namespace ParameterEstimator
 } // namespace CurveFitting

@@ -10,17 +10,14 @@ using namespace Mantid;
 using Mantid::DataHandling::LoadGSS;
 using ScopedFileHelper::ScopedFile;
 
-class LoadGSSTest : public CxxTest::TestSuite
-{
+class LoadGSSTest : public CxxTest::TestSuite {
 public:
-
-  void test_TheBasics()
-  {
+  void test_TheBasics() {
     Mantid::DataHandling::LoadGSS loader;
-    TS_ASSERT_THROWS_NOTHING( loader.initialize() )
-    TS_ASSERT_EQUALS( loader.name(), "LoadGSS" )
-    TS_ASSERT_EQUALS( loader.category(), "Diffraction;DataHandling\\Text" )
-    TS_ASSERT_EQUALS( loader.version(), 1 )
+    TS_ASSERT_THROWS_NOTHING(loader.initialize())
+    TS_ASSERT_EQUALS(loader.name(), "LoadGSS")
+    TS_ASSERT_EQUALS(loader.category(), "Diffraction;DataHandling\\Text")
+    TS_ASSERT_EQUALS(loader.version(), 1)
   }
 
   void test_load_gss_txt() {
@@ -32,8 +29,8 @@ public:
     checkWorkspace(ws, 8, 816);
     auto x1 = ws->readX(0)[99];
     auto x2 = ws->readX(0)[100];
-    auto y  = ws->readY(0)[99];
-    TS_ASSERT_DELTA((x1 + x2)/2, 40844.0625, 1e-6);
+    auto y = ws->readY(0)[99];
+    TS_ASSERT_DELTA((x1 + x2) / 2, 40844.0625, 1e-6);
     TS_ASSERT_DELTA(y, 145304004.625, 1e-6);
   }
 
@@ -55,7 +52,7 @@ public:
         "   115209.92877 12345678.00000004        0.00000000\n"
         "   115213.79731123456789.00000005        0.00000000\n"
         "   115217.66873234567890.00000006        0.00000000";
-    ScopedFile file(gss,"gss_large_x.txt");
+    ScopedFile file(gss, "gss_large_x.txt");
     API::IAlgorithm_sptr loader = createAlgorithm();
     loader->setPropertyValue("Filename", file.getFileName());
     TS_ASSERT(loader->execute())
@@ -63,42 +60,41 @@ public:
     auto x1 = ws->readX(0)[0];
     auto x2 = ws->readX(0)[1];
     auto dx = x2 - x1;
-    auto y  = ws->readY(0)[0] * dx;
-    TS_ASSERT_DELTA((x1 + x2)/2, 115202.20029, 1e-6);
+    auto y = ws->readY(0)[0] * dx;
+    TS_ASSERT_DELTA((x1 + x2) / 2, 115202.20029, 1e-6);
     TS_ASSERT_DELTA(y, 123456.00000002, 1e-10);
     x1 = ws->readX(0)[3];
     x2 = ws->readX(0)[4];
     dx = x2 - x1;
-    y  = ws->readY(0)[3] * dx;
+    y = ws->readY(0)[3] * dx;
     TS_ASSERT_DELTA(y, 123456789.00000005, 1e-10);
   }
 
-  void test_load_gss_ExtendedHeader_gsa()
-  {
+  void test_load_gss_ExtendedHeader_gsa() {
     API::IAlgorithm_sptr loader = createAlgorithm();
-	loader->setPropertyValue("Filename","gss-ExtendedHeader.gsa");
-    TS_ASSERT( loader->execute() )
+    loader->setPropertyValue("Filename", "gss-ExtendedHeader.gsa");
+    TS_ASSERT(loader->execute())
     // Check a few things in the workspace
-	checkWorkspace( loader->getProperty("OutputWorkspace"), 1, 6);
+    checkWorkspace(loader->getProperty("OutputWorkspace"), 1, 6);
   }
 
   /** Test LoadGSS with setting spectrum ID as bank ID
     */
-  void test_load_gss_use_spec()
-  {
+  void test_load_gss_use_spec() {
     // Set property and execute
     LoadGSS loader;
     loader.initialize();
 
-    loader.setPropertyValue("Filename","gss1.txt");
+    loader.setPropertyValue("Filename", "gss1.txt");
     loader.setProperty("OutputWorkspace", "TestWS");
     loader.setProperty("UseBankIDasSpectrumNumber", true);
 
-    TS_ASSERT( loader.execute() );
+    TS_ASSERT(loader.execute());
 
     // Check result
-    API::MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-          API::AnalysisDataService::Instance().retrieve("TestWS"));
+    API::MatrixWorkspace_sptr outws =
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+            API::AnalysisDataService::Instance().retrieve("TestWS"));
     TS_ASSERT(outws);
     if (!outws)
       return;
@@ -114,45 +110,42 @@ public:
     API::AnalysisDataService::Instance().remove("TestWS");
   }
 
-  void test_fails_gracefully_if_passed_wrong_filetype()
-  {
+  void test_fails_gracefully_if_passed_wrong_filetype() {
     API::IAlgorithm_sptr loader = createAlgorithm();
-	loader->setPropertyValue("Filename","argus0026287.nxs");
+    loader->setPropertyValue("Filename", "argus0026287.nxs");
     // Throws different exception type on different platforms!
-    TS_ASSERT_THROWS_ANYTHING( loader->execute() )
+    TS_ASSERT_THROWS_ANYTHING(loader->execute())
 
     API::IAlgorithm_sptr loader2 = createAlgorithm();
-	loader2->setPropertyValue("Filename","AsciiExample.txt");
-    TS_ASSERT_THROWS( loader2->execute(), std::out_of_range )
+    loader2->setPropertyValue("Filename", "AsciiExample.txt");
+    TS_ASSERT_THROWS(loader2->execute(), std::out_of_range)
 
     API::IAlgorithm_sptr loader3 = createAlgorithm();
-	loader3->setPropertyValue("Filename","CSP79590.raw");
-    TS_ASSERT_THROWS( loader3->execute(), std::out_of_range )
+    loader3->setPropertyValue("Filename", "CSP79590.raw");
+    TS_ASSERT_THROWS(loader3->execute(), std::out_of_range)
 
     API::IAlgorithm_sptr loader4 = createAlgorithm();
-	loader4->setPropertyValue("Filename","VULCAN_2916_neutron0_event.dat");
-    TS_ASSERT_THROWS( loader4->execute(), std::out_of_range )
+    loader4->setPropertyValue("Filename", "VULCAN_2916_neutron0_event.dat");
+    TS_ASSERT_THROWS(loader4->execute(), std::out_of_range)
   }
 
 private:
-  API::IAlgorithm_sptr createAlgorithm()
-  {
-    API::IAlgorithm_sptr alg = API::AlgorithmManager::Instance().createUnmanaged("LoadGSS");
+  API::IAlgorithm_sptr createAlgorithm() {
+    API::IAlgorithm_sptr alg =
+        API::AlgorithmManager::Instance().createUnmanaged("LoadGSS");
     alg->initialize();
     alg->setChild(true);
-    alg->setPropertyValue("OutputWorkspace","fakeName");
+    alg->setPropertyValue("OutputWorkspace", "fakeName");
     return alg;
   }
 
-  void checkWorkspace(const API::MatrixWorkspace_const_sptr & ws, int nHist, int nBins)
-  {
-    TS_ASSERT_EQUALS( ws->id(), "Workspace2D" )
-    TS_ASSERT_EQUALS( ws->getNumberHistograms(), nHist )
-    TS_ASSERT_EQUALS( ws->size(), nBins )
-    TS_ASSERT_EQUALS( ws->getAxis(0)->unit()->unitID(), "TOF" )
+  void checkWorkspace(const API::MatrixWorkspace_const_sptr &ws, int nHist,
+                      int nBins) {
+    TS_ASSERT_EQUALS(ws->id(), "Workspace2D")
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHist)
+    TS_ASSERT_EQUALS(ws->size(), nBins)
+    TS_ASSERT_EQUALS(ws->getAxis(0)->unit()->unitID(), "TOF")
   }
-
 };
 
-
-#endif //LOADGSSTEST_H_
+#endif // LOADGSSTEST_H_

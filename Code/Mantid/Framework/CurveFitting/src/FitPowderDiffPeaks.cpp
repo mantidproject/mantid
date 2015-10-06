@@ -438,7 +438,8 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
         robmsgss << parname << " = " << thispeak->getParameter(parname) << endl;
       }
       g_log.information() << "[DB1151] Robust Fit Result:   Chi^2 = " << chi2
-                          << endl << robmsgss.str();
+                          << endl
+                          << robmsgss.str();
 
       rightpeak = thispeak;
       isrightmost = false;
@@ -467,9 +468,9 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
       dbxss << endl;
       for (int i = 0; i < 10; ++i)
         dbxss << "==";
-      dbxss << endl << "[DBx323] Peak (" << peakhkl[0] << ", " << peakhkl[1]
-            << "," << peakhkl[2]
-            << ").  Centre predicted @ TOF = " << predictcentre
+      dbxss << endl
+            << "[DBx323] Peak (" << peakhkl[0] << ", " << peakhkl[1] << ","
+            << peakhkl[2] << ").  Centre predicted @ TOF = " << predictcentre
             << ".  Observed range = " << peakleftbound << ", "
             << peakrightbound;
       g_log.notice(dbxss.str());
@@ -705,7 +706,8 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
   string peakinfoa0 =
       getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
   g_log.notice() << "[DBx533A] Approach A: Starting Peak Function Information: "
-                 << endl << peakinfoa0 << endl;
+                 << endl
+                 << peakinfoa0 << endl;
 
   double chi2a;
   bool fitgooda = doFit1PeakSequential(peakws, peak_wsindex, peak, minimizers,
@@ -721,8 +723,8 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
       getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
   g_log.notice() << "[DBx533A] Approach A:  Fit Successful = " << fitgooda
                  << ", Chi2 = " << chi2a
-                 << ", Peak Function Information: " << endl << peakinfoa1
-                 << endl;
+                 << ", Peak Function Information: " << endl
+                 << peakinfoa1 << endl;
 
   // b) Fit by using Gaussian result (Sigma)
   restoreFunctionParameters(peak, origparammap);
@@ -731,7 +733,8 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
   string peakinfob0 =
       getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
   g_log.notice() << "[DBx533B] Approach B: Starting Peak Function Information: "
-                 << endl << peakinfob0 << endl;
+                 << endl
+                 << peakinfob0 << endl;
 
   double chi2b;
   bool fitgoodb = doFit1PeakSequential(peakws, peak_wsindex, peak, minimizers,
@@ -748,8 +751,8 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
       getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
   g_log.notice() << "[DBx533B] Approach 2: Fit Successful = " << fitgoodb
                  << ", Chi2 = " << chi2b
-                 << ", Peak Function Information: " << endl << peakinfob1
-                 << endl;
+                 << ", Peak Function Information: " << endl
+                 << peakinfob1 << endl;
 
   // c) Fit peak parameters by the value from right peak
   if (rightpeakparammap.size() > 0) {
@@ -777,8 +780,8 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
         getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
     g_log.notice() << "[DBx533C] Approach C:  Fit Successful = " << fitgoodc
                    << ", Chi2 = " << chi2c
-                   << ", Peak Function Information: " << endl << peakinfoc1
-                   << endl;
+                   << ", Peak Function Information: " << endl
+                   << peakinfoc1 << endl;
   } else {
     // No right peak information: set a error entry
     chi2s.push_back(DBL_MAX);
@@ -876,7 +879,8 @@ bool FitPowderDiffPeaks::doFit1PeakBackground(
   // 3. Fit
   string cominfoa = getFunctionInfo(compfunc);
   g_log.notice() << "[DBx533X-0] Fit All: Starting Peak Function Information: "
-                 << endl << cominfoa << "Fit range = " << startx << ", " << endx
+                 << endl
+                 << cominfoa << "Fit range = " << startx << ", " << endx
                  << endl;
 
   // 3. Set
@@ -1182,7 +1186,8 @@ void FitPowderDiffPeaks::fitPeaksWithGoodStartingValues() {
       calculatePeakFitBoundary(ipeak, ipeak, peakfitleftbound,
                                peakfitrightbound);
 
-      g_log.information() << endl << "[T] Fit Peak Indexed " << ipeak << " ("
+      g_log.information() << endl
+                          << "[T] Fit Peak Indexed " << ipeak << " ("
                           << m_vecPeakFunctions.size() - 1 - ipeak
                           << ")\t----------------------------------" << endl;
 
@@ -1665,9 +1670,8 @@ void FitPowderDiffPeaks::storeFunctionParameters(
 //----------------------------------------------------------------------------
 /** Restore the function's parameter values from a map
   */
-void
-FitPowderDiffPeaks::restoreFunctionParameters(IFunction_sptr function,
-                                              map<string, double> parammap) {
+void FitPowderDiffPeaks::restoreFunctionParameters(
+    IFunction_sptr function, map<string, double> parammap) {
   vector<string> paramnames = function->getParameterNames();
   for (size_t i = 0; i < paramnames.size(); ++i) {
     string &parname = paramnames[i];
@@ -1743,7 +1747,8 @@ bool FitPowderDiffPeaks::doFit1PeakSimple(
     // Debug information output
     API::ITableWorkspace_sptr paramws = fitalg->getProperty("OutputParameters");
     std::string infofit = parseFitParameterWorkspace(paramws);
-    g_log.information() << "Fitted Parameters: " << endl << infofit << endl;
+    g_log.information() << "Fitted Parameters: " << endl
+                        << infofit << endl;
   } else {
     g_log.error() << "[DBx128B] Failed to execute fitting peak @ "
                   << peakfunction->centre() << endl;
@@ -2238,8 +2243,8 @@ bool FitPowderDiffPeaks::doFitNPeaksSimple(
     // Debug information output
     API::ITableWorkspace_sptr paramws = fitalg->getProperty("OutputParameters");
     std::string infofit = parseFitParameterWorkspace(paramws);
-    g_log.information() << "[DBx149B] Fitted Parameters: " << endl << infofit
-                        << endl;
+    g_log.information() << "[DBx149B] Fitted Parameters: " << endl
+                        << infofit << endl;
   } else {
     dbss << ": Failed ";
     g_log.error() << "[DBx149C] " << dbss.str() << endl;
@@ -2348,10 +2353,9 @@ void FitPowderDiffPeaks::importInstrumentParameterFromTable(
 
 /** Import Bragg peak table workspace
   */
-void
-FitPowderDiffPeaks::parseBraggPeakTable(TableWorkspace_sptr peakws,
-                                        vector<map<string, double>> &parammaps,
-                                        vector<map<string, int>> &hklmaps) {
+void FitPowderDiffPeaks::parseBraggPeakTable(
+    TableWorkspace_sptr peakws, vector<map<string, double>> &parammaps,
+    vector<map<string, int>> &hklmaps) {
   // 1. Get columns' types and names
   vector<string> paramnames = peakws->getColumnNames();
   size_t numcols = paramnames.size();

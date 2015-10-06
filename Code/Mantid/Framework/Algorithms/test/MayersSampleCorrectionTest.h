@@ -81,7 +81,8 @@ public:
   void test_InputWorkspace_With_No_Sample_Shape_Throws_Error() {
     auto noSampleShapeWS = createTestWorkspaceWithNoSampleShape();
 
-    TS_ASSERT_THROWS(runAlgorithm(noSampleShapeWS, true), std::invalid_argument);
+    TS_ASSERT_THROWS(runAlgorithm(noSampleShapeWS, true),
+                     std::invalid_argument);
   }
 
 private:

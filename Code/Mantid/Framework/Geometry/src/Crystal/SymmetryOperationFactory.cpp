@@ -40,16 +40,16 @@ std::vector<SymmetryOperation> SymmetryOperationFactoryImpl::createSymOps(
 }
 
 /// Subscribes a symmetry operation into the factory
-void
-SymmetryOperationFactoryImpl::subscribeSymOp(const std::string &identifier) {
+void SymmetryOperationFactoryImpl::subscribeSymOp(
+    const std::string &identifier) {
   SymmetryOperation prototype(identifier);
 
   subscribe(identifier, prototype);
 }
 
 /// Unsubscribes a symmetry operation from the factory
-void
-SymmetryOperationFactoryImpl::unsubscribeSymOp(const std::string &identifier) {
+void SymmetryOperationFactoryImpl::unsubscribeSymOp(
+    const std::string &identifier) {
   if (isSubscribed(identifier)) {
     m_prototypes.erase(identifier);
   }
@@ -75,9 +75,8 @@ SymmetryOperationFactoryImpl::subscribedSymbols() const {
 }
 
 /// Subscribes symmetry operation into factory, using the supplied alias as key.
-void
-SymmetryOperationFactoryImpl::subscribe(const std::string &alias,
-                                        const SymmetryOperation &prototype) {
+void SymmetryOperationFactoryImpl::subscribe(
+    const std::string &alias, const SymmetryOperation &prototype) {
   if (!isSubscribed(alias)) {
     m_prototypes.insert(std::make_pair(alias, prototype));
   }

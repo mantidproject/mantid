@@ -5,16 +5,10 @@
 #include "MantidKernel/Exception.h"
 #include <cxxtest/TestSuite.h>
 
-
-class IMDDimensionTest : public CxxTest::TestSuite
-{
+class IMDDimensionTest : public CxxTest::TestSuite {
 public:
-
   /** Class is pure abstract and has no functionality. Nothing to test. */
-  void test_nothing()
-  {
-  }
-
+  void test_nothing() {}
 };
 
 #endif

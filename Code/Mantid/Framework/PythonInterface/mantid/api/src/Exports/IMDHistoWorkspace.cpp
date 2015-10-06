@@ -21,21 +21,22 @@ namespace {
  * @param dims :: the dimensions vector (Py_intptr_t type)
  * @returns A python object containing the numpy array
  */
-PyObject *WrapReadOnlyNumpyFArray(Mantid::signal_t *arr, std::vector<Py_intptr_t> dims)
-{
-    int datatype = Converters::NDArrayTypeIndex<Mantid::signal_t>::typenum;
-    #if NPY_API_VERSION >= 0x00000007 //(1.7)
-        PyArrayObject *nparray = (PyArrayObject *)PyArray_New(&PyArray_Type,
-            static_cast<int>(dims.size()), &dims[0], datatype,NULL,
-            static_cast<void *>(const_cast<double *>(arr)),0,NPY_ARRAY_FARRAY,NULL);
-        PyArray_CLEARFLAGS(nparray, NPY_ARRAY_WRITEABLE);
-    #else
-        PyArrayObject *nparray = (PyArrayObject *)PyArray_New(&PyArray_Type,
-            static_cast<int>(dims.size()), &dims[0], datatype,NULL,
-            static_cast<void *>(const_cast<double *>(arr)),0,NPY_FARRAY,NULL);
-        nparray->flags &= ~NPY_WRITEABLE;
-    #endif
-    return (PyObject *)nparray;
+PyObject *WrapReadOnlyNumpyFArray(Mantid::signal_t *arr,
+                                  std::vector<Py_intptr_t> dims) {
+  int datatype = Converters::NDArrayTypeIndex<Mantid::signal_t>::typenum;
+#if NPY_API_VERSION >= 0x00000007 //(1.7)
+  PyArrayObject *nparray = (PyArrayObject *)PyArray_New(
+      &PyArray_Type, static_cast<int>(dims.size()), &dims[0], datatype, NULL,
+      static_cast<void *>(const_cast<double *>(arr)), 0, NPY_ARRAY_FARRAY,
+      NULL);
+  PyArray_CLEARFLAGS(nparray, NPY_ARRAY_WRITEABLE);
+#else
+  PyArrayObject *nparray = (PyArrayObject *)PyArray_New(
+      &PyArray_Type, static_cast<int>(dims.size()), &dims[0], datatype, NULL,
+      static_cast<void *>(const_cast<double *>(arr)), 0, NPY_FARRAY, NULL);
+  nparray->flags &= ~NPY_WRITEABLE;
+#endif
+  return (PyObject *)nparray;
 }
 
 /**
@@ -50,14 +51,13 @@ std::vector<Py_intptr_t> countDimensions(const IMDHistoWorkspace &self) {
 
   // invert dimensions in C way, e.g. slowest changing ndim goes first
   for (size_t i = 0; i < ndims; ++i) {
-      nd.push_back(self.getDimension( i )->getNBins());
+    nd.push_back(self.getDimension(i)->getNBins());
   }
 
   ndims = nd.size();
   std::vector<Py_intptr_t> dims(ndims);
   for (size_t i = 0; i < ndims; ++i)
     dims[i] = static_cast<Py_intptr_t>(nd[i]);
-
 
   if (dims.empty()) {
     throw std::runtime_error("Workspace has zero dimensions!");
@@ -71,8 +71,8 @@ std::vector<Py_intptr_t> countDimensions(const IMDHistoWorkspace &self) {
  * @param self :: A reference to the calling object
  */
 PyObject *getSignalArrayAsNumpyArray(IMDHistoWorkspace &self) {
-    auto dims = countDimensions(self);
-    return WrapReadOnlyNumpyFArray(self.getSignalArray(),dims);
+  auto dims = countDimensions(self);
+  return WrapReadOnlyNumpyFArray(self.getSignalArray(), dims);
 }
 
 /**
@@ -81,7 +81,7 @@ PyObject *getSignalArrayAsNumpyArray(IMDHistoWorkspace &self) {
  */
 PyObject *getErrorSquaredArrayAsNumpyArray(IMDHistoWorkspace &self) {
   auto dims = countDimensions(self);
-  return WrapReadOnlyNumpyFArray(self.getErrorSquaredArray(),dims);
+  return WrapReadOnlyNumpyFArray(self.getErrorSquaredArray(), dims);
 }
 
 /**
@@ -90,7 +90,7 @@ PyObject *getErrorSquaredArrayAsNumpyArray(IMDHistoWorkspace &self) {
  */
 PyObject *getNumEventsArrayAsNumpyArray(IMDHistoWorkspace &self) {
   auto dims = countDimensions(self);
-  return WrapReadOnlyNumpyFArray(self.getNumEventsArray(),dims);
+  return WrapReadOnlyNumpyFArray(self.getNumEventsArray(), dims);
 }
 
 /**
@@ -136,7 +136,7 @@ void throwIfSizeIncorrect(IMDHistoWorkspace &self, const numeric::array &signal,
 void setSignalArray(IMDHistoWorkspace &self,
                     const numeric::array &signalValues) {
   throwIfSizeIncorrect(self, signalValues, "setSignalArray");
-  object rav=signalValues.attr("ravel")("F");
+  object rav = signalValues.attr("ravel")("F");
   object flattened = rav.attr("flat");
   auto length = len(flattened);
   for (auto i = 0; i < length; ++i) {
@@ -154,7 +154,7 @@ void setSignalArray(IMDHistoWorkspace &self,
 void setErrorSquaredArray(IMDHistoWorkspace &self,
                           const numeric::array &errorSquared) {
   throwIfSizeIncorrect(self, errorSquared, "setErrorSquaredArray");
-  object rav=errorSquared.attr("ravel")("F");
+  object rav = errorSquared.attr("ravel")("F");
   object flattened = rav.attr("flat");
   auto length = len(flattened);
   for (auto i = 0; i < length; ++i) {
@@ -221,7 +221,7 @@ void export_IMDHistoWorkspace() {
 
       .def("getLinearIndex",
            (size_t (IMDHistoWorkspace::*)(size_t, size_t, size_t, size_t)
-            const) &
+                const) &
                IMDHistoWorkspace::getLinearIndex,
            return_value_policy<return_by_value>(),
            "Get the 1D linear index from the 4D array")

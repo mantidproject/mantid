@@ -54,9 +54,12 @@ void SortHKL::init() {
   declareProperty(new WorkspaceProperty<ITableWorkspace>(
                       "StatisticsTable", "StatisticsTable", Direction::Output),
                   "An output table workspace for the statistics of the peaks.");
-  declareProperty(new PropertyWithValue<std::string>("RowName", "Overall", Direction::Input), "name of row");
-  declareProperty("Append", false, "Append to output table workspace if true.\n"
-                                       "If false, new output table workspace (default).");
+  declareProperty(new PropertyWithValue<std::string>("RowName", "Overall",
+                                                     Direction::Input),
+                  "name of row");
+  declareProperty("Append", false,
+                  "Append to output table workspace if true.\n"
+                  "If false, new output table workspace (default).");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -73,13 +76,12 @@ void SortHKL::exec() {
   // Init or append to a table workspace
   bool append = getProperty("Append");
   TableWorkspace_sptr tablews;
-  const  std::string tableName= getProperty("StatisticsTable");
+  const std::string tableName = getProperty("StatisticsTable");
   if (append && AnalysisDataService::Instance().doesExist(tableName)) {
-    tablews = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(tableName);
-  }
-  else{
-    tablews =boost::shared_ptr<TableWorkspace>(
-            new TableWorkspace());
+    tablews =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(tableName);
+  } else {
+    tablews = boost::shared_ptr<TableWorkspace>(new TableWorkspace());
     tablews->addColumn("str", "Resolution Shell");
     tablews->addColumn("int", "No. of Unique Reflections");
     tablews->addColumn("double", "Resolution Min");
@@ -113,13 +115,11 @@ void SortHKL::exec() {
 
   double Chisq = 0.0;
   for (int i = int(NumberPeaks) - 1; i >= 0; --i) {
-    if (peaks[i].getIntensity() == 0.0 ||
-        peaks[i].getHKL() == V3D(0, 0, 0))
+    if (peaks[i].getIntensity() == 0.0 || peaks[i].getHKL() == V3D(0, 0, 0))
       peaksW->removePeak(i);
   }
   NumberPeaks = peaksW->getNumberPeaks();
-  if (NumberPeaks == 0)
-  {
+  if (NumberPeaks == 0) {
     g_log.error() << "Number of peaks should not be 0 for SortHKL.\n";
     return;
   }
@@ -129,14 +129,15 @@ void SortHKL::exec() {
     bool found = false;
     for (int j = i + 1; j < NumberPeaks; j++) {
       V3D hkl2 = peaks[j].getHKL();
-      if (pointGroup->isEquivalent(hkl1, hkl2) ) {
+      if (pointGroup->isEquivalent(hkl1, hkl2)) {
         peaks[j].setHKL(hkl1);
         found = true;
       }
     }
-    if(found) equivalent++;
+    if (found)
+      equivalent++;
   }
-  std::vector<std::pair<std::string, bool> > criteria;
+  std::vector<std::pair<std::string, bool>> criteria;
   // Sort by wavelength
   criteria.push_back(std::pair<std::string, bool>("wavelength", true));
   peaksW->sort(criteria);
@@ -146,8 +147,7 @@ void SortHKL::exec() {
          << peaks[NumberPeaks - 1].getWavelength();
 
   int predictedPeaks = 0;
- if (name.substr(0,4) != "bank")
-  {
+  if (name.substr(0, 4) != "bank") {
     API::IAlgorithm_sptr predictAlg = createChildAlgorithm("PredictPeaks");
     predictAlg->setProperty("InputWorkspace", InPeaksW);
     predictAlg->setPropertyValue("OutputWorkspace", "predictedPeaks");
@@ -263,7 +263,8 @@ void SortHKL::exec() {
   AnalysisDataService::Instance().addOrReplace(tableName, tablews);
 }
 void SortHKL::Outliers(std::vector<double> &data, std::vector<double> &sig2) {
-  if (data.size() < 3)return;
+  if (data.size() < 3)
+    return;
   std::vector<double> Zscore = getZscore(data);
   std::vector<size_t> banned;
   for (size_t i = 0; i < data.size(); ++i) {
@@ -271,11 +272,12 @@ void SortHKL::Outliers(std::vector<double> &data, std::vector<double> &sig2) {
       banned.push_back(i);
       g_log.notice() << "Data (I):";
       for (size_t j = 0; j < data.size(); ++j)
-         g_log.notice() << data[j] << "  " ;
+        g_log.notice() << data[j] << "  ";
       g_log.notice() << "\nData (sigI^2):";
       for (size_t j = 0; j < data.size(); ++j)
-         g_log.notice() << data[j] << "  "  << sig2[j] ;
-      g_log.notice() << "\nOutlier removed (I and sigI^2):" << data[i] << "  "  << sig2[i] << "\n";
+        g_log.notice() << data[j] << "  " << sig2[j];
+      g_log.notice() << "\nOutlier removed (I and sigI^2):" << data[i] << "  "
+                     << sig2[i] << "\n";
     }
   }
   // delete banned peaks

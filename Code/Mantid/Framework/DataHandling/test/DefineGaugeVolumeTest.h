@@ -7,42 +7,40 @@
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
 
-class DefineGaugeVolumeTest : public CxxTest::TestSuite
-{
+class DefineGaugeVolumeTest : public CxxTest::TestSuite {
 private:
   DefineGaugeVolume gauge;
   const std::string sphere;
   const std::string cylinder;
-  
 
 public:
-
-  static DefineGaugeVolumeTest *createSuite() { return new DefineGaugeVolumeTest(); }
+  static DefineGaugeVolumeTest *createSuite() {
+    return new DefineGaugeVolumeTest();
+  }
   static void destroySuite(DefineGaugeVolumeTest *suite) { delete suite; }
-  
 
-  DefineGaugeVolumeTest() :
-    sphere("<sphere id=\"some-sphere\"><centre x=\"0.0\"  y=\"0.0\" z=\"0.0\" /><radius val=\"1.0\" /></sphere>"),
-    cylinder("<infinite-cylinder id=\"shape\"><centre x=\"0.0\" y=\"0.0\" z=\"0.0\" /><axis x=\"0.0\" y=\"0.0\" z=\"1\" /><radius val=\"0.1\" /></infinite-cylinder>")
-  {}
+  DefineGaugeVolumeTest()
+      : sphere("<sphere id=\"some-sphere\"><centre x=\"0.0\"  y=\"0.0\" "
+               "z=\"0.0\" /><radius val=\"1.0\" /></sphere>"),
+        cylinder("<infinite-cylinder id=\"shape\"><centre x=\"0.0\" y=\"0.0\" "
+                 "z=\"0.0\" /><axis x=\"0.0\" y=\"0.0\" z=\"1\" /><radius "
+                 "val=\"0.1\" /></infinite-cylinder>") {}
 
-  void testTheBasics()
-  {
+  void testTheBasics() {
     TS_ASSERT_EQUALS(gauge.name(), "DefineGaugeVolume");
     TS_ASSERT_EQUALS(gauge.version(), 1);
   }
 
-  void testInit()
-  {
+  void testInit() {
     TS_ASSERT_THROWS_NOTHING(gauge.initialize());
     TS_ASSERT(gauge.isInitialized());
   }
 
-  void testInvalidShape()
-  {
+  void testInvalidShape() {
     // Create an 'empty' workspace
-    AnalysisDataService::Instance().add("EmptyWorkspace", WorkspaceFactory::Instance().create(
-        "WorkspaceSingleValue", 1, 1, 1));
+    AnalysisDataService::Instance().add(
+        "EmptyWorkspace",
+        WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1));
 
     gauge.setPropertyValue("Workspace", "EmptyWorkspace");
     gauge.setPropertyValue("ShapeXML", sphere.substr(0, 50));
@@ -51,16 +49,16 @@ public:
     TS_ASSERT(!gauge.isExecuted());
   }
 
-  void testExecute()
-  {
+  void testExecute() {
     gauge.setPropertyValue("Workspace", "EmptyWorkspace");
     gauge.setPropertyValue("ShapeXML", sphere);
 
     TS_ASSERT_THROWS_NOTHING(gauge.execute());
     TS_ASSERT(gauge.isExecuted());
 
-    MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("EmptyWorkspace"));
+    MatrixWorkspace_const_sptr ws =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("EmptyWorkspace"));
 
     TS_ASSERT(ws->run().hasProperty("GaugeVolume"));
     TS_ASSERT_EQUALS(ws->run().getProperty("GaugeVolume")->value(), sphere);
@@ -72,7 +70,6 @@ public:
 
     AnalysisDataService::Instance().remove("EmptyWorkspace");
   }
-
 };
 
 #endif

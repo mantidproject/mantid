@@ -117,46 +117,46 @@ public:
                fakeData->fileNeedsUpdating());
   }
 
-    void test_Creating_Full_MDEvents_Adds_DetectorIDs_To_Workspace() {
-      using Mantid::DataObjects::FakeMD;
-      using Mantid::DataObjects::MDEvent;
-      using Mantid::DataObjects::MDEventsTestHelper::makeAnyMDEW;
-      using Mantid::Kernel::PropertyWithValue;
-      using namespace boost::assign;
+  void test_Creating_Full_MDEvents_Adds_DetectorIDs_To_Workspace() {
+    using Mantid::DataObjects::FakeMD;
+    using Mantid::DataObjects::MDEvent;
+    using Mantid::DataObjects::MDEventsTestHelper::makeAnyMDEW;
+    using Mantid::Kernel::PropertyWithValue;
+    using namespace boost::assign;
 
-      auto fakeData = makeAnyMDEW<MDEvent<3>, 3>(10, 0.0, 10.0, 0);
-      // Give it an instrument
-      auto inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 16);
-      auto ei = fakeData->getExperimentInfo(0);
-      ei->setInstrument(inst);
-      // Give it a run number
-      ei->mutableRun().addProperty(
-          new PropertyWithValue<std::string>("run_number", "12345"), true);
+    auto fakeData = makeAnyMDEW<MDEvent<3>, 3>(10, 0.0, 10.0, 0);
+    // Give it an instrument
+    auto inst =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, 16);
+    auto ei = fakeData->getExperimentInfo(0);
+    ei->setInstrument(inst);
+    // Give it a run number
+    ei->mutableRun().addProperty(
+        new PropertyWithValue<std::string>("run_number", "12345"), true);
 
+    const std::vector<double> peakParams;
+    const std::vector<double> uniformParams = list_of(-1000.0);
+    const int randomSeed(0);
+    const bool randomizeSignal(false);
 
-      const std::vector<double> peakParams;
-      const std::vector<double> uniformParams = list_of(-1000.0);
-      const int randomSeed(0);
-      const bool randomizeSignal(false);
-  
-      FakeMD faker(uniformParams, peakParams, randomSeed, randomizeSignal);
-      faker.fill(fakeData);
+    FakeMD faker(uniformParams, peakParams, randomSeed, randomizeSignal);
+    faker.fill(fakeData);
 
-      TS_ASSERT_EQUALS(1000, fakeData->getNEvents());
+    TS_ASSERT_EQUALS(1000, fakeData->getNEvents());
 
-      Mantid::detid_t expectedIDs[10] = {106, 255, 184, 238, 0,
-                                         32,  77,  255, 37,  60};
-      auto it = fakeData->createIterator();
-      size_t counter(0);
-      while (counter < 10) {
-        int32_t id = it->getInnerDetectorID(0);
-        TS_ASSERT_EQUALS(expectedIDs[counter], id);
-        it->next();
-        ++counter;
-      }
-
-      delete it;
+    Mantid::detid_t expectedIDs[10] = {106, 255, 184, 238, 0,
+                                       32,  77,  255, 37,  60};
+    auto it = fakeData->createIterator();
+    size_t counter(0);
+    while (counter < 10) {
+      int32_t id = it->getInnerDetectorID(0);
+      TS_ASSERT_EQUALS(expectedIDs[counter], id);
+      it->next();
+      ++counter;
     }
+
+    delete it;
+  }
 };
 
 #endif /* MANTID_DATAOBJECTS_FakeMD_H_ */

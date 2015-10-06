@@ -29,7 +29,6 @@ void Logout2::init() {
 
   declareProperty("UserName", "", requireValue,
                   "Name of the user to authenticate as", Direction::Input);
-
 }
 
 void Logout2::exec() {

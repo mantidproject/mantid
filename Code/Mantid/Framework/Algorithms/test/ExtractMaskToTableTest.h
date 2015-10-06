@@ -23,48 +23,47 @@ using namespace Mantid;
 
 using namespace std;
 
-class ExtractMaskToTableTest : public CxxTest::TestSuite
-{
+class ExtractMaskToTableTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ExtractMaskToTableTest *createSuite() { return new ExtractMaskToTableTest(); }
-  static void destroySuite( ExtractMaskToTableTest *suite ) { delete suite; }
+  static ExtractMaskToTableTest *createSuite() {
+    return new ExtractMaskToTableTest();
+  }
+  static void destroySuite(ExtractMaskToTableTest *suite) { delete suite; }
 
   //----------------------------------------------------------------------------------------------
   /** Test method 'subtractVector'
     */
-  void test_method()
-  {
+  void test_method() {
     ExtractMaskToTable alg;
 
     vector<int> vecA;
     vector<int> vecB;
 
     // Case: A constains B
-    for (size_t i = 0; i < 20; ++i)
-    {
-      vecA.push_back(static_cast<int>(i)+5);
+    for (size_t i = 0; i < 20; ++i) {
+      vecA.push_back(static_cast<int>(i) + 5);
     }
 
-    for (size_t i = 0; i < 4; ++i)
-    {
-      vecB.push_back(static_cast<int>(i)*4+1+5);
+    for (size_t i = 0; i < 4; ++i) {
+      vecB.push_back(static_cast<int>(i) * 4 + 1 + 5);
     }
 
     vector<int> vecC = alg.subtractVector(vecA, vecB);
 
-    TS_ASSERT_EQUALS(vecC.size(), vecA.size()-vecB.size());
+    TS_ASSERT_EQUALS(vecC.size(), vecA.size() - vecB.size());
 
-    // Case: A does not contain B; but the intersection between A and B is not empty
+    // Case: A does not contain B; but the intersection between A and B is not
+    // empty
     vecA.clear();
     vecB.clear();
 
-    for (int i = 0; i <10; ++i)
-      vecA.push_back(i*3);
+    for (int i = 0; i < 10; ++i)
+      vecA.push_back(i * 3);
 
     for (int i = 0; i < 10; ++i)
-      vecB.push_back(i+10);
+      vecB.push_back(i + 10);
 
     vecC = alg.subtractVector(vecA, vecB);
 
@@ -75,12 +74,12 @@ public:
     vecB.clear();
 
     for (int i = 0; i < 10; ++i)
-      vecA.push_back(5 + i*2);
+      vecA.push_back(5 + i * 2);
 
     for (int i = 0; i < 3; ++i)
-      vecB.push_back(i+1);
+      vecB.push_back(i + 1);
     for (int i = 0; i < 10; ++i)
-      vecB.push_back(i+10);
+      vecB.push_back(i + 10);
     vecB.push_back(25);
     vecB.push_back(30);
 
@@ -94,8 +93,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test initialization of the algorithm
     */
-  void test_Init()
-  {
+  void test_Init() {
     ExtractMaskToTable alg;
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
@@ -104,16 +102,15 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test for writing a new line to a new table workspace
     */
-  void test_writeToNewTable()
-  {
+  void test_writeToNewTable() {
     // Create a workspace with some detectors masked
     const int nvectors(50), nbins(10);
-    Workspace2D_sptr inputws = WorkspaceCreationHelper::Create2DWorkspace(nvectors, nbins);
+    Workspace2D_sptr inputws =
+        WorkspaceCreationHelper::Create2DWorkspace(nvectors, nbins);
 
     //   Mask every 10th spectra
     std::set<int64_t> maskedIndices;
-    for( int i = 0; i < 50; i += 10 )
-    {
+    for (int i = 0; i < 50; i += 10) {
       maskedIndices.insert(i);
     }
     //   Mask some consecutive detids
@@ -140,7 +137,7 @@ public:
 
     // Validate
     TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
-          AnalysisDataService::Instance().retrieve("MaskTable1"));
+        AnalysisDataService::Instance().retrieve("MaskTable1"));
     TS_ASSERT(outws);
     if (!outws)
       return;
@@ -168,16 +165,15 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test for appending a new line to an existing table workspace
     */
-  void test_appendToExistingTable()
-  {
+  void test_appendToExistingTable() {
     // Create a workspace with some detectors masked
     const int nvectors(50), nbins(10);
-    Workspace2D_sptr inputws = WorkspaceCreationHelper::Create2DWorkspace(nvectors, nbins);
+    Workspace2D_sptr inputws =
+        WorkspaceCreationHelper::Create2DWorkspace(nvectors, nbins);
 
     //   Mask every 10th spectra
     std::set<int64_t> maskedIndices;
-    for( int i = 0; i < 50; i += 10 )
-    {
+    for (int i = 0; i < 50; i += 10) {
       maskedIndices.insert(i);
     }
     //   Mask some consecutive detids
@@ -217,7 +213,7 @@ public:
 
     // Validate
     TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
-          AnalysisDataService::Instance().retrieve("MaskTable2"));
+        AnalysisDataService::Instance().retrieve("MaskTable2"));
     TS_ASSERT(outws);
     if (!outws)
       return;
@@ -258,7 +254,7 @@ public:
     // Execute
     alg1.execute();
     // Returns not executed but doesn't crash
-    TS_ASSERT( !alg1.isExecuted() );
+    TS_ASSERT(!alg1.isExecuted());
 
     // Clean
     AnalysisDataService::Instance().remove("TestWorkspace2");
@@ -267,24 +263,21 @@ public:
     return;
   }
 
-
   /** Test for appending a new line to an existing table workspace
     * Some masked detectors are in the input table workspace
     */
-  void test_appendToPreviousTable()
-  {
+  void test_appendToPreviousTable() {
     // Create a workspace with some detectors masked
     const int nvectors(50), nbins(10);
-    Workspace2D_sptr inputws = WorkspaceCreationHelper::Create2DWorkspace(nvectors, nbins);
+    Workspace2D_sptr inputws =
+        WorkspaceCreationHelper::Create2DWorkspace(nvectors, nbins);
 
     //   Mask every 10th spectra
     std::set<int64_t> maskedIndices;
-    for( int i = 0; i < 50; i += 10 )
-    {
+    for (int i = 0; i < 50; i += 10) {
       maskedIndices.insert(i);
     }
-    for (int i = 22; i < 25; ++i)
-    {
+    for (int i = 22; i < 25; ++i) {
       maskedIndices.insert(i);
     }
     maskedIndices.insert(42);
@@ -326,7 +319,7 @@ public:
 
     // Validate
     TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
-          AnalysisDataService::Instance().retrieve("MaskTable2"));
+        AnalysisDataService::Instance().retrieve("MaskTable2"));
     TS_ASSERT(outws);
     if (!outws)
       return;
@@ -339,7 +332,8 @@ public:
 
     TableRow therow = outws->getRow(2);
     therow >> xxmin >> xxmax >> specstr;
-    cout << "XMin = " << xxmin << ", XMax = " << xxmax << ", Spec list = " << specstr << ".\n";
+    cout << "XMin = " << xxmin << ", XMax = " << xxmax
+         << ", Spec list = " << specstr << ".\n";
     string expectedspec(" 1,  6-8,  11,  21,  31,  41");
     TS_ASSERT_EQUALS(specstr, expectedspec);
     TS_ASSERT_DELTA(xxmin, 1234.0, 0.0001);
@@ -347,7 +341,8 @@ public:
 
     TableRow therow1 = outws->getRow(1);
     therow1 >> xxmin >> xxmax >> specstr;
-    cout << "XMin = " << xxmin << ", XMax = " << xxmax << ", Spec list = " << specstr << ".\n";
+    cout << "XMin = " << xxmin << ", XMax = " << xxmax
+         << ", Spec list = " << specstr << ".\n";
     string expectedspec2("43");
     TS_ASSERT_DELTA(xxmin, 2345.1, 0.0001);
     TS_ASSERT_DELTA(xxmax, 78910.5, 0.0001);
@@ -362,11 +357,12 @@ public:
 
   /** Test for extracting masks from a MaskWorkspace
     */
-  void test_extractFromMaskWorkspace()
-  {
+  void test_extractFromMaskWorkspace() {
     // Create a workspace with Mask
     const int nvectors(50), nbins(10);
-    Workspace2D_sptr inputws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nvectors, nbins);
+    Workspace2D_sptr inputws =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nvectors,
+                                                                     nbins);
     AnalysisDataService::Instance().addOrReplace("TestWorkspace3", inputws);
 
     //   Mask detectors of spectra 1, 6, 11, ..., 31
@@ -378,13 +374,15 @@ public:
     if (!maskalg.isExecuted())
       throw runtime_error("MaskDetectors fails to execute.");
     else
-      cout << "Workspace masked." << "\n";
+      cout << "Workspace masked."
+           << "\n";
 
     Instrument_const_sptr instrument = inputws->getInstrument();
-    for (size_t i = 0; i < instrument->getDetectorIDs().size(); ++i)
-    {
+    for (size_t i = 0; i < instrument->getDetectorIDs().size(); ++i) {
       if (instrument->getDetector(instrument->getDetectorIDs()[i])->isMasked())
-        cout << "Detector : " << instrument->getDetectorIDs()[i] << " is masked." << "\n";
+        cout << "Detector : " << instrument->getDetectorIDs()[i]
+             << " is masked."
+             << "\n";
     }
 
     /*
@@ -400,7 +398,8 @@ public:
     if (!sumalg.isExecuted())
       throw runtime_error("Unable to sum neighbors");
     else
-      cout << "Workspace " << inputws->name() << " has " << inputws->getNumberHistograms() << " spectra.\n";
+      cout << "Workspace " << inputws->name() << " has " <<
+    inputws->getNumberHistograms() << " spectra.\n";
     */
 
     //   Extract to take workspace
@@ -426,7 +425,7 @@ public:
 
     // Validate
     TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
-          AnalysisDataService::Instance().retrieve("MaskTable3"));
+        AnalysisDataService::Instance().retrieve("MaskTable3"));
     TS_ASSERT(outws);
     if (!outws)
       return;
@@ -439,7 +438,8 @@ public:
 
     TableRow therow = outws->getRow(0);
     therow >> xxmin >> xxmax >> specstr;
-    cout << "XMin = " << xxmin << ", XMax = " << xxmax << ", Spec list = " << specstr << ".\n";
+    cout << "XMin = " << xxmin << ", XMax = " << xxmax
+         << ", Spec list = " << specstr << ".\n";
     string expectedspec(" 1-3,  5,  20,  34");
     TS_ASSERT_EQUALS(specstr, expectedspec);
     TS_ASSERT_DELTA(xxmin, 1234.0, 0.0001);
@@ -452,8 +452,6 @@ public:
 
     return;
   }
-
 };
-
 
 #endif /* MANTID_ALGORITHMS_EXTRACTMASKTOTABLETEST_H_ */

@@ -38,11 +38,10 @@ const size_t NUMBERRESERVEDPERMODULE = 1250;
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadVulcanCalFile::LoadVulcanCalFile() : m_instrument(),
-    m_groupingType(VULCAN_OFFSET_BANK),  m_offsetFilename(""),
-    m_badPixFilename(""), m_tofOffsetsWS(), m_offsetsWS(), m_groupWS(),
-    m_maskWS(), m_doAlignEventWS(false), m_eventWS(), m_effLTheta() {
-}
+LoadVulcanCalFile::LoadVulcanCalFile()
+    : m_instrument(), m_groupingType(VULCAN_OFFSET_BANK), m_offsetFilename(""),
+      m_badPixFilename(""), m_tofOffsetsWS(), m_offsetsWS(), m_groupWS(),
+      m_maskWS(), m_doAlignEventWS(false), m_eventWS(), m_effLTheta() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -348,8 +347,8 @@ void LoadVulcanCalFile::generateOffsetsWorkspace() {
 //----------------------------------------------------------------------------------------------
 /** Read VULCAN's offset file
   */
-void
-LoadVulcanCalFile::readOffsetFile(std::map<detid_t, double> &map_detoffset) {
+void LoadVulcanCalFile::readOffsetFile(
+    std::map<detid_t, double> &map_detoffset) {
   // Read file
   ifstream infile(m_offsetFilename.c_str());
   if (!infile.is_open()) {
@@ -376,8 +375,8 @@ LoadVulcanCalFile::readOffsetFile(std::map<detid_t, double> &map_detoffset) {
 /** Process offsets by generating maps
   * Output: Offset workspace : 10^(xi_0 + xi_1 + xi_2)
   */
-void
-LoadVulcanCalFile::processOffsets(std::map<detid_t, double> map_detoffset) {
+void LoadVulcanCalFile::processOffsets(
+    std::map<detid_t, double> map_detoffset) {
   size_t numspec = m_tofOffsetsWS->getNumberHistograms();
 
   // Map from Mantid instrument to VULCAN offset

@@ -27,7 +27,8 @@ using std::size_t;
 DECLARE_FUNCTION(CompositeFunction)
 
 /// Default constructor
-CompositeFunction::CompositeFunction() : IFunction(), m_nParams(0), m_iConstraintFunction(false) {
+CompositeFunction::CompositeFunction()
+    : IFunction(), m_nParams(0), m_iConstraintFunction(false) {
   declareAttribute("NumDeriv", Attribute(false));
 }
 
@@ -180,9 +181,8 @@ void CompositeFunction::setParameter(size_t i, const double &value,
  *  @param i :: The parameter index
  *  @param description :: The new description
  */
-void
-CompositeFunction::setParameterDescription(size_t i,
-                                           const std::string &description) {
+void CompositeFunction::setParameterDescription(
+    size_t i, const std::string &description) {
   size_t iFun = functionIndex(i);
   m_functions[iFun]->setParameterDescription(i - m_paramOffsets[iFun],
                                              description);
@@ -217,9 +217,8 @@ void CompositeFunction::setParameter(const std::string &name,
  * @param name :: The name of the parameter.
  * @param description :: The new description
  */
-void
-CompositeFunction::setParameterDescription(const std::string &name,
-                                           const std::string &description) {
+void CompositeFunction::setParameterDescription(
+    const std::string &name, const std::string &description) {
   std::string pname;
   size_t index;
   parseName(name, index, pname);

@@ -7,41 +7,35 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "ICatTestHelper.h"
 
-
 using namespace Mantid;
 using namespace Mantid::ICat;
 
-class CatalogMyDataSearchTest: public CxxTest::TestSuite
-{
+class CatalogMyDataSearchTest : public CxxTest::TestSuite {
 public:
   /// Skip all unit tests if ICat server is down
-  bool skipTests()
-  {
-    return ICatTestHelper::skipTests();
-  }
+  bool skipTests() { return ICatTestHelper::skipTests(); }
 
-  void testInit()
-  {
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
+  void testInit() {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility",
+                                                        "ISIS");
     CatalogMyDataSearch mydata;
-    TS_ASSERT_THROWS_NOTHING( mydata.initialize());
-    TS_ASSERT( mydata.isInitialized() );
+    TS_ASSERT_THROWS_NOTHING(mydata.initialize());
+    TS_ASSERT(mydata.isInitialized());
   }
-  void testMyDataSearch()
-  {
+  void testMyDataSearch() {
     CatalogMyDataSearch mydata;
 
-    TS_ASSERT( ICatTestHelper::login() );
+    TS_ASSERT(ICatTestHelper::login());
 
-    if ( !mydata.isInitialized() ) mydata.initialize();
+    if (!mydata.isInitialized())
+      mydata.initialize();
 
-    mydata.setPropertyValue("OutputWorkspace","MyInvestigations");
+    mydata.setPropertyValue("OutputWorkspace", "MyInvestigations");
 
     TS_ASSERT_THROWS_NOTHING(mydata.execute());
-    TS_ASSERT( mydata.isExecuted() );
+    TS_ASSERT(mydata.isExecuted());
 
     ICatTestHelper::logout();
   }
-
 };
 #endif

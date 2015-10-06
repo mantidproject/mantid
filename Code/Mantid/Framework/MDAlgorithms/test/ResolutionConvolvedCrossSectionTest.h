@@ -16,65 +16,69 @@
 
 #include <gmock/gmock.h>
 
-class ResolutionConvolvedCrossSectionTest : public CxxTest::TestSuite
-{
+class ResolutionConvolvedCrossSectionTest : public CxxTest::TestSuite {
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ResolutionConvolvedCrossSectionTest *createSuite() { return new ResolutionConvolvedCrossSectionTest(); }
-  static void destroySuite( ResolutionConvolvedCrossSectionTest *suite ) { delete suite; }
-
-  ResolutionConvolvedCrossSectionTest()
-  {
-    using namespace Mantid::MDAlgorithms;
-    ForegroundModelFactory::Instance().subscribe<FakeForegroundModel>("FakeForegroundModel");
-    MDResolutionConvolutionFactory::Instance().subscribe<FakeMDResolutionConvolution>("FakeConvolution");
+  static ResolutionConvolvedCrossSectionTest *createSuite() {
+    return new ResolutionConvolvedCrossSectionTest();
+  }
+  static void destroySuite(ResolutionConvolvedCrossSectionTest *suite) {
+    delete suite;
   }
 
-  ~ResolutionConvolvedCrossSectionTest()
-  {
+  ResolutionConvolvedCrossSectionTest() {
+    using namespace Mantid::MDAlgorithms;
+    ForegroundModelFactory::Instance().subscribe<FakeForegroundModel>(
+        "FakeForegroundModel");
+    MDResolutionConvolutionFactory::Instance()
+        .subscribe<FakeMDResolutionConvolution>("FakeConvolution");
+  }
+
+  ~ResolutionConvolvedCrossSectionTest() {
     using namespace Mantid::MDAlgorithms;
     ForegroundModelFactory::Instance().unsubscribe("FakeForegroundModel");
     MDResolutionConvolutionFactory::Instance().unsubscribe("FakeConvolution");
   }
 
-  void test_functionMD_Does_Not_Throw_With_Foreground_And_ResolutionModel_Attrs_Set()
-  {
+  void
+  test_functionMD_Does_Not_Throw_With_Foreground_And_ResolutionModel_Attrs_Set() {
     using namespace Mantid::MDAlgorithms;
     using namespace Mantid::API;
     Mantid::API::IMDWorkspace_sptr testWS = createTestMDWorkspace();
     Mantid::API::IMDIterator *box = testWS->createIterator();
-    FunctionDomainMD mdDomain(testWS,0,box->getDataSize());
+    FunctionDomainMD mdDomain(testWS, 0, box->getDataSize());
     FunctionValues output;
 
-    IFunction * crossSecResolution = createInitializedTestConvolution();
+    IFunction *crossSecResolution = createInitializedTestConvolution();
     crossSecResolution->setWorkspace(testWS);
     // TODO: Needs a better input workspace
-    //TS_ASSERT_THROWS_NOTHING(crossSecResolution->function(mdDomain, output));
+    // TS_ASSERT_THROWS_NOTHING(crossSecResolution->function(mdDomain, output));
     delete box;
     delete crossSecResolution;
   }
 
-  void test_Function_Acquires_ForegroundModelParameters_When_ResolutionModel_Is_Set()
-  {
+  void
+  test_Function_Acquires_ForegroundModelParameters_When_ResolutionModel_Is_Set() {
     using namespace Mantid::MDAlgorithms;
     using namespace Mantid::API;
-    ResolutionConvolvedCrossSection *crossSection = createInitializedTestConvolution();
+    ResolutionConvolvedCrossSection *crossSection =
+        createInitializedTestConvolution();
     FakeForegroundModel fgModel;
     fgModel.initialize();
 
     TS_ASSERT(fgModel.nParams() > 0);
     TS_ASSERT_EQUALS(crossSection->nParams(), fgModel.nParams());
-    //Check values
+    // Check values
     TS_ASSERT_EQUALS(crossSection->getParameter("FgA0"), fgModel.start1);
     TS_ASSERT_EQUALS(crossSection->getParameter("FgA1"), fgModel.start2);
 
     delete crossSection;
   }
 
-  void test_Function_Acquires_Attributes_From_ResolutionType_And_ForegroundModel_When_Set()
-  {
+  void
+  test_Function_Acquires_Attributes_From_ResolutionType_And_ForegroundModel_When_Set() {
     using namespace Mantid::MDAlgorithms;
     using namespace Mantid::API;
     ResolutionConvolvedCrossSection crossSection;
@@ -87,8 +91,7 @@ public:
     TS_ASSERT_EQUALS(crossSection.nAttributes(), startingNAttrs + 5);
   }
 
-  void test_ResolutionConvolution_Attributes_Are_Passed_On_Correctly()
-  {
+  void test_ResolutionConvolution_Attributes_Are_Passed_On_Correctly() {
     // How this works -> The fake convolution's signal member is
     // set up to throw an exception if the attribute still has
     // its initial value. This should indicate that the setAttribute
@@ -98,10 +101,11 @@ public:
     using namespace Mantid::MDAlgorithms;
     using namespace Mantid::API;
 
-    IFunction * crossSection = createInitializedTestConvolution();
+    IFunction *crossSection = createInitializedTestConvolution();
 
     Mantid::API::IMDWorkspace_sptr testWS = createTestMDWorkspace();
-    auto mdDomain = boost::shared_ptr<FunctionDomainMD>(new FunctionDomainMD(testWS));
+    auto mdDomain =
+        boost::shared_ptr<FunctionDomainMD>(new FunctionDomainMD(testWS));
     FunctionValues output(*mdDomain);
     crossSection->setWorkspace(testWS);
     crossSection->setAttributeValue("ConvAtt0", 100.3);
@@ -113,10 +117,10 @@ public:
   }
 
 private:
-  /// Create a test resolution function, putting the results the the provided pointers
+  /// Create a test resolution function, putting the results the the provided
+  /// pointers
   Mantid::MDAlgorithms::ResolutionConvolvedCrossSection *
-  createInitializedTestConvolution()
-  {
+  createInitializedTestConvolution() {
     using namespace Mantid::MDAlgorithms;
 
     ResolutionConvolvedCrossSection *xSec = new ResolutionConvolvedCrossSection;
@@ -130,15 +134,15 @@ private:
    * Creates a workspace with 4 dims, 3 boxes and 1 event per box = 81 events
     * @return A pointer to the object
    */
-  Mantid::API::IMDWorkspace_sptr createTestMDWorkspace()
-  {
+  Mantid::API::IMDWorkspace_sptr createTestMDWorkspace() {
     using namespace Mantid::DataObjects;
 
     // 4 dims, 3 boxes and 1 event per box = 81 events
-    boost::shared_ptr<MDEventWorkspace<MDEvent<4>,4> > testWS =
-            MDEventsTestHelper::makeMDEWFull<4>(3,0.0,3.,1);
+    boost::shared_ptr<MDEventWorkspace<MDEvent<4>, 4>> testWS =
+        MDEventsTestHelper::makeMDEWFull<4>(3, 0.0, 3., 1);
 
-    testWS->addExperimentInfo(boost::make_shared<Mantid::API::ExperimentInfo>());
+    testWS->addExperimentInfo(
+        boost::make_shared<Mantid::API::ExperimentInfo>());
     return testWS;
   }
 };

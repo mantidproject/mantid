@@ -269,8 +269,8 @@ void SNSLiveEventDataListener::run() {
       std::string bufferParseLog;
       // bufferParse() wants a string where it can save log messages.
       // We don't actually use the messages for anything, though.
-      int packetsParsed = bufferParse( bufferParseLog);
-      bufferParseLog.clear();  // keep the string from growing without bound
+      int packetsParsed = bufferParse(bufferParseLog);
+      bufferParseLog.clear(); // keep the string from growing without bound
       if (packetsParsed == 0) {
         // No packets were parsed.  Sleep a little to let some data accumulate
         // before calling read again.  (Keeps us from spinlocking the cpu...)
@@ -1495,9 +1495,8 @@ ILiveListener::RunStatus SNSLiveEventDataListener::runStatus() {
 // are
 // older than we requested.)
 // Returns false if the packet should be processed, true if is should be ignored
-bool
-SNSLiveEventDataListener::ignorePacket(const ADARA::PacketHeader &hdr,
-                                       const ADARA::RunStatus::Enum status) {
+bool SNSLiveEventDataListener::ignorePacket(
+    const ADARA::PacketHeader &hdr, const ADARA::RunStatus::Enum status) {
   // Since we're filtering based on time (either the absolute timestamp or
   // nothing
   // before the start of the most recent run), once we've determined a given

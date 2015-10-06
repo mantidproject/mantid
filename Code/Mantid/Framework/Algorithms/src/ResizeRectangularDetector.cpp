@@ -5,6 +5,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -48,8 +49,8 @@ const std::string ResizeRectangularDetector::category() const {
 void ResizeRectangularDetector::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
-      "Workspace", "Anonymous", Direction::InOut));
+  declareProperty(new WorkspaceProperty<Workspace>("Workspace", "Anonymous",
+                                                   Direction::InOut));
   declareProperty("ComponentName", "",
                   "The name of the RectangularDetector to resize.");
   declareProperty("ScaleX", 1.0,
@@ -62,7 +63,21 @@ void ResizeRectangularDetector::init() {
 /** Execute the algorithm.
  */
 void ResizeRectangularDetector::exec() {
-  MatrixWorkspace_sptr WS = getProperty("Workspace");
+  // Get the input workspace
+  Workspace_sptr ws = getProperty("Workspace");
+  MatrixWorkspace_sptr inputW =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  DataObjects::PeaksWorkspace_sptr inputP =
+      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
+
+  // Get some stuff from the input workspace
+  Instrument_sptr inst;
+  if (inputW) {
+    inst = boost::const_pointer_cast<Instrument>(inputW->getInstrument());
+  } else if (inputP) {
+    inst = boost::const_pointer_cast<Instrument>(inputP->getInstrument());
+  }
+
   std::string ComponentName = getPropertyValue("ComponentName");
   double ScaleX = getProperty("ScaleX");
   double ScaleY = getProperty("ScaleY");
@@ -70,7 +85,6 @@ void ResizeRectangularDetector::exec() {
   if (ComponentName.empty())
     throw std::runtime_error("You must specify a ComponentName.");
 
-  Instrument_const_sptr inst = WS->getInstrument();
   IComponent_const_sptr comp;
 
   comp = inst->getComponentByName(ComponentName);
@@ -83,13 +97,21 @@ void ResizeRectangularDetector::exec() {
   if (!det)
     throw std::runtime_error("Component with name " + ComponentName +
                              " is not a RectangularDetector.");
+  if (inputW) {
+    Geometry::ParameterMap &pmap = inputW->instrumentParameters();
+    // Add a parameter for the new scale factors
+    pmap.addDouble(det->getComponentID(), "scalex", ScaleX);
+    pmap.addDouble(det->getComponentID(), "scaley", ScaleY);
 
-  Geometry::ParameterMap &pmap = WS->instrumentParameters();
-  // Add a parameter for the new scale factors
-  pmap.addDouble(det->getComponentID(), "scalex", ScaleX);
-  pmap.addDouble(det->getComponentID(), "scaley", ScaleY);
+    pmap.clearPositionSensitiveCaches();
+  } else if (inputP) {
+    Geometry::ParameterMap &pmap = inputP->instrumentParameters();
+    // Add a parameter for the new scale factors
+    pmap.addDouble(det->getComponentID(), "scalex", ScaleX);
+    pmap.addDouble(det->getComponentID(), "scaley", ScaleY);
 
-  pmap.clearPositionSensitiveCaches();
+    pmap.clearPositionSensitiveCaches();
+  }
 }
 
 } // namespace Mantid

@@ -15,15 +15,13 @@ using namespace Mantid::Kernel::Strings;
    \brief test of Strings components
    \date September 2005
    \author S.Ansell
-  
+
    Checks the basic string operations in Strings
 */
 
-class StringsTest : public CxxTest::TestSuite
-{
-public: 
-  void test_replace()
-  {
+class StringsTest : public CxxTest::TestSuite {
+public:
+  void test_replace() {
     std::string in = "hello\nI hate\nnewlines.\n";
     std::string out = replace(in, "\n", " ");
     TS_ASSERT_EQUALS(out, "hello I hate newlines. ");
@@ -31,11 +29,11 @@ public:
     TS_ASSERT_EQUALS(replace("bla", "bla", ""), "");
     TS_ASSERT_EQUALS(replace("FirstSecond", "First", ""), "Second");
     TS_ASSERT_EQUALS(replace("FirstSecond", "Second", ""), "First");
-    TS_ASSERT_EQUALS(replace("Hello You", " ", " I am stupid, "), "Hello I am stupid, You");
+    TS_ASSERT_EQUALS(replace("Hello You", " ", " I am stupid, "),
+                     "Hello I am stupid, You");
   }
 
-  void test_replaceAll()
-  {
+  void test_replaceAll() {
     const std::string input = "Lots and lots of spaces in this sentence.";
     std::string out = replaceAll(input, " ", "_");
     std::string expected = "Lots_and_lots_of_spaces_in_this_sentence.";
@@ -46,87 +44,83 @@ public:
     TS_ASSERT_EQUALS(out, expected);
   }
 
-  void testSplitEmptyPath(){
-      std::vector<std::string> result;
-      TSM_ASSERT(" should return 0",!split_path("",result));	
-      TSM_ASSERT(" final path should be emtpy",result.empty());
+  void testSplitEmptyPath() {
+    std::vector<std::string> result;
+    TSM_ASSERT(" should return 0", !split_path("", result));
+    TSM_ASSERT(" final path should be emtpy", result.empty());
   }
-  void testSplitRemoveSpaces(){
-      std::vector<std::string> result;
-      TSM_ASSERT_EQUALS(" should return 1",1,split_path("aaaa bbbb",result));	
-      TSM_ASSERT_EQUALS("should replace spaces","aaaa_bbbb",result[0]);
+  void testSplitRemoveSpaces() {
+    std::vector<std::string> result;
+    TSM_ASSERT_EQUALS(" should return 1", 1, split_path("aaaa bbbb", result));
+    TSM_ASSERT_EQUALS("should replace spaces", "aaaa_bbbb", result[0]);
   }
-  void testSplitIn2(){
-      std::vector<std::string> result;
-      TSM_ASSERT_EQUALS("should split in 2",2,split_path("aaaa\\bbbbb",result));	
-      TS_ASSERT_EQUALS("aaaa",result[0]);	
-      TS_ASSERT_EQUALS("bbbbb",result[1]);	
-
+  void testSplitIn2() {
+    std::vector<std::string> result;
+    TSM_ASSERT_EQUALS("should split in 2", 2,
+                      split_path("aaaa\\bbbbb", result));
+    TS_ASSERT_EQUALS("aaaa", result[0]);
+    TS_ASSERT_EQUALS("bbbbb", result[1]);
   }
-  void testSplitIn2IgnoreEdges(){
-      std::vector<std::string> result;
-      TSM_ASSERT_EQUALS("should split in 2",2,split_path("/aaaa\\bbbbb/",result));	
-      TS_ASSERT_EQUALS("aaaa",result[0]);	
-      TS_ASSERT_EQUALS("bbbbb",result[1]);	
-
+  void testSplitIn2IgnoreEdges() {
+    std::vector<std::string> result;
+    TSM_ASSERT_EQUALS("should split in 2", 2,
+                      split_path("/aaaa\\bbbbb/", result));
+    TS_ASSERT_EQUALS("aaaa", result[0]);
+    TS_ASSERT_EQUALS("bbbbb", result[1]);
   }
-  void testSplitIn3IgnoreEdgesDelete1(){
-      std::vector<std::string> result;
-      TSM_ASSERT_EQUALS("should split in 2",2,split_path("/aaaa\\bbbbb/./cccccc/../",result));	
-      TS_ASSERT_EQUALS("aaaa",result[0]);	
-      TS_ASSERT_EQUALS("bbbbb",result[1]);	
-
+  void testSplitIn3IgnoreEdgesDelete1() {
+    std::vector<std::string> result;
+    TSM_ASSERT_EQUALS("should split in 2", 2,
+                      split_path("/aaaa\\bbbbb/./cccccc/../", result));
+    TS_ASSERT_EQUALS("aaaa", result[0]);
+    TS_ASSERT_EQUALS("bbbbb", result[1]);
   }
-  void testSplitIn3IgnoreEdgesDelete1b(){
-      std::vector<std::string> result;
-      TSM_ASSERT_EQUALS("should split in 3",3,split_path("/aaaa\\bbbbb/./cccccc/../ee",result));	
-      TS_ASSERT_EQUALS("aaaa",result[0]);	
-      TS_ASSERT_EQUALS("bbbbb",result[1]);	
-      TS_ASSERT_EQUALS("ee",result[2]);	
-
+  void testSplitIn3IgnoreEdgesDelete1b() {
+    std::vector<std::string> result;
+    TSM_ASSERT_EQUALS("should split in 3", 3,
+                      split_path("/aaaa\\bbbbb/./cccccc/../ee", result));
+    TS_ASSERT_EQUALS("aaaa", result[0]);
+    TS_ASSERT_EQUALS("bbbbb", result[1]);
+    TS_ASSERT_EQUALS("ee", result[2]);
   }
-  void testSplitExpandFullPath(){
-      Poco::Path test;
-      test = test.absolute();
-      std::string wkPath = test.toString();
-      std::vector<std::string> base;
-      size_t depth= split_path(wkPath,base);
+  void testSplitExpandFullPath() {
+    Poco::Path test;
+    test = test.absolute();
+    std::string wkPath = test.toString();
+    std::vector<std::string> base;
+    size_t depth = split_path(wkPath, base);
 
-      std::vector<std::string> result;
-      TS_ASSERT_EQUALS(depth+2,split_path("./aaaa\\bbbbb/./",result));	
-      TS_ASSERT_EQUALS("aaaa",result[depth]);	
-      TS_ASSERT_EQUALS("bbbbb",result[depth+1]);	
-
-
+    std::vector<std::string> result;
+    TS_ASSERT_EQUALS(depth + 2, split_path("./aaaa\\bbbbb/./", result));
+    TS_ASSERT_EQUALS("aaaa", result[depth]);
+    TS_ASSERT_EQUALS("bbbbb", result[depth + 1]);
   }
-  void testSplitExpandMoveUpPath(){
-      Poco::Path test;
-      test = test.absolute();
-      std::string wkPath = test.toString();
-      std::vector<std::string> base;
-      size_t depth= split_path(wkPath,base);
+  void testSplitExpandMoveUpPath() {
+    Poco::Path test;
+    test = test.absolute();
+    std::string wkPath = test.toString();
+    std::vector<std::string> base;
+    size_t depth = split_path(wkPath, base);
 
-      std::vector<std::string> result;
-      TS_ASSERT_EQUALS(depth+1,split_path("../aaaa\\bbbbb/./",result));	
-      TS_ASSERT_EQUALS("aaaa",result[depth-1]);	
-      TS_ASSERT_EQUALS("bbbbb",result[depth]);	
-
-
+    std::vector<std::string> result;
+    TS_ASSERT_EQUALS(depth + 1, split_path("../aaaa\\bbbbb/./", result));
+    TS_ASSERT_EQUALS("aaaa", result[depth - 1]);
+    TS_ASSERT_EQUALS("bbbbb", result[depth]);
   }
-  void testSplitTrhowOutOfrange(){
-      std::vector<std::string> result;
-      TSM_ASSERT_EQUALS("should return empty path",0,split_path("/aaaa\\bbbbb/../../",result));	
-      TSM_ASSERT_EQUALS("should return empty path",0,result.size());
-      TSM_ASSERT_THROWS(" this path should go out of range",split_path("/aaaa\\bbbbb/../../../",result),std::invalid_argument);
-
+  void testSplitTrhowOutOfrange() {
+    std::vector<std::string> result;
+    TSM_ASSERT_EQUALS("should return empty path", 0,
+                      split_path("/aaaa\\bbbbb/../../", result));
+    TSM_ASSERT_EQUALS("should return empty path", 0, result.size());
+    TSM_ASSERT_THROWS(" this path should go out of range",
+                      split_path("/aaaa\\bbbbb/../../../", result),
+                      std::invalid_argument);
   }
-  void testSkipLine()
-  {
+  void testSkipLine() {
     TS_ASSERT(skipLine("#blah blah"));
     TS_ASSERT(!skipLine("blah blah"));
   }
-  void testpeekLine()
-  {
+  void testpeekLine() {
     std::istringstream text1("blah blah\nfoo bar\n");
     TS_ASSERT(peekLine(text1) == "blah blah");
     TS_ASSERT(peekLine(text1) == "blah blah");
@@ -135,8 +129,7 @@ public:
     TS_ASSERT(peekLine(text2) == "blah blah");
     TS_ASSERT(peekLine(text2) == "blah blah");
   }
-  void testStrip()
-  {
+  void testStrip() {
     TS_ASSERT(strip("blah") == "blah");
     TS_ASSERT(strip("   blah") == "blah");
     TS_ASSERT(strip("\nblah \t  ") == "blah");
@@ -152,76 +145,71 @@ public:
      when the pattern exists.
   */
   {
-    std::string Ln="Name wav wavelength other stuff";
-    int retVal=extractWord(Ln,"wavelengt",4);
+    std::string Ln = "Name wav wavelength other stuff";
+    int retVal = extractWord(Ln, "wavelengt", 4);
     TS_ASSERT_EQUALS(retVal, 1);
-    TS_ASSERT_EQUALS(Ln, "Name wav  other stuff"); 
+    TS_ASSERT_EQUALS(Ln, "Name wav  other stuff");
   }
 
-  void testConvert()
-  {
-        
+  void testConvert() {
+
     int i;
-    //valid double convert
-    TS_ASSERT_EQUALS(convert("   568   ",i), 1);
-    TS_ASSERT_EQUALS(i,568);
+    // valid double convert
+    TS_ASSERT_EQUALS(convert("   568   ", i), 1);
+    TS_ASSERT_EQUALS(i, 568);
     double X;
-    //valid double convert
-    TS_ASSERT_EQUALS(convert("   3.4   ",X), 1);
-    TS_ASSERT_EQUALS(X,3.4);
-    X=9.0;
-    //invalid leading stuff
-    TS_ASSERT_EQUALS(convert("   e3.4   ",X),0);
-    TS_ASSERT_EQUALS(X,9.0);
-    //invalid trailing stuff
-    TS_ASSERT_EQUALS(convert("   3.4g   ",X),0);
-    TS_ASSERT_EQUALS(X,9.0);
+    // valid double convert
+    TS_ASSERT_EQUALS(convert("   3.4   ", X), 1);
+    TS_ASSERT_EQUALS(X, 3.4);
+    X = 9.0;
+    // invalid leading stuff
+    TS_ASSERT_EQUALS(convert("   e3.4   ", X), 0);
+    TS_ASSERT_EQUALS(X, 9.0);
+    // invalid trailing stuff
+    TS_ASSERT_EQUALS(convert("   3.4g   ", X), 0);
+    TS_ASSERT_EQUALS(X, 9.0);
     std::string Y;
-    TS_ASSERT_EQUALS(convert("   3.4y   ",Y),1);
-    TS_ASSERT_EQUALS(Y,"3.4y");
+    TS_ASSERT_EQUALS(convert("   3.4y   ", Y), 1);
+    TS_ASSERT_EQUALS(Y, "3.4y");
   }
 
-  void testSection()
-  {
-    std::string Mline="V 1 tth ";
+  void testSection() {
+    std::string Mline = "V 1 tth ";
     std::string Y;
-    TS_ASSERT_EQUALS(section(Mline,Y),1);
-    TS_ASSERT_EQUALS(Y,"V");
-    TS_ASSERT_EQUALS(Mline," 1 tth ");  // Note the non-remove spc
+    TS_ASSERT_EQUALS(section(Mline, Y), 1);
+    TS_ASSERT_EQUALS(Y, "V");
+    TS_ASSERT_EQUALS(Mline, " 1 tth "); // Note the non-remove spc
   }
 
-  void testSectPartNum()
-  {
+  void testSectPartNum() {
     double X;
-    std::string NTest="   3.4   ";
-    TS_ASSERT_EQUALS(sectPartNum(NTest,X),1);
-    TS_ASSERT_EQUALS(X,3.4);
-    X=9.0;
-    NTest="   3.4g   ";
-    TS_ASSERT_EQUALS(sectPartNum(NTest,X),1);
-    TS_ASSERT_EQUALS(X,3.4);
-    X=9.0;
-    NTest="   e3.4   ";
-    TS_ASSERT_DIFFERS(sectPartNum(NTest,X),1);
-    TS_ASSERT_EQUALS(X,9.0);
+    std::string NTest = "   3.4   ";
+    TS_ASSERT_EQUALS(sectPartNum(NTest, X), 1);
+    TS_ASSERT_EQUALS(X, 3.4);
+    X = 9.0;
+    NTest = "   3.4g   ";
+    TS_ASSERT_EQUALS(sectPartNum(NTest, X), 1);
+    TS_ASSERT_EQUALS(X, 3.4);
+    X = 9.0;
+    NTest = "   e3.4   ";
+    TS_ASSERT_DIFFERS(sectPartNum(NTest, X), 1);
+    TS_ASSERT_EQUALS(X, 9.0);
   }
 
-  void test_SplitToKeyValuePairs_Returns_Empty_Map_For_Empty_String()
-  {
+  void test_SplitToKeyValuePairs_Returns_Empty_Map_For_Empty_String() {
     auto keyValues = splitToKeyValues("");
 
     TS_ASSERT(keyValues.empty());
   }
 
-  void test_SplitToKeyValuePairs_Returns_Empty_Map_For_String_With_No_Values()
-  {
+  void test_SplitToKeyValuePairs_Returns_Empty_Map_For_String_With_No_Values() {
     auto keyValues = splitToKeyValues("key,key,key");
 
     TS_ASSERT(keyValues.empty());
   }
 
-  void test_SplitToKeyValuePairs_Uses_Equals_And_Comma_As_Separators_By_Default()
-  {
+  void
+  test_SplitToKeyValuePairs_Uses_Equals_And_Comma_As_Separators_By_Default() {
     auto keyValues = splitToKeyValues("key1=value1, key2=value2");
 
     TS_ASSERT_EQUALS(keyValues.size(), 2);
@@ -229,8 +217,7 @@ public:
     TS_ASSERT_EQUALS(keyValues.at("key2"), "value2");
   }
 
-  void test_SplitToKeyValuePairs_Uses_KeyValueSep_If_Given()
-  {
+  void test_SplitToKeyValuePairs_Uses_KeyValueSep_If_Given() {
     auto keyValues = splitToKeyValues("key1@value1, key2@value2", "@");
 
     TS_ASSERT_EQUALS(keyValues.size(), 2);
@@ -238,8 +225,7 @@ public:
     TS_ASSERT_EQUALS(keyValues.at("key2"), "value2");
   }
 
-  void test_SplitToKeyValuePairs_Uses_KeyValueSep_And_ListSep_If_Given()
-  {
+  void test_SplitToKeyValuePairs_Uses_KeyValueSep_And_ListSep_If_Given() {
     auto keyValues = splitToKeyValues("key1@value1: key2@value2", "@", ":");
 
     TS_ASSERT_EQUALS(keyValues.size(), 2);
@@ -247,8 +233,7 @@ public:
     TS_ASSERT_EQUALS(keyValues.at("key2"), "value2");
   }
 
-  void test_SplitToKeyValuePairs_Does_Not_Ignore_Spaces_Within_Key_Or_Value()
-  {
+  void test_SplitToKeyValuePairs_Does_Not_Ignore_Spaces_Within_Key_Or_Value() {
     auto keyValues = splitToKeyValues("key 1@value1: key2@value 2", "@", ":");
 
     TS_ASSERT_EQUALS(keyValues.size(), 2);
@@ -256,21 +241,19 @@ public:
     TS_ASSERT_EQUALS(keyValues.at("key2"), "value 2");
   }
 
-  void test_SplitToKeyValuePairs_Ignores_Items_Without_A_Key_Or_Value()
-  {
+  void test_SplitToKeyValuePairs_Ignores_Items_Without_A_Key_Or_Value() {
     auto keyValues = splitToKeyValues("key1=,key2=value2,=value3");
 
     TS_ASSERT_EQUALS(keyValues.size(), 1);
     TS_ASSERT_EQUALS(keyValues.at("key2"), "value2");
   }
 
-  void test_join()
-  {
+  void test_join() {
     std::vector<std::string> v;
     std::string out;
 
     out = join(v.begin(), v.end(), ",");
-    TS_ASSERT_EQUALS( out, "");
+    TS_ASSERT_EQUALS(out, "");
 
     v.push_back("Help");
     v.push_back("Me");
@@ -281,39 +264,35 @@ public:
     v.push_back("Test");
 
     out = join(v.begin(), v.end(), ",");
-    TS_ASSERT_EQUALS( out, "Help,Me,I'm,Stuck,Inside,A,Test");
+    TS_ASSERT_EQUALS(out, "Help,Me,I'm,Stuck,Inside,A,Test");
   }
 
-  void test_endsWithInt()
-  {
-    TS_ASSERT_EQUALS( endsWithInt("pixel22"), 22);
-    TS_ASSERT_EQUALS( endsWithInt("pixel000123"), 123);
-    TS_ASSERT_EQUALS( endsWithInt("pixel99"), 99);
-    TS_ASSERT_EQUALS( endsWithInt("bla123bla"), -1);
-    TS_ASSERT_EQUALS( endsWithInt(""), -1);
-    TS_ASSERT_EQUALS( endsWithInt("123bla"), -1);
-    TS_ASSERT_EQUALS( endsWithInt("123b"), -1);
-    TS_ASSERT_EQUALS( endsWithInt("123"), 123);
+  void test_endsWithInt() {
+    TS_ASSERT_EQUALS(endsWithInt("pixel22"), 22);
+    TS_ASSERT_EQUALS(endsWithInt("pixel000123"), 123);
+    TS_ASSERT_EQUALS(endsWithInt("pixel99"), 99);
+    TS_ASSERT_EQUALS(endsWithInt("bla123bla"), -1);
+    TS_ASSERT_EQUALS(endsWithInt(""), -1);
+    TS_ASSERT_EQUALS(endsWithInt("123bla"), -1);
+    TS_ASSERT_EQUALS(endsWithInt("123b"), -1);
+    TS_ASSERT_EQUALS(endsWithInt("123"), 123);
   }
 
+  void test_isMember() {
+    std::vector<std::string> group(5, "");
+    group[0] = "A";
+    group[1] = "A1";
+    group[2] = "B0";
+    group[3] = "C";
 
-  void test_isMember()
-  {
-      std::vector<std::string> group(5,"");
-      group[0]="A";
-      group[1]="A1";
-      group[2]="B0";
-      group[3]="C";
-
-      TS_ASSERT_EQUALS(1,isMember(group,"A1"));
-      TS_ASSERT_EQUALS(-1,isMember(group," "));
-      TS_ASSERT_EQUALS(-1,isMember(group,"nothing"));
-      TS_ASSERT_EQUALS(0,isMember(group,"A"));
-      TS_ASSERT_EQUALS(3,isMember(group,"C"));
+    TS_ASSERT_EQUALS(1, isMember(group, "A1"));
+    TS_ASSERT_EQUALS(-1, isMember(group, " "));
+    TS_ASSERT_EQUALS(-1, isMember(group, "nothing"));
+    TS_ASSERT_EQUALS(0, isMember(group, "A"));
+    TS_ASSERT_EQUALS(3, isMember(group, "C"));
   }
 
-  void test_parseRange_defaultSimple()
-  {
+  void test_parseRange_defaultSimple() {
     std::vector<int> result;
     TS_ASSERT_THROWS_NOTHING(result = parseRange("3,1,4,0,2,5"));
     std::vector<int> expected(6);
@@ -326,21 +305,20 @@ public:
     TS_ASSERT_EQUALS(result, expected);
   }
 
-  void test_parseRange_defaultRanges()
-  {
+  void test_parseRange_defaultRanges() {
     std::vector<int> result;
-    TS_ASSERT_THROWS_NOTHING(result = parseRange("  1, 2 - 5,   6   ,7,8,    9,10-12"));
+    TS_ASSERT_THROWS_NOTHING(
+        result = parseRange("  1, 2 - 5,   6   ,7,8,    9,10-12"));
 
     std::vector<int> expected;
     expected.reserve(12);
-    for(int i = 1; i <= 12; i++)
+    for (int i = 1; i <= 12; i++)
       expected.push_back(i);
 
     TS_ASSERT_EQUALS(result, expected);
   }
 
-  void test_parseRange_emptyElements()
-  {
+  void test_parseRange_emptyElements() {
     std::vector<int> expected(3);
     expected[0] = 1;
     expected[1] = 2;
@@ -359,97 +337,101 @@ public:
     TS_ASSERT_EQUALS(result3, expected);
   }
 
-  void test_parseRange_mapStyleSimple()
-  {
+  void test_parseRange_mapStyleSimple() {
     std::vector<int> result;
-    TS_ASSERT_THROWS_NOTHING(result = parseRange("   52   53   54   55   56   57   58   192", " "));
+    TS_ASSERT_THROWS_NOTHING(
+        result = parseRange("   52   53   54   55   56   57   58   192", " "));
 
     std::vector<int> expected;
     expected.reserve(8);
-    for(int i = 52; i <= 58; i++)
+    for (int i = 52; i <= 58; i++)
       expected.push_back(i);
     expected.push_back(192);
 
     TS_ASSERT_EQUALS(result, expected);
   }
 
-  void test_parseRange_mapStyleRanges()
-  {
+  void test_parseRange_mapStyleRanges() {
     std::vector<int> result;
-    TS_ASSERT_THROWS_NOTHING(result = parseRange("  1- 3 4    5 - 7  8 -10  ", " "));
+    TS_ASSERT_THROWS_NOTHING(result =
+                                 parseRange("  1- 3 4    5 - 7  8 -10  ", " "));
 
     std::vector<int> expected;
     expected.reserve(10);
-    for(int i = 1; i <= 10; i++)
+    for (int i = 1; i <= 10; i++)
       expected.push_back(i);
 
     TS_ASSERT_EQUALS(result, expected);
   }
 
-  void test_parseRange_customRangeSep()
-  {
+  void test_parseRange_customRangeSep() {
     std::vector<int> result;
-    TS_ASSERT_THROWS_NOTHING(result = parseRange("1-2,3:5,6-7,8:10", ",","-:"));
+    TS_ASSERT_THROWS_NOTHING(result =
+                                 parseRange("1-2,3:5,6-7,8:10", ",", "-:"));
 
     std::vector<int> expected;
     expected.reserve(10);
-    for(int i = 1; i <= 10; i++)
+    for (int i = 1; i <= 10; i++)
       expected.push_back(i);
 
     TS_ASSERT_EQUALS(result, expected);
   }
 
-  void test_parseRange_emptyString()
-  {
+  void test_parseRange_emptyString() {
     std::vector<int> result;
     TS_ASSERT_THROWS_NOTHING(result = parseRange(""));
     TS_ASSERT(result.empty());
   }
 
-  void test_parseRange_invalidElement()
-  {
-    TS_ASSERT_THROWS_EQUALS(parseRange("1,2,3,a,5"), const std::invalid_argument& e, 
-                            e.what(), std::string("Invalid element: a"));
+  void test_parseRange_invalidElement() {
+    TS_ASSERT_THROWS_EQUALS(parseRange("1,2,3,a,5"),
+                            const std::invalid_argument &e, e.what(),
+                            std::string("Invalid element: a"));
 
-    TS_ASSERT_THROWS_EQUALS(parseRange("1|,|3|4", "|"), const std::invalid_argument& e, 
-                            e.what(), std::string("Invalid element: ,"));
-  } 
-
-  void test_parseRange_invalidRange()
-  {
-    TS_ASSERT_THROWS_EQUALS(parseRange("1,2,3,-5,6"), const std::invalid_argument& e, 
-                            e.what(), std::string("Invalid range: -5"));
-
-    TS_ASSERT_THROWS_EQUALS(parseRange("-3 4", " "), const std::invalid_argument& e, 
-                            e.what(), std::string("Invalid range: -3"));
-
-    TS_ASSERT_THROWS_EQUALS(parseRange("1,2,a-4,5"), const std::invalid_argument& e, 
-                            e.what(), std::string("Invalid range: a-4"));
-
-    TS_ASSERT_THROWS_EQUALS(parseRange("1,2-,5,6"), const std::invalid_argument& e, 
-                            e.what(), std::string("Invalid range: 2-"));
-
-    TS_ASSERT_THROWS_EQUALS(parseRange("1 5-", " "), const std::invalid_argument& e, 
-                            e.what(), std::string("Invalid range: 5-"));
+    TS_ASSERT_THROWS_EQUALS(parseRange("1|,|3|4", "|"),
+                            const std::invalid_argument &e, e.what(),
+                            std::string("Invalid element: ,"));
   }
 
-  void test_parseRange_multipleRangeSep()
-  {
-    TS_ASSERT_THROWS_EQUALS(parseRange("1--5 6  7", " "), const std::invalid_argument& e, 
-                            e.what(), std::string("Multiple range separators: 1--5"));
+  void test_parseRange_invalidRange() {
+    TS_ASSERT_THROWS_EQUALS(parseRange("1,2,3,-5,6"),
+                            const std::invalid_argument &e, e.what(),
+                            std::string("Invalid range: -5"));
 
-    TS_ASSERT_THROWS_EQUALS(parseRange("----"), const std::invalid_argument& e, 
-                            e.what(), std::string("Multiple range separators: ----"));
+    TS_ASSERT_THROWS_EQUALS(parseRange("-3 4", " "),
+                            const std::invalid_argument &e, e.what(),
+                            std::string("Invalid range: -3"));
+
+    TS_ASSERT_THROWS_EQUALS(parseRange("1,2,a-4,5"),
+                            const std::invalid_argument &e, e.what(),
+                            std::string("Invalid range: a-4"));
+
+    TS_ASSERT_THROWS_EQUALS(parseRange("1,2-,5,6"),
+                            const std::invalid_argument &e, e.what(),
+                            std::string("Invalid range: 2-"));
+
+    TS_ASSERT_THROWS_EQUALS(parseRange("1 5-", " "),
+                            const std::invalid_argument &e, e.what(),
+                            std::string("Invalid range: 5-"));
   }
 
-  void test_parseRange_reversedRange()
-  {
-    TS_ASSERT_THROWS_EQUALS(parseRange("5-1,6,7"), const std::invalid_argument& e, 
-                            e.what(), std::string("Range boundaries are reversed: 5-1"));
+  void test_parseRange_multipleRangeSep() {
+    TS_ASSERT_THROWS_EQUALS(parseRange("1--5 6  7", " "),
+                            const std::invalid_argument &e, e.what(),
+                            std::string("Multiple range separators: 1--5"));
+
+    TS_ASSERT_THROWS_EQUALS(parseRange("----"), const std::invalid_argument &e,
+                            e.what(),
+                            std::string("Multiple range separators: ----"));
   }
 
-  void test_toString_vector_of_ints()
-  {
+  void test_parseRange_reversedRange() {
+    TS_ASSERT_THROWS_EQUALS(parseRange("5-1,6,7"),
+                            const std::invalid_argument &e, e.what(),
+                            std::string("Range boundaries are reversed: 5-1"));
+  }
+
+  void test_toString_vector_of_ints() {
     std::vector<int> sortedInts;
     sortedInts.push_back(1);
     sortedInts.push_back(2);
@@ -462,7 +444,6 @@ public:
 
     TS_ASSERT_EQUALS(std::string("1-3,5-6,8"), result);
   }
-
 };
 
-#endif //MANTID_SUPPORTTEST_H_
+#endif // MANTID_SUPPORTTEST_H_

@@ -52,8 +52,7 @@ void UploadRemoteFile2::exec() {
 
   const std::string comp = getPropertyValue("ComputeResource");
   Mantid::API::IRemoteJobManager_sptr jobManager =
-      Mantid::API::RemoteJobManagerFactory::Instance().create(
-          comp);
+      Mantid::API::RemoteJobManagerFactory::Instance().create(comp);
 
   const std::string tid = getPropertyValue("TransactionID");
   const std::string remote = getPropertyValue("RemoteFileName");
@@ -61,8 +60,8 @@ void UploadRemoteFile2::exec() {
   jobManager->uploadRemoteFile(tid, remote, local);
 
   g_log.information() << "Uploaded '" << getPropertyValue("RemoteFileName")
-                      << "' to '" << getPropertyValue("LocalFileName")
-                      << "'" << " on the compute resource " << comp << std::endl;
+                      << "' to '" << getPropertyValue("LocalFileName") << "'"
+                      << " on the compute resource " << comp << std::endl;
 }
 
 } // end namespace RemoteAlgorithms

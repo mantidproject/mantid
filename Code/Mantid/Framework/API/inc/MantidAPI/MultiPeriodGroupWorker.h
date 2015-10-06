@@ -46,8 +46,7 @@ namespace API {
 class DLLExport MultiPeriodGroupWorker {
 public:
   /// Convenience typdef for workspace names.
-  typedef std::vector<WorkspaceGroup_sptr>
-      VecWSGroupType;
+  typedef std::vector<WorkspaceGroup_sptr> VecWSGroupType;
   /// Constructor
   MultiPeriodGroupWorker();
   /// Copy constructor

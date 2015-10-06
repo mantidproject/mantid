@@ -8,91 +8,94 @@
 
 using Mantid::Algorithms::FilterByXValue;
 
-class FilterByXValueTest : public CxxTest::TestSuite
-{
+class FilterByXValueTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static FilterByXValueTest *createSuite() { return new FilterByXValueTest(); }
-  static void destroySuite( FilterByXValueTest *suite ) { delete suite; }
+  static void destroySuite(FilterByXValueTest *suite) { delete suite; }
 
-  void test_validation()
-  {
+  void test_validation() {
     FilterByXValue alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-    TS_ASSERT( alg.isInitialized() );
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
 
     // InputWorkspace has to be an EventWorkspace
-    TS_ASSERT_THROWS( alg.setProperty("InputWorkspace", WorkspaceCreationHelper::Create2DWorkspace(1,1)), std::invalid_argument );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", WorkspaceCreationHelper::CreateEventWorkspace()) );
+    TS_ASSERT_THROWS(
+        alg.setProperty("InputWorkspace",
+                        WorkspaceCreationHelper::Create2DWorkspace(1, 1)),
+        std::invalid_argument);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+        "InputWorkspace", WorkspaceCreationHelper::CreateEventWorkspace()));
 
     // At least one of XMin & XMax must be specified
     auto errorMap = alg.validateInputs();
-    TS_ASSERT_EQUALS( errorMap.size(), 2);
-    TS_ASSERT_EQUALS( errorMap.begin()->first, "XMax" );
-    TS_ASSERT_EQUALS( errorMap.rbegin()->first, "XMin" );
+    TS_ASSERT_EQUALS(errorMap.size(), 2);
+    TS_ASSERT_EQUALS(errorMap.begin()->first, "XMax");
+    TS_ASSERT_EQUALS(errorMap.rbegin()->first, "XMin");
 
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("XMin", 10.0) );
-    TS_ASSERT( alg.validateInputs().empty() );
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMin", 10.0));
+    TS_ASSERT(alg.validateInputs().empty());
 
     // XMax must be > XMin
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("XMax", 9.0) );
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMax", 9.0));
     errorMap = alg.validateInputs();
-    TS_ASSERT_EQUALS( errorMap.size(), 2);
-    TS_ASSERT_EQUALS( errorMap.begin()->first, "XMax" );
-    TS_ASSERT_EQUALS( errorMap.rbegin()->first, "XMin" );
+    TS_ASSERT_EQUALS(errorMap.size(), 2);
+    TS_ASSERT_EQUALS(errorMap.begin()->first, "XMax");
+    TS_ASSERT_EQUALS(errorMap.rbegin()->first, "XMin");
   }
 
-  void test_exec()
-  {
+  void test_exec() {
     using Mantid::DataObjects::EventWorkspace_sptr;
-    EventWorkspace_sptr inputWS = WorkspaceCreationHelper::CreateEventWorkspace2(5,1);
-    // Add the workspace to the ADS so that it gets a name (stops validation complaints)
-    Mantid::API::AnalysisDataService::Instance().add("inWS",inputWS);
-  
-    FilterByXValue alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inputWS) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("OutputWorkspace", "inWS") );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("XMin", 20.5) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("XMax", 30.5) );
-    TS_ASSERT( alg.execute() );
-    
-    TS_ASSERT_EQUALS ( inputWS->getNumberEvents(), 110 );
-    TS_ASSERT_EQUALS ( inputWS->getEventXMin(), 20.5 );
-    TS_ASSERT_EQUALS ( inputWS->getEventXMax(), 30.5 );
-  }
+    EventWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::CreateEventWorkspace2(5, 1);
+    // Add the workspace to the ADS so that it gets a name (stops validation
+    // complaints)
+    Mantid::API::AnalysisDataService::Instance().add("inWS", inputWS);
 
+    FilterByXValue alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "inWS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMin", 20.5));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMax", 30.5));
+    TS_ASSERT(alg.execute());
+
+    TS_ASSERT_EQUALS(inputWS->getNumberEvents(), 110);
+    TS_ASSERT_EQUALS(inputWS->getEventXMin(), 20.5);
+    TS_ASSERT_EQUALS(inputWS->getEventXMax(), 30.5);
+  }
 };
 
-class FilterByXValueTestPerformance : public CxxTest::TestSuite
-{
+class FilterByXValueTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FilterByXValueTestPerformance *createSuite() { return new FilterByXValueTestPerformance(); }
-  static void destroySuite( FilterByXValueTestPerformance *suite ) { delete suite; }
-
-  void setUp()
-  {
-    Mantid::API::AnalysisDataService::Instance().add("ToFilter",
-        WorkspaceCreationHelper::CreateEventWorkspace(5000,1000,8000, 0.0, 1.0, 3) );
+  static FilterByXValueTestPerformance *createSuite() {
+    return new FilterByXValueTestPerformance();
+  }
+  static void destroySuite(FilterByXValueTestPerformance *suite) {
+    delete suite;
   }
 
-  void tearDown()
-  {
+  void setUp() {
+    Mantid::API::AnalysisDataService::Instance().add(
+        "ToFilter", WorkspaceCreationHelper::CreateEventWorkspace(
+                        5000, 1000, 8000, 0.0, 1.0, 3));
+  }
+
+  void tearDown() {
     Mantid::API::AnalysisDataService::Instance().remove("ToFilter");
   }
 
-  void test_crop_events_inplace()
-  {
+  void test_crop_events_inplace() {
     FilterByXValue filter;
     filter.initialize();
-    filter.setPropertyValue("InputWorkspace","ToFilter");
-    filter.setPropertyValue("OutputWorkspace","ToFilter");
-    filter.setProperty("XMin",5000.0);
-    filter.setProperty("XMax",7500.0);
-    TS_ASSERT( filter.execute() );
+    filter.setPropertyValue("InputWorkspace", "ToFilter");
+    filter.setPropertyValue("OutputWorkspace", "ToFilter");
+    filter.setProperty("XMin", 5000.0);
+    filter.setProperty("XMax", 7500.0);
+    TS_ASSERT(filter.execute());
   }
 };
 

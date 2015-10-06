@@ -117,7 +117,7 @@ public:
   /// "Virtual" copy constructor
   TimeSeriesProperty<TYPE> *clone() const;
   /// "Virtual" copy constructor with a time shift in seconds
-  virtual Property* cloneWithTimeShift(const double timeShift) const;
+  virtual Property *cloneWithTimeShift(const double timeShift) const;
   /// Return the memory used by the property, in bytes
   size_t getMemorySize() const;
   /// Merge the given property with this one
@@ -146,7 +146,7 @@ public:
 
   /// Split out a time series property by time intervals.
   void splitByTime(std::vector<SplittingInterval> &splitter,
-                   std::vector<Property *> outputs) const;
+                   std::vector<Property *> outputs, bool isPeriodic) const;
   /// Fill a TimeSplitterType that will filter the events by matching
   void makeFilterByValue(std::vector<SplittingInterval> &split, double min,
                          double max, double TimeTolerance = 0.0,
@@ -306,14 +306,11 @@ private:
   mutable bool m_filterApplied;
 };
 
-
 /// Function filtering double TimeSeriesProperties according to the requested
 /// statistics.
 double DLLExport
-    filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilter,
-                      Kernel::Math::StatisticType statistic_type);
-
-
+filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilter,
+                  Kernel::Math::StatisticType statistic_type);
 
 } // namespace Kernel
 } // namespace Mantid

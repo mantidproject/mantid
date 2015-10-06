@@ -33,14 +33,10 @@ CalculateDIFC::~CalculateDIFC() {}
 const std::string CalculateDIFC::name() const { return "CalculateDIFC"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int CalculateDIFC::version() const {
-  return 1;
-}
+int CalculateDIFC::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CalculateDIFC::category() const {
-  return "Diffraction";
-}
+const std::string CalculateDIFC::category() const { return "Diffraction"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string CalculateDIFC::summary() const {
@@ -51,15 +47,16 @@ const std::string CalculateDIFC::summary() const {
 /** Initialize the algorithm's properties.
  */
 void CalculateDIFC::init() {
-  declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input),
-      "Name of the workspace to have DIFC calculated from");
-  declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "", Direction::Output),
-      "Workspace containing DIFC for each pixel");
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
+                                                         Direction::Input),
+                  "Name of the workspace to have DIFC calculated from");
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
+                                                         Direction::Output),
+                  "Workspace containing DIFC for each pixel");
   declareProperty(
       new WorkspaceProperty<OffsetsWorkspace>(
-          "OffsetsWorkspace", "", Direction::Input, Mantid::API::PropertyMode::Optional),
+          "OffsetsWorkspace", "", Direction::Input,
+          Mantid::API::PropertyMode::Optional),
       "Optional: A OffsetsWorkspace containing the calibration offsets. Either "
       "this or CalibrationFile needs to be specified.");
 }
@@ -119,7 +116,6 @@ void CalculateDIFC::calculate() {
       localWS->setValue(detID, difc);
     }
   }
-
 }
 
 } // namespace Algorithms

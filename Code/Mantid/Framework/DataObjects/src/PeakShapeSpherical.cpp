@@ -57,7 +57,7 @@ PeakShapeSpherical::~PeakShapeSpherical() {}
 PeakShapeSpherical::PeakShapeSpherical(const PeakShapeSpherical &other)
     : PeakShapeBase(other), m_radius(other.radius()),
       m_backgroundInnerRadius(other.backgroundInnerRadius()),
-      m_backgroundOuterRadius(other.backgroundOuterRadius()){}
+      m_backgroundOuterRadius(other.backgroundOuterRadius()) {}
 
 /**
  * @brief Assignment operator
@@ -106,7 +106,7 @@ PeakShapeSpherical *PeakShapeSpherical::clone() const {
   return new PeakShapeSpherical(*this);
 }
 
-std::string PeakShapeSpherical::shapeName() const { return sphereShapeName() ; }
+std::string PeakShapeSpherical::shapeName() const { return sphereShapeName(); }
 
 bool PeakShapeSpherical::operator==(const PeakShapeSpherical &other) const {
   return PeakShapeBase::operator==(other) && other.radius() == this->radius() &&
@@ -135,17 +135,14 @@ boost::optional<double> PeakShapeSpherical::backgroundOuterRadius() const {
  * @return boost optional inner radius.
  */
 boost::optional<double> PeakShapeSpherical::backgroundInnerRadius() const {
-    return m_backgroundInnerRadius;
+  return m_backgroundInnerRadius;
 }
 
 /**
  * @brief PeakShapeSpherical::sphereShapeName
  * @return Spherical shape name for this type.
  */
-const std::string PeakShapeSpherical::sphereShapeName()
-{
-    return "spherical";
-}
+const std::string PeakShapeSpherical::sphereShapeName() { return "spherical"; }
 
 } // namespace DataObjects
 } // namespace Mantid

@@ -113,8 +113,8 @@ void GramCharlierComptonProfile::setAttribute(const std::string &name,
  * @param coeffs A string of space separated 1/0 values indicating which
  * polynomial coefficients to include in the fitting
  */
-void
-GramCharlierComptonProfile::setHermiteCoefficients(const std::string &coeffs) {
+void GramCharlierComptonProfile::setHermiteCoefficients(
+    const std::string &coeffs) {
   if (coeffs.empty()) {
     throw std::invalid_argument(
         "GramCharlierComptonProfile - Hermite polynomial string is empty!");
@@ -273,9 +273,8 @@ void GramCharlierComptonProfile::massProfile(double *result,
  * results. Size is fixed at NFINE_Y
  * @param npoly An integer denoting the polynomial to calculate
  */
-void
-GramCharlierComptonProfile::addMassProfile(double *result,
-                                           const unsigned int npoly) const {
+void GramCharlierComptonProfile::addMassProfile(
+    double *result, const unsigned int npoly) const {
   using namespace Mantid::Kernel;
 
   const double amp(1.0), wg(getParameter(WIDTH_PARAM));

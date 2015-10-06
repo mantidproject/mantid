@@ -46,10 +46,9 @@ void PoldiSpectrumLinearBackground::functionDeriv1DSpectrum(
   }
 }
 
-void
-PoldiSpectrumLinearBackground::poldiFunction1D(const std::vector<int> &indices,
-                                               const FunctionDomain1D &domain,
-                                               FunctionValues &values) const {
+void PoldiSpectrumLinearBackground::poldiFunction1D(
+    const std::vector<int> &indices, const FunctionDomain1D &domain,
+    FunctionValues &values) const {
   double backgroundDetector = getParameter(0);
   double wireCount = static_cast<double>(indices.size());
   double distributionFactor = wireCount * wireCount *

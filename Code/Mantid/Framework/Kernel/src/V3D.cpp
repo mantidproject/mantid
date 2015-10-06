@@ -287,10 +287,7 @@ bool V3D::operator<(const V3D &V) const {
 }
 
 /// Comparison operator greater than.
-bool V3D::operator>(const V3D &rhs) const
-{
-    return rhs < *this;
-}
+bool V3D::operator>(const V3D &rhs) const { return rhs < *this; }
 
 /**
   Sets the vector position from a triplet of doubles x,y,z
@@ -734,7 +731,7 @@ void V3D::loadNexus(::NeXus::File *file, const std::string &name) {
   *  As crystallographical coordinate sytem is based on 3 integers, eps is used
   *as accuracy to convert into integers
 */
-#define DINT(x) std::fabs((x) - double(size_t((x)+0.5)))
+#define DINT(x) std::fabs((x) - double(size_t((x) + 0.5)))
 double nearInt(double val, double eps, double mult) {
   if (val > 0) {
     if (val < 1) {

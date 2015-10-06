@@ -877,9 +877,8 @@ Instrument::getPlottable() const {
   }
 }
 
-void
-Instrument::appendPlottable(const CompAssembly &ca,
-                            std::vector<IObjComponent_const_sptr> &lst) const {
+void Instrument::appendPlottable(
+    const CompAssembly &ca, std::vector<IObjComponent_const_sptr> &lst) const {
   for (int i = 0; i < ca.nelements(); i++) {
     IComponent *c = ca[i].get();
     CompAssembly *a = dynamic_cast<CompAssembly *>(c);

@@ -37,7 +37,7 @@ PeakShapeEllipsoid::PeakShapeEllipsoid(const PeakShapeEllipsoid &other)
       m_abc_radiiBackgroundOuter(other.abcRadiiBackgroundOuter()) {}
 
 PeakShapeEllipsoid &PeakShapeEllipsoid::
-operator=(const PeakShapeEllipsoid &other)  {
+operator=(const PeakShapeEllipsoid &other) {
   if (&other != this) {
     PeakShapeBase::operator=(other);
     m_directions = other.directions();
@@ -72,17 +72,20 @@ std::vector<Kernel::V3D> PeakShapeEllipsoid::directions() const {
   return m_directions;
 }
 
-std::vector<Kernel::V3D> PeakShapeEllipsoid::getDirectionInSpecificFrame(Kernel::Matrix<double>& invertedGoniometerMatrix) const{
+std::vector<Kernel::V3D> PeakShapeEllipsoid::getDirectionInSpecificFrame(
+    Kernel::Matrix<double> &invertedGoniometerMatrix) const {
   std::vector<Kernel::V3D> directionsInFrame;
 
-  if ((invertedGoniometerMatrix.numCols() != m_directions.size())||
-      (invertedGoniometerMatrix.numRows() != m_directions.size())){
-    throw std::invalid_argument("The inverted goniometer matrix is not compatible with the direction vector");
+  if ((invertedGoniometerMatrix.numCols() != m_directions.size()) ||
+      (invertedGoniometerMatrix.numRows() != m_directions.size())) {
+    throw std::invalid_argument("The inverted goniometer matrix is not "
+                                "compatible with the direction vector");
   }
 
-  for (std::vector<Kernel::V3D>::const_iterator it = m_directions.begin(); it != m_directions.end(); ++it){
-    directionsInFrame.push_back(invertedGoniometerMatrix*(*it));
-    Mantid::Kernel::V3D d = invertedGoniometerMatrix*(*it);
+  for (std::vector<Kernel::V3D>::const_iterator it = m_directions.begin();
+       it != m_directions.end(); ++it) {
+    directionsInFrame.push_back(invertedGoniometerMatrix * (*it));
+    Mantid::Kernel::V3D d = invertedGoniometerMatrix * (*it);
   }
 
   return directionsInFrame;
@@ -111,24 +114,24 @@ std::string PeakShapeEllipsoid::toJSON() const {
   return writer.write(root);
 }
 
-PeakShapeEllipsoid* PeakShapeEllipsoid::clone() const {
+PeakShapeEllipsoid *PeakShapeEllipsoid::clone() const {
   return new PeakShapeEllipsoid(*this);
 }
 
-std::string PeakShapeEllipsoid::shapeName() const { return PeakShapeEllipsoid::ellipsoidShapeName(); }
-
-double PeakShapeEllipsoid::radius() const
-{
-    double radius = m_abc_radii[0];
-    for(int8_t i = 1; i < 3; ++i) {
-        radius = std::max(radius, m_abc_radii[i]);
-    }
-    return radius;
+std::string PeakShapeEllipsoid::shapeName() const {
+  return PeakShapeEllipsoid::ellipsoidShapeName();
 }
 
-const std::string PeakShapeEllipsoid::ellipsoidShapeName()
-{
-    return "ellipsoid";
+double PeakShapeEllipsoid::radius() const {
+  double radius = m_abc_radii[0];
+  for (int8_t i = 1; i < 3; ++i) {
+    radius = std::max(radius, m_abc_radii[i]);
+  }
+  return radius;
+}
+
+const std::string PeakShapeEllipsoid::ellipsoidShapeName() {
+  return "ellipsoid";
 }
 
 } // namespace DataObjects

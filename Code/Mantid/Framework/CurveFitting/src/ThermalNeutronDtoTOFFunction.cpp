@@ -68,9 +68,8 @@ void ThermalNeutronDtoTOFFunction::function1D(double *out,
 /** Main function
   * xValues containing the d-space value of peaks centres
   */
-void
-ThermalNeutronDtoTOFFunction::function1D(vector<double> &out,
-                                         const vector<double> xValues) const {
+void ThermalNeutronDtoTOFFunction::function1D(
+    vector<double> &out, const vector<double> xValues) const {
   double dtt1 = getParameter(0);
   double dtt1t = getParameter(1);
   double dtt2t = getParameter(2);

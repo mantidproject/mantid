@@ -18,9 +18,7 @@ DECLARE_ALGORITHM(EvaluateMDFunction)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-EvaluateMDFunction::EvaluateMDFunction() {
-  useAlgorithm("EvaluateFunction");
-}
+EvaluateMDFunction::EvaluateMDFunction() { useAlgorithm("EvaluateFunction"); }
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

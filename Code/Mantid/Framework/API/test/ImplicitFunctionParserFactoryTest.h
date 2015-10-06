@@ -12,80 +12,91 @@
 #include "MantidAPI/ImplicitFunctionParameter.h"
 #include <boost/shared_ptr.hpp>
 
-
-class ImplicitFunctionParserFactoryTest : public CxxTest::TestSuite
-{
+class ImplicitFunctionParserFactoryTest : public CxxTest::TestSuite {
 private:
-  
-  //TODO, use mocking framework instead!
-  class MockImplicitFunctionParameterParser : public Mantid::API::ImplicitFunctionParameterParser
-  {
+  // TODO, use mocking framework instead!
+  class MockImplicitFunctionParameterParser
+      : public Mantid::API::ImplicitFunctionParameterParser {
   public:
-    virtual Mantid::API::ImplicitFunctionParameter* createParameter(Poco::XML::Element*)
-    {
+    virtual Mantid::API::ImplicitFunctionParameter *
+    createParameter(Poco::XML::Element *) {
       return NULL;
     }
-    virtual void setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser* )
-    {
-    }
+    virtual void
+    setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser *) {}
   };
-  
-  class MockImplicitFunctionParserA : public Mantid::API::ImplicitFunctionParser
-  {
-  public:
-    MockImplicitFunctionParserA() : Mantid::API::ImplicitFunctionParser(new MockImplicitFunctionParameterParser) {}
 
-    virtual Mantid::API::ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element*)
-    {
-      return NULL;	
-    }
-    virtual void setSuccessorParser(Mantid::API::ImplicitFunctionParser*){}
-    virtual void setParameterParser(Mantid::API::ImplicitFunctionParameterParser*){}
-  };
-  
-  class MockImplicitFunctionParserB : public Mantid::API::ImplicitFunctionParser
-  {
+  class MockImplicitFunctionParserA
+      : public Mantid::API::ImplicitFunctionParser {
   public:
-    MockImplicitFunctionParserB() : Mantid::API::ImplicitFunctionParser(new MockImplicitFunctionParameterParser) {}
+    MockImplicitFunctionParserA()
+        : Mantid::API::ImplicitFunctionParser(
+              new MockImplicitFunctionParameterParser) {}
 
-    virtual Mantid::API::ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element*)
-    {
-      return NULL;	
+    virtual Mantid::API::ImplicitFunctionBuilder *
+    createFunctionBuilder(Poco::XML::Element *) {
+      return NULL;
     }
-    virtual void setSuccessorParser(Mantid::API::ImplicitFunctionParser*){}
-    virtual void setParameterParser(Mantid::API::ImplicitFunctionParameterParser*){}
+    virtual void setSuccessorParser(Mantid::API::ImplicitFunctionParser *) {}
+    virtual void
+    setParameterParser(Mantid::API::ImplicitFunctionParameterParser *) {}
   };
-  
+
+  class MockImplicitFunctionParserB
+      : public Mantid::API::ImplicitFunctionParser {
+  public:
+    MockImplicitFunctionParserB()
+        : Mantid::API::ImplicitFunctionParser(
+              new MockImplicitFunctionParameterParser) {}
+
+    virtual Mantid::API::ImplicitFunctionBuilder *
+    createFunctionBuilder(Poco::XML::Element *) {
+      return NULL;
+    }
+    virtual void setSuccessorParser(Mantid::API::ImplicitFunctionParser *) {}
+    virtual void
+    setParameterParser(Mantid::API::ImplicitFunctionParameterParser *) {}
+  };
 
 public:
-  
-  void testSetup()
-  {
-    Mantid::API::ImplicitFunctionParserFactory::Instance().subscribe<MockImplicitFunctionParserA>("MockImplicitFunctionParserA");
-    Mantid::API::ImplicitFunctionParserFactory::Instance().subscribe<MockImplicitFunctionParserB>("MockImplicitFunctionParserB");
-  }
-  
-  void testGetFirstConcreteInstance()
-  {
-    Mantid::API::ImplicitFunctionParser* parser = Mantid::API::ImplicitFunctionParserFactory::Instance().createUnwrapped("MockImplicitFunctionParserA");
-    MockImplicitFunctionParserA* a = dynamic_cast<MockImplicitFunctionParserA*>(parser);
-    TSM_ASSERT("The correct implicit parserparameter parser type has not been generated",  NULL != a);
-    delete parser;
-  }
-  
-  void testGetSecondConcreteInstance()
-  {
-    Mantid::API::ImplicitFunctionParser* parser = Mantid::API::ImplicitFunctionParserFactory::Instance().createUnwrapped("MockImplicitFunctionParserB");
-    MockImplicitFunctionParserB* b = dynamic_cast<MockImplicitFunctionParserB*>(parser);
-    TSM_ASSERT("The correct implicit parserparameter parser type has not been generated",  NULL != b);
-    delete parser;
-  }
-  
-  void testCreateThrows()
-  {
-    TSM_ASSERT_THROWS("Should have thrown exception on use of create rather than createunwrapped.", Mantid::API::ImplicitFunctionParserFactory::Instance().create(""), std::runtime_error );
+  void testSetup() {
+    Mantid::API::ImplicitFunctionParserFactory::Instance()
+        .subscribe<MockImplicitFunctionParserA>("MockImplicitFunctionParserA");
+    Mantid::API::ImplicitFunctionParserFactory::Instance()
+        .subscribe<MockImplicitFunctionParserB>("MockImplicitFunctionParserB");
   }
 
+  void testGetFirstConcreteInstance() {
+    Mantid::API::ImplicitFunctionParser *parser =
+        Mantid::API::ImplicitFunctionParserFactory::Instance().createUnwrapped(
+            "MockImplicitFunctionParserA");
+    MockImplicitFunctionParserA *a =
+        dynamic_cast<MockImplicitFunctionParserA *>(parser);
+    TSM_ASSERT("The correct implicit parserparameter parser type has not been "
+               "generated",
+               NULL != a);
+    delete parser;
+  }
+
+  void testGetSecondConcreteInstance() {
+    Mantid::API::ImplicitFunctionParser *parser =
+        Mantid::API::ImplicitFunctionParserFactory::Instance().createUnwrapped(
+            "MockImplicitFunctionParserB");
+    MockImplicitFunctionParserB *b =
+        dynamic_cast<MockImplicitFunctionParserB *>(parser);
+    TSM_ASSERT("The correct implicit parserparameter parser type has not been "
+               "generated",
+               NULL != b);
+    delete parser;
+  }
+
+  void testCreateThrows() {
+    TSM_ASSERT_THROWS(
+        "Should have thrown exception on use of create rather than "
+        "createunwrapped.",
+        Mantid::API::ImplicitFunctionParserFactory::Instance().create(""),
+        std::runtime_error);
+  }
 };
 
-#endif 
+#endif

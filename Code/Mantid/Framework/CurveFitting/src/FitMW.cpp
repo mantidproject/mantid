@@ -625,7 +625,7 @@ void FitMW::addFunctionValuesToWS(
  * Set initial values for parameters with default values.
  * @param function : A function to set parameters for.
  */
-void FitMW::setInitialValues(API::IFunction& function) {
+void FitMW::setInitialValues(API::IFunction &function) {
   auto domain = m_domain.lock();
   auto values = m_values.lock();
   if (domain && values) {

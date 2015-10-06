@@ -47,7 +47,7 @@ public:
   void testGetSetPosition() {
     BraggScattererInCrystalStructure_sptr scatterer = getInitializedScatterer();
 
-    V3D goodPosition(0.2, 0.4, 1./3.);
+    V3D goodPosition(0.2, 0.4, 1. / 3.);
     scatterer->setProperty("Position", "0.2, 0.4, 1/3");
 
     V3D testPos;

@@ -19,6 +19,7 @@ public:
       : m_numColumns(cols), m_numRows(rows) {}
   size_t columnCount() const { return m_numColumns; }
   size_t rowCount() const { return m_numRows; }
+
 private:
   size_t m_numColumns;
   size_t m_numRows;
@@ -36,9 +37,8 @@ public:
   size_t size() const { return 3; }
 
   using ColumnTester::void_pointer;
-  const void* void_pointer(size_t index) const {
-    return &m_names[index];
-  }
+  const void *void_pointer(size_t index) const { return &m_names[index]; }
+
 private:
   std::string m_names[3];
 };
@@ -46,16 +46,15 @@ private:
 class ValueColumn : public ColumnTester {
 public:
   ValueColumn() {
-    m_values[0] = V3D(1,1,0);
-    m_values[1] = V3D(-1,1,0);
-    m_values[2] = V3D(0,0,1);
+    m_values[0] = V3D(1, 1, 0);
+    m_values[1] = V3D(-1, 1, 0);
+    m_values[2] = V3D(0, 0, 1);
   }
   size_t size() const { return 3; }
 
   using ColumnTester::void_pointer;
-  const void* void_pointer(size_t index) const {
-    return &m_values[index];
-  }
+  const void *void_pointer(size_t index) const { return &m_values[index]; }
+
 private:
   V3D m_values[3];
 };
@@ -70,9 +69,8 @@ public:
   size_t size() const { return 3; }
 
   using ColumnTester::void_pointer;
-  const void* void_pointer(size_t index) const {
-    return &m_offsets[index];
-  }
+  const void *void_pointer(size_t index) const { return &m_offsets[index]; }
+
 private:
   double m_offsets[3];
 };
@@ -87,23 +85,22 @@ public:
   size_t size() const { return 3; }
 
   using ColumnTester::void_pointer;
-  const void* void_pointer(size_t index) const {
-    return &m_units[index];
-  }
+  const void *void_pointer(size_t index) const { return &m_units[index]; }
+
 private:
   std::string m_units[3];
 };
 
 class GoodTable : public TableWorkspaceTester {
 public:
-  GoodTable() {};
-  virtual ~GoodTable() {};
+  GoodTable(){};
+  virtual ~GoodTable(){};
 
   size_t columnCount() const { return 4; }
   size_t rowCount() const { return 3; }
 
   using TableWorkspaceTester::getColumn;
-  Column_const_sptr getColumn(const std::string& name) const {
+  Column_const_sptr getColumn(const std::string &name) const {
     if (name == "name")
       return Column_const_sptr(new NameColumn());
     else if (name == "value")
@@ -123,9 +120,9 @@ public:
   void test_blank_constructor() {
     Projection p;
     TS_ASSERT_EQUALS(p.getOffset(0), 0.0);
-    TS_ASSERT_EQUALS(p.U(), V3D(1,0,0));
-    TS_ASSERT_EQUALS(p.V(), V3D(0,1,0));
-    TS_ASSERT_EQUALS(p.W(), V3D(0,0,1));
+    TS_ASSERT_EQUALS(p.U(), V3D(1, 0, 0));
+    TS_ASSERT_EQUALS(p.V(), V3D(0, 1, 0));
+    TS_ASSERT_EQUALS(p.W(), V3D(0, 0, 1));
     TS_ASSERT_EQUALS(p.getUnit(0), RLU);
     TS_ASSERT_EQUALS(p.getUnit(1), RLU);
     TS_ASSERT_EQUALS(p.getUnit(2), RLU);
@@ -143,40 +140,43 @@ public:
   }
 
   void test_construct_bad_workspace_columns() {
-    const DimensionedTable table(0,0);
+    const DimensionedTable table(0, 0);
     try {
       auto p = boost::make_shared<Projection>(table);
       TS_FAIL("Projection constructor should have thrown exception");
-    } catch(std::runtime_error& e) {
-      TS_ASSERT_EQUALS(e.what(),
+    } catch (std::runtime_error &e) {
+      TS_ASSERT_EQUALS(
+          e.what(),
           std::string("4 columns must be provided to create a projection"))
-    } catch(...) {
+    } catch (...) {
       TS_FAIL("Projection constructor threw unexpected exception");
     }
   }
 
   void test_construct_bad_workspace_no_rows() {
-    const DimensionedTable table(4,0);
+    const DimensionedTable table(4, 0);
     try {
       auto p = boost::make_shared<Projection>(table);
       TS_FAIL("Projection constructor should have thrown exception");
-    } catch(std::runtime_error& e) {
-      TS_ASSERT_EQUALS(e.what(),
+    } catch (std::runtime_error &e) {
+      TS_ASSERT_EQUALS(
+          e.what(),
           std::string("3 rows must be provided to create a projection"))
-    } catch(...) {
+    } catch (...) {
       TS_FAIL("Projection constructor threw unexpected exception");
     }
   }
 
   void test_construct_bad_workspace_too_many_rows() {
-    const DimensionedTable table(4,4);
+    const DimensionedTable table(4, 4);
     try {
       auto p = boost::make_shared<Projection>(table);
       TS_FAIL("Projection constructor should have thrown exception");
-    } catch(std::runtime_error& e) {
-      TS_ASSERT_EQUALS(e.what(),
+    } catch (std::runtime_error &e) {
+      TS_ASSERT_EQUALS(
+          e.what(),
           std::string("3 rows must be provided to create a projection"))
-    } catch(...) {
+    } catch (...) {
       TS_FAIL("Projection constructor threw unexpected exception");
     }
   }
@@ -256,12 +256,12 @@ public:
 
   void test_setAxis() {
     Projection p;
-    p.setAxis(0, V3D(1,2,3));
-    p.setAxis(1, V3D(4,5,6));
-    p.setAxis(2, V3D(7,8,8));
-    TS_ASSERT_EQUALS(p.getAxis(0), V3D(1,2,3));
-    TS_ASSERT_EQUALS(p.getAxis(1), V3D(4,5,6));
-    TS_ASSERT_EQUALS(p.getAxis(2), V3D(7,8,8));
+    p.setAxis(0, V3D(1, 2, 3));
+    p.setAxis(1, V3D(4, 5, 6));
+    p.setAxis(2, V3D(7, 8, 8));
+    TS_ASSERT_EQUALS(p.getAxis(0), V3D(1, 2, 3));
+    TS_ASSERT_EQUALS(p.getAxis(1), V3D(4, 5, 6));
+    TS_ASSERT_EQUALS(p.getAxis(2), V3D(7, 8, 8));
   }
 
   void test_setUnit() {

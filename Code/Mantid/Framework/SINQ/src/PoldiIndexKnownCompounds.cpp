@@ -216,8 +216,7 @@ std::vector<Workspace_sptr> PoldiIndexKnownCompounds::getWorkspaces(
       } else {
         workspaces.insert(workspaces.end(), currentWorkspace);
       }
-    }
-    catch (Kernel::Exception::NotFoundError) {
+    } catch (Kernel::Exception::NotFoundError) {
       Workspace_sptr invalid;
       workspaces.insert(workspaces.end(), invalid);
     }
@@ -496,8 +495,8 @@ void PoldiIndexKnownCompounds::indexPeaks(
       getAllIndexCandidatePairs(measured, knownCompoundPeaks);
 
   g_log.information() << "  Number of candidate pairs: " << candidates.size()
-                      << std::endl << "  Assigning most likely candidates..."
-                      << std::endl;
+                      << std::endl
+                      << "  Assigning most likely candidates..." << std::endl;
   assignCandidates(candidates);
 }
 
@@ -713,20 +712,19 @@ void PoldiIndexKnownCompounds::assignCandidates(
 }
 
 /// Returns true if the supplied set contains the peak.
-bool
-PoldiIndexKnownCompounds::inPeakSet(const std::set<PoldiPeak_sptr> &peakSet,
-                                    const PoldiPeak_sptr &peak) const {
+bool PoldiIndexKnownCompounds::inPeakSet(
+    const std::set<PoldiPeak_sptr> &peakSet, const PoldiPeak_sptr &peak) const {
   return peakSet.find(peak) != peakSet.end();
 }
 
 /// Places the measured peak of the IndexCandidatePair in the correct peak
 /// collection.
-void
-PoldiIndexKnownCompounds::assignPeakIndex(const IndexCandidatePair &candidate) {
+void PoldiIndexKnownCompounds::assignPeakIndex(
+    const IndexCandidatePair &candidate) {
   candidate.observed->setHKL(candidate.candidate->hkl());
 
-  m_indexedPeaks[candidate.candidateCollectionIndex]
-      ->addPeak(candidate.observed);
+  m_indexedPeaks[candidate.candidateCollectionIndex]->addPeak(
+      candidate.observed);
 }
 
 PoldiPeakCollection_sptr

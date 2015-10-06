@@ -1726,7 +1726,7 @@ struct soap_cookie {
 #endif
 
 SOAP_FMAC1 struct soap_multipart *SOAP_FMAC2
-    soap_next_multipart(struct soap_multipart *);
+soap_next_multipart(struct soap_multipart *);
 
 #ifdef __cplusplus
 
@@ -1945,9 +1945,9 @@ struct soap_dom_element {
 #endif
 };
 SOAP_FMAC1 struct soap_dom_element *SOAP_FMAC2
-    soap_dom_next_element(struct soap_dom_element *elt);
+soap_dom_next_element(struct soap_dom_element *elt);
 SOAP_FMAC1 struct soap_dom_attribute *SOAP_FMAC2
-    soap_dom_next_attribute(struct soap_dom_attribute *att);
+soap_dom_next_attribute(struct soap_dom_attribute *att);
 #endif
 
 #if defined(__cplusplus) && !defined(WITH_LEAN) && !defined(WITH_COMPAT)
@@ -2390,7 +2390,7 @@ SOAP_FMAC1 long SOAP_FMAC2 soap_strtol(const char *s, char **t, int b);
 #define soap_strtoul(s, t, b) strtoul(s, t, b)
 #else
 SOAP_FMAC1 unsigned long SOAP_FMAC2
-    soap_strtoul(const char *s, char **t, int b);
+soap_strtoul(const char *s, char **t, int b);
 #endif
 
 #if defined(WIN32) && !defined(__MINGW32__)
@@ -2456,49 +2456,49 @@ SOAP_FMAC1 int SOAP_FMAC2 soap_putfault(struct soap *);
 SOAP_FMAC1 void SOAP_FMAC2 soap_ssl_init(void);
 SOAP_FMAC1 int SOAP_FMAC2 soap_poll(struct soap *);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_connect_command(struct soap *, int, const char *, const char *);
+soap_connect_command(struct soap *, int, const char *, const char *);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_connect(struct soap *, const char *, const char *);
+soap_connect(struct soap *, const char *, const char *);
 SOAP_FMAC1 SOAP_SOCKET SOAP_FMAC2
-    soap_bind(struct soap *, const char *, int, int);
+soap_bind(struct soap *, const char *, int, int);
 SOAP_FMAC1 SOAP_SOCKET SOAP_FMAC2 soap_accept(struct soap *);
 SOAP_FMAC1 int SOAP_FMAC2 soap_ssl_accept(struct soap *);
 SOAP_FMAC1 const char *SOAP_FMAC2 soap_ssl_error(struct soap *, int);
 
 #if defined(VXWORKS) && defined(WM_SECURE_KEY_STORAGE)
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_ssl_server_context(struct soap *soap, unsigned short flags,
-                            const char *keyfile, const char *keyid,
-                            const char *password, const char *cafile,
-                            const char *capath, const char *dhfile,
-                            const char *randfile, const char *sid);
+soap_ssl_server_context(struct soap *soap, unsigned short flags,
+                        const char *keyfile, const char *keyid,
+                        const char *password, const char *cafile,
+                        const char *capath, const char *dhfile,
+                        const char *randfile, const char *sid);
 #else
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_ssl_server_context(struct soap *soap, unsigned short flags,
-                            const char *keyfile, const char *password,
-                            const char *cafile, const char *capath,
-                            const char *dhfile, const char *randfile,
-                            const char *sid);
+soap_ssl_server_context(struct soap *soap, unsigned short flags,
+                        const char *keyfile, const char *password,
+                        const char *cafile, const char *capath,
+                        const char *dhfile, const char *randfile,
+                        const char *sid);
 #endif
 #if defined(VXWORKS) && defined(WM_SECURE_KEY_STORAGE)
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_ssl_client_context(struct soap *soap, unsigned short flags,
-                            const char *keyfile, const char *keyid,
-                            const char *password, const char *cafile,
-                            const char *capath, const char *randfile);
+soap_ssl_client_context(struct soap *soap, unsigned short flags,
+                        const char *keyfile, const char *keyid,
+                        const char *password, const char *cafile,
+                        const char *capath, const char *randfile);
 #else
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_ssl_client_context(struct soap *soap, unsigned short flags,
-                            const char *keyfile, const char *password,
-                            const char *cafile, const char *capath,
-                            const char *randfile);
+soap_ssl_client_context(struct soap *soap, unsigned short flags,
+                        const char *keyfile, const char *password,
+                        const char *cafile, const char *capath,
+                        const char *randfile);
 #endif
 
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_puthttphdr(struct soap *, int status, size_t count);
+soap_puthttphdr(struct soap *, int status, size_t count);
 
 SOAP_FMAC1 const char *SOAP_FMAC2
-    soap_get_header_attribute(struct soap *, const char *, const char *);
+soap_get_header_attribute(struct soap *, const char *, const char *);
 SOAP_FMAC1 const char *SOAP_FMAC2 soap_decode_key(char *, size_t, const char *);
 SOAP_FMAC1 const char *SOAP_FMAC2 soap_decode_val(char *, size_t, const char *);
 
@@ -2511,18 +2511,18 @@ SOAP_FMAC1 soap_wchar SOAP_FMAC2 soap_getchar(struct soap *);
 SOAP_FMAC1 int SOAP_FMAC2 soap_tag_cmp(const char *, const char *);
 SOAP_FMAC1 void SOAP_FMAC2 soap_set_fault(struct soap *);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_sender_fault(struct soap *, const char *, const char *);
+soap_sender_fault(struct soap *, const char *, const char *);
 SOAP_FMAC1 int SOAP_FMAC2 soap_sender_fault_subcode(struct soap *, const char *,
                                                     const char *, const char *);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_receiver_fault(struct soap *, const char *, const char *);
+soap_receiver_fault(struct soap *, const char *, const char *);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_receiver_fault_subcode(struct soap *, const char *, const char *,
-                                const char *);
+soap_receiver_fault_subcode(struct soap *, const char *, const char *,
+                            const char *);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_set_sender_error(struct soap *, const char *, const char *, int);
+soap_set_sender_error(struct soap *, const char *, const char *, int);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_set_receiver_error(struct soap *, const char *, const char *, int);
+soap_set_receiver_error(struct soap *, const char *, const char *, int);
 
 SOAP_FMAC1 int SOAP_FMAC2 soap_send_raw(struct soap *, const char *, size_t);
 SOAP_FMAC1 int SOAP_FMAC2 soap_recv_raw(struct soap *);
@@ -2530,16 +2530,16 @@ SOAP_FMAC1 int SOAP_FMAC2 soap_recv(struct soap *);
 SOAP_FMAC1 int SOAP_FMAC2 soap_send(struct soap *, const char *);
 SOAP_FMAC1 int SOAP_FMAC2 soap_send2(struct soap *, const char *, const char *);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_send3(struct soap *, const char *, const char *, const char *);
+soap_send3(struct soap *, const char *, const char *, const char *);
 
 SOAP_FMAC1 int SOAP_FMAC2 soap_pututf8(struct soap *, unsigned long);
 SOAP_FMAC1 soap_wchar SOAP_FMAC2 soap_getutf8(struct soap *);
 
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_putbase64(struct soap *, const unsigned char *, int);
+soap_putbase64(struct soap *, const unsigned char *, int);
 SOAP_FMAC1 unsigned char *SOAP_FMAC2 soap_getbase64(struct soap *, int *, int);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_puthex(struct soap *, const unsigned char *, int);
+soap_puthex(struct soap *, const unsigned char *, int);
 SOAP_FMAC1 unsigned char *SOAP_FMAC2 soap_gethex(struct soap *, int *);
 
 #ifndef WITH_LEANER
@@ -2551,23 +2551,23 @@ SOAP_FMAC1 int SOAP_FMAC2 soap_dime_forward(struct soap *, unsigned char **,
 
 #ifndef WITH_NOIDREF
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_pointer_lookup_id(struct soap *, void *p, int t, struct soap_plist **);
-SOAP_FMAC1 int SOAP_FMAC2 soap_pointer_lookup(struct soap *, const void *p,
-                                              int t, struct soap_plist **);
+soap_pointer_lookup_id(struct soap *, void *p, int t, struct soap_plist **);
+SOAP_FMAC1 int SOAP_FMAC2
+soap_pointer_lookup(struct soap *, const void *p, int t, struct soap_plist **);
 SOAP_FMAC1 int SOAP_FMAC2 soap_pointer_enter(struct soap *, const void *p,
                                              const struct soap_array *a, int n,
                                              int t, struct soap_plist **);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_array_pointer_lookup(struct soap *, const void *p,
-                              const struct soap_array *a, int n, int t,
-                              struct soap_plist **);
+soap_array_pointer_lookup(struct soap *, const void *p,
+                          const struct soap_array *a, int n, int t,
+                          struct soap_plist **);
 SOAP_FMAC1 int SOAP_FMAC2 soap_embed(struct soap *soap, const void *p,
                                      const struct soap_array *a, int n,
                                      const char *tag, int type);
 SOAP_FMAC1 struct soap_ilist *SOAP_FMAC2
-    soap_lookup(struct soap *, const char *);
+soap_lookup(struct soap *, const char *);
 SOAP_FMAC1 struct soap_ilist *SOAP_FMAC2
-    soap_enter(struct soap *, const char *);
+soap_enter(struct soap *, const char *);
 SOAP_FMAC1 int SOAP_FMAC2 soap_resolve(struct soap *);
 SOAP_FMAC1 void SOAP_FMAC2 soap_embedded(struct soap *, const void *p, int t);
 SOAP_FMAC1 int SOAP_FMAC2 soap_reference(struct soap *, const void *p, int t);
@@ -2575,11 +2575,11 @@ SOAP_FMAC1 int SOAP_FMAC2 soap_array_reference(struct soap *, const void *p,
                                                const struct soap_array *a,
                                                int n, int t);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_embedded_id(struct soap *, int id, const void *p, int t);
+soap_embedded_id(struct soap *, int id, const void *p, int t);
 SOAP_FMAC1 int SOAP_FMAC2 soap_is_embedded(struct soap *, struct soap_plist *);
 SOAP_FMAC1 int SOAP_FMAC2 soap_is_single(struct soap *, struct soap_plist *);
 SOAP_FMAC1 void SOAP_FMAC2
-    soap_set_embedded(struct soap *, struct soap_plist *);
+soap_set_embedded(struct soap *, struct soap_plist *);
 #endif
 
 SOAP_FMAC1 int SOAP_FMAC2 soap_begin_count(struct soap *);
@@ -2589,15 +2589,15 @@ SOAP_FMAC1 int SOAP_FMAC2 soap_end_send(struct soap *);
 SOAP_FMAC1 int SOAP_FMAC2 soap_end_send_flush(struct soap *);
 
 SOAP_FMAC1 const struct soap_code_map *SOAP_FMAC2
-    soap_code(const struct soap_code_map *, const char *);
+soap_code(const struct soap_code_map *, const char *);
 SOAP_FMAC1 long SOAP_FMAC2
-    soap_code_int(const struct soap_code_map *, const char *, long);
+soap_code_int(const struct soap_code_map *, const char *, long);
 SOAP_FMAC1 const char *SOAP_FMAC2
-    soap_code_str(const struct soap_code_map *, long);
+soap_code_str(const struct soap_code_map *, long);
 SOAP_FMAC1 long SOAP_FMAC2
-    soap_code_bits(const struct soap_code_map *, const char *);
+soap_code_bits(const struct soap_code_map *, const char *);
 SOAP_FMAC1 const char *SOAP_FMAC2
-    soap_code_list(struct soap *, const struct soap_code_map *, long);
+soap_code_list(struct soap *, const struct soap_code_map *, long);
 
 SOAP_FMAC1 int SOAP_FMAC2 soap_getline(struct soap *, char *, int);
 SOAP_FMAC1 int SOAP_FMAC2 soap_begin_serve(struct soap *);
@@ -2607,16 +2607,15 @@ SOAP_FMAC1 int SOAP_FMAC2 soap_end_recv(struct soap *);
 SOAP_FMAC1 void *SOAP_FMAC2 soap_malloc(struct soap *, size_t);
 SOAP_FMAC1 void SOAP_FMAC2 soap_dealloc(struct soap *, void *);
 SOAP_FMAC1 struct soap_clist *SOAP_FMAC2
-    soap_link(struct soap *, void *, int, int,
-              int (*fdelete)(struct soap_clist *));
+soap_link(struct soap *, void *, int, int, int (*fdelete)(struct soap_clist *));
 SOAP_FMAC1 int SOAP_FMAC2 soap_unlink(struct soap *, const void *);
 SOAP_FMAC1 void SOAP_FMAC2 soap_free_temp(struct soap *);
 SOAP_FMAC1 void SOAP_FMAC2 soap_del(struct soap *);
 
 SOAP_FMAC1 void *SOAP_FMAC2
-    soap_track_malloc(struct soap *, const char *, int, size_t);
+soap_track_malloc(struct soap *, const char *, int, size_t);
 SOAP_FMAC1 void SOAP_FMAC2
-    soap_track_free(struct soap *, const char *, int, void *);
+soap_track_free(struct soap *, const char *, int, void *);
 
 #ifndef WITH_NOIDREF
 SOAP_FMAC1 int SOAP_FMAC2 soap_lookup_type(struct soap *, const char *id);
@@ -2624,22 +2623,22 @@ SOAP_FMAC1 void *SOAP_FMAC2 soap_id_lookup(struct soap *, const char *id,
                                            void **p, int t, size_t n,
                                            unsigned int k);
 SOAP_FMAC1 void *SOAP_FMAC2
-    soap_id_forward(struct soap *, const char *id, void *p, size_t len, int st,
-                    int tt, size_t n, unsigned int k,
-                    void (*fcopy)(struct soap *, int, int, void *, size_t,
-                                  const void *, size_t));
+soap_id_forward(struct soap *, const char *id, void *p, size_t len, int st,
+                int tt, size_t n, unsigned int k,
+                void (*fcopy)(struct soap *, int, int, void *, size_t,
+                              const void *, size_t));
 #endif
 SOAP_FMAC1 void *SOAP_FMAC2
-    soap_id_enter(struct soap *, const char *id, void *p, int t, size_t n,
-                  unsigned int k, const char *type, const char *arrayType,
-                  void *(*finstantiate)(struct soap *, int, const char *,
-                                        const char *, size_t *));
+soap_id_enter(struct soap *, const char *id, void *p, int t, size_t n,
+              unsigned int k, const char *type, const char *arrayType,
+              void *(*finstantiate)(struct soap *, int, const char *,
+                                    const char *, size_t *));
 SOAP_FMAC1 void SOAP_FMAC2 soap_fcopy(struct soap *soap, int st, int tt,
                                       void *p, size_t, const void *q, size_t n);
 
 SOAP_FMAC1 int SOAP_FMAC2 soap_size(const int *, int);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_getoffsets(const char *, const int *, int *, int);
+soap_getoffsets(const char *, const int *, int *, int);
 SOAP_FMAC1 int SOAP_FMAC2 soap_getsize(const char *, const char *, int *);
 SOAP_FMAC1 int SOAP_FMAC2 soap_getsizes(const char *, int *, int);
 SOAP_FMAC1 int SOAP_FMAC2 soap_getposition(const char *, int *);
@@ -2648,7 +2647,7 @@ SOAP_FMAC1 char *SOAP_FMAC2 soap_putsize(struct soap *, const char *, int);
 SOAP_FMAC1 char *SOAP_FMAC2 soap_putsizesoffsets(struct soap *, const char *,
                                                  const int *, const int *, int);
 SOAP_FMAC1 char *SOAP_FMAC2
-    soap_putsizes(struct soap *, const char *, const int *, int);
+soap_putsizes(struct soap *, const char *, const int *, int);
 SOAP_FMAC1 char *SOAP_FMAC2 soap_putoffset(struct soap *, int);
 SOAP_FMAC1 char *SOAP_FMAC2 soap_putoffsets(struct soap *, const int *, int);
 
@@ -2660,7 +2659,7 @@ SOAP_FMAC1 struct soap *SOAP_FMAC2
 SOAP_FMAC1 void SOAP_FMAC2 soap_free(struct soap *);
 SOAP_FMAC1 struct soap *SOAP_FMAC2 soap_copy(const struct soap *);
 SOAP_FMAC1 struct soap *SOAP_FMAC2
-    soap_copy_context(struct soap *, const struct soap *);
+soap_copy_context(struct soap *, const struct soap *);
 SOAP_FMAC1 void SOAP_FMAC2 soap_copy_stream(struct soap *, struct soap *);
 SOAP_FMAC1 void SOAP_FMAC2 soap_free_stream(struct soap *);
 SOAP_FMAC1 void SOAP_FMAC2
@@ -2683,35 +2682,35 @@ SOAP_FMAC1 void SOAP_FMAC2 soap_open_logfile(struct soap *, int);
 SOAP_FMAC1 const char *SOAP_FMAC2 soap_value(struct soap *);
 
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_match_tag(struct soap *, const char *, const char *);
+soap_match_tag(struct soap *, const char *, const char *);
 SOAP_FMAC1 int SOAP_FMAC2 soap_match_array(struct soap *, const char *);
 
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_element(struct soap *, const char *, int, const char *);
+soap_element(struct soap *, const char *, int, const char *);
 SOAP_FMAC1 int SOAP_FMAC2 soap_element_begin_out(struct soap *, const char *tag,
                                                  int id, const char *type);
 SOAP_FMAC1 int SOAP_FMAC2 soap_array_begin_out(struct soap *, const char *tag,
                                                int id, const char *type,
                                                const char *offset);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_element_ref(struct soap *, const char *tag, int id, int href);
+soap_element_ref(struct soap *, const char *tag, int id, int href);
 SOAP_FMAC1 int SOAP_FMAC2 soap_element_href(struct soap *, const char *tag,
                                             int id, const char *ref,
                                             const char *val);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_element_null(struct soap *, const char *tag, int id, const char *type);
+soap_element_null(struct soap *, const char *tag, int id, const char *type);
 SOAP_FMAC1 int SOAP_FMAC2 soap_element_nil(struct soap *, const char *tag);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_element_id(struct soap *, const char *tag, int id, const void *p,
-                    const struct soap_array *a, int d, const char *type, int n);
+soap_element_id(struct soap *, const char *tag, int id, const void *p,
+                const struct soap_array *a, int d, const char *type, int n);
 SOAP_FMAC1 int SOAP_FMAC2 soap_element_result(struct soap *, const char *tag);
 SOAP_FMAC1 void SOAP_FMAC2 soap_check_result(struct soap *, const char *tag);
 SOAP_FMAC1 int SOAP_FMAC2 soap_element_end_out(struct soap *, const char *tag);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_element_start_end_out(struct soap *, const char *tag);
+soap_element_start_end_out(struct soap *, const char *tag);
 
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_attribute(struct soap *, const char *, const char *);
+soap_attribute(struct soap *, const char *, const char *);
 
 SOAP_FMAC1 int SOAP_FMAC2 soap_element_begin_in(struct soap *, const char *tag,
                                                 int nillable, const char *type);
@@ -2726,15 +2725,15 @@ SOAP_FMAC1 void SOAP_FMAC2 soap_revert(struct soap *);
 SOAP_FMAC1 char *SOAP_FMAC2 soap_strdup(struct soap *, const char *);
 SOAP_FMAC1 wchar_t *SOAP_FMAC2 soap_wstrdup(struct soap *, const wchar_t *);
 SOAP_FMAC1 const char *SOAP_FMAC2
-    soap_tagsearch(const char *big, const char *little);
+soap_tagsearch(const char *big, const char *little);
 
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_string_out(struct soap *, const char *s, int flag);
+soap_string_out(struct soap *, const char *s, int flag);
 SOAP_FMAC1 char *SOAP_FMAC2 soap_string_in(struct soap *, int, long, long);
 
 #ifndef WITH_LEANER
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_wstring_out(struct soap *, const wchar_t *s, int flag);
+soap_wstring_out(struct soap *, const wchar_t *s, int flag);
 SOAP_FMAC1 wchar_t *SOAP_FMAC2 soap_wstring_in(struct soap *, int, long, long);
 #endif
 
@@ -2744,34 +2743,34 @@ SOAP_FMAC1 int SOAP_FMAC2 soap_match_namespace(struct soap *, const char *,
 
 SOAP_FMAC1 void SOAP_FMAC2 soap_set_version(struct soap *, short);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_set_namespaces(struct soap *, const struct Namespace *);
+soap_set_namespaces(struct soap *, const struct Namespace *);
 SOAP_FMAC1 void SOAP_FMAC2 soap_set_local_namespaces(struct soap *);
 
 SOAP_FMAC1 void SOAP_FMAC2 soap_pop_namespace(struct soap *);
 SOAP_FMAC1 struct soap_nlist *SOAP_FMAC2
-    soap_push_namespace(struct soap *, const char *, const char *);
+soap_push_namespace(struct soap *, const char *, const char *);
 SOAP_FMAC1 const char *SOAP_FMAC2
-    soap_current_namespace(struct soap *soap, const char *tag);
+soap_current_namespace(struct soap *soap, const char *tag);
 
 SOAP_FMAC1 struct soap_nlist *SOAP_FMAC2
-    soap_lookup_ns(struct soap *soap, const char *tag, size_t n);
+soap_lookup_ns(struct soap *soap, const char *tag, size_t n);
 
 SOAP_FMAC1 int SOAP_FMAC2 soap_store_lab(struct soap *, const char *, size_t);
 SOAP_FMAC1 int SOAP_FMAC2 soap_append_lab(struct soap *, const char *, size_t);
 
 SOAP_FMAC1 struct soap_blist *SOAP_FMAC2 soap_new_block(struct soap *);
 SOAP_FMAC1 void *SOAP_FMAC2
-    soap_push_block(struct soap *, struct soap_blist *, size_t);
+soap_push_block(struct soap *, struct soap_blist *, size_t);
 SOAP_FMAC1 void SOAP_FMAC2 soap_pop_block(struct soap *, struct soap_blist *);
 SOAP_FMAC1 size_t SOAP_FMAC2
-    soap_size_block(struct soap *, struct soap_blist *, size_t);
+soap_size_block(struct soap *, struct soap_blist *, size_t);
 SOAP_FMAC1 char *SOAP_FMAC2
-    soap_first_block(struct soap *, struct soap_blist *);
+soap_first_block(struct soap *, struct soap_blist *);
 SOAP_FMAC1 char *SOAP_FMAC2 soap_next_block(struct soap *, struct soap_blist *);
 SOAP_FMAC1 size_t SOAP_FMAC2
-    soap_block_size(struct soap *, struct soap_blist *);
+soap_block_size(struct soap *, struct soap_blist *);
 SOAP_FMAC1 char *SOAP_FMAC2
-    soap_save_block(struct soap *, struct soap_blist *, char *, int);
+soap_save_block(struct soap *, struct soap_blist *, char *, int);
 SOAP_FMAC1 void SOAP_FMAC2 soap_end_block(struct soap *, struct soap_blist *);
 SOAP_FMAC1 void SOAP_FMAC2 soap_update_pointers(struct soap *soap, char *start,
                                                 char *end, char *p1, char *p2);
@@ -2821,29 +2820,29 @@ SOAP_FMAC1 int SOAP_FMAC2 soap_s2LONG64(struct soap *, const char *, LONG64 *);
 SOAP_FMAC1 int SOAP_FMAC2 soap_s2float(struct soap *, const char *, float *);
 SOAP_FMAC1 int SOAP_FMAC2 soap_s2double(struct soap *, const char *, double *);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_s2unsignedByte(struct soap *, const char *, unsigned char *);
+soap_s2unsignedByte(struct soap *, const char *, unsigned char *);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_s2unsignedShort(struct soap *, const char *, unsigned short *);
+soap_s2unsignedShort(struct soap *, const char *, unsigned short *);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_s2unsignedInt(struct soap *, const char *, unsigned int *);
+soap_s2unsignedInt(struct soap *, const char *, unsigned int *);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_s2unsignedLong(struct soap *, const char *, unsigned long *);
+soap_s2unsignedLong(struct soap *, const char *, unsigned long *);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_s2ULONG64(struct soap *, const char *, ULONG64 *);
-SOAP_FMAC1 int SOAP_FMAC2 soap_s2string(struct soap *, const char *, char **,
-                                        long minlen, long maxlen);
-SOAP_FMAC1 int SOAP_FMAC2 soap_s2QName(struct soap *, const char *, char **,
-                                       long minlen, long maxlen);
+soap_s2ULONG64(struct soap *, const char *, ULONG64 *);
+SOAP_FMAC1 int SOAP_FMAC2
+soap_s2string(struct soap *, const char *, char **, long minlen, long maxlen);
+SOAP_FMAC1 int SOAP_FMAC2
+soap_s2QName(struct soap *, const char *, char **, long minlen, long maxlen);
 
 #ifndef WITH_LEAN
-SOAP_FMAC1 int SOAP_FMAC2 soap_s2wchar(struct soap *, const char *, wchar_t **,
-                                       long minlen, long maxlen);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_s2dateTime(struct soap *, const char *, time_t *);
+soap_s2wchar(struct soap *, const char *, wchar_t **, long minlen, long maxlen);
+SOAP_FMAC1 int SOAP_FMAC2
+soap_s2dateTime(struct soap *, const char *, time_t *);
 SOAP_FMAC1 char *SOAP_FMAC2
-    soap_s2base64(struct soap *, const unsigned char *, char *, int);
+soap_s2base64(struct soap *, const unsigned char *, char *, int);
 SOAP_FMAC1 char *SOAP_FMAC2
-    soap_s2hex(struct soap *, const unsigned char *, char *, int);
+soap_s2hex(struct soap *, const unsigned char *, char *, int);
 #endif
 
 SOAP_FMAC1 const char *SOAP_FMAC2 soap_byte2s(struct soap *, char);
@@ -2854,13 +2853,13 @@ SOAP_FMAC1 const char *SOAP_FMAC2 soap_LONG642s(struct soap *, LONG64);
 SOAP_FMAC1 const char *SOAP_FMAC2 soap_float2s(struct soap *, float);
 SOAP_FMAC1 const char *SOAP_FMAC2 soap_double2s(struct soap *, double);
 SOAP_FMAC1 const char *SOAP_FMAC2
-    soap_unsignedByte2s(struct soap *, unsigned char);
+soap_unsignedByte2s(struct soap *, unsigned char);
 SOAP_FMAC1 const char *SOAP_FMAC2
-    soap_unsignedShort2s(struct soap *, unsigned short);
+soap_unsignedShort2s(struct soap *, unsigned short);
 SOAP_FMAC1 const char *SOAP_FMAC2
-    soap_unsignedInt2s(struct soap *, unsigned int);
+soap_unsignedInt2s(struct soap *, unsigned int);
 SOAP_FMAC1 const char *SOAP_FMAC2
-    soap_unsignedLong2s(struct soap *, unsigned long);
+soap_unsignedLong2s(struct soap *, unsigned long);
 SOAP_FMAC1 const char *SOAP_FMAC2 soap_ULONG642s(struct soap *, ULONG64);
 SOAP_FMAC1 const char *SOAP_FMAC2 soap_QName2s(struct soap *, const char *);
 
@@ -2868,48 +2867,48 @@ SOAP_FMAC1 const char *SOAP_FMAC2 soap_QName2s(struct soap *, const char *);
 SOAP_FMAC1 const char *SOAP_FMAC2 soap_wchar2s(struct soap *, const wchar_t *);
 SOAP_FMAC1 const char *SOAP_FMAC2 soap_dateTime2s(struct soap *, time_t);
 SOAP_FMAC1 const char *SOAP_FMAC2
-    soap_base642s(struct soap *, const char *, char *, size_t, int *);
+soap_base642s(struct soap *, const char *, char *, size_t, int *);
 SOAP_FMAC1 const char *SOAP_FMAC2
-    soap_hex2s(struct soap *, const char *, char *, size_t, int *);
+soap_hex2s(struct soap *, const char *, char *, size_t, int *);
 #endif
 
 SOAP_FMAC1 int *SOAP_FMAC2
-    soap_inint(struct soap *, const char *tag, int *p, const char *, int);
+soap_inint(struct soap *, const char *tag, int *p, const char *, int);
 SOAP_FMAC1 char *SOAP_FMAC2
-    soap_inbyte(struct soap *, const char *tag, char *p, const char *, int);
+soap_inbyte(struct soap *, const char *tag, char *p, const char *, int);
 SOAP_FMAC1 long *SOAP_FMAC2
-    soap_inlong(struct soap *, const char *tag, long *p, const char *, int);
+soap_inlong(struct soap *, const char *tag, long *p, const char *, int);
 SOAP_FMAC1 LONG64 *SOAP_FMAC2
-    soap_inLONG64(struct soap *, const char *tag, LONG64 *p, const char *, int);
+soap_inLONG64(struct soap *, const char *tag, LONG64 *p, const char *, int);
 SOAP_FMAC1 short *SOAP_FMAC2
-    soap_inshort(struct soap *, const char *tag, short *p, const char *, int);
+soap_inshort(struct soap *, const char *tag, short *p, const char *, int);
 SOAP_FMAC1 float *SOAP_FMAC2
-    soap_infloat(struct soap *, const char *tag, float *p, const char *, int);
+soap_infloat(struct soap *, const char *tag, float *p, const char *, int);
 SOAP_FMAC1 double *SOAP_FMAC2
-    soap_indouble(struct soap *, const char *tag, double *p, const char *, int);
+soap_indouble(struct soap *, const char *tag, double *p, const char *, int);
 SOAP_FMAC1 unsigned char *SOAP_FMAC2
-    soap_inunsignedByte(struct soap *, const char *tag, unsigned char *p,
-                        const char *, int);
+soap_inunsignedByte(struct soap *, const char *tag, unsigned char *p,
+                    const char *, int);
 SOAP_FMAC1 unsigned short *SOAP_FMAC2
-    soap_inunsignedShort(struct soap *, const char *tag, unsigned short *p,
-                         const char *, int);
+soap_inunsignedShort(struct soap *, const char *tag, unsigned short *p,
+                     const char *, int);
 SOAP_FMAC1 unsigned int *SOAP_FMAC2
-    soap_inunsignedInt(struct soap *, const char *tag, unsigned int *p,
-                       const char *, int);
+soap_inunsignedInt(struct soap *, const char *tag, unsigned int *p,
+                   const char *, int);
 SOAP_FMAC1 unsigned long *SOAP_FMAC2
-    soap_inunsignedLong(struct soap *, const char *tag, unsigned long *p,
-                        const char *, int);
-SOAP_FMAC1 ULONG64 *SOAP_FMAC2 soap_inULONG64(struct soap *, const char *tag,
-                                              ULONG64 *p, const char *, int);
+soap_inunsignedLong(struct soap *, const char *tag, unsigned long *p,
+                    const char *, int);
+SOAP_FMAC1 ULONG64 *SOAP_FMAC2
+soap_inULONG64(struct soap *, const char *tag, ULONG64 *p, const char *, int);
 SOAP_FMAC1 char **SOAP_FMAC2 soap_instring(struct soap *, const char *tag,
                                            char **p, const char *, int, int,
                                            long, long);
 SOAP_FMAC1 char **SOAP_FMAC2
-    soap_inliteral(struct soap *, const char *tag, char **p);
+soap_inliteral(struct soap *, const char *tag, char **p);
 
 #ifndef WITH_LEAN
-SOAP_FMAC1 time_t *SOAP_FMAC2 soap_indateTime(struct soap *, const char *tag,
-                                              time_t *p, const char *, int);
+SOAP_FMAC1 time_t *SOAP_FMAC2
+soap_indateTime(struct soap *, const char *tag, time_t *p, const char *, int);
 SOAP_FMAC1 time_t SOAP_FMAC2 soap_timegm(struct tm *);
 #endif
 
@@ -2918,7 +2917,7 @@ SOAP_FMAC1 wchar_t **SOAP_FMAC2 soap_inwstring(struct soap *, const char *tag,
                                                wchar_t **p, const char *, int,
                                                long, long);
 SOAP_FMAC1 wchar_t **SOAP_FMAC2
-    soap_inwliteral(struct soap *, const char *tag, wchar_t **p);
+soap_inwliteral(struct soap *, const char *tag, wchar_t **p);
 #endif
 
 SOAP_FMAC1 int SOAP_FMAC2 soap_outbyte(struct soap *, const char *tag, int id,
@@ -2971,13 +2970,13 @@ SOAP_FMAC1 int SOAP_FMAC2 soap_outwliteral(struct soap *, const char *tag,
 
 #ifndef WITH_LEANER
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_attachment(struct soap *, const char *, int, const void *,
-                    const struct soap_array *, const char *, const char *,
-                    const char *, int, const char *, int);
+soap_attachment(struct soap *, const char *, int, const void *,
+                const struct soap_array *, const char *, const char *,
+                const char *, int, const char *, int);
 SOAP_FMAC1 int SOAP_FMAC2 soap_move(struct soap *, long);
 SOAP_FMAC1 size_t SOAP_FMAC2 soap_tell(struct soap *);
 SOAP_FMAC1 char *SOAP_FMAC2
-    soap_dime_option(struct soap *, unsigned short, const char *);
+soap_dime_option(struct soap *, unsigned short, const char *);
 SOAP_FMAC1 int SOAP_FMAC2 soap_getdimehdr(struct soap *);
 SOAP_FMAC1 int SOAP_FMAC2 soap_getdime(struct soap *);
 SOAP_FMAC1 int SOAP_FMAC2 soap_putdimehdr(struct soap *);
@@ -2985,28 +2984,28 @@ SOAP_FMAC1 int SOAP_FMAC2 soap_putdime(struct soap *);
 SOAP_FMAC1 int SOAP_FMAC2 soap_getmimehdr(struct soap *);
 SOAP_FMAC1 int SOAP_FMAC2 soap_getmime(struct soap *);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_putmimehdr(struct soap *, struct soap_multipart *);
+soap_putmimehdr(struct soap *, struct soap_multipart *);
 SOAP_FMAC1 int SOAP_FMAC2 soap_putmime(struct soap *);
 SOAP_FMAC1 void SOAP_FMAC2 soap_set_dime(struct soap *);
 SOAP_FMAC1 void SOAP_FMAC2
-    soap_set_mime(struct soap *, const char *boundary, const char *start);
+soap_set_mime(struct soap *, const char *boundary, const char *start);
 SOAP_FMAC1 void SOAP_FMAC2 soap_clr_dime(struct soap *);
 SOAP_FMAC1 void SOAP_FMAC2 soap_clr_mime(struct soap *);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_set_dime_attachment(struct soap *, char *ptr, size_t size,
-                             const char *type, const char *id,
-                             unsigned short optype, const char *option);
+soap_set_dime_attachment(struct soap *, char *ptr, size_t size,
+                         const char *type, const char *id,
+                         unsigned short optype, const char *option);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_set_mime_attachment(struct soap *, char *ptr, size_t size,
-                             enum soap_mime_encoding encoding, const char *type,
-                             const char *id, const char *location,
-                             const char *description);
+soap_set_mime_attachment(struct soap *, char *ptr, size_t size,
+                         enum soap_mime_encoding encoding, const char *type,
+                         const char *id, const char *location,
+                         const char *description);
 SOAP_FMAC1 void SOAP_FMAC2 soap_post_check_mime_attachments(struct soap *soap);
 SOAP_FMAC1 int SOAP_FMAC2 soap_check_mime_attachments(struct soap *soap);
 SOAP_FMAC1 struct soap_multipart *SOAP_FMAC2
-    soap_get_mime_attachment(struct soap *soap, void *handle);
+soap_get_mime_attachment(struct soap *soap, void *handle);
 SOAP_FMAC1 int SOAP_FMAC2
-    soap_match_cid(struct soap *, const char *, const char *);
+soap_match_cid(struct soap *, const char *, const char *);
 #endif
 
 SOAP_FMAC1 int SOAP_FMAC2 soap_register_plugin_arg(
@@ -3015,44 +3014,43 @@ SOAP_FMAC1 int SOAP_FMAC2 soap_register_plugin_arg(
 SOAP_FMAC1 void *SOAP_FMAC2 soap_lookup_plugin(struct soap *, const char *);
 
 SOAP_FMAC1 const char *SOAP_FMAC2
-    soap_attr_value(struct soap *soap, const char *name, int flag);
-SOAP_FMAC1 int SOAP_FMAC2 soap_set_attr(struct soap *soap, const char *name,
-                                        const char *value, int flag);
+soap_attr_value(struct soap *soap, const char *name, int flag);
+SOAP_FMAC1 int SOAP_FMAC2
+soap_set_attr(struct soap *soap, const char *name, const char *value, int flag);
 SOAP_FMAC1 void SOAP_FMAC2 soap_clr_attr(struct soap *soap);
 
 SOAP_FMAC1 const char *SOAP_FMAC2
-    soap_url(struct soap *soap, const char *, const char *);
+soap_url(struct soap *soap, const char *, const char *);
 SOAP_FMAC1 size_t SOAP_FMAC2 soap_encode_url(const char *, char *, size_t);
 SOAP_FMAC1 const char *SOAP_FMAC2
-    soap_encode_url_string(struct soap *, const char *);
+soap_encode_url_string(struct soap *, const char *);
 #ifdef WITH_COOKIES
 SOAP_FMAC1 void SOAP_FMAC2 soap_getcookies(struct soap *soap, const char *val);
 SOAP_FMAC1 extern struct soap_cookie *SOAP_FMAC2
-    soap_set_cookie(struct soap *, const char *, const char *, const char *,
-                    const char *);
+soap_set_cookie(struct soap *, const char *, const char *, const char *,
+                const char *);
 SOAP_FMAC1 extern struct soap_cookie *SOAP_FMAC2
-    soap_cookie(struct soap *, const char *, const char *, const char *);
+soap_cookie(struct soap *, const char *, const char *, const char *);
 SOAP_FMAC1 extern char *SOAP_FMAC2
-    soap_cookie_value(struct soap *, const char *, const char *, const char *);
+soap_cookie_value(struct soap *, const char *, const char *, const char *);
 SOAP_FMAC1 extern char *SOAP_FMAC2
-    soap_env_cookie_value(struct soap *, const char *, const char *,
-                          const char *);
+soap_env_cookie_value(struct soap *, const char *, const char *, const char *);
 SOAP_FMAC1 extern time_t SOAP_FMAC2
-    soap_cookie_expire(struct soap *, const char *, const char *, const char *);
+soap_cookie_expire(struct soap *, const char *, const char *, const char *);
 SOAP_FMAC1 extern int SOAP_FMAC2
-    soap_set_cookie_expire(struct soap *, const char *, long, const char *,
-                           const char *);
+soap_set_cookie_expire(struct soap *, const char *, long, const char *,
+                       const char *);
 SOAP_FMAC1 extern int SOAP_FMAC2
-    soap_set_cookie_session(struct soap *, const char *, const char *,
-                            const char *);
+soap_set_cookie_session(struct soap *, const char *, const char *,
+                        const char *);
 SOAP_FMAC1 extern int SOAP_FMAC2
-    soap_clr_cookie_session(struct soap *, const char *, const char *,
-                            const char *);
+soap_clr_cookie_session(struct soap *, const char *, const char *,
+                        const char *);
 SOAP_FMAC1 extern void SOAP_FMAC2
-    soap_clr_cookie(struct soap *, const char *, const char *, const char *);
+soap_clr_cookie(struct soap *, const char *, const char *, const char *);
 SOAP_FMAC1 extern int SOAP_FMAC2 soap_getenv_cookies(struct soap *);
 SOAP_FMAC1 extern struct soap_cookie *SOAP_FMAC2
-    soap_copy_cookies(struct soap *, const struct soap *);
+soap_copy_cookies(struct soap *, const struct soap *);
 SOAP_FMAC1 extern void SOAP_FMAC2 soap_free_cookies(struct soap *);
 SOAP_FMAC1 int SOAP_FMAC2 soap_putsetcookies(struct soap *soap);
 SOAP_FMAC1 int SOAP_FMAC2 soap_putcookies(struct soap *soap, const char *domain,

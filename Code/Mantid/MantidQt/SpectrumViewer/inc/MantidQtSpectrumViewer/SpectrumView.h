@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QMdiSubWindow>
 #include <QtGui>
+#include <QList>
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
@@ -71,29 +72,38 @@ public:
 
   ~SpectrumView();
   void renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp);
+  QList<boost::shared_ptr<SpectrumDisplay>> getSpectrumDisplays() const { return m_spectrumDisplay; }
+
+signals:
+  void spectrumDisplayChanged(SpectrumDisplay*);
 
 protected slots:
   void closeWindow();
+  void changeSpectrumDisplay(int tab);
+  void respondToTabCloseReqest(int tab);
 
 protected:
   virtual void resizeEvent(QResizeEvent * event);
   void preDeleteHandle(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace> ws);
   void afterReplaceHandle(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace> ws);
 
+  void dragMoveEvent(QDragMoveEvent *de);
+  void dragEnterEvent(QDragEnterEvent *de);
+  void dropEvent(QDropEvent *de);
+
 private:
-  void init(SpectrumDataSource_sptr dataSource);
-  void updateHandlers(SpectrumDataSource_sptr dataSource);
+  void updateHandlers();
 
-  GraphDisplay* m_hGraph;
-  GraphDisplay* m_vGraph;
+  QList<MatrixWSDataSource_sptr> m_dataSource;
+  QList<boost::shared_ptr<SpectrumDisplay>> m_spectrumDisplay;
+  boost::shared_ptr<GraphDisplay> m_hGraph;
+  boost::shared_ptr<GraphDisplay> m_vGraph;
+  boost::shared_ptr<SVConnections> m_svConnections;
 
-  MatrixWSDataSource_sptr m_dataSource;
 
   Ui::SpectrumViewer *m_ui;
   SliderHandler      *m_sliderHandler;
   RangeHandler       *m_rangeHandler;
-  SpectrumDisplay    *m_spectrumDisplay;
-  SVConnections      *m_svConnections;
   EModeHandler       *m_emodeHandler;
 
 signals:

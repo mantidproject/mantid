@@ -175,9 +175,9 @@ void ConvertToYSpace::init() {
       new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
       "The output workspace in y-Space");
 
-  declareProperty(
-      new WorkspaceProperty<>("QWorkspace", "", Direction::Output, PropertyMode::Optional),
-      "The output workspace in q-Space");
+  declareProperty(new WorkspaceProperty<>("QWorkspace", "", Direction::Output,
+                                          PropertyMode::Optional),
+                  "The output workspace in q-Space");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -201,7 +201,7 @@ void ConvertToYSpace::exec() {
                     boost::lexical_cast<std::string>(i) +
                     ". Zeroing spectrum.");
       m_outputWS->maskWorkspaceIndex(i);
-      if(m_qOutputWS)
+      if (m_qOutputWS)
         m_qOutputWS->maskWorkspaceIndex(i);
     }
 
@@ -211,7 +211,7 @@ void ConvertToYSpace::exec() {
 
   setProperty("OutputWorkspace", m_outputWS);
 
-  if(m_qOutputWS)
+  if (m_qOutputWS)
     setProperty("QWorkspace", m_qOutputWS);
 }
 
@@ -247,7 +247,7 @@ bool ConvertToYSpace::convert(const size_t index) {
       outY[outIndex] = prefactor * inY[j];
       outE[outIndex] = prefactor * inE[j];
 
-      if(m_qOutputWS) {
+      if (m_qOutputWS) {
         m_qOutputWS->dataX(index)[outIndex] = ys;
         m_qOutputWS->dataY(index)[outIndex] = qs;
       }
@@ -280,7 +280,7 @@ void ConvertToYSpace::createOutputWorkspace() {
   m_outputWS->setYUnitLabel("");
 
   // q-Space output workspace
-  if(getPropertyValue("QWorkspace") != "") {
+  if (getPropertyValue("QWorkspace") != "") {
     m_qOutputWS = WorkspaceFactory::Instance().create(m_inputWS);
 
     m_qOutputWS->getAxis(0)->unit() = xLabel;
