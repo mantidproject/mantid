@@ -214,16 +214,14 @@ class SourceLinkDirective(AlgorithmBaseDirective):
         #example url  https://github.com/mantidproject/mantid/blob/master/Code/Mantid/Framework/Algorithms/inc/MantidAlgorithms/MergeRuns.h
 
         url = file_path
+        # remove the directory path
+        url = url.replace(self.get_mantid_directory(), "")
         #harmonize slashes
         url = url.replace("\\","/")
-        #remove everything before Code
-        index = url.find("Code")
-        if index != -1:
-            url = url[index:]
-        else:
-            raise SourceLinkError ("Could not find the 'Code' directory in " + url)
         #prepend the github part
-        url = "https://github.com/mantidproject/mantid/blob/" + mantid.kernel.revision_full() + "/" + url
+        if not url.startswith("/"):
+            url = "/"+url
+        url = "https://github.com/mantidproject/mantid/blob/" + mantid.kernel.revision_full() + url
         return url
 
 def setup(app):
