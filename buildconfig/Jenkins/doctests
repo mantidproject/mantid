@@ -18,7 +18,7 @@ cmake --version
 #####################################################################################
 # Find and install package
 #####################################################################################
-INSTALLER_SCRIPT=$WORKSPACE/Code/Mantid/Testing/SystemTests/scripts/mantidinstaller.py
+INSTALLER_SCRIPT=$WORKSPACE/Testing/SystemTests/scripts/mantidinstaller.py
 EXE_PATH_FILE=$PWD/mantidplotpath.txt
 python ${INSTALLER_SCRIPT} install $WORKSPACE --dump-exe-path=${EXE_PATH_FILE}
 MANTIDPLOT_EXE=$(cat ${EXE_PATH_FILE})
@@ -53,7 +53,7 @@ cd $WORKSPACE/build
 # CMake configuration. We only need a minimal configuration as we will actually
 # just run from the package
 ###############################################################################
-$SCL_ON_RHEL6 "cmake -DMANTID_DATA_STORE=${MANTID_DATA_STORE} ../Code/Mantid"
+$SCL_ON_RHEL6 "cmake -DMANTID_DATA_STORE=${MANTID_DATA_STORE} .."
 
 ###############################################################################
 # Build step
@@ -69,7 +69,7 @@ rm -f $userprops
 
 data_binary_root=${WORKSPACE}/build/ExternalData
 testdata_dir=${data_binary_root}/Testing/Data
-instrument_dir=${WORKSPACE}/Code/Mantid/instrument
+instrument_dir=${WORKSPACE}/instrument
 echo "datasearch.directories=${testdata_dir}/DocTest;${testdata_dir}/UnitTest;${instrument_dir}" > $userprops
 echo "UpdateInstrumentDefinitions.OnStartup = 0" >> $userprops
 echo "usagereports.enabled = 0" >> $userprops
