@@ -2,13 +2,7 @@
 #define MANTID_GEOMETRY_HKLGENERATORTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <iostream>
-
 #include "MantidGeometry/Crystal/HKLGenerator.h"
-#include "MantidGeometry/Crystal/BasicHKLFilters.h"
-#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
-
-#include "MantidKernel/Timer.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -98,102 +92,6 @@ public:
     TS_ASSERT_EQUALS(hkls[26], V3D(1, 1, 1));
 
     TS_ASSERT_EQUALS(std::distance(it, end), 27);
-  }
-
-  void test_speed() {
-    size_t N = 1000;
-
-    Timer t;
-    for (size_t i = 0; i < N; ++i) {
-      HKLGenerator gen(20, 20, 20);
-
-      std::vector<V3D> hkls;
-      hkls.reserve(gen.size());
-
-      for (auto it = gen.begin(), end = gen.end(); it != end; ++it) {
-        hkls.push_back(*it);
-      }
-
-      TS_ASSERT_EQUALS(hkls.size(), 41 * 41 * 41);
-    }
-
-    float e = t.elapsed();
-    std::cout << "T: " << e / static_cast<float>(N) << std::endl;
-  }
-
-  void test_speed_filter_constructor() {
-    size_t N = 1000;
-
-    Timer t;
-    for (size_t i = 0; i < N; ++i) {
-      HKLGenerator gen(20, 20, 20);
-
-      std::vector<V3D> hkls;
-      hkls.reserve(gen.size());
-      std::copy(gen.begin(), gen.end(), std::back_inserter(hkls));
-
-      // TS_ASSERT_EQUALS(hkls.size(), gen.size());
-      TS_ASSERT_EQUALS(hkls.size(), 41 * 41 * 41);
-    }
-
-    float e = t.elapsed();
-    std::cout << "T: " << e / static_cast<float>(N) << std::endl;
-  }
-
-  void test_speed_filter() {
-    size_t N = 1000;
-
-    Timer t;
-    for (size_t i = 0; i < N; ++i) {
-      double dMin = 0.5;
-      UnitCell cell(8, 8, 8);
-
-      HKLGenerator gen(cell, dMin);
-
-      std::vector<V3D> hkls;
-      hkls.reserve(gen.size());
-
-      HKLFilterDRange dFilter(cell, dMin, 200.0);
-
-      for (auto it = gen.begin(); it != gen.end(); ++it) {
-        if (dFilter.isAllowed(*it)) {
-          hkls.push_back(*it);
-        }
-      }
-
-      // TS_ASSERT_EQUALS(hkls.size(), gen.size());
-      TS_ASSERT_DIFFERS(hkls.size(), 0);
-    }
-
-    float e = t.elapsed();
-    std::cout << "T: " << e / static_cast<float>(N) << std::endl;
-  }
-
-  void test_speed_filter_stl() {
-    size_t N = 1000;
-
-    Timer t;
-    for (size_t i = 0; i < N; ++i) {
-      double dMin = 0.5;
-      UnitCell cell(8, 8, 8);
-
-      HKLGenerator gen(cell, dMin);
-
-      std::vector<V3D> hkls;
-      hkls.reserve(gen.size());
-
-      HKLFilter_const_sptr dFilter =
-          boost::make_shared<HKLFilterDRange>(cell, dMin, 200.0);
-
-      std::remove_copy_if(gen.begin(), gen.end(), std::back_inserter(hkls),
-                          (~dFilter)->fn());
-
-      // TS_ASSERT_EQUALS(hkls.size(), gen.size());
-      TS_ASSERT_DIFFERS(hkls.size(), 0);
-    }
-
-    float e = t.elapsed();
-    std::cout << "T: " << e / static_cast<float>(N) << std::endl;
   }
 };
 
