@@ -8,7 +8,7 @@ import numpy as np
 class DetectorFloodWeighting(DataProcessorAlgorithm):
 
     def __init__(self):
-        super.__init__(self, DataProcessorAlgorithm)
+        DataProcessorAlgorithm.__init__(self)
 
     def category(self):
         return 'Workflow\\SANS'
@@ -110,5 +110,4 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
         self.setProperty('OutputWorkspace', normalized)
 
 
-# Register algorithm with Mantid
-AlgorithmFactory.subscribe(DetectorFloodWeighting)
+# Register alg
