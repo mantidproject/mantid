@@ -61,6 +61,7 @@ private:
   Kernel::Property *getPLogForProperty(const API::MatrixWorkspace_sptr &inputWS,
                                        const std::string &name);
   void setFilterLog(const API::MatrixWorkspace_sptr &inputWS);
+
 protected: // for testing, private otherwise.
   // prepare working workspace with appropriate monitor spectra for fitting
   API::MatrixWorkspace_sptr

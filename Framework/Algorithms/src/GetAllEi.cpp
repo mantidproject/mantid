@@ -126,52 +126,51 @@ void GetAllEi::init() {
       "together with total intensity within each peak.");
 }
 
-//unnamed namespace for auxiliary file-based compilation units
+// unnamed namespace for auxiliary file-based compilation units
 namespace {
 
-  /**Simple template function to remove invalid data from vector
-  *@param guessValid -- boolean vector of indicating if each particular guess is
-  *valid
-  *@param guess      -- vector guess values at input and values with removing
-  *                     invalid parameters at output
-  */
-  template <class T>
-  void removeInvalidValues(const std::vector<bool> &guessValid,
-    std::vector<T> &guess) {
-      std::vector<T> new_guess;
-      new_guess.reserve(guess.size());
+/**Simple template function to remove invalid data from vector
+*@param guessValid -- boolean vector of indicating if each particular guess is
+*valid
+*@param guess      -- vector guess values at input and values with removing
+*                     invalid parameters at output
+*/
+template <class T>
+void removeInvalidValues(const std::vector<bool> &guessValid,
+                         std::vector<T> &guess) {
+  std::vector<T> new_guess;
+  new_guess.reserve(guess.size());
 
-      for (size_t i = 0; i < guessValid.size(); i++) {
-        if (guessValid[i]) {
-          new_guess.push_back(guess[i]);
-        }
-      }
-      new_guess.swap(guess);
-  };
-  /**Internal class to contain peak information */
-  struct peakKeeper {
-    double position;
-    double height;
-    double sigma;
-    double energy;
-
-    peakKeeper(double pos, double heigh, double sig)
-      : position(pos), height(heigh), sigma(sig) {
-        this->energy = std::sqrt(2 * M_PI) * height * sigma;
+  for (size_t i = 0; i < guessValid.size(); i++) {
+    if (guessValid[i]) {
+      new_guess.push_back(guess[i]);
     }
-    // to sort peaks
-    bool operator<(const peakKeeper &str) const { return (energy > str.energy); }
-  };
+  }
+  new_guess.swap(guess);
+};
+/**Internal class to contain peak information */
+struct peakKeeper {
+  double position;
+  double height;
+  double sigma;
+  double energy;
 
-  struct peakKeeper2 {
-    double left_rng;
-    double right_rng;
-    peakKeeper2(){};
-    peakKeeper2(double left, double right) : left_rng(left), right_rng(right) {}
-  };
+  peakKeeper(double pos, double heigh, double sig)
+      : position(pos), height(heigh), sigma(sig) {
+    this->energy = std::sqrt(2 * M_PI) * height * sigma;
+  }
+  // to sort peaks
+  bool operator<(const peakKeeper &str) const { return (energy > str.energy); }
+};
 
-} //END unnamed namespace for auxiliary file-based compilation units
+struct peakKeeper2 {
+  double left_rng;
+  double right_rng;
+  peakKeeper2(){};
+  peakKeeper2(double left, double right) : left_rng(left), right_rng(right) {}
+};
 
+} // END unnamed namespace for auxiliary file-based compilation units
 
 /** Executes the algorithm -- found all existing monitor peaks. */
 void GetAllEi::exec() {
@@ -393,12 +392,12 @@ void GetAllEi::exec() {
 
   setProperty("OutputWorkspace", result_ws);
 }
-/**The internal procedure to set filter log from properties, 
+/**The internal procedure to set filter log from properties,
    defining it.
 * @param inputWS -- shared pointer to the input workspace with
                     logs to analyze
 */
-void GetAllEi::setFilterLog(const API::MatrixWorkspace_sptr &inputWS){
+void GetAllEi::setFilterLog(const API::MatrixWorkspace_sptr &inputWS) {
 
   std::string filerLogName;
   std::string filterBase = getProperty("FilterBaseLog");
@@ -414,13 +413,13 @@ void GetAllEi::setFilterLog(const API::MatrixWorkspace_sptr &inputWS){
     m_pFilterLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
         inputWS->run().getProperty(filerLogName));
   } catch (std::runtime_error &) {
-    g_log.warning() << " Can not retrieve (double) filtering log: " 
-                   + filerLogName + " from current workspace\n"
-                   " Using total experiment range to "
-                   "find logs averages for chopper parameters\n";
+    g_log.warning() << " Can not retrieve (double) filtering log: " +
+                           filerLogName +
+                           " from current workspace\n"
+                           " Using total experiment range to "
+                           "find logs averages for chopper parameters\n";
     m_FilterWithDerivative = false;
   }
-
 }
 
 /**Get energy of monitor peak if one is present*/
@@ -479,8 +478,9 @@ bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
     Kernel::VectorHelper::smoothInRange(S, SAvrg, SmoothRange, &X, ind_min,
                                         ind_max, &binsAvrg);
 
-    double realPeakPos(xOfMax); // this position is less shifted due to the skew in
-                        // averaging formula
+    double realPeakPos(
+        xOfMax); // this position is less shifted due to the skew in
+                 // averaging formula
     bool foundRealPeakPos(false);
     std::vector<double> der1Avrg, der2Avrg, peaks, hillsPos, SAvrg1, binsAvrg1;
     size_t nPeaks =
@@ -520,17 +520,17 @@ bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
     }
     if (iterations_fail) {
       g_log.information() << "*No peak search convergence after " +
-                              std::to_string(ic) +
-                              " smoothing iterations at still_count: " +
-                              std::to_string(stay_still_count) +
-                             " Wrong energy or noisy peak at Ei=" +
-                              std::to_string(Ei) << std::endl;
+                                 std::to_string(ic) +
+                                 " smoothing iterations at still_count: " +
+                                 std::to_string(stay_still_count) +
+                                 " Wrong energy or noisy peak at Ei=" +
+                                 std::to_string(Ei) << std::endl;
     }
     g_log.debug() << "*Performed: " + std::to_string(ic) +
-                     " averages for spectra " + std::to_string(index) +
-                     " at energy: " + std::to_string(Ei) +
-                     "\n and found: " + std::to_string(nPeaks) +
-                     "peaks and " + std::to_string(nHills) + " hills\n";
+                         " averages for spectra " + std::to_string(index) +
+                         " at energy: " + std::to_string(Ei) +
+                         "\n and found: " + std::to_string(nPeaks) +
+                         "peaks and " + std::to_string(nHills) + " hills\n";
     if (nPeaks != 1) {
       g_log.debug() << "*Peak rejected as n-peaks !=1 after averaging\n";
       return false;
@@ -545,8 +545,8 @@ bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
         peakTwoSigma = hillsPos[1] - hillsPos[0];
       } else {
         g_log.debug() << "*Peak rejected as averaging gives: " +
-                          std::to_string(nPeaks) + " peaks and " +
-                          std::to_string(nHills) + " heals\n";
+                             std::to_string(nPeaks) + " peaks and " +
+                             std::to_string(nHills) + " heals\n";
 
         return false;
       }
@@ -564,9 +564,9 @@ bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
     return false;
   if (0.25 * peak1TwoSigma > maxSigma || peak1TwoSigma < minSigma) {
     g_log.debug() << "*Rejecting due to width: Peak at mon1 Ei=" +
-                     std::to_string(peak1Pos) + " with Height:" +
-                     std::to_string(peak1Height) + " and 2*Sigma: " +
-                     std::to_string(peak1TwoSigma) << std::endl;
+                         std::to_string(peak1Pos) + " with Height:" +
+                         std::to_string(peak1Height) + " and 2*Sigma: " +
+                         std::to_string(peak1TwoSigma) << std::endl;
     return false;
   }
 
@@ -1079,8 +1079,7 @@ std::map<std::string, std::string> GetAllEi::validateInputs() {
         boost::lexical_cast<std::string>(specNum2);
   }
   // check chopper and initiate it if present (for debugging)
-  m_chopper =
-      inputWS->getInstrument()->getComponentByName("chopper-position");
+  m_chopper = inputWS->getInstrument()->getComponentByName("chopper-position");
   if (!m_chopper) {
     result["Workspace_chopper"] =
         " For this algorithm to work workspace has"
