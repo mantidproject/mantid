@@ -1,11 +1,11 @@
-#ifndef MANTID_CUSTOMINTERFACES_IMAGECORVIEWMOCK_H
-#define MANTID_CUSTOMINTERFACES_IMAGECORVIEWMOCK_H
+#ifndef MANTID_CUSTOMINTERFACES_IMAGEROIVIEWMOCK_H
+#define MANTID_CUSTOMINTERFACES_IMAGEROIVIEWMOCK_H
 
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 
 #include <gmock/gmock.h>
 
-class MockImageCoRView : public MantidQt::CustomInterfaces::IImageCoRView {
+class MockImageROIView : public MantidQt::CustomInterfaces::IImageROIView {
 public:
   // void initParams(ImageStackPreParams &params)
   MOCK_METHOD1(setParams,
@@ -19,7 +19,7 @@ public:
   MOCK_CONST_METHOD0(selectionState, SelectionState());
 
   // void changeSelectionState(const SelectionState state);
-  MOCK_METHOD1(changeSelectionState, void(const IImageCoRView::SelectionState&));
+  MOCK_METHOD1(changeSelectionState, void(const IImageROIView::SelectionState&));
 
   // void showStack(const std::string &path);
   MOCK_METHOD1(showStack, void(const std::string &));
@@ -63,4 +63,4 @@ public:
   MOCK_METHOD0(resetNormArea, void());
 };
 
-#endif // MANTID_CUSTOMINTERFACES_IMAGECORVIEWMOCK_H
+#endif // MANTID_CUSTOMINTERFACES_IMAGEROIVIEWMOCK_H

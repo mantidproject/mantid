@@ -3,7 +3,7 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtCustomInterfaces/Tomography/ImageCoRViewQtWidget.h"
+#include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigAstraToolbox.h"
@@ -73,8 +73,8 @@ void TomographyIfaceViewQtGUI::initLayout() {
   m_uiTabSetup.setupUi(tabSetupW);
   m_ui.tabMain->addTab(tabSetupW, QString("Setup"));
 
-  ImageCoRViewQtWidget *tabCoRW = new ImageCoRViewQtWidget(m_ui.tabMain);
-  m_ui.tabMain->addTab(tabCoRW, QString("ROI etc."));
+  ImageROIViewQtWidget *tabROIW = new ImageROIViewQtWidget(m_ui.tabMain);
+  m_ui.tabMain->addTab(tabROIW, QString("ROI etc."));
 
   QWidget *tabFiltersW = new QWidget();
   m_ui.tabMain->addTab(tabFiltersW, QString("Filters"));
