@@ -81,8 +81,7 @@ void ConvertCWSDMDtoHKL::init() {
 void ConvertCWSDMDtoHKL::exec() {
   // Get inputs
   IMDEventWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  if (inputWS->getSpecialCoordinateSystem() != Mantid::Kernel::QSample)
-  {
+  if (inputWS->getSpecialCoordinateSystem() != Mantid::Kernel::QSample) {
     std::stringstream errmsg;
     errmsg << "Input MDEventWorkspace's coordinate system is not QSample but "
            << inputWS->getSpecialCoordinateSystem() << ".";
@@ -168,9 +167,11 @@ void ConvertCWSDMDtoHKL::getUBMatrix() {
  * It is a convenient algorithm if number of events are few relative to
  * number of detectors
  */
-void ConvertCWSDMDtoHKL::exportEvents(
-    IMDEventWorkspace_sptr mdws, std::vector<Kernel::V3D> &vec_event_qsample,
-    std::vector<signal_t> &vec_event_signal, std::vector<detid_t> &vec_event_det) {
+void
+ConvertCWSDMDtoHKL::exportEvents(IMDEventWorkspace_sptr mdws,
+                                 std::vector<Kernel::V3D> &vec_event_qsample,
+                                 std::vector<signal_t> &vec_event_signal,
+                                 std::vector<detid_t> &vec_event_det) {
   // Set the size of the output vectors
   size_t numevents = mdws->getNEvents();
   g_log.information() << "Number of events = " << numevents << "\n";
