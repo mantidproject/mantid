@@ -109,7 +109,7 @@ public:
    * While the iterators can be instantiated directly, the intention is to
    * use HKLGenerator::begin() and HKLGenerator::end().
    */
-  class const_iterator
+  class MANTID_GEOMETRY_DLL const_iterator
       : public boost::iterator_facade<const_iterator, const Kernel::V3D &,
                                       boost::forward_traversal_tag> {
   public:
