@@ -12,6 +12,6 @@ Useful links
  * Build server: http://builds.mantidproject.org
  * Developer site: http://developer.mantidproject.org
 
-[![Build Status](http://builds.mantidproject.org/job/master_clean/badge/icon)](http://builds.mantidproject.org/job/master_clean/)
+[![Build Status](http://builds.mantidproject.org/job/master_incremental/badge/icon)](http://builds.mantidproject.org/job/master_incremental/)
 [![Coverage Status](https://coveralls.io/repos/mantidproject/mantid/badge.svg?branch=master)](https://coveralls.io/r/mantidproject/mantid?branch=master)
 [![Coverity Scan Build Status](https://img.shields.io/coverity/scan/335.svg)](https://scan.coverity.com/projects/335")
