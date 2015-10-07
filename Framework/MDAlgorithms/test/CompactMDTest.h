@@ -106,48 +106,53 @@ public:
      *  -------------  3
      * -3-2-1 0 1 2 3
      */
-      using namespace Mantid::DataObjects;
-      const size_t numDims = 2;
-      const double signal = 0.0;
-      const double errorSquared = 1.2;
-      size_t numBins[static_cast<int>(numDims)]={3,3};
-      Mantid::coord_t min[static_cast<int>(numDims)]={-3,-3};
-      Mantid::coord_t max[static_cast<int>(numDims)]={3, 3};
-      const std::string name("test");
-      auto inWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(numDims, signal, errorSquared, numBins, min, max, name);
-      inWS->setSignalAt(0, 1.0); //cell a
-      inWS->setSignalAt(2, 1.0); //cell b
-      inWS->setSignalAt(6, 1.0); //cell c
-      inWS->setSignalAt(8, 1.0); //cell d
+    using namespace Mantid::DataObjects;
+    const size_t numDims = 2;
+    const double signal = 0.0;
+    const double errorSquared = 1.2;
+    size_t numBins[static_cast<int>(numDims)] = {3, 3};
+    Mantid::coord_t min[static_cast<int>(numDims)] = {-3, -3};
+    Mantid::coord_t max[static_cast<int>(numDims)] = {3, 3};
+    const std::string name("test");
+    auto inWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
+        numDims, signal, errorSquared, numBins, min, max, name);
+    inWS->setSignalAt(0, 1.0); // cell a
+    inWS->setSignalAt(2, 1.0); // cell b
+    inWS->setSignalAt(6, 1.0); // cell c
+    inWS->setSignalAt(8, 1.0); // cell d
 
-      CompactMD alg;
-      alg.setChild(true);
-      alg.setRethrows(true);
-      alg.initialize();
-      alg.setProperty("InputWorkspace", inWS);
-      alg.setProperty("OutputWorkspace", "out");
-      alg.execute();
-      IMDHistoWorkspace_sptr outputWorkspace = alg.getProperty("OutputWorkspace");
-      TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
+    CompactMD alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setProperty("OutputWorkspace", "out");
+    alg.execute();
+    IMDHistoWorkspace_sptr outputWorkspace = alg.getProperty("OutputWorkspace");
+    TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
                       outputWorkspace->getSignalAt(0), 1);
-      TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
+    TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
                       outputWorkspace->getSignalAt(2), 1);
-      TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
+    TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
                       outputWorkspace->getSignalAt(6), 1);
-      TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
+    TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
                       outputWorkspace->getSignalAt(8), 1);
-      TSM_ASSERT_EQUALS("Minimum should be cropped to -1: ",
-                      outputWorkspace->getDimension(0)->getMinimum(), inWS->getDimension(0)->getMinimum());
-      TSM_ASSERT_EQUALS("Maximum should be cropped to 1: ",
-                      outputWorkspace->getDimension(0)->getMaximum(),inWS->getDimension(0)->getMaximum());
-      TSM_ASSERT_EQUALS("Number of Bins should be 1 : ",
-                      outputWorkspace->getDimension(0)->getNBins(), inWS->getDimension(0)->getNBins());
-      TSM_ASSERT_EQUALS("Bin width should be consistent: ",
+    TSM_ASSERT_EQUALS("Minimum should be cropped to -1: ",
+                      outputWorkspace->getDimension(0)->getMinimum(),
+                      inWS->getDimension(0)->getMinimum());
+    TSM_ASSERT_EQUALS("Maximum should be cropped to 1: ",
+                      outputWorkspace->getDimension(0)->getMaximum(),
+                      inWS->getDimension(0)->getMaximum());
+    TSM_ASSERT_EQUALS("Number of Bins should be 1 : ",
+                      outputWorkspace->getDimension(0)->getNBins(),
+                      inWS->getDimension(0)->getNBins());
+    TSM_ASSERT_EQUALS("Bin width should be consistent: ",
                       outputWorkspace->getDimension(0)->getBinWidth(),
                       inWS->getDimension(0)->getBinWidth());
   }
 
-  void test_all_non_zero_signals_are_kept_when_data_is_concentrated_in_one_half_of_the_workspace(){
+  void
+  test_all_non_zero_signals_are_kept_when_data_is_concentrated_in_one_half_of_the_workspace() {
 
   }
 };
