@@ -2627,7 +2627,7 @@ Matrix *ApplicationWindow::importImage(const QString &fileName) {
   QString fn = fileName;
   if (fn.isEmpty()) {
     QList<QByteArray> list = QImageReader::supportedImageFormats();
-    QString filter = tr("Images") + " (", aux1, aux2;
+    QString filter = tr("images") + " (", aux1, aux2;
     for (int i = 0; i < (int)list.count(); i++) {
       aux1 = " *." + list[i] + " ";
       aux2 += " *." + list[i] + ";;";
@@ -2668,7 +2668,7 @@ Matrix *ApplicationWindow::importImage(const QString &fileName) {
 
 void ApplicationWindow::loadImage() {
   QList<QByteArray> list = QImageReader::supportedImageFormats();
-  QString filter = tr("Images") + " (", aux1, aux2;
+  QString filter = tr("images") + " (", aux1, aux2;
   for (int i = 0; i < (int)list.count(); i++) {
     aux1 = " *." + list[i] + " ";
     aux2 += " *." + list[i] + ";;";
@@ -5041,13 +5041,13 @@ void ApplicationWindow::readSettings() {
   fitPluginsPath = settings.value("/FitPlugins", "fitPlugins").toString();
   templatesDir = settings.value("/TemplatesDir", appPath).toString();
   asciiDirPath = settings.value("/ASCII", appPath).toString();
-  imagesDirPath = settings.value("/Images", appPath).toString();
+  imagesDirPath = settings.value("/images", appPath).toString();
 #else
   fitPluginsPath =
       settings.value("/FitPlugins", "/usr/lib/MantidPlot/plugins").toString();
   templatesDir = settings.value("/TemplatesDir", QDir::homePath()).toString();
   asciiDirPath = settings.value("/ASCII", QDir::homePath()).toString();
-  imagesDirPath = settings.value("/Images", QDir::homePath()).toString();
+  imagesDirPath = settings.value("/images", QDir::homePath()).toString();
   workingDir = settings.value("/WorkingDir", QDir::homePath()).toString();
 #endif
   scriptsDirPath = settings.value("/ScriptsDir", appPath).toString();
@@ -5552,7 +5552,7 @@ void ApplicationWindow::saveSettings() {
   settings.setValue("/HelpFile", helpFilePath);
   settings.setValue("/FitPlugins", fitPluginsPath);
   settings.setValue("/ASCII", asciiDirPath);
-  settings.setValue("/Images", imagesDirPath);
+  settings.setValue("/images", imagesDirPath);
   settings.setValue("/ScriptsDir", scriptsDirPath);
   settings.setValue("/FitModelsDir", fitModelsPath);
   settings.setValue("/CustomActionsDir", customActionsDirPath);
@@ -8312,7 +8312,7 @@ void ApplicationWindow::addImage() {
     return;
 
   QList<QByteArray> list = QImageReader::supportedImageFormats();
-  QString filter = tr("Images") + " (", aux1, aux2;
+  QString filter = tr("images") + " (", aux1, aux2;
   for (int i = 0; i < (int)list.count(); i++) {
     aux1 = " *." + list[i] + " ";
     aux2 += " *." + list[i] + ";;";

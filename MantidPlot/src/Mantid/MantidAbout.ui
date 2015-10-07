@@ -220,7 +220,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap>:/Logos/Images/ISIS Logo.gif</pixmap>
+           <pixmap>:/Logos/images/ISIS Logo.gif</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -245,7 +245,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="../../../Images/images.qrc">:/Ornl_hfir_sns_logo_small.png</pixmap>
+           <pixmap resource="../../../images/images.qrc">:/Ornl_hfir_sns_logo_small.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -289,7 +289,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="../../../Images/images.qrc">:/ISIS_Logo_Transparent.gif</pixmap>
+           <pixmap resource="../../../images/images.qrc">:/ISIS_Logo_Transparent.gif</pixmap>
           </property>
           <property name="scaledContents">
            <bool>false</bool>
@@ -320,7 +320,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="../../../Images/images.qrc">:/ess_logo_transparent_small.png</pixmap>
+           <pixmap resource="../../../images/images.qrc">:/ess_logo_transparent_small.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -404,7 +404,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="../../../Images/images.qrc">:/Tessella_Logo_Transparent.gif</pixmap>
+           <pixmap resource="../../../images/images.qrc">:/Tessella_Logo_Transparent.gif</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -478,7 +478,7 @@
         <string/>
        </property>
        <property name="pixmap">
-        <pixmap resource="../../../Images/images.qrc">:/Mantid_Logo_Transparent.png</pixmap>
+        <pixmap resource="../../../images/images.qrc">:/Mantid_Logo_Transparent.png</pixmap>
        </property>
        <property name="scaledContents">
         <bool>true</bool>
@@ -490,7 +490,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../../Images/images.qrc"/>
+  <include location="../../../images/images.qrc"/>
  </resources>
  <connections>
   <connection>

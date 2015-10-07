@@ -29,9 +29,9 @@ if ( PYLINT_EXECUTABLE )
     set ( PYLINT_VERSION "unknown" )
   endif()
   # Script to find all .py files and execute pylint
-  set ( PYLINT_RUNNER_SCRIPT ${CMAKE_SOURCE_DIR}/Tools/Pylint/run_pylint.py )
+  set ( PYLINT_RUNNER_SCRIPT ${CMAKE_SOURCE_DIR}/tools/Pylint/run_pylint.py )
   # Configuration file
-  set ( PYLINT_CFG_FILE ${CMAKE_SOURCE_DIR}/Tools/Pylint/pylint.cfg )
+  set ( PYLINT_CFG_FILE ${CMAKE_SOURCE_DIR}/tools/Pylint/pylint.cfg )
 endif ()
 
 include(FindPackageHandleStandardArgs)

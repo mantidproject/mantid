@@ -140,7 +140,7 @@
       <string/>
      </property>
      <property name="icon">
-      <iconset resource="../../../../Images/images.qrc">
+      <iconset resource="../../../../images/images.qrc">
        <normaloff>:/Icons/LoadFile.png</normaloff>:/Icons/LoadFile.png</iconset>
      </property>
     </widget>
@@ -180,7 +180,7 @@
   </action>
  </widget>
  <resources>
-  <include location="../../../../Images/images.qrc"/>
+  <include location="../../../../images/images.qrc"/>
  </resources>
  <connections>
   <connection>
