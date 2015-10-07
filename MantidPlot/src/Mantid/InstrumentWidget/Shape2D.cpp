@@ -558,6 +558,10 @@ void Shape2DFree::refit()
 void Shape2DFree::resetBoundingRect()
 {
   m_boundingRect = getPolygonBoundingRect();
+  // Clear the outline path.
+  m_outline = QPainterPath();
+  if (m_polygon.isEmpty()) return;
+
   // If the polygon has apparent holes/discontinuities
   // it will have extra pairs of edges which we don't want
   // to draw.
@@ -588,8 +592,7 @@ void Shape2DFree::resetBoundingRect()
     breaks.push_back(n);
   }
   qSort(breaks);
-  // Clear the outline path.
-  m_outline = QPainterPath();
+
   m_outline.moveTo(m_polygon[0]);
   int j1 = 0;
   // Add contiguous portions of the polygon to the outline
