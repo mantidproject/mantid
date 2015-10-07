@@ -239,7 +239,8 @@ void export_Statistics() {
 
           .def("getZscore", &getZscoreNumpy, arg("data"),
                "Determine the Z score for an array of data")
-          .def("getZscore", &getZscoreNumpyDeprecated, (arg("data"), arg("sorted")),
+          .def("getZscore", &getZscoreNumpyDeprecated,
+               (arg("data"), arg("sorted")),
                "Determine the Z score for an array of "
                "data (deprecated sorted argument)")
           .staticmethod("getZscore")

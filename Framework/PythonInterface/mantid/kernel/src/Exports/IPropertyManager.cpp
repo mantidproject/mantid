@@ -127,14 +127,16 @@ void export_IPropertyManager() {
            return_value_policy<copy_const_reference>(),
            "Returns the list of properties managed by this object")
 
-      .def("declareProperty", &declareProperty, (arg("self"), arg("name"),arg("value")),
+      .def("declareProperty", &declareProperty,
+           (arg("self"), arg("name"), arg("value")),
            "Create a new named property")
 
       .def("setPropertyValue", &IPropertyManager::setPropertyValue,
-           (arg("self"), arg("name"),arg("value")),
+           (arg("self"), arg("name"), arg("value")),
            "Set the value of the named property via a string")
 
-      .def("setProperty", &setProperty, (arg("self"), arg("name"),arg("value")),
+      .def("setProperty", &setProperty,
+           (arg("self"), arg("name"), arg("value")),
            "Set the value of the named property")
 
       .def("setPropertySettings", &setPropertySettings,
@@ -142,7 +144,8 @@ void export_IPropertyManager() {
            "Assign the given IPropertySettings object to the  named property")
 
       .def("setPropertyGroup", &IPropertyManager::setPropertyGroup,
-           (arg("self"), arg("name"),arg("group")), "Set the group for a given property")
+           (arg("self"), arg("name"), arg("group")),
+           "Set the group for a given property")
 
       .def("existsProperty", &IPropertyManager::existsProperty,
            (arg("self"), arg("name")), "Returns whether a property exists")
@@ -156,7 +159,8 @@ void export_IPropertyManager() {
            (arg("self"), arg("name")), return_value_policy<return_by_value>(),
            "Returns the property of the given name. Use .value to give the "
            "value")
-      .def("__setitem__", &declareOrSetProperty, (arg("self"), arg("name"),arg("value")),
+      .def("__setitem__", &declareOrSetProperty,
+           (arg("self"), arg("name"), arg("value")),
            "Set the value of the named property or create it if it doesn't "
            "exist")
       .def("__delitem__", &deleteProperty, (arg("self"), arg("name")),
@@ -166,8 +170,8 @@ void export_IPropertyManager() {
            (arg("self"), arg("name")), "Returns whether a property exists")
 
       // Bonus methods to be even more like a dict
-      .def("has_key", &IPropertyManager::existsProperty, (arg("self"), arg("name")),
-           "Returns whether a property exists")
+      .def("has_key", &IPropertyManager::existsProperty,
+           (arg("self"), arg("name")), "Returns whether a property exists")
       .def("keys", &getKeys, arg("self"))
       .def("values", &IPropertyManager::getProperties, arg("self"),
            return_value_policy<copy_const_reference>(),

@@ -31,7 +31,8 @@ void export_Quat() {
       init<>(arg("self"),
              "Construct a default Quat that will perform no transformation."))
       .def(init<double, double, double, double>(
-          (arg("self"), arg("w"), arg("a"), arg("b"), arg("c")), "Constructor with values"))
+          (arg("self"), arg("w"), arg("a"), arg("b"), arg("c")),
+          "Constructor with values"))
       .def(init<V3D, V3D>((arg("self"), arg("src"), arg("dest")),
                           "Construct a Quat between two vectors"))
       .def(init<V3D, V3D, V3D>((arg("self"), arg("rX"), arg("rY"), arg("rZ")),
@@ -55,17 +56,21 @@ void export_Quat() {
            "Returns the 'length' of the quaternion")
       .def("len2", &Quat::len2, arg("self"),
            "Returns the square of the 'length' of the quaternion")
-      .def("__add__", &Quat::operator +,(arg("left"),arg("right")))
-      .def("__iadd__",&Quat::operator +=,boost::python::return_self<>(),(arg("self"),arg("other")))
-      .def("__sub__", &Quat::operator -,(arg("left"),arg("right")))
-      .def("__isub__",&Quat::operator -=,boost::python::return_self<>(),(arg("self"),arg("other")))
-      .def("__mul__", &Quat::operator *,(arg("left"),arg("right")))
-      .def("__imul__",&Quat::operator *=,boost::python::return_self<>(),(arg("self"),arg("other")))
-      .def("__eq__", &Quat::operator ==,(arg("self"),arg("other")))
-      .def("__ne__", &Quat::operator !=,(arg("self"),arg("other")))
+      .def("__add__", &Quat::operator+, (arg("left"), arg("right")))
+      .def("__iadd__", &Quat::operator+=, boost::python::return_self<>(),
+           (arg("self"), arg("other")))
+      .def("__sub__", &Quat::operator-, (arg("left"), arg("right")))
+      .def("__isub__", &Quat::operator-=, boost::python::return_self<>(),
+           (arg("self"), arg("other")))
+      .def("__mul__", &Quat::operator*, (arg("left"), arg("right")))
+      .def("__imul__", &Quat::operator*=, boost::python::return_self<>(),
+           (arg("self"), arg("other")))
+      .def("__eq__", &Quat::operator==, (arg("self"), arg("other")))
+      .def("__ne__", &Quat::operator!=, (arg("self"), arg("other")))
       .def("__getitem__",
            (const double &(Quat::*)(int) const) & Quat::operator[],
-           return_value_policy<copy_const_reference>(),(arg("self"),arg("index")))
-      .def("__str__", &Quat::toString,arg("self"));
-      //.def(boost::python::self_ns::str(self));
+           return_value_policy<copy_const_reference>(),
+           (arg("self"), arg("index")))
+      .def("__str__", &Quat::toString, arg("self"));
+  //.def(boost::python::self_ns::str(self));
 }

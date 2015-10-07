@@ -34,7 +34,8 @@ createListValidator(const boost::python::list &allowedValues) {
       .def("__init__",                                                         \
            make_constructor(&createListValidator<type>,                        \
                             default_call_policies(), arg("allowedValues")))    \
-      .def("addAllowedValue", &ListValidator<type>::addAllowedValue, (arg("self"),arg("value")),          \
+      .def("addAllowedValue", &ListValidator<type>::addAllowedValue,           \
+           (arg("self"), arg("value")),                                        \
            "Adds a value to the list of accepted values");
 }
 
