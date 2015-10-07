@@ -82,7 +82,7 @@ TimeSeriesProperty<TYPE>::getDerivative() const {
   auto timeSeriesDeriv = std::unique_ptr<TimeSeriesProperty<double>>(
       new TimeSeriesProperty<double>(this->name() + "_derivative"));
   timeSeriesDeriv->reserve(this->m_values.size() - 1);
-  for (it; it != m_values.end(); it++) {
+  for (; it != m_values.end(); it++) {
     TYPE v1 = it->value();
     int64_t t1 = it->time().totalNanoseconds();
     if (t1 != t0) {

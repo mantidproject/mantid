@@ -21,12 +21,12 @@ DECLARE_ALGORITHM(GetAllEi)
 
 /// Empty default constructor
 GetAllEi::GetAllEi()
-    : Algorithm(), m_FilterLogName(""), m_FilterWithDerivative(true),
+    : Algorithm(), m_FilterWithDerivative(true),
       // minimal resolution for all instruments
       m_min_Eresolution(0.08),
       // half maximal resolution for LET
       m_max_Eresolution(0.5e-3), m_peakEnergyRatio2reject(0.1), m_phase(0),
-      m_chopper() {}
+      m_chopper(),m_pFilterLog(nullptr) {}
 
 /// Initialization method.
 void GetAllEi::init() {
@@ -197,25 +197,25 @@ void GetAllEi::exec() {
         " parameter attached to the chopper-position component");
   }
   m_phase = phase[0];
+  std::string filerLogName;
   std::string filterBase = getProperty("FilterBaseLog");
   if (boost::iequals(filterBase, "Defined in IDF")) {
-    m_FilterLogName = m_chopper->getStringParameter("FilterBaseLog")[0];
+    filerLogName = m_chopper->getStringParameter("FilterBaseLog")[0];
     m_FilterWithDerivative =
         m_chopper->getBoolParameter("filter_with_derivative")[0];
   } else {
-    m_FilterLogName = filterBase;
+    filerLogName = filterBase;
     m_FilterWithDerivative = getProperty("FilterWithDerivative");
   }
   try {
-    auto pTimeSeries = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-        inputWS->run().getProperty(m_FilterLogName));
+    m_pFilterLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+        inputWS->run().getProperty(filerLogName));
   } catch (std::runtime_error &) {
     g_log.warning() << " Can not retrieve (double) filtering log: " +
-                           m_FilterLogName + " from current workspace\n"
+                           filerLogName + " from current workspace\n"
                                              " Using total experiment range to "
                                              "find logs averages for chopper "
                                              "parameters\n";
-    m_FilterLogName = "";
     m_FilterWithDerivative = false;
   }
 
@@ -425,7 +425,7 @@ bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
     double sMin(std::numeric_limits<double>::max());
     double sMax(-sMin);
     double xOfMax, dXmax;
-    double ncMax(0), Intensity(0);
+    double Intensity(0);
 
     auto X = inputWS->readX(index);
     auto S = inputWS->readY(index);
@@ -435,8 +435,8 @@ bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
     if (std::fabs(double(ind_max - ind_min)) < 5)
       return false;
 
-    double xMin = X[ind_min];
-    double xMax = X[ind_max];
+    //double xMin = X[ind_min];
+    //double xMax = X[ind_max];
 
     for (size_t i = ind_min; i < ind_max; i++) {
       double dX = X[i + 1] - X[i];
@@ -454,7 +454,7 @@ bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
     if (sMax * dXmax <= 2)
       return false;
     //
-    size_t SearchAreaSize = ind_max - ind_min;
+    //size_t SearchAreaSize = ind_max - ind_min;
 
     double SmoothRange = 2 * maxSigma;
 
@@ -932,15 +932,8 @@ void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
   // TODO: Make it dependent on inputWS time range
 
   std::vector<Kernel::SplittingInterval> splitter;
-  if (m_FilterLogName.size() > 0) {
+  if (m_pFilterLog) {
     std::unique_ptr<Kernel::TimeSeriesProperty<double>> pDerivative;
-    // pointer will not be null as this has been verified in validators
-    auto pTimeSeries = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-        inputWS->run().getProperty(m_FilterLogName));
-    if (!pTimeSeries)
-      throw std::runtime_error(
-          "findChopSpeedAndDelay: filtering log: " + m_FilterLogName +
-          " can not be interpreted as time series property of type 'double'");
 
     // Define selecting function
     bool inSelection(false);
@@ -968,14 +961,14 @@ void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
     };
     //
     // Analyze filtering log
-    auto dateAndTimes = pTimeSeries->valueAsCorrectMap();
+    auto dateAndTimes = m_pFilterLog->valueAsCorrectMap();
     auto it = dateAndTimes.begin();
     auto next = it;
     next++;
     std::map<Kernel::DateAndTime, double> derivMap;
     auto itder = it;
     if (m_FilterWithDerivative) {
-      pDerivative = pTimeSeries->getDerivative();
+      pDerivative = m_pFilterLog->getDerivative();
       derivMap = pDerivative->valueAsCorrectMap();
       itder = derivMap.begin();
     }
@@ -989,8 +982,7 @@ void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
         Kernel::SplittingInterval interval(startTime, endTime, 0);
         splitter.push_back(interval);
       } else {
-        throw std::runtime_error("filter log :" + m_FilterLogName +
-                                 " filters all data points. Nothing to do");
+        throw std::runtime_error("filtered all data points. Nothing to do");
       }
     } else {
       SelectInterval(it->first, next->first, itder->second);
@@ -1055,7 +1047,7 @@ std::map<std::string, std::string> GetAllEi::validateInputs() {
 
   specid_t specNum1 = getProperty("Monitor1SpecID");
   try {
-    size_t wsIndex = inputWS->getIndexFromSpectrumNumber(specNum1);
+    inputWS->getIndexFromSpectrumNumber(specNum1);
   } catch (std::runtime_error &) {
     result["Monitor1SpecID"] =
         "Input workspace does not contain spectra with ID: " +
@@ -1063,7 +1055,7 @@ std::map<std::string, std::string> GetAllEi::validateInputs() {
   }
   specid_t specNum2 = getProperty("Monitor2SpecID");
   try {
-    size_t wsIndex = inputWS->getIndexFromSpectrumNumber(specNum2);
+    inputWS->getIndexFromSpectrumNumber(specNum2);
   } catch (std::runtime_error &) {
     result["Monitor2SpecID"] =
         "Input workspace does not contain spectra with ID: " +
@@ -1144,7 +1136,6 @@ std::map<std::string, std::string> GetAllEi::validateInputs() {
         << " Can not find a log to identify good DAE operations.\n"
            " Assuming that good operations start from experiment time=0";
     // result.erase("FilterBaseLog");
-    m_FilterLogName = "";
   }
 
   return result;

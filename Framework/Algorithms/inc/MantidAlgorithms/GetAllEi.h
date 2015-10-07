@@ -64,7 +64,8 @@ private:
 protected: // for testing, private otherwise.
   // prepare working workspace with appropriate monitor spectra for fitting
   API::MatrixWorkspace_sptr
-  GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
+  // prepare matrix workspace to analyze monitor signal
+  buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
                                 size_t &wsIndex0);
 
   /**Return average time series log value for the appropriately filtered log*/
@@ -94,11 +95,6 @@ protected: // for testing, private otherwise.
                                      std::vector<double> &deriv,
                                      std::vector<double> &zeros);
 
-  /// name of the log, which identifies that instrument is running .
-  /// The log values should be positive when instrument is running and negative
-  /// or 0 otherwise
-  /// or see next property -- filter with derivative
-  std::string m_FilterLogName;
   /// if true, take derivate of the filter log to identify interval when
   /// instrument is running.
   bool m_FilterWithDerivative;
@@ -112,8 +108,10 @@ protected: // for testing, private otherwise.
   // the value of constant phase shift on the chopper used to calculate
   // tof at chopper from recorded delay.
   double m_phase;
-  // internal poínter to accelerate access to chopper
+  // internal pointer to access to chopper
   boost::shared_ptr<const Geometry::IComponent> m_chopper;
+  // internal pointer to access log, used for filtering
+  Kernel::TimeSeriesProperty<double> * m_pFilterLog;
 };
 
 } // namespace Algorithms

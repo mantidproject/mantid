@@ -592,7 +592,7 @@ void smoothInRange(const std::vector<double> &input,
 
   double halfWidth = avrgInterval / 2;
   if (!binBndrs) {
-    if (std::fabs(static_cast<size_t>(halfWidth) * 2 - avrgInterval) > 1.e-6) {
+    if (std::fabs(double(static_cast<size_t>(halfWidth)) * 2 - avrgInterval) > 1.e-6) {
       halfWidth = static_cast<double>(static_cast<size_t>(halfWidth) + 1);
     }
   }
@@ -634,7 +634,7 @@ void smoothInRange(const std::vector<double> &input,
       }
     } else { // integer indexes and functions defined in the bin centers
       iStart = index - static_cast<size_t>(halfWidth);
-      if (startIndex + halfWidth > index)
+      if (startIndex + static_cast<size_t>(halfWidth) > index)
         iStart = startIndex;
       iEnd = index + static_cast<size_t>(halfWidth);
       if (iEnd > endIndex)
