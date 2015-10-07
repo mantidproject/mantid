@@ -5,7 +5,10 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
+
 
 namespace Mantid {
 namespace CurveFitting {
@@ -158,6 +161,15 @@ Workspace_sptr SeqDomainSpectrumCreator::createOutputWorkspace(
     m_manager->setPropertyValue(outputWorkspacePropertyName,
                                 baseName + "Workspace");
     m_manager->setProperty(outputWorkspacePropertyName, outputWs);
+  }
+
+  // If the input is a not an EventWorkspace and is a distrubution, then convert
+  // the output also to a distribution
+  if (!boost::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(
+          m_matrixWorkspace)) {
+    if (m_matrixWorkspace->isDistribution()) {
+      API::WorkspaceHelpers::makeDistribution(outputWs);
+    }
   }
 
   return outputWs;
