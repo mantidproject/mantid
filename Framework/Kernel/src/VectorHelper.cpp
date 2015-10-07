@@ -592,7 +592,8 @@ void smoothInRange(const std::vector<double> &input,
 
   double halfWidth = avrgInterval / 2;
   if (!binBndrs) {
-    if (std::fabs(double(static_cast<size_t>(halfWidth)) * 2 - avrgInterval) > 1.e-6) {
+    if (std::fabs(double(static_cast<size_t>(halfWidth)) * 2 - avrgInterval) >
+        1.e-6) {
       halfWidth = static_cast<double>(static_cast<size_t>(halfWidth) + 1);
     }
   }

@@ -64,9 +64,9 @@ private:
 protected: // for testing, private otherwise.
   // prepare working workspace with appropriate monitor spectra for fitting
   API::MatrixWorkspace_sptr
-  // prepare matrix workspace to analyze monitor signal
-  buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
-                                size_t &wsIndex0);
+      // prepare matrix workspace to analyze monitor signal
+      buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
+                          size_t &wsIndex0);
 
   /**Return average time series log value for the appropriately filtered log*/
   double getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS,
@@ -111,7 +111,7 @@ protected: // for testing, private otherwise.
   // internal pointer to access to chopper
   boost::shared_ptr<const Geometry::IComponent> m_chopper;
   // internal pointer to access log, used for filtering
-  Kernel::TimeSeriesProperty<double> * m_pFilterLog;
+  Kernel::TimeSeriesProperty<double> *m_pFilterLog;
 };
 
 } // namespace Algorithms

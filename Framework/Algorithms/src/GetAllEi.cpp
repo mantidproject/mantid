@@ -26,7 +26,7 @@ GetAllEi::GetAllEi()
       m_min_Eresolution(0.08),
       // half maximal resolution for LET
       m_max_Eresolution(0.5e-3), m_peakEnergyRatio2reject(0.1), m_phase(0),
-      m_chopper(),m_pFilterLog(nullptr) {}
+      m_chopper(), m_pFilterLog(nullptr) {}
 
 /// Initialization method.
 void GetAllEi::init() {
@@ -213,9 +213,9 @@ void GetAllEi::exec() {
   } catch (std::runtime_error &) {
     g_log.warning() << " Can not retrieve (double) filtering log: " +
                            filerLogName + " from current workspace\n"
-                                             " Using total experiment range to "
-                                             "find logs averages for chopper "
-                                             "parameters\n";
+                                          " Using total experiment range to "
+                                          "find logs averages for chopper "
+                                          "parameters\n";
     m_FilterWithDerivative = false;
   }
 
@@ -435,8 +435,8 @@ bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
     if (std::fabs(double(ind_max - ind_min)) < 5)
       return false;
 
-    //double xMin = X[ind_min];
-    //double xMax = X[ind_max];
+    // double xMin = X[ind_min];
+    // double xMax = X[ind_max];
 
     for (size_t i = ind_min; i < ind_max; i++) {
       double dX = X[i + 1] - X[i];
@@ -454,7 +454,7 @@ bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
     if (sMax * dXmax <= 2)
       return false;
     //
-    //size_t SearchAreaSize = ind_max - ind_min;
+    // size_t SearchAreaSize = ind_max - ind_min;
 
     double SmoothRange = 2 * maxSigma;
 
