@@ -13,7 +13,6 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/IEventWorkspace.h"
 
 #include "MantidAPI/TextAxis.h"
@@ -346,7 +345,7 @@ FitMW::createOutputWorkspace(const std::string &baseName,
   if (!boost::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(
           m_matrixWorkspace)) {
     if (m_matrixWorkspace->isDistribution()) {
-      API::WorkspaceHelpers::makeDistribution(ws);
+      ws->isDistribution(true);
     }
   }
 
