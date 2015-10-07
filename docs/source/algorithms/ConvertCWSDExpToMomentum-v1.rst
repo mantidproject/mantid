@@ -19,7 +19,7 @@ In this algorithm's name, ConvertCWSDToMomentum, *CW* stands for constant wave
 This algorithm takes ??? as inputs.
 
 Futhermore, the unit of the output matrix workspace can be converted to 
-momentum transfer (*Q*). 
+momentum transfer (Q). 
 
 
 Outline of algorithm
