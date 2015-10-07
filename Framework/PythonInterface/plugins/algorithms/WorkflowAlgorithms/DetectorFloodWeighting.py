@@ -43,7 +43,7 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
 
         if not any(bands):
             issues['Bands'] = 'Bands must be supplied'
-
+            return issues
 
         if not len(bands)%2 == 0:
             issues['Bands'] = 'Even number of Bands boundaries expected'
