@@ -140,12 +140,14 @@ private:
   /// initialize values to defaults and set max/min for the spin boxes
   void initParamWidgets(size_t maxWidth, size_t maxHeight);
 
+  /// Set coordinates in the widgets from a params object
   void setParamWidgets(ImageStackPreParams &params);
 
   // shows the image in a widget
   void showProjectionImage(const Mantid::API::WorkspaceGroup_sptr &wsg,
                            size_t idx);
 
+  /// repaint the image with new positions of points and rectangles
   void refreshROIetAl();
   void refreshCoR();
   void refreshROI();

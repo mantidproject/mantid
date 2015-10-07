@@ -59,8 +59,8 @@ public:
    * are updated (including spin boxes, image, slider through the
    * image stack, etc.
    *
-   * @param tools identifiers of the tools that can or could be run.
-   * Order matters
+   * @param params all user-modifyable parameters (coordinates for the
+   * CoR, ROI and area for normalization).
    *
    */
   virtual void setParams(ImageStackPreParams &params) = 0;
@@ -84,7 +84,7 @@ public:
   /**
    * Update to a new state (for example select CoR).
    *
-   * @param new state we're transitioning into.
+   * @param state new state we're transitioning into.
    */
   virtual void changeSelectionState(const SelectionState& state) = 0;
 
@@ -110,10 +110,6 @@ public:
    * @param ws Workspace group where every workspace is a FITS or
    * similar image that has been loaded with LoadFITS or similar
    * algorithm.
-   *
-   * @param the (valid) path for this stack, from which it the
-   * workspace group was loaded, in whatever directory layout is being
-   * used (unknown to this view).
    */
   virtual void showStack(Mantid::API::WorkspaceGroup_sptr &ws) = 0;
 

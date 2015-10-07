@@ -115,6 +115,21 @@ void ImageCoRViewQtWidget::setupConnections() {
           SLOT(valueUpdatedNormArea(int)));
 }
 
+/**
+ * Qt events filter for the mouse click and click&drag events that are
+ * used to select points and rectangles. Part of the logic of the
+ * selection is handled here. The test on the presenter can only test
+ * the begin and end of the selection. For full testability (including
+ * the mouse interaction), this method should be implemented fully in
+ * terms of notifications to the presenter. This would require a bunch
+ * of new notifications in IImageCoRPresenter, and making at least all
+ * the mouseUpdateCoR, mouseUpdateROICorners12, mouseXXX methods
+ * public in this view interface. This can be considered at a later
+ * stage.
+ *
+ * @param obj object concerned by the event
+ * @param event event received (mouse click, release, move, etc.)
+ **/
 bool ImageCoRViewQtWidget::eventFilter(QObject *obj, QEvent *event) {
   // quick ignore
   if (IImageCoRView::SelectNone == m_selectionState)
@@ -174,6 +189,10 @@ void ImageCoRViewQtWidget::valueUpdatedNormArea(int) {
   refreshROIetAl();
 }
 
+/**
+ * Parameter values from spin box widgets => coordinate parameters
+ * data member
+ */
 void ImageCoRViewQtWidget::grabCoRFromWidgets() {
   m_params.cor = Mantid::Kernel::V2D(m_ui.spinBox_cor_x->value(),
                                      m_ui.spinBox_cor_y->value());
@@ -195,6 +214,14 @@ void ImageCoRViewQtWidget::grabNormAreaFromWidgets() {
                                          m_ui.spinBox_norm_bottom_y->value()));
 }
 
+/**
+ * Parameter values from mouse position (at a relevant event like
+ * first click, or last release) => spin box widgets, AND coordinate
+ * parameters data member. This grabs the Center of Rotation (CoR)
+ *
+ * @param x position on x axis (local to the image)
+ * @param y position on y axis (local to the image)
+ */
 void ImageCoRViewQtWidget::grabCoRFromMousePoint(int x, int y) {
   m_params.cor = Mantid::Kernel::V2D(x, y);
   m_ui.spinBox_cor_x->setValue(x);
@@ -231,7 +258,7 @@ void ImageCoRViewQtWidget::grabNormAreaCorner2FromMousePoint(int x, int y) {
  * usual in Qt widgets. Top-left is (0,0).
  *
  * @param x position on x axis (local to the image)
- * @param x position on y axis (local to the image)
+ * @param y position on y axis (local to the image)
  */
 void ImageCoRViewQtWidget::mouseUpdateCoR(int x, int y) {
   grabCoRFromMousePoint(x, y);
