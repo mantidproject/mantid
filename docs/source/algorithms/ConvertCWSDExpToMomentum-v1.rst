@@ -92,7 +92,7 @@ In order to integrate them into an organized data structure, i.e., *MDEventWorks
 a virtual instrument is built in the algorithm. 
 
 Virtual instrument
-==================
+##################
 
 A virtual instrument is built in the algorithm. 
 In this virtual instrument, the number of detectors and their position are determined 
@@ -100,13 +100,13 @@ by the number of individual detector's positions in the *experiment*.
 
 
 MDEventWorkspace
-================
+################
 
 There is only one *virtual* instrument and *N* ExperimentInfo.  
 *N* is the total number of experiment points in the *experiment*. 
 
 Inconsistency between using virtual instrument and copying instrument
-=====================================================================
+#####################################################################
 
 It is found that the results, i.e., the peak's position in sample-momentum
 space, by FindPeaksMD, are different betweent the MDEventWorkspaces 
