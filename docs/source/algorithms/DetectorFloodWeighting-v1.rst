@@ -19,7 +19,7 @@ Usage
 
 .. testcode:: DetectorFloodWeightingExample
 
-   import numpy as np
+   import numpy as np 
    # create histogram workspace
    dataX = range(0,10) # or use dataX=range(0,10)
    dataY = [1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2] # or use dataY=[1]*9
