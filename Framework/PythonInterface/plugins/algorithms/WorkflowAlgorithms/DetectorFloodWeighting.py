@@ -2,8 +2,7 @@ from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspace
 
 from mantid.kernel import Direction, FloatArrayProperty, FloatArrayBoundedValidator
 
-import numpy as np 
-
+import numpy as np
 
 class DetectorFloodWeighting(DataProcessorAlgorithm):
 
@@ -111,3 +110,4 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
 
 
 # Register alg
+AlgorithmFactory.subscribe(DetectorFloodWeighting)
