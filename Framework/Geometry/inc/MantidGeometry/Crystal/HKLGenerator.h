@@ -136,6 +136,11 @@ public:
     /// Returns a const reference to the currently pointed at HKL.
     inline const Kernel::V3D &dereference() const { return m_hkl; }
 
+    /// Required for compilation in VS. Forward iterator can not be used
+    /// that way, so the implementation does nothing.
+    inline void advance(difference_type) {}
+    inline void decrement() {}
+
     int m_h, m_k, m_l;
     Kernel::V3D m_hkl;
 
