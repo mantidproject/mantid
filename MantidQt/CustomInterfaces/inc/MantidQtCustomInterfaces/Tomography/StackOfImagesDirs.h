@@ -44,7 +44,7 @@ public:
   bool isValid() const { return m_valid; }
 
   // human readable description of the expected structure of directories
-  std::string description() const { return g_descr; }
+  std::string description() const;
 
   // string that describes the status/error message about this directory
   std::string status() const;

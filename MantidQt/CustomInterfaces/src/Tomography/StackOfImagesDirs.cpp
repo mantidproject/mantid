@@ -25,6 +25,8 @@ StackOfImagesDirs::StackOfImagesDirs(const std::string &path)
   findStackDirs(path);
 }
 
+std::string StackOfImagesDirs::description() const { return g_descr; }
+
 std::string StackOfImagesDirs::status() const {
   if (m_valid)
     return "Stack of images is correct";
