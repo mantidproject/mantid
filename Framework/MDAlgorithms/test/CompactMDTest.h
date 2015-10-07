@@ -9,19 +9,6 @@
 using Mantid::MDAlgorithms::CompactMD;
 using namespace Mantid::API;
 
-namespace {
-
-// This helper sets the signal values to the linear index to have some
-// variety
-void resetSignalsToLinearIndexValue(IMDHistoWorkspace_sptr ws) {
-  auto numberOfIndices = static_cast<size_t>(ws->getNPoints());
-  for (size_t i = 0; i < numberOfIndices; ++i) {
-    auto &signal = ws->signalAt(i);
-    signal = static_cast<Mantid::signal_t>(i);
-  }
-}
-}
-
 //==================
 // Functional Tests
 //==================
@@ -40,27 +27,23 @@ public:
                alg.isInitialized());
   }
   void
-  test_that_all_non_zero_signals_are_kept_with_data_concentrated_in_the_centre() {
+  test_all_non_zero_signals_are_kept_with_data_concentrated_in_the_centre() {
     /*
      *testing the effectiveness of CompactMD when the data looks like this:
      *------------------
      * Input structure:
      *------------------
      *  -------------
-     *  |   |   |   |
-     *  -------------
      *  |   |///|   |
-     *  -------------
-     *  |   |   |   |
      *  -------------
      * -3-2-1 0 1 2 3
      *---------------------------
      * Expected output structure:
      *----------------------------
      * should trim until the first non-zero value.
-     *    -------
-     *    |/////|
-     *    -------
+     *    -----
+     *    |///|
+     *    -----
      *   -1  0  1
      */
 
@@ -96,33 +79,76 @@ public:
                       outputWorkspace->getDimension(0)->getBinWidth(),
                       inWS->getDimension(0)->getBinWidth());
   }
-  void test__all_non_zero_signals_are_kept_with_data_in_each_corner() {
+  void test_all_non_zero_signals_are_kept_with_data_in_each_corner() {
     /*
      *testing the effectiveness of CompactMD when the data looks like this:
-     *------------------
-     * Input structure:
-     *------------------
-     *  -------------
-     *  |///|   |///|
-     *  -------------
-     *  |   |   |   |
-     *  -------------
-     *  |///|   |///|
-     *  -------------
+     *-----------------------------------
+     * Input structure: 2D HistoWorkspace
+     *-----------------------------------
+     *  ------------- -3
+     *  |/a/|   |/b/| -2
+     *  ------------- -1
+     *  |   |   |   |  0
+     *  -------------  1
+     *  |/c/|   |/d/|  2
+     *  -------------  3
      * -3-2-1 0 1 2 3
-     *---------------------------
+     *----------------------------
      * Expected output structure:
      *----------------------------
      * should not trim the workspace at all.
-     *  -------------
-     *  |///|   |///|
-     *  -------------
-     *  |   |   |   |
-     *  -------------
-     *  |///|   |///|
-     *  -------------
+     *  ------------- -3
+     *  |/a/|   |/b/| -2
+     *  ------------- -1
+     *  |   |   |   |  0
+     *  -------------  1
+     *  |/c/|   |/d/|  2
+     *  -------------  3
      * -3-2-1 0 1 2 3
      */
+      using namespace Mantid::DataObjects;
+      const size_t numDims = 2;
+      const double signal = 0.0;
+      const double errorSquared = 1.2;
+      size_t numBins[static_cast<int>(numDims)]={3,3};
+      Mantid::coord_t min[static_cast<int>(numDims)]={-3,-3};
+      Mantid::coord_t max[static_cast<int>(numDims)]={3, 3};
+      const std::string name("test");
+      auto inWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(numDims, signal, errorSquared, numBins, min, max, name);
+      inWS->setSignalAt(0, 1.0); //cell a
+      inWS->setSignalAt(2, 1.0); //cell b
+      inWS->setSignalAt(6, 1.0); //cell c
+      inWS->setSignalAt(8, 1.0); //cell d
+
+      CompactMD alg;
+      alg.setChild(true);
+      alg.setRethrows(true);
+      alg.initialize();
+      alg.setProperty("InputWorkspace", inWS);
+      alg.setProperty("OutputWorkspace", "out");
+      alg.execute();
+      IMDHistoWorkspace_sptr outputWorkspace = alg.getProperty("OutputWorkspace");
+      TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
+                      outputWorkspace->getSignalAt(0), 1);
+      TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
+                      outputWorkspace->getSignalAt(2), 1);
+      TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
+                      outputWorkspace->getSignalAt(6), 1);
+      TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
+                      outputWorkspace->getSignalAt(8), 1);
+      TSM_ASSERT_EQUALS("Minimum should be cropped to -1: ",
+                      outputWorkspace->getDimension(0)->getMinimum(), inWS->getDimension(0)->getMinimum());
+      TSM_ASSERT_EQUALS("Maximum should be cropped to 1: ",
+                      outputWorkspace->getDimension(0)->getMaximum(),inWS->getDimension(0)->getMaximum());
+      TSM_ASSERT_EQUALS("Number of Bins should be 1 : ",
+                      outputWorkspace->getDimension(0)->getNBins(), inWS->getDimension(0)->getNBins());
+      TSM_ASSERT_EQUALS("Bin width should be consistent: ",
+                      outputWorkspace->getDimension(0)->getBinWidth(),
+                      inWS->getDimension(0)->getBinWidth());
+  }
+
+  void test_all_non_zero_signals_are_kept_when_data_is_concentrated_in_one_half_of_the_workspace(){
+
   }
 };
 //===================
