@@ -117,12 +117,12 @@ StackOfImagesDirs ImageCoRPresenter::checkInputStack(const std::string &path) {
 
   const std::string soiPath = soid.sampleImagesDir();
   if (soiPath.empty()) {
-    m_view->userWarning("Error trying to find image stack",
+    m_view->userWarning("Error trying to find a stack of images",
                         "Could not find the sample images directory. The stack "
                         "of images is expected as: \n\n" +
                             soid.description());
   } else if (!soid.isValid()) {
-    m_view->userWarning("Error while checking/validating the image stack",
+    m_view->userWarning("Error while checking/validating the stack of images",
                         "The stack of images could not be loaded correctly. " +
                             soid.status());
   }
@@ -131,16 +131,22 @@ StackOfImagesDirs ImageCoRPresenter::checkInputStack(const std::string &path) {
 }
 
 void ImageCoRPresenter::processNewStack() {
+
   StackOfImagesDirs soid("");
   try {
     soid = checkInputStack(m_stackPath);
-  } catch (std::runtime_error &e) {
+  } catch (std::exception &e) {
+    // Poco::FileNotFoundException: this should never happen, unless
+    // the open dir dialog misbehaves unexpectedly, or in tests
     m_view->userWarning("Error trying to open directories/files",
                         "The path selected via the dialog cannot be openend or "
                         "there was a problem while trying to access it. This "
                         "is an unexpected inconsistency. Error details: " +
                             std::string(e.what()));
   }
+
+  if (!soid.isValid())
+    return;
 
   std::vector<std::string> imgs = soid.sampleFiles();
   if (0 >= imgs.size()) {

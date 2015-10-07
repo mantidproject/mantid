@@ -43,32 +43,6 @@ std::vector<std::string> StackOfImagesDirs::darkFiles() const {
   return findImgFiles(m_darkDir);
 }
 
-std::vector<std::string>
-StackOfImagesDirs::findImgFiles(const std::string &path) const {
-  std::vector<std::string> fnames;
-  Poco::File dir(path);
-  if (!dir.isDirectory() || !dir.exists())
-    return fnames;
-
-  // as an alternative could also use Poco::Glob to find the files
-  Poco::DirectoryIterator it(dir);
-  Poco::DirectoryIterator end;
-  while (it != end) {
-    const std::string name = it.name();
-    // TODO: filter names by extension?
-    if (it->isFile()) {
-      fnames.push_back(it.path().toString());
-    }
-
-    ++it;
-  }
-
-  // this assumes the usual sorting of images of a stack (directory): a prefix,
-  // and a sequence number (with a fixed number of digits).
-  std::sort(fnames.begin(), fnames.end());
-  return fnames;
-}
-
 void StackOfImagesDirs::findStackDirs(const std::string &path) {
   if (path.empty())
     return;
@@ -121,6 +95,32 @@ void StackOfImagesDirs::findStackDirs(const std::string &path) {
     m_statusDescStr = "No files were found in the sample images directory (" +
                       g_sampleNamePrefix + "...).";
   }
+}
+
+std::vector<std::string>
+StackOfImagesDirs::findImgFiles(const std::string &path) const {
+  std::vector<std::string> fnames;
+  Poco::File dir(path);
+  if (!dir.isDirectory() || !dir.exists())
+    return fnames;
+
+  // as an alternative could also use Poco::Glob to find the files
+  Poco::DirectoryIterator it(dir);
+  Poco::DirectoryIterator end;
+  while (it != end) {
+    // TODO: filter names by extension?
+    // const std::string name = it.name();
+    if (it->isFile()) {
+      fnames.push_back(it.path().toString());
+    }
+
+    ++it;
+  }
+
+  // this assumes the usual sorting of images of a stack (directory): a prefix,
+  // and a sequence number (with a fixed number of digits).
+  std::sort(fnames.begin(), fnames.end());
+  return fnames;
 }
 
 } // namespace CustomInterfaces

@@ -93,16 +93,7 @@ protected:
   void initLayout();
   void showImg();
 
-  void grabCoRFromWidgets();
-  void grabROIFromWidgets();
-  void grabNormAreaFromWidgets();
-
-  void grabCoRFromMousePoint(int x, int y);
-  void grabROICorner1FromMousePoint(int x, int y);
-  void grabROICorner2FromMousePoint(int x, int y);
-  void grabNormAreaCorner1FromMousePoint(int x, int y);
-  void grabNormAreaCorner2FromMousePoint(int x, int y);
-
+  /// update coordinates from mouse event
   void mouseUpdateCoR(int x, int y);
   void mouseUpdateROICorners12(int x, int y);
   void mouseUpdateROICorner2(int x, int y);
@@ -128,6 +119,16 @@ private slots:
   void valueUpdatedNormArea(int v);
 
 private:
+  void grabCoRFromWidgets();
+  void grabROIFromWidgets();
+  void grabNormAreaFromWidgets();
+
+  void grabCoRFromMousePoint(int x, int y);
+  void grabROICorner1FromMousePoint(int x, int y);
+  void grabROICorner2FromMousePoint(int x, int y);
+  void grabNormAreaCorner1FromMousePoint(int x, int y);
+  void grabNormAreaCorner2FromMousePoint(int x, int y);
+
   void setupConnections();
 
   void readSettings();
