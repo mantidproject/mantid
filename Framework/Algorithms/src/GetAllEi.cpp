@@ -885,12 +885,11 @@ void GetAllEi::findGuessOpeningTimes(const std::pair<double, double> &TOF_range,
 }
 /**Finds pointer to log value for the property with the name provided
 *
-*@param :: inputWS workspace with logs attached
-*@param :: propertyName name of the property to find log for
+*@param -- inputWS workspace with logs attached
+*@param -- propertyName name of the property to find log for
 *
-*@return :: pointer to property which contain the log requested or nullptr if
-*           no log found or other errors identified.
-*/
+*@return -- pointer to property which contain the log requested or nullptr if
+*           no log found or other errors identified.  */
 Kernel::Property *
 GetAllEi::getPLogForProperty(const API::MatrixWorkspace_sptr &inputWS,
                              const std::string &propertyName) {
