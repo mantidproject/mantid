@@ -666,17 +666,19 @@ size_t GetAllEi::calcDerivativeAndCountZeros(const std::vector<double> &bins,
 }
 
 /**Find indexes of each expected peak intervals from monotonous array of ranges.
-@param eBins   -- bin ranges to look through
-@param guess_energies -- vector of guess energies to look for
-@param irangeMin  -- start indexes of energy intervals in the guess_energies
-vector.
-@param irangeMax  -- final indexes of energy intervals in the guess_energies
-vector.
-@param guessValid -- boolean vector, which specifies if guess energies are valid
+*@param eBins   -- bin ranges to look through
+*@param signal  -- vector of signal in the bins
+*@param guess_energy -- vector of guess energies to look for
+*@param  eResolution -- instrument resolution in energy units
+*@param irangeMin  -- start indexes of energy intervals in the guess_energies
+*                     vector.
+*@param irangeMax  -- final indexes of energy intervals in the guess_energies
+*                     vector.
+*@param guessValid -- boolean vector, which specifies if guess energies are valid
 */
 void GetAllEi::findBinRanges(const MantidVec &eBins, const MantidVec &signal,
                              const std::vector<double> &guess_energy,
-                             double Eresolution, std::vector<size_t> &irangeMin,
+                             double eResolution, std::vector<size_t> &irangeMin,
                              std::vector<size_t> &irangeMax,
                              std::vector<bool> &guessValid) {
 
@@ -729,7 +731,7 @@ void GetAllEi::findBinRanges(const MantidVec &eBins, const MantidVec &signal,
   std::vector<peakKeeper2> guess_peak(guess_energy.size());
   for (size_t nGuess = 0; nGuess < guess_energy.size(); nGuess++) {
     double eGuess = guess_energy[nGuess];
-    getBinRange(eGuess * (1 - 4 * Eresolution), eGuess * (1 + 4 * Eresolution),
+    getBinRange(eGuess * (1 - 4 * eResolution), eGuess * (1 + 4 * eResolution),
                 ind_min, ind_max);
     guess_peak[nGuess] = peakKeeper2(eBins[ind_min], eBins[ind_max]);
   }
@@ -752,9 +754,9 @@ void GetAllEi::findBinRanges(const MantidVec &eBins, const MantidVec &signal,
     if (refineEGuess(eGuess, ind_min, ind_max)) {
 
       getBinRange(
-          std::max(guess_peak[nGuess].left_rng, eGuess * (1 - 3 * Eresolution)),
+          std::max(guess_peak[nGuess].left_rng, eGuess * (1 - 3 * eResolution)),
           std::max(guess_peak[nGuess].right_rng,
-                   eGuess * (1 + 3 * Eresolution)),
+                   eGuess * (1 + 3 * eResolution)),
           ind_min, ind_max);
       irangeMin.push_back(ind_min);
       irangeMax.push_back(ind_max);
@@ -848,8 +850,8 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
 *                     to the chopper opening.
 *@param  Period  -- period of chopper openings
 
-*@return guess_opening_times -- vector of times at which neutrons may
-*                               pass through the chopper.
+*@param guess_opening_times -- output vector with time values 
+*                         at which neutrons may pass through the chopper.
 */
 void GetAllEi::findGuessOpeningTimes(const std::pair<double, double> &TOF_range,
                                      double ChopDelay, double Period,
@@ -880,11 +882,12 @@ void GetAllEi::findGuessOpeningTimes(const std::pair<double, double> &TOF_range,
         ChopDelay + static_cast<double>(i) * Period;
   }
 }
-/**Return pointer to log value for property with specified name
-*@param -- inputWS workspace with logs attached
-*@param -- propertyName name of the property to find log for
+/**Finds pointer to log value for the property with the name provided
 *
-*@return -- pointer to property which contain the log requested or nullptr if
+*@param :: inputWS workspace with logs attached
+*@param :: propertyName name of the property to find log for
+*
+*@return :: pointer to property which contain the log requested or nullptr if
 *           no log found or other errors identified.
 */
 Kernel::Property *
@@ -940,8 +943,8 @@ GetAllEi::getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS,
 }
 /**Analyze chopper logs and identify chopper speed and delay
 @param  inputWS    -- sp to workspace with attached logs.
-@return chop_speed -- chopper speed in uSec
-@return chop_delay -- chopper delay in uSec
+@param chop_speed -- output value for chopper speed in uSec
+@param chop_delay -- output value for chopper delay in uSec
 */
 void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
                                      double &chop_speed, double &chop_delay) {
@@ -1044,7 +1047,7 @@ void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
 }
 
 /**Validates if input workspace contains all necessary logs and if all
-these logs are the logs of appropriate type
+*  these logs are the logs of appropriate type
 @return list of invalid logs or empty list if no errors is found.
 */
 std::map<std::string, std::string> GetAllEi::validateInputs() {
@@ -1087,7 +1090,7 @@ std::map<std::string, std::string> GetAllEi::validateInputs() {
     return result;
   }
 
-  /** Lambda to validate if appropriate log is present in workspace
+  /* Lambda to validate if appropriate log is present in workspace
   and if it's present, it is a time-series property
   * @param prop_name    -- the name of the log to check
   * @param err_presence -- core error message to return if no log found
@@ -1096,10 +1099,10 @@ std::map<std::string, std::string> GetAllEi::validateInputs() {
   * @param fail         -- fail or warn if appropriate log is not available.
 
   * @return             -- false if all properties are fine, or true if check is
-  failed
+  *                        failed
   * modifies result    -- map containing check errors
   *                       if no error found the map is not modified and remains
-  empty.
+  *                       empty.
   */
   auto check_time_series_property =
       [&](const std::string &prop_name, const std::string &err_presence,
