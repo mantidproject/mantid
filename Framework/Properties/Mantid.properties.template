@@ -1,0 +1,231 @@
+# File: Mantid Properties
+# Purpose: This file contains the basic configuration for Mantid.
+# WARNING: This file is not intended to be edited by users.
+#          If you wish to override any setting in this file
+#          Simply copy the entry into the Mantid.user.Properties file
+#          and set the value you desire there.  Any settings in the user.properties
+#          file will override those set in this file.
+#
+#          This File will be overwritten with each new version of Mantid, however
+#          we will never alter your user.properties file so settings there are safe.
+
+# Set a default facility
+default.facility = ISIS
+
+# Set a default instrument
+default.instrument =
+
+# Set of PyQt interfaces to add to the Interfaces menu, separated by a space.  Interfaces are seperated from their respective categories by a "/".
+mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py SANS/ORNL_SANS.py Reflectometry/REFL_Reduction.py Reflectometry/REFL_SF_Calculator.py Reflectometry/REFM_Reduction.py Utility/TofConverter.py Reflectometry/ISIS_Reflectometry.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py Diffraction/HFIR_Powder_Diffraction_Reduction.py
+
+mantidqt.python_interfaces_directory = @MANTID_ROOT@/scripts
+
+# Where to find mantid plugin libraries
+plugins.directory = @PLUGINS@
+
+# Libraries to skip. The strings are searched for when loading libraries so they don't need to be exact
+plugins.exclude = dlopen
+
+# Where to find mantid paraview plugin libraries
+pvplugins.directory = @PV_PLUGINS@
+
+# Where to find Mantid Qt plugin libraries
+mantidqt.plugins.directory = @QTPLUGINS@
+
+# Where to find python plugins
+python.plugins.directories = @PYTHONPLUGIN_DIRS@
+
+# Where to load instrument definition files from
+instrumentDefinition.directory = @MANTID_ROOT@/instrument
+
+# Whether to check for updated instrument definitions on startup of Mantid
+UpdateInstrumentDefinitions.OnStartup = @UPDATE_INSTRUMENT_DEFINTITIONS@
+UpdateInstrumentDefinitions.URL = https://api.github.com/repos/mantidproject/mantid/contents/instrument
+
+# Whether to check for newer mantid versions on startup
+CheckMantidVersion.OnStartup = @CHECK_FOR_NEW_MANTID_VERSION@
+CheckMantidVersion.GitHubReleaseURL = https://api.github.com/repos/mantidproject/mantid/releases/latest
+CheckMantidVersion.DownloadURL = http://download.mantidproject.org
+
+# Whether to report usage statistics back to central server
+usagereports.enabled = @ENABLE_USAGE_REPORTS@
+
+# Where to load Grouping files (that are shipped with Mantid) from
+groupingFiles.directory = @MANTID_ROOT@/instrument/Grouping
+
+# Where to load Mask files (that are shipped with Mantid) from
+maskFiles.directory = @MANTID_ROOT@/instrument/masks
+
+# Where to load OpenCL kernel files
+openclKernelFiles.directory = @MANTID_ROOT@/Framework/GPUAlgorithms/src
+
+# Where to load colormap files (.map)
+colormaps.directory = @COLORMAPS_FOLDER@
+
+# Location of Python scripts that are required for certain aspects of Mantid to function
+# correctly, i.e. customized interfaces
+#
+# WARNING: Altering this value will almost certainly break Mantid functionality
+#
+requiredpythonscript.directories = @REQUIREDSCRIPT_DIRS@
+
+# Additional directories for Python scripts. These are added to the Python path by the Python API.
+# This key is NOT recursive so sub-directories must be added in addition
+pythonscripts.directories = @PYTHONSCRIPT_DIRS@
+
+# Setting this to 1 will allow python algorithms to be reloaded before execution.
+pythonalgorithms.refresh.allowed = 0
+
+# A semi-colon(;) separated list of directories to use to search for data
+# Use forward slash / for all paths
+datasearch.directories = @DATADIRS@
+
+# Path to the ParaView bin directory, i.e. the directory containing the paraview executable
+# Warning: Mantid is compiled against a specific version of ParaView. Ensure that this path
+# points to the ParaView obtained from the Mantid download page
+paraview.path = @PARAVIEW_APP_BIN_DIR@
+
+# Whether to look for ParaView (0 = try to use, 1 = don't use).
+paraview.ignore = @IGNORE_PARAVIEW@
+
+# Root of html documentation (kept as unix-style path)
+docs.html.root = @HTML_ROOT@
+
+# A semi-colon(;) separated list of directories to use to search for files other than data
+# Use forward slash / for all paths
+usersearch.directories =
+
+# Setting this to On enables searching the facilitie's archive automatically
+datasearch.searcharchive = Off
+
+# A default directory to use for saving files
+# Use forward slash / for all paths
+defaultsave.directory =
+
+# ICat download directory
+icatDownload.directory =
+
+# The Number of algorithms properties to retain im memory for refence in scripts.
+algorithms.retained = 50
+
+# Defines the maximum number of cores to use for OpenMP
+# For machine default set to 0
+MultiThreaded.MaxCores = 0
+
+# Defines the area (in FWHM) on both sides of the peak centre within which peaks are calculated.
+# Outside this area peak functions return zero.
+curvefitting.peakRadius = 5
+curvefitting.defaultPeak=Gaussian
+curvefitting.findPeaksFWHM=7
+curvefitting.findPeaksTolerance=4
+
+# Network Timeouts (in seconds for various uses within Mantid)
+network.default.timeout = 30
+network.scriptrepo.timeout = 5
+# Allows the system proxy to be overridden (leave commented out to use the system proxy)
+# proxy.host =
+# proxy.port = 8080
+# This is to force https proxy requests to use the http proxy (current necessary)
+proxy.httpsTargetUrl = http://www.mantidproject.org
+
+# Defines the precision of h, k, and l when output in peak workspace table
+PeakColumn.hklPrec=2
+
+# Do not show 'invisible' workspaces
+MantidOptions.InvisibleWorkspaces=0
+
+# This flag controls the way the "unwrapped" instrument view is rendered.
+# Change to Off to disable OpenGL and use normal windows graphics.
+MantidOptions.InstrumentView.UseOpenGL = On
+
+# Controls the default normalization mode for graph plotting
+# Allowed values are:
+#   On: Normalize to the bin width for plots
+#   Off: Do not normalize
+graph1d.autodistribution = On
+
+#Uncommenting the line below will enable algorithm chain re-running whenever a
+#workspace is replaced. Uncommenting and setting it to 0 will also turn it off
+#enabling this is currently discouraged as it could cause race conditions with python scripts
+#AlgorithmChaining.SwitchedOn = 1
+
+# logging configuration
+# root level message filter (This sets a minimal level possible for any channel)
+logging.loggers.root.level = information
+
+# splitting the messages to many logging channels
+logging.loggers.root.channel.class = SplitterChannel
+logging.loggers.root.channel.channel1 = consoleFilterChannel
+logging.loggers.root.channel.channel2 = fileFilterChannel
+
+# specific filter for the console channel raising the level to notice (drop to debug for debugging)
+logging.channels.consoleFilterChannel.class= FilterChannel
+logging.channels.consoleFilterChannel.channel= consoleChannel
+logging.channels.consoleFilterChannel.level= notice
+
+# specific filter for the file channel raising the level to information (drop to debug for debugging)
+logging.channels.fileFilterChannel.class= FilterChannel
+logging.channels.fileFilterChannel.channel= fileChannel
+logging.channels.fileFilterChannel.level= information
+
+# output to the console - primarily for console based apps
+logging.channels.consoleChannel.class = ConsoleChannel
+logging.channels.consoleChannel.formatter = f1
+
+# output to a file (For error capturing and debugging)
+logging.channels.fileChannel.class = @FILECHANNEL@
+logging.channels.fileChannel.path =
+logging.channels.fileChannel.rotation = 1 M
+logging.channels.fileChannel.purgeCount = 9
+logging.channels.fileChannel.formatter.class = PatternFormatter
+logging.channels.fileChannel.formatter.pattern = %Y-%m-%d %H:%M:%S,%i [%I] %p %s - %t
+logging.channels.fileChannel.formatter.times = local
+logging.formatters.f1.class = PatternFormatter
+logging.formatters.f1.pattern = @CONSOLEPATTERN@
+logging.formatters.f1.times = local
+
+workspace.sendto.SansView.arguments=[file]
+workspace.sendto.SansView.saveusing=SaveCanSAS1D
+workspace.sendto.SansView.target=%SANSVIEWPATH%/SansView.exe
+workspace.sendto.SansView.visible=Yes
+workspace.sendto.name.SansView=0
+
+# Change this property to On to make Mantid case sensitive (ignored on Windows as file searching is always case insensitve)
+filefinder.casesensitive=On
+
+# Control which geometry the Instrument View window displays, valid values
+# are "Default", "Neutronic" or "Physical".
+instrument.view.geometry=Default
+
+# Disabling multifile loading will allow users to load files with "," or "+"
+# in their path, but at the cost of no longer being able to load multiple
+# files with a single call to Load.
+loading.multifile=On
+
+# Limits the maximum number of files Mantid will attempt to load as part of a range.
+# Set to a very high number to disable, however this limit is in place to protect
+# you and your computer from simple formatting mistakes
+loading.multifilelimit=100
+
+# Hide algorithms that use a Property Manager by default.
+algorithms.categories.hidden=Workflow\\Inelastic\\UsesPropertyManager;Workflow\\SANS\\UsesPropertyManager;DataHandling\\LiveData\\Support;Deprecated;Utility\\Development;Remote
+
+# All interface categories are shown by default.
+interfaces.categories.hidden =
+
+# ScriptRepository Properties:
+
+# Url for the WebServer that support the upload of the files that the users want to share
+UploaderWebServer = @MANTIDPUBLISHER@
+# Local system path for the script repository.
+ScriptLocalRepository =
+# Base Url for the remote script repository. Not necessarily accessible, it is used to construct longer URLs
+ScriptRepository = http://download.mantidproject.org/scriptrepository/
+# Pattern given to ScriptRepository that is used to hide entries from repository to the users. It is a csv string separated with ';'
+ScriptRepositoryIgnore = *pyc;
+
+# The ability to send a job to a cluster form the reduction UIs is turned off. Set it to 'On' to enable it.
+cluster.submission=Off
+
+# Used to stop a catalog asynchronous algorithm after the timeout period
+catalog.timeout.value=30
