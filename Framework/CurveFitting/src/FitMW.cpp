@@ -13,6 +13,8 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/IEventWorkspace.h"
 
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -338,6 +340,16 @@ FitMW::createOutputWorkspace(const std::string &baseName,
                                 baseName + "Workspace");
     m_manager->setProperty(outputWorkspacePropertyName, ws);
   }
+
+  // If the input is a not an EventWorkspace and is a distrubution, then convert
+  // the output also to a distribution
+  if (!boost::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(
+          m_matrixWorkspace)) {
+    if (m_matrixWorkspace->isDistribution()) {
+      API::WorkspaceHelpers::makeDistribution(ws);
+    }
+  }
+
   return ws;
 }
 
@@ -632,6 +644,7 @@ void FitMW::setInitialValues(API::IFunction &function) {
     ParameterEstimator::estimate(function, *domain, *values);
   }
 }
+
 
 } // namespace Algorithm
 } // namespace Mantid
