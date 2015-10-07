@@ -23,7 +23,7 @@ public:
     GetAllEi::findGuessOpeningTimes(TOF_range, ChopDelay, Period,
                                     guess_opening_times);
   }
-  bool filterLogProvided() const { return m_useFilterLog; }
+  bool filterLogProvided() const { return static_cast<bool>(m_pFilterLog); }
   double getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS,
                          const std::string &propertyName) {
     std::vector<Kernel::SplittingInterval> splitter;
