@@ -481,10 +481,10 @@ private:
                               "is_running");
     paramMap.add<bool>("bool", chopper.get(), "filter_with_derivative", false);
 
-    auto &x = ws->dataX(0);
-    auto &y = ws->dataY(0);
-    for (size_t i = 0; i < y.size(); i++) {
-    }
+    //auto &x = ws->dataX(0);
+    //auto &y = ws->dataY(0);
+    //for (size_t i = 0; i < y.size(); i++) {
+    //}
 
     if (noLogs)
       return ws;
