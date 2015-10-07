@@ -11,6 +11,7 @@
 using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
+
 class GetAllEiTester : public GetAllEi {
 public:
   void find_chop_speed_and_delay(const API::MatrixWorkspace_sptr &inputWS,
@@ -23,7 +24,7 @@ public:
     GetAllEi::findGuessOpeningTimes(TOF_range, ChopDelay, Period,
                                     guess_opening_times);
   }
-  bool filterLogProvided() const { return static_cast<bool>(m_pFilterLog); }
+  bool filterLogProvided() const { return(m_pFilterLog!=nullptr); }
   double getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS,
                          const std::string &propertyName) {
     std::vector<Kernel::SplittingInterval> splitter;
@@ -44,9 +45,6 @@ public:
   }
   void setResolution(double newResolution) {
     this->m_max_Eresolution = newResolution;
-  }
-  void setFilterWithDerivative(bool yesOrNot) {
-    this->m_FilterWithDerivative = yesOrNot;
   }
   size_t calcDerivativeAndCountZeros(const std::vector<double> &bins,
                                      const std::vector<double> &signal,
@@ -77,21 +75,27 @@ public:
   //
   void test_validators_work() {
 
-    MatrixWorkspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 2, 11, 10);
+    MatrixWorkspace_sptr ws = this->createTestingWS(true);
+
     m_getAllEi.initialize();
     m_getAllEi.setProperty("Workspace", ws);
     m_getAllEi.setProperty("OutputWorkspace", "monitor_peaks");
     TSM_ASSERT_THROWS(
         "should throw runtime error on as spectra ID should be positive",
-        m_getAllEi.setProperty("Monitor1SpecID", 0), std::invalid_argument);
+        m_getAllEi.setProperty("Monitor1SpecID", -1), std::invalid_argument);
+
     m_getAllEi.setProperty("Monitor1SpecID", 1);
     m_getAllEi.setProperty("Monitor2SpecID", 2);
+    m_getAllEi.setProperty("ChopperSpeedLog","Chopper_Speed");
+    m_getAllEi.setProperty("ChopperDelayLog","Chopper_Delay");
+    m_getAllEi.setProperty("FilterBaseLog","proton_charge");
+    m_getAllEi.setProperty("FilterWithDerivative",false);
+
     TSM_ASSERT_THROWS("should throw runtime error on validation as no "
                       "appropriate logs are defined",
                       m_getAllEi.execute(), std::runtime_error);
     auto log_messages = m_getAllEi.validateInputs();
-    TSM_ASSERT_EQUALS("Three logs should fail", log_messages.size(), 2);
+    TSM_ASSERT_EQUALS("Two logs should fail", log_messages.size(), 2);
     // add invalid property type
     ws->mutableRun().addLogData(
         new Kernel::PropertyWithValue<double>("Chopper_Speed", 10.));
@@ -113,6 +117,7 @@ public:
     ws->mutableRun().addLogData(
         new Kernel::TimeSeriesProperty<double>("proton_charge"));
     log_messages = m_getAllEi.validateInputs();
+
     TSM_ASSERT_EQUALS("All logs are defined", log_messages.size(), 0);
     TSM_ASSERT("Filter log is provided ", m_getAllEi.filterLogProvided());
 
@@ -124,18 +129,22 @@ public:
   //
   void test_get_chopper_speed() {
 
-    MatrixWorkspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 2, 11, 10);
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> chopSpeed(
-        new Kernel::TimeSeriesProperty<double>("Chopper_Speed"));
+    MatrixWorkspace_sptr ws = this->createTestingWS(true);
+
     m_getAllEi.initialize();
     m_getAllEi.setProperty("Workspace", ws);
     m_getAllEi.setProperty("OutputWorkspace", "monitor_peaks");
     m_getAllEi.setProperty("Monitor1SpecID", 1);
     m_getAllEi.setProperty("Monitor2SpecID", 2);
-    // m_getAllEi.setProperty("FilterWithDerivative",false);
-    m_getAllEi.setFilterWithDerivative(false);
+    m_getAllEi.setProperty("ChopperSpeedLog","Chopper_Speed");
+    m_getAllEi.setProperty("ChopperDelayLog","Chopper_Delay");
+    m_getAllEi.setProperty("FilterBaseLog","proton_charge");
+    m_getAllEi.setProperty("FilterWithDerivative",false);
 
+ 
+
+    std::unique_ptr<Kernel::TimeSeriesProperty<double>> chopSpeed(
+        new Kernel::TimeSeriesProperty<double>("Chopper_Speed"));
     for (int i = 0; i < 10; i++) {
       chopSpeed->addValue(Kernel::DateAndTime(10000 + 10 * i, 0), 1.);
     }
@@ -147,7 +156,8 @@ public:
     }
     ws->mutableRun().addLogData(chopSpeed.release());
 
-    // Test sort log by run time.
+
+   // Test sort log by run time.
     TSM_ASSERT_THROWS(
         "Attempt to get log without start/stop time set should fail",
         m_getAllEi.getAvrgLogValue(ws, "ChopperSpeedLog"), std::runtime_error);
@@ -189,6 +199,7 @@ public:
     }
     ws->mutableRun().addLogData(chopDelay.release());
     ws->mutableRun().addLogData(goodFram.release());
+
     // Run validate as this will set up property, which indicates filter log
     // presence
     auto errors = m_getAllEi.validateInputs();
@@ -206,21 +217,28 @@ public:
     }
 
     ws->mutableRun().addProperty(goodFram.release(), true);
+    errors = m_getAllEi.validateInputs();
+    TSM_ASSERT_EQUALS("All logs are defined now", errors.size(), 0);
+  
+
     m_getAllEi.find_chop_speed_and_delay(ws, chop_speed, chop_delay);
     TSM_ASSERT_DELTA("Chopper delay should have special speed", 0.1, chop_delay,
                      1.e-6);
   }
   void test_get_chopper_speed_filter_derivative() {
 
-    MatrixWorkspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 2, 11, 10);
+    MatrixWorkspace_sptr ws = this->createTestingWS(true);
+
     m_getAllEi.initialize();
     m_getAllEi.setProperty("Workspace", ws);
     m_getAllEi.setProperty("OutputWorkspace", "monitor_peaks");
     m_getAllEi.setProperty("Monitor1SpecID", 1);
     m_getAllEi.setProperty("Monitor2SpecID", 2);
+    m_getAllEi.setProperty("ChopperSpeedLog","Chopper_Speed");
+    m_getAllEi.setProperty("ChopperDelayLog","Chopper_Delay");
+    m_getAllEi.setProperty("FilterBaseLog","proton_charge");
     m_getAllEi.setProperty("FilterWithDerivative", true);
-    m_getAllEi.setFilterWithDerivative(true);
+
 
     // Test select log by log derivative
     std::unique_ptr<Kernel::TimeSeriesProperty<double>> chopDelay(
@@ -247,6 +265,8 @@ public:
     ws->mutableRun().addLogData(chopSpeed.release());
     ws->mutableRun().addLogData(chopDelay.release());
     ws->mutableRun().addLogData(protCharge.release());
+
+
     // Run validate as this will set up property, which indicates filter log
     // presence
     auto errors = m_getAllEi.validateInputs();
@@ -445,32 +465,55 @@ public:
 private:
   GetAllEiTester m_getAllEi;
 
-  DataObjects::Workspace2D_sptr createTestingWS() {
+  DataObjects::Workspace2D_sptr createTestingWS(bool noLogs=false) {
     double delay(10), speed(50);
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
         2, 2000, true);
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> chopDelay(
-        new Kernel::TimeSeriesProperty<double>("Chopper_Delay"));
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> chopSpeed(
-        new Kernel::TimeSeriesProperty<double>("Chopper_Speed"));
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> protCharge(
-        new Kernel::TimeSeriesProperty<double>("proton_charge"));
+    auto chopper = ws->getInstrument()->getComponentByName("chopper-position");
 
-    for (int i = 0; i < 10; i++) {
-      auto time = Kernel::DateAndTime(10 * i, 0);
-      chopDelay->addValue(time, delay);
-      chopSpeed->addValue(time, speed);
-      protCharge->addValue(time, 1.);
-    }
-    ws->mutableRun().addLogData(chopSpeed.release());
-    ws->mutableRun().addLogData(chopDelay.release());
-    ws->mutableRun().addLogData(protCharge.release());
+     // add chopper parameters
+    auto &paramMap = ws->instrumentParameters();
+    const std::string description(
+      "The initial rotation phase of the disk used to calculate the time"
+      " for neutrons arriving at the chopper according to the formula time = "
+      "delay + initial_phase/Speed");
+     paramMap.add<double>("double", chopper.get(), "initial_phase", -3000.,
+                       &description);
+     paramMap.add<std::string>("string", chopper.get(), "ChopperDelayLog",
+                            "fermi_delay");
+     paramMap.add<std::string>("string", chopper.get(), "ChopperSpeedLog",
+                            "fermi_speed");
+     paramMap.add<std::string>("string", chopper.get(), "FilterBaseLog",
+                            "is_running");
+     paramMap.add<bool>("bool", chopper.get(), "filter_with_derivative", false);
 
-    auto &x = ws->dataX(0);
-    auto &y = ws->dataY(0);
-    for (size_t i = 0; i < y.size(); i++) {
-    }
-    return ws;
+      auto &x = ws->dataX(0);
+      auto &y = ws->dataY(0);
+      for (size_t i = 0; i < y.size(); i++) {
+      }
+
+
+     if(noLogs)return ws;
+
+      std::unique_ptr<Kernel::TimeSeriesProperty<double>> chopDelay(
+          new Kernel::TimeSeriesProperty<double>("Chopper_Delay"));
+      std::unique_ptr<Kernel::TimeSeriesProperty<double>> chopSpeed(
+          new Kernel::TimeSeriesProperty<double>("Chopper_Speed"));
+      std::unique_ptr<Kernel::TimeSeriesProperty<double>> protCharge(
+          new Kernel::TimeSeriesProperty<double>("proton_charge"));
+
+      for (int i = 0; i < 10; i++) {
+        auto time = Kernel::DateAndTime(10 * i, 0);
+        chopDelay->addValue(time, delay);
+        chopSpeed->addValue(time, speed);
+        protCharge->addValue(time, 1.);
+      }
+
+      ws->mutableRun().addLogData(chopSpeed.release());
+      ws->mutableRun().addLogData(chopDelay.release());
+      ws->mutableRun().addLogData(protCharge.release());
+
+      return ws;
   }
 };
 

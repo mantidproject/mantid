@@ -406,7 +406,7 @@ create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
   testInst->markAsSamplePos(sample);
   // chopper position
   Component *chop_pos =
-      new Component("chopper-position", Kernel::V3D(-11, 0, 0), testInst.get());
+      new Component("chopper-position", Kernel::V3D(-10, 0, 0), testInst.get());
   testInst->add(chop_pos);
 
   return space;
