@@ -19,7 +19,7 @@ try:
 except ImportError:
     # In case Mantid is not in the python path
     homedir = os.path.expanduser('~')
-    mantiddir = os.path.join(os.path.join(homedir, 'Mantid/Code/debug/bin'))
+    mantiddir = os.path.join(os.path.join(homedir, 'Mantid_Project/mantid-debug/bin'))
     print 'Mantid Dir = %s' % mantiddir
     if os.path.exists(mantiddir) is False:
         raise RuntimeError('Mantid bin directory %s cannot be found.' % (mantiddir))
