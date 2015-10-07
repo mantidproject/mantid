@@ -644,6 +644,5 @@ void FitMW::setInitialValues(API::IFunction &function) {
   }
 }
 
-
 } // namespace Algorithm
 } // namespace Mantid

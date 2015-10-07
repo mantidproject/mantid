@@ -9,7 +9,6 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 
-
 namespace Mantid {
 namespace CurveFitting {
 
