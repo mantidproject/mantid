@@ -674,7 +674,8 @@ size_t GetAllEi::calcDerivativeAndCountZeros(const std::vector<double> &bins,
 *                     vector.
 *@param irangeMax  -- final indexes of energy intervals in the guess_energies
 *                     vector.
-*@param guessValid -- boolean vector, which specifies if guess energies are valid
+*@param guessValid -- boolean vector, which specifies if guess energies are
+*valid
 */
 void GetAllEi::findBinRanges(const MantidVec &eBins, const MantidVec &signal,
                              const std::vector<double> &guess_energy,
@@ -850,7 +851,7 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
 *                     to the chopper opening.
 *@param  Period  -- period of chopper openings
 
-*@param guess_opening_times -- output vector with time values 
+*@param guess_opening_times -- output vector with time values
 *                         at which neutrons may pass through the chopper.
 */
 void GetAllEi::findGuessOpeningTimes(const std::pair<double, double> &TOF_range,
