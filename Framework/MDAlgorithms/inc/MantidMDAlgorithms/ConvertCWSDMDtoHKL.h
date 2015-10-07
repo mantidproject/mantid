@@ -78,11 +78,11 @@ private:
                        const std::vector<signal_t> &vec_signal,
                        const std::vector<detid_t> &vec_detid);
 
-  void addMDEvents(std::vector<std::vector<coord_t> > &vec_q_sample,
+  void addMDEvents(std::vector<std::vector<coord_t>> &vec_q_sample,
                    std::vector<float> &vec_signal);
 
   void
-  saveMDToFile(std::vector<std::vector<Mantid::coord_t> > &vec_event_qsample,
+  saveMDToFile(std::vector<std::vector<Mantid::coord_t>> &vec_event_qsample,
                std::vector<float> &vec_event_signal);
 
   void saveEventsToFile(const std::string &filename,

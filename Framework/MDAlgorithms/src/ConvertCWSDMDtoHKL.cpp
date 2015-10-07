@@ -167,11 +167,10 @@ void ConvertCWSDMDtoHKL::getUBMatrix() {
  * It is a convenient algorithm if number of events are few relative to
  * number of detectors
  */
-void
-ConvertCWSDMDtoHKL::exportEvents(IMDEventWorkspace_sptr mdws,
-                                 std::vector<Kernel::V3D> &vec_event_qsample,
-                                 std::vector<signal_t> &vec_event_signal,
-                                 std::vector<detid_t> &vec_event_det) {
+void ConvertCWSDMDtoHKL::exportEvents(
+    IMDEventWorkspace_sptr mdws, std::vector<Kernel::V3D> &vec_event_qsample,
+    std::vector<signal_t> &vec_event_signal,
+    std::vector<detid_t> &vec_event_det) {
   // Set the size of the output vectors
   size_t numevents = mdws->getNEvents();
   g_log.information() << "Number of events = " << numevents << "\n";
@@ -223,7 +222,7 @@ ConvertCWSDMDtoHKL::exportEvents(IMDEventWorkspace_sptr mdws,
 /** Save Q-sample to file
  */
 void ConvertCWSDMDtoHKL::saveMDToFile(
-    std::vector<std::vector<coord_t> > &vec_event_qsample,
+    std::vector<std::vector<coord_t>> &vec_event_qsample,
     std::vector<float> &vec_event_signal) {
   // Get file name
   std::string filename = getPropertyValue("QSampleFileName");
@@ -252,11 +251,10 @@ void ConvertCWSDMDtoHKL::saveMDToFile(
 //--------------------------------------------------------------------------
 /** Save HKL to file for 3D visualization
  */
-void
-ConvertCWSDMDtoHKL::saveEventsToFile(const std::string &filename,
-                                     std::vector<Kernel::V3D> &vec_event_pos,
-                                     std::vector<signal_t> &vec_event_signal,
-                                     std::vector<detid_t> &vec_event_detid) {
+void ConvertCWSDMDtoHKL::saveEventsToFile(
+    const std::string &filename, std::vector<Kernel::V3D> &vec_event_pos,
+    std::vector<signal_t> &vec_event_signal,
+    std::vector<detid_t> &vec_event_detid) {
   // Check
   if (vec_event_detid.size() != vec_event_pos.size() ||
       vec_event_pos.size() != vec_event_signal.size())
@@ -280,9 +278,8 @@ ConvertCWSDMDtoHKL::saveEventsToFile(const std::string &filename,
 //--------------------------------------------------------------------------
 /** Convert from Q-sample to HKL
  */
-void
-ConvertCWSDMDtoHKL::convertFromQSampleToHKL(const std::vector<V3D> &q_vectors,
-                                            std::vector<V3D> &miller_indices) {
+void ConvertCWSDMDtoHKL::convertFromQSampleToHKL(
+    const std::vector<V3D> &q_vectors, std::vector<V3D> &miller_indices) {
 
   Matrix<double> tempUB(m_UB);
 
@@ -354,7 +351,7 @@ API::IMDEventWorkspace_sptr ConvertCWSDMDtoHKL::createHKLMDWorkspace(
 
   // Creates a new instance of the MDEventInserter to output workspace
   MDEventWorkspace<MDEvent<3>, 3>::sptr mdws_mdevt_3 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3> >(mdws);
+      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(mdws);
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
   // Go though each spectrum to conver to MDEvent
