@@ -35,6 +35,7 @@ Usage
 Output:
 
 .. testoutput:: DetectorFloodWeightingExample
+
    Number Histograms 2
    Min X: 0.0 Max X: 10.0
    Min Y: 0.5 Max Y: 1.0
