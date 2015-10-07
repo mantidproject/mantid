@@ -96,7 +96,7 @@ public:
                       outputWorkspace->getDimension(0)->getBinWidth(),
                       inWS->getDimension(0)->getBinWidth());
   }
-  void test__all_non_zero_signals_are_kept_with_data_in_each_corner(){
+  void test__all_non_zero_signals_are_kept_with_data_in_each_corner() {
     /*
      *testing the effectiveness of CompactMD when the data looks like this:
      *------------------
@@ -128,5 +128,5 @@ public:
 //===================
 // Performance Tests
 //===================
-//TODO:
+// TODO:
 #endif // !MANTID_MDALGORITHMS_COMPACTMDTEST_H_

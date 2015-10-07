@@ -2,7 +2,7 @@
 #define MANTID_MDALGORITHMS_COMPACTMD_H_
 
 /** An algorithm used to crop an MDHistoWorkspace based on the first
-    non-zero signals found in each dimension. 
+    non-zero signals found in each dimension.
 
   @author Matt King
   @date 02-10-2015
@@ -50,13 +50,12 @@ public:
     return "Crops an MDHistoWorkspace based on the first non-zero signals "
            "giving a more focussed area of interest.";
   }
-  const std::string category() const{
-      return "MDAlgorithms";
-  }
+  const std::string category() const { return "MDAlgorithms"; }
   /// Algorithm's version for identification
   int version() const { return 1; }
 
-  void findFirstNonZeroMinMaxExtents(Mantid::API::IMDHistoWorkspace_sptr inputWs,
+  void
+  findFirstNonZeroMinMaxExtents(Mantid::API::IMDHistoWorkspace_sptr inputWs,
                                 std::vector<Mantid::coord_t> &minVec,
                                 std::vector<Mantid::coord_t> &maxVec);
 };
