@@ -7,6 +7,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <Poco/File.h>
+
 #include "ImageCoRViewMock.h"
 
 using namespace MantidQt::CustomInterfaces;
@@ -65,7 +67,7 @@ public:
     pres.notify(ImageCoRPresenter::Init);
   }
 
-  void test_browseImgEmptyPath() {
+  void test_browseImg_EmptyPath() {
     testing::NiceMock<MockImageCoRView> mockView;
     MantidQt::CustomInterfaces::ImageCoRPresenter pres(&mockView);
 
@@ -79,11 +81,219 @@ public:
     EXPECT_CALL(mockView, showStack(testing::An<const std::string &>()))
         .Times(0);
     EXPECT_CALL(mockView,
-                showStack(testing::An<Mantid::API::WorkspaceGroup_sptr &>(),
-                          testing::An<const std::string &>())).Times(0);
+                showStack(testing::An<Mantid::API::WorkspaceGroup_sptr &>()))
+        .Times(0);
     EXPECT_CALL(mockView, updateImgWithIndex(testing::_)).Times(0);
 
     pres.notify(IImageCoRPresenter::BrowseImgOrStack);
+  }
+
+  void test_newImg_EmptyPath() {
+    testing::NiceMock<MockImageCoRView> mockView;
+    MantidQt::CustomInterfaces::ImageCoRPresenter pres(&mockView);
+
+    EXPECT_CALL(mockView, askImgOrStackPath()).Times(1).WillOnce(Return(""));
+
+    // No error, no warnings, just ignored
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    // should not get there because there's no stack/img - it's just ignored:
+    EXPECT_CALL(mockView, showStack(testing::An<const std::string &>()))
+        .Times(0);
+    EXPECT_CALL(mockView,
+                showStack(testing::An<Mantid::API::WorkspaceGroup_sptr &>()))
+        .Times(0);
+    EXPECT_CALL(mockView, updateImgWithIndex(testing::_)).Times(0);
+
+    pres.notify(IImageCoRPresenter::BrowseImgOrStack);
+  }
+
+  void test_newImg_WrongPath() {
+    testing::NiceMock<MockImageCoRView> mockView;
+    MantidQt::CustomInterfaces::ImageCoRPresenter pres(&mockView);
+
+    EXPECT_CALL(mockView, askImgOrStackPath())
+        .Times(1)
+        .WillOnce(Return("dont_look_for_me_i_dont_exist"));
+
+    // A warning
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+    // should not get there because there's no stack/img
+    EXPECT_CALL(mockView, showStack(testing::An<const std::string &>()))
+        .Times(0);
+    EXPECT_CALL(mockView,
+                showStack(testing::An<Mantid::API::WorkspaceGroup_sptr &>()))
+        .Times(0);
+    EXPECT_CALL(mockView, updateImgWithIndex(testing::_)).Times(0);
+
+    // this exception is currently handled, and a warning given
+    //TSM_ASSERT_THROWS("There should be an exception if there is an unexpected "
+    //                  "error with the images path",
+    //                  pres.notify(IImageCoRPresenter::BrowseImgOrStack),
+    //                  Poco::FileNotFoundException);
+    pres.notify(IImageCoRPresenter::BrowseImgOrStack);
+  }
+
+  void test_updateImgIndex() {
+    testing::NiceMock<MockImageCoRView> mockView;
+    MantidQt::CustomInterfaces::ImageCoRPresenter pres(&mockView);
+
+    int idx = 0;
+    EXPECT_CALL(mockView, currentImgIndex()).Times(1).WillOnce(Return(idx));
+
+    EXPECT_CALL(mockView, updateImgWithIndex(idx)).Times(1);
+
+    // No errors, no warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IImageCoRPresenter::UpdateImgIndex);
+  }
+
+  void test_selectCoR() {
+    testing::NiceMock<MockImageCoRView> mockView;
+    MantidQt::CustomInterfaces::ImageCoRPresenter pres(&mockView);
+
+    EXPECT_CALL(mockView, changeSelectionState(IImageCoRView::SelectCoR))
+        .Times(1);
+
+    // No errors, no warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IImageCoRPresenter::SelectCoR);
+  }
+
+  void test_resetCoR() {
+    testing::NiceMock<MockImageCoRView> mockView;
+    MantidQt::CustomInterfaces::ImageCoRPresenter pres(&mockView);
+
+    EXPECT_CALL(mockView, resetCoR()).Times(1);
+    EXPECT_CALL(mockView, changeSelectionState(IImageCoRView::SelectNone))
+        .Times(1);
+
+    // just a few calls that should not happen
+    EXPECT_CALL(mockView, resetROI()).Times(0);
+    EXPECT_CALL(mockView, showStack(testing::An<const std::string &>()))
+        .Times(0);
+    EXPECT_CALL(mockView,
+                showStack(testing::An<Mantid::API::WorkspaceGroup_sptr &>()))
+        .Times(0);
+    EXPECT_CALL(mockView, updateImgWithIndex(testing::_)).Times(0);
+
+    // No errors, no warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IImageCoRPresenter::ResetCoR);
+  }
+
+  void test_selectROI() {
+    testing::NiceMock<MockImageCoRView> mockView;
+    MantidQt::CustomInterfaces::ImageCoRPresenter pres(&mockView);
+
+    EXPECT_CALL(mockView, changeSelectionState(IImageCoRView::SelectROIFirst))
+        .Times(1);
+
+    // No errors, no warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IImageCoRPresenter::SelectROI);
+  }
+
+  void test_finishROI() {
+    testing::NiceMock<MockImageCoRView> mockView;
+    MantidQt::CustomInterfaces::ImageCoRPresenter pres(&mockView);
+
+    EXPECT_CALL(mockView, changeSelectionState(IImageCoRView::SelectNone))
+        .Times(1);
+
+    // No errors, no warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IImageCoRPresenter::FinishedROI);
+  }
+
+  void test_resetROI() {
+    testing::NiceMock<MockImageCoRView> mockView;
+    MantidQt::CustomInterfaces::ImageCoRPresenter pres(&mockView);
+
+    EXPECT_CALL(mockView, resetROI()).Times(1);
+    EXPECT_CALL(mockView, changeSelectionState(IImageCoRView::SelectNone))
+        .Times(1);
+
+    // just a few calls that should not happen
+    EXPECT_CALL(mockView, resetCoR()).Times(0);
+    EXPECT_CALL(mockView, showStack(testing::An<const std::string &>()))
+        .Times(0);
+    EXPECT_CALL(mockView,
+                showStack(testing::An<Mantid::API::WorkspaceGroup_sptr &>()))
+        .Times(0);
+    EXPECT_CALL(mockView, updateImgWithIndex(testing::_)).Times(0);
+
+    // No errors, no warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IImageCoRPresenter::ResetROI);
+  }
+
+  void test_selectNormalization() {
+    testing::NiceMock<MockImageCoRView> mockView;
+    MantidQt::CustomInterfaces::ImageCoRPresenter pres(&mockView);
+
+    EXPECT_CALL(mockView, changeSelectionState(
+                              IImageCoRView::SelectNormAreaFirst)).Times(1);
+
+    // No errors, no warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IImageCoRPresenter::SelectNormalization);
+  }
+
+  void test_finishNormalization() {
+    testing::NiceMock<MockImageCoRView> mockView;
+    MantidQt::CustomInterfaces::ImageCoRPresenter pres(&mockView);
+
+    EXPECT_CALL(mockView, changeSelectionState(IImageCoRView::SelectNone))
+        .Times(1);
+
+    // No errors, no warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IImageCoRPresenter::FinishedNormalization);
+  }
+
+  void test_resetNormalization() {
+    testing::NiceMock<MockImageCoRView> mockView;
+    MantidQt::CustomInterfaces::ImageCoRPresenter pres(&mockView);
+
+    EXPECT_CALL(mockView, resetNormArea()).Times(1);
+    EXPECT_CALL(mockView, changeSelectionState(IImageCoRView::SelectNone))
+        .Times(1);
+
+    // just a few calls that should not happen
+    EXPECT_CALL(mockView, resetCoR()).Times(0);
+    EXPECT_CALL(mockView, resetROI()).Times(0);
+    EXPECT_CALL(mockView, showStack(testing::An<const std::string &>()))
+        .Times(0);
+    EXPECT_CALL(mockView,
+                showStack(testing::An<Mantid::API::WorkspaceGroup_sptr &>()))
+        .Times(0);
+    EXPECT_CALL(mockView, updateImgWithIndex(testing::_)).Times(0);
+
+    // No errors, no warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IImageCoRPresenter::ResetNormalization);
   }
 
   void test_shutDown() {

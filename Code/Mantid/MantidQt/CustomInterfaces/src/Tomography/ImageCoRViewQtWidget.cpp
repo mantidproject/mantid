@@ -306,7 +306,6 @@ void ImageCoRViewQtWidget::refreshCoR() {
     return;
 
   grabCoRFromWidgets();
-  // TODO: display nicer symbol?
 
   QPixmap toDisplay(*m_basePixmap.get());
   QPainter painter(&toDisplay);
@@ -331,6 +330,8 @@ void ImageCoRViewQtWidget::refreshROIetAl() {
 
   QPixmap toDisplay(*m_basePixmap.get());
   QPainter painter(&toDisplay);
+
+  // TODO: display settings / nicer symbol?
 
   QPen penCoR(Qt::red);
   painter.setPen(penCoR);

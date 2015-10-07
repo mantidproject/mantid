@@ -131,7 +131,16 @@ StackOfImagesDirs ImageCoRPresenter::checkInputStack(const std::string &path) {
 }
 
 void ImageCoRPresenter::processNewStack() {
-  StackOfImagesDirs soid = checkInputStack(m_stackPath);
+  StackOfImagesDirs soid("");
+  try {
+    soid = checkInputStack(m_stackPath);
+  } catch (std::runtime_error &e) {
+    m_view->userWarning("Error trying to open directories/files",
+                        "The path selected via the dialog cannot be openend or "
+                        "there was a problem while trying to access it. This "
+                        "is an unexpected inconsistency. Error details: " +
+                            std::string(e.what()));
+  }
 
   std::vector<std::string> imgs = soid.sampleFiles();
   if (0 >= imgs.size()) {

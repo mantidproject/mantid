@@ -15,14 +15,17 @@ public:
   MOCK_CONST_METHOD0(userSelection,
                      MantidQt::CustomInterfaces::ImageStackPreParams());
 
+  // SelectionState selectionState() const;
+  MOCK_CONST_METHOD0(selectionState, SelectionState());
+
   // void changeSelectionState(const SelectionState state);
-  MOCK_METHOD1(changeSelectionState, void(IImageCoRView::SelectionState));
+  MOCK_METHOD1(changeSelectionState, void(const IImageCoRView::SelectionState&));
 
   // void showStack(const std::string &path);
   MOCK_METHOD1(showStack, void(const std::string &));
 
   // void showStack(const Mantid::API::WorkspaceGroup_sptr &ws);
-  MOCK_METHOD2(showStack, void(Mantid::API::WorkspaceGroup_sptr &, const std::string &));
+  MOCK_METHOD1(showStack, void(Mantid::API::WorkspaceGroup_sptr &));
 
   // const Mantid::API::WorkspaceGroup_sptr stack() const;
   MOCK_CONST_METHOD0(stack, const Mantid::API::WorkspaceGroup_sptr());
