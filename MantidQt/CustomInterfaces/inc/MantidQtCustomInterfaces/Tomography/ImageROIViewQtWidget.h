@@ -1,10 +1,10 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGECORVIEWQTWIDGET_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGECORVIEWQTWIDGET_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGEROIVIEWQTWIDGET_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGEROIVIEWQTWIDGET_H_
 
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidKernel/System.h"
-#include "MantidQtCustomInterfaces/Tomography/IImageCoRPresenter.h"
-#include "MantidQtCustomInterfaces/Tomography/IImageCoRView.h"
+#include "MantidQtCustomInterfaces/Tomography/IImageROIPresenter.h"
+#include "MantidQtCustomInterfaces/Tomography/IImageROIView.h"
 
 #include "ui_ImageSelectCoRAndRegions.h"
 
@@ -24,8 +24,8 @@ image or stack of images. Provides a concrete view for the graphical
 interface for tomography functionality in Mantid. This view is
 Qt-based and it is probably the only one that will be implemented in a
 foreseeable horizon. The interface of this class is given by
-IImageCoRView so that it fits in the MVP (Model-View-Presenter) design
-of the ImageCoR widget.
+IImageROIView so that it fits in the MVP (Model-View-Presenter) design
+of the ImageROI widget.
 
 Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
@@ -48,12 +48,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ImageCoRViewQtWidget : public QWidget, public IImageCoRView {
+class DLLExport ImageROIViewQtWidget : public QWidget, public IImageROIView {
   Q_OBJECT
 
 public:
-  ImageCoRViewQtWidget(QWidget *parent = 0);
-  virtual ~ImageCoRViewQtWidget(){};
+  ImageROIViewQtWidget(QWidget *parent = 0);
+  virtual ~ImageROIViewQtWidget(){};
 
   void setParams(ImageStackPreParams &params);
 
@@ -177,10 +177,10 @@ private:
   SelectionState m_selectionState;
 
   // presenter as in the model-view-presenter
-  boost::scoped_ptr<IImageCoRPresenter> m_presenter;
+  boost::scoped_ptr<IImageROIPresenter> m_presenter;
 };
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGECORVIEWQTWIDGET_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGEROIVIEWQTWIDGET_H_

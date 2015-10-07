@@ -3,8 +3,8 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 
-#include "MantidQtCustomInterfaces/Tomography/ImageCoRViewQtWidget.h"
-#include "MantidQtCustomInterfaces/Tomography/ImageCoRPresenter.h"
+#include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
+#include "MantidQtCustomInterfaces/Tomography/ImageROIPresenter.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -19,11 +19,11 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 // this would be more like a CustomWidget if it's eventually moved there
-const std::string ImageCoRViewQtWidget::m_settingsGroup =
-    "CustomInterfaces/ImageCoRView";
+const std::string ImageROIViewQtWidget::m_settingsGroup =
+    "CustomInterfaces/ImageROIView";
 
-ImageCoRViewQtWidget::ImageCoRViewQtWidget(QWidget *parent)
-    : QWidget(parent), IImageCoRView(), m_imgWidth(0), m_imgHeight(0),
+ImageROIViewQtWidget::ImageROIViewQtWidget(QWidget *parent)
+    : QWidget(parent), IImageROIView(), m_imgWidth(0), m_imgHeight(0),
       m_selectionState(SelectNone), m_presenter(NULL) {
   initLayout();
 
@@ -33,21 +33,21 @@ ImageCoRViewQtWidget::ImageCoRViewQtWidget(QWidget *parent)
   m_ui.label_img->installEventFilter(this);
 }
 
-void ImageCoRViewQtWidget::setParams(ImageStackPreParams &params) {
+void ImageROIViewQtWidget::setParams(ImageStackPreParams &params) {
   m_params = params;
   setParamWidgets(m_params);
 }
 
-ImageStackPreParams ImageCoRViewQtWidget::userSelection() const {
+ImageStackPreParams ImageROIViewQtWidget::userSelection() const {
   return m_params;
 }
 
-void ImageCoRViewQtWidget::changeSelectionState(
-    const IImageCoRView::SelectionState &state) {
+void ImageROIViewQtWidget::changeSelectionState(
+    const IImageROIView::SelectionState &state) {
   m_selectionState = state;
 }
 
-void ImageCoRViewQtWidget::showStack(const std::string & /*path*/) {
+void ImageROIViewQtWidget::showStack(const std::string & /*path*/) {
   // TODO:
   // a) load as proper stack of images workspace - this can only be done when
   //    we have a firt working version of the "lean MD workspace". This method
@@ -57,7 +57,7 @@ void ImageCoRViewQtWidget::showStack(const std::string & /*path*/) {
   // enableParamWidgets(true);
 }
 
-void ImageCoRViewQtWidget::showStack(Mantid::API::WorkspaceGroup_sptr &wsg) {
+void ImageROIViewQtWidget::showStack(Mantid::API::WorkspaceGroup_sptr &wsg) {
   if (0 == wsg->size())
     return;
 
@@ -89,7 +89,7 @@ void ImageCoRViewQtWidget::showStack(Mantid::API::WorkspaceGroup_sptr &wsg) {
   enableParamWidgets(true);
 }
 
-void ImageCoRViewQtWidget::showProjection(
+void ImageROIViewQtWidget::showProjection(
     const Mantid::API::WorkspaceGroup_sptr &wsg, size_t idx) {
 
   showProjectionImage(wsg, idx);
@@ -117,21 +117,21 @@ void ImageCoRViewQtWidget::showProjection(
   m_ui.horizontalScrollBar_img_stack->setValue(static_cast<int>(idx));
 }
 
-void ImageCoRViewQtWidget::userWarning(const std::string &err,
+void ImageROIViewQtWidget::userWarning(const std::string &err,
                                        const std::string &description) {
   QMessageBox::warning(this, QString::fromStdString(err),
                        QString::fromStdString(description), QMessageBox::Ok,
                        QMessageBox::Ok);
 }
 
-void ImageCoRViewQtWidget::userError(const std::string &err,
+void ImageROIViewQtWidget::userError(const std::string &err,
                                      const std::string &description) {
   QMessageBox::critical(this, QString::fromStdString(err),
                         QString::fromStdString(description), QMessageBox::Ok,
                         QMessageBox::Ok);
 }
 
-std::string ImageCoRViewQtWidget::askImgOrStackPath() {
+std::string ImageROIViewQtWidget::askImgOrStackPath() {
   // get path
   QString fitsStr = QString("Supported formats: FITS, TIFF and PNG "
                             "(*.fits *.fit *.tiff *.tif *.png);;"
@@ -153,7 +153,7 @@ std::string ImageCoRViewQtWidget::askImgOrStackPath() {
   return path.toStdString();
 }
 
-void ImageCoRViewQtWidget::saveSettings() const {
+void ImageROIViewQtWidget::saveSettings() const {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
 
@@ -161,7 +161,7 @@ void ImageCoRViewQtWidget::saveSettings() const {
   qs.endGroup();
 }
 
-void ImageCoRViewQtWidget::resetCoR() {
+void ImageROIViewQtWidget::resetCoR() {
   int midx =
       (m_ui.spinBox_cor_x->minimum() + m_ui.spinBox_cor_x->maximum()) / 2;
   m_ui.spinBox_cor_x->setValue(midx);
@@ -170,21 +170,21 @@ void ImageCoRViewQtWidget::resetCoR() {
   m_ui.spinBox_cor_y->setValue(midy);
 }
 
-void ImageCoRViewQtWidget::resetROI() {
+void ImageROIViewQtWidget::resetROI() {
   m_ui.spinBox_roi_top_x->setValue(0);
   m_ui.spinBox_roi_top_y->setValue(0);
   m_ui.spinBox_roi_bottom_x->setValue(m_ui.spinBox_roi_bottom_x->maximum());
   m_ui.spinBox_roi_bottom_y->setValue(m_ui.spinBox_roi_bottom_y->maximum());
 }
 
-void ImageCoRViewQtWidget::resetNormArea() {
+void ImageROIViewQtWidget::resetNormArea() {
   m_ui.spinBox_norm_top_x->setValue(0);
   m_ui.spinBox_norm_top_y->setValue(0);
   m_ui.spinBox_norm_bottom_x->setValue(0);
   m_ui.spinBox_norm_bottom_y->setValue(0);
 }
 
-void ImageCoRViewQtWidget::initLayout() {
+void ImageROIViewQtWidget::initLayout() {
   // setup container ui
   m_ui.setupUi(this);
 
@@ -209,16 +209,16 @@ void ImageCoRViewQtWidget::initLayout() {
   grabROIFromWidgets();
   grabNormAreaFromWidgets();
 
-  // presenter that knows how to handle a IImageCoRView should take care
+  // presenter that knows how to handle a IImageROIView should take care
   // of all the logic. Note the view needs to now the concrete presenter here
-  m_presenter.reset(new ImageCoRPresenter(this));
+  m_presenter.reset(new ImageROIPresenter(this));
 
   // it will know what compute resources and tools we have available:
   // This view doesn't even know the names of compute resources, etc.
-  m_presenter->notify(ImageCoRPresenter::Init);
+  m_presenter->notify(ImageROIPresenter::Init);
 }
 
-void ImageCoRViewQtWidget::setupConnections() {
+void ImageROIViewQtWidget::setupConnections() {
 
   // 'browse' buttons
   connect(m_ui.pushButton_browse_img, SIGNAL(released()), this,
@@ -266,17 +266,17 @@ void ImageCoRViewQtWidget::setupConnections() {
           SLOT(valueUpdatedNormArea(int)));
 }
 
-void ImageCoRViewQtWidget::valueUpdatedCoR(int) {
+void ImageROIViewQtWidget::valueUpdatedCoR(int) {
   grabCoRFromWidgets();
   refreshROIetAl();
 }
 
-void ImageCoRViewQtWidget::valueUpdatedROI(int) {
+void ImageROIViewQtWidget::valueUpdatedROI(int) {
   grabROIFromWidgets();
   refreshROIetAl();
 }
 
-void ImageCoRViewQtWidget::valueUpdatedNormArea(int) {
+void ImageROIViewQtWidget::valueUpdatedNormArea(int) {
   grabNormAreaFromWidgets();
   refreshROIetAl();
 }
@@ -285,12 +285,12 @@ void ImageCoRViewQtWidget::valueUpdatedNormArea(int) {
  * Parameter values from spin box widgets => coordinate parameters
  * data member
  */
-void ImageCoRViewQtWidget::grabCoRFromWidgets() {
+void ImageROIViewQtWidget::grabCoRFromWidgets() {
   m_params.cor = Mantid::Kernel::V2D(m_ui.spinBox_cor_x->value(),
                                      m_ui.spinBox_cor_y->value());
 }
 
-void ImageCoRViewQtWidget::grabROIFromWidgets() {
+void ImageROIViewQtWidget::grabROIFromWidgets() {
   m_params.roi =
       std::make_pair(Mantid::Kernel::V2D(m_ui.spinBox_roi_top_x->value(),
                                          m_ui.spinBox_roi_top_y->value()),
@@ -298,7 +298,7 @@ void ImageCoRViewQtWidget::grabROIFromWidgets() {
                                          m_ui.spinBox_roi_bottom_y->value()));
 }
 
-void ImageCoRViewQtWidget::grabNormAreaFromWidgets() {
+void ImageROIViewQtWidget::grabNormAreaFromWidgets() {
   m_params.normalizationRegion =
       std::make_pair(Mantid::Kernel::V2D(m_ui.spinBox_norm_top_x->value(),
                                          m_ui.spinBox_norm_top_y->value()),
@@ -312,7 +312,7 @@ void ImageCoRViewQtWidget::grabNormAreaFromWidgets() {
  * for every event that modifies the current image and/or selection of
  * parameters.
  */
-void ImageCoRViewQtWidget::refreshROIetAl() {
+void ImageROIViewQtWidget::refreshROIetAl() {
 
   const QPixmap *pp = m_ui.label_img->pixmap();
   if (!pp)
@@ -354,7 +354,7 @@ void ImageCoRViewQtWidget::refreshROIetAl() {
   m_ui.label_img->setPixmap(toDisplay);
 }
 
-void ImageCoRViewQtWidget::refreshCoR() {
+void ImageROIViewQtWidget::refreshCoR() {
   const QPixmap *pp = m_ui.label_img->pixmap();
   if (!pp)
     return;
@@ -376,7 +376,7 @@ void ImageCoRViewQtWidget::refreshCoR() {
   m_ui.label_img->setPixmap(toDisplay);
 }
 
-void ImageCoRViewQtWidget::refreshROI() {
+void ImageROIViewQtWidget::refreshROI() {
   const QPixmap *pp = m_ui.label_img->pixmap();
   if (!pp)
     return;
@@ -397,7 +397,7 @@ void ImageCoRViewQtWidget::refreshROI() {
   m_ui.label_img->setPixmap(toDisplay);
 }
 
-void ImageCoRViewQtWidget::refreshNormArea() {
+void ImageROIViewQtWidget::refreshNormArea() {
   // TODO: display proper symbol
   const QPixmap *pp = m_ui.label_img->pixmap();
   if (!pp)
@@ -419,13 +419,13 @@ void ImageCoRViewQtWidget::refreshNormArea() {
   m_ui.label_img->setPixmap(toDisplay);
 }
 
-void ImageCoRViewQtWidget::enableParamWidgets(bool enable) {
+void ImageROIViewQtWidget::enableParamWidgets(bool enable) {
   m_ui.groupBox_cor->setEnabled(enable);
   m_ui.groupBox_roi->setEnabled(enable);
   m_ui.groupBox_norm->setEnabled(enable);
 }
 
-void ImageCoRViewQtWidget::initParamWidgets(size_t maxWidth, size_t maxHeight) {
+void ImageROIViewQtWidget::initParamWidgets(size_t maxWidth, size_t maxHeight) {
   m_imgWidth = static_cast<int>(maxWidth);
   m_imgHeight = static_cast<int>(maxHeight);
 
@@ -460,7 +460,7 @@ void ImageCoRViewQtWidget::initParamWidgets(size_t maxWidth, size_t maxHeight) {
   resetNormArea();
 }
 
-void ImageCoRViewQtWidget::setParamWidgets(ImageStackPreParams &params) {
+void ImageROIViewQtWidget::setParamWidgets(ImageStackPreParams &params) {
   m_ui.spinBox_cor_x->setValue(static_cast<int>(params.cor.X()));
   m_ui.spinBox_cor_y->setValue(static_cast<int>(params.cor.Y()));
 
@@ -481,46 +481,46 @@ void ImageCoRViewQtWidget::setParamWidgets(ImageStackPreParams &params) {
       static_cast<int>(params.normalizationRegion.second.Y()));
 }
 
-void ImageCoRViewQtWidget::corClicked() {
-  m_presenter->notify(IImageCoRPresenter::SelectCoR);
+void ImageROIViewQtWidget::corClicked() {
+  m_presenter->notify(IImageROIPresenter::SelectCoR);
 }
 
-void ImageCoRViewQtWidget::corResetClicked() {
-  m_presenter->notify(IImageCoRPresenter::ResetCoR);
+void ImageROIViewQtWidget::corResetClicked() {
+  m_presenter->notify(IImageROIPresenter::ResetCoR);
   refreshROIetAl();
 }
 
-void ImageCoRViewQtWidget::roiClicked() {
-  m_presenter->notify(IImageCoRPresenter::SelectROI);
+void ImageROIViewQtWidget::roiClicked() {
+  m_presenter->notify(IImageROIPresenter::SelectROI);
 }
 
-void ImageCoRViewQtWidget::roiResetClicked() {
-  m_presenter->notify(IImageCoRPresenter::ResetROI);
+void ImageROIViewQtWidget::roiResetClicked() {
+  m_presenter->notify(IImageROIPresenter::ResetROI);
   refreshROIetAl();
 }
 
-void ImageCoRViewQtWidget::normAreaClicked() {
-  m_presenter->notify(IImageCoRPresenter::SelectNormalization);
+void ImageROIViewQtWidget::normAreaClicked() {
+  m_presenter->notify(IImageROIPresenter::SelectNormalization);
 }
 
-void ImageCoRViewQtWidget::normAreaResetClicked() {
-  m_presenter->notify(IImageCoRPresenter::ResetNormalization);
+void ImageROIViewQtWidget::normAreaResetClicked() {
+  m_presenter->notify(IImageROIPresenter::ResetNormalization);
   refreshROIetAl();
 }
 
-void ImageCoRViewQtWidget::browseImgClicked() {
-  m_presenter->notify(IImageCoRPresenter::BrowseImgOrStack);
+void ImageROIViewQtWidget::browseImgClicked() {
+  m_presenter->notify(IImageROIPresenter::BrowseImgOrStack);
 }
 
-void ImageCoRViewQtWidget::updateFromImagesSlider(int /* current */) {
-  m_presenter->notify(IImageCoRPresenter::UpdateImgIndex);
+void ImageROIViewQtWidget::updateFromImagesSlider(int /* current */) {
+  m_presenter->notify(IImageROIPresenter::UpdateImgIndex);
 }
 
-size_t ImageCoRViewQtWidget::currentImgIndex() const {
+size_t ImageROIViewQtWidget::currentImgIndex() const {
   return m_ui.horizontalScrollBar_img_stack->value();
 }
 
-void ImageCoRViewQtWidget::updateImgWithIndex(size_t idx) {
+void ImageROIViewQtWidget::updateImgWithIndex(size_t idx) {
   int max = m_ui.horizontalScrollBar_img_stack->maximum();
   int current = m_ui.horizontalScrollBar_img_stack->value();
 
@@ -530,7 +530,7 @@ void ImageCoRViewQtWidget::updateImgWithIndex(size_t idx) {
                              "/" + boost::lexical_cast<std::string>(max + 1)));
 }
 
-void ImageCoRViewQtWidget::showProjectionImage(
+void ImageROIViewQtWidget::showProjectionImage(
     const Mantid::API::WorkspaceGroup_sptr &wsg, size_t idx) {
 
   MatrixWorkspace_sptr ws;
@@ -649,7 +649,7 @@ void ImageCoRViewQtWidget::showProjectionImage(
  * the begin and end of the selection. For full testability (including
  * the mouse interaction), this method should be implemented fully in
  * terms of notifications to the presenter. This would require a bunch
- * of new notifications in IImageCoRPresenter, and making at least all
+ * of new notifications in IImageROIPresenter, and making at least all
  * the mouseUpdateCoR, mouseUpdateROICorners12, mouseXXX methods
  * public in this view interface. This can be considered at a later
  * stage.
@@ -657,9 +657,9 @@ void ImageCoRViewQtWidget::showProjectionImage(
  * @param obj object concerned by the event
  * @param event event received (mouse click, release, move, etc.)
  **/
-bool ImageCoRViewQtWidget::eventFilter(QObject *obj, QEvent *event) {
+bool ImageROIViewQtWidget::eventFilter(QObject *obj, QEvent *event) {
   // quick ignore
-  if (IImageCoRView::SelectNone == m_selectionState)
+  if (IImageROIView::SelectNone == m_selectionState)
     return false;
 
   if (m_ui.label_img == obj) {
@@ -674,25 +674,25 @@ bool ImageCoRViewQtWidget::eventFilter(QObject *obj, QEvent *event) {
     auto type = event->type();
     if (type == QEvent::MouseButtonPress) {
 
-      if (IImageCoRView::SelectCoR == m_selectionState) {
+      if (IImageROIView::SelectCoR == m_selectionState) {
         mouseUpdateCoR(x, y);
-      } else if (IImageCoRView::SelectROIFirst == m_selectionState) {
+      } else if (IImageROIView::SelectROIFirst == m_selectionState) {
         mouseUpdateROICorners12(x, y);
-      } else if (IImageCoRView::SelectNormAreaFirst == m_selectionState) {
+      } else if (IImageROIView::SelectNormAreaFirst == m_selectionState) {
         mouseUpdateNormAreaCorners12(x, y);
       }
     } else if (type == QEvent::MouseMove) {
 
-      if (IImageCoRView::SelectROISecond == m_selectionState) {
+      if (IImageROIView::SelectROISecond == m_selectionState) {
         mouseUpdateROICorner2(x, y);
-      } else if (IImageCoRView::SelectNormAreaSecond == m_selectionState) {
+      } else if (IImageROIView::SelectNormAreaSecond == m_selectionState) {
         mouseUpdateNormAreaCorner2(x, y);
       }
     } else if (type == QEvent::MouseButtonRelease) {
 
-      if (IImageCoRView::SelectROISecond == m_selectionState) {
+      if (IImageROIView::SelectROISecond == m_selectionState) {
         mouseFinishROI(x, y);
-      } else if (IImageCoRView::SelectNormAreaSecond == m_selectionState) {
+      } else if (IImageROIView::SelectNormAreaSecond == m_selectionState) {
         mouseFinishNormArea(x, y);
       }
     }
@@ -709,31 +709,31 @@ bool ImageCoRViewQtWidget::eventFilter(QObject *obj, QEvent *event) {
  * @param x position on x axis (local to the image)
  * @param y position on y axis (local to the image)
  */
-void ImageCoRViewQtWidget::grabCoRFromMousePoint(int x, int y) {
+void ImageROIViewQtWidget::grabCoRFromMousePoint(int x, int y) {
   m_params.cor = Mantid::Kernel::V2D(x, y);
   m_ui.spinBox_cor_x->setValue(x);
   m_ui.spinBox_cor_y->setValue(y);
 }
 
-void ImageCoRViewQtWidget::grabROICorner1FromMousePoint(int x, int y) {
+void ImageROIViewQtWidget::grabROICorner1FromMousePoint(int x, int y) {
   m_params.roi.first = Mantid::Kernel::V2D(x, y);
   m_ui.spinBox_roi_top_x->setValue(x);
   m_ui.spinBox_roi_top_y->setValue(y);
 }
 
-void ImageCoRViewQtWidget::grabROICorner2FromMousePoint(int x, int y) {
+void ImageROIViewQtWidget::grabROICorner2FromMousePoint(int x, int y) {
   m_params.roi.second = Mantid::Kernel::V2D(x, y);
   m_ui.spinBox_roi_bottom_x->setValue(x);
   m_ui.spinBox_roi_bottom_y->setValue(y);
 }
 
-void ImageCoRViewQtWidget::grabNormAreaCorner1FromMousePoint(int x, int y) {
+void ImageROIViewQtWidget::grabNormAreaCorner1FromMousePoint(int x, int y) {
   m_params.normalizationRegion.first = Mantid::Kernel::V2D(x, y);
   m_ui.spinBox_norm_top_x->setValue(x);
   m_ui.spinBox_norm_top_y->setValue(y);
 }
 
-void ImageCoRViewQtWidget::grabNormAreaCorner2FromMousePoint(int x, int y) {
+void ImageROIViewQtWidget::grabNormAreaCorner2FromMousePoint(int x, int y) {
   m_params.normalizationRegion.second = Mantid::Kernel::V2D(x, y);
   m_ui.spinBox_norm_bottom_x->setValue(x);
   m_ui.spinBox_norm_bottom_y->setValue(y);
@@ -747,11 +747,11 @@ void ImageCoRViewQtWidget::grabNormAreaCorner2FromMousePoint(int x, int y) {
  * @param x position on x axis (local to the image)
  * @param y position on y axis (local to the image)
  */
-void ImageCoRViewQtWidget::mouseUpdateCoR(int x, int y) {
+void ImageROIViewQtWidget::mouseUpdateCoR(int x, int y) {
   grabCoRFromMousePoint(x, y);
   refreshROIetAl();
 
-  m_presenter->notify(IImageCoRPresenter::FinishedCoR);
+  m_presenter->notify(IImageROIPresenter::FinishedCoR);
 }
 
 /**
@@ -761,11 +761,11 @@ void ImageCoRViewQtWidget::mouseUpdateCoR(int x, int y) {
  * @param x position on x axis (local to the image)
  * @param y position on y axis (local to the image)
  */
-void ImageCoRViewQtWidget::mouseUpdateROICorners12(int x, int y) {
+void ImageROIViewQtWidget::mouseUpdateROICorners12(int x, int y) {
   grabROICorner1FromMousePoint(x, y);
   grabROICorner2FromMousePoint(x, y);
   refreshROIetAl();
-  m_selectionState = IImageCoRView::SelectROISecond;
+  m_selectionState = IImageROIView::SelectROISecond;
 }
 
 /**
@@ -777,7 +777,7 @@ void ImageCoRViewQtWidget::mouseUpdateROICorners12(int x, int y) {
  * @param x position on x axis (local to the image)
  * @param y position on y axis (local to the image)
  */
-void ImageCoRViewQtWidget::mouseUpdateROICorner2(int x, int y) {
+void ImageROIViewQtWidget::mouseUpdateROICorner2(int x, int y) {
   grabROICorner2FromMousePoint(x, y);
   refreshROIetAl();
 }
@@ -790,39 +790,39 @@ void ImageCoRViewQtWidget::mouseUpdateROICorner2(int x, int y) {
  * @param x position on x axis (local to the image)
  * @param y position on y axis (local to the image)
  */
-void ImageCoRViewQtWidget::mouseFinishROI(int x, int y) {
+void ImageROIViewQtWidget::mouseFinishROI(int x, int y) {
   grabROICorner2FromMousePoint(x, y);
   refreshROIetAl();
-  m_presenter->notify(IImageCoRPresenter::FinishedROI);
+  m_presenter->notify(IImageROIPresenter::FinishedROI);
 }
 
-void ImageCoRViewQtWidget::mouseUpdateNormAreaCorners12(int x, int y) {
+void ImageROIViewQtWidget::mouseUpdateNormAreaCorners12(int x, int y) {
   grabNormAreaCorner1FromMousePoint(x, y);
   grabNormAreaCorner2FromMousePoint(x, y);
   refreshROIetAl();
-  m_selectionState = IImageCoRView::SelectNormAreaSecond;
+  m_selectionState = IImageROIView::SelectNormAreaSecond;
 }
 
-void ImageCoRViewQtWidget::mouseUpdateNormAreaCorner2(int x, int y) {
+void ImageROIViewQtWidget::mouseUpdateNormAreaCorner2(int x, int y) {
   grabNormAreaCorner2FromMousePoint(x, y);
   refreshROIetAl();
 }
 
-void ImageCoRViewQtWidget::mouseFinishNormArea(int x, int y) {
+void ImageROIViewQtWidget::mouseFinishNormArea(int x, int y) {
   grabNormAreaCorner2FromMousePoint(x, y);
   refreshROIetAl();
-  m_presenter->notify(IImageCoRPresenter::FinishedNormalization);
+  m_presenter->notify(IImageROIPresenter::FinishedNormalization);
 }
 
-void ImageCoRViewQtWidget::readSettings() {
+void ImageROIViewQtWidget::readSettings() {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
   restoreGeometry(qs.value("interface-win-geometry").toByteArray());
   qs.endGroup();
 }
 
-void ImageCoRViewQtWidget::closeEvent(QCloseEvent *event) {
-  m_presenter->notify(IImageCoRPresenter::ShutDown);
+void ImageROIViewQtWidget::closeEvent(QCloseEvent *event) {
+  m_presenter->notify(IImageROIPresenter::ShutDown);
   event->accept();
 }
 

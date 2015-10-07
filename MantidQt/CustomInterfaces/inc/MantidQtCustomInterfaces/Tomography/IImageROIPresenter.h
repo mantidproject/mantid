@@ -1,5 +1,5 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGECORPRESENTER_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGECORPRESENTER_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGEROIPRESENTER_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGEROIPRESENTER_H_
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -9,7 +9,7 @@ Presenter for the widget that handles the selection of the center of
 rotation, region of interest, region for normalization, etc. from an
 image or stack of images. This is the abstract base class / interface
 for the presenter (in the sense of the MVP pattern).  The name
-ImageCoR refers to the Center-of-Rotation, which is the most basic
+ImageROI refers to the Center-of-Rotation, which is the most basic
 parameter that users can select via this widget. This class is
 QtGUI-free as it uses the interface of the view. The model is simply
 the ImageStackPreParams class which holds coordinates selected by the
@@ -36,11 +36,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IImageCoRPresenter {
+class IImageROIPresenter {
 
 public:
-  IImageCoRPresenter(){};
-  virtual ~IImageCoRPresenter(){};
+  IImageROIPresenter(){};
+  virtual ~IImageROIPresenter(){};
 
   /// These are user actions, triggered from the (passive) view, that need
   /// handling by the presenter
@@ -68,10 +68,10 @@ public:
    *
    * @param notif Type of notification to process.
    */
-  virtual void notify(IImageCoRPresenter::Notification notif) = 0;
+  virtual void notify(IImageROIPresenter::Notification notif) = 0;
 };
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGECORPRESENTER_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGEROIPRESENTER_H_

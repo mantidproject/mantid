@@ -1,5 +1,5 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGECORVIEW_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGECORVIEW_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGEROIVIEW_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGEROIVIEW_H_
 
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
@@ -11,7 +11,7 @@ namespace CustomInterfaces {
 Widget to handle the selection of the center of rotation, region of
 interest, region for normalization, etc. from an image or stack of
 images. This is the abstract base class / interface for the view of
-this widget (in the sense of the MVP pattern).  The name ImageCoR
+this widget (in the sense of the MVP pattern).  The name ImageROI
 refers to the Center-of-Rotation, which is the most basic parameter
 that users can select via this widget. This class is Qt-free. Qt
 specific functionality and dependencies are added in a class derived
@@ -38,11 +38,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IImageCoRView {
+class IImageROIView {
 
 public:
-  IImageCoRView(){};
-  virtual ~IImageCoRView(){};
+  IImageROIView(){};
+  virtual ~IImageROIView(){};
 
   // Selection states
   enum SelectionState {
@@ -213,4 +213,4 @@ public:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGECORVIEW_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGEROIVIEW_H_

@@ -3,15 +3,15 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
-#include "MantidQtCustomInterfaces/Tomography/ImageCoRPresenter.h"
-#include "MantidQtCustomInterfaces/Tomography/IImageCoRView.h"
+#include "MantidQtCustomInterfaces/Tomography/ImageROIPresenter.h"
+#include "MantidQtCustomInterfaces/Tomography/IImageROIView.h"
 
 using namespace MantidQt::CustomInterfaces;
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ImageCoRPresenter::ImageCoRPresenter(IImageCoRView *view)
+ImageROIPresenter::ImageROIPresenter(IImageROIView *view)
     : m_view(view), m_model(new ImageStackPreParams()) {
   if (!m_view) {
     throw std::runtime_error("Severe inconsistency found. Presenter created "
@@ -20,78 +20,78 @@ ImageCoRPresenter::ImageCoRPresenter(IImageCoRView *view)
   }
 }
 
-ImageCoRPresenter::~ImageCoRPresenter() { cleanup(); }
+ImageROIPresenter::~ImageROIPresenter() { cleanup(); }
 
-void ImageCoRPresenter::cleanup() {}
+void ImageROIPresenter::cleanup() {}
 
-void ImageCoRPresenter::notify(Notification notif) {
+void ImageROIPresenter::notify(Notification notif) {
 
   switch (notif) {
 
-  case IImageCoRPresenter::Init:
+  case IImageROIPresenter::Init:
     processInit();
     break;
 
-  case IImageCoRPresenter::BrowseImgOrStack:
+  case IImageROIPresenter::BrowseImgOrStack:
     processBrowseImg();
     break;
 
-  case IImageCoRPresenter::NewImgOrStack:
+  case IImageROIPresenter::NewImgOrStack:
     processNewStack();
     break;
 
-  case IImageCoRPresenter::UpdateImgIndex:
+  case IImageROIPresenter::UpdateImgIndex:
     processUpdateImgIndex();
     break;
 
-  case IImageCoRPresenter::SelectCoR:
+  case IImageROIPresenter::SelectCoR:
     processSelectCoR();
     break;
 
-  case IImageCoRPresenter::SelectROI:
+  case IImageROIPresenter::SelectROI:
     processSelectROI();
     break;
 
-  case IImageCoRPresenter::SelectNormalization:
+  case IImageROIPresenter::SelectNormalization:
     processSelectNormalization();
     break;
 
-  case IImageCoRPresenter::FinishedCoR:
+  case IImageROIPresenter::FinishedCoR:
     processFinishedCoR();
     break;
 
-  case IImageCoRPresenter::FinishedROI:
+  case IImageROIPresenter::FinishedROI:
     processFinishedROI();
     break;
 
-  case IImageCoRPresenter::FinishedNormalization:
+  case IImageROIPresenter::FinishedNormalization:
     processFinishedNormalization();
     break;
 
-  case IImageCoRPresenter::ResetCoR:
+  case IImageROIPresenter::ResetCoR:
     processResetCoR();
     break;
 
-  case IImageCoRPresenter::ResetROI:
+  case IImageROIPresenter::ResetROI:
     processResetROI();
     break;
 
-  case IImageCoRPresenter::ResetNormalization:
+  case IImageROIPresenter::ResetNormalization:
     processResetNormalization();
     break;
 
-  case IImageCoRPresenter::ShutDown:
+  case IImageROIPresenter::ShutDown:
     processShutDown();
     break;
   }
 }
 
-void ImageCoRPresenter::processInit() {
+void ImageROIPresenter::processInit() {
   ImageStackPreParams p;
   m_view->setParams(p);
 }
 
-void ImageCoRPresenter::processBrowseImg() {
+void ImageROIPresenter::processBrowseImg() {
   const std::string path = m_view->askImgOrStackPath();
 
   if (path.empty())
@@ -112,7 +112,7 @@ void ImageCoRPresenter::processBrowseImg() {
  * @return a stack of images built from the path passed, not
  * necessarily correct (check with isValid())
  */
-StackOfImagesDirs ImageCoRPresenter::checkInputStack(const std::string &path) {
+StackOfImagesDirs ImageROIPresenter::checkInputStack(const std::string &path) {
   StackOfImagesDirs soid(path);
 
   const std::string soiPath = soid.sampleImagesDir();
@@ -130,7 +130,7 @@ StackOfImagesDirs ImageCoRPresenter::checkInputStack(const std::string &path) {
   return soid;
 }
 
-void ImageCoRPresenter::processNewStack() {
+void ImageROIPresenter::processNewStack() {
 
   StackOfImagesDirs soid("");
   try {
@@ -179,53 +179,53 @@ void ImageCoRPresenter::processNewStack() {
     Mantid::API::AnalysisDataService::Instance().remove(wsg->getName());
 }
 
-void ImageCoRPresenter::processUpdateImgIndex() {
+void ImageROIPresenter::processUpdateImgIndex() {
   m_view->updateImgWithIndex(m_view->currentImgIndex());
 }
 
-void ImageCoRPresenter::processSelectCoR() {
-  m_view->changeSelectionState(IImageCoRView::SelectCoR);
+void ImageROIPresenter::processSelectCoR() {
+  m_view->changeSelectionState(IImageROIView::SelectCoR);
 }
 
-void ImageCoRPresenter::processSelectROI() {
-  m_view->changeSelectionState(IImageCoRView::SelectROIFirst);
+void ImageROIPresenter::processSelectROI() {
+  m_view->changeSelectionState(IImageROIView::SelectROIFirst);
 }
 
-void ImageCoRPresenter::processSelectNormalization() {
-  m_view->changeSelectionState(IImageCoRView::SelectNormAreaFirst);
+void ImageROIPresenter::processSelectNormalization() {
+  m_view->changeSelectionState(IImageROIView::SelectNormAreaFirst);
 }
 
-void ImageCoRPresenter::processFinishedCoR() {
-  m_view->changeSelectionState(IImageCoRView::SelectNone);
+void ImageROIPresenter::processFinishedCoR() {
+  m_view->changeSelectionState(IImageROIView::SelectNone);
 }
 
-void ImageCoRPresenter::processFinishedROI() {
-  m_view->changeSelectionState(IImageCoRView::SelectNone);
+void ImageROIPresenter::processFinishedROI() {
+  m_view->changeSelectionState(IImageROIView::SelectNone);
 }
 
-void ImageCoRPresenter::processFinishedNormalization() {
-  m_view->changeSelectionState(IImageCoRView::SelectNone);
+void ImageROIPresenter::processFinishedNormalization() {
+  m_view->changeSelectionState(IImageROIView::SelectNone);
 }
 
-void ImageCoRPresenter::processResetCoR() {
+void ImageROIPresenter::processResetCoR() {
   m_view->resetCoR();
-  m_view->changeSelectionState(IImageCoRView::SelectNone);
+  m_view->changeSelectionState(IImageROIView::SelectNone);
 }
 
-void ImageCoRPresenter::processResetROI() {
+void ImageROIPresenter::processResetROI() {
   m_view->resetROI();
-  m_view->changeSelectionState(IImageCoRView::SelectNone);
+  m_view->changeSelectionState(IImageROIView::SelectNone);
 }
 
-void ImageCoRPresenter::processResetNormalization() {
+void ImageROIPresenter::processResetNormalization() {
   m_view->resetNormArea();
-  m_view->changeSelectionState(IImageCoRView::SelectNone);
+  m_view->changeSelectionState(IImageROIView::SelectNone);
 }
 
-void ImageCoRPresenter::processShutDown() { m_view->saveSettings(); }
+void ImageROIPresenter::processShutDown() { m_view->saveSettings(); }
 
 Mantid::API::WorkspaceGroup_sptr
-ImageCoRPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
+ImageROIPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
   const std::string wsName = "__stack_fits_viewer_tomography_gui";
   auto &ads = Mantid::API::AnalysisDataService::Instance();
   if (ads.doesExist(wsName)) {
@@ -254,7 +254,7 @@ ImageCoRPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
   }
 }
 
-void ImageCoRPresenter::loadFITSImage(const std::string &path,
+void ImageROIPresenter::loadFITSImage(const std::string &path,
                                       const std::string &wsName) {
   // get fits file into workspace and retrieve it from the ADS
   auto alg = Mantid::API::AlgorithmManager::Instance().create("LoadFITS");

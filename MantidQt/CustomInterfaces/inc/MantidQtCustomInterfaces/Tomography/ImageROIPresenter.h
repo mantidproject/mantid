@@ -1,9 +1,9 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGECORPRESENTER_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGECORPRESENTER_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGEROIPRESENTER_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGEROIPRESENTER_H_
 
 #include "MantidAPI/WorkspaceGroup_fwd.h"
-#include "MantidQtCustomInterfaces/Tomography/IImageCoRPresenter.h"
-#include "MantidQtCustomInterfaces/Tomography/IImageCoRView.h"
+#include "MantidQtCustomInterfaces/Tomography/IImageROIPresenter.h"
+#include "MantidQtCustomInterfaces/Tomography/IImageROIView.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
 #include "MantidQtCustomInterfaces/Tomography/StackOfImagesDirs.h"
 
@@ -39,14 +39,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ImageCoRPresenter : public IImageCoRPresenter {
+class DLLExport ImageROIPresenter : public IImageROIPresenter {
 
 public:
   /// Default constructor - normally used from the concrete view
-  ImageCoRPresenter(IImageCoRView *view);
-  virtual ~ImageCoRPresenter();
+  ImageROIPresenter(IImageROIView *view);
+  virtual ~ImageROIPresenter();
 
-  void notify(IImageCoRPresenter::Notification notif);
+  void notify(IImageROIPresenter::Notification notif);
 
 protected:
   void initialize();
@@ -82,7 +82,7 @@ private:
   std::string m_stackPath;
 
   /// Associated view for this presenter (MVP pattern)
-  IImageCoRView *const m_view;
+  IImageROIView *const m_view;
 
   /// Associated model for this presenter (MVP pattern). This is just
   /// a set of coordinates
@@ -92,4 +92,4 @@ private:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGECORPRESENTER_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGEROIPRESENTER_H_
