@@ -2,10 +2,13 @@ from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspace
 
 from mantid.kernel import Direction, FloatArrayProperty, FloatArrayBoundedValidator
 
-import numpy as np
+import numpy as np 
 
 
 class DetectorFloodWeighting(DataProcessorAlgorithm):
+
+    def __init__(self):
+        super.__init__(self, DataProcessorAlgorithm)
 
     def category(self):
         return 'Workflow\\SANS'
@@ -89,11 +92,11 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
 
         # Determine the max across all spectra
         y_values = accumulated_output.extractY()
-        max = np.amax(y_values, axis=1)
+        max_val = np.amax(y_values)
 
         # Create a workspace from the single max value
         create = self.createChildAlgorithm("CreateSingleValuedWorkspace")
-        create.setProperty("DataValue", max[0])
+        create.setProperty("DataValue", max_val)
         create.execute()
         max_ws = create.getProperty("OutputWorkspace").value
 
@@ -104,7 +107,7 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
         divide.execute()
         normalized = divide.getProperty("OutputWorkspace").value
 
-        self.setProperty('OutputWorkspace', normalized) # HACK
+        self.setProperty('OutputWorkspace', normalized)
 
 
 # Register algorithm with Mantid
