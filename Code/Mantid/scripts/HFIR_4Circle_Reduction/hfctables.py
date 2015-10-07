@@ -3,6 +3,28 @@ import numpy
 import HFIR_4Circle_Reduction.NTableWidget as tableBase
 
 
+class IntegratePeaksTableWidget(tableBase.NTableWidget):
+    """
+    Extended table widget for peak integration
+    """
+    def __init__(self, parent):
+        """
+        :param parent:
+        """
+        tableBase.NTableWidget.__init__(self, parent)
+
+        return
+
+    def setup(self):
+        """
+        Init setup
+        :return:
+        """
+        self.init_setup(... ...)
+
+        return
+
+
 class UBMatrixTable(tableBase.NTableWidget):
     """
     Extended table for UB matrix

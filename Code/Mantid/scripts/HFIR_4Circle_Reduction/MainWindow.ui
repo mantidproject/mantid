@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1145</width>
-    <height>770</height>
+    <width>1232</width>
+    <height>783</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1581,7 +1581,7 @@
                  <item row="3" column="2">
                   <widget class="QPlainTextEdit" name="plainTextEdit_ubInput">
                    <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
@@ -1996,39 +1996,154 @@
           </widget>
           <widget class="QWidget" name="tab_indexPeak">
            <attribute name="title">
-            <string>Index Peaks</string>
+            <string>Peak Integration</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_11">
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_16">
-              <item>
+             <layout class="QGridLayout" name="gridLayout_13">
+              <item row="1" column="6">
+               <widget class="QCheckBox" name="checkBox_adaptQBkgd">
+                <property name="text">
+                 <string>Adaptive Q Background</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="lineEdit_scanIntegratePeak">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QCheckBox" name="checkBox_cylinder">
+                <property name="text">
+                 <string>Cylinder</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="3">
+               <widget class="QLineEdit" name="lineEdit_bkgdInnerR"/>
+              </item>
+              <item row="1" column="5">
+               <widget class="QLineEdit" name="lineEdit_bkgdOuterR"/>
+              </item>
+              <item row="2" column="4">
+               <widget class="QLabel" name="label_36">
+                <property name="text">
+                 <string>Percent Background</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="7">
+               <widget class="QCheckBox" name="checkBox_integrateOnEdge">
+                <property name="text">
+                 <string>Integrate on Edge</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
                <widget class="QLabel" name="label_5">
                 <property name="text">
                  <string>Scan Number</string>
                 </property>
                </widget>
               </item>
-              <item>
-               <widget class="QLineEdit" name="lineEdit_scanIndexPeak"/>
-              </item>
-              <item>
-               <widget class="QPushButton" name="pushButton_6">
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_34">
                 <property name="text">
-                 <string>Index Peaks</string>
+                 <string>Peak Radius</string>
                 </property>
                </widget>
               </item>
-              <item>
-               <widget class="QPushButton" name="pushButton_5">
+              <item row="0" column="3">
+               <widget class="QLineEdit" name="lineEdit_ptNumListIntPeak"/>
+              </item>
+              <item row="2" column="7">
+               <widget class="QComboBox" name="comboBox_cylinderIntOption"/>
+              </item>
+              <item row="0" column="7">
+               <widget class="QPushButton" name="pushButton_integratePeak">
                 <property name="text">
-                 <string>Show UB Matrix</string>
+                 <string>Integrate Peaks</string>
                 </property>
                </widget>
+              </item>
+              <item row="2" column="5">
+               <widget class="QLineEdit" name="lineEdit_cylinderBkgdPercent"/>
+              </item>
+              <item row="1" column="4">
+               <widget class="QLabel" name="label_35">
+                <property name="text">
+                 <string>Background Outer Radius</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="5">
+               <widget class="QComboBox" name="comboBox_3">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose the name of the tab, in which the UB matrix is used to convert signals to HKL frame.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Calculate UB</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Merge Scan</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Refine UB</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item row="2" column="6">
+               <widget class="QComboBox" name="comboBox_cylinderProfile">
+                <item>
+                 <property name="text">
+                  <string>Gaussian</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item row="2" column="2">
+               <widget class="QLabel" name="label_39">
+                <property name="text">
+                 <string>Cylinder Length</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QLabel" name="label_37">
+                <property name="text">
+                 <string>Background Inner Radius</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="3">
+               <widget class="QLineEdit" name="lineEdit_cylinderLength"/>
+              </item>
+              <item row="0" column="2">
+               <widget class="QLabel" name="label_33">
+                <property name="text">
+                 <string>Pt Numbers</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="lineEdit_peakRadius"/>
               </item>
              </layout>
             </item>
             <item>
-             <widget class="QTableView" name="tableView_peakIndex"/>
+             <widget class="IntegratePeaksTableWidget" name="tableWidget_peakIndex"/>
             </item>
            </layout>
           </widget>
@@ -2045,7 +2160,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1145</width>
+     <width>1232</width>
      <height>25</height>
     </rect>
    </property>
@@ -2157,6 +2272,11 @@
   </customwidget>
   <customwidget>
    <class>ProcessTableWidget</class>
+   <extends>QTableWidget</extends>
+   <header>hfctables.h</header>
+  </customwidget>
+  <customwidget>
+   <class>IntegratePeaksTableWidget</class>
    <extends>QTableWidget</extends>
    <header>hfctables.h</header>
   </customwidget>

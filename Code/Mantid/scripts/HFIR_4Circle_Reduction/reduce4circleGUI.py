@@ -130,7 +130,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Initial setup
         self.ui.tabWidget.setCurrentIndex(0)
-
+        self.ui.tabWidget.setTabEnabled(4, False)
         self._init_ub_table()
 
         # Tab 'Access'
