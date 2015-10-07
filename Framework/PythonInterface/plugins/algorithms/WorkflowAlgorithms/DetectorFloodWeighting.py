@@ -43,10 +43,11 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
 
         if not any(bands):
             issues['Bands'] = 'Bands must be supplied'
-            return issues
+            return issues # Abort early. Do not continue
 
         if not len(bands)%2 == 0:
             issues['Bands'] = 'Even number of Bands boundaries expected'
+            return issues # Abort early. Do not continue
 
         if len(bands) > 2:
             issues['Bands'] = 'Presently this algorithm only supports one pair of bands'
