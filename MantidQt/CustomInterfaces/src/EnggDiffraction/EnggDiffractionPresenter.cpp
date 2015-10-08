@@ -57,7 +57,8 @@ void EnggDiffractionPresenter::cleanup() {
   if (m_workerThread) {
     if (m_workerThread->isRunning()) {
       g_log.notice() << "A calibration process is currently running, shutting "
-                        "it down immediately..." << std::endl;
+                        "it down immediately..."
+                     << std::endl;
       m_workerThread->wait(10);
     }
     delete m_workerThread;
@@ -109,6 +110,10 @@ void EnggDiffractionPresenter::notify(
   case IEnggDiffractionPresenter::ShutDown:
     processShutDown();
     break;
+
+  case IEnggDiffractionPresenter::PlotRepChange:
+    processPlotRepChange();
+    break;
   }
 }
 
@@ -146,7 +151,8 @@ void EnggDiffractionPresenter::processCalcCalib() {
     return;
   }
   g_log.notice() << "EnggDiffraction GUI: starting new calibration. This may "
-                    "take a few seconds... " << std::endl;
+                    "take a few seconds... "
+                 << std::endl;
 
   const std::string outFilename = outputCalibFilename(vanNo, ceriaNo);
 
@@ -261,6 +267,11 @@ void EnggDiffractionPresenter::processInstChange() {
 }
 
 void EnggDiffractionPresenter::processShutDown() {
+  m_view->saveSettings();
+  cleanup();
+}
+
+void EnggDiffractionPresenter::processPlotRepChange() {
   m_view->saveSettings();
   cleanup();
 }
@@ -414,10 +425,9 @@ void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
  * @param vanNo vanadium run number
  * @param ceriaNo ceria run number
  */
-void
-EnggDiffractionPresenter::startAsyncCalibWorker(const std::string &outFilename,
-                                                const std::string &vanNo,
-                                                const std::string &ceriaNo) {
+void EnggDiffractionPresenter::startAsyncCalibWorker(
+    const std::string &outFilename, const std::string &vanNo,
+    const std::string &ceriaNo) {
   delete m_workerThread;
   m_workerThread = new QThread(this);
   EnggDiffWorker *worker =
@@ -466,11 +476,13 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
   } catch (std::runtime_error &) {
     g_log.error() << "The calibration calculations failed. One of the "
                      "algorithms did not execute correctly. See log messages "
-                     "for details. " << std::endl;
+                     "for details. "
+                  << std::endl;
   } catch (std::invalid_argument &) {
     g_log.error()
         << "The calibration calculations failed. Some input properties "
-           "were not valid. See log messages for details. " << std::endl;
+           "were not valid. See log messages for details. "
+        << std::endl;
   }
   // restore normal data search paths
   conf.setDataSearchDirs(tmpDirs);
@@ -710,8 +722,8 @@ void EnggDiffractionPresenter::inputChecksBeforeFocusTexture(
   inputChecksBeforeFocus();
 }
 
-void
-EnggDiffractionPresenter::inputChecksBanks(const std::vector<bool> &banks) {
+void EnggDiffractionPresenter::inputChecksBanks(
+    const std::vector<bool> &banks) {
   if (0 == banks.size()) {
     const std::string msg =
         "Error in specification of banks found when starting the "
@@ -848,7 +860,8 @@ void EnggDiffractionPresenter::doFocusRun(
     const std::string &specNos, const std::string &dgFile) {
 
   g_log.notice() << "Generating new focusing workspace(s) and file(s) into "
-                    "this directory: " << dir << std::endl;
+                    "this directory: "
+                 << dir << std::endl;
 
   // TODO: this is almost 100% common with doNewCalibrate() - refactor
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
@@ -887,7 +900,8 @@ void EnggDiffractionPresenter::doFocusRun(
         loadDetectorGroupingCSV(dgFile, bankIDs, specs);
       } catch (std::runtime_error &re) {
         g_log.error() << "Error loading detector grouping file: " + dgFile +
-                             ". Detailed error: " + re.what() << std::endl;
+                             ". Detailed error: " + re.what()
+                      << std::endl;
         bankIDs.clear();
         specs.clear();
       }
@@ -903,8 +917,8 @@ void EnggDiffractionPresenter::doFocusRun(
         fpath.append(effectiveFilenames[idx]).toString();
     g_log.notice() << "Generating new focused file (bank " +
                           boost::lexical_cast<std::string>(bankIDs[idx]) +
-                          ") for run " + runNo +
-                          " into: " << effectiveFilenames[idx] << std::endl;
+                          ") for run " + runNo + " into: "
+                   << effectiveFilenames[idx] << std::endl;
     try {
       doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
       m_focusFinishedOK = true;
@@ -916,7 +930,8 @@ void EnggDiffractionPresenter::doFocusRun(
     } catch (std::invalid_argument &ia) {
       g_log.error()
           << "The focusing failed. Some input properties were not valid. "
-             "See log messages for details. Error: " << ia.what() << std::endl;
+             "See log messages for details. Error: "
+          << ia.what() << std::endl;
     }
   }
 
@@ -1084,7 +1099,31 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     alg->execute();
 
     const bool plotFocusedWS = m_view->focusedOutWorkspace();
-    if (plotFocusedWS == true) {
+    int plotType = m_view->currentPlotType();
+    g_log.debug() << "...Plot Type return: " << plotType << std::endl;
+
+    // Qt comboBox returns absurd number for index of 0
+    if (plotType > 3) {
+      plotType = 1;
+    } else {
+      plotType += 1;
+    }
+
+    if (plotFocusedWS == true && 1 == plotType) {
+      if (outWSName == "engggui_focusing_output_ws_bank_1")
+        m_view->plotFocusedSpectrum(outWSName);
+      if (outWSName == "engggui_focusing_output_ws_bank_2")
+        m_view->plotReplacingWindow(outWSName);
+    }
+
+    else if (plotFocusedWS == true && 2 == plotType) {
+      if (outWSName == "engggui_focusing_output_ws_bank_1")
+        m_view->plotFocusedSpectrum(outWSName);
+      if (outWSName == "engggui_focusing_output_ws_bank_2")
+        m_view->plotWaterfallSpectrum(outWSName);
+    }
+
+    else if (plotFocusedWS == true && 3 == plotType) {
       m_view->plotFocusedSpectrum(outWSName);
     }
 
@@ -1160,7 +1199,8 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                        "This is possibly because some of the settings are not "
                        "consistent. Please check the log messages for "
                        "details. Details: " +
-                           std::string(ia.what()) << std::endl;
+                           std::string(ia.what())
+                    << std::endl;
       throw;
     } catch (std::runtime_error &re) {
       g_log.error() << "Failed to calculate Vanadium corrections. "
@@ -1169,7 +1209,8 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                        "There was no obvious error in the input properties "
                        "but the algorithm failed. Please check the log "
                        "messages for details." +
-                           std::string(re.what()) << std::endl;
+                           std::string(re.what())
+                    << std::endl;
       throw;
     }
   } else {

@@ -85,6 +85,7 @@ protected:
   void processLogMsg();
   void processInstChange();
   void processShutDown();
+  void processPlotRepChange();
 
 protected slots:
   void calibrationFinished();

@@ -121,6 +121,12 @@ public:
 
   virtual void plotFocusedSpectrum(const std::string &wsName);
 
+  virtual void plotWaterfallSpectrum(const std::string &wsName);
+
+  virtual void plotReplacingWindow(const std::string &wsName);
+
+  int currentPlotType() const { return m_currentType; }
+
 private slots:
   /// for buttons, do calibrate, focus and similar
   void loadCalibrationClicked();
@@ -144,6 +150,12 @@ private slots:
 
   // slots of the general part of the interface
   void instrumentChanged(int idx);
+
+  // slots of the focus part of the interface
+  void plotRepChanged(int idx);
+
+  // slots of plot spectrum check box status
+  void plotFocusStatus();
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
@@ -183,6 +195,10 @@ private:
 
   /// instrument selected (ENGIN-X, etc.)
   std::string m_currentInst;
+
+  // plot data representation type selected
+  int m_currentType;
+
   /// current calibration produced in the 'Calibration' tab
   std::string m_currentCalibFilename;
   /// calibration settings - from/to the 'settings' tab
