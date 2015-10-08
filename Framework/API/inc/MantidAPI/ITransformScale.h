@@ -8,7 +8,6 @@
 #include <boost/shared_ptr.hpp>
 #endif
 
-#include <string>
 #include <vector>
 
 #include "MantidAPI/DllConfig.h"
