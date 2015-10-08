@@ -58,6 +58,7 @@ namespace CustomInterfaces
     m_peakFitting->initialize();
 
     connect(m_dataLoading, SIGNAL(dataChanged()), SLOT(updateBaselineData()));
+    connect(m_baselineModellingModel, SIGNAL(correctedDataChanged()), SLOT(updatePeakData()));
 
     assert(m_ui.stepView->count() == STEP_NAMES.count()); // Should have names for all steps
 
@@ -66,15 +67,36 @@ namespace CustomInterfaces
 
   void ALCInterface::updateBaselineData() {
 
+    // Make sure we do have some data
     if (m_dataLoading->loadedData()) {
 
+      // Send the data to BaselineModelling
       m_baselineModellingModel->setData(m_dataLoading->loadedData());
 
+      // If we have a fitting function and a fitting range
+      // we can update the baseline model
       if ((!m_baselineModellingView->function().isEmpty()) &&
           (m_baselineModellingView->noOfSectionRows() > 0)) {
 
             // Fit the data
             m_baselineModellingView->emitFitRequested();
+      }
+    }
+  }
+
+  void ALCInterface::updatePeakData() {
+
+    // Make sure we do have some data
+    if (m_baselineModellingModel->correctedData()) {
+
+      // Send the data to PeakFitting
+      m_peakFittingModel->setData(m_baselineModellingModel->correctedData());
+
+      // If we have a fitting function
+      if (m_peakFittingView->function("")) {
+
+        // Fit the data
+        m_peakFittingView->emitFitRequested();
       }
     }
   }
@@ -85,14 +107,6 @@ namespace CustomInterfaces
 
     auto nextWidget = m_ui.stepView->widget(next);
     assert(nextWidget);
-
-    if (nextWidget == m_ui.peakFittingView)
-    {
-      if (m_baselineModellingModel->correctedData())
-      {
-        m_peakFittingModel->setData(m_baselineModellingModel->correctedData());
-      }
-    }
 
     switchStep(next);
   }

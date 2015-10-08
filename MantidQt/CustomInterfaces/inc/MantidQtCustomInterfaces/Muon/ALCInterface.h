@@ -71,6 +71,7 @@ namespace CustomInterfaces
     void importResults();
 
     void updateBaselineData();
+    void updatePeakData();
 
   private:
 
