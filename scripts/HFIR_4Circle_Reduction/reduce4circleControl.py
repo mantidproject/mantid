@@ -1,4 +1,4 @@
-#pylint: disable=C0302,C0103,R0902,R0904,R0913,W0212,W0621
+#pylint: disable=C0302,C0103,R0902,R0904,R0913,W0212,W0621,R0912
 ################################################################################
 #
 # Controlling class
@@ -14,19 +14,7 @@ import urllib2
 
 import numpy
 
-try:
-    import mantid
-except ImportError:
-    # In case Mantid is not in the python path
-    homedir = os.path.expanduser('~')
-    mantiddir = os.path.join(os.path.join(homedir, 'Mantid_Project/mantid-debug/bin'))
-    print 'Mantid Dir = %s' % mantiddir
-    if os.path.exists(mantiddir) is False:
-        raise RuntimeError('Mantid bin directory %s cannot be found.' % (mantiddir))
-
-    # import again
-    sys.path.append(mantiddir)
-    import mantid
+import mantid
 import mantid.simpleapi as api
 from mantid.api import AnalysisDataService
 
@@ -579,12 +567,12 @@ class CWSCDReductionControl(object):
 
     def get_sample_log_value(self, exp_number, scan_number, pt_number, log_name):
         """
-        TODO/DOC
+        Get sample log's value
         :param exp_number:
         :param scan_number:167
         :param pt_number:
         :param log_name:
-        :return:
+        :return: float
         """
         assert isinstance(exp_number, int)
         assert isinstance(scan_number, int)
@@ -674,6 +662,8 @@ class CWSCDReductionControl(object):
         num_peak_index, error = api.IndexPeaks(PeaksWorkspace=peak_ws,
                                                Tolerance=0.4,
                                                RoundHKLs=False)
+        if len(error) > 0:
+            return False, error
 
         if num_peak_index == 0:
             return False, 'No peak can be indexed.'
