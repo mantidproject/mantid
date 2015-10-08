@@ -68,7 +68,7 @@ SeqDomain *SeqDomain::create(API::IDomainCreator::DomainType type) {
  * Calculate the value of a least squares cost function
  * @param leastSquares :: The least squares cost func to calculate the value for
  */
-void SeqDomain::leastSquaresVal(const CostFuncLeastSquares &leastSquares) {
+void SeqDomain::leastSquaresVal(const CostFunctions::CostFuncLeastSquares &leastSquares) {
   API::FunctionDomain_sptr domain;
   API::FunctionValues_sptr values;
   const size_t n = getNDomains();
@@ -87,7 +87,7 @@ void SeqDomain::leastSquaresVal(const CostFuncLeastSquares &leastSquares) {
  * Calculate the value of a least squares cost function
  * @param rwp :: The RWP cost func to calculate the value for
  */
-void SeqDomain::rwpVal(const CostFuncRwp &rwp) {
+void SeqDomain::rwpVal(const CostFunctions::CostFuncRwp &rwp) {
   API::FunctionDomain_sptr domain;
   API::FunctionValues_sptr values;
   const size_t n = getNDomains();
@@ -109,7 +109,7 @@ void SeqDomain::rwpVal(const CostFuncRwp &rwp) {
  * @param evalHessian :: Flag to evaluate the Hessian (second derivatives)
  */
 void SeqDomain::leastSquaresValDerivHessian(
-    const CostFuncLeastSquares &leastSquares, bool evalDeriv,
+    const CostFunctions::CostFuncLeastSquares &leastSquares, bool evalDeriv,
     bool evalHessian) {
   API::FunctionDomain_sptr domain;
   API::FunctionValues_sptr values;
@@ -131,7 +131,7 @@ void SeqDomain::leastSquaresValDerivHessian(
  * @param evalDeriv :: Flag to evaluate the first derivatives
  * @param evalHessian :: Flag to evaluate the Hessian (second derivatives)
  */
-void SeqDomain::rwpValDerivHessian(const CostFuncRwp &rwp, bool evalDeriv,
+void SeqDomain::rwpValDerivHessian(const CostFunctions::CostFuncRwp &rwp, bool evalDeriv,
                                    bool evalHessian) {
   API::FunctionDomain_sptr domain;
   API::FunctionValues_sptr values;

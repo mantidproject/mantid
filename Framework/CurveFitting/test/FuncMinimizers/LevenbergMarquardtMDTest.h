@@ -15,6 +15,7 @@
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::FuncMinimisers;
+using namespace Mantid::CurveFitting::CostFunctions;
 using namespace Mantid::API;
 
 class LevenbergMarquardtMDTest : public CxxTest::TestSuite {

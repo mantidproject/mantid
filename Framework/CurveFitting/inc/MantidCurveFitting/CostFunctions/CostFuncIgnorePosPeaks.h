@@ -8,6 +8,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace CostFunctions {
 /** Cost function which allows positive peaks to be ignored and is suitable
     for e.g. fitting the background
 
@@ -61,6 +62,7 @@ private:
   const std::string m_name;
 };
 
+} // namespace CostFunctions 
 } // namespace CurveFitting
 } // namespace Mantid
 

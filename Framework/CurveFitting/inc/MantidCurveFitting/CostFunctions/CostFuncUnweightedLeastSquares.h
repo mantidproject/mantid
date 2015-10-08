@@ -6,6 +6,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace CostFunctions {
 
 /** @class CostFuncUnweightedLeastSquares
  *
@@ -53,6 +54,7 @@ protected:
   double getResidualVariance() const;
 };
 
+} // namespace CostFunctions 
 } // namespace CurveFitting
 } // namespace Mantid
 

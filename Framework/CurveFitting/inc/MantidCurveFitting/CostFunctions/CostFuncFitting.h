@@ -12,6 +12,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace CostFunctions {
 /** A semi-abstract class for a cost function for fitting functions.
     Implement val(), deriv(), and valAndDeriv() methods in a concrete class.
 
@@ -100,6 +101,7 @@ protected:
   mutable bool m_dirtyHessian; /// dirty hessian flag
 };
 
+} // namespace CostFunctions 
 } // namespace CurveFitting
 } // namespace Mantid
 

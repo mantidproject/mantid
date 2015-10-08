@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h"
-#include "MantidCurveFitting/CostFuncFitting.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 
 #include "MantidAPI/FuncMinimizerFactory.h"
 
@@ -32,8 +32,8 @@ double SimplexMinimizer::fun(const gsl_vector *x, void *params) {
       minimizer.m_costFunction->setParameter(i, gsl_vector_get(x, i));
     }
   }
-  boost::shared_ptr<CostFuncFitting> fitting =
-      boost::dynamic_pointer_cast<CostFuncFitting>(minimizer.m_costFunction);
+  boost::shared_ptr<CostFunctions::CostFuncFitting> fitting =
+      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(minimizer.m_costFunction);
   if (fitting) {
     fitting->getFittingFunction()->applyTies();
   }

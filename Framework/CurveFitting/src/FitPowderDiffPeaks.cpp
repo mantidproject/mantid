@@ -25,7 +25,7 @@
 #include "MantidCurveFitting/BackToBackExponential.h"
 #include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPVoigt.h"
 #include "MantidCurveFitting/FuncMinimizers/DampingMinimizer.h"
-#include "MantidCurveFitting/CostFuncFitting.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>

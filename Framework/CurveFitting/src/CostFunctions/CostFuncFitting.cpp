@@ -10,6 +10,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace CostFunctions {
 
 /**
  * Constructor.
@@ -202,5 +203,6 @@ void CostFuncFitting::calTransformationMatrixNumerically(GSLMatrix &tm) {
   }
 }
 
+} // namespace CostFunctions 
 } // namespace CurveFitting
 } // namespace Mantid

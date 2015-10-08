@@ -13,6 +13,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace CostFunctions {
 
 DECLARE_COSTFUNCTION(CostFuncRwp, Rwp)
 
@@ -64,5 +65,6 @@ double CostFuncRwp::calSqrtW(API::FunctionValues_sptr values) const {
   return sqrt(weight);
 }
 
+} // namespace CostFunctions 
 } // namespace CurveFitting
 } // namespace Mantid

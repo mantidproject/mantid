@@ -13,6 +13,7 @@ namespace CurveFitting {
 class SeqDomain;
 class ParDomain;
 
+namespace CostFunctions {
 /** Cost function for least squares
 
     @author Anders Markvardsen, ISIS, RAL
@@ -107,6 +108,7 @@ protected:
   double m_factor;
 };
 
+} // namespace CostFunctions 
 } // namespace CurveFitting
 } // namespace Mantid
 

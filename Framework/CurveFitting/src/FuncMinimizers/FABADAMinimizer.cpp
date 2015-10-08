@@ -1,5 +1,5 @@
 #include "MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h"
-#include "MantidCurveFitting/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 
 #include <stdio.h>
@@ -93,7 +93,7 @@ FABADAMinimizer::~FABADAMinimizer() {}
 void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
                                  size_t maxIterations) {
 
-  m_leastSquares = boost::dynamic_pointer_cast<CostFuncLeastSquares>(function);
+  m_leastSquares = boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(function);
   if (!m_leastSquares) {
     throw std::invalid_argument(
         "FABADA works only with least squares. Different function was given.");

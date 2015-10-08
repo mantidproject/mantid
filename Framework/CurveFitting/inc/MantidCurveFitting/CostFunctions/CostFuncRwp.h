@@ -16,6 +16,8 @@ namespace CurveFitting {
 class SeqDomain;
 class ParDomain;
 
+namespace CostFunctions {
+
 /** Cost function for Rwp = (sum_i (( obs_i - cal_i )/sigma_i)**2 ) / (sum_i
    (obs_i/sigma_i)**2)
 
@@ -68,6 +70,7 @@ private:
   double calSqrtW(API::FunctionValues_sptr values) const;
 };
 
+} // namespace CostFunctions 
 } // namespace CurveFitting
 } // namespace Mantid
 

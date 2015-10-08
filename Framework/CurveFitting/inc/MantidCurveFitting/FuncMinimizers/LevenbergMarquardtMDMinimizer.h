@@ -10,8 +10,9 @@
 
 namespace Mantid {
 namespace CurveFitting {
-
+namespace CostFunctions {
 class CostFuncLeastSquares;
+} // namespace CostFunctions
 
 namespace FuncMinimisers {
 /** Implementing Levenberg-Marquardt algorithm. Uses the normal system calculate
@@ -58,7 +59,7 @@ public:
 
 private:
   /// Pointer to the cost function. Must be the least squares.
-  boost::shared_ptr<CostFuncLeastSquares> m_leastSquares;
+  boost::shared_ptr<CostFunctions::CostFuncLeastSquares> m_leastSquares;
   /// The tau parameter in the Levenberg-Marquardt method.
   double m_tau;
   /// The damping mu parameter in the Levenberg-Marquardt method.

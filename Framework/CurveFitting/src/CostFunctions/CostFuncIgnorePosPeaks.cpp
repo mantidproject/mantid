@@ -8,6 +8,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace CostFunctions {
 
 DECLARE_COSTFUNCTION(CostFuncIgnorePosPeaks, Ignore positive peaks)
 
@@ -73,5 +74,6 @@ void CostFuncIgnorePosPeaks::deriv(const double *yData,
   }
 }
 
+} // namespace CostFunctions 
 } // namespace CurveFitting
 } // namespace Mantid

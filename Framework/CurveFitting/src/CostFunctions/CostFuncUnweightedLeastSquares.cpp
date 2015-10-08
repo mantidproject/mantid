@@ -6,6 +6,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace CostFunctions {
 
 namespace {
 /// static logger
@@ -80,5 +81,6 @@ double CostFuncUnweightedLeastSquares::getResidualVariance() const {
   return residualVariance;
 }
 
+} // namespace CostFunctions 
 } // namespace CurveFitting
 } // namespace Mantid

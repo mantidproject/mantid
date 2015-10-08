@@ -9,7 +9,7 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidCurveFitting/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
 #include "MantidCurveFitting/Fit.h"
 
@@ -23,6 +23,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::CostFunctions;
 
 class MultiDomainFunctionTest_Function : public virtual IFunction1D,
                                          public virtual ParamFunction {

@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Fit.h"
-#include "MantidCurveFitting/CostFuncFitting.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
@@ -63,7 +63,7 @@ void Fit::initConcrete() {
       API::CostFunctionFactory::Instance().getKeys();
   // select only CostFuncFitting variety
   for (auto it = costFuncOptions.begin(); it != costFuncOptions.end(); ++it) {
-    auto costFunc = boost::dynamic_pointer_cast<CostFuncFitting>(
+    auto costFunc = boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
         API::CostFunctionFactory::Instance().create(*it));
     if (!costFunc) {
       *it = "";
@@ -152,8 +152,8 @@ void Fit::execConcrete() {
   const size_t maxIterations = static_cast<size_t>(intMaxIterations);
 
   // get the cost function which must be a CostFuncFitting
-  boost::shared_ptr<CostFuncFitting> costFunc =
-      boost::dynamic_pointer_cast<CostFuncFitting>(
+  boost::shared_ptr<CostFunctions::CostFuncFitting> costFunc =
+      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
           API::CostFunctionFactory::Instance().create(
               getPropertyValue("CostFunction")));
 

@@ -9,7 +9,7 @@
 
 #include <boost/make_shared.hpp>
 
-using Mantid::CurveFitting::CostFuncUnweightedLeastSquares;
+using Mantid::CurveFitting::CostFunctions::CostFuncUnweightedLeastSquares;
 using namespace Mantid::API;
 
 class CostFuncUnweightedLeastSquaresTest : public CxxTest::TestSuite {

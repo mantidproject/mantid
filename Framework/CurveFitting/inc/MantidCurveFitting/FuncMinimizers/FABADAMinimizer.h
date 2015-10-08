@@ -10,8 +10,10 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace CostFunctions {
 /// Forward Declaration
 class CostFuncLeastSquares;
+}
 }
 }
 
@@ -63,7 +65,7 @@ private:
   /// Pointer to the cost function. Must be the least squares.
   /// Intentar encontrar una manera de sacar aqui el numero de parametros  que
   /// no sea necesaria la cost function
-  boost::shared_ptr<CostFuncLeastSquares> m_leastSquares;
+  boost::shared_ptr<CostFunctions::CostFuncLeastSquares> m_leastSquares;
   /// The number of iterations done.
   size_t m_counter;
   ///

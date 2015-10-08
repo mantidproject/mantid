@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FuncMinimizers/DerivMinimizer.h"
-#include "MantidCurveFitting/CostFuncFitting.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -18,8 +18,8 @@ double DerivMinimizer::fun(const gsl_vector *x, void *params) {
   for (size_t i = 0; i < n; ++i) {
     minimizer.m_costFunction->setParameter(i, gsl_vector_get(x, i));
   }
-  boost::shared_ptr<CostFuncFitting> fitting =
-      boost::dynamic_pointer_cast<CostFuncFitting>(minimizer.m_costFunction);
+  boost::shared_ptr<CostFunctions::CostFuncFitting> fitting =
+      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(minimizer.m_costFunction);
   if (fitting) {
     fitting->getFittingFunction()->applyTies();
   }
@@ -37,8 +37,8 @@ void DerivMinimizer::dfun(const gsl_vector *x, void *params, gsl_vector *g) {
   for (size_t i = 0; i < n; ++i) {
     minimizer.m_costFunction->setParameter(i, gsl_vector_get(x, i));
   }
-  boost::shared_ptr<CostFuncFitting> fitting =
-      boost::dynamic_pointer_cast<CostFuncFitting>(minimizer.m_costFunction);
+  boost::shared_ptr<CostFunctions::CostFuncFitting> fitting =
+      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(minimizer.m_costFunction);
   if (fitting) {
     fitting->getFittingFunction()->applyTies();
   }
@@ -62,8 +62,8 @@ void DerivMinimizer::fundfun(const gsl_vector *x, void *params, double *f,
   for (size_t i = 0; i < n; ++i) {
     minimizer.m_costFunction->setParameter(i, gsl_vector_get(x, i));
   }
-  boost::shared_ptr<CostFuncFitting> fitting =
-      boost::dynamic_pointer_cast<CostFuncFitting>(minimizer.m_costFunction);
+  boost::shared_ptr<CostFunctions::CostFuncFitting> fitting =
+      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(minimizer.m_costFunction);
   if (fitting) {
     fitting->getFittingFunction()->applyTies();
   }

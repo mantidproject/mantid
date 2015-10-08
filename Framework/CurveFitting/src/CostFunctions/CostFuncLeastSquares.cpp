@@ -14,6 +14,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace CostFunctions {
 namespace {
 /// static logger
 Kernel::Logger g_log("CostFuncLeastSquares");
@@ -438,5 +439,6 @@ void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix &covar,
   }
 }
 
+} // namespace CostFunctions 
 } // namespace CurveFitting
 } // namespace Mantid
