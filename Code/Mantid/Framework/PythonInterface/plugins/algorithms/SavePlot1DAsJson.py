@@ -112,7 +112,8 @@ class SavePlot1DAsJson(PythonAlgorithm):
             xlabel=label(workspace.getAxis(0)),
             ylabel=label(workspace.getAxis(1)),
             xunit = unit(workspace.getAxis(0)),
-            yunit = unit(workspace.getAxis(1)),
+            # yunit = unit(workspace.getAxis(1)),
+            yunit = workspace.YUnitLabel(),
             )
         serialized['axes'] = axes
         return {pname: serialized}
