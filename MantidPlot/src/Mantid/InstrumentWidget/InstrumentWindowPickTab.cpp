@@ -197,6 +197,12 @@ m_plotTypeCache(0)
   m_ring_rectangle->setIcon(QIcon(":/PickTools/selection-box-ring.png"));
   m_ring_rectangle->setToolTip("Draw a rectangular ring");
 
+  m_free_draw = new QPushButton();
+  m_free_draw->setCheckable(true);
+  m_free_draw->setAutoExclusive(true);
+  m_free_draw->setIcon(QIcon(":/PickTools/brush.png"));
+  m_free_draw->setToolTip("Draw an arbitrary shape");
+
   m_edit = new QPushButton();
   m_edit->setCheckable(true);
   m_edit->setAutoExclusive(true);
@@ -222,6 +228,7 @@ m_plotTypeCache(0)
   toolBox->addWidget(m_rectangle,0,3);
   toolBox->addWidget(m_ring_ellipse,0,4);
   toolBox->addWidget(m_ring_rectangle,0,5);
+  toolBox->addWidget(m_free_draw,0,6);
   toolBox->addWidget(m_one,1,0);
   toolBox->addWidget(m_tube,1,1);
   toolBox->addWidget(m_peak,1,2);
@@ -237,6 +244,7 @@ m_plotTypeCache(0)
   connect(m_ellipse,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_ring_ellipse,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_ring_rectangle,SIGNAL(clicked()),this,SLOT(setSelectionType()));
+  connect(m_free_draw,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_edit,SIGNAL(clicked()),this,SLOT(setSelectionType()));
 
   // lay out the widgets
@@ -404,13 +412,13 @@ void InstrumentWindowPickTab::setSelectionType()
   {
     m_selectionType = ErasePeak;
     m_activeTool->setText("Tool: Erase crystal peak(s)");
-    surfaceMode = ProjectionSurface::EraseMode;
+    surfaceMode = ProjectionSurface::ErasePeakMode;
   }
   else if (m_rectangle->isChecked())
   {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Rectangle");
-    surfaceMode = ProjectionSurface::DrawMode;
+    surfaceMode = ProjectionSurface::DrawRegularMode;
     plotType = DetectorPlotController::Single;
     m_instrWindow->getSurface()->startCreatingShape2D("rectangle",Qt::green,QColor(255,255,255,80));
   }
@@ -418,7 +426,7 @@ void InstrumentWindowPickTab::setSelectionType()
   {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Ellipse");
-    surfaceMode = ProjectionSurface::DrawMode;
+    surfaceMode = ProjectionSurface::DrawRegularMode;
     plotType = DetectorPlotController::Single;
     m_instrWindow->getSurface()->startCreatingShape2D("ellipse",Qt::green,QColor(255,255,255,80));
   }
@@ -426,7 +434,7 @@ void InstrumentWindowPickTab::setSelectionType()
   {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Elliptical ring");
-    surfaceMode = ProjectionSurface::DrawMode;
+    surfaceMode = ProjectionSurface::DrawRegularMode;
     plotType = DetectorPlotController::Single;
     m_instrWindow->getSurface()->startCreatingShape2D("ring ellipse",Qt::green,QColor(255,255,255,80));
   }
@@ -434,15 +442,23 @@ void InstrumentWindowPickTab::setSelectionType()
   {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Rectangular ring");
-    surfaceMode = ProjectionSurface::DrawMode;
+    surfaceMode = ProjectionSurface::DrawRegularMode;
     plotType = DetectorPlotController::Single;
     m_instrWindow->getSurface()->startCreatingShape2D("ring rectangle",Qt::green,QColor(255,255,255,80));
+  }
+  else if (m_free_draw->isChecked())
+  {
+    m_selectionType = Draw;
+    m_activeTool->setText("Tool: Arbitrary shape");
+    surfaceMode = ProjectionSurface::DrawFreeMode;
+    plotType = DetectorPlotController::Single;
+    m_instrWindow->getSurface()->startCreatingFreeShape(Qt::green,QColor(255,255,255,80));
   }
   else if (m_edit->isChecked())
   {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Shape editing");
-    surfaceMode = ProjectionSurface::DrawMode;
+    surfaceMode = ProjectionSurface::DrawRegularMode;
     plotType = DetectorPlotController::Single;
   }
   m_plotController->setPlotType( plotType );
@@ -451,7 +467,7 @@ void InstrumentWindowPickTab::setSelectionType()
   {
     surface->setInteractionMode( surfaceMode );
     auto interactionMode = surface->getInteractionMode();
-    if ( interactionMode == ProjectionSurface::DrawMode || interactionMode == ProjectionSurface::MoveMode )
+    if ( interactionMode == ProjectionSurface::DrawRegularMode || interactionMode == ProjectionSurface::MoveMode )
     {
         updatePlotMultipleDetectors();
     }
@@ -529,7 +545,7 @@ void InstrumentWindowPickTab::changedIntegrationRange(double,double)
   if ( surface )
   {
     auto interactionMode = surface->getInteractionMode();
-    if ( interactionMode == ProjectionSurface::DrawMode || interactionMode == ProjectionSurface::MoveMode )
+    if ( interactionMode == ProjectionSurface::DrawRegularMode || interactionMode == ProjectionSurface::MoveMode )
     {
         updatePlotMultipleDetectors();
     }
@@ -629,6 +645,8 @@ void InstrumentWindowPickTab::selectTool(const ToolType tool)
     break;
   case DrawEllipse: m_ellipse->setChecked(true);
     break;
+  case DrawFree: m_free_draw->setChecked(true);
+    break;
   case EditShape: m_edit->setChecked(true);
     break;
   default: throw std::invalid_argument("Invalid tool type.");
@@ -668,7 +686,11 @@ void InstrumentWindowPickTab::updateSelectionInfoDisplay()
  */
 void InstrumentWindowPickTab::shapeCreated()
 {
+  if ( !isVisible() ) return;
+  if (!m_free_draw->isChecked())
+  {
     selectTool( EditShape );
+  }
 }
 
 /**

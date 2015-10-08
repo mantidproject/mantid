@@ -259,8 +259,8 @@ FullBinsOnly(Input) *boolean*       Omit the final bin if it's width is smaller 
                                   expected_child=False)
 
     def test_create_algorithm_with_version_produces_initialized_alorithm(self):
-        alg = simpleapi._create_algorithm_object("LoadRaw", 2)
-        self._is_initialized_test(alg, 2, expected_class=AlgorithmProxy,
+        alg = simpleapi._create_algorithm_object("LoadRaw", 3)
+        self._is_initialized_test(alg, 3, expected_class=AlgorithmProxy,
                                   expected_child=False)
 
     def test_create_algorithm_produces_child_inside_PyExec(self):

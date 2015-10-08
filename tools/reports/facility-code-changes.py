@@ -87,6 +87,7 @@ if __name__ == '__main__':
     domains = {}
     domains = {'stfc.ac.uk': 'STFC',
                'clrc.ac.uk': 'STFC',
+               'tessella.com': 'STFC',
                'ornl.gov': 'ORNL',
                'sns.gov': 'ORNL',
                'esss.se': 'ESS',
@@ -123,7 +124,8 @@ if __name__ == '__main__':
                'matd10@yahoo.com': 'OTHERS',
                'diegomon93@gmail.com': 'OTHERS',
                'mgt110@ic.ac.uk': 'OTHERS',
-               'granrothge@users.noreply.github.com': 'ORNL'
+               'granrothge@users.noreply.github.com': 'ORNL',
+               'tom.g.r.brooks@gmail.com': 'STFC'
                }
 
     days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
