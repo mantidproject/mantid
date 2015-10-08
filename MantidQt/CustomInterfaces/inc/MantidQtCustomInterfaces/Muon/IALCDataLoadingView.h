@@ -122,6 +122,12 @@ namespace CustomInterfaces
     /// Opens the Mantid Wiki web page
     virtual void help() = 0;
 
+    /// Disables all the widgets
+    virtual void disableAll() = 0;
+
+    /// Enables all the widgets
+    virtual void enableAll() = 0;
+
   signals:
     /// Request to load data
     void loadRequested();

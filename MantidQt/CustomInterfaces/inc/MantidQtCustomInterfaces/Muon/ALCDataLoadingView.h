@@ -81,6 +81,8 @@ namespace CustomInterfaces
     void setTimeLimits(double tMin, double tMax);
     void setTimeRange (double tMin, double tMax);
     void help();
+    void disableAll();
+    void enableAll();
 
     // -- End of IALCDataLoadingView interface -----------------------------------------------------
 
