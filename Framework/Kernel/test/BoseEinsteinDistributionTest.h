@@ -6,8 +6,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <iostream>
-#include <iomanip>
 
 class BoseEinsteinDistributionTest : public CxxTest::TestSuite {
 public:

@@ -13,8 +13,6 @@
 
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
-#include <iostream>
-#include <iomanip>
 #include <Poco/Mutex.h>
 #include <cstdlib>
 

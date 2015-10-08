@@ -6,7 +6,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-#include <iomanip>
 
 using Mantid::Kernel::UnitConversion;
 

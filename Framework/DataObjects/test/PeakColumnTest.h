@@ -8,8 +8,6 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <boost/make_shared.hpp>
-#include <iostream>
-#include <iomanip>
 
 using namespace Mantid::DataObjects;
 

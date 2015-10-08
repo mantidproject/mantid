@@ -6,8 +6,6 @@
 #include <MantidKernel/Timer.h>
 #include "MantidKernel/Task.h"
 
-#include <iostream>
-#include <iomanip>
 
 using namespace Mantid::Kernel;
 

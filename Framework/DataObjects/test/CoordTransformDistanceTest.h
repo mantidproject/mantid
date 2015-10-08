@@ -5,8 +5,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidDataObjects/CoordTransformDistance.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 #include "MantidAPI/CoordTransform.h"
 
 #include <boost/scoped_ptr.hpp>
