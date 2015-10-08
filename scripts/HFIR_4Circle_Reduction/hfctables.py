@@ -1,6 +1,17 @@
 #pylint: disable=W0403,C0103,R0901,R0904
 import numpy
-import HFIR_4Circle_Reduction.NTableWidget as tableBase
+import NTableWidget as tableBase
+
+# UB peak information table
+Peak_Integration_Table_Setup = [('Scan', 'int'),
+                                ('Pt', 'int'),
+                                ('H', 'float'),
+                                ('K', 'float'),
+                                ('L', 'float'),
+                                ('Q_x', 'float'),
+                                ('Q_y', 'float'),
+                                ('Q_z', 'float'),
+                                ('Intensity', 'float')]
 
 
 class IntegratePeaksTableWidget(tableBase.NTableWidget):
@@ -20,7 +31,7 @@ class IntegratePeaksTableWidget(tableBase.NTableWidget):
         Init setup
         :return:
         """
-        self.init_setup(... ...)
+        self.init_setup(Peak_Integration_Table_Setup)
 
         return
 
@@ -38,7 +49,7 @@ class UBMatrixTable(tableBase.NTableWidget):
         tableBase.NTableWidget.__init__(self, parent)
 
         # Matrix
-        self._matrix = numpy.ndarray( (3, 3), float )
+        self._matrix = numpy.ndarray((3, 3), float)
         for i in xrange(3):
             for j in xrange(3):
                 self._matrix[i][j] = 0.
@@ -130,7 +141,8 @@ UB_Peak_Table_Setup = [('Scan', 'int'),
                        ('Q_y', 'float'),
                        ('Q_z', 'float'),
                        ('Use', 'checkbox'),
-                       ('m1', 'float')]
+                       ('m1', 'float'),
+                       ('Error', 'float')]
 
 
 class UBMatrixPeakTable(tableBase.NTableWidget):
@@ -200,7 +212,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
 
         return
 
-    def set_hkl(self, i_row, hkl):
+    def set_hkl(self, i_row, hkl, error=None):
         """
         Set HKL to table
         :param irow:
@@ -218,12 +230,19 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         self.update_cell_value(i_row, i_col_k, hkl[1])
         self.update_cell_value(i_row, i_col_l, hkl[2])
 
+        if error is not None:
+            i_col_error = UB_Peak_Table_Setup.index(('Error', 'float'))
+            self.update_cell_value(i_row, i_col_error, error)
+
         return
 
 # Processing status table
 Process_Table_Setup = [('Scan', 'int'),
                        ('Number Pt', 'int'),
-                       ('Status', 'str')]
+                       ('Status', 'str'),
+                       ('Merged Workspace', 'str'),
+                       ('Group Name', 'str'),
+                       ('Select', 'checkbox')]
 
 
 class ProcessTableWidget(tableBase.NTableWidget):
@@ -250,8 +269,10 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         # Append rows
         for scan in scans:
-            row_value_list = [scan, 0, 'In Queue']
-            self.append_row(row_value_list)
+            row_value_list = [scan, 0, 'In Queue', '', '', False]
+            status, err = self.append_row(row_value_list)
+            if status is False:
+                raise RuntimeError(err)
 
         return
 
@@ -311,3 +332,33 @@ class ProcessTableWidget(tableBase.NTableWidget):
             return 'Unable to find scan %d in table.' % scan_no
 
         return ''
+
+    def set_ws_names(self, scan_num, merged_md_name, ws_group_name):
+        """
+        TODO/DOC
+        :param merged_md_name:
+        :param ws_group_name:
+        :return:
+        """
+        # Check
+        assert isinstance(scan_num, int)
+        assert isinstance(merged_md_name, str) or merged_md_name is None
+        assert isinstance(ws_group_name, str) or ws_group_name is None
+
+        num_rows = self.rowCount()
+        set_done = False
+        for i_row in xrange(num_rows):
+            tmp_scan_no = self.get_cell_value(i_row, 0)
+            if scan_num == tmp_scan_no:
+                if merged_md_name is not None:
+                    self.update_cell_value(i_row, 3, merged_md_name)
+                if ws_group_name is not None:
+                    self.update_cell_value(i_row, 4, ws_group_name)
+                set_done = True
+                break
+        # END-FOR
+
+        if set_done is False:
+            return 'Unable to find scan %d in table.' % scan_num
+
+        return

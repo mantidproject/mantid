@@ -7,6 +7,7 @@
 import os
 import math
 import csv
+import time
 
 from PyQt4 import QtCore, QtGui
 
@@ -150,6 +151,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.tabWidget.setCurrentIndex(0)
         self.ui.tabWidget.setTabEnabled(4, False)
         self._init_ub_table()
+        self.ui.radioButton_ubFromTab1.setChecked(True)
 
         # Tab 'Access'
         self.ui.lineEdit_url.setText('http://neutron.ornl.gov/user_data/hb3a/')
@@ -518,9 +520,9 @@ class MainWindow(QtGui.QMainWindow):
             status, ret_obj = self._myControl.index_peak(ub_matrix, scan_number=scan_no,
                                                          pt_number=pt_no)
             if status is True:
-                new_hkl = ret_obj
-                print '[DB] Indexed HKL for peak No.%d is %s' % (i_peak, str(new_hkl))
-                self.ui.tableWidget_peaksCalUB.set_hkl(i_peak, new_hkl)
+                new_hkl = ret_obj[0]
+                error = ret_obj[1]
+                self.ui.tableWidget_peaksCalUB.set_hkl(i_peak, new_hkl, error)
             else:
                 err_msg += ret_obj + '\n'
         # END-FOR
@@ -692,14 +694,22 @@ class MainWindow(QtGui.QMainWindow):
             out_ws_name = base_name + '%04d' % scan_no
             self.ui.tableWidget_sliceViewProgress.set_scan_pt(scan_no, 'In Processing')
             try:
-                self._myControl.merge_pts_in_scan(exp_no=None, scan_no=scan_no,
+                ret_tup = self._myControl.merge_pts_in_scan(exp_no=None, scan_no=scan_no,
                                                   target_ws_name=out_ws_name,
                                                   target_frame=frame)
                 merge_status = 'Done'
+                merged_name = ret_tup[0]
+                group_name = ret_tup[1]
             except RuntimeError as e:
                 merge_status = 'Failed. Reason: %s' % str(e)
+                merged_name = ''
+                group_name = ''
             finally:
                 self.ui.tableWidget_sliceViewProgress.set_status(scan_no, merge_status)
+                self.ui.tableWidget_sliceViewProgress.set_ws_names(scan_no, merged_name, group_name)
+
+            # Sleep for a while
+            time.sleep(0.1)
         # END-FOR
 
         return
@@ -964,7 +974,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Set to table
         status, err_msg = self.ui.tableWidget_peaksCalUB.append_row(
-            [scan_number, pt_number, h, k, l, q_sample[0], q_sample[1], q_sample[2], False, m1])
+            [scan_number, pt_number, h, k, l, q_sample[0], q_sample[1], q_sample[2], False, m1, ''])
         if status is False:
             self.pop_one_button_dialog(err_msg)
 

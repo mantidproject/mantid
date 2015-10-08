@@ -9,7 +9,6 @@
 #
 ################################################################################
 import os
-import sys
 import urllib2
 
 import numpy
@@ -654,7 +653,6 @@ class CWSCDReductionControl(object):
         print '[DB] UB matrix = ', ub_1d
 
         # Set UB
-        # ub = srcpeak.sample().getOrientedLattice().getUB()
         api.SetUB(Workspace=peak_ws, UB=ub_1d)
 
         # Note: IndexPeaks and CalcualtePeaksHKL do the same job
@@ -662,8 +660,6 @@ class CWSCDReductionControl(object):
         num_peak_index, error = api.IndexPeaks(PeaksWorkspace=peak_ws,
                                                Tolerance=0.4,
                                                RoundHKLs=False)
-        if len(error) > 0:
-            return False, error
 
         if num_peak_index == 0:
             return False, 'No peak can be indexed.'
@@ -674,34 +670,7 @@ class CWSCDReductionControl(object):
             hkl_v3d = peak_ws.getPeak(0).getHKL()
             hkl = [hkl_v3d.X(), hkl_v3d.Y(), hkl_v3d.Z()]
 
-        return True, hkl
-
-    def index_peak_ws(self, ub_peak_ws, target_peak_ws):
-        """ Index peaks in a peak workspace by UB matrix
-        :param ub_peak_ws: peak workspace containing UB matrix
-        :param target_peak_ws: peak workspace to get peaks indexed
-        :return: (Boolean, Object) - Boolean = True,  Object = ??? - Boolean = False, Object = error message (str)
-        """
-        # Check input
-        assert isinstance(ub_peak_ws, mantid.dataobjects.PeaksWorkspace)
-        assert isinstance(target_peak_ws, mantid.dataobjects.PeaksWorkspace)
-
-        # Get UB matrix
-        if DebugMode is True:
-            ubmatrix = ub_peak_ws.sample().getOrientedLattice().getUB()
-            print "[DB] UB matrix is %s\n" % (str(ubmatrix))
-
-        # Copy sample/ub matrix to target
-        api.CopySample(InputWorkspace=ub_peak_ws,
-                       OutputWorkspace=target_peak_ws.name(),
-                       CopyName=False, CopyMaterial=False, CopyEnvironment=False,
-                       CopyShape=False, CopyLattice=True, CopyOrientationOnly=False)
-
-        numindexed = api.CalculatePeaksHKL(PeaksWorkspace=target_peak_ws, Overwrite=True)
-
-        print "[INFO] There are %d peaks that are indexed." % (numindexed)
-
-        return True, ""
+        return True, (hkl, error)
 
     def load_spice_scan_file(self, exp_no, scan_no, spice_file_name=None):
         """
@@ -809,11 +778,12 @@ class CWSCDReductionControl(object):
     def merge_pts_in_scan(self, exp_no, scan_no, target_ws_name, target_frame):
         """
         Merge Pts in Scan
+        All the workspaces generated as internal results will be grouped
         :param exp_no:
         :param scan_no:
         :param target_ws_name:
         :param target_frame:
-        :return:
+        :return: (merged workspace name, workspace group name)
         """
         # Check
         if exp_no is None:
@@ -845,7 +815,6 @@ class CWSCDReductionControl(object):
             print '[DB] Data directory: %s' % self._dataDir
         max_pts = 0
         ws_names_str = ''
-
 
         for pt in pt_num_list:
             try:
@@ -884,16 +853,21 @@ class CWSCDReductionControl(object):
             out_ws_name = target_ws_name + '_QSample'
         elif target_frame == 'hkl':
             out_ws_name = target_ws_name + '_HKL'
+        else:
+            raise RuntimeError('Impossible to have target frame %s' % target_frame)
 
         ws_names_str = ws_names_str[:-1]
-        print '[DB] Input workspace names for merge: %s' % ws_names_str
-
         api.MergeMD(InputWorkspaces=ws_names_str, OutputWorkspace=out_ws_name, SplitInto=max_pts)
 
         # Group workspaces
-        api.GroupWorkspaces(InputWorkspaces=ws_names_str, OutputWorkspace='Group_Exp406_Scan%d' % scan_no)
+        group_name = 'Group_Exp406_Scan%d' % scan_no
+        api.GroupWorkspaces(InputWorkspaces=ws_names_str, OutputWorkspace=group_name)
+        spice_table_name = get_spice_table_name(exp_no, scan_no)
+        api.GroupWorkspaces(InputWorkspaces='%s,%s' % (group_name, spice_table_name), OutputWorkspace=group_name)
 
-        return
+        ret_tup = out_ws_name, group_name
+
+        return ret_tup
 
     def set_server_url(self, server_url):
         """
