@@ -190,7 +190,7 @@
         <item>
          <widget class="QTabWidget" name="tabWidget">
           <property name="currentIndex">
-           <number>3</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -1147,7 +1147,7 @@
                    </spacer>
                   </item>
                   <item>
-                   <widget class="QPushButton" name="pushButton_3">
+                   <widget class="QPushButton" name="pushButton_deleteUBPeak">
                     <property name="minimumSize">
                      <size>
                       <width>100</width>
@@ -1166,7 +1166,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QPushButton" name="pushButton_4">
+                   <widget class="QPushButton" name="pushButton_clearUBPeakTable">
                     <property name="text">
                      <string>Clear</string>
                     </property>
@@ -1878,14 +1878,14 @@
                 <item>
                  <layout class="QVBoxLayout" name="verticalLayout_10">
                   <item>
-                   <widget class="QPushButton" name="pushButton">
+                   <widget class="QPushButton" name="pushButton_acceptRefinedUB">
                     <property name="text">
                      <string>Accept</string>
                     </property>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QPushButton" name="pushButton_2">
+                   <widget class="QPushButton" name="pushButton_resetRefinedUB">
                     <property name="text">
                      <string>Reset</string>
                     </property>

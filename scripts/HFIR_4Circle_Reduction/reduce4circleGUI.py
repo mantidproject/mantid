@@ -86,6 +86,10 @@ class MainWindow(QtGui.QMainWindow):
                      self.doAcceptCalUB)
         self.connect(self.ui.pushButton_indexUBPeaks, QtCore.SIGNAL('clicked()'),
                      self.do_index_ub_peaks)
+        self.connect(self.ui.pushButton_deleteUBPeak, QtCore.SIGNAL('clicked()'),
+                     self.do_del_ub_peaks)
+        self.connect(self.ui.pushButton_clearUBPeakTable, QtCore.SIGNAL('clicked()'),
+                     self.do_del_ub_peaks)
 
         # Tab 'Slice View'
         self.connect(self.ui.pushButton_setUBSliceView, QtCore.SIGNAL('clicked()'),
@@ -102,6 +106,20 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_browse_working_dir)
         self.connect(self.ui.comboBox_instrument, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.change_instrument_name)
+
+        # Refine UB matrix
+        self.connect(self.ui.pushButton_addToRefine, QtCore.SIGNAL('clicked()'),
+                     self.do_refine_ub)
+        self.connect(self.ui.pushButton_addAllRefineUB, QtCore.SIGNAL('clicked()'),
+                     self.do_refine_ub)
+        self.connect(self.ui.pushButton_acceptRefinedUB, QtCore.SIGNAL('clicked()'),
+                     self.do_refine_ub)
+        self.connect(self.ui.pushButton_resetRefinedUB, QtCore.SIGNAL('clicked()'),
+                     self.do_refine_ub)
+
+        # Tab 'Integrate Peaks'
+        self.connect(self.ui.pushButton_integratePeak, QtCore.SIGNAL('clicked()'),
+                     self.do_integrate_peaks)
 
         # Menu
         self.connect(self.ui.actionExit, QtCore.SIGNAL('triggered()'),
@@ -140,6 +158,27 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.pushButton_browseLocalDataDir.setEnabled(True)
 
         return
+
+    def do_del_ub_peaks(self):
+        """
+
+        :return:
+        """
+        raise RuntimeError('ASAP')
+
+    def do_integrate_peaks(self):
+        """
+
+        :return:
+        """
+        raise RuntimeError('ASAP')
+
+    def do_refine_ub(self):
+        """
+
+        :return:
+        """
+        raise RuntimeError('Next Release')
 
     def _init_ub_table(self):
         """ DOC
