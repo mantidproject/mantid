@@ -17,18 +17,18 @@ public:
   static void destroySuite(QSampleTest *suite) { delete suite; }
 
   void test_name() {
-    QSample frame;
+    Mantid::Geometry::QSample frame;
     TS_ASSERT_EQUALS(QSample::QSampleName, frame.name());
   }
 
   void test_canConvertTo_unit() {
-    QSample frame;
+    Mantid::Geometry::QSample frame;
     InverseAngstromsUnit unit;
     TSM_ASSERT("Same unit type as is used for QLab", frame.canConvertTo(unit));
   }
 
   void test_cannotConvertTo_unit() {
-    QSample frame;
+    Mantid::Geometry::QSample frame;
     ReciprocalLatticeUnit unit;
     TSM_ASSERT("Not same unit type as is used for QLab",
                !frame.canConvertTo(unit));

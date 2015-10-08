@@ -74,6 +74,7 @@ set ( SRC_FILES
 	src/MDGeometry/NullImplicitFunction.cpp
 	src/MDGeometry/QLab.cpp
 	src/MDGeometry/QSample.cpp
+	src/MDGeometry/UnknownFrame.cpp
 	src/Math/Acomp.cpp
 	src/Math/Algebra.cpp
 	src/Math/BnId.cpp
@@ -217,6 +218,7 @@ set ( INC_FILES
 	inc/MantidGeometry/MDGeometry/NullImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/QLab.h
 	inc/MantidGeometry/MDGeometry/QSample.h
+	inc/MantidGeometry/MDGeometry/UnknownFrame.h
 	inc/MantidGeometry/Math/Acomp.h
 	inc/MantidGeometry/Math/Algebra.h
 	inc/MantidGeometry/Math/BnId.h
