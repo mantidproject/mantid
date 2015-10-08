@@ -221,15 +221,5 @@ namespace CustomInterfaces
     MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Muon_ALC"));
   }
 
-  void ALCDataLoadingView::setWaitingCursor()
-  {
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-  }
-
-  void ALCDataLoadingView::restoreCursor()
-  {
-    QApplication::restoreOverrideCursor();
-  }
-
 } // namespace CustomInterfaces
 } // namespace MantidQt

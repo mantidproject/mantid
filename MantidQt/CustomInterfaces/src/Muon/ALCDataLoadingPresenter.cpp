@@ -36,7 +36,6 @@ namespace CustomInterfaces
 
   void ALCDataLoadingPresenter::load()
   {
-    m_view->setWaitingCursor();
 
     try
     {
@@ -114,7 +113,6 @@ namespace CustomInterfaces
       m_view->displayError(e.what());
     }
 
-    m_view->restoreCursor();
   }
 
   void ALCDataLoadingPresenter::updateAvailableInfo()
