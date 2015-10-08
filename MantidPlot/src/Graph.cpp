@@ -60,6 +60,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "Mantid/MantidMatrixCurve.h"
+#include "Mantid/MantidMDCurve.h"
 #include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/QwtRasterDataMD.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
@@ -210,6 +211,9 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
 
   m_isDistribution = false;
   m_normalizable = false;
+
+  m_normalizableMD = false;
+  m_normalizationMD = 0;
 }
 
 void Graph::notifyChanges()
@@ -5541,6 +5545,57 @@ void Graph::binWidthNormalization()
   notifyChanges();
 }
 
+/**
+ * Set 'None' normalization for MD plots
+ */
+void Graph::noNormalizationMD()
+{
+  if (!normalizableMD())
+    return;
+
+  setNormalizationMD(0);
+
+  updateDataCurves();
+  d_plot->updateAxes();
+  setYAxisTitle(yAxisTitleFromFirstCurve());
+
+  notifyChanges();
+}
+
+/**
+ * Set volume normalization for MD plots
+ */
+void Graph::volumeNormalizationMD()
+{
+  if (!normalizableMD())
+    return;
+
+  setNormalizationMD(1);
+
+  updateDataCurves();
+  d_plot->updateAxes();
+  setYAxisTitle(yAxisTitleFromFirstCurve());
+
+  notifyChanges();
+}
+
+/**
+ * Set number of events normalization for MD plots
+ */
+void Graph::numEventsNormalizationMD()
+{
+  if (!normalizableMD())
+    return;
+
+  setNormalizationMD(2);
+
+  updateDataCurves();
+  d_plot->updateAxes();
+  setYAxisTitle(yAxisTitleFromFirstCurve());
+
+  notifyChanges();
+}
+
 void Graph::setWaterfallXOffset(int offset)
 {
   if (offset == d_waterfall_offset_x)
@@ -5654,6 +5709,15 @@ void Graph::updateDataCurves()
       mc->invalidateBoundingRect();
       mc->loadData();
     }
+    else if (MantidMDCurve *mdc = dynamic_cast<MantidMDCurve*>(pc))
+    {
+      //mdc->setDrawAsDistribution(m_isDistribution);
+      // yes, using int in Graph and ApplicationWindow instead of the proper enum, just so that
+      // IMDWorkspace.h does not need to be included in more places in MantidPlot
+      mdc->mantidData()->setNormalization(static_cast<Mantid::API::MDNormalization>(m_normalizationMD));
+      mdc->invalidateBoundingRect();
+    }
+
   }
   QApplication::restoreOverrideCursor();
 }

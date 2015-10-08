@@ -618,6 +618,9 @@ MultiLayer* MantidUI::plotMDList(const QStringList& wsNames, const int plotAxis,
       data->setPlotAxisChoice(plotAxis);
       data->setNormalization(normalization);
 
+      g->setNormalizableMD(true);
+      g->setNormalizationMD(normalization);
+
       // Using information from the first graph
       if( i == 0 && isGraphNew )
         g->setAutoScale();
