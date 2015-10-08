@@ -86,8 +86,8 @@ protected:
   double m_tofMax;
 
   // methods
-  virtual void endOfFrameImpl() override;
-  virtual void addEventImpl(size_t id, double tof) override;
+  virtual void endOfFrameImpl() ;
+  virtual void addEventImpl(size_t id, double tof);
 
 public:
   // construction
@@ -108,8 +108,8 @@ protected:
   std::vector<EventVector_pt> &m_eventVectors;
 
   // methods
-  virtual void endOfFrameImpl() override;
-  virtual void addEventImpl(size_t id, double tof) override;
+  virtual void endOfFrameImpl();
+  virtual void addEventImpl(size_t id, double tof);
 
 public:
   // construction
