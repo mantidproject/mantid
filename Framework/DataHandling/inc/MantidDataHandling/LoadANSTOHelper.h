@@ -86,7 +86,7 @@ protected:
   double m_tofMax;
 
   // methods
-  virtual void endOfFrameImpl() ;
+  virtual void endOfFrameImpl();
   virtual void addEventImpl(size_t id, double tof);
 
 public:
