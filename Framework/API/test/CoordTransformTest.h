@@ -5,8 +5,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidAPI/CoordTransform.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 
 using namespace Mantid;
 

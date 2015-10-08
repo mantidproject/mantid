@@ -19,7 +19,6 @@
 #include <algorithm>
 #include <fstream>
 #include <vector>
-#include <iostream>
 #include <boost/lexical_cast.hpp>
 #include <nexus/NeXusFile.hpp>
 

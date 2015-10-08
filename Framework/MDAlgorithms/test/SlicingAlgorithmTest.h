@@ -9,7 +9,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <iomanip>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;

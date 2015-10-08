@@ -12,8 +12,6 @@
 #include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
 #include <fstream>
-#include <iomanip>
-#include <iostream>
 #include <iosfwd>
 
 using namespace Mantid::DataHandling;
