@@ -1,9 +1,9 @@
-#ifndef CURVEFITTING_FRCONJUGATEGRADIENTTEST_H_
-#define CURVEFITTING_FRCONJUGATEGRADIENTTEST_H_
+#ifndef CURVEFITTING_PRCONJUGATEGRADIENTTEST_H_
+#define CURVEFITTING_PRCONJUGATEGRADIENTTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/FRConjugateGradientMinimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/PRConjugateGradientMinimizer.h"
 #include "MantidAPI/ICostFunction.h"
 
 #include <sstream>
@@ -12,13 +12,13 @@ using namespace Mantid;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::API;
 
-class FRConjugateGradientTestCostFunction : public ICostFunction {
+class PRConjugateGradientTestCostFunction : public ICostFunction {
   double a, b;
 
 public:
-  FRConjugateGradientTestCostFunction() : a(1), b(1) {}
+  PRConjugateGradientTestCostFunction() : a(1), b(1) {}
   virtual std::string name() const {
-    return "FRConjugateGradientTestCostFunction";
+    return "PRConjugateGradientTestCostFunction";
   }
   virtual double getParameter(size_t i) const {
     if (i == 0)
@@ -53,18 +53,18 @@ public:
   }
 };
 
-class FRConjugateGradientTest : public CxxTest::TestSuite {
+class PRConjugateGradientTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FRConjugateGradientTest *createSuite() {
-    return new FRConjugateGradientTest();
+  static PRConjugateGradientTest *createSuite() {
+    return new PRConjugateGradientTest();
   }
-  static void destroySuite(FRConjugateGradientTest *suite) { delete suite; }
+  static void destroySuite(PRConjugateGradientTest *suite) { delete suite; }
 
   void testMinimize() {
-    ICostFunction_sptr fun(new FRConjugateGradientTestCostFunction);
-    FRConjugateGradientMinimizer s;
+    ICostFunction_sptr fun(new PRConjugateGradientTestCostFunction);
+    PRConjugateGradientMinimizer s;
     s.initialize(fun);
     TS_ASSERT(s.minimize());
     TS_ASSERT_DELTA(fun->val(), 3.1, 1e-10);
@@ -74,4 +74,4 @@ public:
   }
 };
 
-#endif /*CURVEFITTING_FRCONJUGATEGRADIENTTEST_H_*/
+#endif /*CURVEFITTING_PRCONJUGATEGRADIENTTEST_H_*/

@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/FABADAMinimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h"
 
 #include "MantidCurveFitting/Fit.h"
 #include "MantidAPI/AlgorithmManager.h"

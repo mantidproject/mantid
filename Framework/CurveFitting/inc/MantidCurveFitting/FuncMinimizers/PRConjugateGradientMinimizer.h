@@ -1,20 +1,20 @@
-#ifndef MANTID_CURVEFITTING_FRCONJUGATEGRADIENTMINIMIZER_H_
-#define MANTID_CURVEFITTING_FRCONJUGATEGRADIENTMINIMIZER_H_
+#ifndef MANTID_CURVEFITTING_PRCONJUGATEGRADIENTMINIMIZER_H_
+#define MANTID_CURVEFITTING_PRCONJUGATEGRADIENTMINIMIZER_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidCurveFitting/DerivMinimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/DerivMinimizer.h"
 
 namespace Mantid {
 namespace CurveFitting {
-/** Implementing Fletcher-Reeves flavour of the conjugate gradient algorithm
+/** Implementing Polak-Ribiere flavour of the conjugate gradient algorithm
     by wrapping the IFuncMinimizer interface around the GSL implementation of
    this algorithm.
 
     @author Anders Markvardsen, ISIS, RAL
-    @date 12/1/2010
+    @date 13/1/2010
 
     Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
    National Laboratory & European Spallation Source
@@ -37,14 +37,12 @@ namespace CurveFitting {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport FRConjugateGradientMinimizer : public DerivMinimizer {
+class DLLExport PRConjugateGradientMinimizer : public DerivMinimizer {
 public:
   /// Constructor.
-  FRConjugateGradientMinimizer() : DerivMinimizer() {}
+  PRConjugateGradientMinimizer() : DerivMinimizer() {}
   /// Name of the minimizer.
-  std::string name() const {
-    return "Conjugate gradient (Fletcher-Reeves imp.)";
-  }
+  std::string name() const { return "Conjugate gradient (Polak-Ribiere imp.)"; }
 
 protected:
   /// Return a concrete type to initialize m_gslSolver with
@@ -54,4 +52,4 @@ protected:
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_FRCONJUGATEGRADIENTMINIMIZER_H_*/
+#endif /*MANTID_CURVEFITTING_PRCONJUGATEGRADIENTMINIMIZER_H_*/

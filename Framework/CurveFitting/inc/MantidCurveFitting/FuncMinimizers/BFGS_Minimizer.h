@@ -1,15 +1,15 @@
-#ifndef MANTID_CURVEFITTING_PRCONJUGATEGRADIENTMINIMIZER_H_
-#define MANTID_CURVEFITTING_PRCONJUGATEGRADIENTMINIMIZER_H_
+#ifndef MANTID_CURVEFITTING_BFGS_MINIMIZERMINIMIZER_H_
+#define MANTID_CURVEFITTING_BFGS_MINIMIZERMINIMIZER_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidCurveFitting/DerivMinimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/DerivMinimizer.h"
 
 namespace Mantid {
 namespace CurveFitting {
-/** Implementing Polak-Ribiere flavour of the conjugate gradient algorithm
+/** Implementing Broyden-Fletcher-Goldfarb-Shanno (BFGS) algorithm
     by wrapping the IFuncMinimizer interface around the GSL implementation of
    this algorithm.
 
@@ -37,19 +37,22 @@ namespace CurveFitting {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PRConjugateGradientMinimizer : public DerivMinimizer {
+class DLLExport BFGS_Minimizer : public DerivMinimizer {
 public:
   /// Constructor.
-  PRConjugateGradientMinimizer() : DerivMinimizer() {}
+  BFGS_Minimizer() : DerivMinimizer() {}
   /// Name of the minimizer.
-  std::string name() const { return "Conjugate gradient (Polak-Ribiere imp.)"; }
+  std::string name() const { return "BFGS_Minimizer"; }
 
 protected:
   /// Return a concrete type to initialize m_gslSolver with
   virtual const gsl_multimin_fdfminimizer_type *getGSLMinimizerType();
+
+  /// Static reference to the logger class
+  static Kernel::Logger &g_log;
 };
 
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_PRCONJUGATEGRADIENTMINIMIZER_H_*/
+#endif /*MANTID_CURVEFITTING_BFGS_MINIMIZERMINIMIZER_H_*/

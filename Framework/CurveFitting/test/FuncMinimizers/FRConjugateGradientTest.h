@@ -1,9 +1,9 @@
-#ifndef CURVEFITTING_BFGSTEST_H_
-#define CURVEFITTING_BFGSTEST_H_
+#ifndef CURVEFITTING_FRCONJUGATEGRADIENTTEST_H_
+#define CURVEFITTING_FRCONJUGATEGRADIENTTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/BFGS_Minimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/FRConjugateGradientMinimizer.h"
 #include "MantidAPI/ICostFunction.h"
 
 #include <sstream>
@@ -12,12 +12,14 @@ using namespace Mantid;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::API;
 
-class BFGSTestCostFunction : public ICostFunction {
+class FRConjugateGradientTestCostFunction : public ICostFunction {
   double a, b;
 
 public:
-  BFGSTestCostFunction() : a(1), b(1) {}
-  virtual std::string name() const { return "BFGSTestCostFunction"; }
+  FRConjugateGradientTestCostFunction() : a(1), b(1) {}
+  virtual std::string name() const {
+    return "FRConjugateGradientTestCostFunction";
+  }
   virtual double getParameter(size_t i) const {
     if (i == 0)
       return a;
@@ -51,16 +53,18 @@ public:
   }
 };
 
-class BFGSTest : public CxxTest::TestSuite {
+class FRConjugateGradientTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static BFGSTest *createSuite() { return new BFGSTest(); }
-  static void destroySuite(BFGSTest *suite) { delete suite; }
+  static FRConjugateGradientTest *createSuite() {
+    return new FRConjugateGradientTest();
+  }
+  static void destroySuite(FRConjugateGradientTest *suite) { delete suite; }
 
   void testMinimize() {
-    ICostFunction_sptr fun(new BFGSTestCostFunction);
-    BFGS_Minimizer s;
+    ICostFunction_sptr fun(new FRConjugateGradientTestCostFunction);
+    FRConjugateGradientMinimizer s;
     s.initialize(fun);
     TS_ASSERT(s.minimize());
     TS_ASSERT_DELTA(fun->val(), 3.1, 1e-10);
@@ -70,4 +74,4 @@ public:
   }
 };
 
-#endif /*CURVEFITTING_BFGSTEST_H_*/
+#endif /*CURVEFITTING_FRCONJUGATEGRADIENTTEST_H_*/

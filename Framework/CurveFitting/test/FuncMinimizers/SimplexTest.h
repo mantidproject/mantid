@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/SimplexMinimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h"
 #include "MantidAPI/ICostFunction.h"
 
 #include <sstream>

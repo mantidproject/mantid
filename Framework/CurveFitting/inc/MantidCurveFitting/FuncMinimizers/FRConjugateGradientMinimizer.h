@@ -1,19 +1,20 @@
-#ifndef MANTID_CURVEFITTING_STEEPESTDESCENT_MINIMIZERMINIMIZER_H_
-#define MANTID_CURVEFITTING_STEEPESTDESCENT_MINIMIZERMINIMIZER_H_
+#ifndef MANTID_CURVEFITTING_FRCONJUGATEGRADIENTMINIMIZER_H_
+#define MANTID_CURVEFITTING_FRCONJUGATEGRADIENTMINIMIZER_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidCurveFitting/DerivMinimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/DerivMinimizer.h"
 
 namespace Mantid {
 namespace CurveFitting {
-/** Implementing the steepest descent algorithm
+/** Implementing Fletcher-Reeves flavour of the conjugate gradient algorithm
     by wrapping the IFuncMinimizer interface around the GSL implementation of
    this algorithm.
 
-    @author Roman Tolchenov, Tessella plc
+    @author Anders Markvardsen, ISIS, RAL
+    @date 12/1/2010
 
     Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
    National Laboratory & European Spallation Source
@@ -36,22 +37,21 @@ namespace CurveFitting {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SteepestDescentMinimizer : public DerivMinimizer {
+class DLLExport FRConjugateGradientMinimizer : public DerivMinimizer {
 public:
   /// Constructor.
-  SteepestDescentMinimizer() : DerivMinimizer() {}
+  FRConjugateGradientMinimizer() : DerivMinimizer() {}
   /// Name of the minimizer.
-  std::string name() const { return "SteepestDescentMinimizer"; }
+  std::string name() const {
+    return "Conjugate gradient (Fletcher-Reeves imp.)";
+  }
 
 protected:
   /// Return a concrete type to initialize m_gslSolver with
   virtual const gsl_multimin_fdfminimizer_type *getGSLMinimizerType();
-
-  /// Static reference to the logger class
-  static Kernel::Logger &g_log;
 };
 
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_STEEPESTDESCENT_MINIMIZERMINIMIZER_H_*/
+#endif /*MANTID_CURVEFITTING_FRCONJUGATEGRADIENTMINIMIZER_H_*/

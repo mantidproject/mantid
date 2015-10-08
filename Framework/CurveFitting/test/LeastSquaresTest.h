@@ -5,9 +5,9 @@
 
 #include "MantidCurveFitting/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/CostFuncRwp.h"
-#include "MantidCurveFitting/SimplexMinimizer.h"
-#include "MantidCurveFitting/BFGS_Minimizer.h"
-#include "MantidCurveFitting/LevenbergMarquardtMDMinimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
 #include "MantidCurveFitting/UserFunction.h"
 #include "MantidCurveFitting/ExpDecay.h"
 #include "MantidAPI/FunctionDomain1D.h"

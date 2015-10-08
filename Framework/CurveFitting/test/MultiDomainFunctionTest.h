@@ -10,7 +10,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidCurveFitting/CostFuncLeastSquares.h"
-#include "MantidCurveFitting/LevenbergMarquardtMDMinimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
 #include "MantidCurveFitting/Fit.h"
 
 #include "MantidTestHelpers/FakeObjects.h"

@@ -1,9 +1,9 @@
-#ifndef CURVEFITTING_PRCONJUGATEGRADIENTTEST_H_
-#define CURVEFITTING_PRCONJUGATEGRADIENTTEST_H_
+#ifndef CURVEFITTING_BFGSTEST_H_
+#define CURVEFITTING_BFGSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/PRConjugateGradientMinimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h"
 #include "MantidAPI/ICostFunction.h"
 
 #include <sstream>
@@ -12,14 +12,12 @@ using namespace Mantid;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::API;
 
-class PRConjugateGradientTestCostFunction : public ICostFunction {
+class BFGSTestCostFunction : public ICostFunction {
   double a, b;
 
 public:
-  PRConjugateGradientTestCostFunction() : a(1), b(1) {}
-  virtual std::string name() const {
-    return "PRConjugateGradientTestCostFunction";
-  }
+  BFGSTestCostFunction() : a(1), b(1) {}
+  virtual std::string name() const { return "BFGSTestCostFunction"; }
   virtual double getParameter(size_t i) const {
     if (i == 0)
       return a;
@@ -53,18 +51,16 @@ public:
   }
 };
 
-class PRConjugateGradientTest : public CxxTest::TestSuite {
+class BFGSTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PRConjugateGradientTest *createSuite() {
-    return new PRConjugateGradientTest();
-  }
-  static void destroySuite(PRConjugateGradientTest *suite) { delete suite; }
+  static BFGSTest *createSuite() { return new BFGSTest(); }
+  static void destroySuite(BFGSTest *suite) { delete suite; }
 
   void testMinimize() {
-    ICostFunction_sptr fun(new PRConjugateGradientTestCostFunction);
-    PRConjugateGradientMinimizer s;
+    ICostFunction_sptr fun(new BFGSTestCostFunction);
+    BFGS_Minimizer s;
     s.initialize(fun);
     TS_ASSERT(s.minimize());
     TS_ASSERT_DELTA(fun->val(), 3.1, 1e-10);
@@ -74,4 +70,4 @@ public:
   }
 };
 
-#endif /*CURVEFITTING_PRCONJUGATEGRADIENTTEST_H_*/
+#endif /*CURVEFITTING_BFGSTEST_H_*/

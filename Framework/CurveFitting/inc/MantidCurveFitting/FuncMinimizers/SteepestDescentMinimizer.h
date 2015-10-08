@@ -1,20 +1,19 @@
-#ifndef MANTID_CURVEFITTING_BFGS_MINIMIZERMINIMIZER_H_
-#define MANTID_CURVEFITTING_BFGS_MINIMIZERMINIMIZER_H_
+#ifndef MANTID_CURVEFITTING_STEEPESTDESCENT_MINIMIZERMINIMIZER_H_
+#define MANTID_CURVEFITTING_STEEPESTDESCENT_MINIMIZERMINIMIZER_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidCurveFitting/DerivMinimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/DerivMinimizer.h"
 
 namespace Mantid {
 namespace CurveFitting {
-/** Implementing Broyden-Fletcher-Goldfarb-Shanno (BFGS) algorithm
+/** Implementing the steepest descent algorithm
     by wrapping the IFuncMinimizer interface around the GSL implementation of
    this algorithm.
 
-    @author Anders Markvardsen, ISIS, RAL
-    @date 13/1/2010
+    @author Roman Tolchenov, Tessella plc
 
     Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
    National Laboratory & European Spallation Source
@@ -37,12 +36,12 @@ namespace CurveFitting {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport BFGS_Minimizer : public DerivMinimizer {
+class DLLExport SteepestDescentMinimizer : public DerivMinimizer {
 public:
   /// Constructor.
-  BFGS_Minimizer() : DerivMinimizer() {}
+  SteepestDescentMinimizer() : DerivMinimizer() {}
   /// Name of the minimizer.
-  std::string name() const { return "BFGS_Minimizer"; }
+  std::string name() const { return "SteepestDescentMinimizer"; }
 
 protected:
   /// Return a concrete type to initialize m_gslSolver with
@@ -55,4 +54,4 @@ protected:
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_BFGS_MINIMIZERMINIMIZER_H_*/
+#endif /*MANTID_CURVEFITTING_STEEPESTDESCENT_MINIMIZERMINIMIZER_H_*/
