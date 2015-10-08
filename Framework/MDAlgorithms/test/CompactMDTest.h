@@ -240,4 +240,36 @@ public:
 // Performance Tests
 //===================
 // TODO:
+using namespace Mantid::DataObjects;
+class CompactMDTestPerformance : public CxxTest::TestSuite {
+
+private:
+  MDHistoWorkspace_sptr m_ws;
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static CompactMDTestPerformance *createSuite() {
+    return new CompactMDTestPerformance();
+  }
+  static void destroySuite(CompactMDTestPerformance *suite) { delete suite; }
+
+  CompactMDTestPerformance() {
+    // Create a 4D workspace.
+    m_ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(
+        1.0 /*signal*/, 4 /*nd*/, 100 /*nbins*/, 10 /*max*/, 1.0 /*error sq*/);
+  }
+  void test_execute_4d() {
+    CompactMD alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", m_ws);
+    alg.setProperty("OutputWorkspace", "out");
+    alg.execute();
+    IMDHistoWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outWS);
+  }
+};
+
 #endif // !MANTID_MDALGORITHMS_COMPACTMDTEST_H_

@@ -17,7 +17,7 @@ createPBinStringVector(std::vector<Mantid::coord_t> minVector,
   std::vector<std::string> pBinStrVector;
   for (size_t iter = 0; iter < numDims; iter++) {
     // creating pbin string using Min and Max Centre positions
-    if (minVector[iter] > maxVector[iter]) {
+    if (minVector[iter] >= maxVector[iter]) {
       throw std::invalid_argument(
           "Minimum extents MUST be less than Maximum extents");
     }
