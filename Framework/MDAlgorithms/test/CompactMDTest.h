@@ -216,6 +216,25 @@ public:
                       outputWorkspace->getDimension(0)->getBinWidth(),
                       inWS->getDimension(0)->getBinWidth());
   }
+  void test_compact_md_throws_when_loading_empty_workspace() {
+    using namespace Mantid::DataObjects;
+    const size_t numDims = 1;
+    const double signal = 0.0;
+    const double errorSquared = 1.3;
+    size_t numBins[static_cast<int>(numDims)] = {3};
+    Mantid::coord_t min[static_cast<int>(numDims)] = {-3};
+    Mantid::coord_t max[static_cast<int>(numDims)] = {3};
+    const std::string name("test");
+    auto inWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
+        numDims, signal, errorSquared, numBins, min, max, name);
+    CompactMD alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setProperty("OutputWorkspace", "out");
+    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+  }
 };
 //===================
 // Performance Tests
