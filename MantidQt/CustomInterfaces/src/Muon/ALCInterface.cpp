@@ -105,9 +105,6 @@ namespace CustomInterfaces
   {
     int next = m_ui.stepView->currentIndex() + 1;
 
-    auto nextWidget = m_ui.stepView->widget(next);
-    assert(nextWidget);
-
     switchStep(next);
   }
 
