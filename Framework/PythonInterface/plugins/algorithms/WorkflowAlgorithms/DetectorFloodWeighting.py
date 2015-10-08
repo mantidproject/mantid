@@ -32,6 +32,8 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
                                                      direction=Direction.Output),
                              doc='Normalized flood weighting measurement')
 
+        self.declareProperty("SolidAngleCorrection", True, direction=Direction.Input, doc="Perform final solid angle correction")
+
 
     def validateInputs(self):
         """
@@ -69,6 +71,13 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
 
         return issues
 
+    def _divide(self, a, b):
+        divide = self.createChildAlgorithm("Divide")
+        divide.setProperty("LHSWorkspace", a)
+        divide.setProperty("RHSWorkspace", b)
+        divide.execute()
+        return divide.getProperty("OutputWorkspace").value
+
 
     def PyExec(self):
 
@@ -101,11 +110,15 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
         max_ws = create.getProperty("OutputWorkspace").value
 
         # Divide each entry by max
-        divide = self.createChildAlgorithm("Divide")
-        divide.setProperty("LHSWorkspace", accumulated_output)
-        divide.setProperty("RHSWorkspace", max_ws)
-        divide.execute()
-        normalized = divide.getProperty("OutputWorkspace").value
+        normalized = self._divide(accumulated_output, max_ws)
+
+        # Perform solid angle correction. Calculate solid angle then divide through.
+        if self.getProperty("SolidAngleCorrection").value:
+            solidAngle = self.createChildAlgorithm("SolidAngle")
+            solidAngle.setProperty("InputWorkspace", normalized)
+            solidAngle.execute()
+            solid_angle_weighting = solidAngle.getProperty("OutputWorkspace").value
+            normalized = self._divide(normalized, solid_angle_weighting);
 
         self.setProperty('OutputWorkspace', normalized)
 

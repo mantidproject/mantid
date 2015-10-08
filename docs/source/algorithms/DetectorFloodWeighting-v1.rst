@@ -10,7 +10,8 @@ Description
 -----------
 This algorithm is used to calculate the detector flood weighting workspace use for pixel flood corrections. It was originally developed for the ANSTO Bilby instrument.
 
-This algorithm crops the data over the specified wavelength region, then normalizes each spectrum to the workspace spectrum maxima.
+This algorithm crops the data over the specified wavelength region, then normalizes each spectrum to the workspace spectrum maxima. The algorithm will then
+perform a solid angle correction on each spectra.
 
 Usage
 -----
