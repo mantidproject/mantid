@@ -447,6 +447,15 @@ void ISISEnergyTransfer::plotRaw() {
     return;
   }
 
+  if (m_uiForm.ckBackgroundRemoval->isChecked() == true) {
+    int startBack = m_uiForm.spBackgroundStart->value();
+    int endBack = m_uiForm.spBackgroundEnd->value();
+    if (startBack > endBack) {
+      emit showMessageBox("Background Start must be less than Background End");
+      return;
+    }
+  }
+
   QString rawFile = m_uiForm.dsRunFiles->getFirstFilename();
   auto pos = rawFile.lastIndexOf(".");
   auto extension = rawFile.right(rawFile.length() - pos);
