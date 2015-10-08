@@ -47,6 +47,7 @@ public:
     ResetFocus,            ///< Re-set / clear all focus inputs and options
     LogMsg,                ///< need to send a message to the Mantid log system
     InstrumentChange,      ///< Instrument selection updated
+	PlotRepChange,         ///< Data Plot representation selection updated
     ShutDown               ///< closing the interface
   };
 

@@ -106,6 +106,19 @@ public:
 
   // virtual void plotFocusedSpectrum();
   MOCK_METHOD1(plotFocusedSpectrum, void(const std::string&));
+
+  // void plotFocusStatus();
+  MOCK_METHOD0(plotFocusStatus, void());
+
+  // void plotRepChanged();
+  MOCK_METHOD1(plotRepChanged, void(int idx));
+
+  // virtual void plotWaterfallSpectrum
+  MOCK_METHOD1(plotWaterfallSpectrum, void(const std::string &wsName));
+
+  // std::string currentPlotType
+  MOCK_CONST_METHOD0(currentPlotType, std::string());
+
 };
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H
