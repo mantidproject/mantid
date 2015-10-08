@@ -602,6 +602,9 @@ bool LoadSpiceXML2DDet::getHB3AWavelength(MatrixWorkspace_sptr dataws,
       if (fabs(m1pos - (-25.870000)) < 0.2) {
         wavelength = 1.003;
         haswavelength = true;
+      } else if (fabs(m1pos - (-39.17)) < 0.2) {
+        wavelength = 1.5424;
+        haswavelength = true;
       } else {
         g_log.warning() << "m1 position " << m1pos
                         << " does not have defined mapping to "
@@ -614,6 +617,9 @@ bool LoadSpiceXML2DDet::getHB3AWavelength(MatrixWorkspace_sptr dataws,
       double m1pos = atof(dataws->run().getProperty("_m1")->value().c_str());
       if (fabs(m1pos - (-25.870000)) < 0.2) {
         wavelength = 1.003;
+        haswavelength = true;
+      } else if (fabs(m1pos - (-39.17)) < 0.2) {
+        wavelength = 1.5424;
         haswavelength = true;
       } else {
         g_log.warning() << "m1 position " << m1pos
