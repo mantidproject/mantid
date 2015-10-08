@@ -10,8 +10,6 @@
 
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
