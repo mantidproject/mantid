@@ -76,21 +76,21 @@ public:
   virtual ~LoadBBY() {}
 
   // description
-  virtual int version() const override { return 1; }
-  virtual const std::string name() const override { return "LoadBBY"; }
-  virtual const std::string category() const override { return "DataHandling"; }
-  virtual const std::string summary() const override {
+  virtual int version() const { return 1; }
+  virtual const std::string name() const { return "LoadBBY"; }
+  virtual const std::string category() const { return "DataHandling"; }
+  virtual const std::string summary() const {
     return "Loads a BilBy data file into an workspace.";
   }
 
   // returns a confidence value that this algorithm can load a specified file
-  virtual int confidence(Kernel::FileDescriptor &descriptor) const override;
+  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
 
 protected:
   // initialisation
-  virtual void init() override;
+  virtual void init();
   // execution
-  virtual void exec() override;
+  virtual void exec();
 
 private:
   // region of intreset
