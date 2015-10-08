@@ -9,6 +9,8 @@
 #include <QMessageBox>
 #include <QPushButton>
 
+#include <iostream>
+
 namespace
 {
   /// static logger
