@@ -209,7 +209,7 @@ public:
     TSM_ASSERT_EQUALS("Minimum should be cut to 1: ",
                       outputWorkspace->getDimension(0)->getMinimum(), -3.0);
     TSM_ASSERT_EQUALS("Maximum should still be 3: ",
-                      outputWorkspace->getDimension(0)->getMaximum(),-1.0);
+                      outputWorkspace->getDimension(0)->getMaximum(), -1.0);
     TSM_ASSERT_EQUALS("Number of Bins should be 1 : ",
                       outputWorkspace->getDimension(0)->getNBins(), 1);
     TSM_ASSERT_EQUALS("Bin width should be consistent: ",
