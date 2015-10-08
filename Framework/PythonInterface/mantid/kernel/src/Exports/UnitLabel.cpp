@@ -52,18 +52,19 @@ void export_UnitLabel() {
       .def(init<UnitLabel::AsciiString>(
           (arg("ascii")), "Construct a label from a plain-text string"))
 
-      .def("ascii", &UnitLabel::ascii,
+      .def("ascii", &UnitLabel::ascii, arg("self"),
            return_value_policy<copy_const_reference>(),
            "Return the label as a plain-text string")
 
-      .def("utf8", &utf8ToUnicode, "Return the label as a unicode string")
+      .def("utf8", &utf8ToUnicode, arg("self"),
+           "Return the label as a unicode string")
 
       .def("latex", &UnitLabel::latex,
-           return_value_policy<copy_const_reference>(),
+           return_value_policy<copy_const_reference>(), arg("self"),
            "Return the label as a plain-text string with latex formatting")
 
       // special functions
       .def("__str__", &UnitLabel::ascii,
-           return_value_policy<copy_const_reference>())
-      .def("__unicode__", &utf8ToUnicode);
+           return_value_policy<copy_const_reference>(), arg("self"))
+      .def("__unicode__", &utf8ToUnicode, arg("self"));
 }

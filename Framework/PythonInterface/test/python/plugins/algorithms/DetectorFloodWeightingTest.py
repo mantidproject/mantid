@@ -1,5 +1,6 @@
 import unittest
 from mantid.api import AlgorithmManager
+from mantid.simpleapi import CreateSampleWorkspace, DeleteWorkspace
 
 
 class DetectorFloodWeightingTest(unittest.TestCase):
@@ -47,10 +48,11 @@ class DetectorFloodWeightingTest(unittest.TestCase):
         alg.setPropertyValue("OutputWorkspace", "dummy")
         self.assertRaises(RuntimeError, alg.execute)
 
-    def test_execute_single(self):
+    def test_execute_single_no_solid_angle(self):
         alg = AlgorithmManager.create("DetectorFloodWeighting")
         alg.setChild(True)
         alg.initialize()
+        alg.setProperty("SolidAngleCorrection", False)
         signal_value = 2
         in_ws = self._create_ws(units="Wavelength", signal_value=signal_value, data_x=range(0,10,1))
         alg.setProperty("InputWorkspace", in_ws)
@@ -69,12 +71,23 @@ class DetectorFloodWeightingTest(unittest.TestCase):
         print out_ws.readY(0)[0]
         self.assertEquals(out_ws.readY(0)[0], 1.0)
 
+    def test_execute_single_with_solid_angle(self):
+        alg = AlgorithmManager.create("DetectorFloodWeighting")
+        alg.setChild(True)
+        alg.initialize()
+        alg.setProperty("SolidAngleCorrection", True)
+        signal_value = 2
+        in_ws = CreateSampleWorkspace(NumBanks=1, XUnit="Wavelength")
+        alg.setProperty("InputWorkspace", in_ws)
+        bands = [1,10]
+        alg.setProperty("Bands", bands) # One band
+        alg.setPropertyValue("OutputWorkspace", "dummy")
+        alg.execute()
 
-
-
-
-
-
+        out_ws = alg.getProperty("OutputWorkspace").value
+        self.assertEqual(1, out_ws.blocksize())
+        self.assertEqual("Wavelength", out_ws.getAxis(0).getUnit().unitID())
+        self.assertEqual(in_ws.getNumberHistograms(), out_ws.getNumberHistograms(), msg="Number of histograms should be unchanged.")
 
 
 if __name__ == '__main__':

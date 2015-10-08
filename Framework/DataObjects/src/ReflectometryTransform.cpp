@@ -305,6 +305,44 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::execute(
   return ws;
 }
 
+IMDHistoWorkspace_sptr ReflectometryTransform::executeMDNormPoly(
+    MatrixWorkspace_const_sptr inputWs) const {
+
+  auto input_x_dim = inputWs->getXDimension();
+
+  MDHistoDimension_sptr dim0 = MDHistoDimension_sptr(new MDHistoDimension(
+      input_x_dim->getName(), input_x_dim->getDimensionId(),
+      input_x_dim->getUnits(),
+      static_cast<Mantid::coord_t>(input_x_dim->getMinimum()),
+      static_cast<Mantid::coord_t>(input_x_dim->getMaximum()),
+      input_x_dim->getNBins()));
+
+  auto input_y_dim = inputWs->getYDimension();
+
+  MDHistoDimension_sptr dim1 = MDHistoDimension_sptr(new MDHistoDimension(
+      input_y_dim->getName(), input_y_dim->getDimensionId(),
+      input_y_dim->getUnits(),
+      static_cast<Mantid::coord_t>(input_y_dim->getMinimum()),
+      static_cast<Mantid::coord_t>(input_y_dim->getMaximum()),
+      input_y_dim->getNBins()));
+
+  auto outWs = boost::make_shared<MDHistoWorkspace>(dim0, dim1);
+
+  for (size_t nHistoIndex = 0; nHistoIndex < inputWs->getNumberHistograms();
+       ++nHistoIndex) {
+    const MantidVec X = inputWs->readX(nHistoIndex);
+    const MantidVec Y = inputWs->readY(nHistoIndex);
+    const MantidVec E = inputWs->readE(nHistoIndex);
+
+    for (size_t nBinIndex = 0; nBinIndex < inputWs->blocksize(); ++nBinIndex) {
+      auto value_index = outWs->getLinearIndex(nBinIndex, nHistoIndex);
+      outWs->setSignalAt(value_index, Y[nBinIndex]);
+      outWs->setErrorSquaredAt(value_index, E[nBinIndex] * E[nBinIndex]);
+    }
+  }
+  return outWs;
+}
+
 /**
  * Execution path for NormalisedPolygon Rebinning
  * @param inputWs : Workspace to be rebinned
@@ -391,7 +429,6 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
           m_calculator->createQuad(lamUpper, lamLower, thetaUpper, thetaLower);
       FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j, outWS,
                                                    zBinsVec);
-
       // Find which qy bin this point lies in
       const auto qIndex =
           std::upper_bound(zBinsVec.begin(), zBinsVec.end(), inputQ[0].Y()) -
@@ -413,11 +450,9 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
   }
   outWS->finalize();
   FractionalRebinning::normaliseOutput(outWS, inputWS);
-
   // Set the output spectrum-detector mapping
   SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
   outWS->updateSpectraUsing(outputDetectorMap);
-
   outWS->getAxis(0)->title() = m_d0Label;
   outWS->setYUnit("");
   outWS->setYUnitLabel("Intensity");

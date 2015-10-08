@@ -1,4 +1,5 @@
-from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceUnitValidator
+from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceUnitValidator, \
+    Progress
 
 from mantid.kernel import Direction, FloatArrayProperty, FloatArrayBoundedValidator
 
@@ -31,6 +32,8 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
                                                      direction=Direction.Output),
                              doc='Normalized flood weighting measurement')
+
+        self.declareProperty("SolidAngleCorrection", True, direction=Direction.Input, doc="Perform final solid angle correction")
 
 
     def validateInputs(self):
@@ -69,8 +72,17 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
 
         return issues
 
+    def _divide(self, lhs, rhs):
+        divide = self.createChildAlgorithm("Divide")
+        divide.setProperty("LHSWorkspace", lhs)
+        divide.setProperty("RHSWorkspace", rhs)
+        divide.execute()
+        return divide.getProperty("OutputWorkspace").value
+
 
     def PyExec(self):
+
+        progress = Progress(self, 0, 1, 4) # Four coarse steps
 
         in_ws = self.getProperty('InputWorkspace').value
         bands = self.getProperty('Bands').value
@@ -82,6 +94,7 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
             upper = bands[i+1]
             step = upper - lower
             params.append((lower, step, upper))
+        progress.report()
 
         accumulated_output = None
         rebin = self.createChildAlgorithm("Rebin")
@@ -89,6 +102,7 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
         rebin.setProperty("InputWorkspace", in_ws)
         rebin.execute()
         accumulated_output = rebin.getProperty("OutputWorkspace").value
+        progress.report()
 
         # Determine the max across all spectra
         y_values = accumulated_output.extractY()
@@ -101,11 +115,17 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
         max_ws = create.getProperty("OutputWorkspace").value
 
         # Divide each entry by max
-        divide = self.createChildAlgorithm("Divide")
-        divide.setProperty("LHSWorkspace", accumulated_output)
-        divide.setProperty("RHSWorkspace", max_ws)
-        divide.execute()
-        normalized = divide.getProperty("OutputWorkspace").value
+        normalized = self._divide(accumulated_output, max_ws)
+        progress.report()
+
+        # Perform solid angle correction. Calculate solid angle then divide through.
+        if self.getProperty("SolidAngleCorrection").value:
+            solidAngle = self.createChildAlgorithm("SolidAngle")
+            solidAngle.setProperty("InputWorkspace", normalized)
+            solidAngle.execute()
+            solid_angle_weighting = solidAngle.getProperty("OutputWorkspace").value
+            normalized = self._divide(normalized, solid_angle_weighting)
+        progress.report()
 
         self.setProperty('OutputWorkspace', normalized)
 
