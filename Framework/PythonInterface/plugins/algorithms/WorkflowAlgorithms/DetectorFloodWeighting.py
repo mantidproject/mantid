@@ -72,10 +72,10 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
 
         return issues
 
-    def _divide(self, a, b):
+    def _divide(self, lhs, rhs):
         divide = self.createChildAlgorithm("Divide")
-        divide.setProperty("LHSWorkspace", a)
-        divide.setProperty("RHSWorkspace", b)
+        divide.setProperty("LHSWorkspace", lhs)
+        divide.setProperty("RHSWorkspace", rhs)
         divide.execute()
         return divide.getProperty("OutputWorkspace").value
 
@@ -124,7 +124,7 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
             solidAngle.setProperty("InputWorkspace", normalized)
             solidAngle.execute()
             solid_angle_weighting = solidAngle.getProperty("OutputWorkspace").value
-            normalized = self._divide(normalized, solid_angle_weighting);
+            normalized = self._divide(normalized, solid_angle_weighting)
         progress.report()
 
         self.setProperty('OutputWorkspace', normalized)
