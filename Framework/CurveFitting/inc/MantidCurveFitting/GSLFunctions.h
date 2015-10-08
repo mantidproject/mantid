@@ -7,7 +7,7 @@
 #include <gsl/gsl_blas.h>
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ICostFunction.h"
-#include "MantidCurveFitting/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 
 namespace Mantid {
 namespace CurveFitting {

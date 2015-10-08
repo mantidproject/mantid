@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/FuncMinimizers/DampingMinimizer.h"
 #include "MantidCurveFitting/UserFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"

@@ -2,7 +2,7 @@
 #define MANTID_CURVEFITTING_COSTFUNCUNWEIGHTEDLEASTSQUARES_H_
 
 #include "MantidKernel/System.h"
-#include "MantidCurveFitting/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 
 namespace Mantid {
 namespace CurveFitting {

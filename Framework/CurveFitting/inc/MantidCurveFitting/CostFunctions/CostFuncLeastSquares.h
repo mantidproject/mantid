@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/CostFuncFitting.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 #include "MantidCurveFitting/GSLMatrix.h"
 #include "MantidCurveFitting/GSLVector.h"
 

@@ -25,7 +25,7 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
 #include "MantidCurveFitting/UserFunction.h"
-#include "MantidCurveFitting/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

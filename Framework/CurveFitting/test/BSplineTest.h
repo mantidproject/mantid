@@ -4,7 +4,7 @@
 #include "MantidCurveFitting/BSpline.h"
 #include "MantidCurveFitting/UserFunction.h"
 #include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
-#include "MantidCurveFitting/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionFactory.h"

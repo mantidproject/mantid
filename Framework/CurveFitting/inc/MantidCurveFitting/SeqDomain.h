@@ -8,8 +8,8 @@
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IDomainCreator.h"
-#include "MantidCurveFitting/CostFuncLeastSquares.h"
-#include "MantidCurveFitting/CostFuncRwp.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncRwp.h"
 
 #include <stdexcept>
 #include <vector>

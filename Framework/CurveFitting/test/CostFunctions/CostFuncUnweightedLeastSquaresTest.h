@@ -5,7 +5,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 
-#include "MantidCurveFitting/CostFuncUnweightedLeastSquares.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncUnweightedLeastSquares.h"
 
 #include <boost/make_shared.hpp>
 

@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/CostFuncIgnorePosPeaks.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncIgnorePosPeaks.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include <cmath>
 #include <gsl/gsl_sf_erf.h>

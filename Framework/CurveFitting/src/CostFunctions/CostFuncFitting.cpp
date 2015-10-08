@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/CostFuncFitting.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 #include "MantidCurveFitting/GSLJacobian.h"
 #include "MantidAPI/IConstraint.h"
 

@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/CostFuncLeastSquares.h"
-#include "MantidCurveFitting/CostFuncRwp.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncRwp.h"
 #include "MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h"
 #include "MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h"
 #include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"

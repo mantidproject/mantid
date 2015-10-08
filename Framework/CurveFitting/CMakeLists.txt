@@ -5,7 +5,6 @@ set ( SRC_FILES
 	#src/RefinePowderInstrumentParameters.cpp
 	src/Abragam.cpp
 	src/AugmentedLagrangianOptimizer.cpp
-	src/FuncMinimizers/BFGS_Minimizer.cpp
 	src/BSpline.cpp
 	src/BackToBackExponential.cpp
 	src/BackgroundFunction.cpp
@@ -23,14 +22,12 @@ set ( SRC_FILES
 	src/ConvertToYSpace.cpp
 	src/Convolution.cpp
 	src/ConvolveWorkspaces.cpp
-	src/CostFuncFitting.cpp
-	src/CostFuncLeastSquares.cpp
-	src/CostFuncRwp.cpp
-	src/CostFuncUnweightedLeastSquares.cpp
+	src/CostFunctions/CostFuncFitting.cpp
+	src/CostFunctions/CostFuncLeastSquares.cpp
+	src/CostFunctions/CostFuncRwp.cpp
+	src/CostFunctions/CostFuncUnweightedLeastSquares.cpp
 	src/CubicSpline.cpp
-	src/FuncMinimizers/DampingMinimizer.cpp
 	src/DeltaFunction.cpp
-	src/FuncMinimizers/DerivMinimizer.cpp
 	src/DiffRotDiscreteCircle.cpp
 	src/DiffSphere.cpp
 	src/DynamicKuboToyabe.cpp
@@ -40,14 +37,22 @@ set ( SRC_FILES
 	src/ExpDecay.cpp
 	src/ExpDecayMuon.cpp
 	src/ExpDecayOsc.cpp
-	src/FuncMinimizers/FABADAMinimizer.cpp
-	src/FuncMinimizers/FRConjugateGradientMinimizer.cpp
 	src/Fit.cpp
 	src/Fit1D.cpp
 	src/FitMW.cpp
 	src/FitPowderDiffPeaks.cpp
 	src/FlatBackground.cpp
 	src/FullprofPolynomial.cpp
+	src/FuncMinimizers/BFGS_Minimizer.cpp
+	src/FuncMinimizers/DampingMinimizer.cpp
+	src/FuncMinimizers/DerivMinimizer.cpp
+	src/FuncMinimizers/FABADAMinimizer.cpp
+	src/FuncMinimizers/FRConjugateGradientMinimizer.cpp
+	src/FuncMinimizers/LevenbergMarquardtMDMinimizer.cpp
+	src/FuncMinimizers/LevenbergMarquardtMinimizer.cpp
+	src/FuncMinimizers/PRConjugateGradientMinimizer.cpp
+	src/FuncMinimizers/SimplexMinimizer.cpp
+	src/FuncMinimizers/SteepestDescentMinimizer.cpp
 	src/FunctionDomain1DSpectrumCreator.cpp
 	src/GSLFunctions.cpp
 	src/GSLMatrix.cpp
@@ -63,8 +68,6 @@ set ( SRC_FILES
 	src/LatticeFunction.cpp
 	src/LeBailFit.cpp
 	src/LeBailFunction.cpp
-	src/FuncMinimizers/LevenbergMarquardtMDMinimizer.cpp
-	src/FuncMinimizers/LevenbergMarquardtMinimizer.cpp
 	src/LinearBackground.cpp
 	src/LogNormal.cpp
 	src/Lorentzian.cpp
@@ -74,7 +77,6 @@ set ( SRC_FILES
 	src/MuonFInteraction.cpp
 	src/NeutronBk2BkExpConvPVoigt.cpp
 	src/NormaliseByPeakArea.cpp
-	src/FuncMinimizers/PRConjugateGradientMinimizer.cpp
 	src/ParDomain.cpp
 	src/ParameterEstimator.cpp
 	src/PawleyFit.cpp
@@ -94,7 +96,6 @@ set ( SRC_FILES
 	src/SeqDomain.cpp
 	src/SeqDomainSpectrumCreator.cpp
 	src/SimpleChebfun.cpp
-	src/FuncMinimizers/SimplexMinimizer.cpp
 	src/SpecialFunctionHelper.cpp
 	src/SplineBackground.cpp
 	src/SplineInterpolation.cpp
@@ -102,7 +103,6 @@ set ( SRC_FILES
 	src/StaticKuboToyabe.cpp
 	src/StaticKuboToyabeTimesExpDecay.cpp
 	src/StaticKuboToyabeTimesGausDecay.cpp
-	src/FuncMinimizers/SteepestDescentMinimizer.cpp
 	src/StretchExp.cpp
 	src/StretchExpMuon.cpp
 	src/TabulatedFunction.cpp
@@ -126,7 +126,6 @@ set ( INC_FILES
 	#inc/MantidCurveFitting/RefinePowderInstrumentParameters.h
 	inc/MantidCurveFitting/Abragam.h
 	inc/MantidCurveFitting/AugmentedLagrangianOptimizer.h
-	inc/MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h
 	inc/MantidCurveFitting/BSpline.h
 	inc/MantidCurveFitting/BackToBackExponential.h
 	inc/MantidCurveFitting/BackgroundFunction.h
@@ -144,14 +143,12 @@ set ( INC_FILES
 	inc/MantidCurveFitting/ConvertToYSpace.h
 	inc/MantidCurveFitting/Convolution.h
 	inc/MantidCurveFitting/ConvolveWorkspaces.h
-	inc/MantidCurveFitting/CostFuncFitting.h
-	inc/MantidCurveFitting/CostFuncLeastSquares.h
-	inc/MantidCurveFitting/CostFuncRwp.h
-	inc/MantidCurveFitting/CostFuncUnweightedLeastSquares.h
+	inc/MantidCurveFitting/CostFunctions/CostFuncFitting.h
+	inc/MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h
+	inc/MantidCurveFitting/CostFunctions/CostFuncRwp.h
+	inc/MantidCurveFitting/CostFunctions/CostFuncUnweightedLeastSquares.h
 	inc/MantidCurveFitting/CubicSpline.h
-	inc/MantidCurveFitting/FuncMinimizers/DampingMinimizer.h
 	inc/MantidCurveFitting/DeltaFunction.h
-	inc/MantidCurveFitting/FuncMinimizers/DerivMinimizer.h
 	inc/MantidCurveFitting/DiffRotDiscreteCircle.h
 	inc/MantidCurveFitting/DiffSphere.h
 	inc/MantidCurveFitting/DllConfig.h
@@ -162,14 +159,22 @@ set ( INC_FILES
 	inc/MantidCurveFitting/ExpDecay.h
 	inc/MantidCurveFitting/ExpDecayMuon.h
 	inc/MantidCurveFitting/ExpDecayOsc.h
-	inc/MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h
-	inc/MantidCurveFitting/FuncMinimizers/FRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/Fit.h
 	inc/MantidCurveFitting/Fit1D.h
 	inc/MantidCurveFitting/FitMW.h
 	inc/MantidCurveFitting/FitPowderDiffPeaks.h
 	inc/MantidCurveFitting/FlatBackground.h
 	inc/MantidCurveFitting/FullprofPolynomial.h
+	inc/MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/DampingMinimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/DerivMinimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/FRConjugateGradientMinimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMinimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/PRConjugateGradientMinimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/SteepestDescentMinimizer.h
 	inc/MantidCurveFitting/FunctionDomain1DSpectrumCreator.h
 	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GSLJacobian.h
@@ -188,8 +193,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/LatticeFunction.h
 	inc/MantidCurveFitting/LeBailFit.h
 	inc/MantidCurveFitting/LeBailFunction.h
-	inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h
-	inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMinimizer.h
 	inc/MantidCurveFitting/LinearBackground.h
 	inc/MantidCurveFitting/LogNormal.h
 	inc/MantidCurveFitting/Lorentzian.h
@@ -199,7 +202,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/MuonFInteraction.h
 	inc/MantidCurveFitting/NeutronBk2BkExpConvPVoigt.h
 	inc/MantidCurveFitting/NormaliseByPeakArea.h
-	inc/MantidCurveFitting/FuncMinimizers/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/ParDomain.h
 	inc/MantidCurveFitting/ParameterEstimator.h
 	inc/MantidCurveFitting/PawleyFit.h
@@ -219,7 +221,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/SeqDomain.h
 	inc/MantidCurveFitting/SeqDomainSpectrumCreator.h
 	inc/MantidCurveFitting/SimpleChebfun.h
-	inc/MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h
 	inc/MantidCurveFitting/SpecialFunctionSupport.h
 	inc/MantidCurveFitting/SplineBackground.h
 	inc/MantidCurveFitting/SplineInterpolation.h
@@ -227,7 +228,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/StaticKuboToyabe.h
 	inc/MantidCurveFitting/StaticKuboToyabeTimesExpDecay.h
 	inc/MantidCurveFitting/StaticKuboToyabeTimesGausDecay.h
-	inc/MantidCurveFitting/FuncMinimizers/SteepestDescentMinimizer.h
 	inc/MantidCurveFitting/StretchExp.h
 	inc/MantidCurveFitting/StretchExpMuon.h
 	inc/MantidCurveFitting/TabulatedFunction.h
@@ -248,7 +248,6 @@ set ( TEST_FILES
 	#SCDPanelErrorsTest.h
 	AbragamTest.h
 	AugmentedLagrangianOptimizerTest.h
-	FuncMinimizers/BFGSTest.h
 	BSplineTest.h
 	BackToBackExponentialTest.h
 	BivariateNormalTest.h
@@ -266,9 +265,8 @@ set ( TEST_FILES
 	ConvertToYSpaceTest.h
 	ConvolutionTest.h
 	ConvolveWorkspacesTest.h
-	CostFuncUnweightedLeastSquaresTest.h
+	CostFunctions/CostFuncUnweightedLeastSquaresTest.h
 	CubicSplineTest.h
-	FuncMinimizers/DampingMinimizerTest.h
 	DeltaFunctionTest.h
 	DiffRotDiscreteCircleTest.h
 	DiffSphereTest.h
@@ -279,13 +277,19 @@ set ( TEST_FILES
 	ExpDecayMuonTest.h
 	ExpDecayOscTest.h
 	ExpDecayTest.h
-	FuncMinimizers/FABADAMinimizerTest.h
-	FuncMinimizers/FRConjugateGradientTest.h
 	FitMWTest.h
 	FitPowderDiffPeaksTest.h
 	FitTest.h
 	FlatBackgroundTest.h
 	FullprofPolynomialTest.h
+	FuncMinimizers/BFGSTest.h
+	FuncMinimizers/DampingMinimizerTest.h
+	FuncMinimizers/FABADAMinimizerTest.h
+	FuncMinimizers/FRConjugateGradientTest.h
+	FuncMinimizers/LevenbergMarquardtMDTest.h
+	FuncMinimizers/LevenbergMarquardtTest.h
+	FuncMinimizers/PRConjugateGradientTest.h
+	FuncMinimizers/SimplexTest.h
 	FunctionDomain1DSpectrumCreatorTest.h
 	FunctionFactoryConstraintTest.h
 	FunctionParameterDecoratorFitTest.h
@@ -303,9 +307,7 @@ set ( TEST_FILES
 	LatticeFunctionTest.h
 	LeBailFitTest.h
 	LeBailFunctionTest.h
-	LeastSquaresTest.h
-	FuncMinimizers/LevenbergMarquardtMDTest.h
-	FuncMinimizers/LevenbergMarquardtTest.h
+	CostFunctions/LeastSquaresTest.h
 	LinearBackgroundTest.h
 	LogNormalTest.h
 	Lorentzian1DTest.h
@@ -315,7 +317,6 @@ set ( TEST_FILES
 	MuonFInteractionTest.h
 	NeutronBk2BkExpConvPVoigtTest.h
 	NormaliseByPeakAreaTest.h
-	FuncMinimizers/PRConjugateGradientTest.h
 	ParameterEstimatorTest.h
 	PawleyFitTest.h
 	PawleyFunctionTest.h
@@ -333,7 +334,6 @@ set ( TEST_FILES
 	ResolutionTest.h
 	SeqDomainSpectrumCreatorTest.h
 	SimpleChebfunTest.h
-	FuncMinimizers/SimplexTest.h
 	SpecialFunctionSupportTest.h
 	SplineBackgroundTest.h
 	SplineInterpolationTest.h

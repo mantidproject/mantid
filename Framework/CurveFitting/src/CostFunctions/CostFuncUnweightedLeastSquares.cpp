@@ -1,4 +1,4 @@
-#include "MantidCurveFitting/CostFuncUnweightedLeastSquares.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncUnweightedLeastSquares.h"
 
 #include "MantidKernel/Logger.h"
 #include <iomanip>
