@@ -49,17 +49,34 @@ namespace CustomInterfaces
     m_dataLoading = new ALCDataLoadingPresenter(dataLoadingView);
     m_dataLoading->initialize();
 
-    auto baselineModellingView = new ALCBaselineModellingView(m_ui.baselineModellingView);
-    m_baselineModelling = new ALCBaselineModellingPresenter(baselineModellingView, m_baselineModellingModel);
+    m_baselineModellingView = new ALCBaselineModellingView(m_ui.baselineModellingView);
+    m_baselineModelling = new ALCBaselineModellingPresenter(m_baselineModellingView, m_baselineModellingModel);
     m_baselineModelling->initialize();
 
-    auto peakFittingView = new ALCPeakFittingView(m_ui.peakFittingView);
-    m_peakFitting = new ALCPeakFittingPresenter(peakFittingView, m_peakFittingModel);
+    m_peakFittingView = new ALCPeakFittingView(m_ui.peakFittingView);
+    m_peakFitting = new ALCPeakFittingPresenter(m_peakFittingView, m_peakFittingModel);
     m_peakFitting->initialize();
+
+    connect(m_dataLoading, SIGNAL(dataChanged()), SLOT(updateBaselineData()));
 
     assert(m_ui.stepView->count() == STEP_NAMES.count()); // Should have names for all steps
 
     switchStep(0); // We always start from the first step
+  }
+
+  void ALCInterface::updateBaselineData() {
+
+    if (m_dataLoading->loadedData()) {
+
+      m_baselineModellingModel->setData(m_dataLoading->loadedData());
+
+      if ((!m_baselineModellingView->function().isEmpty()) &&
+          (m_baselineModellingView->noOfSectionRows() > 0)) {
+
+            // Fit the data
+            m_baselineModellingView->emitFitRequested();
+      }
+    }
   }
 
   void ALCInterface::nextStep()
