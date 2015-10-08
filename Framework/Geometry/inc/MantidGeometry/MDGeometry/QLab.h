@@ -43,6 +43,8 @@ public:
   bool canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const;
   virtual std::string name() const;
   QLab *clone() const;
+  Mantid::Kernel::SpecialCoordinateSystem
+  equivalientSpecialCoordinateSystem() const;
 
   // Type name
   static const std::string QLabName;

@@ -37,6 +37,9 @@ public:
   void test_name() {
     HKL frame(new Mantid::Kernel::ReciprocalLatticeUnit);
     TS_ASSERT_EQUALS(HKL::HKLName, frame.name());
+    TSM_ASSERT_EQUALS("The equivalent special coordinate system should be HKL",
+                      frame.equivalientSpecialCoordinateSystem(),
+                      Mantid::Kernel::SpecialCoordinateSystem::HKL);
   }
 };
 

@@ -44,6 +44,8 @@ public:
   bool canConvertTo(const Kernel::MDUnit &otherUnit) const;
   std::string name() const;
   QSample *clone() const;
+  Mantid::Kernel::SpecialCoordinateSystem
+  equivalientSpecialCoordinateSystem() const;
 
 private:
   /// immutable unit for qlab.

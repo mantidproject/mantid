@@ -33,5 +33,10 @@ GeneralFrame *GeneralFrame::clone() const {
                           std::unique_ptr<Kernel::MDUnit>(m_unit->clone()));
 }
 
+Mantid::Kernel::SpecialCoordinateSystem
+GeneralFrame::equivalientSpecialCoordinateSystem() const {
+  return Mantid::Kernel::SpecialCoordinateSystem::None;
+}
+
 } // namespace Geometry
 } // namespace Mantid

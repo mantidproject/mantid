@@ -64,5 +64,10 @@ std::string HKL::name() const { return HKLName; }
 
 HKL *HKL::clone() const { return new HKL(m_unit->clone()); }
 
+Mantid::Kernel::SpecialCoordinateSystem
+HKL::equivalientSpecialCoordinateSystem() const {
+  return Mantid::Kernel::SpecialCoordinateSystem::HKL;
+}
+
 } // namespace Geometry
 } // namespace Mantid

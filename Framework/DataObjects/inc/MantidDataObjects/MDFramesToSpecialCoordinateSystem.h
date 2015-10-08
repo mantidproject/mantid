@@ -1,17 +1,15 @@
-#ifndef MANTID_GEOMETRY_HKL_H_
-#define MANTID_GEOMETRY_HKL_H_
+#ifndef MANTID_DATAOBJECTS_MDFRAMESTOSPECIALCOORDINATESYTEM_H_
+#define MANTID_DATAOBJECTS_MDFRAMESTOSPECIALCOORDINATESYTEM_H_
 
-#include "MantidKernel/MDUnit.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/UnitLabel.h"
-#include "MantidGeometry/MDGeometry/MDFrame.h"
-#include "MantidGeometry/DllConfig.h"
-#include <memory>
-
+#include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 namespace Mantid {
-namespace Geometry {
+namespace DataObjects {
 
-/** HKL : HKL MDFrame
+/** MDFrameFromMDWorkspace: Each dimension of the MDWorkspace contains an
+    MDFrame. The acutal frame which is common to all dimensions is extracted.
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -34,29 +32,17 @@ namespace Geometry {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_GEOMETRY_DLL HKL : public MDFrame {
+class DLLExport MDFramesToSpecialCoordinateSystem {
 public:
-  HKL(const HKL &other);
-  HKL &operator=(const HKL &other);
-  HKL(std::unique_ptr<Kernel::MDUnit> &unit);
-  HKL(Kernel::MDUnit *unit);
-  virtual ~HKL();
-  static const std::string HKLName;
-
-  // MDFrame interface
-  Kernel::UnitLabel getUnitLabel() const;
-  const Kernel::MDUnit &getMDUnit() const;
-  bool canConvertTo(const Kernel::MDUnit &otherUnit) const;
-  std::string name() const;
-  HKL *clone() const;
-  Mantid::Kernel::SpecialCoordinateSystem
-  equivalientSpecialCoordinateSystem() const;
+  MDFramesToSpecialCoordinateSystem ();
+  ~MDFramesToSpecialCoordinateSystem ();
+  Mantid::Kernel::SpecialCoordinateSystem operator()(Mantid::API::IMDWorkspace_const_sptr workspace) const;
 
 private:
-  std::unique_ptr<Kernel::MDUnit> m_unit;
+  Mantid::Kernel::SpecialCoordinateSystem extractCoordinateSystem(Mantid::Geometry::IMDDimension_const_sptr dimension) const;
 };
 
-} // namespace Geometry
+} // namespace API
 } // namespace Mantid
 
-#endif /* MANTID_GEOMETRY_HKL_H_ */
+#endif /* MANTID_DATAOBJECTS_MDFRAMESTOSPECIALCOORDINATESYTEM_H_ */

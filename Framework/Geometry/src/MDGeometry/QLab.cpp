@@ -35,5 +35,10 @@ std::string QLab::name() const { return QLab::QLabName; }
 
 QLab *QLab::clone() const { return new QLab; }
 
+Mantid::Kernel::SpecialCoordinateSystem
+QLab::equivalientSpecialCoordinateSystem() const {
+  return Mantid::Kernel::SpecialCoordinateSystem::QLab;
+}
+
 } // namespace Geometry
 } // namespace Mantid

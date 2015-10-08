@@ -5,6 +5,7 @@
 
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/UnitLabel.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include <memory>
 
 namespace Mantid {
@@ -40,6 +41,7 @@ public:
   virtual const Mantid::Kernel::MDUnit &getMDUnit() const = 0;
   virtual bool canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const = 0;
   virtual std::string name() const = 0;
+  virtual Mantid::Kernel::SpecialCoordinateSystem equivalientSpecialCoordinateSystem() const= 0;
   virtual MDFrame *clone() const = 0;
   virtual ~MDFrame() {}
 };
