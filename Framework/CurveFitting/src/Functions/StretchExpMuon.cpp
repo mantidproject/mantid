@@ -7,8 +7,13 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
+
 
 using namespace Kernel;
+
 using namespace API;
 
 DECLARE_FUNCTION(StretchExpMuon)
@@ -31,5 +36,6 @@ void StretchExpMuon::function1D(double *out, const double *xValues,
   }
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

@@ -10,6 +10,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 @author Jose Borreguero, NScD
 @date December 02 2013
@@ -125,6 +126,7 @@ private:
   boost::shared_ptr<InelasticDiffRotDiscreteCircle> m_inelastic;
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

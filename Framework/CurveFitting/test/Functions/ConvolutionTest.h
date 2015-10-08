@@ -21,6 +21,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 
 typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
 typedef Mantid::DataObjects::TableWorkspace_sptr TWS_type;

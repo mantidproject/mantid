@@ -10,6 +10,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 
 class ReflectivityMulfTest : public CxxTest::TestSuite {
 public:

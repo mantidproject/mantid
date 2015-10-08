@@ -7,6 +7,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 
 /** ProductLinearExp : Function that evauates the product of an exponential and
   linear function.
@@ -49,6 +50,7 @@ protected:
                           const size_t nData) const;
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

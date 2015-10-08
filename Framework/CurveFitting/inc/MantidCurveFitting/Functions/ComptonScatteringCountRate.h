@@ -8,6 +8,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 
 /**
   Implements a specialized function that encapsulates the combination of
@@ -92,6 +93,7 @@ private:
   std::vector<double> m_dataErrorRatio;
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

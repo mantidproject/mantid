@@ -8,11 +8,16 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 
 // Register the class into the function factory
 DECLARE_FUNCTION(UserFunction)
 
+
 using namespace Kernel;
+
 using namespace API;
 
 /// Constructor
@@ -113,5 +118,6 @@ void UserFunction::functionDeriv(const API::FunctionDomain &domain,
   calNumericalDeriv(domain, jacobian);
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

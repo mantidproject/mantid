@@ -6,6 +6,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 
 /**
   Implements a function to calculate the Compton profile of a nucleus using a
@@ -64,6 +65,7 @@ private:
                    const double amplitude) const;
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

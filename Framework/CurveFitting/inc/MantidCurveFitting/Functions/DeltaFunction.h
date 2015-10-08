@@ -10,6 +10,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 
 Delta function. Makes sence in Convolution only.
@@ -78,6 +79,7 @@ protected:
   }
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

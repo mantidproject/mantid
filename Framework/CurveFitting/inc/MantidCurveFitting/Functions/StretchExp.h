@@ -9,6 +9,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 Provide Streteched Exponential fitting function: h*exp(-(x/t)^b )
 
@@ -55,6 +56,7 @@ protected:
                                const size_t nData);
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

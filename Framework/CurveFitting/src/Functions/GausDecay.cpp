@@ -7,8 +7,13 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
+
 
 using namespace Kernel;
+
 using namespace API;
 
 DECLARE_FUNCTION(GausDecay)
@@ -51,5 +56,6 @@ void GausDecay::setActiveParameter(size_t i, double value) {
     setParameter(j, value, false);
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

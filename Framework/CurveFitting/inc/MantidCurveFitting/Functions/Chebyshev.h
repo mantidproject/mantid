@@ -9,6 +9,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 Implements Chebyshev polynomial expansion.
 
@@ -72,6 +73,7 @@ private:
 
 typedef boost::shared_ptr<Chebyshev> Chebyshev_sptr;
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

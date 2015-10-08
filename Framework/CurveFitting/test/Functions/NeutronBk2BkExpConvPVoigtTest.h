@@ -6,7 +6,7 @@
 #include "MantidCurveFitting/Functions/NeutronBk2BkExpConvPVoigt.h"
 
 using namespace std;
-using Mantid::CurveFitting::NeutronBk2BkExpConvPVoigt;
+using Mantid::CurveFitting::Functions::NeutronBk2BkExpConvPVoigt;
 
 class NeutronBk2BkExpConvPVoigtTest : public CxxTest::TestSuite {
 public:

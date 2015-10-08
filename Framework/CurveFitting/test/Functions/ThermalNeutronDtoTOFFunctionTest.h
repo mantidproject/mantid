@@ -11,7 +11,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 
-using Mantid::CurveFitting::ThermalNeutronDtoTOFFunction;
+using Mantid::CurveFitting::Functions::ThermalNeutronDtoTOFFunction;
 using namespace Mantid;
 using namespace Mantid::API;
 
@@ -45,7 +45,7 @@ public:
     vec_tof.push_back(124187);
 
     // 2. Initialize the method
-    Mantid::CurveFitting::ThermalNeutronDtoTOFFunction function;
+    ThermalNeutronDtoTOFFunction function;
     function.initialize();
 
     function.setParameter("Dtt1", 22777.1);

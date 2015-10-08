@@ -9,6 +9,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 Provide Errore function erfc()for calibrating the end of a tube.
 
@@ -57,6 +58,7 @@ protected:
   virtual void init();
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

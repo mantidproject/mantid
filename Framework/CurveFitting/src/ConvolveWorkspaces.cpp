@@ -25,6 +25,7 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 using namespace Geometry;
+using namespace Functions;
 
 void ConvolveWorkspaces::init() {
   declareProperty(

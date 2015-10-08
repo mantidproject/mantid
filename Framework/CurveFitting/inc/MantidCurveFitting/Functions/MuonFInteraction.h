@@ -9,6 +9,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 Provide Muon F Interaction fitting function
 
@@ -57,6 +58,7 @@ protected:
   virtual void init();
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

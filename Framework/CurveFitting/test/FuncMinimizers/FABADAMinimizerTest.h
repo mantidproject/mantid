@@ -17,6 +17,7 @@ using Mantid::CurveFitting::FuncMinimisers::FABADAMinimizer;
 using namespace Mantid::API;
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 
 class FABADAMinimizerTest : public CxxTest::TestSuite {
 public:

@@ -5,7 +5,7 @@
 
 #include "MantidCurveFitting/Functions/ThermalNeutronBk2BkExpSigma.h"
 
-using Mantid::CurveFitting::ThermalNeutronBk2BkExpSigma;
+using Mantid::CurveFitting::Functions::ThermalNeutronBk2BkExpSigma;
 using namespace Mantid;
 
 class ThermalNeutronBk2BkExpSigmaTest : public CxxTest::TestSuite {
@@ -36,7 +36,7 @@ public:
     vec_tof.push_back(124187);
 
     // 2. Initialize the method
-    Mantid::CurveFitting::ThermalNeutronBk2BkExpSigma function;
+    ThermalNeutronBk2BkExpSigma function;
     function.initialize();
 
     function.setParameter("Sig2", sqrt(11.380));

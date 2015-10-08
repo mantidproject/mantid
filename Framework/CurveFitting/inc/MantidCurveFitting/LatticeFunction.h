@@ -61,7 +61,7 @@ protected:
   void beforeDecoratedFunctionSet(const API::IFunction_sptr &fn);
 
 private:
-  PawleyParameterFunction_sptr m_cellParameters;
+  Functions::PawleyParameterFunction_sptr m_cellParameters;
 };
 
 typedef boost::shared_ptr<LatticeFunction> LatticeFunction_sptr;

@@ -13,11 +13,17 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 
 DECLARE_FUNCTION(PawleyParameterFunction)
 
+
 using namespace API;
+
 using namespace Geometry;
+
 using namespace Kernel;
 
 /// Constructor
@@ -572,5 +578,6 @@ void PawleyFunction::beforeDecoratedFunctionSet(const API::IFunction_sptr &fn) {
   }
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

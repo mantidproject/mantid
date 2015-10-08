@@ -25,6 +25,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 
 class MultiDomainCreatorTest_Fun : public IFunction1D, public ParamFunction {
 public:

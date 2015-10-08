@@ -15,6 +15,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 
 class BoundaryConstraintTest : public CxxTest::TestSuite {
 public:

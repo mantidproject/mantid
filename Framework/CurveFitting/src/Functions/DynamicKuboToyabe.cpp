@@ -9,8 +9,13 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
+
 
 using namespace Kernel;
+
 using namespace API;
 
 DECLARE_FUNCTION(DynamicKuboToyabe)
@@ -375,5 +380,6 @@ bool DynamicKuboToyabe::hasAttribute(const std::string &attName) const {
   return attName == "BinWidth";
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

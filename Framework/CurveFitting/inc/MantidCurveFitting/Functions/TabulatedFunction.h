@@ -19,6 +19,7 @@ class MatrixWorkspace;
 }
 
 namespace CurveFitting {
+namespace Functions {
 /**
 
 A function which takes its values from a file or a workspace. The values atr
@@ -124,6 +125,7 @@ private:
   mutable bool m_setupFinished;
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

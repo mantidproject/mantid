@@ -7,6 +7,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 
 /** ThermalNeutronBk2BkExpSIGMA : Function to calculate Sigma of Bk2Bk
   Exponential function from
@@ -70,6 +71,7 @@ private:
 typedef boost::shared_ptr<ThermalNeutronBk2BkExpSigma>
     ThermalNeutronBk2BkExpSigma_sptr;
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

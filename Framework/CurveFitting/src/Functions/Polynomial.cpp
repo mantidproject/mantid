@@ -2,13 +2,19 @@
 #include "MantidAPI/FunctionFactory.h"
 #include <boost/lexical_cast.hpp>
 
+
 using namespace Mantid::Kernel;
+
 using namespace Mantid::API;
+
 
 using namespace std;
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 
 DECLARE_FUNCTION(Polynomial)
 
@@ -154,5 +160,6 @@ bool Polynomial::hasAttribute(const std::string &attName) const {
   return attName == "n";
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

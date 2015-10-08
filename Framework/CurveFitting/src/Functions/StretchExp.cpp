@@ -7,8 +7,13 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
+
 
 using namespace Kernel;
+
 using namespace API;
 
 DECLARE_FUNCTION(StretchExp)
@@ -71,5 +76,6 @@ void StretchExp::functionDeriv1D(API::Jacobian *out, const double *xValues,
   }
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

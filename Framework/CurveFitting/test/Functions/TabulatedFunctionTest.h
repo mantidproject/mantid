@@ -19,6 +19,7 @@
 #include <fstream>
 
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::API;
 
 namespace {

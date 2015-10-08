@@ -19,6 +19,8 @@
 #include "MantidAPI/FunctionValues.h"
 
 typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
+using Mantid::CurveFitting::Functions::ProductFunction;
+using Mantid::CurveFitting::Functions::Gaussian;
 
 class ProductFunctionMWTest_Gauss : public Mantid::API::IPeakFunction {
 public:
@@ -99,7 +101,7 @@ DECLARE_FUNCTION(ProductFunctionMWTest_Linear)
 class ProductFunctionTest : public CxxTest::TestSuite {
 public:
   void testFunction() {
-    Mantid::CurveFitting::ProductFunction prodF;
+    ProductFunction prodF;
 
     Mantid::API::IFunction_sptr gauss1(new ProductFunctionMWTest_Gauss);
     gauss1->setParameter(0, 1.1);
@@ -154,8 +156,8 @@ public:
             prodF.asString());
     TS_ASSERT(fun);
 
-    Mantid::CurveFitting::ProductFunction *prodF1 =
-        dynamic_cast<Mantid::CurveFitting::ProductFunction *>(fun.get());
+    ProductFunction *prodF1 =
+        dynamic_cast<ProductFunction *>(fun.get());
     TS_ASSERT(prodF1);
 
     TS_ASSERT_EQUALS(prodF1->nFunctions(), 4);
@@ -182,12 +184,12 @@ public:
   }
 
   void testProductFunction() {
-    Mantid::CurveFitting::ProductFunction prodF;
+    ProductFunction prodF;
 
     double c1 = 1.0;
     double h1 = 3.0;
     double s1 = 0.5;
-    Mantid::API::IFunction_sptr f0(new Mantid::CurveFitting::Gaussian);
+    Mantid::API::IFunction_sptr f0(new Gaussian);
     f0->initialize();
     f0->setParameter("PeakCentre", c1);
     f0->setParameter("Height", h1);
@@ -208,7 +210,7 @@ public:
     double c2 = 2;
     double h2 = 10.0;
     double s2 = 0.5;
-    Mantid::API::IFunction_sptr f1(new Mantid::CurveFitting::Gaussian);
+    Mantid::API::IFunction_sptr f1(new Gaussian);
     f1->initialize();
     f1->setParameter("PeakCentre", c2);
     f1->setParameter("Height", h2);
@@ -284,14 +286,14 @@ public:
   }
 
   void testForCategories() {
-    Mantid::CurveFitting::ProductFunction forCat;
+    ProductFunction forCat;
     const std::vector<std::string> categories = forCat.categories();
     TS_ASSERT(categories.size() == 1);
     TS_ASSERT(categories[0] == "General");
   }
 
   void testDerivatives() {
-    Mantid::CurveFitting::ProductFunction prodF;
+    ProductFunction prodF;
 
     Mantid::API::IFunction_sptr linear1(new ProductFunctionMWTest_Linear);
     linear1->setParameter(0, 1.0);

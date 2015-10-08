@@ -6,7 +6,7 @@
 
 #include "ComptonProfileTestHelpers.h"
 
-using Mantid::CurveFitting::VesuvioResolution;
+using Mantid::CurveFitting::Functions::VesuvioResolution;
 
 class VesuvioResolutionTest : public CxxTest::TestSuite {
 public:

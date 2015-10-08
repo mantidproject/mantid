@@ -9,6 +9,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 
 double Sin(double x) { return sin(x); }
 double MinusSin(double x) { return -sin(x); }

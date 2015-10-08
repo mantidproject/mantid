@@ -8,6 +8,9 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 namespace {
 ///@cond
 const char *MASS_NAME = "Mass";
@@ -78,7 +81,8 @@ std::string VesuvioResolution::name() const { return "VesuvioResolution"; }
  */
 void VesuvioResolution::setUpForFit() {
   // Voigt
-  using namespace Mantid::API;
+  
+using namespace Mantid::API;
   m_voigt = boost::dynamic_pointer_cast<IPeakFunction>(
       FunctionFactory::Instance().createFunction("Voigt"));
 }
@@ -253,5 +257,6 @@ void VesuvioResolution::voigtApprox(std::vector<double> &voigt,
                  std::bind2nd(std::multiplies<double>(), norm));
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

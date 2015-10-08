@@ -21,14 +21,20 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 
 namespace {
 /// static logger
 Kernel::Logger g_log("IkedaCarpenterPV");
 }
 
+
 using namespace Kernel;
+
 using namespace SpecialFunctionSupport;
+
 using namespace Geometry;
 
 DECLARE_FUNCTION(IkedaCarpenterPV)
@@ -366,5 +372,6 @@ void IkedaCarpenterPV::functionDeriv(const API::FunctionDomain &domain,
   calNumericalDeriv(domain, jacobian);
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

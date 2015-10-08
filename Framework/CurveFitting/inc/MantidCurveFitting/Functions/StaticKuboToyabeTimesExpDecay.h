@@ -6,6 +6,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 
 /**
   StaticKuboToyabeTimesExpDecay fitting function
@@ -51,6 +52,7 @@ protected:
   virtual void init();
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

@@ -5,8 +5,13 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
+
 
 using namespace Kernel;
+
 using namespace API;
 
 void BackgroundFunction::fit(const std::vector<double> &X,
@@ -15,5 +20,6 @@ void BackgroundFunction::fit(const std::vector<double> &X,
   (void)Y; // Avoid compiler warning
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

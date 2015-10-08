@@ -8,7 +8,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Fit.h"
 
-using Mantid::CurveFitting::Polynomial;
+using Mantid::CurveFitting::Functions::Polynomial;
 using namespace Mantid;
 using namespace API;
 using namespace Kernel;

@@ -9,6 +9,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 Provide oscillating exponential decay function:
 h*exp(-lambda.x)*(cos(2pi*f*x+phi))
@@ -61,6 +62,7 @@ protected:
   virtual void init();
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

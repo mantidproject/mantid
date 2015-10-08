@@ -13,6 +13,8 @@ namespace Mantid {
 namespace CurveFitting {
 namespace ParameterEstimator {
 
+using namespace Functions;
+
 /// The logger.
 Kernel::Logger g_log("ParameterEstimator");
 

@@ -32,6 +32,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 /**
  * Used for testing only
  */

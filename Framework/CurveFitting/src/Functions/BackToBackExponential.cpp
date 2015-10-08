@@ -12,8 +12,13 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
+
 
 using namespace Kernel;
+
 using namespace API;
 
 DECLARE_FUNCTION(BackToBackExponential)
@@ -144,5 +149,6 @@ double BackToBackExponential::expWidth() const {
   return M_LN2 * (a + b) / (a * b);
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

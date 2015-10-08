@@ -13,6 +13,7 @@ class Parser;
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 A background function. Functions that are intended to be used as backgrounds
 should inherit from this class to enable certain features. E.g. querying
@@ -74,6 +75,7 @@ public:
 
 typedef boost::shared_ptr<BackgroundFunction> BackgroundFunction_sptr;
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

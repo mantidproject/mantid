@@ -13,12 +13,18 @@
 const double PEAKRANGE = 5.0;
 const double NEG_DBL_MAX = -1. * DBL_MAX;
 
+
 using namespace std;
+
 using namespace Mantid;
+
 using namespace Mantid::API;
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 namespace {
 /// static reference to the logger
 Kernel::Logger g_log("ThermalNeutronBk2BkExpConvPV");
@@ -774,5 +780,6 @@ void ThermalNeutronBk2BkExpConvPVoigt::setPeakRadius(const int& r)
 }
   */
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

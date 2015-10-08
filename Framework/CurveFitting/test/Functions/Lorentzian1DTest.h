@@ -12,7 +12,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::CurveFitting::Lorentzian1D;
+using Mantid::CurveFitting::Functions::Lorentzian1D;
 using namespace Mantid::DataObjects;
 
 class Lorentzian1DTest : public CxxTest::TestSuite {

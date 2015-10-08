@@ -12,6 +12,7 @@ DECLARE_ALGORITHM(SplineInterpolation)
 
 using namespace API;
 using namespace Kernel;
+using Functions::CubicSpline;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor

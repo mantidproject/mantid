@@ -9,6 +9,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 Provide Log Normal function: h*exp(-(log(x)-t)^2 / (2*b^2) )/x
 
@@ -54,6 +55,7 @@ protected:
                                const size_t nData);
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

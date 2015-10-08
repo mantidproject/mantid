@@ -13,6 +13,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 
 // same class as ConvolutionTest_Gauss in ConvolutionTest.h
 class DeltaFunctionTest_Gauss : public IPeakFunction {

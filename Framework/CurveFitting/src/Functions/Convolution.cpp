@@ -20,8 +20,13 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
+
 
 using namespace Kernel;
+
 using namespace API;
 
 DECLARE_FUNCTION(Convolution)
@@ -297,5 +302,6 @@ void Convolution::refreshResolution() const {
   m_resolution.clear();
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

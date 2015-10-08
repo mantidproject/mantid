@@ -13,6 +13,7 @@
 #include "MantidCurveFitting/Jacobian.h"
 
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::API;
 
 class PeakParameterFunctionTest : public CxxTest::TestSuite {

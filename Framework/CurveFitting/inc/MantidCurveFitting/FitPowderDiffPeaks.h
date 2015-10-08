@@ -88,7 +88,7 @@ private:
   void genPeaksFromTable(DataObjects::TableWorkspace_sptr peakparamws);
 
   /// Generate a peak
-  BackToBackExponential_sptr
+  Functions::BackToBackExponential_sptr
   genPeak(std::map<std::string, int> hklmap,
           std::map<std::string, double> parammap,
           std::map<std::string, std::string> bk2bk2braggmap, bool &good,
@@ -114,62 +114,62 @@ private:
   void fitPeaksRobust();
 
   /// Fit a single peak
-  bool fitPeak(BackToBackExponential_sptr peak,
-               BackgroundFunction_sptr background, double leftdev,
+  bool fitPeak(Functions::BackToBackExponential_sptr peak,
+               Functions::BackgroundFunction_sptr background, double leftdev,
                double rightdev, size_t m_wsIndex, double &chi2);
 
   //---------------------------------------------------------------------------
 
   /// Fit single peak in robust mode (no hint)
-  bool fitSinglePeakRobust(BackToBackExponential_sptr peak,
-                           BackgroundFunction_sptr background, double leftdev,
+  bool fitSinglePeakRobust(Functions::BackToBackExponential_sptr peak,
+                           Functions::BackgroundFunction_sptr background, double leftdev,
                            double rightdev,
                            std::map<std::string, double> rightpeakparammap,
                            double &finalchi2);
 
   /// Fit signle peak by Monte Carlo/simulated annealing
-  bool fitSinglePeakSimulatedAnnealing(BackToBackExponential_sptr peak,
+  bool fitSinglePeakSimulatedAnnealing(Functions::BackToBackExponential_sptr peak,
                                        std::vector<std::string> paramtodomc);
 
   /// Fit peak with confidence of the centre
-  bool fitSinglePeakConfidentX(BackToBackExponential_sptr peak);
+  bool fitSinglePeakConfidentX(Functions::BackToBackExponential_sptr peak);
 
   /// Fit peak with trustful peak parameters
-  bool fitSinglePeakConfident(BackToBackExponential_sptr peak,
-                              BackgroundFunction_sptr backgroundfunction,
+  bool fitSinglePeakConfident(Functions::BackToBackExponential_sptr peak,
+                              Functions::BackgroundFunction_sptr backgroundfunction,
                               double leftbound, double rightbound, double &chi2,
                               bool &annhilatedpeak);
 
   /// Fit peak with confident parameters
   bool fitSinglePeakConfidentY(DataObjects::Workspace2D_sptr dataws,
-                               BackToBackExponential_sptr peak,
+                               Functions::BackToBackExponential_sptr peak,
                                double dampingfactor);
 
   /// Fit peaks with confidence in fwhm and etc.
-  bool fitOverlappedPeaks(std::vector<BackToBackExponential_sptr> peaks,
-                          BackgroundFunction_sptr backgroundfunction,
+  bool fitOverlappedPeaks(std::vector<Functions::BackToBackExponential_sptr> peaks,
+                          Functions::BackgroundFunction_sptr backgroundfunction,
                           double gfwhm);
 
   /// Fit multiple (overlapped) peaks
   bool doFitMultiplePeaks(DataObjects::Workspace2D_sptr dataws, size_t wsindex,
                           API::CompositeFunction_sptr peaksfunc,
-                          std::vector<BackToBackExponential_sptr> peakfuncs,
+                          std::vector<Functions::BackToBackExponential_sptr> peakfuncs,
                           std::vector<bool> &vecfitgood,
                           std::vector<double> &vecchi2s);
 
   /// Use Le Bail method to estimate and set the peak heights
   void estimatePeakHeightsLeBail(DataObjects::Workspace2D_sptr dataws,
                                  size_t wsindex,
-                                 std::vector<BackToBackExponential_sptr> peaks);
+                                 std::vector<Functions::BackToBackExponential_sptr> peaks);
 
   /// Set constraints on a group of overlapped peaks for fitting
   void
-  setOverlappedPeaksConstraints(std::vector<BackToBackExponential_sptr> peaks);
+  setOverlappedPeaksConstraints(std::vector<Functions::BackToBackExponential_sptr> peaks);
 
   /// Fit 1 peak by 1 minimizer of 1 call of minimzer (simple version)
   bool doFit1PeakSimple(DataObjects::Workspace2D_sptr dataws,
                         size_t workspaceindex,
-                        BackToBackExponential_sptr peakfunction,
+                        Functions::BackToBackExponential_sptr peakfunction,
                         std::string minimzername, size_t maxiteration,
                         double &chi2);
 
@@ -182,14 +182,14 @@ private:
 
   /// Fit single peak with background to raw data
   bool doFit1PeakBackground(DataObjects::Workspace2D_sptr dataws,
-                            size_t wsindex, BackToBackExponential_sptr peak,
-                            BackgroundFunction_sptr backgroundfunction,
+                            size_t wsindex, Functions::BackToBackExponential_sptr peak,
+                            Functions::BackgroundFunction_sptr backgroundfunction,
                             double &chi2);
 
   /// Fit 1 peak by using a sequential of minimizer
   bool doFit1PeakSequential(DataObjects::Workspace2D_sptr dataws,
                             size_t workspaceindex,
-                            BackToBackExponential_sptr peakfunction,
+                            Functions::BackToBackExponential_sptr peakfunction,
                             std::vector<std::string> minimzernames,
                             std::vector<size_t> maxiterations,
                             std::vector<double> dampfactors, double &chi2);
@@ -197,7 +197,7 @@ private:
   /// Fit N overlapped peaks in a simple manner
   bool doFitNPeaksSimple(DataObjects::Workspace2D_sptr dataws, size_t wsindex,
                          API::CompositeFunction_sptr peaksfunc,
-                         std::vector<BackToBackExponential_sptr> peakfuncs,
+                         std::vector<Functions::BackToBackExponential_sptr> peakfuncs,
                          std::string minimizername, size_t maxiteration,
                          double &chi2);
 
@@ -241,15 +241,15 @@ private:
   // double leftbound, double rightbound);
 
   /// Estimate the range of a single peak
-  bool estimateSinglePeakRange(BackToBackExponential_sptr peak,
-                               BackgroundFunction_sptr background,
-                               BackToBackExponential_sptr rightpeak,
+  bool estimateSinglePeakRange(Functions::BackToBackExponential_sptr peak,
+                               Functions::BackgroundFunction_sptr background,
+                               Functions::BackToBackExponential_sptr rightpeak,
                                double fwhm, bool ismostright, size_t m_wsIndex,
                                double &chi2);
 
   /// Observe peak range with hint from right peak's properties
-  void observePeakRange(BackToBackExponential_sptr thispeak,
-                        BackToBackExponential_sptr rightpeak,
+  void observePeakRange(Functions::BackToBackExponential_sptr thispeak,
+                        Functions::BackToBackExponential_sptr rightpeak,
                         double refpeakshift, double &peakleftbound,
                         double &peakrightbound);
 
@@ -266,16 +266,16 @@ private:
 
   /// Fit background function by removing the peak properly
   bool doFitBackground(DataObjects::Workspace2D_sptr dataws,
-                       BackgroundFunction_sptr background, double leftpeakbound,
+                       Functions::BackgroundFunction_sptr background, double leftpeakbound,
                        double rightpeakbound);
 
   /// Fit single peak without background
   std::pair<bool, double> doFitPeak_Old(DataObjects::Workspace2D_sptr dataws,
-                                        BackToBackExponential_sptr peak,
+                                        Functions::BackToBackExponential_sptr peak,
                                         double guessedfwhm, bool calchi2);
 
   std::pair<bool, double> doFitPeak(DataObjects::Workspace2D_sptr dataws,
-                                    BackToBackExponential_sptr peakfunction,
+                                    Functions::BackToBackExponential_sptr peakfunction,
                                     double guessedfwhm);
 
   /// Fit background-removed peak by Gaussian
@@ -289,7 +289,7 @@ private:
 
   /// Calcualte the value of a single peak in a given range.
   void calculate1PeakGroup(std::vector<size_t> peakindexes,
-                           BackgroundFunction_sptr background);
+                           Functions::BackgroundFunction_sptr background);
 
   /// Parse the fitting result
   std::string parseFitResult(API::IAlgorithm_sptr fitalg, double &chi2,
@@ -312,7 +312,7 @@ private:
 
   /// Plot a single peak to output vector
   void plotFunction(API::IFunction_sptr peakfunction,
-                    BackgroundFunction_sptr background,
+                    Functions::BackgroundFunction_sptr background,
                     API::FunctionDomain1DVector domain);
 
   //-----------------------------------------------------------------------------------------------
@@ -332,7 +332,7 @@ private:
 
   /// Sorted vector for peaks.  double = d_h, vector = (HKL), peak
   std::vector<std::pair<
-      double, std::pair<std::vector<int>, BackToBackExponential_sptr>>>
+      double, std::pair<std::vector<int>, Functions::BackToBackExponential_sptr>>>
       m_vecPeakFunctions;
 
   /// Peak fitting information
@@ -415,7 +415,7 @@ inline double linearInterpolateY(double x0, double xf, double y0, double yf,
 
 /// Estimate background for a pattern in a coarse mode
 void estimateBackgroundCoarse(DataObjects::Workspace2D_sptr dataws,
-                              BackgroundFunction_sptr background,
+                              Functions::BackgroundFunction_sptr background,
                               size_t wsindexraw, size_t wsindexbkgd,
                               size_t wsindexpeak);
 

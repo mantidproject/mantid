@@ -13,6 +13,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 
 /**
   * Provide peak shape function interface a Peak shape on one time slice of a
@@ -176,6 +177,7 @@ protected:
       expCoeffxy; //<Other common values used in calculating values and
                   //<derivatives
 };
+} // namespace Functions
 }
 }
 

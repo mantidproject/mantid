@@ -7,6 +7,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 
 /** Polynomial : N-th polynomial background function.
 
@@ -73,6 +74,7 @@ private:
 
 typedef boost::shared_ptr<Polynomial> Polynomial_sptr;
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

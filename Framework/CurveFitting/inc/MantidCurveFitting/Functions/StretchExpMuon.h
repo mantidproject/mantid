@@ -8,6 +8,7 @@
 #include "MantidAPI/IFunction1D.h"
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 Provide stetch exponential function for Muon scientists
 
@@ -52,6 +53,7 @@ protected:
   virtual void init();
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

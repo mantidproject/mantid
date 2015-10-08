@@ -11,6 +11,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
  Provide Dynamic Kubo Toyabe function interface to IFunction1D for muon
  scientists.
@@ -87,6 +88,7 @@ private:
   double m_minEps, m_maxEps;
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

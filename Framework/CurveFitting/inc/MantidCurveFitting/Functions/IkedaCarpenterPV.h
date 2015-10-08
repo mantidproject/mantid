@@ -9,6 +9,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 Provide Ikeda-Carpenter-pseudo-Voigt peak shape function interface to
 IPeakFunction. See wiki
@@ -96,6 +97,7 @@ private:
                             double &eta) const;
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

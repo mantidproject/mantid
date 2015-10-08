@@ -6,6 +6,9 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 
 DECLARE_FUNCTION(ProductQuadraticExp)
 
@@ -73,5 +76,6 @@ void ProductQuadraticExp::function1D(double *out, const double *xValues,
   }
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

@@ -12,6 +12,8 @@ namespace CurveFitting {
 // Forward declarations
 //---------------------------------------------------------------------------
 struct DetectorParams;
+namespace Functions {
+
 
 //---------------------------------------------------------------------------
 /// Simple data structure to store resolution parameter values
@@ -118,6 +120,7 @@ private:
   ///@}
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

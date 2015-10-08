@@ -6,6 +6,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 
 /** SimpleChebfun : approximates smooth 1d functions and
   provides methods to manipulate them.
@@ -94,6 +95,7 @@ private:
   bool m_badFit;
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

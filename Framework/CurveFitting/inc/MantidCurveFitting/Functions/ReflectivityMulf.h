@@ -10,6 +10,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 
 /** ReflectivityMulf : Calculate the ReflectivityMulf from a simple layer model.
 
@@ -59,6 +60,7 @@ private:
 
 typedef boost::shared_ptr<ReflectivityMulf> ReflectivityMulf_sptr;
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

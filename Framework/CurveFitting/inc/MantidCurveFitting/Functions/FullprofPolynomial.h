@@ -6,6 +6,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 
 /** FullprofPolynomial : Polynomial background defined in Fullprof
 
@@ -75,6 +76,7 @@ private:
 
 typedef boost::shared_ptr<FullprofPolynomial> FullprofPolynomial_sptr;
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

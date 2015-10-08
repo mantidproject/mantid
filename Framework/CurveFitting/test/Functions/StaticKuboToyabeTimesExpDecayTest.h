@@ -8,11 +8,12 @@
 #include "MantidCurveFitting/Fit.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-using Mantid::CurveFitting::StaticKuboToyabeTimesExpDecay;
+using Mantid::CurveFitting::Functions::StaticKuboToyabeTimesExpDecay;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::DataObjects;
 
 class StaticKuboToyabeTimesExpDecayTest : public CxxTest::TestSuite {

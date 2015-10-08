@@ -102,6 +102,7 @@ public:
   void testAgainstMockData() {
     using namespace Mantid::API;
     using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 
 /**
  * Changing compiler on OS X has yet again caused this (and only this) test to
@@ -172,6 +173,7 @@ public:
   void test_Against_Data_In_DeltaE() {
     using namespace Mantid::API;
     using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 
 #if !(defined __APPLE__)
 
@@ -253,6 +255,7 @@ private:
   Mantid::API::IAlgorithm_sptr runFit(const std::string &wsName) {
     using namespace Mantid::API;
     using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 
     // set up fitting function and pass to Fit
     IkedaCarpenterPV icpv;

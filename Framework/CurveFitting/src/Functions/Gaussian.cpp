@@ -9,8 +9,13 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
+
 
 using namespace Kernel;
+
 using namespace API;
 
 DECLARE_FUNCTION(Gaussian)
@@ -69,5 +74,6 @@ double Gaussian::activeParameter(size_t i) const {
     return getParameter(i);
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

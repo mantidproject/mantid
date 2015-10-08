@@ -9,7 +9,7 @@
 
 #include <cmath>
 
-using Mantid::CurveFitting::BackToBackExponential;
+using Mantid::CurveFitting::Functions::BackToBackExponential;
 
 namespace {
 /**

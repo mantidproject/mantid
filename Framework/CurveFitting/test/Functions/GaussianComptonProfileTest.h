@@ -7,7 +7,8 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "ComptonProfileTestHelpers.h"
 
-using Mantid::CurveFitting::GaussianComptonProfile;
+using Mantid::CurveFitting::Functions::GaussianComptonProfile;
+using Mantid::CurveFitting::Functions::ComptonProfile;
 
 class GaussianComptonProfileTest : public CxxTest::TestSuite {
 public:
@@ -40,7 +41,7 @@ public:
   }
 
   void test_Function_Has_One_Intensity_Coefficient() {
-    boost::shared_ptr<Mantid::CurveFitting::ComptonProfile> profile =
+    boost::shared_ptr<ComptonProfile> profile =
         createFunction();
 
     auto intensityIndices = profile->intensityParameterIndices();

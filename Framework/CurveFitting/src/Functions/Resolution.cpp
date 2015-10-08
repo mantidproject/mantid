@@ -6,8 +6,13 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
+
 
 using namespace Kernel;
+
 using namespace API;
 
 DECLARE_FUNCTION(Resolution)
@@ -43,5 +48,6 @@ bool Resolution::hasAttribute(const std::string &attName) const {
   return m_fun.hasAttribute(attName);
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

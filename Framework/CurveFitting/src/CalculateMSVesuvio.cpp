@@ -27,6 +27,7 @@ namespace Mantid {
 namespace CurveFitting {
 using namespace API;
 using namespace Kernel;
+using namespace Functions;
 using Geometry::Link;
 using Geometry::ParameterMap;
 using Geometry::Track;
@@ -319,8 +320,8 @@ void CalculateMSVesuvio::calculateMS(const size_t wsIndex,
   DetectorParams detpar =
       ConvertToYSpace::getDetectorParameters(m_inputWS, wsIndex);
   detpar.t0 *= 1e6; // t0 in microseconds here
-  ResolutionParams respar =
-      VesuvioResolution::getResolutionParameters(m_inputWS, wsIndex);
+  Functions::ResolutionParams respar =
+      Functions::VesuvioResolution::getResolutionParameters(m_inputWS, wsIndex);
 
   // Final counts averaged over all simulations
   MSVesuvioHelper::SimulationAggregator accumulator(m_nruns);

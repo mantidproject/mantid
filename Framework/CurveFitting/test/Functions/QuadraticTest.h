@@ -17,7 +17,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::CurveFitting::Quadratic;
+using Mantid::CurveFitting::Functions::Quadratic;
 using Mantid::CurveFitting::Fit;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;

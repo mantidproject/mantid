@@ -8,6 +8,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
   This implements a resolution function for fitting a single mass in a compton
   scattering spectrum. The
@@ -81,6 +82,7 @@ private:
   double m_hwhmLorentz;
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

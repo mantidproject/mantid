@@ -5,6 +5,9 @@
 #include "MantidCurveFitting/Functions/ComptonScatteringCountRate.h"
 #include "ComptonProfileTestHelpers.h"
 
+using Mantid::CurveFitting::Functions::ComptonScatteringCountRate;
+using Mantid::CurveFitting::Functions::ComptonProfile;
+
 class ComptonScatteringCountRateTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -209,7 +212,7 @@ public:
 private:
   /// A simple working object to use for the testing
   /// Provides a canned answer of 1 for the massProfile
-  class ComptonProfileStub : public Mantid::CurveFitting::ComptonProfile {
+  class ComptonProfileStub : public ComptonProfile {
   public:
     ComptonProfileStub() : ComptonProfile() {
       declareParameter("Width", 1.0);
@@ -289,7 +292,7 @@ private:
     return func;
   }
 
-  boost::shared_ptr<Mantid::CurveFitting::ComptonScatteringCountRate>
+  boost::shared_ptr<ComptonScatteringCountRate>
   createFunctionNoBackground(const bool useTwoIntensityFuncAsFirst = false) {
     boost::shared_ptr<ComptonProfileStub> func1;
     if (useTwoIntensityFuncAsFirst) {
@@ -310,7 +313,7 @@ private:
     func2->setParameter("Width", 10.0);
     func2->setParameter("Intensity", 3.0);
 
-    using Mantid::CurveFitting::ComptonScatteringCountRate;
+    
     auto profile = boost::make_shared<ComptonScatteringCountRate>();
     profile->initialize();
     profile->addFunction(func1);
@@ -321,7 +324,6 @@ private:
   }
 
   Mantid::API::IFunction_sptr createFunction() {
-    using Mantid::CurveFitting::ComptonScatteringCountRate;
 
     auto profile = boost::make_shared<ComptonScatteringCountRate>();
     profile->initialize();

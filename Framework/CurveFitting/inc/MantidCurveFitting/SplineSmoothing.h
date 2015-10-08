@@ -106,7 +106,7 @@ private:
   void performAdditionalFitting(API::MatrixWorkspace_sptr ws, const int row);
 
   /// CubicSpline member used to perform smoothing
-  boost::shared_ptr<BSpline> m_cspline;
+  boost::shared_ptr<Functions::BSpline> m_cspline;
   /// pointer to the input workspace
   API::MatrixWorkspace_sptr m_inputWorkspace;
   /// pointer to the input workspace converted to point data

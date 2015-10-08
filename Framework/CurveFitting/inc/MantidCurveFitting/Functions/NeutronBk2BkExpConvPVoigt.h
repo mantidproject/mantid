@@ -6,6 +6,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 
 /** NeutronBk2BkExpConvPVoigt : Back-to-back exponential function convoluted
   with pseudo-voigt
@@ -128,6 +129,7 @@ private:
   mutable double m_N;
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

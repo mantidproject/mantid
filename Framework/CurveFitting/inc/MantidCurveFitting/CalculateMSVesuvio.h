@@ -9,11 +9,10 @@
 
 namespace Mantid {
 namespace CurveFitting {
-//-----------------------------------------------------------------------------
-// CurveFitting forward declarations
-//-----------------------------------------------------------------------------
 struct DetectorParams;
+namespace Functions{
 struct ResolutionParams;
+}
 namespace MSVesuvioHelper {
 class RandomNumberGenerator;
 struct Simulation;
@@ -88,12 +87,12 @@ private:
   void cacheInputs();
   void calculateMS(const size_t wsIndex, API::ISpectrum &totalsc,
                    API::ISpectrum &multsc) const;
-  void simulate(const DetectorParams &detpar, const ResolutionParams &respar,
+  void simulate(const DetectorParams &detpar, const Functions::ResolutionParams &respar,
                 MSVesuvioHelper::Simulation &simulCounts) const;
   void assignToOutput(const MSVesuvioHelper::SimulationWithErrors &avgCounts,
                       API::ISpectrum &totalsc, API::ISpectrum &multsc) const;
   double calculateCounts(const DetectorParams &detpar,
-                         const ResolutionParams &respar,
+                         const Functions::ResolutionParams &respar,
                          MSVesuvioHelper::Simulation &simulation) const;
 
   // single-event helpers

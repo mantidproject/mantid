@@ -17,6 +17,7 @@
 #include "MantidKernel/MersenneTwister.h"
 
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 

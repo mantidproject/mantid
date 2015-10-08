@@ -6,13 +6,19 @@
 
 #include <gsl/gsl_sf_erf.h>
 
+
 using namespace Mantid::Kernel;
+
 using namespace Mantid::API;
+
 
 using namespace std;
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 namespace {
 /// static logger
 Kernel::Logger g_log("Bk2BkExpConvPV");
@@ -250,4 +256,5 @@ void Bk2BkExpConvPV::calHandEta(double sigma2, double gamma, double &H,
 }
 
 } // namespace Mantid
+} // namespace Functions
 } // namespace CurveFitting

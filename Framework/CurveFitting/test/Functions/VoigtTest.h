@@ -12,7 +12,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/make_shared.hpp>
 
-using Mantid::CurveFitting::Voigt;
+using Mantid::CurveFitting::Functions::Voigt;
 using Mantid::API::IFunction;
 
 class VoigtTest : public CxxTest::TestSuite {

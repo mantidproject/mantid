@@ -2,11 +2,16 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/System.h"
 
+
 using namespace Mantid::Kernel;
+
 using namespace Mantid::API;
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 DECLARE_FUNCTION(FlatBackground)
 
 //----------------------------------------------------------------------------------------------
@@ -60,4 +65,5 @@ void FlatBackground::functionDeriv1D(API::Jacobian *out, const double *xValues,
 }
 
 } // namespace Mantid
+} // namespace Functions
 } // namespace CurveFitting

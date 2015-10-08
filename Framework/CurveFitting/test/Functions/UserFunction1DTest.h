@@ -11,6 +11,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::API;
 
 class UserFunction1DTest : public CxxTest::TestSuite {

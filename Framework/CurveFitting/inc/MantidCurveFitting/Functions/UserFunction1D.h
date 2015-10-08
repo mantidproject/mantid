@@ -10,6 +10,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 Deprecation notice: instead of using this algorithm please use the Fit algorithm
 where the Function parameter of this algorithm is used
@@ -121,6 +122,7 @@ private:
   boost::shared_array<double> m_tmp1;
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

@@ -8,6 +8,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 
 /** Bk2BkExpConvPV : Peak profile as tback-to-back exponential convoluted with
   pseudo-Voigt.
@@ -92,6 +93,7 @@ private:
 
 typedef boost::shared_ptr<Bk2BkExpConvPV> Bk2BkExpConvPV_sptr;
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

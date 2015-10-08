@@ -8,6 +8,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 Provide lorentzian peak shape function interface to IPeakFunction.
 I.e. the function: \f$ \frac{A}{\pi}( \Gamma/2((x-PeakCentre)^2+(\Gamma/2)^2)
@@ -69,6 +70,7 @@ protected:
   virtual void init();
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

@@ -13,12 +13,17 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 namespace {
 /// static logger
 Kernel::Logger g_log("CubicSpline");
 }
 
+
 using namespace Kernel;
+
 using namespace API;
 
 DECLARE_FUNCTION(CubicSpline)
@@ -359,5 +364,6 @@ void CubicSpline::reallocGSLObjects(const int n) {
  *
  */
 CubicSpline::~CubicSpline() {}
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

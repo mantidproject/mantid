@@ -76,18 +76,18 @@ public:
 protected:
   double getTransformedCenter(double d, const Kernel::Unit_sptr &unit) const;
 
-  void addHKLsToFunction(PawleyFunction_sptr &pawleyFn,
+  void addHKLsToFunction(Functions::PawleyFunction_sptr &pawleyFn,
                          const API::ITableWorkspace_sptr &tableWs,
                          const Kernel::Unit_sptr &unit, double startX,
                          double endX) const;
 
   API::ITableWorkspace_sptr
-  getLatticeFromFunction(const PawleyFunction_sptr &pawleyFn) const;
+  getLatticeFromFunction(const Functions::PawleyFunction_sptr &pawleyFn) const;
   API::ITableWorkspace_sptr
-  getPeakParametersFromFunction(const PawleyFunction_sptr &pawleyFn) const;
+  getPeakParametersFromFunction(const Functions::PawleyFunction_sptr &pawleyFn) const;
 
   API::IFunction_sptr
-  getCompositeFunction(const PawleyFunction_sptr &pawleyFn) const;
+  getCompositeFunction(const Functions::PawleyFunction_sptr &pawleyFn) const;
 
   void init();
   void exec();

@@ -18,6 +18,8 @@ namespace Mantid {
 namespace CurveFitting {
 using namespace API;
 using namespace Kernel;
+using namespace Functions;
+using namespace BOOST_FUNCTION_STD_NS;
 using namespace std;
 
 // Subscription
@@ -227,8 +229,8 @@ void CalculateGammaBackground::calculateSpectrumFromDetector(
   // -- Setup detector & resolution parameters --
   DetectorParams detPar =
       ConvertToYSpace::getDetectorParameters(m_inputWS, inputIndex);
-  ResolutionParams detRes =
-      VesuvioResolution::getResolutionParameters(m_inputWS, inputIndex);
+  Functions::ResolutionParams detRes =
+    Functions::VesuvioResolution::getResolutionParameters(m_inputWS, inputIndex);
 
   // Compute a time of flight spectrum convolved with a Voigt resolution
   // function for each mass

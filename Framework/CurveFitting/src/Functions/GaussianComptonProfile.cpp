@@ -8,6 +8,9 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 DECLARE_FUNCTION(GaussianComptonProfile)
 
 const char *WIDTH_PARAM = "Width";
@@ -112,5 +115,6 @@ void GaussianComptonProfile::massProfile(double *result, const size_t nData,
   }
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

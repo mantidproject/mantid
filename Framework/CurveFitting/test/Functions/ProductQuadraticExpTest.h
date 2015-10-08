@@ -16,6 +16,7 @@
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::API;
 
 class ProductQuadraticExpTest : public CxxTest::TestSuite {

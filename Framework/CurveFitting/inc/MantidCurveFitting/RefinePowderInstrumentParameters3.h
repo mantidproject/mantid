@@ -183,7 +183,7 @@ private:
   std::map<std::string, Parameter> m_profileParameters;
 
   /// My function for peak positions
-  ThermalNeutronDtoTOFFunction_sptr m_positionFunc;
+  Functions::ThermalNeutronDtoTOFFunction_sptr m_positionFunc;
 
   /// Damping factor
   double m_dampingFactor;

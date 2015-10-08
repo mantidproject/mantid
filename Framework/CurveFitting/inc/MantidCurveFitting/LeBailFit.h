@@ -136,7 +136,7 @@ private:
   /// Examine whether the insturment parameter set to a peak can cause a valid
   /// set of peak profile of that peak
   bool examinInstrumentParameterValid(
-      CurveFitting::ThermalNeutronBk2BkExpConvPVoigt_sptr peak, double &d_h,
+      Functions::ThermalNeutronBk2BkExpConvPVoigt_sptr peak, double &d_h,
       double &tof_h, std::string &errmsg);
 
   /// Set parameters to each peak
@@ -161,13 +161,13 @@ private:
 
   /// Group peaks together
   void groupPeaks(std::vector<std::vector<
-      std::pair<double, CurveFitting::ThermalNeutronBk2BkExpConvPVoigt_sptr>>> &
+      std::pair<double, Functions::ThermalNeutronBk2BkExpConvPVoigt_sptr>>> &
                       peakgroupvec);
 
   /// Calcualate the peak heights of a group of overlapped peaks
   bool calculateGroupPeakIntensities(
       std::vector<std::pair<
-          double, CurveFitting::ThermalNeutronBk2BkExpConvPVoigt_sptr>>
+          double, Functions::ThermalNeutronBk2BkExpConvPVoigt_sptr>>
           peakgroup,
       API::MatrixWorkspace_sptr dataws, size_t wsindex, bool zerobackground,
       std::vector<double> &allpeaksvalues);
@@ -343,7 +343,7 @@ private:
   -------------------------------*/
 
   /// Background function
-  CurveFitting::BackgroundFunction_sptr m_backgroundFunction;
+  Functions::BackgroundFunction_sptr m_backgroundFunction;
 
   /// Function parameters updated by fit
   std::map<std::string, Parameter>

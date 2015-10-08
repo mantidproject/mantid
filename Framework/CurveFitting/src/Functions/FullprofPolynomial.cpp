@@ -4,6 +4,9 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 
 DECLARE_FUNCTION(FullprofPolynomial)
 
@@ -161,5 +164,6 @@ bool FullprofPolynomial::hasAttribute(const std::string &attName) const {
   return has;
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

@@ -62,7 +62,7 @@ private:
   void exec();
 
   /// CubicSpline member used to perform interpolation
-  boost::shared_ptr<CubicSpline> m_cspline;
+  boost::shared_ptr<Functions::CubicSpline> m_cspline;
 
   /// setup an output workspace using meta data from inws and taking a number of
   /// spectra

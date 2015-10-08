@@ -29,6 +29,7 @@
 
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::API;
 
 class FitMWTest : public CxxTest::TestSuite {

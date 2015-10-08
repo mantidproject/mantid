@@ -7,8 +7,13 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
+
 
 using namespace Kernel;
+
 using namespace API;
 
 DECLARE_FUNCTION(DeltaFunction)
@@ -32,5 +37,6 @@ void DeltaFunction::functionDeriv1D(Jacobian *out, const double *xValues,
   std::runtime_error("Cannot compute derivative of a delta function");
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

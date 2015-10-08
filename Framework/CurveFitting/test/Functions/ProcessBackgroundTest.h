@@ -11,7 +11,7 @@
 
 #include <fstream>
 
-using Mantid::CurveFitting::ProcessBackground;
+using Mantid::CurveFitting::Functions::ProcessBackground;
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Kernel;

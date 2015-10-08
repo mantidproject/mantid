@@ -4,7 +4,12 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
+
 using namespace Kernel;
+
 using namespace API;
 
 DECLARE_FUNCTION(StaticKuboToyabeTimesGausDecay)
@@ -36,5 +41,6 @@ void StaticKuboToyabeTimesGausDecay::function1D(double *out,
         A * (exp(-(x2 * D2) / 2) * (1 - x2 * D2) * C1 + C2) * exp(-S2 * x2);
   }
 }
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

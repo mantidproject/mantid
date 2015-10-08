@@ -14,6 +14,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 @author Jose Borreguero, NScD
 @date 11/14/2011
@@ -172,6 +173,7 @@ private:
       m_inelastic; // inelastic intensity of the DiffSphere structure factor
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

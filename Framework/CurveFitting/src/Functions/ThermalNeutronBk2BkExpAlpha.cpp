@@ -5,13 +5,20 @@
 #include <gsl/gsl_sf_erf.h>
 #include <cmath>
 
+
 using namespace std;
+
 using namespace Mantid;
+
 using namespace Mantid::API;
+
 using namespace Mantid::CurveFitting;
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 
 DECLARE_FUNCTION(ThermalNeutronBk2BkExpAlpha)
 
@@ -80,5 +87,6 @@ double ThermalNeutronBk2BkExpAlpha::corefunction(double dh, double width,
   return alpha;
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

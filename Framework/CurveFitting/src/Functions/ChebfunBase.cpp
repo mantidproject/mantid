@@ -19,6 +19,9 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 
 // Set the comparison tolerance.
 const double ChebfunBase::g_tolerance = 1e-15;
@@ -297,7 +300,8 @@ ChebfunBase::evalVector(const std::vector<double> &x,
  */
 void ChebfunBase::derivative(const std::vector<double> &a,
                              std::vector<double> &aout) const {
-  using namespace std::placeholders;
+  
+using namespace std::placeholders;
   if (a.size() != m_x.size()) {
     throw std::invalid_argument(
         "Cannot calculate derivative: coeffs vector has wrong size.");
@@ -331,7 +335,8 @@ void ChebfunBase::derivative(const std::vector<double> &a,
  */
 ChebfunBase_sptr ChebfunBase::integral(const std::vector<double> &a,
                                        std::vector<double> &aout) const {
-  using namespace std::placeholders;
+  
+using namespace std::placeholders;
   if (a.size() != m_x.size()) {
     throw std::invalid_argument(
         "Cannot calculate integral: coeffs vector has wrong size.");
@@ -926,5 +931,6 @@ ChebfunBase::smooth(const std::vector<double> &xvalues,
   return y;
 }
 
+} // Functions
 } // CurveFitting
 } // Mantid

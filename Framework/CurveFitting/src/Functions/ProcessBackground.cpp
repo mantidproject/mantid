@@ -16,16 +16,25 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
 
+
 using namespace Mantid;
+
 using namespace Mantid::API;
+
 using namespace Mantid::Kernel;
+
 using namespace Mantid::DataObjects;
+
 using namespace Mantid::CurveFitting;
+
 
 using namespace std;
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 
 DECLARE_ALGORITHM(ProcessBackground)
 
@@ -677,17 +686,17 @@ ProcessBackground::autoBackgroundSelection(Workspace2D_sptr bkgdWS) {
   */
 BackgroundFunction_sptr
 ProcessBackground::createBackgroundFunction(const string backgroundtype) {
-  CurveFitting::BackgroundFunction_sptr bkgdfunction;
+  Functions::BackgroundFunction_sptr bkgdfunction;
 
   if (backgroundtype.compare("Polynomial") == 0) {
     bkgdfunction =
-        boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>(
-            boost::make_shared<CurveFitting::Polynomial>());
+        boost::dynamic_pointer_cast<Functions::BackgroundFunction>(
+            boost::make_shared<Functions::Polynomial>());
     bkgdfunction->initialize();
   } else if (backgroundtype.compare("Chebyshev") == 0) {
-    Chebyshev_sptr cheby = boost::make_shared<CurveFitting::Chebyshev>();
+    Chebyshev_sptr cheby = boost::make_shared<Functions::Chebyshev>();
     bkgdfunction =
-        boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>(cheby);
+        boost::dynamic_pointer_cast<Functions::BackgroundFunction>(cheby);
     bkgdfunction->initialize();
 
     g_log.debug() << "[D] Chebyshev is set to range " << m_lowerBound << ", "
@@ -1099,5 +1108,6 @@ size_t RemovePeaks::excludePeaks(vector<double> v_inX, vector<bool> &v_useX,
   return count;
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

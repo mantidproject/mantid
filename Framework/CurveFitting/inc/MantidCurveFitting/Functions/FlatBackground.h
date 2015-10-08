@@ -6,6 +6,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 
 /** FlatBackground : TODO: DESCRIPTION
 
@@ -47,6 +48,7 @@ private:
   void init();
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

@@ -22,6 +22,9 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
+using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
+
 class DiffSphereTest : public CxxTest::TestSuite {
 public:
   bool skipTests() {
@@ -43,7 +46,7 @@ public:
         "Sigma=0.002);name=ElasticDiffSphere,Q=0.5,Height=47.014,Radius=3.567)";
 
     // Initialize the fit function in the Fit algorithm
-    Mantid::CurveFitting::Fit fitalg;
+    Fit fitalg;
     TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
     TS_ASSERT(fitalg.isInitialized());
     fitalg.setProperty("Function", funtion_string);
@@ -83,7 +86,7 @@ public:
     Mantid::API::IFunction_sptr fitalg_function =
         fitalg.getProperty("Function");
     auto fitalg_conv =
-        boost::dynamic_pointer_cast<Mantid::CurveFitting::Convolution>(
+        boost::dynamic_pointer_cast<Convolution>(
             fitalg_function);
     Mantid::API::IFunction_sptr fitalg_resolution = fitalg_conv->getFunction(0);
     TS_ASSERT_DELTA(fitalg_resolution->getParameter("PeakCentre"), 0.0,
@@ -133,16 +136,16 @@ public:
                              // of the 99 coefficients to break down
 
     // initialize the elastic part
-    boost::shared_ptr<Mantid::CurveFitting::ElasticDiffSphere> elastic_part(
-        new Mantid::CurveFitting::ElasticDiffSphere());
+    boost::shared_ptr<ElasticDiffSphere> elastic_part(
+        new ElasticDiffSphere());
     elastic_part->setParameter("Height", I);
     elastic_part->setParameter("Radius", R);
     elastic_part->setAttributeValue("Q", Q);
     elastic_part->init();
 
     // initialize the inelastic part
-    boost::shared_ptr<Mantid::CurveFitting::InelasticDiffSphere> inelastic_part(
-        new Mantid::CurveFitting::InelasticDiffSphere());
+    boost::shared_ptr<InelasticDiffSphere> inelastic_part(
+        new InelasticDiffSphere());
     inelastic_part->setParameter("Intensity", I);
     inelastic_part->setParameter("Radius", R);
     inelastic_part->setParameter("Diffusion", D);
@@ -186,7 +189,7 @@ public:
     const double Q(0.5);
 
     // Initialize the fit function in the Fit algorithm
-    Mantid::CurveFitting::Fit fitalg;
+    Fit fitalg;
     TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
     TS_ASSERT(fitalg.isInitialized());
     std::ostringstream funtion_stream;
@@ -207,16 +210,16 @@ public:
         fitalg.getProperty("Function"); // main function
     fitalg_function->initialize();
     auto fitalg_conv =
-        boost::dynamic_pointer_cast<Mantid::CurveFitting::Convolution>(
+        boost::dynamic_pointer_cast<Convolution>(
             fitalg_function);                      // cast to Convolution
     fitalg_function = fitalg_conv->getFunction(1); // DiffSphere
     auto fitalg_structure_factor =
-        boost::dynamic_pointer_cast<Mantid::CurveFitting::DiffSphere>(
+        boost::dynamic_pointer_cast<DiffSphere>(
             fitalg_function);
 
     fitalg_function = fitalg_structure_factor->getFunction(0);
     auto fitalg_elastic =
-        boost::dynamic_pointer_cast<Mantid::CurveFitting::ElasticDiffSphere>(
+        boost::dynamic_pointer_cast<ElasticDiffSphere>(
             fitalg_function);
     TS_ASSERT_DELTA(fitalg_elastic->getParameter("Height"), I_0,
                     std::numeric_limits<double>::epsilon());
@@ -230,7 +233,7 @@ public:
 
     fitalg_function = fitalg_structure_factor->getFunction(1);
     auto fitalg_inelastic =
-        boost::dynamic_pointer_cast<Mantid::CurveFitting::InelasticDiffSphere>(
+        boost::dynamic_pointer_cast<InelasticDiffSphere>(
             fitalg_function);
     TS_ASSERT_DELTA(fitalg_inelastic->getParameter("Intensity"), I_0,
                     std::numeric_limits<double>::epsilon());
@@ -332,7 +335,7 @@ private:
       simQ = 0.20092;
 
     // Initialize the fit function in the Fit algorithm
-    Mantid::CurveFitting::Fit fitalg;
+    Fit fitalg;
     TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
     TS_ASSERT(fitalg.isInitialized());
     std::ostringstream funtion_stream;
@@ -399,7 +402,7 @@ private:
     Mantid::API::IFunction_sptr fitalg_function =
         fitalg.getProperty("Function");
     auto fitalg_conv =
-        boost::dynamic_pointer_cast<Mantid::CurveFitting::Convolution>(
+        boost::dynamic_pointer_cast<Convolution>(
             fitalg_function);
     Mantid::API::IFunction_sptr fitalg_resolution = fitalg_conv->getFunction(0);
 
@@ -458,7 +461,7 @@ private:
 
   // create a data workspace using a Fit algorithm
   Mantid::DataObjects::Workspace2D_sptr
-  generateWorkspaceFromFitAlgorithm(Mantid::CurveFitting::Fit &fitalg) {
+  generateWorkspaceFromFitAlgorithm(Fit &fitalg) {
     using namespace Mantid::Kernel;
     using namespace Mantid::Geometry;
 

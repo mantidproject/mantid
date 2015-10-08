@@ -11,6 +11,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 Performes convolution of two functions.
 
@@ -151,6 +152,7 @@ private:
   mutable std::vector<double> m_resolution;
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

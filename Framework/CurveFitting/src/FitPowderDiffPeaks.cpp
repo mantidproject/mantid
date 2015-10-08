@@ -51,6 +51,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using namespace Mantid::CurveFitting::Functions;
 
 using namespace std;
 
@@ -2812,7 +2813,7 @@ FitPowderDiffPeaks::genPeak(map<string, int> hklmap,
                             map<string, string> bk2bk2braggmap, bool &good,
                             vector<int> &hkl, double &d_h) {
   // Generate a peak function
-  CurveFitting::BackToBackExponential newpeak;
+  BackToBackExponential newpeak;
   newpeak.initialize();
   BackToBackExponential_sptr newpeakptr =
       boost::make_shared<BackToBackExponential>(newpeak);

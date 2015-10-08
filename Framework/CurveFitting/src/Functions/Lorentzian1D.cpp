@@ -8,10 +8,14 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 using API::Jacobian;
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Lorentzian1D)
+
 
 using namespace Kernel;
 
@@ -69,5 +73,6 @@ void Lorentzian1D::functionDeriv(const double *in, Jacobian *out,
   }
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

@@ -4,6 +4,10 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
+
 
 using namespace API;
 
@@ -59,5 +63,6 @@ void PeakParameterFunction::beforeDecoratedFunctionSet(
   m_peakFunction = peakFunction;
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

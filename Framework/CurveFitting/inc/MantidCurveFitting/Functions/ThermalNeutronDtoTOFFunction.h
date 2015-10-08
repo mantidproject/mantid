@@ -14,6 +14,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 
 /** ThermalNeutronDtoTOFFunction : TODO: DESCRIPTION
 
@@ -98,6 +99,7 @@ inline double calThermalNeutronTOF(double dh, double dtt1, double dtt1t,
   return tof_h;
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

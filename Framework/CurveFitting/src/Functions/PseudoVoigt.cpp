@@ -6,6 +6,10 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
+
 
 using namespace API;
 
@@ -83,5 +87,6 @@ void PseudoVoigt::init() {
   addConstraint(mixingConstraint);
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

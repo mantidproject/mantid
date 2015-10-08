@@ -8,6 +8,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 Resolution function. It is implemented in terms of TabulatedFunction but doesn't
 inherit form it.
@@ -67,6 +68,7 @@ private:
   TabulatedFunction m_fun;
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

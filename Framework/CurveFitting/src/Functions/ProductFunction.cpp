@@ -6,6 +6,9 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 
 DECLARE_FUNCTION(ProductFunction)
 
@@ -34,5 +37,6 @@ void ProductFunction::functionDeriv(const API::FunctionDomain &domain,
   calNumericalDeriv(domain, jacobian);
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

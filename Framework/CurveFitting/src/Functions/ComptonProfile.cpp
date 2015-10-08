@@ -8,6 +8,9 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 
 namespace {
 ///@cond
@@ -24,7 +27,8 @@ ComptonProfile::ComptonProfile()
     : API::ParamFunction(), API::IFunction1D(), m_log("ComptonProfile"),
       m_wsIndex(0), m_mass(0.0), m_voigt(), m_resolutionFunction(), m_yspace(),
       m_modQ(), m_e0() {
-  using namespace Mantid::API;
+  
+using namespace Mantid::API;
   m_resolutionFunction = boost::dynamic_pointer_cast<VesuvioResolution>(
       FunctionFactory::Instance().createFunction("VesuvioResolution"));
 }
@@ -53,7 +57,8 @@ void ComptonProfile::function1D(double *out, const double *xValues,
  * Creates the internal caches
  */
 void ComptonProfile::setUpForFit() {
-  using namespace Mantid::API;
+  
+using namespace Mantid::API;
   m_voigt = boost::dynamic_pointer_cast<IPeakFunction>(
       FunctionFactory::Instance().createFunction("Voigt"));
   m_resolutionFunction->setUpForFit();
@@ -92,7 +97,7 @@ void ComptonProfile::setMatrixWorkspace(
   m_resolutionFunction->setAttributeValue("Mass", m_mass);
   m_resolutionFunction->setMatrixWorkspace(workspace, wsIndex, startX, endX);
 
-  DetectorParams detpar =
+  CurveFitting::DetectorParams detpar =
       ConvertToYSpace::getDetectorParameters(workspace, m_wsIndex);
   this->cacheYSpaceValues(workspace->readX(m_wsIndex),
                           workspace->isHistogramData(), detpar);
@@ -100,7 +105,7 @@ void ComptonProfile::setMatrixWorkspace(
 
 void ComptonProfile::cacheYSpaceValues(const std::vector<double> &tseconds,
                                        const bool isHistogram,
-                                       const DetectorParams &detpar,
+                                       const CurveFitting::DetectorParams &detpar,
                                        const ResolutionParams &respar) {
   m_resolutionFunction->cacheResolutionComponents(detpar, respar);
   this->cacheYSpaceValues(tseconds, isHistogram, detpar);
@@ -113,7 +118,7 @@ void ComptonProfile::cacheYSpaceValues(const std::vector<double> &tseconds,
  */
 void ComptonProfile::cacheYSpaceValues(const std::vector<double> &tseconds,
                                        const bool isHistogram,
-                                       const DetectorParams &detpar) {
+                                       const CurveFitting::DetectorParams &detpar) {
   // ------ Fixed coefficients related to resolution & Y-space transforms
   // ------------------
   const double mevToK = PhysicalConstants::E_mev_toNeutronWavenumberSq;
@@ -235,5 +240,6 @@ void ComptonProfile::voigtApproxDiff(std::vector<double> &voigtDiff,
                    2.0 * std::pow(epsilon, 3))); // divided by (2eps^3)
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

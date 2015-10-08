@@ -18,6 +18,9 @@
 #include <boost/random/uniform_real.hpp>
 #include <boost/shared_ptr.hpp>
 
+using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
+
 class DiffRotDiscreteCircleTest : public CxxTest::TestSuite {
 
 public:
@@ -34,8 +37,8 @@ public:
     const double w0 = random_value(-1.0, 1.0);
     const double h = random_value(1.0, 1000.0);
     const double fwhm = random_value(1.0, 100.0);
-    boost::shared_ptr<Mantid::CurveFitting::Gaussian> resolution(
-        new Mantid::CurveFitting::Gaussian());
+    boost::shared_ptr<Gaussian> resolution(
+        new Gaussian());
     resolution->initialize(); // declare parameters
     resolution->setCentre(w0);
     resolution->setHeight(h);
@@ -47,16 +50,16 @@ public:
     const double r = random_value(0.3, 9.8);
     const double Q = 0.9;
     const int N = 6;
-    boost::shared_ptr<Mantid::CurveFitting::ElasticDiffRotDiscreteCircle>
+    boost::shared_ptr<ElasticDiffRotDiscreteCircle>
         structure_factor(
-            new Mantid::CurveFitting::ElasticDiffRotDiscreteCircle());
+            new ElasticDiffRotDiscreteCircle());
     structure_factor->setParameter("Height", I);
     structure_factor->setParameter("Radius", r);
     structure_factor->setAttributeValue("Q", Q);
     structure_factor->setAttributeValue("N", N);
 
     // initialize the convolution function
-    Mantid::CurveFitting::Convolution conv;
+    Convolution conv;
     conv.addFunction(resolution);
     conv.addFunction(structure_factor);
 
@@ -124,7 +127,7 @@ public:
                                  "9,Intensity=2.9,Radius=2.3,Decay=0.468";
 
     // Do a fit with no iterations
-    Mantid::CurveFitting::Fit fitalg;
+    Fit fitalg;
     TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
     TS_ASSERT(fitalg.isInitialized());
     fitalg.setProperty("Function", funtion_string);
@@ -172,7 +175,7 @@ public:
     const double tao = 0.45;
     const double Q = 0.7;
     const int N = 4;
-    Mantid::CurveFitting::DiffRotDiscreteCircle func;
+    DiffRotDiscreteCircle func;
     func.init();
     func.setParameter("f1.Intensity", I);
     func.setParameter("f1.Radius", R);
@@ -182,7 +185,7 @@ public:
 
     // check values where correctly initialized
     auto ids = boost::dynamic_pointer_cast<
-        Mantid::CurveFitting::InelasticDiffRotDiscreteCircle>(
+        InelasticDiffRotDiscreteCircle>(
         func.getFunction(1));
     TS_ASSERT_EQUALS(ids->getParameter("Intensity"), I);
     TS_ASSERT_EQUALS(ids->getParameter("Radius"), R);
@@ -193,7 +196,7 @@ public:
     // check the ties were applied correctly
     func.applyTies(); // elastic parameters are tied to inelastic parameters
     auto eds = boost::dynamic_pointer_cast<
-        Mantid::CurveFitting::ElasticDiffRotDiscreteCircle>(
+        ElasticDiffRotDiscreteCircle>(
         func.getFunction(0));
     TS_ASSERT_EQUALS(eds->getParameter("Height"), I);
     TS_ASSERT_EQUALS(eds->getParameter("Radius"), R);
@@ -207,7 +210,7 @@ public:
     const double tao = 0.45;
 
     // This should set parameters of the inelastic part
-    Mantid::CurveFitting::DiffRotDiscreteCircle func;
+    DiffRotDiscreteCircle func;
     func.init();
     func.setParameter("Intensity", I);
     func.setParameter("Radius", R);
@@ -215,7 +218,7 @@ public:
 
     // check the parameter of the inelastic part
     auto ifunc = boost::dynamic_pointer_cast<
-        Mantid::CurveFitting::InelasticDiffRotDiscreteCircle>(
+        InelasticDiffRotDiscreteCircle>(
         func.getFunction(1));
     TS_ASSERT_EQUALS(ifunc->getParameter("Intensity"), I);
     TS_ASSERT_EQUALS(ifunc->getParameter("Radius"), R);
@@ -224,7 +227,7 @@ public:
     // check the parameters of the elastic part
     func.applyTies(); // elastic parameters are tied to inelastic parameters
     auto efunc = boost::dynamic_pointer_cast<
-        Mantid::CurveFitting::ElasticDiffRotDiscreteCircle>(
+        ElasticDiffRotDiscreteCircle>(
         func.getFunction(0));
     TS_ASSERT_EQUALS(efunc->getParameter("Height"), I);
     TS_ASSERT_EQUALS(efunc->getParameter("Radius"), R);
@@ -244,7 +247,7 @@ public:
         "Radius=1.567,Decay=7.567))";
 
     // Initialize the fit function in the Fit algorithm
-    Mantid::CurveFitting::Fit fitalg;
+    Fit fitalg;
     TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
     TS_ASSERT(fitalg.isInitialized());
     fitalg.setProperty("Function", funtion_string);
@@ -277,7 +280,7 @@ public:
     Mantid::API::IFunction_sptr fitalg_function =
         fitalg.getProperty("Function");
     auto fitalg_conv =
-        boost::dynamic_pointer_cast<Mantid::CurveFitting::Convolution>(
+        boost::dynamic_pointer_cast<Convolution>(
             fitalg_function);
     Mantid::API::IFunction_sptr fitalg_resolution = fitalg_conv->getFunction(0);
     TS_ASSERT_DELTA(fitalg_resolution->getParameter("PeakCentre"), 0.0,
@@ -342,7 +345,7 @@ private:
         << ",Shift=" << S << ")";
 
     // Initialize the fit function in the Fit algorithm
-    Mantid::CurveFitting::Fit fitalg;
+    Fit fitalg;
     TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
     TS_ASSERT(fitalg.isInitialized());
     fitalg.setProperty("Function", function_stream.str());
@@ -384,7 +387,7 @@ private:
     Mantid::API::IFunction_sptr fitalg_function =
         fitalg.getProperty("Function");
     auto fitalg_conv =
-        boost::dynamic_pointer_cast<Mantid::CurveFitting::Convolution>(
+        boost::dynamic_pointer_cast<Convolution>(
             fitalg_function);
     Mantid::API::IFunction_sptr fitalg_resolution = fitalg_conv->getFunction(0);
     TS_ASSERT_DELTA(fitalg_resolution->getParameter("PeakCentre"), 0.0,
@@ -525,7 +528,7 @@ private:
 
   // create a data workspace using a Fit algorithm
   Mantid::DataObjects::Workspace2D_sptr
-  generateWorkspaceFromFitAlgorithm(Mantid::CurveFitting::Fit &fitalg) {
+  generateWorkspaceFromFitAlgorithm(Fit &fitalg) {
     using namespace Mantid::Kernel;
     using namespace Mantid::Geometry;
 

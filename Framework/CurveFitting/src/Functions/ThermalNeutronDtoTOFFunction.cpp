@@ -5,11 +5,16 @@
 #include <gsl/gsl_sf_erf.h>
 #include <cmath>
 
+
 using namespace Mantid::API;
+
 using namespace std;
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 
 //----------------------------------------------------------------------------------------------
 DECLARE_FUNCTION(ThermalNeutronDtoTOFFunction)
@@ -140,5 +145,6 @@ void ThermalNeutronDtoTOFFunction::functionDerivLocal(API::Jacobian *,
       "ThermalNeutronDtoTOFFunction.");
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

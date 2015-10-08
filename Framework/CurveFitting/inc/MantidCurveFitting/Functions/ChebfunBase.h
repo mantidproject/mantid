@@ -15,6 +15,7 @@ class IFunction;
 }
 
 namespace CurveFitting {
+namespace Functions {
 
 /// Type of the approximated function
 typedef std::function<double(double)> ChebfunFunctionType;
@@ -213,6 +214,7 @@ boost::shared_ptr<ChebfunBase> ChebfunBase::bestFitAnyTolerance(
   return ChebfunBase_sptr();
 }
 
+} // namespace Functions
 } // CurveFitting
 } // Mantid
 

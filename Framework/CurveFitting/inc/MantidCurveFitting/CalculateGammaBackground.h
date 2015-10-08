@@ -11,7 +11,9 @@ namespace CurveFitting {
 // Forward declarations
 //---------------------------------------------------------------------------
 struct DetectorParams;
+namespace Functions {
 struct ResolutionParams;
+}
 
 /**
 
@@ -80,12 +82,12 @@ private:
                                      const FoilInfo &foilInfo,
                                      const Kernel::V3D &detPos,
                                      const DetectorParams &detPar,
-                                     const ResolutionParams &detRes);
+                                     const Functions::ResolutionParams &detRes);
   /// Compute a TOF spectrum for the given inputs & spectrum
   void calculateTofSpectrum(std::vector<double> &result,
                             std::vector<double> &tmpWork, const size_t wsIndex,
                             const DetectorParams &detpar,
-                            const ResolutionParams &respar);
+                            const Functions::ResolutionParams &respar);
 
   /// Check and store appropriate input data
   void retrieveInputs();

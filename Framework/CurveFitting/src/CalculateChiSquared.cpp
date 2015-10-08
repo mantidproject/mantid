@@ -9,8 +9,9 @@
 namespace Mantid {
 namespace CurveFitting {
 
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
+using namespace Kernel;
+using namespace API;
+using namespace Functions;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateChiSquared)

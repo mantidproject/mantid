@@ -13,7 +13,7 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include "ComptonProfileTestHelpers.h"
+#include "Functions/ComptonProfileTestHelpers.h"
 
 using Mantid::CurveFitting::CalculateMSVesuvio;
 

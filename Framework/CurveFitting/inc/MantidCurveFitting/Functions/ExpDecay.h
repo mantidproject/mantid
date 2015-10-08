@@ -9,6 +9,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 Provide exponential decay function: h*exp(-(x-c)/t)
 
@@ -56,6 +57,7 @@ protected:
                                const size_t nData);
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

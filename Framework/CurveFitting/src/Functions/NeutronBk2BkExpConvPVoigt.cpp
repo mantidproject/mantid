@@ -13,10 +13,14 @@
 const double PEAKRANGE = 5.0;
 const double NEG_DBL_MAX = -1. * DBL_MAX;
 
+
 using namespace std;
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 namespace {
 /// static logger
 Kernel::Logger g_log("NeutronBk2BkExpConvPV");
@@ -504,5 +508,6 @@ double NeutronBk2BkExpConvPVoigt::calOmega(const double x, const double eta,
   return omega;
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

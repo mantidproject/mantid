@@ -8,6 +8,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 
 /** PeakParameterFunction :
 
@@ -62,6 +63,7 @@ protected:
   API::IPeakFunction_sptr m_peakFunction;
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

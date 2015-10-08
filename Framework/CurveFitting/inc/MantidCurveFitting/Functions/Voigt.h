@@ -6,6 +6,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 
 /**
   Implements an analytical approximation to the Voigt function.
@@ -66,6 +67,7 @@ private:
   void setFwhm(const double value);
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

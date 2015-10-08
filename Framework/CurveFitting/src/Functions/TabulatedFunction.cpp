@@ -14,7 +14,12 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
+
 using namespace Kernel;
+
 using namespace API;
 
 namespace {
@@ -276,5 +281,6 @@ void TabulatedFunction::setupData() const {
   m_setupFinished = true;
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

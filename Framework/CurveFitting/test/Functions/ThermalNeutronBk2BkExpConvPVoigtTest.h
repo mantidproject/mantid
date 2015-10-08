@@ -11,7 +11,7 @@
 using namespace Mantid;
 using namespace Kernel;
 using namespace std;
-using Mantid::CurveFitting::ThermalNeutronBk2BkExpConvPVoigt;
+using Mantid::CurveFitting::Functions::ThermalNeutronBk2BkExpConvPVoigt;
 
 class ThermalNeutronBk2BkExpConvPVoigtTest : public CxxTest::TestSuite {
 public:
@@ -138,7 +138,7 @@ public:
     generateData(vecX, vecY, vecE);
 
     // 1. Create peak
-    CurveFitting::ThermalNeutronBk2BkExpConvPVoigt peak;
+    ThermalNeutronBk2BkExpConvPVoigt peak;
     peak.initialize();
 
     peak.setMillerIndex(1, 1, 1);

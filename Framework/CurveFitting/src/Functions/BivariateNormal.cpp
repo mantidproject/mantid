@@ -14,10 +14,14 @@
 #include <string>
 #include <cstdio>
 
+
 using namespace Mantid::API;
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 
 namespace {
 /// static logger
@@ -680,5 +684,6 @@ double BivariateNormal::initCoeff(const MantidVec &D, const MantidVec &X,
   return penalty;
 }
 
+} // namespace Functions
 } // namespace curveFitting
 } // namespaceMantid

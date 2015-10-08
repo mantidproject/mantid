@@ -14,6 +14,7 @@ class Parser;
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 A user defined function.
 
@@ -95,6 +96,7 @@ private:
   static double *AddVariable(const char *varName, void *pufun);
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

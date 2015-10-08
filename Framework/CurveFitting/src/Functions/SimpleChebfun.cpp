@@ -5,6 +5,9 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 
 //----------------------------------------------------------------------------------------------
 /// Constructs a SimpleChebfun that approximates a function with a polynomial of
@@ -163,5 +166,6 @@ SimpleChebfun &SimpleChebfun::operator+=(ChebfunFunctionType fun) {
   return *this;
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

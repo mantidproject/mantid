@@ -16,6 +16,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::CurveFitting::CostFunctions;
 
 class BSplineTest : public CxxTest::TestSuite {

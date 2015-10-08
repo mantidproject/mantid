@@ -15,6 +15,7 @@
 
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::API;
 
 class Bk2BkExpConvPVTest : public CxxTest::TestSuite {

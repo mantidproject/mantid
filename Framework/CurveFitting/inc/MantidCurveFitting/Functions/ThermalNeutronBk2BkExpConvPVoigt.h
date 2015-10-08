@@ -8,6 +8,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 
 /** ThermalNeutronBk2BkExpConvPVoigt :
     Back-to-back exponential convoluted with pseudo Voigt for thermal neutron
@@ -196,6 +197,7 @@ inline double calCubicDSpace(double a, int h, int k, int l)
 /// Integral for Gamma
 // std::complex<double> E1X(std::complex<double> z);
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

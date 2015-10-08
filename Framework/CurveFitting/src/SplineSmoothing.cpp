@@ -16,7 +16,7 @@ DECLARE_ALGORITHM(SplineSmoothing)
 
 using namespace API;
 using namespace Kernel;
-
+using Functions::BSpline;
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */

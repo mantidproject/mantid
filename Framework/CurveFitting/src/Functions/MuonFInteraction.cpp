@@ -7,8 +7,13 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
+
 
 using namespace Kernel;
+
 using namespace API;
 
 DECLARE_FUNCTION(MuonFInteraction)
@@ -40,5 +45,6 @@ void MuonFInteraction::function1D(double *out, const double *xValues,
   }
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

@@ -10,6 +10,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 Allow user to create a fit function which is the product of two or
 more other fit functions.
@@ -62,6 +63,7 @@ protected:
   virtual void init(){};
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

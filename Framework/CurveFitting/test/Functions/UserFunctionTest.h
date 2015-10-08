@@ -8,6 +8,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::API;
 
 class UserFunctionTest : public CxxTest::TestSuite {

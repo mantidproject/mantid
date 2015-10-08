@@ -6,7 +6,7 @@
 #include "MantidCurveFitting/Functions/ThermalNeutronBk2BkExpBeta.h"
 
 using namespace Mantid;
-using Mantid::CurveFitting::ThermalNeutronBk2BkExpBeta;
+using Mantid::CurveFitting::Functions::ThermalNeutronBk2BkExpBeta;
 
 class ThermalNeutronBk2BkExpBetaTest : public CxxTest::TestSuite {
 public:
@@ -36,7 +36,7 @@ public:
     vec_tof.push_back(124187);
 
     // 2. Initialize the method
-    Mantid::CurveFitting::ThermalNeutronBk2BkExpBeta function;
+    ThermalNeutronBk2BkExpBeta function;
     function.initialize();
 
     function.setParameter("Beta0", 3.489);

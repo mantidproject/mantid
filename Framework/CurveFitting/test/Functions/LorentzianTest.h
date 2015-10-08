@@ -9,6 +9,7 @@
 #include "MantidAPI/FunctionValues.h"
 
 #include <boost/make_shared.hpp>
+using Mantid::CurveFitting::Functions::Lorentzian;
 
 class LorentzianTest : public CxxTest::TestSuite {
 public:
@@ -41,7 +42,7 @@ public:
   }
 
   void test_categories() {
-    Mantid::CurveFitting::Lorentzian forCat;
+    Lorentzian forCat;
     const std::vector<std::string> categories = forCat.categories();
     TS_ASSERT(categories.size() == 1);
     TS_ASSERT(categories[0] == "Peak");
@@ -49,7 +50,7 @@ public:
 
   void test_FWHM() {
     double hwhm = 0.5;
-    Mantid::CurveFitting::Lorentzian lor;
+    Lorentzian lor;
     lor.initialize();
     lor.setParameter("Amplitude", 1.0);
     lor.setParameter("PeakCentre", 0.0);
@@ -63,7 +64,7 @@ public:
   }
 
   void test_height() {
-    Mantid::CurveFitting::Lorentzian lor;
+    Lorentzian lor;
     lor.initialize();
     lor.setHeight(2.0);
     lor.setCentre(3.0);
@@ -78,7 +79,7 @@ public:
   }
 
   void test_height_zero_width() {
-    Mantid::CurveFitting::Lorentzian lor;
+    Lorentzian lor;
     lor.initialize();
     lor.setHeight(2.0);
     lor.setCentre(3.0);
@@ -96,7 +97,7 @@ public:
   }
 
   void testIntensity() {
-    Mantid::CurveFitting::Lorentzian lor;
+    Lorentzian lor;
     lor.initialize();
     lor.setHeight(2.0);
     lor.setCentre(3.0);
@@ -110,15 +111,15 @@ public:
   }
 
 private:
-  class TestableLorentzian : public Mantid::CurveFitting::Lorentzian {
+  class TestableLorentzian : public Lorentzian {
   public:
     void functionLocal(double *out, const double *xValues,
                        const size_t nData) const {
-      Mantid::CurveFitting::Lorentzian::functionLocal(out, xValues, nData);
+      Lorentzian::functionLocal(out, xValues, nData);
     }
     void functionDerivLocal(Mantid::API::Jacobian *out, const double *xValues,
                             const size_t nData) {
-      Mantid::CurveFitting::Lorentzian::functionDerivLocal(out, xValues, nData);
+      Lorentzian::functionDerivLocal(out, xValues, nData);
     }
   };
 

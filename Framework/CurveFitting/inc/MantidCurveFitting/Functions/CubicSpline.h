@@ -13,6 +13,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 
 A wrapper around GSL functions implementing cubic spline interpolation.
@@ -117,6 +118,7 @@ private:
 typedef boost::shared_ptr<CubicSpline> CubicSpline_sptr;
 typedef const boost::shared_ptr<CubicSpline> CubicSpline_const_sptr;
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

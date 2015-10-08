@@ -11,7 +11,12 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
+
 using namespace Kernel;
+
 using namespace API;
 
 DECLARE_FUNCTION(BSpline)
@@ -251,5 +256,6 @@ void BSpline::getGSLBreakPoints(std::vector<double> &bp) const {
   }
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

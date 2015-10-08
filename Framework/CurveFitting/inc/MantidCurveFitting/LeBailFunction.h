@@ -174,7 +174,7 @@ private:
   /// Composite functions for all peaks and background
   API::CompositeFunction_sptr m_compsiteFunction;
   /// Background function
-  BackgroundFunction_sptr m_background;
+  Functions::BackgroundFunction_sptr m_background;
 
   /// Parameters
   std::map<std::string, double> m_functionParameters;

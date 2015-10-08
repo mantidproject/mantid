@@ -8,6 +8,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 Provide BackToBackExponential peak shape function interface to IPeakFunction.
 That is the function:
@@ -87,6 +88,7 @@ protected:
 
 typedef boost::shared_ptr<BackToBackExponential> BackToBackExponential_sptr;
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

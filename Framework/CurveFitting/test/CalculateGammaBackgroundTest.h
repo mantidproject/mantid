@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/CalculateGammaBackground.h"
-#include "ComptonProfileTestHelpers.h"
+#include "Functions/ComptonProfileTestHelpers.h"
 
 using Mantid::CurveFitting::CalculateGammaBackground;
 

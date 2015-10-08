@@ -9,6 +9,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 Provide gaussian peak shape function interface to IPeakFunction.
 I.e. the function: Height*exp(-0.5*((x-PeakCentre)/Sigma)^2).
@@ -79,6 +80,7 @@ protected:
   virtual void init();
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

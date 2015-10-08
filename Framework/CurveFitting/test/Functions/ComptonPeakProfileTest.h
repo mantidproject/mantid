@@ -6,7 +6,7 @@
 #include "MantidCurveFitting/Functions/ComptonPeakProfile.h"
 #include "ComptonProfileTestHelpers.h"
 
-using Mantid::CurveFitting::ComptonPeakProfile;
+using Mantid::CurveFitting::Functions::ComptonPeakProfile;
 
 class ComptonPeakProfileTest : public CxxTest::TestSuite {
 

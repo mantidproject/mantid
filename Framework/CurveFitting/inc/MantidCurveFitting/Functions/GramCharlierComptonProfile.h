@@ -6,6 +6,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 
   Implements a function to calculate the Compton profile of a nucleus using a
@@ -95,6 +96,7 @@ private:
   bool m_userFixedFSE;
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

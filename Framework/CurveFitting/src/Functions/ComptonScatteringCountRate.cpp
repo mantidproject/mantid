@@ -10,6 +10,9 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 using Kernel::Logger;
 
 namespace {
@@ -445,5 +448,6 @@ void ComptonScatteringCountRate::createEqualityCM(const size_t nmasses) {
   }
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

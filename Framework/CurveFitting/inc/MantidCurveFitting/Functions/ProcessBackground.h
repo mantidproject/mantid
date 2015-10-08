@@ -13,6 +13,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 
 class RemovePeaks {
 public:
@@ -141,6 +142,7 @@ private:
   void fitBackgroundFunction(std::string bkgdfunctiontype);
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

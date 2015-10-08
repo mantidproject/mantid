@@ -6,7 +6,7 @@
 #include "MantidCurveFitting/Functions/ComptonProfile.h"
 #include <boost/make_shared.hpp>
 
-using Mantid::CurveFitting::ComptonProfile;
+using Mantid::CurveFitting::Functions::ComptonProfile;
 
 class ComptonProfileTest : public CxxTest::TestSuite {
 

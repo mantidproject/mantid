@@ -11,6 +11,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;

@@ -17,6 +17,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 
 class CubicSplineTest : public CxxTest::TestSuite {
 public:

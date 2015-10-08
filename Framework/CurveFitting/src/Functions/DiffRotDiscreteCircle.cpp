@@ -20,8 +20,13 @@ Mantid::Kernel::Logger g_log("DiffSphere");
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
+
 
 using namespace API;
+
 using namespace Geometry;
 
 DECLARE_FUNCTION(ElasticDiffRotDiscreteCircle)
@@ -247,5 +252,6 @@ void DiffRotDiscreteCircle::init() {
   applyTies();
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

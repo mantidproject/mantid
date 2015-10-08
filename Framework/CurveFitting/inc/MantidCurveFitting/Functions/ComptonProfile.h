@@ -14,6 +14,7 @@ namespace CurveFitting {
 //---------------------------------------------------------------------------
 struct DetectorParams;
 
+namespace Functions {
 /**
   This class serves as a base-class for ComptonProfile type functions. @see
   GaussianComptonProfile, GramCharlierComptonProfile
@@ -59,13 +60,13 @@ public:
 
   /// Pre-calculate the Y-space values with specified resolution parameters
   void cacheYSpaceValues(const std::vector<double> &tseconds,
-                         const bool isHistogram, const DetectorParams &detpar,
+                         const bool isHistogram, const CurveFitting::DetectorParams &detpar,
                          const ResolutionParams &respar);
 
   /// Pre-calculate the Y-space values
   virtual void cacheYSpaceValues(const std::vector<double> &tseconds,
                                  const bool isHistogram,
-                                 const DetectorParams &detpar);
+                                 const CurveFitting::DetectorParams &detpar);
   /// Turn off logger
   void disableLogging() { m_log.setEnabled(false); }
   ///@}
@@ -133,6 +134,7 @@ protected:
   ///@}
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

@@ -9,6 +9,9 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 
 DECLARE_FUNCTION(ComptonPeakProfile)
 
@@ -82,7 +85,8 @@ void ComptonPeakProfile::function1D(double *out, const double *xValues,
  */
 void ComptonPeakProfile::setUpForFit() {
   // Voigt & Gaussian
-  using namespace Mantid::API;
+  
+using namespace Mantid::API;
   m_gauss = boost::dynamic_pointer_cast<IPeakFunction>(
       FunctionFactory::Instance().createFunction("Gaussian"));
   m_voigt = boost::dynamic_pointer_cast<IPeakFunction>(
@@ -165,5 +169,6 @@ void ComptonPeakProfile::setAttribute(const std::string &name,
     m_voigtCutOff = value.asDouble();
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

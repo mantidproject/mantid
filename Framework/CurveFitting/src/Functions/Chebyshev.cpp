@@ -9,8 +9,13 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
+
 
 using namespace Kernel;
+
 using namespace API;
 
 DECLARE_FUNCTION(Chebyshev)
@@ -99,5 +104,6 @@ void Chebyshev::setAttribute(const std::string &attName,
   }
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

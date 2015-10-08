@@ -8,11 +8,16 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(UserFunction1D)
 
+
 using namespace Kernel;
+
 using namespace API;
 
 /** Static callback function used by MuParser to initialize variables implicitly
@@ -155,5 +160,6 @@ void UserFunction1D::functionDeriv(const double *in, Jacobian *out,
   }
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

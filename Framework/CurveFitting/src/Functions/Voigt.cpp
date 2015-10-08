@@ -9,6 +9,9 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 DECLARE_FUNCTION(Voigt)
 
 namespace {
@@ -165,5 +168,6 @@ void Voigt::setFwhm(const double value) {
   this->setParameter(GAUSSIAN_FWHM, 0.5 * value);
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

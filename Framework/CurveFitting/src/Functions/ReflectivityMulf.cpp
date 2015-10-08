@@ -3,13 +3,19 @@
 #include <boost/lexical_cast.hpp>
 #include <cmath>
 
+
 using namespace Mantid::Kernel;
+
 using namespace Mantid::API;
+
 
 using namespace std;
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
 
 DECLARE_FUNCTION(ReflectivityMulf)
 
@@ -292,5 +298,6 @@ void ReflectivityMulf::setAttribute(const std::string &attName,
   }
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

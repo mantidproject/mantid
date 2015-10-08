@@ -8,10 +8,11 @@
 #include "MantidCurveFitting/Fit.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-using Mantid::CurveFitting::StaticKuboToyabeTimesGausDecay;
+using Mantid::CurveFitting::Functions::StaticKuboToyabeTimesGausDecay;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::DataObjects;
 
 class StaticKuboToyabeTimesGausDecayTest : public CxxTest::TestSuite {

@@ -6,8 +6,13 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
+
+using namespace CurveFitting;
+
 
 using namespace Kernel;
+
 using namespace API;
 
 DECLARE_FUNCTION(LinearBackground)
@@ -79,5 +84,6 @@ void LinearBackground::fit(const std::vector<double> &X,
   setParameter("A1", a1);
 }
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

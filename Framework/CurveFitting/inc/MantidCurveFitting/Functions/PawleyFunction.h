@@ -13,6 +13,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 
 /** @class PawleyParameterFunction
 
@@ -173,6 +174,7 @@ protected:
 
 typedef boost::shared_ptr<PawleyFunction> PawleyFunction_sptr;
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 

@@ -12,6 +12,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Functions {
 /**
 
 A wrapper around GSL functions implementing a B-spline.
@@ -75,6 +76,7 @@ private:
       m_bsplineDerivWorkspace;
 };
 
+} // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
 
