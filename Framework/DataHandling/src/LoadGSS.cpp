@@ -35,7 +35,8 @@ DECLARE_FILELOADER_ALGORITHM(LoadGSS)
  * be used
   */
 int LoadGSS::confidence(Kernel::FileDescriptor &descriptor) const {
-  if (!descriptor.isAscii())
+
+  if (!descriptor.isAscii() || descriptor.extension() == ".tar")
     return 0;
 
   std::string str;
