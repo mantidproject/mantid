@@ -10,6 +10,8 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace FuncMinimisers {
+
 namespace {
 // Get a reference to the logger
 Kernel::Logger g_log("SteepestDescentMinimizer");
@@ -24,5 +26,6 @@ SteepestDescentMinimizer::getGSLMinimizerType() {
   return gsl_multimin_fdfminimizer_steepest_descent;
 }
 
+} // namespace FuncMinimisers 
 } // namespace CurveFitting
 } // namespace Mantid

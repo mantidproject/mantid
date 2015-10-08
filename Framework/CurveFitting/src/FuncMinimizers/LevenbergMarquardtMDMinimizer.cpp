@@ -17,6 +17,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace FuncMinimisers {
 namespace {
 /// static logger object
 Kernel::Logger g_log("LevenbergMarquardMD");
@@ -287,5 +288,6 @@ double LevenbergMarquardtMDMinimizer::costFunctionVal() {
   return m_leastSquares->val();
 }
 
+} // namespace FuncMinimisers 
 } // namespace CurveFitting
 } // namespace Mantid

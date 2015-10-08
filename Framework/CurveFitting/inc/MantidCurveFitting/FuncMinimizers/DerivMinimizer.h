@@ -12,6 +12,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace FuncMinimisers {
 /** A wrapper around the GSL functions implementing a minimizer using
    derivatives.
     Concrete classes must implement the getGSLMinimizerType() method.
@@ -94,6 +95,7 @@ private:
   void initGSLMMin();
 };
 
+} // namespace FuncMinimisers 
 } // namespace CurveFitting
 } // namespace Mantid
 

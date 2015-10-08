@@ -13,7 +13,7 @@
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidKernel/Exception.h"
 
-using Mantid::CurveFitting::FABADAMinimizer;
+using Mantid::CurveFitting::FuncMinimisers::FABADAMinimizer;
 using namespace Mantid::API;
 using namespace Mantid;
 using namespace Mantid::CurveFitting;

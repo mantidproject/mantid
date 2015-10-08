@@ -17,6 +17,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace FuncMinimisers {
 namespace {
 // Get a reference to the logger
 Kernel::Logger g_log("LevenbergMarquardtMinimizer");
@@ -141,5 +142,6 @@ void LevenbergMarquardtMinimizer::calCovarianceMatrix(double epsrel,
   gsl_multifit_covar(m_gslSolver->J, epsrel, covar);
 }
 
+} // namespace FuncMinimisers 
 } // namespace CurveFitting
 } // namespace Mantid

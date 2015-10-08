@@ -10,8 +10,9 @@
 
 namespace Mantid {
 namespace CurveFitting {
-
 class CostFuncLeastSquares;
+namespace FuncMinimisers {
+
 
 /**
     Implements a least squares minimization algorithm with damping.
@@ -56,13 +57,13 @@ public:
 
 private:
   /// Pointer to the cost function. Must be the least squares.
-  boost::shared_ptr<CostFuncLeastSquares> m_leastSquares;
+  boost::shared_ptr<CurveFitting::CostFuncLeastSquares> m_leastSquares;
   /// Relative tolerance.
   double m_relTol;
   /// The damping mu parameter in the Levenberg-Marquardt method.
   // double m_damping;
 };
-
+} // namespace FuncMinimisers 
 } // namespace CurveFitting
 } // namespace Mantid
 

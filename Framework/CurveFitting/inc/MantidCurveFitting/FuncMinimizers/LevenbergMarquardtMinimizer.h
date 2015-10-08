@@ -11,6 +11,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace FuncMinimisers {
 /** Implementing Levenberg-Marquardt by wrapping the IFuncMinimizer interface
     around the GSL implementation of this algorithm.
 
@@ -79,6 +80,7 @@ private:
   double m_relError;
 };
 
+} // namespace FuncMinimisers 
 } // namespace CurveFitting
 } // namespace Mantid
 

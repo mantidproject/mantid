@@ -13,6 +13,7 @@ namespace CurveFitting {
 
 class CostFuncLeastSquares;
 
+namespace FuncMinimisers {
 /** Implementing Levenberg-Marquardt algorithm. Uses the normal system calculate
     the corrections to the parameters. Expects a cost function that can evaluate
     the value, the derivatives and the hessian matrix.
@@ -71,6 +72,7 @@ private:
   std::vector<double> m_D;
 };
 
+} // namespace FuncMinimisers 
 } // namespace CurveFitting
 } // namespace Mantid
 

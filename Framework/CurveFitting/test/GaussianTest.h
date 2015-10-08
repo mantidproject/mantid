@@ -201,7 +201,7 @@ public:
     costFun->setFittingFunction(fnWithBk, domain, values);
     // TS_ASSERT_EQUALS(costFun->nParams(),3);
 
-    LevenbergMarquardtMDMinimizer s;
+    FuncMinimisers::LevenbergMarquardtMDMinimizer s;
     s.initialize(costFun);
     TS_ASSERT(s.minimize());
 

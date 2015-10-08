@@ -31,6 +31,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace FuncMinimisers {
 
 namespace {
 // static logger object
@@ -641,5 +642,6 @@ void FABADAMinimizer::finalize() {
   }
 }
 
+} // namespace FuncMinimisers 
 } // namespace CurveFitting
 } // namespace Mantid

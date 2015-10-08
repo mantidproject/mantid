@@ -10,7 +10,14 @@
 
 namespace Mantid {
 namespace CurveFitting {
+/// Forward Declaration
 class CostFuncLeastSquares;
+}
+}
+
+namespace Mantid {
+namespace CurveFitting {
+namespace FuncMinimisers {
 
 /** FABADA : TODO: DESCRIPTION
 
@@ -88,6 +95,8 @@ private:
   /// Maximum number of iterations
   size_t m_max_iter;
 };
+
+} // namespace FuncMinimisers 
 } // namespace CurveFitting
 } // namespace Mantid
 

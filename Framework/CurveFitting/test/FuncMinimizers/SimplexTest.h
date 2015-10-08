@@ -10,6 +10,7 @@
 
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::FuncMinimisers;
 using namespace Mantid::API;
 
 class SimplexTestCostFunction : public ICostFunction {

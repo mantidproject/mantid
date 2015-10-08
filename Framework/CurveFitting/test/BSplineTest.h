@@ -345,7 +345,7 @@ private:
     boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
     costFun->setFittingFunction(bsp, domain, values);
 
-    LevenbergMarquardtMDMinimizer s;
+    FuncMinimisers::LevenbergMarquardtMDMinimizer s;
     s.initialize(costFun);
     TS_ASSERT(s.minimize());
     return costFun->val();

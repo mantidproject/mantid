@@ -6,6 +6,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace FuncMinimisers {
 
 /** Used by the GSL to calculate the cost function.
  * @param x :: Vector with parameters
@@ -173,5 +174,6 @@ void DerivMinimizer::setStopGradient(const double value) {
 
 double DerivMinimizer::costFunctionVal() { return m_gslSolver->f; }
 
+} // namespace FuncMinimisers 
 } // namespace CurveFitting
 } // namespace Mantid

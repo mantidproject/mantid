@@ -10,6 +10,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace FuncMinimisers {
 namespace {
 /// static logger object
 Kernel::Logger g_log("BFGS_Minimizer");
@@ -23,5 +24,6 @@ const gsl_multimin_fdfminimizer_type *BFGS_Minimizer::getGSLMinimizerType() {
   return gsl_multimin_fdfminimizer_vector_bfgs2;
 }
 
+} // namespace FuncMinimisers 
 } // namespace CurveFitting
 } // namespace Mantid

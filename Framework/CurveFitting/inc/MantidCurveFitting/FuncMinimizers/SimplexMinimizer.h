@@ -10,6 +10,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace FuncMinimisers {
 /** Implementing Simplex by wrapping the IFuncMinimizer interface
     around the GSL implementation of this algorithm.
 
@@ -87,6 +88,7 @@ private:
   gsl_multimin_function gslContainer;
 };
 
+} // namespace FuncMinimisers 
 } // namespace CurveFitting
 } // namespace Mantid
 

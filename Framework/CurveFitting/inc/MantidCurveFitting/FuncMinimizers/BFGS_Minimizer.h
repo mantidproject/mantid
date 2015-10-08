@@ -9,6 +9,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace FuncMinimisers {
 /** Implementing Broyden-Fletcher-Goldfarb-Shanno (BFGS) algorithm
     by wrapping the IFuncMinimizer interface around the GSL implementation of
    this algorithm.
@@ -52,6 +53,7 @@ protected:
   static Kernel::Logger &g_log;
 };
 
+} // namespace FuncMinimisers 
 } // namespace CurveFitting
 } // namespace Mantid
 

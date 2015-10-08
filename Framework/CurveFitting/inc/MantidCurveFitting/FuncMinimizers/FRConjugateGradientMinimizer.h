@@ -9,6 +9,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace FuncMinimisers {
 /** Implementing Fletcher-Reeves flavour of the conjugate gradient algorithm
     by wrapping the IFuncMinimizer interface around the GSL implementation of
    this algorithm.
@@ -51,6 +52,7 @@ protected:
   virtual const gsl_multimin_fdfminimizer_type *getGSLMinimizerType();
 };
 
+} // namespace FuncMinimisers 
 } // namespace CurveFitting
 } // namespace Mantid
 

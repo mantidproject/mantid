@@ -10,6 +10,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace FuncMinimisers {
 
 // clang-format off
 ///@cond nodoc
@@ -24,5 +25,6 @@ PRConjugateGradientMinimizer::getGSLMinimizerType() {
   return gsl_multimin_fdfminimizer_conjugate_pr;
 }
 
+} // namespace FuncMinimisers 
 } // namespace CurveFitting
 } // namespace Mantid

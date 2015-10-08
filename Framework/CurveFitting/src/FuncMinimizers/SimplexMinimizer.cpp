@@ -10,6 +10,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace FuncMinimisers {
 namespace {
 /// static logger
 Kernel::Logger g_log("SimplexMinimizer");
@@ -117,5 +118,6 @@ void SimplexMinimizer::clearMemory() {
 
 double SimplexMinimizer::costFunctionVal() { return m_gslSolver->fval; }
 
+} // namespace FuncMinimisers 
 } // namespace CurveFitting
 } // namespace Mantid
