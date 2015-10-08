@@ -23,7 +23,6 @@
 #include <boost/lexical_cast.hpp>
 
 #include <sstream>
-#include <iostream>
 
 namespace Mantid {
 namespace API {

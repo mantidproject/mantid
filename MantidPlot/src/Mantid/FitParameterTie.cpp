@@ -2,7 +2,6 @@
 #include "MantidAPI/CompositeFunction.h"
 #include <QRegExp>
 #include <stdexcept>
-#include <iostream>
 
 /// Constructor
 FitParameterTie::FitParameterTie(boost::shared_ptr<Mantid::API::CompositeFunction> cf)

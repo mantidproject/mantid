@@ -1,6 +1,5 @@
 /* File: ScalarUtils.cpp */
 
-#include <iostream>
 #include <stdexcept>
 #include "MantidGeometry/Crystal/ScalarUtils.h"
 #include "MantidGeometry/Crystal/ReducedCell.h"

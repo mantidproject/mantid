@@ -1,4 +1,3 @@
-#include <iostream>
 #include "MantidQtRefDetectorViewer/RefMatrixWSImageView.h"
 #include "MantidQtSpectrumViewer/ArrayDataSource.h"
 #include "MantidQtRefDetectorViewer/RefIVConnections.h"

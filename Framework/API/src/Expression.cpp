@@ -1,10 +1,10 @@
+#include <iostream>
+#include <locale>
+#include <sstream>
+
 #include "MantidAPI/Expression.h"
 
 #include <Poco/StringTokenizer.h>
-
-#include <sstream>
-#include <iostream>
-#include <locale>
 
 namespace Mantid {
 namespace API {

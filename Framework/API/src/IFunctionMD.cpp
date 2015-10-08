@@ -15,7 +15,6 @@
 #include <boost/lambda/lambda.hpp>
 
 #include <sstream>
-#include <iostream>
 #include <algorithm>
 #include <functional>
 #include <iterator>

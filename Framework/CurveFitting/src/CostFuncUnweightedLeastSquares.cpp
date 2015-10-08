@@ -1,7 +1,6 @@
 #include "MantidCurveFitting/CostFuncUnweightedLeastSquares.h"
 
 #include "MantidKernel/Logger.h"
-#include <iomanip>
 #include <cmath>
 
 namespace Mantid {

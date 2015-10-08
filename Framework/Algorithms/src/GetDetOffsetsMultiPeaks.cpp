@@ -18,7 +18,6 @@
 #include "MantidKernel/Statistics.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
-#include <iomanip>
 #include <ostream>
 #include <sstream>
 

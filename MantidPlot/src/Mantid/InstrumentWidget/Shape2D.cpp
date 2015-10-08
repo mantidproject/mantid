@@ -8,7 +8,6 @@
 #include <QLine>
 #include <QMap>
 
-#include <iostream>
 #include <algorithm>
 #include <stdexcept>
 #include <cmath>

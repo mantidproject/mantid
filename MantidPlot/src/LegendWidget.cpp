@@ -45,7 +45,6 @@
 #include <qwt_layout_metrics.h>
 #include <qwt_symbol.h>
 
-#include <iostream>
 
 LegendWidget::LegendWidget(Plot *plot):QWidget(plot),
 	d_plot(plot),
