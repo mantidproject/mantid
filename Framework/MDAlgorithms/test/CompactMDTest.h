@@ -171,7 +171,7 @@ public:
      * Input structure:
      *------------------
      *  -------------
-     *  |   |   |///|
+     *  |///|   |   |
      *  -------------
      * -3-2-1 0 1 2 3
      *---------------------------
@@ -194,22 +194,22 @@ public:
     const std::string name("test");
     auto inWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
         numDims, signal, errorSquared, numBins, min, max, name);
-    inWS->setSignalAt(2, 1.0); // set right-most bin signal to one
-
+    inWS->setSignalAt(0, 1.0); // set right-most bin signal to one
     CompactMD alg;
     alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
     alg.setProperty("OutputWorkspace", "out");
-    alg.execute();
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
     IMDHistoWorkspace_sptr outputWorkspace = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWorkspace);
     TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
                       outputWorkspace->getSignalAt(0), 1);
     TSM_ASSERT_EQUALS("Minimum should be cut to 1: ",
-                      outputWorkspace->getDimension(0)->getMinimum(), 1.0);
+                      outputWorkspace->getDimension(0)->getMinimum(), -3.0);
     TSM_ASSERT_EQUALS("Maximum should still be 3: ",
-                      outputWorkspace->getDimension(0)->getMaximum(), 3.0);
+                      outputWorkspace->getDimension(0)->getMaximum(),-1.0);
     TSM_ASSERT_EQUALS("Number of Bins should be 1 : ",
                       outputWorkspace->getDimension(0)->getNBins(), 1);
     TSM_ASSERT_EQUALS("Bin width should be consistent: ",

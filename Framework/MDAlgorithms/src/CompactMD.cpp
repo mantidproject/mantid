@@ -17,6 +17,10 @@ createPBinStringVector(std::vector<Mantid::coord_t> minVector,
   std::vector<std::string> pBinStrVector;
   for (size_t iter = 0; iter < numDims; iter++) {
     // creating pbin string using Min and Max Centre positions
+    if (minVector[iter] > maxVector[iter]) {
+      throw std::invalid_argument(
+          "Minimum extents MUST be less than Maximum extents");
+    }
     auto pBinStr = boost::lexical_cast<std::string>(
                        minVector[iter] -
                        (inputWs->getDimension(iter)->getBinWidth() * 0.5)) +
@@ -39,7 +43,7 @@ void CompactMD::findFirstNonZeroMinMaxExtents(
     IMDHistoWorkspace_sptr inputWs, std::vector<Mantid::coord_t> &minVec,
     std::vector<Mantid::coord_t> &maxVec) {
   auto ws_iter = inputWs->createIterator();
-  while (ws_iter->next()) {
+  do {
     if (ws_iter->getSignal() == 0) {
       // if signal is 0 then go to next index
       continue;
@@ -59,7 +63,7 @@ void CompactMD::findFirstNonZeroMinMaxExtents(
         }
       }
     }
-  }
+  } while (ws_iter->next());
 }
 
 void CompactMD::init() {
