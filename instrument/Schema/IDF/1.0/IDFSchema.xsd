@@ -289,9 +289,11 @@
           <xs:simpleContent>
             <xs:extension base="xs:string">
               <xs:anyAttribute/>
+
             </xs:extension>
           </xs:simpleContent>
         </xs:complexType>
+
       </xs:element>
       <xs:element name="properties">
         <xs:complexType>
