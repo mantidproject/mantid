@@ -67,6 +67,7 @@
         <file>eraser.png</file>
         <file>selection-box-ring.png</file>
         <file>selection-circle-ring.png</file>
+        <file>brush.png</file>
     </qresource>
     <qresource prefix="/MaskTools">
         <file>selection-circle.png</file>
@@ -74,5 +75,6 @@
         <file>selection-box-ring.png</file>
         <file>selection-circle-ring.png</file>
         <file>selection-edit.png</file>
+        <file>brush.png</file>
     </qresource>
 </RCC>
