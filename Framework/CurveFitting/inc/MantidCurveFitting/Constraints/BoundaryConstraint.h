@@ -8,6 +8,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Constraints {
 //----------------------------------------------------------------------
 // Forward Declaration
 //----------------------------------------------------------------------
@@ -142,6 +143,7 @@ private:
   double m_upperBound;
 };
 
+} // namespace Constraints
 } // namespace CurveFitting
 } // namespace Mantid
 

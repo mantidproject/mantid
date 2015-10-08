@@ -9,7 +9,7 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
 namespace Mantid {
 namespace CurveFitting {

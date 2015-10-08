@@ -8,7 +8,7 @@
 #include "MantidCurveFitting/Functions/UserFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
 #include <sstream>
 
@@ -16,6 +16,7 @@ using namespace Mantid;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::FuncMinimisers;
 using namespace Mantid::CurveFitting::CostFunctions;
+using namespace Mantid::CurveFitting::Constraints;
 using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::API;
 

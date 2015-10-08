@@ -4,10 +4,10 @@ set ( SRC_FILES
 	# src/ChebyshevPolynomialBackground.cpp
 	#src/RefinePowderInstrumentParameters.cpp
 	src/AugmentedLagrangianOptimizer.cpp
-	src/BoundaryConstraint.cpp
 	src/CalculateChiSquared.cpp
 	src/CalculateGammaBackground.cpp
 	src/CalculateMSVesuvio.cpp
+	src/Constraints/BoundaryConstraint.cpp
 	src/ConvertToYSpace.cpp
 	src/ConvolveWorkspaces.cpp
 	src/CostFunctions/CostFuncFitting.cpp
@@ -125,10 +125,10 @@ set ( INC_FILES
 	# inc/MantidCurveFitting/ChebyshevPolynomialBackground.h
 	#inc/MantidCurveFitting/RefinePowderInstrumentParameters.h
 	inc/MantidCurveFitting/AugmentedLagrangianOptimizer.h
-	inc/MantidCurveFitting/BoundaryConstraint.h
 	inc/MantidCurveFitting/CalculateChiSquared.h
 	inc/MantidCurveFitting/CalculateGammaBackground.h
 	inc/MantidCurveFitting/CalculateMSVesuvio.h
+	inc/MantidCurveFitting/Constraints/BoundaryConstraint.h
 	inc/MantidCurveFitting/ConvertToYSpace.h
 	inc/MantidCurveFitting/ConvolveWorkspaces.h
 	inc/MantidCurveFitting/CostFunctions/CostFuncFitting.h
@@ -246,43 +246,21 @@ set ( TEST_FILES
 	# ChebyshevPolynomialBackgroundTest.h
 	# RefinePowderInstrumentParametersTest.h
 	#SCDPanelErrorsTest.h
-	Functions/AbragamTest.h
 	AugmentedLagrangianOptimizerTest.h
-	Functions/BSplineTest.h
-	Functions/BackToBackExponentialTest.h
-	Functions/BivariateNormalTest.h
-	Functions/Bk2BkExpConvPVTest.h
-	BoundaryConstraintTest.h
+	Constraints/BoundaryConstraintTest.h
 	CalculateChiSquaredTest.h
 	CalculateGammaBackgroundTest.h
 	CalculateMSVesuvioTest.h
-	Functions/ChebfunBaseTest.h
-	Functions/ChebyshevTest.h
 	CompositeFunctionTest.h
-	Functions/ComptonPeakProfileTest.h
-	Functions/ComptonProfileTest.h
-	Functions/ComptonScatteringCountRateTest.h
 	ConvertToYSpaceTest.h
-	Functions/ConvolutionTest.h
 	ConvolveWorkspacesTest.h
 	CostFunctions/CostFuncUnweightedLeastSquaresTest.h
 	CostFunctions/LeastSquaresTest.h
-	Functions/CubicSplineTest.h
-	Functions/DeltaFunctionTest.h
-	Functions/DiffRotDiscreteCircleTest.h
-	Functions/DiffSphereTest.h
-	Functions/DynamicKuboToyabeTest.h
-	Functions/EndErfcTest.h
 	EstimatePeakErrorsTest.h
 	EvaluateFunctionTest.h
-	Functions/ExpDecayMuonTest.h
-	Functions/ExpDecayOscTest.h
-	Functions/ExpDecayTest.h
 	FitMWTest.h
 	FitPowderDiffPeaksTest.h
 	FitTest.h
-	Functions/FlatBackgroundTest.h
-	Functions/FullprofPolynomialTest.h
 	FuncMinimizers/BFGSTest.h
 	FuncMinimizers/DampingMinimizerTest.h
 	FuncMinimizers/FABADAMinimizerTest.h
@@ -294,34 +272,42 @@ set ( TEST_FILES
 	FunctionDomain1DSpectrumCreatorTest.h
 	FunctionFactoryConstraintTest.h
 	FunctionParameterDecoratorFitTest.h
-	GSLMatrixTest.h
-	GSLVectorTest.h
+	Functions/AbragamTest.h
+	Functions/BSplineTest.h
+	Functions/BackToBackExponentialTest.h
+	Functions/BivariateNormalTest.h
+	Functions/Bk2BkExpConvPVTest.h
+	Functions/ChebfunBaseTest.h
+	Functions/ChebyshevTest.h
+	Functions/ComptonPeakProfileTest.h
+	Functions/ComptonProfileTest.h
+	Functions/ComptonScatteringCountRateTest.h
+	Functions/ConvolutionTest.h
+	Functions/CubicSplineTest.h
+	Functions/DeltaFunctionTest.h
+	Functions/DiffRotDiscreteCircleTest.h
+	Functions/DiffSphereTest.h
+	Functions/DynamicKuboToyabeTest.h
+	Functions/EndErfcTest.h
+	Functions/ExpDecayMuonTest.h
+	Functions/ExpDecayOscTest.h
+	Functions/ExpDecayTest.h
+	Functions/FlatBackgroundTest.h
+	Functions/FullprofPolynomialTest.h
 	Functions/GausDecayTest.h
 	Functions/GausOscTest.h
 	Functions/GaussianComptonProfileTest.h
 	Functions/GaussianTest.h
 	Functions/GramCharlierComptonProfileTest.h
-	IPeakFunctionCentreParameterNameTest.h
-	IPeakFunctionIntensityTest.h
 	Functions/IkedaCarpenterPVTest.h
-	LatticeDomainCreatorTest.h
-	LatticeFunctionTest.h
-	LeBailFitTest.h
-	LeBailFunctionTest.h
 	Functions/LinearBackgroundTest.h
 	Functions/LogNormalTest.h
 	Functions/Lorentzian1DTest.h
 	Functions/LorentzianTest.h
-	MultiDomainCreatorTest.h
-	MultiDomainFunctionTest.h
 	Functions/MuonFInteractionTest.h
 	Functions/NeutronBk2BkExpConvPVoigtTest.h
-	NormaliseByPeakAreaTest.h
-	ParameterEstimatorTest.h
-	PawleyFitTest.h
 	Functions/PawleyFunctionTest.h
 	Functions/PeakParameterFunctionTest.h
-	PlotPeakByLogValueTest.h
 	Functions/PolynomialTest.h
 	Functions/ProcessBackgroundTest.h
 	Functions/ProductFunctionTest.h
@@ -329,15 +315,9 @@ set ( TEST_FILES
 	Functions/ProductQuadraticExpTest.h
 	Functions/PseudoVoigtTest.h
 	Functions/QuadraticTest.h
-	RefinePowderInstrumentParameters3Test.h
 	Functions/ReflectivityMulfTest.h
 	Functions/ResolutionTest.h
-	SeqDomainSpectrumCreatorTest.h
 	Functions/SimpleChebfunTest.h
-	SpecialFunctionSupportTest.h
-	SplineBackgroundTest.h
-	SplineInterpolationTest.h
-	SplineSmoothingTest.h
 	Functions/StaticKuboToyabeTest.h
 	Functions/StaticKuboToyabeTimesExpDecayTest.h
 	Functions/StaticKuboToyabeTimesGausDecayTest.h
@@ -353,6 +333,26 @@ set ( TEST_FILES
 	Functions/UserFunctionTest.h
 	Functions/VesuvioResolutionTest.h
 	Functions/VoigtTest.h
+	GSLMatrixTest.h
+	GSLVectorTest.h
+	IPeakFunctionCentreParameterNameTest.h
+	IPeakFunctionIntensityTest.h
+	LatticeDomainCreatorTest.h
+	LatticeFunctionTest.h
+	LeBailFitTest.h
+	LeBailFunctionTest.h
+	MultiDomainCreatorTest.h
+	MultiDomainFunctionTest.h
+	NormaliseByPeakAreaTest.h
+	ParameterEstimatorTest.h
+	PawleyFitTest.h
+	PlotPeakByLogValueTest.h
+	RefinePowderInstrumentParameters3Test.h
+	SeqDomainSpectrumCreatorTest.h
+	SpecialFunctionSupportTest.h
+	SplineBackgroundTest.h
+	SplineInterpolationTest.h
+	SplineSmoothingTest.h
 )
 
 if (COVERALLS)

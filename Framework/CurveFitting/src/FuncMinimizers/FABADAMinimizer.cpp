@@ -1,6 +1,6 @@
 #include "MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidCurveFitting//Constraints/BoundaryConstraint.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -122,7 +122,7 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
     m_bound.push_back(false);
     API::IConstraint *iconstr = fun->getConstraint(i);
     if (iconstr) {
-      BoundaryConstraint *bcon = dynamic_cast<BoundaryConstraint *>(iconstr);
+      Constraints::BoundaryConstraint *bcon = dynamic_cast<Constraints::BoundaryConstraint *>(iconstr);
       if (bcon) {
         m_bound[i] = true;
         if (bcon->hasLower()) {

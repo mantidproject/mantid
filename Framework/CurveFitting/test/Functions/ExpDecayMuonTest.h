@@ -6,7 +6,7 @@
 #include "MantidCurveFitting/Functions/ExpDecayMuon.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/Functions/LinearBackground.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/Fit.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"

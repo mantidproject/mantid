@@ -6,7 +6,7 @@
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Fit.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/InstrumentDataService.h"
@@ -33,6 +33,7 @@ using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::CurveFitting::CostFunctions;
+using namespace Mantid::CurveFitting::Constraints;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 

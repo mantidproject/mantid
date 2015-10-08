@@ -3,7 +3,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
@@ -14,8 +14,9 @@
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
-
+  
 using namespace CurveFitting;
+using namespace Constraints;
 
 DECLARE_FUNCTION(PawleyParameterFunction)
 

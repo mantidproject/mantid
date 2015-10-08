@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/IkedaCarpenterPV.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/SpecialFunctionSupport.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -36,6 +36,7 @@ using namespace Kernel;
 using namespace SpecialFunctionSupport;
 
 using namespace Geometry;
+using namespace Constraints;
 
 DECLARE_FUNCTION(IkedaCarpenterPV)
 

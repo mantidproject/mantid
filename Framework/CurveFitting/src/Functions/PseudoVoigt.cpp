@@ -1,14 +1,15 @@
 #include "MantidCurveFitting/Functions/PseudoVoigt.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
 #include <cmath>
 
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
-
+  
 using namespace CurveFitting;
+using namespace Constraints;
 
 
 using namespace API;

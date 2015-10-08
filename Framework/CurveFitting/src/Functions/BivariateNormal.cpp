@@ -1,5 +1,5 @@
 #include "MantidCurveFitting/Functions/BivariateNormal.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/ParameterTie.h"
@@ -20,8 +20,9 @@ using namespace Mantid::API;
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
-
+  
 using namespace CurveFitting;
+using namespace Constraints;
 
 namespace {
 /// static logger

@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidKernel/Logger.h"
@@ -10,6 +10,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Constraints {
 namespace {
 /// static logger
 Kernel::Logger g_log("BoundaryConstraint");
@@ -247,5 +248,6 @@ std::string BoundaryConstraint::asString() const {
   return ostr.str();
 }
 
+} // namespace Constraints
 } // namespace CurveFitting
 } // namespace Mantid

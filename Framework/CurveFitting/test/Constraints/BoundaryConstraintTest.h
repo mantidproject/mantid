@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Functions/Lorentzian.h"
 #include "MantidKernel/UnitFactory.h"
@@ -16,6 +16,7 @@
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
+using namespace Mantid::CurveFitting::Constraints;
 
 class BoundaryConstraintTest : public CxxTest::TestSuite {
 public:
@@ -40,7 +41,7 @@ public:
     TS_ASSERT(bc.hasUpper());
 
     BoundaryConstraint bc2;
-    ;
+    
     bc2.reset(&gaus, 2);
     bc2.setBounds(10, 20);
 

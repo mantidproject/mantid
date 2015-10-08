@@ -10,7 +10,7 @@
 
 #include "MantidCurveFitting/LeBailFit.h"
 #include "MantidCurveFitting/Functions/ThermalNeutronDtoTOFFunction.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
 namespace Mantid {
 namespace CurveFitting {

@@ -1267,7 +1267,7 @@ void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(
         double upperbound = param.maxvalue;
         if (lowerbound >= -DBL_MAX * 0.1 || upperbound <= DBL_MAX * 0.1) {
           // If there is a boundary
-          BoundaryConstraint *bc = new BoundaryConstraint(
+          Constraints::BoundaryConstraint *bc = new Constraints::BoundaryConstraint(
               function.get(), parname, lowerbound, upperbound, false);
           function->addConstraint(bc);
         }

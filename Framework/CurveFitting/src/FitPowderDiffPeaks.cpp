@@ -17,7 +17,7 @@
 #include "MantidAPI/TextAxis.h"
 
 #include "MantidCurveFitting/Fit.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
 #include "MantidCurveFitting/Functions/ThermalNeutronDtoTOFFunction.h"
 #include "MantidCurveFitting/Functions/Polynomial.h"
@@ -52,6 +52,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::CurveFitting::Functions;
+using namespace Mantid::CurveFitting::Constraints;
 
 using namespace std;
 
@@ -1855,8 +1856,8 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
   // b) Constraint
   double centerleftend = in_center - leftfwhm * 0.5;
   double centerrightend = in_center + rightfwhm * 0.5;
-  CurveFitting::BoundaryConstraint *centerbound =
-      new CurveFitting::BoundaryConstraint(gaussianpeak.get(), "PeakCentre",
+  Constraints::BoundaryConstraint *centerbound =
+      new Constraints::BoundaryConstraint(gaussianpeak.get(), "PeakCentre",
                                            centerleftend, centerrightend,
                                            false);
   gaussianpeak->addConstraint(centerbound);

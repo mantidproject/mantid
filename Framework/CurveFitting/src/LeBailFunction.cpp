@@ -2,7 +2,7 @@
 #include "MantidCurveFitting/LeBailFunction.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/Fit.h"
 
 #include <sstream>
@@ -946,7 +946,7 @@ void LeBailFunction::setFitProfileParameter(string paramname, double minvalue,
   std::stringstream parss;
   parss << "f0." << paramname;
   string parnamef0 = parss.str();
-  CurveFitting::BoundaryConstraint *bc = new BoundaryConstraint(
+  Constraints::BoundaryConstraint *bc = new Constraints::BoundaryConstraint(
       m_compsiteFunction.get(), parnamef0, minvalue, maxvalue);
   m_compsiteFunction->addConstraint(bc);
 

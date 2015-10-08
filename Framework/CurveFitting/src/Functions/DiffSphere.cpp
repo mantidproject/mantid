@@ -6,7 +6,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParameterTie.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitConversion.h"
@@ -23,8 +23,9 @@ Mantid::Kernel::Logger g_log("DiffSphere");
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
-
+  
 using namespace CurveFitting;
+using namespace Constraints;
 
 
 using namespace API;

@@ -4,9 +4,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/MuonFInteraction.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidCurveFitting/Functions/LinearBackground.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/Fit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
