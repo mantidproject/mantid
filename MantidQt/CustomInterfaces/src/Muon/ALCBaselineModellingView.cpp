@@ -272,5 +272,9 @@ namespace CustomInterfaces
     MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Muon_ALC"));
   }
 
+  void ALCBaselineModellingView::emitFitRequested() {
+    emit fitRequested();
+  }
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

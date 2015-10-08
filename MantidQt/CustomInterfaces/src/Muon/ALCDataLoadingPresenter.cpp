@@ -108,6 +108,8 @@ namespace CustomInterfaces
       m_view->setDataCurve(*(ALCHelper::curveDataFromWs(m_loadedData, 0)),
                            ALCHelper::curveErrorsFromWs(m_loadedData, 0));
 
+      emit dataChanged();
+
     }
     catch(std::exception& e)
     {
