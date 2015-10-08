@@ -137,23 +137,84 @@ public:
                       outputWorkspace->getSignalAt(6), 1);
     TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
                       outputWorkspace->getSignalAt(8), 1);
-    TSM_ASSERT_EQUALS("Minimum should be cropped to -1: ",
+    TSM_ASSERT_EQUALS("Minimum for dim 0 should be consistent: ",
                       outputWorkspace->getDimension(0)->getMinimum(),
                       inWS->getDimension(0)->getMinimum());
-    TSM_ASSERT_EQUALS("Maximum should be cropped to 1: ",
+    TSM_ASSERT_EQUALS("Maximum for dim 0 should be consistent: ",
                       outputWorkspace->getDimension(0)->getMaximum(),
                       inWS->getDimension(0)->getMaximum());
-    TSM_ASSERT_EQUALS("Number of Bins should be 1 : ",
+    TSM_ASSERT_EQUALS("Minimum for dim 1 should be consistent:",
+                      outputWorkspace->getDimension(1)->getMinimum(),
+                      inWS->getDimension(1)->getMinimum());
+    TSM_ASSERT_EQUALS("Maximum for dim 1 should be consistent: ",
+                      outputWorkspace->getDimension(1)->getMaximum(),
+                      inWS->getDimension(1)->getMaximum());
+    TSM_ASSERT_EQUALS("Number of Bins for dim 0 should be consistent : ",
                       outputWorkspace->getDimension(0)->getNBins(),
                       inWS->getDimension(0)->getNBins());
-    TSM_ASSERT_EQUALS("Bin width should be consistent: ",
+    TSM_ASSERT_EQUALS("Number of Bins for dim 1 should be consistent : ",
+                      outputWorkspace->getDimension(1)->getNBins(),
+                      inWS->getDimension(1)->getNBins());
+    TSM_ASSERT_EQUALS("Bin width for dim 0 should be consistent: ",
                       outputWorkspace->getDimension(0)->getBinWidth(),
                       inWS->getDimension(0)->getBinWidth());
+    TSM_ASSERT_EQUALS("Bin width for dim 1 should be consistent: ",
+                      outputWorkspace->getDimension(1)->getBinWidth(),
+                      inWS->getDimension(1)->getBinWidth());
   }
 
   void
   test_all_non_zero_signals_are_kept_when_data_is_concentrated_in_one_half_of_the_workspace() {
+    /*
+     *testing the effectiveness of CompactMD when the data looks like this:
+     *------------------
+     * Input structure:
+     *------------------
+     *  -------------
+     *  |   |   |///|
+     *  -------------
+     * -3-2-1 0 1 2 3
+     *---------------------------
+     * Expected output structure:
+     *----------------------------
+     * should trim until the first non-zero value.
+     *  -----
+     *  |///|
+     *  -----
+     *  1 2 3
+     */
 
+    using namespace Mantid::DataObjects;
+    const size_t numDims = 1;
+    const double signal = 0.0;
+    const double errorSquared = 1.3;
+    size_t numBins[static_cast<int>(numDims)] = {3};
+    Mantid::coord_t min[static_cast<int>(numDims)] = {-3};
+    Mantid::coord_t max[static_cast<int>(numDims)] = {3};
+    const std::string name("test");
+    auto inWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
+        numDims, signal, errorSquared, numBins, min, max, name);
+    inWS->setSignalAt(2, 1.0); // set right-most bin signal to one
+
+    CompactMD alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setProperty("OutputWorkspace", "out");
+    alg.execute();
+    IMDHistoWorkspace_sptr outputWorkspace = alg.getProperty("OutputWorkspace");
+    TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
+                      outputWorkspace->getSignalAt(0), 1);
+    TSM_ASSERT_EQUALS("Minimum should be cut to 1: ",
+                      outputWorkspace->getDimension(0)->getMinimum(), 1.0);
+    TSM_ASSERT_EQUALS("Maximum should still be 3: ",
+                      outputWorkspace->getDimension(0)->getMaximum(), 3.0);
+    TSM_ASSERT_EQUALS("Number of Bins should be 1 : ",
+                      outputWorkspace->getDimension(0)->getNBins(), 1);
+    TSM_ASSERT_EQUALS("Bin width should be consistent: ",
+                      outputWorkspace->getDimension(0)->getBinWidth(),
+                      inWS->getDimension(0)->getBinWidth());
   }
 };
 //===================
