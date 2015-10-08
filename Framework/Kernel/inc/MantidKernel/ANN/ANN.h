@@ -109,7 +109,7 @@
 
 #include <cstdlib>  // standard lib includes
 #include <cmath>    // math includes
-#include <iostream> // I/O streams
+#include <iosfwd> // I/O streams
 #include <cstring>  // C-style strings
 
 //----------------------------------------------------------------------

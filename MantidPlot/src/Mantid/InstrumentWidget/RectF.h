@@ -7,7 +7,7 @@
 #include <QTransform>
 
 #include <algorithm>
-#include <iostream>
+#include <iosfwd>
 #include <stdexcept>
 #include <cmath>
 
