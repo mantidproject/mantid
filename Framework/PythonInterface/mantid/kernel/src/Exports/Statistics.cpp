@@ -233,33 +233,34 @@ void export_Statistics() {
       class_<Stats>("Stats", no_init)
           .def("getStatistics", &getStatisticsNumpy,
                getStatisticsOverloads(
-                   args("data", "sorted"),
+                   (arg("data"), arg("sorted")),
                    "Determine the statistics for an array of data"))
           .staticmethod("getStatistics")
 
-          .def("getZscore", &getZscoreNumpy, args("data"),
+          .def("getZscore", &getZscoreNumpy, arg("data"),
                "Determine the Z score for an array of data")
-          .def("getZscore", &getZscoreNumpyDeprecated, args("data", "sorted"),
+          .def("getZscore", &getZscoreNumpyDeprecated,
+               (arg("data"), arg("sorted")),
                "Determine the Z score for an array of "
                "data (deprecated sorted argument)")
           .staticmethod("getZscore")
 
           .def("getModifiedZscore", &getModifiedZscoreNumpy,
                getModifiedZscoreOverloads(
-                   args("data", "sorted"),
+                   (arg("data"), arg("sorted")),
                    "Determine the modified Z score for an array of data"))
           .staticmethod("getModifiedZscore")
 
           .def("getMomentsAboutOrigin", &getMomentsAboutOriginNumpy,
                getMomentsAboutOriginOverloads(
-                   args("indep", "depend", "maxMoment"),
+                   (arg("indep"), arg("depend"), arg("maxMoment")),
                    "Calculate the first n-moments (inclusive) about the origin")
                    [ReturnNumpyArray()])
           .staticmethod("getMomentsAboutOrigin")
 
           .def("getMomentsAboutMean", &getMomentsAboutMeanNumpy,
                getMomentsAboutMeanOverloads(
-                   args("indep", "depend", "maxMoment"),
+                   (arg("indep"), arg("depend"), arg("maxMoment")),
                    "Calculate the first n-moments (inclusive) about the mean")
                    [ReturnNumpyArray()])
           .staticmethod("getMomentsAboutMean");

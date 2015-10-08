@@ -12,6 +12,7 @@ using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Kernel::Property;
 using namespace boost::python;
+using boost::python::arg;
 
 namespace {
 
@@ -22,7 +23,8 @@ using Mantid::PythonInterface::Policies::VectorToNumpy;
   register_ptr_to_python<TimeSeriesProperty<TYPE> *>();                        \
                                                                                \
   class_<TimeSeriesProperty<TYPE>, bases<Property>, boost::noncopyable>(       \
-      #Prefix "TimeSeriesProperty", init<const std::string &>())               \
+      #Prefix "TimeSeriesProperty",                                            \
+      init<const std::string &>((arg("self"), arg("value"))))                  \
       .add_property(                                                           \
            "value",                                                            \
            make_function(                                                      \
@@ -32,20 +34,26 @@ using Mantid::PythonInterface::Policies::VectorToNumpy;
                     &Mantid::Kernel::TimeSeriesProperty<TYPE>::timesAsVector)  \
       .def("addValue", (void (TimeSeriesProperty<TYPE>::*)(                    \
                            const DateAndTime &, const TYPE)) &                 \
-                           TimeSeriesProperty<TYPE>::addValue)                 \
+                           TimeSeriesProperty<TYPE>::addValue,                 \
+           (arg("self"), arg("time"), arg("value")))                           \
       .def("addValue", (void (TimeSeriesProperty<TYPE>::*)(                    \
                            const std::string &, const TYPE)) &                 \
-                           TimeSeriesProperty<TYPE>::addValue)                 \
-      .def("valueAsString", &TimeSeriesProperty<TYPE>::value)                  \
-      .def("size", &TimeSeriesProperty<TYPE>::size)                            \
-      .def("firstTime", &TimeSeriesProperty<TYPE>::firstTime)                  \
-      .def("firstValue", &TimeSeriesProperty<TYPE>::firstValue)                \
-      .def("lastTime", &TimeSeriesProperty<TYPE>::lastTime)                    \
-      .def("lastValue", &TimeSeriesProperty<TYPE>::lastValue)                  \
-      .def("nthValue", &TimeSeriesProperty<TYPE>::nthValue)                    \
-      .def("nthTime", &TimeSeriesProperty<TYPE>::nthTime)                      \
-      .def("getStatistics", &TimeSeriesProperty<TYPE>::getStatistics)          \
-      .def("timeAverageValue", &TimeSeriesProperty<TYPE>::timeAverageValue);
+                           TimeSeriesProperty<TYPE>::addValue,                 \
+           (arg("self"), arg("time"), arg("value")))                           \
+      .def("valueAsString", &TimeSeriesProperty<TYPE>::value, arg("self"))     \
+      .def("size", &TimeSeriesProperty<TYPE>::size, arg("self"))               \
+      .def("firstTime", &TimeSeriesProperty<TYPE>::firstTime, arg("self"))     \
+      .def("firstValue", &TimeSeriesProperty<TYPE>::firstValue, arg("self"))   \
+      .def("lastTime", &TimeSeriesProperty<TYPE>::lastTime, arg("self"))       \
+      .def("lastValue", &TimeSeriesProperty<TYPE>::lastValue, arg("self"))     \
+      .def("nthValue", &TimeSeriesProperty<TYPE>::nthValue,                    \
+           (arg("self"), arg("index")))                                        \
+      .def("nthTime", &TimeSeriesProperty<TYPE>::nthTime,                      \
+           (arg("self"), arg("index")))                                        \
+      .def("getStatistics", &TimeSeriesProperty<TYPE>::getStatistics,          \
+           arg("self"))                                                        \
+      .def("timeAverageValue", &TimeSeriesProperty<TYPE>::timeAverageValue,    \
+           arg("self"));
 }
 
 void export_TimeSeriesProperty_Double() {
