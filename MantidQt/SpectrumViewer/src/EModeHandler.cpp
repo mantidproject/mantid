@@ -1,9 +1,10 @@
-#include <QLineEdit>
+#include <iostream>
 
 #include "MantidQtSpectrumViewer/EModeHandler.h"
 #include "MantidQtSpectrumViewer/QtUtils.h"
 #include "MantidKernel/Logger.h"
 
+#include <QLineEdit>
 
 namespace
 {
