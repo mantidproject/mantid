@@ -86,13 +86,6 @@ namespace CustomInterfaces
     auto nextWidget = m_ui.stepView->widget(next);
     assert(nextWidget);
 
-    if (nextWidget == m_ui.baselineModellingView)
-    {
-      if (m_dataLoading->loadedData())
-      {
-        m_baselineModellingModel->setData(m_dataLoading->loadedData());
-      }
-    }
     if (nextWidget == m_ui.peakFittingView)
     {
       if (m_baselineModellingModel->correctedData())
