@@ -50,7 +50,6 @@ set ( SRC_FILES
 	src/LoadILLIndirect.cpp
 	src/LoadILLReflectometry.cpp
 	src/LoadILLSANS.cpp
-	src/LoadISISNexus.cpp
 	src/LoadISISNexus2.cpp
 	src/LoadInstrument.cpp
 	src/LoadInstrumentFromNexus.cpp
@@ -79,13 +78,11 @@ set ( SRC_FILES
 	src/LoadPreNexusMonitors.cpp
 	src/LoadQKK.cpp
 	src/LoadRKH.cpp
-	src/LoadRaw.cpp
 	src/LoadRaw/byte_rel_comp.cpp
 	src/LoadRaw/isisraw.cpp
 	src/LoadRaw/isisraw2.cpp
 	src/LoadRaw/item_struct.cpp
 	src/LoadRaw/vms_convert.cpp
-	src/LoadRaw2.cpp
 	src/LoadRaw3.cpp
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
@@ -210,7 +207,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadILLIndirect.h
 	inc/MantidDataHandling/LoadILLReflectometry.h
 	inc/MantidDataHandling/LoadILLSANS.h
-	inc/MantidDataHandling/LoadISISNexus.h
 	inc/MantidDataHandling/LoadISISNexus2.h
 	inc/MantidDataHandling/LoadInstrument.h
 	inc/MantidDataHandling/LoadInstrumentFromNexus.h
@@ -239,8 +235,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadPreNexusMonitors.h
 	inc/MantidDataHandling/LoadQKK.h
 	inc/MantidDataHandling/LoadRKH.h
-	inc/MantidDataHandling/LoadRaw.h
-	inc/MantidDataHandling/LoadRaw2.h
 	inc/MantidDataHandling/LoadRaw3.h
 	inc/MantidDataHandling/LoadRawBin0.h
 	inc/MantidDataHandling/LoadRawHelper.h
@@ -390,12 +384,10 @@ set ( TEST_FILES
 	LoadPreNexusTest.h
 	LoadQKKTest.h
 	LoadRKHTest.h
-	LoadRaw2Test.h
 	LoadRaw3Test.h
 	LoadRawBin0Test.h
 	LoadRawSaveNxsLoadNxsTest.h
 	LoadRawSpectrum0Test.h
-	LoadRawTest.h
 	LoadReflTBLTest.h
 	LoadSINQFocusTest.h
 	LoadSNSspecTest.h

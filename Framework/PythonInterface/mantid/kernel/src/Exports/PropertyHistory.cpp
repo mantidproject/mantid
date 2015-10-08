@@ -14,22 +14,22 @@ void export_PropertyHistory() {
 
   class_<PropertyHistory>("PropertyHistory", no_init)
 
-      .def("name", &PropertyHistory::name,
+      .def("name", &PropertyHistory::name, arg("self"),
            return_value_policy<copy_const_reference>(),
            "Returns the name of the property.")
 
-      .def("value", &PropertyHistory::value,
+      .def("value", &PropertyHistory::value, arg("self"),
            return_value_policy<copy_const_reference>(),
            "Returns the value of the property.")
 
-      .def("type", &PropertyHistory::type,
+      .def("type", &PropertyHistory::type, arg("self"),
            return_value_policy<copy_const_reference>(),
            "Returns the type of the property.")
 
-      .def("isDefault", &PropertyHistory::isDefault,
+      .def("isDefault", &PropertyHistory::isDefault, arg("self"),
            "Returns if the property value is the default value.")
 
-      .def("direction", &PropertyHistory::direction,
+      .def("direction", &PropertyHistory::direction, arg("self"),
            "Returns the direction of the property.")
       // ----------------- Operators --------------------------------------
       .def(self_ns::str(self));

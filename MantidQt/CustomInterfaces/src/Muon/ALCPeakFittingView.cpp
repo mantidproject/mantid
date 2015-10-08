@@ -147,6 +147,10 @@ void ALCPeakFittingView::displayError(const QString& message)
   QMessageBox::critical(m_widget, "Error", message);
 }
 
+void ALCPeakFittingView::emitFitRequested() {
+  emit fitRequested();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid
 

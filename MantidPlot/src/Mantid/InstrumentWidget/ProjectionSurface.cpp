@@ -62,7 +62,7 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor):
 
   // create and connect the mask drawing input controller
   InputControllerDrawShape* drawController = new InputControllerDrawShape(this);
-  setInputController(DrawMode, drawController);
+  setInputController(DrawRegularMode, drawController);
   connect(drawController,SIGNAL(addShape(QString,int,int,QColor,QColor)),&m_maskShapes,SLOT(addShape(QString,int,int,QColor,QColor)));
   connect(this,SIGNAL(signalToStartCreatingShape2D(QString,QColor,QColor)),drawController,SLOT(startCreatingShape2D(QString,QColor,QColor)));
   connect(drawController,SIGNAL(moveRightBottomTo(int,int)),&m_maskShapes,SLOT(moveRightBottomTo(int,int)));
@@ -70,7 +70,6 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor):
   connect(drawController,SIGNAL(selectCtrlAt(int,int)),&m_maskShapes,SLOT(addToSelectionShapeAt(int,int)));
   connect(drawController,SIGNAL(moveBy(int,int)),&m_maskShapes,SLOT(moveShapeOrControlPointBy(int,int)));
   connect(drawController,SIGNAL(touchPointAt(int,int)),&m_maskShapes,SLOT(touchShapeOrControlPointAt(int,int)));
-  connect(drawController,SIGNAL(disabled()),&m_maskShapes,SLOT(deselectAll()));
   connect(drawController,SIGNAL(removeSelectedShapes()),&m_maskShapes,SLOT(removeSelectedShapes()));
   connect(drawController,SIGNAL(deselectAll()),&m_maskShapes,SLOT(deselectAll()));
   connect(drawController,SIGNAL(restoreOverrideCursor()),&m_maskShapes,SLOT(restoreOverrideCursor()));
@@ -78,9 +77,16 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor):
   connect(drawController,SIGNAL(finishSelection(QRect)),this,SLOT(selectMultipleMasks(QRect)));
   connect(drawController,SIGNAL(finishSelection(QRect)),this,SIGNAL(shapeChangeFinished()));
 
+  InputControllerDrawAndErase* freeDrawController = new InputControllerDrawAndErase(this);
+  setInputController(DrawFreeMode, freeDrawController);
+  connect(this,SIGNAL(signalToStartCreatingFreeShape(QColor,QColor)),freeDrawController,SLOT(startCreatingShape2D(QColor,QColor)));
+  connect(freeDrawController,SIGNAL(addShape(const QPolygonF&,QColor,QColor)),&m_maskShapes,SLOT(addFreeShape(const QPolygonF&,QColor,QColor)));
+  connect(freeDrawController,SIGNAL(draw(const QPolygonF&)),&m_maskShapes,SLOT(drawFree(const QPolygonF&)));
+  connect(freeDrawController,SIGNAL(erase(const QPolygonF&)),&m_maskShapes,SLOT(eraseFree(const QPolygonF&)));
+
   // create and connect the peak eraser controller
   InputControllerErase* eraseController = new InputControllerErase(this);
-  setInputController(EraseMode, eraseController);
+  setInputController(ErasePeakMode, eraseController);
   connect(eraseController,SIGNAL(erase(QRect)),this,SLOT(erasePeaks(QRect)));
 }
 
@@ -138,7 +144,7 @@ void ProjectionSurface::draw(MantidGLWidget *widget)const
   if ( m_viewChanged && ( m_redrawPicking
                           || m_interactionMode == PickSingleMode
                           || m_interactionMode == PickTubeMode
-                          || m_interactionMode == DrawMode ) )
+                          || m_interactionMode == DrawRegularMode ) )
   {
     draw(widget,true);
     m_redrawPicking = false;
@@ -435,7 +441,7 @@ void ProjectionSurface::setInteractionMode(int mode)
     controller = m_inputControllers[m_interactionMode];
     if ( !controller ) throw std::logic_error("Input controller doesn't exist.");
     controller->onEnabled();
-    if ( mode != DrawMode )
+    if ( mode != DrawRegularMode && mode != DrawFreeMode )
     {
         m_maskShapes.deselectAll();
         foreach(PeakOverlay* po, m_peakShapes)
@@ -473,10 +479,13 @@ QString ProjectionSurface::getInfoText() const
         return "Move cursor over instrument to see detector information. ";
     case AddPeakMode:
         return "Click on a detector then click on the mini-plot to add a peak.";
-    case DrawMode:
+    case DrawRegularMode:
         return "Select a tool button to draw a new shape. "
                 "Click on shapes to select. Click and move to edit.";
-    case EraseMode:
+    case DrawFreeMode:
+        return "Draw by holding the left button down. "
+                "Erase with the right button.";
+    case ErasePeakMode:
         return "Click and move the mouse to erase peaks. "
                 "Rotate the wheel to resize the cursor.";
     }
@@ -564,6 +573,11 @@ InputController *ProjectionSurface::getController() const
 void ProjectionSurface::startCreatingShape2D(const QString& type,const QColor& borderColor,const QColor& fillColor)
 {
   emit signalToStartCreatingShape2D(type,borderColor,fillColor);
+}
+
+void ProjectionSurface::startCreatingFreeShape(const QColor& borderColor,const QColor& fillColor)
+{
+  emit signalToStartCreatingFreeShape(borderColor,fillColor);
 }
 
 /**
@@ -679,7 +693,7 @@ void ProjectionSurface::setShowPeakLabelsFlag(bool on)
   */
 void ProjectionSurface::setSelectionRect(const QRect &rect)
 {
-    if ( m_interactionMode != DrawMode || !m_maskShapes.hasSelection() )
+    if ( m_interactionMode != DrawRegularMode || !m_maskShapes.hasSelection() )
     {
         m_selectRect = rect;
     }

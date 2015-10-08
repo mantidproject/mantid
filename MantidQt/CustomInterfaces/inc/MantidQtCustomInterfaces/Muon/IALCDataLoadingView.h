@@ -135,6 +135,9 @@ namespace CustomInterfaces
     /// User has selected the first run
     void firstRunSelected();
 
+    /// New data have been loaded
+    void dataChanged();
+
   };
 
 } // namespace CustomInterfaces
