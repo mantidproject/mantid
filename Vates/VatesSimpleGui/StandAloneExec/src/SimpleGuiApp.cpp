@@ -7,6 +7,7 @@
 #include <QPushButton>
 
 #include <exception>
+#include <iostream>
 
 namespace
 {
