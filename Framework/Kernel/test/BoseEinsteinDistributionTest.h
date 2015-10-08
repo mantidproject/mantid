@@ -6,7 +6,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-
 class BoseEinsteinDistributionTest : public CxxTest::TestSuite {
 public:
   void test_Standard_Distribution_Gives_Correct_Value_Away_From_Edge() {

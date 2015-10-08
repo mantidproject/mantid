@@ -4,7 +4,6 @@
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-
 namespace Mantid {
 namespace API {
 using namespace Geometry;

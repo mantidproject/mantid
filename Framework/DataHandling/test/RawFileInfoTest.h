@@ -5,7 +5,6 @@
 #include "MantidDataHandling/RawFileInfo.h"
 #include "MantidAPI/ITableWorkspace.h"
 
-
 using namespace Mantid::DataHandling;
 
 class RawFileInfoTest : public CxxTest::TestSuite {

@@ -6,7 +6,6 @@
 #include <MantidKernel/Timer.h>
 #include "MantidKernel/Task.h"
 
-
 using namespace Mantid::Kernel;
 
 namespace TaskTestNamespace {

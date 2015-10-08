@@ -6,7 +6,6 @@
 
 #include <boost/scoped_ptr.hpp>
 
-
 using Mantid::PhysicalConstants::MagneticFormFactorTable;
 
 class MagneticFormFactorTableTest : public CxxTest::TestSuite {

@@ -7,7 +7,6 @@
 #include <Poco/LocalDateTime.h>
 #include <Poco/DateTimeFormatter.h>
 
-
 namespace Mantid {
 namespace DataHandling {
 

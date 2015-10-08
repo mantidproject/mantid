@@ -7,7 +7,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V2D.h"
 
-
 using namespace Mantid::Kernel;
 
 namespace Mantid {

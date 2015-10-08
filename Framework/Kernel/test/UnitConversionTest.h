@@ -6,7 +6,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-
 using Mantid::Kernel::UnitConversion;
 
 class UnitConversionTest : public CxxTest::TestSuite {

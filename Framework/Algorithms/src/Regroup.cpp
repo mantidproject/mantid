@@ -12,7 +12,6 @@
 #include <functional>
 #include <cmath>
 
-
 namespace Mantid {
 namespace Algorithms {
 

@@ -7,7 +7,6 @@
 #include "MantidKernel/Task.h"
 #include "MantidKernel/FunctionTask.h"
 
-
 using namespace Mantid::Kernel;
 
 /** Functions for use by the tasks */

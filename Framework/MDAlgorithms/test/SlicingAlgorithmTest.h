@@ -9,7 +9,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
