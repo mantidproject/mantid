@@ -2,8 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/ConvolveWorkspaces.h"
-#include "MantidCurveFitting/Convolution.h"
-#include "MantidCurveFitting/TabulatedFunction.h"
+#include "MantidCurveFitting/Functions/Convolution.h"
+#include "MantidCurveFitting/Functions/TabulatedFunction.h"
 #include <sstream>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_fft_real.h>

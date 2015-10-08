@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidCurveFitting/CubicSpline.h"
+#include "MantidCurveFitting/Functions/CubicSpline.h"
 
 namespace Mantid {
 namespace CurveFitting {

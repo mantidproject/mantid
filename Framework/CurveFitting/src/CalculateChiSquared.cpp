@@ -3,7 +3,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidCurveFitting/ChebfunBase.h"
+#include "MantidCurveFitting/Functions/ChebfunBase.h"
 #include "MantidCurveFitting/GSLJacobian.h"
 
 namespace Mantid {

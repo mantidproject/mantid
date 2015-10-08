@@ -6,12 +6,12 @@
 
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/Fit.h"
-#include "MantidCurveFitting/UserFunction.h"
-#include "MantidCurveFitting/ExpDecay.h"
 #include "MantidCurveFitting/SeqDomain.h"
-#include "MantidCurveFitting/Convolution.h"
-#include "MantidCurveFitting/Gaussian.h"
-#include "MantidCurveFitting/Polynomial.h"
+#include "MantidCurveFitting/Functions/UserFunction.h"
+#include "MantidCurveFitting/Functions/ExpDecay.h"
+#include "MantidCurveFitting/Functions/Convolution.h"
+#include "MantidCurveFitting/Functions/Gaussian.h"
+#include "MantidCurveFitting/Functions/Polynomial.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FrameworkManager.h"

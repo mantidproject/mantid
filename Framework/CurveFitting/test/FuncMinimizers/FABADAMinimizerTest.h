@@ -8,7 +8,7 @@
 #include "MantidCurveFitting/Fit.h"
 #include "MantidAPI/AlgorithmManager.h"
 
-#include "MantidCurveFitting/ExpDecay.h"
+#include "MantidCurveFitting/Functions/ExpDecay.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidKernel/Exception.h"

@@ -2,7 +2,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/SeqDomain.h"
-#include "MantidCurveFitting/Convolution.h"
+#include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidCurveFitting/ParameterEstimator.h"
 
 #include "MantidAPI/CompositeFunction.h"

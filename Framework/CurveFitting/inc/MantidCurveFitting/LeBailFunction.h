@@ -5,7 +5,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/IPowderDiffPeakFunction.h"
-#include "MantidCurveFitting/BackgroundFunction.h"
+#include "MantidCurveFitting/Functions/BackgroundFunction.h"
 
 namespace Mantid {
 namespace CurveFitting {

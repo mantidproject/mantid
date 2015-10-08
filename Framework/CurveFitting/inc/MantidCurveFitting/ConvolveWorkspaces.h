@@ -9,7 +9,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidCurveFitting/CubicSpline.h"
+#include "MantidCurveFitting/Functions/CubicSpline.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1D.h"
 

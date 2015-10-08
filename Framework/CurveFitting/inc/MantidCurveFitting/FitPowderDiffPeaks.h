@@ -8,9 +8,9 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidCurveFitting/BackgroundFunction.h"
-#include "MantidCurveFitting/Polynomial.h"
-#include "MantidCurveFitting/BackToBackExponential.h"
+#include "MantidCurveFitting/Functions/BackgroundFunction.h"
+#include "MantidCurveFitting/Functions/Polynomial.h"
+#include "MantidCurveFitting/Functions/BackToBackExponential.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 
 namespace Mantid {

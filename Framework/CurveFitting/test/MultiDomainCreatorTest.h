@@ -12,7 +12,7 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidCurveFitting/MultiDomainCreator.h"
 #include "MantidCurveFitting/FitMW.h"
-#include "MantidCurveFitting/UserFunction.h"
+#include "MantidCurveFitting/Functions/UserFunction.h"
 #include "MantidKernel/PropertyManager.h"
 
 #include "MantidTestHelpers/FakeObjects.h"

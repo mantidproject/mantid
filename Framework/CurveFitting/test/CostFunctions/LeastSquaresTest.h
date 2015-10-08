@@ -8,13 +8,13 @@
 #include "MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h"
 #include "MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h"
 #include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
-#include "MantidCurveFitting/UserFunction.h"
-#include "MantidCurveFitting/ExpDecay.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidCurveFitting/LinearBackground.h"
-#include "MantidCurveFitting/Gaussian.h"
+#include "MantidCurveFitting/Functions/LinearBackground.h"
+#include "MantidCurveFitting/Functions/Gaussian.h"
+#include "MantidCurveFitting/Functions/UserFunction.h"
+#include "MantidCurveFitting/Functions/ExpDecay.h"
 
 #include <gsl/gsl_blas.h>
 #include <sstream>

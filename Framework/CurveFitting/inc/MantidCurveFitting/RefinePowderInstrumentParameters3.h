@@ -9,7 +9,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 
 #include "MantidCurveFitting/LeBailFit.h"
-#include "MantidCurveFitting/ThermalNeutronDtoTOFFunction.h"
+#include "MantidCurveFitting/Functions/ThermalNeutronDtoTOFFunction.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 
 namespace Mantid {

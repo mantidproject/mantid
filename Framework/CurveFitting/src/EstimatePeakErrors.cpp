@@ -1,6 +1,6 @@
 #include "MantidCurveFitting/EstimatePeakErrors.h"
 #include "MantidCurveFitting/GSLMatrix.h"
-#include "MantidCurveFitting/PeakParameterFunction.h"
+#include "MantidCurveFitting/Functions/PeakParameterFunction.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionProperty.h"

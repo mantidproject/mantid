@@ -7,9 +7,9 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPVoigt.h"
+#include "MantidCurveFitting/Functions/ThermalNeutronBk2BkExpConvPVoigt.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidCurveFitting/BackgroundFunction.h"
+#include "MantidCurveFitting/Functions/BackgroundFunction.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/IFunction.h"
 #include <gsl/gsl_sf_erf.h>

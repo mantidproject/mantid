@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/NormaliseByPeakArea.h"
-#include "ComptonProfileTestHelpers.h"
+#include "Functions/ComptonProfileTestHelpers.h"
 
 using Mantid::CurveFitting::NormaliseByPeakArea;
 

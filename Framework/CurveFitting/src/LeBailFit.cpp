@@ -12,7 +12,7 @@
 #include "MantidCurveFitting/Fit.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidCurveFitting/BackgroundFunction.h"
+#include "MantidCurveFitting/Functions/BackgroundFunction.h"
 #include "MantidAPI/TextAxis.h"
 
 #include <boost/algorithm/string.hpp>

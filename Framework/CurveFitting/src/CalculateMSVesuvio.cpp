@@ -5,7 +5,7 @@
 // Use helpers for storing detector/resolution parameters
 #include "MantidCurveFitting/ConvertToYSpace.h"
 #include "MantidCurveFitting/MSVesuvioHelpers.h"
-#include "MantidCurveFitting/VesuvioResolution.h"
+#include "MantidCurveFitting/Functions/VesuvioResolution.h"
 
 #include "MantidAPI/SampleShapeValidator.h"
 #include "MantidAPI/WorkspaceValidators.h"

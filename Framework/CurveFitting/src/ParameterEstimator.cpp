@@ -1,5 +1,5 @@
 #include "MantidCurveFitting/ParameterEstimator.h"
-#include "MantidCurveFitting/SimpleChebfun.h"
+#include "MantidCurveFitting/Functions/SimpleChebfun.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"

@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/ILatticeFunction.h"
 
-#include "MantidCurveFitting/PawleyFunction.h"
+#include "MantidCurveFitting/Functions/PawleyFunction.h"
 
 namespace Mantid {
 namespace CurveFitting {

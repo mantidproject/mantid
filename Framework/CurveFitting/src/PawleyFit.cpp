@@ -1,7 +1,7 @@
 #include "MantidCurveFitting/PawleyFit.h"
 
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidCurveFitting/PawleyFunction.h"
+#include "MantidCurveFitting/Functions/PawleyFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 

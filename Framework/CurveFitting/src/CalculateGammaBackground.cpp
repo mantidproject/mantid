@@ -1,7 +1,7 @@
 #include "MantidCurveFitting/CalculateGammaBackground.h"
-#include "MantidCurveFitting/ComptonProfile.h"
+#include "MantidCurveFitting/Functions/ComptonProfile.h"
 #include "MantidCurveFitting/ConvertToYSpace.h"
-#include "MantidCurveFitting/VesuvioResolution.h"
+#include "MantidCurveFitting/Functions/VesuvioResolution.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionProperty.h"
