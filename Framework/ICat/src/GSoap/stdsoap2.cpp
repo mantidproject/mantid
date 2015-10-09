@@ -2386,7 +2386,7 @@ int SOAP_FMAC2 soap_resolve(struct soap *soap) {
                                         "location=%p level=%u,%u id='%s'\n",
                                 ip->type, p, ip->level, fp->level, ip->id));
             while (ip->level < k) {
-              void **q = (void **)soap_malloc(soap, sizeof(q));
+              void **q = (void **)soap_malloc(soap, sizeof(*q));
               if (!q)
                 return soap->error;
               *q = p;
