@@ -19,6 +19,11 @@ namespace Algorithms {
 
 DECLARE_ALGORITHM(GetAllEi)
 
+// redefine operations not available in RHEL6
+#ifndef __cplusplus
+#define std::to_string boost::lexical_cast<std::string>
+#endif
+
 /// Empty default constructor
 GetAllEi::GetAllEi()
     : Algorithm(), m_FilterWithDerivative(true),
@@ -26,7 +31,7 @@ GetAllEi::GetAllEi()
       m_min_Eresolution(0.08),
       // half maximal resolution for LET
       m_max_Eresolution(0.5e-3), m_peakEnergyRatio2reject(0.1), m_phase(0),
-      m_chopper(), m_pFilterLog(nullptr) {}
+      m_chopper(), m_pFilterLog(NULL) {}
 
 /// Initialization method.
 void GetAllEi::init() {
