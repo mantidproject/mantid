@@ -344,9 +344,10 @@ void export_ialgorithm() {
       .def("isExecuted", &IAlgorithm::isExecuted,
            "Returns True if the algorithm has been executed successfully, "
            "False otherwise")
-      .def("isLogging", &IAlgorithm::isLogging, "Returns True if the "
-                                                "algorithm's logger is turned "
-                                                "on, False otherwise")
+      .def("isLogging", &IAlgorithm::isLogging, arg("self"),
+           "Returns True if the "
+           "algorithm's logger is turned "
+           "on, False otherwise")
       .def("isRunning", &IAlgorithm::isRunning, "Returns True if the algorithm "
                                                 "is considered to be running, "
                                                 "False otherwise")
