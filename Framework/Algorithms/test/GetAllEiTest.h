@@ -466,15 +466,13 @@ public:
     m_getAllEi.setProperty("ChopperDelayLog", "Chopper_Delay");
     m_getAllEi.setProperty("FilterBaseLog", "is_running");
     m_getAllEi.setProperty("FilterWithDerivative", false);
-    m_getAllEi.setProperty("OutputWorkspace","allEiWs");
+    m_getAllEi.setProperty("OutputWorkspace", "allEiWs");
 
     TS_ASSERT_THROWS_NOTHING(m_getAllEi.execute());
-   // API::MatrixWorkspace_sptr out_ws = m_getAllEi.getProperty("OutputWorkspace");
+    // API::MatrixWorkspace_sptr out_ws =
+    // m_getAllEi.getProperty("OutputWorkspace");
 
-    //TSM_ASSERT("Should be able to retrieve workspace",out_ws);
-
-
-
+    // TSM_ASSERT("Should be able to retrieve workspace",out_ws);
   }
 
 private:
