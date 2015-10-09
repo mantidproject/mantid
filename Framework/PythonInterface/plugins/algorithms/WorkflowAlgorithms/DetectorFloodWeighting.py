@@ -1,5 +1,5 @@
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceUnitValidator, \
-    Progress
+PropertyMode, Progress
 
 from mantid.kernel import Direction, FloatArrayProperty, FloatArrayBoundedValidator
 
@@ -22,6 +22,10 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
                                                      direction=Direction.Input, validator=WorkspaceUnitValidator("Wavelength")),
+                             doc='Flood weighting measurement')
+                             
+        self.declareProperty(MatrixWorkspaceProperty('TransmissionWorkspace', '',
+                                                     direction=Direction.Input, optional=PropertyMode.Optional, validator=WorkspaceUnitValidator("Wavelength")),
                              doc='Flood weighting measurement')
 
         validator = FloatArrayBoundedValidator()
@@ -66,6 +70,14 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
             all_limits.append(limits)
             if lower >= upper:
                 issues['Bands'] = 'Bands should form lower, upper pairs'
+                
+        input_ws = self.getProperty('InputWorkspace').value
+        trans_ws = self.getProperty('TransmissionWorkspace').value
+        if trans_ws:
+             if not trans_ws.getNumberHistograms() == input_ws.getNumberHistograms():
+                 issues['TransmissionWorkspace'] = 'Transmission should have same number of histograms as flood input workspace'
+             if not trans_ws.blocksize() == input_ws.blocksize():
+                 issues['TransmissionWorkspace'] = 'Transmission workspace should be rebinned the same as the flood input workspace'
 
         return issues
 
@@ -82,24 +94,14 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
         divide.setProperty("RHSWorkspace", rhs)
         divide.execute()
         return divide.getProperty("OutputWorkspace").value
-
-
-    def PyExec(self):
-
-        progress = Progress(self, 0, 1, 4) # Four coarse steps
-
-        in_ws = self.getProperty('InputWorkspace').value
-        bands = self.getProperty('Bands').value
-        x_range = max(bands)-min(bands)
-        sum_steps = 0
-
+        
+    def _integrate_bands(self, bands, in_ws):
         # Formulate bands, integrate and sum
         accumulated_output = None
         for i in range(0, len(bands), 2):
             lower = bands[i]
             upper = bands[i+1]
             step = upper - lower
-            sum_steps += step
             
             rebin = self.createChildAlgorithm("Rebin")
             rebin.setProperty("Params", [lower, step, upper])
@@ -112,9 +114,23 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
             else:
                 # First band
                 accumulated_output = integrated
-            
-        progress.report()
+        return accumulated_output
 
+
+    def PyExec(self):
+
+        progress = Progress(self, 0, 1, 4) # Four coarse steps
+
+        in_ws = self.getProperty('InputWorkspace').value
+        trans_ws = self.getProperty('TransmissionWorkspace').value
+        bands = self.getProperty('Bands').value
+        x_range = max(bands)-min(bands)
+
+        accumulated_output = self._integrate_bands(bands, in_ws)
+        if trans_ws:
+            accumulated_trans_output = self._integrate_bands(bands, trans_ws)
+        
+        progress.report()
 
         # Perform solid angle correction. Calculate solid angle then divide through.
         normalized=accumulated_output
@@ -125,6 +141,10 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
             solid_angle_weighting = solidAngle.getProperty("OutputWorkspace").value
             normalized = self._divide(normalized, solid_angle_weighting)
         progress.report()
+        
+        # Divide through by the transmission workspace provided
+        if trans_ws:
+            normalized = self._divide(normalized, accumulated_output)
         
         # Determine the max across all spectra
         y_values = normalized.extractY()
