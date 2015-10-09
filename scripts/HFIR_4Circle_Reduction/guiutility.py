@@ -162,8 +162,3 @@ def parse_integers_editors(line_edits):
         return True, integer_list[0]
 
     return True, integer_list
-
-
-if __name__ == '__main__':
-    int_list = parse_integer_list('123, -234, 330-350, 400, -2-4')
-    print int_list
