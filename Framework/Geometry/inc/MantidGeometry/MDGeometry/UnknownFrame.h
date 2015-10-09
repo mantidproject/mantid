@@ -40,13 +40,15 @@ public:
   UnknownFrame(const Kernel::UnitLabel &unit);
   virtual ~UnknownFrame();
   std::string name() const;
-  bool canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const ;
+  bool canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const;
   Mantid::Kernel::UnitLabel getUnitLabel() const;
   const Mantid::Kernel::MDUnit &getMDUnit() const;
-  Mantid::Kernel::SpecialCoordinateSystem equivalientSpecialCoordinateSystem() const;
+  Mantid::Kernel::SpecialCoordinateSystem
+  equivalientSpecialCoordinateSystem() const;
   UnknownFrame *clone() const;
   // Type name
   static const std::string UnknownFrameName;
+
 private:
   /// Label unit
   const std::unique_ptr<Mantid::Kernel::MDUnit> m_unit;

@@ -35,9 +35,10 @@ namespace DataObjects {
 */
 class DLLExport MDFramesToSpecialCoordinateSystem {
 public:
-  MDFramesToSpecialCoordinateSystem ();
-  ~MDFramesToSpecialCoordinateSystem ();
-  boost::optional<Mantid::Kernel::SpecialCoordinateSystem> operator()(const Mantid::API::IMDWorkspace* workspace) const;
+  MDFramesToSpecialCoordinateSystem();
+  ~MDFramesToSpecialCoordinateSystem();
+  boost::optional<Mantid::Kernel::SpecialCoordinateSystem>
+  operator()(const Mantid::API::IMDWorkspace *workspace) const;
 
 private:
   Mantid::Kernel::SpecialCoordinateSystem extractCoordinateSystem(

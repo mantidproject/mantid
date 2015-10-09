@@ -65,8 +65,7 @@ bool HKLFrameFactory::canInterpret(const MDFrameArgument &argument) const {
   return argument.frameString == HKL::HKLName && compatibleUnit;
 }
 
-
-UnknownFrame*
+UnknownFrame *
 UnknownFrameFactory::createRaw(const MDFrameArgument &argument) const {
   using namespace Mantid::Kernel;
 

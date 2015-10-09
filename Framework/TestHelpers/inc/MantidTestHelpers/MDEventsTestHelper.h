@@ -215,7 +215,8 @@ makeAnyMDEWWithFrames(size_t splitInto, coord_t min, coord_t max,
   auto out = createOutputWorkspace<MDE, nd>(splitInto);
 
   // Add standard dimensions
-  addMDDimensionsWithFrames<MDE, nd>(out, min, max, frame, axisNameFormat, axisIdFormat);
+  addMDDimensionsWithFrames<MDE, nd>(out, min, max, frame, axisNameFormat,
+                                     axisIdFormat);
 
   // Add data
   addData<MDE, nd>(out, splitInto, min, max, numEventsPerBox, wsName);

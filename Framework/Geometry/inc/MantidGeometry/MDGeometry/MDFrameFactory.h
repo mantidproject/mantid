@@ -108,7 +108,6 @@ public:
   bool canInterpret(const MDFrameArgument &argument) const;
 };
 
-
 /// Make a complete factory chain
 MDFrameFactory_uptr MANTID_GEOMETRY_DLL makeMDFrameFactoryChain();
 
