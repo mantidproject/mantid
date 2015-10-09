@@ -8,8 +8,6 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 #include <Poco/File.h>
 
 using namespace Mantid::Kernel;

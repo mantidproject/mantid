@@ -1,7 +1,7 @@
 #ifndef GLCOLOR_H_
 #define GLCOLOR_H_
 
-#include <iostream>
+#include <iosfwd>
 
 /**
   \class  GLColor

@@ -46,7 +46,6 @@
 
 #include "TSVSerialiser.h"
 
-#include <iostream>
 #include <numeric>
 
 Spectrogram::Spectrogram():

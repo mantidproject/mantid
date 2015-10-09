@@ -4,7 +4,6 @@
 
 #include <QDoubleValidator>
 
-#include <iostream>
 #include <cfloat>
 #include <sstream>
 #include <cmath>

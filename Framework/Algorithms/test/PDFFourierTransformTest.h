@@ -11,8 +11,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
-#include <iostream>
-#include <iomanip>
 
 #include "MantidAlgorithms/PDFFourierTransform.h"
 

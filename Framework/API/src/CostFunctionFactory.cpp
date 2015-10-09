@@ -1,7 +1,6 @@
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/ICostFunction.h"
 #include "MantidKernel/LibraryManager.h"
-#include <iostream>
 
 namespace Mantid {
 namespace API {

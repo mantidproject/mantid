@@ -5,8 +5,6 @@
 #include <MantidKernel/Timer.h>
 #include <MantidKernel/System.h>
 #include <boost/make_shared.hpp>
-#include <iostream>
-#include <iomanip>
 
 #include <MantidKernel/ThreadSchedulerMutexes.h>
 

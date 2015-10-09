@@ -2,7 +2,6 @@
  * File DataArray.cpp
  */
 
-#include <iostream>
 #include <math.h>
 
 #include "MantidQtSpectrumViewer/DataArray.h"

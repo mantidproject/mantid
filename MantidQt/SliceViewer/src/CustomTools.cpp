@@ -1,7 +1,5 @@
 #include "MantidQtSliceViewer/CustomTools.h"
-#include <iomanip>
 #include <iosfwd>
-#include <iostream>
 
 namespace MantidQt
 {

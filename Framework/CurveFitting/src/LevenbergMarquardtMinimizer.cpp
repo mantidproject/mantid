@@ -13,7 +13,6 @@
 
 #include <boost/lexical_cast.hpp>
 #include <gsl/gsl_blas.h>
-#include <iostream>
 
 namespace Mantid {
 namespace CurveFitting {

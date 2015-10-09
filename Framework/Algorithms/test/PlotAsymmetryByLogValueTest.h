@@ -13,7 +13,6 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/SaveNexus.h"
 
-#include <iostream>
 #include <Poco/File.h>
 
 using namespace Mantid::API;

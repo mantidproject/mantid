@@ -12,7 +12,6 @@
 #include <boost/bind.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <cfloat>
-#include <iostream>
 #include <limits>
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"

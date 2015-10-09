@@ -4,9 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
-#include <iostream>
 #include <sstream>
-#include <iomanip>
 
 #include "MantidDataHandling/ModifyDetectorDotDatFile.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"

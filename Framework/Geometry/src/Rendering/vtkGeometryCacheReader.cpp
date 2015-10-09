@@ -6,7 +6,6 @@
 #include <Poco/SAX/InputSource.h>
 #include <Poco/Exception.h>
 #include <Poco/DOM/Element.h>
-#include <iostream>
 
 using Poco::XML::DOMParser;
 using Poco::XML::InputSource;

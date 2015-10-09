@@ -10,7 +10,6 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include <iostream>
 #include <vector>
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"

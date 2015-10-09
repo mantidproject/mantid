@@ -6,8 +6,6 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 #include "MantidKernel/VMD.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidTestHelpers/FakeObjects.h"

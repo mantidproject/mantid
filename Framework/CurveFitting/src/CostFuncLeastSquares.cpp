@@ -10,8 +10,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
 
-#include <iomanip>
-
 namespace Mantid {
 namespace CurveFitting {
 namespace {

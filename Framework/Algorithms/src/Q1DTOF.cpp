@@ -9,7 +9,6 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/Histogram1D.h"
-#include <iostream>
 #include <vector>
 
 namespace Mantid {

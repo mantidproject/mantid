@@ -9,8 +9,6 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/FrameworkManager.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
 

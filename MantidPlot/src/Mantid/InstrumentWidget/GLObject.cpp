@@ -5,7 +5,6 @@
 #include "ObjCompAssemblyActor.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
-#include <iostream>
 
 int icount;
 GLObject::GLObject(bool withDisplayList,const std::string& name):mName(name), mChanged(true)
