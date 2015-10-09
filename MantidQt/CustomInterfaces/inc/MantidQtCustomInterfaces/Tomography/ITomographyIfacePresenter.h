@@ -9,7 +9,7 @@ Interface for what the presenter of the tomography GUI needs to
 implement. Here the term presenter is used as in the MVP
 (Model-View-Presenter) pattern. The (passive) view will use this.
 
-Copyright &copy; 2014,205 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.

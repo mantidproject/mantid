@@ -140,6 +140,43 @@ To be able to run jobs on a remote compute resource (cluster, supercomputer, etc
 You can monitor the status of the jobs currently running (and recently
 run) on remote compute resources in the same tab.
 
+Setting common parameters for the reconstruction jobs
+-----------------------------------------------------
+
+Several parameters can be set in the "ROI etc." section or tab. These
+parameters will be used for all the reconstruction jobs, regardless of
+the tool and/or reconstruction method used.
+
+* Region of interest (ROI) for the analysis
+* Area for normalization (open beam, not blocked by sample)
+* Center of rotation, for tomographic reconstruction
+
+At any stage during the process of selecting the regions it is also
+possible to see how the selections fit different images by sliding
+through the images of the stack (using the slider or scroll bar).
+
+The center of rotation can be selected interactively by clicking on
+the select button and then clicking on an image pixel. To select the
+regions of interest or the area of normalization, just click on the
+respective "select" button and then click and drag with the mouse to
+select a rectangle. The precise coordinates of the center and regions
+can be set via the boxes of the right panel as well.
+
+Once you have selected or set one of the regions, or the center, they
+can be selected again by pushing the respective "Select" buttons
+and/or editing their coordinates manually.
+
+The default values, set in principle when a new stack of images is
+loaded, is as follows. The region of intererest is set to cover all
+the images. The regions of normalization is not set (empty), and the
+center of rotation is set to the center of the image. The option to
+find the center of rotation automatically is disabled at present.
+
+If when selection a region the mouse is moved outside of the images,
+it is possible to continue the selection of the region (second corner)
+by clicking again inside the image. Alternatively, any selection can
+be reset at any point by using the "reset" buttons.
+
 Running jobs locally
 --------------------
 
