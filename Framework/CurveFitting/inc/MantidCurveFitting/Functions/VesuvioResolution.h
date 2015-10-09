@@ -8,10 +8,12 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Algorithms {
 //---------------------------------------------------------------------------
 // Forward declarations
 //---------------------------------------------------------------------------
 struct DetectorParams;
+}
 namespace Functions {
 
 
@@ -83,7 +85,7 @@ public:
   setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
                      size_t wi, double startX, double endX);
   /// Pre-calculate the resolution components values
-  void cacheResolutionComponents(const DetectorParams &detpar,
+  void cacheResolutionComponents(const Algorithms::DetectorParams &detpar,
                                  const ResolutionParams &respar);
   /// Turn off logger
   void disableLogging() { m_log.setEnabled(false); }

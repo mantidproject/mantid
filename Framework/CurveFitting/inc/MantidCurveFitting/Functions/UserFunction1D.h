@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/Fit1D.h"
+#include "MantidCurveFitting/Algorithms/Fit1D.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include <boost/shared_array.hpp>
 
@@ -71,7 +71,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class UserFunction1D : public Fit1D {
+class UserFunction1D : public Algorithms::Fit1D {
 public:
   /// Constructor
   UserFunction1D()

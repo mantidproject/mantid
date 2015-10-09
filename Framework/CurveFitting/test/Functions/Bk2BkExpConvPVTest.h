@@ -9,12 +9,13 @@
 #include <fstream>
 
 #include "MantidCurveFitting/Functions/Bk2BkExpConvPV.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::API;
 
@@ -159,7 +160,7 @@ public:
               << std::endl;
 
     // 3. Set fit
-    Fit fitalg;
+    Algorithms::Fit fitalg;
     fitalg.initialize();
     TS_ASSERT(fitalg.isInitialized());
 

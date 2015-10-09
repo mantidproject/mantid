@@ -6,7 +6,7 @@
 #include "MantidCurveFitting/Functions/FullprofPolynomial.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 using Mantid::CurveFitting::Functions::FullprofPolynomial;
@@ -14,6 +14,7 @@ using Mantid::CurveFitting::Functions::FullprofPolynomial;
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
@@ -88,7 +89,7 @@ public:
     tofbkgd->setParameter("A3", 0.0);
 
     // Set up fit
-    CurveFitting::Fit fitalg;
+    CurveFitting::Algorithms::Fit fitalg;
     TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
     TS_ASSERT(fitalg.isInitialized());
 

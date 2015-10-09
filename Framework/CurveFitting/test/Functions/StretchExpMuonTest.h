@@ -7,7 +7,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/Functions/LinearBackground.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -20,6 +20,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
+using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::DataObjects;
 
 class StretchExpMuonTest : public CxxTest::TestSuite {
@@ -55,7 +56,7 @@ public:
   }
 
   void testAgainstMockData() {
-    Fit alg2;
+    Algorithms::Fit alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT(alg2.isInitialized());
 

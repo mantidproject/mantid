@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/Fit1D.h"
+#include "MantidCurveFitting/Algorithms/Fit1D.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -51,7 +51,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Lorentzian1D : public Fit1D {
+class DLLExport Lorentzian1D : public Algorithms::Fit1D {
 public:
   /// Destructor
   virtual ~Lorentzian1D(){};

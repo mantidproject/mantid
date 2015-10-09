@@ -368,7 +368,7 @@ void GramCharlierComptonProfile::setMatrixWorkspace(
  */
 void GramCharlierComptonProfile::cacheYSpaceValues(
     const std::vector<double> &tseconds, const bool isHistogram,
-    const DetectorParams &detpar) {
+    const Algorithms::DetectorParams &detpar) {
   ComptonProfile::cacheYSpaceValues(tseconds, isHistogram,
                                     detpar); // base-class calculations
 

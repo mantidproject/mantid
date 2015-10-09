@@ -6,7 +6,7 @@
 #include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidCurveFitting/Functions/DiffRotDiscreteCircle.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -19,6 +19,7 @@
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::CurveFitting::Functions;
 
 class DiffRotDiscreteCircleTest : public CxxTest::TestSuite {
@@ -127,7 +128,7 @@ public:
                                  "9,Intensity=2.9,Radius=2.3,Decay=0.468";
 
     // Do a fit with no iterations
-    Fit fitalg;
+    Algorithms::Fit fitalg;
     TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
     TS_ASSERT(fitalg.isInitialized());
     fitalg.setProperty("Function", funtion_string);
@@ -247,7 +248,7 @@ public:
         "Radius=1.567,Decay=7.567))";
 
     // Initialize the fit function in the Fit algorithm
-    Fit fitalg;
+    Algorithms::Fit fitalg;
     TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
     TS_ASSERT(fitalg.isInitialized());
     fitalg.setProperty("Function", funtion_string);
@@ -345,7 +346,7 @@ private:
         << ",Shift=" << S << ")";
 
     // Initialize the fit function in the Fit algorithm
-    Fit fitalg;
+    Algorithms::Fit fitalg;
     TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
     TS_ASSERT(fitalg.isInitialized());
     fitalg.setProperty("Function", function_stream.str());
@@ -528,7 +529,7 @@ private:
 
   // create a data workspace using a Fit algorithm
   Mantid::DataObjects::Workspace2D_sptr
-  generateWorkspaceFromFitAlgorithm(Fit &fitalg) {
+  generateWorkspaceFromFitAlgorithm(Algorithms::Fit &fitalg) {
     using namespace Mantid::Kernel;
     using namespace Mantid::Geometry;
 

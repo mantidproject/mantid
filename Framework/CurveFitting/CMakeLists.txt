@@ -3,23 +3,33 @@ set ( SRC_FILES
 	#	src/SCDPanelErrors.cpp
 	# src/ChebyshevPolynomialBackground.cpp
 	#src/RefinePowderInstrumentParameters.cpp
+	src/Algorithms/CalculateChiSquared.cpp
+	src/Algorithms/CalculateGammaBackground.cpp
+	src/Algorithms/CalculateMSVesuvio.cpp
+	src/Algorithms/ConvertToYSpace.cpp
+	src/Algorithms/ConvolveWorkspaces.cpp
+	src/Algorithms/EstimatePeakErrors.cpp
+	src/Algorithms/EvaluateFunction.cpp
+	src/Algorithms/Fit.cpp
+	src/Algorithms/Fit1D.cpp
+	src/Algorithms/FitPowderDiffPeaks.cpp
+	src/Algorithms/LeBailFit.cpp
+	src/Algorithms/LeBailFunction.cpp
+	src/Algorithms/NormaliseByPeakArea.cpp
+	src/Algorithms/PawleyFit.cpp
+	src/Algorithms/PlotPeakByLogValue.cpp
+	src/Algorithms/RefinePowderInstrumentParameters.cpp
+	src/Algorithms/RefinePowderInstrumentParameters3.cpp
+	src/Algorithms/SplineBackground.cpp
+	src/Algorithms/SplineInterpolation.cpp
+	src/Algorithms/SplineSmoothing.cpp
 	src/AugmentedLagrangianOptimizer.cpp
-	src/CalculateChiSquared.cpp
-	src/CalculateGammaBackground.cpp
-	src/CalculateMSVesuvio.cpp
 	src/Constraints/BoundaryConstraint.cpp
-	src/ConvertToYSpace.cpp
-	src/ConvolveWorkspaces.cpp
 	src/CostFunctions/CostFuncFitting.cpp
 	src/CostFunctions/CostFuncLeastSquares.cpp
 	src/CostFunctions/CostFuncRwp.cpp
 	src/CostFunctions/CostFuncUnweightedLeastSquares.cpp
-	src/EstimatePeakErrors.cpp
-	src/EvaluateFunction.cpp
-	src/Fit.cpp
-	src/Fit1D.cpp
 	src/FitMW.cpp
-	src/FitPowderDiffPeaks.cpp
 	src/FuncMinimizers/BFGS_Minimizer.cpp
 	src/FuncMinimizers/DampingMinimizer.cpp
 	src/FuncMinimizers/DerivMinimizer.cpp
@@ -99,22 +109,13 @@ set ( SRC_FILES
 	src/IFittingAlgorithm.cpp
 	src/LatticeDomainCreator.cpp
 	src/LatticeFunction.cpp
-	src/LeBailFit.cpp
-	src/LeBailFunction.cpp
 	src/MSVesuvioHelpers.cpp
 	src/MultiDomainCreator.cpp
-	src/NormaliseByPeakArea.cpp
 	src/ParDomain.cpp
 	src/ParameterEstimator.cpp
-	src/PawleyFit.cpp
-	src/PlotPeakByLogValue.cpp
-	src/RefinePowderInstrumentParameters3.cpp
 	src/SeqDomain.cpp
 	src/SeqDomainSpectrumCreator.cpp
 	src/SpecialFunctionHelper.cpp
-	src/SplineBackground.cpp
-	src/SplineInterpolation.cpp
-	src/SplineSmoothing.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp )
@@ -124,24 +125,34 @@ set ( INC_FILES
 	#	inc/MantidCurveFitting/SCDPanelErrors.h
 	# inc/MantidCurveFitting/ChebyshevPolynomialBackground.h
 	#inc/MantidCurveFitting/RefinePowderInstrumentParameters.h
+	inc/MantidCurveFitting/Algorithms/CalculateChiSquared.h
+	inc/MantidCurveFitting/Algorithms/CalculateGammaBackground.h
+	inc/MantidCurveFitting/Algorithms/CalculateMSVesuvio.h
+	inc/MantidCurveFitting/Algorithms/ConvertToYSpace.h
+	inc/MantidCurveFitting/Algorithms/ConvolveWorkspaces.h
+	inc/MantidCurveFitting/Algorithms/EstimatePeakErrors.h
+	inc/MantidCurveFitting/Algorithms/EvaluateFunction.h
+	inc/MantidCurveFitting/Algorithms/Fit.h
+	inc/MantidCurveFitting/Algorithms/Fit1D.h
+	inc/MantidCurveFitting/Algorithms/FitPowderDiffPeaks.h
+	inc/MantidCurveFitting/Algorithms/LeBailFit.h
+	inc/MantidCurveFitting/Algorithms/LeBailFunction.h
+	inc/MantidCurveFitting/Algorithms/NormaliseByPeakArea.h
+	inc/MantidCurveFitting/Algorithms/PawleyFit.h
+	inc/MantidCurveFitting/Algorithms/PlotPeakByLogValue.h
+	inc/MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters.h
+	inc/MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters3.h
+	inc/MantidCurveFitting/Algorithms/SplineBackground.h
+	inc/MantidCurveFitting/Algorithms/SplineInterpolation.h
+	inc/MantidCurveFitting/Algorithms/SplineSmoothing.h
 	inc/MantidCurveFitting/AugmentedLagrangianOptimizer.h
-	inc/MantidCurveFitting/CalculateChiSquared.h
-	inc/MantidCurveFitting/CalculateGammaBackground.h
-	inc/MantidCurveFitting/CalculateMSVesuvio.h
 	inc/MantidCurveFitting/Constraints/BoundaryConstraint.h
-	inc/MantidCurveFitting/ConvertToYSpace.h
-	inc/MantidCurveFitting/ConvolveWorkspaces.h
 	inc/MantidCurveFitting/CostFunctions/CostFuncFitting.h
 	inc/MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h
 	inc/MantidCurveFitting/CostFunctions/CostFuncRwp.h
 	inc/MantidCurveFitting/CostFunctions/CostFuncUnweightedLeastSquares.h
 	inc/MantidCurveFitting/DllConfig.h
-	inc/MantidCurveFitting/EstimatePeakErrors.h
-	inc/MantidCurveFitting/EvaluateFunction.h
-	inc/MantidCurveFitting/Fit.h
-	inc/MantidCurveFitting/Fit1D.h
 	inc/MantidCurveFitting/FitMW.h
-	inc/MantidCurveFitting/FitPowderDiffPeaks.h
 	inc/MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/DampingMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/DerivMinimizer.h
@@ -224,43 +235,45 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Jacobian.h
 	inc/MantidCurveFitting/LatticeDomainCreator.h
 	inc/MantidCurveFitting/LatticeFunction.h
-	inc/MantidCurveFitting/LeBailFit.h
-	inc/MantidCurveFitting/LeBailFunction.h
 	inc/MantidCurveFitting/MSVesuvioHelpers.h
 	inc/MantidCurveFitting/MultiDomainCreator.h
-	inc/MantidCurveFitting/NormaliseByPeakArea.h
 	inc/MantidCurveFitting/ParDomain.h
 	inc/MantidCurveFitting/ParameterEstimator.h
-	inc/MantidCurveFitting/PawleyFit.h
-	inc/MantidCurveFitting/PlotPeakByLogValue.h
-	inc/MantidCurveFitting/RefinePowderInstrumentParameters3.h
 	inc/MantidCurveFitting/SeqDomain.h
 	inc/MantidCurveFitting/SeqDomainSpectrumCreator.h
 	inc/MantidCurveFitting/SpecialFunctionSupport.h
-	inc/MantidCurveFitting/SplineBackground.h
-	inc/MantidCurveFitting/SplineInterpolation.h
-	inc/MantidCurveFitting/SplineSmoothing.h
 )
 
 set ( TEST_FILES
 	# ChebyshevPolynomialBackgroundTest.h
 	# RefinePowderInstrumentParametersTest.h
 	#SCDPanelErrorsTest.h
+	Algorithms/CalculateChiSquaredTest.h
+	Algorithms/CalculateGammaBackgroundTest.h
+	Algorithms/CalculateMSVesuvioTest.h
+	Algorithms/ConvertToYSpaceTest.h
+	Algorithms/ConvolveWorkspacesTest.h
+	Algorithms/EstimatePeakErrorsTest.h
+	Algorithms/EvaluateFunctionTest.h
+	Algorithms/FitPowderDiffPeaksTest.h
+	Algorithms/FitTest.h
+	Algorithms/LeBailFitTest.h
+	Algorithms/LeBailFunctionTest.h
+	Algorithms/NormaliseByPeakAreaTest.h
+	Algorithms/PawleyFitTest.h
+	Algorithms/PlotPeakByLogValueTest.h
+	Algorithms/RefinePowderInstrumentParameters3Test.h
+	Algorithms/RefinePowderInstrumentParametersTest.h
+	Algorithms/SeqDomainSpectrumCreatorTest.h
+	Algorithms/SplineBackgroundTest.h
+	Algorithms/SplineInterpolationTest.h
+	Algorithms/SplineSmoothingTest.h
 	AugmentedLagrangianOptimizerTest.h
-	Constraints/BoundaryConstraintTest.h
-	CalculateChiSquaredTest.h
-	CalculateGammaBackgroundTest.h
-	CalculateMSVesuvioTest.h
 	CompositeFunctionTest.h
-	ConvertToYSpaceTest.h
-	ConvolveWorkspacesTest.h
+	Constraints/BoundaryConstraintTest.h
 	CostFunctions/CostFuncUnweightedLeastSquaresTest.h
 	CostFunctions/LeastSquaresTest.h
-	EstimatePeakErrorsTest.h
-	EvaluateFunctionTest.h
 	FitMWTest.h
-	FitPowderDiffPeaksTest.h
-	FitTest.h
 	FuncMinimizers/BFGSTest.h
 	FuncMinimizers/DampingMinimizerTest.h
 	FuncMinimizers/FABADAMinimizerTest.h
@@ -339,20 +352,10 @@ set ( TEST_FILES
 	IPeakFunctionIntensityTest.h
 	LatticeDomainCreatorTest.h
 	LatticeFunctionTest.h
-	LeBailFitTest.h
-	LeBailFunctionTest.h
 	MultiDomainCreatorTest.h
 	MultiDomainFunctionTest.h
-	NormaliseByPeakAreaTest.h
 	ParameterEstimatorTest.h
-	PawleyFitTest.h
-	PlotPeakByLogValueTest.h
-	RefinePowderInstrumentParameters3Test.h
-	SeqDomainSpectrumCreatorTest.h
 	SpecialFunctionSupportTest.h
-	SplineBackgroundTest.h
-	SplineInterpolationTest.h
-	SplineSmoothingTest.h
 )
 
 if (COVERALLS)

@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/Chebyshev.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -14,6 +14,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::CurveFitting::Functions;
 
 class ChebyshevTest : public CxxTest::TestSuite {
@@ -60,7 +61,7 @@ public:
     Chebyshev cheb;
     cheb.setAttributeValue("n", 3);
 
-    Fit fit;
+    Algorithms::Fit fit;
     fit.initialize();
 
     fit.setPropertyValue("Function", cheb.asString());
@@ -117,7 +118,7 @@ public:
     cheb.setAttributeValue("StartX", -10.0);
     cheb.setAttributeValue("EndX", 10.0);
 
-    Fit fit;
+    Algorithms::Fit fit;
     fit.initialize();
 
     fit.setPropertyValue("Function", cheb.asString());

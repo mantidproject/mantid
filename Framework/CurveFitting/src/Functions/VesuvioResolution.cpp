@@ -2,15 +2,17 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
-#include "MantidCurveFitting/ConvertToYSpace.h"
+#include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidAPI/FunctionFactory.h"
 #include <gsl/gsl_poly.h>
 
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
-
-using namespace CurveFitting;
+  
+using namespace Mantid;
+using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Algorithms;
 namespace {
 ///@cond
 const char *MASS_NAME = "Mass";
@@ -112,7 +114,7 @@ void VesuvioResolution::setMatrixWorkspace(
  * @param respar Structure containing resolution parameters
  */
 void VesuvioResolution::cacheResolutionComponents(
-    const DetectorParams &detpar, const ResolutionParams &respar) {
+    const Algorithms::DetectorParams &detpar, const ResolutionParams &respar) {
   // geometry
   double theta = detpar.theta; // cache for frequent access
   double hwhmLorentzE = respar.dEnLorentz;

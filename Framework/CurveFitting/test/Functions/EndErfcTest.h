@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/EndErfc.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -14,6 +14,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
+using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::DataObjects;
 
 class EndErfcTest : public CxxTest::TestSuite {
@@ -39,7 +40,7 @@ public:
   }
 
   void testAgainstMockData() {
-    Fit alg2;
+    Algorithms::Fit alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT(alg2.isInitialized());
 

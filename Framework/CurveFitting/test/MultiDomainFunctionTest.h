@@ -11,7 +11,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 
 #include "MantidTestHelpers/FakeObjects.h"
 
@@ -24,6 +24,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::CostFunctions;
+using namespace Mantid::CurveFitting::Algorithms;
 
 class MultiDomainFunctionTest_Function : public virtual IFunction1D,
                                          public virtual ParamFunction {
@@ -187,7 +188,7 @@ public:
     multi->getFunction(2)->setParameter("A", 0);
     multi->getFunction(2)->setParameter("B", 0);
 
-    Fit fit;
+    Algorithms::Fit fit;
     fit.initialize();
     fit.setProperty("Function", boost::dynamic_pointer_cast<IFunction>(multi));
     fit.setProperty("InputWorkspace", ws1);

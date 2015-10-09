@@ -15,7 +15,7 @@
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/AlgorithmFactory.h"
 
@@ -23,6 +23,7 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::CurveFitting::Functions;
 
 class DiffSphereTest : public CxxTest::TestSuite {
@@ -46,7 +47,7 @@ public:
         "Sigma=0.002);name=ElasticDiffSphere,Q=0.5,Height=47.014,Radius=3.567)";
 
     // Initialize the fit function in the Fit algorithm
-    Fit fitalg;
+    Algorithms::Fit fitalg;
     TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
     TS_ASSERT(fitalg.isInitialized());
     fitalg.setProperty("Function", funtion_string);
@@ -189,7 +190,7 @@ public:
     const double Q(0.5);
 
     // Initialize the fit function in the Fit algorithm
-    Fit fitalg;
+    Algorithms::Fit fitalg;
     TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
     TS_ASSERT(fitalg.isInitialized());
     std::ostringstream funtion_stream;
@@ -335,7 +336,7 @@ private:
       simQ = 0.20092;
 
     // Initialize the fit function in the Fit algorithm
-    Fit fitalg;
+    Algorithms::Fit fitalg;
     TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
     TS_ASSERT(fitalg.isInitialized());
     std::ostringstream funtion_stream;
@@ -461,7 +462,7 @@ private:
 
   // create a data workspace using a Fit algorithm
   Mantid::DataObjects::Workspace2D_sptr
-  generateWorkspaceFromFitAlgorithm(Fit &fitalg) {
+  generateWorkspaceFromFitAlgorithm(Algorithms::Fit &fitalg) {
     using namespace Mantid::Kernel;
     using namespace Mantid::Geometry;
 

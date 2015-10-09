@@ -5,7 +5,7 @@
 
 #include "MantidCurveFitting/Functions/LinearBackground.h"
 
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -18,7 +18,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::CurveFitting::Functions::LinearBackground;
-using Mantid::CurveFitting::Fit;
+using Mantid::CurveFitting::Algorithms::Fit;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 

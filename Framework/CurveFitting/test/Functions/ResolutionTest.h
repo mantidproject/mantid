@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/Resolution.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -170,7 +170,7 @@ public:
     conv.addFunction(res);
     conv.addFunction(gauss);
 
-    Fit fit;
+    Algorithms::Fit fit;
     fit.initialize();
     fit.setPropertyValue("Function", conv.asString());
     fit.setPropertyValue("InputWorkspace", "ResolutionTest_WS");

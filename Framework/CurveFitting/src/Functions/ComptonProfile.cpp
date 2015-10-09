@@ -2,15 +2,16 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/ComptonProfile.h"
-#include "MantidCurveFitting/ConvertToYSpace.h"
+#include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidAPI/FunctionFactory.h"
 #include <gsl/gsl_poly.h>
 
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
-
+  
 using namespace CurveFitting;
+using namespace CurveFitting::Algorithms;
 
 namespace {
 ///@cond
@@ -97,7 +98,7 @@ void ComptonProfile::setMatrixWorkspace(
   m_resolutionFunction->setAttributeValue("Mass", m_mass);
   m_resolutionFunction->setMatrixWorkspace(workspace, wsIndex, startX, endX);
 
-  CurveFitting::DetectorParams detpar =
+  Algorithms::DetectorParams detpar =
       ConvertToYSpace::getDetectorParameters(workspace, m_wsIndex);
   this->cacheYSpaceValues(workspace->readX(m_wsIndex),
                           workspace->isHistogramData(), detpar);
@@ -105,7 +106,7 @@ void ComptonProfile::setMatrixWorkspace(
 
 void ComptonProfile::cacheYSpaceValues(const std::vector<double> &tseconds,
                                        const bool isHistogram,
-                                       const CurveFitting::DetectorParams &detpar,
+                                       const Algorithms::DetectorParams &detpar,
                                        const ResolutionParams &respar) {
   m_resolutionFunction->cacheResolutionComponents(detpar, respar);
   this->cacheYSpaceValues(tseconds, isHistogram, detpar);
@@ -118,7 +119,7 @@ void ComptonProfile::cacheYSpaceValues(const std::vector<double> &tseconds,
  */
 void ComptonProfile::cacheYSpaceValues(const std::vector<double> &tseconds,
                                        const bool isHistogram,
-                                       const CurveFitting::DetectorParams &detpar) {
+                                       const Algorithms::DetectorParams &detpar) {
   // ------ Fixed coefficients related to resolution & Y-space transforms
   // ------------------
   const double mevToK = PhysicalConstants::E_mev_toNeutronWavenumberSq;

@@ -33,7 +33,7 @@ Kernel::Logger g_log("IkedaCarpenterPV");
 
 using namespace Kernel;
 
-using namespace SpecialFunctionSupport;
+using namespace CurveFitting::SpecialFunctionSupport;
 
 using namespace Geometry;
 using namespace Constraints;

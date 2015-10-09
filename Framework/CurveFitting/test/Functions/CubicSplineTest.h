@@ -7,7 +7,7 @@
 #include <iostream>
 
 #include "MantidCurveFitting/Functions/CubicSpline.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -17,6 +17,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::CurveFitting::Functions;
 
 class CubicSplineTest : public CxxTest::TestSuite {

@@ -5,7 +5,7 @@
 #include <cmath>
 
 #include "MantidCurveFitting/Functions/ExpDecayOsc.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -14,6 +14,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::CurveFitting::Constraints;
 using namespace Mantid::DataObjects;
@@ -50,7 +51,7 @@ public:
   }
 
   void testAgainstMockData() {
-    Fit alg2;
+    Algorithms::Fit alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT(alg2.isInitialized());
 

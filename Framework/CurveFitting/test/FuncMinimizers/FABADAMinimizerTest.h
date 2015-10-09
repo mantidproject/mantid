@@ -5,7 +5,7 @@
 
 #include "MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h"
 
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidAPI/AlgorithmManager.h"
 
 #include "MantidCurveFitting/Functions/ExpDecay.h"
@@ -17,6 +17,7 @@ using Mantid::CurveFitting::FuncMinimisers::FABADAMinimizer;
 using namespace Mantid::API;
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::CurveFitting::Functions;
 
 class FABADAMinimizerTest : public CxxTest::TestSuite {
@@ -35,7 +36,7 @@ public:
     fun->setParameter("Height", 8.);
     fun->setParameter("Lifetime", 1.0);
 
-    Fit fit;
+    Algorithms::Fit fit;
     fit.initialize();
 
     fit.setRethrows(true);
@@ -144,7 +145,7 @@ public:
     fun->setParameter("Height", 1.);
     fun->setParameter("Lifetime", 1.0);
 
-    Fit fit;
+    Algorithms::Fit fit;
     fit.initialize();
 
     fit.setRethrows(true);

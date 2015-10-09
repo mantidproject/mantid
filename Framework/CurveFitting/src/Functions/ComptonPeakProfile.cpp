@@ -2,7 +2,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/ComptonPeakProfile.h"
-#include "MantidCurveFitting/ConvertToYSpace.h"
+#include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidAPI/FunctionFactory.h"
 
 #include <cmath>
@@ -10,8 +10,9 @@
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
+  
 
-using namespace CurveFitting;
+using namespace CurveFitting::Algorithms;
 
 DECLARE_FUNCTION(ComptonPeakProfile)
 

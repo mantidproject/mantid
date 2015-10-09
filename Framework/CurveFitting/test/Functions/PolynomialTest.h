@@ -6,12 +6,13 @@
 #include "MantidCurveFitting/Functions/Polynomial.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 
 using Mantid::CurveFitting::Functions::Polynomial;
 using namespace Mantid;
 using namespace API;
 using namespace Kernel;
+using namespace Mantid::CurveFitting::Algorithms;
 
 class PolynomialTest : public CxxTest::TestSuite {
 public:
@@ -45,7 +46,7 @@ public:
     // put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
-    CurveFitting::Fit alg2;
+    CurveFitting::Algorithms::Fit alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT(alg2.isInitialized());
 

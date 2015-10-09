@@ -12,9 +12,11 @@
 namespace Mantid {
 
 namespace CurveFitting {
+namespace Algorithms
+{
 class Fit;
 }
-
+}
 namespace API {
 
 //----------------------------------------------------------------------
@@ -88,7 +90,7 @@ protected:
   static Kernel::Logger g_log;
 
   /// Making a friend
-  friend class CurveFitting::Fit;
+  friend class CurveFitting::Algorithms::Fit;
 };
 
 typedef boost::shared_ptr<IFunction1D> IFunction1D_sptr;

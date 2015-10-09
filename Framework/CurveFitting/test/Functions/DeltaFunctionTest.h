@@ -2,7 +2,7 @@
 #define DELTAFUNCTIONTEST_H
 
 #include <cxxtest/TestSuite.h>
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 
 #include "MantidCurveFitting/Functions/DeltaFunction.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
@@ -13,6 +13,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::CurveFitting::Functions;
 
 // same class as ConvolutionTest_Gauss in ConvolutionTest.h

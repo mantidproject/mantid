@@ -5,7 +5,7 @@
 
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
@@ -28,6 +28,7 @@
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::CurveFitting::FuncMinimisers;
 using namespace Mantid::CurveFitting::CostFunctions;

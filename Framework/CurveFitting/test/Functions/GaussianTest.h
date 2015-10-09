@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/Gaussian.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidKernel/UnitFactory.h"
@@ -34,6 +34,7 @@ using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::CurveFitting::CostFunctions;
 using namespace Mantid::CurveFitting::Constraints;
+using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 
@@ -239,7 +240,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     // Initialise algorithm
-    Fit alg;
+    Algorithms::Fit alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
@@ -308,7 +309,7 @@ public:
     Mantid::MantidVec &e = ws2D->dataE(0); // error values of counts
     getMockData(y, e);
 
-    Fit alg2;
+    Algorithms::Fit alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT(alg2.isInitialized());
 
@@ -361,7 +362,7 @@ public:
     // put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
-    Fit alg2;
+    Algorithms::Fit alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT(alg2.isInitialized());
 
@@ -427,7 +428,7 @@ public:
         ConfigService::Instance().getString("curvefitting.peakRadius");
     ConfigService::Instance().setString("curvefitting.peakRadius", "5");
 
-    Fit alg;
+    Algorithms::Fit alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 

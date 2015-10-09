@@ -9,10 +9,12 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace Algorithms {
 //---------------------------------------------------------------------------
 // Forward declarations
 //---------------------------------------------------------------------------
 struct DetectorParams;
+}
 
 namespace Functions {
 /**
@@ -60,13 +62,13 @@ public:
 
   /// Pre-calculate the Y-space values with specified resolution parameters
   void cacheYSpaceValues(const std::vector<double> &tseconds,
-                         const bool isHistogram, const CurveFitting::DetectorParams &detpar,
+                         const bool isHistogram, const Algorithms::DetectorParams &detpar,
                          const ResolutionParams &respar);
 
   /// Pre-calculate the Y-space values
   virtual void cacheYSpaceValues(const std::vector<double> &tseconds,
                                  const bool isHistogram,
-                                 const CurveFitting::DetectorParams &detpar);
+                                 const Algorithms::DetectorParams &detpar);
   /// Turn off logger
   void disableLogging() { m_log.setEnabled(false); }
   ///@}

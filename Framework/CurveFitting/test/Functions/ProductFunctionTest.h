@@ -6,7 +6,7 @@
 #include "MantidCurveFitting/Functions/ProductFunction.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Jacobian.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -21,6 +21,7 @@
 typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
 using Mantid::CurveFitting::Functions::ProductFunction;
 using Mantid::CurveFitting::Functions::Gaussian;
+using Mantid::CurveFitting::Algorithms::Fit;
 
 class ProductFunctionMWTest_Gauss : public Mantid::API::IPeakFunction {
 public:
@@ -251,7 +252,7 @@ public:
 
     Mantid::API::AnalysisDataService::Instance().add(wsName, ws);
 
-    Mantid::CurveFitting::Fit fit;
+    Mantid::CurveFitting::Algorithms::Fit fit;
     fit.initialize();
 
     f0->tie("PeakCentre", "1.0");

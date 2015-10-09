@@ -5,7 +5,7 @@
 #include "MantidTestHelpers/FakeObjects.h"
 
 #include "MantidCurveFitting/FitMW.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/SeqDomain.h"
 #include "MantidCurveFitting/Functions/UserFunction.h"
 #include "MantidCurveFitting/Functions/ExpDecay.h"
@@ -29,6 +29,7 @@
 
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::API;
 
@@ -52,7 +53,7 @@ public:
     fun->setParameter("Height", 1.);
     fun->setParameter("Lifetime", 1.0);
 
-    Fit fit;
+    Algorithms::Fit fit;
     fit.initialize();
 
     fit.setProperty("Function", fun);
@@ -160,7 +161,7 @@ public:
     fun->setParameter("Height", 1.);
     fun->setParameter("Lifetime", 1.);
 
-    Fit fit;
+    Algorithms::Fit fit;
     fit.initialize();
 
     fit.setProperty("Function", fun);

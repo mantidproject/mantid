@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/IkedaCarpenterPV.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidKernel/ConfigService.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -268,7 +268,7 @@ using namespace Mantid::CurveFitting::Functions;
     icpv.tie("Kappa", "46.025921");
     icpv.setParameter("X0", 45.0);
 
-    auto alg = boost::shared_ptr<IAlgorithm>(new Fit);
+    auto alg = boost::shared_ptr<IAlgorithm>(new Algorithms::Fit);
     alg->initialize();
     alg->setPropertyValue("Function", icpv.asString());
     // Set general Fit parameters

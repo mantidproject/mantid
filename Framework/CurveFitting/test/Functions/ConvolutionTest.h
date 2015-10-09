@@ -6,7 +6,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -21,6 +21,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::CurveFitting::Functions;
 
 typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
@@ -407,7 +408,7 @@ public:
     conv->setParameter("f1.h", 1);
     conv->setParameter("f1.w", 1);
 
-    Fit fit;
+    Algorithms::Fit fit;
     fit.initialize();
 
     fit.setPropertyValue("Function", conv->asString());
@@ -425,7 +426,7 @@ public:
         0.1, fabs(out->getParameter("f1.w") - conv->getParameter("f1.w")));
 
     conv->setAttributeValue("FixResolution", false);
-    Fit fit1;
+    Algorithms::Fit fit1;
     fit1.initialize();
     fit1.setProperty("Function", boost::dynamic_pointer_cast<IFunction>(conv));
     fit1.setProperty("InputWorkspace", data);
