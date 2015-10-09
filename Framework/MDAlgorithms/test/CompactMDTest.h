@@ -233,7 +233,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
     alg.setProperty("OutputWorkspace", "out");
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 };
 //===================

@@ -16,11 +16,13 @@ createPBinStringVector(std::vector<Mantid::coord_t> minVector,
   size_t numDims = inputWs->getNumDims();
   std::vector<std::string> pBinStrVector;
   for (size_t iter = 0; iter < numDims; iter++) {
-    // creating pbin string using Min and Max Centre positions
     if (minVector[iter] >= maxVector[iter]) {
-      throw std::invalid_argument(
-          "Minimum extents MUST be less than Maximum extents");
+      std::cerr << "Minimum extent of non-zero signal must be LESS than the "
+                   "maximum extent with non-zero signal"
+                << std::endl;
+      // break;
     }
+    // creating pbin string using Min and Max Centre positions
     auto pBinStr = boost::lexical_cast<std::string>(
                        minVector[iter] -
                        (inputWs->getDimension(iter)->getBinWidth() * 0.5)) +
@@ -91,9 +93,7 @@ void CompactMD::exec() {
   }
   // start our search for the first non-zero signal index.
   findFirstNonZeroMinMaxExtents(input_ws, minVector, maxVector);
-
   auto pBinStrings = createPBinStringVector(minVector, maxVector, input_ws);
-
   // creating IntegrateMDHistoWorkspace algorithm to crop our workspace.
   auto cut_alg = this->createChildAlgorithm("IntegrateMDHistoWorkspace");
   cut_alg->setProperty("InputWorkspace", input_ws);

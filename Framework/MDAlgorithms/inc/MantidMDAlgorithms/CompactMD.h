@@ -53,7 +53,6 @@ public:
   const std::string category() const { return "MDAlgorithms"; }
   /// Algorithm's version for identification
   int version() const { return 1; }
-
   void
   findFirstNonZeroMinMaxExtents(Mantid::API::IMDHistoWorkspace_sptr inputWs,
                                 std::vector<Mantid::coord_t> &minVec,
