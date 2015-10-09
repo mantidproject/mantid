@@ -52,9 +52,6 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
             issues['Bands'] = 'Even number of Bands boundaries expected'
             return issues # Abort early. Do not continue
 
-        if len(bands) > 2:
-            issues['Bands'] = 'Presently this algorithm only supports one pair of bands'
-
         all_limits=list()
         for i in range(0, len(bands), 2):
             lower = bands[i]
@@ -78,6 +75,13 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
         divide.setProperty("RHSWorkspace", rhs)
         divide.execute()
         return divide.getProperty("OutputWorkspace").value
+        
+    def _add(self, lhs, rhs):
+        divide = self.createChildAlgorithm("Plus")
+        divide.setProperty("LHSWorkspace", lhs)
+        divide.setProperty("RHSWorkspace", rhs)
+        divide.execute()
+        return divide.getProperty("OutputWorkspace").value
 
 
     def PyExec(self):
@@ -86,46 +90,60 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
 
         in_ws = self.getProperty('InputWorkspace').value
         bands = self.getProperty('Bands').value
+        x_range = max(bands)-min(bands)
+        sum_steps = 0
 
-        # Formulate bands
-        params = list()
+        # Formulate bands, integrate and sum
+        accumulated_output = None
         for i in range(0, len(bands), 2):
             lower = bands[i]
             upper = bands[i+1]
             step = upper - lower
-            params.append((lower, step, upper))
+            sum_steps += step
+            
+            rebin = self.createChildAlgorithm("Rebin")
+            rebin.setProperty("Params", [lower, step, upper])
+            rebin.setProperty("InputWorkspace", in_ws) # Always integrating the same input workspace
+            rebin.execute()
+            integrated = rebin.getProperty("OutputWorkspace").value
+            
+            if accumulated_output:
+                accumulated_output = self._add(accumulated_output, integrated)
+            else:
+                # First band
+                accumulated_output = integrated
+            
         progress.report()
 
-        accumulated_output = None
-        rebin = self.createChildAlgorithm("Rebin")
-        rebin.setProperty("Params", params[0])
-        rebin.setProperty("InputWorkspace", in_ws)
-        rebin.execute()
-        accumulated_output = rebin.getProperty("OutputWorkspace").value
-        progress.report()
-
-        # Determine the max across all spectra
-        y_values = accumulated_output.extractY()
-        max_val = np.amax(y_values)
-
-        # Create a workspace from the single max value
-        create = self.createChildAlgorithm("CreateSingleValuedWorkspace")
-        create.setProperty("DataValue", max_val)
-        create.execute()
-        max_ws = create.getProperty("OutputWorkspace").value
-
-        # Divide each entry by max
-        normalized = self._divide(accumulated_output, max_ws)
-        progress.report()
 
         # Perform solid angle correction. Calculate solid angle then divide through.
+        normalized=accumulated_output
         if self.getProperty("SolidAngleCorrection").value:
             solidAngle = self.createChildAlgorithm("SolidAngle")
-            solidAngle.setProperty("InputWorkspace", normalized)
+            solidAngle.setProperty("InputWorkspace", accumulated_output)
             solidAngle.execute()
             solid_angle_weighting = solidAngle.getProperty("OutputWorkspace").value
             normalized = self._divide(normalized, solid_angle_weighting)
         progress.report()
+        
+        # Determine the max across all spectra
+        y_values = normalized.extractY()
+        mean_val = np.mean(y_values)
+
+        # Create a workspace from the single max value
+        create = self.createChildAlgorithm("CreateSingleValuedWorkspace")
+        create.setProperty("DataValue", mean_val)
+        create.execute()
+        mean_ws = create.getProperty("OutputWorkspace").value
+        
+        # Divide each entry by mean
+        normalized = self._divide(normalized, mean_ws)
+        progress.report()
+        
+        # Fix-up ranges
+        for i in range(normalized.getNumberHistograms()):
+            normalized.dataX(i)[0] = bands[0]
+            normalized.dataX(i)[1] = bands[-1]
 
         self.setProperty('OutputWorkspace', normalized)
 
