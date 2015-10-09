@@ -63,7 +63,7 @@ void addMDDimensionsWithFrames(
     sprintf(id, axisIdFormat.c_str(), d);
 
     // Use the same frame for all dimensions
-    auto dim = boost::make_shared<MDHistoDimension>(
+    auto dim = boost::make_shared<Mantid::Geometry::MDHistoDimension>(
         axisNameFormat, axisIdFormat, frame, min, max, 10);
     out->addDimension(dim);
   }
@@ -74,7 +74,7 @@ template <typename MDE, size_t nd>
 void addData(
     boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> out,
     size_t splitInto, Mantid::coord_t min, Mantid::coord_t max,
-    size_t numEventsPerBox, std::string wsName) {
+    size_t numEventsPerBox) {
   if (numEventsPerBox > 0) {
     out->splitBox();
     size_t index[nd];
@@ -178,7 +178,7 @@ makeAnyMDEW(size_t splitInto, coord_t min, coord_t max,
   addMDDimensions<MDE, nd>(out, min, max, axisNameFormat, axisIdFormat);
 
   // Add data
-  addData<MDE, nd>(out, splitInto, min, max, numEventsPerBox, wsName);
+  addData<MDE, nd>(out, splitInto, min, max, numEventsPerBox);
 
   // Add to ADS on option
   if (!wsName.empty())
@@ -219,7 +219,7 @@ makeAnyMDEWWithFrames(size_t splitInto, coord_t min, coord_t max,
                                      axisIdFormat);
 
   // Add data
-  addData<MDE, nd>(out, splitInto, min, max, numEventsPerBox, wsName);
+  addData<MDE, nd>(out, splitInto, min, max, numEventsPerBox);
 
   // Add to ADS on option
   if (!wsName.empty())
