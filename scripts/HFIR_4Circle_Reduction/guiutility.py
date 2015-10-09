@@ -43,12 +43,12 @@ def parse_integer_list(array_str):
     array_str = array_str.replace('\t ', '')
 
     int_str_list = array_str.split(',')
-    int_list = list()
+    integer_list = list()
     for int_str in int_str_list:
 
         try:
             int_value = int(int_str)
-            int_list.append(int_value)
+            integer_list.append(int_value)
         except ValueError:
             num_dash = int_str.count('-')
             if num_dash == 1:
@@ -57,35 +57,35 @@ def parse_integer_list(array_str):
                     start_value = int(terms[0])
                     end_value = int(terms[1])
                 except ValueError:
-                    raise 'Unable to parse %s due to value error' % int_str
+                    raise RuntimeError('Unable to parse %s due to value error' % int_str)
             elif num_dash == 2 and int_str.startswith('-'):
                 terms = int_str[1:].split('-')
                 try:
                     start_value = int(terms[0])*-1
                     end_value = int(terms[1])
                 except ValueError:
-                    raise 'Unable to parse %s due to value error' % int_str
+                    raise RuntimeError('Unable to parse %s due to value error' % int_str)
             elif num_dash == 3:
                 terms = int_str.split('-')
                 try:
                     start_value = -1*int(terms[1])
                     end_value = -1*int(terms[3])
                 except ValueError:
-                    raise 'Unable to parse %s due to value error' % int_str
+                    raise RuntimeError('Unable to parse %s due to value error' % int_str)
                 except IndexError:
-                    raise 'Unable to parse %s due to value error' % int_str
+                    raise RuntimeError('Unable to parse %s due to value error' % int_str)
             else:
-                raise 'Unable to parse %s due to value error' % int_str
+                raise RuntimeError('Unable to parse %s due to value error' % int_str)
 
-            int_list.extend(xrange(start_value, end_value+1))
+            integer_list.extend(xrange(start_value, end_value+1))
     # END-FOR
 
-    return int_list
+    return integer_list
 
 
 def parse_float_editors(line_edits):
     """
-    :param line_edit_list:
+    :param line_edits:
     :return: (True, list of floats); (False, error message)
     """
     # Set flag
@@ -124,7 +124,7 @@ def parse_float_editors(line_edits):
 
 def parse_integers_editors(line_edits):
     """
-    :param line_edit_list:
+    :param line_edits:
     :return: (True, list of integers); (False, error message)
     """
     # Set flag

@@ -58,7 +58,7 @@ class UBMatrixTable(tableBase.NTableWidget):
 
     def _set_to_table(self):
         """
-        TODO/DOC
+        Set values in holder '_matrix' to TableWidget
         :return:
         """
         for i_row in xrange(3):
@@ -77,7 +77,7 @@ class UBMatrixTable(tableBase.NTableWidget):
 
     def set_from_list(self, element_array):
         """
-        TODO/DOC
+        Set table value including holder and QTable from a 1D numpy array
         :param element_array:
         :return:
         """
@@ -99,7 +99,7 @@ class UBMatrixTable(tableBase.NTableWidget):
 
     def set_from_matrix(self, matrix):
         """
-        TODO - DOC
+        Set value to both holder and QTable from a numpy 3 x 3 matrix
         :param matrix:
         :return:
         """
@@ -311,7 +311,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
     def set_status(self, scan_no, status):
         """
-        TODO/Doc
+        Set the status for merging scan to QTable
         :param status:
         :return:
         """
@@ -335,7 +335,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
     def set_ws_names(self, scan_num, merged_md_name, ws_group_name):
         """
-        TODO/DOC
+        Set the output workspace and workspace group's names to QTable
         :param merged_md_name:
         :param ws_group_name:
         :return:
