@@ -821,10 +821,11 @@ void SCDCalibratePanels::exec() {
     fit_alg->setProperty("InputWorkspace", ws);
     fit_alg->setProperty("Output", "out");
     fit_alg->setProperty("CalcErrors", false);
+    fit_alg->setPropertyValue(
+        "Minimizer", "Levenberg-Marquardt,AbsError=1.e-12,RelError=1.e-12");
     fit_alg->executeAsChildAlg();
     PARALLEL_CRITICAL(afterFit) {
       g_log.debug() << "Finished executing Fit algorithm\n";
-
       string OutputStatus = fit_alg->getProperty("OutputStatus");
       g_log.notice() << "Output Status=" << OutputStatus << "\n";
 
@@ -1410,7 +1411,7 @@ void SCDCalibratePanels::init() {
   declareProperty("tolerance", .12, mustBePositive,
                   "offset of hkl values from integer for GOOD Peaks");
 
-  declareProperty("NumIterations", 60, "Number of iterations");
+  declareProperty("NumIterations", 1000, "Number of iterations");
   declareProperty(
       "MaxRotationChangeDegrees", 5.0,
       "Maximum Change in Rotations about x,y,or z in degrees(def=5)");
@@ -1497,8 +1498,9 @@ void SCDCalibratePanels::CreateFxnGetValues(
   fit->setAttribute("NGroups", IFunction::Attribute(NGroups));
   fit->setAttribute("BankNames", IFunction::Attribute(BankNameString));
 
-  string fieldBase[8] = { "detWidth", "detHeight", "Xoffset", "Yoffset",
-                          "Zoffset",  "Xrot",      "Yrot",    "Zrot" };
+  string fieldBase[8] = { "detWidthScale", "detHeightScale", "Xoffset",
+                          "Yoffset",       "Zoffset",        "Xrot",
+                          "Yrot",          "Zrot" };
   set<string> FieldB(fieldBase, fieldBase + 8);
 
   for (int g = 0; g < NGroups; ++g) {
