@@ -469,17 +469,17 @@ public:
     m_getAllEi.setProperty("OutputWorkspace", "allEiWs");
 
     TS_ASSERT_THROWS_NOTHING(m_getAllEi.execute());
-    // API::MatrixWorkspace_sptr out_ws =
-    // m_getAllEi.getProperty("OutputWorkspace");
+    API::MatrixWorkspace_sptr out_ws = 
+      API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>("allEiWs");
 
-    // TSM_ASSERT("Should be able to retrieve workspace",out_ws);
+    TSM_ASSERT("Should be able to retrieve workspace",out_ws);
   }
 
 private:
   GetAllEiTester m_getAllEi;
 
   DataObjects::Workspace2D_sptr createTestingWS(bool noLogs = false) {
-    double delay(10), speed(50);
+    double delay(2000), speed(100);
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
         2, 2000, true);
     auto chopper = ws->getInstrument()->getComponentByName("chopper-position");
@@ -500,10 +500,40 @@ private:
                               "is_running");
     paramMap.add<bool>("bool", chopper.get(), "filter_with_derivative", false);
 
-    // auto &x = ws->dataX(0);
-    // auto &y = ws->dataY(0);
-    // for (size_t i = 0; i < y.size(); i++) {
-    //}
+    // test instrument parameters (obtained from workspace):
+    double l_chop(20-11),l_mon1(20-9),l_mon2(20-2);
+    double t_chop2(delay+1.e+6/speed);
+    auto &x = ws->dataX(0);
+    for(size_t i=0;i<x.size();i++){
+      x[i]*=10;
+    }
+    // signal at first monitor
+    double t1=delay*l_mon1/l_chop;
+    double t2=t_chop2*l_mon1/l_chop;
+    {
+      auto &y = ws->dataY(0);
+      for (size_t i = 0; i < y.size(); i++) {
+        double t=0.5*(x[i]+x[i+1]);
+        double tm1=t-t1;
+        double tm2=t-t2;
+        y[i] = 100*std::exp(-tm1*tm1/100.)+200*std::exp(-tm2*tm2/200.);
+      }
+    }
+    // signal at second monitor
+    t1=delay*l_mon2/l_chop;
+    t2=t_chop2*l_mon2/l_chop;
+    {
+      auto &y = ws->dataY(1);
+      for (size_t i = 0; i < y.size(); i++) {
+        double t=0.5*(x[i]+x[i+1]);
+        double tm1=t-t1;
+        double tm2=t-t2;
+        y[i] = 100*std::exp(-tm1*tm1/100.)+200*std::exp(-tm2*tm2/200.);
+
+      }
+    }
+
+
 
     if (noLogs)
       return ws;

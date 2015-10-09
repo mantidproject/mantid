@@ -580,8 +580,6 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
 *@param position     -- output energy of the peak center.
 *@param height       -- output height of the peak assuming Gaussian shape
 *@param twoSigma     -- output width of the peak assuming Gaussian shape
-
-
 */
 bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
                                double Ei,
