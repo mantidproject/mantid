@@ -3416,12 +3416,15 @@ QString Graph::yAxisTitleFromFirstCurve()
     using namespace Mantid::API;
     QString wsName = firstCurve->workspaceName();
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
-    return MantidQt::API::PlotAxis(m_isDistribution, *ws).title();
+    if (ws)
+      return MantidQt::API::PlotAxis(m_isDistribution, *ws).title();
+  } else if (auto *firstCurve = dynamic_cast<MantidMDCurve*>(curve(0))) {
+    MantidQwtIMDWorkspaceData* data = firstCurve->mantidData();
+    if (data)
+      return data->getYAxisLabel();
   }
-  else
-  {
-    return axisTitle(0);
-  }
+
+  return axisTitle(0);
 }
 
 void Graph::contextMenuEvent(QContextMenuEvent *e)
@@ -5524,9 +5527,9 @@ void Graph::noNormalization()
   if(!m_isDistribution) return; // Nothing to do
 
   m_isDistribution = false;
-  updateDataCurves();
-  d_plot->updateAxes();
-  setYAxisTitle(yAxisTitleFromFirstCurve());
+
+  updateCurvesAndAxes();
+
   notifyChanges();
 }
 
@@ -5538,9 +5541,8 @@ void Graph::binWidthNormalization()
   if(m_isDistribution) return; // Nothing to do
 
   m_isDistribution = true;
-  updateDataCurves();
-  d_plot->updateAxes();
-  setYAxisTitle(yAxisTitleFromFirstCurve());
+
+  updateCurvesAndAxes();
 
   notifyChanges();
 }
@@ -5555,9 +5557,7 @@ void Graph::noNormalizationMD()
 
   setNormalizationMD(0);
 
-  updateDataCurves();
-  d_plot->updateAxes();
-  setYAxisTitle(yAxisTitleFromFirstCurve());
+  updateCurvesAndAxes();
 
   notifyChanges();
 }
@@ -5572,9 +5572,7 @@ void Graph::volumeNormalizationMD()
 
   setNormalizationMD(1);
 
-  updateDataCurves();
-  d_plot->updateAxes();
-  setYAxisTitle(yAxisTitleFromFirstCurve());
+  updateCurvesAndAxes();
 
   notifyChanges();
 }
@@ -5589,11 +5587,19 @@ void Graph::numEventsNormalizationMD()
 
   setNormalizationMD(2);
 
+  updateCurvesAndAxes();
+
+  notifyChanges();
+}
+
+/**
+ * Convenience method to use when updating the normalization types
+ * (whether Matrix or MD data normalizatio).
+ */
+void Graph::updateCurvesAndAxes() {
   updateDataCurves();
   d_plot->updateAxes();
   setYAxisTitle(yAxisTitleFromFirstCurve());
-
-  notifyChanges();
 }
 
 void Graph::setWaterfallXOffset(int offset)

@@ -827,6 +827,8 @@ private:
 
   QString yAxisTitleFromFirstCurve();
   
+  void updateCurvesAndAxes();
+
   Plot *d_plot;
   QwtPlotZoomer *d_zoomer[2];
   TitlePicker *titlePicker;
