@@ -27,7 +27,6 @@
 #include <boost/random/variate_generator.hpp>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
 #include <map>
 #include <memory>
 #include <Poco/File.h>

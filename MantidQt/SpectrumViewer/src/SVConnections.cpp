@@ -1,4 +1,3 @@
-#include <iostream>
 #include <qwt_plot_canvas.h>
 
 #include <QDesktopServices>

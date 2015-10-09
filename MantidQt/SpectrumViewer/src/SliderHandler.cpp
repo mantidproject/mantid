@@ -1,4 +1,3 @@
-#include <iostream>
 
 #include <QScrollBar>
 #include "MantidQtSpectrumViewer/SliderHandler.h"

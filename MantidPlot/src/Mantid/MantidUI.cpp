@@ -68,7 +68,6 @@
 #include <locale>
 #include <set>
 #include <fstream>
-#include <iostream>
 #include <sstream>
 
 #include <boost/tokenizer.hpp>

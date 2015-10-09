@@ -58,6 +58,7 @@ namespace CustomInterfaces
     IFunction_const_sptr function(QString index) const;
     boost::optional<QString> currentFunctionIndex() const;
     IPeakFunction_const_sptr peakPicker() const;
+    void emitFitRequested();
 
   public slots:
 

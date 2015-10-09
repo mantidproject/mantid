@@ -11,7 +11,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_array.hpp>
 #include <sstream>
-#include <iostream>
 #include <algorithm>
 
 namespace Mantid {

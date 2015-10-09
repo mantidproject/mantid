@@ -33,7 +33,6 @@
 
 // std
 #include <cmath>
-#include <iostream>
 #include <stdexcept>
 
 //***************************************************************************

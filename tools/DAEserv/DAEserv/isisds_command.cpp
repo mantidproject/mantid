@@ -20,8 +20,6 @@
 #include <stdio.h>
 #include "isisds_command.h"
 
-#include <iostream>
-
 using namespace std;
 
 /* 

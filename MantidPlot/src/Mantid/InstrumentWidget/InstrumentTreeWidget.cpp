@@ -12,7 +12,6 @@
 #include <QMessageBox>
 #include <QString>
 #include <cfloat>
-#include <iostream>
 
 InstrumentTreeWidget::InstrumentTreeWidget(QWidget *w):QTreeView(w), m_instrActor(NULL), m_treeModel(NULL)
 {

@@ -4,7 +4,6 @@
 #include "qwt_scale_div.h"
 #include "MantidQtAPI/PowerScaleEngine.h"
 #include <iosfwd>
-#include <iostream>
 #include <qwt_scale_map.h>
 #include <qwt_scale_widget.h>
 #include <QKeyEvent>

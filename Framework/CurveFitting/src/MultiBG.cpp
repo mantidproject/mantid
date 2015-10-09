@@ -12,7 +12,6 @@
 #include <boost/lexical_cast.hpp>
 
 #include <sstream>
-#include <iostream>
 #include <algorithm>
 #include <iterator>
 #include <float.h>

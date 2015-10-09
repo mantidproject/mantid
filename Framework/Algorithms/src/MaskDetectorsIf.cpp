@@ -5,7 +5,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include <fstream>
-#include <iomanip>
 #include "MantidKernel/ListValidator.h"
 
 namespace Mantid {

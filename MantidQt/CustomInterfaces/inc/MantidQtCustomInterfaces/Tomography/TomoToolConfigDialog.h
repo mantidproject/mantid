@@ -15,7 +15,7 @@ namespace CustomInterfaces {
 Third party tool configuration dialog(s) for the tomographic reconstruction
 GUI.
 
-Copyright &copy; 2014,205 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.

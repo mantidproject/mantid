@@ -76,6 +76,7 @@ set ( TEST_PY_FILES
   SANSSubtractTest.py
   TimeSliceTest.py
   TOFTOFCropWorkspaceTest.py
+  TOFTOFMergeRunsTest.py
   TOSCABankCorrectionTest.py
   TransformToIqtTest.py
   ExportSampleLogsToCSVFileTest.py

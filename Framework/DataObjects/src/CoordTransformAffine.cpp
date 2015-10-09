@@ -1,4 +1,3 @@
-#include <iostream>
 
 #include "MantidAPI/CoordTransform.h"
 #include "MantidDataObjects/CoordTransformAffine.h"

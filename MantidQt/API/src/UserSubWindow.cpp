@@ -12,8 +12,6 @@
 #include <QTemporaryFile>
 #include <QTextStream>
 
-#include <iostream>
-
 using namespace MantidQt::API;
 
 //------------------------------------------------------

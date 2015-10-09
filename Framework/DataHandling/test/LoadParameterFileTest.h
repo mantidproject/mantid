@@ -12,7 +12,6 @@
 #include "MantidAPI/Algorithm.h"
 
 #include <vector>
-#include <iostream>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

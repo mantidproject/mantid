@@ -1,4 +1,3 @@
-#include <iostream>
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DllOpen.h"

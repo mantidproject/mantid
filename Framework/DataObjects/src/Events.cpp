@@ -5,7 +5,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/DateAndTime.h"
 #include <functional>
-#include <iostream>
 #include <math.h>
 
 using std::ostream;

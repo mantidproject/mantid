@@ -5,7 +5,6 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/Utils.h"
-#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <boost/algorithm/string.hpp>

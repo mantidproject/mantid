@@ -5,7 +5,6 @@
 #include <SystemConfiguration/SystemConfiguration.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <CFNetwork/CFProxySupport.h>
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>

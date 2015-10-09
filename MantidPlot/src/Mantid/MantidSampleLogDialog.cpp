@@ -20,7 +20,6 @@
 #include <QRadioButton>
 #include <QFileInfo>
 #include <QMessageBox>
-#include <iostream>
 #include <sstream>
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MultipleExperimentInfos.h"

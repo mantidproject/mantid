@@ -7,7 +7,6 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/VectorHelper.h"
-#include <iostream>
 #include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/BoundedValidator.h"
 

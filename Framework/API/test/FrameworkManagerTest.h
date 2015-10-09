@@ -7,7 +7,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include <stdexcept>
-#include <iostream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

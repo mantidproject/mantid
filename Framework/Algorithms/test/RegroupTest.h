@@ -8,8 +8,6 @@
 #include "MantidAlgorithms/Regroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
-#include <iostream>
-
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;

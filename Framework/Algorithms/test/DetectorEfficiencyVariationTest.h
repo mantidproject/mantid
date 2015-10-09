@@ -14,8 +14,6 @@
 #include <boost/lexical_cast.hpp>
 #include <Poco/Path.h>
 #include <cmath>
-#include <iomanip>
-#include <iostream>
 #include <sstream>
 #include <fstream>
 #include <ios>

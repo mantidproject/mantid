@@ -4,7 +4,6 @@
 #include <set>
 #include <boost/make_shared.hpp>
 #include <boost/algorithm/string.hpp>
-#include <iostream>
 
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"

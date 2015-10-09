@@ -11,8 +11,6 @@
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 
 using namespace Mantid;

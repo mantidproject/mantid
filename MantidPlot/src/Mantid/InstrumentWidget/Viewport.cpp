@@ -1,6 +1,5 @@
 #include "Viewport.h"
 #include <math.h>
-#include <iostream>
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidKernel/V3D.h"
 #include "OpenGLError.h"

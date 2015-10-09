@@ -4,7 +4,6 @@
 #include "MantidAlgorithms/FFTSmooth.h"
 #include "MantidKernel/Exception.h"
 
-#include <iostream>
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 

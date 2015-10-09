@@ -5,7 +5,6 @@
 #include "MantidKernel/Exception.h"
 
 #include <stdexcept>
-#include <iostream>
 #include <functional>
 #include <algorithm>
 #include <float.h>

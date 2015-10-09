@@ -1,6 +1,4 @@
 #include <fstream>
-#include <iomanip>
-#include <iostream>
 #include <complex>
 #include <cmath>
 #include <vector>

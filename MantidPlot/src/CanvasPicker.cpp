@@ -39,7 +39,6 @@
 #include <QVector>
 #include <qwt_text_label.h>
 #include <qwt_plot_canvas.h>
-//#include <iostream>
 
 CanvasPicker::CanvasPicker(Graph *graph):
 	QObject(graph)

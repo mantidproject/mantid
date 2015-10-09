@@ -11,7 +11,6 @@
 
 #include <cmath>
 #include <fstream>
-#include <iomanip>
 
 using std::size_t;
 
