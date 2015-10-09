@@ -149,7 +149,6 @@ void EnggDiffractionViewQtGUI::doSetupTabSettings() {
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabFocus() {
-  m_uiTabFocus.comboBox_PlotData->setCurrentIndex(0);
 
   connect(m_uiTabFocus.pushButton_focus, SIGNAL(released()), this,
           SLOT(focusClicked()));
@@ -239,6 +238,8 @@ void EnggDiffractionViewQtGUI::readSettings() {
 
   m_uiTabFocus.checkBox_FocusedWS->setChecked(
       qs.value("user-params-focus-plot-ws", true).toBool());
+
+  m_uiTabFocus.comboBox_PlotData->setCurrentIndex(0);
 
   QString lastPath =
       MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
@@ -722,7 +723,6 @@ void EnggDiffractionViewQtGUI::plotRepChanged(int /*idx*/) {
   if (!inst)
     return;
   m_currentType = inst->currentIndex();
-  m_presenter->notify(IEnggDiffractionPresenter::PlotRepChange);
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {

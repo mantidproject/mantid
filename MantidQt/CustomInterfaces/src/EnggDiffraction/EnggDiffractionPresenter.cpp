@@ -110,10 +110,6 @@ void EnggDiffractionPresenter::notify(
   case IEnggDiffractionPresenter::ShutDown:
     processShutDown();
     break;
-
-  case IEnggDiffractionPresenter::PlotRepChange:
-    processPlotRepChange();
-    break;
   }
 }
 
@@ -267,11 +263,6 @@ void EnggDiffractionPresenter::processInstChange() {
 }
 
 void EnggDiffractionPresenter::processShutDown() {
-  m_view->saveSettings();
-  cleanup();
-}
-
-void EnggDiffractionPresenter::processPlotRepChange() {
   m_view->saveSettings();
   cleanup();
 }
@@ -1097,36 +1088,8 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     // TODO: use detector positions (from calibrate full) when available
     // alg->setProperty(DetectorPositions, TableWorkspace)
     alg->execute();
-
-    const bool plotFocusedWS = m_view->focusedOutWorkspace();
-    int plotType = m_view->currentPlotType();
-    g_log.debug() << "...Plot Type return: " << plotType << std::endl;
-
-    // Qt comboBox returns absurd number for index of 0
-    if (plotType > 3) {
-      plotType = 1;
-    } else {
-      plotType += 1;
-    }
-
-    if (plotFocusedWS == true && 1 == plotType) {
-      if (outWSName == "engggui_focusing_output_ws_bank_1")
-        m_view->plotFocusedSpectrum(outWSName);
-      if (outWSName == "engggui_focusing_output_ws_bank_2")
-        m_view->plotReplacingWindow(outWSName);
-    }
-
-    else if (plotFocusedWS == true && 2 == plotType) {
-      if (outWSName == "engggui_focusing_output_ws_bank_1")
-        m_view->plotFocusedSpectrum(outWSName);
-      if (outWSName == "engggui_focusing_output_ws_bank_2")
-        m_view->plotWaterfallSpectrum(outWSName);
-    }
-
-    else if (plotFocusedWS == true && 3 == plotType) {
-      m_view->plotFocusedSpectrum(outWSName);
-    }
-
+	// plot Focused workspace according to the data type selected
+	plotFocusedWorkspace(outWSName);
   } catch (std::runtime_error &re) {
     g_log.error() << "Error in calibration. ",
         "Could not run the algorithm EnggCalibrate succesfully for bank " +
@@ -1364,6 +1327,31 @@ void EnggDiffractionPresenter::calcVanadiumWorkspaces(
 
   vanIntegWS = ADS.retrieveWS<ITableWorkspace>(integName);
   vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesName);
+}
+
+/**
+ * Checks the plot type selected and applies the appropriate
+ * python function to apply during first bank and second bank
+ *
+ * @param std::string outWSName; title of focused workspace
+ */
+void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName) {
+  const bool plotFocusedWS = m_view->focusedOutWorkspace();
+  int plotType = m_view->currentPlotType();
+
+  if (plotFocusedWS == true && 0 == plotType) {
+    if (outWSName == "engggui_focusing_output_ws_bank_1")
+      m_view->plotFocusedSpectrum(outWSName);
+    if (outWSName == "engggui_focusing_output_ws_bank_2")
+      m_view->plotReplacingWindow(outWSName);
+  } else if (plotFocusedWS == true && 1 == plotType) {
+    if (outWSName == "engggui_focusing_output_ws_bank_1")
+      m_view->plotFocusedSpectrum(outWSName);
+    if (outWSName == "engggui_focusing_output_ws_bank_2")
+      m_view->plotWaterfallSpectrum(outWSName);
+  } else if (plotFocusedWS == true && 2 == plotType) {
+    m_view->plotFocusedSpectrum(outWSName);
+  }
 }
 
 } // namespace CustomInterfaces

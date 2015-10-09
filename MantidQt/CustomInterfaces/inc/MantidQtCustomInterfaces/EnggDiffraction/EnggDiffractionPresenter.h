@@ -85,7 +85,6 @@ protected:
   void processLogMsg();
   void processInstChange();
   void processShutDown();
-  void processPlotRepChange();
 
 protected slots:
   void calibrationFinished();
@@ -176,6 +175,8 @@ private:
   void calcVanadiumWorkspaces(const std::string &vanNo,
                               Mantid::API::ITableWorkspace_sptr &vanIntegWS,
                               Mantid::API::MatrixWorkspace_sptr &vanCurvesWS);
+
+  void plotFocusedWorkspace(std::string outWSName);
 
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;
