@@ -30,17 +30,17 @@ typedef return_value_policy<Policies::VectorRefToNumpy<Converters::Clone>>
   class_<ArrayProperty<type>, bases<PropertyWithValue<std::vector<type>>>,     \
          boost::noncopyable>(#prefix "ArrayProperty", no_init)                 \
       .def(init<const std::string &, const unsigned int>(                      \
-          (arg("name"), arg("direction") = Direction::Input),                  \
+          (arg("self"), arg("name"), arg("direction") = Direction::Input),     \
           "Construct an ArrayProperty of type" #type))                         \
                                                                                \
       .def(init<const std::string &, IValidator_sptr, const unsigned int>(     \
-          (arg("name"), arg("validator"),                                      \
+          (arg("self"), arg("name"), arg("validator"),                         \
            arg("direction") = Direction::Input),                               \
           "Construct an ArrayProperty of type" #type "with a validator"))      \
                                                                                \
       .def(init<const std::string &, const std::string &, IValidator_sptr,     \
                 const unsigned int>(                                           \
-          (arg("name"), arg("values"),                                         \
+          (arg("self"), arg("name"), arg("values"),                            \
            arg("validator") = IValidator_sptr(new NullValidator),              \
            arg("direction") = Direction::Input),                               \
           "Construct an ArrayProperty of type" #type                           \

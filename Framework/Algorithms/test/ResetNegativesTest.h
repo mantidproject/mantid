@@ -7,8 +7,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <iostream>
-#include <iomanip>
 #include <string>
 
 #include "MantidAlgorithms/ResetNegatives.h"

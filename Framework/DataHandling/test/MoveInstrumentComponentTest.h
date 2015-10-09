@@ -15,7 +15,6 @@
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include <vector>
-#include <iostream>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

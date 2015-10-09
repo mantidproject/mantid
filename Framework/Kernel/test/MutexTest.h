@@ -5,7 +5,6 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/FunctionTask.h"
-#include <iostream>
 #include "MantidKernel/CPUTimer.h"
 #include <Poco/RWLock.h>
 using namespace Mantid::Kernel;

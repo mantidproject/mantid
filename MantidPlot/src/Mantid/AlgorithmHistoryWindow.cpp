@@ -19,7 +19,6 @@
 #include <QDir>
 
 #include <numeric>
-#include <iostream>
 #include <fstream>
 #include <stdio.h>
 

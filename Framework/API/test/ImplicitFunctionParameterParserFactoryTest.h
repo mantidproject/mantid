@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include <vector>
-#include <iostream>
 
 #include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
 #include "MantidKernel/ConfigService.h"

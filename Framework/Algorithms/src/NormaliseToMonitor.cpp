@@ -11,7 +11,6 @@
 #include "MantidKernel/BoundedValidator.h"
 
 #include <cfloat>
-#include <iomanip>
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/IPropertyManager.h"
 

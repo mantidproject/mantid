@@ -5,9 +5,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
-#include <iostream>
 #include <fstream>
-#include <iomanip>
 #include <stdio.h>
 #include <cmath>
 #include "MantidDataObjects/PeaksWorkspace.h"

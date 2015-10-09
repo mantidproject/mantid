@@ -68,34 +68,37 @@ createExclusiveBoundedValidator(object lower = object(),
                             (arg("lower") = object(), arg("upper") = object(), \
                              arg("exclusive") = false)))                       \
       .def("setLower", &BoundedValidator<ElementType>::setLower,               \
-           "Set the lower bound")                                              \
+           (arg("self"), arg("lower")), "Set the lower bound")                 \
       .def("setUpper", &BoundedValidator<ElementType>::setUpper,               \
-           "Set the upper bound")                                              \
+           (arg("self"), arg("upper")), "Set the upper bound")                 \
       .def("setLowerExclusive",                                                \
            &BoundedValidator<ElementType>::setLowerExclusive,                  \
+           (arg("self"), arg("exclusive")),                                    \
            "Sets if the lower bound is exclusive")                             \
       .def("setUpperExclusive",                                                \
            &BoundedValidator<ElementType>::setUpperExclusive,                  \
+           (arg("self"), arg("exclusive")),                                    \
            "Sets if the upper bound is exclsuive")                             \
       .def("setExclusive", &BoundedValidator<ElementType>::setExclusive,       \
+           (arg("self"), arg("exclusive")),                                    \
            "Sets both bounds to be inclusive/exclusive")                       \
-      .def("lower", &BoundedValidator<ElementType>::lower,                     \
+      .def("lower", &BoundedValidator<ElementType>::lower, arg("self"),        \
            return_value_policy<copy_const_reference>(),                        \
            "Returns the lower bound")                                          \
-      .def("upper", &BoundedValidator<ElementType>::upper,                     \
+      .def("upper", &BoundedValidator<ElementType>::upper, arg("self"),        \
            return_value_policy<copy_const_reference>(),                        \
            "Returns the upper bound")                                          \
       .def("setBounds", &BoundedValidator<ElementType>::setBounds,             \
-           "Set both bounds")                                                  \
-      .def("hasLower", &BoundedValidator<ElementType>::hasLower,               \
+           (arg("self"), arg("lower"), arg("upper")), "Set both bounds")       \
+      .def("hasLower", &BoundedValidator<ElementType>::hasLower, arg("self"),  \
            "Returns True if a lower bound has been set")                       \
-      .def("hasUpper", &BoundedValidator<ElementType>::hasUpper,               \
+      .def("hasUpper", &BoundedValidator<ElementType>::hasUpper, arg("self"),  \
            "Returns True if an upper bound has been set")                      \
       .def("isLowerExclusive",                                                 \
-           &BoundedValidator<ElementType>::isLowerExclusive,                   \
+           &BoundedValidator<ElementType>::isLowerExclusive, arg("self"),      \
            "Returns True if the lower bound is exclusive")                     \
       .def("isUpperExclusive",                                                 \
-           &BoundedValidator<ElementType>::isUpperExclusive,                   \
+           &BoundedValidator<ElementType>::isUpperExclusive, arg("self"),      \
            "Returns True if the upper bound is exclusive");
 }
 

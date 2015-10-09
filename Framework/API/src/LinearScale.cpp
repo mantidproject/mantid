@@ -1,7 +1,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <iostream>
 
 #include "MantidAPI/LinearScale.h"
 #include "MantidAPI/TransformScaleFactory.h"

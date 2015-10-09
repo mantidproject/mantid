@@ -7,7 +7,6 @@
 #include "MantidAPI/FunctionFactory.h"
 
 #include <boost/lexical_cast.hpp>
-#include <iostream>
 
 namespace Mantid {
 namespace CurveFitting {

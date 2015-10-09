@@ -6,7 +6,6 @@
 
 #include <cmath>
 #include <algorithm>
-#include <iostream>
 
 namespace Mantid {
 namespace Geometry {

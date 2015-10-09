@@ -10,8 +10,6 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include <iostream>
-#include <iomanip>
 #include <gmock/gmock.h>
 
 #include "MantidDataObjects/Peak.h"

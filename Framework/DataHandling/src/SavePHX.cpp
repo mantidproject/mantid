@@ -8,7 +8,6 @@
 
 #include <cstdio>
 #include <fstream>
-#include <iomanip>
 
 namespace Mantid {
 namespace DataHandling {

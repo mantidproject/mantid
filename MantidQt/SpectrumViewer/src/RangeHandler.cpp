@@ -1,4 +1,3 @@
-#include <iostream>
 #include <QLineEdit>
 
 #include "MantidQtSpectrumViewer/RangeHandler.h"

@@ -6,8 +6,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 #include <fstream>
 #include <Poco/File.h>
 

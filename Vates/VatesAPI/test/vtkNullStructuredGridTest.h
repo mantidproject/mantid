@@ -9,7 +9,6 @@
 
 #include <vtkStructuredGrid.h>
 #include <vtkPoints.h>
-#include <iostream>
 
 using namespace Mantid::VATES;
 

@@ -2,7 +2,6 @@
 // Includes
 //-----------------------------------------------
 #include "MantidKernel/ThreadSafeLogStream.h"
-#include <iostream>
 
 using namespace Mantid::Kernel;
 

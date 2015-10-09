@@ -36,7 +36,7 @@ namespace CustomInterfaces
 
   void ALCDataLoadingPresenter::load()
   {
-    m_view->setWaitingCursor();
+    m_view->disableAll();
 
     try
     {
@@ -108,13 +108,15 @@ namespace CustomInterfaces
       m_view->setDataCurve(*(ALCHelper::curveDataFromWs(m_loadedData, 0)),
                            ALCHelper::curveErrorsFromWs(m_loadedData, 0));
 
+      emit dataChanged();
+
     }
     catch(std::exception& e)
     {
       m_view->displayError(e.what());
     }
 
-    m_view->restoreCursor();
+    m_view->enableAll();
   }
 
   void ALCDataLoadingPresenter::updateAvailableInfo()
