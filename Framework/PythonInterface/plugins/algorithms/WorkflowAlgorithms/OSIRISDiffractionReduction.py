@@ -222,20 +222,28 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         self.declareProperty(StringArrayProperty('Sample'),
                              doc=runs_desc)
+
         self.declareProperty(StringArrayProperty('Vanadium'),
                              doc=runs_desc)
 
         self.declareProperty('Container', '',
                              doc='Run for the container')
+
         self.declareProperty('ContainerScaleFactor', 1.0,
                              doc='Factor by which to scale the container')
 
         self.declareProperty(FileProperty('CalFile', '', action=FileAction.Load),
                              doc='Filename of the .cal file to use in the [[AlignDetectors]] and '+\
                                  '[[DiffractionFocussing]] child algorithms.')
+
+        self.declareProperty('SpectrumMin', 3, doc='Minimum Spectrum to Load from (Must be more than 3)')
+
+        self.declareProperty('SpectrumMax', 962, doc='Maximum Spectrum to Load from file (Must be less than 962)')
+
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', Direction.Output),
                              doc="Name to give the output workspace. If no name is provided, "+\
                                  "one will be generated based on the run numbers.")
+
         self.declareProperty(name='LoadLogFiles', defaultValue=True,
                              doc='Load log files when loading runs')
 
@@ -268,8 +276,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         if self._container_file != '':
             self._container_file = self._find_runs([self._container_file])[0]
 
-        self._spec_min = 3
-        # self._spec_max = 962
+        self._spec_min = self.getPropertyValue("SpectrumMin")
+        self._spec_max = self.getPropertyValue("SpectrumMax")
 
         self._man_d_range = None
         if not self.getProperty("DetectDRange").value:
@@ -288,7 +296,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             Load(Filename=fileName,
                  OutputWorkspace=fileName,
                  SpectrumMin=self._spec_min,
-                 # SpectrumMax=self._spec_max,
+                 SpectrumMax=self._spec_max,
                  LoadLogFiles=self._load_logs)
 
         # Load the container run
@@ -296,7 +304,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             container = Load(Filename=self._container_file,
                              OutputWorkspace='__container',
                              SpectrumMin=self._spec_min,
-                             # SpectrumMax=self._spec_max,
+                             SpectrumMax=self._spec_max,
                              LoadLogFiles=self._load_logs)
 
             # Scale the container run if required
@@ -344,6 +352,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         # Run necessary algorithms on BOTH the Vanadium and Sample workspaces.
         for d_range, wrksp in self._sam_ws_map.getMap().items() + self._van_ws_map.getMap().items():
+            self.log().information('Wrksp:' + str(wrksp) + ' Cal:' + str(self._cal))
             NormaliseByCurrent(InputWorkspace=wrksp,
                                OutputWorkspace=wrksp)
             AlignDetectors(InputWorkspace=wrksp,

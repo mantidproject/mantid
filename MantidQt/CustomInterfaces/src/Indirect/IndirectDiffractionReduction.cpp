@@ -345,6 +345,10 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
                                    m_uiForm.ckLoadLogs->isChecked());
   osirisDiffReduction->setProperty("OutputWorkspace",
                                    drangeWsName.toStdString());
+  auto min = boost::lexical_cast<std::string, int>(m_uiForm.spSpecMin->value());
+  auto max = boost::lexical_cast<std::string, int>(m_uiForm.spSpecMax->value());
+  osirisDiffReduction->setProperty("SpectrumMin", min);
+  osirisDiffReduction->setProperty("SpectrumMax", max);
 
   osirisDiffReduction->setProperty("DetectDRange", !manualDRange);
   if (manualDRange)
