@@ -35,29 +35,32 @@ class TOFTOFCropWorkspace(PythonAlgorithm):
                              doc="Name of the workspace that will contain the results")
         return
 
+    def validateInputs(self):
+        issues = dict()
+        input_workspace = self.getProperty("InputWorkspace").value
+
+        xunit = input_workspace.getAxis(0).getUnit().unitID()
+        if xunit != 'TOF':
+            issues['InputWorkspace'] = "X axis units must be TOF. "
+
+        # check for required properties
+        run = input_workspace.getRun()
+        if not run.hasProperty('channel_width'):
+            issues['InputWorkspace'] = "Input workpsace must have sample log channel_width."
+        if not run.hasProperty('full_channels'):
+            issues['InputWorkspace'] = "Input workpsace must have sample log full_channels."
+
+        return issues
+
     def PyExec(self):
         """ Main execution body
         """
         inputws = self.getProperty("InputWorkspace").value
-        # check X units, will be not needed if validator will work
-        xunit = inputws.getAxis(0).getUnit().unitID()
-        if xunit != 'TOF':
-            message = "Workspace " + inputws.getName() + " has invalid X axis units " + str(xunit) +\
-                ". X axis units must be TOF."
-            self.log().error(message)
-            raise ValueError(message)
-
         outputws = self.getProperty("OutputWorkspace").value
 
-        # check for required properties
         run = inputws.getRun()
-        if run.hasProperty('channel_width') and run.hasProperty('full_channels'):
-            channel_width = float(run.getLogData('channel_width').value)
-            full_channels = float(run.getLogData('full_channels').value)
-        else:
-            message = "Workspace " + inputws.getName() + " does not contain required sample logs. Cannot crop."
-            self.log().error("message")
-            raise RuntimeError(message)
+        channel_width = float(run.getLogData('channel_width').value)
+        full_channels = float(run.getLogData('full_channels').value)
 
         outputws = api.CropWorkspace(inputws, XMin=0., XMax=full_channels*channel_width, OutputWorkspace=outputws)
         self.setProperty("OutputWorkspace", outputws)
