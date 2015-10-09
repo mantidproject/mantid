@@ -11048,7 +11048,7 @@ int SOAP_FMAC2 soap_peek_element(struct soap *soap) {
           soap->arraySize[sizeof(soap->arrayType) - 1] = '\0';
           soap->arrayType[sizeof(soap->arrayType) - 1] = '\0';
         } else if (!soap_match_tag(soap, tp->name, "SOAP-ENC:offset"))
-          strncpy(soap->arrayOffset, tp->value, sizeof(soap->arrayOffset));
+          strncpy(soap->arrayOffset, tp->value, sizeof(soap->arrayOffset) - 1);
         else if (!soap_match_tag(soap, tp->name, "SOAP-ENC:position"))
           soap->position = soap_getposition(tp->value, soap->positions);
         else if (!soap_match_tag(soap, tp->name, "SOAP-ENC:root"))
