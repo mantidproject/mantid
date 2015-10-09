@@ -18,7 +18,6 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Utils.h"
 
-
 namespace {
 template <typename MDE, size_t nd>
 boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>>
@@ -28,16 +27,54 @@ createOutputWorkspace(size_t splitInto) {
   Mantid::API::BoxController_sptr bc = out->getBoxController();
   bc->setSplitThreshold(100);
   bc->setSplitInto(splitInto);
+  return out;
 }
 
 template <typename MDE, size_t nd>
-void processOutputWorkspace(
+void addMDDimensions(
     boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> out,
-    size_t splitInto, Mantid::coord_t min, Mantid::coord_t max, size_t numEventsPerBox,
-    std::string wsName) {
+    Mantid::coord_t min, Mantid::coord_t max, std::string axisNameFormat,
+    std::string axisIdFormat) {
+  // Create dimensions
+  for (size_t d = 0; d < nd; d++) {
+    char name[200];
+    sprintf(name, axisNameFormat.c_str(), d);
+    char id[200];
+    sprintf(id, axisIdFormat.c_str(), d);
 
+    Mantid::Geometry::MDHistoDimension_sptr dim(
+        new Mantid::Geometry::MDHistoDimension(
+            std::string(name), std::string(id), "m", min, max, 10));
+    out->addDimension(dim);
+  }
   out->initialize();
+}
 
+template <typename MDE, size_t nd>
+void addMDDimensionsWithFrames(
+    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> out,
+    Mantid::coord_t min, Mantid::coord_t max,
+    const Mantid::Geometry::MDFrame &frame, std::string axisNameFormat,
+    std::string axisIdFormat) {
+  for (size_t d = 0; d < nd; d++) {
+    char name[200];
+    sprintf(name, axisNameFormat.c_str(), d);
+    char id[200];
+    sprintf(id, axisIdFormat.c_str(), d);
+
+    // Use the same frame for all dimensions
+    auto dim = boost::make_shared<MDHistoDimension>(
+        axisNameFormat, axisIdFormat, frame, min, max, 10);
+    out->addDimension(dim);
+  }
+  out->initialize();
+}
+
+template <typename MDE, size_t nd>
+void addData(
+    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> out,
+    size_t splitInto, Mantid::coord_t min, Mantid::coord_t max,
+    size_t numEventsPerBox, std::string wsName) {
   if (numEventsPerBox > 0) {
     out->splitBox();
     size_t index[nd];
@@ -51,8 +88,9 @@ void processOutputWorkspace(
         Mantid::coord_t centers[nd];
         for (size_t d = 0; d < nd; d++)
           centers[d] = min +
-                       (static_cast<coord_t>(index[d]) + 0.5f) * (max - min) /
-                           static_cast<coord_t>(splitInto);
+                       (static_cast<Mantid::coord_t>(index[d]) + 0.5f) *
+                           (max - min) /
+                           static_cast<Mantid::coord_t>(splitInto);
         out->addEvent(MDE(1.0, 1.0, centers));
       }
 
@@ -61,15 +99,10 @@ void processOutputWorkspace(
     }
     out->refreshCache();
   }
-  auto ei = API::ExperimentInfo_sptr(new API::ExperimentInfo());
+  auto ei = Mantid::API::ExperimentInfo_sptr(new Mantid::API::ExperimentInfo());
   out->addExperimentInfo(ei);
-
-  // Add to ADS on option
-  if (!wsName.empty())
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(wsName, out);
 }
 }
-
 
 namespace Mantid {
 namespace DataObjects {
@@ -138,50 +171,14 @@ makeAnyMDEW(size_t splitInto, coord_t min, coord_t max,
             size_t numEventsPerBox = 0, std::string wsName = "",
             std::string axisNameFormat = "Axis%d",
             std::string axisIdFormat = "Axis%d") {
-  boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> out(
-      new Mantid::DataObjects::MDEventWorkspace<MDE, nd>());
-  Mantid::API::BoxController_sptr bc = out->getBoxController();
-  bc->setSplitThreshold(100);
-  bc->setSplitInto(splitInto);
+  // Create bare workspace
+  auto out = createOutputWorkspace<MDE, nd>(splitInto);
 
-  for (size_t d = 0; d < nd; d++) {
-    char name[200];
-    sprintf(name, axisNameFormat.c_str(), d);
-    char id[200];
-    sprintf(id, axisIdFormat.c_str(), d);
+  // Add standard dimensions
+  addMDDimensions<MDE, nd>(out, min, max, axisNameFormat, axisIdFormat);
 
-    Mantid::Geometry::MDHistoDimension_sptr dim(
-      new Mantid::Geometry::MDHistoDimension(
-          std::string(name), std::string(id), "m", min, max, 10));
-      out->addDimension(dim);
-  }
-  out->initialize();
-
-  if (numEventsPerBox > 0) {
-    out->splitBox();
-    size_t index[nd];
-    Mantid::Kernel::Utils::NestedForLoop::SetUp(nd, index);
-    size_t index_max[nd];
-    Mantid::Kernel::Utils::NestedForLoop::SetUp(nd, index_max, splitInto);
-    bool allDone = false;
-    while (!allDone) {
-      for (size_t i = 0; i < numEventsPerBox; i++) {
-        // Put an event in the middle of each box
-        Mantid::coord_t centers[nd];
-        for (size_t d = 0; d < nd; d++)
-          centers[d] = min +
-                       (static_cast<coord_t>(index[d]) + 0.5f) * (max - min) /
-                           static_cast<coord_t>(splitInto);
-        out->addEvent(MDE(1.0, 1.0, centers));
-      }
-
-      allDone =
-          Mantid::Kernel::Utils::NestedForLoop::Increment(nd, index, index_max);
-    }
-    out->refreshCache();
-  }
-  auto ei = API::ExperimentInfo_sptr(new API::ExperimentInfo());
-  out->addExperimentInfo(ei);
+  // Add data
+  addData<MDE, nd>(out, splitInto, min, max, numEventsPerBox, wsName);
 
   // Add to ADS on option
   if (!wsName.empty())
@@ -191,7 +188,7 @@ makeAnyMDEW(size_t splitInto, coord_t min, coord_t max,
 }
 
 /** Create a test MDEventWorkspace<nd> . Dimensions are names Axis0, Axis1, etc.
- *  But you can set the an MDFrame. For now the same frame along all dimensions
+ *  But you can set an MDFrame. For now the same frame for all dimensions
  *  is used.
  *
  * @param splitInto :: each dimension will split into this many subgrids
@@ -214,51 +211,14 @@ makeAnyMDEWWithFrames(size_t splitInto, coord_t min, coord_t max,
                       size_t numEventsPerBox = 0, std::string wsName = "",
                       std::string axisNameFormat = "Axis%d",
                       std::string axisIdFormat = "Axis%d") {
-  boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> out(
-      new Mantid::DataObjects::MDEventWorkspace<MDE, nd>());
-  Mantid::API::BoxController_sptr bc = out->getBoxController();
-  bc->setSplitThreshold(100);
-  bc->setSplitInto(splitInto);
+  // Create bare workspace
+  auto out = createOutputWorkspace<MDE, nd>(splitInto);
 
-  for (size_t d = 0; d < nd; d++) {
-    char name[200];
-    sprintf(name, axisNameFormat.c_str(), d);
-    char id[200];
-    sprintf(id, axisIdFormat.c_str(), d);
+  // Add standard dimensions
+  addMDDimensionsWithFrames<MDE, nd>(out, min, max, frame, axisNameFormat, axisIdFormat);
 
-    // Use the same frame for all dimensions
-    auto dim = boost::make_shared<MDHistoDimension>("QSampleX", "QSampleX",
-                                                    frame, min, max, 10);
-    out->addDimension(dim);
-  }
-
-  out->initialize();
-
-  if (numEventsPerBox > 0) {
-    out->splitBox();
-    size_t index[nd];
-    Mantid::Kernel::Utils::NestedForLoop::SetUp(nd, index);
-    size_t index_max[nd];
-    Mantid::Kernel::Utils::NestedForLoop::SetUp(nd, index_max, splitInto);
-    bool allDone = false;
-    while (!allDone) {
-      for (size_t i = 0; i < numEventsPerBox; i++) {
-        // Put an event in the middle of each box
-        Mantid::coord_t centers[nd];
-        for (size_t d = 0; d < nd; d++)
-          centers[d] = min +
-                       (static_cast<coord_t>(index[d]) + 0.5f) * (max - min) /
-                           static_cast<coord_t>(splitInto);
-        out->addEvent(MDE(1.0, 1.0, centers));
-      }
-
-      allDone =
-          Mantid::Kernel::Utils::NestedForLoop::Increment(nd, index, index_max);
-    }
-    out->refreshCache();
-  }
-  auto ei = API::ExperimentInfo_sptr(new API::ExperimentInfo());
-  out->addExperimentInfo(ei);
+  // Add data
+  addData<MDE, nd>(out, splitInto, min, max, numEventsPerBox, wsName);
 
   // Add to ADS on option
   if (!wsName.empty())
