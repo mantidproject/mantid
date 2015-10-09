@@ -30,7 +30,6 @@ namespace {
 Kernel::Logger g_log("IkedaCarpenterPV");
 }
 
-
 using namespace Kernel;
 
 using namespace CurveFitting::SpecialFunctionSupport;

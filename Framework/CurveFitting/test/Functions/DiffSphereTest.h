@@ -86,8 +86,7 @@ public:
     Mantid::API::IFunction_sptr fitalg_function =
         fitalg.getProperty("Function");
     auto fitalg_conv =
-        boost::dynamic_pointer_cast<Convolution>(
-            fitalg_function);
+        boost::dynamic_pointer_cast<Convolution>(fitalg_function);
     Mantid::API::IFunction_sptr fitalg_resolution = fitalg_conv->getFunction(0);
     TS_ASSERT_DELTA(fitalg_resolution->getParameter("PeakCentre"), 0.0,
                     0.00001); // allow for a small percent variation
@@ -136,8 +135,7 @@ public:
                              // of the 99 coefficients to break down
 
     // initialize the elastic part
-    boost::shared_ptr<ElasticDiffSphere> elastic_part(
-        new ElasticDiffSphere());
+    boost::shared_ptr<ElasticDiffSphere> elastic_part(new ElasticDiffSphere());
     elastic_part->setParameter("Height", I);
     elastic_part->setParameter("Radius", R);
     elastic_part->setAttributeValue("Q", Q);
@@ -209,18 +207,15 @@ public:
     Mantid::API::IFunction_sptr fitalg_function =
         fitalg.getProperty("Function"); // main function
     fitalg_function->initialize();
-    auto fitalg_conv =
-        boost::dynamic_pointer_cast<Convolution>(
-            fitalg_function);                      // cast to Convolution
+    auto fitalg_conv = boost::dynamic_pointer_cast<Convolution>(
+        fitalg_function);                          // cast to Convolution
     fitalg_function = fitalg_conv->getFunction(1); // DiffSphere
     auto fitalg_structure_factor =
-        boost::dynamic_pointer_cast<DiffSphere>(
-            fitalg_function);
+        boost::dynamic_pointer_cast<DiffSphere>(fitalg_function);
 
     fitalg_function = fitalg_structure_factor->getFunction(0);
     auto fitalg_elastic =
-        boost::dynamic_pointer_cast<ElasticDiffSphere>(
-            fitalg_function);
+        boost::dynamic_pointer_cast<ElasticDiffSphere>(fitalg_function);
     TS_ASSERT_DELTA(fitalg_elastic->getParameter("Height"), I_0,
                     std::numeric_limits<double>::epsilon());
     TS_ASSERT_DELTA(fitalg_elastic->getParameter("Radius"), R_0,
@@ -233,8 +228,7 @@ public:
 
     fitalg_function = fitalg_structure_factor->getFunction(1);
     auto fitalg_inelastic =
-        boost::dynamic_pointer_cast<InelasticDiffSphere>(
-            fitalg_function);
+        boost::dynamic_pointer_cast<InelasticDiffSphere>(fitalg_function);
     TS_ASSERT_DELTA(fitalg_inelastic->getParameter("Intensity"), I_0,
                     std::numeric_limits<double>::epsilon());
     TS_ASSERT_DELTA(fitalg_inelastic->getParameter("Radius"), R_0,
@@ -402,8 +396,7 @@ private:
     Mantid::API::IFunction_sptr fitalg_function =
         fitalg.getProperty("Function");
     auto fitalg_conv =
-        boost::dynamic_pointer_cast<Convolution>(
-            fitalg_function);
+        boost::dynamic_pointer_cast<Convolution>(fitalg_function);
     Mantid::API::IFunction_sptr fitalg_resolution = fitalg_conv->getFunction(0);
 
     TS_ASSERT_DELTA(fitalg_resolution->getParameter("PeakCentre"), S,

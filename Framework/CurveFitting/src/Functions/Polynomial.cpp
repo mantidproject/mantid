@@ -2,11 +2,9 @@
 #include "MantidAPI/FunctionFactory.h"
 #include <boost/lexical_cast.hpp>
 
-
 using namespace Mantid::Kernel;
 
 using namespace Mantid::API;
-
 
 using namespace std;
 

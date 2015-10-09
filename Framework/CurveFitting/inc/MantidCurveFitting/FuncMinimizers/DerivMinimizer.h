@@ -95,7 +95,7 @@ private:
   void initGSLMMin();
 };
 
-} // namespace FuncMinimisers 
+} // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid
 

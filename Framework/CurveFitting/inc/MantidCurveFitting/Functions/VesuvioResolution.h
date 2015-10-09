@@ -16,7 +16,6 @@ struct DetectorParams;
 }
 namespace Functions {
 
-
 //---------------------------------------------------------------------------
 /// Simple data structure to store resolution parameter values
 /// It avoids some functions taking a huge number of arguments

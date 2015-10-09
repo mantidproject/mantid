@@ -6,11 +6,9 @@
 
 #include <gsl/gsl_sf_erf.h>
 
-
 using namespace Mantid::Kernel;
 
 using namespace Mantid::API;
-
 
 using namespace std;
 

@@ -62,7 +62,8 @@ public:
 
   /// Pre-calculate the Y-space values with specified resolution parameters
   void cacheYSpaceValues(const std::vector<double> &tseconds,
-                         const bool isHistogram, const Algorithms::DetectorParams &detpar,
+                         const bool isHistogram,
+                         const Algorithms::DetectorParams &detpar,
                          const ResolutionParams &respar);
 
   /// Pre-calculate the Y-space values

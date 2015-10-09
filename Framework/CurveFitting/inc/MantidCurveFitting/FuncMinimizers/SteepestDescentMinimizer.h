@@ -52,7 +52,7 @@ protected:
   static Kernel::Logger &g_log;
 };
 
-} // namespace FuncMinimisers 
+} // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid
 

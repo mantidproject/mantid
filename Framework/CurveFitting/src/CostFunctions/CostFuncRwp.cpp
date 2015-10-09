@@ -64,6 +64,6 @@ double CostFuncRwp::calSqrtW(API::FunctionValues_sptr values) const {
   return sqrt(weight);
 }
 
-} // namespace CostFunctions 
+} // namespace CostFunctions
 } // namespace CurveFitting
 } // namespace Mantid

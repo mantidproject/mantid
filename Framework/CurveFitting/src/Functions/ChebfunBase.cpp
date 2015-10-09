@@ -300,8 +300,8 @@ ChebfunBase::evalVector(const std::vector<double> &x,
  */
 void ChebfunBase::derivative(const std::vector<double> &a,
                              std::vector<double> &aout) const {
-  
-using namespace std::placeholders;
+
+  using namespace std::placeholders;
   if (a.size() != m_x.size()) {
     throw std::invalid_argument(
         "Cannot calculate derivative: coeffs vector has wrong size.");
@@ -335,8 +335,8 @@ using namespace std::placeholders;
  */
 ChebfunBase_sptr ChebfunBase::integral(const std::vector<double> &a,
                                        std::vector<double> &aout) const {
-  
-using namespace std::placeholders;
+
+  using namespace std::placeholders;
   if (a.size() != m_x.size()) {
     throw std::invalid_argument(
         "Cannot calculate integral: coeffs vector has wrong size.");

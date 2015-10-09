@@ -895,7 +895,8 @@ void LeBailFunction::addBackgroundFunction(
 
   // Create background function from factory
   auto background = FunctionFactory::Instance().createFunction(backgroundtype);
-  m_background = boost::dynamic_pointer_cast<Functions::BackgroundFunction>(background);
+  m_background =
+      boost::dynamic_pointer_cast<Functions::BackgroundFunction>(background);
 
   // Set order and initialize
   m_background->setAttributeValue("n", static_cast<int>(order));

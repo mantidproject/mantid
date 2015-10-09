@@ -15,7 +15,6 @@ using namespace CurveFitting;
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(UserFunction1D)
 
-
 using namespace Kernel;
 
 using namespace API;

@@ -437,6 +437,6 @@ void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix &covar,
   }
 }
 
-} // namespace CostFunctions 
+} // namespace CostFunctions
 } // namespace CurveFitting
 } // namespace Mantid

@@ -26,6 +26,6 @@ SteepestDescentMinimizer::getGSLMinimizerType() {
   return gsl_multimin_fdfminimizer_steepest_descent;
 }
 
-} // namespace FuncMinimisers 
+} // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid

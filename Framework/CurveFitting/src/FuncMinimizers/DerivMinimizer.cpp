@@ -19,7 +19,8 @@ double DerivMinimizer::fun(const gsl_vector *x, void *params) {
     minimizer.m_costFunction->setParameter(i, gsl_vector_get(x, i));
   }
   boost::shared_ptr<CostFunctions::CostFuncFitting> fitting =
-      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(minimizer.m_costFunction);
+      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
+          minimizer.m_costFunction);
   if (fitting) {
     fitting->getFittingFunction()->applyTies();
   }
@@ -38,7 +39,8 @@ void DerivMinimizer::dfun(const gsl_vector *x, void *params, gsl_vector *g) {
     minimizer.m_costFunction->setParameter(i, gsl_vector_get(x, i));
   }
   boost::shared_ptr<CostFunctions::CostFuncFitting> fitting =
-      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(minimizer.m_costFunction);
+      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
+          minimizer.m_costFunction);
   if (fitting) {
     fitting->getFittingFunction()->applyTies();
   }
@@ -63,7 +65,8 @@ void DerivMinimizer::fundfun(const gsl_vector *x, void *params, double *f,
     minimizer.m_costFunction->setParameter(i, gsl_vector_get(x, i));
   }
   boost::shared_ptr<CostFunctions::CostFuncFitting> fitting =
-      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(minimizer.m_costFunction);
+      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
+          minimizer.m_costFunction);
   if (fitting) {
     fitting->getFittingFunction()->applyTies();
   }
@@ -174,6 +177,6 @@ void DerivMinimizer::setStopGradient(const double value) {
 
 double DerivMinimizer::costFunctionVal() { return m_gslSolver->f; }
 
-} // namespace FuncMinimisers 
+} // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid

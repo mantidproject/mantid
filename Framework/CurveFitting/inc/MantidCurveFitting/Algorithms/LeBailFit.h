@@ -168,8 +168,7 @@ private:
   /// Calcualate the peak heights of a group of overlapped peaks
   bool calculateGroupPeakIntensities(
       std::vector<std::pair<
-          double, Functions::ThermalNeutronBk2BkExpConvPVoigt_sptr>>
-          peakgroup,
+          double, Functions::ThermalNeutronBk2BkExpConvPVoigt_sptr>> peakgroup,
       API::MatrixWorkspace_sptr dataws, size_t wsindex, bool zerobackground,
       std::vector<double> &allpeaksvalues);
 

@@ -9,7 +9,7 @@
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
-  
+
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Algorithms;
@@ -83,8 +83,8 @@ std::string VesuvioResolution::name() const { return "VesuvioResolution"; }
  */
 void VesuvioResolution::setUpForFit() {
   // Voigt
-  
-using namespace Mantid::API;
+
+  using namespace Mantid::API;
   m_voigt = boost::dynamic_pointer_cast<IPeakFunction>(
       FunctionFactory::Instance().createFunction("Voigt"));
 }

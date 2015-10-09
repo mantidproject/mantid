@@ -140,7 +140,8 @@ void CalculateMSVesuvio::exec() {
   MatrixWorkspace_sptr multsc = WorkspaceFactory::Instance().create(m_inputWS);
 
   // Initialize random number generator
-  m_randgen = new CurveFitting::MSVesuvioHelper::RandomNumberGenerator(getProperty("Seed"));
+  m_randgen = new CurveFitting::MSVesuvioHelper::RandomNumberGenerator(
+      getProperty("Seed"));
 
   // Setup progress
   const size_t nhist = m_inputWS->getNumberHistograms();
@@ -341,7 +342,8 @@ void CalculateMSVesuvio::calculateMS(const size_t wsIndex,
   }
 
   // Average over all runs and assign to output workspaces
-  CurveFitting::MSVesuvioHelper::SimulationWithErrors avgCounts = accumulator.average();
+  CurveFitting::MSVesuvioHelper::SimulationWithErrors avgCounts =
+      accumulator.average();
   avgCounts.normalise();
   assignToOutput(avgCounts, totalsc, multsc);
 }

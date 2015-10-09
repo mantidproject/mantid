@@ -41,7 +41,7 @@ public:
     TS_ASSERT(bc.hasUpper());
 
     BoundaryConstraint bc2;
-    
+
     bc2.reset(&gaus, 2);
     bc2.setBounds(10, 20);
 

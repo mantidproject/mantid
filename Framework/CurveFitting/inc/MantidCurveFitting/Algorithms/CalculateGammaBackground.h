@@ -16,7 +16,6 @@ namespace Algorithms {
 //---------------------------------------------------------------------------
 struct DetectorParams;
 
-
 /**
 
 Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -79,17 +78,17 @@ private:
   void calculateBackgroundFromFoils(const size_t inputIndex,
                                     const size_t outputIndex);
   /// Compute expected background from single foil for spectrum at wsIndex
-  void calculateBackgroundSingleFoil(std::vector<double> &ctfoil,
-                                     const size_t wsIndex,
-                                     const FoilInfo &foilInfo,
-                                     const Kernel::V3D &detPos,
-                                     const DetectorParams &detPar,
-                                     const CurveFitting::Functions::ResolutionParams &detRes);
+  void calculateBackgroundSingleFoil(
+      std::vector<double> &ctfoil, const size_t wsIndex,
+      const FoilInfo &foilInfo, const Kernel::V3D &detPos,
+      const DetectorParams &detPar,
+      const CurveFitting::Functions::ResolutionParams &detRes);
   /// Compute a TOF spectrum for the given inputs & spectrum
-  void calculateTofSpectrum(std::vector<double> &result,
-                            std::vector<double> &tmpWork, const size_t wsIndex,
-                            const DetectorParams &detpar,
-                            const CurveFitting::Functions::ResolutionParams &respar);
+  void
+  calculateTofSpectrum(std::vector<double> &result,
+                       std::vector<double> &tmpWork, const size_t wsIndex,
+                       const DetectorParams &detpar,
+                       const CurveFitting::Functions::ResolutionParams &respar);
 
   /// Check and store appropriate input data
   void retrieveInputs();

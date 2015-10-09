@@ -13,7 +13,6 @@
 const double PEAKRANGE = 5.0;
 const double NEG_DBL_MAX = -1. * DBL_MAX;
 
-
 using namespace std;
 
 using namespace Mantid;

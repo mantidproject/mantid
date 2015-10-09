@@ -1858,8 +1858,7 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
   double centerrightend = in_center + rightfwhm * 0.5;
   Constraints::BoundaryConstraint *centerbound =
       new Constraints::BoundaryConstraint(gaussianpeak.get(), "PeakCentre",
-                                           centerleftend, centerrightend,
-                                           false);
+                                          centerleftend, centerrightend, false);
   gaussianpeak->addConstraint(centerbound);
 
   // 3. Fit

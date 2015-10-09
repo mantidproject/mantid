@@ -313,7 +313,6 @@ private:
     func2->setParameter("Width", 10.0);
     func2->setParameter("Intensity", 3.0);
 
-    
     auto profile = boost::make_shared<ComptonScatteringCountRate>();
     profile->initialize();
     profile->addFunction(func1);

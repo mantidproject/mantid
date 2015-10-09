@@ -2,7 +2,6 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/System.h"
 
-
 using namespace Mantid::Kernel;
 
 using namespace Mantid::API;

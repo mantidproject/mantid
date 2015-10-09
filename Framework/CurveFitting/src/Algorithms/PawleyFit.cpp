@@ -106,8 +106,8 @@ void PawleyFit::addHKLsToFunction(Functions::PawleyFunction_sptr &pawleyFn,
 
 /// Creates a table containing the cell parameters stored in the supplied
 /// function.
-ITableWorkspace_sptr
-PawleyFit::getLatticeFromFunction(const Functions::PawleyFunction_sptr &pawleyFn) const {
+ITableWorkspace_sptr PawleyFit::getLatticeFromFunction(
+    const Functions::PawleyFunction_sptr &pawleyFn) const {
   if (!pawleyFn) {
     throw std::invalid_argument(
         "Cannot extract lattice parameters from null function.");
@@ -168,8 +168,8 @@ ITableWorkspace_sptr PawleyFit::getPeakParametersFromFunction(
 
 /// Returns a composite function consisting of the Pawley function and Chebyshev
 /// background if enabled in the algorithm.
-IFunction_sptr
-PawleyFit::getCompositeFunction(const Functions::PawleyFunction_sptr &pawleyFn) const {
+IFunction_sptr PawleyFit::getCompositeFunction(
+    const Functions::PawleyFunction_sptr &pawleyFn) const {
   CompositeFunction_sptr composite = boost::make_shared<CompositeFunction>();
   composite->addFunction(pawleyFn);
 
@@ -272,8 +272,9 @@ void PawleyFit::init() {
 /// Execution of algorithm.
 void PawleyFit::exec() {
   // Setup PawleyFunction with cell from input parameters
-  Functions::PawleyFunction_sptr pawleyFn = boost::dynamic_pointer_cast<Functions::PawleyFunction>(
-      FunctionFactory::Instance().createFunction("PawleyFunction"));
+  Functions::PawleyFunction_sptr pawleyFn =
+      boost::dynamic_pointer_cast<Functions::PawleyFunction>(
+          FunctionFactory::Instance().createFunction("PawleyFunction"));
   g_log.information() << "Setting up Pawley function..." << std::endl;
 
   std::string profileFunction = getProperty("PeakProfileFunction");

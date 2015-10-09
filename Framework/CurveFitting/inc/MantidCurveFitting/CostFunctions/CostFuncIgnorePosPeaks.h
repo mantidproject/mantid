@@ -62,7 +62,7 @@ private:
   const std::string m_name;
 };
 
-} // namespace CostFunctions 
+} // namespace CostFunctions
 } // namespace CurveFitting
 } // namespace Mantid
 

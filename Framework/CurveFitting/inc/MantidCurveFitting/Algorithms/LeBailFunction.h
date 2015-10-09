@@ -14,7 +14,7 @@ namespace Algorithms {
 /** LeBailFunction : LeBailFunction is to calculate peak intensities in a
  composite
  *                   function including neutron peak and background functions.
- *                   Note: This is not a Mantid Fit Function, just a helper 
+ *                   Note: This is not a Mantid Fit Function, just a helper
  *                   class to the algorithm
 
   @date 2013-04-26 : original LeBailFunction is not used by any other functions.

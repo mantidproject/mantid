@@ -98,7 +98,7 @@ private:
   size_t m_max_iter;
 };
 
-} // namespace FuncMinimisers 
+} // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid
 

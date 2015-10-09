@@ -10,12 +10,10 @@
 
 namespace Mantid {
 namespace CurveFitting {
-namespace CostFunctions
-{
+namespace CostFunctions {
 class CostFuncLeastSquares;
 } // namespace CostFunctions
 namespace FuncMinimisers {
-
 
 /**
     Implements a least squares minimization algorithm with damping.
@@ -66,7 +64,7 @@ private:
   /// The damping mu parameter in the Levenberg-Marquardt method.
   // double m_damping;
 };
-} // namespace FuncMinimisers 
+} // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid
 

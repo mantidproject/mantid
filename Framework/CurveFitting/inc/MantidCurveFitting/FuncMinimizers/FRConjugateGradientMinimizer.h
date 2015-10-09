@@ -52,7 +52,7 @@ protected:
   virtual const gsl_multimin_fdfminimizer_type *getGSLMinimizerType();
 };
 
-} // namespace FuncMinimisers 
+} // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid
 

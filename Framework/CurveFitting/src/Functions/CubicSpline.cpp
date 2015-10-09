@@ -20,7 +20,6 @@ namespace {
 Kernel::Logger g_log("CubicSpline");
 }
 
-
 using namespace Kernel;
 
 using namespace API;

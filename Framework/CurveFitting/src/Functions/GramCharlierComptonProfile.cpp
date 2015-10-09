@@ -250,8 +250,8 @@ size_t GramCharlierComptonProfile::fillConstraintMatrix(
 void GramCharlierComptonProfile::massProfile(double *result,
                                              const size_t nData) const {
   UNUSED_ARG(nData);
-  
-using namespace Mantid::Kernel;
+
+  using namespace Mantid::Kernel;
 
   // Hermite expansion (only even terms) + FSE term
   const size_t nhermite(m_hermite.size());
@@ -279,8 +279,8 @@ using namespace Mantid::Kernel;
  */
 void GramCharlierComptonProfile::addMassProfile(
     double *result, const unsigned int npoly) const {
-  
-using namespace Mantid::Kernel;
+
+  using namespace Mantid::Kernel;
 
   const double amp(1.0), wg(getParameter(WIDTH_PARAM));
   const double ampNorm = amp / (std::sqrt(2.0 * M_PI) * wg);
@@ -305,8 +305,8 @@ using namespace Mantid::Kernel;
  */
 void GramCharlierComptonProfile::addFSETerm(std::vector<double> &lhs) const {
   assert(static_cast<size_t>(NFINE_Y) == lhs.size());
-  
-using namespace Mantid::Kernel;
+
+  using namespace Mantid::Kernel;
 
   const double amp(1.0), wg(getParameter(WIDTH_PARAM));
   const double ampNorm = amp / (std::sqrt(2.0 * M_PI) * wg);

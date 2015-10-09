@@ -33,7 +33,8 @@ double SimplexMinimizer::fun(const gsl_vector *x, void *params) {
     }
   }
   boost::shared_ptr<CostFunctions::CostFuncFitting> fitting =
-      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(minimizer.m_costFunction);
+      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
+          minimizer.m_costFunction);
   if (fitting) {
     fitting->getFittingFunction()->applyTies();
   }
@@ -118,6 +119,6 @@ void SimplexMinimizer::clearMemory() {
 
 double SimplexMinimizer::costFunctionVal() { return m_gslSolver->fval; }
 
-} // namespace FuncMinimisers 
+} // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid

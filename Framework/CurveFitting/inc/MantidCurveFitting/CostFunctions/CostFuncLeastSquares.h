@@ -108,7 +108,7 @@ protected:
   double m_factor;
 };
 
-} // namespace CostFunctions 
+} // namespace CostFunctions
 } // namespace CurveFitting
 } // namespace Mantid
 

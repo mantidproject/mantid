@@ -88,7 +88,7 @@ private:
   gsl_multimin_function gslContainer;
 };
 
-} // namespace FuncMinimisers 
+} // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid
 

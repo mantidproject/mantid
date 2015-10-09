@@ -5,7 +5,6 @@
 #include <gsl/gsl_sf_erf.h>
 #include <cmath>
 
-
 using namespace std;
 
 using namespace Mantid;

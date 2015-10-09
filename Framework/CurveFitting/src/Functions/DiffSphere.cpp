@@ -23,10 +23,9 @@ Mantid::Kernel::Logger g_log("DiffSphere");
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
-  
+
 using namespace CurveFitting;
 using namespace Constraints;
-
 
 using namespace API;
 

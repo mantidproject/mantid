@@ -7,10 +7,9 @@
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
-  
+
 using namespace CurveFitting;
 using namespace Constraints;
-
 
 using namespace API;
 

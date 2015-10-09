@@ -59,8 +59,7 @@ public:
 
   void
   test_Function_Returns_Same_Number_Intensity_Coefficents_As_Active_Hermite_Coefficients_If_KFSE_Is_Fixed() {
-    boost::shared_ptr<ComptonProfile> profile =
-        createFunction();
+    boost::shared_ptr<ComptonProfile> profile = createFunction();
     profile->setAttributeValue("HermiteCoeffs", "1 0 1"); // turn on C_0 & C_4
     profile->fix(profile->parameterIndex("FSECoeff"));
 
@@ -70,8 +69,7 @@ public:
 
   void
   test_Function_Returns_Same_Number_Intensity_Coefficents_As_Active_Hermite_Coefficients_Plus_One_If_KFSE_Is_Free() {
-    boost::shared_ptr<ComptonProfile> profile =
-        createFunction();
+    boost::shared_ptr<ComptonProfile> profile = createFunction();
     profile->setAttributeValue("HermiteCoeffs", "1 0 1"); // turn on C_0 & C_4
 
     auto intensityIndices = profile->intensityParameterIndices();

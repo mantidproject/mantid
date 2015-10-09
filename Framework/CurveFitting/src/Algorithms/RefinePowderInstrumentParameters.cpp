@@ -228,8 +228,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
 
   // 1. Initialize the fitting function
   ThermalNeutronDtoTOFFunction rawfunc;
-  mFunction =
-      boost::make_shared<ThermalNeutronDtoTOFFunction>(rawfunc);
+  mFunction = boost::make_shared<ThermalNeutronDtoTOFFunction>(rawfunc);
   mFunction->initialize();
 
   API::FunctionDomain1DVector domain(dataWS->readX(1));
@@ -1171,8 +1170,7 @@ void RefinePowderInstrumentParameters::genPeakCentersWorkspace(
     throw runtime_error(errss.str());
   }
 
-  std::map<std::vector<int>, BackToBackExponential_sptr>::iterator
-      peakiter;
+  std::map<std::vector<int>, BackToBackExponential_sptr>::iterator peakiter;
   std::vector<std::pair<double, std::pair<double, double>>>
       peakcenters; // d_h [TOF_h, CHI2]
 

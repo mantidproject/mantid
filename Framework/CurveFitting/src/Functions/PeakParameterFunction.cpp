@@ -8,7 +8,6 @@ namespace Functions {
 
 using namespace CurveFitting;
 
-
 using namespace API;
 
 DECLARE_FUNCTION(PeakParameterFunction)

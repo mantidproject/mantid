@@ -203,6 +203,6 @@ void CostFuncFitting::calTransformationMatrixNumerically(GSLMatrix &tm) {
   }
 }
 
-} // namespace CostFunctions 
+} // namespace CostFunctions
 } // namespace CurveFitting
 } // namespace Mantid

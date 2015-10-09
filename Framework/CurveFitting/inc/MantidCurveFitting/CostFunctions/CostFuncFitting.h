@@ -101,7 +101,7 @@ protected:
   mutable bool m_dirtyHessian; /// dirty hessian flag
 };
 
-} // namespace CostFunctions 
+} // namespace CostFunctions
 } // namespace CurveFitting
 } // namespace Mantid
 

@@ -54,7 +54,7 @@ protected:
   double getResidualVariance() const;
 };
 
-} // namespace CostFunctions 
+} // namespace CostFunctions
 } // namespace CurveFitting
 } // namespace Mantid
 

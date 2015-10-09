@@ -12,8 +12,7 @@
 namespace Mantid {
 
 namespace CurveFitting {
-namespace Algorithms
-{
+namespace Algorithms {
 class Fit;
 }
 }

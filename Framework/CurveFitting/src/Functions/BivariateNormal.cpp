@@ -13,13 +13,12 @@
 #include <string>
 #include <cstdio>
 
-
 using namespace Mantid::API;
 
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
-  
+
 using namespace CurveFitting;
 using namespace Constraints;
 

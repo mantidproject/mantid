@@ -159,7 +159,8 @@ int gsl_fdf(const gsl_vector *x, void *params, gsl_vector *f, gsl_matrix *J) {
  * Constructor. Creates declared -> active index map
  * @param cf :: ICostFunction
  */
-GSL_FitData::GSL_FitData(boost::shared_ptr<CostFunctions::CostFuncLeastSquares> cf)
+GSL_FitData::GSL_FitData(
+    boost::shared_ptr<CostFunctions::CostFuncLeastSquares> cf)
     : function(cf->getFittingFunction()), costFunction(cf) {
   gsl_set_error_handler_off();
   // number of active parameters

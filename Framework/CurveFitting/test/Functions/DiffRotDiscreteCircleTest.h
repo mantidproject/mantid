@@ -38,8 +38,7 @@ public:
     const double w0 = random_value(-1.0, 1.0);
     const double h = random_value(1.0, 1000.0);
     const double fwhm = random_value(1.0, 100.0);
-    boost::shared_ptr<Gaussian> resolution(
-        new Gaussian());
+    boost::shared_ptr<Gaussian> resolution(new Gaussian());
     resolution->initialize(); // declare parameters
     resolution->setCentre(w0);
     resolution->setHeight(h);
@@ -51,9 +50,8 @@ public:
     const double r = random_value(0.3, 9.8);
     const double Q = 0.9;
     const int N = 6;
-    boost::shared_ptr<ElasticDiffRotDiscreteCircle>
-        structure_factor(
-            new ElasticDiffRotDiscreteCircle());
+    boost::shared_ptr<ElasticDiffRotDiscreteCircle> structure_factor(
+        new ElasticDiffRotDiscreteCircle());
     structure_factor->setParameter("Height", I);
     structure_factor->setParameter("Radius", r);
     structure_factor->setAttributeValue("Q", Q);
@@ -185,8 +183,7 @@ public:
     func.setAttributeValue("N", N);
 
     // check values where correctly initialized
-    auto ids = boost::dynamic_pointer_cast<
-        InelasticDiffRotDiscreteCircle>(
+    auto ids = boost::dynamic_pointer_cast<InelasticDiffRotDiscreteCircle>(
         func.getFunction(1));
     TS_ASSERT_EQUALS(ids->getParameter("Intensity"), I);
     TS_ASSERT_EQUALS(ids->getParameter("Radius"), R);
@@ -196,8 +193,7 @@ public:
 
     // check the ties were applied correctly
     func.applyTies(); // elastic parameters are tied to inelastic parameters
-    auto eds = boost::dynamic_pointer_cast<
-        ElasticDiffRotDiscreteCircle>(
+    auto eds = boost::dynamic_pointer_cast<ElasticDiffRotDiscreteCircle>(
         func.getFunction(0));
     TS_ASSERT_EQUALS(eds->getParameter("Height"), I);
     TS_ASSERT_EQUALS(eds->getParameter("Radius"), R);
@@ -218,8 +214,7 @@ public:
     func.setParameter("Decay", tao);
 
     // check the parameter of the inelastic part
-    auto ifunc = boost::dynamic_pointer_cast<
-        InelasticDiffRotDiscreteCircle>(
+    auto ifunc = boost::dynamic_pointer_cast<InelasticDiffRotDiscreteCircle>(
         func.getFunction(1));
     TS_ASSERT_EQUALS(ifunc->getParameter("Intensity"), I);
     TS_ASSERT_EQUALS(ifunc->getParameter("Radius"), R);
@@ -227,8 +222,7 @@ public:
 
     // check the parameters of the elastic part
     func.applyTies(); // elastic parameters are tied to inelastic parameters
-    auto efunc = boost::dynamic_pointer_cast<
-        ElasticDiffRotDiscreteCircle>(
+    auto efunc = boost::dynamic_pointer_cast<ElasticDiffRotDiscreteCircle>(
         func.getFunction(0));
     TS_ASSERT_EQUALS(efunc->getParameter("Height"), I);
     TS_ASSERT_EQUALS(efunc->getParameter("Radius"), R);
@@ -281,8 +275,7 @@ public:
     Mantid::API::IFunction_sptr fitalg_function =
         fitalg.getProperty("Function");
     auto fitalg_conv =
-        boost::dynamic_pointer_cast<Convolution>(
-            fitalg_function);
+        boost::dynamic_pointer_cast<Convolution>(fitalg_function);
     Mantid::API::IFunction_sptr fitalg_resolution = fitalg_conv->getFunction(0);
     TS_ASSERT_DELTA(fitalg_resolution->getParameter("PeakCentre"), 0.0,
                     0.00001); // allow for a small percent variation
@@ -388,8 +381,7 @@ private:
     Mantid::API::IFunction_sptr fitalg_function =
         fitalg.getProperty("Function");
     auto fitalg_conv =
-        boost::dynamic_pointer_cast<Convolution>(
-            fitalg_function);
+        boost::dynamic_pointer_cast<Convolution>(fitalg_function);
     Mantid::API::IFunction_sptr fitalg_resolution = fitalg_conv->getFunction(0);
     TS_ASSERT_DELTA(fitalg_resolution->getParameter("PeakCentre"), 0.0,
                     0.00001); // allow for a small percent variation

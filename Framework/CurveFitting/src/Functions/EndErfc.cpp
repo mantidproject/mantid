@@ -12,7 +12,6 @@ namespace Functions {
 
 using namespace CurveFitting;
 
-
 using namespace Kernel;
 
 using namespace API;

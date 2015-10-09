@@ -28,7 +28,8 @@ void ParDomain::getDomainAndValues(size_t i, API::FunctionDomain_sptr &domain,
  * Calculate the value of a least squares cost function
  * @param leastSquares :: The least squares cost func to calculate the value for
  */
-void ParDomain::leastSquaresVal(const CostFunctions::CostFuncLeastSquares &leastSquares) {
+void ParDomain::leastSquaresVal(
+    const CostFunctions::CostFuncLeastSquares &leastSquares) {
   const int n = static_cast<int>(getNDomains());
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < n; ++i) {

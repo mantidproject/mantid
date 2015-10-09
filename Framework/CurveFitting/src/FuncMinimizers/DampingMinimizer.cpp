@@ -34,7 +34,9 @@ DampingMinimizer::DampingMinimizer(double relTol)
 
 /// Initialize minimizer, i.e. pass a function to minimize.
 void DampingMinimizer::initialize(API::ICostFunction_sptr function, size_t) {
-  m_leastSquares = boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(function);
+  m_leastSquares =
+      boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
+          function);
   if (!m_leastSquares) {
     throw std::invalid_argument("Damping minimizer works only with least "
                                 "squares. Different function was given.");
@@ -123,6 +125,6 @@ double DampingMinimizer::costFunctionVal() {
   return m_leastSquares->val();
 }
 
-} // namespace FuncMinimisers 
+} // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid

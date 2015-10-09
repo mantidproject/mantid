@@ -80,7 +80,7 @@ private:
   double m_relError;
 };
 
-} // namespace FuncMinimisers 
+} // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid
 

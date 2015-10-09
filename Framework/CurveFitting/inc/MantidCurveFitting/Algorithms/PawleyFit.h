@@ -84,8 +84,8 @@ protected:
 
   API::ITableWorkspace_sptr
   getLatticeFromFunction(const Functions::PawleyFunction_sptr &pawleyFn) const;
-  API::ITableWorkspace_sptr
-  getPeakParametersFromFunction(const Functions::PawleyFunction_sptr &pawleyFn) const;
+  API::ITableWorkspace_sptr getPeakParametersFromFunction(
+      const Functions::PawleyFunction_sptr &pawleyFn) const;
 
   API::IFunction_sptr
   getCompositeFunction(const Functions::PawleyFunction_sptr &pawleyFn) const;

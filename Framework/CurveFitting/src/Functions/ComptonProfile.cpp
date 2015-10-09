@@ -9,7 +9,7 @@
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
-  
+
 using namespace CurveFitting;
 using namespace CurveFitting::Algorithms;
 
@@ -28,8 +28,8 @@ ComptonProfile::ComptonProfile()
     : API::ParamFunction(), API::IFunction1D(), m_log("ComptonProfile"),
       m_wsIndex(0), m_mass(0.0), m_voigt(), m_resolutionFunction(), m_yspace(),
       m_modQ(), m_e0() {
-  
-using namespace Mantid::API;
+
+  using namespace Mantid::API;
   m_resolutionFunction = boost::dynamic_pointer_cast<VesuvioResolution>(
       FunctionFactory::Instance().createFunction("VesuvioResolution"));
 }
@@ -58,8 +58,8 @@ void ComptonProfile::function1D(double *out, const double *xValues,
  * Creates the internal caches
  */
 void ComptonProfile::setUpForFit() {
-  
-using namespace Mantid::API;
+
+  using namespace Mantid::API;
   m_voigt = boost::dynamic_pointer_cast<IPeakFunction>(
       FunctionFactory::Instance().createFunction("Voigt"));
   m_resolutionFunction->setUpForFit();
@@ -117,9 +117,9 @@ void ComptonProfile::cacheYSpaceValues(const std::vector<double> &tseconds,
  * @param isHistogram True if histogram tof values have been passed in
  * @param detpar Structure containing detector parameters
  */
-void ComptonProfile::cacheYSpaceValues(const std::vector<double> &tseconds,
-                                       const bool isHistogram,
-                                       const Algorithms::DetectorParams &detpar) {
+void ComptonProfile::cacheYSpaceValues(
+    const std::vector<double> &tseconds, const bool isHistogram,
+    const Algorithms::DetectorParams &detpar) {
   // ------ Fixed coefficients related to resolution & Y-space transforms
   // ------------------
   const double mevToK = PhysicalConstants::E_mev_toNeutronWavenumberSq;

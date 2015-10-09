@@ -16,7 +16,6 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
 
-
 using namespace Mantid;
 
 using namespace Mantid::API;
@@ -26,7 +25,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 
 using namespace Mantid::CurveFitting;
-
 
 using namespace std;
 
@@ -689,9 +687,8 @@ ProcessBackground::createBackgroundFunction(const string backgroundtype) {
   Functions::BackgroundFunction_sptr bkgdfunction;
 
   if (backgroundtype.compare("Polynomial") == 0) {
-    bkgdfunction =
-        boost::dynamic_pointer_cast<Functions::BackgroundFunction>(
-            boost::make_shared<Functions::Polynomial>());
+    bkgdfunction = boost::dynamic_pointer_cast<Functions::BackgroundFunction>(
+        boost::make_shared<Functions::Polynomial>());
     bkgdfunction->initialize();
   } else if (backgroundtype.compare("Chebyshev") == 0) {
     Chebyshev_sptr cheby = boost::make_shared<Functions::Chebyshev>();

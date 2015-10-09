@@ -80,6 +80,6 @@ double CostFuncUnweightedLeastSquares::getResidualVariance() const {
   return residualVariance;
 }
 
-} // namespace CostFunctions 
+} // namespace CostFunctions
 } // namespace CurveFitting
 } // namespace Mantid

@@ -14,12 +14,11 @@
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
-  
+
 using namespace CurveFitting;
 using namespace Constraints;
 
 DECLARE_FUNCTION(PawleyParameterFunction)
-
 
 using namespace API;
 

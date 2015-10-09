@@ -70,7 +70,7 @@ private:
   double calSqrtW(API::FunctionValues_sptr values) const;
 };
 
-} // namespace CostFunctions 
+} // namespace CostFunctions
 } // namespace CurveFitting
 } // namespace Mantid
 

@@ -73,7 +73,7 @@ private:
   std::vector<double> m_D;
 };
 
-} // namespace FuncMinimisers 
+} // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid
 

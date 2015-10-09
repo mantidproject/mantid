@@ -232,7 +232,8 @@ void CalculateGammaBackground::calculateSpectrumFromDetector(
   DetectorParams detPar =
       ConvertToYSpace::getDetectorParameters(m_inputWS, inputIndex);
   CurveFitting::Functions::ResolutionParams detRes =
-    CurveFitting::Functions::VesuvioResolution::getResolutionParameters(m_inputWS, inputIndex);
+      CurveFitting::Functions::VesuvioResolution::getResolutionParameters(
+          m_inputWS, inputIndex);
 
   // Compute a time of flight spectrum convolved with a Voigt resolution
   // function for each mass
@@ -259,7 +260,8 @@ void CalculateGammaBackground::calculateBackgroundFromFoils(
   DetectorParams detPar =
       ConvertToYSpace::getDetectorParameters(m_inputWS, inputIndex);
   CurveFitting::Functions::ResolutionParams detRes =
-    CurveFitting::Functions::VesuvioResolution::getResolutionParameters(m_inputWS, inputIndex);
+      CurveFitting::Functions::VesuvioResolution::getResolutionParameters(
+          m_inputWS, inputIndex);
 
   const size_t nxvalues = m_backgroundWS->blocksize();
   std::vector<double> foilSpectrum(nxvalues);
@@ -392,8 +394,9 @@ void CalculateGammaBackground::calculateTofSpectrum(
       FunctionFactory::Instance().createInitialized(m_profileFunction));
 
   for (size_t i = 0; i < m_npeaks; ++i) {
-    auto profile = boost::dynamic_pointer_cast<CurveFitting::Functions::ComptonProfile>(
-        profileFunction->getFunction(i));
+    auto profile =
+        boost::dynamic_pointer_cast<CurveFitting::Functions::ComptonProfile>(
+            profileFunction->getFunction(i));
     profile->disableLogging();
     profile->setUpForFit();
     profile->cacheYSpaceValues(tseconds, false, detpar, respar);
@@ -426,8 +429,9 @@ void CalculateGammaBackground::retrieveInputs() {
           boost::dynamic_pointer_cast<CompositeFunction>(profileFunction)) {
     m_npeaks = composite->nFunctions();
     for (size_t i = 0; i < m_npeaks; ++i) {
-      auto single = boost::dynamic_pointer_cast<CurveFitting::Functions::ComptonProfile>(
-          composite->getFunction(i));
+      auto single =
+          boost::dynamic_pointer_cast<CurveFitting::Functions::ComptonProfile>(
+              composite->getFunction(i));
       if (!single) {
         throw std::invalid_argument("Invalid function. Composite must contain "
                                     "only ComptonProfile functions");

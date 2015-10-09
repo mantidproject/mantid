@@ -3,11 +3,9 @@
 #include <boost/lexical_cast.hpp>
 #include <cmath>
 
-
 using namespace Mantid::Kernel;
 
 using namespace Mantid::API;
-
 
 using namespace std;
 

@@ -10,7 +10,6 @@
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
-  
 
 using namespace CurveFitting::Algorithms;
 
@@ -86,8 +85,8 @@ void ComptonPeakProfile::function1D(double *out, const double *xValues,
  */
 void ComptonPeakProfile::setUpForFit() {
   // Voigt & Gaussian
-  
-using namespace Mantid::API;
+
+  using namespace Mantid::API;
   m_gauss = boost::dynamic_pointer_cast<IPeakFunction>(
       FunctionFactory::Instance().createFunction("Gaussian"));
   m_voigt = boost::dynamic_pointer_cast<IPeakFunction>(

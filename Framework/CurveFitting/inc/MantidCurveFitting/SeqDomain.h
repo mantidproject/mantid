@@ -57,12 +57,13 @@ public:
   /// Add new domain creator
   void addCreator(API::IDomainCreator_sptr creator);
   /// Calculate the value of a least squares cost function
-  virtual void leastSquaresVal(const CostFunctions::CostFuncLeastSquares &leastSquares);
+  virtual void
+  leastSquaresVal(const CostFunctions::CostFuncLeastSquares &leastSquares);
   /// Calculate the value, first and second derivatives of a least squares cost
   /// function
-  virtual void
-  leastSquaresValDerivHessian(const CostFunctions::CostFuncLeastSquares &leastSquares,
-                              bool evalDeriv, bool evalHessian);
+  virtual void leastSquaresValDerivHessian(
+      const CostFunctions::CostFuncLeastSquares &leastSquares, bool evalDeriv,
+      bool evalHessian);
   /// Calculate the value of a Rwp cost function
   void rwpVal(const CostFunctions::CostFuncRwp &rwp);
   /// Calculate the value, first and second derivatives of a RWP cost function

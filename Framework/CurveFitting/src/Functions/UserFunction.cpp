@@ -15,7 +15,6 @@ using namespace CurveFitting;
 // Register the class into the function factory
 DECLARE_FUNCTION(UserFunction)
 
-
 using namespace Kernel;
 
 using namespace API;

@@ -157,8 +157,7 @@ public:
             prodF.asString());
     TS_ASSERT(fun);
 
-    ProductFunction *prodF1 =
-        dynamic_cast<ProductFunction *>(fun.get());
+    ProductFunction *prodF1 = dynamic_cast<ProductFunction *>(fun.get());
     TS_ASSERT(prodF1);
 
     TS_ASSERT_EQUALS(prodF1->nFunctions(), 4);

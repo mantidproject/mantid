@@ -74,6 +74,6 @@ void CostFuncIgnorePosPeaks::deriv(const double *yData,
   }
 }
 
-} // namespace CostFunctions 
+} // namespace CostFunctions
 } // namespace CurveFitting
 } // namespace Mantid

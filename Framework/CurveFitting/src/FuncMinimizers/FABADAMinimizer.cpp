@@ -92,7 +92,9 @@ FABADAMinimizer::~FABADAMinimizer() {}
 void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
                                  size_t maxIterations) {
 
-  m_leastSquares = boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(function);
+  m_leastSquares =
+      boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
+          function);
   if (!m_leastSquares) {
     throw std::invalid_argument(
         "FABADA works only with least squares. Different function was given.");
@@ -121,7 +123,8 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
     m_bound.push_back(false);
     API::IConstraint *iconstr = fun->getConstraint(i);
     if (iconstr) {
-      Constraints::BoundaryConstraint *bcon = dynamic_cast<Constraints::BoundaryConstraint *>(iconstr);
+      Constraints::BoundaryConstraint *bcon =
+          dynamic_cast<Constraints::BoundaryConstraint *>(iconstr);
       if (bcon) {
         m_bound[i] = true;
         if (bcon->hasLower()) {
@@ -641,6 +644,6 @@ void FABADAMinimizer::finalize() {
   }
 }
 
-} // namespace FuncMinimisers 
+} // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid

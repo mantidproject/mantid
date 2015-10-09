@@ -41,8 +41,7 @@ public:
   }
 
   void test_Function_Has_One_Intensity_Coefficient() {
-    boost::shared_ptr<ComptonProfile> profile =
-        createFunction();
+    boost::shared_ptr<ComptonProfile> profile = createFunction();
 
     auto intensityIndices = profile->intensityParameterIndices();
     TS_ASSERT_EQUALS(1, intensityIndices.size());

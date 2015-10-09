@@ -14,13 +14,11 @@ class RandomNumberGenerator;
 struct Simulation;
 struct SimulationWithErrors;
 }
-namespace Functions{
+namespace Functions {
 struct ResolutionParams;
 }
 namespace Algorithms {
 struct DetectorParams;
-
-
 
 /**
   Calculates the multiple scattering & total scattering contributions
@@ -90,7 +88,8 @@ private:
   void cacheInputs();
   void calculateMS(const size_t wsIndex, API::ISpectrum &totalsc,
                    API::ISpectrum &multsc) const;
-  void simulate(const DetectorParams &detpar, const Functions::ResolutionParams &respar,
+  void simulate(const DetectorParams &detpar,
+                const Functions::ResolutionParams &respar,
                 MSVesuvioHelper::Simulation &simulCounts) const;
   void assignToOutput(const MSVesuvioHelper::SimulationWithErrors &avgCounts,
                       API::ISpectrum &totalsc, API::ISpectrum &multsc) const;
@@ -118,7 +117,8 @@ private:
                     const double e1res) const;
 
   // Member Variables
-  CurveFitting::MSVesuvioHelper::RandomNumberGenerator *m_randgen; // random number generator
+  CurveFitting::MSVesuvioHelper::RandomNumberGenerator *
+      m_randgen; // random number generator
 
   size_t m_acrossIdx, m_upIdx, m_beamIdx; // indices of each direction
   Kernel::V3D m_beamDir;                  // Directional vector for beam
