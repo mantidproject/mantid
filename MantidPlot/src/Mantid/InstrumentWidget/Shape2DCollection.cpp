@@ -7,7 +7,6 @@
 #include <QApplication>
 #include <QStringList>
 
-#include <iostream>
 #include <stdexcept>
 #include <cmath>
 
@@ -203,6 +202,10 @@ Shape2D* Shape2DCollection::createShape(const QString& type,int x,int y) const
   else if (type.toLower() == "rectangle")
   {
      return new Shape2DRectangle(p,QSizeF(0,0));
+  }
+  else if (type.toLower() == "free")
+  {
+     return new Shape2DFree(p);
   }
 
   QStringList complexType = type.split(' ',QString::SkipEmptyParts);
@@ -735,3 +738,48 @@ void Shape2DCollection::changeBorderColor(const QColor &color)
     }
 }
 
+/**
+ * Add a Shape2D object allowing free drawing.
+ * @param poly :: Initial shape.
+ * @param borderColor :: The border colour.
+ * @param fillColor :: The fill colour.
+ */
+void Shape2DCollection::addFreeShape(const QPolygonF& poly,const QColor& borderColor,const QColor& fillColor)
+{
+  auto freeShape = dynamic_cast<Shape2DFree*>(m_currentShape);
+  if (!freeShape)
+  {
+    if (poly.isEmpty()) throw std::logic_error("Cannot create a shape from empty polygon.");
+    auto p = m_transform.inverted().map(poly[0]);
+    addShape("free", static_cast<int>(p.x()), static_cast<int>(p.y()), borderColor, fillColor);
+  }
+  drawFree(poly);
+}
+
+/**
+ * Draw the shape by adding a polygon to it.
+ */
+void Shape2DCollection::drawFree(const QPolygonF& polygon)
+{
+  auto freeShape = dynamic_cast<Shape2DFree*>(m_currentShape);
+  if (freeShape)
+  {
+    auto transform = m_transform.inverted();
+    freeShape->addPolygon(transform.map(polygon));
+    emit shapeChanged();
+  }
+}
+
+/**
+ * Erase part of the shape by subtracting a polygon from it.
+ */
+void Shape2DCollection::eraseFree(const QPolygonF& polygon)
+{
+  auto freeShape = dynamic_cast<Shape2DFree*>(m_currentShape);
+  if (freeShape)
+  {
+    auto transform = m_transform.inverted();
+    freeShape->subtractPolygon(transform.map(polygon));
+    emit shapeChanged();
+  }
+}

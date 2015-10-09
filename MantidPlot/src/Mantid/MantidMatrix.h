@@ -1,6 +1,26 @@
 #ifndef MANTIDMATRIX_H
 #define MANTIDMATRIX_H
 
+#include <map>
+#include <math.h>
+#include <string>
+
+#include "MantidMatrixExtensionRequest.h"
+#include "MantidMatrixModel.h"
+#include "MantidMatrixTabExtension.h"
+
+#include "Mantid/IProjectSerialisable.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtAPI/WorkspaceObserver.h"
+#include "../ContourLinesEditor.h"
+#include "../Graph.h"
+#include "../MdiSubWindow.h"
+#include "../UserFunction.h"
+
+#include <Poco/NObserver.h>
+
 #include <QHeaderView>
 #include <QTableView>
 #include <QPrinter>
@@ -11,31 +31,8 @@
 #include <QMap>
 #include <QPointer>
 
-#include <Poco/NObserver.h>
-
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "../UserFunction.h"
-#include "../MdiSubWindow.h"
-#include "../Graph.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
-#include "Mantid/IProjectSerialisable.h"
-
 #include <qwt_double_rect.h>
 #include <qwt_color_map.h>
-
-#include <math.h>
-#include <string>
-#include <iostream>
-#include <map>
-
-#include "MantidAPI/FrameworkManager.h"
-#include "../ContourLinesEditor.h"
-
-#include "MantidMatrixExtensionRequest.h"
-#include "MantidMatrixModel.h"
-#include "MantidMatrixTabExtension.h"
-
 
 class QLabel;
 class QStackedWidget;

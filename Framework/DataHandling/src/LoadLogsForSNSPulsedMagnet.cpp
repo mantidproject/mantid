@@ -4,7 +4,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 
-#include <iostream>
 #include <fstream>
 #include <sys/stat.h>
 #include <sstream>

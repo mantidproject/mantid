@@ -4,7 +4,6 @@
 #include <boost/scoped_array.hpp>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
-#include <iostream>
 
 #include "MantidCurveFitting/CubicSpline.h"
 #include "MantidCurveFitting/Fit.h"

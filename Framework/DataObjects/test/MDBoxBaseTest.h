@@ -7,8 +7,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidDataObjects/MDBoxBase.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 #include <Poco/File.h>
 #include "MantidAPI/CoordTransform.h"
 

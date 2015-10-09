@@ -100,7 +100,6 @@
 #include <QtGui/qcheckbox.h>
 #include <QtGui/qlineedit.h>
 
-#include <iostream>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE

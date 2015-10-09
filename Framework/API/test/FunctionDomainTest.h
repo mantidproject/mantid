@@ -6,7 +6,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include <cxxtest/TestSuite.h>
-#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::API;

@@ -640,6 +640,13 @@
   </instrument>
 </facility>
 
+<!-- ANSTO -->
+<facility name="ANSTO" FileExtensions=".nxs,.tar">
+  <instrument name="Bilby">
+    <technique>Small Angle Scattering</technique>
+  </instrument>
+</facility>
+
 <!--  Test Facility to allow example usage of Live listeners against "Fake" instrument sources -->
 <facility name="TEST_LIVE" FileExtensions=".nxs,.raw">
   <instrument name="ISIS_Histogram">

@@ -197,4 +197,16 @@ inline std::ostream& operator << (std::ostream& ostr, const RectF& rect)
     return ostr;
 }
 
+inline std::ostream& operator << (std::ostream& ostr, const QRectF& rect)
+{
+  ostr << '[' << rect.left() << ',' << rect.right() << ';' << rect.top() << ',' << rect.bottom() << ']';
+    return ostr;
+}
+
+inline std::ostream& operator << (std::ostream& ostr, const QPointF& p)
+{
+    ostr << '(' << p.x() << ',' << p.y() << ')';
+    return ostr;
+}
+
 #endif // RECTF_H

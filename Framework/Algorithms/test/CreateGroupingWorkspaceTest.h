@@ -7,8 +7,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidAPI/FrameworkManager.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;

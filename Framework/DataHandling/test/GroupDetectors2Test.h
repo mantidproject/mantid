@@ -15,7 +15,6 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <fstream>
-#include <iostream>
 #include <numeric>
 #include <Poco/Path.h>
 #include "MantidDataHandling/MaskDetectors.h"

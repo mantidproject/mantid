@@ -7,8 +7,6 @@
 #include <boost/algorithm/string.hpp>
 
 #include <nexus/napi.h>
-#include <iostream>
-#include <iomanip> // std::setw
 
 namespace Mantid {
 namespace DataHandling {

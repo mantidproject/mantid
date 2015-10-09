@@ -7,7 +7,6 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <boost/make_shared.hpp>
-#include <iomanip>
 
 class FermiChopperModelTest : public CxxTest::TestSuite {
   typedef boost::shared_ptr<Mantid::API::FermiChopperModel>

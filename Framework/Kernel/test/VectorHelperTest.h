@@ -5,8 +5,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/VectorHelper.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 #include <cstdlib>
 #include <boost/assign/list_of.hpp>
 

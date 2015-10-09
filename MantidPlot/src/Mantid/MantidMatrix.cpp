@@ -49,7 +49,6 @@
 #include <QTabWidget>
 
 #include <stdlib.h>
-#include <iostream>
 #include <algorithm>
 #include <limits>
 

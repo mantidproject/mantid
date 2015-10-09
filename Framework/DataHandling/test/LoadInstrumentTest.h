@@ -17,7 +17,6 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <fstream>
-#include <iostream>
 #include <string>
 #include <vector>
 #include "MantidAPI/ExperimentInfo.h"

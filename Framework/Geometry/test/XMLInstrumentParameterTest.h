@@ -6,8 +6,6 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 

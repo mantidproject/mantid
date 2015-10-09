@@ -17,7 +17,6 @@ using namespace Mantid::DataHandling;
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/WorkspaceGroup.h"
-#include <iostream>
 
 class LoadNexusLogsTest : public CxxTest::TestSuite {
 public:

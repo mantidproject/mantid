@@ -7,7 +7,6 @@
 #include <qcheckbox.h>
 #include <qmessagebox.h>
 #include <qheaderview.h>
-#include <iostream>
 
 //---------------------------------------
 // Public member functions

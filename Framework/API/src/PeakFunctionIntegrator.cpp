@@ -2,7 +2,6 @@
 
 #include "MantidAPI/FunctionDomain1D.h"
 #include "gsl/gsl_errno.h"
-#include <iostream>
 #include <iomanip>
 
 namespace Mantid {

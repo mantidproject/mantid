@@ -7,7 +7,7 @@
 #include <vtkFloatArray.h>
 #include <vtkSmartPointer.h>
 #include <vtkStructuredGrid.h>
-#include <iostream>
+
 namespace Mantid {
 namespace VATES {
 

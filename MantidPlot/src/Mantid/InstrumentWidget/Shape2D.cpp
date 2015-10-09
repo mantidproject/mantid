@@ -5,7 +5,9 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 
-#include <iostream>
+#include <QLine>
+#include <QMap>
+
 #include <algorithm>
 #include <stdexcept>
 #include <cmath>
@@ -487,3 +489,154 @@ void Shape2DRing::setColor(const QColor &color)
     m_outer_shape->setColor(color);
 }
 
+//------------------------------------------------------------------------------
+
+/// Construct a zero-sized shape.
+Shape2DFree::Shape2DFree(const QPointF& p):
+  m_polygon(QRectF(p,p))
+{
+  resetBoundingRect();
+}
+
+/// The shape can be selected if it contains the point.
+bool Shape2DFree::selectAt(const QPointF& p)const
+{
+  return contains(p);
+}
+
+/// Check if a point is inside the shape.
+bool Shape2DFree::contains(const QPointF& p)const
+{
+  return m_polygon.containsPoint(p,Qt::OddEvenFill);
+}
+
+/// Add to a larger shape.
+void Shape2DFree::addToPath(QPainterPath& path) const
+{
+  path.addPolygon(m_polygon);
+}
+
+/// Draw.
+void Shape2DFree::drawShape(QPainter& painter) const
+{
+  QPainterPath path;
+  path.addPolygon(m_polygon);
+  painter.fillPath(path, m_fill_color);
+  painter.drawPath(m_outline);
+}
+
+/// Rescale polygon's verices to fit to the new bounding rect.
+void Shape2DFree::refit()
+{
+  auto brOld = getPolygonBoundingRect();
+  auto &brNew = m_boundingRect;
+  if (brNew.xSpan() < 0.0) brNew.xFlip();
+  if (brNew.ySpan() < 0.0) brNew.yFlip();
+
+  auto xs0 = brNew.x0();
+  auto x0 = brOld.x0();
+  auto xScale = brNew.width() / brOld.width();
+
+  auto ys0 = brNew.y0();
+  auto y0 = brOld.y0();
+  auto yScale = brNew.height() / brOld.height();
+  for(int i = 0; i < m_polygon.size(); ++i)
+  {
+    auto &p = m_polygon[i];
+    p.rx() = xs0 + xScale * (p.x() - x0);
+    p.ry() = ys0 + yScale * (p.y() - y0);
+  }
+  resetBoundingRect();
+}
+
+/// Recalculate the bounding rect.
+/// Also make the new border outline.
+/// QPolygonF cannot have holes or disjointed parts,
+/// it's a single closed line. The outline (implemented as a QPainterPath)
+/// makes it look like it have holes.
+void Shape2DFree::resetBoundingRect()
+{
+  m_boundingRect = getPolygonBoundingRect();
+  // Clear the outline path.
+  m_outline = QPainterPath();
+  if (m_polygon.isEmpty()) return;
+
+  // If the polygon has apparent holes/discontinuities
+  // it will have extra pairs of edges which we don't want
+  // to draw.
+  auto n = m_polygon.size() - 1;
+  // Find those vertices at which we must break the polygon
+  // to get rid of these extra edges.
+  QList<int> breaks;
+  breaks.push_back(0);
+  for(int i = 1; i < m_polygon.size() - 1; ++i)
+  {
+    auto p = m_polygon[i];
+    auto j = m_polygon.indexOf(p, i + 1);
+    if (j != -1)
+    {
+      auto i1 = i + 1;
+      auto j1 = j - 1;
+      if (m_polygon[i1] == m_polygon[j1])
+      {
+        breaks.push_back(i);
+        breaks.push_back(i1);
+        breaks.push_back(j1);
+        breaks.push_back(j);
+      }
+    }
+  }
+  if (breaks.back() != n)
+  {
+    breaks.push_back(n);
+  }
+  qSort(breaks);
+
+  m_outline.moveTo(m_polygon[0]);
+  int j1 = 0;
+  // Add contiguous portions of the polygon to the outline
+  // and break at points from breaks list.
+  for(int i = 0; i < breaks.size(); ++i)
+  {
+    auto j = breaks[i];
+    if (j == j1 + 1)
+    {
+      m_outline.moveTo(m_polygon[j]);
+    }
+    else
+    {
+      for(auto k = j1; k <= j; ++k)
+      {
+        m_outline.lineTo(m_polygon[k]);
+      }
+    }
+    j1 = j;
+  }
+}
+
+/// Convert the bounding rect computed by QPolygonF to RectF
+RectF Shape2DFree::getPolygonBoundingRect() const
+{
+  auto br = m_polygon.boundingRect();
+  auto x0 = br.left();
+  auto x1 = br.right();
+  if (x0 > x1) std::swap(x0, x1);
+  auto y0 = br.bottom();
+  auto y1 = br.top();
+  if (y0 > y1) std::swap(y0, y1);
+  return RectF(QPointF(x0,y0), QPointF(x1,y1));
+}
+
+/// Add a polygon to this shape.
+void Shape2DFree::addPolygon(const QPolygonF& polygon)
+{
+  m_polygon = m_polygon.united(polygon);
+  resetBoundingRect();
+}
+
+/// Subtract a polygon from this shape.
+void Shape2DFree::subtractPolygon(const QPolygonF& polygon)
+{
+  m_polygon = m_polygon.subtracted(polygon);
+  resetBoundingRect();
+}

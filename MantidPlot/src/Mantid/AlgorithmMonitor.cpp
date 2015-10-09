@@ -8,7 +8,6 @@
 #include <QtGui>
 #include <QThread>
 
-#include <iostream>
 #include <algorithm>
 
 using namespace std;

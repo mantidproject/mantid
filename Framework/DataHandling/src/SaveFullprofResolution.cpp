@@ -8,7 +8,6 @@
 #include <boost/algorithm/string.hpp>
 #include <Poco/File.h>
 
-#include <iomanip>
 #include <fstream>
 
 using namespace Mantid;

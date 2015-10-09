@@ -5,8 +5,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
-#include <iostream>
-#include <iomanip>
 
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 

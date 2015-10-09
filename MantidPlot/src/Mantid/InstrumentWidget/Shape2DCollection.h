@@ -88,6 +88,7 @@ signals:
 
 public slots:
   void addShape(const QString& type,int x,int y,const QColor& borderColor,const QColor& fillColor);
+  void addFreeShape(const QPolygonF&,const QColor& borderColor,const QColor& fillColor);
   void deselectAll();
   void moveRightBottomTo(int,int);
   void selectShapeOrControlPointAt(int x,int y);
@@ -96,6 +97,8 @@ public slots:
   void touchShapeOrControlPointAt(int x,int y);
   void removeSelectedShapes();
   void restoreOverrideCursor();
+  void drawFree(const QPolygonF& polygon);
+  void eraseFree(const QPolygonF& polygon);
 
 protected:
   virtual void drawShape(QPainter& ) const{} // never called

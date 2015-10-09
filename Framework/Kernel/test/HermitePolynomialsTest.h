@@ -2,7 +2,6 @@
 #define MANTID_KERNEL_HERMITEPOLYNOMIALSTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
 #include "MantidKernel/Math/Distributions/HermitePolynomials.h"
 
 class HermitePolynomialsTest : public CxxTest::TestSuite {

@@ -4,9 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
-#include <iostream>
 #include <fstream>
-#include <iomanip>
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataHandling/SaveDaveGrp.h"

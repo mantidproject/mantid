@@ -2,7 +2,6 @@
 #define MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPCONVPVTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <iostream>
 #include <fstream>
 #include <cmath>
 

@@ -11,8 +11,6 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidAPI/FrameworkManager.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::Crystal;

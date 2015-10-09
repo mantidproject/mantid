@@ -1,6 +1,5 @@
 #include "MantidQtSliceViewer/ColorBarWidget.h"
 #include "qmainwindow.h"
-#include <iostream>
 #include <QApplication>
 #include <QDir>
 #include <QMessageBox>

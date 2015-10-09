@@ -9,7 +9,6 @@
 #include "MantidAPI/FunctionValues.h"
 
 #include <cmath>
-#include <iomanip>
 
 namespace Mantid {
 namespace CurveFitting {

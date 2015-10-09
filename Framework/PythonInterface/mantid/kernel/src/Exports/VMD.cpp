@@ -48,50 +48,56 @@ void setItem(VMD &self, const size_t index, const VMD_t value) {
 
 void export_VMD() {
   class_<VMD>("VMD",
-              init<>("Default constructor gives an object with 1 dimension"))
+              init<>(arg("self"),
+                     "Default constructor gives an object with 1 dimension"))
       .def(init<VMD_t, VMD_t>(
           "Constructs a 2 dimensional vector at the point given",
-          args(("val0"), ("val1"))))
+          (arg("self"), arg("val0"), arg("val1"))))
       .def(init<VMD_t, VMD_t, VMD_t>(
           "Constructs a 3 dimensional vector at the point given",
-          args(("val0"), ("val1"), ("val2"))))
+          (arg("self"), arg("val0"), arg("val1"), arg("val2"))))
       .def(init<VMD_t, VMD_t, VMD_t, VMD_t>(
           "Constructs a 4 dimensional vector at the point given",
-          args(("val0"), ("val1"), ("val2"), ("val3"))))
+          (arg("self"), arg("val0"), arg("val1"), arg("val2"), arg("val3"))))
       .def(init<VMD_t, VMD_t, VMD_t, VMD_t, VMD_t>(
           "Constructs a 5 dimensional vector at the point given",
-          args(("val0"), ("val1"), ("val2"), ("val3"), ("val4"))))
+          (arg("self"), arg("val0"), arg("val1"), arg("val2"), arg("val3"),
+           arg("val4"))))
       .def(init<VMD_t, VMD_t, VMD_t, VMD_t, VMD_t, VMD_t>(
           "Constructs a 6 dimensional vector at the point given",
-          args(("val0"), ("val1"), ("val2"), ("val3"), ("val5"))))
+          (arg("self"), arg("val0"), arg("val1"), arg("val2"), arg("val3"),
+           arg("val4"), arg("val5"))))
 
-      .def("getNumDims", &VMD::getNumDims,
+      .def("getNumDims", &VMD::getNumDims, arg("self"),
            "Returns the number of dimensions the contained in the vector")
 
-      .def("scalar_prod", &VMD::scalar_prod,
+      .def("scalar_prod", &VMD::scalar_prod, (arg("self"), arg("other")),
            "Returns the scalar product of this vector with another. If the "
            "number of dimensions do not match a RuntimeError is raised")
 
-      .def("cross_prod", &VMD::cross_prod,
+      .def("cross_prod", &VMD::cross_prod, (arg("self"), arg("other")),
            "Returns the cross product of this vector with another. If the "
            "number of dimensions do not match a RuntimeError is raised")
 
-      .def("norm", &VMD::norm, "Returns the length of the vector")
+      .def("norm", &VMD::norm, arg("self"), "Returns the length of the vector")
 
-      .def("norm2", &VMD::norm2, "Returns the the squared length of the vector")
+      .def("norm2", &VMD::norm2, arg("self"),
+           "Returns the the squared length of the vector")
 
-      .def("normalize", &VMD::normalize, "Normalizes the length of the vector "
-                                         "to unity and returns the length "
-                                         "before it was normalized")
+      .def("normalize", &VMD::normalize, arg("self"),
+           "Normalizes the length of the vector "
+           "to unity and returns the length "
+           "before it was normalized")
 
-      .def("angle", &VMD::angle, "Returns the angle between the vectors in "
-                                 "radians (0 < theta < pi). If the dimensions "
-                                 "do not match a RuntimeError is raised")
+      .def("angle", &VMD::angle, (arg("self"), arg("other")),
+           "Returns the angle between the vectors in "
+           "radians (0 < theta < pi). If the dimensions "
+           "do not match a RuntimeError is raised")
 
       //----------------------------- special methods
       //--------------------------------
-      .def("__getitem__", &getItem)
-      .def("__setitem__", &setItem)
+      .def("__getitem__", &getItem, (arg("self"), arg("value")))
+      .def("__setitem__", &setItem, (arg("self"), arg("index"), arg("value")))
       .def(self == self)
       .def(self != self) // must define != as Python's default is to compare
                          // object address

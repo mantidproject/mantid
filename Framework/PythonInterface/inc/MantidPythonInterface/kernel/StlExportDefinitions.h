@@ -35,6 +35,8 @@
 #include <vector>
 #include <set>
 
+using boost::python::arg;
+
 namespace Mantid {
 namespace PythonInterface {
 /**
@@ -153,19 +155,20 @@ template <typename ElementType> struct std_set_exporter {
     boost::python::class_<w_t, std::auto_ptr<w_t>>(python_name.c_str())
         .def(boost::python::init<w_t const &>())
         // special methods
-        .def("__str__", &std_set_exporter::to_string)
-        .def("__len__", &w_t::size)
-        .def("__contains__", contains)
-        .def("__getitem__", getitem)
-        .def("__getinitargs__", getinitargs)
+        .def("__str__", &std_set_exporter::to_string, arg("self"))
+        .def("__len__", &w_t::size, arg("self"))
+        .def("__contains__", contains, (arg("self"), arg("element")))
+        .def("__getitem__", getitem, (arg("self"), arg("index")))
+        .def("__getinitargs__", getinitargs, arg("self"))
         // Standard methods
-        .def("size", &w_t::size)
-        .def("insert", insert_element)
-        .def("append", insert_element)
-        .def("insert", insert_set)
-        .def("extend", insert_set)
-        .def("erase", (std::size_t (w_t::*)(e_t const &)) & w_t::erase)
-        .def("clear", &w_t::clear)
+        .def("size", &w_t::size, arg("self"))
+        .def("insert", insert_element, (arg("self"), arg("element")))
+        .def("append", insert_element, (arg("self"), arg("element")))
+        .def("insert", insert_set, (arg("self"), arg("set")))
+        .def("extend", insert_set, (arg("self"), arg("set")))
+        .def("erase", (std::size_t (w_t::*)(e_t const &)) & w_t::erase,
+             (arg("self"), arg("index")))
+        .def("clear", &w_t::clear, arg("self"))
         .enable_pickling()
 
         ;
