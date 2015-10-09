@@ -577,9 +577,9 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
 *@param monsRangeMax -- vector of indexes of right boundaries
 *                       for the subintervals to look for peak
 *
-*@param peakPos      -- output energy of the peak center.
-*@param peakHeight   -- output height of the peak assuming Gaussian shape
-*@param peakTwoSigma -- output width of the peak assuming Gaussian shape
+*@param position     -- output energy of the peak center.
+*@param height       -- output height of the peak assuming Gaussian shape
+*@param twoSigma     -- output width of the peak assuming Gaussian shape
 
 
 */
