@@ -1,6 +1,6 @@
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty    # , WorkspaceUnitValidator
 from mantid.kernel import Direction
-from mantid.simpleapi import CropWorkspace
+import mantid.simpleapi as api
 
 
 class TOFTOFCropWorkspace(PythonAlgorithm):
@@ -59,7 +59,7 @@ class TOFTOFCropWorkspace(PythonAlgorithm):
             self.log().error("message")
             raise RuntimeError(message)
 
-        outputws = CropWorkspace(inputws, XMin=0., XMax=full_channels*channel_width, OutputWorkspace=outputws)
+        outputws = api.CropWorkspace(inputws, XMin=0., XMax=full_channels*channel_width, OutputWorkspace=outputws)
         self.setProperty("OutputWorkspace", outputws)
 
 
