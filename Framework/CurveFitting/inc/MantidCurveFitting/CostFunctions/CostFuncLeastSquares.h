@@ -102,8 +102,8 @@ protected:
   mutable double m_pushedValue;
   mutable GSLVector m_pushedParams;
 
-  friend class SeqDomain;
-  friend class ParDomain;
+  friend class CurveFitting::SeqDomain;
+  friend class CurveFitting::ParDomain;
 
   double m_factor;
 };
