@@ -163,13 +163,6 @@ struct peakKeeper {
   bool operator<(const peakKeeper &str) const { return (energy > str.energy); }
 };
 
-struct peakKeeper2 {
-  double left_rng;
-  double right_rng;
-  peakKeeper2(){};
-  peakKeeper2(double left, double right) : left_rng(left), right_rng(right) {}
-};
-
 } // END unnamed namespace for auxiliary file-based compilation units
 
 /** Executes the algorithm -- found all existing monitor peaks. */
@@ -392,6 +385,10 @@ void GetAllEi::exec() {
 
   setProperty("OutputWorkspace", result_ws);
 }
+
+// unnamed namespace for auxiliary file-based functions, converted from lambda
+// as not all Mantid compilers support lambda yet.
+
 /**The internal procedure to set filter log from properties,
    defining it.
 * @param inputWS -- shared pointer to the input workspace with
@@ -421,8 +418,165 @@ void GetAllEi::setFilterLog(const API::MatrixWorkspace_sptr &inputWS) {
     m_FilterWithDerivative = false;
   }
 }
+/**Former lambda to identify guess values for a peak at given index
+* and set up these parameters as input for fitting algorithm
+*
+*@param inputWS -- the workspace to process
+*@param index -- the number of the workspace spectra to process
+*@param Ei           -- incident energy 
+*@param monsRangeMin -- vector of left boundaries for the subintervals to look for peak
+*@param monsRangeMax -- vector of right boundaries for the subintervals to look for peak
+*
+*@param peakPos      -- output energy of the peak
+*@param peakHeight   -- output height of the peak assuming Gaussian shape
+*@param peakTwoSigma -- output width of the peak assuming Gaussian shape
+*/
+bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS,
+                         size_t index,double Ei,
+                         const std::vector<size_t> &monsRangeMin,
+                         const std::vector<size_t> &monsRangeMax,
+                         double &peakPos, double &peakHeight, double &peakTwoSigma){
 
-/**Get energy of monitor peak if one is present*/
+  // calculate sigma from half-width parameters
+  double maxSigma = Ei * m_min_Eresolution / (2 * std::sqrt(2 * std::log(2.)));
+  double minSigma = Ei * m_max_Eresolution / (2 * std::sqrt(2 * std::log(2.)));
+
+  double sMin(std::numeric_limits<double>::max());
+  double sMax(-sMin);
+  double xOfMax, dXmax;
+  double Intensity(0);
+
+  auto X = inputWS->readX(index);
+  auto S = inputWS->readY(index);
+  size_t ind_min = monsRangeMin[index];
+  size_t ind_max = monsRangeMax[index];
+  // interval too small -- not interested in a peak there
+  if (std::fabs(double(ind_max - ind_min)) < 5)
+    return false;
+
+  // double xMin = X[ind_min];
+  // double xMax = X[ind_max];
+
+  for (size_t i = ind_min; i < ind_max; i++) {
+    double dX = X[i + 1] - X[i];
+    double signal = S[i] / dX;
+    if (signal < sMin)
+      sMin = signal;
+    if (signal > sMax) {
+      sMax = signal;
+      dXmax = dX;
+      xOfMax = X[i];
+    }
+    Intensity += S[i];
+  }
+  // monitor peak should not have just two counts in it.
+  if (sMax * dXmax <= 2)
+    return false;
+  //
+  // size_t SearchAreaSize = ind_max - ind_min;
+
+  double SmoothRange = 2 * maxSigma;
+
+  std::vector<double> SAvrg, binsAvrg;
+  Kernel::VectorHelper::smoothInRange(S, SAvrg, SmoothRange, &X, ind_min,
+    ind_max, &binsAvrg);
+
+  double realPeakPos(xOfMax); // this position is less shifted
+  // due to the skew in averaging formula
+  bool foundRealPeakPos(false);
+  std::vector<double> der1Avrg, der2Avrg, peaks, hillsPos, SAvrg1, binsAvrg1;
+  size_t nPeaks =
+    this->calcDerivativeAndCountZeros(binsAvrg, SAvrg, der1Avrg, peaks);
+  size_t nHills =
+    this->calcDerivativeAndCountZeros(binsAvrg, der1Avrg, der2Avrg, hillsPos);
+  size_t nPrevHills = 2 * nHills;
+  if (nPeaks == 1) {
+    foundRealPeakPos = true;
+    realPeakPos = peaks[0];
+  }
+
+  size_t ic(0), stay_still_count(0);
+  bool iterations_fail(false);
+  while ((nPeaks > 1 || nHills > 2) && (!iterations_fail)) {
+    Kernel::VectorHelper::smoothInRange(SAvrg, SAvrg1, SmoothRange, &binsAvrg,
+      0, ind_max - ind_min, &binsAvrg1);
+    nPrevHills = nHills;
+
+    nPeaks =
+      this->calcDerivativeAndCountZeros(binsAvrg1, SAvrg1, der1Avrg, peaks);
+    nHills =
+      this->calcDerivativeAndCountZeros(binsAvrg1, der1Avrg, der2Avrg, hillsPos);
+    SAvrg.swap(SAvrg1);
+    binsAvrg.swap(binsAvrg1);
+    if (nPeaks == 1 && !foundRealPeakPos) { // fix first peak position found
+      foundRealPeakPos = true;              // as averaging shift peaks on
+      realPeakPos = peaks[0];               // irregular grid.
+    }
+    ic++;
+    if (nPrevHills <= nHills) {
+      stay_still_count++;
+    } else {
+      stay_still_count = 0;
+    }
+    if (ic > 50 || stay_still_count > 3)
+      iterations_fail = true;
+  }
+  if (iterations_fail) {
+    g_log.information() << "*No peak search convergence after " +
+      std::to_string(ic) +
+      " smoothing iterations at still_count: " +
+      std::to_string(stay_still_count) +
+      " Wrong energy or noisy peak at Ei=" +
+      std::to_string(Ei) << std::endl;
+  }
+  g_log.debug() << "*Performed: " + std::to_string(ic) +
+    " averages for spectra " + std::to_string(index) +
+    " at energy: " + std::to_string(Ei) +
+    "\n and found: " + std::to_string(nPeaks) +
+    "peaks and " + std::to_string(nHills) + " hills\n";
+  if (nPeaks != 1) {
+    g_log.debug() << "*Peak rejected as n-peaks !=1 after averaging\n";
+    return false;
+  }
+
+  peakPos = peaks[0];
+  if (nHills > 2) {
+    size_t peakIndex = Kernel::VectorHelper::getBinIndex(hillsPos, peaks[0]);
+    peakTwoSigma = hillsPos[peakIndex + 1] - hillsPos[peakIndex];
+  } else {
+    if (hillsPos.size() == 2) {
+      peakTwoSigma = hillsPos[1] - hillsPos[0];
+    } else {
+      g_log.debug() << "*Peak rejected as averaging gives: " +
+        std::to_string(nPeaks) + " peaks and " +
+        std::to_string(nHills) + " heals\n";
+
+      return false;
+    }
+  }
+  // assuming that averaging conserves intensity and removing linear
+  // background:
+  peakHeight = Intensity / (0.5 * std::sqrt(2. * M_PI) * peakTwoSigma) - sMin;
+  peakPos = realPeakPos;
+
+  return true;
+};
+
+
+/**Get energy of monitor peak if one is present
+*@param inputWS -- the workspace to process
+*@param Ei           -- incident energy 
+*@param monsRangeMin -- vector of indexes of left boundaries 
+*                       for the subintervals to look for peak
+*@param monsRangeMax -- vector of indexes of right boundaries
+*                       for the subintervals to look for peak
+*
+*@param peakPos      -- output energy of the peak center.
+*@param peakHeight   -- output height of the peak assuming Gaussian shape
+*@param peakTwoSigma -- output width of the peak assuming Gaussian shape
+
+
+*/
 bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
                                double Ei,
                                const std::vector<size_t> &monsRangeMin,
@@ -432,135 +586,10 @@ bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
   // calculate sigma from half-width parameters
   double maxSigma = Ei * m_min_Eresolution / (2 * std::sqrt(2 * std::log(2.)));
   double minSigma = Ei * m_max_Eresolution / (2 * std::sqrt(2 * std::log(2.)));
-
-  /**Lambda to identify guess values for a peak at given index
-  and set up these parameters as input for fitting algorithm   */
-  auto peakGuess = [&](size_t index, double &peakPos, double &peakHeight,
-                       double &peakTwoSigma) {
-
-    double sMin(std::numeric_limits<double>::max());
-    double sMax(-sMin);
-    double xOfMax, dXmax;
-    double Intensity(0);
-
-    auto X = inputWS->readX(index);
-    auto S = inputWS->readY(index);
-    size_t ind_min = monsRangeMin[index];
-    size_t ind_max = monsRangeMax[index];
-    // interval too small -- not interested in a peak there
-    if (std::fabs(double(ind_max - ind_min)) < 5)
-      return false;
-
-    // double xMin = X[ind_min];
-    // double xMax = X[ind_max];
-
-    for (size_t i = ind_min; i < ind_max; i++) {
-      double dX = X[i + 1] - X[i];
-      double signal = S[i] / dX;
-      if (signal < sMin)
-        sMin = signal;
-      if (signal > sMax) {
-        sMax = signal;
-        dXmax = dX;
-        xOfMax = X[i];
-      }
-      Intensity += S[i];
-    }
-    // monitor peak should not have just two counts in it.
-    if (sMax * dXmax <= 2)
-      return false;
-    //
-    // size_t SearchAreaSize = ind_max - ind_min;
-
-    double SmoothRange = 2 * maxSigma;
-
-    std::vector<double> SAvrg, binsAvrg;
-    Kernel::VectorHelper::smoothInRange(S, SAvrg, SmoothRange, &X, ind_min,
-                                        ind_max, &binsAvrg);
-
-    double realPeakPos(
-        xOfMax); // this position is less shifted due to the skew in
-                 // averaging formula
-    bool foundRealPeakPos(false);
-    std::vector<double> der1Avrg, der2Avrg, peaks, hillsPos, SAvrg1, binsAvrg1;
-    size_t nPeaks =
-        calcDerivativeAndCountZeros(binsAvrg, SAvrg, der1Avrg, peaks);
-    size_t nHills =
-        calcDerivativeAndCountZeros(binsAvrg, der1Avrg, der2Avrg, hillsPos);
-    size_t nPrevHills = 2 * nHills;
-    if (nPeaks == 1) {
-      foundRealPeakPos = true;
-      realPeakPos = peaks[0];
-    }
-
-    size_t ic(0), stay_still_count(0);
-    bool iterations_fail(false);
-    while ((nPeaks > 1 || nHills > 2) && (!iterations_fail)) {
-      Kernel::VectorHelper::smoothInRange(SAvrg, SAvrg1, SmoothRange, &binsAvrg,
-                                          0, ind_max - ind_min, &binsAvrg1);
-      nPrevHills = nHills;
-
-      nPeaks = calcDerivativeAndCountZeros(binsAvrg1, SAvrg1, der1Avrg, peaks);
-      nHills =
-          calcDerivativeAndCountZeros(binsAvrg1, der1Avrg, der2Avrg, hillsPos);
-      SAvrg.swap(SAvrg1);
-      binsAvrg.swap(binsAvrg1);
-      if (nPeaks == 1 && !foundRealPeakPos) { // fix first peak position found
-        foundRealPeakPos = true;              // as averaging shift peaks on
-        realPeakPos = peaks[0];               // irregular grid.
-      }
-      ic++;
-      if (nPrevHills <= nHills) {
-        stay_still_count++;
-      } else {
-        stay_still_count = 0;
-      }
-      if (ic > 50 || stay_still_count > 3)
-        iterations_fail = true;
-    }
-    if (iterations_fail) {
-      g_log.information() << "*No peak search convergence after " +
-                                 std::to_string(ic) +
-                                 " smoothing iterations at still_count: " +
-                                 std::to_string(stay_still_count) +
-                                 " Wrong energy or noisy peak at Ei=" +
-                                 std::to_string(Ei) << std::endl;
-    }
-    g_log.debug() << "*Performed: " + std::to_string(ic) +
-                         " averages for spectra " + std::to_string(index) +
-                         " at energy: " + std::to_string(Ei) +
-                         "\n and found: " + std::to_string(nPeaks) +
-                         "peaks and " + std::to_string(nHills) + " hills\n";
-    if (nPeaks != 1) {
-      g_log.debug() << "*Peak rejected as n-peaks !=1 after averaging\n";
-      return false;
-    }
-
-    peakPos = peaks[0];
-    if (nHills > 2) {
-      size_t peakIndex = Kernel::VectorHelper::getBinIndex(hillsPos, peaks[0]);
-      peakTwoSigma = hillsPos[peakIndex + 1] - hillsPos[peakIndex];
-    } else {
-      if (hillsPos.size() == 2) {
-        peakTwoSigma = hillsPos[1] - hillsPos[0];
-      } else {
-        g_log.debug() << "*Peak rejected as averaging gives: " +
-                             std::to_string(nPeaks) + " peaks and " +
-                             std::to_string(nHills) + " heals\n";
-
-        return false;
-      }
-    }
-    // assuming that averaging conserves intensity and removing linear
-    // background:
-    peakHeight = Intensity / (0.5 * std::sqrt(2. * M_PI) * peakTwoSigma) - sMin;
-    peakPos = realPeakPos;
-
-    return true;
-  };
   //--------------------------------------------------------------------
   double peak1Pos, peak1TwoSigma, peak1Height;
-  if (!peakGuess(0, peak1Pos, peak1Height, peak1TwoSigma))
+  if (!peakGuess(inputWS,0,Ei, monsRangeMin,monsRangeMax,
+       peak1Pos, peak1Height, peak1TwoSigma))
     return false;
   if (0.25 * peak1TwoSigma > maxSigma || peak1TwoSigma < minSigma) {
     g_log.debug() << "*Rejecting due to width: Peak at mon1 Ei=" +
@@ -572,7 +601,8 @@ bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
 
   if (!this->getProperty("IgnoreSecondMonitor")) {
     double peak2Pos, peak2TwoSigma, peak2Height;
-    if (!peakGuess(1, peak2Pos, peak2Height, peak2TwoSigma))
+    if (!peakGuess(inputWS,1,Ei, monsRangeMin,monsRangeMax,
+      peak2Pos, peak2Height, peak2TwoSigma))
       return false;
     // Let's not check anything except peak position for monitor2, as
     // its intensity may be very low for some instruments.
@@ -600,6 +630,20 @@ bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
   height = peak1Height;
 
   return true;
+}
+namespace { // for lambda extracted from calcDerivativeAndCountZeros
+  /**former lambda from calcDerivativeAndCountZeros 
+   *estimating if sign have changed from its previous value
+   *@param val -- current function value
+   *@param prevSign -- the sign of the function at previous value
+   */
+  bool signChanged(double val,int &prevSign){
+    int curSign = (val >= 0 ? 1 : -1);
+    bool changed = curSign != prevSign;
+    prevSign = curSign;
+    return changed;
+
+  };
 }
 
 /**Bare-bone function to calculate numerical derivative, and estimate number of
@@ -629,13 +673,7 @@ size_t GetAllEi::calcDerivativeAndCountZeros(const std::vector<double> &bins,
 
   size_t nZeros(0);
   int prevSign = (f1 >= 0 ? 1 : -1);
-  /**Estimate if sign have changed from its previous value*/
-  auto signChanged = [&](double x) {
-    int curSign = (x >= 0 ? 1 : -1);
-    bool changed = curSign != prevSign;
-    prevSign = curSign;
-    return changed;
-  };
+
 
   funVal.push_front(f1);
   binVal.push_front(bin1);
@@ -651,18 +689,68 @@ size_t GetAllEi::calcDerivativeAndCountZeros(const std::vector<double> &bins,
     funVal.push_front(f1);
     binVal.push_front(bin1);
 
-    if (signChanged(deriv[i])) {
+    if (signChanged(deriv[i],prevSign)) {
       nZeros++;
       zeros.push_back(0.5 * (bins[i + 1] + bins[i]));
     }
   }
   deriv[nPoints - 1] = 2 * (f1 - f0) / (bin1 + bin0);
-  if (signChanged(deriv[nPoints - 1])) {
+  if (signChanged(deriv[nPoints - 1],prevSign)) {
     zeros.push_back(bins[nPoints - 1]);
     nZeros++;
   }
 
   return nZeros;
+}
+namespace { // for lambda extracted from findBinRanges
+  // get bin range corresponding to the energy range
+  void getBinRange(const MantidVec &eBins,
+    double eMin, double eMax, size_t &index_min, size_t &index_max) {
+
+      size_t nBins = eBins.size();
+      if (eMin <= eBins[0]) {
+        index_min = 0;
+      } else {
+        index_min = Kernel::VectorHelper::getBinIndex(eBins, eMin);
+      }
+
+      if (eMax >= eBins[nBins - 1]) {
+        index_max = nBins - 1;
+      } else {
+        index_max = Kernel::VectorHelper::getBinIndex(eBins, eMax) + 1;
+        if (index_max >= nBins)
+          index_max = nBins - 1; // last bin range anyway. Should not happen
+      }
+  };
+
+  // refine bin range. May need better procedure for this.
+  bool refineEGuess(const MantidVec &eBins,const MantidVec &signal,
+    double &eGuess, size_t index_min, size_t index_max) {
+
+      size_t ind_Emax = index_min;
+      double SMax(0);
+      for (size_t i = index_min; i < index_max; i++) {
+        double dX = eBins[i + 1] - eBins[i];
+        double sig = signal[i] / dX;
+        if (sig > SMax) {
+          SMax = sig;
+          ind_Emax = i;
+        }
+      }
+      if (ind_Emax == index_min || ind_Emax == index_max) {
+        return false;
+      }
+      eGuess = 0.5 * (eBins[ind_Emax] + eBins[ind_Emax + 1]);
+      return true;
+  };
+
+  struct peakKeeper2 {
+    double left_rng;
+    double right_rng;
+    peakKeeper2(){};
+    peakKeeper2(double left, double right) : left_rng(left), right_rng(right) {}
+  };
+
 }
 
 /**Find indexes of each expected peak intervals from monotonous array of ranges.
@@ -674,8 +762,8 @@ size_t GetAllEi::calcDerivativeAndCountZeros(const std::vector<double> &bins,
 *                     vector.
 *@param irangeMax  -- final indexes of energy intervals in the guess_energies
 *                     vector.
-*@param guessValid -- boolean vector, which specifies if guess energies are
-*valid
+*@param guessValid -- output boolean vector, which specifies if guess energies
+*                     in guess_energy vector are valid or not
 */
 void GetAllEi::findBinRanges(const MantidVec &eBins, const MantidVec &signal,
                              const std::vector<double> &guess_energy,
@@ -685,43 +773,6 @@ void GetAllEi::findBinRanges(const MantidVec &eBins, const MantidVec &signal,
 
   size_t nBins = eBins.size();
   guessValid.resize(guess_energy.size());
-  // get bin range corresponding to the energy range
-  auto getBinRange =
-      [&](double eMin, double eMax, size_t &index_min, size_t &index_max) {
-        if (eMin <= eBins[0]) {
-          index_min = 0;
-        } else {
-          index_min = Kernel::VectorHelper::getBinIndex(eBins, eMin);
-        }
-
-        if (eMax >= eBins[nBins - 1]) {
-          index_max = nBins - 1;
-        } else {
-          index_max = Kernel::VectorHelper::getBinIndex(eBins, eMax) + 1;
-          if (index_max >= nBins)
-            index_max = nBins - 1; // last bin range anyway. Should not happen
-        }
-      };
-  // refine bin range. May need better procedure for this.
-  auto refineEGuess = [&](double &eGuess, size_t index_min, size_t index_max) {
-    size_t ind_Emax = index_min;
-    double SMax(0);
-    for (size_t i = index_min; i < index_max; i++) {
-      double dX = eBins[i + 1] - eBins[i];
-      double sig = signal[i] / dX;
-      if (sig > SMax) {
-        SMax = sig;
-        ind_Emax = i;
-      }
-    }
-    if (ind_Emax == index_min || ind_Emax == index_max) {
-      g_log.debug() << "*Incorrect guess energy: " << std::to_string(eGuess)
-                    << " no energy peak found in 4*Sigma range\n";
-      return false;
-    }
-    eGuess = 0.5 * (eBins[ind_Emax] + eBins[ind_Emax + 1]);
-    return true;
-  };
 
   // Do the job
   size_t ind_min, ind_max;
@@ -732,7 +783,8 @@ void GetAllEi::findBinRanges(const MantidVec &eBins, const MantidVec &signal,
   std::vector<peakKeeper2> guess_peak(guess_energy.size());
   for (size_t nGuess = 0; nGuess < guess_energy.size(); nGuess++) {
     double eGuess = guess_energy[nGuess];
-    getBinRange(eGuess * (1 - 4 * eResolution), eGuess * (1 + 4 * eResolution),
+    getBinRange(eBins,eGuess * (1 - 4 * eResolution),
+                eGuess * (1 + 4 * eResolution),
                 ind_min, ind_max);
     guess_peak[nGuess] = peakKeeper2(eBins[ind_min], eBins[ind_max]);
   }
@@ -749,12 +801,11 @@ void GetAllEi::findBinRanges(const MantidVec &eBins, const MantidVec &signal,
   for (size_t nGuess = 0; nGuess < guess_energy.size(); nGuess++) {
 
     double eGuess = guess_energy[nGuess];
-    getBinRange(guess_peak[nGuess].left_rng, guess_peak[nGuess].right_rng,
+    getBinRange(eBins,guess_peak[nGuess].left_rng, guess_peak[nGuess].right_rng,
                 ind_min, ind_max);
 
-    if (refineEGuess(eGuess, ind_min, ind_max)) {
-
-      getBinRange(
+    if (refineEGuess(eBins,signal,eGuess, ind_min, ind_max)) {
+      getBinRange(eBins,
           std::max(guess_peak[nGuess].left_rng, eGuess * (1 - 3 * eResolution)),
           std::max(guess_peak[nGuess].right_rng,
                    eGuess * (1 + 3 * eResolution)),
@@ -764,6 +815,8 @@ void GetAllEi::findBinRanges(const MantidVec &eBins, const MantidVec &signal,
       guessValid[nGuess] = true;
     } else {
       guessValid[nGuess] = false;
+      g_log.debug() << "*Incorrect guess energy: " << std::to_string(eGuess)
+                    << " no energy peak found in 4*Sigma range\n";
     }
   }
   // if array decreasing rather then increasing, indexes behave differently.
@@ -898,7 +951,7 @@ GetAllEi::getPLogForProperty(const API::MatrixWorkspace_sptr &inputWS,
   if (boost::iequals(LogName, "Defined in IDF")) {
     auto AllNames = m_chopper->getStringParameter(propertyName);
     if (AllNames.size() != 1)
-      return nullptr;
+      return NULL;
     LogName = AllNames[0];
   }
   auto pIProperty = (inputWS->run().getProperty(LogName));
@@ -1046,6 +1099,70 @@ void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
   chop_delay += m_phase / chop_speed;
 }
 
+namespace{  // namespace for lambda functions, used in validators
+
+  /* former Lambda to validate if appropriate log is present in workspace
+  and if it's present, it is a time-series property
+  * @param prop_name    -- the name of the log to check
+  * @param err_presence -- core error message to return if no log found
+  * @param err_type     -- core error message to return if
+  *                        log is of incorrect type
+  * @param fail         -- fail or warn if appropriate log is not available.
+  *
+  * @param result       -- map to add the result of check for errors
+  *                       if no error found the map is not modified and remains
+  *                       empty.
+
+
+  * @return             -- false if all checks are fine, or true if check is
+  *                        failed
+  */
+  bool check_time_series_property(const GetAllEi *algo,
+    const API::MatrixWorkspace_sptr &inputWS,
+    const boost::shared_ptr<const Geometry::IComponent> &chopper,
+    const std::string &prop_name,
+    const std::string &err_presence,
+    const std::string &err_type,  bool fail,
+    std::map<std::string, std::string> &result) {
+
+        std::string LogName = algo->getProperty(prop_name);
+        if (boost::iequals(LogName, "Defined in IDF")) {
+          try {
+            auto theLogs = chopper->getStringParameter(prop_name);
+            if (theLogs.size() == 0) {
+              if (fail)
+                result[prop_name] = "Can not retrieve parameter " + prop_name +
+                                    " from the instrument definition file.";
+              return true;
+            }
+            LogName = theLogs[0];
+          } catch (...) {
+            result[prop_name] = "Can not retrieve parameter " + prop_name +
+                                " from the instrument definition file.";
+            return true;
+          }
+        }
+        try {
+          Kernel::Property *pProp = inputWS->run().getProperty(LogName);
+          auto pTSProp =
+              dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pProp);
+          if (!pTSProp) {
+            if (fail)
+              result[prop_name] = "Workspace contains " + err_type + LogName +
+                                  " But its type is not a timeSeries property";
+            return true;
+          }
+        } catch (std::runtime_error &) {
+          if (fail)
+            result[prop_name] =
+                "Workspace has to contain " + err_presence + LogName;
+          return true;
+        }
+        return false;
+      };
+
+}
+
 /**Validates if input workspace contains all necessary logs and if all
 *  these logs are the logs of appropriate type
 @return list of invalid logs or empty list if no errors is found.
@@ -1090,66 +1207,16 @@ std::map<std::string, std::string> GetAllEi::validateInputs() {
     return result;
   }
 
-  /* Lambda to validate if appropriate log is present in workspace
-  and if it's present, it is a time-series property
-  * @param prop_name    -- the name of the log to check
-  * @param err_presence -- core error message to return if no log found
-  * @param err_type     -- core error message to return if
-  *                        log is of incorrect type
-  * @param fail         -- fail or warn if appropriate log is not available.
 
-  * @return             -- false if all properties are fine, or true if check is
-  *                        failed
-  * modifies result    -- map containing check errors
-  *                       if no error found the map is not modified and remains
-  *                       empty.
-  */
-  auto check_time_series_property =
-      [&](const std::string &prop_name, const std::string &err_presence,
-          const std::string &err_type, bool fail) {
-        std::string LogName = this->getProperty(prop_name);
-        if (boost::iequals(LogName, "Defined in IDF")) {
-          try {
-            auto theLogs = m_chopper->getStringParameter(prop_name);
-            if (theLogs.size() == 0) {
-              if (fail)
-                result[prop_name] = "Can not retrieve parameter " + prop_name +
-                                    " from the instrument definition file.";
-              return true;
-            }
-            LogName = theLogs[0];
-          } catch (...) {
-            result[prop_name] = "Can not retrieve parameter " + prop_name +
-                                " from the instrument definition file.";
-            return true;
-          }
-        }
-        try {
-          Kernel::Property *pProp = inputWS->run().getProperty(LogName);
-          auto pTSProp =
-              dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pProp);
-          if (!pTSProp) {
-            if (fail)
-              result[prop_name] = "Workspace contains " + err_type + LogName +
-                                  " But its type is not a timeSeries property";
-            return true;
-          }
-        } catch (std::runtime_error &) {
-          if (fail)
-            result[prop_name] =
-                "Workspace has to contain " + err_presence + LogName;
-          return true;
-        }
-        return false;
-      };
-
-  check_time_series_property("ChopperSpeedLog", "chopper speed log with name: ",
-                             "chopper speed log ", true);
-  check_time_series_property(
+  check_time_series_property(this, inputWS, m_chopper,
+    "ChopperSpeedLog", "chopper speed log with name: ",
+    "chopper speed log ", true, result);
+  check_time_series_property(this, inputWS, m_chopper,
       "ChopperDelayLog", "property related to chopper delay log with name: ",
-      "chopper delay log ", true);
-  bool failed = check_time_series_property(
-      "FilterBaseLog", "filter base log named: ", "filter base log: ", false);
+      "chopper delay log ", true, result);
+  bool failed = check_time_series_property(this, inputWS, m_chopper,
+      "FilterBaseLog", "filter base log named: ", "filter base log: ",
+      false, result);
   if (failed) {
     g_log.warning()
         << " Can not find a log to identify good DAE operations.\n"

@@ -534,6 +534,74 @@ void linearlyInterpolateY(const std::vector<double> &x, std::vector<double> &y,
     step++;
   }
 }
+namespace {
+  // internal function converted from Lambda to identify interval around specified point and
+  // run average around this point
+  double runAverage(size_t index,size_t startIndex,size_t endIndex,
+    const double halfWidth,
+    const std::vector<double> &input,
+    std::vector<double> const *const binBndrs) {
+
+    size_t iStart, iEnd;
+    double bin0(0), weight0(0), weight1(0), start, end;
+    //
+    if (binBndrs) {
+      // identify initial and final bins to
+      // integrate over. Notice the difference
+      // between start and end bin and shift of
+      // the interpolating function into the center
+      // of each bin
+      bin0 = binBndrs->operator[](index + 1) - binBndrs->operator[](index);
+      double binC =
+          0.5 * (binBndrs->operator[](index + 1) + binBndrs->operator[](index));
+      start = binC - halfWidth;
+      end = binC + halfWidth;
+      if (start <= binBndrs->operator[](startIndex)) {
+        iStart = startIndex;
+        start = binBndrs->operator[](iStart);
+      } else {
+        iStart = getBinIndex(*binBndrs, start);
+        weight0 =
+            (binBndrs->operator[](iStart + 1) - start) /
+            (binBndrs->operator[](iStart + 1) - binBndrs->operator[](iStart));
+        iStart++;
+      }
+      if (end >= binBndrs->operator[](endIndex)) {
+        iEnd = endIndex; // the signal defined up to i<iEnd
+        end = binBndrs->operator[](endIndex);
+      } else {
+        iEnd = getBinIndex(*binBndrs, end);
+        weight1 = (end - binBndrs->operator[](iEnd)) /
+                  (binBndrs->operator[](iEnd + 1) - binBndrs->operator[](iEnd));
+      }
+    } else { // integer indexes and functions defined in the bin centers
+      iStart = index - static_cast<size_t>(halfWidth);
+      if (startIndex + static_cast<size_t>(halfWidth) > index)
+        iStart = startIndex;
+      iEnd = index + static_cast<size_t>(halfWidth);
+      if (iEnd > endIndex)
+        iEnd = endIndex;
+    }
+
+    double avrg = 0;
+    size_t ic = 0;
+    for (size_t j = iStart; j < iEnd; j++) {
+      avrg += input[j];
+      ic++;
+    }
+    if (binBndrs) { // add values at edges
+      if (iStart != startIndex)
+        avrg += input[iStart - 1] * weight0;
+      if (iEnd != endIndex)
+        avrg += input[iEnd] * weight1;
+
+      return avrg * bin0 / (end - start);
+    } else {
+      return avrg / double(ic);
+    }
+  };
+
+}
 /** Basic running average of input vector within specified range, considering
 *variable bin-boundaries
  *  if such boundaries are provided.
@@ -597,74 +665,14 @@ void smoothInRange(const std::vector<double> &input,
       halfWidth = static_cast<double>(static_cast<size_t>(halfWidth) + 1);
     }
   }
-  // Lambda to identify interval around specified point and
-  // average around this point
-  auto runAverage = [&](size_t index) {
 
-    size_t iStart, iEnd;
-    double bin0(0), weight0(0), weight1(0), start, end;
-    //
-    if (binBndrs) {
-      // identify initial and final bins to
-      // integrate over. Notice the difference
-      // between start and end bin and shift of
-      // the interpolating function into the center
-      // of each bin
-      bin0 = binBndrs->operator[](index + 1) - binBndrs->operator[](index);
-      double binC =
-          0.5 * (binBndrs->operator[](index + 1) + binBndrs->operator[](index));
-      start = binC - halfWidth;
-      end = binC + halfWidth;
-      if (start <= binBndrs->operator[](startIndex)) {
-        iStart = startIndex;
-        start = binBndrs->operator[](iStart);
-      } else {
-        iStart = getBinIndex(*binBndrs, start);
-        weight0 =
-            (binBndrs->operator[](iStart + 1) - start) /
-            (binBndrs->operator[](iStart + 1) - binBndrs->operator[](iStart));
-        iStart++;
-      }
-      if (end >= binBndrs->operator[](endIndex)) {
-        iEnd = endIndex; // the signal defined up to i<iEnd
-        end = binBndrs->operator[](endIndex);
-      } else {
-        iEnd = getBinIndex(*binBndrs, end);
-        weight1 = (end - binBndrs->operator[](iEnd)) /
-                  (binBndrs->operator[](iEnd + 1) - binBndrs->operator[](iEnd));
-      }
-    } else { // integer indexes and functions defined in the bin centers
-      iStart = index - static_cast<size_t>(halfWidth);
-      if (startIndex + static_cast<size_t>(halfWidth) > index)
-        iStart = startIndex;
-      iEnd = index + static_cast<size_t>(halfWidth);
-      if (iEnd > endIndex)
-        iEnd = endIndex;
-    }
+  if (outBins) outBins->resize(length + 1);
 
-    double avrg = 0;
-    size_t ic = 0;
-    for (size_t j = iStart; j < iEnd; j++) {
-      avrg += input[j];
-      ic++;
-    }
-    if (binBndrs) { // add values at edges
-      if (iStart != startIndex)
-        avrg += input[iStart - 1] * weight0;
-      if (iEnd != endIndex)
-        avrg += input[iEnd] * weight1;
-
-      return avrg * bin0 / (end - start);
-    } else {
-      return avrg / double(ic);
-    }
-  };
   //  Run averaging
-  if (outBins) {
-    outBins->resize(length + 1);
-  }
   for (size_t i = startIndex; i < endIndex; i++) {
-    output[i - startIndex] = runAverage(i);
+
+    output[i - startIndex] = runAverage(i,startIndex,endIndex,halfWidth,
+                                        input,binBndrs);
     if (outBins) {
       outBins->operator[](i - startIndex) = binBndrs->operator[](i);
     }

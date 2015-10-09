@@ -119,7 +119,7 @@ public:
   //
   /// Return time series property, containing time derivative of current
   /// property
-  std::unique_ptr<TimeSeriesProperty<double>> getDerivative() const;
+  std::unique_ptr<TimeSeriesProperty<double> > getDerivative() const;
 
   /// "Virtual" copy constructor with a time shift in seconds
   virtual Property *cloneWithTimeShift(const double timeShift) const;

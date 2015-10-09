@@ -59,13 +59,14 @@ TimeSeriesProperty<TYPE>::cloneWithTimeShift(const double timeShift) const {
 
 /** Return time series property, containing time derivative of current property.
 * The property itself and the returned time derivative become sorted by time and
-* the derivative is  calculated in seconds.
-* (dValue/dT where dT is time difference in seconds
-for subsequent property readings and dValue is difference in subsequent values)
+* the derivative is calculated in seconds^-1.
+* (e.g. dValue/dT where dT=t2-t1 is time difference in seconds
+* for subsequent time readings and dValue=Val1-Val2 is difference in
+* subsequent values)
 *
 */
 template <typename TYPE>
-std::unique_ptr<TimeSeriesProperty<double>>
+std::unique_ptr<TimeSeriesProperty<double> >
 TimeSeriesProperty<TYPE>::getDerivative() const {
 
   if (this->m_values.size() < 2) {
