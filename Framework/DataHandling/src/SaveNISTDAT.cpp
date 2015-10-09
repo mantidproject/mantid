@@ -5,7 +5,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include <fstream> // used to get ofstream
-#include <iostream>
 
 namespace Mantid {
 namespace DataHandling {

@@ -7,7 +7,6 @@
 #include <vector>
 #include <algorithm>
 #include <ctime>
-#include <iomanip>
 
 #include <boost/shared_ptr.hpp>
 

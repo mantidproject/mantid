@@ -12,7 +12,6 @@
 #include <map>
 
 #include <fstream>
-#include <iostream>
 
 #include <algorithm>
 #include "MantidAPI/ISpectrum.h"

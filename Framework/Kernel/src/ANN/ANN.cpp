@@ -27,6 +27,7 @@
 //----------------------------------------------------------------------
 
 #include <cstdlib>                    // C standard lib defs
+#include <iostream>                   // I/O streams
 #include "MantidKernel/ANN/ANNx.h"    // all ANN includes
 #include "MantidKernel/ANN/ANNperf.h" // ANN Perf Header
 

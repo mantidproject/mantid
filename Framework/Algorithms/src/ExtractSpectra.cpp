@@ -9,7 +9,6 @@
 #include "MantidKernel/VectorHelper.h"
 
 #include <algorithm>
-#include <iostream>
 
 namespace {
 /// The percentage 'fuzziness' to use when comparing to bin boundaries

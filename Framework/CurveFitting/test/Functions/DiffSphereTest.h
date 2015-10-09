@@ -1,7 +1,6 @@
 #ifndef DIFFSPHERETEST_H_
 #define DIFFSPHERETEST_H_
 
-#include <iostream>
 #include <fstream>
 #include <limits>
 #include <numeric>

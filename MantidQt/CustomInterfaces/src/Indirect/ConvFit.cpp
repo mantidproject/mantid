@@ -1316,9 +1316,17 @@ void ConvFit::hwhmUpdateRS(double val) {
 void ConvFit::checkBoxUpdate(QtProperty *prop, bool checked) {
   UNUSED_ARG(checked);
 
-  if (prop == m_properties["UseDeltaFunc"])
+  if (prop == m_properties["UseDeltaFunc"]) {
     updatePlotOptions();
-  else if (prop == m_properties["UseFABADA"]) {
+    if (checked == true) {
+      m_properties["DeltaFunction"]->addSubProperty(
+          m_properties["DeltaHeight"]);
+      m_dblManager->setValue(m_properties["DeltaHeight"], 1.0000);
+    } else {
+      m_properties["DeltaFunction"]->removeSubProperty(
+          m_properties["DeltaHeight"]);
+    }
+  } else if (prop == m_properties["UseFABADA"]) {
     if (checked) {
       // FABADA needs a much higher iteration limit
       m_dblManager->setValue(m_properties["MaxIterations"], 20000);

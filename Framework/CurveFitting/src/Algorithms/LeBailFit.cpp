@@ -17,7 +17,6 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <iomanip>
 
 #include <fstream>
 

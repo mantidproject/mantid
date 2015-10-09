@@ -22,7 +22,6 @@
 #include <boost/shared_ptr.hpp>
 #include <exception>
 #include <fstream>
-#include <iostream>
 #include <math.h>
 #include <ostream>
 #include <stdio.h>

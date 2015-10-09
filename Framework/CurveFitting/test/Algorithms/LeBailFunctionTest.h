@@ -5,8 +5,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
 #include <fstream>
 
 #include "MantidCurveFitting/Algorithms/LeBailFunction.h"

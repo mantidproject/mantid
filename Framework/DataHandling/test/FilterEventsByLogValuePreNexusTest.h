@@ -16,7 +16,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/FilterEventsByLogValuePreNexus.h"
 #include <cxxtest/TestSuite.h>
-#include <iostream>
 #include <Poco/File.h>
 
 using namespace Mantid::Geometry;

@@ -1,6 +1,5 @@
 #include "MantidKernel/UnitConversion.h"
 #include <boost/python/class.hpp>
-#include <boost/python/args.hpp>
 
 using Mantid::Kernel::UnitConversion;
 using Mantid::Kernel::DeltaEMode;

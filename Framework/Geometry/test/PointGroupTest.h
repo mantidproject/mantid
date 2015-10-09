@@ -7,8 +7,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
 #include <boost/lexical_cast.hpp>

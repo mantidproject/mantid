@@ -2,8 +2,6 @@
 #define MANTID_GEOMETRY_NiggliCellTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <iostream>
-#include <iomanip>
 #include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Crystal/NiggliCell.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"

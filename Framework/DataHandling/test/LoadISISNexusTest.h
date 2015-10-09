@@ -15,7 +15,6 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-#include "MantidDataHandling/LoadISISNexus.h"
 #include "MantidDataHandling/LoadISISNexus2.h"
 
 #include <cmath>
@@ -546,14 +545,6 @@ public:
                      "Always");
   }
 
-  // Test the stub remnant of version 1 of this algorithm - that it can be run
-  // without setting any properties, and throws an exception.
-  void testRemovedVersion1Throws() {
-    LoadISISNexus v1;
-    v1.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(v1.initialize());
-    TS_ASSERT_THROWS(v1.execute(), Exception::NotImplementedError)
-  }
   void testExecMonExcluded() {
     Mantid::API::FrameworkManager::Instance();
     LoadISISNexus2 ld;

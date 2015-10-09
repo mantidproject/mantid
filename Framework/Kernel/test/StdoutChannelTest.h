@@ -5,7 +5,6 @@
 
 #include "MantidKernel/StdoutChannel.h"
 #include "MantidKernel/Logger.h"
-#include <iostream>
 #include <Poco/Logger.h>
 #include <Poco/NullChannel.h>
 #include <Poco/AutoPtr.h>

@@ -111,65 +111,69 @@ void export_IPropertyManager() {
   register_ptr_to_python<IPropertyManager *>();
 
   class_<IPropertyManager, boost::noncopyable>("IPropertyManager", no_init)
-      .def("propertyCount", &IPropertyManager::propertyCount, args("self"),
+      .def("propertyCount", &IPropertyManager::propertyCount, arg("self"),
            "Returns the number of properties being managed")
 
       .def("getProperty", &IPropertyManager::getPointerToProperty,
-           args("self", "name"), return_value_policy<return_by_value>(),
+           (arg("self"), arg("name")), return_value_policy<return_by_value>(),
            "Returns the property of the given name. Use .value to give the "
            "value")
 
       .def("getPropertyValue", &IPropertyManager::getPropertyValue,
-           args("self", "name"),
+           (arg("self"), arg("name")),
            "Returns a string representation of the named property's value")
 
-      .def("getProperties", &IPropertyManager::getProperties, args("self"),
+      .def("getProperties", &IPropertyManager::getProperties, arg("self"),
            return_value_policy<copy_const_reference>(),
            "Returns the list of properties managed by this object")
 
-      .def("declareProperty", &declareProperty, args("self", "name", "value"),
+      .def("declareProperty", &declareProperty,
+           (arg("self"), arg("name"), arg("value")),
            "Create a new named property")
 
       .def("setPropertyValue", &IPropertyManager::setPropertyValue,
-           args("self", "name", "value"),
+           (arg("self"), arg("name"), arg("value")),
            "Set the value of the named property via a string")
 
-      .def("setProperty", &setProperty, args("self", "name", "value"),
+      .def("setProperty", &setProperty,
+           (arg("self"), arg("name"), arg("value")),
            "Set the value of the named property")
 
       .def("setPropertySettings", &setPropertySettings,
-           args("self", "name", "settingsManager"),
+           (arg("self"), arg("name"), arg("settingsManager")),
            "Assign the given IPropertySettings object to the  named property")
 
       .def("setPropertyGroup", &IPropertyManager::setPropertyGroup,
-           args("self", "name", "group"), "Set the group for a given property")
+           (arg("self"), arg("name"), arg("group")),
+           "Set the group for a given property")
 
       .def("existsProperty", &IPropertyManager::existsProperty,
-           args("self", "name"), "Returns whether a property exists")
+           (arg("self"), arg("name")), "Returns whether a property exists")
 
       // Special methods so that IPropertyManager acts like a dictionary
       // __len__, __getitem__, __setitem__, __delitem__, __iter__ and
       // __contains__
-      .def("__len__", &IPropertyManager::propertyCount, args("self"),
+      .def("__len__", &IPropertyManager::propertyCount, arg("self"),
            "Returns the number of properties being managed")
       .def("__getitem__", &IPropertyManager::getPointerToProperty,
-           args("self", "name"), return_value_policy<return_by_value>(),
+           (arg("self"), arg("name")), return_value_policy<return_by_value>(),
            "Returns the property of the given name. Use .value to give the "
            "value")
-      .def("__setitem__", &declareOrSetProperty, args("self", "name", "value"),
+      .def("__setitem__", &declareOrSetProperty,
+           (arg("self"), arg("name"), arg("value")),
            "Set the value of the named property or create it if it doesn't "
            "exist")
-      .def("__delitem__", &deleteProperty, args("self", "name"),
+      .def("__delitem__", &deleteProperty, (arg("self"), arg("name")),
            "Delete the named property")
       // TODO   .def("__iter__", iterator<std::vector<std::string> > ())
       .def("__contains__", &IPropertyManager::existsProperty,
-           args("self", "name"), "Returns whether a property exists")
+           (arg("self"), arg("name")), "Returns whether a property exists")
 
       // Bonus methods to be even more like a dict
-      .def("has_key", &IPropertyManager::existsProperty, args("self", "name"),
-           "Returns whether a property exists")
-      .def("keys", &getKeys, args("self"))
-      .def("values", &IPropertyManager::getProperties, args("self"),
+      .def("has_key", &IPropertyManager::existsProperty,
+           (arg("self"), arg("name")), "Returns whether a property exists")
+      .def("keys", &getKeys, arg("self"))
+      .def("values", &IPropertyManager::getProperties, arg("self"),
            return_value_policy<copy_const_reference>(),
            "Returns the list of properties managed by this object");
 }

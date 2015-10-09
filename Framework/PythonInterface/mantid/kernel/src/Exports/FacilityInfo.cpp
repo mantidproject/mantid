@@ -13,56 +13,58 @@ void export_FacilityInfo() {
 
   class_<FacilityInfo>("FacilityInfo", no_init)
 
-      .def("name", &FacilityInfo::name,
+      .def("name", &FacilityInfo::name, arg("self"),
            return_value_policy<copy_const_reference>(),
            "Returns name of the facility as definined in the Facilities.xml "
            "file")
 
-      .def("__str__", &FacilityInfo::name,
+      .def("__str__", &FacilityInfo::name, arg("self"),
            return_value_policy<copy_const_reference>(),
            "Returns name of the facility as definined in the Facilities.xml "
            "file")
 
-      .def("zeroPadding", &FacilityInfo::zeroPadding,
+      .def("zeroPadding", &FacilityInfo::zeroPadding, arg("self"),
            "Returns default zero padding for this facility")
 
-      .def("delimiter", &FacilityInfo::delimiter,
+      .def("delimiter", &FacilityInfo::delimiter, arg("self"),
            return_value_policy<copy_const_reference>(),
            "Returns the delimiter between the instrument name and the run "
            "number.")
 
-      .def("extensions", &FacilityInfo::extensions,
+      .def("extensions", &FacilityInfo::extensions, arg("self"),
            "Returns the list of file extensions that are considered as "
            "instrument data files.")
 
-      .def("preferredExtension", &FacilityInfo::preferredExtension,
+      .def("preferredExtension", &FacilityInfo::preferredExtension, arg("self"),
            return_value_policy<copy_const_reference>(),
            "Returns the extension that is preferred for this facility")
 
-      .def("archiveSearch", &FacilityInfo::archiveSearch,
+      .def("archiveSearch", &FacilityInfo::archiveSearch, arg("self"),
            return_value_policy<copy_const_reference>(),
            "Return the archive search interface names")
 
       .def("instruments",
            (const std::vector<InstrumentInfo> &(FacilityInfo::*)() const) &
                FacilityInfo::instruments,
-           return_value_policy<copy_const_reference>(),
+           arg("self"), return_value_policy<copy_const_reference>(),
            "Returns a list of instruments of this facility as defined in the "
            "Facilities.xml file")
 
       .def("instruments", (std::vector<InstrumentInfo>(
                               FacilityInfo::*)(const std::string &) const) &
                               FacilityInfo::instruments,
+           (arg("self"), arg("technique")),
            "Returns a list of instruments of given technique")
 
       .def("instrument", &FacilityInfo::instrument,
+           (arg("self"), arg("instrumentName")),
            return_value_policy<copy_const_reference>(),
            "Returns the instrument with the given name")
 
-      .def("liveListener", &FacilityInfo::liveListener,
+      .def("liveListener", &FacilityInfo::liveListener, arg("self"),
            return_value_policy<copy_const_reference>(),
            "Returns the name of the default live listener")
 
-      .def("computeResources", &FacilityInfo::computeResources,
+      .def("computeResources", &FacilityInfo::computeResources, arg("self"),
            "Returns a vector of the available compute resources");
 }

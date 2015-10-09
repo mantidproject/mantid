@@ -15,8 +15,7 @@ namespace Mantid {
 namespace DataHandling {
 /**
 Loads a Bilby data file. Implements API::IFileLoader and its file check methods
-to
-recognise a file as the one containing Bilby data.
+to recognise a file as the one containing Bilby data.
 
 @author David Mannicke (ANSTO), Anders Markvardsen (ISIS), Roman Tolchenov
 (Tessella plc)
@@ -34,7 +33,7 @@ the Free Software Foundation; either version 3 of the License, or
 
 Mantid is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
@@ -45,6 +44,32 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class DLLExport LoadBBY : public API::IFileLoader<Kernel::FileDescriptor> {
+
+  struct InstrumentInfo {
+    //
+    int32_t bm_counts;
+    int32_t att_pos;
+    //
+    double period_master;
+    double period_slave;
+    double phase_slave;
+    //
+    double L1_chopper_value;
+    double L2_det_value;
+    //
+    double L2_curtainl_value;
+    double L2_curtainr_value;
+    double L2_curtainu_value;
+    double L2_curtaind_value;
+    //
+    double D_det_value;
+    //
+    double D_curtainl_value;
+    double D_curtainr_value;
+    double D_curtainu_value;
+    double D_curtaind_value;
+  };
+
 public:
   // construction
   LoadBBY() {}
@@ -68,26 +93,26 @@ protected:
   virtual void exec();
 
 private:
+  // region of intreset
+  static std::vector<bool> createRoiVector(const std::string &maskfile);
+
   // instrument creation
-  Geometry::Instrument_sptr
-  createInstrument(ANSTO::Tar::File &tarFile, size_t pixelsCutOffL,
-                   size_t pixelsCutOffH, size_t tubeBinning, size_t finalBinsY);
+  Geometry::Instrument_sptr createInstrument(ANSTO::Tar::File &tarFile,
+                                             InstrumentInfo &instrumentInfo);
 
   // load nx dataset
   template <class T>
-  static bool loadNXDataSet(T &value, NeXus::NXEntry &entry,
-                            const std::string &path);
+  static bool loadNXDataSet(NeXus::NXEntry &entry, const std::string &path,
+                            T &value);
 
   // binary file access
-  template <class Counter>
+  template <class EventProcessor>
   static void loadEvents(API::Progress &prog, const char *progMsg,
-                         ANSTO::Tar::File &file, const double tofMinBoundary,
-                         const double tofMaxBoundary, Counter &counter);
-  static std::vector<bool> createMaskVector(const std::string &filename,
-                                            bool &fileLoaded);
-  static std::vector<int> createOffsetVector(const std::string &filename,
-                                             bool &fileLoaded);
+                         ANSTO::Tar::File &tarFile,
+                         EventProcessor &eventProcessor);
 };
-}
-}
+
+} // DataHandling
+} // Mantid
+
 #endif // DATAHANDING_LOADBBY_H_

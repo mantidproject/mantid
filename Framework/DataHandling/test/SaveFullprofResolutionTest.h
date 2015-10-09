@@ -10,7 +10,6 @@
 #include <Poco/File.h>
 
 #include <fstream>
-#include <iostream>
 
 using namespace std;
 using namespace Mantid;

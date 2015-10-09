@@ -6,8 +6,6 @@
 #include "MantidDataObjects/MDBin.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;

@@ -7,7 +7,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-#include <iostream>
 #include <stdexcept>
 
 namespace Mantid {

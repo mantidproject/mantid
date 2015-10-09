@@ -11,7 +11,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include <boost/lexical_cast.hpp>
-#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::API;

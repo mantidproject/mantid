@@ -1,7 +1,6 @@
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
-#include <iostream>
 #include <iterator>
 
 #include "MantidDataHandling/LoadPreNexusMonitors.h"

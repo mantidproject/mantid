@@ -17,7 +17,6 @@
 
 #include <cmath>
 #include <Poco/File.h>
-#include <iostream>
 #include <string>
 #include <sstream>
 #include <cstring>

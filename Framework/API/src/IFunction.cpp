@@ -28,7 +28,6 @@
 
 #include <limits>
 #include <sstream>
-#include <iostream>
 #include <algorithm>
 
 namespace Mantid {

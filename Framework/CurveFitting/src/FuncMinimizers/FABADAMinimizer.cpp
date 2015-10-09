@@ -26,7 +26,6 @@
 #include <boost/version.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 
-#include <iostream>
 #include <ctime>
 
 namespace Mantid {

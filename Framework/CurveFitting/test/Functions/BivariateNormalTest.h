@@ -21,7 +21,6 @@
 #include "MantidCurveFitting/GSLFunctions.h"
 #include "MantidKernel/UnitFactory.h"
 */
-#include <iostream>
 #include <cmath>
 #include <stdio.h>
 #include <stdlib.h>

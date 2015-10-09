@@ -107,10 +107,10 @@
 //  basic includes
 //----------------------------------------------------------------------
 
-#include <cstdlib>  // standard lib includes
-#include <cmath>    // math includes
-#include <iostream> // I/O streams
-#include <cstring>  // C-style strings
+#include <cstdlib> // standard lib includes
+#include <cmath>   // math includes
+#include <iosfwd>  // I/O streams
+#include <cstring> // C-style strings
 
 //----------------------------------------------------------------------
 // Limits

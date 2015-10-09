@@ -54,7 +54,7 @@ class InstrumentWindowMaskTab: public InstrumentWindowTab
   Q_OBJECT
 public:
   enum Mode {Mask, Group, ROI};
-  enum Activity {Move,Select,DrawEllipse,DrawRectangle,DrawEllipticalRing,DrawRectangularRing};
+  enum Activity {Move,Select,DrawEllipse,DrawRectangle,DrawEllipticalRing,DrawRectangularRing,DrawFree};
 
   InstrumentWindowMaskTab(InstrumentWindow* instrWindow);
   void initSurface();
@@ -129,6 +129,7 @@ protected:
   QPushButton* m_rectangle;
   QPushButton* m_ring_ellipse;
   QPushButton* m_ring_rectangle;
+  QPushButton* m_free_draw;
 
   QPushButton* m_apply;
   QPushButton* m_apply_to_view;

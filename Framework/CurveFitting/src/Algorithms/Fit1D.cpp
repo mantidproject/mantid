@@ -5,7 +5,6 @@
 #include <sstream>
 #include <numeric>
 #include <cmath>
-#include <iomanip>
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"

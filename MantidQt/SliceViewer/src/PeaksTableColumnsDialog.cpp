@@ -3,7 +3,6 @@
 #include "ui_PeaksTableColumnsDialog.h"
 
 // REMOVE
-#include <iostream>
 
 namespace MantidQt
 {

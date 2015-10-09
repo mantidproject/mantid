@@ -31,7 +31,6 @@
 #include <boost/algorithm/string/split.hpp>
 
 #include <fstream>
-#include <iomanip>
 
 #include <gsl/gsl_sf_erf.h>
 #include <cmath>

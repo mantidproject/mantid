@@ -8,8 +8,6 @@
 #include "MantidCurveFitting/Algorithms/LeBailFit.h"
 #include "MantidDataHandling/LoadAscii.h"
 
-#include <iostream>
-#include <iomanip>
 #include <fstream>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
