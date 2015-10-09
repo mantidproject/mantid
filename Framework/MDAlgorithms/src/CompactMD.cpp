@@ -18,9 +18,7 @@ createPBinStringVector(std::vector<Mantid::coord_t> minVector,
   for (size_t iter = 0; iter < numDims; iter++) {
     if (minVector[iter] >= maxVector[iter]) {
       std::cerr << "Minimum extent of non-zero signal must be LESS than the "
-                   "maximum extent with non-zero signal"
-                << std::endl;
-      // break;
+                   "maximum extent with non-zero signal" << std::endl;
     }
     // creating pbin string using Min and Max Centre positions
     auto pBinStr = boost::lexical_cast<std::string>(
