@@ -5,10 +5,19 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
 namespace {
-// helper method to create a string from min and max extents (with non-zero
-// signals)
-// ready to be used as the PBins for IntegrateMDHistoWorkspace algorithm in
-// exec.
+/**
+ * helper method to create a string from min and max extents (with non-zero
+ * signals) ready to be used as the PBins for IntegrateMDHistoWorkspace
+ * algorithm in
+ * exec
+ * @param minVector : Vector containing the minimum extents that we will crop
+ * to.
+ * @param maxVector : Vector containing the maximum extents that we will crop
+ * to.
+ * @param inputWs : Used in the calculation from centre to bin edges
+ * @return : a string vector of binning parameters for IntegrateMDHistoWorkspace
+ * to take as input.
+*/
 std::vector<std::string>
 createPBinStringVector(std::vector<Mantid::coord_t> minVector,
                        std::vector<Mantid::coord_t> maxVector,
@@ -39,6 +48,16 @@ namespace MDAlgorithms {
 
 DECLARE_ALGORITHM(CompactMD)
 
+/**
+* Finding the centre points of Bins with non-zero signal values
+* we then compare this centre to minimum and maximum centres we have
+* to get the minimum and maximum extents of the workspace that has non-zero
+* signal values in the Bins.
+* @param inputWs : The workspace that will be iterated over to find the extents.
+* @param minVec : Vector used to stored the minimum extent in each dimension
+* @param maxVec : Vector used to stored the maximum extents in each dimension
+*/
+
 void CompactMD::findFirstNonZeroMinMaxExtents(
     IMDHistoWorkspace_sptr inputWs, std::vector<Mantid::coord_t> &minVec,
     std::vector<Mantid::coord_t> &maxVec) {
@@ -66,6 +85,9 @@ void CompactMD::findFirstNonZeroMinMaxExtents(
   } while (ws_iter->next());
 }
 
+/**
+* Initiliase the algorithm's properties.
+*/
 void CompactMD::init() {
   // input workspace to compact
   declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
@@ -76,6 +98,9 @@ void CompactMD::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "Output compacted workspace");
 }
+/**
+* Execute the algorithm.
+*/
 void CompactMD::exec() {
   const IMDHistoWorkspace_sptr input_ws = this->getProperty("InputWorkspace");
   IMDWorkspace_sptr out_ws;
