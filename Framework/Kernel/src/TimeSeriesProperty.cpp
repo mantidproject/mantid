@@ -66,7 +66,7 @@ TimeSeriesProperty<TYPE>::cloneWithTimeShift(const double timeShift) const {
 *
 */
 template <typename TYPE>
-std::unique_ptr<TimeSeriesProperty<double> >
+std::unique_ptr<TimeSeriesProperty<double>>
 TimeSeriesProperty<TYPE>::getDerivative() const {
 
   if (this->m_values.size() < 2) {

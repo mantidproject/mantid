@@ -59,7 +59,7 @@ rebinHistogram(const std::vector<double> &xold, const std::vector<double> &yold,
                std::vector<double> &ynew, std::vector<double> &enew,
                bool addition);
 
-/// Convert an array of bin boundaries to bin centre values.
+/// Convert an array of bin boundaries to bin center values.
 void MANTID_KERNEL_DLL convertToBinCentre(const std::vector<double> &bin_edges,
                                           std::vector<double> &bin_centres);
 

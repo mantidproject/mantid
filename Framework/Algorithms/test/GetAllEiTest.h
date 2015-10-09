@@ -454,7 +454,28 @@ public:
     TS_ASSERT(!guessValid[0]);
   }
 
-  void test_getAllEiSmooth() { auto ws = createTestingWS(); }
+  void test_getAllEi() {
+    auto ws = createTestingWS();
+
+    m_getAllEi.initialize();
+    m_getAllEi.setProperty("Workspace", ws);
+    m_getAllEi.setProperty("OutputWorkspace", "monitor_peaks");
+    m_getAllEi.setProperty("Monitor1SpecID", 1);
+    m_getAllEi.setProperty("Monitor2SpecID", 2);
+    m_getAllEi.setProperty("ChopperSpeedLog", "Chopper_Speed");
+    m_getAllEi.setProperty("ChopperDelayLog", "Chopper_Delay");
+    m_getAllEi.setProperty("FilterBaseLog", "is_running");
+    m_getAllEi.setProperty("FilterWithDerivative", false);
+    m_getAllEi.setProperty("OutputWorkspace","allEiWs");
+
+    TS_ASSERT_THROWS_NOTHING(m_getAllEi.execute());
+   // API::MatrixWorkspace_sptr out_ws = m_getAllEi.getProperty("OutputWorkspace");
+
+    //TSM_ASSERT("Should be able to retrieve workspace",out_ws);
+
+
+
+  }
 
 private:
   GetAllEiTester m_getAllEi;
@@ -493,19 +514,19 @@ private:
         new Kernel::TimeSeriesProperty<double>("Chopper_Delay"));
     std::unique_ptr<Kernel::TimeSeriesProperty<double>> chopSpeed(
         new Kernel::TimeSeriesProperty<double>("Chopper_Speed"));
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> protCharge(
-        new Kernel::TimeSeriesProperty<double>("proton_charge"));
+    std::unique_ptr<Kernel::TimeSeriesProperty<double>> isRunning(
+        new Kernel::TimeSeriesProperty<double>("is_running"));
 
     for (int i = 0; i < 10; i++) {
       auto time = Kernel::DateAndTime(10 * i, 0);
       chopDelay->addValue(time, delay);
       chopSpeed->addValue(time, speed);
-      protCharge->addValue(time, 1.);
+      isRunning->addValue(time, 1.);
     }
 
     ws->mutableRun().addLogData(chopSpeed.release());
     ws->mutableRun().addLogData(chopDelay.release());
-    ws->mutableRun().addLogData(protCharge.release());
+    ws->mutableRun().addLogData(isRunning.release());
 
     return ws;
   }

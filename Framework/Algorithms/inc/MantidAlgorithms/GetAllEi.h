@@ -62,11 +62,10 @@ private:
                                        const std::string &name);
   void setFilterLog(const API::MatrixWorkspace_sptr &inputWS);
   // former lambda function exposed as not evry compiler support this yet
-  bool peakGuess(const API::MatrixWorkspace_sptr &inputWS,
-    size_t index, double Ei,
-    const std::vector<size_t> &monsRangeMin,
-    const std::vector<size_t> &monsRangeMax,
-    double &peakPos, double &peakHeight, double &peakTwoSigma);
+  bool peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
+                 double Ei, const std::vector<size_t> &monsRangeMin,
+                 const std::vector<size_t> &monsRangeMax, double &peakPos,
+                 double &peakHeight, double &peakTwoSigma);
 
 protected: // for testing, private otherwise.
   // prepare working workspace with appropriate monitor spectra for fitting
