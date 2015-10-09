@@ -123,7 +123,7 @@ private:
 
   /// Fit single peak in robust mode (no hint)
   bool fitSinglePeakRobust(Functions::BackToBackExponential_sptr peak,
-                           Functions::BackgroundFunction_sptr background,
+                           Functions::BackgroundFunction_sptr backgroundfunction,
                            double leftdev, double rightdev,
                            std::map<std::string, double> rightpeakparammap,
                            double &finalchi2);

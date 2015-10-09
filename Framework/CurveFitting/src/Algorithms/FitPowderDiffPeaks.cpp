@@ -593,7 +593,7 @@ void FitPowderDiffPeaks::observePeakRange(BackToBackExponential_sptr thispeak,
   * Assumption:
   * 1. peak must be in the range of [input peak center - leftdev, + rightdev]
   *
-  * Prerequisit:
+  * Prerequisites:
   * ---- NONE!
   *
   * Algorithms:
