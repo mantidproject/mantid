@@ -6,6 +6,7 @@
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/Timer.h"
 #include "MantidAPI/BoxController.h"
@@ -500,6 +501,19 @@ public:
 
     ws->setCoordinateSystem(Mantid::Kernel::QLab);
     TS_ASSERT_EQUALS(Mantid::Kernel::QLab, ws->getSpecialCoordinateSystem());
+  }
+
+  void test_getSpecialCoordinateSystem_when_MDFrames_are_set() {
+    // Arrange
+    const Mantid::Geometry::QSample frame;
+    auto ws = MDEventsTestHelper::makeAnyMDEWWithFrames<MDLeanEvent<2>, 2>(
+        10, 0.0, 10.0, frame, 1);
+    // Act
+    auto specialCoordinateSystem = ws->getSpecialCoordinateSystem();
+    // Assert
+    TSM_ASSERT_EQUALS("Should detect QSample as the SpecialCoordinate",
+                      specialCoordinateSystem,
+                      Mantid::Kernel::SpecialCoordinateSystem::QSample);
   }
 
   void test_getLinePlot() {

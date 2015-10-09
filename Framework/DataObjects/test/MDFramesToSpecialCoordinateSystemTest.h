@@ -9,6 +9,7 @@
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidGeometry/MDGeometry/UnknownFrame.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
@@ -21,12 +22,12 @@ class MDFramesToSpecialCoordinateSystemTest : public CxxTest::TestSuite {
 public:
   void test_that_throws_for_non_md_workspace() {
     // Arrange
-    boost::shared_ptr<MatrixWorkspace> ws(new WorkspaceTester());
+    const boost::shared_ptr<MatrixWorkspace> ws(new WorkspaceTester());
     Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
     // Act + Assert
     TSM_ASSERT_THROWS(
         "Should throw as only MDEvent and MDHisto workspaces are allowed",
-        converter(ws), std::invalid_argument);
+        converter(ws.get()), std::invalid_argument);
   }
 
   void test_that_throws_for_non_uniform_coodinate_system() {
@@ -46,7 +47,7 @@ public:
 
     // Act + Assert
     TSM_ASSERT_THROWS("Should throw as coordinate system is mixed.",
-                      converter(ws), std::invalid_argument);
+                      converter(ws.get()), std::invalid_argument);
   }
 
   void
@@ -66,9 +67,9 @@ public:
     Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
 
     // Act + Assert
-    Mantid::Kernel::SpecialCoordinateSystem coordinateSystem;
-    TS_ASSERT_THROWS_NOTHING(coordinateSystem = converter(ws));
-    TSM_ASSERT_EQUALS("Should be Qlab", coordinateSystem,
+    boost::optional<Mantid::Kernel::SpecialCoordinateSystem> coordinateSystem;
+    TS_ASSERT_THROWS_NOTHING(coordinateSystem = converter(ws.get()));
+    TSM_ASSERT_EQUALS("Should be Qlab", *coordinateSystem,
                       Mantid::Kernel::SpecialCoordinateSystem::QLab);
   }
 
@@ -89,9 +90,9 @@ public:
     Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
 
     // Act + Assert
-    Mantid::Kernel::SpecialCoordinateSystem coordinateSystem;
-    TS_ASSERT_THROWS_NOTHING(coordinateSystem = converter(ws));
-    TSM_ASSERT_EQUALS("Should be QSample", coordinateSystem,
+    boost::optional<Mantid::Kernel::SpecialCoordinateSystem> coordinateSystem;
+    TS_ASSERT_THROWS_NOTHING(coordinateSystem = converter(ws.get()));
+    TSM_ASSERT_EQUALS("Should be QSample", *coordinateSystem,
                       Mantid::Kernel::SpecialCoordinateSystem::QSample);
   }
 
@@ -112,9 +113,9 @@ public:
     Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
 
     // Act + Assert
-    Mantid::Kernel::SpecialCoordinateSystem coordinateSystem;
-    TS_ASSERT_THROWS_NOTHING(coordinateSystem = converter(ws));
-    TSM_ASSERT_EQUALS("Should be HKL", coordinateSystem,
+    boost::optional<Mantid::Kernel::SpecialCoordinateSystem> coordinateSystem;
+    TS_ASSERT_THROWS_NOTHING(coordinateSystem = converter(ws.get()));
+    TSM_ASSERT_EQUALS("Should be HKL", *coordinateSystem,
                       Mantid::Kernel::SpecialCoordinateSystem::HKL);
   }
 
@@ -135,10 +136,31 @@ public:
     Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
 
     // Act + Assert
-    Mantid::Kernel::SpecialCoordinateSystem coordinateSystem;
-    TS_ASSERT_THROWS_NOTHING(coordinateSystem = converter(ws));
-    TSM_ASSERT_EQUALS("Should be None", coordinateSystem,
+    boost::optional<Mantid::Kernel::SpecialCoordinateSystem> coordinateSystem;
+    TS_ASSERT_THROWS_NOTHING(coordinateSystem = converter(ws.get()));
+    TSM_ASSERT_EQUALS("Should be None", *coordinateSystem,
                       Mantid::Kernel::SpecialCoordinateSystem::None);
+  }
+
+  void test_that_returns_empty_optional_when_UnknownFrame_detected() {
+    // Arrange
+    Mantid::Geometry::UnknownFrame frame1("b");
+    Mantid::Geometry::UnknownFrame frame2("b");
+    Mantid::coord_t min = 0;
+    Mantid::coord_t max = 10;
+    size_t bins = 2;
+    auto dimension1 =
+        boost::make_shared<MDHistoDimension>("H", "H", frame1, min, max, bins);
+    auto dimension2 =
+        boost::make_shared<MDHistoDimension>("K", "K", frame2, min, max, bins);
+    auto ws = boost::make_shared<Mantid::DataObjects::MDHistoWorkspace>(
+        dimension1, dimension2);
+    Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
+
+    // Act + Assert
+    boost::optional<Mantid::Kernel::SpecialCoordinateSystem> coordinateSystem;
+    TS_ASSERT_THROWS_NOTHING(coordinateSystem = converter(ws.get()));
+    TSM_ASSERT("Should not be initialized", !coordinateSystem);
   }
 };
 

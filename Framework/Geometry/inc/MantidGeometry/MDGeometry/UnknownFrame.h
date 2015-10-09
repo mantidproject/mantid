@@ -34,15 +34,22 @@ namespace Geometry {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_GEOMETRY_DLL UnknownFrame : public GeneralFrame {
+class MANTID_GEOMETRY_DLL UnknownFrame : public MDFrame {
 public:
-  UnknownFrame(const std::string &frameName, const Kernel::UnitLabel &unit);
-  UnknownFrame(const std::string &frameName,
-               std::unique_ptr<Mantid::Kernel::MDUnit> unit);
+  UnknownFrame(std::unique_ptr<Kernel::MDUnit> unit);
+  UnknownFrame(const Kernel::UnitLabel &unit);
   virtual ~UnknownFrame();
-
+  std::string name() const;
+  bool canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const ;
+  Mantid::Kernel::UnitLabel getUnitLabel() const;
+  const Mantid::Kernel::MDUnit &getMDUnit() const;
+  Mantid::Kernel::SpecialCoordinateSystem equivalientSpecialCoordinateSystem() const;
+  UnknownFrame *clone() const;
   // Type name
   static const std::string UnknownFrameName;
+private:
+  /// Label unit
+  const std::unique_ptr<Mantid::Kernel::MDUnit> m_unit;
 };
 
 } // namespace Geometry

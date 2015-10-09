@@ -5,6 +5,7 @@
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "boost/optional.hpp"
 namespace Mantid {
 namespace DataObjects {
 
@@ -36,13 +37,16 @@ class DLLExport MDFramesToSpecialCoordinateSystem {
 public:
   MDFramesToSpecialCoordinateSystem ();
   ~MDFramesToSpecialCoordinateSystem ();
-  Mantid::Kernel::SpecialCoordinateSystem operator()(Mantid::API::IMDWorkspace_const_sptr workspace) const;
+  boost::optional<Mantid::Kernel::SpecialCoordinateSystem> operator()(const Mantid::API::IMDWorkspace* workspace) const;
 
 private:
-  Mantid::Kernel::SpecialCoordinateSystem extractCoordinateSystem(Mantid::Geometry::IMDDimension_const_sptr dimension) const;
+  Mantid::Kernel::SpecialCoordinateSystem extractCoordinateSystem(
+      Mantid::Geometry::IMDDimension_const_sptr dimension) const;
+  bool
+  isUnknownFrame(Mantid::Geometry::IMDDimension_const_sptr dimension) const;
 };
 
-} // namespace API
+} // namespace DataObjects
 } // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_MDFRAMESTOSPECIALCOORDINATESYTEM_H_ */

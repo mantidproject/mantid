@@ -74,15 +74,13 @@ UnknownFrameFactory::createRaw(const MDFrameArgument &argument) const {
   auto unitFactoryChain = Kernel::makeMDUnitFactoryChain();
   auto mdUnit = unitFactoryChain->create(argument.unitString);
 
-  return new UnknownFrame(argument.frameString, MDUnit_uptr(mdUnit->clone()));
+  return new UnknownFrame(MDUnit_uptr(mdUnit->clone()));
 }
 
 /// Indicate an ability to intepret the string
 bool UnknownFrameFactory::canInterpret(const MDFrameArgument &) const {
   return true; // This can interpret everything
 }
-
-
 
 MDFrameFactory_uptr makeMDFrameFactoryChain() {
   typedef MDFrameFactory_uptr FactoryType;

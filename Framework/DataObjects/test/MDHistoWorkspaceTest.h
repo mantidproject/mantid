@@ -6,6 +6,7 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/VMD.h"
@@ -974,6 +975,29 @@ public:
 
     ws->setCoordinateSystem(Mantid::Kernel::QLab);
     TS_ASSERT_EQUALS(Mantid::Kernel::QLab, ws->getSpecialCoordinateSystem());
+  }
+
+  void test_getSpecialCoordinateSystem_when_MDFrames_are_set() {
+    // Arrange
+    Mantid::Geometry::QSample frame1;
+    Mantid::Geometry::QSample frame2;
+    Mantid::coord_t min = 0;
+    Mantid::coord_t max = 10;
+    size_t bins = 2;
+    auto dimension1 = boost::make_shared<MDHistoDimension>(
+        "QSampleX", "QSampleX", frame1, min, max, bins);
+    auto dimension2 = boost::make_shared<MDHistoDimension>(
+        "QSampleY", "QSampleY", frame2, min, max, bins);
+    auto ws = boost::make_shared<Mantid::DataObjects::MDHistoWorkspace>(
+        dimension1, dimension2);
+
+    // Act
+    auto specialCoordinates = ws->getSpecialCoordinateSystem();
+
+    // Assert
+    TSM_ASSERT_EQUALS("Should detect QSample as the SpecialCoordinate",
+                      specialCoordinates,
+                      Mantid::Kernel::SpecialCoordinateSystem::QSample);
   }
 
   void test_displayNormalizationDefault() {

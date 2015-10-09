@@ -35,7 +35,7 @@ public:
                    const Kernel::UnitLabel &units, coord_t min, coord_t max,
                    size_t numBins)
       : m_name(name), m_dimensionId(ID),
-        m_frame(new UnknownFrame("Unknown frame", units)), m_min(min),
+        m_frame(new UnknownFrame(units)), m_min(min),
         m_max(max), m_numBins(numBins),
         m_binWidth((max - min) / static_cast<coord_t>(numBins)) {
     if (max < min) {
