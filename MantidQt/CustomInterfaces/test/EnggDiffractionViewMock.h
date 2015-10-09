@@ -116,6 +116,9 @@ public:
   // virtual void plotWaterfallSpectrum
   MOCK_METHOD1(plotWaterfallSpectrum, void(const std::string &wsName));
 
+  // virtual void plotReplacingWindow
+  MOCK_METHOD1(plotReplacingWindow, void(const std::string &wsName));
+
   // std::string currentPlotType
   MOCK_CONST_METHOD0(currentPlotType, int());
 };
