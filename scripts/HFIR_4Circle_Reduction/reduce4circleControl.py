@@ -946,7 +946,7 @@ class CWSCDReductionControl(object):
 
     def set_ub_matrix(self, exp_number, ub_matrix):
         """
-        TODO/DOC
+        Set up UB matrix to _UBMatrix dictionary 
         :param exp_number:
         :param ub_matrix:
         :return:
