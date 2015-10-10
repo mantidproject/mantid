@@ -282,6 +282,15 @@ void MdViewerWidget::setupUiAndConnections()
   // Add the color scale lock to the ColoSelectionWidget, which should
   // now be initialized
   ui.colorSelectionWidget->setColorScaleLock(&m_colorScaleLock);
+  
+  
+  
+  // Setup the Default Normalization options
+  setupDefaultNormalizations();
+  QObject::connect(ui.defaultNormalizationHisto,SIGNAL(currentIndexChanged(const QString&)), 
+                   this, SLOT(onDefaultNormalizationHistoChanged(const QString&)));
+  QObject::connect(ui.defaultNormalizationEvent,SIGNAL(currentIndexChanged(const QString&)), 
+                  this, SLOT(onDefaultNormalizationEventChanged(const QString&)));
 }
 
 void MdViewerWidget::panelChanged()
@@ -1706,6 +1715,53 @@ bool MdViewerWidget::areGridAxesOn() {
     return true;
   }
 }
+
+/**
+ * React to normalization changes for MDHisto workspaces
+ */
+void MdViewerWidget::onDefaultNormalizationHistoChanged(
+    const QString &currentText) {
+  // Get current text and save it.
+  mdSettings.setUserSettingNormalizationHisto(currentText);
+}
+
+/**
+ * React to normalization chagnes for MDEvent workspaces
+ */
+void MdViewerWidget::onDefaultNormalizationEventChanged(
+    const QString &currentText) {
+  // Get current text and save it.
+  mdSettings.setUserSettingNormalizationEvent(currentText);
+}
+
+/**
+ * Setup the default normalization
+ */
+void MdViewerWidget::setupDefaultNormalizations() {
+  auto normalizations = mdConstants.getAllNormalizations();
+
+  // Setup the default normalizations for MDHisto workspaces
+  ui.defaultNormalizationHisto->addItems(normalizations);
+  auto indexDefaultNormalizationHisto = ui.defaultNormalizationHisto->findData(
+      mdSettings.getUserSettingNormalizationHisto(), Qt::DisplayRole);
+
+  if (indexDefaultNormalizationHisto != -1) {
+    ui.defaultNormalizationHisto->setCurrentIndex(
+        indexDefaultNormalizationHisto);
+  }
+
+  // Setup the default normalizations for MDEvent workspaces
+  ui.defaultNormalizationEvent->addItems(normalizations);
+  auto indexDefaultNormalizationEvent = ui.defaultNormalizationEvent->findData(
+      mdSettings.getUserSettingNormalizationEvent(), Qt::DisplayRole);
+
+  if (indexDefaultNormalizationEvent != -1) {
+    ui.defaultNormalizationEvent->setCurrentIndex(
+        indexDefaultNormalizationEvent);
+  }
+}
+
+
 
 } // namespace SimpleGui
 } // namespace Vates

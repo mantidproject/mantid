@@ -53,7 +53,7 @@ namespace MantidQt
       m_threeSliceView = "Three Slice";
       m_splatterPlotView = "Splatter Plot";
 
-      m_autoNormalization = "Auto";
+      m_autoNormalization = "Auto Select";
       m_volumeNormalization = "Volume";
       m_numberEventNormalization = "Number Events";
       m_noNormalization = "None";
