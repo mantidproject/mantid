@@ -202,7 +202,7 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
   std::string sep("");
   if (m_dataDir.size() > 0) {
     // Determine system
-    bool isWindows(false);
+    const bool isWindows(false);
 #if _WIN64
     isWindows = true;
 #elif _WIND32
