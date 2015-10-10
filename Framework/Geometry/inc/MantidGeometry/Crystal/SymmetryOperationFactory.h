@@ -1,15 +1,14 @@
 #ifndef MANTID_GEOMETRY_SYMMETRYOPERATIONFACTORY_H_
 #define MANTID_GEOMETRY_SYMMETRYOPERATIONFACTORY_H_
 
+#include <list>
+#include <map>
+
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
 #include "MantidGeometry/Crystal/SymmetryOperationSymbolParser.h"
 #include "MantidKernel/RegistrationHelper.h"
-
-#include <list>
-#include <map>
-#include <iostream>
 
 namespace Mantid {
 namespace Geometry {

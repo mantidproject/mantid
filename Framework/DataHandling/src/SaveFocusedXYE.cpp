@@ -8,7 +8,6 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <fstream>
-#include <iomanip>
 #include <cmath>
 #include <exception>
 

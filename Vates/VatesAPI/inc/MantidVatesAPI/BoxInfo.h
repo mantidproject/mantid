@@ -2,7 +2,6 @@
 #define MANTID_VATESAPI_BOXINFO_H
 
 #include "MantidKernel/System.h"
-#include <iostream>
 #include <boost/optional.hpp>
 
 namespace Mantid

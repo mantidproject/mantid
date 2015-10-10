@@ -7,8 +7,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 #include <Poco/SAX/SAXParser.h>
 #include <sstream>
 #include "MantidKernel/CPUTimer.h"

@@ -6,7 +6,6 @@
 #include "MantidDataHandling/CompressEvents.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <iostream>
 
 using Mantid::MantidVecPtr;
 using namespace Mantid::Kernel;

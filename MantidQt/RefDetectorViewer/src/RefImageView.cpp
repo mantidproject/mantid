@@ -1,4 +1,3 @@
-#include <iostream>
 #include  "MantidQtRefDetectorViewer/RefImageView.h"
 #include  "MantidQtSpectrumViewer/ColorMaps.h"
 

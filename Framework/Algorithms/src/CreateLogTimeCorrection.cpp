@@ -5,7 +5,6 @@
 #include "MantidAPI/WorkspaceValidators.h"
 
 #include <fstream>
-#include <iomanip>
 
 using namespace Mantid;
 using namespace Mantid::API;

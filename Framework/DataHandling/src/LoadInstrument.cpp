@@ -20,7 +20,6 @@
 #include <Poco/Exception.h>
 #include <sstream>
 #include <fstream>
-#include <iostream>
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
 using Poco::XML::DOMParser;

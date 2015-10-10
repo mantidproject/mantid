@@ -33,15 +33,18 @@ void export_Unit() {
   register_ptr_to_python<boost::shared_ptr<Unit>>();
 
   class_<Unit, boost::noncopyable>("Unit", no_init)
-      .def("name", &deprecatedName,
+      .def("name", &deprecatedName, arg("self"),
            "Return the full name of the unit (deprecated, use caption)")
-      .def("caption", &Unit::caption, "Return the full name of the unit")
-      .def("label", &deprecatedLabel, "Returns a plain-text label to be used "
-                                      "as the symbol for the unit (deprecated, "
-                                      "use symbol())")
-      .def("symbol", &Unit::label, "Returns a UnitLabel object that holds "
-                                   "information on the symbol to use for unit")
+      .def("caption", &Unit::caption, arg("self"),
+           "Return the full name of the unit")
+      .def("label", &deprecatedLabel, arg("self"),
+           "Returns a plain-text label to be used "
+           "as the symbol for the unit (deprecated, "
+           "use symbol())")
+      .def("symbol", &Unit::label, arg("self"),
+           "Returns a UnitLabel object that holds "
+           "information on the symbol to use for unit")
       .def(
-          "unitID", &Unit::unitID,
+          "unitID", &Unit::unitID, arg("self"),
           "Returns the string ID of the unit. This may/may not match its name");
 }

@@ -18,8 +18,6 @@
 #include <boost/random/variate_generator.hpp>
 #include <math.h>
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::Crystal;

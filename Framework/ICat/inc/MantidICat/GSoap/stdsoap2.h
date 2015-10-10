@@ -639,7 +639,6 @@ A commercial use license is available from Genivia, Inc., contact@genivia.com
 
 #if defined(__cplusplus) && !defined(WITH_LEAN) && !defined(WITH_COMPAT)
 #include <string>
-#include <iostream>
 #endif
 
 #ifdef WITH_NOHTTP

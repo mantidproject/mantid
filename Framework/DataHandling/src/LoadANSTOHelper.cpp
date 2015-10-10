@@ -9,11 +9,10 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidNexus/NexusClasses.h"
 
-//#include <Poco/File.h>
-
 namespace Mantid {
 namespace DataHandling {
 namespace ANSTO {
+
 // ProgressTracker
 ProgressTracker::ProgressTracker(API::Progress &progBar, const char *msg,
                                  int64_t target, size_t count)
@@ -49,79 +48,79 @@ void ProgressTracker::complete() {
   }
 }
 
+// EventProcessor
+EventProcessor::EventProcessor(const std::vector<bool> &roi,
+                               const size_t stride, const double period,
+                               const double phase, const double tofMinBoundary,
+                               const double tofMaxBoundary)
+    : m_roi(roi), m_stride(stride), m_period(period), m_phase(phase),
+      m_tofMinBoundary(tofMinBoundary), m_tofMaxBoundary(tofMaxBoundary) {}
+void EventProcessor::endOfFrame() { endOfFrameImpl(); }
+void EventProcessor::addEvent(size_t x, size_t y, double tof) {
+  // tof correction
+  if (m_period > 0.0) {
+    tof += m_phase;
+    while (tof > m_period)
+      tof -= m_period;
+    while (tof < 0)
+      tof += m_period;
+  }
+
+  // check if event is in valid range
+  if ((y < m_stride) && (m_tofMinBoundary <= tof) &&
+      (tof <= m_tofMaxBoundary)) {
+
+    // detector id
+    size_t id = m_stride * x + y;
+
+    // check if neutron is in region of intreset
+    if (m_roi[id])
+      addEventImpl(id, tof);
+  }
+}
+
 // EventCounter
-EventCounter::EventCounter(std::vector<size_t> &eventCounts,
-                           const std::vector<bool> &mask,
-                           const std::vector<int> &offsets, size_t stride,
-                           size_t pixelsCutOffL, size_t tubeBinning,
-                           size_t finalBinsY, double periode, double phase)
-    : m_eventCounts(eventCounts), m_mask(mask), m_offsets(offsets),
-      m_stride(stride), m_pixelsCutOffL(pixelsCutOffL),
-      m_tubeBinning(tubeBinning), m_finalBinsY(finalBinsY),
+EventCounter::EventCounter(const std::vector<bool> &roi, const size_t stride,
+                           const double period, const double phase,
+                           const double tofMinBoundary,
+                           const double tofMaxBoundary,
+                           std::vector<size_t> &eventCounts)
+    : EventProcessor(roi, stride, period, phase, tofMinBoundary,
+                     tofMaxBoundary),
+      m_eventCounts(eventCounts), m_numFrames(0),
       m_tofMin(std::numeric_limits<double>::max()),
-      m_tofMax(std::numeric_limits<double>::min()), m_period(periode),
-      m_phase(phase) {}
+      m_tofMax(std::numeric_limits<double>::min()) {}
+size_t EventCounter::numFrames() const { return m_numFrames; }
 double EventCounter::tofMin() const {
   return m_tofMin <= m_tofMax ? m_tofMin : 0.0;
 }
 double EventCounter::tofMax() const {
   return m_tofMin <= m_tofMax ? m_tofMax : 0.0;
 }
-void EventCounter::addEvent(size_t x, size_t y, double tof) {
-  // correction
-  if (m_period > 0.0) {
-    tof += m_phase;
-    while (tof > m_period)
-      tof -= m_period;
-    while (tof < 0)
-      tof += m_period;
-  }
+void EventCounter::endOfFrameImpl() { m_numFrames++; }
+void EventCounter::addEventImpl(size_t id, double tof) {
+  if (m_tofMin > tof)
+    m_tofMin = tof;
+  if (m_tofMax < tof)
+    m_tofMax = tof;
 
-  y = y + (size_t)m_offsets[x];
-  if (y < m_stride) { // sufficient because yNew is size_t
-    if (m_mask[m_stride * x + y]) {
-      if (m_tofMin > tof)
-        m_tofMin = tof;
-      if (m_tofMax < tof)
-        m_tofMax = tof;
-
-      // transformation to bin index
-      size_t j = (y - m_pixelsCutOffL) / m_tubeBinning;
-
-      m_eventCounts[m_finalBinsY * x + j]++;
-    }
-  }
+  m_eventCounts[id]++;
 }
 
 // EventAssigner
-EventAssigner::EventAssigner(std::vector<EventVector_pt> &eventVectors,
-                             const std::vector<bool> &mask,
-                             const std::vector<int> &offsets, size_t stride,
-                             size_t pixelsCutOffL, size_t tubeBinning,
-                             size_t finalBinsY, double periode, double phase)
-    : m_eventVectors(eventVectors), m_mask(mask), m_offsets(offsets),
-      m_stride(stride), m_pixelsCutOffL(pixelsCutOffL),
-      m_tubeBinning(tubeBinning), m_finalBinsY(finalBinsY), m_period(periode),
-      m_phase(phase) {}
-void EventAssigner::addEvent(size_t x, size_t y, double tof) {
-  // correction
-  if (m_period > 0.0) {
-    tof += m_phase;
-    while (tof > m_period)
-      tof -= m_period;
-    while (tof < 0)
-      tof += m_period;
-  }
-
-  y = y + (size_t)m_offsets[x];
-  if (y < m_stride) { // sufficient because yNew is size_t
-    if (m_mask[m_stride * x + y]) {
-      // transformation to bin index
-      size_t j = (y - m_pixelsCutOffL) / m_tubeBinning;
-
-      m_eventVectors[m_finalBinsY * x + j]->push_back(tof);
-    }
-  }
+EventAssigner::EventAssigner(const std::vector<bool> &roi, const size_t stride,
+                             const double period, const double phase,
+                             const double tofMinBoundary,
+                             const double tofMaxBoundary,
+                             std::vector<EventVector_pt> &eventVectors)
+    : EventProcessor(roi, stride, period, phase, tofMinBoundary,
+                     tofMaxBoundary),
+      m_eventVectors(eventVectors) {}
+void EventAssigner::endOfFrameImpl() {
+  // ignore
+}
+void EventAssigner::addEventImpl(size_t id, double tof) {
+  m_eventVectors[id]->push_back(tof);
 }
 
 // FastReadOnlyFile
@@ -332,7 +331,8 @@ int File::read_byte() {
   m_position++;
   return m_buffer[m_bufferPosition++];
 }
-}
-}
-} // namespace
-} // namespace
+
+} // Tar
+} // ANSTO
+} // DataHandling
+} // Mantid

@@ -2,8 +2,6 @@
 #define MANTID_ALGORITHMS_REMOVEPROMPTPULSETEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <iostream>
-#include <iomanip>
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"

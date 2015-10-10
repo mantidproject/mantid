@@ -90,7 +90,11 @@ set ( SRC_FILES
   src/SANSPlotSpecial.cpp
   src/SANSRunWindow.cpp
   src/StepScan.cpp
+  src/Tomography/ImageROIPresenter.cpp
+  src/Tomography/ImageROIViewQtWidget.cpp
+  src/Tomography/ImageStackPreParams.cpp
   src/Tomography/SavuConfigDialog.cpp
+  src/Tomography/StackOfImagesDirs.cpp
   src/Tomography/TomographyIfaceModel.cpp
   src/Tomography/TomographyIfacePresenter.cpp
   src/Tomography/TomographyIfaceViewQtGUI.cpp
@@ -205,8 +209,14 @@ set ( INC_FILES
   inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
   inc/MantidQtCustomInterfaces/SANSRunWindow.h
   inc/MantidQtCustomInterfaces/StepScan.h
+  inc/MantidQtCustomInterfaces/Tomography/IImageROIPresenter.h
+  inc/MantidQtCustomInterfaces/Tomography/IImageROIView.h
+  inc/MantidQtCustomInterfaces/Tomography/ImageROIPresenter.h
+  inc/MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h
+  inc/MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h
   inc/MantidQtCustomInterfaces/Tomography/ITomographyIfacePresenter.h
   inc/MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h
+  inc/MantidQtCustomInterfaces/Tomography/StackOfImagesDirs.h
   inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
   inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
   inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h
@@ -308,6 +318,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/SANSEventSlicing.h
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
                 inc/MantidQtCustomInterfaces/StepScan.h
+                inc/MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h
                 inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
                 inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
                 inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h
@@ -370,6 +381,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/SANSRunWindow.ui
                inc/MantidQtCustomInterfaces/SANSEventSlicing.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
+               inc/MantidQtCustomInterfaces/Tomography/ImageSelectCoRAndRegions.ui
                inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtGUI.ui
                inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabSetup.ui
                inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabRun.ui
@@ -386,12 +398,14 @@ set ( TEST_FILES
   ALCPeakFittingModelTest.h
   ALCPeakFittingPresenterTest.h
   EnggDiffractionPresenterTest.h
+  ImageROIPresenterTest.h
   IO_MuonGroupingTest.h
   MuonAnalysisHelperTest.h
   ParseKeyValueStringTest.h
   ReflGenerateNotebookTest.h
   ReflLegacyTransferStrategyTest.h
   ReflMainViewPresenterTest.h
+  StackOfImagesDirsTest.h
   TomographyIfacePresenterTest.h
   UserInputValidatorTest.h
 )

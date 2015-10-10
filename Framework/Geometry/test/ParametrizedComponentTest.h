@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include <cmath>
-#include <iostream>
 #include <string>
 #include <boost/make_shared.hpp>
 #include "MantidGeometry/Instrument/Component.h"

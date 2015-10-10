@@ -55,7 +55,7 @@ def ws_exist(wslist, logger):
     return True
 
 
-def compare_properties(lhs_run, rhs_run, plist, logger):
+def compare_properties(lhs_run, rhs_run, plist, logger, tolerance=5e-3):
     """
     checks whether properties match in the given runs, produces warnings
         @param lhs_run Left-hand-side run
@@ -65,10 +65,15 @@ def compare_properties(lhs_run, rhs_run, plist, logger):
     """
     lhs_title = ""
     rhs_title = ""
-    if lhs_run.hasProperty('run_title'):
+    if lhs_run.hasProperty('run_title') and rhs_run.hasProperty('run_title'):
         lhs_title = lhs_run.getProperty('run_title').value
-    if rhs_run.hasProperty('run_title'):
         rhs_title = rhs_run.getProperty('run_title').value
+
+    # for TOFTOF run_titles can be identical
+    if lhs_title == rhs_title:
+        if lhs_run.hasProperty('run_number') and rhs_run.hasProperty('run_number'):
+            lhs_title = str(lhs_run.getProperty('run_number').value)
+            rhs_title = str(rhs_run.getProperty('run_number').value)
 
     for property_name in plist:
         if lhs_run.hasProperty(property_name) and rhs_run.hasProperty(property_name):
@@ -81,8 +86,8 @@ def compare_properties(lhs_run, rhs_run, plist, logger):
                             lhs_title + ": " + lhs_property.value + ", but " + \
                             rhs_title + ": " + rhs_property.value
                         logger.warning(message)
-                if lhs_property.type == 'number':
-                    if abs(lhs_property.value - rhs_property.value) > 5e-3:
+                elif lhs_property.type == 'number':
+                    if abs(lhs_property.value - rhs_property.value) > tolerance:
                         message = "Property " + property_name + " does not match! " + \
                             lhs_title + ": " + str(lhs_property.value) + ", but " + \
                             rhs_title + ": " + str(rhs_property.value)
@@ -98,3 +103,54 @@ def compare_properties(lhs_run, rhs_run, plist, logger):
                 lhs_title + " or " + rhs_title + " - skipping comparison."
             logger.warning(message)
     return
+
+
+def compare_mandatory(wslist, plist, logger, tolerance=0.01):
+    """
+    Compares properties which are required to be the same.
+    Produces error message and throws exception if difference is observed
+    or if one of the sample logs is not found.
+    Important: exits after the first difference is observed. No further check is performed.
+        @param wslist  List of workspaces
+        @param plist   List of properties to compare
+        @param logger  Logger self.log()
+        @param tolerance  Tolerance for comparison of the double values.
+    """
+    # retrieve the workspaces, form dictionary {wsname: run}
+    runs = {}
+    for wsname in wslist:
+        wks = api.AnalysisDataService.retrieve(wsname)
+        runs[wsname] = wks.getRun()
+
+    for prop in plist:
+        properties = []
+        for wsname in wslist:
+            run = runs[wsname]
+            if not run.hasProperty(prop):
+                message = "Workspace " + wsname + " does not have sample log " + prop
+                logger.error(message)
+                raise RuntimeError(message)
+
+            curprop = run.getProperty(prop)
+            if curprop.type == 'string':
+                properties.append(curprop.value)
+            elif curprop.type == 'number':
+                properties.append(int(curprop.value/tolerance))
+            else:
+                message = "Unknown type " + str(curprop.type) + " for the sample log " +\
+                    prop + " in the workspace " + wsname
+                logger.error(message)
+                raise RuntimeError(message)
+        # this should never happen, but lets check
+        nprop = len(properties)
+        if nprop != len(wslist):
+            message = "Error. Number of properties " + str(nprop) + " for property " + prop +\
+                " is not equal to number of workspaces " + str(len(wslist))
+            logger.error(message)
+            raise RuntimeError(message)
+        pvalue = properties[0]
+        if properties.count(pvalue) != nprop:
+            message = "Sample log " + prop + " is not identical in the given list of workspaces. \n" +\
+                "Workspaces: " + ", ".join(wslist) + "\n Values: " + str(properties)
+            logger.error(message)
+            raise RuntimeError(message)

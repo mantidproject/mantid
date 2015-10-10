@@ -36,7 +36,6 @@
 
 #include <QString>
 
-#include <iostream>
 
 using namespace Mantid::Geometry;
 using namespace MantidQt::SliceViewer;

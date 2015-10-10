@@ -6,7 +6,6 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include <cfloat>
-#include <iostream>
 #include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {

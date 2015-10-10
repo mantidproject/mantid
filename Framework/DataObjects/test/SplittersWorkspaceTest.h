@@ -5,8 +5,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include <iostream>
-#include <iomanip>
 
 #include "MantidDataObjects/SplittersWorkspace.h"
 

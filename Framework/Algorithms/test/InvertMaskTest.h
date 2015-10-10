@@ -8,8 +8,6 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
-#include <iostream>
-#include <iomanip>
 
 #include "MantidAlgorithms/InvertMask.h"
 

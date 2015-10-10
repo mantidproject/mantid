@@ -15,7 +15,6 @@ using namespace Mantid::Kernel;
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/WorkspaceGroup.h"
-#include <iostream>
 
 class LoadSNSNexusTest : public CxxTest::TestSuite {
 public:

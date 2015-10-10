@@ -5,11 +5,11 @@
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_value_policy.hpp>
+#include <boost/python/return_arg.hpp>
 
 using Mantid::Kernel::Quat;
 using Mantid::Kernel::V3D;
-
-using boost::python::args;
+using boost::python::arg;
 using boost::python::init;
 using boost::python::class_;
 using boost::python::self;
@@ -28,43 +28,49 @@ void export_Quat() {
               "Quaternions are used for roations in 3D spaces and often "
               "implemented for "
               "computer graphics applications.",
-      init<>(args("self"),
+      init<>(arg("self"),
              "Construct a default Quat that will perform no transformation."))
       .def(init<double, double, double, double>(
-          args("self", "w", "a", "b", "c"), "Constructor with values"))
-      .def(init<V3D, V3D>(args("self", "src", "dest"),
+          (arg("self"), arg("w"), arg("a"), arg("b"), arg("c")),
+          "Constructor with values"))
+      .def(init<V3D, V3D>((arg("self"), arg("src"), arg("dest")),
                           "Construct a Quat between two vectors"))
-      .def(init<V3D, V3D, V3D>(args("self", "rX", "rY", "rZ"),
+      .def(init<V3D, V3D, V3D>((arg("self"), arg("rX"), arg("rY"), arg("rZ")),
                                "Construct a Quaternion that performs a "
                                "reference frame rotation.\nThe initial X,Y,Z "
                                "vectors are aligned as expected: X=(1,0,0), "
                                "Y=(0,1,0), Z=(0,0,1)"))
-      .def(init<double, V3D>(args("self", "deg", "axis"),
+      .def(init<double, V3D>((arg("self"), arg("deg"), arg("axis")),
                              "Constructor from an angle(degrees) and an axis."))
-      .def("rotate", &Quat::rotate, args("self", "v"),
+      .def("rotate", &Quat::rotate, (arg("self"), arg("v")),
            "Rotate the quaternion by the given vector")
-      .def("real", &Quat::real, args("self"),
+      .def("real", &Quat::real, arg("self"),
            "Returns the real part of the quaternion")
-      .def("imagI", &Quat::imagI, args("self"),
+      .def("imagI", &Quat::imagI, arg("self"),
            "Returns the ith imaginary component")
-      .def("imagJ", &Quat::imagJ, args("self"),
+      .def("imagJ", &Quat::imagJ, arg("self"),
            "Returns the jth imaginary component")
-      .def("imagK", &Quat::imagK, args("self"),
+      .def("imagK", &Quat::imagK, arg("self"),
            "Returns the kth imaginary component")
-      .def("len", &Quat::len, args("self"),
+      .def("len", &Quat::len, arg("self"),
            "Returns the 'length' of the quaternion")
-      .def("len2", &Quat::len2, args("self"),
+      .def("len2", &Quat::len2, arg("self"),
            "Returns the square of the 'length' of the quaternion")
-      .def(self + self)
-      .def(self += self)
-      .def(self - self)
-      .def(self -= self)
-      .def(self * self)
-      .def(self *= self)
-      .def(self == self)
-      .def(self != self)
+      .def("__add__", &Quat::operator+, (arg("left"), arg("right")))
+      .def("__iadd__", &Quat::operator+=, boost::python::return_self<>(),
+           (arg("self"), arg("other")))
+      .def("__sub__", &Quat::operator-, (arg("left"), arg("right")))
+      .def("__isub__", &Quat::operator-=, boost::python::return_self<>(),
+           (arg("self"), arg("other")))
+      .def("__mul__", &Quat::operator*, (arg("left"), arg("right")))
+      .def("__imul__", &Quat::operator*=, boost::python::return_self<>(),
+           (arg("self"), arg("other")))
+      .def("__eq__", &Quat::operator==, (arg("self"), arg("other")))
+      .def("__ne__", &Quat::operator!=, (arg("self"), arg("other")))
       .def("__getitem__",
            (const double &(Quat::*)(int) const) & Quat::operator[],
-           return_value_policy<copy_const_reference>())
-      .def(boost::python::self_ns::str(self));
+           return_value_policy<copy_const_reference>(),
+           (arg("self"), arg("index")))
+      .def("__str__", &Quat::toString, arg("self"));
+  //.def(boost::python::self_ns::str(self));
 }

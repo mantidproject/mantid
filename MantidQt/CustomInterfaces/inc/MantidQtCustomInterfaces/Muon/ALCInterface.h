@@ -18,9 +18,11 @@ namespace CustomInterfaces
 
   class ALCDataLoadingPresenter;
 
+  class ALCBaselineModellingView;
   class ALCBaselineModellingPresenter;
   class ALCBaselineModellingModel;
 
+  class ALCPeakFittingView;
   class ALCPeakFittingPresenter;
   class ALCPeakFittingModel;
 
@@ -68,10 +70,17 @@ namespace CustomInterfaces
     void exportResults();
     void importResults();
 
+    void updateBaselineData();
+    void updatePeakData();
+
   private:
 
     /// UI form
     Ui::ALCInterface m_ui;
+
+    // Step views
+    ALCBaselineModellingView* m_baselineModellingView;
+    ALCPeakFittingView* m_peakFittingView;
 
     // Step presenters
     ALCDataLoadingPresenter* m_dataLoading;

@@ -59,6 +59,10 @@ A commercial use license is available from Genivia, Inc., contact@genivia.com
 
 #include "MantidICat/GSoap/stdsoap2.h"
 
+#if defined(__cplusplus) && !defined(WITH_LEAN) && !defined(WITH_COMPAT)
+#include <iostream>
+#endif
+
 #if defined(VXWORKS) && defined(WM_SECURE_KEY_STORAGE)
 #include <ipcom_key_db.h>
 #endif

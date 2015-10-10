@@ -1,4 +1,3 @@
-#include <iostream>
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/WorkspaceFactory.h"

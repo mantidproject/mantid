@@ -37,6 +37,34 @@ void AsymmetryCalc::init() {
                   Direction::Input);
 }
 
+//----------------------------------------------------------------------------------------------
+/** Validates the inputs.
+ */
+std::map<std::string, std::string> AsymmetryCalc::validateInputs() {
+
+  std::map<std::string, std::string> result;
+
+  std::vector<size_t> list;
+  std::vector<int> forwd = getProperty("ForwardSpectra");
+  std::vector<int> backwd = getProperty("BackwardSpectra");
+
+  API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+
+  inputWS->getIndicesFromSpectra(forwd, list);
+  if (forwd.size() != list.size()) {
+    result["ForwardSpectra"] =
+        "Some of the spectra can not be found in the input workspace";
+  }
+
+  inputWS->getIndicesFromSpectra(backwd, list);
+  if (backwd.size() != list.size()) {
+    result["BackwardSpectra"] =
+        "Some of the spectra can not be found in the input workspace";
+  }
+
+  return result;
+}
+
 /** Executes the algorithm
  *
  */
@@ -89,11 +117,6 @@ void AsymmetryCalc::exec() {
     specIDs[1] = backward;
     std::vector<size_t> indices;
     tmpWS->getIndicesFromSpectra(specIDs, indices);
-
-    // If some spectra were not found, can't continue
-    if (specIDs.size() != indices.size())
-      throw std::invalid_argument(
-          "Could not find two spectra in the input workspace");
 
     forward = static_cast<int>(indices[0]);
     backward = static_cast<int>(indices[1]);

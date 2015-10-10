@@ -8,8 +8,8 @@
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IDomainCreator.h"
-#include "MantidCurveFitting/CostFuncLeastSquares.h"
-#include "MantidCurveFitting/CostFuncRwp.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncRwp.h"
 
 #include <stdexcept>
 #include <vector>
@@ -57,16 +57,17 @@ public:
   /// Add new domain creator
   void addCreator(API::IDomainCreator_sptr creator);
   /// Calculate the value of a least squares cost function
-  virtual void leastSquaresVal(const CostFuncLeastSquares &leastSquares);
+  virtual void
+  leastSquaresVal(const CostFunctions::CostFuncLeastSquares &leastSquares);
   /// Calculate the value, first and second derivatives of a least squares cost
   /// function
-  virtual void
-  leastSquaresValDerivHessian(const CostFuncLeastSquares &leastSquares,
-                              bool evalDeriv, bool evalHessian);
+  virtual void leastSquaresValDerivHessian(
+      const CostFunctions::CostFuncLeastSquares &leastSquares, bool evalDeriv,
+      bool evalHessian);
   /// Calculate the value of a Rwp cost function
-  void rwpVal(const CostFuncRwp &rwp);
+  void rwpVal(const CostFunctions::CostFuncRwp &rwp);
   /// Calculate the value, first and second derivatives of a RWP cost function
-  void rwpValDerivHessian(const CostFuncRwp &rwp, bool evalDeriv,
+  void rwpValDerivHessian(const CostFunctions::CostFuncRwp &rwp, bool evalDeriv,
                           bool evalHessian);
 
   /// Create an instance of SeqDomain in one of two forms: either SeqDomain for

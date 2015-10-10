@@ -9,8 +9,6 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 
 using namespace Mantid::API;
 using namespace Mantid::Crystal;

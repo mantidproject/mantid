@@ -13,7 +13,6 @@
 
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include <cmath>
-#include <iostream>
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MDHistoToWorkspace2D)
