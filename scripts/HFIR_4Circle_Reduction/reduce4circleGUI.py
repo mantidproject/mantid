@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,relative-import,W0611,R0921,R0902,R0904,R0921
+#pylint: disable=invalid-name,relative-import,W0611,R0921,R0902,R0904,R0921,C0302
 ################################################################################
 #
 # MainWindow application for reducing HFIR 4-circle
@@ -1051,11 +1051,5 @@ class MainWindow(QtGui.QMainWindow):
         assert ubmatrix.shape == (3, 3)
 
         self.ui.tableWidget_ubMatrix.set_from_matrix(ubmatrix)
-
-        """
-        for i in xrange(3):
-            for j in xrange(3):
-                self.ui.tableWidget_ubMatrix.update_cell_value(i, j, ubmatrix[i][j])
-        """
 
         return
