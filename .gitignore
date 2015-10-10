@@ -167,3 +167,12 @@ Desktop.ini
 .tags_sorted_by_file
 
 Code/Mantid/Vates/VatesSimpleGui/ViewWidgets/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
+
+
+# Make sure Third_Party doesn't get checked into the main repository
+Third_Party/
+# Common out-of-source build directory names. Usually, these should go in your .git/info/exclude
+win64/
+dbg/
+rel/
+
