@@ -93,7 +93,7 @@ void RefinePowderInstrumentParameters::init() {
 
   // Lower limit on number of peaks for fitting
   declareProperty(
-      "MinNumberFittedm_Peaks", 5,
+      "MinNumberFittedPeaks", 5,
       "Minimum number of fitted peaks for refining instrument parameters.");
 
   // Refinement algorithm
@@ -149,11 +149,11 @@ void RefinePowderInstrumentParameters::exec() {
 
   m_MinSigma = getProperty("MinSigma");
 
-  int tempint = getProperty("MinNumberFittedm_Peaks");
+  int tempint = getProperty("MinNumberFittedPeaks");
   if (tempint <= 1) {
-    g_log.error() << "Input MinNumberFittedm_Peaks = " << tempint
+    g_log.error() << "Input MinNumberFittedPeaks = " << tempint
                   << " is too small. " << endl;
-    throw std::invalid_argument("Input MinNumberFittedm_Peaks is too small.");
+    throw std::invalid_argument("Input MinNumberFittedPeaks is too small.");
   }
   m_MinNumFittedPeaks = static_cast<size_t>(tempint);
 
