@@ -57,6 +57,7 @@ namespace MantidQt
       virtual void giveUserWarning(std::string prompt, std::string title) = 0;
       virtual void giveUserCritical(std::string prompt, std::string title) = 0;
       virtual void showAlgorithmDialog(const std::string& algorithm) = 0;
+      virtual std::string requestNotebookPath() = 0;
 
       //Plotting
       virtual void plotWorkspaces(const std::set<std::string>& workspaces) = 0;

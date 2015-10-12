@@ -295,16 +295,15 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::saveNotebook(std::map<int,std::set<int>> groups, std::set<int> rows)
     {
-      std::unique_ptr<ReflGenerateNotebook> notebook(new ReflGenerateNotebook(
-        m_wsName, m_model, m_view->getProcessInstrument(), COL_RUNS, COL_TRANSMISSION, COL_OPTIONS, COL_ANGLE,
-        COL_QMIN, COL_QMAX, COL_DQQ, COL_SCALE, COL_GROUP));
-      QString qfilename = QFileDialog::getSaveFileName(0, "Save notebook file", QDir::currentPath(),
-                                                       "IPython Notebook files (*.ipynb);;All files (*.*)",
-                                                       new QString("IPython Notebook files (*.ipynb)"));
-      std::string filename = qfilename.toStdString();
+
+      std::string filename = m_view->requestNotebookPath();
       if (filename == "") {
         return;
       }
+
+      std::unique_ptr<ReflGenerateNotebook> notebook(new ReflGenerateNotebook(
+        m_wsName, m_model, m_view->getProcessInstrument(), COL_RUNS, COL_TRANSMISSION, COL_OPTIONS, COL_ANGLE,
+        COL_QMIN, COL_QMAX, COL_DQQ, COL_SCALE, COL_GROUP));
       std::string generatedNotebook = notebook->generateNotebook(groups, rows);
 
       std::ofstream file(filename.c_str(), std::ofstream::trunc);
