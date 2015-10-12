@@ -1554,14 +1554,15 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
             increment = atoi((pIDElem->getAttribute("step")).c_str());
 
           // check the start end and increment values are sensible
-          if (increment <= 0) {
+          if (0 == increment) {
             std::stringstream ss;
-            ss << "The step element must be strictly positive, found step: "
-               << increment;
+            ss << "The step element cannot be zero, found step: " << increment;
+
             throw Kernel::Exception::InstrumentDefinitionError(ss.str(),
                                                                filename);
           }
-          if (((endID - startID) / increment) < 0) {
+          int numSteps = (endID - startID) / increment;
+          if (numSteps < 0) {
             std::stringstream ss;
             ss << "The start, end, and step elements do not allow a single id "
                   "in the idlist entry - ";
@@ -1572,7 +1573,7 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
                                                                filename);
           }
 
-          idList.vec.reserve((endID - startID) / increment);
+          idList.vec.reserve(numSteps);
           for (int i = startID; i != endID + increment; i += increment) {
             idList.vec.push_back(i);
           }
