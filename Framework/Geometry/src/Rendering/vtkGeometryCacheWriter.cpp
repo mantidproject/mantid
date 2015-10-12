@@ -1,5 +1,4 @@
 #include <fstream>
-#include <iostream>
 #include <sstream>
 
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"

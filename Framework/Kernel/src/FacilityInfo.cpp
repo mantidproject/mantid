@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include <algorithm>
-#include <iostream>
 
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ConfigService.h"

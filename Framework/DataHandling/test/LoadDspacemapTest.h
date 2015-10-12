@@ -10,8 +10,6 @@
 #include <cstring>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
-#include <iomanip>
-#include <iostream>
 #include <vector>
 
 using namespace Mantid::DataHandling;

@@ -8,8 +8,6 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;

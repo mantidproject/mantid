@@ -4,7 +4,6 @@
  *  Created on: Nov 14, 2012
  *      Author: mark.koennecke@psi.ch
  */
-#include <iostream>
 #include <sstream>
 
 #include "MantidAPI/LiveListenerFactory.h"

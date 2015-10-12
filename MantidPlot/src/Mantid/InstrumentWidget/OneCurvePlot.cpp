@@ -16,7 +16,6 @@
 #include <QPainter>
 #include <QFont>
 
-#include <iostream>
 #include <cmath>
 
 OneCurvePlot::OneCurvePlot(QWidget* parent):

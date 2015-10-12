@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/FunctionDomain1D.h"
-#include <iostream>
 
 namespace Mantid {
 namespace API {

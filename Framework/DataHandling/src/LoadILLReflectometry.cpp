@@ -13,7 +13,6 @@
 #include <algorithm>
 
 #include <nexus/napi.h>
-#include <iostream>
 
 namespace Mantid {
 namespace DataHandling {

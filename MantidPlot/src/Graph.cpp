@@ -107,7 +107,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stddef.h>
-#include <iostream>
 
 // We can safely ignore warnings about assuming signed overflow does not occur from qvector.h
 // (They really should have implemented it with unsigned types!

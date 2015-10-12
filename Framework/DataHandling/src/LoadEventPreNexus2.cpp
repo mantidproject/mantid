@@ -3,7 +3,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <functional>
-#include <iostream>
 #include <set>
 #include <vector>
 #include <Poco/File.h>

@@ -18,7 +18,6 @@
 #include "MantidKernel/VectorHelper.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
-#include <iomanip>
 #include <sstream>
 
 namespace Mantid {

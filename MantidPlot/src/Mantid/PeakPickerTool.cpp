@@ -22,7 +22,6 @@
 #include <QInputDialog>
 #include <QMessageBox>
 
-#include <iostream>
 
 namespace
 {

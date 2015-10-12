@@ -1,7 +1,6 @@
 #include "MantidQtSliceViewer/LineOverlay.h"
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
-#include <iostream>
 #include <qpainter.h>
 #include <QRect>
 #include <QShowEvent>

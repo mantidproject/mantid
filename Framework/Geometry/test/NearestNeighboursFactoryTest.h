@@ -4,8 +4,6 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
 
 #include "MantidGeometry/Instrument/NearestNeighboursFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"

@@ -4,6 +4,8 @@
 #include "GLColor.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 
+#include <iostream>
+
 /**
  * Default Constructor
  * @param red :: The red component of the RGB colour

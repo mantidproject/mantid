@@ -6,7 +6,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include "boost/lexical_cast.hpp"
-#include <iostream>
 #include <cmath>
 
 using std::string;

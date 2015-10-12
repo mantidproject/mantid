@@ -3,6 +3,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -193,6 +194,18 @@ public:
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != NULL);
     TS_ASSERT_EQUALS(2, ws->run().getLogData().size());
+  }
+
+  void test_execute_qxqz_normalized_polygon_md() {
+    const bool outputAsMD = true;
+    auto alg = make_standard_algorithm("Q (lab frame)", outputAsMD);
+    alg->setProperty("Method", "NormalisedPolygon");
+    alg->execute();
+    auto ws = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(
+            "OutputTransformedWorkspace"));
+    TS_ASSERT(ws != NULL);
+    TS_ASSERT_EQUALS(2, ws->getExperimentInfo(0)->run().getLogData().size());
   }
 
   void test_execute_kikf_2D() {

@@ -3,6 +3,7 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/Progress.h"
 
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -296,6 +297,7 @@ void ConvertToReflectometryQ::exec() {
   checkOutputDimensionalityChoice(outputDimensions); // TODO: This check can be
                                                      // retired as soon as all
                                                      // transforms have been
+
   // Extract the incient theta angle from the logs if a user provided one is not
   // given.
   if (!bUseOwnIncidentTheta) {
@@ -351,41 +353,66 @@ void ConvertToReflectometryQ::exec() {
 
   TableWorkspace_sptr vertexes =
       boost::make_shared<Mantid::DataObjects::TableWorkspace>();
-
+  Progress transSelectionProg(this, 0.0, 0.1, 2);
   if (outputAsMDWorkspace) {
+    transSelectionProg.report("Choosing Transformation");
     if (transMethod == centerTransform()) {
       auto outputMDWS = transform->executeMD(inputWs, bc);
+      Progress transPerformProg(this, 0.1, 0.7, 5);
+      transPerformProg.report("Performed transformation");
       // Copy ExperimentInfo (instrument, run, sample) to the output WS
       ExperimentInfo_sptr ei(inputWs->cloneExperimentInfo());
       outputMDWS->addExperimentInfo(ei);
       outputWS = outputMDWS;
     } else if (transMethod == normPolyTransform()) {
-      throw std::runtime_error("Normalised Polynomial rebinning not supported "
-                               "for multidimensional output.");
-    } else {
-      throw std::runtime_error("Unknown rebinning method: " + transMethod);
-    }
-  } else {
-    if (transMethod == centerTransform()) {
-      auto outputWS2D = transform->execute(inputWs);
-      outputWS2D->copyExperimentInfoFrom(inputWs.get());
-      outputWS = outputWS2D;
-    } else if (transMethod == normPolyTransform()) {
+      Progress transPerformProg(this, 0.1, 0.7, 5);
       const bool dumpVertexes = this->getProperty("DumpVertexes");
       auto vertexesTable = vertexes;
-
-      auto outputWSRB = transform->executeNormPoly(
+      // perform the normalised polygon transformation
+      transPerformProg.report("Performing Transformation");
+      auto normPolyTrans = transform->executeNormPoly(
           inputWs, vertexesTable, dumpVertexes, outputDimensions);
-      outputWSRB->copyExperimentInfoFrom(inputWs.get());
-      outputWS = outputWSRB;
+      // copy any experiment info from input workspace
+      normPolyTrans->copyExperimentInfoFrom(inputWs.get());
+      // produce MDHistoWorkspace from normPolyTrans workspace.
+      Progress outputToMDProg(this, 0.7, 0.75, 10);
+      auto outputMDWS = transform->executeMDNormPoly(normPolyTrans);
+      ExperimentInfo_sptr ei(normPolyTrans->cloneExperimentInfo());
+      outputMDWS->addExperimentInfo(ei);
+      outputWS = outputMDWS;
+      outputToMDProg.report("Successfully output to MD");
     } else {
       throw std::runtime_error("Unknown rebinning method: " + transMethod);
     }
+  } else if (transMethod == normPolyTransform()) {
+    transSelectionProg.report("Choosing Transformation");
+    Progress transPerformProg(this, 0.1, 0.7, 5);
+    const bool dumpVertexes = this->getProperty("DumpVertexes");
+    auto vertexesTable = vertexes;
+    // perform the normalised polygon transformation
+    transPerformProg.report("Performing Transformation");
+    auto output2DWS = transform->executeNormPoly(
+        inputWs, vertexesTable, dumpVertexes, outputDimensions);
+    // copy any experiment info from input workspace
+    output2DWS->copyExperimentInfoFrom(inputWs.get());
+    outputWS = output2DWS;
+    transPerformProg.report("Transformation Complete");
+  } else if (transMethod == centerTransform()) {
+    transSelectionProg.report("Choosing Transformation");
+    Progress transPerformProg(this, 0.1, 0.7, 5);
+    transPerformProg.report("Performing Transformation");
+    auto output2DWS = transform->execute(inputWs);
+    output2DWS->copyExperimentInfoFrom(inputWs.get());
+    outputWS = output2DWS;
+  } else {
+    throw std::runtime_error("Unknown rebinning method: " + transMethod);
   }
 
   // Execute the transform and bind to the output.
   setProperty("OutputWorkspace", outputWS);
   setProperty("OutputVertexes", vertexes);
+  Progress setPropertyProg(this, 0.8, 1.0, 2);
+  setPropertyProg.report("Success");
 }
 
 } // namespace Mantid

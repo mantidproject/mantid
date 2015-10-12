@@ -16,7 +16,6 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <cmath>
-#include <iostream>
 #include <sstream>
 #include <fstream>
 #include <ios>

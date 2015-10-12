@@ -9,20 +9,21 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidCurveFitting/CostFuncLeastSquares.h"
-#include "MantidCurveFitting/LevenbergMarquardtMDMinimizer.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 
 #include "MantidTestHelpers/FakeObjects.h"
 
 #include <cxxtest/TestSuite.h>
 #include <boost/make_shared.hpp>
 #include <algorithm>
-#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::CostFunctions;
+using namespace Mantid::CurveFitting::Algorithms;
 
 class MultiDomainFunctionTest_Function : public virtual IFunction1D,
                                          public virtual ParamFunction {
@@ -162,7 +163,7 @@ public:
     costFun->setFittingFunction(multi, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 6);
 
-    LevenbergMarquardtMDMinimizer s;
+    FuncMinimisers::LevenbergMarquardtMDMinimizer s;
     s.initialize(costFun);
     TS_ASSERT(s.minimize());
 
@@ -186,7 +187,7 @@ public:
     multi->getFunction(2)->setParameter("A", 0);
     multi->getFunction(2)->setParameter("B", 0);
 
-    Fit fit;
+    Algorithms::Fit fit;
     fit.initialize();
     fit.setProperty("Function", boost::dynamic_pointer_cast<IFunction>(multi));
     fit.setProperty("InputWorkspace", ws1);

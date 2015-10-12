@@ -7,7 +7,6 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 
-#include <iostream>
 #include <algorithm>
 #include <stdexcept>
 #include <cmath>

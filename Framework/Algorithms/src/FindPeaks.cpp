@@ -14,7 +14,6 @@
 #include "MantidKernel/VectorHelper.h"
 
 #include <boost/algorithm/string.hpp>
-#include <iostream>
 #include <numeric>
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"

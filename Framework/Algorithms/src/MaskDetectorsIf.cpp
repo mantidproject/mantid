@@ -6,7 +6,6 @@
 #include "MantidKernel/ListValidator.h"
 
 #include <fstream>
-#include <iomanip>
 
 namespace Mantid {
 namespace Algorithms {

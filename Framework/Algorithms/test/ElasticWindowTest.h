@@ -3,8 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <iostream>
-#include <iomanip>
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/System.h"
 

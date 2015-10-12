@@ -6,7 +6,7 @@
 #include <QCursor>
 #include <QApplication>
 
-#include <iostream>
+#include <cmath>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -315,96 +315,143 @@ void InputControllerMoveUnwrapped::mouseReleaseEvent(QMouseEvent *)
 /**
   * Constructor.
   */
-InputControllerErase::InputControllerErase(QObject *parent):
+InputControllerDraw::InputControllerDraw(QObject *parent):
 InputController(parent),
 m_max_size(32),
 m_size(30),
-m_isButtonPressed(false),
+m_isLeftButtonPressed(false),
+m_isRightButtonPressed(false),
 m_isActive(false),
-m_rect( 0, 0, m_size, m_size )
+m_cursor(NULL)
 {
-    m_cursor = new QPixmap(m_max_size,m_max_size);
-    drawCursor();
-    m_image = new QPixmap(":/PickTools/eraser.png");
 }
 
-InputControllerErase::~InputControllerErase()
+InputControllerDraw::~InputControllerDraw()
 {
     delete m_cursor;
-    delete m_image;
 }
 
 /**
   * Process the mouse press event.
   */
-void InputControllerErase::mousePressEvent(QMouseEvent *event)
+void InputControllerDraw::mousePressEvent(QMouseEvent *event)
 {
     m_isActive = true;
-    m_rect.moveTopLeft(QPoint(event->x(),event->y()));
+    setPosition(QPoint(event->x(),event->y()));
     if (event->button() == Qt::LeftButton)
     {
-        m_isButtonPressed = true;
-        emit erase( m_rect );
+        m_isLeftButtonPressed = true;
+        signalLeftClick();
+    }
+    else if (event->button() == Qt::RightButton)
+    {
+        m_isRightButtonPressed = true;
+        signalRightClick();
     }
 }
 
 /**
   * Process the mouse move event.
   */
-void InputControllerErase::mouseMoveEvent(QMouseEvent *event)
+void InputControllerDraw::mouseMoveEvent(QMouseEvent *event)
 {
     m_isActive = true;
-    m_rect.moveTopLeft(QPoint(event->x(),event->y()));
-    if ( m_isButtonPressed )
+    setPosition(QPoint(event->x(),event->y()));
+    if ( m_isLeftButtonPressed )
     {
-        emit erase( m_rect );
+        signalLeftClick();
+    }
+    else if ( m_isRightButtonPressed )
+    {
+        signalRightClick();
     }
 }
 
 /**
   * Process the mouse button release event.
   */
-void InputControllerErase::mouseReleaseEvent(QMouseEvent *)
+void InputControllerDraw::mouseReleaseEvent(QMouseEvent *event)
 {
-    m_isButtonPressed = false;
+    if (event->button() == Qt::LeftButton)
+    {
+        m_isLeftButtonPressed = false;
+    }
+    else if (event->button() == Qt::RightButton)
+    {
+        m_isRightButtonPressed = false;
+    }
 }
 
-void InputControllerErase::wheelEvent(QWheelEvent *event)
+void InputControllerDraw::wheelEvent(QWheelEvent *event)
 {
     int d = m_size + ( event->delta() > 0 ? 4 : -4 );
     if ( d > 2 && d < m_max_size )
     {
         m_size = d;
-        drawCursor();
+        resize();
+        redrawCursor();
         QApplication::restoreOverrideCursor();
         QApplication::setOverrideCursor(QCursor( *m_cursor, 0, 0 ));
     }
 }
 
-void InputControllerErase::onPaint(QPainter& painter)
+void InputControllerDraw::enterEvent(QEvent *)
 {
-    if ( m_isActive && !m_isButtonPressed )
-    {
-        painter.drawPixmap(m_rect.bottomRight(),*m_image);
-    }
-}
-
-void InputControllerErase::enterEvent(QEvent *)
-{
+    redrawCursor();
     QApplication::setOverrideCursor(QCursor( *m_cursor, 0, 0 ));
     m_isActive = true;
 }
 
-void InputControllerErase::leaveEvent(QEvent *)
+void InputControllerDraw::leaveEvent(QEvent *)
 {
     QApplication::restoreOverrideCursor();
     m_isActive = false;
 }
 
-void InputControllerErase::drawCursor()
+void InputControllerDraw::redrawCursor()
 {
-    m_cursor->fill(QColor(255,255,255,0));
-    QPainter painter( m_cursor );
+  if (!m_cursor)
+  {
+    m_cursor = new QPixmap(m_max_size,m_max_size);
+  }
+  drawCursor(m_cursor);
+}
+
+void InputControllerDraw::signalRightClick()
+{
+}
+
+//--------------------------------------------------------------------------------
+
+InputControllerErase::InputControllerErase(QObject *parent): InputControllerDraw(parent),
+  m_rect( 0, 0, cursorSize(), cursorSize() ) 
+{
+  m_image = new QPixmap(":/PickTools/eraser.png");
+}
+
+InputControllerErase::~InputControllerErase()
+{
+  delete m_image;
+}
+
+void InputControllerErase::signalLeftClick()
+{
+  emit erase(m_rect);
+}
+
+void InputControllerErase::onPaint(QPainter& painter)
+{
+    if ( isActive() && !isLeftButtonPressed() )
+    {
+        painter.drawPixmap(m_rect.bottomRight(),*m_image);
+    }
+}
+
+void InputControllerErase::drawCursor(QPixmap *cursor)
+{
+    cursor->fill(QColor(255,255,255,0));
+    QPainter painter( cursor );
+    auto size = cursorSize();
 
     auto pen = QPen(Qt::DashLine);
     QVector<qreal> dashPattern;
@@ -412,15 +459,106 @@ void InputControllerErase::drawCursor()
     pen.setDashPattern(dashPattern);
     pen.setColor(QColor(0,0,0));
     painter.setPen(pen);
-    painter.drawRect( QRect( 0, 0, m_size, m_size ) );
+    painter.drawRect( QRect( 0, 0, size, size ) );
 
     pen.setColor(QColor(255,255,255));
     pen.setDashOffset(4);
     painter.setPen(pen);
-    painter.drawRect( QRect( 0, 0, m_size, m_size ) );
-
-    m_rect.setSize( QSize(m_size,m_size) );
+    painter.drawRect( QRect( 0, 0, size, size ) );
 }
+
+void InputControllerErase::setPosition(const QPoint &pos)
+{
+  m_rect.moveTopLeft(pos);
+}
+
+void InputControllerErase::resize()
+{
+    auto size = cursorSize();
+    m_rect.setSize( QSize(size, size) );
+}
+
+//--------------------------------------------------------------------------------
+
+InputControllerDrawAndErase::InputControllerDrawAndErase(QObject *parent): InputControllerDraw(parent),
+  m_pos(0,0), m_rect(8), m_creating(false)
+{
+  makePolygon();
+}
+
+void InputControllerDrawAndErase::makePolygon()
+{
+  auto r = double(cursorSize()) / 2.0;
+  double a = 2.0 * M_PI / double(m_rect.size());
+  for(int i = 0; i < m_rect.size(); ++i)
+  {
+    double ia = double(i) * a;
+    auto x = r + static_cast<int>(r * cos(ia));
+    auto y = r + static_cast<int>(r * sin(ia));
+    m_rect[i] = QPointF(x, y);
+  }
+}
+
+void InputControllerDrawAndErase::signalLeftClick()
+{
+  auto poly = m_rect.translated(m_pos);
+  if (m_creating)
+  {
+    m_creating = false;
+    emit addShape(poly, m_borderColor, m_fillColor);
+  }
+  else
+  {
+    emit draw(poly);
+  }
+}
+
+void InputControllerDrawAndErase::signalRightClick()
+{
+  auto poly = m_rect.translated(m_pos);
+  emit erase(poly);
+}
+
+void InputControllerDrawAndErase::drawCursor(QPixmap *cursor)
+{
+    cursor->fill(QColor(255,255,255,0));
+    QPainter painter( cursor );
+
+    auto bRect = m_rect.boundingRect();
+    auto poly = m_rect.translated(-bRect.topLeft());
+
+    auto pen = QPen(Qt::DashLine);
+    QVector<qreal> dashPattern;
+    qreal dashLength = cursorSize() < 10 ? 1 : 2;
+    dashPattern << dashLength << dashLength;
+    pen.setDashPattern(dashPattern);
+    pen.setColor(QColor(0,0,0));
+    painter.setPen(pen);
+    painter.drawPolygon(poly);
+
+    pen.setColor(QColor(255,255,255));
+    pen.setDashOffset(dashLength);
+    painter.setPen(pen);
+    painter.drawPolygon(poly);
+}
+
+void InputControllerDrawAndErase::setPosition(const QPoint &pos)
+{
+  m_pos = pos;
+}
+
+void InputControllerDrawAndErase::resize()
+{
+  makePolygon();
+}
+
+void InputControllerDrawAndErase::startCreatingShape2D(const QColor &borderColor, const QColor &fillColor)
+{
+  m_borderColor = borderColor;
+  m_fillColor = fillColor;
+  m_creating = true;
+}
+
 }
 }
 

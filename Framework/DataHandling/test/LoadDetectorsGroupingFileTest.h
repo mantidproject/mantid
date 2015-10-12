@@ -11,8 +11,6 @@
 #include "Poco/File.h"
 
 #include <cxxtest/TestSuite.h>
-#include <iostream>
-#include <iomanip>
 #include <fstream>
 
 using namespace Mantid;

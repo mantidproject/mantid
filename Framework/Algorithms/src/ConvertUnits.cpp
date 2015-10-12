@@ -19,7 +19,6 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 
 #include <cfloat>
-#include <iostream>
 #include <limits>
 
 namespace Mantid {

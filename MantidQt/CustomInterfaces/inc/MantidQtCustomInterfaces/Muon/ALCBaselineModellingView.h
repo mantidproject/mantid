@@ -63,6 +63,7 @@ namespace CustomInterfaces
     SectionRow sectionRow(int row) const;
     SectionSelector sectionSelector(int index) const;
     int noOfSectionRows() const;
+    void emitFitRequested();
 
   public slots:
     void initialize();

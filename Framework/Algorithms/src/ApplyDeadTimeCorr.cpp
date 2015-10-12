@@ -9,7 +9,6 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 
-#include <iostream>
 #include <cmath>
 
 using std::string;

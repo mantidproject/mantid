@@ -22,9 +22,8 @@
 
 #include <Poco/File.h>
 #include <cmath>
-#include <fstream>
-#include <iomanip>
 #include <numeric>
+#include <fstream>
 #include <sstream>
 
 namespace Mantid {

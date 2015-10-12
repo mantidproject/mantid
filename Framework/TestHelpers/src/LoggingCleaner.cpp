@@ -1,5 +1,4 @@
 #include "MantidKernel/Logger.h"
-#include <iostream>
 
 class LoggingCleaner {
 public:

@@ -15,7 +15,7 @@ Configuration of a third party tomographic reconstruction tool
 specialized for the Astra Toolbox tomographic reconstruction tool
 (C++, CUDA): Astra Toolbox <http://sourceforge.net/p/astra-toolbox/wiki/Home/
 
-Copyright &copy; 2014,205 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -38,7 +38,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport ToolConfigAstraToolbox : public TomoRecToolConfig {
 public:
-  ToolConfigAstraToolbox() { }
+  ToolConfigAstraToolbox();
 
   ToolConfigAstraToolbox(const std::string &runnable, double centerRot,
                          double angleMin, double angleMax,
@@ -47,7 +47,7 @@ public:
                          const std::string &pathOpen,
                          const std::string &pathSample);
 
-  ~ToolConfigAstraToolbox() { }
+  ~ToolConfigAstraToolbox() {}
 
 protected:
   virtual std::string makeCmdLineOptions() const;

@@ -18,19 +18,19 @@
  *      Author: Janik Zikovsky
  */
 
+#include <fstream>
+#include <map>
+#include <string>
+
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/INearestNeighbours.h"
-#include <iostream>
-#include <fstream>
-#include <map>
-#include <string>
+#include "MantidKernel/cow_ptr.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

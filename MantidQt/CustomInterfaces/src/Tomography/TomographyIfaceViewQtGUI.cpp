@@ -3,6 +3,7 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/HelpWindow.h"
+#include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigAstraToolbox.h"
@@ -65,12 +66,27 @@ void TomographyIfaceViewQtGUI::initLayout() {
   // setup container ui
   m_ui.setupUi(this);
   // add tab contents and set up their ui's
-  QWidget *tab1w = new QWidget(m_ui.tabMain);
-  m_uiTabRun.setupUi(tab1w);
-  m_ui.tabMain->addTab(tab1w, QString("Run"));
-  QWidget *tab2w = new QWidget(m_ui.tabMain);
-  m_uiTabSetup.setupUi(tab2w);
-  m_ui.tabMain->addTab(tab2w, QString("Setup"));
+  QWidget *tabRunW = new QWidget(m_ui.tabMain);
+  m_uiTabRun.setupUi(tabRunW);
+  m_ui.tabMain->addTab(tabRunW, QString("Run"));
+  QWidget *tabSetupW = new QWidget(m_ui.tabMain);
+  m_uiTabSetup.setupUi(tabSetupW);
+  m_ui.tabMain->addTab(tabSetupW, QString("Setup"));
+
+  ImageROIViewQtWidget *tabROIW = new ImageROIViewQtWidget(m_ui.tabMain);
+  m_ui.tabMain->addTab(tabROIW, QString("ROI etc."));
+
+  QWidget *tabFiltersW = new QWidget();
+  m_ui.tabMain->addTab(tabFiltersW, QString("Filters"));
+
+  QWidget *tabVizW = new QWidget();
+  m_ui.tabMain->addTab(tabVizW, QString("Visualize"));
+
+  QWidget *tabConvertW = new QWidget();
+  m_ui.tabMain->addTab(tabConvertW, QString("Convert"));
+
+  QWidget *tabEBandsW = new QWidget();
+  m_ui.tabMain->addTab(tabEBandsW, QString("Energy bands"));
 
   readSettings();
 

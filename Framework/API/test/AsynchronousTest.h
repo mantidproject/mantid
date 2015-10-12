@@ -7,7 +7,6 @@
 #include <Poco/ActiveResult.h>
 #include <Poco/NObserver.h>
 #include <Poco/Thread.h>
-#include <iostream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

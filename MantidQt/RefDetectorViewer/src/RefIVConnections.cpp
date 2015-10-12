@@ -1,4 +1,3 @@
-#include <iostream>
 #include <QLineEdit>
 #include <qwt_plot_canvas.h>
 

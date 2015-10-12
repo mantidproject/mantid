@@ -8,8 +8,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/DateAndTime.h"
-#include <iostream>
-#include <iomanip>
 
 #include "MantidDataHandling/MergeLogs.h"
 

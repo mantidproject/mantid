@@ -2,7 +2,6 @@
 #include "MantidAPI/FileProperty.h"
 
 #include <deque>
-#include <iostream>
 #include <fstream>
 #include <iterator>
 

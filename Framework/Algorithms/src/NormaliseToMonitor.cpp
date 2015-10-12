@@ -14,7 +14,6 @@
 #include "MantidKernel/VectorHelper.h"
 
 #include <cfloat>
-#include <iomanip>
 #include <numeric>
 
 using namespace Mantid::DataObjects;

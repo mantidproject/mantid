@@ -1,4 +1,3 @@
-#include <iostream>
 #include "MantidQtSpectrumViewer/MatrixWSSpectrumView.h"
 
 #include "MantidAPI/MatrixWorkspace.h"

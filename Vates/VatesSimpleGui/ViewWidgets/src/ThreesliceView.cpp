@@ -27,9 +27,6 @@
 
 #include <QMessageBox>
 
-#include <iostream>
-#include <string>
-
 namespace Mantid
 {
 namespace Vates

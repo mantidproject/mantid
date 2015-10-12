@@ -5,7 +5,6 @@
 #include "MantidAPI/InstrumentValidator.h"
 
 #include <fstream>
-#include <iomanip>
 
 using namespace Mantid;
 using namespace Mantid::API;

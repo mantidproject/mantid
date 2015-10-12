@@ -12,7 +12,6 @@
 #include <boost/algorithm/string/split.hpp>
 
 #include <fstream>
-#include <iomanip>
 #include <queue>
 
 using namespace Mantid::API;
