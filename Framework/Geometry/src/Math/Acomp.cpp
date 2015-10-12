@@ -981,6 +981,9 @@ It is set on exit (to the EPI)
           break;
       }
 
+      if (PIactive.end() == px)
+        continue;
+
       EPI.push_back(PIform[*px]);
       // remove all minterm that the EPI covered
       for (ddx = DNFactive.begin(); ddx != DNFactive.end(); ++ddx)
