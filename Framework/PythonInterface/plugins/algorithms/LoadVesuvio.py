@@ -134,6 +134,20 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
+    def validateInputs(self):
+        issues = {}
+
+        # Validtae run number ranges
+        run_str = self.getProperty(RUN_PROP).value
+        if "-" in run_str:
+            lower, upper = run_str.split("-")
+            if upper < lower:
+                issues[RUN_PROP] = "Range must be in format lower-upper"
+
+        return issues
+
+#----------------------------------------------------------------------------------------
+
     def _exec_difference_mode(self):
         """
            Execution path when a difference mode is selected
@@ -346,24 +360,42 @@ class LoadVesuvio(LoadEmptyVesuvio):
             if index == 0:
                 out_name, out_mon = SUMMED_WS, SUMMED_MON
             else:
-                out_name, out_mon = SUMMED_WS+'tmp', SUMMED_MON + 'tmp'
-            # Load data
-            ms.LoadRaw(Filename=run, SpectrumList=spectra,
-                       OutputWorkspace=out_name, LoadMonitors='Exclude',EnableLogging=_LOGGING_)
-            ms.LoadRaw(Filename=run,SpectrumList=self._mon_spectra,
-                       OutputWorkspace=out_mon,EnableLogging=_LOGGING_)
-            if index > 0: # sum
-                ms.Plus(LHSWorkspace=SUMMED_WS, RHSWorkspace=out_name,
-                        OutputWorkspace=SUMMED_WS,EnableLogging=_LOGGING_)
-                ms.Plus(LHSWorkspace=SUMMED_MON, RHSWorkspace=out_mon,
-                        OutputWorkspace=SUMMED_MON,EnableLogging=_LOGGING_)
-                ms.DeleteWorkspace(out_name,EnableLogging=_LOGGING_)
-                ms.DeleteWorkspace(out_mon,EnableLogging=_LOGGING_)
+                out_name, out_mon = SUMMED_WS + 'tmp', SUMMED_MON + 'tmp'
 
-        ms.CropWorkspace(Inputworkspace= SUMMED_WS, OutputWorkspace= SUMMED_WS,
-                         XMax=self._tof_max,EnableLogging=_LOGGING_)
-        ms.CropWorkspace(Inputworkspace= SUMMED_MON, OutputWorkspace= SUMMED_MON,
-                         XMax=self._mon_tof_max, EnableLogging=_LOGGING_)
+            # Load data
+            ms.LoadRaw(Filename=run,
+                       SpectrumList=spectra,
+                       OutputWorkspace=out_name,
+                       LoadMonitors='Exclude',
+                       EnableLogging=_LOGGING_)
+            ms.LoadRaw(Filename=run,
+                       SpectrumList=self._mon_spectra,
+                       OutputWorkspace=out_mon,
+                       EnableLogging=_LOGGING_)
+
+            # Sum
+            if index > 0:
+                ms.Plus(LHSWorkspace=SUMMED_WS,
+                        RHSWorkspace=out_name,
+                        OutputWorkspace=SUMMED_WS,
+                        EnableLogging=_LOGGING_)
+                ms.Plus(LHSWorkspace=SUMMED_MON,
+                        RHSWorkspace=out_mon,
+                        OutputWorkspace=SUMMED_MON,
+                        EnableLogging=_LOGGING_)
+
+                ms.DeleteWorkspace(out_name, EnableLogging=_LOGGING_)
+                ms.DeleteWorkspace(out_mon, EnableLogging=_LOGGING_)
+
+        ms.CropWorkspace(Inputworkspace= SUMMED_WS,
+                         OutputWorkspace=SUMMED_WS,
+                         XMax=self._tof_max,
+                         EnableLogging=_LOGGING_)
+        ms.CropWorkspace(Inputworkspace= SUMMED_MON,
+                         OutputWorkspace=SUMMED_MON,
+                         XMax=self._mon_tof_max,
+                         EnableLogging=_LOGGING_)
+
         return mtd[SUMMED_WS], mtd[SUMMED_MON]
 
 #----------------------------------------------------------------------------------------
@@ -375,9 +407,9 @@ class LoadVesuvio(LoadEmptyVesuvio):
         run_str = self.getProperty(RUN_PROP).value
         # Load is not doing the right thing when summing. The numbers don't look correct
         if "-" in run_str:
-            lower,upper =  run_str.split("-")
+            lower, upper = run_str.split("-")
             # Range goes lower to up-1 but we want to include the last number
-            runs = range(int(lower),int(upper)+1)
+            runs = range(int(lower), int(upper)+1)
 
         elif "," in run_str:
             runs =  run_str.split(",")
