@@ -994,6 +994,43 @@ GetAllEi::getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS,
 
   return pTimeSeries->getStatistics().mean;
 }
+namespace { // former lambda function for findChopSpeedAndDelay
+
+  /**Select time interval on the basis of previous time interval
+  * selection and check if current value gets in the selection
+  *
+  * @param t_beg -- initial time for current time interval
+  * @param t_end -- final time for current time interval
+  * @param inSelection -- the boolean indicating if previous interval
+  *                       was selected on input and current selected on 
+  *                       output
+  * @param startTime -- total selection time start moment
+  * @param endTime   -- total selection time final moments
+  *
+  *@return true if selection interval is completed 
+  *        (current interval is not selected) and false otherwise
+  */
+  bool SelectInterval(const Kernel::DateAndTime &t_beg, 
+    const Kernel::DateAndTime &t_end,
+    double value, bool &inSelection,
+    Kernel::DateAndTime &startTime,  Kernel::DateAndTime &endTime){
+
+      if (value > 0) {
+        if (!inSelection) {
+          startTime = t_beg;
+        }
+        inSelection = true;
+      } else {
+        if (inSelection) {
+          inSelection = false;
+          if (endTime > startTime)
+            return true;
+        }
+      }
+      endTime = t_end;
+      return false;
+  };
+}
 /**Analyze chopper logs and identify chopper speed and delay
 @param  inputWS    -- sp to workspace with attached logs.
 @param chop_speed -- output value for chopper speed in uSec
@@ -1012,26 +1049,6 @@ void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
     bool inSelection(false);
     // time interval to select (start-end)
     Kernel::DateAndTime startTime, endTime;
-    /**Select time interval on the basis of previous time interval state */
-    auto SelectInterval = [&startTime, &endTime, &inSelection](
-        const Kernel::DateAndTime &t_beg, const Kernel::DateAndTime &t_end,
-        double value) {
-
-      if (value > 0) {
-        if (!inSelection) {
-          startTime = t_beg;
-        }
-        inSelection = true;
-      } else {
-        if (inSelection) {
-          inSelection = false;
-          if (endTime > startTime)
-            return true;
-        }
-      }
-      endTime = t_end;
-      return false;
-    };
     //
     // Analyze filtering log
     auto dateAndTimes = m_pFilterLog->valueAsCorrectMap();
@@ -1048,7 +1065,8 @@ void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
 
     // initialize selection log
     if (dateAndTimes.size() <= 1) {
-      SelectInterval(it->first, it->first, itder->second);
+      SelectInterval(it->first, it->first, itder->second,
+                     inSelection,startTime,endTime);
       if (inSelection) {
         startTime = inputWS->run().startTime();
         endTime = inputWS->run().endTime();
@@ -1058,14 +1076,16 @@ void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
         throw std::runtime_error("filtered all data points. Nothing to do");
       }
     } else {
-      SelectInterval(it->first, next->first, itder->second);
+      SelectInterval(it->first, next->first, itder->second,
+                     inSelection,startTime,endTime);
     }
 
     // if its filtered using log, both iterator walk through the same values
     // if use derivative, derivative's values are used for filtering
     // and derivative assumed in a center of an interval
     for (; next != dateAndTimes.end(); ++next, ++itder) {
-      if (SelectInterval(it->first, next->first, itder->second)) {
+      if (SelectInterval(it->first, next->first, itder->second,
+                         inSelection,startTime,endTime)) {
         Kernel::SplittingInterval interval(startTime, endTime, 0);
         splitter.push_back(interval);
       }
@@ -1093,7 +1113,7 @@ void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
                              "during the algorithm execution");
   std::string units = pProperty->units();
   // its chopper phase provided
-  if (units == "deg" || units.c_str()[0] == -80) {
+  if (units == "deg" || units.c_str()[0] == -80) { //<- userd in ISIS ASCII representation of o(deg)
     chop_delay *= 1.e+6 / (360. * chop_speed); // convert in uSec
   }
   chop_delay += m_phase / chop_speed;
