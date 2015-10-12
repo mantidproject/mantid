@@ -155,7 +155,7 @@ public:
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != NULL);
     TS_ASSERT_EQUALS(2, ws->getExperimentInfo(0)->run().getLogData().size());
-   // Assert that dimensions should be a general frame
+    // Assert that dimensions should be a general frame
     const auto &frame0 = ws->getDimension(0)->getMDFrame();
     TSM_ASSERT_THROWS_NOTHING(
         "Should be a QLab frame",

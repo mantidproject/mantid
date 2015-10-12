@@ -80,7 +80,8 @@ public:
     TS_ASSERT_EQUALS(1, product->getNBins());
     TSM_ASSERT_THROWS_NOTHING(
         "Should have selected GeneralFrame as the frame",
-        dynamic_cast<const Mantid::Geometry::GeneralFrame &>(product->getMDFrame()));
+        dynamic_cast<const Mantid::Geometry::GeneralFrame &>(
+            product->getMDFrame()));
   }
 
   void testCopy() {

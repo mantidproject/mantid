@@ -19,7 +19,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
-
 class MDGeometryTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -292,7 +291,6 @@ public:
     TSM_ASSERT("All basis vectors are normalized",
                geometry.allBasisNormalized());
   }
-
 };
 
 #endif /* MANTID_API_MDGEOMETRYTEST_H_ */

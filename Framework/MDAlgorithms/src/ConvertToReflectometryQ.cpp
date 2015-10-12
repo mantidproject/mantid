@@ -346,22 +346,20 @@ void ConvertToReflectometryQ::exec() {
         dim0min, dim0max, dim1min, dim1max, incidentTheta, numberOfBinsQx,
         numberOfBinsQz);
     frame.reset(new Mantid::Geometry::GeneralFrame(
-        "P",
-        Mantid::Kernel::InverseAngstromsUnit().getUnitLabel()));
+        "P", Mantid::Kernel::InverseAngstromsUnit().getUnitLabel()));
   } else {
     transform = boost::make_shared<ReflectometryTransformKiKf>(
         dim0min, dim0max, dim1min, dim1max, incidentTheta, numberOfBinsQx,
         numberOfBinsQz);
     frame.reset(new Mantid::Geometry::GeneralFrame(
-        "KiKf",
-        Mantid::Kernel::InverseAngstromsUnit().getUnitLabel()));
+        "KiKf", Mantid::Kernel::InverseAngstromsUnit().getUnitLabel()));
   }
 
   IMDWorkspace_sptr outputWS;
 
   TableWorkspace_sptr vertexes =
       boost::make_shared<Mantid::DataObjects::TableWorkspace>();
-  
+
   if (outputAsMDWorkspace) {
     if (transMethod == centerTransform()) {
       auto outputMDWS = transform->executeMD(inputWs, bc, std::move(frame));

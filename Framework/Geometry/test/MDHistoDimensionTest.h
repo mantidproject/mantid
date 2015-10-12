@@ -66,7 +66,7 @@ public:
 
   void test_getMDUnits_gives_label_unit() {
     Kernel::UnitLabel unitLabel("Meters");
-     Mantid::Geometry::GeneralFrame frame("Length", unitLabel);
+    Mantid::Geometry::GeneralFrame frame("Length", unitLabel);
     MDHistoDimension dimension("Distance", "Dist", frame, 0, 10, 1);
     const Mantid::Kernel::MDUnit &unit = dimension.getMDUnits();
     TS_ASSERT_EQUALS(unit.getUnitLabel(), unitLabel);

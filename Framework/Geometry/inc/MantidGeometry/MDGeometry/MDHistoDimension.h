@@ -23,7 +23,6 @@ namespace Geometry {
  */
 class MANTID_GEOMETRY_DLL MDHistoDimension : public IMDDimension {
 public:
-
   /** Constructor for simple MDHistoDimension
   * @param name :: full name of the axis
   * @param ID :: identifier string
