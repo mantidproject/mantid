@@ -34,7 +34,7 @@ PyObject *getCategories(IFunction &self) {
 // -- Set property overloads --
 // setProperty(index,value,explicit)
 typedef void (IFunction::*setParameterType1)(size_t, const double &value, bool);
-fdef __clang__
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif

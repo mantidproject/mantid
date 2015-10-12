@@ -42,7 +42,7 @@ typedef void (*declarePropertyType3)(boost::python::object &self,
 typedef void (*declarePropertyType4)(boost::python::object &self,
                                      const std::string &,
                                      const boost::python::object &, const int);
-fdef __clang__
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
