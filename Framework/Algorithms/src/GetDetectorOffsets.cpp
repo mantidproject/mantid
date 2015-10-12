@@ -1,19 +1,17 @@
 #include "MantidAlgorithms/GetDetectorOffsets.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/IBackgroundFunction.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/MaskWorkspace.h"
-#include <boost/math/special_functions/fpclassify.hpp>
-#include <fstream>
-#include <iomanip>
-#include <ostream>
-#include <sstream>
+#include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+
+#include <boost/math/special_functions/fpclassify.hpp>
+#include <iomanip>
+#include <sstream>
 
 namespace Mantid {
 namespace Algorithms {

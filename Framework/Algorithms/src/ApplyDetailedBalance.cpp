@@ -1,12 +1,13 @@
 #include "MantidAlgorithms/ApplyDetailedBalance.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+
 #include "boost/lexical_cast.hpp"
 #include <iostream>
 #include <cmath>
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/PhysicalConstants.h"
 
 using std::string;
 using namespace Mantid::Kernel;

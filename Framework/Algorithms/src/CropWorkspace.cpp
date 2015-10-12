@@ -2,13 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CropWorkspace.h"
-
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/TextAxis.h"
-#include "MantidKernel/VectorHelper.h"
-#include <iostream>
-#include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {

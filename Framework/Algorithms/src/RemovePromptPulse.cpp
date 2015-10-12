@@ -1,9 +1,8 @@
 #include "MantidAlgorithms/RemovePromptPulse.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using std::string;
 namespace Mantid {

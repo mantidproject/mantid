@@ -3,10 +3,10 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MaskDetectorsIf.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidKernel/ListValidator.h"
+
 #include <fstream>
 #include <iomanip>
-#include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
 namespace Algorithms {

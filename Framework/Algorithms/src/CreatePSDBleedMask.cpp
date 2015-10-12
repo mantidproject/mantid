@@ -2,17 +2,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CreatePSDBleedMask.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/NullValidator.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 
-#include <map>
-#include <list>
 #include <cfloat>
 #include <iterator>
+#include <list>
+#include <map>
 
 namespace Mantid {
 namespace Algorithms {

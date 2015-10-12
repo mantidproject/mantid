@@ -4,10 +4,13 @@
 #include "MantidAlgorithms/Qxy.h"
 #include "MantidAlgorithms/Qhelper.h"
 #include "MantidAPI/BinEdgeAxis.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/BoundedValidator.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 
 namespace Mantid {

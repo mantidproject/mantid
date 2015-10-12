@@ -1,5 +1,9 @@
 #include "MantidAlgorithms/IdentifyNoisyDetectors.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
