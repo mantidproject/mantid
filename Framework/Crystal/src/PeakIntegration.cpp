@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -14,7 +14,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include <boost/math/special_functions/fpclassify.hpp>
-#include <fstream>
 
 namespace Mantid {
 namespace Crystal {
