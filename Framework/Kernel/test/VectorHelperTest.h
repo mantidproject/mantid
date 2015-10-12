@@ -290,15 +290,15 @@ public:
     inputBoundaries[5] = 15;
     inputBoundaries[6] = 21;
     VectorHelper::smoothInRange(inputData, output, 6, &inputBoundaries);
-    TS_ASSERT_DELTA(output[2], 3., 1.e-8);
-    TS_ASSERT_DELTA(output[0], 1., 1.e-8);
-    TS_ASSERT_DELTA(output[5], 6., 1.e-8);
+    TS_ASSERT_DELTA(output[2], 3, 1.e-8);
+    TS_ASSERT_DELTA(output[0], 1, 1.e-8);
+    TS_ASSERT_DELTA(output[5], 6, 1.e-8);
 
     std::vector<double> out_bins;
     VectorHelper::smoothInRange(inputData, output, 3, &inputBoundaries, 1, 5,
                                 &out_bins);
     TS_ASSERT_EQUALS(output.size(), 4);
-    TS_ASSERT_DELTA(output[1], 3., 1.e-8);
+    TS_ASSERT_DELTA(output[1], 3, 1.e-8);
   }
 
   void test_Smooth_keeps_peakPosition() {
@@ -340,8 +340,8 @@ public:
     iRight = inputData[indOfMax + 1] /
              (inputBoundaries[indOfMax + 2] - inputBoundaries[indOfMax + 1]);
 
-    // TS_ASSERT(iLeft<fMax);
-    // TS_ASSERT(iRight<fMax);
+    TS_ASSERT(iLeft<fMax);
+    TS_ASSERT(iRight<fMax);
 
     output.swap(inputData);
     VectorHelper::smoothInRange(inputData, output, 10, &inputBoundaries);
@@ -367,7 +367,7 @@ public:
              (inputBoundaries[indOfMax + 2] - inputBoundaries[indOfMax + 1]);
 
     // TS_ASSERT(iLeft<fMax);
-    // TS_ASSERT(iRight<fMax);
+    TS_ASSERT(iRight<fMax);
 
     output.swap(inputData);
     VectorHelper::smoothInRange(inputData, output, 10, &inputBoundaries);
