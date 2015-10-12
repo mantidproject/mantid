@@ -75,7 +75,8 @@ public:
   // Execute the strategy to produce a transformed, output MDWorkspace
   Mantid::API::IMDEventWorkspace_sptr
   executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs,
-            Mantid::API::BoxController_sptr boxController) const;
+            Mantid::API::BoxController_sptr boxController,
+            Mantid::Geometry::MDFrame_uptr frame) const;
 
   // Execute the strategy to produce a transformed, output group of Matrix (2D)
   // Workspaces

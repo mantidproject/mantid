@@ -12,6 +12,9 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidGeometry/MDGeometry/QLab.h"
+
 #include <boost/assign.hpp>
 
 #include <cxxtest/TestSuite.h>
@@ -152,6 +155,14 @@ public:
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != NULL);
     TS_ASSERT_EQUALS(2, ws->getExperimentInfo(0)->run().getLogData().size());
+   // Assert that dimensions should be a general frame
+    const auto &frame0 = ws->getDimension(0)->getMDFrame();
+    TSM_ASSERT_THROWS_NOTHING(
+        "Should be a QLab frame",
+        dynamic_cast<const Mantid::Geometry::QLab &>(frame0));
+    TSM_ASSERT_EQUALS(
+        "Should have a special coordinate system selection of QLab",
+        ws->getSpecialCoordinateSystem(), Mantid::Kernel::QLab);
   }
 
   void test_execute_kikf_md() {
@@ -161,6 +172,14 @@ public:
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != NULL);
+    // Assert that dimensions should be a general frame
+    const auto &frame0 = ws->getDimension(0)->getMDFrame();
+    TSM_ASSERT_THROWS_NOTHING(
+        "Should be a general frame",
+        dynamic_cast<const Mantid::Geometry::GeneralFrame &>(frame0));
+    TSM_ASSERT_EQUALS(
+        "Should have a special coordinate system selection of None",
+        ws->getSpecialCoordinateSystem(), Mantid::Kernel::None);
   }
 
   void test_execute_pipf_md() {
@@ -170,6 +189,14 @@ public:
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != NULL);
+    // Assert that dimensions should be a general frame
+    const auto &frame0 = ws->getDimension(0)->getMDFrame();
+    TSM_ASSERT_THROWS_NOTHING(
+        "Should be a general frame",
+        dynamic_cast<const Mantid::Geometry::GeneralFrame &>(frame0));
+    TSM_ASSERT_EQUALS(
+        "Should have a special coordinate system selection of None",
+        ws->getSpecialCoordinateSystem(), Mantid::Kernel::None);
   }
 
   void test_execute_qxqz_2D() {

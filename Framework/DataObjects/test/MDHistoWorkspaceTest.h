@@ -79,10 +79,11 @@ public:
 
   //--------------------------------------------------------------------------------------
   void test_constructor() {
-    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 5));
-    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", "m", -10, 10, 5));
-    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", "m", -10, 10, 5));
-    MDHistoDimension_sptr dimT(new MDHistoDimension("T", "t", "m", -10, 10, 5));
+    Mantid::Geometry::GeneralFrame frame("m", "m");
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimT(new MDHistoDimension("T", "t", frame, -10, 10, 5));
 
     MDHistoWorkspace ws(dimX, dimY, dimZ, dimT);
 
@@ -155,8 +156,9 @@ public:
   //---------------------------------------------------------------------------------------------------
   /** Create a dense histogram with only 2 dimensions */
   void test_constructor_fewerDimensions() {
-    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 5));
-    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", "m", -10, 10, 5));
+    Mantid::Geometry::GeneralFrame frame("m", "m");
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", frame, -10, 10, 5));
 
     MDHistoWorkspace ws(dimX, dimY);
 
@@ -184,9 +186,10 @@ public:
   /** Create a dense histogram with 7 dimensions */
   void test_constructor_MoreThanFourDimensions() {
     std::vector<MDHistoDimension_sptr> dimensions;
+    Mantid::Geometry::GeneralFrame frame("m", "m");
     for (size_t i = 0; i < 7; i++) {
       dimensions.push_back(MDHistoDimension_sptr(
-          new MDHistoDimension("Dim", "Dim", "m", -10, 10, 3)));
+          new MDHistoDimension("Dim", "Dim", frame, -10, 10, 3)));
     }
 
     MDHistoWorkspace ws(dimensions);
@@ -239,7 +242,8 @@ public:
 
   //---------------------------------------------------------------------------------------------------
   void test_getVertexesArray_1D() {
-    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 5));
+    Mantid::Geometry::GeneralFrame frame("m", "m");
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", frame, -10, 10, 5));
     MDHistoWorkspace ws(dimX);
     size_t numVertices;
     coord_t *v1 = ws.getVertexesArray(0, numVertices);
@@ -256,8 +260,9 @@ public:
 
   //---------------------------------------------------------------------------------------------------
   void test_getVertexesArray_2D() {
-    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 5));
-    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", "m", -10, 10, 5));
+    Mantid::Geometry::GeneralFrame frame("m", "m");
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", frame, -10, 10, 5));
     MDHistoWorkspace ws(dimX, dimY);
     size_t numVertices, i;
 
@@ -281,9 +286,10 @@ public:
 
   //---------------------------------------------------------------------------------------------------
   void test_getVertexesArray_3D() {
-    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 5));
-    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", "m", -9, 10, 5));
-    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", "m", -8, 10, 5));
+    Mantid::Geometry::GeneralFrame frame("m", "m");
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", frame, -9, 10, 5));
+    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", frame, -8, 10, 5));
     MDHistoWorkspace ws(dimX, dimY, dimZ);
     size_t numVertices, i;
 
@@ -297,10 +303,11 @@ public:
 
   //---------------------------------------------------------------------------------------------------
   void test_getCenter_3D() {
+    Mantid::Geometry::GeneralFrame frame("m", "m");
     MDHistoDimension_sptr dimX(
-        new MDHistoDimension("X", "x", "m", -10, 10, 20));
-    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", "m", -9, 10, 19));
-    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", "m", -8, 10, 18));
+        new MDHistoDimension("X", "x", frame, -10, 10, 20));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", frame, -9, 10, 19));
+    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", frame, -8, 10, 18));
     MDHistoWorkspace ws(dimX, dimY, dimZ);
     VMD v = ws.getCenter(0);
     TS_ASSERT_DELTA(v[0], -9.5, 1e-5);
@@ -311,13 +318,14 @@ public:
   //---------------------------------------------------------------------------------------------------
   /** Test for a possible seg-fault if nx != ny etc. */
   void test_uneven_numbers_of_bins() {
-    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 5));
+    Mantid::Geometry::GeneralFrame frame("m", "m");
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", frame, -10, 10, 5));
     MDHistoDimension_sptr dimY(
-        new MDHistoDimension("Y", "y", "m", -10, 10, 10));
+        new MDHistoDimension("Y", "y", frame, -10, 10, 10));
     MDHistoDimension_sptr dimZ(
-        new MDHistoDimension("Z", "z", "m", -10, 10, 20));
+        new MDHistoDimension("Z", "z", frame, -10, 10, 20));
     MDHistoDimension_sptr dimT(
-        new MDHistoDimension("T", "t", "m", -10, 10, 10));
+        new MDHistoDimension("T", "t", frame, -10, 10, 10));
 
     MDHistoWorkspace ws(dimX, dimY, dimZ, dimT);
 
@@ -348,10 +356,11 @@ public:
 
   //---------------------------------------------------------------------------------------------------
   void test_createIterator() {
+    Mantid::Geometry::GeneralFrame frame("m", "m");
     MDHistoDimension_sptr dimX(
-        new MDHistoDimension("X", "x", "m", -10, 10, 10));
-    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", "m", -9, 10, 10));
-    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", "m", -8, 10, 10));
+        new MDHistoDimension("X", "x", frame, -10, 10, 10));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", frame, -9, 10, 10));
+    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", frame, -8, 10, 10));
     MDHistoWorkspace ws(dimX, dimY, dimZ);
     IMDIterator *it = ws.createIterator();
     TS_ASSERT(it);
@@ -369,14 +378,15 @@ public:
   //---------------------------------------------------------------------------------------------------
   // Test for the IMDWorkspace aspects of MDWorkspace.
   void testGetNonIntegratedDimensions() {
+    Mantid::Geometry::GeneralFrame frame("m", "m");
     MDHistoDimension_sptr dimX(
-        new MDHistoDimension("X", "x", "m", -10, 10, 1)); // Integrated.
+        new MDHistoDimension("X", "x", frame, -10, 10, 1)); // Integrated.
     MDHistoDimension_sptr dimY(
-        new MDHistoDimension("Y", "y", "m", -10, 10, 10));
+        new MDHistoDimension("Y", "y", frame, -10, 10, 10));
     MDHistoDimension_sptr dimZ(
-        new MDHistoDimension("Z", "z", "m", -10, 10, 20));
+        new MDHistoDimension("Z", "z", frame, -10, 10, 20));
     MDHistoDimension_sptr dimT(
-        new MDHistoDimension("T", "t", "m", -10, 10, 10));
+        new MDHistoDimension("T", "t", frame, -10, 10, 10));
 
     MDHistoWorkspace ws(dimX, dimY, dimZ, dimT);
     Mantid::Geometry::VecIMDDimension_const_sptr vecNonIntegratedDims =
@@ -419,11 +429,11 @@ public:
         "<RefDimensionId>z</RefDimensionId>" + "</ZDimension>" +
         "<TDimension>" + "<RefDimensionId>t</RefDimensionId>" +
         "</TDimension>" + "</DimensionSet>";
-
-    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 5));
-    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", "m", -10, 10, 5));
-    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", "m", -10, 10, 5));
-    MDHistoDimension_sptr dimT(new MDHistoDimension("T", "t", "m", -10, 10, 5));
+    Mantid::Geometry::GeneralFrame frame("m", "m");
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", frame, -10, 10, 5));
+    MDHistoDimension_sptr dimT(new MDHistoDimension("T", "t", frame, -10, 10, 5));
 
     MDHistoWorkspace ws(dimX, dimY, dimZ, dimT);
 
@@ -1001,7 +1011,8 @@ public:
   }
 
   void test_displayNormalizationDefault() {
-    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 5));
+    Mantid::Geometry::GeneralFrame frame("m", "m");
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", frame, -10, 10, 5));
     // Constructor variant 1.
     MDHistoWorkspace ws1(dimX);
     TS_ASSERT_EQUALS(Mantid::API::NoNormalization, ws1.displayNormalization());
@@ -1018,10 +1029,9 @@ public:
   }
 
   void test_setDisplayNormalization() {
-
     auto targetDisplayNormalization = Mantid::API::VolumeNormalization;
-
-    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 5));
+    Mantid::Geometry::GeneralFrame frame("m", "m");
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", frame, -10, 10, 5));
     // Constructor variant 1.
     MDHistoWorkspace ws1(dimX, dimX, dimX, dimX, targetDisplayNormalization);
     TS_ASSERT_EQUALS(targetDisplayNormalization, ws1.displayNormalization());
