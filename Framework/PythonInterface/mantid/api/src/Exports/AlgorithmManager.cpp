@@ -57,12 +57,19 @@ boost::python::list runningInstancesOf(AlgorithmManagerImpl &self,
 
 ///@cond
 //------------------------------------------------------------------------------------------------------
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
 /// Define overload generators
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(create_overloads,
                                        AlgorithmManagerImpl::create, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createUnmanaged_overloads,
                                        AlgorithmManagerImpl::createUnmanaged, 1,
                                        2)
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 ///@endcond
 }
 

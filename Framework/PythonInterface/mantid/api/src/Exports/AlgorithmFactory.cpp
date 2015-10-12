@@ -99,8 +99,14 @@ void subscribe(AlgorithmFactoryImpl &self, const boost::python::object &obj) {
   // from the FileLoaderRegistry
   FileLoaderRegistry::Instance().unsubscribe(descr.first, descr.second);
 }
-
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(existsOverloader, exists, 1, 2)
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 ///@endcond
 }

@@ -7,6 +7,10 @@ using Mantid::Geometry::IComponent;
 using namespace boost::python;
 
 namespace {
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
 // Default parameter function overloads
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParameterNames,
                                        Component::getParameterNames, 0, 1)
@@ -36,6 +40,9 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamShortDescription,
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamDescription,
                                        Component::getParamDescription, 1, 2)
 }
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 void export_Component() {
   class_<Component, bases<IComponent>, boost::noncopyable>("Component", no_init)

@@ -34,10 +34,16 @@ typedef return_value_policy<VectorRefToNumpy<WrapReadWrite>>
     return_readwrite_numpy;
 
 //------------------------------- Overload macros ---------------------------
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
 // Overloads for binIndexOf function which has 1 optional argument
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_binIndexOfOverloads,
                                        MatrixWorkspace::binIndexOf, 1, 2)
-
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 /**
  * Set the values from an python array-style object into the given spectrum in
  * the workspace

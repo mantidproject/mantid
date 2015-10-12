@@ -14,8 +14,15 @@ using namespace boost::python;
 
 namespace {
 ///@cond
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Workspace_isDirtyOverloads,
                                        Workspace::isDirty, 0, 1)
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 ///@endcond
 }
 

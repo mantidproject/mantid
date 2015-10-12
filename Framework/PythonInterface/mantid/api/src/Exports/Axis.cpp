@@ -25,8 +25,17 @@ namespace {
 namespace bpl = boost::python;
 
 //------------------------------- Overload macros ---------------------------
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
+
 // Overloads for operator() function which has 1 optional argument
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Axis_getValue, Axis::getValue, 1, 2)
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 /**
  * Extract the axis values as a sequence. A numpy array is used if the

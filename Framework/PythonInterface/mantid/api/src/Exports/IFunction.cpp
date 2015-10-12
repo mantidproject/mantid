@@ -34,14 +34,20 @@ PyObject *getCategories(IFunction &self) {
 // -- Set property overloads --
 // setProperty(index,value,explicit)
 typedef void (IFunction::*setParameterType1)(size_t, const double &value, bool);
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType1_Overloads,
-                                       setParameter, 2, 3)
-// setProperty(index,value,explicit)
-typedef void (IFunction::*setParameterType2)(const std::string &,
-                                             const double &value, bool);
+fdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType1_Overloads,
+                                           setParameter, 2, 3)
+    // setProperty(index,value,explicit)
+    typedef void (IFunction::*setParameterType2)(const std::string &,
+                                                 const double &value, bool);
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType2_Overloads,
                                        setParameter, 2, 3)
-
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 ///@endcond
 }
 
