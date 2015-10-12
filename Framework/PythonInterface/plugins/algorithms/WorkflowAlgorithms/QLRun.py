@@ -11,8 +11,8 @@ class QLRun(PythonAlgorithm):
         return "PythonAlgorithms"
 
     def summary(self):
-        return "This algorithm runs the Fortran QLines programs which fits a Delta function of"
-               " amplitude 0 and Lorentzians of amplitude A(j) and HWHM W(j) where j=1,2,3. The"
+        return "This algorithm runs the Fortran QLines programs which fits a Delta function of"+\
+               " amplitude 0 and Lorentzians of amplitude A(j) and HWHM W(j) where j=1,2,3. The"+\
                " whole function is then convoled with the resolution function."
 
     def PyInit(self):

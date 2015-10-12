@@ -185,7 +185,21 @@ void Quasi::run() {
   }
   QString plot = m_uiForm.cbPlot->currentText();
 
-  pyInput += "QLRun('" + program + "','" + sampleName + "','" + resName +
+  IAlgorithm_sptr runAlg = AlgorithmManager::Instance().create("QLRun");
+  runAlg->initialize();
+  runAlg->setProperty("program", program.toStdString());
+  runAlg->setProperty("samWs", sampleName.toStdString());
+  runAlg->setProperty("resWs", resName.toStdString());
+  runAlg->setProperty("resNormWs", resNormFile.toStdString());
+  runAlg->setProperty("erange", eRange.toStdString());
+  runAlg->setProperty("nbins", nBins.toStdString());
+  runAlg->setProperty("Fit", fitOps.toStdString());
+  runAlg->setProperty("wfile", fixedWidthFile.toStdString());
+  runAlg->setProperty("Loop", sequence.toStdString());
+  runAlg->setProperty("Save", save.toStdString());
+  runAlg->setProperty("Plot", plot.toStdString());
+
+  /*pyInput += "QLRun('" + program + "','" + sampleName + "','" + resName +
              "','" + resNormFile + "'," + eRange + ","
                                                    " " +
              nBins + "," + fitOps + ",'" + fixedWidthFile + "'," + sequence +
@@ -193,15 +207,25 @@ void Quasi::run() {
              " Save=" +
              save + ", Plot='" + plot + "')\n";
 
-  runPythonScript(pyInput);
-
-  updateMiniPlot();
+  runPythonScript(pyInput);*/
+  m_batchAlgoRunner->addAlgorithm(runAlg);
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(algorithmComplete(bool)));
+  m_batchAlgoRunner->executeBatchAsync();
 }
 
 /**
  * Updates the data and fit curves on the mini plot.
  */
-void Quasi::updateMiniPlot() {
+void Quasi::algorithmComplete(bool error) {
+
+  if (error)
+    return;
+  else
+    updateMiniPlot();
+}
+
+void Quasi::updateMiniPlot(){
   // Update sample plot
   if (!m_uiForm.dsSample->isValid())
     return;
