@@ -1,0 +1,36 @@
+digraph LoadEventAndCompress {
+  label="LoadEventAndCompress Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    file1 [label="Filename"]
+    file2 [label="Filename"]
+    OutputWorkspace
+    MaxChunkSize
+    FilterBadPulses
+  }
+
+  subgraph algoritms {
+    $algorithm_style
+    loadEventNexus    [label="LoadEventNexus v1"]
+    compressEvents    [label="CompressEvents v1"]
+    determineChunking [label="DetermineChunking v1"]
+    filterBadPulses   [label="FilterBadPulses v1"]
+    plus              [label="Plus v1"]
+  }
+
+  file1                  -> determineChunking
+  MaxChunkSize           -> determineChunking
+  file2                  -> loadEventNexus
+  determineChunking      -> loadEventNexus [label="loop over chunks"]
+
+  loadEventNexus         -> filterBadPulses
+  FilterBadPulses        -> filterBadPulses
+  filterBadPulses        -> compressEvents
+
+  compressEvents         -> plus
+  plus                   -> loadEventNexus [label="accumulate"]
+  plus                   -> OutputWorkspace
+
+}
