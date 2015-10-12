@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/SANSBeamFinder.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "Poco/Path.h"
 #include "Poco/String.h"
 #include "Poco/NumberFormatter.h"
