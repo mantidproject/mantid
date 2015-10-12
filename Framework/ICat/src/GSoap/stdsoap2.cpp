@@ -8188,9 +8188,11 @@ void *SOAP_FMAC2 soap_id_lookup(struct soap *soap, const char *id, void **p,
       void *s, **r = &ip->link;
       q = (void **)ip->link;
       while (q) {
-        *r = (void *)soap_malloc(soap, sizeof(void *));
-        if (!*r)
+        void **tmp = (void **)soap_malloc(soap, sizeof(void *));
+        if (!tmp)
           return NULL;
+        *r = (void*)tmp;
+
         s = *q;
         *q = *r;
         r = (void **)*r;
@@ -10040,7 +10042,7 @@ int SOAP_FMAC2 soap_element_start_end_out(struct soap *soap, const char *tag) {
   if (soap->mode & SOAP_XML_CANONICAL) {
     struct soap_nlist *np;
     for (tp = soap->attributes; tp; tp = tp->next) {
-      if (tp->visible && tp->name)
+      if (tp->visible && tp->name[0])
         soap_utilize_ns(soap, tp->name);
     }
     for (np = soap->nlist; np; np = np->next) {

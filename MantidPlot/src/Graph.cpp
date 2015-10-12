@@ -1436,7 +1436,8 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
           QwtScaleWidget *rightAxis = d_plot->axisWidget(QwtPlot::yRight);
           if(rightAxis)
           {
-            if (type == ScaleTransformation::Log10 && (start <= 0 || start == DBL_MAX))
+            //if (type == ScaleTransformation::Log10 && (start <= 0 || start == DBL_MAX))
+            if (type == GraphOptions::Log10 && (start <= 0 || start == DBL_MAX))
             {
               start = sp->getMinPositiveValue();
             }
