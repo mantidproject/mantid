@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import Direction, FloatArrayProperty
@@ -7,6 +8,8 @@ COMPRESS_TOL_TOF = .01
 
 
 class PDToPDFgetN(DataProcessorAlgorithm):
+    _focusPos = {}
+    _iparmFile = None
 
     def category(self):
         return "Workflow\\Diffraction;PythonAlgorithms"
@@ -87,8 +90,6 @@ class PDToPDFgetN(DataProcessorAlgorithm):
         self._focusPos['Azimuthal'] = results[6]
 
     def PyExec(self):
-        filename = self.getProperty("Filename").value
-
         self._loadCharacterizations()
 
         wksp = self.getProperty("InputWorkspace").value
