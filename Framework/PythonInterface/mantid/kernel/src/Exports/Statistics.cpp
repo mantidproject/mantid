@@ -96,6 +96,7 @@ Statistics getStatisticsNumpy(const numeric::array &data,
 
 #ifdef __clang__
 #pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
 // Define an overload to handle the default argument
@@ -154,6 +155,7 @@ std::vector<double> getModifiedZscoreNumpy(const numeric::array &data,
 
 #ifdef __clang__
 #pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
 // Define an overload to handle the default argument
@@ -214,6 +216,7 @@ std::vector<double> getMomentsAboutOriginNumpy(const numeric::array &indep,
 
 #ifdef __clang__
 #pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
 // Define an overload to handle the default argument
@@ -235,6 +238,7 @@ std::vector<double> getMomentsAboutMeanNumpy(const numeric::array &indep,
 
 #ifdef __clang__
 #pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
 // Define an overload to handle the default argument

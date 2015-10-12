@@ -36,6 +36,7 @@ typedef return_value_policy<VectorRefToNumpy<WrapReadWrite>>
 //------------------------------- Overload macros ---------------------------
 #ifdef __clang__
 #pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
 // Overloads for binIndexOf function which has 1 optional argument

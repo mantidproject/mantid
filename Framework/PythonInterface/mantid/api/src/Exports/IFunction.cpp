@@ -36,6 +36,7 @@ PyObject *getCategories(IFunction &self) {
 typedef void (IFunction::*setParameterType1)(size_t, const double &value, bool);
 #ifdef __clang__
 #pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType1_Overloads,
