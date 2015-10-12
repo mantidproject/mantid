@@ -772,7 +772,7 @@ void GetAllEi::findBinRanges(const MantidVec &eBins, const MantidVec &signal,
                              std::vector<size_t> &irangeMax,
                              std::vector<bool> &guessValid) {
 
-  size_t nBins = eBins.size();
+  //size_t nBins = eBins.size(); 
   guessValid.resize(guess_energy.size());
 
   // Do the job
