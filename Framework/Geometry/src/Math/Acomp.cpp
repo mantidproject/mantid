@@ -366,7 +366,8 @@ Assumes that the component is sorted and inserts appropiately.
     for (acp = AX.Comp.begin(); acp != AX.Comp.end(); ++acp) {
       std::vector<Acomp>::iterator cpt;
       cpt = std::lower_bound(Comp.begin(), Comp.end(), *acp);
-      if (cpt == Comp.end() || *cpt != *aup) // Only insert if new
+      if (cpt == Comp.end() ||
+          (AX.Units.end() != aup && *cpt != *aup)) // Only insert if new
         Comp.insert(cpt, *acp);
     }
     return;
