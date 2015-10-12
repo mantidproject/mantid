@@ -1,6 +1,6 @@
 #pylint: disable=no-init
-from mantid.api import PythonAlgorithm, AlgorithmFactory
-from mantid.kernel import StringListValidator, StringMandatoryValidator
+from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode
+from mantid.kernel import StringListValidator, StringMandatoryValidator, Direction
 from mantid.simpleapi import *
 from mantid import config, logger
 import os
@@ -8,7 +8,7 @@ import os
 class QLRun(PythonAlgorithm):
 
     def category(self):
-        return "PythonAlgorithms"
+        return "Workflow\\MIDAS;PythonAlgorithms"
 
     def summary(self):
         return "This algorithm runs the Fortran QLines programs which fits a Delta function of"+\
@@ -27,21 +27,21 @@ class QLRun(PythonAlgorithm):
                              doc='Name of the resolution input Workspace')
 
         self.declareProperty(MatrixWorkspaceProperty('resNormWs', '',
-                             optional=PropertyMod.Optional, direction=Direction.Input),
+                             optional=PropertyMode.Optional, direction=Direction.Input),
                              doc='Name of the ResNorm input Workspace')
 
-        self.declareProperty(name='erange', '', validator=StringMandatoryValidator(),
+        self.declareProperty(name='erange', defaultValue='', validator=StringMandatoryValidator(),
                              doc='The range of the data to be fitted in the format of a python list [min,max]')
 
-        self.declareProperty(name='nbins', '', validator=StringMandatoryValidator(),
+        self.declareProperty(name='nbins', defaultValue='', validator=StringMandatoryValidator(),
                              doc='The number and type of binning to be used in the format of a python list'
                              ' [sampleBins,resolutionBins')
 
-        self.declareProperty(name='Fit', '', validator=StringMandatoryValidator(),
+        self.declareProperty(name='Fit', defaultValue='', validator=StringMandatoryValidator(),
                              doc='The features of the Fit in the form of a python list'
                              ' [elasticPeak(T/F),background,fixedWidth(T/F),useResNorm(T/F)')
 
-        self.declareProperty(name='wfile' '', doc='The name of the fixedWidth file')
+        self.declareProperty(name='wfile', defaultValue='', doc='The name of the fixedWidth file')
 
         self.declareProperty(name='Loop', defaultValue='True', doc='If the fit is sequential.')
 
@@ -260,6 +260,7 @@ class QLRun(PythonAlgorithm):
             SaveNexusProcessed(InputWorkspace=outWS, Filename=out_path)
             logger.information('Output fit file created : ' + fit_path)
             logger.information('Output paramter file created : ' + out_path)
+
 
 
 # Register algorithm with Mantid
