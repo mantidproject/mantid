@@ -62,8 +62,8 @@ void LatticeFunction::init() {
 
 /// Checks that the decorated function is a PawleyParameterFunction.
 void LatticeFunction::beforeDecoratedFunctionSet(const IFunction_sptr &fn) {
-  PawleyParameterFunction_sptr paramFn =
-      boost::dynamic_pointer_cast<PawleyParameterFunction>(fn);
+  Functions::PawleyParameterFunction_sptr paramFn =
+      boost::dynamic_pointer_cast<Functions::PawleyParameterFunction>(fn);
 
   if (!paramFn) {
     throw std::invalid_argument(

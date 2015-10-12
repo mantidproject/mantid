@@ -9,7 +9,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidDataObjects/Peak.h"
-#include "MantidCurveFitting/PawleyFit.h"
+#include "MantidCurveFitting/Algorithms/PawleyFit.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -17,6 +17,7 @@ namespace CurveFitting {
 using namespace API;
 using namespace Kernel;
 using namespace DataObjects;
+using namespace CurveFitting::Algorithms;
 
 /// Constructor
 LatticeDomainCreator::LatticeDomainCreator(

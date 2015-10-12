@@ -2,7 +2,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/SeqDomain.h"
-#include "MantidCurveFitting/Convolution.h"
+#include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidCurveFitting/ParameterEstimator.h"
 
 #include "MantidAPI/CompositeFunction.h"
@@ -449,7 +449,7 @@ void FitMW::appendCompositeFunctionMembers(
   // if function is a Convolution then output of convolved model's mebers may be
   // required
   if (m_convolutionCompositeMembers &&
-      boost::dynamic_pointer_cast<CurveFitting::Convolution>(function)) {
+      boost::dynamic_pointer_cast<Functions::Convolution>(function)) {
     appendConvolvedCompositeFunctionMembers(functionList, function);
   } else {
     const auto compositeFn =
@@ -486,8 +486,8 @@ void FitMW::appendCompositeFunctionMembers(
 void FitMW::appendConvolvedCompositeFunctionMembers(
     std::list<API::IFunction_sptr> &functionList,
     const API::IFunction_sptr &function) const {
-  boost::shared_ptr<CurveFitting::Convolution> convolution =
-      boost::dynamic_pointer_cast<CurveFitting::Convolution>(function);
+  boost::shared_ptr<Functions::Convolution> convolution =
+      boost::dynamic_pointer_cast<Functions::Convolution>(function);
 
   const auto compositeFn = boost::dynamic_pointer_cast<API::CompositeFunction>(
       convolution->getFunction(1));
@@ -498,8 +498,8 @@ void FitMW::appendConvolvedCompositeFunctionMembers(
     const size_t nlocals = compositeFn->nFunctions();
     for (size_t i = 0; i < nlocals; ++i) {
       auto localFunction = compositeFn->getFunction(i);
-      boost::shared_ptr<CurveFitting::Convolution> localConvolution =
-          boost::make_shared<CurveFitting::Convolution>();
+      boost::shared_ptr<Functions::Convolution> localConvolution =
+          boost::make_shared<Functions::Convolution>();
       localConvolution->addFunction(resolution);
       localConvolution->addFunction(localFunction);
       functionList.insert(functionList.end(), localConvolution);

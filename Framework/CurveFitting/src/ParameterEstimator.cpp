@@ -1,5 +1,5 @@
 #include "MantidCurveFitting/ParameterEstimator.h"
-#include "MantidCurveFitting/SimpleChebfun.h"
+#include "MantidCurveFitting/Functions/SimpleChebfun.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -12,6 +12,8 @@
 namespace Mantid {
 namespace CurveFitting {
 namespace ParameterEstimator {
+
+using namespace Functions;
 
 /// The logger.
 Kernel::Logger g_log("ParameterEstimator");
