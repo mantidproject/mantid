@@ -46,24 +46,22 @@ typedef void (*declarePropertyType4)(boost::python::object &self,
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
-    // Overload types
-    BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType1_Overload,
-                                    PythonAlgorithm::declarePyAlgProperty, 2, 3)
-        BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType2_Overload,
-                                        PythonAlgorithm::declarePyAlgProperty,
-                                        3, 6)
-            BOOST_PYTHON_FUNCTION_OVERLOADS(
-                declarePropertyType3_Overload,
-                PythonAlgorithm::declarePyAlgProperty, 4, 5)
+// Overload types
+BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType1_Overload,
+                                PythonAlgorithm::declarePyAlgProperty, 2, 3)
+BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType2_Overload,
+                                PythonAlgorithm::declarePyAlgProperty, 3, 6)
+BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType3_Overload,
+                                PythonAlgorithm::declarePyAlgProperty, 4, 5)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
-    /**
-     * Map a CancelException to a Python KeyboardInterupt
-     * @param exc A cancel exception to translate. Unused here as the message is
-     * ignored
-     */
-    void translateCancel(const Algorithm::CancelException &exc) {
+/**
+ * Map a CancelException to a Python KeyboardInterupt
+ * @param exc A cancel exception to translate. Unused here as the message is
+ * ignored
+ */
+void translateCancel(const Algorithm::CancelException &exc) {
   UNUSED_ARG(exc);
   PyErr_SetString(PyExc_KeyboardInterrupt, "");
 }
