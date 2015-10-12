@@ -24,7 +24,8 @@ DECLARE_ALGORITHM(ConvertCWSDExpToMomentum)
 /** Constructor
  */
 ConvertCWSDExpToMomentum::ConvertCWSDExpToMomentum()
-    : m_iColFilename(2), m_iColStartDetID(3), m_setQRange(true) {}
+    : m_iColFilename(2), m_iColStartDetID(3), m_setQRange(true),
+      m_isBaseName(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
