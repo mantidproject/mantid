@@ -124,14 +124,14 @@ void Quasi::run() {
   // Using 1/0 instead of True/False for compatibility with underlying Fortran
   // code
   // in some places
-  std::string save("False");
-  std::string elasticPeak("False");
-  std::string sequence("False");
+  bool save = false;
+  bool elasticPeak = false;
+  bool sequence = false;
 
-  std::string fixedWidth("False");
+  bool fixedWidth = false;
   std::string fixedWidthFile("");
 
-  std::string useResNorm("False");
+  bool useResNorm = false;
   std::string resNormFile("");
 
   std::string pyInput = "from IndirectBayes import QLRun\n";
@@ -153,19 +153,19 @@ void Quasi::run() {
   std::string background = m_uiForm.cbBackground->currentText().toStdString();
 
   if (m_uiForm.chkElasticPeak->isChecked()) {
-    elasticPeak = "True";
+    elasticPeak = true;
   }
   if (m_uiForm.chkSequentialFit->isChecked()) {
-    sequence = "True";
+    sequence = true;
   }
 
   if (m_uiForm.chkFixWidth->isChecked()) {
-    fixedWidth = "True";
+    fixedWidth = true;
     fixedWidthFile = m_uiForm.mwFixWidthDat->getFirstFilename().toStdString();
   }
 
   if (m_uiForm.chkUseResNorm->isChecked()) {
-    useResNorm = "True";
+    useResNorm = true;
     resNormFile = m_uiForm.dsResNorm->getCurrentDataName().toStdString();
   }
 
@@ -178,7 +178,7 @@ void Quasi::run() {
 
   // Output options
   if (m_uiForm.chkSave->isChecked()) {
-    save = "True";
+    save = true;
   }
   std::string plot = m_uiForm.cbPlot->currentText().toStdString();
 

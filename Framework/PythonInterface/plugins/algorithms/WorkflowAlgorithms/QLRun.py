@@ -1,6 +1,6 @@
 #pylint: disable=no-init
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode
-from mantid.kernel import StringListValidator, StringMandatoryValidator, Direction
+from mantid.kernel import StringListValidator, Direction
 from mantid.simpleapi import *
 from mantid import config, logger
 import os
@@ -42,26 +42,26 @@ class QLRun(PythonAlgorithm):
         self.declareProperty(name='ResolutionBins', defaultValue=1,
                              doc='The number of resolution bins')
 
-        self.declareProperty(name='Elastic', defaultValue='True', validator=StringMandatoryValidator(),
+        self.declareProperty(name='Elastic', defaultValue=True,
                              doc='Fit option for using the elastic peak')
 
         self.declareProperty(name='Background', defaultValue='Flat',
                              validator=StringListValidator(['Sloping','Flat','Zero']),
                              doc='Fit option for the type of background')
 
-        self.declareProperty(name='FixedWidth', defaultValue='True', validator=StringMandatoryValidator(),
+        self.declareProperty(name='FixedWidth', defaultValue=True,
                              doc='Fit option for using FixedWidth')
 
-        self.declareProperty(name='UseResNorm', defaultValue='False', validator=StringMandatoryValidator(),
+        self.declareProperty(name='UseResNorm', defaultValue=False,
                              doc='fit option for using ResNorm')
 
         self.declareProperty(name='WidthFile', defaultValue='', doc='The name of the fixedWidth file')
 
-        self.declareProperty(name='Loop', defaultValue='True', doc='Switch Sequential fit On/Off')
+        self.declareProperty(name='Loop', defaultValue=True, doc='Switch Sequential fit On/Off')
 
-        self.declareProperty(name='Plot', defaultValue='False', doc='Plot options')
+        self.declareProperty(name='Plot', defaultValue='', doc='Plot options')
 
-        self.declareProperty(name='Save', defaultValue='False', doc='Switch Save result to nxs file Off/On')
+        self.declareProperty(name='Save', defaultValue=False, doc='Switch Save result to nxs file Off/On')
 
     def PyExec(self):
         from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
@@ -78,18 +78,18 @@ class QLRun(PythonAlgorithm):
         program = self.getPropertyValue('Program')
         samWS = self.getPropertyValue('SampleWorkspace')
         resWS = self.getPropertyValue('ResolutionWorkspace')
-        resNormWs = self.getPropertyValue('ResNormWorkspace')
+        resnormWS = self.getPropertyValue('ResNormWorkspace')
         e_min = self.getProperty('MinRange').value
         e_max = self.getProperty('MaxRange').value
         sam_bins = self.getPropertyValue('SampleBins')
         res_bins = self.getPropertyValue('ResolutionBins')
-        elastic = self.getPropertyValue('Elastic')
+        elastic = self.getProperty('Elastic').value
         background = self.getPropertyValue('Background')
-        width = self.getPropertyValue('FixedWidth')
-        res_norm = self.getPropertyValue('UseResNorm')
+        width = self.getProperty('FixedWidth').value
+        res_norm = self.getProperty('UseResNorm').value
         wfile = self.getPropertyValue('WidthFile')
-        Loop = self.getPropertyValue('Loop')
-        Save = self.getPropertyValue('Save')
+        Loop = self.getProperty('Loop').value
+        Save = self.getProperty('Save').value
         Plot = self.getPropertyValue('Plot')
 
         erange = [e_min, e_max]
