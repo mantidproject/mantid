@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+#pylint: disable-all
 from PyQt4 import QtCore, QtGui
 import os
 from mantid.simpleapi import *
