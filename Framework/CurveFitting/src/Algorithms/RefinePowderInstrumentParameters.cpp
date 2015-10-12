@@ -349,8 +349,8 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   // 6. Pretty screen output
   stringstream dbss;
   dbss << "************ Fit Parameter Result *************" << std::endl;
-  for (paramiter = m_FuncParameters.begin(); paramiter != m_FuncParameters.end();
-       ++paramiter) {
+  for (paramiter = m_FuncParameters.begin();
+       paramiter != m_FuncParameters.end(); ++paramiter) {
     std::string parname = paramiter->first;
     double inpparvalue = m_OrigParameters[parname];
     double parvalue = paramiter->second;
@@ -473,10 +473,11 @@ void RefinePowderInstrumentParameters::refineInstrumentParametersMC(
 
   stringstream dbss;
   for (size_t i = 0; i < m_PeakFunctionParameterNames.size(); ++i) {
-    dbss << setw(20) << m_PeakFunctionParameterNames[i] << ": Min = " << setw(15)
-         << setprecision(6) << lowerbounds[i] << ", Max = " << setw(15)
-         << setprecision(6) << upperbounds[i] << ", Step Size = " << setw(15)
-         << setprecision(6) << stepsizes[i] << endl;
+    dbss << setw(20) << m_PeakFunctionParameterNames[i]
+         << ": Min = " << setw(15) << setprecision(6) << lowerbounds[i]
+         << ", Max = " << setw(15) << setprecision(6) << upperbounds[i]
+         << ", Step Size = " << setw(15) << setprecision(6) << stepsizes[i]
+         << endl;
   }
   g_log.notice() << "Monte Carlo Parameters: " << endl
                  << dbss.str();
@@ -510,7 +511,7 @@ void RefinePowderInstrumentParameters::refineInstrumentParametersMC(
     // a. Set the function with the
     for (size_t j = 0; j < m_PeakFunctionParameterNames.size(); ++j) {
       m_Function->setParameter(m_PeakFunctionParameterNames[j],
-                              m_BestFitParameters[i].second[j]);
+                               m_BestFitParameters[i].second[j]);
     }
 
     // b. Calculate
@@ -946,8 +947,8 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
 
     m_PeakErrors.insert(make_pair(hkl, chi2));
 
-    g_log.information() << "[Generatem_Peaks] Peak " << ir << " HKL = [" << hkl[0]
-                        << ", " << hkl[1] << ", " << hkl[2]
+    g_log.information() << "[Generatem_Peaks] Peak " << ir << " HKL = ["
+                        << hkl[0] << ", " << hkl[1] << ", " << hkl[2]
                         << "], Input Center = " << setw(10) << setprecision(6)
                         << newpeak.centre() << endl;
 

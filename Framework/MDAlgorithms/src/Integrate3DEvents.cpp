@@ -126,7 +126,8 @@ Integrate3DEvents::ellipseIntegrateEvents(
 
   auto pos = m_event_lists.find(hkl_key);
   if (m_event_lists.end() == pos)
-    return boost::make_shared<NoShape>();;
+    return boost::make_shared<NoShape>();
+  ;
 
   std::vector<std::pair<double, V3D>> &some_events = pos->second;
 

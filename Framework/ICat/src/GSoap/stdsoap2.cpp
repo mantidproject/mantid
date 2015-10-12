@@ -8191,7 +8191,7 @@ void *SOAP_FMAC2 soap_id_lookup(struct soap *soap, const char *id, void **p,
         void **tmp = (void **)soap_malloc(soap, sizeof(void *));
         if (!tmp)
           return NULL;
-        *r = (void*)tmp;
+        *r = (void *)tmp;
 
         s = *q;
         *q = *r;
