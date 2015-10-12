@@ -538,10 +538,10 @@ namespace {
 * point and  run average around this point 
 *@param index      -- index to average around
 *@param startIndex -- index in the array of data (input to start average
-*                     from) should be >=0 and <index
+*                     from) should be: index>=startIndex>=0
 *@param endIndex   -- index in the array of data (input to end average at)
-*                     shiykd be <=input.size() and > then index
-*@param halfWidth  -- half width of the interval to integrate within
+*                     should be: index<=endIndex<=input.size()
+*@param halfWidth  -- half width of the interval to integrate.
 *@param input      -- vector of input signal
 *@param binBndrs   -- pointer to vector of bin boundaries or NULL pointer.
  */

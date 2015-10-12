@@ -446,7 +446,6 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
 
   // calculate sigma from half-width parameters
   double maxSigma = Ei * m_min_Eresolution / (2 * std::sqrt(2 * std::log(2.)));
-  double minSigma = Ei * m_max_Eresolution / (2 * std::sqrt(2 * std::log(2.)));
 
   double sMin(std::numeric_limits<double>::max());
   double sMax(-sMin);
@@ -461,8 +460,9 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
   if (std::fabs(double(ind_max - ind_min)) < 5)
     return false;
 
-  // double xMin = X[ind_min];
-  // double xMax = X[ind_max];
+  //double xMin = X[ind_min];
+  //double xMax = X[ind_max];
+  //size_t ind_Ofmax(ind_min);
 
   for (size_t i = ind_min; i < ind_max; i++) {
     double dX = X[i + 1] - X[i];
@@ -473,6 +473,7 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
       sMax = signal;
       dXmax = dX;
       xOfMax = X[i];
+      //ind_Ofmax=i;
     }
     Intensity += S[i];
   }
@@ -650,9 +651,10 @@ bool signChanged(double val, int &prevSign) {
 }
 
 /**Bare-bone function to calculate numerical derivative, and estimate number of
-zeros
-* this derivative has. No checks are performed for simplicity,
-* so data have to be correct form at input.
+* zeros this derivative has. The function is assumed to be defined on the
+* the left of a bin range so the derivative is calculated in the same point.
+* No checks are performed for simplicity so data have to be correct 
+* form at input.
 *@param bins -- vector of bin boundaries.
 *@param signal  -- vector of signal size of bins.size()-1
 *@param deriv   -- output vector of numerical derivative
@@ -668,32 +670,30 @@ size_t GetAllEi::calcDerivativeAndCountZeros(const std::vector<double> &bins,
   deriv.resize(nPoints);
   zeros.resize(0);
 
-  std::list<double> funVal, binVal;
+  std::list<double> funVal;
   double bin0 = bins[1] - bins[0];
   double f0 = signal[0] / bin0;
   double bin1 = bins[2] - bins[1];
   double f1 = signal[1] / bin1;
 
   size_t nZeros(0);
-  int prevSign = (f1 >= 0 ? 1 : -1);
 
   funVal.push_front(f1);
-  binVal.push_front(bin1);
   deriv[0] = 2 * (f1 - f0) / (bin0 + bin1);
+  int prevSign = (deriv[0] >= 0 ? 1 : -1);
+
   for (size_t i = 1; i < nPoints - 1; i++) {
     bin1 = (bins[i + 2] - bins[i + 1]);
     f1 = signal[i + 1] / bin1;
-    deriv[i] = (f1 - f0) / (bins[i + 1] - bins[i] + 0.5 * (bin1 + bin0));
+    deriv[i] =(f1 - f0) / (bins[i + 2] - bins[i]);
     f0 = funVal.back();
-    bin0 = binVal.back();
     funVal.pop_back();
-    binVal.pop_back();
     funVal.push_front(f1);
-    binVal.push_front(bin1);
+
 
     if (signChanged(deriv[i], prevSign)) {
       nZeros++;
-      zeros.push_back(0.5 * (bins[i + 1] + bins[i]));
+      zeros.push_back(0.5*(bins[i-1]+bins[i]));
     }
   }
   deriv[nPoints - 1] = 2 * (f1 - f0) / (bin1 + bin0);
