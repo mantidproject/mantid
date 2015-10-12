@@ -104,7 +104,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(getStatisticsOverloads, getStatisticsNumpy, 1,
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
-///============================ Z score
+//============================ Z score
 //============================================
 
 /**
