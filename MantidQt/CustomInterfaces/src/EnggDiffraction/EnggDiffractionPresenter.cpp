@@ -1333,12 +1333,11 @@ void EnggDiffractionPresenter::calcVanadiumWorkspaces(
  * Checks the plot type selected and applies the appropriate
  * python function to apply during first bank and second bank
  *
- * @param std::string outWSName; title of focused workspace
+ * @param outWSName; title of the focused workspace
  */
 void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName) {
   const bool plotFocusedWS = m_view->focusedOutWorkspace();
   int plotType = m_view->currentPlotType();
-
   if (plotFocusedWS == true && 0 == plotType) {
     if (outWSName == "engggui_focusing_output_ws_bank_1")
       m_view->plotFocusedSpectrum(outWSName);
