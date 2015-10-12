@@ -30,25 +30,38 @@ class QLRun(PythonAlgorithm):
                              optional=PropertyMode.Optional, direction=Direction.Input),
                              doc='Name of the ResNorm input Workspace')
 
-        self.declareProperty(name='erange', defaultValue='', validator=StringMandatoryValidator(),
-                             doc='The range of the data to be fitted in the format of a python list [min,max]')
+        self.declareProperty(name='Minrange', defaultValue='', validator=StringMandatoryValidator(),
+                             doc='the start of the fit range')
 
-        self.declareProperty(name='nbins', defaultValue='', validator=StringMandatoryValidator(),
-                             doc='The number and type of binning to be used in the format of a python list'
-                             ' [sampleBins,resolutionBins')
+        self.declareProperty(name='Maxrange', defaultValue='', validator=StringMandatoryValidator(),
+                             doc='The end of the fit range ')
 
-        self.declareProperty(name='Fit', defaultValue='', validator=StringMandatoryValidator(),
-                             doc='The features of the Fit in the form of a python list'
-                             ' [elasticPeak(T/F),background,fixedWidth(T/F),useResNorm(T/F)')
+        self.declareProperty(name='SampleBins', defaultValue='', validator=StringMandatoryValidator(),
+                             doc='The number of sample bins')
+
+        self.declareProperty(name='ResolutionBins', defaultValue='', validator=StringMandatoryValidator(),
+                             doc='The number of resolution bins')
+
+        self.declareProperty(name='Elastic', defaultValue='True', validator=StringMandatoryValidator(),
+                             doc='Fit option for using the elastic peak')
+
+        self.declareProperty(name='Background', defaultValue='',
+                             validator=StringListValidator(['Sloping','Flat','Zero']),
+                             doc='Fit option for the type of background')
+
+        self.declareProperty(name='FixedWidth', defaultValue='', validator=StringMandatoryValidator(),
+                             doc='Fit option for using FixedWidth')
+
+        self.declareProperty(name='UseResNorm', defaultValue='', validator=StringMandatoryValidator(),
+                             doc='fit option for using ResNorm')
 
         self.declareProperty(name='wfile', defaultValue='', doc='The name of the fixedWidth file')
 
-        self.declareProperty(name='Loop', defaultValue='True', doc='If the fit is sequential.')
+        self.declareProperty(name='Loop', defaultValue='True', doc='Switch Sequential fit On/Off')
 
-        self.declareProperty(name='Plot', defaultValue='False', doc='If the result should be plotted.')
+        self.declareProperty(name='Plot', defaultValue='False', doc='Plot options')
 
-        self.declareProperty(name='Save', defaultValue='False', doc='If the result should be saved'
-                             ' to the default save directory.')
+        self.declareProperty(name='Save', defaultValue='False', doc='Switch Save result to nxs file Off/On')
 
     def PyExec(self):
         from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
@@ -60,8 +73,19 @@ class QLRun(PythonAlgorithm):
 
         from IndirectBayes import *
 
-        #expand fit options
-        elastic, background, width, res_norm = Fit
+        self.log().information('QLRun input')
+
+        fit_ops = self.getProperty('Fit')
+        min = self.getProperty('Minrange')
+        max = self.getProperty('Maxrange')
+        sam_bins = self.getProperty('SampleBins')
+        res_bins = self.getProperty('ResolutionBins')
+        erange = [min, max]
+        nbins = [sam_bins, res_bins]
+        elastic = self.getProperty('Elastic')
+        background = self.getProperty('Background')
+        width = self.getProperty('FixedWidth')
+        res_norm = self.geProperty('UseResNorm')
 
         #convert true/false to 1/0 for fortran
         o_el = 1 if elastic else 0
