@@ -60,6 +60,10 @@ namespace CustomInterfaces
     /// Updates the list of logs and number of periods
     void updateAvailableInfo();
 
+  signals:
+    /// Signal emitted when data get changed
+    void dataChanged();
+
   private:
     /// View which the object works with
     IALCDataLoadingView* const m_view;

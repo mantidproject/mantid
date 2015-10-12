@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <iostream>
 #include <sstream>
 #include <string>
 

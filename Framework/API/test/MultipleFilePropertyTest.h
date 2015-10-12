@@ -8,8 +8,6 @@
 #include "MantidKernel/Logger.h"
 
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 
 #include <Poco/Path.h>
 #include <Poco/File.h>

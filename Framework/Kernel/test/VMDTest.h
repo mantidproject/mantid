@@ -5,8 +5,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include <cmath>
-#include <iostream>
-#include <iomanip>
 
 #include "MantidKernel/VMD.h"
 

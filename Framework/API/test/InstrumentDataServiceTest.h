@@ -6,7 +6,6 @@
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
-#include <iostream>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;

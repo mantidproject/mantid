@@ -13,7 +13,6 @@
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidMDAlgorithms/LoadSQW.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include <iostream>
 #include <cfloat>
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/BoxControllerNeXusIO.h"

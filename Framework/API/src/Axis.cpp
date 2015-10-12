@@ -5,8 +5,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <iostream>
-
 namespace Mantid {
 namespace API {
 

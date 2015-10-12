@@ -2,7 +2,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/MantidVersion.h"
 #include <fstream>
-#include <iomanip>
 
 namespace Mantid {
 namespace DataHandling {

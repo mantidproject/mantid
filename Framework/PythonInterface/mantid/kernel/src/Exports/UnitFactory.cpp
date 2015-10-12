@@ -14,10 +14,10 @@ using namespace boost::python;
 
 void export_UnitFactory() {
   class_<UnitFactoryImpl, boost::noncopyable>("UnitFactoryImpl", no_init)
-      .def("create", &UnitFactoryImpl::create,
+      .def("create", &UnitFactoryImpl::create, (arg("self"), arg("className")),
            "Creates a named unit if it exists in the factory")
 
-      .def("getKeys", &UnitFactoryImpl::getKeys,
+      .def("getKeys", &UnitFactoryImpl::getKeys, arg("self"),
            return_value_policy<Policies::VectorToNumpy>(),
            "Returns a list of units available from the factory")
 

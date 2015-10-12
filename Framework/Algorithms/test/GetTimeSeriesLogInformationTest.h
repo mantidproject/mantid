@@ -5,8 +5,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include <cmath>
-#include <iostream>
-#include <iomanip>
 #include <fstream>
 #include <Poco/File.h>
 

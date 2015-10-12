@@ -20,7 +20,6 @@
 #include <functional>
 #include <cmath>
 
-#include <iostream>
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 

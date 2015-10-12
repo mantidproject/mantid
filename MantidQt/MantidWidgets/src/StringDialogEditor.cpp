@@ -8,7 +8,6 @@
 #include <QDialog>
 #include <QSettings>
 
-#include <iostream>
 
 /**
  * Do nothing to connect a manager.

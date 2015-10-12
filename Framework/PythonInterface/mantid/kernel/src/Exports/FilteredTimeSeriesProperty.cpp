@@ -19,10 +19,11 @@ namespace {
   class_<FilteredTimeSeriesProperty<TYPE>, bases<TimeSeriesProperty<TYPE>>,    \
          boost::noncopyable>(#Prefix "FilteredTimeSeriesProperty", no_init)    \
       .def(init<TimeSeriesProperty<TYPE> *, const TimeSeriesProperty<bool> &,  \
-                const bool>("Constructor", (arg("source"), arg("filter"),      \
-                                            arg("transferOwner"))))            \
+                const bool>(                                                   \
+          "Constructor",                                                       \
+          (arg("self"), arg("source"), arg("filter"), arg("transferOwner"))))  \
       .def("unfiltered", &FilteredTimeSeriesProperty<TYPE>::unfiltered,        \
-           return_value_policy<RemoveConst>(),                                 \
+           (arg("self")), return_value_policy<RemoveConst>(),                  \
            "Returns a time series containing the unfiltered data");
 }
 

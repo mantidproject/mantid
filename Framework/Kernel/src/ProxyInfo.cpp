@@ -1,6 +1,5 @@
 #include "MantidKernel/ProxyInfo.h"
 #include <stdexcept>
-#include <iostream>
 
 namespace Mantid {
 namespace Kernel {

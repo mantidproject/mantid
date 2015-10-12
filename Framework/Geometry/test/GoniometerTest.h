@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include <iostream>
 #include <stdexcept>
 #include <string>
 #include "MantidKernel/Quat.h"
