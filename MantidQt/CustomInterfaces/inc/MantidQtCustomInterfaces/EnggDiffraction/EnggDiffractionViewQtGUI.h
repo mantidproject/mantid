@@ -125,6 +125,8 @@ public:
 
   virtual void plotReplacingWindow(const std::string &wsName);
 
+  virtual bool saveOutputFiles() const;
+
   int currentPlotType() const { return m_currentType; }
 
 private slots:

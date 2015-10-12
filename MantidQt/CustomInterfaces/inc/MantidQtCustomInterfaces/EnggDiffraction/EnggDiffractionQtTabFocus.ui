@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>614</width>
-    <height>545</height>
+    <height>551</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -471,7 +471,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_22">
         <item>
-         <widget class="QCheckBox" name="checkBox_OutputFiles_">
+         <widget class="QCheckBox" name="checkBox_SaveOutputFiles">
           <property name="text">
            <string>Output Files</string>
           </property>

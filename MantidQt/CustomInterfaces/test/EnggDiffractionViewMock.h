@@ -50,6 +50,9 @@ public:
   // virtual std::string currentCalibFile() const;
   MOCK_CONST_METHOD0(currentCalibFile, std::string());
 
+  // std::string currentPlotType
+  MOCK_CONST_METHOD0(currentPlotType, int());
+
   // virtual std::string newVanadiumNo() const;
   MOCK_CONST_METHOD0(newVanadiumNo, std::string());
 
@@ -104,6 +107,9 @@ public:
   // void saveSettings() const;
   MOCK_CONST_METHOD0(saveSettings, void());
 
+  // std::string saveOutputFiles
+  MOCK_CONST_METHOD0(saveOutputFiles, bool());
+
   // virtual void plotFocusedSpectrum();
   MOCK_METHOD1(plotFocusedSpectrum, void(const std::string &));
 
@@ -119,8 +125,7 @@ public:
   // virtual void plotReplacingWindow
   MOCK_METHOD1(plotReplacingWindow, void(const std::string &wsName));
 
-  // std::string currentPlotType
-  MOCK_CONST_METHOD0(currentPlotType, int());
+
 };
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H

@@ -425,6 +425,7 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabFocus.lineEdit_run_num->setEnabled(enable);
   m_uiTabFocus.pushButton_focus->setEnabled(enable);
   m_uiTabFocus.checkBox_FocusedWS->setEnabled(enable);
+  m_uiTabFocus.checkBox_SaveOutputFiles->setEnabled(enable);
 
   m_uiTabFocus.pushButton_focus->setEnabled(enable);
   m_uiTabFocus.pushButton_focus_cropped->setEnabled(enable);
@@ -708,6 +709,10 @@ std::string EnggDiffractionViewQtGUI::focusingTextureGroupingFile() const {
 
 bool EnggDiffractionViewQtGUI::focusedOutWorkspace() const {
   return m_uiTabFocus.checkBox_FocusedWS->checkState();
+}
+
+bool EnggDiffractionViewQtGUI::saveOutputFiles() const {
+  return m_uiTabFocus.checkBox_SaveOutputFiles->checkState();
 }
 
 void EnggDiffractionViewQtGUI::plotFocusStatus() {

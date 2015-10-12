@@ -1088,8 +1088,8 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     // TODO: use detector positions (from calibrate full) when available
     // alg->setProperty(DetectorPositions, TableWorkspace)
     alg->execute();
-	// plot Focused workspace according to the data type selected
-	plotFocusedWorkspace(outWSName);
+    // plot Focused workspace according to the data type selected
+    plotFocusedWorkspace(outWSName);
   } catch (std::runtime_error &re) {
     g_log.error() << "Error in calibration. ",
         "Could not run the algorithm EnggCalibrate succesfully for bank " +
@@ -1097,8 +1097,8 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
             re.what() + " Please check also the log messages for details.";
     throw;
   }
-
   g_log.notice() << "Produced focused workspace: " << outWSName << std::endl;
+
   try {
     g_log.debug() << "Going to save focused output into nexus file: "
                   << fullFilename << std::endl;
@@ -1116,6 +1116,13 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   }
   g_log.notice() << "Saved focused workspace as file: " << fullFilename
                  << std::endl;
+
+  bool saveOutputFiles = m_view->saveOutputFiles();
+  if (saveOutputFiles) {
+    saveGSS(outWSName);
+    saveFocusedXYE(outWSName);
+    saveOpenGenie(outWSName);
+  }
 }
 
 /**
@@ -1351,6 +1358,97 @@ void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName) {
   } else if (plotFocusedWS == true && 2 == plotType) {
     m_view->plotFocusedSpectrum(outWSName);
   }
+}
+
+/**
+ * Convert the generated output files and saves them in
+ * FocusedXYE format
+ *
+ * @param inputWorkspace; title of the focused workspace
+ */
+void EnggDiffractionPresenter::saveFocusedXYE(
+    const std::string inputWorkspace) {
+  auto alg = Algorithm::fromString("SaveFocusedXYE");
+  std::string fullFilename = inputWorkspace + "_FocusedxyeFile.dat";
+  try {
+    g_log.debug() << "Going to save focused output into OpenGenie file: "
+                  << fullFilename << std::endl;
+    alg->initialize();
+    alg->setProperty("InputWorkspace", inputWorkspace);
+
+    std::string filename(fullFilename);
+    alg->setPropertyValue("Filename", filename);
+    alg->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Error in saving focused XYE file. ",
+        "Could not run the algorithm SaveFocusedXYE succesfully for "
+        "workspace " +
+            inputWorkspace + ". Error description: " + re.what() +
+            " Please check also the log messages for details.";
+    throw;
+  }
+  g_log.notice() << "Saved focused workspace as file: " << fullFilename
+                 << std::endl;
+}
+
+/**
+ * Convert the generated output files and saves them in
+ * GSS format
+ *
+ * @param inputWorkspace; title of the focused workspace
+ */
+void EnggDiffractionPresenter::saveGSS(const std::string inputWorkspace) {
+  auto alg = Algorithm::fromString("SaveGSS");
+  std::string fullFilename = inputWorkspace + "_GssFile.gss";
+  try {
+    g_log.debug() << "Going to save focused output into OpenGenie file: "
+                  << fullFilename << std::endl;
+    alg->initialize();
+    alg->setProperty("InputWorkspace", inputWorkspace);
+
+    std::string filename(fullFilename);
+    alg->setPropertyValue("Filename", filename);
+    alg->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Error in saving focused XYE file. ",
+        "Could not run the algorithm SaveFocusedXYE succesfully for "
+        "workspace " +
+            inputWorkspace + ". Error description: " + re.what() +
+            " Please check also the log messages for details.";
+    throw;
+  }
+  g_log.notice() << "Saved focused workspace as file: " << fullFilename
+                 << std::endl;
+}
+
+/**
+ * Convert the generated output files and saves them in
+ * OpenGenie format
+ *
+ * @param inputWorkspace; title of the focused workspace
+ */
+void EnggDiffractionPresenter::saveOpenGenie(const std::string inputWorkspace) {
+  auto alg = Algorithm::fromString("SaveOpenGenieAscii");
+  std::string fullFilename = inputWorkspace + "_OpenGenieFile.his";
+  try {
+    g_log.debug() << "Going to save focused output into OpenGenie file: "
+                  << fullFilename << std::endl;
+    alg->initialize();
+    alg->setProperty("InputWorkspace", inputWorkspace);
+
+    std::string filename(fullFilename);
+    alg->setPropertyValue("Filename", filename);
+    alg->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Error in saving focused XYE file. ",
+        "Could not run the algorithm SaveFocusedXYE succesfully for "
+        "workspace " +
+            inputWorkspace + ". Error description: " + re.what() +
+            " Please check also the log messages for details.";
+    throw;
+  }
+  g_log.notice() << "Saved focused workspace as file: " << fullFilename
+                 << std::endl;
 }
 
 } // namespace CustomInterfaces
