@@ -214,27 +214,27 @@ public:
   }
 
   void test_copyPropertiesFrom() {
-      IAlgorithm_sptr alg =
+    IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create("ToyAlgorithmProxy");
-      alg->initialize();
-      alg->setPropertyValue( "prop1", "string" );
-      alg->setPropertyValue("prop2","1");
-      IAlgorithm_sptr algCopy =
+    alg->initialize();
+    alg->setPropertyValue("prop1", "string");
+    alg->setPropertyValue("prop2", "1");
+    IAlgorithm_sptr algCopy =
         AlgorithmManager::Instance().create("ToyAlgorithmProxy");
 
-      auto algProxy = boost::dynamic_pointer_cast<AlgorithmProxy>(alg);
-      auto algCopyProxy = boost::dynamic_pointer_cast<AlgorithmProxy>(algCopy);
-      algCopyProxy->copyPropertiesFrom(*algProxy);
+    auto algProxy = boost::dynamic_pointer_cast<AlgorithmProxy>(alg);
+    auto algCopyProxy = boost::dynamic_pointer_cast<AlgorithmProxy>(algCopy);
+    algCopyProxy->copyPropertiesFrom(*algProxy);
 
-      int val = boost::lexical_cast<int>(algCopy->getPropertyValue("prop2"));
+    int val = boost::lexical_cast<int>(algCopy->getPropertyValue("prop2"));
 
-      TS_ASSERT_EQUALS(val,1);
+    TS_ASSERT_EQUALS(val, 1);
 
-      //set another value and check the other value is unaffected
-      algCopy->setPropertyValue( "prop1", "A difference" );
-      int val2 = boost::lexical_cast<int>(algCopy->getPropertyValue("prop2"));
+    // set another value and check the other value is unaffected
+    algCopy->setPropertyValue("prop1", "A difference");
+    int val2 = boost::lexical_cast<int>(algCopy->getPropertyValue("prop2"));
 
-      TS_ASSERT_EQUALS(val,val2);
+    TS_ASSERT_EQUALS(val, val2);
   }
 };
 
