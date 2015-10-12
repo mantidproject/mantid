@@ -203,11 +203,12 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
   std::string sep("");
   if (m_dataDir.size() > 0) {
     // Determine system
-    const bool isWindows(false);
 #if _WIN64
-    isWindows = true;
-#elif _WIND32
-    isWindows = true;
+    const bool isWindows = true;
+#elif _WIN32
+    const bool isWindows = true;
+#else
+    const bool isWindows = false;
 #endif
     if (isWindows && *m_dataDir.rbegin() != '\\') {
       sep = "\\";
