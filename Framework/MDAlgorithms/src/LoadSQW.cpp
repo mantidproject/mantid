@@ -420,7 +420,7 @@ void LoadSQW::buildMDDimsBase(
     DimVector[i].setId(dimID[i]);
     DimVector[i].setUnits(dimUnit[i]);
     DimVector[i].setName(dimID[i]);
-    DimVector[i].setFrameName(dimID[i]);
+    DimVector[i].setFrameName(dimFrameName[i]);
   }
 }
 
