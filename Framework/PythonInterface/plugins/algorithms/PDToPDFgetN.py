@@ -18,6 +18,7 @@ class PDToPDFgetN(DataProcessorAlgorithm):
         return "The algorithm used converting raw data to pdfgetn input files"
 
     def PyInit(self):
+        group = "Input"
         self.declareProperty(FileProperty(name="Filename",
                                           defaultValue="", action=FileAction.Load,
                                           extensions=["_event.nxs", ".nxs.h5"]),
@@ -32,6 +33,19 @@ class PDToPDFgetN(DataProcessorAlgorithm):
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
                              doc="Handle to reduced workspace")
+        self.setPropertyGroup("Filename", group)
+        self.setPropertyGroup("MaxChunkSize", group)
+        self.setPropertyGroup("FilterBadPulses", group)
+        self.setPropertyGroup("InputWorkspace", group)
+
+        group = "Output"
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "",
+                                                     direction=Direction.Output),
+                             doc="Handle to reduced workspace")
+        self.declareProperty(FileProperty(name="PDFgetNFile", defaultValue="", action=FileAction.Save,
+                                          extensions=[".getn"]), "Output filename")
+        self.setPropertyGroup("OutputWorkspace", group)
+        self.setPropertyGroup("PDFgetNFile", group)
 
         self.declareProperty(FileProperty(name="CalibrationFile",
                                           defaultValue="", action=FileAction.OptionalLoad,
@@ -53,12 +67,6 @@ class PDToPDFgetN(DataProcessorAlgorithm):
         self.declareProperty("ResampleX", 0,
                              "Number of bins in x-axis. Non-zero value overrides \"Params\" property. " +
                              "Negative value means logorithmic binning.")
-
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "",
-                                                     direction=Direction.Output),
-                             doc="Handle to reduced workspace")
-        self.declareProperty(FileProperty(name="PDFgetNFile", defaultValue="", action=FileAction.Save,
-                                          extensions=[".getn"]), "Output filename")
 
     def _loadCharacterizations(self):
         self._focusPos = {}
@@ -83,11 +91,16 @@ class PDToPDFgetN(DataProcessorAlgorithm):
 
         self._loadCharacterizations()
 
-        wksp = LoadEventAndCompress(Filename=self.getProperty("Filename").value,
-                                    OutputWorkspace=self.getPropertyValue("OutputWorkspace"),
-                                    MaxChunkSize=self.getProperty("MaxChunkSize").value,
-                                    FilterBadPulses=self.getProperty("FilterBadPulses").value,
-                                    CompressTOFTolerance=COMPRESS_TOL_TOF)
+        wksp = self.getProperty("InputWorkspace").value
+        if wksp is None:
+            wksp = LoadEventAndCompress(Filename=self.getProperty("Filename").value,
+                                        OutputWorkspace=self.getPropertyValue("OutputWorkspace"),
+                                        MaxChunkSize=self.getProperty("MaxChunkSize").value,
+                                        FilterBadPulses=self.getProperty("FilterBadPulses").value,
+                                        CompressTOFTolerance=COMPRESS_TOL_TOF)
+        else:
+            self.log().information("Using input workspace. Ignoring properties 'Filename', " +
+                                   "'OutputWorkspace', 'MaxChunkSize', and 'FilterBadPulses'")
 
         charac = ""
         if mtd.doesExist("characterizations"):
