@@ -117,62 +117,84 @@ void export_Run() {
   // Run class
   class_<Run, boost::noncopyable>("Run", no_init)
       .def("getProtonCharge", &Run::getProtonCharge,
+           arg("self"),
            "Return the total good proton charge for the run")
 
       .def("integrateProtonCharge", &Run::integrateProtonCharge,
+           arg("self"),
            "Return the total good proton charge for the run")
 
       .def("hasProperty", &Run::hasProperty,
+           (arg("self"), arg("name")),
            "Returns True if the given log value is contained within the run")
 
       .def("getProperty", &Run::getProperty,
-           return_value_policy<return_by_value>(), "Returns the named property "
-                                                   "(log value). Use '.value' "
-                                                   "to return the value.")
+           (arg("self"), arg("name")),
+           return_value_policy<return_by_value>(),
+           "Returns the named property "
+           "(log value). Use '.value' "
+           "to return the value.")
 
-      .def("getProperties", &Run::getProperties, return_internal_reference<>(),
+      .def("getProperties", &Run::getProperties,
+           arg("self"),
+           return_internal_reference<>(),
            "Return the list of run properties managed by this object.")
 
       .def("getLogData",
            (Property * (Run::*)(const std::string &) const) & Run::getLogData,
+           (arg("self"), arg("name")),
            return_value_policy<return_by_value>(),
            "Returns the named log. Use '.value' to return the value. The same "
            "as getProperty.")
 
       .def("getLogData",
            (const std::vector<Property *> &(Run::*)() const) & Run::getLogData,
+           arg("self"),
            return_internal_reference<>(),
            "Return the list of logs for this run. The same as getProperties.")
 
       .def("getGoniometer",
            (const Mantid::Geometry::Goniometer &(Run::*)() const) &
                Run::getGoniometer,
+           arg("self"),
            return_value_policy<reference_existing_object>(),
            "Get the oriented lattice for this sample")
 
-      .def("addProperty", &addProperty, "Adds a property with the given name "
-                                        "and value. If replace=True then an "
-                                        "existing property is overwritten")
+      .def("addProperty", &addProperty,
+           (arg("self"), arg("name"), arg("value"), arg("replace")),
+           "Adds a property with the given name "
+           "and value. If replace=True then an "
+           "existing property is overwritten")
 
       .def("addProperty", &addPropertyWithUnit,
+           (arg("self"), arg("name"), arg("value"), arg("units"), arg("replace")),
            "Adds a property with the given name, value and unit. If "
            "replace=True then an existing property is overwritten")
 
       .def("setStartAndEndTime", &Run::setStartAndEndTime,
+           (arg("self"), arg("start"), arg("end")),
            "Set the start and end time of the run")
 
       .def("startTime", &Run::startTime,
+           arg("self"),
            "Return the total starting time of the run.")
 
-      .def("endTime", &Run::endTime, "Return the total ending time of the run.")
+      .def("endTime", &Run::endTime,
+           arg("self"),
+           "Return the total ending time of the run.")
 
       //--------------------------- Dictionary
       // access----------------------------
-      .def("get", &getWithDefault, "Returns the value pointed to by the key or "
+      .def("get", &getWithDefault,
+           (arg("self"), arg("key"), arg("default")),
+           "Returns the value pointed to by the key or "
                                    "None if it does not exist")
       .def("get", &get,
+           (arg("self"), arg("key")),
            "Returns the value pointed to by the key or the default value given")
-      .def("keys", &keys, "Returns the names of the properties as list")
+      .def("keys", &keys,
+           arg("self"),
+           "Returns the names of the properties as list")
       .def("__contains__", &Run::hasProperty)
       .def("__getitem__", &Run::getProperty,
            return_value_policy<return_by_value>())

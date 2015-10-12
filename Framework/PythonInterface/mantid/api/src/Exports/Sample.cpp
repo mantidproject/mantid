@@ -39,19 +39,33 @@ void export_Sample() {
       .def("getThickness", &Sample::getThickness,
            arg("self"),
 	   "Return the thickness in mm")
-      .def("getHeight", &Sample::getHeight, "Return the height in mm")
-      .def("getWidth", &Sample::getWidth, "Return the width in mm")
+	  .def("getHeight", &Sample::getHeight,
+		   arg("self"),
+		   "Return the height in mm")
+	  .def("getWidth", &Sample::getWidth,
+		   arg("self"),
+		   "Return the width in mm")
       .def("getMaterial",
            (const Material &(Sample::*)() const)(&Sample::getMaterial),
+           arg("self"),
            return_value_policy<reference_existing_object>(),
            "The material the sample is composed of")
       .def("setGeometryFlag", &Sample::setGeometryFlag,
+           (arg("self"), arg("geom_id")),
            "Set the geometry flag.")
-      .def("setThickness", &Sample::setThickness, "Set the thickness in mm.")
-      .def("setHeight", &Sample::setHeight, "Set the height in mm.")
-      .def("setWidth", &Sample::setWidth, "Set the width in mm.")
+      .def("setThickness", &Sample::setThickness,
+           (arg("self"), arg("thick")),
+           "Set the thickness in mm.")
+      .def("setHeight", &Sample::setHeight,
+           (arg("self"), arg("height")),
+           "Set the height in mm.")
+      .def("setWidth", &Sample::setWidth,
+           (arg("self"), arg("width")),
+           "Set the width in mm.")
       // -------------------------Operators
       // -------------------------------------
-      .def("__len__", &Sample::size)
+      .def("__len__", &Sample::size,
+           arg("self"),
+           "Gets the number of samples in this collection")
       .def("__getitem__", &Sample::operator[], return_internal_reference<>());
 }
