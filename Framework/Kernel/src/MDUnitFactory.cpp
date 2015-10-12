@@ -35,7 +35,13 @@ ReciprocalLatticeUnitFactory::createRaw(const std::string &) const {
 
 bool ReciprocalLatticeUnitFactory::canInterpret(
     const std::string &unitString) const {
-  return unitString == Units::Symbol::RLU.ascii();
+  auto isRLU = unitString == Units::Symbol::RLU.ascii();
+
+  // In addition to having RLU we can encounter units of type "in 6.28 A^-1"
+  // We need to account for the latter here
+  boost::regex pattern("in.*A\\^-1");
+  auto isHoraceStyle = boost::regex_match(unitString, pattern);
+  return isRLU || isHoraceStyle;
 }
 
 MDUnitFactory_uptr makeMDUnitFactoryChain() {
