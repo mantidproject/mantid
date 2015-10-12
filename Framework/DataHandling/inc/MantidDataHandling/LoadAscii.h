@@ -47,8 +47,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport LoadAscii : public API::IFileLoader<Kernel::FileDescriptor>,
-                            public API::DeprecatedAlgorithm 
-{
+                            public API::DeprecatedAlgorithm {
 public:
   /// Default constructor
   LoadAscii();

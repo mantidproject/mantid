@@ -90,7 +90,7 @@ struct Pulse {
 
 class DLLExport LoadEventPreNexus
     : public API::IFileLoader<Kernel::FileDescriptor>,
-      public API::DeprecatedAlgorithm  {
+      public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   LoadEventPreNexus();
