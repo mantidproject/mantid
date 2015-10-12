@@ -16,8 +16,6 @@
 #include <boost/scoped_array.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidKernel/Strings.h"
 

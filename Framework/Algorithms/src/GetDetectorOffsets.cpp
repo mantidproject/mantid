@@ -9,7 +9,6 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
-#include <iomanip>
 #include <ostream>
 #include <sstream>
 #include "MantidKernel/BoundedValidator.h"

@@ -1,5 +1,4 @@
 
-#include <iostream>
 
 #include <QScrollBar>
 #include "MantidQtRefDetectorViewer/RefSliderHandler.h"

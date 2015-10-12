@@ -6,7 +6,6 @@
  */
 
 #include "pixmaps.h"
-#include <iostream>
 #include <sstream>
 #include <stdexcept>
 

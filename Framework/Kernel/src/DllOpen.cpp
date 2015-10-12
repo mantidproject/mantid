@@ -1,5 +1,4 @@
 #include <string>
-#include <iostream>
 
 /*
  If the OS is Windows then LoadLibrary, GetProcAddress and FreeLibrary are used.

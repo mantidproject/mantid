@@ -8,7 +8,6 @@
 #include "MantidAPI/ParameterTie.h"
 
 #include <sstream>
-#include <iostream>
 
 namespace Mantid {
 namespace API {

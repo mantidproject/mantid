@@ -13,7 +13,7 @@ namespace CustomInterfaces {
 /**
 Settings for a set of tomographic reconstruction tools supported.
 
-Copyright &copy; 2014,205 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.

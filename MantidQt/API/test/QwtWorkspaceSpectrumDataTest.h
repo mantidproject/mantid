@@ -2,8 +2,6 @@
 #define MANTIDQT_API_MANTIDQWTWORKSPACESPECTRUMDATA_H_
 
 #include <cxxtest/TestSuite.h>
-#include <iostream>
-#include <iomanip>
 #include <limits>
 #include <QRgb>
 #include "MantidAPI/MatrixWorkspace.h"

@@ -6,7 +6,6 @@
 #include "MantidKernel/RegistrationHelper.h"
 #include <boost/make_shared.hpp>
 #include <boost/lexical_cast.hpp>
-#include <iostream>
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <QDesktopServices>

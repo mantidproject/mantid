@@ -5,13 +5,13 @@
 #include "MantidTestHelpers/FakeObjects.h"
 
 #include "MantidCurveFitting/FitMW.h"
-#include "MantidCurveFitting/Fit.h"
-#include "MantidCurveFitting/UserFunction.h"
-#include "MantidCurveFitting/ExpDecay.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/SeqDomain.h"
-#include "MantidCurveFitting/Convolution.h"
-#include "MantidCurveFitting/Gaussian.h"
-#include "MantidCurveFitting/Polynomial.h"
+#include "MantidCurveFitting/Functions/UserFunction.h"
+#include "MantidCurveFitting/Functions/ExpDecay.h"
+#include "MantidCurveFitting/Functions/Convolution.h"
+#include "MantidCurveFitting/Functions/Gaussian.h"
+#include "MantidCurveFitting/Functions/Polynomial.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -29,6 +29,8 @@
 
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Algorithms;
+using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::API;
 
 class FitMWTest : public CxxTest::TestSuite {
@@ -51,7 +53,7 @@ public:
     fun->setParameter("Height", 1.);
     fun->setParameter("Lifetime", 1.0);
 
-    Fit fit;
+    Algorithms::Fit fit;
     fit.initialize();
 
     fit.setProperty("Function", fun);
@@ -159,7 +161,7 @@ public:
     fun->setParameter("Height", 1.);
     fun->setParameter("Lifetime", 1.);
 
-    Fit fit;
+    Algorithms::Fit fit;
     fit.initialize();
 
     fit.setProperty("Function", fun);

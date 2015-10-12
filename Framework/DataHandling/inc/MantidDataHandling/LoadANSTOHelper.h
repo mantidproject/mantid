@@ -22,6 +22,7 @@
 namespace Mantid {
 namespace DataHandling {
 namespace ANSTO {
+
 /// pointer to the vector of events
 typedef std::vector<DataObjects::TofEvent> *EventVector_pt;
 
@@ -47,61 +48,75 @@ public:
   void complete();
 };
 
-class EventCounter {
-private:
+class EventProcessor {
+protected:
   // fields
-  std::vector<size_t> &m_eventCounts;
-  const std::vector<bool> &m_mask;
-  const std::vector<int> &m_offsets;
+  const std::vector<bool> &m_roi;
   const size_t m_stride;
-  const size_t m_pixelsCutOffL;
-  const size_t m_tubeBinning;
-  const size_t m_finalBinsY;
-  // tof boundaries
-  double m_tofMin;
-  double m_tofMax;
-  // correction
+  // tof correction
   const double m_period;
   const double m_phase;
+  // boundaries
+  const double m_tofMinBoundary;
+  const double m_tofMaxBoundary;
+
+  // methods
+  virtual void endOfFrameImpl() = 0;
+  virtual void addEventImpl(size_t id, double tof) = 0;
 
 public:
   // construction
-  EventCounter(std::vector<size_t> &eventCounts, const std::vector<bool> &mask,
-               const std::vector<int> &offsets, size_t stride,
-               size_t pixelsCutOffL, size_t tubeBinning, size_t finalBinsY,
-               double periode, double phase);
-
-  // properties
-  double tofMin() const;
-  double tofMax() const;
+  EventProcessor(const std::vector<bool> &roi, const size_t stride,
+                 const double period, const double phase,
+                 const double tofMinBoundary, const double tofMaxBoundary);
 
   // methods
+  void endOfFrame();
   void addEvent(size_t x, size_t y, double tof);
 };
 
-class EventAssigner {
-private:
+class EventCounter : public EventProcessor {
+protected:
   // fields
-  std::vector<EventVector_pt> &m_eventVectors;
-  const std::vector<bool> &m_mask;
-  const std::vector<int> &m_offsets;
-  const size_t m_stride;
-  const size_t m_pixelsCutOffL;
-  const size_t m_tubeBinning;
-  const size_t m_finalBinsY;
-  // correction
-  const double m_period;
-  const double m_phase;
+  std::vector<size_t> &m_eventCounts;
+  // number of frames
+  size_t m_numFrames;
+  // tof
+  double m_tofMin;
+  double m_tofMax;
+
+  // methods
+  virtual void endOfFrameImpl();
+  virtual void addEventImpl(size_t id, double tof);
 
 public:
   // construction
-  EventAssigner(std::vector<EventVector_pt> &eventVectors,
-                const std::vector<bool> &mask, const std::vector<int> &offsets,
-                size_t stride, size_t pixelsCutOffL, size_t tubeBinning,
-                size_t finalBinsY, double periode, double phase);
+  EventCounter(const std::vector<bool> &roi, const size_t stride,
+               const double period, const double phase,
+               const double tofMinBoundary, const double tofMaxBoundary,
+               std::vector<size_t> &eventCounts);
+
+  // properties
+  size_t numFrames() const;
+  double tofMin() const;
+  double tofMax() const;
+};
+
+class EventAssigner : public EventProcessor {
+protected:
+  // fields
+  std::vector<EventVector_pt> &m_eventVectors;
 
   // methods
-  void addEvent(size_t x, size_t y, double tof);
+  virtual void endOfFrameImpl();
+  virtual void addEventImpl(size_t id, double tof);
+
+public:
+  // construction
+  EventAssigner(const std::vector<bool> &roi, const size_t stride,
+                const double period, const double phase,
+                const double tofMinBoundary, const double tofMaxBoundary,
+                std::vector<EventVector_pt> &eventVectors);
 };
 
 class FastReadOnlyFile {
@@ -125,6 +140,7 @@ public:
 };
 
 namespace Tar {
+
 struct EntryHeader {
   // cppcheck-suppress unusedStructMember
   char FileName[100];
@@ -157,8 +173,6 @@ struct EntryHeader {
   // cppcheck-suppress unusedStructMember
   char FilenamePrefix[155];
 };
-
-template <size_t N> int64_t octalToInt(char(&str)[N]);
 
 class File {
 
@@ -206,8 +220,10 @@ public:
   size_t read(void *dst, size_t size);
   int read_byte();
 };
-}
-}
-}
-}
+
+} // Tar
+} // ANSTO
+} // DataHandling
+} // Mantid
+
 #endif // DATAHANDING_ANSTO_H_

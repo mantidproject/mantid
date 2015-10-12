@@ -166,7 +166,7 @@ Desktop.ini
 .tags
 .tags_sorted_by_file
 
-Code/Mantid/Vates/VatesSimpleGui/ViewWidgets/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
+Vates/VatesSimpleGui/ViewWidgets/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
 
 
 # Make sure Third_Party doesn't get checked into the main repository

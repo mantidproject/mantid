@@ -5,7 +5,7 @@
 #include <complex>
 #include "MantidCurveFitting/SpecialFunctionSupport.h"
 
-#include "MantidCurveFitting/Lorentzian1D.h"
+#include "MantidCurveFitting/Functions/Lorentzian1D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"

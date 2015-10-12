@@ -9,7 +9,6 @@
 #include "MantidKernel/Unit.h"
 
 #include <boost/lexical_cast.hpp>
-#include <iostream>
 
 namespace Mantid {
 namespace API {

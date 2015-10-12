@@ -13,7 +13,6 @@
 
 #include <Poco/File.h>
 #include <limits>
-#include <iostream>
 
 namespace Mantid {
 namespace DataHandling {

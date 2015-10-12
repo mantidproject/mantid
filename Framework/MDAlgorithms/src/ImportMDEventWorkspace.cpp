@@ -1,6 +1,5 @@
 #include "MantidMDAlgorithms/ImportMDEventWorkspace.h"
 
-#include <iostream>
 #include <fstream>
 
 #include "MantidAPI/FileProperty.h"

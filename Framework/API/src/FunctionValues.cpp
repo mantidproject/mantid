@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/FunctionValues.h"
-#include <iostream>
 #include <algorithm>
 
 namespace Mantid {

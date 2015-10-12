@@ -10,7 +10,6 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include <iostream>
 #include <vector>
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/NullValidator.h"

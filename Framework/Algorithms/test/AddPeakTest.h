@@ -9,8 +9,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;

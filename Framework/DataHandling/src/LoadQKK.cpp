@@ -14,9 +14,7 @@
 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <Poco/File.h>
-#include <iostream>
 #include <fstream>
-#include <iomanip>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;

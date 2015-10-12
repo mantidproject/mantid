@@ -7,7 +7,6 @@
 #include <QApplication>
 #include <QStringList>
 
-#include <iostream>
 #include <stdexcept>
 #include <cmath>
 

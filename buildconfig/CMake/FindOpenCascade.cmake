@@ -18,7 +18,8 @@ if ( WIN32 )
   add_definitions ( -DWNT )
 endif ( WIN32 )
 
-find_path ( OPENCASCADE_LIBRARY_DIR libTKernel.so PATHS
+find_path ( OPENCASCADE_LIBRARY_DIR NAMES libTKernel.so libTKernel.dylib PATHS
+                /usr/local/lib
                 /opt/OpenCASCADE/lib64
                 $ENV{CASROOT}/lib64
                 /opt/OpenCASCADE/lib

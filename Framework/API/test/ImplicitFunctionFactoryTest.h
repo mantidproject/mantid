@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include <vector>
-#include <iostream>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "MantidAPI/ImplicitFunctionParameterParserFactory.h"

@@ -51,8 +51,8 @@ public:
   MOCK_METHOD1(setAvailablePeriods, void(const std::vector<std::string>&));
   MOCK_METHOD2(setTimeLimits, void(double,double));
   MOCK_METHOD2(setTimeRange, void(double,double));
-  MOCK_METHOD0(setWaitingCursor, void());
-  MOCK_METHOD0(restoreCursor, void());
+  MOCK_METHOD0(disableAll, void());
+  MOCK_METHOD0(enableAll, void());
   MOCK_METHOD0(help, void());
 
   void requestLoading() { emit loadRequested(); }
@@ -116,7 +116,7 @@ public:
   void test_defaultLoad()
   {
     InSequence s;
-    EXPECT_CALL(*m_view, setWaitingCursor());
+    EXPECT_CALL(*m_view, disableAll());
 
     EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size,3),
                                             QwtDataX(0, 1350, 1E-8),
@@ -130,7 +130,7 @@ public:
                                             VectorValue(1,1.284E-3,1E-6),
                                             VectorValue(2,1.280E-3,1E-6))));
 
-    EXPECT_CALL(*m_view, restoreCursor());
+    EXPECT_CALL(*m_view, enableAll());
 
     m_view->requestLoading();
   }
@@ -232,7 +232,7 @@ public:
     ON_CALL(*m_view, deadTimeType()).WillByDefault(Return("FromRunData"));
     EXPECT_CALL(*m_view, deadTimeType()).Times(2);
     EXPECT_CALL(*m_view, deadTimeFile()).Times(0);
-    EXPECT_CALL(*m_view, restoreCursor()).Times(1);
+    EXPECT_CALL(*m_view, enableAll()).Times(1);
     EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size,3),
                                             QwtDataY(0, 0.150616, 1E-3),
                                             QwtDataY(1, 0.143444, 1E-3),
@@ -251,7 +251,7 @@ public:
     ON_CALL(*m_view, deadTimeType()).WillByDefault(Return("FromSpecifiedFile"));
     EXPECT_CALL(*m_view, deadTimeType()).Times(2);
     EXPECT_CALL(*m_view, deadTimeFile()).Times(1);
-    EXPECT_CALL(*m_view, restoreCursor()).Times(1);
+    EXPECT_CALL(*m_view, enableAll()).Times(1);
     m_view->requestLoading();
   }
 
@@ -264,7 +264,7 @@ public:
     ON_CALL(*m_view, getBackwardGrouping()).WillByDefault(Return("1-32"));
     EXPECT_CALL(*m_view, getForwardGrouping()).Times(1);
     EXPECT_CALL(*m_view, getBackwardGrouping()).Times(1);
-    EXPECT_CALL(*m_view, restoreCursor()).Times(1);
+    EXPECT_CALL(*m_view, enableAll()).Times(1);
     EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size, 3),
                                             QwtDataX(0, 1350, 1E-8),
                                             QwtDataX(1, 1360, 1E-8),
