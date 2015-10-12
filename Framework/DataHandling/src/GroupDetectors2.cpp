@@ -3,14 +3,14 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/GroupDetectors2.h"
 
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 
 #include <boost/regex.hpp>
 

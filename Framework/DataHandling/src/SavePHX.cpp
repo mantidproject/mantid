@@ -1,10 +1,13 @@
 #include "MantidDataHandling/SavePHX.h"
-#include "MantidDataHandling/FindDetectorsPar.h"
+
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/InstrumentValidator.h"
+
+#include "MantidDataHandling/FindDetectorsPar.h"
+
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Objects/Object.h"
-#include "MantidAPI/WorkspaceValidators.h"
 
 #include <cstdio>
 #include <fstream>
