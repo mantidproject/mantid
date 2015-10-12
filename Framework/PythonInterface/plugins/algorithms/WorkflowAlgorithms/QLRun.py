@@ -16,46 +16,46 @@ class QLRun(PythonAlgorithm):
                " whole function is then convoled with the resolution function."
 
     def PyInit(self):
-        self.declareProperty(name='program', defaultValue='QL',
+        self.declareProperty(name='Program', defaultValue='QL',
                              validator=StringListValidator(['QL','QSe']),
                              doc='The type of program to run (either QL or QSe)')
 
-        self.declareProperty(MatrixWorkspaceProperty('samWs', '', direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
                              doc='Name of the Sample input Workspace')
 
-        self.declareProperty(MatrixWorkspaceProperty('resWs', '', direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('ResolutionWorkspace', '', direction=Direction.Input),
                              doc='Name of the resolution input Workspace')
 
-        self.declareProperty(MatrixWorkspaceProperty('resNormWs', '',
+        self.declareProperty(MatrixWorkspaceProperty('ResNormWorkspace', '',
                              optional=PropertyMode.Optional, direction=Direction.Input),
                              doc='Name of the ResNorm input Workspace')
 
-        self.declareProperty(name='Minrange', defaultValue='', validator=StringMandatoryValidator(),
-                             doc='the start of the fit range')
+        self.declareProperty(name='MinRange', defaultValue=-0.2,
+                             doc='The start of the fit range. Default=-0.2')
 
-        self.declareProperty(name='Maxrange', defaultValue='', validator=StringMandatoryValidator(),
-                             doc='The end of the fit range ')
+        self.declareProperty(name='MaxRange', defaultValue=0.2,
+                             doc='The end of the fit range. Default=0.2')
 
-        self.declareProperty(name='SampleBins', defaultValue='', validator=StringMandatoryValidator(),
+        self.declareProperty(name='SampleBins', defaultValue=1,
                              doc='The number of sample bins')
 
-        self.declareProperty(name='ResolutionBins', defaultValue='', validator=StringMandatoryValidator(),
+        self.declareProperty(name='ResolutionBins', defaultValue=1,
                              doc='The number of resolution bins')
 
         self.declareProperty(name='Elastic', defaultValue='True', validator=StringMandatoryValidator(),
                              doc='Fit option for using the elastic peak')
 
-        self.declareProperty(name='Background', defaultValue='',
+        self.declareProperty(name='Background', defaultValue='Flat',
                              validator=StringListValidator(['Sloping','Flat','Zero']),
                              doc='Fit option for the type of background')
 
-        self.declareProperty(name='FixedWidth', defaultValue='', validator=StringMandatoryValidator(),
+        self.declareProperty(name='FixedWidth', defaultValue='True', validator=StringMandatoryValidator(),
                              doc='Fit option for using FixedWidth')
 
-        self.declareProperty(name='UseResNorm', defaultValue='', validator=StringMandatoryValidator(),
+        self.declareProperty(name='UseResNorm', defaultValue='False', validator=StringMandatoryValidator(),
                              doc='fit option for using ResNorm')
 
-        self.declareProperty(name='wfile', defaultValue='', doc='The name of the fixedWidth file')
+        self.declareProperty(name='WidthFile', defaultValue='', doc='The name of the fixedWidth file')
 
         self.declareProperty(name='Loop', defaultValue='True', doc='Switch Sequential fit On/Off')
 
@@ -75,17 +75,25 @@ class QLRun(PythonAlgorithm):
 
         self.log().information('QLRun input')
 
-        fit_ops = self.getProperty('Fit')
-        min = self.getProperty('Minrange')
-        max = self.getProperty('Maxrange')
-        sam_bins = self.getProperty('SampleBins')
-        res_bins = self.getProperty('ResolutionBins')
-        erange = [min, max]
+        program = self.getPropertyValue('Program')
+        samWS = self.getPropertyValue('SampleWorkspace')
+        resWS = self.getPropertyValue('ResolutionWorkspace')
+        resNormWs = self.getPropertyValue('ResNormWorkspace')
+        e_min = self.getProperty('MinRange').value
+        e_max = self.getProperty('MaxRange').value
+        sam_bins = self.getPropertyValue('SampleBins')
+        res_bins = self.getPropertyValue('ResolutionBins')
+        elastic = self.getPropertyValue('Elastic')
+        background = self.getPropertyValue('Background')
+        width = self.getPropertyValue('FixedWidth')
+        res_norm = self.getPropertyValue('UseResNorm')
+        wfile = self.getPropertyValue('WidthFile')
+        Loop = self.getPropertyValue('Loop')
+        Save = self.getPropertyValue('Save')
+        Plot = self.getPropertyValue('Plot')
+
+        erange = [e_min, e_max]
         nbins = [sam_bins, res_bins]
-        elastic = self.getProperty('Elastic')
-        background = self.getProperty('Background')
-        width = self.getProperty('FixedWidth')
-        res_norm = self.geProperty('UseResNorm')
 
         #convert true/false to 1/0 for fortran
         o_el = 1 if elastic else 0
