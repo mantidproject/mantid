@@ -202,7 +202,7 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
   // Check whether to add / or \ to m_dataDir
   std::string sep("");
   if (m_dataDir.size() > 0) {
-    // Determine system
+// Determine system
 #if _WIN64
     const bool isWindows = true;
 #elif _WIN32
@@ -210,6 +210,7 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
 #else
     const bool isWindows = false;
 #endif
+
     if (isWindows && *m_dataDir.rbegin() != '\\') {
       sep = "\\";
     } else if (!isWindows && *m_dataDir.rbegin() != '/')
