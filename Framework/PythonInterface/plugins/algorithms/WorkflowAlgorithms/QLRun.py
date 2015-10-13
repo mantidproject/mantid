@@ -1,9 +1,20 @@
 #pylint: disable=no-init
+from IndirectImport import *
+if is_supported_f2py_platform():
+    QLr     = import_f2py("QLres")
+    QLd     = import_f2py("QLdata")
+    Qse     = import_f2py("QLse")
+    Que     = import_f2py("Quest")
+    resnorm = import_f2py("ResNorm")
+else:
+    unsupported_message()
+    
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode
 from mantid.kernel import StringListValidator, Direction
 from mantid.simpleapi import *
 from mantid import config, logger
 import os
+import numpy as np
 
 class QLRun(PythonAlgorithm):
 
@@ -115,14 +126,15 @@ class QLRun(PythonAlgorithm):
 
 
     def PyExec(self):
-        from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
+        #from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
 
         if is_supported_f2py_platform():
             import IndirectBayes as Main
 
         run_f2py_compatibility_test()
 
-        from IndirectBayes import *
+        from IndirectBayes import CalcErange, GetXYE, ReadNormFile, ReadWidthFile, QLAddSampleLogs, C2Fw, C2Se, QuasiPlot
+        from IndirectCommon import getDefaultWorkingDirectory, CheckXrange, CheckAnalysers, getEfixed, GetThetaQ, CheckHistZero, CheckHistSame
 
         self.log().information('QLRun input')
 
