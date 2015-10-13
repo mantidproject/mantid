@@ -460,7 +460,17 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
   //		ioRAW(file, &u_len, 1, from_file);
   if (from_file) {
     u_len = add.ad_data - add.ad_user - 2;
+
+    if (u_len < 0 || (add.ad_data < add.ad_user + 2)) {
+      // this will/would be used for memory allocation
+      std::cerr << "Error in u_len value read from file, it would be " << u_len
+                << "; where it is calculated as "
+                   "u_len = ad_data - ad_user - 2, where ad_data: "
+                << add.ad_data << ", ad_user: " << add.ad_user << std::endl;
+      return 0;
+    }
   }
+
   ioRAW(file, &u_dat, u_len, from_file);
   ioRAW(file, &ver8, 1, from_file);
   fgetpos(file, &dhdr_pos);
