@@ -27,16 +27,37 @@ createPBinStringVector(std::vector<Mantid::coord_t> minVector,
   for (size_t iter = 0; iter < numDims; iter++) {
     if (minVector[iter] >= maxVector[iter]) {
       std::cerr << "Minimum extent of non-zero signal must be LESS than the "
-                   "maximum extent with non-zero signal" << std::endl;
+                   "maximum extent with non-zero signal"
+                << std::endl;
+    }
+    // We are working with Centres and not Bin Edges so we know that we will
+    // always be half a bin width away from the closest bin edge.
+
+    // We will only crop when we set minimum pbin > minimum extent of that
+    // dimension
+    // otherwise we should not crop.
+    if (minVector[iter] - (inputWs->getDimension(iter)->getBinWidth() * 0.5) >
+        inputWs->getDimension(iter)->getMinimum()) {
+      minVector[iter] = Mantid::coord_t(
+          minVector[iter] - (inputWs->getDimension(iter)->getBinWidth() * 0.5));
+    }
+    // We will only crop when we set maximum pbin < maximum extent of that
+    // dimension
+    // otherwise we should not crop.
+    if (maxVector[iter] + (inputWs->getDimension(iter)->getBinWidth() * 0.5) <
+        inputWs->getDimension(iter)->getMaximum()) {
+      maxVector[iter] = Mantid::coord_t(
+          maxVector[iter] + (inputWs->getDimension(iter)->getBinWidth() * 0.5));
+    }
+    // when Min == Max we know that there is no signal inside that dimension
+    // so just use the original extents to copy that dimension.
+    if (minVector[iter] == maxVector[iter]) {
+      minVector[iter] = inputWs->getDimension(iter)->getMinimum();
+      maxVector[iter] = inputWs->getDimension(iter)->getMaximum();
     }
     // creating pbin string using Min and Max Centre positions
-    auto pBinStr = boost::lexical_cast<std::string>(
-                       minVector[iter] -
-                       (inputWs->getDimension(iter)->getBinWidth() * 0.5)) +
-                   ",0," +
-                   boost::lexical_cast<std::string>(
-                       maxVector[iter] +
-                       (inputWs->getDimension(iter)->getBinWidth() * 0.5));
+    auto pBinStr = boost::lexical_cast<std::string>(minVector[iter]) + ",0," +
+                   boost::lexical_cast<std::string>(maxVector[iter]);
     pBinStrVector.push_back(pBinStr);
   }
   return pBinStrVector;
