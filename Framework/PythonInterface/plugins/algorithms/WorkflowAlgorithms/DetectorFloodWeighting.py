@@ -22,11 +22,11 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
                                                      direction=Direction.Input, validator=WorkspaceUnitValidator("Wavelength")),
-                             doc='Flood weighting measurement')
-                             
+                                                     doc='Flood weighting measurement')
         self.declareProperty(MatrixWorkspaceProperty('TransmissionWorkspace', '',
-                                                     direction=Direction.Input, optional=PropertyMode.Optional, validator=WorkspaceUnitValidator("Wavelength")),
-                             doc='Flood weighting measurement')
+                                                     direction=Direction.Input, optional=PropertyMode.Optional, 
+                                                     validator=WorkspaceUnitValidator("Wavelength")),
+                                                     doc='Flood weighting measurement')
 
         validator = FloatArrayBoundedValidator()
         validator.setLower(0.)
@@ -70,14 +70,13 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
             all_limits.append(limits)
             if lower >= upper:
                 issues['Bands'] = 'Bands should form lower, upper pairs'
-                
         input_ws = self.getProperty('InputWorkspace').value
         trans_ws = self.getProperty('TransmissionWorkspace').value
         if trans_ws:
-             if not trans_ws.getNumberHistograms() == input_ws.getNumberHistograms():
-                 issues['TransmissionWorkspace'] = 'Transmission should have same number of histograms as flood input workspace'
-             if not trans_ws.blocksize() == input_ws.blocksize():
-                 issues['TransmissionWorkspace'] = 'Transmission workspace should be rebinned the same as the flood input workspace'
+            if not trans_ws.getNumberHistograms() == input_ws.getNumberHistograms():
+                issues['TransmissionWorkspace'] = 'Transmission should have same number of histograms as flood input workspace'
+            if not trans_ws.blocksize() == input_ws.blocksize():
+                issues['TransmissionWorkspace'] = 'Transmission workspace should be rebinned the same as the flood input workspace'
 
         return issues
 
@@ -87,14 +86,14 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
         divide.setProperty("RHSWorkspace", rhs)
         divide.execute()
         return divide.getProperty("OutputWorkspace").value
-        
+    
     def _add(self, lhs, rhs):
         divide = self.createChildAlgorithm("Plus")
         divide.setProperty("LHSWorkspace", lhs)
         divide.setProperty("RHSWorkspace", rhs)
         divide.execute()
         return divide.getProperty("OutputWorkspace").value
-        
+    
     def _integrate_bands(self, bands, in_ws):
         # Formulate bands, integrate and sum
         accumulated_output = None
@@ -108,7 +107,6 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
             rebin.setProperty("InputWorkspace", in_ws) # Always integrating the same input workspace
             rebin.execute()
             integrated = rebin.getProperty("OutputWorkspace").value
-            
             if accumulated_output:
                 accumulated_output = self._add(accumulated_output, integrated)
             else:
@@ -124,7 +122,6 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
         in_ws = self.getProperty('InputWorkspace').value
         trans_ws = self.getProperty('TransmissionWorkspace').value
         bands = self.getProperty('Bands').value
-        x_range = max(bands)-min(bands)
 
         accumulated_output = self._integrate_bands(bands, in_ws)
         if trans_ws:
@@ -144,22 +141,18 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
         
         # Divide through by the transmission workspace provided
         if trans_ws:
-            normalized = self._divide(normalized, accumulated_output)
-        
+            normalized = self._divide(normalized, accumulated_trans_output)
         # Determine the max across all spectra
         y_values = normalized.extractY()
         mean_val = np.mean(y_values)
-
         # Create a workspace from the single max value
         create = self.createChildAlgorithm("CreateSingleValuedWorkspace")
         create.setProperty("DataValue", mean_val)
         create.execute()
         mean_ws = create.getProperty("OutputWorkspace").value
-        
         # Divide each entry by mean
         normalized = self._divide(normalized, mean_ws)
         progress.report()
-        
         # Fix-up ranges
         for i in range(normalized.getNumberHistograms()):
             normalized.dataX(i)[0] = bands[0]
