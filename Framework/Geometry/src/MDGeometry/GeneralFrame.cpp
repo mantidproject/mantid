@@ -3,6 +3,10 @@
 namespace Mantid {
 namespace Geometry {
 
+const std::string GeneralFrame::GeneralFrameDistance = "Distance";
+const std::string GeneralFrame::GeneralFrameTOF = "Time of Flight";
+const std::string GeneralFrame::GeneralFrameName  = "General Frame";
+
 GeneralFrame::GeneralFrame(const std::string &frameName,
                            std::unique_ptr<Kernel::MDUnit> unit)
     : m_unit(unit.release()), m_frameName(frameName) {}

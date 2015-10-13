@@ -35,6 +35,11 @@ void addMDDimensions(
     boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> out,
     Mantid::coord_t min, Mantid::coord_t max, std::string axisNameFormat,
     std::string axisIdFormat) {
+
+  // Create MDFrame of General Frame type
+  Mantid::Geometry::GeneralFrame frame(
+      Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
+
   // Create dimensions
   for (size_t d = 0; d < nd; d++) {
     char name[200];
@@ -44,7 +49,7 @@ void addMDDimensions(
 
     Mantid::Geometry::MDHistoDimension_sptr dim(
         new Mantid::Geometry::MDHistoDimension(
-            std::string(name), std::string(id), "m", min, max, 10));
+            std::string(name), std::string(id), frame, min, max, 10));
     out->addDimension(dim);
   }
   out->initialize();

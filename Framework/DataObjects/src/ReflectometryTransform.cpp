@@ -204,6 +204,7 @@ void createVerticalAxis(MatrixWorkspace *const ws, const MantidVec &xAxisVec,
  * Performs centre-point rebinning and produces an MDWorkspace
  * @param inputWs : The workspace you wish to perform centre-point rebinning on.
  * @param boxController : controls how the MDWorkspace will be split
+ * @param frame: the md frame for the two MDHistoDimensions
  * @returns An MDWorkspace based on centre-point rebinning of the inputWS
  */
 Mantid::API::IMDEventWorkspace_sptr ReflectometryTransform::executeMD(

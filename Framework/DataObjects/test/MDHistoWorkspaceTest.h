@@ -422,7 +422,7 @@ public:
     // outputs like this.
     std::string expectedXML =
         std::string("<DimensionSet>") + "<Dimension ID=\"x\">" +
-        "<Name>X</Name>" + "<Units>m</Units>" + "<Frame>Unknown frame</Frame>" +
+        "<Name>X</Name>" + "<Units>m</Units>" + "<Frame>My General Frame</Frame>" +
         "<UpperBounds>10.0000</UpperBounds>" +
         "<LowerBounds>-10.0000</LowerBounds>" +
         "<NumberOfBins>5</NumberOfBins>" + "</Dimension>" +
@@ -444,7 +444,7 @@ public:
         "<RefDimensionId>z</RefDimensionId>" + "</ZDimension>" +
         "<TDimension>" + "<RefDimensionId>t</RefDimensionId>" +
         "</TDimension>" + "</DimensionSet>";
-    Mantid::Geometry::GeneralFrame frame("m", "m");
+    Mantid::Geometry::GeneralFrame frame("My General Frame", "m");
     MDHistoDimension_sptr dimX(
         new MDHistoDimension("X", "x", frame, -10, 10, 5));
     MDHistoDimension_sptr dimY(

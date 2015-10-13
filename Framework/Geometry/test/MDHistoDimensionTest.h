@@ -43,7 +43,7 @@ public:
         "<NumberOfBins>1</NumberOfBins>" + "<Integrated>" +
         "<UpperLimit>20.0000</UpperLimit>" +
         "<LowerLimit>-10.0000</LowerLimit>" + "</Integrated>" + "</Dimension>";
-    Mantid::Geometry::GeneralFrame frame("Furlongs", "Furlongs");
+    Mantid::Geometry::GeneralFrame frame("My General Frame", "Furlongs");
     MDHistoDimension dimension("name", "id", frame, -10, 20.0, 1);
     std::string actualXML = dimension.toXMLString();
     TS_ASSERT_EQUALS(expectedXML, actualXML);

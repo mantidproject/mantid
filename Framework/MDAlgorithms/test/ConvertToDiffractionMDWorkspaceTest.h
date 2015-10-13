@@ -8,7 +8,9 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidGeometry/MDGeometry/QLab.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -48,6 +50,13 @@ public:
       return;
     TS_ASSERT_EQUALS(ws->getDimension(0)->getName(), "Q_lab_x");
     TS_ASSERT_EQUALS(ws->getSpecialCoordinateSystem(), Mantid::Kernel::QLab);
+        // Test the frame type
+    for (size_t dim = 0; dim < ws->getNumDims(); ++dim) {
+      const auto &frame = ws->getDimension(dim)->getMDFrame();
+      TSM_ASSERT_THROWS_NOTHING(
+          "Should be convertible to a QSample frame",
+          dynamic_cast<const Mantid::Geometry::QLab &>(frame));
+    }
 
     // But you can't add to an existing one of the wrong dimensions type, if you
     // choose Append
@@ -86,6 +95,13 @@ public:
       return;
     TS_ASSERT_EQUALS(ws->getDimension(0)->getName(), "H");
     TS_ASSERT_EQUALS(ws->getSpecialCoordinateSystem(), Mantid::Kernel::HKL);
+    // Test the frame type
+    for (size_t dim = 0; dim < ws->getNumDims(); ++dim) {
+      const auto &frame = ws->getDimension(dim)->getMDFrame();
+      TSM_ASSERT_THROWS_NOTHING(
+          "Should be convertible to a QSample frame",
+          dynamic_cast<const Mantid::Geometry::HKL &>(frame));
+    }
 
     AnalysisDataService::Instance().remove("testOutMD");
     alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace",
@@ -103,6 +119,13 @@ public:
       return;
     TS_ASSERT_EQUALS(ws->getDimension(0)->getName(), "Q_sample_x");
     TS_ASSERT_EQUALS(ws->getSpecialCoordinateSystem(), Mantid::Kernel::QSample);
+    // Test the frame type
+    for (size_t dim = 0; dim < ws->getNumDims(); ++dim) {
+      const auto &frame = ws->getDimension(dim)->getMDFrame();
+      TSM_ASSERT_THROWS_NOTHING(
+          "Should be convertible to a QSample frame",
+          dynamic_cast<const Mantid::Geometry::QSample &>(frame));
+    }
   }
 
   void do_test_MINITOPAZ(EventType type, size_t numTimesToAdd = 1,

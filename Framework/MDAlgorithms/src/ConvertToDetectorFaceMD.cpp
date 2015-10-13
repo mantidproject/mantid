@@ -212,18 +212,24 @@ void ConvertToDetectorFaceMD::exec() {
   if (ax0->getValue(ax0->length() - 1) > tof_max)
     tof_max = ax0->getValue(ax0->length() - 1);
 
+  // Get MDFrame of General Frame type
+  Mantid::Geometry::GeneralFrame framePixel(
+      Mantid::Geometry::GeneralFrame::GeneralFrameName, "pixel");
+  Mantid::Geometry::GeneralFrame frameTOF(
+      Mantid::Geometry::GeneralFrame::GeneralFrameName, ax0->unit()->label());
+
   // ------------------ Build all the dimensions ----------------------------
   MDHistoDimension_sptr dimX(
-      new MDHistoDimension("x", "x", "pixel", static_cast<coord_t>(0),
+      new MDHistoDimension("x", "x", framePixel, static_cast<coord_t>(0),
                            static_cast<coord_t>(m_numXPixels), m_numXPixels));
   MDHistoDimension_sptr dimY(
-      new MDHistoDimension("y", "y", "pixel", static_cast<coord_t>(0),
+      new MDHistoDimension("y", "y", framePixel, static_cast<coord_t>(0),
                            static_cast<coord_t>(m_numYPixels), m_numYPixels));
   std::string TOFname = ax0->title();
   if (TOFname.empty())
     TOFname = ax0->unit()->unitID();
   MDHistoDimension_sptr dimTOF(new MDHistoDimension(
-      TOFname, TOFname, ax0->unit()->label(), static_cast<coord_t>(tof_min),
+      TOFname, TOFname, frameTOF, static_cast<coord_t>(tof_min),
       static_cast<coord_t>(tof_max), ax0->length()));
 
   std::vector<IMDDimension_sptr> dims;
@@ -232,10 +238,12 @@ void ConvertToDetectorFaceMD::exec() {
   dims.push_back(dimTOF);
 
   if (banks.size() > 1) {
+    Mantid::Geometry::GeneralFrame frameNumber(
+        Mantid::Geometry::GeneralFrame::GeneralFrameName, "number");
     int min = banks.begin()->first;
     int max = banks.rbegin()->first + 1;
     MDHistoDimension_sptr dimBanks(new MDHistoDimension(
-        "bank", "bank", "number", static_cast<coord_t>(min),
+        "bank", "bank", frameNumber, static_cast<coord_t>(min),
         static_cast<coord_t>(max), max - min));
     dims.push_back(dimBanks);
   }
