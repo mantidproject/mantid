@@ -55,15 +55,16 @@ void export_PointGroup() {
       .value("Cubic", PointGroup::Cubic);
 
   class_<PointGroup, boost::noncopyable, bases<Group>>("PointGroup", no_init)
-    .def("getName", &PointGroup::getName, arg("self"))
-    .def("getHMSymbol", &PointGroup::getSymbol, arg("self"))
-    .def("getCrystalSystem", &PointGroup::crystalSystem, arg("self"))
-    .def("isEquivalent", &isEquivalent,
-	 (arg("self"), arg("hkl1"), arg("hkl2")),
-	 "Check whether the two HKLs are symmetrically equivalent.")
-    .def("getEquivalents", &getEquivalents, (arg("self"), arg("hkl")),
-	 "Returns an array with all symmetry equivalents of the supplied HKL.")
-    .def("getReflectionFamily", &getReflectionFamily,
-	 (arg("self"), arg("hkl")),
-	 "Returns the same HKL for all symmetry equivalents.");
+      .def("getName", &PointGroup::getName, arg("self"))
+      .def("getHMSymbol", &PointGroup::getSymbol, arg("self"))
+      .def("getCrystalSystem", &PointGroup::crystalSystem, arg("self"))
+      .def("isEquivalent", &isEquivalent,
+           (arg("self"), arg("hkl1"), arg("hkl2")),
+           "Check whether the two HKLs are symmetrically equivalent.")
+      .def("getEquivalents", &getEquivalents, (arg("self"), arg("hkl")),
+           "Returns an array with all symmetry equivalents of the supplied "
+           "HKL.")
+      .def("getReflectionFamily", &getReflectionFamily,
+           (arg("self"), arg("hkl")),
+           "Returns the same HKL for all symmetry equivalents.");
 }

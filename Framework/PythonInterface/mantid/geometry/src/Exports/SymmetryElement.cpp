@@ -42,15 +42,12 @@ void export_SymmetryElement() {
       .value("None", SymmetryElementRotation::None);
 
   class_<SymmetryElement, boost::noncopyable>("SymmetryElement", no_init)
-    .def("getHMSymbol", &SymmetryElement::hmSymbol,
-	 arg("self"),
-	 "Returns the Hermann-Mauguin symbol for the element.")
-    .def("getAxis", &getAxis, 
-	 arg("self"),
-	 "Returns the symmetry axis or [0,0,0] for "
-	 "identiy, inversion and translations.")
-    .def("getRotationSense", &getRotationSense,
-	 arg("self"),
-	 "Returns the rotation sense of a rotation axis or None"
-	 "if the element is not a rotation.");
+      .def("getHMSymbol", &SymmetryElement::hmSymbol, arg("self"),
+           "Returns the Hermann-Mauguin symbol for the element.")
+      .def("getAxis", &getAxis, arg("self"),
+           "Returns the symmetry axis or [0,0,0] for "
+           "identiy, inversion and translations.")
+      .def("getRotationSense", &getRotationSense, arg("self"),
+           "Returns the rotation sense of a rotation axis or None"
+           "if the element is not a rotation.");
 }

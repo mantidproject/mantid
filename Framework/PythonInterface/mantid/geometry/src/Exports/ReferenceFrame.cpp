@@ -21,15 +21,14 @@ void export_ReferenceFrame() {
       .export_values();
 
   class_<ReferenceFrame, boost::noncopyable>("ReferenceFrame", no_init)
-    .def("pointingAlongBeam", &ReferenceFrame::pointingAlongBeam, arg("self"))
-    .def("pointingUp", &ReferenceFrame::pointingUp, arg("self"))
-    .def("vecPointingUp", &ReferenceFrame::vecPointingUp, arg("self"))
-    .def("vecPointingAlongBeam", &ReferenceFrame::vecPointingAlongBeam,
-	 arg("self"))
-    .def("pointingAlongBeamAxis", &ReferenceFrame::pointingAlongBeamAxis,
-	 arg("self"))
-    .def("pointingUpAxis", &ReferenceFrame::pointingUpAxis, arg("self"))
-    .def("pointingHorizontalAxis", &ReferenceFrame::pointingHorizontalAxis,
-	 arg("self"))
-    ;
+      .def("pointingAlongBeam", &ReferenceFrame::pointingAlongBeam, arg("self"))
+      .def("pointingUp", &ReferenceFrame::pointingUp, arg("self"))
+      .def("vecPointingUp", &ReferenceFrame::vecPointingUp, arg("self"))
+      .def("vecPointingAlongBeam", &ReferenceFrame::vecPointingAlongBeam,
+           arg("self"))
+      .def("pointingAlongBeamAxis", &ReferenceFrame::pointingAlongBeamAxis,
+           arg("self"))
+      .def("pointingUpAxis", &ReferenceFrame::pointingUpAxis, arg("self"))
+      .def("pointingHorizontalAxis", &ReferenceFrame::pointingHorizontalAxis,
+           arg("self"));
 }
