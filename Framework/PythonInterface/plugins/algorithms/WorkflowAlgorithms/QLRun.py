@@ -7,6 +7,23 @@ import os
 
 class QLRun(PythonAlgorithm):
 
+    _program = None
+    _samWS = None
+    _resWS = None
+    _resnormWS = None
+    _e_min = None
+    _e_max = None
+    _sam_bins = None
+    _res_bins = None
+    _elastic = None
+    _background = None
+    _width = None
+    _res_norm = None
+    _wfile = None
+    _Loop = None
+    _Save = None
+    _Plot = None
+
     def category(self):
         return "Workflow\\MIDAS;PythonAlgorithms"
 
@@ -66,6 +83,39 @@ class QLRun(PythonAlgorithm):
 
         self.declareProperty(name='Save', defaultValue=False, doc='Switch Save result to nxs file Off/On')
 
+
+    def validateInputs(self):
+        self._get_properties()
+        issues = dict()
+
+        # Validate fitting range in energy
+        e_min = self.getProperty('MinRange').value
+        e_max = self.getProperty('MaxRange').value
+        if e_min > e_max:
+            issues['EnergyMax'] = 'Must be less than EnergyMin'
+
+        return issues
+
+
+    def _get_properties(self):
+        self._program = self.getPropertyValue('Program')
+        self._samWS = self.getPropertyValue('SampleWorkspace')
+        self._resWS = self.getPropertyValue('ResolutionWorkspace')
+        self._resnormWS = self.getPropertyValue('ResNormWorkspace')
+        self._e_min = self.getProperty('MinRange').value
+        self._e_max = self.getProperty('MaxRange').value
+        self._sam_bins = self.getPropertyValue('SampleBins')
+        self._res_bins = self.getPropertyValue('ResolutionBins')
+        self._elastic = self.getProperty('Elastic').value
+        self._background = self.getPropertyValue('Background')
+        self._width = self.getProperty('FixedWidth').value
+        self._res_norm = self.getProperty('UseResNorm').value
+        self._wfile = self.getPropertyValue('WidthFile')
+        self._Loop = self.getProperty('Loop').value
+        self._Save = self.getProperty('Save').value
+        self._Plot = self.getPropertyValue('Plot')
+
+
     def PyExec(self):
         from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
 
@@ -78,37 +128,20 @@ class QLRun(PythonAlgorithm):
 
         self.log().information('QLRun input')
 
-        program = self.getPropertyValue('Program')
-        samWS = self.getPropertyValue('SampleWorkspace')
-        resWS = self.getPropertyValue('ResolutionWorkspace')
-        resnormWS = self.getPropertyValue('ResNormWorkspace')
-        e_min = self.getProperty('MinRange').value
-        e_max = self.getProperty('MaxRange').value
-        sam_bins = self.getPropertyValue('SampleBins')
-        res_bins = self.getPropertyValue('ResolutionBins')
-        elastic = self.getProperty('Elastic').value
-        background = self.getPropertyValue('Background')
-        width = self.getProperty('FixedWidth').value
-        res_norm = self.getProperty('UseResNorm').value
-        wfile = self.getPropertyValue('WidthFile')
-        Loop = self.getProperty('Loop').value
-        Save = self.getProperty('Save').value
-        Plot = self.getPropertyValue('Plot')
-
-        erange = [e_min, e_max]
-        nbins = [sam_bins, res_bins]
+        erange = [self._e_min, self._e_max]
+        nbins = [self._sam_bins, self._res_bins]
 
         #convert true/false to 1/0 for fortran
-        o_el = 1 if elastic else 0
-        o_w1 = 1 if width else 0
-        o_res = 1 if res_norm else 0
+        o_el = 1 if self._elastic else 0
+        o_w1 = 1 if self._width else 0
+        o_res = 1 if self._res_norm else 0
 
         #fortran code uses background choices defined using the following numbers
-        if background == 'Sloping':
+        if self._background == 'Sloping':
             o_bgd = 2
-        elif background == 'Flat':
+        elif self._background == 'Flat':
             o_bgd = 1
-        elif background == 'Zero':
+        elif self._background == 'Zero':
             o_bgd = 0
 
         fitOp = [o_el, o_bgd, o_w1, o_res]
@@ -120,29 +153,29 @@ class QLRun(PythonAlgorithm):
 
         nbin,nrbin = nbins[0], nbins[1]
 
-        logger.information('Sample is ' + samWS)
-        logger.information('Resolution is ' + resWS)
+        logger.information('Sample is ' + self._samWS)
+        logger.information('Resolution is ' + self._resWS)
 
-        CheckAnalysers(samWS,resWS)
-        efix = getEfixed(samWS)
-        theta, Q = GetThetaQ(samWS)
+        CheckAnalysers(self._samWS,self._resWS)
+        efix = getEfixed(self._samWS)
+        theta, Q = GetThetaQ(self._samWS)
 
-        nsam,ntc = CheckHistZero(samWS)
+        nsam,ntc = CheckHistZero(self._samWS)
 
         totalNoSam = nsam
 
         #check if we're performing a sequential fit
-        if Loop != True:
+        if self._Loop != True:
             nsam = 1
 
-        nres = CheckHistZero(resWS)[0]
+        nres = CheckHistZero(self._resWS)[0]
 
-        if program == 'QL':
+        if self._program == 'QL':
             if nres == 1:
                 prog = 'QLr'                        # res file
             else:
                 prog = 'QLd'                        # data file
-                CheckHistSame(samWS,'Sample',resWS,'Resolution')
+                CheckHistSame(self._samWS,'Sample',self._resWS,'Resolution')
         elif program == 'QSe':
             if nres == 1:
                 prog = 'QSe'                        # res file
@@ -153,21 +186,21 @@ class QLRun(PythonAlgorithm):
         logger.information(' Number of spectra = '+str(nsam))
         logger.information(' Erange : '+str(erange[0])+' to '+str(erange[1]))
 
-        Wy,We = ReadWidthFile(width,wfile,totalNoSam)
-        dtn,xsc = ReadNormFile(res_norm,resnormWS,totalNoSam)
+        Wy,We = ReadWidthFile(self._width,self._wfile,totalNoSam)
+        dtn,xsc = ReadNormFile(self._res_norm,self._resnormWS,totalNoSam)
 
-        fname = samWS[:-4] + '_'+ prog
+        fname = self._samWS[:-4] + '_'+ prog
         probWS = fname + '_Prob'
         fitWS = fname + '_Fit'
-        wrks=os.path.join(workdir, samWS[:-4])
+        wrks=os.path.join(workdir, self._samWS[:-4])
         logger.information(' lptfile : '+wrks+'_'+prog+'.lpt')
         lwrk=len(wrks)
         wrks.ljust(140,' ')
-        wrkr=resWS
+        wrkr=self._resWS
         wrkr.ljust(140,' ')
 
         # initialise probability list
-        if program == 'QL':
+        if self._program == 'QL':
             prob0 = []
             prob1 = []
             prob2 = []
@@ -183,7 +216,7 @@ class QLRun(PythonAlgorithm):
         for m in range(0,nsam):
             logger.information('Group ' +str(m)+ ' at angle '+ str(theta[m]))
             nsp = m+1
-            nout,bnorm,Xdat,Xv,Yv,Ev = CalcErange(samWS,m,erange,nbin)
+            nout,bnorm,Xdat,Xv,Yv,Ev = CalcErange(self._samWS,m,erange,nbin)
             Ndat = nout[0]
             Imin = nout[1]
             Imax = nout[2]
@@ -191,7 +224,7 @@ class QLRun(PythonAlgorithm):
                 mm = m
             else:
                 mm = 0
-            Nb,Xb,Yb,Eb = GetXYE(resWS,mm,array_len)     # get resolution data
+            Nb,Xb,Yb,Eb = GetXYE(self._resWS,mm,array_len)     # get resolution data
             numb = [nsam, nsp, ntc, Ndat, nbin, Imin, Imax, Nb, nrbin]
             rscl = 1.0
             reals = [efix, theta[m], rscl, bnorm]
@@ -216,7 +249,7 @@ class QLRun(PythonAlgorithm):
             dataX = np.append(dataX,2*xout[nd-1]-xout[nd-2])
             yfit_list = np.split(yfit[:4*nd],4)
             dataF1 = yfit_list[1]
-            if program == 'QL':
+            if self._program == 'QL':
                 dataF2 = yfit_list[2]
             dataG = np.zeros(nd)
             datX = dataX
@@ -232,7 +265,7 @@ class QLRun(PythonAlgorithm):
             nsp = 3
             names = 'data,fit.1,diff.1'
             res_plot = [0, 1, 2]
-            if program == 'QL':
+            if self._program == 'QL':
                 datX = np.append(datX,dataX)
                 datY = np.append(datY,dataF2[:nd])
                 datE = np.append(datE,dataG)
@@ -259,7 +292,7 @@ class QLRun(PythonAlgorithm):
 
         GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS)
 
-        if program == 'QL':
+        if self._program == 'QL':
             yPr0 = np.array([prob0[0]])
             yPr1 = np.array([prob1[0]])
             yPr2 = np.array([prob2[0]])
@@ -272,23 +305,23 @@ class QLRun(PythonAlgorithm):
             yProb = np.append(yProb,yPr2)
             CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,\
                 Nspec=3, UnitX='MomentumTransfer')
-            outWS = C2Fw(samWS[:-4],fname)
-            if Plot != 'None':
-                QuasiPlot(fname,Plot,res_plot,Loop)
-        if program == 'QSe':
+            outWS = C2Fw(self._samWS[:-4],fname)
+            if self._Plot != 'None':
+                QuasiPlot(fname,self._Plot,res_plot,self._Loop)
+        if self._program == 'QSe':
             outWS = C2Se(fname)
-            if Plot != 'None':
-                QuasiPlot(fname,Plot,res_plot,Loop)
+            if self._Plot != 'None':
+                QuasiPlot(fname,self._Plot,res_plot,self._Loop)
 
         #Add some sample logs to the output workspaces
-        CopyLogs(InputWorkspace=samWS, OutputWorkspace=outWS)
-        QLAddSampleLogs(outWS, resWS, prog, background, elastic, erange,
-                        (nbin, nrbin), resnormWS, wfile)
-        CopyLogs(InputWorkspace=samWS, OutputWorkspace=fitWS)
-        QLAddSampleLogs(fitWS, resWS, prog, background, elastic, erange,
-                        (nbin, nrbin), resnormWS, wfile)
+        CopyLogs(InputWorkspace=self._samWS, OutputWorkspace=outWS)
+        QLAddSampleLogs(outWS, self._resWS, prog, self._background, self._elastic, erange,
+                        (nbin, nrbin), self._resnormWS, self._wfile)
+        CopyLogs(InputWorkspace=self._samWS, OutputWorkspace=fitWS)
+        QLAddSampleLogs(fitWS, self._resWS, prog, self._background, self._elastic, erange,
+                        (nbin, nrbin), self._resnormWS, self._wfile)
 
-        if Save:
+        if self._Save:
             fit_path = os.path.join(workdir,fitWS+'.nxs')
             SaveNexusProcessed(InputWorkspace=fitWS, Filename=fit_path)
             out_path = os.path.join(workdir, outWS+'.nxs')                    # path name for nxs file
