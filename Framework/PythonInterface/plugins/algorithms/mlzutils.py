@@ -1,4 +1,6 @@
+# pylint: disable=assignment-from-none
 import mantid.simpleapi as api
+import numpy as np
 
 
 def cleanup(wslist):
@@ -154,3 +156,82 @@ def compare_mandatory(wslist, plist, logger, tolerance=0.01):
                 "Workspaces: " + ", ".join(wslist) + "\n Values: " + str(properties)
             logger.error(message)
             raise RuntimeError(message)
+
+
+def remove_fit_workspaces(prefix):
+    ws1 = prefix + '_Parameters'
+    ws2 = prefix + '_NormalisedCovarianceMatrix'
+    cleanup([ws1, ws2])
+
+
+def do_fit_gaussian(workspace, index, logger, cleanup_fit=True):
+    """
+    Calculates guess values on peak centre, sigma and peak height.
+    Uses them as an input to run a fit algorithm
+        @ param workspace --- input workspace
+        @ param index --- the spectrum with which WorkspaceIndex to fit
+        @ param cleanup --- if False, the intermediate workspaces created by Fit algorithm will not be removed
+        @ returns peak_centre --- fitted peak centre
+        @ returns sigma --- fitted sigma
+    """
+    nhist = workspace.getNumberHistograms()
+    if index > nhist:
+        message = "Index " + str(index) + " is out of range for the workspace " + workspace.getName()
+        logger.error(message)
+        raise RuntimeError(message)
+
+    x_values = np.array(workspace.readX(index))
+    y_values = np.array(workspace.readY(index))
+
+    # get peak centre position
+    imax = np.argmax(y_values)
+    height = y_values[imax]
+
+    # check for zero or negative signal
+    if height <= 0:
+        logger.warning("Workspace %s, detector %d has maximum <= 0" % (workspace.getName(), index))
+        return [0, 0]
+
+    try_centre = x_values[imax]
+
+    # guess sigma
+    indices = np.argwhere(y_values > 0.5*height)
+    nentries = len(indices)
+    if nentries < 3:
+        message = "Spectrum " + str(index) + " in workspace " + workspace.getName() +\
+            " has too narrow peak. Cannot guess sigma. Check your data."
+        logger.error(message)
+        raise RuntimeError(message)
+    # fwhm = sigma * (2.*np.sqrt(2.*np.log(2.)))
+    fwhm = np.fabs(x_values[indices[nentries - 1, 0]] - x_values[indices[0, 0]])
+    sigma = fwhm/(2.*np.sqrt(2.*np.log(2.)))
+
+    # execute Fit algorithm
+    myfunc = 'name=Gaussian, Height='+str(height)+', PeakCentre='+str(try_centre)+', Sigma='+str(sigma)
+    startX = try_centre - 3.0*fwhm
+    endX = try_centre + 3.0*fwhm
+    prefix = "Fit" + workspace.getName() + str(index)
+    retvals = api.Fit(InputWorkspace=workspace.getName(), WorkspaceIndex=index, StartX=startX, EndX=endX,
+                      Function=myfunc, Output=prefix, OutputParametersOnly=True)
+    if not retvals or len(retvals) < 4:
+        message = "For detector " + str(index) + " in workspace " + workspace.getName() +\
+            " failed to retrieve fit results. Input guess parameters are " + str(myfunc)
+        logger.error(message)
+        if cleanup_fit:
+            remove_fit_workspaces(prefix)
+        raise RuntimeError(message)
+
+    fitStatus = retvals[0]
+    paramTable = retvals[3]
+    if fitStatus != 'success':
+        message = "For detector " + str(index) + " in workspace " + workspace.getName() +\
+            "fit has been terminated with status " + fitStatus + ". Input guess parameters are " + str(myfunc)
+        logger.error(message)
+        if cleanup_fit:
+            remove_fit_workspaces(prefix)
+        raise RuntimeError(message)
+    result = paramTable.column(1)[1:3]
+    if cleanup_fit:
+        remove_fit_workspaces(prefix)
+    # return list: [peak_centre, sigma]
+    return result
