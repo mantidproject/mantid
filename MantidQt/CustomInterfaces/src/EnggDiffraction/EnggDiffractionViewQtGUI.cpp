@@ -307,8 +307,7 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
   qs.setValue("user-params-focus-texture-detector-grouping-file",
               m_uiTabFocus.lineEdit_texture_grouping_file->text());
 
-  qs.setValue("user-params-focus-plot-ws",
-              m_uiTabFocus.checkBox_FocusedWS->checkState());
+  qs.setValue("value", m_uiTabFocus.checkBox_FocusedWS->isChecked());
 
   // TODO: this should become << >> operators on EnggDiffCalibSettings
   qs.setValue("input-dir-calib-files",

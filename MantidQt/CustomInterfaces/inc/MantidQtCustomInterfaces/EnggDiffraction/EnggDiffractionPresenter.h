@@ -178,10 +178,12 @@ private:
 
   void plotFocusedWorkspace(std::string outWSName);
 
-  // Algorithms to save the generate workspace
-  void saveGSS(std::string inputWorkspace, std::string bank);
-  void saveFocusedXYE(std::string inputWorkspace, std::string bank);
-  void saveOpenGenie(std::string inputWorkspace, std::string specNums);
+  // Algorithms to save the generated workspace
+  void saveGSS(std::string inputWorkspace, std::string bank, std::string runNo);
+  void saveFocusedXYE(std::string inputWorkspace, std::string bank,
+                      std::string runNo);
+  void saveOpenGenie(std::string inputWorkspace, std::string specNums,
+                     std::string bank, std::string runNo);
 
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;
@@ -198,6 +200,9 @@ private:
   bool m_calibFinishedOK;
   /// true if the last focusing completed successfully
   bool m_focusFinishedOK;
+
+  /// Counter for the cropped output files
+  static int g_croppedCounter;
 
   /// Associated view for this presenter (MVP pattern)
   IEnggDiffractionView *const m_view;

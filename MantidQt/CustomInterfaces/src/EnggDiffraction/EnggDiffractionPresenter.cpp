@@ -32,6 +32,7 @@ const std::string EnggDiffractionPresenter::g_enginxStr = "ENGINX";
 const bool EnggDiffractionPresenter::g_askUserCalibFilename = false;
 const std::string EnggDiffractionPresenter::g_vanIntegrationWSName =
     "engggui_vanadium_integration_ws";
+int EnggDiffractionPresenter::g_croppedCounter = 0;
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(NULL), m_calibFinishedOK(false), m_focusFinishedOK(false),
@@ -1132,9 +1133,10 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
 
   bool saveOutputFiles = m_view->saveOutputFiles();
   if (saveOutputFiles) {
-    saveFocusedXYE(outWSName, boost::lexical_cast<std::string>(bank));
-    saveGSS(outWSName, boost::lexical_cast<std::string>(bank));
-    saveOpenGenie(outWSName, specNumsOpenGenie);
+    saveFocusedXYE(outWSName, boost::lexical_cast<std::string>(bank), runNo);
+    saveGSS(outWSName, boost::lexical_cast<std::string>(bank), runNo);
+    saveOpenGenie(outWSName, specNumsOpenGenie,
+                  boost::lexical_cast<std::string>(bank), runNo);
   }
 }
 
@@ -1379,25 +1381,47 @@ void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName) {
  *
  * @param inputWorkspace title of the focused workspace
  * @param bank the number of the bank as a string
+ * @param runNo the run number as a string
  */
 void EnggDiffractionPresenter::saveFocusedXYE(const std::string inputWorkspace,
-                                              std::string bank) {
+                                              std::string bank,
+                                              std::string runNo) {
   auto alg = Algorithm::fromString("SaveFocusedXYE");
-  std::string fullFilename = inputWorkspace + ".dat";
-
+  std::string fullFilename;
+  if (inputWorkspace.std::string::find("texture") != std::string::npos) {
+    fullFilename = "ENGINX_" + runNo + "_texture_" + bank + ".dat";
+  }
+  if (inputWorkspace.std::string::find("cropped") != std::string::npos) {
+    fullFilename = "ENGINX_" + runNo + "_cropped_" +
+                   boost::lexical_cast<std::string>(g_croppedCounter) + ".dat";
+    g_croppedCounter++;
+  } else {
+    fullFilename = "ENGINX_" + runNo + "_bank_" + bank + ".dat";
+  }
+  std::string saveDir;
+  try {
+    // takes to the root of directory according to the platform
+    // and appends the following string provided
+    saveDir =
+        Poco::Path(saveDir).expand("/EnginX_Mantid/User/" + runNo + "/Focus/");
+    if (!Poco::File(saveDir).exists()) {
+      Poco::File(saveDir).createDirectories();
+    }
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Error while using Poco: " << re.what();
+  }
   try {
     g_log.debug() << "Going to save focused output into OpenGenie file: "
                   << fullFilename << std::endl;
     alg->initialize();
     alg->setProperty("InputWorkspace", inputWorkspace);
-
-    std::string filename(fullFilename);
+    std::string filename(saveDir + fullFilename);
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("SplitFiles", false);
     alg->setPropertyValue("StartAtBankNumber", bank);
     alg->execute();
   } catch (std::runtime_error &re) {
-    g_log.error() << "Error in saving FocusedXYE file. ",
+    g_log.error() << "Error in saving FocusedXYE format file. ",
         "Could not run the algorithm SaveFocusXYE succesfully for "
         "workspace " +
             inputWorkspace + ". Error description: " + re.what() +
@@ -1414,23 +1438,48 @@ void EnggDiffractionPresenter::saveFocusedXYE(const std::string inputWorkspace,
  *
  * @param inputWorkspace title of the focused workspace
  * @param bank the number of the bank as a string
+ * @param runNo the run number as a string
  */
 void EnggDiffractionPresenter::saveGSS(const std::string inputWorkspace,
-                                       std::string bank) {
+                                       std::string bank, std::string runNo) {
   auto alg = Algorithm::fromString("SaveGSS");
-  std::string fullFilename = inputWorkspace + ".gss";
+  std::string fullFilename;
+  if (inputWorkspace.std::string::find("texture") != std::string::npos) {
+    fullFilename = "ENGINX_" + runNo + "_texture_" + bank + ".gss";
+  }
+  if (inputWorkspace.std::string::find("cropped") != std::string::npos) {
+    fullFilename = "ENGINX_" + runNo + "_cropped_" +
+                   boost::lexical_cast<std::string>(g_croppedCounter) + ".gss";
+    g_croppedCounter++;
+  } else {
+    fullFilename = "ENGINX_" + runNo + "_bank_" + bank + ".gss";
+  }
+
+  std::string saveDir;
+  try {
+    // takes to the root of directory according to the platform
+    // and appends the following string provided
+    saveDir =
+        Poco::Path(saveDir).expand("/EnginX_Mantid/User/" + runNo + "/Focus/");
+    if (!Poco::File(saveDir).exists()) {
+      Poco::File(saveDir).createDirectories();
+    }
+  } catch (std::runtime_error &re) {
+     g_log.error() << "Error while using Poco: " << re.what();
+  }
 
   try {
     g_log.debug() << "Going to save focused output into OpenGenie file: "
                   << fullFilename << std::endl;
     alg->initialize();
     alg->setProperty("InputWorkspace", inputWorkspace);
-    std::string filename(fullFilename);
+    std::string filename(saveDir + fullFilename);
     alg->setPropertyValue("Filename", filename);
+    alg->setProperty("SplitFiles", false);
     alg->setPropertyValue("Bank", bank);
     alg->execute();
   } catch (std::runtime_error &re) {
-    g_log.error() << "Error in saving GSS file. ",
+    g_log.error() << "Error in saving GSS format file. ",
         "Could not run the algorithm saveGSS succesfully for "
         "workspace " +
             inputWorkspace + ". Error description: " + re.what() +
@@ -1447,22 +1496,51 @@ void EnggDiffractionPresenter::saveGSS(const std::string inputWorkspace,
  *
  * @param inputWorkspace title of the focused workspace
  * @param specNums number of spectrum to display
+ * @param bank the number of the bank as a string
+ * @param runNo the run number as a string
  */
 void EnggDiffractionPresenter::saveOpenGenie(const std::string inputWorkspace,
-                                             std::string specNums) {
+                                             std::string specNums,
+                                             std::string bank,
+                                             std::string runNo) {
   auto alg = Algorithm::fromString("SaveOpenGenieAscii");
-  std::string fullFilename = inputWorkspace + ".his";
+  std::string fullFilename;
+  if (inputWorkspace.std::string::find("texture") != std::string::npos) {
+    fullFilename = "ENGINX_" + runNo + "_texture_" + bank + ".his";
+  }
+  if (inputWorkspace.std::string::find("cropped") != std::string::npos) {
+    fullFilename = "ENGINX_" + runNo + "_cropped_" +
+                   boost::lexical_cast<std::string>(g_croppedCounter) + ".his";
+    g_croppedCounter++;
+  } else {
+    fullFilename = "ENGINX_" + runNo + "_bank_" + bank + ".his";
+  }
+
+  std::string saveDir;
+  try {
+    // takes to the root of directory according to the platform
+    // and appends the following string provided
+    saveDir =
+        Poco::Path(saveDir).expand("/EnginX_Mantid/User/" + runNo + "/Focus/");
+
+    if (!Poco::File(saveDir).exists()) {
+      Poco::File(saveDir).createDirectories();
+    }
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Error while using Poco: " << re.what();
+  }
+
   try {
     g_log.debug() << "Going to save focused output into OpenGenie file: "
                   << fullFilename << std::endl;
     alg->initialize();
     alg->setProperty("InputWorkspace", inputWorkspace);
-    std::string filename(fullFilename);
+    std::string filename(saveDir + fullFilename);
     alg->setPropertyValue("Filename", filename);
     alg->setPropertyValue("SpecNumberField", specNums);
     alg->execute();
   } catch (std::runtime_error &re) {
-    g_log.error() << "Error in saving Open Genie file. ",
+    g_log.error() << "Error in saving OpenGenie format file. ",
         "Could not run the algorithm SaveOpenGenieAscii succesfully for "
         "workspace " +
             inputWorkspace + ". Error description: " + re.what() +
