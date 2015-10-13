@@ -37,6 +37,6 @@ void export_Goniometer() {
            getEulerAngles_overloads(args("self", "convention"),
                                     "Default convention is \'YZX\'. Universal "
                                     "goniometer is \'YZY\'"))
-      .def("getR", &Goniometer::getR, return_readonly_numpy())
-      .def("setR", &setR);
+      .def("getR", &Goniometer::getR, arg("self"), return_readonly_numpy())
+      .def("setR", &setR, (arg("self"), arg("rot")));
 }

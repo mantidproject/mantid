@@ -39,53 +39,70 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamDescription,
 
 void export_Component() {
   class_<Component, bases<IComponent>, boost::noncopyable>("Component", no_init)
-      .def("getParameterNames", &Component::getParameterNames,
-           Component_getParameterNames())
-      .def("hasParameter", &Component::hasParameter, Component_hasParameter())
-      .def("getNumberParameter", &Component::getNumberParameter,
-           Component_getNumberParameter())
-      .def("getBoolParameter", &Component::getBoolParameter,
-           Component_getBoolParameter())
-      .def("getPositionParameter", &Component::getPositionParameter,
-           Component_getPositionParameter())
-      .def("getRotationParameter", &Component::getRotationParameter,
-           Component_getRotationParameter())
-      .def("getStringParameter", &Component::getStringParameter,
-           Component_getStringParameter())
-      .def("getIntParameter", &Component::getIntParameter,
-           Component_getIntParameter())
-      //
-      .def("getRotation", &Component::getRotation, Component_getRotation())
-      .def("getRelativePos", &Component::getRelativePos,
-           Component_getRelativePos())
-      //
-      .def("getParamShortDescription", &Component::getParamShortDescription,
-           Component_getParamShortDescription())
-      .def("getParamDescription", &Component::getParamDescription,
-           Component_getParamDescription())
-      .def("getShortDescription", &Component::getShortDescription,
-           "Return the short description of current parameterized component")
-      .def("getDescription", &Component::getDescription,
-           "Return the description of current parameterized component")
-      .def("setDescription", &Component::setDescription,
-           "Set component's description, works only if the component is "
-           "parameterized component")
+    .def("getParameterNames", &Component::getParameterNames,
+	 Component_getParameterNames((arg("self"), arg("recursive")=true))
+	 )
+    .def("hasParameter", &Component::hasParameter,
+	 Component_hasParameter
+	 ((arg("self"), arg("name"), arg("recursive")=true)))
+    .def("getNumberParameter", &Component::getNumberParameter,
+	 Component_getNumberParameter
+	 ((arg("self"), arg("pname"), arg("recursive")=true)))
+    .def("getBoolParameter", &Component::getBoolParameter,
+	 Component_getBoolParameter
+	 ((arg("self"), arg("pname"), arg("recursive")=true)))
+    .def("getPositionParameter", &Component::getPositionParameter,
+	 Component_getPositionParameter
+	 ((arg("self"), arg("pname"), arg("recursive")=true)))
+    .def("getRotationParameter", &Component::getRotationParameter,
+	 Component_getRotationParameter
+	 ((arg("self"), arg("pname"), arg("recursive")=true)))
+    .def("getStringParameter", &Component::getStringParameter,
+           Component_getStringParameter
+	 ((arg("self"), arg("pname"), arg("recursive")=true)))
+    .def("getIntParameter", &Component::getIntParameter,
+	 Component_getIntParameter
+	 ((arg("self"), arg("pname"), arg("recursive")=true)))
+    //
+    .def("getRotation", &Component::getRotation, 
+	 Component_getRotation(arg("self")))
+    .def("getRelativePos", &Component::getRelativePos,
+	 Component_getRelativePos(arg("self")))
+    //
+    .def("getParamShortDescription", &Component::getParamShortDescription,
+	 Component_getParamShortDescription
+	 ((arg("self"), arg("pname"), arg("recursive")=true)))
+    .def("getParamDescription", &Component::getParamDescription,
+	 Component_getParamDescription
+	 ((arg("self"), arg("pname"), arg("recursive")=true)))
+    
+    .def("getShortDescription", &Component::getShortDescription,
+	 arg("self"),
+	 "Return the short description of current parameterized component")
+    .def("getDescription", &Component::getDescription,
+	 arg("self"),
+	 "Return the description of current parameterized component")
+    .def("setDescription", &Component::setDescription,
+	 (arg("self"), arg("descr")),
+	 "Set component's description, works only if the component is "
+	 "parameterized component")
 
-      // HACK -- python should return parameters regardless of type. this is
-      // untill rows below do not work
-      .def("getParameterType", &Component::getParameterType,
-           Component_getParameterType())
-      //// this does not work for some obvious or not obvious reasons
-      //.def("getParameter", &Component::getNumberParameter,
-      // Component_getNumberParameter())
-      //.def("getParameter", &Component::getBoolParameter,
-      // Component_getBoolParameter())
-      //.def("getParameter", &Component::getStringParameter,
-      // Component_getStringParameter())
-      //.def("getParameter", &Component::getPositionParameter,
-      // Component_getPositionParameter())
-      //.def("getParameter", &Component::getRotationParameter,
-      // Component_getRotationParameter())
-
-      ;
+    // HACK -- python should return parameters regardless of type. this is
+    // untill rows below do not work
+    .def("getParameterType", &Component::getParameterType,
+	 Component_getParameterType
+	 ((arg("self"), arg("pname"), arg("recursive")=true)))
+    //// this does not work for some obvious or not obvious reasons
+    //.def("getParameter", &Component::getNumberParameter,
+    // Component_getNumberParameter())
+    //.def("getParameter", &Component::getBoolParameter,
+    // Component_getBoolParameter())
+    //.def("getParameter", &Component::getStringParameter,
+    // Component_getStringParameter())
+    //.def("getParameter", &Component::getPositionParameter,
+    // Component_getPositionParameter())
+    //.def("getParameter", &Component::getRotationParameter,
+    // Component_getRotationParameter())
+    
+    ;
 }

@@ -44,22 +44,32 @@ void export_SpaceGroupFactory() {
 
   class_<SpaceGroupFactoryImpl, boost::noncopyable>("SpaceGroupFactoryImpl",
                                                     no_init)
-      .def("isSubscribedSymbol", &isSubscribedSymbol,
-           "Returns true if the space group the supplied symbol is subscribed.")
-      .def("isSubscribedNumber", &isSubscribedNumber,
-           "Returns true if a space group with the given number is subscribed.")
-      .def("createSpaceGroup", &createSpaceGroup, "Creates a space group.")
-      .def("getAllSpaceGroupSymbols", &allSpaceGroupSymbols,
-           "Returns all subscribed space group symbols.")
-      .def("getAllSpaceGroupNumbers",
-           &SpaceGroupFactoryImpl::subscribedSpaceGroupNumbers,
-           "Returns all subscribed space group numbers.")
-      .def("subscribedSpaceGroupSymbols", &spaceGroupSymbolsForNumber,
-           "Returns all space group symbols that are registered under the "
-           "given number.")
-      .def("getSpaceGroupsForPointGroup", &spaceGroupSymbolsForPointGroup)
-      .def("Instance", &SpaceGroupFactory::Instance,
-           return_value_policy<reference_existing_object>(),
-           "Returns a reference to the SpaceGroupFactory singleton")
-      .staticmethod("Instance");
+    .def("isSubscribedSymbol", &isSubscribedSymbol,
+	 (arg("self"), arg("symbol")),
+	 "Returns true if the space group the supplied symbol is subscribed.")
+    .def("isSubscribedNumber", &isSubscribedNumber,
+	 (arg("self"), arg("number")),
+	 "Returns true if a space group with the given number is subscribed.")
+    .def("createSpaceGroup", &createSpaceGroup, 
+	 (arg("self"), arg("symbol")),
+	 "Creates a space group.")
+    .def("getAllSpaceGroupSymbols", &allSpaceGroupSymbols,
+	 arg("self"),
+	 "Returns all subscribed space group symbols.")
+    .def("getAllSpaceGroupNumbers",
+	 &SpaceGroupFactoryImpl::subscribedSpaceGroupNumbers,
+	 arg("self"),
+	 "Returns all subscribed space group numbers.")
+    .def("subscribedSpaceGroupSymbols", &spaceGroupSymbolsForNumber,
+	 (arg("self"), arg("number")),
+	 "Returns all space group symbols that are registered under the "
+	 "given number.")
+    .def("getSpaceGroupsForPointGroup", 
+	 &spaceGroupSymbolsForPointGroup,
+	 (arg("self"), arg("pointGroup"))
+	 )
+    .def("Instance", &SpaceGroupFactory::Instance,
+	 return_value_policy<reference_existing_object>(),
+	 "Returns a reference to the SpaceGroupFactory singleton")
+    .staticmethod("Instance");
 }
