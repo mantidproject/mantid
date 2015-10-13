@@ -88,7 +88,7 @@ TimeSeriesProperty<TYPE>::getDerivative() const {
     int64_t t1 = it->time().totalNanoseconds();
     if (t1 != t0) {
       double deriv = 1.e+9 * (double(v1 - v0) / double(t1 - t0));
-      int64_t tm = static_cast<int64_t>(0.5 * (t1 + t0));
+      int64_t tm = static_cast<int64_t>((t1 + t0) / 2);
       timeSeriesDeriv->addValue(Kernel::DateAndTime(tm), deriv);
     }
     t0 = t1;

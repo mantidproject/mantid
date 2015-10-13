@@ -395,7 +395,7 @@ public:
     TS_ASSERT_EQUALS(nZer, 3);
     for (size_t i = 0; i < 99; i++) { // intentionally left boundary point --
                                       // its accuracy is much lower
-      TSM_ASSERT_DELTA("At i=" + std::to_string(i), deriv[i],
+      TSM_ASSERT_DELTA("At i=" + boost::lexical_cast<std::string>(i), deriv[i],
                        10. * std::cos(0.5 * (bins[i] + bins[i + 1])), 1.e-1);
     }
     TS_ASSERT_DELTA(zeros[0], 1.55, 1.e-3);
