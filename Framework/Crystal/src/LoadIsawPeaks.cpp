@@ -190,7 +190,7 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
     }
     bankName += SbankNum;
     boost::shared_ptr<const Geometry::IComponent> bank =
-        instr_old->getComponentByName(bankName);
+        getCachedBankByName(bankName, instr_old);
 
     if (!bank) {
       g_log.error() << "There is no bank " << bankName << " in the instrument"
@@ -405,7 +405,8 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
 int LoadIsawPeaks::findPixelID(Instrument_const_sptr inst, std::string bankName,
                                int col, int row) {
   boost::shared_ptr<const IComponent> parent =
-      inst->getComponentByName(bankName);
+      getCachedBankByName(bankName, inst);
+
   if (parent->type().compare("RectangularDetector") == 0) {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
@@ -605,6 +606,29 @@ void LoadIsawPeaks::exec() {
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(ws));
 
   this->checkNumberPeaks(ws, getPropertyValue("Filename"));
+}
+
+//----------------------------------------------------------------------------------------------
+/** Retrieves pointer to given bank from local cache.
+ *
+ * When the bank isn't in the local cache, it is loaded and
+ * added to the cache for later use. Lifetime of the cache
+ * is bound to the lifetime of this instance of the algorithm
+ * (typically, the instance should be destroyed once exec()
+ * finishes).
+ *
+ * Note that while this is used only for banks here, it would
+ * work for caching any component without modification.
+ *
+ * @param bankname :: the name of the requested bank
+ * @param inst :: the instrument from which to load the bank if it is not yet cached
+ * @return A shared pointer to the request bank (empty shared pointer if not found)
+ */
+boost::shared_ptr<const IComponent> LoadIsawPeaks::getCachedBankByName(std::string bankname, const boost::shared_ptr<const Geometry::Instrument>& inst)
+{
+    if (m_banks.count(bankname) == 0)
+        m_banks[bankname] = inst->getComponentByName(bankname);
+    return m_banks[bankname];
 }
 
 } // namespace Mantid
