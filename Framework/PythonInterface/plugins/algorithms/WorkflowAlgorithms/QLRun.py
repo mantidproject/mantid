@@ -8,7 +8,7 @@ if is_supported_f2py_platform():
     resnorm = import_f2py("ResNorm")
 else:
     unsupported_message()
-    
+
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode
 from mantid.kernel import StringListValidator, Direction
 from mantid.simpleapi import *
