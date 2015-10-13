@@ -159,8 +159,8 @@ bool ISISEnergyTransfer::validate() {
     if (m_uiForm.ckBackgroundRemoval->isChecked()) {
       MatrixWorkspace_sptr tempWs =
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
-      const int minBack = tempWs->readX(0)[0];
-      const int maxBack = tempWs->readX(0)[tempWs->blocksize()];
+      const double minBack = tempWs->readX(0)[0];
+      const double maxBack = tempWs->readX(0)[tempWs->blocksize()];
 
       if (m_uiForm.spBackgroundStart->value() < minBack) {
         uiv.addErrorMessage("The Start of Background Removal is less than the "
@@ -529,8 +529,8 @@ void ISISEnergyTransfer::plotRaw() {
   if (m_uiForm.ckBackgroundRemoval->isChecked()) {
     MatrixWorkspace_sptr tempWs =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
-    const int minBack = tempWs->readX(0)[0];
-    const int maxBack = tempWs->readX(0)[tempWs->blocksize()];
+    const double minBack = tempWs->readX(0)[0];
+    const double maxBack = tempWs->readX(0)[tempWs->blocksize()];
 
     if (startBack < minBack) {
       emit showMessageBox("The Start of Background Removal is less than the "
