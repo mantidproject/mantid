@@ -865,34 +865,37 @@ int setValues(const std::string &Line, const std::vector<int> &Index,
  * @return a string with the word read in
  */
 std::string getWord(std::istream &in, bool consumeEOL) {
-  std::string s;
-  char c = 0;
-  if (in.good())
-    for (c = static_cast<char>(in.get()); c == ' ' && in.good();
-         c = static_cast<char>(in.get())) {
-    }
-  else
-    return std::string();
+  std::string ret;
+  char nextch = 0;
 
-  if (c == '\n') {
+  // Skip leading spaces
+  do {
+    nextch = static_cast<char>(in.get());
+  } while (nextch == ' ');
+
+  // Return an empty string on EOL; optionally consume it
+  if (nextch == '\n' || nextch == '\r') {
     if (!consumeEOL)
-      in.putback(c);
+      in.unget();
 
-    return std::string();
+    return ret;
+  }
+  else { // Non-EOL and non-space character
+      in.unget(); // Put it back on stream
   }
 
-  s.push_back(c);
-
+  // Get next word if stream is still valid
   if (in.good())
-    for (c = static_cast<char>(in.get());
-         in.good() && c != ' ' && c != '\n' && c != '\r';
-         c = static_cast<char>(in.get()))
-      s.push_back(c);
+    in >> ret;
 
-  if (((c == '\n') || (c == '\r')) && !consumeEOL)
-    in.putback(c);
+  // Optionally consume EOL character
+  if (consumeEOL) {
+    nextch = static_cast<char>(in.peek());
+    if ((nextch == '\n') || (nextch == '\r'))
+      in.ignore();
+  }
 
-  return s;
+  return ret;
 }
 
 //-----------------------------------------------------------------------------------------------
