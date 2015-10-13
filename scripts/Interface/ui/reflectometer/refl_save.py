@@ -32,10 +32,12 @@ class Ui_SaveWindow(object):
     def setupUi(self, SaveWindow):
         self.SavePath=""
         SaveWindow.setObjectName(_fromUtf8("SaveWindow"))
-        SaveWindow.resize(700, 450)
+        SaveWindow.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding))
         SaveWindow.setAcceptDrops(True)
-
+        main_layout = QtGui.QHBoxLayout()
+        SaveWindow.setLayout(main_layout)
         self.centralWidget = QtGui.QWidget(SaveWindow)
+        main_layout.addWidget(self.centralWidget)
         self.centralWidget.setObjectName(_fromUtf8("centralWidget"))
         self.gridLayout_2 = QtGui.QGridLayout(self.centralWidget)
         self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
@@ -236,7 +238,7 @@ class Ui_SaveWindow(object):
 
     def retranslateUi(self, SaveWindow):
         SaveWindow.setWindowTitle(QtGui.QApplication.translate("SaveWindow", "SaveWindow", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton.setText(QtGui.QApplication.translate("SaveWindow", "SAVE", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButton.setText(QtGui.QApplication.translate("SaveWindow", "Save", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_2.setText(QtGui.QApplication.translate("SaveWindow", "Refresh", None, QtGui.QApplication.UnicodeUTF8))
 
     def _get_saveable_workspace_names(self):
