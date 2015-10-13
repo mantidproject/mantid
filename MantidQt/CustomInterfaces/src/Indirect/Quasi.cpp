@@ -134,8 +134,6 @@ void Quasi::run() {
   bool useResNorm = false;
   std::string resNormFile("");
 
-  std::string pyInput = "from IndirectBayes import QLRun\n";
-
   std::string sampleName =
       m_uiForm.dsSample->getCurrentDataName().toStdString();
   std::string resName =
@@ -201,15 +199,6 @@ void Quasi::run() {
   runAlg->setProperty("Save", save);
   runAlg->setProperty("Plot", plot);
 
-  /*pyInput += "QLRun('" + program + "','" + sampleName + "','" + resName +
-             "','" + resNormFile + "'," + eRange + ","
-                                                   " " +
-             nBins + "," + fitOps + ",'" + fixedWidthFile + "'," + sequence +
-             ", "
-             " Save=" +
-             save + ", Plot='" + plot + "')\n";
-
-  runPythonScript(pyInput);*/
   m_batchAlgoRunner->addAlgorithm(runAlg);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
