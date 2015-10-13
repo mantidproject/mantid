@@ -340,8 +340,8 @@ public:
     iRight = inputData[indOfMax + 1] /
              (inputBoundaries[indOfMax + 2] - inputBoundaries[indOfMax + 1]);
 
-    TS_ASSERT(iLeft<fMax);
-    TS_ASSERT(iRight<fMax);
+    TS_ASSERT(iLeft < fMax);
+    TS_ASSERT(iRight < fMax);
 
     output.swap(inputData);
     VectorHelper::smoothInRange(inputData, output, 10, &inputBoundaries);
@@ -367,7 +367,7 @@ public:
              (inputBoundaries[indOfMax + 2] - inputBoundaries[indOfMax + 1]);
 
     // TS_ASSERT(iLeft<fMax);
-    TS_ASSERT(iRight<fMax);
+    TS_ASSERT(iRight < fMax);
 
     output.swap(inputData);
     VectorHelper::smoothInRange(inputData, output, 10, &inputBoundaries);

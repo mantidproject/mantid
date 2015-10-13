@@ -460,9 +460,9 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
   if (std::fabs(double(ind_max - ind_min)) < 5)
     return false;
 
-  //double xMin = X[ind_min];
-  //double xMax = X[ind_max];
-  //size_t ind_Ofmax(ind_min);
+  // double xMin = X[ind_min];
+  // double xMax = X[ind_max];
+  // size_t ind_Ofmax(ind_min);
 
   for (size_t i = ind_min; i < ind_max; i++) {
     double dX = X[i + 1] - X[i];
@@ -473,7 +473,7 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
       sMax = signal;
       dXmax = dX;
       xOfMax = X[i];
-      //ind_Ofmax=i;
+      // ind_Ofmax=i;
     }
     Intensity += S[i];
   }
@@ -653,7 +653,7 @@ bool signChanged(double val, int &prevSign) {
 /**Bare-bone function to calculate numerical derivative, and estimate number of
 * zeros this derivative has. The function is assumed to be defined on the
 * the left of a bin range so the derivative is calculated in the same point.
-* No checks are performed for simplicity so data have to be correct 
+* No checks are performed for simplicity so data have to be correct
 * form at input.
 *@param bins -- vector of bin boundaries.
 *@param signal  -- vector of signal size of bins.size()-1
@@ -685,15 +685,14 @@ size_t GetAllEi::calcDerivativeAndCountZeros(const std::vector<double> &bins,
   for (size_t i = 1; i < nPoints - 1; i++) {
     bin1 = (bins[i + 2] - bins[i + 1]);
     f1 = signal[i + 1] / bin1;
-    deriv[i] =(f1 - f0) / (bins[i + 2] - bins[i]);
+    deriv[i] = (f1 - f0) / (bins[i + 2] - bins[i]);
     f0 = funVal.back();
     funVal.pop_back();
     funVal.push_front(f1);
 
-
     if (signChanged(deriv[i], prevSign)) {
       nZeros++;
-      zeros.push_back(0.5*(bins[i-1]+bins[i]));
+      zeros.push_back(0.5 * (bins[i - 1] + bins[i]));
     }
   }
   deriv[nPoints - 1] = 2 * (f1 - f0) / (bin1 + bin0);
@@ -996,40 +995,40 @@ GetAllEi::getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS,
 }
 namespace { // former lambda function for findChopSpeedAndDelay
 
-  /**Select time interval on the basis of previous time interval
-  * selection and check if current value gets in the selection
-  *
-  * @param t_beg -- initial time for current time interval
-  * @param t_end -- final time for current time interval
-  * @param inSelection -- the boolean indicating if previous interval
-  *                       was selected on input and current selected on 
-  *                       output
-  * @param startTime -- total selection time start moment
-  * @param endTime   -- total selection time final moments
-  *
-  *@return true if selection interval is completed 
-  *        (current interval is not selected) and false otherwise
-  */
-  bool SelectInterval(const Kernel::DateAndTime &t_beg, 
-    const Kernel::DateAndTime &t_end,
-    double value, bool &inSelection,
-    Kernel::DateAndTime &startTime,  Kernel::DateAndTime &endTime){
+/**Select time interval on the basis of previous time interval
+* selection and check if current value gets in the selection
+*
+* @param t_beg -- initial time for current time interval
+* @param t_end -- final time for current time interval
+* @param inSelection -- the boolean indicating if previous interval
+*                       was selected on input and current selected on
+*                       output
+* @param startTime -- total selection time start moment
+* @param endTime   -- total selection time final moments
+*
+*@return true if selection interval is completed
+*        (current interval is not selected) and false otherwise
+*/
+bool SelectInterval(const Kernel::DateAndTime &t_beg,
+                    const Kernel::DateAndTime &t_end, double value,
+                    bool &inSelection, Kernel::DateAndTime &startTime,
+                    Kernel::DateAndTime &endTime) {
 
-      if (value > 0) {
-        if (!inSelection) {
-          startTime = t_beg;
-        }
-        inSelection = true;
-      } else {
-        if (inSelection) {
-          inSelection = false;
-          if (endTime > startTime)
-            return true;
-        }
-      }
-      endTime = t_end;
-      return false;
-  };
+  if (value > 0) {
+    if (!inSelection) {
+      startTime = t_beg;
+    }
+    inSelection = true;
+  } else {
+    if (inSelection) {
+      inSelection = false;
+      if (endTime > startTime)
+        return true;
+    }
+  }
+  endTime = t_end;
+  return false;
+};
 }
 /**Analyze chopper logs and identify chopper speed and delay
 @param  inputWS    -- sp to workspace with attached logs.
@@ -1065,8 +1064,8 @@ void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
 
     // initialize selection log
     if (dateAndTimes.size() <= 1) {
-      SelectInterval(it->first, it->first, itder->second,
-                     inSelection,startTime,endTime);
+      SelectInterval(it->first, it->first, itder->second, inSelection,
+                     startTime, endTime);
       if (inSelection) {
         startTime = inputWS->run().startTime();
         endTime = inputWS->run().endTime();
@@ -1076,16 +1075,16 @@ void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
         throw std::runtime_error("filtered all data points. Nothing to do");
       }
     } else {
-      SelectInterval(it->first, next->first, itder->second,
-                     inSelection,startTime,endTime);
+      SelectInterval(it->first, next->first, itder->second, inSelection,
+                     startTime, endTime);
     }
 
     // if its filtered using log, both iterator walk through the same values
     // if use derivative, derivative's values are used for filtering
     // and derivative assumed in a center of an interval
     for (; next != dateAndTimes.end(); ++next, ++itder) {
-      if (SelectInterval(it->first, next->first, itder->second,
-                         inSelection,startTime,endTime)) {
+      if (SelectInterval(it->first, next->first, itder->second, inSelection,
+                         startTime, endTime)) {
         Kernel::SplittingInterval interval(startTime, endTime, 0);
         splitter.push_back(interval);
       }
@@ -1113,7 +1112,9 @@ void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
                              "during the algorithm execution");
   std::string units = pProperty->units();
   // its chopper phase provided
-  if (units == "deg" || units.c_str()[0] == -80) { //<- userd in ISIS ASCII representation of o(deg)
+  if (units == "deg" ||
+      units.c_str()[0] ==
+          -80) { //<- userd in ISIS ASCII representation of o(deg)
     chop_delay *= 1.e+6 / (360. * chop_speed); // convert in uSec
   }
   chop_delay += m_phase / chop_speed;

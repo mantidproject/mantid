@@ -534,8 +534,9 @@ void linearlyInterpolateY(const std::vector<double> &x, std::vector<double> &y,
   }
 }
 namespace {
-/** internal function converted from Lambda to identify interval around specified
-* point and  run average around this point 
+/** internal function converted from Lambda to identify interval around
+*specified
+* point and  run average around this point
 *@param index      -- index to average around
 *@param startIndex -- index in the array of data (input to start average
 *                     from) should be: index>=startIndex>=0
@@ -558,7 +559,7 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex,
     // between start and end bin and shift of
     // the interpolating function into the center
     // of each bin
-    //bin0 = binBndrs->operator[](index + 1) - binBndrs->operator[](index);
+    // bin0 = binBndrs->operator[](index + 1) - binBndrs->operator[](index);
     double binC =
         0.5 * (binBndrs->operator[](index + 1) + binBndrs->operator[](index));
     start = binC - halfWidth;
@@ -589,10 +590,10 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex,
     if (iEnd > endIndex)
       iEnd = endIndex;
   }
-  if(iStart>iEnd){ // start and end get into the same bin
-    weight1 =0;
-    weight0 = (end-start) /
-      (binBndrs->operator[](iStart) - binBndrs->operator[](iStart-1));
+  if (iStart > iEnd) { // start and end get into the same bin
+    weight1 = 0;
+    weight0 = (end - start) /
+              (binBndrs->operator[](iStart)-binBndrs->operator[](iStart - 1));
   }
 
   double avrg = 0;
@@ -607,7 +608,7 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex,
     if (iEnd != endIndex)
       avrg += input[iEnd] * weight1;
 
-    return avrg/(end - start);
+    return avrg / (end - start);
   } else {
     return avrg / double(ic);
   }
@@ -638,7 +639,7 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex,
 *                     bin boundaries for output array.
 */
 void smoothInRange(const std::vector<double> &input,
-                   std::vector<double> &output,const double avrgInterval,
+                   std::vector<double> &output, const double avrgInterval,
                    std::vector<double> const *const binBndrs, size_t startIndex,
                    size_t endIndex, std::vector<double> *const outBins) {
 
@@ -676,13 +677,14 @@ void smoothInRange(const std::vector<double> &input,
     outBins->resize(length + 1);
 
   //  Run averaging
-  double binSize   = 1;
+  double binSize = 1;
   for (size_t i = startIndex; i < endIndex; i++) {
     if (binBndrs) {
-      binSize = binBndrs->operator[](i+1) - binBndrs->operator[](i);
+      binSize = binBndrs->operator[](i + 1) - binBndrs->operator[](i);
     }
     output[i - startIndex] =
-      runAverage(i, startIndex, endIndex, halfWidth, input, binBndrs) * binSize;
+        runAverage(i, startIndex, endIndex, halfWidth, input, binBndrs) *
+        binSize;
     if (outBins) {
       outBins->operator[](i - startIndex) = binBndrs->operator[](i);
     }
