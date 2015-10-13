@@ -340,6 +340,6 @@ class QLRun(PythonAlgorithm):
             logger.information('Output paramter file created : ' + out_path)
 
 
-
-# Register algorithm with Mantid
-AlgorithmFactory.subscribe(QLRun)
+if is_supported_f2py_platform():
+    # Register algorithm with Mantid
+    AlgorithmFactory.subscribe(QLRun)
