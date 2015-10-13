@@ -147,7 +147,7 @@ void removeInvalidValues(const std::vector<bool> &guessValid,
     }
   }
   new_guess.swap(guess);
-};
+}
 /**Internal class to contain peak information */
 struct peakKeeper {
   double position;
@@ -569,7 +569,7 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
   peakPos = realPeakPos;
 
   return true;
-};
+}
 
 /**Get energy of monitor peak if one is present
 *@param inputWS -- the workspace to process
@@ -653,7 +653,7 @@ bool signChanged(double val, int &prevSign) {
   bool changed = curSign != prevSign;
   prevSign = curSign;
   return changed;
-};
+}
 }
 
 /**Bare-bone function to calculate numerical derivative, and estimate number of
@@ -728,7 +728,7 @@ void getBinRange(const MantidVec &eBins, double eMin, double eMax,
     if (index_max >= nBins)
       index_max = nBins - 1; // last bin range anyway. Should not happen
   }
-};
+}
 
 // refine bin range. May need better procedure for this.
 bool refineEGuess(const MantidVec &eBins, const MantidVec &signal,
@@ -749,7 +749,7 @@ bool refineEGuess(const MantidVec &eBins, const MantidVec &signal,
   }
   eGuess = 0.5 * (eBins[ind_Emax] + eBins[ind_Emax + 1]);
   return true;
-};
+}
 
 struct peakKeeper2 {
   double left_rng;
@@ -1035,7 +1035,7 @@ bool SelectInterval(const Kernel::DateAndTime &t_beg,
   }
   endTime = t_end;
   return false;
-};
+}
 }
 /**Analyze chopper logs and identify chopper speed and delay
 @param  inputWS    -- sp to workspace with attached logs.
@@ -1184,7 +1184,7 @@ bool check_time_series_property(
     return true;
   }
   return false;
-};
+}
 }
 
 /**Validates if input workspace contains all necessary logs and if all

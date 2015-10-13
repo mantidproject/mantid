@@ -79,7 +79,7 @@ to convert units from TOF to energy.
        print "!  {0: >6.1f}  !  {1: >6.2f} !   {2: >6.2f}    ! {3: >6.2f}     !".format(allEi[ind],val[1],peakHeight[ind],peakWidth[ind])
     #
     # NOTE: incident energy of GetEi is calculated from distance between monitor 1 and 2, and this distance is not correct in 
-    # the test workspace. The important pint is that getEi can find energies from guess values and TOF for peaks is correct.
+    # the test workspace. The tested point is that getEi can find energies from guess values and TOF for peaks is correct.
     
 Output:
 
@@ -88,7 +88,7 @@ Output:
 
     ! Guess Ei ! peak TOF ! peak height ! peak width !
     !    67.0  !  4188.03 !    34.68    !   2.35     !
-    !   124.0  !  3079.09 !    14.01    !   4.35     !
+    !   124.1  !  3079.09 !    14.01    !   4.35     !
     
 .. categories::
 
