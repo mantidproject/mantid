@@ -29,8 +29,6 @@ Usage
    
    print 'Number Histograms',out_ws.getNumberHistograms()
    print 'Min X:', out_ws.readX(0)[0], 'Max X:', out_ws.readX(0)[1]  
-   y_data = out_ws.extractY()
-   print  'Min Y:', np.amin(y_data), 'Max Y:', np.amax(y_data)   
 
 Output:
 
@@ -38,7 +36,6 @@ Output:
 
    Number Histograms 2
    Min X: 0.0 Max X: 10.0
-   Min Y: 0.5 Max Y: 1.0
 
 **Example - With Solid Angle Correction **
 
