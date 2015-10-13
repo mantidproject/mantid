@@ -89,10 +89,8 @@ class QLRun(PythonAlgorithm):
         issues = dict()
 
         # Validate fitting range in energy
-        e_min = self.getProperty('MinRange').value
-        e_max = self.getProperty('MaxRange').value
-        if e_min > e_max:
-            issues['EnergyMax'] = 'Must be less than EnergyMin'
+        if self._e_min > self._e_max:
+            issues['MaxRange'] = 'Must be less than EnergyMin'
 
         return issues
 
