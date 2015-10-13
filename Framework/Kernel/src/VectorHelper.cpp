@@ -585,7 +585,7 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex,
     if (iStart > iEnd) { // start and end get into the same bin
       weight1 = 0;
       weight0 = (end - start) /
-              (binBndrs->operator[](iStart)-binBndrs->operator[](iStart - 1));
+                (binBndrs->operator[](iStart)-binBndrs->operator[](iStart - 1));
     }
   } else { // integer indexes and functions defined in the bin centers
     iStart = index - static_cast<size_t>(halfWidth);
