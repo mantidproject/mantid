@@ -107,7 +107,14 @@ void CheckMantidVersion::exec() {
   if (!json.empty()) {
     Json::Reader r;
     Json::Value root;
-    r.parse(json, root);
+    bool parseOK = r.parse(json, root);
+    if (!parseOK) {
+      g_log.error() << "Error trying to parse this JSON string from GitHub: "
+                    << json << std::endl;
+      throw std::runtime_error("Error found when parsing version information "
+                               "retrieved from GitHub as a JSON string." +
+                               r.getFormattedErrorMessages());
+    }
 
     std::string gitHubVersionTag = root["tag_name"].asString();
     mostRecentVersion = cleanVersionTag(gitHubVersionTag);
