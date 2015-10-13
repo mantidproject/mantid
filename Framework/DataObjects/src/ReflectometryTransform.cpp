@@ -314,7 +314,7 @@ IMDHistoWorkspace_sptr ReflectometryTransform::executeMDNormPoly(
 
   MDHistoDimension_sptr dim0 = MDHistoDimension_sptr(new MDHistoDimension(
       input_x_dim->getName(), input_x_dim->getDimensionId(),
-      input_x_dim->getUnits(),
+      input_x_dim->getMDFrame(),
       static_cast<Mantid::coord_t>(input_x_dim->getMinimum()),
       static_cast<Mantid::coord_t>(input_x_dim->getMaximum()),
       input_x_dim->getNBins()));
@@ -323,7 +323,7 @@ IMDHistoWorkspace_sptr ReflectometryTransform::executeMDNormPoly(
 
   MDHistoDimension_sptr dim1 = MDHistoDimension_sptr(new MDHistoDimension(
       input_y_dim->getName(), input_y_dim->getDimensionId(),
-      input_y_dim->getUnits(),
+      input_y_dim->getMDFrame(),
       static_cast<Mantid::coord_t>(input_y_dim->getMinimum()),
       static_cast<Mantid::coord_t>(input_y_dim->getMaximum()),
       input_y_dim->getNBins()));

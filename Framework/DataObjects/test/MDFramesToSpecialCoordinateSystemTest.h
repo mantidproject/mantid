@@ -30,7 +30,7 @@ public:
         converter(ws.get()), std::invalid_argument);
   }
 
-  void test_that_throws_for_non_uniform_coodinate_system() {
+  void test_that_throws_for_non_uniform_Q_coodinate_system() {
     // Arrange
     Mantid::Geometry::QLab frame1;
     Mantid::Geometry::QSample frame2;
@@ -46,8 +46,34 @@ public:
     Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
 
     // Act + Assert
-    TSM_ASSERT_THROWS("Should throw as coordinate system is mixed.",
-                      converter(ws.get()), std::invalid_argument);
+    TSM_ASSERT_THROWS(
+        "Should throw as coordinate system is mixed with several Q types.",
+        converter(ws.get()), std::invalid_argument);
+  }
+
+  void test_that_doesn_not_throw_for_non_uniform_Q_coodinate_system() {
+    // Arrange
+    Mantid::Geometry::QLab frame1;
+    Mantid::Geometry::GeneralFrame frame2("test", "Test");
+    Mantid::coord_t min = 0;
+    Mantid::coord_t max = 10;
+    size_t bins = 2;
+    auto dimension1 = boost::make_shared<MDHistoDimension>(
+        "QLabX", "QLabX", frame1, min, max, bins);
+    auto dimension2 = boost::make_shared<MDHistoDimension>(
+        "General Frame", "General Frame", frame2, min, max, bins);
+    auto ws = boost::make_shared<Mantid::DataObjects::MDHistoWorkspace>(
+        dimension1, dimension2);
+    Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
+
+    // Act + Assert
+    boost::optional<Mantid::Kernel::SpecialCoordinateSystem> coordinateSystem;
+    TSM_ASSERT_THROWS_NOTHING("Should throw nothing as coordinate system is "
+                              "mixed only with one Q type.",
+                              coordinateSystem = converter(ws.get()));
+
+    TSM_ASSERT_EQUALS("Should be Qlab", *coordinateSystem,
+                      Mantid::Kernel::SpecialCoordinateSystem::QLab);
   }
 
   void

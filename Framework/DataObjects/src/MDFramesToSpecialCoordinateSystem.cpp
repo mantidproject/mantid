@@ -10,7 +10,7 @@ MDFramesToSpecialCoordinateSystem::MDFramesToSpecialCoordinateSystem() {}
 MDFramesToSpecialCoordinateSystem::~MDFramesToSpecialCoordinateSystem() {}
 
 /**
- * Return a q frame which is common to all dimensions
+ * Get the Special Coordinate System based on the MDFrame information.
  * @param workspace: the workspace which is being queried
  * @returns either a special coordinate or an empty optional
  */
@@ -25,48 +25,60 @@ boost::optional<Mantid::Kernel::SpecialCoordinateSystem>
                                 "workspaces");
   }
 
-  // Coordiante system
-  // Extract expected special coordinate system
-  auto coordinateSystem = extractCoordinateSystem(workspace->getDimension(0));
+  // Requirements for the special coordinate are: If there are more than one
+  // Q-compatible (QSample, QLab, HKL) dimension, then they have to be identical
+  // This dimension will define the special coordinate system. Otherwise, we
+  // don't have a special coordinate system
+
+  boost::optional<Mantid::Kernel::SpecialCoordinateSystem> qFrameType;
   auto isUnknown = false;
   for (size_t dimIndex = 0; dimIndex < workspace->getNumDims(); ++dimIndex) {
-    auto current = extractCoordinateSystem(workspace->getDimension(dimIndex));
-    if (coordinateSystem == current) {
-      coordinateSystem = current;
-    } else {
-      throw std::invalid_argument("Error in MDFrameFromWorkspace: Coordinate "
-                                  "system in the different dimensions don't "
-                                  "match.");
+    auto dimension = workspace->getDimension(dimIndex);
+    auto &frame = dimension->getMDFrame();
+    // Check for QCompatibility
+    if (frame.getMDUnit().isQUnit()) {
+      auto specialCoordinteSystem = frame.equivalientSpecialCoordinateSystem();
+      checkQCompatibility(specialCoordinteSystem, qFrameType);
+      qFrameType = specialCoordinteSystem;
     }
 
-    // Check if the Frame is of UnknownFrame Type
-    isUnknown = isUnknownFrame(workspace->getDimension(dimIndex));
+    isUnknown = isUnknownFrame(dimension);
   }
 
   boost::optional<Mantid::Kernel::SpecialCoordinateSystem> output;
-  if (!isUnknown) {
-    output = coordinateSystem;
+  if (qFrameType) {
+    output = qFrameType;
+  } else {
+    // If the frame is unknown then keep the optional empty
+    if (!isUnknown) {
+      output = Mantid::Kernel::SpecialCoordinateSystem::None;
+    }
   }
+
   return output;
 }
 
 /**
- * Extracts the QFrame coordinate system form the dimension
- * @param dimension: a dimension
- * @returns a Qframe identifier
+ * Make sure that the QFrame types are the same.
+ * @param specialCoordinateSystem: the q frame type to test.
+ * @param qFrameType: the current q frame type
  */
-Mantid::Kernel::SpecialCoordinateSystem
-MDFramesToSpecialCoordinateSystem::extractCoordinateSystem(
-    Mantid::Geometry::IMDDimension_const_sptr dimension) const {
-  auto &frame = dimension->getMDFrame();
-  return frame.equivalientSpecialCoordinateSystem();
+void MDFramesToSpecialCoordinateSystem::checkQCompatibility(
+    Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem,
+    boost::optional<Mantid::Kernel::SpecialCoordinateSystem> qFrameType) const {
+  if (qFrameType) {
+    if (specialCoordinateSystem != qFrameType.get()) {
+      throw std::invalid_argument("Error in MDFrameFromWorkspace: Coordinate "
+                                  "system in the different dimensions don't "
+                                  "match.");
+    }
+  }
 }
 
-/*
- * Checks if an MDFrame is an UnknownFrame
- * @param dimension: a dimension
- * @returns true if the MDFrame is of UnknownFrame type.
- */
+/* Checks if an MDFrame is an UnknownFrame
+* @param dimension: a dimension
+* @returns true if the MDFrame is of UnknownFrame type.
+*/
 bool MDFramesToSpecialCoordinateSystem::isUnknownFrame(
     Mantid::Geometry::IMDDimension_const_sptr dimension) const {
   Mantid::Geometry::MDFrame_uptr replica(dimension->getMDFrame().clone());
@@ -76,5 +88,6 @@ bool MDFramesToSpecialCoordinateSystem::isUnknownFrame(
   }
   return isUnknown;
 }
+
 }
 }

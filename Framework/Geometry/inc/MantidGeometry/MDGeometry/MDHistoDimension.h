@@ -23,7 +23,7 @@ namespace Geometry {
  */
 class MANTID_GEOMETRY_DLL MDHistoDimension : public IMDDimension {
 public:
-
+#if 1
   /** Constructor for simple MDHistoDimension
   * @param name :: full name of the axis
   * @param ID :: identifier string
@@ -44,7 +44,7 @@ public:
                                   "dimension with min > max");
     }
   }
-
+#endif
 
   /** Constructor for simple MDHistoDimension
   * @param name :: full name of the axis

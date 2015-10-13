@@ -427,15 +427,15 @@ public:
         "<LowerBounds>-10.0000</LowerBounds>" +
         "<NumberOfBins>5</NumberOfBins>" + "</Dimension>" +
         "<Dimension ID=\"y\">" + "<Name>Y</Name>" + "<Units>m</Units>" +
-        "<Frame>Unknown frame</Frame>" + "<UpperBounds>10.0000</UpperBounds>" +
+        "<Frame>My General Frame</Frame>" + "<UpperBounds>10.0000</UpperBounds>" +
         "<LowerBounds>-10.0000</LowerBounds>" +
         "<NumberOfBins>5</NumberOfBins>" + "</Dimension>" +
         "<Dimension ID=\"z\">" + "<Name>Z</Name>" + "<Units>m</Units>" +
-        "<Frame>Unknown frame</Frame>" + "<UpperBounds>10.0000</UpperBounds>" +
+        "<Frame>My General Frame</Frame>" + "<UpperBounds>10.0000</UpperBounds>" +
         "<LowerBounds>-10.0000</LowerBounds>" +
         "<NumberOfBins>5</NumberOfBins>" + "</Dimension>" +
         "<Dimension ID=\"t\">" + "<Name>T</Name>" + "<Units>m</Units>" +
-        "<Frame>Unknown frame</Frame>" + "<UpperBounds>10.0000</UpperBounds>" +
+        "<Frame>My General Frame</Frame>" + "<UpperBounds>10.0000</UpperBounds>" +
         "<LowerBounds>-10.0000</LowerBounds>" +
         "<NumberOfBins>5</NumberOfBins>" + "</Dimension>" + "<XDimension>" +
         "<RefDimensionId>x</RefDimensionId>" + "</XDimension>" +
@@ -995,15 +995,6 @@ public:
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1);
     TSM_ASSERT_EQUALS("Should default to no special coordinate system.",
                       Mantid::Kernel::None, ws->getSpecialCoordinateSystem());
-  }
-
-  void test_setSpecialCoordinateSystem_default() {
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1);
-    TS_ASSERT_EQUALS(Mantid::Kernel::None, ws->getSpecialCoordinateSystem());
-
-    ws->setCoordinateSystem(Mantid::Kernel::QLab);
-    TS_ASSERT_EQUALS(Mantid::Kernel::QLab, ws->getSpecialCoordinateSystem());
   }
 
   void test_getSpecialCoordinateSystem_when_MDFrames_are_set() {

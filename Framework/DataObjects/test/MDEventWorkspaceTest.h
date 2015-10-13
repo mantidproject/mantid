@@ -496,15 +496,6 @@ public:
                       Mantid::Kernel::None, ws->getSpecialCoordinateSystem());
   }
 
-  void test_setSpecialCoordinateSystem_default() {
-    MDEventWorkspace1Lean::sptr ws =
-        MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 1 /*event per box*/);
-    TS_ASSERT_EQUALS(Mantid::Kernel::None, ws->getSpecialCoordinateSystem());
-
-    ws->setCoordinateSystem(Mantid::Kernel::QLab);
-    TS_ASSERT_EQUALS(Mantid::Kernel::QLab, ws->getSpecialCoordinateSystem());
-  }
-
   void test_getSpecialCoordinateSystem_when_MDFrames_are_set() {
     // Arrange
     const Mantid::Geometry::QSample frame;

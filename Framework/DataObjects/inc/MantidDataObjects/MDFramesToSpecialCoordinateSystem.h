@@ -41,8 +41,10 @@ public:
   operator()(const Mantid::API::IMDWorkspace *workspace) const;
 
 private:
-  Mantid::Kernel::SpecialCoordinateSystem extractCoordinateSystem(
-      Mantid::Geometry::IMDDimension_const_sptr dimension) const;
+  void checkQCompatibility(
+      Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem,
+      boost::optional<Mantid::Kernel::SpecialCoordinateSystem> qFrameType)
+      const;
   bool
   isUnknownFrame(Mantid::Geometry::IMDDimension_const_sptr dimension) const;
 };
