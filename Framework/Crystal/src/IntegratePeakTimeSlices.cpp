@@ -2220,7 +2220,14 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
                                         std::vector<std::string> const &names,
                                         double chisqOverDOF) {
   int Ibk = find("Background", names);
+  if (Ibk < 0)
+    throw runtime_error("Irrecoverable inconsistency found. The index for the "
+                        "parameter 'Background' is lower than zero.");
+
   int IIntensity = find("Intensity", names);
+  if (IIntensity < 0)
+    throw runtime_error("Irrecoverable inconsistency found. The index for the "
+                        "parameter 'Intensity' is lower than zero.");
 
   if (chisqOverDOF < 0) {
 
