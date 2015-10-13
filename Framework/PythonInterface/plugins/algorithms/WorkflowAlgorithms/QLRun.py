@@ -15,6 +15,9 @@ class QLRun(PythonAlgorithm):
                " amplitude 0 and Lorentzians of amplitude A(j) and HWHM W(j) where j=1,2,3. The"+\
                " whole function is then convoled with the resolution function."
 
+    def version(self):
+        return 1
+
     def PyInit(self):
         self.declareProperty(name='Program', defaultValue='QL',
                              validator=StringListValidator(['QL','QSe']),
