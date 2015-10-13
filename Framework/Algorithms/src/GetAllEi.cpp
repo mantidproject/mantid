@@ -19,7 +19,6 @@ namespace Algorithms {
 
 DECLARE_ALGORITHM(GetAllEi)
 
-
 /// Empty default constructor
 GetAllEi::GetAllEi()
     : Algorithm(), m_FilterWithDerivative(true),
@@ -529,13 +528,17 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
     g_log.information() << "*No peak search convergence after " +
                                boost::lexical_cast<std::string>(ic) +
                                " smoothing iterations at still_count: " +
-                               boost::lexical_cast<std::string>(stay_still_count) +
+                               boost::lexical_cast<std::string>(
+                                   stay_still_count) +
                                " Wrong energy or noisy peak at Ei=" +
-                               boost::lexical_cast<std::string>(Ei) << std::endl;
+                               boost::lexical_cast<std::string>(Ei)
+                        << std::endl;
   }
   g_log.debug() << "*Performed: " + boost::lexical_cast<std::string>(ic) +
-                       " averages for spectra " + boost::lexical_cast<std::string>(index) +
-                       " at energy: " + boost::lexical_cast<std::string>(Ei) + "\n and found: " +
+                       " averages for spectra " +
+                       boost::lexical_cast<std::string>(index) +
+                       " at energy: " + boost::lexical_cast<std::string>(Ei) +
+                       "\n and found: " +
                        boost::lexical_cast<std::string>(nPeaks) + "peaks and " +
                        boost::lexical_cast<std::string>(nHills) + " hills\n";
   if (nPeaks != 1) {
@@ -552,8 +555,10 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
       peakTwoSigma = hillsPos[1] - hillsPos[0];
     } else {
       g_log.debug() << "*Peak rejected as averaging gives: " +
-                           boost::lexical_cast<std::string>(nPeaks) + " peaks and " +
-                           boost::lexical_cast<std::string>(nHills) + " heals\n";
+                           boost::lexical_cast<std::string>(nPeaks) +
+                           " peaks and " +
+                           boost::lexical_cast<std::string>(nHills) +
+                           " heals\n";
 
       return false;
     }
@@ -594,9 +599,12 @@ bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
     return false;
   if (0.25 * peak1TwoSigma > maxSigma || peak1TwoSigma < minSigma) {
     g_log.debug() << "*Rejecting due to width: Peak at mon1 Ei=" +
-                         boost::lexical_cast<std::string>(peak1Pos) + " with Height:" +
-                         boost::lexical_cast<std::string>(peak1Height) + " and 2*Sigma: " +
-                         boost::lexical_cast<std::string>(peak1TwoSigma) << std::endl;
+                         boost::lexical_cast<std::string>(peak1Pos) +
+                         " with Height:" +
+                         boost::lexical_cast<std::string>(peak1Height) +
+                         " and 2*Sigma: " +
+                         boost::lexical_cast<std::string>(peak1TwoSigma)
+                  << std::endl;
     return false;
   }
 
@@ -617,8 +625,10 @@ bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
       g_log.debug()
           << "*Rejecting due to displacement between Peak at mon1: Ei=" +
                  boost::lexical_cast<std::string>(peak1Pos) + " with Height:" +
-                 boost::lexical_cast<std::string>(peak1Height) + " and 2*Sigma: " +
-                 boost::lexical_cast<std::string>(peak1TwoSigma) + "\n and Peak at mon2: Ei= " +
+                 boost::lexical_cast<std::string>(peak1Height) +
+                 " and 2*Sigma: " +
+                 boost::lexical_cast<std::string>(peak1TwoSigma) +
+                 "\n and Peak at mon2: Ei= " +
                  boost::lexical_cast<std::string>(peak2Pos) + "and height: " +
                  boost::lexical_cast<std::string>(peak1Height) << std::endl;
 
@@ -767,7 +777,7 @@ void GetAllEi::findBinRanges(const MantidVec &eBins, const MantidVec &signal,
                              std::vector<size_t> &irangeMax,
                              std::vector<bool> &guessValid) {
 
-  //size_t nBins = eBins.size(); 
+  // size_t nBins = eBins.size();
   guessValid.resize(guess_energy.size());
 
   // Do the job
@@ -810,7 +820,8 @@ void GetAllEi::findBinRanges(const MantidVec &eBins, const MantidVec &signal,
       guessValid[nGuess] = true;
     } else {
       guessValid[nGuess] = false;
-      g_log.debug() << "*Incorrect guess energy: " << boost::lexical_cast<std::string>(eGuess)
+      g_log.debug() << "*Incorrect guess energy: "
+                    << boost::lexical_cast<std::string>(eGuess)
                     << " no energy peak found in 4*Sigma range\n";
     }
   }
