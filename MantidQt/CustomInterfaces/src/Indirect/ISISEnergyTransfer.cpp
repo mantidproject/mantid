@@ -128,6 +128,52 @@ bool ISISEnergyTransfer::validate() {
     }
   }
 
+  if (m_uiForm.dsRunFiles->isValid()) {
+    int detectorMin = m_uiForm.spPlotTimeSpecMin->value();
+    int detectorMax = m_uiForm.spPlotTimeSpecMax->value();
+
+    QString rawFile = m_uiForm.dsRunFiles->getFirstFilename();
+    auto pos = rawFile.lastIndexOf(".");
+    auto extension = rawFile.right(rawFile.length() - pos);
+    QFileInfo rawFileInfo(rawFile);
+    std::string name = rawFileInfo.baseName().toStdString();
+
+    IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("Load");
+    loadAlg->initialize();
+    loadAlg->setProperty("Filename", rawFile.toStdString());
+    loadAlg->setProperty("OutputWorkspace", name);
+    if (extension.compare(".nxs") == 0) {
+      int64_t detectorMin =
+          static_cast<int64_t>(m_uiForm.spPlotTimeSpecMin->value());
+      int64_t detectorMax =
+          static_cast<int64_t>(m_uiForm.spPlotTimeSpecMax->value());
+      loadAlg->setProperty("SpectrumMin", detectorMin);
+      loadAlg->setProperty("SpectrumMax", detectorMax);
+    } else {
+      loadAlg->setProperty("SpectrumMin", detectorMin);
+      loadAlg->setProperty("SpectrumMax", detectorMax);
+    }
+
+    loadAlg->execute();
+
+    if (m_uiForm.ckBackgroundRemoval->isChecked()) {
+      MatrixWorkspace_sptr tempWs =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+      const int minBack = tempWs->readX(0)[0];
+      const int maxBack = tempWs->readX(0)[tempWs->blocksize()];
+
+      if (m_uiForm.spBackgroundStart->value() < minBack) {
+        uiv.addErrorMessage("The Start of Background Removal is less than the "
+                            "minimum of the data range");
+      }
+
+      if (m_uiForm.spBackgroundEnd->value() > maxBack) {
+        uiv.addErrorMessage("The End of Background Removal is more than the "
+                            "maximum of the data range");
+      }
+    }
+  }
+
   QString error = uiv.generateErrorMessage();
   showMessageBox(error);
 
