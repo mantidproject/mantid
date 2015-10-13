@@ -1,3 +1,4 @@
+
 .. algorithm::
 
 .. summary::
@@ -19,14 +20,41 @@ exp[-2\pi(\sigma k)\beta]. This, in the energy to time FT transformation, is \ps
 
 Usage
 -----
-**Example - a basic example using QLRun**
 
-    sample = Load('irs26176_graphite002_red.nxs')
-    resolution = Load('irs26173_graphite002_red.nxs')
+**Example - QLRun**
 
-    QLRun(Program="QL", SampleWorkspace=sample, ResolutionWorkspace=resolution, MinRange=-0.547607, MaxRange=0.543216, SampleBins=1, ResolutionBins=1, Elastic=false, Background="Sloping", FixedWidth=false, UseResNorm=false, WidthFile="", Loop=true, Save=false, Plot="None")
+.. testcode:: QLRunExample
 
-.. code-block:: python
+    # Load in test data
+    sampleWs = Load('irs26176_graphite002_red.nxs')
+    resWs = Load('irs26173_graphite002_red.nxs')
+
+    # Run QLRun algorithm
+    QLRun(Program="QL", SampleWorkspace=sampleWs, ResolutionWorkspace=resWs, MinRange=-0.547607, MaxRange=0.543216, SampleBins=1, ResolutionBins=1, Elastic=False, Background="Sloping", FixedWidth=False, UseResNorm=False, WidthFile="", Loop=True, Save=False, Plot="None")
+    outputName = 'samp_QLd_Workspace_0'
+
+    # capture first fitted workspace
+    result_ws = mtd[outputName]
+
+    # Print the result
+    print "The Y values of the first fitted workspace are:"
+    print "data  : %.5f" %(result_ws.readY(0)[0])
+    print "fit.1 : %.5f" %(result_ws.readY(1)[0])
+    print "diff.1: %.5f" %(result_ws.readY(2)[0])
+    print "fit.2 : %.5f" %(result_ws.readY(3)[0])
+    print "diff.2: %.5f" %(result_ws.readY(4)[0])
+
+Output:
+
+.. testoutput:: QLRunExample
+    :options: +NORMALIZE_WHITESPACE
+
+    The Y values of the first fitted workspace are:
+    data  : 0.02540
+    fit.1 : 0.01906
+    diff.1: -0.00635
+    fit.2 : 0.01732
+    diff.2: -0.00808
 
 .. categories::
 
