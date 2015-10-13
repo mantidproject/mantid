@@ -104,7 +104,7 @@ Mantid::coord_t getPrecisionCorrectedCoordinate(Mantid::coord_t position,
 
   // Check if the relative deviation is larger than 1e-6
   const auto deviation = fabs((nearest - position) / binWidth);
-  const auto tolerance = 1e-6;
+  const auto tolerance = 1e-5;
   Mantid::coord_t coordinate(position);
   if (deviation < tolerance) {
     coordinate = nearest;
