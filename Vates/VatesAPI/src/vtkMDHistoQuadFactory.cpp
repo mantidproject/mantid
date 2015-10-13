@@ -120,7 +120,11 @@ namespace Mantid
         double progressFactor = 0.5/double(nBinsX);
         double progressOffset = 0.5;
         boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(dynamic_cast<MDHistoWorkspaceIterator*>(createIteratorWithNormalization(m_normalizationOption, m_workspace.get())));
-    
+        if (!iterator) {
+          throw std::runtime_error(
+              "Could not convert IMDIterator to a MDHistoWorkspaceIterator");
+        }
+
         size_t index = 0;
         for (int i = 0; i < nBinsX; i++)
         {
