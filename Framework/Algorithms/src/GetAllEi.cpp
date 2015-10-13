@@ -444,7 +444,7 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
 
   double sMin(std::numeric_limits<double>::max());
   double sMax(-sMin);
-  double xOfMax, dXmax;
+  double xOfMax(0), dXmax(0);
   double Intensity(0);
 
   auto X = inputWS->readX(index);
