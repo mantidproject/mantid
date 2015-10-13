@@ -297,7 +297,7 @@ class ISISLoadFilesLET(stresstesting.MantidStressTest):
         #
         self.assertEqual(mon_ws.getNumberHistograms(),27)
 
-        ei_ws = GetAllEi(mon_ws,40961,40966,IgnoreSecondMonitor=True)
+        ei_ws = GetAllEi(mon_ws,40966,40967,IgnoreSecondMonitor=True)
         self.assertTrue(isinstance(ei_ws,Workspace))
 
         self.valid = True
