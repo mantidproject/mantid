@@ -528,7 +528,7 @@ EventList &EventList::operator-=(const EventList &more_events) {
     this->clearData();
     return *this;
   }
-   
+
   // We'll let the -= operator for the given vector of event lists handle it
   switch (this->getEventType()) {
   case TOF:

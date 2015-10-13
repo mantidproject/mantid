@@ -221,9 +221,9 @@ FindPeaksMD::createPeak(const Mantid::Kernel::V3D &Q, const double binCount) {
   } else if (dimType == QSAMPLE) {
     // Build using the Q-sample-frame constructor
     p = boost::make_shared<Peak>(inst, Q, m_goniometer);
-  } else  {
+  } else {
     throw std::invalid_argument(
-      "Cannot Integrate peaks unless the dimension is QLAB or QSAMPLE");
+        "Cannot Integrate peaks unless the dimension is QLAB or QSAMPLE");
   }
 
   try { // Look for a detector

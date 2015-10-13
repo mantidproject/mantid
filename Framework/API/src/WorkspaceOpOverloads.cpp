@@ -76,9 +76,8 @@ ResultType executeBinaryOperation(const std::string &algorithmName,
   if (child) {
     return alg->getProperty("OutputWorkspace");
   } else {
-    API::Workspace_sptr result =
-        API::AnalysisDataService::Instance().retrieve(
-            alg->getPropertyValue("OutputWorkspace"));
+    API::Workspace_sptr result = API::AnalysisDataService::Instance().retrieve(
+        alg->getPropertyValue("OutputWorkspace"));
     return boost::dynamic_pointer_cast<typename ResultType::element_type>(
         result);
   }
@@ -511,7 +510,8 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
           return false;
       }
     } else if (std::abs(firstWSLoop - secondWSLoop) /
-                   std::max<double>(std::abs(firstWSLoop), std::abs(secondWSLoop)) >
+                   std::max<double>(std::abs(firstWSLoop),
+                                    std::abs(secondWSLoop)) >
                1.0E-7)
       return false;
   }

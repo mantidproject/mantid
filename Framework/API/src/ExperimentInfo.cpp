@@ -1149,7 +1149,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     // if( comp_name == prev_name ) continue; this blocks reading in different
     // parameters of the same component. RNT
     // prev_name = comp_name;
-    const Geometry::IComponent *comp = nullptr;
+    const Geometry::IComponent *comp = NULL;
     if (comp_name.find("detID:") != std::string::npos) {
       int detID = atoi(comp_name.substr(6).c_str());
       comp = instr->getDetector(detID).get();
