@@ -582,6 +582,11 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex,
       weight1 = (end - binBndrs->operator[](iEnd)) /
                 (binBndrs->operator[](iEnd + 1) - binBndrs->operator[](iEnd));
     }
+    if (iStart > iEnd) { // start and end get into the same bin
+      weight1 = 0;
+      weight0 = (end - start) /
+              (binBndrs->operator[](iStart)-binBndrs->operator[](iStart - 1));
+    }
   } else { // integer indexes and functions defined in the bin centers
     iStart = index - static_cast<size_t>(halfWidth);
     if (startIndex + static_cast<size_t>(halfWidth) > index)
@@ -589,11 +594,6 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex,
     iEnd = index + static_cast<size_t>(halfWidth);
     if (iEnd > endIndex)
       iEnd = endIndex;
-  }
-  if (iStart > iEnd) { // start and end get into the same bin
-    weight1 = 0;
-    weight0 = (end - start) /
-              (binBndrs->operator[](iStart)-binBndrs->operator[](iStart - 1));
   }
 
   double avrg = 0;
@@ -612,7 +612,7 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex,
   } else {
     return avrg / double(ic);
   }
-};
+}
 }
 /** Basic running average of input vector within specified range, considering
 *  variable bin-boundaries if such boundaries are provided.
