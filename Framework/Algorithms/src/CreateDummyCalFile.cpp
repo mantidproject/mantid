@@ -111,7 +111,7 @@ void CreateDummyCalFile::exec() {
   std::string filename = getProperty("CalFilename");
 
   // Plan to overwrite file, so do not check if it exists
-  bool overwrite = false;
+  const bool overwrite = false;
 
   int number = 0;
   Progress prog(this, 0.0, 0.8, assemblies.size());

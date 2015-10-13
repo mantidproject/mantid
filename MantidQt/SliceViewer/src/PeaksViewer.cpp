@@ -122,9 +122,9 @@ PeaksViewer::~PeaksViewer() {}
  */
 bool PeaksViewer::hasThingsToShow() const { return m_presenter->size() >= 1; }
 
-void PeaksViewer::   clearPeaksModeRequest(
+void PeaksViewer::clearPeaksModeRequest(
     const PeaksWorkspaceWidget *const originWidget, const bool on) {
-  EditMode mode;
+  EditMode mode = None;
   if (on) {
     QList<PeaksWorkspaceWidget *> children =
         qFindChildren<PeaksWorkspaceWidget *>(this);
@@ -149,7 +149,7 @@ void PeaksViewer::   clearPeaksModeRequest(
 
 void PeaksViewer::addPeaksModeRequest(const PeaksWorkspaceWidget * const originWidget, const bool on)
 {
-    EditMode mode;
+    EditMode mode = None;
     if(on) {
     QList<PeaksWorkspaceWidget *> children =
         qFindChildren<PeaksWorkspaceWidget *>(this);

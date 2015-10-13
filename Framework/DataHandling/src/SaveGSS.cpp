@@ -410,6 +410,7 @@ void writeLogValue(std::ostream &os, const Run &runinfo,
 void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
                            double primaryflightpath) const {
   const Run &runinfo = inputWS->run();
+  std::ios::fmtflags fflags(os.flags());
 
   // Run number
   if (format.compare(SLOG) == 0) {
@@ -483,6 +484,8 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
     os << "\n";
   }
 
+  os.flags(fflags);
+
   return;
 }
 
@@ -491,10 +494,12 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
   */
 inline void writeBankLine(std::stringstream &out, const std::string &bintype,
                           const int banknum, const size_t datasize) {
+  std::ios::fmtflags fflags(out.flags());
   out << "BANK " << std::fixed << std::setprecision(0)
       << banknum // First bank should be 1 for GSAS; this can be changed
       << std::fixed << " " << datasize << std::fixed << " " << datasize
       << std::fixed << " " << bintype;
+  out.flags(fflags);
 }
 
 //----------------------------------------------------------------------------------------------

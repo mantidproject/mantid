@@ -241,6 +241,7 @@ inline GSLMatrixMult3 operator*(const GSLMatrixMult2 &mm, const Tr &m) {
 
 /// The << operator. Prints a matrix in rows.
 inline std::ostream &operator<<(std::ostream &ostr, const GSLMatrix &m) {
+  std::ios::fmtflags fflags(ostr.flags());
   ostr << std::scientific << std::setprecision(6);
   for (size_t i = 0; i < m.size1(); ++i) {
     for (size_t j = 0; j < m.size2(); ++j) {
@@ -248,6 +249,7 @@ inline std::ostream &operator<<(std::ostream &ostr, const GSLMatrix &m) {
     }
     ostr << std::endl;
   }
+  ostr.flags(fflags);
   return ostr;
 }
 

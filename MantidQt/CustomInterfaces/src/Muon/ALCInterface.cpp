@@ -31,6 +31,7 @@ namespace CustomInterfaces
 
   ALCInterface::ALCInterface(QWidget* parent)
     : UserSubWindow(parent), m_ui(),
+      m_baselineModellingView(NULL), m_peakFittingView(NULL),
       m_dataLoading(NULL), m_baselineModelling(NULL), m_peakFitting(NULL),
       m_baselineModellingModel(new ALCBaselineModellingModel()),
       m_peakFittingModel(new ALCPeakFittingModel())

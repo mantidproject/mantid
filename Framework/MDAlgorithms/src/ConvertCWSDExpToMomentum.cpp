@@ -24,7 +24,8 @@ DECLARE_ALGORITHM(ConvertCWSDExpToMomentum)
 /** Constructor
  */
 ConvertCWSDExpToMomentum::ConvertCWSDExpToMomentum()
-    : m_iColFilename(2), m_iColStartDetID(3), m_setQRange(true) {}
+    : m_iColFilename(2), m_iColStartDetID(3), m_setQRange(true),
+      m_isBaseName(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -201,13 +202,15 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
   // Check whether to add / or \ to m_dataDir
   std::string sep("");
   if (m_dataDir.size() > 0) {
-    // Determine system
-    bool isWindows(false);
+// Determine system
 #if _WIN64
-    isWindows = true;
-#elif _WIND32
-    isWindows = true;
+    const bool isWindows = true;
+#elif _WIN32
+    const bool isWindows = true;
+#else
+    const bool isWindows = false;
 #endif
+
     if (isWindows && *m_dataDir.rbegin() != '\\') {
       sep = "\\";
     } else if (!isWindows && *m_dataDir.rbegin() != '/')
