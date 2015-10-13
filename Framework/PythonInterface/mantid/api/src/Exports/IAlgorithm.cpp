@@ -302,54 +302,41 @@ void export_ialgorithm() {
 
   class_<IAlgorithm, bases<IPropertyManager>, boost::noncopyable>(
       "IAlgorithm", "Interface for all algorithms", no_init)
-      .def("name", &IAlgorithm::name,
-           arg("self"),
+      .def("name", &IAlgorithm::name, arg("self"),
            "Returns the name of the algorithm")
-      .def("alias", &IAlgorithm::alias,
-           arg("self"),
+      .def("alias", &IAlgorithm::alias, arg("self"),
            "Return the aliases for the algorithm")
-      .def("version", &IAlgorithm::version,
-           arg("self"),
+      .def("version", &IAlgorithm::version, arg("self"),
            "Returns the version number of the algorithm")
-      .def("cancel", &IAlgorithm::cancel,
-           arg("self"),
+      .def("cancel", &IAlgorithm::cancel, arg("self"),
            "Request that the algorithm stop running")
-      .def("category", &IAlgorithm::category,
-           arg("self"),
+      .def("category", &IAlgorithm::category, arg("self"),
            "Returns the category containing the algorithm")
-      .def("categories", &IAlgorithm::categories,
-           arg("self"),
+      .def("categories", &IAlgorithm::categories, arg("self"),
            "Returns the list of categories this algorithm belongs to")
-      .def("summary", &IAlgorithm::summary,
-           arg("self"),
+      .def("summary", &IAlgorithm::summary, arg("self"),
            "Returns a summary message describing the algorithm")
-      .def("workspaceMethodName", &IAlgorithm::workspaceMethodName,
-           arg("self"),
+      .def("workspaceMethodName", &IAlgorithm::workspaceMethodName, arg("self"),
            "Returns a name that will be used when attached as a workspace "
            "method. Empty string indicates do not attach")
-      .def("workspaceMethodOn", &IAlgorithm::workspaceMethodOn,
-           arg("self"),
+      .def("workspaceMethodOn", &IAlgorithm::workspaceMethodOn, arg("self"),
            return_value_policy<VectorToNumpy>(), // creates a list for strings
            "Returns a set of class names that will have the method attached. "
            "Empty list indicates all types")
       .def("workspaceMethodInputProperty",
-           &IAlgorithm::workspaceMethodInputProperty,
-           arg("self"),
+           &IAlgorithm::workspaceMethodInputProperty, arg("self"),
            "Returns the name of the input workspace property used by the "
            "calling object")
-      .def("getAlgorithmID", &getAlgorithmID,
-           arg("self"),
+      .def("getAlgorithmID", &getAlgorithmID, arg("self"),
            "Returns a unique identifier for this algorithm object")
-      .def("docString", &createDocString,
-           arg("self"),
+      .def("docString", &createDocString, arg("self"),
            "Returns a doc string for the algorithm")
       .def("mandatoryProperties", &getInputPropertiesWithMandatoryFirst,
            arg("self"),
            "Returns a list of input and in/out property names that is ordered "
            "such that the mandatory properties are first followed by the "
            "optional ones.")
-      .def("orderedProperties", &getAlgorithmPropertiesOrdered,
-           arg("self"),
+      .def("orderedProperties", &getAlgorithmPropertiesOrdered, arg("self"),
            "Return a list of input, in/out and output properties "
            "such that the mandatory properties are first followed by the "
            "optional ones.")

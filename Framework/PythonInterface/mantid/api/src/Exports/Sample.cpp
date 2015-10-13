@@ -16,56 +16,41 @@ void export_Sample() {
 
   class_<Sample, boost::noncopyable>("Sample", no_init)
       .def("getName", &Sample::getName,
-           return_value_policy<copy_const_reference>(),
-           arg("self"),
+           return_value_policy<copy_const_reference>(), arg("self"),
            "Returns the string name of the sample")
       .def("getOrientedLattice", (const OrientedLattice &(Sample::*)() const) &
                                      Sample::getOrientedLattice,
-           arg("self"),
-           return_value_policy<reference_existing_object>(),
+           arg("self"), return_value_policy<reference_existing_object>(),
            "Get the oriented lattice for this sample")
-      .def("hasOrientedLattice", &Sample::hasOrientedLattice,
-           arg("self"),
+      .def("hasOrientedLattice", &Sample::hasOrientedLattice, arg("self"),
            "Returns True if this sample has an oriented lattice, false "
            "otherwise")
-      .def("size", &Sample::size,
-           arg("self"),
+      .def("size", &Sample::size, arg("self"),
            "Return the number of samples contained within this sample")
       // Required for ISIS SANS reduction until the full sample geometry is
       // defined on loading
-      .def("getGeometryFlag", &Sample::getGeometryFlag,
-           arg("self"),
+      .def("getGeometryFlag", &Sample::getGeometryFlag, arg("self"),
            "Return the geometry flag.")
-      .def("getThickness", &Sample::getThickness,
-           arg("self"),
-	   "Return the thickness in mm")
-	  .def("getHeight", &Sample::getHeight,
-		   arg("self"),
-		   "Return the height in mm")
-	  .def("getWidth", &Sample::getWidth,
-		   arg("self"),
-		   "Return the width in mm")
+      .def("getThickness", &Sample::getThickness, arg("self"),
+           "Return the thickness in mm")
+      .def("getHeight", &Sample::getHeight, arg("self"),
+           "Return the height in mm")
+      .def("getWidth", &Sample::getWidth, arg("self"), "Return the width in mm")
       .def("getMaterial",
            (const Material &(Sample::*)() const)(&Sample::getMaterial),
-           arg("self"),
-           return_value_policy<reference_existing_object>(),
+           arg("self"), return_value_policy<reference_existing_object>(),
            "The material the sample is composed of")
       .def("setGeometryFlag", &Sample::setGeometryFlag,
-           (arg("self"), arg("geom_id")),
-           "Set the geometry flag.")
-      .def("setThickness", &Sample::setThickness,
-           (arg("self"), arg("thick")),
+           (arg("self"), arg("geom_id")), "Set the geometry flag.")
+      .def("setThickness", &Sample::setThickness, (arg("self"), arg("thick")),
            "Set the thickness in mm.")
-      .def("setHeight", &Sample::setHeight,
-           (arg("self"), arg("height")),
+      .def("setHeight", &Sample::setHeight, (arg("self"), arg("height")),
            "Set the height in mm.")
-      .def("setWidth", &Sample::setWidth,
-           (arg("self"), arg("width")),
+      .def("setWidth", &Sample::setWidth, (arg("self"), arg("width")),
            "Set the width in mm.")
       // -------------------------Operators
       // -------------------------------------
-      .def("__len__", &Sample::size,
-           arg("self"),
+      .def("__len__", &Sample::size, arg("self"),
            "Gets the number of samples in this collection")
       .def("__getitem__", &Sample::operator[], return_internal_reference<>());
 }

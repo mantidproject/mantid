@@ -73,53 +73,41 @@ void export_Axis() {
 
   // Class
   class_<Axis, boost::noncopyable>("MantidAxis", no_init)
-      .def("length", &Axis::length,
-           arg("self"),
+      .def("length", &Axis::length, arg("self"),
            "Returns the length of the axis")
       .def("title", (const std::string &(Axis::*)() const) & Axis::title,
-           arg("self"),
-           return_value_policy<copy_const_reference>(), "Get the axis title")
-      .def("isSpectra", &Axis::isSpectra,
-           arg("self"),
+           arg("self"), return_value_policy<copy_const_reference>(),
+           "Get the axis title")
+      .def("isSpectra", &Axis::isSpectra, arg("self"),
            "Returns true if this is a SpectraAxis")
-      .def("isNumeric", &Axis::isNumeric,
-           arg("self"),
+      .def("isNumeric", &Axis::isNumeric, arg("self"),
            "Returns true if this is a NumericAxis")
-      .def("isText", &Axis::isText,
-           arg("self"),
+      .def("isText", &Axis::isText, arg("self"),
            "Returns true if this is a TextAxis")
-      .def("label", &Axis::label,
-           (arg("self"), arg("index")),
+      .def("label", &Axis::label, (arg("self"), arg("index")),
            "Return the axis label")
       .def("getUnit", (const Unit_sptr &(Axis::*)() const) & Axis::unit,
-           arg("self"),
-           return_value_policy<copy_const_reference>(),
+           arg("self"), return_value_policy<copy_const_reference>(),
            "Returns the unit object for the axis")
       .def("getValue", &Axis::getValue,
            Axis_getValue(args("index", "vertical_index"),
                          "Returns the value at the given point on the Axis. "
                          "The vertical axis index [default=0]"))
-      .def("extractValues", &extractAxisValues,
-           arg("self"),
+      .def("extractValues", &extractAxisValues, arg("self"),
            "Return a numpy array of the axis values")
-      .def("setUnit", &Axis::setUnit,
-           (arg("self"), arg("unit_name")),
+      .def("setUnit", &Axis::setUnit, (arg("self"), arg("unit_name")),
            return_value_policy<copy_const_reference>(),
            "Set the unit for this axis by name.")
       .def("setValue", &Axis::setValue,
            (arg("self"), arg("index"), arg("value")),
            "Set a value at the given index")
-      .def("getMin", &Axis::getMin,
-           arg("self"),
+      .def("getMin", &Axis::getMin, arg("self"),
            "Get min value specified on the axis")
-      .def("getMax", &Axis::getMax,
-           arg("self"),
+      .def("getMax", &Axis::getMax, arg("self"),
            "Get max value specified on the axis")
       //------------------------------------ Special methods
       //------------------------------------
-      .def("__len__",
-           &Axis::length,
-           arg("self"));
+      .def("__len__", &Axis::length, arg("self"));
 }
 
 // --------------------------------------------------------------------------------------------
@@ -182,11 +170,9 @@ void export_TextAxis() {
       .def("setLabel", &TextAxis::setLabel,
            (arg("self"), arg("index"), arg("label")),
            "Set the label at the given entry")
-      .def("label", &TextAxis::label,
-           (arg("self"), arg("index")),
+      .def("label", &TextAxis::label, (arg("self"), arg("index")),
            "Return the label at the given position")
-      .def("create", &createTextAxis,
-           arg("length"),
+      .def("create", &createTextAxis, arg("length"),
            return_internal_reference<>(),
            "Creates a new TextAxis of a specified length")
       .staticmethod("create");

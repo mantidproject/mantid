@@ -51,42 +51,33 @@ void export_IFunction() {
 
   class_<IFunction, IFunctionAdapter, boost::noncopyable>(
       "IFunction", "Base class for all functions", no_init)
-      .def("name", &IFunction::name,
-           arg("self"),
+      .def("name", &IFunction::name, arg("self"),
            "Return the name of the function")
 
-      .def("category", &IFunctionAdapter::category,
-           arg("self"),
+      .def("category", &IFunctionAdapter::category, arg("self"),
            "Return a semi-colon(;) separated string for the categories this "
            "class should belong to. For sub-categories use a \\ separator")
 
-      .def("initialize", &IFunction::initialize,
-           arg("self"),
+      .def("initialize", &IFunction::initialize, arg("self"),
            "Declares any parameters and attributes on the function")
 
-      .def("getCategories", &getCategories,
-           arg("self"),
+      .def("getCategories", &getCategories, arg("self"),
            "Returns a list of the categories for an algorithm")
 
-      .def("nAttributes", &IFunction::nAttributes,
-           arg("self"),
+      .def("nAttributes", &IFunction::nAttributes, arg("self"),
            "Return the number of attributes (non-fitting arguments)")
 
-      .def("attributeNames", &IFunction::getAttributeNames,
-           arg("self"),
+      .def("attributeNames", &IFunction::getAttributeNames, arg("self"),
            "The names of all the attributes")
 
-      .def("nParams", &IFunction::nParams,
-           arg("self"),
+      .def("nParams", &IFunction::nParams, arg("self"),
            "Return the number of parameters")
 
-      .def("parameterName", &IFunction::parameterName,
-           (arg("self"), arg("i")),
+      .def("parameterName", &IFunction::parameterName, (arg("self"), arg("i")),
            "Return the name of the ith parameter")
 
       .def("paramDescription", &IFunction::parameterDescription,
-           (arg("self"), arg("i")),
-           "Return a description of the ith parameter")
+           (arg("self"), arg("i")), "Return a description of the ith parameter")
 
       .def("isExplicitlySet", &IFunction::isExplicitlySet,
            (arg("self"), arg("i")),
@@ -94,14 +85,12 @@ void export_IFunction() {
 
       .def("getParameterValue",
            (double (IFunction::*)(size_t) const) & IFunction::getParameter,
-           (arg("self"), arg("i")),
-           "Get the value of the ith parameter")
+           (arg("self"), arg("i")), "Get the value of the ith parameter")
 
       .def("getParameterValue",
            (double (IFunction::*)(const std::string &) const) &
                IFunction::getParameter,
-            (arg("self"), arg("name")),
-           "Get the value of the named parameter")
+           (arg("self"), arg("name")), "Get the value of the named parameter")
 
       .def("setParameter", (setParameterType1)&IFunction::setParameter,
            setParameterType1_Overloads("Sets the value of the ith parameter"))

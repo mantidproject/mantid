@@ -167,8 +167,7 @@ void export_IMDHistoWorkspace() {
   // IMDHistoWorkspace class
   class_<IMDHistoWorkspace, bases<IMDWorkspace, MultipleExperimentInfos>,
          boost::noncopyable>("IMDHistoWorkspace", no_init)
-      .def("getSignalArray", &getSignalArrayAsNumpyArray,
-           arg("self"),
+      .def("getSignalArray", &getSignalArrayAsNumpyArray, arg("self"),
            "Returns a read-only numpy array containing the signal values")
 
       .def("getErrorSquaredArray", &getErrorSquaredArrayAsNumpyArray,
@@ -176,8 +175,7 @@ void export_IMDHistoWorkspace() {
            "Returns a read-only numpy array containing the square of the error "
            "values")
 
-      .def("getNumEventsArray", &getNumEventsArrayAsNumpyArray,
-           arg("self"),
+      .def("getNumEventsArray", &getNumEventsArrayAsNumpyArray, arg("self"),
            "Returns a read-only numpy array containing the number of MD events "
            "in each bin")
 
@@ -199,23 +197,21 @@ void export_IMDHistoWorkspace() {
            (arg("self"), arg("index"), arg("value")),
            "Sets the squared-error at the specified index.")
 
-      .def("setSignalArray", &setSignalArray,
-           arg("self"),
+      .def("setSignalArray", &setSignalArray, arg("self"),
            "Sets the signal from a numpy array. The sizes must match the "
            "current workspace sizes. A ValueError is thrown if not")
 
-      .def("setErrorSquaredArray", &setErrorSquaredArray,
-           arg("self"),
+      .def("setErrorSquaredArray", &setErrorSquaredArray, arg("self"),
            "Sets the square of the errors from a numpy array. The sizes must "
            "match the current workspace sizes. A ValueError is thrown if not")
 
       .def("setTo", &IMDHistoWorkspace::setTo,
-           (arg("self"), arg("signal"), arg("error_squared"), arg("num_events")),
+           (arg("self"), arg("signal"), arg("error_squared"),
+            arg("num_events")),
            "Sets all signals/errors in the workspace to the given values")
 
       .def("getInverseVolume", &IMDHistoWorkspace::getInverseVolume,
-           arg("self"),
-           return_value_policy<return_by_value>(),
+           arg("self"), return_value_policy<return_by_value>(),
            "Return the inverse of volume of EACH cell in the workspace.")
 
       .def("getLinearIndex",
@@ -236,7 +232,8 @@ void export_IMDHistoWorkspace() {
            (size_t (IMDHistoWorkspace::*)(size_t, size_t, size_t, size_t)
                 const) &
                IMDHistoWorkspace::getLinearIndex,
-           (arg("self"), arg("index1"), arg("index2"), arg("index3"), arg("index4")),
+           (arg("self"), arg("index1"), arg("index2"), arg("index3"),
+            arg("index4")),
            return_value_policy<return_by_value>(),
            "Get the 1D linear index from the 4D array")
 

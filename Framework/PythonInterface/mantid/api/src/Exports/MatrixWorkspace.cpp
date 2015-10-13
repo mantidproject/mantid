@@ -150,12 +150,10 @@ void export_MatrixWorkspace() {
          boost::noncopyable>("MatrixWorkspace", no_init)
       //--------------------------------------- Meta information
       //-----------------------------------------------------------------------
-      .def("blocksize", &MatrixWorkspace::blocksize,
-           arg("self"),
+      .def("blocksize", &MatrixWorkspace::blocksize, arg("self"),
            "Returns size of the Y data array")
       .def("getNumberHistograms", &MatrixWorkspace::getNumberHistograms,
-           arg("self"),
-           "Returns the number of spectra in the workspace")
+           arg("self"), "Returns the number of spectra in the workspace")
       .def("binIndexOf", &MatrixWorkspace::binIndexOf,
            MatrixWorkspace_binIndexOfOverloads(
                (arg("self"), arg("xvalue"), arg("workspaceIndex")),
@@ -171,12 +169,10 @@ void export_MatrixWorkspace() {
            "Returns the signed two theta value for given detector")
       .def("getSpectrum", (ISpectrum * (MatrixWorkspace::*)(const size_t)) &
                               MatrixWorkspace::getSpectrum,
-           (arg("self"), arg("workspaceIndex")),
-           return_internal_reference<>(),
+           (arg("self"), arg("workspaceIndex")), return_internal_reference<>(),
            "Return the spectra at the given workspace index.")
       .def("getIndexFromSpectrumNumber",
-           &MatrixWorkspace::getIndexFromSpectrumNumber,
-           arg("self"),
+           &MatrixWorkspace::getIndexFromSpectrumNumber, arg("self"),
            "Returns workspace index correspondent to the given spectrum "
            "number. Throws if no such spectrum is present in the workspace")
       .def("getDetector", &MatrixWorkspace::getDetector,
@@ -185,23 +181,19 @@ void export_MatrixWorkspace() {
            "Return the Detector or "
            "DetectorGroup that is linked to "
            "the given workspace index")
-      .def("getRun", &MatrixWorkspace::mutableRun,
-           arg("self"),
+      .def("getRun", &MatrixWorkspace::mutableRun, arg("self"),
            return_internal_reference<>(),
            "Return the Run object for this workspace")
-      .def("axes", &MatrixWorkspace::axes,
-           arg("self"),
+      .def("axes", &MatrixWorkspace::axes, arg("self"),
            "Returns the number of axes attached to the workspace")
       .def("getAxis", &MatrixWorkspace::getAxis,
-           (arg("self"), arg("axis_index")),
-           return_internal_reference<>(),
-            "Get a pointer to a workspace axis")
+           (arg("self"), arg("axis_index")), return_internal_reference<>(),
+           "Get a pointer to a workspace axis")
       .def("isHistogramData", &MatrixWorkspace::isHistogramData, arg("self"),
            "Returns True if this is considered to be binned data.")
       .def("isDistribution", (const bool &(MatrixWorkspace::*)() const) &
                                  MatrixWorkspace::isDistribution,
-           arg("self"),
-           return_value_policy<copy_const_reference>(),
+           arg("self"), return_value_policy<copy_const_reference>(),
            "Returns the status of the distribution flag")
       .def("YUnit", &MatrixWorkspace::YUnit, arg("self"),
            "Returns the current Y unit for the data (Y axis) in the workspace")
@@ -212,8 +204,7 @@ void export_MatrixWorkspace() {
       .def("getNumberBins", &getNumberBinsDeprecated, arg("self"),
            "Returns size of the Y data array (deprecated, use blocksize "
            "instead)")
-      .def("getSampleDetails", &getSampleDetailsDeprecated,
-           arg("self"),
+      .def("getSampleDetails", &getSampleDetailsDeprecated, arg("self"),
            return_internal_reference<>(),
            "Return the Run object for this workspace (deprecated, use getRun "
            "instead)")
@@ -228,8 +219,7 @@ void export_MatrixWorkspace() {
            "Sets a new unit for the data (Y axis) in the workspace")
       .def("setDistribution", (bool &(MatrixWorkspace::*)(const bool)) &
                                   MatrixWorkspace::isDistribution,
-           (arg("self"), arg("newVal")),
-           return_value_policy<return_by_value>(),
+           (arg("self"), arg("newVal")), return_value_policy<return_by_value>(),
            "Set distribution flag. If True the workspace has been divided by "
            "the bin-width.")
       .def("replaceAxis", &MatrixWorkspace::replaceAxis,
@@ -239,11 +229,10 @@ void export_MatrixWorkspace() {
       //--------------------------------------- Read spectrum data
       //-------------------------
       .def("readX", &MatrixWorkspace::readX,
-           (arg("self"), arg("workspaceIndex")),
-           return_readonly_numpy(),
+           (arg("self"), arg("workspaceIndex")), return_readonly_numpy(),
            "Creates a read-only numpy wrapper "
-                                           "around the original X data at the "
-                                           "given index")
+           "around the original X data at the "
+           "given index")
       .def("readY", &MatrixWorkspace::readY, return_readonly_numpy(),
            args("self", "workspaceIndex"), "Creates a read-only numpy wrapper "
                                            "around the original Y data at the "

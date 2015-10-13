@@ -22,33 +22,26 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Workspace_isDirtyOverloads,
 void export_Workspace() {
   class_<Workspace, bases<DataItem>, boost::noncopyable>("Workspace", no_init)
       .def("getName", &Workspace::getName,
-           return_value_policy<copy_const_reference>(),
-           arg("self"),
+           return_value_policy<copy_const_reference>(), arg("self"),
            "Returns the name of the workspace. This could be an empty string")
-      .def("getTitle", &Workspace::getTitle,
-           arg("self"),
+      .def("getTitle", &Workspace::getTitle, arg("self"),
            "Returns the title of the workspace")
-      .def("setTitle", &Workspace::setTitle,
-           (arg("self"), arg("title")),
+      .def("setTitle", &Workspace::setTitle, (arg("self"), arg("title")),
            "Set the title of the workspace")
-      .def("getComment", &Workspace::getComment,
-           arg("self"),
+      .def("getComment", &Workspace::getComment, arg("self"),
            return_value_policy<copy_const_reference>(),
            "Returns the comment field on the workspace")
-      .def("setComment", &Workspace::setComment,
-           (arg("self"), arg("comment")),
+      .def("setComment", &Workspace::setComment, (arg("self"), arg("comment")),
            "Set the comment field of the workspace")
       .def("isDirty", &Workspace::isDirty,
            Workspace_isDirtyOverloads(arg("n"), "True if the workspace has run "
                                                 "more than n algorithms "
                                                 "(Default=1)"))
-      .def("getMemorySize", &Workspace::getMemorySize,
-           arg("self"),
+      .def("getMemorySize", &Workspace::getMemorySize, arg("self"),
            "Returns the memory footprint of the workspace in KB")
       .def("getHistory", (const WorkspaceHistory &(Workspace::*)() const) &
                              Workspace::getHistory,
-           arg("self"),
-           return_value_policy<reference_existing_object>(),
+           arg("self"), return_value_policy<reference_existing_object>(),
            "Return read-only access to the workspace history");
 
   // register pointers

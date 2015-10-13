@@ -38,8 +38,7 @@ void export_WorkspaceHistory() {
 
   class_<WorkspaceHistory, boost::noncopyable>("WorkspaceHistory", no_init)
 
-      .def("getAlgorithmHistories", &getHistoriesAsList,
-           arg("self"),
+      .def("getAlgorithmHistories", &getHistoriesAsList, arg("self"),
            "Returns a list of algorithm histories for this workspace history.")
 
       .def("getAlgorithmHistory", &WorkspaceHistory::getAlgorithmHistory,
@@ -47,16 +46,13 @@ void export_WorkspaceHistory() {
            return_value_policy<Policies::RemoveConstSharedPtr>(),
            "Returns the algorithm history at the given index in the history")
 
-      .def("size", &WorkspaceHistory::size,
-           arg("self"),
+      .def("size", &WorkspaceHistory::size, arg("self"),
            "Returns the number of algorithms in the immediate history")
 
-      .def("empty", &WorkspaceHistory::empty,
-           arg("self"),
+      .def("empty", &WorkspaceHistory::empty, arg("self"),
            "Returns whether the history has any entries")
 
-      .def("lastAlgorithm", &WorkspaceHistory::lastAlgorithm,
-           arg("self"),
+      .def("lastAlgorithm", &WorkspaceHistory::lastAlgorithm, arg("self"),
            "Returns the last algorithm run on this workspace so that its "
            "properties can be accessed")
 

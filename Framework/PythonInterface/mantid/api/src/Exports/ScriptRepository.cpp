@@ -197,24 +197,14 @@ Arguments:\n\
   class_<ScriptRepository, boost::noncopyable>("ScriptRepository", repo_desc,
                                                no_init)
       .def("install", &ScriptRepository::install,
-                       (arg("self"), arg("local_path")),
-                       install_desc)
-      .def("listFiles", &getListFiles,
-                         arg("self"),
-                       list_files_desc)
-      .def("fileInfo", &getInfo,
-                        (arg("self"), arg("path")),
-                       file_info_desc)
-      .def("description", &getDescription,
-                           (arg("self"), arg("path")),
-                       file_description_desc)
-      .def("fileStatus", &getStatus,
-                          (arg("self"), arg("path")),
-                       file_status_desc)
+           (arg("self"), arg("local_path")), install_desc)
+      .def("listFiles", &getListFiles, arg("self"), list_files_desc)
+      .def("fileInfo", &getInfo, (arg("self"), arg("path")), file_info_desc)
+      .def("description", &getDescription, (arg("self"), arg("path")),
+           file_description_desc)
+      .def("fileStatus", &getStatus, (arg("self"), arg("path")),
+           file_status_desc)
       .def("download", &ScriptRepository::download,
-                        (arg("self"), arg("file_path")),
-                         download_desc)
-      .def("update", &ScriptRepository::check4Update,
-                      arg("self"),
-                       update_desc);
+           (arg("self"), arg("file_path")), download_desc)
+      .def("update", &ScriptRepository::check4Update, arg("self"), update_desc);
 }

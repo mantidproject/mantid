@@ -83,14 +83,14 @@ void export_leaf_classes() {
            "Creates and intializes a named child algorithm. Output workspaces "
            "are given a dummy name.")
       .def("declareProperty",
-           (declarePropertyType1) & PythonAlgorithm::declarePyAlgProperty,
+           (declarePropertyType1)&PythonAlgorithm::declarePyAlgProperty,
            declarePropertyType1_Overload(
                (arg("self"), arg("prop"), arg("doc") = "")))
       .def("enableHistoryRecordingForChild",
            &Algorithm::enableHistoryRecordingForChild, (args("on")),
            "Turns history recording on or off for an algorithm.")
       .def("declareProperty",
-           (declarePropertyType2) & PythonAlgorithm::declarePyAlgProperty,
+           (declarePropertyType2)&PythonAlgorithm::declarePyAlgProperty,
            declarePropertyType2_Overload(
                (arg("self"), arg("name"), arg("defaultValue"),
                 arg("validator") = object(), arg("doc") = "",
@@ -99,7 +99,7 @@ void export_leaf_classes() {
                "the type of the defaultValue and mapped to an appropriate C++ "
                "type"))
       .def("declareProperty",
-           (declarePropertyType3) & PythonAlgorithm::declarePyAlgProperty,
+           (declarePropertyType3)&PythonAlgorithm::declarePyAlgProperty,
            declarePropertyType3_Overload(
                (arg("self"), arg("name"), arg("defaultValue"), arg("doc") = "",
                 arg("direction") = Direction::Input),
@@ -107,7 +107,7 @@ void export_leaf_classes() {
                "type "
                "of the defaultValue and mapped to an appropriate C++ type"))
       .def("declareProperty",
-           (declarePropertyType4) & PythonAlgorithm::declarePyAlgProperty,
+           (declarePropertyType4)&PythonAlgorithm::declarePyAlgProperty,
            (arg("self"), arg("name"), arg("defaultValue"),
             arg("direction") = Direction::Input),
            "Declares a named property where the type is taken from the type "
