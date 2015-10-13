@@ -318,7 +318,7 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
  * @param bankName :: the bank number from the ISAW file.
  * @return the Peak the Peak object created
  */
-Mantid::DataObjects::Peak readPeak(PeaksWorkspace_sptr outWS,
+DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
                                    std::string &lastStr, std::ifstream &in,
                                    int &seqNum, std::string bankName) {
   double h;
@@ -387,8 +387,8 @@ Mantid::DataObjects::Peak readPeak(PeaksWorkspace_sptr outWS,
   Instrument_const_sptr inst = outWS->getInstrument();
   if (!inst)
     throw std::runtime_error("No instrument in PeaksWorkspace!");
-  LoadIsawPeaks u;
-  int pixelID = u.findPixelID(inst, bankName, static_cast<int>(col),
+
+  int pixelID = findPixelID(inst, bankName, static_cast<int>(col),
                               static_cast<int>(row));
 
   // Create the peak object
@@ -441,7 +441,7 @@ int LoadIsawPeaks::findPixelID(Instrument_const_sptr inst, std::string bankName,
 
 //-----------------------------------------------------------------------------------------------
 /** Read the header of each peak block section */
-std::string readPeakBlockHeader(std::string lastStr, std::ifstream &in,
+std::string LoadIsawPeaks::readPeakBlockHeader(std::string lastStr, std::ifstream &in,
                                 int &run, int &detName, double &chi,
                                 double &phi, double &omega, double &monCount) {
   std::string s = lastStr;

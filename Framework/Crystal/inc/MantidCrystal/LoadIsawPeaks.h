@@ -36,8 +36,6 @@ public:
 
   /// Returns a confidence value that this algorithm can load a file
   virtual int confidence(Kernel::FileDescriptor &descriptor) const;
-  int findPixelID(Geometry::Instrument_const_sptr inst, std::string bankName,
-                  int col, int row);
 
 private:
   /// Initialise the properties
@@ -51,6 +49,17 @@ private:
 
   std::string readHeader(Mantid::DataObjects::PeaksWorkspace_sptr outWS,
                          std::ifstream &in, double &T0);
+
+  DataObjects::Peak readPeak(DataObjects::PeaksWorkspace_sptr outWS,
+                             std::string &lastStr, std::ifstream &in,
+                             int &seqNum, std::string bankName);
+
+  int findPixelID(Geometry::Instrument_const_sptr inst, std::string bankName,
+                  int col, int row);
+
+  std::string readPeakBlockHeader(std::string lastStr, std::ifstream &in,
+                                  int &run, int &detName, double &chi,
+                                  double &phi, double &omega, double &monCount);
 
   void appendFile(Mantid::DataObjects::PeaksWorkspace_sptr outWS,
                   std::string filename);
