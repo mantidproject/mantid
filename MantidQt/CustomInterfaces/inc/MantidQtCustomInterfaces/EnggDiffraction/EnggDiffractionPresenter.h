@@ -178,9 +178,10 @@ private:
 
   void plotFocusedWorkspace(std::string outWSName);
 
-  void saveGSS(std::string inputWorkspace);
-  void saveFocusedXYE(std::string inputWorkspace);
-  void saveOpenGenie(std::string inputWorkspace);
+  // Algorithms to save the generate workspace
+  void saveGSS(std::string inputWorkspace, std::string bank);
+  void saveFocusedXYE(std::string inputWorkspace, std::string bank);
+  void saveOpenGenie(std::string inputWorkspace, std::string specNums);
 
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;
