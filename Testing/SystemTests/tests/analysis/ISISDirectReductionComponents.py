@@ -239,6 +239,16 @@ class ISISLoadFilesMER(stresstesting.MantidStressTest):
         det = mon_ws.getDetector(0)
         self.assertTrue(det.isMonitor())
 
+        ei_ws = GetAllEi(mon_ws,69634,69638,IgnoreSecondMonitor=False)
+        self.assertTrue(isinstance(ei_ws,Workspace))
+        
+        en_peaks = ei_ws.readX(0)
+        self.assertAlmostEquals(len(en_peaks),1)
+        self.assertAlmostEqual(en_peaks[0],108.94,2)
+
+        
+
+
         self.valid = True
 
 
@@ -283,12 +293,21 @@ class ISISLoadFilesLET(stresstesting.MantidStressTest):
         #
         self.assertEqual(mon_ws.getNumberHistograms(),27)
 
+        ei_ws = GetAllEi(mon_ws,40966,40967,IgnoreSecondMonitor=True)
+        self.assertTrue(isinstance(ei_ws,Workspace))
+        
+        en_peaks = ei_ws.readX(0)
+        self.assertAlmostEquals(len(en_peaks),4)
+        self.assertAlmostEqual(en_peaks[0],6.93,2)
+        
 
         self.valid = True
+
 
 
     def validate(self):
         return self.valid
 
 if __name__=="__main__":
-    ISISLoadFilesMER.runTest()
+    tester = ISISLoadFilesLET()
+    tester.runTest()
