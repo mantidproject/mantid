@@ -84,7 +84,9 @@ LoadEventPreNexus::LoadEventPreNexus()
       num_good_events(0), num_error_events(0), num_ignored_events(0),
       first_event(0), max_events(0), using_mapping_file(false),
       loadOnlySomeSpectra(false), spectraLoadMap(), longest_tof(0),
-      shortest_tof(0), parallelProcessing(false) {}
+      shortest_tof(0), parallelProcessing(false) {
+  this->useAlgorithm("LoadEventPreNexus", 2);
+}
 
 LoadEventPreNexus::~LoadEventPreNexus() { delete this->eventfile; }
 

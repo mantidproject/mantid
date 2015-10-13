@@ -9,8 +9,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 
-#include "MantidCurveFitting/Gaussian.h"
-#include "MantidCurveFitting/FlatBackground.h"
+#include "MantidCurveFitting/Functions/FlatBackground.h"
 
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -21,6 +20,7 @@ using Mantid::Poldi::PoldiFitPeaks1D2;
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 

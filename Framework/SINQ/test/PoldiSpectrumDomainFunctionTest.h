@@ -12,7 +12,6 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
-#include "MantidCurveFitting/Gaussian.h"
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/Jacobian.h"
 

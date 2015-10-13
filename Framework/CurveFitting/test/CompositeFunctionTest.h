@@ -5,7 +5,7 @@
 
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
@@ -13,12 +13,12 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FrameworkManager.h"
 
-#include "MantidCurveFitting/SimplexMinimizer.h"
-#include "MantidCurveFitting/BFGS_Minimizer.h"
-#include "MantidCurveFitting/LevenbergMarquardtMDMinimizer.h"
-#include "MantidCurveFitting/UserFunction.h"
-#include "MantidCurveFitting/ExpDecay.h"
-#include "MantidCurveFitting/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
+#include "MantidCurveFitting/Functions/UserFunction.h"
+#include "MantidCurveFitting/Functions/ExpDecay.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/GSLJacobian.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
@@ -28,6 +28,10 @@
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Algorithms;
+using namespace Mantid::CurveFitting::Functions;
+using namespace Mantid::CurveFitting::FuncMinimisers;
+using namespace Mantid::CurveFitting::CostFunctions;
 
 typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
 typedef Mantid::DataObjects::TableWorkspace_sptr TWS_type;
