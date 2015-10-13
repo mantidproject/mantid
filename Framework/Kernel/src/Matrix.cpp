@@ -166,8 +166,8 @@ Matrix<T>::Matrix(const Matrix<T> &A, const size_t nrow, const size_t ncol)
         for (size_t j = 0; j <= ny; j++) {
           if (j != ncol) {
 
-              V[iR][jR] = A.V[i][j];
-              jR++;
+            V[iR][jR] = A.V[i][j];
+            jR++;
           }
         }
         iR++;
