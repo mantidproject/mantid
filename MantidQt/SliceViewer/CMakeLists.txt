@@ -28,6 +28,7 @@ set ( SRC_FILES
     src/RebinOffState.cpp
 	src/SliceViewer.cpp
 	src/SliceViewerWindow.cpp
+    src/SliceViewerState.cpp
 	src/SnapToGridDialog.cpp
 	src/XYLimitsDialog.cpp
 	src/LinePlotOptions.cpp
