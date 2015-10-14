@@ -884,8 +884,7 @@ std::string getWord(std::istream &in, bool consumeEOL) {
     }
 
     return ret;
-  }
-  else {      // Non-EOL and non-space character
+  } else {      // Non-EOL and non-space character
     in.unget(); // Put it back on stream
   }
 
@@ -903,8 +902,7 @@ std::string getWord(std::istream &in, bool consumeEOL) {
           (nextch == '\r' && in.peek() == '\n')) {
         in.ignore();
       }
-    }
-    else {
+    } else {
       in.unget();
     }
   }
