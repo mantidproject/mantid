@@ -2021,7 +2021,6 @@ bool FitPowderDiffPeaks::doFitMultiplePeaks(
   // 1. Fit peaks intensities first
   const size_t numpeaks = peakfuncs.size();
   map<string, double> peaksfuncparams;
-  bool evergood = true;
 
   // a) Set up fit/fix
   vector<string> peakparnames = peakfuncs[0]->getParameterNames();
@@ -2045,7 +2044,7 @@ bool FitPowderDiffPeaks::doFitMultiplePeaks(
   double chi2;
   bool fitgood = doFitNPeaksSimple(dataws, wsindex, peaksfunc, peakfuncs,
                                    "Levenberg-MarquardtMD", 1000, chi2);
-  evergood = evergood || fitgood;
+  bool evergood = fitgood;
 
   // c) Process result
   if (!fitgood) {

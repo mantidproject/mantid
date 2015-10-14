@@ -2341,8 +2341,11 @@ void ConfigDialog::apply()
   QList<MdiSubWindow*> windows = app->windowsList();
   foreach(MdiSubWindow *w, windows){
     if (w->isA("MultiLayer")){
-      (dynamic_cast<MultiLayer*>(w))->setScaleLayersOnPrint(boxScaleLayersOnPrint->isChecked());
-      (dynamic_cast<MultiLayer*>(w))->printCropmarks(boxPrintCropmarks->isChecked());
+      MultiLayer* multiLayer = dynamic_cast<MultiLayer*>(w);
+      if (multiLayer) {
+        multiLayer->setScaleLayersOnPrint(boxScaleLayersOnPrint->isChecked());
+        multiLayer->printCropmarks(boxPrintCropmarks->isChecked());
+      }
     }
   }
   // general page: application tab

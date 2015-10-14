@@ -99,6 +99,15 @@ void PoldiResidualCorrelationCore::distributeCorrelationCounts(
         case 2: {
           int middleIndex = cleanIndex((locator.icmin + 1), m_timeBinCount);
 
+          if (middleIndex < 0) {
+            m_logger.warning()
+                << "Inconsistency foun while calculating distribute "
+                   "correlation counts for d-value with index "
+                << boost::lexical_cast<std::string>(k) << ", got middle index: "
+                << boost::lexical_cast<std::string>(middleIndex)
+                << ", ignoring it." << std::endl;
+            break;
+          }
           addToCountData(locator.detectorElement, middleIndex, deltaForD);
         }
         case 1: {

@@ -153,7 +153,9 @@ const std::string AlignDetectors::summary() const {
 }
 
 /// (Empty) Constructor
-AlignDetectors::AlignDetectors() { this->tofToDmap = NULL; }
+AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {
+  this->tofToDmap = NULL;
+}
 
 /// Destructor
 AlignDetectors::~AlignDetectors() { delete this->tofToDmap; }

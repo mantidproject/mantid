@@ -16,7 +16,8 @@ DECLARE_ALGORITHM(MonitorEfficiencyCorUser)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-MonitorEfficiencyCorUser::MonitorEfficiencyCorUser() {}
+MonitorEfficiencyCorUser::MonitorEfficiencyCorUser()
+    : m_inputWS(), m_outputWS(), m_Ei(.0), m_monitorCounts(0) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

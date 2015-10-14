@@ -7,7 +7,6 @@
 #include <QValidator>
 #include <QFormLayout>
 
-
 namespace MantidQt {
 namespace CustomDialogs {
 DECLARE_DIALOG(GetNegMuMuonicXRDDialog)
@@ -18,7 +17,8 @@ DECLARE_DIALOG(GetNegMuMuonicXRDDialog)
  */
 
 GetNegMuMuonicXRDDialog::GetNegMuMuonicXRDDialog(QWidget *parent)
-    : API::AlgorithmDialog(parent) {}
+    : API::AlgorithmDialog(parent), m_periodicTable(NULL), m_yPosition(NULL),
+      m_groupWorkspaceNameInput(NULL), m_showLegendCheck(NULL) {}
 
 /// Initialise the layout
 void GetNegMuMuonicXRDDialog::initLayout() {
@@ -26,18 +26,18 @@ void GetNegMuMuonicXRDDialog::initLayout() {
   this->setMaximumHeight(400);
   this->setMaximumWidth(675);
   // assign periodicTable member to a new periodicTable
-  periodicTable = new PeriodicTableWidget();
+  m_periodicTable = new PeriodicTableWidget();
 
-  // assign yPosition member to a new QLineEdit
-  yPosition = new QLineEdit();
-  //assign GroupWorkspaceName member to a new QLineEdit
-  groupWorkspaceNameInput = new QLineEdit();
+  // assign m_yPosition member to a new QLineEdit
+  m_yPosition = new QLineEdit();
+  // assign GroupWorkspaceName member to a new QLineEdit
+  m_groupWorkspaceNameInput = new QLineEdit();
   auto *groupWsInputLabel = new QLabel("OutputWorkspace");
-  groupWorkspaceNameInput->setMaximumWidth(250);
+  m_groupWorkspaceNameInput->setMaximumWidth(250);
   // Disable all buttons on the periodicTable
   // as we only have a select few that need to be
   // enabled.
-  periodicTable->disableAllElementButtons();
+  m_periodicTable->disableAllElementButtons();
 
   /*Elements Enabled Correspond to those for which we
   * have data for in the dictionary found in
@@ -51,44 +51,44 @@ void GetNegMuMuonicXRDDialog::initLayout() {
   // run button for executing the algorithm
   auto *runButton = new QPushButton("Run");
 
-  // label for the QLineEdit for yPosition property
-  auto *yPositionLabel = new QLabel("Y Position");
+  // label for the QLineEdit for m_yPosition property
+  auto *m_yPositionLabel = new QLabel("Y Position");
 
-  /*validator allows only numeric input for yPosition
+  /*validator allows only numeric input for m_yPosition
    *this helps with validating the input.
    *Does not detect empty string as invalid input.
    */
-  auto yPositionNumericValidator = new QDoubleValidator();
+  auto m_yPositionNumericValidator = new QDoubleValidator();
 
   // YPosition LineEdit Attributes
-  yPosition->setMaximumWidth(250);
-  yPosition->setPlaceholderText("-0.01");
-  yPosition->setValidator(yPositionNumericValidator);
+  m_yPosition->setMaximumWidth(250);
+  m_yPosition->setPlaceholderText("-0.01");
+  m_yPosition->setValidator(m_yPositionNumericValidator);
 
   // Run Button Attributes and signal/slot assignment
   runButton->setMaximumWidth(100);
   connect(runButton, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(this, SIGNAL(validInput()), this, SLOT(accept()));
 
-  //Show Legend button attributes and signal/slot asssignment
-  showLegendCheck = new QCheckBox("Show Legend");
-  connect(showLegendCheck, SIGNAL(clicked()), this, SLOT(showLegend()));
+  // Show Legend button attributes and signal/slot asssignment
+  m_showLegendCheck = new QCheckBox("Show Legend");
+  connect(m_showLegendCheck, SIGNAL(clicked()), this, SLOT(showLegend()));
   // Adding Widgets to Layout
-  main_layout->addWidget(periodicTable);
-  main_layout->addWidget(showLegendCheck);
-  main_layout->addWidget(yPositionLabel);
-  main_layout->addWidget(yPosition);
+  main_layout->addWidget(m_periodicTable);
+  main_layout->addWidget(m_showLegendCheck);
+  main_layout->addWidget(m_yPositionLabel);
+  main_layout->addWidget(m_yPosition);
   main_layout->addWidget(groupWsInputLabel);
-  main_layout->addWidget(groupWorkspaceNameInput);
+  main_layout->addWidget(m_groupWorkspaceNameInput);
   main_layout->addWidget(runButton);
 }
 
 /**
  *
  */
-void GetNegMuMuonicXRDDialog::showLegend(){
-    bool checked = showLegendCheck->isChecked();
-    periodicTable->showGroupLegend(checked);
+void GetNegMuMuonicXRDDialog::showLegend() {
+  bool checked = m_showLegendCheck->isChecked();
+  m_periodicTable->showGroupLegend(checked);
 }
 
 /**
@@ -102,13 +102,13 @@ void GetNegMuMuonicXRDDialog::enableElementsForGetNegMuMuonicXRD() {
    * for the algorithm, and the button for that element can be enabled
    * the same as the elements are below.
    */
-  periodicTable->enableButtonByName("Au");
-  periodicTable->enableButtonByName("Ag");
-  periodicTable->enableButtonByName("Cu");
-  periodicTable->enableButtonByName("Zn");
-  periodicTable->enableButtonByName("Pb");
-  periodicTable->enableButtonByName("As");
-  periodicTable->enableButtonByName("Sn");
+  m_periodicTable->enableButtonByName("Au");
+  m_periodicTable->enableButtonByName("Ag");
+  m_periodicTable->enableButtonByName("Cu");
+  m_periodicTable->enableButtonByName("Zn");
+  m_periodicTable->enableButtonByName("Pb");
+  m_periodicTable->enableButtonByName("As");
+  m_periodicTable->enableButtonByName("Sn");
 }
 
 /**
@@ -128,7 +128,7 @@ bool GetNegMuMuonicXRDDialog::validateDialogInput(QString input) {
 */
 void GetNegMuMuonicXRDDialog::runClicked() {
   // getting a list of strings of elements selected from periodicTableWidget
-  QString elementsSelectedStr = periodicTable->getAllCheckedElementsStr();
+  QString elementsSelectedStr = m_periodicTable->getAllCheckedElementsStr();
   // if no elements are selected from the PeriodicTableWidget, a pop-up appears
   // to the user.
   if (!validateDialogInput(elementsSelectedStr)) {
@@ -141,15 +141,16 @@ void GetNegMuMuonicXRDDialog::runClicked() {
   // signal.
   if (validateDialogInput(elementsSelectedStr)) {
     storePropertyValue("Elements", elementsSelectedStr);
-    if (validateDialogInput(yPosition->text())) {
-      storePropertyValue("YAxisPosition", yPosition->text());
+    if (validateDialogInput(m_yPosition->text())) {
+      storePropertyValue("YAxisPosition", m_yPosition->text());
     } else {
-      // used as default value for yPosition property if the user does not input
+      // used as default value for m_yPosition property if the user does not
+      // input
       // one.
-      storePropertyValue("YAxisPosition", yPosition->placeholderText());
+      storePropertyValue("YAxisPosition", m_yPosition->placeholderText());
     }
-    if (validateDialogInput(groupWorkspaceNameInput->text())){
-        storePropertyValue("OutputWorkspace", groupWorkspaceNameInput->text());
+    if (validateDialogInput(m_groupWorkspaceNameInput->text())) {
+      storePropertyValue("OutputWorkspace", m_groupWorkspaceNameInput->text());
     }
     emit validInput();
   }
