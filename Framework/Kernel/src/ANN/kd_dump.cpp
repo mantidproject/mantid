@@ -441,7 +441,7 @@ static ANNkd_ptr annReadTree(istream &in,           // input stream
     in >> n_bnds; // number of bounding sides
                   // allocate bounds array
 
-    if (0 < n_bnds ||
+    if (0 > n_bnds ||
         static_cast<size_t>(std::numeric_limits<int>::max()) <=
             static_cast<size_t>(n_bnds / sizeof(ANNorthHalfSpace))) {
       annError("Too big number of bounding sides, would cause overflow when "
