@@ -318,6 +318,7 @@ public:
     alg.setProperty("FirstPeriodWorkspace", inWS);
     alg.setProperty("SecondPeriodWorkspace", inWSSecond);
     alg.setProperty("OutputType", "PairAsymmetry");
+    alg.setProperty("PeriodOperation", "-");
     alg.setProperty("PairFirstIndex", 2);
     alg.setProperty("PairSecondIndex", 0);
     alg.setPropertyValue("OutputWorkspace", outWSName);
@@ -333,9 +334,9 @@ public:
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(ws->blocksize(), 3);
 
-      TS_ASSERT_DELTA(ws->readY(0)[0], 1.1785, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[1], 0.9750, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[2], 0.8333, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[0], -0.3214, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[1], -0.2250, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[2], -0.1666, 0.0001);
 
       TS_ASSERT_EQUALS(ws->readX(0)[0], 1.5);
       TS_ASSERT_EQUALS(ws->readX(0)[1], 2.5);
