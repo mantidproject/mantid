@@ -546,8 +546,7 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionPawley(
                                 "peaks do not have point group.");
   }
 
-  std::string crystalSystem =
-      getCrystalSystemAsString(pointGroup->crystalSystem());
+  std::string crystalSystem = getCrystalSystemFromPointGroup(pointGroup);
   pawleyFunction->setCrystalSystem(crystalSystem);
 
   UnitCell cell = peakCollection->unitCell();
@@ -573,6 +572,35 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionPawley(
   mdFunction->addFunction(poldiPawleyFunction);
 
   return mdFunction;
+}
+
+/**
+ * Returns the crystal system for the specified point group
+ *
+ * This function simply uses Geometry::getCrystalSystemAsString(), except when
+ * the crystal system is trigonal but the point group uses hexagonal axes. In
+ * that case this function returns the string for PointGroup::Hexagonal.
+ *
+ * @param pointGroup :: The point group for which to find the crystal system
+ * @return The crystal system for the point group
+ */
+std::string PoldiFitPeaks2D::getCrystalSystemFromPointGroup(
+    const PointGroup_sptr &pointGroup) const {
+  if (!pointGroup) {
+    throw std::invalid_argument(
+        "Cannot return crystal system for null PointGroup.");
+  }
+
+  PointGroup::CrystalSystem crystalSystem = pointGroup->crystalSystem();
+
+  if (crystalSystem == PointGroup::Trigonal) {
+    if (pointGroup->getCoordinateSystem() ==
+        Group::CoordinateSystem::Hexagonal) {
+      return getCrystalSystemAsString(PointGroup::Hexagonal);
+    }
+  }
+
+  return getCrystalSystemAsString(crystalSystem);
 }
 
 /**

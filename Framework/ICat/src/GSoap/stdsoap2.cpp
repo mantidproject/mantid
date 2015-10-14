@@ -2386,7 +2386,7 @@ int SOAP_FMAC2 soap_resolve(struct soap *soap) {
                                         "location=%p level=%u,%u id='%s'\n",
                                 ip->type, p, ip->level, fp->level, ip->id));
             while (ip->level < k) {
-              void **q = (void **)soap_malloc(soap, sizeof(q));
+              void **q = (void **)soap_malloc(soap, sizeof(*q));
               if (!q)
                 return soap->error;
               *q = p;
@@ -8188,9 +8188,11 @@ void *SOAP_FMAC2 soap_id_lookup(struct soap *soap, const char *id, void **p,
       void *s, **r = &ip->link;
       q = (void **)ip->link;
       while (q) {
-        *r = (void *)soap_malloc(soap, sizeof(void *));
-        if (!*r)
+        void **tmp = (void **)soap_malloc(soap, sizeof(void *));
+        if (!tmp)
           return NULL;
+        *r = (void *)tmp;
+
         s = *q;
         *q = *r;
         r = (void **)*r;
@@ -10040,7 +10042,7 @@ int SOAP_FMAC2 soap_element_start_end_out(struct soap *soap, const char *tag) {
   if (soap->mode & SOAP_XML_CANONICAL) {
     struct soap_nlist *np;
     for (tp = soap->attributes; tp; tp = tp->next) {
-      if (tp->visible && tp->name)
+      if (tp->visible && tp->name[0])
         soap_utilize_ns(soap, tp->name);
     }
     for (np = soap->nlist; np; np = np->next) {
@@ -11048,7 +11050,7 @@ int SOAP_FMAC2 soap_peek_element(struct soap *soap) {
           soap->arraySize[sizeof(soap->arrayType) - 1] = '\0';
           soap->arrayType[sizeof(soap->arrayType) - 1] = '\0';
         } else if (!soap_match_tag(soap, tp->name, "SOAP-ENC:offset"))
-          strncpy(soap->arrayOffset, tp->value, sizeof(soap->arrayOffset));
+          strncpy(soap->arrayOffset, tp->value, sizeof(soap->arrayOffset) - 1);
         else if (!soap_match_tag(soap, tp->name, "SOAP-ENC:position"))
           soap->position = soap_getposition(tp->value, soap->positions);
         else if (!soap_match_tag(soap, tp->name, "SOAP-ENC:root"))

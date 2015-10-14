@@ -1278,11 +1278,13 @@ bool Algorithm::processGroups() {
   // ---------- Create all the output workspaces ----------------------------
   for (size_t owp = 0; owp < m_pureOutputWorkspaceProps.size(); owp++) {
     Property *prop = dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp]);
-    WorkspaceGroup_sptr outWSGrp = WorkspaceGroup_sptr(new WorkspaceGroup());
-    outGroups.push_back(outWSGrp);
-    // Put the GROUP in the ADS
-    AnalysisDataService::Instance().addOrReplace(prop->value(), outWSGrp);
-    outWSGrp->observeADSNotifications(false);
+    if (prop) {
+      WorkspaceGroup_sptr outWSGrp = WorkspaceGroup_sptr(new WorkspaceGroup());
+      outGroups.push_back(outWSGrp);
+      // Put the GROUP in the ADS
+      AnalysisDataService::Instance().addOrReplace(prop->value(), outWSGrp);
+      outWSGrp->observeADSNotifications(false);
+    }
   }
 
   // Go through each entry in the input group(s)

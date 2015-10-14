@@ -36,19 +36,20 @@ namespace CustomDialogs {
 class GetNegMuMuonicXRDDialog : public API::AlgorithmDialog {
   Q_OBJECT
 
-  public:
+public:
   /// Constructor
   GetNegMuMuonicXRDDialog(QWidget *parent = 0);
 
-  private:
+private:
   /// Periodic Table widget used for selection of elements property
-  PeriodicTableWidget *periodicTable;
+  PeriodicTableWidget *m_periodicTable;
   /// QLineEdit used for input of y-position property
-  QLineEdit *yPosition;
+  QLineEdit *m_yPosition;
   /// QLineEdit used for input of GroupWorkspaceSpace
-  QLineEdit *groupWorkspaceNameInput;
-  //Check box for showing or hiding the Legend for PeriodicTableWidget
-  QCheckBox *showLegendCheck;
+  QLineEdit *m_groupWorkspaceNameInput;
+  // Check box for showing or hiding the Legend for PeriodicTableWidget
+  QCheckBox *m_showLegendCheck;
+
   /// Validate that the input is not empty before running algorithm
   bool validateDialogInput(QString input);
   /** Enables a the buttons corresponding to the elements
@@ -56,15 +57,15 @@ class GetNegMuMuonicXRDDialog : public API::AlgorithmDialog {
   */
   void enableElementsForGetNegMuMuonicXRD();
 
-  private slots:
+private slots:
   /// When the "Run" button is clicked, the algorithm is executed with inputs
   void runClicked();
   void showLegend();
 
-  protected:
+protected:
   // create the initial layout
   void initLayout();
-  signals:
+signals:
   /// signal emitted when validateDialogInput passes
   void validInput();
 };

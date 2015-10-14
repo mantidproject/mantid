@@ -385,6 +385,8 @@ public:
     // check automatic plotting
     EXPECT_CALL(mockView, focusedOutWorkspace()).Times(1).WillOnce(Return(true));
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(1);
+	// There are two/three other tests that have the disabled_ prefix so they
+	// normally run
 
     // Should not try to use options for other types of focusing
     EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);

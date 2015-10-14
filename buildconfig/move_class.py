@@ -15,32 +15,36 @@ def move_one(subproject, classname, newproject, newclassname, oldfilename, newfi
     """Move one file """
 
     # Move the file
-    cmd = "mv " + oldfilename + " " + newfilename
-    if not args.no_vcs:
-        cmd = "git " + cmd
-    print "Running:", cmd
-    retval = os.system(cmd)
-    if retval != 0:
-        raise RuntimeError("Error executing cmd '%s'" % cmd)
+    try:
+        cmd = "mv " + oldfilename + " " + newfilename
+        cmd = cmd.replace("\\","/")
+        if not args.no_vcs:
+            cmd = "git " + cmd
+        print "Running:", cmd
+        retval = os.system(cmd)
+        if retval != 0:
+            raise RuntimeError("Error executing cmd '%s'" % cmd)
 
-    f = open(newfilename, 'r')
-    text = f.read()
-    f.close()
+        f = open(newfilename, 'r')
+        text = f.read()
+        f.close()
 
-    # Replace any includes of it
-    text = text.replace("Mantid" + subproject + "/" + args.source_subfolder + classname + ".h",
-                        "Mantid" + newproject + "/" + args.dest_subfolder + newclassname + ".h")
+        # Replace any includes of it
+        text = text.replace("Mantid" + subproject + "/" + args.source_subfolder + classname + ".h",
+                            "Mantid" + newproject + "/" + args.dest_subfolder + newclassname + ".h")
 
-    #Replace the guard
-    old_guard = "MANTID_%s_%s_H_" % (subproject.upper(), classname.upper())
-    new_guard = "MANTID_%s_%s_H_" % (newproject.upper(), newclassname.upper())
-    text = text.replace(old_guard, new_guard)
+        #Replace the guard
+        old_guard = "MANTID_%s_%s_H_" % (subproject.upper(), classname.upper())
+        new_guard = "MANTID_%s_%s_H_" % (newproject.upper(), newclassname.upper())
+        text = text.replace(old_guard, new_guard)
 
-    # Replace the namespace declaration
-    text = text.replace("namespace " + subproject, "namespace " + newproject)
-    # Replace the conents
-    f = open(newfilename, 'w')
-    f.write(text)
+        # Replace the namespace declaration
+        text = text.replace("namespace " + subproject, "namespace " + newproject)
+        # Replace the conents
+        f = open(newfilename, 'w')
+        f.write(text)
+    except RuntimeError as err:
+        print err
 
 
 
@@ -57,7 +61,7 @@ def move_all(subproject, classname, newproject, newclassname, args):
 
     newheaderfile = os.path.join(newbasedir, "inc/" + new_header_folder + "/" + args.dest_subfolder + newclassname + ".h")
     newsourcefile = os.path.join(newbasedir, "src/" + args.dest_subfolder + newclassname + ".cpp")
-    newtestfile = os.path.join(newbasedir, "test/" + newclassname + "Test.h")
+    newtestfile = os.path.join(newbasedir, "test/" + args.dest_subfolder + newclassname + "Test.h")
 
     if args.header and not overwrite and os.path.exists(newheaderfile):
         print "\nError! Header file %s already exists. Use --force to overwrite.\n" % newheaderfile

@@ -215,12 +215,15 @@ FindPeaksMD::createPeak(const Mantid::Kernel::V3D &Q, const double binCount) {
   boost::shared_ptr<DataObjects::Peak> p;
   if (dimType == QLAB) {
     // Build using the Q-lab-frame constructor
-    p = boost::shared_ptr<DataObjects::Peak>(new Peak(inst, Q));
+    p = boost::make_shared<Peak>(inst, Q);
     // Save gonio matrix for later
     p->setGoniometerMatrix(m_goniometer);
   } else if (dimType == QSAMPLE) {
     // Build using the Q-sample-frame constructor
-    p = boost::shared_ptr<DataObjects::Peak>(new Peak(inst, Q, m_goniometer));
+    p = boost::make_shared<Peak>(inst, Q, m_goniometer);
+  } else {
+    throw std::invalid_argument(
+        "Cannot Integrate peaks unless the dimension is QLAB or QSAMPLE");
   }
 
   try { // Look for a detector

@@ -514,7 +514,10 @@ void CustomActionDialog::chooseFolder()
 QAction * CustomActionDialog::actionAt(int row)
 {
 	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
-	QList<QAction *>actions = app->customActionsList();
+  if (!app)
+    throw std::runtime_error(
+        "The parent of this dialog was not the Application Window");
+  QList<QAction *>actions = app->customActionsList();
 	if (actions.isEmpty() || row < 0 || row >= actions.count())
         return 0;
 

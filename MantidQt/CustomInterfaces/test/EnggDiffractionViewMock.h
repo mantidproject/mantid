@@ -105,7 +105,22 @@ public:
   MOCK_CONST_METHOD0(saveSettings, void());
 
   // virtual void plotFocusedSpectrum();
-  MOCK_METHOD1(plotFocusedSpectrum, void(const std::string&));
+  MOCK_METHOD1(plotFocusedSpectrum, void(const std::string &));
+
+  // void plotFocusStatus();
+  MOCK_METHOD0(plotFocusStatus, void());
+
+  // void plotRepChanged();
+  MOCK_METHOD1(plotRepChanged, void(int idx));
+
+  // virtual void plotWaterfallSpectrum
+  MOCK_METHOD1(plotWaterfallSpectrum, void(const std::string &wsName));
+
+  // virtual void plotReplacingWindow
+  MOCK_METHOD1(plotReplacingWindow, void(const std::string &wsName));
+
+  // std::string currentPlotType
+  MOCK_CONST_METHOD0(currentPlotType, int());
 };
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H

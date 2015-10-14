@@ -209,6 +209,20 @@ public slots:
   bool isDistribution() const { return m_isDistribution; }
   void setDistribution(const bool on) { m_isDistribution = on; }
 
+  void noNormalizationMD();
+  void numEventsNormalizationMD();
+  void volumeNormalizationMD();
+
+  /// normalizable in the MD sense, don't confuse with (bin width) normalizable(),
+  /// True if this is a plot MD
+  bool normalizableMD() const { return m_normalizableMD; }
+  void setNormalizableMD(const bool on) { m_normalizableMD = on; }
+
+  /// when using MD curves (true == normalizbleMD()), what type of normalization
+  int normalizationMD() const { return m_normalizationMD; }
+  void setNormalizationMD(const int normalization) { m_normalizationMD = normalization; }
+
+
 
   //! Accessor method for #d_plot.
   Plot* plotWidget(){return d_plot;};
@@ -813,6 +827,8 @@ private:
 
   QString yAxisTitleFromFirstCurve();
   
+  void updateCurvesAndAxes();
+
   Plot *d_plot;
   QwtPlotZoomer *d_zoomer[2];
   TitlePicker *titlePicker;
@@ -877,6 +893,12 @@ private:
   bool m_isDistribution;
   // True, if the graph can be plotted as distribution
   bool m_normalizable;
+
+  // True if the graph is an MD plot and can be normalized (none, volume, events)
+  bool m_normalizableMD;
+  /// type of normalization for MD curves
+  int m_normalizationMD;
+
   // x and y units of MantidCurves
   boost::shared_ptr<Mantid::Kernel::Unit> m_xUnits;
   boost::shared_ptr<Mantid::Kernel::Unit> m_yUnits;

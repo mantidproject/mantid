@@ -581,8 +581,8 @@ void UnwrappedSurface::drawSimpleToImage(QImage* image,bool picking)const
     if ( iw < 4 ) iw = 4;
     if ( ih < 4 ) ih = 4;
     
-    double w = (iw == 0)?  dw : udet.width/2;
-    double h = (ih == 0)?  dh : udet.height/2;
+    double w = udet.width/2;
+    double h = udet.height/2;
 
     if (!(m_viewRect.contains(udet.u-w, udet.v-h) || m_viewRect.contains(udet.u+w, udet.v+h))) continue;
 
