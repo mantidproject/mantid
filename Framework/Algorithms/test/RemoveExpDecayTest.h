@@ -26,23 +26,22 @@ public:
     TS_ASSERT(alg->isInitialized())
   }
 
-  void testExecute() {
+  void test_Execute() {
 
-    auto ws = createWorkspace(4, 50);
+    auto ws = createWorkspace(1, 50);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RemoveExpDecay");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
-    alg->setPropertyValue("Spectra", "0");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
   }
 
-  void test_TwoSpectra() {
+  void test_EmptySpectrumList() {
 
     auto ws = createWorkspace(2, 50);
 
@@ -83,6 +82,46 @@ public:
     TS_ASSERT_DELTA(outWS->readE(1)[10], 0.0054, 0.0001);
     TS_ASSERT_DELTA(outWS->readE(1)[19], 0.0059, 0.0001);
     TS_ASSERT_DELTA(outWS->readE(1)[49], 0.0078, 0.0001);
+  }
+
+  void test_SpectrumList() {
+
+    auto ws = createWorkspace(2, 50);
+
+    // First, run the algorithm without specifying any spectrum
+    IAlgorithm_sptr alg1 = AlgorithmManager::Instance().create("RemoveExpDecay");
+    alg1->initialize();
+    alg1->setChild(true);
+    alg1->setProperty("InputWorkspace", ws);
+    alg1->setPropertyValue("OutputWorkspace", outputName);
+    TS_ASSERT_THROWS_NOTHING(alg1->execute());
+    TS_ASSERT(alg1->isExecuted());
+    MatrixWorkspace_sptr out1 = alg1->getProperty("OutputWorkspace");
+
+    // Then run the algorithm on the second spectrum only
+    IAlgorithm_sptr alg2 = AlgorithmManager::Instance().create("RemoveExpDecay");
+    alg2->initialize();
+    alg2->setChild(true);
+    alg2->setProperty("InputWorkspace", ws);
+    alg2->setPropertyValue("OutputWorkspace", outputName);
+    alg2->setPropertyValue("Spectra", "1");
+    TS_ASSERT_THROWS_NOTHING(alg2->execute());
+    TS_ASSERT(alg2->isExecuted());
+    MatrixWorkspace_sptr out2 = alg2->getProperty("OutputWorkspace");
+
+    // Both output workspaces should have 2 spectra
+    TS_ASSERT_EQUALS(out1->getNumberHistograms(), ws->getNumberHistograms());
+    TS_ASSERT_EQUALS(out2->getNumberHistograms(), ws->getNumberHistograms());
+
+    // Compare results, they should match for the selected spectrum
+    TS_ASSERT_EQUALS(out1->readX(1), out2->readX(1));
+    TS_ASSERT_EQUALS(out1->readY(1), out2->readY(1));
+    TS_ASSERT_EQUALS(out1->readE(1), out2->readE(1));
+
+    // Compare non-selected spectra, the should match the input ones
+    TS_ASSERT_EQUALS(ws->readX(0), out2->readX(0));
+    TS_ASSERT_EQUALS(ws->readY(0), out2->readY(0));
+    TS_ASSERT_EQUALS(ws->readE(0), out2->readE(0));
   }
 
   void test_yUnitLabel() {
