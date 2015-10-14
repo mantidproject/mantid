@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 using Mantid::API::HistogramValidator;
 
@@ -15,9 +16,20 @@ public:
   static void destroySuite( HistogramValidatorTest *suite ) { delete suite; }
 
 
-  void test_Something()
+  void test_success()
   {
-    TS_FAIL( "You forgot to write a test!");
+    auto ws = boost::make_shared<WorkspaceTester>();
+    ws->init(2, 11, 10);
+    HistogramValidator validator;
+    TS_ASSERT_EQUALS(validator.isValid(ws), "");
+  }
+
+  void test_fail()
+  {
+    auto ws = boost::make_shared<WorkspaceTester>();
+    ws->init(2, 10, 10);
+    HistogramValidator validator;
+    TS_ASSERT_EQUALS(validator.isValid(ws), "The workspace must contain histogram data");
   }
 
 

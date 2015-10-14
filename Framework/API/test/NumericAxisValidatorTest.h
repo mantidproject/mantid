@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/NumericAxisValidator.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 using Mantid::API::NumericAxisValidator;
 
@@ -15,9 +16,22 @@ public:
   static void destroySuite( NumericAxisValidatorTest *suite ) { delete suite; }
 
 
-  void test_Something()
+  void test_success()
   {
-    TS_FAIL( "You forgot to write a test!");
+    auto ws = boost::make_shared<WorkspaceTester>();
+    ws->init(2, 11, 10);
+    auto newAxis = new NumericAxis(2);
+    ws->replaceAxis(1, newAxis);
+    NumericAxisValidator validator;
+    TS_ASSERT_EQUALS(validator.isValid(ws), "");
+  }
+
+  void test_fail()
+  {
+    auto ws = boost::make_shared<WorkspaceTester>();
+    ws->init(2, 11, 10);
+    NumericAxisValidator validator;
+    TS_ASSERT_EQUALS(validator.isValid(ws), "A workspace with axis being a Numeric Axis is required here.");
   }
 
 

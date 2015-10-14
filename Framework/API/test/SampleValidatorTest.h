@@ -4,6 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/SampleValidator.h"
+#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using Mantid::API::SampleValidator;
 
@@ -15,11 +17,25 @@ public:
   static void destroySuite( SampleValidatorTest *suite ) { delete suite; }
 
 
-  void test_Something()
+  void test_fail()
   {
-    TS_FAIL( "You forgot to write a test!");
+    auto ws = boost::make_shared<WorkspaceTester>();
+    ws->init(2, 11, 10);
+    SampleValidator validator;
+    TS_ASSERT_EQUALS(validator.isValid(ws), "The sample is missing the following properties: shape,material");
   }
 
+  void test_success()
+  {
+    auto ws = boost::make_shared<WorkspaceTester>();
+    auto sphere = ComponentCreationHelper::createSphere(1.0, V3D(), "sphere");
+    Mantid::Kernel::Material material("stuff", Mantid::PhysicalConstants::NeutronAtom(), 10);
+    sphere->setMaterial(material);
+    ws->mutableSample().setShape(*sphere);
+
+    SampleValidator validator;
+    TS_ASSERT_EQUALS(validator.checkValidity(ws), "");
+  }
 
 };
 

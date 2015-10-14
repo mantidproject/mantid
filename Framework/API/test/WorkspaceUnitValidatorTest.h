@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 using Mantid::API::WorkspaceUnitValidator;
 
@@ -15,9 +16,21 @@ public:
   static void destroySuite( WorkspaceUnitValidatorTest *suite ) { delete suite; }
 
 
-  void test_Something()
+  void test_fail()
   {
-    TS_FAIL( "You forgot to write a test!");
+    auto ws = boost::make_shared<WorkspaceTester>();
+    ws->init(2, 11, 10);
+    WorkspaceUnitValidator validator;
+    TS_ASSERT_EQUALS(validator.isValid(ws), "The workspace must have units");
+  }
+
+  void test_success()
+  {
+    auto ws = boost::make_shared<WorkspaceTester>();
+    ws->init(2, 11, 10);
+    ws->getAxis(0)->setUnit("TOF");
+    WorkspaceUnitValidator validator;
+    TS_ASSERT_EQUALS(validator.isValid(ws), "");
   }
 
 

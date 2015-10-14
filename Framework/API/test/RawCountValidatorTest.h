@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/RawCountValidator.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 using Mantid::API::RawCountValidator;
 
@@ -15,9 +16,19 @@ public:
   static void destroySuite( RawCountValidatorTest *suite ) { delete suite; }
 
 
-  void test_Something()
+  void test_success()
   {
-    TS_FAIL( "You forgot to write a test!");
+    auto ws = boost::make_shared<WorkspaceTester>();
+    RawCountValidator validator;
+    TS_ASSERT_EQUALS(validator.isValid(ws), "");
+  }
+
+  void test_fail()
+  {
+    auto ws = boost::make_shared<WorkspaceTester>();
+    ws->isDistribution(true);
+    RawCountValidator validator;
+    TS_ASSERT_EQUALS(validator.isValid(ws), "A workspace containing numbers of counts is required here");
   }
 
 

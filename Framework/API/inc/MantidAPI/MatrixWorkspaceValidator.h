@@ -2,7 +2,7 @@
 #define MANTID_API_MATRIXWORKSPACEVALIDATOR_H_
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/TypedValidator.h"
 
 namespace Mantid {

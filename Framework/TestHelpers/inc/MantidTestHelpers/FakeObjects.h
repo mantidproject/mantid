@@ -118,7 +118,7 @@ public:
     m_axes[1] = new Mantid::API::SpectraAxis(this);
   }
   size_t size() const { return vec.size() * blocksize(); }
-  size_t blocksize() const { return vec[0].dataY().size(); }
+  size_t blocksize() const { return vec.empty() ? 0 : vec[0].dataY().size(); }
   ISpectrum *getSpectrum(const size_t index) { return &vec[index]; }
   const ISpectrum *getSpectrum(const size_t index) const {
     return &vec[index];

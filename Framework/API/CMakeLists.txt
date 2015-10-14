@@ -377,7 +377,6 @@ set ( TEST_FILES
 	LogManagerTest.h
 	MDGeometryTest.h
 	MatrixWorkspaceMDIteratorTest.h
-	MatrixWorkspaceValidatorTest.h
 	MemoryManagerTest.h
 	ModeratorModelTest.h
 	MultiDomainFunctionTest.h

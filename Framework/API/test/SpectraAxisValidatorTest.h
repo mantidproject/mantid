@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 using Mantid::API::SpectraAxisValidator;
 
@@ -14,12 +15,23 @@ public:
   static SpectraAxisValidatorTest *createSuite() { return new SpectraAxisValidatorTest(); }
   static void destroySuite( SpectraAxisValidatorTest *suite ) { delete suite; }
 
-
-  void test_Something()
+  void test_fail()
   {
-    TS_FAIL( "You forgot to write a test!");
+    auto ws = boost::make_shared<WorkspaceTester>();
+    ws->init(2, 11, 10);
+    auto newAxis = new NumericAxis(2);
+    ws->replaceAxis(1, newAxis);
+    SpectraAxisValidator validator;
+    TS_ASSERT_EQUALS(validator.isValid(ws), "A workspace with axis being Spectra Number is required here.");
   }
 
+  void test_success()
+  {
+    auto ws = boost::make_shared<WorkspaceTester>();
+    ws->init(2, 11, 10);
+    SpectraAxisValidator validator;
+    TS_ASSERT_EQUALS(validator.isValid(ws), "");
+  }
 
 };
 

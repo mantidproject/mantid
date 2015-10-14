@@ -2,6 +2,7 @@
 #define MANTID_API_INSTRUMENTVALIDATOR_H_
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidKernel/TypedValidator.h"
 
 namespace Mantid {
