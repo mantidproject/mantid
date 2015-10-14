@@ -110,9 +110,8 @@ void ReflectometryReductionOneAuto::init() {
                   "I0 monitor workspace index");
   declareProperty(new PropertyWithValue<std::string>("ProcessingInstructions",
                                                      "", Direction::Input),
-                  "Processing commands to select and add spectrum to make a "
-                  "detector workspace. See [[PeformIndexOperations]] for "
-                  "syntax.");
+                  "Grouping pattern of workspace indices to yield only the"
+                  " detectors of interest. See GroupDetectors for syntax.");
   declareProperty("WavelengthMin", Mantid::EMPTY_DBL(),
                   "Wavelength Min in angstroms", Direction::Input);
   declareProperty("WavelengthMax", Mantid::EMPTY_DBL(),
