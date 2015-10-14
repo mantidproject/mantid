@@ -9,13 +9,14 @@
 #include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Algorithms;
 
 class FunctionParameterDecoratorFitTest;
 

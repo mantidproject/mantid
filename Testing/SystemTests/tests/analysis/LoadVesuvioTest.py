@@ -238,6 +238,10 @@ class VesuvioTests(unittest.TestCase):
 
     #================== Failure cases ================================
 
+    def test_run_range_bad_order_raises_error(self):
+        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188-14187",
+                          OutputWorkspace=self.ws_name)
+
     def test_missing_spectra_property_raises_error(self):
         self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
                           OutputWorkspace=self.ws_name)

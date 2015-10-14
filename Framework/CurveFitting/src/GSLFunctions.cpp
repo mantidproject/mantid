@@ -126,7 +126,7 @@ int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
 
   // functionDeriv() return derivatives of calculated data values. Need to
   // convert this values into
-  // derivatives of calculated-observed devided by error values used by GSL
+  // derivatives of calculated-observed divided by error values used by GSL
   auto values = boost::dynamic_pointer_cast<API::FunctionValues>(
       p->costFunction->getValues());
   if (!values) {
@@ -159,7 +159,8 @@ int gsl_fdf(const gsl_vector *x, void *params, gsl_vector *f, gsl_matrix *J) {
  * Constructor. Creates declared -> active index map
  * @param cf :: ICostFunction
  */
-GSL_FitData::GSL_FitData(boost::shared_ptr<CostFuncLeastSquares> cf)
+GSL_FitData::GSL_FitData(
+    boost::shared_ptr<CostFunctions::CostFuncLeastSquares> cf)
     : function(cf->getFittingFunction()), costFunction(cf) {
   gsl_set_error_handler_off();
   // number of active parameters

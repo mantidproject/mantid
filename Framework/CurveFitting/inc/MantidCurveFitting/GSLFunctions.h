@@ -7,7 +7,7 @@
 #include <gsl/gsl_blas.h>
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ICostFunction.h"
-#include "MantidCurveFitting/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -85,7 +85,7 @@ public:
 /// Structure to contain least squares data and used by GSL
 struct GSL_FitData {
   /// Constructor
-  GSL_FitData(boost::shared_ptr<CostFuncLeastSquares> cf);
+  GSL_FitData(boost::shared_ptr<CostFunctions::CostFuncLeastSquares> cf);
   /// Destructor
   ~GSL_FitData();
   /// number of points to be fitted (size of X, Y and sqrtWeightData arrays)
@@ -94,14 +94,14 @@ struct GSL_FitData {
   size_t p;
   /// Pointer to the function
   API::IFunction_sptr function;
-  boost::shared_ptr<CostFuncLeastSquares> costFunction;
+  boost::shared_ptr<CostFunctions::CostFuncLeastSquares> costFunction;
   /// Initial function parameters
   gsl_vector *initFuncParams;
   /// Jacobi matrix interface
   JacobianImpl1 J;
 
   // this is presently commented out in the implementation
-  // gsl_matrix *holdCalculatedJacobian; ///< cache of the claculated jacobian
+  // gsl_matrix *holdCalculatedJacobian; ///< cache of the calculated jacobian
 };
 
 int gsl_f(const gsl_vector *x, void *params, gsl_vector *f);

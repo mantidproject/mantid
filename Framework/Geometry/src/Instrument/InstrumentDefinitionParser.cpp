@@ -1554,7 +1554,15 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
             increment = atoi((pIDElem->getAttribute("step")).c_str());
 
           // check the start end and increment values are sensible
-          if (((endID - startID) / increment) < 0) {
+          if (0 == increment) {
+            std::stringstream ss;
+            ss << "The step element cannot be zero, found step: " << increment;
+
+            throw Kernel::Exception::InstrumentDefinitionError(ss.str(),
+                                                               filename);
+          }
+          int numSteps = (endID - startID) / increment;
+          if (numSteps < 0) {
             std::stringstream ss;
             ss << "The start, end, and step elements do not allow a single id "
                   "in the idlist entry - ";
@@ -1565,7 +1573,7 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
                                                                filename);
           }
 
-          idList.vec.reserve((endID - startID) / increment);
+          idList.vec.reserve(numSteps);
           for (int i = startID; i != endID + increment; i += increment) {
             idList.vec.push_back(i);
           }
@@ -2301,7 +2309,9 @@ void InstrumentDefinitionParser::createNeutronicInstrument() {
             mapTypeNameToShape.find(shapeName);
         if (shapeIt != mapTypeNameToShape.end()) {
           // Change the shape on the current component to the one requested
-          dynamic_cast<ObjComponent *>(it->first)->setShape(shapeIt->second);
+          auto objCmpt = dynamic_cast<ObjComponent *>(it->first);
+          if (objCmpt)
+            objCmpt->setShape(shapeIt->second);
         } else {
           throw Exception::InstrumentDefinitionError(
               "Requested type " + shapeName + " not defined in IDF");

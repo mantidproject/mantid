@@ -65,7 +65,9 @@ public:
   void setPropertyOrdinal(const int &index, const std::string &value);
 
   /// Make m_properties point to the same PropertyManager as po.
-  void copyPropertiesFrom(const PropertyManagerOwner &po) { *this = po; }
+  virtual void copyPropertiesFrom(const PropertyManagerOwner &po) {
+    *this = po;
+  }
 
   bool existsProperty(const std::string &name) const;
   bool validateProperties() const;

@@ -12,7 +12,7 @@ namespace MantidQt
 namespace SpectrumView
 {
 
-QColor GraphDisplay::g_curveColors[] = {Qt::black, Qt::red, Qt::green, Qt::blue};
+std::vector<QColor> GraphDisplay::g_curveColors;
 
 /**
  *  Construct a GraphDisplay to display selected graph on the specifed plot
@@ -40,6 +40,11 @@ GraphDisplay::GraphDisplay( QwtPlot*      graphPlot,
 {
   if(isVertical)
     graphPlot->setAxisMaxMajor( QwtPlot::xBottom, 3 );
+
+  g_curveColors.push_back(Qt::black);
+  g_curveColors.push_back(Qt::red);
+  g_curveColors.push_back(Qt::green);
+  g_curveColors.push_back(Qt::blue);
 }
 
 
@@ -130,7 +135,7 @@ void GraphDisplay::setData(const QVector<double> & xData,
   auto curve = new QwtPlotCurve;
   curve->setData( xData, yData );
   curve->attach( m_graphPlot );
-  auto colorIndex = m_curves.size() % sizeof(g_curveColors);
+  auto colorIndex = m_curves.size() % g_curveColors.size();
   curve->setPen(QPen(g_curveColors[colorIndex]));
   m_curves.append(curve);
 
