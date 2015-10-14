@@ -1,5 +1,5 @@
 from mantiddoc.directives.base import AlgorithmBaseDirective
-
+import string
 
 class PropertiesDirective(AlgorithmBaseDirective):
 
