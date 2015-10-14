@@ -32,14 +32,14 @@ class PropertiesDirective(AlgorithmBaseDirective):
             header = ('Name', 'Default', 'Description')
 
             for i in xrange(ifunc.numParams()):
-                properties.append((
-                                  ifunc.parameterName(i),
-                                  str(ifunc.getParameterValue(i)),
-                                  ifunc.paramDescription(i)
-                                  ))
+                properties.append((ifunc.parameterName(i),
+                                   str(ifunc.getParameterValue(i)),
+                                   ifunc.paramDescription(i)
+                ))
             self.add_rst(self.make_header("Properties (fitting parameters)"))
         else: # this is an Algorithm
-            alg = self.create_mantid_algorithm(self.algorithm_name(), self.algorithm_version())
+            alg = self.create_mantid_algorithm(self.algorithm_name(),
+                                               self.algorithm_version())
             alg_properties = alg.getProperties()
             if len(alg_properties) == 0:
                 return False
@@ -99,7 +99,7 @@ class PropertiesDirective(AlgorithmBaseDirective):
         # Added 10 to the length to ensure if table_content is 0 that
         # the table is still displayed.
         col_sizes = [max( (len(row[i] * 10) + 10) for row in table_content)
-                for i in range(len(header_content))]
+                     for i in range(len(header_content))]
 
         # Use the column widths as a means to formatting columns.
         formatter = ' '.join('{%d:<%d}' % (index,col) for index, col in enumerate(col_sizes))
