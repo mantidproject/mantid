@@ -125,8 +125,13 @@ int ISISRAW2::ioRAW(FILE *file, bool from_file, bool read_data) {
 /// @param file :: The file pointer
 /// @param i :: The amount of data to skip
 void ISISRAW2::skipData(FILE *file, int i) {
-  if (i < ndes)
-    fseek(file, 4 * ddes[i].nwords, SEEK_CUR);
+  if (i < ndes) {
+    int zero = fseek(file, 4 * ddes[i].nwords, SEEK_CUR);
+    if (0 != zero) {
+      g_log.warning() << "Failed to skip data from file, with value: " << i
+                      << "\n";
+    }
+  }
 }
 
 /// Read data
