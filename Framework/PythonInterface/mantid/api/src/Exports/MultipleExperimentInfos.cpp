@@ -15,7 +15,6 @@ void export_MultipleExperimentInfos() {
            (arg("self"), arg("run_index")),
            "Return the experiment info at the given index.")
       .def("getNumExperimentInfo",
-           &MultipleExperimentInfos::getNumExperimentInfo,
-           arg("self"),
+           &MultipleExperimentInfos::getNumExperimentInfo, arg("self"),
            "Return the number of experiment info objects,");
 }

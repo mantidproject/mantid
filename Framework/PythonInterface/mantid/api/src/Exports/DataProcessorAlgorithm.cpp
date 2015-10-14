@@ -47,8 +47,7 @@ void export_DataProcessorAlgorithm() {
            "input file when processing in chunks")
 
       .def("loadChunk", &DataProcessorAdapter::loadChunkProxy,
-           (arg("self"), arg("row_index")),
-           "Load a chunk of data")
+           (arg("self"), arg("row_index")), "Load a chunk of data")
 
       .def("load", (loadOverload1)&DataProcessorAdapter::loadProxy,
            (arg("self"), arg("input_data")),
@@ -62,8 +61,7 @@ void export_DataProcessorAlgorithm() {
            "AnalysisDataService.")
 
       .def("splitInput", &DataProcessorAdapter::splitInputProxy,
-           (arg("self"), arg("input")),
-           return_value_policy<VectorToNumpy>())
+           (arg("self"), arg("input")), return_value_policy<VectorToNumpy>())
 
       .def("forwardProperties", &DataProcessorAdapter::forwardPropertiesProxy,
            arg("self"))
@@ -92,8 +90,7 @@ void export_DataProcessorAlgorithm() {
            "build. For "
            "non-MPI build it always returns true")
 
-      .def("getNThreads", &DataProcessorAdapter::getNThreadsProxy,
-           arg("self"),
+      .def("getNThreads", &DataProcessorAdapter::getNThreadsProxy, arg("self"),
            "Returns the number of running MPI processes in an MPI build or 1 "
            "for "
            "a non-MPI build");

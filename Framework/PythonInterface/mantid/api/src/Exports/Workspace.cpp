@@ -34,11 +34,10 @@ void export_Workspace() {
       .def("setComment", &Workspace::setComment, (arg("self"), arg("comment")),
            "Set the comment field of the workspace")
       .def("isDirty", &Workspace::isDirty,
-           Workspace_isDirtyOverloads(
-             (arg("self"), arg("n")),
-             "True if the workspace has run "
-             "more than n algorithms "
-             "(Default=1)"))
+           Workspace_isDirtyOverloads((arg("self"), arg("n")),
+                                      "True if the workspace has run "
+                                      "more than n algorithms "
+                                      "(Default=1)"))
       .def("getMemorySize", &Workspace::getMemorySize, arg("self"),
            "Returns the memory footprint of the workspace in KB")
       .def("getHistory", (const WorkspaceHistory &(Workspace::*)() const) &

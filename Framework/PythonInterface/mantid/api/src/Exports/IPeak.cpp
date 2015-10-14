@@ -124,11 +124,9 @@ void export_IPeak() {
       .def("setSigmaIntensity", &IPeak::setSigmaIntensity,
            (arg("self"), arg("sigma_intensity")),
            "Set the error on the integrated peak intensity")
-      .def("getBinCount", &IPeak::getBinCount,
-           arg("self"),
+      .def("getBinCount", &IPeak::getBinCount, arg("self"),
            "Return the # of counts in the bin at its peak")
-      .def("setBinCount", &IPeak::setBinCount,
-           (arg("self"), arg("bin_count")),
+      .def("setBinCount", &IPeak::setBinCount, (arg("self"), arg("bin_count")),
            "Set the # of counts in the bin at its peak")
       .def("getRow", &IPeak::getRow, arg("self"),
            "For RectangularDetectors only, returns "

@@ -124,10 +124,9 @@ void export_AlgorithmFactory() {
            (arg("self"), arg("algorithm_name")),
            "Returns the highest version of the named algorithm. Throws "
            "ValueError if no algorithm can be found")
-      .def("subscribe", &subscribe,
-           (arg("self"), arg("object")),
+      .def("subscribe", &subscribe, (arg("self"), arg("object")),
            "Register a Python class derived from "
-                                    "PythonAlgorithm into the factory")
+           "PythonAlgorithm into the factory")
 
       .def("Instance", &AlgorithmFactory::Instance,
            return_value_policy<reference_existing_object>(),

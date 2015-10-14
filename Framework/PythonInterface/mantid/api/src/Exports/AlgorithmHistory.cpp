@@ -58,31 +58,25 @@ void export_AlgorithmHistory() {
   register_ptr_to_python<Mantid::API::AlgorithmHistory_sptr>();
 
   class_<AlgorithmHistory>("AlgorithmHistory", no_init)
-      .def("name", &AlgorithmHistory::name,
-           arg("self"),
+      .def("name", &AlgorithmHistory::name, arg("self"),
            return_value_policy<copy_const_reference>(),
            "Returns the name of the algorithm.")
 
-      .def("version", &AlgorithmHistory::version,
-           arg("self"),
+      .def("version", &AlgorithmHistory::version, arg("self"),
            return_value_policy<copy_const_reference>(),
            "Returns the version of the algorithm.")
 
       .def("executionDuration", &AlgorithmHistory::executionDuration,
-           arg("self"),
-           "Returns the execution duration of the algorithm.")
+           arg("self"), "Returns the execution duration of the algorithm.")
 
-      .def("executionDate", &AlgorithmHistory::executionDate,
-           arg("self"),
+      .def("executionDate", &AlgorithmHistory::executionDate, arg("self"),
            "Returns the execution date of the algorithm.")
 
-      .def("execCount", &AlgorithmHistory::execCount,
-           arg("self"),
+      .def("execCount", &AlgorithmHistory::execCount, arg("self"),
            return_value_policy<copy_const_reference>(),
            "Returns the execution number of the algorithm.")
 
-      .def("childHistorySize", &AlgorithmHistory::childHistorySize,
-           arg("self"),
+      .def("childHistorySize", &AlgorithmHistory::childHistorySize, arg("self"),
            "Returns the number of the child algorithms.")
 
       .def("getChildAlgorithmHistory",
@@ -90,14 +84,12 @@ void export_AlgorithmHistory() {
            (arg("self"), arg("index")),
            "Returns the child algorithm at the given index in the history")
 
-      .def("getChildHistories", &getChildrenAsList,
-           arg("self"),
+      .def("getChildHistories", &getChildrenAsList, arg("self"),
            "Returns a list of child "
            "algorithm histories for "
            "this algorithm history.")
 
-      .def("getProperties", &getPropertiesAsList,
-           arg("self"),
+      .def("getProperties", &getPropertiesAsList, arg("self"),
            "Returns properties for this algorithm history.")
 
       .def("getChildAlgorithm", &AlgorithmHistory::getChildAlgorithm,

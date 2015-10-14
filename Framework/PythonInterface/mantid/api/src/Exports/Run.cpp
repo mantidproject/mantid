@@ -182,10 +182,8 @@ void export_Run() {
            "Returns the value pointed to by the key or the default value given")
       .def("keys", &keys, arg("self"),
            "Returns the names of the properties as list")
-      .def("__contains__", &Run::hasProperty,
-           (arg("self"), arg("name")))
-      .def("__getitem__", &Run::getProperty,
-           (arg("self"), arg("name")),
+      .def("__contains__", &Run::hasProperty, (arg("self"), arg("name")))
+      .def("__getitem__", &Run::getProperty, (arg("self"), arg("name")),
            return_value_policy<return_by_value>())
       .def("__setitem__", &addOrReplaceProperty,
            (arg("self"), arg("name"), arg("value")))
