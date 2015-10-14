@@ -25,6 +25,7 @@ namespace CustomInterfaces {
 DECLARE_SUBWINDOW(EnggDiffractionViewQtGUI)
 
 const double EnggDiffractionViewQtGUI::g_defaultRebinWidth = -0.0005;
+int EnggDiffractionViewQtGUI::m_currentType = 0;
 
 const std::string EnggDiffractionViewQtGUI::g_iparmExtStr =
     "GSAS instrument parameters, IPARM file: PRM, PAR, IPAR, IPARAM "
@@ -723,10 +724,10 @@ void EnggDiffractionViewQtGUI::plotFocusStatus() {
 }
 
 void EnggDiffractionViewQtGUI::plotRepChanged(int /*idx*/) {
-  QComboBox *inst = m_uiTabFocus.comboBox_PlotData;
-  if (!inst)
+  QComboBox *plotType = m_uiTabFocus.comboBox_PlotData;
+  if (!plotType)
     return;
-  m_currentType = inst->currentIndex();
+  m_currentType = plotType->currentIndex();
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {

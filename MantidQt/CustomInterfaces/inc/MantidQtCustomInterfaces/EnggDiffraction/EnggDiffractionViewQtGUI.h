@@ -199,7 +199,7 @@ private:
   std::string m_currentInst;
 
   // plot data representation type selected
-  int m_currentType;
+  int static m_currentType;
 
   /// current calibration produced in the 'Calibration' tab
   std::string m_currentCalibFilename;

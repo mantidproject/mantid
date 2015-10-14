@@ -1103,7 +1103,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     // alg->setProperty(DetectorPositions, TableWorkspace)
     alg->execute();
     // plot Focused workspace according to the data type selected
-    plotFocusedWorkspace(outWSName);
+    plotFocusedWorkspace(outWSName, boost::lexical_cast<std::string>(bank));
   } catch (std::runtime_error &re) {
     g_log.error() << "Error in calibration. ",
         "Could not run the algorithm EnggCalibrate succesfully for bank " +
@@ -1357,21 +1357,23 @@ void EnggDiffractionPresenter::calcVanadiumWorkspaces(
  *
  * @param outWSName title of the focused workspace
  */
-void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName) {
+void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName, std::string bank) {
   const bool plotFocusedWS = m_view->focusedOutWorkspace();
   int plotType = m_view->currentPlotType();
-  if (plotFocusedWS == true && 0 == plotType) {
-    if (outWSName == "engggui_focusing_output_ws_bank_1")
+  if (plotFocusedWS) {
+    if (plotType == 0) {
+      if (bank == "1")
+        m_view->plotFocusedSpectrum(outWSName);
+      if (bank == "2")
+        m_view->plotReplacingWindow(outWSName);
+    } else if (1 == plotType) {
+      if (bank == "1")
+        m_view->plotFocusedSpectrum(outWSName);
+      if (bank == "2")
+        m_view->plotWaterfallSpectrum(outWSName);
+    } else if (2 == plotType) {
       m_view->plotFocusedSpectrum(outWSName);
-    if (outWSName == "engggui_focusing_output_ws_bank_2")
-      m_view->plotReplacingWindow(outWSName);
-  } else if (plotFocusedWS == true && 1 == plotType) {
-    if (outWSName == "engggui_focusing_output_ws_bank_1")
-      m_view->plotFocusedSpectrum(outWSName);
-    if (outWSName == "engggui_focusing_output_ws_bank_2")
-      m_view->plotWaterfallSpectrum(outWSName);
-  } else if (plotFocusedWS == true && 2 == plotType) {
-    m_view->plotFocusedSpectrum(outWSName);
+    }
   }
 }
 

@@ -176,7 +176,7 @@ private:
                               Mantid::API::ITableWorkspace_sptr &vanIntegWS,
                               Mantid::API::MatrixWorkspace_sptr &vanCurvesWS);
 
-  void plotFocusedWorkspace(std::string outWSName);
+  void plotFocusedWorkspace(std::string outWSName, std::string bank);
 
   // Algorithms to save the generated workspace
   void saveGSS(std::string inputWorkspace, std::string bank, std::string runNo);
