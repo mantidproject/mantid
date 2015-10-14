@@ -283,9 +283,9 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
               m_uiTabCalib.lineEdit_current_calib_filename->text());
 
   qs.setValue("user-params-new-vanadium-num",
-              m_uiTabCalib.lineEdit_new_vanadium_num->text());
+              m_uiTabCalib.lineEdit_new_vanadium_num->getText());
   qs.setValue("user-params-new-ceria-num",
-              m_uiTabCalib.lineEdit_new_ceria_num->text());
+              m_uiTabCalib.lineEdit_new_ceria_num->getText());
 
   // user params - focusing
   qs.setValue("user-params-focus-runno", m_uiTabFocus.lineEdit_run_num->text());
@@ -384,11 +384,11 @@ std::string EnggDiffractionViewQtGUI::currentCeriaNo() const {
 }
 
 std::string EnggDiffractionViewQtGUI::newVanadiumNo() const {
-  return m_uiTabCalib.lineEdit_new_vanadium_num->text().toStdString();
+  return m_uiTabCalib.lineEdit_new_vanadium_num->getText().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::newCeriaNo() const {
-  return m_uiTabCalib.lineEdit_new_ceria_num->text().toStdString();
+  return m_uiTabCalib.lineEdit_new_ceria_num->getText().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::currentCalibFile() const {

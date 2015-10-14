@@ -168,31 +168,29 @@
         <bool>false</bool>
        </property>
        <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_new_vanadium_num">
-          <property name="text">
+        <item row="0" column="1" colspan="2">
+         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="lineEdit_new_vanadium_num" native="true">
+          <property name="text" stdset="0">
+           <string>241391</string>
+          </property>
+          <property name="label" stdset="0">
            <string>Vanadium #:</string>
           </property>
-         </widget>
-        </item>
-        <item row="0" column="1" colspan="2">
-         <widget class="QLineEdit" name="lineEdit_new_vanadium_num">
-          <property name="text">
-           <string>236516</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_new_ceria_num">
-          <property name="text">
-           <string>Calibration sample #:</string>
+          <property name="multipleFiles" stdset="0">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
         <item row="1" column="1" colspan="2">
-         <widget class="QLineEdit" name="lineEdit_new_ceria_num">
-          <property name="text">
+         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="lineEdit_new_ceria_num" native="true">
+          <property name="text" stdset="0">
            <string>241391</string>
+          </property>
+          <property name="label" stdset="0">
+           <string>Calibration sample #:</string>
+          </property>
+          <property name="multipleFiles" stdset="0">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -216,6 +214,20 @@
           </property>
          </widget>
         </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_new_ceria_num">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_new_vanadium_num">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
      </item>
@@ -236,6 +248,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
