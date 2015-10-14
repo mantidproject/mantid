@@ -289,7 +289,8 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
               m_uiTabCalib.lineEdit_new_ceria_num->getText());
 
   // user params - focusing
-  qs.setValue("user-params-focus-runno", m_uiTabFocus.lineEdit_run_num->getText());
+  qs.setValue("user-params-focus-runno",
+              m_uiTabFocus.lineEdit_run_num->getText());
 
   qs.beginWriteArray("user-params-focus-bank_i");
   qs.setArrayIndex(0);

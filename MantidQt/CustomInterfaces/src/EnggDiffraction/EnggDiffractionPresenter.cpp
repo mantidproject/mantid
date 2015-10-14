@@ -1356,8 +1356,10 @@ void EnggDiffractionPresenter::calcVanadiumWorkspaces(
  * python function to apply during first bank and second bank
  *
  * @param outWSName title of the focused workspace
+ * @param bank the number of bank
  */
-void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName, std::string bank) {
+void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName,
+                                                    std::string bank) {
   const bool plotFocusedWS = m_view->focusedOutWorkspace();
   int plotType = m_view->currentPlotType();
   if (plotFocusedWS) {
@@ -1467,7 +1469,7 @@ void EnggDiffractionPresenter::saveGSS(const std::string inputWorkspace,
       Poco::File(saveDir).createDirectories();
     }
   } catch (std::runtime_error &re) {
-     g_log.error() << "Error while using Poco: " << re.what();
+    g_log.error() << "Error while using Poco: " << re.what();
   }
 
   try {
