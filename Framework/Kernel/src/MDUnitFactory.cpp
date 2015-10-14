@@ -24,8 +24,13 @@ InverseAngstromsUnitFactory::createRaw(const std::string &) const {
 bool InverseAngstromsUnitFactory::canInterpret(
     const std::string &unitString) const {
   boost::regex pattern("(Angstrom\\^-1)");
+  boost::regex pattern2("A\\^-1");
   boost::smatch match; // Unused.
-  return boost::regex_search(unitString, match, pattern);
+
+  auto isFullAngstrom = boost::regex_search(unitString, match, pattern);
+  auto isPartialAngstrom = boost::regex_search(unitString, match, pattern2);
+
+  return isFullAngstrom || isPartialAngstrom;
 }
 
 ReciprocalLatticeUnit *

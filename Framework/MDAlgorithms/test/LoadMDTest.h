@@ -565,8 +565,10 @@ public:
   void test_histo1D() {
     Mantid::coord_t min(-10.0);
     Mantid::coord_t max(10.0);
+    Mantid::Geometry::GeneralFrame frame(
+        Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
     std::vector<Geometry::IMDDimension_sptr> dims(
-        1, boost::make_shared<Geometry::MDHistoDimension>("X", "x", "m", min,
+        1, boost::make_shared<Geometry::MDHistoDimension>("X", "x", frame, min,
                                                           max, 5));
     MDHistoWorkspace_sptr ws =
         boost::make_shared<MDHistoWorkspace>(dims, API::VolumeNormalization);

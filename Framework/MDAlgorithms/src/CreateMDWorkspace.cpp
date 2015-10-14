@@ -176,7 +176,7 @@ void CreateMDWorkspace::exec() {
   for (size_t d = 0; d < ndims; d++) {
     auto frame = createMDFrame(frames[d], units[d]);
     MDHistoDimension *dim = new MDHistoDimension(
-        names[d], names[d], *frame.get(), static_cast<coord_t>(extents[d * 2]),
+        names[d], names[d], *frame, static_cast<coord_t>(extents[d * 2]),
         static_cast<coord_t>(extents[d * 2 + 1]), 1);
     out->addDimension(MDHistoDimension_sptr(dim));
   }

@@ -69,7 +69,7 @@ void addMDDimensionsWithFrames(
 
     // Use the same frame for all dimensions
     auto dim = boost::make_shared<Mantid::Geometry::MDHistoDimension>(
-        axisNameFormat, axisIdFormat, frame, min, max, 10);
+        std::string(name), std::string(id), frame, min, max, 10);
     out->addDimension(dim);
   }
   out->initialize();

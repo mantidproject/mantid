@@ -186,10 +186,6 @@ void SlicingAlgorithm::makeBasisVectorFromString(const std::string &str) {
                                 "input dimensions) in the dimensions string: " +
                                 str);
 
-  // Extract the arguments
-  std::string id = name;
-  std::string units = Strings::strip(strs[0]);
-
   // Get the number of bins from
   int numBins = m_numBins[dim];
   if (numBins < 1)
@@ -249,6 +245,13 @@ void SlicingAlgorithm::makeBasisVectorFromString(const std::string &str) {
   // Scaling factor, to convert from units in the INPUT dimensions to the output
   // BIN number
   double binningScaling = double(numBins) / (lengthInInput);
+
+  // Extract the arguments
+  std::string id = name;
+  std::string units = Strings::strip(strs[0]);
+
+  // Create the appropriate frame
+  //auto frame = createMDFrame(units);
 
   // Create the output dimension
   MDHistoDimension_sptr out(
@@ -510,9 +513,10 @@ void SlicingAlgorithm::makeAlignedDimensionFromString(const std::string &str) {
 
     // Copy the dimension name, ID and units
     IMDDimension_const_sptr inputDim = m_inWS->getDimension(dim_index);
+    const auto& frame = inputDim->getMDFrame();
     m_binDimensions.push_back(MDHistoDimension_sptr(
         new MDHistoDimension(inputDim->getName(), inputDim->getDimensionId(),
-                             inputDim->getUnits(), min, max, numBins)));
+                             frame, min, max, numBins)));
 
     // Add the index from which we're binning to the vector
     this->m_dimensionToBinFrom.push_back(dim_index);
@@ -1001,6 +1005,19 @@ SlicingAlgorithm::getImplicitFunctionForChunk(const size_t *const chunkMin,
     return getGeneralImplicitFunction(chunkMin, chunkMax);
   }
 }
+
+#if 0
+/**
+ * Create an MDFrame for the Non-Axis-Aligned case
+ * 1. Check that Q-based frames are not mixed with non-Q-based frames
+ * 2. Select Q-based frame if available
+ * @param units: the units
+ * @returns the unique pointer
+ */
+Mantid::Geometry::MDFrame_uptr SlicingAlgorithm::createMDFrameForNonAxisAligned(std::string units) const {
+
+}
+#endif
 
 } // namespace Mantid
 } // namespace DataObjects

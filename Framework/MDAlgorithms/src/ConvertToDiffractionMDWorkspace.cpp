@@ -444,7 +444,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
     // Give all the dimensions
     for (size_t d = 0; d < nd; d++) {
       MDHistoDimension *dim = new MDHistoDimension(
-          dimensionNames[d], dimensionNames[d], *frame.get(),
+          dimensionNames[d], dimensionNames[d], *frame,
           static_cast<coord_t>(extents[d * 2]),
           static_cast<coord_t>(extents[d * 2 + 1]), 10);
       ws->addDimension(MDHistoDimension_sptr(dim));

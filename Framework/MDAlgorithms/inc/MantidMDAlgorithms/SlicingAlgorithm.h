@@ -150,6 +150,10 @@ protected:
 
   /// The NormalizeBasisVectors option
   bool m_NormalizeBasisVectors;
+
+  private:
+  //Mantid::Geometry::MDFrame_uptr createMDFrameForNonAxisAligned(std::string units) const;
+
 };
 
 } // namespace DataObjects
