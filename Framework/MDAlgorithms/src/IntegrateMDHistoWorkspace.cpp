@@ -386,6 +386,10 @@ void IntegrateMDHistoWorkspace::exec() {
         // Create a thread-local input iterator.
         boost::scoped_ptr<MDHistoWorkspaceIterator> inIterator(
             dynamic_cast<MDHistoWorkspaceIterator *>(inWS->createIterator()));
+        if (!inIterator) {
+          throw std::runtime_error(
+              "Could not convert IMDIterator to a MDHistoWorkspaceIterator");
+        }
 
         /*
         We jump to the iterator position which is closest in the model

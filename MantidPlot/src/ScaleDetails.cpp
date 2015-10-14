@@ -272,6 +272,10 @@ void ScaleDetails::initWidgets()
     if (type == ScaleDraw::Date)
     {
       ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(m_mappedaxis));
+      if (!sclDraw) {
+        throw std::runtime_error("Could not convert the axis Scale Draw object "
+                                 "to a ScaleDraw object");
+      }
       QDateTime origin = sclDraw->dateTimeOrigin();
 
       m_dspnStart->hide();

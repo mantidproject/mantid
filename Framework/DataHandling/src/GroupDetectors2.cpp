@@ -353,7 +353,7 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
     }
     // check we don't have an index that is too high for the workspace
     size_t maxIn = static_cast<size_t>(workspace->getNumberHistograms() - 1);
-    std::vector<size_t>::const_iterator it = m_GroupSpecInds[0].begin();
+    auto it = m_GroupSpecInds[0].begin();
     for (; it != m_GroupSpecInds[0].end(); ++it) {
       if (*it > maxIn) {
         g_log.error() << "Spectra index " << *it
@@ -375,7 +375,7 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
 
   // up date unUsedSpec, this is used to find duplicates and when the user has
   // set KeepUngroupedSpectra
-  std::vector<size_t>::const_iterator index = m_GroupSpecInds[0].begin();
+  auto index = m_GroupSpecInds[0].begin();
   for (; index != m_GroupSpecInds[0].end();
        ++index) { // the vector<int> m_GroupSpecInds[0] must not index contain
                   // numbers that don't exist in the workspaace

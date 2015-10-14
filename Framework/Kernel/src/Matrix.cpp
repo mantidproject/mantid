@@ -158,17 +158,20 @@ Matrix<T>::Matrix(const Matrix<T> &A, const size_t nrow, const size_t ncol)
     throw Kernel::Exception::IndexError(ncol, A.ny,
                                         "Matrix::Constructor without col");
   setMem(nx, ny);
-  size_t iR(0);
-  for (size_t i = 0; i <= nx; i++) {
-    if (i != nrow) {
-      size_t jR(0);
-      for (size_t j = 0; j <= ny; j++) {
-        if (j != ncol) {
-          V[iR][jR] = A.V[i][j];
-          jR++;
+  if (V) {
+    size_t iR(0);
+    for (size_t i = 0; i <= nx; i++) {
+      if (i != nrow) {
+        size_t jR(0);
+        for (size_t j = 0; j <= ny; j++) {
+          if (j != ncol) {
+
+            V[iR][jR] = A.V[i][j];
+            jR++;
+          }
         }
+        iR++;
       }
-      iR++;
     }
   }
 }

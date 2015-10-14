@@ -2309,7 +2309,9 @@ void InstrumentDefinitionParser::createNeutronicInstrument() {
             mapTypeNameToShape.find(shapeName);
         if (shapeIt != mapTypeNameToShape.end()) {
           // Change the shape on the current component to the one requested
-          dynamic_cast<ObjComponent *>(it->first)->setShape(shapeIt->second);
+          auto objCmpt = dynamic_cast<ObjComponent *>(it->first);
+          if (objCmpt)
+            objCmpt->setShape(shapeIt->second);
         } else {
           throw Exception::InstrumentDefinitionError(
               "Requested type " + shapeName + " not defined in IDF");

@@ -5,11 +5,11 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Property.h"
-#include "MantidKernel/Exception.h"
+//#include "MantidKernel/Exception.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectraAxis.h"
+//#include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
@@ -67,30 +67,20 @@ ResultType executeBinaryOperation(const std::string &algorithmName,
 
   alg->execute();
 
-  if (alg->isExecuted()) {
-    // Get the output workspace property
-    if (child) {
-      return alg->getProperty("OutputWorkspace");
-    } else {
-      API::Workspace_sptr result =
-          API::AnalysisDataService::Instance().retrieve(
-              alg->getPropertyValue("OutputWorkspace"));
-      return boost::dynamic_pointer_cast<typename ResultType::element_type>(
-          result);
-    }
-  } else {
+  if (!alg->isExecuted()) {
     std::string message = "Error while executing operation: " + algorithmName;
     throw std::runtime_error(message);
   }
 
-  throw Kernel::Exception::NotFoundError(
-      "Required output workspace property not found on Child Algorithm",
-      "OutputWorkspace");
-
-  // Horendous code inclusion to satisfy compilers that all code paths return a
-  // value
-  // in reality the above code should either throw or return successfully.
-  return ResultType();
+  // Get the output workspace property
+  if (child) {
+    return alg->getProperty("OutputWorkspace");
+  } else {
+    API::Workspace_sptr result = API::AnalysisDataService::Instance().retrieve(
+        alg->getPropertyValue("OutputWorkspace"));
+    return boost::dynamic_pointer_cast<typename ResultType::element_type>(
+        result);
+  }
 }
 
 template DLLExport MatrixWorkspace_sptr
@@ -169,14 +159,12 @@ bool equals(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs,
   // Rest: use default
 
   alg->execute();
-  if (alg->isExecuted()) {
-    return (alg->getPropertyValue("Result") == "Success!");
-  } else {
+  if (!alg->isExecuted()) {
     std::string message =
         "Error while executing operation: CheckWorkspacesMatch";
     throw std::runtime_error(message);
   }
-  return false;
+  return (alg->getPropertyValue("Result") == "Success!");
 }
 
 /** Creates a temporary single value workspace the error is set to zero
@@ -512,17 +500,18 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
   if (!step)
     step = 1;
   for (size_t i = step; i < numHist; i += step) {
-    const double firstWS =
+    const double firstWSLoop =
         std::accumulate(ws1->readX(i).begin(), ws1->readX(i).end(), 0.);
-    const double secondWS =
+    const double secondWSLoop =
         std::accumulate(ws2->readX(i).begin(), ws2->readX(i).end(), 0.);
-    if (std::abs(firstWS) < 1.0E-7 && std::abs(secondWS) < 1.0E-7) {
+    if (std::abs(firstWSLoop) < 1.0E-7 && std::abs(secondWSLoop) < 1.0E-7) {
       for (size_t j = 0; j < ws1->readX(i).size(); j++) {
         if (std::abs(ws1->readX(i)[j] - ws2->readX(i)[j]) > 1.0E-7)
           return false;
       }
-    } else if (std::abs(firstWS - secondWS) /
-                   std::max<double>(std::abs(firstWS), std::abs(secondWS)) >
+    } else if (std::abs(firstWSLoop - secondWSLoop) /
+                   std::max<double>(std::abs(firstWSLoop),
+                                    std::abs(secondWSLoop)) >
                1.0E-7)
       return false;
   }
