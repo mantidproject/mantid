@@ -335,7 +335,9 @@ annReadDump(istream &in,              // input stream
       in >> the_bnd_box_hi[j];
     }
 
-    if (std::numeric_limits<int>::max() <= the_n_pts / sizeof(ANNidx)) {
+    if (0 > the_n_pts ||
+        static_cast<size_t>(std::numeric_limits<int>::max()) <=
+            static_cast<size_t>(the_n_pts / sizeof(ANNidx))) {
       annError("Too big number of elements for the point index array. This "
                "would cause an overflow when allocating memory",
                ANNabort);
@@ -439,7 +441,9 @@ static ANNkd_ptr annReadTree(istream &in,           // input stream
     in >> n_bnds; // number of bounding sides
                   // allocate bounds array
 
-    if (std::numeric_limits<int>::max() <= n_bnds / sizeof(ANNorthHalfSpace)) {
+    if (0 < n_bnds ||
+        static_cast<size_t>(std::numeric_limits<int>::max()) <=
+            static_cast<size_t>(n_bnds / sizeof(ANNorthHalfSpace))) {
       annError("Too big number of bounding sides, would cause overflow when "
                "allocating memory",
                ANNabort);

@@ -16062,12 +16062,13 @@ int SOAP_FMAC2 soap_puthttphdr(struct soap *soap, int status, size_t count) {
       if (soap->mime.start) {
         const char startStr[] = "\"; start=\"";
         strcat(soap->tmpbuf, startStr);
-        strncat(soap->tmpbuf, soap->mime.start, sizeof(soap->tmpbuf)-sizeof(startStr));
+        strncat(soap->tmpbuf, soap->mime.start,
+                sizeof(soap->tmpbuf) - sizeof(startStr));
       }
       strcat(soap->tmpbuf, "\"");
       if (r) {
         const char startInfoStr[] = "; start-info=\"";
-        size_t lenStart = sizeof(soap->tmpbuf)-sizeof(startInfoStr);
+        size_t lenStart = sizeof(soap->tmpbuf) - sizeof(startInfoStr);
         strncat(soap->tmpbuf, startInfoStr, lenStart);
         size_t lenR = lenStart - strnlen(r, lenStart);
         strncat(soap->tmpbuf, r, lenR);

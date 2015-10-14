@@ -147,7 +147,7 @@ SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type,
   }
 
   int zero = setsockopt(s, SOL_SOCKET, SO_KEEPALIVE, (char *)&setkeepalive,
-                       sizeof(setkeepalive));
+                        sizeof(setkeepalive));
   if (0 != zero) {
     closesocket(s);
     return INVALID_SOCKET;
