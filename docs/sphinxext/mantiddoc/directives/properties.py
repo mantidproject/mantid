@@ -214,7 +214,7 @@ class PropertiesDirective(AlgorithmBaseDirective):
 
         allowedValueString = str(prop.allowedValues)
         # 4 allows for ['']
-        if len(allowedValueString) > 4: 
+        if len(allowedValueString) > 4:
             ##make sure the last sentence ended with a full stop (or equivalent)
             if (not desc.rstrip().endswith("."))      \
                 and (not desc.rstrip().endswith("!")) \
@@ -227,7 +227,7 @@ class PropertiesDirective(AlgorithmBaseDirective):
                 if (not item.startswith(".")) and (not item[-4:].startswith(".")):
                     isFileExts = False
                     break
-                    
+
             prefixString = " Allowed values: "
             if isFileExts:
                 prefixString = " Allowed extensions: "
