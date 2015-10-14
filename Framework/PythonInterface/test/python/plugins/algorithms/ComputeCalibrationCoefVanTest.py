@@ -27,12 +27,6 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
         self.assertEqual(wsoutput.getRun().getLogData('run_title').value,
                          self._input_ws.getRun().getLogData('run_title').value)
 
-        # Structure of output workspace
-        for i in range(wsoutput.getNumberHistograms()):
-            self.assertIsNotNone(wsoutput.readY(i)[0])
-            for j in range(1, wsoutput.blocksize()):
-                self.assertEqual(wsoutput.readY(i)[j], wsoutput.readY(i)[0])
-
         # Size of output workspace
         self.assertEqual(wsoutput.getNumberHistograms(), self._input_ws.getNumberHistograms())
 
