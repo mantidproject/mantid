@@ -93,10 +93,18 @@ Statistics getStatisticsNumpy(const numeric::array &data,
     throw UnknownDataType();
   }
 }
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
 // Define an overload to handle the default argument
 BOOST_PYTHON_FUNCTION_OVERLOADS(getStatisticsOverloads, getStatisticsNumpy, 1,
                                 2)
-
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 //============================ Z score
 //============================================
 
@@ -145,9 +153,17 @@ std::vector<double> getModifiedZscoreNumpy(const numeric::array &data,
   }
 }
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
 // Define an overload to handle the default argument
 BOOST_PYTHON_FUNCTION_OVERLOADS(getModifiedZscoreOverloads,
                                 getModifiedZscoreNumpy, 1, 2)
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 //============================ getMoments
 //============================================
@@ -198,10 +214,17 @@ std::vector<double> getMomentsAboutOriginNumpy(const numeric::array &indep,
   return getMomentsNumpyImpl(&getMomentsAboutOrigin, indep, depend, maxMoment);
 }
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
 // Define an overload to handle the default argument
 BOOST_PYTHON_FUNCTION_OVERLOADS(getMomentsAboutOriginOverloads,
                                 getMomentsAboutOriginNumpy, 2, 3)
-
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 /**
  * Proxy for @see Mantid::Kernel::getMomentsAboutMean so that it can accept
  * numpy arrays
@@ -213,9 +236,18 @@ std::vector<double> getMomentsAboutMeanNumpy(const numeric::array &indep,
   return getMomentsNumpyImpl(&getMomentsAboutMean, indep, depend, maxMoment);
 }
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
 // Define an overload to handle the default argument
 BOOST_PYTHON_FUNCTION_OVERLOADS(getMomentsAboutMeanOverloads,
                                 getMomentsAboutMeanNumpy, 2, 3)
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+
 ///@endcond
 }
 
