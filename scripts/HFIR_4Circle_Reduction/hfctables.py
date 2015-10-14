@@ -72,7 +72,7 @@ class UBMatrixTable(tableBase.NTableWidget):
         Get the copy of the matrix
         :return:
         """
-        print '[DB] MatrixTable: _Matrix = ', self._matrix
+        # print '[DB] MatrixTable: _Matrix = ', self._matrix
         return self._matrix.copy()
 
     def set_from_list(self, element_array):
@@ -140,7 +140,7 @@ UB_Peak_Table_Setup = [('Scan', 'int'),
                        ('Q_x', 'float'),
                        ('Q_y', 'float'),
                        ('Q_z', 'float'),
-                       ('Use', 'checkbox'),
+                       ('Selected', 'checkbox'),
                        ('m1', 'float'),
                        ('Error', 'float')]
 
@@ -191,6 +191,17 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
 
         return m_h, m_k, m_l
 
+    def get_scan_pt(self, row_number):
+        """
+        Get Scan and Pt from a row
+        :param row_number:
+        :return:
+        """
+        scan_number = self.get_cell_value(row_number, 0)
+        pt_number = self.get_cell_value(row_number, 1)
+
+        return scan_number, pt_number
+
     def is_selected(self, row_index):
         """
 
@@ -199,7 +210,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         if row_index < 0 or row_index >= self.rowCount():
             raise IndexError('Input row number %d is out of range [0, %d)' % (row_index, self.rowCount()))
 
-        col_index = UB_Peak_Table_Setup.index(('Use', 'checkbox'))
+        col_index = UB_Peak_Table_Setup.index(('Selected', 'checkbox'))
 
         return self.get_cell_value(row_index, col_index)
 
@@ -235,6 +246,16 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
             self.update_cell_value(i_row, i_col_error, error)
 
         return
+
+    def update_hkl(self, i_row, h, k, l):
+        """ Update HKL value
+        """
+        self.update_cell_value(i_row, 2, h)
+        self.update_cell_value(i_row, 3, k)
+        self.update_cell_value(i_row, 4, l)
+
+        return
+
 
 # Processing status table
 Process_Table_Setup = [('Scan', 'int'),

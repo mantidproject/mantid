@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1232</width>
+    <width>1292</width>
     <height>783</height>
    </rect>
   </property>
@@ -190,7 +190,7 @@
         <item>
          <widget class="QTabWidget" name="tabWidget">
           <property name="currentIndex">
-           <number>0</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -2210,7 +2210,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1232</width>
+     <width>1292</width>
      <height>25</height>
     </rect>
    </property>
@@ -2219,22 +2219,8 @@ p, li { white-space: pre-wrap; }
      <string>File</string>
     </property>
     <addaction name="separator"/>
-    <addaction name="actionNew"/>
-    <addaction name="actionOpen"/>
-    <addaction name="actionSave"/>
     <addaction name="actionExit"/>
     <addaction name="separator"/>
-   </widget>
-   <widget class="QMenu" name="menuView">
-    <property name="title">
-     <string>View</string>
-    </property>
-    <addaction name="actionLog"/>
-   </widget>
-   <widget class="QMenu" name="menuHelp">
-    <property name="title">
-     <string>Help</string>
-    </property>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -2245,9 +2231,7 @@ p, li { white-space: pre-wrap; }
     <addaction name="separator"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuView"/>
    <addaction name="menuTools"/>
-   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionNew">

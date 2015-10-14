@@ -35,7 +35,7 @@ class PeakInfo(object):
 
         # Define class variable
         self._myParent = parent
-        self._myHKL = [0, 0, 0]
+        self._userHKL = [0, 0, 0]
 
         self._myExpNumber = None
         self._myScanNumber = None
@@ -56,7 +56,25 @@ class PeakInfo(object):
         """
         assert isinstance(self._myPeakWSKey, tuple)
         exp_number, scan_number, pt_number = self._myPeakWSKey
+
         return self._myParent.get_ub_peak_ws(exp_number, scan_number, pt_number)[1]
+
+    def get_peak_ws_hkl(self):
+        """ Get HKL from PeakWorkspace
+        :return:
+        """
+        hkl = self._myPeakWS.getHKL()
+
+        return hkl.getX(), hkl.getY(), hkl.getZ()
+
+    def get_user_hkl(self):
+        """
+        Get HKL set to this object by client
+        :return: 3-tuple of float as (H, K, L)
+        """
+        hkl = self._userHKL
+
+        return hkl[0], hkl[1], hkl[2]
 
     def set_from_run_info(self, exp_number, scan_number, pt_number):
         """ Set from run information with parent
@@ -103,7 +121,7 @@ class PeakInfo(object):
 
         return
 
-    def set_hkl(self, h, k, l):
+    def set_user_hkl(self, h, k, l):
         """
         Set HKL to this peak Info
         :return:
@@ -112,9 +130,9 @@ class PeakInfo(object):
         assert isinstance(k, float)
         assert isinstance(l, float)
 
-        self._myHKL[0] = h
-        self._myHKL[1] = k
-        self._myHKL[2] = l
+        self._userHKL[0] = h
+        self._userHKL[1] = k
+        self._userHKL[2] = l
 
         return
 
@@ -124,23 +142,6 @@ class PeakInfo(object):
         :return: 3-tuple of integer as experiment number, scan number and Pt number
         """
         return self._myExpNumber, self._myScanNumber, self._myPtNumber
-
-    def get_hkl_peak_ws(self):
-        """ Get HKL from PeakWorkspace
-        :return:
-        """
-        hkl = self._myPeakWS.getHKL()
-
-        return hkl.getX(), hkl.getY(), hkl.getZ()
-
-    def getHKL(self):
-        """
-        Get HKL set to this object by client
-        :return: 3-tuple of float as (H, K, L)
-        """
-        hkl = self._myHKL
-
-        return hkl[0], hkl[1], hkl[2]
 
     def getQSample(self):
         """
@@ -643,7 +644,7 @@ class CWSCDReductionControl(object):
 
         # Find out the peak workspace
         exp_num = self._expNumber
-        if self._myUBPeakWSDict.has_key((exp_num, scan_number, pt_number)) is False:
+        if (exp_num, scan_number, pt_number) in self._myUBPeakWSDict is False:
             err_msg = 'No PeakWorkspace is found for exp %d scan %d pt %d' % (
                 exp_num, scan_number, pt_number)
             return False, err_msg

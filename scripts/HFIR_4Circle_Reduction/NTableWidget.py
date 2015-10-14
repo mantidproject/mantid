@@ -67,10 +67,24 @@ class NTableWidget(QtGui.QTableWidget):
 
         return True, ret_msg
 
+    def delete_rows(self, row_number_list):
+        """ Delete rows
+        :param row_number_list:
+        :return:
+        """
+        # Check and re-order row numbers
+        assert isinstance(row_number_list, list)
+        row_number_list.sort(reverse=True)
+
+        for row_number in row_number_list:
+            self.removeRow(row_number)
+
+        return
+
     def get_selected_rows(self):
         """
 
-        :return:
+        :return: list of row numbers that are selected
         """
         rows_list = list()
         index_status = self._myColumnTypeList.index('checkbox')
@@ -130,11 +144,14 @@ class NTableWidget(QtGui.QTableWidget):
                 # Regular cell
                 item_i_j = self.item(row_index, i_col)
                 assert isinstance(item_i_j, QtGui.QTableWidgetItem)
-                value = str(item_i_j.text())
-                if c_type == 'int':
-                    value = int(value)
-                elif c_type == 'float':
-                    value = float(value)
+                value = str(item_i_j.text()).strip()
+                if len(value) > 0:
+                    if c_type == 'int':
+                        value = int(value)
+                    elif c_type == 'float':
+                        value = float(value)
+                else:
+                    value = None
 
                 ret_list.append(value)
             # END-IF-ELSE
@@ -147,8 +164,6 @@ class NTableWidget(QtGui.QTableWidget):
         :param column_tup_list: list of 2-tuple as string (column name) and string (data type)
         :return:
         """
-        print '[DB] Init set up table with %d columns!' % len(column_tup_list)
-
         # Define column headings
         num_cols = len(column_tup_list)
 

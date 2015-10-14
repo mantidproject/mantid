@@ -90,7 +90,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_deleteUBPeak, QtCore.SIGNAL('clicked()'),
                      self.do_del_ub_peaks)
         self.connect(self.ui.pushButton_clearUBPeakTable, QtCore.SIGNAL('clicked()'),
-                     self.do_del_ub_peaks)
+                     self.do_clear_ub_peaks)
+        self.connect(self.ui.pushButton_resetPeakHKLs, QtCore.SIGNAL('clicked()'),
+                     self.do_reset_ub_peaks_hkl)
 
         # Tab 'Slice View'
         self.connect(self.ui.pushButton_setUBSliceView, QtCore.SIGNAL('clicked()'),
@@ -160,13 +162,6 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.pushButton_browseLocalDataDir.setEnabled(True)
 
         return
-
-    def do_del_ub_peaks(self):
-        """
-
-        :return:
-        """
-        raise RuntimeError('ASAP')
 
     def do_integrate_peaks(self):
         """
@@ -270,7 +265,7 @@ class MainWindow(QtGui.QMainWindow):
             h = math.copysign(1, h)*int(abs(h)+0.5)
             k = math.copysign(1, k)*int(abs(k)+0.5)
             l = math.copysign(1, l)*int(abs(l)+0.5)
-        peakinfo.set_hkl(h, k, l)
+        peakinfo.set_user_hkl(h, k, l)
         self.set_ub_peak_table(peakinfo)
 
         # Clear
@@ -286,7 +281,6 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEdit_L.setText('')
 
         return
-
 
     def doAcceptCalUB(self):
         """ Accept the calculated UB matrix
@@ -410,6 +404,29 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_clear_ub_peaks(self):
+        """
+        Clear all peaks in UB-Peak table
+        :return:
+        """
+        self.ui.tableWidget_peaksCalUB.clear()
+
+        return
+
+    def do_del_ub_peaks(self):
+        """
+        Delete a peak in UB-Peak table
+        :return:
+        """
+        # Find out the lines to get deleted
+        row_num_list = self.ui.tableWidget_peaksCalUB.get_selected_rows()
+        print '[DB] Row %s are selected' % str(row_num_list)
+
+        # Delete
+        self.ui.tableWidget_peaksCalUB.delete_rows(row_num_list)
+
+        return
+
     def do_download_spice_data(self):
         """ Download SPICE data
         :return:
@@ -490,7 +507,8 @@ class MainWindow(QtGui.QMainWindow):
         assert isinstance(peak_info, r4c.PeakInfo)
 
         # Set the HKL value from PeakInfo directly
-        h, k, l = peak_info.get_hkl_peak_ws()
+        # BAD PROGRAMMING! THERE ARE TOO MANY WAYS TO ACCESS STORED HKL
+        h, k, l = peak_info.get_peak_ws_hkl()
         self.ui.lineEdit_H.setText('%.2f' % h)
         self.ui.lineEdit_K.setText('%.2f' % k)
         self.ui.lineEdit_L.setText('%.2f' % l)
@@ -695,8 +713,8 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.tableWidget_sliceViewProgress.set_scan_pt(scan_no, 'In Processing')
             try:
                 ret_tup = self._myControl.merge_pts_in_scan(exp_no=None, scan_no=scan_no,
-                                                  target_ws_name=out_ws_name,
-                                                  target_frame=frame)
+                                                            target_ws_name=out_ws_name,
+                                                            target_frame=frame)
                 merge_status = 'Done'
                 merged_name = ret_tup[0]
                 group_name = ret_tup[1]
@@ -710,6 +728,26 @@ class MainWindow(QtGui.QMainWindow):
 
             # Sleep for a while
             time.sleep(0.1)
+        # END-FOR
+
+        return
+
+    def do_reset_ub_peaks_hkl(self):
+        """
+        Reset user specified HKL value to peak table
+        :return:
+        """
+        num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
+        for i_row in xrange(num_rows):
+            print '[DB] Update row %d' % (i_row)
+            scan, pt = self.ui.tableWidget_peaksCalUB.get_scan_pt(i_row)
+            status, peak_info = self._myControl.get_peak_info(None, scan, pt)
+            if status is False:
+                error_message = peak_info
+                raise RuntimeError(error_message)
+            peak_info.reset_hkl()
+            h, k, l = peak_info.get_user_hkl()
+            self.ui.tableWidget_peaksCalUB.update_hkl(i_row, h, k, l)
         # END-FOR
 
         return
@@ -968,7 +1006,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Get data
         exp_number, scan_number, pt_number = peakinfo.getExpInfo()
-        h, k, l = peakinfo.getHKL()
+        h, k, l = peakinfo.get_user_hkl()
         q_sample = peakinfo.getQSample()
         m1 = self._myControl.get_sample_log_value(exp_number, scan_number, pt_number, '_m1')
 

@@ -11,173 +11,101 @@ HFIR single crystalreduction interface is a GUI to download, view and reduce dat
 HFIR's four-circle single crystal diffractometer in SPICE format. 
 
 
-Use cases for tabs
-------------------
+Introduction of Tabs
+--------------------
 
-  1. **Raw Detectors**: Visualize the reading of detectors directly coming out of the raw data
+  1. **Setup and Data Access**: Configure the instrument name, data server URL and directories.
   
-    - Plot N lines for N Pts.;
-    - Highlight (make it thicker) the Pt that is interested;
-    - New from Mantid:  *ReadRawSpiceSignal(Pts)*;
+    - Configure the instrument name;
+    - Set up and test HB3A data server's URL;
+    - Configure the directory to save raw data;
+    - Configure the directory to save working result;
+    - Download data from server;
     
-  2. **Individual Detector**: Visual the readings of one detector across an experiment
+  2. **View Raw Data**: View 2D image of counts on detector of one measurement.
   
-    - Plot the counts of any individual detector;
-    - Able to change the X-axis from 2theta to arbitrary sample environment log;
-    - New from Mantid: *ReadRawSpiceSignal(DetectorID, XLabel)*;
+    - Plot the counts of the 256 by 256 2D detector;
     
-  3. **Normalized**: Reduce one scan each time
+  3. **Calculate UB**: Calculate UB matrix.
   
-    - Plot the reduced data
-    - Automatically locate detector efficiency file
-    - New from Mantid: *ConvertCWPDMDToSpectra(ExcludedDetectors=[])*
-    - New from Mantid: *ConvertSpiceDataToRealSpace(DetectorEfficiencyTable)*
+    - Find peak in one measurement;
+    - Option to load Miller index directly from SPICE file;
+    - Calculate UB matrix;
+    - Re-index the peaks;
     
-  4. **Multiple Scans**: Reduce a set of scans
+  4. **Merge Scan**: Merge all the measurements in a scan.
   
-    - Reduce a set of scans and plot in 2D/water-fall mode;
-    - Able to merge all the scans;
-    - New from Mantid: *ConvertCWPDMDToSpectra(ExcludedDetectors=[])*
+    - Merge all measuring points in a scan to an MDEventWorkspace in HKL-frame or Q-sample-frame;
+    - Allow various ways to set up UB matrix
     
-  5. **Vanadium**: strip vanadium peaks
+  5. **Refine UB**: Refine UB matrix
   
-    - Strip vanadium peak with unit 'Degrees' because of the binning (range and step size) must be respected;
-    - Peaks' position should be calculated and indicated auotmatically;
-    - *Mantid::StripPeaks()* will be called instread of *StripVadadiumPeaks()* because
-      the later one only works in d-spacing;
+    - Disabled becaues it is in development still;
       
-  6. **Advanced Setup**
+  6. **Peak Integration**: Integrate peaks
   
-    - URL for raw data files; 
+    - Disabled because it is still in development.
+
+Use Cases
+---------
+
+Here are some use cases that can be used as examples.
 
 
-Workflow for *Normalization*
-============================
+Workflow to calculate UB matrix
++++++++++++++++++++++++++++++++
 
-Here is a typical use case for reduce data via tab *Noramlization*
+Here is a typical use case to calculate UB matrix
 
- 1. User specifies *Exp No* and *Scan No* and push button *Load*;
+ 1. User specifies *Experiment* and pushes button *Set*
  
-  - HFIR-PDR-GUI loads SPICE data according to experiment number and scan number;
-  - HFIR-PDR-GUI checks whether vanadium correction file, i.e., detector efficiency file exists on server;
-  - HFIR-PDR-GUI checks whether excluded detectors file exists on server;
-  - HFIR-PDR-GUI checks log **m1** for wavelength and set to *Wavelength* ;
-  
- 2. User may specify detector efficient file;
+ 2. User enters tab *View Raw Data*
+
+ 3. User inputs scan number and list all the measuring points
  
- 3. User specifies *Bin Size*; 
+ 4. User views all the measurements
+
+ 5. User finds out the measurement with the strongest reflection and push button use
+
+ 6. GUI shifts to tab *Calculate UB* automatically
+
+ 7. User pushes button *Find Peak* with checking *Load HKL from file*
+
+ 8. GUI finds the peak center and load HKL
+
+ 9. User pushes button *Add peak* to add the peak to table
+
+ 10. User repeats step 2 to 9 to add other peaks
+
+ 11. User select the peaks that are linearly independent and pushes *Calcualte UB*
+
+ 12. GUI calculates UB matrix and show the result
+
+ 13. User may push *Index peak* to use the calculated UB matrix to index peaks in the table to check UB matrix.
  
- 4. User pushes button *2Theta*, *dSpacng*, or *Q*;
+
+Workflow to merge measurements in scan
+++++++++++++++++++++++++++++++++++++++
+
+Here is a typical use case to merge all the measuring points (Pt.) in a scan.
+
+ 1. User specifies *Exp Number* and pushes button *Set*
  
-  - HFIR-PDF-GUI reduce data in unit of *2theta* by taking accounting of 
-  
-    - Detector efficiency;
-    - Excluded detectors; 
-    
- 5. HFIR-PDR-GUI plots the reduced data;
- 
- 6. User may rebin by different binning parameters or unit;
- 
- 7. User may push button *Next Scan* or *Prev Scan* to load and reduce other scans with current setup;
- 
- 8. User may save the result by pushing button *Save*;
+ 2. User enters tab *Merge Scan*
 
+ 3. User specifies the UB matrix either by *From Tab UB* or by entering the values to text editor
 
-Workflow for *Raw Detectors*
-============================
+ 4. User specifies the frame in which the merged data will be in
 
-Here is a typical use case for reduce data via tab *Noramlization*
+ 5. User specifies the scan number and root name for the output MDEventWorkspace
 
- 1. User specifies *Exp No* and *Scan No* and push button *Load*;
- 
-  - HFIR-PDR-GUI loads SPICE data according to experiment number and scan number;
-  - HFIR-PDR-GUI checks whether vanadium correction file, i.e., detector efficiency file exists on server;
-  - HFIR-PDR-GUI checks whether excluded detectors file exists on server;
-  - HFIR-PDR-GUI checks log **m1** for wavelength and set to *Wavelength* ;
-  
- 2. User specifies a *Pt.* number and push button *Plot Raw Detector*;
- 
-  - HFIR-PDF-GUI plots the raw detector counts normalized by monitor count;
-  
- 3. User may push button *Previous Pt.* or *Next Pt.* for the other experiment points;
+ 6. User pushes button *Merge*
 
+ 7. User goes to MantidPlot to view the merged scan by SliceView or Vates.
 
-
-Workflow for *Multiple Scans*
-=======================================
-
-It might be confusing to use the functionalities in tab *Multiple Scans*. 
-Here is the suggested workflow to reduce multiple scans and possibly merge them.
-
- 1. Set up *Exp No* and range of scan numbers;
- 2. Push button *Load All* to load and reduce all runs specified in previous step to single-spectrum diffraction pattern;
- 3. Plot all reduced scans in default;
- 4. Optinally plot all data in 2D fill plot;
- 5. User can delete some scans from the reduced scans via GUI or input text edit (not implemented yet);
- 6. Push button *Merge* to merge the scans;
- 7. Push button *Save All* to save all individual scans to files;
- 8. Push button *Save Merged* to save the merged scans to one file; 
-
-
-HB2A Data Reduction
--------------------
-
-Raw experimental data are to be corrected by (1) detector efficiency, (2) vanadium spectrum and etc. 
-Experiments are done with neutrons with various wavelengthes.  
-There information can be retrieved from HB2A's data repository accessible from internet. 
-
-Experiment setup and sample log
-===============================
-
- 1. **Wavelength**: There are three settings for neutron wavelength, referenced by sample log *m1*. 
- 
-  - Ge 113: :math:`\lambda = 2.41 \AA`, m1 = 9.45  (The **error** can be 0.05, such that in Exp 231 scan0001, m1=9.5)
-  - Ge 115: :math:`\lambda = 1.54 \AA`, m1 = 0
-  - Ge 117  :math:`\lambda = 1.12 \AA`, No used
-
- 2. **Collimator translation**: There are two status for collimator, which is specified by sample log *colltrans*
- 
-  - *IN*:  colltrans = 0
-  - *OUT*: colltrans = +/-80
-
-
-Raw data correction files
-=========================
-
- 1. **Detector efficiency**: 
-  - File name: *HB2A_exp0IJK__GE_abc_XY_vcorr.txt* where
-  
-    - IJK is the experiment number
-    - abc is the GE set up.  It can be 113, 115 or 117
-    - XY is either IN or OUT. 
-    - Exmaple: *HB2A_exp0400__Ge_113_IN_vcorr.txt*
-    
-  - Web address: *http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0IJK__Ge_abc_IN_vcorr.txt*
-  
-    - IJK is the experiment number
-    - abc is the GE set up.  It can be 113, 115 or 117
-    - XY is either IN or OUT. 
-    - Exmaple: *http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400__Ge_113_IN_vcorr.txt*
-
- 2. **Excluded detectors**:  Some detectors might be exluded from the experiment for some reason.  It is recorded in some excluded detectors' file.
- 
-  - File name: *HB2A_exp0IJK__exclude_detectors.txt*
-  
-   - IJK is the epxeriment number
-   - Exmaple: *HB2A_exp0400__exclude_detectors.txt*
-   
-  - Web address: *http://neutron.ornl.gov/user_data/hb2a/expIJK/Datafiles/HB2A_exp0IJK__exclude_detectors.txt*
-  
-   - IJK is the experiment number
-   - Example: *http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400__exclude_detectors.txt*
-
- 3. Detector gaps: The 2-theta gap (in unit degrees) can be changed among cycles. 
- 
-   - Location example: *http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400__gaps.txt*
 
 
 Limitation
 ----------
 
-- HFIR powder reduction GUI supports for instrument HB2A only in release 3.4.0;
-
+- HFIR single crystal reduction GUI supports for instrument HB3A only from release 3.5.0 and nightly.
