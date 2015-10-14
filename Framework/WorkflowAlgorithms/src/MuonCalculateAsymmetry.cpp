@@ -107,126 +107,272 @@ void MuonCalculateAsymmetry::exec() {
   MatrixWorkspace_sptr firstPeriodWS = getProperty("FirstPeriodWorkspace");
   MatrixWorkspace_sptr secondPeriodWS = getProperty("SecondPeriodWorkspace");
 
-  MatrixWorkspace_sptr firstConverted = convertWorkspace(firstPeriodWS);
-
-  if (secondPeriodWS) {
-    // Two periods
-    MatrixWorkspace_sptr secondConverted = convertWorkspace(secondPeriodWS);
-
-    setProperty("OutputWorkspace",
-                mergePeriods(firstConverted, secondConverted));
-
-  } else {
-    // Single period only
-    setProperty("OutputWorkspace", firstConverted);
-  }
-
-}
-
-/**
- * Converts given workspace according to the OutputType.
- * @param ws :: Workspace to convert
- * @return Converted workspace
- */
-MatrixWorkspace_sptr
-MuonCalculateAsymmetry::convertWorkspace(MatrixWorkspace_sptr ws) {
+  // The type of calculation
   const std::string type = getPropertyValue("OutputType");
 
-  if (type == "GroupCounts" || type == "GroupAsymmetry") {
-    int groupIndex = getProperty("GroupIndex");
+  // The group index
+  int groupIndex = getProperty("GroupIndex");
 
-    if (groupIndex == EMPTY_INT())
-      throw std::runtime_error("GroupIndex is not specified");
+  // The type of period operation (+ or -)
+  std::string op = getProperty("PeriodOperation");
 
-    // Yank out the counts of requested group
-    IAlgorithm_sptr alg = createChildAlgorithm("ExtractSingleSpectrum");
-    alg->initialize();
-    alg->setProperty("InputWorkspace", ws);
-    alg->setProperty("WorkspaceIndex", groupIndex);
-    alg->execute();
+  if (type == "GroupCounts") {
 
-    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+    auto outWS =
+        calculateGroupCounts(firstPeriodWS, secondPeriodWS, groupIndex, op);
 
-    if (type == "GroupAsymmetry") {
-      // GroupAsymmetry - counts with ExpDecay removed and normalized
+    setProperty("OutputWorkspace", outWS);
 
-      IAlgorithm_sptr alg = createChildAlgorithm("RemoveExpDecay");
-      alg->initialize();
-      alg->setProperty("InputWorkspace", outWS);
-      alg->execute();
+  } else if (type == "GroupAsymmetry") {
 
-      outWS = alg->getProperty("OutputWorkspace");
-    }
+    auto outWS =
+        calculateGroupAsymmetry(firstPeriodWS, secondPeriodWS, groupIndex, op);
 
-    return outWS;
+    setProperty("OutputWorkspace", outWS);
+
   } else if (type == "PairAsymmetry") {
-    // PairAsymmetry - result of AsymmetryCalc algorithm
 
     int pairFirstIndex = getProperty("PairFirstIndex");
     int pairSecondIndex = getProperty("PairSecondIndex");
-
-    if (pairFirstIndex == EMPTY_INT() || pairSecondIndex == EMPTY_INT())
-      throw std::invalid_argument("Both pair indices should be specified");
-
     double alpha = getProperty("Alpha");
 
-    // We get pair groups as their workspace indices, but AsymmetryCalc wants
-    // spectra numbers,
-    // so need to convert
-    specid_t spectraNo1 = ws->getSpectrum(pairFirstIndex)->getSpectrumNo();
-    specid_t spectraNo2 = ws->getSpectrum(pairSecondIndex)->getSpectrumNo();
+    auto outWS =
+        calculatePairAsymmetry(firstPeriodWS, secondPeriodWS, pairFirstIndex,
+                               pairSecondIndex, alpha, op);
 
-    if (spectraNo1 == -1 || spectraNo2 == -1 || spectraNo1 == spectraNo2)
-      throw std::invalid_argument(
-          "Spectra numbers of the input workspace are not set properly");
+    setProperty("OutputWorkspace", outWS);
 
-    IAlgorithm_sptr alg = createChildAlgorithm("AsymmetryCalc");
-    alg->setProperty("InputWorkspace", ws);
-    // As strings, cause otherwise would need to create arrays with single
-    // elements
-    alg->setPropertyValue("ForwardSpectra",
-                          boost::lexical_cast<std::string>(spectraNo1));
-    alg->setPropertyValue("BackwardSpectra",
-                          boost::lexical_cast<std::string>(spectraNo2));
-    alg->setProperty("Alpha", alpha);
+  } else {
+
+    throw std::invalid_argument("Specified OutputType is not supported");
+  }
+}
+
+/**
+* Calculates raw counts according to period operation
+* @param firstPeriodWS :: [input] First period workspace
+* @param secondPeriodWS :: [input] Second period workspace
+* @param groupIndex :: [input] Index of the workspace to extract counts from
+* @param op :: [input] Period operation (+ or -)
+*/
+MatrixWorkspace_sptr MuonCalculateAsymmetry::calculateGroupCounts(
+    const MatrixWorkspace_sptr &firstPeriodWS,
+    const MatrixWorkspace_sptr &secondPeriodWS, int groupIndex,
+    std::string op) {
+
+  if (secondPeriodWS) {
+    // Two periods supplied
+
+    MatrixWorkspace_sptr tempWS;
+
+    if (op == "+") {
+
+      IAlgorithm_sptr alg = createChildAlgorithm("Plus");
+      alg->initialize();
+      alg->setProperty("LHSWorkspace", firstPeriodWS);
+      alg->setProperty("RHSWorkspace", secondPeriodWS);
+      alg->execute();
+      tempWS = alg->getProperty("OutputWorkspace");
+
+    } else if (op == "-") {
+
+      IAlgorithm_sptr alg = createChildAlgorithm("Minus");
+      alg->initialize();
+      alg->setProperty("LHSWorkspace", firstPeriodWS);
+      alg->setProperty("RHSWorkspace", secondPeriodWS);
+      alg->execute();
+      tempWS = alg->getProperty("OutputWorkspace");
+    }
+
+    IAlgorithm_sptr alg = createChildAlgorithm("ExtractSingleSpectrum");
+    alg->initialize();
+    alg->setProperty("InputWorkspace", tempWS);
+    alg->setProperty("WorkspaceIndex", groupIndex);
     alg->execute();
+    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
 
+    return outWS;
+
+  } else {
+    // Only one period supplied
+
+    IAlgorithm_sptr alg = createChildAlgorithm("ExtractSingleSpectrum");
+    alg->initialize();
+    alg->setProperty("InputWorkspace", firstPeriodWS);
+    alg->setProperty("WorkspaceIndex", groupIndex);
+    alg->execute();
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
 
     return outWS;
   }
-
-  throw std::invalid_argument("Specified OutputType is not supported");
 }
 
 /**
- * Merges two period workspaces according to PeriodOperation specified.
- * @param ws1 :: First period workspace
- * @param ws2 :: Second period workspace
- * @return Merged workspace
- */
-MatrixWorkspace_sptr
-MuonCalculateAsymmetry::mergePeriods(MatrixWorkspace_sptr ws1,
-                                     MatrixWorkspace_sptr ws2) {
-  std::string op = getProperty("PeriodOperation");
+* Calculates single-spectrum asymmetry according to period operation
+* @param firstPeriodWS :: [input] First period workspace
+* @param secondPeriodWS :: [input] Second period workspace
+* @param groupIndex :: [input] Workspace index for which to calculate asymmetry
+* @param op :: [input] Period operation (+ or -)
+*/
+MatrixWorkspace_sptr MuonCalculateAsymmetry::calculateGroupAsymmetry(
+    const MatrixWorkspace_sptr &firstPeriodWS,
+    const MatrixWorkspace_sptr &secondPeriodWS, int groupIndex,
+    std::string op) {
 
-  std::string algorithmName;
+  // The output workspace
+  MatrixWorkspace_sptr tempWS;
 
-  if (op == "+") {
-    algorithmName = "Plus";
-  } else if (op == "-") {
-    algorithmName = "Minus";
+  if (secondPeriodWS) {
+    // Two period workspaces where supplied
+
+      if (op == "+") {
+
+        // Sum
+        IAlgorithm_sptr alg = createChildAlgorithm("Plus");
+        alg->initialize();
+        alg->setProperty("LHSWorkspace", firstPeriodWS);
+        alg->setProperty("RHSWorkspace", secondPeriodWS);
+        alg->execute();
+        MatrixWorkspace_sptr sumWS = alg->getProperty("OutputWorkspace");
+
+        // Remove decay
+        IAlgorithm_sptr asym = createChildAlgorithm("RemoveExpDecay");
+        asym->setProperty("InputWorkspace",sumWS);
+        asym->execute();
+        tempWS = asym->getProperty("OutputWorkspace");
+
+      } else if (op == "-") {
+
+        // Remove decay (first period ws)
+        IAlgorithm_sptr asym = createChildAlgorithm("RemoveExpDecay");
+        asym->initialize();
+        asym->setProperty("InputWorkspace",firstPeriodWS);
+        asym->execute();
+        MatrixWorkspace_sptr asymFirstPeriod = asym->getProperty("OutputWorkspace");
+
+        // Remove decay (second period ws)
+        asym = createChildAlgorithm("RemoveExpDecay");
+        asym->initialize();
+        asym->setProperty("InputWorkspace", secondPeriodWS);
+        asym->execute();
+        MatrixWorkspace_sptr asymSecondPeriod = asym->getProperty("OutputWorkspace");
+
+        // Now subtract
+        IAlgorithm_sptr alg = createChildAlgorithm("Minus");
+        alg->initialize();
+        alg->setProperty("LHSWorkspace", asymFirstPeriod);
+        alg->setProperty("RHSWorkspace", asymSecondPeriod);
+        alg->execute();
+        tempWS = alg->getProperty("OutputWorkspace");
+
+      }
+    } else {
+      // Only one period was supplied
+
+      IAlgorithm_sptr alg = createChildAlgorithm("RemoveExpDecay");
+      alg->initialize();
+      alg->setProperty("InputWorkspace", firstPeriodWS);
+      alg->execute();
+      tempWS = alg->getProperty("OutputWorkspace");
+    }
+
+    // Extract the requested spectrum
+    IAlgorithm_sptr alg = createChildAlgorithm("ExtractSingleSpectrum");
+    alg->initialize();
+    alg->setProperty("InputWorkspace", tempWS);
+    alg->setProperty("WorkspaceIndex", groupIndex);
+    alg->execute();
+    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+    return outWS;
+}
+
+/**
+* Calculates pair asymmetry according to period operation
+* @param firstPeriodWS :: [input] First period workspace
+* @param secondPeriodWS :: [input] Second period workspace
+* @param groupIndex :: [input] Workspace index for which to calculate asymmetry
+* @param op :: [input] Period operation (+ or -)
+*/
+MatrixWorkspace_sptr MuonCalculateAsymmetry::calculatePairAsymmetry(
+    const MatrixWorkspace_sptr &firstPeriodWS,
+    const MatrixWorkspace_sptr &secondPeriodWS, int firstPairIndex,
+    int secondPairIndex, double alpha, std::string op) {
+
+  // Pair indices as vectors
+  std::vector<int> fwd(1, firstPairIndex + 1);
+  std::vector<int> bwd(1, secondPairIndex + 1);
+
+  if (secondPeriodWS) {
+
+    MatrixWorkspace_sptr outWS;
+
+    if (op == "+") {
+
+        // Sum
+        IAlgorithm_sptr alg = createChildAlgorithm("Plus");
+        alg->initialize();
+        alg->setProperty("LHSWorkspace", firstPeriodWS);
+        alg->setProperty("RHSWorkspace", secondPeriodWS);
+        alg->execute();
+        MatrixWorkspace_sptr sumWS = alg->getProperty("OutputWorkspace");
+
+        // Asymmetry calculation
+        alg = createChildAlgorithm("AsymmetryCalc");
+        alg->setProperty("InputWorkspace", sumWS);
+        alg->setProperty("ForwardSpectra", fwd);
+        alg->setProperty("BackwardSpectra", bwd);
+        alg->setProperty("Alpha", alpha);
+        alg->execute();
+        outWS = alg->getProperty("OutputWorkspace");
+
+    } else if (op == "-") {
+
+        std::vector<int> fwd(1, firstPairIndex + 1);
+        std::vector<int> bwd(1, secondPairIndex + 1);
+
+        // First period asymmetry
+        IAlgorithm_sptr alg = createChildAlgorithm("AsymmetryCalc");
+        alg->setProperty("InputWorkspace", firstPeriodWS);
+        alg->setProperty("ForwardSpectra", fwd);
+        alg->setProperty("BackwardSpectra", bwd);
+        alg->setProperty("Alpha", alpha);
+        alg->execute();
+        MatrixWorkspace_sptr asymFirstPeriod =
+            alg->getProperty("OutputWorkspace");
+
+        // Second period asymmetry
+        alg = createChildAlgorithm("AsymmetryCalc");
+        alg->setProperty("InputWorkspace", secondPeriodWS);
+        alg->setProperty("ForwardSpectra", fwd);
+        alg->setProperty("BackwardSpectra", bwd);
+        alg->setProperty("Alpha", alpha);
+        alg->execute();
+        MatrixWorkspace_sptr asymSecondPeriod =
+            alg->getProperty("OutputWorkspace");
+
+        // Now subtract
+        alg = createChildAlgorithm("Minus");
+        alg->initialize();
+        alg->setProperty("LHSWorkspace", asymFirstPeriod);
+        alg->setProperty("RHSWorkspace", asymSecondPeriod);
+        alg->execute();
+        outWS = alg->getProperty("OutputWorkspace");
+    }
+
+    return outWS;
+
+  } else {
+
+    IAlgorithm_sptr alg = createChildAlgorithm("AsymmetryCalc");
+    alg->setProperty("InputWorkspace", firstPeriodWS);
+    alg->setProperty("ForwardSpectra", fwd);
+    alg->setProperty("BackwardSpectra", bwd);
+    alg->setProperty("Alpha", alpha);
+    alg->execute();
+    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+
+    return outWS;
   }
-
-  IAlgorithm_sptr alg = createChildAlgorithm(algorithmName);
-  alg->initialize();
-  alg->setProperty("LHSWorkspace", ws1);
-  alg->setProperty("RHSWorkspace", ws2);
-  alg->execute();
-
-  MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
-
-  return outWS;
 }
 } // namespace WorkflowAlgorithms
 } // namespace Mantid

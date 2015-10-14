@@ -317,6 +317,7 @@ public:
     alg.initialize();
     alg.setProperty("FirstPeriodWorkspace", inWS);
     alg.setProperty("SecondPeriodWorkspace", inWSSecond);
+    alg.setProperty("PeriodOperation", "-");
     alg.setProperty("OutputType", "PairAsymmetry");
     alg.setProperty("PeriodOperation", "-");
     alg.setProperty("PairFirstIndex", 2);
