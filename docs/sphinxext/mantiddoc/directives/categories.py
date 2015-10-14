@@ -299,8 +299,6 @@ def create_category_pages(app):
     Arguments:
       app: A Sphinx application object
     """
-    import os.path
-
     env = app.builder.env
     # jinja2 html template
     template = CATEGORY_PAGE_TEMPLATE
