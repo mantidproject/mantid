@@ -181,6 +181,10 @@ boost::shared_ptr<Workspace> ISISHistoDataListener::extractData() {
   getFloatArray("RRPB", floatBuffer, 32);
   const double protonCharge = floatBuffer[8];
 
+  if (m_timeRegime < 0)
+    throw std::runtime_error("The value of the time regime variable is "
+                             "negative. This is an Internal inconsistency.");
+
   // find out the number of histograms in the output workspace
   const size_t numberOfHistograms =
       m_specList.empty() ? m_numberOfSpectra[m_timeRegime] : m_specList.size();
