@@ -288,7 +288,7 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
               m_uiTabCalib.lineEdit_new_ceria_num->getText());
 
   // user params - focusing
-  qs.setValue("user-params-focus-runno", m_uiTabFocus.lineEdit_run_num->text());
+  qs.setValue("user-params-focus-runno", m_uiTabFocus.lineEdit_run_num->getText());
 
   qs.beginWriteArray("user-params-focus-bank_i");
   qs.setArrayIndex(0);
@@ -298,12 +298,12 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
   qs.endArray();
 
   qs.setValue("user-params-focus-cropped-runno",
-              m_uiTabFocus.lineEdit_cropped_run_num->text());
+              m_uiTabFocus.lineEdit_cropped_run_num->getText());
   qs.setValue("user-params-focus-cropped-spectrum-nos",
               m_uiTabFocus.lineEdit_cropped_spec_ids->text());
 
   qs.setValue("user-params-focus-texture-runno",
-              m_uiTabFocus.lineEdit_texture_run_num->text());
+              m_uiTabFocus.lineEdit_texture_run_num->getText());
   qs.setValue("user-params-focus-texture-detector-grouping-file",
               m_uiTabFocus.lineEdit_texture_grouping_file->text());
 
@@ -676,15 +676,15 @@ void EnggDiffractionViewQtGUI::browseTextureDetGroupingFile() {
 }
 
 std::string EnggDiffractionViewQtGUI::focusingRunNo() const {
-  return m_uiTabFocus.lineEdit_run_num->text().toStdString();
+  return m_uiTabFocus.lineEdit_run_num->getText().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::focusingCroppedRunNo() const {
-  return m_uiTabFocus.lineEdit_cropped_run_num->text().toStdString();
+  return m_uiTabFocus.lineEdit_cropped_run_num->getText().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::focusingTextureRunNo() const {
-  return m_uiTabFocus.lineEdit_texture_run_num->text().toStdString();
+  return m_uiTabFocus.lineEdit_texture_run_num->getText().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::focusingDir() const {

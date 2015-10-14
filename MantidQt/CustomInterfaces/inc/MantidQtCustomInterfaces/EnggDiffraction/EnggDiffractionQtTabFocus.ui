@@ -20,30 +20,6 @@
       <string>Focus run</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="2" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <item>
-         <spacer name="horizontalSpacer_3">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>238</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_focus">
-          <property name="text">
-           <string>Focus</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
       <item row="1" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout_5">
         <item>
@@ -113,12 +89,36 @@
         </item>
        </layout>
       </item>
+      <item row="2" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>238</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_focus">
+          <property name="text">
+           <string>Focus</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
       <item row="0" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <widget class="QLabel" name="label_run_num">
           <property name="text">
-           <string>Run #:</string>
+           <string/>
           </property>
          </widget>
         </item>
@@ -136,12 +136,18 @@
          </spacer>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_run_num">
-          <property name="text">
+         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="lineEdit_run_num" native="true">
+          <property name="text" stdset="0">
            <string/>
           </property>
-          <property name="readOnly">
+          <property name="readOnly" stdset="0">
            <bool>false</bool>
+          </property>
+          <property name="label" stdset="0">
+           <string>Run #:</string>
+          </property>
+          <property name="multipleFiles" stdset="0">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -161,7 +167,7 @@
         <item>
          <widget class="QLabel" name="label_cropped_run_num">
           <property name="text">
-           <string>Run #:</string>
+           <string/>
           </property>
          </widget>
         </item>
@@ -179,12 +185,18 @@
          </spacer>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_cropped_run_num">
-          <property name="text">
+         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="lineEdit_cropped_run_num" native="true">
+          <property name="text" stdset="0">
            <string/>
           </property>
-          <property name="readOnly">
+          <property name="readOnly" stdset="0">
            <bool>false</bool>
+          </property>
+          <property name="label" stdset="0">
+           <string>Run #:</string>
+          </property>
+          <property name="multipleFiles" stdset="0">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -262,7 +274,7 @@
         <item>
          <widget class="QLabel" name="label_texture_run_num">
           <property name="text">
-           <string>Run #:</string>
+           <string/>
           </property>
          </widget>
         </item>
@@ -280,12 +292,18 @@
          </spacer>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_texture_run_num">
-          <property name="text">
+         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="lineEdit_texture_run_num" native="true">
+          <property name="text" stdset="0">
            <string/>
           </property>
-          <property name="readOnly">
+          <property name="readOnly" stdset="0">
            <bool>false</bool>
+          </property>
+          <property name="label" stdset="0">
+           <string>Run #:</string>
+          </property>
+          <property name="multipleFiles" stdset="0">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -521,6 +539,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
