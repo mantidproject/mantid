@@ -97,10 +97,16 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         dataX = self.vanaws.readX(0)
         coefY = np.zeros(nhist)
         coefE = np.zeros(nhist)
+        instrument = self.vanaws.getInstrument()
+        detID_offset = self.get_detID_offset()
         for idx in range(nhist):
             prog_reporter.report("Setting %dth spectrum" % idx)
             dataY = self.vanaws.readY(idx)
-            if np.max(dataY) != 0:
+            det = instrument.getDetector(idx + detID_offset)
+            if np.max(dataY) == 0 or det.isMasked():
+                coefY[idx] = 0.
+                coefE[idx] = 0.
+            else:
                 dataE = self.vanaws.readE(idx)
                 peak_centre, sigma = mlzutils.do_fit_gaussian(self.vanaws, idx, self.log())
                 fwhm = sigma*2.*np.sqrt(2.*np.log(2.))
@@ -108,9 +114,6 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
                 idxmax = (np.fabs(dataX-peak_centre-3.*fwhm)).argmin()
                 coefY[idx] = dwf[idx]*sum(dataY[idxmin:idxmax+1])
                 coefE[idx] = dwf[idx]*sum(dataE[idxmin:idxmax+1])
-            else:
-                coefY[idx] = 0.
-                coefE[idx] = 0.
 
         # create X array, X data are the same for all detectors, so
         coefX = np.zeros(nhist)
@@ -124,6 +127,12 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace", outws)
 
+    def get_detID_offset(self):
+        """
+        returns ID of the first detector
+        """
+        return self.vanaws.getSpectrum(0).getDetectorIDs()[0]
+
     def calculate_dwf(self):
         """
         Calculates Debye-Waller factor according to
@@ -134,11 +143,7 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         thetasort = np.zeros(nhist)  # theta in radians !!!NOT 2Theta
 
         instrument = self.vanaws.getInstrument()
-        detID_offset = 0
-        try:
-            instrument.getDetector(0)
-        except RuntimeError:
-            detID_offset = 1
+        detID_offset = self.get_detID_offset()
 
         for i in range(nhist):
             det = instrument.getDetector(i + detID_offset)

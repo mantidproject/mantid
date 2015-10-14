@@ -220,6 +220,5 @@ def do_fit_gaussian(workspace, index, logger):
         logger.error(message)
         raise RuntimeError(message)
 
-    result = param_table.column(1)[1:3]
     # return list: [peak_centre, sigma]
-    return result
+    return param_table.column(1)[1:3]
