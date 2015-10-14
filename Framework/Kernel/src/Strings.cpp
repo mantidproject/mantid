@@ -897,7 +897,7 @@ std::string getWord(std::istream &in, bool consumeEOL) {
     nextch = static_cast<char>(in.get());
 
     // Handle CRLF and LFCR on Unix by consuming both
-    if (nextch == '\n' || nextch == '\n') {
+    if (nextch == '\n' || nextch == '\r') {
       if ((nextch == '\n' && in.peek() == '\r') ||
           (nextch == '\r' && in.peek() == '\n')) {
         in.ignore();
