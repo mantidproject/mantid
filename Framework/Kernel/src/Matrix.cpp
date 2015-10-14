@@ -158,7 +158,7 @@ Matrix<T>::Matrix(const Matrix<T> &A, const size_t nrow, const size_t ncol)
     throw Kernel::Exception::IndexError(ncol, A.ny,
                                         "Matrix::Constructor without col");
   setMem(nx, ny);
-  if (!V) {
+  if (V) {
     size_t iR(0);
     for (size_t i = 0; i <= nx; i++) {
       if (i != nrow) {
