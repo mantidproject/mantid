@@ -1,5 +1,5 @@
-# pylint: disable=assignment-from-none
 import mantid.simpleapi as api
+from mantid.api import AlgorithmManager
 import numpy as np
 
 
@@ -158,19 +158,12 @@ def compare_mandatory(wslist, plist, logger, tolerance=0.01):
             raise RuntimeError(message)
 
 
-def remove_fit_workspaces(prefix):
-    ws1 = prefix + '_Parameters'
-    ws2 = prefix + '_NormalisedCovarianceMatrix'
-    cleanup([ws1, ws2])
-
-
-def do_fit_gaussian(workspace, index, logger, cleanup_fit=True):
+def do_fit_gaussian(workspace, index, logger):
     """
     Calculates guess values on peak centre, sigma and peak height.
     Uses them as an input to run a fit algorithm
         @ param workspace --- input workspace
         @ param index --- the spectrum with which WorkspaceIndex to fit
-        @ param cleanup --- if False, the intermediate workspaces created by Fit algorithm will not be removed
         @ returns peak_centre --- fitted peak centre
         @ returns sigma --- fitted sigma
     """
@@ -206,32 +199,27 @@ def do_fit_gaussian(workspace, index, logger, cleanup_fit=True):
     fwhm = np.fabs(x_values[indices[nentries - 1, 0]] - x_values[indices[0, 0]])
     sigma = fwhm/(2.*np.sqrt(2.*np.log(2.)))
 
-    # execute Fit algorithm
+    # create and execute Fit algorithm
     myfunc = 'name=Gaussian, Height='+str(height)+', PeakCentre='+str(try_centre)+', Sigma='+str(sigma)
     startX = try_centre - 3.0*fwhm
     endX = try_centre + 3.0*fwhm
     prefix = "Fit" + workspace.getName() + str(index)
-    retvals = api.Fit(InputWorkspace=workspace.getName(), WorkspaceIndex=index, StartX=startX, EndX=endX,
-                      Function=myfunc, Output=prefix, OutputParametersOnly=True)
-    if not retvals or len(retvals) < 4:
+    fit_alg = AlgorithmManager.createUnmanaged('Fit')
+    fit_alg.initialize()
+    fit_alg.setChild(True)
+    api.set_properties(fit_alg, Function=myfunc, InputWorkspace=workspace, CreateOutput=True, Output=prefix)
+    fit_alg.setProperty('StartX', startX)
+    fit_alg.setProperty('EndX', endX)
+    fit_alg.setProperty('WorkspaceIndex', index)
+    fit_successful = fit_alg.execute()
+    param_table = fit_alg.getProperty('OutputParameters').value
+
+    if not fit_successful:
         message = "For detector " + str(index) + " in workspace " + workspace.getName() +\
-            " failed to retrieve fit results. Input guess parameters are " + str(myfunc)
+            "fit was not successful. Input guess parameters are " + str(myfunc)
         logger.error(message)
-        if cleanup_fit:
-            remove_fit_workspaces(prefix)
         raise RuntimeError(message)
 
-    fitStatus = retvals[0]
-    paramTable = retvals[3]
-    if fitStatus != 'success':
-        message = "For detector " + str(index) + " in workspace " + workspace.getName() +\
-            "fit has been terminated with status " + fitStatus + ". Input guess parameters are " + str(myfunc)
-        logger.error(message)
-        if cleanup_fit:
-            remove_fit_workspaces(prefix)
-        raise RuntimeError(message)
-    result = paramTable.column(1)[1:3]
-    if cleanup_fit:
-        remove_fit_workspaces(prefix)
+    result = param_table.column(1)[1:3]
     # return list: [peak_centre, sigma]
     return result

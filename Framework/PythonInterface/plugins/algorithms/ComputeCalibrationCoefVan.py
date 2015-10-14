@@ -71,13 +71,13 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         run = self.vanaws.getRun()
         if not run.hasProperty('temperature'):
             self.log().warning("Temperature sample log is not present in " + self.vanaws.getName() +
-                               "T=293K is assumed for Debye-Waller factor.")
+                               " T=293K is assumed for Debye-Waller factor.")
             return self.defaultT
         try:
             temperature = float(run.getProperty('temperature').value)
         except ValueError, err:
             self.log().warning("Error of getting temperature: " + err +
-                               "T=293K is assumed for Debye-Waller factor.")
+                               " T=293K is assumed for Debye-Waller factor.")
             return self.defaultT
 
         return temperature
@@ -103,7 +103,7 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
             dataY = self.vanaws.readY(idx)
             if np.max(dataY) != 0:
                 dataE = self.vanaws.readE(idx)
-                peak_centre, sigma = mlzutils.do_fit_gaussian(self.vanaws, idx, self.log(), cleanup_fit=False)
+                peak_centre, sigma = mlzutils.do_fit_gaussian(self.vanaws, idx, self.log())
                 fwhm = sigma*2.*np.sqrt(2.*np.log(2.))
                 idxmin = (np.fabs(dataX-peak_centre+3.*fwhm)).argmin()
                 idxmax = (np.fabs(dataX-peak_centre-3.*fwhm)).argmin()
@@ -144,7 +144,8 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
 
         for i in range(nhist):
             det = instrument.getDetector(i + detID_offset)
-            thetasort[i] = 0.5*self.vanaws.detectorSignedTwoTheta(det)
+            thetasort[i] = 0.5*np.sign(np.cos(det.getPhi()))*self.vanaws.detectorTwoTheta(det)
+            # thetasort[i] = 0.5*self.vanaws.detectorSignedTwoTheta(det) # gives opposite sign for detectors 0-24
 
         temperature = self.get_temperature()                    # T in K
         wlength = float(run.getLogData('wavelength').value)     # Wavelength, Angstrom

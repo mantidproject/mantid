@@ -65,10 +65,10 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
 
         # check dwf calculation
         y_sum = sum(self._input_ws.readY(1)[27:75])
-        det2 = self._input_ws.getInstrument().getDetector(2)
+        # det2 = self._input_ws.getInstrument().getDetector(2)
         mvan = 0.001*50.942/N_A
         Bcoef = 4.736767162094296*1e+20*hbar*hbar/(2.0*mvan*k*389.0)
-        dwf = np.exp(-1.0*Bcoef*(4.0*np.pi*np.sin(0.5*self._input_ws.detectorSignedTwoTheta(det2))/4.0)**2)
+        dwf = np.exp(-1.0*Bcoef*(4.0*np.pi*np.sin(0.5*np.radians(15.0))/4.0)**2)
         self.assertAlmostEqual(y_sum*dwf, wsoutput.readY(1)[0])
 
         DeleteWorkspace(wsoutput)
