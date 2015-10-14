@@ -756,6 +756,14 @@ public:
       TS_ASSERT_EQUALS("0", extractStringLog(*firstMatrixWS, "measurement_subid"));
       TS_ASSERT_EQUALS("", extractStringLog(*firstMatrixWS, "measurement_label"));
       TS_ASSERT_EQUALS("PNR", extractStringLog(*firstMatrixWS, "measurement_type"));
+
+      auto secondMatrixWS =
+          boost::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(1));
+
+      TS_ASSERT_EQUALS("34", extractStringLog(*secondMatrixWS, "measurement_id"));
+      TS_ASSERT_EQUALS("0", extractStringLog(*secondMatrixWS, "measurement_subid"));
+      TS_ASSERT_EQUALS("", extractStringLog(*secondMatrixWS, "measurement_label"));
+      TS_ASSERT_EQUALS("PNR", extractStringLog(*secondMatrixWS, "measurement_type"));
   }
 };
 
