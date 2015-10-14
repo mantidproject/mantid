@@ -123,18 +123,26 @@ void export_IFunction() {
 
       //-- Deprecated functions that have the wrong names --
       .def("categories", &getCategories,
+           arg("self"),
            "Returns a list of the categories for an algorithm")
-      .def("numParams", &IFunction::nParams, "Return the number of parameters")
+      .def("numParams", &IFunction::nParams,
+           arg("self"),
+           "Return the number of parameters")
       .def("getParamName", &IFunction::parameterName,
+           (arg("self"), arg("i")),
            "Return the name of the ith parameter")
       .def("getParamDescr", &IFunction::parameterDescription,
+           (arg("self"), arg("i")),
            "Return a description of the ith parameter")
       .def("getParamExplicit", &IFunction::isExplicitlySet,
+           (arg("self"), arg("i")),
            "Return whether the ith parameter needs to be explicitely set")
       .def("getParamValue",
            (double (IFunction::*)(std::size_t) const) & IFunction::getParameter,
+           (arg("self"), arg("i")),
            "Get the value of the ith parameter")
       //-- Python special methods --
       .def("__repr__", &IFunction::asString,
+           arg("self"),
            "Return a string representation of the function");
 }

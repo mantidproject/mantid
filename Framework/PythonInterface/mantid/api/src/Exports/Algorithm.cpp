@@ -121,6 +121,7 @@ void export_leaf_classes() {
 
       // deprecated methods
       .def("setWikiSummary", &PythonAlgorithm::setWikiSummary,
+           (arg("self"), arg("summary")),
            "(Deprecated.) Set summary for the help.");
 
   // Prior to version 3.2 there was a separate C++ PythonAlgorithm class that

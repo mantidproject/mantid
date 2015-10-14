@@ -340,46 +340,64 @@ void export_ialgorithm() {
            "Return a list of input, in/out and output properties "
            "such that the mandatory properties are first followed by the "
            "optional ones.")
-
       .def("outputProperties", &getOutputProperties,
+           arg("self"),
            "Returns a list of the output properties on the algorithm")
       .def("isInitialized", &IAlgorithm::isInitialized,
+           arg("self"),
            "Returns True if the algorithm is initialized, False otherwise")
       .def("isExecuted", &IAlgorithm::isExecuted,
+           arg("self"),
            "Returns True if the algorithm has been executed successfully, "
            "False otherwise")
       .def("isLogging", &IAlgorithm::isLogging, arg("self"),
            "Returns True if the "
            "algorithm's logger is turned "
            "on, False otherwise")
-      .def("isRunning", &IAlgorithm::isRunning, "Returns True if the algorithm "
-                                                "is considered to be running, "
-                                                "False otherwise")
+      .def("isRunning", &IAlgorithm::isRunning,
+           arg("self"),
+           "Returns True if the algorithm "
+           "is considered to be running, "
+           "False otherwise")
       .def("setChild", &IAlgorithm::setChild,
+           (arg("self"), arg("is_child")),
            "If true this algorithm is run as a child algorithm. There will be "
            "no logging and nothing is stored in the Analysis Data Service")
       .def("enableHistoryRecordingForChild",
            &IAlgorithm::enableHistoryRecordingForChild,
+           (arg("self"), arg("on")),
            "If true then history will be recorded regardless of the child "
            "status")
       .def("setAlgStartupLogging", &IAlgorithm::setAlgStartupLogging,
+           (arg("self"), arg("enabled")),
            "If true then allow logging of start and end messages")
       .def("getAlgStartupLogging", &IAlgorithm::getAlgStartupLogging,
+           arg("self"),
            "Returns true if logging of start and end messages")
       .def("setAlwaysStoreInADS", &IAlgorithm::setAlwaysStoreInADS,
+           (arg("self"), arg("do_store")),
            "If true then even child algorithms will have their workspaces "
            "stored in the ADS.")
       .def("isChild", &IAlgorithm::isChild,
+           arg("self"),
            "Returns True if the algorithm has been marked to run as a child. "
            "If True then Output workspaces "
            "are NOT stored in the Analysis Data Service but must be retrieved "
            "from the property.")
-      .def("setLogging", &IAlgorithm::setLogging, "Toggle logging on/off.")
-      .def("setRethrows", &IAlgorithm::setRethrows)
-      .def("initialize", &IAlgorithm::initialize, "Initializes the algorithm")
+      .def("setLogging", &IAlgorithm::setLogging,
+           (arg("self"), arg("value")),
+           "Toggle logging on/off.")
+      .def("setRethrows", &IAlgorithm::setRethrows,
+           (arg("self"), arg("rethrow")),
+           "To query whether an algorithm should rethrow exceptions when executing.")
+      .def("initialize", &IAlgorithm::initialize,
+           arg("self"),
+           "Initializes the algorithm")
       .def("validateInputs", &IAlgorithm::validateInputs,
+           arg("self"),
            "Cross-check all inputs and return any errors as a dictionary")
       .def("execute", &executeProxy,
+           arg("self"),
            "Runs the algorithm and returns whether it has been successful")
       // 'Private' static methods
       .def("_algorithmInThread", &_algorithmInThread)
@@ -389,7 +407,9 @@ void export_ialgorithm() {
 
       // deprecated methods
       .def("getOptionalMessage", &getOptionalMessage,
+           arg("self"),
            "Returns the optional user message attached to the algorithm")
       .def("getWikiSummary", &getWikiSummary,
+           arg("self"),
            "Returns the summary found on the wiki page");
 }

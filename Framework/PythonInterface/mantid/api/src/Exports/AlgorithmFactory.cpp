@@ -118,11 +118,15 @@ void export_AlgorithmFactory() {
                             "an option to specify the version"))
 
       .def("getRegisteredAlgorithms", &getRegisteredAlgorithms,
+           (arg("self"), arg("include_hidden")),
            "Returns a Python dictionary of currently registered algorithms")
       .def("highestVersion", &AlgorithmFactoryImpl::highestVersion,
+           (arg("self"), arg("algorithm_name")),
            "Returns the highest version of the named algorithm. Throws "
            "ValueError if no algorithm can be found")
-      .def("subscribe", &subscribe, "Register a Python class derived from "
+      .def("subscribe", &subscribe,
+           (arg("self"), arg("object")),
+           "Register a Python class derived from "
                                     "PythonAlgorithm into the factory")
 
       .def("Instance", &AlgorithmFactory::Instance,
