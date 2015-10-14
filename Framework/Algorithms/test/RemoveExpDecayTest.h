@@ -7,6 +7,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
+using Mantid::MantidVec;
 
 const std::string outputName = "MuonRemoveExpDecay_Output";
 
@@ -26,7 +27,8 @@ public:
   }
 
   void testExecute() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+
+    auto ws = createWorkspace(4, 50);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RemoveExpDecay");
     alg->initialize();
@@ -41,7 +43,8 @@ public:
   }
 
   void testExecuteWhereSepctraNotSet() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+
+    auto ws = createWorkspace(4, 50);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RemoveExpDecay");
     alg->initialize();
@@ -55,19 +58,59 @@ public:
   }
 
   void test_yUnitLabel() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+
+    auto ws = createWorkspace(4, 50);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RemoveExpDecay");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
-    alg->execute();
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted())
 
     MatrixWorkspace_sptr result = alg->getProperty("OutputWorkspace");
     TS_ASSERT(result);
     TS_ASSERT_EQUALS(result->YUnitLabel(), "Asymmetry");
 
+  }
+
+    MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
+
+    // Create a fake muon dataset
+    double a = 0.1;   // Amplitude of the oscillations
+    double w = 25.;   // Frequency of the oscillations
+    double tau = 2.2; // Muon life time
+
+    MantidVec X;
+    MantidVec Y;
+    MantidVec E;
+    for (size_t s = 0; s < nspec; s++) {
+      for (size_t t = 0; t < maxt; t++) {
+        double x = static_cast<double>(t) / static_cast<double>(maxt);
+        double e = exp(-x / tau);
+        X.push_back(x);
+        Y.push_back(a * sin(w * x +
+                            static_cast<double>(s) * M_PI /
+                                static_cast<double>(nspec)) *
+                        e +
+                    e);
+        E.push_back(0.005);
+      }
+    }
+
+    auto createWS = AlgorithmManager::Instance().create("CreateWorkspace");
+    createWS->initialize();
+    createWS->setChild(true);
+    createWS->setProperty("DataX", X);
+    createWS->setProperty("DataY", Y);
+    createWS->setProperty("DataE", E);
+    createWS->setProperty("NSpec", static_cast<int>(nspec));
+    createWS->setPropertyValue("OutputWorkspace", "ws");
+    createWS->execute();
+    MatrixWorkspace_sptr ws = createWS->getProperty("OutputWorkspace");
+
+    return ws;
   }
 };
 
