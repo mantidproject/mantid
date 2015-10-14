@@ -875,13 +875,18 @@ std::string getWord(std::istream &in, bool consumeEOL) {
 
   // Return an empty string on EOL; optionally consume it
   if (nextch == '\n' || nextch == '\r') {
-    if (!consumeEOL)
+    if (!consumeEOL) {
       in.unget();
+    } else if ((nextch == '\n' && in.peek() == '\r') ||
+               (nextch == '\r' && in.peek() == '\n')) {
+      // Handle CRLF and LFCR on Unix by consuming both
+      in.ignore();
+    }
 
     return ret;
   }
-  else { // Non-EOL and non-space character
-      in.unget(); // Put it back on stream
+  else {      // Non-EOL and non-space character
+    in.unget(); // Put it back on stream
   }
 
   // Get next word if stream is still valid
@@ -890,9 +895,18 @@ std::string getWord(std::istream &in, bool consumeEOL) {
 
   // Optionally consume EOL character
   if (consumeEOL) {
-    nextch = static_cast<char>(in.peek());
-    if ((nextch == '\n') || (nextch == '\r'))
-      in.ignore();
+    nextch = static_cast<char>(in.get());
+
+    // Handle CRLF and LFCR on Unix by consuming both
+    if (nextch == '\n' || nextch == '\n') {
+      if ((nextch == '\n' && in.peek() == '\r') ||
+          (nextch == '\r' && in.peek() == '\n')) {
+        in.ignore();
+      }
+    }
+    else {
+      in.unget();
+    }
   }
 
   return ret;

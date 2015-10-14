@@ -18,13 +18,11 @@ namespace Crystal {
 class DLLExport LoadIsawPeaks
     : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
-  LoadIsawPeaks() = default;
-  virtual ~LoadIsawPeaks() = default;
+  LoadIsawPeaks();
+  virtual ~LoadIsawPeaks();
 
   /// Algorithm's name for identification
-  virtual const std::string name() const {
-    return "LoadIsawPeaks";
-  }
+  virtual const std::string name() const { return "LoadIsawPeaks"; }
 
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
@@ -32,9 +30,7 @@ public:
   }
 
   /// Algorithm's version for identification
-  virtual int version() const {
-    return 1;
-  }
+  virtual int version() const { return 1; }
 
   /// Algorithm's category for identification
   virtual const std::string category() const {
@@ -86,8 +82,9 @@ private:
   std::map<std::string, boost::shared_ptr<const Geometry::IComponent>> m_banks;
 
   /// Retrieve cached bank (or load and cache for next time)
-  boost::shared_ptr<const Geometry::IComponent> getCachedBankByName(std::string bankname, const boost::shared_ptr<const Geometry::Instrument>& inst);
-
+  boost::shared_ptr<const Geometry::IComponent> getCachedBankByName(
+      std::string bankname,
+      const boost::shared_ptr<const Geometry::Instrument> &inst);
 };
 
 } // namespace Mantid

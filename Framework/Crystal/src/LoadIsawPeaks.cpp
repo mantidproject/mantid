@@ -19,6 +19,15 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
+//----------------------------------------------------------------------------------------------
+/** Constructor
+ */
+LoadIsawPeaks::LoadIsawPeaks() {}
+
+//----------------------------------------------------------------------------------------------
+/** Destructor
+ */
+LoadIsawPeaks::~LoadIsawPeaks() {}
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -68,8 +77,7 @@ int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
       getWord(in, false);
     readToEndOfLine(in, true);
     confidence = 95;
-  }
-  catch (std::exception &) {
+  } catch (std::exception &) {
   }
 
   return confidence;
@@ -322,8 +330,9 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
  * @return the Peak the Peak object created
  */
 DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
-                                   std::string &lastStr, std::ifstream &in,
-                                   int &seqNum, std::string bankName) {
+                                          std::string &lastStr,
+                                          std::ifstream &in, int &seqNum,
+                                          std::string bankName) {
   double h;
   double k;
   double l;
@@ -391,8 +400,8 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   if (!inst)
     throw std::runtime_error("No instrument in PeaksWorkspace!");
 
-  int pixelID = findPixelID(inst, bankName, static_cast<int>(col),
-                              static_cast<int>(row));
+  int pixelID =
+      findPixelID(inst, bankName, static_cast<int>(col), static_cast<int>(row));
 
   // Create the peak object
   Peak peak(outWS->getInstrument(), pixelID, wl);
@@ -446,9 +455,11 @@ int LoadIsawPeaks::findPixelID(Instrument_const_sptr inst, std::string bankName,
 
 //-----------------------------------------------------------------------------------------------
 /** Read the header of each peak block section */
-std::string LoadIsawPeaks::readPeakBlockHeader(std::string lastStr, std::ifstream &in,
-                                int &run, int &detName, double &chi,
-                                double &phi, double &omega, double &monCount) {
+std::string LoadIsawPeaks::readPeakBlockHeader(std::string lastStr,
+                                               std::ifstream &in, int &run,
+                                               int &detName, double &chi,
+                                               double &phi, double &omega,
+                                               double &monCount) {
   std::string s = lastStr;
 
   if (s.length() < 1 && in.good()) // blank line
@@ -615,14 +626,17 @@ void LoadIsawPeaks::checkNumberPeaks(PeaksWorkspace_sptr outWS,
  * work for caching any component without modification.
  *
  * @param bankname :: the name of the requested bank
- * @param inst :: the instrument from which to load the bank if it is not yet cached
- * @return A shared pointer to the request bank (empty shared pointer if not found)
+ * @param inst :: the instrument from which to load the bank if it is not yet
+ *cached
+ * @return A shared pointer to the request bank (empty shared pointer if not
+ *found)
  */
-boost::shared_ptr<const IComponent> LoadIsawPeaks::getCachedBankByName(std::string bankname, const boost::shared_ptr<const Geometry::Instrument>& inst)
-{
-    if (m_banks.count(bankname) == 0)
-        m_banks[bankname] = inst->getComponentByName(bankname);
-    return m_banks[bankname];
+boost::shared_ptr<const IComponent> LoadIsawPeaks::getCachedBankByName(
+    std::string bankname,
+    const boost::shared_ptr<const Geometry::Instrument> &inst) {
+  if (m_banks.count(bankname) == 0)
+    m_banks[bankname] = inst->getComponentByName(bankname);
+  return m_banks[bankname];
 }
 
 } // namespace Mantid
