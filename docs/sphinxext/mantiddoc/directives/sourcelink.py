@@ -87,7 +87,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
             raise SourceLinkError(error_string)
 
         try:
-            self.output_to_page(file_paths,file_name,sanity_checks);
+            self.output_to_page(file_paths,file_name,sanity_checks)
         except SourceLinkError as err:
             error_string += str(err) + "\n"
 

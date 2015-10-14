@@ -1,4 +1,4 @@
-from base import BaseDirective
+from mantiddoc.directives.base import BaseDirective
 from sphinx.locale import _
 import os, string, subprocess
 
