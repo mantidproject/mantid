@@ -78,8 +78,8 @@ void export_leaf_classes() {
            "Initialize the algorithm from a string representation")
       .staticmethod("fromString")
       .def("createChildAlgorithm", &Algorithm::createChildAlgorithm,
-           (arg("self"), arg("name"), arg("startProgress"), arg("endProgress"),
-            arg("enableLogging"), arg("version")),
+           (arg("self"), arg("name"), arg("startProgress") = -1.0, arg("endProgress") = -1.0,
+            arg("enableLogging") = true, arg("version") = -1),
            "Creates and intializes a named child algorithm. Output workspaces "
            "are given a dummy name.")
       .def("declareProperty",
