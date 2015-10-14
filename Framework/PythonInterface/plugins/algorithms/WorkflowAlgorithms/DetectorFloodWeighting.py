@@ -24,7 +24,7 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
                                                      direction=Direction.Input, validator=WorkspaceUnitValidator("Wavelength")),
                                                      doc='Flood weighting measurement')
         self.declareProperty(MatrixWorkspaceProperty('TransmissionWorkspace', '',
-                                                     direction=Direction.Input, optional=PropertyMode.Optional, 
+                                                     direction=Direction.Input, optional=PropertyMode.Optional,
                                                      validator=WorkspaceUnitValidator("Wavelength")),
                                                      doc='Flood weighting measurement')
 
@@ -86,14 +86,14 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
         divide.setProperty("RHSWorkspace", rhs)
         divide.execute()
         return divide.getProperty("OutputWorkspace").value
-    
+        
     def _add(self, lhs, rhs):
         divide = self.createChildAlgorithm("Plus")
         divide.setProperty("LHSWorkspace", lhs)
         divide.setProperty("RHSWorkspace", rhs)
         divide.execute()
         return divide.getProperty("OutputWorkspace").value
-    
+        
     def _integrate_bands(self, bands, in_ws):
         # Formulate bands, integrate and sum
         accumulated_output = None
@@ -101,7 +101,6 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
             lower = bands[i]
             upper = bands[i+1]
             step = upper - lower
-            
             rebin = self.createChildAlgorithm("Rebin")
             rebin.setProperty("Params", [lower, step, upper])
             rebin.setProperty("InputWorkspace", in_ws) # Always integrating the same input workspace
@@ -126,7 +125,6 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
         accumulated_output = self._integrate_bands(bands, in_ws)
         if trans_ws:
             accumulated_trans_output = self._integrate_bands(bands, trans_ws)
-        
         progress.report()
 
         # Perform solid angle correction. Calculate solid angle then divide through.
@@ -138,7 +136,6 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
             solid_angle_weighting = solidAngle.getProperty("OutputWorkspace").value
             normalized = self._divide(normalized, solid_angle_weighting)
         progress.report()
-        
         # Divide through by the transmission workspace provided
         if trans_ws:
             normalized = self._divide(normalized, accumulated_trans_output)
