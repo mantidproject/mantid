@@ -3,10 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAlgorithms/RemoveExpDecay.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
 const std::string outputName = "MuonRemoveExpDecay_Output";
@@ -21,51 +20,54 @@ public:
   RemoveExpDecayTest() { FrameworkManager::Instance(); }
 
   void testInit() {
-    MuonRemoveExpDecay alg;
-    alg.initialize();
-    TS_ASSERT(alg.isInitialized())
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RemoveExpDecay");
+    alg->initialize();
+    TS_ASSERT(alg->isInitialized())
   }
 
   void testExecute() {
     auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
 
-    MuonRemoveExpDecay alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT(alg.isInitialized());
-    alg.setChild(true);
-    alg.setProperty("InputWorkspace", ws);
-    alg.setPropertyValue("OutputWorkspace", outputName);
-    alg.setPropertyValue("Spectra", "0");
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(alg.isExecuted())
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RemoveExpDecay");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setPropertyValue("OutputWorkspace", outputName);
+    alg->setPropertyValue("Spectra", "0");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
   }
 
   void testExecuteWhereSepctraNotSet() {
     auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
 
-    MuonRemoveExpDecay alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT(alg.isInitialized());
-    alg.setChild(true);
-    alg.setProperty("InputWorkspace", ws);
-    alg.setPropertyValue("OutputWorkspace", outputName);
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(alg.isExecuted())
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RemoveExpDecay");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setPropertyValue("OutputWorkspace", outputName);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted())
+
+    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
   }
 
   void test_yUnitLabel() {
     auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
 
-    MuonRemoveExpDecay alg;
-    alg.initialize();
-    alg.setChild(true);
-    alg.setProperty("InputWorkspace", ws);
-    alg.setProperty("OutputWorkspace", outputName);
-    alg.execute();
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RemoveExpDecay");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setPropertyValue("OutputWorkspace", outputName);
+    alg->execute();
 
-    MatrixWorkspace_sptr result = alg.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr result = alg->getProperty("OutputWorkspace");
     TS_ASSERT(result);
     TS_ASSERT_EQUALS(result->YUnitLabel(), "Asymmetry");
+
   }
 };
 
