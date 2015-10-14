@@ -400,10 +400,12 @@ void export_ialgorithm() {
            arg("self"),
            "Runs the algorithm and returns whether it has been successful")
       // 'Private' static methods
-      .def("_algorithmInThread", &_algorithmInThread)
+      .def("_algorithmInThread", &_algorithmInThread,
+           arg("thread_id"))
       .staticmethod("_algorithmInThread")
       // Special methods
-      .def("__str__", &IAlgorithm::toString)
+      .def("__str__", &IAlgorithm::toString,
+           arg("self"))
 
       // deprecated methods
       .def("getOptionalMessage", &getOptionalMessage,

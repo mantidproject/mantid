@@ -78,8 +78,8 @@ void export_leaf_classes() {
            "Initialize the algorithm from a string representation")
       .staticmethod("fromString")
       .def("createChildAlgorithm", &Algorithm::createChildAlgorithm,
-           (arg("name"), arg("startProgress") = -1.0, arg("endProgress") = -1.0,
-            arg("enableLogging") = true, arg("version") = -1),
+           (arg("self"), arg("name"), arg("startProgress"), arg("endProgress"),
+            arg("enableLogging"), arg("version")),
            "Creates and intializes a named child algorithm. Output workspaces "
            "are given a dummy name.")
       .def("declareProperty",
@@ -87,7 +87,7 @@ void export_leaf_classes() {
            declarePropertyType1_Overload(
                (arg("self"), arg("prop"), arg("doc") = "")))
       .def("enableHistoryRecordingForChild",
-           &Algorithm::enableHistoryRecordingForChild, (args("on")),
+           &Algorithm::enableHistoryRecordingForChild, (arg("self"), arg("on")),
            "Turns history recording on or off for an algorithm.")
       .def("declareProperty",
            (declarePropertyType2)&PythonAlgorithm::declarePyAlgProperty,

@@ -93,10 +93,14 @@ void export_IFunction() {
            (arg("self"), arg("name")), "Get the value of the named parameter")
 
       .def("setParameter", (setParameterType1)&IFunction::setParameter,
-           setParameterType1_Overloads("Sets the value of the ith parameter"))
+           setParameterType1_Overloads(
+             (arg("self"), arg("i"), arg("value"), arg("explicitlySet")),
+             "Sets the value of the ith parameter"))
 
       .def("setParameter", (setParameterType2)&IFunction::setParameter,
-           setParameterType2_Overloads("Sets the value of the named parameter"))
+           setParameterType2_Overloads(
+             (arg("self"), arg("name"), arg("value"), arg("explicitlySet")),
+             "Sets the value of the named parameter"))
 
       .def("declareAttribute", &IFunctionAdapter::declareAttribute,
            (arg("self"), arg("name"), arg("default_value")),

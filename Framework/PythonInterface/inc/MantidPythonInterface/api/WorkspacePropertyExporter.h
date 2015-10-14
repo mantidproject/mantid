@@ -137,7 +137,7 @@ template <typename WorkspaceType> struct WorkspacePropertyExporter {
         .def("__init__",
              make_constructor(
                  &createPropertyWithValidator, default_call_policies(),
-                 args("name", "defaultValue", "direction", "validator")))
+                 (arg("name"), arg("defaultValue"), arg("direction"), arg("validator"))))
         .def("__init__",
              make_constructor(&createPropertyWithOptionalFlag,
                               default_call_policies(),
@@ -149,6 +149,7 @@ template <typename WorkspaceType> struct WorkspacePropertyExporter {
                               args("name", "defaultValue", "direction",
                                    "optional", "locking", "validator")))
         .def("isOptional", &TypedWorkspaceProperty::isOptional,
+             arg("self"),
              "Returns true if the property has been marked as optional")
 
         .add_property("value", &value);

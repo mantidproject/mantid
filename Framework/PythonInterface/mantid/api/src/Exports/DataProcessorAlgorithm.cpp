@@ -70,6 +70,7 @@ void export_DataProcessorAlgorithm() {
 
       .def("getProcessProperties",
            &DataProcessorAdapter::getProcessPropertiesProxy,
+           (arg("self"), arg("property_manager")),
            "Returns the named property manager from the service or creates "
            "a new one if it does not exist")
 

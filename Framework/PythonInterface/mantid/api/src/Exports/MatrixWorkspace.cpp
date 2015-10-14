@@ -172,7 +172,8 @@ void export_MatrixWorkspace() {
            (arg("self"), arg("workspaceIndex")), return_internal_reference<>(),
            "Return the spectra at the given workspace index.")
       .def("getIndexFromSpectrumNumber",
-           &MatrixWorkspace::getIndexFromSpectrumNumber, arg("self"),
+           &MatrixWorkspace::getIndexFromSpectrumNumber,
+           (arg("self"), arg("spec_no")),
            "Returns workspace index correspondent to the given spectrum "
            "number. Throws if no such spectrum is present in the workspace")
       .def("getDetector", &MatrixWorkspace::getDetector,

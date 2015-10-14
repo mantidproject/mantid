@@ -90,9 +90,10 @@ void export_Axis() {
            arg("self"), return_value_policy<copy_const_reference>(),
            "Returns the unit object for the axis")
       .def("getValue", &Axis::getValue,
-           Axis_getValue(args("index", "vertical_index"),
-                         "Returns the value at the given point on the Axis. "
-                         "The vertical axis index [default=0]"))
+           Axis_getValue(
+             (arg("self"), arg("index"), arg("vertical_index")),
+             "Returns the value at the given point on the Axis. "
+             "The vertical axis index [default=0]"))
       .def("extractValues", &extractAxisValues, arg("self"),
            "Return a numpy array of the axis values")
       .def("setUnit", &Axis::setUnit, (arg("self"), arg("unit_name")),
@@ -126,7 +127,9 @@ void export_NumericAxis() {
   /// Exported so that Boost.Python can give back a NumericAxis class when an
   /// Axis* is returned
   class_<NumericAxis, bases<Axis>, boost::noncopyable>("NumericAxis", no_init)
-      .def("create", &createNumericAxis, return_internal_reference<>(),
+      .def("create", &createNumericAxis,
+           arg("length"),
+           return_internal_reference<>(),
            "Creates a new NumericAxis of a specified length")
       .staticmethod("create");
 }
@@ -149,7 +152,9 @@ void export_BinEdgeAxis() {
   /// Axis* is returned
   class_<BinEdgeAxis, bases<NumericAxis>, boost::noncopyable>("BinEdgeAxis",
                                                               no_init)
-      .def("create", &createBinEdgeAxis, return_internal_reference<>(),
+      .def("create", &createBinEdgeAxis,
+           arg("length"),
+           return_internal_reference<>(),
            "Creates a new BinEdgeAxis of a specified length")
       .staticmethod("create");
 }
