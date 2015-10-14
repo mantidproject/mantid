@@ -86,14 +86,14 @@ def custominterface_screenshot(name, directory, ext = ".png", widget_name = None
     dlg = threadsafe_call(iface_mgr.createSubWindow, name, None)
 
     if dlg is None:
-      raise RuntimeError("Interface '%s' could not be created" % name)
+        raise RuntimeError("Interface '%s' could not be created" % name)
 
     if widget_name:
-      widget = dlg.findChild(QWidget, widget_name)
-      if widget is None:
-        raise RuntimeError("Widget '%s' does not exist in interface '%s'" % (widget_name, name))
-      picture = Screenshot(widget, name.replace(' ','_') + "_" + widget_name + "_widget" + ext, directory)
+        widget = dlg.findChild(QWidget, widget_name)
+        if widget is None:
+            raise RuntimeError("Widget '%s' does not exist in interface '%s'" % (widget_name, name))
+        picture = Screenshot(widget, name.replace(' ','_') + "_" + widget_name + "_widget" + ext, directory)
     else:
-      picture = Screenshot(dlg, name.replace(' ','_') + "_interface" + ext, directory)
+        picture = Screenshot(dlg, name.replace(' ','_') + "_interface" + ext, directory)
     threadsafe_call(dlg.close)
     return picture

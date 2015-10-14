@@ -6,7 +6,7 @@
     creates "index" pages that lists the contents of each category. The display of each
     "index" page is controlled by a jinja2 template.
 """
-from base import AlgorithmBaseDirective, algorithm_name_and_version
+from mantiddoc.directives.base import AlgorithmBaseDirective, algorithm_name_and_version
 from sphinx.util.osutil import relative_uri
 import os
 
