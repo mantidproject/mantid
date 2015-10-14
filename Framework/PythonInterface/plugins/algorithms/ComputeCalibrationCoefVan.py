@@ -7,7 +7,6 @@ import scipy as sp
 import mlzutils
 
 
-# Test for keyword Vanadium or vanadium in Title - compulsory entries
 class ComputeCalibrationCoefVan(PythonAlgorithm):
     """ Calculate coefficients to normalize by Vanadium and correct Debye Waller factor
     """
@@ -107,7 +106,6 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
                 fwhm = sigma*2.*np.sqrt(2.*np.log(2.))
                 idxmin = (np.fabs(dataX-peak_centre+3.*fwhm)).argmin()
                 idxmax = (np.fabs(dataX-peak_centre-3.*fwhm)).argmin()
-                self.log().debug("Sigma=%f, centre=%f, fwhm=%f, idxmin=%d, idxmax=%d" % (sigma, peak_centre, fwhm, idxmin, idxmax))
                 coefY[idx] = dwf[idx]*sum(dataY[idxmin:idxmax+1])
                 coefE[idx] = dwf[idx]*sum(dataE[idxmin:idxmax+1])
             else:
