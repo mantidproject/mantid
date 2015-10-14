@@ -246,6 +246,16 @@ makeMDEW(size_t splitInto, coord_t min, coord_t max,
   return makeAnyMDEW<MDLeanEvent<nd>, nd>(splitInto, min, max, numEventsPerBox);
 }
 
+/** Make a MDEventWorkspace with MDLeanEvents nad MDFrames*/
+template <size_t nd>
+boost::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>, nd>>
+makeMDEWWithFrames(size_t splitInto, coord_t min, coord_t max,
+                   const Mantid::Geometry::MDFrame &frame,
+                   size_t numEventsPerBox = 0) {
+  return makeAnyMDEWWithFrames<MDLeanEvent<nd>, nd>(splitInto, min, max, frame,
+                                                    numEventsPerBox);
+}
+
 /** Make a MDEventWorkspace with MDEvents  - updated to split dims by splitInto,
  * not 10 */
 template <size_t nd>

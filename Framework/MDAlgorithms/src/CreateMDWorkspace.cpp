@@ -66,7 +66,10 @@ void CreateMDWorkspace::init() {
       " **General Frame**: Any frame which is not a Q-based frame."
       " **QLab**: Wave-vector converted into the lab frame."
       " **QSample**: Wave-vector converted into the frame of the sample."
-      " **HKL**: Wave-vector converted into the crystal's HKL indices.");
+      " **HKL**: Wave-vector converted into the crystal's HKL indices."
+      " Note if nothing is specified then the **General Frame** is being "
+      "selected. Also note that if you select a frame then this might override "
+      "your unit selection if it is not compatible with the frame.");
   // Set the box controller properties
   this->initBoxControllerProps("5", 1000, 5);
 

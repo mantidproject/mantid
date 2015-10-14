@@ -63,7 +63,14 @@ private:
     std::vector<double> errorValues(totalBins, errorValue);
     mdworkspaceAlg->setProperty("ErrorInput", errorValues);
     mdworkspaceAlg->setPropertyValue("Names", "H,K,L");
-    mdworkspaceAlg->setPropertyValue("Units", "-,-,-");
+    std::string units = Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
+                        Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
+                        Mantid::Kernel::Units::Symbol::RLU.ascii();
+    std::string frames = Mantid::Geometry::HKL::HKLName + "," +
+                         Mantid::Geometry::HKL::HKLName + "," +
+                         Mantid::Geometry::HKL::HKLName;
+    TS_ASSERT_THROWS_NOTHING(mdworkspaceAlg->setProperty("Frames", frames));
+    TS_ASSERT_THROWS_NOTHING(mdworkspaceAlg->setProperty("Units", units));
     mdworkspaceAlg->setPropertyValue("OutputWorkspace",
                                      "IntegratePeaksMDTest_MDEWS");
     mdworkspaceAlg->execute();
