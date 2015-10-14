@@ -110,7 +110,7 @@ namespace Mantid
         IMDDimension_const_sptr inDim = eventWs->getDimension(d);
         axisLabels.push_back(makeAxisTitle(inDim));
         //Copy the dimension, but set the ID and name to be the same. This is an assumption in bintohistoworkspace.
-        MDHistoDimension_sptr dim(new MDHistoDimension(inDim->getName(), inDim->getName(), inDim->getUnits(), inDim->getMinimum(), inDim->getMaximum(), size_t(10)));
+        MDHistoDimension_sptr dim(new MDHistoDimension(inDim->getName(), inDim->getName(), inDim->getMDFrame(), inDim->getMinimum(), inDim->getMaximum(), size_t(10)));
         dimensions.push_back(dim);
       }
 

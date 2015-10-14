@@ -138,8 +138,10 @@ public:
     using MantidQt::API::PlotAxis;
     using Mantid::Geometry::MDHistoDimension;
     using Mantid::Kernel::UnitLabel;
-
-      MDHistoDimension dim("tof", "dimx", UnitLabel("us",L"\u03bcs","\\mu s"), 0.0f, 1.0f, 10);
+    Mantid::Geometry::GeneralFrame frame(
+        Mantid::Geometry::GeneralFrame::GeneralFrameTOF,
+        UnitLabel("us", L"\u03bcs", "\\mu s"));
+    MDHistoDimension dim("tof", "dimx", frame, 0.0f, 1.0f, 10);
     QString expected = QString::fromWCharArray(L"tof (\u03bcs)");
     TS_ASSERT_EQUALS(expected, PlotAxis(dim).title());
   }
