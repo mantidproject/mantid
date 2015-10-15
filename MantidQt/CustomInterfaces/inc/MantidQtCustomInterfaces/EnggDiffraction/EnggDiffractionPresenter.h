@@ -11,6 +11,8 @@
 
 #include <boost/scoped_ptr.hpp>
 
+#include <Poco/Path.h>
+
 #include <QObject>
 
 class QThread;
@@ -179,12 +181,19 @@ private:
   // plots workspace according to the user selection
   void plotFocusedWorkspace(std::string outWSName, std::string bank);
 
-  // Algorithms to save the generated workspace
+  // algorithms to save the generated workspace
   void saveGSS(std::string inputWorkspace, std::string bank, std::string runNo);
   void saveFocusedXYE(std::string inputWorkspace, std::string bank,
                       std::string runNo);
   void saveOpenGenie(std::string inputWorkspace, std::string specNums,
                      std::string bank, std::string runNo);
+
+  // generates the required file name of the output files
+  std::string outFileNameFactory(std::string inputWorkspace, std::string runNo,
+                                 std::string bank, std::string format);
+
+  // generates a directory if not found and handles the path
+  Poco::Path outFilesDir(std::string runNo);
 
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;

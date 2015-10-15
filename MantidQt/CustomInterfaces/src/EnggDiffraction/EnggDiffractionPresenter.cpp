@@ -13,7 +13,6 @@
 #include <boost/lexical_cast.hpp>
 
 #include <Poco/File.h>
-#include <Poco/Path.h>
 
 #include <QThread>
 
@@ -1390,36 +1389,24 @@ void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName,
 void EnggDiffractionPresenter::saveFocusedXYE(const std::string inputWorkspace,
                                               std::string bank,
                                               std::string runNo) {
-  auto alg = Algorithm::fromString("SaveFocusedXYE");
-  std::string fullFilename;
-  if (inputWorkspace.std::string::find("texture") != std::string::npos) {
-    fullFilename = "ENGINX_" + runNo + "_texture_" + bank + ".dat";
-  }
-  if (inputWorkspace.std::string::find("cropped") != std::string::npos) {
-    fullFilename = "ENGINX_" + runNo + "_cropped_" +
-                   boost::lexical_cast<std::string>(g_croppedCounter) + ".dat";
-    g_croppedCounter++;
-  } else {
-    fullFilename = "ENGINX_" + runNo + "_bank_" + bank + ".dat";
-  }
-  std::string saveDir;
-  try {
-    // takes to the root of directory according to the platform
-    // and appends the following string provided
-    saveDir =
-        Poco::Path(saveDir).expand("/EnginX_Mantid/User/" + runNo + "/Focus/");
-    if (!Poco::File(saveDir).exists()) {
-      Poco::File(saveDir).createDirectories();
-    }
-  } catch (std::runtime_error &re) {
-    g_log.error() << "Error while using Poco: " << re.what();
-  }
+
+  // Generates the file name in the appropriate format
+  std::string fullFilename =
+      outFileNameFactory(inputWorkspace, runNo, bank, ".dat");
+
+  // Creates appropriate directory
+  Poco::Path saveDir = outFilesDir(runNo);
+
+  // append the full file name in the end
+  saveDir.append(fullFilename);
+
   try {
     g_log.debug() << "Going to save focused output into OpenGenie file: "
                   << fullFilename << std::endl;
+    auto alg = Algorithm::fromString("SaveFocusedXYE");
     alg->initialize();
     alg->setProperty("InputWorkspace", inputWorkspace);
-    std::string filename(saveDir + fullFilename);
+    std::string filename(saveDir.toString());
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("SplitFiles", false);
     alg->setPropertyValue("StartAtBankNumber", bank);
@@ -1432,7 +1419,7 @@ void EnggDiffractionPresenter::saveFocusedXYE(const std::string inputWorkspace,
             " Please check also the log messages for details.";
     throw;
   }
-  g_log.notice() << "Saved focused workspace as file: " << fullFilename
+  g_log.notice() << "Saved focused workspace as file: " << saveDir.toString()
                  << std::endl;
 }
 
@@ -1446,38 +1433,24 @@ void EnggDiffractionPresenter::saveFocusedXYE(const std::string inputWorkspace,
  */
 void EnggDiffractionPresenter::saveGSS(const std::string inputWorkspace,
                                        std::string bank, std::string runNo) {
-  auto alg = Algorithm::fromString("SaveGSS");
-  std::string fullFilename;
-  if (inputWorkspace.std::string::find("texture") != std::string::npos) {
-    fullFilename = "ENGINX_" + runNo + "_texture_" + bank + ".gss";
-  }
-  if (inputWorkspace.std::string::find("cropped") != std::string::npos) {
-    fullFilename = "ENGINX_" + runNo + "_cropped_" +
-                   boost::lexical_cast<std::string>(g_croppedCounter) + ".gss";
-    g_croppedCounter++;
-  } else {
-    fullFilename = "ENGINX_" + runNo + "_bank_" + bank + ".gss";
-  }
 
-  std::string saveDir;
-  try {
-    // takes to the root of directory according to the platform
-    // and appends the following string provided
-    saveDir =
-        Poco::Path(saveDir).expand("/EnginX_Mantid/User/" + runNo + "/Focus/");
-    if (!Poco::File(saveDir).exists()) {
-      Poco::File(saveDir).createDirectories();
-    }
-  } catch (std::runtime_error &re) {
-    g_log.error() << "Error while using Poco: " << re.what();
-  }
+  // Generates the file name in the appropriate format
+  std::string fullFilename =
+      outFileNameFactory(inputWorkspace, runNo, bank, ".gss");
+
+  // Creates appropriate directory
+  Poco::Path saveDir = outFilesDir(runNo);
+
+  // append the full file name in the end
+  saveDir.append(fullFilename);
 
   try {
     g_log.debug() << "Going to save focused output into OpenGenie file: "
                   << fullFilename << std::endl;
+    auto alg = Algorithm::fromString("SaveGSS");
     alg->initialize();
     alg->setProperty("InputWorkspace", inputWorkspace);
-    std::string filename(saveDir + fullFilename);
+    std::string filename(saveDir.toString());
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("SplitFiles", false);
     alg->setPropertyValue("Bank", bank);
@@ -1490,7 +1463,7 @@ void EnggDiffractionPresenter::saveGSS(const std::string inputWorkspace,
             " Please check also the log messages for details.";
     throw;
   }
-  g_log.notice() << "Saved focused workspace as file: " << fullFilename
+  g_log.notice() << "Saved focused workspace as file: " << saveDir.toString()
                  << std::endl;
 }
 
@@ -1507,39 +1480,24 @@ void EnggDiffractionPresenter::saveOpenGenie(const std::string inputWorkspace,
                                              std::string specNums,
                                              std::string bank,
                                              std::string runNo) {
-  auto alg = Algorithm::fromString("SaveOpenGenieAscii");
-  std::string fullFilename;
-  if (inputWorkspace.std::string::find("texture") != std::string::npos) {
-    fullFilename = "ENGINX_" + runNo + "_texture_" + bank + ".his";
-  }
-  if (inputWorkspace.std::string::find("cropped") != std::string::npos) {
-    fullFilename = "ENGINX_" + runNo + "_cropped_" +
-                   boost::lexical_cast<std::string>(g_croppedCounter) + ".his";
-    g_croppedCounter++;
-  } else {
-    fullFilename = "ENGINX_" + runNo + "_bank_" + bank + ".his";
-  }
 
-  std::string saveDir;
-  try {
-    // takes to the root of directory according to the platform
-    // and appends the following string provided
-    saveDir =
-        Poco::Path(saveDir).expand("/EnginX_Mantid/User/" + runNo + "/Focus/");
+  // Generates the file name in the appropriate format
+  std::string fullFilename =
+      outFileNameFactory(inputWorkspace, runNo, bank, ".his");
 
-    if (!Poco::File(saveDir).exists()) {
-      Poco::File(saveDir).createDirectories();
-    }
-  } catch (std::runtime_error &re) {
-    g_log.error() << "Error while using Poco: " << re.what();
-  }
+  // Creates appropriate directory
+  Poco::Path saveDir = outFilesDir(runNo);
+
+  // append the full file name in the end
+  saveDir.append(fullFilename);
 
   try {
     g_log.debug() << "Going to save focused output into OpenGenie file: "
                   << fullFilename << std::endl;
+    auto alg = Algorithm::fromString("SaveOpenGenieAscii");
     alg->initialize();
     alg->setProperty("InputWorkspace", inputWorkspace);
-    std::string filename(saveDir + fullFilename);
+    std::string filename(saveDir.toString());
     alg->setPropertyValue("Filename", filename);
     alg->setPropertyValue("SpecNumberField", specNums);
     alg->execute();
@@ -1551,8 +1509,66 @@ void EnggDiffractionPresenter::saveOpenGenie(const std::string inputWorkspace,
             " Please check also the log messages for details.";
     throw;
   }
-  g_log.notice() << "Saved focused workspace as file: " << fullFilename
+  g_log.notice() << "Saved focused workspace as file: " << saveDir.toString()
                  << std::endl;
+}
+
+/**
+ * Generates the required file name of the output files
+ *
+ * @param inputWorkspace title of the focused workspace
+ * @param runNo the run number as a string
+ * @param bank the number of the bank as a string
+ * @param format the format of the file to be saved as
+ */
+std::string EnggDiffractionPresenter::outFileNameFactory(
+    std::string inputWorkspace, std::string runNo, std::string bank,
+    std::string format) {
+  std::string fullFilename;
+  if (inputWorkspace.std::string::find("texture") != std::string::npos) {
+    fullFilename = "ENGINX_" + runNo + "_texture_" + bank + format;
+  }
+  if (inputWorkspace.std::string::find("cropped") != std::string::npos) {
+    fullFilename = "ENGINX_" + runNo + "_cropped_" +
+                   boost::lexical_cast<std::string>(g_croppedCounter) + format;
+    g_croppedCounter++;
+  } else {
+    fullFilename = "ENGINX_" + runNo + "_bank_" + bank + format;
+  }
+  return fullFilename;
+}
+
+/**
+ * Generates a directory if not found and handles the path
+ *
+ * @param runNo the run number as a string
+ */
+Poco::Path EnggDiffractionPresenter::outFilesDir(std::string runNo) {
+  Poco::Path saveDir;
+  try {
+
+// takes to the root of directory according to the platform
+// and appends the following string provided
+#ifdef __unix__
+    saveDir = Poco::Path().home();
+    saveDir.append("EnginX_Mantid");
+    saveDir.append("User");
+    saveDir.append(runNo);
+    saveDir.append("Focus");
+#else
+    // else or for windows run this
+    saveDir = (saveDir).expand("C:/EnginX_Mantid/User/" + runNo + "/Focus/");
+#endif
+
+    if (!Poco::File(saveDir.toString()).exists()) {
+      Poco::File(saveDir.toString()).createDirectories();
+    }
+  } catch (Poco::FileAccessDeniedException &e) {
+    g_log.error() << "error caused by file access/permission: " << e.what();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Error while find/creating a path: " << re.what();
+  }
+  return saveDir;
 }
 
 } // namespace CustomInterfaces

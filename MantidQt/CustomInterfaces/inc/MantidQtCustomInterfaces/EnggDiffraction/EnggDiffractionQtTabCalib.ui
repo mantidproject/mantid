@@ -171,7 +171,7 @@
         <item row="0" column="1" colspan="2">
          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="lineEdit_new_vanadium_num" native="true">
           <property name="text" stdset="0">
-           <string>241391</string>
+           <string>236516</string>
           </property>
           <property name="label" stdset="0">
            <string>Vanadium #:</string>
