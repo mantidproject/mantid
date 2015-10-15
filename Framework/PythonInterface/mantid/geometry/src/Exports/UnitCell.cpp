@@ -38,103 +38,129 @@ void export_UnitCell() {
       return_readonly_numpy;
 
   class_<UnitCell>("UnitCell", init<>())
-      .def(init<UnitCell const &>(arg("other")))
-      .def(init<double, double, double>((arg("_a"), arg("_b"), arg("_c"))))
+      .def(init<UnitCell const &>((arg("self"), arg("other"))))
+      .def(init<double, double, double>(
+          (arg("self"), arg("_a"), arg("_b"), arg("_c"))))
       .def(init<double, double, double, double, double, double, optional<int>>(
-          (arg("_a"), arg("_b"), arg("_c"), arg("_alpha"), arg("_beta"),
-           arg("_gamma"), arg("Unit") = (int)(angDegrees))))
-      .def("a", (double (UnitCell::*)() const) & UnitCell::a)
-      .def("a1", (double (UnitCell::*)() const) & UnitCell::a1)
-      .def("a2", (double (UnitCell::*)() const) & UnitCell::a2)
-      .def("a3", (double (UnitCell::*)() const) & UnitCell::a3)
-      .def("alpha", (double (UnitCell::*)() const) & UnitCell::alpha)
-      .def("alpha1", (double (UnitCell::*)() const) & UnitCell::alpha1)
-      .def("alpha2", (double (UnitCell::*)() const) & UnitCell::alpha2)
-      .def("alpha3", (double (UnitCell::*)() const) & UnitCell::alpha3)
-      .def("alphastar", (double (UnitCell::*)() const) & UnitCell::alphastar)
-      .def("astar", (double (UnitCell::*)() const) & UnitCell::astar)
-      .def("b", (double (UnitCell::*)() const) & UnitCell::b)
-      .def("b1", (double (UnitCell::*)() const) & UnitCell::b1)
-      .def("b2", (double (UnitCell::*)() const) & UnitCell::b2)
-      .def("b3", (double (UnitCell::*)() const) & UnitCell::b3)
-      .def("beta", (double (UnitCell::*)() const) & UnitCell::beta)
-      .def("beta1", (double (UnitCell::*)() const) & UnitCell::beta1)
-      .def("beta2", (double (UnitCell::*)() const) & UnitCell::beta2)
-      .def("beta3", (double (UnitCell::*)() const) & UnitCell::beta3)
-      .def("betastar", (double (UnitCell::*)() const) & UnitCell::betastar)
-      .def("bstar", (double (UnitCell::*)() const) & UnitCell::bstar)
-      .def("c", (double (UnitCell::*)() const) & UnitCell::c)
-      .def("cstar", (double (UnitCell::*)() const) & UnitCell::cstar)
+          (arg("self"), arg("_a"), arg("_b"), arg("_c"), arg("_alpha"),
+           arg("_beta"), arg("_gamma"), arg("Unit") = (int)(angDegrees))))
+      .def("a", (double (UnitCell::*)() const) & UnitCell::a, arg("self"))
+      .def("a1", (double (UnitCell::*)() const) & UnitCell::a1, arg("self"))
+      .def("a2", (double (UnitCell::*)() const) & UnitCell::a2, arg("self"))
+      .def("a3", (double (UnitCell::*)() const) & UnitCell::a3, arg("self"))
+      .def("alpha", (double (UnitCell::*)() const) & UnitCell::alpha,
+           arg("self"))
+      .def("alpha1", (double (UnitCell::*)() const) & UnitCell::alpha1,
+           arg("self"))
+      .def("alpha2", (double (UnitCell::*)() const) & UnitCell::alpha2,
+           arg("self"))
+      .def("alpha3", (double (UnitCell::*)() const) & UnitCell::alpha3,
+           arg("self"))
+      .def("alphastar", (double (UnitCell::*)() const) & UnitCell::alphastar,
+           arg("self"))
+      .def("astar", (double (UnitCell::*)() const) & UnitCell::astar,
+           arg("self"))
+      .def("b", (double (UnitCell::*)() const) & UnitCell::b, arg("self"))
+      .def("b1", (double (UnitCell::*)() const) & UnitCell::b1, arg("self"))
+      .def("b2", (double (UnitCell::*)() const) & UnitCell::b2, arg("self"))
+      .def("b3", (double (UnitCell::*)() const) & UnitCell::b3, arg("self"))
+      .def("beta", (double (UnitCell::*)() const) & UnitCell::beta, arg("self"))
+      .def("beta1", (double (UnitCell::*)() const) & UnitCell::beta1,
+           arg("self"))
+      .def("beta2", (double (UnitCell::*)() const) & UnitCell::beta2,
+           arg("self"))
+      .def("beta3", (double (UnitCell::*)() const) & UnitCell::beta3,
+           arg("self"))
+      .def("betastar", (double (UnitCell::*)() const) & UnitCell::betastar,
+           arg("self"))
+      .def("bstar", (double (UnitCell::*)() const) & UnitCell::bstar,
+           arg("self"))
+      .def("c", (double (UnitCell::*)() const) & UnitCell::c, arg("self"))
+      .def("cstar", (double (UnitCell::*)() const) & UnitCell::cstar,
+           arg("self"))
       .def("d",
            (double (UnitCell::*)(double, double, double) const) & UnitCell::d,
-           (arg("h"), arg("k"), arg("l")))
+           (arg("self"), arg("h"), arg("k"), arg("l")))
       .def("d", (double (UnitCell::*)(const V3D &) const) & UnitCell::d,
-           (arg("hkl")))
+           (arg("self"), arg("hkl")))
       .def("dstar", (double (UnitCell::*)(double, double, double) const) &
                         UnitCell::dstar,
-           (arg("h"), arg("k"), arg("l")))
-      .def("errora", (double (UnitCell::*)() const) & UnitCell::errora)
-      .def("errorb", (double (UnitCell::*)() const) & UnitCell::errorb)
-      .def("errorc", (double (UnitCell::*)() const) & UnitCell::errorc)
+           (arg("self"), arg("h"), arg("k"), arg("l")))
+      .def("errora", (double (UnitCell::*)() const) & UnitCell::errora,
+           arg("self"))
+      .def("errorb", (double (UnitCell::*)() const) & UnitCell::errorb,
+           arg("self"))
+      .def("errorc", (double (UnitCell::*)() const) & UnitCell::errorc,
+           arg("self"))
       .def("erroralpha",
            (double (UnitCell::*)(int const) const) & UnitCell::erroralpha,
-           (arg("Unit") = (int)(angDegrees)))
+           (arg("self"), arg("Unit") = (int)(angDegrees)))
       .def("errorbeta",
            (double (UnitCell::*)(int const) const) & UnitCell::errorbeta,
-           (arg("Unit") = (int)(angDegrees)))
+           (arg("self"), arg("Unit") = (int)(angDegrees)))
       .def("errorgamma",
            (double (UnitCell::*)(int const) const) & UnitCell::errorgamma,
-           (arg("Unit") = (int)(angDegrees)))
-      .def("gamma", (double (UnitCell::*)() const) & UnitCell::gamma)
-      .def("gammastar", (double (UnitCell::*)() const) & UnitCell::gammastar)
+           (arg("self"), arg("Unit") = (int)(angDegrees)))
+      .def("gamma", (double (UnitCell::*)() const) & UnitCell::gamma,
+           arg("self"))
+      .def("gammastar", (double (UnitCell::*)() const) & UnitCell::gammastar,
+           arg("self"))
       .def("recAngle", (double (UnitCell::*)(double, double, double, double,
                                              double, double, int const) const) &
                            UnitCell::recAngle,
-           (arg("h1"), arg("k1"), arg("l1"), arg("h2"), arg("k2"), arg("l2"),
-            arg("Unit") = (int)(angDegrees)))
-      .def("recVolume", (double (UnitCell::*)() const) & UnitCell::recVolume)
+           (arg("self"), arg("h1"), arg("k1"), arg("l1"), arg("h2"), arg("k2"),
+            arg("l2"), arg("Unit") = (int)(angDegrees)))
+      .def("recVolume", (double (UnitCell::*)() const) & UnitCell::recVolume,
+           arg("self"))
       .def("set", (void (UnitCell::*)(double, double, double, double, double,
                                       double, int const)) &
                       UnitCell::set,
-           (arg("_a"), arg("_b"), arg("_c"), arg("_alpha"), arg("_beta"),
-            arg("_gamma"), arg("Unit") = (int)(angDegrees)))
-      .def("seta", (void (UnitCell::*)(double))(&UnitCell::seta), (arg("_a")))
+           (arg("self"), arg("_a"), arg("_b"), arg("_c"), arg("_alpha"),
+            arg("_beta"), arg("_gamma"), arg("Unit") = (int)(angDegrees)))
+      .def("seta", (void (UnitCell::*)(double))(&UnitCell::seta),
+           (arg("self"), arg("_a")))
       .def("setalpha",
            (void (UnitCell::*)(double, int const))(&UnitCell::setalpha),
-           (arg("_alpha"), arg("Unit") = (int)(angDegrees)))
-      .def("setb", (void (UnitCell::*)(double))(&UnitCell::setb), (arg("_b")))
+           (arg("self"), arg("_alpha"), arg("Unit") = (int)(angDegrees)))
+      .def("setb", (void (UnitCell::*)(double))(&UnitCell::setb),
+           (arg("self"), arg("_b")))
       .def("setbeta",
            (void (UnitCell::*)(double, int const))(&UnitCell::setbeta),
-           (arg("_beta"), arg("Unit") = (int)(angDegrees)))
-      .def("setc", (void (UnitCell::*)(double))(&UnitCell::setc), (arg("_c")))
+           (arg("self"), arg("_beta"), arg("Unit") = (int)(angDegrees)))
+      .def("setc", (void (UnitCell::*)(double))(&UnitCell::setc),
+           (arg("self"), arg("_c")))
       .def("setgamma",
            (void (UnitCell::*)(double, int const))(&UnitCell::setgamma),
-           (arg("_gamma"), arg("Unit") = (int)(angDegrees)))
+           (arg("self"), arg("_gamma"), arg("Unit") = (int)(angDegrees)))
       .def("setError", (void (UnitCell::*)(double, double, double, double,
                                            double, double, int const)) &
                            UnitCell::setError,
-           (arg("_aerr"), arg("_berr"), arg("_cerr"), arg("_alphaerr"),
-            arg("_betaerr"), arg("_gammaerr"), arg("Unit") = (int)(angDegrees)))
+           (arg("self"), arg("_aerr"), arg("_berr"), arg("_cerr"),
+            arg("_alphaerr"), arg("_betaerr"), arg("_gammaerr"),
+            arg("Unit") = (int)(angDegrees)))
       .def("setErrora", (void (UnitCell::*)(double))(&UnitCell::setErrora),
-           (arg("_aerr")))
+           (arg("self"), arg("_aerr")))
       .def("setErroralpha",
            (void (UnitCell::*)(double, int const))(&UnitCell::setErroralpha),
-           (arg("_alphaerr"), arg("Unit") = (int)(angDegrees)))
+           (arg("self"), arg("_alphaerr"), arg("Unit") = (int)(angDegrees)))
       .def("setErrorb", (void (UnitCell::*)(double))(&UnitCell::setErrorb),
-           (arg("_berr")))
+           (arg("self"), arg("_berr")))
       .def("setErrorbeta",
            (void (UnitCell::*)(double, int const))(&UnitCell::setErrorbeta),
-           (arg("_betaerr"), arg("Unit") = (int)(angDegrees)))
+           (arg("self"), arg("_betaerr"), arg("Unit") = (int)(angDegrees)))
       .def("setErrorc", (void (UnitCell::*)(double))(&UnitCell::setErrorc),
-           (arg("_cerr")))
+           (arg("self"), arg("_cerr")))
       .def("setErrorgamma",
            (void (UnitCell::*)(double, int const))(&UnitCell::setErrorgamma),
-           (arg("_gammaerr"), arg("Unit") = (int)(angDegrees)))
-      .def("volume", (double (UnitCell::*)() const) & UnitCell::volume)
-      .def("getG", &UnitCell::getG, return_readonly_numpy())
-      .def("getGstar", &UnitCell::getGstar, return_readonly_numpy())
-      .def("getB", &UnitCell::getB, return_readonly_numpy())
-      .def("recalculateFromGstar", &recalculateFromGstar);
+           (arg("self"), arg("_gammaerr"), arg("Unit") = (int)(angDegrees)))
+      .def("volume", (double (UnitCell::*)() const) & UnitCell::volume,
+           arg("self"))
+      .def("getG", &UnitCell::getG, arg("self"), return_readonly_numpy())
+      .def("getGstar", &UnitCell::getGstar, arg("self"),
+           return_readonly_numpy())
+      .def("getB", &UnitCell::getB, arg("self"), return_readonly_numpy())
+      .def("recalculateFromGstar", &recalculateFromGstar,
+           (arg("self"), arg("NewGstar")));
 
   scope().attr("deg2rad") = Mantid::Geometry::deg2rad;
   scope().attr("rad2deg") = Mantid::Geometry::rad2deg;

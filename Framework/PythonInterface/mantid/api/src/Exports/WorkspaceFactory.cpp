@@ -40,10 +40,18 @@ Workspace_sptr createFromParentPtr(WorkspaceFactoryImpl &self,
 }
 
 /// Overload generator for create
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
 BOOST_PYTHON_FUNCTION_OVERLOADS(createFromParent_Overload, createFromParentPtr,
                                 2, 5)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createTable_Overload, createTable, 0, 1)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createPeaks_Overload, createPeaks, 0, 1)
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 }
 
 void export_WorkspaceFactory() {

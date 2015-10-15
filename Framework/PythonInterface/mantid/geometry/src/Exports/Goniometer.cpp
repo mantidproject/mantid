@@ -13,9 +13,17 @@ using namespace boost::python;
 namespace //<unnamed>
     {
 ///@cond
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
 // define overloaded functions
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getEulerAngles_overloads,
                                        Goniometer::getEulerAngles, 0, 1)
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 ///@endcond
 
 /// Set the U vector via a numpy array
@@ -37,6 +45,6 @@ void export_Goniometer() {
            getEulerAngles_overloads(args("self", "convention"),
                                     "Default convention is \'YZX\'. Universal "
                                     "goniometer is \'YZY\'"))
-      .def("getR", &Goniometer::getR, return_readonly_numpy())
-      .def("setR", &setR);
+      .def("getR", &Goniometer::getR, arg("self"), return_readonly_numpy())
+      .def("setR", &setR, (arg("self"), arg("rot")));
 }

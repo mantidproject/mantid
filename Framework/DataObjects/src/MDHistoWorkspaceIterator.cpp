@@ -199,8 +199,17 @@ void MDHistoWorkspaceIterator::init(
     for (size_t d = 0; d < m_nd; d++)
       m_center[d] = m_origin[d] + 0.5f * m_binWidth[d];
     // Skip on if the first point is NOT contained
-    if (!m_function->isPointContained(m_center))
-      next();
+    if (!m_function->isPointContained(m_center)) {
+      bool didNext = next();
+      if (!didNext && this->valid()) {
+        throw std::runtime_error(
+            "Inconsistency found initializing "
+            "MDHistoWorkspace iterator: this iterator should be valid, but "
+            "when tried to skip the "
+            "first point (not contained) could not iterate to "
+            "next point.");
+      }
+    }
   }
 
   // --- Calculate index permutations for neighbour finding face touching ---
@@ -293,9 +302,11 @@ bool MDHistoWorkspaceIterator::valid() const { return (m_pos < m_max); }
 /// @return true if you can continue iterating
 bool MDHistoWorkspaceIterator::next() {
   if (m_function) {
+    bool allIncremented = false;
     do {
       m_pos++;
-      Utils::NestedForLoop::Increment(m_nd, m_index, m_indexMax);
+      allIncremented =
+          Utils::NestedForLoop::Increment(m_nd, m_index, m_indexMax);
       // Calculate the center
       for (size_t d = 0; d < m_nd; d++) {
         m_center[d] =
@@ -304,7 +315,8 @@ bool MDHistoWorkspaceIterator::next() {
       }
       //        std::cout<<std::endl;
       // Keep incrementing until you are in the implicit function
-    } while (!m_function->isPointContained(m_center) && m_pos < m_max);
+    } while (!allIncremented && !m_function->isPointContained(m_center) &&
+             m_pos < m_max);
   } else {
     ++m_pos;
   }

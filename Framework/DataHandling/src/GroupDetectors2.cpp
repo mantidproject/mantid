@@ -804,6 +804,10 @@ void GroupDetectors2::readFile(spec2index_map &specs2index, std::istream &File,
       numberOfSpectra = readInt(thisLine);
     } while (numberOfSpectra == EMPTY_LINE);
 
+    if (numberOfSpectra <= 0) {
+      throw std::invalid_argument("The number of spectra is zero or negative");
+    }
+
     // the value of this map is the list of spectra numbers that will be
     // combined into a group
     m_GroupSpecInds[spectrumNo].reserve(numberOfSpectra);

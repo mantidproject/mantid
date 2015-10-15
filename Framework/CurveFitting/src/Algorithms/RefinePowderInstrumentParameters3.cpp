@@ -870,8 +870,15 @@ double RefinePowderInstrumentParameters3::calculateFunctionError(
   // 2. Fit with zero iteration
   double chi2;
   string fitstatus;
-  doFitFunction(function, dataws, wsindex, "Levenberg-MarquardtMD", 0, chi2,
-                fitstatus);
+  const std::string minimizer = "Levenberg-MarquardtMD";
+  bool fitOK =
+      doFitFunction(function, dataws, wsindex, minimizer, 0, chi2, fitstatus);
+
+  if (!fitOK) {
+    g_log.warning() << "Fit by " << minimizer
+                    << " with 0 iterations failed, with reason: " << fitstatus
+                    << "\n";
+  }
 
   // 3. Restore the fit/fix setup
   for (size_t i = 0; i < parnames.size(); ++i) {
