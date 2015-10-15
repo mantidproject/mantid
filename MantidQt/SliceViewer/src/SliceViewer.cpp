@@ -998,10 +998,8 @@ void SliceViewer::setRebinNumBins(int xBins, int yBins) {
  * See setRebinThickness() to adjust the thickness in other dimensions.
  *
  * @param mode :: true for rebinning mode
- * @param locked :: if true, then the rebinned area is only refreshed manually
- *        or when changing rebinning parameters.
  */
-void SliceViewer::setRebinMode(bool mode, bool locked) {
+void SliceViewer::setRebinMode(bool mode) {
   // The events associated with these controls will trigger a re-draw
   m_syncRebinMode->toggle(mode);
 }

@@ -117,7 +117,7 @@ public:
   /// Dynamic Rebinning-related Python bindings
   void setRebinThickness(int dim, double thickness);
   void setRebinNumBins(int xBins, int yBins);
-  void setRebinMode(bool mode, bool locked);
+  void setRebinMode(bool mode);
   void refreshRebin();
 
   /// Methods relating to peaks overlays.
