@@ -648,14 +648,14 @@ void Union::getBoundingBox(double &xmax, double &ymax, double &zmax,
 //---------------------------------------------------------------
 
 SurfPoint::SurfPoint()
-    : Rule(), key(0), keyN(0), sign(1)
+    : Rule(), key(0), keyN(0)
 /**
   Constructor with null key/number
 */
 {}
 
 SurfPoint::SurfPoint(const SurfPoint &A)
-    : Rule(), key(A.key->clone()), keyN(A.keyN), sign(A.sign)
+    : Rule(), key(A.key->clone()), keyN(A.keyN)
 /**
   Copy constructor
   @param A :: SurfPoint to copy
@@ -682,7 +682,6 @@ SurfPoint &SurfPoint::operator=(const SurfPoint &A)
     delete key;
     key = A.key->clone();
     keyN = A.keyN;
-    sign = A.sign;
   }
   return *this;
 }
@@ -752,8 +751,9 @@ void SurfPoint::setKeyN(const int Ky)
   @param Ky :: key value (+/- is used for sign)
 */
 {
-  sign = (Ky < 0) ? -1 : 1;
+  int sign = (Ky < 0) ? -1 : 1;
   keyN = sign * Ky;
+  key->setSign(sign);
   return;
 }
 
@@ -789,7 +789,7 @@ bool SurfPoint::isValid(const Kernel::V3D &Pt) const
 */
 {
   if (key) {
-    return (key->side(Pt) * sign) >= 0;
+    return (key->side(Pt) * key->getSign()) >= 0;
   }
   return false;
 }
@@ -806,7 +806,7 @@ bool SurfPoint::isValid(const std::map<int, int> &MX) const
   if (lx == MX.end())
     return false;
   const int rtype = (lx->second) ? 1 : -1;
-  return (rtype * sign) >= 0 ? true : false;
+  return (rtype * key->getSign()) >= 0 ? true : false;
 }
 
 std::string SurfPoint::display() const
@@ -817,7 +817,7 @@ std::string SurfPoint::display() const
 */
 {
   std::stringstream cx;
-  cx << sign *keyN;
+  cx << key->getSign() * keyN;
   return cx.str();
 }
 
@@ -844,7 +844,7 @@ std::string SurfPoint::displayAddress() const
  */
 void SurfPoint::getBoundingBox(double &xmax, double &ymax, double &zmax,
                                double &xmin, double &ymin, double &zmin) {
-  if (this->sign < 1) // If the object sign is positive then include
+  if (this->key->getSign() < 1) // If the object sign is positive then include
     key->getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
   else { // if the object sign is negative then get the complement
     std::vector<V3D> listOfPoints;

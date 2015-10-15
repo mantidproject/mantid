@@ -227,7 +227,6 @@ class MANTID_GEOMETRY_DLL SurfPoint : public Rule {
 private:
   Surface *key; ///< Actual Surface Base Object
   int keyN;     ///< Key Number (identifer)
-  int sign;     ///< +/- in Object unit
 
 public:
   SurfPoint();
@@ -251,7 +250,7 @@ public:
   void setKey(Surface *);
   bool isValid(const Kernel::V3D &) const;
   bool isValid(const std::map<int, int> &) const;
-  int getSign() const { return sign; } ///< Get Sign
+  int getSign() const { return key->getSign(); } ///< Get Sign
   int getKeyN() const { return keyN; } ///< Get Key
   int simplify();
 

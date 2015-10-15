@@ -144,14 +144,13 @@ TopoDS_Shape OCGeometryGenerator::AnalyzeRule(Intersection *rule) {
 TopoDS_Shape OCGeometryGenerator::AnalyzeRule(Union *rule) {
   TopoDS_Shape left = AnalyzeRule(rule->leaf(0));
   TopoDS_Shape right = AnalyzeRule(rule->leaf(1));
-  // TopoDS_Shape Result=BRepAlgoAPI_Fuse(left,right);
   BRepAlgoAPI_Fuse fuse(left, right);
   return fuse.Shape();
 }
 TopoDS_Shape OCGeometryGenerator::AnalyzeRule(SurfPoint *rule) {
   // Check for individual type of surfaces
   Surface *surf = rule->getKey();
-  TopoDS_Shape Result = CreateShape(surf, rule->getSign());
+  TopoDS_Shape Result = CreateShape(surf);
   if (rule->getSign() > 0 &&
       surf->className() != Surface::DerivedClassName::PLANE)
     Result.Complement();
@@ -200,7 +199,7 @@ TopoDS_Shape OCGeometryGenerator::AnalyzeRule(Rule *rule) {
   }
 }
 
-TopoDS_Shape OCGeometryGenerator::CreateShape(Surface *surf, int orientation) {
+TopoDS_Shape OCGeometryGenerator::CreateShape(Surface *surf) {
   if (surf == NULL)
     return TopoDS_Shape();
   // Check for the type of the surface object
@@ -215,7 +214,7 @@ TopoDS_Shape OCGeometryGenerator::CreateShape(Surface *surf, int orientation) {
     return CreateCylinder(static_cast<Cylinder *>(surf));
     break;
   case Surface::DerivedClassName::PLANE:
-    return CreatePlane(static_cast<Plane *>(surf), orientation);
+    return CreatePlane(static_cast<Plane *>(surf));
     break;
   case Surface::DerivedClassName::TORUS:
     return CreateTorus(static_cast<Torus *>(surf));
@@ -257,8 +256,9 @@ TopoDS_Shape OCGeometryGenerator::CreateCone(Cone *cone) {
       .Shape();
 }
 
-TopoDS_Shape OCGeometryGenerator::CreatePlane(Plane *plane, int orientation) {
+TopoDS_Shape OCGeometryGenerator::CreatePlane(Plane *plane) {
   // Get Plane normal and distance.
+  int orientation = plane->getSign();
   V3D normal = plane->getNormal();
   double norm2 = normal.norm2();
   if (norm2 == 0.0) {
