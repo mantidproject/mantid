@@ -1,7 +1,7 @@
 #pylint: disable=no-init
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
                         WorkspaceGroup, WorkspaceGroupProperty, ITableWorkspaceProperty,
-                        Progress)
+                        Progress, PropertyMode)
 from mantid.kernel import Direction
 from mantid.simpleapi import *
 
@@ -54,8 +54,10 @@ class ResNorm(PythonAlgorithm):
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                                                     direction=Direction.Output),
                              doc='Fitted parameter output')
-        self.declareProperty(ITableWorkspaceProperty('OutputWorkspaceTable', '',
-                                                    direction=Direction.Output),
+
+        self.declareProperty(ITableWorkspaceProperty('OutputWorkspaceTable', '', 
+                                                     optional=PropertyMode.Optional, 
+                                                     direction=Direction.Output),
                              doc='Table workspace of fit parameters')
 
 
@@ -86,11 +88,12 @@ class ResNorm(PythonAlgorithm):
         self._e_max = self.getProperty('EnergyMax').value
         self._create_output = self.getProperty('CreateOutput').value
         self._out_ws = self.getPropertyValue('OutputWorkspace')
-        self._out_ws_table = self.getPropertyValue('OutputWorkspaceTable')
 
 
     def PyExec(self):
         from IndirectCommon import getWSprefix
+        if self._create_output:
+            self._out_ws_table = self.getPropertyValue('OutputWorkspaceTable')
 
         # Process vanadium workspace
         van_ws = ConvertSpectrumAxis(InputWorkspace=self._van_ws,
@@ -136,14 +139,14 @@ class ResNorm(PythonAlgorithm):
         GroupWorkspaces(InputWorkspaces=result_workspaces,
                         OutputWorkspace=self._out_ws)
         self.setProperty('OutputWorkspace', self._out_ws)
-        self.setProperty('OutputWorkspaceTable', fit_params)
 
         DeleteWorkspace(van_ws)
         DeleteWorkspace(padded_res_ws)
         prog_process.report('Deleting workspaces')
-        if not self._create_output:
-            DeleteWorkspace(fit_params)
-        
+
+        if self._create_output:
+            self.setProperty('OutputWorkspaceTable', fit_params)
+
 
     def _process_res_ws(self, num_hist):
         """
