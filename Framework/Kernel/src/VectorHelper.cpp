@@ -559,7 +559,7 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex,
     // between start and end bin and shift of
     // the interpolating function into the center
     // of each bin
-    auto & rBndrs = *binBndrs;
+    auto &rBndrs = *binBndrs;
     // bin0 = binBndrs->operator[](index + 1) - binBndrs->operator[](index);
 
     double binC = 0.5 * (rBndrs[index + 1] + rBndrs[index]);
@@ -570,17 +570,16 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex,
       start = rBndrs[iStart];
     } else {
       iStart = getBinIndex(*binBndrs, start);
-      weight0 = (rBndrs[iStart + 1] - start) /
-          (rBndrs[iStart + 1] - rBndrs[iStart]);
+      weight0 =
+          (rBndrs[iStart + 1] - start) / (rBndrs[iStart + 1] - rBndrs[iStart]);
       iStart++;
     }
     if (end >= rBndrs[endIndex]) {
       iEnd = endIndex; // the signal defined up to i<iEnd
-      end =  rBndrs[endIndex];
+      end = rBndrs[endIndex];
     } else {
       iEnd = getBinIndex(*binBndrs, end);
-      weight1 = (end - rBndrs[iEnd]) /
-                (rBndrs[iEnd + 1] - rBndrs[iEnd]);
+      weight1 = (end - rBndrs[iEnd]) / (rBndrs[iEnd + 1] - rBndrs[iEnd]);
     }
     if (iStart > iEnd) { // start and end get into the same bin
       weight1 = 0;
