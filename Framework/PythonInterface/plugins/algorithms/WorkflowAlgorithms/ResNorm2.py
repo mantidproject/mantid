@@ -109,7 +109,7 @@ class ResNorm(PythonAlgorithm):
         input_str = ''
         for idx in range(num_hist):
             input_str += '%s,i%d;' % (padded_res_ws, idx)
-            prog_namer.report()
+            prog_namer.report('Generating PlotPeak input string')
 
         out_name = getWSprefix(self._res_ws) + 'ResNorm_Fit'
         function = 'name=TabulatedFunction,Workspace=%s,Scaling=1,Shift=0,XScaling=1,ties=(Shift=0)' % self._van_ws
@@ -131,7 +131,7 @@ class ResNorm(PythonAlgorithm):
         prog_process = Progress(self, start=0.94, end=1.0, nreports=3)
         for param_name, output_name in params.items():
             result_workspaces.append(self._process_fit_params(fit_params, param_name, v_values, v_unit, output_name))
-            prog_process.report()
+            prog_process.report('Processing Fit data')
 
         GroupWorkspaces(InputWorkspaces=result_workspaces,
                         OutputWorkspace=self._out_ws)
@@ -140,7 +140,7 @@ class ResNorm(PythonAlgorithm):
 
         DeleteWorkspace(van_ws)
         DeleteWorkspace(padded_res_ws)
-        prog_process.report()
+        prog_process.report('Deleting workspaces')
         if not self._create_output:
             DeleteWorkspace(fit_params)
         
