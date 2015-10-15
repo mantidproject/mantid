@@ -36,6 +36,8 @@ void ContainerSubtraction::run() {
           sampleWsName.toStdString());
   m_originalSampleUnits = sampleWs->getAxis(0)->unit()->unitID();
 
+
+
   // If not in wavelength then do conversion
   if (m_originalSampleUnits != "Wavelength") {
     g_log.information(
@@ -50,6 +52,16 @@ void ContainerSubtraction::run() {
   MatrixWorkspace_sptr canWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           canWsName.toStdString());
+
+  if (m_uiForm.ckShiftCan->isChecked()) {
+    IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
+    scaleX->initialize();
+    scaleX->setProperty("InputWorkspace", canWs);
+    scaleX->setProperty("OutputWorkspace", canWs->getName());
+    scaleX->setProperty("Factor", m_uiForm.spShift->value());
+    scaleX->setProperty("Operation", "Add");
+    scaleX->execute();
+  }
 
   // If not in wavelength then do conversion
   std::string originalCanUnits = canWs->getAxis(0)->unit()->unitID();
