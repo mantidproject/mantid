@@ -117,8 +117,10 @@ private:
                 bool loadAsRectImg = false);
 
   // Reads the data from a single FITS file into a workspace
-  void readDataToImgs(const FITSInfo &fileInfo, API::MantidImage &imageY,
-                      API::MantidImage &imageE, std::vector<char> &buffer);
+  void readDataToImgs(const FITSInfo &fileInfo, double cmpp,
+                      API::MantidImage &imageY, API::MantidImage &imageE,
+                      DataObjects::Workspace2D_sptr ws,
+                      std::vector<char> &buffer);
 
   /// Once loaded, check against standard and limitations of this algorithm
   void headerSanityCheck(const FITSInfo &hdr, const FITSInfo &hdrFirst);

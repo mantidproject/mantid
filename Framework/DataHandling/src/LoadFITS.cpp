@@ -246,7 +246,7 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
   latestWS = makeWorkspace(headers[0], fileNumberInGroup, buffer, imageY,
                            imageE, latestWS, loadAsRectImg);
 
-  std::map<size_t, Workspace2D_sptr> wsOrdered;
+  std::vector<Workspace2D_sptr> wsOrdered(headers.size());
   wsOrdered[0] = latestWS;
 
   if (isInstrOtherThanIMAT(headers[0])) {
@@ -270,7 +270,8 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
     }
   }
 
-  PARALLEL_FOR_NO_WSP_CHECK()
+  // don't feel tempted to parallelize this loop as it is - it uses the same
+  // imageY and imageE buffers for all the workspaces
   for (int64_t i = 1; i < static_cast<int64_t>(headers.size()); ++i) {
     latestWS = makeWorkspace(headers[i], fileNumberInGroup, buffer, imageY,
                              imageE, latestWS, loadAsRectImg);
@@ -278,8 +279,8 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
   }
 
   // Add to group - done here to maintain sequence
-  for (auto it = wsOrdered.begin(); it != wsOrdered.end(); ++it) {
-    wsGroup->addWorkspace(it->second);
+  for (size_t i = 0; i < wsOrdered.size(); ++i) {
+    wsGroup->addWorkspace(wsOrdered[i]);
   }
 
   setProperty("OutputWorkspace", wsGroup);
@@ -303,6 +304,7 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
   for (size_t i = 0; i < paths.size(); ++i) {
     headers[i].extension = "";
     headers[i].filePath = paths[i];
+
     // Get various pieces of information from the file header which are used
     // to
     // create the workspace
@@ -462,6 +464,14 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
 void LoadFITS::parseHeader(FITSInfo &headerInfo) {
   headerInfo.headerSizeMultiplier = 0;
   std::ifstream istr(headerInfo.filePath.c_str(), std::ios::binary);
+  istr.seekg (0, istr.end);
+  if (!istr.tellg() > 0) {
+    throw std::runtime_error(
+        "Found file that is readable but empty (0 bytes size): " +
+        headerInfo.filePath);
+  }
+  istr.seekg(0, istr.beg);
+
   Poco::BinaryReader reader(istr);
 
   // Iterate 80 bytes at a time until header is parsed | 2880 bytes is the
@@ -510,7 +520,10 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
  * with data
  *
  * @param fileInfo information for the current file
- * @param newFileNumber number for the new file when added into ws group
+ *
+ * @param newFileNumber sequence number for the new file when added
+ * into ws group
+ *
  * @param buffer pre-allocated buffer to contain data values
  * @param imageY Object to set the Y data values in
  * @param imageE Object to set the E data values in
@@ -535,10 +548,7 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
 
   std::string baseName = m_baseName + currNumberS;
 
-  // set data
-  readDataToImgs(fileInfo, imageY, imageE, buffer);
-
-  // Create ws
+  // Create workspace
   Workspace2D_sptr ws;
   if (!parent) {
     if (!loadAsRectImg) {
@@ -560,8 +570,6 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
         WorkspaceFactory::Instance().create(parent));
   }
 
-  doFilterNoise(m_noiseThresh, imageY, imageE);
-
   // this pixel scale property is used to set the workspace X values
   double cm_1 = getProperty("Scale");
   // amount of width units (e.g. cm) per pixel
@@ -570,12 +578,14 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
     cmpp /= cm_1;
   cmpp *= static_cast<double>(m_rebin);
 
+  // set data
+  readDataToImgs(fileInfo, cmpp, imageY, imageE, ws, buffer);
+
+  doFilterNoise(m_noiseThresh, imageY, imageE);
+
   // Set in WS
   // Note this can change the sizes of the images and the number of pixels
-  if (1 == m_rebin) {
-    ws->setImageYAndE(imageY, imageE, 0, loadAsRectImg, cmpp,
-                      false /* no parallel load */);
-  } else {
+  if (1 != m_rebin) {
     MantidImage rebinnedY(imageY.size() / m_rebin,
                           std::vector<double>(imageY[0].size() / m_rebin));
     MantidImage rebinnedE(imageE.size() / m_rebin,
@@ -666,14 +676,17 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
  * Reads the data (matrix) from a single FITS file into image objects.
  *
  * @param fileInfo information on the FITS file to load, including its path
+ * @param cmpp centimeters per pixel, to scale/normalize values
  * @param imageY Object to set the Y data values in
  * @param imageE Object to set the E data values in
  * @param buffer pre-allocated buffer to contain data values
  *
  * @throws std::runtime_error if there are file input issues
  */
-void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, MantidImage &imageY,
-                              MantidImage &imageE, std::vector<char> &buffer) {
+  void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, double cmpp,
+                                MantidImage &imageY,
+                              MantidImage &imageE, Workspace2D_sptr ws,
+                              std::vector<char> &buffer) {
   std::string filename = fileInfo.filePath;
   Poco::FileStream file(filename, std::ios::in);
 
@@ -694,19 +707,19 @@ void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, MantidImage &imageY,
   // create pointer of correct data type to void pointer of the buffer:
   uint8_t *buffer8 = reinterpret_cast<uint8_t *>(&buffer[0]);
 
-  std::vector<char> buf(bytespp);
-  char *tmp = &buf.front();
-  size_t start = 0;
-  for (size_t i = 0; i < fileInfo.axisPixelLengths[1]; ++i) {   // width
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (size_t i = 0; i < fileInfo.axisPixelLengths[1]; ++i) { // width
+    Mantid::API::ISpectrum *specRow = ws->getSpectrum(i);
+    double xval = static_cast<double>(i) * cmpp;
+    std::fill(specRow->dataX().begin(), specRow->dataX().end(), xval);
+
     for (size_t j = 0; j < fileInfo.axisPixelLengths[0]; ++j) { // height
-      // If you wanted to PARALLEL_...ize these loops (which doesn't
-      // seem to provide any speed up, you cannot use the
-      // start+=bytespp at the end of this loop. You'd need something
-      // like this:
-      //
-      // size_t start =
-      //   ((i * (bytespp)) * fileInfo.axisPixelLengths[1]) +
-      //  (j * (bytespp));
+
+      size_t start =
+          ((i * (bytespp)) * fileInfo.axisPixelLengths[1]) + (j * (bytespp));
+
+      char tmpbuf;
+      char *tmp = &tmpbuf;
 
       // Reverse byte order of current value
       std::reverse_copy(buffer8 + start, buffer8 + start + bytespp, tmp);
@@ -714,29 +727,26 @@ void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, MantidImage &imageY,
       double val = 0;
       if (fileInfo.bitsPerPixel == 8)
         val = static_cast<double>(*reinterpret_cast<uint8_t *>(tmp));
-      if (fileInfo.bitsPerPixel == 16)
+      else if (fileInfo.bitsPerPixel == 16)
         val = static_cast<double>(*reinterpret_cast<uint16_t *>(tmp));
-      if (fileInfo.bitsPerPixel == 32 && !fileInfo.isFloat)
+      else if (fileInfo.bitsPerPixel == 32 && !fileInfo.isFloat)
         val = static_cast<double>(*reinterpret_cast<uint32_t *>(tmp));
-      if (fileInfo.bitsPerPixel == 64 && !fileInfo.isFloat)
+      else if (fileInfo.bitsPerPixel == 64 && !fileInfo.isFloat)
         val = static_cast<double>(*reinterpret_cast<uint64_t *>(tmp));
 
       // cppcheck doesn't realise that these are safe casts
-      if (fileInfo.bitsPerPixel == 32 && fileInfo.isFloat) {
+      else if (fileInfo.bitsPerPixel == 32 && fileInfo.isFloat) {
         // cppcheck-suppress invalidPointerCast
         val = static_cast<double>(*reinterpret_cast<float *>(tmp));
-      }
-      if (fileInfo.bitsPerPixel == 64 && fileInfo.isFloat) {
+      } else if (fileInfo.bitsPerPixel == 64 && fileInfo.isFloat) {
         // cppcheck-suppress invalidPointerCast
         val = *reinterpret_cast<double *>(tmp);
       }
 
       val = fileInfo.scale * val - fileInfo.offset;
 
-      imageY[i][j] = val;
-      imageE[i][j] = sqrt(val);
-
-      start += bytespp;
+      specRow->dataY()[j] = val;
+      specRow->dataE()[j] = sqrt(val);
     }
   }
 }
@@ -933,7 +943,7 @@ bool LoadFITS::isInstrOtherThanIMAT(FITSInfo &hdr) {
 
 /**
  * Returns the trailing number from a string minus leading 0's (so 25 from
- * workspace_00025)the confidence with with this algorithm can load the file
+ * workspace_00025).
  *
  * @param name string with a numerical suffix
  *
