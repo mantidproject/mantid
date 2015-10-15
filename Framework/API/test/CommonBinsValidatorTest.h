@@ -23,7 +23,7 @@ public:
     TS_ASSERT_EQUALS(validator.isValid(ws), "");
   }
 
-  void xtest_zero_length_bins() {
+  void test_zero_length_bins() {
     auto ws = boost::make_shared<WorkspaceTester>();
     ws->init(2, 11, 10);
     CommonBinsValidator validator;
