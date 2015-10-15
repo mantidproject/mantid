@@ -86,22 +86,25 @@ void export_AlgorithmManager() {
           .def("createUnmanaged", &AlgorithmManagerImpl::createUnmanaged,
                createUnmanaged_overloads((arg("name"), arg("version")),
                                          "Creates an unmanaged algorithm."))
-          .def("size", &AlgorithmManagerImpl::size,
+          .def("size", &AlgorithmManagerImpl::size, arg("self"),
                "Returns the number of managed algorithms")
           .def("setMaxAlgorithms", &AlgorithmManagerImpl::setMaxAlgorithms,
+               (arg("self"), arg("n")),
                "Set the maximum number of allowed managed algorithms")
-          .def("getAlgorithm", &getAlgorithm,
+          .def("getAlgorithm", &getAlgorithm, (arg("self"), arg("id_holder")),
                "Return the algorithm instance identified by the given id.")
-          .def("removeById", &removeById,
+          .def("removeById", &removeById, (arg("self"), arg("id_holder")),
                "Remove an algorithm from the managed list")
           .def("newestInstanceOf", &AlgorithmManagerImpl::newestInstanceOf,
+               (arg("self"), arg("algorithm_name")),
                "Returns the newest created instance of the named algorithm")
           .def("runningInstancesOf", &runningInstancesOf,
+               (arg("self"), arg("algorithm_name")),
                "Returns a list of managed algorithm instances that are "
                "currently executing")
-          .def("clear", &AlgorithmManagerImpl::clear,
+          .def("clear", &AlgorithmManagerImpl::clear, arg("self"),
                "Clears the current list of managed algorithms")
-          .def("cancelAll", &AlgorithmManagerImpl::cancelAll,
+          .def("cancelAll", &AlgorithmManagerImpl::cancelAll, arg("self"),
                "Requests that all currently running algorithms be cancelled");
 
   // Instance method
