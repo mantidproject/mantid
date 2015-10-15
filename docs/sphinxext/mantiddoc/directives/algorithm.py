@@ -1,7 +1,4 @@
-from base import AlgorithmBaseDirective
-from docutils import nodes
-from sphinx.locale import _
-from sphinx.util.compat import make_admonition
+from mantiddoc.directives.base import AlgorithmBaseDirective
 import os
 import re
 

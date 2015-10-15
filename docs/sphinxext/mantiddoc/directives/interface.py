@@ -1,5 +1,4 @@
-from base import BaseDirective
-from sphinx.locale import _
+from mantiddoc.directives.base import BaseDirective
 import os
 
 class InterfaceDirective(BaseDirective):

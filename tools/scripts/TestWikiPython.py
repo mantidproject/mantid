@@ -7,7 +7,6 @@ import os
 import re
 import sys
 import urllib2
-import urlparse
 import argparse
 import json
 
@@ -31,6 +30,7 @@ def getTestablePages(url):
 
 def convertURLToRaw(url):
     return url.replace(" ","%20") + "?action=raw"
+
 def writeTestRst(filepath,mediawikiText,pageName):
     '''
     for a block of wiki text, writes out all tests found to an rst page
@@ -164,6 +164,3 @@ for url in urlList:
     #run pandoc and get the output in rst
     mediawikiText = readWebPage(convertURLToRaw(baseUrl + url))
     writeTestRst(outputFile,mediawikiText,pageName)
-
-
-

@@ -87,7 +87,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
             raise SourceLinkError(error_string)
 
         try:
-            self.output_to_page(file_paths,file_name,sanity_checks);
+            self.output_to_page(file_paths,file_name,sanity_checks)
         except SourceLinkError as err:
             error_string += str(err) + "\n"
 
@@ -112,12 +112,15 @@ class SourceLinkDirective(AlgorithmBaseDirective):
                 suggested_path = "os_agnostic_path_to_file_from_source_root"
                 if len(path_list) > 1:
                     suggested_path = path_list[0].replace(self.source_root, "")
-                raise SourceLinkError("Found multiple possibilities for " + file_name + "." + extension + "\n" +
-                "Possible matches" +  str(path_list) + "\n" +
-                "Specify one using the " + extension + " option\n" +
-                "e.g. \n" +
-                ".. sourcelink:\n" +
-                "      :" + extension + ": " + suggested_path)
+                raise SourceLinkError("Found multiple possibilities for " +
+                                      file_name + "." + extension + "\n" +
+                                      "Possible matches" +  str(path_list) +
+                                      "\n" +
+                                      "Specify one using the " + extension +
+                                      " option\n" +
+                                      "e.g. \n" +
+                                      ".. sourcelink:\n" +
+                                      "      :" + extension + ": " + suggested_path)
 
             return self.file_lookup[file_name][extension]
         except KeyError:
