@@ -108,14 +108,17 @@ class ResNorm(PythonAlgorithm):
         out_name = getWSprefix(self._res_ws) + 'ResNorm_Fit'
         function = 'name=TabulatedFunction,Workspace=%s,Scaling=1,Shift=0,XScaling=1,ties=(Shift=0)' % self._van_ws
 
-        fit_params = PlotPeakByLogValue(Input=input_str,
-                                        OutputWorkspace=out_name,
-                                        Function=function,
-                                        FitType='Individual',
-                                        PassWSIndexToFunction=True,
-                                        CreateOutput=self._create_output,
-                                        StartX=self._e_min,
-                                        EndX=self._e_max)
+        plot_peaks = self.createChildAlgorithm(name='PlotPeakByLogValue', startProgress=0.02, endProgress=0.94, enableLogging=True)
+        plot_peaks.setProperty('Input', input_str)
+        plot_peaks.setProperty('OutputWorkspace', out_name)
+        plot_peaks.setProperty('Function', function)
+        plot_peaks.setProperty('FitType', 'Individual')
+        plot_peaks.setProperty('PassWSIndexToFunction', True)
+        plot_peaks.setProperty('CreateOutput', self._create_output)
+        plot_peaks.setProperty('StartX', self._e_min)
+        plot_peaks.setProperty('EndX', self._e_max)
+        plot_peaks.execute()
+        fit_params = plot_peaks.getProperty('OutputWorkspace').value
 
         params = {'XScaling':'Stretch', 'Scaling':'Intensity'}
         result_workspaces = []
@@ -133,7 +136,7 @@ class ResNorm(PythonAlgorithm):
         prog_process.report()
         if not self._create_output:
             DeleteWorkspace(fit_params)
-
+        
 
     def _process_res_ws(self, num_hist):
         """
