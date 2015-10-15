@@ -5,8 +5,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidDataObjects/MDLeanEvent.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 
 #include <boost/scoped_array.hpp>
 

@@ -10,7 +10,6 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-#include <iostream>
 #include <fstream>
 #include <string>
 #include <cstdio>

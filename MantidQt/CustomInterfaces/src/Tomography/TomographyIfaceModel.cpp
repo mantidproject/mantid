@@ -582,7 +582,6 @@ TomographyIfaceModel::loadFITSImage(const std::string &path) {
         "Failed to load image. Could not load this file as a "
         "FITS image: " +
         std::string(e.what()));
-    return WorkspaceGroup_sptr();
   }
   if (!alg->isExecuted()) {
     throw std::runtime_error(

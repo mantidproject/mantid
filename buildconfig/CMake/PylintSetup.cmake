@@ -33,6 +33,7 @@ if ( PYLINT_FOUND )
         Framework/PythonInterface/plugins
         scripts
         Testing/SystemTests/tests/analysis
+        tools
   )
   set ( PYLINT_EXCLUDES
         scripts/lib1to2

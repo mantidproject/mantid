@@ -21,7 +21,6 @@
 #include <fstream>
 #include <numeric>
 #include <cmath>
-#include <iomanip>
 #include "MantidAPI/WorkspaceValidators.h"
 
 namespace Mantid {

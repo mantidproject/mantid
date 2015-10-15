@@ -36,7 +36,7 @@ namespace CustomInterfaces
 
   void ALCDataLoadingPresenter::load()
   {
-    m_view->setWaitingCursor();
+    m_view->disableAll();
 
     try
     {
@@ -116,7 +116,7 @@ namespace CustomInterfaces
       m_view->displayError(e.what());
     }
 
-    m_view->restoreCursor();
+    m_view->enableAll();
   }
 
   void ALCDataLoadingPresenter::updateAvailableInfo()

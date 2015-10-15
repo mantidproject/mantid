@@ -12,21 +12,24 @@ void export_ISpectrum() {
 
   class_<ISpectrum, boost::noncopyable>("ISpectrum", no_init)
       .def("hasDetectorID", &ISpectrum::hasDetectorID,
+           (arg("self"), arg("det_id")),
            "Returns True if the spectrum contain the given spectrum number")
-      .def("getSpectrumNo", &ISpectrum::getSpectrumNo,
+      .def("getSpectrumNo", &ISpectrum::getSpectrumNo, arg("self"),
            "Returns the spectrum number of this spectrum")
       .def("getDetectorIDs", (const std::set<detid_t> &(ISpectrum::*)() const) &
                                  ISpectrum::getDetectorIDs,
-           return_value_policy<copy_const_reference>(),
+           arg("self"), return_value_policy<copy_const_reference>(),
            "Returns a list of detector IDs for this spectrum")
       .def("addDetectorID", &ISpectrum::addDetectorID,
-           "Add a detector ID to this spectrum")
+           (arg("self"), arg("det_id")), "Add a detector ID to this spectrum")
       .def("setDetectorID", &ISpectrum::setDetectorID,
-           "Set the given ID has the only")
-      .def("clearDetectorIDs", &ISpectrum::clearDetectorIDs,
+           (arg("self"), arg("det_id")), "Set the given ID has the only")
+      .def("clearDetectorIDs", &ISpectrum::clearDetectorIDs, arg("self"),
            "Clear the set of detector IDs")
       .def("setSpectrumNo", &ISpectrum::setSpectrumNo,
+           (arg("self"), arg("num")),
            "Set the spectrum number for this spectrum")
-      .def("hasDx", &ISpectrum::hasDx, "Returns True if the spectrum uses the "
-                                       "DX (X Error) array, else False.");
+      .def("hasDx", &ISpectrum::hasDx, arg("self"),
+           "Returns True if the spectrum uses the "
+           "DX (X Error) array, else False.");
 }

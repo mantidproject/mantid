@@ -172,7 +172,7 @@ void FFT::exec() {
   // centerShift == true means that the zero on the x axis is assumed to be in
   // the data centre
   // at point with index i = ySize/2. If shift == false the zero is at i = 0
-  bool centerShift = true;
+  const bool centerShift = true;
 
   API::TextAxis *tAxis = new API::TextAxis(nOut);
   int iRe = 0;

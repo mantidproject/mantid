@@ -108,10 +108,14 @@ void ContourLinesEditor::updateContourLevels()
 
 	int rows = table->rowCount();
 	QwtValueList levels;
-	for (int i = 0; i < rows; i++)
-		levels << dynamic_cast<DoubleSpinBox*>(table->cellWidget(i, 0))->value();
+  for (int i = 0; i < rows; i++) {
+    DoubleSpinBox *spinBox =
+        dynamic_cast<DoubleSpinBox *>(table->cellWidget(i, 0));
+    if (spinBox)
+      levels << spinBox->value();
+  }
 
-	d_spectrogram->setContourLevels(levels);
+  d_spectrogram->setContourLevels(levels);
 }
 
 void ContourLinesEditor::updateContourPens()

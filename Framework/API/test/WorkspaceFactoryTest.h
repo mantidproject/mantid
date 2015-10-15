@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include <vector>
-#include <iostream>
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"

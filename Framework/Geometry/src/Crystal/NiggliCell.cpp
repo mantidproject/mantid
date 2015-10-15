@@ -3,7 +3,6 @@
 #include "MantidKernel/Quat.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include <iostream>
 #include <stdexcept>
 #include <algorithm>
 

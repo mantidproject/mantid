@@ -18,7 +18,7 @@ custom interfaces might be moved out of here. Tools of other type
 might be added, and then this should not be a sublcass of
 TomoRecToolConfig but of a more general ToolConfig class.
 
-Copyright &copy; 2014,205 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.

@@ -269,6 +269,30 @@ public:
   * @param wsName name of the workspace to plot (must be in the ADS)
   */
   virtual void plotFocusedSpectrum(const std::string &wsName) = 0;
+
+  /**
+ * Produces a waterfall spectrum graph for focused output. Runs
+ * plotSpectrum function via python.
+ *
+ * @param wsName name of the workspace to plot (must be in the ADS)
+ */
+  virtual void plotWaterfallSpectrum(const std::string &wsName) = 0;
+
+  /**
+  * Produces a replaceable spectrum graph for focused output. Runs
+  * plotSpectrum function via python.
+  *
+  * @param wsName name of the workspace to plot (must be in the ADS)
+  */
+  virtual void plotReplacingWindow(const std::string &wsName) = 0;
+
+  /*
+ * Selected plot data representation will be applied, which will
+ * ran through python script
+ *
+ * @return which format should to applied for plotting data
+ */
+  virtual int currentPlotType() const = 0;
 };
 
 } // namespace CustomInterfaces

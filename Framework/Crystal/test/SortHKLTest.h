@@ -10,8 +10,6 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 #include <fstream>
 #include <Poco/File.h>
 

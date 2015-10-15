@@ -10,9 +10,17 @@ using Mantid::API::ExperimentInfo;
 using Mantid::PythonInterface::Policies::RemoveConstSharedPtr;
 using namespace boost::python;
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
 /// Overload generator for getInstrumentFilename
 BOOST_PYTHON_FUNCTION_OVERLOADS(getInstrumentFilename_Overload,
                                 ExperimentInfo::getInstrumentFilename, 1, 2)
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 void export_ExperimentInfo() {
   register_ptr_to_python<boost::shared_ptr<ExperimentInfo>>();

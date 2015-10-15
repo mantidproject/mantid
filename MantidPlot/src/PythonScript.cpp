@@ -39,7 +39,6 @@
 #include <QVariant>
 #include <QMessageBox>
 
-#include <iostream>
 #include <stdexcept>
 
 

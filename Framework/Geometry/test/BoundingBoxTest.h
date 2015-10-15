@@ -5,7 +5,6 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/Timer.h"
-#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;

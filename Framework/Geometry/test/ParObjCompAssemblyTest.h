@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include <cmath>
-#include <iostream>
 #include <string>
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"

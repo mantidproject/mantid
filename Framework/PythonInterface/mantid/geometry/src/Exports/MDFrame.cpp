@@ -13,6 +13,6 @@ void export_MDFrame() {
   register_ptr_to_python<boost::shared_ptr<MDFrame>>();
 
   class_<MDFrame, boost::noncopyable>("MDFrame", no_init)
-      .def("getUnitLabel", &MDFrame::getUnitLabel)
-      .def("name", &MDFrame::name);
+      .def("getUnitLabel", &MDFrame::getUnitLabel, arg("self"))
+      .def("name", &MDFrame::name, arg("self"));
 }

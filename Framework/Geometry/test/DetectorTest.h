@@ -6,7 +6,6 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include <cmath>
-#include <iostream>
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;

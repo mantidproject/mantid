@@ -10,7 +10,6 @@
 #include <QMessageBox>
 #include <QHash>
 
-#include <iostream>
 #include <qfontmetrics.h>
 
 using namespace MantidQt::API;

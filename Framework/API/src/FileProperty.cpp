@@ -13,7 +13,6 @@
 #include <Poco/File.h>
 #include <cctype>
 #include <algorithm>
-#include <iostream>
 
 namespace Mantid {
 

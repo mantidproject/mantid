@@ -27,7 +27,6 @@
 #include "MantidAPI/FileProperty.h"
 
 #include <fstream> // used to get ofstream
-#include <iomanip> // setw() used below
 
 /* @class SaveCSV
 

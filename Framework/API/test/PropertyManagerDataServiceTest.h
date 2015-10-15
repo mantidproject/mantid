@@ -6,7 +6,6 @@
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/Exception.h"
-#include <iostream>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

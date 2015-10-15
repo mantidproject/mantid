@@ -4,7 +4,6 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-#include <iostream>
 #include <queue>
 
 namespace Mantid {

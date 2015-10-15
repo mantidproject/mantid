@@ -9,8 +9,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <iostream>
-#include <iomanip>
 #include <set>
 #include <string>
 

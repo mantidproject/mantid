@@ -1,11 +1,12 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include <string>
-#include <iostream>
 #include <fstream>
-#include <Poco/Path.h>
+#include <string>
+
 #include "MantidKernel/ConfigService.h"
+
+#include <Poco/Path.h>
 
 namespace ScopedFileHelper {
 /** File object type. Provides exception save file creation/destruction.

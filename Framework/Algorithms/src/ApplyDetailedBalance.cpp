@@ -3,7 +3,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "boost/lexical_cast.hpp"
-#include <iostream>
 #include <cmath>
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/PhysicalConstants.h"

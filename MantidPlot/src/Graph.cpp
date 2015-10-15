@@ -60,6 +60,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "Mantid/MantidMatrixCurve.h"
+#include "Mantid/MantidMDCurve.h"
 #include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/QwtRasterDataMD.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
@@ -107,7 +108,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stddef.h>
-#include <iostream>
 
 // We can safely ignore warnings about assuming signed overflow does not occur from qvector.h
 // (They really should have implemented it with unsigned types!
@@ -210,6 +210,9 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
 
   m_isDistribution = false;
   m_normalizable = false;
+
+  m_normalizableMD = false;
+  m_normalizationMD = 0;
 }
 
 void Graph::notifyChanges()
@@ -1437,7 +1440,8 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
           QwtScaleWidget *rightAxis = d_plot->axisWidget(QwtPlot::yRight);
           if(rightAxis)
           {
-            if (type == ScaleTransformation::Log10 && (start <= 0 || start == DBL_MAX))
+            //if (type == ScaleTransformation::Log10 && (start <= 0 || start == DBL_MAX))
+            if (type == GraphOptions::Log10 && (start <= 0 || start == DBL_MAX))
             {
               start = sp->getMinPositiveValue();
             }
@@ -3412,12 +3416,15 @@ QString Graph::yAxisTitleFromFirstCurve()
     using namespace Mantid::API;
     QString wsName = firstCurve->workspaceName();
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
-    return MantidQt::API::PlotAxis(m_isDistribution, *ws).title();
+    if (ws)
+      return MantidQt::API::PlotAxis(m_isDistribution, *ws).title();
+  } else if (auto *firstCurve = dynamic_cast<MantidMDCurve*>(curve(0))) {
+    MantidQwtIMDWorkspaceData* data = firstCurve->mantidData();
+    if (data)
+      return data->getYAxisLabel();
   }
-  else
-  {
-    return axisTitle(0);
-  }
+
+  return axisTitle(0);
 }
 
 void Graph::contextMenuEvent(QContextMenuEvent *e)
@@ -5520,9 +5527,9 @@ void Graph::noNormalization()
   if(!m_isDistribution) return; // Nothing to do
 
   m_isDistribution = false;
-  updateDataCurves();
-  d_plot->updateAxes();
-  setYAxisTitle(yAxisTitleFromFirstCurve());
+
+  updateCurvesAndAxes();
+
   notifyChanges();
 }
 
@@ -5534,11 +5541,65 @@ void Graph::binWidthNormalization()
   if(m_isDistribution) return; // Nothing to do
 
   m_isDistribution = true;
+
+  updateCurvesAndAxes();
+
+  notifyChanges();
+}
+
+/**
+ * Set 'None' normalization for MD plots
+ */
+void Graph::noNormalizationMD()
+{
+  if (!normalizableMD())
+    return;
+
+  setNormalizationMD(0);
+
+  updateCurvesAndAxes();
+
+  notifyChanges();
+}
+
+/**
+ * Set volume normalization for MD plots
+ */
+void Graph::volumeNormalizationMD()
+{
+  if (!normalizableMD())
+    return;
+
+  setNormalizationMD(1);
+
+  updateCurvesAndAxes();
+
+  notifyChanges();
+}
+
+/**
+ * Set number of events normalization for MD plots
+ */
+void Graph::numEventsNormalizationMD()
+{
+  if (!normalizableMD())
+    return;
+
+  setNormalizationMD(2);
+
+  updateCurvesAndAxes();
+
+  notifyChanges();
+}
+
+/**
+ * Convenience method to use when updating the normalization types
+ * (whether Matrix or MD data normalizatio).
+ */
+void Graph::updateCurvesAndAxes() {
   updateDataCurves();
   d_plot->updateAxes();
   setYAxisTitle(yAxisTitleFromFirstCurve());
-
-  notifyChanges();
 }
 
 void Graph::setWaterfallXOffset(int offset)
@@ -5654,6 +5715,15 @@ void Graph::updateDataCurves()
       mc->invalidateBoundingRect();
       mc->loadData();
     }
+    else if (MantidMDCurve *mdc = dynamic_cast<MantidMDCurve*>(pc))
+    {
+      //mdc->setDrawAsDistribution(m_isDistribution);
+      // yes, using int in Graph and ApplicationWindow instead of the proper enum, just so that
+      // IMDWorkspace.h does not need to be included in more places in MantidPlot
+      mdc->mantidData()->setNormalization(static_cast<Mantid::API::MDNormalization>(m_normalizationMD));
+      mdc->invalidateBoundingRect();
+    }
+
   }
   QApplication::restoreOverrideCursor();
 }

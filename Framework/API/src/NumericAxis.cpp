@@ -191,9 +191,9 @@ std::string NumericAxis::label(const std::size_t &index) const {
   auto it = numberLabel.end() - 1;
   for (; it != numberLabel.begin(); --it) {
     if (*it == '0') {
-      numberLabel.erase(it);
+      it = numberLabel.erase(it);
     } else if (*it == '.') {
-      numberLabel.erase(it);
+      it = numberLabel.erase(it);
       break;
     } else {
       break;

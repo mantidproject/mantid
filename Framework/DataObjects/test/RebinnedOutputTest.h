@@ -4,8 +4,6 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
 
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

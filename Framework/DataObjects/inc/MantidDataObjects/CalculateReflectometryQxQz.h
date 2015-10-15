@@ -22,7 +22,8 @@ public:
   /**
    Constructor
    */
-  CalculateReflectometryQxQz() : m_dirQx(0.0), m_dirQz(0.0) {}
+  CalculateReflectometryQxQz()
+      : m_cos_theta_i(0.0), m_sin_theta_i(0.0), m_dirQx(0.0), m_dirQz(0.0) {}
 
   /**
    Setter for the incident theta value require for the calculation. Internally

@@ -14,8 +14,6 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
-#include <iostream>
-#include <iomanip>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

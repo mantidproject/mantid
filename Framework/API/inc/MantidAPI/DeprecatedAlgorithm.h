@@ -52,7 +52,7 @@ private:
   /// Replacement version, -1 indicates latest
   int m_replacementVersion;
   /// The date that the algorithm was first deprecated.
-  std::string m_deprecatdDate;
+  std::string m_deprecatedDate;
 };
 
 } // namespace API

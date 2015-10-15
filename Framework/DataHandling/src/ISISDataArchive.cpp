@@ -12,7 +12,6 @@
 #include <Poco/Exception.h>
 
 #include <sstream>
-#include <iostream>
 
 namespace Mantid {
 namespace DataHandling {

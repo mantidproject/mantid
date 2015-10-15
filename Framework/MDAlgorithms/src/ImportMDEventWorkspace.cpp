@@ -1,6 +1,5 @@
 #include "MantidMDAlgorithms/ImportMDEventWorkspace.h"
 
-#include <iostream>
 #include <fstream>
 
 #include "MantidAPI/FileProperty.h"
@@ -267,7 +266,13 @@ void ImportMDEventWorkspace::exec() {
       m_nDimensions + 4; // signal, error, run_no, detector_no
   m_IsFullDataObjects = (nActualColumns == columnsForFullEvents);
 
-  m_nDataObjects = posDiffMDEvent / nActualColumns;
+  if (0 == nActualColumns) {
+    m_nDataObjects = 0;
+    g_log.warning() << "The number of actual columns found in the file "
+                       "(exlcuding comments) is zero" << std::endl;
+  } else {
+    m_nDataObjects = posDiffMDEvent / nActualColumns;
+  }
 
   // Get the min and max extents in each dimension.
   std::vector<double> extentMins(m_nDimensions);

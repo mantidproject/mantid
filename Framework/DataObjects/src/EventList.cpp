@@ -9,7 +9,6 @@
 #include <cfloat>
 
 #include <functional>
-#include <iostream>
 #include <limits>
 #include <math.h>
 #include <Poco/ScopedLock.h>
@@ -549,6 +548,7 @@ EventList &EventList::operator-=(const EventList &more_events) {
       minusHelper(this->weightedEvents, more_events.weightedEventsNoTime);
       break;
     }
+    break;
 
   case WEIGHTED_NOTIME:
     switch (more_events.getEventType()) {
@@ -562,6 +562,7 @@ EventList &EventList::operator-=(const EventList &more_events) {
       minusHelper(this->weightedEventsNoTime, more_events.weightedEventsNoTime);
       break;
     }
+    break;
   }
 
   // No guaranteed order

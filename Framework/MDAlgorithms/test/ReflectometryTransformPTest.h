@@ -5,8 +5,6 @@
 #include <cmath>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
 #include "MantidMDAlgorithms/ReflectometryTransformP.h"
 
 using namespace Mantid::DataObjects;
