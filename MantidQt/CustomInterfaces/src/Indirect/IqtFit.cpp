@@ -475,6 +475,9 @@ void IqtFit::updatePlot() {
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         outputGroup->getItem(specNo));
     if (ws) {
+      if (m_uiForm.ckPlotGuess->isChecked()) {
+        m_uiForm.ppPlot->removeSpectrum("Guess");
+      }
       m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
       m_uiForm.ppPlot->addSpectrum("Diff", ws, 2, Qt::blue);
     }
