@@ -221,11 +221,13 @@ int Object::complementaryObject(const int Cnum, std::string &Ln) {
   std::string::size_type posB;
   posB = Ln.find_first_of("()", posA);
   if (posB == std::string::npos)
-    throw std::runtime_error("Object::complemenet :: " + Ln);
+    throw std::runtime_error("Object::complement :: " + Ln);
 
   brackCnt = (Ln[posB] == '(') ? 1 : 0;
   while (posB != std::string::npos && brackCnt) {
     posB = Ln.find_first_of("()", posB);
+    if (posB == std::string::npos)
+      break;
     brackCnt += (Ln[posB] == '(') ? 1 : -1;
     posB++;
   }
@@ -242,7 +244,7 @@ int Object::complementaryObject(const int Cnum, std::string &Ln) {
     return 1;
   }
 
-  throw std::runtime_error("Object::complemenet :: " + Part);
+  throw std::runtime_error("Object::complement :: " + Part);
   return 0;
 }
 

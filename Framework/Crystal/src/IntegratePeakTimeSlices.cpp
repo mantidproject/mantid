@@ -587,6 +587,12 @@ void IntegratePeakTimeSlices::exec() {
 
             // Now set up the center for this peak
             int i = find("Mrow", names);
+            if (i < 0) {
+              throw std::runtime_error("Inconsistency found in algorithm "
+                                       "execution. The index for the parameter "
+                                       "Mrow is negative.");
+            }
+
             lastRow = (int)(params[i] + .5);
             i = find("Mcol", names);
             lastCol = (int)(params[i] + .5);
@@ -2220,7 +2226,16 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
                                         std::vector<std::string> const &names,
                                         double chisqOverDOF) {
   int Ibk = find("Background", names);
+  if (Ibk < 0)
+    throw std::runtime_error(
+        "Irrecoverable inconsistency found. The index for the "
+        "parameter 'Background' is lower than zero.");
+
   int IIntensity = find("Intensity", names);
+  if (IIntensity < 0)
+    throw std::runtime_error(
+        "Irrecoverable inconsistency found. The index for the "
+        "parameter 'Intensity' is lower than zero.");
 
   if (chisqOverDOF < 0) {
 
@@ -2497,6 +2512,15 @@ int IntegratePeakTimeSlices::UpdateOutputWS(
   int IVxy = find("SSrc", names);
   int Irow = find("Mrow", names);
   int Icol = find("Mcol", names);
+
+  if (Ibk < 0 || IIntensity < 0 || IVx < 0 || IVy < 0 || IVxy < 0 || Irow < 0 ||
+      Icol < 0) {
+    throw std::runtime_error("Inconsistency found when updating output "
+                             "workspace. None of the indices for the "
+                             "parameters 'Background', 'Intensity', 'SScol', "
+                             "'SSrow', 'SSrc', 'Mrow', 'Mcol' can be "
+                             "negative.");
+  }
 
   int newRowIndex = 0;
 
