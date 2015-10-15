@@ -464,7 +464,7 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
 void LoadFITS::parseHeader(FITSInfo &headerInfo) {
   headerInfo.headerSizeMultiplier = 0;
   std::ifstream istr(headerInfo.filePath.c_str(), std::ios::binary);
-  istr.seekg (0, istr.end);
+  istr.seekg(0, istr.end);
   if (!istr.tellg() > 0) {
     throw std::runtime_error(
         "Found file that is readable but empty (0 bytes size): " +
@@ -548,7 +548,8 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
 
   std::string baseName = m_baseName + currNumberS;
 
-  // Create workspace
+  // Create workspace (taking into account already here if rebinning is
+  // going to happen)
   Workspace2D_sptr ws;
   if (!parent) {
     if (!loadAsRectImg) {
@@ -578,22 +579,28 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
     cmpp /= cm_1;
   cmpp *= static_cast<double>(m_rebin);
 
-  // set data
-  readDataToImgs(fileInfo, cmpp, imageY, imageE, ws, buffer);
+  if (loadAsRectImg && 1 == m_rebin) {
+    // set data directly into workspace
+    readDataToWorkspace(fileInfo, cmpp, ws, buffer);
+  } else {
+    readDataToImgs(fileInfo, imageY, imageE, buffer);
+    doFilterNoise(m_noiseThresh, imageY, imageE);
 
-  doFilterNoise(m_noiseThresh, imageY, imageE);
+    // Note this can change the sizes of the images and the number of pixels
+    if (1 == m_rebin) {
+      ws->setImageYAndE(imageY, imageE, 0, loadAsRectImg, cmpp,
+                        false /* no parallel load */);
 
-  // Set in WS
-  // Note this can change the sizes of the images and the number of pixels
-  if (1 != m_rebin) {
-    MantidImage rebinnedY(imageY.size() / m_rebin,
-                          std::vector<double>(imageY[0].size() / m_rebin));
-    MantidImage rebinnedE(imageE.size() / m_rebin,
-                          std::vector<double>(imageE[0].size() / m_rebin));
+    } else {
+      MantidImage rebinnedY(imageY.size() / m_rebin,
+                            std::vector<double>(imageY[0].size() / m_rebin));
+      MantidImage rebinnedE(imageE.size() / m_rebin,
+                            std::vector<double>(imageE[0].size() / m_rebin));
 
-    doRebin(m_rebin, imageY, imageE, rebinnedY, rebinnedE);
-    ws->setImageYAndE(rebinnedY, rebinnedE, 0, loadAsRectImg, cmpp,
-                      false /* no parallel load */);
+      doRebin(m_rebin, imageY, imageE, rebinnedY, rebinnedE);
+      ws->setImageYAndE(rebinnedY, rebinnedE, 0, loadAsRectImg, cmpp,
+                        false /* no parallel load */);
+    }
   }
 
   ws->setTitle(baseName);
@@ -673,47 +680,35 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
 }
 
 /**
- * Reads the data (matrix) from a single FITS file into image objects.
+ * Reads the data (FITS matrix) from a single FITS file into a
+ * workspace (directly into the spectra, using one spectrum per image
+ * row).
  *
  * @param fileInfo information on the FITS file to load, including its path
  * @param cmpp centimeters per pixel, to scale/normalize values
- * @param imageY Object to set the Y data values in
- * @param imageE Object to set the E data values in
- * @param buffer pre-allocated buffer to contain data values
+ * @param ws workspace with the required dimensions
+ * @param buffer pre-allocated buffer to read from file
  *
  * @throws std::runtime_error if there are file input issues
  */
-  void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, double cmpp,
-                                MantidImage &imageY,
-                              MantidImage &imageE, Workspace2D_sptr ws,
-                              std::vector<char> &buffer) {
-  std::string filename = fileInfo.filePath;
-  Poco::FileStream file(filename, std::ios::in);
+void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
+                                   Workspace2D_sptr ws,
+                                   std::vector<char> &buffer) {
 
   size_t bytespp = (fileInfo.bitsPerPixel / 8);
   size_t len = m_pixelCount * bytespp;
-  file.seekg(g_BASE_HEADER_SIZE * fileInfo.headerSizeMultiplier);
-  file.read(&buffer[0], len);
-  if (!file) {
-    throw std::runtime_error(
-        "Error while reading file: " + filename + ". Tried to read " +
-        boost::lexical_cast<std::string>(len) + " bytes but got " +
-        boost::lexical_cast<std::string>(file.gcount()) +
-        " bytes. The file and/or its headers may be wrong.");
-  }
-  // all is loaded
-  file.close();
+  readInBuffer(fileInfo, buffer, len);
 
   // create pointer of correct data type to void pointer of the buffer:
   uint8_t *buffer8 = reinterpret_cast<uint8_t *>(&buffer[0]);
 
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (size_t i = 0; i < fileInfo.axisPixelLengths[1]; ++i) { // width
+  for (size_t i = 0; i < fileInfo.axisPixelLengths[1]; ++i) { // rows
     Mantid::API::ISpectrum *specRow = ws->getSpectrum(i);
     double xval = static_cast<double>(i) * cmpp;
     std::fill(specRow->dataX().begin(), specRow->dataX().end(), xval);
 
-    for (size_t j = 0; j < fileInfo.axisPixelLengths[0]; ++j) { // height
+    for (size_t j = 0; j < fileInfo.axisPixelLengths[0]; ++j) { // columns
 
       size_t start =
           ((i * (bytespp)) * fileInfo.axisPixelLengths[1]) + (j * (bytespp));
@@ -749,6 +744,96 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
       specRow->dataE()[j] = sqrt(val);
     }
   }
+}
+
+/**
+ * Reads the data (FITS matrix) from a single FITS file into image
+ * objects (Y and E). E is filled with the sqrt() of Y.
+ *
+ * @param fileInfo information on the FITS file to load, including its path
+ * @param imageY Object to set the Y data values in
+ * @param imageE Object to set the E data values in
+ * @param buffer pre-allocated buffer to contain data values
+ *
+ * @throws std::runtime_error if there are file input issues
+ */
+void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, MantidImage &imageY,
+                              MantidImage &imageE, std::vector<char> &buffer) {
+
+  size_t bytespp = (fileInfo.bitsPerPixel / 8);
+  size_t len = m_pixelCount * bytespp;
+  readInBuffer(fileInfo, buffer, len);
+
+  // create pointer of correct data type to void pointer of the buffer:
+  uint8_t *buffer8 = reinterpret_cast<uint8_t *>(&buffer[0]);
+  std::vector<char> buf(bytespp);
+  char *tmp = &buf.front();
+  size_t start = 0;
+
+  for (size_t i = 0; i < fileInfo.axisPixelLengths[1]; ++i) { // width
+    for (size_t j = 0; j < fileInfo.axisPixelLengths[0]; ++j) { // height
+      // If you wanted to PARALLEL_...ize these loops (which doesn't
+      // seem to provide any speed up when loading images one at a
+      // time, you cannot use the start+=bytespp at the end of this
+      // loop. You'd need something like this:
+      //
+      // size_t start =
+      // ((i * (bytespp)) * fileInfo.axisPixelLengths[1]) +
+      // (j * (bytespp));
+      // Reverse byte order of current value
+      std::reverse_copy(buffer8 + start, buffer8 + start + bytespp, tmp);
+      double val = 0;
+      if (fileInfo.bitsPerPixel == 8)
+        val = static_cast<double>(*reinterpret_cast<uint8_t *>(tmp));
+      if (fileInfo.bitsPerPixel == 16)
+        val = static_cast<double>(*reinterpret_cast<uint16_t *>(tmp));
+      if (fileInfo.bitsPerPixel == 32 && !fileInfo.isFloat)
+        val = static_cast<double>(*reinterpret_cast<uint32_t *>(tmp));
+      if (fileInfo.bitsPerPixel == 64 && !fileInfo.isFloat)
+        val = static_cast<double>(*reinterpret_cast<uint64_t *>(tmp));
+      // cppcheck doesn't realise that these are safe casts
+      if (fileInfo.bitsPerPixel == 32 && fileInfo.isFloat) {
+        // cppcheck-suppress invalidPointerCast
+        val = static_cast<double>(*reinterpret_cast<float *>(tmp));
+      }
+      if (fileInfo.bitsPerPixel == 64 && fileInfo.isFloat) {
+        // cppcheck-suppress invalidPointerCast
+        val = *reinterpret_cast<double *>(tmp);
+      }
+      val = fileInfo.scale * val - fileInfo.offset;
+      imageY[i][j] = val;
+      imageE[i][j] = sqrt(val);
+      start += bytespp;
+    }
+  }
+}
+
+/**
+ * Reads the data (FITS matrix) from a single FITS file into a
+ * buffer. This simply reads the raw block of data, without doing any
+ * re-scaling or adjustment.
+ *
+ * @param fileInfo information on the FITS file to load, including its path
+ * @param buffer pre-allocated buffer where to read data
+ * @param len amount of chars/bytes/octets to read
+ *
+ * @throws std::runtime_error if there are file input issues
+ */
+void LoadFITS::readInBuffer(const FITSInfo &fileInfo, std::vector<char> &buffer,
+                            size_t len) {
+  std::string filename = fileInfo.filePath;
+  Poco::FileStream file(filename, std::ios::in);
+  file.seekg(g_BASE_HEADER_SIZE * fileInfo.headerSizeMultiplier);
+  file.read(&buffer[0], len);
+  if (!file) {
+    throw std::runtime_error(
+        "Error while reading file: " + filename + ". Tried to read " +
+        boost::lexical_cast<std::string>(len) + " bytes but got " +
+        boost::lexical_cast<std::string>(file.gcount()) +
+        " bytes. The file and/or its headers may be wrong.");
+  }
+  // all is loaded
+  file.close();
 }
 
 /**

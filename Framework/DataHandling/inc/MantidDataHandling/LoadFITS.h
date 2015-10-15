@@ -116,11 +116,18 @@ private:
                 const DataObjects::Workspace2D_sptr parent,
                 bool loadAsRectImg = false);
 
-  // Reads the data from a single FITS file into a workspace
-  void readDataToImgs(const FITSInfo &fileInfo, double cmpp,
-                      API::MantidImage &imageY, API::MantidImage &imageE,
-                      DataObjects::Workspace2D_sptr ws,
-                      std::vector<char> &buffer);
+  // Reads the data from a single FITS file into a workspace (directly, fast)
+  void readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
+                           DataObjects::Workspace2D_sptr ws,
+                           std::vector<char> &buffer);
+
+  // Reads the data from a single FITS file into image objects (Y and E) that
+  // then can/will be copied into a workspace
+  void readDataToImgs(const FITSInfo &fileInfo, API::MantidImage &imageY,
+                      API::MantidImage &imageE, std::vector<char> &buffer);
+
+  void readInBuffer(const FITSInfo &fileInfo, std::vector<char> &buffer,
+                    size_t len);
 
   /// Once loaded, check against standard and limitations of this algorithm
   void headerSanityCheck(const FITSInfo &hdr, const FITSInfo &hdrFirst);

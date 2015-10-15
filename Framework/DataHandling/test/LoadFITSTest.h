@@ -306,8 +306,28 @@ public:
       TS_ASSERT_THROWS_NOTHING(
           ws = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
 
-      TS_ASSERT_EQUALS(ws->getNumberHistograms(), SPECTRA_COUNT_ASRECT);
+      TSM_ASSERT_EQUALS("The number of histograms should be the expected, "
+                        "dimension of the image",
+                        ws->getNumberHistograms(), SPECTRA_COUNT_ASRECT);
     }
+
+    // and finally a basic check of values in the image, to be safe
+    MatrixWorkspace_sptr ws0;
+    TS_ASSERT_THROWS_NOTHING(
+        ws0 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0)));
+
+    size_t n = ws0->getNumberHistograms();
+    TSM_ASSERT_EQUALS(
+        "The value at a given spectrum and bin (first one) is not as expected",
+        ws0->readY(n - 1)[0], 137);
+
+    TSM_ASSERT_EQUALS(
+        "The value at a given spectrum and bin (middle one) is not as expected",
+        ws0->readY(n - 1)[SPECTRA_COUNT_ASRECT / 2], 159);
+
+    TSM_ASSERT_EQUALS(
+        "The value at a given spectrum and bin (last one) is not as expected",
+        ws0->readY(n - 1).back(), 142);
   }
 
 private:
