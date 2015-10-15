@@ -7,6 +7,8 @@
 #include <vector>
 
 #include "MantidQtCustomInterfaces/ReflLegacyTransferStrategy.h"
+#include "MantidQtCustomInterfaces/ReflTableSchema.h"
+
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -32,19 +34,19 @@ public:
     std::vector<std::map<std::string,std::string> > expected;
     std::map<std::string,std::string> expectedRow;
 
-    expectedRow["runs"] = "1234";
-    expectedRow["theta"] = "";
-    expectedRow["group"] = "0";
+    expectedRow[ReflTableSchema::RUNS] = "1234";
+    expectedRow[ReflTableSchema::ANGLE] = "";
+    expectedRow[ReflTableSchema::GROUP] = "0";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1235";
-    expectedRow["theta"] = "";
-    expectedRow["group"] = "1";
+    expectedRow[ReflTableSchema::RUNS] = "1235";
+    expectedRow[ReflTableSchema::ANGLE] = "";
+    expectedRow[ReflTableSchema::GROUP] = "1";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1236";
-    expectedRow["theta"] = "";
-    expectedRow["group"] = "2";
+    expectedRow[ReflTableSchema::RUNS] = "1236";
+    expectedRow[ReflTableSchema::ANGLE] = "";
+    expectedRow[ReflTableSchema::GROUP] = "2";
     expected.push_back(expectedRow);
 
     ReflLegacyTransferStrategy strategy;
@@ -64,19 +66,19 @@ public:
     std::vector<std::map<std::string,std::string> > expected;
     std::map<std::string,std::string> expectedRow;
 
-    expectedRow["runs"] = "1233";
-    expectedRow["theta"] = "";
-    expectedRow["group"] = "0";
+    expectedRow[ReflTableSchema::RUNS] = "1233";
+    expectedRow[ReflTableSchema::ANGLE] = "";
+    expectedRow[ReflTableSchema::GROUP] = "0";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1234+1235";
-    expectedRow["theta"] = "";
-    expectedRow["group"] = "1";
+    expectedRow[ReflTableSchema::RUNS] = "1234+1235";
+    expectedRow[ReflTableSchema::ANGLE] = "";
+    expectedRow[ReflTableSchema::GROUP] = "1";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1236";
-    expectedRow["theta"] = "";
-    expectedRow["group"] = "2";
+    expectedRow[ReflTableSchema::RUNS] = "1236";
+    expectedRow[ReflTableSchema::ANGLE] = "";
+    expectedRow[ReflTableSchema::GROUP] = "2";
     expected.push_back(expectedRow);
 
     ReflLegacyTransferStrategy strategy;
@@ -96,25 +98,27 @@ public:
     std::vector<std::map<std::string,std::string> > expected;
     std::map<std::string,std::string> expectedRow;
 
-    expectedRow["runs"] = "1234";
-    expectedRow["theta"] = "";
-    expectedRow["group"] = "0";
+    expectedRow[ReflTableSchema::RUNS] = "1234";
+    expectedRow[ReflTableSchema::ANGLE] = "";
+    expectedRow[ReflTableSchema::GROUP] = "0";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1235";
-    expectedRow["theta"] = "3.14";
-    expectedRow["group"] = "1";
+    expectedRow[ReflTableSchema::RUNS] = "1235";
+    expectedRow[ReflTableSchema::ANGLE] = "3.14";
+    expectedRow[ReflTableSchema::GROUP] = "1";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1236";
-    expectedRow["theta"] = "2.17";
-    expectedRow["group"] = "2";
+    expectedRow[ReflTableSchema::RUNS] = "1236";
+    expectedRow[ReflTableSchema::ANGLE] = "2.17";
+    expectedRow[ReflTableSchema::GROUP] = "2";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1237";
-    expectedRow["theta"] = "1.23";
-    expectedRow["group"] = "3";
+    expectedRow[ReflTableSchema::RUNS] = "1237";
+    expectedRow[ReflTableSchema::ANGLE] = "1.23";
+    expectedRow[ReflTableSchema::GROUP] = "3";
     expected.push_back(expectedRow);
+
+    std::sort(expected.begin(), expected.end());
 
     ReflLegacyTransferStrategy strategy;
     auto output = strategy.transferRuns(input);
@@ -137,40 +141,42 @@ public:
     std::vector<std::map<std::string,std::string> > expected;
     std::map<std::string,std::string> expectedRow;
 
-    expectedRow["runs"] = "1230";
-    expectedRow["theta"] = "";
-    expectedRow["group"] = "0";
+    expectedRow[ReflTableSchema::RUNS] = "1230";
+    expectedRow[ReflTableSchema::ANGLE] = "";
+    expectedRow[ReflTableSchema::GROUP] = "0";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1231+1232";
-    expectedRow["theta"] = "3.14";
-    expectedRow["group"] = "1";
+    expectedRow[ReflTableSchema::RUNS] = "1231+1232";
+    expectedRow[ReflTableSchema::ANGLE] = "3.14";
+    expectedRow[ReflTableSchema::GROUP] = "1";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1233";
-    expectedRow["theta"] = "2.17";
-    expectedRow["group"] = "1";
+    expectedRow[ReflTableSchema::RUNS] = "1233";
+    expectedRow[ReflTableSchema::ANGLE] = "2.17";
+    expectedRow[ReflTableSchema::GROUP] = "1";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1234";
-    expectedRow["theta"] = "2.17";
-    expectedRow["group"] = "2";
+    expectedRow[ReflTableSchema::RUNS] = "1234";
+    expectedRow[ReflTableSchema::ANGLE] = "2.17";
+    expectedRow[ReflTableSchema::GROUP] = "2";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1235";
-    expectedRow["theta"] = "1.23";
-    expectedRow["group"] = "2";
+    expectedRow[ReflTableSchema::RUNS] = "1235";
+    expectedRow[ReflTableSchema::ANGLE] = "1.23";
+    expectedRow[ReflTableSchema::GROUP] = "2";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1236";
-    expectedRow["theta"] = "1.23";
-    expectedRow["group"] = "3";
+    expectedRow[ReflTableSchema::RUNS] = "1236";
+    expectedRow[ReflTableSchema::ANGLE] = "1.23";
+    expectedRow[ReflTableSchema::GROUP] = "3";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1237";
-    expectedRow["theta"] = "";
-    expectedRow["group"] = "4";
+    expectedRow[ReflTableSchema::RUNS] = "1237";
+    expectedRow[ReflTableSchema::ANGLE] = "";
+    expectedRow[ReflTableSchema::GROUP] = "4";
     expected.push_back(expectedRow);
+
+    std::sort(expected.begin(), expected.end());
 
     ReflLegacyTransferStrategy strategy;
     auto output = strategy.transferRuns(input);

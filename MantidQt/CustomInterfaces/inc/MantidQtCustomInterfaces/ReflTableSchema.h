@@ -12,6 +12,7 @@ namespace ReflTableSchema{
 typedef std::string ColumnNameType;
 typedef std::string ColumnValueType;
 typedef std::map<int, ColumnNameType> ColumnIndexNameMap;
+typedef std::map<ColumnNameType, int> ColumnNameIndexMap;
 
 /// Label for run number column
 static const std::string RUNS("Run(s)");
@@ -53,6 +54,8 @@ const int COL_OPTIONS(8);
 
 /// Make the column index map.
 ColumnIndexNameMap makeColumnIndexMap();
+/// Make the column name map.
+ColumnNameIndexMap makeColumnNameMap();
 
 } // ReflTableSchema
 } // namespace CustomInterfaces

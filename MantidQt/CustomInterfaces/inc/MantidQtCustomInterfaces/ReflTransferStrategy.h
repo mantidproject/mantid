@@ -39,7 +39,8 @@ namespace MantidQt
 
       /**
        * @param runRows : A map where the keys are the runs and the values the descriptions
-       * @returns A vector of maps where each map represents a row, with values for "runs", "theta", and "group"
+       * @returns A vector of maps where each map represents a row,
+       * with Keys matching Column headings and Values matching the row entries for those columns
        */
       virtual std::vector<std::map<std::string,std::string> > transferRuns(const std::map<std::string,std::string>& runRows) = 0;
     };

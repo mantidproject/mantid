@@ -19,6 +19,15 @@ ColumnIndexNameMap makeColumnIndexMap(){
     return columnMap;
 }
 
+ColumnNameIndexMap makeColumnNameMap(){
+    auto indexMap = makeColumnIndexMap();
+    ColumnNameIndexMap columnMap;
+    for(auto it = indexMap.begin(); it != indexMap.end(); ++it){
+        columnMap.insert(std::make_pair(it->second, it->first));
+    }
+    return columnMap;
+}
+
 }
 } // namespace CustomInterfaces
 } // namespace Mantid

@@ -1,5 +1,5 @@
 #include "MantidQtCustomInterfaces/ReflLegacyTransferStrategy.h"
-
+#include "MantidQtCustomInterfaces/ReflTableSchema.h"
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
@@ -66,9 +66,9 @@ namespace MantidQt
       for(auto run = runsByDesc.begin(); run != runsByDesc.end(); ++run)
       {
         std::map<std::string,std::string> row;
-        row["runs"] = run->second;
-        row["theta"] = thetaByDesc[run->first];
-        row["group"] = groupsByDesc[run->first];
+        row[ReflTableSchema::RUNS] = run->second;
+        row[ReflTableSchema::ANGLE] = thetaByDesc[run->first];
+        row[ReflTableSchema::GROUP] = groupsByDesc[run->first];
         output.push_back(row);
       }
       std::sort(output.begin(), output.end());
