@@ -1,6 +1,7 @@
 #pylint: disable=no-init
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
-                        WorkspaceGroup, WorkspaceGroupProperty, Progress)
+                        WorkspaceGroup, WorkspaceGroupProperty, ITableWorkspaceProperty,
+                        Progress)
 from mantid.kernel import Direction
 from mantid.simpleapi import *
 
@@ -13,6 +14,7 @@ class ResNorm(PythonAlgorithm):
     _e_max = None
     _create_output = None
     _out_ws = None
+    _out_ws_table = None
 
 
     def category(self):
@@ -52,6 +54,9 @@ class ResNorm(PythonAlgorithm):
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                                                     direction=Direction.Output),
                              doc='Fitted parameter output')
+        self.declareProperty(ITableWorkspaceProperty('OutputWorkspaceTable', '',
+                                                    direction=Direction.Output),
+                             doc='Table workspace of fit parameters')
 
 
     def validateInputs(self):
@@ -81,6 +86,7 @@ class ResNorm(PythonAlgorithm):
         self._e_max = self.getProperty('EnergyMax').value
         self._create_output = self.getProperty('CreateOutput').value
         self._out_ws = self.getPropertyValue('OutputWorkspace')
+        self._out_ws_table = self.getPropertyValue('OutputWorkspaceTable')
 
 
     def PyExec(self):
@@ -130,6 +136,7 @@ class ResNorm(PythonAlgorithm):
         GroupWorkspaces(InputWorkspaces=result_workspaces,
                         OutputWorkspace=self._out_ws)
         self.setProperty('OutputWorkspace', self._out_ws)
+        self.setProperty('OutputWorkspaceTable', fit_params)
 
         DeleteWorkspace(van_ws)
         DeleteWorkspace(padded_res_ws)
