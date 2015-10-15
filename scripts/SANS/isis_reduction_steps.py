@@ -1216,7 +1216,8 @@ class TransmissionCalc(ReductionStep):
         as a function of wavelength. The results are stored as a workspace
     """
 
-    # The different ways of doing a fit, convert the possible ways of specifying this (also the way it is specified in the GUI to the way it can be send to CalculateTransmission
+    # The different ways of doing a fit, convert the possible ways of specifying this
+    #   (also the way it is specified in the GUI to the way it can be send to CalculateTransmission
     TRANS_FIT_OPTIONS = {
         'YLOG' : 'Log',
         'STRAIGHT' : 'Linear',
