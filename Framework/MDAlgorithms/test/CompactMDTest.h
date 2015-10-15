@@ -129,7 +129,7 @@ public:
     alg.setProperty("OutputWorkspace", "out");
     alg.execute();
     IMDHistoWorkspace_sptr outputWorkspace = alg.getProperty("OutputWorkspace");
-    /*TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
+    TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
                       outputWorkspace->getSignalAt(0), 1);
     TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
                       outputWorkspace->getSignalAt(2), 1);
@@ -160,7 +160,7 @@ public:
                       inWS->getDimension(0)->getBinWidth());
     TSM_ASSERT_EQUALS("Bin width for dim 1 should be consistent: ",
                       outputWorkspace->getDimension(1)->getBinWidth(),
-                      inWS->getDimension(1)->getBinWidth());*/
+                      inWS->getDimension(1)->getBinWidth());
   }
 
   void
@@ -236,6 +236,7 @@ public:
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error &);
   }
 };
+
 //===================
 // Performance Tests
 //===================
@@ -252,13 +253,22 @@ public:
     return new CompactMDTestPerformance();
   }
   static void destroySuite(CompactMDTestPerformance *suite) { delete suite; }
-
-  CompactMDTestPerformance() {
+  void setUp() {
     // Create a 4D workspace.
-    m_ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        1.0 /*signal*/, 4 /*nd*/, 100 /*nbins*/, 10 /*max*/, 1.0 /*error sq*/);
+    const size_t numDims = 4;
+    const double signal = 0.0;
+    const double errorSquared = 1.2;
+    size_t numBins[static_cast<int>(numDims)] = {3, 3, 3, 3};
+    Mantid::coord_t min[static_cast<int>(numDims)] = {-3, -3, -3, -3};
+    Mantid::coord_t max[static_cast<int>(numDims)] = {3, 3, 3, 3};
+    const std::string name("test");
+    m_ws = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
+        numDims, signal, errorSquared, numBins, min, max, name);
   }
   void test_execute_4d() {
+    m_ws->setSignalAt(0, 1.0);
+    m_ws->setSignalAt(5, 1.2);
+    m_ws->setSignalAt(1, 2.3);
     CompactMD alg;
     alg.setChild(true);
     alg.setRethrows(true);
