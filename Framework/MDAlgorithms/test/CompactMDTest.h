@@ -264,7 +264,6 @@ public:
     const std::string name("test");
     m_ws = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
         numDims, signal, errorSquared, numBins, min, max, name);
-
   }
   void test_execute_4d() {
     m_ws->setSignalAt(0, 1.0);
