@@ -25,6 +25,7 @@ void export_IObjComponent() {
 
   class_<IObjComponent, boost::python::bases<IComponent>, boost::noncopyable>(
       "IObjComponent", no_init)
-      .def("shape", &getShape, "Get the object that represents the physical "
-                               "shape of this component");
+      .def("shape", &getShape, arg("self"), "Get the object that represents "
+                                            "the physical shape of this "
+                                            "component");
 }

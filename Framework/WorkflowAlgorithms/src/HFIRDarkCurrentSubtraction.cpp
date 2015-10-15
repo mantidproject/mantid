@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/HFIRDarkCurrentSubtraction.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "Poco/Path.h"
 #include "Poco/String.h"
@@ -22,8 +22,7 @@ using namespace API;
 using namespace Geometry;
 
 void HFIRDarkCurrentSubtraction::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
-  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
+  auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
   declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
                                           Direction::Input, wsValidator));
 

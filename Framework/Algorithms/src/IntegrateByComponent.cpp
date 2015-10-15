@@ -1,5 +1,5 @@
 #include "MantidAlgorithms/IntegrateByComponent.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/HistogramValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include <gsl/gsl_statistics.h>
 #include <boost/math/special_functions/fpclassify.hpp>

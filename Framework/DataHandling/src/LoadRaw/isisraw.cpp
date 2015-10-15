@@ -460,7 +460,17 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
   //		ioRAW(file, &u_len, 1, from_file);
   if (from_file) {
     u_len = add.ad_data - add.ad_user - 2;
+
+    if (u_len < 0 || (add.ad_data < add.ad_user + 2)) {
+      // this will/would be used for memory allocation
+      std::cerr << "Error in u_len value read from file, it would be " << u_len
+                << "; where it is calculated as "
+                   "u_len = ad_data - ad_user - 2, where ad_data: "
+                << add.ad_data << ", ad_user: " << add.ad_user << std::endl;
+      return 0;
+    }
   }
+
   ioRAW(file, &u_dat, u_len, from_file);
   ioRAW(file, &ver8, 1, from_file);
   fgetpos(file, &dhdr_pos);
@@ -474,8 +484,12 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
     if (from_file) {
       ndes = t_nper * (t_nsp1 + 1);
       ioRAW(file, &ddes, ndes, from_file);
-      for (i = 0; i < ndes; i++)
-        fseek(file, 4 * ddes[i].nwords, SEEK_CUR);
+      for (i = 0; i < ndes; i++) {
+        int zero = fseek(file, 4 * ddes[i].nwords, SEEK_CUR);
+        if (0 != zero)
+          std::cerr << "Failed to seek position in file for index: " << i
+                    << "\n";
+      }
     }
   } else if (dhdr.d_comp == 0) {
     ndata = t_nper * (t_nsp1 + 1) * (t_ntc1 + 1);
@@ -527,15 +541,38 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
     dhdr.d_exp_filesize =
         uncomp_filesize /
         128; // in 512 byte blocks (vms default allocation unit)
-    fgetpos(file, &keep_pos);
+    int zero = fgetpos(file, &keep_pos);
+    if (!zero) {
+      std::cerr << "Error when getting file position: " << strerror(errno)
+                << std::endl;
+      return -1;
+    }
+
     // update section addresses
-    fsetpos(file, &add_pos);
+    zero = fsetpos(file, &add_pos);
+    if (!zero) {
+      std::cerr << "Error when setting file position: " << strerror(errno)
+                << std::endl;
+      return -1;
+    }
+
     ioRAW(file, &add, 1, from_file);
     // update data header and descriptors etc.
-    fsetpos(file, &dhdr_pos);
+    zero = fsetpos(file, &dhdr_pos);
+    if (!zero) {
+      std::cerr << "Error when setting file position to header: "
+                << strerror(errno) << std::endl;
+      return -1;
+    }
+
     ioRAW(file, &dhdr, 1, from_file);
     ioRAW(file, &ddes, ndes, from_file);
-    fsetpos(file, &keep_pos);
+    zero = fsetpos(file, &keep_pos);
+    if (!zero) {
+      std::cerr << "Error when restoring file position: " << strerror(errno)
+                << std::endl;
+      return -1;
+    }
   }
   return 0;
 }
@@ -669,16 +706,18 @@ int ISISRAW::ioRAW(FILE *file, LOG_LINE *s, int len, bool from_file) {
 
 /// stuff
 int ISISRAW::ioRAW(FILE *file, char *s, int len, bool from_file) {
-  size_t n;
   if ((len <= 0) || (s == 0)) {
     return 0;
   }
+
+  size_t n;
   if (from_file) {
     n = fread(s, sizeof(char), len, file);
     return static_cast<int>(n - len);
   } else {
     n = fwrite(s, sizeof(char), len, file);
   }
+
   return 0;
 }
 
@@ -687,11 +726,15 @@ int ISISRAW::ioRAW(FILE *file, int *s, int len, bool from_file) {
   if ((len <= 0) || (s == 0)) {
     return 0;
   }
+
+  size_t n;
   if (from_file) {
-    fread(s, sizeof(int), len, file);
+    n = fread(s, sizeof(int), len, file);
+    return static_cast<int>(n - len);
   } else {
-    fwrite(s, sizeof(int), len, file);
+    n = fwrite(s, sizeof(int), len, file);
   }
+
   return 0;
 }
 
@@ -700,10 +743,13 @@ int ISISRAW::ioRAW(FILE *file, uint32_t *s, int len, bool from_file) {
   if ((len <= 0) || (s == 0)) {
     return 0;
   }
+
+  size_t n;
   if (from_file) {
-    fread(s, sizeof(uint32_t), len, file);
+    n = fread(s, sizeof(uint32_t), len, file);
+    return static_cast<int>(n - len);
   } else {
-    fwrite(s, sizeof(uint32_t), len, file);
+    n = fwrite(s, sizeof(uint32_t), len, file);
   }
   return 0;
 }
@@ -714,12 +760,15 @@ int ISISRAW::ioRAW(FILE *file, float *s, int len, bool from_file) {
   if ((len <= 0) || (s == 0)) {
     return 0;
   }
+
+  size_t n;
   if (from_file) {
-    fread(s, sizeof(float), len, file);
+    n = fread(s, sizeof(float), len, file);
     vaxf_to_local(s, &len, &errcode);
+    return static_cast<int>(n - len);
   } else {
     local_to_vaxf(s, &len, &errcode);
-    fwrite(s, sizeof(float), len, file);
+    n = fwrite(s, sizeof(float), len, file);
     vaxf_to_local(s, &len, &errcode);
   }
   return 0;
@@ -894,36 +943,6 @@ int ISISRAW::readFromFile(const char *filename, bool read_data) {
   if (input_file != NULL) {
     ioRAW(input_file, true, read_data);
     fclose(input_file);
-    return 0;
-  } else {
-    return -1;
-  }
-}
-
-/// stuff
-int ISISRAW::writeToFile(const char *filename) {
-  unsigned char zero_pad[512];
-  memset(zero_pad, 0, sizeof(zero_pad));
-  remove(filename);
-#ifdef MS_VISUAL_STUDIO
-  FILE *output_file = NULL;
-  if (fopen_s(&output_file, filename, "w+bc") != 0) {
-    return -1;
-  }
-#else  //_WIN32
-  FILE *output_file = fopen(filename, "w+bc");
-#endif //_WIN32
-  if (output_file != NULL) {
-    ioRAW(output_file, false, 0);
-    fflush(output_file);
-    // we need to pad to a multiple of 512 bytes for VMS compatibility
-    fseek(output_file, 0, SEEK_END);
-    long pos = ftell(output_file);
-    if (pos % 512 > 0) {
-      int npad = 512 - pos % 512;
-      fwrite(zero_pad, 1, npad, output_file);
-    }
-    fclose(output_file);
     return 0;
   } else {
     return -1;

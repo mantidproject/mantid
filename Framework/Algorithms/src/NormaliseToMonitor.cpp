@@ -2,17 +2,19 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/NormaliseToMonitor.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <cfloat>
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/IPropertyManager.h"
+#include <numeric>
 
 using namespace Mantid::DataObjects;
 using Mantid::Kernel::IPropertyManager;

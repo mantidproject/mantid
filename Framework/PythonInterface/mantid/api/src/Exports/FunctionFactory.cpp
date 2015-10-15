@@ -89,15 +89,15 @@ void export_FunctionFactory() {
 
   class_<FunctionFactoryImpl, boost::noncopyable>("FunctionFactoryImpl",
                                                   no_init)
-      .def("getFunctionNames", &getFunctionNames,
+      .def("getFunctionNames", &getFunctionNames, arg("self"),
            "Returns a list of the currently available functions")
       .def("createFunction", &FunctionFactoryImpl::createFunction,
+           (arg("self"), arg("type")),
            "Return a pointer to the requested function")
-      .def("subscribe", &subscribe,
+      .def("subscribe", &subscribe, (arg("self"), arg("object")),
            "Register a Python class derived from IFunction into the factory")
       .def("unsubscribe", &FunctionFactoryImpl::unsubscribe,
-           "Remove a type from the factory")
-
+           (arg("self"), arg("class_name")), "Remove a type from the factory")
       .def("Instance", &FunctionFactory::Instance,
            return_value_policy<reference_existing_object>(),
            "Returns a reference to the FunctionFactory singleton")

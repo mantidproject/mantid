@@ -2,11 +2,11 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/MaskDetectors.h"
-#include "MantidAPI/FrameworkManager.h"
+
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/BoundedValidator.h"
 #include <set>
 

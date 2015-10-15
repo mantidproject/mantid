@@ -1,10 +1,13 @@
 #include "MantidAlgorithms/He3TubeEfficiency.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/cow_ptr.h"
+#include "MantidKernel/CompositeValidator.h"
+
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>

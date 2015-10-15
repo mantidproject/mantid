@@ -1,18 +1,21 @@
 #include "MantidAlgorithms/GetEi2.h"
 
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/IObjComponent.h"
+#include "MantidGeometry/muParser_Silent.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <boost/lexical_cast.hpp>
 #include <cmath>
 #include <algorithm>
 #include <sstream>
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidGeometry/muParser_Silent.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

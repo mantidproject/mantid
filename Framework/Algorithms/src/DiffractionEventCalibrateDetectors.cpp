@@ -4,27 +4,27 @@
 #include "MantidAlgorithms/DiffractionEventCalibrateDetectors.h"
 #include "MantidAlgorithms/GSLFunctions.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/IFunction.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidAPI/IFunction.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/BoundedValidator.h"
+
+#include <Poco/File.h>
 #include <cmath>
 #include <numeric>
-#include <Poco/File.h>
-#include <sstream>
 #include <fstream>
-#include "MantidDataObjects/GroupingWorkspace.h"
-#include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include <sstream>
 
 namespace Mantid {
 namespace Algorithms {

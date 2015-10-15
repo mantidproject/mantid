@@ -2,7 +2,6 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertToHistogram.h"
-#include "MantidAPI/WorkspaceValidators.h"
 
 namespace Mantid {
 namespace Algorithms {

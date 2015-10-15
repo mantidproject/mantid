@@ -33,3 +33,8 @@ std::ostream& OpenGLError::log()
 {
   return g_log.error();
 }
+
+std::ostream& OpenGLError::logDebug()
+{
+  return g_log.debug();
+}

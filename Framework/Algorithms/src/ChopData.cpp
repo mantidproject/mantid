@@ -1,5 +1,8 @@
 #include "MantidAlgorithms/ChopData.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 
 namespace Mantid {

@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {

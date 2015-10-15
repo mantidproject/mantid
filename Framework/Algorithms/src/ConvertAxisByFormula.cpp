@@ -1,8 +1,9 @@
 #include "MantidAlgorithms/ConvertAxisByFormula.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidGeometry/muParser_Silent.h"
+#include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/IncreasingAxisValidator.h"
 #include "MantidAPI/RefAxis.h"
+#include "MantidGeometry/muParser_Silent.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/shared_ptr.hpp>

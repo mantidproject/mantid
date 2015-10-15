@@ -2,19 +2,24 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertUnits.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/Run.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include <boost/function.hpp>
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/UnitFactory.h"
+
 #include <boost/bind.hpp>
+#include <boost/function.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
+
 #include <cfloat>
 #include <limits>
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
