@@ -151,16 +151,6 @@ namespace MantidQt
 
       void saveNotebook(std::map<int,std::set<int>> groups, std::set<int> rows);
 
-    public:
-      static const int COL_RUNS         = 0;
-      static const int COL_ANGLE        = 1;
-      static const int COL_TRANSMISSION = 2;
-      static const int COL_QMIN         = 3;
-      static const int COL_QMAX         = 4;
-      static const int COL_DQQ          = 5;
-      static const int COL_SCALE        = 6;
-      static const int COL_GROUP        = 7;
-      static const int COL_OPTIONS      = 8;
     };
   }
 }

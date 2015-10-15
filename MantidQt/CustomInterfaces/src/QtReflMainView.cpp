@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/QtReflMainView.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
+#include "MantidQtCustomInterfaces/ReflTableSchema.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtAPI/HelpWindow.h"
@@ -532,7 +533,7 @@ namespace MantidQt
     */
     void QtReflMainView::setOptionsHintStrategy(HintStrategy* hintStrategy)
     {
-      ui.viewTable->setItemDelegateForColumn(ReflMainViewPresenter::COL_OPTIONS, new HintingLineEditFactory(hintStrategy));
+      ui.viewTable->setItemDelegateForColumn(ReflTableSchema::COL_OPTIONS, new HintingLineEditFactory(hintStrategy));
     }
 
     /**

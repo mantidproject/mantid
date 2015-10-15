@@ -4,6 +4,7 @@
 #include <gmock/gmock.h>
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/ReflSearchModel.h"
+#include "MantidQtCustomInterfaces/ReflTableSchema.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidAPI/TableRow.h"
 
@@ -11,15 +12,15 @@ using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
 
 //Clean column ids for use within tests
-const int RunCol     = ReflMainViewPresenter::COL_RUNS;
-const int ThetaCol   = ReflMainViewPresenter::COL_ANGLE;
-const int TransCol   = ReflMainViewPresenter::COL_TRANSMISSION;
-const int QMinCol    = ReflMainViewPresenter::COL_QMIN;
-const int QMaxCol    = ReflMainViewPresenter::COL_QMAX;
-const int DQQCol     = ReflMainViewPresenter::COL_DQQ;
-const int ScaleCol   = ReflMainViewPresenter::COL_SCALE;
-const int GroupCol   = ReflMainViewPresenter::COL_GROUP;
-const int OptionsCol = ReflMainViewPresenter::COL_OPTIONS;
+const int RunCol     = ReflTableSchema::COL_RUNS;
+const int ThetaCol   = ReflTableSchema::COL_ANGLE;
+const int TransCol   = ReflTableSchema::COL_TRANSMISSION;
+const int QMinCol    = ReflTableSchema::COL_QMIN;
+const int QMaxCol    = ReflTableSchema::COL_QMAX;
+const int DQQCol     = ReflTableSchema::COL_DQQ;
+const int ScaleCol   = ReflTableSchema::COL_SCALE;
+const int GroupCol   = ReflTableSchema::COL_GROUP;
+const int OptionsCol = ReflTableSchema::COL_OPTIONS;
 
 class MockView : public ReflMainView
 {
