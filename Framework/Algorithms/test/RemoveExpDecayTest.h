@@ -89,7 +89,8 @@ public:
     auto ws = createWorkspace(2, 50);
 
     // First, run the algorithm without specifying any spectrum
-    IAlgorithm_sptr alg1 = AlgorithmManager::Instance().create("RemoveExpDecay");
+    IAlgorithm_sptr alg1 =
+        AlgorithmManager::Instance().create("RemoveExpDecay");
     alg1->initialize();
     alg1->setChild(true);
     alg1->setProperty("InputWorkspace", ws);
@@ -99,7 +100,8 @@ public:
     MatrixWorkspace_sptr out1 = alg1->getProperty("OutputWorkspace");
 
     // Then run the algorithm on the second spectrum only
-    IAlgorithm_sptr alg2 = AlgorithmManager::Instance().create("RemoveExpDecay");
+    IAlgorithm_sptr alg2 =
+        AlgorithmManager::Instance().create("RemoveExpDecay");
     alg2->initialize();
     alg2->setChild(true);
     alg2->setProperty("InputWorkspace", ws);
@@ -139,10 +141,9 @@ public:
     MatrixWorkspace_sptr result = alg->getProperty("OutputWorkspace");
     TS_ASSERT(result);
     TS_ASSERT_EQUALS(result->YUnitLabel(), "Asymmetry");
-
   }
 
-    MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
+  MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
 
     // Create a fake muon dataset
     double a = 0.1;   // Amplitude of the oscillations
