@@ -98,7 +98,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_setUBSliceView, QtCore.SIGNAL('clicked()'),
                      self.do_set_ub_sv)
         self.connect(self.ui.pushButton_process4SliceView, QtCore.SIGNAL('clicked()'),
-                     self.do_process_for_sv)
+                     self.do_merge_scans)
 
         # Tab 'Advanced'
         self.connect(self.ui.pushButton_useDefaultDir, QtCore.SIGNAL('clicked()'),
@@ -152,6 +152,7 @@ class MainWindow(QtGui.QMainWindow):
         # Initial setup
         self.ui.tabWidget.setCurrentIndex(0)
         self.ui.tabWidget.setTabEnabled(4, False)
+        self.ui.tabWidget.setTabEnabled(5, False)
         self._init_ub_table()
         self.ui.radioButton_ubFromTab1.setChecked(True)
 
@@ -243,7 +244,7 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(int_list)
         exp_no, scan_no, pt_no = int_list
 
-        # Get HKL
+        # Get HKL from GUI
         status, float_list = gutil.parse_float_editors([self.ui.lineEdit_H,
                                                         self.ui.lineEdit_K,
                                                         self.ui.lineEdit_L])
@@ -253,20 +254,19 @@ class MainWindow(QtGui.QMainWindow):
             return
         h, k, l = float_list
 
-        status, peakinfo = self._myControl.get_peak_info(exp_no, scan_no, pt_no)
+        status, peak_info_obj = self._myControl.get_peak_info(exp_no, scan_no, pt_no)
         if status is False:
-            error_message = peakinfo
+            error_message = peak_info_obj
             self.pop_one_button_dialog(error_message)
             return
-        assert isinstance(peakinfo, r4c.PeakInfo)
+        assert isinstance(peak_info_obj, r4c.PeakInfo)
 
-        # h, k, l = peak_info.get_hkl_peak_ws()
         if self.ui.checkBox_roundHKLInt.isChecked():
             h = math.copysign(1, h)*int(abs(h)+0.5)
             k = math.copysign(1, k)*int(abs(k)+0.5)
             l = math.copysign(1, l)*int(abs(l)+0.5)
-        peakinfo.set_user_hkl(h, k, l)
-        self.set_ub_peak_table(peakinfo)
+        peak_info_obj.set_user_hkl(h, k, l)
+        self.set_ub_peak_table(peak_info_obj)
 
         # Clear
         self.ui.lineEdit_scanNumber.setText('')
@@ -285,7 +285,7 @@ class MainWindow(QtGui.QMainWindow):
     def doAcceptCalUB(self):
         """ Accept the calculated UB matrix
         """
-
+        raise RuntimeError('ASAP')
         return
 
     def doAddScanPtToRefineUB(self):
@@ -373,8 +373,8 @@ class MainWindow(QtGui.QMainWindow):
         for i_row in xrange(num_rows):
             if self.ui.tableWidget_peaksCalUB.is_selected(i_row) is True:
                 scan_num, pt_num = self.ui.tableWidget_peaksCalUB.get_exp_info(i_row)
-                # h, k, l = self.ui.tableWidget_peaksCalUB.get_hkl(i_row)
-                status, peak_info = self._myControl.add_peak_info(exp_number, scan_num, pt_num)
+                status, peak_info = self._myControl.get_peak_info(exp_number, scan_num, pt_num)
+                peak_info.set_peak_ws_hkl_from_user()
                 if status is False:
                     self.pop_one_button_dialog(peak_info)
                     return
@@ -670,7 +670,7 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_process_for_sv(self):
+    def do_merge_scans(self):
         """ Process data for slicing view
         :return:
         """
@@ -745,7 +745,6 @@ class MainWindow(QtGui.QMainWindow):
             if status is False:
                 error_message = peak_info
                 raise RuntimeError(error_message)
-            peak_info.reset_hkl()
             h, k, l = peak_info.get_user_hkl()
             self.ui.tableWidget_peaksCalUB.update_hkl(i_row, h, k, l)
         # END-FOR

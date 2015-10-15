@@ -89,19 +89,24 @@ Workflow to merge measurements in scan
 
 Here is a typical use case to merge all the measuring points (Pt.) in a scan.
 
- 1. User specifies *Exp Number* and pushes button *Set*
+ 1. User specifies *Experiment* and pushes button *Set*
  
  2. User enters tab *Merge Scan*
 
- 3. User specifies the UB matrix either by *From Tab UB* or by entering the values to text editor
+ 3. User specifies the UB matrix either by *From tab Calculate UB* or by entering the values to text editor
 
- 4. User specifies the frame in which the merged data will be in
+ 4. User pushes button *Set*.
 
- 5. User specifies the scan number and root name for the output MDEventWorkspace
+ 5. User specifies the frame in which the merged data will be in. If the target frame is Q-Sample-Sapce, then there is 
+     no need to specify UB matrix;
 
- 6. User pushes button *Merge*
+ 6. User specifies the scan numbers and push button *Add*;
+     
+ 7. User specifies the base name for the output MDEventWorkspaces;
 
- 7. User goes to MantidPlot to view the merged scan by SliceView or Vates.
+ 8. User pushes button *Process*;
+
+ 9. User goes to MantidPlot to view the merged scan by SliceView or Vates.
 
 
 

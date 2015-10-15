@@ -43,7 +43,8 @@ class PeakInfo(object):
 
         self._myPeakWSKey = (None, None, None)
         self._myPeakIndex = None
-        self._myPeakWS = None
+        # IPeak instance
+        self._myPeak = None
 
         self._myLastPeakUB = None
 
@@ -63,7 +64,7 @@ class PeakInfo(object):
         """ Get HKL from PeakWorkspace
         :return:
         """
-        hkl = self._myPeakWS.getHKL()
+        hkl = self._myPeak.getHKL()
 
         return hkl.getX(), hkl.getY(), hkl.getZ()
 
@@ -91,7 +92,7 @@ class PeakInfo(object):
         if status is True:
             self._myPeakWSKey = (exp_number, scan_number, pt_number)
             self._myPeakIndex = 0
-            self._myPeakWS = peak_ws.getPeak(0)
+            self._myPeak = peak_ws.getPeak(0)
         else:
             error_message = peak_ws
             return False, error_message
@@ -117,7 +118,25 @@ class PeakInfo(object):
         except RuntimeError as run_err:
             raise RuntimeError(run_err)
 
-        self._myPeakWS = peak
+        self._myPeak = peak
+
+        return
+
+    def set_peak_ws_hkl_from_user(self):
+        """
+
+        :return:
+        """
+        # Check
+        if isinstance(self._myPeak, mantid.api.IPeak) is False:
+            raise RuntimeError('self._myPeakWS should be an instance of  mantid.api.IPeak. '
+                               'But it is of instance of %s now.' % str(type(self._myPeak)))
+
+        # Get hkl
+        h, k, l = self._userHKL
+        print '[DB] PeakInfo Get User HKL = (%f, %f, %f) to IPeak ' % (h, k, l)
+
+        self._myPeak.setHKL(h, k, l)
 
         return
 
@@ -134,6 +153,8 @@ class PeakInfo(object):
         self._userHKL[1] = k
         self._userHKL[2] = l
 
+        print '[DB] PeakInfo Set User HKL to (%f, %f, %f) ' % (self._userHKL[0], self._userHKL[1], self._userHKL[2])
+
         return
 
     def getExpInfo(self):
@@ -148,7 +169,7 @@ class PeakInfo(object):
 
         :return: 3-tuple of floats as Qx, Qy, Qz
         """
-        q_sample = self._myPeakWS.getQSampleFrame()
+        q_sample = self._myPeak.getQSampleFrame()
         return q_sample.getX(), q_sample.getY(), q_sample.getZ()
 
 
@@ -268,9 +289,11 @@ class CWSCDReductionControl(object):
         # END-FOR(i_peak_info)
 
         # Calculate UB matrix
-        api.CalculateUMatrix(PeaksWorkspace=ub_peak_ws_name,
-                             a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma)
-        # ub_peak_ws = AnalysisDataService.retrieve(ub_peak_ws_name)
+        try:
+            api.CalculateUMatrix(PeaksWorkspace=ub_peak_ws_name,
+                                 a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma)
+        except ValueError as val_err:
+            return False, str(val_err)
 
         ub_matrix = ub_peak_ws.sample().getOrientedLattice().getUB()
 
@@ -608,6 +631,8 @@ class CWSCDReductionControl(object):
                                                 str(self._myUBPeakWSDict.keys()))
             return False, err_msg
 
+        print '[DB] PeakInfoDictionary Keys = %s' % str(self._myPeakInfoDict.keys())
+
         return True, self._myPeakInfoDict[(exp_number, scan_number, pt_number)]
 
     def get_ub_peak_ws(self, exp_number, scan_number, pt_number):
@@ -816,6 +841,7 @@ class CWSCDReductionControl(object):
             print '[DB] Data directory: %s' % self._dataDir
         max_pts = 0
         ws_names_str = ''
+        ws_names_to_group = ''
 
         for pt in pt_num_list:
             try:
@@ -832,12 +858,14 @@ class CWSCDReductionControl(object):
                                              OutputWorkspace=out_q_name,
                                              Directory=self._dataDir)
 
+                ws_names_to_group += out_q_name + ','
                 if target_frame == 'hkl':
                     out_hkl_name = 'HKL_Scan%d_Pt%d' % (scan_no, pt)
                     api.ConvertCWSDMDtoHKL(InputWorkspace=out_q_name,
                                            UBMatrix=ub_matrix_1d,
                                            OutputWorkspace=out_hkl_name)
                     ws_names_str += out_hkl_name + ','
+                    ws_names_to_group += out_hkl_name + ','
                 else:
                     ws_names_str += out_q_name + ','
 
@@ -862,7 +890,7 @@ class CWSCDReductionControl(object):
 
         # Group workspaces
         group_name = 'Group_Exp406_Scan%d' % scan_no
-        api.GroupWorkspaces(InputWorkspaces=ws_names_str, OutputWorkspace=group_name)
+        api.GroupWorkspaces(InputWorkspaces=ws_names_to_group, OutputWorkspace=group_name)
         spice_table_name = get_spice_table_name(exp_no, scan_no)
         api.GroupWorkspaces(InputWorkspaces='%s,%s' % (group_name, spice_table_name), OutputWorkspace=group_name)
 
