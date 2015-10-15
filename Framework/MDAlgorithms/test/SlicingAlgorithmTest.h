@@ -438,7 +438,7 @@ public:
   }
 
 
-  void test_makeBasisVectorFromStringWithPureQSampleInput() {
+  void test_makeBasisVectorFromString_WithPureQSampleInput() {
     // Test WITH and WITHOUT basis vector normalization
     for (int normalize = 0; normalize < 2; normalize++) {
       SlicingAlgorithmImpl alg;
@@ -495,9 +495,86 @@ public:
     }
   }
 
+  void test_makeBasisVectorFromString_WithMixedMDFrames_AndBasisVectorNotMixed() {
+    // Test WITH and WITHOUT basis vector normalization
+    for (int normalize = 0; normalize < 2; normalize++) {
+      SlicingAlgorithmImpl alg;
+      alg.m_inWS = wsMixedFrames; // First three dimensions are Q Sample
+                                  // the last is General Frame
+      // Set up data that comes from other properties
+      alg.m_minExtents.push_back(-5.0);
+      alg.m_maxExtents.push_back(+5.0);
+      alg.m_numBins.push_back(20);
+      alg.m_NormalizeBasisVectors = (normalize > 0);
+      
+      TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
+      TSM_ASSERT_THROWS_NOTHING(
+          "", alg.makeBasisVectorFromString(
+                  " name, units  , 1,2,3,0")); // Basis vector is in QSample
+                                               // sub-space
+      TS_ASSERT_EQUALS(alg.m_bases.size(), 1);
+      TS_ASSERT_EQUALS(alg.m_binDimensions.size(), 1);
+      TS_ASSERT_EQUALS(alg.m_binningScaling.size(), 1);
+      TS_ASSERT_EQUALS(alg.m_transformScaling.size(), 1);
 
+      VMD basis(1., 2., 3., 0.);
+      if (alg.m_NormalizeBasisVectors)
+        basis.normalize();
 
+      TS_ASSERT_EQUALS(alg.m_bases[0], basis);
+      IMDDimension_sptr dim = alg.m_binDimensions[0];
+      TS_ASSERT_EQUALS(dim->getName(), "name");
+      TSM_ASSERT("The units selection is ignored", dim->getUnits() != "units");
+      TS_ASSERT_EQUALS(
+          dim->getUnits(),
+          Mantid::Kernel::InverseAngstromsUnit().getUnitLabel().ascii());
+      TSM_ASSERT_THROWS_NOTHING(
+          "Should be a QSample",
+          dynamic_cast<const Mantid::Geometry::QSample &>(dim->getMDFrame()))
 
+      TS_ASSERT_EQUALS(dim->getNBins(), 20);
+      TS_ASSERT_EQUALS(dim->getMinimum(), -5);
+      TS_ASSERT_EQUALS(dim->getMaximum(), +5);
+      TS_ASSERT_DELTA(dim->getX(5), -2.5, 1e-5);
+
+      if (alg.m_NormalizeBasisVectors) {
+        TSM_ASSERT_DELTA("Unit transformation scaling if normalizing",
+                         alg.m_transformScaling[0], 1.0, 1e-5);
+        TSM_ASSERT_DELTA("A bin ranges from 0-0.5 in OUTPUT, which is 0.5 long "
+                         "in the INPUT, "
+                         "so the binningScaling is 2.",
+                         alg.m_binningScaling[0], 2., 1e-5);
+      } else {
+        TSM_ASSERT_DELTA("Length sqrt(14) in INPUT = 1.0 in output",
+                         alg.m_transformScaling[0], sqrt(1.0 / 14.0), 1e-5);
+        TSM_ASSERT_DELTA("A bin ranges from 0-0.5 in OUTPUT, which is "
+                         "0.5/sqrt(14) long in the INPUT, "
+                         "so the binningScaling is 2/sqrt(14)",
+                         alg.m_binningScaling[0], 2. / sqrt(14.0), 1e-5);
+      }
+    }
+  }
+
+  void
+  test_makeBasisVectorFromString_WithMixedMDFrames_AndBasisVectorMixed() {
+    // Test WITH and WITHOUT basis vector normalization
+    for (int normalize = 0; normalize < 2; normalize++) {
+      SlicingAlgorithmImpl alg;
+      alg.m_inWS = wsMixedFrames; // First three dimensions are Q Sample
+                                  // the last is General Frame
+      // Set up data that comes from other properties
+      alg.m_minExtents.push_back(-5.0);
+      alg.m_maxExtents.push_back(+5.0);
+      alg.m_numBins.push_back(20);
+      alg.m_NormalizeBasisVectors = (normalize > 0);
+
+      TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
+      TSM_ASSERT_THROWS(
+          "BASIS vector is NOT IN QSample sub-space",
+          alg.makeBasisVectorFromString(" name, units , 1,2,3,1"),
+          std::runtime_error);
+    }
+  }
 
   /// Create a basis vector with a dimension with [commas,etc] in the name.
   void test_makeBasisVectorFromString_NameWithCommas() {
@@ -730,22 +807,6 @@ public:
     TS_ASSERT(!func->isPointContained(VMD(1.5, 1.5, 1.5, 11.5)));
   }
 
-  void test_createGeneralTransform_4D_to_4D_with_mixed_frames() {
-    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
-        wsMixedFrames, "OutX, m, 1,0,0,0", "OutY, m, 0,1,0,0", "OutZ, m, 0,0,1,0",
-        "OutE,m, 0,0,0,1", VMD(1, 1, 1, 1), "0,10,0,10,0,10,0,10", "5,5,5,5");
-    TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
-
-    // The implicit function
-    MDImplicitFunction *func(NULL);
-    TS_ASSERT_THROWS_NOTHING(func =
-                                 alg->getImplicitFunctionForChunk(NULL, NULL));
-    TS_ASSERT(func);
-    TS_ASSERT_EQUALS(func->getNumPlanes(), 8);
-    TS_ASSERT(func->isPointContained(VMD(1.5, 1.5, 1.5, 1.5)));
-    TS_ASSERT(!func->isPointContained(VMD(1.5, 1.5, 1.5, -1.5)));
-    TS_ASSERT(!func->isPointContained(VMD(1.5, 1.5, 1.5, 11.5)));
-  }
 
   /** 4D "left-handed" coordinate system
    * obtained by flipping the Y basis vector.  */
