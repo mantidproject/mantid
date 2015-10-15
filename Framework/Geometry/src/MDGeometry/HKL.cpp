@@ -69,5 +69,16 @@ HKL::equivalientSpecialCoordinateSystem() const {
   return Mantid::Kernel::SpecialCoordinateSystem::HKL;
 }
 
+bool HKL::isQ() const { return true; }
+
+bool HKL::isSameType(const MDFrame &frame) const {
+  auto isSameType = true;
+  try {
+    dynamic_cast<const HKL &>(frame);
+  } catch (std::bad_cast &) {
+    isSameType = false;
+  }
+  return isSameType;
+}
 } // namespace Geometry
 } // namespace Mantid

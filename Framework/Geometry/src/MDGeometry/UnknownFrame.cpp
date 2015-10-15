@@ -35,5 +35,20 @@ UnknownFrame::equivalientSpecialCoordinateSystem() const {
 UnknownFrame *UnknownFrame::clone() const {
   return new UnknownFrame(std::unique_ptr<Kernel::MDUnit>(m_unit->clone()));
 }
+
+bool UnknownFrame::isQ() const{
+  return false;
+}
+
+bool UnknownFrame::isSameType(const MDFrame &frame) const {
+  auto isSameType = true;
+  try {
+    dynamic_cast<const UnknownFrame &>(frame);
+  } catch (std::bad_cast &) {
+    isSameType = false;
+  }
+  return isSameType;
+}
+
 }
 }

@@ -76,6 +76,26 @@ void addMDDimensionsWithFrames(
 }
 
 template <typename MDE, size_t nd>
+void addMDDimensionsWithIndividualFrames(
+    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> out,
+    Mantid::coord_t min, Mantid::coord_t max,
+    std::vector<Mantid::Geometry::MDFrame_sptr> frame,
+    std::string axisNameFormat, std::string axisIdFormat) {
+  for (size_t d = 0; d < nd; d++) {
+    char name[200];
+    sprintf(name, axisNameFormat.c_str(), d);
+    char id[200];
+    sprintf(id, axisIdFormat.c_str(), d);
+
+    // Use the same frame for all dimensions
+    auto dim = boost::make_shared<Mantid::Geometry::MDHistoDimension>(
+        std::string(name), std::string(id), *frame[d], min, max, 10);
+    out->addDimension(dim);
+  }
+  out->initialize();
+}
+
+template <typename MDE, size_t nd>
 void addData(
     boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> out,
     size_t splitInto, Mantid::coord_t min, Mantid::coord_t max,
@@ -197,6 +217,47 @@ makeAnyMDEW(size_t splitInto, coord_t min, coord_t max,
   return out;
 }
 
+
+/** Create a test MDEventWorkspace<nd> . Dimensions are names Axis0, Axis1, etc.
+ *  But you can set an MDFrame. The frames can be set individually.
+ *
+ * @param splitInto :: each dimension will split into this many subgrids
+ * @param min :: extent of each dimension (min)
+ * @param max :: extent of each dimension (max)
+ * @param frames:: the chosen frame
+ * @param numEventsPerBox :: will create one MDLeanEvent in the center of each
+ *sub-box.
+ *        0 = don't split box, don't add events
+ * @param wsName :: if specified, then add the workspace to the analysis data
+ *service
+ * @param axisNameFormat :: string for the axis name, processed via sprintf()
+ * @param axisIdFormat :: string for the axis ID, processed via sprintf()
+ * @return shared ptr to the created workspace
+ */
+template <typename MDE, size_t nd>
+boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>>
+makeAnyMDEWWithIndividualFrames(size_t splitInto, coord_t min, coord_t max,
+                      std::vector<Mantid::Geometry::MDFrame_sptr>frames,
+                      size_t numEventsPerBox = 0, std::string wsName = "",
+                      std::string axisNameFormat = "Axis%d",
+                      std::string axisIdFormat = "Axis%d") {
+  // Create bare workspace
+  auto out = createOutputWorkspace<MDE, nd>(splitInto);
+
+  // Add standard dimensions
+  addMDDimensionsWithIndividualFrames<MDE, nd>(out, min, max, frames, axisNameFormat,
+                                     axisIdFormat);
+
+  // Add data
+  addData<MDE, nd>(out, splitInto, min, max, numEventsPerBox);
+
+  // Add to ADS on option
+  if (!wsName.empty())
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(wsName, out);
+
+  return out;
+}
+
 /** Create a test MDEventWorkspace<nd> . Dimensions are names Axis0, Axis1, etc.
  *  But you can set an MDFrame. For now the same frame for all dimensions
  *  is used.
@@ -255,6 +316,18 @@ makeMDEWWithFrames(size_t splitInto, coord_t min, coord_t max,
   return makeAnyMDEWWithFrames<MDLeanEvent<nd>, nd>(splitInto, min, max, frame,
                                                     numEventsPerBox);
 }
+
+/** Make a MDEventWorkspace with MDLeanEvents and individual MDFrames*/
+template <size_t nd>
+boost::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>, nd>>
+makeMDEWWithIndividualFrames(size_t splitInto, coord_t min, coord_t max,
+                   std::vector<Mantid::Geometry::MDFrame_sptr> frame,
+                   size_t numEventsPerBox = 0) {
+  return makeAnyMDEWWithIndividualFrames<MDLeanEvent<nd>, nd>(splitInto, min, max, frame,
+                                                    numEventsPerBox);
+}
+
+
 
 /** Make a MDEventWorkspace with MDEvents  - updated to split dims by splitInto,
  * not 10 */

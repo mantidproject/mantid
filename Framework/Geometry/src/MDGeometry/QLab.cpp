@@ -40,5 +40,19 @@ QLab::equivalientSpecialCoordinateSystem() const {
   return Mantid::Kernel::SpecialCoordinateSystem::QLab;
 }
 
+bool QLab::isQ() const {
+  return true;
+}
+
+bool QLab::isSameType(const MDFrame& frame) const {
+  auto isSameType = true;
+  try {
+    dynamic_cast<const QLab&>(frame);
+  } catch (std::bad_cast&) {
+    isSameType = false;
+  }
+  return isSameType;
+}
+
 } // namespace Geometry
 } // namespace Mantid

@@ -42,5 +42,17 @@ GeneralFrame::equivalientSpecialCoordinateSystem() const {
   return Mantid::Kernel::SpecialCoordinateSystem::None;
 }
 
+bool GeneralFrame::isQ() const { return false; }
+
+bool GeneralFrame::isSameType(const MDFrame &frame) const {
+  auto isSameType = true;
+  try {
+    dynamic_cast<const GeneralFrame &>(frame);
+  } catch (std::bad_cast &) {
+    isSameType = false;
+  }
+  return isSameType;
+}
+
 } // namespace Geometry
 } // namespace Mantid

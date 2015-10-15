@@ -4,9 +4,11 @@
 #include "MantidKernel/VMD.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-
+#include "MantidKernel/MDUnit.h"
+#include "MantidKernel/UnitLabel.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
@@ -48,6 +50,8 @@ public:
   IMDEventWorkspace_sptr ws3;
   IMDEventWorkspace_sptr ws4;
   IMDEventWorkspace_sptr ws5;
+  IMDEventWorkspace_sptr wsQSample;
+  IMDEventWorkspace_sptr wsMixedFrames;
   IMDEventWorkspace_sptr ws_names;
 
   SlicingAlgorithmTest() {
@@ -57,6 +61,19 @@ public:
     ws3 = MDEventsTestHelper::makeMDEW<3>(5, 0.0, 10.0, 1);
     ws4 = MDEventsTestHelper::makeMDEW<4>(5, 0.0, 10.0, 1);
     ws5 = MDEventsTestHelper::makeMDEW<5>(5, 0.0, 10.0, 1);
+    // Workspace with QSample frames
+    Mantid::Geometry::QSample qSampleFrame;
+    wsQSample = MDEventsTestHelper::makeMDEWWithFrames<3>(5, 0.0, 10.0,
+                                                          qSampleFrame, 1);
+    // Workspace with mixed frames
+    std::vector<Mantid::Geometry::MDFrame_sptr> frames;
+    frames.push_back(std::make_shared<Mantid::Geometry::QSample>());
+    frames.push_back(std::make_shared<Mantid::Geometry::QSample>());
+    frames.push_back(std::make_shared<Mantid::Geometry::QSample>());
+    frames.push_back(std::make_shared<Mantid::Geometry::GeneralFrame>(
+        Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m"));
+    wsMixedFrames = MDEventsTestHelper::makeMDEWWithIndividualFrames<4>(
+        5, 0.0, 10.0, frames, 1);
     /// Workspace with custom names
     ws_names = MDEventsTestHelper::makeAnyMDEW<MDEvent<3>, 3>(
         3, 0.0, 10.0, 1, "", "[%dh,k,l]", "Q%d");
@@ -95,7 +112,7 @@ public:
         alg.makeAlignedDimensionFromString("Axis0, 11.0, 9.0"));
   }
 
-  void test_makeAlignedDimensionFromString() {
+    void test_makeAlignedDimensionFromString() {
     SlicingAlgorithmImpl alg;
     alg.m_inWS = ws;
     TSM_ASSERT_THROWS_NOTHING(
@@ -108,6 +125,28 @@ public:
     IMDDimension_sptr dim = alg.m_binDimensions[0];
     TS_ASSERT_EQUALS(dim->getName(), "Axis2");
     TS_ASSERT_EQUALS(dim->getUnits(), "m");
+    TS_ASSERT_EQUALS(dim->getNBins(), 10);
+    TS_ASSERT_EQUALS(dim->getX(10), 9.0);
+  }
+
+  void test_makeAlignedDimensionFromStringWithMDFrameSetToQSample() {
+    SlicingAlgorithmImpl alg;
+    alg.m_inWS = wsQSample;
+    TSM_ASSERT_THROWS_NOTHING(
+        "", alg.makeAlignedDimensionFromString("Axis2, 1.0, 9.0, 10"));
+    TS_ASSERT_EQUALS(alg.m_dimensionToBinFrom.size(), 1);
+    TS_ASSERT_EQUALS(alg.m_binDimensions.size(), 1);
+
+    TS_ASSERT_EQUALS(alg.m_dimensionToBinFrom[0], 2);
+
+    IMDDimension_sptr dim = alg.m_binDimensions[0];
+    TS_ASSERT_EQUALS(dim->getName(), "Axis2");
+    TS_ASSERT_EQUALS(
+        dim->getUnits(),
+        Mantid::Kernel::InverseAngstromsUnit().getUnitLabel().ascii());
+    TSM_ASSERT_THROWS_NOTHING(
+        "Should be a QSample",
+        dynamic_cast<const Mantid::Geometry::QSample &>(dim->getMDFrame()))
     TS_ASSERT_EQUALS(dim->getNBins(), 10);
     TS_ASSERT_EQUALS(dim->getX(10), 9.0);
   }
@@ -373,7 +412,8 @@ public:
       TS_ASSERT_EQUALS(alg.m_bases[0], basis);
       IMDDimension_sptr dim = alg.m_binDimensions[0];
       TS_ASSERT_EQUALS(dim->getName(), "name");
-      TS_ASSERT_EQUALS(dim->getUnits(), "units");
+      TSM_ASSERT("The units selection is ignored", dim->getUnits() != "units");
+      TSM_ASSERT("The unit is in m", dim->getUnits() == "m");
       TS_ASSERT_EQUALS(dim->getNBins(), 20);
       TS_ASSERT_EQUALS(dim->getMinimum(), -5);
       TS_ASSERT_EQUALS(dim->getMaximum(), +5);
@@ -396,6 +436,68 @@ public:
       }
     }
   }
+
+
+  void test_makeBasisVectorFromStringWithPureQSampleInput() {
+    // Test WITH and WITHOUT basis vector normalization
+    for (int normalize = 0; normalize < 2; normalize++) {
+      SlicingAlgorithmImpl alg;
+      alg.m_inWS = wsQSample; // All dimensions are QSample
+      // Set up data that comes from other properties
+      alg.m_minExtents.push_back(-5.0);
+      alg.m_maxExtents.push_back(+5.0);
+      alg.m_numBins.push_back(20);
+      alg.m_NormalizeBasisVectors = (normalize > 0);
+
+      TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
+      TSM_ASSERT_THROWS_NOTHING(
+          "", alg.makeBasisVectorFromString(" name, units  , 1,2,3"));
+      TS_ASSERT_EQUALS(alg.m_bases.size(), 1);
+      TS_ASSERT_EQUALS(alg.m_binDimensions.size(), 1);
+      TS_ASSERT_EQUALS(alg.m_binningScaling.size(), 1);
+      TS_ASSERT_EQUALS(alg.m_transformScaling.size(), 1);
+
+      VMD basis(1., 2., 3.);
+      if (alg.m_NormalizeBasisVectors)
+        basis.normalize();
+
+      TS_ASSERT_EQUALS(alg.m_bases[0], basis);
+      IMDDimension_sptr dim = alg.m_binDimensions[0];
+      TS_ASSERT_EQUALS(dim->getName(), "name");
+      TSM_ASSERT("The units selection is ignored", dim->getUnits() != "units");
+      TS_ASSERT_EQUALS(
+          dim->getUnits(),
+          Mantid::Kernel::InverseAngstromsUnit().getUnitLabel().ascii());
+      TSM_ASSERT_THROWS_NOTHING(
+          "Should be a QSample",
+          dynamic_cast<const Mantid::Geometry::QSample &>(dim->getMDFrame()))
+
+      TS_ASSERT_EQUALS(dim->getNBins(), 20);
+      TS_ASSERT_EQUALS(dim->getMinimum(), -5);
+      TS_ASSERT_EQUALS(dim->getMaximum(), +5);
+      TS_ASSERT_DELTA(dim->getX(5), -2.5, 1e-5);
+
+      if (alg.m_NormalizeBasisVectors) {
+        TSM_ASSERT_DELTA("Unit transformation scaling if normalizing",
+                         alg.m_transformScaling[0], 1.0, 1e-5);
+        TSM_ASSERT_DELTA("A bin ranges from 0-0.5 in OUTPUT, which is 0.5 long "
+                         "in the INPUT, "
+                         "so the binningScaling is 2.",
+                         alg.m_binningScaling[0], 2., 1e-5);
+      } else {
+        TSM_ASSERT_DELTA("Length sqrt(14) in INPUT = 1.0 in output",
+                         alg.m_transformScaling[0], sqrt(1.0 / 14.0), 1e-5);
+        TSM_ASSERT_DELTA("A bin ranges from 0-0.5 in OUTPUT, which is "
+                         "0.5/sqrt(14) long in the INPUT, "
+                         "so the binningScaling is 2/sqrt(14)",
+                         alg.m_binningScaling[0], 2. / sqrt(14.0), 1e-5);
+      }
+    }
+  }
+
+
+
+
 
   /// Create a basis vector with a dimension with [commas,etc] in the name.
   void test_makeBasisVectorFromString_NameWithCommas() {
@@ -424,7 +526,8 @@ public:
     IMDDimension_sptr dim = alg.m_binDimensions[0];
     TS_ASSERT_EQUALS(dim->getName(), "[Dumb,Name]");
     TS_ASSERT_EQUALS(dim->getDimensionId(), "[Dumb,Name]");
-    TS_ASSERT_EQUALS(dim->getUnits(), "units");
+    TSM_ASSERT("The units selection is ignored", dim->getUnits() != "units");
+    TSM_ASSERT("The unit is in m", dim->getUnits() == "m");
     TS_ASSERT_EQUALS(dim->getNBins(), 20);
     TS_ASSERT_EQUALS(dim->getMinimum(), -5);
     TS_ASSERT_EQUALS(dim->getMaximum(), +5);
@@ -613,6 +716,23 @@ public:
   void test_createGeneralTransform_4D_to_4D() {
     SlicingAlgorithmImpl *alg = do_createGeneralTransform(
         ws4, "OutX,m, 1,0,0,0", "OutY,m, 0,1,0,0", "OutZ,m, 0,0,1,0",
+        "OutE,m, 0,0,0,1", VMD(1, 1, 1, 1), "0,10,0,10,0,10,0,10", "5,5,5,5");
+    TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
+
+    // The implicit function
+    MDImplicitFunction *func(NULL);
+    TS_ASSERT_THROWS_NOTHING(func =
+                                 alg->getImplicitFunctionForChunk(NULL, NULL));
+    TS_ASSERT(func);
+    TS_ASSERT_EQUALS(func->getNumPlanes(), 8);
+    TS_ASSERT(func->isPointContained(VMD(1.5, 1.5, 1.5, 1.5)));
+    TS_ASSERT(!func->isPointContained(VMD(1.5, 1.5, 1.5, -1.5)));
+    TS_ASSERT(!func->isPointContained(VMD(1.5, 1.5, 1.5, 11.5)));
+  }
+
+  void test_createGeneralTransform_4D_to_4D_with_mixed_frames() {
+    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
+        wsMixedFrames, "OutX, m, 1,0,0,0", "OutY, m, 0,1,0,0", "OutZ, m, 0,0,1,0",
         "OutE,m, 0,0,0,1", VMD(1, 1, 1, 1), "0,10,0,10,0,10,0,10", "5,5,5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
 

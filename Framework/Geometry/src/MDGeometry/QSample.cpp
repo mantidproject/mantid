@@ -35,5 +35,17 @@ QSample::equivalientSpecialCoordinateSystem() const {
   return Mantid::Kernel::SpecialCoordinateSystem::QSample;
 }
 
+bool QSample::isQ() const { return true; }
+
+bool QSample::isSameType(const MDFrame &frame) const {
+  auto isSameType = true;
+  try {
+    dynamic_cast<const QSample &>(frame);
+  } catch (std::bad_cast &) {
+    isSameType = false;
+  }
+  return isSameType;
+}
+
 } // namespace Geometry
 } // namespace Mantid

@@ -41,6 +41,8 @@ public:
   Mantid::Kernel::UnitLabel getUnitLabel() const;
   const Mantid::Kernel::MDUnit &getMDUnit() const;
   bool canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const;
+  bool isQ() const;
+  bool isSameType(const MDFrame& frame) const;
   virtual std::string name() const;
   QLab *clone() const;
   Mantid::Kernel::SpecialCoordinateSystem
