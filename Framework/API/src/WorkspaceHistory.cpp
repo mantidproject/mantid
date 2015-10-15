@@ -370,7 +370,7 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
   // Get the duration
   getWordsInString(info[EXEC_DUR], dummy, dummy, temp, dummy);
   double dur = boost::lexical_cast<double>(temp);
-  if (dur < 0.0) {
+  if (dur < -1.0) {
     g_log.warning() << "Error parsing duration in algorithm history entry."
                     << "\n";
     dur = -1.0;
