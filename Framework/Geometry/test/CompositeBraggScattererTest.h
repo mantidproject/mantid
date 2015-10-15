@@ -9,6 +9,7 @@
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 
 #include "MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h"
+#include <iostream>
 #include <map>
 
 using namespace Mantid::Geometry;
@@ -68,38 +69,16 @@ public:
   }
 
   void testAddGetScatterer() {
-    UnitCell cell(5.43, 5.43, 5.43);
-    SpaceGroup_const_sptr spaceGroup =
-        SpaceGroupFactory::Instance().createSpaceGroup("P 1 2/m 1");
-
     CompositeBraggScatterer_sptr scatterer = CompositeBraggScatterer::create();
     TS_ASSERT_EQUALS(scatterer->propertyCount(), 0);
 
     IsotropicAtomBraggScatterer_sptr siOne =
         getInitializedScatterer("Si", "[0, 0, 0]");
-    TS_ASSERT_DIFFERS(siOne->getSpaceGroup()->hmSymbol(),
-                      spaceGroup->hmSymbol());
-
     size_t oldCount = scatterer->nScatterers();
     scatterer->addScatterer(siOne);
-    TS_ASSERT_EQUALS(scatterer->propertyCount(), 2);
+    TS_ASSERT_EQUALS(scatterer->propertyCount(), 1);
 
     TS_ASSERT_EQUALS(scatterer->nScatterers(), oldCount + 1);
-
-    // Properties are propagated.
-    scatterer->setProperty("UnitCell", unitCellToStr(cell));
-    scatterer->setProperty("SpaceGroup", spaceGroup->hmSymbol());
-
-    // The scatterer is cloned, so the new space group is not in siOne
-    TS_ASSERT_EQUALS(
-        boost::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
-            scatterer->getScatterer(0))
-            ->getSpaceGroup()
-            ->hmSymbol(),
-        spaceGroup->hmSymbol());
-    TS_ASSERT_DIFFERS(siOne->getSpaceGroup()->hmSymbol(),
-                      spaceGroup->hmSymbol());
-
     TS_ASSERT_THROWS(scatterer->getScatterer(2), std::out_of_range);
   }
 
@@ -147,12 +126,16 @@ public:
     UnitCell cell(5.43, 6.43, 7.43, 90.0, 103.0, 90.0);
     SpaceGroup_const_sptr spaceGroup =
         SpaceGroupFactory::Instance().createSpaceGroup("P 1 2/m 1");
+    std::vector<V3D> positions =
+        spaceGroup->getEquivalentPositions(V3D(0.2, 0.3, 0.4));
 
     CompositeBraggScatterer_sptr coll = CompositeBraggScatterer::create();
-    coll->addScatterer(
-        getInitializedScatterer("Si", "[0.2, 0.3, 0.4]", 0.01267));
+    for (auto pos = positions.begin(); pos != positions.end(); ++pos) {
+      std::ostringstream strm;
+      strm << (*pos);
+      coll->addScatterer(getInitializedScatterer("Si", strm.str(), 0.01267));
+    }
 
-    coll->setProperty("SpaceGroup", spaceGroup->hmSymbol());
     coll->setProperty("UnitCell", unitCellToStr(cell));
 
     // Load reference data, obtained with SHELXL-2014.

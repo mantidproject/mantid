@@ -532,9 +532,9 @@ public:
     CompositeBraggScatterer_sptr atoms = CompositeBraggScatterer::create();
     atoms->addScatterer(atomSi);
 
-    CrystalStructure_sptr Si(new CrystalStructure(
+    CrystalStructure Si(
         UnitCell(5.43071, 5.43071, 5.43071),
-        SpaceGroupFactory::Instance().createSpaceGroup("P m -3 m"), atoms));
+        SpaceGroupFactory::Instance().createSpaceGroup("P m -3 m"), atoms);
 
     return PoldiPeakCollection_sptr(new PoldiPeakCollection(Si, 1.1, 1.95));
   }

@@ -60,26 +60,11 @@ typedef boost::shared_ptr<IsotropicAtomBraggScatterer>
     (hence the class name), which may be insufficient depending on the crystal
     structure, but as a first approximation it is often enough.
 
-    This class is designed to handle atoms in a unit cell. When a position is
-    set, the internally stored space group is used to generate all positions
-    that are symmetrically equivalent. In the structure factor calculation
-    method all contributions are summed.
+    This class is designed to handle atoms in the asymmetric unit of the cell,
+    creation of symmetrically equivalent atoms in the entire unit cell has to
+    be handled elsewhere.
 
-    Easiest is demonstration by example. Copper crystallizes in the space group
-    \f$Fm\bar{3}m\f$, Cu atoms occupy the position (0,0,0) and, because
-    of the F-centering, also 3 additional positions.
-
-        BraggScatterer_sptr cu =
-            BraggScattererFactory::Instance().createScatterer(
-                "IsotropicAtomBraggScatterer",
-                "Element=Cu; SpaceGroup=F m -3 m")
-
-        cu->setProperty("UnitCell", unitCellToStr(cellCu));
-        StructureFactor F = cu->calculateStructureFactor(V3D(1, 1, 1));
-
-    The structure factor F contains contributions from all 4 copper atoms in the
-    cell. This is convenient especially for general positions.
-    The general position of \f$Fm\bar{3}m\f$ for example has 192 equivalents.
+    One example where this is done can be found in CrystalStructure.
 
     [1] http://ww1.iucr.org/comm/cnom/adp/finrep/finrep.html
 
@@ -138,6 +123,23 @@ protected:
 
 typedef boost::shared_ptr<IsotropicAtomBraggScatterer>
     IsotropicAtomBraggScatterer_sptr;
+
+class MANTID_GEOMETRY_DLL IsotropicAtomBraggScattererParser {
+public:
+  IsotropicAtomBraggScattererParser(const std::string &scattererString);
+
+  std::vector<BraggScatterer_sptr> operator()() const;
+
+private:
+  BraggScatterer_sptr getScatterer(const std::string &singleScatterer) const;
+  std::vector<std::string>
+  getCleanScattererTokens(const std::vector<std::string> &tokens) const;
+
+  std::string m_scattererString;
+};
+
+MANTID_GEOMETRY_DLL std::string
+getIsotropicAtomBraggScattererString(const BraggScatterer_sptr &scatterer);
 
 } // namespace Geometry
 } // namespace Mantid
