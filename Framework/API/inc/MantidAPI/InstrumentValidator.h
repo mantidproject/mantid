@@ -51,7 +51,6 @@ private:
   unsigned int m_requires;
 };
 
-
 } // namespace API
 } // namespace Mantid
 

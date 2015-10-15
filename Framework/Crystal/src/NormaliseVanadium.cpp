@@ -27,7 +27,7 @@ NormaliseVanadium::NormaliseVanadium() : API::Algorithm() {}
 void NormaliseVanadium::init() {
   // The input workspace must have an instrument and units of wavelength
   auto wsValidator = boost::make_shared<InstrumentValidator>();
-  
+
   declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
                                           Direction::Input, wsValidator),
                   "The X values for the input workspace must be in units of "

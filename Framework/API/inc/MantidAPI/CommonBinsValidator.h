@@ -6,7 +6,7 @@
 namespace Mantid {
 namespace API {
 
-/** 
+/**
   A validator which provides a <I>TENTATIVE</I> check that a workspace
   contains common bins in each spectrum.
   For efficiency reasons, it only checks that the first and last spectra have

@@ -47,7 +47,6 @@ private:
   const int m_axisNumber;
 };
 
-
 } // namespace API
 } // namespace Mantid
 

@@ -6,7 +6,7 @@
 namespace Mantid {
 namespace API {
 
-/** 
+/**
   A validator which checks that a workspace contains histogram data (the
   default) or point data as required.
 

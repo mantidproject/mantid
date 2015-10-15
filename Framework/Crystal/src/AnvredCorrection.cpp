@@ -78,8 +78,7 @@ AnvredCorrection::AnvredCorrection()
 void AnvredCorrection::init() {
 
   // The input workspace must have an instrument and units of wavelength
-  auto wsValidator =
-      boost::make_shared<InstrumentValidator>();
+  auto wsValidator = boost::make_shared<InstrumentValidator>();
 
   declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
                                           Direction::Input, wsValidator),

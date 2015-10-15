@@ -11,7 +11,7 @@ namespace API {
  * (false).
  */
 HistogramValidator::HistogramValidator(const bool &mustBeHistogram)
-  : MatrixWorkspaceValidator(), m_mustBeHistogram(mustBeHistogram) {}
+    : MatrixWorkspaceValidator(), m_mustBeHistogram(mustBeHistogram) {}
 
 /// Clone the current state
 Kernel::IValidator_sptr HistogramValidator::clone() const {
@@ -23,7 +23,8 @@ Kernel::IValidator_sptr HistogramValidator::clone() const {
   *  @param value :: The workspace to test
   *  @return A user level description if a problem exists or ""
   */
-std::string HistogramValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
+std::string
+HistogramValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   if (m_mustBeHistogram) {
     if (value->isHistogramData())
       return "";

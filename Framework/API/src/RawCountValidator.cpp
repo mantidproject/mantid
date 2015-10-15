@@ -6,7 +6,8 @@ namespace API {
 
 /** Constructor
   * @param mustNotBeDistribution :: Flag indicating whether the check is that
-  * a workspace should not be a distribution (true, default) or should be (false).
+  * a workspace should not be a distribution (true, default) or should be
+ * (false).
   */
 RawCountValidator::RawCountValidator(const bool &mustNotBeDistribution)
     : m_mustNotBeDistribution(mustNotBeDistribution) {}
@@ -21,7 +22,8 @@ Kernel::IValidator_sptr RawCountValidator::clone() const {
   *  @return A user level description of any problem that exists or "" no
   * problem
   */
-std::string RawCountValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
+std::string
+RawCountValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   if (m_mustNotBeDistribution) {
     if (!value->isDistribution())
       return "";

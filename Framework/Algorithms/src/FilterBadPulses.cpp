@@ -10,7 +10,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
 
-
 namespace Mantid {
 namespace Algorithms {
 // Register the algorithm into the algorithm factory

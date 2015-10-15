@@ -15,7 +15,8 @@ Kernel::IValidator_sptr IncreasingAxisValidator::clone() const {
   * @param value The workspace to check
   * @return "" if is valid, otherwise a user level description of a problem
   */
-std::string IncreasingAxisValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
+std::string IncreasingAxisValidator::checkValidity(
+    const MatrixWorkspace_sptr &value) const {
   // 0 for X axis
   Axis *xAxis = value->getAxis(0);
 
@@ -24,7 +25,7 @@ std::string IncreasingAxisValidator::checkValidity(const MatrixWorkspace_sptr &v
   if (xAxis->length() > 1 &&
       xAxis->getValue(0) >= xAxis->getValue(xAxis->length() - 1))
     return "X axis of the workspace should be increasing from left to "
-            "right";
+           "right";
   else
     return "";
 }

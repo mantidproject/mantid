@@ -36,7 +36,6 @@ namespace API {
 class MANTID_API_DLL MatrixWorkspaceValidator
     : public Kernel::TypedValidator<MatrixWorkspace_sptr> {};
 
-
 } // namespace API
 } // namespace Mantid
 

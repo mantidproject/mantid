@@ -6,7 +6,7 @@
 namespace Mantid {
 namespace API {
 
-/** 
+/**
   A validator which checks that the X axis of a workspace is increasing from
   left to right.
 
@@ -42,7 +42,6 @@ private:
   /// Check for validity
   std::string checkValidity(const MatrixWorkspace_sptr &value) const;
 };
-
 
 } // namespace API
 } // namespace Mantid

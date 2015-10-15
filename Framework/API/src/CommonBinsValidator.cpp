@@ -14,7 +14,8 @@ Kernel::IValidator_sptr CommonBinsValidator::clone() const {
   * @param value :: The workspace to test
   * @return A message for users saying that bins are different, otherwise ""
   */
-std::string CommonBinsValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
+std::string
+CommonBinsValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   if (!value)
     return "Enter an existing workspace";
   if (value->isCommonBins())

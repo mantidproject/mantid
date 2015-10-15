@@ -47,7 +47,6 @@ private:
   const bool m_mustNotBeDistribution;
 };
 
-
 } // namespace API
 } // namespace Mantid
 

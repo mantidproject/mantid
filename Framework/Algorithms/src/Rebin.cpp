@@ -9,7 +9,6 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
-
 namespace Mantid {
 namespace Algorithms {
 

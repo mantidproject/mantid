@@ -12,7 +12,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MantidVersion.h"
 
-
 //-----------------------------------------------------------------------------
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;

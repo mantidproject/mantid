@@ -7,7 +7,8 @@ namespace API {
 /** Class constructor with parameter.
   * @param axisNumber :: set the axis number to validate
   */
-NumericAxisValidator::NumericAxisValidator(const int &axisNumber) : m_axisNumber(axisNumber) {}
+NumericAxisValidator::NumericAxisValidator(const int &axisNumber)
+    : m_axisNumber(axisNumber) {}
 
 /// Clone the current state
 Kernel::IValidator_sptr NumericAxisValidator::clone() const {
@@ -18,7 +19,8 @@ Kernel::IValidator_sptr NumericAxisValidator::clone() const {
 *  @param value :: The workspace to test
 *  @return A message for users with negative results, otherwise ""
 */
-std::string NumericAxisValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
+std::string
+NumericAxisValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   Mantid::API::Axis *axis = value->getAxis(m_axisNumber);
   if (axis->isNumeric())
     return "";

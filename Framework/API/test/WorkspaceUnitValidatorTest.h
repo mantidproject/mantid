@@ -12,29 +12,25 @@ class WorkspaceUnitValidatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static WorkspaceUnitValidatorTest *createSuite() { return new WorkspaceUnitValidatorTest(); }
-  static void destroySuite( WorkspaceUnitValidatorTest *suite ) { delete suite; }
+  static WorkspaceUnitValidatorTest *createSuite() {
+    return new WorkspaceUnitValidatorTest();
+  }
+  static void destroySuite(WorkspaceUnitValidatorTest *suite) { delete suite; }
 
-
-  void test_fail()
-  {
+  void test_fail() {
     auto ws = boost::make_shared<WorkspaceTester>();
     ws->init(2, 11, 10);
     WorkspaceUnitValidator validator;
     TS_ASSERT_EQUALS(validator.isValid(ws), "The workspace must have units");
   }
 
-  void test_success()
-  {
+  void test_success() {
     auto ws = boost::make_shared<WorkspaceTester>();
     ws->init(2, 11, 10);
     ws->getAxis(0)->setUnit("TOF");
     WorkspaceUnitValidator validator;
     TS_ASSERT_EQUALS(validator.isValid(ws), "");
   }
-
-
 };
-
 
 #endif /* MANTID_API_WORKSPACEUNITVALIDATORTEST_H_ */

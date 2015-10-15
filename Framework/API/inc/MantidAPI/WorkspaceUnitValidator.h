@@ -6,7 +6,7 @@
 namespace Mantid {
 namespace API {
 
-/** 
+/**
   A validator which checks that the unit of the workspace referred to
   by a WorkspaceProperty is the expected one.
 
@@ -46,7 +46,6 @@ private:
   /// The name of the required unit
   const std::string m_unitID;
 };
-
 
 } // namespace API
 } // namespace Mantid
