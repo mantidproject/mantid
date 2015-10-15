@@ -41,7 +41,9 @@ public:
   virtual void acceptVisitor(BaseVisit &A) const { A.Accept(*this); }
 
   /// Effective typeid
-  virtual std::string className() const { return "Quadratic"; }
+  virtual DerivedClassName className() const {
+    return DerivedClassName::QUADRATIC;
+  }
 
   const std::vector<double> &copyBaseEqn() const {
     return BaseEqn;

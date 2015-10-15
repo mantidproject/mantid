@@ -52,8 +52,7 @@ private:
 
 public:
   /// Public identifer
-  virtual std::string className() const { return "Cone"; }
-
+  virtual DerivedClassName className() const { return DerivedClassName::CONE; }
   Cone();
   Cone(const Cone &);
   Cone *clone() const;

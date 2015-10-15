@@ -138,25 +138,22 @@ void OCGeometryGenerator::AnalyzeObject() {
 TopoDS_Shape OCGeometryGenerator::AnalyzeRule(Intersection *rule) {
   TopoDS_Shape left = AnalyzeRule(rule->leaf(0));
   TopoDS_Shape right = AnalyzeRule(rule->leaf(1));
-  // TopoDS_Shape Result=BRepAlgoAPI_Common(left,right);
   BRepAlgoAPI_Common comm(left, right);
-  TopoDS_Shape Result = comm.Shape();
-  // std::cerr << "Intersection status " << comm.ErrorStatus() << std::endl;
-  return Result;
+  return comm.Shape();
 }
 TopoDS_Shape OCGeometryGenerator::AnalyzeRule(Union *rule) {
   TopoDS_Shape left = AnalyzeRule(rule->leaf(0));
   TopoDS_Shape right = AnalyzeRule(rule->leaf(1));
   // TopoDS_Shape Result=BRepAlgoAPI_Fuse(left,right);
   BRepAlgoAPI_Fuse fuse(left, right);
-  TopoDS_Shape Result = fuse.Shape();
-  return Result;
+  return fuse.Shape();
 }
 TopoDS_Shape OCGeometryGenerator::AnalyzeRule(SurfPoint *rule) {
   // Check for individual type of surfaces
   Surface *surf = rule->getKey();
   TopoDS_Shape Result = CreateShape(surf, rule->getSign());
-  if (rule->getSign() > 0 && surf->className() != "Plane")
+  if (rule->getSign() > 0 &&
+      surf->className() != Surface::DerivedClassName::PLANE)
     Result.Complement();
   return Result;
 }
@@ -178,48 +175,62 @@ TopoDS_Shape OCGeometryGenerator::AnalyzeRule(BoolValue *rule) {
 TopoDS_Shape OCGeometryGenerator::AnalyzeRule(Rule *rule) {
   if (rule == NULL)
     return TopoDS_Shape();
-  if (rule->className() == "Intersection") {
-    return AnalyzeRule((Intersection *)rule);
-  } else if (rule->className() == "Union") {
-    return AnalyzeRule((Union *)rule);
-  } else if (rule->className() == "SurfPoint") {
-    return AnalyzeRule((SurfPoint *)rule);
-  } else if (rule->className() == "CompGrp") {
-    return AnalyzeRule((CompGrp *)rule);
-  } else if (rule->className() == "CompObj") {
-    return AnalyzeRule((CompObj *)rule);
-  } else if (rule->className() == "BoolValue") {
-    return AnalyzeRule((BoolValue *)rule);
+  switch (rule->className()) {
+  case Rule::DerivedClassName::INTERSECTION:
+    return AnalyzeRule(static_cast<Intersection *>(rule));
+    break;
+  case Rule::DerivedClassName::UNION:
+    return AnalyzeRule(static_cast<Union *>(rule));
+    break;
+  case Rule::DerivedClassName::SURFPOINT:
+    return AnalyzeRule(static_cast<SurfPoint *>(rule));
+    break;
+  case Rule::DerivedClassName::COMPGRP:
+    return AnalyzeRule(static_cast<CompGrp *>(rule));
+    break;
+  case Rule::DerivedClassName::COMPOBJ:
+    return AnalyzeRule(static_cast<CompObj *>(rule));
+    break;
+  case Rule::DerivedClassName::BOOLVALUE:
+    return AnalyzeRule(static_cast<BoolValue *>(rule));
+    break;
+  default:
+    return TopoDS_Shape();
+    break;
   }
-  return TopoDS_Shape();
 }
 
 TopoDS_Shape OCGeometryGenerator::CreateShape(Surface *surf, int orientation) {
+  if (surf == NULL)
+    return TopoDS_Shape();
   // Check for the type of the surface object
-  if (surf->className() == "Sphere") {
-    return CreateSphere((Sphere *)surf);
-  } else if (surf->className() == "Cone") {
-    return CreateCone((Cone *)surf);
-  } else if (surf->className() == "Cylinder") {
-    return CreateCylinder((Cylinder *)surf);
-  } else if (surf->className() == "Plane") {
-    return CreatePlane((Plane *)surf, orientation);
-  } else if (surf->className() == "Torus") {
-    return CreateTorus((Torus *)surf);
+  switch (surf->className()) {
+  case Surface::DerivedClassName::SPHERE:
+    return CreateSphere(static_cast<Sphere *>(surf));
+    break;
+  case Surface::DerivedClassName::CONE:
+    return CreateCone(static_cast<Cone *>(surf));
+    break;
+  case Surface::DerivedClassName::CYLINDER:
+    return CreateCylinder(static_cast<Cylinder *>(surf));
+    break;
+  case Surface::DerivedClassName::PLANE:
+    return CreatePlane(static_cast<Plane *>(surf), orientation);
+    break;
+  case Surface::DerivedClassName::TORUS:
+    return CreateTorus(static_cast<Torus *>(surf));
+    break;
+  default:
+    return TopoDS_Shape();
+    break;
   }
-  return TopoDS_Shape();
 }
 TopoDS_Shape OCGeometryGenerator::CreateSphere(Sphere *sphere) {
-  // Get the center to Sphere, Radius
+  // Get the center to Sphere
   V3D center = sphere->getCentre();
-  double radius = sphere->getRadius();
-  TopoDS_Shape shape = BRepPrimAPI_MakeSphere(radius).Shape();
-  gp_Trsf T;
-  gp_Vec v(center[0], center[1], center[2]);
-  T.SetTranslation(v);
-  BRepBuilderAPI_Transform move(T);
-  move.Perform(shape);
-  return move.Shape();
+  return BRepPrimAPI_MakeSphere(gp_Pnt(center[0], center[1], center[2]),
+                                sphere->getRadius())
+      .Shape();
 }
 TopoDS_Shape OCGeometryGenerator::CreateCylinder(Cylinder *cylinder) {
   // Get the Cylinder Centre,Normal,Radius
@@ -231,10 +242,9 @@ TopoDS_Shape OCGeometryGenerator::CreateCylinder(Cylinder *cylinder) {
   center[2] = center[2] - axis[2] * 500;
   gp_Ax2 gpA(gp_Pnt(center[0], center[1], center[2]),
              gp_Dir(axis[0], axis[1], axis[2]));
-  TopoDS_Shape shape =
-      BRepPrimAPI_MakeCylinder(gpA, radius, 1000, 2 * M_PI).Solid();
-  return shape;
+  return BRepPrimAPI_MakeCylinder(gpA, radius, 1000, 2 * M_PI).Solid();
 }
+
 TopoDS_Shape OCGeometryGenerator::CreateCone(Cone *cone) {
   // Get the Cone Centre Normal Radius
   V3D center = cone->getCentre();
@@ -242,11 +252,11 @@ TopoDS_Shape OCGeometryGenerator::CreateCone(Cone *cone) {
   double angle = cone->getCosAngle();
   gp_Ax2 gpA(gp_Pnt(center[0], center[1], center[2]),
              gp_Dir(axis[0], axis[1], axis[2]));
-  TopoDS_Shape shape =
-      BRepPrimAPI_MakeCone(gpA, 0, 1000 / tan(acos(angle * M_PI / 180.0)), 1000,
-                           2 * M_PI).Shape();
-  return shape;
+  return BRepPrimAPI_MakeCone(gpA, 0, 1000 / tan(acos(angle * M_PI / 180.0)),
+                              1000, 2 * M_PI)
+      .Shape();
 }
+
 TopoDS_Shape OCGeometryGenerator::CreatePlane(Plane *plane, int orientation) {
   // Get Plane normal and distance.
   V3D normal = plane->getNormal();
@@ -278,9 +288,9 @@ TopoDS_Shape OCGeometryGenerator::CreatePlane(Plane *plane, int orientation) {
   // create a box
   gp_Pnt p(-1000.0, -1000.0, -1000.0);
   TopoDS_Shape world = BRepPrimAPI_MakeBox(p, 2000.0, 2000.0, 2000.0).Shape();
-  Result = BRepAlgoAPI_Common(world, Result);
-  return Result;
+  return BRepAlgoAPI_Common(world, Result);
 }
+
 TopoDS_Shape OCGeometryGenerator::CreateTorus(Torus *) {
   // NOTE:: Not yet implemented
   return TopoDS_Shape();

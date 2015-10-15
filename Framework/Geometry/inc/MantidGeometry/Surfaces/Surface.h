@@ -47,6 +47,16 @@ private:
   int Name; ///< Surface number (MCNPX identifier)
 
 public:
+  enum class DerivedClassName {
+    SURFACE,
+    SPHERE,
+    CONE,
+    CYLINDER,
+    PLANE,
+    TORUS,
+    QUADRATIC
+  };
+
   static const int Nprecision = 10; ///< Precision of the output
 
   Surface();
@@ -56,7 +66,9 @@ public:
   virtual ~Surface();
 
   /// Effective typeid
-  virtual std::string className() const { return "Surface"; }
+  virtual DerivedClassName className() const {
+    return DerivedClassName::SURFACE;
+  }
 
   /// Accept visitor for line calculation
   virtual void acceptVisitor(BaseVisit &A) const { A.Accept(*this); }
