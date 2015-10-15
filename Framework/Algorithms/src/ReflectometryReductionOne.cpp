@@ -1,12 +1,11 @@
 #include "MantidAlgorithms/ReflectometryReductionOne.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/RebinParamsValidator.h"
 #include <boost/make_shared.hpp>
 #include <boost/assign/list_of.hpp>
 

@@ -2,7 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertToDistribution.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/RawCountValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 
 namespace Mantid {
 namespace Algorithms {

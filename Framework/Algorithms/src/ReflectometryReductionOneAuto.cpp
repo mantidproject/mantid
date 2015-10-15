@@ -1,9 +1,9 @@
 #include "MantidAlgorithms/ReflectometryReductionOneAuto.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/ListValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include <boost/optional.hpp>
 #include <boost/assign/list_of.hpp>

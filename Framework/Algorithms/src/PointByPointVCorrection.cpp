@@ -3,9 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/PointByPointVCorrection.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include <cfloat>
 #include <cmath>
+#include <numeric>
 
 namespace Mantid {
 namespace Algorithms {

@@ -3,9 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MaskDetectorsIf.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include <fstream>
 #include "MantidKernel/ListValidator.h"
+
+#include <fstream>
 
 namespace Mantid {
 namespace Algorithms {

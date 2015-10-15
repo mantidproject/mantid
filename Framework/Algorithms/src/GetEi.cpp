@@ -1,12 +1,14 @@
 #include "MantidAlgorithms/GetEi.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include <boost/lexical_cast.hpp>
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/Exception.h"
-#include <cmath>
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
+
+#include <boost/lexical_cast.hpp>
+#include <cmath>
 
 namespace Mantid {
 namespace Algorithms {

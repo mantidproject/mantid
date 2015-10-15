@@ -1,6 +1,5 @@
 #include "MantidAlgorithms/AppendSpectra.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"

@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSLoad.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include <MantidAPI/FileFinder.h>
 #include <MantidAPI/FileProperty.h>
@@ -40,8 +40,7 @@ void EQSANSLoad::init() {
                                         "_event.nxs"),
                   "The name of the input event Nexus file to load");
 
-  auto wsValidator = boost::make_shared<CompositeValidator>();
-  wsValidator->add<WorkspaceUnitValidator>("TOF");
+  auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("TOF");
   declareProperty(new WorkspaceProperty<EventWorkspace>(
                       "InputWorkspace", "", Direction::Input,
                       PropertyMode::Optional, wsValidator),

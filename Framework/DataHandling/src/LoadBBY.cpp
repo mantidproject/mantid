@@ -1,13 +1,12 @@
 #include "MantidDataHandling/LoadBBY.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 
 #include <Poco/TemporaryFile.h>

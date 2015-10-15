@@ -2,17 +2,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CalculateFlatBackground.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include <algorithm>
-#include <climits>
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/VectorHelper.h"
+#include <algorithm>
+#include <climits>
+#include <numeric>
 #include <boost/lexical_cast.hpp>
 
 namespace Mantid {
