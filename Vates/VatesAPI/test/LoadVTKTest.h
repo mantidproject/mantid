@@ -5,6 +5,7 @@
 #include "MantidVatesAPI/LoadVTK.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/UnknownFrame.h"
 #include "MantidAPI/AlgorithmManager.h"
 
 using namespace Mantid::API;
@@ -129,14 +130,29 @@ public:
         outWSName);
 
     TS_ASSERT_EQUALS(3, outWS->getNumDims());
-    do_check_dimension(outWS->getDimension(0), "X", 0, 67, 68); // These numbers are expected min, max, and nbins known from the input file for dim x.
-    do_check_dimension(outWS->getDimension(1), "Y", 0, 67, 68); // These numbers are expected min, max, and nbins known from the input file for dim y.
-    do_check_dimension(outWS->getDimension(2), "Z", 0, 67, 68); // These numbers are expected min, max, and nbins known from the input file for dim z.
+    do_check_dimension(outWS->getDimension(0), "X", 0, 67,
+                       68); // These numbers are expected min, max, and nbins
+                            // known from the input file for dim x.
+    do_check_dimension(outWS->getDimension(1), "Y", 0, 67,
+                       68); // These numbers are expected min, max, and nbins
+                            // known from the input file for dim y.
+    do_check_dimension(outWS->getDimension(2), "Z", 0, 67,
+                       68); // These numbers are expected min, max, and nbins
+                            // known from the input file for dim z.
 
-	TSM_ASSERT_THROWS_NOTHING("Should be an UnknownFrame", dynamic_cast<const Mantid::Geometry::UnknownFrame&>(outWS->getDimension(0)))
-	TSM_ASSERT_THROWS_NOTHING("Should be an UnknownFrame", dynamic_cast<const Mantid::Geometry::UnknownFrame&>(outWS->getDimension(1)))
-	TSM_ASSERT_THROWS_NOTHING("Should be an UnknownFrame", dynamic_cast<const Mantid::Geometry::UnknownFrame&>(outWS->getDimension(2)))
-	
+    TSM_ASSERT_THROWS_NOTHING(
+        "Should be an UnknownFrame",
+        dynamic_cast<const Mantid::Geometry::UnknownFrame &>(
+            outWS->getDimension(0)->getMDFrame()))
+    TSM_ASSERT_THROWS_NOTHING(
+        "Should be an UnknownFrame",
+        dynamic_cast<const Mantid::Geometry::UnknownFrame &>(
+            outWS->getDimension(1)->getMDFrame()))
+    TSM_ASSERT_THROWS_NOTHING(
+        "Should be an UnknownFrame",
+        dynamic_cast<const Mantid::Geometry::UnknownFrame &>(
+            outWS->getDimension(2)->getMDFrame()))
+
     double topPercent = loadVTK.getProperty("KeepTopPercent");
     TSM_ASSERT_EQUALS("Should default to 25%", 25, topPercent);
 
