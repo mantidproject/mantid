@@ -235,18 +235,28 @@ MatrixWorkspace_sptr MuonCalculateAsymmetry::calculateGroupAsymmetry(
         alg->execute();
         MatrixWorkspace_sptr sumWS = alg->getProperty("OutputWorkspace");
 
+        // GroupIndex as vector
+        // Necessary if we want RemoveExpDecay to fit only the requested
+        // spectrum
+        std::vector<int> spec(1, groupIndex);
+
         // Remove decay
         IAlgorithm_sptr asym = createChildAlgorithm("RemoveExpDecay");
         asym->setProperty("InputWorkspace",sumWS);
+        asym->setProperty("Spectra", spec);
         asym->execute();
         tempWS = asym->getProperty("OutputWorkspace");
 
       } else if (op == "-") {
 
+        // GroupIndex as vector
+        std::vector<int> spec(1, groupIndex);
+
         // Remove decay (first period ws)
         IAlgorithm_sptr asym = createChildAlgorithm("RemoveExpDecay");
         asym->initialize();
         asym->setProperty("InputWorkspace",firstPeriodWS);
+        asym->setProperty("Spectra", spec);
         asym->execute();
         MatrixWorkspace_sptr asymFirstPeriod = asym->getProperty("OutputWorkspace");
 
@@ -254,6 +264,7 @@ MatrixWorkspace_sptr MuonCalculateAsymmetry::calculateGroupAsymmetry(
         asym = createChildAlgorithm("RemoveExpDecay");
         asym->initialize();
         asym->setProperty("InputWorkspace", secondPeriodWS);
+        asym->setProperty("Spectra", spec);
         asym->execute();
         MatrixWorkspace_sptr asymSecondPeriod = asym->getProperty("OutputWorkspace");
 
