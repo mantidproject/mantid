@@ -133,6 +133,10 @@ public:
     do_check_dimension(outWS->getDimension(1), "Y", 0, 67, 68); // These numbers are expected min, max, and nbins known from the input file for dim y.
     do_check_dimension(outWS->getDimension(2), "Z", 0, 67, 68); // These numbers are expected min, max, and nbins known from the input file for dim z.
 
+	TSM_ASSERT_THROWS_NOTHING("Should be an UnknownFrame", dynamic_cast<const Mantid::Geometry::UnknownFrame&>(outWS->getDimension(0)))
+	TSM_ASSERT_THROWS_NOTHING("Should be an UnknownFrame", dynamic_cast<const Mantid::Geometry::UnknownFrame&>(outWS->getDimension(1)))
+	TSM_ASSERT_THROWS_NOTHING("Should be an UnknownFrame", dynamic_cast<const Mantid::Geometry::UnknownFrame&>(outWS->getDimension(2)))
+	
     double topPercent = loadVTK.getProperty("KeepTopPercent");
     TSM_ASSERT_EQUALS("Should default to 25%", 25, topPercent);
 

@@ -34,8 +34,8 @@ bool InverseAngstromsUnitFactory::canInterpret(
 }
 
 ReciprocalLatticeUnit *
-ReciprocalLatticeUnitFactory::createRaw(const std::string &) const {
-  return new ReciprocalLatticeUnit;
+ReciprocalLatticeUnitFactory::createRaw(const std::string & unitString) const {
+  return new ReciprocalLatticeUnit(UnitLabel(unitString));
 }
 
 bool ReciprocalLatticeUnitFactory::canInterpret(
@@ -44,15 +44,15 @@ bool ReciprocalLatticeUnitFactory::canInterpret(
 
   // In addition to having RLU we can encounter units of type "in 6.28 A^-1"
   // We need to account for the latter here
-  boost::regex pattern("in.*A\\^-1");
+  boost::regex pattern("in.*A.*\\^-1");
   auto isHoraceStyle = boost::regex_match(unitString, pattern);
   return isRLU || isHoraceStyle;
 }
 
 MDUnitFactory_uptr makeMDUnitFactoryChain() {
   typedef MDUnitFactory_uptr FactoryType;
-  auto first = FactoryType(new InverseAngstromsUnitFactory);
-  first->setSuccessor(FactoryType(new ReciprocalLatticeUnitFactory))
+  auto first = FactoryType(new ReciprocalLatticeUnitFactory);
+  first->setSuccessor(FactoryType(new InverseAngstromsUnitFactory))
       // Add more factories here!
       // Make sure that LabelUnitFactory is the last in the chain to give a fall
       // through

@@ -54,10 +54,16 @@ public:
 /// Dimensionless RLU
 class DLLExport ReciprocalLatticeUnit : public QUnit {
 public:
+  ReciprocalLatticeUnit();
+  ReciprocalLatticeUnit(const UnitLabel &unitLabel);
   UnitLabel getUnitLabel() const;
   bool canConvertTo(const MDUnit &other) const;
   ReciprocalLatticeUnit *clone() const;
   virtual ~ReciprocalLatticeUnit();
+
+private:
+  bool isSpecialRLUUnitLabel() const;
+  UnitLabel m_unitLabel;
 };
 
 /// Inverse Angstroms unit
