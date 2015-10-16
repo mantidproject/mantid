@@ -34,7 +34,7 @@ bool InverseAngstromsUnitFactory::canInterpret(
 }
 
 ReciprocalLatticeUnit *
-ReciprocalLatticeUnitFactory::createRaw(const std::string & unitString) const {
+ReciprocalLatticeUnitFactory::createRaw(const std::string &unitString) const {
   return new ReciprocalLatticeUnit(UnitLabel(unitString));
 }
 

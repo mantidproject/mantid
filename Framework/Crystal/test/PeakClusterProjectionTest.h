@@ -115,7 +115,8 @@ public:
         Mantid::Geometry::HKL::HKLName, Mantid::Kernel::Units::Symbol::RLU);
     auto frame = frameFactory->create(frameArg);
     IMDHistoWorkspace_sptr inWS =
-        MDEventsTestHelper::makeFakeMDHistoWorkspaceWithMDFrame(1, 2, *frame, 1);
+        MDEventsTestHelper::makeFakeMDHistoWorkspaceWithMDFrame(1, 2, *frame,
+                                                                1);
     inWS->setCoordinateSystem(Mantid::Kernel::HKL);
 
     TSM_ASSERT_THROWS("Must be +3 dimensional",

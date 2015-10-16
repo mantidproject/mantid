@@ -148,7 +148,8 @@ public:
     TS_ASSERT(alg.isInitialized())
     Mantid::Geometry::QSample frame;
     IMDEventWorkspace_sptr in_ws =
-        MDEventsTestHelper::makeAnyMDEWWithFrames<MDE, nd>(10, 0.0, 10.0, frame, 1);
+        MDEventsTestHelper::makeAnyMDEWWithFrames<MDE, nd>(10, 0.0, 10.0, frame,
+                                                           1);
     Mantid::Kernel::SpecialCoordinateSystem appliedCoord =
         Mantid::Kernel::QSample;
     in_ws->setCoordinateSystem(appliedCoord);

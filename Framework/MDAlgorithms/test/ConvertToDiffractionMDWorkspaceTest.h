@@ -50,7 +50,7 @@ public:
       return;
     TS_ASSERT_EQUALS(ws->getDimension(0)->getName(), "Q_lab_x");
     TS_ASSERT_EQUALS(ws->getSpecialCoordinateSystem(), Mantid::Kernel::QLab);
-        // Test the frame type
+    // Test the frame type
     for (size_t dim = 0; dim < ws->getNumDims(); ++dim) {
       const auto &frame = ws->getDimension(dim)->getMDFrame();
       TSM_ASSERT_THROWS_NOTHING(

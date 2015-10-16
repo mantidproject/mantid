@@ -112,7 +112,7 @@ public:
         alg.makeAlignedDimensionFromString("Axis0, 11.0, 9.0"));
   }
 
-    void test_makeAlignedDimensionFromString() {
+  void test_makeAlignedDimensionFromString() {
     SlicingAlgorithmImpl alg;
     alg.m_inWS = ws;
     TSM_ASSERT_THROWS_NOTHING(
@@ -437,7 +437,6 @@ public:
     }
   }
 
-
   void test_makeBasisVectorFromString_WithPureQSampleInput() {
     // Test WITH and WITHOUT basis vector normalization
     for (int normalize = 0; normalize < 2; normalize++) {
@@ -495,7 +494,8 @@ public:
     }
   }
 
-  void test_makeBasisVectorFromString_WithMixedMDFrames_AndBasisVectorNotMixed() {
+  void
+  test_makeBasisVectorFromString_WithMixedMDFrames_AndBasisVectorNotMixed() {
     // Test WITH and WITHOUT basis vector normalization
     for (int normalize = 0; normalize < 2; normalize++) {
       SlicingAlgorithmImpl alg;
@@ -506,7 +506,7 @@ public:
       alg.m_maxExtents.push_back(+5.0);
       alg.m_numBins.push_back(20);
       alg.m_NormalizeBasisVectors = (normalize > 0);
-      
+
       TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
       TSM_ASSERT_THROWS_NOTHING(
           "", alg.makeBasisVectorFromString(
@@ -555,8 +555,7 @@ public:
     }
   }
 
-  void
-  test_makeBasisVectorFromString_WithMixedMDFrames_AndBasisVectorMixed() {
+  void test_makeBasisVectorFromString_WithMixedMDFrames_AndBasisVectorMixed() {
     // Test WITH and WITHOUT basis vector normalization
     for (int normalize = 0; normalize < 2; normalize++) {
       SlicingAlgorithmImpl alg;
@@ -569,10 +568,9 @@ public:
       alg.m_NormalizeBasisVectors = (normalize > 0);
 
       TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
-      TSM_ASSERT_THROWS(
-          "BASIS vector is NOT IN QSample sub-space",
-          alg.makeBasisVectorFromString(" name, units , 1,2,3,1"),
-          std::runtime_error);
+      TSM_ASSERT_THROWS("BASIS vector is NOT IN QSample sub-space",
+                        alg.makeBasisVectorFromString(" name, units , 1,2,3,1"),
+                        std::runtime_error);
     }
   }
 
@@ -806,7 +804,6 @@ public:
     TS_ASSERT(!func->isPointContained(VMD(1.5, 1.5, 1.5, -1.5)));
     TS_ASSERT(!func->isPointContained(VMD(1.5, 1.5, 1.5, 11.5)));
   }
-
 
   /** 4D "left-handed" coordinate system
    * obtained by flipping the Y basis vector.  */

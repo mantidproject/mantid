@@ -124,10 +124,11 @@ public:
 
     TS_ASSERT_EQUALS("A", dim1->getName());
     TS_ASSERT_EQUALS("A", dim1->getDimensionId());
-    TSM_ASSERT("Should not be set to U any longer", "U" != dim1->getUnits().ascii());
+    TSM_ASSERT("Should not be set to U any longer",
+               "U" != dim1->getUnits().ascii());
     TSM_ASSERT_THROWS_NOTHING(
-            "Should be convertible to a QSample frame",
-            dynamic_cast<const Mantid::Geometry::QSample &>(dim1->getMDFrame()));
+        "Should be convertible to a QSample frame",
+        dynamic_cast<const Mantid::Geometry::QSample &>(dim1->getMDFrame()));
     TS_ASSERT_EQUALS(1, dim1->getMaximum());
     TS_ASSERT_EQUALS(-1, dim1->getMinimum());
     TS_ASSERT_EQUALS(5, dim1->getNBins());
@@ -185,11 +186,13 @@ public:
     // Check frame and label
     TSM_ASSERT("Should be set to U", "U" == dim1->getUnits().ascii());
     TSM_ASSERT_THROWS_NOTHING(
-            "Should be convertible to a General Frame",
-            dynamic_cast<const Mantid::Geometry::GeneralFrame &>(dim1->getMDFrame()));
+        "Should be convertible to a General Frame",
+        dynamic_cast<const Mantid::Geometry::GeneralFrame &>(
+            dim1->getMDFrame()));
     TSM_ASSERT_THROWS_NOTHING(
-            "Should be convertible to a General Frame",
-            dynamic_cast<const Mantid::Geometry::GeneralFrame &>(dim2->getMDFrame()));
+        "Should be convertible to a General Frame",
+        dynamic_cast<const Mantid::Geometry::GeneralFrame &>(
+            dim2->getMDFrame()));
 
     // Check the data
     double *signals = outWs->getSignalArray();

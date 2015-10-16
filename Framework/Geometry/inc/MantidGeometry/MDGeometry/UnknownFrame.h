@@ -42,7 +42,7 @@ public:
   std::string name() const;
   bool canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const;
   bool isQ() const;
-  bool isSameType(const MDFrame& frame) const;
+  bool isSameType(const MDFrame &frame) const;
   Mantid::Kernel::UnitLabel getUnitLabel() const;
   const Mantid::Kernel::MDUnit &getMDUnit() const;
   Mantid::Kernel::SpecialCoordinateSystem

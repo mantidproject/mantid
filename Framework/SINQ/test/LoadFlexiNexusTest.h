@@ -65,8 +65,6 @@ public:
     TS_ASSERT_DELTA(dimi->getMinimum(), -86, .1);
     TS_ASSERT_DELTA(dimi->getMaximum(), 84.65, .1);
 
-
-
     // test some meta data
     std::string title = data->getTitle();
     size_t found = title.find("Selene");

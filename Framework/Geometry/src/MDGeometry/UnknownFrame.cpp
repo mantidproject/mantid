@@ -36,9 +36,7 @@ UnknownFrame *UnknownFrame::clone() const {
   return new UnknownFrame(std::unique_ptr<Kernel::MDUnit>(m_unit->clone()));
 }
 
-bool UnknownFrame::isQ() const{
-  return false;
-}
+bool UnknownFrame::isQ() const { return false; }
 
 bool UnknownFrame::isSameType(const MDFrame &frame) const {
   auto isSameType = true;
@@ -49,6 +47,5 @@ bool UnknownFrame::isSameType(const MDFrame &frame) const {
   }
   return isSameType;
 }
-
 }
 }

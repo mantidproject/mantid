@@ -79,10 +79,9 @@ private:
         "CreateMDWorkspace", 20, "Dimensions", "3", "EventType", "MDEvent",
         "Extents", "-10,10,-10,10,-10,10", "Names",
         "Q_sample_x,Q_sample_y,Q_sample_z", "Units",
-        "Q_Sample_X,Q_Sample_Y,Q_Sample_Z",
-        "Frames", "QSample,QSample,QSample",
-        "SplitInto", "5", "SplitThreshold",
-        "20", "MaxRecursionDepth", "15", "OutputWorkspace", "MDEWS");
+        "Q_Sample_X,Q_Sample_Y,Q_Sample_Z", "Frames", "QSample,QSample,QSample",
+        "SplitInto", "5", "SplitThreshold", "20", "MaxRecursionDepth", "15",
+        "OutputWorkspace", "MDEWS");
 
     // Give it an instrument
     Instrument_sptr inst =

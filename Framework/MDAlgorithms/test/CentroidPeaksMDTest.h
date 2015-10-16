@@ -34,7 +34,6 @@ using namespace Mantid::Geometry;
 using namespace Mantid::MDAlgorithms;
 using Mantid::Kernel::V3D;
 
-
 class CentroidPeaksMDTest : public CxxTest::TestSuite {
 public:
   void test_Init() {

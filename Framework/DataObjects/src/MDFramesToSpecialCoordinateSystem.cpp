@@ -88,6 +88,5 @@ bool MDFramesToSpecialCoordinateSystem::isUnknownFrame(
   }
   return isUnknown;
 }
-
 }
 }

@@ -19,7 +19,6 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
 
-
 #include <boost/assign/list_of.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <set>

@@ -605,7 +605,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
 
   // Create MDFrame of General Frame type
   Mantid::Geometry::GeneralFrame frame(
-    Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
+      Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
 
   // Add dimensions
   for (size_t i = 0; i < m_nDimensions; ++i) {

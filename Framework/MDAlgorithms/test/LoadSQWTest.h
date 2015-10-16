@@ -159,10 +159,11 @@ public:
     TS_ASSERT_EQUALS("en", d->getDimensionId());
 
     // Check Units
-    auto expectedUnit = Mantid::Kernel::InverseAngstromsUnit().getUnitLabel().ascii();
-    TS_ASSERT_EQUALS(expectedUnit , a->getUnits().ascii());
-    TS_ASSERT_EQUALS(expectedUnit , b->getUnits().ascii());
-    TS_ASSERT_EQUALS(expectedUnit , c->getUnits().ascii());
+    auto expectedUnit =
+        Mantid::Kernel::InverseAngstromsUnit().getUnitLabel().ascii();
+    TS_ASSERT_EQUALS(expectedUnit, a->getUnits().ascii());
+    TS_ASSERT_EQUALS(expectedUnit, b->getUnits().ascii());
+    TS_ASSERT_EQUALS(expectedUnit, c->getUnits().ascii());
     TS_ASSERT_EQUALS("meV", d->getUnits().ascii());
 
     // Check Nbins

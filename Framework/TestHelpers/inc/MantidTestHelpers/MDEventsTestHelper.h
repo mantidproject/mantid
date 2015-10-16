@@ -79,7 +79,7 @@ template <typename MDE, size_t nd>
 void addMDDimensionsWithIndividualFrames(
     boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> out,
     Mantid::coord_t min, Mantid::coord_t max,
-    const std::vector<Mantid::Geometry::MDFrame_sptr>& frame,
+    const std::vector<Mantid::Geometry::MDFrame_sptr> &frame,
     std::string axisNameFormat, std::string axisIdFormat) {
   for (size_t d = 0; d < nd; d++) {
     char name[200];
@@ -217,7 +217,6 @@ makeAnyMDEW(size_t splitInto, coord_t min, coord_t max,
   return out;
 }
 
-
 /** Create a test MDEventWorkspace<nd> . Dimensions are names Axis0, Axis1, etc.
  *  But you can set an MDFrame. The frames can be set individually.
  *
@@ -236,17 +235,18 @@ makeAnyMDEW(size_t splitInto, coord_t min, coord_t max,
  */
 template <typename MDE, size_t nd>
 boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>>
-makeAnyMDEWWithIndividualFrames(size_t splitInto, coord_t min, coord_t max,
-                      std::vector<Mantid::Geometry::MDFrame_sptr>frames,
-                      size_t numEventsPerBox = 0, std::string wsName = "",
-                      std::string axisNameFormat = "Axis%d",
-                      std::string axisIdFormat = "Axis%d") {
+makeAnyMDEWWithIndividualFrames(
+    size_t splitInto, coord_t min, coord_t max,
+    std::vector<Mantid::Geometry::MDFrame_sptr> frames,
+    size_t numEventsPerBox = 0, std::string wsName = "",
+    std::string axisNameFormat = "Axis%d",
+    std::string axisIdFormat = "Axis%d") {
   // Create bare workspace
   auto out = createOutputWorkspace<MDE, nd>(splitInto);
 
   // Add standard dimensions
-  addMDDimensionsWithIndividualFrames<MDE, nd>(out, min, max, frames, axisNameFormat,
-                                     axisIdFormat);
+  addMDDimensionsWithIndividualFrames<MDE, nd>(out, min, max, frames,
+                                               axisNameFormat, axisIdFormat);
 
   // Add data
   addData<MDE, nd>(out, splitInto, min, max, numEventsPerBox);
@@ -320,14 +320,13 @@ makeMDEWWithFrames(size_t splitInto, coord_t min, coord_t max,
 /** Make a MDEventWorkspace with MDLeanEvents and individual MDFrames*/
 template <size_t nd>
 boost::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>, nd>>
-makeMDEWWithIndividualFrames(size_t splitInto, coord_t min, coord_t max,
-                   const std::vector<Mantid::Geometry::MDFrame_sptr>& frame,
-                   size_t numEventsPerBox = 0) {
-  return makeAnyMDEWWithIndividualFrames<MDLeanEvent<nd>, nd>(splitInto, min, max, frame,
-                                                    numEventsPerBox);
+makeMDEWWithIndividualFrames(
+    size_t splitInto, coord_t min, coord_t max,
+    const std::vector<Mantid::Geometry::MDFrame_sptr> &frame,
+    size_t numEventsPerBox = 0) {
+  return makeAnyMDEWWithIndividualFrames<MDLeanEvent<nd>, nd>(
+      splitInto, min, max, frame, numEventsPerBox);
 }
-
-
 
 /** Make a MDEventWorkspace with MDEvents  - updated to split dims by splitInto,
  * not 10 */

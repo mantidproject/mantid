@@ -117,7 +117,8 @@ public:
 
     Mantid::Geometry::QSample frame;
     IMDEventWorkspace_sptr in_ws =
-        MDEventsTestHelper::makeAnyMDEWWithFrames<MDLeanEvent<3>, 3>(10, 0.0, 10.0, frame, numEventsPerBox);
+        MDEventsTestHelper::makeAnyMDEWWithFrames<MDLeanEvent<3>, 3>(
+            10, 0.0, 10.0, frame, numEventsPerBox);
     Mantid::Kernel::SpecialCoordinateSystem appliedCoord =
         Mantid::Kernel::QSample;
 

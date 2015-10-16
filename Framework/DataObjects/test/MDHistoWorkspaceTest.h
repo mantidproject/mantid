@@ -422,20 +422,24 @@ public:
     // outputs like this.
     std::string expectedXML =
         std::string("<DimensionSet>") + "<Dimension ID=\"x\">" +
-        "<Name>X</Name>" + "<Units>m</Units>" + "<Frame>My General Frame</Frame>" +
+        "<Name>X</Name>" + "<Units>m</Units>" +
+        "<Frame>My General Frame</Frame>" +
         "<UpperBounds>10.0000</UpperBounds>" +
         "<LowerBounds>-10.0000</LowerBounds>" +
         "<NumberOfBins>5</NumberOfBins>" + "</Dimension>" +
         "<Dimension ID=\"y\">" + "<Name>Y</Name>" + "<Units>m</Units>" +
-        "<Frame>My General Frame</Frame>" + "<UpperBounds>10.0000</UpperBounds>" +
+        "<Frame>My General Frame</Frame>" +
+        "<UpperBounds>10.0000</UpperBounds>" +
         "<LowerBounds>-10.0000</LowerBounds>" +
         "<NumberOfBins>5</NumberOfBins>" + "</Dimension>" +
         "<Dimension ID=\"z\">" + "<Name>Z</Name>" + "<Units>m</Units>" +
-        "<Frame>My General Frame</Frame>" + "<UpperBounds>10.0000</UpperBounds>" +
+        "<Frame>My General Frame</Frame>" +
+        "<UpperBounds>10.0000</UpperBounds>" +
         "<LowerBounds>-10.0000</LowerBounds>" +
         "<NumberOfBins>5</NumberOfBins>" + "</Dimension>" +
         "<Dimension ID=\"t\">" + "<Name>T</Name>" + "<Units>m</Units>" +
-        "<Frame>My General Frame</Frame>" + "<UpperBounds>10.0000</UpperBounds>" +
+        "<Frame>My General Frame</Frame>" +
+        "<UpperBounds>10.0000</UpperBounds>" +
         "<LowerBounds>-10.0000</LowerBounds>" +
         "<NumberOfBins>5</NumberOfBins>" + "</Dimension>" + "<XDimension>" +
         "<RefDimensionId>x</RefDimensionId>" + "</XDimension>" +

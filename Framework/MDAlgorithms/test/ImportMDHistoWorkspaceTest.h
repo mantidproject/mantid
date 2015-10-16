@@ -278,7 +278,8 @@ public:
     alg->setPropertyValue("NumberOfBins", "2,2,2");
     alg->setPropertyValue("Names", "A,B,C");
     alg->setPropertyValue("Units", "U,U,U");
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Frames", "QSample, QSample, QSample"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setPropertyValue("Frames", "QSample, QSample, QSample"));
     alg->setPropertyValue("OutputWorkspace", "test_workspace");
     alg->setRethrows(true);
     alg->execute();
@@ -304,7 +305,8 @@ public:
       TSM_ASSERT_THROWS_NOTHING(
           "Should be convertible to a QSample frame",
           dynamic_cast<const Mantid::Geometry::QSample &>(frame));
-      TSM_ASSERT("Should not be set to U any longer", "U" != dimension->getUnits().ascii());
+      TSM_ASSERT("Should not be set to U any longer",
+                 "U" != dimension->getUnits().ascii());
     }
 
     ADS.remove("test_workspace");

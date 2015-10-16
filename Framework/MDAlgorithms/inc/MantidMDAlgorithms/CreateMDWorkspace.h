@@ -38,14 +38,17 @@ public:
   /// Algorithm's category for identification
   virtual const std::string category() const { return "MDAlgorithms"; }
   virtual std::map<std::string, std::string> validateInputs();
+
 private:
   void init();
   void exec();
 
   template <typename MDE, size_t nd>
   void finish(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
-  Mantid::Geometry::MDFrame_uptr createMDFrame(std::string frame, std::string unit);
-  bool checkIfFrameValid(const std::string& frame, const std::vector<std::string>& targetFrames);
+  Mantid::Geometry::MDFrame_uptr createMDFrame(std::string frame,
+                                               std::string unit);
+  bool checkIfFrameValid(const std::string &frame,
+                         const std::vector<std::string> &targetFrames);
 };
 
 } // namespace Mantid

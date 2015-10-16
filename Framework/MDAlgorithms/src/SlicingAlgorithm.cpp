@@ -1082,12 +1082,12 @@ SlicingAlgorithm::extractMDFrameForNonAxisAligned(
                              "project on any vector of the old basis.");
   }
   // Get a reference frame to perform pairwise comparison
-  const auto& referenceMDFrame =
+  const auto &referenceMDFrame =
       m_inWS->getDimension(indicesWithProjection[0])->getMDFrame();
 
   for (auto it = indicesWithProjection.begin();
        it != indicesWithProjection.end(); ++it) {
-    const auto& toCheckMDFrame = m_inWS->getDimension(*it)->getMDFrame();
+    const auto &toCheckMDFrame = m_inWS->getDimension(*it)->getMDFrame();
     if (!referenceMDFrame.isSameType(toCheckMDFrame)) {
       throw std::runtime_error("Slicing Algorithm: New basis yvector tries to "
                                "mix un-mixable MDFrame types.");

@@ -21,7 +21,8 @@ public:
     TS_ASSERT_EQUALS(unitLabel.ascii(), unit.getUnitLabel().ascii());
   }
 
-  void test_RLU_Constructor_with_invalid_special_unit_label_does_not_accept_the_label() {
+  void
+  test_RLU_Constructor_with_invalid_special_unit_label_does_not_accept_the_label() {
     auto unitLabel = UnitLabel("in invalidLabel A-1");
     ReciprocalLatticeUnit unit(unitLabel);
     TS_ASSERT_EQUALS(Units::Symbol::RLU, unit.getUnitLabel());

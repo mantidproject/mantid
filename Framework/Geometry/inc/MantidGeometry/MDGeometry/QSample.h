@@ -43,7 +43,7 @@ public:
   const Kernel::MDUnit &getMDUnit() const;
   bool canConvertTo(const Kernel::MDUnit &otherUnit) const;
   bool isQ() const;
-  bool isSameType(const MDFrame& frame) const;
+  bool isSameType(const MDFrame &frame) const;
   std::string name() const;
   QSample *clone() const;
   Mantid::Kernel::SpecialCoordinateSystem

@@ -301,13 +301,13 @@ MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(
   return ws_sptr;
 }
 
-
 //-------------------------------------------------------------------------------------
 /** Creates a fake MDHistoWorkspace with MDFrame selection
  *
  * @param signal :: signal in every point
  * @param numDims :: number of dimensions to create. They will range from 0 to
  *max
+ * @param frame :: the selected frame
  * @param numBins :: bins in each dimensions
  * @param max :: max position in each dimension
  * @param errorSquared :: error squared in every point
@@ -358,7 +358,6 @@ Mantid::DataObjects::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceWithMDFrame(
     AnalysisDataService::Instance().addOrReplace(name, ws_sptr);
   return ws_sptr;
 }
-
 
 /**
  * Delete a file from disk
