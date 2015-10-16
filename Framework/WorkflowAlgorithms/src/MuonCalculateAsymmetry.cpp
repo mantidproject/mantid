@@ -304,6 +304,7 @@ MatrixWorkspace_sptr MuonCalculateAsymmetry::calculateGroupAsymmetry(
 * @param secondPeriodWS :: [input] Second period workspace
 * @param firstPairIndex :: [input] Workspace index for the forward group
 * @param secondPairIndex :: [input] Workspace index for the backward group
+* @param alpha :: [input] The balance parameter
 * @param op :: [input] Period operation (+ or -)
 */
 MatrixWorkspace_sptr MuonCalculateAsymmetry::calculatePairAsymmetry(
