@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/RefReduction.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/UnitFactory.h"
@@ -629,6 +628,8 @@ double RefReduction::calculateAngleREFM(MatrixWorkspace_sptr workspace) {
   Mantid::Kernel::Property *prop = workspace->run().getProperty("SampleDetDis");
   Mantid::Kernel::TimeSeriesProperty<double> *dp =
       dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
+  if (!dp)
+    throw std::runtime_error("SampleDetDis was not a TimeSeriesProperty");
   const double det_distance = dp->getStatistics().mean / 1000.0;
 
   double direct_beam_pix = getProperty("DirectPixel");

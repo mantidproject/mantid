@@ -26,12 +26,12 @@ Usage
 
   import os, numpy as np
   # prepare input
-  E = np.arange(-50, 50, 1.0)
+  E = np.arange(-50, 50, 10.0)
   I = 1000 * np.exp(-E**2/10**2)
   err = I ** .5
   dataws = CreateWorkspace(
       DataX = E, DataY = I, DataE = err, NSpec = 1,
-      UnitX = "Energy(meV)")
+      UnitX = "Energy")
   # output path
   out_json = "myplot.json"
   # run algorithm

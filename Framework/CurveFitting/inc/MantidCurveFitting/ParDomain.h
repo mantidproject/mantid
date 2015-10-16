@@ -43,12 +43,13 @@ public:
   virtual void getDomainAndValues(size_t i, API::FunctionDomain_sptr &domain,
                                   API::FunctionValues_sptr &values) const;
   /// Calculate the value of a least squares cost function
-  virtual void leastSquaresVal(const CostFuncLeastSquares &leastSquares);
+  virtual void
+  leastSquaresVal(const CostFunctions::CostFuncLeastSquares &leastSquares);
   /// Calculate the value, first and second derivatives of a least squares cost
   /// function
-  virtual void
-  leastSquaresValDerivHessian(const CostFuncLeastSquares &leastSquares,
-                              bool evalDeriv, bool evalHessian);
+  virtual void leastSquaresValDerivHessian(
+      const CostFunctions::CostFuncLeastSquares &leastSquares, bool evalDeriv,
+      bool evalHessian);
 };
 
 } // namespace CurveFitting

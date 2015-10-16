@@ -6,6 +6,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidGeometry/Crystal/PointGroup.h"
 
 #include "MantidKernel/Matrix.h"
 
@@ -103,6 +104,9 @@ protected:
   Poldi2DFunction_sptr
   getFunctionPawley(std::string profileFunctionName,
                     const PoldiPeakCollection_sptr &peakCollection);
+
+  std::string getCrystalSystemFromPointGroup(
+      const Geometry::PointGroup_sptr &pointGroup) const;
 
   std::string
   getRefinedStartingCell(const std::string &initialCell,

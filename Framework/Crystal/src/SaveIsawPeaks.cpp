@@ -1,5 +1,5 @@
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidCrystal/SaveIsawPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"

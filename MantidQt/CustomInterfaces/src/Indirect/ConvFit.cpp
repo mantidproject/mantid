@@ -35,6 +35,8 @@ ConvFit::ConvFit(QWidget *parent)
 void ConvFit::setup() {
   // Create Property Managers
   m_stringManager = new QtStringPropertyManager();
+  m_runMin = 0;
+  m_runMax = 0;
 
   // Initialise fitTypeStrings
   m_fitStrings = QStringList() << ""
@@ -237,6 +239,8 @@ void ConvFit::run() {
   std::string function = std::string(func->asString());
   std::string stX = m_properties["StartX"]->valueText().toStdString();
   std::string enX = m_properties["EndX"]->valueText().toStdString();
+  m_runMin = m_uiForm.spSpectraMin->value();
+  m_runMax = m_uiForm.spSpectraMax->value();
   std::string specMin = m_uiForm.spSpectraMin->text().toStdString();
   std::string specMax = m_uiForm.spSpectraMax->text().toStdString();
   int maxIterations =
@@ -984,17 +988,24 @@ void ConvFit::updatePlot() {
   }
 
   // If there is a result plot then plot it
-  std::string groupName =  m_baseName.toStdString() + "_Workspaces";
+  std::string groupName = m_baseName.toStdString() + "_Workspaces";
   if (AnalysisDataService::Instance().doesExist(groupName)) {
     WorkspaceGroup_sptr outputGroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            groupName);
-    if (specNo >= static_cast<int>(outputGroup->size()))
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
+    if (specNo - m_runMin >= static_cast<int>(outputGroup->size()))
       return;
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        outputGroup->getItem(specNo));
-    if (ws)
-      m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
+    if ((specNo - m_runMin) >= 0) {
+      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+		  outputGroup->getItem(specNo- m_runMin));
+      if (ws) {
+        m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
+        m_uiForm.ppPlot->addSpectrum("Diff", ws, 2, Qt::blue);
+        if (m_uiForm.ckPlotGuess->isChecked()) {
+          m_uiForm.ppPlot->removeSpectrum("Guess");
+          m_uiForm.ckPlotGuess->setChecked(false);
+        }
+      }
+    }
   }
 }
 

@@ -7,6 +7,11 @@ using Mantid::Geometry::IComponent;
 using namespace boost::python;
 
 namespace {
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
 // Default parameter function overloads
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParameterNames,
                                        Component::getParameterNames, 0, 1)
@@ -36,45 +41,62 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamShortDescription,
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamDescription,
                                        Component::getParamDescription, 1, 2)
 }
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 void export_Component() {
   class_<Component, bases<IComponent>, boost::noncopyable>("Component", no_init)
       .def("getParameterNames", &Component::getParameterNames,
-           Component_getParameterNames())
-      .def("hasParameter", &Component::hasParameter, Component_hasParameter())
+           Component_getParameterNames((arg("self"), arg("recursive") = true)))
+      .def("hasParameter", &Component::hasParameter,
+           Component_hasParameter(
+               (arg("self"), arg("name"), arg("recursive") = true)))
       .def("getNumberParameter", &Component::getNumberParameter,
-           Component_getNumberParameter())
+           Component_getNumberParameter(
+               (arg("self"), arg("pname"), arg("recursive") = true)))
       .def("getBoolParameter", &Component::getBoolParameter,
-           Component_getBoolParameter())
+           Component_getBoolParameter(
+               (arg("self"), arg("pname"), arg("recursive") = true)))
       .def("getPositionParameter", &Component::getPositionParameter,
-           Component_getPositionParameter())
+           Component_getPositionParameter(
+               (arg("self"), arg("pname"), arg("recursive") = true)))
       .def("getRotationParameter", &Component::getRotationParameter,
-           Component_getRotationParameter())
+           Component_getRotationParameter(
+               (arg("self"), arg("pname"), arg("recursive") = true)))
       .def("getStringParameter", &Component::getStringParameter,
-           Component_getStringParameter())
+           Component_getStringParameter(
+               (arg("self"), arg("pname"), arg("recursive") = true)))
       .def("getIntParameter", &Component::getIntParameter,
-           Component_getIntParameter())
+           Component_getIntParameter(
+               (arg("self"), arg("pname"), arg("recursive") = true)))
       //
-      .def("getRotation", &Component::getRotation, Component_getRotation())
+      .def("getRotation", &Component::getRotation,
+           Component_getRotation(arg("self")))
       .def("getRelativePos", &Component::getRelativePos,
-           Component_getRelativePos())
+           Component_getRelativePos(arg("self")))
       //
       .def("getParamShortDescription", &Component::getParamShortDescription,
-           Component_getParamShortDescription())
+           Component_getParamShortDescription(
+               (arg("self"), arg("pname"), arg("recursive") = true)))
       .def("getParamDescription", &Component::getParamDescription,
-           Component_getParamDescription())
-      .def("getShortDescription", &Component::getShortDescription,
+           Component_getParamDescription(
+               (arg("self"), arg("pname"), arg("recursive") = true)))
+
+      .def("getShortDescription", &Component::getShortDescription, arg("self"),
            "Return the short description of current parameterized component")
-      .def("getDescription", &Component::getDescription,
+      .def("getDescription", &Component::getDescription, arg("self"),
            "Return the description of current parameterized component")
       .def("setDescription", &Component::setDescription,
+           (arg("self"), arg("descr")),
            "Set component's description, works only if the component is "
            "parameterized component")
 
       // HACK -- python should return parameters regardless of type. this is
       // untill rows below do not work
       .def("getParameterType", &Component::getParameterType,
-           Component_getParameterType())
+           Component_getParameterType(
+               (arg("self"), arg("pname"), arg("recursive") = true)))
       //// this does not work for some obvious or not obvious reasons
       //.def("getParameter", &Component::getNumberParameter,
       // Component_getNumberParameter())

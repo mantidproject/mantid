@@ -1,8 +1,8 @@
-#pylint: disable=invalid-name
+#pylint: disable-all
 from PyQt4 import QtCore, QtGui
 import os
 from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup
+from mantid.api import WorkspaceGroup, AnalysisDataService
 import xml.etree.ElementTree as xml
 from isis_reflectometry.quick import *
 from isis_reflectometry.procedures import *
@@ -32,10 +32,12 @@ class Ui_SaveWindow(object):
     def setupUi(self, SaveWindow):
         self.SavePath=""
         SaveWindow.setObjectName(_fromUtf8("SaveWindow"))
-        SaveWindow.resize(700, 450)
+        SaveWindow.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding))
         SaveWindow.setAcceptDrops(True)
-
+        main_layout = QtGui.QHBoxLayout()
+        SaveWindow.setLayout(main_layout)
         self.centralWidget = QtGui.QWidget(SaveWindow)
+        main_layout.addWidget(self.centralWidget)
         self.centralWidget.setObjectName(_fromUtf8("centralWidget"))
         self.gridLayout_2 = QtGui.QGridLayout(self.centralWidget)
         self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
@@ -236,12 +238,18 @@ class Ui_SaveWindow(object):
 
     def retranslateUi(self, SaveWindow):
         SaveWindow.setWindowTitle(QtGui.QApplication.translate("SaveWindow", "SaveWindow", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton.setText(QtGui.QApplication.translate("SaveWindow", "SAVE", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButton.setText(QtGui.QApplication.translate("SaveWindow", "Save", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_2.setText(QtGui.QApplication.translate("SaveWindow", "Refresh", None, QtGui.QApplication.UnicodeUTF8))
 
+    def _get_saveable_workspace_names(self):
+        names = mtd.getObjectNames()
+        # Exclude WorkspaceGroups from our list. We cannot save them to ASCII.
+        names = [i for i in names if not isinstance(AnalysisDataService.retrieve(i), WorkspaceGroup)]
+        return names
+    
     def filterWksp(self):
         self.listWidget.clear()
-        names = mtd.getObjectNames()
+        names = self._get_saveable_workspace_names()
         if self.regExCheckBox.isChecked():
             regex=re.compile(self.filterEdit.text())
             filtered = list()
@@ -268,7 +276,7 @@ class Ui_SaveWindow(object):
 
     def populateList(self):
         self.listWidget.clear()
-        names = mtd.getObjectNames()
+        names = self._get_saveable_workspace_names()
         if len(names):
             RB_Number=groupGet(names[0],'samp','rb_proposal')
             for ws in names:

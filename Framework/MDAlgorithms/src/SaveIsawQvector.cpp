@@ -3,7 +3,8 @@
 #include <fstream>
 
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"

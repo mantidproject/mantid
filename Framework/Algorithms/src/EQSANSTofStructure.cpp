@@ -2,12 +2,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/EQSANSTofStructure.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <vector>
 

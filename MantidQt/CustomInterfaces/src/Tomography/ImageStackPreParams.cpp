@@ -5,9 +5,7 @@ using namespace MantidQt::CustomInterfaces;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ImageStackPreParams::ImageStackPreParams()
-{
+ImageStackPreParams::ImageStackPreParams() : medianFilter(false) {}
 
-}
 } // namespace CustomInterfaces
 } // namespace MantidQt

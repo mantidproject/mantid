@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/MaskBinsFromTable.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/ArrayProperty.h"

@@ -2,16 +2,21 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertSpectrumAxis2.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidKernel/UnitConversion.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/Run.h"
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-#include <cfloat>
+#include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/UnitConversion.h"
+#include "MantidKernel/UnitFactory.h"
+
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
+
+#include <cfloat>
 
 namespace Mantid {
 namespace Algorithms {

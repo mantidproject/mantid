@@ -2348,7 +2348,7 @@ int SOAP_FMAC2 soap_resolve(struct soap *soap) {
       } else if (*ip->id == '#') {
         DBGLOG(TEST,
                SOAP_MESSAGE(fdebug, "Missing data for id='%s'\n", ip->id));
-        strcpy(soap->id, ip->id + 1);
+        strncpy(soap->id, ip->id + 1, sizeof(soap->id));
         return soap->error = SOAP_MISSING_ID;
       }
     }
@@ -2386,7 +2386,7 @@ int SOAP_FMAC2 soap_resolve(struct soap *soap) {
                                         "location=%p level=%u,%u id='%s'\n",
                                 ip->type, p, ip->level, fp->level, ip->id));
             while (ip->level < k) {
-              void **q = (void **)soap_malloc(soap, sizeof(q));
+              void **q = (void **)soap_malloc(soap, sizeof(*q));
               if (!q)
                 return soap->error;
               *q = p;
@@ -3207,7 +3207,7 @@ const char *SOAP_FMAC2 soap_ssl_error(struct soap *soap, int ret) {
   int err = SSL_get_error(soap->ssl, ret);
   const char *msg = soap_code_str(h_ssl_error_codes, err);
   if (msg)
-    strcpy(soap->msgbuf, msg);
+    strncpy(soap->msgbuf, msg, sizeof(soap->msgbuf));
   else
     return ERR_error_string(err, soap->msgbuf);
   if (ERR_peek_error()) {
@@ -6049,7 +6049,7 @@ static int http_post(struct soap *soap, const char *endpoint, const char *host,
       sprintf(soap->tmpbuf, "[%s]", host); /* RFC 2732 */
     else
 #endif
-      strcpy(soap->tmpbuf, host);
+      strncpy(soap->tmpbuf, host, sizeof(soap->tmpbuf));
   }
   if ((err = soap->fposthdr(soap, "Host", soap->tmpbuf)))
     return err;
@@ -8161,7 +8161,7 @@ void *SOAP_FMAC2 soap_id_lookup(struct soap *soap, const char *id, void **p,
                         "Resolved href='%s' type=%d location=%p (%u bytes)\n",
                         id, t, ip->ptr, (unsigned int)n));
     if (ip->type != t) {
-      strcpy(soap->id, id);
+      strncpy(soap->id, id, sizeof(soap->id));
       soap->error = SOAP_HREF;
       DBGLOG(TEST,
              SOAP_MESSAGE(
@@ -8188,9 +8188,11 @@ void *SOAP_FMAC2 soap_id_lookup(struct soap *soap, const char *id, void **p,
       void *s, **r = &ip->link;
       q = (void **)ip->link;
       while (q) {
-        *r = (void *)soap_malloc(soap, sizeof(void *));
-        if (!*r)
+        void **tmp = (void **)soap_malloc(soap, sizeof(void *));
+        if (!tmp)
           return NULL;
+        *r = (void *)tmp;
+
         s = *q;
         *q = *r;
         r = (void **)*r;
@@ -8263,7 +8265,7 @@ void *SOAP_FMAC2 soap_id_forward(struct soap *soap, const char *href, void *p,
                                 "size=%lu level=%u got type=%d size=%lu\n",
                         href, ip->type, (unsigned long)ip->size, k, st,
                         (unsigned long)n));
-    strcpy(soap->id, href);
+    strncpy(soap->id, href, sizeof(soap->id));
     soap->error = SOAP_HREF;
     return NULL;
   }
@@ -8355,12 +8357,12 @@ soap_id_enter(struct soap *soap, const char *id, void *p, int t, size_t n,
                                 "size=%lu level=%u got type=%d size=%lu\n",
                         id, ip->type, (unsigned long)ip->size, k, t,
                         (unsigned long)n));
-    strcpy(soap->id, id);
+    strncpy(soap->id, id, sizeof(soap->id));
     soap->error = SOAP_HREF;
     return NULL;
   } else if (ip->ptr) {
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Multiply defined id='%s'\n", id));
-    strcpy(soap->id, id);
+    strncpy(soap->id, id, sizeof(soap->id));
     soap->error = SOAP_DUPLICATE_ID;
     return NULL;
   } else {
@@ -10040,7 +10042,7 @@ int SOAP_FMAC2 soap_element_start_end_out(struct soap *soap, const char *tag) {
   if (soap->mode & SOAP_XML_CANONICAL) {
     struct soap_nlist *np;
     for (tp = soap->attributes; tp; tp = tp->next) {
-      if (tp->visible && tp->name)
+      if (tp->visible && tp->name[0])
         soap_utilize_ns(soap, tp->name);
     }
     for (np = soap->nlist; np; np = np->next) {
@@ -11048,7 +11050,7 @@ int SOAP_FMAC2 soap_peek_element(struct soap *soap) {
           soap->arraySize[sizeof(soap->arrayType) - 1] = '\0';
           soap->arrayType[sizeof(soap->arrayType) - 1] = '\0';
         } else if (!soap_match_tag(soap, tp->name, "SOAP-ENC:offset"))
-          strncpy(soap->arrayOffset, tp->value, sizeof(soap->arrayOffset));
+          strncpy(soap->arrayOffset, tp->value, sizeof(soap->arrayOffset) - 1);
         else if (!soap_match_tag(soap, tp->name, "SOAP-ENC:position"))
           soap->position = soap_getposition(tp->value, soap->positions);
         else if (!soap_match_tag(soap, tp->name, "SOAP-ENC:root"))
@@ -16060,18 +16062,24 @@ int SOAP_FMAC2 soap_puthttphdr(struct soap *soap, int status, size_t count) {
       } else
         strcat(soap->tmpbuf, s);
       if (soap->mime.start) {
-        strcat(soap->tmpbuf, "\"; start=\"");
-        strcat(soap->tmpbuf, soap->mime.start);
+        const char startStr[] = "\"; start=\"";
+        strcat(soap->tmpbuf, startStr);
+        strncat(soap->tmpbuf, soap->mime.start,
+                sizeof(soap->tmpbuf) - sizeof(startStr));
       }
       strcat(soap->tmpbuf, "\"");
       if (r) {
-        strcat(soap->tmpbuf, "; start-info=\"");
-        strcat(soap->tmpbuf, r);
-        strcat(soap->tmpbuf, "\"");
+        const char startInfoStr[] = "; start-info=\"";
+        size_t lenStart = sizeof(soap->tmpbuf) - sizeof(startInfoStr);
+        strncat(soap->tmpbuf, startInfoStr, lenStart);
+        size_t lenR = lenStart - strnlen(r, lenStart);
+        strncat(soap->tmpbuf, r, lenR);
+        size_t lenEnd = lenR - 1;
+        strncat(soap->tmpbuf, "\"", lenEnd);
       }
       s = soap->tmpbuf;
     } else
-      s = strcpy(soap->tmpbuf, s);
+      s = strncpy(soap->tmpbuf, s, sizeof(soap->tmpbuf));
     if (status == SOAP_OK && soap->version == 2 && soap->action &&
         strlen(soap->action) + strlen(s) < sizeof(soap->tmpbuf) - 80)
       sprintf(soap->tmpbuf + strlen(s), "; action=\"%s\"", soap->action);

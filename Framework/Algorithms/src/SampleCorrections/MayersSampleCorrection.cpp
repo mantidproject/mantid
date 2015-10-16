@@ -3,9 +3,9 @@
 //------------------------------------------------------------------------------
 #include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
 #include "MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h"
-#include "MantidAPI/Progress.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/SampleValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/CompositeValidator.h"
 

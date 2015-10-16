@@ -26,5 +26,5 @@ where
 .. categories::
 
 .. sourcelink::
-    :h: Framework/CurveFitting/inc/MantidCurveFitting/Quadratic.h
-    :cpp: Framework/CurveFitting/src/Quadratic.cpp
+    :h: Framework/CurveFitting/inc/MantidCurveFitting/Functions/Quadratic.h
+    :cpp: Framework/CurveFitting/src/Functions/Quadratic.cpp

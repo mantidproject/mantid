@@ -1,5 +1,4 @@
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidCrystal/SaveLauenorm.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Utils.h"

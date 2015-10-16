@@ -42,7 +42,11 @@ typedef void (*declarePropertyType3)(boost::python::object &self,
 typedef void (*declarePropertyType4)(boost::python::object &self,
                                      const std::string &,
                                      const boost::python::object &, const int);
-
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
 // Overload types
 BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType1_Overload,
                                 PythonAlgorithm::declarePyAlgProperty, 2, 3)
@@ -50,7 +54,9 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType2_Overload,
                                 PythonAlgorithm::declarePyAlgProperty, 3, 6)
 BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType3_Overload,
                                 PythonAlgorithm::declarePyAlgProperty, 4, 5)
-
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 /**
  * Map a CancelException to a Python KeyboardInterupt
  * @param exc A cancel exception to translate. Unused here as the message is
@@ -77,22 +83,19 @@ void export_leaf_classes() {
       .def("fromString", &Algorithm::fromString,
            "Initialize the algorithm from a string representation")
       .staticmethod("fromString")
-
       .def("createChildAlgorithm", &Algorithm::createChildAlgorithm,
-           (arg("name"), arg("startProgress") = -1.0, arg("endProgress") = -1.0,
-            arg("enableLogging") = true, arg("version") = -1),
+           (arg("self"), arg("name"), arg("startProgress") = -1.0,
+            arg("endProgress") = -1.0, arg("enableLogging") = true,
+            arg("version") = -1),
            "Creates and intializes a named child algorithm. Output workspaces "
            "are given a dummy name.")
-
       .def("declareProperty",
            (declarePropertyType1)&PythonAlgorithm::declarePyAlgProperty,
            declarePropertyType1_Overload(
                (arg("self"), arg("prop"), arg("doc") = "")))
-
       .def("enableHistoryRecordingForChild",
-           &Algorithm::enableHistoryRecordingForChild, (args("on")),
+           &Algorithm::enableHistoryRecordingForChild, (arg("self"), arg("on")),
            "Turns history recording on or off for an algorithm.")
-
       .def("declareProperty",
            (declarePropertyType2)&PythonAlgorithm::declarePyAlgProperty,
            declarePropertyType2_Overload(
@@ -102,7 +105,6 @@ void export_leaf_classes() {
                "Declares a named property where the type is taken from "
                "the type of the defaultValue and mapped to an appropriate C++ "
                "type"))
-
       .def("declareProperty",
            (declarePropertyType3)&PythonAlgorithm::declarePyAlgProperty,
            declarePropertyType3_Overload(
@@ -111,23 +113,22 @@ void export_leaf_classes() {
                "Declares a named property where the type is taken from the "
                "type "
                "of the defaultValue and mapped to an appropriate C++ type"))
-
       .def("declareProperty",
            (declarePropertyType4)&PythonAlgorithm::declarePyAlgProperty,
            (arg("self"), arg("name"), arg("defaultValue"),
             arg("direction") = Direction::Input),
            "Declares a named property where the type is taken from the type "
            "of the defaultValue and mapped to an appropriate C++ type")
-
-      .def("getLogger", &PythonAlgorithm::getLogger,
+      .def("getLogger", &PythonAlgorithm::getLogger, arg("self"),
            return_value_policy<reference_existing_object>(),
            "Returns a reference to this algorithm's logger")
-      .def("log", &PythonAlgorithm::getLogger,
+      .def("log", &PythonAlgorithm::getLogger, arg("self"),
            return_value_policy<reference_existing_object>(),
            "Returns a reference to this algorithm's logger") // Traditional name
 
       // deprecated methods
       .def("setWikiSummary", &PythonAlgorithm::setWikiSummary,
+           (arg("self"), arg("summary")),
            "(Deprecated.) Set summary for the help.");
 
   // Prior to version 3.2 there was a separate C++ PythonAlgorithm class that

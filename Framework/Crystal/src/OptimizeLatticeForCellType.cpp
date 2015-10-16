@@ -2,7 +2,6 @@
 #include "MantidCrystal/GSLFunctions.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/ListValidator.h"

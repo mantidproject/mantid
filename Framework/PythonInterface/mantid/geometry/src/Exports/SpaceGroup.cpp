@@ -53,16 +53,19 @@ void export_SpaceGroup() {
   register_ptr_to_python<boost::shared_ptr<SpaceGroup>>();
 
   class_<SpaceGroup, boost::noncopyable, bases<Group>>("SpaceGroup", no_init)
-      .def("getNumber", &SpaceGroup::number)
-      .def("getHMSymbol", &SpaceGroup::hmSymbol)
+      .def("getNumber", &SpaceGroup::number, arg("self"))
+      .def("getHMSymbol", &SpaceGroup::hmSymbol, arg("self"))
       .def("getEquivalentPositions", &getEquivalentPositions,
+           (arg("self"), arg("point")),
            "Returns an array with all symmetry equivalents of the supplied "
            "HKL.")
       .def("isAllowedReflection", &isAllowedReflection,
+           (arg("self"), arg("hkl")),
            "Returns True if the supplied reflection is allowed with respect to "
            "space group symmetry operations.")
-      .def("getPointGroup", &SpaceGroup::getPointGroup,
+      .def("getPointGroup", &SpaceGroup::getPointGroup, arg("self"),
            "Returns the point group of the space group.")
       .def("getSiteSymmetryGroup", &getSiteSymmetryGroup,
+           (arg("self"), arg("position")),
            "Returns the site symmetry group for supplied point coordinates.");
 }

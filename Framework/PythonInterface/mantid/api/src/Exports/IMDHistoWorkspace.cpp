@@ -167,55 +167,65 @@ void export_IMDHistoWorkspace() {
   // IMDHistoWorkspace class
   class_<IMDHistoWorkspace, bases<IMDWorkspace, MultipleExperimentInfos>,
          boost::noncopyable>("IMDHistoWorkspace", no_init)
-      .def("getSignalArray", &getSignalArrayAsNumpyArray,
+      .def("getSignalArray", &getSignalArrayAsNumpyArray, arg("self"),
            "Returns a read-only numpy array containing the signal values")
 
       .def("getErrorSquaredArray", &getErrorSquaredArrayAsNumpyArray,
+           arg("self"),
            "Returns a read-only numpy array containing the square of the error "
            "values")
 
-      .def("getNumEventsArray", &getNumEventsArrayAsNumpyArray,
+      .def("getNumEventsArray", &getNumEventsArrayAsNumpyArray, arg("self"),
            "Returns a read-only numpy array containing the number of MD events "
            "in each bin")
 
       .def("signalAt", &IMDHistoWorkspace::signalAt,
+           (arg("self"), arg("index")),
            return_value_policy<copy_non_const_reference>(),
            "Return a reference to the signal at the linear index")
 
       .def("errorSquaredAt", &IMDHistoWorkspace::errorSquaredAt,
+           (arg("self"), arg("index")),
            return_value_policy<copy_non_const_reference>(),
            "Return the squared-errors at the linear index")
 
       .def("setSignalAt", &IMDHistoWorkspace::setSignalAt,
+           (arg("self"), arg("index"), arg("value")),
            "Sets the signal at the specified index.")
 
       .def("setErrorSquaredAt", &IMDHistoWorkspace::setErrorSquaredAt,
+           (arg("self"), arg("index"), arg("value")),
            "Sets the squared-error at the specified index.")
 
       .def("setSignalArray", &setSignalArray,
+           (arg("self"), arg("signalValues")),
            "Sets the signal from a numpy array. The sizes must match the "
            "current workspace sizes. A ValueError is thrown if not")
 
-      .def("setErrorSquaredArray", &setErrorSquaredArray,
+      .def("setErrorSquaredArray", &setErrorSquaredArray, arg("self"),
            "Sets the square of the errors from a numpy array. The sizes must "
            "match the current workspace sizes. A ValueError is thrown if not")
 
       .def("setTo", &IMDHistoWorkspace::setTo,
+           (arg("self"), arg("signal"), arg("error_squared"),
+            arg("num_events")),
            "Sets all signals/errors in the workspace to the given values")
 
       .def("getInverseVolume", &IMDHistoWorkspace::getInverseVolume,
-           return_value_policy<return_by_value>(),
+           arg("self"), return_value_policy<return_by_value>(),
            "Return the inverse of volume of EACH cell in the workspace.")
 
       .def("getLinearIndex",
            (size_t (IMDHistoWorkspace::*)(size_t, size_t) const) &
                IMDHistoWorkspace::getLinearIndex,
+           (arg("self"), arg("index1"), arg("index2")),
            return_value_policy<return_by_value>(),
            "Get the 1D linear index from the 2D array")
 
       .def("getLinearIndex",
            (size_t (IMDHistoWorkspace::*)(size_t, size_t, size_t) const) &
                IMDHistoWorkspace::getLinearIndex,
+           (arg("self"), arg("index1"), arg("index2"), arg("index3")),
            return_value_policy<return_by_value>(),
            "Get the 1D linear index from the 3D array")
 
@@ -223,10 +233,13 @@ void export_IMDHistoWorkspace() {
            (size_t (IMDHistoWorkspace::*)(size_t, size_t, size_t, size_t)
                 const) &
                IMDHistoWorkspace::getLinearIndex,
+           (arg("self"), arg("index1"), arg("index2"), arg("index3"),
+            arg("index4")),
            return_value_policy<return_by_value>(),
            "Get the 1D linear index from the 4D array")
 
       .def("getCenter", &IMDHistoWorkspace::getCenter,
+           (arg("self"), arg("linear_index")),
            return_value_policy<return_by_value>(),
            "Return the position of the center of a bin at a given position");
 

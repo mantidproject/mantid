@@ -99,8 +99,15 @@ void subscribe(AlgorithmFactoryImpl &self, const boost::python::object &obj) {
   // from the FileLoaderRegistry
   FileLoaderRegistry::Instance().unsubscribe(descr.first, descr.second);
 }
-
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(existsOverloader, exists, 1, 2)
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 ///@endcond
 }
@@ -118,12 +125,15 @@ void export_AlgorithmFactory() {
                             "an option to specify the version"))
 
       .def("getRegisteredAlgorithms", &getRegisteredAlgorithms,
+           (arg("self"), arg("include_hidden")),
            "Returns a Python dictionary of currently registered algorithms")
       .def("highestVersion", &AlgorithmFactoryImpl::highestVersion,
+           (arg("self"), arg("algorithm_name")),
            "Returns the highest version of the named algorithm. Throws "
            "ValueError if no algorithm can be found")
-      .def("subscribe", &subscribe, "Register a Python class derived from "
-                                    "PythonAlgorithm into the factory")
+      .def("subscribe", &subscribe, (arg("self"), arg("object")),
+           "Register a Python class derived from "
+           "PythonAlgorithm into the factory")
 
       .def("Instance", &AlgorithmFactory::Instance,
            return_value_policy<reference_existing_object>(),

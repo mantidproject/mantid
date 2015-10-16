@@ -18,6 +18,7 @@ set ( SRC_FILES
 	src/ChopperModel.cpp
 	src/Column.cpp
 	src/ColumnFactory.cpp
+	src/CommonBinsValidator.cpp
 	src/CompositeCatalog.cpp
 	src/CompositeDomainMD.cpp
 	src/CompositeFunction.cpp
@@ -45,6 +46,7 @@ set ( SRC_FILES
 	src/FunctionValues.cpp
 	src/GridDomain.cpp
 	src/GridDomain1D.cpp
+	src/HistogramValidator.cpp
 	src/HistoryItem.cpp
 	src/HistoryView.cpp
 	src/IDomainCreator.cpp
@@ -74,7 +76,9 @@ set ( SRC_FILES
 	src/ImplicitFunctionFactory.cpp
 	src/ImplicitFunctionParameterParserFactory.cpp
 	src/ImplicitFunctionParserFactory.cpp
+	src/IncreasingAxisValidator.cpp
 	src/InstrumentDataService.cpp
+	src/InstrumentValidator.cpp
 	src/JointDomain.cpp
 	src/LatticeDomain.cpp
 	src/LinearScale.cpp
@@ -92,10 +96,11 @@ set ( SRC_FILES
 	src/MultiPeriodGroupWorker.cpp
 	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
+	src/NotebookBuilder.cpp
+	src/NotebookWriter.cpp
 	src/NullCoordTransform.cpp
-        src/NotebookBuilder.cpp
-      	src/NotebookWriter.cpp 
 	src/NumericAxis.cpp
+	src/NumericAxisValidator.cpp
 	src/ParamFunction.cpp
 	src/ParameterReference.cpp
 	src/ParameterTie.cpp
@@ -104,17 +109,20 @@ set ( SRC_FILES
 	src/Projection.cpp
 	src/PropertyManagerDataService.cpp
 	src/PropertyNexus.cpp
+	src/RawCountValidator.cpp
 	src/RefAxis.cpp
 	src/RemoteJobManagerFactory.cpp
 	src/Run.cpp
 	src/Sample.cpp
 	src/SampleEnvironment.cpp
 	src/SampleShapeValidator.cpp
+	src/SampleValidator.cpp
 	src/ScopedWorkspace.cpp
 	src/ScriptBuilder.cpp
 	src/ScriptRepository.cpp
 	src/ScriptRepositoryFactory.cpp
 	src/SpectraAxis.cpp
+	src/SpectraAxisValidator.cpp
 	src/SpectrumDetectorMapping.cpp
 	src/TableRow.cpp
 	src/TextAxis.cpp
@@ -125,7 +133,7 @@ set ( SRC_FILES
 	src/WorkspaceHistory.cpp
 	src/WorkspaceOpOverloads.cpp
 	src/WorkspaceProperty.cpp
-        src/WorkspaceValidators.cpp
+	src/WorkspaceUnitValidator.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/CompositeFunction.cpp
@@ -158,6 +166,7 @@ set ( INC_FILES
 	inc/MantidAPI/ChopperModel.h
 	inc/MantidAPI/Column.h
 	inc/MantidAPI/ColumnFactory.h
+	inc/MantidAPI/CommonBinsValidator.h
 	inc/MantidAPI/CompositeCatalog.h
 	inc/MantidAPI/CompositeDomain.h
 	inc/MantidAPI/CompositeDomainMD.h
@@ -189,6 +198,7 @@ set ( INC_FILES
 	inc/MantidAPI/FunctionValues.h
 	inc/MantidAPI/GridDomain.h
 	inc/MantidAPI/GridDomain1D.h
+	inc/MantidAPI/HistogramValidator.h
 	inc/MantidAPI/HistoryItem.h
 	inc/MantidAPI/HistoryView.h
 	inc/MantidAPI/IAlgorithm.h
@@ -242,7 +252,9 @@ set ( INC_FILES
 	inc/MantidAPI/ImplicitFunctionParameterParserFactory.h
 	inc/MantidAPI/ImplicitFunctionParser.h
 	inc/MantidAPI/ImplicitFunctionParserFactory.h
+	inc/MantidAPI/IncreasingAxisValidator.h
 	inc/MantidAPI/InstrumentDataService.h
+	inc/MantidAPI/InstrumentValidator.h
 	inc/MantidAPI/Jacobian.h
 	inc/MantidAPI/JointDomain.h
 	inc/MantidAPI/LatticeDomain.h
@@ -253,8 +265,9 @@ set ( INC_FILES
 	inc/MantidAPI/MDGeometry.h
 	inc/MantidAPI/MatrixWSIndexCalculator.h
 	inc/MantidAPI/MatrixWorkspace.h
-	inc/MantidAPI/MatrixWorkspace_fwd.h
 	inc/MantidAPI/MatrixWorkspaceMDIterator.h
+	inc/MantidAPI/MatrixWorkspaceValidator.h
+	inc/MantidAPI/MatrixWorkspace_fwd.h
 	inc/MantidAPI/MemoryManager.h
 	inc/MantidAPI/ModeratorModel.h
 	inc/MantidAPI/MultiDomainFunction.h
@@ -262,10 +275,11 @@ set ( INC_FILES
 	inc/MantidAPI/MultiPeriodGroupWorker.h
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
-        inc/MantidAPI/NotebookBuilder.h
-        inc/MantidAPI/NotebookWriter.h  
+	inc/MantidAPI/NotebookBuilder.h
+	inc/MantidAPI/NotebookWriter.h
 	inc/MantidAPI/NullCoordTransform.h
 	inc/MantidAPI/NumericAxis.h
+	inc/MantidAPI/NumericAxisValidator.h
 	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/ParameterReference.h
 	inc/MantidAPI/ParameterTie.h
@@ -274,12 +288,14 @@ set ( INC_FILES
 	inc/MantidAPI/Projection.h
 	inc/MantidAPI/PropertyManagerDataService.h
 	inc/MantidAPI/PropertyNexus.h
+	inc/MantidAPI/RawCountValidator.h
 	inc/MantidAPI/RefAxis.h
 	inc/MantidAPI/RemoteJobManagerFactory.h
 	inc/MantidAPI/Run.h
 	inc/MantidAPI/Sample.h
 	inc/MantidAPI/SampleEnvironment.h
 	inc/MantidAPI/SampleShapeValidator.h
+	inc/MantidAPI/SampleValidator.h
 	inc/MantidAPI/ScopedWorkspace.h
 	inc/MantidAPI/ScriptBuilder.h
 	inc/MantidAPI/ScriptRepository.h
@@ -287,6 +303,7 @@ set ( INC_FILES
 	inc/MantidAPI/SingleValueParameter.h
 	inc/MantidAPI/SingleValueParameterParser.h
 	inc/MantidAPI/SpectraAxis.h
+	inc/MantidAPI/SpectraAxisValidator.h
 	inc/MantidAPI/SpectrumDetectorMapping.h
 	inc/MantidAPI/TableRow.h
 	inc/MantidAPI/TextAxis.h
@@ -294,14 +311,14 @@ set ( INC_FILES
 	inc/MantidAPI/VectorParameter.h
 	inc/MantidAPI/VectorParameterParser.h
 	inc/MantidAPI/Workspace.h
-	inc/MantidAPI/Workspace_fwd.h
 	inc/MantidAPI/WorkspaceFactory.h
 	inc/MantidAPI/WorkspaceGroup.h
 	inc/MantidAPI/WorkspaceGroup_fwd.h
 	inc/MantidAPI/WorkspaceHistory.h
 	inc/MantidAPI/WorkspaceOpOverloads.h
 	inc/MantidAPI/WorkspaceProperty.h
-	inc/MantidAPI/WorkspaceValidators.h
+	inc/MantidAPI/WorkspaceUnitValidator.h
+	inc/MantidAPI/Workspace_fwd.h
 )
 
 set ( TEST_FILES
@@ -317,6 +334,7 @@ set ( TEST_FILES
 	AsynchronousTest.h
 	BinEdgeAxisTest.h
 	BoxControllerTest.h
+	CommonBinsValidatorTest.h
 	CompositeFunctionTest.h
 	CoordTransformTest.h
 	CostFunctionFactoryTest.h
@@ -337,6 +355,7 @@ set ( TEST_FILES
 	FunctionPropertyTest.h
 	FunctionTest.h
 	FunctionValuesTest.h
+	HistogramValidatorTest.h
 	HistoryItemTest.h
 	HistoryViewTest.h
 	IEventListTest.h
@@ -352,6 +371,7 @@ set ( TEST_FILES
 	ImplicitFunctionParserFactoryTest.h
 	IncreasingAxisValidatorTest.h
 	InstrumentDataServiceTest.h
+	InstrumentValidatorTest.h
 	LatticeDomainTest.h
 	LiveListenerFactoryTest.h
 	LogManagerTest.h
@@ -367,6 +387,7 @@ set ( TEST_FILES
 	NotebookBuilderTest.h
 	NotebookWriterTest.h
 	NumericAxisTest.h
+	NumericAxisValidatorTest.h
 	ParamFunctionAttributeHolderTest.h
 	ParameterReferenceTest.h
 	ParameterTieTest.h
@@ -374,14 +395,17 @@ set ( TEST_FILES
 	ProjectionTest.h
 	PropertyManagerDataServiceTest.h
 	PropertyNexusTest.h
+	RawCountValidatorTest.h
 	RemoteJobManagerFactoryTest.h
 	RunTest.h
 	SampleEnvironmentTest.h
 	SampleShapeValidatorTest.h
 	SampleTest.h
+	SampleValidatorTest.h
 	ScopedWorkspaceTest.h
 	ScriptBuilderTest.h
 	SpectraAxisTest.h
+	SpectraAxisValidatorTest.h
 	SpectrumDetectorMappingTest.h
 	TextAxisTest.h
 	VectorParameterParserTest.h
@@ -392,6 +416,7 @@ set ( TEST_FILES
 	WorkspaceHistoryTest.h
 	WorkspaceOpOverloadsTest.h
 	WorkspacePropertyTest.h
+	WorkspaceUnitValidatorTest.h
 )
 
 set ( GMOCK_TEST_FILES

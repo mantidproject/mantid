@@ -55,6 +55,9 @@ void SimplexMinimizer::initialize(API::ICostFunction_sptr function, size_t) {
   size_t np = function->nParams();
   // step size for simplex
   m_simplexStepSize = gsl_vector_alloc(np);
+  if (m_simplexStepSize == NULL) {
+    throw std::runtime_error("Simplex step size initialized to NULL pointer");
+  }
   gsl_vector_set_all(m_simplexStepSize, m_size);
 
   // setup simplex container

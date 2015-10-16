@@ -26,6 +26,7 @@ set ( TEST_PY_FILES
   EnggFitPeaksTest.py
   EnggFocusTest.py
   EnggVanadiumCorrectionsTest.py
+  EVSDiffractionReductionTest.py
   FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
@@ -75,6 +76,7 @@ set ( TEST_PY_FILES
   UpdatePeakParameterTableValueTest.py
   SANSSubtractTest.py
   TimeSliceTest.py
+  TOFTOFCropWorkspaceTest.py
   TOFTOFMergeRunsTest.py
   TOSCABankCorrectionTest.py
   TransformToIqtTest.py
