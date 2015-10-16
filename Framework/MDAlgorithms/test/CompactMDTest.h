@@ -258,10 +258,12 @@ public:
     const size_t numDims = 4;
     const double signal = 0.0;
     const double errorSquared = 1.2;
-    size_t numBins[static_cast<int>(numDims)] = {5, 10, 5, 10};
+    size_t numBins[static_cast<int>(numDims)] = {10, 20, 10, 20};
     Mantid::coord_t min[static_cast<int>(numDims)] = {-5, -10, -5, -10};
     Mantid::coord_t max[static_cast<int>(numDims)] = {5, 10, 5, 10};
     const std::string name("test");
+    m_ws = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
+        numDims, signal, errorSquared, numBins, min, max, name);
     // setting signals like this for variety
     auto iter = m_ws->createIterator();
     do {
@@ -270,8 +272,6 @@ public:
         m_ws->setSignalAt(index, 1.0);
       }
     } while (iter->next());
-    m_ws = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
-        numDims, signal, errorSquared, numBins, min, max, name);
   }
   void test_execute_4d() {
     CompactMD alg;
