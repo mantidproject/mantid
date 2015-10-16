@@ -259,7 +259,47 @@ public:
 
   void test_groupAsymmetry_twoPeriods_plus() {
 
-    // TODO: write test once plus operation is fixed
+    // Name of the output workspace.
+    const std::string outWSName = outputWorkspaceName("GroupAsymmetry");
+
+    MatrixWorkspace_sptr inWS = createWorkspace(3);
+    MatrixWorkspace_sptr inWSSecond = createWorkspace();
+
+    MuonCalculateAsymmetry alg;
+    alg.initialize();
+    alg.setProperty("FirstPeriodWorkspace", inWS);
+    alg.setProperty("SecondPeriodWorkspace", inWSSecond);
+    alg.setProperty("PeriodOperation", "+");
+    alg.setProperty("OutputType", "GroupAsymmetry");
+    alg.setProperty("GroupIndex", 1);
+    alg.setPropertyValue("OutputWorkspace", outWSName);
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service.
+    auto ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
+    TS_ASSERT(ws);
+
+    if (ws) {
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
+      TS_ASSERT_EQUALS(ws->blocksize(), 3);
+
+      TS_ASSERT_EQUALS(ws->readX(0)[0], 1);
+      TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
+      TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
+
+      TS_ASSERT_DELTA(ws->readY(0)[0], -0.2529, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[1], 0.3918, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[2], 1.5316, 0.0001);
+
+      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0547, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[1], 0.1010, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[2], 0.1825, 0.0001);
+    }
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
   }
 
   void test_pairAsymmetry_singlePeriod() {
@@ -354,7 +394,48 @@ public:
 
   void test_pairAsymmetry_twoPeriods_plus() {
 
-    // TODO: write unit test for "+" operation once it is fixed
+    // Name of the output workspace.
+    const std::string outWSName = outputWorkspaceName("GroupAsymmetry");
+
+    MatrixWorkspace_sptr inWS = createWorkspace(3);
+    MatrixWorkspace_sptr inWSSecond = createWorkspace();
+
+    MuonCalculateAsymmetry alg;
+    alg.initialize();
+    alg.setProperty("FirstPeriodWorkspace", inWS);
+    alg.setProperty("SecondPeriodWorkspace", inWSSecond);
+    alg.setProperty("PeriodOperation", "+");
+    alg.setProperty("OutputType", "PairAsymmetry");
+    alg.setProperty("PairFirstIndex", 0);
+    alg.setProperty("PairSecondIndex", 2);
+    alg.setPropertyValue("OutputWorkspace", outWSName);
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service.
+    auto ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
+    TS_ASSERT(ws);
+
+    if (ws) {
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
+      TS_ASSERT_EQUALS(ws->blocksize(), 3);
+
+      TS_ASSERT_EQUALS(ws->readX(0)[0], 1.5);
+      TS_ASSERT_EQUALS(ws->readX(0)[1], 2.5);
+      TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
+
+      TS_ASSERT_DELTA(ws->readY(0)[0], -0.5454, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[1], -0.4615, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[2], -0.4000, 0.0001);
+
+      TS_ASSERT_DELTA(ws->readE(0)[0], 0.2428, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[1], 0.2159, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[2], 0.1966, 0.0001);
+    }
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
   }
 
 private:
