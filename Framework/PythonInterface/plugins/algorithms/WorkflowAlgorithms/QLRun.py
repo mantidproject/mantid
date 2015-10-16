@@ -186,7 +186,7 @@ class QLRun(PythonAlgorithm):
             else:
                 prog = 'QLd'                        # data file
                 CheckHistSame(self._samWS,'Sample',self._resWS,'Resolution')
-        elif program == 'QSe':
+        elif self._program == 'QSe':
             if nres == 1:
                 prog = 'QSe'                        # res file
             else:
