@@ -58,9 +58,7 @@ public:
   Sphere &operator=(const Sphere &);
   ~Sphere();
   /// Effective typename
-  virtual DerivedClassName className() const {
-    return DerivedClassName::SPHERE;
-  }
+  virtual std::string className() const { return "Sphere"; }
   // Visit acceptor
   virtual void acceptVisitor(BaseVisit &A) const { A.Accept(*this); }
   /// Set the sphere defination by input string in MCNP format

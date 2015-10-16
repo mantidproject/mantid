@@ -59,9 +59,7 @@ private:
 
 public:
   /// Public identifer
-  virtual DerivedClassName className() const {
-    return DerivedClassName::CYLINDER;
-  }
+  virtual std::string className() const { return "Cylinder"; }
 
   Cylinder();
   Cylinder(const Cylinder &);

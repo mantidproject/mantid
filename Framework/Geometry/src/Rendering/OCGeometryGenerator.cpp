@@ -151,8 +151,7 @@ TopoDS_Shape OCGeometryGenerator::AnalyzeRule(SurfPoint *rule) {
   // Check for individual type of surfaces
   Surface *surf = rule->getKey();
   TopoDS_Shape Result = surf->createShape();
-  if (rule->getSign() > 0 &&
-      surf->className() != Surface::DerivedClassName::PLANE)
+  if (rule->getSign() > 0 && surf->className() != "Plane")
     Result.Complement();
   return Result;
 }

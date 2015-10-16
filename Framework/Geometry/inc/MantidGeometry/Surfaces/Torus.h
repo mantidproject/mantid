@@ -53,7 +53,7 @@ private:
 
 public:
   /// Public identifier
-  virtual DerivedClassName className() const { return DerivedClassName::TORUS; }
+  virtual std::string className() const { return "Torus"; }
 
   Torus();
   Torus(const Torus &);

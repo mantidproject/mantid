@@ -50,16 +50,6 @@ private:
   int m_Sign = 1;
 
 public:
-  enum class DerivedClassName {
-    SURFACE,
-    SPHERE,
-    CONE,
-    CYLINDER,
-    PLANE,
-    TORUS,
-    QUADRATIC
-  };
-
   static const int Nprecision = 10; ///< Precision of the output
 
   Surface();
@@ -69,9 +59,7 @@ public:
   virtual ~Surface();
 
   /// Effective typeid
-  virtual DerivedClassName className() const {
-    return DerivedClassName::SURFACE;
-  }
+  virtual std::string className() const { return "Surface"; }
 
   /// Accept visitor for line calculation
   virtual void acceptVisitor(BaseVisit &A) const { A.Accept(*this); }
@@ -102,10 +90,7 @@ public:
   /// bounding box for the surface
   virtual void getBoundingBox(double &xmax, double &ymax, double &zmax,
                               double &xmin, double &ymin, double &zmin) = 0;
-  void setSign(int Sign) {
-    if (this)
-      m_Sign = Sign;
-  }
+  void setSign(int Sign) { m_Sign = Sign; }
   int getSign() const { return m_Sign; }
 
   virtual TopoDS_Shape createShape();

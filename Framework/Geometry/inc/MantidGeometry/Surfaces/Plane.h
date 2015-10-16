@@ -56,7 +56,7 @@ private:
 
 public:
   /// Effective typename
-  virtual DerivedClassName className() const { return DerivedClassName::PLANE; }
+  virtual std::string className() const { return "Plane"; }
 
   Plane();
   Plane(const Plane &);
