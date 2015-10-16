@@ -262,10 +262,6 @@ public:
     Mantid::coord_t min[static_cast<int>(numDims)] = {-5, -10, -5, -10};
     Mantid::coord_t max[static_cast<int>(numDims)] = {5, 10, 5, 10};
     const std::string name("test");
-    m_ws = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
-        numDims, signal, errorSquared, numBins, min, max, name);
-  }
-  void test_execute_4d() {
     // setting signals like this for variety
     auto iter = m_ws->createIterator();
     do {
@@ -274,21 +270,10 @@ public:
         m_ws->setSignalAt(index, 1.0);
       }
     } while (iter->next());
-    CompactMD alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", m_ws);
-    alg.setProperty("OutputWorkspace", "out");
-    alg.execute();
-    IMDHistoWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outWS);
+    m_ws = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
+        numDims, signal, errorSquared, numBins, min, max, name);
   }
-  void test_on_workspace_where_every_bin_has_non_zero_signal() {
-    auto iter = m_ws->createIterator();
-    do {
-      m_ws->setSignalAt(iter->getLinearIndex(), 1.0);
-    } while (iter->next());
+  void test_execute_4d() {
     CompactMD alg;
     alg.setChild(true);
     alg.setRethrows(true);
