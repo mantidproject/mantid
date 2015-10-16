@@ -1258,6 +1258,11 @@ Instrument::ContainsState Instrument::containsRectDetectors() const {
     if (detector && detector->isMonitor())
       continue;
 
+    // skip choppers HACK!
+    if (comp->getName() == "chopper-position") {
+      continue;
+    }
+
     if (dynamic_cast<const RectangularDetector *>(comp.get())) {
       if (!foundRect)
         foundRect = true;
