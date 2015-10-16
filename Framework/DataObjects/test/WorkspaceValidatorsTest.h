@@ -2,7 +2,12 @@
 #define WORKSPACEVALIDATORSTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/RawCountValidator.h"
+#include "MantidAPI/SampleValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/NeutronAtom.h"

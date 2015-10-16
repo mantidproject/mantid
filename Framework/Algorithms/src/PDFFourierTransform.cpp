@@ -1,6 +1,5 @@
 #include "MantidAlgorithms/PDFFourierTransform.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"

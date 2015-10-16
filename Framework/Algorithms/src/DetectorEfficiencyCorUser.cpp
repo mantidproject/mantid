@@ -1,9 +1,10 @@
 #include "MantidAlgorithms/DetectorEfficiencyCorUser.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidGeometry/muParser_Silent.h"
-#include <ctime>
 
 namespace Mantid {
 namespace Algorithms {

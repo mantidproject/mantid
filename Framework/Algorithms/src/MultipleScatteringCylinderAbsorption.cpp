@@ -2,9 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MultipleScatteringCylinderAbsorption.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <stdexcept>

@@ -8,11 +8,15 @@
 #include "MantidGeometry/Crystal/SpaceGroup.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
 #include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
+#include "MantidGeometry/Crystal/HKLFilter.h"
 
 #include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace Geometry {
+
+// Forward declaration
+class StructureFactorCalculator;
 
 /**
     @class CrystalStructure
@@ -28,90 +32,30 @@ namespace Geometry {
     them in order to provide some useful calculations that are
     common when working with crystal structures.
 
-    A common task is to calculate lattice plane spacings for a
-    given list of HKL-values. For this calculation, only the unit
-    cell has to be known:
+    Besides construction from actual objects, a CrystalStructure object can be
+    constructed from three strings that contain the corresponding information.
 
-        CrystalStructure structure(someUnitCell);
+    The unit cell string must consist of 3 or 6 floating point numbers, which
+    are 3 lenghts in Angström and 3 angles in degree. If the angles are not
+    supplied, they are assumed to be 90 degrees.
 
-        std::vector<double> dValues = structure.getDValues(hklList);
+    The space group string must be a valid space group that is registered into
+    the factory. Lastly, specification of the atoms in the asymmetric unit is
+    required. The format is as follows:
 
-    Where did 'hklList' come from? For this, CrystalStructure offers
-    a method as well. Provided a unit cell, it's possible to get all
-    HKLs within a given d range:
+        Element x y z Occupancy U_iso;
+        Element x y z Occupancy U_iso;
+        ...
 
-        CrystalStructure structure(someUnitCell);
-        std::vector<V3D> hklList = structure.getHKLs(0.5, 10.0);
+    Element has to be a valid NeutronAtom, x, y and z are fractional coordinates
+    between 0 and 1 (other coordinates will be transformed to that range). It is
+    allowed (and encouraged) to use proper fractions in the coordinates, for
+    example:
 
-    If the lattice is centered, not all combinations of h, k and l are
-    allowed. The first method to provide a centering is to use
-    one of the ReflectionCondition-classes directly:
+        Mg 1/3 2/3 1/4 1.0 0.05;
 
-        ReflectionCondition_sptr fCentering =
-            boost::make_shared<ReflectionConditionAllFaceCentred>();
-
-        structure.setCentering(fCentering);
-
-    Now, only reflections that fulfill the centering condition are
-    returned by getHKLs. For powder diffraction it's not very
-    useful to get all reflections, because symmetrically equivalent
-    reflections can not be distinguished. Which reflections are
-    equivalent is determined by the point group. Again, one possibility
-    is to directly assign a point group:
-
-        PointGroup_sptr pointGroup =
-            PointGroupFactory::Instance().createPointGroup("m-3m");
-
-        structure.setPointGroup(pointGroup);
-
-        std::vector<V3D> uniqueHKLs = structure.getUniqueHKLs(0.5, 10.0);
-
-    The list uniqueHKLs contains only symmetrically independent
-    reflections. Both point group and centering may be provided
-    to the constructor of CrystalStructure as well:
-
-        CrystalStructure structure(someUnitCell, pointGroup, centering);
-
-    According to the list given above, this is not a complete description
-    of a crystal structure - indeed, the information only describes
-    the crystal lattice. As demonstrated by the examples, this is already
-    enough information for knowing which reflections are present in
-    a given d-range for many cases.
-
-    An example where more information is required can be found in a very
-    common crystal structure, the structure of Silicon. Silicon crystallizes
-    in the space group Fd-3m (No. 227) and the asymmetric unit consists of
-    one Si-atom at the position (1/8, 1/8, 1/8) (for origin choice 2, with the
-    inversion at the origin). Looking up this space group in the International
-    Tables for Crystallography A reveals that placing a scatterer at this
-    position introduces a new reflection condition for general reflections hkl:
-
-           h = 2n + 1 (reflections with odd h are allowed)
-        or h + k + l = 4n
-
-    This means that for example the reflection family {2 2 2} is not allowed,
-    even though the F-centering would allow it. In other words, guessing
-    existing reflections of silicon only using lattice information does not lead
-    to the correct result. Besides that, there are also glide planes in that
-    space group, which come with additional reflection conditions as well.
-
-    One way to obtain the correct result for this case is to calculate
-    structure factors for each HKL and check whether |F|^2 is non-zero. Of
-    course, to perform this calculation, all three items mentioned in the list
-    at the beginning must be present. CrystalStructure offers an additional
-    constructor for this purpose:
-
-        CrystalStructure silicon(unitcell, spaceGroup, scatterers);
-
-    After constructing the object like this, it's no longer possible to set
-    point group and centering, because this is determined by the space group.
-    Now, a different method for checking allowed reflections is available:
-
-        std::vector<V3D> uniqueHKLs = silicon.getUniqueHKLs(0.5, 10.0,
-                                         CrystalStructure::UseStructureFactors);
-
-    By supplying the extra argument, |F|^2 is calculated for each reflection
-    and if it's greater than 1e-9, it's considered to be allowed.
+    Occupancy must be given as values between 0 and 1 and U_iso is the isotropic
+    thermal displacement parameter, given in Angrström^2.
 
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 05/08/2014
@@ -138,20 +82,18 @@ namespace Geometry {
   */
 class DLLExport CrystalStructure {
 public:
-  enum ReflectionConditionMethod { UseCentering, UseStructureFactor };
-
-  CrystalStructure(
-      const UnitCell &unitCell,
-      const PointGroup_sptr &pointGroup =
-          PointGroupFactory::Instance().createPointGroup("-1"),
-      const ReflectionCondition_sptr &centering =
-          ReflectionCondition_sptr(new ReflectionConditionPrimitive));
-
   CrystalStructure(const UnitCell &unitCell,
                    const SpaceGroup_const_sptr &spaceGroup,
                    const CompositeBraggScatterer_sptr &scatterers);
 
-  virtual ~CrystalStructure() {}
+  CrystalStructure(const std::string &unitCellString,
+                   const std::string &spaceGroupString,
+                   const std::string &scattererString);
+
+  CrystalStructure(const CrystalStructure &other);
+  CrystalStructure &operator=(const CrystalStructure &other);
+
+  ~CrystalStructure() {}
 
   UnitCell cell() const;
   void setCell(const UnitCell &cell);
@@ -159,55 +101,24 @@ public:
   SpaceGroup_const_sptr spaceGroup() const;
   void setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
 
-  void setPointGroup(const PointGroup_sptr &pointGroup);
-  PointGroup_sptr pointGroup() const;
-  PointGroup::CrystalSystem crystalSystem() const;
-
-  void setCentering(const ReflectionCondition_sptr &centering);
-  ReflectionCondition_sptr centering() const;
+  ReflectionCondition_sptr centering() const { return m_centering; }
 
   CompositeBraggScatterer_sptr getScatterers() const;
   void setScatterers(const CompositeBraggScatterer_sptr &scatterers);
   void addScatterers(const CompositeBraggScatterer_sptr &scatterers);
 
-  std::vector<Kernel::V3D>
-  getHKLs(double dMin, double dMax,
-          ReflectionConditionMethod method = UseCentering) const;
-  std::vector<Kernel::V3D>
-  getUniqueHKLs(double dMin, double dMax,
-                ReflectionConditionMethod method = UseCentering) const;
-
-  std::vector<double> getDValues(const std::vector<Kernel::V3D> &hkls) const;
-  std::vector<double> getFSquared(const std::vector<Kernel::V3D> &hkls) const;
-
 protected:
-  void setPointGroupFromSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
+  void assignUnitCellToScatterers(const UnitCell &unitCell);
+
   void
   setReflectionConditionFromSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
 
-  void assignSpaceGroupToScatterers(const SpaceGroup_const_sptr &spaceGroup);
-  void assignUnitCellToScatterers(const UnitCell &unitCell);
-
   void initializeScatterers();
-
-  bool
-  isStateSufficientForHKLGeneration(ReflectionConditionMethod method) const;
-  bool isStateSufficientForUniqueHKLGeneration(
-      ReflectionConditionMethod method) const;
-
-  void throwIfRangeUnacceptable(double dMin, double dMax) const;
-
-  bool isAllowed(const Kernel::V3D &hkl,
-                 ReflectionConditionMethod method) const;
-
-  double getDValue(const Kernel::V3D &hkl) const;
-  double getFSquared(const Kernel::V3D &hkl) const;
 
   UnitCell m_cell;
   SpaceGroup_const_sptr m_spaceGroup;
-  CompositeBraggScatterer_sptr m_scatterers;
-  PointGroup_sptr m_pointGroup;
   ReflectionCondition_sptr m_centering;
+  CompositeBraggScatterer_sptr m_scatterers;
 };
 
 typedef boost::shared_ptr<CrystalStructure> CrystalStructure_sptr;

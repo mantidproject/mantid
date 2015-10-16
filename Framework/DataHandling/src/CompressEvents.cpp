@@ -2,9 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/CompressEvents.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include <set>

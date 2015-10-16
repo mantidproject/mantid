@@ -4,12 +4,13 @@
 #include "MantidAlgorithms/CreateCalFileByNames.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentDataService.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/ConfigService.h"
+
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
+
 #include <fstream>
 #include <queue>
 

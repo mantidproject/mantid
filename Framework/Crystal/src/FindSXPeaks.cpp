@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCrystal/FindSXPeaks.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/HistogramValidator.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/BoundedValidator.h"
 

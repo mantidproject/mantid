@@ -1,11 +1,15 @@
 #include "MantidAlgorithms/DetectorEfficiencyCor.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include <algorithm>
-#include <functional>
-#include <cmath>
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+
+#include <algorithm>
+#include <cmath>
+#include <functional>
 
 namespace Mantid {
 namespace Algorithms {

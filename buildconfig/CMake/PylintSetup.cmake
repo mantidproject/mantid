@@ -34,6 +34,7 @@ if ( PYLINT_FOUND )
         scripts
         Testing/SystemTests/tests/analysis
         tools
+        docs/sphinxext/mantiddoc
   )
   set ( PYLINT_EXCLUDES
         scripts/lib1to2

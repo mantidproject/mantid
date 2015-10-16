@@ -2,11 +2,14 @@
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/SaveGSS.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/WorkspaceValidators.h"
+
 #include "MantidAPI/AlgorithmHistory.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
+
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>

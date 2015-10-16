@@ -1,10 +1,7 @@
 #include "MantidAlgorithms/MonitorEfficiencyCorUser.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/CompositeValidator.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/MultiThreaded.h"
-#include <ctime>
 
 namespace Mantid {
 namespace Algorithms {

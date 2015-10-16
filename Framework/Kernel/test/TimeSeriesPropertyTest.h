@@ -122,7 +122,36 @@ public:
     TS_ASSERT_EQUALS(twoVals[1], threeVals[2]);
     TS_ASSERT_EQUALS(newVal, threeVals[1]);
   }
+  void test_GetDerivative() {
+    dProp->addValue("2007-11-30T16:17:10", 10);
+    dProp->addValue("2007-11-30T16:17:12", 12);
+    dProp->addValue("2007-11-30T16:17:01", 01);
+    dProp->addValue("2007-11-30T16:17:05", 05);
 
+    auto derProp = dProp->getDerivative();
+    TS_ASSERT(dynamic_cast<TimeSeriesProperty<double> *>(derProp.get()))
+
+    TS_ASSERT_EQUALS(derProp->size(), 3);
+    auto derValues = derProp->valuesAsVector();
+
+    TS_ASSERT_EQUALS(derValues[0], 1);
+    TS_ASSERT_EQUALS(derValues[1], 1);
+    TS_ASSERT_EQUALS(derValues[2], 1);
+
+    TSM_ASSERT_THROWS("derivative undefined for string property",
+                      sProp->getDerivative(), std::runtime_error);
+
+    iProp->addValue("2007-11-30T16:17:10", 10);
+    TSM_ASSERT_THROWS(
+        "derivative undefined for property with less then 2 values",
+        iProp->getDerivative(), std::runtime_error);
+    iProp->addValue("2007-11-30T16:17:12", 12);
+
+    derProp = iProp->getDerivative();
+    TS_ASSERT_EQUALS(derProp->size(), 1);
+    derValues = derProp->valuesAsVector();
+    TS_ASSERT_EQUALS(derValues[0], 1);
+  }
   void test_timesAsVector() {
     TimeSeriesProperty<double> *p =
         new TimeSeriesProperty<double>("doubleProp");
