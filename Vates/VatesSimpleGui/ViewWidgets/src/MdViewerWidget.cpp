@@ -169,6 +169,10 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
 {
   //this will initialize the ParaView application if needed.
   VatesParaViewApplication::instance();
+  
+  //reset the qt error redirection that Paraview puts in place
+  // this may not be necessary if we move to qt5
+  QtCore::qInstallMsgHandler(0)
 
   // Calling workspace observer functions.
   observeAfterReplace();
