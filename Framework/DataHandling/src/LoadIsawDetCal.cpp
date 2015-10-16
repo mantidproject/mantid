@@ -2,26 +2,26 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadIsawDetCal.h"
+
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/TableRow.h"
+#include "MantidAPI/InstrumentValidator.h"
+
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/TextAxis.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/Exception.h"
+
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+
 #include "MantidKernel/V3D.h"
+
 #include <Poco/File.h>
 #include <sstream>
 #include <fstream>
 #include <numeric>
 #include <cmath>
-#include "MantidAPI/WorkspaceValidators.h"
 
 namespace Mantid {
 namespace DataHandling {

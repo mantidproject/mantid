@@ -1,8 +1,6 @@
 #include "MantidMDAlgorithms/ConvertToDiffractionMDWorkspace2.h"
 
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/Progress.h"
-#include "MantidAPI/WorkspaceValidators.h"
 
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"

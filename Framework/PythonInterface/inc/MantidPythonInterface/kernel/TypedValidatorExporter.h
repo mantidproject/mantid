@@ -39,7 +39,7 @@ template <typename Type> struct TypedValidatorExporter {
 
     class_<TypedValidator<Type>, bases<IValidator>, boost::noncopyable>(
         pythonClassName, no_init)
-        .def("isValid", &IValidator::isValid<Type>,
+        .def("isValid", &IValidator::isValid<Type>, (arg("self"), arg("value")),
              "Returns an empty string if the value is considered valid, "
              "otherwise a string defining the error is returned.");
   }

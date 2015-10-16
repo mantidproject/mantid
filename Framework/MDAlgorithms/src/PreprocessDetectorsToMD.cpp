@@ -1,7 +1,8 @@
 #include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidAPI/NumericAxis.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

@@ -68,8 +68,53 @@ class DetectorFloodWeightingTest(unittest.TestCase):
         x_axis = out_ws.readX(0)
         self.assertEquals(x_axis[0], bands[0])
         self.assertEquals(x_axis[-1], bands[-1])
-        print out_ws.readY(0)[0]
         self.assertEquals(out_ws.readY(0)[0], 1.0)
+        
+    def test_execute_multiple_bands_no_solid_angle(self):
+        alg = AlgorithmManager.create("DetectorFloodWeighting")
+        alg.setChild(True)
+        alg.initialize()
+        alg.setProperty("SolidAngleCorrection", False)
+        signal_value = 2
+        in_ws = self._create_ws(units="Wavelength", signal_value=signal_value, data_x=range(0,10,1))
+        alg.setProperty("InputWorkspace", in_ws)
+        bands = [1,2,3,4]
+        alg.setProperty("Bands", bands) # One band
+        alg.setPropertyValue("OutputWorkspace", "dummy")
+        alg.execute()
+
+        out_ws = alg.getProperty("OutputWorkspace").value
+        self.assertEqual(1, out_ws.blocksize())
+        self.assertEqual("Wavelength", out_ws.getAxis(0).getUnit().unitID())
+        self.assertEqual(in_ws.getNumberHistograms(), out_ws.getNumberHistograms(), msg="Number of histograms should be unchanged.")
+        x_axis = out_ws.readX(0)
+        self.assertEquals(x_axis[0], bands[0])
+        self.assertEquals(x_axis[-1], bands[-1])
+        self.assertEquals(out_ws.readY(0)[0], 1.0)
+
+    def test_execute_multiple_bands_no_solid_angle_with_transmission(self):
+        alg = AlgorithmManager.create("DetectorFloodWeighting")
+        alg.setChild(True)
+        alg.initialize()
+        alg.setProperty("SolidAngleCorrection", False)
+        signal_value = 2
+        in_ws = self._create_ws(units="Wavelength", signal_value=signal_value, data_x=range(0,10,1))
+        alg.setProperty("InputWorkspace", in_ws)
+        alg.setProperty("TransmissionWorkspace", in_ws)
+        bands = [1,2,3,4]
+        alg.setProperty("Bands", bands) # One band
+        alg.setPropertyValue("OutputWorkspace", "dummy")
+        alg.execute()
+
+        out_ws = alg.getProperty("OutputWorkspace").value
+        self.assertEqual(1, out_ws.blocksize())
+        self.assertEqual("Wavelength", out_ws.getAxis(0).getUnit().unitID())
+        self.assertEqual(in_ws.getNumberHistograms(), out_ws.getNumberHistograms(), msg="Number of histograms should be unchanged.")
+        x_axis = out_ws.readX(0)
+        self.assertEquals(x_axis[0], bands[0])
+        self.assertEquals(x_axis[-1], bands[-1])
+        self.assertEquals(out_ws.readY(0)[0], 1.0)
+
 
     def test_execute_single_with_solid_angle(self):
         alg = AlgorithmManager.create("DetectorFloodWeighting")
@@ -88,6 +133,7 @@ class DetectorFloodWeightingTest(unittest.TestCase):
         self.assertEqual(1, out_ws.blocksize())
         self.assertEqual("Wavelength", out_ws.getAxis(0).getUnit().unitID())
         self.assertEqual(in_ws.getNumberHistograms(), out_ws.getNumberHistograms(), msg="Number of histograms should be unchanged.")
+
 
 
 if __name__ == '__main__':

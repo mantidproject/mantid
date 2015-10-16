@@ -16,6 +16,8 @@ public:
   static bool check(const std::string& funName);
   static bool hasError(const std::string& funName){return check(funName);}
   static std::ostream& log();
+  static std::ostream& logDebug();
+
 private:
   std::string m_msg;
 };

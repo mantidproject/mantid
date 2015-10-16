@@ -3,14 +3,14 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/GroupDetectors2.h"
 
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 
 #include <boost/regex.hpp>
 
@@ -803,6 +803,10 @@ void GroupDetectors2::readFile(spec2index_map &specs2index, std::istream &File,
       std::getline(File, thisLine), lineNum++;
       numberOfSpectra = readInt(thisLine);
     } while (numberOfSpectra == EMPTY_LINE);
+
+    if (numberOfSpectra <= 0) {
+      throw std::invalid_argument("The number of spectra is zero or negative");
+    }
 
     // the value of this map is the list of spectra numbers that will be
     // combined into a group

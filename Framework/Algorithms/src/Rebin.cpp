@@ -3,15 +3,11 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Rebin.h"
 
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/VisibleWhenProperty.h"
-
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid {
 namespace Algorithms {

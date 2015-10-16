@@ -2,14 +2,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/SaveCanSAS1D2.h"
+
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/Exception.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/MantidVersion.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidAPI/Run.h"
-#include <boost/shared_ptr.hpp>
+#include "MantidAPI/WorkspaceUnitValidator.h"
+
+#include "MantidGeometry/IComponent.h"
+
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/MantidVersion.h"
 
 //-----------------------------------------------------------------------------
 using namespace Mantid::Kernel;

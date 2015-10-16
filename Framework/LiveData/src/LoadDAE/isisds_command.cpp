@@ -145,8 +145,14 @@ SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type,
   if (s == INVALID_SOCKET) {
     return INVALID_SOCKET;
   }
-  setsockopt(s, SOL_SOCKET, SO_KEEPALIVE, (char *)&setkeepalive,
-             sizeof(setkeepalive));
+
+  int zero = setsockopt(s, SOL_SOCKET, SO_KEEPALIVE, (char *)&setkeepalive,
+                        sizeof(setkeepalive));
+  if (0 != zero) {
+    closesocket(s);
+    return INVALID_SOCKET;
+  }
+
   if (connect(s, (struct sockaddr *)&address, sizeof(address)) == -1) {
     closesocket(s);
     return INVALID_SOCKET;

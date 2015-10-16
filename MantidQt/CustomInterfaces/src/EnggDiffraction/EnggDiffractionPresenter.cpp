@@ -13,7 +13,6 @@
 #include <boost/lexical_cast.hpp>
 
 #include <Poco/File.h>
-#include <Poco/Path.h>
 
 #include <QThread>
 
@@ -32,6 +31,7 @@ const std::string EnggDiffractionPresenter::g_enginxStr = "ENGINX";
 const bool EnggDiffractionPresenter::g_askUserCalibFilename = false;
 const std::string EnggDiffractionPresenter::g_vanIntegrationWSName =
     "engggui_vanadium_integration_ws";
+int EnggDiffractionPresenter::g_croppedCounter = 0;
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(NULL), m_calibFinishedOK(false), m_focusFinishedOK(false),
@@ -1021,8 +1021,8 @@ void EnggDiffractionPresenter::focusingFinished() {
  *
  * @param bank instrument bank number to focus
  *
- * @param specNos string specifying a list of spectra (for cropped
- * focusing), only considered if not empty
+ * @param specNos string specifying a list of spectra (for "cropped"
+ * focusing or "texture" focusing), only considered if not empty
  *
  * @param dgFile detector grouping file name. If not empty implies
  * texture focusing
@@ -1062,16 +1062,29 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   }
 
   std::string outWSName;
+  std::string specNumsOpenGenie;
   if (!dgFile.empty()) {
+    // doing focus "texture"
     outWSName = "engggui_focusing_output_ws_texture_bank_" +
                 boost::lexical_cast<std::string>(bank);
+    specNumsOpenGenie = specNos;
   } else if (specNos.empty()) {
+    // doing focus "normal" / by banks
     outWSName = "engggui_focusing_output_ws_bank_" +
                 boost::lexical_cast<std::string>(bank);
-  } else {
-    outWSName = "engggui_focusing_output_ws_cropped";
-  }
 
+    // specnum for opengenie according to bank number
+    if (boost::lexical_cast<std::string>(bank) == "1") {
+      specNumsOpenGenie = "1 - 1200";
+    } else if (boost::lexical_cast<std::string>(bank) == "2") {
+      specNumsOpenGenie = "1201 - 1400";
+    }
+
+  } else {
+    // doing focus "cropped"
+    outWSName = "engggui_focusing_output_ws_cropped";
+    specNumsOpenGenie = specNos;
+  }
   try {
     auto alg = Algorithm::fromString("EnggFocus");
     alg->initialize();
@@ -1088,8 +1101,8 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     // TODO: use detector positions (from calibrate full) when available
     // alg->setProperty(DetectorPositions, TableWorkspace)
     alg->execute();
-	// plot Focused workspace according to the data type selected
-	plotFocusedWorkspace(outWSName);
+    // plot Focused workspace according to the data type selected
+    plotFocusedWorkspace(outWSName, boost::lexical_cast<std::string>(bank));
   } catch (std::runtime_error &re) {
     g_log.error() << "Error in calibration. ",
         "Could not run the algorithm EnggCalibrate succesfully for bank " +
@@ -1097,8 +1110,8 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
             re.what() + " Please check also the log messages for details.";
     throw;
   }
-
   g_log.notice() << "Produced focused workspace: " << outWSName << std::endl;
+
   try {
     g_log.debug() << "Going to save focused output into nexus file: "
                   << fullFilename << std::endl;
@@ -1116,6 +1129,14 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   }
   g_log.notice() << "Saved focused workspace as file: " << fullFilename
                  << std::endl;
+
+  bool saveOutputFiles = m_view->saveOutputFiles();
+  if (saveOutputFiles) {
+    saveFocusedXYE(outWSName, boost::lexical_cast<std::string>(bank), runNo);
+    saveGSS(outWSName, boost::lexical_cast<std::string>(bank), runNo);
+    saveOpenGenie(outWSName, specNumsOpenGenie,
+                  boost::lexical_cast<std::string>(bank), runNo);
+  }
 }
 
 /**
@@ -1333,24 +1354,221 @@ void EnggDiffractionPresenter::calcVanadiumWorkspaces(
  * Checks the plot type selected and applies the appropriate
  * python function to apply during first bank and second bank
  *
- * @param outWSName; title of the focused workspace
+ * @param outWSName title of the focused workspace
+ * @param bank the number of bank
  */
-void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName) {
+void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName,
+                                                    std::string bank) {
   const bool plotFocusedWS = m_view->focusedOutWorkspace();
   int plotType = m_view->currentPlotType();
-  if (plotFocusedWS == true && 0 == plotType) {
-    if (outWSName == "engggui_focusing_output_ws_bank_1")
+  if (plotFocusedWS) {
+    if (plotType == 0) {
+      if (bank == "1")
+        m_view->plotFocusedSpectrum(outWSName);
+      if (bank == "2")
+        m_view->plotReplacingWindow(outWSName);
+    } else if (1 == plotType) {
+      if (bank == "1")
+        m_view->plotFocusedSpectrum(outWSName);
+      if (bank == "2")
+        m_view->plotWaterfallSpectrum(outWSName);
+    } else if (2 == plotType) {
       m_view->plotFocusedSpectrum(outWSName);
-    if (outWSName == "engggui_focusing_output_ws_bank_2")
-      m_view->plotReplacingWindow(outWSName);
-  } else if (plotFocusedWS == true && 1 == plotType) {
-    if (outWSName == "engggui_focusing_output_ws_bank_1")
-      m_view->plotFocusedSpectrum(outWSName);
-    if (outWSName == "engggui_focusing_output_ws_bank_2")
-      m_view->plotWaterfallSpectrum(outWSName);
-  } else if (plotFocusedWS == true && 2 == plotType) {
-    m_view->plotFocusedSpectrum(outWSName);
+    }
   }
+}
+
+/**
+ * Convert the generated output files and saves them in
+ * FocusedXYE format
+ *
+ * @param inputWorkspace title of the focused workspace
+ * @param bank the number of the bank as a string
+ * @param runNo the run number as a string
+ */
+void EnggDiffractionPresenter::saveFocusedXYE(const std::string inputWorkspace,
+                                              std::string bank,
+                                              std::string runNo) {
+
+  // Generates the file name in the appropriate format
+  std::string fullFilename =
+      outFileNameFactory(inputWorkspace, runNo, bank, ".dat");
+
+  // Creates appropriate directory
+  Poco::Path saveDir = outFilesDir(runNo);
+
+  // append the full file name in the end
+  saveDir.append(fullFilename);
+
+  try {
+    g_log.debug() << "Going to save focused output into OpenGenie file: "
+                  << fullFilename << std::endl;
+    auto alg = Algorithm::fromString("SaveFocusedXYE");
+    alg->initialize();
+    alg->setProperty("InputWorkspace", inputWorkspace);
+    std::string filename(saveDir.toString());
+    alg->setPropertyValue("Filename", filename);
+    alg->setProperty("SplitFiles", false);
+    alg->setPropertyValue("StartAtBankNumber", bank);
+    alg->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Error in saving FocusedXYE format file. ",
+        "Could not run the algorithm SaveFocusXYE succesfully for "
+        "workspace " +
+            inputWorkspace + ". Error description: " + re.what() +
+            " Please check also the log messages for details.";
+    throw;
+  }
+  g_log.notice() << "Saved focused workspace as file: " << saveDir.toString()
+                 << std::endl;
+}
+
+/**
+ * Convert the generated output files and saves them in
+ * GSS format
+ *
+ * @param inputWorkspace title of the focused workspace
+ * @param bank the number of the bank as a string
+ * @param runNo the run number as a string
+ */
+void EnggDiffractionPresenter::saveGSS(const std::string inputWorkspace,
+                                       std::string bank, std::string runNo) {
+
+  // Generates the file name in the appropriate format
+  std::string fullFilename =
+      outFileNameFactory(inputWorkspace, runNo, bank, ".gss");
+
+  // Creates appropriate directory
+  Poco::Path saveDir = outFilesDir(runNo);
+
+  // append the full file name in the end
+  saveDir.append(fullFilename);
+
+  try {
+    g_log.debug() << "Going to save focused output into OpenGenie file: "
+                  << fullFilename << std::endl;
+    auto alg = Algorithm::fromString("SaveGSS");
+    alg->initialize();
+    alg->setProperty("InputWorkspace", inputWorkspace);
+    std::string filename(saveDir.toString());
+    alg->setPropertyValue("Filename", filename);
+    alg->setProperty("SplitFiles", false);
+    alg->setPropertyValue("Bank", bank);
+    alg->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Error in saving GSS format file. ",
+        "Could not run the algorithm saveGSS succesfully for "
+        "workspace " +
+            inputWorkspace + ". Error description: " + re.what() +
+            " Please check also the log messages for details.";
+    throw;
+  }
+  g_log.notice() << "Saved focused workspace as file: " << saveDir.toString()
+                 << std::endl;
+}
+
+/**
+ * Convert the generated output files and saves them in
+ * OpenGenie format
+ *
+ * @param inputWorkspace title of the focused workspace
+ * @param specNums number of spectrum to display
+ * @param bank the number of the bank as a string
+ * @param runNo the run number as a string
+ */
+void EnggDiffractionPresenter::saveOpenGenie(const std::string inputWorkspace,
+                                             std::string specNums,
+                                             std::string bank,
+                                             std::string runNo) {
+
+  // Generates the file name in the appropriate format
+  std::string fullFilename =
+      outFileNameFactory(inputWorkspace, runNo, bank, ".his");
+
+  // Creates appropriate directory
+  Poco::Path saveDir = outFilesDir(runNo);
+
+  // append the full file name in the end
+  saveDir.append(fullFilename);
+
+  try {
+    g_log.debug() << "Going to save focused output into OpenGenie file: "
+                  << fullFilename << std::endl;
+    auto alg = Algorithm::fromString("SaveOpenGenieAscii");
+    alg->initialize();
+    alg->setProperty("InputWorkspace", inputWorkspace);
+    std::string filename(saveDir.toString());
+    alg->setPropertyValue("Filename", filename);
+    alg->setPropertyValue("SpecNumberField", specNums);
+    alg->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Error in saving OpenGenie format file. ",
+        "Could not run the algorithm SaveOpenGenieAscii succesfully for "
+        "workspace " +
+            inputWorkspace + ". Error description: " + re.what() +
+            " Please check also the log messages for details.";
+    throw;
+  }
+  g_log.notice() << "Saved focused workspace as file: " << saveDir.toString()
+                 << std::endl;
+}
+
+/**
+ * Generates the required file name of the output files
+ *
+ * @param inputWorkspace title of the focused workspace
+ * @param runNo the run number as a string
+ * @param bank the number of the bank as a string
+ * @param format the format of the file to be saved as
+ */
+std::string EnggDiffractionPresenter::outFileNameFactory(
+    std::string inputWorkspace, std::string runNo, std::string bank,
+    std::string format) {
+  std::string fullFilename;
+  if (inputWorkspace.std::string::find("texture") != std::string::npos) {
+    fullFilename = "ENGINX_" + runNo + "_texture_" + bank + format;
+  }
+  if (inputWorkspace.std::string::find("cropped") != std::string::npos) {
+    fullFilename = "ENGINX_" + runNo + "_cropped_" +
+                   boost::lexical_cast<std::string>(g_croppedCounter) + format;
+    g_croppedCounter++;
+  } else {
+    fullFilename = "ENGINX_" + runNo + "_bank_" + bank + format;
+  }
+  return fullFilename;
+}
+
+/**
+ * Generates a directory if not found and handles the path
+ *
+ * @param runNo the run number as a string
+ */
+Poco::Path EnggDiffractionPresenter::outFilesDir(std::string runNo) {
+  Poco::Path saveDir;
+  try {
+
+// takes to the root of directory according to the platform
+// and appends the following string provided
+#ifdef __unix__
+    saveDir = Poco::Path().home();
+    saveDir.append("EnginX_Mantid");
+    saveDir.append("User");
+    saveDir.append(runNo);
+    saveDir.append("Focus");
+#else
+    // else or for windows run this
+    saveDir = (saveDir).expand("C:/EnginX_Mantid/User/" + runNo + "/Focus/");
+#endif
+
+    if (!Poco::File(saveDir.toString()).exists()) {
+      Poco::File(saveDir.toString()).createDirectories();
+    }
+  } catch (Poco::FileAccessDeniedException &e) {
+    g_log.error() << "error caused by file access/permission: " << e.what();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Error while find/creating a path: " << re.what();
+  }
+  return saveDir;
 }
 
 } // namespace CustomInterfaces

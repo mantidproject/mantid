@@ -209,8 +209,9 @@ void file_compress(file, mode)
     FILE  *in;
     gzFile out;
 
-    strcpy(outfile, file);
-    strcat(outfile, GZ_SUFFIX);
+    strncpy(outfile, file, MAX_NAME_LEN-1);
+    outfile[MAX_NAME_LEN-1] = '\0';
+    strncat(outfile, GZ_SUFFIX, MAX_NAME_LEN - strlen(outfile) - 1);
 
     in = fopen(file, "rb");
     if (in == NULL) {

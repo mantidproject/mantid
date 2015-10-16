@@ -70,22 +70,26 @@ void export_WorkspaceFactory() {
   class_<WorkspaceFactoryImpl, boost::noncopyable>("WorkspaceFactoryImpl",
                                                    no_init)
       .def("create", &createFromParentPtr,
-           createFromParent_Overload(
-               createFromParentDoc, (arg("parent"), arg("NVectors") = -1,
-                                     arg("XLength") = -1, arg("YLength") = -1)))
+           createFromParent_Overload(createFromParentDoc,
+                                     (arg("self"), arg("parent"),
+                                      arg("NVectors") = -1, arg("XLength") = -1,
+                                      arg("YLength") = -1)))
 
       .def("create", (createFromScratchPtr)&WorkspaceFactoryImpl::create,
            createFromScratchDoc, return_value_policy<AsType<Workspace_sptr>>(),
-           (arg("className"), arg("NVectors"), arg("XLength"), arg("YLength")))
+           (arg("self"), arg("className"), arg("NVectors"), arg("XLength"),
+            arg("YLength")))
 
       .def("createTable", &WorkspaceFactoryImpl::createTable,
-           createTable_Overload("Creates an empty TableWorkspace",
-                                (arg("className") = "TableWorkspace"))
+           createTable_Overload(
+               "Creates an empty TableWorkspace",
+               (arg("self"), arg("className") = "TableWorkspace"))
                [return_value_policy<AsType<Workspace_sptr>>()])
 
       .def("createPeaks", &WorkspaceFactoryImpl::createPeaks,
-           createPeaks_Overload("Creates an empty PeaksWorkspace",
-                                (arg("className") = "PeaksWorkspace"))
+           createPeaks_Overload(
+               "Creates an empty PeaksWorkspace",
+               (arg("self"), arg("className") = "PeaksWorkspace"))
                [return_value_policy<AsType<Workspace_sptr>>()])
 
       .def("Instance", &WorkspaceFactory::Instance,

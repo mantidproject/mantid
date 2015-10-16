@@ -4,17 +4,22 @@
 #include <stdexcept>
 
 #include "MantidAlgorithms/SofQW.h"
-#include "MantidDataObjects/Histogram1D.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/Histogram1D.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid {
 namespace Algorithms {

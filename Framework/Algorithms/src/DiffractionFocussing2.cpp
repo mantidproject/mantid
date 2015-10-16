@@ -2,21 +2,19 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/DiffractionFocussing2.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/Axis.h"
+
 #include <cfloat>
-#include <fstream>
 #include <iterator>
 #include <numeric>
-#include "MantidAPI/ISpectrum.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -43,9 +41,7 @@ DiffractionFocussing2::~DiffractionFocussing2() {}
  */
 void DiffractionFocussing2::init() {
 
-  auto wsValidator = boost::make_shared<CompositeValidator>();
-  // wsValidator->add<wsValidator->add>("dSpacing");
-  wsValidator->add<API::RawCountValidator>();
+  auto wsValidator = boost::make_shared<API::RawCountValidator>();
   declareProperty(new API::WorkspaceProperty<MatrixWorkspace>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "A 2D workspace with X values of d-spacing/Q-spacing");

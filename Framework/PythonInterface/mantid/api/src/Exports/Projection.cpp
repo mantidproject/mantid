@@ -114,21 +114,23 @@ void export_Projection() {
            "of u and v.")
       .def("__init__", make_constructor(&projCtor3),
            "Constructs a 3 dimensional projection")
-      .def("getOffset", &Projection::getOffset,
+      .def("getOffset", &Projection::getOffset, (arg("self"), arg("nd")),
            "Returns the offset for the given dimension", args("dimension"))
-      .def("getAxis", &Projection::getAxis,
+      .def("getAxis", &Projection::getAxis, (arg("self"), arg("nd")),
            "Returns the axis for the given dimension", args("dimension"))
-      .def("getType", &getUnit, "Returns the unit for the given dimension",
-           args("dimension"))
+      .def("getType", &getUnit, (arg("self"), arg("dimension")),
+           "Returns the unit for the given dimension")
       .def("setOffset", &Projection::setOffset,
+           (arg("self"), arg("nd"), arg("offset")),
            "Sets the offset for the given dimension",
            args("dimension", "offset"))
       .def("setAxis", &Projection::setAxis,
-           "Sets the axis for the given dimension", args("dimension", "axis"))
-      .def("setAxis", &projSetAxis, "Sets the axis for the given dimension",
-           args("dimension", "axis"))
-      .def("setType", &setUnit, "Sets the unit for the given dimension",
-           args("dimension", "unit"))
+           (arg("self"), arg("dimension"), arg("axis")),
+           "Sets the axis for the given dimension")
+      .def("setAxis", &projSetAxis, (arg("self"), arg("nd"), arg("data")),
+           "Sets the axis for the given dimension")
+      .def("setType", &setUnit, (arg("self"), arg("dimension"), arg("unit")),
+           "Sets the unit for the given dimension")
       .add_property(
            "u", make_function(&Projection::U, return_internal_reference<>(),
                               boost::mpl::vector2<V3D &, Projection &>()),

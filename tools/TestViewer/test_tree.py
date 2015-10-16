@@ -8,8 +8,7 @@ import PyQt4.QtGui
 from PyQt4.QtGui import *
 
 import test_info
-from test_info import TestSuite, TestSingle, TestProject, MultipleProjects
-import random
+from test_info import TestSuite, TestProject
 import datetime
 
 HORIZONTAL_HEADERS = ("Test", "Status", "Time (sec)", "Last Run")
@@ -81,16 +80,19 @@ def get_background_color(state):
 
     elif state == test_info.TestResult.ALL_PASSED:
         col = MyColors.lightGreen
-        if state.old: col = MyColors.darkishGreen
+        if state.old:
+            col = MyColors.darkishGreen
 
     elif state == test_info.TestResult.ALL_FAILED or (state == test_info.TestResult.SOME_FAILED) \
          or state == test_info.TestResult.ABORTED:
         col = QColor(Qt.red)
-        if state.old: col = QColor( 200, 50, 50 )
+        if state.old:
+            col = QColor( 200, 50, 50 )
 
     elif state == test_info.TestResult.BUILD_ERROR:
         col = QColor(Qt.magenta)
-        if state.old: col = desaturate(col, 0.5)
+        if state.old:
+            col = desaturate(col, 0.5)
 
 #    elif state == test_info.TestResult.SOME_FAILED:
 #        col = MyColors.lightRed

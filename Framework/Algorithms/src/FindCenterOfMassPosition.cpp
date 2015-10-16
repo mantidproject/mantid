@@ -2,17 +2,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FindCenterOfMassPosition.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include <vector>
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/NullValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
 namespace Algorithms {

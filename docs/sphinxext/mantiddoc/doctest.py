@@ -172,8 +172,10 @@ class TestSuiteReport(object):
     @property
     def nfailed(self):
         def sum_failure(fails, case):
-            if case.failed: return fails + 1
-            else: return fails
+            if case.failed:
+                return fails + 1
+            else:
+                return fails
         return reduce(sum_failure, self.testcases, 0)
 
     @property

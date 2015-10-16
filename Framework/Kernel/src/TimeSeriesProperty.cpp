@@ -57,6 +57,54 @@ TimeSeriesProperty<TYPE>::cloneWithTimeShift(const double timeShift) const {
   return timeSeriesProperty;
 }
 
+/** Return time series property, containing time derivative of current property.
+* The property itself and the returned time derivative become sorted by time and
+* the derivative is calculated in seconds^-1.
+* (e.g. dValue/dT where dT=t2-t1 is time difference in seconds
+* for subsequent time readings and dValue=Val1-Val2 is difference in
+* subsequent values)
+*
+*/
+template <typename TYPE>
+std::unique_ptr<TimeSeriesProperty<double>>
+TimeSeriesProperty<TYPE>::getDerivative() const {
+
+  if (this->m_values.size() < 2) {
+    throw std::runtime_error("Derivative is not defined for a time-series "
+                             "property with less then two values");
+  }
+
+  this->sort();
+  auto it = this->m_values.begin();
+  int64_t t0 = it->time().totalNanoseconds();
+  TYPE v0 = it->value();
+
+  it++;
+  auto timeSeriesDeriv = std::unique_ptr<TimeSeriesProperty<double>>(
+      new TimeSeriesProperty<double>(this->name() + "_derivative"));
+  timeSeriesDeriv->reserve(this->m_values.size() - 1);
+  for (; it != m_values.end(); it++) {
+    TYPE v1 = it->value();
+    int64_t t1 = it->time().totalNanoseconds();
+    if (t1 != t0) {
+      double deriv = 1.e+9 * (double(v1 - v0) / double(t1 - t0));
+      int64_t tm = static_cast<int64_t>((t1 + t0) / 2);
+      timeSeriesDeriv->addValue(Kernel::DateAndTime(tm), deriv);
+    }
+    t0 = t1;
+    v0 = v1;
+  }
+  return timeSeriesDeriv;
+}
+/** time series derivative specialization for string type */
+template <>
+std::unique_ptr<TimeSeriesProperty<double>>
+TimeSeriesProperty<std::string>::getDerivative() const {
+  throw std::runtime_error(
+      "Time series property derivative is not defined for strings");
+  // return nullptr;
+}
+
 /**
  * Return the memory used by the property, in bytes
  * */

@@ -1,24 +1,23 @@
 #include "MantidAlgorithms/GetDetOffsetsMultiPeaks.h"
 #include "MantidAlgorithms/GSLFunctions.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Statistics.h"
+#include "MantidKernel/VectorHelper.h"
+
 #include <boost/math/special_functions/fpclassify.hpp>
-#include <fstream>
-#include <ostream>
 #include <sstream>
 
 namespace Mantid {
