@@ -169,10 +169,6 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
 {
   //this will initialize the ParaView application if needed.
   VatesParaViewApplication::instance();
-  
-  //reset the qt error redirection that Paraview puts in place
-  // this may not be necessary if we move to qt5
-  qInstallMsgHandler(0);
 
   // Calling workspace observer functions.
   observeAfterReplace();
@@ -186,7 +182,9 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
   QObject::connect(&m_rebinnedSourcesManager, SIGNAL(switchSources(std::string, std::string)),
                    this, SLOT(onSwitchSources(std::string, std::string)));
 
-
+  //reset the qt error redirection that Paraview puts in place
+  // this may not be necessary if we move to qt5
+  qInstallMsgHandler(0);
 }
 
 /**
