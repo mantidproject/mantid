@@ -12,6 +12,8 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <Poco/File.h>
+#include <fstream>
+#include <sstream>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -173,10 +175,9 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
  * specifies along with bankPrefix
  * @param &Groups       The internal form for grouping.
  */
-void SCDCalibratePanels::CalculateGroups(set<string> &AllBankNames,
-                                         string Grouping, string bankPrefix,
-                                         string bankingCode,
-                                         vector<vector<string> > &Groups) {
+void SCDCalibratePanels::CalculateGroups(
+    set<string, compareBanks> &AllBankNames, string Grouping, string bankPrefix,
+    string bankingCode, vector<vector<string> > &Groups) {
   Groups.clear();
 
   if (Grouping == "OnePanelPerGroup") {
@@ -590,7 +591,7 @@ void SCDCalibratePanels::exec() {
   string bankingCode = getProperty("Grouping");
 
   //----------------- Set Up Bank Name Vectors -------------------------
-  set<string> AllBankNames;
+  set<string, compareBanks> AllBankNames;
   for (int i = 0; i < peaksWs->getNumberPeaks(); ++i)
     AllBankNames.insert(peaksWs->getPeak(i).getBankName());
 
@@ -603,16 +604,14 @@ void SCDCalibratePanels::exec() {
       Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
   QErrTable->addColumn("int", "Bank Number");
   QErrTable->addColumn("int", "Peak Number");
-  QErrTable->addColumn("int", "Peak Row");
-  QErrTable->addColumn("double", "Error in Q");
-  QErrTable->addColumn("int", "Peak Column");
-  QErrTable->addColumn("int", "Run Number");
-  QErrTable->addColumn("double", "wl");
-  QErrTable->addColumn("double", "tof");
-  QErrTable->addColumn("double", "d-spacing");
-  QErrTable->addColumn("double", "L2");
-  QErrTable->addColumn("double", "Scat");
-  QErrTable->addColumn("double", "y");
+  QErrTable->addColumn("int", "Calculated Column");
+  QErrTable->addColumn("int", "Theoretical Column");
+  QErrTable->addColumn("int", "Calculated Row");
+  QErrTable->addColumn("int", "Theoretical Row");
+  QErrTable->addColumn("double", "Calculated TOF ");
+  QErrTable->addColumn("double", "Theoretical TOF");
+  double chisqSum = 0;
+  int NDofSum = 0;
 
   PARALLEL_FOR1(peaksWs)
   for (int iGr = 0; iGr < static_cast<int>(Groups.size()); iGr++) {
@@ -742,12 +741,9 @@ void SCDCalibratePanels::exec() {
 
     int startX = bounds[0];
     int endXp1 = bounds[group->size()];
-    if (endXp1 - startX < 12) {
+    if (endXp1 - startX < 13) {
       g_log.error() << "Bank Group " << BankNameString
                     << " does not have enough peaks for fitting" << endl;
-
-      /*throw runtime_error("Group " + BankNameString +
-                          " does not have enough peaks");*/
       continue;
     }
 
@@ -816,33 +812,26 @@ void SCDCalibratePanels::exec() {
     fit_alg->initialize();
 
     int Niterations = getProperty("NumIterations");
+    std::string minimizerError = getProperty("minimizerError");
     fit_alg->setProperty("Function", iFunc);
     fit_alg->setProperty("MaxIterations", Niterations);
     fit_alg->setProperty("InputWorkspace", ws);
     fit_alg->setProperty("Output", "out");
     fit_alg->setProperty("CalcErrors", false);
-    fit_alg->setPropertyValue(
-        "Minimizer", "Levenberg-Marquardt,AbsError=1.e-12,RelError=1.e-12");
+    fit_alg->setPropertyValue("Minimizer", "Levenberg-Marquardt,AbsError=" +
+                                               minimizerError + ",RelError=" +
+                                               minimizerError);
     fit_alg->executeAsChildAlg();
     PARALLEL_CRITICAL(afterFit) {
       g_log.debug() << "Finished executing Fit algorithm\n";
       string OutputStatus = fit_alg->getProperty("OutputStatus");
-      g_log.notice() << "Output Status=" << OutputStatus << "\n";
-
-      /*declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
-                          "OutputNormalisedCovarianceMatrix", "CovarianceInfo",
-                          Kernel::Direction::Output),
-                      "The name of the TableWorkspace in which to store the
-         final "
-                      "covariance matrix");*/
-
-      ITableWorkspace_sptr NormCov =
-          fit_alg->getProperty("OutputNormalisedCovarianceMatrix");
-      // setProperty("OutputNormalisedCovarianceMatrix", NormCov);
+      g_log.notice() << BankNameString << " Output Status=" << OutputStatus
+                     << "\n";
 
       //--------------------- Get and Process Results -----------------------
       double chisq = fit_alg->getProperty("OutputChi2overDoF");
-      // setProperty("ChiSqOverDOF", chisq);
+      chisqSum += chisq;
+
       if (chisq > 1) {
         g_log.warning()
             << "************* This is a large chi squared value ************\n";
@@ -907,14 +896,18 @@ void SCDCalibratePanels::exec() {
 
       // g_log.notice() << "      nVars=" <<nVars<< endl;
       int NDof = ((int)ws->dataX(0).size() - nVars);
-      // setProperty("DOF", NDof);
-      g_log.notice() << "ChiSqoverDoF =" << chisq << " NDof =" << NDof << "\n";
+      NDofSum = +NDof;
 
       map<string, double> result;
 
       for (size_t i = 0; i < min<size_t>(params.size(), names.size()); ++i) {
         result[names[i]] = params[i];
       }
+
+      g_log.notice() << BankNameString << " ChiSqoverDoF =" << chisq
+                     << " NDof =" << NDof << " l0 = " << result["l0"]
+                     << " T0 = " << result["t0"]
+                     << " peaks = " << endXp1 - startX << "\n";
 
       //--------------------- Create Result Table Workspace-------------------
       this->progress(.92, "Creating Results table");
@@ -969,7 +962,8 @@ void SCDCalibratePanels::exec() {
       for (int i = 0; i < peaksWs->getNumberPeaks(); ++i)
         MyBankNames.insert(banksVec[0]);
       this->progress(.94, "Saving detcal file");
-      saveIsawDetCal(NewInstrument, MyBankNames, result["t0"], DetCalFileName);
+      saveIsawDetCal(NewInstrument, MyBankNames, result["t0"],
+                     DetCalFileName + boost::lexical_cast<std::string>(iGr));
 
       this->progress(.96, "Saving xml param file");
       string XmlFileName = getProperty("XmlFilename");
@@ -1003,15 +997,6 @@ void SCDCalibratePanels::exec() {
           BankNumDef++;
           bankNum = BankNumDef;
         }
-
-        Mantid::API::TableRow row = QErrTable->appendRow();
-        row << bankNum << pk << peak.getRow()
-            << sqrt(out[q] * out[q] + out[q + 1] * out[q + 1] +
-                    out[q + 2] * out[q + 2]) << peak.getCol()
-            << peak.getRunNumber() << peak.getWavelength() << peak.getTOF()
-            << peak.getDSpacing() << peak.getL2() << peak.getScattering()
-            << peak.getDetPos().Y();
-        QErrTable->setComment(string("Errors in Q for each Peak"));
         try {
           Geometry::OrientedLattice lattice(a, b, c, alpha, beta, gamma);
           lattice.setUB(peaksWs->sample().getOrientedLattice().getUB());
@@ -1019,11 +1004,10 @@ void SCDCalibratePanels::exec() {
                            peak.getGoniometerMatrix());
           Peak calculated(NewInstrument, peak.getQSampleFrame(),
                           peak.getGoniometerMatrix());
-          std::cout << bankNum << "  " << pk << "  " << calculated.getCol()
-                    << "  " << theoretical.getCol() << "  "
-                    << calculated.getRow() << "  " << theoretical.getRow()
-                    << "  " << calculated.getTOF() << "  "
-                    << theoretical.getTOF() << "\n";
+          Mantid::API::TableRow row = QErrTable->appendRow();
+          row << bankNum << pk << calculated.getCol() << theoretical.getCol()
+              << calculated.getRow() << theoretical.getRow()
+              << calculated.getTOF() << theoretical.getTOF();
         }
         catch (...) {
           g_log.debug() << "Problem only in printing peaks" << std::endl;
@@ -1033,7 +1017,73 @@ void SCDCalibratePanels::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+  std::vector<std::string> detcal;
+  std::vector<double> l0vec, t0vec;
+  std::ofstream outfile(DetCalFileName);
+  std::string line, seven;
+  for (int iGr = 0; iGr < static_cast<int>(Groups.size()); iGr++) {
+    std::ifstream infile(DetCalFileName +
+                         boost::lexical_cast<std::string>(iGr));
+    while (std::getline(infile, line)) {
+      if (iGr == 0) {
+        if (line[0] == '#' || line[0] == '6')
+          outfile << line << "\n";
+      }
+      if (line[0] == '7') {
+        double L0bank, T0bank;
+        std::stringstream(line) >> seven >> L0bank >> T0bank;
+        l0vec.push_back(L0bank);
+        t0vec.push_back(T0bank);
+      } else if (line[0] == '5')
+        detcal.push_back(line);
+    }
+    infile.close();
+    if (Poco::File(DetCalFileName + boost::lexical_cast<std::string>(iGr))
+            .exists())
+      Poco::File(DetCalFileName + boost::lexical_cast<std::string>(iGr))
+          .remove();
+  }
+  std::vector<double> Zscore = getZscore(l0vec);
+  std::vector<size_t> banned;
+  for (size_t i = 0; i < l0vec.size(); ++i) {
+    if (Zscore[i] > 0.5) {
+      banned.push_back(i);
+    }
+  }
+  // delete outliers
+  for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin();
+       it != banned.rend(); ++it) {
+    l0vec.erase(l0vec.begin() + (*it));
+  }
+
+  Statistics stats = getStatistics(l0vec);
+  outfile << std::setprecision(4) << std::fixed << (stats.mean);
+  Zscore = getZscore(t0vec);
+  banned.clear();
+  for (size_t i = 0; i < t0vec.size(); ++i) {
+    if (Zscore[i] > 0.5) {
+      banned.push_back(i);
+    }
+  }
+  // delete outliers
+  for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin();
+       it != banned.rend(); ++it) {
+    t0vec.erase(t0vec.begin() + (*it));
+  }
+  stats = getStatistics(t0vec);
+  outfile << std::setw(13) << std::setprecision(3) << stats.mean << std::endl;
+  outfile << "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX "
+             "  CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY "
+             "     UpZ" << std::endl;
+  for (vector<std::string>::const_iterator itdet = detcal.begin();
+       itdet != detcal.end(); ++itdet)
+    outfile << *itdet << "\n";
+  outfile.close();
+
+  QErrTable->setComment(string("Errors in Q for each Peak"));
   setProperty("QErrorWorkspace", QErrTable);
+  setProperty("ChiSqOverDOF", chisqSum);
+  setProperty("DOF", NDofSum);
 }
 
 /**
@@ -1270,7 +1320,7 @@ void SCDCalibratePanels::saveIsawDetCal(
   if (filename.empty())
     return;
 
-  g_log.notice() << "Saving DetCal file in " << filename << "\n";
+  // g_log.notice() << "Saving DetCal file in " << filename << "\n";
 
   // create a workspace to pass to SaveIsawDetCal
   const size_t number_spectra = instrument->getNumberDetectors();
@@ -1290,7 +1340,7 @@ void SCDCalibratePanels::saveIsawDetCal(
   alg->setProperty("Filename", filename);
   alg->setProperty("TimeOffset", T0);
   alg->setProperty("BankNames", banknames);
-  alg->setProperty("AppendFile", true);
+  // alg->setProperty("AppendFile", true);
   alg->executeAsChildAlg();
 }
 
@@ -1410,8 +1460,9 @@ void SCDCalibratePanels::init() {
   // settings-------------------------
   declareProperty("tolerance", .12, mustBePositive,
                   "offset of hkl values from integer for GOOD Peaks");
-
-  declareProperty("NumIterations", 1000, "Number of iterations");
+  declareProperty("minimizerError", 1.e-12, mustBePositive,
+                  "error for Levenberg-Marquardt minimizer");
+  declareProperty("NumIterations", 60, "Number of iterations");
   declareProperty(
       "MaxRotationChangeDegrees", 5.0,
       "Maximum Change in Rotations about x,y,or z in degrees(def=5)");
@@ -1422,6 +1473,7 @@ void SCDCalibratePanels::init() {
 
   const string TOLERANCES("Tolerance settings");
   setPropertyGroup("tolerance", TOLERANCES);
+  setPropertyGroup("minimizerError", TOLERANCES);
   setPropertyGroup("NumIterations", TOLERANCES);
   setPropertyGroup("MaxRotationChangeDegrees", TOLERANCES);
   setPropertyGroup("MaxPositionChange_meters", TOLERANCES);

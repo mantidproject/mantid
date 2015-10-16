@@ -141,6 +141,22 @@ public:
       double const L0, Kernel::V3D const newSampPos,
       boost::shared_ptr<const Geometry::ParameterMap> const pmapOld);
 
+  struct compareBanks {
+    bool operator()(const std::string &lhs, const std::string &rhs) const {
+      std::string bankPart = "bank";
+      std::string bankName = lhs;
+      boost::trim(bankName);
+      boost::erase_all(bankName, bankPart);
+      int bank1 = 0;
+      Kernel::Strings::convert(bankName, bank1);
+      bankName = rhs;
+      boost::trim(bankName);
+      boost::erase_all(bankName, bankPart);
+      int bank2 = 0;
+      Kernel::Strings::convert(bankName, bank2);
+      return bank1 < bank2;
+    }
+  };
   /**
    * Given a string representation of a set of groups( [] separated list of
    * bank nums separated by commas or colons( for ranges) , this method will
@@ -164,10 +180,10 @@ public:
    *names.
    *
    */
-  void CalculateGroups(std::set<std::string> &AllBankNames,
+  void CalculateGroups(std::set<std::string, compareBanks> &AllBankNames,
                        std::string Grouping, std::string bankPrefix,
                        std::string bankingCode,
-                       std::vector<std::vector<std::string>> &Groups);
+                       std::vector<std::vector<std::string> > &Groups);
 
   /**
    * Calculate the Workspace2D associated with a Peaksworkspace for Composite
@@ -240,7 +256,6 @@ private:
   void init();
 
   API::ITableWorkspace_sptr Result;
-
 
   /**
    * Creates a new instrument when a calibration file( .xml or .detcal)
@@ -332,7 +347,7 @@ private:
    *Groups
    */
   void saveXmlFile(std::string const FileName,
-                   std::vector<std::vector<std::string>> const Groups,
+                   std::vector<std::vector<std::string> > const Groups,
                    Geometry::Instrument_const_sptr const instrument) const;
 };
 
