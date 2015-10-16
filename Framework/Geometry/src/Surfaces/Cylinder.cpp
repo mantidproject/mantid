@@ -5,6 +5,8 @@
 #include <cfloat>
 #include <iostream>
 
+#include <BRepPrimAPI_MakeCylinder.hxx>
+
 namespace Mantid {
 
 namespace Geometry {
@@ -443,6 +445,15 @@ void Cylinder::getBoundingBox(double &xmax, double &ymax, double &zmax,
     if (zmin < tzmin)
       zmin = tzmin;
   }
+}
+
+TopoDS_Shape Cylinder::createShape() {
+  gp_Pnt center;
+  center.SetX(Centre[0] - Normal[0] * 500.0);
+  center.SetY(Centre[1] - Normal[1] * 500.0);
+  center.SetZ(Centre[2] - Normal[2] * 500.0);
+  gp_Ax2 gpA(center, gp_Dir(Normal[0], Normal[1], Normal[2]));
+  return BRepPrimAPI_MakeCylinder(gpA, Radius, 1000.0, 2.0 * M_PI).Solid();
 }
 
 } // NAMESPACE MonteCarlo

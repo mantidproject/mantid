@@ -150,7 +150,7 @@ TopoDS_Shape OCGeometryGenerator::AnalyzeRule(Union *rule) {
 TopoDS_Shape OCGeometryGenerator::AnalyzeRule(SurfPoint *rule) {
   // Check for individual type of surfaces
   Surface *surf = rule->getKey();
-  TopoDS_Shape Result = CreateShape(surf);
+  TopoDS_Shape Result = surf->createShape();
   if (rule->getSign() > 0 &&
       surf->className() != Surface::DerivedClassName::PLANE)
     Result.Complement();
@@ -197,103 +197,6 @@ TopoDS_Shape OCGeometryGenerator::AnalyzeRule(Rule *rule) {
     return TopoDS_Shape();
     break;
   }
-}
-
-TopoDS_Shape OCGeometryGenerator::CreateShape(Surface *surf) {
-  if (surf == NULL)
-    return TopoDS_Shape();
-  // Check for the type of the surface object
-  switch (surf->className()) {
-  case Surface::DerivedClassName::SPHERE:
-    return CreateSphere(static_cast<Sphere *>(surf));
-    break;
-  case Surface::DerivedClassName::CONE:
-    return CreateCone(static_cast<Cone *>(surf));
-    break;
-  case Surface::DerivedClassName::CYLINDER:
-    return CreateCylinder(static_cast<Cylinder *>(surf));
-    break;
-  case Surface::DerivedClassName::PLANE:
-    return CreatePlane(static_cast<Plane *>(surf));
-    break;
-  case Surface::DerivedClassName::TORUS:
-    return CreateTorus(static_cast<Torus *>(surf));
-    break;
-  default:
-    return TopoDS_Shape();
-    break;
-  }
-}
-TopoDS_Shape OCGeometryGenerator::CreateSphere(Sphere *sphere) {
-  // Get the center to Sphere
-  V3D center = sphere->getCentre();
-  return BRepPrimAPI_MakeSphere(gp_Pnt(center[0], center[1], center[2]),
-                                sphere->getRadius())
-      .Shape();
-}
-TopoDS_Shape OCGeometryGenerator::CreateCylinder(Cylinder *cylinder) {
-  // Get the Cylinder Centre,Normal,Radius
-  V3D center = cylinder->getCentre();
-  V3D axis = cylinder->getNormal();
-  double radius = cylinder->getRadius();
-  center[0] = center[0] - axis[0] * 500;
-  center[1] = center[1] - axis[1] * 500;
-  center[2] = center[2] - axis[2] * 500;
-  gp_Ax2 gpA(gp_Pnt(center[0], center[1], center[2]),
-             gp_Dir(axis[0], axis[1], axis[2]));
-  return BRepPrimAPI_MakeCylinder(gpA, radius, 1000, 2 * M_PI).Solid();
-}
-
-TopoDS_Shape OCGeometryGenerator::CreateCone(Cone *cone) {
-  // Get the Cone Centre Normal Radius
-  V3D center = cone->getCentre();
-  V3D axis = cone->getNormal();
-  double angle = cone->getCosAngle();
-  gp_Ax2 gpA(gp_Pnt(center[0], center[1], center[2]),
-             gp_Dir(axis[0], axis[1], axis[2]));
-  return BRepPrimAPI_MakeCone(gpA, 0, 1000 / tan(acos(angle * M_PI / 180.0)),
-                              1000, 2 * M_PI)
-      .Shape();
-}
-
-TopoDS_Shape OCGeometryGenerator::CreatePlane(Plane *plane) {
-  // Get Plane normal and distance.
-  int orientation = plane->getSign();
-  V3D normal = plane->getNormal();
-  double norm2 = normal.norm2();
-  if (norm2 == 0.0) {
-    throw std::runtime_error("Cannot create a plane with zero normal");
-  }
-  double distance = plane->getDistance();
-  // Find point closest to origin
-  double t = distance / norm2;
-  // Create Half Space
-  TopoDS_Shape Result;
-  if (orientation > 0) {
-    TopoDS_Face P =
-        BRepBuilderAPI_MakeFace(
-            gp_Pln(normal[0], normal[1], normal[2], -distance)).Face();
-    Result = BRepPrimAPI_MakeHalfSpace(P, gp_Pnt(normal[0] * (1 + t),
-                                                 normal[1] * (1 + t),
-                                                 normal[2] * (1 + t))).Solid();
-  } else {
-    TopoDS_Face P =
-        BRepBuilderAPI_MakeFace(
-            gp_Pln(normal[0], normal[1], normal[2], -distance)).Face();
-    P.Reverse();
-    Result = BRepPrimAPI_MakeHalfSpace(P, gp_Pnt(normal[0] * (1 + t),
-                                                 normal[1] * (1 + t),
-                                                 normal[2] * (1 + t))).Solid();
-  }
-  // create a box
-  gp_Pnt p(-1000.0, -1000.0, -1000.0);
-  TopoDS_Shape world = BRepPrimAPI_MakeBox(p, 2000.0, 2000.0, 2000.0).Shape();
-  return BRepAlgoAPI_Common(world, Result);
-}
-
-TopoDS_Shape OCGeometryGenerator::CreateTorus(Torus *) {
-  // NOTE:: Not yet implemented
-  return TopoDS_Shape();
 }
 
 int OCGeometryGenerator::getNumberOfTriangles() {

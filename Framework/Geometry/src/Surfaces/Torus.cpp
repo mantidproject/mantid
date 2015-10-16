@@ -333,6 +333,11 @@ void Torus::setDistanceFromCentreToTube(double dist) { Iradius = dist; }
  */
 void Torus::setTubeRadius(double dist) { Dradius = dist; }
 
+TopoDS_Shape Torus::createShape() {
+  // NOTE:: Not yet implemented
+  return TopoDS_Shape();
+}
+
 } // NAMESPACE MonteCarlo
 
 } // NAMESPACE Mantid

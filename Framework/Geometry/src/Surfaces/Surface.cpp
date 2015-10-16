@@ -32,7 +32,7 @@ Surface::Surface()
 {}
 
 Surface::Surface(const Surface &A)
-    : Name(A.Name)
+    : Name(A.Name), m_Sign(A.m_Sign)
 /**
   Copy constructor
   @param A :: Surface to copy
@@ -48,6 +48,7 @@ Surface &Surface::operator=(const Surface &A)
 {
   if (this != &A) {
     Name = A.Name;
+    m_Sign = A.m_Sign;
   }
   return *this;
 }
@@ -93,6 +94,8 @@ void Surface::write(std::ostream &out) const
   (void)out; // Avoid compiler warning
   throw Kernel::Exception::AbsObjMethod("Surface::write");
 }
+
+TopoDS_Shape Surface::createShape() { return TopoDS_Shape(); }
 
 } // NAMESPACE Geometry
 

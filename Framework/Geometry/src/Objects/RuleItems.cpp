@@ -19,6 +19,7 @@
 #include "MantidGeometry/Surfaces/Line.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
+#include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Object.h"
 
@@ -648,11 +649,13 @@ void Union::getBoundingBox(double &xmax, double &ymax, double &zmax,
 //---------------------------------------------------------------
 
 SurfPoint::SurfPoint()
-    : Rule(), key(0), keyN(0)
+    : Rule(), keyN(0)
 /**
   Constructor with null key/number
 */
-{}
+{
+  key = new Sphere();
+}
 
 SurfPoint::SurfPoint(const SurfPoint &A)
     : Rule(), key(A.key->clone()), keyN(A.keyN)
@@ -679,8 +682,10 @@ SurfPoint &SurfPoint::operator=(const SurfPoint &A)
 */
 {
   if (&A != this) {
+    int sign = key->getSign();
     delete key;
     key = A.key->clone();
+    key->setSign(sign);
     keyN = A.keyN;
   }
   return *this;
@@ -763,9 +768,11 @@ void SurfPoint::setKey(Surface *Spoint)
   @param Spoint :: new key values
 */
 {
+  int sign = key->getSign();
   if (key != Spoint)
     delete key;
   key = Spoint;
+  key->setSign(sign);
   return;
 }
 

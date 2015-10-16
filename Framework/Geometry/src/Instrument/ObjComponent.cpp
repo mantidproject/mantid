@@ -303,10 +303,10 @@ const V3D ObjComponent::takeOutRotation(V3D point) const {
 * nothing.
 */
 void ObjComponent::draw() const {
-  if (Handle() == NULL)
+  if (Handler() == NULL)
     return;
   // Render the ObjComponent and then render the object
-  Handle()->Render();
+  Handler()->Render();
 }
 
 /**
@@ -322,12 +322,12 @@ void ObjComponent::drawObject() const {
 * before rendering.
 */
 void ObjComponent::initDraw() const {
-  if (Handle() == NULL)
+  if (Handler() == NULL)
     return;
   // Render the ObjComponent and then render the object
   if (shape() != NULL)
     shape()->initDraw();
-  Handle()->Initialize();
+  Handler()->Initialize();
 }
 
 } // namespace Geometry

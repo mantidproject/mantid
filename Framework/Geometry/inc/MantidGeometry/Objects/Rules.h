@@ -227,7 +227,6 @@ class MANTID_GEOMETRY_DLL SurfPoint : public Rule {
 private:
   Surface *key; ///< Actual Surface Base Object
   int keyN;     ///< Key Number (identifer)
-
 public:
   SurfPoint();
   SurfPoint(const SurfPoint &);

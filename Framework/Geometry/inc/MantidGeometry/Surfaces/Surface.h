@@ -5,6 +5,8 @@
 #include "BaseVisit.h"
 #include <string>
 
+#include <TopoDS_Shape.hxx>
+
 namespace Mantid {
 namespace Kernel {
 class V3D;
@@ -100,8 +102,13 @@ public:
   /// bounding box for the surface
   virtual void getBoundingBox(double &xmax, double &ymax, double &zmax,
                               double &xmin, double &ymin, double &zmin) = 0;
-  void setSign(int Sign) { m_Sign = Sign; }
+  void setSign(int Sign) {
+    if (this)
+      m_Sign = Sign;
+  }
   int getSign() const { return m_Sign; }
+
+  virtual TopoDS_Shape createShape();
 };
 
 } // NAMESPACE Geometry

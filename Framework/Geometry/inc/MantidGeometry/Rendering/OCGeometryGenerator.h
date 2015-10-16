@@ -72,18 +72,6 @@ private:
   TopoDS_Shape AnalyzeRule(CompObj *);
   /// Analyze a geometry rule for a boolean value
   TopoDS_Shape AnalyzeRule(BoolValue *);
-  /// create an OpenCascade shape from a Mantid shape
-  TopoDS_Shape CreateShape(Surface *surf);
-  /// create an OpenCascade sphere from a Mantid shape
-  TopoDS_Shape CreateSphere(Sphere *);
-  /// create an OpenCascade cylinder from a Mantid shape
-  TopoDS_Shape CreateCylinder(Cylinder *);
-  /// create an OpenCascade cone from a Mantid shape
-  TopoDS_Shape CreateCone(Cone *);
-  /// create an OpenCascade plane from a Mantid shape
-  TopoDS_Shape CreatePlane(Plane *);
-  /// create an OpenCascade Torus from a Mantid shape
-  TopoDS_Shape CreateTorus(Torus *);
 
 public:
   OCGeometryGenerator(const Object *obj);

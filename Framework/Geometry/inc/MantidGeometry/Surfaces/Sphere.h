@@ -6,6 +6,9 @@
 #include "MantidKernel/V3D.h"
 #include <string>
 
+#include <TopoDS_Shape.hxx>
+#include <BRepPrimAPI_MakeSphere.hxx>
+
 namespace Mantid {
 
 namespace Geometry {
@@ -91,6 +94,8 @@ public:
   static int g_nslices;
   /// The number of stacks to approximate a sphere
   static int g_nstacks;
+
+  virtual TopoDS_Shape createShape();
 };
 
 } // NAMESPACE Geometry

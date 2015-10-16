@@ -19,6 +19,8 @@
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Cone.h"
 
+#include <BRepPrimAPI_MakeCone.hxx>
+
 namespace Mantid {
 
 namespace Geometry {
@@ -402,6 +404,15 @@ void Cone::getBoundingBox(double &xmax, double &ymax, double &zmax,
     ymin = Centre.Y() - radius;
     ymax = Centre.Y() + radius;
   }
+}
+
+TopoDS_Shape Cone::createShape() {
+  gp_Ax2 gpA(gp_Pnt(Centre[0], Centre[1], Centre[2]),
+             gp_Dir(Normal[0], Normal[1], Normal[2]));
+  return BRepPrimAPI_MakeCone(gpA, 0.0,
+                              1000.0 / tan(acos(cangle * M_PI / 180.0)), 1000.0,
+                              2.0 * M_PI)
+      .Shape();
 }
 
 } // NAMESPACE Geometry

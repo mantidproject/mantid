@@ -663,10 +663,10 @@ unsigned int RectangularDetector::getTextureID() const { return m_textureID; }
 void RectangularDetector::draw() const {
   // std::cout << "RectangularDetector::draw() called for " << this->getName()
   // << "\n";
-  if (Handle() == NULL)
+  if (Handler() == NULL)
     return;
   // Render the ObjComponent and then render the object
-  Handle()->Render();
+  Handler()->Render();
 }
 
 /**
@@ -685,11 +685,11 @@ void RectangularDetector::drawObject() const {
 void RectangularDetector::initDraw() const {
   // std::cout << "RectangularDetector::initDraw() called for " <<
   // this->getName() << "\n";
-  if (Handle() == NULL)
+  if (Handler() == NULL)
     return;
   // Render the ObjComponent and then render the object
   // if(shape!=NULL)    shape->initDraw();
-  Handle()->Initialize();
+  Handler()->Initialize();
 }
 
 //-------------------------------------------------------------------------------------------------

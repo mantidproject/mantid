@@ -2,6 +2,8 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
 
+#include <BRepPrimAPI_MakeSphere.hxx>
+
 namespace Mantid {
 
 namespace Geometry {
@@ -255,6 +257,11 @@ void Sphere::getBoundingBox(double &xmax, double &ymax, double &zmax,
   xmin = Centre[0] - Radius;
   ymin = Centre[1] - Radius;
   zmin = Centre[2] - Radius;
+}
+
+TopoDS_Shape Sphere::createShape() {
+  return BRepPrimAPI_MakeSphere(gp_Pnt(Centre[0], Centre[1], Centre[2]), Radius)
+      .Shape();
 }
 
 } // NAMESPACE Geometry

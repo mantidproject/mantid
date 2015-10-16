@@ -102,6 +102,8 @@ public:
   static int g_nslices;
   /// The number of stacks to approximate a cone
   static int g_nstacks;
+
+  virtual TopoDS_Shape createShape();
 };
 
 } // NAMESPACE MonteCarlo
