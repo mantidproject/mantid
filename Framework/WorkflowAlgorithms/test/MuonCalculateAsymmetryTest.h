@@ -346,7 +346,7 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 
-    void test_pairAsymmetry_twoPeriods_minus() {
+  void test_pairAsymmetry_twoPeriods_minus() {
     // Name of the output workspace.
     const std::string outWSName = outputWorkspaceName("GroupAsymmetry");
 
