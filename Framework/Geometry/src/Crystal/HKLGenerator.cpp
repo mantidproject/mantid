@@ -61,7 +61,7 @@ V3D HKLGenerator::getEndHKL() const {
 
 /// Default constructor, requirement from boost::iterator_facade
 HKLGenerator::const_iterator::const_iterator()
-    : m_h(0), m_k(0), m_l(0), m_hkl(0), m_hMin(0), m_hMax(0), m_kMin(0),
+    : m_h(0), m_k(0), m_l(0), m_hkl(V3D(0, 0, 0)), m_hMin(0), m_hMax(0), m_kMin(0),
       m_kMax(0), m_lMin(0), m_lMax(0) {}
 
 /// Return an iterator with min = max = current.
