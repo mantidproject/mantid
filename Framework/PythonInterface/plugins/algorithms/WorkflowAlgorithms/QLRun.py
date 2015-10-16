@@ -7,7 +7,7 @@ if is_supported_f2py_platform():
     Que     = import_f2py("Quest")
     resnorm = import_f2py("ResNorm")
 else:
-    unsupported_message()
+    logger.error('F2Py functionality not currently available on your platform.')
 
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode
 from mantid.kernel import StringListValidator, Direction
