@@ -15,8 +15,6 @@
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
-
-
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -86,15 +84,16 @@ void setSpectrumFromPyObject(MatrixWorkspace &self, data_modifier accessor,
  * @param self  :: A reference to the calling object
  * @param value :: The python pointer to the workspace to set
  */
-void setMonitorWorkspace(MatrixWorkspace &self,const boost::python::object &value){
+void setMonitorWorkspace(MatrixWorkspace &self,
+                         const boost::python::object &value) {
 
-  MatrixWorkspace_sptr monWS = 
-    boost::dynamic_pointer_cast<MatrixWorkspace>
-    (Mantid::PythonInterface::ExtractWorkspace(value)());
-  if(monWS){
-    if(monWS.get() == &self){
-      throw std::runtime_error("To avoid memory leak, monitor workspace"
-        " can not be the same workspace as the host workspace");
+  MatrixWorkspace_sptr monWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      Mantid::PythonInterface::ExtractWorkspace(value)());
+  if (monWS) {
+    if (monWS.get() == &self) {
+      throw std::runtime_error(
+          "To avoid memory leak, monitor workspace"
+          " can not be the same workspace as the host workspace");
     }
   }
   self.setMonitorWorkspace(monWS);
@@ -104,11 +103,10 @@ void setMonitorWorkspace(MatrixWorkspace &self,const boost::python::object &valu
  *
  * @param self  :: A reference to the calling object
 */
-void clearMonitorWorkspace(MatrixWorkspace &self){
+void clearMonitorWorkspace(MatrixWorkspace &self) {
   MatrixWorkspace_sptr monWS;
   self.setMonitorWorkspace(monWS);
 }
-
 
 /**
  * Set the X values from an python array-style object
@@ -178,7 +176,6 @@ Mantid::API::Run &getSampleDetailsDeprecated(MatrixWorkspace &self) {
   return self.mutableRun();
 }
 }
-
 
 /** Python exports of the Mantid::API::MatrixWorkspace class. */
 void export_MatrixWorkspace() {
@@ -353,20 +350,18 @@ void export_MatrixWorkspace() {
            "Performs a comparison operation on two workspaces, using the "
            "CheckWorkspacesMatch algorithm")
       //---------   monitor workspace --------------------------------------
-      .def("getMonitorWorkspace",&MatrixWorkspace::monitorWorkspace,
+      .def("getMonitorWorkspace", &MatrixWorkspace::monitorWorkspace,
            args("self"),
            "Return internal monitor workspace bound to current workspace.")
-      .def("setMonitorWorkspace",&setMonitorWorkspace,
+      .def("setMonitorWorkspace", &setMonitorWorkspace,
            args("self", "MonitorWS"),
            "Set specified workspace as monitor workspace for"
            "current workspace. "
            "Note: The workspace does not have to contain monitors though "
            "some subsequent algorithms may expect it to be "
            "monitor workspace later.")
-      .def("clearMonitorWorkspace",&clearMonitorWorkspace,
-           args("self"),
+      .def("clearMonitorWorkspace", &clearMonitorWorkspace, args("self"),
            "Forget about monitor workspace, attached to the current workspace");
-
 
   RegisterWorkspacePtrToPython<MatrixWorkspace>();
 }
