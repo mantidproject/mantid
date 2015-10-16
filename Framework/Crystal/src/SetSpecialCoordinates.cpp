@@ -4,9 +4,14 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Logger.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+
+namespace {
+Mantid::Kernel::Logger g_log("SetSpecialCoordinates");
+}
 
 namespace Mantid {
 namespace Crystal {
@@ -70,7 +75,9 @@ const std::string SetSpecialCoordinates::category() const { return "Crystal"; }
 void SetSpecialCoordinates::init() {
   declareProperty(
       new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::InOut),
-      "An input/output workspace. The new log will be added to it.");
+      "An input/output workspace. The new log will be added to it. Improtant "
+      "Note: This has now only an effect on PeaksWorkspaces. MDEvent and "
+      "MDHisto worksapces are not affaceted by this algorithm");
 
   declareProperty(
       "SpecialCoordinates", "Q (lab frame)",
@@ -86,7 +93,9 @@ bool SetSpecialCoordinates::writeCoordinatesToMDEventWorkspace(
     Workspace_sptr inWS, SpecialCoordinateSystem coordinateSystem) {
   bool written = false;
   if (auto mdEventWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(inWS)) {
-    mdEventWS->setCoordinateSystem(coordinateSystem);
+    g_log.warning("SetSpecialCoordinates: This algorithm cannot set the "
+                  "special coordinate system for an MDEvent workspace any "
+                  "longer.");
     written = true;
   }
   return written;
@@ -96,7 +105,9 @@ bool SetSpecialCoordinates::writeCoordinatesToMDHistoWorkspace(
     Workspace_sptr inWS, SpecialCoordinateSystem coordinateSystem) {
   bool written = false;
   if (auto mdHistoWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(inWS)) {
-    mdHistoWS->setCoordinateSystem(coordinateSystem);
+    g_log.warning("SetSpecialCoordinates: This algorithm cannot set the "
+                  "special coordinate system for an MDHisto workspace any "
+                  "longer.");
     written = true;
   }
   return written;
