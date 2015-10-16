@@ -7,7 +7,7 @@
 
 #include "MantidKernel/Logger.h"
 
-#include <Poco/Timer.h>
+#include <Poco/Mutex.h>
 
 #include <cmath>
 
@@ -20,8 +20,10 @@ using namespace Functions;
 /// The logger.
 Kernel::Logger g_log("ParameterEstimator");
 
+namespace {
 /// Mutex to prevent simultaneous access to functionMap
-static Poco::Mutex mutex;
+Poco::Mutex FUNCTION_MAP_MUTEX;
+}
 
 enum Function { None, Gaussian, Lorentzian, BackToBackExponential };
 typedef std::map<std::string, std::pair<size_t, Function>> FunctionMapType;
@@ -43,7 +45,7 @@ void initFunctionLookup(FunctionMapType &functionMapType) {
 /// @returns :: a const reference to the functionMapType
 const FunctionMapType &getFunctionMapType() {
 
-  Poco::Mutex::ScopedLock lock(mutex);
+  Poco::Mutex::ScopedLock lock(FUNCTION_MAP_MUTEX);
 
   static FunctionMapType functionMapType;
 
