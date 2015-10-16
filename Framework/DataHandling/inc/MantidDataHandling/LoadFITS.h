@@ -116,6 +116,9 @@ private:
                 const DataObjects::Workspace2D_sptr parent,
                 bool loadAsRectImg = false);
 
+  void addAxesInfoAndLogs(DataObjects::Workspace2D_sptr ws, bool loadAsRectImg,
+                          const FITSInfo &fileInfo, double cmpp);
+
   // Reads the data from a single FITS file into a workspace (directly, fast)
   void readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
                            DataObjects::Workspace2D_sptr ws,

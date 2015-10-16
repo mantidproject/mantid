@@ -11,6 +11,7 @@
 
 #include <Poco/BinaryReader.h>
 #include <Poco/FileStream.h>
+#include <Poco/Path.h>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
@@ -546,8 +547,6 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
   std::string currNumberS = padZeros(newFileNumber, g_DIGIT_SIZE_APPEND);
   ++newFileNumber;
 
-  std::string baseName = m_baseName + currNumberS;
-
   // Create workspace (taking into account already here if rebinning is
   // going to happen)
   Workspace2D_sptr ws;
@@ -603,8 +602,20 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
     }
   }
 
-  ws->setTitle(baseName);
+  ws->setTitle(Poco::Path(fileInfo.filePath).getFileName());
 
+  addAxesInfoAndLogs(ws, loadAsRectImg, fileInfo, cmpp);
+
+  m_progress->report();
+
+  return ws;
+}
+
+/**
+ *
+ */
+void LoadFITS::addAxesInfoAndLogs(Workspace2D_sptr ws, bool loadAsRectImg,
+                                  const FITSInfo &fileInfo, double cmpp) {
   // add axes
   size_t width = fileInfo.axisPixelLengths[0] / m_rebin;
   size_t height = fileInfo.axisPixelLengths[1] / m_rebin;
@@ -673,10 +684,6 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
   ws->mutableRun().removeLogData("ImageKey", true);
   ws->mutableRun().addLogData(
       new PropertyWithValue<std::string>("ImageKey", fileInfo.imageKey));
-
-  m_progress->report();
-
-  return ws;
 }
 
 /**
@@ -770,7 +777,7 @@ void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, MantidImage &imageY,
   char *tmp = &buf.front();
   size_t start = 0;
 
-  for (size_t i = 0; i < fileInfo.axisPixelLengths[1]; ++i) { // width
+  for (size_t i = 0; i < fileInfo.axisPixelLengths[1]; ++i) {   // width
     for (size_t j = 0; j < fileInfo.axisPixelLengths[0]; ++j) { // height
       // If you wanted to PARALLEL_...ize these loops (which doesn't
       // seem to provide any speed up when loading images one at a
