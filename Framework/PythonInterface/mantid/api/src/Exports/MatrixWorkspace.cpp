@@ -98,8 +98,17 @@ void setMonitorWorkspace(MatrixWorkspace &self,const boost::python::object &valu
     }
   }
   self.setMonitorWorkspace(monWS);
-
 }
+/**
+ * Clear monitor workspace attached to for current workspace.
+ *
+ * @param self  :: A reference to the calling object
+*/
+void clearMonitorWorkspace(MatrixWorkspace &self){
+  MatrixWorkspace_sptr monWS;
+  self.setMonitorWorkspace(monWS);
+}
+
 
 /**
  * Set the X values from an python array-style object
@@ -351,9 +360,13 @@ void export_MatrixWorkspace() {
            args("self", "MonitorWS"),
            "Set specified workspace as monitor workspace for"
            "current workspace. "
-           "Note: The workspace does not have to contain monitors though"
-           "some subsequent algorithms may need it to be "
-           "monitor workspace later.");
+           "Note: The workspace does not have to contain monitors though "
+           "some subsequent algorithms may expect it to be "
+           "monitor workspace later.")
+      .def("clearMonitorWorkspace",&clearMonitorWorkspace,
+           args("self"),
+           "Forget about monitor workspace, attached to the current workspace");
+
 
   RegisterWorkspacePtrToPython<MatrixWorkspace>();
 }

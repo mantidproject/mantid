@@ -344,6 +344,31 @@ class MatrixWorkspaceTest(unittest.TestCase):
         ws1.setComment(comment)
         self.assertEquals(comment, ws1.getComment())
         AnalysisDataService.remove(ws1.getName())
+        
+    def test_setGetMonitorWS(self):
+        run_algorithm('CreateWorkspace', OutputWorkspace='ws1',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
+        run_algorithm('CreateWorkspace', OutputWorkspace='ws_mon',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
+        
+        ws1=mtd['ws1']
+        monWs = ws1.getMonitorWorkspace()
+        self.assertTrue(monWs is None)
+        
+        monWs = mtd['ws_mon']
+        ws1.setMonitorWorkspace(monWs)
+        monWs.setTitle("My Fake Monitor workspace")
+        
+        monWs1 = ws1.getMonitorWorkspace();
+        self.assertEquals(monWs.getTitle(), monWs1.getTitle())
+        
+        ws1.clearMonitorWorkspace()
+        monWs1 = ws1.getMonitorWorkspace()
+        self.assertTrue(monWs1 is None)        
 
 if __name__ == '__main__':
     unittest.main()
+    #Testing particular test from Mantid
+    #class theTester(MatrixWorkspaceTest):
+    #    def runTest():
+    #        pass
+    #tester = theTester()
+    tester.test_setGetMonitorWS()
