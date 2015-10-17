@@ -612,16 +612,35 @@ double RefReduction::calculateAngleREFM(MatrixWorkspace_sptr workspace) {
   double dangle = getProperty("DetectorAngle");
   if (isEmpty(dangle)) {
     Mantid::Kernel::Property *prop = workspace->run().getProperty("DANGLE");
+    if (!prop) {
+      throw std::runtime_error("DetectorAngle property not given as input, and "
+                               "could not find the log entry DANGLE either");
+    }
     Mantid::Kernel::TimeSeriesProperty<double> *dp =
         dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
+    if (!dp) {
+      throw std::runtime_error(
+          "The log entry DANGLE could not"
+          "be interpreted as a property of type time series of double");
+    }
     dangle = dp->getStatistics().mean;
   }
 
   double dangle0 = getProperty("DetectorAngle0");
   if (isEmpty(dangle0)) {
     Mantid::Kernel::Property *prop = workspace->run().getProperty("DANGLE0");
+    if (!prop) {
+      throw std::runtime_error("DetectorAngle0 property not given aas input, "
+                               "and could not find the log entry DANGLE0 "
+                               "either");
+    }
     Mantid::Kernel::TimeSeriesProperty<double> *dp =
         dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
+    if (!dp) {
+      throw std::runtime_error(
+          "The log entry DANGLE0 could not "
+          "be interpreted as a property of type time series of double values");
+    }
     dangle0 = dp->getStatistics().mean;
   }
 
