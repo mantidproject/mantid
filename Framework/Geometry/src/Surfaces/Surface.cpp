@@ -32,7 +32,7 @@ Surface::Surface()
 {}
 
 Surface::Surface(const Surface &A)
-    : Name(A.Name), m_Sign(A.m_Sign)
+    : Name(A.Name)
 /**
   Copy constructor
   @param A :: Surface to copy
@@ -48,7 +48,6 @@ Surface &Surface::operator=(const Surface &A)
 {
   if (this != &A) {
     Name = A.Name;
-    m_Sign = A.m_Sign;
   }
   return *this;
 }

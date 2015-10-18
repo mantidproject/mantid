@@ -47,7 +47,6 @@ namespace Geometry {
 class MANTID_GEOMETRY_DLL Surface {
 private:
   int Name; ///< Surface number (MCNPX identifier)
-  int m_Sign = 1;
 
 public:
   static const int Nprecision = 10; ///< Precision of the output
@@ -90,9 +89,6 @@ public:
   /// bounding box for the surface
   virtual void getBoundingBox(double &xmax, double &ymax, double &zmax,
                               double &xmin, double &ymin, double &zmin) = 0;
-  void setSign(int Sign) { m_Sign = Sign; }
-  int getSign() const { return m_Sign; }
-
   virtual TopoDS_Shape createShape();
 };
 
