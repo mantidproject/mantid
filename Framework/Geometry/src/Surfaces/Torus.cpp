@@ -18,6 +18,8 @@
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Surfaces/Torus.h"
 
+#include <TopoDS_Shape.hxx>
+
 namespace Mantid {
 
 namespace Geometry {

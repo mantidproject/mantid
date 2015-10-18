@@ -23,6 +23,11 @@
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Object.h"
 
+#include <TopoDS_Shape.hxx>
+#include <BRepAlgoAPI_Common.hxx>
+#include <BRepAlgoAPI_Fuse.hxx>
+#include <BRepPrimAPI_MakeBox.hxx>
+
 namespace Mantid {
 
 namespace Geometry {
@@ -335,6 +340,17 @@ void Intersection::getBoundingBox(double &xmax, double &ymax, double &zmax,
   zmin = (Azmin > Bzmin) ? Azmin : Bzmin;
 }
 
+/**
+* Analyze intersection
+* @return the resulting TopoDS_Shape
+*/
+TopoDS_Shape Intersection::analyze() {
+  TopoDS_Shape left = A->analyze();
+  TopoDS_Shape right = B->analyze();
+  BRepAlgoAPI_Common comm(left, right);
+  return comm.Shape();
+}
+
 // -------------------------------------------------------------
 //         UNION
 //---------------------------------------------------------------
@@ -644,6 +660,14 @@ void Union::getBoundingBox(double &xmax, double &ymax, double &zmax,
   zmax = (Azmax > Bzmax) ? Azmax : Bzmax;
   zmin = (Azmin < Bzmin) ? Azmin : Bzmin;
 }
+
+TopoDS_Shape Union::analyze() {
+  TopoDS_Shape left = A->analyze();
+  TopoDS_Shape right = B->analyze();
+  BRepAlgoAPI_Fuse fuse(left, right);
+  return fuse.Shape();
+}
+
 // -------------------------------------------------------------
 //         SURF KEYS
 //---------------------------------------------------------------
@@ -938,6 +962,20 @@ void SurfPoint::getBoundingBox(double &xmax, double &ymax, double &zmax,
     }
   }
 }
+
+TopoDS_Shape SurfPoint::analyze() {
+  // Check for individual type of surfaces
+  TopoDS_Shape Result = key->createShape();
+  if (sign > 0)
+    Result.Complement();
+  if (key->className() == "Plane") {
+    // build a box
+    gp_Pnt p(-1000.0, -1000.0, -1000.0);
+    TopoDS_Shape world = BRepPrimAPI_MakeBox(p, 2000.0, 2000.0, 2000.0).Shape();
+    return BRepAlgoAPI_Common(world, Result);
+  }
+  return Result;
+}
 //----------------------------------------
 //       COMPOBJ
 //----------------------------------------
@@ -1221,6 +1259,12 @@ void CompObj::getBoundingBox(double &xmax, double &ymax, double &zmax,
         zmax = (*it)[2];
     }
   }
+}
+
+TopoDS_Shape CompObj::analyze() {
+  TopoDS_Shape Result = const_cast<Rule *>(key->topRule())->analyze();
+  Result.Complement();
+  return Result;
 }
 
 // -----------------------------------------------
@@ -1681,6 +1725,14 @@ void CompGrp::getBoundingBox(double &xmax, double &ymax, double &zmax,
     }
   }
 }
+
+TopoDS_Shape CompGrp::analyze() {
+  TopoDS_Shape Result = A->analyze();
+  Result.Complement();
+  return Result;
+}
+
+TopoDS_Shape BoolValue::analyze() { return TopoDS_Shape(); }
 
 } // NAMESPACE Geometry
 

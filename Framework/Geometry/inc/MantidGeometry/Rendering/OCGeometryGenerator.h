@@ -58,21 +58,6 @@ private:
   TopoDS_Shape *ObjSurface; ///< Storage for the output surface
   /// Analyze the object
   void AnalyzeObject();
-  /// Analyze a geometry rule for n object rule
-  TopoDS_Shape AnalyzeRule(Rule *);
-  /// Analyze a geometry rule for an intersection
-  TopoDS_Shape AnalyzeRule(Intersection *);
-  /// Analyze a geometry rule for a union
-  TopoDS_Shape AnalyzeRule(Union *);
-  /// Analyze a geometry rule for a surface rule
-  TopoDS_Shape AnalyzeRule(SurfPoint *);
-  /// Analyze a geometry rule for a Complement group
-  TopoDS_Shape AnalyzeRule(CompGrp *);
-  /// Analyze a geometry rule for a complement object
-  TopoDS_Shape AnalyzeRule(CompObj *);
-  /// Analyze a geometry rule for a boolean value
-  TopoDS_Shape AnalyzeRule(BoolValue *);
-
 public:
   OCGeometryGenerator(const Object *obj);
   ~OCGeometryGenerator();

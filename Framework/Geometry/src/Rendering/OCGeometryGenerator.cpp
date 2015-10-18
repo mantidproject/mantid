@@ -50,12 +50,7 @@ GCC_DIAG_OFF(cast-qual)
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
-#include <BRepPrimAPI_MakeHalfSpace.hxx>
-#include <BRepPrimAPI_MakeSphere.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
-#include <BRepPrimAPI_MakeCylinder.hxx>
-#include <BRepPrimAPI_MakeCone.hxx>
-#include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRep_Tool.hxx>
 #include <Poly_Triangulation.hxx>
@@ -105,11 +100,6 @@ OCGeometryGenerator::~OCGeometryGenerator() {
 }
 
 /**
-* Returns the shape generated.
-*/
-TopoDS_Shape *OCGeometryGenerator::getObjectSurface() { return ObjSurface; }
-
-/**
 * Analyzes the rule tree in object and creates a Topology Shape
 */
 void OCGeometryGenerator::AnalyzeObject() {
@@ -122,7 +112,7 @@ void OCGeometryGenerator::AnalyzeObject() {
       return;
     }
     // Traverse through Rule
-    TopoDS_Shape Result = AnalyzeRule(const_cast<Rule *>(top));
+    TopoDS_Shape Result = const_cast<Rule *>(top)->analyze();
     try {
       ObjSurface = new TopoDS_Shape(Result);
       BRepMesh_IncrementalMesh(Result, 0.001);
@@ -131,78 +121,11 @@ void OCGeometryGenerator::AnalyzeObject() {
     }
   }
 }
+
 /**
-* Analyze intersection
-* @return the resulting TopoDS_Shape
+* Returns the shape generated.
 */
-TopoDS_Shape OCGeometryGenerator::AnalyzeRule(Intersection *rule) {
-  TopoDS_Shape left = AnalyzeRule(rule->leaf(0));
-  TopoDS_Shape right = AnalyzeRule(rule->leaf(1));
-  BRepAlgoAPI_Common comm(left, right);
-  return comm.Shape();
-}
-TopoDS_Shape OCGeometryGenerator::AnalyzeRule(Union *rule) {
-  TopoDS_Shape left = AnalyzeRule(rule->leaf(0));
-  TopoDS_Shape right = AnalyzeRule(rule->leaf(1));
-  BRepAlgoAPI_Fuse fuse(left, right);
-  return fuse.Shape();
-}
-TopoDS_Shape OCGeometryGenerator::AnalyzeRule(SurfPoint *rule) {
-  // Check for individual type of surfaces
-  Surface *surf = rule->getKey();
-  TopoDS_Shape Result = surf->createShape();
-  if (rule->getSign() > 0)
-    Result.Complement();
-  if (surf->className() == "Plane") {
-    // build a box
-    gp_Pnt p(-1000.0, -1000.0, -1000.0);
-    TopoDS_Shape world = BRepPrimAPI_MakeBox(p, 2000.0, 2000.0, 2000.0).Shape();
-    return BRepAlgoAPI_Common(world, Result);
-  }
-  return Result;
-}
-TopoDS_Shape OCGeometryGenerator::AnalyzeRule(CompGrp *rule) {
-  TopoDS_Shape Result = AnalyzeRule(rule->leaf(0));
-  Result.Complement();
-  return Result;
-}
-TopoDS_Shape OCGeometryGenerator::AnalyzeRule(CompObj *rule) {
-  Object *obj = rule->getObj();
-  TopoDS_Shape Result = AnalyzeRule(const_cast<Rule *>(obj->topRule()));
-  Result.Complement();
-  return Result;
-}
-TopoDS_Shape OCGeometryGenerator::AnalyzeRule(BoolValue *rule) {
-  (void)rule; // Avoid compiler warning
-  return TopoDS_Shape();
-}
-TopoDS_Shape OCGeometryGenerator::AnalyzeRule(Rule *rule) {
-  if (rule == NULL)
-    return TopoDS_Shape();
-  switch (rule->className()) {
-  case Rule::DerivedClassName::INTERSECTION:
-    return AnalyzeRule(static_cast<Intersection *>(rule));
-    break;
-  case Rule::DerivedClassName::UNION:
-    return AnalyzeRule(static_cast<Union *>(rule));
-    break;
-  case Rule::DerivedClassName::SURFPOINT:
-    return AnalyzeRule(static_cast<SurfPoint *>(rule));
-    break;
-  case Rule::DerivedClassName::COMPGRP:
-    return AnalyzeRule(static_cast<CompGrp *>(rule));
-    break;
-  case Rule::DerivedClassName::COMPOBJ:
-    return AnalyzeRule(static_cast<CompObj *>(rule));
-    break;
-  case Rule::DerivedClassName::BOOLVALUE:
-    return AnalyzeRule(static_cast<BoolValue *>(rule));
-    break;
-  default:
-    return TopoDS_Shape();
-    break;
-  }
-}
+TopoDS_Shape *OCGeometryGenerator::getObjectSurface() { return ObjSurface; }
 
 int OCGeometryGenerator::getNumberOfTriangles() {
   int countFace = 0;

@@ -102,12 +102,12 @@ public:
   virtual const boost::shared_ptr<const Kernel::Material> material() const = 0;
 
   /// Gets the GeometryHandler
-  GeometryHandler *Handler() const { return handler; }
+  GeometryHandler *Handle() const { return handle; }
 
 protected:
   /// Protected copy constructor
   IObjComponent(const IObjComponent &);
-  /// Assignment operato
+  /// Assignment operator
   IObjComponent &operator=(const IObjComponent &);
 
   /// Reset the current geometry handler
@@ -115,7 +115,7 @@ protected:
 
 private:
   /// Geometry Handle for rendering
-  GeometryHandler *handler;
+  GeometryHandler *handle;
 
   friend class GeometryHandler;
 };

@@ -6,8 +6,7 @@
 #include "MantidKernel/V3D.h"
 #include <string>
 
-#include <TopoDS_Shape.hxx>
-#include <BRepPrimAPI_MakeSphere.hxx>
+class TopoDS_Shape;
 
 namespace Mantid {
 

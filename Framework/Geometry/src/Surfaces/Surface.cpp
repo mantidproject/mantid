@@ -20,6 +20,8 @@
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 
+#include <TopoDS_Shape.hxx>
+
 namespace Mantid {
 
 namespace Geometry {

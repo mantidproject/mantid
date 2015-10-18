@@ -5,7 +5,7 @@
 #include "BaseVisit.h"
 #include <string>
 
-#include <TopoDS_Shape.hxx>
+class TopoDS_Shape;
 
 namespace Mantid {
 namespace Kernel {

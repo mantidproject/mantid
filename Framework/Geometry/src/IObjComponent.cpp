@@ -8,20 +8,20 @@
 namespace Mantid {
 namespace Geometry {
 
-IObjComponent::IObjComponent() { handler = new CacheGeometryHandler(this); }
+IObjComponent::IObjComponent() { handle = new CacheGeometryHandler(this); }
 
 /** Constructor, specifying the GeometryHandler (renderer engine)
  * for this IObjComponent.
  */
 IObjComponent::IObjComponent(GeometryHandler *the_handler) {
-  handler = the_handler;
+  handle = the_handler;
 }
 
 // Looking to get rid of the first of these constructors in due course (and
 // probably add others)
 IObjComponent::~IObjComponent() {
-  if (handler != NULL)
-    delete handler;
+  if (handle != NULL)
+    delete handle;
 }
 
 /**
@@ -32,7 +32,7 @@ IObjComponent::~IObjComponent() {
 void IObjComponent::setGeometryHandler(GeometryHandler *h) {
   if (h == NULL)
     return;
-  this->handler = h;
+  this->handle = h;
 }
 
 /**
@@ -42,7 +42,7 @@ void IObjComponent::setGeometryHandler(GeometryHandler *h) {
 IObjComponent::IObjComponent(const IObjComponent &origin) {
   // Handler contains a pointer to 'this' therefore needs regenerating
   // with new object
-  handler = origin.handler->createInstance(this);
+  handle = origin.handle->createInstance(this);
 }
 
 /**
@@ -52,7 +52,7 @@ IObjComponent::IObjComponent(const IObjComponent &origin) {
  */
 IObjComponent &IObjComponent::operator=(const IObjComponent &rhs) {
   if (&rhs != this) {
-    handler = rhs.handler->createInstance(this);
+    handle = rhs.handle->createInstance(this);
   }
   return *this;
 }

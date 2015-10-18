@@ -49,7 +49,7 @@
 #include <algorithm>
 
 /// to be used in std::transform
-struct _Sqrt {
+struct Sqrt {
   double operator()(double x)
   {
     return sqrt(x);
@@ -1263,7 +1263,7 @@ void DetectorPlotController::prepareDataForSumsPlot(
 
   if (err)
   {
-    std::transform(err->begin(), err->end(), err->begin(), _Sqrt());
+    std::transform(err->begin(), err->end(), err->begin(), Sqrt());
   }
 }
 

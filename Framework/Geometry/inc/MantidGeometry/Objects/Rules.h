@@ -110,6 +110,8 @@ public:
   /// Abstract getBoundingBox
   virtual void getBoundingBox(double &xmax, double &ymax, double &zmax,
                               double &xmin, double &ymin, double &zmin) = 0;
+
+  virtual TopoDS_Shape analyze() = 0;
 };
 
 /**
@@ -159,6 +161,7 @@ public:
   int simplify(); ///< apply general intersection simplification
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin); /// bounding box
+  virtual TopoDS_Shape analyze();
 };
 
 /**
@@ -209,6 +212,7 @@ public:
   int simplify(); ///< apply general intersection simplification
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin); /// bounding box
+  virtual TopoDS_Shape analyze();
 };
 
 /**
@@ -259,6 +263,7 @@ public:
   std::string displayAddress() const;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin); /// bounding box
+  virtual TopoDS_Shape analyze();
 };
 
 /**
@@ -309,6 +314,7 @@ public:
   std::string displayAddress() const;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin); /// bounding box
+  virtual TopoDS_Shape analyze();
 };
 
 /**
@@ -355,6 +361,7 @@ public:
   std::string displayAddress() const;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin); /// bounding box
+  virtual TopoDS_Shape analyze();
 };
 
 /**
@@ -404,6 +411,7 @@ public:
   std::string displayAddress() const;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin); /// bounding box
+  TopoDS_Shape analyze();
 };
 
 } // NAMESPACE  Geometry
