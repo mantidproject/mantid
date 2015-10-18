@@ -151,8 +151,14 @@ TopoDS_Shape OCGeometryGenerator::AnalyzeRule(SurfPoint *rule) {
   // Check for individual type of surfaces
   Surface *surf = rule->getKey();
   TopoDS_Shape Result = surf->createShape();
-  if (rule->getSign() > 0 && surf->className() != "Plane")
+  if (rule->getSign() > 0)
     Result.Complement();
+  if (surf->className() == "Plane") {
+    // build a box
+    gp_Pnt p(-1000.0, -1000.0, -1000.0);
+    TopoDS_Shape world = BRepPrimAPI_MakeBox(p, 2000.0, 2000.0, 2000.0).Shape();
+    return BRepAlgoAPI_Common(world, Result);
+  }
   return Result;
 }
 TopoDS_Shape OCGeometryGenerator::AnalyzeRule(CompGrp *rule) {

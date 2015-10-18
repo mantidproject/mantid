@@ -421,7 +421,6 @@ void Plane::getBoundingBox(double &xmax, double &ymax, double &zmax,
 
 TopoDS_Shape Plane::createShape() {
   // Get Plane normal and distance.
-  int orientation = this->getSign();
   V3D normal = this->getNormal();
   double norm2 = normal.norm2();
   if (norm2 == 0.0) {
@@ -431,29 +430,15 @@ TopoDS_Shape Plane::createShape() {
   // Find point closest to origin
   double t = distance / norm2;
   // Create Half Space
-  TopoDS_Shape Result;
-  if (orientation > 0) {
-    TopoDS_Face P = BRepBuilderAPI_MakeFace(
-                        gp_Pln(normal[0], normal[1], normal[2], -distance))
-                        .Face();
-    Result = BRepPrimAPI_MakeHalfSpace(P, gp_Pnt(normal[0] * (1 + t),
-                                                 normal[1] * (1 + t),
-                                                 normal[2] * (1 + t)))
-                 .Solid();
-  } else {
-    TopoDS_Face P = BRepBuilderAPI_MakeFace(
-                        gp_Pln(normal[0], normal[1], normal[2], -distance))
-                        .Face();
-    P.Reverse();
-    Result = BRepPrimAPI_MakeHalfSpace(P, gp_Pnt(normal[0] * (1 + t),
-                                                 normal[1] * (1 + t),
-                                                 normal[2] * (1 + t)))
-                 .Solid();
-  }
-  // create a box
-  gp_Pnt p(-1000.0, -1000.0, -1000.0);
-  TopoDS_Shape world = BRepPrimAPI_MakeBox(p, 2000.0, 2000.0, 2000.0).Shape();
-  return BRepAlgoAPI_Common(world, Result);
+  TopoDS_Face P = BRepBuilderAPI_MakeFace(
+                      gp_Pln(normal[0], normal[1], normal[2], -distance))
+                      .Face();
+
+  TopoDS_Shape Result = BRepPrimAPI_MakeHalfSpace(
+                            P, gp_Pnt(normal[0] * (1 + t), normal[1] * (1 + t),
+                                      normal[2] * (1 + t)))
+                            .Solid();
+  return Result.Complemented();
 }
 
 } // NAMESPACE MonteCarlo
