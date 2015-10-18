@@ -42,7 +42,7 @@ set ( TESTING_TIMEOUT 300 CACHE INTEGER
 set ( Boost_NO_BOOST_CMAKE TRUE )
 find_package ( Boost REQUIRED date_time regex )
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
-add_definitions ( -DBOOST_ALL_DYN_LINK )
+add_definitions ( -DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB )
 # Need this defined globally for our log time values
 add_definitions ( -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG )
 

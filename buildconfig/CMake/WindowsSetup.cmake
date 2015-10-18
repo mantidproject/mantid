@@ -16,6 +16,15 @@ set ( Boost_NO_SYSTEM_PATHS TRUE )
 ###########################################################################
 set (SYSTEM_PACKAGE_TARGET RUNTIME)
 
+###########################################################################
+# Compiler options.
+###########################################################################
+add_definitions ( -DWIN32 -D_WINDOWS -DMS_VISUAL_STUDIO )
+add_definitions ( -D_USE_MATH_DEFINES -DNOMINMAX )
+add_definitions ( -DGSL_DLL -DJSON_DLL )
+add_definitions ( -DPOCO_NO_UNWINDOWS )
+add_definitions ( -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS )
+
 ##########################################################################
 # Additional compiler flags
 ##########################################################################
@@ -30,24 +39,20 @@ set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /w34296 /w34389 /Zc:wchar_t-" )
 
 # As discussed here: http://code.google.com/p/googletest/issues/detail?id=412
 # gtest requires changing the _VARAIDIC_MAX value for VS2012 as it defaults to 5
-#if ( MSVC_VERSION EQUAL 1700 )
-#  message ( STATUS "Found VS2012 - Increasing maximum number of variadic template arguments to 10" )
-#  add_definitions ( /D _VARIADIC_MAX=10 ) 
-#endif ()
+add_definitions ( -D_variadic_max=10 ) 
 
 # Set PCH heap limit, the default does not work when running msbuild from the commandline for some reason
 # Any other value lower or higher seems to work but not the default. It it is fine without this when compiling
 # in the GUI though...
-#SET( VISUALSTUDIO_COMPILERHEAPLIMIT 150 )
+set ( VISUALSTUDIO_COMPILERHEAPLIMIT 150 )
 # It make or may not already be set so override if it is (assumes if in CXX also in C)
-#if ( CMAKE_CXX_FLAGS MATCHES "(/Zm)([0-9]+)" )
-#  string ( REGEX REPLACE "(/Zm)([0-9]+)" "\\1${VISUALSTUDIO_COMPILERHEAPLIMIT}" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} )
-#  string ( REGEX REPLACE "(/Zm)([0-9]+)" "\\1${VISUALSTUDIO_COMPILERHEAPLIMIT}" CMAKE_C_FLAGS ${CMAKE_C_FLAGS} )
-#else()
-# set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Zm${VISUALSTUDIO_COMPILERHEAPLIMIT}" )
-# set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm${VISUALSTUDIO_COMPILERHEAPLIMIT}" )
-#endif()
-
+if ( CMAKE_CXX_FLAGS MATCHES "(/Zm)([0-9]+)" )
+ string ( REGEX REPLACE "(/Zm)([0-9]+)" "\\1${VISUALSTUDIO_COMPILERHEAPLIMIT}" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} )
+ string ( REGEX REPLACE "(/Zm)([0-9]+)" "\\1${VISUALSTUDIO_COMPILERHEAPLIMIT}" CMAKE_C_FLAGS ${CMAKE_C_FLAGS} )
+else()
+set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Zm${VISUALSTUDIO_COMPILERHEAPLIMIT}" )
+set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm${VISUALSTUDIO_COMPILERHEAPLIMIT}" )
+endif()
 
 ###########################################################################
 # On Windows we want to bundle Python. The necessary libraries are in
@@ -78,7 +83,7 @@ set ( PYTHONW_EXECUTABLE "${PYTHON_DIR}/pythonw.exe" CACHE FILEPATH
 set ( USE_TCMALLOC ON CACHE BOOL "If true, link with tcmalloc" )
 # If not wanted, just carry on without it
 if ( USE_TCMALLOC )
-  set ( TCMALLOC_LIBRARIES optimized "${CMAKE_LIBRARY_PATH}/libtcmalloc_minimal.lib" debug "${CMAKE_LIBRARY_PATH}/libtcmalloc_minimal_d.lib" )
+  set ( TCMALLOC_LIBRARIES optimized "${CMAKE_LIBRARY_PATH}/libtcmalloc_minimal.lib" debug "${CMAKE_LIBRARY_PATH}/libtcmalloc_minimal-debug.lib" )
   # Use an alternate variable name so that it is only set on Windows
   set ( TCMALLOC_LIBRARIES_LINKTIME ${TCMALLOC_LIBRARIES})
   set ( CMAKE_SHARED_LINKER_FLAGS /INCLUDE:"__tcmalloc" )
@@ -86,16 +91,6 @@ else ( USE_TCMALLOC )
   message ( STATUS "TCMalloc will not be included." )
 endif ()
 
-
-###########################################################################
-# Compiler options.
-###########################################################################
-add_definitions ( -DWIN32 -D_WINDOWS -DMS_VISUAL_STUDIO )
-add_definitions ( -D_USE_MATH_DEFINES -DNOMINMAX )
-add_definitions ( -DGSL_DLL -DJSON_DLL )
-add_definitions ( -DPOCO_NO_UNWINDOWS )
-add_definitions ( -D_SCL_SECURE_NO_WARNINGS )
-add_definitions ( -D_CRT_SECURE_NO_WARNINGS )
 
 set ( CONSOLE ON CACHE BOOL "Switch for enabling/disabling the console" )
 
