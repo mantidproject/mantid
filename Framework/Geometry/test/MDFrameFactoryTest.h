@@ -104,6 +104,10 @@ public:
     TSM_ASSERT("Should offer to produce HKL products",
                factory.canInterpret(
                    MDFrameArgument(HKL::HKLName, Units::Symbol::RLU)));
+
+    TSM_ASSERT(
+        "Should offer to produce HKL products",
+        factory.canInterpret(MDFrameArgument(HKL::HKLName, "in 1.684 A^-1")));
   }
 
   void test_HKLFrameFactory_create_inverse_angstroms() {

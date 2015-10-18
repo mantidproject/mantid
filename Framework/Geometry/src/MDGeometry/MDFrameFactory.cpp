@@ -3,7 +3,7 @@
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
-
+#include <boost/regex.hpp>
 namespace Mantid {
 namespace Geometry {
 
@@ -58,9 +58,13 @@ bool HKLFrameFactory::canInterpret(const MDFrameArgument &argument) const {
   auto unitFactoryChain = Kernel::makeMDUnitFactoryChain();
   auto mdUnit = unitFactoryChain->create(argument.unitString);
   // We expect units to be RLU or A^-1
-  const bool compatibleUnit =
-      (mdUnit->getUnitLabel() == Units::Symbol::InverseAngstrom ||
-       mdUnit->getUnitLabel() == Units::Symbol::RLU);
+  auto isInverseAngstrom =
+      mdUnit->getUnitLabel() == Units::Symbol::InverseAngstrom;
+  auto isRLU = mdUnit->getUnitLabel() == Units::Symbol::RLU;
+  boost::regex pattern("in.*A.*\\^-1");
+  auto isHoraceStyle =
+      boost::regex_match(mdUnit->getUnitLabel().ascii(), pattern);
+  const bool compatibleUnit = isInverseAngstrom || isRLU || isHoraceStyle;
   // Check both the frame name and the unit name
   return argument.frameString == HKL::HKLName && compatibleUnit;
 }
