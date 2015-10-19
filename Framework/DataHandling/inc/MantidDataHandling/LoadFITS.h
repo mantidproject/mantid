@@ -180,7 +180,6 @@ private:
   int m_rebin;
   // noise threshold level
   double m_noiseThresh;
-  API::Progress *m_progress;
 
   // Number of digits for the fixed width appendix number added to
   // workspace names, i.e. 3=> workspace_001; 5 => workspace_00001

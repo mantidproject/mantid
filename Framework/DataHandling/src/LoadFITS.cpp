@@ -38,7 +38,7 @@ LoadFITS::LoadFITS()
     : m_headerScaleKey(), m_headerOffsetKey(), m_headerBitDepthKey(),
       m_headerRotationKey(), m_headerImageKeyKey(), m_headerAxisNameKeys(),
       m_mapFile(), m_baseName(), m_pixelCount(0), m_rebin(1),
-      m_noiseThresh(0.0), m_progress(NULL) {
+      m_noiseThresh(0.0) {
   setupDefaultKeywordNames();
 }
 
@@ -225,7 +225,7 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
   WorkspaceGroup_sptr wsGroup;
 
   if (!AnalysisDataService::Instance().doesExist(groupName)) {
-    wsGroup = WorkspaceGroup_sptr(new WorkspaceGroup);
+    wsGroup = WorkspaceGroup_sptr(new WorkspaceGroup());
     wsGroup->setTitle(groupName);
   } else {
     // Get the name of the latest file in group to start numbering from
@@ -238,16 +238,19 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
     fileNumberInGroup = fetchNumber(latestName) + 1;
   }
 
+  size_t totalWS = headers.size();
   // Create a progress reporting object
-  m_progress = new Progress(this, 0, 1, headers.size() + 1);
+  API::Progress progress(this, 0, 1, totalWS + 1);
+  progress.report(0, "Loading file(s) into workspace(s)");
 
   // Create first workspace (with instrument definition). This is also used as
   // a template for creating others
   Workspace2D_sptr latestWS;
   latestWS = makeWorkspace(headers[0], fileNumberInGroup, buffer, imageY,
                            imageE, latestWS, loadAsRectImg);
+  progress.report(1, "First file loaded.");
 
-  std::vector<Workspace2D_sptr> wsOrdered(headers.size());
+  std::vector<Workspace2D_sptr> wsOrdered(totalWS);
   wsOrdered[0] = latestWS;
 
   if (isInstrOtherThanIMAT(headers[0])) {
@@ -273,10 +276,12 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
 
   // don't feel tempted to parallelize this loop as it is - it uses the same
   // imageY and imageE buffers for all the workspaces
-  for (int64_t i = 1; i < static_cast<int64_t>(headers.size()); ++i) {
+  for (int64_t i = 1; i < static_cast<int64_t>(totalWS); ++i) {
     latestWS = makeWorkspace(headers[i], fileNumberInGroup, buffer, imageY,
                              imageE, latestWS, loadAsRectImg);
     wsOrdered[i] = latestWS;
+    progress.report("Loaded file " + boost::lexical_cast<std::string>(i + 1) +
+                    " of " + boost::lexical_cast<std::string>(totalWS));
   }
 
   // Add to group - done here to maintain sequence
@@ -377,7 +382,8 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
       for (int j = 0; headers.size() > i && j < headers[i].numberOfAxis; ++j) {
         headers[i].axisPixelLengths.push_back(boost::lexical_cast<size_t>(
             headers[i].headerKeys[m_headerAxisNameKeys[j]]));
-        g_log.information()
+        // only debug level, when loading multiple files this is very verbose
+        g_log.debug()
             << "Found axis length header entry: " << m_headerAxisNameKeys[j]
             << " = " << headers[i].axisPixelLengths.back() << std::endl;
       }
@@ -468,7 +474,7 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
   istr.seekg(0, istr.end);
   if (!istr.tellg() > 0) {
     throw std::runtime_error(
-        "Found file that is readable but empty (0 bytes size): " +
+        "Found a file that is readable but empty (0 bytes size): " +
         headerInfo.filePath);
   }
   istr.seekg(0, istr.beg);
@@ -605,8 +611,6 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
   ws->setTitle(Poco::Path(fileInfo.filePath).getFileName());
 
   addAxesInfoAndLogs(ws, loadAsRectImg, fileInfo, cmpp);
-
-  m_progress->report();
 
   return ws;
 }
