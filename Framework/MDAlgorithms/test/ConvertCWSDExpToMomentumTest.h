@@ -75,7 +75,8 @@ public:
       const auto &frame = outws->getDimension(dim)->getMDFrame();
       TSM_ASSERT_THROWS_NOTHING(
           "Should be convertible to a QSample frame",
-          dynamic_cast<const Mantid::Geometry::QSample &>(frame));
+          const auto &tmp =
+              dynamic_cast<const Mantid::Geometry::QSample &>(frame));
     }
 
     return;

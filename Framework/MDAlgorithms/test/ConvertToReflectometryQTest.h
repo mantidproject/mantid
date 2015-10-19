@@ -160,7 +160,7 @@ public:
     const auto &frame0 = ws->getDimension(0)->getMDFrame();
     TSM_ASSERT_THROWS_NOTHING(
         "Should be a QLab frame",
-        dynamic_cast<const Mantid::Geometry::QLab &>(frame0));
+        const auto &tmp = dynamic_cast<const Mantid::Geometry::QLab &>(frame0));
     TSM_ASSERT_EQUALS(
         "Should have a special coordinate system selection of QLab",
         ws->getSpecialCoordinateSystem(), Mantid::Kernel::QLab);
@@ -177,7 +177,8 @@ public:
     const auto &frame0 = ws->getDimension(0)->getMDFrame();
     TSM_ASSERT_THROWS_NOTHING(
         "Should be a general frame",
-        dynamic_cast<const Mantid::Geometry::GeneralFrame &>(frame0));
+        const auto &tmp =
+            dynamic_cast<const Mantid::Geometry::GeneralFrame &>(frame0));
     TSM_ASSERT_EQUALS(
         "Should have a special coordinate system selection of None",
         ws->getSpecialCoordinateSystem(), Mantid::Kernel::None);
@@ -194,7 +195,8 @@ public:
     const auto &frame0 = ws->getDimension(0)->getMDFrame();
     TSM_ASSERT_THROWS_NOTHING(
         "Should be a general frame",
-        dynamic_cast<const Mantid::Geometry::GeneralFrame &>(frame0));
+        const auto &tmp =
+            dynamic_cast<const Mantid::Geometry::GeneralFrame &>(frame0));
     TSM_ASSERT_EQUALS(
         "Should have a special coordinate system selection of None",
         ws->getSpecialCoordinateSystem(), Mantid::Kernel::None);

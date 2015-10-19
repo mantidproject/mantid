@@ -40,7 +40,8 @@ bool QSample::isQ() const { return true; }
 bool QSample::isSameType(const MDFrame &frame) const {
   auto isSameType = true;
   try {
-    dynamic_cast<const QSample &>(frame);
+    const auto& tmp = dynamic_cast<const QSample &>(frame);
+    UNUSED_ARG(tmp);
   } catch (std::bad_cast &) {
     isSameType = false;
   }

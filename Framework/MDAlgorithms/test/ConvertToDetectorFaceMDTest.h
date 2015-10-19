@@ -83,8 +83,9 @@ public:
       TS_ASSERT_EQUALS(dim->getUnits(), "pixel");
       TSM_ASSERT_THROWS_NOTHING(
           "Should be convertible to a General frame",
-          dynamic_cast<const Mantid::Geometry::GeneralFrame &>(
-              dim->getMDFrame()));
+          const auto &tmp =
+              dynamic_cast<const Mantid::Geometry::GeneralFrame &>(
+                  dim->getMDFrame()));
     }
     IMDDimension_const_sptr dim = ws->getDimension(2);
     TS_ASSERT_EQUALS(dim->getName(), "dSpacing");
@@ -94,7 +95,7 @@ public:
     TS_ASSERT_EQUALS(dim->getUnits(), "Angstrom");
     TSM_ASSERT_THROWS_NOTHING(
         "Should be convertible to a General frame",
-        dynamic_cast<const Mantid::Geometry::GeneralFrame &>(
+        const auto &tmp = dynamic_cast<const Mantid::Geometry::GeneralFrame &>(
             dim->getMDFrame()));
 
     return ws;

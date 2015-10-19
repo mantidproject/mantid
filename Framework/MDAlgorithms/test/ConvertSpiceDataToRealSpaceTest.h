@@ -226,7 +226,8 @@ public:
       const auto &frame = mdws->getDimension(dim)->getMDFrame();
       TSM_ASSERT_THROWS_NOTHING(
           "Should be convertible to a General frame",
-          dynamic_cast<const Mantid::Geometry::GeneralFrame &>(frame));
+          const auto &tmp =
+              dynamic_cast<const Mantid::Geometry::GeneralFrame &>(frame));
     }
 
     // Examine Monitor MDWorkspace
@@ -250,7 +251,8 @@ public:
       const auto &frame = monmdws->getDimension(dim)->getMDFrame();
       TSM_ASSERT_THROWS_NOTHING(
           "Should be convertible to a General frame",
-          dynamic_cast<const Mantid::Geometry::GeneralFrame &>(frame));
+          const auto &tmp =
+              dynamic_cast<const Mantid::Geometry::GeneralFrame &>(frame));
     }
 
     // Remove workspaces

@@ -134,7 +134,8 @@ public:
             "IntegratePeaksMDTest_MDEWS");
     auto &frame = mdews->getDimension(0)->getMDFrame();
     TSM_ASSERT_THROWS_NOTHING(
-        "Should be HKL", dynamic_cast<const Mantid::Geometry::HKL &>(frame));
+        "Should be HKL",
+        const auto &tmp = dynamic_cast<const Mantid::Geometry::HKL &>(frame));
     TS_ASSERT_EQUALS(mdews->getNPoints(), 3000);
     TS_ASSERT_DELTA(mdews->getBox()->getSignal(), 3000.0, 1e-2);
 

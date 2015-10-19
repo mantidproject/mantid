@@ -142,15 +142,15 @@ public:
 
     TSM_ASSERT_THROWS_NOTHING(
         "Should be an UnknownFrame",
-        dynamic_cast<const Mantid::Geometry::UnknownFrame &>(
+        const auto &tmp = dynamic_cast<const Mantid::Geometry::UnknownFrame &>(
             outWS->getDimension(0)->getMDFrame()))
     TSM_ASSERT_THROWS_NOTHING(
         "Should be an UnknownFrame",
-        dynamic_cast<const Mantid::Geometry::UnknownFrame &>(
+        const auto &tmp = dynamic_cast<const Mantid::Geometry::UnknownFrame &>(
             outWS->getDimension(1)->getMDFrame()))
     TSM_ASSERT_THROWS_NOTHING(
         "Should be an UnknownFrame",
-        dynamic_cast<const Mantid::Geometry::UnknownFrame &>(
+        const auto &tmp = dynamic_cast<const Mantid::Geometry::UnknownFrame &>(
             outWS->getDimension(2)->getMDFrame()))
 
     double topPercent = loadVTK.getProperty("KeepTopPercent");

@@ -47,7 +47,8 @@ bool GeneralFrame::isQ() const { return false; }
 bool GeneralFrame::isSameType(const MDFrame &frame) const {
   auto isSameType = true;
   try {
-    dynamic_cast<const GeneralFrame &>(frame);
+    const auto &tmp = dynamic_cast<const GeneralFrame &>(frame);
+    UNUSED_ARG(tmp);
   } catch (std::bad_cast &) {
     isSameType = false;
   }

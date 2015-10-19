@@ -31,9 +31,10 @@ public:
     TS_ASSERT_EQUALS(0, product->getMinimum());
     TS_ASSERT_EQUALS(2, product->getMaximum());
     TS_ASSERT_EQUALS(1, product->getNBins());
-    TSM_ASSERT_THROWS_NOTHING(
-        "Should have selected QLab as the frame",
-        dynamic_cast<const Mantid::Geometry::QLab &>(product->getMDFrame()));
+    TSM_ASSERT_THROWS_NOTHING("Should have selected QLab as the frame",
+                              const auto &tmp =
+                                  dynamic_cast<const Mantid::Geometry::QLab &>(
+                                      product->getMDFrame()));
     delete product;
   }
 
@@ -58,7 +59,8 @@ public:
     TS_ASSERT_EQUALS(1, product->getNBins());
     TSM_ASSERT_THROWS_NOTHING(
         "Should have selected QSample as the frame",
-        dynamic_cast<const Mantid::Geometry::QSample &>(product->getMDFrame()));
+        const auto &tmp = dynamic_cast<const Mantid::Geometry::QSample &>(
+            product->getMDFrame()));
   }
 
   void testConstruct_without_frame_name() {
@@ -81,7 +83,7 @@ public:
     TS_ASSERT_EQUALS(1, product->getNBins());
     TSM_ASSERT_THROWS_NOTHING(
         "Should have selected GeneralFrame as the frame",
-        dynamic_cast<const Mantid::Geometry::GeneralFrame &>(
+        const auto &tmp = dynamic_cast<const Mantid::Geometry::GeneralFrame &>(
             product->getMDFrame()));
   }
 

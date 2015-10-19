@@ -66,7 +66,7 @@ public:
       const auto &frame = hklws->getDimension(dim)->getMDFrame();
       TSM_ASSERT_THROWS_NOTHING(
           "Should be convertible to a HKL frame",
-          dynamic_cast<const Mantid::Geometry::HKL &>(frame));
+          const auto &tmp = dynamic_cast<const Mantid::Geometry::HKL &>(frame));
     }
   }
 
