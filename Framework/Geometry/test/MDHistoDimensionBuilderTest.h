@@ -81,8 +81,7 @@ public:
     TS_ASSERT_EQUALS(2, product->getMaximum());
     TS_ASSERT_EQUALS(1, product->getNBins());
     TSM_ASSERT_EQUALS("Should have selected GeneralFrame as the frame",
-                      "testDimName",
-                      product->getMDFrame().name());
+                      "testDimName", product->getMDFrame().name());
   }
 
   void testCopy() {
