@@ -81,7 +81,7 @@ public:
     TS_ASSERT_EQUALS(2, product->getMaximum());
     TS_ASSERT_EQUALS(1, product->getNBins());
     TSM_ASSERT_EQUALS("Should have selected GeneralFrame as the frame",
-                      Mantid::Geometry::GeneralFrame::GeneralFrameName,
+                      "testDimName",
                       product->getMDFrame().name());
   }
 

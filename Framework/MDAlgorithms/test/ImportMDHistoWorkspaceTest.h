@@ -303,8 +303,7 @@ public:
       auto dimension = outWs->getDimension(dim);
       const auto &frame = dimension->getMDFrame();
       TSM_ASSERT_EQUALS("Should be convertible to a QSample frame",
-                        Mantid::Geometry::QSample::QSampleName,
-                        frame.name());
+                        Mantid::Geometry::QSample::QSampleName, frame.name());
       TSM_ASSERT("Should not be set to U any longer",
                  "U" != dimension->getUnits().ascii());
     }
