@@ -9,48 +9,48 @@ def fixBadIndent(toModify,indent):
     good=int(err_string[1])
     return toModify.replace(' '*bad,' '*good)
 
-def fixParens(fname,err,errlines):
-    f=open(fname,'r')
-    content=f.readlines()
-    f.close()
-    newcontent=content
-    for i,error in zip(errlines,err):
+def fixParens(fname,errorlist,errlines):
+    tofixf=open(fname,'r')
+    file_content=tofixf.readlines()
+    tofixf.close()
+    newcontent=file_content
+    for i,error in zip(errlines,errorlist):
         if error.find('(superfluous-parens)')!=-1:
             kwd=error.split("'")[1]
-            pattern=re.compile(kwd+'(?P<spaces>\ *)\((?P<content>.*)\)')
-            match=pattern.search(content[i])
+            pattern=re.compile(kwd+'(?P<spaces>\ *)\((?P<file_content>.*)\)')
+            match=pattern.search(file_content[i])
             d=match.groupdict()
-            newcontent[i]=content[i].replace(kwd+d['spaces']+'('+d['content']+')',kwd+' '+d['content'])
-    f=open(fname,'w')
-    f.write(''.join(newcontent))
-    f.close()
+            newcontent[i]=file_content[i].replace(kwd+d['spaces']+'('+d['file_content']+')',kwd+' '+d['file_content'])
+    tofixf=open(fname,'w')
+    tofixf.write(''.join(newcontent))
+    tofixf.close()
 
-def fixSeveralErrors(fname,err,errlines):
-    f=open(fname,'r')
-    content=f.readlines()
-    f.close()
-    newcontent=content
-    for i,error in zip(errlines,err):
+def fixSeveralErrors(fname,errorlist,errlines):
+    tofixf=open(fname,'r')
+    file_content=tofixf.readlines()
+    tofixf.close()
+    newcontent=file_content
+    for i,error in zip(errlines,errorlist):
         if error.find('Bad indentation')!=-1:
-            newcontent[i]=fixBadIndent(content[i],error)
+            newcontent[i]=fixBadIndent(file_content[i],error)
         if error.find('missing-final-newline')!=-1:
             newcontent[-1]+='\n'
         if error.find('mixed-indentation')!=-1:
-            newcontent[i]=content[i].replace('\t', '    ')
+            newcontent[i]=file_content[i].replace('\t', '    ')
         if error.find('trailing-whitespace')!=-1:
-            newcontent[i]=content[i].rstrip()+'\n'
+            newcontent[i]=file_content[i].rstrip()+'\n'
         if error.find('Unnecessary semicolon')!=-1:
-            newcontent[i]=content[i].replace(';','')
-    f=open(fname,'w')
-    f.write(''.join(newcontent))
-    f.close()
+            newcontent[i]=file_content[i].replace(';','')
+    tofixf=open(fname,'w')
+    tofixf.write(''.join(newcontent))
+    tofixf.close()
 
-def addIgnoreStatement(fname,err):
-    f=open(fname,'r')
-    content=f.readlines()
-    f.close()
+def addIgnoreStatement(fname,errorlist):
+    tofixf=open(fname,'r')
+    file_content=tofixf.readlines()
+    tofixf.close()
     ignore=[]
-    for error in err:
+    for error in errorlist:
         if error.find('(invalid-name)')!=-1 and 'invalid-name' not in ignore:
             ignore.append('invalid-name')
         if error.find('(no-init)')!=-1 and 'no-init' not in ignore:
@@ -58,10 +58,10 @@ def addIgnoreStatement(fname,err):
         if error.find('(too-many-lines)')!=-1 and 'too-many-lines' not in ignore:
             ignore.append('too-many-lines')
     if len(ignore)!=0:
-        f=open(fname,'w')
-        f.write("#pylint: disable="+','.join(ignore)+'\n')
-        f.write(''.join(content))
-        f.close()
+        tofixf=open(fname,'w')
+        tofixf.write("#pylint: disable="+','.join(ignore)+'\n')
+        tofixf.write(''.join(file_content))
+        tofixf.close()
 
 def generate_choices():
     ch=['simple','parentheses','add_ignores']

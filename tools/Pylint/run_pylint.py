@@ -172,8 +172,8 @@ def parse_arguments(argv):
                       help="If provided, store the output in the given file.")
     parser.add_option("-x", "--exclude", dest="exclude", metavar="EXCLUDES",
                       help="If provided, a space-separated list of "
-                            "files/directories to exclude. Relative paths are "
-                            "taken as relative to --basedir")
+                           "files/directories to exclude. Relative paths are "
+                           "taken as relative to --basedir")
 
     parser.set_defaults(format=DEFAULT_PYLINT_FORMAT, exe=DEFAULT_PYLINT_EXE, nofail=False,
                         basedir=os.getcwd(), rcfile=DEFAULT_RCFILE, exclude="")
@@ -242,6 +242,7 @@ def check_module_imports():
       str: String indicating success/failure
     """
     msg = ""
+    #pylint: disable=unused-variable
     try:
         import mantid
     except ImportError, exc:
