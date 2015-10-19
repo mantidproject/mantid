@@ -160,9 +160,6 @@ public:
     const auto &frame0 = ws->getDimension(0)->getMDFrame();
     TSM_ASSERT_EQUALS("Should be a QLab frame",
                       Mantid::Geometry::QLab::QLabName, frame0.name());
-    TSM_ASSERT_THROWS_NOTHING(
-        "Should be a QLab frame",
-        const auto &tmp = dynamic_cast<const Mantid::Geometry::QLab &>(frame0));
     TSM_ASSERT_EQUALS(
         "Should have a special coordinate system selection of QLab",
         ws->getSpecialCoordinateSystem(), Mantid::Kernel::QLab);

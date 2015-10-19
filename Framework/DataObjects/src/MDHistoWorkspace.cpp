@@ -3,6 +3,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/VMD.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidDataObjects/MDFramesToSpecialCoordinateSystem.h"
@@ -1213,9 +1214,11 @@ uint64_t MDHistoWorkspace::sumNContribEvents() const {
   return sum;
 }
 
+
 /**
  * Get the Q frame system (if any) to use.
 */
+GCC_DIAG_OFF(strict-aliasing)
 Kernel::SpecialCoordinateSystem
 MDHistoWorkspace::getSpecialCoordinateSystem() const {
   MDFramesToSpecialCoordinateSystem converter;
@@ -1227,6 +1230,8 @@ MDHistoWorkspace::getSpecialCoordinateSystem() const {
 
   return coordinates;
 }
+GCC_DIAG_ON(strict-aliasing)
+
 
 /**
 Set the special coordinate system (if any) to use.

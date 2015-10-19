@@ -1,6 +1,7 @@
 #include "MantidDataObjects/MDFramesToSpecialCoordinateSystem.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -9,6 +10,8 @@ MDFramesToSpecialCoordinateSystem::MDFramesToSpecialCoordinateSystem() {}
 
 MDFramesToSpecialCoordinateSystem::~MDFramesToSpecialCoordinateSystem() {}
 
+// Need to turn off the warnings because of boost optional being used.
+GCC_DIAG_OFF(maybe-uninitialized)
 /**
  * Get the Special Coordinate System based on the MDFrame information.
  * @param workspace: the workspace which is being queried
@@ -57,6 +60,7 @@ boost::optional<Mantid::Kernel::SpecialCoordinateSystem>
 
   return output;
 }
+GCC_DIAG_ON(maybe-uninitialized)
 
 /**
  * Make sure that the QFrame types are the same.
