@@ -23,10 +23,12 @@
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Object.h"
 
+#ifdef ENABLE_OPENCASCADE
 #include <TopoDS_Shape.hxx>
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
+#endif
 
 namespace Mantid {
 
@@ -340,6 +342,7 @@ void Intersection::getBoundingBox(double &xmax, double &ymax, double &zmax,
   zmin = (Azmin > Bzmin) ? Azmin : Bzmin;
 }
 
+#ifdef ENABLE_OPENCASCADE
 /**
 * Analyze intersection
 * @return the resulting TopoDS_Shape
@@ -350,6 +353,7 @@ TopoDS_Shape Intersection::analyze() {
   BRepAlgoAPI_Common comm(left, right);
   return comm.Shape();
 }
+#endif
 
 // -------------------------------------------------------------
 //         UNION
@@ -661,12 +665,14 @@ void Union::getBoundingBox(double &xmax, double &ymax, double &zmax,
   zmin = (Azmin < Bzmin) ? Azmin : Bzmin;
 }
 
+#ifdef ENABLE_OPENCASCADE
 TopoDS_Shape Union::analyze() {
   TopoDS_Shape left = A->analyze();
   TopoDS_Shape right = B->analyze();
   BRepAlgoAPI_Fuse fuse(left, right);
   return fuse.Shape();
 }
+#endif
 
 // -------------------------------------------------------------
 //         SURF KEYS
@@ -963,6 +969,7 @@ void SurfPoint::getBoundingBox(double &xmax, double &ymax, double &zmax,
   }
 }
 
+#ifdef ENABLE_OPENCASCADE
 TopoDS_Shape SurfPoint::analyze() {
   // Check for individual type of surfaces
   TopoDS_Shape Result = key->createShape();
@@ -976,6 +983,7 @@ TopoDS_Shape SurfPoint::analyze() {
   }
   return Result;
 }
+#endif
 //----------------------------------------
 //       COMPOBJ
 //----------------------------------------
@@ -1261,12 +1269,13 @@ void CompObj::getBoundingBox(double &xmax, double &ymax, double &zmax,
   }
 }
 
+#ifdef ENABLE_OPENCASCADE
 TopoDS_Shape CompObj::analyze() {
   TopoDS_Shape Result = const_cast<Rule *>(key->topRule())->analyze();
   Result.Complement();
   return Result;
 }
-
+#endif
 // -----------------------------------------------
 // BOOLVALUE
 // -----------------------------------------------
@@ -1726,6 +1735,7 @@ void CompGrp::getBoundingBox(double &xmax, double &ymax, double &zmax,
   }
 }
 
+#ifdef ENABLE_OPENCASCADE
 TopoDS_Shape CompGrp::analyze() {
   TopoDS_Shape Result = A->analyze();
   Result.Complement();
@@ -1733,7 +1743,7 @@ TopoDS_Shape CompGrp::analyze() {
 }
 
 TopoDS_Shape BoolValue::analyze() { return TopoDS_Shape(); }
-
+#endif
 } // NAMESPACE Geometry
 
 } // NAMESPACE Mantid

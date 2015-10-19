@@ -89,7 +89,9 @@ public:
   /// bounding box for the surface
   virtual void getBoundingBox(double &xmax, double &ymax, double &zmax,
                               double &xmin, double &ymin, double &zmin) = 0;
+#ifdef ENABLE_OPENCASCADE
   virtual TopoDS_Shape createShape();
+#endif
 };
 
 } // NAMESPACE Geometry

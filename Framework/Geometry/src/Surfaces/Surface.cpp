@@ -19,9 +19,9 @@
 #include "MantidGeometry/Math/PolyBase.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
-
+#ifdef ENABLE_OPENCASCADE
 #include <TopoDS_Shape.hxx>
-
+#endif
 namespace Mantid {
 
 namespace Geometry {
@@ -96,8 +96,9 @@ void Surface::write(std::ostream &out) const
   throw Kernel::Exception::AbsObjMethod("Surface::write");
 }
 
+#ifdef ENABLE_OPENCASCADE
 TopoDS_Shape Surface::createShape() { return TopoDS_Shape(); }
-
+#endif
 } // NAMESPACE Geometry
 
 } // NAMESPACE Mantid

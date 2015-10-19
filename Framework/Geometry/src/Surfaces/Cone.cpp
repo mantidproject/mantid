@@ -19,7 +19,9 @@
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Cone.h"
 
+#ifdef ENABLE_OPENCASCADE
 #include <BRepPrimAPI_MakeCone.hxx>
+#endif
 
 namespace Mantid {
 
@@ -406,6 +408,7 @@ void Cone::getBoundingBox(double &xmax, double &ymax, double &zmax,
   }
 }
 
+#ifdef ENABLE_OPENCASCADE
 TopoDS_Shape Cone::createShape() {
   gp_Ax2 gpA(gp_Pnt(Centre[0], Centre[1], Centre[2]),
              gp_Dir(Normal[0], Normal[1], Normal[2]));
@@ -414,7 +417,7 @@ TopoDS_Shape Cone::createShape() {
                               2.0 * M_PI)
       .Shape();
 }
-
+#endif
 } // NAMESPACE Geometry
 
 } // NAMESPACE Mantid

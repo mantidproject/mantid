@@ -4,7 +4,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Quat.h"
@@ -19,6 +18,7 @@ namespace Mantid {
 namespace Geometry {
 class Rule;
 class CompGrp;
+class Surface;
 class Track;
 class GeometryHandler;
 class CacheGeometryHandler;

@@ -93,8 +93,9 @@ public:
                                 Kernel::V3D &output);
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin);
-
+#ifdef ENABLE_OPENCASCADE
   virtual TopoDS_Shape createShape();
+#endif
 };
 
 } // NAMESPACE Geometry

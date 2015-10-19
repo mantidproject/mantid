@@ -5,7 +5,9 @@
 #include <cfloat>
 #include <iostream>
 
+#ifdef ENABLE_OPENCASCADE
 #include <BRepPrimAPI_MakeCylinder.hxx>
+#endif
 
 namespace Mantid {
 
@@ -447,6 +449,7 @@ void Cylinder::getBoundingBox(double &xmax, double &ymax, double &zmax,
   }
 }
 
+#ifdef ENABLE_OPENCASCADE
 TopoDS_Shape Cylinder::createShape() {
   gp_Pnt center;
   center.SetX(Centre[0] - Normal[0] * 500.0);
@@ -455,7 +458,7 @@ TopoDS_Shape Cylinder::createShape() {
   gp_Ax2 gpA(center, gp_Dir(Normal[0], Normal[1], Normal[2]));
   return BRepPrimAPI_MakeCylinder(gpA, Radius, 1000.0, 2.0 * M_PI).Solid();
 }
-
+#endif
 } // NAMESPACE MonteCarlo
 
 } // NAMESPACE Mantid

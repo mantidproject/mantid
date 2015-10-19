@@ -5,11 +5,13 @@
 #include <cfloat>
 #include <iostream>
 
+#ifdef ENABLE_OPENCASCADE
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepPrimAPI_MakeHalfSpace.hxx>
 #include <BRepAlgoAPI_Common.hxx>
 #include <gp_Pln.hxx>
+#endif
 
 namespace Mantid {
 
@@ -419,6 +421,7 @@ void Plane::getBoundingBox(double &xmax, double &ymax, double &zmax,
   }
 }
 
+#ifdef ENABLE_OPENCASCADE
 TopoDS_Shape Plane::createShape() {
   // Get Plane normal and distance.
   V3D normal = this->getNormal();
@@ -440,6 +443,7 @@ TopoDS_Shape Plane::createShape() {
                             .Solid();
   return Result.Complemented();
 }
+#endif
 
 } // NAMESPACE MonteCarlo
 

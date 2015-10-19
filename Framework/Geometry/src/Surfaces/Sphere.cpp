@@ -2,7 +2,9 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
 
+#ifdef ENABLE_OPENCASCADE
 #include <BRepPrimAPI_MakeSphere.hxx>
+#endif
 
 namespace Mantid {
 
@@ -259,10 +261,12 @@ void Sphere::getBoundingBox(double &xmax, double &ymax, double &zmax,
   zmin = Centre[2] - Radius;
 }
 
+#ifdef ENABLE_OPENCASCADE
 TopoDS_Shape Sphere::createShape() {
   return BRepPrimAPI_MakeSphere(gp_Pnt(Centre[0], Centre[1], Centre[2]), Radius)
       .Shape();
 }
+#endif
 
 } // NAMESPACE Geometry
 

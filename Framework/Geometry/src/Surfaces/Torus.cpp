@@ -17,9 +17,9 @@
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Surfaces/Torus.h"
-
+#ifdef ENABLE_OPENCASCADE
 #include <TopoDS_Shape.hxx>
-
+#endif
 namespace Mantid {
 
 namespace Geometry {
@@ -335,10 +335,12 @@ void Torus::setDistanceFromCentreToTube(double dist) { Iradius = dist; }
  */
 void Torus::setTubeRadius(double dist) { Dradius = dist; }
 
+#ifdef ENABLE_OPENCASCADE
 TopoDS_Shape Torus::createShape() {
   // NOTE:: Not yet implemented
   return TopoDS_Shape();
 }
+#endif
 
 } // NAMESPACE MonteCarlo
 

@@ -3,6 +3,8 @@
 
 #include <map>
 
+class TopoDS_Shape;
+
 namespace Mantid {
 
 namespace Geometry {
@@ -56,23 +58,15 @@ public:
   static int removeComplementary(Rule *&); ///< NOT WORKING
   static int removeItem(Rule *&TRule, const int SurfN);
 
-  enum class DerivedClassName {
-    RULE,
-    INTERSECTION,
-    UNION,
-    SURFPOINT,
-    COMPOBJ,
-    COMPGRP,
-    BOOLVALUE
-  };
-
   Rule();
   Rule(Rule *);
   Rule(const Rule &);
   Rule &operator=(const Rule &);
   virtual ~Rule();
   virtual Rule *clone() const = 0; ///< abstract clone object
-  virtual DerivedClassName className() const { return DerivedClassName::RULE; };
+  virtual std::string className() const {
+    return "Rule";
+  }; ///< Returns class name as string
 
   /// No leaf for a base rule
   virtual Rule *leaf(const int = 0) const { return 0; }
@@ -110,8 +104,9 @@ public:
   /// Abstract getBoundingBox
   virtual void getBoundingBox(double &xmax, double &ymax, double &zmax,
                               double &xmin, double &ymin, double &zmin) = 0;
-
+#ifdef ENABLE_OPENCASCADE
   virtual TopoDS_Shape analyze() = 0;
+#endif
 };
 
 /**
@@ -136,9 +131,9 @@ public:
   explicit Intersection(Rule *, Rule *);
   explicit Intersection(Rule *, Rule *, Rule *);
   Intersection *clone() const; ///< Makes a copy of the whole downward tree
-  virtual DerivedClassName className() const {
-    return DerivedClassName::INTERSECTION;
-  };
+  virtual std::string className() const {
+    return "Intersection";
+  } ///< Returns class name as string
 
   Intersection(const Intersection &);
   Intersection &operator=(const Intersection &);
@@ -161,7 +156,9 @@ public:
   int simplify(); ///< apply general intersection simplification
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin); /// bounding box
+#ifdef ENABLE_OPENCASCADE
   virtual TopoDS_Shape analyze();
+#endif
 };
 
 /**
@@ -190,9 +187,9 @@ public:
   Union *clone() const;
   Union &operator=(const Union &);
   ~Union();
-  virtual DerivedClassName className() const {
-    return DerivedClassName::UNION;
-  };
+  virtual std::string className() const {
+    return "Union";
+  } ///< Returns class name as string
 
   Rule *leaf(const int ipt = 0) const {
     return ipt ? B : A;
@@ -212,7 +209,9 @@ public:
   int simplify(); ///< apply general intersection simplification
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin); /// bounding box
+#ifdef ENABLE_OPENCASCADE
   virtual TopoDS_Shape analyze();
+#endif
 };
 
 /**
@@ -238,9 +237,9 @@ public:
   SurfPoint *clone() const;
   SurfPoint &operator=(const SurfPoint &);
   ~SurfPoint();
-  virtual DerivedClassName className() const {
-    return DerivedClassName::SURFPOINT;
-  };
+  virtual std::string className() const {
+    return "SurfPoint";
+  } ///< Returns class name as string
 
   Rule *leaf(const int = 0) const { return 0; } ///< No Leaves
   void setLeaves(Rule *, Rule *);
@@ -263,7 +262,9 @@ public:
   std::string displayAddress() const;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin); /// bounding box
+#ifdef ENABLE_OPENCASCADE
   virtual TopoDS_Shape analyze();
+#endif
 };
 
 /**
@@ -289,9 +290,9 @@ public:
   CompObj *clone() const;
   CompObj &operator=(const CompObj &);
   ~CompObj();
-  virtual DerivedClassName className() const {
-    return DerivedClassName::COMPOBJ;
-  };
+  virtual std::string className() const {
+    return "CompObj";
+  } ///< Returns class name as string
 
   void setLeaves(Rule *, Rule *);
   void setLeaf(Rule *, const int = 0);
@@ -314,7 +315,9 @@ public:
   std::string displayAddress() const;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin); /// bounding box
+#ifdef ENABLE_OPENCASCADE
   virtual TopoDS_Shape analyze();
+#endif
 };
 
 /**
@@ -340,9 +343,9 @@ public:
   CompGrp *clone() const;
   CompGrp &operator=(const CompGrp &);
   ~CompGrp();
-  virtual DerivedClassName className() const {
-    return DerivedClassName::COMPGRP;
-  };
+  virtual std::string className() const {
+    return "CompGrp";
+  } ///< Returns class name as string
 
   Rule *leaf(const int) const { return A; } ///< selects leaf component
   void setLeaves(Rule *, Rule *);
@@ -361,7 +364,9 @@ public:
   std::string displayAddress() const;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin); /// bounding box
+#ifdef ENABLE_OPENCASCADE
   virtual TopoDS_Shape analyze();
+#endif
 };
 
 /**
@@ -385,9 +390,9 @@ public:
   BoolValue *clone() const;
   BoolValue &operator=(const BoolValue &);
   ~BoolValue();
-  virtual DerivedClassName className() const {
-    return DerivedClassName::BOOLVALUE;
-  };
+  virtual std::string className() const {
+    return "BoolValue";
+  } ///< Returns class name as string
 
   Rule *leaf(const int = 0) const { return 0; } ///< No leaves
   void setLeaves(Rule *, Rule *);
@@ -411,7 +416,9 @@ public:
   std::string displayAddress() const;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin); /// bounding box
+#ifdef ENABLE_OPENCASCADE
   TopoDS_Shape analyze();
+#endif
 };
 
 } // NAMESPACE  Geometry

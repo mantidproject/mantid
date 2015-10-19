@@ -98,8 +98,9 @@ public:
   static int g_nslices;
   /// The number of stacks to approximate a cylinder
   static int g_nstacks;
-
+#ifdef ENABLE_OPENCASCADE
   virtual TopoDS_Shape createShape();
+#endif
 };
 
 } // NAMESPACE Geometry
