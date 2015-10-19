@@ -292,7 +292,7 @@ def run_checks(targets, serializer, options):
         targetpath = os.path.join(options.basedir, target)
         pkg_init = os.path.join(targetpath, "__init__.py")
         if os.path.isfile(targetpath) or os.path.isfile(pkg_init):
-            overall_stats.add(target, exec_pylint_on_importable(targetpath, serializer, options))
+            overall_stats.add(targetpath, exec_pylint_on_importable(targetpath, serializer, options))
         else:
             overall_stats.update(exec_pylint_on_all(targetpath, serializer, options, excludes))
     ##
