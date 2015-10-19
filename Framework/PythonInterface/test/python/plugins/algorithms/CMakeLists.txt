@@ -8,6 +8,7 @@ set ( TEST_PY_FILES
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
+  ComputeCalibrationCoefVanTest.py
   CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
   CreateMDTest.py
