@@ -152,7 +152,7 @@ const std::string ReplicateMD::category() const { return "MDAlgorithms"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ReplicateMD::summary() const {
-  return "This is a algorithm to create a higher dimensional dataset by "
+  return "This is an algorithm to create a higher dimensional dataset by "
          "replicating along an additional axis";
 }
 

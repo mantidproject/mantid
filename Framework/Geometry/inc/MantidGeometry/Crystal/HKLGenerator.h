@@ -113,8 +113,7 @@ public:
       : public boost::iterator_facade<const_iterator, const Kernel::V3D &,
                                       boost::forward_traversal_tag> {
   public:
-    /// Default constructor, requirement from boost::iterator_facade
-    const_iterator() {}
+    const_iterator();
 
     explicit const_iterator(const Kernel::V3D &current);
 
