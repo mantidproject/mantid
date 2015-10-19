@@ -49,13 +49,11 @@ using Mantid::Kernel::NetworkProxy;
 #include <Poco/DateTimeFormatter.h>
 
 // from boost
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 
-using boost::property_tree::ptree;
+#include <json/json.h>
 
 namespace Mantid {
 namespace API {
@@ -822,19 +820,16 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
     std::string detail;
     std::string published_date;
 
-    ptree pt;
-    try {
-      read_json(answer, pt);
-      info = pt.get<std::string>("message", "");
-      detail = pt.get<std::string>("detail", "");
-      published_date = pt.get<std::string>("pub_date", "");
-      std::string cmd = pt.get<std::string>("shell", "");
-      if (!cmd.empty())
-        detail.append("\nFrom Command: ").append(cmd);
-
-    } catch (boost::property_tree::json_parser_error &ex) {
+    Json::Value pt;
+    if (!Json::Reader::parse(answer, pt)) {
       throw ScriptRepoException("Bad answer from the Server", ex.what());
     }
+    info = pt.get<std::string>("message", "");
+    detail = pt.get<std::string>("detail", "");
+    published_date = pt.get<std::string>("pub_date", "");
+    std::string cmd = pt.get<std::string>("shell", "");
+    if (!cmd.empty())
+      detail.append("\nFrom Command: ").append(cmd);
 
     if (info == "success") {
       g_log.notice() << "ScriptRepository:" << file_path << " uploaded!"
