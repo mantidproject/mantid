@@ -609,7 +609,11 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex,
 
     return avrg / (end - start);
   } else {
-    return avrg / double(ic);
+    if (0 == ic) {
+      return 0;
+    } else {
+      return avrg / double(ic);
+    }
   }
 }
 }
@@ -683,11 +687,11 @@ void smoothInRange(const std::vector<double> &input,
     output[i - startIndex] =
         runAverage(i, startIndex, endIndex, halfWidth, input, binBndrs) *
         binSize;
-    if (outBins) {
+    if (outBins && binBndrs) {
       outBins->operator[](i - startIndex) = binBndrs->operator[](i);
     }
   }
-  if (outBins) {
+  if (outBins && binBndrs) {
     outBins->operator[](endIndex - startIndex) = binBndrs->operator[](endIndex);
   }
 }
