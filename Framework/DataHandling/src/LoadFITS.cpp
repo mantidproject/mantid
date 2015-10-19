@@ -510,7 +510,7 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
   headerInfo.headerSizeMultiplier = 0;
   std::ifstream istr(headerInfo.filePath.c_str(), std::ios::binary);
   istr.seekg(0, istr.end);
-  if (!istr.tellg() > 0) {
+  if (!(istr.tellg() > 0)) {
     throw std::runtime_error(
         "Found a file that is readable but empty (0 bytes size): " +
         headerInfo.filePath);
@@ -771,7 +771,8 @@ void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
   uint8_t *buffer8 = reinterpret_cast<uint8_t *>(&buffer[0]);
 
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (size_t i = 0; i < fileInfo.axisPixelLengths[1]; ++i) { // rows
+  for (int i = 0; i < static_cast<int>(fileInfo.axisPixelLengths[1]);
+       ++i) { // rows
     Mantid::API::ISpectrum *specRow = ws->getSpectrum(i);
     double xval = static_cast<double>(i) * cmpp;
     std::fill(specRow->dataX().begin(), specRow->dataX().end(), xval);
