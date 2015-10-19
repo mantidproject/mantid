@@ -371,4 +371,4 @@ if __name__ == '__main__':
     #    def runTest():
     #        pass
     #tester = theTester()
-    tester.test_setGetMonitorWS()
+    #tester.test_setGetMonitorWS()
