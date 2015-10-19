@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/ICatalogInfo.h"
 #include <string>
 
 //----------------------------------------------------------------------
@@ -43,10 +44,12 @@ namespace Kernel {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class MANTID_KERNEL_DLL CatalogInfo {
+class MANTID_KERNEL_DLL CatalogInfo : public ICatalogInfo {
 public:
   /// Constructor
   CatalogInfo(const Poco::XML::Element *element);
+  /// Copy constructor
+  CatalogInfo(const CatalogInfo& other);
   /// Obtain catalog name from the facility file.
   const std::string catalogName() const;
   /// Obtain soap end point from the facility file.
@@ -76,6 +79,9 @@ private:
   std::string getAttribute(const Poco::XML::Element *element,
                            const std::string &tagName,
                            const std::string &attributeName);
+
+  // Disabled assignment operator.
+  CatalogInfo& operator=(const CatalogInfo &other);
 
   std::string m_catalogName;
   std::string m_soapEndPoint;

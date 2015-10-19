@@ -134,6 +134,39 @@ public:
 
     return (new CatalogInfo(element));
   }
+
+  void testCopyConstructor() {
+    const std::string facilitiesXml =
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+        "<facilities>"
+        "<facility name=\"ISIS\">"
+        "<catalog name=\"ICat3Catalog\">"
+        "<soapendpoint "
+        "url=\"https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT\"></"
+        "soapendpoint>"
+        "<filelocation>"
+        "<prefix regex=\"\\\\\\\\isis\\\\inst\\$\\\\Instruments\\$\"></prefix>"
+        "<windows replacement=\"\"></windows>"
+        "<linux replacement=\"/archive\"></linux>"
+        "<mac replacement=\"/archive\"></mac>"
+        "</filelocation>"
+        "</catalog>"
+        "</facility>"
+        "</facilities>";
+
+    std::unique_ptr<CatalogInfo> original(getCatalogFromXML(facilitiesXml));
+
+    CatalogInfo copy = *original;
+
+    TS_ASSERT_EQUALS(original->catalogName(), copy.catalogName());
+    TS_ASSERT_EQUALS(original->catalogPrefix(), copy.catalogPrefix());
+    TS_ASSERT_EQUALS(original->externalDownloadURL(),
+                     copy.externalDownloadURL());
+    TS_ASSERT_EQUALS(original->linuxPrefix(), copy.linuxPrefix());
+    TS_ASSERT_EQUALS(original->macPrefix(), copy.macPrefix());
+    TS_ASSERT_EQUALS(original->windowsPrefix(), copy.windowsPrefix());
+    TS_ASSERT_EQUALS(original->soapEndPoint(), copy.soapEndPoint());
+  }
 };
 
 #endif /*MANTID_CATALOGINFOTEST_H_*/
