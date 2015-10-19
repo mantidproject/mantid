@@ -1214,10 +1214,12 @@ uint64_t MDHistoWorkspace::sumNContribEvents() const {
   return sum;
 }
 
-
 /**
  * Get the Q frame system (if any) to use.
 */
+// clang-format off
+GCC_DIAG_OFF(cast-qual)
+// clang-format on
 GCC_DIAG_OFF(strict-aliasing)
 Kernel::SpecialCoordinateSystem
 MDHistoWorkspace::getSpecialCoordinateSystem() const {
@@ -1231,7 +1233,9 @@ MDHistoWorkspace::getSpecialCoordinateSystem() const {
   return coordinates;
 }
 GCC_DIAG_ON(strict-aliasing)
-
+// clang-format off
+GCC_DIAG_ON(cast-qual)
+// clang-format on
 
 /**
 Set the special coordinate system (if any) to use.

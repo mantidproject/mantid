@@ -11,6 +11,9 @@ MDFramesToSpecialCoordinateSystem::MDFramesToSpecialCoordinateSystem() {}
 MDFramesToSpecialCoordinateSystem::~MDFramesToSpecialCoordinateSystem() {}
 
 // Need to turn off the warnings because of boost optional being used.
+// clang-format off
+GCC_DIAG_OFF(cast-qual)
+// clang-format on
 GCC_DIAG_OFF(maybe-uninitialized)
 /**
  * Get the Special Coordinate System based on the MDFrame information.
@@ -61,6 +64,9 @@ boost::optional<Mantid::Kernel::SpecialCoordinateSystem>
   return output;
 }
 GCC_DIAG_ON(maybe-uninitialized)
+// clang-format off
+GCC_DIAG_ON(cast-qual)
+// clang-format on
 
 /**
  * Make sure that the QFrame types are the same.
