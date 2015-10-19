@@ -1,7 +1,8 @@
 #pylint: disable=invalid-name
 """ Sample LET reduction script """
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
-
+import os,sys
+os.environ["PATH"] = r"c:/Mantid/_builds/br_master/bin/Release;"+os.environ["PATH"]
+sys.path.append(r'c:\Mantid\scripts\Inelastic')
 
 from Direct.ReductionWrapper import *
 try:

@@ -693,12 +693,7 @@ class RunDescriptor(PropDescriptor):
         new_name = self._build_ws_name()
         old_name = workspace.name()
         if new_name != old_name:
-            RenameWorkspace(InputWorkspace=old_name,OutputWorkspace=new_name)
-
-            old_mon_name = old_name + '_monitors'
-            new_mon_name = new_name + '_monitors'
-            if old_mon_name in mtd:
-                RenameWorkspace(InputWorkspace=old_mon_name,OutputWorkspace=new_mon_name)
+            RenameWorkspace(InputWorkspace=old_name,OutputWorkspace=new_name,RenameMonitors=True)
         self._ws_name = new_name
 #--------------------------------------------------------------------------------------------------------------------
     @staticmethod
@@ -770,39 +765,46 @@ class RunDescriptor(PropDescriptor):
 #--------------------------------------------------------------------------------------------------------------------
     def chop_ws_part(self,origin,tof_range,rebin,chunk_num,n_chunks):
         """Chop part of the original workspace and sets it up to this run as new original
-           Return the pointer to workspace being chopped
+           Return the pointer to the original workspace (the chunk has been taken) if the 
+           chunk is not the last one, and pointer to last chunk when the last chunk was taken
+           (original workspace was destroyed in this case)
         """
         if not origin:
             origin = self.get_workspace()
 
         origin_name = origin.name()
-        try:
-            mon_ws = mtd[origin_name + '_monitors']
-        except:
-            mon_ws = None
+        # separate monitor's ws name
+        mon_ws = origin.getMonitorWorkspace()
 
         target_name = '#{0}/{1}#'.format(chunk_num,n_chunks) + origin_name
         if chunk_num == n_chunks:
-            RenameWorkspace(InputWorkspace=origin_name,OutputWorkspace=target_name)
-            if mon_ws:
-                RenameWorkspace(InputWorkspace=mon_ws,OutputWorkspace=target_name + '_monitors')
+            RenameWorkspace(InputWorkspace=origin_name,OutputWorkspace=target_name,RenameMonitors=True)
             origin_name = target_name
-            origin_invalidated = True
         else:
             if mon_ws:
-                CloneWorkspace(InputWorkspace=mon_ws,OutputWorkspace=target_name + '_monitors')
-            origin_invalidated = False
+                mon_ws = CloneWorkspace(InputWorkspace=mon_ws,OutputWorkspace=target_name + '_monitors')
+        if mon_ws:
+           mon_ws_name = mon_ws.name()
+        else:
+           mon_ws_name = origin_name
 
         if rebin: # debug and compatibility mode with old reduction
-            Rebin(origin_name,OutputWorkspace=target_name,Params=[tof_range[0],tof_range[1],tof_range[2]],PreserveEvents=False)
+            target=Rebin(origin_name,OutputWorkspace=target_name,Params=[tof_range[0],tof_range[1],tof_range[2]],PreserveEvents=False)
+            # Rebin in place does not conserves mon_ws?
+            origin_deleted = True
         else:
-            CropWorkspace(origin_name,OutputWorkspace=target_name,XMin=tof_range[0],XMax=tof_range[2])
+            target = CropWorkspace(origin_name,OutputWorkspace=target_name,XMin=tof_range[0],XMax=tof_range[2])
+            origin_deleted = False
+        if mon_ws:
+            mon_ws = mtd[mon_ws_name] # The reason why this operation has to be performed is fully unclear, but its necessary
+            target.setMonitorWorkspace(mon_ws)
+
 
         self._set_ws_as_source(mtd[target_name])
-        if origin_invalidated:
+        if origin_deleted:
             return self.get_workspace()
         else:
-            return origin
+            return mtd[origin_name]
 
 #--------------------------------------------------------------------------------------------------------------------
     def get_monitors_ws(self,monitors_ID=None,otherWS=None):
@@ -818,18 +820,20 @@ class RunDescriptor(PropDescriptor):
         if not data_ws:
             return None
 
-        monWS_name = data_ws.name() + '_monitors'
-        if monWS_name in mtd:
-            mon_ws = mtd[monWS_name]
-            monitors_separate = True
-        else:
-            mon_ws = data_ws
+        mon_ws = data_ws.getMonitorWorkspace()
+        if mon_ws is None:
             monitors_separate = False
+            mon_ws = data_ws
+        else:
+            monitors_separate = True
 
         spec_to_mon = RunDescriptor._holder.spectra_to_monitors_list
         if monitors_separate and spec_to_mon :
             for specID in spec_to_mon:
                 mon_ws = self.copy_spectrum2monitors(data_ws,mon_ws,specID)
+            if mon_ws:
+                mon_ws=mtd[mon_ws.name()] # very weird operation needed
+                data_ws.setMonitorWorkspace(mon_ws)
 
         if monitors_ID:
             def flatten_list(targ_list,source):
