@@ -146,7 +146,8 @@ public:
         Mantid::Kernel::InverseAngstromsUnit().getUnitLabel().ascii());
     TSM_ASSERT_THROWS_NOTHING(
         "Should be a QSample",
-        dynamic_cast<const Mantid::Geometry::QSample &>(dim->getMDFrame()))
+        const auto &tmp =
+            dynamic_cast<const Mantid::Geometry::QSample &>(dim->getMDFrame()))
     TS_ASSERT_EQUALS(dim->getNBins(), 10);
     TS_ASSERT_EQUALS(dim->getX(10), 9.0);
   }
@@ -469,7 +470,8 @@ public:
           Mantid::Kernel::InverseAngstromsUnit().getUnitLabel().ascii());
       TSM_ASSERT_THROWS_NOTHING(
           "Should be a QSample",
-          dynamic_cast<const Mantid::Geometry::QSample &>(dim->getMDFrame()))
+          const auto &tmp = dynamic_cast<const Mantid::Geometry::QSample &>(
+              dim->getMDFrame()))
 
       TS_ASSERT_EQUALS(dim->getNBins(), 20);
       TS_ASSERT_EQUALS(dim->getMinimum(), -5);
@@ -530,7 +532,8 @@ public:
           Mantid::Kernel::InverseAngstromsUnit().getUnitLabel().ascii());
       TSM_ASSERT_THROWS_NOTHING(
           "Should be a QSample",
-          dynamic_cast<const Mantid::Geometry::QSample &>(dim->getMDFrame()))
+          const auto &tmp = dynamic_cast<const Mantid::Geometry::QSample &>(
+              dim->getMDFrame()))
 
       TS_ASSERT_EQUALS(dim->getNBins(), 20);
       TS_ASSERT_EQUALS(dim->getMinimum(), -5);

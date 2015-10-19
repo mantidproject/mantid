@@ -187,11 +187,11 @@ public:
     TSM_ASSERT("Should be set to U", "U" == dim1->getUnits().ascii());
     TSM_ASSERT_THROWS_NOTHING(
         "Should be convertible to a General Frame",
-        dynamic_cast<const Mantid::Geometry::GeneralFrame &>(
+        const auto &tmp = dynamic_cast<const Mantid::Geometry::GeneralFrame &>(
             dim1->getMDFrame()));
     TSM_ASSERT_THROWS_NOTHING(
         "Should be convertible to a General Frame",
-        dynamic_cast<const Mantid::Geometry::GeneralFrame &>(
+        const auto &tmp = dynamic_cast<const Mantid::Geometry::GeneralFrame &>(
             dim2->getMDFrame()));
 
     // Check the data

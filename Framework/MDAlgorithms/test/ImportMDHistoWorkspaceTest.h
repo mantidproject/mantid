@@ -304,7 +304,7 @@ public:
       const auto &frame = dimension->getMDFrame();
       TSM_ASSERT_THROWS_NOTHING(
           "Should be convertible to a QSample frame",
-          dynamic_cast<const Mantid::Geometry::QSample &>(frame));
+          const auto &tmp = dynamic_cast<const Mantid::Geometry::QSample &>(frame));
       TSM_ASSERT("Should not be set to U any longer",
                  "U" != dimension->getUnits().ascii());
     }
