@@ -66,7 +66,7 @@ public:
   virtual Rule *clone() const = 0; ///< abstract clone object
   virtual std::string className() const {
     return "Rule";
-  }; ///< Returns class name as string
+  } ///< Returns class name as string
 
   /// No leaf for a base rule
   virtual Rule *leaf(const int = 0) const { return 0; }

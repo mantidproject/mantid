@@ -847,7 +847,7 @@ std::string SurfPoint::display() const
 */
 {
   std::stringstream cx;
-  cx << sign * keyN;
+  cx << sign *keyN;
   return cx.str();
 }
 
@@ -874,7 +874,7 @@ std::string SurfPoint::displayAddress() const
  */
 void SurfPoint::getBoundingBox(double &xmax, double &ymax, double &zmax,
                                double &xmin, double &ymin, double &zmin) {
-  if (sign < 1) // If the object sign is positive then include
+  if (this->sign < 1) // If the object sign is positive then include
     key->getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
   else { // if the object sign is negative then get the complement
     std::vector<V3D> listOfPoints;
