@@ -53,9 +53,8 @@ public:
     // Test the frame type
     for (size_t dim = 0; dim < ws->getNumDims(); ++dim) {
       const auto &frame = ws->getDimension(dim)->getMDFrame();
-      TSM_ASSERT_THROWS_NOTHING(
-          "Should be convertible to a QSample frame",
-          const auto &tmp = dynamic_cast<const Mantid::Geometry::QLab &>(frame));
+      TSM_ASSERT_EQUALS("Should be convertible to a QSample frame",
+                        Mantid::Geometry::QLab::QLabName, frame.name());
     }
 
     // But you can't add to an existing one of the wrong dimensions type, if you
@@ -98,9 +97,8 @@ public:
     // Test the frame type
     for (size_t dim = 0; dim < ws->getNumDims(); ++dim) {
       const auto &frame = ws->getDimension(dim)->getMDFrame();
-      TSM_ASSERT_THROWS_NOTHING(
-          "Should be convertible to a QSample frame",
-          const auto &tmp = dynamic_cast<const Mantid::Geometry::HKL &>(frame));
+      TSM_ASSERT_EQUALS("Should be convertible to a HKL frame",
+                        Mantid::Geometry::HKL::HKLName, frame.name());
     }
 
     AnalysisDataService::Instance().remove("testOutMD");
@@ -122,10 +120,8 @@ public:
     // Test the frame type
     for (size_t dim = 0; dim < ws->getNumDims(); ++dim) {
       const auto &frame = ws->getDimension(dim)->getMDFrame();
-      TSM_ASSERT_THROWS_NOTHING(
-          "Should be convertible to a QSample frame",
-          const auto &tmp =
-              dynamic_cast<const Mantid::Geometry::QSample &>(frame));
+      TSM_ASSERT_EQUALS("Should be convertible to a QSample frame",
+                        Mantid::Geometry::QSample::QSampleName, frame.name());
     }
   }
 

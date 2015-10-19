@@ -139,19 +139,15 @@ public:
     do_check_dimension(outWS->getDimension(2), "Z", 0, 67,
                        68); // These numbers are expected min, max, and nbins
                             // known from the input file for dim z.
-
-    TSM_ASSERT_THROWS_NOTHING(
-        "Should be an UnknownFrame",
-        const auto &tmp = dynamic_cast<const Mantid::Geometry::UnknownFrame &>(
-            outWS->getDimension(0)->getMDFrame()))
-    TSM_ASSERT_THROWS_NOTHING(
-        "Should be an UnknownFrame",
-        const auto &tmp = dynamic_cast<const Mantid::Geometry::UnknownFrame &>(
-            outWS->getDimension(1)->getMDFrame()))
-    TSM_ASSERT_THROWS_NOTHING(
-        "Should be an UnknownFrame",
-        const auto &tmp = dynamic_cast<const Mantid::Geometry::UnknownFrame &>(
-            outWS->getDimension(2)->getMDFrame()))
+    TSM_ASSERT_EQUALS("Should be an UnknownFrame",
+                        Mantid::Geometry::UnknownFrame::UnknownFrameName,
+                        outWS->getDimension(0)->getMDFrame().name());
+	TSM_ASSERT_EQUALS("Should be an UnknownFrame",
+                        Mantid::Geometry::UnknownFrame::UnknownFrameName,
+                        outWS->getDimension(1)->getMDFrame().name());
+	TSM_ASSERT_EQUALS("Should be an UnknownFrame",
+                        Mantid::Geometry::UnknownFrame::UnknownFrameName,
+                        outWS->getDimension(2)->getMDFrame().name());
 
     double topPercent = loadVTK.getProperty("KeepTopPercent");
     TSM_ASSERT_EQUALS("Should default to 25%", 25, topPercent);

@@ -73,10 +73,8 @@ public:
     // Test the frame type
     for (size_t dim = 0; dim < outws->getNumDims(); ++dim) {
       const auto &frame = outws->getDimension(dim)->getMDFrame();
-      TSM_ASSERT_THROWS_NOTHING(
-          "Should be convertible to a QSample frame",
-          const auto &tmp =
-              dynamic_cast<const Mantid::Geometry::QSample &>(frame));
+      TSM_ASSERT_EQUALS("Should be convertible to a QSample frame",
+                        Mantid::Geometry::QSample::QSampleName, frame.name());
     }
 
     return;

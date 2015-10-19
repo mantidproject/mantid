@@ -31,10 +31,10 @@ public:
     TS_ASSERT_EQUALS(0, product->getMinimum());
     TS_ASSERT_EQUALS(2, product->getMaximum());
     TS_ASSERT_EQUALS(1, product->getNBins());
-    TSM_ASSERT_THROWS_NOTHING("Should have selected QLab as the frame",
-                              const auto &tmp =
-                                  dynamic_cast<const Mantid::Geometry::QLab &>(
-                                      product->getMDFrame()));
+    TSM_ASSERT_EQUALS("Should have selected QLab as the frame",
+                      Mantid::Geometry::QLab::QLabName,
+                      product->getMDFrame().name());
+
     delete product;
   }
 
@@ -57,10 +57,9 @@ public:
     TS_ASSERT_EQUALS(0, product->getMinimum());
     TS_ASSERT_EQUALS(2, product->getMaximum());
     TS_ASSERT_EQUALS(1, product->getNBins());
-    TSM_ASSERT_THROWS_NOTHING(
-        "Should have selected QSample as the frame",
-        const auto &tmp = dynamic_cast<const Mantid::Geometry::QSample &>(
-            product->getMDFrame()));
+    TSM_ASSERT_EQUALS("Should have selected QSample as the frame",
+                      Mantid::Geometry::QSample::QSampleName,
+                      product->getMDFrame().name());
   }
 
   void testConstruct_without_frame_name() {
@@ -81,10 +80,9 @@ public:
     TS_ASSERT_EQUALS(0, product->getMinimum());
     TS_ASSERT_EQUALS(2, product->getMaximum());
     TS_ASSERT_EQUALS(1, product->getNBins());
-    TSM_ASSERT_THROWS_NOTHING(
-        "Should have selected GeneralFrame as the frame",
-        const auto &tmp = dynamic_cast<const Mantid::Geometry::GeneralFrame &>(
-            product->getMDFrame()));
+    TSM_ASSERT_EQUALS("Should have selected GeneralFrame as the frame",
+                      Mantid::Geometry::GeneralFrame::GeneralFrameName,
+                      product->getMDFrame().name());
   }
 
   void testCopy() {

@@ -158,6 +158,8 @@ public:
     TS_ASSERT_EQUALS(2, ws->getExperimentInfo(0)->run().getLogData().size());
     // Assert that dimensions should be a general frame
     const auto &frame0 = ws->getDimension(0)->getMDFrame();
+    TSM_ASSERT_EQUALS("Should be a QLab frame",
+                      Mantid::Geometry::QLab::QLabName, frame0.name());
     TSM_ASSERT_THROWS_NOTHING(
         "Should be a QLab frame",
         const auto &tmp = dynamic_cast<const Mantid::Geometry::QLab &>(frame0));
@@ -175,10 +177,7 @@ public:
     TS_ASSERT(ws != NULL);
     // Assert that dimensions should be a general frame
     const auto &frame0 = ws->getDimension(0)->getMDFrame();
-    TSM_ASSERT_THROWS_NOTHING(
-        "Should be a general frame",
-        const auto &tmp =
-            dynamic_cast<const Mantid::Geometry::GeneralFrame &>(frame0));
+    TSM_ASSERT_EQUALS("Should be a general frame", "KiKf", frame0.name());
     TSM_ASSERT_EQUALS(
         "Should have a special coordinate system selection of None",
         ws->getSpecialCoordinateSystem(), Mantid::Kernel::None);
@@ -193,10 +192,7 @@ public:
     TS_ASSERT(ws != NULL);
     // Assert that dimensions should be a general frame
     const auto &frame0 = ws->getDimension(0)->getMDFrame();
-    TSM_ASSERT_THROWS_NOTHING(
-        "Should be a general frame",
-        const auto &tmp =
-            dynamic_cast<const Mantid::Geometry::GeneralFrame &>(frame0));
+    TSM_ASSERT_EQUALS("Should be a general frame", "P", frame0.name());
     TSM_ASSERT_EQUALS(
         "Should have a special coordinate system selection of None",
         ws->getSpecialCoordinateSystem(), Mantid::Kernel::None);

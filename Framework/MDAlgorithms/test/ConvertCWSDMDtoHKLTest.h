@@ -64,9 +64,8 @@ public:
     // Test the frame type
     for (size_t dim = 0; dim < hklws->getNumDims(); ++dim) {
       const auto &frame = hklws->getDimension(dim)->getMDFrame();
-      TSM_ASSERT_THROWS_NOTHING(
-          "Should be convertible to a HKL frame",
-          const auto &tmp = dynamic_cast<const Mantid::Geometry::HKL &>(frame));
+      TSM_ASSERT_EQUALS("Should be convertible to a HKL frame",
+                        Mantid::Geometry::HKL::HKLName, frame.name());
     }
   }
 

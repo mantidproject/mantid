@@ -133,9 +133,8 @@ public:
         AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(
             "IntegratePeaksMDTest_MDEWS");
     auto &frame = mdews->getDimension(0)->getMDFrame();
-    TSM_ASSERT_THROWS_NOTHING(
-        "Should be HKL",
-        const auto &tmp = dynamic_cast<const Mantid::Geometry::HKL &>(frame));
+    TSM_ASSERT_EQUALS("Should be HKL", Mantid::Geometry::HKL::HKLName,
+                      frame.name());
     TS_ASSERT_EQUALS(mdews->getNPoints(), 3000);
     TS_ASSERT_DELTA(mdews->getBox()->getSignal(), 3000.0, 1e-2);
 

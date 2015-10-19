@@ -189,16 +189,15 @@ public:
     if (withFrames) {
       for (size_t dim = 0; dim < ws->getNumDims(); ++dim) {
         const auto &frame = ws->getDimension(dim)->getMDFrame();
-        TSM_ASSERT_THROWS_NOTHING(
-            "Should be convertible to a QSample frame",
-            dynamic_cast<const Mantid::Geometry::QSample &>(frame));
+        TSM_ASSERT_EQUALS("Should be convertible to a QSample frame",
+                          Mantid::Geometry::QSample::QSampleName, frame.name());
       }
     } else {
       for (size_t dim = 0; dim < ws->getNumDims(); ++dim) {
         const auto &frame = ws->getDimension(dim)->getMDFrame();
-        TSM_ASSERT_THROWS_NOTHING(
-            "Should be convertible to a General frame",
-            dynamic_cast<const Mantid::Geometry::GeneralFrame &>(frame));
+        TSM_ASSERT_EQUALS("Should be convertible to a General frame",
+                          Mantid::Geometry::GeneralFrame::GeneralFrameName,
+                          frame.name());
       }
     }
   }
