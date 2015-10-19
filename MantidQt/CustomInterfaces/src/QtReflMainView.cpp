@@ -8,6 +8,12 @@
 #include <qinputdialog.h>
 #include <qmessagebox.h>
 
+
+namespace
+{
+  const QString ReflSettingsGroup = "Mantid/CustomInterfaces/ISISReflectometry";
+}
+
 namespace MantidQt
 {
   namespace CustomInterfaces
@@ -443,6 +449,31 @@ namespace MantidQt
                                                        "IPython Notebook files (*.ipynb);;All files (*.*)",
                                                        new QString("IPython Notebook files (*.ipynb)"));
       return qfilename.toStdString();
+    }
+
+    /**
+     Save settings
+     */
+    void saveSettings(const std::map<std::string,QVariant>& options)
+    {
+      QSettings settings;
+      settings.beginGroup(ReflSettingsGroup);
+      for(auto it = options.begin(); it != options.end(); ++it)
+        settings.setValue(QString::fromStdString(it->first), it->second);
+      settings.endGroup();
+    }
+
+    /*
+     Load settings
+     */
+    void loadSettings(std::map<std::string,QVariant>& options)
+    {
+      QSettings settings;
+      settings.beginGroup(ReflSettingsGroup);
+      QStringList keys = settings.childKeys();
+      for(auto it = keys.begin(); it != keys.end(); ++it)
+        options[it->toStdString()] = settings.value(*it);
+      settings.endGroup();
     }
 
     /**
