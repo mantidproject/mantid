@@ -453,8 +453,9 @@ namespace MantidQt
 
     /**
      Save settings
+     @param options : map of user options to save
      */
-    void saveSettings(const std::map<std::string,QVariant>& options)
+    void QtReflMainView::saveSettings(const std::map<std::string,QVariant>& options)
     {
       QSettings settings;
       settings.beginGroup(ReflSettingsGroup);
@@ -463,10 +464,11 @@ namespace MantidQt
       settings.endGroup();
     }
 
-    /*
+    /**
      Load settings
+     @param options : map of user options to load into
      */
-    void loadSettings(std::map<std::string,QVariant>& options)
+    void QtReflMainView::loadSettings(std::map<std::string,QVariant>& options)
     {
       QSettings settings;
       settings.beginGroup(ReflSettingsGroup);
