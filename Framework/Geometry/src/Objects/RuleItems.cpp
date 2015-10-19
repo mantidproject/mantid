@@ -19,7 +19,6 @@
 #include "MantidGeometry/Surfaces/Line.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
-#include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Object.h"
 
