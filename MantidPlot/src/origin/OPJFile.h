@@ -782,10 +782,10 @@ private:
 	int compareFunctionnames(const char *sname) const;				//!< returns matching function index
 	std::vector<std::string> findDataByIndex(int index) const;
 	std::string findObjectByIndex(int index);
-	void readSpreadInfo(FILE *fopj, FILE *fdebug);
-	void readExcelInfo(FILE *f, FILE *debug);
-	void readMatrixInfo(FILE *fopj, FILE *fdebug);
-	void readGraphInfo(FILE *fopj, FILE *fdebug);
+	void readSpreadInfo(FILE *fopj, int file_size, FILE *fdebug);
+	void readExcelInfo(FILE *f, int file_size, FILE *debug);
+	void readMatrixInfo(FILE *fopj, int file_size, FILE *fdebug);
+	void readGraphInfo(FILE *fopj, int file_size, FILE *fdebug);
 	void readGraphGridInfo(graphGrid &grid, FILE *fopj, int pos);
 	void readGraphAxisBreakInfo(graphAxisBreak &axis_break, FILE *fopj, int pos);
 	void readGraphAxisFormatInfo(graphAxisFormat &format, FILE *fopj, int pos);

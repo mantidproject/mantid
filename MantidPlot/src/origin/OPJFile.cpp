@@ -713,6 +713,18 @@ int OPJFile::ParseFormatNew() {
   char vers[5];
   vers[4]=0;
 
+  // get file size
+  int file_size = 0;
+  {
+    int rv = fseek(f, 0 , SEEK_END);
+    if (rv < 0)
+      fprintf(debug, "Error: could not move to the end of the file\n");
+    file_size = ftell(f);
+    rv = fseek(f, 0, SEEK_SET);
+    if (rv < 0)
+      fprintf(debug, "Error: could not move to the beginning of the file\n");
+  }
+
   // get version
   fseek(f,0x7,SEEK_SET);
   fread(&vers,4,1,f);
@@ -1160,13 +1172,13 @@ int OPJFile::ParseFormatNew() {
     fseek(f,POS,SEEK_SET);
 
     if(compareSpreadnames(object_name)!=-1)
-      readSpreadInfo(f, debug);
+      readSpreadInfo(f, file_size, debug);
     else if(compareMatrixnames(object_name)!=-1)
-      readMatrixInfo(f, debug);
+      readMatrixInfo(f, file_size, debug);
     else if(compareExcelnames(object_name)!=-1)
-      readExcelInfo(f, debug);
+      readExcelInfo(f, file_size, debug);
     else
-      readGraphInfo(f, debug);
+      readGraphInfo(f, file_size, debug);
   }
 
 
@@ -1276,7 +1288,7 @@ int OPJFile::ParseFormatNew() {
   return 0;
 }
 
-void OPJFile::readSpreadInfo(FILE *f, FILE *debug)
+void OPJFile::readSpreadInfo(FILE *f, int file_size, FILE *debug)
 {
   int POS=int(ftell(f));
 
@@ -1332,6 +1344,12 @@ void OPJFile::readSpreadInfo(FILE *f, FILE *debug)
         // this would end in an overflow and it's obviously wrong
         fprintf(debug, "Error: while reading spread info, found section size: %d\n", sec_size);
         fflush(debug);
+      }
+
+      if (file_size < sec_size) {
+        fprintf(debug, "Error in readSpread: found section size (%d) bigger than total file size: %d\n", sec_size, file_size);
+        fflush(debug);
+        return;
       }
 
     //section_body_1
@@ -1507,7 +1525,7 @@ void OPJFile::readSpreadInfo(FILE *f, FILE *debug)
   fseek(f,POS,SEEK_SET);
 }
 
-void OPJFile::readExcelInfo(FILE *f, FILE *debug)
+void OPJFile::readExcelInfo(FILE *f, int file_size, FILE *debug)
 {
   int POS=int(ftell(f));
 
@@ -1567,6 +1585,12 @@ void OPJFile::readExcelInfo(FILE *f, FILE *debug)
         fprintf(debug, "Error: while reading Excel info, found section size: %d\n", sec_size);
         fflush(debug);
       }
+
+      if (file_size < sec_size) {
+        fprintf(debug, "Error in readExcel: found section size (%d) bigger than total file size: %d\n", sec_size, file_size);
+        fflush(debug);
+        return;
+    }
 
     //section_body_1
       LAYER+=0x5;
@@ -1748,7 +1772,7 @@ void OPJFile::readExcelInfo(FILE *f, FILE *debug)
   fseek(f,POS,SEEK_SET);
 }
 
-void OPJFile::readMatrixInfo(FILE *f, FILE *debug)
+void OPJFile::readMatrixInfo(FILE *f, int file_size, FILE *debug)
 {
   int POS=int(ftell(f));
 
@@ -1824,7 +1848,13 @@ void OPJFile::readMatrixInfo(FILE *f, FILE *debug)
       fflush(debug);
     }
 
-  //section_body_1
+    if (file_size < sec_size) {
+        fprintf(debug, "Error in readMatrix: found section size (%d) bigger than total file size: %d\n", sec_size, file_size);
+        fflush(debug);
+        return;
+    }
+
+    //section_body_1
     LAYER+=0x5;
     //check if it is a formula
     if(0==strcmp(sec_name,"MV"))
@@ -1909,7 +1939,7 @@ void OPJFile::readMatrixInfo(FILE *f, FILE *debug)
 }
 
 
-void OPJFile::readGraphInfo(FILE *f, FILE *debug)
+void OPJFile::readGraphInfo(FILE *f, int file_size, FILE *debug)
 {
   int POS=int(ftell(f));
 
@@ -2129,6 +2159,12 @@ void OPJFile::readGraphInfo(FILE *f, FILE *debug)
       fseek(f,LAYER,SEEK_SET);
       fread(&sec_size,4,1,f);
       if(IsBigEndian()) SwapBytes(sec_size);
+
+      if (file_size < sec_size) {
+        fprintf(debug, "Error in readGraph: found section size (%d) bigger than total file size: %d\n", sec_size, file_size);
+        fflush(debug);
+        return;
+    }
 
     //section_body_2
       LAYER+=0x5;
@@ -2938,6 +2974,17 @@ void OPJFile::readProjectTreeFolder(FILE *f, FILE *debug, tree<projectNode>::ite
 {
   int POS=int(ftell(f));
 
+  int file_size = 0;
+  {
+    int rv = fseek(f, 0 , SEEK_END);
+    if (rv < 0)
+      fprintf(debug, "Error: could not move to the end of the file\n");
+    file_size = ftell(f);
+    rv = fseek(f, POS, SEEK_SET);
+    if (rv < 0)
+      fprintf(debug, "Error: could not move to the beginning of the file\n");
+  }
+
   double creation_date, modification_date;
 
   POS+=5;
@@ -2977,6 +3024,10 @@ void OPJFile::readProjectTreeFolder(FILE *f, FILE *debug, tree<projectNode>::ite
   if(IsBigEndian()) SwapBytes(objectcount);
   POS+=5+5;
 
+  // there cannot be more objects than bytes
+  if (objectcount > file_size)
+    objectcount = 0;
+
   for(int i=0; i<objectcount; ++i)
   {
     POS+=5;
@@ -2997,6 +3048,7 @@ void OPJFile::readProjectTreeFolder(FILE *f, FILE *debug, tree<projectNode>::ite
   }
   fseek(f,POS,SEEK_SET);
   fread(&objectcount,4,1,f);
+
   if(IsBigEndian()) SwapBytes(objectcount);
   fseek(f,1,SEEK_CUR);
   for(int i=0; i<objectcount; ++i)
