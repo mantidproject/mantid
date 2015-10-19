@@ -100,11 +100,6 @@ OCGeometryGenerator::~OCGeometryGenerator() {
 }
 
 /**
-* Returns the shape generated.
-*/
-TopoDS_Shape *OCGeometryGenerator::getObjectSurface() { return ObjSurface; }
-  
-/**
 * Analyzes the rule tree in object and creates a Topology Shape
 */
 void OCGeometryGenerator::AnalyzeObject() {
