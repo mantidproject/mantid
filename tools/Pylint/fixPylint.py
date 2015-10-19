@@ -1,13 +1,13 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name,anomalous-backslash-in-string
 import os
 import re
 import argparse
 
-def fixBadIndent(line,indent):
-    err=indent.replace(' Bad indentation. Found ','').replace('(bad-indentation)','').split('spaces, expected')
-    bad=int(err[0])
-    good=int(err[1])
-    return line.replace(' '*bad,' '*good)
+def fixBadIndent(toModify,indent):
+    err_string=indent.replace(' Bad indentation. Found ','').replace('(bad-indentation)','').split('spaces, expected')
+    bad=int(err_string[0])
+    good=int(err_string[1])
+    return toModify.replace(' '*bad,' '*good)
 
 def fixParens(fname,err,errlines):
     f=open(fname,'r')
@@ -49,8 +49,6 @@ def addIgnoreStatement(fname,err):
     f=open(fname,'r')
     content=f.readlines()
     f.close()
-    addNoInit=False
-    addInvalidName=False
     ignore=[]
     for error in err:
         if error.find('(invalid-name)')!=-1 and 'invalid-name' not in ignore:
@@ -67,7 +65,8 @@ def addIgnoreStatement(fname,err):
 
 def generate_choices():
     ch=['simple','parentheses','add_ignores']
-    ch_help=['simple - fixes the following warning: bad-indentation, missing-final-newline, mixed_indentation, trailing-whitespace, unnecesary-semicolon',
+    ch_help=['simple - fixes the following warning: bad-indentation, missing-final-newline, '+\
+             'mixed_indentation, trailing-whitespace, unnecesary-semicolon',
              'parentheses - fixes superfluous-parens warning',
              'add_ignores - adds ignore statemets at the beginning of each file to ignore invalid-name, no-init, too-many-lines']
     chhelp="The possible choices supported are:\n\t"+'\n\t'.join(ch_help)
@@ -77,7 +76,8 @@ if __name__=='__main__':
     choices,choices_help=generate_choices()
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
                                      epilog=choices_help,
-                                     description='Fix some pylint warnings. It is STRONGLY RECOMMENDED to rerun the pylintcheck between fixes')
+                                     description='Fix some pylint warnings. It is STRONGLY RECOMMENDED to '+\
+                                                 'rerun the pylintcheck between fixes')
     parser.add_argument('-fix','--fix', default='simple',
                         choices=choices,
                         help='Select things to fix (default: simple). \nSee the choices options below.')
