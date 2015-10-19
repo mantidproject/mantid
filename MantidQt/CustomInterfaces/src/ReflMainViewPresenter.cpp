@@ -25,7 +25,6 @@
 #include <sstream>
 
 #include <QSettings>
-#include <QFileDialog>
 
 
 using namespace Mantid::API;
