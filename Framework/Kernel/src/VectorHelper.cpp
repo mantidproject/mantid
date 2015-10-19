@@ -533,6 +533,7 @@ void linearlyInterpolateY(const std::vector<double> &x, std::vector<double> &y,
     step++;
   }
 }
+
 namespace {
 /** internal function converted from Lambda to identify interval around
 * specified  point and  run average around this point
@@ -551,7 +552,7 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex,
                   std::vector<double> const *const binBndrs) {
 
   size_t iStart, iEnd;
-  double weight0(0), weight1(0), start, end;
+  double weight0(0), weight1(0), start(0.0), end(0.0);
   //
   if (binBndrs) {
     // identify initial and final bins to
@@ -607,7 +608,11 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex,
     if (iEnd != endIndex)
       avrg += input[iEnd] * weight1;
 
-    return avrg / (end - start);
+    double div = end - start;
+    if (.0 == div)
+      return 0;
+    else
+      return avrg / (end - start);
   } else {
     if (0 == ic) {
       return 0;
@@ -617,6 +622,7 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex,
   }
 }
 }
+
 /** Basic running average of input vector within specified range, considering
 *  variable bin-boundaries if such boundaries are provided.
 * The algorithm performs trapezium integration, so some peak shift
