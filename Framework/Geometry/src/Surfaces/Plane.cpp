@@ -301,7 +301,7 @@ void Plane::write(std::ostream &OX) const {
   std::ostringstream cx;
   Surface::writeHeader(cx);
   cx.precision(Surface::Nprecision);
-    const std::size_t ptype = planeType();
+  const std::size_t ptype = planeType();
   if (!ptype)
     cx << "p " << NormV[0] << " " << NormV[1] << " " << NormV[2] << " " << Dist;
   else if (NormV[ptype - 1] < 0)
