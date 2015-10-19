@@ -37,7 +37,7 @@ const std::string LoadFITS::g_defaultImgType = "SAMPLE";
 LoadFITS::LoadFITS()
     : m_headerScaleKey(), m_headerOffsetKey(), m_headerBitDepthKey(),
       m_headerRotationKey(), m_headerImageKeyKey(), m_headerAxisNameKeys(),
-      m_mapFile(), m_baseName(), m_pixelCount(0) {
+      m_mapFile(), m_pixelCount(0) {
   setupDefaultKeywordNames();
 }
 
@@ -424,9 +424,6 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
   // to it.
   std::string groupName = outWSName;
 
-  // This forms the name of the group
-  m_baseName = getPropertyValue("OutputWorkspace") + "_";
-
   size_t fileNumberInGroup = 0;
   WorkspaceGroup_sptr wsGroup;
 
@@ -594,10 +591,6 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
                         std::vector<char> &buffer, MantidImage &imageY,
                         MantidImage &imageE, const Workspace2D_sptr parent,
                         bool loadAsRectImg, int binSize, double noiseThresh) {
-
-  std::string currNumberS = padZeros(newFileNumber, g_DIGIT_SIZE_APPEND);
-  ++newFileNumber;
-
   // Create workspace (taking into account already here if rebinning is
   // going to happen)
   Workspace2D_sptr ws;
@@ -653,7 +646,12 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
     }
   }
 
-  ws->setTitle(Poco::Path(fileInfo.filePath).getFileName());
+  try {
+    ws->setTitle(Poco::Path(fileInfo.filePath).getFileName());
+  } catch (std::runtime_error &) {
+    ws->setTitle(padZeros(newFileNumber, g_DIGIT_SIZE_APPEND));
+  }
+  ++newFileNumber;
 
   addAxesInfoAndLogs(ws, loadAsRectImg, fileInfo, binSize, cmpp);
 

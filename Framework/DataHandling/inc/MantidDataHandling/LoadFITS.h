@@ -174,7 +174,6 @@ private:
   std::string m_sampleRotation;
   std::string m_imageType;
 
-  std::string m_baseName;
   size_t m_pixelCount;
 
   // Number of digits for the fixed width appendix number added to

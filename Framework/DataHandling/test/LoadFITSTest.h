@@ -311,10 +311,17 @@ public:
                         ws->getNumberHistograms(), g_SPECTRA_COUNT_ASRECT);
     }
 
+    TSM_ASSERT_EQUALS("The output workspace group should have two workspaces",
+                      out->size(), 2);
+
     // and finally a basic check of values in the image, to be safe
     MatrixWorkspace_sptr ws0;
     TS_ASSERT_THROWS_NOTHING(
         ws0 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0)));
+
+    TSM_ASSERT_EQUALS("The title of the first output workspace is not the name "
+                      "of the first file",
+                      ws0->getTitle(), g_smallFname1);
 
     size_t n = ws0->getNumberHistograms();
     TSM_ASSERT_EQUALS(
@@ -328,6 +335,25 @@ public:
     TSM_ASSERT_EQUALS(
         "The value at a given spectrum and bin (last one) is not as expected",
         ws0->readY(n - 1).back(), 142);
+
+    MatrixWorkspace_sptr ws1;
+    TS_ASSERT_THROWS_NOTHING(
+        ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(1)));
+
+    TSM_ASSERT_EQUALS("The title of the second output workspace is not the "
+                      "name of the second file",
+                      ws1->getTitle(), g_smallFname2);
+    TSM_ASSERT_EQUALS(
+        "The value at a given spectrum and bin (first one) is not as expected",
+        ws1->readY(n - 1)[0], 155);
+
+    TSM_ASSERT_EQUALS(
+        "The value at a given spectrum and bin (middle one) is not as expected",
+        ws1->readY(n - 1)[g_SPECTRA_COUNT_ASRECT / 2], 199);
+
+    TSM_ASSERT_EQUALS(
+        "The value at a given spectrum and bin (last one) is not as expected",
+        ws1->readY(n - 1).back(), 133);
   }
 
   void test_loadEmpty() {
@@ -386,6 +412,5 @@ const std::string LoadFITSTest::g_hdrBITPIX = "16";
 const std::string LoadFITSTest::g_hdrNAXIS = "2";
 const std::string LoadFITSTest::g_hdrNAXIS1 = "512";
 const std::string LoadFITSTest::g_hdrNAXIS2 = "512";
-
 
 #endif // MANTID_DATAHANDLING_LOADFITSTEST_H_
