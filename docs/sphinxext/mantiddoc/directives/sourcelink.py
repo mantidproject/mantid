@@ -186,7 +186,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
             suggested_path = "os_agnostic_path_to_file_from_Code/Mantid"
             if len(valid_ext_list) == 0:
                 raise SourceLinkError("No file possibilities for " + file_name + " have been found\n" +
-                                      "Please specify a better one using the :filename: opiton or use the " + 
+                                      "Please specify a better one using the :filename: opiton or use the " +
                                       str(self.file_types.keys()) + " options\n" +
                                       "e.g. \n" +
                                       ".. sourcelink:\n" +
@@ -199,7 +199,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
                 if ("cpp" not in valid_ext_list) or ("h" not in valid_ext_list):
                     raise SourceLinkError("Only one of .h and .cpp found for " + file_name + "\n" +
                                           "valid files found for " + str(valid_ext_list) + "\n" +
-                                          "Please specify the missing one using an " + 
+                                          "Please specify the missing one using an " +
                                           str(self.file_types.keys()) + " option\n" +
                                           "e.g. \n" +
                                           ".. sourcelink:\n" +

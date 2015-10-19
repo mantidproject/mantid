@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import os,  re
 import urllib2
 
@@ -67,11 +68,11 @@ for alg in algs:
             algText = algRst.read()
         for concept in concepts:
             regex = conceptsPattern[concept]
-    	    while (regex.search(algText) != None):
-    	        outputError(alg, algVersion, "found", concept)
-    	        algText = regex.sub(r":ref:`\1 <\2>`",algText)
+            while regex.search(algText) != None:
+                outputError(alg, algVersion, "found", concept)
+                algText = regex.sub(r":ref:`\1 <\2>`",algText)
                 with open (filename, "w") as algRst:
-    	            algRst.write(algText)
+                    algRst.write(algText)
 
     if fileFound==False:
         outputError(alg, algVersion, "File not found")
