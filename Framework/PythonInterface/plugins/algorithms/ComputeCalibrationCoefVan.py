@@ -1,6 +1,5 @@
-from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, Progress, InstrumentValidator
+from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, Progress, InstrumentValidator
 from mantid.kernel import Direction
-import mantid.simpleapi as api
 import numpy as np
 from scipy import integrate
 import scipy as sp
@@ -36,10 +35,10 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
     def PyInit(self):
         """ Declare properties
         """
-        self.declareProperty(WorkspaceProperty("VanadiumWorkspace", "", direction=Direction.Input,
-                                               validator=InstrumentValidator()),
+        self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", direction=Direction.Input,
+                                                     validator=InstrumentValidator()),
                              "Input Vanadium workspace")
-        self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
                              "Name the workspace that will contain the calibration coefficients")
         return
 
@@ -55,10 +54,6 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
                 float(run.getProperty('wavelength').value)
             except ValueError:
                 issues['VanadiumWorkspace'] = "Invalid value for wavelength sample log. Wavelength must be a number."
-
-        outws = self.getPropertyValue("OutputWorkspace")
-        if not outws:
-            issues["OutputWorkspace"] = "Name of the output workspace must not be empty."
 
         return issues
 
@@ -119,11 +114,16 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         coefX = np.zeros(nhist)
         coefX.fill(dataX[0])
 
-        api.CreateWorkspace(OutputWorkspace=outws_name, DataX=coefX, DataY=coefY, DataE=coefE, NSpec=nhist, UnitX="TOF")
-        outws = api.AnalysisDataService.retrieve(outws_name)
-        api.CopyLogs(self.vanaws, outws)
-
-        self.log().information("Workspace with calibration coefficients " + outws.getName() + " has been created.")
+        create = self.createChildAlgorithm("CreateWorkspace")
+        create.setPropertyValue('OutputWorkspace', outws_name)
+        create.setProperty('ParentWorkspace', self.vanaws)
+        create.setProperty('DataX', coefX)
+        create.setProperty('DataY', coefY)
+        create.setProperty('DataE', coefE)
+        create.setProperty('NSpec', nhist)
+        create.setProperty('UnitX', 'TOF')
+        create.execute()
+        outws = create.getProperty('OutputWorkspace').value
 
         self.setProperty("OutputWorkspace", outws)
 
@@ -140,7 +140,7 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         """
         run = self.vanaws.getRun()
         nhist = self.vanaws.getNumberHistograms()
-        thetasort = np.zeros(nhist)  # theta in radians !!!NOT 2Theta
+        thetasort = np.zeros(nhist)  # theta in radians, not 2Theta
 
         instrument = self.vanaws.getInstrument()
         detID_offset = self.get_detID_offset()

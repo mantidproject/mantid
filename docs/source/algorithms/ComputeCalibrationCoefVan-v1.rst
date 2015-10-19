@@ -21,7 +21,7 @@ Algorithm creates a workspace with  detector sensitivity correction coefficients
 
    :math:`J(y) = \int_0^1 x\cdot\mathrm{coth}\left(\frac{x}{2y}\right)\,\mathrm{d}x`
 
-   where :math:`y=T/T_m` is the ratio of the temperature during the experiment :math:`T` to the Debye temperature :math:`T_m = 389K`, :math:`m_V` is the Vanadium atomic mass (in kg) and :math:`\theta_i` is the polar angle of the i-th detector retrieved using the *detectorSignedTwoTheta* function.
+   where :math:`y=T/T_m` is the ratio of the temperature during the experiment :math:`T` to the Debye temperature :math:`T_m = 389K`, :math:`m_V` is the Vanadium atomic mass (in kg) and :math:`\theta_i` is the polar angle of the i-th detector.
 
 .. warning::
 
