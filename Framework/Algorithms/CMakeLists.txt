@@ -3,6 +3,7 @@ set ( SRC_FILES
 	# src/CountEventsInPulses.cpp
 	# src/UpdatePeakParameterTable.cpp
 	src/AbsorptionCorrection.cpp
+	src/AddHistoryNote.cpp
 	src/AddLogDerivative.cpp
 	src/AddNote.cpp
 	src/AddPeak.cpp
@@ -126,12 +127,12 @@ set ( SRC_FILES
 	src/FlatPlateAbsorption.cpp
 	src/GeneralisedSecondDifference.cpp
 	src/GenerateEventsFilter.cpp
+	src/GenerateIPythonNotebook.cpp
 	src/GeneratePeaks.cpp
 	src/GeneratePythonScript.cpp
 	src/GetAllEi.cpp
 	src/GetDetOffsetsMultiPeaks.cpp
 	src/GetDetectorOffsets.cpp
-	src/GetAllEi.cpp
 	src/GetEi.cpp
 	src/GetEi2.cpp
 	src/GetTimeSeriesLogInformation.cpp
@@ -272,13 +273,14 @@ set ( SRC_FILES
 	src/WienerSmooth.cpp
 	src/WorkspaceJoiners.cpp
 	src/XDataConverter.cpp
-    src/GenerateIPythonNotebook.cpp)
+)
 
 set ( INC_FILES
 	#	inc/MantidAlgorithms/Q1DTOF.h
 	# inc/MantidAlgorithms/CountEventsInPulses.h
 	# inc/MantidAlgorithms/UpdatePeakParameterTable.h
 	inc/MantidAlgorithms/AbsorptionCorrection.h
+	inc/MantidAlgorithms/AddHistoryNote.h
 	inc/MantidAlgorithms/AddLogDerivative.h
 	inc/MantidAlgorithms/AddNote.h
 	inc/MantidAlgorithms/AddPeak.h
@@ -401,11 +403,12 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FixGSASInstrumentFile.h
 	inc/MantidAlgorithms/FlatPlateAbsorption.h
 	inc/MantidAlgorithms/GSLFunctions.h
-	inc/MantidAlgorithms/GetAllEi.h
 	inc/MantidAlgorithms/GeneralisedSecondDifference.h
 	inc/MantidAlgorithms/GenerateEventsFilter.h
+	inc/MantidAlgorithms/GenerateIPythonNotebook.h
 	inc/MantidAlgorithms/GeneratePeaks.h
 	inc/MantidAlgorithms/GeneratePythonScript.h
+	inc/MantidAlgorithms/GetAllEi.h
 	inc/MantidAlgorithms/GetDetOffsetsMultiPeaks.h
 	inc/MantidAlgorithms/GetDetectorOffsets.h
 	inc/MantidAlgorithms/GetEi.h
@@ -549,7 +552,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/WienerSmooth.h
 	inc/MantidAlgorithms/WorkspaceJoiners.h
 	inc/MantidAlgorithms/XDataConverter.h
-    inc/MantidAlgorithms/GenerateIPythonNotebook.h)
+)
 
 set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp
     src/FFTSmooth.cpp
@@ -566,6 +569,7 @@ endif(UNITY_BUILD)
 set ( TEST_FILES
 	# CountEventsInPulsesTest.h
 	# UpdatePeakParameterTableTest.h
+	AddHistoryNoteTest.h
 	AddLogDerivativeTest.h
 	AddNoteTest.h
 	AddPeakTest.h
