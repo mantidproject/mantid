@@ -50,7 +50,7 @@ private:
 
   Kernel::V3D Centre; ///< Kernel::V3D for centre
   Kernel::V3D Normal; ///< Direction of centre line
-  int Nvec;           ///< Normal vector is x,y or z :: (1-3) (0 if general)
+  std::size_t Nvec;   ///< Normal vector is x,y or z :: (1-3) (0 if general)
   double Radius;      ///< Radius of cylinder
 
   void rotate(const Kernel::Matrix<double> &);

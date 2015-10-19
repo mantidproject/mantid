@@ -171,8 +171,8 @@ int Torus::setSurface(const std::string &Pstr)
     return errDesc;
 
   // Torus on X/Y/Z axis
-  const int ptype = static_cast<int>(tolower(item[2]) - 'x');
-  if (ptype < 0 || ptype >= 3)
+  const std::size_t ptype = static_cast<std::size_t>(tolower(item[2]) - 'x');
+  if (ptype >= 3)
     return errAxis;
 
   Kernel::V3D Norm;

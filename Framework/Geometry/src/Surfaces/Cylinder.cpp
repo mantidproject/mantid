@@ -113,9 +113,10 @@ int Cylinder::setSurface(const std::string &Pstr)
     return errDesc;
 
   // Cylinders on X/Y/Z axis
-  const int itemPt((item[1] == '/' && item.length() == 3) ? 2 : 1);
-  const int ptype = static_cast<int>(tolower(item[itemPt]) - 'x');
-  if (ptype < 0 || ptype >= 3)
+  const std::size_t itemPt((item[1] == '/' && item.length() == 3) ? 2 : 1);
+  const std::size_t ptype =
+      static_cast<std::size_t>(tolower(item[itemPt]) - 'x');
+  if (ptype >= 3)
     return errAxis;
   std::vector<double> norm(3, 0.0);
   std::vector<double> cent(3, 0.0);
@@ -123,7 +124,7 @@ int Cylinder::setSurface(const std::string &Pstr)
 
   if (itemPt != 1) {
     // get the other two coordinates
-    int index((!ptype) ? 1 : 0);
+    std::size_t index((!ptype) ? 1 : 0);
     while (index < 3 && Mantid::Kernel::Strings::section(Line, cent[index])) {
       index++;
       if (index == ptype)
@@ -202,7 +203,7 @@ void Cylinder::setNvec()
  */
 {
   Nvec = 0;
-  for (int i = 0; i < 3; i++) {
+  for (std::size_t i = 0; i < 3; i++) {
     if (fabs(Normal[i]) > (1.0 - Tolerance)) {
       Nvec = i + 1;
       return;

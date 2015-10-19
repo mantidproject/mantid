@@ -52,7 +52,7 @@ private:
   Kernel::V3D NormV; ///< Normal vector
   double Dist;       ///< Distance
 
-  int planeType() const; ///< are we alined on an axis
+  std::size_t planeType() const; ///< are we alined on an axis
 
 public:
   /// Effective typename

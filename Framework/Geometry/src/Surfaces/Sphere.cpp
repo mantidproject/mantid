@@ -107,14 +107,15 @@ Valid input is:
   if (item.length() == 2) // sx/sy/sz
   {
     if (tolower(item[1]) != 'o') {
-      const int pType = static_cast<int>(tolower(item[1]) - 'x');
-      if (pType < 0 || pType > 2)
+      const std::size_t pType =
+          static_cast<std::size_t>(tolower(item[1]) - 'x');
+      if (pType > 2)
         return -3;
       if (!Mantid::Kernel::Strings::section(Line, cent[pType]))
         return -4;
     }
   } else if (item.length() == 1) {
-    int index;
+    std::size_t index;
     for (index = 0;
          index < 3 && Mantid::Kernel::Strings::section(Line, cent[index]);
          index++)

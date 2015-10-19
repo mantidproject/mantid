@@ -260,7 +260,7 @@ void Plane::print() const
   return;
 }
 
-int Plane::planeType() const
+std::size_t Plane::planeType() const
 /**
    Find if the normal vector allows it to be a special
    type of plane (x,y,z direction)
@@ -269,7 +269,7 @@ int Plane::planeType() const
    @retval 0 :: general plane
 */
 {
-  for (int i = 0; i < 3; i++)
+  for (std::size_t i = 0; i < 3; i++)
     if (fabs(NormV[i]) > (1.0 - Tolerance))
       return i + 1;
   return 0;
@@ -301,7 +301,7 @@ void Plane::write(std::ostream &OX) const {
   std::ostringstream cx;
   Surface::writeHeader(cx);
   cx.precision(Surface::Nprecision);
-  const int ptype = planeType();
+    const std::size_t ptype = planeType();
   if (!ptype)
     cx << "p " << NormV[0] << " " << NormV[1] << " " << NormV[2] << " " << Dist;
   else if (NormV[ptype - 1] < 0)
