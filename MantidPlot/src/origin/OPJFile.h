@@ -782,14 +782,14 @@ private:
 	int compareFunctionnames(const char *sname) const;				//!< returns matching function index
 	std::vector<std::string> findDataByIndex(int index) const;
 	std::string findObjectByIndex(int index);
-	void readSpreadInfo(FILE *fopj, int file_size, FILE *fdebug);
+        void readSpreadInfo(FILE *fopj, int file_size, FILE *fdebug);
 	void readExcelInfo(FILE *f, int file_size, FILE *debug);
 	void readMatrixInfo(FILE *fopj, int file_size, FILE *fdebug);
 	void readGraphInfo(FILE *fopj, int file_size, FILE *fdebug);
-	void readGraphGridInfo(graphGrid &grid, FILE *fopj, int pos);
-	void readGraphAxisBreakInfo(graphAxisBreak &axis_break, FILE *fopj, int pos);
-	void readGraphAxisFormatInfo(graphAxisFormat &format, FILE *fopj, int pos);
-	void readGraphAxisTickLabelsInfo(graphAxisTick &tick, FILE *fopj, int pos);
+	void readGraphGridInfo(graphGrid &grid, FILE *fopj, FILE *debug, int pos);
+	void readGraphAxisBreakInfo(graphAxisBreak &axis_break, FILE *fopj, FILE *debug, int pos);
+	void readGraphAxisFormatInfo(graphAxisFormat &format, FILE *fopj, FILE *debug, int pos);
+	void readGraphAxisTickLabelsInfo(graphAxisTick &tick, FILE *fopj, FILE *debug, int pos);
 	void readProjectTree(FILE *f, FILE *debug);
 	void readProjectTreeFolder(FILE *f, FILE *debug, tree<projectNode>::iterator parent);
 	void readWindowProperties(originWindow& window, FILE *f, FILE *debug, int POS, int headersize);
