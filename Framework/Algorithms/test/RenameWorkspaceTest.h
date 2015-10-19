@@ -23,7 +23,7 @@ public:
     TS_ASSERT(alg2.isInitialized());
 
     const std::vector<Property *> props = alg2.getProperties();
-    TS_ASSERT_EQUALS(props.size(), 2);
+    TS_ASSERT_EQUALS(props.size(), 3);
 
     TS_ASSERT_EQUALS(props[0]->name(), "InputWorkspace");
     TS_ASSERT(props[0]->isDefault());
@@ -132,7 +132,7 @@ public:
     ads.clear();
   }
 
-  void testMonitorWS() {
+  void testRenameMonitorWS() {
     AnalysisDataService::Instance().clear();
     MatrixWorkspace_sptr inputWS = createWorkspace();
     AnalysisDataService::Instance().add("InputWS", inputWS);
@@ -146,6 +146,7 @@ public:
         alg.setPropertyValue("InputWorkspace", "InputWS"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "WS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RenameMonitors", true));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
