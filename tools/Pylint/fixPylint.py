@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import os
 import re
 import argparse
@@ -155,7 +156,7 @@ if __name__=='__main__':
                     errorlines.append(lineNumber)
                 j+=1
             if args.fix=='simple':
-                tryToFixError(correct_filename,errors,errorlines)
+                fixSeveralErrors(correct_filename,errors,errorlines)
             elif args.fix=='add_ignores':
                 addIgnoreStatement(correct_filename,errors)
             elif args.fix=='parentheses':

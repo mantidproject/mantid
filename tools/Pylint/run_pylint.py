@@ -57,7 +57,7 @@ class Results(object):
         """
         Return true if all files were clean
         """
-        return (len(self.failures) == 0)
+        return len(self.failures) == 0
 
     def add(self, modulename, status):
         """
@@ -352,7 +352,7 @@ def find_importable_targets(dirpath):
             pkg_init = os.path.join(abspath, "__init__.py")
             if (os.path.isfile(abspath) and item.endswith(".py")) or \
                 os.path.isfile(pkg_init):
-                 importables.append(abspath)
+                importables.append(abspath)
             elif os.path.isdir(abspath):
                 importables.extend(package_walk(abspath))
         return importables
@@ -386,7 +386,7 @@ def exec_pylint_on_importable(srcpath, serializer, options):
     with temp_dir_change(os.path.dirname(srcpath)):
         status = subp.call(cmd, stdout=serializer)
 
-    return (status == 0)
+    return status == 0
 
 #------------------------------------------------------------------------------
 
