@@ -269,7 +269,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /**  Filter test with TOF correction
     */
-  void test_FilterWithCorrection() {
+  void test_FilterWithCustumizedCorrection() {
     // 1. Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -328,9 +328,12 @@ public:
     DataObjects::EventList elist3 = filteredws1->getEventList(3);
     elist3.sortPulseTimeTOF();
 
-    DataObjects::TofEvent eventmin = elist3.getEvent(0);
-    TS_ASSERT_EQUALS(eventmin.pulseTime().totalNanoseconds(), runstart_i64);
-    TS_ASSERT_DELTA(eventmin.tof(), 80 * 1000, 1.0E-4);
+    if (elist3.getNumberEvents() > 0)
+    {
+      DataObjects::TofEvent eventmin = elist3.getEvent(0);
+      TS_ASSERT_EQUALS(eventmin.pulseTime().totalNanoseconds(), runstart_i64);
+      TS_ASSERT_DELTA(eventmin.tof(), 80 * 1000, 1.0E-4);
+    }
 
     // 5. Clean
     AnalysisDataService::Instance().remove("EventData");
