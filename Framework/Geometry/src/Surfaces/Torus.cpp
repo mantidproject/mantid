@@ -17,9 +17,30 @@
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Surfaces/Torus.h"
+
 #ifdef ENABLE_OPENCASCADE
-#include <TopoDS_Shape.hxx>
+// Opencascade defines _USE_MATH_DEFINES without checking whether it is already
+// used.
+// Undefine it here before we include the headers to avoid a warning
+#ifdef _MSC_VER
+#undef _USE_MATH_DEFINES
+#ifdef M_SQRT1_2
+#undef M_SQRT1_2
 #endif
+#endif
+
+#include "MantidKernel/WarningSuppressions.h"
+GCC_DIAG_OFF(conversion)
+// clang-format off
+GCC_DIAG_OFF(cast-qual)
+// clang-format on
+#include <TopoDS_Shape.hxx>
+GCC_DIAG_ON(conversion)
+// clang-format off
+GCC_DIAG_ON(cast-qual)
+// clang-format on
+#endif
+
 namespace Mantid {
 
 namespace Geometry {

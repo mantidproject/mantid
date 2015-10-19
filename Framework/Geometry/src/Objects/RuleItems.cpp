@@ -23,10 +23,29 @@
 #include "MantidGeometry/Objects/Object.h"
 
 #ifdef ENABLE_OPENCASCADE
+// Opencascade defines _USE_MATH_DEFINES without checking whether it is already
+// used.
+// Undefine it here before we include the headers to avoid a warning
+#ifdef _MSC_VER
+#undef _USE_MATH_DEFINES
+#ifdef M_SQRT1_2
+#undef M_SQRT1_2
+#endif
+#endif
+
+#include "MantidKernel/WarningSuppressions.h"
+GCC_DIAG_OFF(conversion)
+// clang-format off
+GCC_DIAG_OFF(cast-qual)
+// clang-format on
 #include <TopoDS_Shape.hxx>
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
+GCC_DIAG_ON(conversion)
+// clang-format off
+GCC_DIAG_ON(cast-qual)
+// clang-format on
 #endif
 
 namespace Mantid {
