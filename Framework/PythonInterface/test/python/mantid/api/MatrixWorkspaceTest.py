@@ -1,5 +1,8 @@
 import unittest
 import sys
+import os
+#os.environ["PATH"] =r"c:/Mantid/_builds/br_master/bin/Release;"+os.environ["PATH"]
+
 import math
 from testhelpers import create_algorithm, run_algorithm, can_be_instantiated, WorkspaceCreationHelper
 from mantid.api import (MatrixWorkspace, MatrixWorkspaceProperty, WorkspaceProperty, Workspace,
@@ -349,11 +352,11 @@ class MatrixWorkspaceTest(unittest.TestCase):
         run_algorithm('CreateWorkspace', OutputWorkspace='ws1',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
         run_algorithm('CreateWorkspace', OutputWorkspace='ws_mon',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
         
-        ws1=mtd['ws1']
+        ws1=AnalysisDataService.retrieve('ws1')
         monWs = ws1.getMonitorWorkspace()
         self.assertTrue(monWs is None)
         
-        monWs = mtd['ws_mon']
+        monWs = AnalysisDataService.retrieve('ws_mon')
         ws1.setMonitorWorkspace(monWs)
         monWs.setTitle("My Fake Monitor workspace")
         
