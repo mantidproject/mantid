@@ -37,8 +37,7 @@ const std::string LoadFITS::g_defaultImgType = "SAMPLE";
 LoadFITS::LoadFITS()
     : m_headerScaleKey(), m_headerOffsetKey(), m_headerBitDepthKey(),
       m_headerRotationKey(), m_headerImageKeyKey(), m_headerAxisNameKeys(),
-      m_mapFile(), m_baseName(), m_pixelCount(0), m_rebin(1),
-      m_noiseThresh(0.0) {
+      m_mapFile(), m_baseName(), m_pixelCount(0) {
   setupDefaultKeywordNames();
 }
 
@@ -54,31 +53,6 @@ int LoadFITS::confidence(Kernel::FileDescriptor &descriptor) const {
   return (descriptor.extension() == ".fits" || descriptor.extension() == ".fit")
              ? 80
              : 0;
-}
-
-/**
- * Sets several keyword names with default (and standard) values. You
- * don't want to change these unless you want to break compatibility
- * with the FITS standard.
- */
-void LoadFITS::setupDefaultKeywordNames() {
-  // Inits all the absolutely necessary keywords
-  // standard headers (If SIMPLE=T)
-  m_headerScaleKey = "BSCALE";
-  m_headerOffsetKey = "BZERO";
-  m_headerBitDepthKey = "BITPIX";
-  m_headerImageKeyKey = "IMAGE_TYPE"; // This is a "HIERARCH Image/Type= "
-  m_headerRotationKey = "ROTATION";
-
-  m_headerNAxisNameKey = "NAXIS";
-  m_headerAxisNameKeys.push_back("NAXIS1");
-  m_headerAxisNameKeys.push_back("NAXIS2");
-
-  m_mapFile = "";
-
-  // extensions
-  m_sampleRotation = "HIERARCH Sample/Tomo_Angle";
-  m_imageType = "HIERARCH Image/Type";
 }
 
 /**
@@ -147,149 +121,12 @@ void LoadFITS::exec() {
   std::vector<std::string> paths;
   boost::split(paths, fName, boost::is_any_of(","));
 
-  m_rebin = getProperty("BinSize");
-  m_noiseThresh = getProperty("FilterNoiseLevel");
+  int binSize = getProperty("BinSize");
+  double noiseThresh = getProperty("FilterNoiseLevel");
   bool loadAsRectImg = getProperty("LoadAsRectImg");
   const std::string outWSName = getPropertyValue("OutputWorkspace");
 
-  doLoadFiles(paths, outWSName, loadAsRectImg);
-}
-
-/**
- * Create FITS file information for each file selected. Loads headers
- * and data from the files and creates and fills the output
- * workspace(s).
- *
- * @param paths File names as given in the algorithm input property
- *
- * @param outWSName name of the output (group) workspace to create
- *
- * @param loadAsRectImg Load files with 1 spectrum per row and 1 bin
- * per column, so a color fill plot displays the image
- *
- * @throw std::runtime_error when load fails (for example a memory
- * allocation issue, wrong rebin requested, etc.)
- */
-void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
-                           const std::string &outWSName, bool loadAsRectImg) {
-  std::vector<FITSInfo> headers;
-
-  doLoadHeaders(paths, headers);
-
-  // No extension is set -> it's the standard format which we can parse.
-  if (headers[0].numberOfAxis > 0)
-    m_pixelCount += headers[0].axisPixelLengths[0];
-
-  // Presumably 2 axis, but futureproofing.
-  for (int i = 1; i < headers[0].numberOfAxis; ++i) {
-    m_pixelCount *= headers[0].axisPixelLengths[i];
-  }
-
-  // Check consistency of m_rebin asap
-  for (int i = 0; i < headers[0].numberOfAxis; ++i) {
-    if (0 != (headers[0].axisPixelLengths[i] % m_rebin)) {
-      throw std::runtime_error(
-          "Cannot rebin this image in blocks of " +
-          boost::lexical_cast<std::string>(m_rebin) + " x " +
-          boost::lexical_cast<std::string>(m_rebin) +
-          " pixels as requested because the size of dimension " +
-          boost::lexical_cast<std::string>(i + 1) + " (" +
-          boost::lexical_cast<std::string>(headers[0].axisPixelLengths[i]) +
-          ") is not a multiple of the bin size.");
-    }
-  }
-
-  MantidImage imageY(headers[0].axisPixelLengths[1],
-                     std::vector<double>(headers[0].axisPixelLengths[0]));
-  MantidImage imageE(headers[0].axisPixelLengths[1],
-                     std::vector<double>(headers[0].axisPixelLengths[0]));
-
-  size_t bytes = (headers[0].bitsPerPixel / 8) * m_pixelCount;
-  std::vector<char> buffer;
-  try {
-    buffer.resize(bytes);
-  } catch (std::exception &) {
-    throw std::runtime_error(
-        "Could not allocate enough memory to run when trying to allocate " +
-        boost::lexical_cast<std::string>(bytes) + " bytes.");
-  }
-
-  // Create a group for these new workspaces, if the group already exists, add
-  // to it.
-  std::string groupName = outWSName;
-
-  // This forms the name of the group
-  m_baseName = getPropertyValue("OutputWorkspace") + "_";
-
-  size_t fileNumberInGroup = 0;
-  WorkspaceGroup_sptr wsGroup;
-
-  if (!AnalysisDataService::Instance().doesExist(groupName)) {
-    wsGroup = WorkspaceGroup_sptr(new WorkspaceGroup());
-    wsGroup->setTitle(groupName);
-  } else {
-    // Get the name of the latest file in group to start numbering from
-    if (AnalysisDataService::Instance().doesExist(groupName))
-      wsGroup =
-          AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
-
-    std::string latestName = wsGroup->getNames().back();
-    // Set next file number
-    fileNumberInGroup = fetchNumber(latestName) + 1;
-  }
-
-  size_t totalWS = headers.size();
-  // Create a progress reporting object
-  API::Progress progress(this, 0, 1, totalWS + 1);
-  progress.report(0, "Loading file(s) into workspace(s)");
-
-  // Create first workspace (with instrument definition). This is also used as
-  // a template for creating others
-  Workspace2D_sptr latestWS;
-  latestWS = makeWorkspace(headers[0], fileNumberInGroup, buffer, imageY,
-                           imageE, latestWS, loadAsRectImg);
-  progress.report(1, "First file loaded.");
-
-  std::vector<Workspace2D_sptr> wsOrdered(totalWS);
-  wsOrdered[0] = latestWS;
-
-  if (isInstrOtherThanIMAT(headers[0])) {
-    // For now we assume IMAT except when specific headers are found by
-    // isInstrOtherThanIMAT()
-    //
-    // TODO: do this conditional on INSTR='IMAT' when we have proper IMAT .fits
-    // files
-    try {
-      IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
-      std::string directoryName =
-          Kernel::ConfigService::Instance().getInstrumentDirectory();
-      directoryName = directoryName + "/IMAT_Definition.xml";
-      loadInst->setPropertyValue("Filename", directoryName);
-      loadInst->setProperty<MatrixWorkspace_sptr>(
-          "Workspace", boost::dynamic_pointer_cast<MatrixWorkspace>(latestWS));
-      loadInst->execute();
-    } catch (std::exception &ex) {
-      g_log.information("Cannot load the instrument definition. " +
-                        std::string(ex.what()));
-    }
-  }
-
-  // don't feel tempted to parallelize this loop as it is - it uses the same
-  // imageY and imageE buffers for all the workspaces
-  for (int64_t i = 1; i < static_cast<int64_t>(totalWS); ++i) {
-    latestWS = makeWorkspace(headers[i], fileNumberInGroup, buffer, imageY,
-                             imageE, latestWS, loadAsRectImg);
-    wsOrdered[i] = latestWS;
-    progress.report("Loaded file " + boost::lexical_cast<std::string>(i + 1) +
-                    " of " + boost::lexical_cast<std::string>(totalWS));
-  }
-
-  // Add to group - done here to maintain sequence
-  for (size_t i = 0; i < wsOrdered.size(); ++i) {
-    wsGroup->addWorkspace(wsOrdered[i]);
-  }
-
-  setProperty("OutputWorkspace", wsGroup);
+  doLoadFiles(paths, outWSName, loadAsRectImg, binSize, noiseThresh);
 }
 
 /**
@@ -383,9 +220,9 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
         headers[i].axisPixelLengths.push_back(boost::lexical_cast<size_t>(
             headers[i].headerKeys[m_headerAxisNameKeys[j]]));
         // only debug level, when loading multiple files this is very verbose
-        g_log.debug()
-            << "Found axis length header entry: " << m_headerAxisNameKeys[j]
-            << " = " << headers[i].axisPixelLengths.back() << std::endl;
+        g_log.debug() << "Found axis length header entry: "
+                      << m_headerAxisNameKeys[j] << " = "
+                      << headers[i].axisPixelLengths.back() << std::endl;
       }
 
       // Various extensions to the FITS format are used elsewhere, and
@@ -457,6 +294,210 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
     // FITS), and has two axis
     headerSanityCheck(headers[i], headers[0]);
   }
+}
+
+/**
+ * Checks that a FITS header (once loaded) is valid/supported:
+ * standard (no extension to FITS), and has two axis with the expected
+ * dimensions.
+ *
+ * @param hdr FITS header struct loaded from a file - to check
+ *
+ * @param hdrFirst FITS header struct loaded from a (first) reference file -
+ *to
+ * compare against
+ *
+ * @throws std::exception if there's any issue or unsupported entry in the
+ * header
+ */
+void LoadFITS::headerSanityCheck(const FITSInfo &hdr,
+                                 const FITSInfo &hdrFirst) {
+  bool valid = true;
+  if (hdr.extension != "") {
+    valid = false;
+    g_log.error() << "File " << hdr.filePath
+                  << ": extensions found in the header." << std::endl;
+  }
+  if (hdr.numberOfAxis != 2) {
+    valid = false;
+    g_log.error() << "File " << hdr.filePath
+                  << ": the number of axes is not 2 but: " << hdr.numberOfAxis
+                  << std::endl;
+  }
+
+  // Test current item has same axis values as first item.
+  if (hdr.axisPixelLengths[0] != hdrFirst.axisPixelLengths[0]) {
+    valid = false;
+    g_log.error() << "File " << hdr.filePath
+                  << ": the number of pixels in the first dimension differs "
+                     "from the first file loaded (" << hdrFirst.filePath
+                  << "): " << hdr.axisPixelLengths[0]
+                  << " != " << hdrFirst.axisPixelLengths[0] << std::endl;
+  }
+  if (hdr.axisPixelLengths[1] != hdrFirst.axisPixelLengths[1]) {
+    valid = false;
+    g_log.error() << "File " << hdr.filePath
+                  << ": the number of pixels in the second dimension differs"
+                     "from the first file loaded (" << hdrFirst.filePath
+                  << "): " << hdr.axisPixelLengths[0]
+                  << " != " << hdrFirst.axisPixelLengths[0] << std::endl;
+  }
+
+  // Check the format is correct and create the Workspace
+  if (!valid) {
+    // Invalid files, record error
+    throw std::runtime_error(
+        "An issue has been found in the header of this FITS file: " +
+        hdr.filePath +
+        ". This algorithm currently doesn't support FITS files with "
+        "non-standard extensions, more than two axis "
+        "of data, or has detected that all the files are "
+        "not similar.");
+  }
+}
+
+/**
+ * Create FITS file information for each file selected. Loads headers
+ * and data from the files and creates and fills the output
+ * workspace(s).
+ *
+ * @param paths File names as given in the algorithm input property
+ *
+ * @param outWSName name of the output (group) workspace to create
+ *
+ * @param loadAsRectImg Load files with 1 spectrum per row and 1 bin
+ * per column, so a color fill plot displays the image
+ *
+ * @param binSize size to rebin (1 == no re-bin == default)
+ *
+ * @param noiseThresh threshold for noise filtering
+ *
+ * @throw std::runtime_error when load fails (for example a memory
+ * allocation issue, wrong rebin requested, etc.)
+ */
+void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
+                           const std::string &outWSName, bool loadAsRectImg,
+                           int binSize, double noiseThresh) {
+  std::vector<FITSInfo> headers;
+
+  doLoadHeaders(paths, headers);
+
+  // No extension is set -> it's the standard format which we can parse.
+  if (headers[0].numberOfAxis > 0)
+    m_pixelCount += headers[0].axisPixelLengths[0];
+
+  // Presumably 2 axis, but futureproofing.
+  for (int i = 1; i < headers[0].numberOfAxis; ++i) {
+    m_pixelCount *= headers[0].axisPixelLengths[i];
+  }
+
+  // Check consistency of binSize asap
+  for (int i = 0; i < headers[0].numberOfAxis; ++i) {
+    if (0 != (headers[0].axisPixelLengths[i] % binSize)) {
+      throw std::runtime_error(
+          "Cannot rebin this image in blocks of " +
+          boost::lexical_cast<std::string>(binSize) + " x " +
+          boost::lexical_cast<std::string>(binSize) +
+          " pixels as requested because the size of dimension " +
+          boost::lexical_cast<std::string>(i + 1) + " (" +
+          boost::lexical_cast<std::string>(headers[0].axisPixelLengths[i]) +
+          ") is not a multiple of the bin size.");
+    }
+  }
+
+  MantidImage imageY(headers[0].axisPixelLengths[1],
+                     std::vector<double>(headers[0].axisPixelLengths[0]));
+  MantidImage imageE(headers[0].axisPixelLengths[1],
+                     std::vector<double>(headers[0].axisPixelLengths[0]));
+
+  size_t bytes = (headers[0].bitsPerPixel / 8) * m_pixelCount;
+  std::vector<char> buffer;
+  try {
+    buffer.resize(bytes);
+  } catch (std::exception &) {
+    throw std::runtime_error(
+        "Could not allocate enough memory to run when trying to allocate " +
+        boost::lexical_cast<std::string>(bytes) + " bytes.");
+  }
+
+  // Create a group for these new workspaces, if the group already exists, add
+  // to it.
+  std::string groupName = outWSName;
+
+  // This forms the name of the group
+  m_baseName = getPropertyValue("OutputWorkspace") + "_";
+
+  size_t fileNumberInGroup = 0;
+  WorkspaceGroup_sptr wsGroup;
+
+  if (!AnalysisDataService::Instance().doesExist(groupName)) {
+    wsGroup = WorkspaceGroup_sptr(new WorkspaceGroup());
+    wsGroup->setTitle(groupName);
+  } else {
+    // Get the name of the latest file in group to start numbering from
+    if (AnalysisDataService::Instance().doesExist(groupName))
+      wsGroup =
+          AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
+
+    std::string latestName = wsGroup->getNames().back();
+    // Set next file number
+    fileNumberInGroup = fetchNumber(latestName) + 1;
+  }
+
+  size_t totalWS = headers.size();
+  // Create a progress reporting object
+  API::Progress progress(this, 0, 1, totalWS + 1);
+  progress.report(0, "Loading file(s) into workspace(s)");
+
+  // Create first workspace (with instrument definition). This is also used as
+  // a template for creating others
+  Workspace2D_sptr latestWS;
+  latestWS =
+      makeWorkspace(headers[0], fileNumberInGroup, buffer, imageY, imageE,
+                    latestWS, loadAsRectImg, binSize, noiseThresh);
+  progress.report(1, "First file loaded.");
+
+  std::vector<Workspace2D_sptr> wsOrdered(totalWS);
+  wsOrdered[0] = latestWS;
+
+  if (isInstrOtherThanIMAT(headers[0])) {
+    // For now we assume IMAT except when specific headers are found by
+    // isInstrOtherThanIMAT()
+    //
+    // TODO: do this conditional on INSTR='IMAT' when we have proper IMAT .fits
+    // files
+    try {
+      IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+      std::string directoryName =
+          Kernel::ConfigService::Instance().getInstrumentDirectory();
+      directoryName = directoryName + "/IMAT_Definition.xml";
+      loadInst->setPropertyValue("Filename", directoryName);
+      loadInst->setProperty<MatrixWorkspace_sptr>(
+          "Workspace", boost::dynamic_pointer_cast<MatrixWorkspace>(latestWS));
+      loadInst->execute();
+    } catch (std::exception &ex) {
+      g_log.information("Cannot load the instrument definition. " +
+                        std::string(ex.what()));
+    }
+  }
+
+  // don't feel tempted to parallelize this loop as it is - it uses the same
+  // imageY and imageE buffers for all the workspaces
+  for (int64_t i = 1; i < static_cast<int64_t>(totalWS); ++i) {
+    latestWS =
+        makeWorkspace(headers[i], fileNumberInGroup, buffer, imageY, imageE,
+                      latestWS, loadAsRectImg, binSize, noiseThresh);
+    wsOrdered[i] = latestWS;
+    progress.report("Loaded file " + boost::lexical_cast<std::string>(i + 1) +
+                    " of " + boost::lexical_cast<std::string>(totalWS));
+  }
+
+  // Add to group - done here to maintain sequence
+  for (size_t i = 0; i < wsOrdered.size(); ++i) {
+    wsGroup->addWorkspace(wsOrdered[i]);
+  }
+
+  setProperty("OutputWorkspace", wsGroup);
 }
 
 /**
@@ -542,13 +583,17 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
  * spectrum per row and one bin per column, instead of the (default)
  * as many spectra as pixels.
  *
+ * @param binSize size to rebin (1 == no re-bin == default)
+ *
+ * @param noiseThresh threshold for noise filtering
+ *
  * @returns A newly created Workspace2D, as a shared pointer
  */
 Workspace2D_sptr
 LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
                         std::vector<char> &buffer, MantidImage &imageY,
                         MantidImage &imageE, const Workspace2D_sptr parent,
-                        bool loadAsRectImg) {
+                        bool loadAsRectImg, int binSize, double noiseThresh) {
 
   std::string currNumberS = padZeros(newFileNumber, g_DIGIT_SIZE_APPEND);
   ++newFileNumber;
@@ -558,7 +603,7 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
   Workspace2D_sptr ws;
   if (!parent) {
     if (!loadAsRectImg) {
-      size_t finalPixelCount = m_pixelCount / m_rebin * m_rebin;
+      size_t finalPixelCount = m_pixelCount / binSize * binSize;
       ws = boost::dynamic_pointer_cast<Workspace2D>(
           WorkspaceFactory::Instance().create("Workspace2D", finalPixelCount, 2,
                                               1));
@@ -566,10 +611,10 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
       ws = boost::dynamic_pointer_cast<Workspace2D>(
           WorkspaceFactory::Instance().create(
               "Workspace2D",
-              fileInfo.axisPixelLengths[1] / m_rebin, // one bin per column
-              fileInfo.axisPixelLengths[0] / m_rebin +
+              fileInfo.axisPixelLengths[1] / binSize, // one bin per column
+              fileInfo.axisPixelLengths[0] / binSize +
                   1, // one spectrum per row
-              fileInfo.axisPixelLengths[0] / m_rebin));
+              fileInfo.axisPixelLengths[0] / binSize));
     }
   } else {
     ws = boost::dynamic_pointer_cast<Workspace2D>(
@@ -582,27 +627,27 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
   double cmpp = 1; // cm per pixel == bin width
   if (0.0 != cm_1)
     cmpp /= cm_1;
-  cmpp *= static_cast<double>(m_rebin);
+  cmpp *= static_cast<double>(binSize);
 
-  if (loadAsRectImg && 1 == m_rebin) {
+  if (loadAsRectImg && 1 == binSize) {
     // set data directly into workspace
     readDataToWorkspace(fileInfo, cmpp, ws, buffer);
   } else {
     readDataToImgs(fileInfo, imageY, imageE, buffer);
-    doFilterNoise(m_noiseThresh, imageY, imageE);
+    doFilterNoise(noiseThresh, imageY, imageE);
 
     // Note this can change the sizes of the images and the number of pixels
-    if (1 == m_rebin) {
+    if (1 == binSize) {
       ws->setImageYAndE(imageY, imageE, 0, loadAsRectImg, cmpp,
                         false /* no parallel load */);
 
     } else {
-      MantidImage rebinnedY(imageY.size() / m_rebin,
-                            std::vector<double>(imageY[0].size() / m_rebin));
-      MantidImage rebinnedE(imageE.size() / m_rebin,
-                            std::vector<double>(imageE[0].size() / m_rebin));
+      MantidImage rebinnedY(imageY.size() / binSize,
+                            std::vector<double>(imageY[0].size() / binSize));
+      MantidImage rebinnedE(imageE.size() / binSize,
+                            std::vector<double>(imageE[0].size() / binSize));
 
-      doRebin(m_rebin, imageY, imageE, rebinnedY, rebinnedE);
+      doRebin(binSize, imageY, imageE, rebinnedY, rebinnedE);
       ws->setImageYAndE(rebinnedY, rebinnedE, 0, loadAsRectImg, cmpp,
                         false /* no parallel load */);
     }
@@ -610,19 +655,33 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
 
   ws->setTitle(Poco::Path(fileInfo.filePath).getFileName());
 
-  addAxesInfoAndLogs(ws, loadAsRectImg, fileInfo, cmpp);
+  addAxesInfoAndLogs(ws, loadAsRectImg, fileInfo, binSize, cmpp);
 
   return ws;
 }
 
 /**
+ * Add information to the workspace being loaded: labels, units, logs related to
+ * the image size, etc.
  *
+ * @param ws workspace to manipulate
+ *
+ * @param loadAsRectImg if true, the workspace has one spectrum per
+ * row and one bin per column
+ *
+ * @param fileInfo information for the current file
+ *
+ * @param binSize size to rebin (1 == no re-bin == default)
+ *
+ * @param cmpp centimeters per pixel (already taking into account
+ * possible rebinning)
  */
 void LoadFITS::addAxesInfoAndLogs(Workspace2D_sptr ws, bool loadAsRectImg,
-                                  const FITSInfo &fileInfo, double cmpp) {
+                                  const FITSInfo &fileInfo, int binSize,
+                                  double cmpp) {
   // add axes
-  size_t width = fileInfo.axisPixelLengths[0] / m_rebin;
-  size_t height = fileInfo.axisPixelLengths[1] / m_rebin;
+  size_t width = fileInfo.axisPixelLengths[0] / binSize;
+  size_t height = fileInfo.axisPixelLengths[1] / binSize;
   if (loadAsRectImg) {
     // width/X axis
     auto axw = new Mantid::API::NumericAxis(width + 1);
@@ -945,66 +1004,6 @@ void LoadFITS::doRebin(size_t rebin, MantidImage &imageY, MantidImage &imageE,
 }
 
 /**
- * Checks that a FITS header (once loaded) is valid/supported:
- * standard (no extension to FITS), and has two axis with the expected
- * dimensions.
- *
- * @param hdr FITS header struct loaded from a file - to check
- *
- * @param hdrFirst FITS header struct loaded from a (first) reference file -
- *to
- * compare against
- *
- * @throws std::exception if there's any issue or unsupported entry in the
- * header
- */
-void LoadFITS::headerSanityCheck(const FITSInfo &hdr,
-                                 const FITSInfo &hdrFirst) {
-  bool valid = true;
-  if (hdr.extension != "") {
-    valid = false;
-    g_log.error() << "File " << hdr.filePath
-                  << ": extensions found in the header." << std::endl;
-  }
-  if (hdr.numberOfAxis != 2) {
-    valid = false;
-    g_log.error() << "File " << hdr.filePath
-                  << ": the number of axes is not 2 but: " << hdr.numberOfAxis
-                  << std::endl;
-  }
-
-  // Test current item has same axis values as first item.
-  if (hdr.axisPixelLengths[0] != hdrFirst.axisPixelLengths[0]) {
-    valid = false;
-    g_log.error() << "File " << hdr.filePath
-                  << ": the number of pixels in the first dimension differs "
-                     "from the first file loaded (" << hdrFirst.filePath
-                  << "): " << hdr.axisPixelLengths[0]
-                  << " != " << hdrFirst.axisPixelLengths[0] << std::endl;
-  }
-  if (hdr.axisPixelLengths[1] != hdrFirst.axisPixelLengths[1]) {
-    valid = false;
-    g_log.error() << "File " << hdr.filePath
-                  << ": the number of pixels in the second dimension differs"
-                     "from the first file loaded (" << hdrFirst.filePath
-                  << "): " << hdr.axisPixelLengths[0]
-                  << " != " << hdrFirst.axisPixelLengths[0] << std::endl;
-  }
-
-  // Check the format is correct and create the Workspace
-  if (!valid) {
-    // Invalid files, record error
-    throw std::runtime_error(
-        "An issue has been found in the header of this FITS file: " +
-        hdr.filePath +
-        ". This algorithm currently doesn't support FITS files with "
-        "non-standard extensions, more than two axis "
-        "of data, or has detected that all the files are "
-        "not similar.");
-  }
-}
-
-/**
  * Looks for headers used by specific instruments/cameras, or finds if
  * the instrument does not appear to be IMAT, which is the only one
  * for which we have a camera-instrument definition and because of
@@ -1030,7 +1029,7 @@ bool LoadFITS::isInstrOtherThanIMAT(FITSInfo &hdr) {
         << it->second
         << ". This file seems to come from a Starlight camera, "
            "as used for calibration of the instruments HiFi and EMU (and"
-           "possibly others). Not "
+           "possibly others). Note: not "
            "loading instrument definition." << std::endl;
   }
 
@@ -1038,43 +1037,28 @@ bool LoadFITS::isInstrOtherThanIMAT(FITSInfo &hdr) {
 }
 
 /**
- * Returns the trailing number from a string minus leading 0's (so 25 from
- * workspace_00025).
- *
- * @param name string with a numerical suffix
- *
- * @returns A numerical representation of the string minus leading characters
- * and leading 0's
+ * Sets several keyword names with default (and standard) values. You
+ * don't want to change these unless you want to break compatibility
+ * with the FITS standard.
  */
-size_t LoadFITS::fetchNumber(const std::string &name) {
-  std::string tmpStr = "";
-  for (auto it = name.end() - 1; isdigit(*it); --it) {
-    tmpStr.insert(0, 1, *it);
-  }
-  while (tmpStr.length() > 0 && tmpStr[0] == '0') {
-    tmpStr.erase(tmpStr.begin());
-  }
-  return (tmpStr.length() > 0) ? boost::lexical_cast<size_t>(tmpStr) : 0;
-}
+void LoadFITS::setupDefaultKeywordNames() {
+  // Inits all the absolutely necessary keywords
+  // standard headers (If SIMPLE=T)
+  m_headerScaleKey = "BSCALE";
+  m_headerOffsetKey = "BZERO";
+  m_headerBitDepthKey = "BITPIX";
+  m_headerImageKeyKey = "IMAGE_TYPE"; // This is a "HIERARCH Image/Type= "
+  m_headerRotationKey = "ROTATION";
 
-/**
- * Adds 0's to the front of a number to create a string of size
- * totalDigitCount including number
- *
- * @param number input number to add padding to
- *
- * @param totalDigitCount width of the resulting string with 0s followed by
- * number
- *
- * @return A string with the 0-padded number
- */
-std::string LoadFITS::padZeros(const size_t number,
-                               const size_t totalDigitCount) {
-  std::ostringstream ss;
-  ss << std::setw(static_cast<int>(totalDigitCount)) << std::setfill('0')
-     << static_cast<int>(number);
+  m_headerNAxisNameKey = "NAXIS";
+  m_headerAxisNameKeys.push_back("NAXIS1");
+  m_headerAxisNameKeys.push_back("NAXIS2");
 
-  return ss.str();
+  m_mapFile = "";
+
+  // extensions
+  m_sampleRotation = "HIERARCH Sample/Tomo_Angle";
+  m_imageType = "HIERARCH Image/Type";
 }
 
 /**
@@ -1125,5 +1109,44 @@ void LoadFITS::mapHeaderKeys() {
   }
 }
 
+/**
+ * Returns the trailing number from a string minus leading 0's (so 25 from
+ * workspace_00025).
+ *
+ * @param name string with a numerical suffix
+ *
+ * @returns A numerical representation of the string minus leading characters
+ * and leading 0's
+ */
+size_t LoadFITS::fetchNumber(const std::string &name) {
+  std::string tmpStr = "";
+  for (auto it = name.end() - 1; isdigit(*it); --it) {
+    tmpStr.insert(0, 1, *it);
+  }
+  while (tmpStr.length() > 0 && tmpStr[0] == '0') {
+    tmpStr.erase(tmpStr.begin());
+  }
+  return (tmpStr.length() > 0) ? boost::lexical_cast<size_t>(tmpStr) : 0;
+}
+
+/**
+ * Adds 0's to the front of a number to create a string of size
+ * totalDigitCount including number
+ *
+ * @param number input number to add padding to
+ *
+ * @param totalDigitCount width of the resulting string with 0s followed by
+ * number
+ *
+ * @return A string with the 0-padded number
+ */
+std::string LoadFITS::padZeros(const size_t number,
+                               const size_t totalDigitCount) {
+  std::ostringstream ss;
+  ss << std::setw(static_cast<int>(totalDigitCount)) << std::setfill('0')
+     << static_cast<int>(number);
+
+  return ss.str();
+}
 } // namespace DataHandling
 } // namespace Mantid
