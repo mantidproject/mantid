@@ -414,8 +414,7 @@ TopoDS_Shape Cone::createShape() {
              gp_Dir(Normal[0], Normal[1], Normal[2]));
   return BRepPrimAPI_MakeCone(gpA, 0.0,
                               1000.0 / tan(acos(cangle * M_PI / 180.0)), 1000.0,
-                              2.0 * M_PI)
-      .Shape();
+                              2.0 * M_PI).Shape();
 }
 #endif
 } // NAMESPACE Geometry

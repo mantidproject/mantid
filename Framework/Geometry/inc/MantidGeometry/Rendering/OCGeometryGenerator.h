@@ -58,6 +58,7 @@ private:
   TopoDS_Shape *ObjSurface; ///< Storage for the output surface
   /// Analyze the object
   void AnalyzeObject();
+
 public:
   OCGeometryGenerator(const Object *obj);
   ~OCGeometryGenerator();
