@@ -365,10 +365,14 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertTrue(monWs1 is None)        
 
 if __name__ == '__main__':
-    unittest.main()
     #Testing particular test from Mantid
     #class theTester(MatrixWorkspaceTest):
+    #    def __init__(self):
+    #        self.setUp()
+    #        
     #    def runTest():
     #        pass
     #tester = theTester()
-    #tester.test_setGetMonitorWS()
+    #tester.test_data_members_give_writable_numpy_array()
+  
+    unittest.main()
