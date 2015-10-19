@@ -1,3 +1,4 @@
+#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 from math import *
 

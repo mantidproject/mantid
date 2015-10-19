@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,no-init
 """ An AbstractTreeItem implementation for a QTreeView
 that uses the results from test runners. """
 
@@ -295,7 +296,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
 
         # What background color?
         if role == Qt.BackgroundRole:
-            return item.background_color();
+            return item.background_color()
 
         #User role is used when directly querying the contents of the item
         if role == Qt.UserRole:
@@ -490,7 +491,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
                 for k in xrange(num_tests):
                     test_indx = self.index(k, 0, suite_indx)
                     # Sets it as checked.
-                    self.setData(test_indx, QtCore.Qt.Checked, QtCore.Qt.CheckStateRole);
+                    self.setData(test_indx, QtCore.Qt.Checked, QtCore.Qt.CheckStateRole)
 
     def mouseDoubleClickEvent(self):
         print "mouseDoubleClickEvent"
@@ -536,7 +537,7 @@ class TreeFilterProxyModel(QSortFilterProxyModel):
                 return False
             if self.selected_only:
                 if isinstance(item, TestProject) or  isinstance(item, TestSuite) :
-                    return (item.get_selected() > 0)
+                    return item.get_selected() > 0
                 else:
                     # Don't filter out TestSingles based on selection (since they're all selected)
                     return True

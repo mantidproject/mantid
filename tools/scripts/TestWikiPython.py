@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 ###########################################################################################
 # Extracts code blocks marked as python from mediawiki pages and checks they run
 # run with -h for command line arguments
@@ -133,7 +134,7 @@ parser.add_argument('-o', '--o',
                     help='Provide a path to output to an output directory')
 
 args = parser.parse_args()
-urlList = [];
+urlList = []
 baseUrl = "http://www.mantidproject.org/"
 if args.s is not None:
     baseUrl = args.s
