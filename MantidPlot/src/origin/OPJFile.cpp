@@ -83,7 +83,7 @@ int strcmp_i(const char *s1,
   {                                                                            \
     int retval = fseek(fd, offset, whence);                                    \
     if (retval < 0) {                                                          \
-      char *posStr = NULL;                                                     \
+      std::string posStr = "";                                                 \
       if (SEEK_SET == whence)                                                  \
         posStr = "beginning of the file";                                      \
       else if (SEEK_CUR == whence)                                             \
@@ -92,15 +92,16 @@ int strcmp_i(const char *s1,
         posStr = "end of the file";                                            \
                                                                                \
       fprintf(debug, " WARNING : could not move to position %d from the %s\n", \
-              offset, posStr);                                                 \
+              offset, posStr.c_str());                                         \
     }                                                                          \
   }
 
 // for standard calls like 'int retval = fread(&objectcount, 4, 1, f);'
+// Note: using size_t because of MSVC which takes and returns size_t
 #define CHECKED_FREAD(debug, ptr, size, nmemb, stream)                         \
   {                                                                            \
-    int retval = fread(ptr, size, nmemb, stream);                              \
-    if (size * nmemb != retval) {                                              \
+    size_t retval = fread(ptr, size, nmemb, stream);                           \
+    if (static_cast<size_t>(size * nmemb) != retval) {                         \
       fprintf(                                                                 \
           debug,                                                               \
           " WARNING : could not read %d bytes from file, read: %d bytes\n",    \
