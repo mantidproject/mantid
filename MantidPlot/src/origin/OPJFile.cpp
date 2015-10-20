@@ -96,8 +96,7 @@ int strcmp_i(const char *s1,
     }                                                                          \
   }
 
-// for standard calls like 'int retval = fread(&objectcount, 4, 1, f);'
-// Note: using size_t because of MSVC which takes and returns size_t
+// for standard calls like 'size_t retval = fread(&objectcount, 4, 1, f);'
 #define CHECKED_FREAD(debug, ptr, size, nmemb, stream)                         \
   {                                                                            \
     size_t retval = fread(ptr, size, nmemb, stream);                           \
@@ -280,8 +279,8 @@ int OPJFile::Parse() {
     return -1;
   }
 
-  retval = fread(&vers, 4, 1, f);
-  if (4 != retval) {
+  size_t readval = fread(&vers, 4, 1, f);
+  if (4 != readval) {
     printf(" WARNING : could not read four bytes with the version information, "
            "read: %d bytes\n",
            retval);
