@@ -1481,15 +1481,19 @@ void ScriptRepositoryImpl::parseLocalRepository(Repository &repo) {
 
  */
 void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
-  ptree pt;
   std::string filename = std::string(local_repository).append(".local.json");
   std::vector<std::string> entries_to_delete;
   Repository::iterator entry_it;
   std::set<std::string> folders_of_deleted;
+
   try {
-    read_json(filename, pt);
-    BOOST_FOREACH (ptree::value_type &file, pt) {
-      entry_it = repo.find(file.first);
+    Json::Value pt = readJsonFile(filename, "Error reading .local.json file");
+    for( auto it = pt.begin() ; it != pt.end() ; it++ ) {
+
+      std::string filepath = it.key().asString();
+      Json::Value entry_json = pt.get(filepath, "");
+
+      entry_it = repo.find(filepath);
       if (entry_it != repo.end()) {
         // entry found, so, lets update the entry
         if (entry_it->second.local && entry_it->second.remote) {
@@ -1497,24 +1501,23 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
           // was found at the local file system and at the remote repository
 
           entry_it->second.downloaded_pubdate =
-              DateAndTime(file.second.get<std::string>("downloaded_pubdate"));
+              DateAndTime(entry_json.get("downloaded_pubdate", "").asString());
           entry_it->second.downloaded_date =
-              DateAndTime(file.second.get<std::string>("downloaded_date"));
+              DateAndTime(entry_json.get("downloaded_date", "").asString());
           entry_it->second.auto_update =
-              (file.second.get<std::string>("auto_update", std::string()) ==
-               "true");
+              entry_json.get("auto_update", false).asBool();
 
         } else {
-          // if the entry was not found locally or remotelly, this means
-          // that this entry was deleted (remotelly or locally),
+          // if the entry was not found locally or remotely, this means
+          // that this entry was deleted (remotely or locally),
           // so it should not appear at local_repository json any more
-          entries_to_delete.push_back(file.first);
-          folders_of_deleted.insert(getParentFolder(file.first));
+          entries_to_delete.push_back(filepath);
+          folders_of_deleted.insert(getParentFolder(filepath));
         }
       } else {
         // this entry was never created before, so it should not
         // exist in local repository json
-        entries_to_delete.push_back(file.first);
+        entries_to_delete.push_back(filepath);
       }
 
     } // end loop FOREACH entry in local json
@@ -1524,8 +1527,7 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
 
       // clear the auto_update flag from the folders if the user deleted files
       BOOST_FOREACH (const std::string &folder, folders_of_deleted) {
-        ptree::assoc_iterator pt_entry = pt.find(folder);
-        if (pt_entry == pt.not_found())
+        if (!pt.isMember(folder))
           continue;
 
         entry_it = repo.find(folder);
@@ -1541,27 +1543,19 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
       for (std::vector<std::string>::iterator it = entries_to_delete.begin();
            it != entries_to_delete.end(); ++it) {
         // remove this entry
-        pt.erase(*it);
+        pt.removeMember(*it);
       }
 #if defined(_WIN32) || defined(_WIN64)
       // set the .repository.json and .local.json not hidden (to be able to edit
       // it)
       SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_NORMAL);
 #endif
-      write_json(filename, pt);
+      writeJsonFile(filename, pt, "Error writing .local.json file");
 #if defined(_WIN32) || defined(_WIN64)
       // set the .repository.json and .local.json hidden
       SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_HIDDEN);
 #endif
     }
-  } catch (boost::property_tree::json_parser_error &ex) {
-    std::stringstream ss;
-    ss << "Corrupted local database : " << filename;
-
-    g_log.error() << "ScriptRepository: " << ss.str()
-                  << "\nDetails: downloaded entries - json_parser_error: "
-                  << ex.what() << std::endl;
-    throw ScriptRepoException(ss.str(), ex.what());
   } catch (std::exception &ex) {
     std::stringstream ss;
     ss << "RuntimeError: checking downloaded entries >> " << ex.what();
