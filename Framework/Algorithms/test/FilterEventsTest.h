@@ -353,6 +353,63 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction of direct geometry
     */
+  void test_FilterElasticCorrection() {
+    DataObjects::EventWorkspace_sptr ws =
+        createEventWorkspaceDirect(0, 1000000);
+    AnalysisDataService::Instance().addOrReplace("MockElasticEventWS", ws);
+
+    MatrixWorkspace_sptr splws = createMatrixSplittersElastic();
+    AnalysisDataService::Instance().addOrReplace("SplitterTableX", splws);
+
+    // Run the filtering
+    FilterEvents filter;
+    filter.initialize();
+
+    filter.setProperty("InputWorkspace", ws->name());
+    filter.setProperty("OutputWorkspaceBaseName", "SplittedDataElastic");
+    filter.setProperty("CorrectionToSample", "Elastic");
+    filter.setProperty("SplitterWorkspace", "SplitterTableX");
+
+    TS_ASSERT_THROWS_NOTHING(filter.execute());
+    TS_ASSERT(filter.isExecuted());
+
+    // Check number of output workspaces
+    std::vector<std::string> vecwsname = filter.getProperty("OutputWorkspaceNames");
+    TS_ASSERT_EQUALS(vecwsname.size(), 5);
+
+    EventWorkspace_sptr ws5 = boost::dynamic_pointer_cast<EventWorkspace>(
+        AnalysisDataService::Instance().retrieve("SplittedDataElastic_5"));
+    TS_ASSERT(ws5);
+    if (ws5) {
+      TS_ASSERT_EQUALS(ws5->getNumberEvents(), 0);
+    }
+
+    EventWorkspace_sptr ws7 = boost::dynamic_pointer_cast<EventWorkspace>(
+        AnalysisDataService::Instance().retrieve("SplittedDataElastic_7"));
+    TS_ASSERT(ws7);
+    if (ws7) {
+      TS_ASSERT_EQUALS(ws7->getNumberEvents(), 100);
+    }
+
+    // Check individual events
+    EventList &ev0 = ws7->getEventList(0);
+    TS_ASSERT_EQUALS(ev0.getNumberEvents(), 10);
+    std::vector<doublle> vectofs = ev0.getTofs();
+    TS_ASSERT_DELTA(vectofs[0], 12121, 0.001);
+
+    // Delete all the workspaces generated here
+    AnalysisDataService::Instance().remove("MockDirectEventWS");
+    AnalysisDataService::Instance().remove("SplitterTableX");
+    for (size_t i = 0; i < vecwsname.size(); ++i) {
+      AnalysisDataService::Instance().remove(vecwsname[i]);
+    }
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test filtering with correction of direct geometry
+    */
   void test_FilterDGCorrection() {
     DataObjects::EventWorkspace_sptr ws =
         createEventWorkspaceDirect(0, 1000000);
