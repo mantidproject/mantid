@@ -247,6 +247,12 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         Do a simple container subtraction (when no corrections are given).
         """
 
+
+        logger.information('Rebining can to ensure Minus')
+        RebinToWorkspace(WorkspaceToRebin=self._can_ws_name,
+                         WorkspaceToMatch=self._sample_ws_name,
+                         OutputWorkspace=self._can_ws_name)
+
         logger.information('Using simple container subtraction')
 
         Minus(LHSWorkspace=self._sample_ws_name,

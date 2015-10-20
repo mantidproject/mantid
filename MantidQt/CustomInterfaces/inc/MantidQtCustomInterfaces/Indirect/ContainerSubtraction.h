@@ -28,8 +28,6 @@ private:
   virtual bool validate();
   virtual void loadSettings(const QSettings &settings);
 
-  void addRebinStep(QString toRebin, QString toMatch);
-
   Ui::ContainerSubtraction m_uiForm;
   std::string m_originalSampleUnits;
 };
