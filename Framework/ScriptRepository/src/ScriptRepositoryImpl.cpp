@@ -1571,41 +1571,36 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
 
 void ScriptRepositoryImpl::updateLocalJson(const std::string &path,
                                            const RepositoryEntry &entry) {
-  ptree local_json;
-  std::string filename = std::string(local_repository).append(".local.json");
-  read_json(filename, local_json);
 
-  ptree::const_assoc_iterator it = local_json.find(path);
-  if (it == local_json.not_found()) {
-    boost::property_tree::ptree array;
-    array.put(std::string("downloaded_date"),
-              entry.downloaded_date.toFormattedString());
-    array.put(std::string("downloaded_pubdate"),
-              entry.downloaded_pubdate.toFormattedString());
-    //      array.push_back(std::make_pair("auto_update",entry.auto_update)));
-    local_json.push_back(
-        std::pair<std::string,
-                  boost::property_tree::basic_ptree<std::string, std::string>>(
-            path, array));
+  std::string filename = std::string(local_repository).append(".local.json");
+  Json::Value local_json = readJsonFile(filename, "Error reading .local.json file");
+
+  if (!local_json.isMember(path)) {
+
+    // Create new entry
+    Json::Value new_entry;
+    new_entry["downloaded_date"] = entry.downloaded_date.toFormattedString();
+    new_entry["downloaded_pubdate"] = entry.downloaded_pubdate.toFormattedString();
+
+    // Add new entry to repository json value
+    local_json[path] = new_entry;
+
   } else {
-    local_json.put(boost::property_tree::ptree::path_type(
-                       std::string(path).append("!downloaded_pubdate"), '!'),
-                   entry.downloaded_pubdate.toFormattedString().c_str());
-    local_json.put(boost::property_tree::ptree::path_type(
-                       std::string(path).append("!downloaded_date"), '!'),
-                   entry.downloaded_date.toFormattedString().c_str());
-    std::string auto_update_op =
-        (const char *)((entry.auto_update) ? "true" : "false");
-    std::string key = std::string(path).append("!auto_update");
-    local_json.put(boost::property_tree::ptree::path_type(key, '!'),
-                   auto_update_op);
+
+    Json::Value replace_entry;
+    replace_entry["downloaded_date"] = entry.downloaded_date.toFormattedString();
+    replace_entry["downloaded_pubdate"] = entry.downloaded_pubdate.toFormattedString();
+    replace_entry["auto_update"] = ((entry.auto_update) ? "true" : "false");
+
+    local_json.removeMember(path);
+    local_json[path] = replace_entry;
   }
-// g_log.debug() << "Update LOCAL JSON FILE" << std::endl;
+
 #if defined(_WIN32) || defined(_WIN64)
   // set the .repository.json and .local.json not hidden to be able to edit it
   SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_NORMAL);
 #endif
-  write_json(filename, local_json);
+  writeJsonFile(filename, local_json, "Error writing .local.json file");
 #if defined(_WIN32) || defined(_WIN64)
   // set the .repository.json and .local.json hidden
   SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_HIDDEN);
