@@ -142,6 +142,8 @@ void CompareWorkspaces::exec() {
  */
 bool CompareWorkspaces::processGroups() {
   m_Result = true;
+  m_Errors = WorkspaceFactory::Instance().createTable("TableWorkspace");
+  m_Errors->addColumn("str", "Error Message");
 
   // Get workspaces
   Workspace_const_sptr w1 = getProperty("Workspace1");
@@ -166,6 +168,7 @@ bool CompareWorkspaces::processGroups() {
   }
 
   setProperty("Result", m_Result);
+  setProperty("ErrorWorkspace", m_Errors);
   setExecuted(true);
   notificationCenter().postNotification(
       new FinishedNotification(this, this->isExecuted()));
