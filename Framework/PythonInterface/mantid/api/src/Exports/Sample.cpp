@@ -1,5 +1,6 @@
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidKernel/Material.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -25,6 +26,17 @@ void export_Sample() {
       .def("hasOrientedLattice", &Sample::hasOrientedLattice, arg("self"),
            "Returns True if this sample has an oriented lattice, false "
            "otherwise")
+      .def("getCrystalStructure", &Sample::getCrystalStructure, arg("self"),
+           return_value_policy<reference_existing_object>(),
+           "Get the crystal structure for this sample")
+      .def("hasCrystalStructure", &Sample::hasCrystalStructure, arg("self"),
+           "Returns True if this sample has a crystal structure, false "
+           "otherwise")
+      .def("setCrystalStructure", &Sample::setCrystalStructure, arg("self"),
+           arg("crystalStructure"),
+           "Assign a crystal structure object to the sample.")
+      .def("clearCrystalStructure", &Sample::clearCrystalStructure, arg("self"),
+           "Removes the internally stored crystal structure.")
       .def("size", &Sample::size, arg("self"),
            "Return the number of samples contained within this sample")
       // Required for ISIS SANS reduction until the full sample geometry is
