@@ -12,9 +12,8 @@ MDFramesToSpecialCoordinateSystem::~MDFramesToSpecialCoordinateSystem() {}
 
 // Need to turn off the warnings because of boost optional being used.
 // clang-format off
-GCC_DIAG_OFF(cast-qual)
+GCC_DIAG_OFF(uninitialized)
 // clang-format on
-GCC_DIAG_OFF(maybe-uninitialized)
 /**
  * Get the Special Coordinate System based on the MDFrame information.
  * @param workspace: the workspace which is being queried
@@ -63,9 +62,8 @@ boost::optional<Mantid::Kernel::SpecialCoordinateSystem>
 
   return output;
 }
-GCC_DIAG_ON(maybe-uninitialized)
 // clang-format off
-GCC_DIAG_ON(cast-qual)
+GCC_DIAG_ON(uninitialized)
 // clang-format on
 
 /**

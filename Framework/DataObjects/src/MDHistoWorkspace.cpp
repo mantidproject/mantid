@@ -1218,9 +1218,8 @@ uint64_t MDHistoWorkspace::sumNContribEvents() const {
  * Get the Q frame system (if any) to use.
 */
 // clang-format off
-GCC_DIAG_OFF(cast-qual)
-// clang-format on
 GCC_DIAG_OFF(strict-aliasing)
+// clang-format on
 Kernel::SpecialCoordinateSystem
 MDHistoWorkspace::getSpecialCoordinateSystem() const {
   MDFramesToSpecialCoordinateSystem converter;
@@ -1229,13 +1228,13 @@ MDHistoWorkspace::getSpecialCoordinateSystem() const {
   if (coordinatesFromMDFrames) {
     coordinates = coordinatesFromMDFrames.get();
   }
-
   return coordinates;
 }
-GCC_DIAG_ON(strict-aliasing)
 // clang-format off
-GCC_DIAG_ON(cast-qual)
+GCC_DIAG_ON(strict-aliasing)
 // clang-format on
+
+
 
 /**
 Set the special coordinate system (if any) to use.
