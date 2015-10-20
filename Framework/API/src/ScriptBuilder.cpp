@@ -106,16 +106,14 @@ void ScriptBuilder::buildChildren(
 * @param algHistory :: pointer to an algorithm history object
 * @returns std::string to run this algorithm
 */
-const std::string ScriptBuilder::buildCommentString(AlgorithmHistory_const_sptr algHistory)
-{
+const std::string
+ScriptBuilder::buildCommentString(AlgorithmHistory_const_sptr algHistory) {
   std::ostringstream comment;
   const std::string name = algHistory->name();
-  if (name == COMMENT_ALG)
-  {
+  if (name == COMMENT_ALG) {
     auto props = algHistory->getProperties();
     for (auto propIter = props.begin(); propIter != props.end(); ++propIter) {
-      if ((*propIter)->name() == "Note")
-      {
+      if ((*propIter)->name() == "Note") {
         comment << "# " << (*propIter)->value();
       }
     }
@@ -123,12 +121,12 @@ const std::string ScriptBuilder::buildCommentString(AlgorithmHistory_const_sptr 
   return comment.str();
 }
 
-  /**
- * Build the script output for a single algorithm
- *
- * @param algHistory :: pointer to an algorithm history object
- * @returns std::string to run this algorithm
- */
+/**
+* Build the script output for a single algorithm
+*
+* @param algHistory :: pointer to an algorithm history object
+* @returns std::string to run this algorithm
+*/
 const std::string
 ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
   std::ostringstream properties;

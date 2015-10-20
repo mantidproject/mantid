@@ -31,9 +31,7 @@ const std::string Comment::name() const { return "Comment"; }
 int Comment::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string Comment::category() const {
-  return "DataHandling";
-}
+const std::string Comment::category() const { return "DataHandling"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string Comment::summary() const {
@@ -48,11 +46,12 @@ void Comment::init() {
       new WorkspaceProperty<Workspace>("Workspace", "", Direction::InOut),
       "An InOut workspace that will store the new history comment");
 
-  declareProperty(
-      "Text", "", boost::make_shared<MandatoryValidator<std::string>>(),
-      "The text you want to store in the history of the workspace", Direction::Input);
+  declareProperty("Text", "",
+                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  "The text you want to store in the history of the workspace",
+                  Direction::Input);
 
-  //always record history for this algorithm
+  // always record history for this algorithm
   enableHistoryRecordingForChild(true);
 }
 
@@ -60,7 +59,7 @@ void Comment::init() {
 /** Execute the algorithm.
  */
 void Comment::exec() {
-  //do nothing
+  // do nothing
 }
 
 } // namespace Algorithms
