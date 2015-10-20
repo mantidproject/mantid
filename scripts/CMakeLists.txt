@@ -6,6 +6,7 @@ add_subdirectory(Interface/ui)
 add_subdirectory(lib1to2/gui)
 add_subdirectory(PyChop)
 add_subdirectory(TofConverter)
+add_subdirectory(HFIR_4Circle_Reduction)
 
 # Chain all required interface custom targets into CompilePyUI
 add_custom_target(CompilePyUI DEPENDS
@@ -15,6 +16,7 @@ add_custom_target(CompilePyUI DEPENDS
   CompileUITofConverter
   CompileUIUI
   CompileUILib1To2
+  CompileUIHFIR_4Circle_Reduction
 )
 
 set ( TEST_PY_FILES

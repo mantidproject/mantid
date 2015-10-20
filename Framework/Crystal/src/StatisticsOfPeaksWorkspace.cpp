@@ -1,5 +1,4 @@
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidCrystal/StatisticsOfPeaksWorkspace.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/BoundedValidator.h"

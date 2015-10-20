@@ -116,6 +116,8 @@ public:
   void setPropertyValue(const std::string &name, const std::string &value);
   /// Do something after a property was set
   void afterPropertySet(const std::string &);
+  /// Make m_properties point to the same PropertyManager as po.
+  void copyPropertiesFrom(const PropertyManagerOwner &po);
   //@}
 
   void cancel();

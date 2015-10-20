@@ -1,4 +1,4 @@
-from base import BaseDirective
+from mantiddoc.directives.base import BaseDirective
 from sphinx.locale import _
 import os, string, subprocess
 
@@ -63,7 +63,7 @@ class DiagramDirective(BaseDirective):
             dot_executable = os.environ["DOT_EXECUTABLE"]
         except:
             self.add_rst(".. figure:: /images/ImageNotFound.png\n\n" +
-                        "    graphviz not found - diagram could not be rendered.")
+                         "    graphviz not found - diagram could not be rendered.")
             return []
 
         #Make sure we have an output directory

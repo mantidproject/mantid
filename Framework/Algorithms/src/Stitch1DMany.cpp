@@ -1,11 +1,9 @@
 #include "MantidAlgorithms/Stitch1DMany.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/RebinParamsValidator.h"
 
 #include <boost/make_shared.hpp>
 

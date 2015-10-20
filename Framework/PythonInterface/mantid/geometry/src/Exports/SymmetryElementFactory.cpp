@@ -9,6 +9,7 @@ void export_SymmetryElementFactory() {
   class_<SymmetryElementFactoryImpl, boost::noncopyable>(
       "SymmetryElementFactoryImpl", no_init)
       .def("createSymElement", &SymmetryElementFactoryImpl::createSymElement,
+           (arg("self"), arg("operation")),
            "Creates the symmetry element that corresponds to the supplied "
            "symmetry operation.")
       .def("Instance", &SymmetryElementFactory::Instance,

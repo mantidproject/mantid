@@ -1,6 +1,6 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"

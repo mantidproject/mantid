@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConjoinWorkspaces.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/SpectraAxis.h"
 
 namespace Mantid {

@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/GroupDetectors.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/ArrayProperty.h"
 #include <set>

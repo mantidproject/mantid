@@ -2,12 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/EQSANSResolution.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/EventList.h"
-#include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid {
 namespace Algorithms {

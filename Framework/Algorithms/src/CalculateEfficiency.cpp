@@ -2,11 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CalculateEfficiency.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
-#include <vector>
 #include "MantidKernel/BoundedValidator.h"
+#include <vector>
 
 namespace Mantid {
 namespace Algorithms {

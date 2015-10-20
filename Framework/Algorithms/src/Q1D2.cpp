@@ -2,16 +2,19 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Q1D2.h"
+#include "MantidAlgorithms/Qhelper.h"
+#include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidDataObjects/Histogram1D.h"
-#include "MantidAlgorithms/Qhelper.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidAPI/ISpectrum.h"
 
 namespace Mantid {
 namespace Algorithms {

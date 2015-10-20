@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import re, glob, os
 
 def grep(patt,lines):
@@ -30,13 +31,13 @@ for filename in files:
 
     #print os.path.basename(filename)[:-4]
     with open(filename) as file:
-      lines = file.readlines()
-      for alg in algs:
-        expr = regexs[alg]
-        results = grep(expr, lines)
-        if results:
-          print filename
-          print results
+        lines = file.readlines()
+        for alg in algs:
+            expr = regexs[alg]
+            results = grep(expr, lines)
+            if results:
+                print filename
+                print results
 
 
 

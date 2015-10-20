@@ -17,7 +17,8 @@ def getSaveDir():
     return os.path.abspath(os.path.curdir)
 
 def do_cleanup():
-    Files = ["PG3_9829.gsa",
+    Files = ["PG3_9829.getn",
+             "PG3_9829.gsa",
              "PG3_9829.py",
              "PG3_9830.gsa",
              "PG3_9830.py",
@@ -249,3 +250,38 @@ class SeriesAndConjoinFilesTest(stresstesting.MantidStressTest):
         self.tolerance = 1.0e-2
         return ('PG3_9829','PG3_9829_golden')
         #return ('PG3_9830','PG3_9830_golden') # can only validate one workspace
+
+class ToPDFgetNTest(stresstesting.MantidStressTest):
+    cal_file   = "PG3_FERNS_d4832_2011_08_24.cal"
+    char_file  = "PG3_characterization_2012_02_23-HR-ILL.txt"
+    data_file = "PG3_9829_event.nxs"
+    getn_file = "PG3_9829.getn"
+
+    def cleanup(self):
+        do_cleanup()
+        return True
+
+    def requiredMemoryMB(self):
+        """Requires 3Gb"""
+        return 3000
+
+    def requiredFiles(self):
+        files = [self.cal_file, self.char_file, self.data_file]
+        return files
+
+    def runTest(self):
+        savedir = getSaveDir()
+        PDToPDFgetN(Filename=self.data_file,
+                    FilterBadPulses=25,
+                    OutputWorkspace=self.data_file,
+                    PDFgetNFile=os.path.join(savedir, self.getn_file),
+                    CalibrationFile=self.cal_file,
+                    CharacterizationRunsFile=self.char_file,
+                    RemovePromptPulseWidth=50,
+                    Binning=-.0004)
+
+    def validateMethod(self):
+        return None # it running is all that we need
+
+    def validate(self):
+        pass

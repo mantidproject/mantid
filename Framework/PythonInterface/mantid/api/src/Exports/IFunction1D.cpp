@@ -18,6 +18,7 @@ void export_IFunction1D() {
       .def("function1D",
            (object (IFunction1DAdapter::*)(const object &) const) &
                IFunction1DAdapter::function1D,
+           (arg("self"), arg("xvals")),
            "Calculate the values of the function for the given x values and "
            "returns them");
 }

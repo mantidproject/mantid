@@ -28,11 +28,20 @@ std::string getStringUsingCache(ConfigServiceImpl &self,
   return self.getString(key, true);
 }
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
+
 /// Overload generator for getInstrument
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getInstrument_Overload, getInstrument, 0,
                                        1)
 /// Overload generator for getString
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getString_Overload, getString, 1, 2)
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 }
 
 void export_ConfigService() {

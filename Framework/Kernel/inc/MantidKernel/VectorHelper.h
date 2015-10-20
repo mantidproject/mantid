@@ -59,7 +59,7 @@ rebinHistogram(const std::vector<double> &xold, const std::vector<double> &yold,
                std::vector<double> &ynew, std::vector<double> &enew,
                bool addition);
 
-/// Convert an array of bin boundaries to bin centre values.
+/// Convert an array of bin boundaries to bin center values.
 void MANTID_KERNEL_DLL convertToBinCentre(const std::vector<double> &bin_edges,
                                           std::vector<double> &bin_centres);
 
@@ -81,6 +81,15 @@ MANTID_KERNEL_DLL int getBinIndex(const std::vector<double> &bins,
 MANTID_KERNEL_DLL void linearlyInterpolateY(const std::vector<double> &x,
                                             std::vector<double> &y,
                                             const double stepSize);
+// Do running average of input vector within specified range, considering
+// heterogeneous bin-boundaries
+// if such boundaries are provided
+MANTID_KERNEL_DLL void
+smoothInRange(const std::vector<double> &input, std::vector<double> &output,
+              double avrgInterval,
+              std::vector<double> const *const binBoundaris = NULL,
+              size_t startIndex = 0, size_t endIndex = 0,
+              std::vector<double> *const outputBinBoundaries = NULL);
 
 //-------------------------------------------------------------------------------------
 /** Return the length of the vector (in the physical sense),
@@ -102,7 +111,7 @@ template <typename T>
 T scalar_prod(const std::vector<T> &v1, const std::vector<T> &v2) {
   if (v1.size() != v2.size())
     throw std::invalid_argument(" scalar product is defined only for the "
-                                "vectors of the equivalient length");
+                                "vectors of the equivalent length");
   T total = 0;
   for (size_t i = 0; i < v1.size(); i++)
     total += v1[i] * v2[i];
@@ -153,7 +162,7 @@ template <class T> struct SumGaussError : public std::binary_function<T, T, T> {
 };
 
 /**
- * Functor to deal with the increase in the error when adding (or substracting)
+ * Functor to deal with the increase in the error when adding (or subtracting)
  * a number of counts.
  * More generally add errors in quadrature using the square of one of the errors
  * (variance = error^2)

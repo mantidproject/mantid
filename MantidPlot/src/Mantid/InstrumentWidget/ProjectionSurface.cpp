@@ -220,7 +220,8 @@ void ProjectionSurface::draw(MantidGLWidget *widget,bool picking)const
     getController()->onPaint( painter );
     painter.end();
     // Discard any error generated here
-    glGetError();
+    GLuint ecode = glGetError();
+    OpenGLError::logDebug() << "Discarding OpenGL error: " << gluErrorString(ecode);
   }
 
 }

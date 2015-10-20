@@ -80,7 +80,13 @@ PeakColumn::PeakColumn(std::vector<Peak> &peaks, const std::string &name)
   this->m_name = name;
   this->m_type = typeFromName(name); // Throws if the name is unknown
   this->m_hklPrec = 2;
-  ConfigService::Instance().getValue("PeakColumn.hklPrec", this->m_hklPrec);
+  const std::string key = "PeakColumn.hklPrec";
+  int gotit = ConfigService::Instance().getValue(key, this->m_hklPrec);
+  if (!gotit)
+    g_log.information()
+        << "In PeakColumn constructor, did not find any value for '" << key
+        << "' from the Config Service. Using default: " << this->m_hklPrec
+        << "\n";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -134,6 +140,7 @@ const std::type_info &PeakColumn::get_pointer_type_info() const {
 void PeakColumn::print(size_t index, std::ostream &s) const {
   Peak &peak = m_peaks[index];
 
+  std::ios::fmtflags fflags(s.flags());
   if (m_name == "RunNumber")
     s << peak.getRunNumber();
   else if (m_name == "DetID")
@@ -152,6 +159,7 @@ void PeakColumn::print(size_t index, std::ostream &s) const {
     s << std::fixed << std::setprecision(m_hklPrec) << peak.getL();
   } else
     s << peak.getValueByColName(m_name);
+  s.flags(fflags);
 }
 
 //-------------------------------------------------------------------------------------

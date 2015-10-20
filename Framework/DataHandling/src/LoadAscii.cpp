@@ -24,7 +24,9 @@ using namespace Kernel;
 using namespace API;
 
 /// Empty constructor
-LoadAscii::LoadAscii() : m_columnSep(), m_separatorIndex() {}
+LoadAscii::LoadAscii() : m_columnSep(), m_separatorIndex() {
+  this->useAlgorithm("LoadAscii", 2);
+}
 
 /**
  * Return the confidence with with this algorithm can load the file

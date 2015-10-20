@@ -7,6 +7,8 @@
 
 #include "MantidKernel/Logger.h"
 
+#include <Poco/Mutex.h>
+
 #include <cmath>
 
 namespace Mantid {
@@ -18,20 +20,44 @@ using namespace Functions;
 /// The logger.
 Kernel::Logger g_log("ParameterEstimator");
 
+namespace {
+/// Mutex to prevent simultaneous access to functionMap
+Poco::Mutex FUNCTION_MAP_MUTEX;
+}
+
 enum Function { None, Gaussian, Lorentzian, BackToBackExponential };
 typedef std::map<std::string, std::pair<size_t, Function>> FunctionMapType;
 
 //----------------------------------------------------------------------------------------------
+
+/// Initializes a FunctionMapType object
+/// @param functionMapType :: the function map to initialize
+void initFunctionLookup(FunctionMapType &functionMapType) {
+  assert(functionMapType.empty());
+
+  functionMapType["Gaussian"] = std::make_pair(2, Gaussian);
+  functionMapType["Lorentzian"] = std::make_pair(2, Lorentzian);
+  functionMapType["BackToBackExponential"] =
+      std::make_pair(4, BackToBackExponential);
+}
+
+/// Returns a reference to the static functionMapType
+/// @returns :: a const reference to the functionMapType
+const FunctionMapType &getFunctionMapType() {
+
+  Poco::Mutex::ScopedLock lock(FUNCTION_MAP_MUTEX);
+
+  static FunctionMapType functionMapType;
+
+  if (functionMapType.empty())
+    initFunctionLookup(functionMapType);
+  return functionMapType;
+}
+
 /// Return a function code for a function if it needs setting values or None
 /// otherwise.
 Function whichFunction(const API::IFunction &function) {
-  static FunctionMapType functionMap;
-  if (functionMap.empty()) {
-    functionMap["Gaussian"] = std::make_pair(2, Gaussian);
-    functionMap["Lorentzian"] = std::make_pair(2, Lorentzian);
-    functionMap["BackToBackExponential"] =
-        std::make_pair(4, BackToBackExponential);
-  }
+  const FunctionMapType &functionMap = getFunctionMapType();
   auto index = functionMap.find(function.name());
   if (index != functionMap.end()) {
     if (!function.isExplicitlySet(index->second.first))

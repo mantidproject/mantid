@@ -6,7 +6,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "boost/lexical_cast.hpp"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 

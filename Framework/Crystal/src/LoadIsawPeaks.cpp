@@ -29,8 +29,9 @@ LoadIsawPeaks::LoadIsawPeaks() {}
  */
 LoadIsawPeaks::~LoadIsawPeaks() {}
 
+//----------------------------------------------------------------------------------------------
 /**
- * Return the confidence with with this algorithm can load the file
+ * Determine the confidence with which this algorithm can load a given file
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
@@ -78,11 +79,9 @@ int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
     confidence = 95;
   } catch (std::exception &) {
   }
+
   return confidence;
 }
-
-//----------------------------------------------------------------------------------------------
-//----------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -99,6 +98,23 @@ void LoadIsawPeaks::init() {
                   "Name of the output workspace.");
 }
 
+//----------------------------------------------------------------------------------------------
+/** Execute the algorithm.
+ */
+void LoadIsawPeaks::exec() {
+  // Create the workspace
+  PeaksWorkspace_sptr ws(new PeaksWorkspace());
+
+  // This loads (appends) the peaks
+  this->appendFile(ws, getPropertyValue("Filename"));
+
+  // Save it in the output
+  setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(ws));
+
+  this->checkNumberPeaks(ws, getPropertyValue("Filename"));
+}
+
+//----------------------------------------------------------------------------------------------
 std::string
 LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
                               Geometry::Instrument_const_sptr instr_old,
@@ -113,7 +129,6 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
     startChar = getWord(in, false);
   }
   if (!(in.good())) {
-    // g_log.error()<<"Peaks file has no time shift and L0 info"<<std::endl;
     throw std::invalid_argument("Peaks file has no time shift and L0 info");
   }
   std::string L1s = getWord(in, false);
@@ -190,7 +205,7 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
     }
     bankName += SbankNum;
     boost::shared_ptr<const Geometry::IComponent> bank =
-        instr_old->getComponentByName(bankName);
+        getCachedBankByName(bankName, instr_old);
 
     if (!bank) {
       g_log.error() << "There is no bank " << bankName << " in the instrument"
@@ -291,15 +306,11 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   Geometry::Instrument_const_sptr instr(
       new Geometry::Instrument(instr_old->baseInstrument(), map));
 
-  // std::string s;
   std::string s = ApplyCalibInfo(in, "", instr_old, instr, T0);
   outWS->setInstrument(instr);
 
   // Now skip all lines on L1, detector banks, etc. until we get to a block of
   // peaks. They start with 0.
-  // readToEndOfLine( in ,  true );
-  // readToEndOfLine( in ,  true );
-  // s = getWord(in, false);
   while (s != "0" && in.good()) {
     readToEndOfLine(in, true);
     s = getWord(in, false);
@@ -318,9 +329,10 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
  * @param bankName :: the bank number from the ISAW file.
  * @return the Peak the Peak object created
  */
-Mantid::DataObjects::Peak readPeak(PeaksWorkspace_sptr outWS,
-                                   std::string &lastStr, std::ifstream &in,
-                                   int &seqNum, std::string bankName) {
+DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
+                                          std::string &lastStr,
+                                          std::ifstream &in, int &seqNum,
+                                          std::string bankName) {
   double h;
   double k;
   double l;
@@ -387,9 +399,9 @@ Mantid::DataObjects::Peak readPeak(PeaksWorkspace_sptr outWS,
   Instrument_const_sptr inst = outWS->getInstrument();
   if (!inst)
     throw std::runtime_error("No instrument in PeaksWorkspace!");
-  LoadIsawPeaks u;
-  int pixelID = u.findPixelID(inst, bankName, static_cast<int>(col),
-                              static_cast<int>(row));
+
+  int pixelID =
+      findPixelID(inst, bankName, static_cast<int>(col), static_cast<int>(row));
 
   // Create the peak object
   Peak peak(outWS->getInstrument(), pixelID, wl);
@@ -402,10 +414,12 @@ Mantid::DataObjects::Peak readPeak(PeaksWorkspace_sptr outWS,
   return peak;
 }
 
+//----------------------------------------------------------------------------------------------
 int LoadIsawPeaks::findPixelID(Instrument_const_sptr inst, std::string bankName,
                                int col, int row) {
   boost::shared_ptr<const IComponent> parent =
-      inst->getComponentByName(bankName);
+      getCachedBankByName(bankName, inst);
+
   if (parent->type().compare("RectangularDetector") == 0) {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
@@ -441,9 +455,11 @@ int LoadIsawPeaks::findPixelID(Instrument_const_sptr inst, std::string bankName,
 
 //-----------------------------------------------------------------------------------------------
 /** Read the header of each peak block section */
-std::string readPeakBlockHeader(std::string lastStr, std::ifstream &in,
-                                int &run, int &detName, double &chi,
-                                double &phi, double &omega, double &monCount) {
+std::string LoadIsawPeaks::readPeakBlockHeader(std::string lastStr,
+                                               std::ifstream &in, int &run,
+                                               int &detName, double &chi,
+                                               double &phi, double &omega,
+                                               double &monCount) {
   std::string s = lastStr;
 
   if (s.length() < 1 && in.good()) // blank line
@@ -491,6 +507,11 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
   // Open the file
   std::ifstream in(filename.c_str());
 
+  // Calculate filesize
+  in.seekg(0, in.end);
+  auto filelen = in.tellg();
+  in.seekg(0, in.beg);
+
   // Read the header, load the instrument
   double T0;
   std::string s = readHeader(outWS, in, T0);
@@ -514,8 +535,8 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
   Mantid::Geometry::Goniometer uniGonio;
   uniGonio.makeUniversalGoniometer();
 
-  // TODO: Can we find the number of peaks to get better progress reporting?
-  Progress prog(this, 0.0, 1.0, 100);
+  // Progress is reported based on how much of the file we've read
+  Progress prog(this, 0.0, 1.0, filelen);
 
   while (in.good()) {
     // Read the header if necessary
@@ -565,9 +586,10 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
                       << e.what() << std::endl;
     }
 
-    prog.report();
+    prog.report(in.tellg());
   }
 }
+
 //-----------------------------------------------------------------------------------------------
 /** Count the peaks from a .peaks file and compare with the workspace
  * @param outWS :: the workspace in which to place the information
@@ -592,19 +614,29 @@ void LoadIsawPeaks::checkNumberPeaks(PeaksWorkspace_sptr outWS,
 }
 
 //----------------------------------------------------------------------------------------------
-/** Execute the algorithm.
+/** Retrieves pointer to given bank from local cache.
+ *
+ * When the bank isn't in the local cache, it is loaded and
+ * added to the cache for later use. Lifetime of the cache
+ * is bound to the lifetime of this instance of the algorithm
+ * (typically, the instance should be destroyed once exec()
+ * finishes).
+ *
+ * Note that while this is used only for banks here, it would
+ * work for caching any component without modification.
+ *
+ * @param bankname :: the name of the requested bank
+ * @param inst :: the instrument from which to load the bank if it is not yet
+ *cached
+ * @return A shared pointer to the request bank (empty shared pointer if not
+ *found)
  */
-void LoadIsawPeaks::exec() {
-  // Create the workspace
-  PeaksWorkspace_sptr ws(new PeaksWorkspace());
-
-  // This loads (appends) the peaks
-  this->appendFile(ws, getPropertyValue("Filename"));
-
-  // Save it in the output
-  setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(ws));
-
-  this->checkNumberPeaks(ws, getPropertyValue("Filename"));
+boost::shared_ptr<const IComponent> LoadIsawPeaks::getCachedBankByName(
+    std::string bankname,
+    const boost::shared_ptr<const Geometry::Instrument> &inst) {
+  if (m_banks.count(bankname) == 0)
+    m_banks[bankname] = inst->getComponentByName(bankname);
+  return m_banks[bankname];
 }
 
 } // namespace Mantid

@@ -25,6 +25,7 @@
      components defined in this file to face a position by default -->    
      <components-are-facing x="0.0" y="0.0" z="0.0" />
    </defaults>
+   
    <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
    <!-- detector components -->
     <properties>
@@ -89,6 +90,7 @@
      </cylinder> 
      <algebra val="some-shape" />
    </type>
+   
  
    <!-- Sample-position types -->
    <type name="nickel-holder" is="SamplePos">
@@ -666,6 +668,35 @@
   <id start="12470001" end="12471024" />
   <id start="12480001" end="12481024" />
  </idlist>
+<!-- Chopper position -->
+ <component type="chopper-position">
+    <location z="-1.5"/>
+    <!--description is="The component provides sample-choper distance, used
+    to estimate chopper delay time and Tobyfit resolution calculations."/-->
+    <parameter name="initial_phase">    
+        <value val="-0."/>
+        <description is="The initial rotation phase of the disk used to caluclate the time
+        for neutrons arriving at the chopper according to the formula time = delay + initial_phase/Speed"/>    
+    </parameter>
+    <parameter name="ChopperDelayLog" type="string">
+        <value val="Chopper5_Disk2_phase"/>    
+    </parameter>
+    <parameter name="ChopperSpeedLog" type="string">
+        <value val="Chopper5_Disk2_speed"/>    
+    </parameter>
+    <parameter name="FilterBaseLog" type="string">
+        <value val="good_uah_log"/>    
+    </parameter>
+    <!-- if the log above should be used as it is or 
+    one should calculate its derivative -->
+    <parameter name="filter_with_derivative" type="bool">
+        <value val="True"/>    
+    </parameter>    
+
+  </component>
+  <type name="chopper-position" is="ChopperPos"></type>  
+  
+  
   <!-- DETECTOR PARAMETERS -->
   <component-link name="monitors">
    <parameter name="DelayTime">

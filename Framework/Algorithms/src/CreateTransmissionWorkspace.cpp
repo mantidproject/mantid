@@ -1,12 +1,8 @@
 #include "MantidAlgorithms/CreateTransmissionWorkspace.h"
 
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/BoundedValidator.h"
-#include <boost/make_shared.hpp>
+
 #include <boost/assign/list_of.hpp>
 
 using namespace Mantid::Kernel;
@@ -48,9 +44,7 @@ const std::string CreateTransmissionWorkspace::category() const {
 /** Initialize the algorithm's properties.
  */
 void CreateTransmissionWorkspace::init() {
-  boost::shared_ptr<CompositeValidator> inputValidator =
-      boost::make_shared<CompositeValidator>();
-  inputValidator->add(boost::make_shared<WorkspaceUnitValidator>("TOF"));
+  auto inputValidator = boost::make_shared<WorkspaceUnitValidator>("TOF");
 
   declareProperty(new WorkspaceProperty<MatrixWorkspace>(
                       "FirstTransmissionRun", "", Direction::Input,

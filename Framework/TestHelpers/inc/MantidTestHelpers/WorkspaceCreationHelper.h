@@ -46,7 +46,7 @@ public:
     return out;
   }
 };
-/** mock algorithn for doing logging/progress reporting*/
+/** mock algorithm for doing logging/progress reporting*/
 class MockAlgorithm : public Mantid::API::Algorithm {
 public:
   MockAlgorithm(size_t nSteps = 100);
@@ -178,8 +178,8 @@ void addNoise(Mantid::API::MatrixWorkspace_sptr ws, double noise,
 /**
  * Create a test workspace with a fully defined instrument
  * Each spectra will have a cylindrical detector defined 2*cylinder_radius away
- * from the centre of the
- * pervious.
+ * from the centre of the previous.
+ *
  * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0
  */
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithFullInstrument(
@@ -262,7 +262,7 @@ CreateRandomEventWorkspace(size_t numbins, size_t numpixels,
 
 Mantid::API::MatrixWorkspace_sptr
 CreateGroupedWorkspace2D(size_t numHist, int numBins, double binDelta);
-// grouped workpsace with detectors arranges in rings in centre and into boxes
+// grouped workspace with detectors arranges in rings in center and into boxes
 // outside
 Mantid::API::MatrixWorkspace_sptr CreateGroupedWorkspace2DWithRingsAndBoxes(
     size_t RootOfNumHist = 10, int numBins = 10, double binDelta = 1.0);

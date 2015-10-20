@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/IncreasingAxisValidator.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidAPI/NumericAxis.h"
 

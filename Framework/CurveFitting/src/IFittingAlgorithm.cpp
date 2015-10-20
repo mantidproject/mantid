@@ -216,9 +216,10 @@ void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName,
     boost::shared_ptr<MultiDomainCreator> multiCreator =
         boost::dynamic_pointer_cast<MultiDomainCreator>(m_domainCreator);
     if (!multiCreator) {
+      auto &reference = *m_domainCreator.get();
       throw std::runtime_error(
           std::string("MultiDomainCreator expected, found ") +
-          typeid(*m_domainCreator.get()).name());
+          typeid(reference).name());
     }
     if (!multiCreator->hasCreator(index)) {
       creator->declareDatasetProperties(suffix, addProperties);

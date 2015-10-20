@@ -702,6 +702,8 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 					break;
 				case 'F':
 					s=opj.functionIndex(data.right(data.length()-2).toStdString().c_str());
+                                        if (s<0)
+                                          break;
 					int type;
 					if(opj.functionType(s)==1)//Polar
 					{

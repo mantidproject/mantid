@@ -1,6 +1,8 @@
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataHandling/SaveParameterFile.h"
+
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/InstrumentValidator.h"
+
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"

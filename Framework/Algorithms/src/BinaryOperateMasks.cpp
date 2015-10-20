@@ -1,7 +1,5 @@
 #include "MantidAlgorithms/BinaryOperateMasks.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/MaskWorkspace.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::Kernel;

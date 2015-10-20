@@ -1,5 +1,4 @@
 #include "MantidCrystal/SetSpecialCoordinates.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"

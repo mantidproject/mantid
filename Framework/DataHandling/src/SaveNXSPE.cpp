@@ -1,10 +1,15 @@
 #include "MantidDataHandling/SaveNXSPE.h"
 
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidGeometry/Instrument/Detector.h"
+
 #include "MantidDataHandling/FindDetectorsPar.h"
+#include "MantidGeometry/Instrument/Detector.h"
+
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MantidVersion.h"
 
 #include <boost/scoped_array.hpp>

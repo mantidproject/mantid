@@ -152,43 +152,43 @@ private:
 
   //--------------- Class Variables -------------------
   /// Output Workspace containing the dspacing ~ TOF peak positions
-  DataObjects::Workspace2D_sptr dataWS;
+  DataObjects::Workspace2D_sptr m_dataWS;
 
   /// Map for all peaks to fit individually
-  std::map<std::vector<int>, Functions::BackToBackExponential_sptr> mPeaks;
+  std::map<std::vector<int>, Functions::BackToBackExponential_sptr> m_Peaks;
 
   /// Map for all peaks' error (fitted vs. experimental): [HKL]: Chi^2
-  std::map<std::vector<int>, double> mPeakErrors;
+  std::map<std::vector<int>, double> m_PeakErrors;
 
   /// Map for function (instrument parameter)
-  std::map<std::string, double> mFuncParameters;
+  std::map<std::string, double> m_FuncParameters;
   /// Map to store the original (input) parameters
-  std::map<std::string, double> mOrigParameters;
+  std::map<std::string, double> m_OrigParameters;
 
   /// Peak function parameter names
-  std::vector<std::string> mPeakFunctionParameterNames;
+  std::vector<std::string> m_PeakFunctionParameterNames;
   /// N sets of the peak parameter values for the best N chi2 for MC.  It is
   /// paired with mPeakFunctionParameterNames
-  std::vector<std::pair<double, std::vector<double>>> mBestMCParameters;
+  std::vector<std::pair<double, std::vector<double>>> m_BestMCParameters;
   /// N sets of the peak parameter values for the best N chi2 for MC.  It is
   /// paired with mPeakFunctionParameterNames
-  std::vector<std::pair<double, std::vector<double>>> mBestFitParameters;
+  std::vector<std::pair<double, std::vector<double>>> m_BestFitParameters;
   /// N sets of the homemade chi2 and gsl chi2
-  std::vector<std::pair<double, double>> mBestFitChi2s;
+  std::vector<std::pair<double, double>> m_BestFitChi2s;
   /// Best Chi2 ever
-  double mBestGSLChi2;
+  double m_BestGSLChi2;
 
   /// Minimum allowed sigma of a peak
-  double mMinSigma;
+  double m_MinSigma;
 
   /// Minimum number of fitted peaks for refinement
-  size_t mMinNumFittedPeaks;
+  size_t m_MinNumFittedPeaks;
 
   /// Maximum number of data stored
-  size_t mMaxNumberStoredParameters;
+  size_t m_MaxNumberStoredParameters;
 
   /// Modelling function
-  Functions::ThermalNeutronDtoTOFFunction_sptr mFunction;
+  Functions::ThermalNeutronDtoTOFFunction_sptr m_Function;
 };
 
 /** Formular for linear iterpolation: X = [(xf-x0)*Y - (xf*y0-x0*yf)]/(yf-y0)

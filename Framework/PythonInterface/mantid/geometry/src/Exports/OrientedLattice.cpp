@@ -55,13 +55,17 @@ void export_OrientedLattice() {
           (arg("_a"), arg("_b"), arg("_c"), arg("_alpha"), arg("_beta"),
            arg("_gamma"), arg("Unit") = (int)(angDegrees))))
       .def(init<UnitCell>(arg("uc")))
-      .def("getuVector", (&OrientedLattice::getuVector))
-      .def("getvVector", (&OrientedLattice::getvVector))
-      .def("getU", &OrientedLattice::getU, return_readonly_numpy())
-      .def("setU", &setU)
-      .def("getUB", &OrientedLattice::getUB, return_readonly_numpy())
-      .def("setUB", &setUB)
-      .def("setUFromVectors", &setUFromVectors)
-      .def("qFromHKL", &qFromHKL, "Q vector from HKL vector")
-      .def("hklFromQ", &hklFromQ, "HKL value from Q vector");
+      .def("getuVector", (&OrientedLattice::getuVector), arg("self"))
+      .def("getvVector", (&OrientedLattice::getvVector), arg("self"))
+      .def("getU", &OrientedLattice::getU, arg("self"), return_readonly_numpy())
+      .def("setU", &setU, (arg("self"), arg("newU")))
+      .def("getUB", &OrientedLattice::getUB, arg("self"),
+           return_readonly_numpy())
+      .def("setUB", &setUB, (arg("self"), arg("newUB")))
+      .def("setUFromVectors", &setUFromVectors,
+           (arg("self"), arg("u"), arg("v")))
+      .def("qFromHKL", &qFromHKL, (arg("self"), arg("vec")),
+           "Q vector from HKL vector")
+      .def("hklFromQ", &hklFromQ, (arg("self"), arg("vec")),
+           "HKL value from Q vector");
 }

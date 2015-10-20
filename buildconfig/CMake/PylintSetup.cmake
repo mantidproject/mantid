@@ -33,6 +33,8 @@ if ( PYLINT_FOUND )
         Framework/PythonInterface/plugins
         scripts
         Testing/SystemTests/tests/analysis
+        tools
+        docs/sphinxext/mantiddoc
   )
   set ( PYLINT_EXCLUDES
         scripts/lib1to2
