@@ -595,7 +595,8 @@ void IntegratePeakTimeSlices::exec() {
 
             lastRow = (int)(params[i] + .5);
             i = find("Mcol", names);
-            lastCol = (int)(params[i] + .5);
+            if (i >= 0)
+              lastCol = (int)(params[i] + .5);
             prog.report();
 
           } else if (dir > 0)
