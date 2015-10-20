@@ -10,10 +10,6 @@ MDFramesToSpecialCoordinateSystem::MDFramesToSpecialCoordinateSystem() {}
 
 MDFramesToSpecialCoordinateSystem::~MDFramesToSpecialCoordinateSystem() {}
 
-// Need to turn off the warnings because of boost optional being used.
-// clang-format off
-GCC_DIAG_OFF(uninitialized)
-// clang-format on
 /**
  * Get the Special Coordinate System based on the MDFrame information.
  * @param workspace: the workspace which is being queried
@@ -35,23 +31,32 @@ boost::optional<Mantid::Kernel::SpecialCoordinateSystem>
   // This dimension will define the special coordinate system. Otherwise, we
   // don't have a special coordinate system
 
-  boost::optional<Mantid::Kernel::SpecialCoordinateSystem> qFrameType;
+  boost::optional<Mantid::Kernel::SpecialCoordinateSystem> qFrameType =
+      Mantid::Kernel::SpecialCoordinateSystem::None; // Set to none just to have
+                                                     // it initialized
+  auto hasQFrame = false;
   auto isUnknown = false;
   for (size_t dimIndex = 0; dimIndex < workspace->getNumDims(); ++dimIndex) {
     auto dimension = workspace->getDimension(dimIndex);
     auto &frame = dimension->getMDFrame();
-    // Check for QCompatibility
+    // Check for QCompatibility. This has gotten a bit more complicated than
+    // necessary since the boost optional
+    // caused a GCC error, when it was not initialized. Using -Wuninitialized
+    // didn't make the compiler happy.
     if (frame.getMDUnit().isQUnit()) {
       auto specialCoordinteSystem = frame.equivalientSpecialCoordinateSystem();
-      checkQCompatibility(specialCoordinteSystem, qFrameType);
+      if (hasQFrame) {
+        checkQCompatibility(specialCoordinteSystem, qFrameType);
+      }
       qFrameType = specialCoordinteSystem;
+      hasQFrame = true;
     }
 
     isUnknown = isUnknownFrame(dimension);
   }
 
   boost::optional<Mantid::Kernel::SpecialCoordinateSystem> output;
-  if (qFrameType) {
+  if (hasQFrame) {
     output = qFrameType;
   } else {
     // If the frame is unknown then keep the optional empty
