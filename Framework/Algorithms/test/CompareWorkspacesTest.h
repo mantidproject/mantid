@@ -1220,9 +1220,9 @@ private:
     if (expectedResult == PROPERTY_VALUE_TRUE) {
       TS_ASSERT_EQUALS(matcher.getPropertyValue("Result"), expectedResult);
     } else {
-      TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+      TS_ASSERT_DIFFERS(matcher.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-      ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+      ITableWorkspace_sptr table = matcher.getProperty("ErrorWorkspace"); // AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
       TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), expectedResult);
     }
   }
