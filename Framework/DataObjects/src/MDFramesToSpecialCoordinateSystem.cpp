@@ -63,7 +63,6 @@ boost::optional<Mantid::Kernel::SpecialCoordinateSystem>
   return output;
 }
 
-
 /**
  * Make sure that the QFrame types are the same.
  * @param specialCoordinateSystem: the q frame type to test.
