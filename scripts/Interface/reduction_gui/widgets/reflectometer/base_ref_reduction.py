@@ -1,3 +1,4 @@
+#pylint: disable=too-many-lines
 #pylint: disable=invalid-name,unused-import
 from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util

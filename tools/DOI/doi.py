@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """A script for generating DataCite DOI's for Mantid releases, to be called by
 a Jenkins job during the release process.  When given a major, minor and patch
 release number along with username and password credentials, it will build a

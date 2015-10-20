@@ -1,4 +1,5 @@
-﻿#pylint: disable=invalid-name
+#pylint: disable=too-many-lines
+#pylint: disable=invalid-name
 """ File contains collection of Descriptors used to define complex
     properties in NonIDF_Properties and PropertyManager classes
 """

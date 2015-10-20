@@ -202,7 +202,7 @@ class AlgorithmDirective(AlgorithmBaseDirective):
 
 #------------------------------------------------------------------------------------------------------------
 
-def html_collect_pages(app):
+def html_collect_pages(dummy_app):
     """
     Write out unversioned algorithm pages that redirect to the highest version of the algorithm
     """

@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import os,  re
 import urllib2
 
@@ -6,7 +7,7 @@ def readWebPage(url):
     opener = urllib2.build_opener(proxy)
     urllib2.install_opener(opener)
     aResp =urllib2.urlopen(url)
-    web_pg = aResp.read();
+    web_pg = aResp.read()
     return web_pg
 
 def ticketExists(alg, ticketHash):

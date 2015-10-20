@@ -385,7 +385,7 @@ public slots:
   void setScale(QwtPlot::Axis axis, QString logOrLin);
   double axisStep(int axis){return d_user_step[axis];};
   //! Set the axis scale
-  void setAxisScale(int axis, double start, double end, int type = -1, double step = 0.0,
+  void setAxisScale(int axis, double start, double end, int scaleType = -1, double step = 0.0,
                     int majorTicks = 5, int minorTicks = 5);
   
 	/// in plot windows change both axis to log-log

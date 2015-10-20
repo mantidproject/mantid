@@ -40,52 +40,6 @@ LoadIsawDetCal::LoadIsawDetCal() : API::Algorithm() {}
 /// Destructor
 LoadIsawDetCal::~LoadIsawDetCal() {}
 
-/**
- * The intensity function calculates the intensity as a function of detector
- * position and angles
- * @param x :: The shift along the X-axis
- * @param y :: The shift along the Y-axis
- * @param z :: The shift along the Z-axis
- * @param detname :: The detector name
- * @param ws :: The workspace
- */
-
-void LoadIsawDetCal::center(double x, double y, double z, std::string detname,
-                            API::Workspace_sptr ws) {
-  MatrixWorkspace_sptr inputW =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
-  PeaksWorkspace_sptr inputP = boost::dynamic_pointer_cast<PeaksWorkspace>(ws);
-
-  // Get some stuff from the input workspace
-  Instrument_sptr inst;
-  if (inputW) {
-    inst = boost::const_pointer_cast<Instrument>(inputW->getInstrument());
-  } else if (inputP) {
-    inst = boost::const_pointer_cast<Instrument>(inputP->getInstrument());
-  }
-
-  IComponent_const_sptr comp = inst->getComponentByName(detname);
-  if (comp == 0) {
-    std::ostringstream mess;
-    mess << "Component with name " << detname << " was not found.";
-    g_log.error(mess.str());
-    throw std::runtime_error(mess.str());
-  }
-
-  // Do the move
-  using namespace Geometry::ComponentHelper;
-  TransformType positionType = Absolute;
-  if (inputW) {
-    Geometry::ParameterMap &pmap = inputW->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(x, y, z),
-                                             positionType);
-  } else if (inputP) {
-    Geometry::ParameterMap &pmap = inputP->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(x, y, z),
-                                             positionType);
-  }
-}
-
 /** Initialisation method
 */
 void LoadIsawDetCal::init() {
@@ -118,13 +72,7 @@ void LoadIsawDetCal::exec() {
       boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
   PeaksWorkspace_sptr inputP = boost::dynamic_pointer_cast<PeaksWorkspace>(ws);
 
-  // Get some stuff from the input workspace
-  Instrument_sptr inst;
-  if (inputW) {
-    inst = boost::const_pointer_cast<Instrument>(inputW->getInstrument());
-  } else if (inputP) {
-    inst = boost::const_pointer_cast<Instrument>(inputP->getInstrument());
-  }
+  Instrument_sptr inst = getCheckInst(ws);
 
   std::string instname = inst->getName();
 
@@ -435,6 +383,83 @@ void LoadIsawDetCal::exec() {
   setProperty("InputWorkspace", ws);
 
   return;
+}
+
+/**
+ * The intensity function calculates the intensity as a function of detector
+ * position and angles
+ * @param x :: The shift along the X-axis
+ * @param y :: The shift along the Y-axis
+ * @param z :: The shift along the Z-axis
+ * @param detname :: The detector name
+ * @param ws :: The workspace
+ */
+
+void LoadIsawDetCal::center(double x, double y, double z, std::string detname,
+                            API::Workspace_sptr ws) {
+
+  Instrument_sptr inst = getCheckInst(ws);
+
+  IComponent_const_sptr comp = inst->getComponentByName(detname);
+  if (comp == 0) {
+    std::ostringstream mess;
+    mess << "Component with name " << detname << " was not found.";
+    g_log.error(mess.str());
+    throw std::runtime_error(mess.str());
+  }
+
+  // Do the move
+  using namespace Geometry::ComponentHelper;
+  TransformType positionType = Absolute;
+  MatrixWorkspace_sptr inputW =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  PeaksWorkspace_sptr inputP = boost::dynamic_pointer_cast<PeaksWorkspace>(ws);
+  if (inputW) {
+    Geometry::ParameterMap &pmap = inputW->instrumentParameters();
+    Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(x, y, z),
+                                             positionType);
+  } else if (inputP) {
+    Geometry::ParameterMap &pmap = inputP->instrumentParameters();
+    Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(x, y, z),
+                                             positionType);
+  }
+}
+
+/**
+ * Gets the instrument of the workspace, checking that the workspace
+ * and the instrument are as expected.
+ *
+ * @param ws workspace (expected Matrix or Peaks Workspace)
+ *
+ * @throw std::runtime_error if there's any problem with the workspace or it is
+ * not possible to get an instrument object from it
+ */
+Instrument_sptr LoadIsawDetCal::getCheckInst(API::Workspace_sptr ws) {
+  MatrixWorkspace_sptr inputW =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  PeaksWorkspace_sptr inputP = boost::dynamic_pointer_cast<PeaksWorkspace>(ws);
+
+  // Get some stuff from the input workspace
+  Instrument_sptr inst;
+  if (inputW) {
+    inst = boost::const_pointer_cast<Instrument>(inputW->getInstrument());
+    if (!inst)
+      throw std::runtime_error("Could not get a valid instrument from the "
+                               "MatrixWorkspace provided as input");
+  } else if (inputP) {
+    inst = boost::const_pointer_cast<Instrument>(inputP->getInstrument());
+    if (!inst)
+      throw std::runtime_error("Could not get a valid instrument from the "
+                               "PeaksWorkspace provided as input");
+  } else {
+    if (!inst)
+      throw std::runtime_error("Could not get a valid instrument from the "
+                               "workspace which does not seem to be valid as "
+                               "input (must be either MatrixWorkspace or "
+                               "PeaksWorkspace");
+  }
+
+  return inst;
 }
 
 } // namespace Algorithm
