@@ -49,15 +49,11 @@ using Mantid::Kernel::NetworkProxy;
 #include <Poco/DateTimeFormatter.h>
 
 // from boost
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 
 #include <json/json.h>
-
-using boost::property_tree::ptree;  // Todo remove once using jsoncpp, plus boost ptree includes
 
 namespace Mantid {
 namespace API {
