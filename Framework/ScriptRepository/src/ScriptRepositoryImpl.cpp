@@ -77,11 +77,11 @@ const char *emptyURL =
 /**
 Write json object to file
 */
-void write_json_file(std::string filename, Json::Value json, std::string error)
+void writeJsonFile(const std::string& filename, Json::Value json, const std::string& error)
 {
   Poco::FileStream filestream(filename);
   if (!filestream.good()) {
-    g_log.error() << error;
+    g_log.error() << error << std::endl;
   }
   Json::StyledWriter writer;
   filestream << writer.write(json);
@@ -89,22 +89,37 @@ void write_json_file(std::string filename, Json::Value json, std::string error)
 }
 
 /**
+Read json object from file
+*/
+Json::Value readJsonFile(const std::string& filename, const std::string& error)
+{
+  Poco::FileInputStream filestream(filename);
+  if (!filestream.good()) {
+    g_log.error() << error << std::endl;
+  }
+  Json::Reader json_reader;
+  Json::Value read;
+  json_reader.parse(filestream, read);
+  return read;
+}
+
+/**
 Write string to file
 */
-void write_string_file(std::string filename, std::string strToWrite, std::string error)
+void writeStringFile(const std::string& filename, const std::string& stringToWrite, const std::string& error)
 {
   Poco::FileStream filestream(filename);
   if (!filestream.good()) {
-    g_log.error() << error;
+    g_log.error() << error << std::endl;
   }
-  filestream << strToWrite;
+  filestream << stringToWrite;
   filestream.close();
 }
 
 /**
 Test if a file with this filename already exists
 */
-bool file_exists(std::string filename)
+bool fileExists(const std::string& filename)
 {
   Poco::File test_file(filename);
   if (test_file.exists()) {
@@ -313,9 +328,9 @@ void ScriptRepositoryImpl::install(const std::string &path) {
   g_log.debug() << "ScriptRepository downloaded repository information"
                 << std::endl;
   // creation of the instance of local_json file
-  if (!file_exists(local_json_file))
+  if (!fileExists(local_json_file))
   {
-    write_string_file(local_json_file, "{\n}",
+    writeStringFile(local_json_file, "{\n}",
                     "ScriptRepository failed to create local repository");
     g_log.debug() << "ScriptRepository created the local repository information"
     << std::endl;
@@ -649,7 +664,7 @@ void ScriptRepositoryImpl::download_directory(
       it->second.downloaded_pubdate = it->second.pub_date;
       updateLocalJson(it->first, it->second);
 
-    }                                   // end donwloading directory
+    }                                   // end downloading directory
                                         // update the status
     it->second.status = BOTH_UNCHANGED; // update this entry
   }                                     // end interaction with all entries
@@ -929,24 +944,21 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
 void ScriptRepositoryImpl::updateRepositoryJson(const std::string &path,
                                                 const RepositoryEntry &entry) {
 
-  ptree repository_json;
+  Json::Value repository_json;
   std::string filename =
-      std::string(local_repository).append(".repository.json");
-  read_json(filename, repository_json);
+  std::string(local_repository).append(".repository.json");
+  repository_json = readJsonFile(filename, "Error reading .repository.json file");
 
-  ptree::const_assoc_iterator it = repository_json.find(path);
-  if (it == repository_json.not_found()) {
-    boost::property_tree::ptree array;
-    array.put(std::string("author"), entry.author);
-    array.put(std::string("description"), entry.description);
-    std::string directory =
-        (const char *)((entry.directory) ? "true" : "false");
-    array.put(std::string("directory"), directory);
-    array.put(std::string("pub_date"), entry.pub_date.toFormattedString());
-    repository_json.push_back(
-        std::pair<std::string,
-                  boost::property_tree::basic_ptree<std::string, std::string>>(
-            path, array));
+  if (!repository_json.isMember(path)) {
+    // Create Json value for entry
+    Json::Value entry_json;
+    entry_json["author"] = entry.author;
+    entry_json["description"] = entry.description;
+    entry_json["directory"] = (entry.directory ? "true" : "false");
+    entry_json["pub_date"] = entry.pub_date.toFormattedString();
+
+    // Add Json value for entry to repository Json value
+    repository_json[path] = entry_json;
   }
 
   g_log.debug() << "Update LOCAL JSON FILE" << std::endl;
@@ -954,7 +966,7 @@ void ScriptRepositoryImpl::updateRepositoryJson(const std::string &path,
   // set the .repository.json and .local.json not hidden to be able to edit it
   SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_NORMAL);
 #endif
-  write_json(filename, repository_json);
+  writeJsonFile(filename, repository_json, "Error writing .repository.json file");
 #if defined(_WIN32) || defined(_WIN64)
   // set the .repository.json and .local.json hidden
   SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_HIDDEN);

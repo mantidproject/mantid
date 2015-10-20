@@ -19,11 +19,13 @@
 namespace Mantid {
 namespace API {
 
-void write_json_file(std::string filename, Json::Value json, std::string error);
+void writeJsonFile(const std::string& filename, Json::Value json, const std::string& error);
 
-void write_string_file(std::string filename, std::string strToWrite, std::string error);
+Json::Value readJsonFile(const std::string& filename, const std::string& error);
 
-bool file_exists(std::string filename);
+void writeStringFile(const std::string& filename, const std::string& stringToWrite, const std::string& error);
+
+bool fileExists(const std::string& filename);
 
 /** Implementation of Mantid::API::ScriptRepository
 
