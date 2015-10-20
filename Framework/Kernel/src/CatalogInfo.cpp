@@ -79,23 +79,20 @@ const std::string CatalogInfo::linuxPrefix() const { return (m_linuxPrefix); }
  * @param path :: The archive path from ICAT to perform the transform on.
  * @return The path to the archive for the user's OS.
  */
-std::string CatalogInfo::transformArchivePath(std::string &path) {
+std::string CatalogInfo::transformArchivePath(const std::string &path) const {
   std::string ret;
 #ifdef __linux__
-  path = replacePrefix(path, catalogPrefix(), linuxPrefix());
-  path = replaceAllOccurences(path, "\\", "/");
-  ret = path;
+  ret = replacePrefix(path, catalogPrefix(), linuxPrefix());
+  ret = replaceAllOccurences(ret, "\\", "/");
 #elif __APPLE__
-  path = replacePrefix(path, catalogPrefix(), macPrefix());
-  path = replaceAllOccurences(path, "\\", "/");
-  ret = path;
+  ret = replacePrefix(path, catalogPrefix(), macPrefix());
+  ret = replaceAllOccurences(ret, "\\", "/");
 #elif _WIN32
   // Check to see if path is a windows path.
   if (path.find("\\") == std::string::npos) {
-    path = replacePrefix(path, linuxPrefix(), windowsPrefix());
-    path = replaceAllOccurences(path, "/", "\\");
+    ret = replacePrefix(path, linuxPrefix(), windowsPrefix());
+    ret = replaceAllOccurences(ret, "/", "\\");
   }
-  ret = path;
 #endif
   return ret;
 }
@@ -107,13 +104,12 @@ std::string CatalogInfo::transformArchivePath(std::string &path) {
  * @param prefix :: Replace result of regex with this prefix.
  * @return A string containing the replacement.
  */
-std::string CatalogInfo::replacePrefix(std::string &path,
+std::string CatalogInfo::replacePrefix(const std::string &path,
                                        const std::string &regex,
-                                       const std::string &prefix) {
+                                       const std::string &prefix) const {
   boost::regex re(regex);
   // Assign the result of the replacement back to path and return it.
-  path = boost::regex_replace(path, re, prefix);
-  return (path);
+  return boost::regex_replace(path, re, prefix);
 }
 
 /**
@@ -124,11 +120,11 @@ std::string CatalogInfo::replacePrefix(std::string &path,
  * @param format  :: A substitute string.
  * @return A string containing the replacement.
  */
-std::string CatalogInfo::replaceAllOccurences(std::string &path,
+std::string CatalogInfo::replaceAllOccurences(const std::string &path,
                                               const std::string &search,
-                                              const std::string &format) {
-  boost::replace_all(path, search, format);
-  return (path);
+                                              const std::string &format) const {
+
+  return boost::replace_all_copy(path, search, format);
 }
 
 /**
