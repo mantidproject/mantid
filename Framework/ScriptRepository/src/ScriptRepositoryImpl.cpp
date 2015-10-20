@@ -49,11 +49,15 @@ using Mantid::Kernel::NetworkProxy;
 #include <Poco/DateTimeFormatter.h>
 
 // from boost
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 
 #include <json/json.h>
+
+using boost::property_tree::ptree;  // Todo remove once using jsoncpp, plus boost ptree includes
 
 namespace Mantid {
 namespace API {
@@ -69,6 +73,32 @@ const char *emptyURL =
     "to the central repository.\nThis entry should be defined at the "
     "properties file, "
     "at ScriptRepository";
+
+/**
+Write json object to file
+*/
+void write_json_file(std::string filename, Json::Value json, std::string error)
+{
+  Poco::FileStream filestream(filename);
+  if (!filestream.good()) {
+    g_log.error() << error;
+  }
+  Json::StyledWriter writer;
+  filestream << writer.write(json);
+  filestream.close();
+}
+
+/**
+Test if a file with this filename already exists
+*/
+bool file_exists(std::string filename)
+{
+  Poco::File test_file(filename);
+  if (test_file.exists()) {
+    return true;
+  }
+  return false;
+}
 
 DECLARE_SCRIPTREPOSITORY(ScriptRepositoryImpl)
 /**
@@ -270,12 +300,13 @@ void ScriptRepositoryImpl::install(const std::string &path) {
   g_log.debug() << "ScriptRepository downloaded repository information"
                 << std::endl;
   // creation of the instance of local_json file
-  Poco::File local(local_json_file);
-  if (!local.exists()) {
-    ptree pt;
-    write_json(local_json_file, pt);
+  if (!file_exists(local_json_file))
+  {
+    Json::Value pt;
+    write_json_file(local_json_file, pt,
+                    "ScriptRepository failed to create local repository");
     g_log.debug() << "ScriptRepository created the local repository information"
-                  << std::endl;
+    << std::endl;
   }
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -821,13 +852,14 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
     std::string published_date;
 
     Json::Value pt;
-    if (!Json::Reader::parse(answer, pt)) {
-      throw ScriptRepoException("Bad answer from the Server", ex.what());
+    Json::Reader json_reader;
+    if (!json_reader.parse(answer, pt)) {
+      throw ScriptRepoException("Bad answer from the Server");
     }
-    info = pt.get<std::string>("message", "");
-    detail = pt.get<std::string>("detail", "");
-    published_date = pt.get<std::string>("pub_date", "");
-    std::string cmd = pt.get<std::string>("shell", "");
+    info = pt.get("message", "UTF-8" ).asString();
+    detail = pt.get("detail", "UTF-8" ).asString();
+    published_date = pt.get("pub_date", "UTF-8" ).asString();
+    std::string cmd = pt.get("shell", "UTF-8" ).asString();
     if (!cmd.empty())
       detail.append("\nFrom Command: ").append(cmd);
 

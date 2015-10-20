@@ -4,6 +4,7 @@
 #include "MantidAPI/ScriptRepository.h"
 #include "MantidKernel/DateAndTime.h"
 #include <map>
+#include <json/value.h>
 
 #ifdef _WIN32
 #if (IN_MANTID_SCRIPTREPO)
@@ -17,6 +18,10 @@
 
 namespace Mantid {
 namespace API {
+
+void write_json_file(std::string filename, Json::Value json, std::string error);
+
+bool file_exists(std::string filename);
 
 /** Implementation of Mantid::API::ScriptRepository
 
