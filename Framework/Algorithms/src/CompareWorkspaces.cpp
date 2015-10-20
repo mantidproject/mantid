@@ -9,6 +9,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 
@@ -107,7 +108,7 @@ void CompareWorkspaces::init() {
 
   declareProperty("Result", false, Direction::Output);
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>("ErrorWorkspace", "", Direction::Output),
+      new WorkspaceProperty<ITableWorkspace>("ErrorWorkspace", "compare_errors", Direction::Output),
       "TableWorkspace containing any errors that occured during execution");
 }
 
@@ -130,8 +131,6 @@ void CompareWorkspaces::exec() {
 
   setProperty("Result", m_Result);
   setProperty("ErrorWorkspace", m_Errors);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -227,7 +226,7 @@ void CompareWorkspaces::processGroups(
     if (!success) {
       m_Result = false;
 
-      ITableWorkspace_sptr table = checker->getProperty("Errors");
+      ITableWorkspace_sptr table = checker->getProperty("ErrorWorkspace");
       handleError(table->cell<std::string>(0, 0) + ". Inputs=[" + namesOne[i] + "," + namesTwo[i] + "]");
     }
   }
@@ -1131,7 +1130,6 @@ void CompareWorkspaces::handleError(std::string msg)
 {
   TableRow row = m_Errors->appendRow();
   row << msg;
-  // TODO: output to log
   m_Result = false;
 }
 
@@ -1148,8 +1146,7 @@ then 0
 
 @returns true if error or false if the value is within the limits requested
 */
-inline bool CompareWorkspaces::relErr(const double &x1, const double &x2, const double &errorVal) {
-
+bool CompareWorkspaces::relErr(double x1, double x2, double errorVal) const {
   double num = std::fabs(x1 - x2);
   // how to treat x1<0 and x2 > 0 ?  probably this way
   double den = 0.5 * (std::fabs(x1) + std::fabs(x2));

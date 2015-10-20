@@ -130,7 +130,7 @@ private:
 
   void handleError(std::string msg);
 
-  inline bool relErr(const double &x1, const double &x2, const double &errorVal);
+  bool relErr(double x1, double x2, double errorVal) const;
 
   /// Result of comparison (true if equal, false otherwise)
   bool m_Result;
