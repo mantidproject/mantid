@@ -41,8 +41,7 @@ void createOrUpdateValue(API::Run &run, const std::string &name,
 DECLARE_ALGORITHM(AddNote)
 
 //----------------------------------------------------------------------------------------------
-AddNote::AddNote() {
-  useAlgorithm("Comment", 1);}
+AddNote::AddNote() { useAlgorithm("Comment", 1); }
 
 AddNote::~AddNote() {}
 
