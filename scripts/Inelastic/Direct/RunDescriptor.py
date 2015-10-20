@@ -821,6 +821,13 @@ class RunDescriptor(PropDescriptor):
             return None
 
         mon_ws = data_ws.getMonitorWorkspace()
+        if mon_ws is None: # May be old code or some problem connecting workspace with monitor workspace
+            ws_name = data_ws.name()
+            mon_ws_name = ws_name+'_monitors'
+            if mon_ws_name in mtd:
+                mon_ws = mtd[mon_ws_name]
+                data_ws.setMonitorWorkspace(mon_ws) # connect workspace and monitors together
+
         if mon_ws is None:
             monitors_separate = False
             mon_ws = data_ws

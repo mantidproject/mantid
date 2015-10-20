@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+﻿#pylint: disable=invalid-name
 """ File contains collection of Descriptors used to define complex
     properties in NonIDF_Properties and PropertyManager classes
 """
@@ -81,6 +81,10 @@ class IncidentEnergy(PropDescriptor):
         self._incident_energy = 0
         self._num_energies = 1
         self._cur_iter_en = 0
+    # AUTO EI mode
+        self._autoEiMode=False
+        self._monitor_ws=None
+        
     def __get__(self,instance,owner=None):
         """ return  incident energy or list of incident energies """
         if instance is None:
@@ -91,6 +95,9 @@ class IncidentEnergy(PropDescriptor):
         """ Set up incident energy or range of energies in various formats """
         if value != None:
             if isinstance(value,str):
+                if value.lower()=='auto':
+                    self._autoEiMode = True
+                    return
                 if value.find('[') > -1:
                     energy_list = True
                     value = value.translate(None, '[]').strip()
@@ -121,7 +128,7 @@ class IncidentEnergy(PropDescriptor):
                 else:
                     self._incident_energy = float(value)
         else:
-            raise KeyError("Incident energy have to be positive number of list of positive numbers. Got None")
+            raise KeyError("Incident energy have to be positive number of list of positive numbers or keyword AUTO. Got None")
 
         if isinstance(self._incident_energy,list):
             self._num_energies = len(self._incident_energy)

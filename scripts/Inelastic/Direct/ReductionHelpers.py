@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+﻿#pylint: disable=invalid-name
 from mantid import config
 import os
 
@@ -320,7 +320,7 @@ def check_instrument_name(old_name,new_name):
     new_name = short_name
     facility = str(config.getFacility())
 
-    config['default.instrument'] = full_name
+    #config['default.instrument'] = full_name
     return (new_name,full_name,facility)
 
 def parse_single_name(filename):
