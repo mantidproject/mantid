@@ -22,10 +22,12 @@ void RenameWorkspace::init() {
       new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input));
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
                                                    Direction::Output));
-  declareProperty("RenameMonitors",false,"If true, and monitor workspace found attached"
-                  " to the source workspace, the monitors workspace is renamed too"
-                  " (the monitor workspace name would be NewName_monitors",
-                  Direction::Input);
+  declareProperty(
+      "RenameMonitors", false,
+      "If true, and monitor workspace found attached"
+      " to the source workspace, the monitors workspace is renamed too"
+      " (the monitor workspace name would be NewName_monitors",
+      Direction::Input);
 }
 
 /** Executes the algorithm
@@ -54,7 +56,7 @@ void RenameWorkspace::exec() {
 
   const bool renameMonitors = getProperty("RenameMonitors");
   if (!renameMonitors)
-      return;
+    return;
 
   // Deal with attached monitor workspace if any.
   auto matInputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
