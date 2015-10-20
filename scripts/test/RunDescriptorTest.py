@@ -571,8 +571,30 @@ class RunDescriptorTest(unittest.TestCase):
         propman.sample_run = None
         DeleteWorkspace(a_wksp)
 
+    def test_strange_behaviour(self):
+        wksp=CreateSampleWorkspace(Function='Multiple Peaks',WorkspaceType='Event',
+                                NumBanks=1, BankPixelWidth=1, NumEvents=1, XUnit='TOF',
+                                XMin=2000, XMax=20000, BinWidth=1)
+        wksp_mon=CreateSampleWorkspace(Function='Multiple Peaks',WorkspaceType='Histogram',
+                                NumBanks=1, BankPixelWidth=1, NumEvents=1, XUnit='TOF',
+                                XMin=2000, XMax=20000, BinWidth=1)
+        wksp.setMonitorWorkspace(wksp_mon);
+
+        wsr = RenameWorkspace(wksp,OutputWorkspace='Renamed1',RenameMonitors=True)
+        mon_ws = wsr.getMonitorWorkspace()
+        wsr = RenameWorkspace(wksp,OutputWorkspace='Renamed2',RenameMonitors=True)
+
+        mon_ws_name = mon_ws.name()
+        self.assertEquals(mon_ws_name,'Renamed2_monitors')
+
+        self.assertRaises(ValueError,wsr.setMonitorWorkspace,mon_ws)
+        
+        wsr.setMonitorWorkspace(mtd[mon_ws_name])
+
 
 
 
 if __name__=="__main__":
+    #tester=RunDescriptorTest('test_strange_behaviour')
+    #tester.test_strange_behaviour()
     unittest.main()

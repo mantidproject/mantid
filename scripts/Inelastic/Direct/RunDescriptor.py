@@ -693,6 +693,13 @@ class RunDescriptor(PropDescriptor):
         new_name = self._build_ws_name()
         old_name = workspace.name()
         if new_name != old_name:
+            # Compartibility with old test code comes here:
+            mon_ws = workspace.getMonitorWorkspace()
+            if mon_ws is None: # Its possible that monitor workspace in some way was not attached
+                mon_ws_name = old_name + '_monitors' # to current workspace
+                if mon_ws_name in mtd:
+                    mon_ws = mtd[mon_ws_name]
+                    workspace.setMonitorWorkspace(mon_ws)
             RenameWorkspace(InputWorkspace=old_name,OutputWorkspace=new_name,RenameMonitors=True)
         self._ws_name = new_name
 #--------------------------------------------------------------------------------------------------------------------
@@ -794,7 +801,10 @@ class RunDescriptor(PropDescriptor):
             origin_deleted = True
         else:
             target = CropWorkspace(origin_name,OutputWorkspace=target_name,XMin=tof_range[0],XMax=tof_range[2])
-            origin_deleted = False
+            if origin_name == target_name:
+                origin_deleted = True
+            else:
+                origin_deleted = False
         if mon_ws:
             mon_ws = mtd[mon_ws_name] # The reason why this operation has to be performed is fully unclear, but its necessary
             target.setMonitorWorkspace(mon_ws)

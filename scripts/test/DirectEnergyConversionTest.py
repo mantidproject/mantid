@@ -625,6 +625,8 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
 
 if __name__=="__main__":
-   test = DirectEnergyConversionTest('test_abs_multirep_with_bkg_and_bleed')
-   test.test_abs_multirep_with_bkg_and_bleed()
-   #unittest.main()
+   #test = DirectEnergyConversionTest('test_multirep_mode')
+   #test.test_multirep_mode()
+   #test = DirectEnergyConversionTest('test_multirep_abs_units_mode')
+   #test.test_multirep_abs_units_mode()
+   unittest.main()
