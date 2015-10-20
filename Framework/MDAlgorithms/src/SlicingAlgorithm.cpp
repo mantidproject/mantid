@@ -1078,8 +1078,8 @@ Mantid::Geometry::MDFrame_uptr
 SlicingAlgorithm::extractMDFrameForNonAxisAligned(
     std::vector<size_t> indicesWithProjection, std::string) const {
   if (indicesWithProjection.empty()) {
-    throw std::runtime_error("Slicing Algorithm: Chosen vector does not "
-                             "project on any vector of the old basis.");
+    g_log.warning() << "Slicing Algorithm: Chosen vector does not "
+                       "project on any vector of the old basis.";
   }
   // Get a reference frame to perform pairwise comparison
   const auto &referenceMDFrame =
@@ -1089,8 +1089,8 @@ SlicingAlgorithm::extractMDFrameForNonAxisAligned(
        it != indicesWithProjection.end(); ++it) {
     const auto &toCheckMDFrame = m_inWS->getDimension(*it)->getMDFrame();
     if (!referenceMDFrame.isSameType(toCheckMDFrame)) {
-      throw std::runtime_error("Slicing Algorithm: New basis yvector tries to "
-                               "mix un-mixable MDFrame types.");
+      g_log.warning() << "Slicing Algorithm: New basis vector tries to "
+                         "mix un-mixable MDFrame types.";
     }
   }
 

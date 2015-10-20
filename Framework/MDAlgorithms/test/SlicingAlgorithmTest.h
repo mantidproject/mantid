@@ -555,25 +555,6 @@ public:
     }
   }
 
-  void test_makeBasisVectorFromString_WithMixedMDFrames_AndBasisVectorMixed() {
-    // Test WITH and WITHOUT basis vector normalization
-    for (int normalize = 0; normalize < 2; normalize++) {
-      SlicingAlgorithmImpl alg;
-      alg.m_inWS = wsMixedFrames; // First three dimensions are Q Sample
-                                  // the last is General Frame
-      // Set up data that comes from other properties
-      alg.m_minExtents.push_back(-5.0);
-      alg.m_maxExtents.push_back(+5.0);
-      alg.m_numBins.push_back(20);
-      alg.m_NormalizeBasisVectors = (normalize > 0);
-
-      TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
-      TSM_ASSERT_THROWS("BASIS vector is NOT IN QSample sub-space",
-                        alg.makeBasisVectorFromString(" name, units , 1,2,3,1"),
-                        std::runtime_error);
-    }
-  }
-
   /// Create a basis vector with a dimension with [commas,etc] in the name.
   void test_makeBasisVectorFromString_NameWithCommas() {
     SlicingAlgorithmImpl alg;
