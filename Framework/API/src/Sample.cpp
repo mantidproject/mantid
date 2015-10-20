@@ -191,7 +191,13 @@ void Sample::setCrystalStructure(
 
 /// Returns true if the sample actually holds a CrystalStructure.
 bool Sample::hasCrystalStructure() const {
-  return m_crystalStructure.operator bool();
+  // Conversion to bool seems to be a problem in VS2012, so this is a bit more
+  // verbose than it should be.
+  if (m_crystalStructure) {
+    return true;
+  }
+
+  return false;
 }
 
 /// Destroys the internally stored CrystalStructure-object.

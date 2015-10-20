@@ -107,7 +107,8 @@ public:
   /** @name Access the sample's crystal structure */
   //@{
   const Geometry::CrystalStructure &getCrystalStructure() const;
-  void setCrystalStructure(const Geometry::CrystalStructure &newCrystalStructure);
+  void
+  setCrystalStructure(const Geometry::CrystalStructure &newCrystalStructure);
   bool hasCrystalStructure() const;
   void clearCrystalStructure();
   //@}

@@ -231,24 +231,26 @@ public:
   }
 
   void test_crystalStructureCopyConstructorAndAssignment() {
-      Sample sampleA;
+    Sample sampleA;
 
-      CrystalStructure structure("3 4 5 90 90 90", "C m m m",
-                                 "Fe 0.12 0.23 0.121");
-      sampleA.setCrystalStructure(structure);
-      TS_ASSERT(sampleA.hasCrystalStructure());
+    CrystalStructure structure("3 4 5 90 90 90", "C m m m",
+                               "Fe 0.12 0.23 0.121");
+    sampleA.setCrystalStructure(structure);
+    TS_ASSERT(sampleA.hasCrystalStructure());
 
-      Sample sampleB = sampleA;
-      TS_ASSERT(sampleB.hasCrystalStructure());
+    Sample sampleB = sampleA;
+    TS_ASSERT(sampleB.hasCrystalStructure());
 
-      CrystalStructure fromA = sampleA.getCrystalStructure();
-      CrystalStructure fromB = sampleB.getCrystalStructure();
-      TS_ASSERT_EQUALS(fromA.spaceGroup()->hmSymbol(), fromB.spaceGroup()->hmSymbol());
+    CrystalStructure fromA = sampleA.getCrystalStructure();
+    CrystalStructure fromB = sampleB.getCrystalStructure();
+    TS_ASSERT_EQUALS(fromA.spaceGroup()->hmSymbol(),
+                     fromB.spaceGroup()->hmSymbol());
 
-      Sample sampleC(sampleA);
+    Sample sampleC(sampleA);
 
-      CrystalStructure fromC = sampleC.getCrystalStructure();
-      TS_ASSERT_EQUALS(fromA.spaceGroup()->hmSymbol(), fromC.spaceGroup()->hmSymbol());
+    CrystalStructure fromC = sampleC.getCrystalStructure();
+    TS_ASSERT_EQUALS(fromA.spaceGroup()->hmSymbol(),
+                     fromC.spaceGroup()->hmSymbol());
   }
 
   void test_Material_Returns_The_Correct_Value() {
