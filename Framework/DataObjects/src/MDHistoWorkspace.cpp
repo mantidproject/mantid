@@ -1234,8 +1234,6 @@ MDHistoWorkspace::getSpecialCoordinateSystem() const {
 GCC_DIAG_ON(strict-aliasing)
 // clang-format on
 
-
-
 /**
 Set the special coordinate system (if any) to use.
 @param coordinateSystem : Special coordinate system to use.
