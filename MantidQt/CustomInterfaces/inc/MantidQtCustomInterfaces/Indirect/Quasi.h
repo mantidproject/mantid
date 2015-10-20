@@ -44,6 +44,8 @@ private:
   int m_previewSpec;
   /// The ui form
   Ui::Quasi m_uiForm;
+  /// alg
+  Mantid::API::IAlgorithm_sptr m_QuasiAlg;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

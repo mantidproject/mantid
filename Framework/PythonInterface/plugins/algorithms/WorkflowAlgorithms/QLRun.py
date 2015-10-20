@@ -9,7 +9,7 @@ if is_supported_f2py_platform():
 else:
     logger.error('F2Py functionality not currently available on your platform.')
 
-from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode
+from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, WorkspaceGroupProperty
 from mantid.kernel import StringListValidator, Direction
 from mantid.simpleapi import *
 from mantid import config, logger
@@ -93,6 +93,16 @@ class QLRun(PythonAlgorithm):
         self.declareProperty(name='Plot', defaultValue='', doc='Plot options')
 
         self.declareProperty(name='Save', defaultValue=False, doc='Switch Save result to nxs file Off/On')
+
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceFit', '', direction=Direction.Output),
+                             doc='The name of the fit output workspaces')
+
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceProb', '', optional=PropertyMode.Optional,
+                             direction=Direction.Output),
+                             doc='The name of the probability output workspaces')
+
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceResult', '', direction=Direction.Output),
+                             doc='The name of the result output workspaces')
 
 
     def validateInputs(self):
@@ -313,7 +323,7 @@ class QLRun(PythonAlgorithm):
             yProb = yPr0
             yProb = np.append(yProb,yPr1)
             yProb = np.append(yProb,yPr2)
-            CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,\
+            probWs = CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,\
                 Nspec=3, UnitX='MomentumTransfer')
             outWS = C2Fw(self._samWS[:-4],fname)
             if self._Plot != 'None':
@@ -338,6 +348,11 @@ class QLRun(PythonAlgorithm):
             SaveNexusProcessed(InputWorkspace=outWS, Filename=out_path)
             logger.information('Output fit file created : ' + fit_path)
             logger.information('Output paramter file created : ' + out_path)
+
+        self.setProperty('OutputworkspaceFit', fitWS)
+        self.setProperty('OutputWorkspaceResult', outWS)
+        if self._program == 'QL':
+            self.setProperty('OutputWorkspaceProb', probWS)
 
 
 if is_supported_f2py_platform():

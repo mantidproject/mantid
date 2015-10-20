@@ -186,6 +186,9 @@ void Quasi::run() {
   runAlg->setProperty("SampleWorkspace", sampleName);
   runAlg->setProperty("ResolutionWorkspace", resName);
   runAlg->setProperty("ResNormWorkspace", resNormFile);
+  runAlg->setProperty("OutputWorkspaceFit", "fit");
+  runAlg->setProperty("OutputWorkspaceProb", "prob");
+  runAlg->setProperty("OutputWorkspaceResult", "result");
   runAlg->setProperty("MinRange", eMin);
   runAlg->setProperty("MaxRange", eMax);
   runAlg->setProperty("SampleBins", sampleBins);
@@ -199,6 +202,7 @@ void Quasi::run() {
   runAlg->setProperty("Save", save);
   runAlg->setProperty("Plot", plot);
 
+  m_QuasiAlg = runAlg;
   m_batchAlgoRunner->addAlgorithm(runAlg);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
