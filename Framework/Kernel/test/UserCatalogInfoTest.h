@@ -34,7 +34,6 @@ public:
   MOCK_CONST_METHOD0(windowsPrefix, const std::string());
   MOCK_CONST_METHOD0(macPrefix, const std::string());
   MOCK_CONST_METHOD0(linuxPrefix, const std::string());
-  MOCK_CONST_METHOD1(transformArchivePath, std::string(const std::string &));
   virtual ~MockICatalogInfo() {}
 };
 
@@ -149,20 +148,20 @@ public:
     TS_ASSERT(Mock::VerifyAndClear(&mockConfigService));
   }
 
-  void test_auto_adapter(){
+  void test_auto_adapter() {
 
-      // Adaptee
-      struct UserType{
-          std::string operator[] (const std::string) const {return "my_value";}
-      };
+    // Adaptee
+    struct UserType {
+      std::string getString(const std::string &) const { return "my_value"; }
+    };
 
-      UserType usertype;
-      CatalogConfigService* service = makeCatalogConfigServiceAdapter(usertype, "my_key");
-      OptionalPath mountPoint = service->preferredMountPoint();
-      TS_ASSERT(mountPoint);
-      TS_ASSERT_EQUALS("my_value", mountPoint.get());
-      delete service;
-
+    UserType usertype;
+    CatalogConfigService *service =
+        makeCatalogConfigServiceAdapter(usertype, "my_key");
+    OptionalPath mountPoint = service->preferredMountPoint();
+    TS_ASSERT(mountPoint);
+    TS_ASSERT_EQUALS("my_value", mountPoint.get());
+    delete service;
   }
 };
 

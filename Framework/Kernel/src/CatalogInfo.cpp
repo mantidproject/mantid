@@ -3,9 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/CatalogInfo.h"
 
-#include <boost/regex.hpp>
-#include <boost/algorithm/string.hpp>
-
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
@@ -73,59 +70,6 @@ const std::string CatalogInfo::macPrefix() const { return (m_macPrefix); }
  * Obtain Linux prefix from facility file.
  */
 const std::string CatalogInfo::linuxPrefix() const { return (m_linuxPrefix); }
-
-/**
- * Transform's the archive path based on operating system (OS) used.
- * @param path :: The archive path from ICAT to perform the transform on.
- * @return The path to the archive for the user's OS.
- */
-std::string CatalogInfo::transformArchivePath(const std::string &path) const {
-  std::string ret;
-#ifdef __linux__
-  ret = replacePrefix(path, catalogPrefix(), linuxPrefix());
-  ret = replaceAllOccurences(ret, "\\", "/");
-#elif __APPLE__
-  ret = replacePrefix(path, catalogPrefix(), macPrefix());
-  ret = replaceAllOccurences(ret, "\\", "/");
-#elif _WIN32
-  // Check to see if path is a windows path.
-  if (path.find("\\") == std::string::npos) {
-    ret = replacePrefix(path, linuxPrefix(), windowsPrefix());
-    ret = replaceAllOccurences(ret, "/", "\\");
-  }
-#endif
-  return ret;
-}
-
-/**
- * Replace the content of a string using regex.
- * @param path   :: An string to search and replace on.
- * @param regex  :: The regex to search for.
- * @param prefix :: Replace result of regex with this prefix.
- * @return A string containing the replacement.
- */
-std::string CatalogInfo::replacePrefix(const std::string &path,
-                                       const std::string &regex,
-                                       const std::string &prefix) const {
-  boost::regex re(regex);
-  // Assign the result of the replacement back to path and return it.
-  return boost::regex_replace(path, re, prefix);
-}
-
-/**
- * Replace all occurrences of the search string in the input with the format
- * string.
- * @param path    :: An string to search and replace on.
- * @param search  :: A substring to be searched for.
- * @param format  :: A substitute string.
- * @return A string containing the replacement.
- */
-std::string CatalogInfo::replaceAllOccurences(const std::string &path,
-                                              const std::string &search,
-                                              const std::string &format) const {
-
-  return boost::replace_all_copy(path, search, format);
-}
 
 /**
  * Obtain the attribute from a given element tag and attribute name.

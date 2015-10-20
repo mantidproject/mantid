@@ -14,7 +14,7 @@ typedef boost::optional<std::string> OptionalPath;
 class CatalogConfigService {
 public:
   virtual OptionalPath preferredMountPoint() const = 0;
-  virtual ~CatalogConfigService(){}
+  virtual ~CatalogConfigService() {}
 };
 
 template <typename T>
@@ -22,11 +22,15 @@ CatalogConfigService *makeCatalogConfigServiceAdapter(
     const T &adaptee, const std::string key = "icatDownload.mountPoint") {
   class Adapter : public CatalogConfigService {
   private:
-    T m_adaptee;
+    const T &m_adaptee;
     std::string m_key;
+
   public:
-    Adapter(T adaptee, const std::string key) : m_adaptee(adaptee), m_key(key) {}
-    virtual OptionalPath preferredMountPoint() const { return m_adaptee[m_key]; }
+    Adapter(const T &adaptee, const std::string key)
+        : m_adaptee(adaptee), m_key(key) {}
+    virtual OptionalPath preferredMountPoint() const {
+      return m_adaptee.getString(m_key);
+    }
   };
   return new Adapter(adaptee, key);
 }
@@ -71,7 +75,6 @@ public:
   const std::string windowsPrefix() const;
   const std::string macPrefix() const;
   const std::string linuxPrefix() const;
-  std::string transformArchivePath(const std::string &path) const;
 
 private:
   /// Facility catalog info. Aggregation only solution here.

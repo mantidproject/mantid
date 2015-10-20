@@ -1,6 +1,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/ICatalogInfo.h"
+#include "MantidKernel/UserCatalogInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtMantidWidgets/CatalogSearch.h"
@@ -1053,10 +1055,19 @@ namespace MantidQt
      */
     void CatalogSearch::disableDownloadButtonIfArchives(int row)
     {
+      using namespace Mantid::Kernel;
+
       QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
       // The location of the file selected in the archives.
       std::string location = table->item(row,headerIndexByName(table, "Location"))->text().toStdString();
-      Mantid::Kernel::CatalogInfo catalogInfo = Mantid::Kernel::ConfigService::Instance().getFacility().catalogInfo();
+
+      // Create and use the user-set ConfigInformation.
+      std::unique_ptr<CatalogConfigService> catConfigService(
+          makeCatalogConfigServiceAdapter(ConfigService::Instance()));
+      UserCatalogInfo catalogInfo(
+          ConfigService::Instance().getFacility().catalogInfo(),
+          *catConfigService);
+
       std::string fileLocation = catalogInfo.transformArchivePath(location);
 
       std::ifstream hasAccessToArchives(fileLocation.c_str());

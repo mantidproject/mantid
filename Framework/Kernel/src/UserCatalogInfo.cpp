@@ -50,10 +50,5 @@ const std::string UserCatalogInfo::linuxPrefix() const {
   return m_catInfo.linuxPrefix();
 }
 
-std::string
-UserCatalogInfo::transformArchivePath(const std::string &path) const {
-  return m_catInfo.transformArchivePath(path);
-}
-
 } // namespace Kernel
 } // namespace Mantid

@@ -61,21 +61,11 @@ public:
   /// Obtain Windows prefix from the facility file.
   const std::string windowsPrefix() const;
   /// Obtain Macintosh prefix from facility file.
-  const std::string macPrefix() const;
+  virtual const std::string macPrefix() const override;
   /// Obtain Linux prefix from facility file.
   const std::string linuxPrefix() const;
-  /// Transform's the archive path based on operating system used.
-  std::string transformArchivePath(const std::string &path) const;
 
 private:
-  /// Replace the content of a string using regex.
-  std::string replacePrefix(const std::string &path, const std::string &regex,
-                            const std::string &prefix) const;
-  /// Replace all occurrences of the search string in the input with the format
-  /// string.
-  std::string replaceAllOccurences(const std::string &path,
-                                   const std::string &search,
-                                   const std::string &format) const;
   /// Obtain the attribute from a given element tag and attribute name.
   std::string getAttribute(const Poco::XML::Element *element,
                            const std::string &tagName,
