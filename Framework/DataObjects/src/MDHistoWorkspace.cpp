@@ -1230,9 +1230,7 @@ MDHistoWorkspace::getSpecialCoordinateSystem() const {
   }
   return coordinates;
 }
-// clang-format off
-GCC_DIAG_ON(strict-aliasing)
-// clang-format on
+
 
 /**
 Set the special coordinate system (if any) to use.
