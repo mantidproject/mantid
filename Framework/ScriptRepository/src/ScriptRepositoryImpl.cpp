@@ -1423,32 +1423,25 @@ void ScriptRepositoryImpl::doDownloadFile(const std::string &url_file,
  @todo describe
  */
 void ScriptRepositoryImpl::parseCentralRepository(Repository &repo) {
-  ptree pt;
   std::string filename =
       std::string(local_repository).append(".repository.json");
   try {
-    read_json(filename, pt);
+    Json::Value pt = readJsonFile(filename, "Error reading .repository.json file");
 
-    BOOST_FOREACH (ptree::value_type &file, pt) {
-      if (!isEntryValid(file.first))
+    for( auto it = pt.begin() ; it != pt.end() ; it++ ) {
+      std::string filepath = it.key().asString();
+      if (!isEntryValid(filepath))
         continue;
-      // g_log.debug() << "Inserting : file.first " << file.first << std::endl;
-      RepositoryEntry &entry = repo[file.first];
+      Json::Value entry_json = pt.get(filepath, "");
+      RepositoryEntry &entry = repo[filepath];
       entry.remote = true;
-      entry.directory = file.second.get("directory", false);
-      entry.pub_date = DateAndTime(file.second.get<std::string>("pub_date"));
-      entry.description = file.second.get("description", "");
-      entry.author = file.second.get("author", "");
+      entry.directory = entry_json.get("directory", false).asBool();
+      entry.pub_date = DateAndTime(entry_json.get("pub_date", "").asString());
+      entry.description = entry_json.get("description", "").asString();
+      entry.author = entry_json.get("author", "").asString();
       entry.status = BOTH_UNCHANGED;
     }
 
-  } catch (boost::property_tree::json_parser_error &ex) {
-    std::stringstream ss;
-    ss << "Corrupted database : " << filename;
-
-    g_log.error() << "ScriptRepository: " << ss.str()
-                  << "\nDetails: json_parser_error: " << ex.what() << std::endl;
-    throw ScriptRepoException(ss.str(), ex.what());
   } catch (std::exception &ex) {
     std::stringstream ss;
     ss << "RuntimeError: checking database >> " << ex.what();
