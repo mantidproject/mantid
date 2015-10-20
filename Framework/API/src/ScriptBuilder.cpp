@@ -136,7 +136,7 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
   std::string prop = "";
 
   if (name == COMMENT_ALG)
-    properties << buildCommentString(algHistory) << "\n";
+    return buildCommentString(algHistory);
 
   auto props = algHistory->getProperties();
   for (auto propIter = props.begin(); propIter != props.end(); ++propIter) {
