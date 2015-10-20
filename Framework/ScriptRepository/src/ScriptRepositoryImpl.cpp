@@ -79,7 +79,7 @@ Write json object to file
 */
 void writeJsonFile(const std::string& filename, Json::Value json, const std::string& error)
 {
-  Poco::FileStream filestream(filename);
+  Poco::FileOutputStream filestream(filename);
   if (!filestream.good()) {
     g_log.error() << error << std::endl;
   }
@@ -883,10 +883,10 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
     if (!json_reader.parse(answer, pt)) {
       throw ScriptRepoException("Bad answer from the Server");
     }
-    info = pt.get("message", "UTF-8" ).asString();
-    detail = pt.get("detail", "UTF-8" ).asString();
-    published_date = pt.get("pub_date", "UTF-8" ).asString();
-    std::string cmd = pt.get("shell", "UTF-8" ).asString();
+    info = pt.get("message", "").asString();
+    detail = pt.get("detail", "").asString();
+    published_date = pt.get("pub_date", "").asString();
+    std::string cmd = pt.get("shell", "").asString();
     if (!cmd.empty())
       detail.append("\nFrom Command: ").append(cmd);
 
@@ -1067,21 +1067,18 @@ void ScriptRepositoryImpl::remove(const std::string &file_path,
     // not.
     std::string info;
     std::string detail;
-    ptree pt;
-    try {
-      read_json(answer, pt);
-      info = pt.get<std::string>("message", "");
-      detail = pt.get<std::string>("detail", "");
-      std::string cmd = pt.get<std::string>("shell", "");
-      if (!cmd.empty())
-        detail.append("\nFrom Command: ").append(cmd);
+    Json::Value answer_json;
 
-    } catch (boost::property_tree::json_parser_error &ex) {
-      // this should not occurr in production. The answer from the
-      // server should always be a valid json file
-      g_log.debug() << "Bad answer: " << ex.what() << std::endl;
-      throw ScriptRepoException("Bad answer from the Server", ex.what());
+    Json::Reader json_reader;
+    if (!json_reader.parse(answer, answer_json)) {
+      throw ScriptRepoException("Bad answer from the Server");
     }
+    info = answer_json.get("message", "").asString();
+    detail = answer_json.get("detail", "").asString();
+    std::string cmd = answer_json.get("shell", "").asString();
+
+    if (!cmd.empty())
+      detail.append("\nFrom Command: ").append(cmd);
 
     g_log.debug() << "Checking if success info=" << info << std::endl;
     // check if the server removed the file from the central repository
@@ -1099,31 +1096,21 @@ void ScriptRepositoryImpl::remove(const std::string &file_path,
     // dealt with locally.
     //
     {
-      ptree pt;
       std::string filename =
           std::string(local_repository).append(".repository.json");
-      try {
-        read_json(filename, pt);
-        pt.erase(relative_path); // remove the entry
-#if defined(_WIN32) || defined(_WIN64)
-        // set the .repository.json and .local.json not hidden (to be able to
-        // edit it)
-        SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_NORMAL);
-#endif
-        write_json(filename, pt);
-#if defined(_WIN32) || defined(_WIN64)
-        // set the .repository.json and .local.json hidden
-        SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_HIDDEN);
-#endif
-      } catch (boost::property_tree::json_parser_error &ex) {
-        std::stringstream ss;
-        ss << "corrupted central copy of database : " << filename;
 
-        g_log.error() << "ScriptRepository: " << ss.str()
-                      << "\nDetails: deleting entries - json_parser_error: "
-                      << ex.what() << std::endl;
-        throw ScriptRepoException(ss.str(), ex.what());
-      }
+      Json::Value pt = readJsonFile(filename, "Error reading .repository.json file");
+      pt.removeMember(relative_path); // remove the entry
+#if defined(_WIN32) || defined(_WIN64)
+      // set the .repository.json and .local.json not hidden (to be able to
+      // edit it)
+      SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_NORMAL);
+#endif
+      writeJsonFile(filename, pt, "Error writing .repository.json file");
+#if defined(_WIN32) || defined(_WIN64)
+      // set the .repository.json and .local.json hidden
+      SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_HIDDEN);
+#endif
     }
 
     // update the repository list variable
