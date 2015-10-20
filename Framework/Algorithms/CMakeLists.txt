@@ -3,7 +3,6 @@ set ( SRC_FILES
 	# src/CountEventsInPulses.cpp
 	# src/UpdatePeakParameterTable.cpp
 	src/AbsorptionCorrection.cpp
-	src/AddHistoryNote.cpp
 	src/AddLogDerivative.cpp
 	src/AddNote.cpp
 	src/AddPeak.cpp
@@ -41,6 +40,7 @@ set ( SRC_FILES
 	src/ClearInstrumentParameters.cpp
 	src/ClearMaskFlag.cpp
 	src/CloneWorkspace.cpp
+	src/Comment.cpp
 	src/CommutativeBinaryOperation.cpp
 	src/ConjoinWorkspaces.cpp
 	src/ConvertAxesToRealSpace.cpp
@@ -280,7 +280,6 @@ set ( INC_FILES
 	# inc/MantidAlgorithms/CountEventsInPulses.h
 	# inc/MantidAlgorithms/UpdatePeakParameterTable.h
 	inc/MantidAlgorithms/AbsorptionCorrection.h
-	inc/MantidAlgorithms/AddHistoryNote.h
 	inc/MantidAlgorithms/AddLogDerivative.h
 	inc/MantidAlgorithms/AddNote.h
 	inc/MantidAlgorithms/AddPeak.h
@@ -318,6 +317,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ClearInstrumentParameters.h
 	inc/MantidAlgorithms/ClearMaskFlag.h
 	inc/MantidAlgorithms/CloneWorkspace.h
+	inc/MantidAlgorithms/Comment.h
 	inc/MantidAlgorithms/CommutativeBinaryOperation.h
 	inc/MantidAlgorithms/ConjoinWorkspaces.h
 	inc/MantidAlgorithms/ConvertAxesToRealSpace.h
@@ -569,7 +569,6 @@ endif(UNITY_BUILD)
 set ( TEST_FILES
 	# CountEventsInPulsesTest.h
 	# UpdatePeakParameterTableTest.h
-	AddHistoryNoteTest.h
 	AddLogDerivativeTest.h
 	AddNoteTest.h
 	AddPeakTest.h
@@ -607,6 +606,7 @@ set ( TEST_FILES
 	ClearInstrumentParametersTest.h
 	ClearMaskFlagTest.h
 	CloneWorkspaceTest.h
+	CommentTest.h
 	CommutativeBinaryOperationTest.h
 	ConjoinWorkspacesTest.h
 	ConvertAxesToRealSpaceTest.h

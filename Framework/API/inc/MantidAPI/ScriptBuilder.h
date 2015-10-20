@@ -60,6 +60,8 @@ private:
   void buildChildren(std::ostringstream &os,
                      std::vector<HistoryItem>::const_iterator &iter,
                      int depth = 1);
+  const std::string 
+  buildCommentString(AlgorithmHistory_const_sptr algHistory);
   const std::string
   buildAlgorithmString(AlgorithmHistory_const_sptr algHistory);
   const std::string
@@ -68,6 +70,8 @@ private:
   const std::vector<HistoryItem> m_historyItems;
   std::string m_output;
   std::string m_versionSpecificity;
+
+  
 };
 
 } // namespace API

@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/AddHistoryNote.h"
+#include "MantidAlgorithms/Comment.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid {
@@ -10,47 +10,47 @@ using Mantid::API::WorkspaceProperty;
 using Mantid::API::Workspace;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(AddHistoryNote)
+DECLARE_ALGORITHM(Comment)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-AddHistoryNote::AddHistoryNote() {}
+Comment::Comment() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-AddHistoryNote::~AddHistoryNote() {}
+Comment::~Comment() {}
 
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string AddHistoryNote::name() const { return "AddHistoryNote"; }
+const std::string Comment::name() const { return "Comment"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int AddHistoryNote::version() const { return 1; }
+int Comment::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string AddHistoryNote::category() const {
+const std::string Comment::category() const {
   return "DataHandling";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string AddHistoryNote::summary() const {
-  return "Adds a note into the history record of a workspace";
+const std::string Comment::summary() const {
+  return "Adds a comment into the history record of a workspace";
 }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void AddHistoryNote::init() {
+void Comment::init() {
   declareProperty(
       new WorkspaceProperty<Workspace>("Workspace", "", Direction::InOut),
-      "An InOut workspace that will store the new history record");
+      "An InOut workspace that will store the new history comment");
 
   declareProperty(
-      "Note", "", boost::make_shared<MandatoryValidator<std::string>>(),
-      "The note you want to store in the history of the workspace", Direction::Input);
+      "Text", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      "The text you want to store in the history of the workspace", Direction::Input);
 
   //always record history for this algorithm
   enableHistoryRecordingForChild(true);
@@ -59,7 +59,7 @@ void AddHistoryNote::init() {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void AddHistoryNote::exec() {
+void Comment::exec() {
   //do nothing
 }
 

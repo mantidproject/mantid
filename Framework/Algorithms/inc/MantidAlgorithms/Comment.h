@@ -1,12 +1,12 @@
-#ifndef MANTID_ALGORITHMS_ADDHISTORYNOTE_H_
-#define MANTID_ALGORITHMS_ADDHISTORYNOTE_H_
+#ifndef MANTID_ALGORITHMS_COMMENT_H_
+#define MANTID_ALGORITHMS_COMMENT_H_
 
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 namespace Mantid {
 namespace Algorithms {
 
-/** AddHistoryNote : Adds a note into the history record of a workspace
+/** Comment : Adds a note into the history record of a workspace
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -29,10 +29,10 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport AddHistoryNote : public API::Algorithm {
+class DLLExport Comment : public API::Algorithm {
 public:
-  AddHistoryNote();
-  virtual ~AddHistoryNote();
+  Comment();
+  virtual ~Comment();
 
   virtual const std::string name() const;
   virtual int version() const;
@@ -47,4 +47,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_ADDHISTORYNOTE_H_ */
+#endif /* MANTID_ALGORITHMS_COMMENT_H_ */
