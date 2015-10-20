@@ -52,6 +52,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 #include <math.h>
 #include <cstring>
 #include <algorithm> //required for std::swap
@@ -1327,6 +1328,12 @@ void OPJFile::readSpreadInfo(FILE *f, FILE *debug)
       fread(&sec_size,4,1,f);
       if(IsBigEndian()) SwapBytes(sec_size);
 
+      if (INT_MAX == sec_size) {
+        // this would end in an overflow and it's obviously wrong
+        fprintf(debug, "Error: while reading spread info, found section size: %d\n", sec_size);
+        fflush(debug);
+      }
+
     //section_body_1
       LAYER+=0x5;
       fseek(f,LAYER,SEEK_SET);
@@ -1335,6 +1342,9 @@ void OPJFile::readSpreadInfo(FILE *f, FILE *debug)
       if(col_index!=-1)
       {
         char *stmp=new char[sec_size+1];
+        if (!stmp)
+          break;
+
         stmp[sec_size]='\0';
         fread(stmp,sec_size,1,f);
         SPREADSHEET[spread].column[col_index].command=stmp;
@@ -1551,6 +1561,12 @@ void OPJFile::readExcelInfo(FILE *f, FILE *debug)
       fseek(f,LAYER,SEEK_SET);
       fread(&sec_size,4,1,f);
       if(IsBigEndian()) SwapBytes(sec_size);
+
+      if (INT_MAX == sec_size) {
+        // this would end in an overflow for new[] below and it's obviously wrong
+        fprintf(debug, "Error: while reading Excel info, found section size: %d\n", sec_size);
+        fflush(debug);
+      }
 
     //section_body_1
       LAYER+=0x5;
@@ -1801,6 +1817,12 @@ void OPJFile::readMatrixInfo(FILE *f, FILE *debug)
     fseek(f,LAYER,SEEK_SET);
     fread(&sec_size,4,1,f);
     if(IsBigEndian()) SwapBytes(sec_size);
+
+    if (INT_MAX == sec_size) {
+      // this would end in an overflow for new[] below and it's obviously wrong
+      fprintf(debug, "Error: while reading matrix info, found section size: %d\n", sec_size);
+      fflush(debug);
+    }
 
   //section_body_1
     LAYER+=0x5;
@@ -2933,11 +2955,17 @@ void OPJFile::readProjectTreeFolder(FILE *f, FILE *debug, tree<projectNode>::ite
   fread(&namesize,4,1,f);
   if(IsBigEndian()) SwapBytes(namesize);
 
-  POS+=5;
+  if (INT_MAX == namesize) {
+    // this would cause an overflow and it's anyway obviously wrong
+    fprintf(debug, "Error: while reading project tree folder, found project/folder name size: %d\n", namesize);
+    fflush(debug);
+  }
 
   // read folder name
   char* name=new char[namesize+1];
   name[namesize]='\0';
+
+  POS+=5;
   fseek(f,POS,SEEK_SET);
   fread(name,namesize,1,f);
   tree<projectNode>::iterator current_folder=projectTree.append_child(parent, projectNode(name, 1, creation_date, modification_date));

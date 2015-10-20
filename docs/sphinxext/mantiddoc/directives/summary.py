@@ -1,4 +1,4 @@
-from base import AlgorithmBaseDirective
+from mantiddoc.directives.base import AlgorithmBaseDirective
 
 
 class SummaryDirective(AlgorithmBaseDirective):

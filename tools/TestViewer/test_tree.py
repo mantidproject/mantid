@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,no-init
 """ An AbstractTreeItem implementation for a QTreeView
 that uses the results from test runners. """
 
@@ -8,8 +9,7 @@ import PyQt4.QtGui
 from PyQt4.QtGui import *
 
 import test_info
-from test_info import TestSuite, TestSingle, TestProject, MultipleProjects
-import random
+from test_info import TestSuite, TestProject
 import datetime
 
 HORIZONTAL_HEADERS = ("Test", "Status", "Time (sec)", "Last Run")
@@ -81,16 +81,19 @@ def get_background_color(state):
 
     elif state == test_info.TestResult.ALL_PASSED:
         col = MyColors.lightGreen
-        if state.old: col = MyColors.darkishGreen
+        if state.old:
+            col = MyColors.darkishGreen
 
     elif state == test_info.TestResult.ALL_FAILED or (state == test_info.TestResult.SOME_FAILED) \
          or state == test_info.TestResult.ABORTED:
         col = QColor(Qt.red)
-        if state.old: col = QColor( 200, 50, 50 )
+        if state.old:
+            col = QColor( 200, 50, 50 )
 
     elif state == test_info.TestResult.BUILD_ERROR:
         col = QColor(Qt.magenta)
-        if state.old: col = desaturate(col, 0.5)
+        if state.old:
+            col = desaturate(col, 0.5)
 
 #    elif state == test_info.TestResult.SOME_FAILED:
 #        col = MyColors.lightRed
@@ -293,7 +296,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
 
         # What background color?
         if role == Qt.BackgroundRole:
-            return item.background_color();
+            return item.background_color()
 
         #User role is used when directly querying the contents of the item
         if role == Qt.UserRole:
@@ -488,7 +491,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
                 for k in xrange(num_tests):
                     test_indx = self.index(k, 0, suite_indx)
                     # Sets it as checked.
-                    self.setData(test_indx, QtCore.Qt.Checked, QtCore.Qt.CheckStateRole);
+                    self.setData(test_indx, QtCore.Qt.Checked, QtCore.Qt.CheckStateRole)
 
     def mouseDoubleClickEvent(self):
         print "mouseDoubleClickEvent"
@@ -534,7 +537,7 @@ class TreeFilterProxyModel(QSortFilterProxyModel):
                 return False
             if self.selected_only:
                 if isinstance(item, TestProject) or  isinstance(item, TestSuite) :
-                    return (item.get_selected() > 0)
+                    return item.get_selected() > 0
                 else:
                     # Don't filter out TestSingles based on selection (since they're all selected)
                     return True

@@ -338,51 +338,55 @@ void export_ITableWorkspace() {
 
   class_<ITableWorkspace, bases<Workspace>, boost::noncopyable>(
       "ITableWorkspace", iTableWorkspace_docstring.c_str(), no_init)
-      .def("addColumn", &addColumn, (arg("type"), arg("name")),
+      .def("addColumn", &addColumn, (arg("self"), arg("type"), arg("name")),
            "Add a named column with the given type. Recognized types are: "
            "int,float,double,bool,str,V3D,long64")
 
-      .def("removeColumn", &ITableWorkspace::removeColumn, (arg("name")),
-           "Remove the named column")
+      .def("removeColumn", &ITableWorkspace::removeColumn,
+           (arg("self"), arg("name")), "Remove the named column")
 
-      .def("columnCount", &ITableWorkspace::columnCount,
+      .def("columnCount", &ITableWorkspace::columnCount, arg("self"),
            "Returns the number of columns in the workspace")
 
-      .def("rowCount", &ITableWorkspace::rowCount,
+      .def("rowCount", &ITableWorkspace::rowCount, arg("self"),
            "Returns the number of rows within the workspace")
 
-      .def("setRowCount", &ITableWorkspace::setRowCount, (arg("count")),
+      .def("setRowCount", &ITableWorkspace::setRowCount,
+           (arg("self"), arg("count")),
            "Resize the table to contain count rows")
 
-      .def("__len__", &ITableWorkspace::rowCount,
+      .def("__len__", &ITableWorkspace::rowCount, arg("self"),
            "Returns the number of rows within the workspace")
 
-      .def("getColumnNames", &ITableWorkspace::getColumnNames,
+      .def("getColumnNames", &ITableWorkspace::getColumnNames, arg("self"),
            boost::python::return_value_policy<VectorToNumpy>(),
            "Return a list of the column names")
 
-      .def("keys", &ITableWorkspace::getColumnNames,
+      .def("keys", &ITableWorkspace::getColumnNames, arg("self"),
            boost::python::return_value_policy<VectorToNumpy>(),
            "Return a list of the column names")
 
-      .def("column", &column,
+      .def("column", &column, (arg("self"), arg("column")),
            "Return all values of a specific column as a list")
 
-      .def("row", &row, "Return all values of a specific row as a dict")
+      .def("row", &row, (arg("self"), arg("row")),
+           "Return all values of a specific row as a dict")
 
-      .def("addRow", &addRowFromDict,
+      .def("addRow", &addRowFromDict, (arg("self"), arg("row_items_dict")),
            "Appends a row with the values from the dictionary")
 
-      .def("addRow", &addRowFromList,
+      .def("addRow", &addRowFromList, (arg("self"), arg("row_items_list")),
            "Appends a row with the values from the given list. "
            "It it assumed that the items are in the correct order for the "
            "defined columns")
 
-      .def("cell", &cell, "Return the given cell. If the first argument is a "
-                          "number then it is interpreted as a row otherwise it "
-                          "is interpreted as a column name")
+      .def("cell", &cell, (arg("self"), arg("value"), arg("row_or_column")),
+           "Return the given cell. If the first argument is a "
+           "number then it is interpreted as a row otherwise it "
+           "is interpreted as a column name")
 
-      .def("setCell", &setCell,
+      .def("setCell", &setCell, (arg("self"), arg("row_or_column"),
+                                 arg("column_or_row"), arg("value")),
            "Sets the value of a given cell. If the first argument is a "
            "number then it is interpreted as a row otherwise it is interpreted "
            "as a column name");

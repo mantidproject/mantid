@@ -80,7 +80,13 @@ PeakColumn::PeakColumn(std::vector<Peak> &peaks, const std::string &name)
   this->m_name = name;
   this->m_type = typeFromName(name); // Throws if the name is unknown
   this->m_hklPrec = 2;
-  ConfigService::Instance().getValue("PeakColumn.hklPrec", this->m_hklPrec);
+  const std::string key = "PeakColumn.hklPrec";
+  int gotit = ConfigService::Instance().getValue(key, this->m_hklPrec);
+  if (!gotit)
+    g_log.information()
+        << "In PeakColumn constructor, did not find any value for '" << key
+        << "' from the Config Service. Using default: " << this->m_hklPrec
+        << "\n";
 }
 
 //----------------------------------------------------------------------------------------------

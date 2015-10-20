@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/HFIRLoad.h"
 #include "MantidWorkflowAlgorithms/HFIRInstrument.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include <MantidAPI/FileProperty.h>
 #include "Poco/NumberFormatter.h"
 #include "MantidKernel/BoundedValidator.h"

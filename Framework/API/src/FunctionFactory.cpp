@@ -192,6 +192,9 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
     inputError(expr.str());
   }
 
+  if (!cfun)
+    inputError(expr.str());
+
   for (; it != terms.end(); ++it) {
     const Expression &term = it->bracketsRemoved();
     IFunction_sptr fun;

@@ -1,8 +1,14 @@
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidDataHandling/FindDetectorsPar.h"
 #include "MantidDataHandling/SaveNXTomo.h"
+
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/HistogramValidator.h"
+
+#include "MantidDataHandling/FindDetectorsPar.h"
+
 #include "MantidGeometry/IComponent.h"
+
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MantidVersion.h"
 
 #include <nexus/NeXusException.hpp>

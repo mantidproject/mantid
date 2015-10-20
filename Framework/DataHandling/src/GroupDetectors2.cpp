@@ -3,14 +3,14 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/GroupDetectors2.h"
 
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 
 #include <boost/regex.hpp>
 
@@ -353,8 +353,9 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
     }
     // check we don't have an index that is too high for the workspace
     size_t maxIn = static_cast<size_t>(workspace->getNumberHistograms() - 1);
-    std::vector<size_t>::const_iterator it = m_GroupSpecInds[0].begin();
-    for (; it != m_GroupSpecInds[0].end(); ++it) {
+    auto indices0 = m_GroupSpecInds[0];
+    auto it = indices0.begin();
+    for (; it != indices0.end(); ++it) {
       if (*it > maxIn) {
         g_log.error() << "Spectra index " << *it
                       << " doesn't exist in the input workspace, the highest "
@@ -375,8 +376,9 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
 
   // up date unUsedSpec, this is used to find duplicates and when the user has
   // set KeepUngroupedSpectra
-  std::vector<size_t>::const_iterator index = m_GroupSpecInds[0].begin();
-  for (; index != m_GroupSpecInds[0].end();
+  auto indices0 = m_GroupSpecInds[0];
+  auto index = indices0.begin();
+  for (; index != indices0.end();
        ++index) { // the vector<int> m_GroupSpecInds[0] must not index contain
                   // numbers that don't exist in the workspaace
     if (unUsedSpec[*index] != USED) {
@@ -803,6 +805,10 @@ void GroupDetectors2::readFile(spec2index_map &specs2index, std::istream &File,
       std::getline(File, thisLine), lineNum++;
       numberOfSpectra = readInt(thisLine);
     } while (numberOfSpectra == EMPTY_LINE);
+
+    if (numberOfSpectra <= 0) {
+      throw std::invalid_argument("The number of spectra is zero or negative");
+    }
 
     // the value of this map is the list of spectra numbers that will be
     // combined into a group

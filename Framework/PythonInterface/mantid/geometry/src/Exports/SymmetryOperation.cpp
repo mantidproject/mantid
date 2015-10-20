@@ -34,19 +34,21 @@ void export_SymmetryOperation() {
   register_ptr_to_python<boost::shared_ptr<SymmetryOperation>>();
 
   class_<SymmetryOperation>("SymmetryOperation")
-      .def("getOrder", &SymmetryOperation::order,
+      .def("getOrder", &SymmetryOperation::order, arg("self"),
            "Returns the order of the symmetry operation, which indicates how "
            "often the operation needs to be applied to a point to arrive at "
            "identity.")
-      .def("getIdentifier", &SymmetryOperation::identifier,
+      .def("getIdentifier", &SymmetryOperation::identifier, arg("self"),
            "The identifier of the operation in x,y,z-notation.")
       .def("transformCoordinates", &applyToCoordinates,
+           (arg("self"), arg("coordinates")),
            "Returns transformed coordinates. For transforming HKLs, use "
            "transformHKL.")
-      .def("transformHKL", &applyToVector, "Returns transformed HKLs. For "
-                                           "transformation of coordinates use "
-                                           "transformCoordinates.")
-      .def("apply", &applyToVector, "An alias for transformHKL.");
+      .def("transformHKL", &applyToVector, (arg("self"), arg("hkl")),
+           "Returns transformed HKLs. For transformation of coordinates use "
+           "transformCoordinates.")
+      .def("apply", &applyToVector, (arg("self"), arg("hkl")),
+           "An alias for transformHKL.");
 
   std_vector_exporter<Mantid::Geometry::SymmetryOperation>::wrap(
       "std_vector_symmetryoperation");

@@ -1,5 +1,4 @@
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidCrystal/SortHKL.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"

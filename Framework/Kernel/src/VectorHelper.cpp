@@ -534,6 +534,174 @@ void linearlyInterpolateY(const std::vector<double> &x, std::vector<double> &y,
   }
 }
 
+namespace {
+/** internal function converted from Lambda to identify interval around
+* specified  point and  run average around this point
+*
+*@param index      -- index to average around
+*@param startIndex -- index in the array of data (input to start average
+*                     from) should be: index>=startIndex>=0
+*@param endIndex   -- index in the array of data (input to end average at)
+*                     should be: index<=endIndex<=input.size()
+*@param halfWidth  -- half width of the interval to integrate.
+*@param input      -- vector of input signal
+*@param binBndrs   -- pointer to vector of bin boundaries or NULL pointer.
+ */
+double runAverage(size_t index, size_t startIndex, size_t endIndex,
+                  const double halfWidth, const std::vector<double> &input,
+                  std::vector<double> const *const binBndrs) {
+
+  size_t iStart, iEnd;
+  double weight0(0), weight1(0), start(0.0), end(0.0);
+  //
+  if (binBndrs) {
+    // identify initial and final bins to
+    // integrate over. Notice the difference
+    // between start and end bin and shift of
+    // the interpolating function into the center
+    // of each bin
+    auto &rBndrs = *binBndrs;
+    // bin0 = binBndrs->operator[](index + 1) - binBndrs->operator[](index);
+
+    double binC = 0.5 * (rBndrs[index + 1] + rBndrs[index]);
+    start = binC - halfWidth;
+    end = binC + halfWidth;
+    if (start <= rBndrs[startIndex]) {
+      iStart = startIndex;
+      start = rBndrs[iStart];
+    } else {
+      iStart = getBinIndex(*binBndrs, start);
+      weight0 =
+          (rBndrs[iStart + 1] - start) / (rBndrs[iStart + 1] - rBndrs[iStart]);
+      iStart++;
+    }
+    if (end >= rBndrs[endIndex]) {
+      iEnd = endIndex; // the signal defined up to i<iEnd
+      end = rBndrs[endIndex];
+    } else {
+      iEnd = getBinIndex(*binBndrs, end);
+      weight1 = (end - rBndrs[iEnd]) / (rBndrs[iEnd + 1] - rBndrs[iEnd]);
+    }
+    if (iStart > iEnd) { // start and end get into the same bin
+      weight1 = 0;
+      weight0 = (end - start) / (rBndrs[iStart] - rBndrs[iStart - 1]);
+    }
+  } else { // integer indexes and functions defined in the bin centers
+    auto iHalfWidth = static_cast<size_t>(halfWidth);
+    iStart = index - iHalfWidth;
+    if (startIndex + iHalfWidth > index)
+      iStart = startIndex;
+    iEnd = index + iHalfWidth;
+    if (iEnd > endIndex)
+      iEnd = endIndex;
+  }
+
+  double avrg = 0;
+  size_t ic = 0;
+  for (size_t j = iStart; j < iEnd; j++) {
+    avrg += input[j];
+    ic++;
+  }
+  if (binBndrs) { // add values at edges
+    if (iStart != startIndex)
+      avrg += input[iStart - 1] * weight0;
+    if (iEnd != endIndex)
+      avrg += input[iEnd] * weight1;
+
+    double div = end - start;
+    if (.0 == div)
+      return 0;
+    else
+      return avrg / (end - start);
+  } else {
+    if (0 == ic) {
+      return 0;
+    } else {
+      return avrg / double(ic);
+    }
+  }
+}
+}
+
+/** Basic running average of input vector within specified range, considering
+*  variable bin-boundaries if such boundaries are provided.
+* The algorithm performs trapezium integration, so some peak shift
+* related to the first derivative of the integrated function can be observed.
+*
+* @param input::   input vector to smooth
+* @param output::  resulting vector (can not coincide with input)
+* @param avrgInterval:: the interval to average function in.
+*                      the function is averaged within +-0.5*avrgInterval
+* @param binBndrs :: pointer to the vector, containing bin boundaries.
+*                    If provided, its length has to be input.size()+1,
+*                    if not, equal size bins of size 1 are assumed,
+*                    so avrgInterval becomes the number of points
+*                    to average over. Bin boundaries array have to
+*                    increase and can not contain equal boundaries.
+* @param startIndex:: if provided, its start index to run averaging from.
+*                     if not, averaging starts from the index 0
+* @param endIndex ::  final index to run average to, if provided. If
+*                     not, or higher then number of elements in input array,
+*                     averaging is performed to the end point of the input
+*                     array
+* @param outBins ::   if present, pointer to a vector to return
+*                     bin boundaries for output array.
+*/
+void smoothInRange(const std::vector<double> &input,
+                   std::vector<double> &output, const double avrgInterval,
+                   std::vector<double> const *const binBndrs, size_t startIndex,
+                   size_t endIndex, std::vector<double> *const outBins) {
+
+  if (endIndex == 0)
+    endIndex = input.size();
+  if (endIndex > input.size())
+    endIndex = input.size();
+
+  if (endIndex <= startIndex) {
+    output.resize(0);
+    return;
+  }
+
+  size_t max_size = input.size();
+  if (binBndrs) {
+    if (binBndrs->size() != max_size + 1) {
+      throw std::invalid_argument(
+          "Array of bin boundaries, "
+          "if present, have to be one bigger then the input array");
+    }
+  }
+
+  size_t length = endIndex - startIndex;
+  output.resize(length);
+
+  double halfWidth = avrgInterval / 2;
+  if (!binBndrs) {
+    if (std::floor(halfWidth) * 2 - avrgInterval > 1.e-6) {
+      halfWidth = std::floor(halfWidth) + 1;
+    }
+  }
+
+  if (outBins)
+    outBins->resize(length + 1);
+
+  //  Run averaging
+  double binSize = 1;
+  for (size_t i = startIndex; i < endIndex; i++) {
+    if (binBndrs) {
+      binSize = binBndrs->operator[](i + 1) - binBndrs->operator[](i);
+    }
+    output[i - startIndex] =
+        runAverage(i, startIndex, endIndex, halfWidth, input, binBndrs) *
+        binSize;
+    if (outBins && binBndrs) {
+      outBins->operator[](i - startIndex) = binBndrs->operator[](i);
+    }
+  }
+  if (outBins && binBndrs) {
+    outBins->operator[](endIndex - startIndex) = binBndrs->operator[](endIndex);
+  }
+}
+
 /// Declare all version of this
 template DLLExport std::vector<int32_t>
 splitStringIntoVector<int32_t>(std::string listString);

@@ -341,7 +341,7 @@ void LeBailFit::exec() {
   case FIT:
     // LeBail Fit
     g_log.notice() << "Function: Do LeBail Fit ==> Monte Carlo.\n";
-
+  // fall through
   case MONTECARLO:
     // Monte carlo Le Bail refinement
     g_log.notice("Function: Do LeBail Fit By Monte Carlo Random Walk.");

@@ -1,14 +1,15 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-
-#include <fstream>
-#include <sstream>
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/VectorHelper.h"
 #include "MantidAlgorithms/CrossCorrelate.h"
-#include <numeric>
+#include "MantidAPI/RawCountValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/VectorHelper.h"
+
+#include <numeric>
+#include <sstream>
 
 namespace Mantid {
 namespace Algorithms {

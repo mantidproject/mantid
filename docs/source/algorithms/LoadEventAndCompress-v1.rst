@@ -41,6 +41,44 @@ download due to their size.  They can however be downloaded using these links:
    PG3_9830_event = LoadEventAndCompress(Filename='PG3_9830_event.nxs',
                                          MaxChunkSize=1.)
 
+**Example - Usage with MPI**
+
+Create a python driver script called test_mpi.py
+
+.. code-block:: python
+
+    from mantid.simpleapi import *
+    import mantid
+    if AlgorithmFactory.exists('GatherWorkspaces'):
+        HAVE_MPI = True
+        from mpi4py import MPI
+        mpiRank = MPI.COMM_WORLD.Get_rank()
+        mpiSize = MPI.COMM_WORLD.Get_size()
+    else:
+        HAVE_MPI = False
+        mpiRank = 0 # simplify if clauses
+        mpiSize = 1 # simplify if clauses
+
+    wksp = LoadEventAndCompress(Filename="PG3_2538_event.nxs")
+    print "Rank = ", mpiRank, "Number of Events = ", wksp.getNumberEvents()
+    if mpiRank == 0:
+        reduce = AlignAndFocusPowder(InputWorkspace=wksp, CalFileName='PG3_calibrate_d2538_2014_05_13.cal', Params='0.5,0.01,2')
+        SaveNexus(reduce,Filename=str(mpiSize)+"tasks.nxs")
+
+And run it using the following commands
+
+.. code-block::
+
+    $ module load mpi/openmpi-x86_64
+    $ export LD_PRELOAD=/usr/lib64/openmpi/lib/libmpi.so
+    $ mpirun -np 8 mantidpython test_mpi.py
+
+to run without mpi is simply
+
+.. code-block::
+
+    $ mantidpython test_mpi.py
+
 .. categories::
 
 .. sourcelink::

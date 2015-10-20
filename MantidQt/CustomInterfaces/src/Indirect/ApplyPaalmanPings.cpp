@@ -145,6 +145,7 @@ void ApplyPaalmanPings::run() {
         switch (result) {
         case QMessageBox::YesToAll:
           interpolateAll = true;
+          //fall through
         case QMessageBox::Yes:
           addInterpolationStep(factorWs, absCorProps["SampleWorkspace"]);
           break;

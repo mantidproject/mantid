@@ -8,7 +8,6 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/StartsWithValidator.h"

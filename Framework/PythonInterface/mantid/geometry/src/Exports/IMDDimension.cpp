@@ -39,24 +39,24 @@ void export_IMDDimension() {
   register_ptr_to_python<boost::shared_ptr<IMDDimension>>();
 
   class_<IMDDimension, boost::noncopyable>("IMDDimension", no_init)
-      .def("getName", &IMDDimension::getName, "Return the name of the "
-                                              "dimension as can be displayed "
-                                              "along the axis")
-      .def("getMaximum", &IMDDimension::getMaximum,
+      .def("getName", &IMDDimension::getName, arg("self"),
+           "Return the name of the dimension as can be displayed "
+           "along the axis")
+      .def("getMaximum", &IMDDimension::getMaximum, arg("self"),
            "Return the maximum extent of this dimension")
-      .def("getMinimum", &IMDDimension::getMinimum,
+      .def("getMinimum", &IMDDimension::getMinimum, arg("self"),
            "Return the maximum extent of this dimension")
-      .def("getNBins", &IMDDimension::getNBins,
+      .def("getNBins", &IMDDimension::getNBins, arg("self"),
            "Return the number of bins dimension have (an integrated has one). "
            "A axis directed along dimension would have getNBins+1 axis points.")
-      .def("getX", &IMDDimension::getX,
+      .def("getX", &IMDDimension::getX, (arg("self"), arg("ind")),
            "Return coordinate of the axis at the given index")
-      .def("getDimensionId", &IMDDimension::getDimensionId,
+      .def("getDimensionId", &IMDDimension::getDimensionId, arg("self"),
            "Return a short name which identify the dimension among other "
            "dimension."
            "A dimension can be usually find by its ID and various  ")
-      .def("getUnits", &getUnitsAsStr,
+      .def("getUnits", &getUnitsAsStr, arg("self"),
            "Return the units associated with this dimension.")
-      .def("getMDFrame", &getMDFrame,
+      .def("getMDFrame", &getMDFrame, arg("self"),
            "Return the multidimensional frame for this dimension.");
 }

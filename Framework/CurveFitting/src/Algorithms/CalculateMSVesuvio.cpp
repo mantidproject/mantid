@@ -8,7 +8,7 @@
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
 
 #include "MantidAPI/SampleShapeValidator.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"

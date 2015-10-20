@@ -2,16 +2,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/TOFSANSResolution.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include "boost/math/special_functions/fpclassify.hpp"
-#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -34,8 +34,7 @@ void TOFSANSResolution::init() {
           boost::make_shared<WorkspaceUnitValidator>("MomentumTransfer")),
       "Name the workspace to calculate the resolution for");
 
-  auto wsValidator = boost::make_shared<CompositeValidator>();
-  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
+  auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
   declareProperty(new WorkspaceProperty<>("ReducedWorkspace", "",
                                           Direction::Input, wsValidator),
                   "I(Q) workspace");

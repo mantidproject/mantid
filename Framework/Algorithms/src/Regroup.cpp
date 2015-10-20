@@ -2,11 +2,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Regroup.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/HistogramValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 
-#include <sstream>
 #include <numeric>
 #include <algorithm>
 #include <functional>

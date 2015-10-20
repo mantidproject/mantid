@@ -1,9 +1,12 @@
 #include "MantidMDAlgorithms/MDNormSCD.h"
 
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
 

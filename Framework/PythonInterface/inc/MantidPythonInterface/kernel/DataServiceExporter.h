@@ -66,30 +66,37 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
     auto classType =
         PythonType(pythonClassName, no_init)
             .def("add", &DataServiceExporter::addItem,
+                 (arg("self"), arg("name"), arg("item")),
                  "Adds the given object to the service with the given name. If "
                  "the name/object exists it will raise an error.")
             .def("addOrReplace", &DataServiceExporter::addOrReplaceItem,
+                 (arg("self"), arg("name"), arg("item")),
                  "Adds the given object to the service with the given name. "
                  "The the name exists the object is replaced.")
-            .def("doesExist", &SvcType::doesExist,
+            .def("doesExist", &SvcType::doesExist, (arg("self"), arg("name")),
                  "Returns True if the object is found in the service.")
             .def("retrieve", &DataServiceExporter::retrieveOrKeyError,
+                 (arg("self"), arg("name")),
                  "Retrieve the named object. Raises an exception if the name "
                  "does not exist")
-            .def("remove", &SvcType::remove, "Remove a named object")
-            .def("clear", &SvcType::clear,
+            .def("remove", &SvcType::remove, (arg("self"), arg("name")),
+                 "Remove a named object")
+            .def("clear", &SvcType::clear, arg("self"),
                  "Removes all objects managed by the service.")
-            .def("size", &SvcType::size,
+            .def("size", &SvcType::size, arg("self"),
                  "Returns the number of objects within the service")
             .def("getObjectNames", &DataServiceExporter::getObjectNamesAsList,
+                 arg("self"),
                  "Return the list of names currently known to the ADS")
 
             // Make it act like a dictionary
-            .def("__len__", &SvcType::size)
-            .def("__getitem__", &DataServiceExporter::retrieveOrKeyError)
-            .def("__setitem__", &DataServiceExporter::addOrReplaceItem)
-            .def("__contains__", &SvcType::doesExist)
-            .def("__delitem__", &SvcType::remove);
+            .def("__len__", &SvcType::size, arg("self"))
+            .def("__getitem__", &DataServiceExporter::retrieveOrKeyError,
+                 (arg("self"), arg("name")))
+            .def("__setitem__", &DataServiceExporter::addOrReplaceItem,
+                 (arg("self"), arg("name"), arg("item")))
+            .def("__contains__", &SvcType::doesExist, arg("self"))
+            .def("__delitem__", &SvcType::remove, (arg("self"), arg("name")));
 
     return classType;
   }

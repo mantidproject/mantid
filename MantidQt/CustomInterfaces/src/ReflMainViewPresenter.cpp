@@ -24,16 +24,15 @@
 #include <fstream>
 #include <sstream>
 
-#include <QSettings>
-#include <QFileDialog>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
 
-namespace {
-const QString ReflSettingsGroup = "Mantid/CustomInterfaces/ISISReflectometry";
+
+namespace
+{
 
 void validateModel(ITableWorkspace_sptr model) {
   if (!model)
@@ -1606,13 +1605,9 @@ void ReflMainViewPresenter::setOptions(
   for (auto it = options.begin(); it != options.end(); ++it)
     m_options[it->first] = it->second;
 
-  // Save any changes to disk
-  QSettings settings;
-  settings.beginGroup(ReflSettingsGroup);
-  for (auto it = m_options.begin(); it != m_options.end(); ++it)
-    settings.setValue(QString::fromStdString(it->first), it->second);
-  settings.endGroup();
-}
+      //Save any changes to disk
+      m_view->saveSettings(m_options);
+    }
 
 /** Load options from disk if possible, or set to defaults */
 void ReflMainViewPresenter::initOptions() {
@@ -1631,13 +1626,8 @@ void ReflMainViewPresenter::initOptions() {
   m_options["RoundQMaxPrecision"] = 3;
   m_options["RoundDQQPrecision"] = 3;
 
-  // Load saved values from disk
-  QSettings settings;
-  settings.beginGroup(ReflSettingsGroup);
-  QStringList keys = settings.childKeys();
-  for (auto it = keys.begin(); it != keys.end(); ++it)
-    m_options[it->toStdString()] = settings.value(*it);
-  settings.endGroup();
-}
-}
+      //Load saved values from disk
+      m_view->loadSettings(m_options);
+    }
+  }
 }

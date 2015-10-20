@@ -1,35 +1,37 @@
 #include "InstrumentActor.h"
 #include "CompAssemblyActor.h"
-#include "ObjComponentActor.h"
-#include "SampleActor.h"
 #include "ComponentActor.h"
-#include "ObjCompAssemblyActor.h"
-#include "RectangularDetectorActor.h"
 #include "GLActorVisitor.h"
+#include "ObjCompAssemblyActor.h"
+#include "ObjComponentActor.h"
+#include "RectangularDetectorActor.h"
+#include "SampleActor.h"
 
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidGeometry/Objects/Object.h"
-#include "MantidGeometry/ICompAssembly.h"
-#include "MantidGeometry/IObjComponent.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/IMaskWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceValidators.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
+#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/ICompAssembly.h"
+#include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/IObjComponent.h"
+
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/ReadLock.h"
+#include "MantidKernel/V3D.h"
+
 #include <boost/algorithm/string.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 
-#include <QSettings>
 #include <QMessageBox>
+#include <QSettings>
 
 #include <numeric>
-#include "MantidGeometry/IDTypes.h"
-#include "MantidKernel/ReadLock.h"
 
 using namespace Mantid::Kernel::Exception;
 using namespace Mantid::Geometry;

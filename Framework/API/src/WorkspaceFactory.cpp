@@ -86,7 +86,7 @@ WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent,
   return ws;
 }
 
-/** Initialise a workspace from its parent
+/** Initialize a workspace from its parent
  * This sets values such as title, instrument, units, sample, spectramap.
  * This does NOT copy any data.
  *
