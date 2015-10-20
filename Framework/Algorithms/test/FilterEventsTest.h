@@ -394,7 +394,7 @@ public:
     // Check individual events
     EventList &ev0 = ws7->getEventList(0);
     TS_ASSERT_EQUALS(ev0.getNumberEvents(), 10);
-    std::vector<doublle> vectofs = ev0.getTofs();
+    std::vector<double> vectofs = ev0.getTofs();
     TS_ASSERT_DELTA(vectofs[0], 12121, 0.001);
 
     // Delete all the workspaces generated here
@@ -860,6 +860,43 @@ public:
     }
 
     return el;
+  }
+
+  /** Create a matrix splitters workspace for elastic correction
+   * @brief createMatrixSplittersElastic
+   * @return
+   */
+  API::MatrixWorkspace_sptr createMatrixSplittersElastic() {
+    MatrixWorkspace_sptr spws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceFactory::Instance().create("Workspace2D", 1, 11, 10));
+
+    MantidVec &vec_splitTimes = spws->dataX(0);
+    MantidVec &vec_splitGroup = spws->dataY(0);
+
+    vec_splitTimes[0] = 1000000;
+    vec_splitTimes[1] = 1300000; // Rule in  1,339,000
+    vec_splitTimes[2] = 2000000;
+    vec_splitTimes[3] = 2190000; // Rule out 2,155,000
+    vec_splitTimes[4] = 4000000;
+    vec_splitTimes[5] = 5000000;
+    vec_splitTimes[6] = 5500000; // Rule in  5,741,000
+    vec_splitTimes[7] = 7000000;
+    vec_splitTimes[8] = 8000000;
+    vec_splitTimes[9] = 9000000;
+    vec_splitTimes[10] = 10000000;
+
+    vec_splitGroup[0] = 2;
+    vec_splitGroup[1] = 5;
+    vec_splitGroup[2] = 4;
+    vec_splitGroup[3] = -1;
+    vec_splitGroup[4] = 6;
+    vec_splitGroup[5] = 7;
+    vec_splitGroup[6] = 8;
+    vec_splitGroup[7] = -1;
+    vec_splitGroup[8] = 1;
+    vec_splitGroup[9] = 3;
+
+    return spws;
   }
 
   API::MatrixWorkspace_sptr createMatrixSplittersDG() {
