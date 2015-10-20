@@ -177,7 +177,7 @@ built in validator that requires that input workspaces exist and are of
 the correct type and that output workspaces have a name set.
 
 For more details on using validators, see the
-`PropertyAlgorithm <https://github.com/mantidproject/mantid/blob/master/Code/Mantid/Framework/UserAlgorithms/PropertyAlgorithm.cpp>`__
+`PropertyAlgorithm <https://github.com/mantidproject/mantid/blob/master/Code/Mantid/Framework/UserAlgorithms/PropertyAlgorithm.cpp>`__ :ref:`PropertyAlgorithm <algm-PropertyAlgorithm>`
 example or the full documentation for the individual validators (linked
 above).
 
