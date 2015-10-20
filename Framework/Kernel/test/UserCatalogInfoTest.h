@@ -148,6 +148,22 @@ public:
     TS_ASSERT(Mock::VerifyAndClear(&mockCatInfo));
     TS_ASSERT(Mock::VerifyAndClear(&mockConfigService));
   }
+
+  void test_auto_adapter(){
+
+      // Adaptee
+      struct UserType{
+          std::string operator[] (const std::string) const {return "my_value";}
+      };
+
+      UserType usertype;
+      CatalogConfigService* service = makeCatalogConfigServiceAdapter(usertype, "my_key");
+      OptionalPath mountPoint = service->preferredMountPoint();
+      TS_ASSERT(mountPoint);
+      TS_ASSERT_EQUALS("my_value", mountPoint.get());
+      delete service;
+
+  }
 };
 
 #endif /* MANTID_KERNEL_USERCATALOGINFOTEST_H_ */

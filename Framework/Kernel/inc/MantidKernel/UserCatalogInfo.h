@@ -14,22 +14,21 @@ typedef boost::optional<std::string> OptionalPath;
 class CatalogConfigService {
 public:
   virtual OptionalPath preferredMountPoint() const = 0;
+  virtual ~CatalogConfigService(){}
 };
 
 template <typename T>
-CatalogConfigService *makeCatalogConfigServiceAdapter(const T &adaptee) {
+CatalogConfigService *makeCatalogConfigServiceAdapter(
+    const T &adaptee, const std::string key = "icatDownload.mountPoint") {
   class Adapter : public CatalogConfigService {
   private:
     T m_adaptee;
-
+    std::string m_key;
   public:
-    Adapter(T adaptee) : m_adaptee(adaptee) {}
-    virtual OptionalPath preferredMountPoint() const {
-      OptionalPath temp;
-      return temp;
-    }
+    Adapter(T adaptee, const std::string key) : m_adaptee(adaptee), m_key(key) {}
+    virtual OptionalPath preferredMountPoint() const { return m_adaptee[m_key]; }
   };
-  return new Adapter(adaptee);
+  return new Adapter(adaptee, key);
 }
 
 /** UserCatalogInfo : Takes catalog info from the facility (via CatalogInfo),
