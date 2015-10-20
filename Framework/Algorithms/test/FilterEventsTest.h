@@ -375,7 +375,7 @@ public:
 
     // Check number of output workspaces
     std::vector<std::string> vecwsname = filter.getProperty("OutputWorkspaceNames");
-    TS_ASSERT_EQUALS(vecwsname.size(), 5);
+    TS_ASSERT_EQUALS(vecwsname.size(), 9);
 
     EventWorkspace_sptr ws5 = boost::dynamic_pointer_cast<EventWorkspace>(
         AnalysisDataService::Instance().retrieve("SplittedDataElastic_5"));
@@ -388,14 +388,14 @@ public:
         AnalysisDataService::Instance().retrieve("SplittedDataElastic_7"));
     TS_ASSERT(ws7);
     if (ws7) {
-      TS_ASSERT_EQUALS(ws7->getNumberEvents(), 100);
+      TS_ASSERT_EQUALS(ws7->getNumberEvents(), 10);
     }
 
     // Check individual events
     EventList &ev0 = ws7->getEventList(0);
-    TS_ASSERT_EQUALS(ev0.getNumberEvents(), 10);
+    TS_ASSERT_EQUALS(ev0.getNumberEvents(), 1);
     std::vector<double> vectofs = ev0.getTofs();
-    TS_ASSERT_DELTA(vectofs[0], 12121, 0.001);
+    TS_ASSERT_DELTA(vectofs[0], 741.0, 0.001);
 
     // Delete all the workspaces generated here
     AnalysisDataService::Instance().remove("MockDirectEventWS");
