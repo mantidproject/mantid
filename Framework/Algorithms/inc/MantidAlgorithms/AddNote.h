@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_ADDNOTE_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -33,7 +34,8 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport AddNote : public API::Algorithm {
+class DLLExport AddNote : public API::Algorithm,
+                          public API::DeprecatedAlgorithm {
 public:
   AddNote();
   virtual ~AddNote();
