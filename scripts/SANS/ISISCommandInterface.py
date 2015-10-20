@@ -1091,10 +1091,6 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
     # that we are consistent to not mix with [degree/XSF, m]
     original = ReductionSingleton().get_instrument().cur_detector_position(ReductionSingleton().get_sample().get_wksp_name())
 
-    # If we have 0 iterations then we should return here
-    if MaxIter <= 0:
-        return xstart, ystart
-
     if ReductionSingleton().instrument.lowAngDetSet:
         det_bank = 'rear'
     else:
@@ -1128,6 +1124,13 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
     beam_center_logger = BeamCenterLogger(centre_reduction,
                                           coord1_scale_factor,
                                           coord2_scale_factor)
+
+    # If we have 0 iterations then we should return here
+    if MaxIter <= 0:
+        zero_iterations_msg = ("You have selected 0 iterations. The beam centre" +
+                               "will be positioned at (" + str(xstart) + ", " + str(ystart) +")")
+        beam_center_logger.report(zero_iterations_msg)
+        return xstart, ystart
 
     beam_center_logger.report_init(COORD1NEW, COORD2NEW)
 
