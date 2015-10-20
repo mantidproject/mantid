@@ -1,15 +1,18 @@
 #include "MantidDataHandling/FindDetectorsPar.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/MultiThreaded.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidAPI/WorkspaceValidators.h"
+
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
+
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/MultiThreaded.h"
 
 #include <Poco/File.h>
 #include <limits>

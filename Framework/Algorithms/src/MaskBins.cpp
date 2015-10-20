@@ -2,11 +2,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MaskBins.h"
-#include <limits>
-#include <sstream>
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/HistogramValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+
+#include <limits>
+#include <sstream>
 
 namespace Mantid {
 namespace Algorithms {

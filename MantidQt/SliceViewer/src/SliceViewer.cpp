@@ -122,8 +122,6 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   // hide unused buttons
   ui.btnZoom->hide();      // hidden for a long time
-  ui.btnRebinLock->hide(); // now replaced by auto rebin mode
-  // ui.btnClearLine->hide();  // turning off line mode now removes line
 
   // ----------- Toolbar button signals ----------------
   QObject::connect(ui.btnResetZoom, SIGNAL(clicked()), this, SLOT(resetZoom()));
@@ -377,13 +375,6 @@ void SliceViewer::initMenus() {
   m_syncRebinMode = new SyncedCheckboxes(action, ui.btnRebinMode, false);
   connect(m_syncRebinMode, SIGNAL(toggled(bool)), this,
           SLOT(RebinMode_toggled(bool)));
-  m_menuView->addAction(action);
-
-  action = new QAction(QPixmap(), "&Lock Rebinned WS", this);
-  m_syncRebinLock = new SyncedCheckboxes(action, ui.btnRebinLock, true);
-  connect(m_syncRebinLock, SIGNAL(toggled(bool)), this,
-          SLOT(RebinLock_toggled(bool)));
-  action->setVisible(false); // hide this action
   m_menuView->addAction(action);
 
   action = new QAction(QPixmap(), "Rebin Current View", this);
@@ -691,7 +682,6 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
 
   // Can't use dynamic rebin mode with a MatrixWorkspace
   m_syncRebinMode->setEnabled(!matrix);
-  m_syncRebinLock->setEnabled(!matrix);
 
   // Go to no normalization by default for MatrixWorkspaces
   if (matrix)
@@ -1008,13 +998,10 @@ void SliceViewer::setRebinNumBins(int xBins, int yBins) {
  * See setRebinThickness() to adjust the thickness in other dimensions.
  *
  * @param mode :: true for rebinning mode
- * @param locked :: if true, then the rebinned area is only refreshed manually
- *        or when changing rebinning parameters.
  */
-void SliceViewer::setRebinMode(bool mode, bool locked) {
+void SliceViewer::setRebinMode(bool mode) {
   // The events associated with these controls will trigger a re-draw
   m_syncRebinMode->toggle(mode);
-  m_syncRebinLock->toggle(locked);
 }
 
 //------------------------------------------------------------------------------
@@ -1098,7 +1085,6 @@ void SliceViewer::RebinMode_toggled(bool checked) {
   for (size_t d = 0; d < m_dimWidgets.size(); d++)
     m_dimWidgets[d]->showRebinControls(checked);
   ui.btnRebinRefresh->setEnabled(checked);
-  ui.btnRebinLock->setEnabled(checked);
   m_syncAutoRebin->setEnabled(checked);
   m_actionRefreshRebin->setEnabled(checked);
   m_rebinMode = checked;
@@ -1118,17 +1104,6 @@ void SliceViewer::RebinMode_toggled(bool checked) {
   }
 }
 
-//------------------------------------------------------------------------------
-/** Slot called when locking/unlocking the dynamically rebinned
- * overlaid workspace
- * @param checked :: DO lock the workspace in place
- */
-void SliceViewer::RebinLock_toggled(bool checked) {
-  m_rebinLocked = checked;
-  // Rebin immediately
-  if (!m_rebinLocked && m_rebinMode)
-    this->rebinParamsChanged();
-}
 
 //------------------------------------------------------------------------------
 /// Slot for zooming into

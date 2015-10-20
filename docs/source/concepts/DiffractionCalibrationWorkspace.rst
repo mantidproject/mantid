@@ -57,3 +57,5 @@ various parameters on an instrument view.
   * ``offset`` (double array) not used. Value of the legacy calibration file.
 
 The `group` information will still be extracted into separate `GroupingWorkspace` and `MaskWorkspace`.
+
+.. categories:: Concepts

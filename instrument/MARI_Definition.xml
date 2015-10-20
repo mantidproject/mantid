@@ -42,6 +42,38 @@
   
 
   <!-- CHOPPERS -->
+ <!-- Chopper position -->
+ <component type="chopper-position">
+    <location z="-1.689"/>
+    <!--description is="The component provides sample-choper distance, used
+    to estimate chopper delay time and Tobyfit resolution calculations."/ -->
+    <!-- if chopper "a": t_offset = -3281.8/SPEED + 16.2; 
+        if chopper "g": t_offset = -2822.5/SPEED + 9.7
+        if chopper "s": t_offset = -3326.8/SPEED + 7.7
+    -->
+    <parameter name="initial_phase">    
+        <value val="-3000."/>
+        <description is="The initial rotation phase of the disk used to caluclate the time
+        for neutrons arriving at the chopper according to the formula time = delay + initial_phase/Speed"/>
+    </parameter>
+    <parameter name="ChopperDelayLog" type="string">
+        <value val="fermi_delay"/>
+    </parameter>
+    <parameter name="ChopperSpeedLog" type="string">
+        <value val="fermi_speed"/>
+    </parameter>
+    <parameter name="FilterBaseLog" type="string">
+        <value val="good_uah_log"/>
+    </parameter>
+    <!-- if the log above should be used as it is or 
+    one should calculate its derivative -->
+    <parameter name="filter_with_derivative" type="bool">
+        <value val="True"/>	
+    </parameter>
+
+  </component>
+  <type name="chopper-position" is="ChopperPos"></type>  
+  
   
   <component type="fermi-chopper">
     <location y="-0.1" z="-1.689" />
@@ -50,9 +82,11 @@
     </parameter>
     <parameter name="Delay (us)">
       <logfile id="fermi_delay" extract-single-value-as="last_value" />
-      <description is="Delay is the time chopper waits for...? (test description)"/>
+      <description is="Delay is the time between the moment when beam hits moderator and the moment, 
+      when neutron passes through chopper for the first time."/>
     </parameter>
-  </component>
+     
+  </component>  
   <type name="fermi-chopper" is="chopper">
     <cylinder id="body">
         <centre-of-bottom-base x="0.0" y="0.0" z="0.0" />

@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 # This python script is run after running extractAlgorithmNames.py, where
 # the output of that script is saved to a *.txt
 #
@@ -18,7 +19,7 @@ allAlgs = [line.strip() for line in open(algorithmList)]
 os.chdir('PythonInterface/plugins/algorithms/WorkflowAlgorithms')
 for line in allAlgs:
     #print line
-    fullline = line    
+    fullline = line
     args = [
         'git', 'log',
         '--pretty=short',
@@ -30,11 +31,11 @@ for line in allAlgs:
     authors = subprocess.check_output(args).replace('"', '').split('\n')
     authors = set(authors)
     authors = authors - set([''])
-    
+
     for author in authors:
         #print author
         fullline = fullline + ", " + author
-	
+
     print fullline
 
 #line = 'GroupWorkspaces.cpp'
@@ -54,5 +55,5 @@ for line in allAlgs:
 #for author in authors:
     #print author
 #    fullline = fullline + ", " + author
-	
+
 #print fullline

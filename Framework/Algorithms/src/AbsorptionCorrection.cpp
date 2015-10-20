@@ -2,13 +2,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/AbsorptionCorrection.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/Fast_Exponential.h"
-#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid {
 namespace Algorithms {

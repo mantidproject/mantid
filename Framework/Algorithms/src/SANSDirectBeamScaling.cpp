@@ -2,15 +2,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SANSDirectBeamScaling.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Histogram1D.h"
-#include <vector>
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid {
 namespace Algorithms {

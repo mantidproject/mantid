@@ -2,7 +2,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/InstrumentValidator.h"
 
 #include <fstream>
 

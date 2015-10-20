@@ -4,14 +4,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/SetScalingPSD.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "LoadRaw/isisraw.h"
+
 #include <cmath>
 #include <fstream>
-#include "LoadRaw/isisraw.h"
 
 namespace Mantid {
 namespace DataHandling {

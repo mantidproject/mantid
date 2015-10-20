@@ -1,6 +1,5 @@
 #include "MantidAlgorithms/MedianDetectorTest.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/Exception.h"
+#include "MantidAPI/HistogramValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>

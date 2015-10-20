@@ -1,30 +1,24 @@
 #include "MantidAlgorithms/ConvertUnitsUsingDetectorTable.h"
 
+#include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include "MantidAlgorithms/ConvertUnitsUsingDetectorTable.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/Run.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include <boost/function.hpp>
 #include <boost/bind.hpp>
+#include <boost/function.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
+
+#include <algorithm>
 #include <cfloat>
 #include <limits>
-#include <vector>
-#include <algorithm>
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
 namespace Algorithms {

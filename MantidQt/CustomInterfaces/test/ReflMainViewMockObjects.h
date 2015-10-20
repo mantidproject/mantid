@@ -57,6 +57,8 @@ public:
   virtual void setProgress(int) {};
   virtual void setTableList(const std::set<std::string>&) {};
   virtual void setInstrumentList(const std::vector<std::string>&, const std::string&) {};
+  virtual void saveSettings(const std::map<std::string,QVariant>&) {};
+  virtual void loadSettings(std::map<std::string,QVariant>&) {};
   virtual std::string getProcessInstrument() const {return "FAKE";}
   virtual boost::shared_ptr<IReflPresenter> getPresenter() const {return boost::shared_ptr<IReflPresenter>();}
 };

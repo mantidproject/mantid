@@ -2,13 +2,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PropertyManager.h"
 
 namespace Mantid {

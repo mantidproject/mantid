@@ -1,17 +1,15 @@
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidDataHandling/LoadCalFile.h"
 #include "MantidDataHandling/LoadDspacemap.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidDataHandling/LoadCalFile.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/BinaryFile.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/V3D.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

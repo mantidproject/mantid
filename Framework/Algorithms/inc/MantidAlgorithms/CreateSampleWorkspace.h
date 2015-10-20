@@ -76,6 +76,7 @@ private:
                                    double noiseScale);
   void replaceAll(std::string &str, const std::string &from,
                   const std::string &to);
+  void addChopperParameters(API::MatrixWorkspace_sptr &ws);
 
   /// A pointer to the random number generator
   Kernel::PseudoRandomNumberGenerator *m_randGen;

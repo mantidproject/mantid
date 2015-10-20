@@ -2,14 +2,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SphericalAbsorption.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/Fast_Exponential.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/Fast_Exponential.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
 
 using namespace Mantid::PhysicalConstants;
 

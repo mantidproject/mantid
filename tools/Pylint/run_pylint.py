@@ -57,7 +57,7 @@ class Results(object):
         """
         Return true if all files were clean
         """
-        return (len(self.failures) == 0)
+        return len(self.failures) == 0
 
     def add(self, modulename, status):
         """
@@ -172,8 +172,8 @@ def parse_arguments(argv):
                       help="If provided, store the output in the given file.")
     parser.add_option("-x", "--exclude", dest="exclude", metavar="EXCLUDES",
                       help="If provided, a space-separated list of "
-                            "files/directories to exclude. Relative paths are "
-                            "taken as relative to --basedir")
+                           "files/directories to exclude. Relative paths are "
+                           "taken as relative to --basedir")
 
     parser.set_defaults(format=DEFAULT_PYLINT_FORMAT, exe=DEFAULT_PYLINT_EXE, nofail=False,
                         basedir=os.getcwd(), rcfile=DEFAULT_RCFILE, exclude="")
@@ -242,6 +242,7 @@ def check_module_imports():
       str: String indicating success/failure
     """
     msg = ""
+    #pylint: disable=unused-variable
     try:
         import mantid
     except ImportError, exc:
@@ -292,7 +293,7 @@ def run_checks(targets, serializer, options):
         targetpath = os.path.join(options.basedir, target)
         pkg_init = os.path.join(targetpath, "__init__.py")
         if os.path.isfile(targetpath) or os.path.isfile(pkg_init):
-            overall_stats.add(exec_pylint_on_importable(targetpath, serializer, options))
+            overall_stats.add(targetpath, exec_pylint_on_importable(targetpath, serializer, options))
         else:
             overall_stats.update(exec_pylint_on_all(targetpath, serializer, options, excludes))
     ##
@@ -352,7 +353,7 @@ def find_importable_targets(dirpath):
             pkg_init = os.path.join(abspath, "__init__.py")
             if (os.path.isfile(abspath) and item.endswith(".py")) or \
                 os.path.isfile(pkg_init):
-                 importables.append(abspath)
+                importables.append(abspath)
             elif os.path.isdir(abspath):
                 importables.extend(package_walk(abspath))
         return importables
@@ -386,7 +387,7 @@ def exec_pylint_on_importable(srcpath, serializer, options):
     with temp_dir_change(os.path.dirname(srcpath)):
         status = subp.call(cmd, stdout=serializer)
 
-    return (status == 0)
+    return status == 0
 
 #------------------------------------------------------------------------------
 

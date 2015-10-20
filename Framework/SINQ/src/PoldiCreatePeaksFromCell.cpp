@@ -6,11 +6,8 @@
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
-#include "MantidGeometry/Crystal/BraggScattererFactory.h"
-
-#include <boost/tokenizer.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/assign.hpp>
+#include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
+#include "MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h"
 
 namespace Mantid {
 namespace Poldi {
@@ -73,64 +70,6 @@ std::map<std::string, std::string> PoldiCreatePeaksFromCell::validateInputs() {
 SpaceGroup_const_sptr PoldiCreatePeaksFromCell::getSpaceGroup(
     const std::string &spaceGroupString) const {
   return SpaceGroupFactory::Instance().createSpaceGroup(spaceGroupString);
-}
-
-CompositeBraggScatterer_sptr PoldiCreatePeaksFromCell::getScatterers(
-    const std::string &scattererString) const {
-  boost::char_separator<char> atomSep(";");
-  boost::tokenizer<boost::char_separator<char>> tokens(scattererString,
-                                                       atomSep);
-
-  std::vector<BraggScatterer_sptr> scatterers;
-
-  for (auto it = tokens.begin(); it != tokens.end(); ++it) {
-    scatterers.push_back(getScatterer(boost::trim_copy(*it)));
-  }
-
-  return CompositeBraggScatterer::create(scatterers);
-}
-
-BraggScatterer_sptr PoldiCreatePeaksFromCell::getScatterer(
-    const std::string &singleScatterer) const {
-  std::vector<std::string> tokens;
-  boost::split(tokens, singleScatterer, boost::is_any_of(" "));
-
-  if (tokens.size() < 4 || tokens.size() > 6) {
-    throw std::invalid_argument("Could not parse scatterer string: " +
-                                singleScatterer);
-  }
-
-  std::vector<std::string> cleanScattererTokens =
-      getCleanScattererTokens(tokens);
-  std::vector<std::string> properties =
-      boost::assign::list_of("Element")("Position")("Occupancy")("U")
-          .convert_to_container<std::vector<std::string>>();
-
-  std::string initString;
-  for (size_t i = 0; i < cleanScattererTokens.size(); ++i) {
-    initString += properties[i] + "=" + cleanScattererTokens[i] + ";";
-  }
-
-  return BraggScattererFactory::Instance().createScatterer(
-      "IsotropicAtomBraggScatterer", initString);
-}
-
-std::vector<std::string> PoldiCreatePeaksFromCell::getCleanScattererTokens(
-    const std::vector<std::string> &tokens) const {
-  std::vector<std::string> cleanTokens;
-
-  // Element
-  cleanTokens.push_back(tokens[0]);
-
-  // X, Y, Z
-  cleanTokens.push_back("[" + tokens[1] + "," + tokens[2] + "," + tokens[3] +
-                        "]");
-
-  for (size_t i = 4; i < tokens.size(); ++i) {
-    cleanTokens.push_back(tokens[i]);
-  }
-
-  return cleanTokens;
 }
 
 /** Returns the largest lattice spacing based on the algorithm properties
@@ -283,11 +222,11 @@ void PoldiCreatePeaksFromCell::exec() {
   g_log.information() << "Constrained unit cell is: " << unitCellToStr(unitCell)
                       << std::endl;
 
-  CompositeBraggScatterer_sptr scatterers = getScatterers(getProperty("Atoms"));
+  CompositeBraggScatterer_sptr scatterers = CompositeBraggScatterer::create(
+      IsotropicAtomBraggScattererParser(getProperty("Atoms"))());
 
   // Create a CrystalStructure-object for use with PoldiPeakCollection
-  CrystalStructure_sptr crystalStructure =
-      boost::make_shared<CrystalStructure>(unitCell, spaceGroup, scatterers);
+  CrystalStructure crystalStructure(unitCell, spaceGroup, scatterers);
 
   double dMin = getProperty("LatticeSpacingMin");
   double dMax = getDMaxValue(unitCell);

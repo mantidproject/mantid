@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSMonitorTOF.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidGeometry/Instrument.h"
 #include "Poco/NumberFormatter.h"

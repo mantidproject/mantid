@@ -33,7 +33,6 @@ public:
 
     TS_ASSERT(scatterer->existsProperty("Position"));
     TS_ASSERT(scatterer->existsProperty("UnitCell"));
-    TS_ASSERT(scatterer->existsProperty("SpaceGroup"));
   }
 
   void testAfterScattererPropertySet() {
@@ -70,47 +69,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         scatterer->setProperty("UnitCell", unitCellToStr(cell)));
     TS_ASSERT_EQUALS(scatterer->getCell().getG(), cell.getG());
-  }
-
-  void testGetSetSpaceGroup() {
-    BraggScattererInCrystalStructure_sptr scatterer = getInitializedScatterer();
-
-    SpaceGroup_const_sptr testGroup =
-        SpaceGroupFactory::Instance().createSpaceGroup("P m -3 m");
-
-    TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("SpaceGroup", "P m -3 m"));
-    TS_ASSERT_EQUALS(scatterer->getSpaceGroup()->hmSymbol(),
-                     testGroup->hmSymbol());
-  }
-
-  void testEquivalentPositions() {
-    BraggScattererInCrystalStructure_sptr scatterer = getInitializedScatterer();
-
-    V3D generalPosition(0.3, 0.32, 0.45);
-
-    // No space group set - no equivalent positions
-    scatterer->setProperty("Position", "[0.3, 0.32, 0.45]");
-    TS_ASSERT_EQUALS(scatterer->getEquivalentPositions().size(), 1);
-    TS_ASSERT_EQUALS(scatterer->getEquivalentPositions().front(),
-                     generalPosition);
-
-    // Assigning a space group must cause recalculation of equivalent positions
-    SpaceGroup_const_sptr testGroup =
-        SpaceGroupFactory::Instance().createSpaceGroup("P m -3 m");
-    scatterer->setProperty("SpaceGroup", "P m -3 m");
-
-    TS_ASSERT_EQUALS(scatterer->getEquivalentPositions().size(),
-                     testGroup->order());
-
-    // Re-setting the position also recalculates
-    V3D specialPosition(0.0, 0.0, 0.0);
-
-    scatterer->setProperty("Position", "[0, 0, 0]");
-    // Pm-3m does not contain translations, so (0,0,0) is not transformed by any
-    // symmetry operation of the group
-    TS_ASSERT_EQUALS(scatterer->getEquivalentPositions().size(), 1);
-    TS_ASSERT_EQUALS(scatterer->getEquivalentPositions().front(),
-                     specialPosition);
   }
 
   void testUnitCellStringValidator() {

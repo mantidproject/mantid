@@ -1,10 +1,10 @@
-#include <sstream>
 #include "MantidAlgorithms/ResampleX.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
+
+#include <sstream>
 
 namespace Mantid {
 namespace Algorithms {

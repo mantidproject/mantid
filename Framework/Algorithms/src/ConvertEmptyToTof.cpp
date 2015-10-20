@@ -3,13 +3,13 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertEmptyToTof.h"
 
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/ConstraintFactory.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <cmath>
 #include <map>
@@ -54,8 +54,7 @@ const std::string ConvertEmptyToTof::category() const {
  */
 void ConvertEmptyToTof::init() {
 
-  auto wsValidator = boost::make_shared<CompositeValidator>();
-  wsValidator->add<WorkspaceUnitValidator>("Empty");
+  auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("Empty");
   declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "Name of the input workspace");

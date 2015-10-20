@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 #! /usr/bin/python
 # Convert an acor file into VTK format (specifically a vtp file)
 from xml.dom import minidom
@@ -10,19 +11,19 @@ def convertToVTU(infile, outpath):
     planelist=[]
     npoints = 0
     for line in datafile:
-        numbers = line.split();
-        if( len(numbers) != 4 ):
+        numbers = line.split()
+        if len(numbers) != 4 :
             continue
-        if( npoints == 0 ):
+        if npoints == 0 :
             curz = numbers[2]
-        if( numbers[2] != curz ):
+        if numbers[2] != curz :
             datalist.append(planelist)
             curz = numbers[2]
             planelist=[]
         planelist.append(numbers)
         npoints += 1
 
-# Append last set
+    # Append last set
     datalist.append(planelist)
     datafile.close()
 
@@ -43,7 +44,7 @@ def convertToVTU(infile, outpath):
     piece.setAttribute( "NumberOfPoints", str(npoints))
     piece.setAttribute( "NumberOfCells",  str(ncells))
 
-# First the PointData element
+    # First the PointData element
     point_data = doc.createElement("PointData")
     piece.appendChild(point_data)
     point_data.setAttribute("Scalars", "Intensity")
@@ -59,7 +60,7 @@ def convertToVTU(infile, outpath):
             txt = doc.createTextNode(str(point[3]))
             data_array.appendChild(txt)
 
-# Now the Points element
+    # Now the Points element
     points = doc.createElement("Points")
     piece.appendChild(points)
 
@@ -111,12 +112,12 @@ def convertToVTU(infile, outpath):
         txt = doc.createTextNode("4")
         data_array.appendChild(txt)
 
-# #print doc.toprettyxml(newl="\n")
+    #print doc.toprettyxml(newl="\n")
     shortname = infile.split('/')
     name = outpath + shortname[len(shortname)-1] + ".vtu"
-    file = open(name,'w')
-    doc.writexml(file, newl="\n")
-    file.close()
+    handle = open(name,'w')
+    doc.writexml(handle, newl="\n")
+    handle.close()
 
     del datalist
     del planelist
@@ -160,6 +161,6 @@ def writeParallelVTU(files, prefix):
 #    print doc.toprettyxml(newl="\n")
     filename = prefix + files[0].split('.')[0] + ".pvtu"
 #    print filename
-    file = open(filename,'w')
-    doc.writexml(file, newl="\n")
-    file.close()
+    handle = open(filename,'w')
+    doc.writexml(handle, newl="\n")
+    handle.close()

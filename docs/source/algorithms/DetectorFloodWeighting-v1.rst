@@ -10,8 +10,7 @@ Description
 -----------
 This algorithm is used to calculate the detector flood weighting workspace use for pixel flood corrections. It was originally developed for the ANSTO Bilby instrument.
 
-This algorithm crops the data over the specified wavelength region, then normalizes each spectrum to the workspace spectrum maxima. The algorithm will then
-perform a solid angle correction on each spectra via :ref:`algm-SolidAngle`.
+This algorithm crops the data over the specified wavelength region, and sums it. The algorithm will then perform a solid angle correction on each spectra via :ref:`algm-SolidAngle` if specified, and divides through by the provided transmission workspace if provided. The result is divided by the mean spectrum value in the previous result.
 
 Usage
 -----
@@ -30,8 +29,6 @@ Usage
    
    print 'Number Histograms',out_ws.getNumberHistograms()
    print 'Min X:', out_ws.readX(0)[0], 'Max X:', out_ws.readX(0)[1]  
-   y_data = out_ws.extractY()
-   print  'Min Y:', np.amin(y_data), 'Max Y:', np.amax(y_data)   
 
 Output:
 
@@ -39,7 +36,6 @@ Output:
 
    Number Histograms 2
    Min X: 0.0 Max X: 10.0
-   Min Y: 0.5 Max Y: 1.0
 
 **Example - With Solid Angle Correction **
 

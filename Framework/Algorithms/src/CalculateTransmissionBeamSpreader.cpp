@@ -2,10 +2,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CalculateTransmissionBeamSpreader.h"
-#include "MantidAlgorithms/SumSpectra.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 
 namespace Mantid {

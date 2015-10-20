@@ -1,5 +1,4 @@
 #include "MantidAlgorithms/ConvertAxesToRealSpace.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ListValidator.h"
