@@ -1231,7 +1231,6 @@ MDHistoWorkspace::getSpecialCoordinateSystem() const {
   return coordinates;
 }
 
-
 /**
 Set the special coordinate system (if any) to use.
 @param coordinateSystem : Special coordinate system to use.
