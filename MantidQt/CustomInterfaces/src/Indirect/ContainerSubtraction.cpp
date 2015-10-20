@@ -59,13 +59,6 @@ void ContainerSubtraction::run() {
     scaleX->setProperty("Factor", m_uiForm.spShift->value());
     scaleX->setProperty("Operation", "Add");
     scaleX->execute();
-    IAlgorithm_sptr rebinAlg =
-        AlgorithmManager::Instance().create("RebinToWorkspace");
-    rebinAlg->initialize();
-    rebinAlg->setProperty("WorkspaceToRebin", canWs);
-    rebinAlg->setProperty("WorkspaceToMatch", sampleWs);
-    rebinAlg->setProperty("OutputWorkspace", canWsName.toStdString());
-    rebinAlg->execute();
   }
 
   // If not in wavelength then do conversion
@@ -93,7 +86,15 @@ void ContainerSubtraction::run() {
                                        QMessageBox::Yes, QMessageBox::No,
                                        QMessageBox::NoButton);
 
-    if (result != QMessageBox::Yes) {
+    if (result == QMessageBox::Yes) {
+      IAlgorithm_sptr rebinAlg =
+          AlgorithmManager::Instance().create("RebinToWorkspace");
+      rebinAlg->initialize();
+      rebinAlg->setProperty("WorkspaceToRebin", canWs);
+      rebinAlg->setProperty("WorkspaceToMatch", sampleWs);
+      rebinAlg->setProperty("OutputWorkspace", canWsName.toStdString());
+      rebinAlg->execute();
+    } else {
       m_batchAlgoRunner->clearQueue();
       g_log.error("Cannot apply absorption corrections using a sample and "
                   "container with different binning.");

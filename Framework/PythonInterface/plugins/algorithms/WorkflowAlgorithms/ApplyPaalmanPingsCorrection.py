@@ -248,7 +248,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         """
 
 
-        logger.information('Rebining can to ensure Minus')
+        logger.information('Rebining container to ensure Minus')
         RebinToWorkspace(WorkspaceToRebin=self._can_ws_name,
                          WorkspaceToMatch=self._sample_ws_name,
                          OutputWorkspace=self._can_ws_name)
