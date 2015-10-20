@@ -100,9 +100,9 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
   // CalibrationParameters or similar class/structure
   const std::string vanadiumRun = "236516";
   const std::string ceriaRun = "241391";
-  m_uiTabCalib.lineEdit_new_vanadium_num->setText(
+  m_uiTabCalib.lineEdit_new_vanadium_num->setUserInput(
       QString::fromStdString(vanadiumRun));
-  m_uiTabCalib.lineEdit_new_ceria_num->setText(
+  m_uiTabCalib.lineEdit_new_ceria_num->setUserInput(
       QString::fromStdString(ceriaRun));
 
   // push button signals/slots
@@ -178,6 +178,11 @@ void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
   connect(m_ui.comboBox_instrument, SIGNAL(currentIndexChanged(int)), this,
           SLOT(instrumentChanged(int)));
 
+  // signal/slot connections to respond to changes in instrument selection combo
+  // boxes
+  connect(m_ui.comboBox_instrument, SIGNAL(instrumentChanged(int)), this,
+          SLOT(userSelectInstrument()));
+
   connect(m_ui.pushButton_help, SIGNAL(released()), this, SLOT(openHelpWin()));
   // note connection to the parent window, otherwise an empty frame window
   // may remain open and visible after this close
@@ -212,7 +217,7 @@ void EnggDiffractionViewQtGUI::readSettings() {
       qs.value("user-params-new-ceria-num", "").toString());
 
   // user params - focusing
-  m_uiTabFocus.lineEdit_run_num->setText(
+  m_uiTabFocus.lineEdit_run_num->setUserInput(
       qs.value("user-params-focus-runno", "").toString());
 
   qs.beginReadArray("user-params-focus-bank_i");
@@ -224,13 +229,13 @@ void EnggDiffractionViewQtGUI::readSettings() {
       qs.value("value", true).toBool());
   qs.endArray();
 
-  m_uiTabFocus.lineEdit_cropped_run_num->setText(
+  m_uiTabFocus.lineEdit_cropped_run_num->setUserInput(
       qs.value("user-params-focus-cropped-runno", "").toString());
 
   m_uiTabFocus.lineEdit_cropped_spec_ids->setText(
       qs.value("user-params-focus-cropped-spectrum-nos", "").toString());
 
-  m_uiTabFocus.lineEdit_texture_run_num->setText(
+  m_uiTabFocus.lineEdit_texture_run_num->setUserInput(
       qs.value("user-params-focus-texture-runno", "").toString());
 
   m_uiTabFocus.lineEdit_texture_grouping_file->setText(
@@ -735,9 +740,19 @@ void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
   QComboBox *inst = m_ui.comboBox_instrument;
   if (!inst)
     return;
-
   m_currentInst = inst->currentText().toStdString();
   m_presenter->notify(IEnggDiffractionPresenter::InstrumentChange);
+}
+
+void EnggDiffractionViewQtGUI::userSelectInstrument() {
+  // Set file browsing to current instrument
+  auto prefix = QString::fromStdString(m_currentInst);
+  m_uiTabFocus.lineEdit_run_num->setInstrumentOverride(prefix);
+  m_uiTabFocus.lineEdit_texture_run_num->setInstrumentOverride(prefix);
+  m_uiTabFocus.lineEdit_cropped_run_num->setInstrumentOverride(prefix);
+
+  m_uiTabCalib.lineEdit_new_ceria_num->setInstrumentOverride(prefix);
+  m_uiTabCalib.lineEdit_new_vanadium_num->setInstrumentOverride(prefix);
 }
 
 void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {

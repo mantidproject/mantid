@@ -198,6 +198,9 @@ private:
   /// instrument selected (ENGIN-X, etc.)
   std::string m_currentInst;
 
+  /// the instrument selection has changed (slot)
+  void userSelectInstrument();
+
   // plot data representation type selected
   int static m_currentType;
 
@@ -224,6 +227,7 @@ private:
 
   /// presenter as in the model-view-presenter
   boost::scoped_ptr<IEnggDiffractionPresenter> m_presenter;
+
 };
 
 } // namespace CustomInterfaces
