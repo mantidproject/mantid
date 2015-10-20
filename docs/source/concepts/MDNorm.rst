@@ -158,4 +158,6 @@ Current implementation
 As of release 3.3, the normalization can be calculated for single crystal 
 diffraction (:ref:`MDNormSCD <algm-MDNormSCD>`) 
 and single crystal direct geometry inelastic scattering 
-(:ref:`MDNormDirectSC <algm-MDNormDirectSC>`).    
+(:ref:`MDNormDirectSC <algm-MDNormDirectSC>`).
+
+.. categories:: Concepts

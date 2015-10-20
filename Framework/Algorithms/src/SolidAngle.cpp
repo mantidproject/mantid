@@ -2,11 +2,11 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SolidAngle.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/AlgorithmFactory.h"
-#include "MantidKernel/UnitFactory.h"
-#include <cfloat>
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/UnitFactory.h"
+
+#include <cfloat>
 
 namespace Mantid {
 namespace Algorithms {

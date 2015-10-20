@@ -172,8 +172,10 @@ class TestSuiteReport(object):
     @property
     def nfailed(self):
         def sum_failure(fails, case):
-            if case.failed: return fails + 1
-            else: return fails
+            if case.failed:
+                return fails + 1
+            else:
+                return fails
         return reduce(sum_failure, self.testcases, 0)
 
     @property
@@ -196,7 +198,7 @@ class TestCaseReport(object):
 
     @property
     def passed(self):
-        return (self.failure_descr == "")
+        return self.failure_descr == ""
 
     @property
     def failed(self):
@@ -307,7 +309,7 @@ class DocTestOutputParser(object):
                              % text[1])
         results = results[2:] # trim off top two lines of header information
         maintests, cleanup = self.__split_on_cleanup(results)
-        overall_success = not (maintests[0] == FAILURE_MARKER)
+        overall_success = not maintests[0] == FAILURE_MARKER
 
         if overall_success:
             testcases = self.__parse_success(fullname, maintests)

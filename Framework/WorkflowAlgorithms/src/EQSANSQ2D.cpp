@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSQ2D.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "Poco/NumberFormatter.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 
@@ -17,8 +17,7 @@ using namespace API;
 using namespace Geometry;
 
 void EQSANSQ2D::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
-  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
+  auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
   declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
                                           Direction::Input, wsValidator),
                   "Workspace to calculate I(qx,qy) from");

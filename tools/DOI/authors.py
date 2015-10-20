@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from itertools import chain, ifilterfalse
 import string, os, re
 

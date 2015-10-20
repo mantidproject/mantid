@@ -26,7 +26,7 @@
   <component name="Source" type="source">
     <location x="0.0" y="0.0" />
     <parameter name="z"> 
-      <logfile id="L1_chopper_value" eq="1*value"/>
+      <logfile id="L1_chopper_value" eq="-1*value"/>
     </parameter>
   </component>
   <type name="source" is="Source" />

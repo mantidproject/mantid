@@ -1,5 +1,9 @@
 #include "MantidAlgorithms/IdentifyNoisyDetectors.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -131,6 +135,11 @@ void IdentifyNoisyDetectors::getStdDev(MatrixWorkspace_sptr valid,
       mean2 += std::pow(values->readY(i)[0], 2);
       count++;
     }
+  }
+
+  if (0 == count) {
+    // all values are zero, no need to loop
+    return;
   }
 
   mean = mean / count;

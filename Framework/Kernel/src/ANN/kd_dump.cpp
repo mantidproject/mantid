@@ -34,6 +34,8 @@
 #include "kd_tree.h" // kd-tree declarations
 #include "bd_tree.h" // bd-tree declarations
 
+#include <limits>
+
 using namespace std; // make std:: available
 
 //----------------------------------------------------------------------
@@ -332,6 +334,15 @@ annReadDump(istream &in,              // input stream
     for (j = 0; j < the_dim; j++) { // read bounding box low
       in >> the_bnd_box_hi[j];
     }
+
+    if (0 > the_n_pts ||
+        static_cast<size_t>(std::numeric_limits<int>::max()) <=
+            static_cast<size_t>(the_n_pts / sizeof(ANNidx))) {
+      annError("Too big number of elements for the point index array. This "
+               "would cause an overflow when allocating memory",
+               ANNabort);
+    }
+
     the_pidx = new ANNidx[the_n_pts]; // allocate point index array
     int next_idx = 0;                 // number of indices filled
                                       // read the tree and indices
@@ -429,6 +440,16 @@ static ANNkd_ptr annReadTree(istream &in,           // input stream
     int n_bnds;   // number of bounding sides
     in >> n_bnds; // number of bounding sides
                   // allocate bounds array
+
+    if (0 > n_bnds ||
+        static_cast<size_t>(std::numeric_limits<int>::max()) <=
+            static_cast<size_t>(n_bnds / sizeof(ANNorthHalfSpace))) {
+      annError("Too big number of bounding sides, would cause overflow when "
+               "allocating memory",
+               ANNabort);
+      exit(0);
+    }
+
     ANNorthHSArray bds = new ANNorthHalfSpace[n_bnds];
     for (int i = 0; i < n_bnds; i++) {
       int sd;               // which side

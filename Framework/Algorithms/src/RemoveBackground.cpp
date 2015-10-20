@@ -3,15 +3,17 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/RemoveBackground.h"
 
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/EventList.h"
 
 namespace Mantid {
 namespace Algorithms {

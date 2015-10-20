@@ -484,12 +484,12 @@ class MantidConfigDirectInelastic(object):
     #
     def init_user(self,fedIDorUser,theUser=None):
         """Define settings, specific to a user
-           Supports two interfaces -- old and the new one 
+           Supports two interfaces -- old and the new one
            where
-           OldInterface: requested two input parameters 
+           OldInterface: requested two input parameters
            fedID   -- users federal id
            theUser -- class defining all other user property
-           NewInterface: requested single parameter: 
+           NewInterface: requested single parameter:
            theUser -- class defining all user's properties including fedID
         """
         if not theUser:

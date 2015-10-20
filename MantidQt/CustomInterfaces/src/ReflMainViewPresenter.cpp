@@ -24,9 +24,6 @@
 #include <fstream>
 #include <sstream>
 
-#include <QSettings>
-#include <QFileDialog>
-
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -36,7 +33,6 @@ using namespace MantidQt::MantidWidgets;
 
 namespace
 {
-  const QString ReflSettingsGroup = "Mantid/CustomInterfaces/ISISReflectometry";
 
   void validateModel(ITableWorkspace_sptr model)
   {
@@ -295,16 +291,15 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::saveNotebook(std::map<int,std::set<int>> groups, std::set<int> rows)
     {
-      std::unique_ptr<ReflGenerateNotebook> notebook(new ReflGenerateNotebook(
-        m_wsName, m_model, m_view->getProcessInstrument(), COL_RUNS, COL_TRANSMISSION, COL_OPTIONS, COL_ANGLE,
-        COL_QMIN, COL_QMAX, COL_DQQ, COL_SCALE, COL_GROUP));
-      QString qfilename = QFileDialog::getSaveFileName(0, "Save notebook file", QDir::currentPath(),
-                                                       "IPython Notebook files (*.ipynb);;All files (*.*)",
-                                                       new QString("IPython Notebook files (*.ipynb)"));
-      std::string filename = qfilename.toStdString();
+
+      std::string filename = m_view->requestNotebookPath();
       if (filename == "") {
         return;
       }
+
+      std::unique_ptr<ReflGenerateNotebook> notebook(new ReflGenerateNotebook(
+        m_wsName, m_model, m_view->getProcessInstrument(), COL_RUNS, COL_TRANSMISSION, COL_OPTIONS, COL_ANGLE,
+        COL_QMIN, COL_QMAX, COL_DQQ, COL_SCALE, COL_GROUP));
       std::string generatedNotebook = notebook->generateNotebook(groups, rows);
 
       std::ofstream file(filename.c_str(), std::ofstream::trunc);
@@ -1512,11 +1507,7 @@ namespace MantidQt
         m_options[it->first] = it->second;
 
       //Save any changes to disk
-      QSettings settings;
-      settings.beginGroup(ReflSettingsGroup);
-      for(auto it = m_options.begin(); it != m_options.end(); ++it)
-        settings.setValue(QString::fromStdString(it->first), it->second);
-      settings.endGroup();
+      m_view->saveSettings(m_options);
     }
 
     /** Load options from disk if possible, or set to defaults */
@@ -1538,12 +1529,7 @@ namespace MantidQt
       m_options["RoundDQQPrecision"] = 3;
 
       //Load saved values from disk
-      QSettings settings;
-      settings.beginGroup(ReflSettingsGroup);
-      QStringList keys = settings.childKeys();
-      for(auto it = keys.begin(); it != keys.end(); ++it)
-        m_options[it->toStdString()] = settings.value(*it);
-      settings.endGroup();
+      m_view->loadSettings(m_options);
     }
   }
 }

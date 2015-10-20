@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCrystal/AnvredCorrection.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
@@ -78,9 +78,7 @@ AnvredCorrection::AnvredCorrection()
 void AnvredCorrection::init() {
 
   // The input workspace must have an instrument and units of wavelength
-  boost::shared_ptr<CompositeValidator> wsValidator =
-      boost::make_shared<CompositeValidator>();
-  wsValidator->add(boost::make_shared<InstrumentValidator>());
+  auto wsValidator = boost::make_shared<InstrumentValidator>();
 
   declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
                                           Direction::Input, wsValidator),

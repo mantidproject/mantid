@@ -1,10 +1,11 @@
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/BoundedValidator.h"
-
-#include <boost/make_shared.hpp>
+#include "MantidKernel/CompositeValidator.h"
 
 namespace Mantid {
 namespace CurveFitting {

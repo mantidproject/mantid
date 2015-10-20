@@ -1349,6 +1349,28 @@ void FunctionBrowser::addFunction()
 }
 
 /**
+ * Set value of an attribute (as a property) to a function.
+ * @param fun :: Function to which attribute is set.
+ * @param prop :: A property with the name and value of the attribute.
+ */
+void FunctionBrowser::setAttributeToFunction(Mantid::API::IFunction& fun, QtProperty* prop)
+{
+    std::string attName = prop->propertyName().toStdString();
+    SetAttributeFromProperty setter(this,prop);
+    Mantid::API::IFunction::Attribute attr = fun.getAttribute(attName);
+    attr.apply(setter);
+    try
+    {
+      fun.setAttribute(attName,attr);
+    }
+    catch(std::exception& expt)
+    {
+      QMessageBox::critical(this,"MantidPlot - Error", "Cannot set attribute " + QString::fromStdString(attName) + 
+        " of function " + prop->propertyName() + ":\n\n" + QString::fromStdString(expt.what()));
+    }
+}
+
+/**
  * Return the function 
  * @param prop :: Function property 
  * @param attributesOnly :: Only set attributes
@@ -1380,6 +1402,10 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty* prop, bool 
           cf->addFunction(f);
         }
       }
+      else if (isAttribute(child))
+      {
+        setAttributeToFunction(*fun, child);
+      }
     }
   }
   else
@@ -1390,19 +1416,7 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty* prop, bool 
     {
       if (isAttribute(child))
       {
-        std::string attName = child->propertyName().toStdString();
-        SetAttributeFromProperty setter(this,child);
-        Mantid::API::IFunction::Attribute attr = fun->getAttribute(attName);
-        attr.apply(setter);
-        try
-        {
-          fun->setAttribute(attName,attr);
-        }
-        catch(std::exception& expt)
-        {
-          QMessageBox::critical(this,"MantidPlot - Error", "Cannot set attribute " + QString::fromStdString(attName) + 
-            " of function " + prop->propertyName() + ":\n\n" + QString::fromStdString(expt.what()));
-        }
+        setAttributeToFunction(*fun, child);
       }
       else if (!attributesOnly && isParameter(child))
       {

@@ -2,16 +2,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Integration.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/RebinnedOutput.h"
-#include "MantidAPI/Progress.h"
-#include <cmath>
-
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/VectorHelper.h"
+
+#include <cmath>
+#include <numeric>
 
 namespace Mantid {
 namespace Algorithms {

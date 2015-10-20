@@ -77,7 +77,8 @@ private:
         "\"https://api.github.com/users/peterfpeterson/received_events\",\n"
         "    \"type\": \"User\",\n"
         "    \"site_admin\": false\n"
-        "  }";
+        "  }\n"
+        "}";
 
     return outputString;
   }

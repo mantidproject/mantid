@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCrystal/NormaliseVanadium.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Fast_Exponential.h"
@@ -26,8 +26,7 @@ NormaliseVanadium::NormaliseVanadium() : API::Algorithm() {}
 
 void NormaliseVanadium::init() {
   // The input workspace must have an instrument and units of wavelength
-  auto wsValidator = boost::make_shared<CompositeValidator>();
-  wsValidator->add<InstrumentValidator>();
+  auto wsValidator = boost::make_shared<InstrumentValidator>();
 
   declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
                                           Direction::Input, wsValidator),

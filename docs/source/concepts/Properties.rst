@@ -176,8 +176,7 @@ In addition to the above, if used, Workspace properties also have a
 built in validator that requires that input workspaces exist and are of
 the correct type and that output workspaces have a name set.
 
-For more details on using validators, see the
-`PropertyAlgorithm <https://github.com/mantidproject/mantid/blob/master/Code/Mantid/Framework/UserAlgorithms/PropertyAlgorithm.cpp>`__
+For more details on using validators, see the :ref:`PropertyAlgorithm <algm-PropertyAlgorithm>`
 example or the full documentation for the individual validators (linked
 above).
 

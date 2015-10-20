@@ -157,7 +157,7 @@ void FindPeakBackground::exec() {
     Statistics stats = getStatistics(maskedY);
     Ymean = stats.mean;
     Yvariance = stats.standard_deviation * stats.standard_deviation;
-    Ysigma = std::sqrt((moment4(maskedY, n - l0, Ymean) -
+    Ysigma = std::sqrt((moment4(maskedY, static_cast<size_t>(xn), Ymean) -
                         (xn - 3.0) / (xn - 1.0) * Yvariance) /
                        xn);
     MantidVec::const_iterator it =

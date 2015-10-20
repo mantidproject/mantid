@@ -229,7 +229,7 @@ ConventionalCell ScalarUtils::GetCellForForm(const DblMatrix &UB,
   if (allowPermutations) {
     double angle_tolerance = 2.0;
     double length_factor = 1.05;
-    UB_list = GetRelatedUBs(UB, angle_tolerance, length_factor);
+    UB_list = GetRelatedUBs(UB, length_factor, angle_tolerance);
   } else {
     // Get exact form requested and not permutations
     UB_list.push_back(UB);

@@ -1,6 +1,7 @@
 #pylint: disable=no-init
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
-                        WorkspaceGroup, WorkspaceGroupProperty, Progress)
+                        WorkspaceGroup, WorkspaceGroupProperty, ITableWorkspaceProperty,
+                        Progress, PropertyMode)
 from mantid.kernel import Direction
 from mantid.simpleapi import *
 
@@ -13,6 +14,7 @@ class ResNorm(PythonAlgorithm):
     _e_max = None
     _create_output = None
     _out_ws = None
+    _out_ws_table = None
 
 
     def category(self):
@@ -53,6 +55,11 @@ class ResNorm(PythonAlgorithm):
                                                     direction=Direction.Output),
                              doc='Fitted parameter output')
 
+        self.declareProperty(ITableWorkspaceProperty('OutputWorkspaceTable', '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc='Table workspace of fit parameters')
+
 
     def validateInputs(self):
         self._get_properties()
@@ -85,6 +92,8 @@ class ResNorm(PythonAlgorithm):
 
     def PyExec(self):
         from IndirectCommon import getWSprefix
+        if self._create_output:
+            self._out_ws_table = self.getPropertyValue('OutputWorkspaceTable')
 
         # Process vanadium workspace
         van_ws = ConvertSpectrumAxis(InputWorkspace=self._van_ws,
@@ -103,26 +112,29 @@ class ResNorm(PythonAlgorithm):
         input_str = ''
         for idx in range(num_hist):
             input_str += '%s,i%d;' % (padded_res_ws, idx)
-            prog_namer.report()
+            prog_namer.report('Generating PlotPeak input string')
 
         out_name = getWSprefix(self._res_ws) + 'ResNorm_Fit'
         function = 'name=TabulatedFunction,Workspace=%s,Scaling=1,Shift=0,XScaling=1,ties=(Shift=0)' % self._van_ws
 
-        fit_params = PlotPeakByLogValue(Input=input_str,
-                                        OutputWorkspace=out_name,
-                                        Function=function,
-                                        FitType='Individual',
-                                        PassWSIndexToFunction=True,
-                                        CreateOutput=self._create_output,
-                                        StartX=self._e_min,
-                                        EndX=self._e_max)
+        plot_peaks = self.createChildAlgorithm(name='PlotPeakByLogValue', startProgress=0.02, endProgress=0.94, enableLogging=True)
+        plot_peaks.setProperty('Input', input_str)
+        plot_peaks.setProperty('OutputWorkspace', out_name)
+        plot_peaks.setProperty('Function', function)
+        plot_peaks.setProperty('FitType', 'Individual')
+        plot_peaks.setProperty('PassWSIndexToFunction', True)
+        plot_peaks.setProperty('CreateOutput', self._create_output)
+        plot_peaks.setProperty('StartX', self._e_min)
+        plot_peaks.setProperty('EndX', self._e_max)
+        plot_peaks.execute()
+        fit_params = plot_peaks.getProperty('OutputWorkspace').value
 
         params = {'XScaling':'Stretch', 'Scaling':'Intensity'}
         result_workspaces = []
         prog_process = Progress(self, start=0.94, end=1.0, nreports=3)
         for param_name, output_name in params.items():
             result_workspaces.append(self._process_fit_params(fit_params, param_name, v_values, v_unit, output_name))
-            prog_process.report()
+            prog_process.report('Processing Fit data')
 
         GroupWorkspaces(InputWorkspaces=result_workspaces,
                         OutputWorkspace=self._out_ws)
@@ -130,9 +142,10 @@ class ResNorm(PythonAlgorithm):
 
         DeleteWorkspace(van_ws)
         DeleteWorkspace(padded_res_ws)
-        prog_process.report()
-        if not self._create_output:
-            DeleteWorkspace(fit_params)
+        prog_process.report('Deleting workspaces')
+
+        if self._create_output:
+            self.setProperty('OutputWorkspaceTable', fit_params)
 
 
     def _process_res_ws(self, num_hist):

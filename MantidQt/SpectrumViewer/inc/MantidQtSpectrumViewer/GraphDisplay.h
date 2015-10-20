@@ -96,7 +96,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER GraphDisplay
    double m_minY;
    double m_maxY;
 
-   static QColor g_curveColors[];
+   static std::vector<QColor> g_curveColors;
 
 };
 

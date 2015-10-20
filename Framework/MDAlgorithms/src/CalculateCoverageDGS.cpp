@@ -1,5 +1,5 @@
 #include "MantidMDAlgorithms/CalculateCoverageDGS.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"

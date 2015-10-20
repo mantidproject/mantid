@@ -30,7 +30,8 @@ DECLARE_ALGORITHM(SaveDiffCal)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-SaveDiffCal::SaveDiffCal() {}
+SaveDiffCal::SaveDiffCal()
+    : m_numValues(0), m_calibrationWS(), m_detidToIndex() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

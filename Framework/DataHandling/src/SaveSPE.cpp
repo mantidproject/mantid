@@ -2,13 +2,17 @@
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/SaveSPE.h"
+#include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidKernel/CompositeValidator.h"
+
 #include "Poco/File.h"
+#include <boost/math/special_functions/fpclassify.hpp>
+
 #include <cstdio>
 #include <cmath>
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <stdexcept>
 
 namespace Mantid {

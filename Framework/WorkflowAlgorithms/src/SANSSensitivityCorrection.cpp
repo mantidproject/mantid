@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/SANSSensitivityCorrection.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"

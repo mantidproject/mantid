@@ -2,14 +2,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SumNeighbours.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include <boost/algorithm/string.hpp>
 #include "MantidKernel/BoundedValidator.h"
+
+#include <boost/algorithm/string.hpp>
 
 namespace Mantid {
 namespace Algorithms {

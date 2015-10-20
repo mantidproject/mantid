@@ -1,4 +1,4 @@
-#pylint: disable=no-init,unused-variable
+#pylint: disable=no-init,unused-variable,invalid-name,bare-except
 from mantid.api import *
 from mantid.kernel import *
 
@@ -76,30 +76,47 @@ class SavePlot1DAsJson(PythonAlgorithm):
         return
 
     def _serialize(self, workspace, plotname):
-        wname = plotname or workspace.getName()
+        pname = plotname or workspace.getName()
         # init dictionary
         ishist = workspace.isHistogramData()
         plottype = "histogram" if ishist else "point"
-        serialized = {"type": plottype}
-        # helper
-        label = lambda axis: "%s (%s)" % (
-            axis.getUnit().caption(),
-            axis.getUnit().symbol() or 1,
+        serialized = dict(
+            type = plottype,
+            data = dict(),
             )
         # loop over spectra
         for i in range(workspace.getNumberHistograms()):
-            k = "%s%s" % (wname, i)
-            value = dict(
-                x=list(workspace.readX(i)),
-                y=list(workspace.readY(i)),
-                e=list(workspace.readE(i)),
-                xlabel=label(workspace.getAxis(0)),
-                ylabel=label(workspace.getAxis(1)),
-                title="long title of %s" % k,
-                )
-            serialized[k] = value
+            spectrum_no = workspace.getSpectrum(i).getSpectrumNo()
+            # Why do we need label?
+            # label = "%s_spectrum_%d" % (pname, spectrum_no)
+            # labels.append(label)
+            # or title?
+            # title = "%s - spectrum %d" % (workspace.getTitle(), spectrum_no)
+            arr = [
+                list(workspace.readX(i)),
+                list(workspace.readY(i)),
+                list(workspace.readE(i)),
+                ]
+            serialized['data'][spectrum_no] = arr
             continue
-        return serialized
+        # axes
+        # .. helper
+        label = lambda axis: axis.getUnit().caption()
+        def unit(axis):
+            s = axis.getUnit().symbol()
+            try:
+                return s.latex()
+            except:
+                return '%s' % s
+        axes = dict(
+            xlabel=label(workspace.getAxis(0)),
+            ylabel=label(workspace.getAxis(1)),
+            xunit = unit(workspace.getAxis(0)),
+            # yunit = unit(workspace.getAxis(1)),
+            yunit = workspace.YUnitLabel(),
+            )
+        serialized['axes'] = axes
+        return {pname: serialized}
 
 
 # Register algorithm with Mantid

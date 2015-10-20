@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -45,7 +46,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport LoadAscii : public API::IFileLoader<Kernel::FileDescriptor> {
+class DLLExport LoadAscii : public API::IFileLoader<Kernel::FileDescriptor>,
+                            public API::DeprecatedAlgorithm {
 public:
   /// Default constructor
   LoadAscii();

@@ -19,18 +19,22 @@ In this algorithm's name, ConvertCWSDToMomentum, *CW* stands for constant wave
 This algorithm takes ??? as inputs.
 
 Futhermore, the unit of the output matrix workspace can be converted to 
-momentum transfer (:math:`Q`). 
+momentum transfer (Q).
 
 
 Outline of algorithm
 ####################
 
-1. Create output workspace.
+1. Create output workspace
+
  * Build a virtual instrument, requiring  
+
    - position of source
    - position of sample
    - detector ID, position, detector size of pixels
+
 2. Read in data via table workspace
+
  * From each row, (1) file name and (2) starting detector ID are read in.  
  * Detector position in (virtual) instrument of MDEventWorkspace is compared with the position in MatrixWorkspace 
  * Momentum is calcualted by goniometry values
@@ -75,8 +79,6 @@ Each MDEvent in output MDEventWorkspace contain
 * Detector ID
 * Run Number
 
-
-
 Combine Experiment Into One MDEventWorkspace
 --------------------------------------------
 
@@ -90,7 +92,7 @@ In order to integrate them into an organized data structure, i.e., *MDEventWorks
 a virtual instrument is built in the algorithm. 
 
 Virtual instrument
-==================
+##################
 
 A virtual instrument is built in the algorithm. 
 In this virtual instrument, the number of detectors and their position are determined 
@@ -98,13 +100,13 @@ by the number of individual detector's positions in the *experiment*.
 
 
 MDEventWorkspace
-================
+################
 
 There is only one *virtual* instrument and *N* ExperimentInfo.  
 *N* is the total number of experiment points in the *experiment*. 
 
 Inconsistency between using virtual instrument and copying instrument
-=====================================================================
+#####################################################################
 
 It is found that the results, i.e., the peak's position in sample-momentum
 space, by FindPeaksMD, are different betweent the MDEventWorkspaces 
@@ -145,7 +147,7 @@ with 2D angular detector.
 Usage
 -----
 
-**Example - convert an HB3A's experiment to MDWorkspace in sample momentum workspae and creating virtual instrument.:**
+**Example - convert an HB3A's experiment to MDWorkspace in sample momentum workspae and creating virtual instrument**
 
 .. testcode:: ExConvertHB3AToMDVirtualInstrument
 

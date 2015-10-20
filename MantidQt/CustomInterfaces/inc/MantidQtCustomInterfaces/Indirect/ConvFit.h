@@ -77,6 +77,9 @@ private:
   QStringList m_fitStrings;
   QString m_previousFit;
   QString m_baseName;
+  int m_runMin;
+  int m_runMax;
+
 };
 } // namespace IDA
 } // namespace CustomInterfaces

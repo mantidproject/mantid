@@ -302,89 +302,102 @@ void export_ialgorithm() {
 
   class_<IAlgorithm, bases<IPropertyManager>, boost::noncopyable>(
       "IAlgorithm", "Interface for all algorithms", no_init)
-      .def("name", &IAlgorithm::name, "Returns the name of the algorithm")
-      .def("alias", &IAlgorithm::alias, "Return the aliases for the algorithm")
-      .def("version", &IAlgorithm::version,
+      .def("name", &IAlgorithm::name, arg("self"),
+           "Returns the name of the algorithm")
+      .def("alias", &IAlgorithm::alias, arg("self"),
+           "Return the aliases for the algorithm")
+      .def("version", &IAlgorithm::version, arg("self"),
            "Returns the version number of the algorithm")
-      .def("cancel", &IAlgorithm::cancel,
+      .def("cancel", &IAlgorithm::cancel, arg("self"),
            "Request that the algorithm stop running")
-      .def("category", &IAlgorithm::category,
+      .def("category", &IAlgorithm::category, arg("self"),
            "Returns the category containing the algorithm")
-      .def("categories", &IAlgorithm::categories,
+      .def("categories", &IAlgorithm::categories, arg("self"),
            "Returns the list of categories this algorithm belongs to")
-      .def("summary", &IAlgorithm::summary,
+      .def("summary", &IAlgorithm::summary, arg("self"),
            "Returns a summary message describing the algorithm")
-      .def("workspaceMethodName", &IAlgorithm::workspaceMethodName,
+      .def("workspaceMethodName", &IAlgorithm::workspaceMethodName, arg("self"),
            "Returns a name that will be used when attached as a workspace "
            "method. Empty string indicates do not attach")
-      .def("workspaceMethodOn", &IAlgorithm::workspaceMethodOn,
+      .def("workspaceMethodOn", &IAlgorithm::workspaceMethodOn, arg("self"),
            return_value_policy<VectorToNumpy>(), // creates a list for strings
            "Returns a set of class names that will have the method attached. "
            "Empty list indicates all types")
       .def("workspaceMethodInputProperty",
-           &IAlgorithm::workspaceMethodInputProperty,
+           &IAlgorithm::workspaceMethodInputProperty, arg("self"),
            "Returns the name of the input workspace property used by the "
            "calling object")
-      .def("getAlgorithmID", &getAlgorithmID,
+      .def("getAlgorithmID", &getAlgorithmID, arg("self"),
            "Returns a unique identifier for this algorithm object")
-      .def("docString", &createDocString,
+      .def("docString", &createDocString, arg("self"),
            "Returns a doc string for the algorithm")
       .def("mandatoryProperties", &getInputPropertiesWithMandatoryFirst,
+           arg("self"),
            "Returns a list of input and in/out property names that is ordered "
            "such that the mandatory properties are first followed by the "
            "optional ones.")
-      .def("orderedProperties", &getAlgorithmPropertiesOrdered,
+      .def("orderedProperties", &getAlgorithmPropertiesOrdered, arg("self"),
            "Return a list of input, in/out and output properties "
            "such that the mandatory properties are first followed by the "
            "optional ones.")
-      .def("outputProperties", &getOutputProperties,
+      .def("outputProperties", &getOutputProperties, arg("self"),
            "Returns a list of the output properties on the algorithm")
-      .def("isInitialized", &IAlgorithm::isInitialized,
+      .def("isInitialized", &IAlgorithm::isInitialized, arg("self"),
            "Returns True if the algorithm is initialized, False otherwise")
-      .def("isExecuted", &IAlgorithm::isExecuted,
+      .def("isExecuted", &IAlgorithm::isExecuted, arg("self"),
            "Returns True if the algorithm has been executed successfully, "
            "False otherwise")
-      .def("isLogging", &IAlgorithm::isLogging, "Returns True if the "
-                                                "algorithm's logger is turned "
-                                                "on, False otherwise")
-      .def("isRunning", &IAlgorithm::isRunning, "Returns True if the algorithm "
-                                                "is considered to be running, "
-                                                "False otherwise")
-      .def("setChild", &IAlgorithm::setChild,
+      .def("isLogging", &IAlgorithm::isLogging, arg("self"),
+           "Returns True if the "
+           "algorithm's logger is turned "
+           "on, False otherwise")
+      .def("isRunning", &IAlgorithm::isRunning, arg("self"),
+           "Returns True if the algorithm "
+           "is considered to be running, "
+           "False otherwise")
+      .def("setChild", &IAlgorithm::setChild, (arg("self"), arg("is_child")),
            "If true this algorithm is run as a child algorithm. There will be "
            "no logging and nothing is stored in the Analysis Data Service")
       .def("enableHistoryRecordingForChild",
            &IAlgorithm::enableHistoryRecordingForChild,
+           (arg("self"), arg("on")),
            "If true then history will be recorded regardless of the child "
            "status")
       .def("setAlgStartupLogging", &IAlgorithm::setAlgStartupLogging,
+           (arg("self"), arg("enabled")),
            "If true then allow logging of start and end messages")
       .def("getAlgStartupLogging", &IAlgorithm::getAlgStartupLogging,
-           "Returns true if logging of start and end messages")
+           arg("self"), "Returns true if logging of start and end messages")
       .def("setAlwaysStoreInADS", &IAlgorithm::setAlwaysStoreInADS,
+           (arg("self"), arg("do_store")),
            "If true then even child algorithms will have their workspaces "
            "stored in the ADS.")
-      .def("isChild", &IAlgorithm::isChild,
+      .def("isChild", &IAlgorithm::isChild, arg("self"),
            "Returns True if the algorithm has been marked to run as a child. "
            "If True then Output workspaces "
            "are NOT stored in the Analysis Data Service but must be retrieved "
            "from the property.")
-      .def("setLogging", &IAlgorithm::setLogging, "Toggle logging on/off.")
-      .def("setRethrows", &IAlgorithm::setRethrows)
-      .def("initialize", &IAlgorithm::initialize, "Initializes the algorithm")
-      .def("validateInputs", &IAlgorithm::validateInputs,
+      .def("setLogging", &IAlgorithm::setLogging, (arg("self"), arg("value")),
+           "Toggle logging on/off.")
+      .def("setRethrows", &IAlgorithm::setRethrows,
+           (arg("self"), arg("rethrow")), "To query whether an algorithm "
+                                          "should rethrow exceptions when "
+                                          "executing.")
+      .def("initialize", &IAlgorithm::initialize, arg("self"),
+           "Initializes the algorithm")
+      .def("validateInputs", &IAlgorithm::validateInputs, arg("self"),
            "Cross-check all inputs and return any errors as a dictionary")
-      .def("execute", &executeProxy,
+      .def("execute", &executeProxy, arg("self"),
            "Runs the algorithm and returns whether it has been successful")
       // 'Private' static methods
-      .def("_algorithmInThread", &_algorithmInThread)
+      .def("_algorithmInThread", &_algorithmInThread, arg("thread_id"))
       .staticmethod("_algorithmInThread")
       // Special methods
-      .def("__str__", &IAlgorithm::toString)
+      .def("__str__", &IAlgorithm::toString, arg("self"))
 
       // deprecated methods
-      .def("getOptionalMessage", &getOptionalMessage,
+      .def("getOptionalMessage", &getOptionalMessage, arg("self"),
            "Returns the optional user message attached to the algorithm")
-      .def("getWikiSummary", &getWikiSummary,
+      .def("getWikiSummary", &getWikiSummary, arg("self"),
            "Returns the summary found on the wiki page");
 }

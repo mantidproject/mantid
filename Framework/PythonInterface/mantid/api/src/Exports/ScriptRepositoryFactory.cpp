@@ -19,6 +19,7 @@ void export_ScriptRepositoryFactory() {
   class_<ScriptRepositoryFactoryImpl, boost::noncopyable>(
       "ScriptRepositoryFactory", no_init)
       .def("create", &ScriptRepositoryFactoryImpl::create,
+           (arg("self"), arg("class_name")),
            "Return a pointer to the ScriptRepository object")
       .def("Instance", &ScriptRepositoryFactory::Instance,
            return_value_policy<reference_existing_object>(),

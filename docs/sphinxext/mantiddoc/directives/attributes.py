@@ -1,6 +1,4 @@
-from properties import PropertiesDirective
-import string
-
+from mantiddoc.directives.properties import PropertiesDirective
 
 class AttributesDirective(PropertiesDirective):
 

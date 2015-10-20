@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
@@ -88,7 +89,8 @@ struct Pulse {
 #pragma pack(pop)
 
 class DLLExport LoadEventPreNexus
-    : public API::IFileLoader<Kernel::FileDescriptor> {
+    : public API::IFileLoader<Kernel::FileDescriptor>,
+      public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   LoadEventPreNexus();

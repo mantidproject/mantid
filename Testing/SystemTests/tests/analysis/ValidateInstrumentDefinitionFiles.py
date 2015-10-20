@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 #pylint: disable=no-init
 from mantid import config
 import os
@@ -10,6 +11,8 @@ EXPECTED_EXT = '.expected'
 class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
 
     xsdFile=''
+    # Explicitly specify single file to test. If None, test all.
+    theFileToTest=None #"MARI_Definition.xml"
 
     def skipTests(self):
         try:
@@ -66,7 +69,10 @@ class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
 
         direc = config['instrumentDefinition.directory']
         self.xsdFile =  os.path.join(direc,'Schema/IDF/1.0/','IDFSchema.xsd')
-        files = self.__getDataFileList__()
+        if self.theFileToTest is None:
+            files = self.__getDataFileList__()
+        else:
+            files = [os.path.join(direc,self.theFileToTest)]
 
         # run the tests
         failed = []
@@ -94,5 +100,7 @@ class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
 if __name__ == '__main__':
 
     valid = ValidateInstrumentDefinitionFiles()
+    # validate specific file
+    #valid.theFileToTest = "MARI_Definition.xml"
     valid.runTest()
 
