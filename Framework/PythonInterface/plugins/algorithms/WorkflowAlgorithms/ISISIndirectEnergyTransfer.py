@@ -282,7 +282,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         GroupWorkspaces(InputWorkspaces=output_workspace_names,
                         OutputWorkspace=self._output_ws)
 
-        self.setProperty('OutputWorkspace', self._output_ws)
+        self.setProperty('OutputWorkspace', mtd[self._output_ws])
 
         # Plot result workspaces
         if self._plot_type != 'None':
