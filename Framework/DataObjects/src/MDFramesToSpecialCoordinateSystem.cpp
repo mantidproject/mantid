@@ -62,9 +62,7 @@ boost::optional<Mantid::Kernel::SpecialCoordinateSystem>
 
   return output;
 }
-// clang-format off
-GCC_DIAG_ON(uninitialized)
-// clang-format on
+
 
 /**
  * Make sure that the QFrame types are the same.
