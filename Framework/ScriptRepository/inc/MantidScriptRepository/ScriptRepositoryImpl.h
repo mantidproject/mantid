@@ -21,6 +21,8 @@ namespace API {
 
 void write_json_file(std::string filename, Json::Value json, std::string error);
 
+void write_string_file(std::string filename, std::string strToWrite, std::string error);
+
 bool file_exists(std::string filename);
 
 /** Implementation of Mantid::API::ScriptRepository

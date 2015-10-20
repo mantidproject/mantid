@@ -89,6 +89,19 @@ void write_json_file(std::string filename, Json::Value json, std::string error)
 }
 
 /**
+Write string to file
+*/
+void write_string_file(std::string filename, std::string strToWrite, std::string error)
+{
+  Poco::FileStream filestream(filename);
+  if (!filestream.good()) {
+    g_log.error() << error;
+  }
+  filestream << strToWrite;
+  filestream.close();
+}
+
+/**
 Test if a file with this filename already exists
 */
 bool file_exists(std::string filename)
@@ -302,8 +315,7 @@ void ScriptRepositoryImpl::install(const std::string &path) {
   // creation of the instance of local_json file
   if (!file_exists(local_json_file))
   {
-    Json::Value pt;
-    write_json_file(local_json_file, pt,
+    write_string_file(local_json_file, "{\n}",
                     "ScriptRepository failed to create local repository");
     g_log.debug() << "ScriptRepository created the local repository information"
     << std::endl;
