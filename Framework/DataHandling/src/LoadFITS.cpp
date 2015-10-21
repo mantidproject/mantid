@@ -496,6 +496,23 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
  * information into. This object must have its field filePath set to
  * the input file
  *
+ * A typical simple FITS header looks like this:
+@verbatim
+SIMPLE  =                    T / file does conform to FITS standard
+BITPIX  =                   16 / number of bits per data pixel
+NAXIS   =                    2 / number of data axes
+NAXIS1  =                  512 / length of data axis 1
+NAXIS2  =                  512 / length of data axis 2
+EXTEND  =                    T / FITS dataset may contain extensions
+COMMENT   FITS (Flexible Image Transport System) format is defined in 'Astronomy
+COMMENT   and Astrophysics', volume 376, page 359; bibcode: 2001A&A...376..359H
+TOF     =   0.0595897599999995 / Ttime of flight from the external trigger
+TIMEBIN =           4.096E-005 / Time width of this image
+N_COUNTS=               182976 / Total counts in this image
+N_TRIGS =                 4426 / Number of triggers acquired
+END
+@endverbatim
+ *
  * @throws various std::runtime_error etc. on read failure
 */
 void LoadFITS::parseHeader(FITSInfo &headerInfo) {
@@ -514,25 +531,35 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
   // Iterate 80 bytes at a time until header is parsed | 2880 bytes is the
   // fixed header length of FITS
   // 2880/80 = 36 iterations required
+  const std::string commentKW = "COMMENT";
   bool endFound = false;
   while (!endFound) {
     headerInfo.headerSizeMultiplier++;
-    for (int i = 0; i < 36; ++i) {
+    const int entriesPerHDU = 36;
+    for (int i = 0; i < entriesPerHDU; ++i) {
       // Keep vect of each header item, including comments, and also keep a
       // map of individual keys.
       std::string part;
       reader.readRaw(80, part);
       headerInfo.headerItems.push_back(part);
 
-      // Add key/values - these are separated by the = symbol.
-      // If it doesn't have an = it's a comment to ignore. All keys should be
-      // unique
+      // from the FITS standard about COMMENT: This keyword shall have no
+      // associated value; columns 9-80 may contain any ASCII text.
+      // That includes '='
+      if (boost::iequals(commentKW, part.substr(0, commentKW.size()))) {
+        continue;
+      }
+
+      // Add non-comment key/values. These hey and value are separated by the
+      // character '='. All keys should be unique.
+      // This will simply and silenty ignore any entry without the '='
       auto eqPos = part.find('=');
       if (eqPos > 0) {
         std::string key = part.substr(0, eqPos);
         std::string value = part.substr(eqPos + 1);
 
-        // Comments are added after the value separated by a / symbol. Remove.
+        // Comments on header entries are added after the value separated by a /
+        // symbol. Exclude those comments.
         auto slashPos = value.find('/');
         if (slashPos > 0)
           value = value.substr(0, slashPos);
