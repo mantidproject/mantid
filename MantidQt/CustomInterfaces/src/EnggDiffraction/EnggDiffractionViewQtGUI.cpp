@@ -76,6 +76,9 @@ void EnggDiffractionViewQtGUI::initLayout() {
   m_uiTabSettings.setupUi(wSettings);
   m_ui.tabMain->addTab(wSettings, QString("Settings"));
 
+  QComboBox *inst = m_ui.comboBox_instrument;
+  m_currentInst = inst->currentText().toStdString();
+  setPrefix(m_currentInst);
   readSettings();
 
   // basic UI setup, connect signals, etc.
@@ -177,12 +180,6 @@ void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
   // change instrument
   connect(m_ui.comboBox_instrument, SIGNAL(currentIndexChanged(int)), this,
           SLOT(instrumentChanged(int)));
-
-  // signal/slot connections to respond to changes in instrument selection combo
-  // boxes
-  connect(m_ui.comboBox_instrument, SIGNAL(instrumentChanged(int)), this,
-          SLOT(userSelectInstrument()));
-
   connect(m_ui.pushButton_help, SIGNAL(released()), this, SLOT(openHelpWin()));
   // note connection to the parent window, otherwise an empty frame window
   // may remain open and visible after this close
@@ -744,15 +741,21 @@ void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
   m_presenter->notify(IEnggDiffractionPresenter::InstrumentChange);
 }
 
-void EnggDiffractionViewQtGUI::userSelectInstrument() {
+void EnggDiffractionViewQtGUI::userSelectInstrument(const QString &prefix) {
   // Set file browsing to current instrument
-  auto prefix = QString::fromStdString(m_currentInst);
-  m_uiTabFocus.lineEdit_run_num->setInstrumentOverride(prefix);
-  m_uiTabFocus.lineEdit_texture_run_num->setInstrumentOverride(prefix);
-  m_uiTabFocus.lineEdit_cropped_run_num->setInstrumentOverride(prefix);
+  setPrefix(prefix.toStdString());
+}
 
-  m_uiTabCalib.lineEdit_new_ceria_num->setInstrumentOverride(prefix);
-  m_uiTabCalib.lineEdit_new_vanadium_num->setInstrumentOverride(prefix);
+void EnggDiffractionViewQtGUI::setPrefix(std::string prefix) {
+  QString prefixInput = QString::fromStdString(prefix);
+  // focus tab
+  m_uiTabFocus.lineEdit_run_num->setInstrumentOverride(prefixInput);
+  m_uiTabFocus.lineEdit_texture_run_num->setInstrumentOverride(prefixInput);
+  m_uiTabFocus.lineEdit_cropped_run_num->setInstrumentOverride(prefixInput);
+
+  // calibration tab
+  m_uiTabCalib.lineEdit_new_ceria_num->setInstrumentOverride(prefixInput);
+  m_uiTabCalib.lineEdit_new_vanadium_num->setInstrumentOverride(prefixInput);
 }
 
 void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {

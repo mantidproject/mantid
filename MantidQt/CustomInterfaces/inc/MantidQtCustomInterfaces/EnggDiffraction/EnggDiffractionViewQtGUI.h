@@ -198,8 +198,11 @@ private:
   /// instrument selected (ENGIN-X, etc.)
   std::string m_currentInst;
 
-  /// the instrument selection has changed (slot)
-  void userSelectInstrument();
+  /// User select instrument
+  void userSelectInstrument(const QString &prefix);
+
+  /// setting the instrument prefix ahead of the run number
+  void setPrefix(std::string prefix);
 
   // plot data representation type selected
   int static m_currentType;
@@ -227,7 +230,6 @@ private:
 
   /// presenter as in the model-view-presenter
   boost::scoped_ptr<IEnggDiffractionPresenter> m_presenter;
-
 };
 
 } // namespace CustomInterfaces
