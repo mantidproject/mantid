@@ -55,11 +55,12 @@ class CentreFinder(object):
         better estimate for the beam centre position can hence be calculated iteratively
     """
     QUADS = ['Left', 'Right', 'Up', 'Down']
-    def __init__(self, guess_centre, find_direction = FindDirectionEnum.ALL):
+    def __init__(self, guess_centre, sign_policy, find_direction = FindDirectionEnum.ALL):
         """
             Takes a loaded reducer (sample information etc.) and the initial guess of the centre
             position that are required for all later iterations
             @param guess_centre: the starting position that the trial x and y are relative to
+            @param sign_policy: sets the sign for the move operation.
             @param find_direction: Find beam centre for directions, ie if all or only up/down
                                    or only left right
         """
@@ -69,6 +70,11 @@ class CentreFinder(object):
         self.coord1_scale_factor = 1.0
         self.coord2_scale_factor = 1.0
         self.find_direction = find_direction
+        self.sign_coord1 = -1.
+        self.sign_coord2 = -1.
+        if sign_policy is not None and len(sign_policy) == 2:
+            self.sign_coord1 = sign_policy[0]
+            self.sign_coord2 = sign_policy[1]
 
     def SeekCentre(self, setup, trial):
         """
@@ -136,8 +142,11 @@ class CentreFinder(object):
             @param x: the distance to move in the x (-x) direction in metres
             @param y: the distance to move in the y (-y) direction in metres
         """
-        x = -x
-        y = -y
+        # Displacing the beam by +5 is equivalent to displacing the isntrument by -5. Hence we change
+        # the sign here. LARMOR does this correction in the instrument itself, while for the others
+        # we don't
+        x = self.sign_coord1*x
+        y = self.sign_coord2*y
 
         setup.instrument.elementary_displacement_of_single_component(workspace=setup.get_sample().wksp_name,
                                                                      component_name=self.detector,
@@ -348,6 +357,11 @@ class CentrePositioner(object):
         '''
         return self.position_provider.is_coord2_increment_smaller_than_tolerance()
 
+    def produce_sign_policy(self):
+        '''
+        Gets a tuple of sign policies for the translation of the instrument.
+        '''
+        return self.position_provider.provide_sign_policy()
 
 # Thes classes make sure that only the relevant directions are updated
 # They are not instrument dependent, they should only dependt on the user's choice.
@@ -594,6 +608,9 @@ class PositionProvider(object):
         else:
             return False
 
+    def provide_sign_policy(self):
+        RuntimeError("The PositionProvider interface is not implemented")
+
 class PositionProviderXY(PositionProvider):
     '''
     Handles the increments for the case when both coordinates are cartesian
@@ -603,6 +620,9 @@ class PositionProviderXY(PositionProvider):
         self.increment_x = increment_coord1
         self.increment_y = increment_coord2
         self.tolerance = tolerance
+        # The sign policy
+        self.sign_policy_x = -1.
+        self.sign_policy_y = -1.
 
     def get_coord1_for_input_with_correct_scaling(self, coord1):
         '''
@@ -656,6 +676,14 @@ class PositionProviderXY(PositionProvider):
     def get_increment_coord2(self):
         return self.increment_y
 
+    def provide_sign_policy(self):
+        '''
+        Get the sign policy for the x, y translations. Displacing the beam by 5mm
+        is equivalent to displacing the instrument by -5mm, hence we need the
+        minus sign here.
+        '''
+        return self.sign_policy_x, self.sign_policy_y
+
 class PositionProviderAngleY(PositionProvider):
     '''
     Handles the increments for the case when the first coordinate is an angle
@@ -669,6 +697,10 @@ class PositionProviderAngleY(PositionProvider):
         self.tolerance_angle = tolerance_angle
         self.coord1_offset = coord1_offset
         self.coord1_scale_factor = coord1_scale_factor
+        # The sign policy
+        self.sign_policy_angle = 1.
+        self.sign_policy_y = -1.
+
 
     def get_coord1_for_input_with_correct_scaling(self, coord1):
         '''
@@ -724,6 +756,16 @@ class PositionProviderAngleY(PositionProvider):
 
     def get_increment_coord2(self):
         return self.increment_y
+
+    def provide_sign_policy(self):
+        '''
+        Get the sign policy for the angle, y translations. Displacing the beam by 5mm
+        is equivalent to displacing the instrument by -5mm. The angle displacement in
+        LARMOR does the sign switch already. Hence we have a positve sign policy for
+        the angle direction
+        '''
+        return self.sign_policy_angle, self.sign_policy_y
+
 
 # The classes below provide a logging facility for the Beam Centre Finder mechanism
 class BeamCenterLogger(object):

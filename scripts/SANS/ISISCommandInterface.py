@@ -1119,7 +1119,10 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
     # Produce the initial position
     COORD1NEW, COORD2NEW = centre_positioner.produce_initial_position()
 
-    centre = CentreFinder(original, find_direction)
+    # Set the CentreFinder
+    sign_policy = centre_positioner.produce_sign_policy()
+    centre = CentreFinder(original, sign_policy, find_direction)
+
     # Produce a logger for this the Beam Centre Finder
     beam_center_logger = BeamCenterLogger(centre_reduction,
                                           coord1_scale_factor,
@@ -1140,7 +1143,6 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
     centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
     beam_center_logger.report_status(0, original[0], original[1], resCoord1_old, resCoord2_old)
-
     # take first trial step
     COORD1NEW, COORD2NEW = centre_positioner.increment_position(COORD1NEW, COORD2NEW)
     graph_handle = None
@@ -1149,8 +1151,8 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
         it = i
         centre_reduction.set_beam_finder(
             isis_reduction_steps.BaseBeamFinder(COORD1NEW, COORD2NEW), det_bank)
-
         resCoord1, resCoord2 = centre.SeekCentre(centre_reduction, [COORD1NEW, COORD2NEW])
+
         centre_reduction = copy.deepcopy(ReductionSingleton().reference())
         LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
 
@@ -1166,7 +1168,6 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
             except :
                 #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot
                 pass
-
         #have we stepped across the y-axis that goes through the beam center?
         if resCoord1 > resCoord1_old:
             # yes with stepped across the middle, reverse direction and half the step size
