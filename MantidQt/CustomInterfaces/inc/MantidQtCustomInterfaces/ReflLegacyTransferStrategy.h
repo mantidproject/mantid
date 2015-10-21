@@ -34,9 +34,13 @@ namespace MantidQt
     class DLLExport ReflLegacyTransferStrategy : public ReflTransferStrategy
     {
     public:
-      std::vector<std::map<std::string, std::string>>
+      virtual std::vector<std::map<std::string, std::string>>
       transferRuns(const std::map<std::string, std::string> &runRows,
                    Mantid::Kernel::ProgressBase &progress);
+
+      virtual ReflLegacyTransferStrategy *clone() const;
+
+      virtual bool knownFileType(const std::string &filename) const;
     };
   }
 }

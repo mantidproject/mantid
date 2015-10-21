@@ -1456,7 +1456,8 @@ void ReflMainViewPresenter::search() {
 
   try {
     auto results = m_searcher->search(searchString, searchInstr);
-    m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(results));
+    m_searchModel =
+        ReflSearchModel_sptr(new ReflSearchModel(*m_transferStrategy, results));
     m_view->showSearch(m_searchModel);
   } catch (std::runtime_error &e) {
     m_view->giveUserCritical("Error running search:\n" + std::string(e.what()),

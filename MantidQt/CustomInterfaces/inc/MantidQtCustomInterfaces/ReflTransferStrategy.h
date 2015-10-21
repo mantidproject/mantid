@@ -54,6 +54,20 @@ namespace MantidQt
       virtual std::vector<std::map<std::string, std::string>>
       transferRuns(const std::map<std::string, std::string> &runRows,
                    Mantid::Kernel::ProgressBase &progress) = 0;
+
+      /**
+      * Virtual constructor
+      * @return : A new instance of this.
+      */
+      virtual ReflTransferStrategy *clone() const = 0;
+
+      /**
+      * Filter. Individual transfer strategies may veto file types they
+      * do not understand and will be unable to extract metadata for.
+      * @param filename : Full name of the file.
+      * @return True only if the file type is known.
+      */
+      virtual bool knownFileType(const std::string &filename) const = 0;
     };
   }
 }

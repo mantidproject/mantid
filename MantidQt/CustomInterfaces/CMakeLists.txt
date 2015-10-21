@@ -79,6 +79,7 @@ set ( SRC_FILES
 	src/ReflGenerateNotebook.cpp
 	src/ReflLegacyTransferStrategy.cpp
 	src/ReflMainViewPresenter.cpp
+	src/ReflMeasureTransferStrategy.cpp
 	src/ReflSearchModel.cpp
 	src/ReflTableSchema.cpp
 	src/SANSAddFiles.cpp
@@ -202,6 +203,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/ReflLegacyTransferStrategy.h
 	inc/MantidQtCustomInterfaces/ReflMainView.h
 	inc/MantidQtCustomInterfaces/ReflMainViewPresenter.h
+	inc/MantidQtCustomInterfaces/ReflMeasureTransferStrategy.h
 	inc/MantidQtCustomInterfaces/ReflSearchModel.h
 	inc/MantidQtCustomInterfaces/ReflTableSchema.h
 	inc/MantidQtCustomInterfaces/ReflTransferStrategy.h
@@ -395,22 +397,23 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
 )
 
 set ( TEST_FILES
-  ALCBaselineModellingModelTest.h
-  ALCBaselineModellingPresenterTest.h
-  ALCDataLoadingPresenterTest.h
-  ALCPeakFittingModelTest.h
-  ALCPeakFittingPresenterTest.h
-  EnggDiffractionPresenterTest.h
-  ImageROIPresenterTest.h
-  IO_MuonGroupingTest.h
-  MuonAnalysisHelperTest.h
-  ParseKeyValueStringTest.h
-  ReflGenerateNotebookTest.h
-  ReflLegacyTransferStrategyTest.h
-  ReflMainViewPresenterTest.h
-  StackOfImagesDirsTest.h
-  TomographyIfacePresenterTest.h
-  UserInputValidatorTest.h
+	ALCBaselineModellingModelTest.h
+	ALCBaselineModellingPresenterTest.h
+	ALCDataLoadingPresenterTest.h
+	ALCPeakFittingModelTest.h
+	ALCPeakFittingPresenterTest.h
+	EnggDiffractionPresenterTest.h
+	IO_MuonGroupingTest.h
+	ImageROIPresenterTest.h
+	MuonAnalysisHelperTest.h
+	ParseKeyValueStringTest.h
+	ReflGenerateNotebookTest.h
+	ReflLegacyTransferStrategyTest.h
+	ReflMainViewPresenterTest.h
+	ReflMeasureTransferStrategyTest.h
+	StackOfImagesDirsTest.h
+	TomographyIfacePresenterTest.h
+	UserInputValidatorTest.h
 )
 
 include_directories ( inc )

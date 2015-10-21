@@ -6,11 +6,14 @@
 #include <boost/shared_ptr.hpp>
 #include <map>
 #include <vector>
+#include <memory>
 
 namespace MantidQt
 {
   namespace CustomInterfaces
   {
+  // Forward declaration
+  class ReflTransferStrategy;
 
     /** ReflSearchModel : Provides a QAbstractTableModel for a Mantid ITableWorkspace of Reflectometry search results.
 
@@ -38,7 +41,8 @@ namespace MantidQt
     {
       Q_OBJECT
     public:
-      ReflSearchModel(Mantid::API::ITableWorkspace_sptr tableWorkspace);
+      ReflSearchModel(const ReflTransferStrategy &transferMethod,
+                      Mantid::API::ITableWorkspace_sptr tableWorkspace);
       virtual ~ReflSearchModel();
       //row and column counts
       int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -49,6 +53,10 @@ namespace MantidQt
       QVariant headerData(int section, Qt::Orientation orientation, int role) const;
       //get flags for a cell
       Qt::ItemFlags flags(const QModelIndex &index) const;
+
+    private:
+      // The matching transfer method to use.
+      std::unique_ptr<ReflTransferStrategy> m_transferMethod;
 
     protected:
       //vector of the run numbers

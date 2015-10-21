@@ -10,6 +10,7 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
+
     ITableWorkspace_sptr ReflCatalogSearcher::search(const std::string& text, const std::string& instrument)
     {
       auto sessions = CatalogManager::Instance().getActiveSessions();
@@ -41,11 +42,6 @@ namespace MantidQt
         }
         //If this isn't the right instrument, remove it
         else if(run.substr(0, instrument.size()) != instrument)
-        {
-          toRemove.insert(i);
-        }
-        //If it's not a raw file, remove it
-        else if(run.substr(run.size() - 4, 4) != ".raw")
         {
           toRemove.insert(i);
         }

@@ -78,6 +78,17 @@ namespace MantidQt
       }
       std::sort(output.begin(), output.end());
       return output;
-    }
+  }
+
+  ReflLegacyTransferStrategy *ReflLegacyTransferStrategy::clone() const {
+    return new ReflLegacyTransferStrategy(*this);
+  }
+
+  bool MantidQt::CustomInterfaces::ReflLegacyTransferStrategy::knownFileType(
+      const std::string &filename) const {
+    boost::regex pattern("raw$", boost::regex::icase);
+    boost::smatch match; // Unused.
+    return boost::regex_search(filename, match, pattern);
+  }
   }
 }

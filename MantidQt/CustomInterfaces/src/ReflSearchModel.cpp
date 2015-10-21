@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/ReflSearchModel.h"
+#include "MantidQtCustomInterfaces/ReflTransferStrategy.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 
@@ -12,8 +13,9 @@ namespace MantidQt
     /** Constructor
     @param tableWorkspace : The table workspace to copy data from
     */
-    ReflSearchModel::ReflSearchModel(ITableWorkspace_sptr tableWorkspace)
-    {
+    ReflSearchModel::ReflSearchModel(const ReflTransferStrategy &transferMethod,
+                                     ITableWorkspace_sptr tableWorkspace)
+        : m_transferMethod(transferMethod.clone()) {
       //Copy the data from the input table workspace
       for(size_t i = 0; i < tableWorkspace->rowCount(); ++i)
       {
