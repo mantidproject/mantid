@@ -125,7 +125,7 @@ void MDHWLoadingPresenter::extractMetadata(
     axisLabels.push_back(makeAxisTitle(inDim));
     MDHistoDimension_sptr dim(
         new MDHistoDimension(inDim->getName(), inDim->getName(),
-                             inDim->getUnits(), min, max, inDim->getNBins()));
+                             inDim->getMDFrame(), min, max, inDim->getNBins()));
     dimensions.push_back(dim);
   }
 

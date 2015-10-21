@@ -7,6 +7,7 @@
 #include "MantidGeometry/MDGeometry/QLab.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/UnknownFrame.h"
 #include "MantidGeometry/DllConfig.h"
 #include <memory>
 
@@ -93,6 +94,15 @@ public:
 class MANTID_GEOMETRY_DLL HKLFrameFactory : public MDFrameFactory {
 private:
   HKL *createRaw(const MDFrameArgument &argument) const;
+
+public:
+  bool canInterpret(const MDFrameArgument &argument) const;
+};
+
+/// Unknown Frame derived MDFrameFactory type
+class MANTID_GEOMETRY_DLL UnknownFrameFactory : public MDFrameFactory {
+private:
+  UnknownFrame *createRaw(const MDFrameArgument &argument) const;
 
 public:
   bool canInterpret(const MDFrameArgument &argument) const;

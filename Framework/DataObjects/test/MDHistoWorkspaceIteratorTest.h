@@ -244,9 +244,11 @@ public:
   }
 
   void test_skip_masked_detectors() {
+    Mantid::Geometry::GeneralFrame frame(
+        Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
     WritableHistoWorkspace *ws =
         new WritableHistoWorkspace(MDHistoDimension_sptr(
-            new MDHistoDimension("x", "x", "m", 0.0, 10, 100)));
+            new MDHistoDimension("x", "x", frame, 0.0, 10, 100)));
 
     ws->setMaskValueAt(0, true);  // Mask the first bin
     ws->setMaskValueAt(1, true);  // Mask the second bin

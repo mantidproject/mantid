@@ -19,6 +19,7 @@ set ( SRC_FILES
 	src/MDBoxFlatTree.cpp
 	src/MDBoxSaveable.cpp
 	src/MDEventFactory.cpp
+	src/MDFramesToSpecialCoordinateSystem.cpp
 	src/MDHistoWorkspace.cpp
 	src/MDHistoWorkspaceIterator.cpp
 	src/MDLeanEvent.cpp
@@ -90,6 +91,7 @@ set ( INC_FILES
 	inc/MantidDataObjects/MDEventInserter.h
 	inc/MantidDataObjects/MDEventWorkspace.h
 	inc/MantidDataObjects/MDEventWorkspace.tcc
+	inc/MantidDataObjects/MDFramesToSpecialCoordinateSystem.h
 	inc/MantidDataObjects/MDGridBox.h
 	inc/MantidDataObjects/MDGridBox.tcc
 	inc/MantidDataObjects/MDHistoWorkspace.h
@@ -149,6 +151,7 @@ set ( TEST_FILES
 	MDEventInserterTest.h
 	MDEventTest.h
 	MDEventWorkspaceTest.h
+	MDFramesToSpecialCoordinateSystemTest.h
 	MDGridBoxTest.h
 	MDHistoWorkspaceIteratorTest.h
 	MDHistoWorkspaceTest.h

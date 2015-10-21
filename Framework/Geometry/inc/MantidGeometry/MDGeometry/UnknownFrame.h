@@ -1,17 +1,17 @@
-#ifndef MANTID_GEOMETRY_HKL_H_
-#define MANTID_GEOMETRY_HKL_H_
+#ifndef MANTID_GEOMETRY_UNKNOWN_H_
+#define MANTID_GEOMETRY_UNKNOWN_H_
 
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/UnitLabel.h"
-#include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidGeometry/DllConfig.h"
 #include <memory>
 
 namespace Mantid {
 namespace Geometry {
 
-/** HKL : HKL MDFrame
+/** UnknownFrame : Unknown MDFrame
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -34,31 +34,29 @@ namespace Geometry {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_GEOMETRY_DLL HKL : public MDFrame {
+class MANTID_GEOMETRY_DLL UnknownFrame : public MDFrame {
 public:
-  HKL(const HKL &other);
-  HKL &operator=(const HKL &other);
-  HKL(std::unique_ptr<Kernel::MDUnit> &unit);
-  HKL(Kernel::MDUnit *unit);
-  virtual ~HKL();
-  static const std::string HKLName;
-
-  // MDFrame interface
-  Kernel::UnitLabel getUnitLabel() const;
-  const Kernel::MDUnit &getMDUnit() const;
-  bool canConvertTo(const Kernel::MDUnit &otherUnit) const;
+  UnknownFrame(std::unique_ptr<Kernel::MDUnit> unit);
+  UnknownFrame(const Kernel::UnitLabel &unit);
+  virtual ~UnknownFrame();
+  std::string name() const;
+  bool canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const;
   bool isQ() const;
   bool isSameType(const MDFrame &frame) const;
-  std::string name() const;
-  HKL *clone() const;
+  Mantid::Kernel::UnitLabel getUnitLabel() const;
+  const Mantid::Kernel::MDUnit &getMDUnit() const;
   Mantid::Kernel::SpecialCoordinateSystem
   equivalientSpecialCoordinateSystem() const;
+  UnknownFrame *clone() const;
+  // Type name
+  static const std::string UnknownFrameName;
 
 private:
-  std::unique_ptr<Kernel::MDUnit> m_unit;
+  /// Label unit
+  const std::unique_ptr<Mantid::Kernel::MDUnit> m_unit;
 };
 
 } // namespace Geometry
 } // namespace Mantid
 
-#endif /* MANTID_GEOMETRY_HKL_H_ */
+#endif /* MANTID_GEOMETRY_QLAB_H_ */

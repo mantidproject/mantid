@@ -12,6 +12,7 @@
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDFramesToSpecialCoordinateSystem.h"
 #include "MantidDataObjects/MDGridBox.h"
 #include "MantidDataObjects/MDLeanEvent.h"
 #include <iomanip>
@@ -796,7 +797,14 @@ Get the coordinate system (if any) to use.
 */
 TMDE(Kernel::SpecialCoordinateSystem
          MDEventWorkspace)::getSpecialCoordinateSystem() const {
-  return m_coordSystem;
+  MDFramesToSpecialCoordinateSystem converter;
+  auto coordinatesFromMDFrames = converter(this);
+  auto coordinates = m_coordSystem;
+
+  if (coordinatesFromMDFrames) {
+    coordinates = coordinatesFromMDFrames.get();
+  }
+  return coordinates;
 }
 
 /**

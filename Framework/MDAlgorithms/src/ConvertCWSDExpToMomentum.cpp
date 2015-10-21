@@ -2,6 +2,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
@@ -174,13 +175,15 @@ ConvertCWSDExpToMomentum::createExperimentMDWorkspace() {
     g_log.debug() << "Direction " << d << ", Range = " << m_extentMins[d]
                   << ", " << m_extentMaxs[d] << "\n";
 
+  // Set Q Sample frame
+  Mantid::Geometry::QSample frame;
+
   for (size_t i = 0; i < nDimension; ++i) {
     std::string id = vec_ID[i];
     std::string name = dimensionNames[i];
-    std::string units = "A^-1";
     mdws->addDimension(
         Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
-            id, name, units, static_cast<coord_t>(m_extentMins[i]),
+            id, name, frame, static_cast<coord_t>(m_extentMins[i]),
             static_cast<coord_t>(m_extentMaxs[i]), m_numBins[i])));
   }
 
