@@ -412,6 +412,8 @@ private:
   void initTransmissionSettings();
   /// Set all trans fields to a certain enabled state
   void resetAllTransFields();
+  /// Reset the to M3
+  void resetToM3IfNecessary();
   /// Check the validty of inputs
   bool areSettingsValid();
   /// Check setting for wavelengths and Q values
