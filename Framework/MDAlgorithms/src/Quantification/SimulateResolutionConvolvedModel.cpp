@@ -168,6 +168,7 @@ void SimulateResolutionConvolvedModel::createOutputWorkspace() {
     bc->setSplitInto(i, inputDim->getNBins());
     builder.setMin(inputDim->getMinimum());
     builder.setMax(inputDim->getMaximum());
+    builder.setFrameName(inputDim->getMDFrame().name());
 
     m_outputWS->addDimension(builder.create());
   }

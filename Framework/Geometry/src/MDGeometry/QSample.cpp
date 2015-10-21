@@ -30,5 +30,23 @@ std::string QSample::name() const { return QSampleName; }
 
 QSample *QSample::clone() const { return new QSample; }
 
+Mantid::Kernel::SpecialCoordinateSystem
+QSample::equivalientSpecialCoordinateSystem() const {
+  return Mantid::Kernel::SpecialCoordinateSystem::QSample;
+}
+
+bool QSample::isQ() const { return true; }
+
+bool QSample::isSameType(const MDFrame &frame) const {
+  auto isSameType = true;
+  try {
+    const auto &tmp = dynamic_cast<const QSample &>(frame);
+    UNUSED_ARG(tmp);
+  } catch (std::bad_cast &) {
+    isSameType = false;
+  }
+  return isSameType;
+}
+
 } // namespace Geometry
 } // namespace Mantid

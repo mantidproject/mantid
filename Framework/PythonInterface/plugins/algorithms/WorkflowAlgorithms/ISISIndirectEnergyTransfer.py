@@ -138,14 +138,19 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                                              plot_reduction)
 
         self._setup()
+        load_prog = Progress(self, start=0.0, end=0.10, nreports=2)
+        load_prog.report('loading files')
         self._workspace_names, self._chopped_data = load_files(self._data_files,
                                                                self._ipf_filename,
                                                                self._spectra_range[0],
                                                                self._spectra_range[1],
                                                                self._sum_files,
                                                                self._load_logs)
+        load_prog.report('files loaded')
 
+        process_prog = Progress(self, start=0.1, end=0.9, nreports=len(self._workspace_names))
         for c_ws_name in self._workspace_names:
+            process_prog.report('processing workspace' + c_ws_name)
             is_multi_frame = isinstance(mtd[c_ws_name], WorkspaceGroup)
 
             # Get list of workspaces
@@ -263,22 +268,28 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         # Rename output workspaces
         output_workspace_names = [rename_reduction(ws_name, self._sum_files) for ws_name in self._workspace_names]
 
+        summary_prog = Progress(self, start=0.9, end=1.0, nreports=4)
+
         # Save result workspaces
         if self._save_formats is not None:
+            summary_prog.report('saving')
             save_reduction(output_workspace_names,
                            self._save_formats,
                            self._output_x_units)
 
         # Group result workspaces
+        summary_prog.report('grouping workspaces')
         GroupWorkspaces(InputWorkspaces=output_workspace_names,
                         OutputWorkspace=self._output_ws)
 
-        self.setProperty('OutputWorkspace', self._output_ws)
+        self.setProperty('OutputWorkspace', mtd[self._output_ws])
 
         # Plot result workspaces
         if self._plot_type != 'None':
+            summary_prog.report('Plotting')
             for ws_name in mtd[self._output_ws].getNames():
                 plot_reduction(ws_name, self._plot_type)
+        summary_prog.report('Algorithm complete')
 
 
     def validateInputs(self):

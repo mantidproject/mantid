@@ -3,6 +3,7 @@
 
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidMDAlgorithms/ImportMDEventWorkspace.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidKernel/ConfigService.h"
 
 #include <cxxtest/TestSuite.h>
@@ -318,7 +319,9 @@ public:
         AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
             "test_out");
     TS_ASSERT_EQUALS(3, outWS->getNumDims());
-
+    TSM_ASSERT_EQUALS("Should be a general frame",
+                      outWS->getDimension(0)->getMDFrame().name(),
+                      Mantid::Geometry::GeneralFrame::GeneralFrameName);
     TS_ASSERT_EQUALS(3, outWS->getNPoints());
     TS_ASSERT_EQUALS("MDEvent", outWS->getEventTypeName());
   }

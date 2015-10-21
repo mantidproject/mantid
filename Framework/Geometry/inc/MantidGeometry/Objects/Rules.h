@@ -3,6 +3,8 @@
 
 #include <map>
 
+class TopoDS_Shape;
+
 namespace Mantid {
 
 namespace Geometry {
@@ -102,6 +104,9 @@ public:
   /// Abstract getBoundingBox
   virtual void getBoundingBox(double &xmax, double &ymax, double &zmax,
                               double &xmin, double &ymin, double &zmin) = 0;
+#ifdef ENABLE_OPENCASCADE
+  virtual TopoDS_Shape analyze() = 0;
+#endif
 };
 
 /**
@@ -151,6 +156,9 @@ public:
   int simplify(); ///< apply general intersection simplification
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin); /// bounding box
+#ifdef ENABLE_OPENCASCADE
+  virtual TopoDS_Shape analyze();
+#endif
 };
 
 /**
@@ -201,6 +209,9 @@ public:
   int simplify(); ///< apply general intersection simplification
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin); /// bounding box
+#ifdef ENABLE_OPENCASCADE
+  virtual TopoDS_Shape analyze();
+#endif
 };
 
 /**
@@ -220,7 +231,6 @@ private:
   Surface *key; ///< Actual Surface Base Object
   int keyN;     ///< Key Number (identifer)
   int sign;     ///< +/- in Object unit
-
 public:
   SurfPoint();
   SurfPoint(const SurfPoint &);
@@ -252,6 +262,9 @@ public:
   std::string displayAddress() const;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin); /// bounding box
+#ifdef ENABLE_OPENCASCADE
+  virtual TopoDS_Shape analyze();
+#endif
 };
 
 /**
@@ -302,6 +315,9 @@ public:
   std::string displayAddress() const;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin); /// bounding box
+#ifdef ENABLE_OPENCASCADE
+  virtual TopoDS_Shape analyze();
+#endif
 };
 
 /**
@@ -348,6 +364,9 @@ public:
   std::string displayAddress() const;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin); /// bounding box
+#ifdef ENABLE_OPENCASCADE
+  virtual TopoDS_Shape analyze();
+#endif
 };
 
 /**
@@ -397,6 +416,9 @@ public:
   std::string displayAddress() const;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin); /// bounding box
+#ifdef ENABLE_OPENCASCADE
+  TopoDS_Shape analyze();
+#endif
 };
 
 } // NAMESPACE  Geometry

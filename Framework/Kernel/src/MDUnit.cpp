@@ -33,8 +33,19 @@ bool QUnit::isQUnit() const { return true; }
 //----------------------------------------------------------------------------------------------
 // RLU
 //----------------------------------------------------------------------------------------------
+ReciprocalLatticeUnit::ReciprocalLatticeUnit() : m_unitLabel(UnitLabel("")) {}
+
+ReciprocalLatticeUnit::ReciprocalLatticeUnit(const UnitLabel &unitLabel)
+    : m_unitLabel(unitLabel) {}
+
+ReciprocalLatticeUnit::~ReciprocalLatticeUnit() {}
+
 UnitLabel ReciprocalLatticeUnit::getUnitLabel() const {
-  return Units::Symbol::RLU;
+  if (isSpecialRLUUnitLabel()) {
+    return m_unitLabel;
+  } else {
+    return Units::Symbol::RLU;
+  }
 }
 
 bool ReciprocalLatticeUnit::canConvertTo(const MDUnit &other) const {
@@ -42,10 +53,18 @@ bool ReciprocalLatticeUnit::canConvertTo(const MDUnit &other) const {
 }
 
 ReciprocalLatticeUnit *ReciprocalLatticeUnit::clone() const {
-  return new ReciprocalLatticeUnit;
+  if (isSpecialRLUUnitLabel()) {
+    return new ReciprocalLatticeUnit(m_unitLabel);
+  } else {
+    return new ReciprocalLatticeUnit;
+  }
 }
 
-ReciprocalLatticeUnit::~ReciprocalLatticeUnit() {}
+bool ReciprocalLatticeUnit::isSpecialRLUUnitLabel() const {
+  boost::regex pattern("in.*A.*\\^-1");
+  return boost::regex_match(m_unitLabel.ascii(), pattern);
+}
+
 //----------------------------------------------------------------------------------------------
 // End RLU
 //----------------------------------------------------------------------------------------------

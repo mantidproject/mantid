@@ -23,6 +23,9 @@
 #include "MantidMDAlgorithms/ReflectometryTransformQxQz.h"
 #include "MantidMDAlgorithms/ReflectometryTransformP.h"
 
+#include "MantidGeometry/MDGeometry/QLab.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
+
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -334,21 +337,26 @@ void ConvertToReflectometryQ::exec() {
   BoxController_sptr bc = boost::make_shared<BoxController>(2);
   this->setBoxController(bc);
 
-  // Select the transform strategy.
+  // Select the transform strategy and an appropriate MDFrame
   ReflectometryTransform_sptr transform;
-
+  Mantid::Geometry::MDFrame_uptr frame;
   if (outputDimensions == qSpaceTransform()) {
     transform = boost::make_shared<ReflectometryTransformQxQz>(
         dim0min, dim0max, dim1min, dim1max, incidentTheta, numberOfBinsQx,
         numberOfBinsQz);
+    frame.reset(new Mantid::Geometry::QLab);
   } else if (outputDimensions == pSpaceTransform()) {
     transform = boost::make_shared<ReflectometryTransformP>(
         dim0min, dim0max, dim1min, dim1max, incidentTheta, numberOfBinsQx,
         numberOfBinsQz);
+    frame.reset(new Mantid::Geometry::GeneralFrame(
+        "P", Mantid::Kernel::InverseAngstromsUnit().getUnitLabel()));
   } else {
     transform = boost::make_shared<ReflectometryTransformKiKf>(
         dim0min, dim0max, dim1min, dim1max, incidentTheta, numberOfBinsQx,
         numberOfBinsQz);
+    frame.reset(new Mantid::Geometry::GeneralFrame(
+        "KiKf", Mantid::Kernel::InverseAngstromsUnit().getUnitLabel()));
   }
 
   IMDWorkspace_sptr outputWS;
@@ -359,7 +367,7 @@ void ConvertToReflectometryQ::exec() {
   if (outputAsMDWorkspace) {
     transSelectionProg.report("Choosing Transformation");
     if (transMethod == centerTransform()) {
-      auto outputMDWS = transform->executeMD(inputWs, bc);
+      auto outputMDWS = transform->executeMD(inputWs, bc, std::move(frame));
       Progress transPerformProg(this, 0.1, 0.7, 5);
       transPerformProg.report("Performed transformation");
       // Copy ExperimentInfo (instrument, run, sample) to the output WS

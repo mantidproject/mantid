@@ -11,6 +11,7 @@
 #include "MantidDataObjects/MDEventInserter.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -602,11 +603,14 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
   vec_name[1] = "Y";
   vec_name[2] = "Z";
 
+  // Create MDFrame of General Frame type
+  Mantid::Geometry::GeneralFrame frame(
+      Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
+
   // Add dimensions
   for (size_t i = 0; i < m_nDimensions; ++i) {
     std::string id = vec_ID[i];
     std::string name = vec_name[i];
-    std::string units = "m";
     // int nbins = 100;
 
     for (size_t d = 0; d < 3; ++d)
@@ -614,7 +618,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
                     << ", " << m_extentMaxs[d] << "\n";
     outWs->addDimension(
         Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
-            id, name, units, static_cast<coord_t>(m_extentMins[i]),
+            id, name, frame, static_cast<coord_t>(m_extentMins[i]),
             static_cast<coord_t>(m_extentMaxs[i]), m_numBins[i])));
   }
 
@@ -684,15 +688,18 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
   vec_name[1] = "Y";
   vec_name[2] = "Z";
 
+  // Create MDFrame of General Frame type
+  Mantid::Geometry::GeneralFrame frame(
+      Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
+
   // Add dimensions
   for (size_t i = 0; i < m_nDimensions; ++i) {
     std::string id = vec_ID[i];
     std::string name = vec_name[i];
-    std::string units = "m";
 
     outWs->addDimension(
         Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
-            id, name, units, static_cast<coord_t>(m_extentMins[i]),
+            id, name, frame, static_cast<coord_t>(m_extentMins[i]),
             static_cast<coord_t>(m_extentMaxs[i]), m_numBins[i])));
   }
 
