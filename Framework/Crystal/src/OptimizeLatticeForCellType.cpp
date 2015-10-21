@@ -95,7 +95,7 @@ void OptimizeLatticeForCellType::exec() {
   runWS.push_back(ws);
 
   if (perRun) {
-    std::vector<std::pair<std::string, bool> > criteria;
+    std::vector<std::pair<std::string, bool>> criteria;
     // Sort by run number
     criteria.push_back(std::pair<std::string, bool>("runnumber", true));
     ws->sort(criteria);
@@ -104,7 +104,7 @@ void OptimizeLatticeForCellType::exec() {
     int count = 0;
     for (size_t i = 0; i < peaks_all.size(); i++) {
       if (peaks_all[i].getRunNumber() != run) {
-        count++; // first entry in runWS is input workspace
+        count++;  // first entry in runWS is input workspace
         DataObjects::PeaksWorkspace_sptr cloneWS(new PeaksWorkspace());
         cloneWS->setInstrument(ws->getInstrument());
         cloneWS->copyExperimentInfoFrom(ws.get());
@@ -138,8 +138,7 @@ void OptimizeLatticeForCellType::exec() {
 
     std::ostringstream fun_str;
     fun_str << "name=LatticeErrors";
-    for (size_t i = 0; i < 6; i++)
-      fun_str << ",p" << i << "=" << lat[i];
+    for (size_t i = 0; i < 6; i++) fun_str << ",p" << i << "=" << lat[i];
 
     IAlgorithm_sptr fit_alg;
     try {
@@ -187,13 +186,14 @@ void OptimizeLatticeForCellType::exec() {
     }
     fit_alg->setProperty("InputWorkspace", data);
     fit_alg->setProperty("WorkspaceIndex", 0);
-    fit_alg->setProperty("MaxIterations", 5000);
+    fit_alg->setProperty("CostFunction", "Unweighted least squares");
     fit_alg->setProperty("CreateOutput", true);
     fit_alg->setProperty("Output", "fit");
     fit_alg->executeAsChildAlg();
-    MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
 
     double chisq = fit_alg->getProperty("OutputChi2overDoF");
+    ITableWorkspace_sptr ParamTable = fit_alg->getProperty("OutputParameters");
+
     std::vector<double> Params;
     IFunction_sptr out = fit_alg->getProperty("Function");
 
@@ -208,33 +208,13 @@ void OptimizeLatticeForCellType::exec() {
     OrientedLattice latt = peakWS->mutableSample().getOrientedLattice();
     DblMatrix UBnew = latt.getUB();
 
-    calculateErrors(runWS[i_run]->getName(), cell_type, Params, sigabc, chisq);
+    for (size_t i = 0; i < 6; i++) sigabc[i] = ParamTable->Double(i, 2);
+
     OrientedLattice o_lattice;
     o_lattice.setUB(UBnew);
 
-    if (cell_type == ReducedCell::CUBIC()) {
-      o_lattice.setError(sigabc[0], sigabc[0], sigabc[0], 0, 0, 0);
-    } else if (cell_type == ReducedCell::TETRAGONAL()) {
-      o_lattice.setError(sigabc[0], sigabc[0], sigabc[1], 0, 0, 0);
-    } else if (cell_type == ReducedCell::ORTHORHOMBIC()) {
-      o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], 0, 0, 0);
-    } else if (cell_type == ReducedCell::RHOMBOHEDRAL()) {
-      o_lattice.setError(sigabc[0], sigabc[0], sigabc[0], sigabc[1], sigabc[1],
-                         sigabc[1]);
-    } else if (cell_type == ReducedCell::HEXAGONAL()) {
-      o_lattice.setError(sigabc[0], sigabc[0], sigabc[1], 0, 0, 0);
-    } else if (cell_type == "Monoclinic ( a unique )") {
-      o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], 0, 0);
-    } else if (cell_type == ReducedCell::MONOCLINIC() ||
-               cell_type == "Monoclinic ( b unique )") {
-      o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], 0, sigabc[3], 0);
-
-    } else if (cell_type == "Monoclinic ( c unique )") {
-      o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], 0, 0, sigabc[3]);
-    } else if (cell_type == ReducedCell::TRICLINIC()) {
-      o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
-                         sigabc[5]);
-    }
+    o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
+                       sigabc[5]);
 
     // Show the modified lattice parameters
     g_log.notice() << runWS[i_run]->getName() << "  " << o_lattice << "\n";
@@ -253,15 +233,14 @@ void OptimizeLatticeForCellType::exec() {
     AnalysisDataService::Instance().remove("_peaks");
     if (perRun) {
       std::string outputdir = getProperty("OutputDirectory");
-      if (outputdir[outputdir.size() - 1] != '/')
-        outputdir += "/";
+      if (outputdir[outputdir.size() - 1] != '/') outputdir += "/";
       // Save Peaks
       Mantid::API::IAlgorithm_sptr savePks_alg =
           createChildAlgorithm("SaveIsawPeaks");
       savePks_alg->setPropertyValue("InputWorkspace", runWS[i_run]->getName());
-      savePks_alg->setProperty("Filename", outputdir + "ls" +
-                                               runWS[i_run]->getName() +
-                                               ".integrate");
+      savePks_alg->setProperty(
+          "Filename",
+          outputdir + "ls" + runWS[i_run]->getName() + ".integrate");
       savePks_alg->executeAsChildAlg();
       g_log.notice() << "See output file: " << outputdir + "ls" +
                                                    runWS[i_run]->getName() +
@@ -271,8 +250,8 @@ void OptimizeLatticeForCellType::exec() {
       Mantid::API::IAlgorithm_sptr saveUB_alg =
           createChildAlgorithm("SaveIsawUB");
       saveUB_alg->setPropertyValue("InputWorkspace", runWS[i_run]->getName());
-      saveUB_alg->setProperty("Filename", outputdir + "ls" +
-                                              runWS[i_run]->getName() + ".mat");
+      saveUB_alg->setProperty(
+          "Filename", outputdir + "ls" + runWS[i_run]->getName() + ".mat");
       saveUB_alg->executeAsChildAlg();
       // Show the names of files written
       g_log.notice() << "See output file: "
@@ -374,8 +353,7 @@ double OptimizeLatticeForCellType::optLatticeSum(std::string inname,
   double *out = new double[n_peaks];
   optLattice(inname, lattice_parameters, out);
   double ChiSqTot = 0;
-  for (size_t i = 0; i < n_peaks; i++)
-    ChiSqTot += out[i];
+  for (size_t i = 0; i < n_peaks; i++) ChiSqTot += out[i];
   delete[] out;
   return ChiSqTot;
 }
@@ -395,8 +373,7 @@ void OptimizeLatticeForCellType::optLattice(std::string inname,
   std::vector<V3D> q_vector;
   std::vector<V3D> hkl_vector;
 
-  for (size_t i = 0; i < params.size(); i++)
-    params[i] = std::abs(params[i]);
+  for (size_t i = 0; i < params.size(); i++) params[i] = std::abs(params[i]);
   for (size_t i = 0; i < n_peaks; i++) {
     q_vector.push_back(peaks[i].getQSampleFrame());
     hkl_vector.push_back(peaks[i].getHKL());
@@ -443,8 +420,7 @@ void OptimizeLatticeForCellType::optLattice(std::string inname,
 bool OptimizeLatticeForCellType::edgePixel(PeaksWorkspace_sptr ws,
                                            std::string bankName, int col,
                                            int row, int Edge) {
-  if (bankName.compare("None") == 0)
-    return false;
+  if (bankName.compare("None") == 0) return false;
   Geometry::Instrument_const_sptr Iptr = ws->getInstrument();
   boost::shared_ptr<const IComponent> parent =
       Iptr->getComponentByName(bankName);
@@ -517,118 +493,6 @@ DblMatrix OptimizeLatticeForCellType::aMatrix(std::vector<double> lattice) {
 
   return result;
 }
-//-----------------------------------------------------------------------------------------
-/**
 
-  @param  npeaks       Number of peaks
-  @param  inname       Name of workspace containing peaks
-  @param  cell_type    cell type to optimize
-  @param  Params       optimized cell parameters
-  @param  sigabc       errors of optimized parameters
-  @param  chisq        chisq from optimization
-*/
-void OptimizeLatticeForCellType::calculateErrors(std::string inname,
-                                                 std::string cell_type,
-                                                 std::vector<double> &Params,
-                                                 std::vector<double> &sigabc,
-                                                 double chisq) {
-
-  for (size_t i = 0; i < sigabc.size(); i++)
-    sigabc[i] = 0.0;
-
-  int MAX_STEPS = 10;          // evaluate approximation using deltas
-                               // ranging over 10 orders of magnitudue
-  double START_DELTA = 1.0e-2; // start with change of 1%
-  std::vector<double> approx;  // save list of approximations
-
-  double delta;
-  size_t nopt = 1;
-  if (cell_type.compare(0, 2, "Te") == 0)
-    nopt = 2;
-  else if (cell_type.compare(0, 2, "Or") == 0)
-    nopt = 3;
-  else if (cell_type.compare(0, 2, "Rh") == 0)
-    nopt = 2;
-  else if (cell_type.compare(0, 2, "He") == 0)
-    nopt = 2;
-  else if (cell_type.compare(0, 2, "Mo") == 0)
-    nopt = 4;
-  else if (cell_type.compare(0, 2, "Tr") == 0)
-    nopt = 6;
-
-  std::vector<double> x;
-  x.push_back(Params[0]);
-  if (cell_type.compare(0, 2, "Te") == 0)
-    x.push_back(Params[2]);
-  else if (cell_type.compare(0, 2, "Or") == 0) {
-    x.push_back(Params[1]);
-    x.push_back(Params[2]);
-  } else if (cell_type.compare(0, 2, "Rh") == 0)
-    x.push_back(Params[3]);
-  else if (cell_type.compare(0, 2, "He") == 0)
-    x.push_back(Params[2]);
-  else if (cell_type.compare(0, 2, "Mo") == 0) {
-    x.push_back(Params[1]);
-    x.push_back(Params[2]);
-    if (cell_type.length() < 13)
-      x.push_back(Params[4]); // default is b
-    else if (cell_type.compare(13, 1, "a") == 0)
-      x.push_back(Params[3]);
-    else if (cell_type.compare(13, 1, "b") == 0)
-      x.push_back(Params[4]);
-    else if (cell_type.compare(13, 1, "c") == 0)
-      x.push_back(Params[5]);
-  } else if (cell_type.compare(0, 2, "Tr") == 0)
-    for (size_t i = 1; i < nopt; i++)
-      x.push_back(Params[i]);
-
-  for (size_t k = 0; k < nopt; k++) {
-    double diff = 0.0;
-
-    double x_save = x[k];
-
-    if (x_save < 1.0e-8) // if parameter essentially 0, use
-      delta = 1.0e-8;    // a "small" step
-    else
-      delta = START_DELTA * x_save;
-
-    for (int count = 0; count < MAX_STEPS; count++) {
-      x[k] = x_save + delta;
-      double chi_3 = optLatticeSum(inname, cell_type, x);
-
-      x[k] = x_save - delta;
-      double chi_1 = optLatticeSum(inname, cell_type, x);
-
-      x[k] = x_save;
-      double chi_2 = optLatticeSum(inname, cell_type, x);
-
-      diff = chi_1 - 2 * chi_2 + chi_3;
-      if (diff > 0) {
-        approx.push_back(std::abs(delta) * std::sqrt(2.0 / std::abs(diff)));
-      }
-      delta = delta / 10;
-    }
-    if (approx.size() == 0)
-      sigabc[k] = Mantid::EMPTY_DBL(); // no reasonable value
-
-    else if (approx.size() == 1)
-      sigabc[k] = approx[0]; // only one possible value
-
-    else // use one with smallest diff
-    {
-      double min_diff = Mantid::EMPTY_DBL();
-      for (size_t i = 0; i < approx.size() - 1; i++) {
-        diff = std::abs((approx[i + 1] - approx[i]) / approx[i]);
-        if (diff < min_diff) {
-          sigabc[k] = approx[i + 1];
-          min_diff = diff;
-        }
-      }
-    }
-  }
-
-  for (size_t i = 0; i < std::min<size_t>(7, sigabc.size()); i++)
-    sigabc[i] = sqrt(chisq) * sigabc[i];
-}
-} // namespace Algorithm
-} // namespace Mantid
+}  // namespace Algorithm
+}  // namespace Mantid

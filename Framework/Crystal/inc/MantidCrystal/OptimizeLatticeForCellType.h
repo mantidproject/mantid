@@ -5,6 +5,7 @@
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidAPI/IFunction.h"
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
@@ -40,7 +41,7 @@ namespace Crystal {
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport OptimizeLatticeForCellType : public API::Algorithm {
-public:
+ public:
   /// Default constructorMatrix
   OptimizeLatticeForCellType();
   /// Destructor
@@ -63,7 +64,7 @@ public:
                        std::vector<double> &params);
   void optLattice(std::string inname, std::vector<double> &params, double *out);
 
-private:
+ private:
   // Overridden Algorithm methods
   void init();
   void exec();
@@ -71,12 +72,9 @@ private:
   bool edgePixel(DataObjects::PeaksWorkspace_sptr ws, std::string bankName,
                  int col, int row, int Edge);
   Kernel::DblMatrix aMatrix(std::vector<double> lattice);
-  void calculateErrors(std::string inname, std::string cell_type,
-                       std::vector<double> &Params, std::vector<double> &sigabc,
-                       double chisq);
 };
 
-} // namespace Algorithm
-} // namespace Mantid
+}  // namespace Algorithm
+}  // namespace Mantid
 
 #endif /*MANTID_CRYSTAL_OptimizeLatticeForCellType_H_*/
