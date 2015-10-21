@@ -516,9 +516,7 @@ namespace MantidQt
     void QtReflMainView::setProgress(int progress)
     {
       ui.progressBar->setValue(progress);
-      QPalette p = palette();
-      p.setColor(QPalette::Highlight, Qt::green);
-      ui.progressBar->setPalette(p);
+      QApplication::processEvents();
     }
 
     /**
@@ -670,6 +668,11 @@ namespace MantidQt
     {
       return ui.textSearch->text().toStdString();
     }
+
+    /**
+     * Clear the progress
+     */
+    void QtReflMainView::clearProgress() { ui.progressBar->reset(); }
 
   } // namespace CustomInterfaces
 } // namespace Mantid

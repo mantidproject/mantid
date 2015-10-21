@@ -3,6 +3,13 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
+namespace Mantid {
+namespace Kernel {
+// Forward dec
+class ProgressBase;
+}
+}
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -31,9 +38,9 @@ namespace CustomInterfaces {
 */
 class MANTIDQT_CUSTOMINTERFACES_DLL ProgressableView {
 public:
-  //Set the status of the progress bar
   virtual void setProgressRange(int min, int max) = 0;
   virtual void setProgress(int progress) = 0;
+  virtual void clearProgress() = 0;
   virtual ~ProgressableView() {}
 };
 

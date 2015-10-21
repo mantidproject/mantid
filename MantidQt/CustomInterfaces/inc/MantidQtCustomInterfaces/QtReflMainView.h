@@ -78,6 +78,7 @@ namespace MantidQt
       //Set the status of the progress bar
       virtual void setProgressRange(int min, int max);
       virtual void setProgress(int progress);
+      virtual void clearProgress();
 
       //Get status of the checkbox which dictates whether an ipython notebook is produced
       virtual bool getEnableNotebook();
