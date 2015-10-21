@@ -355,8 +355,9 @@ public:
     */
   void test_FilterElasticCorrection() {
     DataObjects::EventWorkspace_sptr ws =
-        createEventWorkspaceDirect(0, 1000000);
+        createEventWorkspaceElastic(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockElasticEventWS", ws);
+    TS_ASSERT_EQUALS(ws->getNumberEvents(), 10000);
 
     MatrixWorkspace_sptr splws = createMatrixSplittersElastic();
     AnalysisDataService::Instance().addOrReplace("SplitterTableX", splws);
@@ -689,39 +690,50 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Create an EventWorkspace.  This workspace has
-    * @param runstart_i64 : absolute run start time in int64_t format with unit
-   * nanosecond
-    * @param pulsedt : pulse length in int64_t format with unit nanosecond
-    * @param todft : time interval between 2 adjacent event in same pulse in
-   * int64_t format of unit nanosecond
-    * @param numpulses : number of pulses in the event workspace
+  /** Create an EventWorkspace as diffractometer
+   * @brief createEventWorkspaceElastic
+   * @param runstart_i64
+   * @param pulsedt
+   * @return
    */
   DataObjects::EventWorkspace_sptr
-  createEventWorkspaceElastic(int64_t runstart_i64, int64_t pulsedt,
-                              int64_t tofdt, size_t numpulses) {
-    // 1. Create an EventWorkspace with 10 detectors
+  createEventWorkspaceElastic(int64_t runstart_i64, int64_t pulsedt) {
+    // Create an EventWorkspace with 10 banks with 1 detector each.  No events
+    // is generated
     DataObjects::EventWorkspace_sptr eventWS =
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1,
                                                                         true);
 
+    // L1 = 10
+    Kernel::V3D samplepos = eventWS->getInstrument()->getSample()->getPos();
+    Kernel::V3D sourcepos = eventWS->getInstrument()->getSource()->getPos();
+    std::cout << "sample position: " << samplepos.toString() << "\n";
+    std::cout << "source position: " << sourcepos.toString() << "\n";
+    double l1 = samplepos.distance(sourcepos);
+    std::cout << "L1 = " << l1 << "\n";
+    for (size_t i = 0; i < eventWS->getNumberHistograms(); ++i)
+    {
+      Kernel::V3D detpos = eventWS->getDetector(i)->getPos();
+      double l2 = samplepos.distance(detpos);
+      std::cout << "detector " << i << ": L2 = " << l2 << "\n";
+    }
+
     Kernel::DateAndTime runstart(runstart_i64);
 
-    // 2. Set run_start time
+    // Create 1000 events
+    EventList fakeevlist = fake_uniform_time_sns_data(runstart_i64, pulsedt);
+
+    // Set properties: (1) run_start time; (2) Ei
     eventWS->mutableRun().addProperty("run_start", runstart.toISO8601String(),
                                       true);
 
+    // Add neutrons
     for (size_t i = 0; i < eventWS->getNumberHistograms(); i++) {
       DataObjects::EventList *elist = eventWS->getEventListPtr(i);
 
-      for (int64_t pid = 0; pid < static_cast<int64_t>(numpulses); pid++) {
-        int64_t pulsetime_i64 = pid * pulsedt + runstart.totalNanoseconds();
-        Kernel::DateAndTime pulsetime(pulsetime_i64);
-        for (size_t e = 0; e < 10; e++) {
-          double tof = static_cast<double>(e * tofdt / 1000);
-          DataObjects::TofEvent event(tof, pulsetime);
-          elist->addEventQuickly(event);
-        }
+      for (size_t ievent = 0; ievent < fakeevlist.getNumberEvents(); ++ievent) {
+        TofEvent tofevent = fakeevlist.getEvent(ievent);
+        elist->addEventQuickly(tofevent);
       } // FOR each pulse
     }   // For each bank
 
