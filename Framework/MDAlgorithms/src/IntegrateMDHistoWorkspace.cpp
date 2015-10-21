@@ -104,7 +104,7 @@ Mantid::coord_t getPrecisionCorrectedCoordinate(Mantid::coord_t position,
 
   // Check if the relative deviation is larger than 1e-6
   const auto deviation = fabs((nearest - position) / binWidth);
-  const auto tolerance = 1e-6;
+  const auto tolerance = 1e-5;
   Mantid::coord_t coordinate(position);
   if (deviation < tolerance) {
     coordinate = nearest;
@@ -195,6 +195,7 @@ MDHistoWorkspace_sptr createShapedOutput(IMDHistoWorkspace const *const inWS,
               binning.back()) /*max*/); // Set custom min, max and nbins.
     } else if (i < pbins.size() && similarBinning(pbins[i])) {
       auto binning = pbins[i];
+
       Mantid::coord_t pMin = static_cast<Mantid::coord_t>(binning.front());
       Mantid::coord_t pMax = static_cast<Mantid::coord_t>(binning.back());
       size_t numberOfBins;
@@ -386,6 +387,10 @@ void IntegrateMDHistoWorkspace::exec() {
         // Create a thread-local input iterator.
         boost::scoped_ptr<MDHistoWorkspaceIterator> inIterator(
             dynamic_cast<MDHistoWorkspaceIterator *>(inWS->createIterator()));
+        if (!inIterator) {
+          throw std::runtime_error(
+              "Could not convert IMDIterator to a MDHistoWorkspaceIterator");
+        }
 
         /*
         We jump to the iterator position which is closest in the model

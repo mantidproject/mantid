@@ -23,6 +23,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/MersenneTwister.h"
@@ -403,6 +404,10 @@ create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
   testInst->setPos(0.0, 0.0, 0.0);
   testInst->add(sample);
   testInst->markAsSamplePos(sample);
+  // chopper position
+  Component *chop_pos =
+      new Component("chopper-position", Kernel::V3D(-10, 0, 0), testInst.get());
+  testInst->add(chop_pos);
 
   return space;
 }

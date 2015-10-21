@@ -10153,6 +10153,7 @@ void ApplicationWindow::showGraphContextMenu() {
   QMenu axes(this);
   QMenu colour(this);
   QMenu normalization(this);
+  QMenu normMD(this);
   QMenu exports(this);
   QMenu copy(this);
   QMenu prints(this);
@@ -10218,6 +10219,27 @@ void ApplicationWindow::showGraphContextMenu() {
     noNorm->setChecked(!ag->isDistribution());
     binNorm->setChecked(ag->isDistribution());
     cm.insertItem(tr("&Normalization"), &normalization);
+  } else if (ag->normalizableMD()) {
+    QAction *noNormMD = new QAction(tr("N&one"), &normMD);
+    noNormMD->setCheckable(true);
+    connect(noNormMD, SIGNAL(activated()), ag, SLOT(noNormalizationMD()));
+    normMD.addAction(noNormMD);
+
+    QAction *volNormMD = new QAction(tr("&Volume"), &normMD);
+    volNormMD->setCheckable(true);
+    connect(volNormMD, SIGNAL(activated()), ag, SLOT(volumeNormalizationMD()));
+    normMD.addAction(volNormMD);
+
+    QAction *eventsNormMD = new QAction(tr("&Events"), &normMD);
+    eventsNormMD->setCheckable(true);
+    connect(eventsNormMD, SIGNAL(activated()), ag, SLOT(numEventsNormalizationMD()));
+    normMD.addAction(eventsNormMD);
+
+    int normalization = ag->normalizationMD();
+    noNormMD->setChecked(0 == normalization);
+    volNormMD->setChecked(1 == normalization);
+    eventsNormMD->setChecked(2 == normalization);
+    cm.insertItem("MD &Normalization", &normMD);
   }
 
   QMenu plotType(this);

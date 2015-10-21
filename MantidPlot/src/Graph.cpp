@@ -60,6 +60,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "Mantid/MantidMatrixCurve.h"
+#include "Mantid/MantidMDCurve.h"
 #include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/QwtRasterDataMD.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
@@ -209,6 +210,9 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
 
   m_isDistribution = false;
   m_normalizable = false;
+
+  m_normalizableMD = false;
+  m_normalizationMD = 0;
 }
 
 void Graph::notifyChanges()
@@ -1286,7 +1290,7 @@ void Graph::linColor()
   notifyChanges();
 }
 
-void Graph::setAxisScale(int axis, double start, double end, int type, double step,
+void Graph::setAxisScale(int axis, double start, double end, int scaleType, double step,
     int majorTicks, int minorTicks)
 {
   ScaleEngine *sc_engine = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
@@ -1296,19 +1300,30 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
   ScaleTransformation::Type old_type = sc_engine->type();
 
   // If not specified, keep the same as now
-  if( type < 0 ) type = axisType(axis);
+  if( scaleType < 0 ) scaleType = axisType(axis);
 
-  if (type != old_type)
-  {
-    // recalculate boundingRect of MantidCurves
-    emit axisScaleChanged(axis,type == ScaleTransformation::Log10);
+  int type = ScaleTransformation::Linear;
+  // just to have the one-by-one ScaleType => GraphOptions; higher values of ScaleType
+  // will be GraphOptions::Linear
+  if (ScaleDraw::ScaleType::Numeric == scaleType) {
+    type = ScaleTransformation::Linear;
+  } else if (ScaleDraw::ScaleType::Text == scaleType) {
+    type = ScaleTransformation::Log10;
+  } else if (ScaleDraw::ScaleType::Day == scaleType) {
+    type = ScaleTransformation::Power;
   }
 
-  if (type == GraphOptions::Log10)
+  if (static_cast<int>(type) != static_cast<int>(old_type))
+  {
+    // recalculate boundingRect of MantidCurves
+    emit axisScaleChanged(axis, type == ScaleTransformation::Log10);
+  }
+
+  if (type == ScaleTransformation::Log10)
   {
     sc_engine->setType(ScaleTransformation::Log10);
   }
-  else if (type == GraphOptions::Power)
+  else if (type == ScaleTransformation::Power)
   {
     sc_engine->setType(ScaleTransformation::Power);
   }
@@ -1317,7 +1332,7 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
     sc_engine->setType(ScaleTransformation::Linear);
   }
 
-  if (type == GraphOptions::Log10)
+  if (type == ScaleTransformation::Log10)
   {
     if (start <= 0)
     {
@@ -1364,7 +1379,7 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
     // log scales can't represent zero or negative values, 1e-10 is a low number that I hope will be lower than most of the data but is still sensible for many color plots
     //start = start < 1e-90 ? 1e-10 : start;
   }
-  else if (type == GraphOptions::Power)
+  else if (type == ScaleTransformation::Power)
   {
     double const nth_power = sc_engine->nthPower();
     if (start <= 0 && nth_power < 0)
@@ -3411,12 +3426,15 @@ QString Graph::yAxisTitleFromFirstCurve()
     using namespace Mantid::API;
     QString wsName = firstCurve->workspaceName();
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
-    return MantidQt::API::PlotAxis(m_isDistribution, *ws).title();
+    if (ws)
+      return MantidQt::API::PlotAxis(m_isDistribution, *ws).title();
+  } else if (auto *firstCurve = dynamic_cast<MantidMDCurve*>(curve(0))) {
+    MantidQwtIMDWorkspaceData* data = firstCurve->mantidData();
+    if (data)
+      return data->getYAxisLabel();
   }
-  else
-  {
-    return axisTitle(0);
-  }
+
+  return axisTitle(0);
 }
 
 void Graph::contextMenuEvent(QContextMenuEvent *e)
@@ -5519,9 +5537,9 @@ void Graph::noNormalization()
   if(!m_isDistribution) return; // Nothing to do
 
   m_isDistribution = false;
-  updateDataCurves();
-  d_plot->updateAxes();
-  setYAxisTitle(yAxisTitleFromFirstCurve());
+
+  updateCurvesAndAxes();
+
   notifyChanges();
 }
 
@@ -5533,11 +5551,65 @@ void Graph::binWidthNormalization()
   if(m_isDistribution) return; // Nothing to do
 
   m_isDistribution = true;
+
+  updateCurvesAndAxes();
+
+  notifyChanges();
+}
+
+/**
+ * Set 'None' normalization for MD plots
+ */
+void Graph::noNormalizationMD()
+{
+  if (!normalizableMD())
+    return;
+
+  setNormalizationMD(0);
+
+  updateCurvesAndAxes();
+
+  notifyChanges();
+}
+
+/**
+ * Set volume normalization for MD plots
+ */
+void Graph::volumeNormalizationMD()
+{
+  if (!normalizableMD())
+    return;
+
+  setNormalizationMD(1);
+
+  updateCurvesAndAxes();
+
+  notifyChanges();
+}
+
+/**
+ * Set number of events normalization for MD plots
+ */
+void Graph::numEventsNormalizationMD()
+{
+  if (!normalizableMD())
+    return;
+
+  setNormalizationMD(2);
+
+  updateCurvesAndAxes();
+
+  notifyChanges();
+}
+
+/**
+ * Convenience method to use when updating the normalization types
+ * (whether Matrix or MD data normalizatio).
+ */
+void Graph::updateCurvesAndAxes() {
   updateDataCurves();
   d_plot->updateAxes();
   setYAxisTitle(yAxisTitleFromFirstCurve());
-
-  notifyChanges();
 }
 
 void Graph::setWaterfallXOffset(int offset)
@@ -5653,6 +5725,15 @@ void Graph::updateDataCurves()
       mc->invalidateBoundingRect();
       mc->loadData();
     }
+    else if (MantidMDCurve *mdc = dynamic_cast<MantidMDCurve*>(pc))
+    {
+      //mdc->setDrawAsDistribution(m_isDistribution);
+      // yes, using int in Graph and ApplicationWindow instead of the proper enum, just so that
+      // IMDWorkspace.h does not need to be included in more places in MantidPlot
+      mdc->mantidData()->setNormalization(static_cast<Mantid::API::MDNormalization>(m_normalizationMD));
+      mdc->invalidateBoundingRect();
+    }
+
   }
   QApplication::restoreOverrideCursor();
 }

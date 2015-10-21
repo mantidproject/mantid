@@ -99,6 +99,24 @@ numbers. For example:
    2, 100, 102, 107
    3, 300, 310, 320-329, 350-370
 
+Output
+^^^^^^
+
+Under the output section, the user is provided with an option of
+plotting data in three different formats. One Window - Replacing
+Plots: will replace the previous graph and plot a new graph on top.
+One Window - Waterfall: will plot all the generated focused
+workspace graphs in one window which can be useful while comparing
+various graphs. The Multiple Windows: will plot graph in
+separate windows.
+
+The user also has an option of generated GSS, XYE and OpenGenie
+formatted file by clicking the Output Files checkbox. This will
+generated three different files for each focused output workspace
+in Mantid. These files can be found with appropriate name at location:
+C:\EnginX_Mantid\User\236516\Focus on Windows, the
+EnginX_Mantid folder can be found on Desktop/Home on other platforms.
+
 Settings
 --------
 

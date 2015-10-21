@@ -368,28 +368,23 @@ namespace MantidWidgets
 
       MatrixWorkspace_sptr ws;
 
-      auto load = boost::dynamic_pointer_cast<AlgorithmProxy>( AlgorithmManager::Instance().create("MuonLoad") );
-      load->setChild(true);
-      load->setRethrows(true);
-      load->copyPropertiesFrom(*m_loadAlg);
-
-      try
-      {
+      try {
+        auto load = AlgorithmManager::Instance().create("MuonLoad");
         load->initialize();
-
-        load->setPropertyValue( "Filename", fileIt->toStdString() );
-        load->setPropertyValue( "OutputWorkspace", "__YouDontSeeMeIAmNinja" ); // Is not used
-
-        if ( m_fitPropBrowser->rawData() ) // TODO: or vice verca?
-          load->setPropertyValue( "RebinParams", "" );
+        load->setChild(true);
+        load->setRethrows(true);
+        load->updatePropertyValues(*m_loadAlg);
+        load->setPropertyValue("Filename", fileIt->toStdString());
+        load->setPropertyValue("OutputWorkspace", "__YouDontSeeMeIAmNinja");
+        if (m_fitPropBrowser->rawData()) // TODO: or vice verca?
+          load->setPropertyValue("RebinParams", "");
 
         load->execute();
 
         ws = load->getProperty("OutputWorkspace");
-      }
-      catch(...)
-      {
-        QMessageBox::critical(this, "Loading failed", 
+      } catch (...) {
+        QMessageBox::critical(
+            this, "Loading failed",
             "Unable to load one of the files.\n\nCheck log for details");
         break;
       }

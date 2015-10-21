@@ -87,7 +87,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
             raise SourceLinkError(error_string)
 
         try:
-            self.output_to_page(file_paths,file_name,sanity_checks);
+            self.output_to_page(file_paths,file_name,sanity_checks)
         except SourceLinkError as err:
             error_string += str(err) + "\n"
 
@@ -112,12 +112,15 @@ class SourceLinkDirective(AlgorithmBaseDirective):
                 suggested_path = "os_agnostic_path_to_file_from_source_root"
                 if len(path_list) > 1:
                     suggested_path = path_list[0].replace(self.source_root, "")
-                raise SourceLinkError("Found multiple possibilities for " + file_name + "." + extension + "\n" +
-                "Possible matches" +  str(path_list) + "\n" +
-                "Specify one using the " + extension + " option\n" +
-                "e.g. \n" +
-                ".. sourcelink:\n" +
-                "      :" + extension + ": " + suggested_path)
+                raise SourceLinkError("Found multiple possibilities for " +
+                                      file_name + "." + extension + "\n" +
+                                      "Possible matches" +  str(path_list) +
+                                      "\n" +
+                                      "Specify one using the " + extension +
+                                      " option\n" +
+                                      "e.g. \n" +
+                                      ".. sourcelink:\n" +
+                                      "      :" + extension + ": " + suggested_path)
 
             return self.file_lookup[file_name][extension]
         except KeyError:
@@ -147,7 +150,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
         builddir = os.path.join(builddir, "..", "..")
         builddir = os.path.abspath(builddir)
 
-        for dirName, subdirList, fileList in os.walk(self.source_root):
+        for dirName, dummy_subdirList, fileList in os.walk(self.source_root):
             if dirName.startswith(builddir):
                 continue # don't check or add to the cache
             for fname in fileList:
@@ -183,29 +186,31 @@ class SourceLinkDirective(AlgorithmBaseDirective):
             suggested_path = "os_agnostic_path_to_file_from_Code/Mantid"
             if len(valid_ext_list) == 0:
                 raise SourceLinkError("No file possibilities for " + file_name + " have been found\n" +
-                    "Please specify a better one using the :filename: opiton or use the " + str(self.file_types.keys()) + " options\n" +
-                    "e.g. \n" +
-                    ".. sourcelink:\n" +
-                    "      :" + self.file_types.keys()[0] + ": " + suggested_path + "\n "+
-                    "or \n" +
-                    ".. sourcelink:\n" +
-                    "      :filename: " + file_name)
+                                      "Please specify a better one using the :filename: opiton or use the " +
+                                      str(self.file_types.keys()) + " options\n" +
+                                      "e.g. \n" +
+                                      ".. sourcelink:\n" +
+                                      "      :" + self.file_types.keys()[0] + ": " + suggested_path + "\n "+
+                                      "or \n" +
+                                      ".. sourcelink:\n" +
+                                      "      :filename: " + file_name)
             #if the have a cpp we should also have a h
             if ("cpp" in valid_ext_list) or ("h" in valid_ext_list):
                 if ("cpp" not in valid_ext_list) or ("h" not in valid_ext_list):
                     raise SourceLinkError("Only one of .h and .cpp found for " + file_name + "\n" +
-                    "valid files found for " + str(valid_ext_list) + "\n" +
-                    "Please specify the missing one using an " + str(self.file_types.keys()) + " option\n" +
-                    "e.g. \n" +
-                    ".. sourcelink:\n" +
-                    "      :" + self.file_types.keys()[0] + ": " + suggested_path)
+                                          "valid files found for " + str(valid_ext_list) + "\n" +
+                                          "Please specify the missing one using an " +
+                                          str(self.file_types.keys()) + " option\n" +
+                                          "e.g. \n" +
+                                          ".. sourcelink:\n" +
+                                          "      :" + self.file_types.keys()[0] + ": " + suggested_path)
         return
 
     def output_path_to_page(self, filepath, extension):
         """
         Outputs the source link for a file to the rst page
         """
-        dirName,fName = os.path.split(filepath)
+        dummy_dirName,fName = os.path.split(filepath)
         self.add_rst(self.file_types[extension] + ": `" + fName + " <" + self.convert_path_to_github_url(filepath) + ">`_\n\n")
         return
 

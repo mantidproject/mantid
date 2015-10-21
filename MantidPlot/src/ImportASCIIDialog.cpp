@@ -450,62 +450,67 @@ void ImportASCIIDialog::preview()
 
 void ImportASCIIDialog::previewTable()
 {
-	if (!d_preview_table)
-		return;
+  if (!d_preview_table)
+    return;
 
-	if (!d_preview_table->isVisible())
-		d_preview_table->show();
+  if (!d_preview_table->isVisible())
+    d_preview_table->show();
 
-	if (d_current_path.trimmed().isEmpty()){
-		d_preview_table->clear();
-		d_preview_table->resetHeader();
-        return;
-    }
+  if (d_current_path.trimmed().isEmpty()){
+    d_preview_table->clear();
+    d_preview_table->resetHeader();
+    return;
+  }
 
-	int importMode = d_import_mode->currentIndex();
-	if (importMode == NewTables)
-		importMode = Table::Overwrite;
-	else
-		importMode -= 2;
+  int importMode = d_import_mode->currentIndex();
+  if (importMode == NewTables) {
+    importMode = ImportASCIIDialog::NewWorkspace; //(ImportASCIIDialog::ImportMode)Table::Overwrite;
+  } else {
+    importMode -= 2;
+  }
 
-	d_preview_table->resetHeader();
-	d_preview_table->importASCII(d_current_path, columnSeparator(), d_ignored_lines->value(),
-							d_rename_columns->isChecked(), d_strip_spaces->isChecked(),
-							d_simplify_spaces->isChecked(), d_import_comments->isChecked(),
-                            d_comment_string->text(), (Table::ImportMode)importMode, 
-                            boxEndLine->currentIndex(), d_preview_lines_box->value());
+  d_preview_table->resetHeader();
+  d_preview_table->importASCII(d_current_path, columnSeparator(), d_ignored_lines->value(),
+                               d_rename_columns->isChecked(), d_strip_spaces->isChecked(),
+                               d_simplify_spaces->isChecked(), d_import_comments->isChecked(),
+                               d_comment_string->text(), (Table::ImportMode)importMode,
+                               boxEndLine->currentIndex(), d_preview_lines_box->value());
 
-	if (d_import_dec_separators->isChecked())
-		d_preview_table->updateDecimalSeparators(decimalSeparators());
-    if (!d_preview_table->isVisible())
-        d_preview_table->show();
+  if (d_import_dec_separators->isChecked())
+    d_preview_table->updateDecimalSeparators(decimalSeparators());
+
+  if (!d_preview_table->isVisible())
+    d_preview_table->show();
 }
 
-void ImportASCIIDialog::previewMatrix()
-{
-	if (!d_preview_matrix)
-		return;
+void ImportASCIIDialog::previewMatrix() {
+  if (!d_preview_matrix)
+    return;
 
-	if (d_current_path.trimmed().isEmpty()){
-		d_preview_matrix->clear();
-        return;
-    }
+  if (d_current_path.trimmed().isEmpty()) {
+    d_preview_matrix->clear();
+    return;
+  }
 
-	int importMode = d_import_mode->currentIndex();
-	if (importMode == NewMatrices)
-		importMode = Matrix::Overwrite;
-	else
-		importMode -= 2;
+  int importMode = d_import_mode->currentIndex();
+  if (importMode == NewMatrices) {
+    importMode = ImportASCIIDialog::NewWorkspace; //(ImportASCIIDialog::ImportMode)Matrix::Overwrite;
+  } else {
+    // Overwrite-2 => NewColumns (in both Matrix::importMode and
+    // ImportASCIIDialog::importMode)
+    importMode -= 2;
+  }
 
-	QLocale locale = d_preview_matrix->locale();
-	if(d_import_dec_separators->isChecked())
-		locale = decimalSeparators();
+  QLocale locale = d_preview_matrix->locale();
+  if (d_import_dec_separators->isChecked())
+    locale = decimalSeparators();
 
-	d_preview_matrix->importASCII(d_current_path, columnSeparator(), d_ignored_lines->value(),
-							d_strip_spaces->isChecked(), d_simplify_spaces->isChecked(),
-                            d_comment_string->text(), importMode, locale,
-                            boxEndLine->currentIndex(), d_preview_lines_box->value());
-	d_preview_matrix->resizeColumnsToContents();
+  d_preview_matrix->importASCII(
+      d_current_path, columnSeparator(), d_ignored_lines->value(),
+      d_strip_spaces->isChecked(), d_simplify_spaces->isChecked(),
+      d_comment_string->text(), importMode, locale, boxEndLine->currentIndex(),
+      d_preview_lines_box->value());
+  d_preview_matrix->resizeColumnsToContents();
 }
 
 void ImportASCIIDialog::changePreviewFile(const QString& path)
@@ -542,8 +547,8 @@ void ImportASCIIDialog::setNewWindowsOnly(bool on)
     if (on){
         d_import_mode->clear();
         d_import_mode->addItem(tr("New Table"));
-        d_import_mode->addItem(tr("New Matrice"));
-		d_import_mode->addItem(tr("New Workspace"));
+        d_import_mode->addItem(tr("New Matrix"));
+        d_import_mode->addItem(tr("New Workspace"));
     }
 
     d_preview_button->setChecked(false);

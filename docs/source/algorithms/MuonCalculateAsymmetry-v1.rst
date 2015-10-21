@@ -57,7 +57,7 @@ Output:
 .. testcode:: ExGroupAsymmetryMultiperiod
 
    y1 = [100,50,10]
-   y2 = [ 50,25, 5]
+   y2 = [150,20,1]
    x = [1,2,3]
 
    input1 = CreateWorkspace(x, y1)
@@ -75,7 +75,7 @@ Output:
 
 .. testoutput:: ExGroupAsymmetryMultiperiod
 
-   Output: [ 0.1524242  -0.0916425  -0.71360777]
+   Output: [-0.28634067  0.60594273  0.26255546]
 
 .. categories::
 

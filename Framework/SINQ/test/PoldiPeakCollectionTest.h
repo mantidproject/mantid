@@ -13,6 +13,7 @@
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidGeometry/Crystal/BraggScattererFactory.h"
+#include "MantidGeometry/Crystal/ReflectionGenerator.h"
 
 #include <stdexcept>
 
@@ -323,7 +324,7 @@ public:
   }
 
   void testStructureConstructor() {
-    CrystalStructure_sptr structure = getCsClStructure();
+    CrystalStructure structure = getCsClStructure();
 
     double dMin = 0.55;
     double dMax = 5.0;
@@ -357,18 +358,19 @@ public:
   }
 
   void testSetPeaks() {
-    CrystalStructure_sptr structure = getCsClStructure();
+    CrystalStructure structure = getCsClStructure();
+    ReflectionGenerator generator(structure);
 
     double dMin = 0.55;
     double dMax = 5.0;
 
-    std::vector<V3D> hkls = structure->getUniqueHKLs(dMin, dMax);
-    std::vector<double> dValues = structure->getDValues(hkls);
+    std::vector<V3D> hkls = generator.getUniqueHKLs(dMin, dMax);
+    std::vector<double> dValues = generator.getDValues(hkls);
     std::vector<double> fSquared(dValues.size(), 0.0);
 
     TestablePoldiPeakCollection p;
 
-    p.setPointGroup(structure->pointGroup());
+    p.setPointGroup(structure.spaceGroup()->getPointGroup());
     TS_ASSERT_THROWS_NOTHING(p.setPeaks(hkls, dValues, fSquared));
 
     dValues.pop_back();
@@ -377,7 +379,7 @@ public:
   }
 
 private:
-  CrystalStructure_sptr getCsClStructure() {
+  CrystalStructure getCsClStructure() {
     UnitCell CsCl(4.126, 4.126, 4.126);
     SpaceGroup_const_sptr Pm3m =
         SpaceGroupFactory::Instance().createSpaceGroup("P m -3 m");
@@ -392,7 +394,7 @@ private:
     atoms->addScatterer(cs);
     atoms->addScatterer(cl);
 
-    return boost::make_shared<CrystalStructure>(CsCl, Pm3m, atoms);
+    return CrystalStructure(CsCl, Pm3m, atoms);
   }
 
   TableWorkspace_sptr m_dummyData;

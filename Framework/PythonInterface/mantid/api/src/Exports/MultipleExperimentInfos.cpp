@@ -12,8 +12,9 @@ void export_MultipleExperimentInfos() {
       .def("getExperimentInfo",
            (ExperimentInfo_sptr (MultipleExperimentInfos::*)(const uint16_t)) &
                MultipleExperimentInfos::getExperimentInfo,
+           (arg("self"), arg("run_index")),
            "Return the experiment info at the given index.")
       .def("getNumExperimentInfo",
-           &MultipleExperimentInfos::getNumExperimentInfo,
+           &MultipleExperimentInfos::getNumExperimentInfo, arg("self"),
            "Return the number of experiment info objects,");
 }

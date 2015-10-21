@@ -1,9 +1,10 @@
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidAlgorithms/ReflectometryWorkflowBase.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/RebinParamsValidator.h"
 
 #include <boost/assign/list_of.hpp>
 

@@ -385,6 +385,18 @@ UncertainValue PoldiAutoCorrelationCore::getCMessAndCSigma(
   case 2: {
     int middleIndex = cleanIndex((locator.icmin + 1), m_timeBinCount);
 
+    if (middleIndex < 0) {
+      m_logger.warning() << "Inconsistency foun while calculating correlation "
+                            "intensity and error for d-value: "
+                         << boost::lexical_cast<std::string>(dValue)
+                         << ", with detector index: "
+                         << boost::lexical_cast<std::string>(index)
+                         << ", got middle index: "
+                         << boost::lexical_cast<std::string>(middleIndex)
+                         << ", ignoring it." << std::endl;
+      break;
+    }
+
     double counts = getCounts(locator.detectorElement, middleIndex);
     double normCounts = getNormCounts(locator.detectorElement, middleIndex);
 

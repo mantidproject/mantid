@@ -6,6 +6,7 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventInserter.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/MDUnit.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -266,7 +267,13 @@ void ImportMDEventWorkspace::exec() {
       m_nDimensions + 4; // signal, error, run_no, detector_no
   m_IsFullDataObjects = (nActualColumns == columnsForFullEvents);
 
-  m_nDataObjects = posDiffMDEvent / nActualColumns;
+  if (0 == nActualColumns) {
+    m_nDataObjects = 0;
+    g_log.warning() << "The number of actual columns found in the file "
+                       "(exlcuding comments) is zero" << std::endl;
+  } else {
+    m_nDataObjects = posDiffMDEvent / nActualColumns;
+  }
 
   // Get the min and max extents in each dimension.
   std::vector<double> extentMins(m_nDimensions);
@@ -290,14 +297,18 @@ void ImportMDEventWorkspace::exec() {
 
   // Extract Dimensions and add to the output workspace.
   DataCollectionType::iterator dimEntriesIterator = m_posDimStart;
+  auto unitFactory = makeMDUnitFactoryChain();
   for (size_t i = 0; i < m_nDimensions; ++i) {
     std::string id = convert<std::string>(*(++dimEntriesIterator));
     std::string name = convert<std::string>(*(++dimEntriesIterator));
     std::string units = convert<std::string>(*(++dimEntriesIterator));
     int nbins = convert<int>(*(++dimEntriesIterator));
 
+    auto mdUnit = unitFactory->create(units);
+    Mantid::Geometry::GeneralFrame frame(
+        Mantid::Geometry::GeneralFrame::GeneralFrameName, std::move(mdUnit));
     outWs->addDimension(MDHistoDimension_sptr(new MDHistoDimension(
-        id, name, units, static_cast<coord_t>(extentMins[i]),
+        id, name, frame, static_cast<coord_t>(extentMins[i]),
         static_cast<coord_t>(extentMaxs[i]), nbins)));
   }
 

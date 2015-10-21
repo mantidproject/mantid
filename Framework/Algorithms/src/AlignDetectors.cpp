@@ -4,11 +4,13 @@
 #include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/RawCountValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidKernel/V3D.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/V3D.h"
 #include "MantidKernel/UnitFactory.h"
 #include <fstream>
 #include <sstream>
@@ -151,7 +153,9 @@ const std::string AlignDetectors::summary() const {
 }
 
 /// (Empty) Constructor
-AlignDetectors::AlignDetectors() { this->tofToDmap = NULL; }
+AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {
+  this->tofToDmap = NULL;
+}
 
 /// Destructor
 AlignDetectors::~AlignDetectors() { delete this->tofToDmap; }

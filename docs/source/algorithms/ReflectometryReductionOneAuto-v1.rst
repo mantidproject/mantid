@@ -13,13 +13,19 @@ Facade over :ref:`algm-ReflectometryReductionOne`.
 
 Pulls numeric parameters out of the instrument parameters where possible. You can override any of these automatically applied defaults by providing your own value for the input.
 
+See :ref:`algm-ReflectometryReductionOne` for more information on the wrapped algorithm.
+
+ProcessingInstructions
+######################
+
 If ProcessingInstructions is not set its value is inferred from other properties:
 
 * If AnalysisMode = PointDetectorAnalaysis and PointDetectorStart = PointDetectorStop then the spectrum specified by PointDetectorStart is used.
 * If AnalysisMode = PointDetectorAnalaysis and PointDetectorStart ≠ PointDetectorStop then the sum of the spectra from PointDetectorStart to PointDetectorStop is used.
 * If AnalysisMode = MultiDetectorAnalaysis then all of the spectra from MultiDetectorStart onwards are used.
 
-See :ref:`algm-ReflectometryReductionOne` for more information on the wrapped algorithm.
+Note, the ProcessingInstructions are workspace indicies, not detector IDs. The first few workspaces may correspond to monitors, rather than detectors of interest.
+For the syntax of this property, see :ref:`algm-GroupDetectors`.
 
 Workflow for WorkspaceGroups
 ############################

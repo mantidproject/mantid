@@ -16,31 +16,33 @@ void export_RectangularDetector() {
 
   class_<RectangularDetector, bases<CompAssembly, IObjComponent>,
          boost::noncopyable>("RectangularDetector", no_init)
-      .def("xpixels", &RectangularDetector::xpixels,
+      .def("xpixels", &RectangularDetector::xpixels, arg("self"),
            "Returns the number of pixels in the X direction")
-      .def("ypixels", &RectangularDetector::ypixels,
+      .def("ypixels", &RectangularDetector::ypixels, arg("self"),
            "Returns the number of pixels in the Y direction")
-      .def("xstep", &RectangularDetector::xstep,
+      .def("xstep", &RectangularDetector::xstep, arg("self"),
            "Returns the step size in the X direction")
-      .def("ystep", &RectangularDetector::ystep,
+      .def("ystep", &RectangularDetector::ystep, arg("self"),
            "Returns the step size in the Y direction")
-      .def("xsize", &RectangularDetector::xsize,
+      .def("xsize", &RectangularDetector::xsize, arg("self"),
            "Returns the size in the X direction")
-      .def("ysize", &RectangularDetector::ysize,
+      .def("ysize", &RectangularDetector::ysize, arg("self"),
            "Returns the size in the Y direction")
-      .def("xstart", &RectangularDetector::xstart,
+      .def("xstart", &RectangularDetector::xstart, arg("self"),
            "Returns the start position in the X direction")
-      .def("ystart", &RectangularDetector::ystart,
+      .def("ystart", &RectangularDetector::ystart, arg("self"),
            "Returns the start position in the Y direction")
-      .def("idstart", &RectangularDetector::idstart, "Returns the idstart")
+      .def("idstart", &RectangularDetector::idstart, arg("self"),
+           "Returns the idstart")
       .def("idfillbyfirst_y", &RectangularDetector::idfillbyfirst_y,
-           "Returns the idfillbyfirst_y")
-      .def("idstepbyrow", &RectangularDetector::idstepbyrow,
+           arg("self"), "Returns the idfillbyfirst_y")
+      .def("idstepbyrow", &RectangularDetector::idstepbyrow, arg("self"),
            "Returns the idstepbyrow")
-      .def("idstep", &RectangularDetector::idstep, "Returns the idstep")
-      .def("minDetectorID", &RectangularDetector::minDetectorID,
+      .def("idstep", &RectangularDetector::idstep, arg("self"),
+           "Returns the idstep")
+      .def("minDetectorID", &RectangularDetector::minDetectorID, arg("self"),
            "Returns the minimum detector id")
-      .def("maxDetectorID", &RectangularDetector::maxDetectorID,
+      .def("maxDetectorID", &RectangularDetector::maxDetectorID, arg("self"),
            "Returns the maximum detector id");
 }
 

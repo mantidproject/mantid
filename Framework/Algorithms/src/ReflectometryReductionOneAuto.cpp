@@ -1,9 +1,9 @@
 #include "MantidAlgorithms/ReflectometryReductionOneAuto.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/ListValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include <boost/optional.hpp>
 #include <boost/assign/list_of.hpp>
@@ -110,9 +110,8 @@ void ReflectometryReductionOneAuto::init() {
                   "I0 monitor workspace index");
   declareProperty(new PropertyWithValue<std::string>("ProcessingInstructions",
                                                      "", Direction::Input),
-                  "Processing commands to select and add spectrum to make a "
-                  "detector workspace. See [[PeformIndexOperations]] for "
-                  "syntax.");
+                  "Grouping pattern of workspace indices to yield only the"
+                  " detectors of interest. See GroupDetectors for syntax.");
   declareProperty("WavelengthMin", Mantid::EMPTY_DBL(),
                   "Wavelength Min in angstroms", Direction::Input);
   declareProperty("WavelengthMax", Mantid::EMPTY_DBL(),

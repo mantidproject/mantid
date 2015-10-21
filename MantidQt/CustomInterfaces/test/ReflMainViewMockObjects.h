@@ -33,6 +33,7 @@ public:
   MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
   MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
+  MOCK_METHOD0(requestNotebookPath, std::string());
 
   MOCK_METHOD1(showAlgorithmDialog, void(const std::string&));
   MOCK_METHOD1(plotWorkspaces, void(const std::set<std::string>&));
@@ -46,6 +47,7 @@ public:
   MOCK_CONST_METHOD0(getClipboard, std::string());
   MOCK_CONST_METHOD0(getSearchString, std::string());
   MOCK_CONST_METHOD0(getSearchInstrument, std::string());
+  MOCK_METHOD0(getEnableNotebook, bool());
 
   //Calls we don't care about
   virtual void showTable(QReflTableModel_sptr) {};
@@ -53,9 +55,10 @@ public:
   virtual void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy*) {};
   virtual void setProgressRange(int,int) {};
   virtual void setProgress(int) {};
-  virtual bool getEnableNotebook() {return false;};
   virtual void setTableList(const std::set<std::string>&) {};
   virtual void setInstrumentList(const std::vector<std::string>&, const std::string&) {};
+  virtual void saveSettings(const std::map<std::string,QVariant>&) {};
+  virtual void loadSettings(std::map<std::string,QVariant>&) {};
   virtual std::string getProcessInstrument() const {return "FAKE";}
   virtual boost::shared_ptr<IReflPresenter> getPresenter() const {return boost::shared_ptr<IReflPresenter>();}
 };

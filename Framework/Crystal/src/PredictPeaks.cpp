@@ -1,7 +1,6 @@
 #include "MantidCrystal/PredictPeaks.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 

@@ -2,12 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/TOFSANSResolutionByPixel.h"
+#include "MantidAlgorithms/GravitySANSHelper.h"
 #include "MantidAlgorithms/TOFSANSResolutionByPixelCalculator.h"
 #include "MantidAlgorithms/SANSCollimationLengthEstimator.h"
-#include "MantidAlgorithms/GravitySANSHelper.h"
-#include "MantidAlgorithms/CloneWorkspace.h"
-#include "MantidAlgorithms/RebinToWorkspace.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"

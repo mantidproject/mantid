@@ -64,25 +64,35 @@ void export_Group() {
       .value("Associativity", Group::Associativity);
 
   class_<Group, boost::noncopyable>("Group", no_init)
-      .def("__init__", make_constructor(&constructGroupFromString),
+      .def("__init__",
+           make_constructor(&constructGroupFromString, default_call_policies(),
+                            (arg("symmetryOperationString"))),
            "Construct a group from the provided initializer string.")
-      .def("__init__", make_constructor(&constructGroupFromVector),
+      .def("__init__",
+           make_constructor(&constructGroupFromVector, default_call_policies(),
+                            (arg("symmetryOperationVector"))),
            "Construct a group from the provided symmetry operation list.")
-      .def("__init__", make_constructor(&constructGroupFromPythonList),
+      .def("__init__", make_constructor(&constructGroupFromPythonList,
+                                        default_call_policies(),
+                                        (arg("symmetryOperationList"))),
            "Construct a group from a python generated symmetry operation list.")
-      .def("getOrder", &Group::order, "Returns the order of the group.")
-      .def("getCoordinateSystem", &Group::getCoordinateSystem,
+      .def("getOrder", &Group::order, arg("self"),
+           "Returns the order of the group.")
+      .def("getCoordinateSystem", &Group::getCoordinateSystem, arg("self"),
            "Returns the type of coordinate system to distinguish groups with "
            "hexagonal system definition.")
-      .def("getSymmetryOperations", &Group::getSymmetryOperations,
+      .def("getSymmetryOperations", &Group::getSymmetryOperations, arg("self"),
            "Returns the symmetry operations contained in the group.")
       .def("getSymmetryOperationStrings", &getSymmetryOperationStrings,
+           arg("self"),
            "Returns the x,y,z-strings for the contained symmetry operations.")
       .def("containsOperation", &Group::containsOperation,
+           (arg("self"), arg("operation")),
            "Checks whether a SymmetryOperation is included in Group.")
-      .def("isGroup", &Group::isGroup, "Checks whether the contained symmetry "
-                                       "operations fulfill the group axioms.")
-      .def("fulfillsAxiom", &Group::fulfillsAxiom,
+      .def("isGroup", &Group::isGroup, arg("self"),
+           "Checks whether the contained symmetry "
+           "operations fulfill the group axioms.")
+      .def("fulfillsAxiom", &Group::fulfillsAxiom, (arg("self"), arg("axiom")),
            "Checks if the contained symmetry operations fulfill the specified "
            "group axiom.");
 }

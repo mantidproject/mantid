@@ -1,10 +1,13 @@
 #include "MantidCurveFitting/Algorithms/NormaliseByPeakArea.h"
 
-#include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/IFunction.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 
 #include <boost/make_shared.hpp>
 

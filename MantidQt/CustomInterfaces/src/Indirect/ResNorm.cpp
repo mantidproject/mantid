@@ -112,6 +112,7 @@ void ResNorm::run() {
   resNorm->setProperty("EnergyMax", eMax);
   resNorm->setProperty("CreateOutput", true);
   resNorm->setProperty("OutputWorkspace", outputWsName.toStdString());
+  resNorm->setProperty("OutputWorkspaceTable", (outputWsName + "_Fit").toStdString());
   m_batchAlgoRunner->addAlgorithm(resNorm);
 
   // Handle saving

@@ -1,6 +1,6 @@
 #include "MantidWorkflowAlgorithms/StepScan.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 

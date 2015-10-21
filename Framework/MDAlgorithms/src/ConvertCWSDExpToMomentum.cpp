@@ -2,6 +2,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
@@ -24,7 +25,8 @@ DECLARE_ALGORITHM(ConvertCWSDExpToMomentum)
 /** Constructor
  */
 ConvertCWSDExpToMomentum::ConvertCWSDExpToMomentum()
-    : m_iColFilename(2), m_iColStartDetID(3), m_setQRange(true) {}
+    : m_iColFilename(2), m_iColStartDetID(3), m_setQRange(true),
+      m_isBaseName(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -173,13 +175,15 @@ ConvertCWSDExpToMomentum::createExperimentMDWorkspace() {
     g_log.debug() << "Direction " << d << ", Range = " << m_extentMins[d]
                   << ", " << m_extentMaxs[d] << "\n";
 
+  // Set Q Sample frame
+  Mantid::Geometry::QSample frame;
+
   for (size_t i = 0; i < nDimension; ++i) {
     std::string id = vec_ID[i];
     std::string name = dimensionNames[i];
-    std::string units = "A^-1";
     mdws->addDimension(
         Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
-            id, name, units, static_cast<coord_t>(m_extentMins[i]),
+            id, name, frame, static_cast<coord_t>(m_extentMins[i]),
             static_cast<coord_t>(m_extentMaxs[i]), m_numBins[i])));
   }
 
@@ -201,13 +205,15 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
   // Check whether to add / or \ to m_dataDir
   std::string sep("");
   if (m_dataDir.size() > 0) {
-    // Determine system
-    bool isWindows(false);
+// Determine system
 #if _WIN64
-    isWindows = true;
-#elif _WIND32
-    isWindows = true;
+    const bool isWindows = true;
+#elif _WIN32
+    const bool isWindows = true;
+#else
+    const bool isWindows = false;
 #endif
+
     if (isWindows && *m_dataDir.rbegin() != '\\') {
       sep = "\\";
     } else if (!isWindows && *m_dataDir.rbegin() != '/')
@@ -412,6 +418,13 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
   }
   expinfo->mutableRun().setGoniometer(dataws->run().getGoniometer(), false);
   expinfo->mutableRun().addProperty("run_number", runnumber);
+  // Add all the other propertys from original data workspace
+  const std::vector<Kernel::Property *> vec_property =
+      dataws->run().getProperties();
+  for (size_t i = 0; i < vec_property.size(); ++i) {
+    expinfo->mutableRun().addProperty(vec_property[i]->clone());
+  }
+
   m_outputWS->addExperimentInfo(expinfo);
 
   return;

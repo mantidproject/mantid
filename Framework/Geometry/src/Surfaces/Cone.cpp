@@ -19,6 +19,29 @@
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Cone.h"
 
+#ifdef ENABLE_OPENCASCADE
+// Opencascade defines _USE_MATH_DEFINES without checking whether it is already
+// used.
+// Undefine it here before we include the headers to avoid a warning
+#ifdef _MSC_VER
+#undef _USE_MATH_DEFINES
+#ifdef M_SQRT1_2
+#undef M_SQRT1_2
+#endif
+#endif
+
+#include "MantidKernel/WarningSuppressions.h"
+GCC_DIAG_OFF(conversion)
+// clang-format off
+GCC_DIAG_OFF(cast-qual)
+// clang-format on
+#include <BRepPrimAPI_MakeCone.hxx>
+GCC_DIAG_ON(conversion)
+// clang-format off
+GCC_DIAG_ON(cast-qual)
+// clang-format on
+#endif
+
 namespace Mantid {
 
 namespace Geometry {
@@ -99,9 +122,10 @@ int Cone::setSurface(const std::string &Pstr)
     return -1;
 
   // Cones on X/Y/Z axis
-  const int itemPt((item[1] == '/' && item.length() == 3) ? 2 : 1);
-  const int ptype = static_cast<int>(tolower(item[itemPt]) - 'x');
-  if (ptype < 0 || ptype >= 3)
+  const std::size_t itemPt((item[1] == '/' && item.length() == 3) ? 2 : 1);
+  const std::size_t ptype =
+      static_cast<std::size_t>(tolower(item[itemPt]) - 'x');
+  if (ptype >= 3)
     return -2;
   std::vector<double> norm(3, 0.0);
   std::vector<double> cent(3, 0.0);
@@ -112,7 +136,7 @@ int Cone::setSurface(const std::string &Pstr)
     if (!Mantid::Kernel::Strings::section(Line, cent[ptype]))
       return -3;
   } else {
-    int index;
+    std::size_t index;
     for (index = 0;
          index < 3 && Mantid::Kernel::Strings::section(Line, cent[index]);
          index++)
@@ -337,12 +361,13 @@ void Cone::write(std::ostream &OX) const
   if (Cdir || Centre.nullVector(Tolerance)) {
     cx << " k";
     cx << Tailends[Ndir + 3] << " "; // set x,y,z based on Ndir
-    cx << ((Cdir > 0) ? Centre[Cdir - 1] : Centre[-Cdir - 1]);
+    cx << ((Cdir > 0) ? Centre[static_cast<std::size_t>(Cdir - 1)]
+                      : Centre[static_cast<std::size_t>(-Cdir - 1)]);
     cx << " ";
   } else {
     cx << " k/";
     cx << Tailends[Ndir + 3] << " "; // set x,y,z based on Ndir
-    for (int i = 0; i < 3; i++)
+    for (std::size_t i = 0; i < 3; i++)
       cx << Centre[i] << " ";
   }
   const double TA = tan((M_PI * alpha) / 180.0); // tan^2(angle)
@@ -404,6 +429,15 @@ void Cone::getBoundingBox(double &xmax, double &ymax, double &zmax,
   }
 }
 
+#ifdef ENABLE_OPENCASCADE
+TopoDS_Shape Cone::createShape() {
+  gp_Ax2 gpA(gp_Pnt(Centre[0], Centre[1], Centre[2]),
+             gp_Dir(Normal[0], Normal[1], Normal[2]));
+  return BRepPrimAPI_MakeCone(gpA, 0.0,
+                              1000.0 / tan(acos(cangle * M_PI / 180.0)), 1000.0,
+                              2.0 * M_PI).Shape();
+}
+#endif
 } // NAMESPACE Geometry
 
 } // NAMESPACE Mantid

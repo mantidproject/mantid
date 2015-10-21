@@ -3,7 +3,10 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/SaveNISTDAT.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+
 #include <fstream> // used to get ofstream
 
 namespace Mantid {

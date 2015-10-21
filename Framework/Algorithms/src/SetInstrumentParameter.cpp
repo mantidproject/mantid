@@ -1,10 +1,10 @@
 #include "MantidAlgorithms/SetInstrumentParameter.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/Strings.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/Strings.h"
 
 namespace Mantid {
 namespace Algorithms {

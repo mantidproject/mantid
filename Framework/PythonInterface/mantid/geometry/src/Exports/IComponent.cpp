@@ -29,16 +29,18 @@ void export_IComponent() {
   register_ptr_to_python<boost::shared_ptr<IComponent>>();
 
   class_<IComponent, boost::noncopyable>("IComponent", no_init)
-      .def("getPos", &IComponent::getPos,
+      .def("getPos", &IComponent::getPos, arg("self"),
            "Returns the absolute position of the component")
-      .def("getDistance", &getDistance, "Returns the distance, in metres, "
-                                        "between this and the given component")
-      .def("getName", &IComponent::getName, "Returns the name of the component")
-      .def("getFullName", &IComponent::getFullName,
+      .def("getDistance", &getDistance, (arg("self"), arg("other")),
+           "Returns the distance, in metres, "
+           "between this and the given component")
+      .def("getName", &IComponent::getName, arg("self"),
+           "Returns the name of the component")
+      .def("getFullName", &IComponent::getFullName, arg("self"),
            "Returns full path name of component")
-      .def("type", &IComponent::type,
+      .def("type", &IComponent::type, arg("self"),
            "Returns the type of the component represented as a string")
-      .def("getRelativeRot", &IComponent::getRelativeRot,
+      .def("getRelativeRot", &IComponent::getRelativeRot, arg("self"),
            return_value_policy<copy_const_reference>(),
            "Returns the relative rotation as a Quat");
 }

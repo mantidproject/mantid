@@ -5,6 +5,7 @@
 #include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDFrame.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -36,6 +37,7 @@ public:
   virtual int version() const { return 1; }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "MDAlgorithms"; }
+  virtual std::map<std::string, std::string> validateInputs();
 
 private:
   void init();
@@ -43,6 +45,10 @@ private:
 
   template <typename MDE, size_t nd>
   void finish(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  Mantid::Geometry::MDFrame_uptr createMDFrame(std::string frame,
+                                               std::string unit);
+  bool checkIfFrameValid(const std::string &frame,
+                         const std::vector<std::string> &targetFrames);
 };
 
 } // namespace Mantid

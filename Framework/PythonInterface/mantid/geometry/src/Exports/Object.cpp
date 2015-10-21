@@ -13,9 +13,9 @@ void export_Object() {
   class_<Object, boost::noncopyable>("Object", no_init)
       .def("getBoundingBox",
            (const BoundingBox &(Object::*)() const) & Object::getBoundingBox,
-           return_value_policy<copy_const_reference>(),
+           arg("self"), return_value_policy<copy_const_reference>(),
            "Return the axis-aligned bounding box for this shape")
 
-      .def("getShapeXML", &Object::getShapeXML,
+      .def("getShapeXML", &Object::getShapeXML, arg("self"),
            "Returns the XML that was used to create this shape.");
 }

@@ -3,8 +3,6 @@
 #include <algorithm>
 
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/Progress.h"
-#include "MantidAPI/WorkspaceValidators.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"

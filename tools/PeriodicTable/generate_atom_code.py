@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 #!/usr/bin/env python
 
 VERSION = "1.0"
@@ -30,13 +31,13 @@ def writeMiddle(handle, abundance, atom):
         if density is None:
             density = "NAN"
         else:
-            desnity = str(density)
+            density = str(density)
     except TypeError:
         density = "NAN"
     handle.write("%f, %f, %s" % (abundance, mass, density))
 
 def writeEnd(handle):
-    handle.write(");\n");
+    handle.write(");\n")
 
 def writeIsotope(handle, element, atomicnumber):
     isotope = element._isotopes[atomicnumber]

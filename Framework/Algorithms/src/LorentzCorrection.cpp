@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/LorentzCorrection.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>

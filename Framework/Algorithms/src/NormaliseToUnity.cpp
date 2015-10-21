@@ -2,9 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/NormaliseToUnity.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/Progress.h"
+#include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/HistogramValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 
 namespace Mantid {
 namespace Algorithms {

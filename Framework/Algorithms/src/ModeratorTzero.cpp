@@ -2,14 +2,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ModeratorTzero.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidGeometry/muParser_Silent.h"
+
 #include <boost/lexical_cast.hpp>
-#include "MantidDataObjects/EventList.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -35,8 +36,7 @@ void ModeratorTzero::setFormula(const std::string &formula) {
 
 void ModeratorTzero::init() {
 
-  auto wsValidator = boost::make_shared<CompositeValidator>();
-  wsValidator->add<WorkspaceUnitValidator>("TOF");
+  auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("TOF");
   declareProperty(new WorkspaceProperty<MatrixWorkspace>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace, containing events and/or "

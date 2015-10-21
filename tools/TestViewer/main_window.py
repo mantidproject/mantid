@@ -1,12 +1,12 @@
+#pylint: disable=invalid-name
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import sys
 import time
-import optparse
 import os
 
-from PyQt4 import QtGui, uic, QtCore
+from PyQt4 import QtGui, QtCore
 import PyQt4.QtCore
 from PyQt4.QtCore import *
 import PyQt4.QtGui
@@ -14,10 +14,9 @@ from PyQt4.QtGui import *
 
 import ui_main_window
 import test_info
-from test_info import TestSuite, TestSingle, TestProject, MultipleProjects
+from test_info import TestSuite, TestSingle, TestProject
 
-import test_tree
-from test_tree import TestTreeModel, TreeItemSuite, TreeItemProject, TreeFilterProxyModel
+from test_tree import TestTreeModel, TreeFilterProxyModel
 
 
 #==================================================================================================
@@ -285,11 +284,11 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
 
         # --- Text settings ---
         memory = s.value("memory_limit_MB", 8000).toInt()[0]
-        test_info.memory_limit_kb = memory*1024;
+        test_info.memory_limit_kb = memory*1024
         self.textMemory.setPlainText("%d" % memory)
 
         timeout = s.value("process_timeout_sec", 30).toInt()[0]
-        test_info.process_timeout_sec = timeout;
+        test_info.process_timeout_sec = timeout
         self.textTimeout.setPlainText("%d" % timeout)
         self.select_by_string_lastValue = str(s.value("select_by_string_lastValue", "-Performance").toString())
 
@@ -313,10 +312,10 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         try:
             s = plainTextBox.toPlainText()
             value = int(s)
-            plainTextBox.setStyleSheet("QPlainTextEdit { background-color: white; }");
+            plainTextBox.setStyleSheet("QPlainTextEdit { background-color: white; }")
             return value
         except:
-            plainTextBox.setStyleSheet("QPlainTextEdit { background-color: tomato; }");
+            plainTextBox.setStyleSheet("QPlainTextEdit { background-color: tomato; }")
             return None
 
 
@@ -326,14 +325,14 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         """ called when one of the text boxes changes """
         s = self.settings
 
-        memory = self.get_int_from_text(self.textMemory);
+        memory = self.get_int_from_text(self.textMemory)
         if not memory is None:
-            test_info.memory_limit_kb = memory*1024;
+            test_info.memory_limit_kb = memory*1024
             s.setValue("memory_limit_MB", memory)
 
-        timeout = self.get_int_from_text(self.textTimeout);
+        timeout = self.get_int_from_text(self.textTimeout)
         if not timeout is None:
-            test_info.process_timeout_sec = timeout;
+            test_info.process_timeout_sec = timeout
             s.setValue("process_timeout_sec", timeout)
 
 
@@ -460,8 +459,8 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
                     if (time.time() - self.last_console_update) > 1.5: # Dont update more often than this:
                         self.textConsole.setText( u'<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n' +
                                                   self.stdout )
-                        sb = self.textConsole.verticalScrollBar();
-                        sb.setValue(sb.maximum());
+                        sb = self.textConsole.verticalScrollBar()
+                        sb.setValue(sb.maximum())
                         self.last_console_update = time.time()
 
 
@@ -540,7 +539,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         elif isinstance(res, TestSingle):
             self.labelTestType.setText("Single Test Results:")
         else:
-            raise "Incorrect object passed to show_results; should be TestProject, TestSuite, or TestSingle."
+            raise RuntimeError("Incorrect object passed to show_results; should be TestProject, TestSuite, or TestSingle.")
         self.labelTestName.setText( res.get_fullname() )
         self.labelTestName.hide()
         self.textResults.setText( u'<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n'
@@ -574,7 +573,8 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         parallel = self.checkInParallel.isChecked()
         # Do some setup of the worker and GUI
         num_steps = self.worker.set_parameters(self, selected_only=selected_only, make_tests=True, parallel=parallel)
-        if num_steps < 1: num_steps = 1
+        if num_steps < 1:
+            num_steps = 1
         self.progTest.setValue(0)
         self.progTest.setMaximum( num_steps )
         self.set_running(True)
@@ -631,15 +631,17 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
 def start():
     # Start the settings object.
     # TODO: Change the company name here and in MantidPlot
-    settings = QSettings("ISIS", "MantidTestViewer");
+    settings = QSettings("ISIS", "MantidTestViewer")
     settings_bin_folder = str(settings.value("bin_folder", "../../Mantid/bin").toString())
     settings_source_folder = str(settings.value("source_folder", "../../Mantid/Framework").toString())
 
     bin_folder = ""
-    if len(sys.argv) > 1: bin_folder = sys.argv[1]
+    if len(sys.argv) > 1:
+        bin_folder = sys.argv[1]
 
     source_folder = ""
-    if len(sys.argv) > 2: source_folder = sys.argv[2]
+    if len(sys.argv) > 2:
+        source_folder = sys.argv[2]
 
     if bin_folder == "--help":
         print """TestViewer.py [BINFOLDER] [SOURCEFOLDER]
@@ -690,4 +692,3 @@ def start():
 
 if __name__ == '__main__':
     start()
-

@@ -1,7 +1,4 @@
-from base import AlgorithmBaseDirective
-from docutils import nodes
-from sphinx.locale import _
-from sphinx.util.compat import make_admonition
+from mantiddoc.directives.base import AlgorithmBaseDirective
 import os
 import re
 
@@ -205,7 +202,7 @@ class AlgorithmDirective(AlgorithmBaseDirective):
 
 #------------------------------------------------------------------------------------------------------------
 
-def html_collect_pages(app):
+def html_collect_pages(dummy_app):
     """
     Write out unversioned algorithm pages that redirect to the highest version of the algorithm
     """

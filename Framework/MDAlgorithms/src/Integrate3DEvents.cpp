@@ -35,14 +35,14 @@ using Mantid::Kernel::V3D;
 Integrate3DEvents::Integrate3DEvents(
     std::vector<std::pair<double, V3D>> const &peak_q_list,
     DblMatrix const &UBinv, double radius) {
-  this->UBinv = UBinv;
-  this->radius = radius;
+  m_UBinv = UBinv;
+  m_radius = radius;
 
   int64_t hkl_key;
   for (size_t it = 0; it != peak_q_list.size(); ++it) {
     hkl_key = getHklKey(peak_q_list[it].second);
     if (hkl_key != 0) // only save if hkl != (0,0,0)
-      peak_qs[hkl_key] = peak_q_list[it].second;
+      m_peak_qs[hkl_key] = peak_q_list[it].second;
   }
 }
 
@@ -124,7 +124,12 @@ Integrate3DEvents::ellipseIntegrateEvents(
     return boost::make_shared<NoShape>();
   }
 
-  std::vector<std::pair<double, V3D>> &some_events = event_lists[hkl_key];
+  auto pos = m_event_lists.find(hkl_key);
+  if (m_event_lists.end() == pos)
+    return boost::make_shared<NoShape>();
+  ;
+
+  std::vector<std::pair<double, V3D>> &some_events = pos->second;
 
   if (some_events.size() < 3) // if there are not enough events to
   {                           // find covariance matrix, return
@@ -132,14 +137,14 @@ Integrate3DEvents::ellipseIntegrateEvents(
   }
 
   DblMatrix cov_matrix(3, 3);
-  makeCovarianceMatrix(some_events, cov_matrix, radius);
+  makeCovarianceMatrix(some_events, cov_matrix, m_radius);
 
   std::vector<V3D> eigen_vectors;
   getEigenVectors(cov_matrix, eigen_vectors);
 
   std::vector<double> sigmas;
   for (int i = 0; i < 3; i++) {
-    sigmas.push_back(stdDev(some_events, eigen_vectors[i], radius));
+    sigmas.push_back(stdDev(some_events, eigen_vectors[i], m_radius));
   }
 
   bool invalid_peak = false;
@@ -392,7 +397,7 @@ int64_t Integrate3DEvents::getHklKey2(V3D const &hkl) {
  *  @param q_vector  The q_vector to be mapped to h,k,l
  */
 int64_t Integrate3DEvents::getHklKey(V3D const &q_vector) {
-  V3D hkl = UBinv * q_vector;
+  V3D hkl = m_UBinv * q_vector;
   int h = boost::math::iround<double>(hkl[0]);
   int k = boost::math::iround<double>(hkl[1]);
   int l = boost::math::iround<double>(hkl[2]);
@@ -424,15 +429,15 @@ void Integrate3DEvents::addEvent(std::pair<double, V3D> event_Q,
   if (hkl_key == 0) // don't keep events associated with 0,0,0
     return;
 
-  auto peak_it = peak_qs.find(hkl_key);
-  if (peak_it != peak_qs.end()) {
+  auto peak_it = m_peak_qs.find(hkl_key);
+  if (peak_it != m_peak_qs.end()) {
     if (!peak_it->second.nullVector()) {
       if (hkl_integ)
-        event_Q.second = event_Q.second - UBinv * peak_it->second;
+        event_Q.second = event_Q.second - m_UBinv * peak_it->second;
       else
         event_Q.second = event_Q.second - peak_it->second;
-      if (event_Q.second.norm() < radius) {
-        event_lists[hkl_key].push_back(event_Q);
+      if (event_Q.second.norm() < m_radius) {
+        m_event_lists[hkl_key].push_back(event_Q);
       }
     }
   }
@@ -511,8 +516,8 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
     // if necessary restrict the background ellipsoid
     // to lie within the specified sphere, and adjust
     // the other sizes, proportionally
-    if (r3 * max_sigma > radius) {
-      r3 = radius / max_sigma;
+    if (r3 * max_sigma > m_radius) {
+      r3 = m_radius / max_sigma;
       r1 = r3 * 0.79370053f; // This value for r1 and r2 makes the background
       r2 = r1;               // shell volume equal to the peak region volume.
     }

@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	${SRC_FILES} ${OPENCASCADE_SRC}
 	src/ComponentParser.cpp
+	src/Crystal/BasicHKLFilters.cpp
 	src/Crystal/BraggScatterer.cpp
 	src/Crystal/BraggScattererFactory.cpp
 	src/Crystal/BraggScattererInCrystalStructure.cpp
@@ -10,6 +11,8 @@ set ( SRC_FILES
 	src/Crystal/CrystalStructure.cpp
 	src/Crystal/CyclicGroup.cpp
 	src/Crystal/Group.cpp
+	src/Crystal/HKLFilter.cpp
+	src/Crystal/HKLGenerator.cpp
 	src/Crystal/IPeak.cpp
 	src/Crystal/IndexingUtils.cpp
 	src/Crystal/IsotropicAtomBraggScatterer.cpp
@@ -25,9 +28,12 @@ set ( SRC_FILES
 	src/Crystal/ProductOfCyclicGroups.cpp
 	src/Crystal/ReducedCell.cpp
 	src/Crystal/ReflectionCondition.cpp
+	src/Crystal/ReflectionGenerator.cpp
 	src/Crystal/ScalarUtils.cpp
 	src/Crystal/SpaceGroup.cpp
 	src/Crystal/SpaceGroupFactory.cpp
+	src/Crystal/StructureFactorCalculator.cpp
+	src/Crystal/StructureFactorCalculatorSummation.cpp
 	src/Crystal/SymmetryElement.cpp
 	src/Crystal/SymmetryElementFactory.cpp
 	src/Crystal/SymmetryOperation.cpp
@@ -74,6 +80,7 @@ set ( SRC_FILES
 	src/MDGeometry/NullImplicitFunction.cpp
 	src/MDGeometry/QLab.cpp
 	src/MDGeometry/QSample.cpp
+	src/MDGeometry/UnknownFrame.cpp
 	src/Math/Acomp.cpp
 	src/Math/Algebra.cpp
 	src/Math/BnId.cpp
@@ -129,6 +136,7 @@ set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
 
 set ( INC_FILES
 	inc/MantidGeometry/ComponentParser.h
+	inc/MantidGeometry/Crystal/BasicHKLFilters.h
 	inc/MantidGeometry/Crystal/BraggScatterer.h
 	inc/MantidGeometry/Crystal/BraggScattererFactory.h
 	inc/MantidGeometry/Crystal/BraggScattererInCrystalStructure.h
@@ -139,6 +147,8 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/CrystalStructure.h
 	inc/MantidGeometry/Crystal/CyclicGroup.h
 	inc/MantidGeometry/Crystal/Group.h
+	inc/MantidGeometry/Crystal/HKLFilter.h
+	inc/MantidGeometry/Crystal/HKLGenerator.h
 	inc/MantidGeometry/Crystal/IPeak.h
 	inc/MantidGeometry/Crystal/IndexingUtils.h
 	inc/MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h
@@ -156,9 +166,12 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/ProductOfCyclicGroups.h
 	inc/MantidGeometry/Crystal/ReducedCell.h
 	inc/MantidGeometry/Crystal/ReflectionCondition.h
+	inc/MantidGeometry/Crystal/ReflectionGenerator.h
 	inc/MantidGeometry/Crystal/ScalarUtils.h
 	inc/MantidGeometry/Crystal/SpaceGroup.h
 	inc/MantidGeometry/Crystal/SpaceGroupFactory.h
+	inc/MantidGeometry/Crystal/StructureFactorCalculator.h
+	inc/MantidGeometry/Crystal/StructureFactorCalculatorSummation.h
 	inc/MantidGeometry/Crystal/SymmetryElement.h
 	inc/MantidGeometry/Crystal/SymmetryElementFactory.h
 	inc/MantidGeometry/Crystal/SymmetryOperation.h
@@ -217,6 +230,7 @@ set ( INC_FILES
 	inc/MantidGeometry/MDGeometry/NullImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/QLab.h
 	inc/MantidGeometry/MDGeometry/QSample.h
+	inc/MantidGeometry/MDGeometry/UnknownFrame.h
 	inc/MantidGeometry/Math/Acomp.h
 	inc/MantidGeometry/Math/Algebra.h
 	inc/MantidGeometry/Math/BnId.h
@@ -254,6 +268,7 @@ set ( INC_FILES
 set ( TEST_FILES
 	AcompTest.h
 	AlgebraTest.h
+	BasicHKLFiltersTest.h
 	BnIdTest.h
 	BoundingBoxTest.h
 	BraggScattererFactoryTest.h
@@ -280,6 +295,8 @@ set ( TEST_FILES
 	GeneralTest.h
 	GoniometerTest.h
 	GroupTest.h
+	HKLFilterTest.h
+	HKLGeneratorTest.h
 	HKLTest.h
 	IDFObjectTest.h
 	IMDDimensionFactoryTest.h
@@ -335,6 +352,7 @@ set ( TEST_FILES
 	ReducedCellTest.h
 	ReferenceFrameTest.h
 	ReflectionConditionTest.h
+	ReflectionGeneratorTest.h
 	RotCounterTest.h
 	RulesBoolValueTest.h
 	RulesCompGrpTest.h
@@ -348,6 +366,8 @@ set ( TEST_FILES
 	SpaceGroupFactoryTest.h
 	SpaceGroupTest.h
 	SphereTest.h
+	StructureFactorCalculatorSummationTest.h
+	StructureFactorCalculatorTest.h
 	SurfaceFactoryTest.h
 	SurfaceTest.h
 	SymmetryElementFactoryTest.h
@@ -380,10 +400,8 @@ endif(UNITY_BUILD)
 
 # ===================== Open Cascade ===================
 if (ENABLE_OPENCASCADE)
-  find_package ( OpenCascade REQUIRED )
   include_directories ( system ${OPENCASCADE_INCLUDE_DIR} )
   set (SRC_FILES ${SRC_FILES} ${OPENCASCADE_SRC} )
-  add_definitions ( -DENABLE_OPENCASCADE )
 endif ()
 
 # A few defines needed for OpenCascade on the Mac

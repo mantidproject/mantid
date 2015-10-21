@@ -2,9 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CopyInstrumentParameters.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+
+#include <iostream>
 
 namespace Mantid {
 namespace Algorithms {

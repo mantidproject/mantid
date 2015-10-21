@@ -218,6 +218,17 @@ void AlgorithmProxy::afterPropertySet(const std::string &name) {
   copyPropertiesFrom(*m_alg);
 }
 
+/**
+ * Copy properties from another property manager
+ * Making sure that the concrete alg is kept in sync
+ * @param po :: The property manager to copy
+ */
+void AlgorithmProxy::copyPropertiesFrom(const PropertyManagerOwner &po) {
+  PropertyManagerOwner::copyPropertiesFrom(po);
+  createConcreteAlg(true);
+  m_alg->copyPropertiesFrom(*this);
+}
+
 //----------------------------------------------------------------------
 // Private methods
 //----------------------------------------------------------------------
