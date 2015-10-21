@@ -69,12 +69,12 @@ class IndirectResolution(DataProcessorAlgorithm):
         iet_alg.setProperty('InputFiles', self._input_files)
         iet_alg.setProperty('SpectraRange', self._detector_range)
         iet_alg.execute()
-        
+
         group_ws = iet_alg.getProperty('OutputWorkspace').value
         icon_ws = group_ws.getItem(0).getName()
 
         workflow_prog = Progress(self, start=0.7, end=0.9, nreports=4)
-        
+
         if self._scale_factor != 1.0:
             workflow_prog.report('Scaling Workspace')
             Scale(InputWorkspace=icon_ws,

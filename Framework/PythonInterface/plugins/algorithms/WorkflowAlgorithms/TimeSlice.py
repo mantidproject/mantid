@@ -141,7 +141,7 @@ class TimeSlice(PythonAlgorithm):
             Transpose(InputWorkspace=slice_file, OutputWorkspace=slice_file)
             unit = mtd[slice_file].getAxis(0).setUnit("Label")
             unit.setLabel("Spectrum Number", "")
-            
+
             workflow_prog.report('Deleting Workspace')
             out_ws_list.append(slice_file)
             DeleteWorkspace(raw_file)
