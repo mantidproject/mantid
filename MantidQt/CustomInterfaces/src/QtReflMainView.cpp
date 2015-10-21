@@ -262,12 +262,16 @@ namespace MantidQt
     void QtReflMainView::on_comboProcessInstrument_currentIndexChanged(int index)
     {
       ui.comboSearchInstrument->setCurrentIndex(index);
+      m_calculator->setCurrentInstrumentName(ui.comboProcessInstrument->currentText().toStdString());
+      m_calculator->emitInstrumentChangedSignal();
     }
 
     /** This slot is used to syncrhonise the two instrument selection widgets */
     void QtReflMainView::on_comboSearchInstrument_currentIndexChanged(int index)
     {
       ui.comboProcessInstrument->setCurrentIndex(index);
+      m_calculator->setCurrentInstrumentName(ui.comboProcessInstrument->currentText().toStdString());
+      m_calculator->emitInstrumentChangedSignal();
     }
 
     /**
@@ -299,6 +303,7 @@ namespace MantidQt
     */
     void QtReflMainView::on_actionSlitCalculator_triggered()
     {
+      m_calculator->setCurrentInstrumentName(ui.comboProcessInstrument->currentText().toStdString());
       m_calculator->show();
     }
 

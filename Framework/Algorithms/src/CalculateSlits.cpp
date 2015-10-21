@@ -39,7 +39,7 @@ const std::string CalculateSlits::category() const {
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string CalculateSlits::summary() const {
   return "Calculates appropriate slit widths for reflectometry instruments "
-         "based on the instrument setup and desired resolution and footprint of the experiment.";
+         "based on the instrument setup, desired resolution, and desired footprint of the experiment.";
 }
 
 //----------------------------------------------------------------------------------------------
