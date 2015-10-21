@@ -6,11 +6,14 @@
 
 import os
 from mantid.simpleapi import *
+#pylint: disable=unused-import
 from mantid.kernel import funcreturns
+#pylint: disable=unused-import
 from mantid import api,geometry,config
 import numpy as np
 
 import Direct.ReductionHelpers as prop_helpers
+#pylint: disable=unused-import
 import Direct.CommonFunctions as common
 from collections import Iterable
 
@@ -23,6 +26,7 @@ class PropDescriptor(object):
     def dependencies(self):
         """Returns the list of other properties names, this property depends on"""
         return []
+#pylint: disable=unused-argument		
     def validate(self,instance, owner):
         """Interface to validate property descriptor,
            provided to check properties interaction before long run
@@ -85,13 +89,13 @@ class IncidentEnergy(PropDescriptor):
     # AUTO EI mode
         self._autoEiMode=False
         self._monitor_ws=None
-        
+
     def __get__(self,instance,owner=None):
         """ return  incident energy or list of incident energies """
         if instance is None:
             return self
         return self._incident_energy
-
+#pylint: disable=too-many-branches
     def __set__(self,instance,value):
         """ Set up incident energy or range of energies in various formats """
         if value != None:
