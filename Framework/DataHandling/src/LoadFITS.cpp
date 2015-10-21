@@ -448,14 +448,12 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
 
   // Create first workspace (with instrument definition). This is also used as
   // a template for creating others
-  Workspace2D_sptr latestWS;
-  latestWS =
-      makeWorkspace(headers[0], fileNumberInGroup, buffer, imageY, imageE,
-                    latestWS, loadAsRectImg, binSize, noiseThresh);
+  Workspace2D_sptr imgWS;
+  imgWS = makeWorkspace(headers[0], fileNumberInGroup, buffer, imageY, imageE,
+                        imgWS, loadAsRectImg, binSize, noiseThresh);
   progress.report(1, "First file loaded.");
 
-  std::vector<Workspace2D_sptr> wsOrdered(totalWS);
-  wsOrdered[0] = latestWS;
+  wsGroup->addWorkspace(imgWS);
 
   if (isInstrOtherThanIMAT(headers[0])) {
     // For now we assume IMAT except when specific headers are found by
@@ -470,7 +468,7 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
       directoryName = directoryName + "/IMAT_Definition.xml";
       loadInst->setPropertyValue("Filename", directoryName);
       loadInst->setProperty<MatrixWorkspace_sptr>(
-          "Workspace", boost::dynamic_pointer_cast<MatrixWorkspace>(latestWS));
+          "Workspace", boost::dynamic_pointer_cast<MatrixWorkspace>(imgWS));
       loadInst->execute();
     } catch (std::exception &ex) {
       g_log.information("Cannot load the instrument definition. " +
@@ -481,17 +479,11 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
   // don't feel tempted to parallelize this loop as it is - it uses the same
   // imageY and imageE buffers for all the workspaces
   for (int64_t i = 1; i < static_cast<int64_t>(totalWS); ++i) {
-    latestWS =
-        makeWorkspace(headers[i], fileNumberInGroup, buffer, imageY, imageE,
-                      latestWS, loadAsRectImg, binSize, noiseThresh);
-    wsOrdered[i] = latestWS;
+    imgWS = makeWorkspace(headers[i], fileNumberInGroup, buffer, imageY, imageE,
+                          imgWS, loadAsRectImg, binSize, noiseThresh);
     progress.report("Loaded file " + boost::lexical_cast<std::string>(i + 1) +
                     " of " + boost::lexical_cast<std::string>(totalWS));
-  }
-
-  // Add to group - done here to maintain sequence
-  for (size_t i = 0; i < wsOrdered.size(); ++i) {
-    wsGroup->addWorkspace(wsOrdered[i]);
+    wsGroup->addWorkspace(imgWS);
   }
 
   setProperty("OutputWorkspace", wsGroup);
