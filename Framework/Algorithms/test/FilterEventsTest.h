@@ -330,8 +330,7 @@ public:
     DataObjects::EventList elist3 = filteredws1->getEventList(3);
     elist3.sortPulseTimeTOF();
 
-    if (elist3.getNumberEvents() > 0)
-    {
+    if (elist3.getNumberEvents() > 0) {
       DataObjects::TofEvent eventmin = elist3.getEvent(0);
       TS_ASSERT_EQUALS(eventmin.pulseTime().totalNanoseconds(), runstart_i64);
       TS_ASSERT_DELTA(eventmin.tof(), 80 * 1000, 1.0E-4);
@@ -377,15 +376,16 @@ public:
     TS_ASSERT(filter.isExecuted());
 
     // Check number of output workspaces
-    std::vector<std::string> vecwsname = filter.getProperty("OutputWorkspaceNames");
+    std::vector<std::string> vecwsname =
+        filter.getProperty("OutputWorkspaceNames");
     TS_ASSERT_EQUALS(vecwsname.size(), 9);
 
     for (size_t i = 0; i < vecwsname.size(); ++i) {
       EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve(vecwsname[i]));
-      std::cout << "Output workspace " << vecwsname[i] << ": " << ws->getNumberEvents() << "\n";
+          AnalysisDataService::Instance().retrieve(vecwsname[i]));
+      std::cout << "Output workspace " << vecwsname[i] << ": "
+                << ws->getNumberEvents() << "\n";
     }
-
 
     EventWorkspace_sptr ws5 = boost::dynamic_pointer_cast<EventWorkspace>(
         AnalysisDataService::Instance().retrieve("SplittedDataElastic_5"));
@@ -720,8 +720,7 @@ public:
     std::cout << "source position: " << sourcepos.toString() << "\n";
     double l1 = samplepos.distance(sourcepos);
     std::cout << "L1 = " << l1 << "\n";
-    for (size_t i = 0; i < eventWS->getNumberHistograms(); ++i)
-    {
+    for (size_t i = 0; i < eventWS->getNumberHistograms(); ++i) {
       Kernel::V3D detpos = eventWS->getDetector(i)->getPos();
       double l2 = samplepos.distance(detpos);
       std::cout << "detector " << i << ": L2 = " << l2 << "\n";
@@ -872,7 +871,7 @@ public:
 
     // Create some mostly-reasonable fake data.
     unsigned seed1 = 1;
-    std::minstd_rand0 g1 (seed1);
+    std::minstd_rand0 g1(seed1);
 
     for (int time = 0; time < 1000; time++) {
       // All pulse times from 0 to 999 in seconds
@@ -880,7 +879,8 @@ public:
           static_cast<int64_t>(time * pulselength + runstart));
       double tof = static_cast<double>(g1() % 1000);
       el += TofEvent(tof, pulsetime);
-      // std::cout << "Added 20th event as " << tof << ", " << pulsetime << "\n";
+      // std::cout << "Added 20th event as " << tof << ", " << pulsetime <<
+      // "\n";
     }
 
     return el;

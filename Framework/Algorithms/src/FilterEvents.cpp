@@ -673,7 +673,8 @@ void FilterEvents::setupCustomizedTOFCorrection() {
     throw runtime_error(errss.str());
   }
 
-  // Parse detector and its TOF correction (i.e., offset factor and tof shift) to a map
+  // Parse detector and its TOF correction (i.e., offset factor and tof shift)
+  // to a map
   map<detid_t, double> toffactormap;
   map<detid_t, double> tofshiftmap;
   size_t numrows = m_detCorrectWorkspace->rowCount();
@@ -690,7 +691,8 @@ void FilterEvents::setupCustomizedTOFCorrection() {
     } else {
       // Error, throw!
       stringstream errss;
-      errss << "Correction (i.e., offset) equal to " << offset_factor << " of row "
+      errss << "Correction (i.e., offset) equal to " << offset_factor
+            << " of row "
             << "is out of range [0, 1].";
       throw runtime_error(errss.str());
     }
@@ -713,8 +715,8 @@ void FilterEvents::setupCustomizedTOFCorrection() {
   } else if (toffactormap.size() < numhist) {
     stringstream errss;
     errss << "Input correction table workspace has more detectors ("
-          << toffactormap.size() << ") than input workspace " << m_eventWS->name()
-          << "'s spectra number (" << numhist << ".\n";
+          << toffactormap.size() << ") than input workspace "
+          << m_eventWS->name() << "'s spectra number (" << numhist << ".\n";
     throw runtime_error(errss.str());
   }
 
