@@ -1427,10 +1427,12 @@ void ScriptRepositoryImpl::parseCentralRepository(Repository &repo) {
     Json::Value pt =
         readJsonFile(filename, "Error reading .repository.json file");
 
-    // This is looping through the member name list rather than using Json::ValueIterator
-    // as a workaround for a bug in the JsonCpp library (Json::ValueIterator is not exported)
+    // This is looping through the member name list rather than using
+    // Json::ValueIterator
+    // as a workaround for a bug in the JsonCpp library (Json::ValueIterator is
+    // not exported)
     Json::Value::Members member_names = pt.getMemberNames();
-    for (unsigned int i=0; i<member_names.size(); ++i) {
+    for (unsigned int i = 0; i < member_names.size(); ++i) {
       std::string filepath = member_names[i];
       if (!isEntryValid(filepath))
         continue;
@@ -1490,9 +1492,14 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
 
   try {
     Json::Value pt = readJsonFile(filename, "Error reading .local.json file");
-    for (auto it = pt.begin(); it != pt.end(); it++) {
 
-      std::string filepath = it.key().asString();
+    // This is looping through the member name list rather than using
+    // Json::ValueIterator
+    // as a workaround for a bug in the JsonCpp library (Json::ValueIterator is
+    // not exported)
+    Json::Value::Members member_names = pt.getMemberNames();
+    for (unsigned int i = 0; i < member_names.size(); ++i) {
+      std::string filepath = member_names[i];
       Json::Value entry_json = pt.get(filepath, "");
 
       entry_it = repo.find(filepath);
@@ -1506,8 +1513,10 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
               DateAndTime(entry_json.get("downloaded_pubdate", "").asString());
           entry_it->second.downloaded_date =
               DateAndTime(entry_json.get("downloaded_date", "").asString());
+          std::string auto_update =
+              entry_json.get("auto_update", "false").asString();
           entry_it->second.auto_update =
-              entry_json.get("auto_update", false).asBool();
+              (auto_update == "true"); // get().asBool() fails here on OS X
 
         } else {
           // if the entry was not found locally or remotely, this means
@@ -1598,6 +1607,7 @@ void ScriptRepositoryImpl::updateLocalJson(const std::string &path,
         entry.downloaded_pubdate.toFormattedString();
     replace_entry["auto_update"] = ((entry.auto_update) ? "true" : "false");
 
+    // Replace existing entry for this file
     local_json.removeMember(path);
     local_json[path] = replace_entry;
   }
