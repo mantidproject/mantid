@@ -3097,7 +3097,7 @@ void SANSRunWindow::enableOrDisableDefaultSave() {
   if (m_outputWS.isEmpty()) { // setEnabled(false) gets run below
   } else if (m_uiForm.outfile_edit->text()
                  .isEmpty()) { // setEnabled(false) gets run below
-  } else { // ensure that one format box is checked
+  } else {                     // ensure that one format box is checked
     for (SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end();
          ++i) {
       if (i.key()->isChecked()) {
@@ -3482,7 +3482,7 @@ SANSRunWindow::getGroupMember(Mantid::API::Workspace_const_sptr in,
 QStringList SANSRunWindow::getSaveAlgs() {
   QStringList checked;
   for (SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end();
-       ++i) { // the key is the check box
+       ++i) {                   // the key is the check box
     if (i.key()->isChecked()) { // and value() is the name of the algorithm
                                 // associated with that checkbox
       checked.append(i.value());
