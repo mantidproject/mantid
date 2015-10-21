@@ -1,4 +1,4 @@
-import unittest
+﻿import unittest
 import sys
 import math
 from testhelpers import create_algorithm, run_algorithm, can_be_instantiated, WorkspaceCreationHelper
@@ -349,11 +349,11 @@ class MatrixWorkspaceTest(unittest.TestCase):
         run_algorithm('CreateWorkspace', OutputWorkspace='ws1',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
         run_algorithm('CreateWorkspace', OutputWorkspace='ws_mon',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
         
-        ws1=mtd['ws1']
+        ws1=AnalysisDataService.retrieve('ws1')
         monWs = ws1.getMonitorWorkspace()
         self.assertTrue(monWs is None)
         
-        monWs = mtd['ws_mon']
+        monWs = AnalysisDataService.retrieve('ws_mon')
         ws1.setMonitorWorkspace(monWs)
         monWs.setTitle("My Fake Monitor workspace")
         
@@ -362,13 +362,21 @@ class MatrixWorkspaceTest(unittest.TestCase):
         
         ws1.clearMonitorWorkspace()
         monWs1 = ws1.getMonitorWorkspace()
-        self.assertTrue(monWs1 is None)        
+        self.assertTrue(monWs1 is None)
+
+        # Check weak pointer issues
+        ws1.setMonitorWorkspace(monWs)
+        wms=ws1.getMonitorWorkspace()
+        allFine = False
+        try:
+            ws1.setMonitorWorkspace(wms)
+            allFine = True
+        except ValueError:            
+            pass
+        self.assertTrue(allFine)
 
 if __name__ == '__main__':
-    unittest.main()
+    #unittest.main()
     #Testing particular test from Mantid
-    #class theTester(MatrixWorkspaceTest):
-    #    def runTest():
-    #        pass
-    #tester = theTester()
-    #tester.test_setGetMonitorWS()
+    tester=MatrixWorkspaceTest('test_setGetMonitorWS')
+    tester.test_setGetMonitorWS()

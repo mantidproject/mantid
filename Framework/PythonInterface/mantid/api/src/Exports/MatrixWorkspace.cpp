@@ -89,14 +89,15 @@ void setMonitorWorkspace(MatrixWorkspace &self,
 
   MatrixWorkspace_sptr monWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
       Mantid::PythonInterface::ExtractWorkspace(value)());
-  if (monWS) {
-    if (monWS.get() == &self) {
-      throw std::runtime_error(
-          "To avoid memory leak, monitor workspace"
-          " can not be the same workspace as the host workspace");
-    }
-  }
   self.setMonitorWorkspace(monWS);
+}
+/**
+* @param self  :: A reference to the calling object
+* 
+*@return weak pointer to monitor workspace used by python
+*/
+boost::weak_ptr<MatrixWorkspace> getMonitorWorkspace(MatrixWorkspace &self) {
+	return boost::weak_ptr<MatrixWorkspace>(self.monitorWorkspace());
 }
 /**
  * Clear monitor workspace attached to for current workspace.
@@ -350,7 +351,7 @@ void export_MatrixWorkspace() {
            "Performs a comparison operation on two workspaces, using the "
            "CheckWorkspacesMatch algorithm")
       //---------   monitor workspace --------------------------------------
-      .def("getMonitorWorkspace", &MatrixWorkspace::monitorWorkspace,
+      .def("getMonitorWorkspace", &getMonitorWorkspace,
            args("self"),
            "Return internal monitor workspace bound to current workspace.")
       .def("setMonitorWorkspace", &setMonitorWorkspace,
