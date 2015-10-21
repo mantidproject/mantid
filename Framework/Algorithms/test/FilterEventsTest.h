@@ -16,6 +16,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSplitter.h"
 
+#include <random>
+
 using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
@@ -869,6 +871,9 @@ public:
     EventList el = EventList();
 
     // Create some mostly-reasonable fake data.
+    unsigned seed1 = 1;
+    std::minstd_rand0 g1 (seed1);
+
     srand(1234); // Fixed random seed
     for (int time = 0; time < 1000; time++) {
       // All pulse times from 0 to 999 in seconds
@@ -876,8 +881,10 @@ public:
           static_cast<int64_t>(time * pulselength + runstart));
       double tof = rand() % 1000;
       el += TofEvent(tof, pulsetime);
-      if (time == 20)
-        std::cout << "Added 20th event as " << tof << ", " << pulsetime << "\n";
+
+      std::cout << "Added 20th event as " << tof << ", " << pulsetime
+                << " | " << "g() = " << g1() << "\n";
+
     }
 
     return el;
