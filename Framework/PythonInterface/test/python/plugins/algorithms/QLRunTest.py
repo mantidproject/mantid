@@ -7,13 +7,15 @@ class QLRunTest(unittest.TestCase):
     _res_ws = None
     _sample_ws = None
     _num_bins = None
+    _num_hists = None
 
     def setUp(self):
         self._res_ws = Load(Filename='irs26173_graphite002_res.nxs',
                             OutputWorkspace='__QLRunTest_Resolution')
-        self._sample_ws = Load(Filename='irs26173_graphite002_red.nxs',
-                            OutputWorkspace='__QLRunTest_Vanadium')
+        self._sample_ws = Load(Filename='irs26176_graphite002_red.nxs',
+                            OutputWorkspace='__QLRunTest_Sample')
         self._num_bins = self._sample_ws.blocksize()
+        self._num_hists = self._sample_ws.getNumberHistograms()
         
                             
     def _validate_QLr_result(self, result, probability, group):
@@ -29,14 +31,14 @@ class QLRunTest(unittest.TestCase):
         # Test size/shape of result
         self.assertTrue(isinstance(result, MatrixWorkspace))
         self.assertEquals(result.getNumberHistograms(), 21)
-        self.assertEquals(result.blocksize(), self._num_bins)
-        self.assertEquals(result.getAxis(0).getUnit().unitID(), 'q')
+        self.assertEquals(result.blocksize(), self._num_hists)
+        self.assertEquals(result.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
 
         # Test size/shape of probability
         self.assertTrue(isinstance(probability, MatrixWorkspace))
         self.assertEquals(probability.getNumberHistograms(), 3)
-        self.assertEquals(probability.blocksize(), self._num_bins)
-        self.assertEquals(result.getAxis(0).getUnit().unitID(), 'q')
+        self.assertEquals(probability.blocksize(), self._num_hists)
+        self.assertEquals(result.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
 
         # Test size/shape of group fitting workspaces
         self.assertTrue(isinstance(group, WorkspaceGroup))
@@ -47,8 +49,7 @@ class QLRunTest(unittest.TestCase):
             sub_ws = group.getItem(i)
             self.assertTrue(isinstance(sub_ws, MatrixWorkspace))
             self.assertEqual(sub_ws.getNumberHistograms(), 5)
-            self.assertEqual(sub_ws.blocksize(), self._num_bins)
-            self.assertEquals(sub_ws.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
+            self.assertEquals(sub_ws.getAxis(0).getUnit().unitID(), 'DeltaE')
 
 
     def _validate_QSe_result(self, result, group):
@@ -90,7 +91,7 @@ class QLRunTest(unittest.TestCase):
                                         SampleBins=1,
                                         ResolutionBins=1,
                                         Elastic=False,
-                                        Background='Sloping'
+                                        Background='Sloping',
                                         FixedWidth=False,
                                         UseResNorm=False,
                                         WidthFile='',
