@@ -6,9 +6,11 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/NotebookWriter.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Utils.h"
+#include "MantidQtCustomInterfaces/ProgressableView.h"
 #include "MantidQtCustomInterfaces/ReflCatalogSearcher.h"
 #include "MantidQtCustomInterfaces/ReflLegacyTransferStrategy.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
@@ -33,6 +35,18 @@ using namespace MantidQt::MantidWidgets;
 
 namespace
 {
+
+class ReflProgress : public Mantid::Kernel::ProgressBase {
+
+public:
+  ReflProgress(double start, double end, int64_t nSteps)
+      : ProgressBase(start, end, nSteps) {}
+
+  void doReport(const std::string &msg) {
+    // TODO.
+  }
+  ~ReflProgress() {}
+};
 
 void validateModel(ITableWorkspace_sptr model) {
   if (!model)
@@ -105,8 +119,10 @@ ITableWorkspace_sptr createDefaultWorkspace() {
 namespace MantidQt {
 namespace CustomInterfaces {
 ReflMainViewPresenter::ReflMainViewPresenter(
-    ReflMainView *view, boost::shared_ptr<IReflSearcher> searcher)
-    : m_view(view), m_tableDirty(false), m_searcher(searcher),
+    ReflMainView *mainView, ProgressableView *progressView,
+    boost::shared_ptr<IReflSearcher> searcher)
+    : m_view(mainView), m_progressView(progressView), m_tableDirty(false),
+      m_searcher(searcher),
       m_transferStrategy(new ReflLegacyTransferStrategy()),
       m_addObserver(*this, &ReflMainViewPresenter::handleAddEvent),
       m_remObserver(*this, &ReflMainViewPresenter::handleRemEvent),
@@ -1455,7 +1471,8 @@ void ReflMainViewPresenter::transfer() {
     runs[run] = description;
   }
 
-  auto newRows = m_transferStrategy->transferRuns(runs);
+  ReflProgress progress(0, 1, selectedRows.size());
+  auto newRows = m_transferStrategy->transferRuns(runs, progress);
 
   std::map<std::string, int> groups;
   // Loop over the rows (vector elements)

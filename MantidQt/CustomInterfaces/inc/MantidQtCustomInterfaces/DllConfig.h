@@ -1,6 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_DLLCONFIG_H_
 #define MANTIDQTCUSTOMINTERFACES_DLLCONFIG_H_
 
+#include "MantidKernel/System.h"
+
 /*  
     This file contains the DLLExport/DLLImport linkage configuration for the 
     MantidQt CustomInterfaces library
@@ -26,9 +28,9 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifdef IN_MANTIDQT_CUSTOMINTERFACES
-#define MANTIDQT_CUSTOMINTERFACES_DLL Q_DECL_EXPORT
+#define MANTIDQT_CUSTOMINTERFACES_DLL DLLExport
 #else
-#define MANTIDQT_CUSTOMINTERFACES_DLL Q_DECL_IMPORT
+#define MANTIDQT_CUSTOMINTERFACES_DLL DLLImport
 #endif
 
 #endif // MANTIDQTCUSTOMINTERFACES_DLLCONFIG_H_

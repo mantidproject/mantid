@@ -5,6 +5,12 @@
 #include <string>
 #include <vector>
 
+namespace Mantid {
+namespace Kernel {
+// Forward dec
+class ProgressBase;
+}
+}
 namespace MantidQt
 {
   namespace CustomInterfaces
@@ -38,11 +44,16 @@ namespace MantidQt
       virtual ~ReflTransferStrategy() {};
 
       /**
-       * @param runRows : A map where the keys are the runs and the values the descriptions
+       * @param runRows : A map where the keys are the runs and the values the
+       * descriptions
+       * @param progress : Progress object to notify.
        * @returns A vector of maps where each map represents a row,
-       * with Keys matching Column headings and Values matching the row entries for those columns
+       * with Keys matching Column headings and Values matching the row entries
+       * for those columns
        */
-      virtual std::vector<std::map<std::string,std::string> > transferRuns(const std::map<std::string,std::string>& runRows) = 0;
+      virtual std::vector<std::map<std::string, std::string>>
+      transferRuns(const std::map<std::string, std::string> &runRows,
+                   Mantid::Kernel::ProgressBase &progress) = 0;
     };
   }
 }

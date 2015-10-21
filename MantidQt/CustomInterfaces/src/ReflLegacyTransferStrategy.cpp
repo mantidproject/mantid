@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/ReflLegacyTransferStrategy.h"
 #include "MantidQtCustomInterfaces/ReflTableSchema.h"
+#include "MantidKernel/ProgressBase.h"
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
@@ -8,8 +9,10 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    std::vector<std::map<std::string,std::string> > ReflLegacyTransferStrategy::transferRuns(const std::map<std::string,std::string>& runRows)
-    {
+  std::vector<std::map<std::string, std::string>>
+  ReflLegacyTransferStrategy::transferRuns(
+      const std::map<std::string, std::string> &runRows,
+      Mantid::Kernel::ProgressBase &progress) {
       /*
        * If the descriptions are the same except for theta: same group, different rows.
        * If the descriptions are the same including theta: same row with runs separated by '+'
@@ -59,6 +62,8 @@ namespace MantidQt
 
         //Assign this description to the group it belongs to
         groupsByDesc[desc] = groupsByDesc[cleanDesc];
+
+        progress.report();
       }
 
       //All the data we need is now properly organised, so we can quickly throw out the rows needed

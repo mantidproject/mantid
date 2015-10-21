@@ -5,12 +5,14 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <gmock/gmock.h>
 
 #include "MantidQtCustomInterfaces/ReflLegacyTransferStrategy.h"
 #include "MantidQtCustomInterfaces/ReflTableSchema.h"
-
+#include "ReflMainViewMockObjects.h"
 
 using namespace MantidQt::CustomInterfaces;
+using namespace testing;
 
 class ReflLegacyTransferStrategyTest : public CxxTest::TestSuite
 {
@@ -50,9 +52,14 @@ public:
     expected.push_back(expectedRow);
 
     ReflLegacyTransferStrategy strategy;
-    auto output = strategy.transferRuns(input);
+
+    MockProgressBase progress;
+    EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
+
+    auto output = strategy.transferRuns(input, progress);
 
     TS_ASSERT_EQUALS(output, expected);
+    TS_ASSERT(Mock::VerifyAndClear(&progress));
   }
 
   void testGroupedTransfer()
@@ -82,9 +89,14 @@ public:
     expected.push_back(expectedRow);
 
     ReflLegacyTransferStrategy strategy;
-    auto output = strategy.transferRuns(input);
+
+    MockProgressBase progress;
+    EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
+
+    auto output = strategy.transferRuns(input, progress);
 
     TS_ASSERT_EQUALS(output, expected);
+    TS_ASSERT(Mock::VerifyAndClear(&progress));
   }
 
   void testThetaExtraction()
@@ -121,9 +133,14 @@ public:
     std::sort(expected.begin(), expected.end());
 
     ReflLegacyTransferStrategy strategy;
-    auto output = strategy.transferRuns(input);
+
+    MockProgressBase progress;
+    EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
+
+    auto output = strategy.transferRuns(input, progress);
 
     TS_ASSERT_EQUALS(output, expected);
+    TS_ASSERT(Mock::VerifyAndClear(&progress));
   }
 
   void testComplexExtraction()
@@ -179,9 +196,14 @@ public:
     std::sort(expected.begin(), expected.end());
 
     ReflLegacyTransferStrategy strategy;
-    auto output = strategy.transferRuns(input);
+
+    MockProgressBase progress;
+    EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
+
+    auto output = strategy.transferRuns(input, progress);
 
     TS_ASSERT_EQUALS(output, expected);
+    TS_ASSERT(Mock::VerifyAndClear(&progress));
   }
 };
 

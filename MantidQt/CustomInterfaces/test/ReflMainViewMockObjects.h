@@ -2,11 +2,13 @@
 #define MANTID_CUSTOMINTERFACES_REFLMAINVIEWMOCKOBJECTS_H
 
 #include <gmock/gmock.h>
+#include "MantidQtCustomInterfaces/ProgressableView.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/ReflTableSchema.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidKernel/ProgressBase.h"
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
@@ -62,6 +64,18 @@ public:
   virtual void loadSettings(std::map<std::string,QVariant>&) {};
   virtual std::string getProcessInstrument() const {return "FAKE";}
   virtual boost::shared_ptr<IReflPresenter> getPresenter() const {return boost::shared_ptr<IReflPresenter>();}
+};
+
+class MockProgressableView : public ProgressableView {
+public:
+  ~MockProgressableView() {}
+};
+
+class MockProgressBase : public Mantid::Kernel::ProgressBase {
+
+public:
+  MOCK_METHOD1(doReport, void(const std::string &));
+  ~MockProgressBase() {}
 };
 
 #endif /*MANTID_CUSTOMINTERFACES_REFLMAINVIEWMOCKOBJECTS_H*/

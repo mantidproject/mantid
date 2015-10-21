@@ -3,6 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtCustomInterfaces/ProgressableView.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/ReflSearchModel.h"
@@ -39,8 +41,10 @@ namespace MantidQt
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport QtReflMainView : public MantidQt::API::UserSubWindow, public ReflMainView
-    {
+  class MANTIDQT_CUSTOMINTERFACES_DLL QtReflMainView
+      : public MantidQt::API::UserSubWindow,
+        public ReflMainView,
+        public ProgressableView {
       Q_OBJECT
     public:
       QtReflMainView(QWidget *parent = 0);
