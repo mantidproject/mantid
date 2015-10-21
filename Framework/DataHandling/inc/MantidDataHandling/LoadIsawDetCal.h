@@ -5,6 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/Instrument.h"
+
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
@@ -70,6 +72,8 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
+
+  Geometry::Instrument_sptr getCheckInst(API::Workspace_sptr ws);
 };
 
 } // namespace DataHandling

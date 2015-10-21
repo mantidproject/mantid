@@ -1,3 +1,4 @@
+#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 """
     This file defines what happens in each step in the data reduction, it's

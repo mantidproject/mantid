@@ -59,6 +59,10 @@ namespace MantidQt
       virtual void showAlgorithmDialog(const std::string& algorithm) = 0;
       virtual std::string requestNotebookPath() = 0;
 
+      //Settings
+      virtual void saveSettings(const std::map<std::string,QVariant>& options) = 0;
+      virtual void loadSettings(std::map<std::string,QVariant>& options) = 0;
+
       //Plotting
       virtual void plotWorkspaces(const std::set<std::string>& workspaces) = 0;
 

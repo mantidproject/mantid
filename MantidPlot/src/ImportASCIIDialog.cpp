@@ -464,7 +464,7 @@ void ImportASCIIDialog::previewTable()
 
   int importMode = d_import_mode->currentIndex();
   if (importMode == NewTables) {
-    importMode = (ImportASCIIDialog::ImportMode)Table::Overwrite;
+    importMode = ImportASCIIDialog::NewWorkspace; //(ImportASCIIDialog::ImportMode)Table::Overwrite;
   } else {
     importMode -= 2;
   }
@@ -494,7 +494,7 @@ void ImportASCIIDialog::previewMatrix() {
 
   int importMode = d_import_mode->currentIndex();
   if (importMode == NewMatrices) {
-    importMode = (ImportASCIIDialog::ImportMode)Matrix::Overwrite;
+    importMode = ImportASCIIDialog::NewWorkspace; //(ImportASCIIDialog::ImportMode)Matrix::Overwrite;
   } else {
     // Overwrite-2 => NewColumns (in both Matrix::importMode and
     // ImportASCIIDialog::importMode)

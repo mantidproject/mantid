@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 #! /usr/bin/python
 # Convert an acor file into VTK format (specifically a vtp file)
 from xml.dom import minidom

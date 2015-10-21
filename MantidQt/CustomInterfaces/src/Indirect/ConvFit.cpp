@@ -28,7 +28,8 @@ namespace IDA {
 
 ConvFit::ConvFit(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_stringManager(NULL), m_cfTree(NULL),
-      m_fixedProps(), m_cfInputWS(), m_cfInputWSName(), m_confitResFileType() {
+      m_fixedProps(), m_cfInputWS(), m_cfInputWSName(), m_confitResFileType(),
+      m_runMin(-1), m_runMax(-1) {
   m_uiForm.setupUi(parent);
 }
 
@@ -996,7 +997,7 @@ void ConvFit::updatePlot() {
       return;
     if ((specNo - m_runMin) >= 0) {
       MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-		  outputGroup->getItem(specNo- m_runMin));
+          outputGroup->getItem(specNo - m_runMin));
       if (ws) {
         m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
         m_uiForm.ppPlot->addSpectrum("Diff", ws, 2, Qt::blue);
@@ -1102,8 +1103,7 @@ void ConvFit::singleFit() {
       runPythonCode(
           QString(
               "from IndirectCommon import getWSprefix\nprint getWSprefix('") +
-          m_cfInputWSName + QString("')\n"))
-          .trimmed();
+          m_cfInputWSName + QString("')\n")).trimmed();
   m_singleFitOutputName +=
       QString("conv_") + fitType + bgType + m_uiForm.spPlotSpectrum->text();
   int maxIterations =

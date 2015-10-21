@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 #pylint: disable=no-init
 from mantid import config
 import os
