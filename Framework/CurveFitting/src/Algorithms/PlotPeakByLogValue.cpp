@@ -326,8 +326,8 @@ void PlotPeakByLogValue::exec() {
       row << chi2;
 
       Prog += dProg;
-	  std::string current = boost::lexical_cast<std::string>(i);
-	  progress(Prog, ("Fitting Workspace: (" + current + ") - "));
+      std::string current = boost::lexical_cast<std::string>(i);
+      progress(Prog, ("Fitting Workspace: (" + current + ") - "));
       interruption_point();
 
       if (individual) {

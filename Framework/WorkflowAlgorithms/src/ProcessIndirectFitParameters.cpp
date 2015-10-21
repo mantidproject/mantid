@@ -95,7 +95,7 @@ void ProcessIndirectFitParameters::exec() {
   const size_t totalNames = parameterNames.size();
   Progress tblSearchProg = Progress(this, 0.0, 0.5, totalNames * 2);
   for (size_t i = 0; i < totalNames; i++) {
-	tblSearchProg.report("Splitting table into relevant columns");
+    tblSearchProg.report("Splitting table into relevant columns");
     auto const allColumnNames = inputWs->getColumnNames();
     auto columns = searchForFitParams(parameterNames.at(i), allColumnNames);
     auto errColumns =
@@ -109,7 +109,7 @@ void ProcessIndirectFitParameters::exec() {
     auto convertToMatrix =
         createChildAlgorithm("ConvertTableToMatrixWorkspace", -1, -1, true);
     convertToMatrix->setAlwaysStoreInADS(true);
-	tblSearchProg.report("Converting Column to Matrix");
+    tblSearchProg.report("Converting Column to Matrix");
     for (size_t j = 0; j < min; j++) {
       convertToMatrix->setProperty("InputWorkspace", inputWs);
       convertToMatrix->setProperty("ColumnX", xColumn);
@@ -138,7 +138,7 @@ void ProcessIndirectFitParameters::exec() {
   for (size_t j = 0; j < wsMax; j++) {
     std::string tempPeakWs = workspaceNames.at(j).at(0);
     const size_t paramMax = workspaceNames.at(j).size();
-	workflowProg.report("Conjoining matrix workspaces");
+    workflowProg.report("Conjoining matrix workspaces");
     for (size_t k = 1; k < paramMax; k++) {
       auto paramWs = workspaceNames.at(j).at(k);
       conjoin->setProperty("InputWorkspace1", tempPeakWs);
@@ -152,7 +152,7 @@ void ProcessIndirectFitParameters::exec() {
   // Join all peaks into a single workspace
   std::string tempWorkspace = tempWorkspaces.at(0);
   for (auto it = tempWorkspaces.begin() + 1; it != tempWorkspaces.end(); ++it) {
-	workflowProg.report("Joining peak workspaces");
+    workflowProg.report("Joining peak workspaces");
     conjoin->setProperty("InputWorkspace1", tempWorkspace);
     conjoin->setProperty("InputWorkspace2", *it);
     conjoin->executeAsChildAlg();
