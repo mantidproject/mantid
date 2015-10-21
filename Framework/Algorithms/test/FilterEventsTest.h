@@ -405,7 +405,7 @@ public:
     EventList &ev0 = ws7->getEventList(0);
     TS_ASSERT_EQUALS(ev0.getNumberEvents(), 1);
     std::vector<double> vectofs = ev0.getTofs();
-    TS_ASSERT_DELTA(vectofs[0], 741.0, 0.001);
+    TS_ASSERT_DELTA(vectofs[0], 272.0, 0.001);
 
     // Delete all the workspaces generated here
     AnalysisDataService::Instance().remove("MockDirectEventWS");
@@ -874,17 +874,13 @@ public:
     unsigned seed1 = 1;
     std::minstd_rand0 g1 (seed1);
 
-    srand(1234); // Fixed random seed
     for (int time = 0; time < 1000; time++) {
       // All pulse times from 0 to 999 in seconds
       Kernel::DateAndTime pulsetime(
           static_cast<int64_t>(time * pulselength + runstart));
-      double tof = rand() % 1000;
+      double tof = static_cast<double>(g1() % 1000);
       el += TofEvent(tof, pulsetime);
-
-      std::cout << "Added 20th event as " << tof << ", " << pulsetime
-                << " | " << "g() = " << g1() << "\n";
-
+      // std::cout << "Added 20th event as " << tof << ", " << pulsetime << "\n";
     }
 
     return el;
