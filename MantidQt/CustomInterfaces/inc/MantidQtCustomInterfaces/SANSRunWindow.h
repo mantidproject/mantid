@@ -420,6 +420,9 @@ private:
   void checkWaveLengthAndQValues(bool &isValid, QString &message,
                                  QLineEdit *min, QLineEdit *max,
                                  QComboBox *selection, QString type);
+  /// LOQ specific settings
+  void applyLOQSettings(bool isNowLOQ);
+
 
   UserSubWindow * slicingWindow;
 

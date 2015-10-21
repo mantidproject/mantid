@@ -3059,7 +3059,21 @@ void SANSRunWindow::handleInstrumentChange() {
   m_uiForm.sliceEvent->setHidden(hide_events_gui);
   m_uiForm.l_events_label->setHidden(hide_events_gui);
   m_uiForm.l_events_binning->setHidden(hide_events_gui);
+
+  // Provide LOQ Specific settings
+  const auto isNowLOQ = m_uiForm.inst_opt->currentText() == "LOQ";
+  applyLOQSettings(isNowLOQ);
 }
+
+/**
+ * Apply or unapply LOQ-specific settings
+ * @param isNowLOQ: if true then apply LOQ settings else unapply
+ */
+void SANSRunWindow::applyLOQSettings(bool isNowLOQ) {
+  // M4 Transmission monitor
+  m_uiForm.trans_M4_check_box->setDisabled(isNowLOQ);
+}
+
 /** Record if the user has changed the default filename, because then we don't
 *  change it
 */
@@ -4098,6 +4112,10 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
                    "value.");
     }
   }
+
+  // In case we don't have anything, have M3 checked.
+  // This has appeared in LOQ.
+  resetToM3IfNecessary();
 }
 
 /**
