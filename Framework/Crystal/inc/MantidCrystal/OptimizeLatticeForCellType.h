@@ -71,7 +71,7 @@ private:
   bool edgePixel(DataObjects::PeaksWorkspace_sptr ws, std::string bankName,
                  int col, int row, int Edge);
   Kernel::DblMatrix aMatrix(std::vector<double> lattice);
-  void calculateErrors(size_t npeaks, std::string inname, std::string cell_type,
+  void calculateErrors(std::string inname, std::string cell_type,
                        std::vector<double> &Params, std::vector<double> &sigabc,
                        double chisq);
 };

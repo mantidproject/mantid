@@ -95,7 +95,7 @@ void OptimizeLatticeForCellType::exec() {
   runWS.push_back(ws);
 
   if (perRun) {
-    std::vector<std::pair<std::string, bool>> criteria;
+    std::vector<std::pair<std::string, bool> > criteria;
     // Sort by run number
     criteria.push_back(std::pair<std::string, bool>("runnumber", true));
     ws->sort(criteria);
@@ -144,7 +144,8 @@ void OptimizeLatticeForCellType::exec() {
     IAlgorithm_sptr fit_alg;
     try {
       fit_alg = createChildAlgorithm("Fit", -1, -1, false);
-    } catch (Exception::NotFoundError &) {
+    }
+    catch (Exception::NotFoundError &) {
       g_log.error("Can't locate Fit algorithm");
       throw;
     }
@@ -207,8 +208,7 @@ void OptimizeLatticeForCellType::exec() {
     OrientedLattice latt = peakWS->mutableSample().getOrientedLattice();
     DblMatrix UBnew = latt.getUB();
 
-    calculateErrors(n_peaks, runWS[i_run]->getName(), cell_type, Params, sigabc,
-                    chisq);
+    calculateErrors(runWS[i_run]->getName(), cell_type, Params, sigabc, chisq);
     OrientedLattice o_lattice;
     o_lattice.setUB(UBnew);
 
@@ -263,9 +263,9 @@ void OptimizeLatticeForCellType::exec() {
                                                runWS[i_run]->getName() +
                                                ".integrate");
       savePks_alg->executeAsChildAlg();
-      g_log.notice() << "See output file: "
-                     << outputdir + "ls" + runWS[i_run]->getName() +
-                            ".integrate"
+      g_log.notice() << "See output file: " << outputdir + "ls" +
+                                                   runWS[i_run]->getName() +
+                                                   ".integrate"
                      << "\n";
       // Save UB
       Mantid::API::IAlgorithm_sptr saveUB_alg =
@@ -527,14 +527,15 @@ DblMatrix OptimizeLatticeForCellType::aMatrix(std::vector<double> lattice) {
   @param  sigabc       errors of optimized parameters
   @param  chisq        chisq from optimization
 */
-void OptimizeLatticeForCellType::calculateErrors(
-    size_t npeaks, std::string inname, std::string cell_type,
-    std::vector<double> &Params, std::vector<double> &sigabc, double chisq) {
-  double result = chisq;
+void OptimizeLatticeForCellType::calculateErrors(std::string inname,
+                                                 std::string cell_type,
+                                                 std::vector<double> &Params,
+                                                 std::vector<double> &sigabc,
+                                                 double chisq) {
+
   for (size_t i = 0; i < sigabc.size(); i++)
     sigabc[i] = 0.0;
 
-  size_t nDOF = 3 * (npeaks - 3);
   int MAX_STEPS = 10;          // evaluate approximation using deltas
                                // ranging over 10 orders of magnitudue
   double START_DELTA = 1.0e-2; // start with change of 1%
@@ -626,10 +627,8 @@ void OptimizeLatticeForCellType::calculateErrors(
     }
   }
 
-  delta = result / (double)nDOF;
-
   for (size_t i = 0; i < std::min<size_t>(7, sigabc.size()); i++)
-    sigabc[i] = sqrt(delta) * sigabc[i];
+    sigabc[i] = sqrt(chisq) * sigabc[i];
 }
 } // namespace Algorithm
 } // namespace Mantid
