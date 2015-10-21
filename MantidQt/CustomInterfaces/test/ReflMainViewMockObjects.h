@@ -68,6 +68,8 @@ public:
 
 class MockProgressableView : public ProgressableView {
 public:
+  MOCK_METHOD1(setProgress, void(int));
+  MOCK_METHOD2(setProgressRange, void(int, int));
   ~MockProgressableView() {}
 };
 

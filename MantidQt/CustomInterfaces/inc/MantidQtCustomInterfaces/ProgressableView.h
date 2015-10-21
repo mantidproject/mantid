@@ -31,6 +31,9 @@ namespace CustomInterfaces {
 */
 class MANTIDQT_CUSTOMINTERFACES_DLL ProgressableView {
 public:
+  //Set the status of the progress bar
+  virtual void setProgressRange(int min, int max) = 0;
+  virtual void setProgress(int progress) = 0;
   virtual ~ProgressableView() {}
 };
 

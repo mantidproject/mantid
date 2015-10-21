@@ -42,7 +42,7 @@ public:
   ReflProgress(double start, double end, int64_t nSteps)
       : ProgressBase(start, end, nSteps) {}
 
-  void doReport(const std::string &msg) {
+  void doReport(const std::string &) {
     // TODO.
   }
   ~ReflProgress() {}
@@ -334,8 +334,8 @@ bool ReflMainViewPresenter::processGroups(std::map<int, std::set<int>> groups,
   int progress = 0;
   // Each group and each row within count as a progress step.
   const int maxProgress = (int)(rows.size() + groups.size());
-  m_view->setProgressRange(progress, maxProgress);
-  m_view->setProgress(progress);
+  m_progressView->setProgressRange(progress, maxProgress);
+  m_progressView->setProgress(progress);
 
   for (auto gIt = groups.begin(); gIt != groups.end(); ++gIt) {
     const std::set<int> groupRows = gIt->second;
@@ -344,28 +344,28 @@ bool ReflMainViewPresenter::processGroups(std::map<int, std::set<int>> groups,
     for (auto rIt = groupRows.begin(); rIt != groupRows.end(); ++rIt) {
       try {
         reduceRow(*rIt);
-        m_view->setProgress(++progress);
+        m_progressView->setProgress(++progress);
       } catch (std::exception &ex) {
         const std::string rowNo =
             Mantid::Kernel::Strings::toString<int>(*rIt + 1);
         const std::string message =
             "Error encountered while processing row " + rowNo + ":\n";
         m_view->giveUserCritical(message + ex.what(), "Error");
-        m_view->setProgress(0);
+        m_progressView->setProgress(0);
         return false;
       }
     }
 
     try {
       stitchRows(groupRows);
-      m_view->setProgress(++progress);
+      m_progressView->setProgress(++progress);
     } catch (std::exception &ex) {
       const std::string groupNo =
           Mantid::Kernel::Strings::toString<int>(gIt->first);
       const std::string message =
           "Error encountered while stitching group " + groupNo + ":\n";
       m_view->giveUserCritical(message + ex.what(), "Error");
-      m_view->setProgress(0);
+      m_progressView->setProgress(0);
       return false;
     }
   }
