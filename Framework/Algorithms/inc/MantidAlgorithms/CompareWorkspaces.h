@@ -139,7 +139,7 @@ private:
   API::ITableWorkspace_sptr m_Errors;
 
   /// Report progress of comparison
-  API::Progress* m_Prog;
+  API::Progress *m_Prog;
 
   /// Variable states if one wants to compare workspaces in parallell. This
   /// usully true but if one wants to look at the comparison logs, parallell

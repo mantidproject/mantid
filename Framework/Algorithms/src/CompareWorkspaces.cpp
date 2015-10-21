@@ -28,11 +28,8 @@ DECLARE_ALGORITHM(CompareWorkspaces)
 /** Constructor
  */
 CompareWorkspaces::CompareWorkspaces()
-  : API::Algorithm()
-  , m_Result(false)
-  , m_Prog(nullptr)
-  , m_ParallelComparison(true) {
-}
+    : API::Algorithm(), m_Result(false), m_Prog(nullptr),
+      m_ParallelComparison(true) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -42,7 +39,9 @@ CompareWorkspaces::~CompareWorkspaces() {}
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string CompareWorkspaces::name() const { return "CompareWorkspaces"; }
+const std::string CompareWorkspaces::name() const {
+  return "CompareWorkspaces";
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
 int CompareWorkspaces::version() const { return 1; }
@@ -55,8 +54,8 @@ const std::string CompareWorkspaces::category() const {
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string CompareWorkspaces::summary() const {
   return "Compares two workspaces for equality. This algorithm is mainly "
-           "intended for use by the Mantid development team as part of the "
-           "testing process.";
+         "intended for use by the Mantid development team as part of the "
+         "testing process.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -108,7 +107,8 @@ void CompareWorkspaces::init() {
 
   declareProperty("Result", false, Direction::Output);
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>("ErrorWorkspace", "compare_errors", Direction::Output),
+      new WorkspaceProperty<ITableWorkspace>("ErrorWorkspace", "compare_errors",
+                                             Direction::Output),
       "TableWorkspace containing any errors that occured during execution");
 }
 
@@ -169,9 +169,17 @@ bool CompareWorkspaces::processGroups() {
 
   setProperty("Result", m_Result);
   setProperty("ErrorWorkspace", m_Errors);
+
+  // Store output workspace in AnalysisDataService
+  // this->store();
+
   setExecuted(true);
   notificationCenter().postNotification(
       new FinishedNotification(this, this->isExecuted()));
+
+  // Free up any memory available
+  // Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+
   return true;
 }
 
@@ -184,8 +192,8 @@ bool CompareWorkspaces::processGroups() {
 void CompareWorkspaces::processGroups(
     boost::shared_ptr<const API::WorkspaceGroup> groupOne,
     boost::shared_ptr<const API::WorkspaceGroup> groupTwo) {
-  //m_Result = true;
-  //m_Errors = WorkspaceFactory::Instance().createTable("TableWorkspace");
+  // m_Result = true;
+  // m_Errors = WorkspaceFactory::Instance().createTable("TableWorkspace");
 
   // Check their sizes
   const size_t totalNum = static_cast<size_t>(groupOne->getNumberOfEntries());
@@ -230,7 +238,8 @@ void CompareWorkspaces::processGroups(
       m_Result = false;
 
       ITableWorkspace_sptr table = checker->getProperty("ErrorWorkspace");
-      handleError(table->cell<std::string>(0, 0) + ". Inputs=[" + namesOne[i] + "," + namesTwo[i] + "]");
+      handleError(table->cell<std::string>(0, 0) + ". Inputs=[" + namesOne[i] +
+                  "," + namesTwo[i] + "]");
     }
   }
 }
@@ -239,8 +248,7 @@ void CompareWorkspaces::processGroups(
 /**
  * @brief CompareWorkspaces::doComparison
  */
-void CompareWorkspaces::doComparison()
-{
+void CompareWorkspaces::doComparison() {
   Workspace_sptr w1 = getProperty("Workspace1");
   Workspace_sptr w2 = getProperty("Workspace2");
 
@@ -531,7 +539,7 @@ bool CompareWorkspaces::compareEventWorkspaces(
  *  @retval false The data does not matches
  */
 bool CompareWorkspaces::checkData(API::MatrixWorkspace_const_sptr ws1,
-                                     API::MatrixWorkspace_const_sptr ws2) {
+                                  API::MatrixWorkspace_const_sptr ws2) {
   // Cache a few things for later use
   const size_t numHists = ws1->getNumberHistograms();
   const size_t numBins = ws1->blocksize();
@@ -622,7 +630,7 @@ bool CompareWorkspaces::checkData(API::MatrixWorkspace_const_sptr ws1,
 /// @retval true The axes match
 /// @retval false The axes do not match
 bool CompareWorkspaces::checkAxes(API::MatrixWorkspace_const_sptr ws1,
-                                     API::MatrixWorkspace_const_sptr ws2) {
+                                  API::MatrixWorkspace_const_sptr ws2) {
   const int numAxes = ws1->axes();
 
   if (numAxes != ws2->axes()) {
@@ -699,7 +707,7 @@ bool CompareWorkspaces::checkAxes(API::MatrixWorkspace_const_sptr ws1,
 /// @retval true The maps match
 /// @retval false The maps do not match
 bool CompareWorkspaces::checkSpectraMap(MatrixWorkspace_const_sptr ws1,
-                                           MatrixWorkspace_const_sptr ws2) {
+                                        MatrixWorkspace_const_sptr ws2) {
   if (ws1->getNumberHistograms() != ws2->getNumberHistograms()) {
     handleError("Number of spectra mismatch");
     return false;
@@ -739,8 +747,8 @@ bool CompareWorkspaces::checkSpectraMap(MatrixWorkspace_const_sptr ws1,
 /// @param ws2 :: the second workspace
 /// @retval true The instruments match
 /// @retval false The instruments do not match
-bool CompareWorkspaces::checkInstrument(
-    API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2) {
+bool CompareWorkspaces::checkInstrument(API::MatrixWorkspace_const_sptr ws1,
+                                        API::MatrixWorkspace_const_sptr ws2) {
   // First check the name matches
   if (ws1->getInstrument()->getName() != ws2->getInstrument()->getName()) {
     g_log.debug() << "Instrument names: WS1 = "
@@ -757,7 +765,8 @@ bool CompareWorkspaces::checkInstrument(
     g_log.debug()
         << "Here information to help understand parameter map differences:\n";
     g_log.debug() << ws1_parmap.diff(ws2_parmap);
-    handleError("Instrument ParameterMap mismatch (differences in ordering ignored)");
+    handleError(
+        "Instrument ParameterMap mismatch (differences in ordering ignored)");
     return false;
   }
 
@@ -771,7 +780,7 @@ bool CompareWorkspaces::checkInstrument(
 /// @retval true The masking matches
 /// @retval false The masking does not match
 bool CompareWorkspaces::checkMasking(API::MatrixWorkspace_const_sptr ws1,
-                                        API::MatrixWorkspace_const_sptr ws2) {
+                                     API::MatrixWorkspace_const_sptr ws2) {
   const int numHists = static_cast<int>(ws1->getNumberHistograms());
 
   for (int i = 0; i < numHists; ++i) {
@@ -801,7 +810,7 @@ bool CompareWorkspaces::checkMasking(API::MatrixWorkspace_const_sptr ws1,
 /// @retval true The sample matches
 /// @retval false The samples does not match
 bool CompareWorkspaces::checkSample(const API::Sample &sample1,
-                                       const API::Sample &sample2) {
+                                    const API::Sample &sample2) {
   if (sample1.getName() != sample2.getName()) {
     g_log.debug() << "WS1 sample name: " << sample1.getName() << "\n";
     g_log.debug() << "WS2 sample name: " << sample2.getName() << "\n";
@@ -822,7 +831,7 @@ bool CompareWorkspaces::checkSample(const API::Sample &sample1,
 /// @retval false The samples does not match
 
 bool CompareWorkspaces::checkRunProperties(const API::Run &run1,
-                                              const API::Run &run2) {
+                                           const API::Run &run2) {
   double run1Charge(-1.0);
   try {
     run1Charge = run1.getProtonCharge();
@@ -961,7 +970,7 @@ int CompareWorkspaces::compareEventsListInDetails(
 }
 
 void CompareWorkspaces::doPeaksComparison(API::IPeaksWorkspace_sptr tws1,
-                                             API::IPeaksWorkspace_sptr tws2) {
+                                          API::IPeaksWorkspace_sptr tws2) {
   // Check some table-based stuff
   if (tws1->getNumberPeaks() != tws2->getNumberPeaks()) {
     handleError("Mismatched number of rows.");
@@ -1052,9 +1061,9 @@ void CompareWorkspaces::doPeaksComparison(API::IPeaksWorkspace_sptr tws1,
   return;
 }
 
-void CompareWorkspaces::doTableComparison(
-    API::ITableWorkspace_const_sptr tws1,
-    API::ITableWorkspace_const_sptr tws2) {
+void
+CompareWorkspaces::doTableComparison(API::ITableWorkspace_const_sptr tws1,
+                                     API::ITableWorkspace_const_sptr tws2) {
   // First the easy things
   const auto numCols = tws1->columnCount();
   if (numCols != tws2->columnCount()) {
@@ -1110,8 +1119,7 @@ void CompareWorkspaces::doTableComparison(
   } // loop over columns
 }
 
-void CompareWorkspaces::doMDComparison(Workspace_sptr w1,
-                                          Workspace_sptr w2) {
+void CompareWorkspaces::doMDComparison(Workspace_sptr w1, Workspace_sptr w2) {
   IMDWorkspace_sptr mdws1, mdws2;
   mdws1 = boost::dynamic_pointer_cast<IMDWorkspace>(w1);
   mdws2 = boost::dynamic_pointer_cast<IMDWorkspace>(w2);
@@ -1129,8 +1137,7 @@ void CompareWorkspaces::doMDComparison(Workspace_sptr w1,
   }
 }
 
-void CompareWorkspaces::handleError(std::string msg)
-{
+void CompareWorkspaces::handleError(std::string msg) {
   TableRow row = m_Errors->appendRow();
   row << msg;
   m_Result = false;

@@ -28,12 +28,14 @@ class CompareWorkspacesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CompareWorkspacesTest *createSuite() { return new CompareWorkspacesTest(); }
-  static void destroySuite( CompareWorkspacesTest *suite ) { delete suite; }
+  static CompareWorkspacesTest *createSuite() {
+    return new CompareWorkspacesTest();
+  }
+  static void destroySuite(CompareWorkspacesTest *suite) { delete suite; }
 
   CompareWorkspacesTest()
-      : ws1(WorkspaceCreationHelper::Create2DWorkspace123(2, 2))
-      , PROPERTY_VALUE_TRUE("1") {
+      : ws1(WorkspaceCreationHelper::Create2DWorkspace123(2, 2)),
+        PROPERTY_VALUE_TRUE("1") {
     FrameworkManager::Instance();
   }
 
@@ -57,8 +59,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws));
 
     TS_ASSERT(checker.execute());
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     PROPERTY_VALUE_TRUE);
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
     // Same, using the Mantid::API::equals() function
     TS_ASSERT(Mantid::API::equals(ws, ws));
   }
@@ -109,8 +110,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace2", boost::dynamic_pointer_cast<Workspace>(pws2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     PROPERTY_VALUE_TRUE);
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
 
   void testPeaks_extrapeak() {
@@ -161,8 +161,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace2", boost::dynamic_pointer_cast<Workspace>(pws2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      PROPERTY_VALUE_TRUE);
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
 
   void testEvent_matches() {
@@ -178,8 +177,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace2", boost::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     PROPERTY_VALUE_TRUE);
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
     // Same, using the Mantid::API::equals() function
     TS_ASSERT(Mantid::API::equals(ews1, ews2));
@@ -195,8 +193,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace2", boost::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      PROPERTY_VALUE_TRUE);
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
     // Same, using the Mantid::API::equals() function
     TS_ASSERT(!Mantid::API::equals(ws1, ews2));
@@ -215,8 +212,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace2", boost::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      PROPERTY_VALUE_TRUE);
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT((!Mantid::API::equals(ews1, ews2)));
   }
@@ -233,8 +229,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace2", boost::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      PROPERTY_VALUE_TRUE);
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT((!Mantid::API::equals(ews1, ews2)));
   }
@@ -251,8 +246,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace2", boost::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      PROPERTY_VALUE_TRUE);
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT((!Mantid::API::equals(ews1, ews2)));
   }
@@ -269,8 +263,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     PROPERTY_VALUE_TRUE);
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
 
   void testMDEvents_different_eventtypes() {
@@ -286,8 +279,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      PROPERTY_VALUE_TRUE);
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
 
   void testMDEvents_different_dims() {
@@ -302,8 +294,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      PROPERTY_VALUE_TRUE);
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
 
   void testMDEvents_different_dimnames() {
@@ -320,8 +311,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      PROPERTY_VALUE_TRUE);
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
 
   void testMDEvents_different_dimmin() {
@@ -338,8 +328,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      PROPERTY_VALUE_TRUE);
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
 
   void testMDEvents_different_numdata() {
@@ -356,8 +345,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      PROPERTY_VALUE_TRUE);
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
 
   void testMDEvents_different_data() {
@@ -383,8 +371,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      PROPERTY_VALUE_TRUE);
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
 
   void testMDEvents_different_error() {
@@ -410,8 +397,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      PROPERTY_VALUE_TRUE);
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
 
   void testMDHisto_matches() {
@@ -426,8 +412,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     PROPERTY_VALUE_TRUE);
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
 
   void testMDHist_different_dims() {
@@ -442,8 +427,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      PROPERTY_VALUE_TRUE);
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
 
   void testMDHist_different_dimnames() {
@@ -467,8 +451,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      PROPERTY_VALUE_TRUE);
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
 
   void testMDHist_different_dimbins() {
@@ -483,8 +466,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      PROPERTY_VALUE_TRUE);
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
 
   void testMDHist_different_dimmax() {
@@ -500,8 +482,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      PROPERTY_VALUE_TRUE);
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
 
   void testMDHist_different_data() {
@@ -517,8 +498,7 @@ public:
         "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Tolerance", 1.0e-5));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      PROPERTY_VALUE_TRUE);
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
 
   void testMDHist_different_error() {
@@ -534,8 +514,7 @@ public:
         "Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Tolerance", 1.0e-5));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      PROPERTY_VALUE_TRUE);
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
 
   void testDifferentSize() {
@@ -552,8 +531,10 @@ public:
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
     // TODO: Why doesn't getProperty work for this?
-    //ITableWorkspace_sptr table = checker.getProperty("ErrorWorkspace");
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+    // ITableWorkspace_sptr table = checker.getProperty("ErrorWorkspace");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_errors");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Size mismatch");
 
     // Same, using the !Mantid::API::equals() function
@@ -573,8 +554,11 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
-    TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Histogram/point-like mismatch");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_errors");
+    TS_ASSERT_EQUALS(table->cell<std::string>(0, 0),
+                     "Histogram/point-like mismatch");
 
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT((!Mantid::API::equals(ws1, ws2)));
@@ -594,8 +578,11 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
-    TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Distribution flag mismatch");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_errors");
+    TS_ASSERT_EQUALS(table->cell<std::string>(0, 0),
+                     "Distribution flag mismatch");
 
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT((!Mantid::API::equals(ws1, ws2)));
@@ -616,7 +603,9 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_errors");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Axis 1 type mismatch");
 
     // Same, using the !Mantid::API::equals() function
@@ -637,7 +626,9 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_errors");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Axis 0 title mismatch");
 
     // Same, using the !Mantid::API::equals() function
@@ -659,7 +650,9 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_errors");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Axis 0 unit mismatch");
 
     // Same, using the !Mantid::API::equals() function
@@ -697,7 +690,9 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_errors");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Axis 1 values mismatch");
 
     // Same, using the !Mantid::API::equals() function
@@ -718,7 +713,9 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_errors");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "YUnit mismatch");
 
     // Same, using the !Mantid::API::equals() function
@@ -738,8 +735,11 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
-    TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Spectrum number mismatch");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_errors");
+    TS_ASSERT_EQUALS(table->cell<std::string>(0, 0),
+                     "Spectrum number mismatch");
 
     ws2 = WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
     ws2->getSpectrum(0)->setDetectorID(99);
@@ -750,7 +750,8 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+    table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+        "compare_errors");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Detector IDs mismatch");
 
     // Same, using the !Mantid::API::equals() function
@@ -773,8 +774,11 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
-    TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Instrument name mismatch");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_errors");
+    TS_ASSERT_EQUALS(table->cell<std::string>(0, 0),
+                     "Instrument name mismatch");
 
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT((!Mantid::API::equals(ws1, ws2)));
@@ -795,9 +799,12 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
-    TS_ASSERT_EQUALS(table->cell<std::string>(0, 0),
-                     "Instrument ParameterMap mismatch (differences in ordering ignored)");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_errors");
+    TS_ASSERT_EQUALS(
+        table->cell<std::string>(0, 0),
+        "Instrument ParameterMap mismatch (differences in ordering ignored)");
 
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT((!Mantid::API::equals(ws1, ws2)));
@@ -819,7 +826,9 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_errors");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Masking mismatch");
 
     Mantid::API::MatrixWorkspace_sptr ws3 =
@@ -834,7 +843,8 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+    table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+        "compare_errors");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Masking mismatch");
 
     // Same, using the !Mantid::API::equals() function
@@ -856,7 +866,9 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_errors");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Sample name mismatch");
   }
 
@@ -875,7 +887,9 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_errors");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Proton charge mismatch");
   }
 
@@ -895,8 +909,11 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
-    TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Different numbers of logs");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_errors");
+    TS_ASSERT_EQUALS(table->cell<std::string>(0, 0),
+                     "Different numbers of logs");
 
     Mantid::API::MatrixWorkspace_sptr ws3 =
         WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
@@ -909,7 +926,8 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+    table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+        "compare_errors");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Log mismatch");
 
     Mantid::API::MatrixWorkspace_sptr ws4 =
@@ -923,7 +941,8 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+    table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+        "compare_errors");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Log mismatch");
   }
 
@@ -1028,8 +1047,11 @@ public:
     TS_ASSERT(alg.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
-    TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Number of columns mismatch");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_errors");
+    TS_ASSERT_EQUALS(table->cell<std::string>(0, 0),
+                     "Number of columns mismatch");
   }
 
   void test_tableworkspace_different_number_of_rows_fails() {
@@ -1049,7 +1071,9 @@ public:
     TS_ASSERT(alg.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_errors");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Number of rows mismatch");
   }
 
@@ -1076,7 +1100,9 @@ public:
     TS_ASSERT(alg.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_errors");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Column name mismatch");
   }
 
@@ -1093,7 +1119,9 @@ public:
     TS_ASSERT(alg.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_errors");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Column type mismatch");
   }
 
@@ -1108,7 +1136,9 @@ public:
     TS_ASSERT(alg.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_errors");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Table data mismatch");
 
     table2 = setupTableWorkspace();
@@ -1118,7 +1148,8 @@ public:
     TS_ASSERT(alg.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+    table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+        "compare_errors");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Table data mismatch");
 
     table1 = setupTableWorkspace();
@@ -1129,7 +1160,8 @@ public:
     TS_ASSERT(alg.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+    table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+        "compare_errors");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Table data mismatch");
   }
 
@@ -1143,7 +1175,9 @@ public:
     TS_ASSERT(alg.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_errors");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0),
                      "One workspace is a PeaksWorkspace and the other is not.");
   }
@@ -1159,7 +1193,9 @@ public:
     TS_ASSERT(alg.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_errors");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0),
                      "One workspace is a TableWorkspace and the other is not.");
   }
@@ -1220,9 +1256,10 @@ private:
     if (expectedResult == PROPERTY_VALUE_TRUE) {
       TS_ASSERT_EQUALS(matcher.getPropertyValue("Result"), expectedResult);
     } else {
-      TS_ASSERT_DIFFERS(matcher.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+      TS_ASSERT_DIFFERS(matcher.getPropertyValue("Result"),
+                        PROPERTY_VALUE_TRUE);
 
-      ITableWorkspace_sptr table = matcher.getProperty("ErrorWorkspace"); // AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_errors");
+      ITableWorkspace_sptr table = matcher.getProperty("ErrorWorkspace");
       TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), expectedResult);
     }
   }
@@ -1239,6 +1276,5 @@ private:
 
   const std::string PROPERTY_VALUE_TRUE;
 };
-
 
 #endif /* MANTID_ALGORITHMS_COMPAREWORKSPACESTEST_H_ */
