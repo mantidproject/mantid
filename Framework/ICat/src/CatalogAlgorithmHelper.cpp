@@ -31,8 +31,8 @@ const std::string CatalogAlgorithmHelper::getIDSError(
     Json::Reader json_reader;
     json_reader.parse(responseStream, json);
     // Return the message returned by the server.
-    return json.get("code", "UTF-8" ).asString() + ": " +
-      json.get("message", "UTF-8" ).asString();
+    return json.get("code", "UTF-8").asString() + ": " +
+           json.get("message", "UTF-8").asString();
   }
   // No error occurred, so return an empty string for verification.
   return "";

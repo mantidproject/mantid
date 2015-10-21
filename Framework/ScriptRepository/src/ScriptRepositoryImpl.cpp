@@ -73,8 +73,8 @@ const char *emptyURL =
 /**
 Write json object to file
 */
-void writeJsonFile(const std::string& filename, Json::Value json, const std::string& error)
-{
+void writeJsonFile(const std::string &filename, Json::Value json,
+                   const std::string &error) {
   Poco::FileOutputStream filestream(filename);
   if (!filestream.good()) {
     g_log.error() << error << std::endl;
@@ -87,8 +87,8 @@ void writeJsonFile(const std::string& filename, Json::Value json, const std::str
 /**
 Read json object from file
 */
-Json::Value readJsonFile(const std::string& filename, const std::string& error)
-{
+Json::Value readJsonFile(const std::string &filename,
+                         const std::string &error) {
   Poco::FileInputStream filestream(filename);
   if (!filestream.good()) {
     g_log.error() << error << std::endl;
@@ -102,8 +102,9 @@ Json::Value readJsonFile(const std::string& filename, const std::string& error)
 /**
 Write string to file
 */
-void writeStringFile(const std::string& filename, const std::string& stringToWrite, const std::string& error)
-{
+void writeStringFile(const std::string &filename,
+                     const std::string &stringToWrite,
+                     const std::string &error) {
   Poco::FileStream filestream(filename);
   if (!filestream.good()) {
     g_log.error() << error << std::endl;
@@ -115,8 +116,7 @@ void writeStringFile(const std::string& filename, const std::string& stringToWri
 /**
 Test if a file with this filename already exists
 */
-bool fileExists(const std::string& filename)
-{
+bool fileExists(const std::string &filename) {
   Poco::File test_file(filename);
   if (test_file.exists()) {
     return true;
@@ -324,12 +324,11 @@ void ScriptRepositoryImpl::install(const std::string &path) {
   g_log.debug() << "ScriptRepository downloaded repository information"
                 << std::endl;
   // creation of the instance of local_json file
-  if (!fileExists(local_json_file))
-  {
+  if (!fileExists(local_json_file)) {
     writeStringFile(local_json_file, "{\n}",
                     "ScriptRepository failed to create local repository");
     g_log.debug() << "ScriptRepository created the local repository information"
-    << std::endl;
+                  << std::endl;
   }
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -942,8 +941,9 @@ void ScriptRepositoryImpl::updateRepositoryJson(const std::string &path,
 
   Json::Value repository_json;
   std::string filename =
-  std::string(local_repository).append(".repository.json");
-  repository_json = readJsonFile(filename, "Error reading .repository.json file");
+      std::string(local_repository).append(".repository.json");
+  repository_json =
+      readJsonFile(filename, "Error reading .repository.json file");
 
   if (!repository_json.isMember(path)) {
     // Create Json value for entry
@@ -962,7 +962,8 @@ void ScriptRepositoryImpl::updateRepositoryJson(const std::string &path,
   // set the .repository.json and .local.json not hidden to be able to edit it
   SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_NORMAL);
 #endif
-  writeJsonFile(filename, repository_json, "Error writing .repository.json file");
+  writeJsonFile(filename, repository_json,
+                "Error writing .repository.json file");
 #if defined(_WIN32) || defined(_WIN64)
   // set the .repository.json and .local.json hidden
   SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_HIDDEN);
@@ -1095,7 +1096,8 @@ void ScriptRepositoryImpl::remove(const std::string &file_path,
       std::string filename =
           std::string(local_repository).append(".repository.json");
 
-      Json::Value pt = readJsonFile(filename, "Error reading .repository.json file");
+      Json::Value pt =
+          readJsonFile(filename, "Error reading .repository.json file");
       pt.removeMember(relative_path); // remove the entry
 #if defined(_WIN32) || defined(_WIN64)
       // set the .repository.json and .local.json not hidden (to be able to
@@ -1422,9 +1424,10 @@ void ScriptRepositoryImpl::parseCentralRepository(Repository &repo) {
   std::string filename =
       std::string(local_repository).append(".repository.json");
   try {
-    Json::Value pt = readJsonFile(filename, "Error reading .repository.json file");
+    Json::Value pt =
+        readJsonFile(filename, "Error reading .repository.json file");
 
-    for( auto it = pt.begin() ; it != pt.end() ; it++ ) {
+    for (auto it = pt.begin(); it != pt.end(); it++) {
       std::string filepath = it.key().asString();
       if (!isEntryValid(filepath))
         continue;
@@ -1484,7 +1487,7 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
 
   try {
     Json::Value pt = readJsonFile(filename, "Error reading .local.json file");
-    for( auto it = pt.begin() ; it != pt.end() ; it++ ) {
+    for (auto it = pt.begin(); it != pt.end(); it++) {
 
       std::string filepath = it.key().asString();
       Json::Value entry_json = pt.get(filepath, "");
@@ -1569,14 +1572,16 @@ void ScriptRepositoryImpl::updateLocalJson(const std::string &path,
                                            const RepositoryEntry &entry) {
 
   std::string filename = std::string(local_repository).append(".local.json");
-  Json::Value local_json = readJsonFile(filename, "Error reading .local.json file");
+  Json::Value local_json =
+      readJsonFile(filename, "Error reading .local.json file");
 
   if (!local_json.isMember(path)) {
 
     // Create new entry
     Json::Value new_entry;
     new_entry["downloaded_date"] = entry.downloaded_date.toFormattedString();
-    new_entry["downloaded_pubdate"] = entry.downloaded_pubdate.toFormattedString();
+    new_entry["downloaded_pubdate"] =
+        entry.downloaded_pubdate.toFormattedString();
 
     // Add new entry to repository json value
     local_json[path] = new_entry;
@@ -1584,8 +1589,10 @@ void ScriptRepositoryImpl::updateLocalJson(const std::string &path,
   } else {
 
     Json::Value replace_entry;
-    replace_entry["downloaded_date"] = entry.downloaded_date.toFormattedString();
-    replace_entry["downloaded_pubdate"] = entry.downloaded_pubdate.toFormattedString();
+    replace_entry["downloaded_date"] =
+        entry.downloaded_date.toFormattedString();
+    replace_entry["downloaded_pubdate"] =
+        entry.downloaded_pubdate.toFormattedString();
     replace_entry["auto_update"] = ((entry.auto_update) ? "true" : "false");
 
     local_json.removeMember(path);
