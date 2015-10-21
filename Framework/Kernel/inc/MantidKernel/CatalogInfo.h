@@ -49,7 +49,7 @@ public:
   /// Constructor
   CatalogInfo(const Poco::XML::Element *element);
   /// Copy constructor
-  CatalogInfo(const CatalogInfo& other);
+  CatalogInfo(const CatalogInfo &other);
   /// Obtain catalog name from the facility file.
   const std::string catalogName() const;
   /// Obtain soap end point from the facility file.
@@ -61,7 +61,7 @@ public:
   /// Obtain Windows prefix from the facility file.
   const std::string windowsPrefix() const;
   /// Obtain Macintosh prefix from facility file.
-  virtual const std::string macPrefix() const override;
+  virtual const std::string macPrefix() const;
   /// Obtain Linux prefix from facility file.
   const std::string linuxPrefix() const;
 
@@ -72,7 +72,7 @@ private:
                            const std::string &attributeName);
 
   // Disabled assignment operator.
-  CatalogInfo& operator=(const CatalogInfo &other);
+  CatalogInfo &operator=(const CatalogInfo &other);
 
   std::string m_catalogName;
   std::string m_soapEndPoint;
