@@ -366,7 +366,7 @@ public:
     FilterEvents filter;
     filter.initialize();
 
-    filter.setProperty("InputWorkspace", ws->name());
+    filter.setPropertyValue("InputWorkspace", "MockElasticEventWS");
     filter.setProperty("OutputWorkspaceBaseName", "SplittedDataElastic");
     filter.setProperty("CorrectionToSample", "Elastic");
     filter.setProperty("SplitterWorkspace", "SplitterTableX");
@@ -377,6 +377,13 @@ public:
     // Check number of output workspaces
     std::vector<std::string> vecwsname = filter.getProperty("OutputWorkspaceNames");
     TS_ASSERT_EQUALS(vecwsname.size(), 9);
+
+    for (size_t i = 0; i < vecwsname.size(); ++i) {
+      EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>(
+            AnalysisDataService::Instance().retrieve(vecwsname[i]));
+      std::cout << "Output workspace " << vecwsname[i] << ": " << ws->getNumberEvents() << "\n";
+    }
+
 
     EventWorkspace_sptr ws5 = boost::dynamic_pointer_cast<EventWorkspace>(
         AnalysisDataService::Instance().retrieve("SplittedDataElastic_5"));
@@ -867,8 +874,10 @@ public:
       // All pulse times from 0 to 999 in seconds
       Kernel::DateAndTime pulsetime(
           static_cast<int64_t>(time * pulselength + runstart));
-      el += TofEvent(rand() % 1000,
-                     pulsetime); // Kernel::DateAndTime(time*1.0, 0.0) );
+      double tof = rand() % 1000;
+      el += TofEvent(tof, pulsetime);
+      if (time == 20)
+        std::cout << "Added 20th event as " << tof << ", " << pulsetime << "\n";
     }
 
     return el;
@@ -886,12 +895,12 @@ public:
     MantidVec &vec_splitGroup = spws->dataY(0);
 
     vec_splitTimes[0] = 1000000;
-    vec_splitTimes[1] = 1300000; // Rule in  1,339,000
+    vec_splitTimes[1] = 1300000;
     vec_splitTimes[2] = 2000000;
-    vec_splitTimes[3] = 2190000; // Rule out 2,155,000
+    vec_splitTimes[3] = 2190000;
     vec_splitTimes[4] = 4000000;
     vec_splitTimes[5] = 5000000;
-    vec_splitTimes[6] = 5500000; // Rule in  5,741,000
+    vec_splitTimes[6] = 5500000;
     vec_splitTimes[7] = 7000000;
     vec_splitTimes[8] = 8000000;
     vec_splitTimes[9] = 9000000;
