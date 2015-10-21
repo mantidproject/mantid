@@ -22,6 +22,32 @@
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Object.h"
 
+#ifdef ENABLE_OPENCASCADE
+// Opencascade defines _USE_MATH_DEFINES without checking whether it is already
+// used.
+// Undefine it here before we include the headers to avoid a warning
+#ifdef _MSC_VER
+#undef _USE_MATH_DEFINES
+#ifdef M_SQRT1_2
+#undef M_SQRT1_2
+#endif
+#endif
+
+#include "MantidKernel/WarningSuppressions.h"
+GCC_DIAG_OFF(conversion)
+// clang-format off
+GCC_DIAG_OFF(cast-qual)
+// clang-format on
+#include <TopoDS_Shape.hxx>
+#include <BRepAlgoAPI_Common.hxx>
+#include <BRepAlgoAPI_Fuse.hxx>
+#include <BRepPrimAPI_MakeBox.hxx>
+GCC_DIAG_ON(conversion)
+// clang-format off
+GCC_DIAG_ON(cast-qual)
+// clang-format on
+#endif
+
 namespace Mantid {
 
 namespace Geometry {
@@ -334,6 +360,19 @@ void Intersection::getBoundingBox(double &xmax, double &ymax, double &zmax,
   zmin = (Azmin > Bzmin) ? Azmin : Bzmin;
 }
 
+#ifdef ENABLE_OPENCASCADE
+/**
+* Analyze intersection
+* @return the resulting TopoDS_Shape
+*/
+TopoDS_Shape Intersection::analyze() {
+  TopoDS_Shape left = A->analyze();
+  TopoDS_Shape right = B->analyze();
+  BRepAlgoAPI_Common comm(left, right);
+  return comm.Shape();
+}
+#endif
+
 // -------------------------------------------------------------
 //         UNION
 //---------------------------------------------------------------
@@ -643,12 +682,22 @@ void Union::getBoundingBox(double &xmax, double &ymax, double &zmax,
   zmax = (Azmax > Bzmax) ? Azmax : Bzmax;
   zmin = (Azmin < Bzmin) ? Azmin : Bzmin;
 }
+
+#ifdef ENABLE_OPENCASCADE
+TopoDS_Shape Union::analyze() {
+  TopoDS_Shape left = A->analyze();
+  TopoDS_Shape right = B->analyze();
+  BRepAlgoAPI_Fuse fuse(left, right);
+  return fuse.Shape();
+}
+#endif
+
 // -------------------------------------------------------------
 //         SURF KEYS
 //---------------------------------------------------------------
 
 SurfPoint::SurfPoint()
-    : Rule(), key(0), keyN(0), sign(1)
+    : Rule(), key(NULL), keyN(0), sign(1)
 /**
   Constructor with null key/number
 */
@@ -937,6 +986,22 @@ void SurfPoint::getBoundingBox(double &xmax, double &ymax, double &zmax,
     }
   }
 }
+
+#ifdef ENABLE_OPENCASCADE
+TopoDS_Shape SurfPoint::analyze() {
+  // Check for individual type of surfaces
+  TopoDS_Shape Result = key->createShape();
+  if (sign > 0)
+    Result.Complement();
+  if (key->className() == "Plane") {
+    // build a box
+    gp_Pnt p(-1000.0, -1000.0, -1000.0);
+    TopoDS_Shape world = BRepPrimAPI_MakeBox(p, 2000.0, 2000.0, 2000.0).Shape();
+    return BRepAlgoAPI_Common(world, Result);
+  }
+  return Result;
+}
+#endif
 //----------------------------------------
 //       COMPOBJ
 //----------------------------------------
@@ -1222,6 +1287,13 @@ void CompObj::getBoundingBox(double &xmax, double &ymax, double &zmax,
   }
 }
 
+#ifdef ENABLE_OPENCASCADE
+TopoDS_Shape CompObj::analyze() {
+  TopoDS_Shape Result = const_cast<Rule *>(key->topRule())->analyze();
+  Result.Complement();
+  return Result;
+}
+#endif
 // -----------------------------------------------
 // BOOLVALUE
 // -----------------------------------------------
@@ -1681,6 +1753,15 @@ void CompGrp::getBoundingBox(double &xmax, double &ymax, double &zmax,
   }
 }
 
+#ifdef ENABLE_OPENCASCADE
+TopoDS_Shape CompGrp::analyze() {
+  TopoDS_Shape Result = A->analyze();
+  Result.Complement();
+  return Result;
+}
+
+TopoDS_Shape BoolValue::analyze() { return TopoDS_Shape(); }
+#endif
 } // NAMESPACE Geometry
 
 } // NAMESPACE Mantid

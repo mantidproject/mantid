@@ -398,10 +398,8 @@ endif(UNITY_BUILD)
 
 # ===================== Open Cascade ===================
 if (ENABLE_OPENCASCADE)
-  find_package ( OpenCascade REQUIRED )
   include_directories ( system ${OPENCASCADE_INCLUDE_DIR} )
   set (SRC_FILES ${SRC_FILES} ${OPENCASCADE_SRC} )
-  add_definitions ( -DENABLE_OPENCASCADE )
 endif ()
 
 # A few defines needed for OpenCascade on the Mac
