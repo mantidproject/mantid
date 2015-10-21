@@ -1,3 +1,4 @@
+#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 """ File contains Descriptors used describe run for direct inelastic reduction """
 
@@ -995,8 +996,8 @@ class RunDescriptor(PropDescriptor):
             Load(Filename=data_file, OutputWorkspace=ws_name,LoadMonitors = '1',MonitorsAsEvents='0')
         #HACK >>> , necessary until #11565 is fixed
         if nxs_file :
-           instr_name = RunDescriptor._holder.instr_name
-           if instr_name == 'LET' and self._run_number>14151 and self._run_number<14382:
+            instr_name = RunDescriptor._holder.instr_name
+            if instr_name == 'LET' and self._run_number>14151 and self._run_number<14382:
                 FrameworkManager.clearInstruments()
                 idf_file = api.ExperimentInfo.getInstrumentFilename(instr_name)
                 idf_path,tile = os.path.split(idf_file)

@@ -1462,8 +1462,8 @@ TMDE(void MDGridBox)::integrateCylinder(
       // Distance from center to the peak integration center
       coord_t out[nd];
       radiusTransform.apply(boxCenter, out);
-      if (out[0] < std::sqrt(diagonalSquared * 0.72 + radius * radius) &&
-          (nd >= 1 &&
+      if ((nd >= 1) && out[0] < std::sqrt(diagonalSquared * 0.72 + radius * radius) &&
+          (nd >= 2 &&
            std::fabs(out[1]) <
                std::sqrt(diagonalSquared * 0.72 + 0.25 * length * length))) {
         // If the center is closer than the size of the box, then it MIGHT be

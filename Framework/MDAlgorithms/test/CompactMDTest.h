@@ -34,9 +34,9 @@ public:
      * Input structure:
      *------------------
      *  -------------
-     *  |   |///|   |
-     *  -------------
-     * -3-2-1 0 1 2 3
+     *  |   |   |///|   |   |
+     *  ---------------------
+     * -5-4-3 2-1 0 1 2 3 4 5
      *---------------------------
      * Expected output structure:
      *----------------------------
@@ -51,13 +51,13 @@ public:
     const size_t numDims = 1;
     const double signal = 0.0;
     const double errorSquared = 1.3;
-    size_t numBins[static_cast<int>(numDims)] = {3};
-    Mantid::coord_t min[static_cast<int>(numDims)] = {-3};
-    Mantid::coord_t max[static_cast<int>(numDims)] = {3};
+    size_t numBins[static_cast<int>(numDims)] = {5};
+    Mantid::coord_t min[static_cast<int>(numDims)] = {-5};
+    Mantid::coord_t max[static_cast<int>(numDims)] = {5};
     const std::string name("test");
     auto inWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
         numDims, signal, errorSquared, numBins, min, max, name);
-    inWS->setSignalAt(1, 1.0); // set middle bin signal to one
+    inWS->setSignalAt(2, 1.0); // set middle bin signal to one
     CompactMD alg;
     alg.setChild(true);
     alg.setRethrows(true);
@@ -258,17 +258,22 @@ public:
     const size_t numDims = 4;
     const double signal = 0.0;
     const double errorSquared = 1.2;
-    size_t numBins[static_cast<int>(numDims)] = {3, 3, 3, 3};
-    Mantid::coord_t min[static_cast<int>(numDims)] = {-3, -3, -3, -3};
-    Mantid::coord_t max[static_cast<int>(numDims)] = {3, 3, 3, 3};
+    size_t numBins[static_cast<int>(numDims)] = {10, 20, 10, 20};
+    Mantid::coord_t min[static_cast<int>(numDims)] = {-5, -10, -5, -10};
+    Mantid::coord_t max[static_cast<int>(numDims)] = {5, 10, 5, 10};
     const std::string name("test");
     m_ws = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
         numDims, signal, errorSquared, numBins, min, max, name);
+    // setting signals like this for variety
+    auto iter = m_ws->createIterator();
+    do {
+      auto index = iter->getLinearIndex();
+      if (index % 2 == 0) {
+        m_ws->setSignalAt(index, 1.0);
+      }
+    } while (iter->next());
   }
   void test_execute_4d() {
-    m_ws->setSignalAt(0, 1.0);
-    m_ws->setSignalAt(5, 1.2);
-    m_ws->setSignalAt(1, 2.3);
     CompactMD alg;
     alg.setChild(true);
     alg.setRethrows(true);

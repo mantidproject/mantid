@@ -95,6 +95,7 @@ public:
   virtual std::string getSearchString() const;
 
   virtual boost::shared_ptr<IReflPresenter> getPresenter() const;
+
 private:
   // initialise the interface
   virtual void initLayout();
@@ -143,7 +144,7 @@ private slots:
   void showSearchContextMenu(const QPoint &pos);
 };
 
-} // namespace CustomInterfaces
 } // namespace Mantid
+} // namespace CustomInterfaces
 
 #endif /* MANTID_CUSTOMINTERFACES_QTREFLMAINVIEW_H_ */

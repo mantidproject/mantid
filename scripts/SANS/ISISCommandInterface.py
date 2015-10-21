@@ -1,3 +1,4 @@
+#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 """
     Enables the SANS commands (listed at http://www.mantidproject.org/SANS) to
@@ -574,7 +575,7 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
 
     # We need to make sure at this point that the workspaces are 1D. We
     # don't really know how to match the workspaces for the 2D case.
-    if (not su.is_1D_workspace(mtd[frontData]) or not su.is_1D_workspace(mtd[rearData])):
+    if not su.is_1D_workspace(mtd[frontData]) or not su.is_1D_workspace(mtd[rearData]):
         sanslog.warning("Request to perform a fit to find the shift and scale values for"
                         "a non-1D workspace is not possible. Default values are provided.")
         scale = rAnds.scale
