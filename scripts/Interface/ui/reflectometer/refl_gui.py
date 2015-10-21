@@ -794,7 +794,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                             if self.tableMain.item(row, self.scale_col).text():
                                 Scale(InputWorkspace=wksp[i], OutputWorkspace=wksp[i], Factor=1 / float(self.tableMain.item(row, self.scale_col).text()))
                             if self.__checked_row_stiched(row):
-                                print 'iterator i has a value of : ', i, '\n'
                                 if len(runno) == 1:
                                     logger.notice("Nothing to combine for processing row : " + str(row))
                                 else:
@@ -813,16 +812,13 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                                     Qmax = max(w2.readX(0))
                                     if len(self.tableMain.item(row, i * 5 + 3).text()) > 0:
                                         Qmin = float(self.tableMain.item(row, i * 5 + 3).text())
-                                        if (Qmin < _overallQMin) :
-                                            print 'QMin Changed.'
-                                            _overallQMin = Qmin
-
                                     if len(self.tableMain.item(row, i * 5 + 4).text()) > 0:
                                         Qmax = float(self.tableMain.item(row, i * 5 + 4).text())
-                                        if (Qmax > _overallQMax):
-                                            print 'QMax Changed.'
-                                            _overallQMax = Qmax
-                                
+                                    if Qmax > _overallQMax:
+                                        _overallQMax = Qmax
+                                    if Qmin < _overallQMin :
+                                        _overallQMin = Qmin
+
                                     wcomb = combineDataMulti(wksp, outputwksp, overlapLow, overlapHigh, _overallQMin, _overallQMax, -dqq, 1, keep=True)
 
 
