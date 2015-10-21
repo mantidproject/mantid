@@ -1427,8 +1427,11 @@ void ScriptRepositoryImpl::parseCentralRepository(Repository &repo) {
     Json::Value pt =
         readJsonFile(filename, "Error reading .repository.json file");
 
-    for (auto it = pt.begin(); it != pt.end(); it++) {
-      std::string filepath = it.key().asString();
+    // This is looping through the member name list rather than using Json::ValueIterator
+    // as a workaround for a bug in the JsonCpp library (Json::ValueIterator is not exported)
+    Json::Value::Members member_names = pt.getMemberNames();
+    for (unsigned int i=0; i<member_names.size(); ++i) {
+      std::string filepath = member_names[i];
       if (!isEntryValid(filepath))
         continue;
       Json::Value entry_json = pt.get(filepath, "");
