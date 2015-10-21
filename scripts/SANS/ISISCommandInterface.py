@@ -340,7 +340,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
 
         @param wav_start: the first wavelength to be in the output data
         @param wav_end: the last wavelength in the output data
-        @param full_trans_wav: if to use a wide wavelength range, the instrument's default wavelength range, for the transmission correction, false by default
+        @param full_trans_wav: if to use a wide wavelength range, the instrument's default wavelength range,
+                               for the transmission correction, false by default
         @param name_suffix: append the created output workspace with this
         @param combineDet: combineDet can be one of the following:
                            'rear'                (run one reduction for the 'rear' detector data)
@@ -350,7 +351,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                             None                 (run one reduction for whatever detector has been set as the current detector
                                                   before running this method. If front apply rescale+shift)
         @param resetSetup: if true reset setup at the end
-        @param out_fit_settings: An output parameter. It is used, specially when resetSetup is True, in order to remember the 'scale and fit' of the fitting algorithm.
+        @param out_fit_settings: An output parameter. It is used, specially when resetSetup is True, in order to remember the
+                                 'scale and fit' of the fitting algorithm.
         @return Name of one of the workspaces created
     """
     _printMessage('WavRangeReduction(' + str(wav_start) + ', ' + str(wav_end) + ', '+str(full_trans_wav)+')')
@@ -674,7 +676,8 @@ def _WavRangeReduction(name_suffix=None):
     def _common_substring(val1, val2):
         l = []
         for i in range(len(val1)):
-            if val1[i]==val2[i]: l.append(val1[i])
+            if val1[i]==val2[i]:
+                l.append(val1[i])
             else:
                 return ''.join(l)
 
@@ -878,9 +881,11 @@ def SetDetectorOffsets(bank, x, y, z, rot, radius, side, xtilt=0.0, ytilt=0.0 ):
     detector.y_tilt = ytilt
 
 def SetCorrectionFile(bank, filename):
-    # 10/03/15 RKH, create a new routine that allows change of "direct beam file" = correction file, for a given
-    # detector, this simplify the iterative process used to adjust it. Will still have to keep changing the name of the file
-    # for each iteratiom to avoid Mantid using a cached version, but can then use only a single user (=mask) file for each set of iterations.
+    # 10/03/15 RKH, create a new routine that allows change of "direct beam file" = correction file,
+    # for a given detector, this simplify the iterative process used to adjust it.
+    # Will still have to keep changing the name of the file
+    # for each iteratiom to avoid Mantid using a cached version, but can then use
+    # only a single user (=mask) file for each set of iterations.
     # Modelled this on SetDetectorOffsets above ...
     """
         @param bank: Must be either 'front' or 'rear' (not case sensitive)
@@ -905,8 +910,11 @@ def LimitsR(rmin, rmax, quiet=False, reducer=None):
 def LimitsWav(lmin, lmax, step, bin_type):
     _printMessage('LimitsWav(' + str(lmin) + ', ' + str(lmax) + ', ' + str(step) + ', '  + bin_type + ')')
 
-    if  bin_type.upper().strip() == 'LINEAR': bin_type = 'LIN'
-    if  bin_type.upper().strip() == 'LOGARITHMIC': bin_type = 'LOG'
+    if  bin_type.upper().strip() == 'LINEAR':
+        bin_type = 'LIN'
+    if  bin_type.upper().strip() == 'LOGARITHMIC':
+        bin_type = 'LOG'
+
     if bin_type == 'LOG':
         bin_sym = '-'
     else:

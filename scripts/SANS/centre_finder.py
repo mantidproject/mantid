@@ -5,7 +5,7 @@ from mantid.simpleapi import *
 from mantid.kernel import Logger
 import SANSUtility
 
-class FindDirectionEnum(object):
+class FindDirectionEnum(object):#pylint: disable-msg:R0903
     ALL = 0
     UP_DOWN = 1
     LEFT_RIGHT=2
@@ -365,7 +365,7 @@ class CentrePositioner(object):
 
 # Thes classes make sure that only the relevant directions are updated
 # They are not instrument dependent, they should only dependt on the user's choice.
-class BeamCentrePositionUpdaterFactory(object):
+class BeamCentrePositionUpdaterFactory(object): #pylint: disable-msg:R0903
     '''
     Creates the required beam centre position updater.
     '''
@@ -387,7 +387,7 @@ class BeamCentrePositionUpdaterFactory(object):
             RuntimeError("Error in BeamCentrePositionUpdaterFactory: You need to provide a position update"
                          "policy, ie up/down, left/right or all")
 
-class BeamCentrePositionUpdater(object):
+class BeamCentrePositionUpdater(object):#pylint: disable-msg:R0903
     '''
     Handles the position updates, ie if we are only intereseted in left/right or up/down or all
     '''
