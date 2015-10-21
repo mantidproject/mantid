@@ -92,7 +92,7 @@ endif()
 ###########################################################################
 # Call our setup script
 ###########################################################################
-if (NOT ENABLE_OPERNCASCADE)
+if (NOT ENABLE_OPENCASCADE)
  set ( ENABLE_OPENCASCADE ON CACHE BOOL "Enable OpenCascade-based 3D visualisation")
 endif()
 include ( CommonSetup )
