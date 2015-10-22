@@ -50,25 +50,34 @@ void ContainerSubtraction::run() {
   MatrixWorkspace_sptr canWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           canWsName.toStdString());
+  QString canCloneName = canWsName + "_Shifted";
+  IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
+  clone->initialize();
+  clone->setProperty("InputWorkspace", canWs);
+  clone->setProperty("Outputworkspace", canCloneName.toStdString());
+  clone->execute();
+  MatrixWorkspace_sptr canCloneWs =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          canCloneName.toStdString());
 
   if (m_uiForm.ckShiftCan->isChecked()) {
     IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
     scaleX->initialize();
-    scaleX->setProperty("InputWorkspace", canWs);
-    scaleX->setProperty("OutputWorkspace", canWs->getName());
+    scaleX->setProperty("InputWorkspace", canCloneWs);
+    scaleX->setProperty("OutputWorkspace", canCloneName.toStdString());
     scaleX->setProperty("Factor", m_uiForm.spShift->value());
     scaleX->setProperty("Operation", "Add");
     scaleX->execute();
   }
 
   // If not in wavelength then do conversion
-  std::string originalCanUnits = canWs->getAxis(0)->unit()->unitID();
+  std::string originalCanUnits = canCloneWs->getAxis(0)->unit()->unitID();
   if (originalCanUnits != "Wavelength") {
     g_log.information("Container workspace not in wavelength, need to "
                       "convert to continue.");
-    absCorProps["CanWorkspace"] = addConvertUnitsStep(canWs, "Wavelength");
+    absCorProps["CanWorkspace"] = addConvertUnitsStep(canCloneWs, "Wavelength");
   } else {
-    absCorProps["CanWorkspace"] = canWsName.toStdString();
+    absCorProps["CanWorkspace"] = canCloneName.toStdString();
   }
 
   bool useCanScale = m_uiForm.ckScaleCan->isChecked();
@@ -78,7 +87,7 @@ void ContainerSubtraction::run() {
   }
 
   // Check for same binning across sample and container
-  if (!checkWorkspaceBinningMatches(sampleWs, canWs)) {
+  if (!checkWorkspaceBinningMatches(sampleWs, canCloneWs)) {
     QString text = "Binning on sample and container does not match."
                    "Would you like to rebin the sample to match the container?";
 
@@ -90,9 +99,9 @@ void ContainerSubtraction::run() {
       IAlgorithm_sptr rebinAlg =
           AlgorithmManager::Instance().create("RebinToWorkspace");
       rebinAlg->initialize();
-      rebinAlg->setProperty("WorkspaceToRebin", canWs);
+      rebinAlg->setProperty("WorkspaceToRebin", canCloneWs);
       rebinAlg->setProperty("WorkspaceToMatch", sampleWs);
-      rebinAlg->setProperty("OutputWorkspace", canWsName.toStdString());
+      rebinAlg->setProperty("OutputWorkspace", canCloneName.toStdString());
       rebinAlg->execute();
     } else {
       m_batchAlgoRunner->clearQueue();
@@ -199,9 +208,15 @@ void ContainerSubtraction::plotPreview(int specIndex) {
         Qt::green);
 
   // Plot container
-  m_uiForm.ppPreview->addSpectrum("Container",
-                                  m_uiForm.dsContainer->getCurrentDataName(),
-                                  specIndex, Qt::red);
+  if (m_uiForm.ckShiftCan->isChecked()) {
+    m_uiForm.ppPreview->addSpectrum("Container",
+                                    (m_uiForm.dsContainer->getCurrentDataName() + "_Shifted"),
+                                    specIndex, Qt::red);
+  } else {
+    m_uiForm.ppPreview->addSpectrum("Container",
+                                    m_uiForm.dsContainer->getCurrentDataName(),
+                                    specIndex, Qt::red);
+  }
 }
 
 void ContainerSubtraction::postProcessComplete(bool error) {
