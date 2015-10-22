@@ -16,6 +16,20 @@ namespace MantidQt
   namespace CustomInterfaces
   {
 
+  /**
+  * The SearchResult struct provides search metadata information
+  */
+  struct SearchResult {
+    SearchResult() {}
+    SearchResult(const std::string &desc, const std::string &loc)
+        : description(desc), location(loc) {}
+    std::string description;
+    std::string location;
+  };
+
+  /// Helper typdef for map of SearchResults keyed by run
+  typedef std::map<std::string, SearchResult> SearchResultMap;
+
     /** ReflTransferStrategy : Provides an stratgegy for transferring runs from search results to a format suitable for processing.
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
@@ -44,15 +58,16 @@ namespace MantidQt
       virtual ~ReflTransferStrategy() {};
 
       /**
-       * @param runRows : A map where the keys are the runs and the values the
-       * descriptions
+       * @param searchResults : A map where the keys are the runs and the values
+       * the
+       * descriptions, location etc.
        * @param progress : Progress object to notify.
        * @returns A vector of maps where each map represents a row,
        * with Keys matching Column headings and Values matching the row entries
        * for those columns
        */
       virtual std::vector<std::map<std::string, std::string>>
-      transferRuns(const std::map<std::string, std::string> &runRows,
+      transferRuns(const SearchResultMap &searchResults,
                    Mantid::Kernel::ProgressBase &progress) = 0;
 
       /**

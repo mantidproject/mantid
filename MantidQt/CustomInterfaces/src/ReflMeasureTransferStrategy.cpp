@@ -16,9 +16,10 @@ ReflMeasureTransferStrategy::~ReflMeasureTransferStrategy() {}
 
 std::vector<std::map<std::string, std::string>>
 MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
-    const std::map<std::string, std::string> &runRows,
+    const SearchResultMap &searchResults,
     Mantid::Kernel::ProgressBase &progress) {
-  return std::vector<std::map<std::string, std::string>>(1);
+
+  return std::vector<std::map<std::string, std::string>>(1); // HACK
 }
 
 ReflMeasureTransferStrategy *ReflMeasureTransferStrategy::clone() const {

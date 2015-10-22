@@ -1455,9 +1455,9 @@ void ReflMainViewPresenter::search() {
     m_view->showAlgorithmDialog("CatalogLogin");
 
   try {
-    auto results = m_searcher->search(searchString, searchInstr);
-    m_searchModel =
-        ReflSearchModel_sptr(new ReflSearchModel(*m_transferStrategy, results));
+    auto results = m_searcher->search(searchString);
+    m_searchModel = ReflSearchModel_sptr(
+        new ReflSearchModel(*m_transferStrategy, results, searchInstr));
     m_view->showSearch(m_searchModel);
   } catch (std::runtime_error &e) {
     m_view->giveUserCritical("Error running search:\n" + std::string(e.what()),
@@ -1468,7 +1468,7 @@ void ReflMainViewPresenter::search() {
 /** Transfers the selected runs in the search results to the processing table */
 void ReflMainViewPresenter::transfer() {
   // Build the input for the transfer strategy
-  std::map<std::string, std::string> runs;
+  SearchResultMap runs;
   auto selectedRows = m_view->getSelectedSearchRows();
   for (auto rowIt = selectedRows.begin(); rowIt != selectedRows.end();
        ++rowIt) {
@@ -1476,11 +1476,17 @@ void ReflMainViewPresenter::transfer() {
     const std::string run = m_searchModel->data(m_searchModel->index(row, 0))
                                 .toString()
                                 .toStdString();
-    const std::string description =
-        m_searchModel->data(m_searchModel->index(row, 1))
-            .toString()
-            .toStdString();
-    runs[run] = description;
+    SearchResult searchResult;
+
+    searchResult.description = m_searchModel->data(m_searchModel->index(row, 1))
+                                   .toString()
+                                   .toStdString();
+
+    searchResult.location = m_searchModel->data(m_searchModel->index(row, 2))
+                                .toString()
+                                .toStdString();
+
+    runs[run] = searchResult;
   }
 
   ReflProgress progress(0, selectedRows.size(), selectedRows.size(),

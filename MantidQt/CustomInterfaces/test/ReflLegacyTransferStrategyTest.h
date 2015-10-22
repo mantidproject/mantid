@@ -28,10 +28,10 @@ public:
   ReflLegacyTransferStrategyTest() {}
 
   void testBasicTransfer() {
-    std::map<std::string, std::string> input;
-    input["1234"] = "fictitious run on gold";
-    input["1235"] = "fictitious run on silver";
-    input["1236"] = "fictitious run on bronze";
+    SearchResultMap input;
+    input["1234"] = SearchResult("fictitious run on gold", "");
+    input["1235"] = SearchResult("fictitious run on silver", "");
+    input["1236"] = SearchResult("fictitious run on bronze", "");
 
     std::vector<std::map<std::string, std::string>> expected;
     std::map<std::string, std::string> expectedRow;
@@ -63,11 +63,11 @@ public:
   }
 
   void testGroupedTransfer() {
-    std::map<std::string, std::string> input;
-    input["1233"] = "fictitious run on platinum";
-    input["1234"] = "fictitious run on gold";
-    input["1235"] = "fictitious run on gold";
-    input["1236"] = "fictitious run on silver";
+    SearchResultMap input;
+    input["1233"] = SearchResult("fictitious run on platinum", "");
+    input["1234"] = SearchResult("fictitious run on gold", "");
+    input["1235"] = SearchResult("fictitious run on gold", "");
+    input["1236"] = SearchResult("fictitious run on silver", "");
 
     std::vector<std::map<std::string, std::string>> expected;
     std::map<std::string, std::string> expectedRow;
@@ -99,11 +99,12 @@ public:
   }
 
   void testThetaExtraction() {
-    std::map<std::string, std::string> input;
-    input["1234"] = "fictitious run on gold";
-    input["1235"] = "fictitious run on silver in 3.14 theta";
-    input["1236"] = "fictitious run on bronze th=2.17";
-    input["1237"] = "fictitious run on platinum th:1.23 and pH=12";
+    SearchResultMap input;
+    input["1234"] = SearchResult("fictitious run on gold", "");
+    input["1235"] = SearchResult("fictitious run on silver in 3.14 theta", "");
+    input["1236"] = SearchResult("fictitious run on bronze th=2.17", "");
+    input["1237"] =
+        SearchResult("fictitious run on platinum th:1.23 and pH=12", "");
 
     std::vector<std::map<std::string, std::string>> expected;
     std::map<std::string, std::string> expectedRow;
@@ -142,15 +143,16 @@ public:
   }
 
   void testComplexExtraction() {
-    std::map<std::string, std::string> input;
-    input["1230"] = "fictitious run on gold";
-    input["1231"] = "fictitious run on silver in 3.14 theta";
-    input["1232"] = "fictitious run on silver in 3.14 theta";
-    input["1233"] = "fictitious run on silver in 2.17 theta";
-    input["1234"] = "fictitious run on bronze th=2.17";
-    input["1235"] = "fictitious run on bronze th=1.23";
-    input["1236"] = "fictitious run on platinum th:1.23 and pH=12";
-    input["1237"] = "fictitious run on fool's gold";
+    SearchResultMap input;
+    input["1230"] = SearchResult("fictitious run on gold", "");
+    input["1231"] = SearchResult("fictitious run on silver in 3.14 theta", "");
+    input["1232"] = SearchResult("fictitious run on silver in 3.14 theta", "");
+    input["1233"] = SearchResult("fictitious run on silver in 2.17 theta", "");
+    input["1234"] = SearchResult("fictitious run on bronze th=2.17", "");
+    input["1235"] = SearchResult("fictitious run on bronze th=1.23", "");
+    input["1236"] =
+        SearchResult("fictitious run on platinum th:1.23 and pH=12", "");
+    input["1237"] = SearchResult("fictitious run on fool's gold", "");
 
     std::vector<std::map<std::string, std::string>> expected;
     std::map<std::string, std::string> expectedRow;

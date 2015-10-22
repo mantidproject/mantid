@@ -42,7 +42,8 @@ namespace MantidQt
       Q_OBJECT
     public:
       ReflSearchModel(const ReflTransferStrategy &transferMethod,
-                      Mantid::API::ITableWorkspace_sptr tableWorkspace);
+                      Mantid::API::ITableWorkspace_sptr tableWorkspace,
+                      const std::string &instrument);
       virtual ~ReflSearchModel();
       //row and column counts
       int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -54,16 +55,15 @@ namespace MantidQt
       //get flags for a cell
       Qt::ItemFlags flags(const QModelIndex &index) const;
 
-    private:
-      // The matching transfer method to use.
-      std::unique_ptr<ReflTransferStrategy> m_transferMethod;
-
     protected:
       //vector of the run numbers
       std::vector<std::string> m_runs;
 
-      //maps each run number to its description
+      /// maps each run number to its description
       std::map<std::string,std::string> m_descriptions;
+
+      /// maps each run number to its location
+      std::map<std::string, std::string> m_locations;
     };
 
     /// Typedef for a shared pointer to \c ReflSearchModel

@@ -11,7 +11,7 @@ namespace MantidQt
   {
   std::vector<std::map<std::string, std::string>>
   ReflLegacyTransferStrategy::transferRuns(
-      const std::map<std::string, std::string> &runRows,
+      const SearchResultMap &searchResults,
       Mantid::Kernel::ProgressBase &progress) {
       /*
        * If the descriptions are the same except for theta: same group, different rows.
@@ -29,10 +29,10 @@ namespace MantidQt
       std::map<std::string,std::string> thetaByDesc;
 
       //Iterate over the input and build the maps
-      for(auto rowIt = runRows.begin(); rowIt != runRows.end(); ++rowIt)
-      {
+      for (auto rowIt = searchResults.begin(); rowIt != searchResults.end();
+           ++rowIt) {
         const std::string run = rowIt->first;
-        const std::string desc = rowIt->second;
+        const std::string desc = rowIt->second.description;
         std::string cleanDesc = desc;
 
         //See if theta is in the description
