@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleEnvironment.h"
+#include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -197,6 +198,59 @@ public:
     TS_ASSERT(!sampleB.hasOrientedLattice())
     TS_ASSERT_THROWS(sampleB.getOrientedLattice(), std::runtime_error &)
     delete latticeA;
+  }
+
+  void test_setCrystalStructure() {
+    Sample sample;
+    TS_ASSERT(!sample.hasCrystalStructure());
+    TS_ASSERT_THROWS(sample.getCrystalStructure(), std::runtime_error);
+
+    CrystalStructure structure("3 4 5 90 90 90", "C m m m",
+                               "Fe 0.12 0.23 0.121");
+
+    TS_ASSERT_THROWS_NOTHING(sample.setCrystalStructure(structure));
+    TS_ASSERT(sample.hasCrystalStructure());
+    CrystalStructure fromSample = sample.getCrystalStructure();
+
+    TS_ASSERT(fromSample.spaceGroup());
+    TS_ASSERT_EQUALS(fromSample.spaceGroup()->hmSymbol(), "C m m m");
+  }
+
+  void test_clearCrystalStructure() {
+    Sample sample;
+    TS_ASSERT(!sample.hasCrystalStructure());
+    TS_ASSERT_THROWS(sample.getCrystalStructure(), std::runtime_error);
+
+    CrystalStructure structure("3 4 5 90 90 90", "C m m m",
+                               "Fe 0.12 0.23 0.121");
+    sample.setCrystalStructure(structure);
+    TS_ASSERT(sample.hasCrystalStructure());
+
+    TS_ASSERT_THROWS_NOTHING(sample.clearCrystalStructure());
+    TS_ASSERT(!sample.hasCrystalStructure());
+  }
+
+  void test_crystalStructureCopyConstructorAndAssignment() {
+    Sample sampleA;
+
+    CrystalStructure structure("3 4 5 90 90 90", "C m m m",
+                               "Fe 0.12 0.23 0.121");
+    sampleA.setCrystalStructure(structure);
+    TS_ASSERT(sampleA.hasCrystalStructure());
+
+    Sample sampleB = sampleA;
+    TS_ASSERT(sampleB.hasCrystalStructure());
+
+    CrystalStructure fromA = sampleA.getCrystalStructure();
+    CrystalStructure fromB = sampleB.getCrystalStructure();
+    TS_ASSERT_EQUALS(fromA.spaceGroup()->hmSymbol(),
+                     fromB.spaceGroup()->hmSymbol());
+
+    Sample sampleC(sampleA);
+
+    CrystalStructure fromC = sampleC.getCrystalStructure();
+    TS_ASSERT_EQUALS(fromA.spaceGroup()->hmSymbol(),
+                     fromC.spaceGroup()->hmSymbol());
   }
 
   void test_Material_Returns_The_Correct_Value() {

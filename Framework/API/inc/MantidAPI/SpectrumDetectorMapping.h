@@ -4,7 +4,7 @@
 #include <vector>
 #include <set>
 #ifndef Q_MOC_RUN
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #endif
 
 #include "MantidGeometry/IDTypes.h"
@@ -50,7 +50,7 @@ class MatrixWorkspace;
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL SpectrumDetectorMapping {
-  typedef boost::unordered_map<specid_t, std::set<detid_t>> sdmap;
+  typedef std::unordered_map<specid_t, std::set<detid_t>> sdmap;
 
 public:
   explicit SpectrumDetectorMapping(const MatrixWorkspace *const workspace,

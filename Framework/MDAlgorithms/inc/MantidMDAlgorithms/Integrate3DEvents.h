@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <boost/shared_ptr.hpp>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
 
@@ -53,9 +53,9 @@ namespace MDAlgorithms {
                  <http://doxygen.mantidproject.org>
  */
 
-typedef boost::unordered_map<
+typedef std::unordered_map<
     int64_t, std::vector<std::pair<double, Mantid::Kernel::V3D>>> EventListMap;
-typedef boost::unordered_map<int64_t, Mantid::Kernel::V3D> PeakQMap;
+typedef std::unordered_map<int64_t, Mantid::Kernel::V3D> PeakQMap;
 
 class DLLExport Integrate3DEvents {
 public:

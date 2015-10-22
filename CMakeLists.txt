@@ -92,6 +92,9 @@ endif()
 ###########################################################################
 # Call our setup script
 ###########################################################################
+if (NOT ENABLE_OPENCASCADE)
+ set ( ENABLE_OPENCASCADE ON CACHE BOOL "Enable OpenCascade-based 3D visualisation")
+endif()
 include ( CommonSetup )
 
 ###########################################################################
@@ -132,7 +135,6 @@ set( DOCS_BUILDDIR ${CMAKE_BINARY_DIR}/docs )
 # Framework Build options
 set ( CXXTEST_SINGLE_LOGFILE CACHE BOOL "Switch to have the tests for each package run together")
 set ( CXXTEST_ADD_PERFORMANCE OFF CACHE BOOL "Switch to add Performance tests to the list of tests run by ctest?")
-set ( ENABLE_OPENCASCADE ON CACHE BOOL "Enable OpenCascade-based 3D visualisation")
 
 add_subdirectory ( Framework )
 

@@ -8,7 +8,7 @@
 // Boost graphing
 #ifndef Q_MOC_RUN
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 #endif
@@ -21,7 +21,7 @@ namespace Geometry {
 class Instrument;
 class IComponent;
 
-typedef boost::unordered_map<specid_t, std::set<detid_t>>
+typedef std::unordered_map<specid_t, std::set<detid_t>>
     ISpectrumDetectorMapping;
 
 /**
