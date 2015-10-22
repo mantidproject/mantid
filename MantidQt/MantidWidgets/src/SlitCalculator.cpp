@@ -3,7 +3,6 @@
 #include "MantidAPI/Progress.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
-
 #include <math.h>
 
 namespace MantidQt {
@@ -11,14 +10,14 @@ namespace MantidWidgets {
 SlitCalculator::SlitCalculator(QWidget *parent) {
   Q_UNUSED(parent);
   ui.setupUi(this);
-  if (currentInstrumentName == ""){
-      currentInstrumentName = "INTER";
-      setInstrument(currentInstrumentName);
+  if (currentInstrumentName == "") {
+    currentInstrumentName = "INTER";
+    setInstrument(currentInstrumentName);
   }
   on_recalculate_triggered();
 }
-void SlitCalculator::emitInstrumentChangedSignal(){
-    on_recalculate_triggered();
+void SlitCalculator::processInstrumentHasBeenChanged() {
+  on_recalculate_triggered();
 }
 SlitCalculator::~SlitCalculator() {}
 void SlitCalculator::setInstrument(std::string instrumentName) {
@@ -55,25 +54,24 @@ void SlitCalculator::setupSlitCalculatorWithInstrumentValues(
   auto slit1Component = instrument->getComponentByName("slit1");
   auto slit2Component = instrument->getComponentByName("slit2");
   auto sampleComponent = instrument->getComponentByName("some-surface-holder");
-    // convert between metres and millimetres
+  // convert between metres and millimetres
   const double s1s2 = 1e3 * slit1Component->getDistance(*slit2Component);
   ui.spinSlit1Slit2->setValue(s1s2);
   const double s2sa = 1e3 * slit2Component->getDistance(*sampleComponent);
   ui.spinSlit2Sample->setValue(s2sa);
-  
 }
 Mantid::Geometry::Instrument_sptr SlitCalculator::getInstrument() {
   return this->instrument;
 }
-void SlitCalculator::setCurrentInstrumentName(std::string instrumentName){
-    this->currentInstrumentName = instrumentName;
+void SlitCalculator::setCurrentInstrumentName(std::string instrumentName) {
+  this->currentInstrumentName = instrumentName;
 }
-std::string SlitCalculator::getCurrentInstrumentName(){
-    return this->currentInstrumentName;
+std::string SlitCalculator::getCurrentInstrumentName() {
+  return this->currentInstrumentName;
 }
 void SlitCalculator::on_recalculate_triggered() {
   const auto currentInstrument = getInstrument();
-  if (currentInstrument->getName() != currentInstrumentName){
+  if (currentInstrument->getName() != currentInstrumentName) {
     setInstrument(currentInstrumentName);
   }
   // Gather input

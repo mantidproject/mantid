@@ -44,7 +44,7 @@ public:
   Mantid::Geometry::Instrument_sptr getInstrument();
   void setCurrentInstrumentName(std::string instrumentName);
   std::string getCurrentInstrumentName();
-  void emitInstrumentChangedSignal();
+  void processInstrumentHasBeenChanged();
 
 protected:
   Ui::SlitCalculator ui;
@@ -54,8 +54,6 @@ private:
   std::string currentInstrumentName;
   void setupSlitCalculatorWithInstrumentValues(
       Mantid::Geometry::Instrument_const_sptr);
-signals:
-  void instrumentChanged();
 private slots:
   void on_recalculate_triggered();
 };
