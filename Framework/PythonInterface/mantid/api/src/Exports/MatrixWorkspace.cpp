@@ -317,7 +317,7 @@ void export_MatrixWorkspace() {
       //-----------------------------------
       .def("equals", &Mantid::API::equals, args("self", "other", "tolerance"),
            "Performs a comparison operation on two workspaces, using the "
-           "CheckWorkspacesMatch algorithm");
+           "CompareWorkspaces algorithm");
 
   RegisterWorkspacePtrToPython<MatrixWorkspace>();
 }
