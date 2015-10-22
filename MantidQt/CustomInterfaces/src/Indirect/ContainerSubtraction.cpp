@@ -68,6 +68,13 @@ void ContainerSubtraction::run() {
     scaleX->setProperty("Factor", m_uiForm.spShift->value());
     scaleX->setProperty("Operation", "Add");
     scaleX->execute();
+    IAlgorithm_sptr rebin =
+        AlgorithmManager::Instance().create("RebinToWorkspace");
+    rebin->initialize();
+    rebin->setProperty("WorkspaceToRebin", canCloneWs);
+    rebin->setProperty("WorkspaceToMatch", sampleWs);
+    rebin->setProperty("OutputWorkspace", canCloneName.toStdString());
+    rebin->execute();
   }
 
   // If not in wavelength then do conversion
@@ -96,13 +103,7 @@ void ContainerSubtraction::run() {
                                        QMessageBox::NoButton);
 
     if (result == QMessageBox::Yes) {
-      IAlgorithm_sptr rebinAlg =
-          AlgorithmManager::Instance().create("RebinToWorkspace");
-      rebinAlg->initialize();
-      rebinAlg->setProperty("WorkspaceToRebin", canCloneWs);
-      rebinAlg->setProperty("WorkspaceToMatch", sampleWs);
-      rebinAlg->setProperty("OutputWorkspace", canCloneName.toStdString());
-      rebinAlg->execute();
+		addRebinStep(canCloneName, sampleWsName);
     } else {
       m_batchAlgoRunner->clearQueue();
       g_log.error("Cannot apply absorption corrections using a sample and "
@@ -136,6 +137,28 @@ void ContainerSubtraction::run() {
 
   // Set the result workspace for Python script export
   m_pythonExportWsName = outputWsName.toStdString();
+}
+
+/**
+ * Adds a rebin to workspace step to the calculation for when using a sample and
+ *container that
+ * have different binning.
+ *
+ * @param toRebin
+ * @param toMatch
+ */
+void ContainerSubtraction::addRebinStep(QString toRebin, QString toMatch) {
+  API::BatchAlgorithmRunner::AlgorithmRuntimeProps rebinProps;
+  rebinProps["WorkspaceToMatch"] = toMatch.toStdString();
+
+  IAlgorithm_sptr rebinAlg =
+      AlgorithmManager::Instance().create("RebinToWorkspace");
+  rebinAlg->initialize();
+
+  rebinAlg->setProperty("WorkspaceToRebin", toRebin.toStdString());
+  rebinAlg->setProperty("OutputWorkspace", toRebin.toStdString());
+
+  m_batchAlgoRunner->addAlgorithm(rebinAlg, rebinProps);
 }
 
 /**
@@ -209,9 +232,9 @@ void ContainerSubtraction::plotPreview(int specIndex) {
 
   // Plot container
   if (m_uiForm.ckShiftCan->isChecked()) {
-    m_uiForm.ppPreview->addSpectrum("Container",
-                                    (m_uiForm.dsContainer->getCurrentDataName() + "_Shifted"),
-                                    specIndex, Qt::red);
+    m_uiForm.ppPreview->addSpectrum(
+        "Container", (m_uiForm.dsContainer->getCurrentDataName() + "_Shifted"),
+        specIndex, Qt::red);
   } else {
     m_uiForm.ppPreview->addSpectrum("Container",
                                     m_uiForm.dsContainer->getCurrentDataName(),
