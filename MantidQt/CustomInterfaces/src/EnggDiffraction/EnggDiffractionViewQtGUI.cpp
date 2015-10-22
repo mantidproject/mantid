@@ -55,7 +55,7 @@ const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
  * @param parent Parent window (most likely the Mantid main app window).
  */
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
-    : UserSubWindow(parent), IEnggDiffractionView(), m_currentInst("ENGIN-X"),
+    : UserSubWindow(parent), IEnggDiffractionView(), m_currentInst("ENGINX"),
       m_currentCalibFilename(""), m_presenter(NULL) {}
 
 EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {}
@@ -78,6 +78,7 @@ void EnggDiffractionViewQtGUI::initLayout() {
 
   QComboBox *inst = m_ui.comboBox_instrument;
   m_currentInst = inst->currentText().toStdString();
+
   setPrefix(m_currentInst);
   readSettings();
 
