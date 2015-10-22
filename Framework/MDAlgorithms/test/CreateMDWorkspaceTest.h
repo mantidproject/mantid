@@ -3,6 +3,8 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -62,6 +64,23 @@ public:
                          "-1,1,-2,2,3,3", "Names", "One,Two,Three",
                          "MinRecursionDepth", "5", "MaxRecursionDepth", "4")
                    ->isExecuted());
+
+    // Wrong Frame-type input
+    TS_ASSERT_THROWS(FrameworkManager::Instance().exec(
+                         "CreateMDWorkspace", 12, "OutputWorkspace",
+                         "simple_md", "Dimensions", "3", "Extents",
+                         "-1,1,-2,2,3,3", "Names", "One,Two,Three", "Units",
+                         "One,Two,Three", "Frames", "QSample, QTest, QSample"),
+                     std::runtime_error);
+
+    // Wrong number of frames
+    TS_ASSERT_THROWS(!FrameworkManager::Instance().exec(
+                         "CreateMDWorkspace", 12, "OutputWorkspace",
+                         "simple_md", "Dimensions", "3", "Extents",
+                         "-1,1,-2,2,3,3", "Names", "One,Two,Three", "Units",
+                         "One,Two,Three", "Frames", "QSample, QSample"),
+                     std::runtime_error);
+
     // Uses too much memory
     TS_ASSERT(!FrameworkManager::Instance()
                    .exec("CreateMDWorkspace", 14, "OutputWorkspace",
@@ -73,7 +92,7 @@ public:
   }
 
   void do_test_exec(std::string Filename, bool lean, int MinRecursionDepth = 0,
-                    int expectedNumMDBoxes = 216) {
+                    int expectedNumMDBoxes = 216, bool withFrames = false) {
 
     std::string wsName = "CreateMDWorkspaceTest_out";
     CreateMDWorkspace alg;
@@ -91,6 +110,9 @@ public:
     alg.setPropertyValue("OutputWorkspace", wsName);
     alg.setPropertyValue("Filename", Filename);
     alg.setPropertyValue("Memory", "1");
+    if (withFrames) {
+      alg.setPropertyValue("Frames", "QSample, QSample, QSample");
+    }
 
     std::string fullName = alg.getPropertyValue("Filename");
     if (fullName != "")
@@ -161,6 +183,22 @@ public:
       ws->clearFileBacked(false);
       if (Poco::File(s).exists())
         Poco::File(s).remove();
+    }
+
+    // Test the frame type
+    if (withFrames) {
+      for (size_t dim = 0; dim < ws->getNumDims(); ++dim) {
+        const auto &frame = ws->getDimension(dim)->getMDFrame();
+        TSM_ASSERT_EQUALS("Should be convertible to a QSample frame",
+                          Mantid::Geometry::QSample::QSampleName, frame.name());
+      }
+    } else {
+      for (size_t dim = 0; dim < ws->getNumDims(); ++dim) {
+        const auto &frame = ws->getDimension(dim)->getMDFrame();
+        TSM_ASSERT_EQUALS("Should be convertible to a General frame",
+                          Mantid::Geometry::GeneralFrame::GeneralFrameName,
+                          frame.name());
+      }
     }
   }
 

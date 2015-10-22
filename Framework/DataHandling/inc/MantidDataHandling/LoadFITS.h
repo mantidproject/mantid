@@ -97,31 +97,43 @@ private:
   /// Execution code
   void exec();
 
-  /// Loads files into workspace(s)
-  void doLoadFiles(const std::vector<std::string> &paths,
-                   const std::string &outWSName, bool loadAsRectImg = false);
-
   /// Loads the FITS header(s) into a struct
   void doLoadHeaders(const std::vector<std::string> &paths,
                      std::vector<FITSInfo> &headers);
+
+  /// Once loaded, check against standard and limitations of this algorithm
+  void headerSanityCheck(const FITSInfo &hdr, const FITSInfo &hdrFirst);
+
+  /// Loads files into workspace(s)
+  void doLoadFiles(const std::vector<std::string> &paths,
+                   const std::string &outWSName, bool loadAsRectImg,
+                   int binSize, double noiseThresh);
 
   /// Parses the header values for the FITS file
   void parseHeader(FITSInfo &headerInfo);
 
   /// Initialises a workspace with IDF and fills it with data
-  DataObjects::Workspace2D_sptr
-  makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
-                std::vector<char> &buffer, API::MantidImage &imageY,
-                API::MantidImage &imageE,
-                const DataObjects::Workspace2D_sptr parent,
-                bool loadAsRectImg = false);
+  DataObjects::Workspace2D_sptr makeWorkspace(
+      const FITSInfo &fileInfo, size_t &newFileNumber,
+      std::vector<char> &buffer, API::MantidImage &imageY,
+      API::MantidImage &imageE, const DataObjects::Workspace2D_sptr parent,
+      bool loadAsRectImg = false, int binSize = 1, double noiseThresh = false);
 
-  // Reads the data from a single FITS file into a workspace
+  void addAxesInfoAndLogs(DataObjects::Workspace2D_sptr ws, bool loadAsRectImg,
+                          const FITSInfo &fileInfo, int binSize, double cmpp);
+
+  // Reads the data from a single FITS file into a workspace (directly, fast)
+  void readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
+                           DataObjects::Workspace2D_sptr ws,
+                           std::vector<char> &buffer);
+
+  // Reads the data from a single FITS file into image objects (Y and E) that
+  // then can/will be copied into a workspace
   void readDataToImgs(const FITSInfo &fileInfo, API::MantidImage &imageY,
                       API::MantidImage &imageE, std::vector<char> &buffer);
 
-  /// Once loaded, check against standard and limitations of this algorithm
-  void headerSanityCheck(const FITSInfo &hdr, const FITSInfo &hdrFirst);
+  void readInBuffer(const FITSInfo &fileInfo, std::vector<char> &buffer,
+                    size_t len);
 
   /// filter noise pixel by pixel
   void doFilterNoise(double thresh, API::MantidImage &imageY,
@@ -136,15 +148,15 @@ private:
 
   void setupDefaultKeywordNames();
 
+  // Maps the header keys to specified values
+  void mapHeaderKeys();
+
   /// Returns the trailing number from a string minus leading 0's (so 25 from
-  /// workspace_00025)
+  /// workspace_000025)
   size_t fetchNumber(const std::string &name);
 
   // Adds a number of leading 0's to another number up to the totalDigitCount.
   std::string padZeros(const size_t number, const size_t totalDigitCount);
-
-  // Maps the header keys to specified values
-  void mapHeaderKeys();
 
   // Strings used to map header keys
   std::string m_headerScaleKey;
@@ -162,17 +174,11 @@ private:
   std::string m_sampleRotation;
   std::string m_imageType;
 
-  std::string m_baseName;
   size_t m_pixelCount;
-  // rebin block size (m_rebin x m_rebin) cells
-  int m_rebin;
-  // noise threshold level
-  double m_noiseThresh;
-  API::Progress *m_progress;
 
   // Number of digits for the fixed width appendix number added to
   // workspace names, i.e. 3=> workspace_001; 5 => workspace_00001
-  static const size_t g_DIGIT_SIZE_APPEND = 5;
+  static const size_t g_DIGIT_SIZE_APPEND = 6;
   /// size of a FITS header block (room for 36 entries, of 80
   /// characters each), in bytes. A FITS header always comes in
   /// multiples of this block.

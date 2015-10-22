@@ -297,8 +297,9 @@ MDHistoDimension_sptr LoadFlexiNexus::makeDimension(NeXus::File *fin, int index,
     min = tmp;
     g_log.notice("WARNING: swapped axis values on " + name);
   }
+  Mantid::Geometry::GeneralFrame frame(name, "");
   return MDHistoDimension_sptr(
-      new MDHistoDimension(name, name, "", min, max, length));
+      new MDHistoDimension(name, name, frame, min, max, length));
 }
 void LoadFlexiNexus::addMetaData(NeXus::File *fin, Workspace_sptr ws,
                                  ExperimentInfo_sptr info) {

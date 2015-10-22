@@ -28,13 +28,14 @@ private:
   /// specified event type.
   IMDEventWorkspace_sptr createInputWorkspace(const std::string &eventType) {
     using Mantid::Geometry::MDHistoDimension;
-
+    Mantid::Geometry::GeneralFrame frame(
+        Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
     IMDEventWorkspace_sptr ws = MDEventFactory::CreateMDWorkspace(2, eventType);
     coord_t min(-10.0f), max(10.0f);
     ws->addDimension(
-        boost::make_shared<MDHistoDimension>("A", "A", "m", min, max, 1));
+        boost::make_shared<MDHistoDimension>("A", "A", frame, min, max, 1));
     ws->addDimension(
-        boost::make_shared<MDHistoDimension>("B", "B", "m", min, max, 1));
+        boost::make_shared<MDHistoDimension>("B", "B", frame, min, max, 1));
     ws->initialize();
     // Split to level 1
     ws->splitBox();

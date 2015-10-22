@@ -6,6 +6,7 @@
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/Timer.h"
 #include "MantidAPI/BoxController.h"
@@ -91,10 +92,10 @@ public:
 
   void test_copy_constructor() {
     MDEventWorkspace<MDLeanEvent<3>, 3> ew3;
-
+    Mantid::Geometry::GeneralFrame frame("m", "m");
     for (size_t i = 0; i < 3; i++) {
-      ew3.addDimension(
-          MDHistoDimension_sptr(new MDHistoDimension("x", "x", "m", -1, 1, 0)));
+      ew3.addDimension(MDHistoDimension_sptr(
+          new MDHistoDimension("x", "x", frame, -1, 1, 0)));
     }
     ew3.initialize();
     ew3.getBoxController()->setSplitThreshold(1);
@@ -153,20 +154,22 @@ public:
 
   void test_initialize_throws() {
     IMDEventWorkspace *ew = new MDEventWorkspace<MDLeanEvent<3>, 3>();
+    Mantid::Geometry::GeneralFrame frame("m", "m");
     TS_ASSERT_THROWS(ew->initialize(), std::runtime_error);
     for (size_t i = 0; i < 5; i++)
-      ew->addDimension(
-          MDHistoDimension_sptr(new MDHistoDimension("x", "x", "m", -1, 1, 0)));
+      ew->addDimension(MDHistoDimension_sptr(
+          new MDHistoDimension("x", "x", frame, -1, 1, 0)));
     TS_ASSERT_THROWS(ew->initialize(), std::runtime_error);
     delete ew;
   }
 
   void test_initialize() {
     IMDEventWorkspace *ew = new MDEventWorkspace<MDLeanEvent<3>, 3>();
+    Mantid::Geometry::GeneralFrame frame("m", "m");
     TS_ASSERT_THROWS(ew->initialize(), std::runtime_error);
     for (size_t i = 0; i < 3; i++)
-      ew->addDimension(
-          MDHistoDimension_sptr(new MDHistoDimension("x", "x", "m", -1, 1, 0)));
+      ew->addDimension(MDHistoDimension_sptr(
+          new MDHistoDimension("x", "x", frame, -1, 1, 0)));
     TS_ASSERT_THROWS_NOTHING(ew->initialize());
     delete ew;
   }
@@ -493,13 +496,17 @@ public:
                       Mantid::Kernel::None, ws->getSpecialCoordinateSystem());
   }
 
-  void test_setSpecialCoordinateSystem_default() {
-    MDEventWorkspace1Lean::sptr ws =
-        MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 1 /*event per box*/);
-    TS_ASSERT_EQUALS(Mantid::Kernel::None, ws->getSpecialCoordinateSystem());
-
-    ws->setCoordinateSystem(Mantid::Kernel::QLab);
-    TS_ASSERT_EQUALS(Mantid::Kernel::QLab, ws->getSpecialCoordinateSystem());
+  void test_getSpecialCoordinateSystem_when_MDFrames_are_set() {
+    // Arrange
+    const Mantid::Geometry::QSample frame;
+    auto ws = MDEventsTestHelper::makeAnyMDEWWithFrames<MDLeanEvent<2>, 2>(
+        10, 0.0, 10.0, frame, 1);
+    // Act
+    auto specialCoordinateSystem = ws->getSpecialCoordinateSystem();
+    // Assert
+    TSM_ASSERT_EQUALS("Should detect QSample as the SpecialCoordinate",
+                      specialCoordinateSystem,
+                      Mantid::Kernel::SpecialCoordinateSystem::QSample);
   }
 
   void test_getLinePlot() {

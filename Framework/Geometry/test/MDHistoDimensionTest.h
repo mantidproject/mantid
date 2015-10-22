@@ -16,13 +16,15 @@ public:
   void test_constructor_throws() {
     coord_t min = 10;
     coord_t max = 1; // min > max !
+    Mantid::Geometry::GeneralFrame frame("My General Frame", "Furlongs");
     TSM_ASSERT_THROWS("Should throw if min > max!",
-                      MDHistoDimension("name", "id", "Furlongs", min, max, 15),
+                      MDHistoDimension("name", "id", frame, min, max, 15),
                       std::invalid_argument);
   }
 
   void test_constructor() {
-    MDHistoDimension d("name", "id", "Furlongs", -10, 20.0, 15);
+    Mantid::Geometry::GeneralFrame frame("My General Frame", "Furlongs");
+    MDHistoDimension d("name", "id", frame, -10, 20.0, 15);
     TS_ASSERT_EQUALS(d.getName(), "name");
     TS_ASSERT_EQUALS(d.getDimensionId(), "id");
     TS_ASSERT_EQUALS(d.getUnits(), "Furlongs");
@@ -35,14 +37,14 @@ public:
   void test_toXMLStringIntegrated() {
     std::string expectedXML =
         std::string("<Dimension ID=\"id\">") + "<Name>name</Name>" +
-        "<Units>Furlongs</Units>" + "<Frame>Unknown frame</Frame>" +
+        "<Units>Furlongs</Units>" + "<Frame>My General Frame</Frame>" +
         "<UpperBounds>20.0000</UpperBounds>" +
         "<LowerBounds>-10.0000</LowerBounds>" +
         "<NumberOfBins>1</NumberOfBins>" + "<Integrated>" +
         "<UpperLimit>20.0000</UpperLimit>" +
         "<LowerLimit>-10.0000</LowerLimit>" + "</Integrated>" + "</Dimension>";
-
-    MDHistoDimension dimension("name", "id", "Furlongs", -10, 20.0, 1);
+    Mantid::Geometry::GeneralFrame frame("My General Frame", "Furlongs");
+    MDHistoDimension dimension("name", "id", frame, -10, 20.0, 1);
     std::string actualXML = dimension.toXMLString();
     TS_ASSERT_EQUALS(expectedXML, actualXML);
   }
@@ -50,20 +52,20 @@ public:
   void test_toXMLStringNotIntegrated() {
     std::string expectedXML =
         std::string("<Dimension ID=\"id\">") + "<Name>name</Name>" +
-        "<Units>Furlongs</Units>" + "<Frame>Unknown frame</Frame>" +
+        "<Units>Furlongs</Units>" + "<Frame>My General Frame</Frame>" +
         "<UpperBounds>20.0000</UpperBounds>" +
         "<LowerBounds>-10.0000</LowerBounds>" +
         "<NumberOfBins>15</NumberOfBins>" + "</Dimension>";
-
-    MDHistoDimension dimension("name", "id", "Furlongs", -10, 20.0, 15);
+    Mantid::Geometry::GeneralFrame frame("My General Frame", "Furlongs");
+    MDHistoDimension dimension("name", "id", frame, -10, 20.0, 15);
     std::string actualXML = dimension.toXMLString();
     TS_ASSERT_EQUALS(expectedXML, actualXML);
   }
 
   void test_getMDUnits_gives_label_unit() {
-
     Kernel::UnitLabel unitLabel("Meters");
-    MDHistoDimension dimension("Distance", "Dist", unitLabel, 0, 10, 1);
+    Mantid::Geometry::GeneralFrame frame("Length", unitLabel);
+    MDHistoDimension dimension("Distance", "Dist", frame, 0, 10, 1);
     const Mantid::Kernel::MDUnit &unit = dimension.getMDUnits();
     TS_ASSERT_EQUALS(unit.getUnitLabel(), unitLabel);
     TS_ASSERT(dynamic_cast<const Mantid::Kernel::LabelUnit *>(&unit));

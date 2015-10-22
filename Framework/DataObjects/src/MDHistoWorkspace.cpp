@@ -3,8 +3,10 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/VMD.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
+#include "MantidDataObjects/MDFramesToSpecialCoordinateSystem.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include <map>
@@ -13,6 +15,7 @@
 #include <boost/scoped_array.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
+#include <boost/optional.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -1212,11 +1215,20 @@ uint64_t MDHistoWorkspace::sumNContribEvents() const {
 }
 
 /**
-Get the special coordinate system (if any) to use.
+ * Get the Q frame system (if any) to use.
 */
+// clang-format off
+GCC_DIAG_OFF(strict-aliasing)
+// clang-format on
 Kernel::SpecialCoordinateSystem
 MDHistoWorkspace::getSpecialCoordinateSystem() const {
-  return m_coordSystem;
+  MDFramesToSpecialCoordinateSystem converter;
+  auto coordinatesFromMDFrames = converter(this);
+  auto coordinates = m_coordSystem;
+  if (coordinatesFromMDFrames) {
+    coordinates = coordinatesFromMDFrames.get();
+  }
+  return coordinates;
 }
 
 /**
