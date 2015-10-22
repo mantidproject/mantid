@@ -2,8 +2,22 @@
 #define MANTID_CUSTOMINTERFACES_REFLMEASURETRANSFERSTRATEGYTEST_H_
 
 #include <cxxtest/TestSuite.h>
-
+#include "ReflMainViewMockObjects.h"
 #include "MantidQtCustomInterfaces/ReflMeasureTransferStrategy.h"
+#include "MantidQtCustomInterfaces/ReflMeasurementSource.h"
+#include <memory>
+#include <gmock/gmock.h>
+
+using namespace testing;
+
+class MockReflMeasurementSource
+    : public MantidQt::CustomInterfaces::ReflMeasurementSource {
+public:
+  MOCK_CONST_METHOD1(
+      obtain, MantidQt::CustomInterfaces::Measurement(const std::string &));
+  MOCK_CONST_METHOD0(clone, MockReflMeasurementSource *());
+  ~MockReflMeasurementSource() {}
+};
 
 using MantidQt::CustomInterfaces::ReflMeasureTransferStrategy;
 
@@ -19,14 +33,33 @@ public:
   }
 
   void test_clone() {
-    ReflMeasureTransferStrategy strategy;
+
+    // Sub component ICatalogInfo will be cloned
+    auto pCatInfo = new MockICatalogInfo;
+    EXPECT_CALL(*pCatInfo, clone()).WillOnce(Return(new MockICatalogInfo));
+
+    // Sub component Measurment source will be cloned
+    auto pMeasurementSource = new MockReflMeasurementSource;
+    EXPECT_CALL(*pMeasurementSource, clone())
+        .WillOnce(Return(new MockReflMeasurementSource));
+
+    // Create it
+    ReflMeasureTransferStrategy strategy(
+        std::move(std::unique_ptr<MockICatalogInfo>(pCatInfo)),
+        std::move(
+            std::unique_ptr<MockReflMeasurementSource>(pMeasurementSource)));
+    // Clone it
     auto *clone = strategy.clone();
     TS_ASSERT(dynamic_cast<ReflMeasureTransferStrategy *>(clone));
     delete clone;
   }
 
   void test_filtering() {
-    ReflMeasureTransferStrategy strategy;
+
+    ReflMeasureTransferStrategy strategy(
+        std::unique_ptr<MockICatalogInfo>(new MockICatalogInfo),
+        std::unique_ptr<MockReflMeasurementSource>(
+            new MockReflMeasurementSource));
 
     // ISIS nexus format files can have the right logs.
     TSM_ASSERT("Yes this transfer mechanism should know about nexus formats",

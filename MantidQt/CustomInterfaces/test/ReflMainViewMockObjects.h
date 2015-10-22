@@ -8,6 +8,7 @@
 #include "MantidQtCustomInterfaces/ReflTableSchema.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"
 
 using namespace MantidQt::CustomInterfaces;
@@ -75,10 +76,22 @@ public:
 };
 
 class MockProgressBase : public Mantid::Kernel::ProgressBase {
-
 public:
   MOCK_METHOD1(doReport, void(const std::string &));
   ~MockProgressBase() {}
+};
+
+class MockICatalogInfo : public Mantid::Kernel::ICatalogInfo {
+public:
+  MOCK_CONST_METHOD0(catalogName, const std::string());
+  MOCK_CONST_METHOD0(soapEndPoint, const std::string());
+  MOCK_CONST_METHOD0(externalDownloadURL, const std::string());
+  MOCK_CONST_METHOD0(catalogPrefix, const std::string());
+  MOCK_CONST_METHOD0(windowsPrefix, const std::string());
+  MOCK_CONST_METHOD0(macPrefix, const std::string());
+  MOCK_CONST_METHOD0(linuxPrefix, const std::string());
+  MOCK_CONST_METHOD0(clone, ICatalogInfo *());
+  virtual ~MockICatalogInfo() {}
 };
 
 #endif /*MANTID_CUSTOMINTERFACES_REFLMAINVIEWMOCKOBJECTS_H*/

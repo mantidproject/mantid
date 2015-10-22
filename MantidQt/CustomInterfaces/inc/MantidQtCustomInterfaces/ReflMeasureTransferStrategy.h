@@ -7,9 +7,20 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <memory>
+
+namespace Mantid {
+namespace Kernel {
+// Forward dec
+class ICatalogInfo;
+}
+}
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+// Forward dec
+class ReflMeasurementSource;
 
 /** ReflMeasureTransferStrategy : Transfer strategy that uses the measurement
   information
@@ -39,7 +50,11 @@ namespace CustomInterfaces {
 class MANTIDQT_CUSTOMINTERFACES_DLL ReflMeasureTransferStrategy
     : public ReflTransferStrategy {
 public:
-  ReflMeasureTransferStrategy();
+  ReflMeasureTransferStrategy(
+      std::unique_ptr<Mantid::Kernel::ICatalogInfo> catInfo,
+      std::unique_ptr<ReflMeasurementSource> measurementSource);
+
+  ReflMeasureTransferStrategy(const ReflMeasureTransferStrategy &other);
 
   virtual std::vector<std::map<std::string, std::string>>
   transferRuns(const SearchResultMap &searchResults,
@@ -50,6 +65,13 @@ public:
   virtual bool knownFileType(const std::string &filename) const;
 
   virtual ~ReflMeasureTransferStrategy();
+
+private:
+  /// Catalog information needed for transformations
+  std::unique_ptr<Mantid::Kernel::ICatalogInfo> m_catInfo;
+
+  /// Measurement source for loading.
+  std::unique_ptr<ReflMeasurementSource> m_measurementSource;
 };
 
 } // namespace CustomInterfaces

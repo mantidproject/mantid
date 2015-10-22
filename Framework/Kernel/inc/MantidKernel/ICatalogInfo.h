@@ -46,8 +46,11 @@ public:
   virtual const std::string macPrefix() const = 0;
   /// Obtain Linux prefix from facility file.
   virtual const std::string linuxPrefix() const = 0;
+  /// Clone
+  virtual ICatalogInfo *clone() const = 0;
   /// Transform's the archive path based on operating system used.
   std::string transformArchivePath(const std::string &path) const;
+
   /// virtual destructor
   virtual ~ICatalogInfo();
 

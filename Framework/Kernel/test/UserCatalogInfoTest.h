@@ -34,6 +34,7 @@ public:
   MOCK_CONST_METHOD0(windowsPrefix, const std::string());
   MOCK_CONST_METHOD0(macPrefix, const std::string());
   MOCK_CONST_METHOD0(linuxPrefix, const std::string());
+  MOCK_CONST_METHOD0(clone, ICatalogInfo *());
   virtual ~MockICatalogInfo() {}
 };
 
@@ -49,14 +50,19 @@ public:
   void test_pass_through_adaptee() {
 
     // Adaptee
-    MockICatalogInfo mockCatInfo;
-    EXPECT_CALL(mockCatInfo, catalogName()).Times(Exactly(1));
-    EXPECT_CALL(mockCatInfo, catalogPrefix()).Times(Exactly(1));
-    EXPECT_CALL(mockCatInfo, externalDownloadURL()).Times(Exactly(1));
-    EXPECT_CALL(mockCatInfo, linuxPrefix()).Times(Exactly(1));
-    EXPECT_CALL(mockCatInfo, macPrefix()).Times(Exactly(1));
-    EXPECT_CALL(mockCatInfo, windowsPrefix()).Times(Exactly(1));
-    EXPECT_CALL(mockCatInfo, soapEndPoint()).Times(Exactly(1));
+    MockICatalogInfo host;
+    auto mockCatInfo = new MockICatalogInfo;
+
+    // because the input gets cloned, we need to set our expectations upon the
+    // clone product
+    EXPECT_CALL(host, clone()).WillOnce(Return(mockCatInfo));
+    EXPECT_CALL(*mockCatInfo, catalogName()).Times(Exactly(1));
+    EXPECT_CALL(*mockCatInfo, catalogPrefix()).Times(Exactly(1));
+    EXPECT_CALL(*mockCatInfo, externalDownloadURL()).Times(Exactly(1));
+    EXPECT_CALL(*mockCatInfo, linuxPrefix()).Times(Exactly(1));
+    EXPECT_CALL(*mockCatInfo, macPrefix()).Times(Exactly(1));
+    EXPECT_CALL(*mockCatInfo, windowsPrefix()).Times(Exactly(1));
+    EXPECT_CALL(*mockCatInfo, soapEndPoint()).Times(Exactly(1));
 
     // The user service will return to the effect that there are no user
     // overrides
@@ -65,7 +71,7 @@ public:
         .WillRepeatedly(Return(OptionalPath())); // No user override
 
     // Setup the UserCatalogInfo
-    UserCatalogInfo userAdapter(mockCatInfo, mockConfigService);
+    UserCatalogInfo userAdapter(host, mockConfigService);
 
     userAdapter.catalogName();
     userAdapter.catalogPrefix();
@@ -81,53 +87,8 @@ public:
 
   void test_mac_path_customizeable() {
 
-    MockICatalogInfo mockCatInfo;
-    MockCatalogConfigService mockConfigService;
-
-    const std::string expectedPath = "/custom_mac_mountpoint";
-
-    // Set the User override to be used to return the expected path.
-    EXPECT_CALL(mockConfigService, preferredMountPoint())
-        .WillRepeatedly(Return(OptionalPath(expectedPath))); // overriden path.
-
-    // Expect that the facility default is not used.
-    EXPECT_CALL(mockCatInfo, macPrefix()).Times(Exactly(0));
-
-    UserCatalogInfo userCatInfo(mockCatInfo, mockConfigService);
-    std::string actualPath = userCatInfo.macPrefix();
-
-    TSM_ASSERT_EQUALS("Mac mount point should have come from user override",
-                      expectedPath, actualPath);
-    TS_ASSERT(Mock::VerifyAndClear(&mockCatInfo));
-    TS_ASSERT(Mock::VerifyAndClear(&mockConfigService));
-  }
-
-  void test_linux_path_customizeable() {
-
-    MockICatalogInfo mockCatInfo;
-    MockCatalogConfigService mockConfigService;
-
-    const std::string expectedPath = "/custom_linux_mountpoint";
-
-    // Set the User override to be used to return the expected path.
-    EXPECT_CALL(mockConfigService, preferredMountPoint())
-        .WillRepeatedly(Return(OptionalPath(expectedPath))); // overriden path.
-
-    // Expect that the facility default is not used.
-    EXPECT_CALL(mockCatInfo, linuxPrefix()).Times(Exactly(0));
-
-    UserCatalogInfo userCatInfo(mockCatInfo, mockConfigService);
-    std::string actualPath = userCatInfo.linuxPrefix();
-
-    TSM_ASSERT_EQUALS("Linux mount point should have come from user override",
-                      expectedPath, actualPath);
-    TS_ASSERT(Mock::VerifyAndClear(&mockCatInfo));
-    TS_ASSERT(Mock::VerifyAndClear(&mockConfigService));
-  }
-
-  void test_windows_path_customizeable() {
-
-    MockICatalogInfo mockCatInfo;
+    auto mockCatInfo = new MockICatalogInfo;
+    MockICatalogInfo host;
     MockCatalogConfigService mockConfigService;
 
     const std::string expectedPath = "/custom_windows_mountpoint";
@@ -136,15 +97,78 @@ public:
     EXPECT_CALL(mockConfigService, preferredMountPoint())
         .WillRepeatedly(Return(OptionalPath(expectedPath))); // overriden path.
 
+    EXPECT_CALL(host, clone())
+        .WillOnce(Return(mockCatInfo)); // because the input gets cloned, we
+                                        // need to set our expectations upon the
+                                        // clone product
     // Expect that the facility default is not used.
-    EXPECT_CALL(mockCatInfo, windowsPrefix()).Times(Exactly(0));
+    EXPECT_CALL(*mockCatInfo, macPrefix()).Times(Exactly(0));
 
-    UserCatalogInfo userCatInfo(mockCatInfo, mockConfigService);
+    UserCatalogInfo userCatInfo(host, mockConfigService);
+    std::string actualPath = userCatInfo.macPrefix();
+
+    TSM_ASSERT_EQUALS("Mac mount point should have come from user override",
+                      expectedPath, actualPath);
+    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo));
+    TS_ASSERT(Mock::VerifyAndClear(&host));
+    TS_ASSERT(Mock::VerifyAndClear(&mockConfigService));
+  }
+
+  void test_linux_path_customizeable() {
+
+    auto mockCatInfo = new MockICatalogInfo;
+    MockICatalogInfo host;
+    MockCatalogConfigService mockConfigService;
+
+    const std::string expectedPath = "/custom_windows_mountpoint";
+
+    // Set the User override to be used to return the expected path.
+    EXPECT_CALL(mockConfigService, preferredMountPoint())
+        .WillRepeatedly(Return(OptionalPath(expectedPath))); // overriden path.
+
+    EXPECT_CALL(host, clone())
+        .WillOnce(Return(mockCatInfo)); // because the input gets cloned, we
+                                        // need to set our expectations upon the
+                                        // clone product
+    // Expect that the facility default is not used.
+    EXPECT_CALL(*mockCatInfo, linuxPrefix()).Times(Exactly(0));
+
+    UserCatalogInfo userCatInfo(host, mockConfigService);
+    std::string actualPath = userCatInfo.linuxPrefix();
+
+    TSM_ASSERT_EQUALS("Linux mount point should have come from user override",
+                      expectedPath, actualPath);
+    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo));
+    TS_ASSERT(Mock::VerifyAndClear(&host));
+    TS_ASSERT(Mock::VerifyAndClear(&mockConfigService));
+  }
+
+  void test_windows_path_customizeable() {
+
+    auto mockCatInfo = new MockICatalogInfo;
+    MockICatalogInfo host;
+    MockCatalogConfigService mockConfigService;
+
+    const std::string expectedPath = "/custom_windows_mountpoint";
+
+    // Set the User override to be used to return the expected path.
+    EXPECT_CALL(mockConfigService, preferredMountPoint())
+        .WillRepeatedly(Return(OptionalPath(expectedPath))); // overriden path.
+
+    EXPECT_CALL(host, clone())
+        .WillOnce(Return(mockCatInfo)); // because the input gets cloned, we
+                                        // need to set our expectations upon the
+                                        // clone product
+    // Expect that the facility default is not used.
+    EXPECT_CALL(*mockCatInfo, windowsPrefix()).Times(Exactly(0));
+
+    UserCatalogInfo userCatInfo(host, mockConfigService);
     std::string actualPath = userCatInfo.windowsPrefix();
 
     TSM_ASSERT_EQUALS("Windows mount point should have come from user override",
                       expectedPath, actualPath);
-    TS_ASSERT(Mock::VerifyAndClear(&mockCatInfo));
+    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo));
+    TS_ASSERT(Mock::VerifyAndClear(&host));
     TS_ASSERT(Mock::VerifyAndClear(&mockConfigService));
   }
 

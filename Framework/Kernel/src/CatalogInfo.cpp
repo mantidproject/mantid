@@ -72,6 +72,12 @@ const std::string CatalogInfo::macPrefix() const { return (m_macPrefix); }
 const std::string CatalogInfo::linuxPrefix() const { return (m_linuxPrefix); }
 
 /**
+ * Virtual constructor
+ * @return deep copy of this
+ */
+CatalogInfo *CatalogInfo::clone() const { return new CatalogInfo(*this); }
+
+/**
  * Obtain the attribute from a given element tag and attribute name.
  * @param element       :: The name of the element in the XML file.
  * @param tagName       :: The name of the tag to search for.

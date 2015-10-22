@@ -5,6 +5,7 @@
 #include "MantidKernel/ICatalogInfo.h"
 #include "Poco/Path.h"
 #include <boost/optional.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Kernel {
@@ -65,6 +66,8 @@ class MANTID_KERNEL_DLL UserCatalogInfo : public ICatalogInfo {
 public:
   UserCatalogInfo(const ICatalogInfo &catInfo,
                   const CatalogConfigService &catalogConfigService);
+
+  UserCatalogInfo(const UserCatalogInfo &other);
   virtual ~UserCatalogInfo();
 
   // ICatalogInfo interface
@@ -75,13 +78,13 @@ public:
   const std::string windowsPrefix() const;
   const std::string macPrefix() const;
   const std::string linuxPrefix() const;
+  UserCatalogInfo *clone() const;
 
 private:
   /// Facility catalog info. Aggregation only solution here.
-  const ICatalogInfo &m_catInfo;
-
-  /// Catalog config service. Aggregation only solution here.
-  const CatalogConfigService &m_catalogConfigService;
+  const std::unique_ptr<ICatalogInfo> m_catInfo;
+  /// Archive mount point
+  const OptionalPath m_mountPoint;
 };
 
 } // namespace Kernel

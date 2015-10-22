@@ -64,6 +64,8 @@ public:
   virtual const std::string macPrefix() const;
   /// Obtain Linux prefix from facility file.
   const std::string linuxPrefix() const;
+  /// Clone
+  virtual CatalogInfo *clone() const;
 
 private:
   /// Obtain the attribute from a given element tag and attribute name.

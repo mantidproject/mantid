@@ -21,6 +21,10 @@
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 #include "MantidQtCustomInterfaces/ParseKeyValueString.h"
 
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/CatalogInfo.h"
+#include "MantidKernel/ConfigService.h"
+
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
@@ -140,6 +144,15 @@ ReflMainViewPresenter::ReflMainViewPresenter(
       m_clearObserver(*this, &ReflMainViewPresenter::handleClearEvent),
       m_renameObserver(*this, &ReflMainViewPresenter::handleRenameEvent),
       m_replaceObserver(*this, &ReflMainViewPresenter::handleReplaceEvent) {
+
+  // TODO. Select strategy.
+  /*
+  std::unique_ptr<CatalogConfigService> catConfigService(
+      makeCatalogConfigServiceAdapter(ConfigService::Instance()));
+  UserCatalogInfo catalogInfo(
+      ConfigService::Instance().getFacility().catalogInfo(), *catConfigService);
+  */
+
   // Initialise options
   initOptions();
 

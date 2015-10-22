@@ -204,6 +204,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/ReflMainView.h
 	inc/MantidQtCustomInterfaces/ReflMainViewPresenter.h
 	inc/MantidQtCustomInterfaces/ReflMeasureTransferStrategy.h
+	inc/MantidQtCustomInterfaces/ReflMeasurementSource.h
 	inc/MantidQtCustomInterfaces/ReflSearchModel.h
 	inc/MantidQtCustomInterfaces/ReflTableSchema.h
 	inc/MantidQtCustomInterfaces/ReflTransferStrategy.h
