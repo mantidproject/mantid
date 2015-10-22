@@ -5,7 +5,6 @@ import refl_save
 import refl_choose_col
 import refl_options
 import csv
-import string
 import os
 import re
 from operator import itemgetter
@@ -819,7 +818,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                                     if Qmin < _overallQMin :
                                         _overallQMin = Qmin
 
-                                    wcomb = combineDataMulti(wksp, outputwksp, overlapLow, overlapHigh, _overallQMin, _overallQMax, -dqq, 1, keep=True)
+                                    _wcomb = combineDataMulti(wksp, outputwksp, overlapLow, overlapHigh, _overallQMin, _overallQMax, -dqq, 1, keep=True)
 
 
                         # Enable the plot button
