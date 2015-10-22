@@ -71,7 +71,7 @@ class TOFTOFMergeRuns(PythonAlgorithm):
         Checks whether given workspaces can be merged
         """
         # mandatory properties must be identical
-        mlzutils.compare_mandatory(wsnames, self.mandatory_properties, self.log())
+        api.CompareSampleLogs(wsnames, self.mandatory_properties, 0.01, 'error')
 
         # timing (x-axis binning) must match
         # is it possible to use WorkspaceHelpers::matchingBins from python?
@@ -89,12 +89,7 @@ class TOFTOFMergeRuns(PythonAlgorithm):
                     raise RuntimeError(message)
 
         # warnig if optional properties are not identical must be given
-        ws1 = api.AnalysisDataService.retrieve(wsnames[0])
-        run1 = ws1.getRun()
-        for wsname in wsnames[1:]:
-            wks = api.AnalysisDataService.retrieve(wsname)
-            run = wks.getRun()
-            mlzutils.compare_properties(run1, run, self.optional_properties, self.log(), tolerance=0.01)
+        api.CompareSampleLogs(wsnames, self.optional_properties, 0.01, 'warning')
         return True
 
     def PyExec(self):
