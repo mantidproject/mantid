@@ -4698,7 +4698,8 @@ void SANSRunWindow::initQResolutionSettings() {
   m_uiForm.q_resolution_delta_r_input->setToolTip(deltaR);
   m_uiForm.q_resolution_delta_r_label->setToolTip(deltaR);
 
-  // Set the ToolTip for w1  const QString w1("The width of the first aperture in mm.");
+  // Set the ToolTip for w1 
+  const QString w1("The width of the first aperture in mm.");
   m_uiForm.q_resolution_w1_input->setToolTip(w1);
   m_uiForm.q_resolution_w1_label->setToolTip(w1);
 
