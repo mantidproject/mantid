@@ -39,7 +39,8 @@ const std::string CalculateSlits::category() const {
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string CalculateSlits::summary() const {
   return "Calculates appropriate slit widths for reflectometry instruments "
-         "based on the instrument setup, desired resolution, and desired footprint of the experiment.";
+         "based on the instrument setup, desired resolution, and desired "
+         "footprint of the experiment.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -54,7 +55,9 @@ void CalculateSlits::init() {
                   "translatable in the vertical axis)");
   declareProperty("Resolution", Mantid::EMPTY_DBL(),
                   "The Resolution that you desire to obtain in the experiment");
-  declareProperty("Footprint", Mantid::EMPTY_DBL(), "The Footprint you wish to achieve for the experiment, in mm");
+  declareProperty(
+      "Footprint", Mantid::EMPTY_DBL(),
+      "The Footprint you wish to achieve for the experiment, in mm");
   declareProperty("Angle", Mantid::EMPTY_DBL(), "Incident angle in degrees.");
 
   declareProperty("Slit1", Mantid::EMPTY_DBL(), "Calculated Slit 1 width in mm",
