@@ -409,7 +409,9 @@ class MainWindow(QtGui.QMainWindow):
         Clear all peaks in UB-Peak table
         :return:
         """
-        self.ui.tableWidget_peaksCalUB.clear()
+        num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
+        row_number_list = range(num_rows)
+        self.ui.tableWidget_peaksCalUB.delete_rows(row_number_list)
 
         return
 
