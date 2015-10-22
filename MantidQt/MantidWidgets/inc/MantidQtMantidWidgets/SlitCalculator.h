@@ -41,7 +41,7 @@ public:
   SlitCalculator(QWidget *parent);
   virtual ~SlitCalculator();
   void setInstrument(std::string instrumentName);
-  Mantid::Geometry::Instrument_sptr getInstrument();
+  Mantid::Geometry::Instrument_const_sptr getInstrument();
   void setCurrentInstrumentName(std::string instrumentName);
   std::string getCurrentInstrumentName();
   void processInstrumentHasBeenChanged();
@@ -50,7 +50,7 @@ protected:
   Ui::SlitCalculator ui;
 
 private:
-  Mantid::Geometry::Instrument_sptr instrument;
+  Mantid::Geometry::Instrument_const_sptr instrument;
   std::string currentInstrumentName;
   void setupSlitCalculatorWithInstrumentValues(
       Mantid::Geometry::Instrument_const_sptr);

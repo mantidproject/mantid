@@ -60,14 +60,14 @@ void SlitCalculator::setupSlitCalculatorWithInstrumentValues(
   const double s2sa = 1e3 * slit2Component->getDistance(*sampleComponent);
   ui.spinSlit2Sample->setValue(s2sa);
 }
-Mantid::Geometry::Instrument_sptr SlitCalculator::getInstrument() {
-  return this->instrument;
+Mantid::Geometry::Instrument_const_sptr SlitCalculator::getInstrument() {
+  return instrument;
 }
 void SlitCalculator::setCurrentInstrumentName(std::string instrumentName) {
   this->currentInstrumentName = instrumentName;
 }
 std::string SlitCalculator::getCurrentInstrumentName() {
-  return this->currentInstrumentName;
+  return currentInstrumentName;
 }
 void SlitCalculator::on_recalculate_triggered() {
   const auto currentInstrument = getInstrument();
