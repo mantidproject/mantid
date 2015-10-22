@@ -128,15 +128,15 @@ private:
                                  size_t &numdiffpulse, size_t &numdifftof,
                                  size_t &numdiffboth) const;
 
-  void handleError(std::string msg);
+  void recordMismatch(std::string msg);
 
   bool relErr(double x1, double x2, double errorVal) const;
 
   /// Result of comparison (true if equal, false otherwise)
   bool m_Result;
 
-  /// Error messages that resulted from comparison
-  API::ITableWorkspace_sptr m_Errors;
+  /// Mismatch messages that resulted from comparison
+  API::ITableWorkspace_sptr m_Messages;
 
   /// Report progress of comparison
   API::Progress *m_Prog;

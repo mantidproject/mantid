@@ -106,9 +106,9 @@ void CompareWorkspaces::init() {
 
   declareProperty("Result", false, Direction::Output);
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>("ErrorWorkspace", "compare_errors",
+      new WorkspaceProperty<ITableWorkspace>("Messages", "compare_msgs",
                                              Direction::Output),
-      "TableWorkspace containing any errors that occured during execution");
+      "TableWorkspace containing messages about any mismatches detected");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -116,8 +116,8 @@ void CompareWorkspaces::init() {
  */
 void CompareWorkspaces::exec() {
   m_Result = true;
-  m_Errors = WorkspaceFactory::Instance().createTable("TableWorkspace");
-  m_Errors->addColumn("str", "Error Message");
+  m_Messages = WorkspaceFactory::Instance().createTable("TableWorkspace");
+  m_Messages->addColumn("str", "Message");
 
   if (g_log.is(Logger::Priority::PRIO_DEBUG))
     m_ParallelComparison = false;
@@ -125,11 +125,11 @@ void CompareWorkspaces::exec() {
   this->doComparison();
 
   if (!m_Result) {
-    handleError("The workspaces did not match");
+    recordMismatch("The workspaces did not match");
   }
 
   setProperty("Result", m_Result);
-  setProperty("ErrorWorkspace", m_Errors);
+  setProperty("Messages", m_Messages);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -141,8 +141,8 @@ void CompareWorkspaces::exec() {
  */
 bool CompareWorkspaces::processGroups() {
   m_Result = true;
-  m_Errors = WorkspaceFactory::Instance().createTable("TableWorkspace");
-  m_Errors->addColumn("str", "Error Message");
+  m_Messages = WorkspaceFactory::Instance().createTable("TableWorkspace");
+  m_Messages->addColumn("str", "Message");
 
   // Get workspaces
   Workspace_const_sptr w1 = getProperty("Workspace1");
@@ -162,11 +162,12 @@ bool CompareWorkspaces::processGroups() {
                              "input is a WorkspaceGroup. This is a logical "
                              "error in the code.");
   } else if (!ws1 || !ws2) {
-    handleError("Type mismatch. One workspace is a group, the other is not.");
+    recordMismatch(
+        "Type mismatch. One workspace is a group, the other is not.");
   }
 
   setProperty("Result", m_Result);
-  setProperty("ErrorWorkspace", m_Errors);
+  setProperty("Messages", m_Messages);
 
   // Store output workspace in AnalysisDataService
   this->store();
@@ -191,7 +192,7 @@ void CompareWorkspaces::processGroups(
   // Check their sizes
   const size_t totalNum = static_cast<size_t>(groupOne->getNumberOfEntries());
   if (groupOne->getNumberOfEntries() != groupTwo->getNumberOfEntries()) {
-    handleError("GroupWorkspaces size mismatch.");
+    recordMismatch("GroupWorkspaces size mismatch.");
     return;
   }
 
@@ -230,9 +231,9 @@ void CompareWorkspaces::processGroups(
     if (!success) {
       m_Result = false;
 
-      ITableWorkspace_sptr table = checker->getProperty("ErrorWorkspace");
-      handleError(table->cell<std::string>(0, 0) + ". Inputs=[" + namesOne[i] +
-                  "," + namesTwo[i] + "]");
+      ITableWorkspace_sptr table = checker->getProperty("Messages");
+      recordMismatch(table->cell<std::string>(0, 0) + ". Inputs=[" +
+                     namesOne[i] + "," + namesTwo[i] + "]");
     }
   }
 }
@@ -253,7 +254,7 @@ void CompareWorkspaces::doComparison() {
   IPeaksWorkspace_sptr pws1 = boost::dynamic_pointer_cast<IPeaksWorkspace>(w1);
   IPeaksWorkspace_sptr pws2 = boost::dynamic_pointer_cast<IPeaksWorkspace>(w2);
   if ((pws1 && !pws2) || (!pws1 && pws2)) {
-    handleError("One workspace is a PeaksWorkspace and the other is not.");
+    recordMismatch("One workspace is a PeaksWorkspace and the other is not.");
     return;
   }
   // Check some peak-based stuff
@@ -270,7 +271,7 @@ void CompareWorkspaces::doComparison() {
   auto tws1 = boost::dynamic_pointer_cast<const ITableWorkspace>(w1);
   auto tws2 = boost::dynamic_pointer_cast<const ITableWorkspace>(w2);
   if ((tws1 && !tws2) || (!tws1 && tws2)) {
-    handleError("One workspace is a TableWorkspace and the other is not.");
+    recordMismatch("One workspace is a TableWorkspace and the other is not.");
     return;
   }
   if (tws1 && tws2) {
@@ -288,7 +289,8 @@ void CompareWorkspaces::doComparison() {
   IMDEventWorkspace_const_sptr mdews2 =
       boost::dynamic_pointer_cast<const IMDEventWorkspace>(w2);
   if ((mdews1 && !mdews2) || (!mdews1 && mdews2)) {
-    handleError("One workspace is an IMDEventWorkspace and the other is not.");
+    recordMismatch(
+        "One workspace is an IMDEventWorkspace and the other is not.");
     return;
   }
   // Check things for IMDHistoWorkspaces
@@ -297,7 +299,8 @@ void CompareWorkspaces::doComparison() {
   IMDHistoWorkspace_const_sptr mdhws2 =
       boost::dynamic_pointer_cast<const IMDHistoWorkspace>(w2);
   if ((mdhws1 && !mdhws2) || (!mdhws1 && mdhws2)) {
-    handleError("One workspace is an IMDHistoWorkspace and the other is not.");
+    recordMismatch(
+        "One workspace is an IMDHistoWorkspace and the other is not.");
     return;
   }
 
@@ -324,7 +327,8 @@ void CompareWorkspaces::doComparison() {
       boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
   if (getProperty("CheckType")) {
     if ((ews1 && !ews2) || (!ews1 && ews2)) {
-      handleError("One workspace is an EventWorkspace and the other is not.");
+      recordMismatch(
+          "One workspace is an EventWorkspace and the other is not.");
       return;
     }
   }
@@ -386,12 +390,12 @@ bool CompareWorkspaces::compareEventWorkspaces(
 
   // Compare number of spectra
   if (ews1->getNumberHistograms() != ews2->getNumberHistograms()) {
-    handleError("Mismatched number of histograms.");
+    recordMismatch("Mismatched number of histograms.");
     return false;
   }
 
   if (ews1->getEventType() != ews2->getEventType()) {
-    handleError("Mismatched type of events in the EventWorkspaces.");
+    recordMismatch("Mismatched type of events in the EventWorkspaces.");
     return false;
   }
 
@@ -514,7 +518,7 @@ bool CompareWorkspaces::compareEventWorkspaces(
            << "First found mismatched event list is at workspace index "
            << mismatchedEventWI;
     }
-    handleError(mess.str());
+    recordMismatch(mess.str());
     wsmatch = false;
   } else {
     wsmatch = true;
@@ -541,13 +545,13 @@ bool CompareWorkspaces::checkData(API::MatrixWorkspace_const_sptr ws1,
 
   // First check that the workspace are the same size
   if (numHists != ws2->getNumberHistograms() || numBins != ws2->blocksize()) {
-    handleError("Size mismatch");
+    recordMismatch("Size mismatch");
     return false;
   }
 
   // Check that both are either histograms or point-like data
   if (histogram != ws2->isHistogramData()) {
-    handleError("Histogram/point-like mismatch");
+    recordMismatch("Histogram/point-like mismatch");
     return false;
   }
 
@@ -611,7 +615,7 @@ bool CompareWorkspaces::checkData(API::MatrixWorkspace_const_sptr ws1,
   PARALLEL_CHECK_INTERUPT_REGION
 
   if (!resultBool)
-    handleError("Data mismatch");
+    recordMismatch("Data mismatch");
   // If all is well, return true
   return resultBool;
 }
@@ -629,7 +633,7 @@ bool CompareWorkspaces::checkAxes(API::MatrixWorkspace_const_sptr ws1,
   const int numAxes = ws1->axes();
 
   if (numAxes != ws2->axes()) {
-    handleError("Different numbers of axes");
+    recordMismatch("Different numbers of axes");
     return false;
   }
 
@@ -642,12 +646,12 @@ bool CompareWorkspaces::checkAxes(API::MatrixWorkspace_const_sptr ws1,
     const Axis *const ax2 = ws2->getAxis(i);
 
     if (ax1->isSpectra() != ax2->isSpectra()) {
-      handleError(axis_name + " type mismatch");
+      recordMismatch(axis_name + " type mismatch");
       return false;
     }
 
     if (ax1->title() != ax2->title()) {
-      handleError(axis_name + " title mismatch");
+      recordMismatch(axis_name + " title mismatch");
       return false;
     }
 
@@ -657,7 +661,7 @@ bool CompareWorkspaces::checkAxes(API::MatrixWorkspace_const_sptr ws1,
     if ((ax1_unit == NULL && ax2_unit != NULL) ||
         (ax1_unit != NULL && ax2_unit == NULL) ||
         (ax1_unit && ax1_unit->unitID() != ax2_unit->unitID())) {
-      handleError(axis_name + " unit mismatch");
+      recordMismatch(axis_name + " unit mismatch");
       return false;
     }
 
@@ -668,11 +672,11 @@ bool CompareWorkspaces::checkAxes(API::MatrixWorkspace_const_sptr ws1,
       const NumericAxis *na1 = static_cast<const NumericAxis *>(ax1);
       const double tolerance = getProperty("Tolerance");
       if (!na1->equalWithinTolerance(*ax2, tolerance)) {
-        handleError(axis_name + " values mismatch");
+        recordMismatch(axis_name + " values mismatch");
         return false;
       }
     } else if (!ax1->isSpectra() && !ax1->operator==(*ax2)) {
-      handleError(axis_name + " values mismatch");
+      recordMismatch(axis_name + " values mismatch");
       return false;
     }
   }
@@ -680,7 +684,7 @@ bool CompareWorkspaces::checkAxes(API::MatrixWorkspace_const_sptr ws1,
   if (ws1->YUnit() != ws2->YUnit()) {
     g_log.debug() << "YUnit strings : WS1 = " << ws1->YUnit()
                   << " WS2 = " << ws2->YUnit() << "\n";
-    handleError("YUnit mismatch");
+    recordMismatch("YUnit mismatch");
     return false;
   }
 
@@ -688,7 +692,7 @@ bool CompareWorkspaces::checkAxes(API::MatrixWorkspace_const_sptr ws1,
   if (ws1->isDistribution() != ws2->isDistribution()) {
     g_log.debug() << "Distribution flags: WS1 = " << ws1->isDistribution()
                   << " WS2 = " << ws2->isDistribution() << "\n";
-    handleError("Distribution flag mismatch");
+    recordMismatch("Distribution flag mismatch");
     return false;
   }
 
@@ -705,7 +709,7 @@ bool CompareWorkspaces::checkAxes(API::MatrixWorkspace_const_sptr ws1,
 bool CompareWorkspaces::checkSpectraMap(MatrixWorkspace_const_sptr ws1,
                                         MatrixWorkspace_const_sptr ws2) {
   if (ws1->getNumberHistograms() != ws2->getNumberHistograms()) {
-    handleError("Number of spectra mismatch");
+    recordMismatch("Number of spectra mismatch");
     return false;
   }
 
@@ -713,7 +717,7 @@ bool CompareWorkspaces::checkSpectraMap(MatrixWorkspace_const_sptr ws1,
     const ISpectrum *spec1 = ws1->getSpectrum(i);
     const ISpectrum *spec2 = ws2->getSpectrum(i);
     if (spec1->getSpectrumNo() != spec2->getSpectrumNo()) {
-      handleError("Spectrum number mismatch");
+      recordMismatch("Spectrum number mismatch");
       return false;
     }
     if (spec1->getDetectorIDs().size() != spec2->getDetectorIDs().size()) {
@@ -721,14 +725,14 @@ bool CompareWorkspaces::checkSpectraMap(MatrixWorkspace_const_sptr ws1,
       out << "Number of detector IDs mismatch: "
           << spec1->getDetectorIDs().size() << " vs "
           << spec2->getDetectorIDs().size() << " at workspace index " << i;
-      handleError(out.str());
+      recordMismatch(out.str());
       return false;
     }
     std::set<detid_t>::const_iterator it1 = spec1->getDetectorIDs().begin();
     std::set<detid_t>::const_iterator it2 = spec2->getDetectorIDs().begin();
     for (; it1 != spec1->getDetectorIDs().end(); ++it1, ++it2) {
       if (*it1 != *it2) {
-        handleError("Detector IDs mismatch");
+        recordMismatch("Detector IDs mismatch");
         return false;
       }
     }
@@ -751,7 +755,7 @@ bool CompareWorkspaces::checkInstrument(API::MatrixWorkspace_const_sptr ws1,
     g_log.debug() << "Instrument names: WS1 = "
                   << ws1->getInstrument()->getName()
                   << " WS2 = " << ws2->getInstrument()->getName() << "\n";
-    handleError("Instrument name mismatch");
+    recordMismatch("Instrument name mismatch");
     return false;
   }
 
@@ -762,7 +766,7 @@ bool CompareWorkspaces::checkInstrument(API::MatrixWorkspace_const_sptr ws1,
     g_log.debug()
         << "Here information to help understand parameter map differences:\n";
     g_log.debug() << ws1_parmap.diff(ws2_parmap);
-    handleError(
+    recordMismatch(
         "Instrument ParameterMap mismatch (differences in ordering ignored)");
     return false;
   }
@@ -786,14 +790,14 @@ bool CompareWorkspaces::checkMasking(API::MatrixWorkspace_const_sptr ws1,
     if (ws1_masks != ws2->hasMaskedBins(i)) {
       g_log.debug() << "Only one workspace has masked bins for spectrum " << i
                     << "\n";
-      handleError("Masking mismatch");
+      recordMismatch("Masking mismatch");
       return false;
     }
 
     // If there are masked bins, check that they match
     if (ws1_masks && ws1->maskedBins(i) != ws2->maskedBins(i)) {
       g_log.debug() << "Mask lists for spectrum " << i << " do not match\n";
-      handleError("Masking mismatch");
+      recordMismatch("Masking mismatch");
       return false;
     }
   }
@@ -813,7 +817,7 @@ bool CompareWorkspaces::checkSample(const API::Sample &sample1,
   if (sample1.getName() != sample2.getName()) {
     g_log.debug() << "WS1 sample name: " << sample1.getName() << "\n";
     g_log.debug() << "WS2 sample name: " << sample2.getName() << "\n";
-    handleError("Sample name mismatch");
+    recordMismatch("Sample name mismatch");
     return false;
   }
   // N.B. Sample shape properties are not currently written out to nexus
@@ -845,7 +849,7 @@ bool CompareWorkspaces::checkRunProperties(const API::Run &run1,
   if (run1Charge != run2Charge) {
     g_log.debug() << "WS1 proton charge: " << run1Charge << "\n";
     g_log.debug() << "WS2 proton charge: " << run2Charge << "\n";
-    handleError("Proton charge mismatch");
+    recordMismatch("Proton charge mismatch");
     return false;
   }
 
@@ -855,7 +859,7 @@ bool CompareWorkspaces::checkRunProperties(const API::Run &run1,
   if (ws1logs.size() != ws2logs.size()) {
     g_log.debug() << "WS1 number of logs: " << ws1logs.size() << "\n";
     g_log.debug() << "WS2 number of logs: " << ws2logs.size() << "\n";
-    handleError("Different numbers of logs");
+    recordMismatch("Different numbers of logs");
     return false;
   }
 
@@ -868,7 +872,7 @@ bool CompareWorkspaces::checkRunProperties(const API::Run &run1,
     if (matched) {
       if (*(ws1logs[i]) != *(ws2logs[i])) {
         matched = false;
-        handleError("Log mismatch");
+        recordMismatch("Log mismatch");
       }
     }
     PARALLEL_END_INTERUPT_REGION
@@ -972,11 +976,11 @@ void CompareWorkspaces::doPeaksComparison(API::IPeaksWorkspace_sptr tws1,
                                           API::IPeaksWorkspace_sptr tws2) {
   // Check some table-based stuff
   if (tws1->getNumberPeaks() != tws2->getNumberPeaks()) {
-    handleError("Mismatched number of rows.");
+    recordMismatch("Mismatched number of rows.");
     return;
   }
   if (tws1->columnCount() != tws2->columnCount()) {
-    handleError("Mismatched number of columns.");
+    recordMismatch("Mismatched number of columns.");
     return;
   }
 
@@ -1052,7 +1056,7 @@ void CompareWorkspaces::doPeaksComparison(API::IPeaksWorkspace_sptr tws1,
       if (std::fabs(s1 - s2) > tolerance) {
         g_log.debug() << "Data mismatch at cell (row#,col#): (" << i << "," << j
                       << ")\n";
-        handleError("Data mismatch");
+        recordMismatch("Data mismatch");
         return;
       }
     }
@@ -1068,14 +1072,14 @@ CompareWorkspaces::doTableComparison(API::ITableWorkspace_const_sptr tws1,
   if (numCols != tws2->columnCount()) {
     g_log.debug() << "Number of columns mismatch (" << numCols << " vs "
                   << tws2->columnCount() << ")\n";
-    handleError("Number of columns mismatch");
+    recordMismatch("Number of columns mismatch");
     return;
   }
   const auto numRows = tws1->rowCount();
   if (numRows != tws2->rowCount()) {
     g_log.debug() << "Number of rows mismatch (" << numRows << " vs "
                   << tws2->rowCount() << ")\n";
-    handleError("Number of rows mismatch");
+    recordMismatch("Number of rows mismatch");
     return;
   }
 
@@ -1086,13 +1090,13 @@ CompareWorkspaces::doTableComparison(API::ITableWorkspace_const_sptr tws1,
     if (c1->name() != c2->name()) {
       g_log.debug() << "Column name mismatch at column " << i << " ("
                     << c1->name() << " vs " << c2->name() << ")\n";
-      handleError("Column name mismatch");
+      recordMismatch("Column name mismatch");
       return;
     }
     if (c1->type() != c2->type()) {
       g_log.debug() << "Column type mismatch at column " << i << " ("
                     << c1->type() << " vs " << c2->type() << ")\n";
-      handleError("Column type mismatch");
+      recordMismatch("Column type mismatch");
       return;
     }
   }
@@ -1111,7 +1115,7 @@ CompareWorkspaces::doTableComparison(API::ITableWorkspace_const_sptr tws1,
     if (r1s.str() != r2s.str()) {
       g_log.debug() << "Table data mismatch at row " << i << " (" << r1s.str()
                     << " vs " << r2s.str() << ")\n";
-      handleError("Table data mismatch");
+      recordMismatch("Table data mismatch");
       if (!checkAllData)
         return;
     }
@@ -1133,19 +1137,19 @@ void CompareWorkspaces::doMDComparison(Workspace_sptr w1, Workspace_sptr w2) {
   bool doesMatch = alg->getProperty("Equals");
   std::string algResult = alg->getProperty("Result");
   if (!doesMatch) {
-    handleError(algResult);
+    recordMismatch(algResult);
   }
 }
 
 //------------------------------------------------------------------------------------------------
 /**
- * Records an error that has occurred in the output workspace and sets the
+ * Records a mismatch that has occurred in the output workspace and sets the
  * Result to indicate that the input workspaces did not match.
  *
- * @param msg Error message to be logged in output workspace
+ * @param msg Mismatch message to be logged in output workspace
  */
-void CompareWorkspaces::handleError(std::string msg) {
-  TableRow row = m_Errors->appendRow();
+void CompareWorkspaces::recordMismatch(std::string msg) {
+  TableRow row = m_Messages->appendRow();
   row << msg;
   m_Result = false;
 }

@@ -530,11 +530,9 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    // TODO: Why doesn't getProperty work for this?
-    // ITableWorkspace_sptr table = checker.getProperty("ErrorWorkspace");
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_errors");
+            "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Size mismatch");
 
     // Same, using the !Mantid::API::equals() function
@@ -556,7 +554,7 @@ public:
 
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_errors");
+            "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0),
                      "Histogram/point-like mismatch");
 
@@ -580,7 +578,7 @@ public:
 
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_errors");
+            "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0),
                      "Distribution flag mismatch");
 
@@ -605,7 +603,7 @@ public:
 
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_errors");
+            "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Axis 1 type mismatch");
 
     // Same, using the !Mantid::API::equals() function
@@ -628,7 +626,7 @@ public:
 
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_errors");
+            "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Axis 0 title mismatch");
 
     // Same, using the !Mantid::API::equals() function
@@ -652,7 +650,7 @@ public:
 
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_errors");
+            "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Axis 0 unit mismatch");
 
     // Same, using the !Mantid::API::equals() function
@@ -692,7 +690,7 @@ public:
 
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_errors");
+            "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Axis 1 values mismatch");
 
     // Same, using the !Mantid::API::equals() function
@@ -715,7 +713,7 @@ public:
 
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_errors");
+            "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "YUnit mismatch");
 
     // Same, using the !Mantid::API::equals() function
@@ -737,7 +735,7 @@ public:
 
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_errors");
+            "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0),
                      "Spectrum number mismatch");
 
@@ -751,7 +749,7 @@ public:
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
     table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-        "compare_errors");
+        "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Detector IDs mismatch");
 
     // Same, using the !Mantid::API::equals() function
@@ -776,7 +774,7 @@ public:
 
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_errors");
+            "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0),
                      "Instrument name mismatch");
 
@@ -801,7 +799,7 @@ public:
 
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_errors");
+            "compare_msgs");
     TS_ASSERT_EQUALS(
         table->cell<std::string>(0, 0),
         "Instrument ParameterMap mismatch (differences in ordering ignored)");
@@ -828,7 +826,7 @@ public:
 
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_errors");
+            "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Masking mismatch");
 
     Mantid::API::MatrixWorkspace_sptr ws3 =
@@ -844,7 +842,7 @@ public:
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
     table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-        "compare_errors");
+        "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Masking mismatch");
 
     // Same, using the !Mantid::API::equals() function
@@ -868,7 +866,7 @@ public:
 
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_errors");
+            "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Sample name mismatch");
   }
 
@@ -889,7 +887,7 @@ public:
 
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_errors");
+            "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Proton charge mismatch");
   }
 
@@ -911,7 +909,7 @@ public:
 
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_errors");
+            "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0),
                      "Different numbers of logs");
 
@@ -927,7 +925,7 @@ public:
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
     table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-        "compare_errors");
+        "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Log mismatch");
 
     Mantid::API::MatrixWorkspace_sptr ws4 =
@@ -942,7 +940,7 @@ public:
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
     table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-        "compare_errors");
+        "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Log mismatch");
   }
 
@@ -1049,7 +1047,7 @@ public:
 
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_errors");
+            "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0),
                      "Number of columns mismatch");
   }
@@ -1073,7 +1071,7 @@ public:
 
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_errors");
+            "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Number of rows mismatch");
   }
 
@@ -1102,7 +1100,7 @@ public:
 
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_errors");
+            "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Column name mismatch");
   }
 
@@ -1121,7 +1119,7 @@ public:
 
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_errors");
+            "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Column type mismatch");
   }
 
@@ -1138,7 +1136,7 @@ public:
 
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_errors");
+            "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Table data mismatch");
 
     table2 = setupTableWorkspace();
@@ -1149,7 +1147,7 @@ public:
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
     table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-        "compare_errors");
+        "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Table data mismatch");
 
     table1 = setupTableWorkspace();
@@ -1161,7 +1159,7 @@ public:
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
     table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-        "compare_errors");
+        "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Table data mismatch");
   }
 
@@ -1177,7 +1175,7 @@ public:
 
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_errors");
+            "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0),
                      "One workspace is a PeaksWorkspace and the other is not.");
   }
@@ -1195,7 +1193,7 @@ public:
 
     ITableWorkspace_sptr table =
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_errors");
+            "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0),
                      "One workspace is a TableWorkspace and the other is not.");
   }
@@ -1261,7 +1259,7 @@ private:
 
       ITableWorkspace_sptr table =
           AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-              "compare_errors");
+              "compare_msgs");
       TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), expectedResult);
     }
   }

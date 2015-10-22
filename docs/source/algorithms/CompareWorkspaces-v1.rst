@@ -24,9 +24,9 @@ Workspace2D always fail.
 
 This algorithm has two outputs: A boolean "Result" that indicates whether
 the workspaces matched (true) or not (false), and a TableWorkspace property
-named "ErrorWorkspace" with a single column that contains messages about any
-mismatches that were detected. If the workspaces matched, ErrorWorkspace will
-be empty.
+named "Messages" (workspace name defaults to "compare_msgs") with a single 
+column that contains messages about any mismatches that were detected. If 
+the input workspaces matched, the message workspace will be empty.
 
 
 Usage
@@ -43,10 +43,10 @@ Usage
     #create a copy of the workspace
     ws2 = CloneWorkspace(ws1)
 
-    (result, errors) = CheckWorkspacesMatch(ws1, ws2)
+    (result, messages) = CompareWorkspaces(ws1, ws2)
 
     print "Result:", result
-    print errors.rowCount()
+    print messages.rowCount()
 
 
 Output:
@@ -72,15 +72,15 @@ Output:
     dataY2 = np.sin(dataX) + 0.1*np.random.random_sample(len(dataX))
     ws2 = CreateWorkspace(dataX, dataY2)
 
-    (result, errors) = CheckWorkspacesMatch(ws1, ws2) # Fails, they're not the same
+    (result, messages) = CompareWorkspaces(ws1, ws2) # Fails, they're not the same
     print "Result:", result
-    print "Displaying", errors.rowCount(), "errors:"
-    for row in errors: print row
+    print "Displaying", messages.rowCount(), "messages:"
+    for row in messages: print row
 
-    (result, errors) = CheckWorkspacesMatch(ws1, ws2, Tolerance=0.1) # Passes, they're close enough
+    (result, messages) = CompareWorkspaces(ws1, ws2, Tolerance=0.1) # Passes, they're close enough
     print "Result:", result
-    print "Displaying", errors.rowCount(), "errors:"
-    for row in errors: print row
+    print "Displaying", messages.rowCount(), "messages:"
+    for row in messages: print row
 
 
 Output:
@@ -88,11 +88,11 @@ Output:
 .. testoutput:: ExCompareWorkspacesTolerance
 
     Result: False
-    Displaying 2 errors:
-    {'Error Message': 'Data mismatch'}
-    {'Error Message': 'The workspaces did not match'}
+    Displaying 2 messages:
+    {'Message': 'Data mismatch'}
+    {'Message': 'The workspaces did not match'}
     Result: True
-    Displaying 0 errors:
+    Displaying 0 messages:
 
 
 .. categories::
