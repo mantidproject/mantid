@@ -1441,6 +1441,8 @@ SlitCalculator
 public:
   SlitCalculator(QWidget* parent);
   virtual ~SlitCalculator();
+  void setCurrentInstrumentName(char*);
+  void processInstrumentHasBeenChanged();
 
 };
 

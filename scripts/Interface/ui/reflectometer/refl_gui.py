@@ -211,7 +211,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
     def _show_slit_calculator(self):
         calc = mantidqtpython.MantidQt.MantidWidgets.SlitCalculator(self)
-        calc.setCurrentInstrumentName(str(self.current_instrument))
+        calc.setCurrentInstrumentName(self.current_instrument)
+        calc.processInstrumentHasBeenChanged()
         calc.exec_()
 
     def _polar_corr_selected(self):
