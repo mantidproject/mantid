@@ -23,9 +23,9 @@ class QLRun(PythonAlgorithm):
     _width = None
     _res_norm = None
     _wfile = None
-    _Loop = None
-    _Save = None
-    _Plot = None
+    _loop = None
+    _save = None
+    _plot = None
 
     def category(self):
         return "Workflow\\MIDAS;PythonAlgorithms"
@@ -122,9 +122,9 @@ class QLRun(PythonAlgorithm):
         self._width = self.getProperty('FixedWidth').value
         self._res_norm = self.getProperty('UseResNorm').value
         self._wfile = self.getPropertyValue('WidthFile')
-        self._Loop = self.getProperty('Loop').value
-        self._Save = self.getProperty('Save').value
-        self._Plot = self.getPropertyValue('Plot')
+        self._loop = self.getProperty('Loop').value
+        self._save = self.getProperty('Save').value
+        self._plot = self.getPropertyValue('Plot')
 
 
     def PyExec(self):
@@ -132,11 +132,11 @@ class QLRun(PythonAlgorithm):
 
         run_f2py_compatibility_test()
 
-        from IndirectBayes import (CalcErange, GetXYE, ReadNormFile, \
-                                   ReadWidthFile, QLAddSampleLogs, C2Fw, \
+        from IndirectBayes import (CalcErange, GetXYE, ReadNormFile,
+                                   ReadWidthFile, QLAddSampleLogs, C2Fw,
                                    C2Se, QuasiPlot)
-        from IndirectCommon import (getDefaultWorkingDirectory, CheckXrange,\
-                                    CheckAnalysers, getEfixed, GetThetaQ,\
+        from IndirectCommon import (getDefaultWorkingDirectory, CheckXrange,
+                                    CheckAnalysers, getEfixed, GetThetaQ,
                                     CheckHistZero, CheckHistSame)
 
         self.log().information('QLRun input')
@@ -178,7 +178,7 @@ class QLRun(PythonAlgorithm):
         totalNoSam = nsam
 
         #check if we're performing a sequential fit
-        if self._Loop != True:
+        if self._loop != True:
             nsam = 1
 
         nres = CheckHistZero(self._resWS)[0]
@@ -319,12 +319,12 @@ class QLRun(PythonAlgorithm):
             probWs = CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,\
                 Nspec=3, UnitX='MomentumTransfer')
             outWS = C2Fw(self._samWS[:-4],fname)
-            if self._Plot != 'None':
-                QuasiPlot(fname,self._Plot,res_plot,self._Loop)
+            if self._plot != 'None':
+                QuasiPlot(fname,self._plot,res_plot,self._loop)
         if self._program == 'QSe':
             outWS = C2Se(fname)
-            if self._Plot != 'None':
-                QuasiPlot(fname,self._Plot,res_plot,self._Loop)
+            if self._plot != 'None':
+                QuasiPlot(fname,self._plot,res_plot,self._loop)
 
         #Add some sample logs to the output workspaces
         CopyLogs(InputWorkspace=self._samWS, OutputWorkspace=outWS)
@@ -334,7 +334,7 @@ class QLRun(PythonAlgorithm):
         QLAddSampleLogs(fitWS, self._resWS, prog, self._background, self._elastic, erange,
                         (nbin, nrbin), self._resnormWS, self._wfile)
 
-        if self._Save:
+        if self._save:
             fit_path = os.path.join(workdir,fitWS+'.nxs')
             SaveNexusProcessed(InputWorkspace=fitWS, Filename=fit_path)
             out_path = os.path.join(workdir, outWS+'.nxs')                    # path name for nxs file
