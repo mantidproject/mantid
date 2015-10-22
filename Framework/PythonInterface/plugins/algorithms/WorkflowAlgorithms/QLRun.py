@@ -97,12 +97,12 @@ class QLRun(PythonAlgorithm):
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceFit', '', direction=Direction.Output),
                              doc='The name of the fit output workspaces')
 
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceResult', '', direction=Direction.Output),
+                             doc='The name of the result output workspaces')
+
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceProb', '', optional=PropertyMode.Optional,
                              direction=Direction.Output),
                              doc='The name of the probability output workspaces')
-
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceResult', '', direction=Direction.Output),
-                             doc='The name of the result output workspaces')
 
 
     def validateInputs(self):
@@ -349,8 +349,9 @@ class QLRun(PythonAlgorithm):
             logger.information('Output fit file created : ' + fit_path)
             logger.information('Output paramter file created : ' + out_path)
 
-        self.setProperty('OutputworkspaceFit', fitWS)
+        self.setProperty('OutputWorkspaceFit', fitWS)
         self.setProperty('OutputWorkspaceResult', outWS)
+
         if self._program == 'QL':
             self.setProperty('OutputWorkspaceProb', probWS)
 
