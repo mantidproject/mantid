@@ -37,7 +37,6 @@ CompareWorkspaces::CompareWorkspaces()
 CompareWorkspaces::~CompareWorkspaces() {}
 
 //----------------------------------------------------------------------------------------------
-
 /// Algorithms name for identification. @see Algorithm::name
 const std::string CompareWorkspaces::name() const {
   return "CompareWorkspaces";
@@ -155,8 +154,7 @@ bool CompareWorkspaces::processGroups() {
   WorkspaceGroup_const_sptr ws2 =
       boost::dynamic_pointer_cast<const WorkspaceGroup>(w2);
 
-  if (ws1 && ws2) // Both are groups
-  {
+  if (ws1 && ws2) { // Both are groups
     processGroups(ws1, ws2);
   } else if (!ws1 && !ws2) { // Neither are groups (shouldn't happen)
     m_Result = false;
@@ -171,14 +169,11 @@ bool CompareWorkspaces::processGroups() {
   setProperty("ErrorWorkspace", m_Errors);
 
   // Store output workspace in AnalysisDataService
-  // this->store();
+  this->store();
 
   setExecuted(true);
   notificationCenter().postNotification(
       new FinishedNotification(this, this->isExecuted()));
-
-  // Free up any memory available
-  // Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 
   return true;
 }
@@ -192,8 +187,6 @@ bool CompareWorkspaces::processGroups() {
 void CompareWorkspaces::processGroups(
     boost::shared_ptr<const API::WorkspaceGroup> groupOne,
     boost::shared_ptr<const API::WorkspaceGroup> groupTwo) {
-  // m_Result = true;
-  // m_Errors = WorkspaceFactory::Instance().createTable("TableWorkspace");
 
   // Check their sizes
   const size_t totalNum = static_cast<size_t>(groupOne->getNumberOfEntries());
@@ -379,8 +372,6 @@ void CompareWorkspaces::doComparison() {
     if (!checkRunProperties(ws1->run(), ws2->run()))
       return;
   }
-
-  return;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -532,6 +523,7 @@ bool CompareWorkspaces::compareEventWorkspaces(
   return wsmatch;
 }
 
+//------------------------------------------------------------------------------------------------
 /** Checks that the data matches
  *  @param ws1 :: the first workspace
  *  @param ws2 :: the second workspace
@@ -624,11 +616,14 @@ bool CompareWorkspaces::checkData(API::MatrixWorkspace_const_sptr ws1,
   return resultBool;
 }
 
-/// Checks that the axes matches
-/// @param ws1 :: the first workspace
-/// @param ws2 :: the second workspace
-/// @retval true The axes match
-/// @retval false The axes do not match
+//------------------------------------------------------------------------------------------------
+/**
+ * Checks that the axes matches
+ * @param ws1 :: the first workspace
+ * @param ws2 :: the second workspace
+ * @retval true The axes match
+ * @retval false The axes do not match
+ */
 bool CompareWorkspaces::checkAxes(API::MatrixWorkspace_const_sptr ws1,
                                   API::MatrixWorkspace_const_sptr ws2) {
   const int numAxes = ws1->axes();
@@ -701,6 +696,7 @@ bool CompareWorkspaces::checkAxes(API::MatrixWorkspace_const_sptr ws1,
   return true;
 }
 
+//------------------------------------------------------------------------------------------------
 /// Checks that the spectra maps match
 /// @param ws1 :: the first sp det map
 /// @param ws2 :: the second sp det map
@@ -742,6 +738,7 @@ bool CompareWorkspaces::checkSpectraMap(MatrixWorkspace_const_sptr ws1,
   return true;
 }
 
+//------------------------------------------------------------------------------------------------
 /// Checks that the instruments match
 /// @param ws1 :: the first workspace
 /// @param ws2 :: the second workspace
@@ -774,6 +771,7 @@ bool CompareWorkspaces::checkInstrument(API::MatrixWorkspace_const_sptr ws1,
   return true;
 }
 
+//------------------------------------------------------------------------------------------------
 /// Checks that the masking matches
 /// @param ws1 :: the first workspace
 /// @param ws2 :: the second workspace
@@ -804,6 +802,7 @@ bool CompareWorkspaces::checkMasking(API::MatrixWorkspace_const_sptr ws1,
   return true;
 }
 
+//------------------------------------------------------------------------------------------------
 /// Checks that the sample matches
 /// @param sample1 :: the first sample
 /// @param sample2 :: the second sample
@@ -824,12 +823,12 @@ bool CompareWorkspaces::checkSample(const API::Sample &sample1,
   return true;
 }
 
+//------------------------------------------------------------------------------------------------
 /// Checks that the Run matches
 /// @param run1 :: the first run object
 /// @param run2 :: the second run object
 /// @retval true The sample matches
 /// @retval false The samples does not match
-
 bool CompareWorkspaces::checkRunProperties(const API::Run &run1,
                                            const API::Run &run2) {
   double run1Charge(-1.0);
@@ -880,19 +879,19 @@ bool CompareWorkspaces::checkRunProperties(const API::Run &run1,
 
 //------------------------------------------------------------------------------------------------
 /** Compare 2 different events list with detailed information output (Linear)
-  * It assumes that the number of events between these 2 are identical
-  * el1 :: event list 1
-  * el2 :: event list 2
-  * tolfTOF :: tolerance of Time-of-flight (in micro-second)
-  * tolWeight :: tolerance of weight for weighted neutron events
-  * tolPulse :: tolerance of pulse time (in nanosecond)
-  * NOTE: there is no need to compare the event type as it has been done by
+ * It assumes that the number of events between these 2 are identical
+ * el1 :: event list 1
+ * el2 :: event list 2
+ * tolfTOF :: tolerance of Time-of-flight (in micro-second)
+ * tolWeight :: tolerance of weight for weighted neutron events
+ * tolPulse :: tolerance of pulse time (in nanosecond)
+ * NOTE: there is no need to compare the event type as it has been done by
  * other tjype of check
-  * printdetails :: option for comparing. -1: simple, 0: full but no print, 1:
+ * printdetails :: option for comparing. -1: simple, 0: full but no print, 1:
  * full with print
-  * @return :: int.  -1: different number of events;  N > 0 : some
-  *            events are not same
-  */
+ * @return :: int.  -1: different number of events;  N > 0 : some
+ *            events are not same
+ */
 int CompareWorkspaces::compareEventsListInDetails(
     const EventList &el1, const EventList &el2, double tolTof, double tolWeight,
     int64_t tolPulse, bool printdetails, size_t &numdiffpulse,
@@ -907,9 +906,8 @@ int CompareWorkspaces::compareEventsListInDetails(
   numdiffpulse = 0;
   numdifftof = 0;
   numdiffboth = 0;
-
-  // Compar
   int returnint = 0;
+
   // Compare event by event including all events
   const std::vector<TofEvent> &events1 = el1.getEvents();
   const std::vector<TofEvent> &events2 = el2.getEvents();
@@ -965,10 +963,11 @@ int CompareWorkspaces::compareEventsListInDetails(
         "Detected mismatched events in weight.  Implement this branch ASAP.");
   }
 
-  // anything that gets this far is equal within tolerances
+  // Anything that gets this far is equal within tolerances
   return returnint;
 }
 
+//------------------------------------------------------------------------------------------------
 void CompareWorkspaces::doPeaksComparison(API::IPeaksWorkspace_sptr tws1,
                                           API::IPeaksWorkspace_sptr tws2) {
   // Check some table-based stuff
@@ -1058,9 +1057,9 @@ void CompareWorkspaces::doPeaksComparison(API::IPeaksWorkspace_sptr tws1,
       }
     }
   }
-  return;
 }
 
+//------------------------------------------------------------------------------------------------
 void
 CompareWorkspaces::doTableComparison(API::ITableWorkspace_const_sptr tws1,
                                      API::ITableWorkspace_const_sptr tws2) {
@@ -1119,6 +1118,7 @@ CompareWorkspaces::doTableComparison(API::ITableWorkspace_const_sptr tws1,
   } // loop over columns
 }
 
+//------------------------------------------------------------------------------------------------
 void CompareWorkspaces::doMDComparison(Workspace_sptr w1, Workspace_sptr w2) {
   IMDWorkspace_sptr mdws1, mdws2;
   mdws1 = boost::dynamic_pointer_cast<IMDWorkspace>(w1);
@@ -1137,12 +1137,20 @@ void CompareWorkspaces::doMDComparison(Workspace_sptr w1, Workspace_sptr w2) {
   }
 }
 
+//------------------------------------------------------------------------------------------------
+/**
+ * Records an error that has occurred in the output workspace and sets the
+ * Result to indicate that the input workspaces did not match.
+ *
+ * @param msg Error message to be logged in output workspace
+ */
 void CompareWorkspaces::handleError(std::string msg) {
   TableRow row = m_Errors->appendRow();
   row << msg;
   m_Result = false;
 }
 
+//------------------------------------------------------------------------------------------------
 /** Function which calculates relative error between two values and analyses if
 this error is within the limits
 * requested. When the absolute value of the difference is smaller then the value
