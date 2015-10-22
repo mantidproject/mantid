@@ -733,6 +733,12 @@ class ISISInstrument(BaseInstrument):
             self.set_up_for_run(run_num)
 
         if self._newCalibrationWS:
+            # We are about to transfer the Instrument Parameter File from the
+            # calibration to the original workspace. We want to add new parameters
+            # which the calibration file has not yet picked up.
+            # IMPORTANT NOTE: This takes the parameter settings from the original workspace
+            # if they are old too, then we don't pick up newly added parameters
+            self._add_parmeters_absent_in_calibration(ws_name, self._newCalibrationWS)
             self.changeCalibration(ws_name)
 
         # centralize the bank to the centre
@@ -755,6 +761,63 @@ class ISISInstrument(BaseInstrument):
         # this forces us to have 'copyable' objects.
         self._newCalibrationWS = str(ws_reference)
 
+    def _add_parmeters_absent_in_calibration(self, ws_name, calib_name):
+        '''
+        We load the instrument specific Instrument Parameter File (IPF) and check if
+        there are any settings which the calibration workspace does not have. The calibration workspace
+        has its own parameter map stored in the nexus file. This means that if we add new
+        entries to the IPF, then they are not being picked up. We do not want to change the existing
+        values, just add new entries.
+        @param ws_name: the name of the main workspace with the data
+        @param calibration_workspace: the name of the calibration workspace
+        '''
+        if calib_name == None or ws_name == None:
+            return
+        workspace = mtd[ws_name]
+        calibration_workspace = mtd[calib_name]
+
+        # 1.Iterate over all parameters in the original workspace
+        # 2. Compare with the calibration workspace
+        # 3. If it does not exist, then add it
+        original_parmeters = workspace.getInstrument().getParameterNames()
+        for param in original_parmeters:
+            if not calibration_workspace.getInstrument().hasParameter(param):
+                self._add_new_parameter_to_calibration(param, workspace, calibration_workspace)
+
+    def _add_new_parameter_to_calibration(self, param_name, workspace, calibration_workspace):
+        '''
+        Adds the missing value from the Instrument Parameter File (IPF) of the workspace to
+        the IPF of the calibration workspace. We check for the
+                                                             1. Type
+                                                             2. Value
+                                                             3. Name
+                                                             4. ComponentName (which is the instrument)
+        @param param_name: the name of the parameter to add
+        @param workspace: the donor of the parameter
+        @param calibration_workspace: the receiver of the parameter
+        '''
+        ws_instrument = workspace.getInstrument()
+        component_name = ws_instrument.getName()
+        ipf_type = ws_instrument.getParameterType(param_name)
+        # For now we only expect string, int and double
+        type_ids = ["string", "int", "double"]
+        value = None
+        type_to_save = "Number"
+        if ipf_type == type_ids[0]:
+            value = ws_instrument.getStringParameter(param_name)
+            type_to_save = "String"
+        elif ipf_type == type_ids[1]:
+            value = ws_instrument.getIntParameter(param_name)
+        elif ipf_type == type_ids[2]:
+            value = ws_instrument.getNumberParameter(param_name)
+        else:
+            raise RuntimeError("ISISInstrument: An Instrument Parameter File value of unknown type"
+                               "is trying to be copied. Cannot handle this currently.")
+        SetInstrumentParameter(Workspace = calibration_workspace,
+                               ComponentName = component_name,
+                               ParameterName = param_name,
+                               ParameterType = type_to_save,
+                               Value = str(value[0]))
 
 
 class LOQ(ISISInstrument):

@@ -498,10 +498,26 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                 Cf_can = CropWorkspace(InputWorkspace=Cf_can, OutputWorkspace=Cf_can, XMin=minQ, XMax=maxQ)
                 Cr_can = CropWorkspace(InputWorkspace=Cr_can, OutputWorkspace=Cr_can, XMin=minQ, XMax=maxQ)
 
-            mergedQ = (Cf+shift*Nf+Cr)/(Nf/scale + Nr)
+            # We want: (Cf+shift*Nf+Cr)/(Nf/scale + Nr)
+            shifted_norm_front = Scale(InputWorkspace = Nf, Operation = "Multiply", Factor = shift)
+            scaled_norm_front = Scale(InputWorkspace = Nf, Operation = "Multiply", Factor = (1./scale))
+            dividend = Cf + shifted_norm_front + Cr
+            divisor = scaled_norm_front + Nr
+            mergedQ = dividend/divisor
+
+            DeleteWorkspace(dividend)
+            DeleteWorkspace(divisor)
+            DeleteWorkspace(scaled_norm_front)
+            DeleteWorkspace(shifted_norm_front)
+
             if consider_can:
                 mergedQ -= (Cf_can+Cr_can)/(Nf_can/scale + Nr_can)
 
+            # We need to correct the errors. Note that the Can contribution is ignored here.
+            su.correct_q_resolution_for_merged(count_ws_front = Cf,
+                                               count_ws_rear = Cr,
+                                               output_ws = mergedQ,
+                                               scale = scale)
             RenameWorkspace(InputWorkspace=mergedQ,OutputWorkspace= retWSname_merged)
 
             # save the properties Transmission and TransmissionCan inside the merged workspace
@@ -531,8 +547,10 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     #applying scale and shift on the front detector reduced data
     if reduce_front_flag:
         frontWS = mtd[retWSname_front]
-        frontWS = (frontWS+shift)*scale
+        buffer = Scale(InputWorkspace = frontWS, Operation = "Add", Factor = shift)
+        frontWS = Scale(InputWorkspace = buffer, Operation = "Multiply", Factor = scale)
         RenameWorkspace(InputWorkspace=frontWS,OutputWorkspace= retWSname_front)
+        DeleteWorkspace(buffer)
 
     # finished calculating cross section so can restore these value
     ReductionSingleton().to_Q.outputParts = toRestoreOutputParts
@@ -1407,6 +1425,255 @@ def AddRuns(runs, instrument ='sans2d', saveAsEvent=False, binning = "Monitors",
              saveAsEvent=saveAsEvent,
              isOverlay = isOverlay,
              time_shifts = time_shifts)
+
+
+
+##################### Accesor functions for QResolution
+def get_q_resolution_moderator():
+    '''
+    Gets the moderator file path
+    @returns the moderator file path or nothing
+    '''
+    val = ReductionSingleton().to_Q.get_q_resolution_moderator()
+    if val == None:
+        val = ''
+    print str(val)
+    return val
+
+def set_q_resolution_moderator(file_name):
+    '''
+    Sets the moderator file path
+    @param file_name: the full file path
+    '''
+    try:
+        ReductionSingleton().to_Q.set_q_resolution_moderator(file_name)
+    except RuntimeError, details:
+        sanslog.error("The specified moderator file could not be found. Please specify a file"
+                      "which exists in the search directories. See details: %s" %str(details))
+
+#-- Use q resoltion
+def get_q_resultution_use():
+    '''
+    Gets if the q resolution option is being used
+    @returns true if the resolution option is being used, else false
+    '''
+    val = ReductionSingleton().to_Q.get_use_q_resolution()
+    print str(val)
+    return val
+
+def set_q_resolution_use(use):
+    '''
+    Sets if the q resolution option is being used
+    @param use: use flag
+    '''
+    if use == True:
+        ReductionSingleton().to_Q.set_use_q_resolution(True)
+    elif use == False:
+        ReductionSingleton().to_Q.set_use_q_resolution(False)
+    else:
+        sanslog.warning('Warning: Could could not set useage of QResolution')
+
+#-- Collimation length
+def get_q_resolution_collimation_length():
+    '''
+    Get the collimation length
+    @returns the collimation length in mm
+    '''
+    element = ReductionSingleton().to_Q.get_q_resolution_collimation_length()
+    msg = "CollimationLength"
+    if su.is_convertible_to_float(element) or not element:
+        pass
+    else:
+        sanslog.warning('Warning: Could not convert %s to float.' % msg)
+    print str(element)
+    return element
+
+def set_q_resolution_collimation_length(collimation_length):
+    '''
+    Sets the collimation length
+    @param collimation_length: the collimation length
+    '''
+    if collimation_length == None:
+        return
+    msg = "Collimation Length"
+    if su.is_convertible_to_float(collimation_length):
+        c_l = float(collimation_length)
+        ReductionSingleton().to_Q.set_q_resolution_collimation_length(c_l)
+    else:
+        sanslog.warning('Warning: Could not convert %s to float.' % msg)
+
+
+#-- Delta R
+def get_q_resolution_delta_r():
+    '''
+    Get the delta r value
+    @returns the delta r in mm
+    '''
+    val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_delta_r, "DeltaR")
+    print str(val)
+    return val
+
+def set_q_resolution_delta_r(delta_r):
+    '''
+    Sets the delta r value
+    @param delta_r: the delta r value
+    '''
+    set_q_resolution_float(ReductionSingleton().to_Q.set_q_resolution_delta_r, delta_r, "DeltaR")
+
+#-- A1
+def get_q_resolution_a1():
+    '''
+    Get the A1 diameter
+    @returns the diameter for the first aperature in mm
+    '''
+    val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_a1, "A1")
+    print str(val)
+    return val
+
+def set_q_resolution_a1(a1):
+    '''
+    Sets the a1 value
+    @param a1: the a1 value in mm
+    '''
+    set_q_resolution_float(ReductionSingleton().to_Q.set_q_resolution_a1, a1, "A1")
+
+#-- A2
+def get_q_resolution_a2():
+    '''
+    Get the A2 diameter
+    @returns the diameter for the second aperature in mm
+    '''
+    val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_a2, "A2")
+    print str(val)
+    return val
+
+def set_q_resolution_a2(a2):
+    '''
+    Sets the a2 value
+    @param a2: the a2 value in mm
+    '''
+    set_q_resolution_float(ReductionSingleton().to_Q.set_q_resolution_a2, a2, "A2")
+
+#-- H1
+def get_q_resolution_h1():
+    '''
+    Get the first height for rectangular apertures
+    @returns the first height in mm
+    '''
+    val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_h1, "H1")
+    print str(val)
+    return val
+
+def set_q_resolution_h1(h1):
+    '''
+    Set the first height for rectangular apertures
+    @param h1: the first height in mm
+    '''
+    set_q_resolution_float(ReductionSingleton().to_Q.set_q_resolution_h1, h1, "H1")
+
+#-- H2
+def get_q_resolution_h2():
+    '''
+    Get the second height for rectangular apertures
+    @returns the second height in mm
+    '''
+    val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_h2, "H2")
+    print str(val)
+    return val
+
+def set_q_resolution_h2(h2):
+    '''
+    Set the second height for rectangular apertures
+    @param h2: the second height in mm
+    '''
+    set_q_resolution_float(ReductionSingleton().to_Q.set_q_resolution_h2, h2, "H2")
+
+#-- W1
+def get_q_resolution_w1():
+    '''
+    Get the first width for rectangular apertures
+    @returns the first width in mm
+    '''
+    val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_w1, "W1")
+    print str(val)
+    return val
+
+def set_q_resolution_w1(w1):
+    '''
+    Set the first width for rectangular apertures
+    @param w1: the first width in mm
+    '''
+    set_q_resolution_float(ReductionSingleton().to_Q.set_q_resolution_w1, w1, "W1")
+
+#-- W2
+def get_q_resolution_w2():
+    '''
+    Get the second width for rectangular apertures
+    @returns the second width in mm
+    '''
+    val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_w2, "W2")
+    print str(val)
+    return val
+
+def set_q_resolution_w2(w2):
+    '''
+    Set the second width for rectangular apertures
+    @param w1: the second width in mm
+    '''
+    set_q_resolution_float(ReductionSingleton().to_Q.set_q_resolution_w2, w2, "W2")
+
+
+#-- Reset
+def reset_q_resolution_settings():
+    '''
+    Resets the q settings
+    '''
+    ReductionSingleton().to_Q.reset_q_settings()
+
+#-- Set float value
+def set_q_resolution_float(func, arg, msg):
+    '''
+    Set a q resolution value
+    @param func: the speficied function to run
+    @param arg: the argument
+    @param mgs: error message
+    '''
+    if arg == None:
+        return
+
+    if su.is_convertible_to_float(arg):
+        d_r = su.millimeter_2_meter(float(arg))
+        func(d_r)
+    else:
+        sanslog.warning('Warning: Could not convert %s to float.' % msg)
+
+def get_q_resolution_float(func, msg):
+    '''
+    Gets a q resolution value and checks if it has been set.
+    @param func: the speficied function to run
+    @param mgs: error message
+    @return the correct value
+    '''
+    element = func()
+
+    if su.is_convertible_to_float(element):
+        element = su.meter_2_millimeter(element)
+    elif not element:
+        pass
+    else:
+        sanslog.warning('Warning: Could not convert %s to float.' % msg)
+    return element
+
+def are_settings_consistent():
+    '''
+    Runs the consistency check over all reductionssteps and reports cosistency
+    issues to the user. The user needs to sort out these issues.
+    '''
+    try:
+        ReductionSingleton().perform_consistency_check()
+    except RuntimeError, details:
+        sanslog.error("There was an inconsistency issue with your settings. See details: %s", str(details))
+        raise RuntimeError("Please fix the following inconsistencies: %s" % str(details))
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################
