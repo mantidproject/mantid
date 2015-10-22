@@ -47,8 +47,12 @@ public:
   Kernel::UnitLabel getUnitLabel() const;
   const Kernel::MDUnit &getMDUnit() const;
   bool canConvertTo(const Kernel::MDUnit &otherUnit) const;
+  bool isQ() const;
+  bool isSameType(const MDFrame &frame) const;
   std::string name() const;
   HKL *clone() const;
+  Mantid::Kernel::SpecialCoordinateSystem
+  equivalientSpecialCoordinateSystem() const;
 
 private:
   std::unique_ptr<Kernel::MDUnit> m_unit;

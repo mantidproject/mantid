@@ -65,7 +65,7 @@ namespace Mantid
         }
         //std::cout << "dim " << d << min << " to " <<  max << std::endl;
         axisLabels.push_back(makeAxisTitle(inDim));
-        MDHistoDimension_sptr dim(new MDHistoDimension(inDim->getName(), inDim->getName(), inDim->getUnits(), min, max, inDim->getNBins()));
+        MDHistoDimension_sptr dim(new MDHistoDimension(inDim->getName(), inDim->getName(), inDim->getMDFrame(), min, max, inDim->getNBins()));
         dimensions.push_back(dim);
       }
 

@@ -27,7 +27,7 @@ class NearestNeighboursTest : public CxxTest::TestSuite {
 public:
   static ISpectrumDetectorMapping
   buildSpectrumDetectorMapping(const specid_t start, const specid_t end) {
-    boost::unordered_map<specid_t, std::set<detid_t>> map;
+    std::unordered_map<specid_t, std::set<detid_t>> map;
     for (specid_t i = start; i <= end; ++i) {
       map[i].insert(i);
     }

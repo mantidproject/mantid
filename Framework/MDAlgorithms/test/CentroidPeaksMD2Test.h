@@ -6,10 +6,14 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidGeometry/MDGeometry/QLab.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidMDAlgorithms/CentroidPeaksMD2.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
+#include "MantidKernel/UnitLabelTypes.h"
 
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -40,8 +44,22 @@ public:
 
   //-------------------------------------------------------------------------------
   /** Create the (blank) MDEW */
-  static void createMDEW() {
+  static void createMDEW(std::string CoordinatesToUse) {
     // ---- Start with empty MDEW ----
+    std::string frames;
+    if (CoordinatesToUse == "Q (lab frame)") {
+      frames = Mantid::Geometry::QLab::QLabName + "," +
+               Mantid::Geometry::QLab::QLabName + "," +
+               Mantid::Geometry::QLab::QLabName;
+    } else if (CoordinatesToUse == "Q (sample frame)") {
+      frames = Mantid::Geometry::QSample::QSampleName + "," +
+               Mantid::Geometry::QSample::QSampleName + "," +
+               Mantid::Geometry::QSample::QSampleName;
+    } else if (CoordinatesToUse == "HKL") {
+      frames = Mantid::Geometry::HKL::HKLName + "," +
+               Mantid::Geometry::HKL::HKLName + "," +
+               Mantid::Geometry::HKL::HKLName;
+    }
     CreateMDWorkspace algC;
     TS_ASSERT_THROWS_NOTHING(algC.initialize())
     TS_ASSERT(algC.isInitialized())
@@ -49,7 +67,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         algC.setProperty("Extents", "-10,10,-10,10,-10,10"));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Names", "h,k,l"));
-    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Units", "-,-,-"));
+    std::string units = Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
+                        Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
+                        Mantid::Kernel::Units::Symbol::RLU.ascii();
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Units", units));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Frames", frames));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("SplitInto", "5"));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("MaxRecursionDepth", "2"));
     TS_ASSERT_THROWS_NOTHING(
@@ -140,7 +162,7 @@ public:
   /** Full test using faked-out peak data */
   void do_test_exec() {
     // --- Fake workspace with 3 peaks ------
-    createMDEW();
+    createMDEW(CoordinatesToUse);
     addPeak(1000, 0, 0., 0., 1.0);
     addPeak(1000, 2., 3., 4., 0.5);
     addPeak(1000, 6., 6., 6., 2.0);
@@ -196,7 +218,7 @@ public:
 
   void test_exec_HKL_NotInPlace() {
     CoordinatesToUse = "HKL";
-    createMDEW();
+    createMDEW(CoordinatesToUse);
     addPeak(1000, 0, 0., 0., 1.0);
     doRun(V3D(0., 0., 0.), 1.0, V3D(0., 0., 0.),
           "Start at the center, get the center",

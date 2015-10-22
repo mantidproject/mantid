@@ -6,6 +6,8 @@
 #include "MantidKernel/V3D.h"
 #include <string>
 
+class TopoDS_Shape;
+
 namespace Mantid {
 
 namespace Geometry {
@@ -89,6 +91,9 @@ public:
   static int g_nslices;
   /// The number of stacks to approximate a sphere
   static int g_nstacks;
+#ifdef ENABLE_OPENCASCADE
+  virtual TopoDS_Shape createShape();
+#endif
 };
 
 } // NAMESPACE Geometry

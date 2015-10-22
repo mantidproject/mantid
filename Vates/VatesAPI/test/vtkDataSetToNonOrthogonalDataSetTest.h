@@ -10,6 +10,9 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidDataObjects/CoordTransformAffine.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidKernel/MDUnit.h"
 
 #include <vtkDataArray.h>
 #include <vtkFieldData.h>
@@ -38,15 +41,17 @@ private:
     // Creating an MDEventWorkspace as the content is not germain to the
     // information necessary for the non-orthogonal axes
     std::string wsName = "simpleWS";
-    IMDEventWorkspace_sptr ws = makeAnyMDEW<MDEvent<4>, 4>(1, 0.0, 1.0, 1, wsName);
+    IMDEventWorkspace_sptr ws;
     // Set the coordinate system
-    if (!wrongCoords)
-    {
-      ws->setCoordinateSystem(Mantid::Kernel::HKL);
-    }
-    else
-    {
-      ws->setCoordinateSystem(QSample);
+    if (wrongCoords) {
+      Mantid::Geometry::QSample frame;
+      ws = MDEventsTestHelper::makeAnyMDEWWithFrames<MDEvent<4>, 4>(
+          1, 0.0, 1.0, frame, 1, wsName);
+
+    } else {
+      Mantid::Geometry::HKL frame(new Mantid::Kernel::ReciprocalLatticeUnit);
+      ws = MDEventsTestHelper::makeAnyMDEWWithFrames<MDEvent<4>, 4>(
+          1, 0.0, 1.0, frame, 1, wsName);
     }
 
     // Set the UB matrix

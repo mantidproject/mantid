@@ -408,15 +408,18 @@ void LoadSQW::buildMDDimsBase(
     std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVector) {
   std::vector<std::string> dimID(4, "qx");
   std::vector<std::string> dimUnit(4, "A^-1");
+  std::vector<std::string> dimFrameName(4, "HKL");
   dimID[1] = "qy";
   dimID[2] = "qz";
   dimID[3] = "en";
   dimUnit[3] = "meV";
+  dimFrameName[3] = "meV";
   DimVector.resize(4);
   for (size_t i = 0; i < 4; i++) {
     DimVector[i].setId(dimID[i]);
     DimVector[i].setUnits(dimUnit[i]);
     DimVector[i].setName(dimID[i]);
+    DimVector[i].setFrameName(dimFrameName[i]);
   }
 }
 

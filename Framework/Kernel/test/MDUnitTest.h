@@ -15,6 +15,19 @@ public:
   static MDUnitTest *createSuite() { return new MDUnitTest(); }
   static void destroySuite(MDUnitTest *suite) { delete suite; }
 
+  void test_RLU_Constructor_with_valid_special_unit_label_accepts_the_label() {
+    auto unitLabel = UnitLabel("in 1.992 A^-1");
+    ReciprocalLatticeUnit unit(unitLabel);
+    TS_ASSERT_EQUALS(unitLabel.ascii(), unit.getUnitLabel().ascii());
+  }
+
+  void
+  test_RLU_Constructor_with_invalid_special_unit_label_does_not_accept_the_label() {
+    auto unitLabel = UnitLabel("in invalidLabel A-1");
+    ReciprocalLatticeUnit unit(unitLabel);
+    TS_ASSERT_EQUALS(Units::Symbol::RLU, unit.getUnitLabel());
+  }
+
   void test_RLU_getUnitLabel() {
     ReciprocalLatticeUnit unit;
     TS_ASSERT_EQUALS(Units::Symbol::RLU, unit.getUnitLabel());

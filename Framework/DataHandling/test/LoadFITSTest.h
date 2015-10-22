@@ -48,7 +48,7 @@ public:
   void test_propertiesMissing() {
     LoadFITS lf;
     TS_ASSERT_THROWS_NOTHING(lf.initialize());
-    TS_ASSERT_THROWS_NOTHING(lf.setPropertyValue("Filename", smallFname1));
+    TS_ASSERT_THROWS_NOTHING(lf.setPropertyValue("Filename", g_smallFname1));
     TS_ASSERT_THROWS(lf.execute(), std::runtime_error);
     TS_ASSERT(!lf.isExecuted());
 
@@ -101,7 +101,7 @@ public:
     // Should fail because mandatory parameter has not been set
     TS_ASSERT_THROWS(algToBeTested.execute(), std::runtime_error);
 
-    inputFile = smallFname1 + ", " + smallFname2;
+    inputFile = g_smallFname1 + ", " + g_smallFname2;
     algToBeTested.setPropertyValue("Filename", inputFile);
 
     // Set the ImageKey to be 0 (this used to be required, but the key
@@ -130,24 +130,24 @@ public:
 
     // basic FITS headers
     const auto run = ws1->run();
-    TS_ASSERT_EQUALS(run.getLogData("SIMPLE")->value(), hdrSIMPLE);
-    TS_ASSERT_EQUALS(run.getLogData("BITPIX")->value(), hdrBITPIX);
-    TS_ASSERT_EQUALS(run.getLogData("NAXIS")->value(), hdrNAXIS);
-    TS_ASSERT_EQUALS(run.getLogData("NAXIS1")->value(), hdrNAXIS1);
-    TS_ASSERT_EQUALS(run.getLogData("NAXIS2")->value(), hdrNAXIS2);
+    TS_ASSERT_EQUALS(run.getLogData("SIMPLE")->value(), g_hdrSIMPLE);
+    TS_ASSERT_EQUALS(run.getLogData("BITPIX")->value(), g_hdrBITPIX);
+    TS_ASSERT_EQUALS(run.getLogData("NAXIS")->value(), g_hdrNAXIS);
+    TS_ASSERT_EQUALS(run.getLogData("NAXIS1")->value(), g_hdrNAXIS1);
+    TS_ASSERT_EQUALS(run.getLogData("NAXIS2")->value(), g_hdrNAXIS2);
 
     // Number of spectra
-    TS_ASSERT_EQUALS(ws1->getNumberHistograms(), SPECTRA_COUNT);
-    TS_ASSERT_EQUALS(ws2->getNumberHistograms(), SPECTRA_COUNT);
+    TS_ASSERT_EQUALS(ws1->getNumberHistograms(), g_SPECTRA_COUNT);
+    TS_ASSERT_EQUALS(ws2->getNumberHistograms(), g_SPECTRA_COUNT);
 
     // Sum the two bins from the last spectra - should be 70400
     double sumY =
-        ws1->readY(SPECTRA_COUNT - 1)[0] + ws2->readY(SPECTRA_COUNT - 1)[0];
+        ws1->readY(g_SPECTRA_COUNT - 1)[0] + ws2->readY(g_SPECTRA_COUNT - 1)[0];
     TS_ASSERT_EQUALS(sumY, 275);
     // Check the sum of the error values for the last spectra in each file -
     // should be 375.183
     double sumE =
-        ws1->readE(SPECTRA_COUNT - 1)[0] + ws2->readE(SPECTRA_COUNT - 1)[0];
+        ws1->readE(g_SPECTRA_COUNT - 1)[0] + ws2->readE(g_SPECTRA_COUNT - 1)[0];
     TS_ASSERT_LESS_THAN(std::abs(sumE - 23.4489), 0.0001); // Include a small
     // tolerance check with
     // the assert - not
@@ -165,7 +165,7 @@ public:
     testAlg->setPropertyValue("OutputWorkspace", outputSpace);
     testAlg->setProperty("FilterNoiseLevel", 200.0);
 
-    inputFile = smallFname1 + ", " + smallFname2;
+    inputFile = g_smallFname1 + ", " + g_smallFname2;
     testAlg->setPropertyValue("Filename", inputFile);
 
     TS_ASSERT_THROWS_NOTHING(testAlg->execute());
@@ -185,12 +185,12 @@ public:
       TS_ASSERT_THROWS_NOTHING(
           ws = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
 
-      TS_ASSERT_EQUALS(ws->getNumberHistograms(), SPECTRA_COUNT);
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), g_SPECTRA_COUNT);
 
       // check Y and Error
-      TS_ASSERT_EQUALS(ws->readY(SPECTRA_COUNT - 100)[0], expectedY[i]);
+      TS_ASSERT_EQUALS(ws->readY(g_SPECTRA_COUNT - 100)[0], expectedY[i]);
       TS_ASSERT_LESS_THAN(
-          std::abs(ws->readE(SPECTRA_COUNT - 100)[0] - expectedE[i]), 0.0001);
+          std::abs(ws->readE(g_SPECTRA_COUNT - 100)[0] - expectedE[i]), 0.0001);
     }
   }
 
@@ -201,7 +201,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(testAlg->initialize());
     TS_ASSERT(testAlg->isInitialized());
 
-    inputFile = smallFname1 + ", " + smallFname2;
+    inputFile = g_smallFname1 + ", " + g_smallFname2;
     testAlg->setPropertyValue("Filename", inputFile);
     testAlg->setProperty("BinSize", 3);
     // this should fail - width and height not multiple of 3
@@ -219,7 +219,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(testAlg->initialize());
     TS_ASSERT(testAlg->isInitialized());
 
-    inputFile = smallFname1 + ", " + smallFname2;
+    inputFile = g_smallFname1 + ", " + g_smallFname2;
     testAlg->setPropertyValue("Filename", inputFile);
     int binSize = 2;
     testAlg->setProperty("BinSize", 2);
@@ -242,7 +242,7 @@ public:
           ws = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
 
       TS_ASSERT_EQUALS(ws->getNumberHistograms(),
-                       SPECTRA_COUNT_ASRECT / binSize);
+                       g_SPECTRA_COUNT_ASRECT / binSize);
     }
 
     // try 8, 512x512 => 64x64 image
@@ -253,7 +253,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(testAlg->initialize());
     TS_ASSERT(testAlg->isInitialized());
 
-    inputFile = smallFname1 + ", " + smallFname2;
+    inputFile = g_smallFname1 + ", " + g_smallFname2;
     testAlg->setPropertyValue("Filename", inputFile);
     testAlg->setProperty("BinSize", binSize);
     testAlg->setProperty("LoadAsRectImg", true);
@@ -274,7 +274,7 @@ public:
           ws = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
 
       TS_ASSERT_EQUALS(ws->getNumberHistograms(),
-                       SPECTRA_COUNT_ASRECT / binSize);
+                       g_SPECTRA_COUNT_ASRECT / binSize);
     }
   }
 
@@ -289,7 +289,7 @@ public:
     testAlg->setPropertyValue("OutputWorkspace", outputSpace);
     testAlg->setProperty("LoadAsRectImg", true);
 
-    inputFile = smallFname1 + ", " + smallFname2;
+    inputFile = g_smallFname1 + ", " + g_smallFname2;
     testAlg->setPropertyValue("Filename", inputFile);
 
     TS_ASSERT_THROWS_NOTHING(testAlg->execute());
@@ -306,8 +306,71 @@ public:
       TS_ASSERT_THROWS_NOTHING(
           ws = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
 
-      TS_ASSERT_EQUALS(ws->getNumberHistograms(), SPECTRA_COUNT_ASRECT);
+      TSM_ASSERT_EQUALS("The number of histograms should be the expected, "
+                        "dimension of the image",
+                        ws->getNumberHistograms(), g_SPECTRA_COUNT_ASRECT);
     }
+
+    TSM_ASSERT_EQUALS("The output workspace group should have two workspaces",
+                      out->size(), 2);
+
+    // and finally a basic check of values in the image, to be safe
+    MatrixWorkspace_sptr ws0;
+    TS_ASSERT_THROWS_NOTHING(
+        ws0 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0)));
+
+    TSM_ASSERT_EQUALS("The title of the first output workspace is not the name "
+                      "of the first file",
+                      ws0->getTitle(), g_smallFname1);
+
+    size_t n = ws0->getNumberHistograms();
+    TSM_ASSERT_EQUALS(
+        "The value at a given spectrum and bin (first one) is not as expected",
+        ws0->readY(n - 1)[0], 137);
+
+    TSM_ASSERT_EQUALS(
+        "The value at a given spectrum and bin (middle one) is not as expected",
+        ws0->readY(n - 1)[g_SPECTRA_COUNT_ASRECT / 2], 159);
+
+    TSM_ASSERT_EQUALS(
+        "The value at a given spectrum and bin (last one) is not as expected",
+        ws0->readY(n - 1).back(), 142);
+
+    MatrixWorkspace_sptr ws1;
+    TS_ASSERT_THROWS_NOTHING(
+        ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(1)));
+
+    TSM_ASSERT_EQUALS("The title of the second output workspace is not the "
+                      "name of the second file",
+                      ws1->getTitle(), g_smallFname2);
+    TSM_ASSERT_EQUALS(
+        "The value at a given spectrum and bin (first one) is not as expected",
+        ws1->readY(n - 1)[0], 155);
+
+    TSM_ASSERT_EQUALS(
+        "The value at a given spectrum and bin (middle one) is not as expected",
+        ws1->readY(n - 1)[g_SPECTRA_COUNT_ASRECT / 2], 199);
+
+    TSM_ASSERT_EQUALS(
+        "The value at a given spectrum and bin (last one) is not as expected",
+        ws1->readY(n - 1).back(), 133);
+  }
+
+  void test_loadEmpty() {
+    testAlg =
+        Mantid::API::AlgorithmManager::Instance().create("LoadFITS" /*, 1*/);
+
+    TS_ASSERT_THROWS_NOTHING(testAlg->initialize());
+    TS_ASSERT(testAlg->isInitialized());
+
+    outputSpace = "I_should_not_load_correctly";
+    testAlg->setPropertyValue("OutputWorkspace", outputSpace);
+    testAlg->setProperty("LoadAsRectImg", true);
+
+    testAlg->setPropertyValue("Filename", g_emptyFileName);
+
+    TS_ASSERT_THROWS_NOTHING(testAlg->execute());
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist(outputSpace));
   }
 
 private:
@@ -316,28 +379,38 @@ private:
 
   std::string inputFile;
   std::string outputSpace;
-  static const std::string smallFname1;
-  static const std::string smallFname2;
+  static const std::string g_smallFname1;
+  static const std::string g_smallFname2;
 
-  const static size_t xdim = 512;
-  const static size_t ydim = 512;
-  const static size_t SPECTRA_COUNT = xdim * ydim;
-  const static size_t SPECTRA_COUNT_ASRECT = ydim;
+  const static std::string g_emptyFileName;
+
+  const static size_t g_xdim;
+  const static size_t g_ydim;
+  const static size_t g_SPECTRA_COUNT;
+  const static size_t g_SPECTRA_COUNT_ASRECT;
+
   // FITS headers
-  const static std::string hdrSIMPLE;
-  const static std::string hdrBITPIX;
-  const static std::string hdrNAXIS;
-  const static std::string hdrNAXIS1;
-  const static std::string hdrNAXIS2;
+  const static std::string g_hdrSIMPLE;
+  const static std::string g_hdrBITPIX;
+  const static std::string g_hdrNAXIS;
+  const static std::string g_hdrNAXIS1;
+  const static std::string g_hdrNAXIS2;
 };
 
-const std::string LoadFITSTest::smallFname1 = "FITS_small_01.fits";
-const std::string LoadFITSTest::smallFname2 = "FITS_small_02.fits";
+const std::string LoadFITSTest::g_smallFname1 = "FITS_small_01.fits";
+const std::string LoadFITSTest::g_smallFname2 = "FITS_small_02.fits";
 
-const std::string LoadFITSTest::hdrSIMPLE = "T";
-const std::string LoadFITSTest::hdrBITPIX = "16";
-const std::string LoadFITSTest::hdrNAXIS = "2";
-const std::string LoadFITSTest::hdrNAXIS1 = "512";
-const std::string LoadFITSTest::hdrNAXIS2 = "512";
+const std::string LoadFITSTest::g_emptyFileName = "FITS_empty_file.fits";
+
+const size_t LoadFITSTest::g_xdim = 512;
+const size_t LoadFITSTest::g_ydim = 512;
+const size_t LoadFITSTest::g_SPECTRA_COUNT = g_xdim * g_ydim;
+const size_t LoadFITSTest::g_SPECTRA_COUNT_ASRECT = g_ydim;
+
+const std::string LoadFITSTest::g_hdrSIMPLE = "T";
+const std::string LoadFITSTest::g_hdrBITPIX = "16";
+const std::string LoadFITSTest::g_hdrNAXIS = "2";
+const std::string LoadFITSTest::g_hdrNAXIS1 = "512";
+const std::string LoadFITSTest::g_hdrNAXIS2 = "512";
 
 #endif // MANTID_DATAHANDLING_LOADFITSTEST_H_

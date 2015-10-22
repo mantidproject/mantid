@@ -8,10 +8,13 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
+
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD2.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidKernel/UnitLabelTypes.h"
 
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -91,7 +94,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         algC.setProperty("Extents", "-10,10,-10,10,-10,10"));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Names", "h,k,l"));
-    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Units", "-,-,-"));
+    std::string units = Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
+                        Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
+                        Mantid::Kernel::Units::Symbol::RLU.ascii();
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Units", units));
+    std::string frames = Mantid::Geometry::HKL::HKLName + "," +
+                         Mantid::Geometry::HKL::HKLName + "," +
+                         Mantid::Geometry::HKL::HKLName;
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Frames", frames));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("SplitInto", "5"));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("MaxRecursionDepth", "2"));
     TS_ASSERT_THROWS_NOTHING(algC.setPropertyValue(
