@@ -853,7 +853,7 @@ class CWSCDReductionControl(object):
                                               DetectorTableWorkspace='MockDetTable')
 
                 out_q_name = 'HB3A_Exp%d_Scan%d_Pt%d_MD' % (exp_no, scan_no, pt)
-                api.ConvertCWSDExpToMomentum(InputWorkspace='ScanPtInfo_Exp406_Scan%d' % scan_no,
+                api.ConvertCWSDExpToMomentum(InputWorkspace='ScanPtInfo_Exp%d_Scan%d' % (exp_no, scan_no),
                                              CreateVirtualInstrument=False,
                                              OutputWorkspace=out_q_name,
                                              Directory=self._dataDir)

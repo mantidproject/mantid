@@ -711,6 +711,9 @@ class MainWindow(QtGui.QMainWindow):
 
             out_ws_name = base_name + '%04d' % scan_no
             self.ui.tableWidget_sliceViewProgress.set_scan_pt(scan_no, 'In Processing')
+            merge_status = 'UNKNOWN'
+            merged_name = '???'
+            group_name = '???'
             try:
                 ret_tup = self._myControl.merge_pts_in_scan(exp_no=None, scan_no=scan_no,
                                                             target_ws_name=out_ws_name,
@@ -722,6 +725,7 @@ class MainWindow(QtGui.QMainWindow):
                 merge_status = 'Failed. Reason: %s' % str(e)
                 merged_name = ''
                 group_name = ''
+                print merge_status
             finally:
                 self.ui.tableWidget_sliceViewProgress.set_status(scan_no, merge_status)
                 self.ui.tableWidget_sliceViewProgress.set_ws_names(scan_no, merged_name, group_name)
