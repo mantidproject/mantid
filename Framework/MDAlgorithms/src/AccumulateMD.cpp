@@ -66,7 +66,7 @@ void AccumulateMD::init() {
   declareProperty(new ArrayProperty<double>("EFix", Direction::Input),
                   "datasource energy values in meV");
 
-  declareProperty('Emode', Direction::Input, "Analysis mode");
+  declareProperty("Emode", "", Direction::Input);
 
   declareProperty(new ArrayProperty<double>("Alatt", Direction::Input),
                   "Lattice parameters");
@@ -90,16 +90,20 @@ void AccumulateMD::init() {
   declareProperty(new ArrayProperty<double>("Gs", Direction::Input),
                   "gs rotation in degrees. Optional or one entry per run.");
 
-  declareProperty('InPlace', Direction::Input,
-                  "Execute conversions to MD and Merge in one-step. Less "
-                  "memory overhead.");
+  declareProperty(
+      new PropertyWithValue<bool>("InPlace", false, Direction::Input),
+      "Execute conversions to MD and Merge in one-step. Less "
+      "memory overhead.");
+
+  declareProperty(new PropertyWithValue<bool>("Clean", false, Direction::Input),
+                  "Create workspace from fresh rather than appending to "
+                  "existing workspace.");
 }
 
 /*
  Execute the algorithm.
  */
 void AccumulateMD::exec() {}
-
 
 } // namespace MDAlgorithms
 } // namespace Mantid
