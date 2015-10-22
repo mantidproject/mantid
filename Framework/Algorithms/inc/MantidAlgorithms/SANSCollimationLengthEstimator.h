@@ -40,7 +40,7 @@ private:
   double getCollimationLengthWithGuides(
       Mantid::API::MatrixWorkspace_sptr inOutWS, const double L1,
       const double collimationLengthCorrection) const;
-  double getGuideValue(Mantid::Kernel::Property* prop) const;
+  double getGuideValue(Mantid::Kernel::Property *prop) const;
 };
 }
 }

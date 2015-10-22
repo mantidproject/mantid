@@ -162,7 +162,8 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspace(
 
 class SANSCollimationLengthEstimatorTest : public CxxTest::TestSuite {
 public:
-  void test_that_collimation_length_is_provided_for_simple_instrument_without_guides() {
+  void
+  test_that_collimation_length_is_provided_for_simple_instrument_without_guides() {
     // Arrange
     double collimationLengthCorrection = 20;
     double collimationLengthIncrement = -1;
@@ -189,7 +190,8 @@ public:
                       expectedCollimationLength);
   }
 
-  void test_that_default_value_of_4_is_produced_if_collimation_length_is_not_specified() {
+  void
+  test_that_default_value_of_4_is_produced_if_collimation_length_is_not_specified() {
     // Arrange
     double collimationLengthCorrection = -1;
     double collimationLengthIncrement = -1;
@@ -280,7 +282,8 @@ public:
         5.0);
   }
 
-  void test_that_missing_collimation_length_increment_produces_a_default_value() {
+  void
+  test_that_missing_collimation_length_increment_produces_a_default_value() {
     // Arrange
     double collimationLengthCorrection = 20;
     double collimationLengthIncrement = -1;
@@ -303,7 +306,8 @@ public:
         5.0);
   }
 
-  void test_that_mismatch_of_log_guides_with_specified_number_of_guides_throws() {
+  void
+  test_that_mismatch_of_log_guides_with_specified_number_of_guides_throws() {
     // Arrange
     double collimationLengthCorrection = 20;
     double collimationLengthIncrement = 2;
