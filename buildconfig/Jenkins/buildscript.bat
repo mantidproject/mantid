@@ -6,22 +6,23 @@ setlocal enableextensions enabledelayedexpansion
 ::
 :: WORKSPACE & JOB_NAME are environment variables that are set by Jenkins.
 :: BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each slave.
+:: CMake, git & git-lfs should be on the PATH
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+set VS_VERSION=14
+set CM_GENERATOR=Visual Studio 14 2015 Win64
+
+:: While we transition between VS 2012 & 2015 we need to be able to clean the build directory
+:: if the previous build was not with the same compiler
+for /f "delims=" %%I in ('where git') do @set GIT_EXE_DIR=%%~dpI
+set GIT_ROOT_DIR=%GIT_EXE_DIR:~0,-4%
+set GREP_EXE=%GIT_ROOT_DIR%bin\grep.exe
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: All nodes currently have PARAVIEW_DIR=4.3.b40280 and PARAVIEW_NEXT_DIR=4.3.1
+:: All nodes currently have PARAVIEW_DIR=4.3.b40280, PARAVIEW_NEXT_DIR=4.3.1
+:: and PARAVIEW_MSVC2015_DIR=4.3.b40280
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-set CMAKE_BIN_DIR=C:\Program Files (x86)\CMake 2.8\bin
-"%CMAKE_BIN_DIR%\cmake.exe" --version
+call cmake.exe --version
 echo %sha1%
-
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Get or update the third party dependencies
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-cd %WORKSPACE%
-call fetch_Third_Party win64
-cd %WORKSPACE%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Set up the location for local object store outside of the build and source
@@ -59,7 +60,16 @@ if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
 ::                            the links helps keep it fresh
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set BUILD_DIR=%WORKSPACE%\build
-if "%CLEANBUILD%" == "yes" (
+if exist %BUILD_DIR%\CMakeCache.txt (
+  "%GREP_EXE%" CMAKE_LINKER:FILEPATH %BUILD_DIR%\CMakeCache.txt | "%GREP_EXE%" @VS_VERSION@
+  if %ERRORLEVEL% EQU 0 (
+    echo Previous build was with Visual Studio 2015, not cleaning build directory
+  ) else (
+    set CLEANBUILD=yes
+    echo Previous build was with Visual Studio 2012, build directory will be cleaned
+  )
+)
+if "!CLEANBUILD!" == "yes" (
   rmdir /S /Q %BUILD_DIR%
 )
 
@@ -97,15 +107,11 @@ if not "%JOB_NAME%"=="%JOB_NAME:relwithdbg=%" (
 ) else (
     set BUILD_CONFIG=Release
     ))
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Update the PATH so that we can find everything
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-set PATH=%WORKSPACE%\Third_Party\lib\win64;%WORKSPACE%\Third_Party\lib\win64\Python27;%WORKSPACE%\Third_Party\lib\win64\mingw;%PARAVIEW_DIR%\bin\%BUILD_CONFIG%;%PATH%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: CMake configuration
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-"%CMAKE_BIN_DIR%\cmake.exe" -G "Visual Studio 11 Win64" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_DOCS% ..
+"%CMAKE_BIN_DIR%\cmake.exe" -G "@CM_GENERATOR@" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_DOCS% ..
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
