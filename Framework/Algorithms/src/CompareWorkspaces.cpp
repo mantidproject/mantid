@@ -1067,9 +1067,9 @@ void CompareWorkspaces::doPeaksComparison(API::IPeaksWorkspace_sptr tws1,
 }
 
 //------------------------------------------------------------------------------------------------
-void
-CompareWorkspaces::doTableComparison(API::ITableWorkspace_const_sptr tws1,
-                                     API::ITableWorkspace_const_sptr tws2) {
+void CompareWorkspaces::doTableComparison(
+    API::ITableWorkspace_const_sptr tws1,
+    API::ITableWorkspace_const_sptr tws2) {
   // First the easy things
   const auto numCols = tws1->columnCount();
   if (numCols != tws2->columnCount()) {

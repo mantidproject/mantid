@@ -159,8 +159,7 @@ bool equals(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs,
 
   alg->execute();
   if (!alg->isExecuted()) {
-    std::string message =
-        "Error while executing operation: CompareWorkspaces";
+    std::string message = "Error while executing operation: CompareWorkspaces";
     throw std::runtime_error(message);
   }
   return alg->getProperty("Result");
