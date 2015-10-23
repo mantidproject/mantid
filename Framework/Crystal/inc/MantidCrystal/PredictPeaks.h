@@ -44,7 +44,7 @@ private:
   /// Run the algorithm
   void exec();
 
-  void doHKL(const double h, const double k, const double l, bool doFilter);
+  void doHKL(const Kernel::V3D &hkl, bool doFilter);
 
 private:
   /// Reflection conditions possible

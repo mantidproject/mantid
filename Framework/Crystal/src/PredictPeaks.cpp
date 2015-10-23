@@ -4,6 +4,9 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 
+#include "MantidGeometry/Crystal/HKLGenerator.h"
+#include "MantidGeometry/Crystal/BasicHKLFilters.h"
+
 using Mantid::Kernel::EnabledWhenProperty;
 
 namespace Mantid {
@@ -107,51 +110,40 @@ void PredictPeaks::init() {
  * @param l
  * @param doFilter if true, skip unacceptable d-spacings
  */
-void PredictPeaks::doHKL(const double h, const double k, const double l,
-                         bool doFilter) {
-  V3D hkl(h, k, l);
+void PredictPeaks::doHKL(const V3D &hkl, bool doFilter) {
+  // The q-vector direction of the peak is = goniometer * ub * hkl_vector
+  // This is in inelastic convention: momentum transfer of the LATTICE!
+  // Also, q does have a 2pi factor = it is equal to 2pi/wavelength.
+  V3D q = m_mat * hkl;
 
-  // Skip those with unacceptable d-spacings
-  double d = m_crystal.d(hkl);
-  if (!doFilter || (d > m_minD && d < m_maxD)) {
-    // The q-vector direction of the peak is = goniometer * ub * hkl_vector
-    // This is in inelastic convention: momentum transfer of the LATTICE!
-    // Also, q does have a 2pi factor = it is equal to 2pi/wavelength.
-    V3D q = m_mat * hkl * (2.0 * M_PI);
+  /* The incident neutron wavevector is in the +Z direction, ki = 2*pi/wl (in
+   * z direction).
+   * In the inelastic convention, q = ki - kf.
+   * The final neutron wavector kf = -qx in x; -qy in y; and (-qz+2*pi/wl) in
+   * z.
+   * AND: norm(kf) = norm(ki) = 2*pi/wavelength
+   * THEREFORE: 2*pi/wl = norm(q)^2 / (2*qz)
+   */
+  double one_over_wl = (q.norm2() / (2.0 * q.Z()));
+  double wl = 1.0 / one_over_wl;
 
-    /* The incident neutron wavevector is in the +Z direction, ki = 2*pi/wl (in
-     * z direction).
-     * In the inelastic convention, q = ki - kf.
-     * The final neutron wavector kf = -qx in x; -qy in y; and (-qz+2*pi/wl) in
-     * z.
-     * AND: norm(kf) = norm(ki) = 2*pi/wavelength
-     * THEREFORE: 2*pi/wl = norm(q)^2 / (2*qz)
-     */
-    double norm_q = q.norm();
-    double one_over_wl = ((norm_q * norm_q) / (2.0 * q.Z())) / (2.0 * M_PI);
-    double wl = 1.0 / one_over_wl;
+  // Only keep going for accepted wavelengths.
+  if (wl > 0 && (!doFilter || (wl >= m_wlMin && wl <= m_wlMax))) {
+    ++m_numInRange;
 
-    g_log.debug() << "Peak at " << hkl << " has d-spacing " << d
-                  << " and wavelength " << wl << std::endl;
+    // Create the peak using the Q in the lab framewith all its info:
+    Peak p(m_inst, q * (2.0 * M_PI), boost::optional<double>());
+    if (p.findDetector()) {
+      // Only add peaks that hit the detector
+      p.setGoniometerMatrix(m_gonio);
+      // Save the run number found before.
+      p.setRunNumber(m_runNumber);
+      p.setHKL(hkl);
 
-    // Only keep going for accepted wavelengths.
-    if (wl > 0 && (!doFilter || (wl >= m_wlMin && wl <= m_wlMax))) {
-      PARALLEL_CRITICAL(PredictPeaks_m_numInRange) { m_numInRange++; }
-
-      // Create the peak using the Q in the lab framewith all its info:
-      Peak p(m_inst, q, boost::optional<double>());
-      if (p.findDetector()) {
-        // Only add peaks that hit the detector
-        p.setGoniometerMatrix(m_gonio);
-        // Save the run number found before.
-        p.setRunNumber(m_runNumber);
-        p.setHKL(hkl);
-
-        // Add it to the workspace
-        PARALLEL_CRITICAL(PredictPeaks_appendPeak) { m_pw->addPeak(p); }
-      } // Detector was found
-    }   // (wavelength is okay)
-  }     // (d is acceptable)
+      // Add it to the workspace
+      m_pw->addPeak(p);
+    } // Detector was found
+  }   // (wavelength is okay)
 }
 
 //----------------------------------------------------------------------------------------------
@@ -178,7 +170,8 @@ void PredictPeaks::exec() {
       gonioVec.push_back(m_gonio);
     } catch (std::runtime_error &e) {
       g_log.error() << "Error getting the goniometer rotation matrix from the "
-                       "InputWorkspace." << std::endl
+                       "InputWorkspace."
+                    << std::endl
                     << e.what() << std::endl;
       g_log.warning() << "Using identity goniometer rotation matrix instead."
                       << std::endl;
@@ -295,10 +288,8 @@ void PredictPeaks::exec() {
       m_wlMax = 1e10;
 
       // cppcheck-suppress syntaxError
-      PRAGMA_OMP(parallel for schedule(dynamic, 1) )
       for (int i = 0; i < static_cast<int>(HKLPeaksWorkspace->getNumberPeaks());
            ++i) {
-        PARALLEL_START_INTERUPT_REGION
 
         IPeak &p = HKLPeaksWorkspace->getPeak(i);
         // Get HKL from that peak
@@ -307,68 +298,37 @@ void PredictPeaks::exec() {
         if (RoundHKL)
           hkl.round();
         // Predict the HKL of that peak
-        doHKL(hkl[0], hkl[1], hkl[2], false);
+        doHKL(hkl, false);
 
-        PARALLEL_END_INTERUPT_REGION
       } // for each hkl in the workspace
-      PARALLEL_CHECK_INTERUPT_REGION
     } else {
-      // ---------------- Determine which HKL to look for
-      // -------------------------------------
-      // Inverse d-spacing that is the limit to look for.
-      double Qmax = 2. * M_PI / m_minD;
-      V3D hklMin(0, 0, 0);
-      V3D hklMax(0, 0, 0);
-      for (double qx = -1; qx < 2; qx += 2)
-        for (double qy = -1; qy < 2; qy += 2)
-          for (double qz = -1; qz < 2; qz += 2) {
-            // Build a q-vector for this corner of a cube
-            V3D Q(qx, qy, qz);
-            Q *= Qmax;
-            V3D hkl = m_crystal.hklFromQ(Q);
-            // Find the limits of each hkl
-            for (size_t i = 0; i < 3; i++) {
-              if (hkl[i] < hklMin[i])
-                hklMin[i] = hkl[i];
-              if (hkl[i] > hklMax[i])
-                hklMax[i] = hkl[i];
-            }
-          }
-      // Round to nearest int
-      hklMin.round();
-      hklMax.round();
+      HKLGenerator gen(m_crystal, m_minD);
+      auto filter =
+          boost::make_shared<HKLFilterCentering>(refCond) &
+          boost::make_shared<HKLFilterDRange>(m_crystal, m_minD, m_maxD);
 
-      // How many HKLs is that total?
-      V3D hklDiff = hklMax - hklMin + V3D(1, 1, 1);
-      size_t numHKLs = size_t(hklDiff[0] * hklDiff[1] * hklDiff[2]);
+      V3D hklMin = *(gen.begin());
 
-      g_log.information() << "HKL range for d_min of " << m_minD
-                          << "to d_max of " << m_maxD << " is from " << hklMin
-                          << " to " << hklMax << ", a total of " << numHKLs
-                          << " possible HKL's\n";
+      g_log.notice() << "HKL range for d_min of " << m_minD << "to d_max of "
+                     << m_maxD << " is from " << hklMin << " to "
+                     << hklMin * -1.0 << ", a total of " << gen.size()
+                     << " possible HKL's\n";
 
-      if (numHKLs > 10000000000)
+      g_log.notice() << "Other: " << gen.size() << std::endl;
+
+      if (gen.size() > 10000000000)
         throw std::invalid_argument("More than 10 billion HKLs to search. Is "
                                     "your d_min value too small?");
 
-      Progress prog(this, 0.0, 1.0, numHKLs);
+      Progress prog(this, 0.0, 1.0, gen.size());
       prog.setNotifyStep(0.01);
 
-      PRAGMA_OMP(parallel for schedule(dynamic, 1) )
-      for (int h = (int)hklMin[0]; h <= (int)hklMax[0]; h++) {
-        PARALLEL_START_INTERUPT_REGION
-        for (int k = (int)hklMin[1]; k <= (int)hklMax[1]; k++) {
-          for (int l = (int)hklMin[2]; l <= (int)hklMax[2]; l++) {
-            if (refCond->isAllowed(h, k, l) &&
-                (abs(h) + abs(k) + abs(l) != 0)) {
-              doHKL(double(h), double(k), double(l), true);
-            } // refl is allowed and not 0,0,0
-            prog.report();
-          } // for each l
-        }   // for each k
-        PARALLEL_END_INTERUPT_REGION
-      } // for each h
-      PARALLEL_CHECK_INTERUPT_REGION
+      for (auto hkl = gen.begin(); hkl != gen.end(); ++hkl) {
+        if (filter->isAllowed(*hkl)) {
+          doHKL(*hkl, true);
+        }
+        prog.report();
+      }
 
     } // Find the HKL automatically
 
