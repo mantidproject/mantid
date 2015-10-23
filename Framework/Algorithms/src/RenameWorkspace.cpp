@@ -28,7 +28,7 @@ void RenameWorkspace::init() {
       " to the source workspace, the monitors workspace is renamed too.\n"
       "The monitor workspace name is created from the new workspace "
       "name: NewWSName by adding the _monitors suffix"
-	  " (e.g.: NewWSName_monitors)",
+      " (e.g.: NewWSName_monitors)",
       Direction::Input);
 }
 
