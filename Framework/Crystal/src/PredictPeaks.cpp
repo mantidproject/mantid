@@ -115,14 +115,14 @@ void PredictPeaks::doHKL(const V3D &hkl) {
   // The q-vector direction of the peak is = goniometer * ub * hkl_vector
   // This is in inelastic convention: momentum transfer of the LATTICE!
   // Also, q does have a 2pi factor = it is equal to 2pi/wavelength.
-  V3D q = m_mat * hkl;
+  V3D q = m_mat * hkl * (2.0 * M_PI);
 
   // Create the peak using the Q in the lab framewith all its info:
-  Peak p(m_inst, q * (2.0 * M_PI), boost::optional<double>());
+  Peak p(m_inst, q, boost::optional<double>());
 
-  // The constructor calls setQLabFrame, which already calls findDetector, which
-  // is expensive. It's not necessary to call it again, instead it's enough to
-  // check whether a detector has already been set.
+  /* The constructor calls setQLabFrame, which already calls findDetector, which
+     is expensive. It's not necessary to call it again, instead it's enough to
+     check whether a detector has already been set. */
   if (p.getDetector()) {
     // Only add peaks that hit the detector
     p.setGoniometerMatrix(m_gonio);
@@ -161,7 +161,8 @@ void PredictPeaks::exec() {
     } catch (std::runtime_error &e) {
       // If there is no goniometer matrix, use identity matrix instead.
       g_log.error() << "Error getting the goniometer rotation matrix from the "
-                       "InputWorkspace." << std::endl
+                       "InputWorkspace."
+                    << std::endl
                     << e.what() << std::endl;
       g_log.warning() << "Using identity goniometer rotation matrix instead."
                       << std::endl;
@@ -206,7 +207,8 @@ void PredictPeaks::exec() {
 
         g_log.error()
             << "Error getting the goniometer rotation matrix from the "
-               "InputWorkspace." << std::endl
+               "InputWorkspace."
+            << std::endl
             << e.what() << std::endl;
         g_log.warning() << "Using identity goniometer rotation matrix instead."
                         << std::endl;
