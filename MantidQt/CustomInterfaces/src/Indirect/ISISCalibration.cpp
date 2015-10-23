@@ -155,20 +155,20 @@ namespace CustomInterfaces
   void ISISCalibration::run()
   {
     // Get properties
-    QString firstFile = m_uiForm.leRunNo->getFirstFilename();
     QStringList filenameList = m_uiForm.leRunNo->getFilenames();
     QString filenames = filenameList.join(",");
     QString userInFiles = m_uiForm.leRunNo->getText();
     QString firstFileNumber("");
-    auto cutIndex = userInFiles.lastIndexOf("-");
-    if (cutIndex == -1) {
-      cutIndex = userInFiles.lastIndexOf(",");
-      if (cutIndex == -1) {
-        firstFileNumber = userInFiles;
-      }
-
+    auto cutIndexDash = userInFiles.indexOf("-");
+    auto cutIndexComma = userInFiles.indexOf(",");
+    if (cutIndexDash == -1 && cutIndexComma == -1) {
+      firstFileNumber = userInFiles;
     } else {
-      firstFileNumber = userInFiles.left(cutIndex);
+      if (cutIndexDash < cutIndexComma) {
+        firstFileNumber = userInFiles.left(cutIndexDash);
+      } else {
+        firstFileNumber = userInFiles.left(cutIndexComma);
+      }
     }
 
     auto instDetails = getInstrumentDetails();
@@ -180,7 +180,6 @@ namespace CustomInterfaces
     QString backgroundRange = m_properties["CalBackMin"]->valueText() + "," +
                               m_properties["CalBackMax"]->valueText();
 
-    // QFileInfo firstFileInfo(firstFile);
     QString outputWorkspaceNameStem =
         getInstrumentConfiguration()->getInstrumentName() + firstFileNumber +
         QString::fromStdString("_") +
