@@ -111,7 +111,7 @@ void PredictPeaks::init() {
  * @param l
  * @param doFilter if true, skip unacceptable d-spacings
  */
-void PredictPeaks::doHKL(const V3D &hkl, bool doFilter) {
+void PredictPeaks::doHKL(const V3D &hkl) {
   // The q-vector direction of the peak is = goniometer * ub * hkl_vector
   // This is in inelastic convention: momentum transfer of the LATTICE!
   // Also, q does have a 2pi factor = it is equal to 2pi/wavelength.
@@ -119,7 +119,11 @@ void PredictPeaks::doHKL(const V3D &hkl, bool doFilter) {
 
   // Create the peak using the Q in the lab framewith all its info:
   Peak p(m_inst, q * (2.0 * M_PI), boost::optional<double>());
-  if (p.findDetector()) {
+
+  // The constructor calls setQLabFrame, which already calls findDetector, which
+  // is expensive. It's not necessary to call it again, instead it's enough to
+  // check whether a detector has already been set.
+  if (p.getDetector()) {
     // Only add peaks that hit the detector
     p.setGoniometerMatrix(m_gonio);
     // Save the run number found before.
@@ -137,59 +141,85 @@ void PredictPeaks::doHKL(const V3D &hkl, bool doFilter) {
 void PredictPeaks::exec() {
   // Get the input properties
   Workspace_sptr inBareWS = getProperty("InputWorkspace");
-  ExperimentInfo_sptr inWS;
+
+  ExperimentInfo_sptr inWS =
+      boost::dynamic_pointer_cast<ExperimentInfo>(inBareWS);
+
   MatrixWorkspace_sptr matrixWS =
       boost::dynamic_pointer_cast<MatrixWorkspace>(inBareWS);
   PeaksWorkspace_sptr peaksWS =
       boost::dynamic_pointer_cast<PeaksWorkspace>(inBareWS);
   IMDEventWorkspace_sptr mdWS =
       boost::dynamic_pointer_cast<IMDEventWorkspace>(inBareWS);
-  std::vector<Matrix<double>> gonioVec;
-  m_gonio = Matrix<double>(3, 3, true);
-  Mantid::Kernel::DblMatrix gonioLast = Matrix<double>(3, 3, false);
+
+  std::vector<DblMatrix> gonioVec;
   if (matrixWS) {
-    inWS = matrixWS;
     // Retrieve the goniometer rotation matrix
     try {
-      m_gonio = inWS->mutableRun().getGoniometerMatrix();
-      gonioVec.push_back(m_gonio);
+      DblMatrix goniometerMatrix = matrixWS->run().getGoniometerMatrix();
+      gonioVec.push_back(goniometerMatrix);
     } catch (std::runtime_error &e) {
+      // If there is no goniometer matrix, use identity matrix instead.
       g_log.error() << "Error getting the goniometer rotation matrix from the "
-                       "InputWorkspace."
-                    << std::endl
+                       "InputWorkspace." << std::endl
                     << e.what() << std::endl;
       g_log.warning() << "Using identity goniometer rotation matrix instead."
                       << std::endl;
     }
   } else if (peaksWS) {
-    // We must sort the peaks
+    // Sort peaks by run number so that peaks with equal goniometer matrices are
+    // adjacent
     std::vector<std::pair<std::string, bool>> criteria;
     criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
-    // criteria.push_back(std::pair<std::string, bool>("BankName", true));
-    peaksWS->sort(criteria);
-    inWS = peaksWS;
-    for (int i = 0; i < static_cast<int>(peaksWS->getNumberPeaks()); ++i) {
 
+    peaksWS->sort(criteria);
+
+    // Get all goniometer matrices
+    DblMatrix lastGoniometerMatrix = Matrix<double>(3, 3, false);
+    for (int i = 0; i < static_cast<int>(peaksWS->getNumberPeaks()); ++i) {
       IPeak &p = peaksWS->getPeak(i);
-      m_gonio = p.getGoniometerMatrix();
-      if (!(m_gonio == gonioLast)) {
-        gonioLast = m_gonio;
-        gonioVec.push_back(gonioLast);
+      DblMatrix currentGoniometerMatrix = p.getGoniometerMatrix();
+      if (!(currentGoniometerMatrix == lastGoniometerMatrix)) {
+        gonioVec.push_back(currentGoniometerMatrix);
+        lastGoniometerMatrix = currentGoniometerMatrix;
       }
-    } // for each hkl in the workspace
+    }
+
   } else if (mdWS) {
     if (mdWS->getNumExperimentInfo() <= 0)
       throw std::invalid_argument(
           "Specified a MDEventWorkspace as InputWorkspace but it does not have "
           "any ExperimentInfo associated. Please choose a workspace with a "
           "full instrument and sample.");
+
     inWS = mdWS->getExperimentInfo(0);
-    // Retrieve the goniometer rotation matrix
-    for (uint16_t i = 0; i < mdWS->getNumExperimentInfo(); i++) {
-      m_gonio = mdWS->getExperimentInfo(i)->mutableRun().getGoniometerMatrix();
-      gonioVec.push_back(m_gonio);
+
+    // Retrieve the goniometer rotation matrices for each experiment info
+    for (uint16_t i = 0; i < mdWS->getNumExperimentInfo(); ++i) {
+      try {
+        DblMatrix goniometerMatrix =
+            mdWS->getExperimentInfo(i)->mutableRun().getGoniometerMatrix();
+        gonioVec.push_back(goniometerMatrix);
+      } catch (std::runtime_error &e) {
+        // If there is no goniometer matrix, use identity matrix instead.
+        gonioVec.push_back(DblMatrix(3, 3, true));
+
+        g_log.error()
+            << "Error getting the goniometer rotation matrix from the "
+               "InputWorkspace." << std::endl
+            << e.what() << std::endl;
+        g_log.warning() << "Using identity goniometer rotation matrix instead."
+                        << std::endl;
+      }
     }
   }
+
+  // If there's no goniometer matrix at this point, push back an identity
+  // matrix.
+  if (gonioVec.empty()) {
+    gonioVec.push_back(DblMatrix(3, 3, true));
+  }
+
   // Find the run number
   if (inWS) {
     m_runNumber = inWS->getRunNumber();
@@ -209,14 +239,6 @@ void PredictPeaks::exec() {
   if (!inWS || !inWS->getInstrument()->getSample())
     throw std::invalid_argument("Did not specify a valid InputWorkspace with a "
                                 "full instrument and sample.");
-  if (m_wlMin >= m_wlMax)
-    throw std::invalid_argument("WavelengthMin must be < WavelengthMax.");
-  if (m_wlMin < 1e-5)
-    throw std::invalid_argument("WavelengthMin must be stricly positive.");
-  if (m_minD < 1e-4)
-    throw std::invalid_argument("MinDSpacing must be stricly positive.");
-  if (m_minD >= m_maxD)
-    throw std::invalid_argument("MinDSpacing must be < MaxDSpacing.");
 
   // Get the instrument and its detectors
   m_inst = inWS->getInstrument();
@@ -226,7 +248,6 @@ void PredictPeaks::exec() {
 
   // L1 path and direction
   V3D beamDir = m_inst->getSource()->getPos() - samplePos;
-  // double L1 = beamDir.normalize(); // Normalize to unity
 
   if ((fabs(beamDir.X()) > 1e-2) ||
       (fabs(beamDir.Y()) > 1e-2)) // || (beamDir.Z() < 0))
@@ -246,6 +267,7 @@ void PredictPeaks::exec() {
   // Create the output
   m_pw = PeaksWorkspace_sptr(new PeaksWorkspace());
   setProperty<PeaksWorkspace_sptr>("OutputWorkspace", m_pw);
+
   // Copy instrument, sample, etc.
   m_pw->copyExperimentInfoFrom(inWS.get());
 
@@ -269,7 +291,7 @@ void PredictPeaks::exec() {
 
     V3D hklMin = *(gen.begin());
 
-    g_log.notice() << "HKL range for d_min of " << m_minD << "to d_max of "
+    g_log.notice() << "HKL range for d_min of " << m_minD << " to d_max of "
                    << m_maxD << " is from " << hklMin << " to " << hklMin * -1.0
                    << ", a total of " << gen.size() << " possible HKL's\n";
 
@@ -304,39 +326,13 @@ void PredictPeaks::exec() {
     // Final transformation matrix (HKL to Q in lab frame)
     m_mat = m_gonio * ub;
 
-    if (HKLPeaksWorkspace) {
-      // --------------Use the HKL from a list in a PeaksWorkspace
-      // --------------------------
-      // Disable some of the other filters
-      m_minD = 0.0;
-      m_maxD = 1e10;
-      m_wlMin = 0.0;
-      m_wlMax = 1e10;
+    Progress prog(this, 0.0, 1.0, possibleHKLs.size());
+    prog.setNotifyStep(0.01);
 
-      // cppcheck-suppress syntaxError
-      for (int i = 0; i < static_cast<int>(HKLPeaksWorkspace->getNumberPeaks());
-           ++i) {
-
-        IPeak &p = HKLPeaksWorkspace->getPeak(i);
-        // Get HKL from that peak
-        V3D hkl = p.getHKL();
-        // Use the rounded HKL value on option
-        if (RoundHKL)
-          hkl.round();
-        // Predict the HKL of that peak
-        doHKL(hkl, false);
-
-      } // for each hkl in the workspace
-    } else {
-      Progress prog(this, 0.0, 1.0, possibleHKLs.size());
-      prog.setNotifyStep(0.01);
-
-      for (auto hkl = possibleHKLs.begin(); hkl != possibleHKLs.end(); ++hkl) {
-        doHKL(*hkl, true);
-        prog.report();
-      }
-
-    } // Find the HKL automatically
+    for (auto hkl = possibleHKLs.begin(); hkl != possibleHKLs.end(); ++hkl) {
+      doHKL(*hkl);
+      prog.report();
+    }
 
     g_log.notice() << "Out of " << possibleHKLs.size()
                    << " allowed peaks within parameters, "
