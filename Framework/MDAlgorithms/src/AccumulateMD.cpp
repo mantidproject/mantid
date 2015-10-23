@@ -14,6 +14,7 @@
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include <vector>
 #include <Poco/File.h>
+#include <unordered_set>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -70,8 +71,9 @@ bool fileExists(const std::string &filename) {
 /*
 Return a vector of anything in input_data which is not in current_data
 */
-std::vector<std::string> filterToNew(const std::vector<std::string> &input_data,
-                                     const std::vector<std::string> &current_data) {
+std::vector<std::string>
+filterToNew(const std::vector<std::string> &input_data,
+            const std::vector<std::string> &current_data) {
   std::vector<std::string> new_data;
   std::remove_copy_if(
       input_data.begin(), input_data.end(), std::back_inserter(new_data),
@@ -88,15 +90,19 @@ Return a vector of the names of files and workspaces which have previously added
 to the workspace
 */
 std::vector<std::string> getCurrentData(const WorkspaceHistory &ws_history) {
-  std::vector<std::string> currentFilesAndWorkspaces;
+  // Using a set so we don't have to check if names are unique
+  std::unordered_set<std::string> currentFilesAndWorkspaces;
 
-  // TODO trawl history for workspace and file names
-  // This is DataSources property of the original call of CreateMD and any
-  // subsequent calls of AccumulateMD
+  // Get previously added data sources from DataSources property of the original
+  // call of CreateMD and any subsequent calls of AccumulateMD
   auto view = ws_history.createView();
   view->unrollAll();
 
-  return currentFilesAndWorkspaces;
+  // currentFilesAndWorkspaces.insert(newName)
+
+  std::vector<std::string> result(currentFilesAndWorkspaces.begin(),
+                                  currentFilesAndWorkspaces.end());
+  return result;
 }
 
 // Register the algorithm into the AlgorithmFactory
@@ -222,7 +228,7 @@ void AccumulateMD::exec() {
   }
   Algorithm::interruption_point();
 
-  // Trawl workspace history for filenames and workspace names
+  // Find what files and workspaces have already been included in the workspace.
   const WorkspaceHistory wsHistory = input_ws->getHistory();
   std::vector<std::string> current_data = getCurrentData(wsHistory);
 
