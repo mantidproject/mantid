@@ -22,6 +22,12 @@ void RenameWorkspace::init() {
       new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input));
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
                                                    Direction::Output));
+  declareProperty(
+      "RenameMonitors", false,
+      "If true, and monitor workspace found attached"
+      " to the source workspace, the monitors workspace is renamed too"
+      " (the monitor workspace name would be NewName_monitors",
+      Direction::Input);
 }
 
 /** Executes the algorithm
@@ -47,6 +53,34 @@ void RenameWorkspace::exec() {
 
   // rename the input workspace using the rename method
   AnalysisDataService::Instance().rename(inputwsName, outputwsName);
+
+  const bool renameMonitors = getProperty("RenameMonitors");
+  if (!renameMonitors)
+    return;
+
+  // Deal with attached monitor workspace if any.
+  auto matInputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
+  if (!matInputWS) // its some kind workspaces which may not have possibility
+    return;        // to attach monitors to it
+  auto monWS = matInputWS->monitorWorkspace();
+  if (monWS) {
+    std::string monWSName = monWS->getName();
+    // rename the monitor workspace accordingly
+    if (monWSName.size() == 0) {
+      // workspace will always have name after added to ADS, so apparently not
+      // the case
+      AnalysisDataService::Instance().add(outputwsName + "_monitors", monWS);
+    } else {
+      try {
+        AnalysisDataService::Instance().rename(monWSName,
+                                               outputwsName + "_monitors");
+      } catch (Kernel::Exception::NotFoundError &) { // it may be deleted
+        AnalysisDataService::Instance().add(monWSName, monWS);
+        AnalysisDataService::Instance().rename(monWSName,
+                                               outputwsName + "_monitors");
+      }
+    }
+  }
 }
 
 bool RenameWorkspace::processGroups() {

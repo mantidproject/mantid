@@ -376,6 +376,7 @@ public:
   // Methods handling the internal monitor workspace
   virtual void
   setMonitorWorkspace(const boost::shared_ptr<MatrixWorkspace> &monitorWS);
+  // get monitor workspace
   boost::shared_ptr<MatrixWorkspace> monitorWorkspace() const;
 
   void saveInstrumentNexus(::NeXus::File *file) const;

@@ -6,11 +6,14 @@
 
 import os
 from mantid.simpleapi import *
+#pylint: disable=unused-import
 from mantid.kernel import funcreturns
+#pylint: disable=unused-import
 from mantid import api,geometry,config
 import numpy as np
 
 import Direct.ReductionHelpers as prop_helpers
+#pylint: disable=unused-import
 import Direct.CommonFunctions as common
 from collections import Iterable
 
@@ -23,6 +26,7 @@ class PropDescriptor(object):
     def dependencies(self):
         """Returns the list of other properties names, this property depends on"""
         return []
+#pylint: disable=unused-argument		
     def validate(self,instance, owner):
         """Interface to validate property descriptor,
            provided to check properties interaction before long run
@@ -82,16 +86,23 @@ class IncidentEnergy(PropDescriptor):
         self._incident_energy = 0
         self._num_energies = 1
         self._cur_iter_en = 0
+    # AUTO EI mode
+        self._autoEiMode=False
+        self._monitor_ws=None
+
     def __get__(self,instance,owner=None):
         """ return  incident energy or list of incident energies """
         if instance is None:
             return self
         return self._incident_energy
-
+#pylint: disable=too-many-branches
     def __set__(self,instance,value):
         """ Set up incident energy or range of energies in various formats """
         if value != None:
             if isinstance(value,str):
+                if value.lower()=='auto':
+                    self._autoEiMode = True
+                    return
                 if value.find('[') > -1:
                     energy_list = True
                     value = value.translate(None, '[]').strip()
@@ -122,7 +133,7 @@ class IncidentEnergy(PropDescriptor):
                 else:
                     self._incident_energy = float(value)
         else:
-            raise KeyError("Incident energy have to be positive number of list of positive numbers. Got None")
+            raise KeyError("Incident energy have to be positive number of list of positive numbers or keyword AUTO. Got None")
 
         if isinstance(self._incident_energy,list):
             self._num_energies = len(self._incident_energy)

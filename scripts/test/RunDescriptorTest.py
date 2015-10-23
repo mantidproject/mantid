@@ -1,5 +1,5 @@
 import os,sys,inspect
-#os.environ["PATH"] =r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+#os.environ["PATH"] =r"c:/Mantid/_builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -144,6 +144,8 @@ class RunDescriptorTest(unittest.TestCase):
         propman  = self.prop_man
         run_ws = CreateSampleWorkspace( Function='Multiple Peaks', WorkspaceType = 'Event',NumBanks=1, BankPixelWidth=5, NumEvents=100)
         run_ws_monitors = CreateSampleWorkspace( Function='Multiple Peaks', WorkspaceType = 'Histogram',NumBanks=2, BankPixelWidth=1, NumEvents=100)
+        run_ws.setMonitorWorkspace(run_ws_monitors)
+
         self.assertEqual(run_ws_monitors.getNumberHistograms(),2)
 
 
@@ -159,8 +161,9 @@ class RunDescriptorTest(unittest.TestCase):
         propman  = self.prop_man
         run_ws = CreateSampleWorkspace( Function='Multiple Peaks', WorkspaceType = 'Event',NumBanks=1, BankPixelWidth=5, NumEvents=100)
         run_ws_monitors = CreateSampleWorkspace( Function='Multiple Peaks', WorkspaceType = 'Histogram',NumBanks=2, BankPixelWidth=1, NumEvents=100)
-
         run_ws_monitors = Rebin(run_ws_monitors,Params='1,-0.01,20000')
+        run_ws.setMonitorWorkspace(run_ws_monitors)
+
         x=run_ws_monitors.readX(0)
         dx = x[1:]-x[:-1]
         min_step0 = min(dx)
@@ -243,9 +246,9 @@ class RunDescriptorTest(unittest.TestCase):
         propman  = self.prop_man
         ws=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
                                                      XMin=2000, XMax=20000, BinWidth=1)
-
         ws_monitors=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
                                                     XMin=2000, XMax=20000, BinWidth=1)
+        ws.setMonitorWorkspace(ws_monitors)
 
         propman.sample_run = ws
 
@@ -568,12 +571,30 @@ class RunDescriptorTest(unittest.TestCase):
         propman.sample_run = None
         DeleteWorkspace(a_wksp)
 
+    def test_strange_behaviour(self):
+        wksp=CreateSampleWorkspace(Function='Multiple Peaks',WorkspaceType='Event',
+                                NumBanks=1, BankPixelWidth=1, NumEvents=1, XUnit='TOF',
+                                XMin=2000, XMax=20000, BinWidth=1)
+        wksp_mon=CreateSampleWorkspace(Function='Multiple Peaks',WorkspaceType='Histogram',
+                                NumBanks=1, BankPixelWidth=1, NumEvents=1, XUnit='TOF',
+                                XMin=2000, XMax=20000, BinWidth=1)
+        wksp.setMonitorWorkspace(wksp_mon);
 
+        wsr = RenameWorkspace(wksp,OutputWorkspace='Renamed1',RenameMonitors=True)
+        mon_ws = wsr.getMonitorWorkspace()
+        wsr = RenameWorkspace(wksp,OutputWorkspace='Renamed2',RenameMonitors=True)
 
+        mon_ws_name = mon_ws.name()
+        self.assertEquals(mon_ws_name,'Renamed2_monitors')
 
+        self.assertRaises(ValueError,wsr.setMonitorWorkspace,mon_ws)
+        
+        wsr.setMonitorWorkspace(mtd[mon_ws_name])
 
 
 
 
 if __name__=="__main__":
+    #tester=RunDescriptorTest('test_strange_behaviour')
+    #tester.test_strange_behaviour()
     unittest.main()

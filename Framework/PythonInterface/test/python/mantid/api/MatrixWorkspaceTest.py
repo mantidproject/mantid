@@ -1,5 +1,8 @@
 import unittest
 import sys
+import os
+#os.environ["PATH"] =r"c:/Mantid/_builds/br_master/bin/Release;"+os.environ["PATH"]
+
 import math
 from testhelpers import create_algorithm, run_algorithm, can_be_instantiated, WorkspaceCreationHelper
 from mantid.api import (MatrixWorkspace, MatrixWorkspaceProperty, WorkspaceProperty, Workspace,
@@ -344,6 +347,35 @@ class MatrixWorkspaceTest(unittest.TestCase):
         ws1.setComment(comment)
         self.assertEquals(comment, ws1.getComment())
         AnalysisDataService.remove(ws1.getName())
+        
+    def test_setGetMonitorWS(self):
+        run_algorithm('CreateWorkspace', OutputWorkspace='ws1',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
+        run_algorithm('CreateWorkspace', OutputWorkspace='ws_mon',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
+        
+        ws1=AnalysisDataService.retrieve('ws1')
+        monWs = ws1.getMonitorWorkspace()
+        self.assertTrue(monWs is None)
+        
+        monWs = AnalysisDataService.retrieve('ws_mon')
+        ws1.setMonitorWorkspace(monWs)
+        monWs.setTitle("My Fake Monitor workspace")
+        
+        monWs1 = ws1.getMonitorWorkspace();
+        self.assertEquals(monWs.getTitle(), monWs1.getTitle())
+        
+        ws1.clearMonitorWorkspace()
+        monWs1 = ws1.getMonitorWorkspace()
+        self.assertTrue(monWs1 is None)        
 
 if __name__ == '__main__':
+    #Testing particular test from Mantid
+    #class theTester(MatrixWorkspaceTest):
+    #    def __init__(self):
+    #        self.setUp()
+    #        
+    #    def runTest():
+    #        pass
+    #tester = theTester()
+    #tester.test_data_members_give_writable_numpy_array()
+  
     unittest.main()
