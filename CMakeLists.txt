@@ -39,22 +39,10 @@ set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #e
 set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 
 ###########################################################################
-# Third party for Windows
+# Third party for Visual Studio
 ###########################################################################
-if ( CMAKE_HOST_WIN32 )
-  set ( THIRD_PARTY_DIR ${PROJECT_SOURCE_DIR}/thirdparty CACHE PATH
-       "Root directory of the third-party dependencies. " )
-  if( NOT IS_DIRECTORY ${THIRD_PARTY_DIR} )
-    message ( FATAL_ERROR "Third-party directory '${THIRD_PARTY_DIR}' does not point to a valid directory" )
-  endif()
-  # Print out where we think we are looking for 3rd party stuff
-  set ( THIRD_PARTY_BIN "${THIRD_PARTY_DIR}/bin;${THIRD_PARTY_DIR}/lib/qt4/bin" )
-  message ( STATUS "Looking for third-dependencies in ${THIRD_PARTY_DIR}. " 
-                    " NOTE: Please check '${THIRD_PARTY_BIN}' are on the PATH")
-  set ( ENV{PATH} "${THIRD_PARTY_BIN};$ENV{PATH}" )
-  include ( WindowsSetup )
-  # Settings for generating the windows Nullsoft package via CPack
-  include ( WindowsNSIS )
+if ( MSVC )
+  include ( MSVCSetup )
 endif()
 
 ###########################################################################
@@ -155,6 +143,9 @@ add_dependencies ( check GUITests )
 add_custom_target ( AllTests )
 add_dependencies ( AllTests FrameworkTests GUITests )
 
+if ( MSVC )
+  add_definitions ( -DQWT_DLL )
+endif ()
 add_subdirectory ( MantidQt )
 
 if ( UNIX )
@@ -243,7 +234,9 @@ if ( ENABLE_CPACK )
     # Mac package settings
     set ( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/installers/WinInstaller/License.txt )
 
-    IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+    if(CMAKE_HOST_WIN32)
+      include ( WindowsNSIS )
+    elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
       include ( CPackLinuxSetup )
       # let people know what is coming out the other end
       message ( STATUS " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
