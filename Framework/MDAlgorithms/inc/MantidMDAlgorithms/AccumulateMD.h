@@ -14,10 +14,13 @@ class IMDHistoWorkspace;
 namespace MDAlgorithms {
 
 std::vector<std::string>
-  filterToExistingSources(std::vector<std::string> input_data, Kernel::Logger &g_log);
+filterToExistingSources(std::vector<std::string> input_data,
+                        Kernel::Logger &g_log);
 
-std::vector<std::string>
-  filterToNew(std::vector<std::string> input_data, Kernel::Logger &g_log);
+std::vector<std::string> filterToNew(std::vector<std::string> input_data,
+                                     Kernel::Logger &g_log);
+
+bool fileExists(const std::string &filename);
 
 /** AccumulateMD : Algorithm for appending new data to a MDHistoWorkspace
 
@@ -55,7 +58,6 @@ public:
 private:
   void init();
   void exec();
-
 };
 
 } // namespace MDAlgorithms

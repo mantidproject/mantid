@@ -26,7 +26,8 @@ Return names of data sources which are found as a workspace or file.
 Print to log whether data are found or not.
  */
 std::vector<std::string>
-filterToExistingSources(std::vector<std::string> input_data, Kernel::Logger &g_log) {
+filterToExistingSources(std::vector<std::string> input_data,
+                        Kernel::Logger &g_log) {
   std::vector<std::string> existing_input_data;
 
   g_log.information() << "Finding data:" << std::endl;
@@ -36,9 +37,14 @@ filterToExistingSources(std::vector<std::string> input_data, Kernel::Logger &g_l
   for (auto it = input_data.begin(); it != input_data.end(); ++it) {
     std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(*it);
 
-    // Calls to the AnalysisDataService in algorithms like this should ordinarily
+    // Calls to the AnalysisDataService in algorithms like this should
+    // ordinarily
     // be avoided, unfortunately we have little choice in this case.
-    if (AnalysisDataService::Instance().doesExist(*it) || !filepath.empty()) {
+    // If we gave FileFinder an absolute path it just returns it (whether or not
+    // the file exists) so we must check the full path returned with
+    // fileExists()
+    if (AnalysisDataService::Instance().doesExist(*it) ||
+        fileExists(filepath)) {
       existing_input_data.push_back(*it);
       g_log.information() << *it << " - FOUND" << std::endl;
     } else {
@@ -49,11 +55,23 @@ filterToExistingSources(std::vector<std::string> input_data, Kernel::Logger &g_l
   return existing_input_data;
 }
 
+/**
+Test if a file with this full path exists
+*/
+bool fileExists(const std::string &filename) {
+  Poco::File test_file(filename);
+  if (test_file.exists()) {
+    return true;
+  }
+  return false;
+}
+
 // TODO compare input_data with current data in the workspace
 // append anything new to the list
-// probably have to trawl the workspace history for file and workspace names to do this
-std::vector<std::string>
-filterToNew(std::vector<std::string> input_data, Kernel::Logger &g_log) {
+// probably have to trawl the workspace history for file and workspace names to
+// do this
+std::vector<std::string> filterToNew(std::vector<std::string> input_data,
+                                     Kernel::Logger &g_log) {
   std::vector<std::string> new_data;
 
   return new_data;
@@ -194,7 +212,6 @@ void AccumulateMD::exec() {
   Algorithm::interruption_point();
 
   // TODO if we reach here then new data exists to append to the input workspace
-
 }
 
 } // namespace MDAlgorithms
