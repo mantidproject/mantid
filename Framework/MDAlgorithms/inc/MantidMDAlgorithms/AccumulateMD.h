@@ -4,11 +4,20 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 
+namespace {}
+
 namespace Mantid {
-  namespace API {
-    class IMDHistoWorkspace;
-  }
-  namespace MDAlgorithms {
+namespace API {
+class IMDHistoWorkspace;
+}
+
+namespace MDAlgorithms {
+
+std::vector<std::string>
+  filterToExistingSources(std::vector<std::string> input_data, Kernel::Logger &g_log);
+
+std::vector<std::string>
+  filterToNew(std::vector<std::string> input_data, Kernel::Logger &g_log);
 
 /** AccumulateMD : Algorithm for appending new data to a MDHistoWorkspace
 
@@ -33,20 +42,21 @@ namespace Mantid {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-    class DLLExport AccumulateMD : public API::Algorithm {
-    public:
-    AccumulateMD();
-    virtual ~AccumulateMD();
+class DLLExport AccumulateMD : public API::Algorithm {
+public:
+  AccumulateMD();
+  virtual ~AccumulateMD();
 
-    virtual const std::string name() const;
-    virtual int version() const;
-    virtual const std::string category() const;
-    virtual const std::string summary() const;
+  virtual const std::string name() const;
+  virtual int version() const;
+  virtual const std::string category() const;
+  virtual const std::string summary() const;
 
-    private:
-    void init();
-    void exec();
-  };
+private:
+  void init();
+  void exec();
+
+};
 
 } // namespace MDAlgorithms
 } // namespace Mantid
