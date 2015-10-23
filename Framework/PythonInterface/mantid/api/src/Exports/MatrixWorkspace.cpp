@@ -93,7 +93,7 @@ void setMonitorWorkspace(MatrixWorkspace &self,
 }
 /**
 * @param self  :: A reference to the calling object
-* 
+*
 *@return weak pointer to monitor workspace used by python
 */
 boost::weak_ptr<Workspace> getMonitorWorkspace(MatrixWorkspace &self) {
@@ -351,8 +351,7 @@ void export_MatrixWorkspace() {
            "Performs a comparison operation on two workspaces, using the "
            "CheckWorkspacesMatch algorithm")
       //---------   monitor workspace --------------------------------------
-      .def("getMonitorWorkspace", &getMonitorWorkspace,
-           args("self"),
+      .def("getMonitorWorkspace", &getMonitorWorkspace, args("self"),
            "Return internal monitor workspace bound to current workspace.")
       .def("setMonitorWorkspace", &setMonitorWorkspace,
            args("self", "MonitorWS"),
