@@ -25,8 +25,9 @@ void RenameWorkspace::init() {
   declareProperty(
       "RenameMonitors", false,
       "If true, and monitor workspace found attached"
-      " to the source workspace, the monitors workspace is renamed too"
-      " (the monitor workspace name would be NewName_monitors",
+      " to the source workspace, the monitors workspace is renamed too.\n"
+      "The monitor workspace name is related to new workspace "
+      " name: NewWSName as NewWSName_monitors.",
       Direction::Input);
 }
 
