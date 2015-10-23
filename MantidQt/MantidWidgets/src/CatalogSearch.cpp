@@ -612,9 +612,15 @@ namespace MantidQt
       // Update the label to inform the user that searching is in progress.
       m_icatUiForm.searchResultsLbl->setText("searching investigations...");
 
+      // Get previous sorting parameters
+      QTableWidget* resultsTable = m_icatUiForm.searchResultsTbl;
+      int sort_section = resultsTable->horizontalHeader()->sortIndicatorSection();
+      Qt::SortOrder sort_order = resultsTable->horizontalHeader()->sortIndicatorOrder();
+
       // Remove previous search results.
       std::string searchResults = "searchResults";
-      clearSearch(m_icatUiForm.searchResultsTbl, searchResults);
+
+      clearSearch(resultsTable, searchResults);
 
       auto sessionIDs = m_catalogSelector->getSelectedCatalogSessions();
       // Obtain the number of results for paging.
@@ -637,7 +643,7 @@ namespace MantidQt
       m_icatUiForm.searchResultsLbl->setText(QString::number(numrows) + " investigations found.");
 
       // Populate the result table from the searchResult workspace.
-      populateResultTable();
+      populateResultTable(sort_section, sort_order);
     }
 
     /**
@@ -712,8 +718,10 @@ namespace MantidQt
 
     /**
      * Outputs the results of the search into the "Search results" table.
+     * @param sort_section :: An int giving the column number by which to sort the data (0 will sort by StartDate)
+     * @param sort_order :: A Qt::SortOrder giving the order of sorting
      */
-    void CatalogSearch::populateResultTable()
+    void CatalogSearch::populateResultTable(int sort_section, Qt::SortOrder sort_order)
     {
       // Obtain a pointer to the "searchResults" workspace where the search results are saved if it exists.
       Mantid::API::ITableWorkspace_sptr workspace;
@@ -761,9 +769,14 @@ namespace MantidQt
       //Resize InvestigationID column to fit contents
       resultsTable->resizeColumnToContents(headerIndexByName(resultsTable, "InvestigationID"));
 
-      // Sort by endDate with the most recent being first.
+      // Sort by specified column or by descending StartDate if none specified
       resultsTable->setSortingEnabled(true);
-      resultsTable->sortByColumn(headerIndexByName(resultsTable, "Start date"),Qt::DescendingOrder);
+      if (sort_section == 0) {
+        resultsTable->sortByColumn(headerIndexByName(resultsTable, "Start date"),Qt::DescendingOrder);
+      } else {
+          resultsTable->sortByColumn(sort_section, sort_order);
+      }
+
     }
 
     /**

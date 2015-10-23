@@ -5,6 +5,29 @@
 #include <cfloat>
 #include <iostream>
 
+#ifdef ENABLE_OPENCASCADE
+// Opencascade defines _USE_MATH_DEFINES without checking whether it is already
+// used.
+// Undefine it here before we include the headers to avoid a warning
+#ifdef _MSC_VER
+#undef _USE_MATH_DEFINES
+#ifdef M_SQRT1_2
+#undef M_SQRT1_2
+#endif
+#endif
+
+#include "MantidKernel/WarningSuppressions.h"
+GCC_DIAG_OFF(conversion)
+// clang-format off
+GCC_DIAG_OFF(cast-qual)
+// clang-format on
+#include <BRepPrimAPI_MakeCylinder.hxx>
+GCC_DIAG_ON(conversion)
+// clang-format off
+GCC_DIAG_ON(cast-qual)
+// clang-format on
+#endif
+
 namespace Mantid {
 
 namespace Geometry {
@@ -90,9 +113,10 @@ int Cylinder::setSurface(const std::string &Pstr)
     return errDesc;
 
   // Cylinders on X/Y/Z axis
-  const int itemPt((item[1] == '/' && item.length() == 3) ? 2 : 1);
-  const int ptype = static_cast<int>(tolower(item[itemPt]) - 'x');
-  if (ptype < 0 || ptype >= 3)
+  const std::size_t itemPt((item[1] == '/' && item.length() == 3) ? 2 : 1);
+  const std::size_t ptype =
+      static_cast<std::size_t>(tolower(item[itemPt]) - 'x');
+  if (ptype >= 3)
     return errAxis;
   std::vector<double> norm(3, 0.0);
   std::vector<double> cent(3, 0.0);
@@ -100,7 +124,7 @@ int Cylinder::setSurface(const std::string &Pstr)
 
   if (itemPt != 1) {
     // get the other two coordinates
-    int index((!ptype) ? 1 : 0);
+    std::size_t index((!ptype) ? 1 : 0);
     while (index < 3 && Mantid::Kernel::Strings::section(Line, cent[index])) {
       index++;
       if (index == ptype)
@@ -179,7 +203,7 @@ void Cylinder::setNvec()
  */
 {
   Nvec = 0;
-  for (int i = 0; i < 3; i++) {
+  for (std::size_t i = 0; i < 3; i++) {
     if (fabs(Normal[i]) > (1.0 - Tolerance)) {
       Nvec = i + 1;
       return;
@@ -445,6 +469,16 @@ void Cylinder::getBoundingBox(double &xmax, double &ymax, double &zmax,
   }
 }
 
+#ifdef ENABLE_OPENCASCADE
+TopoDS_Shape Cylinder::createShape() {
+  gp_Pnt center;
+  center.SetX(Centre[0] - Normal[0] * 500.0);
+  center.SetY(Centre[1] - Normal[1] * 500.0);
+  center.SetZ(Centre[2] - Normal[2] * 500.0);
+  gp_Ax2 gpA(center, gp_Dir(Normal[0], Normal[1], Normal[2]));
+  return BRepPrimAPI_MakeCylinder(gpA, Radius, 1000.0, 2.0 * M_PI).Solid();
+}
+#endif
 } // NAMESPACE MonteCarlo
 
 } // NAMESPACE Mantid

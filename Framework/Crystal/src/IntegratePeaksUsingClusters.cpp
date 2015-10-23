@@ -128,8 +128,9 @@ void IntegratePeaksUsingClusters::exec() {
         mdWS->getSpecialCoordinateSystem();
     if (mdCoordinates == None) {
       throw std::invalid_argument("The coordinate system of the input "
-                                  "MDWorkspace cannot be established. Run "
-                                  "SetSpecialCoordinates on InputWorkspace.");
+                                  "MDWorkspace cannot be established. Create "
+                                  "your workspace with an MDFrame which is "
+                                  "not a General Frame or Unknown Frame.");
     }
   }
 

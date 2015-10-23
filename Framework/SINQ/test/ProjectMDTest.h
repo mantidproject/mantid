@@ -228,18 +228,20 @@ public:
 private:
   MDHistoWorkspace_sptr makeTestMD() {
     IMDDimension_sptr dim;
+    Mantid::Geometry::GeneralFrame frame(
+        Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "mm");
     std::vector<IMDDimension_sptr> dimensions;
-    dim = MDHistoDimension_sptr(new MDHistoDimension(
-        std::string("x"), std::string("ID0"), std::string("mm"), coord_t(-5),
-        coord_t(5), size_t(10)));
+    dim = MDHistoDimension_sptr(
+        new MDHistoDimension(std::string("x"), std::string("ID0"), frame,
+                             coord_t(-5), coord_t(5), size_t(10)));
     dimensions.push_back(boost::const_pointer_cast<IMDDimension>(dim));
-    dim = MDHistoDimension_sptr(new MDHistoDimension(
-        std::string("y"), std::string("ID1"), std::string("mm"), coord_t(-6),
-        coord_t(6), size_t(12)));
+    dim = MDHistoDimension_sptr(
+        new MDHistoDimension(std::string("y"), std::string("ID1"), frame,
+                             coord_t(-6), coord_t(6), size_t(12)));
     dimensions.push_back(boost::const_pointer_cast<IMDDimension>(dim));
-    dim = MDHistoDimension_sptr(new MDHistoDimension(
-        std::string("z"), std::string("ID2"), std::string("mm"), coord_t(-10),
-        coord_t(10), size_t(20)));
+    dim = MDHistoDimension_sptr(
+        new MDHistoDimension(std::string("z"), std::string("ID2"), frame,
+                             coord_t(-10), coord_t(10), size_t(20)));
     dimensions.push_back(boost::const_pointer_cast<IMDDimension>(dim));
 
     MDHistoWorkspace_sptr outWS(new MDHistoWorkspace(dimensions));

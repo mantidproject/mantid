@@ -9,6 +9,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
 
 using Mantid::MDAlgorithms::ConvertCWSDMDtoHKL;
 
@@ -60,6 +61,12 @@ public:
 
     TS_ASSERT_EQUALS(hklws->getSpecialCoordinateSystem(),
                      Mantid::Kernel::SpecialCoordinateSystem::HKL);
+    // Test the frame type
+    for (size_t dim = 0; dim < hklws->getNumDims(); ++dim) {
+      const auto &frame = hklws->getDimension(dim)->getMDFrame();
+      TSM_ASSERT_EQUALS("Should be convertible to a HKL frame",
+                        Mantid::Geometry::HKL::HKLName, frame.name());
+    }
   }
 
 private:
@@ -68,11 +75,12 @@ private:
   void createMDEW() {
     // ---- Start with empty MDEW ----
     FrameworkManager::Instance().exec(
-        "CreateMDWorkspace", 18, "Dimensions", "3", "EventType", "MDEvent",
+        "CreateMDWorkspace", 20, "Dimensions", "3", "EventType", "MDEvent",
         "Extents", "-10,10,-10,10,-10,10", "Names",
         "Q_sample_x,Q_sample_y,Q_sample_z", "Units",
-        "Q_Sample_X,Q_Sample_Y,Q_Sample_Z", "SplitInto", "5", "SplitThreshold",
-        "20", "MaxRecursionDepth", "15", "OutputWorkspace", "MDEWS");
+        "Q_Sample_X,Q_Sample_Y,Q_Sample_Z", "Frames", "QSample,QSample,QSample",
+        "SplitInto", "5", "SplitThreshold", "20", "MaxRecursionDepth", "15",
+        "OutputWorkspace", "MDEWS");
 
     // Give it an instrument
     Instrument_sptr inst =

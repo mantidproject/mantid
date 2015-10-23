@@ -19,6 +19,7 @@
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/DateAndTime.h"
@@ -217,44 +218,11 @@ Mantid::DataObjects::MDHistoWorkspace_sptr
 makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins,
                          coord_t max, double errorSquared, std::string name,
                          double numEvents) {
-  MDHistoWorkspace *ws = NULL;
-  if (numDims == 1) {
-    ws = new MDHistoWorkspace(MDHistoDimension_sptr(
-        new MDHistoDimension("x", "x", "m", 0.0, max, numBins)));
-  } else if (numDims == 2) {
-    ws = new MDHistoWorkspace(MDHistoDimension_sptr(new MDHistoDimension(
-                                  "x", "x", "m", 0.0, max, numBins)),
-                              MDHistoDimension_sptr(new MDHistoDimension(
-                                  "y", "y", "m", 0.0, max, numBins)));
-  } else if (numDims == 3) {
-    ws = new MDHistoWorkspace(MDHistoDimension_sptr(new MDHistoDimension(
-                                  "x", "x", "m", 0.0, max, numBins)),
-                              MDHistoDimension_sptr(new MDHistoDimension(
-                                  "y", "y", "m", 0.0, max, numBins)),
-                              MDHistoDimension_sptr(new MDHistoDimension(
-                                  "z", "z", "m", 0.0, max, numBins)));
-  } else if (numDims == 4) {
-    ws = new MDHistoWorkspace(
-        MDHistoDimension_sptr(
-            new MDHistoDimension("x", "x", "m", 0.0, max, numBins)),
-        MDHistoDimension_sptr(
-            new MDHistoDimension("y", "y", "m", 0.0, max, numBins)),
-        MDHistoDimension_sptr(
-            new MDHistoDimension("z", "z", "m", 0.0, max, numBins)),
-        MDHistoDimension_sptr(
-            new MDHistoDimension("t", "t", "m", 0.0, max, numBins)));
-  }
-
-  if (!ws)
-    throw std::runtime_error(
-        " invalid or unsupported number of dimensions given");
-
-  MDHistoWorkspace_sptr ws_sptr(ws);
-  ws_sptr->setTo(signal, errorSquared, numEvents);
-  ws_sptr->addExperimentInfo(ExperimentInfo_sptr(new ExperimentInfo()));
-  if (!name.empty())
-    AnalysisDataService::Instance().addOrReplace(name, ws_sptr);
-  return ws_sptr;
+  // Create MDFrame of General Frame type
+  Mantid::Geometry::GeneralFrame frame(
+      Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
+  return makeFakeMDHistoWorkspaceWithMDFrame(
+      signal, numDims, frame, numBins, max, errorSquared, name, numEvents);
 }
 
 //-------------------------------------------------------------------------------------
@@ -280,10 +248,14 @@ makeFakeMDHistoWorkspaceGeneral(size_t numDims, double signal,
   names.push_back("z");
   names.push_back("t");
 
+  // Create MDFrame of General Frame type
+  Mantid::Geometry::GeneralFrame frame(
+      Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
+
   std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
   for (size_t d = 0; d < numDims; d++)
     dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(
-        names[d], names[d], "m", min[d], max[d], numBins[d])));
+        names[d], names[d], frame, min[d], max[d], numBins[d])));
 
   MDHistoWorkspace *ws = NULL;
   ws = new MDHistoWorkspace(dimensions);
@@ -313,14 +285,75 @@ MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(
     coord_t *min, coord_t *max, std::vector<std::string> names,
     std::string name) {
   std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
+  // Create MDFrame of General Frame type
+  Mantid::Geometry::GeneralFrame frame(
+      Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
   for (size_t d = 0; d < numDims; d++)
     dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(
-        names[d], names[d], "m", min[d], max[d], numBins[d])));
+        names[d], names[d], frame, min[d], max[d], numBins[d])));
 
   MDHistoWorkspace *ws = NULL;
   ws = new MDHistoWorkspace(dimensions);
   MDHistoWorkspace_sptr ws_sptr(ws);
   ws_sptr->setTo(signal, errorSquared, 1.0 /* num events */);
+  if (!name.empty())
+    AnalysisDataService::Instance().addOrReplace(name, ws_sptr);
+  return ws_sptr;
+}
+
+//-------------------------------------------------------------------------------------
+/** Creates a fake MDHistoWorkspace with MDFrame selection
+ *
+ * @param signal :: signal in every point
+ * @param numDims :: number of dimensions to create. They will range from 0 to
+ *max
+ * @param frame :: the selected frame
+ * @param numBins :: bins in each dimensions
+ * @param max :: max position in each dimension
+ * @param errorSquared :: error squared in every point
+ * @param name :: optional name
+ * @param numEvents :: optional number of events in each bin. Default 1.0
+ * @return the MDHisto
+ */
+Mantid::DataObjects::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceWithMDFrame(
+    double signal, size_t numDims, const Mantid::Geometry::MDFrame &frame,
+    size_t numBins, coord_t max, double errorSquared, std::string name,
+    double numEvents) {
+  MDHistoWorkspace *ws = NULL;
+  if (numDims == 1) {
+    ws = new MDHistoWorkspace(MDHistoDimension_sptr(
+        new MDHistoDimension("x", "x", frame, 0.0, max, numBins)));
+  } else if (numDims == 2) {
+    ws = new MDHistoWorkspace(MDHistoDimension_sptr(new MDHistoDimension(
+                                  "x", "x", frame, 0.0, max, numBins)),
+                              MDHistoDimension_sptr(new MDHistoDimension(
+                                  "y", "y", frame, 0.0, max, numBins)));
+  } else if (numDims == 3) {
+    ws = new MDHistoWorkspace(MDHistoDimension_sptr(new MDHistoDimension(
+                                  "x", "x", frame, 0.0, max, numBins)),
+                              MDHistoDimension_sptr(new MDHistoDimension(
+                                  "y", "y", frame, 0.0, max, numBins)),
+                              MDHistoDimension_sptr(new MDHistoDimension(
+                                  "z", "z", frame, 0.0, max, numBins)));
+  } else if (numDims == 4) {
+    ws = new MDHistoWorkspace(
+        MDHistoDimension_sptr(
+            new MDHistoDimension("x", "x", frame, 0.0, max, numBins)),
+        MDHistoDimension_sptr(
+            new MDHistoDimension("y", "y", frame, 0.0, max, numBins)),
+        MDHistoDimension_sptr(
+            new MDHistoDimension("z", "z", frame, 0.0, max, numBins)),
+        MDHistoDimension_sptr(
+            new MDHistoDimension("t", "t", frame, 0.0, max, numBins)));
+  }
+
+  if (!ws)
+    throw std::runtime_error(
+        " invalid or unsupported number of dimensions given");
+
+  MDHistoWorkspace_sptr ws_sptr(ws);
+  ws_sptr->setTo(signal, errorSquared, numEvents);
+  ws_sptr->addExperimentInfo(ExperimentInfo_sptr(new ExperimentInfo()));
   if (!name.empty())
     AnalysisDataService::Instance().addOrReplace(name, ws_sptr);
   return ws_sptr;

@@ -198,6 +198,12 @@ private:
   /// instrument selected (ENGIN-X, etc.)
   std::string m_currentInst;
 
+  /// User select instrument
+  void userSelectInstrument(const QString &prefix);
+
+  /// setting the instrument prefix ahead of the run number
+  void setPrefix(std::string prefix);
+
   // plot data representation type selected
   int static m_currentType;
 

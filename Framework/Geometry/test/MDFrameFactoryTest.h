@@ -9,6 +9,7 @@
 #include "MantidGeometry/MDGeometry/QLab.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/UnknownFrame.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidKernel/MDUnit.h"
 
@@ -65,7 +66,7 @@ public:
 
     std::unique_ptr<MDFrame> product = factory.create(argument);
     TSM_ASSERT("Should be creating a QLab frame",
-               dynamic_cast<QLab *>(product.get()));
+               dynamic_cast<Mantid::Geometry::QLab *>(product.get()));
   }
 
   void test_QSampleFrameFactory() {
@@ -82,7 +83,7 @@ public:
 
     std::unique_ptr<MDFrame> product = factory.create(argument);
     TSM_ASSERT("Should be creating a QSample frame",
-               dynamic_cast<QSample *>(product.get()));
+               dynamic_cast<Mantid::Geometry::QSample *>(product.get()));
   }
 
   void test_HKLFrameFactory_interpretation() {
@@ -103,6 +104,10 @@ public:
     TSM_ASSERT("Should offer to produce HKL products",
                factory.canInterpret(
                    MDFrameArgument(HKL::HKLName, Units::Symbol::RLU)));
+
+    TSM_ASSERT(
+        "Should offer to produce HKL products",
+        factory.canInterpret(MDFrameArgument(HKL::HKLName, "in 1.684 A^-1")));
   }
 
   void test_HKLFrameFactory_create_inverse_angstroms() {
@@ -112,7 +117,7 @@ public:
         MDFrameArgument(HKL::HKLName, Units::Symbol::InverseAngstrom));
 
     TSM_ASSERT("Should be creating a HKL frame, in inverse angstroms",
-               dynamic_cast<HKL *>(product.get()));
+               dynamic_cast<Mantid::Geometry::HKL *>(product.get()));
 
     TSM_ASSERT_EQUALS("Units carried across incorrectly",
                       Units::Symbol::InverseAngstrom, product->getUnitLabel());
@@ -124,7 +129,7 @@ public:
     std::unique_ptr<MDFrame> product =
         factory.create(MDFrameArgument(HKL::HKLName, Units::Symbol::RLU));
     TSM_ASSERT("Should be creating a HKL frame, in rlu",
-               dynamic_cast<HKL *>(product.get()));
+               dynamic_cast<Mantid::Geometry::HKL *>(product.get()));
 
     TSM_ASSERT_EQUALS("Units carried across incorrectly", Units::Symbol::RLU,
                       product->getUnitLabel());
@@ -133,13 +138,15 @@ public:
   void test_make_standard_chain() {
     MDFrameFactory_uptr chain = makeMDFrameFactoryChain();
     // Now lets try the chain of factories out
+    TS_ASSERT(dynamic_cast<UnknownFrame *>(
+        chain->create(MDFrameArgument(UnknownFrame::UnknownFrameName)).get()));
     TS_ASSERT(dynamic_cast<GeneralFrame *>(
         chain->create(MDFrameArgument("any_frame")).get()));
-    TS_ASSERT(dynamic_cast<QLab *>(
+    TS_ASSERT(dynamic_cast<Mantid::Geometry::QLab *>(
         chain->create(MDFrameArgument(QLab::QLabName)).get()));
-    TS_ASSERT(dynamic_cast<QSample *>(
+    TS_ASSERT(dynamic_cast<Mantid::Geometry::QSample *>(
         chain->create(MDFrameArgument(QSample::QSampleName)).get()));
-    TS_ASSERT(dynamic_cast<HKL *>(
+    TS_ASSERT(dynamic_cast<Mantid::Geometry::HKL *>(
         chain->create(MDFrameArgument(HKL::HKLName, Units::Symbol::RLU))
             .get()));
   }

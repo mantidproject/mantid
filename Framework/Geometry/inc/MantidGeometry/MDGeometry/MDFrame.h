@@ -5,6 +5,7 @@
 
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/UnitLabel.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include <memory>
 
 namespace Mantid {
@@ -39,13 +40,19 @@ public:
   virtual Mantid::Kernel::UnitLabel getUnitLabel() const = 0;
   virtual const Mantid::Kernel::MDUnit &getMDUnit() const = 0;
   virtual bool canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const = 0;
+  virtual bool isQ() const = 0;
+  virtual bool isSameType(const MDFrame &frame) const = 0;
   virtual std::string name() const = 0;
+  virtual Mantid::Kernel::SpecialCoordinateSystem
+  equivalientSpecialCoordinateSystem() const = 0;
   virtual MDFrame *clone() const = 0;
   virtual ~MDFrame() {}
 };
 
 typedef std::unique_ptr<MDFrame> MDFrame_uptr;
 typedef std::unique_ptr<const MDFrame> MDFrame_const_uptr;
+typedef std::shared_ptr<MDFrame> MDFrame_sptr;
+typedef std::shared_ptr<const MDFrame> MDFrame_const_sptr;
 
 } // namespace Geometry
 } // namespace Mantid

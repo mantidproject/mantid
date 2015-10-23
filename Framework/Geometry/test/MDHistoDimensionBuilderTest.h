@@ -3,6 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
+#include "MantidGeometry/MDGeometry/QLab.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
 
 using Mantid::Geometry::MDHistoDimension;
 using Mantid::Geometry::MDHistoDimensionBuilder;
@@ -18,19 +20,49 @@ public:
     builder.setMin(0);
     builder.setMax(2);
     builder.setNumBins(1);
+    builder.setFrameName("QLab");
 
     MDHistoDimension *product = builder.createRaw();
 
     TS_ASSERT_EQUALS("testDimName", product->getName());
     TS_ASSERT_EQUALS("testDimId", product->getDimensionId());
-    TS_ASSERT_EQUALS("A^-1", product->getUnits().ascii());
+    Mantid::Kernel::InverseAngstromsUnit expectedUnit;
+    TS_ASSERT_EQUALS(expectedUnit.getUnitLabel(), product->getUnits().ascii());
     TS_ASSERT_EQUALS(0, product->getMinimum());
     TS_ASSERT_EQUALS(2, product->getMaximum());
     TS_ASSERT_EQUALS(1, product->getNBins());
+    TSM_ASSERT_EQUALS("Should have selected QLab as the frame",
+                      Mantid::Geometry::QLab::QLabName,
+                      product->getMDFrame().name());
+
     delete product;
   }
 
   void testConstruct() {
+    MDHistoDimensionBuilder builder;
+    builder.setName("testDimName");
+    builder.setId("testDimId");
+    builder.setUnits("A^-1");
+    builder.setMin(0);
+    builder.setMax(2);
+    builder.setNumBins(1);
+    builder.setFrameName("QSample");
+
+    IMDDimension_sptr product;
+    TS_ASSERT_THROWS_NOTHING(product = builder.create());
+    TS_ASSERT_EQUALS("testDimName", product->getName());
+    TS_ASSERT_EQUALS("testDimId", product->getDimensionId());
+    Mantid::Kernel::InverseAngstromsUnit expectedUnit;
+    TS_ASSERT_EQUALS(expectedUnit.getUnitLabel(), product->getUnits().ascii());
+    TS_ASSERT_EQUALS(0, product->getMinimum());
+    TS_ASSERT_EQUALS(2, product->getMaximum());
+    TS_ASSERT_EQUALS(1, product->getNBins());
+    TSM_ASSERT_EQUALS("Should have selected QSample as the frame",
+                      Mantid::Geometry::QSample::QSampleName,
+                      product->getMDFrame().name());
+  }
+
+  void testConstruct_without_frame_name() {
     MDHistoDimensionBuilder builder;
     builder.setName("testDimName");
     builder.setId("testDimId");
@@ -43,10 +75,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(product = builder.create());
     TS_ASSERT_EQUALS("testDimName", product->getName());
     TS_ASSERT_EQUALS("testDimId", product->getDimensionId());
-    TS_ASSERT_EQUALS("A^-1", product->getUnits().ascii());
+    Mantid::Kernel::InverseAngstromsUnit expectedUnit;
+    TS_ASSERT_EQUALS(expectedUnit.getUnitLabel(), product->getUnits().ascii());
     TS_ASSERT_EQUALS(0, product->getMinimum());
     TS_ASSERT_EQUALS(2, product->getMaximum());
     TS_ASSERT_EQUALS(1, product->getNBins());
+    TSM_ASSERT_EQUALS("Should have selected GeneralFrame as the frame",
+                      "testDimName", product->getMDFrame().name());
   }
 
   void testCopy() {

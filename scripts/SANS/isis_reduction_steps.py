@@ -1138,6 +1138,7 @@ class LoadSample(LoadRun):
         num = 0
         while True:
             reducer.instrument.on_load_sample(self.wksp_name, reducer.get_beam_center(), isSample)
+            reducer.update_beam_center()
             num += 1
             if num == self.periods_in_file:
                 break
@@ -2103,6 +2104,15 @@ class BaseBeamFinder(ReductionStep):
 
     def execute(self, reducer, workspace=None):
         return "Beam Center set at: %s %s" % (str(self._beam_center_x), str(self._beam_center_y))
+
+    def update_beam_center(self, beam_center_x, beam_center_y):
+        '''
+        Update the beam center position of the BeamBaseFinder
+        @param beam_center_x: The first position
+        @param beam_center_y: The second position
+        '''
+        self._beam_center_x = beam_center_x
+        self._beam_center_y = beam_center_y
 
 
 class UserFile(ReductionStep):

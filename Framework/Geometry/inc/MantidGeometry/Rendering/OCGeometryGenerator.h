@@ -58,32 +58,6 @@ private:
   TopoDS_Shape *ObjSurface; ///< Storage for the output surface
   /// Analyze the object
   void AnalyzeObject();
-  /// Analyze a geometry rule for n object rule
-  TopoDS_Shape AnalyzeRule(Rule *);
-  /// Analyze a geometry rule for an intersection
-  TopoDS_Shape AnalyzeRule(Intersection *);
-  /// Analyze a geometry rule for a union
-  TopoDS_Shape AnalyzeRule(Union *);
-  /// Analyze a geometry rule for a surface rule
-  TopoDS_Shape AnalyzeRule(SurfPoint *);
-  /// Analyze a geometry rule for a Complement group
-  TopoDS_Shape AnalyzeRule(CompGrp *);
-  /// Analyze a geometry rule for a complement object
-  TopoDS_Shape AnalyzeRule(CompObj *);
-  /// Analyze a geometry rule for a boolean value
-  TopoDS_Shape AnalyzeRule(BoolValue *);
-  /// create an OpenCascade shape from a Mantid shape
-  TopoDS_Shape CreateShape(Surface *surf, int orientation);
-  /// create an OpenCascade sphere from a Mantid shape
-  TopoDS_Shape CreateSphere(Sphere *);
-  /// create an OpenCascade cylinder from a Mantid shape
-  TopoDS_Shape CreateCylinder(Cylinder *);
-  /// create an OpenCascade cone from a Mantid shape
-  TopoDS_Shape CreateCone(Cone *);
-  /// create an OpenCascade plane from a Mantid shape
-  TopoDS_Shape CreatePlane(Plane *, int orientation);
-  /// create an OpenCascade Torus from a Mantid shape
-  TopoDS_Shape CreateTorus(Torus *);
 
 public:
   OCGeometryGenerator(const Object *obj);
