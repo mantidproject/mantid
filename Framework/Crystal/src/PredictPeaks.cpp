@@ -6,6 +6,7 @@
 
 #include "MantidGeometry/Crystal/HKLGenerator.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
+#include "MantidGeometry/Crystal/HKLFilterWavelength.h"
 
 using Mantid::Kernel::EnabledWhenProperty;
 
@@ -116,34 +117,18 @@ void PredictPeaks::doHKL(const V3D &hkl, bool doFilter) {
   // Also, q does have a 2pi factor = it is equal to 2pi/wavelength.
   V3D q = m_mat * hkl;
 
-  /* The incident neutron wavevector is in the +Z direction, ki = 2*pi/wl (in
-   * z direction).
-   * In the inelastic convention, q = ki - kf.
-   * The final neutron wavector kf = -qx in x; -qy in y; and (-qz+2*pi/wl) in
-   * z.
-   * AND: norm(kf) = norm(ki) = 2*pi/wavelength
-   * THEREFORE: 2*pi/wl = norm(q)^2 / (2*qz)
-   */
-  double one_over_wl = (q.norm2() / (2.0 * q.Z()));
-  double wl = 1.0 / one_over_wl;
+  // Create the peak using the Q in the lab framewith all its info:
+  Peak p(m_inst, q * (2.0 * M_PI), boost::optional<double>());
+  if (p.findDetector()) {
+    // Only add peaks that hit the detector
+    p.setGoniometerMatrix(m_gonio);
+    // Save the run number found before.
+    p.setRunNumber(m_runNumber);
+    p.setHKL(hkl);
 
-  // Only keep going for accepted wavelengths.
-  if (wl > 0 && (!doFilter || (wl >= m_wlMin && wl <= m_wlMax))) {
-    ++m_numInRange;
-
-    // Create the peak using the Q in the lab framewith all its info:
-    Peak p(m_inst, q * (2.0 * M_PI), boost::optional<double>());
-    if (p.findDetector()) {
-      // Only add peaks that hit the detector
-      p.setGoniometerMatrix(m_gonio);
-      // Save the run number found before.
-      p.setRunNumber(m_runNumber);
-      p.setHKL(hkl);
-
-      // Add it to the workspace
-      m_pw->addPeak(p);
-    } // Detector was found
-  }   // (wavelength is okay)
+    // Add it to the workspace
+    m_pw->addPeak(p);
+  } // Detector was found
 }
 
 //----------------------------------------------------------------------------------------------
@@ -236,6 +221,19 @@ void PredictPeaks::exec() {
   // Get the instrument and its detectors
   m_inst = inWS->getInstrument();
 
+  // Sample position
+  V3D samplePos = m_inst->getSample()->getPos();
+
+  // L1 path and direction
+  V3D beamDir = m_inst->getSource()->getPos() - samplePos;
+  // double L1 = beamDir.normalize(); // Normalize to unity
+
+  if ((fabs(beamDir.X()) > 1e-2) ||
+      (fabs(beamDir.Y()) > 1e-2)) // || (beamDir.Z() < 0))
+    throw std::invalid_argument("Instrument must have a beam direction that "
+                                "is only in the +Z direction for this "
+                                "algorithm to be valid..");
+
   // --- Reflection condition ----
   // Use the primitive by default
   ReflectionCondition_sptr refCond(new ReflectionConditionPrimitive());
@@ -260,23 +258,51 @@ void PredictPeaks::exec() {
   // Get the UB matrix from it
   Matrix<double> ub(3, 3, true);
   ub = m_crystal.getUB();
+
+  std::vector<V3D> possibleHKLs;
+  if (!HKLPeaksWorkspace) {
+    HKLGenerator gen(m_crystal, m_minD);
+    auto filter =
+        boost::make_shared<HKLFilterCentering>(refCond) &
+        boost::make_shared<HKLFilterDRange>(m_crystal, m_minD, m_maxD) &
+        boost::make_shared<HKLFilterWavelength>(ub, m_wlMin, m_wlMax);
+
+    V3D hklMin = *(gen.begin());
+
+    g_log.notice() << "HKL range for d_min of " << m_minD << "to d_max of "
+                   << m_maxD << " is from " << hklMin << " to " << hklMin * -1.0
+                   << ", a total of " << gen.size() << " possible HKL's\n";
+
+    g_log.notice() << "Other: " << gen.size() << std::endl;
+
+    if (gen.size() > 10000000000)
+      throw std::invalid_argument("More than 10 billion HKLs to search. Is "
+                                  "your d_min value too small?");
+
+    possibleHKLs.reserve(gen.size());
+    std::remove_copy_if(gen.begin(), gen.end(),
+                        std::back_inserter(possibleHKLs), (~filter)->fn());
+  } else {
+    possibleHKLs.reserve(HKLPeaksWorkspace->getNumberPeaks());
+    for (int i = 0; i < static_cast<int>(HKLPeaksWorkspace->getNumberPeaks());
+         ++i) {
+
+      IPeak &p = HKLPeaksWorkspace->getPeak(i);
+      // Get HKL from that peak
+      V3D hkl = p.getHKL();
+      // Use the rounded HKL value on option
+      if (RoundHKL)
+        hkl.round();
+      // Predict the HKL of that peak
+      possibleHKLs.push_back(hkl);
+
+    } // for each hkl in the workspace
+  }
+
   for (size_t iVec = 0; iVec < gonioVec.size(); ++iVec) {
     m_gonio = gonioVec[iVec];
     // Final transformation matrix (HKL to Q in lab frame)
     m_mat = m_gonio * ub;
-
-    // Sample position
-    V3D samplePos = m_inst->getSample()->getPos();
-
-    // L1 path and direction
-    V3D beamDir = m_inst->getSource()->getPos() - samplePos;
-    // double L1 = beamDir.normalize(); // Normalize to unity
-
-    if ((fabs(beamDir.X()) > 1e-2) ||
-        (fabs(beamDir.Y()) > 1e-2)) // || (beamDir.Z() < 0))
-      throw std::invalid_argument("Instrument must have a beam direction that "
-                                  "is only in the +Z direction for this "
-                                  "algorithm to be valid..");
 
     if (HKLPeaksWorkspace) {
       // --------------Use the HKL from a list in a PeaksWorkspace
@@ -302,37 +328,17 @@ void PredictPeaks::exec() {
 
       } // for each hkl in the workspace
     } else {
-      HKLGenerator gen(m_crystal, m_minD);
-      auto filter =
-          boost::make_shared<HKLFilterCentering>(refCond) &
-          boost::make_shared<HKLFilterDRange>(m_crystal, m_minD, m_maxD);
-
-      V3D hklMin = *(gen.begin());
-
-      g_log.notice() << "HKL range for d_min of " << m_minD << "to d_max of "
-                     << m_maxD << " is from " << hklMin << " to "
-                     << hklMin * -1.0 << ", a total of " << gen.size()
-                     << " possible HKL's\n";
-
-      g_log.notice() << "Other: " << gen.size() << std::endl;
-
-      if (gen.size() > 10000000000)
-        throw std::invalid_argument("More than 10 billion HKLs to search. Is "
-                                    "your d_min value too small?");
-
-      Progress prog(this, 0.0, 1.0, gen.size());
+      Progress prog(this, 0.0, 1.0, possibleHKLs.size());
       prog.setNotifyStep(0.01);
 
-      for (auto hkl = gen.begin(); hkl != gen.end(); ++hkl) {
-        if (filter->isAllowed(*hkl)) {
-          doHKL(*hkl, true);
-        }
+      for (auto hkl = possibleHKLs.begin(); hkl != possibleHKLs.end(); ++hkl) {
+        doHKL(*hkl, true);
         prog.report();
       }
 
     } // Find the HKL automatically
 
-    g_log.notice() << "Out of " << m_numInRange
+    g_log.notice() << "Out of " << possibleHKLs.size()
                    << " allowed peaks within parameters, "
                    << m_pw->getNumberPeaks()
                    << " were found to hit a detector.\n";
