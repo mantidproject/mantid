@@ -34,7 +34,7 @@ CompareWorkspaces::CompareWorkspaces()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-CompareWorkspaces::~CompareWorkspaces() {}
+CompareWorkspaces::~CompareWorkspaces() { delete m_Prog; }
 
 //----------------------------------------------------------------------------------------------
 /// Algorithms name for identification. @see Algorithm::name
@@ -81,22 +81,23 @@ void CompareWorkspaces::init() {
                   "Whether to check that the instruments match. ");
   declareProperty("CheckMasking", true,
                   "Whether to check that the bin masking matches. ");
-  declareProperty(
-      "CheckSample", false,
-      "Whether to check that the sample (e.g. logs)."); // Have this one false
-                                                        // by default - the logs
-                                                        // are brittle
+
+  // Have this one false by default - the logs are brittle
+  declareProperty("CheckSample", false,
+                  "Whether to check that the sample (e.g. logs).");
+
   declareProperty(
       "ToleranceRelErr", false,
       "Treat tolerance as relative error rather then the absolute error.\n"
       "This is only applicable to Matrix workspaces.");
+
+  // Have this one false by default - it can be a lot of printing.
   declareProperty("CheckAllData", false,
                   "Usually checking data ends when first mismatch occurs. This "
                   "forces algorithm to check all data and print mismatch to "
                   "the debug log.\n"
                   "Very often such logs are huge so making it true should be "
                   "the last option.");
-  // Have this one false by default - it can be a lot of printing.
 
   declareProperty("NumberMismatchedSpectraToPrint", 1,
                   "Number of mismatched spectra from lowest to be listed. ");
@@ -125,7 +126,8 @@ void CompareWorkspaces::exec() {
   this->doComparison();
 
   if (!m_Result) {
-    recordMismatch("The workspaces did not match");
+    std::string message = m_Messages->cell<std::string>(0, 0);
+    g_log.notice() << "The workspaces did not match: " << message << std::endl;
   }
 
   setProperty("Result", m_Result);
@@ -170,7 +172,8 @@ bool CompareWorkspaces::processGroups() {
   setProperty("Messages", m_Messages);
 
   // Store output workspace in AnalysisDataService
-  this->store();
+  if (!isChild())
+    this->store();
 
   setExecuted(true);
   notificationCenter().postNotification(

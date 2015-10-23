@@ -88,9 +88,8 @@ Output:
 .. testoutput:: ExCompareWorkspacesTolerance
 
     Result: False
-    Displaying 2 messages:
+    Displaying 1 messages:
     {'Message': 'Data mismatch'}
-    {'Message': 'The workspaces did not match'}
     Result: True
     Displaying 0 messages:
 
