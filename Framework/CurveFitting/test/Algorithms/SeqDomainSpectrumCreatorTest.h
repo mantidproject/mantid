@@ -351,8 +351,8 @@ private:
     ~TestableSeqDomainSpectrumCreator() {}
   };
 
-  class SeqDomainCreatorTestFunction : public virtual IFunction1DSpectrum,
-                                       public virtual ParamFunction {
+  class SeqDomainCreatorTestFunction : public IFunction1DSpectrum,
+                                       public ParamFunction {
   public:
     ~SeqDomainCreatorTestFunction() {}
 
@@ -374,8 +374,8 @@ private:
   };
 
   class SeqDomainCreatorTestFunctionComplex
-      : public virtual IFunction1DSpectrum,
-        public virtual ParamFunction {
+      : public IFunction1DSpectrum,
+        public ParamFunction {
   public:
     ~SeqDomainCreatorTestFunctionComplex() {}
 

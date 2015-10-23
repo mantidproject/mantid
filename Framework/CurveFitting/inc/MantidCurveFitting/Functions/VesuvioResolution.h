@@ -55,8 +55,8 @@ struct ResolutionParams {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_CURVEFITTING_DLL VesuvioResolution
-    : public virtual API::ParamFunction,
-      public virtual API::IFunction1D {
+    : public API::ParamFunction,
+      public API::IFunction1D {
 public:
   /// Creates a POD struct containing the required resolution parameters for
   /// this spectrum

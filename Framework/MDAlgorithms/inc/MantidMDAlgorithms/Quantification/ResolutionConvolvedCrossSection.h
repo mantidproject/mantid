@@ -45,8 +45,8 @@ class ForegroundModel;
  * of a foreground model with a resolution calculation for an MD workspace.
  */
 class DLLExport ResolutionConvolvedCrossSection
-    : public virtual API::ParamFunction,
-      public virtual API::IFunctionMD {
+    : public API::ParamFunction,
+      public API::IFunctionMD {
 public:
   /// Constructor
   ResolutionConvolvedCrossSection();

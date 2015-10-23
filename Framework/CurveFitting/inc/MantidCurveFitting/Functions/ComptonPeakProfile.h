@@ -41,8 +41,8 @@ namespace Functions {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_CURVEFITTING_DLL ComptonPeakProfile
-    : public virtual API::ParamFunction,
-      public virtual API::IFunction1D {
+    : public API::ParamFunction,
+      public API::IFunction1D {
 public:
   /// Default constructor required for factory
   ComptonPeakProfile();
