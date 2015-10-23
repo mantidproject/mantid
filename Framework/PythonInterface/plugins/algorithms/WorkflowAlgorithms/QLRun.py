@@ -131,7 +131,7 @@ class QLRun(PythonAlgorithm):
         self._save = self.getProperty('Save').value
         self._plot = self.getPropertyValue('Plot')
 
-    #pylint: disable=too-many-locals
+    #pylint: disable=too-many-locals,too-many-statements
     def PyExec(self):
         #from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
 
@@ -140,8 +140,7 @@ class QLRun(PythonAlgorithm):
         from IndirectBayes import (CalcErange, GetXYE, ReadNormFile,
                                    ReadWidthFile, QLAddSampleLogs, C2Fw,
                                    C2Se, QuasiPlot)
-        from IndirectCommon import (getDefaultWorkingDirectory, CheckXrange,
-                                    CheckAnalysers, getEfixed, GetThetaQ,
+        from IndirectCommon import (CheckXrange, CheckAnalysers, getEfixed, GetThetaQ,
                                     CheckHistZero, CheckHistSame)
 
         self.log().information('QLRun input')
