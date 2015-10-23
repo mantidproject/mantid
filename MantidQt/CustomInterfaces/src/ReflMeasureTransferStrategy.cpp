@@ -1,11 +1,16 @@
 #include "MantidQtCustomInterfaces/ReflMeasureTransferStrategy.h"
 #include "MantidQtCustomInterfaces/ReflMeasurementSource.h"
-
+#include "MantidQtCustomInterfaces/ReflTableSchema.h"
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/UserCatalogInfo.h"
 #include <boost/regex.hpp>
 #include <memory>
+#include <vector>
+#include <map>
+#include <utility>
+#include <limits>
+#include <set>
 
 using namespace Mantid::Kernel;
 
@@ -38,26 +43,67 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
     const SearchResultMap &searchResults,
     Mantid::Kernel::ProgressBase &progress) {
 
+  typedef std::vector<Measurement> VecSameMeasurement;
+  typedef std::map<Measurement::IDType, VecSameMeasurement>
+      MapGroupedMeasurement;
+
+  MapGroupedMeasurement mapOfMeasurements;
   for (auto it = searchResults.begin(); it != searchResults.end(); ++it) {
     const auto location = it->second.location;
     const auto fuzzyName = it->first;
 
     const auto definedPath = m_catInfo->transformArchivePath(location);
 
+    // This is where we read the meta data.
     Measurement metaData = m_measurementSource->obtain(definedPath, fuzzyName);
-    /*
-    const Poco::File filePath(loadPath);
-    if (filePath.exists() && filePath.isFile()) {
 
-
-    } else {
-        // Load from this path
+    // If the measurement information is not consistent, or could not be
+    // obtained. skip this measurement.
+    if (metaData.isUseable()) {
+      if (mapOfMeasurements.find(metaData.id()) == mapOfMeasurements.end()) {
+        // Start a new group
+        mapOfMeasurements.insert(
+            std::make_pair(metaData.id(), VecSameMeasurement(1, metaData)));
+      } else {
+        // Add to existing group
+        mapOfMeasurements[metaData.id()].push_back(metaData);
+      }
     }
-    */
 
+    // Obtaining metadata could take time.
     progress.report();
   }
-  return std::vector<std::map<std::string, std::string>>(1); // HACK
+
+  // Now flatten everything out into a table-like output
+  std::vector<std::map<std::string, std::string>> output;
+  int nextGroupId = 0;
+
+  for (auto group = mapOfMeasurements.begin(); group != mapOfMeasurements.end();
+       ++group) {
+
+    // Map keyed by subId to index of exisiting subid written.
+    std::map<std::string, int> subIdMap;
+    for (size_t i = 0; i < group->second.size(); ++i) {
+      const Measurement &measurement = group->second[i];
+      if (subIdMap.find(measurement.subId()) != subIdMap.end()) {
+        // We already have that subid.
+        const int rowIndex = subIdMap[measurement.subId()];
+        std::string currentRuns = output[rowIndex][ReflTableSchema::RUNS];
+        output[rowIndex][ReflTableSchema::RUNS] =
+            currentRuns + "+" + measurement.run();
+      } else {
+        std::map<std::string, std::string> row;
+        row[ReflTableSchema::RUNS] = measurement.run();
+        row[ReflTableSchema::ANGLE] = measurement.angle();
+        row[ReflTableSchema::GROUP] = nextGroupId;
+        subIdMap.insert(std::make_pair(measurement.subId(), i));
+        output.push_back(row);
+      }
+    }
+    ++nextGroupId;
+  }
+
+  return output;
 }
 
 ReflMeasureTransferStrategy *ReflMeasureTransferStrategy::clone() const {

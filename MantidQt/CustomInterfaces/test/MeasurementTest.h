@@ -24,21 +24,25 @@ public:
     const std::string measurementSubId = "s";
     const std::string measurementLabel = "l";
     const std::string measurementType = "t";
+    const double angle = 0.1;
+    const std::string run = "123";
 
     Measurement measurement(measurementId, measurementSubId, measurementLabel,
-                            measurementType);
+                            measurementType, angle, run);
 
     TS_ASSERT(measurement.isUseable());
     TS_ASSERT_EQUALS(measurementId, measurement.id());
     TS_ASSERT_EQUALS(measurementSubId, measurement.subId());
     TS_ASSERT_EQUALS(measurementLabel, measurement.label());
     TS_ASSERT_EQUALS(measurementType, measurement.type());
+    TS_ASSERT_EQUALS(angle, measurement.angle());
+    TS_ASSERT_EQUALS(run, measurement.run());
   }
 
   void test_invalid_construction_when_measurementId_empty() {
 
     Measurement measurement("", "measurementSubId", "measurementLabel",
-                            "measurementType");
+                            "measurementType", 0.1, "111");
 
     TS_ASSERT(!measurement.isUseable());
   }
@@ -46,7 +50,7 @@ public:
   void test_invalid_construction_when_measurementSubId_empty() {
 
     Measurement measurement("measurementId", "", "measurementLabel",
-                            "measurementType");
+                            "measurementType", 0.1, "111");
 
     TS_ASSERT(!measurement.isUseable());
   }
@@ -54,14 +58,14 @@ public:
   void test_invalid_construction_when_label_empty() {
 
     Measurement measurement("measurementId", "measurementSubId", "",
-                            "measurementType");
+                            "measurementType", 0.1, "111");
 
     TS_ASSERT(!measurement.isUseable());
   }
 
   void test_invalid_construction_when_type_empty() {
     Measurement measurement("measurementId", "measurementSubId",
-                            "measurementLabel", "");
+                            "measurementLabel", "", 0.1, "111");
 
     TS_ASSERT(!measurement.isUseable());
   }
