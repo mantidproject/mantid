@@ -1,7 +1,6 @@
 #ifndef MANTID_ALGORITHMS_COMPAREWORKSPACES_H_
 #define MANTID_ALGORITHMS_COMPAREWORKSPACES_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -66,7 +65,7 @@ namespace Algorithms {
  * File change history is stored at: <https://github.com/mantidproject/mantid>
  * Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_ALGORITHMS_DLL CompareWorkspaces : public API::Algorithm {
+class DLLExport CompareWorkspaces : public API::Algorithm {
 public:
   CompareWorkspaces();
   virtual ~CompareWorkspaces();
