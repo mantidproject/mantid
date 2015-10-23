@@ -94,21 +94,26 @@ void ContainerSubtraction::run() {
   }
 
   // Check for same binning across sample and container
-  if (!checkWorkspaceBinningMatches(sampleWs, canCloneWs)) {
-    QString text = "Binning on sample and container does not match."
-                   "Would you like to rebin the sample to match the container?";
+  if (m_uiForm.ckShiftCan->isChecked()) {
+    addRebinStep(canCloneName, sampleWsName);
+  } else {
+    if (!checkWorkspaceBinningMatches(sampleWs, canCloneWs)) {
+      QString text =
+          "Binning on sample and container does not match."
+          "Would you like to rebin the sample to match the container?";
 
-    int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
-                                       QMessageBox::Yes, QMessageBox::No,
-                                       QMessageBox::NoButton);
+      int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
+                                         QMessageBox::Yes, QMessageBox::No,
+                                         QMessageBox::NoButton);
 
-    if (result == QMessageBox::Yes) {
-		addRebinStep(canCloneName, sampleWsName);
-    } else {
-      m_batchAlgoRunner->clearQueue();
-      g_log.error("Cannot apply absorption corrections using a sample and "
-                  "container with different binning.");
-      return;
+      if (result == QMessageBox::Yes) {
+        addRebinStep(canCloneName, sampleWsName);
+      } else {
+        m_batchAlgoRunner->clearQueue();
+        g_log.error("Cannot apply absorption corrections using a sample and "
+                    "container with different binning.");
+        return;
+      }
     }
   }
 
