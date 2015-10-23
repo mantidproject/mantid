@@ -41,7 +41,7 @@ public:
               const double angle, const std::string &run);
 
   /// Constructional method
-  static Measurement InvalidMeasurement();
+  static Measurement InvalidMeasurement(const std::string& why);
 
   /// Copy constructor
   Measurement(const Measurement &other);
@@ -50,6 +50,7 @@ public:
   ~Measurement();
 
   bool isUseable() const;
+  std::string whyUnuseable() const;
   IDType id() const;
   IDType subId() const;
   std::string run() const;
@@ -59,14 +60,14 @@ public:
 
 private:
   /// Constructor
-  Measurement();
+  Measurement(const std::string& why);
   const IDType m_measurementId;
   const IDType m_subId;
   const std::string m_label;
   const std::string m_type;
   const double m_angle;
   const std::string m_run;
-  bool m_valid;
+  std::string m_whyUnuseable;
   /// Not assignable
   Measurement &operator=(const Measurement &);
 };

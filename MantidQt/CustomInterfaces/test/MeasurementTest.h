@@ -15,8 +15,10 @@ public:
   static void destroySuite(MeasurementTest *suite) { delete suite; }
 
   void test_invalid_construction_via_constructional_method() {
-    auto measure = Measurement::InvalidMeasurement();
+    std::string message = "Gave up";
+    auto measure = Measurement::InvalidMeasurement(message);
     TS_ASSERT(!measure.isUseable());
+    TS_ASSERT_EQUALS(message, measure.whyUnuseable());
   }
 
   void test_valid_construction_via_constructor() {
@@ -55,19 +57,19 @@ public:
     TS_ASSERT(!measurement.isUseable());
   }
 
-  void test_invalid_construction_when_label_empty() {
+  void test_valid_construction_when_label_empty() {
 
     Measurement measurement("measurementId", "measurementSubId", "",
                             "measurementType", 0.1, "111");
 
-    TS_ASSERT(!measurement.isUseable());
+    TSM_ASSERT("Empty labels are not terminal", measurement.isUseable());
   }
 
-  void test_invalid_construction_when_type_empty() {
+  void test_valid_construction_when_type_empty() {
     Measurement measurement("measurementId", "measurementSubId",
                             "measurementLabel", "", 0.1, "111");
 
-    TS_ASSERT(!measurement.isUseable());
+    TSM_ASSERT("Empty type info is not terminal",measurement.isUseable());
   }
 };
 

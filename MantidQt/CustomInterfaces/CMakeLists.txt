@@ -81,6 +81,7 @@ set ( SRC_FILES
 	src/ReflLegacyTransferStrategy.cpp
 	src/ReflMainViewPresenter.cpp
 	src/ReflMeasureTransferStrategy.cpp
+	src/ReflNexusMeasurementSource.cpp
 	src/ReflSearchModel.cpp
 	src/ReflTableSchema.cpp
 	src/SANSAddFiles.cpp
@@ -207,6 +208,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/ReflMainViewPresenter.h
 	inc/MantidQtCustomInterfaces/ReflMeasureTransferStrategy.h
 	inc/MantidQtCustomInterfaces/ReflMeasurementSource.h
+	inc/MantidQtCustomInterfaces/ReflNexusMeasurementSource.h
 	inc/MantidQtCustomInterfaces/ReflSearchModel.h
 	inc/MantidQtCustomInterfaces/ReflTableSchema.h
 	inc/MantidQtCustomInterfaces/ReflTransferStrategy.h
@@ -415,6 +417,7 @@ set ( TEST_FILES
 	ReflLegacyTransferStrategyTest.h
 	ReflMainViewPresenterTest.h
 	ReflMeasureTransferStrategyTest.h
+	ReflNexusMeasurementSourceTest.h
 	StackOfImagesDirsTest.h
 	TomographyIfacePresenterTest.h
 	UserInputValidatorTest.h

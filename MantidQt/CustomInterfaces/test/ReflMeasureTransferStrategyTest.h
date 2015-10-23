@@ -204,7 +204,7 @@ public:
     // search result.
     EXPECT_CALL(*mockMeasurementSource, obtain(_, _))
         .Times(Exactly(data.size()))
-        .WillRepeatedly(Return(Measurement::InvalidMeasurement()));
+        .WillRepeatedly(Return(Measurement::InvalidMeasurement("Abort!")));
 
     auto mockCatInfo = new MockICatalogInfo;
     // We expect that every location will be translated/transformed to make it
