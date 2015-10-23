@@ -61,19 +61,11 @@ endif()
 set ( PYTHON_DIR ${THIRD_PARTY_DIR}/lib/python2.7 )
 ## Set the variables that FindPythonLibs would set
 set ( PYTHON_INCLUDE_PATH "${PYTHON_DIR}/Include" )
-# Libraries can be in one of two places. This allows it still to build with the old locations
-set ( PYTHON_LIBRARIES "${PYTHON_DIR}/libs/python27.lib" )
-#  set ( PYTHON_DEBUG_LIBRARY "${CMAKE_LIBRARY_PATH}/Python27/libs/python27_d.lib" )
-#set ( PYTHON_DEBUG_LIBRARIES ${PYTHON_DEBUG_LIBRARY} )
-
-## Add debug library into libraries variable
-#set ( PYTHON_LIBRARIES optimized ${PYTHON_LIBRARIES} debug ${PYTHON_DEBUG_LIBRARIES} )
-set ( PYTHON_LIBRARIES optimized ${PYTHON_LIBRARIES} )
+set ( PYTHON_LIBRARIES ${PYTHON_DIR}/libs/python27.lib )
 
 ## The executable
-set ( PYTHON_EXECUTABLE "${PYTHON_DIR}/python.exe" CACHE FILEPATH "The location of the python executable" FORCE ) 
-#set ( PYTHON_EXECUTABLE_DEBUG "${CMAKE_LIBRARY_PATH}/Python27/python_d.exe" CACHE FILEPATH "The location of the debug build of the python executable" FORCE ) 
-## The "pythonw" executable that avoids raising another terminal when it runs. Used for IPython
+set ( PYTHON_EXECUTABLE "${PYTHON_DIR}/python.exe" CACHE FILEPATH "The location of the python executable" FORCE )
+# The "pythonw" executable that avoids raising another terminal when it runs. Used for IPython
 set ( PYTHONW_EXECUTABLE "${PYTHON_DIR}/pythonw.exe" CACHE FILEPATH
       "The location of the pythonw executable. This suppresses the new terminal window on startup" FORCE ) 
 

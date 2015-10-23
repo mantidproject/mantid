@@ -11,19 +11,19 @@ if( WIN32 )
   # Bundled Python for dev build
   #####################################################################
  
-  ## Python package directories ##
-  file(TO_NATIVE_PATH ${CMAKE_LIBRARY_PATH}/Python27 SRC_NATIVE)
-  if ( MSVC_IDE )
-    file(TO_NATIVE_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} BIN_NATIVE)
-    add_custom_command( TARGET ${PYBUNDLE_POST_TARGET} POST_BUILD
-                        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/setup_dev_bundle.bat 
-                        ARGS ${CMAKE_CFG_INTDIR} ${SRC_NATIVE} ${BIN_NATIVE} )
-  else()
-    file(TO_NATIVE_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} BIN_NATIVE)
-    add_custom_command( TARGET ${PYBUNDLE_POST_TARGET} POST_BUILD
-                        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/setup_dev_bundle.bat 
-                        ARGS ${CMAKE_BUILD_TYPE} ${SRC_NATIVE} ${BIN_NATIVE} )
-  endif()
+  # ## Python package directories ##
+  # file(TO_NATIVE_PATH ${CMAKE_LIBRARY_PATH}/Python27 SRC_NATIVE)
+  # if ( MSVC_IDE )
+    # file(TO_NATIVE_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} BIN_NATIVE)
+    # add_custom_command( TARGET ${PYBUNDLE_POST_TARGET} POST_BUILD
+                        # COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/setup_dev_bundle.bat 
+                        # ARGS ${CMAKE_CFG_INTDIR} ${SRC_NATIVE} ${BIN_NATIVE} )
+  # else()
+    # file(TO_NATIVE_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} BIN_NATIVE)
+    # add_custom_command( TARGET ${PYBUNDLE_POST_TARGET} POST_BUILD
+                        # COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/setup_dev_bundle.bat 
+                        # ARGS ${CMAKE_BUILD_TYPE} ${SRC_NATIVE} ${BIN_NATIVE} )
+  # endif()
   
   #####################################################################
   # Bundle for package

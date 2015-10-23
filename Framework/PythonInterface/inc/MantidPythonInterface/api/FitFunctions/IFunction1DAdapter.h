@@ -41,9 +41,9 @@ namespace PythonInterface {
  * This is essentially a transparent layer that handles the function calls up
  *into Python.
  */
-class IFunction1DAdapter : public virtual API::ParamFunction,
-                           public virtual API::IFunction1D,
-                           public virtual IFunctionAdapter {
+class IFunction1DAdapter : public API::ParamFunction,
+                           public API::IFunction1D,
+                           public IFunctionAdapter {
 public:
   /// A constructor that looks like a Python __init__ method
   IFunction1DAdapter(PyObject *self);
