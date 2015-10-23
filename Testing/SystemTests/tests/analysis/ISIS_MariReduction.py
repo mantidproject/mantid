@@ -186,7 +186,7 @@ class ReduceMARIMon2Norm(ReductionWrapper):
       # MARI calibration uses one of data files defined on instrument.  Here
       # vanadium run is used for calibration
       # TODO: Why not workspace?, check it
-        prop['det_cal_file'] = "11060"
+        prop['det_cal_file'] = "MAR11060.raw"
         prop['save_format'] = []
         return prop
       #
@@ -301,12 +301,12 @@ class ReduceMARIMonitorsSeparate(ReductionWrapper):
 if __name__ == "__main__":
 
     data_root = r'd:\Data\MantidDevArea\Datastore\DataCopies'
-    data_dir = os.path.join(data_root,r'Testing\Data\SystemTest')
-    ref_data_dir = os.path.join(data_root,r'Testing\SystemTests\tests\analysis\reference')
-    result_dir = r'd:/Data/Mantid_Testing/14_12_15'
-    config.setDataSearchDirs('{0};{1};{2}'.format(data_dir,ref_data_dir,result_dir))
+    #data_dir = os.path.join(data_root,r'Testing\Data\SystemTest')
+    #ref_data_dir = os.path.join(data_root,r'Testing\SystemTests\tests\analysis\reference')
+    #result_dir = r'd:/Data/Mantid_Testing/14_12_15'
+    #config.setDataSearchDirs('{0};{1};{2}'.format(data_dir,ref_data_dir,result_dir))
     #config.appendDataSearchDir('d:/Data/Mantid_GIT/Test/AutoTestData')
-    config['defaultsave.directory'] = result_dir # folder to save resulting spe/nxspe files.  Defaults are in
+    #config['defaultsave.directory'] = result_dir # folder to save resulting spe/nxspe files.  Defaults are in
 
     # execute stuff from Mantid
     #rd = ReduceMARIFromFile()
