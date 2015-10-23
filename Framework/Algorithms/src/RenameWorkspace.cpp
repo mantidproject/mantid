@@ -61,21 +61,24 @@ void RenameWorkspace::exec() {
 
   // Deal with attached monitor workspace if any.
   auto matInputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
-  if(!matInputWS) // its some kind workspaces which may not have possibility
-    return;      // to attach monitors to it
+  if (!matInputWS) // its some kind workspaces which may not have possibility
+    return;        // to attach monitors to it
   auto monWS = matInputWS->monitorWorkspace();
-  if(monWS) {
+  if (monWS) {
     std::string monWSName = monWS->getName();
     // rename the monitor workspace accordingly
-    if(monWSName.size() == 0) {
-      // workspace will always have name after added to ADS, so apparently not the case
-      AnalysisDataService::Instance().add(outputwsName+"_monitors",monWS);
+    if (monWSName.size() == 0) {
+      // workspace will always have name after added to ADS, so apparently not
+      // the case
+      AnalysisDataService::Instance().add(outputwsName + "_monitors", monWS);
     } else {
       try {
-        AnalysisDataService::Instance().rename(monWSName, outputwsName+"_monitors");
-      } catch (Kernel::Exception::NotFoundError &) {  // it may be deleted
-          AnalysisDataService::Instance().add(monWSName,monWS);
-          AnalysisDataService::Instance().rename(monWSName, outputwsName+"_monitors");
+        AnalysisDataService::Instance().rename(monWSName,
+                                               outputwsName + "_monitors");
+      } catch (Kernel::Exception::NotFoundError &) { // it may be deleted
+        AnalysisDataService::Instance().add(monWSName, monWS);
+        AnalysisDataService::Instance().rename(monWSName,
+                                               outputwsName + "_monitors");
       }
     }
   }

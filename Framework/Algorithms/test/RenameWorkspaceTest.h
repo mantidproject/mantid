@@ -139,13 +139,10 @@ public:
     MatrixWorkspace_sptr monWS = createWorkspace();
     inputWS->setMonitorWorkspace(monWS);
 
-
     Mantid::Algorithms::RenameWorkspace alg;
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", "InputWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "WS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "InputWS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RenameMonitors", true));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -153,12 +150,11 @@ public:
 
     Workspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result =
-            AnalysisDataService::Instance().retrieveWS<Workspace>("WS"));
+        result = AnalysisDataService::Instance().retrieveWS<Workspace>("WS"));
     TS_ASSERT(result);
     TS_ASSERT_THROWS_NOTHING(
-        result =
-            AnalysisDataService::Instance().retrieveWS<Workspace>("WS_monitors"));
+        result = AnalysisDataService::Instance().retrieveWS<Workspace>(
+            "WS_monitors"));
     TS_ASSERT(result);
 
     AnalysisDataService::Instance().remove("WS_monitors");
@@ -172,12 +168,11 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(
-        result =
-            AnalysisDataService::Instance().retrieveWS<Workspace>("WS1"));
+        result = AnalysisDataService::Instance().retrieveWS<Workspace>("WS1"));
     TS_ASSERT(result);
     TS_ASSERT_THROWS_NOTHING(
-        result =
-            AnalysisDataService::Instance().retrieveWS<Workspace>("WS1_monitors"));
+        result = AnalysisDataService::Instance().retrieveWS<Workspace>(
+            "WS1_monitors"));
     TS_ASSERT(result);
     // monitors renamed
     alg.setPropertyValue("InputWorkspace", "WS1");
@@ -186,18 +181,15 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(
-        result =
-            AnalysisDataService::Instance().retrieveWS<Workspace>("WS2"));
+        result = AnalysisDataService::Instance().retrieveWS<Workspace>("WS2"));
     TS_ASSERT(result);
     TS_ASSERT_THROWS_NOTHING(
-        result =
-            AnalysisDataService::Instance().retrieveWS<Workspace>("WS2_monitors"));
+        result = AnalysisDataService::Instance().retrieveWS<Workspace>(
+            "WS2_monitors"));
     TS_ASSERT(result);
 
     AnalysisDataService::Instance().remove("WS2");
     AnalysisDataService::Instance().remove("WS2_monitors");
-
-
   }
   MatrixWorkspace_sptr createWorkspace() {
     MatrixWorkspace_sptr inputWS =
