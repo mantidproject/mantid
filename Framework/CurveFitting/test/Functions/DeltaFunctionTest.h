@@ -122,6 +122,47 @@ public:
     }
   }
 
+  void test_delta_with_shift(){
+    IPeakFunction::setPeakRadius(1000);
+    auto res = IPeakFunction_sptr(new DeltaFunctionTest_Gauss());
+    double a = 0.13;
+    double ha = 1.0/sqrt(M_PI*a);
+    res->setParameter("c", 0);
+    res->setParameter("h", ha);
+    res->setParameter("s", 1./a);
+
+    auto gauss = IPeakFunction_sptr(new DeltaFunctionTest_Gauss());
+    double h = 3.0;
+    double b = 3.0;
+    gauss->setParameter("c", 0);
+    gauss->setParameter("h", h);
+    gauss->setParameter("s", 1./b);
+
+    auto delta = IPeakFunction_sptr(new DeltaFunction());
+
+    Convolution conv;
+    conv.addFunction(res);
+    conv.addFunction(gauss);
+    conv.addFunction(delta);
+
+    FunctionDomain1DVector x(-6, 6, 100);
+    FunctionValues y(x);
+    conv.function(x,y);
+
+    double hh = h * sqrt(b/(a+b));
+    double bb = a + b;
+    double dlt = 0;
+    for(size_t i = 10; i < x.size()-10; ++i)
+    {
+      auto xx = x[i];
+      auto d = y[i] - hh * exp(-xx*xx/bb) - ha * exp(-xx*xx/a);
+      if (fabs(d) > dlt){
+        dlt = fabs(d);
+        std::cerr << xx << ' ' << dlt << std::endl;
+      }
+    }
+  }
+
 }; // end of DeltaFunctionTest
 
 #endif /* DELTAFUNCTIONTEST_H */

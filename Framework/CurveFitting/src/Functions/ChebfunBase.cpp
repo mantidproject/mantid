@@ -391,7 +391,7 @@ ChebfunBase::bestFitTempl(double start, double end, FunctionType f,
     maxSize = g_maxNumberPoints;
   for (size_t n = n0; n < maxSize; n *= 2) {
     // value of n must be even! or everything breaks!
-    ChebfunBase base(n, start, end);
+    ChebfunBase base(n, start, end, tolerance);
     if (p2.empty()) {
       p2 = base.fit(f);
     } else {
@@ -426,7 +426,7 @@ ChebfunBase::bestFitTempl(double start, double end, FunctionType f,
       }
 
       if (m != n + 1) {
-        auto newBase = ChebfunBase_sptr(new ChebfunBase(m - 1, start, end));
+        auto newBase = ChebfunBase_sptr(new ChebfunBase(m - 1, start, end, tolerance));
         a.resize(m);
         p = newBase->calcP(a);
         return newBase;
@@ -667,8 +667,7 @@ std::vector<double> ChebfunBase::fitOdd(const API::IFunction &f,
     xOdd.push_back(*x);
   }
 
-  // fun1d->function1D(pOdd.data(), xOdd.data(), xOdd.size());
-  API::FunctionDomain1DView x(m_x.data(), m_x.size());
+  API::FunctionDomain1DView x(xOdd.data(), xOdd.size());
   API::FunctionValues y(x);
   f.function(x, y);
   pOdd = y.toVector();

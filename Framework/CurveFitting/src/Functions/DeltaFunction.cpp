@@ -19,7 +19,7 @@ DECLARE_FUNCTION(DeltaFunction)
 
 DeltaFunction::DeltaFunction() {
   declareParameter("Height", 1.0);
-  // declareParameter("Centre", 0.0);
+  declareParameter("Centre", 0.0);
 }
 
 void DeltaFunction::function1D(double *out, const double *xValues,
