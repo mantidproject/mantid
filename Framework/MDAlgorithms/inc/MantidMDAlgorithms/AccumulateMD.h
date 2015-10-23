@@ -15,14 +15,13 @@ class IMDHistoWorkspace;
 namespace MDAlgorithms {
 
 std::vector<std::string>
-filterToExistingSources(std::vector<std::string> input_data,
+filterToExistingSources(const std::vector<std::string> &input_data,
                         Kernel::Logger &g_log);
 
-std::vector<std::string> filterToNew(std::vector<std::string> input_data,
-                                     std::vector<std::string> current_data,
-                                     Kernel::Logger &g_log);
+std::vector<std::string> filterToNew(const std::vector<std::string> &input_data,
+                                     const std::vector<std::string> &current_data);
 
-std::vector<std::string> getCurrentData(API::WorkspaceHistory &ws_history);
+std::vector<std::string> getCurrentData(const API::WorkspaceHistory &ws_history);
 
 bool fileExists(const std::string &filename);
 

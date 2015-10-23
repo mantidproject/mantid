@@ -27,7 +27,7 @@ Return names of data sources which are found as a workspace or file.
 Print to log whether data are found or not.
  */
 std::vector<std::string>
-filterToExistingSources(std::vector<std::string> input_data,
+filterToExistingSources(const std::vector<std::string> &input_data,
                         Kernel::Logger &g_log) {
   std::vector<std::string> existing_input_data;
 
@@ -56,7 +56,7 @@ filterToExistingSources(std::vector<std::string> input_data,
   return existing_input_data;
 }
 
-/**
+/*
 Test if a file with this full path exists
 */
 bool fileExists(const std::string &filename) {
@@ -67,21 +67,32 @@ bool fileExists(const std::string &filename) {
   return false;
 }
 
-// TODO compare input_data with current data in the workspace
-// append anything new to the list
-// probably have to trawl the workspace history for file and workspace names to
-// do this
-std::vector<std::string> filterToNew(std::vector<std::string> input_data,
-                                     std::vector<std::string> current_data,
-                                     Kernel::Logger &g_log) {
+/*
+Return a vector of anything in input_data which is not in current_data
+*/
+std::vector<std::string> filterToNew(const std::vector<std::string> &input_data,
+                                     const std::vector<std::string> &current_data) {
   std::vector<std::string> new_data;
+  std::remove_copy_if(
+      input_data.begin(), input_data.end(), std::back_inserter(new_data),
+      [&current_data](const std::string &arg) {
+        return (std::find(current_data.begin(), current_data.end(), arg) !=
+                current_data.end());
+      });
 
   return new_data;
 }
 
+/*
+Return a vector of the names of files and workspaces which have previously added
+to the workspace
+*/
 std::vector<std::string> getCurrentData(const WorkspaceHistory &ws_history) {
   std::vector<std::string> currentFilesAndWorkspaces;
 
+  // TODO trawl history for workspace and file names
+  // This is DataSources property of the original call of CreateMD and any
+  // subsequent calls of AccumulateMD
   auto view = ws_history.createView();
   view->unrollAll();
 
@@ -216,7 +227,7 @@ void AccumulateMD::exec() {
   std::vector<std::string> current_data = getCurrentData(wsHistory);
 
   // If there's no new data, we don't have anything to do
-  input_data = filterToNew(input_data, current_data, g_log);
+  input_data = filterToNew(input_data, current_data);
   if (input_data.empty()) {
     g_log.information() << "No new data to append to workspace in "
                         << this->name() << std::endl;

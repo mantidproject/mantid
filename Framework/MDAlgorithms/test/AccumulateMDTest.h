@@ -88,6 +88,42 @@ public:
     // Remove the temporary file
     existent_file.remove();
   }
+
+  void test_filter_to_new_none_new() {
+    std::vector<std::string> input_data;
+    input_data.push_back("test1");
+    input_data.push_back("test2");
+    input_data.push_back("test3");
+    std::vector<std::string> current_data = input_data;
+
+    std::vector<std::string> result =
+        Mantid::MDAlgorithms::filterToNew(input_data, current_data);
+
+    // Two input vectors were identical, so we should get an empty vector back
+    TS_ASSERT(result.empty());
+  }
+
+  void test_filter_to_new() {
+    std::vector<std::string> input_data;
+    input_data.push_back("test1");
+    input_data.push_back("test2");
+    input_data.push_back("test3");
+    input_data.push_back("test4");
+    input_data.push_back("test5");
+
+    std::vector<std::string> current_data;
+    current_data.push_back("test1");
+    current_data.push_back("test3");
+    current_data.push_back("test4");
+
+    std::vector<std::string> result =
+        Mantid::MDAlgorithms::filterToNew(input_data, current_data);
+
+    // test2 and test5 is new data (it is in input_data but not current_data)
+    // and so should be returned in the vector
+    TS_ASSERT_EQUALS(result[0], "test2");
+    TS_ASSERT_EQUALS(result[1], "test5");
+  }
 };
 
 #endif /* MANTID_MDALGORITHMS_ACCUMULATEMDTEST_H_ */
