@@ -45,9 +45,6 @@ void OptimizeLatticeForCellType::init() {
   cellTypes.push_back(ReducedCell::HEXAGONAL());
   cellTypes.push_back(ReducedCell::RHOMBOHEDRAL());
   cellTypes.push_back(ReducedCell::MONOCLINIC());
-  cellTypes.push_back("Monoclinic ( a unique )");
-  cellTypes.push_back("Monoclinic ( b unique )");
-  cellTypes.push_back("Monoclinic ( c unique )");
   cellTypes.push_back(ReducedCell::TRICLINIC());
   declareProperty("CellType", cellTypes[0],
                   boost::make_shared<StringListValidator>(cellTypes),
@@ -95,7 +92,7 @@ void OptimizeLatticeForCellType::exec() {
   runWS.push_back(ws);
 
   if (perRun) {
-    std::vector<std::pair<std::string, bool>> criteria;
+    std::vector<std::pair<std::string, bool> > criteria;
     // Sort by run number
     criteria.push_back(std::pair<std::string, bool>("runnumber", true));
     ws->sort(criteria);
@@ -104,7 +101,7 @@ void OptimizeLatticeForCellType::exec() {
     int count = 0;
     for (size_t i = 0; i < peaks_all.size(); i++) {
       if (peaks_all[i].getRunNumber() != run) {
-        count++;  // first entry in runWS is input workspace
+        count++; // first entry in runWS is input workspace
         DataObjects::PeaksWorkspace_sptr cloneWS(new PeaksWorkspace());
         cloneWS->setInstrument(ws->getInstrument());
         cloneWS->copyExperimentInfoFrom(ws.get());
@@ -126,19 +123,8 @@ void OptimizeLatticeForCellType::exec() {
     const DblMatrix UB = peakWS->sample().getOrientedLattice().getUB();
     std::vector<double> lat(6);
     IndexingUtils::GetLatticeParameters(UB, lat);
-    // initialize parameters for optimization
-    size_t n_peaks = peakWS->getNumberPeaks();
-    MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create(
-        std::string("Workspace2D"), 1, n_peaks, n_peaks);
-    for (size_t i = 0; i < data->blocksize(); i++) {
-      data->dataX(0)[i] = static_cast<double>(i);
-      data->dataY(0)[i] = 0.0;
-      data->dataE(0)[i] = 1.0;
-    }
 
-    std::ostringstream fun_str;
-    fun_str << "name=LatticeErrors";
-    for (size_t i = 0; i < 6; i++) fun_str << ",p" << i << "=" << lat[i];
+    std::string fun_str = inParams(cell_type, lat);
 
     IAlgorithm_sptr fit_alg;
     try {
@@ -149,43 +135,9 @@ void OptimizeLatticeForCellType::exec() {
       throw;
     }
 
-    fit_alg->setPropertyValue("Function", fun_str.str());
-    if (cell_type == ReducedCell::CUBIC()) {
-      std::ostringstream tie_str;
-      tie_str << "p1=p0,p2=p0,p3=90,p4=90,p5=90";
-      fit_alg->setProperty("Ties", tie_str.str());
-    } else if (cell_type == ReducedCell::TETRAGONAL()) {
-      std::ostringstream tie_str;
-      tie_str << "p1=p0,p3=90,p4=90,p5=90";
-      fit_alg->setProperty("Ties", tie_str.str());
-    } else if (cell_type == ReducedCell::ORTHORHOMBIC()) {
-      std::ostringstream tie_str;
-      tie_str << "p3=90,p4=90,p5=90";
-      fit_alg->setProperty("Ties", tie_str.str());
-    } else if (cell_type == ReducedCell::RHOMBOHEDRAL()) {
-      std::ostringstream tie_str;
-      tie_str << "p1=p0,p2=p0,p4=p3,p5=p3";
-      fit_alg->setProperty("Ties", tie_str.str());
-    } else if (cell_type == ReducedCell::HEXAGONAL()) {
-      std::ostringstream tie_str;
-      tie_str << "p1=p0,p3=90,p4=90,p5=120";
-      fit_alg->setProperty("Ties", tie_str.str());
-    } else if (cell_type == "Monoclinic ( a unique )") {
-      std::ostringstream tie_str;
-      tie_str << "p4=90,p5=90";
-      fit_alg->setProperty("Ties", tie_str.str());
-    } else if (cell_type == ReducedCell::MONOCLINIC() ||
-               cell_type == "Monoclinic ( b unique )") {
-      std::ostringstream tie_str;
-      tie_str << "p3=90,p5=90";
-      fit_alg->setProperty("Ties", tie_str.str());
-    } else if (cell_type == "Monoclinic ( c unique )") {
-      std::ostringstream tie_str;
-      tie_str << "p3=90,p4=90";
-      fit_alg->setProperty("Ties", tie_str.str());
-    }
-    fit_alg->setProperty("InputWorkspace", data);
-    fit_alg->setProperty("WorkspaceIndex", 0);
+    fit_alg->setPropertyValue("Function", fun_str);
+    fit_alg->setProperty("Ties", "ZeroShift=0.0");
+    fit_alg->setProperty("InputWorkspace", peakWS);
     fit_alg->setProperty("CostFunction", "Unweighted least squares");
     fit_alg->setProperty("CreateOutput", true);
     fit_alg->setProperty("Output", "fit");
@@ -193,26 +145,13 @@ void OptimizeLatticeForCellType::exec() {
 
     double chisq = fit_alg->getProperty("OutputChi2overDoF");
     ITableWorkspace_sptr ParamTable = fit_alg->getProperty("OutputParameters");
+    std::vector<double> Params = outParams(cell_type, 1, ParamTable);
 
-    std::vector<double> Params;
-    IFunction_sptr out = fit_alg->getProperty("Function");
-
-    Params.push_back(out->getParameter("p0"));
-    Params.push_back(out->getParameter("p1"));
-    Params.push_back(out->getParameter("p2"));
-    Params.push_back(out->getParameter("p3"));
-    Params.push_back(out->getParameter("p4"));
-    Params.push_back(out->getParameter("p5"));
-
-    std::vector<double> sigabc(Params.size());
-    OrientedLattice latt = peakWS->mutableSample().getOrientedLattice();
-    DblMatrix UBnew = latt.getUB();
-
-    for (size_t i = 0; i < 6; i++) sigabc[i] = ParamTable->Double(i, 2);
+    std::vector<double> sigabc = outParams(cell_type, 2, ParamTable);
 
     OrientedLattice o_lattice;
-    o_lattice.setUB(UBnew);
-
+    o_lattice.set(Params[0], Params[1], Params[2], Params[3], Params[4],
+                  Params[5]);
     o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
                        sigabc[5]);
 
@@ -233,14 +172,15 @@ void OptimizeLatticeForCellType::exec() {
     AnalysisDataService::Instance().remove("_peaks");
     if (perRun) {
       std::string outputdir = getProperty("OutputDirectory");
-      if (outputdir[outputdir.size() - 1] != '/') outputdir += "/";
+      if (outputdir[outputdir.size() - 1] != '/')
+        outputdir += "/";
       // Save Peaks
       Mantid::API::IAlgorithm_sptr savePks_alg =
           createChildAlgorithm("SaveIsawPeaks");
       savePks_alg->setPropertyValue("InputWorkspace", runWS[i_run]->getName());
-      savePks_alg->setProperty(
-          "Filename",
-          outputdir + "ls" + runWS[i_run]->getName() + ".integrate");
+      savePks_alg->setProperty("Filename", outputdir + "ls" +
+                                               runWS[i_run]->getName() +
+                                               ".integrate");
       savePks_alg->executeAsChildAlg();
       g_log.notice() << "See output file: " << outputdir + "ls" +
                                                    runWS[i_run]->getName() +
@@ -250,8 +190,8 @@ void OptimizeLatticeForCellType::exec() {
       Mantid::API::IAlgorithm_sptr saveUB_alg =
           createChildAlgorithm("SaveIsawUB");
       saveUB_alg->setPropertyValue("InputWorkspace", runWS[i_run]->getName());
-      saveUB_alg->setProperty(
-          "Filename", outputdir + "ls" + runWS[i_run]->getName() + ".mat");
+      saveUB_alg->setProperty("Filename", outputdir + "ls" +
+                                              runWS[i_run]->getName() + ".mat");
       saveUB_alg->executeAsChildAlg();
       // Show the names of files written
       g_log.notice() << "See output file: "
@@ -262,151 +202,123 @@ void OptimizeLatticeForCellType::exec() {
 }
 //-----------------------------------------------------------------------------------------
 /**
-  @param  inname       Name of Filename containing peaks
   @param  cell_type    cell type to optimize
-  @param  params       optimized cell parameters
-  @return  chisq of optimization
+  @param  lat             optimized cell parameters
+  @return  fun_str       string of parameters for fitting
 */
-double OptimizeLatticeForCellType::optLatticeSum(std::string inname,
-                                                 std::string cell_type,
-                                                 std::vector<double> &params) {
+std::string OptimizeLatticeForCellType::inParams(std::string cell_type,
+                                                 std::vector<double> &lat) {
+  std::ostringstream fun_str;
+  fun_str << "name=LatticeFunction,CrystalSystem=" << cell_type;
+
   std::vector<double> lattice_parameters;
   lattice_parameters.assign(6, 0);
   if (cell_type == ReducedCell::CUBIC()) {
-    lattice_parameters[0] = params[0];
-    lattice_parameters[1] = params[0];
-    lattice_parameters[2] = params[0];
+    fun_str << ",a=" << lat[0];
+  } else if (cell_type == ReducedCell::TETRAGONAL()) {
+    fun_str << ",a=" << lat[0];
+    fun_str << ",c=" << lat[2];
+  } else if (cell_type == ReducedCell::ORTHORHOMBIC()) {
+    fun_str << ",a=" << lat[0];
+    fun_str << ",b=" << lat[1];
+    fun_str << ",c=" << lat[2];
+  } else if (cell_type == ReducedCell::RHOMBOHEDRAL()) {
+    fun_str << ",a=" << lat[0];
+    fun_str << ",Alpha=" << lat[3];
+  } else if (cell_type == ReducedCell::HEXAGONAL()) {
+    fun_str << ",a=" << lat[0];
+    fun_str << ",c=" << lat[2];
+  } else if (cell_type == ReducedCell::MONOCLINIC()) {
+    fun_str << ",a=" << lat[0];
+    fun_str << ",b=" << lat[1];
+    fun_str << ",c=" << lat[2];
+    fun_str << ",Beta=" << lat[4];
+  } else if (cell_type == ReducedCell::TRICLINIC()) {
+    fun_str << ",a=" << lat[0];
+    fun_str << ",b=" << lat[1];
+    fun_str << ",c=" << lat[2];
+    fun_str << ",Alpha=" << lat[3];
+    fun_str << ",Beta=" << lat[4];
+    fun_str << ",Gamma=" << lat[5];
+  }
 
+  return fun_str.str();
+}
+//-----------------------------------------------------------------------------------------
+/**
+  @param  cell_type           cell type to optimize
+  @param  col                     1 for parameter 2 for error
+  @param  ParamTable       optimized cell parameters
+  @return  chisq of optimization
+*/
+std::vector<double>
+OptimizeLatticeForCellType::outParams(std::string cell_type, int icol,
+                                      ITableWorkspace_sptr ParamTable) {
+  std::vector<double> lattice_parameters;
+  lattice_parameters.assign(6, 0);
+
+  if (cell_type == ReducedCell::CUBIC()) {
+    lattice_parameters[0] = ParamTable->Double(0, icol);
+    lattice_parameters[1] = ParamTable->Double(0, icol);
+    lattice_parameters[2] = ParamTable->Double(0, icol);
+    if (icol == 2)
+      return lattice_parameters;
     lattice_parameters[3] = 90;
     lattice_parameters[4] = 90;
     lattice_parameters[5] = 90;
   } else if (cell_type == ReducedCell::TETRAGONAL()) {
-    lattice_parameters[0] = params[0];
-    lattice_parameters[1] = params[0];
-    lattice_parameters[2] = params[1];
-
+    lattice_parameters[0] = ParamTable->Double(0, icol);
+    lattice_parameters[1] = ParamTable->Double(0, icol);
+    lattice_parameters[2] = ParamTable->Double(1, icol);
+    if (icol == 2)
+      return lattice_parameters;
     lattice_parameters[3] = 90;
     lattice_parameters[4] = 90;
     lattice_parameters[5] = 90;
   } else if (cell_type == ReducedCell::ORTHORHOMBIC()) {
-    lattice_parameters[0] = params[0];
-    lattice_parameters[1] = params[1];
-    lattice_parameters[2] = params[2];
-
+    lattice_parameters[0] = ParamTable->Double(0, icol);
+    lattice_parameters[1] = ParamTable->Double(1, icol);
+    lattice_parameters[2] = ParamTable->Double(2, icol);
+    if (icol == 2)
+      return lattice_parameters;
     lattice_parameters[3] = 90;
     lattice_parameters[4] = 90;
     lattice_parameters[5] = 90;
   } else if (cell_type == ReducedCell::RHOMBOHEDRAL()) {
-    lattice_parameters[0] = params[0];
-    lattice_parameters[1] = params[0];
-    lattice_parameters[2] = params[0];
-
-    lattice_parameters[3] = params[1];
-    lattice_parameters[4] = params[1];
-    lattice_parameters[5] = params[1];
+    lattice_parameters[0] = ParamTable->Double(0, icol);
+    lattice_parameters[1] = ParamTable->Double(0, icol);
+    lattice_parameters[2] = ParamTable->Double(0, icol);
+    lattice_parameters[3] = ParamTable->Double(1, icol);
+    lattice_parameters[4] = ParamTable->Double(1, icol);
+    lattice_parameters[5] = ParamTable->Double(1, icol);
   } else if (cell_type == ReducedCell::HEXAGONAL()) {
-    lattice_parameters[0] = params[0];
-    lattice_parameters[1] = params[0];
-    lattice_parameters[2] = params[1];
-
+    lattice_parameters[0] = ParamTable->Double(0, icol);
+    lattice_parameters[1] = ParamTable->Double(0, icol);
+    lattice_parameters[2] = ParamTable->Double(1, icol);
+    if (icol == 2)
+      return lattice_parameters;
     lattice_parameters[3] = 90;
     lattice_parameters[4] = 90;
     lattice_parameters[5] = 120;
-  } else if (cell_type == "Monoclinic ( a unique )") {
-    lattice_parameters[0] = params[0];
-    lattice_parameters[1] = params[1];
-    lattice_parameters[2] = params[2];
-
-    lattice_parameters[3] = params[3];
-    lattice_parameters[4] = 90;
-    lattice_parameters[5] = 90;
-  } else if (cell_type == ReducedCell::MONOCLINIC() ||
-             cell_type == "Monoclinic ( b unique )") {
-    lattice_parameters[0] = params[0];
-    lattice_parameters[1] = params[1];
-    lattice_parameters[2] = params[2];
-
+  } else if (cell_type == ReducedCell::MONOCLINIC()) {
+    lattice_parameters[0] = ParamTable->Double(0, icol);
+    lattice_parameters[1] = ParamTable->Double(1, icol);
+    lattice_parameters[2] = ParamTable->Double(2, icol);
+    lattice_parameters[4] = ParamTable->Double(3, icol);
+    if (icol == 2)
+      return lattice_parameters;
     lattice_parameters[3] = 90;
-    lattice_parameters[4] = params[3];
     lattice_parameters[5] = 90;
-  } else if (cell_type == "Monoclinic ( c unique )") {
-    lattice_parameters[0] = params[0];
-    lattice_parameters[1] = params[1];
-    lattice_parameters[2] = params[2];
-
-    lattice_parameters[3] = 90;
-    lattice_parameters[4] = 90;
-    lattice_parameters[5] = params[3];
   } else if (cell_type == ReducedCell::TRICLINIC()) {
-    lattice_parameters[0] = params[0];
-    lattice_parameters[1] = params[1];
-    lattice_parameters[2] = params[2];
-
-    lattice_parameters[3] = params[3];
-    lattice_parameters[4] = params[4];
-    lattice_parameters[5] = params[5];
+    lattice_parameters[0] = ParamTable->Double(0, icol);
+    lattice_parameters[1] = ParamTable->Double(1, icol);
+    lattice_parameters[2] = ParamTable->Double(2, icol);
+    lattice_parameters[3] = ParamTable->Double(3, icol);
+    lattice_parameters[4] = ParamTable->Double(4, icol);
+    lattice_parameters[5] = ParamTable->Double(5, icol);
   }
 
-  PeaksWorkspace_sptr ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-      AnalysisDataService::Instance().retrieve(inname));
-  size_t n_peaks = ws->getNumberPeaks();
-  double *out = new double[n_peaks];
-  optLattice(inname, lattice_parameters, out);
-  double ChiSqTot = 0;
-  for (size_t i = 0; i < n_peaks; i++) ChiSqTot += out[i];
-  delete[] out;
-  return ChiSqTot;
-}
-//-----------------------------------------------------------------------------------------
-/**
-  @param  inname       Name of workspace containing peaks
-  @param  params       optimized cell parameters
-  @param  out          residuals from optimization
-*/
-void OptimizeLatticeForCellType::optLattice(std::string inname,
-                                            std::vector<double> &params,
-                                            double *out) {
-  PeaksWorkspace_sptr ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-      AnalysisDataService::Instance().retrieve(inname));
-  const std::vector<Peak> &peaks = ws->getPeaks();
-  size_t n_peaks = ws->getNumberPeaks();
-  std::vector<V3D> q_vector;
-  std::vector<V3D> hkl_vector;
-
-  for (size_t i = 0; i < params.size(); i++) params[i] = std::abs(params[i]);
-  for (size_t i = 0; i < n_peaks; i++) {
-    q_vector.push_back(peaks[i].getQSampleFrame());
-    hkl_vector.push_back(peaks[i].getHKL());
-  }
-
-  Mantid::API::IAlgorithm_sptr alg = createChildAlgorithm("CalculateUMatrix");
-  alg->setPropertyValue("PeaksWorkspace", inname);
-  alg->setProperty("a", params[0]);
-  alg->setProperty("b", params[1]);
-  alg->setProperty("c", params[2]);
-  alg->setProperty("alpha", params[3]);
-  alg->setProperty("beta", params[4]);
-  alg->setProperty("gamma", params[5]);
-  alg->executeAsChildAlg();
-
-  ws = alg->getProperty("PeaksWorkspace");
-  OrientedLattice latt = ws->mutableSample().getOrientedLattice();
-  DblMatrix UB = latt.getUB();
-  DblMatrix A = aMatrix(params);
-  DblMatrix Bc = A;
-  Bc.Invert();
-  DblMatrix U1_B1 = UB * A;
-  OrientedLattice o_lattice;
-  o_lattice.setUB(U1_B1);
-  DblMatrix U1 = o_lattice.getU();
-  DblMatrix U1_Bc = U1 * Bc;
-
-  for (size_t i = 0; i < hkl_vector.size(); i++) {
-    V3D error = U1_Bc * hkl_vector[i] - q_vector[i] / (2.0 * M_PI);
-    out[i] = error.norm2();
-  }
-
-  return;
+  return lattice_parameters;
 }
 //-----------------------------------------------------------------------------------------
 /**
@@ -420,7 +332,8 @@ void OptimizeLatticeForCellType::optLattice(std::string inname,
 bool OptimizeLatticeForCellType::edgePixel(PeaksWorkspace_sptr ws,
                                            std::string bankName, int col,
                                            int row, int Edge) {
-  if (bankName.compare("None") == 0) return false;
+  if (bankName.compare("None") == 0)
+    return false;
   Geometry::Instrument_const_sptr Iptr = ws->getInstrument();
   boost::shared_ptr<const IComponent> parent =
       Iptr->getComponentByName(bankName);
@@ -453,46 +366,6 @@ bool OptimizeLatticeForCellType::edgePixel(PeaksWorkspace_sptr ws,
   }
   return false;
 }
-//-----------------------------------------------------------------------------------------
-/**
-  @param  lattice       lattice parameters
-  @return the A matrix calculated
-*/
-DblMatrix OptimizeLatticeForCellType::aMatrix(std::vector<double> lattice) {
-  double degrees_to_radians = M_PI / 180;
-  double alpha = lattice[3] * degrees_to_radians;
-  double beta = lattice[4] * degrees_to_radians;
-  double gamma = lattice[5] * degrees_to_radians;
 
-  double l1 = lattice[0];
-  double l2 = 0;
-  double l3 = 0;
-
-  double m1 = lattice[1] * std::cos(gamma);
-  double m2 = lattice[1] * std::sin(gamma);
-  double m3 = 0;
-
-  double n1 = std::cos(beta);
-  double n2 =
-      (std::cos(alpha) - std::cos(beta) * std::cos(gamma)) / std::sin(gamma);
-  double n3 = std::sqrt(1 - n1 * n1 - n2 * n2);
-  n1 *= lattice[2];
-  n2 *= lattice[2];
-  n3 *= lattice[2];
-
-  DblMatrix result(3, 3);
-  result[0][0] = l1;
-  result[0][1] = l2;
-  result[0][2] = l3;
-  result[1][0] = m1;
-  result[1][1] = m2;
-  result[1][2] = m3;
-  result[2][0] = n1;
-  result[2][1] = n2;
-  result[2][2] = n3;
-
-  return result;
-}
-
-}  // namespace Algorithm
-}  // namespace Mantid
+} // namespace Algorithm
+} // namespace Mantid

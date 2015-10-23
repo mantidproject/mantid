@@ -41,7 +41,7 @@ namespace Crystal {
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport OptimizeLatticeForCellType : public API::Algorithm {
- public:
+public:
   /// Default constructorMatrix
   OptimizeLatticeForCellType();
   /// Destructor
@@ -59,22 +59,21 @@ class DLLExport OptimizeLatticeForCellType : public API::Algorithm {
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Crystal"; }
-  /// Call TOFLattice as a Child Algorithm to get statistics of the peaks
-  double optLatticeSum(std::string inname, std::string cell_type,
-                       std::vector<double> &params);
-  void optLattice(std::string inname, std::vector<double> &params, double *out);
 
- private:
+  std::vector<double> outParams(std::string cell_type, int icol,
+                                API::ITableWorkspace_sptr ParamTable);
+  std::string inParams(std::string cell_type, std::vector<double> &lat);
+
+private:
   // Overridden Algorithm methods
   void init();
   void exec();
   /// Function to find peaks near detector edge
   bool edgePixel(DataObjects::PeaksWorkspace_sptr ws, std::string bankName,
                  int col, int row, int Edge);
-  Kernel::DblMatrix aMatrix(std::vector<double> lattice);
 };
 
-}  // namespace Algorithm
-}  // namespace Mantid
+} // namespace Algorithm
+} // namespace Mantid
 
 #endif /*MANTID_CRYSTAL_OptimizeLatticeForCellType_H_*/
