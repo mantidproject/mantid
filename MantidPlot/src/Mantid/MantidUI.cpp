@@ -3617,7 +3617,7 @@ bool MantidUI::workspacesDockPlot1To1()
 
 struct mem_block
 {
-  int size;
+  SIZE_T size;
   int state;
 };
 
