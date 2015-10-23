@@ -40,11 +40,11 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
 
   for (auto it = searchResults.begin(); it != searchResults.end(); ++it) {
     const auto location = it->second.location;
-    const auto run = it->first;
+    const auto fuzzyName = it->first;
 
-    const auto loadPath = m_catInfo->transformArchivePath(location);
+    const auto definedPath = m_catInfo->transformArchivePath(location);
 
-    Measurement metaData = m_measurementSource->obtain(loadPath);
+    Measurement metaData = m_measurementSource->obtain(definedPath, fuzzyName);
     /*
     const Poco::File filePath(loadPath);
     if (filePath.exists() && filePath.isFile()) {

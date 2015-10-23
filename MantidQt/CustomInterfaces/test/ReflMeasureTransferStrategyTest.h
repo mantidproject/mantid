@@ -7,19 +7,19 @@
 #include "MantidQtCustomInterfaces/ReflMeasurementSource.h"
 #include <memory>
 #include <gmock/gmock.h>
+#include <utility>
 
 using namespace testing;
+using namespace MantidQt::CustomInterfaces;
 
 class MockReflMeasurementSource
     : public MantidQt::CustomInterfaces::ReflMeasurementSource {
 public:
-  MOCK_CONST_METHOD1(
-      obtain, MantidQt::CustomInterfaces::Measurement(const std::string &));
+  MOCK_CONST_METHOD2(obtain, MantidQt::CustomInterfaces::Measurement(
+                                 const std::string &, const std::string &));
   MOCK_CONST_METHOD0(clone, MockReflMeasurementSource *());
   ~MockReflMeasurementSource() {}
 };
-
-using MantidQt::CustomInterfaces::ReflMeasureTransferStrategy;
 
 class ReflMeasureTransferStrategyTest : public CxxTest::TestSuite {
 public:
@@ -30,6 +30,40 @@ public:
   }
   static void destroySuite(ReflMeasureTransferStrategyTest *suite) {
     delete suite;
+  }
+
+  void test_obtain_single_measurement() {
+
+    SearchResultMap data;
+    data.insert(std::make_pair<std::string, SearchResult>(
+        "111", SearchResult("descr", "location")));
+
+    auto mockMeasurementSource = new MockReflMeasurementSource;
+    // We expect that we are going to fetch the  measurement data for every
+    // search result.
+    EXPECT_CALL(*mockMeasurementSource, obtain(_, _))
+        .Times(Exactly(data.size()))
+        .WillRepeatedly(Return(Measurement("a", "s_a", "l", "t")));
+
+    auto mockCatInfo = new MockICatalogInfo;
+    // We expect that every location will be translated/transformed to make it
+    // os specific
+    EXPECT_CALL(*mockCatInfo, transformArchivePath(_))
+        .Times(Exactly(data.size()))
+        .WillRepeatedly(Return(std::string()));
+
+    MockProgressBase progress;
+    EXPECT_CALL(progress, doReport(_)).Times(Exactly(data.size()));
+
+    ReflMeasureTransferStrategy strategy(
+        std::move(std::unique_ptr<MockICatalogInfo>(mockCatInfo)),
+        std::move(
+            std::unique_ptr<MockReflMeasurementSource>(mockMeasurementSource)));
+
+    strategy.transferRuns(data, progress);
+
+    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo));
+    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementSource));
   }
 
   void test_clone() {

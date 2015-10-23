@@ -49,7 +49,7 @@ public:
   /// Clone
   virtual ICatalogInfo *clone() const = 0;
   /// Transform's the archive path based on operating system used.
-  std::string transformArchivePath(const std::string &path) const;
+  virtual std::string transformArchivePath(const std::string &path) const;
 
   /// virtual destructor
   virtual ~ICatalogInfo();

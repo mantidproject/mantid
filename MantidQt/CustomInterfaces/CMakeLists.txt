@@ -47,6 +47,7 @@ set ( SRC_FILES
 	src/Indirect/Stretch.cpp
 	src/MantidEV.cpp
 	src/MantidEVWorker.cpp
+	src/Measurement.cpp
 	src/MultiDatasetFit/MDFAddWorkspaceDialog.cpp
 	src/MultiDatasetFit/MDFDataController.cpp
 	src/MultiDatasetFit/MDFDatasetPlotData.cpp
@@ -164,6 +165,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Indirect/Stretch.h
 	inc/MantidQtCustomInterfaces/MantidEV.h
 	inc/MantidQtCustomInterfaces/MantidEVWorker.h
+	inc/MantidQtCustomInterfaces/Measurement.h
 	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFAddWorkspaceDialog.h
 	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFDataController.h
 	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFDatasetPlotData.h
@@ -406,6 +408,7 @@ set ( TEST_FILES
 	EnggDiffractionPresenterTest.h
 	IO_MuonGroupingTest.h
 	ImageROIPresenterTest.h
+	MeasurementTest.h
 	MuonAnalysisHelperTest.h
 	ParseKeyValueStringTest.h
 	ReflGenerateNotebookTest.h

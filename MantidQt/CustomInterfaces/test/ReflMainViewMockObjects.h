@@ -91,6 +91,7 @@ public:
   MOCK_CONST_METHOD0(macPrefix, const std::string());
   MOCK_CONST_METHOD0(linuxPrefix, const std::string());
   MOCK_CONST_METHOD0(clone, ICatalogInfo *());
+  MOCK_CONST_METHOD1(transformArchivePath, std::string(const std::string &));
   virtual ~MockICatalogInfo() {}
 };
 

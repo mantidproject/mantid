@@ -1,17 +1,13 @@
-#ifndef MANTIDQT_CUSTOMINTERFACES_REFLMEASUREMENTSOURCE_H_
-#define MANTIDQT_CUSTOMINTERFACES_REFLMEASUREMENTSOURCE_H_
+#ifndef MANTIDQT_CUSTOMINTERFACES_MEASUREMENT_H_
+#define MANTIDQT_CUSTOMINTERFACES_MEASUREMENT_H_
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/Measurement.h"
-#include <string>
+#include <String>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-
-/** ReflMeasurementSource : Repository pattern abstracting data mapping from
- domain. Specifically for accessing
- * measurement information from some data map/repository.
+/** Measurement : Immutable measurement type
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -34,18 +30,41 @@ namespace CustomInterfaces {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL ReflMeasurementSource {
+class MANTIDQT_CUSTOMINTERFACES_DLL Measurement {
+
 public:
-  /// Get the measurement somehow using location, or fuzzy path
-  virtual Measurement obtain(const std::string &definedPath,
-                             const std::string &fuzzyName) const = 0;
-  /// Virtual destructor
-  virtual ReflMeasurementSource *clone() const = 0;
+  /// Constructor
+  Measurement(const std::string &measurementId, const std::string &subId,
+              const std::string &label, const std::string &type);
+
+  /// Constructional method
+  static Measurement InvalidMeasurement();
+
+  /// Copy constructor
+  Measurement(const Measurement &other);
+
   /// Destructor
-  virtual ~ReflMeasurementSource(){};
+  ~Measurement();
+
+  bool isUseable() const;
+  std::string id() const;
+  std::string subId() const;
+  std::string type() const;
+  std::string label() const;
+
+private:
+  /// Constructor
+  Measurement();
+  const std::string m_measurementId;
+  const std::string m_subId;
+  const std::string m_label;
+  const std::string m_type;
+  bool m_valid;
+  /// Not assignable
+  Measurement &operator=(const Measurement &);
 };
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
-#endif /* MANTIDQT_CUSTOMINTERFACES_REFLMEASUREMENTSOURCE_H_ */
+#endif /* MANTIDQT_CUSTOMINTERFACES_MEASUREMENT_H_ */
