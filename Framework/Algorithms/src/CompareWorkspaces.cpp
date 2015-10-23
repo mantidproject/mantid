@@ -28,7 +28,7 @@ DECLARE_ALGORITHM(CompareWorkspaces)
 /** Constructor
  */
 CompareWorkspaces::CompareWorkspaces()
-    : API::Algorithm(), m_Result(false), m_Prog(nullptr),
+    : API::Algorithm(), m_Result(false), m_Prog(NULL),
       m_ParallelComparison(true) {}
 
 //----------------------------------------------------------------------------------------------
