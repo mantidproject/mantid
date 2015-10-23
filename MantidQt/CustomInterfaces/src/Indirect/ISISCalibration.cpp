@@ -152,8 +152,7 @@ namespace CustomInterfaces
   {
   }
 
-  void ISISCalibration::run()
-  {
+  void ISISCalibration::run() {
     // Get properties
     QStringList filenameList = m_uiForm.leRunNo->getFilenames();
     QString filenames = filenameList.join(",");
@@ -161,13 +160,21 @@ namespace CustomInterfaces
     QString firstFileNumber("");
     auto cutIndexDash = userInFiles.indexOf("-");
     auto cutIndexComma = userInFiles.indexOf(",");
+
     if (cutIndexDash == -1 && cutIndexComma == -1) {
       firstFileNumber = userInFiles;
     } else {
-      if (cutIndexDash < cutIndexComma) {
+      if (cutIndexDash != -1) {
         firstFileNumber = userInFiles.left(cutIndexDash);
       } else {
         firstFileNumber = userInFiles.left(cutIndexComma);
+      }
+      if (cutIndexDash != -1 && cutIndexComma != -1) {
+        if (cutIndexDash < cutIndexComma) {
+          firstFileNumber = userInFiles.left(cutIndexDash);
+        } else {
+          firstFileNumber = userInFiles.left(cutIndexComma);
+        }
       }
     }
 
