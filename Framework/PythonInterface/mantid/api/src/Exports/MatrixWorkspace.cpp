@@ -96,8 +96,8 @@ void setMonitorWorkspace(MatrixWorkspace &self,
 * 
 *@return weak pointer to monitor workspace used by python
 */
-boost::weak_ptr<MatrixWorkspace> getMonitorWorkspace(MatrixWorkspace &self) {
-	return boost::weak_ptr<MatrixWorkspace>(self.monitorWorkspace());
+boost::weak_ptr<Workspace> getMonitorWorkspace(MatrixWorkspace &self) {
+  return boost::weak_ptr<Workspace>(self.monitorWorkspace());
 }
 /**
  * Clear monitor workspace attached to for current workspace.
