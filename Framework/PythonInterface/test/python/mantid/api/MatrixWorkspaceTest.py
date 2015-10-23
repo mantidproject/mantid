@@ -1,4 +1,4 @@
-import unittest
+﻿import unittest
 import sys
 import math
 from testhelpers import create_algorithm, run_algorithm, can_be_instantiated, WorkspaceCreationHelper
@@ -344,6 +344,48 @@ class MatrixWorkspaceTest(unittest.TestCase):
         ws1.setComment(comment)
         self.assertEquals(comment, ws1.getComment())
         AnalysisDataService.remove(ws1.getName())
+        
+    def test_setGetMonitorWS(self):
+        run_algorithm('CreateWorkspace', OutputWorkspace='ws1',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
+        run_algorithm('CreateWorkspace', OutputWorkspace='ws_mon',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
+        
+        ws1=AnalysisDataService.retrieve('ws1')
+        try:
+            monWs = ws1.getMonitorWorkspace()
+            GotIt = True
+        except RuntimeError:
+            GotIt = False             
+        self.assertFalse(GotIt)
+        
+        monWs = AnalysisDataService.retrieve('ws_mon')
+        ws1.setMonitorWorkspace(monWs)
+        monWs.setTitle("My Fake Monitor workspace")
+        
+        monWs1 = ws1.getMonitorWorkspace();
+        self.assertEquals(monWs.getTitle(), monWs1.getTitle())
+        
+        ws1.clearMonitorWorkspace()
+        try:
+            monWs1 = ws1.getMonitorWorkspace()
+            GotIt = True
+        except RuntimeError:
+            GotIt = False             
+        self.assertFalse(GotIt)
+
+        # Check weak pointer issues
+        ws1.setMonitorWorkspace(monWs)
+        wms=ws1.getMonitorWorkspace()
+
+        allFine = False
+        try:
+            ws1.setMonitorWorkspace(wms) 
+            allFine = True
+        except ValueError:            
+            pass
+        self.assertTrue(allFine)
 
 if __name__ == '__main__':
     unittest.main()
+    #Testing particular test from Mantid
+    #tester=MatrixWorkspaceTest('test_setGetMonitorWS')
+    #tester.test_setGetMonitorWS()

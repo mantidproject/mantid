@@ -1135,6 +1135,11 @@ MatrixWorkspace::maskedBins(const size_t &workspaceIndex) const {
 */
 void MatrixWorkspace::setMonitorWorkspace(
     const boost::shared_ptr<MatrixWorkspace> &monitorWS) {
+  if (monitorWS.get() == this) {
+    throw std::runtime_error(
+        "To avoid memory leak, monitor workspace"
+        " can not be the same workspace as the host workspace");
+  }
   m_monitorWorkspace = monitorWS;
 }
 
