@@ -10,6 +10,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/HistoryView.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include <vector>
 #include <Poco/File.h>
@@ -71,10 +72,20 @@ bool fileExists(const std::string &filename) {
 // probably have to trawl the workspace history for file and workspace names to
 // do this
 std::vector<std::string> filterToNew(std::vector<std::string> input_data,
+                                     std::vector<std::string> current_data,
                                      Kernel::Logger &g_log) {
   std::vector<std::string> new_data;
 
   return new_data;
+}
+
+std::vector<std::string> getCurrentData(const WorkspaceHistory &ws_history) {
+  std::vector<std::string> currentFilesAndWorkspaces;
+
+  auto view = ws_history.createView();
+  view->unrollAll();
+
+  return currentFilesAndWorkspaces;
 }
 
 // Register the algorithm into the AlgorithmFactory
@@ -162,7 +173,7 @@ void AccumulateMD::init() {
  */
 void AccumulateMD::exec() {
 
-  IMDHistoWorkspace_sptr input_ws = this->getProperty("InputWorkspace");
+  const IMDHistoWorkspace_sptr input_ws = this->getProperty("InputWorkspace");
   std::vector<std::string> input_data = this->getProperty("DataSources");
 
   input_data = filterToExistingSources(input_data, g_log);
@@ -196,14 +207,16 @@ void AccumulateMD::exec() {
     createAlg->setPropertyValue("InPlace", this->getProperty("InPlace"));
     createAlg->execute();
 
-    // Todo set output workspace and delete input workspace
-
     return; // POSSIBLE EXIT POINT
   }
   Algorithm::interruption_point();
 
+  // Trawl workspace history for filenames and workspace names
+  const WorkspaceHistory wsHistory = input_ws->getHistory();
+  std::vector<std::string> current_data = getCurrentData(wsHistory);
+
   // If there's no new data, we don't have anything to do
-  input_data = filterToNew(input_data, g_log);
+  input_data = filterToNew(input_data, current_data, g_log);
   if (input_data.empty()) {
     g_log.information() << "No new data to append to workspace in "
                         << this->name() << std::endl;

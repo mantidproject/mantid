@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceHistory.h"
 
 namespace {}
 
@@ -18,7 +19,10 @@ filterToExistingSources(std::vector<std::string> input_data,
                         Kernel::Logger &g_log);
 
 std::vector<std::string> filterToNew(std::vector<std::string> input_data,
+                                     std::vector<std::string> current_data,
                                      Kernel::Logger &g_log);
+
+std::vector<std::string> getCurrentData(API::WorkspaceHistory &ws_history);
 
 bool fileExists(const std::string &filename);
 
