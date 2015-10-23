@@ -64,21 +64,22 @@ endif ()
 
 find_package ( Doxygen ) # optional
 
-# Need to change search path to find zlib include on Windows.
-# Couldn't figure out how to extend CMAKE_INCLUDE_PATH variable for extra path
-# so I'm caching old value, changing it temporarily and then setting it back
-set ( MAIN_CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} )
-set ( CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH}/zlib123 )
-find_package ( ZLIB REQUIRED )
-set ( CMAKE_INCLUDE_PATH ${MAIN_CMAKE_INCLUDE_PATH} )
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows" OR (APPLE AND OSX_VERSION VERSION_LESS 10.9))
-  set (HDF5_DIR "${CMAKE_MODULE_PATH}")
+if(CMAKE_HOST_WIN32)
+  find_package ( ZLIB REQUIRED 
+    CONFIGS zlib-config.cmake )
+  set (HDF5_DIR "${THIRD_PARTY_DIR}/cmake")
   find_package ( HDF5 COMPONENTS CXX HL REQUIRED
     CONFIGS hdf5-config.cmake )
-  add_definitions ( -DH5_BUILT_AS_DYNAMIC_LIB )
 else()
-  find_package ( HDF5 COMPONENTS CXX HL REQUIRED )
+  find_package ( ZLIB REQUIRED )
+  if (APPLE AND OSX_VERSION VERSION_LESS 10.9)
+    set (HDF5_DIR "${CMAKE_MODULE_PATH}")
+    find_package ( HDF5 COMPONENTS CXX HL REQUIRED
+      CONFIGS hdf5-config.cmake )
+    add_definitions ( -DH5_BUILT_AS_DYNAMIC_LIB )
+  else()
+    find_package ( HDF5 COMPONENTS CXX HL REQUIRED )
+  endif()
 endif()
 
 find_package ( PythonInterp )
