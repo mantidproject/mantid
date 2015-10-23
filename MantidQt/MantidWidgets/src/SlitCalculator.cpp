@@ -11,12 +11,16 @@ SlitCalculator::SlitCalculator(QWidget *parent) {
   Q_UNUSED(parent);
   ui.setupUi(this);
   if (currentInstrumentName == "") {
+    // set up the initial instrument if there is not one associated
+    // with slit calculator
     currentInstrumentName = "INTER";
     setInstrument(currentInstrumentName);
   }
   on_recalculate_triggered();
 }
 void SlitCalculator::processInstrumentHasBeenChanged() {
+  // used in refl main window to indicate that slitCalculator fields
+  // need to update because another instrument has been selected.
   on_recalculate_triggered();
 }
 SlitCalculator::~SlitCalculator() {}
@@ -41,7 +45,7 @@ void SlitCalculator::setInstrument(std::string instrumentName) {
     this->instrument = Mantid::API::InstrumentDataService::Instance().retrieve(
         instrumentNameMangled);
   } else {
-    // We set the XML that we have found for the instrument.
+    // We set the instrument from XML that we have found.
     Mantid::API::Progress *prog = new Mantid::API::Progress();
     this->instrument = parser.parseXML(prog);
     delete prog;
@@ -51,14 +55,28 @@ void SlitCalculator::setInstrument(std::string instrumentName) {
 
 void SlitCalculator::setupSlitCalculatorWithInstrumentValues(
     Mantid::Geometry::Instrument_const_sptr instrument) {
+  // fetch the components that we need for values from IDF
   auto slit1Component = instrument->getComponentByName("slit1");
   auto slit2Component = instrument->getComponentByName("slit2");
   auto sampleComponent = instrument->getComponentByName("some-surface-holder");
-  // convert between metres and millimetres
-  const double s1s2 = 1e3 * slit1Component->getDistance(*slit2Component);
-  ui.spinSlit1Slit2->setValue(s1s2);
-  const double s2sa = 1e3 * slit2Component->getDistance(*sampleComponent);
-  ui.spinSlit2Sample->setValue(s2sa);
+  // check that they have been fetched from the IDF
+  if (slit1Component.get() != NULL && slit2Component.get() != NULL &&
+      sampleComponent.get() != NULL) {
+    // convert from meters to millimeters
+    const double s1s2 = 1e3 * (slit1Component->getDistance(*slit2Component));
+    // set value in field of slitCalculator
+    ui.spinSlit1Slit2->setValue(s1s2);
+    // convert from meters to millimeters
+    const double s2sa = 1e3 * (slit2Component->getDistance(*sampleComponent));
+    // set value in field of slitCalculator
+    ui.spinSlit2Sample->setValue(s2sa);
+  } else {
+    // the parameters slit1, slit2 and sample-holder where not found
+    // set the values in SlitCalculator up so that it is obvious
+    // we did not retrieve them from any IDF.
+    ui.spinSlit1Slit2->setValue(0.0);
+    ui.spinSlit2Sample->setValue(0.0);
+  }
 }
 Mantid::Geometry::Instrument_const_sptr SlitCalculator::getInstrument() {
   return instrument;

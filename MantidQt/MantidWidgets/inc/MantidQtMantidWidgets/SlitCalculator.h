@@ -40,10 +40,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SlitCalculator : public QDialog {
 public:
   SlitCalculator(QWidget *parent);
   virtual ~SlitCalculator();
-  void setInstrument(std::string instrumentName);
-  Mantid::Geometry::Instrument_const_sptr getInstrument();
   void setCurrentInstrumentName(std::string instrumentName);
-  std::string getCurrentInstrumentName();
   void processInstrumentHasBeenChanged();
 
 protected:
@@ -54,6 +51,9 @@ private:
   std::string currentInstrumentName;
   void setupSlitCalculatorWithInstrumentValues(
       Mantid::Geometry::Instrument_const_sptr);
+  std::string getCurrentInstrumentName();
+  Mantid::Geometry::Instrument_const_sptr getInstrument();
+  void setInstrument(std::string instrumentName);
 private slots:
   void on_recalculate_triggered();
 };
