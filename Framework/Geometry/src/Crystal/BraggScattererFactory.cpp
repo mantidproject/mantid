@@ -19,9 +19,8 @@ namespace Geometry {
  * @param properties :: Semi-colon separated "name=value"-pairs.
  * @return Initialized scatterer object.
  */
-BraggScatterer_sptr
-BraggScattererFactoryImpl::createScatterer(const std::string &name,
-                                           const std::string &properties) {
+BraggScatterer_sptr BraggScattererFactoryImpl::createScatterer(
+    const std::string &name, const std::string &properties) const {
   BraggScatterer_sptr scatterer = create(name);
   scatterer->initialize();
 

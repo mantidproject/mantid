@@ -4,6 +4,7 @@
 #include "MantidMDAlgorithms/MergeMDFiles.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -35,6 +36,7 @@ public:
     std::vector<std::vector<std::string>> filenames;
     Mantid::Kernel::SpecialCoordinateSystem appliedCoord =
         Mantid::Kernel::QSample;
+    Mantid::Geometry::QSample frame;
     std::vector<MDEventWorkspace3Lean::sptr> inWorkspaces;
     // how many events put into each file.
     long nFileEvents(1000);
@@ -42,8 +44,8 @@ public:
       std::ostringstream mess;
       mess << "MergeMDFilesTestInput" << i;
       MDEventWorkspace3Lean::sptr ws =
-          MDAlgorithmsTestHelper::makeFileBackedMDEW(
-              mess.str(), true, -nFileEvents, appliedCoord);
+          MDAlgorithmsTestHelper::makeFileBackedMDEWwithMDFrame(
+              mess.str(), true, frame, -nFileEvents, appliedCoord);
       inWorkspaces.push_back(ws);
       filenames.push_back(
           std::vector<std::string>(1, ws->getBoxController()->getFilename()));

@@ -137,6 +137,11 @@ void IdentifyNoisyDetectors::getStdDev(MatrixWorkspace_sptr valid,
     }
   }
 
+  if (0 == count) {
+    // all values are zero, no need to loop
+    return;
+  }
+
   mean = mean / count;
   double stddev = sqrt((mean2 / count) - std::pow(mean, 2));
 

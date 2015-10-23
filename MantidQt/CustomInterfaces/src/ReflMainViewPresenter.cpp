@@ -24,9 +24,6 @@
 #include <fstream>
 #include <sstream>
 
-#include <QSettings>
-#include <QFileDialog>
-
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -36,7 +33,6 @@ using namespace MantidQt::MantidWidgets;
 
 namespace
 {
-  const QString ReflSettingsGroup = "Mantid/CustomInterfaces/ISISReflectometry";
 
   void validateModel(ITableWorkspace_sptr model)
   {
@@ -1511,11 +1507,7 @@ namespace MantidQt
         m_options[it->first] = it->second;
 
       //Save any changes to disk
-      QSettings settings;
-      settings.beginGroup(ReflSettingsGroup);
-      for(auto it = m_options.begin(); it != m_options.end(); ++it)
-        settings.setValue(QString::fromStdString(it->first), it->second);
-      settings.endGroup();
+      m_view->saveSettings(m_options);
     }
 
     /** Load options from disk if possible, or set to defaults */
@@ -1537,12 +1529,7 @@ namespace MantidQt
       m_options["RoundDQQPrecision"] = 3;
 
       //Load saved values from disk
-      QSettings settings;
-      settings.beginGroup(ReflSettingsGroup);
-      QStringList keys = settings.childKeys();
-      for(auto it = keys.begin(); it != keys.end(); ++it)
-        m_options[it->toStdString()] = settings.value(*it);
-      settings.endGroup();
+      m_view->loadSettings(m_options);
     }
   }
 }

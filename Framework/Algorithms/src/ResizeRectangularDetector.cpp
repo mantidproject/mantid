@@ -74,8 +74,21 @@ void ResizeRectangularDetector::exec() {
   Instrument_sptr inst;
   if (inputW) {
     inst = boost::const_pointer_cast<Instrument>(inputW->getInstrument());
+    if (!inst)
+      throw std::runtime_error("Could not get a valid instrument from the "
+                               "MatrixWorkspace provided as input");
+
   } else if (inputP) {
     inst = boost::const_pointer_cast<Instrument>(inputP->getInstrument());
+    if (!inst)
+      throw std::runtime_error("Could not get a valid instrument from the "
+                               "PeaksWorkspace provided as input");
+  } else {
+    if (!inst)
+      throw std::runtime_error("Could not get a valid instrument from the "
+                               "workspace and it does not seem to be valid as "
+                               "input (must be either MatrixWorkspace or "
+                               "PeaksWorkspace");
   }
 
   std::string ComponentName = getPropertyValue("ComponentName");

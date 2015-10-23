@@ -116,6 +116,14 @@ public:
   virtual std::string currentInstrument() const = 0;
 
   /**
+  * Selected plot data representation will be applied, which will
+  * ran through python script
+  *
+  * @return which format should to applied for plotting data
+  */
+  virtual int currentPlotType() const = 0;
+
+  /**
    * The Vanadium run number used in the current calibration
    *
    * @return Vanadium run number, as a string
@@ -263,6 +271,14 @@ public:
   virtual void saveSettings() const = 0;
 
   /**
+ * Saves the ouput files which are generated, this can be done
+ * via Output Files checkbox on the focus tab
+ *
+ * @return bool
+ */
+  virtual bool saveOutputFiles() const = 0;
+
+  /**
   * Produces a single spectrum graph for focused output. Runs
   * plotSpectrum function via python.
   *
@@ -285,14 +301,6 @@ public:
   * @param wsName name of the workspace to plot (must be in the ADS)
   */
   virtual void plotReplacingWindow(const std::string &wsName) = 0;
-
-  /*
- * Selected plot data representation will be applied, which will
- * ran through python script
- *
- * @return which format should to applied for plotting data
- */
-  virtual int currentPlotType() const = 0;
 };
 
 } // namespace CustomInterfaces

@@ -53,6 +53,7 @@ class ISIS_ReductionWebLike(stresstesting.MantidStressTest):
         if 'outWS' in mtd:
             return 'outWS'
         saveFileName = self.rd.reducer.save_file_name
+#pylint: disable=unused-variable
         outWS = Load(Filename=saveFileName+'.nxs')
         outWS *= 0.997979227566217
         fullRezPath =FileFinder.getFullPath(saveFileName+'.nxs')
@@ -63,7 +64,11 @@ class ISIS_ReductionWebLike(stresstesting.MantidStressTest):
 
     def validate(self):
         """Returns the name of the workspace & file to compare"""
+        # tolerance defined outside of init
+#pylint: disable=W0201
         self.tolerance = 1e-6
+        # tolerance_is_reller defined outside of init
+#pylint: disable=W0201
         self.tolerance_is_reller=True
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
@@ -97,6 +102,8 @@ class ISIS_ReductionWrapperValidate(stresstesting.MantidStressTest):
         # this is correct workflow for the ref file
         #rd.reducer.prop_man.save_file_name = ref_file
         # temporary workflow, until we fix workspace adjustment
+        # disable pylint -- access to protected member
+#pylint: disable=W0212
         rd._tolerr =3.e-3
         rd.reducer.prop_man.save_file_name = 'MARIReduction.nxs'
         rd.validate_run_number=11001
@@ -239,6 +246,13 @@ class ISISLoadFilesMER(stresstesting.MantidStressTest):
         det = mon_ws.getDetector(0)
         self.assertTrue(det.isMonitor())
 
+        ei_ws = GetAllEi(mon_ws,69634,69638,IgnoreSecondMonitor=False)
+        self.assertTrue(isinstance(ei_ws,Workspace))
+
+        en_peaks = ei_ws.readX(0)
+        self.assertAlmostEquals(len(en_peaks),1)
+        self.assertAlmostEqual(en_peaks[0],108.94,2)
+
         self.valid = True
 
 
@@ -283,12 +297,16 @@ class ISISLoadFilesLET(stresstesting.MantidStressTest):
         #
         self.assertEqual(mon_ws.getNumberHistograms(),27)
 
+        ei_ws = GetAllEi(mon_ws,40966,40967,IgnoreSecondMonitor=True)
+        self.assertTrue(isinstance(ei_ws,Workspace))
 
         self.valid = True
+
 
 
     def validate(self):
         return self.valid
 
 if __name__=="__main__":
-    ISISLoadFilesMER.runTest()
+    tester = ISISLoadFilesLET()
+    tester.runTest()

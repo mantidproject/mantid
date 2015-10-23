@@ -34,9 +34,9 @@ public:
      * Input structure:
      *------------------
      *  -------------
-     *  |   |///|   |
-     *  -------------
-     * -3-2-1 0 1 2 3
+     *  |   |   |///|   |   |
+     *  ---------------------
+     * -5-4-3 2-1 0 1 2 3 4 5
      *---------------------------
      * Expected output structure:
      *----------------------------
@@ -51,13 +51,13 @@ public:
     const size_t numDims = 1;
     const double signal = 0.0;
     const double errorSquared = 1.3;
-    size_t numBins[static_cast<int>(numDims)] = {3};
-    Mantid::coord_t min[static_cast<int>(numDims)] = {-3};
-    Mantid::coord_t max[static_cast<int>(numDims)] = {3};
+    size_t numBins[static_cast<int>(numDims)] = {5};
+    Mantid::coord_t min[static_cast<int>(numDims)] = {-5};
+    Mantid::coord_t max[static_cast<int>(numDims)] = {5};
     const std::string name("test");
     auto inWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
         numDims, signal, errorSquared, numBins, min, max, name);
-    inWS->setSignalAt(1, 1.0); // set middle bin signal to one
+    inWS->setSignalAt(2, 1.0); // set middle bin signal to one
     CompactMD alg;
     alg.setChild(true);
     alg.setRethrows(true);
@@ -129,7 +129,7 @@ public:
     alg.setProperty("OutputWorkspace", "out");
     alg.execute();
     IMDHistoWorkspace_sptr outputWorkspace = alg.getProperty("OutputWorkspace");
-    /*TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
+    TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
                       outputWorkspace->getSignalAt(0), 1);
     TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
                       outputWorkspace->getSignalAt(2), 1);
@@ -160,7 +160,7 @@ public:
                       inWS->getDimension(0)->getBinWidth());
     TSM_ASSERT_EQUALS("Bin width for dim 1 should be consistent: ",
                       outputWorkspace->getDimension(1)->getBinWidth(),
-                      inWS->getDimension(1)->getBinWidth());*/
+                      inWS->getDimension(1)->getBinWidth());
   }
 
   void
@@ -236,6 +236,7 @@ public:
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error &);
   }
 };
+
 //===================
 // Performance Tests
 //===================
@@ -252,11 +253,25 @@ public:
     return new CompactMDTestPerformance();
   }
   static void destroySuite(CompactMDTestPerformance *suite) { delete suite; }
-
-  CompactMDTestPerformance() {
+  void setUp() {
     // Create a 4D workspace.
-    m_ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        1.0 /*signal*/, 4 /*nd*/, 100 /*nbins*/, 10 /*max*/, 1.0 /*error sq*/);
+    const size_t numDims = 4;
+    const double signal = 0.0;
+    const double errorSquared = 1.2;
+    size_t numBins[static_cast<int>(numDims)] = {10, 20, 10, 20};
+    Mantid::coord_t min[static_cast<int>(numDims)] = {-5, -10, -5, -10};
+    Mantid::coord_t max[static_cast<int>(numDims)] = {5, 10, 5, 10};
+    const std::string name("test");
+    m_ws = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
+        numDims, signal, errorSquared, numBins, min, max, name);
+    // setting signals like this for variety
+    auto iter = m_ws->createIterator();
+    do {
+      auto index = iter->getLinearIndex();
+      if (index % 2 == 0) {
+        m_ws->setSignalAt(index, 1.0);
+      }
+    } while (iter->next());
   }
   void test_execute_4d() {
     CompactMD alg;

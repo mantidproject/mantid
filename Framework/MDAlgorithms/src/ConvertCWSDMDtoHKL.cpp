@@ -6,8 +6,10 @@
 
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/UnitLabelTypes.h"
 
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -335,14 +337,18 @@ API::IMDEventWorkspace_sptr ConvertCWSDMDtoHKL::createHKLMDWorkspace(
   std::vector<size_t> m_numBins(3, 100);
   getRange(vec_hkl, m_extentMins, m_extentMaxs);
 
+  // Get MDFrame of HKL type with RLU
+  auto unitFactory = makeMDUnitFactoryChain();
+  auto unit = unitFactory->create(Units::Symbol::RLU.ascii());
+  Mantid::Geometry::HKL frame(unit);
+
   for (size_t i = 0; i < nDimension; ++i) {
     std::string id = vec_ID[i];
     std::string name = dimensionNames[i];
     // std::string units = "A^-1";
-    std::string units = "";
     mdws->addDimension(
         Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
-            id, name, units, static_cast<coord_t>(m_extentMins[i]),
+            id, name, frame, static_cast<coord_t>(m_extentMins[i]),
             static_cast<coord_t>(m_extentMaxs[i]), m_numBins[i])));
   }
 

@@ -4,6 +4,8 @@
 #include "MantidAPI/LogManager.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 
+#include "MantidGeometry/Crystal/ReflectionGenerator.h"
+
 #include "boost/format.hpp"
 #include "boost/algorithm/string/join.hpp"
 
@@ -33,27 +35,22 @@ PoldiPeakCollection::PoldiPeakCollection(const TableWorkspace_sptr &workspace)
 }
 
 PoldiPeakCollection::PoldiPeakCollection(
-    const Geometry::CrystalStructure_sptr &crystalStructure, double dMin,
-    double dMax)
+    const CrystalStructure &crystalStructure, double dMin, double dMax)
     : m_peaks(), m_intensityType(Integral), m_profileFunctionName(),
       m_pointGroup() {
-  if (!crystalStructure) {
-    throw std::invalid_argument(
-        "Cannot create PoldiPeakCollection from invalid CrystalStructure.");
-  }
-
   m_pointGroup = PointGroupFactory::Instance().createPointGroupFromSpaceGroup(
-      crystalStructure->spaceGroup());
+      crystalStructure.spaceGroup());
 
-  m_unitCell = crystalStructure->cell();
+  m_unitCell = crystalStructure.cell();
 
-  std::vector<V3D> uniqueHKL = crystalStructure->getUniqueHKLs(
-      dMin, dMax, Geometry::CrystalStructure::UseStructureFactor);
-  std::vector<double> dValues = crystalStructure->getDValues(uniqueHKL);
-  std::vector<double> structureFactors =
-      crystalStructure->getFSquared(uniqueHKL);
+  ReflectionGenerator generator(crystalStructure,
+                                ReflectionConditionFilter::StructureFactor);
 
-  setPeaks(uniqueHKL, dValues, structureFactors);
+  std::vector<V3D> hkls = generator.getUniqueHKLs(dMin, dMax);
+  std::vector<double> dValues = generator.getDValues(hkls);
+  std::vector<double> structureFactors = generator.getFsSquared(hkls);
+
+  setPeaks(hkls, dValues, structureFactors);
 }
 
 PoldiPeakCollection_sptr PoldiPeakCollection::clone() {

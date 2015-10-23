@@ -4,7 +4,9 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
+
 #include "MantidGeometry/Crystal/BraggScatterer.h"
+#include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -67,7 +69,7 @@ class MANTID_GEOMETRY_DLL BraggScattererFactoryImpl
     : public Kernel::DynamicFactory<BraggScatterer> {
 public:
   BraggScatterer_sptr createScatterer(const std::string &name,
-                                      const std::string &properties = "");
+                                      const std::string &properties = "") const;
 
   /// Subscribes a scatterer class into the factory.
   template <class C> void subscribeScatterer() {

@@ -73,7 +73,8 @@ public:
   std::string name() const { return "CompositeBraggScatterer"; }
   BraggScatterer_sptr clone() const;
 
-  void addScatterer(const BraggScatterer_sptr &scatterer);
+  virtual void addScatterer(const BraggScatterer_sptr &scatterer);
+  void setScatterers(const std::vector<BraggScatterer_sptr> &scatterers);
   size_t nScatterers() const;
   BraggScatterer_sptr getScatterer(size_t i) const;
   void removeScatterer(size_t i);
@@ -87,6 +88,9 @@ protected:
   void propagatePropertyToScatterer(BraggScatterer_sptr &scatterer,
                                     const std::string &propertyName,
                                     const std::string &propertyValue);
+
+  void addScattererImplementation(const BraggScatterer_sptr &scatterer);
+  void removeScattererImplementation(size_t i);
 
   void redeclareProperties();
   std::map<std::string, size_t> getPropertyCountMap() const;

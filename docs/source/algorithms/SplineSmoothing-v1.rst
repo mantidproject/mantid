@@ -18,16 +18,21 @@ derivatives of each of the interpolated points as a side product.
 Setting the DerivOrder property to zero will force the algorithm to
 calculate no derivatives.
 
-The algorithm allows user to include number of breaking points which
-will enable the algorithm to execute functions with large number of
-spikes or noise. With the control of number of breaking points, user
-will be able to execute :ref:`SplineSmoothing <algm-SplineSmoothing-v1>`
-algorithm in small period of time. The lower breaking points number is
-set the faster algorithm will execute the function but it will not
-produce high quality smoothing function. By inserting high number of
-breaking points, a detailed smoothing function can also be produced.
+The algorithm provides user with an option of including number of
+breaking points which will enable the algorithm to execute functions
+with large number of spikes or noise. With the control of number of
+breaking points, user will be able to execute
+:ref:`SplineSmoothing <algm-SplineSmoothing-v1>` algorithm in small
+period of time. The lower breaking points number is set the faster
+algorithm will execute the function but it will not produce high
+quality smoothing function. By inserting high number of breaking points,
+a detailed smoothing function can also be produced. By not providing
+MaxNumberOfBreaks, the alogirthm will assume that user would like to
+execute the maximum number of breaks possible. This comes with a risk
+of alogirthm falling in to a very long loop.
 
-Users are also able to successfully apply the algorithm to a workspace
+By providing MaxNumberOfBreaks as a parameter, the users are also will
+be able to successfully and efficiently apply the algorithm to a workspace
 with multiple spectrums, which would generate an output of workspace
 with multiple spectrums of :ref:`SplineSmoothing <algm-SplineSmoothing-v1>`
 algorithm applied to it. `BSpline <http://www.mantidproject.org/BSpline>`_

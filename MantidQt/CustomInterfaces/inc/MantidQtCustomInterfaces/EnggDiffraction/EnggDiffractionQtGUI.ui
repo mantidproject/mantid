@@ -108,7 +108,7 @@
        <widget class="QComboBox" name="comboBox_instrument">
         <item>
          <property name="text">
-          <string>ENGIN-X</string>
+          <string>ENGINX</string>
          </property>
         </item>
        </widget>

@@ -125,6 +125,8 @@ public:
 
   virtual void plotReplacingWindow(const std::string &wsName);
 
+  virtual bool saveOutputFiles() const;
+
   int currentPlotType() const { return m_currentType; }
 
 private slots:
@@ -196,8 +198,14 @@ private:
   /// instrument selected (ENGIN-X, etc.)
   std::string m_currentInst;
 
+  /// User select instrument
+  void userSelectInstrument(const QString &prefix);
+
+  /// setting the instrument prefix ahead of the run number
+  void setPrefix(std::string prefix);
+
   // plot data representation type selected
-  int m_currentType;
+  int static m_currentType;
 
   /// current calibration produced in the 'Calibration' tab
   std::string m_currentCalibFilename;

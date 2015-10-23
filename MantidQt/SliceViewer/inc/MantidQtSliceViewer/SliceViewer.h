@@ -117,7 +117,7 @@ public:
   /// Dynamic Rebinning-related Python bindings
   void setRebinThickness(int dim, double thickness);
   void setRebinNumBins(int xBins, int yBins);
-  void setRebinMode(bool mode, bool locked);
+  void setRebinMode(bool mode);
   void refreshRebin();
 
   /// Methods relating to peaks overlays.
@@ -188,7 +188,6 @@ public slots:
   void LineMode_toggled(bool);
   void SnapToGrid_toggled(bool);
   void RebinMode_toggled(bool);
-  void RebinLock_toggled(bool);
   void autoRebin_toggled(bool);
 
   // Dynamic rebinning
@@ -333,7 +332,7 @@ private:
 
   /// Synced menu/buttons
   MantidQt::API::SyncedCheckboxes *m_syncLineMode, *m_syncSnapToGrid,
-    *m_syncRebinMode, *m_syncRebinLock, *m_syncAutoRebin;
+    *m_syncRebinMode, *m_syncAutoRebin;
 
   /// Cached double for infinity
   double m_inf;

@@ -21,6 +21,9 @@ public:
     GeneralFrame frame("Temperature", "DegC");
     TS_ASSERT_EQUALS("Temperature", frame.name());
     TS_ASSERT_EQUALS(UnitLabel("DegC"), frame.getUnitLabel());
+    TSM_ASSERT_EQUALS("The equivalent special coordinate system should be None",
+                      frame.equivalientSpecialCoordinateSystem(),
+                      Mantid::Kernel::SpecialCoordinateSystem::None);
   }
 
   void test_string_unit_construction() {

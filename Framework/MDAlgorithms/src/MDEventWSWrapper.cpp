@@ -39,9 +39,10 @@ void MDEventWSWrapper::createEmptyEventWS(const MDWSDescription &description) {
           Mantid::coord_t(description.getDimMax()[d]), nBins);
 
     } else {
+      Mantid::Geometry::GeneralFrame frame(description.getDimNames()[d],
+                                           description.getDimUnits()[d]);
       dim = new Geometry::MDHistoDimension(
-          description.getDimNames()[d], description.getDimIDs()[d],
-          description.getDimUnits()[d],
+          description.getDimNames()[d], description.getDimIDs()[d], frame,
           Mantid::coord_t(description.getDimMin()[d]),
           Mantid::coord_t(description.getDimMax()[d]), nBins);
     }

@@ -11,6 +11,7 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidMDAlgorithms/LoadMD.h"
 
 #include <cxxtest/TestSuite.h>
@@ -565,8 +566,10 @@ public:
   void test_histo1D() {
     Mantid::coord_t min(-10.0);
     Mantid::coord_t max(10.0);
+    Mantid::Geometry::GeneralFrame frame(
+        Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
     std::vector<Geometry::IMDDimension_sptr> dims(
-        1, boost::make_shared<Geometry::MDHistoDimension>("X", "x", "m", min,
+        1, boost::make_shared<Geometry::MDHistoDimension>("X", "x", frame, min,
                                                           max, 5));
     MDHistoWorkspace_sptr ws =
         boost::make_shared<MDHistoWorkspace>(dims, API::VolumeNormalization);
@@ -591,9 +594,11 @@ public:
 
   /// More of an integration test as it uses both load and save.
   void test_save_and_load_special_coordinates_MDEventWorkspace() {
+    Mantid::Geometry::QSample frame;
     MDEventWorkspace1Lean::sptr mdeventWS =
-        MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 2);
-    const SpecialCoordinateSystem appliedCoordinateSystem = QSample;
+        MDEventsTestHelper::makeMDEWWithFrames<1>(10, 0.0, 10.0, frame, 2);
+    const Mantid::Kernel::SpecialCoordinateSystem appliedCoordinateSystem =
+        Mantid::Kernel::SpecialCoordinateSystem::QSample;
     mdeventWS->setCoordinateSystem(appliedCoordinateSystem);
 
     auto loadedWS = testSaveAndLoadWorkspace(mdeventWS, "MDEventWorkspace");
@@ -605,9 +610,11 @@ public:
 
   // backwards-compatability check for coordinate in log
   void test_load_coordinate_system_MDEventWorkspace_from_experiment_info() {
+    Mantid::Geometry::QSample frame;
     MDEventWorkspace1Lean::sptr mdeventWS =
-        MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 2);
-    const SpecialCoordinateSystem appliedCoordinateSystem = QSample;
+        MDEventsTestHelper::makeMDEWWithFrames<1>(10, 0.0, 10.0, frame, 2);
+    const Mantid::Kernel::SpecialCoordinateSystem appliedCoordinateSystem =
+        Mantid::Kernel::SpecialCoordinateSystem::QSample;
     mdeventWS->setCoordinateSystem(appliedCoordinateSystem);
 
     // Create a log in the first experiment info to simulated an old version of
@@ -626,9 +633,11 @@ public:
   }
 
   void test_save_and_load_special_coordinates_MDHistoWorkspace() {
-    auto mdhistoWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        2.5, 2, 10, 10.0, 3.5, "", 4.5);
-    const SpecialCoordinateSystem appliedCoordinateSystem = QSample;
+    Mantid::Geometry::QSample frame;
+    auto mdhistoWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceWithMDFrame(
+        2.5, 2, frame, 10, 10.0, 3.5, "", 4.5);
+    const Mantid::Kernel::SpecialCoordinateSystem appliedCoordinateSystem =
+        Mantid::Kernel::SpecialCoordinateSystem::QSample;
     mdhistoWS->setCoordinateSystem(appliedCoordinateSystem);
 
     auto loadedWS = testSaveAndLoadWorkspace(mdhistoWS, "MDHistoWorkspace");
@@ -640,9 +649,11 @@ public:
 
   // backwards-compatability check for coordinate in log
   void test_load_coordinate_system_MDHistoWorkspace_from_experiment_info() {
-    auto mdhistoWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        2.5, 2, 10, 10.0, 3.5, "", 4.5);
-    const SpecialCoordinateSystem appliedCoordinateSystem = QSample;
+    Mantid::Geometry::QSample frame;
+    auto mdhistoWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceWithMDFrame(
+        2.5, 2, frame, 10, 10.0, 3.5, "", 4.5);
+    const Mantid::Kernel::SpecialCoordinateSystem appliedCoordinateSystem =
+        Mantid::Kernel::SpecialCoordinateSystem::QSample;
     mdhistoWS->setCoordinateSystem(appliedCoordinateSystem);
 
     // Create a log in the first experiment info to simulated an old version of

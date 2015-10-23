@@ -14,8 +14,10 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/UnitLabelTypes.h"
 #include "MantidKernel/V3D.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
 
 #include <boost/assign/list_of.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -78,7 +80,14 @@ protected:
             .convert_to_container<std::vector<double>>();
     mdworkspaceAlg->setProperty("Extents", extents);
     mdworkspaceAlg->setPropertyValue("Names", "H,K,L");
-    mdworkspaceAlg->setPropertyValue("Units", "-,-,-");
+    std::string units = Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
+                        Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
+                        Mantid::Kernel::Units::Symbol::RLU.ascii();
+    mdworkspaceAlg->setProperty("Units", units);
+    std::string frames = Mantid::Geometry::HKL::HKLName + "," +
+                         Mantid::Geometry::HKL::HKLName + "," +
+                         Mantid::Geometry::HKL::HKLName;
+    mdworkspaceAlg->setProperty("Frames", frames);
     mdworkspaceAlg->setPropertyValue("OutputWorkspace",
                                      "IntegratePeaksMDTest_MDEWS");
     mdworkspaceAlg->execute();

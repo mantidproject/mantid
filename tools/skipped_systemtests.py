@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 #!/usr/bin/env python
 
 import ast
@@ -33,7 +34,7 @@ def addTestResult(results, case, label):
 
 
 def printResultCell(mark, length):
-    if (mark):
+    if mark:
         left = int(length/2)
         right = length-left-1
         print "%sx%s" % (' '*left, ' '*right),

@@ -25,6 +25,7 @@ namespace CustomInterfaces {
 DECLARE_SUBWINDOW(EnggDiffractionViewQtGUI)
 
 const double EnggDiffractionViewQtGUI::g_defaultRebinWidth = -0.0005;
+int EnggDiffractionViewQtGUI::m_currentType = 0;
 
 const std::string EnggDiffractionViewQtGUI::g_iparmExtStr =
     "GSAS instrument parameters, IPARM file: PRM, PAR, IPAR, IPARAM "
@@ -54,7 +55,7 @@ const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
  * @param parent Parent window (most likely the Mantid main app window).
  */
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
-    : UserSubWindow(parent), IEnggDiffractionView(), m_currentInst("ENGIN-X"),
+    : UserSubWindow(parent), IEnggDiffractionView(), m_currentInst("ENGINX"),
       m_currentCalibFilename(""), m_presenter(NULL) {}
 
 EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {}
@@ -75,6 +76,10 @@ void EnggDiffractionViewQtGUI::initLayout() {
   m_uiTabSettings.setupUi(wSettings);
   m_ui.tabMain->addTab(wSettings, QString("Settings"));
 
+  QComboBox *inst = m_ui.comboBox_instrument;
+  m_currentInst = inst->currentText().toStdString();
+
+  setPrefix(m_currentInst);
   readSettings();
 
   // basic UI setup, connect signals, etc.
@@ -99,9 +104,9 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
   // CalibrationParameters or similar class/structure
   const std::string vanadiumRun = "236516";
   const std::string ceriaRun = "241391";
-  m_uiTabCalib.lineEdit_new_vanadium_num->setText(
+  m_uiTabCalib.lineEdit_new_vanadium_num->setUserInput(
       QString::fromStdString(vanadiumRun));
-  m_uiTabCalib.lineEdit_new_ceria_num->setText(
+  m_uiTabCalib.lineEdit_new_ceria_num->setUserInput(
       QString::fromStdString(ceriaRun));
 
   // push button signals/slots
@@ -176,7 +181,6 @@ void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
   // change instrument
   connect(m_ui.comboBox_instrument, SIGNAL(currentIndexChanged(int)), this,
           SLOT(instrumentChanged(int)));
-
   connect(m_ui.pushButton_help, SIGNAL(released()), this, SLOT(openHelpWin()));
   // note connection to the parent window, otherwise an empty frame window
   // may remain open and visible after this close
@@ -211,7 +215,7 @@ void EnggDiffractionViewQtGUI::readSettings() {
       qs.value("user-params-new-ceria-num", "").toString());
 
   // user params - focusing
-  m_uiTabFocus.lineEdit_run_num->setText(
+  m_uiTabFocus.lineEdit_run_num->setUserInput(
       qs.value("user-params-focus-runno", "").toString());
 
   qs.beginReadArray("user-params-focus-bank_i");
@@ -223,13 +227,13 @@ void EnggDiffractionViewQtGUI::readSettings() {
       qs.value("value", true).toBool());
   qs.endArray();
 
-  m_uiTabFocus.lineEdit_cropped_run_num->setText(
+  m_uiTabFocus.lineEdit_cropped_run_num->setUserInput(
       qs.value("user-params-focus-cropped-runno", "").toString());
 
   m_uiTabFocus.lineEdit_cropped_spec_ids->setText(
       qs.value("user-params-focus-cropped-spectrum-nos", "").toString());
 
-  m_uiTabFocus.lineEdit_texture_run_num->setText(
+  m_uiTabFocus.lineEdit_texture_run_num->setUserInput(
       qs.value("user-params-focus-texture-runno", "").toString());
 
   m_uiTabFocus.lineEdit_texture_grouping_file->setText(
@@ -283,12 +287,13 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
               m_uiTabCalib.lineEdit_current_calib_filename->text());
 
   qs.setValue("user-params-new-vanadium-num",
-              m_uiTabCalib.lineEdit_new_vanadium_num->text());
+              m_uiTabCalib.lineEdit_new_vanadium_num->getText());
   qs.setValue("user-params-new-ceria-num",
-              m_uiTabCalib.lineEdit_new_ceria_num->text());
+              m_uiTabCalib.lineEdit_new_ceria_num->getText());
 
   // user params - focusing
-  qs.setValue("user-params-focus-runno", m_uiTabFocus.lineEdit_run_num->text());
+  qs.setValue("user-params-focus-runno",
+              m_uiTabFocus.lineEdit_run_num->getText());
 
   qs.beginWriteArray("user-params-focus-bank_i");
   qs.setArrayIndex(0);
@@ -298,17 +303,16 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
   qs.endArray();
 
   qs.setValue("user-params-focus-cropped-runno",
-              m_uiTabFocus.lineEdit_cropped_run_num->text());
+              m_uiTabFocus.lineEdit_cropped_run_num->getText());
   qs.setValue("user-params-focus-cropped-spectrum-nos",
               m_uiTabFocus.lineEdit_cropped_spec_ids->text());
 
   qs.setValue("user-params-focus-texture-runno",
-              m_uiTabFocus.lineEdit_texture_run_num->text());
+              m_uiTabFocus.lineEdit_texture_run_num->getText());
   qs.setValue("user-params-focus-texture-detector-grouping-file",
               m_uiTabFocus.lineEdit_texture_grouping_file->text());
 
-  qs.setValue("user-params-focus-plot-ws",
-              m_uiTabFocus.checkBox_FocusedWS->checkState());
+  qs.setValue("value", m_uiTabFocus.checkBox_FocusedWS->isChecked());
 
   // TODO: this should become << >> operators on EnggDiffCalibSettings
   qs.setValue("input-dir-calib-files",
@@ -385,11 +389,11 @@ std::string EnggDiffractionViewQtGUI::currentCeriaNo() const {
 }
 
 std::string EnggDiffractionViewQtGUI::newVanadiumNo() const {
-  return m_uiTabCalib.lineEdit_new_vanadium_num->text().toStdString();
+  return m_uiTabCalib.lineEdit_new_vanadium_num->getText().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::newCeriaNo() const {
-  return m_uiTabCalib.lineEdit_new_ceria_num->text().toStdString();
+  return m_uiTabCalib.lineEdit_new_ceria_num->getText().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::currentCalibFile() const {
@@ -425,6 +429,7 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabFocus.lineEdit_run_num->setEnabled(enable);
   m_uiTabFocus.pushButton_focus->setEnabled(enable);
   m_uiTabFocus.checkBox_FocusedWS->setEnabled(enable);
+  m_uiTabFocus.checkBox_SaveOutputFiles->setEnabled(enable);
 
   m_uiTabFocus.pushButton_focus->setEnabled(enable);
   m_uiTabFocus.pushButton_focus_cropped->setEnabled(enable);
@@ -676,15 +681,15 @@ void EnggDiffractionViewQtGUI::browseTextureDetGroupingFile() {
 }
 
 std::string EnggDiffractionViewQtGUI::focusingRunNo() const {
-  return m_uiTabFocus.lineEdit_run_num->text().toStdString();
+  return m_uiTabFocus.lineEdit_run_num->getText().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::focusingCroppedRunNo() const {
-  return m_uiTabFocus.lineEdit_cropped_run_num->text().toStdString();
+  return m_uiTabFocus.lineEdit_cropped_run_num->getText().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::focusingTextureRunNo() const {
-  return m_uiTabFocus.lineEdit_texture_run_num->text().toStdString();
+  return m_uiTabFocus.lineEdit_texture_run_num->getText().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::focusingDir() const {
@@ -710,6 +715,10 @@ bool EnggDiffractionViewQtGUI::focusedOutWorkspace() const {
   return m_uiTabFocus.checkBox_FocusedWS->checkState();
 }
 
+bool EnggDiffractionViewQtGUI::saveOutputFiles() const {
+  return m_uiTabFocus.checkBox_SaveOutputFiles->checkState();
+}
+
 void EnggDiffractionViewQtGUI::plotFocusStatus() {
   if (focusedOutWorkspace()) {
     m_uiTabFocus.comboBox_PlotData->setEnabled(true);
@@ -719,19 +728,35 @@ void EnggDiffractionViewQtGUI::plotFocusStatus() {
 }
 
 void EnggDiffractionViewQtGUI::plotRepChanged(int /*idx*/) {
-  QComboBox *inst = m_uiTabFocus.comboBox_PlotData;
-  if (!inst)
+  QComboBox *plotType = m_uiTabFocus.comboBox_PlotData;
+  if (!plotType)
     return;
-  m_currentType = inst->currentIndex();
+  m_currentType = plotType->currentIndex();
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
   QComboBox *inst = m_ui.comboBox_instrument;
   if (!inst)
     return;
-
   m_currentInst = inst->currentText().toStdString();
   m_presenter->notify(IEnggDiffractionPresenter::InstrumentChange);
+}
+
+void EnggDiffractionViewQtGUI::userSelectInstrument(const QString &prefix) {
+  // Set file browsing to current instrument
+  setPrefix(prefix.toStdString());
+}
+
+void EnggDiffractionViewQtGUI::setPrefix(std::string prefix) {
+  QString prefixInput = QString::fromStdString(prefix);
+  // focus tab
+  m_uiTabFocus.lineEdit_run_num->setInstrumentOverride(prefixInput);
+  m_uiTabFocus.lineEdit_texture_run_num->setInstrumentOverride(prefixInput);
+  m_uiTabFocus.lineEdit_cropped_run_num->setInstrumentOverride(prefixInput);
+
+  // calibration tab
+  m_uiTabCalib.lineEdit_new_ceria_num->setInstrumentOverride(prefixInput);
+  m_uiTabCalib.lineEdit_new_vanadium_num->setInstrumentOverride(prefixInput);
 }
 
 void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {

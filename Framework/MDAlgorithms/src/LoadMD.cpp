@@ -7,6 +7,7 @@
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDFrameFactory.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidGeometry/MDGeometry/UnknownFrame.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Memory.h"
@@ -353,7 +354,7 @@ void LoadMD::loadDimensions2() {
     try {
       m_file->getAttr("frame", frame);
     } catch (std::exception &) {
-      frame = "Unknown frame";
+      frame = Mantid::Geometry::UnknownFrame::UnknownFrameName;
     }
     Geometry::MDFrame_const_uptr mdFrame =
         Geometry::makeMDFrameFactoryChain()->create(

@@ -5,7 +5,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
-#include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidGeometry/MDGeometry/UnknownFrame.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/MDUnitFactory.h"
 #include "MantidKernel/VMD.h"
@@ -23,27 +23,6 @@ namespace Geometry {
  */
 class MANTID_GEOMETRY_DLL MDHistoDimension : public IMDDimension {
 public:
-  /** Constructor for simple MDHistoDimension
-  * @param name :: full name of the axis
-  * @param ID :: identifier string
-  * @param units :: A plain-text string giving the units of this dimension
-  * @param min :: minimum extent
-  * @param max :: maximum extent
-  * @param numBins :: number of bins (evenly spaced)
-  */
-  MDHistoDimension(std::string name, std::string ID,
-                   const Kernel::UnitLabel &units, coord_t min, coord_t max,
-                   size_t numBins)
-      : m_name(name), m_dimensionId(ID),
-        m_frame(new GeneralFrame("Unknown frame", units)), m_min(min),
-        m_max(max), m_numBins(numBins),
-        m_binWidth((max - min) / static_cast<coord_t>(numBins)) {
-    if (max < min) {
-      throw std::invalid_argument("Error making MDHistoDimension. Cannot have "
-                                  "dimension with min > max");
-    }
-  }
-
   /** Constructor for simple MDHistoDimension
   * @param name :: full name of the axis
   * @param ID :: identifier string

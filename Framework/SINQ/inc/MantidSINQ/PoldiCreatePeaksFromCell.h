@@ -57,13 +57,6 @@ protected:
   Geometry::SpaceGroup_const_sptr
   getSpaceGroup(const std::string &spaceGroupString) const;
 
-  Geometry::CompositeBraggScatterer_sptr
-  getScatterers(const std::string &scattererString) const;
-  Geometry::BraggScatterer_sptr
-  getScatterer(const std::string &singleScatterer) const;
-  std::vector<std::string>
-  getCleanScattererTokens(const std::vector<std::string> &tokens) const;
-
   double getDMaxValue(const Geometry::UnitCell &unitCell) const;
 
   double getLargestDValue(const Geometry::UnitCell &unitCell) const;

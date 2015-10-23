@@ -1290,7 +1290,7 @@ void Graph::linColor()
   notifyChanges();
 }
 
-void Graph::setAxisScale(int axis, double start, double end, int type, double step,
+void Graph::setAxisScale(int axis, double start, double end, int scaleType, double step,
     int majorTicks, int minorTicks)
 {
   ScaleEngine *sc_engine = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
@@ -1300,19 +1300,30 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
   ScaleTransformation::Type old_type = sc_engine->type();
 
   // If not specified, keep the same as now
-  if( type < 0 ) type = axisType(axis);
+  if( scaleType < 0 ) scaleType = axisType(axis);
 
-  if (type != old_type)
-  {
-    // recalculate boundingRect of MantidCurves
-    emit axisScaleChanged(axis,type == ScaleTransformation::Log10);
+  int type = ScaleTransformation::Linear;
+  // just to have the one-by-one ScaleType => GraphOptions; higher values of ScaleType
+  // will be GraphOptions::Linear
+  if (ScaleDraw::ScaleType::Numeric == scaleType) {
+    type = ScaleTransformation::Linear;
+  } else if (ScaleDraw::ScaleType::Text == scaleType) {
+    type = ScaleTransformation::Log10;
+  } else if (ScaleDraw::ScaleType::Day == scaleType) {
+    type = ScaleTransformation::Power;
   }
 
-  if (type == GraphOptions::Log10)
+  if (static_cast<int>(type) != static_cast<int>(old_type))
+  {
+    // recalculate boundingRect of MantidCurves
+    emit axisScaleChanged(axis, type == ScaleTransformation::Log10);
+  }
+
+  if (type == ScaleTransformation::Log10)
   {
     sc_engine->setType(ScaleTransformation::Log10);
   }
-  else if (type == GraphOptions::Power)
+  else if (type == ScaleTransformation::Power)
   {
     sc_engine->setType(ScaleTransformation::Power);
   }
@@ -1321,7 +1332,7 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
     sc_engine->setType(ScaleTransformation::Linear);
   }
 
-  if (type == GraphOptions::Log10)
+  if (type == ScaleTransformation::Log10)
   {
     if (start <= 0)
     {
@@ -1368,7 +1379,7 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
     // log scales can't represent zero or negative values, 1e-10 is a low number that I hope will be lower than most of the data but is still sensible for many color plots
     //start = start < 1e-90 ? 1e-10 : start;
   }
-  else if (type == GraphOptions::Power)
+  else if (type == ScaleTransformation::Power)
   {
     double const nth_power = sc_engine->nthPower();
     if (start <= 0 && nth_power < 0)
@@ -1440,8 +1451,7 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
           QwtScaleWidget *rightAxis = d_plot->axisWidget(QwtPlot::yRight);
           if(rightAxis)
           {
-            //if (type == ScaleTransformation::Log10 && (start <= 0 || start == DBL_MAX))
-            if (type == GraphOptions::Log10 && (start <= 0 || start == DBL_MAX))
+            if (type == ScaleTransformation::Log10 && (start <= 0 || start == DBL_MAX))
             {
               start = sp->getMinPositiveValue();
             }

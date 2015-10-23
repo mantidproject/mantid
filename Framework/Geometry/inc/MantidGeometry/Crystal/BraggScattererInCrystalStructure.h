@@ -14,12 +14,10 @@ namespace Geometry {
 
     This class provides an extension of BraggScatterer, suitable
     for scatterers that are part of a crystal structure. Information about
-    the unit cell and space group can be set. The space group information
-    is used to calculate equivalent positions in the structure.
+    the unit cell can be set.
 
-    Both space group and unit cell are exposed marked as exposed to
-    BraggScattererComposite, so all members of one composite will
-    have the same unit cell and space group.
+    The unit cell is marked as exposed to BraggScattererComposite, so all
+    members of one composite will have the same unit cell.
 
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 04/11/2014
@@ -51,9 +49,7 @@ public:
   virtual ~BraggScattererInCrystalStructure() {}
 
   Kernel::V3D getPosition() const;
-  std::vector<Kernel::V3D> getEquivalentPositions() const;
   UnitCell getCell() const;
-  SpaceGroup_const_sptr getSpaceGroup() const;
 
 protected:
   virtual void afterPropertySet(const std::string &propertyName);
@@ -68,18 +64,13 @@ protected:
 
   virtual void setPosition(const Kernel::V3D &position);
   virtual void setCell(const UnitCell &cell);
-  virtual void setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
 
   virtual void declareProperties();
 
   Kernel::V3D getPositionFromString(const std::string &positionString) const;
-  void recalculateEquivalentPositions();
 
   Kernel::V3D m_position;
-  std::vector<Kernel::V3D> m_equivalentPositions;
-
   UnitCell m_cell;
-  SpaceGroup_const_sptr m_spaceGroup;
 };
 
 typedef boost::shared_ptr<BraggScattererInCrystalStructure>
@@ -98,6 +89,9 @@ protected:
   Kernel::IValidator_sptr clone() const;
   virtual std::string checkValidity(const std::string &unitCellString) const;
 };
+
+MANTID_GEOMETRY_DLL std::vector<std::string>
+getTokenizedPositionString(const std::string &position);
 
 } // namespace Geometry
 } // namespace Mantid

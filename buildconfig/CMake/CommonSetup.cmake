@@ -57,6 +57,11 @@ find_package ( MuParser REQUIRED )
 find_package ( JsonCPP REQUIRED )
 include_directories ( SYSTEM ${JSONCPP_INCLUDE_DIR} )
 
+if (ENABLE_OPENCASCADE)
+  find_package ( OpenCascade REQUIRED )
+  add_definitions ( -DENABLE_OPENCASCADE )
+endif ()
+
 find_package ( Doxygen ) # optional
 
 # Need to change search path to find zlib include on Windows.
