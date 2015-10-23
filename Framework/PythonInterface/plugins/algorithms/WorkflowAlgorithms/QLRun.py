@@ -8,6 +8,11 @@ from mantid import config, logger
 import os
 import numpy as np
 
+if is_supported_f2py_platform():
+    QLr     = import_f2py("QLres")
+    QLd     = import_f2py("QLdata")
+    Qse     = import_f2py("QLse")
+
 class QLRun(PythonAlgorithm):
 
     _program = None
@@ -159,7 +164,10 @@ class QLRun(PythonAlgorithm):
 
         fitOp = [o_el, o_bgd, o_w1, o_res]
 
-        workdir = getDefaultWorkingDirectory()
+        workdir = config['defaultsave.directory']
+        if not os.path.isdir(workdir):
+            workdir = os.getcwd()
+            logger.information('Default Save directory is not set. Defaulting to current working Directory: ' + workdir)
 
         array_len = 4096                           # length of array in Fortran
         CheckXrange(erange,'Energy')
