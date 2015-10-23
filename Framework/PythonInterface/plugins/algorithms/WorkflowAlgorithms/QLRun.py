@@ -1,4 +1,4 @@
-#pylint: disable=no-init
+#pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init
 from IndirectImport import *
 
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, WorkspaceGroupProperty
@@ -126,7 +126,7 @@ class QLRun(PythonAlgorithm):
         self._save = self.getProperty('Save').value
         self._plot = self.getPropertyValue('Plot')
 
-
+    #pylint: disable=too-many-locals
     def PyExec(self):
         #from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
 
