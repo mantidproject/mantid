@@ -8,6 +8,7 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include <Poco/BinaryReader.h>
 #include <Poco/FileStream.h>
@@ -801,29 +802,27 @@ void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
       size_t start =
           ((i * (bytespp)) * fileInfo.axisPixelLengths[1]) + (j * (bytespp));
 
-      char tmpbuf;
-      char *tmp = &tmpbuf;
-
       // Reverse byte order of current value
-      std::reverse_copy(buffer8 + start, buffer8 + start + bytespp, tmp);
+      boost::scoped_ptr<uint8_t> tmp(new uint8_t[bytespp]);
+      std::reverse_copy(buffer8 + start, buffer8 + start + bytespp, tmp.get());
 
       double val = 0;
       if (fileInfo.bitsPerPixel == 8)
-        val = static_cast<double>(*reinterpret_cast<uint8_t *>(tmp));
+        val = static_cast<double>(*reinterpret_cast<uint8_t *>(tmp.get()));
       else if (fileInfo.bitsPerPixel == 16)
-        val = static_cast<double>(*reinterpret_cast<uint16_t *>(tmp));
+        val = static_cast<double>(*reinterpret_cast<uint16_t *>(tmp.get()));
       else if (fileInfo.bitsPerPixel == 32 && !fileInfo.isFloat)
-        val = static_cast<double>(*reinterpret_cast<uint32_t *>(tmp));
+        val = static_cast<double>(*reinterpret_cast<uint32_t *>(tmp.get()));
       else if (fileInfo.bitsPerPixel == 64 && !fileInfo.isFloat)
-        val = static_cast<double>(*reinterpret_cast<uint64_t *>(tmp));
+        val = static_cast<double>(*reinterpret_cast<uint64_t *>(tmp.get()));
 
       // cppcheck doesn't realise that these are safe casts
       else if (fileInfo.bitsPerPixel == 32 && fileInfo.isFloat) {
         // cppcheck-suppress invalidPointerCast
-        val = static_cast<double>(*reinterpret_cast<float *>(tmp));
+        val = static_cast<double>(*reinterpret_cast<float *>(tmp.get()));
       } else if (fileInfo.bitsPerPixel == 64 && fileInfo.isFloat) {
         // cppcheck-suppress invalidPointerCast
-        val = *reinterpret_cast<double *>(tmp);
+        val = *reinterpret_cast<double *>(tmp.get());
       }
 
       val = fileInfo.scale * val - fileInfo.offset;
