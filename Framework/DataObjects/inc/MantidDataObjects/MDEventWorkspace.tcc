@@ -9,6 +9,7 @@
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Utils.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
@@ -21,6 +22,14 @@
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/Exception.h"
+
+// Test for gcc 4.4
+#if __GNUC__ > 4 || \
+    (__GNUC__ == 4 && (__GNUC_MINOR__ > 4 || \
+		       (__GNUC_MINOR__ == 4 && \
+			__GNUC_PATCHLEVEL__ > 0)))
+GCC_DIAG_OFF(strict-aliasing)
+#endif
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
