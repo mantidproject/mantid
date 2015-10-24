@@ -782,53 +782,55 @@ void LoadFITS::addAxesInfoAndLogs(Workspace2D_sptr ws, bool loadAsRectImg,
 void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
                                    Workspace2D_sptr ws,
                                    std::vector<char> &buffer) {
-
-  size_t bytespp = (fileInfo.bitsPerPixel / 8);
-  size_t len = m_pixelCount * bytespp;
+  const size_t bytespp = (fileInfo.bitsPerPixel / 8);
+  const size_t len = m_pixelCount * bytespp;
   readInBuffer(fileInfo, buffer, len);
 
-  // create pointer of correct data type to void pointer of the buffer:
-  uint8_t *buffer8 = reinterpret_cast<uint8_t *>(&buffer[0]);
+  const size_t nrows(fileInfo.axisPixelLengths[1]),
+    ncols(fileInfo.axisPixelLengths[0]);
+  // Treat buffer as a series of bytes
+  uint8_t *buffer8 = reinterpret_cast<uint8_t*>(&buffer.front());
 
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int i = 0; i < static_cast<int>(fileInfo.axisPixelLengths[1]);
-       ++i) { // rows
+  for (int i = 0; i < static_cast<int>(nrows); ++i) {
     Mantid::API::ISpectrum *specRow = ws->getSpectrum(i);
-    double xval = static_cast<double>(i) * cmpp;
-    std::fill(specRow->dataX().begin(), specRow->dataX().end(), xval);
+    auto & dataX = specRow->dataX();
+    auto & dataY = specRow->dataY();
+    auto & dataE = specRow->dataE();
+    std::fill(dataX.begin(), dataX.end(), static_cast<double>(i)*cmpp);
 
-    for (size_t j = 0; j < fileInfo.axisPixelLengths[0]; ++j) { // columns
-
-      size_t start =
-          ((i * (bytespp)) * fileInfo.axisPixelLengths[1]) + (j * (bytespp));
-
-      // Reverse byte order of current value
-      boost::scoped_ptr<uint8_t> tmp(new uint8_t[bytespp]);
-      std::reverse_copy(buffer8 + start, buffer8 + start + bytespp, tmp.get());
+    for (size_t j = 0; j < ncols; ++j) {
+      // Map from 2D->1D index
+      const size_t start = ((i * (bytespp)) * nrows) + (j * (bytespp));
+      uint8_t const * const buffer8Start = buffer8 + start;
+      // Reverse byte order of current value. Make sure we allocate enough
+      // enough space to hold the size
+      boost::scoped_ptr<uint8_t> byteValue(new uint8_t[bytespp]);
+      std::reverse_copy(buffer8Start, buffer8Start + bytespp, byteValue.get());
 
       double val = 0;
       if (fileInfo.bitsPerPixel == 8)
-        val = static_cast<double>(*reinterpret_cast<uint8_t *>(tmp.get()));
+        val = static_cast<double>(*byteValue);
       else if (fileInfo.bitsPerPixel == 16)
-        val = static_cast<double>(*reinterpret_cast<uint16_t *>(tmp.get()));
+        val = static_cast<double>(*reinterpret_cast<uint16_t*>(byteValue.get()));
       else if (fileInfo.bitsPerPixel == 32 && !fileInfo.isFloat)
-        val = static_cast<double>(*reinterpret_cast<uint32_t *>(tmp.get()));
+        val = static_cast<double>(*reinterpret_cast<uint32_t*>(byteValue.get()));
       else if (fileInfo.bitsPerPixel == 64 && !fileInfo.isFloat)
-        val = static_cast<double>(*reinterpret_cast<uint64_t *>(tmp.get()));
+        val = static_cast<double>(*reinterpret_cast<uint64_t*>(byteValue.get()));
 
       // cppcheck doesn't realise that these are safe casts
       else if (fileInfo.bitsPerPixel == 32 && fileInfo.isFloat) {
         // cppcheck-suppress invalidPointerCast
-        val = static_cast<double>(*reinterpret_cast<float *>(tmp.get()));
+        val = static_cast<double>(*reinterpret_cast<float *>(byteValue.get()));
       } else if (fileInfo.bitsPerPixel == 64 && fileInfo.isFloat) {
         // cppcheck-suppress invalidPointerCast
-        val = *reinterpret_cast<double *>(tmp.get());
+        val = *reinterpret_cast<double *>(byteValue.get());
       }
 
       val = fileInfo.scale * val - fileInfo.offset;
+      dataY[j] = val;
+      dataE[j] = sqrt(val);
 
-      specRow->dataY()[j] = val;
-      specRow->dataE()[j] = sqrt(val);
     }
   }
 }
