@@ -787,22 +787,22 @@ void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
   readInBuffer(fileInfo, buffer, len);
 
   const size_t nrows(fileInfo.axisPixelLengths[1]),
-    ncols(fileInfo.axisPixelLengths[0]);
+      ncols(fileInfo.axisPixelLengths[0]);
   // Treat buffer as a series of bytes
-  uint8_t *buffer8 = reinterpret_cast<uint8_t*>(&buffer.front());
+  uint8_t *buffer8 = reinterpret_cast<uint8_t *>(&buffer.front());
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < static_cast<int>(nrows); ++i) {
     Mantid::API::ISpectrum *specRow = ws->getSpectrum(i);
-    auto & dataX = specRow->dataX();
-    auto & dataY = specRow->dataY();
-    auto & dataE = specRow->dataE();
-    std::fill(dataX.begin(), dataX.end(), static_cast<double>(i)*cmpp);
+    auto &dataX = specRow->dataX();
+    auto &dataY = specRow->dataY();
+    auto &dataE = specRow->dataE();
+    std::fill(dataX.begin(), dataX.end(), static_cast<double>(i) * cmpp);
 
     for (size_t j = 0; j < ncols; ++j) {
       // Map from 2D->1D index
       const size_t start = ((i * (bytespp)) * nrows) + (j * (bytespp));
-      uint8_t const * const buffer8Start = buffer8 + start;
+      uint8_t const *const buffer8Start = buffer8 + start;
       // Reverse byte order of current value. Make sure we allocate enough
       // enough space to hold the size
       boost::scoped_ptr<uint8_t> byteValue(new uint8_t[bytespp]);
@@ -812,11 +812,14 @@ void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
       if (fileInfo.bitsPerPixel == 8)
         val = static_cast<double>(*byteValue);
       else if (fileInfo.bitsPerPixel == 16)
-        val = static_cast<double>(*reinterpret_cast<uint16_t*>(byteValue.get()));
+        val =
+            static_cast<double>(*reinterpret_cast<uint16_t *>(byteValue.get()));
       else if (fileInfo.bitsPerPixel == 32 && !fileInfo.isFloat)
-        val = static_cast<double>(*reinterpret_cast<uint32_t*>(byteValue.get()));
+        val =
+            static_cast<double>(*reinterpret_cast<uint32_t *>(byteValue.get()));
       else if (fileInfo.bitsPerPixel == 64 && !fileInfo.isFloat)
-        val = static_cast<double>(*reinterpret_cast<uint64_t*>(byteValue.get()));
+        val =
+            static_cast<double>(*reinterpret_cast<uint64_t *>(byteValue.get()));
 
       // cppcheck doesn't realise that these are safe casts
       else if (fileInfo.bitsPerPixel == 32 && fileInfo.isFloat) {
@@ -830,7 +833,6 @@ void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
       val = fileInfo.scale * val - fileInfo.offset;
       dataY[j] = val;
       dataE[j] = sqrt(val);
-
     }
   }
 }
