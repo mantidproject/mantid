@@ -19,17 +19,28 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
+namespace {
+
+/**
+ * Reinterpret a byte sequence as InterpretType and cast to double
+ * @param Pointer to byte src
+ */
+template <typename InterpretType> double toDouble(uint8_t *src) {
+  return static_cast<double>(*reinterpret_cast<InterpretType *>(src));
+}
+}
+
 namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadFITS)
 
+// Static class constants
 const std::string LoadFITS::g_BIT_DEPTH_NAME = "BitDepthName";
 const std::string LoadFITS::g_ROTATION_NAME = "RotationName";
 const std::string LoadFITS::g_AXIS_NAMES_NAME = "AxisNames";
 const std::string LoadFITS::g_IMAGE_KEY_NAME = "ImageKeyName";
 const std::string LoadFITS::g_HEADER_MAP_NAME = "HeaderMapFile";
-
 const std::string LoadFITS::g_defaultImgType = "SAMPLE";
 
 /**
@@ -809,25 +820,18 @@ void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
       std::reverse_copy(buffer8Start, buffer8Start + bytespp, byteValue.get());
 
       double val = 0;
-      if (fileInfo.bitsPerPixel == 8)
-        val = static_cast<double>(*byteValue);
-      else if (fileInfo.bitsPerPixel == 16)
-        val =
-            static_cast<double>(*reinterpret_cast<uint16_t *>(byteValue.get()));
-      else if (fileInfo.bitsPerPixel == 32 && !fileInfo.isFloat)
-        val =
-            static_cast<double>(*reinterpret_cast<uint32_t *>(byteValue.get()));
-      else if (fileInfo.bitsPerPixel == 64 && !fileInfo.isFloat)
-        val =
-            static_cast<double>(*reinterpret_cast<uint64_t *>(byteValue.get()));
-
-      // cppcheck doesn't realise that these are safe casts
-      else if (fileInfo.bitsPerPixel == 32 && fileInfo.isFloat) {
-        // cppcheck-suppress invalidPointerCast
-        val = static_cast<double>(*reinterpret_cast<float *>(byteValue.get()));
+      if (fileInfo.bitsPerPixel == 8) {
+        val = toDouble<uint8_t>(byteValue.get());
+      } else if (fileInfo.bitsPerPixel == 16) {
+        val = toDouble<uint16_t>(byteValue.get());
+      } else if (fileInfo.bitsPerPixel == 32 && !fileInfo.isFloat) {
+        val = toDouble<uint32_t>(byteValue.get());
+      } else if (fileInfo.bitsPerPixel == 64 && !fileInfo.isFloat) {
+        val = toDouble<uint32_t>(byteValue.get());
+      } else if (fileInfo.bitsPerPixel == 32 && fileInfo.isFloat) {
+        val = toDouble<float>(byteValue.get());
       } else if (fileInfo.bitsPerPixel == 64 && fileInfo.isFloat) {
-        // cppcheck-suppress invalidPointerCast
-        val = *reinterpret_cast<double *>(byteValue.get());
+        val = toDouble<double>(byteValue.get());
       }
 
       val = fileInfo.scale * val - fileInfo.offset;
