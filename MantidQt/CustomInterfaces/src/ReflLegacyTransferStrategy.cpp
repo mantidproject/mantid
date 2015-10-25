@@ -10,8 +10,8 @@ namespace MantidQt
   namespace CustomInterfaces
   {
   std::vector<std::map<std::string, std::string>>
-  ReflLegacyTransferStrategy::transferRuns(SearchResultMap &searchResults,
-      Mantid::Kernel::ProgressBase &progress) {
+  ReflLegacyTransferStrategy::transferRuns(
+      SearchResultMap &searchResults, Mantid::Kernel::ProgressBase &progress) {
       /*
        * If the descriptions are the same except for theta: same group, different rows.
        * If the descriptions are the same including theta: same row with runs separated by '+'
