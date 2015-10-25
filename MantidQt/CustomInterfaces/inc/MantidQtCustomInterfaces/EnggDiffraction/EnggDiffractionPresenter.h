@@ -86,6 +86,7 @@ protected:
   void processResetFocus();
   void processLogMsg();
   void processInstChange();
+  void processRBNumberChange();
   void processShutDown();
 
 protected slots:
@@ -93,6 +94,8 @@ protected slots:
   void focusingFinished();
 
 private:
+  bool validateRBNumber(const std::string &rbn) const;
+
   /// @name Calibration related private methods
   //@{
   void inputChecksBeforeCalibrate(const std::string &newVanNo,
