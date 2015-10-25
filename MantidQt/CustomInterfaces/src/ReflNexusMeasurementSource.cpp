@@ -4,10 +4,12 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <boost/regex.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -37,24 +39,20 @@ ReflNexusMeasurementSource::obtain(const std::string &definedPath,
     }
   }
   try {
+
+    auto hostWorkspace =
+        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+
     IAlgorithm_sptr algLoadRun =
-        AlgorithmManager::Instance().create("LoadISISNexus");
+        AlgorithmManager::Instance().create("LoadNexusLogs");
     algLoadRun->setChild(true);
     algLoadRun->setRethrows(true);
     algLoadRun->initialize();
     algLoadRun->setProperty("Filename", filenameArg);
-    algLoadRun->setPropertyValue("OutputWorkspace", "dummy");
+    algLoadRun->setProperty("Workspace", hostWorkspace);
     algLoadRun->execute();
-    Workspace_sptr temp = algLoadRun->getProperty("OutputWorkspace");
-    MatrixWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
-    if (outWS.get() == NULL) {
-      WorkspaceGroup_sptr tempGroup =
-          boost::dynamic_pointer_cast<WorkspaceGroup>(temp);
-      outWS =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(tempGroup->getItem(0));
-    }
-    auto run = outWS->run();
+
+    auto run = hostWorkspace->run();
     const std::string measurementId =
         run.getPropertyValueAsType<std::string>("measurement_id");
     const std::string measurementSubId =
@@ -63,8 +61,15 @@ ReflNexusMeasurementSource::obtain(const std::string &definedPath,
         run.getPropertyValueAsType<std::string>("measurement_label");
     const std::string measurementType =
         run.getPropertyValueAsType<std::string>("measurement_type");
-    const std::string runNumber =
-        run.getPropertyValueAsType<std::string>("run_number");
+    std::string runNumber;
+    try {
+      runNumber = run.getPropertyValueAsType<std::string>("run_number");
+    } catch (Exception::NotFoundError &) {
+      boost::regex re("([0-9]*)$");
+      boost::smatch match;
+      boost::regex_search(fuzzyName, match, re);
+      runNumber = match[0];
+    }
 
     double theta = -1.0;
     try {
