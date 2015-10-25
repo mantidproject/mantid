@@ -15,25 +15,36 @@ public:
   static ReflNexusMeasurementSourceTest *createSuite() { return new ReflNexusMeasurementSourceTest(); }
   static void destroySuite( ReflNexusMeasurementSourceTest *suite ) { delete suite; }
 
-  void xtest_obatin_via_full_path(){
+  void test_obatin_via_full_path() {
 
-      std::string path = Mantid::API::FileFinder::Instance().getFullPath("POLREF14966");
+    std::string path =
+        Mantid::API::FileFinder::Instance().findRun("POLREF14966");
       Poco::File file(path);
       TSM_ASSERT("Test setup incorrect", !path.empty() && file.exists());
 
       ReflNexusMeasurementSource source;
       Measurement measurement = source.obtain(path, "made_up");
+      TS_ASSERT(measurement.isUseable());
+      TS_ASSERT(measurement.isUseable());
+      TS_ASSERT_EQUALS("34", measurement.id());
+      TS_ASSERT_EQUALS("0", measurement.subId());
+      TS_ASSERT_EQUALS("14966", measurement.run());
+      TS_ASSERT_EQUALS("", measurement.label());
+      TS_ASSERT_EQUALS("", measurement.label());
   }
 
   void test_obtain_via_fuzzy_path()
   {
-    //ReflNexusMeasurementSource source;
+    ReflNexusMeasurementSource source;
 
-    //Measurement measurement = source.obtain("made_up", "POLREF14966");
-
+    Measurement measurement = source.obtain("made_up", "POLREF14966");
+    TS_ASSERT(measurement.isUseable());
+    TS_ASSERT_EQUALS("34", measurement.id());
+    TS_ASSERT_EQUALS("0", measurement.subId());
+    TS_ASSERT_EQUALS("14966", measurement.run());
+    TS_ASSERT_EQUALS("", measurement.label());
+    TS_ASSERT_EQUALS("", measurement.label());
   }
-
-
 
 };
 
