@@ -191,6 +191,16 @@ public:
                                  const std::vector<double> &tzero) = 0;
 
   /**
+   * Enable/disable all the sections or tabs of the interface. To be
+   * used with required parameters, like a valid instrument, a valid
+   * RB number, etc. This should effectively disable/enable all
+   * actions, including calibration, focusing, event mode, etc.
+   *
+   * @param enable true to enable all tabs of the interface
+   */
+  virtual void enableTabs(bool enable) = 0;
+
+  /**
    * Enable/disable calibrate+focus actions. The idea is that actions
    * / buttons like 'calibrate', 'load calibration', or 'focus' can be
    * disabled while a calibration of a focusing is being calculated.
