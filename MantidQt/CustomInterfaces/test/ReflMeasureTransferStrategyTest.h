@@ -214,7 +214,7 @@ public:
 
     MockProgressBase progress;
     // Nothing obtained. No progress to report.
-    EXPECT_CALL(progress, doReport(_)).Times(Exactly(0));
+    EXPECT_CALL(progress, doReport(_)).Times(Exactly(1));
 
     ReflMeasureTransferStrategy strategy(
         std::move(std::unique_ptr<MockICatalogInfo>(mockCatInfo)),

@@ -57,7 +57,7 @@ public:
   ReflMeasureTransferStrategy(const ReflMeasureTransferStrategy &other);
 
   virtual std::vector<std::map<std::string, std::string>>
-  transferRuns(const SearchResultMap &searchResults,
+  transferRuns(SearchResultMap &searchResults,
                Mantid::Kernel::ProgressBase &progress);
 
   virtual ReflMeasureTransferStrategy *clone() const;

@@ -25,6 +25,7 @@ namespace MantidQt
         : description(desc), location(loc) {}
     std::string description;
     std::string location;
+    std::string issues;
   };
 
   /// Helper typdef for map of SearchResults keyed by run
@@ -67,7 +68,7 @@ namespace MantidQt
        * for those columns
        */
       virtual std::vector<std::map<std::string, std::string>>
-      transferRuns(const SearchResultMap &searchResults,
+      transferRuns(SearchResultMap &searchResults,
                    Mantid::Kernel::ProgressBase &progress) = 0;
 
       /**

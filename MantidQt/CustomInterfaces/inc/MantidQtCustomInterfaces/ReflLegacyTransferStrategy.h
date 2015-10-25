@@ -35,7 +35,7 @@ namespace MantidQt
     {
     public:
       virtual std::vector<std::map<std::string, std::string>>
-      transferRuns(const SearchResultMap &searchResults,
+      transferRuns(SearchResultMap &searchResults,
                    Mantid::Kernel::ProgressBase &progress);
 
       virtual ReflLegacyTransferStrategy *clone() const;

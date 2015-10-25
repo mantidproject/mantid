@@ -40,7 +40,7 @@ ReflMeasureTransferStrategy::~ReflMeasureTransferStrategy() {}
 
 std::vector<std::map<std::string, std::string>>
 MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
-    const SearchResultMap &searchResults,
+    SearchResultMap &searchResults,
     Mantid::Kernel::ProgressBase &progress) {
 
   typedef std::vector<Measurement> VecSameMeasurement;
@@ -68,6 +68,9 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
         // Add to existing group
         mapOfMeasurements[metaData.id()].push_back(metaData);
       }
+    }
+    else{
+        it->second.issues = metaData.whyUnuseable();
     }
 
     // Obtaining metadata could take time.
