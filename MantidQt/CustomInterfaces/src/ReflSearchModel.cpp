@@ -11,6 +11,7 @@ namespace MantidQt
 
     //----------------------------------------------------------------------------------------------
     /** Constructor
+    @param transferMethod : Transfer strategy
     @param tableWorkspace : The table workspace to copy data from
     @param instrument : instrument name
     */

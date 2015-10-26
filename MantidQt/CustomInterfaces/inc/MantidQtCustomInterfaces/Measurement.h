@@ -2,7 +2,7 @@
 #define MANTIDQT_CUSTOMINTERFACES_MEASUREMENT_H_
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include <String>
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
