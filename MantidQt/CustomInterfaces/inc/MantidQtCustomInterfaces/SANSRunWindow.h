@@ -309,6 +309,10 @@ private slots:
   void onTransmissionRadiusCheckboxChanged();
   /// Transmission setting for ROI files
   void onTransmissionROIFilesCheckboxChanged();
+  /// React to change in Left/Right checkbox
+  void onLeftRightCheckboxChanged();
+  /// React to change in Up/Down checkbox
+  void onUpDownCheckboxChanged();
   /// Handle a change of the aperture geometry for QResolution
   void handleQResolutionApertureChange(int aperture);
 
@@ -454,8 +458,12 @@ private:
   void checkWaveLengthAndQValues(bool &isValid, QString &message,
                                  QLineEdit *min, QLineEdit *max,
                                  QComboBox *selection, QString type);
+  /// Update the beam center fields
+  void updateBeamCenterCoordinates();
   /// LOQ specific settings
   void applyLOQSettings(bool isNowLOQ);
+  /// Set the beam finder details
+  void setBeamFinderDetails();
   /// Gets the QResolution settings and shows them in the GUI
   void retrieveQResolutionSettings();
   /// Gets the QResolution settings for the aperture, decides for the the
