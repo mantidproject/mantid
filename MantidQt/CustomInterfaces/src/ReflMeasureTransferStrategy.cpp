@@ -84,7 +84,7 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
        ++group) {
 
     // Map keyed by subId to index of exisiting subid written.
-    std::map<std::string, int> subIdMap;
+    std::map<std::string, size_t> subIdMap;
     for (size_t i = 0; i < group->second.size(); ++i) {
       const Measurement &measurement = group->second[i];
       if (subIdMap.find(measurement.subId()) != subIdMap.end()) {
