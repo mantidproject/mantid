@@ -235,6 +235,14 @@ def calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det,
                             "TransmissionMonitor": str(first_det),
                             "OutputUnfittedData": True})
             output_ws = alg.getProperty("OutputWorkspace").value
+            ##### HACK START ######
+            # Fixing the Fit algorithm to output distribution when the input is a distribution
+            # causes the system test EQSANSTransmissionCompatibility to worsen. Currently we
+            # don't have enough information to ensure that this is valid. Hence we set the
+            # distribution flag back at this point.
+            if output_ws.isDistribution():
+                output_ws.setDistribution(False)
+            ##### HACK END ########
         else:
             alg = _execute("CalculateTransmission",
                            {"DirectRunWorkspace": empty_mon_ws,
@@ -243,6 +251,14 @@ def calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det,
                             "TransmissionMonitor": str(first_det),
                             "OutputUnfittedData": True})
             output_ws = alg.getProperty("OutputWorkspace").value
+            ##### HACK START ######
+            # Fixing the Fit algorithm to output distribution when the input is a distribution
+            # causes the system test EQSANSTransmissionCompatibility to worsen. Currently we
+            # don't have enough information to ensure that this is valid. Hence we set the
+            # distribution flag back at this point.
+            if output_ws.isDistribution():
+                output_ws.setDistribution(False)
+            ##### HACK END ########
         # Get the unfitted data
         raw_ws = None
         if alg.existsProperty("UnfittedData"):
