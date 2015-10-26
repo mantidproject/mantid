@@ -43,7 +43,7 @@ void OptimizeLatticeForCellType::init() {
   cellTypes.push_back(ReducedCell::TETRAGONAL());
   cellTypes.push_back(ReducedCell::ORTHORHOMBIC());
   cellTypes.push_back(ReducedCell::HEXAGONAL());
-  cellTypes.push_back(ReducedCell::RHOMBOHEDRAL());
+  cellTypes.push_back("Trigonal"); // was RHOMBOHEDRAL
   cellTypes.push_back(ReducedCell::MONOCLINIC());
   cellTypes.push_back(ReducedCell::TRICLINIC());
   declareProperty("CellType", cellTypes[0],
@@ -149,7 +149,29 @@ void OptimizeLatticeForCellType::exec() {
 
     std::vector<double> sigabc = outParams(cell_type, 2, ParamTable);
 
+    IAlgorithm_sptr ub_alg;
+    try {
+      ub_alg =
+          createChildAlgorithm("FindUBUsingLatticeParameters", -1, -1, false);
+    }
+    catch (Exception::NotFoundError &) {
+      g_log.error("Can't locate FindUBUsingLatticeParameters algorithm");
+      throw;
+    }
+
+    ub_alg->setProperty("PeaksWorkspace", peakWS);
+    ub_alg->setProperty("a", Params[0]);
+    ub_alg->setProperty("b", Params[1]);
+    ub_alg->setProperty("c", Params[2]);
+    ub_alg->setProperty("alpha", Params[3]);
+    ub_alg->setProperty("beta", Params[4]);
+    ub_alg->setProperty("gamma", Params[5]);
+    ub_alg->setProperty("NumInitial", 15);
+    ub_alg->setProperty("Tolerance", tolerance);
+    ub_alg->executeAsChildAlg();
+    DblMatrix UBnew = peakWS->mutableSample().getOrientedLattice().getUB();
     OrientedLattice o_lattice;
+    o_lattice.setUB(UBnew);
     o_lattice.set(Params[0], Params[1], Params[2], Params[3], Params[4],
                   Params[5]);
     o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
@@ -222,7 +244,7 @@ std::string OptimizeLatticeForCellType::inParams(std::string cell_type,
     fun_str << ",a=" << lat[0];
     fun_str << ",b=" << lat[1];
     fun_str << ",c=" << lat[2];
-  } else if (cell_type == ReducedCell::RHOMBOHEDRAL()) {
+  } else if (cell_type == "Trigonal") {
     fun_str << ",a=" << lat[0];
     fun_str << ",Alpha=" << lat[3];
   } else if (cell_type == ReducedCell::HEXAGONAL()) {
@@ -284,7 +306,7 @@ OptimizeLatticeForCellType::outParams(std::string cell_type, int icol,
     lattice_parameters[3] = 90;
     lattice_parameters[4] = 90;
     lattice_parameters[5] = 90;
-  } else if (cell_type == ReducedCell::RHOMBOHEDRAL()) {
+  } else if (cell_type == "Trigonal") {
     lattice_parameters[0] = ParamTable->Double(0, icol);
     lattice_parameters[1] = ParamTable->Double(0, icol);
     lattice_parameters[2] = ParamTable->Double(0, icol);
