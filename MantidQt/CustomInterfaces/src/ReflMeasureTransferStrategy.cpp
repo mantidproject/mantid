@@ -11,6 +11,7 @@
 #include <utility>
 #include <limits>
 #include <set>
+#include <sstream>
 
 using namespace Mantid::Kernel;
 
@@ -96,7 +97,9 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
         std::map<std::string, std::string> row;
         row[ReflTableSchema::RUNS] = measurement.run();
         row[ReflTableSchema::ANGLE] = measurement.angleStr();
-        row[ReflTableSchema::GROUP] = nextGroupId;
+        std::stringstream buffer;
+        buffer << nextGroupId;
+        row[ReflTableSchema::GROUP] = buffer.str();
         subIdMap.insert(std::make_pair(measurement.subId(), i));
         output.push_back(row);
       }

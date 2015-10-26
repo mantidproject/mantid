@@ -33,7 +33,7 @@ namespace CustomInterfaces {
 class MANTIDQT_CUSTOMINTERFACES_DLL Measurement {
 
 public:
-  typedef const std::string IDType;
+  typedef std::string IDType;
 
   /// Constructor
   Measurement(const IDType &measurementId, const IDType &subId,
@@ -41,7 +41,7 @@ public:
               const double angle, const std::string &run);
 
   /// Constructional method
-  static Measurement InvalidMeasurement(const std::string& why);
+  static Measurement InvalidMeasurement(const std::string &why);
 
   /// Copy constructor
   Measurement(const Measurement &other);
@@ -58,19 +58,19 @@ public:
   std::string label() const;
   double angle() const;
   std::string angleStr() const;
+  Measurement &operator=(const Measurement &);
 
 private:
   /// Constructor
-  Measurement(const std::string& why);
-  const IDType m_measurementId;
-  const IDType m_subId;
-  const std::string m_label;
-  const std::string m_type;
-  const double m_angle;
-  const std::string m_run;
+  Measurement(const std::string &why);
+  IDType m_measurementId;
+  IDType m_subId;
+  std::string m_label;
+  std::string m_type;
+  double m_angle;
+  std::string m_run;
   std::string m_whyUnuseable;
   /// Not assignable
-  Measurement &operator=(const Measurement &);
 };
 
 } // namespace CustomInterfaces

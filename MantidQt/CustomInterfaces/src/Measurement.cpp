@@ -78,6 +78,19 @@ std::string Measurement::angleStr() const {
   return buffer.str();
 }
 
+Measurement &Measurement::operator=(const Measurement &other) {
+  if (&other != this) {
+    m_measurementId = other.id();
+    m_subId = other.subId();
+    m_label = other.label();
+    m_type = other.type();
+    m_angle = other.angle();
+    m_run = other.run();
+    m_whyUnuseable = other.whyUnuseable();
+  }
+  return *this;
+}
+
 std::string Measurement::whyUnuseable() const { return m_whyUnuseable; }
 
 } // namespace CustomInterfaces

@@ -181,7 +181,7 @@ public:
 
     UserType usertype;
     CatalogConfigService *service =
-        makeCatalogConfigServiceAdapter(usertype, "my_key");
+        makeCatalogConfigServiceAdapter(usertype, std::string("my_key"));
     OptionalPath mountPoint = service->preferredMountPoint();
     TS_ASSERT(mountPoint);
     TS_ASSERT_EQUALS("my_value", mountPoint.get());
