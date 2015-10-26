@@ -9,15 +9,15 @@
 Description
 -----------
 
-Utility algorithm. Compares specified sample logs for a given list of workspaces or workspace groups. If sample logs match, no output will be produced. If sample logs do not match or do not exist, one two actions on user's choice will be performed:
+Utility algorithm. Compares specified sample logs for a given list of workspaces or workspace groups. If sample logs match, no output will be produced. If sample logs do not match or do not exist, comma separated list of these sample logs will be returned. This list can be used as an input for :ref:`algm-CreateLogPropertyTable` algorithm to get a TableWorkspace with not identical properties.
 
-- **warning**: algorithm will throw a warning, containing run titles or run numbers of not identical properties. All specified sample logs will be checked for all input workspaces. This action may be utilized to warn the user about difference in optional sample logs.
-
-- **error**: algorithm will terminate with an error message after first not matching property will be found or if one of specified sample logs does not exist. This action is useful for mandatory properties, which must be identical in the given list of workspaces.
+For the moment, algorithm does not support comparison of the time series logs. 
 
 
 Usage
 -----
+
+**Example 1: compare identical sample logs**
 
 .. testcode:: ExCompareSampleLogs
 
@@ -25,14 +25,16 @@ Usage
     ws1 = CreateSampleWorkspace()
     ws2 = CreateSampleWorkspace()
 
-    lognames = 'run_title,deterota,wavelength,polarisation,flipper'
-    logvalues = 'ws1,-10.0,4.2,x,ON'
+    lognames = 'omega,wavelength,polarisation,flipper'
+    logvalues = '10.0,4.2,x,ON'
     AddSampleLogMultiple(Workspace=ws1, LogNames=lognames, LogValues=logvalues, ParseType=True)
-    logvalues = 'ws2,-10.0,4.2,x,OFF'
+    logvalues = '10.0,4.2,x,ON'
     AddSampleLogMultiple(Workspace=ws2, LogNames=lognames, LogValues=logvalues, ParseType=True)
 
     # compare sample logs
-    CompareSampleLogs('ws1,ws2', 'deterota,wavelength,polarisation,flipper' , 0.01, 'warning')
+    result = CompareSampleLogs('ws1,ws2', 'omega,wavelength,polarisation,flipper' , 0.01)
+    if result == '':
+        print "All sample logs match!"
 
 .. testcleanup:: ExCompareSampleLogs
 
@@ -43,7 +45,46 @@ Output:
 
 .. testoutput:: ExCompareSampleLogs
 
-    Property flipper does not match! ws1: ON, but ws2: OFF
+    All sample logs match!
+
+
+**Example 2: create a table of not identical sample logs**
+
+.. testcode:: ExCompareSampleLogs2
+
+    # create workspaces with some sample logs
+    ws1 = CreateSampleWorkspace()
+    ws2 = CreateSampleWorkspace()
+
+    lognames = 'run_title,omega,wavelength,polarisation,flipper'
+    logvalues = 'ws1,10.0,4.2,x,ON'
+    AddSampleLogMultiple(Workspace=ws1, LogNames=lognames, LogValues=logvalues, ParseType=True)
+    logvalues = 'ws2,12.0,4.2,x,OFF'
+    AddSampleLogMultiple(Workspace=ws2, LogNames=lognames, LogValues=logvalues, ParseType=True)
+
+    # compare sample logs
+    result = CompareSampleLogs('ws1,ws2', lognames , 0.01)
+    print "Following sample logs do not match: ", result
+
+    # create a table
+    table = CreateLogPropertyTable('ws1,ws2', result, GroupPolicy='All')
+    print "Column names are: ", table.getColumnNames()
+    print "The omega values are:", table.column(1)
+    print "The flipper values are:", table.column(2)
+
+.. testcleanup:: ExCompareSampleLogs2
+
+    DeleteWorkspace('ws1')
+    DeleteWorkspace('ws2')
+
+Output:
+
+.. testoutput:: ExCompareSampleLogs2
+
+    Following sample logs do not match:  run_title,omega,flipper
+    Column names are:  ['run_title', 'omega', 'flipper']
+    The omega values are: ['10', '12']
+    The flipper values are: ['ON', 'OFF']
 
 .. categories::
 

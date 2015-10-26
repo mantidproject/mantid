@@ -98,7 +98,6 @@ Output:
 
 .. testoutput:: ExTOFTOFMergeRuns2ws
 
-    Property temperature does not match! TOFTOFTestdata: 294.14, but TOFTOFTestdata2: 296.16
     Temperature of experiment for 1st workspace (in K):  294.14
     Temperature of experiment for 2nd workspace (in K):  296.16
     Temperature of experiment for merged workspaces = average over workspaces (in K):  295.15
@@ -141,7 +140,6 @@ Output:
 
 .. testoutput:: ExTOFTOFMergeRunsGroup
 
-    Property temperature does not match! TOFTOFTestdata: 294.14, but TOFTOFTestdata2: 296.16
     Monitor counts for 1st workspace:  136935
     Monitor counts for 2nd workspace:  145145
     Monitor counts for merged workspaces = sum over all workspaces:  282080

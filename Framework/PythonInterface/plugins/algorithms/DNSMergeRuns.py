@@ -84,7 +84,9 @@ class DNSMergeRuns(PythonAlgorithm):
         self._same_wavelength()
 
         # algorithm must warn if some properties_to_compare are different
-        api.CompareSampleLogs(self.workspace_names, self.properties_to_compare, 5e-3, 'warning')
+        result = api.CompareSampleLogs(self.workspace_names, self.properties_to_compare, 5e-3)
+        if len(result) > 0:
+            self.log().warning("Sample logs " + result + " do not match!")
 
         return True
 

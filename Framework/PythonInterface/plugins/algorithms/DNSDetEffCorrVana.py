@@ -145,7 +145,9 @@ class DNSDetEffCorrVana(PythonAlgorithm):
         mlzutils.ws_exist(wslist_norm, self.log())
 
         # check sample logs, produce warnings if different
-        api.CompareSampleLogs(wslist, self.properties_to_compare, 5e-3, 'warning')
+        result = api.CompareSampleLogs(wslist, self.properties_to_compare, 5e-3)
+        if len(result) > 0:
+            self.log().warning("Sample logs " + result + " do not match!")
 
         # apply correction
         outws = self._vana_correct()
