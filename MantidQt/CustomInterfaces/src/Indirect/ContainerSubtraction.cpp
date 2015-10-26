@@ -300,6 +300,19 @@ void ContainerSubtraction::absCorComplete(bool error) {
   if (save)
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
 
+  if (m_uiForm.ckShiftCan->isChecked()) {
+    IAlgorithm_sptr shiftLog =
+        AlgorithmManager::Instance().create("AddSampleLog");
+    shiftLog->initialize();
+
+    shiftLog->setProperty("Workspace", m_pythonExportWsName);
+    shiftLog->setProperty("LogName", "container_shift");
+    shiftLog->setProperty("LogType", "Number");
+    shiftLog->setProperty(
+        "LogText", boost::lexical_cast<std::string>(m_uiForm.spShift->value()));
+    m_batchAlgoRunner->addAlgorithm(shiftLog);
+  }
+
   // Run algorithm queue
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(postProcessComplete(bool)));
