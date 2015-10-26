@@ -26,7 +26,7 @@ BraggScatterer_sptr IsotropicAtomBraggScatterer::clone() const {
   IsotropicAtomBraggScatterer_sptr clone =
       boost::make_shared<IsotropicAtomBraggScatterer>();
   clone->initialize();
-  clone->setProperties(this->asString(false, ';'));
+  clone->setProperties(this->asString(false));
 
   return clone;
 }

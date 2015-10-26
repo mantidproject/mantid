@@ -222,7 +222,7 @@ void StartLiveDataDialog::parseInput()
   {
     storePropertyValue("ProcessingAlgorithm", ui.processingAlgo->getSelectedAlgorithm());
     std::string props;
-    props = m_processingAlg->asString(false, ';'); /* use semicolon to properly separate the props */
+    props = m_processingAlg->asString(false); 
     storePropertyValue("ProcessingProperties", QString::fromStdString(props));
   }
   else if (m_useProcessScript)
@@ -235,7 +235,7 @@ void StartLiveDataDialog::parseInput()
   {
     storePropertyValue("PostProcessingAlgorithm", ui.postAlgo->getSelectedAlgorithm());
     std::string props;
-    props = m_postProcessingAlg->asString(false, ';'); /* use semicolon to properly separate the props */
+    props = m_postProcessingAlg->asString(false); 
     storePropertyValue("PostProcessingProperties", QString::fromStdString(props));
   }
   else if (m_usePostProcessScript)
