@@ -122,6 +122,12 @@ public:
 
     // Two input vectors were identical, so we should get an empty vector back
     TS_ASSERT(input_data.empty());
+
+    // Parameter vectors should also have been emptied
+    TS_ASSERT(psi.empty());
+    TS_ASSERT(gl.empty());
+    TS_ASSERT(gs.empty());
+    TS_ASSERT(efix.empty());
   }
 
   void test_filter_to_new() {
@@ -150,6 +156,12 @@ public:
     // and so should be returned in the vector
     TS_ASSERT_EQUALS(input_data[0], "test2");
     TS_ASSERT_EQUALS(input_data[1], "test5");
+
+    // Parameter vectors should have been reduced to the same size
+    TS_ASSERT_EQUALS(psi.size(), input_data.size());
+    TS_ASSERT_EQUALS(gl.size(), input_data.size());
+    TS_ASSERT_EQUALS(gs.size(), input_data.size());
+    TS_ASSERT_EQUALS(efix.size(), input_data.size());
   }
 
   void test_insert_data_sources() {
