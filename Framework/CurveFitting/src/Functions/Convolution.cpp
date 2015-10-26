@@ -161,7 +161,8 @@ void Convolution::function(const FunctionDomain &domain,
   if (nFunctions() == 1) {
     // return the resolution transform for testing
     double dx = 1.; // nData > 1? xValues[1] - xValues[0]: 1.;
-    std::transform(m_resolution.begin(), m_resolution.end(), out,
+    std::transform(m_resolution.begin(), m_resolution.end(),
+                   values.getPointerToCalculated(0),
                    std::bind2nd(std::multiplies<double>(), dx));
     return;
   }
@@ -173,35 +174,33 @@ void Convolution::function(const FunctionDomain &domain,
   std::vector<boost::shared_ptr<DeltaFunction>> dltFuns;
   double dltF = 0;
   bool deltaFunctionsOnly = false;
+  bool deltaShifted = false;
   CompositeFunction_sptr cf =
       boost::dynamic_pointer_cast<CompositeFunction>(getFunction(1));
   if (cf) {
     for (size_t i = 0; i < cf->nFunctions(); ++i) {
-      boost::shared_ptr<DeltaFunction> df =
-          boost::dynamic_pointer_cast<DeltaFunction>(cf->getFunction(i));
+      auto df = boost::dynamic_pointer_cast<DeltaFunction>(cf->getFunction(i));
       if (df) {
         dltFuns.push_back(df);
+        if (df->getParameter("Centre") != 0.0) {
+          deltaShifted = true;
+        }
         dltF += df->getParameter("Height") * df->HeightPrefactor();
       }
     }
     if (dltFuns.size() == cf->nFunctions()) {
       // all delta functions - return scaled resolution
       deltaFunctionsOnly = true;
-      //resolution->function1D(out, xValues, nData);
-      //std::transform(out, out + nData, out,
-      //               std::bind2nd(std::multiplies<double>(), dltF));
-      //return;
     }
-  } else if (dynamic_cast<DeltaFunction *>(getFunction(1).get())) {
+  } else if (auto df =
+                 boost::dynamic_pointer_cast<DeltaFunction>(getFunction(1))) {
     // single delta function - return scaled resolution
     deltaFunctionsOnly = true;
-    //auto df = boost::dynamic_pointer_cast<DeltaFunction>(getFunction(1));
-    //resolution->function1D(out, xValues, nData);
-    //std::transform(
-    //    out, out + nData, out,
-    //    std::bind2nd(std::multiplies<double>(),
-    //                 df->getParameter("Height") * df->HeightPrefactor()));
-    //return;
+    dltFuns.push_back(df);
+    if (df->getParameter("Centre") != 0.0) {
+      deltaShifted = true;
+    }
+    dltF = df->getParameter("Height") * df->HeightPrefactor();
   }
 
   // out points to the calculated values in values
@@ -214,8 +213,7 @@ void Convolution::function(const FunctionDomain &domain,
                            workspace.workspace);
 
     // Fourier transform is integration - multiply by the step in the
-    // integration
-    // variable
+    // integration variable
     double dx = nData > 1 ? xValues[1] - xValues[0] : 1.;
     std::transform(out, out + nData, out,
                    std::bind2nd(std::multiplies<double>(), dx));
@@ -250,7 +248,7 @@ void Convolution::function(const FunctionDomain &domain,
                    std::bind2nd(std::multiplies<double>(), dx));
   }
 
-  if (dltF != 0.) {
+  if (dltF != 0.0 && !deltaShifted) {
     // If model contains any delta functions their effect is addition of scaled
     // resolution
     std::vector<double> tmp(nData);
@@ -258,6 +256,20 @@ void Convolution::function(const FunctionDomain &domain,
     std::transform(tmp.begin(), tmp.end(), tmp.begin(),
                    std::bind2nd(std::multiplies<double>(), dltF));
     std::transform(out, out + nData, tmp.data(), out, std::plus<double>());
+  } else if (!dltFuns.empty()) {
+    std::vector<double> x(nData);
+    for (auto it = dltFuns.begin(); it != dltFuns.end(); ++it) {
+      auto df = *it;
+      double shift = - df->getParameter("Centre");
+      dltF = df->getParameter("Height") * df->HeightPrefactor();
+      std::transform(xValues, xValues + nData, x.data(),
+                     std::bind2nd(std::plus<double>(), shift));
+      std::vector<double> tmp(nData);
+      resolution->function1D(tmp.data(), x.data(), nData);
+      std::transform(tmp.begin(), tmp.end(), tmp.begin(),
+                     std::bind2nd(std::multiplies<double>(), dltF));
+      std::transform(out, out + nData, tmp.data(), out, std::plus<double>());
+    }
   }
 }
 

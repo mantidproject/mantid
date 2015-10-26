@@ -139,6 +139,10 @@ public:
     gauss->setParameter("s", 1./b);
 
     auto delta = IPeakFunction_sptr(new DeltaFunction());
+    double shift = 0.1;
+    double scale = 0.3;
+    delta->setParameter("Centre", shift);
+    delta->setParameter("Height", scale);
 
     Convolution conv;
     conv.addFunction(res);
@@ -155,11 +159,60 @@ public:
     for(size_t i = 10; i < x.size()-10; ++i)
     {
       auto xx = x[i];
-      auto d = y[i] - hh * exp(-xx*xx/bb) - ha * exp(-xx*xx/a);
-      if (fabs(d) > dlt){
-        dlt = fabs(d);
-        std::cerr << xx << ' ' << dlt << std::endl;
-      }
+      auto xxx = xx - shift;
+      auto d = y[i] - hh * exp(-xx*xx/bb) - scale * ha * exp(-xxx*xxx/a);
+      TS_ASSERT_DELTA(d, 0.0, 1e-11);
+    }
+  }
+
+  void test_two_deltas_with_shifts(){
+    IPeakFunction::setPeakRadius(1000);
+    auto res = IPeakFunction_sptr(new DeltaFunctionTest_Gauss());
+    double a = 0.13;
+    double ha = 1.0/sqrt(M_PI*a);
+    res->setParameter("c", 0);
+    res->setParameter("h", ha);
+    res->setParameter("s", 1./a);
+
+    auto gauss = IPeakFunction_sptr(new DeltaFunctionTest_Gauss());
+    double h = 3.0;
+    double b = 3.0;
+    gauss->setParameter("c", 0);
+    gauss->setParameter("h", h);
+    gauss->setParameter("s", 1./b);
+
+    auto delta1 = IPeakFunction_sptr(new DeltaFunction());
+    double shift1 = 2;
+    double scale1 = 0.3;
+    delta1->setParameter("Centre", shift1);
+    delta1->setParameter("Height", scale1);
+
+    auto delta2 = IPeakFunction_sptr(new DeltaFunction());
+    double shift2 = -2;
+    double scale2 = 1.3;
+    delta2->setParameter("Centre", shift2);
+    delta2->setParameter("Height", scale2);
+
+    Convolution conv;
+    conv.addFunction(res);
+    conv.addFunction(gauss);
+    conv.addFunction(delta1);
+    conv.addFunction(delta2);
+
+    FunctionDomain1DVector x(-6, 6, 100);
+    FunctionValues y(x);
+    conv.function(x,y);
+
+    double hh = h * sqrt(b/(a+b));
+    double bb = a + b;
+    double dlt = 0;
+    for(size_t i = 10; i < x.size()-10; ++i)
+    {
+      auto xx = x[i];
+      auto xx1 = xx - shift1;
+      auto xx2 = xx - shift2;
+      auto d = y[i] - hh * exp(-xx*xx/bb) - scale1 * ha * exp(-xx1*xx1/a) - scale2 * ha * exp(-xx2*xx2/a);
+      TS_ASSERT_DELTA(d, 0.0, 1e-11);
     }
   }
 
