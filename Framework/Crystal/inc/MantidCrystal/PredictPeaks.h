@@ -38,13 +38,27 @@ public:
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Crystal"; }
 
+  void checkBeamDirection() const;
+  void setInstrumentFromInputWorkspace(const API::ExperimentInfo_sptr &inWS);
+  void setRunNumberFromInputWorkspace(const API::ExperimentInfo_sptr &inWS);
 private:
   /// Initialise the properties
   void init();
   /// Run the algorithm
   void exec();
 
-  void doHKL(const Kernel::V3D &hkl);
+  void fillPossibleHKLsUsingGenerator(
+      const Kernel::DblMatrix &ub,
+      const Geometry::OrientedLattice &orientedLattice,
+      std::vector<Kernel::V3D> &possibleHKLs);
+
+  void fillPossibleHKLsUsingPeaksWorkspace(
+      const DataObjects::PeaksWorkspace_sptr &possibleHKLWorkspace,
+      std::vector<Kernel::V3D> &possibleHKLs) const;
+
+  void calculateQAndAddToOutput(const Kernel::V3D &hkl,
+                                const Kernel::DblMatrix &orientedUB,
+                                const Kernel::DblMatrix &goniometerMatrix);
 
 private:
   /// Reflection conditions possible
@@ -52,26 +66,10 @@ private:
 
   /// Run number of input workspace
   int m_runNumber;
-  /// Min wavelength parameter
-  double m_wlMin;
-  /// Max wavelength parameter
-  double m_wlMax;
   /// Instrument reference
   Geometry::Instrument_const_sptr m_inst;
   /// Output peaks workspace
   Mantid::DataObjects::PeaksWorkspace_sptr m_pw;
-  /// Counter of possible peaks
-  size_t m_numInRange;
-  /// Crystal applied
-  Geometry::OrientedLattice m_crystal;
-  /// Min D spacing to apply.
-  double m_minD;
-  /// Max D spacing to apply.
-  double m_maxD;
-  /// HKL->Q matrix (Goniometer * UB)
-  Mantid::Kernel::DblMatrix m_mat;
-  /// Goniometer rotation matrix
-  Mantid::Kernel::DblMatrix m_gonio;
 };
 
 } // namespace Mantid
