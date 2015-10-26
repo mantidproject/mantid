@@ -89,7 +89,8 @@ filterToNew(const std::vector<std::string> &input_data,
 Return a vector of the names of files and workspaces which have previously added
 to the workspace
 */
-std::vector<std::string> getCurrentData(const WorkspaceHistory &ws_history) {
+std::vector<std::string>
+getHistoricalDataSources(const WorkspaceHistory &ws_history) {
   // Using a set so we only insert unique names
   std::set<std::string> historicalDataSources;
 
@@ -234,7 +235,7 @@ void AccumulateMD::exec() {
                     << std::endl;
     return; // POSSIBLE EXIT POINT
   }
-  Algorithm::interruption_point();
+  this->interruption_point();
 
   // If Clean=True then just call CreateMD to create a fresh workspace and
   // delete the old one, note this means we don't retain workspace history...
@@ -259,11 +260,11 @@ void AccumulateMD::exec() {
 
     return; // POSSIBLE EXIT POINT
   }
-  Algorithm::interruption_point();
+  this->interruption_point();
 
   // Find what files and workspaces have already been included in the workspace.
   const WorkspaceHistory wsHistory = input_ws->getHistory();
-  std::vector<std::string> current_data = getCurrentData(wsHistory);
+  std::vector<std::string> current_data = getHistoricalDataSources(wsHistory);
 
   // If there's no new data, we don't have anything to do
   input_data = filterToNew(input_data, current_data);
@@ -272,9 +273,81 @@ void AccumulateMD::exec() {
                         << this->name() << std::endl;
     return; // POSSIBLE EXIT POINT
   }
-  Algorithm::interruption_point();
+  this->interruption_point();
 
-  // TODO if we reach here then new data exists to append to the input workspace
+  // If we reach here then new data exists to append to the input workspace
+  this->progress(0.0);
+  double progress_interval = 1.0 / input_data.size();
+  int progress_count = 1;
+  for (auto it = input_data.begin(); it != input_data.end();
+       ++it, ++progress_count) {
+
+    Workspace_sptr loaded_ws = getLoadedWs(*it);
+    MDHistoWorkspace_sptr temp_md_ws =
+        convertWorkspaceToMD(loaded_ws, this->getProperty("EMode"));
+    setSampleParameters(); // goniometer, UB, efix etc
+    appendWorkspace();
+
+    // TODO delete temp_md_ws
+
+    // Report progress to user and allow interrupt
+    this->progress(progress_count * progress_interval);
+    this->interruption_point();
+  }
+  this->progress(1.0); // Ensure progress is reported complete
+
+  // TODO set outputworkspace?
+  // TODO any cleanup to do?
+}
+
+/*
+Convert the workspace to an MDWorkspace
+*/
+MDHistoWorkspace_sptr
+AccumulateMD::convertWorkspaceToMD(Workspace_sptr loaded_ws,
+                                   std::string emode) {
+  // Find the Min Max extents
+  Mantid::API::Algorithm_sptr minMaxAlg =
+      createChildAlgorithm("ConvertToMDMinMaxGlobal");
+  minMaxAlg->setProperty("InputWorkspace", loaded_ws);
+  minMaxAlg->setProperty("QDimensions", "Q3D");
+  minMaxAlg->setProperty("dEAnalysisMode", emode);
+  minMaxAlg->executeAsChildAlg();
+
+  // Convert to MD
+  Mantid::API::Algorithm_sptr convertAlg = createChildAlgorithm("ConvertToMD");
+  convertAlg->setProperty("InputWorkspace", loaded_ws);
+  convertAlg->setProperty("QDimensions", "Q3D");
+  convertAlg->setProperty("QConversionScales", "HKL");
+  convertAlg->setProperty("dEAnalysisMode", emode);
+  convertAlg->setProperty("MinValues",
+                          minMaxAlg->getProperty("MinValues"));
+  convertAlg->setProperty("MaxValues",
+                          minMaxAlg->getPropertyValue("MaxValues"));
+  convertAlg->setProperty("OverwriteExisting", true); // TODO check
+  convertAlg->setPropertyValue("OutputWorkspace", "dummy");
+  convertAlg->executeAsChildAlg();
+
+  return convertAlg->getProperty("OutputWorkspace");
+}
+
+/*
+Load data or get already loaded workspace
+*/
+Workspace_sptr AccumulateMD::getLoadedWs(std::string ws_name) {
+  Workspace_sptr loaded_ws;
+
+  if (!AnalysisDataService::Instance().doesExist(ws_name)) {
+    Mantid::API::Algorithm_sptr loadAlg = createChildAlgorithm("Load");
+    loadAlg->setProperty("Filename", ws_name);
+    loadAlg->executeAsChildAlg();
+    loaded_ws = loadAlg->getProperty("OutputWorkspace");
+  } else {
+    loaded_ws =
+      AnalysisDataService::Instance().retrieveWS<Mantid::API::Workspace>(
+        ws_name);
+  }
+  return loaded_ws;
 }
 
 } // namespace MDAlgorithms

@@ -131,14 +131,15 @@ public:
     Mantid::MDAlgorithms::insertDataSources(dataSources, dataSourcesSet);
 
     // Check set contains "test1", "test2" and "test3"
-    auto iter1 = dataSourcesSet.find("test1");
-    TS_ASSERT(iter1 != dataSourcesSet.end());
+    std::set<std::string>::iterator iter;
+    iter = dataSourcesSet.find("test1");
+    TS_ASSERT(iter != dataSourcesSet.end());
 
-    auto iter2 = dataSourcesSet.find("test2");
-    TS_ASSERT(iter2 != dataSourcesSet.end());
+    iter = dataSourcesSet.find("test2");
+    TS_ASSERT(iter != dataSourcesSet.end());
 
-    auto iter3 = dataSourcesSet.find("test3");
-    TS_ASSERT(iter3 != dataSourcesSet.end());
+    iter = dataSourcesSet.find("test3");
+    TS_ASSERT(iter != dataSourcesSet.end());
   }
 
   void test_insert_data_sources_with_whitespace() {
@@ -147,14 +148,24 @@ public:
     Mantid::MDAlgorithms::insertDataSources(dataSources, dataSourcesSet);
 
     // Check set contains "test1", "test2" and "test3"
-    auto iter1 = dataSourcesSet.find("test1");
-    TS_ASSERT(iter1 != dataSourcesSet.end());
+    std::set<std::string>::iterator iter;
+    iter = dataSourcesSet.find("test1");
+    TS_ASSERT(iter != dataSourcesSet.end());
 
-    auto iter2 = dataSourcesSet.find("test2");
-    TS_ASSERT(iter2 != dataSourcesSet.end());
+    iter = dataSourcesSet.find("test2");
+    TS_ASSERT(iter != dataSourcesSet.end());
 
-    auto iter3 = dataSourcesSet.find("test3");
-    TS_ASSERT(iter3 != dataSourcesSet.end());
+    iter = dataSourcesSet.find("test3");
+    TS_ASSERT(iter != dataSourcesSet.end());
+  }
+
+  void test_get_historical_data_sources() {
+    // Create workspace with CreateMD
+    // Add workspace to ADS
+    // Append data with AccumulateMD
+    // const WorkspaceHistory wsHistory = input_ws->getHistory();
+    // std::vector<std::string> current_data = getHistoricalDataSources(wsHistory);
+    // Test all the data sources from CreateMD and AccumulateMD are in resultant vector
   }
 };
 

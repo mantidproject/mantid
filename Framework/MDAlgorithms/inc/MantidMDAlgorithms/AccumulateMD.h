@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include <set>
 
 namespace {}
@@ -19,12 +20,15 @@ std::vector<std::string>
 filterToExistingSources(const std::vector<std::string> &input_data,
                         Kernel::Logger &g_log);
 
-std::vector<std::string> filterToNew(const std::vector<std::string> &input_data,
-                                     const std::vector<std::string> &current_data);
+std::vector<std::string>
+filterToNew(const std::vector<std::string> &input_data,
+            const std::vector<std::string> &current_data);
 
-std::vector<std::string> getCurrentData(const API::WorkspaceHistory &ws_history);
+std::vector<std::string>
+getHistoricalDataSources(const API::WorkspaceHistory &ws_history);
 
-void insertDataSources(const std::string& dataSources, std::set<std::string>& historicalDataSources);
+void insertDataSources(const std::string &dataSources,
+                       std::set<std::string> &historicalDataSources);
 
 bool fileExists(const std::string &filename);
 
@@ -64,6 +68,12 @@ public:
 private:
   void init();
   void exec();
+
+  Mantid::DataObjects::MDHistoWorkspace_sptr
+  convertWorkspaceToMD(Mantid::API::Workspace_sptr loaded_ws, std::string emode);
+
+  Mantid::API::Workspace_sptr getLoadedWs(std::string ws_name);
+
 };
 
 } // namespace MDAlgorithms
