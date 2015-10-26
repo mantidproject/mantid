@@ -180,7 +180,7 @@ void Quasi::run() {
   }
   std::string plot = m_uiForm.cbPlot->currentText().toStdString();
 
-  IAlgorithm_sptr runAlg = AlgorithmManager::Instance().create("QLRun");
+  IAlgorithm_sptr runAlg = AlgorithmManager::Instance().create("BayesQuasi");
   runAlg->initialize();
   runAlg->setProperty("Program", program);
   runAlg->setProperty("SampleWorkspace", sampleName);
