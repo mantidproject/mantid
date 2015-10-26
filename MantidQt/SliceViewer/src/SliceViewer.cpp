@@ -1,4 +1,6 @@
+#include <iomanip>
 #include <iosfwd>
+#include <iostream>
 #include <limits>
 #include <sstream>
 #include <vector>
@@ -71,7 +73,6 @@ namespace SliceViewer {
 const QString SliceViewer::NoNormalizationKey = "No";
 const QString SliceViewer::VolumeNormalizationKey = "Volume";
 const QString SliceViewer::NumEventsNormalizationKey = "# Events";
-
 //------------------------------------------------------------------------------
 /** Constructor */
 SliceViewer::SliceViewer(QWidget *parent)
@@ -85,9 +86,10 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_peaksSliderWidget(NULL) {
 
   ui.setupUi(this);
-
+  //set to disabled state by default.
+  setCurrentState(boost::make_shared<RebinDisabledState>());
   m_inf = std::numeric_limits<double>::infinity();
-
+  //Rebinning overlay workspace
   // Point m_plot to the plot created in QtDesigner
   m_plot = ui.safeQwtPlot;
   // Add a spectrograph
@@ -130,13 +132,12 @@ SliceViewer::SliceViewer(QWidget *parent)
                    SLOT(setColorScaleAutoFull()));
   QObject::connect(ui.btnRangeSlice, SIGNAL(clicked()), this,
                    SLOT(setColorScaleAutoSlice()));
-  QObject::connect(ui.btnRebinRefresh, SIGNAL(clicked()), this,
-                   SLOT(rebinParamsChanged()));
-  QObject::connect(ui.btnAutoRebin, SIGNAL(toggled(bool)), this,
-                   SLOT(autoRebin_toggled(bool)));
+  //QObject::connect(ui.btnRebinRefresh, SIGNAL(clicked()), this,
+    //               SLOT(rebinParamsChanged()));
+  //QObject::connect(ui.btnAutoRebin, SIGNAL(toggled(bool)), this,
+    //               SLOT(autoRebin_toggled(bool)));
   QObject::connect(ui.btnPeakOverlay, SIGNAL(clicked()), this,
                    SLOT(peakOverlay_clicked()));
-
   // ----------- Other signals ----------------
   QObject::connect(m_colorBar, SIGNAL(colorBarDoubleClicked()), this,
                    SLOT(loadColorMapSlot()));
@@ -146,9 +147,7 @@ SliceViewer::SliceViewer(QWidget *parent)
                    SLOT(dynamicRebinComplete(bool)));
 
   initMenus();
-
   loadSettings();
-
   updateDisplay();
 
   // -------- Line Overlay ----------------
@@ -391,7 +390,7 @@ void SliceViewer::initMenus() {
   m_menuView->addAction(action);
 
   m_menuView->addSeparator();
-
+  currentState->apply(this);
   action = new QAction(QPixmap(), "Peak Overlay", this);
   connect(action, SIGNAL(triggered()), this, SLOT(peakOverlay_clicked()));
   m_menuView->addAction(action);
@@ -538,6 +537,7 @@ void SliceViewer::initMenus() {
   bar->addMenu(m_menuLine);
   bar->addMenu(m_menuPeaks);
   bar->addMenu(m_menuHelp);
+
 }
 
 //------------------------------------------------------------------------------
@@ -2231,7 +2231,16 @@ void SliceViewer::autoRebin_toggled(bool checked) {
 bool SliceViewer::isAutoRebinSet() const {
   return ui.btnAutoRebin->isEnabled() && ui.btnAutoRebin->isChecked();
 }
-
+/** FOR REBIN STATE IMPLEMENTATION **/
+void SliceViewer::setRebinBtnState(bool state){
+    ui.btnRebinMode->setEnabled(state);
+    ui.btnAutoRebin->setEnabled(state);
+    ui.btnRebinRefresh->setEnabled(state);
+    rebinParamsChanged();
+}
+void SliceViewer::setOverlayPipeline(Mantid::API::IMDWorkspace_sptr current_m_overlay){
+    m_overlayWS= current_m_overlay;
+}
 /**
 Auto rebin the workspace according the the current-view + rebin parameters if
 that option has been set.
@@ -2242,6 +2251,10 @@ void SliceViewer::autoRebinIfRequired() {
   }
 }
 
+bool SliceViewer::m_ws_is_EventWorkspace(){
+    return boost::dynamic_pointer_cast<IMDEventWorkspace>(m_ws);
+}
+/************************************/
 /**
  * Convenience function for removing all displayed peaks workspaces.
  */
@@ -2519,6 +2532,7 @@ void SliceViewer::dropEvent(QDropEvent *e) {
     }
   }
 }
+
 
 } // namespace
 }

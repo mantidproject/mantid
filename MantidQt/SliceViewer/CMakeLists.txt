@@ -8,7 +8,7 @@ set ( SRC_FILES
 	src/LineViewer.cpp
 	src/PeakBoundingBox.cpp
 	src/PeaksViewerOverlayDialog.cpp
-        src/PeakOverlayInteractive.cpp
+    src/PeakOverlayInteractive.cpp
 	src/PeakOverlayMultiCross.cpp
 	src/PeakOverlayMultiCrossFactory.cpp
 	src/PeakOverlayMultiSphere.cpp
@@ -24,8 +24,11 @@ set ( SRC_FILES
 	src/ProxyCompositePeaksPresenter.cpp
 	src/QPeaksTableModel.cpp
 	src/QScienceSpinBox.cpp
+    src/RebinDisabledState.cpp
+    src/RebinOffState.cpp
 	src/SliceViewer.cpp
 	src/SliceViewerWindow.cpp
+    src/SliceViewerState.cpp
 	src/SnapToGridDialog.cpp
 	src/XYLimitsDialog.cpp
 	src/LinePlotOptions.cpp
@@ -65,7 +68,10 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/ProxyCompositePeaksPresenter.h
 	inc/MantidQtSliceViewer/QPeaksTableModel.h
 	inc/MantidQtSliceViewer/QScienceSpinBox.h
+    inc/MantidQtSliceviewer/RebinDisabledState.h
+    inc/MantidQtSliceViewer/RebinOffState.h
 	inc/MantidQtSliceViewer/SliceViewer.h
+    inc/MantidQtSliceViewer/SliceViewerState.h
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
 	inc/MantidQtSliceViewer/SnapToGridDialog.h
 	inc/MantidQtSliceViewer/UpdateableOnDemand.h
