@@ -57,7 +57,7 @@ public:
       throw std::runtime_error("ProgressableView is null");
     }
     m_progressableView->clearProgress();
-    m_progressableView->setProgressRange(start, end);
+    m_progressableView->setProgressRange(static_cast<int>(start), static_cast<int>(end));
   }
 
   void doReport(const std::string &) {
