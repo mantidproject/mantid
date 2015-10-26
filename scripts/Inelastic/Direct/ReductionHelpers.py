@@ -285,12 +285,12 @@ def check_instrument_name(old_name,new_name):
 
     if new_name is None:
         if not old_name is None:
-            return (None,None,config.getFacility(),True)
+            return (None,None,config.getFacility())
         else:
             raise KeyError("No instrument name is defined")
 
     if old_name == new_name:
-        return
+        return (None,None,None)
 
     # Instrument name might be a prefix, query Mantid for the full name
     short_name=''

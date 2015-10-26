@@ -1364,6 +1364,7 @@ class RunDescriptor(PropDescriptor):
 #-------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------
+#pylint: disable=too-many-public-methods
 class RunDescriptorDependent(RunDescriptor):
     """Simple RunDescriptor class dependent on another RunDescriptor,
        providing the host descriptor if current descriptor value is not defined
@@ -1463,18 +1464,18 @@ class RunDescriptorDependent(RunDescriptor):
             return super(RunDescriptorDependent,self).get_ws_clone(clone_name)
         else:
             return self._host.get_ws_clone(clone_name)
-
+#pylint: disable=too-many-arguments
     def chop_ws_part(self,origin,tof_range,rebin,chunk_num,n_chunks):
         if self._has_own_value:
             return super(RunDescriptorDependent,self).chop_ws_part(origin,tof_range,rebin,chunk_num,n_chunks)
         else:
             return self._host.chop_ws_part(origin,tof_range,rebin,chunk_num,n_chunks)
 
-    def get_monitors_ws(self,monitor_ID=None):
+    def get_monitors_ws(self,monitor_ID=None,otherWS=None):
         if self._has_own_value:
-            return super(RunDescriptorDependent,self).get_monitors_ws(monitor_ID)
+            return super(RunDescriptorDependent,self).get_monitors_ws(monitor_ID,otherWS)
         else:
-            return self._host.get_monitors_ws(monitor_ID)
+            return self._host.get_monitors_ws(monitor_ID,otherWS)
 
     def is_existing_ws(self):
         if self._has_own_value:
@@ -1487,19 +1488,20 @@ class RunDescriptorDependent(RunDescriptor):
             return super(RunDescriptorDependent,self).file_hint(run_num_str,filePath,fileExt,**kwargs)
         else:
             return self._host.file_hint(run_num_str,filePath,fileExt,**kwargs)
-
+#pylint: disable=too-many-arguments
     def find_file(self,propman,inst_name=None,run_num=None,filePath=None,fileExt=None,**kwargs):
         if self._has_own_value:
             return super(RunDescriptorDependent,self).find_file(propman,inst_name,run_num,filePath,fileExt,**kwargs)
         else:
             return self._host.find_file(propman,inst_name,run_num,filePath,fileExt,**kwargs)
-
+#pylint: disable=too-many-arguments
     def load_file(self,inst_name,ws_name,run_number=None,load_mon_with_workspace=False,filePath=None,fileExt=None,**kwargs):
         if self._has_own_value:
-            return super(RunDescriptorDependent,self).load_file(inst_name,ws_name,run_number,load_mon_with_workspace,filePath,fileExt,**kwargs)
+            return super(RunDescriptorDependent,self).load_file(inst_name,ws_name,run_number,load_mon_with_workspace,\
+                         filePath,fileExt,**kwargs)
         else:
             return self._host.load_file(inst_name,ws_name,run_number,load_mon_with_workspace,filePath,fileExt,**kwargs)
-
+#pylint: disable=too-many-arguments
     def load_run(self,inst_name, calibration=None, force=False, mon_load_option=False,use_ws_calibration=True,\
                  filePath=None,fileExt=None,**kwargs):
         if self._has_own_value:
@@ -1547,9 +1549,10 @@ def build_run_file_name(run_num,inst,file_path='',fext=''):
     if isinstance(run_num,str):
         run_num_str = run_num
     else:
-       fac = RunDescriptor._holder.facility
-       zero_padding    = fac.instrument(inst).zeroPadding(run_num)
-       run_num_str = str(run_num).zfill(zero_padding)
+#pylint: disable=W0212
+        fac = RunDescriptor._holder.facility
+        zero_padding    = fac.instrument(inst).zeroPadding(run_num)
+        run_num_str = str(run_num).zfill(zero_padding)
 
     fname = '{0}{1}{2}'.format(inst,run_num_str,fext)
     if not file_path is None:

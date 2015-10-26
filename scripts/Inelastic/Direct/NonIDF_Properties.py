@@ -171,7 +171,7 @@ class NonIDF_Properties(object):
 
             elif isinstance(Instrument,str): # instrument name defined
                 new_name,full_name,facility_ = prop_helpers.check_instrument_name(None,Instrument)
-                idf_dir = config.getString('instrumentDefinitgeton.directory')
+                #idf_dir = config.getString('instrumentDefinitgeton.directory')
                 idf_file = api.ExperimentInfo.getInstrumentFilename(full_name)
                 tmp_ws_name = '__empty_' + full_name
                 if not mtd.doesExist(tmp_ws_name):

@@ -6,7 +6,9 @@
 
 import os
 from mantid.simpleapi import *
+#pylint: disable=unused-import
 from mantid.kernel import funcreturns
+#pylint: disable=unused-import
 from mantid import api,geometry,config
 import numpy as np
 
@@ -564,7 +566,7 @@ class DetCalFile(PropDescriptor):
         if isinstance(self._det_cal_file,api.Workspace):
         # nothing to do.  Workspace used for calibration
             return (True,'Workspace {0} used for detectors calibration'.format(self._det_cal_file.name()))
- 
+
         dcf_val = self._det_cal_file
         if isinstance(dcf_val,str): # it may be string representation of runN
             try:
@@ -607,7 +609,7 @@ class MapMaskFile(PropDescriptor):
         if not doc_string is None:
             self.__doc__ = doc_string
 
-    def __get__(self,instance,type=None):
+    def __get__(self,instance,class_type=None):
         if instance is None:
             return self
 
@@ -619,7 +621,7 @@ class MapMaskFile(PropDescriptor):
             if not fileExtension:
                 value = value + self._file_ext
         self._file_name = value
-
+#pylint: disable=unused-argument
     def find_file(self,instance,**kwargs):
         """ Method to find file, correspondent to
            current MapMaskFile file hint
@@ -1174,6 +1176,7 @@ class MonoCorrectionFactor(PropDescriptor):
         self._cor_factor = value
     #
         if value is None:
+#pylint: disable=W0212
             self._mono_run_prop._in_cash = False # enable monovan run validation if any
     #
     def set_val_to_cash(self,instance,value):
@@ -1327,6 +1330,7 @@ class RotationAngle(PropDescriptor):
                 working_ws = mtd[external_ws]
 
         value = None
+#pylint: disable=W0212
         log_names = self._motor_log._log_names
         for name in log_names:
             try:
@@ -1340,6 +1344,7 @@ class RotationAngle(PropDescriptor):
         """Independent method to read rotation angle from workspace and
          previously set log and offset parameters
         """
+#pylint: disable=W0212
         offset = self._mot_offset._offset
         if offset is None:
             return np.NaN
