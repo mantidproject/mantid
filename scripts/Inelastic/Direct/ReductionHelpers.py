@@ -285,7 +285,7 @@ def check_instrument_name(old_name,new_name):
 
     if new_name is None:
         if not old_name is None:
-            return (None,None,str(config.getFacility()))
+            return (None,None,config.getFacility(),True)
         else:
             raise KeyError("No instrument name is defined")
 
@@ -299,12 +299,12 @@ def check_instrument_name(old_name,new_name):
         instrument = config.getFacility().instrument(new_name)
         short_name = instrument.shortName()
         full_name = instrument.name()
+        facility = config.getFacility()
     except RuntimeError:
         # it is possible to have wrong facility:
         facilities = config.getFacilities()
-        old_facility = str(config.getFacility())
         for facility in facilities:
-            config.setString('default.facility',facility.name())
+            #config.setString('default.facility',facility.name())
             try :
                 instrument = facility.instrument(new_name)
                 short_name = instrument.shortName()
@@ -313,12 +313,11 @@ def check_instrument_name(old_name,new_name):
                     break
             except:
                 pass
+        #config.setString('default.facility',old_facility)
         if len(short_name)==0 :
-            config.setString('default.facility',old_facility)
             raise KeyError(" Can not find/set-up the instrument: "+new_name+' in any supported facility')
 
     new_name = short_name
-    facility = str(config.getFacility())
 
     #config['default.instrument'] = full_name
     return (new_name,full_name,facility)

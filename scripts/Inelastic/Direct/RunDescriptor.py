@@ -1,4 +1,4 @@
-#pylint: disable=too-many-lines
+﻿#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 """ File contains Descriptors used describe run for direct inelastic reduction """
 
@@ -914,16 +914,18 @@ class RunDescriptor(PropDescriptor):
         return hint,old_ext
 #--------------------------------------------------------------------------------------------------------------------
 
-    def find_file(self,inst_name=None,run_num=None,filePath=None,fileExt=None,**kwargs):
+    def find_file(self,propman,inst_name=None,run_num=None,filePath=None,fileExt=None,**kwargs):
         """Use Mantid to search for the given run. """
 
         if not inst_name:
-            inst_name = RunDescriptor._holder.short_inst_name
+            inst_name = propman.short_inst_name
 
-        if run_num:
-            run_num_str = str(run_num)
-        else:
-            run_num_str = str(self.run_number())
+        if not run_num:
+            run_num = self.run_number()
+
+        fac             = propman.facility
+        zero_padding    = fac.instrument(inst_name).zeroPadding(run_num)
+        run_num_str = str(run_num).zfill(zero_padding)
         #
         file_hint,old_ext = self.file_hint(run_num_str,filePath,fileExt,**kwargs)
 
@@ -958,7 +960,7 @@ class RunDescriptor(PropDescriptor):
     def load_file(self,inst_name,ws_name,run_number=None,load_mon_with_workspace=False,filePath=None,fileExt=None,**kwargs):
         """Load run for the instrument name provided. If run_numner is None, look for the current run"""
 
-        ok,data_file = self.find_file(None,run_number,filePath,fileExt,**kwargs)
+        ok,data_file = self.find_file(RunDescriptor._holder,None,run_number,filePath,fileExt,**kwargs)
         if not ok:
             self._ws_name = None
             raise IOError(data_file)
@@ -1486,11 +1488,11 @@ class RunDescriptorDependent(RunDescriptor):
         else:
             return self._host.file_hint(run_num_str,filePath,fileExt,**kwargs)
 
-    def find_file(self,inst_name=None,run_num=None,filePath=None,fileExt=None,**kwargs):
+    def find_file(self,propman,inst_name=None,run_num=None,filePath=None,fileExt=None,**kwargs):
         if self._has_own_value:
-            return super(RunDescriptorDependent,self).find_file(inst_name,run_num,filePath,fileExt,**kwargs)
+            return super(RunDescriptorDependent,self).find_file(propman,inst_name,run_num,filePath,fileExt,**kwargs)
         else:
-            return self._host.find_file(inst_name,run_num,filePath,fileExt,**kwargs)
+            return self._host.find_file(propman,inst_name,run_num,filePath,fileExt,**kwargs)
 
     def load_file(self,inst_name,ws_name,run_number=None,load_mon_with_workspace=False,filePath=None,fileExt=None,**kwargs):
         if self._has_own_value:
@@ -1542,12 +1544,16 @@ def build_run_file_name(run_num,inst,file_path='',fext=''):
     """Build the full name of a runfile from all possible components"""
     if fext is None:
         fext = ''
-    #HACK: current ISIS File format consist of 5 digit. It is defined somewhere in Mantid
-    # but redefined here. Should pick things up from MANTID
-    fname = '{0}{1:0>5}{2}'.format(inst,run_num,fext)
+    if isinstance(run_num,str):
+        run_num_str = run_num
+    else:
+       fac = RunDescriptor._holder.facility
+       zero_padding    = fac.instrument(inst).zeroPadding(run_num)
+       run_num_str = str(run_num).zfill(zero_padding)
+
+    fname = '{0}{1}{2}'.format(inst,run_num_str,fext)
     if not file_path is None:
         if os.path.exists(file_path):
             fname = os.path.join(file_path,fname)
     return fname
-
 

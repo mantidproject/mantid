@@ -1,4 +1,4 @@
-#pylint: disable=too-many-lines
+﻿#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 """ File contains collection of Descriptors used to define complex
     properties in NonIDF_Properties and PropertyManager classes
@@ -373,7 +373,7 @@ class InstrumentDependentProp(PropDescriptor):
         else:
             return getattr(instance,self._prop_name)
     def __set__(self,instance,values):
-        raise AttributeError("Property {0} can not be assigned".format(self._prop_name))
+        raise AttributeError("Property {0} can not be assigned. It defined by instrument".format(self._prop_name))
 #end InstrumentDependentProp
 #-----------------------------------------------------------------------------------------
 class VanadiumRMM(PropDescriptor):
@@ -553,25 +553,38 @@ class DetCalFile(PropDescriptor):
         """ reports if the detector calibration is in a run-file or separate file(workspace)"""
         return self._calibrated_by_run
 
-    def find_file(self,**kwargs):
+    def find_file(self,instance,**kwargs):
         """ Method to find file, correspondent to
             current _det_cal_file file hint
         """
         if self._det_cal_file is None:
         # nothing to look for
             return (True,"No Detector calibration file defined")
-        if isinstance(self._det_cal_file,int): # this can be only a run number
-            file_hint = str(self._det_cal_file)
+
+        if isinstance(self._det_cal_file,api.Workspace):
+        # nothing to do.  Workspace used for calibration
+            return (True,'Workspace {0} used for detectors calibration'.format(self._det_cal_file.name()))
+ 
+        dcf_val = self._det_cal_file
+        if isinstance(dcf_val,str): # it may be string representation of runN
+            try:
+                dcf_val = int(dcf_val)
+            except ValueError:
+                pass
+
+        if isinstance(dcf_val,int): # this is a run number
+            inst_short_name = instance.short_inst_name
+            fac             = instance.facility
+            zero_padding    = fac.instrument(inst_short_name).zeroPadding(dcf_val)
+            file_hint = inst_short_name+str(dcf_val).zfill(zero_padding)
             try:
                 file_name = FileFinder.findRuns(file_hint)[0]
             except:
                 return (False,"Can not find run file corresponding to run N: {0}".format(file_hint))
             self._det_cal_file = file_name
             return (True,file_name)
-        if isinstance(self._det_cal_file,api.Workspace):
-        # nothing to do.  Workspace used for calibration
-            return (True,'Workspace {0} used for detectors calibration'.format(self._det_cal_file.name()))
-        # string can be a run number or a file name:
+
+         # string can be a run number or a file name:
         file_name = prop_helpers.findFile(self._det_cal_file)
         if len(file_name) == 0: # it still can be a run number as string
             try:
@@ -607,7 +620,7 @@ class MapMaskFile(PropDescriptor):
                 value = value + self._file_ext
         self._file_name = value
 
-    def find_file(self,**kwargs):
+    def find_file(self,instance,**kwargs):
         """ Method to find file, correspondent to
            current MapMaskFile file hint
        """
