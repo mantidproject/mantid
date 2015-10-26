@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/Measurement.h"
 #include <string>
+#include <sstream>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -24,9 +25,9 @@ Measurement::Measurement(const Measurement::IDType &measurementId,
   if (m_measurementId.empty()) {
     accumulatedProblems += "No measurement id. ";
   } else if (m_subId.empty()) {
-    accumulatedProblems +=  "No sub id. ";
+    accumulatedProblems += "No sub id. ";
   } else if (m_run.empty()) {
-    accumulatedProblems += "No run" ;
+    accumulatedProblems += "No run";
   }
   m_whyUnuseable = accumulatedProblems;
 }
@@ -34,7 +35,8 @@ Measurement::Measurement(const Measurement::IDType &measurementId,
 /**
  * Constructor making an invalid Measurement
  */
-Measurement::Measurement(const std::string& why) : m_angle(0), m_whyUnuseable(why){}
+Measurement::Measurement(const std::string &why)
+    : m_angle(0), m_whyUnuseable(why) {}
 
 /**
  * Copy constructor
@@ -52,7 +54,9 @@ Measurement::~Measurement() {}
  * InvalidMeasurement static creational method
  * @return Invalid measurement
  */
-Measurement Measurement::InvalidMeasurement(const std::string& why) { return Measurement(why); }
+Measurement Measurement::InvalidMeasurement(const std::string &why) {
+  return Measurement(why);
+}
 
 bool Measurement::isUseable() const { return m_whyUnuseable.empty(); }
 
@@ -68,10 +72,13 @@ double Measurement::angle() const { return m_angle; }
 
 std::string Measurement::run() const { return m_run; }
 
-std::string Measurement::whyUnuseable() const
-{
-    return m_whyUnuseable;
+std::string Measurement::angleStr() const {
+  std::stringstream buffer;
+  buffer << angle();
+  return buffer.str();
 }
+
+std::string Measurement::whyUnuseable() const { return m_whyUnuseable; }
 
 } // namespace CustomInterfaces
 } // namespace Mantid

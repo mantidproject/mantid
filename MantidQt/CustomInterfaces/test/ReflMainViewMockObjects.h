@@ -52,6 +52,9 @@ public:
   MOCK_CONST_METHOD0(getSearchString, std::string());
   MOCK_CONST_METHOD0(getSearchInstrument, std::string());
   MOCK_METHOD0(getEnableNotebook, bool());
+  MOCK_CONST_METHOD0(getTransferMethod, std::string());
+
+  MOCK_METHOD1(setTransferMethods, void(const std::set<std::string>&));
 
   //Calls we don't care about
   virtual void showTable(QReflTableModel_sptr) {};

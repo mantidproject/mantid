@@ -95,7 +95,7 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
       } else {
         std::map<std::string, std::string> row;
         row[ReflTableSchema::RUNS] = measurement.run();
-        row[ReflTableSchema::ANGLE] = measurement.angle();
+        row[ReflTableSchema::ANGLE] = measurement.angleStr();
         row[ReflTableSchema::GROUP] = nextGroupId;
         subIdMap.insert(std::make_pair(measurement.subId(), i));
         output.push_back(row);

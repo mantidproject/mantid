@@ -43,7 +43,7 @@ namespace MantidQt
           m_runs.push_back(run);
           const std::string description = tableWorkspace->String(i, 6);
           m_descriptions[run] = description;
-          const std::string location = tableWorkspace->String(i, 2);
+          const std::string location = tableWorkspace->String(i, 1);
           m_locations[run] = location;
         }
       }

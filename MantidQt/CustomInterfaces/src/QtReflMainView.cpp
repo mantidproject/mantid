@@ -79,6 +79,17 @@ namespace MantidQt
     }
 
     /**
+     * Set all possible tranfer methods
+     * @param methods : All possible transfer methods.
+     */
+    void QtReflMainView::setTransferMethods(const std::set<std::string>& methods){
+        for(auto method = methods.begin(); method != methods.end(); ++method){
+       ui.comboTransferMethod->addItem((*method).c_str());
+        }
+    }
+
+
+    /**
     Set a new model in the tableview
     @param model : the model to be attached to the tableview
     */
@@ -673,6 +684,13 @@ namespace MantidQt
      * Clear the progress
      */
     void QtReflMainView::clearProgress() { ui.progressBar->reset(); }
+
+    /**
+     * @return the transfer method selected.
+     */
+    std::string QtReflMainView::getTransferMethod() const{
+        return ui.comboTransferMethod->currentText().toStdString();
+    }
 
   } // namespace CustomInterfaces
 } // namespace Mantid

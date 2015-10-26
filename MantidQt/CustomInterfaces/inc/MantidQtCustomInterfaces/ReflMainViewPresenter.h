@@ -12,6 +12,7 @@
 
 #include <Poco/AutoPtr.h>
 #include <Poco/NObserver.h>
+#include <memory>
 
 namespace MantidQt
 {
@@ -73,7 +74,6 @@ namespace MantidQt
       std::map<std::string,QVariant> m_options;
       //the search implementation
       boost::shared_ptr<IReflSearcher> m_searcher;
-      boost::shared_ptr<ReflTransferStrategy> m_transferStrategy;
 
       //process selected rows
       void process();
@@ -158,6 +158,13 @@ namespace MantidQt
       void handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
 
       void saveNotebook(std::map<int,std::set<int>> groups, std::set<int> rows);
+
+    private:
+
+      static const std::string LegacyTransferMethod;
+      static const std::string MeasureTransferMethod;
+
+      std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
 
     };
   }

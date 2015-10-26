@@ -83,12 +83,13 @@ namespace MantidQt
       //Get status of the checkbox which dictates whether an ipython notebook is produced
       virtual bool getEnableNotebook();
 
-      //Settor methods
+      //Setter methods
       virtual void setSelection(const std::set<int>& rows);
       virtual void setTableList(const std::set<std::string>& tables);
       virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument);
       virtual void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy* hintStrategy);
       virtual void setClipboard(const std::string& text);
+      virtual void setTransferMethods(const std::set<std::string>& methods);
 
       //Accessor methods
       virtual std::set<int> getSelectedRows() const;
@@ -98,6 +99,7 @@ namespace MantidQt
       virtual std::string getWorkspaceToOpen() const;
       virtual std::string getClipboard() const;
       virtual std::string getSearchString() const;
+      virtual std::string getTransferMethod() const;
 
       virtual boost::shared_ptr<IReflPresenter> getPresenter() const;
 

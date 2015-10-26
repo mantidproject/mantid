@@ -124,8 +124,22 @@ public:
 
   ReflMainViewPresenterTest() { FrameworkManager::Instance(); }
 
+  void test_constructor_sets_possible_transfer_methods(){
+      NiceMock<MockView> mockView;
+      MockProgressableView mockProgress;
+
+      // Expect that the transfer methods get initialized on the view
+      EXPECT_CALL(mockView, setTransferMethods(_)).Times(Exactly(1));
+
+      // Constructor
+      ReflMainViewPresenter presenter(&mockView, &mockProgress);
+
+      // Verify expectations
+      TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
   void testSaveNew() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -143,7 +157,7 @@ public:
   }
 
   void testSaveExisting() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -162,7 +176,7 @@ public:
   }
 
   void testSaveAs() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -193,7 +207,7 @@ public:
   }
 
   void testAppendRow() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -236,7 +250,7 @@ public:
   }
 
   void testAppendRowSpecify() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -282,7 +296,7 @@ public:
   }
 
   void testAppendRowSpecifyPlural() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -327,7 +341,7 @@ public:
   }
 
   void testPrependRow() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -369,7 +383,7 @@ public:
   }
 
   void testPrependRowSpecify() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -414,7 +428,7 @@ public:
   }
 
   void testPrependRowSpecifyPlural() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -460,7 +474,7 @@ public:
   }
 
   void testDeleteRowNone() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -494,7 +508,7 @@ public:
   }
 
   void testDeleteRowSingle() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -532,7 +546,7 @@ public:
   }
 
   void testDeleteRowPlural() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -573,7 +587,7 @@ public:
   }
 
   void testProcess() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -627,7 +641,7 @@ public:
   }
 
   void testProcessWithNotebook() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -695,7 +709,7 @@ public:
     createTOFWorkspace("dataA");
     createTOFWorkspace("dataB", "12346");
 
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
     EXPECT_CALL(mockView, getWorkspaceToOpen())
@@ -752,7 +766,7 @@ public:
 
     AnalysisDataService::Instance().addOrReplace("TestWorkspace", ws);
 
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -770,7 +784,7 @@ public:
   }
 
   void testBadWorkspaceLength() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -807,7 +821,7 @@ public:
   }
 
   void testPromptSaveAfterAppendRow() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -837,7 +851,7 @@ public:
   }
 
   void testPromptSaveAfterDeleteRow() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -879,7 +893,7 @@ public:
   }
 
   void testPromptSaveAndDiscard() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -902,7 +916,7 @@ public:
   }
 
   void testPromptSaveOnOpen() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -1009,7 +1023,7 @@ public:
         << ""
         << "" << 1.0 << 5 << ""; // Row 9
 
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -1101,7 +1115,7 @@ public:
   }
 
   void testClearRows() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -1163,7 +1177,7 @@ public:
   }
 
   void testCopyRow() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -1189,7 +1203,7 @@ public:
   }
 
   void testCopyRows() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -1221,7 +1235,7 @@ public:
   }
 
   void testCutRow() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -1258,7 +1272,7 @@ public:
   }
 
   void testCutRows() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -1297,7 +1311,7 @@ public:
   }
 
   void testPasteRow() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -1347,7 +1361,7 @@ public:
   }
 
   void testPasteNewRow() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -1395,7 +1409,7 @@ public:
   }
 
   void testPasteRows() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -1456,7 +1470,7 @@ public:
   }
 
   void testPasteNewRows() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -1515,7 +1529,7 @@ public:
   }
 
   void testImportTable() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     NiceMock<MockProgressableView> mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
     EXPECT_CALL(mockView, showAlgorithmDialog("LoadReflTBL"));
@@ -1525,7 +1539,7 @@ public:
   }
 
   void testExportTable() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     MockProgressableView mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
     EXPECT_CALL(mockView, showAlgorithmDialog("SaveReflTBL"));
@@ -1535,7 +1549,7 @@ public:
   }
 
   void testPlotRowWarn() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     MockProgressableView mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 
@@ -1569,7 +1583,7 @@ public:
   }
 
   void testPlotGroupWarn() {
-    MockView mockView;
+    NiceMock<MockView> mockView;
     MockProgressableView mockProgress;
     ReflMainViewPresenter presenter(&mockView, &mockProgress);
 

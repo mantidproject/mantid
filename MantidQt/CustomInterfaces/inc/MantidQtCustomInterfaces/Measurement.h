@@ -57,6 +57,7 @@ public:
   std::string type() const;
   std::string label() const;
   double angle() const;
+  std::string angleStr() const;
 
 private:
   /// Constructor

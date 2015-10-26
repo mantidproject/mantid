@@ -6,13 +6,18 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/NotebookWriter.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UserCatalogInfo.h"
 #include "MantidKernel/Utils.h"
+#include "MantidQtCustomInterfaces/ReflNexusMeasurementSource.h"
 #include "MantidQtCustomInterfaces/ProgressableView.h"
 #include "MantidQtCustomInterfaces/ReflCatalogSearcher.h"
 #include "MantidQtCustomInterfaces/ReflLegacyTransferStrategy.h"
+#include "MantidQtCustomInterfaces/ReflMeasureTransferStrategy.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
@@ -30,15 +35,12 @@
 #include <fstream>
 #include <sstream>
 
-
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
 
-
-namespace
-{
+namespace {
 
 class ReflProgress : public Mantid::Kernel::ProgressBase {
 private:
@@ -138,7 +140,6 @@ ReflMainViewPresenter::ReflMainViewPresenter(
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressView), m_tableDirty(false),
       m_searcher(searcher),
-      m_transferStrategy(new ReflLegacyTransferStrategy()),
       m_addObserver(*this, &ReflMainViewPresenter::handleAddEvent),
       m_remObserver(*this, &ReflMainViewPresenter::handleRemEvent),
       m_clearObserver(*this, &ReflMainViewPresenter::handleClearEvent),
@@ -217,6 +218,12 @@ ReflMainViewPresenter::ReflMainViewPresenter(
   // If we don't have a searcher yet, use ReflCatalogSearcher
   if (!m_searcher)
     m_searcher.reset(new ReflCatalogSearcher());
+
+  // Set the possible tranfer methods
+  std::set<std::string> methods;
+  methods.insert(LegacyTransferMethod);
+  methods.insert(MeasureTransferMethod);
+  m_view->setTransferMethods(methods);
 
   // Start with a blank table
   newTable();
@@ -1470,7 +1477,7 @@ void ReflMainViewPresenter::search() {
   try {
     auto results = m_searcher->search(searchString);
     m_searchModel = ReflSearchModel_sptr(
-        new ReflSearchModel(*m_transferStrategy, results, searchInstr));
+        new ReflSearchModel(*getTransferStrategy(), results, searchInstr));
     m_view->showSearch(m_searchModel);
   } catch (std::runtime_error &e) {
     m_view->giveUserCritical("Error running search:\n" + std::string(e.what()),
@@ -1505,7 +1512,7 @@ void ReflMainViewPresenter::transfer() {
   ReflProgress progress(0, selectedRows.size(), selectedRows.size(),
                         this->m_progressView);
 
-  auto newRows = m_transferStrategy->transferRuns(runs, progress);
+  auto newRows = getTransferStrategy()->transferRuns(runs, progress);
 
   std::map<std::string, int> groups;
   // Loop over the rows (vector elements)
@@ -1655,9 +1662,9 @@ void ReflMainViewPresenter::setOptions(
   for (auto it = options.begin(); it != options.end(); ++it)
     m_options[it->first] = it->second;
 
-      //Save any changes to disk
-      m_view->saveSettings(m_options);
-    }
+  // Save any changes to disk
+  m_view->saveSettings(m_options);
+}
 
 /** Load options from disk if possible, or set to defaults */
 void ReflMainViewPresenter::initOptions() {
@@ -1676,8 +1683,50 @@ void ReflMainViewPresenter::initOptions() {
   m_options["RoundQMaxPrecision"] = 3;
   m_options["RoundDQQPrecision"] = 3;
 
-      //Load saved values from disk
-      m_view->loadSettings(m_options);
-    }
+  // Load saved values from disk
+  m_view->loadSettings(m_options);
+}
+
+/**
+ * Select and make a transfer strategy on demand based. Pick up the
+ *user-provided
+ * transfer strategy to do this.
+ *
+ * @return new TransferStrategy
+ */
+std::unique_ptr<ReflTransferStrategy>
+ReflMainViewPresenter::getTransferStrategy() {
+  const std::string currentMethod = m_view->getTransferMethod();
+  if (currentMethod == MeasureTransferMethod) {
+
+    // We need catalog info overrides from the user-based config service
+    std::unique_ptr<CatalogConfigService> catConfigService(
+        makeCatalogConfigServiceAdapter(ConfigService::Instance()));
+
+    // We make a user-based Catalog Info object for the transfer
+    auto catInfo = std::unique_ptr<ICatalogInfo>(new UserCatalogInfo(
+        ConfigService::Instance().getFacility().catalogInfo(),
+        *catConfigService));
+
+    // We are going to load from disk to pick up the meta data, so provide the
+    // right repository to do this.
+    auto source =
+        std::unique_ptr<ReflMeasurementSource>(new ReflNexusMeasurementSource);
+
+    // Finally make and return the Measure based transfer strategy.
+    return std::unique_ptr<ReflTransferStrategy>(
+        new ReflMeasureTransferStrategy(std::move(catInfo), std::move(source)));
+  } else if (currentMethod == LegacyTransferMethod) {
+    return std::unique_ptr<ReflTransferStrategy>(
+        new ReflLegacyTransferStrategy);
+
+  } else {
+    throw std::runtime_error("Unknown tranfer method selected: " +
+                             currentMethod);
   }
+}
+
+const std::string ReflMainViewPresenter::MeasureTransferMethod = "Measurement";
+const std::string ReflMainViewPresenter::LegacyTransferMethod = "Description";
+}
 }
