@@ -25,7 +25,8 @@ try:
     import mantidplot
 except:
     mantidplot = None
-    #this should happen when this is called from outside Mantidplot and only then, the result is that attempting to plot will raise an exception
+    #this should happen when this is called from outside Mantidplot and only then,
+    #the result is that attempting to plot will raise an exception
     pass
 
 try:

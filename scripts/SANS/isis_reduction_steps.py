@@ -769,7 +769,8 @@ class Mask_ISIS(ReductionStep):
                     self.arm_x=0.0
                     self.arm_y=0.0
                 else:
-                    _issueWarning('Unrecognized line masking command "' + details + '" syntax is MASK/LINE width angle or MASK/LINE width angle x y')
+                    _issueWarning('Unrecognized line masking command "' + details +
+                                  '" syntax is MASK/LINE width angle or MASK/LINE width angle x y')
             else:
                 _issueWarning('Unrecognized masking option "' + details + '"')
         elif len(parts) == 3:
@@ -788,7 +789,9 @@ class Mask_ISIS(ReductionStep):
                     elif detname.upper() == 'REAR':
                         self.time_mask_r += ';' + bin_range
                     else:
-                        _issueWarning('Detector \'' + detname + '\' not found in currently selected instrument ' + self.instrument.name() + '. Skipping line.')
+                        _issueWarning('Detector \'' + detname +
+                                      '\' not found in currently selected instrument ' +
+                                      self.instrument.name() + '. Skipping line.')
                 else:
                     _issueWarning('Unrecognized masking line "' + details + '"')
         else:
@@ -800,7 +803,9 @@ class Mask_ISIS(ReductionStep):
         elif detect.upper() == 'REAR':
             self.spec_mask_r += ',' + mask_string
         else:
-            _issueWarning('Detector \'' + detect + '\' not found in currently selected instrument ' + self.instrument.name() + '. Skipping line.')
+            _issueWarning('Detector \'' + detect +
+                          '\' not found in currently selected instrument ' +
+                          self.instrument.name() + '. Skipping line.')
 
     def _ConvertToSpecList(self, maskstring, detector):
         '''
@@ -883,11 +888,16 @@ class Mask_ISIS(ReductionStep):
             Purpose of this method is to populate self._lim_phi_xml
         '''
         # convert all angles to be between 0 and 360
-        while phimax > 360 : phimax -= 360
-        while phimax < 0 : phimax += 360
-        while phimin > 360 : phimin -= 360
-        while phimin < 0 : phimin += 360
-        while phimax<phimin : phimax += 360
+        while phimax > 360 :
+            phimax -= 360
+        while phimax < 0 :
+            phimax += 360
+        while phimin > 360 :
+            phimin -= 360
+        while phimin < 0 :
+            phimin += 360
+        while phimax<phimin :
+            phimax += 360
 
         #Convert to radians
         phimin = math.pi*phimin/180.0
@@ -899,7 +909,8 @@ class Mask_ISIS(ReductionStep):
             + self._infinite_plane(id+'_plane2',centre, [-math.cos(-phimax + math.pi/2.0),-math.sin(-phimax + math.pi/2.0),0])
 
         if use_mirror:
-            self._lim_phi_xml += self._infinite_plane(id+'_plane3',centre, [math.cos(-phimax + math.pi/2.0),math.sin(-phimax + math.pi/2.0),0]) \
+            self._lim_phi_xml += self._infinite_plane(id+'_plane3',centre,
+                                                      [math.cos(-phimax + math.pi/2.0),math.sin(-phimax + math.pi/2.0),0]) \
             + self._infinite_plane(id+'_plane4',centre, [-math.cos(-phimin + math.pi/2.0),-math.sin(-phimin + math.pi/2.0),0]) \
             + '<algebra val="#(('+id+'_plane1 '+id+'_plane2):('+id+'_plane3 '+id+'_plane4))" />'
         else:
@@ -1924,7 +1935,8 @@ class ConvertToQISIS(ReductionStep):
         if (not self._grav_extra_length_set) or override:
             self._grav_extra_length = extra_length
         else:
-            msg = "User file can't override previous extra length setting for gravity correction; extra length remains " + str(self._grav_extra_length)
+            msg = ("User file can't override previous extra length setting for" +
+                  " gravity correction; extra length remains " + str(self._grav_extra_length))
             print msg
             sanslog.warning(msg)
 
