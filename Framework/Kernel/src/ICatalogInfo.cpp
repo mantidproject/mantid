@@ -19,6 +19,8 @@ std::string ICatalogInfo::transformArchivePath(const std::string &path) const {
   if (path.find("\\") == std::string::npos) {
     ret = replacePrefix(path, linuxPrefix(), windowsPrefix());
     ret = replaceAllOccurences(ret, "/", "\\");
+  } else {
+    ret = path;
   }
 #endif
   return ret;
