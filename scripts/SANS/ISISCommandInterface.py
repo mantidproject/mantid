@@ -11,7 +11,7 @@ sanslog = Logger("SANS")
 
 import isis_reduction_steps
 import isis_reducer
-from centre_finder import CentreFinder as CentreFinder
+from centre_finder import *
 #import SANSReduction
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup
@@ -340,7 +340,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
 
         @param wav_start: the first wavelength to be in the output data
         @param wav_end: the last wavelength in the output data
-        @param full_trans_wav: if to use a wide wavelength range, the instrument's default wavelength range, for the transmission correction, false by default
+        @param full_trans_wav: if to use a wide wavelength range, the instrument's default wavelength range,
+                               for the transmission correction, false by default
         @param name_suffix: append the created output workspace with this
         @param combineDet: combineDet can be one of the following:
                            'rear'                (run one reduction for the 'rear' detector data)
@@ -350,7 +351,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                             None                 (run one reduction for whatever detector has been set as the current detector
                                                   before running this method. If front apply rescale+shift)
         @param resetSetup: if true reset setup at the end
-        @param out_fit_settings: An output parameter. It is used, specially when resetSetup is True, in order to remember the 'scale and fit' of the fitting algorithm.
+        @param out_fit_settings: An output parameter. It is used, specially when resetSetup is True, in order to remember the
+                                 'scale and fit' of the fitting algorithm.
         @return Name of one of the workspaces created
     """
     _printMessage('WavRangeReduction(' + str(wav_start) + ', ' + str(wav_end) + ', '+str(full_trans_wav)+')')
@@ -674,7 +676,8 @@ def _WavRangeReduction(name_suffix=None):
     def _common_substring(val1, val2):
         l = []
         for i in range(len(val1)):
-            if val1[i]==val2[i]: l.append(val1[i])
+            if val1[i]==val2[i]:
+                l.append(val1[i])
             else:
                 return ''.join(l)
 
@@ -878,9 +881,11 @@ def SetDetectorOffsets(bank, x, y, z, rot, radius, side, xtilt=0.0, ytilt=0.0 ):
     detector.y_tilt = ytilt
 
 def SetCorrectionFile(bank, filename):
-    # 10/03/15 RKH, create a new routine that allows change of "direct beam file" = correction file, for a given
-    # detector, this simplify the iterative process used to adjust it. Will still have to keep changing the name of the file
-    # for each iteratiom to avoid Mantid using a cached version, but can then use only a single user (=mask) file for each set of iterations.
+    # 10/03/15 RKH, create a new routine that allows change of "direct beam file" = correction file,
+    # for a given detector, this simplify the iterative process used to adjust it.
+    # Will still have to keep changing the name of the file
+    # for each iteratiom to avoid Mantid using a cached version, but can then use
+    # only a single user (=mask) file for each set of iterations.
     # Modelled this on SetDetectorOffsets above ...
     """
         @param bank: Must be either 'front' or 'rear' (not case sensitive)
@@ -905,8 +910,11 @@ def LimitsR(rmin, rmax, quiet=False, reducer=None):
 def LimitsWav(lmin, lmax, step, bin_type):
     _printMessage('LimitsWav(' + str(lmin) + ', ' + str(lmax) + ', ' + str(step) + ', '  + bin_type + ')')
 
-    if  bin_type.upper().strip() == 'LINEAR': bin_type = 'LIN'
-    if  bin_type.upper().strip() == 'LOGARITHMIC': bin_type = 'LOG'
+    if  bin_type.upper().strip() == 'LINEAR':
+        bin_type = 'LIN'
+    if  bin_type.upper().strip() == 'LOGARITHMIC':
+        bin_type = 'LOG'
+
     if bin_type == 'LOG':
         bin_sym = '-'
     else:
@@ -1061,7 +1069,7 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
 
     return script
 
-def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, tolerance=1.251e-4):
+def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, tolerance=1.251e-4, find_direction = FindDirectionEnum.ALL):
     """
         Estimates the location of the effective beam centre given a good initial estimate. For more
         information go to this page
@@ -1069,20 +1077,27 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
         @param rlow: mask around the (estimated) centre to this radius (in millimetres)
         @param rupp: don't include further out than this distance (mm) from the centre point
         @param MaxInter: don't calculate more than this number of iterations (default = 10)
-        @param xstart: initial guess for the horizontal distance of the beam centre from the
-                        detector centre in meters (default the values in the mask file)
-        @param ystart: initial guess for the distance of the beam centre from the detector
-                       centre vertically in metres (default the values in the mask file)
-    @param tolerance: define the precision of the search. If the step is smaller than the tolerance,
-                      it will be considered stop searching the centre (default=1.251e-4 or 1.251um)
+        @param xstart: initial guess for the horizontal distance of the beam centre
+                       from the detector centre in meters (default the values in the mask file), or in the
+                       case of rotated instruments a rotation about the y axis. The unit is degree/XSF
+        @param ystart: initial guess for the distance of the beam centre from the detector centre
+                       vertically in metres (default the values in the mask file)
+        @param tolerance: define the precision of the search. If the step is smaller than the
+                          tolerance, it will be considered stop searching the centre (default=1.251e-4 or 1.251um)
+        @param find_only: if only Up/Down or only Left/Right is
+                          required then variable is set to
         @return: the best guess for the beam centre point
     """
-    XSTEP = ReductionSingleton().inst.cen_find_step
-    YSTEP = ReductionSingleton().inst.cen_find_step2
+    COORD1STEP = ReductionSingleton().inst.cen_find_step
+    COORD2STEP = ReductionSingleton().inst.cen_find_step2
 
     XSF = ReductionSingleton().inst.beam_centre_scale_factor1
     YSF = ReductionSingleton().inst.beam_centre_scale_factor2
+    coord1_scale_factor = XSF
+    coord2_scale_factor = YSF
 
+    # Here we have to be careful as the original position can be either in [m, m] or [degree, m], we need to make sure
+    # that we are consistent to not mix with [degree/XSF, m]
     original = ReductionSingleton().get_instrument().cur_detector_position(ReductionSingleton().get_sample().get_wksp_name())
 
     if ReductionSingleton().instrument.lowAngDetSet:
@@ -1096,43 +1111,61 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
             float(xstart), float(ystart)),det_bank)
 
     beamcoords = ReductionSingleton().get_beam_center()
-    XNEW = beamcoords[0]
-    YNEW = beamcoords[1]
-    xstart = beamcoords[0]
-    ystart = beamcoords[1]
-
 
     #remove this if we know running the Reducer() doesn't change i.e. all execute() methods are const
     centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
 
-    centre = CentreFinder(original)
-    centre.logger.notice("xstart,ystart="+str(XNEW*1000.)+" "+str(YNEW*1000.))
-    centre.logger.notice("Starting centre finding routine ...")
-    #this function moves the detector to the beam center positions defined above and
+    # Create an object which handles the positions and increments
+    centre_positioner = CentrePositioner(reducer = centre_reduction,
+                                         position_type = find_direction,
+                                         coord1_start = beamcoords[0],
+                                         coord2_start = beamcoords[1],
+                                         coord1_step = COORD1STEP,
+                                         coord2_step = COORD2STEP,
+                                         tolerance = tolerance)
+
+    # Produce the initial position
+    COORD1NEW, COORD2NEW = centre_positioner.produce_initial_position()
+
+    # Set the CentreFinder
+    sign_policy = centre_positioner.produce_sign_policy()
+    centre = CentreFinder(original, sign_policy, find_direction)
+
+    # Produce a logger for this the Beam Centre Finder
+    beam_center_logger = BeamCenterLogger(centre_reduction,
+                                          coord1_scale_factor,
+                                          coord2_scale_factor)
+
+    # If we have 0 iterations then we should return here
+    if MaxIter <= 0:
+        zero_iterations_msg = ("You have selected 0 iterations. The beam centre" +
+                               "will be positioned at (" + str(xstart) + ", " + str(ystart) +")")
+        beam_center_logger.report(zero_iterations_msg)
+        return xstart, ystart
+
+    beam_center_logger.report_init(COORD1NEW, COORD2NEW)
+
+    # this function moves the detector to the beam center positions defined above and
     # returns an estimate of where the beam center is relative to the new center
-    resX_old, resY_old = centre.SeekCentre(centre_reduction, [XNEW, YNEW])
+    resCoord1_old, resCoord2_old = centre.SeekCentre(centre_reduction, [COORD1NEW, COORD2NEW])
     centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
-
-    logger.notice(centre.status_str(0, resX_old, resY_old))
-
+    beam_center_logger.report_status(0, original[0], original[1], resCoord1_old, resCoord2_old)
     # take first trial step
-    XNEW = xstart + XSTEP
-    YNEW = ystart + YSTEP
+    COORD1NEW, COORD2NEW = centre_positioner.increment_position(COORD1NEW, COORD2NEW)
     graph_handle = None
     it = 0
     for i in range(1, MaxIter+1):
         it = i
-
         centre_reduction.set_beam_finder(
-            isis_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
+            isis_reduction_steps.BaseBeamFinder(COORD1NEW, COORD2NEW), det_bank)
+        resCoord1, resCoord2 = centre.SeekCentre(centre_reduction, [COORD1NEW, COORD2NEW])
 
-        resX, resY = centre.SeekCentre(centre_reduction, [XNEW, YNEW])
         centre_reduction = copy.deepcopy(ReductionSingleton().reference())
         LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
 
-        centre.logger.notice(centre.status_str(it, resX, resY))
+        beam_center_logger.report_status(it, COORD1NEW, COORD2NEW, resCoord1, resCoord2)
 
         if mantidplot:
             try :
@@ -1140,37 +1173,38 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
                     #once we have a plot it will be updated automatically when the workspaces are updated
                     graph_handle = mantidplot.plotSpectrum(centre.QUADS, 0)
                 graph_handle.activeLayer().setTitle(\
-                        centre.status_str(it, resX, resY))
+                         beam_center_logger.get_status_message(it, COORD1NEW, COORD2NEW, resCoord1, resCoord2))
             except :
                 #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot
                 pass
-
         #have we stepped across the y-axis that goes through the beam center?
-        if resX > resX_old:
+        if resCoord1 > resCoord1_old:
             # yes with stepped across the middle, reverse direction and half the step size
-            XSTEP = -XSTEP/2.
-        if resY > resY_old:
-            YSTEP = -YSTEP/2.
-        if abs(XSTEP) < tolerance and abs(YSTEP) < tolerance :
+            centre_positioner.set_new_increment_coord1()
+        if resCoord2 > resCoord2_old:
+            centre_positioner.set_new_increment_coord2()
+        if (centre_positioner.is_increment_coord1_smaller_than_tolerance() and
+            centre_positioner.is_increment_coord2_smaller_than_tolerance()):
             # this is the success criteria, we've close enough to the center
-            centre.logger.notice("Converged - check if stuck in local minimum!")
+            beam_center_logger.report("Converged - check if stuck in local minimum!")
             break
 
-        resX_old = resX
-        resY_old = resY
-        XNEW += XSTEP
-        YNEW += YSTEP
+        resCoord1_old = resCoord1
+        resCoord2_old = resCoord2
 
-    if it == MaxIter:
-        centre.logger.notice("Out of iterations, new coordinates may not be the best!")
-        XNEW -= XSTEP
-        YNEW -= YSTEP
+        if it != MaxIter:
+            COORD1NEW, COORD2NEW = centre_positioner.increment_position(COORD1NEW, COORD2NEW)
+        else:
+            beam_center_logger.report("Out of iterations, new coordinates may not be the best!")
+
+    # Create the appropriate return values
+    coord1_centre, coord2_centre = centre_positioner.produce_final_position(COORD1NEW, COORD2NEW)
 
     ReductionSingleton().set_beam_finder(
-        isis_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
-    centre.logger.notice("Centre coordinates updated: [" + str(XNEW*XSF) + ", " + str(YNEW*YSF) + ']')
+        isis_reduction_steps.BaseBeamFinder(coord1_centre, coord2_centre), det_bank)
+    beam_center_logger.report_final(coord1_centre, coord2_centre)
 
-    return XNEW, YNEW
+    return coord1_centre, coord2_centre
 
 
 ###################### Utility functions ####################################################
@@ -1408,6 +1442,19 @@ def AddRuns(runs, instrument ='sans2d', saveAsEvent=False, binning = "Monitors",
              isOverlay = isOverlay,
              time_shifts = time_shifts)
 
+def is_current_workspace_an_angle_workspace():
+    '''
+    Queries if the current workspace, stored in the reducer is a workspace
+    which uses [angle, pos] to denote its location
+    @returns true if it is an angle workspace else false
+    '''
+    is_angle = False
+    # pylint: disable=bare-except
+    try:
+        is_angle = is_workspace_which_requires_angle(reducer = ReductionSingleton())
+    except:
+        is_angle = False
+    return is_angle
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################

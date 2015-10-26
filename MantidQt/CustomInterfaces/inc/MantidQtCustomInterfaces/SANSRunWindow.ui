@@ -3201,9 +3201,9 @@ p, li { white-space: pre-wrap; }
           <property name="checkable">
            <bool>false</bool>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_12" stretch="1,1,2">
+          <layout class="QVBoxLayout" name="verticalLayout_12" stretch="0,1,2">
            <item>
-            <widget class="QGroupBox" name="groupBox_12">
+            <widget class="QGroupBox" name="beam_centre_finder_groupbox">
              <property name="title">
               <string>Current ( x , y ) [mm]</string>
              </property>
@@ -3271,6 +3271,37 @@ p, li { white-space: pre-wrap; }
                 </property>
                </widget>
               </item>
+              <item row="1" column="3">
+               <layout class="QHBoxLayout" name="horizontalLayout_24">
+                <item>
+                 <widget class="QCheckBox" name="left_right_checkbox">
+                  <property name="text">
+                   <string>Left/Right</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="up_down_checkbox">
+                  <property name="text">
+                   <string>Up/Down</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item row="0" column="3">
+               <widget class="QLabel" name="label_16">
+                <property name="text">
+                 <string>Find Beam Centre for:</string>
+                </property>
+               </widget>
+              </item>
              </layout>
              <zorder>rear_beam_y</zorder>
              <zorder>rear_radio</zorder>
@@ -3278,6 +3309,7 @@ p, li { white-space: pre-wrap; }
              <zorder>front_beam_x</zorder>
              <zorder>front_radio</zorder>
              <zorder>rear_beam_x</zorder>
+             <zorder>label_16</zorder>
             </widget>
            </item>
            <item>
