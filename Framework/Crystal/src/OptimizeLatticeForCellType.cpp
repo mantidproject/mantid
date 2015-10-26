@@ -43,7 +43,7 @@ void OptimizeLatticeForCellType::init() {
   cellTypes.push_back(ReducedCell::TETRAGONAL());
   cellTypes.push_back(ReducedCell::ORTHORHOMBIC());
   cellTypes.push_back(ReducedCell::HEXAGONAL());
-  cellTypes.push_back("Trigonal"); // was RHOMBOHEDRAL
+  cellTypes.push_back(ReducedCell::RHOMBOHEDRAL());
   cellTypes.push_back(ReducedCell::MONOCLINIC());
   cellTypes.push_back(ReducedCell::TRICLINIC());
   declareProperty("CellType", cellTypes[0],
@@ -231,7 +231,11 @@ void OptimizeLatticeForCellType::exec() {
 std::string OptimizeLatticeForCellType::inParams(std::string cell_type,
                                                  std::vector<double> &lat) {
   std::ostringstream fun_str;
-  fun_str << "name=LatticeFunction,CrystalSystem=" << cell_type;
+  // TODO remove next 3 lines when PointGroup is changed
+  if (cell_type == "Rhombohedral")
+    fun_str << "name=LatticeFunction,CrystalSystem=Trigonal";
+  else
+    fun_str << "name=LatticeFunction,CrystalSystem=" << cell_type;
 
   std::vector<double> lattice_parameters;
   lattice_parameters.assign(6, 0);
@@ -244,7 +248,7 @@ std::string OptimizeLatticeForCellType::inParams(std::string cell_type,
     fun_str << ",a=" << lat[0];
     fun_str << ",b=" << lat[1];
     fun_str << ",c=" << lat[2];
-  } else if (cell_type == "Trigonal") {
+  } else if (cell_type == ReducedCell::RHOMBOHEDRAL()) {
     fun_str << ",a=" << lat[0];
     fun_str << ",Alpha=" << lat[3];
   } else if (cell_type == ReducedCell::HEXAGONAL()) {
@@ -306,7 +310,7 @@ OptimizeLatticeForCellType::outParams(std::string cell_type, int icol,
     lattice_parameters[3] = 90;
     lattice_parameters[4] = 90;
     lattice_parameters[5] = 90;
-  } else if (cell_type == "Trigonal") {
+  } else if (cell_type == "Rhombohedral") {
     lattice_parameters[0] = ParamTable->Double(0, icol);
     lattice_parameters[1] = ParamTable->Double(0, icol);
     lattice_parameters[2] = ParamTable->Double(0, icol);
