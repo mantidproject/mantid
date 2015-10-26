@@ -244,6 +244,8 @@ void SANSRunWindow::initLayout() {
   m_uiForm.centre_logging->attachLoggingChannel();
   connect(m_uiForm.clear_centre_log, SIGNAL(clicked()), m_uiForm.centre_logging,
           SLOT(clear()));
+  connect(m_uiForm.up_down_checkbox, SIGNAL(stateChanged(int)), this, SLOT(onUpDownCheckboxChanged()));
+  connect(m_uiForm.left_right_checkbox, SIGNAL(stateChanged(int)), this, SLOT(onLeftRightCheckboxChanged()));
 
   // Create the widget hash maps
   initWidgetMaps();
@@ -422,7 +424,7 @@ void SANSRunWindow::setupSaveBox() {
             SLOT(enableOrDisableDefaultSave()));
   }
 }
-/** Raises a saveWorkspaces dialog which allows people to save any workspace or
+/** Raises a saveWorkspaces dialog which allows people to save any workspace 
 *  workspaces the user chooses
 */
 void SANSRunWindow::saveWorkspacesDialog() {
@@ -969,10 +971,10 @@ bool SANSRunWindow::loadUserFile() {
   m_uiForm.smpl_offset->setText(QString::number(dbl_param * unit_conv));
 
   // Centre coordinates
-  // from the ticket #5942 both detectors have center coordinates
-  dbl_param =
-      runReduceScriptFunction(
-          "print i.ReductionSingleton().get_beam_center('rear')[0]").toDouble();
+  // Update the beam centre coordinates
+  updateBeamCenterCoordinates();
+  // Set the beam finder specific settings
+  setBeamFinderDetails();
   // get the scale factor1 for the beam centre to scale it correctly
   double dbl_paramsf =
       runReduceScriptFunction(
@@ -997,7 +999,6 @@ bool SANSRunWindow::loadUserFile() {
                   "print i.ReductionSingleton().get_beam_center('front')[1]")
                   .toDouble();
   m_uiForm.front_beam_y->setText(QString::number(dbl_param * 1000.0));
-
   // Gravity switch
   QString param =
       runReduceScriptFunction("print i.ReductionSingleton().to_Q.get_gravity()")
@@ -2096,8 +2097,14 @@ bool SANSRunWindow::handleLoadButtonClick() {
   m_sample_file = sample;
   setProcessingState(Ready);
   m_uiForm.load_dataBtn->setText("Load Data");
+
+  // Update the beam center position
+  updateBeamCenterCoordinates();
+  // Set the beam finder specific settings
+  setBeamFinderDetails();
   return true;
 }
+
 /** Queries the number of periods from the Python object whose name was passed
 *  @param RunStep name of the RunStep Python object
 *  @param output where the number will be displayed
@@ -2721,6 +2728,8 @@ void SANSRunWindow::handleRunFindCentre() {
   if (m_uiForm.front_radio->isChecked())
     py_code += "i.SetDetectorFloodFile('')\n";
 
+  // We need to load the FinDirectionEnum class
+  py_code += "from centre_finder import FindDirectionEnum as FindDirectionEnum \n";
   // Find centre function
   py_code += "i.FindBeamCentre(rlow=" + m_uiForm.beam_rmin->text() + ",rupp=" +
              m_uiForm.beam_rmax->text() + ",MaxIter=" +
@@ -2747,9 +2756,21 @@ void SANSRunWindow::handleRunFindCentre() {
     setProcessingState(Ready);
     return;
   }
-  py_code += ", tolerance=" + QString::number(tolerance) + ")";
+  py_code += ", tolerance=" + QString::number(tolerance); 
 
-  g_centreFinderLog.notice("Iteration 1\n");
+  // Set which part of the beam centre finder should be used
+  auto updownIsRequired = m_uiForm.up_down_checkbox->isChecked();
+  auto leftRightIsRequired = m_uiForm.left_right_checkbox->isChecked();
+  if (updownIsRequired && leftRightIsRequired) {
+    py_code += ", find_direction=FindDirectionEnum.ALL";
+  } else if (updownIsRequired) {
+    py_code += ", find_direction=FindDirectionEnum.UP_DOWN";
+  } else if (leftRightIsRequired) {
+    py_code += ", find_direction=FindDirectionEnum.LEFT_RIGHT";
+  }
+  py_code += ")";
+
+  g_centreFinderLog.notice("Beam Centre Finder Start\n");
   m_uiForm.beamstart_box->setFocus();
 
   // Execute the code
@@ -3997,6 +4018,29 @@ void SANSRunWindow::setM3M4Logic(TransSettings setting, bool isNowChecked) {
 }
 
 /**
+ * React to changes of the Up/Down checkbox
+ */
+void SANSRunWindow::onUpDownCheckboxChanged() {
+  auto checked = m_uiForm.up_down_checkbox->isChecked();
+  if (m_uiForm.rear_radio->isChecked()) {
+    m_uiForm.rear_beam_y->setEnabled(checked);
+  } else {
+    m_uiForm.front_beam_y->setEnabled(checked);
+  }
+}
+
+/**
+ * React to changes of the Left/Right checkbox
+ */
+void SANSRunWindow::onLeftRightCheckboxChanged() {
+  auto checked = m_uiForm.left_right_checkbox->isChecked();
+  if (m_uiForm.rear_radio->isChecked()) {
+    m_uiForm.rear_beam_x->setEnabled(checked);
+  } else {
+    m_uiForm.front_beam_x->setEnabled(checked);
+  }
+}
+/**
  * Set beam stop logic for Radius, ROI and Mask
  * @param setting :: the checked item
  * @param isNowChecked :: What is the current check-state of the setting?
@@ -4403,6 +4447,64 @@ void SANSRunWindow::checkWaveLengthAndQValues(bool &isValid, QString &message,
     message += " issue: Trying to use Logarithmic steps and values which are "
                "<= 0.0. \n";
   }
+}
+
+/**
+ *  Update the beam centre coordinates
+ */
+void SANSRunWindow::updateBeamCenterCoordinates() {
+  // Centre coordinates
+  // from the ticket #5942 both detectors have center coordinates
+  double dbl_param =
+      runReduceScriptFunction(
+          "print i.ReductionSingleton().get_beam_center('rear')[0]")
+          .toDouble();
+  // get the scale factor1 for the beam centre to scale it correctly
+  double dbl_paramsf =
+      runReduceScriptFunction(
+          "print i.ReductionSingleton().get_beam_center_scale_factor1()")
+          .toDouble();
+  m_uiForm.rear_beam_x->setText(QString::number(dbl_param * dbl_paramsf));
+  // get scale factor2 for the beam centre to scale it correctly
+  dbl_paramsf =
+      runReduceScriptFunction(
+          "print i.ReductionSingleton().get_beam_center_scale_factor2()")
+          .toDouble();
+  dbl_param = runReduceScriptFunction(
+                  "print i.ReductionSingleton().get_beam_center('rear')[1]")
+                  .toDouble();
+  m_uiForm.rear_beam_y->setText(QString::number(dbl_param * dbl_paramsf));
+  // front
+  dbl_param = runReduceScriptFunction(
+                  "print i.ReductionSingleton().get_beam_center('front')[0]")
+                  .toDouble();
+  m_uiForm.front_beam_x->setText(QString::number(dbl_param * 1000.0));
+  dbl_param = runReduceScriptFunction(
+                  "print i.ReductionSingleton().get_beam_center('front')[1]")
+                  .toDouble();
+  m_uiForm.front_beam_y->setText(QString::number(dbl_param * 1000.0));
+}
+
+/**
+ * Set the beam finder details
+ */
+void SANSRunWindow::setBeamFinderDetails() {
+  // The instrument name
+  auto instrumentName = m_uiForm.inst_opt->currentText();
+
+  // Set the labels according to the instrument
+  auto requiresAngle = runReduceScriptFunction(
+                           "print i.is_current_workspace_an_angle_workspace()")
+                           .simplified();
+  QString labelPosition;
+  if (requiresAngle == m_constants.getPythonTrueKeyword()) {
+    labelPosition = "Current ( " + QString(QChar(0x03B2)) + " , y ) [";
+    labelPosition.append(QChar(0xb0));
+    labelPosition += ",mm]";
+  } else {
+    labelPosition = "Current ( x , y ) [mm,mm]";
+  }
+  m_uiForm.beam_centre_finder_groupbox->setTitle(labelPosition);
 }
 
 } // namespace CustomInterfaces

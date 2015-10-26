@@ -306,6 +306,10 @@ private slots:
   void onTransmissionRadiusCheckboxChanged();
   /// Transmission setting for ROI files
   void onTransmissionROIFilesCheckboxChanged();
+  /// React to change in Left/Right checkbox
+  void onLeftRightCheckboxChanged();
+  /// React to change in Up/Down checkbox
+  void onUpDownCheckboxChanged();
 
 private:
   /// used to specify the range of validation to do
@@ -449,8 +453,12 @@ private:
   void checkWaveLengthAndQValues(bool &isValid, QString &message,
                                  QLineEdit *min, QLineEdit *max,
                                  QComboBox *selection, QString type);
+  /// Update the beam center fields
+  void updateBeamCenterCoordinates();
   /// LOQ specific settings
   void applyLOQSettings(bool isNowLOQ);
+  /// Set the beam finder details
+  void setBeamFinderDetails();
 
   UserSubWindow *slicingWindow;
 };
