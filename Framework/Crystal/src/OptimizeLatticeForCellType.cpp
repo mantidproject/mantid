@@ -223,8 +223,8 @@ void OptimizeLatticeForCellType::exec() {
 //-----------------------------------------------------------------------------------------
 /**
   @param  cell_type    cell type to optimize
-  @param  lat             optimized cell parameters
-  @return  fun_str       string of parameters for fitting
+  @param  lat          optimized cell parameters
+  @return  fun_str     string of parameters for fitting
 */
 std::string OptimizeLatticeForCellType::inParams(std::string cell_type,
                                                  std::vector<double> &lat) {
@@ -271,9 +271,9 @@ std::string OptimizeLatticeForCellType::inParams(std::string cell_type,
 //-----------------------------------------------------------------------------------------
 /**
   @param  cell_type           cell type to optimize
-  @param  col                     1 for parameter 2 for error
-  @param  ParamTable       optimized cell parameters
-  @return  chisq of optimization
+  @param  icol                1 for parameter or 2 for error
+  @param  ParamTable          table of parameters and errors
+  @return  vector of lattice parameters or errors
 */
 std::vector<double>
 OptimizeLatticeForCellType::outParams(std::string cell_type, int icol,
