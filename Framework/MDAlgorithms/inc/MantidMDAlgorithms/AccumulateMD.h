@@ -16,13 +16,20 @@ class IMDHistoWorkspace;
 
 namespace MDAlgorithms {
 
-std::vector<std::string>
-filterToExistingSources(const std::vector<std::string> &input_data,
-                        Kernel::Logger &g_log);
+void filterToExistingSources(std::vector<std::string> &input_data,
+                             std::vector<double> &psi, std::vector<double> &gl,
+                             std::vector<double> &gs,
+                             std::vector<double> &efix);
 
-std::vector<std::string>
-filterToNew(const std::vector<std::string> &input_data,
-            const std::vector<std::string> &current_data);
+bool dataExists(const std::string &dataName);
+
+void filterToNew(std::vector<std::string> &input_data,
+                 std::vector<std::string> &current_data,
+                 std::vector<double> &psi, std::vector<double> &gl,
+                 std::vector<double> &gs, std::vector<double> &efix);
+
+bool appearsInCurrentData(const std::string &input_data,
+                          std::vector<std::string> &current_data);
 
 std::vector<std::string>
 getHistoricalDataSources(const API::WorkspaceHistory &ws_history);
@@ -31,6 +38,8 @@ void insertDataSources(const std::string &dataSources,
                        std::set<std::string> &historicalDataSources);
 
 bool fileExists(const std::string &filename);
+
+void padParameterVector(std::vector<double> &param_vector);
 
 /** AccumulateMD : Algorithm for appending new data to a MDHistoWorkspace
 
@@ -70,10 +79,10 @@ private:
   void exec();
 
   Mantid::DataObjects::MDHistoWorkspace_sptr
-  convertWorkspaceToMD(Mantid::API::Workspace_sptr loaded_ws, std::string emode);
+  convertWorkspaceToMD(Mantid::API::Workspace_sptr loaded_ws,
+                       std::string emode);
 
   Mantid::API::Workspace_sptr getLoadedWs(std::string ws_name);
-
 };
 
 } // namespace MDAlgorithms

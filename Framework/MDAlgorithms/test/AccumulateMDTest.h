@@ -32,15 +32,20 @@ public:
     // Create vector of data_sources to filter
     std::vector<std::string> data_sources;
 
+    // Create vector for other parameters
+    std::vector<double> psi(1, 0.0);
+    std::vector<double> gl(1, 0.0);
+    std::vector<double> gs(1, 0.0);
+    std::vector<double> efix(1, 0.0);
+
     // Add absolute path to a file which doesn't exist
     Poco::Path filepath =
         Poco::Path(Mantid::Kernel::ConfigService::Instance().getTempDir(),
                    "ACCUMULATEMDTEST_NONEXISTENTFILE");
     data_sources.push_back(filepath.toString());
 
-    Mantid::Kernel::Logger logger("AccumulateMDTest");
-    data_sources =
-        Mantid::MDAlgorithms::filterToExistingSources(data_sources, logger);
+    Mantid::MDAlgorithms::filterToExistingSources(data_sources, psi, gl, gs,
+                                                  efix);
 
     TS_ASSERT(data_sources.empty());
   }
@@ -48,6 +53,12 @@ public:
   void test_filter_to_existing_sources_workspace_exist() {
     // Create vector of data_sources to filter
     std::vector<std::string> data_sources;
+
+    // Create vector for other parameters
+    std::vector<double> psi(1, 0.0);
+    std::vector<double> gl(1, 0.0);
+    std::vector<double> gs(1, 0.0);
+    std::vector<double> efix(1, 0.0);
 
     // Create a cheap workspace
     std::string ws_name = "ACCUMULATEMDTEST_EXISTENTWORKSPACE";
@@ -57,9 +68,8 @@ public:
 
     data_sources.push_back(ws_name);
 
-    Mantid::Kernel::Logger logger("AccumulateMDTest");
-    data_sources =
-        Mantid::MDAlgorithms::filterToExistingSources(data_sources, logger);
+    Mantid::MDAlgorithms::filterToExistingSources(data_sources, psi, gl, gs,
+                                                  efix);
 
     TS_ASSERT(!data_sources.empty());
 
@@ -71,6 +81,12 @@ public:
     // Create vector of data_sources to filter
     std::vector<std::string> data_sources;
 
+    // Create vector for other parameters
+    std::vector<double> psi(1, 0.0);
+    std::vector<double> gl(1, 0.0);
+    std::vector<double> gs(1, 0.0);
+    std::vector<double> efix(1, 0.0);
+
     // Create a temporary file to find
     Poco::Path filepath =
         Poco::Path(Mantid::Kernel::ConfigService::Instance().getTempDir(),
@@ -79,9 +95,8 @@ public:
     existent_file.createFile();
     data_sources.push_back(filepath.toString());
 
-    Mantid::Kernel::Logger logger("AccumulateMDTest");
-    data_sources =
-        Mantid::MDAlgorithms::filterToExistingSources(data_sources, logger);
+    Mantid::MDAlgorithms::filterToExistingSources(data_sources, psi, gl, gs,
+                                                  efix);
 
     TS_ASSERT(!data_sources.empty());
 
@@ -96,11 +111,17 @@ public:
     input_data.push_back("test3");
     std::vector<std::string> current_data = input_data;
 
-    std::vector<std::string> result =
-        Mantid::MDAlgorithms::filterToNew(input_data, current_data);
+    // Create vector for other parameters
+    std::vector<double> psi(3, 0.0);
+    std::vector<double> gl(3, 0.0);
+    std::vector<double> gs(3, 0.0);
+    std::vector<double> efix(3, 0.0);
+
+    Mantid::MDAlgorithms::filterToNew(input_data, current_data, psi, gl, gs,
+                                      efix);
 
     // Two input vectors were identical, so we should get an empty vector back
-    TS_ASSERT(result.empty());
+    TS_ASSERT(input_data.empty());
   }
 
   void test_filter_to_new() {
@@ -116,13 +137,19 @@ public:
     current_data.push_back("test3");
     current_data.push_back("test4");
 
-    std::vector<std::string> result =
-        Mantid::MDAlgorithms::filterToNew(input_data, current_data);
+    // Create vector for other parameters
+    std::vector<double> psi(5, 0.0);
+    std::vector<double> gl(5, 0.0);
+    std::vector<double> gs(5, 0.0);
+    std::vector<double> efix(5, 0.0);
+
+    Mantid::MDAlgorithms::filterToNew(input_data, current_data, psi, gl, gs,
+                                      efix);
 
     // test2 and test5 is new data (it is in input_data but not current_data)
     // and so should be returned in the vector
-    TS_ASSERT_EQUALS(result[0], "test2");
-    TS_ASSERT_EQUALS(result[1], "test5");
+    TS_ASSERT_EQUALS(input_data[0], "test2");
+    TS_ASSERT_EQUALS(input_data[1], "test5");
   }
 
   void test_insert_data_sources() {
@@ -164,8 +191,10 @@ public:
     // Add workspace to ADS
     // Append data with AccumulateMD
     // const WorkspaceHistory wsHistory = input_ws->getHistory();
-    // std::vector<std::string> current_data = getHistoricalDataSources(wsHistory);
-    // Test all the data sources from CreateMD and AccumulateMD are in resultant vector
+    // std::vector<std::string> current_data =
+    // getHistoricalDataSources(wsHistory);
+    // Test all the data sources from CreateMD and AccumulateMD are in resultant
+    // vector
   }
 };
 

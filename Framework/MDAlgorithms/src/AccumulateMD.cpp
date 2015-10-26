@@ -1,8 +1,5 @@
 #include "MantidMDAlgorithms/AccumulateMD.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/Progress.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -25,36 +22,36 @@ namespace MDAlgorithms {
 
 /*
 Return names of data sources which are found as a workspace or file.
-Print to log whether data are found or not.
- */
-std::vector<std::string>
-filterToExistingSources(const std::vector<std::string> &input_data,
-                        Kernel::Logger &g_log) {
-  std::vector<std::string> existing_input_data;
-
-  g_log.information() << "Finding data:" << std::endl;
-
-  // If the entry exists as a workspace or a file then append it to existent
-  // data list
-  for (auto it = input_data.begin(); it != input_data.end(); ++it) {
-    std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(*it);
-
-    // Calls to the AnalysisDataService in algorithms like this should
-    // ordinarily
-    // be avoided, unfortunately we have little choice in this case.
-    // If we gave FileFinder an absolute path it just returns it (whether or not
-    // the file exists) so we must check the full path returned with
-    // fileExists()
-    if (AnalysisDataService::Instance().doesExist(*it) ||
-        fileExists(filepath)) {
-      existing_input_data.push_back(*it);
-      g_log.information() << *it << " - FOUND" << std::endl;
-    } else {
-      g_log.information() << *it << " - NOT FOUND" << std::endl;
+*/
+void filterToExistingSources(std::vector<std::string> &input_data,
+                             std::vector<double> &psi, std::vector<double> &gl,
+                             std::vector<double> &gs,
+                             std::vector<double> &efix) {
+  for (unsigned long i = input_data.size(); i > 0; i--) {
+    if (!dataExists(input_data[i - 1])) {
+      input_data.erase(input_data.begin() + i - 1);
+      psi.erase(psi.begin() + i - 1);
+      gl.erase(gl.begin() + i - 1);
+      gs.erase(gs.begin() + i - 1);
+      efix.erase(efix.begin() + i - 1);
     }
   }
+}
 
-  return existing_input_data;
+/*
+Return true if dataName is an existing workspace or file
+*/
+bool dataExists(const std::string &dataName) {
+  std::string filepath =
+      Mantid::API::FileFinder::Instance().getFullPath(dataName);
+  // Calls to the AnalysisDataService in algorithms like this should
+  // ordinarily
+  // be avoided, unfortunately we have little choice in this case.
+  // If we gave FileFinder an absolute path it just returns it (whether or not
+  // the file exists) so we must check the full path returned with
+  // fileExists()
+  return (AnalysisDataService::Instance().doesExist(dataName) ||
+          fileExists(filepath));
 }
 
 /*
@@ -62,27 +59,36 @@ Test if a file with this full path exists
 */
 bool fileExists(const std::string &filename) {
   Poco::File test_file(filename);
-  if (test_file.exists()) {
-    return true;
-  }
-  return false;
+  return test_file.exists();
 }
 
 /*
-Return a vector of anything in input_data which is not in current_data
+Remove anything from input_data which is already in current_data
 */
-std::vector<std::string>
-filterToNew(const std::vector<std::string> &input_data,
-            const std::vector<std::string> &current_data) {
-  std::vector<std::string> new_data;
-  std::remove_copy_if(
-      input_data.begin(), input_data.end(), std::back_inserter(new_data),
-      [&current_data](const std::string &arg) {
-        return (std::find(current_data.begin(), current_data.end(), arg) !=
-                current_data.end());
-      });
+void filterToNew(std::vector<std::string> &input_data,
+                 std::vector<std::string> &current_data,
+                 std::vector<double> &psi, std::vector<double> &gl,
+                 std::vector<double> &gs, std::vector<double> &efix) {
+  for (unsigned long i = input_data.size(); i > 0; i--) {
+    if (appearsInCurrentData(input_data[i - 1], current_data)) {
+      input_data.erase(input_data.begin() + i - 1);
+      psi.erase(psi.begin() + i - 1);
+      gl.erase(gl.begin() + i - 1);
+      gs.erase(gs.begin() + i - 1);
+      efix.erase(efix.begin() + i - 1);
+    }
+  }
+}
 
-  return new_data;
+bool appearsInCurrentData(const std::string &data_source,
+                          std::vector<std::string> &current_data) {
+  for (auto reverseIt = current_data.rbegin(); reverseIt != current_data.rend();
+       ++reverseIt) {
+    if (data_source == *reverseIt) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /*
@@ -136,6 +142,14 @@ void insertDataSources(const std::string &dataSources,
   // Insert each data source into our complete set of historical data sources
   for (auto it = data_split.begin(); it != data_split.end(); ++it) {
     historicalDataSources.insert(*it);
+  }
+}
+
+void padParameterVector(std::vector<double> &param_vector) {
+  if (param_vector.size() == 0) {
+    std::fill(param_vector.begin(), param_vector.end(), 0.0);
+  } else if (param_vector.size() == 1) {
+    std::fill(param_vector.begin(), param_vector.end(), param_vector[0]);
   }
 }
 
@@ -227,7 +241,16 @@ void AccumulateMD::exec() {
   const IMDHistoWorkspace_sptr input_ws = this->getProperty("InputWorkspace");
   std::vector<std::string> input_data = this->getProperty("DataSources");
 
-  input_data = filterToExistingSources(input_data, g_log);
+  std::vector<double> psi = this->getProperty("Psi");
+  padParameterVector(psi);
+  std::vector<double> gl = this->getProperty("Gl");
+  padParameterVector(gl);
+  std::vector<double> gs = this->getProperty("Gs");
+  padParameterVector(gs);
+  std::vector<double> efix = this->getProperty("EFix");
+  padParameterVector(efix);
+
+  filterToExistingSources(input_data, psi, gl, gs, efix);
 
   // If we can't find any data, we can't do anything
   if (input_data.empty()) {
@@ -244,19 +267,19 @@ void AccumulateMD::exec() {
     Mantid::API::Algorithm_sptr createAlg = createChildAlgorithm("CreateMD");
 
     createAlg->setProperty("DataSources", input_data);
-    createAlg->setPropertyValue("EFix", this->getProperty("EFix"));
+    createAlg->setProperty("EFix", efix);
     createAlg->setPropertyValue("EMode", this->getProperty("EMode"));
     createAlg->setPropertyValue("Alatt", this->getProperty("Alatt"));
     createAlg->setPropertyValue("Angdeg", this->getProperty("Angdeg"));
     createAlg->setPropertyValue("u", this->getProperty("u"));
     createAlg->setPropertyValue("v", this->getProperty("v"));
-    createAlg->setPropertyValue("Psi", this->getProperty("Psi"));
-    createAlg->setPropertyValue("Gl", this->getProperty("Gl"));
-    createAlg->setPropertyValue("Gs", this->getProperty("Gs"));
+    createAlg->setProperty("Psi", psi);
+    createAlg->setProperty("Gl", gl);
+    createAlg->setProperty("Gs", gs);
     createAlg->setPropertyValue("OutputWorkspace",
                                 this->getProperty("OutputWorkspace"));
     createAlg->setPropertyValue("InPlace", this->getProperty("InPlace"));
-    createAlg->execute();
+    createAlg->executeAsChildAlg();
 
     return; // POSSIBLE EXIT POINT
   }
@@ -267,7 +290,7 @@ void AccumulateMD::exec() {
   std::vector<std::string> current_data = getHistoricalDataSources(wsHistory);
 
   // If there's no new data, we don't have anything to do
-  input_data = filterToNew(input_data, current_data);
+  filterToNew(input_data, current_data, psi, gl, gs, efix);
   if (input_data.empty()) {
     g_log.information() << "No new data to append to workspace in "
                         << this->name() << std::endl;
@@ -275,79 +298,13 @@ void AccumulateMD::exec() {
   }
   this->interruption_point();
 
+  // TODO
   // If we reach here then new data exists to append to the input workspace
-  this->progress(0.0);
-  double progress_interval = 1.0 / input_data.size();
-  int progress_count = 1;
-  for (auto it = input_data.begin(); it != input_data.end();
-       ++it, ++progress_count) {
-
-    Workspace_sptr loaded_ws = getLoadedWs(*it);
-    MDHistoWorkspace_sptr temp_md_ws =
-        convertWorkspaceToMD(loaded_ws, this->getProperty("EMode"));
-    setSampleParameters(); // goniometer, UB, efix etc
-    appendWorkspace();
-
-    // TODO delete temp_md_ws
-
-    // Report progress to user and allow interrupt
-    this->progress(progress_count * progress_interval);
-    this->interruption_point();
-  }
-  this->progress(1.0); // Ensure progress is reported complete
+  // Use CreateMD with the new data to make a temp workspace
+  // Merge the temp workspace with the input workspace using MergeMD
 
   // TODO set outputworkspace?
   // TODO any cleanup to do?
-}
-
-/*
-Convert the workspace to an MDWorkspace
-*/
-MDHistoWorkspace_sptr
-AccumulateMD::convertWorkspaceToMD(Workspace_sptr loaded_ws,
-                                   std::string emode) {
-  // Find the Min Max extents
-  Mantid::API::Algorithm_sptr minMaxAlg =
-      createChildAlgorithm("ConvertToMDMinMaxGlobal");
-  minMaxAlg->setProperty("InputWorkspace", loaded_ws);
-  minMaxAlg->setProperty("QDimensions", "Q3D");
-  minMaxAlg->setProperty("dEAnalysisMode", emode);
-  minMaxAlg->executeAsChildAlg();
-
-  // Convert to MD
-  Mantid::API::Algorithm_sptr convertAlg = createChildAlgorithm("ConvertToMD");
-  convertAlg->setProperty("InputWorkspace", loaded_ws);
-  convertAlg->setProperty("QDimensions", "Q3D");
-  convertAlg->setProperty("QConversionScales", "HKL");
-  convertAlg->setProperty("dEAnalysisMode", emode);
-  convertAlg->setProperty("MinValues",
-                          minMaxAlg->getProperty("MinValues"));
-  convertAlg->setProperty("MaxValues",
-                          minMaxAlg->getPropertyValue("MaxValues"));
-  convertAlg->setProperty("OverwriteExisting", true); // TODO check
-  convertAlg->setPropertyValue("OutputWorkspace", "dummy");
-  convertAlg->executeAsChildAlg();
-
-  return convertAlg->getProperty("OutputWorkspace");
-}
-
-/*
-Load data or get already loaded workspace
-*/
-Workspace_sptr AccumulateMD::getLoadedWs(std::string ws_name) {
-  Workspace_sptr loaded_ws;
-
-  if (!AnalysisDataService::Instance().doesExist(ws_name)) {
-    Mantid::API::Algorithm_sptr loadAlg = createChildAlgorithm("Load");
-    loadAlg->setProperty("Filename", ws_name);
-    loadAlg->executeAsChildAlg();
-    loaded_ws = loadAlg->getProperty("OutputWorkspace");
-  } else {
-    loaded_ws =
-      AnalysisDataService::Instance().retrieveWS<Mantid::API::Workspace>(
-        ws_name);
-  }
-  return loaded_ws;
 }
 
 } // namespace MDAlgorithms
