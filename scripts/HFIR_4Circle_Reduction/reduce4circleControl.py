@@ -698,6 +698,65 @@ class CWSCDReductionControl(object):
 
         return True, (hkl, error)
 
+    def integrate_peaks(self, exp_no, scan_no, pt_list, md_ws_name,
+                        peak_radius, bkgd_inner_radius, bkgd_outer_radius,
+                        is_cylinder):
+        """
+        Integrate peaks
+        :return:
+        """
+        # Check input
+        if is_cylinder is True:
+            raise RuntimeError('Cylinder peak shape has not been implemented yet!')
+
+        if exp_no is None:
+            exp_no = self._expNumber
+        assert isinstance(exp_no, int)
+        assert isinstance(scan_no, int)
+        assert isinstance(peak_radius, float)
+        assert isinstance(bkgd_inner_radius, float)
+        assert isinstance(bkgd_outer_radius, float)
+        assert bkgd_inner_radius >= peak_radius
+        assert bkgd_outer_radius >= bkgd_inner_radius
+
+        # Get MD WS
+        if md_ws_name is None:
+            raise RuntimeError('Implement how to locate merged MD workspace name from '
+                               'Exp %d Scan %d Pt %s' % (exp_no, scan_no, str(pt_list)))
+        # Peak workspace
+        # create an empty peak workspace
+        if AnalysisDataService.doesExist('spicematrixws') is False:
+            raise RuntimeError('Workspace spicematrixws does not exist.')
+        api.LoadInstrument(Workspace='', InstrumentName='HB3A')
+        target_peak_ws_name = 'MyPeakWS'
+        api.CreatePeaksWorkspace(InstrumentWorkspace='spicematrixws', OutputWorkspace=target_peak_ws_name)
+        target_peak_ws = AnalysisDataService.retrieve(target_peak_ws_name)
+        # copy a peak
+        temp_peak_ws_name = 'peak1'
+        api.FindPeaksMD(InputWorkspace='MergedSan0017_QSample',
+                        PeakDistanceThreshold=0.5,
+                        MaxPeaks=10,
+                        DensityThresholdFactor=100,
+                        OutputWorkspace=temp_peak_ws_name)
+
+        src_peak_ws = AnalysisDataService.retrieve(temp_peak_ws_name)
+        centre_peak = src_peak_ws.getPeak(0)
+        target_peak_ws.addPeak(centre_peak)
+        target_peak_ws.removePeak(0)
+
+        # Integrate peak
+        api.IntegratePeaksMD(InputWorkspace='MergedSan0017_QSample',
+                             PeakRadius=1.5,
+                             BackgroundInnerRadius=1.5,
+                             BackgroundOuterRadius=3,
+                             PeaksWorkspace=target_peak_ws_name,
+                             OutputWorkspace='SinglePeak1',
+                             IntegrateIfOnEdge=False,
+                             AdaptiveQBackground=True,
+                             Cylinder=False)
+
+        return
+
     def load_spice_scan_file(self, exp_no, scan_no, spice_file_name=None):
         """
         Load a SPICE scan file to table workspace and run information matrix workspace.

@@ -152,8 +152,8 @@ class MainWindow(QtGui.QMainWindow):
         # Initial setup
         self.ui.tabWidget.setCurrentIndex(0)
         self.ui.tabWidget.setTabEnabled(4, False)
-        self.ui.tabWidget.setTabEnabled(5, False)
-        self._init_ub_table()
+        self.ui.tabWidget.setTabEnabled(5, True)
+        self._init_table_widgets()
         self.ui.radioButton_ubFromTab1.setChecked(True)
 
         # Tab 'Access'
@@ -166,10 +166,12 @@ class MainWindow(QtGui.QMainWindow):
 
     def do_integrate_peaks(self):
         """
-
+        Integrate peaks
         :return:
         """
-        raise RuntimeError('ASAP')
+
+        self._myControl.integrate_peaks()
+
 
     def do_refine_ub(self):
         """
@@ -178,7 +180,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         raise RuntimeError('Next Release')
 
-    def _init_ub_table(self):
+    def _init_table_widgets(self):
         """ DOC
         :return:
         """
@@ -190,6 +192,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.tableWidget_ubMatrix.setup()
         self.ui.tableWidget_ubSiceView.setup()
         self.ui.tableWidget_refinedUB.setup()
+        self.ui.tableWidget_peakIndex.setup()
 
         self.ui.tableWidget_sliceViewProgress.setup()
 
