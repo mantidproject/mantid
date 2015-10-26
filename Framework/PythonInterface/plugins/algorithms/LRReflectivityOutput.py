@@ -194,8 +194,6 @@ class LRReflectivityOutput(PythonAlgorithm):
         content += '# Mantid version: %s\n' % mantid.__version__
         content += header_info
 
-        # Add str() of reduction algo
-
         try:
             if len(meta_data.strip())>0:
                 content += '#\n'
