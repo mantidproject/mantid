@@ -1,5 +1,8 @@
 #include "MantidMDAlgorithms/CreateMDHistoWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/BoundedValidator.h"
 #include <algorithm>
 
 using namespace Mantid::Kernel;
@@ -48,19 +51,63 @@ const std::string CreateMDHistoWorkspace::category() const {
 /** Initialize the algorithm's properties.
  */
 void CreateMDHistoWorkspace::init() {
-  declareProperty(new ArrayProperty<double>("SignalInput"),
-                  "Signal array for n-dimensional workspace");
+  auto validator = boost::make_shared<CompositeValidator>();
+  validator->add(boost::make_shared<BoundedValidator<int>>(1, 9));
+  validator->add(boost::make_shared<MandatoryValidator<int>>());
+  auto mandatoryIntArrayValidator =
+      boost::make_shared<MandatoryValidator<std::vector<int>>>();
+  auto mandatoryDoubleArrayValidator =
+      boost::make_shared<MandatoryValidator<std::vector<double>>>();
+  auto mandatoryStrArrayValidator =
+      boost::make_shared<MandatoryValidator<std::vector<std::string>>>();
 
-  declareProperty(new ArrayProperty<double>("ErrorInput"),
-                  "Error array for n-dimensional workspace");
+  declareProperty(
+      new ArrayProperty<double>("SignalInput", mandatoryDoubleArrayValidator),
+      "Signal array for n-dimensional workspace");
+
+  declareProperty(
+      new ArrayProperty<double>("ErrorInput", mandatoryDoubleArrayValidator),
+      "Error array for n-dimensional workspace");
 
   declareProperty(
       new ArrayProperty<double>("NumberOfEvents", std::vector<double>(0)),
       "Number of pixels array for n-dimensional workspace. Optional, defaults "
       "to 1 per bin.");
+  declareProperty(new PropertyWithValue<int>("Dimensionality", -1, validator,
+                                             Direction::Input),
+                  "Dimensionality of the data in the file.");
 
-  // Declare all the generic properties required.
-  this->initGenericImportProps();
+  declareProperty(
+      new ArrayProperty<double>("Extents", mandatoryDoubleArrayValidator),
+      "A comma separated list of min, max for each dimension,\n"
+      "specifying the extents of each dimension.");
+
+  declareProperty(
+      new ArrayProperty<int>("NumberOfBins", mandatoryIntArrayValidator),
+      "Number of bin in each dimension.");
+
+  declareProperty(
+      new ArrayProperty<std::string>("Names", mandatoryStrArrayValidator),
+      "A comma separated list of the name of each dimension.");
+
+  declareProperty(
+      new ArrayProperty<std::string>("Units", mandatoryStrArrayValidator),
+      "A comma separated list of the units of each dimension.");
+
+  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>(
+                      "OutputWorkspace", "", Direction::Output),
+                  "MDHistoWorkspace reflecting the input text file.");
+  declareProperty(
+      new ArrayProperty<std::string>("Frames"),
+      " A comma separated list of the frames of each dimension. "
+      " The frames can be"
+      " **General Frame**: Any frame which is not a Q-based frame."
+      " **QLab**: Wave-vector converted into the lab frame."
+      " **QSample**: Wave-vector converted into the frame of the sample."
+      " **HKL**: Wave-vector converted into the crystal's HKL indices."
+      " Note if nothing is specified then the **General Frame** is being "
+      "selected. Also note that if you select a frame then this might override "
+      "your unit selection if it is not compatible with the frame.");
 }
 
 //----------------------------------------------------------------------------------------------
