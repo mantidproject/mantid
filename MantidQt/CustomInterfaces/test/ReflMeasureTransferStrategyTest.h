@@ -57,7 +57,8 @@ public:
 
     MockProgressBase progress;
     // We expect a progress update on each transfer
-    EXPECT_CALL(progress, doReport(_)).Times(Exactly(static_cast<int>(data.size())));
+    EXPECT_CALL(progress, doReport(_))
+        .Times(Exactly(static_cast<int>(data.size())));
 
     ReflMeasureTransferStrategy strategy(
         std::move(std::unique_ptr<MockICatalogInfo>(mockCatInfo)),
@@ -100,7 +101,8 @@ public:
 
     MockProgressBase progress;
     // Expect a progress update
-    EXPECT_CALL(progress, doReport(_)).Times(Exactly(static_cast<int>(data.size())));
+    EXPECT_CALL(progress, doReport(_))
+        .Times(Exactly(static_cast<int>(data.size())));
 
     // Make the transfer stragegy
     ReflMeasureTransferStrategy strategy(
@@ -161,7 +163,8 @@ public:
 
     MockProgressBase progress;
     // Expect a progress update
-    EXPECT_CALL(progress, doReport(_)).Times(Exactly(static_cast<int>(data.size())));
+    EXPECT_CALL(progress, doReport(_))
+        .Times(Exactly(static_cast<int>(data.size())));
 
     // Make the transfer stragegy
     ReflMeasureTransferStrategy strategy(
