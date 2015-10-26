@@ -1,12 +1,16 @@
+# pylint: disable=no-init,attribute-defined-outside-init,too-many-public-methods
+
 import stresstesting
 from mantid.simpleapi import *
 from mantid.api import *
 import unittest
+
 DIFF_PLACES = 7
+
 
 class SplineSmoothingTest(stresstesting.MantidStressTest):
     def requiredFiles(self):
-        return ["Stheta.nxs", "ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs"]
+        return set(["Stheta.nxs", "ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs"])
 
     def runTest(self):
         self._success = False
@@ -15,8 +19,8 @@ class SplineSmoothingTest(stresstesting.MantidStressTest):
         SplineSmoothing(InputWorkspace=wsenginx, OutputWorkspace="enginxOutSpline", MaxNumberOfBreaks=20)
 
         # MaxNumberOfBreaks=0, maximum number of breaking points possible
-        wsStheta = Load("Stheta")
-        SplineSmoothing(InputWorkspace=wsStheta, OutputWorkspace="SthetaOutSpline")
+        wsstheta = Load("Stheta")
+        SplineSmoothing(InputWorkspace=wsstheta, OutputWorkspace="SthetaOutSpline")
 
         self._success = True
 
@@ -41,7 +45,6 @@ class SplineSmoothingTest(stresstesting.MantidStressTest):
 class LoadTests(unittest.TestCase):
     wsname = "__LoadTest"
     cleanup_names = []
-    # ws_smooth = mtd['enginxOutSpline']
 
     def tearDown(self):
         self.cleanup_names.append(self.wsname)
@@ -55,13 +58,13 @@ class LoadTests(unittest.TestCase):
     # ============================ Success ==============================
     def runTest(self):
         wsenginx = Load("ENGINX_precalculated_vanadium_run000236516_bank_curves")
-        ws_smooth = SplineSmoothing(InputWorkspace=wsenginx, MaxNumberOfBreaks=50)
+        SplineSmoothing(InputWorkspace=wsenginx, MaxNumberOfBreaks=50)
 
         # MaxNumberOfBreaks=0, maximum number of breaking points possible
-        wsStheta = Load("Stheta")
-        SplineSmoothing(InputWorkspace=wsStheta, OutputWorkspace="SthetaOutSpline")
+        wsstheta = Load("Stheta")
+        SplineSmoothing(InputWorkspace=wsstheta, OutputWorkspace="SthetaOutSpline")
 
-    def test_Enginx_curve_spline_smoothed(self):
+    def test_enginx_curve_spline_smoothed(self):
         ws_smooth = mtd['enginxOutSpline']
 
         # SplineSmooth all three spectrum
@@ -71,12 +74,26 @@ class LoadTests(unittest.TestCase):
         self.assertAlmostEqual(0.24360103, ws_smooth.readX(2)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(0.86546920, ws_smooth.readX(2)[1738], places=DIFF_PLACES)
 
-    def test_STheta_curve_spline_smoothed(self):
+        self.assertAlmostEqual(57.1213842, ws_smooth.readY(2)[0], places=DIFF_PLACES)
+
+    def test_stheta_curve_spline_smoothed(self):
         ws_smooth = mtd['SthetaOutSpline']
 
         # SplineSmooth all three spectrum
         self.assertEquals(1, ws_smooth.getNumberHistograms())
         self.assertEquals(463, ws_smooth.blocksize())
 
-        self.assertAlmostEqual(2.3405, ws_smooth.readX(0)[0], places=4)
-        self.assertAlmostEqual(56.9972, ws_smooth.readX(0)[231], places=4)
+        self.assertAlmostEqual(2.3405, ws_smooth.readX(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(56.9972, ws_smooth.readX(0)[231], places=DIFF_PLACES)
+
+    def test_enginx_curve_further_checks(self):
+        ws_smooth_enginx = mtd['enginxOutSpline']
+        ws_enginx = mtd['wsenginx']
+
+        ws_smooth_stetha = mtd['SthetaOutSpline']
+        ws_stetha = mtd['wsStheta']
+
+        for i in range(0, 462):
+            self.assertTrue(ws_enginx.readX(0)[i], ws_smooth_enginx.readX(0)[i])
+            self.assertTrue(ws_stetha.readX(0)[i], ws_smooth_stetha.readX(0)[i])
+            self.assertTrue(ws_stetha.readY(0)[i], ws_smooth_stetha.readY(0)[i])
