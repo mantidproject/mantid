@@ -119,6 +119,9 @@ void Q1D2::exec() {
   // define the (large number of) data objects that are going to be used in all
   // iterations of the loop below
 
+  // Flag to decide if Q Resolution is to be used
+  auto useQResolution = qResolution ? true : false;
+
   // this will become the output workspace from this algorithm
   MatrixWorkspace_sptr outputWS =
       setUpOutputWorkspace(getProperty("OutputBinning"));
@@ -131,13 +134,11 @@ void Q1D2::exec() {
   // the error on the normalisation
   MantidVec normError2(YOut.size(), 0.0);
   // the averaged Q resolution
-  MantidVec &qResolutionOut = outputWS->dataDx(0);
+  MantidVec &qResolutionOut =
+      useQResolution ? outputWS->dataDx(0) : MantidVec();
 
   const int numSpec = static_cast<int>(m_dataWS->getNumberHistograms());
   Progress progress(this, 0.05, 1.0, numSpec + 1);
-
-  // Flag to decide if Q Resolution is to be used
-  auto useQResolution = qResolution ? true : false;
 
   PARALLEL_FOR3(m_dataWS, outputWS, pixelAdj)
   for (int i = 0; i < numSpec; ++i) {

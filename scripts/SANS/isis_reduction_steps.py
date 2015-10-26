@@ -2194,12 +2194,17 @@ class ConvertToQISIS(ReductionStep):
     def _check_q_settings_complete(self):
         '''
         Check that the q resolution settings are complete.
-        We need a moderator file path.
+        We need a moderator file path. And the other settings have to be self consistent
         '''
         try:
             dummy_file_path, dummy_suggested_name = getFileAndName(self._q_resolution_moderator_file_name)
         except:
             raise RuntimeError("The specified moderator file is not valid. Please make sure that that it exists in your search directory.")
+
+        # If A1 is set, then A2 should be set and vice versa
+        if ((self.get_q_resolution_a1() is None and self.get_q_resolution_a2() is not None) or
+            (self.get_q_resolution_a2() is None and self.get_q_resolution_a1() is not None)):
+            raise RuntimeError("Both, A1 and A2, need to be specified.")
 
     def _set_up_q_resolution_parameters(self):
         '''

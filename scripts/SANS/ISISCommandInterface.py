@@ -1707,7 +1707,7 @@ def are_settings_consistent():
     try:
         ReductionSingleton().perform_consistency_check()
     except RuntimeError, details:
-        sanslog.error("There was an inconsistency issue with your settings. See details: %s", str(details))
+        sanslog.error("There was an inconsistency issue with your settings. See details: %s" % str(details))
         raise RuntimeError("Please fix the following inconsistencies: %s" % str(details))
 
 def is_current_workspace_an_angle_workspace():
