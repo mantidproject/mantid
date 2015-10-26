@@ -96,6 +96,7 @@ void EnggDiffractionViewQtGUI::initLayout() {
   // it will know what compute resources and tools we have available:
   // This view doesn't even know the names of compute resources, etc.
   m_presenter->notify(IEnggDiffractionPresenter::Start);
+  m_presenter->notify(IEnggDiffractionPresenter::RBNumberChange);
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabCalib() {
@@ -178,7 +179,7 @@ void EnggDiffractionViewQtGUI::doSetupTabFocus() {
 }
 
 void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
-  m_presenter->notify(IEnggDiffractionPresenter::RBNumberChange);
+  enableTabs(false);
 
   // change instrument
   connect(m_ui.comboBox_instrument, SIGNAL(currentIndexChanged(int)), this,

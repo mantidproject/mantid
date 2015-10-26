@@ -97,12 +97,14 @@ public:
 
     // will need basic calibration settings from the user
     EnggDiffCalibSettings calibSettings;
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(1).WillOnce(
-        Return(calibSettings));
+    EXPECT_CALL(mockView, currentCalibSettings())
+        .Times(1)
+        .WillOnce(Return(calibSettings));
 
     const std::string mockFname = "foo.par";
-    EXPECT_CALL(mockView, askExistingCalibFilename()).Times(1).WillOnce(
-        Return(mockFname));
+    EXPECT_CALL(mockView, askExistingCalibFilename())
+        .Times(1)
+        .WillOnce(Return(mockFname));
 
     // should not get to the point where the calibration is calculated
     EXPECT_CALL(mockView, newCalibLoaded(testing::_, testing::_, mockFname))
@@ -121,12 +123,14 @@ public:
 
     // will need basic calibration settings from the user
     EnggDiffCalibSettings calibSettings;
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(1).WillOnce(
-        Return(calibSettings));
+    EXPECT_CALL(mockView, currentCalibSettings())
+        .Times(1)
+        .WillOnce(Return(calibSettings));
 
     const std::string mockFname = "ENGINX_111111_222222_foo_bar.par";
-    EXPECT_CALL(mockView, askExistingCalibFilename()).Times(1).WillOnce(
-        Return(mockFname));
+    EXPECT_CALL(mockView, askExistingCalibFilename())
+        .Times(1)
+        .WillOnce(Return(mockFname));
     EXPECT_CALL(mockView, newCalibLoaded(testing::_, testing::_, mockFname))
         .Times(1);
 
@@ -175,8 +179,9 @@ public:
     // them
     EnggDiffCalibSettings calibSettings;
 
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(1).WillOnce(
-        Return(calibSettings));
+    EXPECT_CALL(mockView, currentCalibSettings())
+        .Times(1)
+        .WillOnce(Return(calibSettings));
 
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(vanNo));
 
@@ -213,8 +218,9 @@ public:
     calibSettings.m_pixelCalibFilename =
         instr + "_" + vanNo + "_" + ceriaNo + ".prm";
     calibSettings.m_templateGSAS_PRM = "fake.prm";
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(2).WillRepeatedly(
-        Return(calibSettings));
+    EXPECT_CALL(mockView, currentCalibSettings())
+        .Times(2)
+        .WillRepeatedly(Return(calibSettings));
 
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(vanNo));
 
@@ -264,8 +270,9 @@ public:
 
     // will need basic calibration settings from the user
     EnggDiffCalibSettings calibSettings;
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(2).WillOnce(
-        Return(calibSettings));
+    EXPECT_CALL(mockView, currentCalibSettings())
+        .Times(2)
+        .WillOnce(Return(calibSettings));
 
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -280,8 +287,9 @@ public:
 
     // empty run number!
     EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return(""));
-    EXPECT_CALL(mockView, focusingBanks()).Times(1).WillOnce(
-        Return(m_ex_enginx_banks));
+    EXPECT_CALL(mockView, focusingBanks())
+        .Times(1)
+        .WillOnce(Return(m_ex_enginx_banks));
 
     // should not try to use these ones
     EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
@@ -340,13 +348,15 @@ public:
 
     // wrong run number!
     EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return("999999"));
-    EXPECT_CALL(mockView, focusingBanks()).Times(1).WillOnce(
-        Return(m_ex_enginx_banks));
+    EXPECT_CALL(mockView, focusingBanks())
+        .Times(1)
+        .WillOnce(Return(m_ex_enginx_banks));
 
     // needs basic calibration settings from the user to start focusing
     EnggDiffCalibSettings calibSettings;
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(1).WillOnce(
-        Return(calibSettings));
+    EXPECT_CALL(mockView, currentCalibSettings())
+        .Times(1)
+        .WillOnce(Return(calibSettings));
 
     // Should not try to use options for other types of focusing
     EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
@@ -374,19 +384,23 @@ public:
 
     // an example run available in unit test data:
     EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return("228061"));
-    EXPECT_CALL(mockView, focusingBanks()).Times(1).WillOnce(
-        Return(m_ex_enginx_banks));
+    EXPECT_CALL(mockView, focusingBanks())
+        .Times(1)
+        .WillOnce(Return(m_ex_enginx_banks));
 
     // will need basic calibration settings from the user
     EnggDiffCalibSettings calibSettings;
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(1).WillOnce(
-        Return(calibSettings));
+    EXPECT_CALL(mockView, currentCalibSettings())
+        .Times(1)
+        .WillOnce(Return(calibSettings));
 
     // check automatic plotting
-    EXPECT_CALL(mockView, focusedOutWorkspace()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(mockView, focusedOutWorkspace())
+        .Times(1)
+        .WillOnce(Return(true));
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(1);
-	// There are two/three other tests that have the disabled_ prefix so they
-	// normally run
+    // There are two/three other tests that have the disabled_ prefix so they
+    // normally run
 
     // Should not try to use options for other types of focusing
     EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
@@ -414,8 +428,9 @@ public:
 
     // will need basic calibration settings from the user
     EnggDiffCalibSettings calibSettings;
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(1).WillOnce(
-        Return(calibSettings));
+    EXPECT_CALL(mockView, currentCalibSettings())
+        .Times(1)
+        .WillOnce(Return(calibSettings));
 
     EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
@@ -433,10 +448,12 @@ public:
 
     // empty run number!
     EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(1).WillOnce(Return(""));
-    EXPECT_CALL(mockView, focusingBanks()).Times(1).WillOnce(
-        Return(m_ex_enginx_banks));
-    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(1).WillOnce(
-        Return("1"));
+    EXPECT_CALL(mockView, focusingBanks())
+        .Times(1)
+        .WillOnce(Return(m_ex_enginx_banks));
+    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs())
+        .Times(1)
+        .WillOnce(Return("1"));
 
     // should not try to use these ones
     EXPECT_CALL(mockView, focusingRunNo()).Times(0);
@@ -461,12 +478,15 @@ public:
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
     // ok run number
-    EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(1).WillOnce(
-        Return("228061"));
-    EXPECT_CALL(mockView, focusingBanks()).Times(1).WillOnce(
-        Return(std::vector<bool>()));
-    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(1).WillOnce(
-        Return("1,5"));
+    EXPECT_CALL(mockView, focusingCroppedRunNo())
+        .Times(1)
+        .WillOnce(Return("228061"));
+    EXPECT_CALL(mockView, focusingBanks())
+        .Times(1)
+        .WillOnce(Return(std::vector<bool>()));
+    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs())
+        .Times(1)
+        .WillOnce(Return("1,5"));
 
     // should not try to use these ones
     EXPECT_CALL(mockView, focusingRunNo()).Times(0);
@@ -491,12 +511,15 @@ public:
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
     // ok run number
-    EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(1).WillOnce(
-        Return("228061"));
-    EXPECT_CALL(mockView, focusingBanks()).Times(1).WillOnce(
-        Return(m_ex_enginx_banks));
-    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(1).WillOnce(
-        Return(""));
+    EXPECT_CALL(mockView, focusingCroppedRunNo())
+        .Times(1)
+        .WillOnce(Return("228061"));
+    EXPECT_CALL(mockView, focusingBanks())
+        .Times(1)
+        .WillOnce(Return(m_ex_enginx_banks));
+    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs())
+        .Times(1)
+        .WillOnce(Return(""));
 
     // should not try to use these ones
     EXPECT_CALL(mockView, focusingRunNo()).Times(0);
@@ -522,8 +545,9 @@ public:
 
     // empty run number!
     EXPECT_CALL(mockView, focusingTextureRunNo()).Times(1).WillOnce(Return(""));
-    EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(1).WillOnce(
-        Return(""));
+    EXPECT_CALL(mockView, focusingTextureGroupingFile())
+        .Times(1)
+        .WillOnce(Return(""));
 
     // should not try to use these ones
     EXPECT_CALL(mockView, focusingRunNo()).Times(0);
@@ -547,11 +571,13 @@ public:
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
     // goo run number
-    EXPECT_CALL(mockView, focusingTextureRunNo()).Times(1).WillOnce(
-        Return("228061"));
+    EXPECT_CALL(mockView, focusingTextureRunNo())
+        .Times(1)
+        .WillOnce(Return("228061"));
     EXPECT_CALL(mockView, focusingBanks()).Times(0);
-    EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(1).WillOnce(
-        Return(""));
+    EXPECT_CALL(mockView, focusingTextureGroupingFile())
+        .Times(1)
+        .WillOnce(Return(""));
 
     // should not try to use these ones
     EXPECT_CALL(mockView, focusingRunNo()).Times(0);
@@ -574,11 +600,13 @@ public:
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
     // goo run number
-    EXPECT_CALL(mockView, focusingTextureRunNo()).Times(1).WillOnce(
-        Return("228061"));
+    EXPECT_CALL(mockView, focusingTextureRunNo())
+        .Times(1)
+        .WillOnce(Return("228061"));
     // non empty but absurd csv file of detector groups
-    EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(1).WillOnce(
-        Return("i_dont_exist_dont_look_for_me.csv"));
+    EXPECT_CALL(mockView, focusingTextureGroupingFile())
+        .Times(1)
+        .WillOnce(Return("i_dont_exist_dont_look_for_me.csv"));
 
     // should not try to use these ones
     EXPECT_CALL(mockView, focusingRunNo()).Times(0);
@@ -621,8 +649,9 @@ public:
 
     // empty run number!
     EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return(""));
-    EXPECT_CALL(mockView, focusingBanks()).Times(1).WillOnce(
-        Return(m_ex_enginx_banks));
+    EXPECT_CALL(mockView, focusingBanks())
+        .Times(1)
+        .WillOnce(Return(m_ex_enginx_banks));
 
     // should not get that far that it tries to get these parameters
     EXPECT_CALL(mockView, currentInstrument()).Times(0);
@@ -648,6 +677,36 @@ public:
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(IEnggDiffractionPresenter::LogMsg);
+  }
+
+  void test_RBNumberChange_ok() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+    // as if the user has set an empty RB Number that looks correct
+    EXPECT_CALL(mockView, getRBNumber()).Times(1).WillOnce(Return("RB000xxxx"));
+    EXPECT_CALL(mockView, enableTabs(true)).Times(1);
+
+    // no errors/ warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IEnggDiffractionPresenter::RBNumberChange);
+  }
+
+  void test_RBNumberChange_empty() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+    // as if the user has set an empty RB Number
+    EXPECT_CALL(mockView, getRBNumber()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, enableTabs(false)).Times(1);
+
+    // no errors/ warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IEnggDiffractionPresenter::RBNumberChange);
   }
 
   void test_instChange() {

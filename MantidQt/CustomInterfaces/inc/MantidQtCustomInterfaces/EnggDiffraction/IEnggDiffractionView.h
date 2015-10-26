@@ -96,9 +96,9 @@ public:
   virtual std::vector<std::string> logMsgs() const = 0;
 
   /**
-   * Username entered by the user
+   * RB Number entered by the user
    *
-   * @return username to log in to the compute resource
+   * @return RB number as string as provided by the user
    */
   virtual std::string getRBNumber() const = 0;
 
