@@ -38,6 +38,11 @@ public:
   virtual ~MockICatalogInfo() {}
 };
 
+// Adaptee
+struct UserType {
+  std::string getString(const std::string &) const { return "my_value"; }
+};
+
 class UserCatalogInfoTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -173,12 +178,6 @@ public:
   }
 
   void test_auto_adapter() {
-
-    // Adaptee
-    struct UserType {
-      std::string getString(const std::string &) const { return "my_value"; }
-    };
-
     UserType usertype;
     CatalogConfigService *service =
         makeCatalogConfigServiceAdapter(usertype, std::string("my_key"));

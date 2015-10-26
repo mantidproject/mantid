@@ -1512,7 +1512,7 @@ void ReflMainViewPresenter::transfer() {
   }
 
   ReflProgress progress(0, static_cast<double>(selectedRows.size()),
-                        static_cast<double>(selectedRows.size()),
+                        static_cast<int64_t>(selectedRows.size()),
                         this->m_progressView);
 
   auto newRows = getTransferStrategy()->transferRuns(runs, progress);
