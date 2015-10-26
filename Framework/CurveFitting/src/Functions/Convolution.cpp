@@ -101,7 +101,6 @@ void Convolution::function(const FunctionDomain &domain,
 
   size_t nData = domain.size();
   const double *xValues = d1d->getPointerAt(0);
-  double *out = values.getPointerToCalculated(0);
 
   refreshResolution();
 
@@ -173,6 +172,7 @@ void Convolution::function(const FunctionDomain &domain,
   // check for delta functions
   std::vector<boost::shared_ptr<DeltaFunction>> dltFuns;
   double dltF = 0;
+  bool deltaFunctionsOnly = false;
   CompositeFunction_sptr cf =
       boost::dynamic_pointer_cast<CompositeFunction>(getFunction(1));
   if (cf) {
@@ -186,60 +186,69 @@ void Convolution::function(const FunctionDomain &domain,
     }
     if (dltFuns.size() == cf->nFunctions()) {
       // all delta functions - return scaled resolution
-      resolution->function1D(out, xValues, nData);
-      std::transform(out, out + nData, out,
-                     std::bind2nd(std::multiplies<double>(), dltF));
-      return;
+      deltaFunctionsOnly = true;
+      //resolution->function1D(out, xValues, nData);
+      //std::transform(out, out + nData, out,
+      //               std::bind2nd(std::multiplies<double>(), dltF));
+      //return;
     }
   } else if (dynamic_cast<DeltaFunction *>(getFunction(1).get())) {
     // single delta function - return scaled resolution
-    auto df = boost::dynamic_pointer_cast<DeltaFunction>(getFunction(1));
-    resolution->function1D(out, xValues, nData);
-    std::transform(
-        out, out + nData, out,
-        std::bind2nd(std::multiplies<double>(),
-                     df->getParameter("Height") * df->HeightPrefactor()));
-    return;
+    deltaFunctionsOnly = true;
+    //auto df = boost::dynamic_pointer_cast<DeltaFunction>(getFunction(1));
+    //resolution->function1D(out, xValues, nData);
+    //std::transform(
+    //    out, out + nData, out,
+    //    std::bind2nd(std::multiplies<double>(),
+    //                 df->getParameter("Height") * df->HeightPrefactor()));
+    //return;
   }
 
   // out points to the calculated values in values
-  getFunction(1)->function(domain, values);
-  gsl_fft_real_transform(out, 1, nData, workspace.wavetable,
-                         workspace.workspace);
+  double *out = values.getPointerToCalculated(0);
 
-  // Fourier transform is integration - multiply by the step in the integration
-  // variable
-  double dx = nData > 1 ? xValues[1] - xValues[0] : 1.;
-  std::transform(out, out + nData, out,
-                 std::bind2nd(std::multiplies<double>(), dx));
+  if (!deltaFunctionsOnly) {
+    // Transform the model function
+    getFunction(1)->function(domain, values);
+    gsl_fft_real_transform(out, 1, nData, workspace.wavetable,
+                           workspace.workspace);
 
-  // now out contains fourier transform of the model function
+    // Fourier transform is integration - multiply by the step in the
+    // integration
+    // variable
+    double dx = nData > 1 ? xValues[1] - xValues[0] : 1.;
+    std::transform(out, out + nData, out,
+                   std::bind2nd(std::multiplies<double>(), dx));
 
-  HalfComplex res(m_resolution.data(), nData);
-  HalfComplex fun(out, nData);
+    // now out contains fourier transform of the model function
 
-  // Multiply transforms of the resolution and model functions
-  // Result is stored in fun
-  for (size_t i = 0; i <= res.size(); i++) {
-    // complex multiplication
-    double res_r = res.real(i);
-    double res_i = res.imag(i);
-    double fun_r = fun.real(i);
-    double fun_i = fun.imag(i);
-    fun.set(i, res_r * fun_r - res_i * fun_i, res_r * fun_i + res_i * fun_r);
+    HalfComplex res(m_resolution.data(), nData);
+    HalfComplex fun(out, nData);
+
+    // Multiply transforms of the resolution and model functions
+    // Result is stored in fun
+    for (size_t i = 0; i <= res.size(); i++) {
+      // complex multiplication
+      double res_r = res.real(i);
+      double res_i = res.imag(i);
+      double fun_r = fun.real(i);
+      double fun_i = fun.imag(i);
+      fun.set(i, res_r * fun_r - res_i * fun_i, res_r * fun_i + res_i * fun_r);
+    }
+
+    // Inverse fourier transform of fun
+    gsl_fft_halfcomplex_wavetable *wavetable_r =
+        gsl_fft_halfcomplex_wavetable_alloc(nData);
+    gsl_fft_halfcomplex_inverse(out, 1, nData, wavetable_r,
+                                workspace.workspace);
+    gsl_fft_halfcomplex_wavetable_free(wavetable_r);
+
+    // Inverse fourier transform is integration - multiply by the step in the
+    // integration variable
+    dx = nData > 1 ? 1. / (xValues[1] - xValues[0]) : 1.;
+    std::transform(out, out + nData, out,
+                   std::bind2nd(std::multiplies<double>(), dx));
   }
-
-  // Inverse fourier transform of fun
-  gsl_fft_halfcomplex_wavetable *wavetable_r =
-      gsl_fft_halfcomplex_wavetable_alloc(nData);
-  gsl_fft_halfcomplex_inverse(out, 1, nData, wavetable_r, workspace.workspace);
-  gsl_fft_halfcomplex_wavetable_free(wavetable_r);
-
-  // Inverse fourier transform is integration - multiply by the step in the
-  // integration variable
-  dx = nData > 1 ? 1. / (xValues[1] - xValues[0]) : 1.;
-  std::transform(out, out + nData, out,
-                 std::bind2nd(std::multiplies<double>(), dx));
 
   if (dltF != 0.) {
     // If model contains any delta functions their effect is addition of scaled
