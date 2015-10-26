@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include <set>
 
 namespace {}
 
@@ -22,6 +23,8 @@ std::vector<std::string> filterToNew(const std::vector<std::string> &input_data,
                                      const std::vector<std::string> &current_data);
 
 std::vector<std::string> getCurrentData(const API::WorkspaceHistory &ws_history);
+
+void insertDataSources(const std::string& dataSources, std::set<std::string>& historicalDataSources);
 
 bool fileExists(const std::string &filename);
 

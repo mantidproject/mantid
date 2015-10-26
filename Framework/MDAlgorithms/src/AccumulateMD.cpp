@@ -14,7 +14,7 @@
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include <vector>
 #include <Poco/File.h>
-#include <unordered_set>
+#include <boost/algorithm/string.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -90,19 +90,52 @@ Return a vector of the names of files and workspaces which have previously added
 to the workspace
 */
 std::vector<std::string> getCurrentData(const WorkspaceHistory &ws_history) {
-  // Using a set so we don't have to check if names are unique
-  std::unordered_set<std::string> currentFilesAndWorkspaces;
+  // Using a set so we only insert unique names
+  std::set<std::string> historicalDataSources;
 
   // Get previously added data sources from DataSources property of the original
   // call of CreateMD and any subsequent calls of AccumulateMD
   auto view = ws_history.createView();
   view->unrollAll();
+  const std::vector<HistoryItem> history_items = view->getAlgorithmsList();
+  for (auto iter = history_items.begin(); iter != history_items.end(); ++iter) {
+    auto alg_history = iter->getAlgorithmHistory();
+    if (alg_history->name() == "CreateMD" ||
+        alg_history->name() == "AccumulateMD") {
+      auto props = alg_history->getProperties();
+      for (auto propIter = props.begin(); propIter != props.end(); ++propIter) {
+        PropertyHistory_const_sptr propHistory = *propIter;
+        if (propHistory->name() == "DataSources") {
+          insertDataSources(propHistory->value(), historicalDataSources);
+        }
+      }
+    }
+  }
 
-  // currentFilesAndWorkspaces.insert(newName)
-
-  std::vector<std::string> result(currentFilesAndWorkspaces.begin(),
-                                  currentFilesAndWorkspaces.end());
+  std::vector<std::string> result(historicalDataSources.begin(),
+                                  historicalDataSources.end());
   return result;
+}
+
+/*
+Split string of data sources from workspace history and insert them into
+complete set of historical data sources
+*/
+void insertDataSources(const std::string &dataSources,
+                       std::set<std::string> &historicalDataSources) {
+  // Split the property string into a vector of data sources
+  std::vector<std::string> data_split;
+  boost::split(data_split, dataSources, boost::is_any_of(","));
+
+  // Trim any whitespace from ends of each data source string
+  std::for_each(
+      data_split.begin(), data_split.end(),
+      boost::bind(boost::algorithm::trim<std::string>, _1, std::locale()));
+
+  // Insert each data source into our complete set of historical data sources
+  for (auto it = data_split.begin(); it != data_split.end(); ++it) {
+    historicalDataSources.insert(*it);
+  }
 }
 
 // Register the algorithm into the AlgorithmFactory

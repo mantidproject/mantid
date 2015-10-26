@@ -124,6 +124,38 @@ public:
     TS_ASSERT_EQUALS(result[0], "test2");
     TS_ASSERT_EQUALS(result[1], "test5");
   }
+
+  void test_insert_data_sources() {
+    std::string dataSources = "test1,test2,test3";
+    std::set<std::string> dataSourcesSet;
+    Mantid::MDAlgorithms::insertDataSources(dataSources, dataSourcesSet);
+
+    // Check set contains "test1", "test2" and "test3"
+    auto iter1 = dataSourcesSet.find("test1");
+    TS_ASSERT(iter1 != dataSourcesSet.end());
+
+    auto iter2 = dataSourcesSet.find("test2");
+    TS_ASSERT(iter2 != dataSourcesSet.end());
+
+    auto iter3 = dataSourcesSet.find("test3");
+    TS_ASSERT(iter3 != dataSourcesSet.end());
+  }
+
+  void test_insert_data_sources_with_whitespace() {
+    std::string dataSources = " test1,test2 , test3";
+    std::set<std::string> dataSourcesSet;
+    Mantid::MDAlgorithms::insertDataSources(dataSources, dataSourcesSet);
+
+    // Check set contains "test1", "test2" and "test3"
+    auto iter1 = dataSourcesSet.find("test1");
+    TS_ASSERT(iter1 != dataSourcesSet.end());
+
+    auto iter2 = dataSourcesSet.find("test2");
+    TS_ASSERT(iter2 != dataSourcesSet.end());
+
+    auto iter3 = dataSourcesSet.find("test3");
+    TS_ASSERT(iter3 != dataSourcesSet.end());
+  }
 };
 
 #endif /* MANTID_MDALGORITHMS_ACCUMULATEMDTEST_H_ */
