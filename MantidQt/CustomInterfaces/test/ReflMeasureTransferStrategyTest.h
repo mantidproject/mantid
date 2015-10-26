@@ -45,19 +45,19 @@ public:
     // We expect that we are going to fetch the  measurement data for every
     // search result.
     EXPECT_CALL(*mockMeasurementSource, obtain(_, _))
-        .Times(Exactly(data.size()))
+        .Times(Exactly(static_cast<int>(data.size())))
         .WillRepeatedly(Return(Measurement("a", "s_a", "l", "t", 0, "111")));
 
     auto mockCatInfo = new MockICatalogInfo;
     // We expect that every location will be translated/transformed to make it
     // os specific
     EXPECT_CALL(*mockCatInfo, transformArchivePath(_))
-        .Times(Exactly(data.size()))
+        .Times(Exactly(static_cast<int>(data.size())))
         .WillRepeatedly(Return(std::string()));
 
     MockProgressBase progress;
     // We expect a progress update on each transfer
-    EXPECT_CALL(progress, doReport(_)).Times(Exactly(data.size()));
+    EXPECT_CALL(progress, doReport(_)).Times(Exactly(static_cast<int>(data.size())));
 
     ReflMeasureTransferStrategy strategy(
         std::move(std::unique_ptr<MockICatalogInfo>(mockCatInfo)),
@@ -86,7 +86,7 @@ public:
     // We are going to return three SearchResults two have the same measurement
     // id
     EXPECT_CALL(*mockMeasurementSource, obtain(_, _))
-        .Times(Exactly(data.size()))
+        .Times(Exactly(static_cast<int>(data.size())))
         .WillOnce(Return(Measurement("m1", "s1", "l1", "t1", 0.1, "111")))
         .WillOnce(Return(Measurement("m1", "s2", "l1", "t1", 0.2, "122")))
         .WillOnce(Return(Measurement("m2", "s2", "l1", "t1", 0.2, "123")));
@@ -95,12 +95,12 @@ public:
     // We expect that every location will be translated/transformed to make it
     // os specific
     EXPECT_CALL(*mockCatInfo, transformArchivePath(_))
-        .Times(Exactly(data.size()))
+        .Times(Exactly(static_cast<int>(data.size())))
         .WillRepeatedly(Return(std::string()));
 
     MockProgressBase progress;
     // Expect a progress update
-    EXPECT_CALL(progress, doReport(_)).Times(Exactly(data.size()));
+    EXPECT_CALL(progress, doReport(_)).Times(Exactly(static_cast<int>(data.size())));
 
     // Make the transfer stragegy
     ReflMeasureTransferStrategy strategy(
@@ -147,7 +147,7 @@ public:
     auto mockMeasurementSource = new MockReflMeasurementSource;
     // All 3 have same measurment id, but we also have 2 with same sub id.
     EXPECT_CALL(*mockMeasurementSource, obtain(_, _))
-        .Times(Exactly(data.size()))
+        .Times(Exactly(static_cast<int>(data.size())))
         .WillOnce(Return(Measurement("m1", "s1", "l1", "t1", 0.1, "111")))
         .WillOnce(Return(Measurement("m1", "s1", "l1", "t1", 0.2, "122")))
         .WillOnce(Return(Measurement("m1", "s2", "l1", "t1", 0.2, "123")));
@@ -156,12 +156,12 @@ public:
     // We expect that every location will be translated/transformed to make it
     // os specific
     EXPECT_CALL(*mockCatInfo, transformArchivePath(_))
-        .Times(Exactly(data.size()))
+        .Times(Exactly(static_cast<int>(data.size())))
         .WillRepeatedly(Return(std::string()));
 
     MockProgressBase progress;
     // Expect a progress update
-    EXPECT_CALL(progress, doReport(_)).Times(Exactly(data.size()));
+    EXPECT_CALL(progress, doReport(_)).Times(Exactly(static_cast<int>(data.size())));
 
     // Make the transfer stragegy
     ReflMeasureTransferStrategy strategy(
@@ -203,14 +203,14 @@ public:
     // We expect that we are going to fetch the  measurement data for every
     // search result.
     EXPECT_CALL(*mockMeasurementSource, obtain(_, _))
-        .Times(Exactly(data.size()))
+        .Times(Exactly(static_cast<int>(data.size())))
         .WillRepeatedly(Return(Measurement::InvalidMeasurement("Abort!")));
 
     auto mockCatInfo = new MockICatalogInfo;
     // We expect that every location will be translated/transformed to make it
     // os specific
     EXPECT_CALL(*mockCatInfo, transformArchivePath(_))
-        .Times(Exactly(data.size()));
+        .Times(Exactly(static_cast<int>(data.size())));
 
     MockProgressBase progress;
     // Nothing obtained. No progress to report.

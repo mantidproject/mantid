@@ -50,7 +50,7 @@ public:
   ReflProgress(
       double start, double end, int64_t nSteps,
       MantidQt::CustomInterfaces::ProgressableView *const progressableView)
-      : ProgressBase(start, end, nSteps), m_progressableView(progressableView) {
+      : ProgressBase(static_cast<int>(start), static_cast<int>(end), static_cast<int>(nSteps)), m_progressableView(progressableView) {
     if (!progressableView) {
       throw std::runtime_error("ProgressableView is null");
     }
@@ -1509,7 +1509,7 @@ void ReflMainViewPresenter::transfer() {
     runs[run] = searchResult;
   }
 
-  ReflProgress progress(0, selectedRows.size(), selectedRows.size(),
+  ReflProgress progress(0, static_cast<double>(selectedRows.size()), static_cast<double>(selectedRows.size()),
                         this->m_progressView);
 
   auto newRows = getTransferStrategy()->transferRuns(runs, progress);
