@@ -57,11 +57,13 @@ PointGroup::PointGroup(const std::string &symbolHM, const Group &group,
     : Group(group), m_symbolHM(symbolHM),
       m_name(symbolHM + " (" + description + ")") {
   m_crystalSystem = getCrystalSystemFromGroup();
+  m_latticeSystem = getLatticeSystemFromCrystalSystemAndGroup(m_crystalSystem);
 }
 
 PointGroup::PointGroup(const PointGroup &other)
     : Group(other), m_symbolHM(other.m_symbolHM), m_name(other.m_name),
-      m_crystalSystem(other.m_crystalSystem) {}
+      m_crystalSystem(other.m_crystalSystem),
+      m_latticeSystem(other.m_latticeSystem) {}
 
 PointGroup &PointGroup::operator=(const PointGroup &other) {
   Group::operator=(other);
@@ -69,6 +71,7 @@ PointGroup &PointGroup::operator=(const PointGroup &other) {
   m_symbolHM = other.m_symbolHM;
   m_name = other.m_name;
   m_crystalSystem = other.m_crystalSystem;
+  m_latticeSystem = other.m_latticeSystem;
 
   return *this;
 }
@@ -158,6 +161,31 @@ PointGroup::CrystalSystem PointGroup::getCrystalSystemFromGroup() const {
   return CrystalSystem::Triclinic;
 }
 
+PointGroup::LatticeSystem PointGroup::getLatticeSystemFromCrystalSystemAndGroup(
+    const CrystalSystem &crystalSystem) const {
+  switch (crystalSystem) {
+  case CrystalSystem::Cubic:
+    return LatticeSystem::Cubic;
+  case CrystalSystem::Hexagonal:
+    return LatticeSystem::Hexagonal;
+  case CrystalSystem::Tetragonal:
+    return LatticeSystem::Tetragonal;
+  case CrystalSystem::Orthorhombic:
+    return LatticeSystem::Orthorhombic;
+  case CrystalSystem::Monoclinic:
+    return LatticeSystem::Monoclinic;
+  case CrystalSystem::Triclinic:
+    return LatticeSystem::Triclinic;
+  default: {
+    if (getCoordinateSystem() == Group::Hexagonal) {
+      return LatticeSystem::Hexagonal;
+    }
+
+    return LatticeSystem::Rhombohedral;
+  }
+  }
+}
+
 /** @return a vector with all possible PointGroup objects */
 std::vector<PointGroup_sptr> getAllPointGroups() {
   std::vector<std::string> allSymbols =
@@ -224,6 +252,50 @@ getCrystalSystemFromString(const std::string &crystalSystem) {
   } else {
     throw std::invalid_argument("Not a valid crystal system: '" +
                                 crystalSystem + "'.");
+  }
+}
+
+std::string
+getLatticeSystemAsString(const PointGroup::LatticeSystem &latticeSystem) {
+  switch (latticeSystem) {
+  case PointGroup::LatticeSystem::Cubic:
+    return "Cubic";
+  case PointGroup::LatticeSystem::Tetragonal:
+    return "Tetragonal";
+  case PointGroup::LatticeSystem::Hexagonal:
+    return "Hexagonal";
+  case PointGroup::LatticeSystem::Rhombohedral:
+    return "Rhombohedral";
+  case PointGroup::LatticeSystem::Orthorhombic:
+    return "Orthorhombic";
+  case PointGroup::LatticeSystem::Monoclinic:
+    return "Monoclinic";
+  default:
+    return "Triclinic";
+  }
+}
+
+PointGroup::LatticeSystem
+getLatticeSystemFromString(const std::string &latticeSystem) {
+  std::string latticeSystemLC = boost::algorithm::to_lower_copy(latticeSystem);
+
+  if (latticeSystemLC == "cubic") {
+    return PointGroup::LatticeSystem::Cubic;
+  } else if (latticeSystemLC == "tetragonal") {
+    return PointGroup::LatticeSystem::Tetragonal;
+  } else if (latticeSystemLC == "hexagonal") {
+    return PointGroup::LatticeSystem::Hexagonal;
+  } else if (latticeSystemLC == "rhombohedral") {
+    return PointGroup::LatticeSystem::Rhombohedral;
+  } else if (latticeSystemLC == "orthorhombic") {
+    return PointGroup::LatticeSystem::Orthorhombic;
+  } else if (latticeSystemLC == "monoclinic") {
+    return PointGroup::LatticeSystem::Monoclinic;
+  } else if (latticeSystemLC == "triclinic") {
+    return PointGroup::LatticeSystem::Triclinic;
+  } else {
+    throw std::invalid_argument("Not a valid lattice system: '" +
+                                latticeSystem + "'.");
   }
 }
 

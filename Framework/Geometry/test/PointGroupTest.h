@@ -367,6 +367,55 @@ public:
                      PointGroup::CrystalSystem::Triclinic);
   }
 
+  void testLatticeSystemNames() {
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("Cubic"),
+                     PointGroup::LatticeSystem::Cubic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("cubic"),
+                     PointGroup::LatticeSystem::Cubic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("CUBIC"),
+                     PointGroup::LatticeSystem::Cubic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("CuBiC"),
+                     PointGroup::LatticeSystem::Cubic);
+
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("Tetragonal"),
+                     PointGroup::LatticeSystem::Tetragonal);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("Hexagonal"),
+                     PointGroup::LatticeSystem::Hexagonal);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("Rhombohedral"),
+                     PointGroup::LatticeSystem::Rhombohedral);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("Orthorhombic"),
+                     PointGroup::LatticeSystem::Orthorhombic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("Monoclinic"),
+                     PointGroup::LatticeSystem::Monoclinic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("Triclinic"),
+                     PointGroup::LatticeSystem::Triclinic);
+
+    TS_ASSERT_THROWS(getLatticeSystemFromString("DoesNotExist"),
+                     std::invalid_argument);
+
+    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(
+                         PointGroup::LatticeSystem::Cubic)),
+                     PointGroup::LatticeSystem::Cubic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(
+                         PointGroup::LatticeSystem::Tetragonal)),
+                     PointGroup::LatticeSystem::Tetragonal);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(
+                         PointGroup::LatticeSystem::Hexagonal)),
+                     PointGroup::LatticeSystem::Hexagonal);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(
+                         PointGroup::LatticeSystem::Rhombohedral)),
+                     PointGroup::LatticeSystem::Rhombohedral);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(
+                         PointGroup::LatticeSystem::Orthorhombic)),
+                     PointGroup::LatticeSystem::Orthorhombic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(
+                         PointGroup::LatticeSystem::Monoclinic)),
+                     PointGroup::LatticeSystem::Monoclinic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(
+                         PointGroup::LatticeSystem::Triclinic)),
+                     PointGroup::LatticeSystem::Triclinic);
+  }
+
 private:
   void checkPointGroupPerformance(const PointGroup_sptr &pointGroup) {
     V3D equiv[] = {

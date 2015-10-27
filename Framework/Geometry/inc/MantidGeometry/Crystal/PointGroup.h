@@ -34,6 +34,16 @@ public:
     Cubic
   };
 
+  enum class LatticeSystem {
+    Triclinic,
+    Monoclinic,
+    Orthorhombic,
+    Tetragonal,
+    Hexagonal,
+    Rhombohedral,
+    Cubic
+  };
+
   PointGroup(const std::string &symbolHM, const Group &group,
              const std::string &description = "");
 
@@ -47,6 +57,7 @@ public:
   std::string getSymbol() const;
 
   CrystalSystem crystalSystem() const { return m_crystalSystem; }
+  LatticeSystem latticeSystem() const { return m_latticeSystem; }
 
   /// Return true if the hkls are in same group
   bool isEquivalent(const Kernel::V3D &hkl, const Kernel::V3D &hkl2) const;
@@ -60,10 +71,13 @@ protected:
   std::vector<Kernel::V3D> getEquivalentSet(const Kernel::V3D &hkl) const;
 
   CrystalSystem getCrystalSystemFromGroup() const;
+  LatticeSystem getLatticeSystemFromCrystalSystemAndGroup(
+      const CrystalSystem &crystalSystem) const;
 
   std::string m_symbolHM;
   std::string m_name;
   CrystalSystem m_crystalSystem;
+  LatticeSystem m_latticeSystem;
 };
 
 /// Shared pointer to a PointGroup
@@ -82,6 +96,14 @@ getCrystalSystemAsString(const PointGroup::CrystalSystem &crystalSystem);
 MANTID_GEOMETRY_DLL
 PointGroup::CrystalSystem
 getCrystalSystemFromString(const std::string &crystalSystem);
+
+MANTID_GEOMETRY_DLL
+std::string
+getLatticeSystemAsString(const PointGroup::LatticeSystem &latticeSystem);
+
+MANTID_GEOMETRY_DLL
+PointGroup::LatticeSystem
+getLatticeSystemFromString(const std::string &latticeSystem);
 
 } // namespace Mantid
 } // namespace Geometry
