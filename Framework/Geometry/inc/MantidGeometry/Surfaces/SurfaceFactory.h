@@ -59,9 +59,9 @@ public:
   static SurfaceFactory *Instance();
   ~SurfaceFactory();
 
-  Surface *createSurface(const std::string &) const;
-  Surface *createSurfaceID(const std::string &) const;
-  Surface *processLine(const std::string &) const;
+  std::unique_ptr<Surface> createSurface(const std::string &) const;
+  std::unique_ptr<Surface> createSurfaceID(const std::string &) const;
+  std::unique_ptr<Surface> processLine(const std::string &) const;
 };
 
 } // NAMESPACE Geometry

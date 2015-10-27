@@ -190,10 +190,10 @@ private:
     std::string C33 = "px -3.2";
 
     // First create some surfaces
-    std::map<int, Surface *> CylSurMap;
-    CylSurMap[31] = new Cylinder();
-    CylSurMap[32] = new Plane();
-    CylSurMap[33] = new Plane();
+    std::map<int, std::unique_ptr<Surface>> CylSurMap;
+    CylSurMap[31] = std::unique_ptr<Cylinder>(new Cylinder());
+    CylSurMap[32] = std::unique_ptr<Plane>(new Plane());
+    CylSurMap[33] = std::unique_ptr<Plane>(new Plane());
 
     CylSurMap[31]->setSurface(C31);
     CylSurMap[32]->setSurface(C32);

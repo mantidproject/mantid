@@ -88,7 +88,8 @@ void SurfaceFactory::registerSurface()
   return;
 }
 
-Surface *SurfaceFactory::createSurface(const std::string &Key) const
+std::unique_ptr<Surface>
+SurfaceFactory::createSurface(const std::string &Key) const
 /**
   Creates an instance of tally
   given a valid key.
@@ -104,11 +105,11 @@ Surface *SurfaceFactory::createSurface(const std::string &Key) const
     throw Kernel::Exception::NotFoundError("SurfaceFactory::createSurface",
                                            Key);
   }
-  Surface *X = vc->second->clone();
-  return X;
+  return std::unique_ptr<Surface>(vc->second->clone());
 }
 
-Surface *SurfaceFactory::createSurfaceID(const std::string &Key) const
+std::unique_ptr<Surface>
+SurfaceFactory::createSurfaceID(const std::string &Key) const
 /**
   Creates an instance of tally
   given a valid key.
@@ -129,7 +130,8 @@ Surface *SurfaceFactory::createSurfaceID(const std::string &Key) const
   return createSurface(mc->second);
 }
 
-Surface *SurfaceFactory::processLine(const std::string &Line) const
+std::unique_ptr<Surface>
+SurfaceFactory::processLine(const std::string &Line) const
 /**
   Creates an instance of a surface
   given a valid line
@@ -143,7 +145,7 @@ Surface *SurfaceFactory::processLine(const std::string &Line) const
   if (!Mantid::Kernel::Strings::convert(Line, key))
     throw Kernel::Exception::NotFoundError("SurfaceFactory::processLine", Line);
 
-  Surface *X = createSurfaceID(key);
+  std::unique_ptr<Surface> X = createSurfaceID(key);
   if (X->setSurface(Line)) {
     std::cerr << "X:: " << X->setSurface(Line) << std::endl;
     throw Kernel::Exception::NotFoundError("SurfaceFactory::processLine", Line);

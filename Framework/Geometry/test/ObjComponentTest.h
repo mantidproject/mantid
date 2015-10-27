@@ -450,10 +450,10 @@ private:
     std::string C33 = "px -3.2";
 
     // First create some surfaces
-    std::map<int, Surface *> CylSurMap;
-    CylSurMap[31] = new Cylinder();
-    CylSurMap[32] = new Plane();
-    CylSurMap[33] = new Plane();
+    std::map<int, std::unique_ptr<Surface>> CylSurMap;
+    CylSurMap[31] = std::unique_ptr<Cylinder>(new Cylinder());
+    CylSurMap[32] = std::unique_ptr<Plane>(new Plane());
+    CylSurMap[33] = std::unique_ptr<Plane>(new Plane());
 
     CylSurMap[31]->setSurface(C31);
     CylSurMap[32]->setSurface(C32);
@@ -479,10 +479,10 @@ private:
     std::string C33 = "px -3.0";
 
     // First create some surfaces
-    std::map<int, Surface *> CylSurMap;
-    CylSurMap[31] = new Cylinder();
-    CylSurMap[32] = new Plane();
-    CylSurMap[33] = new Plane();
+    std::map<int, std::unique_ptr<Surface>> CylSurMap;
+    CylSurMap[31] = std::unique_ptr<Cylinder>(new Cylinder());
+    CylSurMap[32] = std::unique_ptr<Plane>(new Plane());
+    CylSurMap[33] = std::unique_ptr<Plane>(new Plane());
 
     CylSurMap[31]->setSurface(C31);
     CylSurMap[32]->setSurface(C32);
@@ -511,13 +511,13 @@ private:
     std::string C6 = planes[5];
 
     // Create surfaces
-    std::map<int, Surface *> CubeSurMap;
-    CubeSurMap[1] = new Plane();
-    CubeSurMap[2] = new Plane();
-    CubeSurMap[3] = new Plane();
-    CubeSurMap[4] = new Plane();
-    CubeSurMap[5] = new Plane();
-    CubeSurMap[6] = new Plane();
+    std::map<int, std::unique_ptr<Surface>> CubeSurMap;
+    CubeSurMap[1] = std::unique_ptr<Plane>(new Plane());
+    CubeSurMap[2] = std::unique_ptr<Plane>(new Plane());
+    CubeSurMap[3] = std::unique_ptr<Plane>(new Plane());
+    CubeSurMap[4] = std::unique_ptr<Plane>(new Plane());
+    CubeSurMap[5] = std::unique_ptr<Plane>(new Plane());
+    CubeSurMap[6] = std::unique_ptr<Plane>(new Plane());
 
     CubeSurMap[1]->setSurface(C1);
     CubeSurMap[2]->setSurface(C2);

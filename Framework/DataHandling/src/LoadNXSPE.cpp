@@ -368,8 +368,8 @@ Geometry::Object_sptr LoadNXSPE::createCuboid(double dx, double dy, double dz) {
   std::string S41 = "so 0.01"; // Sphere at origin radius 0.01
 
   // First create some surfaces
-  std::map<int, Geometry::Surface *> SphSurMap;
-  SphSurMap[41] = new Geometry::Sphere();
+  std::map<int, std::unique_ptr<Geometry::Surface>> SphSurMap;
+  SphSurMap[41] = std::unique_ptr<Geometry::Surface>(new Geometry::Sphere());
   SphSurMap[41]->setSurface(S41);
   SphSurMap[41]->setName(41);
 
