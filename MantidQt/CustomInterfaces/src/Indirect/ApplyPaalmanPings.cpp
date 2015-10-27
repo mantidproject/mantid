@@ -178,14 +178,10 @@ void ApplyPaalmanPings::run() {
   }
   QString outputWsName =
       sampleWsName.left(nameCutIndex) + +"_" + correctionType + "_Corrected";
-
-  if (useCan) {
-    auto containerWsName = m_uiForm.dsContainer->getCurrentDataName();
-    int cutIndex = containerWsName.indexOf("_");
-    if (cutIndex == -1) {
-      cutIndex = containerWsName.length();
-    }
-	outputWsName += "_Subtract_" + containerWsName.left(cutIndex);
+  if(m_uiForm.ckUseCan->isChecked()){
+    QString canWsName = m_uiForm.dsContainer->getCurrentDataName();
+	auto canCut = canWsName.indexOf("_");
+	outputWsName += "_" + canWsName.left(canCut);
   }
 
   applyCorrAlg->setProperty("OutputWorkspace", outputWsName.toStdString());

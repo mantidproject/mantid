@@ -19,6 +19,8 @@ namespace {
 Mantid::Kernel::Logger g_log("ScriptBuilder");
 }
 
+const std::string COMMENT_ALG = "Comment";
+
 ScriptBuilder::ScriptBuilder(boost::shared_ptr<HistoryView> view,
                              std::string versionSpecificity)
     : m_historyItems(view->getAlgorithmsList()), m_output(),
@@ -99,16 +101,40 @@ void ScriptBuilder::buildChildren(
 }
 
 /**
- * Build the script output for a single algorithm
- *
- * @param algHistory :: pointer to an algorithm history object
- * @returns std::string to run this algorithm
- */
+* Build the script output for a single comment
+*
+* @param algHistory :: pointer to an algorithm history object
+* @returns std::string to run this algorithm
+*/
+const std::string
+ScriptBuilder::buildCommentString(AlgorithmHistory_const_sptr algHistory) {
+  std::ostringstream comment;
+  const std::string name = algHistory->name();
+  if (name == COMMENT_ALG) {
+    auto props = algHistory->getProperties();
+    for (auto propIter = props.begin(); propIter != props.end(); ++propIter) {
+      if ((*propIter)->name() == "Note") {
+        comment << "# " << (*propIter)->value();
+      }
+    }
+  }
+  return comment.str();
+}
+
+/**
+* Build the script output for a single algorithm
+*
+* @param algHistory :: pointer to an algorithm history object
+* @returns std::string to run this algorithm
+*/
 const std::string
 ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
   std::ostringstream properties;
   const std::string name = algHistory->name();
   std::string prop = "";
+
+  if (name == COMMENT_ALG)
+    return buildCommentString(algHistory);
 
   auto props = algHistory->getProperties();
   for (auto propIter = props.begin(); propIter != props.end(); ++propIter) {

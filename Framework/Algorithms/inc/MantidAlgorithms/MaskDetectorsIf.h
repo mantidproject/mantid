@@ -10,7 +10,7 @@
 
 // To be compatible with VSC Express edition that does not have tr1
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 namespace Mantid {
 namespace Algorithms {
@@ -69,7 +69,7 @@ private:
   /// Returns an allowed values statement to insert into decumentation
   std::string allowedValuesStatement(std::vector<std::string> vals);
   // Typedef for det to value map
-  typedef boost::unordered_map<detid_t, bool> udet2valuem;
+  typedef std::unordered_map<detid_t, bool> udet2valuem;
   /// A map of detector numbers to mask boolean
   udet2valuem umap;
   /// Get the properties

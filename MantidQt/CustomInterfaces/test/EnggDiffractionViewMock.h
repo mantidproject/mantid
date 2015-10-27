@@ -74,6 +74,9 @@ public:
                void(const std::string &, const std::vector<double> &,
                     const std::vector<double> &));
 
+  // virtual void enableTabs(bool enable);
+  MOCK_METHOD1(enableTabs, void(bool));
+
   // virtual void enableCalibrateAndFocusActions(bool enable);
   MOCK_METHOD1(enableCalibrateAndFocusActions, void(bool));
 
@@ -124,8 +127,6 @@ public:
 
   // virtual void plotReplacingWindow
   MOCK_METHOD1(plotReplacingWindow, void(const std::string &wsName));
-
-
 };
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H

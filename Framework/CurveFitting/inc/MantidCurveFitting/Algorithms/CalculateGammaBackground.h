@@ -3,7 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -104,7 +104,7 @@ private:
   /// Input TOF data
   API::MatrixWorkspace_const_sptr m_inputWS;
   /// Sorted indices to correct
-  boost::unordered_map<size_t, size_t> m_indices;
+  std::unordered_map<size_t, size_t> m_indices;
   /// Function that defines the mass profile
   std::string m_profileFunction;
   /// The number of peaks in spectrum

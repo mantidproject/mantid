@@ -15,6 +15,7 @@ namespace Mantid {
 //------------------------------------------------------------------------------
 namespace Geometry {
 class OrientedLattice;
+class CrystalStructure;
 }
 
 namespace API {
@@ -103,6 +104,15 @@ public:
   bool hasOrientedLattice() const;
   //@}
 
+  /** @name Access the sample's crystal structure */
+  //@{
+  const Geometry::CrystalStructure &getCrystalStructure() const;
+  void
+  setCrystalStructure(const Geometry::CrystalStructure &newCrystalStructure);
+  bool hasCrystalStructure() const;
+  void clearCrystalStructure();
+  //@}
+
   // Required for SANS work until we define a proper
   // sample object from the raw file information
   /**@name Legacy functions */
@@ -136,6 +146,9 @@ private:
   boost::shared_ptr<SampleEnvironment> m_environment;
   /// Pointer to the OrientedLattice of the sample, NULL if not set.
   Geometry::OrientedLattice *m_lattice;
+
+  /// CrystalStructure of the sample
+  std::unique_ptr<Geometry::CrystalStructure> m_crystalStructure;
 
   /// Vector of child samples
   std::vector<boost::shared_ptr<Sample>> m_samples;
