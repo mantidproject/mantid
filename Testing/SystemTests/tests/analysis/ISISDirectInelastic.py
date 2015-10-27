@@ -310,7 +310,7 @@ class MARIReductionWaitAndSum(ISISDirectInelasticReduction):
       """
         self._counter+=1
         if self._counter>= 3:
-            source =  FileFinder.findRuns('11015')[0]
+            source =  FileFinder.findRuns('MAR11015')[0]
             targ_path = config['defaultsave.directory']
             targ_file = os.path.join(targ_path,'MAR11002.raw')
             shutil.copy2(source ,targ_file )
