@@ -76,7 +76,12 @@ TimeAtSampleStrategyIndirect::calculate(const size_t &workspace_index) const {
     errormsg << "Workspace index " << workspace_index << " is a monitor. ";
     throw std::invalid_argument(errormsg.str());
   }
-  return Correction(1.0, shift);
+
+  Correction retvalue(0, 0);
+  retvalue.factor = 1.0;
+  retvalue.offset = shift;
+
+  return retvalue;
 }
 
 } // namespace Algorithms

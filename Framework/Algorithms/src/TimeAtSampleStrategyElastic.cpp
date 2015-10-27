@@ -70,7 +70,12 @@ TimeAtSampleStrategyElastic::calculate(const size_t &workspace_index) const {
   const V3D &beamDir = refFrame->vecPointingAlongBeam();
   const double factor = calculateTOFRatio(*m_ws->getDetector(workspace_index),
                                           *source, *sample, L1s, beamDir);
-  return Correction(0, factor);
+
+  Correction retvalue(0, 0);
+  retvalue.factor = factor;
+  retvalue.offset = 0;
+
+  return retvalue;
 }
 
 } // namespace Algorithms
