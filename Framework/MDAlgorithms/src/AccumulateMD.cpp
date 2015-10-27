@@ -57,6 +57,8 @@ bool dataExists(const std::string &data_name) {
 Test if a file with this full path exists
 */
 bool fileExists(const std::string &filename) {
+  if (filename.empty())
+    return false;
   Poco::File test_file(filename);
   return test_file.exists();
 }
