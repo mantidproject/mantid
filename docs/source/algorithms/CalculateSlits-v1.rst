@@ -20,7 +20,15 @@ CalculateSlits uses nothing but the input properties to calculate the output, sp
 
    Slit1 = (2 \times Slit1Slit2 \times tan(\alpha \times Resolution)) - Slit2
 
-where :math:`\alpha` is the angle in radians.
+where :math:`\alpha` is the angle in radians (conversion between degrees and radians is implemented by the algorithm).
+
+Footprint
+---------
+
+The footprint of the experiment is not necessarily instrument specific and can be thought of as the area of the sample
+that is reach by the beam during the experiment. When providing the value of the footprint to the algorithm it should be
+based on the footprint that you would wish to use for the experiment as this information cannot be taken directly from
+the instrument definition and is experiment-dependant. 
 
 Usage
 -----
