@@ -58,6 +58,7 @@ def main(sysarg):
     output_dir = pathjoin(SPHINX_BUILD_DIR, BUILDER)
     doctree_dir = pathjoin(SPHINX_BUILD_DIR, "doctrees")
     argv = [sys.executable,
+            "-N",
             "-b", BUILDER,
             "-d", doctree_dir,
             "-c", CONF_DIR,
