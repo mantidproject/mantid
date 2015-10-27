@@ -92,6 +92,8 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.filterbadpulses_edit.setValidator(dv8)
         self._content.filterbadpulses_edit.setText("95.")
 
+        self._content.extension_combo.addItems(['.h5', '.hd5'])
+
         # Connections from action/event to function to handle
         self.connect(self._content.stripvanpeaks_chkbox, QtCore.SIGNAL("clicked()"),\
                 self._stripvanpeaks_clicked)

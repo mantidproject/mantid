@@ -322,6 +322,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
                                        splitinfowsname=None):
         """ Build the script to call SNSPowderReduction()
         """
+        # FIXME / TODO - Figure out how to get instrument name and facility name!
         script  = "SNSPowderReduction(\n"
         script += "%sInstrument   = '%s',\n" % (DiffractionReductionScripter.WIDTH, self.instrument_name)
 
