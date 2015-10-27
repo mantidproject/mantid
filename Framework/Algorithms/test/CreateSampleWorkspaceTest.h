@@ -217,15 +217,19 @@ public:
     // Name of the output workspace.
     std::string outWSName("CreateSampleWorkspaceTest_OutputWS_event");
 
-    auto ws = boost::dynamic_pointer_cast<IEventWorkspace>(createSampleWorkspace(outWSName, "Event"));
+    auto ws = boost::dynamic_pointer_cast<IEventWorkspace>(
+        createSampleWorkspace(outWSName, "Event"));
     TS_ASSERT(ws);
-    if(!ws) return;
+    if (!ws)
+      return;
 
     // The number of events per spectrum is not simply nhist*events_per_hist
     // The algorithm computes the number of events required per bin to give the
-    // total per spectrum as requested but can only add integer numbers of events
+    // total per spectrum as requested but can only add integer numbers of
+    // events
     // so the number added will always be less than expected.
-    // In this case the background has 99 bins at 0.3 & 1 bin at 10.3 => total sum=40
+    // In this case the background has 99 bins at 0.3 & 1 bin at 10.3 => total
+    // sum=40
     //    signal_scale_factor = events_per_spec/40 = 1000/40=25  =>
     //      background Y = 0.3*25 = 7.5 => int(7.5)=7
     //      peak Y = 10.3*25 = 257.5 => int(257.5)=257
