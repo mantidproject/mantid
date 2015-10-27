@@ -197,7 +197,8 @@ void AccumulateMD::init() {
 
   declareProperty(
       new ArrayProperty<std::string>(
-          "DataSources", boost::make_shared<MandatoryValidator<std::vector<std::string>>>(),
+          "DataSources",
+          boost::make_shared<MandatoryValidator<std::vector<std::string>>>(),
           Direction::Input),
       "Input workspaces to process, or filenames to load and process");
 
@@ -213,23 +214,25 @@ void AccumulateMD::init() {
                   boost::make_shared<StringListValidator>(e_mode_options),
                   "Analysis mode [‘Elastic’, ‘Direct’, ‘Indirect’].");
 
-  declareProperty(new ArrayProperty<double>(
-                      "Alatt",
-                      boost::make_shared<MandatoryValidator<std::vector<double>>>(),
-                      Direction::Input),
-                  "Lattice parameters");
+  declareProperty(
+      new ArrayProperty<double>(
+          "Alatt",
+          boost::make_shared<MandatoryValidator<std::vector<double>>>(),
+          Direction::Input),
+      "Lattice parameters");
 
-  declareProperty(new ArrayProperty<double>(
-                      "Angdeg",
-                      boost::make_shared<MandatoryValidator<std::vector<double>>>(),
-                      Direction::Input),
-                  "Lattice angles");
+  declareProperty(
+      new ArrayProperty<double>(
+          "Angdeg",
+          boost::make_shared<MandatoryValidator<std::vector<double>>>(),
+          Direction::Input),
+      "Lattice angles");
 
-  declareProperty(new ArrayProperty<double>(
-                      "u",
-                      boost::make_shared<MandatoryValidator<std::vector<double>>>(),
-                      Direction::Input),
-                  "Lattice vector parallel to neutron beam");
+  declareProperty(
+      new ArrayProperty<double>(
+          "u", boost::make_shared<MandatoryValidator<std::vector<double>>>(),
+          Direction::Input),
+      "Lattice vector parallel to neutron beam");
 
   declareProperty(
       new ArrayProperty<double>(
