@@ -74,6 +74,11 @@ void PredictPeaks::init() {
                   "Which reflection condition applies to this crystal, "
                   "reducing the number of expected HKL peaks?");
 
+  declareProperty("CalculateStructureFactors", false,
+                  "Calculate structure factors for the predicted peaks. This "
+                  "option only works if the sample of the input workspace has "
+                  "a crystal structure assigned.");
+
   declareProperty(new WorkspaceProperty<PeaksWorkspace>("HKLPeaksWorkspace", "",
                                                         Direction::Input,
                                                         PropertyMode::Optional),
@@ -348,11 +353,17 @@ void PredictPeaks::fillPossibleHKLsUsingPeaksWorkspace(
  * stored in sample if available. For consistency it sets the OrientedLattice
  * in the sample as the unit cell of the crystal structure.
  *
+ * Additionally, the property CalculateStructureFactors is taken into account.
+ * If it's disabled, the calculator will not be assigned, disabling structure
+ * factor calculation.
+ *
  * @param sample :: Sample, potentially with crystal structure
  */
 void PredictPeaks::setStructureFactorCalculatorFromSample(
     const Sample &sample) {
-  if (sample.hasCrystalStructure()) {
+  bool calculateStructureFactors = getProperty("CalculateStructureFactors");
+
+  if (calculateStructureFactors && sample.hasCrystalStructure()) {
     CrystalStructure crystalStructure = sample.getCrystalStructure();
     crystalStructure.setCell(sample.getOrientedLattice());
 
