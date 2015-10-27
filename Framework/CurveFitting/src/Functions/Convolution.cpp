@@ -246,6 +246,8 @@ void Convolution::function(const FunctionDomain &domain,
     dx = nData > 1 ? 1. / (xValues[1] - xValues[0]) : 1.;
     std::transform(out, out + nData, out,
                    std::bind2nd(std::multiplies<double>(), dx));
+  } else {
+    values.zeroCalculated();
   }
 
   if (dltF != 0.0 && !deltaShifted) {
