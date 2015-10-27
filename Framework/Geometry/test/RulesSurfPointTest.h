@@ -30,8 +30,9 @@ public:
     SurfPoint A;
     TS_ASSERT_EQUALS(A.display(), "0");
     auto P1 = std::unique_ptr<Surface>(new Plane);
+    auto P2 = P1.get(); // non-owning pointer
     A.setKey(std::move(P1));
-    // TS_ASSERT_EQUALS(A.getKey(), P1);
+    TS_ASSERT_EQUALS(A.getKey(), P2);
   }
 
   void testSetKeyN() {
@@ -45,9 +46,10 @@ public:
   void testFullCreatedObject() {
     SurfPoint A;
     auto P1 = std::unique_ptr<Surface>(new Plane);
+    auto P2 = P1.get(); // non-owning pointer
     A.setKey(std::move(P1));
     A.setKeyN(10);
-    // TS_ASSERT_EQUALS(A.getKey(), P1);
+    TS_ASSERT_EQUALS(A.getKey(), P2);
     TS_ASSERT_EQUALS(A.getKeyN(), 10);
     TS_ASSERT_EQUALS(A.display(), "10");
   }
@@ -78,16 +80,18 @@ public:
     // TODO:disable setleaves function
     SurfPoint A;
     auto P1 = std::unique_ptr<Surface>(new Plane);
+    auto P2 = P1.get(); // non-owning pointer
     A.setKey(std::move(P1));
     A.setKeyN(10);
-    // TS_ASSERT_EQUALS(A.getKey(), P1);
+    TS_ASSERT_EQUALS(A.getKey(), P2);
     TS_ASSERT_EQUALS(A.getKeyN(), 10);
     TS_ASSERT_EQUALS(A.display(), "10");
     SurfPoint B;
     auto S1 = std::unique_ptr<Surface>(new Sphere);
+    auto S2 = S1.get(); // non-owning pointer
     B.setKey(std::move(S1));
     B.setKeyN(11);
-    // TS_ASSERT_EQUALS(B.getKey(), S1);
+    TS_ASSERT_EQUALS(B.getKey(), S2);
     TS_ASSERT_EQUALS(B.getKeyN(), 11);
     TS_ASSERT_EQUALS(B.display(), "11");
     A.setLeaves(&B, (Rule *)0);
@@ -100,16 +104,18 @@ public:
                        // have leaves
     SurfPoint A;
     auto P1 = std::unique_ptr<Surface>(new Plane);
+    auto P2 = P1.get(); // non-owning pointer
     A.setKey(std::move(P1));
     A.setKeyN(10);
-    // TS_ASSERT_EQUALS(A.getKey(), P1);
+    TS_ASSERT_EQUALS(A.getKey(), P2);
     TS_ASSERT_EQUALS(A.getKeyN(), 10);
     TS_ASSERT_EQUALS(A.display(), "10");
     SurfPoint B;
     auto S1 = std::unique_ptr<Surface>(new Sphere);
+    auto S2 = S1.get(); // non-owning pointer
     B.setKey(std::move(S1));
     B.setKeyN(11);
-    // TS_ASSERT_EQUALS(B.getKey(), S1);
+    TS_ASSERT_EQUALS(B.getKey(), S2);
     TS_ASSERT_EQUALS(B.getKeyN(), 11);
     TS_ASSERT_EQUALS(B.display(), "11");
     A.setLeaf(&B, 0);
@@ -121,16 +127,18 @@ public:
   void testfindLeaf() { // TODO: disable to find leaf as this is final
     SurfPoint A;
     auto P1 = std::unique_ptr<Surface>(new Plane);
+    auto P2 = P1.get(); // non-owning pointer
     A.setKey(std::move(P1));
     A.setKeyN(10);
-    // TS_ASSERT_EQUALS(A.getKey(), P1);
+    TS_ASSERT_EQUALS(A.getKey(), P2);
     TS_ASSERT_EQUALS(A.getKeyN(), 10);
     TS_ASSERT_EQUALS(A.display(), "10");
     SurfPoint B;
     auto S1 = std::unique_ptr<Surface>(new Sphere);
+    auto S2 = S1.get(); // non-owning pointer
     B.setKey(std::move(S1));
     B.setKeyN(11);
-    // TS_ASSERT_EQUALS(B.getKey(), S1);
+    TS_ASSERT_EQUALS(B.getKey(), S2);
     TS_ASSERT_EQUALS(B.getKeyN(), 11);
     TS_ASSERT_EQUALS(B.display(), "11");
     TS_ASSERT_EQUALS(A.findLeaf(&B), -1);
@@ -143,9 +151,10 @@ public:
   void testFindKey() {
     SurfPoint A;
     auto P1 = std::unique_ptr<Surface>(new Plane);
+    auto P2 = P1.get(); // non-owning pointer
     A.setKey(std::move(P1));
     A.setKeyN(10);
-    // TS_ASSERT_EQUALS(A.getKey(), P1);
+    TS_ASSERT_EQUALS(A.getKey(), P2);
     TS_ASSERT_EQUALS(A.getKeyN(), 10);
     TS_ASSERT_EQUALS(A.display(), "10");
     TS_ASSERT_EQUALS(A.findKey(10), &A);
@@ -155,9 +164,10 @@ public:
   void testGetSign() {
     SurfPoint A;
     auto P1 = std::unique_ptr<Surface>(new Plane);
+    auto P2 = P1.get(); // non-owning pointer
     A.setKey(std::move(P1));
     A.setKeyN(10);
-    // TS_ASSERT_EQUALS(A.getKey(), P1);
+    TS_ASSERT_EQUALS(A.getKey(), P2);
     TS_ASSERT_EQUALS(A.getKeyN(), 10);
     TS_ASSERT_EQUALS(A.display(), "10");
     TS_ASSERT_EQUALS(A.getSign(), 1);
@@ -169,9 +179,10 @@ public:
   void testSelfConstructor() {
     SurfPoint A;
     auto P1 = std::unique_ptr<Surface>(new Plane);
+    auto P2 = P1.get(); // non-owning pointer
     A.setKey(std::move(P1));
     A.setKeyN(10);
-    // TS_ASSERT_EQUALS(A.getKey(), P1);
+    TS_ASSERT_EQUALS(A.getKey(), P2);
     TS_ASSERT_EQUALS(A.getKeyN(), 10);
     TS_ASSERT_EQUALS(A.display(), "10");
     TS_ASSERT_EQUALS(A.getSign(), 1);
@@ -185,9 +196,10 @@ public:
   void testClone() {
     SurfPoint A;
     auto P1 = std::unique_ptr<Surface>(new Plane);
+    auto P2 = P1.get(); // non-owning pointer
     A.setKey(std::move(P1));
     A.setKeyN(10);
-    // TS_ASSERT_EQUALS(A.getKey(), P1);
+    TS_ASSERT_EQUALS(A.getKey(), P2);
     TS_ASSERT_EQUALS(A.getKeyN(), 10);
     TS_ASSERT_EQUALS(A.display(), "10");
     TS_ASSERT_EQUALS(A.getSign(), 1);
@@ -203,9 +215,10 @@ public:
   void testAssignment() {
     SurfPoint A;
     auto P1 = std::unique_ptr<Surface>(new Plane);
+    auto P2 = P1.get(); // non-owning pointer
     A.setKey(std::move(P1));
     A.setKeyN(10);
-    // TS_ASSERT_EQUALS(A.getKey(), P1);
+    TS_ASSERT_EQUALS(A.getKey(), P2);
     TS_ASSERT_EQUALS(A.getKeyN(), 10);
     TS_ASSERT_EQUALS(A.display(), "10");
     TS_ASSERT_EQUALS(A.getSign(), 1);
@@ -221,9 +234,10 @@ public:
     SurfPoint A;
     auto P1 = std::unique_ptr<Surface>(new Plane);
     P1->setSurface("px 5");
+    auto P2 = P1.get(); // non-owning pointer
     A.setKey(std::move(P1));
     A.setKeyN(10);
-    // TS_ASSERT_EQUALS(A.getKey(), P1);
+    TS_ASSERT_EQUALS(A.getKey(), P2);
     TS_ASSERT_EQUALS(A.getKeyN(), 10);
     TS_ASSERT_EQUALS(A.display(), "10");
     TS_ASSERT_EQUALS(A.getSign(), 1);
@@ -235,10 +249,11 @@ public:
   void testIsValidMap() {
     SurfPoint A;
     auto P1 = std::unique_ptr<Surface>(new Plane);
+    auto P2 = P1.get(); // non-owning pointer
     P1->setSurface("px 5");
     A.setKey(std::move(P1));
     A.setKeyN(10);
-    // TS_ASSERT_EQUALS(A.getKey(), P1);
+    TS_ASSERT_EQUALS(A.getKey(), P2);
     TS_ASSERT_EQUALS(A.getKeyN(), 10);
     TS_ASSERT_EQUALS(A.display(), "10");
     TS_ASSERT_EQUALS(A.getSign(), 1);
