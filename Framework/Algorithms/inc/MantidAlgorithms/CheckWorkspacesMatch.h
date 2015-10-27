@@ -106,7 +106,7 @@ private:
   virtual bool processGroups();
 
   /// This algorithm is now deprecated and calls CompareWorkspaces instead
-  std::string runCompareWorkspaces();
+  std::string runCompareWorkspaces(bool group_compare = false);
 };
 
 } // namespace Algorithms

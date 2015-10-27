@@ -24,9 +24,11 @@ Workspace2D always fail.
 
 This algorithm has two outputs: A boolean "Result" that indicates whether
 the workspaces matched (true) or not (false), and a TableWorkspace property
-named "Messages" (workspace name defaults to "compare_msgs") with a single 
-column that contains messages about any mismatches that were detected. If 
-the input workspaces matched, the message workspace will be empty.
+named "Messages" (workspace name defaults to "compare_msgs") with three 
+columns. The first column contains messages about any mismatches that were 
+detected. The second and third columns are the names of the workspaces that
+were being compared when the mismatch message was issues. If all the input 
+workspaces matched, the message workspace will be empty.
 
 
 Usage
@@ -89,7 +91,7 @@ Output:
 
     Result: False
     Displaying 1 messages:
-    {'Message': 'Data mismatch'}
+    {'Message': 'Data mismatch', 'Workspace 1': 'ws1', 'Workspace 2': 'ws2'}
     Result: True
     Displaying 0 messages:
 

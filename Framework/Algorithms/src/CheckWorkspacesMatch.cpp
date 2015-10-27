@@ -90,7 +90,7 @@ void CheckWorkspacesMatch::init() {
 //----------------------------------------------------------------------------------------------
 void CheckWorkspacesMatch::exec() {
   // Run new algorithm
-  auto result = runCompareWorkspaces();
+  auto result = runCompareWorkspaces(false);
 
   // Output as per previous behaviour
   if (result != successString()) {
@@ -109,7 +109,7 @@ void CheckWorkspacesMatch::exec() {
  */
 bool CheckWorkspacesMatch::processGroups() {
   // Run new algorithm
-  auto result = runCompareWorkspaces();
+  auto result = runCompareWorkspaces(true);
 
   // Output as per previous behaviour
   if (result != successString()) {
@@ -132,9 +132,10 @@ bool CheckWorkspacesMatch::processGroups() {
  * Result string formatted the same way as before; "Success!" when workspaces
  * match or a newline separated list of mismatch messages.
  *
+ * @param group_compare Should output be formatted like group comparison?
  * @return A string containing either successString() or mismatch messages
  */
-std::string CheckWorkspacesMatch::runCompareWorkspaces() {
+std::string CheckWorkspacesMatch::runCompareWorkspaces(bool group_compare) {
   // This algorithm produces a single result string
   std::string result;
 
@@ -170,6 +171,17 @@ std::string CheckWorkspacesMatch::runCompareWorkspaces() {
     auto rowcount = table->rowCount();
     for (size_t i = 0; i < rowcount; ++i) {
       result += table->cell<std::string>(i, 0);
+
+      // Emulate special case output format when comparing groups
+      if (group_compare &&
+          table->cell<std::string>(i, 0) !=
+              "Type mismatch. One workspace is a group, the other is not." &&
+          table->cell<std::string>(i, 0) != "GroupWorkspaces size mismatch.") {
+
+        result += ". Inputs=[" + table->cell<std::string>(i, 1) + "," +
+                  table->cell<std::string>(i, 2) + "]";
+      }
+
       if (i < (rowcount - 1))
         result += "\n";
     }

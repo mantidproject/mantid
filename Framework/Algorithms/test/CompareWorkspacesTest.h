@@ -1012,7 +1012,7 @@ public:
 
     doGroupTest(
         groupOneName, groupTwoName,
-        "Different numbers of logs. Inputs=[TestGroupOne_0,TestGroupTwo_0]",
+        "Different numbers of logs",
         otherProps);
 
     // Cleanup

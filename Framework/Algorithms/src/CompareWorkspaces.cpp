@@ -110,6 +110,11 @@ void CompareWorkspaces::init() {
       new WorkspaceProperty<ITableWorkspace>("Messages", "compare_msgs",
                                              Direction::Output),
       "TableWorkspace containing messages about any mismatches detected");
+
+  m_Messages = WorkspaceFactory::Instance().createTable("TableWorkspace");
+  m_Messages->addColumn("str", "Message");
+  m_Messages->addColumn("str", "Workspace 1");
+  m_Messages->addColumn("str", "Workspace 2");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -117,8 +122,7 @@ void CompareWorkspaces::init() {
  */
 void CompareWorkspaces::exec() {
   m_Result = true;
-  m_Messages = WorkspaceFactory::Instance().createTable("TableWorkspace");
-  m_Messages->addColumn("str", "Message");
+  m_Messages->setRowCount(0); // Clear table
 
   if (g_log.is(Logger::Priority::PRIO_DEBUG))
     m_ParallelComparison = false;
@@ -143,8 +147,7 @@ void CompareWorkspaces::exec() {
  */
 bool CompareWorkspaces::processGroups() {
   m_Result = true;
-  m_Messages = WorkspaceFactory::Instance().createTable("TableWorkspace");
-  m_Messages->addColumn("str", "Message");
+  m_Messages->setRowCount(0); // Clear table
 
   // Get workspaces
   Workspace_const_sptr w1 = getProperty("Workspace1");
@@ -232,11 +235,8 @@ void CompareWorkspaces::processGroups(
 
     bool success = checker->getProperty("Result");
     if (!success) {
-      m_Result = false;
-
       ITableWorkspace_sptr table = checker->getProperty("Messages");
-      recordMismatch(table->cell<std::string>(0, 0) + ". Inputs=[" +
-                     namesOne[i] + "," + namesTwo[i] + "]");
+      recordMismatch(table->cell<std::string>(0, 0), namesOne[i], namesTwo[i]);
     }
   }
 }
@@ -1150,10 +1150,24 @@ void CompareWorkspaces::doMDComparison(Workspace_sptr w1, Workspace_sptr w2) {
  * Result to indicate that the input workspaces did not match.
  *
  * @param msg Mismatch message to be logged in output workspace
+ * @param ws1 Name of first workspace being compared
+ * @param ws2 Name of second workspace being compared
  */
-void CompareWorkspaces::recordMismatch(std::string msg) {
+void CompareWorkspaces::recordMismatch(std::string msg, std::string ws1,
+                                       std::string ws2) {
+  // Workspace names default to the workspaces currently being compared
+  if (ws1.empty()) {
+    Workspace_const_sptr w1 = getProperty("Workspace1");
+    ws1 = w1->name();
+  }
+  if (ws2.empty()) {
+    Workspace_const_sptr w2 = getProperty("Workspace2");
+    ws2 = w2->name();
+  }
+
+  // Add new row and flag this comparison as a mismatch
   TableRow row = m_Messages->appendRow();
-  row << msg;
+  row << msg << ws1 << ws2;
   m_Result = false;
 }
 

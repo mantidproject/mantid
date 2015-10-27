@@ -40,8 +40,12 @@ namespace Algorithms {
  *
  * Output Properties:
  * <UL>
- * <LI> Result - Contains 'success' if the workspaces match, the reason for the
- * failure otherwise </LI>
+ * <LI> Result - Contains boolean true if the workspaces match, false otherwise
+ * </LI>
+ * <LI> Messages - TableWorkspace with three columns. The first column contains
+ * messages about any mismatches that were detected. The second and third
+ * columns contain the names of the workspaces being compared. If no mismatches
+ * were detected, this workspace will be empty.
  * </UL>
  *
  * Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -127,7 +131,9 @@ private:
                                  size_t &numdiffpulse, size_t &numdifftof,
                                  size_t &numdiffboth) const;
 
-  void recordMismatch(std::string msg);
+  /// Records a mismatch in the Messages workspace and sets Result to false
+  void recordMismatch(std::string msg, std::string ws1 = "",
+                      std::string ws2 = "");
 
   bool relErr(double x1, double x2, double errorVal) const;
 
