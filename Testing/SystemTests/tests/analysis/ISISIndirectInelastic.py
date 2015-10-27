@@ -610,7 +610,7 @@ class ISISIndirectInelasticDiagnostics(ISISIndirectInelasticBase):
                   SpectraRange=self.spectra)
 
         # Construct the result ws name.
-        Load(File=self.rawfiles[0]
+        Load(Filename=self.rawfiles[0],
              OutputWorkspace='__temp')
         resultWs = mtd['__temp']
         inst_name = resultWs.getInstrument().getFullName().lower()
