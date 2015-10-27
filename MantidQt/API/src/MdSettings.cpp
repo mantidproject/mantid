@@ -1,5 +1,6 @@
 #include "MantidQtAPI/MdSettings.h"
 #include "MantidQtAPI/MdConstants.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "boost/scoped_ptr.hpp"
 #include <QSettings>
 #include <QString>
@@ -19,7 +20,9 @@ MdSettings::MdSettings() : m_vsiGroup("Mantid/MdPlotting/Vsi"),
                            m_lblLastSessionBackgroundColor("lastsessionbackgroundcolor"),
                            m_lblSliceViewerColorMap("ColormapFile"), // This is the same as in Slice Viewer !!,
                            m_lblUserSettingInitialView("initialview"),
-                           m_lblLastSessionLogScale("lastsessionlogscale")
+                           m_lblLastSessionLogScale("lastsessionlogscale"),
+                           m_lblDefaultNormalizationHisto("defaultnormalizationhisto"),
+                           m_lblDefaultNormalizationEvent("defaultnormalizationevent")
 {
   m_mdConstants.initializeSettingsConstants();
 }
@@ -227,3 +230,66 @@ void MdSettings::setUserSettingIntialView(QString initialView)
   settings.setValue(m_lblUserSettingInitialView, initialView);
   settings.endGroup();
 }
+
+void MdSettings::setUserSettingNormalizationHisto(QString normalization) {
+  QSettings settings;
+
+  settings.beginGroup(m_vsiGroup);
+  settings.setValue(m_lblDefaultNormalizationHisto, normalization);
+  settings.endGroup();
+}
+
+QString MdSettings::getUserSettingNormalizationHisto() {
+  QSettings settings;
+
+  settings.beginGroup(m_vsiGroup);
+  QString defaultNormalization = settings.value(m_lblDefaultNormalizationHisto, m_mdConstants.getAutoNormalization()).asString();
+  settings.endGroup();
+
+  return defaultNormalization; 
+}
+
+
+void MdSettings::setUserSettingNormalizationEvent(QString normalization) {
+  QSettings settings;
+
+  settings.beginGroup(m_vsiGroup);
+  settings.setValue(m_lblDefaultNormalizationEvent, normalization);
+  settings.endGroup();
+}
+
+QString MdSettings::getUserSettingNormalizationEvent() {
+  QSettings settings;
+
+  settings.beginGroup(m_vsiGroup);
+  QString defaultNormalization = settings.value(m_lblDefaultNormalizationEvent, m_mdConstants.getAutoNormalization()).asString();
+  settings.endGroup();
+
+  return defaultNormalization; 
+}
+
+int MdSettings::convertNormalizationToInteger(QString normalization) {
+  if (normalization == m_mdConstants.getNoNormalization()) {
+    return static_cast<int>(Mantid::API::NoNormalization);
+  } else if (normalization == m_mdConstants.getVolumeNormalization()) {
+    return static_cast<int>(Mantid::API::VolumeNormalization);
+  } else if (normalization == m_mdConstants.getNumberEventNormalization()) {
+    return static_cast<int>(Mantid::API::NumEventsNormalization);
+  } else {
+    return 3;
+  }
+}
+
+int MdSettings::getUserSettingNormalizationHistoAsInteger() {
+  auto normalization = getUserSettingNormalizationHisto();
+  return convertNormalizationToInteger(normalization);
+}
+
+int MdSettings::getUserSettingNormalizationEventAsInteger() {
+  auto normalization = getUserSettingNormalizationEvent();
+  return convertNormalizationToInteger(normalization);
+}
+
+
+
+

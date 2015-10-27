@@ -83,8 +83,8 @@ private:
                         out->getBoxController()->getMaxDepth());
     }
 
-    TSM_ASSERT_EQUALS("Should show volume normalization",
-                      out->displayNormalization(), eventNorm);
+    TSM_ASSERT_EQUALS("Should show num event normalization",
+                      out->displayNormalization(), histoNorm);
     TSM_ASSERT_EQUALS("Should show num event normalization",
                       out->displayNormalizationHisto(), histoNorm);
 

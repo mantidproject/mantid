@@ -165,7 +165,51 @@ namespace MantidQt
          * @returns Was a log scale state?
          */
          bool getLastSessionLogScale();
-         
+        
+        /**
+         * Set the user setting for the default normalization for histo workspaces
+         * @param normalization: the default normalization
+         */
+         void setUserSettingNormalizationHisto(QString normalization);
+
+        /**
+         * Get the user setting for the default normalization for histo workspaces
+         * @returns the default normalization
+         */
+         QString getUserSettingNormalizationHisto();
+
+        /**
+         * Get the normalization as an integer for histo workspaces
+         * @returns the current user setting as an integer
+         */ 
+        int getUserSettingNormalizationHistoAsInteger();
+
+
+        /**
+         * Set the user setting for the default normalization for event workspaces
+         * @param normalization: the default normalization
+         */
+         void setUserSettingNormalizationEvent(QString normalization);
+
+        /**
+         * Get the user setting for the default normalization for event workspaces
+         * @returns the default normalization
+         */
+         QString getUserSettingNormalizationEvent();
+
+        /**
+         * Get the normalization as an integer for event workspaces
+         * @returns the current user setting as an integer
+         */ 
+        int getUserSettingNormalizationEventAsInteger();
+
+        /**
+         * Convert normalization string to integer
+         * @param normalization: normalization string
+         * @returns normalization as an integer 
+         */
+        int convertNormalizationToInteger(QString normalization);
+
       private:
         MdConstants m_mdConstants;
 
@@ -187,6 +231,9 @@ namespace MantidQt
 
         QString m_lblUserSettingInitialView;
         QString m_lblLastSessionLogScale;
+
+        QString m_lblDefaultNormalizationHisto;
+        QString m_lblDefaultNormalizationEvent;
     };
   }
 }

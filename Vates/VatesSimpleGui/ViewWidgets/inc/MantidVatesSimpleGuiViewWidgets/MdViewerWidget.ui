@@ -19,6 +19,9 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="toolTip">
+   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the initial default normalization when loading a workspace for the first time.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,0">
    <property name="spacing">
     <number>0</number>
@@ -96,7 +99,7 @@
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_2">
+      <spacer name="horizontalSpacer_8">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -107,6 +110,26 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="lbl_normalizationHisto">
+       <property name="toolTip">
+        <string extracomment="Select the default initial normalization when MDHisto workspaces are loaded"/>
+       </property>
+       <property name="text">
+        <string>Initial MDHisto Norm:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="defaultNormalizationHisto">
+       <property name="toolTip">
+        <string extracomment="Select the default initial normalization when MDHisto workspaces are loaded"/>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -152,6 +175,19 @@
       </widget>
      </item>
      <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_5">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -185,7 +221,7 @@
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_6">
+      <spacer name="horizontalSpacer_7">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -196,6 +232,26 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="lbl_normalizationEvent">
+       <property name="toolTip">
+        <string extracomment="Select the default initial normalization when MDEvent workspaces are loaded"/>
+       </property>
+       <property name="text">
+        <string>Initial MDEvent Norm:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="defaultNormalizationEvent">
+       <property name="toolTip">
+        <string extracomment="Select the default initial normalization when MDEvent workspaces are loaded"/>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

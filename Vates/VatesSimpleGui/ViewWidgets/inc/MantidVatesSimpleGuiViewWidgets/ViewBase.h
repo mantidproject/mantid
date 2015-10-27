@@ -2,6 +2,7 @@
 #define VIEWBASE_H_
 
 #include "MantidQtAPI/PythonThreading.h"
+#include "MantidQtAPI/MdSettings.h"
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
@@ -101,6 +102,8 @@ public:
   virtual bool hasWorkspaceType(const QString &wsTypeName);
   /// Check if file/workspace is a MDHistoWorkspace.
   virtual bool isMDHistoWorkspace(pqPipelineSource *src);
+  /// Check if file/workspace is a MDHistoWorkspace.
+  virtual bool isMDEventWorkspace(pqPipelineSource *src);
   /// Check if file/workspace is an internally rebinned workspace
   virtual bool isInternallyRebinnedWorkspace(pqPipelineSource* src);
   /// Check if file/workspace is a Peaks one.
@@ -269,6 +272,7 @@ private:
   vtkSmartPointer<vtkEventQtSlotConnect> m_vtkConnections;
   RecursivePythonGIL m_pythonGIL;
   Mantid::VATES::ColorScaleLock* m_colorScaleLock;
+  MantidQt::API::MdSettings m_mdSettings;///<Holds the MD settings which are used to persist data
 
 };
 

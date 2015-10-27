@@ -89,6 +89,12 @@ namespace MantidQt
         
         double getLogScaleDefaultValue();
 
+        QString getAutoNormalization() const;
+        QString getVolumeNormalization() const;
+        QString getNumberEventNormalization() const;
+        QString getNoNormalization() const;
+        QStringList getAllNormalizations() const;
+
       private:
         QString m_generalMdColorMap;
         QColor m_defaultBackgroundColor;
@@ -98,6 +104,11 @@ namespace MantidQt
         QString m_threeSliceView;
         QString m_splatterPlotView;
         QString m_techniqueDependence;
+
+        QString m_autoNormalization;
+        QString m_volumeNormalization;
+        QString m_numberEventNormalization;
+        QString m_noNormalization;
 
         const double m_colorScaleStandardMax;
         const double m_logScaleDefaultValue;

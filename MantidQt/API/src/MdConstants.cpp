@@ -52,6 +52,11 @@ namespace MantidQt
       m_multiSliceView = "Multi Slice";
       m_threeSliceView = "Three Slice";
       m_splatterPlotView = "Splatter Plot";
+
+      m_autoNormalization = "Auto Select";
+      m_volumeNormalization = "Volume";
+      m_numberEventNormalization = "Number Events";
+      m_noNormalization = "None";
     }
 
     /**
@@ -152,5 +157,53 @@ namespace MantidQt
 
       return views;
     }
+
+    /**
+     * Get the auto normalization 
+     * @returns the auto normalization
+     */
+    QString MdConstants::getAutoNormalization() const {
+      return m_autoNormalization;
+    }
+
+    /** 
+     * Get the volume normalization
+     * @returns the volume normalization 
+     */
+    QString MdConstants::getVolumeNormalization() const {
+      return m_volumeNormalization;
+    }
+
+    /**
+     * Get the number of events normalization
+     * @returns the number of events normalization
+     */
+    QString MdConstants::getNumberEventNormalization() const {
+      return m_numberEventNormalization;
+    }
+
+    /**
+     * Get no normalization
+     * @returns the no normalization
+     */
+    QString MdConstants::getNoNormalization() const {
+      return m_noNormalization;
+    }
+
+     /**
+     * Get a list of all normalization options.
+     *@returns A list of all normalization options
+     */
+    QStringList MdConstants::getAllNormalizations() const
+    {
+      QStringList normalizations;
+
+      normalizations.append(getAutoNormalization());
+      normalizations.append(getVolumeNormalization());
+      normalizations.append(getNumberEventNormalization());
+      normalizations.append(getNoNormalization());
+      return normalizations;
+    }
+
   }
 }
