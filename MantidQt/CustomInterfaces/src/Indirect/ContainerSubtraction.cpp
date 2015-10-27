@@ -235,15 +235,36 @@ void ContainerSubtraction::plotPreview(int specIndex) {
         "Subtracted", QString::fromStdString(m_pythonExportWsName), specIndex,
         Qt::green);
 
+ //Scale can
+  if (m_uiForm.ckScaleCan->isChecked()) {
+    auto canName = m_uiForm.dsContainer->getCurrentDataName();
+    if (m_uiForm.ckShiftCan->isChecked()) {
+      canName += "_Shifted";
+    }
+    IAlgorithm_sptr scaleCan = AlgorithmManager::Instance().create("Scale");
+    scaleCan->initialize();
+	scaleCan->setProperty("InputWorkspace", canName.toStdString());
+    scaleCan->setProperty("OutputWorkspace", "__container_corrected");
+    scaleCan->setProperty("Factor", m_uiForm.spCanScale->value());
+    scaleCan->setProperty("Operation", "Multiply");
+    scaleCan->execute();
+  }
+
   // Plot container
-  if (m_uiForm.ckShiftCan->isChecked()) {
-    m_uiForm.ppPreview->addSpectrum(
-        "Container", (m_uiForm.dsContainer->getCurrentDataName() + "_Shifted"),
-        specIndex, Qt::red);
-  } else {
-    m_uiForm.ppPreview->addSpectrum("Container",
-                                    m_uiForm.dsContainer->getCurrentDataName(),
+  if (m_uiForm.ckScaleCan->isChecked()) {
+    m_uiForm.ppPreview->addSpectrum("Container", "__container_corrected",
                                     specIndex, Qt::red);
+  } else {
+    if (m_uiForm.ckShiftCan->isChecked()) {
+      m_uiForm.ppPreview->addSpectrum(
+          "Container",
+          (m_uiForm.dsContainer->getCurrentDataName() + "_Shifted"), specIndex,
+          Qt::red);
+    } else {
+      m_uiForm.ppPreview->addSpectrum(
+          "Container", m_uiForm.dsContainer->getCurrentDataName(), specIndex,
+          Qt::red);
+    }
   }
 }
 
