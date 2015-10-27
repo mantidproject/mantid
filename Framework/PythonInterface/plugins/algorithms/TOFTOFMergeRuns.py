@@ -91,7 +91,7 @@ class TOFTOFMergeRuns(PythonAlgorithm):
                     raise RuntimeError(message)
 
         # warnig if optional properties are not identical must be given
-        api.CompareSampleLogs(wsnames, self.optional_properties, 0.01)
+        result = api.CompareSampleLogs(wsnames, self.optional_properties, 0.01)
         if len(result) > 0:
             self.log().warning("Sample logs " + result + " do not match!")
 
