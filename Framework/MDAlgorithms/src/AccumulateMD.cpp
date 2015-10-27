@@ -196,25 +196,45 @@ void AccumulateMD::init() {
                   "MDHistoWorkspace with new data appended.");
 
   declareProperty(
-      new ArrayProperty<std::string>("DataSources", Direction::Input),
+      new ArrayProperty<std::string>(
+          "DataSources", boost::make_shared<MandatoryValidator<std::vector<std::string>>>(),
+          Direction::Input),
       "Input workspaces to process, or filenames to load and process");
 
   declareProperty(new ArrayProperty<double>("EFix", Direction::Input),
                   "datasource energy values in meV");
 
-  declareProperty("Emode", "Direct", Direction::Input);
+  std::vector<std::string> e_mode_options;
+  e_mode_options.push_back("Elastic");
+  e_mode_options.push_back("Direct");
+  e_mode_options.push_back("Indirect");
 
-  declareProperty(new ArrayProperty<double>("Alatt", Direction::Input),
+  declareProperty("Emode", "Direct",
+                  boost::make_shared<StringListValidator>(e_mode_options),
+                  "Analysis mode [‘Elastic’, ‘Direct’, ‘Indirect’].");
+
+  declareProperty(new ArrayProperty<double>(
+                      "Alatt",
+                      boost::make_shared<MandatoryValidator<std::vector<double>>>(),
+                      Direction::Input),
                   "Lattice parameters");
 
-  declareProperty(new ArrayProperty<double>("Angdeg", Direction::Input),
+  declareProperty(new ArrayProperty<double>(
+                      "Angdeg",
+                      boost::make_shared<MandatoryValidator<std::vector<double>>>(),
+                      Direction::Input),
                   "Lattice angles");
 
-  declareProperty(new ArrayProperty<double>("u", Direction::Input),
+  declareProperty(new ArrayProperty<double>(
+                      "u",
+                      boost::make_shared<MandatoryValidator<std::vector<double>>>(),
+                      Direction::Input),
                   "Lattice vector parallel to neutron beam");
 
   declareProperty(
-      new ArrayProperty<double>("v", Direction::Input),
+      new ArrayProperty<double>(
+          "v", boost::make_shared<MandatoryValidator<std::vector<double>>>(),
+          Direction::Input),
       "Lattice vector perpendicular to neutron beam in the horizontal plane");
 
   declareProperty(new ArrayProperty<double>("Psi", Direction::Input),
