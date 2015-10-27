@@ -244,6 +244,7 @@ void PredictPeaks::exec() {
   setProperty<PeaksWorkspace_sptr>("OutputWorkspace", m_pw);
 }
 
+/// Tries to set the internally stored instrument from an ExperimentInfo-object.
 void PredictPeaks::setInstrumentFromInputWorkspace(
     const ExperimentInfo_sptr &inWS) {
   // Check that there is an input workspace that has a sample.
@@ -254,6 +255,7 @@ void PredictPeaks::setInstrumentFromInputWorkspace(
   m_inst = inWS->getInstrument();
 }
 
+/// Sets the run number from the supplied ExperimentInfo or throws an exception.
 void PredictPeaks::setRunNumberFromInputWorkspace(
     const ExperimentInfo_sptr &inWS) {
   if (!inWS) {
@@ -263,6 +265,7 @@ void PredictPeaks::setRunNumberFromInputWorkspace(
   m_runNumber = inWS->getRunNumber();
 }
 
+/// Checks that the beam direction is +Z, throws exception otherwise.
 void PredictPeaks::checkBeamDirection() const {
   V3D samplePos = m_inst->getSample()->getPos();
 
@@ -338,6 +341,15 @@ void PredictPeaks::fillPossibleHKLsUsingPeaksWorkspace(
   } // for each hkl in the workspace
 }
 
+/**
+ * @brief Assigns a StructureFactorCalculator if available in sample.
+ *
+ * This method constructs a StructureFactorCalculator using the CrystalStructure
+ * stored in sample if available. For consistency it sets the OrientedLattice
+ * in the sample as the unit cell of the crystal structure.
+ *
+ * @param sample :: Sample, potentially with crystal structure
+ */
 void PredictPeaks::setStructureFactorCalculatorFromSample(
     const Sample &sample) {
   if (sample.hasCrystalStructure()) {
