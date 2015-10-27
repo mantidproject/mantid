@@ -7,6 +7,7 @@
 #include "MantidGeometry/Crystal/HKLGenerator.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 #include "MantidGeometry/Crystal/HKLFilterWavelength.h"
+#include "MantidGeometry/Crystal/StructureFactorCalculatorSummation.h"
 
 using Mantid::Kernel::EnabledWhenProperty;
 
@@ -24,7 +25,8 @@ using namespace Mantid::Kernel;
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-PredictPeaks::PredictPeaks() : m_runNumber(-1), m_inst(), m_pw() {
+PredictPeaks::PredictPeaks()
+    : m_runNumber(-1), m_inst(), m_pw(), m_sfCalculator() {
   m_refConds = getAllReflectionConditions();
 }
 
@@ -200,9 +202,10 @@ void PredictPeaks::exec() {
   // Copy instrument, sample, etc.
   m_pw->copyExperimentInfoFrom(inputExperimentInfo.get());
 
+  const Sample &sample = inputExperimentInfo->sample();
+
   // Retrieve the OrientedLattice (UnitCell) from the workspace
-  OrientedLattice orientedLattice =
-      inputExperimentInfo->sample().getOrientedLattice();
+  OrientedLattice orientedLattice = sample.getOrientedLattice();
 
   // Get the UB matrix from it
   Matrix<double> ub(3, 3, true);
@@ -217,16 +220,18 @@ void PredictPeaks::exec() {
     fillPossibleHKLsUsingPeaksWorkspace(possibleHKLWorkspace, possibleHKLs);
   }
 
-  for (size_t iVec = 0; iVec < gonioVec.size(); ++iVec) {
-    // Final transformation matrix (HKL to Q in lab frame)
-    DblMatrix goniometerMatrix = gonioVec[iVec];
-    DblMatrix orientedUB = goniometerMatrix * ub;
+  setStructureFactorCalculatorFromSample(sample);
 
-    Progress prog(this, 0.0, 1.0, possibleHKLs.size());
-    prog.setNotifyStep(0.01);
+  Progress prog(this, 0.0, 1.0, possibleHKLs.size() * gonioVec.size());
+  prog.setNotifyStep(0.01);
+
+  for (auto goniometerMatrix = gonioVec.begin();
+       goniometerMatrix != gonioVec.end(); ++goniometerMatrix) {
+    // Final transformation matrix (HKL to Q in lab frame)
+    DblMatrix orientedUB = (*goniometerMatrix) * ub;
 
     for (auto hkl = possibleHKLs.begin(); hkl != possibleHKLs.end(); ++hkl) {
-      calculateQAndAddToOutput(*hkl, orientedUB, goniometerMatrix);
+      calculateQAndAddToOutput(*hkl, orientedUB, *goniometerMatrix);
       prog.report();
     }
 
@@ -242,7 +247,6 @@ void PredictPeaks::exec() {
 void PredictPeaks::setInstrumentFromInputWorkspace(
     const ExperimentInfo_sptr &inWS) {
   // Check that there is an input workspace that has a sample.
-
   if (!inWS || !inWS->getInstrument())
     throw std::invalid_argument("Did not specify a valid InputWorkspace with a "
                                 "full instrument.");
@@ -260,7 +264,6 @@ void PredictPeaks::setRunNumberFromInputWorkspace(
 }
 
 void PredictPeaks::checkBeamDirection() const {
-
   V3D samplePos = m_inst->getSample()->getPos();
 
   // L1 path and direction
@@ -304,8 +307,6 @@ void PredictPeaks::fillPossibleHKLsUsingGenerator(
                  << " is from " << hklMin << " to " << hklMin * -1.0
                  << ", a total of " << gen.size() << " possible HKL's\n";
 
-  g_log.notice() << "Other: " << gen.size() << std::endl;
-
   if (gen.size() > 10000000000)
     throw std::invalid_argument("More than 10 billion HKLs to search. Is "
                                 "your d_min value too small?");
@@ -335,6 +336,17 @@ void PredictPeaks::fillPossibleHKLsUsingPeaksWorkspace(
 
     possibleHKLs.push_back(hkl);
   } // for each hkl in the workspace
+}
+
+void PredictPeaks::setStructureFactorCalculatorFromSample(
+    const Sample &sample) {
+  if (sample.hasCrystalStructure()) {
+    CrystalStructure crystalStructure = sample.getCrystalStructure();
+    crystalStructure.setCell(sample.getOrientedLattice());
+
+    m_sfCalculator = StructureFactorCalculatorFactory::create<
+        StructureFactorCalculatorSummation>(crystalStructure);
+  }
 }
 
 /**
@@ -370,6 +382,10 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
     // Save the run number found before.
     p.setRunNumber(m_runNumber);
     p.setHKL(hkl);
+
+    if (m_sfCalculator) {
+      p.setIntensity(m_sfCalculator->getFSquared(hkl));
+    }
 
     // Add it to the workspace
     m_pw->addPeak(p);

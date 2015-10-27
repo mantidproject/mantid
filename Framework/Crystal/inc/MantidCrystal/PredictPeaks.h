@@ -6,6 +6,7 @@
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
 #include "MantidKernel/System.h"
 #include <MantidGeometry/Crystal/OrientedLattice.h>
+#include <MantidGeometry/Crystal/StructureFactorCalculator.h>
 #include "MantidKernel/Matrix.h"
 
 namespace Mantid {
@@ -38,14 +39,15 @@ public:
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Crystal"; }
 
-  void checkBeamDirection() const;
-  void setInstrumentFromInputWorkspace(const API::ExperimentInfo_sptr &inWS);
-  void setRunNumberFromInputWorkspace(const API::ExperimentInfo_sptr &inWS);
 private:
   /// Initialise the properties
   void init();
   /// Run the algorithm
   void exec();
+
+  void checkBeamDirection() const;
+  void setInstrumentFromInputWorkspace(const API::ExperimentInfo_sptr &inWS);
+  void setRunNumberFromInputWorkspace(const API::ExperimentInfo_sptr &inWS);
 
   void fillPossibleHKLsUsingGenerator(
       const Kernel::DblMatrix &ub,
@@ -55,6 +57,8 @@ private:
   void fillPossibleHKLsUsingPeaksWorkspace(
       const DataObjects::PeaksWorkspace_sptr &possibleHKLWorkspace,
       std::vector<Kernel::V3D> &possibleHKLs) const;
+
+  void setStructureFactorCalculatorFromSample(const API::Sample &sample);
 
   void calculateQAndAddToOutput(const Kernel::V3D &hkl,
                                 const Kernel::DblMatrix &orientedUB,
@@ -70,6 +74,8 @@ private:
   Geometry::Instrument_const_sptr m_inst;
   /// Output peaks workspace
   Mantid::DataObjects::PeaksWorkspace_sptr m_pw;
+
+  Geometry::StructureFactorCalculator_sptr m_sfCalculator;
 };
 
 } // namespace Mantid
