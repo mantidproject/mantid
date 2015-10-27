@@ -18,8 +18,10 @@ using namespace API;
 DECLARE_FUNCTION(DeltaFunction)
 
 DeltaFunction::DeltaFunction() {
-  declareParameter("Height", 1.0);
-  declareParameter("Centre", 0.0);
+  declareParameter("Height", 1.0,
+                   "Scaling factor to be applied to the resolution.");
+  declareParameter("Centre", 0.0,
+                   "Shift along the x-axis to be applied to the resolution.");
 }
 
 void DeltaFunction::function1D(double *out, const double *xValues,
