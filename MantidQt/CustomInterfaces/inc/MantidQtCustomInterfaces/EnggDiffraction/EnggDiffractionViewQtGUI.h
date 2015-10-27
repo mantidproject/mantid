@@ -99,6 +99,8 @@ public:
                          const std::vector<double> &difc,
                          const std::vector<double> &tzero);
 
+  virtual void enableTabs(bool enable);
+
   virtual void enableCalibrateAndFocusActions(bool enable);
 
   virtual std::string focusingDir() const;
@@ -152,6 +154,8 @@ private slots:
 
   // slots of the general part of the interface
   void instrumentChanged(int idx);
+
+  void RBNumberChanged();
 
   // slots of the focus part of the interface
   void plotRepChanged(int idx);
