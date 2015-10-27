@@ -33,7 +33,7 @@ PointGroup_sptr PointGroupFactoryImpl::createPointGroupFromSpaceGroup(
     PointGroup_sptr pointGroup = createPointGroup(pointGroupSymbol);
 
     // If the crystal system is trigonal, we need to do more.
-    if (pointGroup->crystalSystem() == PointGroup::Trigonal) {
+    if (pointGroup->crystalSystem() == PointGroup::CrystalSystem::Trigonal) {
       throw std::invalid_argument(
           "Trigonal space groups need to be processed differently.");
     }

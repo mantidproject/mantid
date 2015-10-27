@@ -131,31 +131,31 @@ PointGroup::CrystalSystem PointGroup::getCrystalSystemFromGroup() const {
   }
 
   if (symbolMap["3"].size() == 4) {
-    return Cubic;
+    return CrystalSystem::Cubic;
   }
 
   if (symbolMap["6"].size() == 1 || symbolMap["-6"].size() == 1) {
-    return Hexagonal;
+    return CrystalSystem::Hexagonal;
   }
 
   if (symbolMap["3"].size() == 1) {
-    return Trigonal;
+    return CrystalSystem::Trigonal;
   }
 
   if (symbolMap["4"].size() == 1 || symbolMap["-4"].size() == 1) {
-    return Tetragonal;
+    return CrystalSystem::Tetragonal;
   }
 
   if (symbolMap["2"].size() == 3 ||
       (symbolMap["2"].size() == 1 && symbolMap["m"].size() == 2)) {
-    return Orthorhombic;
+    return CrystalSystem::Orthorhombic;
   }
 
   if (symbolMap["2"].size() == 1 || symbolMap["m"].size() == 1) {
-    return Monoclinic;
+    return CrystalSystem::Monoclinic;
   }
 
-  return Triclinic;
+  return CrystalSystem::Triclinic;
 }
 
 /** @return a vector with all possible PointGroup objects */
@@ -186,17 +186,17 @@ PointGroupCrystalSystemMap getPointGroupsByCrystalSystem() {
 std::string
 getCrystalSystemAsString(const PointGroup::CrystalSystem &crystalSystem) {
   switch (crystalSystem) {
-  case PointGroup::Cubic:
+  case PointGroup::CrystalSystem::Cubic:
     return "Cubic";
-  case PointGroup::Tetragonal:
+  case PointGroup::CrystalSystem::Tetragonal:
     return "Tetragonal";
-  case PointGroup::Hexagonal:
+  case PointGroup::CrystalSystem::Hexagonal:
     return "Hexagonal";
-  case PointGroup::Trigonal:
+  case PointGroup::CrystalSystem::Trigonal:
     return "Trigonal";
-  case PointGroup::Orthorhombic:
+  case PointGroup::CrystalSystem::Orthorhombic:
     return "Orthorhombic";
-  case PointGroup::Monoclinic:
+  case PointGroup::CrystalSystem::Monoclinic:
     return "Monoclinic";
   default:
     return "Triclinic";
@@ -208,19 +208,19 @@ getCrystalSystemFromString(const std::string &crystalSystem) {
   std::string crystalSystemLC = boost::algorithm::to_lower_copy(crystalSystem);
 
   if (crystalSystemLC == "cubic") {
-    return PointGroup::Cubic;
+    return PointGroup::CrystalSystem::Cubic;
   } else if (crystalSystemLC == "tetragonal") {
-    return PointGroup::Tetragonal;
+    return PointGroup::CrystalSystem::Tetragonal;
   } else if (crystalSystemLC == "hexagonal") {
-    return PointGroup::Hexagonal;
+    return PointGroup::CrystalSystem::Hexagonal;
   } else if (crystalSystemLC == "trigonal") {
-    return PointGroup::Trigonal;
+    return PointGroup::CrystalSystem::Trigonal;
   } else if (crystalSystemLC == "orthorhombic") {
-    return PointGroup::Orthorhombic;
+    return PointGroup::CrystalSystem::Orthorhombic;
   } else if (crystalSystemLC == "monoclinic") {
-    return PointGroup::Monoclinic;
+    return PointGroup::CrystalSystem::Monoclinic;
   } else if (crystalSystemLC == "triclinic") {
-    return PointGroup::Triclinic;
+    return PointGroup::CrystalSystem::Triclinic;
   } else {
     throw std::invalid_argument("Not a valid crystal system: '" +
                                 crystalSystem + "'.");

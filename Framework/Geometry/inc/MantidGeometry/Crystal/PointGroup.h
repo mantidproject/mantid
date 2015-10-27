@@ -24,7 +24,7 @@ namespace Geometry {
  */
 class MANTID_GEOMETRY_DLL PointGroup : public Group {
 public:
-  enum CrystalSystem {
+  enum class CrystalSystem {
     Triclinic,
     Monoclinic,
     Orthorhombic,

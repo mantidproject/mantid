@@ -46,13 +46,13 @@ void export_PointGroup() {
       class_<PointGroup, boost::noncopyable>("PointGroup", no_init);
 
   enum_<PointGroup::CrystalSystem>("CrystalSystem")
-      .value("Triclinic", PointGroup::Triclinic)
-      .value("Monoclinic", PointGroup::Monoclinic)
-      .value("Orthorhombic", PointGroup::Orthorhombic)
-      .value("Tetragonal", PointGroup::Tetragonal)
-      .value("Hexagonal", PointGroup::Hexagonal)
-      .value("Trigonal", PointGroup::Trigonal)
-      .value("Cubic", PointGroup::Cubic);
+      .value("Triclinic", PointGroup::CrystalSystem::Triclinic)
+      .value("Monoclinic", PointGroup::CrystalSystem::Monoclinic)
+      .value("Orthorhombic", PointGroup::CrystalSystem::Orthorhombic)
+      .value("Tetragonal", PointGroup::CrystalSystem::Tetragonal)
+      .value("Hexagonal", PointGroup::CrystalSystem::Hexagonal)
+      .value("Trigonal", PointGroup::CrystalSystem::Trigonal)
+      .value("Cubic", PointGroup::CrystalSystem::Cubic);
 
   class_<PointGroup, boost::noncopyable, bases<Group>>("PointGroup", no_init)
       .def("getName", &PointGroup::getName, arg("self"))

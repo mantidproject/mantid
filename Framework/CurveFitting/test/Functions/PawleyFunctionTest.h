@@ -31,66 +31,81 @@ public:
 
     // Cubic, check case insensitivity
     TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("CrystalSystem", "cubic"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Cubic);
+    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::CrystalSystem::Cubic);
     TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("CrystalSystem", "Cubic"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Cubic);
+    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::CrystalSystem::Cubic);
     TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("CrystalSystem", "CUBIC"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Cubic);
+    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::CrystalSystem::Cubic);
 
     // Tetragonal
     TS_ASSERT_THROWS_NOTHING(
         fn.setAttributeValue("CrystalSystem", "tetragonal"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Tetragonal);
+    TS_ASSERT_EQUALS(fn.getCrystalSystem(),
+                     PointGroup::CrystalSystem::Tetragonal);
     TS_ASSERT_THROWS_NOTHING(
         fn.setAttributeValue("CrystalSystem", "Tetragonal"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Tetragonal);
+    TS_ASSERT_EQUALS(fn.getCrystalSystem(),
+                     PointGroup::CrystalSystem::Tetragonal);
     TS_ASSERT_THROWS_NOTHING(
         fn.setAttributeValue("CrystalSystem", "TETRAGONAL"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Tetragonal);
+    TS_ASSERT_EQUALS(fn.getCrystalSystem(),
+                     PointGroup::CrystalSystem::Tetragonal);
 
     // Hexagonal
     TS_ASSERT_THROWS_NOTHING(
         fn.setAttributeValue("CrystalSystem", "hexagonal"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Hexagonal);
+    TS_ASSERT_EQUALS(fn.getCrystalSystem(),
+                     PointGroup::CrystalSystem::Hexagonal);
     TS_ASSERT_THROWS_NOTHING(
         fn.setAttributeValue("CrystalSystem", "Hexagonal"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Hexagonal);
+    TS_ASSERT_EQUALS(fn.getCrystalSystem(),
+                     PointGroup::CrystalSystem::Hexagonal);
     TS_ASSERT_THROWS_NOTHING(
         fn.setAttributeValue("CrystalSystem", "HEXAGONAL"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Hexagonal);
+    TS_ASSERT_EQUALS(fn.getCrystalSystem(),
+                     PointGroup::CrystalSystem::Hexagonal);
 
     // Orthorhombic
     TS_ASSERT_THROWS_NOTHING(
         fn.setAttributeValue("CrystalSystem", "orthorhombic"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Orthorhombic);
+    TS_ASSERT_EQUALS(fn.getCrystalSystem(),
+                     PointGroup::CrystalSystem::Orthorhombic);
     TS_ASSERT_THROWS_NOTHING(
         fn.setAttributeValue("CrystalSystem", "Orthorhombic"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Orthorhombic);
+    TS_ASSERT_EQUALS(fn.getCrystalSystem(),
+                     PointGroup::CrystalSystem::Orthorhombic);
     TS_ASSERT_THROWS_NOTHING(
         fn.setAttributeValue("CrystalSystem", "ORTHORHOMBIC"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Orthorhombic);
+    TS_ASSERT_EQUALS(fn.getCrystalSystem(),
+                     PointGroup::CrystalSystem::Orthorhombic);
 
     // Monoclinic
     TS_ASSERT_THROWS_NOTHING(
         fn.setAttributeValue("CrystalSystem", "monoclinic"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Monoclinic);
+    TS_ASSERT_EQUALS(fn.getCrystalSystem(),
+                     PointGroup::CrystalSystem::Monoclinic);
     TS_ASSERT_THROWS_NOTHING(
         fn.setAttributeValue("CrystalSystem", "Monoclinic"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Monoclinic);
+    TS_ASSERT_EQUALS(fn.getCrystalSystem(),
+                     PointGroup::CrystalSystem::Monoclinic);
     TS_ASSERT_THROWS_NOTHING(
         fn.setAttributeValue("CrystalSystem", "MONOCLINIC"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Monoclinic);
+    TS_ASSERT_EQUALS(fn.getCrystalSystem(),
+                     PointGroup::CrystalSystem::Monoclinic);
 
     // Triclinic
     TS_ASSERT_THROWS_NOTHING(
         fn.setAttributeValue("CrystalSystem", "triclinic"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Triclinic);
+    TS_ASSERT_EQUALS(fn.getCrystalSystem(),
+                     PointGroup::CrystalSystem::Triclinic);
     TS_ASSERT_THROWS_NOTHING(
         fn.setAttributeValue("CrystalSystem", "Triclinic"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Triclinic);
+    TS_ASSERT_EQUALS(fn.getCrystalSystem(),
+                     PointGroup::CrystalSystem::Triclinic);
     TS_ASSERT_THROWS_NOTHING(
         fn.setAttributeValue("CrystalSystem", "TRICLINIC"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Triclinic);
+    TS_ASSERT_EQUALS(fn.getCrystalSystem(),
+                     PointGroup::CrystalSystem::Triclinic);
 
     // invalid string
     TS_ASSERT_THROWS(fn.setAttributeValue("CrystalSystem", "invalid"),

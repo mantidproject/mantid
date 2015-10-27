@@ -593,10 +593,10 @@ std::string PoldiFitPeaks2D::getCrystalSystemFromPointGroup(
 
   PointGroup::CrystalSystem crystalSystem = pointGroup->crystalSystem();
 
-  if (crystalSystem == PointGroup::Trigonal) {
+  if (crystalSystem == PointGroup::CrystalSystem::Trigonal) {
     if (pointGroup->getCoordinateSystem() ==
         Group::CoordinateSystem::Hexagonal) {
-      return getCrystalSystemAsString(PointGroup::Hexagonal);
+      return getCrystalSystemAsString(PointGroup::CrystalSystem::Hexagonal);
     }
   }
 

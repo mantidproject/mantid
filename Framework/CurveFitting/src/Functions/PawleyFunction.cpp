@@ -28,7 +28,7 @@ using namespace Kernel;
 
 /// Constructor
 PawleyParameterFunction::PawleyParameterFunction()
-    : ParamFunction(), m_crystalSystem(PointGroup::Triclinic),
+    : ParamFunction(), m_crystalSystem(PointGroup::CrystalSystem::Triclinic),
       m_profileFunctionCenterParameterName() {}
 
 /**
@@ -59,28 +59,28 @@ PointGroup::CrystalSystem PawleyParameterFunction::getCrystalSystem() const {
 /// Returns a UnitCell object constructed from the function's parameters.
 UnitCell PawleyParameterFunction::getUnitCellFromParameters() const {
   switch (m_crystalSystem) {
-  case PointGroup::Cubic: {
+  case PointGroup::CrystalSystem::Cubic: {
     double a = getParameter("a");
     double aErr = getError(0);
     UnitCell uc(a, a, a);
     uc.setError(aErr, aErr, aErr, 0.0, 0.0, 0.0);
     return uc;
   }
-  case PointGroup::Tetragonal: {
+  case PointGroup::CrystalSystem::Tetragonal: {
     double a = getParameter("a");
     double aErr = getError(0);
     UnitCell uc(a, a, getParameter("c"));
     uc.setError(aErr, aErr, getError(1), 0.0, 0.0, 0.0);
     return uc;
   }
-  case PointGroup::Hexagonal: {
+  case PointGroup::CrystalSystem::Hexagonal: {
     double a = getParameter("a");
     double aErr = getError(0);
     UnitCell uc(a, a, getParameter("c"), 90, 90, 120);
     uc.setError(aErr, aErr, getError(1), 0.0, 0.0, 0.0);
     return uc;
   }
-  case PointGroup::Trigonal: {
+  case PointGroup::CrystalSystem::Trigonal: {
     double a = getParameter("a");
     double alpha = getParameter("Alpha");
     double aErr = getError(0);
@@ -89,18 +89,18 @@ UnitCell PawleyParameterFunction::getUnitCellFromParameters() const {
     uc.setError(aErr, aErr, aErr, alphaErr, alphaErr, alphaErr);
     return uc;
   }
-  case PointGroup::Orthorhombic: {
+  case PointGroup::CrystalSystem::Orthorhombic: {
     UnitCell uc(getParameter("a"), getParameter("b"), getParameter("c"));
     uc.setError(getError(0), getError(1), getError(2), 0.0, 0.0, 0.0);
     return uc;
   }
-  case PointGroup::Monoclinic: {
+  case PointGroup::CrystalSystem::Monoclinic: {
     UnitCell uc(getParameter("a"), getParameter("b"), getParameter("c"), 90,
                 getParameter("Beta"), 90);
     uc.setError(getError(0), getError(1), getError(2), 0.0, getError(3), 0.0);
     return uc;
   }
-  case PointGroup::Triclinic: {
+  case PointGroup::CrystalSystem::Triclinic: {
     UnitCell uc(getParameter("a"), getParameter("b"), getParameter("c"),
                 getParameter("Alpha"), getParameter("Beta"),
                 getParameter("Gamma"));
@@ -217,20 +217,20 @@ void PawleyParameterFunction::createCrystalSystemParameters(
 
   clearAllParameters();
   switch (crystalSystem) {
-  case PointGroup::Cubic:
+  case PointGroup::CrystalSystem::Cubic:
     declareParameter("a", 1.0);
     addLengthConstraint("a");
     break;
 
-  case PointGroup::Hexagonal:
-  case PointGroup::Tetragonal:
+  case PointGroup::CrystalSystem::Hexagonal:
+  case PointGroup::CrystalSystem::Tetragonal:
     declareParameter("a", 1.0);
     declareParameter("c", 1.0);
     addLengthConstraint("a");
     addLengthConstraint("c");
     break;
 
-  case PointGroup::Orthorhombic:
+  case PointGroup::CrystalSystem::Orthorhombic:
     declareParameter("a", 1.0);
     declareParameter("b", 1.0);
     declareParameter("c", 1.0);
@@ -239,7 +239,7 @@ void PawleyParameterFunction::createCrystalSystemParameters(
     addLengthConstraint("c");
     break;
 
-  case PointGroup::Monoclinic:
+  case PointGroup::CrystalSystem::Monoclinic:
     declareParameter("a", 1.0);
     declareParameter("b", 1.0);
     declareParameter("c", 1.0);
@@ -251,7 +251,7 @@ void PawleyParameterFunction::createCrystalSystemParameters(
     addAngleConstraint("Beta");
     break;
 
-  case PointGroup::Trigonal:
+  case PointGroup::CrystalSystem::Trigonal:
     declareParameter("a", 1.0);
     declareParameter("Alpha", 90.0);
     addLengthConstraint("a");
