@@ -21,7 +21,7 @@ void filterToExistingSources(std::vector<std::string> &input_data,
                              std::vector<double> &gs,
                              std::vector<double> &efix);
 
-bool dataExists(const std::string &dataName);
+bool dataExists(const std::string &data_name);
 
 void filterToNew(std::vector<std::string> &input_data,
                  std::vector<std::string> &current_data,
@@ -34,8 +34,8 @@ bool appearsInCurrentData(const std::string &input_data,
 std::vector<std::string>
 getHistoricalDataSources(const API::WorkspaceHistory &ws_history);
 
-void insertDataSources(const std::string &dataSources,
-                       std::set<std::string> &historicalDataSources);
+void insertDataSources(const std::string &data_sources,
+                       std::set<std::string> &historical_data_sources);
 
 bool fileExists(const std::string &filename);
 
@@ -78,11 +78,10 @@ private:
   void init();
   void exec();
 
-  Mantid::DataObjects::MDHistoWorkspace_sptr
-  convertWorkspaceToMD(Mantid::API::Workspace_sptr loaded_ws,
-                       std::string emode);
-
-  Mantid::API::Workspace_sptr getLoadedWs(std::string ws_name);
+  Mantid::API::IMDHistoWorkspace_sptr createMDWorkspace(
+      const std::vector<std::string> &data_sources,
+      const std::vector<double> &psi, const std::vector<double> &gl,
+      const std::vector<double> &gs, const std::vector<double> &efix);
 };
 
 } // namespace MDAlgorithms

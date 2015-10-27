@@ -9,7 +9,6 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/HistoryView.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
-#include <vector>
 #include <Poco/File.h>
 #include <boost/algorithm/string.hpp>
 
@@ -41,16 +40,16 @@ void filterToExistingSources(std::vector<std::string> &input_data,
 /*
 Return true if dataName is an existing workspace or file
 */
-bool dataExists(const std::string &dataName) {
+bool dataExists(const std::string &data_name) {
   std::string filepath =
-      Mantid::API::FileFinder::Instance().getFullPath(dataName);
+      Mantid::API::FileFinder::Instance().getFullPath(data_name);
   // Calls to the AnalysisDataService in algorithms like this should
   // ordinarily
   // be avoided, unfortunately we have little choice in this case.
   // If we gave FileFinder an absolute path it just returns it (whether or not
   // the file exists) so we must check the full path returned with
   // fileExists()
-  return (AnalysisDataService::Instance().doesExist(dataName) ||
+  return (AnalysisDataService::Instance().doesExist(data_name) ||
           fileExists(filepath));
 }
 
@@ -82,9 +81,9 @@ void filterToNew(std::vector<std::string> &input_data,
 
 bool appearsInCurrentData(const std::string &data_source,
                           std::vector<std::string> &current_data) {
-  for (auto reverseIt = current_data.rbegin(); reverseIt != current_data.rend();
-       ++reverseIt) {
-    if (data_source == *reverseIt) {
+  for (auto reverse_it = current_data.rbegin(); reverse_it != current_data.rend();
+       ++reverse_it) {
+    if (data_source == *reverse_it) {
       return true;
     }
   }
@@ -98,7 +97,7 @@ to the workspace
 std::vector<std::string>
 getHistoricalDataSources(const WorkspaceHistory &ws_history) {
   // Using a set so we only insert unique names
-  std::set<std::string> historicalDataSources;
+  std::set<std::string> historical_data_sources;
 
   // Get previously added data sources from DataSources property of the original
   // call of CreateMD and any subsequent calls of AccumulateMD
@@ -111,16 +110,16 @@ getHistoricalDataSources(const WorkspaceHistory &ws_history) {
         alg_history->name() == "AccumulateMD") {
       auto props = alg_history->getProperties();
       for (auto propIter = props.begin(); propIter != props.end(); ++propIter) {
-        PropertyHistory_const_sptr propHistory = *propIter;
-        if (propHistory->name() == "DataSources") {
-          insertDataSources(propHistory->value(), historicalDataSources);
+        PropertyHistory_const_sptr prop_history = *propIter;
+        if (prop_history->name() == "DataSources") {
+          insertDataSources(prop_history->value(), historical_data_sources);
         }
       }
     }
   }
 
-  std::vector<std::string> result(historicalDataSources.begin(),
-                                  historicalDataSources.end());
+  std::vector<std::string> result(historical_data_sources.begin(),
+                                  historical_data_sources.end());
   return result;
 }
 
@@ -128,11 +127,11 @@ getHistoricalDataSources(const WorkspaceHistory &ws_history) {
 Split string of data sources from workspace history and insert them into
 complete set of historical data sources
 */
-void insertDataSources(const std::string &dataSources,
-                       std::set<std::string> &historicalDataSources) {
+void insertDataSources(const std::string &data_sources,
+                       std::set<std::string> &historical_data_sources) {
   // Split the property string into a vector of data sources
   std::vector<std::string> data_split;
-  boost::split(data_split, dataSources, boost::is_any_of(","));
+  boost::split(data_split, data_sources, boost::is_any_of(","));
 
   // Trim any whitespace from ends of each data source string
   std::for_each(
@@ -141,7 +140,7 @@ void insertDataSources(const std::string &dataSources,
 
   // Insert each data source into our complete set of historical data sources
   for (auto it = data_split.begin(); it != data_split.end(); ++it) {
-    historicalDataSources.insert(*it);
+    historical_data_sources.insert(*it);
   }
 }
 
@@ -264,30 +263,16 @@ void AccumulateMD::exec() {
   // delete the old one, note this means we don't retain workspace history...
   bool do_clean = this->getProperty("Clean");
   if (do_clean) {
-    Mantid::API::Algorithm_sptr createAlg = createChildAlgorithm("CreateMD");
-
-    createAlg->setProperty("DataSources", input_data);
-    createAlg->setProperty("EFix", efix);
-    createAlg->setPropertyValue("EMode", this->getProperty("EMode"));
-    createAlg->setPropertyValue("Alatt", this->getProperty("Alatt"));
-    createAlg->setPropertyValue("Angdeg", this->getProperty("Angdeg"));
-    createAlg->setPropertyValue("u", this->getProperty("u"));
-    createAlg->setPropertyValue("v", this->getProperty("v"));
-    createAlg->setProperty("Psi", psi);
-    createAlg->setProperty("Gl", gl);
-    createAlg->setProperty("Gs", gs);
-    createAlg->setPropertyValue("OutputWorkspace",
-                                this->getProperty("OutputWorkspace"));
-    createAlg->setPropertyValue("InPlace", this->getProperty("InPlace"));
-    createAlg->executeAsChildAlg();
-
+    IMDHistoWorkspace_sptr out_ws =
+        createMDWorkspace(input_data, psi, gl, gs, efix);
+    this->setProperty("OutputWorkspace", out_ws);
     return; // POSSIBLE EXIT POINT
   }
   this->interruption_point();
 
   // Find what files and workspaces have already been included in the workspace.
-  const WorkspaceHistory wsHistory = input_ws->getHistory();
-  std::vector<std::string> current_data = getHistoricalDataSources(wsHistory);
+  const WorkspaceHistory ws_history = input_ws->getHistory();
+  std::vector<std::string> current_data = getHistoricalDataSources(ws_history);
 
   // If there's no new data, we don't have anything to do
   filterToNew(input_data, current_data, psi, gl, gs, efix);
@@ -298,13 +283,49 @@ void AccumulateMD::exec() {
   }
   this->interruption_point();
 
-  // TODO
   // If we reach here then new data exists to append to the input workspace
   // Use CreateMD with the new data to make a temp workspace
   // Merge the temp workspace with the input workspace using MergeMD
+  IMDHistoWorkspace_sptr tmp_ws =
+      createMDWorkspace(input_data, psi, gl, gs, efix);
+  this->interruption_point();
 
-  // TODO set outputworkspace?
-  // TODO any cleanup to do?
+  std::string workspaceNames = input_ws->getName();
+  workspaceNames.append(",");
+  workspaceNames.append(tmp_ws->getName());
+
+  Algorithm_sptr merge_alg = createChildAlgorithm("MergeMD");
+  merge_alg->setProperty("InputWorkspaces", workspaceNames);
+  merge_alg->executeAsChildAlg();
+  IMDHistoWorkspace_sptr out_ws = merge_alg->getProperty("OutputWorkspace");
+
+  this->setProperty("OutputWorkspace", out_ws);
+}
+
+/*
+ Use the CreateMD algorithm to create an MD workspace
+ */
+IMDHistoWorkspace_sptr AccumulateMD::createMDWorkspace(
+    const std::vector<std::string> &data_sources,
+    const std::vector<double> &psi, const std::vector<double> &gl,
+    const std::vector<double> &gs, const std::vector<double> &efix) {
+
+  Algorithm_sptr create_alg = createChildAlgorithm("CreateMD");
+
+  create_alg->setProperty("DataSources", data_sources);
+  create_alg->setProperty("EFix", efix);
+  create_alg->setPropertyValue("EMode", this->getProperty("EMode"));
+  create_alg->setPropertyValue("Alatt", this->getProperty("Alatt"));
+  create_alg->setPropertyValue("Angdeg", this->getProperty("Angdeg"));
+  create_alg->setPropertyValue("u", this->getProperty("u"));
+  create_alg->setPropertyValue("v", this->getProperty("v"));
+  create_alg->setProperty("Psi", psi);
+  create_alg->setProperty("Gl", gl);
+  create_alg->setProperty("Gs", gs);
+  create_alg->setPropertyValue("InPlace", this->getProperty("InPlace"));
+  create_alg->executeAsChildAlg();
+
+  return create_alg->getProperty("OutputWorkspace");
 }
 
 } // namespace MDAlgorithms
