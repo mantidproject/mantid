@@ -168,6 +168,12 @@ install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_m
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/mantidpython.bat DESTINATION bin )
 
 ###########################################################################
+# Icons for shortcuts
+###########################################################################
+install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/mantid_notebook.ico DESTINATION bin )
+install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/mantid_python.ico DESTINATION bin )
+
+###########################################################################
 # Extra NSIS commands for shortcuts, start menu items etc
 # Three backward slashes are required to escape a character to get the
 # character through to NSIS.
@@ -176,22 +182,22 @@ install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/mantidpy
 set (CPACK_NSIS_CREATE_ICONS_EXTRA "
   CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidPlot.lnk' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\MantidPlot.exe' 0
   
-  CreateShortCut \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidPython.lnk\\\" \\\"$INSTDIR\\\\bin\\\\mantidpython.bat\\\"
+  CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidPython.lnk' '$INSTDIR\\\\bin\\\\mantidpython.bat' '' '$INSTDIR\\\\bin\\\\mantid_python.ico'
   
-  CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidIPythonNotebook.lnk' '$INSTDIR\\\\bin\\\\mantidpython.bat' 'notebook --notebook-dir=%userprofile%'
+  CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidNotebook.lnk' '$INSTDIR\\\\bin\\\\mantidpython.bat' 'notebook --notebook-dir=%userprofile%' '$INSTDIR\\\\bin\\\\mantid_notebook.ico'
 ")
 set (CPACK_NSIS_DELETE_ICONS_EXTRA "
   Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\MantidPlot.lnk\\\"
   Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\MantidPython.lnk\\\"
-  Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\MantidIPythonNotebook.lnk\\\"
+  Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\MantidNotebook.lnk\\\"
 ")
 # The blank lines seem to be required or it doesn't create the shortcut
 set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
   CreateShortCut '$DESKTOP\\\\MantidPlot.lnk' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\MantidPlot.exe' 0
 
-  CreateShortCut \\\"$DESKTOP\\\\MantidPython.lnk\\\" \\\"$INSTDIR\\\\bin\\\\mantidpython.bat\\\"
+  CreateShortCut '$DESKTOP\\\\MantidPython.lnk' '$INSTDIR\\\\bin\\\\mantidpython.bat' '' '$INSTDIR\\\\bin\\\\mantid_python.ico'
   
-  CreateShortCut '$DESKTOP\\\\MantidIPythonNotebook.lnk' '$INSTDIR\\\\bin\\\\mantidpython.bat' 'notebook --notebook-dir=%userprofile%'
+  CreateShortCut '$DESKTOP\\\\MantidNotebook.lnk' '$INSTDIR\\\\bin\\\\mantidpython.bat' 'notebook --notebook-dir=%userprofile%' '$INSTDIR\\\\bin\\\\mantid_notebook.ico'
   
   CreateDirectory \\\"$INSTDIR\\\\logs\\\"
 
@@ -201,7 +207,7 @@ set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
 set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
   Delete \\\"$DESKTOP\\\\MantidPlot.lnk\\\"
   Delete \\\"$DESKTOP\\\\MantidPython.lnk\\\"
-  Delete \\\"$DESKTOP\\\\MantidIPythonNotebook.lnk\\\"
+  Delete \\\"$DESKTOP\\\\MantidNotebook.lnk\\\"
   RMDir \\\"$INSTDIR\\\\logs\\\"
   RMDir \\\"$INSTDIR\\\\docs\\\"
 ")
