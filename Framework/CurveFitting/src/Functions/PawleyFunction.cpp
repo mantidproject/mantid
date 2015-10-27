@@ -61,32 +61,52 @@ UnitCell PawleyParameterFunction::getUnitCellFromParameters() const {
   switch (m_crystalSystem) {
   case PointGroup::Cubic: {
     double a = getParameter("a");
-    return UnitCell(a, a, a);
+    double aErr = getError(0);
+    UnitCell uc(a, a, a);
+    uc.setError(aErr, aErr, aErr, 0.0, 0.0, 0.0);
+    return uc;
   }
   case PointGroup::Tetragonal: {
     double a = getParameter("a");
-    return UnitCell(a, a, getParameter("c"));
+    double aErr = getError(0);
+    UnitCell uc(a, a, getParameter("c"));
+    uc.setError(aErr, aErr, getError(1), 0.0, 0.0, 0.0);
+    return uc;
   }
   case PointGroup::Hexagonal: {
     double a = getParameter("a");
-    return UnitCell(a, a, getParameter("c"), 90, 90, 120);
+    double aErr = getError(0);
+    UnitCell uc(a, a, getParameter("c"), 90, 90, 120);
+    uc.setError(aErr, aErr, getError(1), 0.0, 0.0, 0.0);
+    return uc;
   }
   case PointGroup::Trigonal: {
     double a = getParameter("a");
     double alpha = getParameter("Alpha");
-    return UnitCell(a, a, a, alpha, alpha, alpha);
+    double aErr = getError(0);
+    double alphaErr = getError(1);
+    UnitCell uc(a, a, a, alpha, alpha, alpha);
+    uc.setError(aErr, aErr, aErr, alphaErr, alphaErr, alphaErr);
+    return uc;
   }
   case PointGroup::Orthorhombic: {
-    return UnitCell(getParameter("a"), getParameter("b"), getParameter("c"));
+    UnitCell uc(getParameter("a"), getParameter("b"), getParameter("c"));
+    uc.setError(getError(0), getError(1), getError(2), 0.0, 0.0, 0.0);
+    return uc;
   }
   case PointGroup::Monoclinic: {
-    return UnitCell(getParameter("a"), getParameter("b"), getParameter("c"), 90,
-                    getParameter("Beta"), 90);
+    UnitCell uc(getParameter("a"), getParameter("b"), getParameter("c"), 90,
+                getParameter("Beta"), 90);
+    uc.setError(getError(0), getError(1), getError(2), 0.0, getError(3), 0.0);
+    return uc;
   }
   case PointGroup::Triclinic: {
-    return UnitCell(getParameter("a"), getParameter("b"), getParameter("c"),
-                    getParameter("Alpha"), getParameter("Beta"),
-                    getParameter("Gamma"));
+    UnitCell uc(getParameter("a"), getParameter("b"), getParameter("c"),
+                getParameter("Alpha"), getParameter("Beta"),
+                getParameter("Gamma"));
+    uc.setError(getError(0), getError(1), getError(2), getError(3), getError(4),
+                getError(5));
+    return uc;
   }
   }
 
@@ -100,29 +120,34 @@ void PawleyParameterFunction::setParametersFromUnitCell(const UnitCell &cell) {
 
   try {
     setParameter("b", cell.b());
-  } catch (std::invalid_argument) {
+  }
+  catch (std::invalid_argument) {
     // do nothing.
   }
 
   try {
     setParameter("c", cell.c());
-  } catch (std::invalid_argument) {
+  }
+  catch (std::invalid_argument) {
     // do nothing
   }
 
   try {
     setParameter("Alpha", cell.alpha());
-  } catch (std::invalid_argument) {
+  }
+  catch (std::invalid_argument) {
     // do nothing.
   }
   try {
     setParameter("Beta", cell.beta());
-  } catch (std::invalid_argument) {
+  }
+  catch (std::invalid_argument) {
     // do nothing.
   }
   try {
     setParameter("Gamma", cell.gamma());
-  } catch (std::invalid_argument) {
+  }
+  catch (std::invalid_argument) {
     // do nothing.
   }
 }
@@ -183,8 +208,8 @@ void PawleyParameterFunction::setProfileFunction(
  *
  * @param crystalSystem :: Crystal system, case insensitive.
  */
-void PawleyParameterFunction::setCrystalSystem(
-    const std::string &crystalSystem) {
+void
+PawleyParameterFunction::setCrystalSystem(const std::string &crystalSystem) {
   m_crystalSystem = Geometry::getCrystalSystemFromString(crystalSystem);
 
   createCrystalSystemParameters(m_crystalSystem);
@@ -260,8 +285,8 @@ void PawleyParameterFunction::createCrystalSystemParameters(
 }
 
 /// Adds a default constraint so that cell edge lengths can not be less than 0.
-void PawleyParameterFunction::addLengthConstraint(
-    const std::string &parameterName) {
+void
+PawleyParameterFunction::addLengthConstraint(const std::string &parameterName) {
   BoundaryConstraint *cellEdgeConstraint =
       new BoundaryConstraint(this, parameterName, 0.0, true);
   cellEdgeConstraint->setPenaltyFactor(1e12);
@@ -269,8 +294,8 @@ void PawleyParameterFunction::addLengthConstraint(
 }
 
 /// Adds a default constraint so cell angles are in the range 0 to 180.
-void PawleyParameterFunction::addAngleConstraint(
-    const std::string &parameterName) {
+void
+PawleyParameterFunction::addAngleConstraint(const std::string &parameterName) {
   BoundaryConstraint *cellAngleConstraint =
       new BoundaryConstraint(this, parameterName, 0.0, 180.0, true);
   cellAngleConstraint->setPenaltyFactor(1e12);
@@ -351,7 +376,8 @@ void PawleyFunction::setProfileFunction(const std::string &profileFunction) {
     newFunction->setCentre(oldFunction->centre());
     try {
       newFunction->setFwhm(oldFunction->fwhm());
-    } catch (...) {
+    }
+    catch (...) {
       // do nothing.
     }
     newFunction->setHeight(oldFunction->height());
@@ -452,13 +478,15 @@ void PawleyFunction::function(const FunctionDomain &domain,
       try {
         size_t offset = calculateFunctionValues(peak, domain1D, localValues);
         values.addToCalculated(offset, localValues);
-      } catch (std::invalid_argument) {
+      }
+      catch (std::invalid_argument) {
         // do nothing
       }
     }
 
     setPeakPositions(centreName, 0.0, cell);
-  } catch (std::bad_cast) {
+  }
+  catch (std::bad_cast) {
     // do nothing
   }
 }
@@ -496,7 +524,8 @@ void PawleyFunction::addPeak(const Kernel::V3D &hkl, double fwhm,
 
   try {
     peak->setFwhm(fwhm);
-  } catch (...) {
+  }
+  catch (...) {
     // do nothing.
   }
 

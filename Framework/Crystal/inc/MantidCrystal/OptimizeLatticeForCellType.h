@@ -6,6 +6,8 @@
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/ILatticeFunction.h"
+#include "MantidGeometry/Crystal/UnitCell.h"
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
@@ -60,9 +62,9 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Crystal"; }
 
-  std::vector<double> outParams(std::string cell_type, int icol,
-                                API::ITableWorkspace_sptr ParamTable);
-  std::string inParams(std::string cell_type, std::vector<double> &lat);
+  API::ILatticeFunction_sptr
+  getLatticeFunction(const std::string &cellType,
+                     const Geometry::UnitCell &cell) const;
 
 private:
   // Overridden Algorithm methods

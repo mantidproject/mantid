@@ -92,7 +92,7 @@ void OptimizeLatticeForCellType::exec() {
   runWS.push_back(ws);
 
   if (perRun) {
-    std::vector<std::pair<std::string, bool>> criteria;
+    std::vector<std::pair<std::string, bool> > criteria;
     // Sort by run number
     criteria.push_back(std::pair<std::string, bool>("runnumber", true));
     ws->sort(criteria);
@@ -124,17 +124,20 @@ void OptimizeLatticeForCellType::exec() {
     std::vector<double> lat(6);
     IndexingUtils::GetLatticeParameters(UB, lat);
 
-    std::string fun_str = inParams(cell_type, lat);
+    API::ILatticeFunction_sptr latticeFunction =
+        getLatticeFunction(cell_type, peakWS->sample().getOrientedLattice());
 
     IAlgorithm_sptr fit_alg;
     try {
       fit_alg = createChildAlgorithm("Fit", -1, -1, false);
-    } catch (Exception::NotFoundError &) {
+    }
+    catch (Exception::NotFoundError &) {
       g_log.error("Can't locate Fit algorithm");
       throw;
     }
 
-    fit_alg->setPropertyValue("Function", fun_str);
+    fit_alg->setProperty(
+        "Function", boost::static_pointer_cast<IFunction>(latticeFunction));
     fit_alg->setProperty("Ties", "ZeroShift=0.0");
     fit_alg->setProperty("InputWorkspace", peakWS);
     fit_alg->setProperty("CostFunction", "Unweighted least squares");
@@ -143,37 +146,39 @@ void OptimizeLatticeForCellType::exec() {
     fit_alg->executeAsChildAlg();
 
     double chisq = fit_alg->getProperty("OutputChi2overDoF");
-    ITableWorkspace_sptr ParamTable = fit_alg->getProperty("OutputParameters");
-    std::vector<double> Params = outParams(cell_type, 1, ParamTable);
-
-    std::vector<double> sigabc = outParams(cell_type, 2, ParamTable);
+    Geometry::UnitCell refinedCell = latticeFunction->getUnitCell();
+    /*std::vector<double> sigabc;
+    for (size_t i = 0; i < latticeFunction->nParams(); i++)
+      sigabc.push_back(latticeFunction->getError(i));*/
 
     IAlgorithm_sptr ub_alg;
     try {
       ub_alg =
           createChildAlgorithm("FindUBUsingLatticeParameters", -1, -1, false);
-    } catch (Exception::NotFoundError &) {
+    }
+    catch (Exception::NotFoundError &) {
       g_log.error("Can't locate FindUBUsingLatticeParameters algorithm");
       throw;
     }
 
     ub_alg->setProperty("PeaksWorkspace", peakWS);
-    ub_alg->setProperty("a", Params[0]);
-    ub_alg->setProperty("b", Params[1]);
-    ub_alg->setProperty("c", Params[2]);
-    ub_alg->setProperty("alpha", Params[3]);
-    ub_alg->setProperty("beta", Params[4]);
-    ub_alg->setProperty("gamma", Params[5]);
+    ub_alg->setProperty("a", refinedCell.a());
+    ub_alg->setProperty("b", refinedCell.b());
+    ub_alg->setProperty("c", refinedCell.c());
+    ub_alg->setProperty("alpha", refinedCell.alpha());
+    ub_alg->setProperty("beta", refinedCell.beta());
+    ub_alg->setProperty("gamma", refinedCell.gamma());
     ub_alg->setProperty("NumInitial", 15);
     ub_alg->setProperty("Tolerance", tolerance);
     ub_alg->executeAsChildAlg();
     DblMatrix UBnew = peakWS->mutableSample().getOrientedLattice().getUB();
     OrientedLattice o_lattice;
     o_lattice.setUB(UBnew);
-    o_lattice.set(Params[0], Params[1], Params[2], Params[3], Params[4],
-                  Params[5]);
-    o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
-                       sigabc[5]);
+    o_lattice.set(refinedCell.a(), refinedCell.b(), refinedCell.c(),
+                  refinedCell.alpha(), refinedCell.beta(), refinedCell.gamma());
+    o_lattice.setError(refinedCell.errora(), refinedCell.errorb(),
+                       refinedCell.errorc(), refinedCell.erroralpha(),
+                       refinedCell.errorbeta(), refinedCell.errorgamma());
 
     // Show the modified lattice parameters
     g_log.notice() << runWS[i_run]->getName() << "  " << o_lattice << "\n";
@@ -202,9 +207,9 @@ void OptimizeLatticeForCellType::exec() {
                                                runWS[i_run]->getName() +
                                                ".integrate");
       savePks_alg->executeAsChildAlg();
-      g_log.notice() << "See output file: "
-                     << outputdir + "ls" + runWS[i_run]->getName() +
-                            ".integrate"
+      g_log.notice() << "See output file: " << outputdir + "ls" +
+                                                   runWS[i_run]->getName() +
+                                                   ".integrate"
                      << "\n";
       // Save UB
       Mantid::API::IAlgorithm_sptr saveUB_alg =
@@ -222,128 +227,31 @@ void OptimizeLatticeForCellType::exec() {
 }
 //-----------------------------------------------------------------------------------------
 /**
-  @param  cell_type    cell type to optimize
-  @param  lat          optimized cell parameters
-  @return  fun_str     string of parameters for fitting
+  @param  cell_type                cell type to optimize
+  @param  cell                          unit cell
+  @return  latticeFunction        Function for fitting
 */
-std::string OptimizeLatticeForCellType::inParams(std::string cell_type,
-                                                 std::vector<double> &lat) {
+API::ILatticeFunction_sptr
+OptimizeLatticeForCellType::getLatticeFunction(const std::string &cellType,
+                                               const UnitCell &cell) const {
   std::ostringstream fun_str;
   // TODO remove next 3 lines when PointGroup is changed
-  if (cell_type == "Rhombohedral")
+  if (cellType == "Rhombohedral")
     fun_str << "name=LatticeFunction,CrystalSystem=Trigonal";
   else
-    fun_str << "name=LatticeFunction,CrystalSystem=" << cell_type;
+    fun_str << "name=LatticeFunction,CrystalSystem=" << cellType;
 
-  std::vector<double> lattice_parameters;
-  lattice_parameters.assign(6, 0);
-  if (cell_type == ReducedCell::CUBIC()) {
-    fun_str << ",a=" << lat[0];
-  } else if (cell_type == ReducedCell::TETRAGONAL()) {
-    fun_str << ",a=" << lat[0];
-    fun_str << ",c=" << lat[2];
-  } else if (cell_type == ReducedCell::ORTHORHOMBIC()) {
-    fun_str << ",a=" << lat[0];
-    fun_str << ",b=" << lat[1];
-    fun_str << ",c=" << lat[2];
-  } else if (cell_type == ReducedCell::RHOMBOHEDRAL()) {
-    fun_str << ",a=" << lat[0];
-    fun_str << ",Alpha=" << lat[3];
-  } else if (cell_type == ReducedCell::HEXAGONAL()) {
-    fun_str << ",a=" << lat[0];
-    fun_str << ",c=" << lat[2];
-  } else if (cell_type == ReducedCell::MONOCLINIC()) {
-    fun_str << ",a=" << lat[0];
-    fun_str << ",b=" << lat[1];
-    fun_str << ",c=" << lat[2];
-    fun_str << ",Beta=" << lat[4];
-  } else if (cell_type == ReducedCell::TRICLINIC()) {
-    fun_str << ",a=" << lat[0];
-    fun_str << ",b=" << lat[1];
-    fun_str << ",c=" << lat[2];
-    fun_str << ",Alpha=" << lat[3];
-    fun_str << ",Beta=" << lat[4];
-    fun_str << ",Gamma=" << lat[5];
+  API::IFunction_sptr rawFunction =
+      API::FunctionFactory::Instance().createInitialized(fun_str.str());
+  API::ILatticeFunction_sptr latticeFunction =
+      boost::dynamic_pointer_cast<API::ILatticeFunction>(rawFunction);
+  if (latticeFunction) {
+    latticeFunction->setUnitCell(cell);
   }
 
-  return fun_str.str();
+  return latticeFunction;
 }
-//-----------------------------------------------------------------------------------------
-/**
-  @param  cell_type           cell type to optimize
-  @param  icol                1 for parameter or 2 for error
-  @param  ParamTable          table of parameters and errors
-  @return  vector of lattice parameters or errors
-*/
-std::vector<double>
-OptimizeLatticeForCellType::outParams(std::string cell_type, int icol,
-                                      ITableWorkspace_sptr ParamTable) {
-  std::vector<double> lattice_parameters;
-  lattice_parameters.assign(6, 0);
 
-  if (cell_type == ReducedCell::CUBIC()) {
-    lattice_parameters[0] = ParamTable->Double(0, icol);
-    lattice_parameters[1] = ParamTable->Double(0, icol);
-    lattice_parameters[2] = ParamTable->Double(0, icol);
-    if (icol == 2)
-      return lattice_parameters;
-    lattice_parameters[3] = 90;
-    lattice_parameters[4] = 90;
-    lattice_parameters[5] = 90;
-  } else if (cell_type == ReducedCell::TETRAGONAL()) {
-    lattice_parameters[0] = ParamTable->Double(0, icol);
-    lattice_parameters[1] = ParamTable->Double(0, icol);
-    lattice_parameters[2] = ParamTable->Double(1, icol);
-    if (icol == 2)
-      return lattice_parameters;
-    lattice_parameters[3] = 90;
-    lattice_parameters[4] = 90;
-    lattice_parameters[5] = 90;
-  } else if (cell_type == ReducedCell::ORTHORHOMBIC()) {
-    lattice_parameters[0] = ParamTable->Double(0, icol);
-    lattice_parameters[1] = ParamTable->Double(1, icol);
-    lattice_parameters[2] = ParamTable->Double(2, icol);
-    if (icol == 2)
-      return lattice_parameters;
-    lattice_parameters[3] = 90;
-    lattice_parameters[4] = 90;
-    lattice_parameters[5] = 90;
-  } else if (cell_type == "Rhombohedral") {
-    lattice_parameters[0] = ParamTable->Double(0, icol);
-    lattice_parameters[1] = ParamTable->Double(0, icol);
-    lattice_parameters[2] = ParamTable->Double(0, icol);
-    lattice_parameters[3] = ParamTable->Double(1, icol);
-    lattice_parameters[4] = ParamTable->Double(1, icol);
-    lattice_parameters[5] = ParamTable->Double(1, icol);
-  } else if (cell_type == ReducedCell::HEXAGONAL()) {
-    lattice_parameters[0] = ParamTable->Double(0, icol);
-    lattice_parameters[1] = ParamTable->Double(0, icol);
-    lattice_parameters[2] = ParamTable->Double(1, icol);
-    if (icol == 2)
-      return lattice_parameters;
-    lattice_parameters[3] = 90;
-    lattice_parameters[4] = 90;
-    lattice_parameters[5] = 120;
-  } else if (cell_type == ReducedCell::MONOCLINIC()) {
-    lattice_parameters[0] = ParamTable->Double(0, icol);
-    lattice_parameters[1] = ParamTable->Double(1, icol);
-    lattice_parameters[2] = ParamTable->Double(2, icol);
-    lattice_parameters[4] = ParamTable->Double(3, icol);
-    if (icol == 2)
-      return lattice_parameters;
-    lattice_parameters[3] = 90;
-    lattice_parameters[5] = 90;
-  } else if (cell_type == ReducedCell::TRICLINIC()) {
-    lattice_parameters[0] = ParamTable->Double(0, icol);
-    lattice_parameters[1] = ParamTable->Double(1, icol);
-    lattice_parameters[2] = ParamTable->Double(2, icol);
-    lattice_parameters[3] = ParamTable->Double(3, icol);
-    lattice_parameters[4] = ParamTable->Double(4, icol);
-    lattice_parameters[5] = ParamTable->Double(5, icol);
-  }
-
-  return lattice_parameters;
-}
 //-----------------------------------------------------------------------------------------
 /**
   @param  ws           Name of workspace containing peaks
