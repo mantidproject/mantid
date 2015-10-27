@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
@@ -69,7 +70,8 @@ namespace Algorithms {
  * File change history is stored at: <https://github.com/mantidproject/mantid>
  * Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport CheckWorkspacesMatch : public API::Algorithm {
+class DLLExport CheckWorkspacesMatch : public API::Algorithm,
+                                       public API::DeprecatedAlgorithm {
 public:
   CheckWorkspacesMatch();
   virtual ~CheckWorkspacesMatch();

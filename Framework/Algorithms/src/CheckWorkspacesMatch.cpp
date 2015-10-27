@@ -24,7 +24,11 @@ namespace Algorithms {
 DECLARE_ALGORITHM(CheckWorkspacesMatch)
 
 /// Constructor
-CheckWorkspacesMatch::CheckWorkspacesMatch() : API::Algorithm() {}
+CheckWorkspacesMatch::CheckWorkspacesMatch()
+    : API::Algorithm(), API::DeprecatedAlgorithm() {
+  useAlgorithm("CompareWorkspaces");
+  deprecatedDate("2015-10-27");
+}
 
 /// Virtual destructor
 CheckWorkspacesMatch::~CheckWorkspacesMatch() {}
