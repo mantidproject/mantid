@@ -232,7 +232,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         m = 1.675e-27  # kg
         constant = 4e-4 * math.pi * m * source_detector_distance / h * math.sin(theta)
         q_range = [qMin, qStep, constant / TOFrange[0] * 1.2]
-        
+
         q_min_from_data = constant / TOFrange[1]
         q_max_from_data = constant / TOFrange[0]
         AddSampleLog(Workspace=q_workspace, LogName='q_min', LogText=str(q_min_from_data), LogType='Number')
@@ -321,7 +321,6 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                 AnalysisDataService.remove(ws)
 
         self.setProperty('OutputWorkspace', mtd[name_output_ws])
-
 
     def calculate_scattering_angle(self, ws_event_data):
         """
@@ -566,6 +565,5 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         else:
             logger.error("Could not find scaling factor for %s" % str(workspace))
         return workspace
-
 
 AlgorithmFactory.subscribe(LiquidsReflectometryReduction)

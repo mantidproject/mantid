@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 import math
 import time
 import mantid
@@ -30,27 +30,27 @@ class LRReflectivityOutput(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty("OutputBinning", [0.005, -0.01, 1.0], direction=Direction.Input))
         self.declareProperty("DQConstant", 0.0004, "Constant factor for the resolution dQ = dQ0 + Q dQ/Q")
         self.declareProperty("DQSlope", 0.025, "Slope for the resolution dQ = dQ0 + Q dQ/Q")
-        self.declareProperty(FileProperty('OutputFilename', '', action=FileAction.Save, extensions = ["txt"]),
+        self.declareProperty(FileProperty('OutputFilename', '', action=FileAction.Save, extensions=["txt"]),
                              doc='Name of the reflectivity file output')
         self.declareProperty("MetaData", "", "Additional meta-data to add to the top of the output file")
-        
+
     def PyExec(self):
         # Check that all the input workspaces are scaled
         workspace_list = self.getProperty("ReducedWorkspaces").value
         if self.check_scaling(workspace_list) == False:
             logger.error("Absolute normalization not available!")
-        
+
         # Put the workspaces together
         self.average_points_for_single_q(workspace_list)
-        
+
     def check_scaling(self, workspace_list):
         """
             Check that all the workspaces are on an absolute scale.
             @param workspace_list: list of workspaces to put together
         """
-        #TODO: Store scaling factors and clocking correction in header
+        # TODO: Store scaling factors and clocking correction in header
         scaling_cutoff = self.getProperty("ScalingWavelengthCutoff")
-        
+
         normalization_available = True
         for ws in workspace_list:
             if mtd[ws].getRun().hasProperty("isSFfound"):
@@ -58,7 +58,7 @@ class LRReflectivityOutput(PythonAlgorithm):
                     try:
                         wl = mtd[ws].getRun().getProperty("LambdaRequest").value[0]
                         # Scaling factor above the wavelength cutoff are assumed to be 1
-                        normalization_available = wl>scaling_cutoff
+                        normalization_available = wl > scaling_cutoff
                         logger.notice("%s: no normalization for wl=%s" % (ws, str(wl)))
                     except:
                         logger.notice("%s: could not find LambdaRequest" % ws)  
@@ -69,8 +69,7 @@ class LRReflectivityOutput(PythonAlgorithm):
                 logger.notice("%s: no normalization info" % ws)
                 normalization_available = False
         return normalization_available
-        
-        
+
     def average_points_for_single_q(self, scaled_ws_list):
         """
             Take the point with the smalled error when multiple points are
@@ -88,7 +87,7 @@ class LRReflectivityOutput(PythonAlgorithm):
         # Convert each histo to histograms and rebin to final binning
         for ws in scaled_ws_list:
             new_name = "%s_histo" % ws
-            #ConvertToHistogram(InputWorkspace=ws, OutputWorkspace=new_name)
+            # ConvertToHistogram(InputWorkspace=ws, OutputWorkspace=new_name)
             mtd[ws].setDistribution(True)
             Rebin(InputWorkspace=ws, Params=binning_parameters,
                   OutputWorkspace=new_name)
@@ -113,9 +112,9 @@ class LRReflectivityOutput(PythonAlgorithm):
             header_info += "# %-9s %-9s %-14.6g %-14.6g %-12.6g %-12.6s %-12.6s %-12.6s %-12.6s %-12.6s\n" % value_list
 
         # Take the first rebinned histo as our output
-        data_x = mtd[scaled_ws_list[0]+'_histo'].dataX(0)
-        data_y = mtd[scaled_ws_list[0]+'_histo'].dataY(0)
-        data_e = mtd[scaled_ws_list[0]+'_histo'].dataE(0)
+        data_x = mtd[scaled_ws_list[0] + '_histo'].dataX(0)
+        data_y = mtd[scaled_ws_list[0] + '_histo'].dataY(0)
+        data_e = mtd[scaled_ws_list[0] + '_histo'].dataE(0)
 
         # Skip first point and last one
         points_to_skip = 1
@@ -123,9 +122,9 @@ class LRReflectivityOutput(PythonAlgorithm):
             skipped_points = 0
             distribution_started = False
 
-            data_y_i = mtd[scaled_ws_list[i]+'_histo'].dataY(0)
-            data_e_i = mtd[scaled_ws_list[i]+'_histo'].dataE(0)
-            for j in range(len(data_y_i)-1):
+            data_y_i = mtd[scaled_ws_list[i] + '_histo'].dataY(0)
+            data_e_i = mtd[scaled_ws_list[i] + '_histo'].dataE(0)
+            for j in range(len(data_y_i) - 1):
                 # Check whether we need to skip this point
                 if data_y_i[j] > 0:
                     distribution_started = True
@@ -134,23 +133,23 @@ class LRReflectivityOutput(PythonAlgorithm):
                         continue
 
                 # If this is the last point of the distribution, skip it
-                if distribution_started and data_y_i[j+1]==0 and data_e_i[j+1]==0:
+                if distribution_started and data_y_i[j + 1] == 0 and data_e_i[j + 1] == 0:
                     break
-                    
-                if data_y_i[j]>0:
-                    if data_y[j]>0:
-                        data_y[j] = 0.5*(data_y[j]+data_y_i[j])
-                        data_e[j] = 0.5*math.sqrt(data_e[j]*data_e[j]+data_e_i[j]*data_e_i[j])
+
+                if data_y_i[j] > 0:
+                    if data_y[j] > 0:
+                        data_y[j] = 0.5 * (data_y[j] + data_y_i[j])
+                        data_e[j] = 0.5 * math.sqrt(data_e[j] * data_e[j] + data_e_i[j] * data_e_i[j])
                     else:
                         data_y[j] = data_y_i[j]
                         data_e[j] = data_e_i[j]
 
         # Skip the first point
         for i in range(len(data_y)):
-            if data_y[i]>0:
+            if data_y[i] > 0:
                 data_y[i] = 0.0
                 break
-        
+
         # Scale to unity
         scale_to_unity = self.getProperty("ScaleToUnity").value
         specular_cutoff = self.getProperty("SpecularCutoff").value
@@ -159,7 +158,7 @@ class LRReflectivityOutput(PythonAlgorithm):
             y_values = []
             e_values = []
             for i in range(len(data_y)):
-                if data_y[i]>0 and data_x[i]<specular_cutoff:
+                if data_y[i] > 0 and data_x[i] < specular_cutoff:
                     y_values.append(data_y[i])
                     e_values.append(data_e[i])
 
@@ -167,26 +166,26 @@ class LRReflectivityOutput(PythonAlgorithm):
             total = 0.0
             weights = 0.0
             for i in range(len(y_values)):
-                total += e_values[i]*y_values[i]
+                total += e_values[i] * y_values[i]
                 weights += e_values[i]
-            scaling_factor = total/weights
-            
-        Scale(InputWorkspace=scaled_ws_list[0]+'_histo', OutputWorkspace=scaled_ws_list[0]+'_scaled',
-              Factor=1.0/scaling_factor, Operation='Multiply')
-        
+            scaling_factor = total / weights
+
+        Scale(InputWorkspace=scaled_ws_list[0] + '_histo', OutputWorkspace=scaled_ws_list[0] + '_scaled',
+              Factor=1.0 / scaling_factor, Operation='Multiply')
+
         # Save the data
         file_path = self.getProperty("OutputFilename").value
         dq0 = self.getProperty("DQConstant").value
         dq_over_q = self.getProperty("DQSlope").value
         meta_data = self.getProperty("MetaData").value
 
-        data_x = mtd[scaled_ws_list[0]+'_scaled'].dataX(0)
-        data_y = mtd[scaled_ws_list[0]+'_scaled'].dataY(0)
-        data_e = mtd[scaled_ws_list[0]+'_scaled'].dataE(0)
+        data_x = mtd[scaled_ws_list[0] + '_scaled'].dataX(0)
+        data_y = mtd[scaled_ws_list[0] + '_scaled'].dataY(0)
+        data_e = mtd[scaled_ws_list[0] + '_scaled'].dataE(0)
 
-        start_time = mtd[scaled_ws_list[0]+'_scaled'].getRun().getProperty("start_time").value
-        experiment = mtd[scaled_ws_list[0]+'_scaled'].getRun().getProperty("experiment_identifier").value
-        run_number = mtd[scaled_ws_list[0]+'_scaled'].getRun().getProperty("run_number").value
+        start_time = mtd[scaled_ws_list[0] + '_scaled'].getRun().getProperty("start_time").value
+        experiment = mtd[scaled_ws_list[0] + '_scaled'].getRun().getProperty("experiment_identifier").value
+        run_number = mtd[scaled_ws_list[0] + '_scaled'].getRun().getProperty("run_number").value
 
         content = '# Experiment %s Run %s\n' % (experiment, run_number)
         content += '# Run start time: %s\n' % start_time
@@ -195,7 +194,7 @@ class LRReflectivityOutput(PythonAlgorithm):
         content += header_info
 
         try:
-            if len(meta_data.strip())>0:
+            if len(meta_data.strip()) > 0:
                 content += '#\n'
                 lines = meta_data.strip().split('\n')
                 for l in lines:
@@ -207,10 +206,10 @@ class LRReflectivityOutput(PythonAlgorithm):
         content += '# dQ0[1/Angstrom] = %g\n' % dq0
         content += '# dQ/Q = %g\n' % dq_over_q
         content += '# Q[1/Angstrom] R delta_R Precision\n'
-    
+
         for i in range(len(data_x)):
             # Skip point where the error is much larger than the reflectivity value
-            if (data_y[i]>data_e[i]/100.0):
+            if (data_y[i] > data_e[i] / 100.0):
                 content += str(data_x[i])
                 content += ' ' + str(data_y[i])
                 content += ' ' + str(data_e[i])
@@ -218,14 +217,14 @@ class LRReflectivityOutput(PythonAlgorithm):
                 content += ' ' + _precision
                 content += '\n'
 
-        f=open(file_path,'w')
+        f = open(file_path, 'w')
         f.write(content)
         f.close()
 
         for ws in scaled_ws_list:
-            if AnalysisDataService.doesExist(ws+'_histo'):
-                AnalysisDataService.remove(ws+'_histo')
-            if AnalysisDataService.doesExist(ws+'_scaled'):
-                AnalysisDataService.remove(ws+'_scaled')
-                
+            if AnalysisDataService.doesExist(ws + '_histo'):
+                AnalysisDataService.remove(ws + '_histo')
+            if AnalysisDataService.doesExist(ws + '_scaled'):
+                AnalysisDataService.remove(ws + '_scaled')
+
 AlgorithmFactory.subscribe(LRReflectivityOutput)
