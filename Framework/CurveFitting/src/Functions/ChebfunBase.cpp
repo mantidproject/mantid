@@ -426,7 +426,8 @@ ChebfunBase::bestFitTempl(double start, double end, FunctionType f,
       }
 
       if (m != n + 1) {
-        auto newBase = ChebfunBase_sptr(new ChebfunBase(m - 1, start, end, tolerance));
+        auto newBase =
+            ChebfunBase_sptr(new ChebfunBase(m - 1, start, end, tolerance));
         a.resize(m);
         p = newBase->calcP(a);
         return newBase;
