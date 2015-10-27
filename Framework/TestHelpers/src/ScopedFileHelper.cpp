@@ -4,6 +4,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidTestHelpers/ScopedFileHelper.h"
+#include <iostream>
 
 namespace ScopedFileHelper {
 /**
