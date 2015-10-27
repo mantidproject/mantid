@@ -61,9 +61,9 @@ Output:
 
 .. testoutput:: ExFilter
 
-    The number of events within the relative Filter: 4058
-    The number of events within the Aboslute Filter: 1322
-    Compared to the number in the unfiltered workspace: 8000
+    The number of events within the relative Filter: 950
+    The number of events within the Aboslute Filter: 315
+    Compared to the number in the unfiltered workspace: 1900
 
 
 .. categories::
