@@ -4,6 +4,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <sstream>
 
 namespace Mantid {
