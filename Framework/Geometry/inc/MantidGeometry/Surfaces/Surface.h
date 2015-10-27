@@ -4,6 +4,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "BaseVisit.h"
 #include <string>
+#include <memory>
 
 class TopoDS_Shape;
 

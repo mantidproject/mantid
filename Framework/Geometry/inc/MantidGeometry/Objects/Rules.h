@@ -2,6 +2,7 @@
 #define Rules_h
 
 #include <map>
+#include <memory>
 
 class TopoDS_Shape;
 
