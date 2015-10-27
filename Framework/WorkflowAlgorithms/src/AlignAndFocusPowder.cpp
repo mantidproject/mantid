@@ -494,11 +494,6 @@ void AlignAndFocusPowder::exec() {
     // turn off the low res stuff
     m_processLowResTOF = false;
 
-    g_log.information() << "running CropWorkspace(MinWavelength=" << minwl;
-    if (!isEmpty(maxwl))
-      g_log.information() << ", MaxWavelength=" << maxwl;
-    g_log.information() << ")\n";
-
     EventWorkspace_sptr ews =
         boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
     if (ews)
@@ -508,6 +503,11 @@ void AlignAndFocusPowder::exec() {
 
     m_outputW = convertUnits(m_outputW, "Wavelength");
 
+    g_log.information() << "running CropWorkspace(WavelengthMin=" << minwl;
+    if (!isEmpty(maxwl))
+      g_log.information() << ", WavelengthMax=" << maxwl;
+    g_log.information() << ")\n";
+
     API::IAlgorithm_sptr removeAlg = createChildAlgorithm("CropWorkspace");
     removeAlg->setProperty("InputWorkspace", m_outputW);
     removeAlg->setProperty("OutputWorkspace", m_outputW);
@@ -515,6 +515,9 @@ void AlignAndFocusPowder::exec() {
     removeAlg->setProperty("XMax", maxwl);
     removeAlg->executeAsChildAlg();
     m_outputW = removeAlg->getProperty("OutputWorkspace");
+    if (ews)
+      g_log.information() << "Number of events = " << ews->getNumberEvents()
+                          << ". ";
   } else if (DIFCref > 0.) {
     g_log.information() << "running RemoveLowResTof(RefDIFC=" << DIFCref
                         << ",K=3.22)\n";
@@ -729,7 +732,7 @@ AlignAndFocusPowder::diffractionFocus(API::MatrixWorkspace_sptr ws) {
 API::MatrixWorkspace_sptr
 AlignAndFocusPowder::convertUnits(API::MatrixWorkspace_sptr matrixws,
                                   std::string target) {
-  g_log.information() << "running ConvertUnits(Target=dSpacing)\n";
+  g_log.information() << "running ConvertUnits(Target=" << target << ")\n";
 
   API::IAlgorithm_sptr convert2Alg = createChildAlgorithm("ConvertUnits");
   convert2Alg->setProperty("InputWorkspace", matrixws);
