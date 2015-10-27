@@ -81,9 +81,9 @@ void filterToNew(std::vector<std::string> &input_data,
 
 bool appearsInCurrentData(const std::string &data_source,
                           std::vector<std::string> &current_data) {
-  for (auto reverse_it = current_data.rbegin(); reverse_it != current_data.rend();
-       ++reverse_it) {
-    if (data_source == *reverse_it) {
+  for (auto reverse_iter = current_data.rbegin();
+       reverse_iter != current_data.rend(); ++reverse_iter) {
+    if (data_source == *reverse_iter) {
       return true;
     }
   }
@@ -109,8 +109,9 @@ getHistoricalDataSources(const WorkspaceHistory &ws_history) {
     if (alg_history->name() == "CreateMD" ||
         alg_history->name() == "AccumulateMD") {
       auto props = alg_history->getProperties();
-      for (auto propIter = props.begin(); propIter != props.end(); ++propIter) {
-        PropertyHistory_const_sptr prop_history = *propIter;
+      for (auto prop_iter = props.begin(); prop_iter != props.end();
+           ++prop_iter) {
+        PropertyHistory_const_sptr prop_history = *prop_iter;
         if (prop_history->name() == "DataSources") {
           insertDataSources(prop_history->value(), historical_data_sources);
         }
@@ -183,12 +184,12 @@ const std::string AccumulateMD::summary() const {
  Initialize the algorithm's properties.
  */
 void AccumulateMD::init() {
-  declareProperty(new WorkspaceProperty<API::IMDHistoWorkspace>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
+                                                      Direction::Input),
                   "An input MDHistoWorkspace to append data to.");
 
-  declareProperty(new WorkspaceProperty<API::IMDHistoWorkspace>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace", "",
+                                                      Direction::Output),
                   "MDHistoWorkspace with new data appended.");
 
   declareProperty(
@@ -198,7 +199,7 @@ void AccumulateMD::init() {
   declareProperty(new ArrayProperty<double>("EFix", Direction::Input),
                   "datasource energy values in meV");
 
-  declareProperty("Emode", "", Direction::Input);
+  declareProperty("Emode", "Direct", Direction::Input);
 
   declareProperty(new ArrayProperty<double>("Alatt", Direction::Input),
                   "Lattice parameters");
@@ -237,7 +238,7 @@ void AccumulateMD::init() {
  */
 void AccumulateMD::exec() {
 
-  const IMDHistoWorkspace_sptr input_ws = this->getProperty("InputWorkspace");
+  IMDWorkspace_sptr input_ws = this->getProperty("InputWorkspace");
   std::vector<std::string> input_data = this->getProperty("DataSources");
 
   std::vector<double> psi = this->getProperty("Psi");
@@ -263,8 +264,7 @@ void AccumulateMD::exec() {
   // delete the old one, note this means we don't retain workspace history...
   bool do_clean = this->getProperty("Clean");
   if (do_clean) {
-    IMDHistoWorkspace_sptr out_ws =
-        createMDWorkspace(input_data, psi, gl, gs, efix);
+    IMDWorkspace_sptr out_ws = createMDWorkspace(input_data, psi, gl, gs, efix);
     this->setProperty("OutputWorkspace", out_ws);
     return; // POSSIBLE EXIT POINT
   }
@@ -286,8 +286,7 @@ void AccumulateMD::exec() {
   // If we reach here then new data exists to append to the input workspace
   // Use CreateMD with the new data to make a temp workspace
   // Merge the temp workspace with the input workspace using MergeMD
-  IMDHistoWorkspace_sptr tmp_ws =
-      createMDWorkspace(input_data, psi, gl, gs, efix);
+  IMDWorkspace_sptr tmp_ws = createMDWorkspace(input_data, psi, gl, gs, efix);
   this->interruption_point();
 
   std::string workspaceNames = input_ws->getName();
@@ -297,7 +296,7 @@ void AccumulateMD::exec() {
   Algorithm_sptr merge_alg = createChildAlgorithm("MergeMD");
   merge_alg->setProperty("InputWorkspaces", workspaceNames);
   merge_alg->executeAsChildAlg();
-  IMDHistoWorkspace_sptr out_ws = merge_alg->getProperty("OutputWorkspace");
+  IMDWorkspace_sptr out_ws = merge_alg->getProperty("OutputWorkspace");
 
   this->setProperty("OutputWorkspace", out_ws);
 }
@@ -305,7 +304,7 @@ void AccumulateMD::exec() {
 /*
  Use the CreateMD algorithm to create an MD workspace
  */
-IMDHistoWorkspace_sptr AccumulateMD::createMDWorkspace(
+IMDWorkspace_sptr AccumulateMD::createMDWorkspace(
     const std::vector<std::string> &data_sources,
     const std::vector<double> &psi, const std::vector<double> &gl,
     const std::vector<double> &gs, const std::vector<double> &efix) {

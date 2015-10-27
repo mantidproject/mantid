@@ -78,7 +78,7 @@ private:
   void init();
   void exec();
 
-  Mantid::API::IMDHistoWorkspace_sptr createMDWorkspace(
+  Mantid::API::IMDWorkspace_sptr createMDWorkspace(
       const std::vector<std::string> &data_sources,
       const std::vector<double> &psi, const std::vector<double> &gl,
       const std::vector<double> &gs, const std::vector<double> &efix);
