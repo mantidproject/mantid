@@ -89,7 +89,7 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
       const Measurement &measurement = group->second[i];
       if (subIdMap.find(measurement.subId()) != subIdMap.end()) {
         // We already have that subid.
-        const int rowIndex = subIdMap[measurement.subId()];
+        const size_t rowIndex = subIdMap[measurement.subId()];
         std::string currentRuns = output[rowIndex][ReflTableSchema::RUNS];
         output[rowIndex][ReflTableSchema::RUNS] =
             currentRuns + "+" + measurement.run();
