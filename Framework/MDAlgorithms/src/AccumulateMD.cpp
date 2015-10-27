@@ -11,6 +11,7 @@
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include <Poco/File.h>
 #include <boost/algorithm/string.hpp>
+#include "MantidAPI/IMDEventWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -43,8 +44,7 @@ Return true if dataName is an existing workspace or file
 bool dataExists(const std::string &data_name) {
   std::string filepath =
       Mantid::API::FileFinder::Instance().getFullPath(data_name);
-  // Calls to the AnalysisDataService in algorithms like this should
-  // ordinarily
+  // Calls to the ADS in algorithms like this should ordinarily
   // be avoided, unfortunately we have little choice in this case.
   // If we gave FileFinder an absolute path it just returns it (whether or not
   // the file exists) so we must check the full path returned with
@@ -147,7 +147,8 @@ void insertDataSources(const std::string &data_sources,
   }
 }
 
-void padParameterVector(std::vector<double> &param_vector, unsigned long grow_to_size) {
+void padParameterVector(std::vector<double> &param_vector,
+                        unsigned long grow_to_size) {
   if (param_vector.size() == 0) {
     param_vector.resize(grow_to_size, 0.0);
   } else if (param_vector.size() == 1) {
@@ -186,12 +187,12 @@ const std::string AccumulateMD::summary() const {
  Initialize the algorithm's properties.
  */
 void AccumulateMD::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
-                                                      Direction::Input),
+  declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
+                                                           Direction::Input),
                   "An input MDHistoWorkspace to append data to.");
 
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace", "",
-                                                      Direction::Output),
+  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+                      "OutputWorkspace", "", Direction::Output),
                   "MDHistoWorkspace with new data appended.");
 
   declareProperty(
@@ -240,7 +241,7 @@ void AccumulateMD::init() {
  */
 void AccumulateMD::exec() {
 
-  IMDWorkspace_sptr input_ws = this->getProperty("InputWorkspace");
+  IMDEventWorkspace_sptr input_ws = this->getProperty("InputWorkspace");
   std::vector<std::string> input_data = this->getProperty("DataSources");
 
   std::vector<double> psi = this->getProperty("Psi");
@@ -269,6 +270,8 @@ void AccumulateMD::exec() {
   if (do_clean) {
     IMDWorkspace_sptr out_ws = createMDWorkspace(input_data, psi, gl, gs, efix);
     this->setProperty("OutputWorkspace", out_ws);
+    g_log.notice() << this->name() << " succesfully created a clean workspace"
+                   << std::endl;
     return; // POSSIBLE EXIT POINT
   }
   this->interruption_point();
@@ -280,8 +283,9 @@ void AccumulateMD::exec() {
   // If there's no new data, we don't have anything to do
   filterToNew(input_data, current_data, psi, gl, gs, efix);
   if (input_data.empty()) {
-    g_log.information() << "No new data to append to workspace in "
-                        << this->name() << std::endl;
+    g_log.notice() << "No new data to append to workspace in " << this->name()
+                   << std::endl;
+    this->setProperty("OutputWorkspace", input_ws);
     return; // POSSIBLE EXIT POINT
   }
   this->interruption_point();
@@ -292,16 +296,26 @@ void AccumulateMD::exec() {
   IMDWorkspace_sptr tmp_ws = createMDWorkspace(input_data, psi, gl, gs, efix);
   this->interruption_point();
 
-  std::string workspaceNames = input_ws->getName();
-  workspaceNames.append(",");
-  workspaceNames.append(tmp_ws->getName());
+  std::string temp_ws_name = "TEMP_WORKSPACE_ACCUMULATEMD";
+  // Currently have to us ADS here as list of workspaces can only be passed as a
+  // string of names
+  AnalysisDataService::Instance().add(temp_ws_name, tmp_ws);
+  std::string ws_names_to_merge = input_ws->getName();
+  ws_names_to_merge.append(",");
+  ws_names_to_merge.append(temp_ws_name);
 
   Algorithm_sptr merge_alg = createChildAlgorithm("MergeMD");
-  merge_alg->setProperty("InputWorkspaces", workspaceNames);
+  merge_alg->setProperty("InputWorkspaces", ws_names_to_merge);
   merge_alg->executeAsChildAlg();
-  IMDWorkspace_sptr out_ws = merge_alg->getProperty("OutputWorkspace");
+
+  API::IMDEventWorkspace_sptr out_ws =
+      merge_alg->getProperty("OutputWorkspace");
 
   this->setProperty("OutputWorkspace", out_ws);
+  g_log.notice() << this->name() << " successfully appended data" << std::endl;
+
+  // Clean up temporary workspace
+  AnalysisDataService::Instance().remove(temp_ws_name);
 }
 
 /*
