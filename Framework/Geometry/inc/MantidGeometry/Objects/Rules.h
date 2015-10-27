@@ -230,8 +230,8 @@ be calculated
 class MANTID_GEOMETRY_DLL SurfPoint : public Rule {
 private:
   std::unique_ptr<Surface> key; ///< Actual Surface Base Object
-  int keyN;     ///< Key Number (identifer)
-  int sign;     ///< +/- in Object unit
+  int keyN;                     ///< Key Number (identifer)
+  int sign;                     ///< +/- in Object unit
 public:
   SurfPoint();
   SurfPoint(const SurfPoint &);

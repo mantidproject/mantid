@@ -739,8 +739,7 @@ SurfPoint::~SurfPoint()
 /**
   Destructor
 */
-{
-}
+{}
 
 void SurfPoint::setLeaf(Rule *nR, const int)
 /**
