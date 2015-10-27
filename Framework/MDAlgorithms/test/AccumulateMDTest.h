@@ -28,6 +28,24 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
   }
 
+  void test_pad_parameter_vector_empty() {
+    std::vector<double> test_param_vector;
+    unsigned long grow_to = 8;
+    Mantid::MDAlgorithms::padParameterVector(test_param_vector, grow_to);
+
+    TS_ASSERT_EQUALS(test_param_vector.size(), 8);
+    TS_ASSERT_EQUALS(test_param_vector[4], 0.0);
+  }
+
+  void test_pad_parameter_vector_values() {
+    std::vector<double> test_param_vector(1, 3.7);
+    unsigned long grow_to = 8;
+    Mantid::MDAlgorithms::padParameterVector(test_param_vector, grow_to);
+
+    TS_ASSERT_EQUALS(test_param_vector.size(), 8);
+    TS_ASSERT_EQUALS(test_param_vector[4], 3.7);
+  }
+
   void test_filter_to_existing_sources_file_nonexist() {
     // Create vector of data_sources to filter
     std::vector<std::string> data_sources;

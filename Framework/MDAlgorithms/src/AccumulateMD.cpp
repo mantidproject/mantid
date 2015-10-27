@@ -147,11 +147,11 @@ void insertDataSources(const std::string &data_sources,
   }
 }
 
-void padParameterVector(std::vector<double> &param_vector) {
+void padParameterVector(std::vector<double> &param_vector, unsigned long grow_to_size) {
   if (param_vector.size() == 0) {
-    std::fill(param_vector.begin(), param_vector.end(), 0.0);
+    param_vector.resize(grow_to_size, 0.0);
   } else if (param_vector.size() == 1) {
-    std::fill(param_vector.begin(), param_vector.end(), param_vector[0]);
+    param_vector.resize(grow_to_size, param_vector[0]);
   }
 }
 
@@ -244,13 +244,13 @@ void AccumulateMD::exec() {
   std::vector<std::string> input_data = this->getProperty("DataSources");
 
   std::vector<double> psi = this->getProperty("Psi");
-  padParameterVector(psi);
+  padParameterVector(psi, input_data.size());
   std::vector<double> gl = this->getProperty("Gl");
-  padParameterVector(gl);
+  padParameterVector(gl, input_data.size());
   std::vector<double> gs = this->getProperty("Gs");
-  padParameterVector(gs);
+  padParameterVector(gs, input_data.size());
   std::vector<double> efix = this->getProperty("EFix");
-  padParameterVector(efix);
+  padParameterVector(efix, input_data.size());
 
   filterToExistingSources(input_data, psi, gl, gs, efix);
 
@@ -258,6 +258,7 @@ void AccumulateMD::exec() {
   if (input_data.empty()) {
     g_log.warning() << "No data found matching input in " << this->name()
                     << std::endl;
+    this->setProperty("OutputWorkspace", input_ws);
     return; // POSSIBLE EXIT POINT
   }
   this->interruption_point();
@@ -315,15 +316,15 @@ IMDWorkspace_sptr AccumulateMD::createMDWorkspace(
 
   create_alg->setProperty("DataSources", data_sources);
   create_alg->setProperty("EFix", efix);
-  create_alg->setPropertyValue("EMode", this->getProperty("EMode"));
-  create_alg->setPropertyValue("Alatt", this->getProperty("Alatt"));
-  create_alg->setPropertyValue("Angdeg", this->getProperty("Angdeg"));
-  create_alg->setPropertyValue("u", this->getProperty("u"));
-  create_alg->setPropertyValue("v", this->getProperty("v"));
+  create_alg->setPropertyValue("EMode", this->getPropertyValue("EMode"));
+  create_alg->setPropertyValue("Alatt", this->getPropertyValue("Alatt"));
+  create_alg->setPropertyValue("Angdeg", this->getPropertyValue("Angdeg"));
+  create_alg->setPropertyValue("u", this->getPropertyValue("u"));
+  create_alg->setPropertyValue("v", this->getPropertyValue("v"));
   create_alg->setProperty("Psi", psi);
   create_alg->setProperty("Gl", gl);
   create_alg->setProperty("Gs", gs);
-  create_alg->setPropertyValue("InPlace", this->getProperty("InPlace"));
+  create_alg->setPropertyValue("InPlace", this->getPropertyValue("InPlace"));
   create_alg->executeAsChildAlg();
 
   return create_alg->getProperty("OutputWorkspace");

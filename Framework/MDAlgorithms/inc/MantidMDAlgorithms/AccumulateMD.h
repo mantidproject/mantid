@@ -39,7 +39,7 @@ void insertDataSources(const std::string &data_sources,
 
 bool fileExists(const std::string &filename);
 
-void padParameterVector(std::vector<double> &param_vector);
+void padParameterVector(std::vector<double> &param_vector, unsigned long grow_to_size);
 
 /** AccumulateMD : Algorithm for appending new data to a MDHistoWorkspace
 
