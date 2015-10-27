@@ -228,7 +228,7 @@ be calculated
 
 class MANTID_GEOMETRY_DLL SurfPoint : public Rule {
 private:
-  Surface *key; ///< Actual Surface Base Object
+  std::unique_ptr<Surface> key; ///< Actual Surface Base Object
   int keyN;     ///< Key Number (identifer)
   int sign;     ///< +/- in Object unit
 public:
@@ -250,14 +250,14 @@ public:
   int type() const { return 0; } ///< Effective name
 
   void setKeyN(const int Ky); ///< set keyNumber
-  void setKey(Surface *);
+  void setKey(std::unique_ptr<Surface> key);
   bool isValid(const Kernel::V3D &) const;
   bool isValid(const std::map<int, int> &) const;
   int getSign() const { return sign; } ///< Get Sign
   int getKeyN() const { return keyN; } ///< Get Key
   int simplify();
 
-  Surface *getKey() const { return key; } ///< Get Surface Ptr
+  Surface *getKey() const { return key.get(); } ///< Get Surface Ptr
   std::string display() const;
   std::string displayAddress() const;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,

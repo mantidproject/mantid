@@ -140,13 +140,13 @@ private:
     SurfPoint *sR1, *sR2;
     sR1 = new SurfPoint();
     sR2 = new SurfPoint();
-    Sphere *sP = new Sphere();
+    auto sP = std::unique_ptr<Surface>(new Sphere());
     sP->setSurface("s 2.0 0.0 0.0 2");
-    sR1->setKey(sP); // Sphere
+    sR1->setKey(std::move(sP)); // Sphere
     sR1->setKeyN(-10);
-    Cylinder *cP = new Cylinder();
+    auto cP = std::unique_ptr<Surface>(new Cylinder());
     cP->setSurface("cy 1.0");
-    sR2->setKey(cP); // cappedcylinder
+    sR2->setKey(std::move(cP)); // cappedcylinder
     sR2->setKeyN(-11);
     Union *uR1;
     uR1 = new Union(sR1, sR2);

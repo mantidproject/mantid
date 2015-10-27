@@ -80,13 +80,13 @@ private:
     // A Node
     SurfPoint *A, *B, *C;
     A = new SurfPoint();
-    A->setKey(new Plane());
+    A->setKey(std::unique_ptr<Surface>(new Plane()));
     A->setKeyN(10);
     B = new SurfPoint();
-    B->setKey(new Sphere());
+    B->setKey(std::unique_ptr<Surface>(new Sphere()));
     B->setKeyN(11);
     C = new SurfPoint();
-    C->setKey(new Cylinder());
+    C->setKey(std::unique_ptr<Surface>(new Cylinder()));
     C->setKeyN(12);
 
     Union *Left;
@@ -104,13 +104,13 @@ private:
     // A Node
     SurfPoint *A, *B, *C;
     A = new SurfPoint();
-    A->setKey(new Plane());
+    A->setKey(std::unique_ptr<Surface>(new Plane()));
     A->setKeyN(10);
     B = new SurfPoint();
-    B->setKey(new Sphere());
+    B->setKey(std::unique_ptr<Surface>(new Sphere()));
     B->setKeyN(11);
     C = new SurfPoint();
-    C->setKey(new Cylinder());
+    C->setKey(std::unique_ptr<Surface>(new Cylinder()));
     C->setKeyN(12);
     Intersection *Root;
     Root = new Intersection();
@@ -130,13 +130,13 @@ private:
   Rule *createAMixedTree() { // A B : C A
     SurfPoint *A, *B, *C;
     A = new SurfPoint();
-    A->setKey(new Plane());
+    A->setKey(std::unique_ptr<Surface>(new Plane()));
     A->setKeyN(10);
     B = new SurfPoint();
-    B->setKey(new Sphere());
+    B->setKey(std::unique_ptr<Surface>(new Sphere()));
     B->setKeyN(11);
     C = new SurfPoint();
-    C->setKey(new Cylinder());
+    C->setKey(std::unique_ptr<Surface>(new Cylinder()));
     C->setKeyN(12);
     Union *Root;
     Root = new Union();

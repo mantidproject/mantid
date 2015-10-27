@@ -697,14 +697,14 @@ TopoDS_Shape Union::analyze() {
 //---------------------------------------------------------------
 
 SurfPoint::SurfPoint()
-    : Rule(), key(NULL), keyN(0), sign(1)
+    : Rule(), key(), keyN(0), sign(1)
 /**
   Constructor with null key/number
 */
 {}
 
 SurfPoint::SurfPoint(const SurfPoint &A)
-    : Rule(), key(A.key->clone().release()), keyN(A.keyN), sign(A.sign)
+    : Rule(), key(A.key->clone()), keyN(A.keyN), sign(A.sign)
 /**
   Copy constructor
   @param A :: SurfPoint to copy
@@ -728,8 +728,7 @@ SurfPoint &SurfPoint::operator=(const SurfPoint &A)
 */
 {
   if (&A != this) {
-    delete key;
-    key = A.key->clone().release();
+    key = A.key->clone();
     keyN = A.keyN;
     sign = A.sign;
   }
@@ -741,7 +740,6 @@ SurfPoint::~SurfPoint()
   Destructor
 */
 {
-  delete key;
 }
 
 void SurfPoint::setLeaf(Rule *nR, const int)
@@ -806,15 +804,13 @@ void SurfPoint::setKeyN(const int Ky)
   return;
 }
 
-void SurfPoint::setKey(Surface *Spoint)
+void SurfPoint::setKey(std::unique_ptr<Surface> Spoint)
 /**
   Sets the key pointer. The class takes ownership.
   @param Spoint :: new key values
 */
 {
-  if (key != Spoint)
-    delete key;
-  key = Spoint;
+  key = std::move(Spoint);
   return;
 }
 
