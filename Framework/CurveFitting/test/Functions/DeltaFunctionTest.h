@@ -155,7 +155,6 @@ public:
 
     double hh = h * sqrt(b / (a + b));
     double bb = a + b;
-    double dlt = 0;
     for (size_t i = 10; i < x.size() - 10; ++i) {
       auto xx = x[i];
       auto xxx = xx - shift;
@@ -205,7 +204,6 @@ public:
 
     double hh = h * sqrt(b / (a + b));
     double bb = a + b;
-    double dlt = 0;
     for (size_t i = 10; i < x.size() - 10; ++i) {
       auto xx = x[i];
       auto xx1 = xx - shift1;
