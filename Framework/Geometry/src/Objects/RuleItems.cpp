@@ -704,7 +704,7 @@ SurfPoint::SurfPoint()
 {}
 
 SurfPoint::SurfPoint(const SurfPoint &A)
-    : Rule(), key(A.key->clone()), keyN(A.keyN), sign(A.sign)
+    : Rule(), key(A.key->clone().release()), keyN(A.keyN), sign(A.sign)
 /**
   Copy constructor
   @param A :: SurfPoint to copy
@@ -729,7 +729,7 @@ SurfPoint &SurfPoint::operator=(const SurfPoint &A)
 {
   if (&A != this) {
     delete key;
-    key = A.key->clone();
+    key = A.key->clone().release();
     keyN = A.keyN;
     sign = A.sign;
   }

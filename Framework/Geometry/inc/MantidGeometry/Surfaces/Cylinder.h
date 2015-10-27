@@ -63,7 +63,7 @@ public:
 
   Cylinder();
   Cylinder(const Cylinder &);
-  Cylinder *clone() const;
+  std::unique_ptr<Surface> clone() const;
   Cylinder &operator=(const Cylinder &);
   ~Cylinder();
 

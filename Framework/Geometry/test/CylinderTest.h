@@ -47,9 +47,8 @@ public:
     Cylinder A;
     A.setSurface("c/x 0.5 0.5 1.0");
     TS_ASSERT_EQUALS(extractString(A), "-1  c/x 0.5 0.5 1\n");
-    Cylinder *B = A.clone();
+    auto B = A.clone();
     TS_ASSERT_EQUALS(extractString(*B), extractString(A));
-    delete B;
   }
 
   void testAssignment() {

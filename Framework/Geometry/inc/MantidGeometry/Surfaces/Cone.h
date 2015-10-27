@@ -55,7 +55,7 @@ public:
   virtual std::string className() const { return "Cone"; }
   Cone();
   Cone(const Cone &);
-  Cone *clone() const;
+  std::unique_ptr<Surface> clone() const;
   Cone &operator=(const Cone &);
   int operator==(const Cone &) const;
   ~Cone();

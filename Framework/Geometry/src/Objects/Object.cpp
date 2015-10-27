@@ -284,7 +284,7 @@ int Object::populate(const std::map<int, std::unique_ptr<Surface>> &Smap) {
         std::map<int, std::unique_ptr<Surface>>::const_iterator mf =
             Smap.find(KV->getKeyN());
         if (mf != Smap.end()) {
-          KV->setKey(mf->second->clone());
+          KV->setKey(mf->second->clone().release());
           Rcount++;
         } else {
           throw Kernel::Exception::NotFoundError("Object::populate",

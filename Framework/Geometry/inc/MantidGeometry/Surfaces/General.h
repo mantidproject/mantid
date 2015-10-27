@@ -44,7 +44,7 @@ class MANTID_GEOMETRY_DLL General : public Quadratic {
 public:
   General();
   General(const General &);
-  General *clone() const;
+  std::unique_ptr<Surface> clone() const;
   General &operator=(const General &);
   ~General();
 

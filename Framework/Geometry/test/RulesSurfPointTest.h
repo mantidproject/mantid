@@ -134,7 +134,7 @@ public:
     TS_ASSERT_EQUALS(B.getKeyN(), 11);
     TS_ASSERT_EQUALS(B.display(), "11");
     TS_ASSERT_EQUALS(A.findLeaf(&B), -1);
-    B.setKey(P1->clone());
+    B.setKey(P1->clone().release());
     B.setKeyN(10);
     TS_ASSERT_EQUALS(A.findLeaf(&B), -1);
     TS_ASSERT_EQUALS(A.findLeaf(&A), 0);

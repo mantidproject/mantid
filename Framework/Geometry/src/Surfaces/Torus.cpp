@@ -67,13 +67,13 @@ Torus::Torus(const Torus &A)
 */
 {}
 
-Torus *Torus::clone() const
+std::unique_ptr<Surface> Torus::clone() const
 /**
   Makes a clone (implicit virtual copy constructor)
   @return new(*this)
 */
 {
-  return new Torus(*this);
+  return std::unique_ptr<Surface>(new Torus(*this));
 }
 
 Torus &Torus::operator=(const Torus &A)

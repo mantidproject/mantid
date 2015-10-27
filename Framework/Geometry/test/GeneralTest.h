@@ -46,11 +46,9 @@ public:
     A.setSurface("gq 1 1 1 0 0 0 0 0 0 -1");
     TS_ASSERT_EQUALS(extractString(A),
                      "-1 gq  1  1  1  0  0  0  0  0  0  -1 \n");
-    General *B;
-    B = A.clone();
+    auto B = A.clone();
     TS_ASSERT_EQUALS(extractString(*B),
                      "-1 gq  1  1  1  0  0  0  0  0  0  -1 \n");
-    delete B;
   }
 
   void testEqualOperator() {

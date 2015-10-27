@@ -73,13 +73,13 @@ Cone::Cone(const Cone &A)
  */
 {}
 
-Cone *Cone::clone() const
+std::unique_ptr<Surface> Cone::clone() const
 /**
  Makes a clone (implicit virtual copy constructor)
  @return new(*this)
  */
 {
-  return new Cone(*this);
+  return std::unique_ptr<Surface>(new Cone(*this));
 }
 
 Cone &Cone::operator=(const Cone &A)

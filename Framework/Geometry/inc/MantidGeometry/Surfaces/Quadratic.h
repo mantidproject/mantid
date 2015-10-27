@@ -33,7 +33,8 @@ public:
 
   Quadratic();
   Quadratic(const Quadratic &);
-  virtual Quadratic *clone() const = 0; ///< Abstract clone function
+  virtual std::unique_ptr<Surface>
+  clone() const = 0; ///< Abstract clone function
   Quadratic &operator=(const Quadratic &);
   virtual ~Quadratic();
 

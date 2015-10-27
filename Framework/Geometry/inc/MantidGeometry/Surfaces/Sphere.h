@@ -53,7 +53,7 @@ private:
 public:
   Sphere();
   Sphere(const Sphere &);
-  Sphere *clone() const;
+  std::unique_ptr<Surface> clone() const;
   Sphere &operator=(const Sphere &);
   ~Sphere();
   /// Effective typename

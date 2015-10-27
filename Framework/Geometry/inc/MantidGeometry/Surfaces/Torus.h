@@ -57,7 +57,7 @@ public:
 
   Torus();
   Torus(const Torus &);
-  Torus *clone() const;
+  std::unique_ptr<Surface> clone() const;
   Torus &operator=(const Torus &);
   int operator==(const Torus &) const;
   ~Torus();

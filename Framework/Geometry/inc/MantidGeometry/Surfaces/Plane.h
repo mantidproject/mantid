@@ -60,7 +60,7 @@ public:
 
   Plane();
   Plane(const Plane &);
-  Plane *clone() const;
+  std::unique_ptr<Surface> clone() const;
   Plane &operator=(const Plane &);
   virtual ~Plane();
 

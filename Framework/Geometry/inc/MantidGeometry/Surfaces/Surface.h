@@ -53,7 +53,8 @@ public:
 
   Surface();
   Surface(const Surface &);
-  virtual Surface *clone() const = 0; ///< Abstract clone function
+  virtual std::unique_ptr<Surface>
+  clone() const = 0; ///< Abstract clone function
   Surface &operator=(const Surface &);
   virtual ~Surface();
 

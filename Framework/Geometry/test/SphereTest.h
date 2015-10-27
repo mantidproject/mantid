@@ -48,9 +48,8 @@ public:
     Sphere A;
     A.setSurface("s 1.1 -2.1 1.1 2");
     TS_ASSERT_EQUALS(extractString(A), "-1 s [1.1,-2.1,1.1] 2\n");
-    Sphere *B = A.clone();
+    auto B = A.clone();
     TS_ASSERT_EQUALS(extractString(*B), "-1 s [1.1,-2.1,1.1] 2\n");
-    delete B;
   }
 
   void testAssignment() {

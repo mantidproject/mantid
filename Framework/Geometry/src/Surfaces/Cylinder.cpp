@@ -61,13 +61,13 @@ Cylinder::Cylinder(const Cylinder &A)
  */
 {}
 
-Cylinder *Cylinder::clone() const
+std::unique_ptr<Surface> Cylinder::clone() const
 /**
  Makes a clone (implicit virtual copy constructor)
  @return Copy(*this)
  */
 {
-  return new Cylinder(*this);
+  return std::unique_ptr<Surface>(new Cylinder(*this));
 }
 
 Cylinder &Cylinder::operator=(const Cylinder &A)
