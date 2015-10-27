@@ -1,4 +1,4 @@
-#pylint: disable=no-init
+﻿#pylint: disable=no-init
 import stresstesting
 from mantid.simpleapi import *
 from mantid.api import Workspace
@@ -120,7 +120,7 @@ class MARIReductionFromFileCache(ISISDirectInelasticReduction):
       """
         self._counter+=1
         if self._counter == 2:
-            source =  FileFinder.findRuns('11001')[0]
+            source =  FileFinder.findRuns('MAR11001')[0]
             targ_path = config['defaultsave.directory']
             targ_file = os.path.join(targ_path,'MAR11002.nxs')
             shutil.copy2(source ,targ_file )
@@ -128,7 +128,7 @@ class MARIReductionFromFileCache(ISISDirectInelasticReduction):
         if self._counter>= 3:
             if os.path.exists(self._file_to_clear):
                 os.remove(self._file_to_clear)
-            source =  FileFinder.findRuns('11001')[0]
+            source =  FileFinder.findRuns('MAR11001')[0]
             targ_path = config['defaultsave.directory']
             targ_file = os.path.join(targ_path,'MAR11002.raw')
             shutil.copy2(source ,targ_file )

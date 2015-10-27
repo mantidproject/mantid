@@ -309,8 +309,8 @@ if __name__ == "__main__":
     #config['defaultsave.directory'] = result_dir # folder to save resulting spe/nxspe files.  Defaults are in
 
     # execute stuff from Mantid
-    #rd = ReduceMARIFromFile()
-    rd= ReduceMARIMon2Norm()
+    rd = ReduceMARIFromFile()
+    #rd= ReduceMARIMon2Norm()
     #rd = ReduceMARIMonitorsSeparate()
     #rd = ReduceMARIFromWorkspace()
     rd.def_advanced_properties()
