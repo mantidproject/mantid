@@ -94,21 +94,26 @@ void ContainerSubtraction::run() {
   }
 
   // Check for same binning across sample and container
-  if (!checkWorkspaceBinningMatches(sampleWs, canCloneWs)) {
-    QString text = "Binning on sample and container does not match."
-                   "Would you like to rebin the sample to match the container?";
+  if (m_uiForm.ckShiftCan->isChecked()) {
+    addRebinStep(canCloneName, sampleWsName);
+  } else {
+    if (!checkWorkspaceBinningMatches(sampleWs, canCloneWs)) {
+      QString text =
+          "Binning on sample and container does not match."
+          "Would you like to rebin the sample to match the container?";
 
-    int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
-                                       QMessageBox::Yes, QMessageBox::No,
-                                       QMessageBox::NoButton);
+      int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
+                                         QMessageBox::Yes, QMessageBox::No,
+                                         QMessageBox::NoButton);
 
-    if (result == QMessageBox::Yes) {
-		addRebinStep(canCloneName, sampleWsName);
-    } else {
-      m_batchAlgoRunner->clearQueue();
-      g_log.error("Cannot apply absorption corrections using a sample and "
-                  "container with different binning.");
-      return;
+      if (result == QMessageBox::Yes) {
+        addRebinStep(canCloneName, sampleWsName);
+      } else {
+        m_batchAlgoRunner->clearQueue();
+        g_log.error("Cannot apply absorption corrections using a sample and "
+                    "container with different binning.");
+        return;
+      }
     }
   }
 
@@ -294,6 +299,19 @@ void ContainerSubtraction::absCorComplete(bool error) {
   bool save = m_uiForm.ckSave->isChecked();
   if (save)
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+
+  if (m_uiForm.ckShiftCan->isChecked()) {
+    IAlgorithm_sptr shiftLog =
+        AlgorithmManager::Instance().create("AddSampleLog");
+    shiftLog->initialize();
+
+    shiftLog->setProperty("Workspace", m_pythonExportWsName);
+    shiftLog->setProperty("LogName", "container_shift");
+    shiftLog->setProperty("LogType", "Number");
+    shiftLog->setProperty(
+        "LogText", boost::lexical_cast<std::string>(m_uiForm.spShift->value()));
+    m_batchAlgoRunner->addAlgorithm(shiftLog);
+  }
 
   // Run algorithm queue
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
