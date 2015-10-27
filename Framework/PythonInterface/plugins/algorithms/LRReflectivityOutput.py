@@ -1,4 +1,4 @@
-# pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name,bare-except
 import math
 import time
 import mantid
@@ -48,7 +48,6 @@ class LRReflectivityOutput(PythonAlgorithm):
             Check that all the workspaces are on an absolute scale.
             @param workspace_list: list of workspaces to put together
         """
-        # TODO: Store scaling factors and clocking correction in header
         scaling_cutoff = self.getProperty("ScalingWavelengthCutoff")
 
         normalization_available = True
@@ -61,7 +60,7 @@ class LRReflectivityOutput(PythonAlgorithm):
                         normalization_available = wl > scaling_cutoff
                         logger.notice("%s: no normalization for wl=%s" % (ws, str(wl)))
                     except:
-                        logger.notice("%s: could not find LambdaRequest" % ws)  
+                        logger.notice("%s: could not find LambdaRequest" % ws)
                         normalization_available = False
                 else:
                     logger.notice("%s: normalization found" % ws)
@@ -70,6 +69,7 @@ class LRReflectivityOutput(PythonAlgorithm):
                 normalization_available = False
         return normalization_available
 
+    #pylint: disable=too-many-locals,too-many-branches
     def average_points_for_single_q(self, scaled_ws_list):
         """
             Take the point with the smalled error when multiple points are
@@ -118,7 +118,7 @@ class LRReflectivityOutput(PythonAlgorithm):
 
         # Skip first point and last one
         points_to_skip = 1
-        for i in range(1, len(scaled_ws_list)): 
+        for i in range(1, len(scaled_ws_list)):
             skipped_points = 0
             distribution_started = False
 
@@ -209,7 +209,7 @@ class LRReflectivityOutput(PythonAlgorithm):
 
         for i in range(len(data_x)):
             # Skip point where the error is much larger than the reflectivity value
-            if (data_y[i] > data_e[i] / 100.0):
+            if data_y[i] > data_e[i] / 100.0:
                 content += str(data_x[i])
                 content += ' ' + str(data_y[i])
                 content += ' ' + str(data_e[i])
