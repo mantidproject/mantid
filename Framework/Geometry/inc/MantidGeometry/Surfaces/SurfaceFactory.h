@@ -40,9 +40,8 @@ namespace Geometry {
 
 class MANTID_GEOMETRY_DLL SurfaceFactory {
 private:
-  typedef std::map<std::string, Surface *>
-      MapType; ///< Storage of surface pointers
-
+  typedef std::map<std::string, std::unique_ptr<Surface>>
+      MapType;                 ///< Storage of surface pointers
   static SurfaceFactory *FOBJ; ///< Effective "this"
 
   MapType SGrid;                  ///< The tally stack

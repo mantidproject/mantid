@@ -61,30 +61,23 @@ SurfaceFactory::SurfaceFactory(const SurfaceFactory &A)
 {
   MapType::const_iterator vc;
   for (vc = A.SGrid.begin(); vc != A.SGrid.end(); ++vc)
-    SGrid.insert(MapType::value_type(vc->first, vc->second->clone()));
+    SGrid.insert(MapType::value_type(
+        vc->first, std::unique_ptr<Surface>(vc->second->clone())));
 }
 
-SurfaceFactory::~SurfaceFactory()
-/**
-  Destructor removes memory for atom/cluster list
-*/
-{
-  MapType::iterator vc;
-  for (vc = SGrid.begin(); vc != SGrid.end(); ++vc)
-    delete vc->second;
-}
+SurfaceFactory::~SurfaceFactory() {}
 
 void SurfaceFactory::registerSurface()
 /**
   Register tallies to be used
 */
 {
-  SGrid["Plane"] = new Plane;
-  SGrid["Cylinder"] = new Cylinder;
-  SGrid["Cone"] = new Cone;
+  SGrid["Plane"] = std::unique_ptr<Surface>(new Plane);
+  SGrid["Cylinder"] = std::unique_ptr<Surface>(new Cylinder);
+  SGrid["Cone"] = std::unique_ptr<Surface>(new Cone);
   // SGrid["Torus"]=new Torus;
-  SGrid["General"] = new General;
-  SGrid["Sphere"] = new Sphere;
+  SGrid["General"] = std::unique_ptr<Surface>(new General);
+  SGrid["Sphere"] = std::unique_ptr<Surface>(new Sphere);
 
   ID['c'] = "Cylinder";
   ID['k'] = "Cone";
