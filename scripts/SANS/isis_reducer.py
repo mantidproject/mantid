@@ -669,6 +669,30 @@ class ISISReducer(Reducer):
             except:
                 #if the workspace can't be deleted this function does nothing
                 pass
+    def get_reduction_steps(self):
+        '''
+        Provides a way to access the reduction steps
+        @returns the reduction steps
+        '''
+        return self._reduction_steps
+
+    def perform_consistency_check(self):
+        '''
+        Runs the consistency check over all reduction steps
+        '''
+        was_empty = False
+        if not self._reduction_steps:
+            self._to_steps()
+            was_empty = True
+
+        try:
+            to_check = self._reduction_steps
+            for element in to_check:
+                element.run_consistency_check()
+        except RuntimeError, details:
+            if was_empty:
+                self._reduction_steps = None
+            raise RuntimeError(str(details))
 
     def update_beam_center(self):
         """
