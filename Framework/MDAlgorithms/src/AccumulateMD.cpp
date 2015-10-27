@@ -212,7 +212,7 @@ void AccumulateMD::init() {
 
   declareProperty("Emode", "Direct",
                   boost::make_shared<StringListValidator>(e_mode_options),
-                  "Analysis mode [‘Elastic’, ‘Direct’, ‘Indirect’].");
+                  "Analysis mode ['Elastic', 'Direct', 'Indirect'].");
 
   declareProperty(
       new ArrayProperty<double>(
