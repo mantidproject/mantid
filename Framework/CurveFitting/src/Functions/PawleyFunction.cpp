@@ -61,32 +61,52 @@ UnitCell PawleyParameterFunction::getUnitCellFromParameters() const {
   switch (m_crystalSystem) {
   case PointGroup::Cubic: {
     double a = getParameter("a");
-    return UnitCell(a, a, a);
+    double aErr = getError(0);
+    UnitCell uc(a, a, a);
+    uc.setError(aErr, aErr, aErr, 0.0, 0.0, 0.0);
+    return uc;
   }
   case PointGroup::Tetragonal: {
     double a = getParameter("a");
-    return UnitCell(a, a, getParameter("c"));
+    double aErr = getError(0);
+    UnitCell uc(a, a, getParameter("c"));
+    uc.setError(aErr, aErr, getError(1), 0.0, 0.0, 0.0);
+    return uc;
   }
   case PointGroup::Hexagonal: {
     double a = getParameter("a");
-    return UnitCell(a, a, getParameter("c"), 90, 90, 120);
+    double aErr = getError(0);
+    UnitCell uc(a, a, getParameter("c"), 90, 90, 120);
+    uc.setError(aErr, aErr, getError(1), 0.0, 0.0, 0.0);
+    return uc;
   }
   case PointGroup::Trigonal: {
     double a = getParameter("a");
     double alpha = getParameter("Alpha");
-    return UnitCell(a, a, a, alpha, alpha, alpha);
+    double aErr = getError(0);
+    double alphaErr = getError(1);
+    UnitCell uc(a, a, a, alpha, alpha, alpha);
+    uc.setError(aErr, aErr, aErr, alphaErr, alphaErr, alphaErr);
+    return uc;
   }
   case PointGroup::Orthorhombic: {
-    return UnitCell(getParameter("a"), getParameter("b"), getParameter("c"));
+    UnitCell uc(getParameter("a"), getParameter("b"), getParameter("c"));
+    uc.setError(getError(0), getError(1), getError(2), 0.0, 0.0, 0.0);
+    return uc;
   }
   case PointGroup::Monoclinic: {
-    return UnitCell(getParameter("a"), getParameter("b"), getParameter("c"), 90,
-                    getParameter("Beta"), 90);
+    UnitCell uc(getParameter("a"), getParameter("b"), getParameter("c"), 90,
+                getParameter("Beta"), 90);
+    uc.setError(getError(0), getError(1), getError(2), 0.0, getError(3), 0.0);
+    return uc;
   }
   case PointGroup::Triclinic: {
-    return UnitCell(getParameter("a"), getParameter("b"), getParameter("c"),
-                    getParameter("Alpha"), getParameter("Beta"),
-                    getParameter("Gamma"));
+    UnitCell uc(getParameter("a"), getParameter("b"), getParameter("c"),
+                getParameter("Alpha"), getParameter("Beta"),
+                getParameter("Gamma"));
+    uc.setError(getError(0), getError(1), getError(2), getError(3), getError(4),
+                getError(5));
+    return uc;
   }
   }
 

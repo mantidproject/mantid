@@ -59,8 +59,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", WSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("CellType", "Monoclinic ( a unique )"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("CellType", "Monoclinic"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -69,8 +68,8 @@ public:
     // Check that the UB matrix is the same as in TOPAZ_3007.mat
     OrientedLattice latt = ws->mutableSample().getOrientedLattice();
 
-    double correct_UB[] = {-0.0477, 0.0413, -0.0005, -0.0055, -0.0090,
-                           0.1250,  0.0610, 0.0314,  0.0110};
+    double correct_UB[] = {0.0454,  0.0406,  0.0122, -0.0014, -0.0031,
+                           -0.1165, -0.0574, 0.0322, -0.0273};
 
     std::vector<double> UB_calculated = latt.getUB().getVector();
 

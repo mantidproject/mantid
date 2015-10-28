@@ -172,9 +172,20 @@ void ContainerSubtraction::addRebinStep(QString toRebin, QString toMatch) {
  */
 bool ContainerSubtraction::validate() {
   UserInputValidator uiv;
+
+  // Check valid inputs
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
   uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
-  MatrixWorkspace_sptr sampleWs;
+
+  // Get Workspaces
+  MatrixWorkspace_sptr sampleWs =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          m_uiForm.dsSample->getCurrentDataName().toStdString());
+  MatrixWorkspace_sptr containerWs =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          m_uiForm.dsContainer->getCurrentDataName().toStdString());
+
+  // Check Sample is of same type as container
   QString sample = m_uiForm.dsSample->getCurrentDataName();
   QString sampleType = sample.right(sample.length() - sample.lastIndexOf("_"));
   QString container = m_uiForm.dsContainer->getCurrentDataName();
@@ -188,6 +199,15 @@ bool ContainerSubtraction::validate() {
   if (containerType != sampleType)
     uiv.addErrorMessage(
         "Sample and can workspaces must contain the same type of data.");
+
+  // Check sample has the same number of Histograms as the contianer
+  const size_t sampleHist = sampleWs->getNumberHistograms();
+  const size_t containerHist = containerWs->getNumberHistograms();
+
+  if (sampleHist != containerHist) {
+    uiv.addErrorMessage(
+        " Sample and Container do not have a matching number of Histograms.");
+  }
 
   // Show errors if there are any
   if (!uiv.isAllInputValid())
@@ -235,15 +255,36 @@ void ContainerSubtraction::plotPreview(int specIndex) {
         "Subtracted", QString::fromStdString(m_pythonExportWsName), specIndex,
         Qt::green);
 
+ //Scale can
+  if (m_uiForm.ckScaleCan->isChecked()) {
+    auto canName = m_uiForm.dsContainer->getCurrentDataName();
+    if (m_uiForm.ckShiftCan->isChecked()) {
+      canName += "_Shifted";
+    }
+    IAlgorithm_sptr scaleCan = AlgorithmManager::Instance().create("Scale");
+    scaleCan->initialize();
+	scaleCan->setProperty("InputWorkspace", canName.toStdString());
+    scaleCan->setProperty("OutputWorkspace", "__container_corrected");
+    scaleCan->setProperty("Factor", m_uiForm.spCanScale->value());
+    scaleCan->setProperty("Operation", "Multiply");
+    scaleCan->execute();
+  }
+
   // Plot container
-  if (m_uiForm.ckShiftCan->isChecked()) {
-    m_uiForm.ppPreview->addSpectrum(
-        "Container", (m_uiForm.dsContainer->getCurrentDataName() + "_Shifted"),
-        specIndex, Qt::red);
-  } else {
-    m_uiForm.ppPreview->addSpectrum("Container",
-                                    m_uiForm.dsContainer->getCurrentDataName(),
+  if (m_uiForm.ckScaleCan->isChecked()) {
+    m_uiForm.ppPreview->addSpectrum("Container", "__container_corrected",
                                     specIndex, Qt::red);
+  } else {
+    if (m_uiForm.ckShiftCan->isChecked()) {
+      m_uiForm.ppPreview->addSpectrum(
+          "Container",
+          (m_uiForm.dsContainer->getCurrentDataName() + "_Shifted"), specIndex,
+          Qt::red);
+    } else {
+      m_uiForm.ppPreview->addSpectrum(
+          "Container", m_uiForm.dsContainer->getCurrentDataName(), specIndex,
+          Qt::red);
+    }
   }
 }
 

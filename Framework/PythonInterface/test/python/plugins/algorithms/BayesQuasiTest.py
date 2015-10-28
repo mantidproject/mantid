@@ -4,7 +4,7 @@ from IndirectImport import *
 from mantid.api import MatrixWorkspace, WorkspaceGroup
 
 if is_supported_f2py_platform():
-    class QLRunTest(unittest.TestCase):
+    class BayesQuasiTest(unittest.TestCase):
 
         _res_ws = None
         _sample_ws = None
@@ -13,9 +13,9 @@ if is_supported_f2py_platform():
 
         def setUp(self):
             self._res_ws = Load(Filename='irs26173_graphite002_res.nxs',
-                                OutputWorkspace='__QLRunTest_Resolution')
+                                OutputWorkspace='__BayesQuasiTest_Resolution')
             self._sample_ws = Load(Filename='irs26176_graphite002_red.nxs',
-                                OutputWorkspace='__QLRunTest_Sample')
+                                OutputWorkspace='__BayesQuasiTest_Sample')
             self._num_bins = self._sample_ws.blocksize()
             self._num_hists = self._sample_ws.getNumberHistograms()
 
@@ -24,9 +24,9 @@ if is_supported_f2py_platform():
             """
             Validates that the output workspaces are of the correct type, units and shape.
 
-            @param result Result workspace from QLRun
-            @param prob Probability workspace from QLRun
-            @param group Group workspace of fitted spectra from QLRun
+            @param result Result workspace from BayesQuasi
+            @param prob Probability workspace from BayesQuasi
+            @param group Group workspace of fitted spectra from BayesQuasi
             """
 
             # Test size/shape of result
@@ -58,9 +58,9 @@ if is_supported_f2py_platform():
             Validates that the output workspaces have expected values
             with values from the last known correct version
 
-            @param result Result workspace from QLRun
-            @param prob Probability workspace from QLRun
-            @param group Group workspace of fitted spectra from QLRun
+            @param result Result workspace from BayesQuasi
+            @param prob Probability workspace from BayesQuasi
+            @param group Group workspace of fitted spectra from BayesQuasi
             """
 
             # Test values of result
@@ -91,8 +91,8 @@ if is_supported_f2py_platform():
             Validates that the output workspaces are of the correct type, units and shape.
             with values from the last known correct version
 
-            @param result Result workspace from QLRun
-            @param group Group workspace of fitted spectra from QLRun
+            @param result Result workspace from BayesQuasi
+            @param group Group workspace of fitted spectra from BayesQuasi
             """
 
             # Test size/shape of result
@@ -117,9 +117,9 @@ if is_supported_f2py_platform():
             """
             Validates that the output workspaces have expected values
 
-            @param result Result workspace from QLRun
-            @param prob Probability workspace from QLRun
-            @param group Group workspace of fitted spectra from QLRun
+            @param result Result workspace from BayesQuasi
+            @param prob Probability workspace from BayesQuasi
+            @param group Group workspace of fitted spectra from BayesQuasi
             """
 
             # Test values of result
@@ -138,9 +138,9 @@ if is_supported_f2py_platform():
 
         def test_QLr_Run(self):
             """
-            Test Lorentzian fit for QLRun
+            Test Lorentzian fit for BayesQuasi
             """
-            fit_group, result, prob= QLRun(Program='QL',
+            fit_group, result, prob= BayesQuasi(Program='QL',
                                               SampleWorkspace=self._sample_ws,
                                               ResolutionWorkspace=self._res_ws,
                                               MinRange=-0.547607,
@@ -161,9 +161,9 @@ if is_supported_f2py_platform():
 
         def test_QSe_Run(self):
             """
-            Test Stretched Exponential fit for QLRun
+            Test Stretched Exponential fit for BayesQuasi
             """
-            fit_group, result = QLRun(Program='QSe',
+            fit_group, result = BayesQuasi(Program='QSe',
                                       SampleWorkspace=self._sample_ws,
                                       ResolutionWorkspace=self._res_ws,
                                       MinRange=-0.547607,

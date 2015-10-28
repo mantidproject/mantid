@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/QtReflMainView.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
+#include "MantidQtCustomInterfaces/ReflTableSchema.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtAPI/HelpWindow.h"
@@ -58,8 +59,9 @@ void QtReflMainView::initLayout() {
           SLOT(showSearchContextMenu(const QPoint &)));
 
   // Finally, create a presenter to do the thinking for us
-  m_presenter =
-      boost::shared_ptr<IReflPresenter>(new ReflMainViewPresenter(this));
+  m_presenter = boost::shared_ptr<IReflPresenter>(new ReflMainViewPresenter(
+      this /*main view*/,
+      this /*currently this concrete view is also responsibile for prog reporting*/));
 }
 
 /**
@@ -70,6 +72,16 @@ presenter
 void QtReflMainView::setModel(QString name) {
   m_toOpen = name.toStdString();
   m_presenter->notify(IReflPresenter::OpenTableFlag);
+}
+
+/**
+ * Set all possible tranfer methods
+ * @param methods : All possible transfer methods.
+ */
+void QtReflMainView::setTransferMethods(const std::set<std::string> &methods) {
+  for (auto method = methods.begin(); method != methods.end(); ++method) {
+    ui.comboTransferMethod->addItem((*method).c_str());
+  }
 }
 
 /**
@@ -556,8 +568,7 @@ column.
 */
 void QtReflMainView::setOptionsHintStrategy(HintStrategy *hintStrategy) {
   ui.viewTable->setItemDelegateForColumn(
-      ReflMainViewPresenter::COL_OPTIONS,
-      new HintingLineEditFactory(hintStrategy));
+      ReflTableSchema::COL_OPTIONS, new HintingLineEditFactory(hintStrategy));
 }
 
 /**
@@ -642,6 +653,18 @@ Get the string the user wants to search for.
 */
 std::string QtReflMainView::getSearchString() const {
   return ui.textSearch->text().toStdString();
+}
+
+/**
+ * Clear the progress
+ */
+void QtReflMainView::clearProgress() { ui.progressBar->reset(); }
+
+/**
+ * @return the transfer method selected.
+ */
+std::string QtReflMainView::getTransferMethod() const {
+  return ui.comboTransferMethod->currentText().toStdString();
 }
 
 } // namespace CustomInterfaces
