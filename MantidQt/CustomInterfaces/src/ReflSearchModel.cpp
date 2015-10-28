@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/ReflSearchModel.h"
+#include "MantidQtCustomInterfaces/ReflTransferStrategy.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 
@@ -10,17 +11,42 @@ namespace MantidQt
 
     //----------------------------------------------------------------------------------------------
     /** Constructor
+    @param transferMethod : Transfer strategy
     @param tableWorkspace : The table workspace to copy data from
+    @param instrument : instrument name
     */
-    ReflSearchModel::ReflSearchModel(ITableWorkspace_sptr tableWorkspace)
-    {
+    ReflSearchModel::ReflSearchModel(const ReflTransferStrategy &transferMethod,
+                                     ITableWorkspace_sptr tableWorkspace,
+                                     const std::string &instrument) {
       //Copy the data from the input table workspace
       for(size_t i = 0; i < tableWorkspace->rowCount(); ++i)
       {
-        const std::string run = tableWorkspace->String(i,0);
-        const std::string description = tableWorkspace->String(i,6);
-        m_runs.push_back(run);
-        m_descriptions[run] = description;
+        const std::string runFile = tableWorkspace->String(i, 0);
+
+        // If this isn't the right instrument, remove it
+        auto run = runFile;
+        if (run.substr(0, instrument.size()) != instrument) {
+          continue; // Don't show runs that appear to be from other instruments.
+        }
+
+        // It's a valid run, so let's trim the instrument prefix and ".raw"
+        // suffix
+        run =
+            run.substr(instrument.size(), run.size() - (instrument.size() + 4));
+
+        // Let's also get rid of any leading zeros
+        size_t numZeros = 0;
+        while (run[numZeros] == '0')
+          numZeros++;
+        run = run.substr(numZeros, run.size() - numZeros);
+
+        if (transferMethod.knownFileType(runFile)) {
+          m_runs.push_back(run);
+          const std::string description = tableWorkspace->String(i, 6);
+          m_descriptions[run] = description;
+          const std::string location = tableWorkspace->String(i, 1);
+          m_locations[run] = location;
+        }
       }
 
       //By sorting the vector of runs, we sort the entire table
@@ -45,10 +71,7 @@ namespace MantidQt
     /**
     @return the number of columns in the model.
     */
-    int ReflSearchModel::columnCount(const QModelIndex &) const
-    {
-      return 2;
-    }
+    int ReflSearchModel::columnCount(const QModelIndex &) const { return 3; }
 
     /**
     Overrident data method, allows consuming view to extract data for an index and role.
@@ -74,6 +97,9 @@ namespace MantidQt
       if(colNumber == 1)
         return QString::fromStdString(m_descriptions.find(run)->second);
 
+      if (colNumber == 2)
+        return QString::fromStdString(m_locations.find(run)->second);
+
       return QVariant();
     }
 
@@ -95,6 +121,8 @@ namespace MantidQt
         {
           case 0: return "Run";
           case 1: return "Description";
+          case 2:
+            return "Location";
           default: return "";
         }
       }

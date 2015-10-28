@@ -38,7 +38,8 @@ namespace MantidQt
     {
     public:
       virtual ~IReflSearcher() {};
-      virtual Mantid::API::ITableWorkspace_sptr search(const std::string& text, const std::string& instrument) = 0;
+      virtual Mantid::API::ITableWorkspace_sptr
+      search(const std::string &text) = 0;
     };
   }
 }

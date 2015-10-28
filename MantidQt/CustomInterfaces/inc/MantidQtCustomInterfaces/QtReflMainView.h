@@ -3,6 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtCustomInterfaces/ProgressableView.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/ReflSearchModel.h"
@@ -35,11 +37,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
+    File change history is stored at: <https://github.com/mantidproject/mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+    */
 class DLLExport QtReflMainView : public MantidQt::API::UserSubWindow,
-                                 public ReflMainView {
+                                 public ReflMainView,
+                                 public ProgressableView {
   Q_OBJECT
 public:
   QtReflMainView(QWidget *parent = 0);
@@ -75,6 +78,7 @@ public:
   // Set the status of the progress bar
   virtual void setProgressRange(int min, int max);
   virtual void setProgress(int progress);
+  virtual void clearProgress();
 
   // Get status of the checkbox which dictates whether an ipython notebook is
   // produced
@@ -88,6 +92,7 @@ public:
   virtual void
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy);
   virtual void setClipboard(const std::string &text);
+  virtual void setTransferMethods(const std::set<std::string> &methods);
 
   // Accessor methods
   virtual std::set<int> getSelectedRows() const;
@@ -97,6 +102,7 @@ public:
   virtual std::string getWorkspaceToOpen() const;
   virtual std::string getClipboard() const;
   virtual std::string getSearchString() const;
+  virtual std::string getTransferMethod() const;
 
   virtual boost::shared_ptr<IReflPresenter> getPresenter() const;
 
