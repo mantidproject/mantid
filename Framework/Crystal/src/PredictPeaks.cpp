@@ -135,8 +135,7 @@ void PredictPeaks::exec() {
     } catch (std::runtime_error &e) {
       // If there is no goniometer matrix, use identity matrix instead.
       g_log.error() << "Error getting the goniometer rotation matrix from the "
-                       "InputWorkspace."
-                    << std::endl
+                       "InputWorkspace." << std::endl
                     << e.what() << std::endl;
       g_log.warning() << "Using identity goniometer rotation matrix instead."
                       << std::endl;
@@ -181,8 +180,7 @@ void PredictPeaks::exec() {
 
         g_log.error()
             << "Error getting the goniometer rotation matrix from the "
-               "InputWorkspace."
-            << std::endl
+               "InputWorkspace." << std::endl
             << e.what() << std::endl;
         g_log.warning() << "Using identity goniometer rotation matrix instead."
                         << std::endl;
@@ -311,9 +309,10 @@ void PredictPeaks::fillPossibleHKLsUsingGenerator(
 
   V3D hklMin = *(gen.begin());
 
-  g_log.notice() << "HKL range for d_min of " << dMin << " to d_max of " << dMax
-                 << " is from " << hklMin << " to " << hklMin * -1.0
-                 << ", a total of " << gen.size() << " possible HKL's\n";
+  g_log.information() << "HKL range for d_min of " << dMin << " to d_max of "
+                      << dMax << " is from " << hklMin << " to "
+                      << hklMin * -1.0 << ", a total of " << gen.size()
+                      << " possible HKL's\n";
 
   if (gen.size() > 10000000000)
     throw std::invalid_argument("More than 10 billion HKLs to search. Is "
