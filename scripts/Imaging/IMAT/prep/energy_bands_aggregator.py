@@ -115,6 +115,8 @@ class EnergyBandsAggregator(object):
         self.supported_aggs = ['sum', 'average']
         # format of the output images.
         self.supported_out_formats = ['tiff', 'png']
+        # because tiff is the most common choice of third party tools
+        self.default_out_format = 'tiff'
         # the default one
         self._out_format = out_format
 
@@ -293,7 +295,8 @@ class EnergyBandsAggregator(object):
             if 2 != len(band_indices) or not isinstance(band_indices[0], int) or\
                not isinstance(band_indices[1], int):
                 raise ValueError("Wrong min-max energy band indices given: {0}".format(band_indices))
-
+            if band_indices[0] > band_indices[1]:
+                raise ValueError("The minimum energy band index must be lower than the maximum index")
 
     #pylint: disable=too-many-arguments
     def agg_angles(self, in_path, output_path=None, band_indices=None,
