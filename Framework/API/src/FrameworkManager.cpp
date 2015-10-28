@@ -16,7 +16,7 @@
 
 #include <Poco/ActiveResult.h>
 
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 
 #include <cstdarg>
 

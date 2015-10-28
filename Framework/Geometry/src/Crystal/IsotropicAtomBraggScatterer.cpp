@@ -11,7 +11,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/assign.hpp>
 
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 
 namespace Mantid {
 namespace Geometry {

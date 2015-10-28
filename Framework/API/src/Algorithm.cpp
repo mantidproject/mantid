@@ -27,7 +27,7 @@
 #include <Poco/StringTokenizer.h>
 #include <Poco/Void.h>
 
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 
 #include <map>
 

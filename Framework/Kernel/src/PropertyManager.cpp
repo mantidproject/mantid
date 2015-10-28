@@ -4,7 +4,7 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 
 namespace Mantid {
 namespace Kernel {
