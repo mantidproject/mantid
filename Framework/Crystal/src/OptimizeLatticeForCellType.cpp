@@ -81,18 +81,19 @@ void OptimizeLatticeForCellType::exec() {
   DataObjects::PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
 
   std::vector<DataObjects::PeaksWorkspace_sptr> runWS;
-
-  for (int i = int(ws->getNumberPeaks()) - 1; i >= 0; --i) {
-    const std::vector<Peak> &peaks = ws->getPeaks();
-    if (edgePixel(ws, peaks[i].getBankName(), peaks[i].getCol(),
-                  peaks[i].getRow(), edge)) {
-      ws->removePeak(i);
+  if (edge > 0) {
+    for (int i = int(ws->getNumberPeaks()) - 1; i >= 0; --i) {
+      const std::vector<Peak> &peaks = ws->getPeaks();
+      if (edgePixel(ws, peaks[i].getBankName(), peaks[i].getCol(),
+                    peaks[i].getRow(), edge)) {
+        ws->removePeak(i);
+      }
     }
   }
   runWS.push_back(ws);
 
   if (perRun) {
-    std::vector<std::pair<std::string, bool>> criteria;
+    std::vector<std::pair<std::string, bool> > criteria;
     // Sort by run number
     criteria.push_back(std::pair<std::string, bool>("runnumber", true));
     ws->sort(criteria);
@@ -130,7 +131,8 @@ void OptimizeLatticeForCellType::exec() {
     IAlgorithm_sptr fit_alg;
     try {
       fit_alg = createChildAlgorithm("Fit", -1, -1, false);
-    } catch (Exception::NotFoundError &) {
+    }
+    catch (Exception::NotFoundError &) {
       g_log.error("Can't locate Fit algorithm");
       throw;
     }
@@ -154,7 +156,8 @@ void OptimizeLatticeForCellType::exec() {
     try {
       ub_alg =
           createChildAlgorithm("FindUBUsingLatticeParameters", -1, -1, false);
-    } catch (Exception::NotFoundError &) {
+    }
+    catch (Exception::NotFoundError &) {
       g_log.error("Can't locate FindUBUsingLatticeParameters algorithm");
       throw;
     }
@@ -205,9 +208,9 @@ void OptimizeLatticeForCellType::exec() {
                                                runWS[i_run]->getName() +
                                                ".integrate");
       savePks_alg->executeAsChildAlg();
-      g_log.notice() << "See output file: "
-                     << outputdir + "ls" + runWS[i_run]->getName() +
-                            ".integrate"
+      g_log.notice() << "See output file: " << outputdir + "ls" +
+                                                   runWS[i_run]->getName() +
+                                                   ".integrate"
                      << "\n";
       // Save UB
       Mantid::API::IAlgorithm_sptr saveUB_alg =
@@ -281,6 +284,15 @@ bool OptimizeLatticeForCellType::edgePixel(PeaksWorkspace_sptr ws,
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
+    int startI = 1;
+    if (children[0]->getName() == "sixteenpack") {
+      startI = 0;
+      parent = children[0];
+      children.clear();
+      boost::shared_ptr<const Geometry::ICompAssembly> asmb =
+          boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+      asmb->getChildren(children, false);
+    }
     boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
@@ -288,8 +300,8 @@ bool OptimizeLatticeForCellType::edgePixel(PeaksWorkspace_sptr ws,
     int NROWS = static_cast<int>(grandchildren.size());
     int NCOLS = static_cast<int>(children.size());
     // Wish pixels and tubes start at 1 not 0
-    if (col - 1 < Edge || col - 1 >= (NCOLS - Edge) || row - 1 < Edge ||
-        row - 1 >= (NROWS - Edge))
+    if (col - startI < Edge || col - startI >= (NCOLS - Edge) ||
+        row - startI < Edge || row - startI >= (NROWS - Edge))
       return true;
     else
       return false;
