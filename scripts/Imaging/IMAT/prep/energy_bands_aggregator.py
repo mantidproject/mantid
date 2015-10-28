@@ -84,6 +84,7 @@ except RuntimeError:
                 raise ImportError("Cannot find the package 'tifffile' in the system or together with this "
                                   "module. It is required to read/write TIFF image files. " + FREEIMG_ERR_MSG)
 
+#pylint: disable=too-many-instance-attributes
 class EnergyBandsAggregator(object):
     """
     Combines energy bands, producing stacks of images with one image per projection angle from
