@@ -40,12 +40,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport QtReflMainView : public MantidQt::API::UserSubWindow, public ReflMainView
-    {
-      Q_OBJECT
-    public:
-      QtReflMainView(QWidget *parent = 0);
-      virtual ~QtReflMainView();
+class DLLExport QtReflMainView : public MantidQt::API::UserSubWindow,
+                                 public ReflMainView,
+                                 public ProgressableView {
+  Q_OBJECT
+public:
+  QtReflMainView(QWidget *parent = 0);
+  virtual ~QtReflMainView();
 
   /// Name of the interface
   static std::string name() { return "ISIS Reflectometry (Polref)"; }
@@ -74,31 +75,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   // Plotting
   virtual void plotWorkspaces(const std::set<std::string> &workspaces);
 
-      //Set the status of the progress bar
-      virtual void setProgressRange(int min, int max);
-      virtual void setProgress(int progress);
-      virtual void clearProgress();
+  // Set the status of the progress bar
+  virtual void setProgressRange(int min, int max);
+  virtual void setProgress(int progress);
+  virtual void clearProgress();
 
   // Get status of the checkbox which dictates whether an ipython notebook is
   // produced
   virtual bool getEnableNotebook();
 
-      //Settor methods
-      virtual void setSelection(const std::set<int>& rows);
-      virtual void setTableList(const std::set<std::string>& tables);
-      virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument);
-      virtual void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy* hintStrategy);
-      virtual void setClipboard(const std::string& text);
+  // Settor methods
+  virtual void setSelection(const std::set<int> &rows);
+  virtual void setTableList(const std::set<std::string> &tables);
+  virtual void setInstrumentList(const std::vector<std::string> &instruments,
+                                 const std::string &defaultInstrument);
+  virtual void
+  setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy);
+  virtual void setClipboard(const std::string &text);
+  virtual void setTransferMethods(const std::set<std::string> &methods);
 
-      //Accessor methods
-      virtual std::set<int> getSelectedRows() const;
-      virtual std::set<int> getSelectedSearchRows() const;
-      virtual std::string getSearchInstrument() const;
-      virtual std::string getProcessInstrument() const;
-      virtual std::string getWorkspaceToOpen() const;
-      virtual std::string getClipboard() const;
-      virtual std::string getSearchString() const;
-      virtual std::string getTransferMethod() const;
+  // Accessor methods
+  virtual std::set<int> getSelectedRows() const;
+  virtual std::set<int> getSelectedSearchRows() const;
+  virtual std::string getSearchInstrument() const;
+  virtual std::string getProcessInstrument() const;
+  virtual std::string getWorkspaceToOpen() const;
+  virtual std::string getClipboard() const;
+  virtual std::string getSearchString() const;
+  virtual std::string getTransferMethod() const;
 
   virtual boost::shared_ptr<IReflPresenter> getPresenter() const;
 

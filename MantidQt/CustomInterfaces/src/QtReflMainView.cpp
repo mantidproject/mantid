@@ -58,11 +58,11 @@ void QtReflMainView::initLayout() {
           SIGNAL(customContextMenuRequested(const QPoint &)), this,
           SLOT(showSearchContextMenu(const QPoint &)));
 
-      //Finally, create a presenter to do the thinking for us
-      m_presenter = boost::shared_ptr<IReflPresenter>(new ReflMainViewPresenter(
-          this /*main view*/,
-          this /*currently this concrete view is also responsibile for prog reporting*/));
-    }
+  // Finally, create a presenter to do the thinking for us
+  m_presenter = boost::shared_ptr<IReflPresenter>(new ReflMainViewPresenter(
+      this /*main view*/,
+      this /*currently this concrete view is also responsibile for prog reporting*/));
+}
 
 /**
 This slot loads a table workspace model and changes to a LoadedMainView
@@ -74,29 +74,29 @@ void QtReflMainView::setModel(QString name) {
   m_presenter->notify(IReflPresenter::OpenTableFlag);
 }
 
-    /**
-     * Set all possible tranfer methods
-     * @param methods : All possible transfer methods.
-     */
-    void QtReflMainView::setTransferMethods(const std::set<std::string>& methods){
-        for(auto method = methods.begin(); method != methods.end(); ++method){
-       ui.comboTransferMethod->addItem((*method).c_str());
-        }
-    }
+/**
+ * Set all possible tranfer methods
+ * @param methods : All possible transfer methods.
+ */
+void QtReflMainView::setTransferMethods(const std::set<std::string> &methods) {
+  for (auto method = methods.begin(); method != methods.end(); ++method) {
+    ui.comboTransferMethod->addItem((*method).c_str());
+  }
+}
 
-
-    /**
-    Set a new model in the tableview
-    @param model : the model to be attached to the tableview
-    */
-    void QtReflMainView::showTable(QReflTableModel_sptr model)
-    {
-      m_model = model;
-      //So we can notify the presenter when the user updates the table
-      connect(m_model.get(), SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(tableUpdated(const QModelIndex&, const QModelIndex&)));
-      ui.viewTable->setModel(m_model.get());
-      ui.viewTable->resizeColumnsToContents();
-    }
+/**
+Set a new model in the tableview
+@param model : the model to be attached to the tableview
+*/
+void QtReflMainView::showTable(QReflTableModel_sptr model) {
+  m_model = model;
+  // So we can notify the presenter when the user updates the table
+  connect(m_model.get(),
+          SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
+          SLOT(tableUpdated(const QModelIndex &, const QModelIndex &)));
+  ui.viewTable->setModel(m_model.get());
+  ui.viewTable->resizeColumnsToContents();
+}
 
 /**
 Set a new model for search results
@@ -508,14 +508,13 @@ void QtReflMainView::setProgressRange(int min, int max) {
   ui.progressBar->setRange(min, max);
 }
 
-    /**
-    Set the status of the progress bar
-    @param progress : The current value of the bar
-    */
-    void QtReflMainView::setProgress(int progress)
-    {
-      ui.progressBar->setValue(progress);
-    }
+/**
+Set the status of the progress bar
+@param progress : The current value of the bar
+*/
+void QtReflMainView::setProgress(int progress) {
+  ui.progressBar->setValue(progress);
+}
 
 /**
  Get status of checkbox which determines whether an ipython notebook is produced
@@ -562,14 +561,15 @@ void QtReflMainView::setInstrumentList(
   ui.comboProcessInstrument->setCurrentIndex(index);
 }
 
-    /**
-    Set the strategy used for generating hints for the autocompletion in the options column.
-    @param hintStrategy The hinting strategy to use
-    */
-    void QtReflMainView::setOptionsHintStrategy(HintStrategy* hintStrategy)
-    {
-      ui.viewTable->setItemDelegateForColumn(ReflTableSchema::COL_OPTIONS, new HintingLineEditFactory(hintStrategy));
-    }
+/**
+Set the strategy used for generating hints for the autocompletion in the options
+column.
+@param hintStrategy The hinting strategy to use
+*/
+void QtReflMainView::setOptionsHintStrategy(HintStrategy *hintStrategy) {
+  ui.viewTable->setItemDelegateForColumn(
+      ReflTableSchema::COL_OPTIONS, new HintingLineEditFactory(hintStrategy));
+}
 
 /**
 Sets the contents of the system's clipboard
@@ -655,17 +655,17 @@ std::string QtReflMainView::getSearchString() const {
   return ui.textSearch->text().toStdString();
 }
 
-    /**
-     * Clear the progress
-     */
-    void QtReflMainView::clearProgress() { ui.progressBar->reset(); }
+/**
+ * Clear the progress
+ */
+void QtReflMainView::clearProgress() { ui.progressBar->reset(); }
 
-    /**
-     * @return the transfer method selected.
-     */
-    std::string QtReflMainView::getTransferMethod() const{
-        return ui.comboTransferMethod->currentText().toStdString();
-    }
+/**
+ * @return the transfer method selected.
+ */
+std::string QtReflMainView::getTransferMethod() const {
+  return ui.comboTransferMethod->currentText().toStdString();
+}
 
-  } // namespace CustomInterfaces
+} // namespace CustomInterfaces
 } // namespace Mantid
