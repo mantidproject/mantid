@@ -96,7 +96,8 @@ public:
   } ///< Always returns false (0)
 
   int Eliminate(); ///< elimination not written
-  int substituteSurf(const int SurfN, const int newSurfN, Surface *SPtr);
+  int substituteSurf(const int SurfN, const int newSurfN,
+                     const boost::shared_ptr<Surface> &SPtr);
 
   /// Abstract Display
   virtual std::string display() const = 0;

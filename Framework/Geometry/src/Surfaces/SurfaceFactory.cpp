@@ -61,7 +61,7 @@ SurfaceFactory::SurfaceFactory(const SurfaceFactory &A)
 {
   MapType::const_iterator vc;
   for (vc = A.SGrid.begin(); vc != A.SGrid.end(); ++vc)
-    SGrid.insert(MapType::value_type(
+    SGrid.push_back(MapType::value_type(
         vc->first, std::unique_ptr<Surface>(vc->second->clone())));
 }
 
@@ -72,12 +72,15 @@ void SurfaceFactory::registerSurface()
   Register tallies to be used
 */
 {
-  SGrid["Plane"] = std::unique_ptr<Surface>(new Plane);
-  SGrid["Cylinder"] = std::unique_ptr<Surface>(new Cylinder);
-  SGrid["Cone"] = std::unique_ptr<Surface>(new Cone);
+  SGrid.push_back(std::make_pair("Plane", std::unique_ptr<Surface>(new Plane)));
+  SGrid.push_back(
+      std::make_pair("Cylinder", std::unique_ptr<Surface>(new Cylinder)));
+  SGrid.push_back(std::make_pair("Cone", std::unique_ptr<Surface>(new Cone)));
   // SGrid["Torus"]=new Torus;
-  SGrid["General"] = std::unique_ptr<Surface>(new General);
-  SGrid["Sphere"] = std::unique_ptr<Surface>(new Sphere);
+  SGrid.push_back(
+      std::make_pair("General", std::unique_ptr<Surface>(new General)));
+  SGrid.push_back(
+      std::make_pair("Sphere", std::unique_ptr<Surface>(new Sphere)));
 
   ID['c'] = "Cylinder";
   ID['k'] = "Cone";
@@ -86,6 +89,20 @@ void SurfaceFactory::registerSurface()
   ID['s'] = "Sphere";
   // ID['t']="Torus";
   return;
+}
+
+namespace {
+class KeyEquals {
+public:
+  KeyEquals(std::string key) : m_key(std::move(key)) {}
+  bool
+  operator()(const std::pair<std::string, std::unique_ptr<Surface>> &element) {
+    return m_key == element.first;
+  }
+
+private:
+  std::string m_key;
+};
 }
 
 std::unique_ptr<Surface>
@@ -100,7 +117,7 @@ SurfaceFactory::createSurface(const std::string &Key) const
 */
 {
   MapType::const_iterator vc;
-  vc = SGrid.find(Key);
+  vc = std::find_if(SGrid.begin(), SGrid.end(), KeyEquals(Key));
   if (vc == SGrid.end()) {
     throw Kernel::Exception::NotFoundError("SurfaceFactory::createSurface",
                                            Key);

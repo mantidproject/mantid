@@ -550,7 +550,8 @@ int Object::removeSurface(const int SurfN) {
 * @param SPtr :: Surface pointer for surface NsurfN
 * @return number of surfaces substituted
 */
-int Object::substituteSurf(const int SurfN, const int NsurfN, Surface *SPtr) {
+int Object::substituteSurf(const int SurfN, const int NsurfN,
+                           const boost::shared_ptr<Surface> &SPtr) {
   if (!TopRule)
     return 0;
   const int out = TopRule->substituteSurf(SurfN, NsurfN, SPtr);
