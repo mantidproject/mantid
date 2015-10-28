@@ -859,7 +859,7 @@ IAlgorithm_sptr Algorithm::fromHistory(const AlgorithmHistory &history) {
   root["version"] = history.version();
   root["properties"] = jsonMap;
 
-  const std::string output = writer.write(jsonMap);
+  const std::string output = writer.write(root);
   IAlgorithm_sptr alg;
 
   try {

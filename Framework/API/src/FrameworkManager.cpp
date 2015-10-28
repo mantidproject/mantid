@@ -16,6 +16,8 @@
 
 #include <Poco/ActiveResult.h>
 
+#include <jsoncpp/json/json.h>
+
 #include <cstdarg>
 
 #ifdef _WIN32
@@ -307,7 +309,42 @@ FrameworkManagerImpl::createAlgorithm(const std::string &algName,
   IAlgorithm *alg = AlgorithmManager::Instance()
                         .create(algName, version)
                         .get(); // createAlgorithm(algName);
-  alg->setProperties(propertiesArray);
+
+  ::Json::Value propertyJson;
+  // Split up comma-separated properties
+  typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+
+  boost::char_separator<char> sep(";");
+  tokenizer propPairs(propertiesArray, sep);
+  int index = 0;
+  // Iterate over the properties
+  for (tokenizer::iterator it = propPairs.begin(); it != propPairs.end();
+       ++it) {
+    // Pair of the type "
+    std::string pair = *it;
+
+    size_t n = pair.find('=');
+    if (n != std::string::npos) {
+      // Normal "PropertyName=value" string.
+      std::string propName = "";
+      std::string value = "";
+
+      // Extract the value string
+      if (n < pair.size() - 1) {
+        propName = pair.substr(0, n);
+        value = pair.substr(n + 1, pair.size() - n - 1);
+      } else {
+        // String is "PropertyName="
+        propName = pair.substr(0, n);
+        value = "";
+      }
+      // Set it
+      propertyJson[propName] = value;
+    }
+    index++;
+  }
+  ::Json::FastWriter writer;
+  alg->setProperties(writer.write(propertyJson));
   return alg;
 }
 

@@ -84,7 +84,7 @@ public:
     // Declare all algorithms, e.g. Rebin
     FrameworkManager::Instance();
     EventWorkspace_sptr ws;
-    ws = doExecEvent("Replace", 0, "Rebin", "Params=40e3, 1e3, 60e3");
+    ws = doExecEvent("Replace", 0, "Rebin", "{\"Params\":\"40e3, 1e3, 60e3\"}");
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
     // Check that rebin was called
@@ -120,7 +120,7 @@ public:
     FrameworkManager::Instance();
     AlgorithmManager::Instance().clear();
     EventWorkspace_sptr ws;
-    ws = doExecEvent("Replace", 1, "Rebin", "Params=40e3, 1e3, 60e3");
+    ws = doExecEvent("Replace", 1, "Rebin", "{\"Params\":\"40e3, 1e3, 60e3\"}");
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);

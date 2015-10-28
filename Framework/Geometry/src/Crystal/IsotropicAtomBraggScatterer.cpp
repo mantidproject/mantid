@@ -11,6 +11,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/assign.hpp>
 
+#include <jsoncpp/json/json.h>
+
 namespace Mantid {
 namespace Geometry {
 
@@ -174,15 +176,18 @@ BraggScatterer_sptr IsotropicAtomBraggScattererParser::getScatterer(
   }
 
   std::vector<std::string> cleanScattererTokens =
-      getCleanScattererTokens(tokens);
+     getCleanScattererTokens(tokens);
   std::vector<std::string> properties =
       boost::assign::list_of("Element")("Position")("Occupancy")("U")
           .convert_to_container<std::vector<std::string>>();
 
-  std::string initString;
+  ::Json::Value root;
   for (size_t i = 0; i < cleanScattererTokens.size(); ++i) {
-    initString += properties[i] + "=" + cleanScattererTokens[i] + ";";
+    root[properties[i]] = cleanScattererTokens[i];
   }
+
+  ::Json::FastWriter writer;
+  std::string initString = writer.write(root);
 
   return BraggScattererFactory::Instance().createScatterer(
       "IsotropicAtomBraggScatterer", initString);
