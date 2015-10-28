@@ -73,7 +73,7 @@ The script provides some information about the predicted peaks and
 their structure factors. Additionally it prints out the HKL of peaks
 with predicted structure factor very close to 0, which are absent:
 
-.. testoutput::
+.. testoutput:: ExPredictPeaksCrystalStructure
 
     There are 294 detectable peaks.
     Maximum intensity: 6101.93
