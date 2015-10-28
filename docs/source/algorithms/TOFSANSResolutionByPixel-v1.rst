@@ -29,7 +29,7 @@ by wavelength steps set elsewhere in Mantid which should be at least as large as
 equivalent time bins used in the original histogram data collection. For event mode data 
 :math:`\Delta \lambda` is in theory very small, but in practice a histogram in 
 time has to be generated (perhaps using monitor time bins or specifically set 
-“event time bins”), before a rebinning into user provided wavelength steps in InputWorkspace. 
+event-time-bins), before a rebinning into user provided wavelength steps in InputWorkspace. 
 Again the latter steps should be the largest.
 
 Q values needed here are calculated in the same way as for Q1D, including correction 
