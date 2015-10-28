@@ -3,8 +3,6 @@ from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspacePropert
 from mantid.kernel import Direction
 import numpy as np
 
-import mlzutils
-
 
 class DNSDetEffCorrVana(PythonAlgorithm):
     """
@@ -87,6 +85,17 @@ class DNSDetEffCorrVana(PythonAlgorithm):
 
         return vmean
 
+    def cleanup(self, wslist):
+        """
+        deletes workspaces from list
+        @param wslist List of names of workspaces to delete.
+        """
+        for wsname in wslist:
+            if api.AnalysisDataService.doesExist(wsname):
+                delete = self.createChildAlgorithm('DeleteWorkspace')
+                delete.setProperty("Workspace", wsname)
+        return
+
     def _vana_correct(self):
         """
         creates the corrected workspace
@@ -106,7 +115,7 @@ class DNSDetEffCorrVana(PythonAlgorithm):
         arr = np.array(_vana_bg_.extractY()).flatten()
         neg_values = np.where(arr < 0)[0]
         if len(neg_values):
-            mlzutils.cleanup(wslist)
+            self.cleanup(wslist)
             message = "Background " + self.bkgws.getName() + " is higher than Vanadium " + \
                 self.vanaws.getName() + " signal!"
             self.log().error(message)
@@ -115,7 +124,7 @@ class DNSDetEffCorrVana(PythonAlgorithm):
         # 3. calculate correction coefficients
         _vana_mean_ws_ = self._vana_mean(_vana_bg_)
         if not _vana_mean_ws_:
-            mlzutils.cleanup(wslist)
+            self.cleanup(wslist)
             return None
         if not self.vana_mean_name:
             wslist.append(_vana_mean_ws_.getName())
@@ -126,8 +135,34 @@ class DNSDetEffCorrVana(PythonAlgorithm):
                    OutputWorkspace=self.outws_name)
         outws = api.mtd[self.outws_name]
         # cleanup
-        mlzutils.cleanup(wslist)
+        self.cleanup(wslist)
         return outws
+
+    def validateInputs(self):
+        issues = dict()
+
+        dataws = self.getProperty("InputWorkspace").value
+        vanaws = self.getProperty("VanaWorkspace").value
+        bkgws = self.getProperty("BkgWorkspace").value
+
+        # dimensions must match
+        ndims = dataws.getNumDims()
+        nhists = dataws.getNumberHistograms()
+        nblocks = dataws.blocksize()
+        if vanaws.getNumDims() != ndims:
+            issues["VanaWorkspace"] = "Number of dimensions does not match to the data workspace."
+        if bkgws.getNumDims() != ndims:
+            issues["BkgWorkspace"] = "Number of dimensions does not match to the data workspace."
+        if vanaws.getNumberHistograms() != nhists:
+            issues["VanaWorkspace"] = "Number of histograms does not match to the data workspace."
+        if bkgws.getNumberHistograms() != nhists:
+            issues["BkgWorkspace"] = "Number of histograms does not match to the data workspace."
+        if vanaws.blocksize() != nblocks:
+            issues["VanaWorkspace"] = "Number of blocks does not match to the data workspace."
+        if bkgws.blocksize() != nblocks:
+            issues["BkgWorkspace"] = "Number of blocks does not match to the data workspace."
+
+        return issues
 
     def PyExec(self):
         # Input
@@ -137,14 +172,15 @@ class DNSDetEffCorrVana(PythonAlgorithm):
         self.bkgws = api.mtd[self.getPropertyValue("BkgWorkspace")]
         self.vana_mean_name = self.getPropertyValue("VanadiumMean")
 
-        # check dimensions
-        wslist = [self.dataws.getName(), self.vanaws.getName(), self.bkgws.getName()]
-        mlzutils.same_dimensions(wslist)
         # check if the _NORM workspaces exist
         wslist_norm = [self.vanaws.getName() + '_NORM', self.bkgws.getName() + '_NORM']
-        mlzutils.ws_exist(wslist_norm, self.log())
+        for wsname in wslist_norm:
+            if not api.AnalysisDataService.doesExist(wsname):
+                message = "Workspace " + wsname + " does not exist!"
+                raise RuntimeError(message)
 
         # check sample logs, produce warnings if different
+        wslist = [self.dataws.getName(), self.vanaws.getName(), self.bkgws.getName()]
         result = api.CompareSampleLogs(wslist, self.properties_to_compare, 5e-3)
         if len(result) > 0:
             self.log().warning("Sample logs " + result + " do not match!")

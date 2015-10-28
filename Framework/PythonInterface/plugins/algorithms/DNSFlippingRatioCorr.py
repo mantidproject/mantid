@@ -4,8 +4,6 @@ from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspacePropert
 from mantid.kernel import Direction, FloatBoundedValidator
 import numpy as np
 
-import mlzutils
-
 
 class DNSFlippingRatioCorr(PythonAlgorithm):
     """
@@ -129,17 +127,12 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
             self.log().error(message)
             raise RuntimeError(message)
         # workspaces and normalization workspaces must exist
-        wslist = self.input_workspaces.values()
         # for data workspaces normalization is not mandatory
         dataws_names = [self.input_workspaces['SF_Data'], self.input_workspaces['NSF_Data']]
         for wsname in self.input_workspaces.values():
             if wsname not in dataws_names:
-                wslist.append(wsname + '_NORM')
-
-        mlzutils.ws_exist(wslist, self.log())
-
-        # they must have the same dimensions
-        mlzutils.same_dimensions(self.input_workspaces.values())
+                if not api.AnalysisDataService.doesExist(wsname + '_NORM'):
+                    raise RuntimeError("Normalization workspace for " + wsname + " does not exist.")
 
         # and the same polarisation
         self._same_polarisation()
@@ -152,6 +145,17 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         if len(result) > 0:
             self.log().warning("Sample logs " + result + " do not match!")
         return True
+
+    def cleanup(self, wslist):
+        """
+        deletes workspaces from list
+        @param wslist List of names of workspaces to delete.
+        """
+        for wsname in wslist:
+            if api.AnalysisDataService.doesExist(wsname):
+                delete = self.createChildAlgorithm('DeleteWorkspace')
+                delete.setProperty("Workspace", wsname)
+        return
 
     def _fr_correction(self):
         """
@@ -191,7 +195,7 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         sf_neg_values = np.where(sf_arr < 0)[0]
         nsf_neg_values = np.where(nsf_arr < 0)[0]
         if len(sf_neg_values) or len(nsf_neg_values):
-            mlzutils.cleanup(wslist)
+            self.cleanup(wslist)
             message = "Background is higher than NiCr signal!"
             self.log().error(message)
             raise RuntimeError(message)
@@ -224,8 +228,33 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
             api.Minus(LHSWorkspace=nsf_outws, RHSWorkspace=_tmp_ws_, OutputWorkspace=self.nsf_outws_name)
 
         # cleanup
-        mlzutils.cleanup(wslist)
+        self.cleanup(wslist)
         return
+
+    def validateInputs(self):
+        issues = dict()
+
+        workspaces = {"NSFDataWorkspace": None, "SFNiCrWorkspace": None, "NSFNiCrWorkspace": None,
+                      "SFBkgrWorkspace": None, "NSFBkgrWorkspace": None}
+
+        for key in workspaces.keys():
+            workspaces[key] = self.getProperty(key).value
+
+        # dimensions must match
+        datasf = self.getProperty("SFDataWorkspace").value
+        ndims = datasf.getNumDims()
+        nhists = datasf.getNumberHistograms()
+        nblocks = datasf.blocksize()
+
+        for key in workspaces.keys():
+            if workspaces[key].getNumDims() != ndims:
+                issues[key] = "Number of dimensions does not match to the data workspace."
+            if workspaces[key].getNumberHistograms() != nhists:
+                issues[key] = "Number of histograms does not match to the data workspace."
+            if workspaces[key].blocksize() != nblocks:
+                issues[key] = "Number of blocks does not match to the data workspace."
+
+        return issues
 
     def PyExec(self):
         # Input

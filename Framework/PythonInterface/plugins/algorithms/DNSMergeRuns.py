@@ -1,9 +1,7 @@
 import mantid.simpleapi as api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty
-from mantid.kernel import Direction, StringArrayProperty, StringListValidator, V3D
+from mantid.kernel import Direction, StringArrayProperty, StringListValidator, V3D, StringArrayLengthValidator
 import numpy as np
-
-import mlzutils
 
 
 class DNSMergeRuns(PythonAlgorithm):
@@ -44,8 +42,11 @@ class DNSMergeRuns(PythonAlgorithm):
         return "Merges runs performed at different detector bank positions into one matrix workspace."
 
     def PyInit(self):
-        self.declareProperty(StringArrayProperty(name="WorkspaceNames",
-                                                 direction=Direction.Input),
+
+        validator = StringArrayLengthValidator()
+        validator.setLengthMin(2)
+
+        self.declareProperty(StringArrayProperty(name="WorkspaceNames", direction=Direction.Input, validator=validator),
                              doc="List of Workspace names to merge.")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
                              doc="A workspace name to save the merged data.")
@@ -56,29 +57,48 @@ class DNSMergeRuns(PythonAlgorithm):
                              "otherwise the separate normalization workspace will be created.")
         return
 
+    def validateInputs(self):
+        issues = dict()
+        workspace_names = self.getProperty("WorkspaceNames").value
+
+        if not api.AnalysisDataService.doesExist(workspace_names[0]):
+            issues["WorkspaceNames"] = "Workspace " + workspace_names[0] + " does not exist!"
+            return issues
+
+        ws0 = api.AnalysisDataService.retrieve(workspace_names[0])
+        ndims = ws0.getNumDims()
+        nhists = ws0.getNumberHistograms()
+        nblocks = ws0.blocksize()
+        # workspaces must exist and have the same dimensions
+        for wsname in workspace_names[1:]:
+            if not api.AnalysisDataService.doesExist(wsname):
+                issues["WorkspaceNames"] = "Workspace " + wsname + " does not exist"
+            else:
+                wks = api.AnalysisDataService.retrieve(wsname)
+                if wks.getNumDims() != ndims:
+                    issues["WorkspaceNames"] = "Number of dimensions for workspace " + wks.getName() + \
+                        " does not match to one for " + ws0.getName()
+                if wks.getNumberHistograms() != nhists:
+                    issues["WorkspaceNames"] = "Number of histohrams for workspace " + wks.getName() + \
+                        " does not match to one for " + ws0.getName()
+                if wks.blocksize() != nblocks:
+                    issues["WorkspaceNames"] = "Number of blocks for workspace " + wks.getName() + \
+                        " does not match to one for " + ws0.getName()
+
+        return issues
+
     def _can_merge(self):
         """
         checks whether it is possible to merge the given list of workspaces
         """
-        # list of workspaces must not be empty
-        if not self.workspace_names:
-            message = "No workspace names has been specified! Nothing to merge."
-            self.log().error(message)
-            raise RuntimeError(message)
-
-        # workspaces must exist
-        mlzutils.ws_exist(self.workspace_names, self.log())
-
         # all workspaces must be either normalized or not normalized, but not mixed
         self._are_normalized()
 
         # if data are not normalized, normalization workspaces must exist
         if not self.is_normalized:
-            wslist = [wsname + '_NORM' for wsname in self.workspace_names]
-            mlzutils.ws_exist(wslist, self.log())
-
-        # they must have the same dimensions
-        mlzutils.same_dimensions(self.workspace_names)
+            for wsname in self.workspace_names:
+                if not api.AnalysisDataService.doesExist(wsname + '_NORM'):
+                    raise RuntimeError("Normalization workspace for " + wsname + " does not exist!")
 
         # and the same wavelength
         self._same_wavelength()
@@ -146,7 +166,7 @@ class DNSMergeRuns(PythonAlgorithm):
                 self.log().information("Merge not normalized workspaces")
                 return False
         else:
-            message = "Cannot merge workspaces with different wavelength!"
+            message = "Cannot merge normalized and not normalized workspaces!"
             self.log().error(message)
             raise RuntimeError(message)
 
