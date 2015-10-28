@@ -2085,7 +2085,7 @@ class ConvertToQISIS(ReductionStep):
         @returns the sigma moderator workspace
         '''
         moderator_ws = LoadRKH(Filename = self.get_q_resolution_moderator(),  FirstColumnValue="Wavelength")
-        moderator_wavelength_ws = ConvertToHistogram(InputWorkspace = moderator_ws)
+        moderator_histogram_ws = ConvertToHistogram(InputWorkspace = moderator_ws)
         DeleteWorkspace(moderator_ws)
         return moderator_histogram_ws
 
