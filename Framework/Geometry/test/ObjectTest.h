@@ -1036,7 +1036,7 @@ private:
       }
       A->setName(vc->first);
       SMap.insert(STYPE::value_type(vc->first,
-                                    boost::shared_ptr<Surface>(std::move(A))));
+                                    boost::shared_ptr<Surface>(A.release())));
     }
 
     return;

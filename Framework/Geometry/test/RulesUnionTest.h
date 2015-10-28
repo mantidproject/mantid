@@ -15,6 +15,8 @@
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Cone.h"
 
+#include "boost/make_shared.hpp"
+
 using namespace Mantid;
 using namespace Geometry;
 using Mantid::Kernel::V3D;
@@ -29,16 +31,16 @@ public:
 
   void testTwoRuleConstructor() {
     SurfPoint *S1, *S2;
-    auto P1 = std::unique_ptr<Surface>(new Plane);
-    auto Sp1 = std::unique_ptr<Surface>(new Sphere);
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
     S1 = new SurfPoint();
     S2 = new SurfPoint();
-    S1->setKey(std::move(P1));
+    S1->setKey(P1);
     S1->setKeyN(10);
-    S2->setKey(std::move(Sp1));
+    S2->setKey(Sp1);
     S2->setKeyN(11);
     Union A(S1, S2);
     TS_ASSERT_EQUALS(A.display(), "10 : 11");
@@ -49,16 +51,16 @@ public:
   void testThreeRuleConstructor() {
     Union Parent;
     SurfPoint *S1, *S2;
-    auto P1 = std::unique_ptr<Surface>(new Plane);
-    auto Sp1 = std::unique_ptr<Surface>(new Sphere);
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
     S1 = new SurfPoint();
     S2 = new SurfPoint();
-    S1->setKey(std::move(P1));
+    S1->setKey(P1);
     S1->setKeyN(10);
-    S2->setKey(std::move(Sp1));
+    S2->setKey(Sp1);
     S2->setKeyN(11);
     Union A(&Parent, S1, S2);
     TS_ASSERT_EQUALS(A.display(), "10 : 11");
@@ -69,16 +71,16 @@ public:
 
   void testUnionConstructor() {
     SurfPoint *S1, *S2;
-    auto P1 = std::unique_ptr<Surface>(new Plane);
-    auto Sp1 = std::unique_ptr<Surface>(new Sphere);
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
     S1 = new SurfPoint();
     S2 = new SurfPoint();
-    S1->setKey(std::move(P1));
+    S1->setKey(P1);
     S1->setKeyN(10);
-    S2->setKey(std::move(Sp1));
+    S2->setKey(Sp1);
     S2->setKeyN(11);
     Union A(S1, S2);
     TS_ASSERT_EQUALS(A.display(), "10 : 11");
@@ -92,16 +94,16 @@ public:
 
   void testClone() {
     SurfPoint *S1, *S2;
-    auto P1 = std::unique_ptr<Surface>(new Plane);
-    auto Sp1 = std::unique_ptr<Surface>(new Sphere);
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
     S1 = new SurfPoint();
     S2 = new SurfPoint();
-    S1->setKey(std::move(P1));
+    S1->setKey(P1);
     S1->setKeyN(10);
-    S2->setKey(std::move(Sp1));
+    S2->setKey(Sp1);
     S2->setKeyN(11);
     Union A(S1, S2);
     TS_ASSERT_EQUALS(A.display(), "10 : 11");
@@ -117,16 +119,16 @@ public:
 
   void testAssignment() {
     SurfPoint *S1, *S2;
-    auto P1 = std::unique_ptr<Surface>(new Plane);
-    auto Sp1 = std::unique_ptr<Surface>(new Sphere);
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
     S1 = new SurfPoint();
     S2 = new SurfPoint();
-    S1->setKey(std::move(P1));
+    S1->setKey(P1);
     S1->setKeyN(10);
-    S2->setKey(std::move(Sp1));
+    S2->setKey(Sp1);
     S2->setKeyN(11);
     Union A(S1, S2);
     TS_ASSERT_EQUALS(A.display(), "10 : 11");
@@ -141,16 +143,16 @@ public:
 
   void testSetLeaves() {
     SurfPoint *S1, *S2;
-    auto P1 = std::unique_ptr<Surface>(new Plane);
-    auto Sp1 = std::unique_ptr<Surface>(new Sphere);
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
     S1 = new SurfPoint();
     S2 = new SurfPoint();
-    S1->setKey(std::move(P1));
+    S1->setKey(P1);
     S1->setKeyN(10);
-    S2->setKey(std::move(Sp1));
+    S2->setKey(Sp1);
     S2->setKeyN(11);
     Union A;
     A.setLeaves(S1, S2);
@@ -161,16 +163,16 @@ public:
 
   void testSetLeaf() {
     SurfPoint *S1, *S2;
-    auto P1 = std::unique_ptr<Surface>(new Plane);
-    auto Sp1 = std::unique_ptr<Surface>(new Sphere);
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
     S1 = new SurfPoint();
     S2 = new SurfPoint();
-    S1->setKey(std::move(P1));
+    S1->setKey(P1);
     S1->setKeyN(10);
-    S2->setKey(std::move(Sp1));
+    S2->setKey(Sp1);
     S2->setKeyN(11);
     Union A;
     A.setLeaf(S2, 1);
@@ -184,16 +186,16 @@ public:
 
   void testFindLeaf() {
     SurfPoint *S1, *S2, S3;
-    auto P1 = std::unique_ptr<Surface>(new Plane);
-    auto Sp1 = std::unique_ptr<Surface>(new Sphere);
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
     S1 = new SurfPoint();
     S2 = new SurfPoint();
-    S1->setKey(std::move(P1));
+    S1->setKey(P1);
     S1->setKeyN(10);
-    S2->setKey(std::move(Sp1));
+    S2->setKey(Sp1);
     S2->setKeyN(11);
     Union A;
     A.setLeaves(S1, S2);
@@ -207,16 +209,16 @@ public:
 
   void testFindKey() {
     SurfPoint *S1, *S2;
-    auto P1 = std::unique_ptr<Surface>(new Plane);
-    auto Sp1 = std::unique_ptr<Surface>(new Sphere);
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
     S1 = new SurfPoint();
     S2 = new SurfPoint();
-    S1->setKey(std::move(P1));
+    S1->setKey(P1);
     S1->setKeyN(10);
-    S2->setKey(std::move(Sp1));
+    S2->setKey(Sp1);
     S2->setKeyN(11);
     Union A;
     A.setLeaves(S1, S2);
@@ -231,16 +233,16 @@ public:
   void testIsComplementary() { // Problem: it only detects whether first leaf or
                                // second leaf but not both
     SurfPoint *S1, *S2;
-    auto P1 = std::unique_ptr<Surface>(new Plane);
-    auto Sp1 = std::unique_ptr<Surface>(new Sphere);
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
     S1 = new SurfPoint();
     S2 = new SurfPoint();
-    S1->setKey(std::move(P1));
+    S1->setKey(P1);
     S1->setKeyN(10);
-    S2->setKey(std::move(Sp1));
+    S2->setKey(Sp1);
     S2->setKeyN(11);
     Union A(S1, S2);
     TS_ASSERT_EQUALS(A.display(), "10 : 11");
@@ -257,16 +259,16 @@ public:
 
   void testIsValid() {
     SurfPoint *S1, *S2;
-    auto P1 = std::unique_ptr<Surface>(new Plane);
-    auto Sp1 = std::unique_ptr<Surface>(new Sphere);
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
     S1 = new SurfPoint();
     S2 = new SurfPoint();
-    S1->setKey(std::move(P1));
+    S1->setKey(P1);
     S1->setKeyN(10);
-    S2->setKey(std::move(Sp1));
+    S2->setKey(Sp1);
     S2->setKeyN(-11);
     Union A(S1, S2);
     TS_ASSERT_EQUALS(A.display(), "10 : -11");
@@ -282,16 +284,16 @@ public:
 
   void testIsValidMap() {
     SurfPoint *S1, *S2;
-    auto P1 = std::unique_ptr<Surface>(new Plane);
-    auto Sp1 = std::unique_ptr<Surface>(new Sphere);
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
     S1 = new SurfPoint();
     S2 = new SurfPoint();
-    S1->setKey(std::move(P1));
+    S1->setKey(P1);
     S1->setKeyN(10);
-    S2->setKey(std::move(Sp1));
+    S2->setKey(Sp1);
     S2->setKeyN(-11);
     Union A(S1, S2);
     TS_ASSERT_EQUALS(A.display(), "10 : -11");

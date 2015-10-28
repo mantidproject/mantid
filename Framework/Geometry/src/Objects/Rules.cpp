@@ -592,7 +592,7 @@ int Rule::substituteSurf(const int SurfN, const int newSurfN,
   SurfPoint *Ptr = dynamic_cast<SurfPoint *>(findKey(SurfN));
   while (Ptr) {
     Ptr->setKeyN(Ptr->getSign() * newSurfN);
-    Ptr->setKey(SPtr); // Clone to ensure uniqueness
+    Ptr->setKey(SPtr);
     cnt++;
     // get next key
     Ptr = dynamic_cast<SurfPoint *>(findKey(SurfN));
