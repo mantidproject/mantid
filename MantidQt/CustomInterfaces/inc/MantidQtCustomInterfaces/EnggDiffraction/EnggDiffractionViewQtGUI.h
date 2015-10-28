@@ -9,6 +9,7 @@
 #include "ui_EnggDiffractionQtGUI.h"
 #include "ui_EnggDiffractionQtTabCalib.h"
 #include "ui_EnggDiffractionQtTabFocus.h"
+#include "ui_EnggDiffractionQtTabPreproc.h"
 #include "ui_EnggDiffractionQtTabSettings.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -197,6 +198,7 @@ private:
   // but they could be separate dialogs, widgets, etc.
   Ui::EnggDiffractionQtTabCalib m_uiTabCalib;
   Ui::EnggDiffractionQtTabFocus m_uiTabFocus;
+  Ui::EnggDiffractionQtTabPreproc m_uiTabPreproc;
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
 
   /// instrument selected (ENGIN-X, etc.)

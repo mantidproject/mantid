@@ -72,6 +72,10 @@ void EnggDiffractionViewQtGUI::initLayout() {
   m_uiTabFocus.setupUi(wFocus);
   m_ui.tabMain->addTab(wFocus, QString("Focus"));
 
+  QWidget *wPreproc = new QWidget(m_ui.tabMain);
+  m_uiTabPreproc.setupUi(wPreproc);
+  m_ui.tabMain->addTab(wPreproc, QString("Pre-processing"));
+
   QWidget *wSettings = new QWidget(m_ui.tabMain);
   m_uiTabSettings.setupUi(wSettings);
   m_ui.tabMain->addTab(wSettings, QString("Settings"));
