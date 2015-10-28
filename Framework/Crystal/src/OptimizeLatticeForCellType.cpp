@@ -93,7 +93,7 @@ void OptimizeLatticeForCellType::exec() {
   runWS.push_back(ws);
 
   if (perRun) {
-    std::vector<std::pair<std::string, bool> > criteria;
+    std::vector<std::pair<std::string, bool>> criteria;
     // Sort by run number
     criteria.push_back(std::pair<std::string, bool>("runnumber", true));
     ws->sort(criteria);
@@ -131,8 +131,7 @@ void OptimizeLatticeForCellType::exec() {
     IAlgorithm_sptr fit_alg;
     try {
       fit_alg = createChildAlgorithm("Fit", -1, -1, false);
-    }
-    catch (Exception::NotFoundError &) {
+    } catch (Exception::NotFoundError &) {
       g_log.error("Can't locate Fit algorithm");
       throw;
     }
@@ -156,8 +155,7 @@ void OptimizeLatticeForCellType::exec() {
     try {
       ub_alg =
           createChildAlgorithm("FindUBUsingLatticeParameters", -1, -1, false);
-    }
-    catch (Exception::NotFoundError &) {
+    } catch (Exception::NotFoundError &) {
       g_log.error("Can't locate FindUBUsingLatticeParameters algorithm");
       throw;
     }
@@ -208,9 +206,9 @@ void OptimizeLatticeForCellType::exec() {
                                                runWS[i_run]->getName() +
                                                ".integrate");
       savePks_alg->executeAsChildAlg();
-      g_log.notice() << "See output file: " << outputdir + "ls" +
-                                                   runWS[i_run]->getName() +
-                                                   ".integrate"
+      g_log.notice() << "See output file: "
+                     << outputdir + "ls" + runWS[i_run]->getName() +
+                            ".integrate"
                      << "\n";
       // Save UB
       Mantid::API::IAlgorithm_sptr saveUB_alg =
