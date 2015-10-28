@@ -2,7 +2,7 @@
 #define Rules_h
 
 #include <map>
-#include <memory>
+#include <boost/shared_ptr.hpp>
 
 class TopoDS_Shape;
 
@@ -229,7 +229,7 @@ be calculated
 
 class MANTID_GEOMETRY_DLL SurfPoint : public Rule {
 private:
-  std::unique_ptr<Surface> key; ///< Actual Surface Base Object
+  boost::shared_ptr<Surface> m_key; ///< Actual Surface Base Object
   int keyN;                     ///< Key Number (identifer)
   int sign;                     ///< +/- in Object unit
 public:
@@ -251,14 +251,14 @@ public:
   int type() const { return 0; } ///< Effective name
 
   void setKeyN(const int Ky); ///< set keyNumber
-  void setKey(std::unique_ptr<Surface> key);
+  void setKey(const boost::shared_ptr<Surface> &key);
   bool isValid(const Kernel::V3D &) const;
   bool isValid(const std::map<int, int> &) const;
   int getSign() const { return sign; } ///< Get Sign
   int getKeyN() const { return keyN; } ///< Get Key
   int simplify();
 
-  Surface *getKey() const { return key.get(); } ///< Get Surface Ptr
+  Surface *getKey() const { return m_key.get(); } ///< Get Surface Ptr
   std::string display() const;
   std::string displayAddress() const;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,

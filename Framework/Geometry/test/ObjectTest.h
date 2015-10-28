@@ -8,7 +8,8 @@
 #include <algorithm>
 #include <ctime>
 
-#include <boost/shared_ptr.hpp>
+#include "boost/shared_ptr.hpp"
+#include "boost/make_shared.hpp"
 
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
@@ -291,8 +292,8 @@ public:
     std::string S41 = "s 1 1 1 4"; // Sphere at (1,1,1) radius 4
 
     // First create some surfaces
-    std::map<int, std::unique_ptr<Surface>> SphSurMap;
-    SphSurMap[41] = std::unique_ptr<Sphere>(new Sphere());
+    std::map<int, boost::shared_ptr<Surface>> SphSurMap;
+    SphSurMap[41] = boost::make_shared<Sphere>();
     SphSurMap[41]->setSurface(S41);
     SphSurMap[41]->setName(41);
 
@@ -887,7 +888,7 @@ public:
 
 private:
   /// Surface type
-  typedef std::map<int, std::unique_ptr<Surface>> STYPE;
+  typedef std::map<int, boost::shared_ptr<Surface>> STYPE;
 
   /// set timeTest true to get time comparisons of soild angle methods
   const static bool timeTest = false;
@@ -900,10 +901,10 @@ private:
     std::string C33 = "px -3.2";
 
     // First create some surfaces
-    std::map<int, std::unique_ptr<Surface>> CylSurMap;
-    CylSurMap[31] = std::unique_ptr<Surface>(new Cylinder());
-    CylSurMap[32] = std::unique_ptr<Surface>(new Plane());
-    CylSurMap[33] = std::unique_ptr<Surface>(new Plane());
+    std::map<int, boost::shared_ptr<Surface>> CylSurMap;
+    CylSurMap[31] = boost::make_shared<Cylinder>();
+    CylSurMap[32] = boost::make_shared<Plane>();
+    CylSurMap[33] = boost::make_shared<Plane>();
 
     CylSurMap[31]->setSurface(C31);
     CylSurMap[32]->setSurface(C32);
@@ -935,10 +936,10 @@ private:
     std::string C33 = "px -1.0";
 
     // First create some surfaces
-    std::map<int, std::unique_ptr<Surface>> CylSurMap;
-    CylSurMap[31] = std::unique_ptr<Cylinder>(new Cylinder());
-    CylSurMap[32] = std::unique_ptr<Plane>(new Plane());
-    CylSurMap[33] = std::unique_ptr<Plane>(new Plane());
+    std::map<int, boost::shared_ptr<Surface>> CylSurMap;
+    CylSurMap[31] = boost::make_shared<Cylinder>();
+    CylSurMap[32] = boost::make_shared<Plane>();
+    CylSurMap[33] = boost::make_shared<Plane>();
 
     CylSurMap[31]->setSurface(C31);
     CylSurMap[32]->setSurface(C32);
@@ -962,8 +963,8 @@ private:
     std::string S41 = "so 4.1"; // Sphere at origin radius 4.1
 
     // First create some surfaces
-    std::map<int, std::unique_ptr<Surface>> SphSurMap;
-    SphSurMap[41] = std::unique_ptr<Sphere>(new Sphere());
+    std::map<int, boost::shared_ptr<Surface>> SphSurMap;
+    SphSurMap[41] = boost::make_shared<Sphere>();
     SphSurMap[41]->setSurface(S41);
     SphSurMap[41]->setName(41);
 
@@ -1034,7 +1035,8 @@ private:
         exit(1);
       }
       A->setName(vc->first);
-      SMap.insert(STYPE::value_type(vc->first, std::move(A)));
+      SMap.insert(STYPE::value_type(vc->first,
+                                    boost::shared_ptr<Surface>(std::move(A))));
     }
 
     return;
@@ -1049,13 +1051,13 @@ private:
     std::string C6 = "pz 0.5";
 
     // Create surfaces
-    std::map<int, std::unique_ptr<Surface>> CubeSurMap;
-    CubeSurMap[1] = std::unique_ptr<Plane>(new Plane());
-    CubeSurMap[2] = std::unique_ptr<Plane>(new Plane());
-    CubeSurMap[3] = std::unique_ptr<Plane>(new Plane());
-    CubeSurMap[4] = std::unique_ptr<Plane>(new Plane());
-    CubeSurMap[5] = std::unique_ptr<Plane>(new Plane());
-    CubeSurMap[6] = std::unique_ptr<Plane>(new Plane());
+    std::map<int, boost::shared_ptr<Surface>> CubeSurMap;
+    CubeSurMap[1] = boost::make_shared<Plane>();
+    CubeSurMap[2] = boost::make_shared<Plane>();
+    CubeSurMap[3] = boost::make_shared<Plane>();
+    CubeSurMap[4] = boost::make_shared<Plane>();
+    CubeSurMap[5] = boost::make_shared<Plane>();
+    CubeSurMap[6] = boost::make_shared<Plane>();
 
     CubeSurMap[1]->setSurface(C1);
     CubeSurMap[2]->setSurface(C2);
@@ -1090,13 +1092,13 @@ private:
     std::string C6 = planes[5];
 
     // Create surfaces
-    std::map<int, std::unique_ptr<Surface>> CubeSurMap;
-    CubeSurMap[1] = std::unique_ptr<Plane>(new Plane());
-    CubeSurMap[2] = std::unique_ptr<Plane>(new Plane());
-    CubeSurMap[3] = std::unique_ptr<Plane>(new Plane());
-    CubeSurMap[4] = std::unique_ptr<Plane>(new Plane());
-    CubeSurMap[5] = std::unique_ptr<Plane>(new Plane());
-    CubeSurMap[6] = std::unique_ptr<Plane>(new Plane());
+    std::map<int, boost::shared_ptr<Surface>> CubeSurMap;
+    CubeSurMap[1] = boost::make_shared<Plane>();
+    CubeSurMap[2] = boost::make_shared<Plane>();
+    CubeSurMap[3] = boost::make_shared<Plane>();
+    CubeSurMap[4] = boost::make_shared<Plane>();
+    CubeSurMap[5] = boost::make_shared<Plane>();
+    CubeSurMap[6] = boost::make_shared<Plane>();
 
     CubeSurMap[1]->setSurface(C1);
     CubeSurMap[2]->setSurface(C2);

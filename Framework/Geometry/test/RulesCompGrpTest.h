@@ -6,6 +6,9 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 #include <cfloat>
+
+#include "boost/make_shared.hpp"
+
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Objects/Object.h"
@@ -140,13 +143,13 @@ private:
     SurfPoint *sR1, *sR2;
     sR1 = new SurfPoint();
     sR2 = new SurfPoint();
-    auto sP = std::unique_ptr<Surface>(new Sphere());
+    auto sP = boost::make_shared<Sphere>();
     sP->setSurface("s 2.0 0.0 0.0 2");
-    sR1->setKey(std::move(sP)); // Sphere
+    sR1->setKey(sP); // Sphere
     sR1->setKeyN(-10);
-    auto cP = std::unique_ptr<Surface>(new Cylinder());
+    auto cP = boost::make_shared<Cylinder>();
     cP->setSurface("cy 1.0");
-    sR2->setKey(std::move(cP)); // cappedcylinder
+    sR2->setKey(cP); // cappedcylinder
     sR2->setKeyN(-11);
     Union *uR1;
     uR1 = new Union(sR1, sR2);

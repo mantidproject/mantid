@@ -421,7 +421,7 @@ int Rule::removeItem(Rule *&TRule, const int SurfN)
         throw std::logic_error("Failed to cast Rule object to SurfPoint");
       }
       SX->setKeyN(0);
-      SX->setKey(std::unique_ptr<Surface>());
+      SX->setKey(boost::shared_ptr<Surface>());
       return cnt + 1;
     }
     delete Ptr;
