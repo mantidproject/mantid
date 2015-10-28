@@ -36,13 +36,11 @@ const std::string CreateMD::name() const { return "CreateMD"; }
 int CreateMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CreateMD::category() const {
-  return "TODO: FILL IN A CATEGORY";
-}
+const std::string CreateMD::category() const { return "MDAlgorithms"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string CreateMD::summary() const {
-  return "TODO: FILL IN A SUMMARY";
+  return "Creates an MDWorkspace in the Q3D, HKL frame";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -139,7 +137,7 @@ Mantid::API::Workspace_sptr CreateMD::loadWs(const std::string &filename,
  * Set the sample log for the workspace
  */
 void CreateMD::addSampleLog(Mantid::API::Workspace_sptr workspace,
-                            const std::string &log_name, int log_number) {
+                            const std::string &log_name, double log_number) {
   Algorithm_sptr log_alg = createChildAlgorithm("AddSampleLog");
 
   std::stringstream log_num_str;
@@ -165,6 +163,27 @@ void CreateMD::setGoniometer(Mantid::API::Workspace_sptr workspace) {
   log_alg->setProperty("Axis2", "psi,0,1,0,1");
 
   log_alg->executeAsChildAlg();
+}
+
+/*
+ * Set UB for the workspace
+ */
+void CreateMD::setUB(Mantid::API::Workspace_sptr workspace, double a, double b,
+                     double c, double alpha, double beta, double gamma,
+                     const std::vector<double> &u,
+                     const std::vector<double> &v) {
+  Algorithm_sptr set_ub_alg = createChildAlgorithm("SetUB");
+
+  set_ub_alg->setProperty("Workspace", workspace);
+  set_ub_alg->setProperty("a", a);
+  set_ub_alg->setProperty("b", b);
+  set_ub_alg->setProperty("c", c);
+  set_ub_alg->setProperty("alpha", alpha);
+  set_ub_alg->setProperty("beta", beta);
+  set_ub_alg->setProperty("gamma", gamma);
+  set_ub_alg->setProperty("u", u);
+  set_ub_alg->setProperty("v", v);
+  set_ub_alg->executeAsChildAlg();
 }
 
 /*
@@ -214,14 +233,60 @@ Mantid::API::Workspace_sptr CreateMD::merge_runs(const std::string &to_merge) {
 }
 
 /*
- * TODO function description
+ * Add parameter logs and convert to MD for a single run
  */
 Mantid::API::Workspace_sptr CreateMD::single_run(
     Mantid::API::Workspace_sptr input_workspace, const std::string &emode,
-    const std::string &efix, const std::string &psi, const std::string &gl,
-    const std::string &gs, bool in_place, const std::string &alatt,
-    const std::string &angdeg, const std::string &u, const std::string &v,
-    Mantid::API::Workspace_sptr out_mdws) {}
+    double efix, double psi, double gl, double gs, bool in_place,
+    const std::vector<double> &alatt, const std::vector<double> &angdeg,
+    const std::vector<double> &u, const std::vector<double> &v,
+    Mantid::API::Workspace_sptr out_mdws) {
+
+  std::vector<std::string> goniometer_params;
+  goniometer_params.push_back(psi);
+  goniometer_params.push_back(gl);
+  goniometer_params.push_back(gs);
+
+  std::vector<std::string> ub_params;
+  ub_params.push_back(alatt);
+  ub_params.push_back(angdeg);
+  ub_params.push_back(u);
+  ub_params.push_back(v);
+
+  if (std::any_of(ub_params.begin(), ub_params.end(),
+                  [](const std::string &param) { return param.empty(); }) &&
+      !std::all_of(ub_params.begin(), ub_params.end(),
+                   [](const std::string &param) { return param.empty(); })) {
+    throw std::invalid_argument(
+        "Either specify all of alatt, angledeg, u, v or none of them");
+  } else if (std::all_of(
+                 ub_params.begin(), ub_params.end(),
+                 [](const std::string &param) { return param.empty(); })) {
+    if (true) { // TODO check if UB set already
+      g_log.warning() << "Sample already has a UB. This will not be "
+                         "overwritten. Use ClearUB and re-run." << std::endl;
+    } else {
+      setUB(input_workspace, alatt[0], alatt[1], alatt[2], angdeg[0], angdeg[1],
+            angdeg[2], u, v);
+    }
+
+    if (efix > 0.0) {
+      addSampleLog(input_workspace, "Ei", efix);
+    }
+
+    if (std::any_of(goniometer_params.begin(), goniometer_params.end(),
+                    [](const std::string &param) { return param.empty(); })) {
+      addSampleLog(input_workspace, "gl", gl);
+      addSampleLog(input_workspace, "gs", gs);
+      addSampleLog(input_workspace, "psi", psi);
+      setGoniometer(input_workspace);
+    }
+
+    Mantid::API::Workspace_sptr output_run =
+        convertToMD(input_workspace, emode, in_place, out_mdws);
+    return output_run;
+  }
+}
 
 } // namespace MDAlgorithms
 } // namespace Mantid

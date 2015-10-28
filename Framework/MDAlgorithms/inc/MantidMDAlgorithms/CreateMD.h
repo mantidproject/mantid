@@ -48,9 +48,13 @@ private:
                                      const std::string &wsname);
 
   void addSampleLog(Mantid::API::Workspace_sptr workspace,
-                    const std::string &log_name, int log_number);
+                    const std::string &log_name, double log_number);
 
   void setGoniometer(Mantid::API::Workspace_sptr workspace);
+
+  void setUB(Mantid::API::Workspace_sptr workspace, double a, double b,
+             double c, double alpha, double beta, double gamma,
+             const std::vector<double> &u, const std::vector<double> &v);
 
   Mantid::API::Workspace_sptr convertToMD(Mantid::API::Workspace_sptr workspace,
                                           const std::string &analysis_mode,
@@ -61,11 +65,11 @@ private:
 
   Mantid::API::Workspace_sptr
   single_run(Mantid::API::Workspace_sptr input_workspace,
-             const std::string &emode, const std::string &efix,
-             const std::string &psi, const std::string &gl,
-             const std::string &gs, bool in_place, const std::string &alatt,
-             const std::string &angdeg, const std::string &u,
-             const std::string &v, Mantid::API::Workspace_sptr out_mdws);
+             const std::string &emode, double efix, double psi, double gl,
+             double gs, bool in_place, const std::vector<double> &alatt,
+             const std::vector<double> &angdeg, const std::vector<double> &u,
+             const std::vector<double> &v,
+             Mantid::API::Workspace_sptr out_mdws);
 };
 
 } // namespace MDAlgorithms
