@@ -172,9 +172,20 @@ void ContainerSubtraction::addRebinStep(QString toRebin, QString toMatch) {
  */
 bool ContainerSubtraction::validate() {
   UserInputValidator uiv;
+
+  // Check valid inputs
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
   uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
-  MatrixWorkspace_sptr sampleWs;
+
+  // Get Workspaces
+  MatrixWorkspace_sptr sampleWs =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          m_uiForm.dsSample->getCurrentDataName().toStdString());
+  MatrixWorkspace_sptr containerWs =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          m_uiForm.dsContainer->getCurrentDataName().toStdString());
+
+  // Check Sample is of same type as container
   QString sample = m_uiForm.dsSample->getCurrentDataName();
   QString sampleType = sample.right(sample.length() - sample.lastIndexOf("_"));
   QString container = m_uiForm.dsContainer->getCurrentDataName();
@@ -188,6 +199,15 @@ bool ContainerSubtraction::validate() {
   if (containerType != sampleType)
     uiv.addErrorMessage(
         "Sample and can workspaces must contain the same type of data.");
+
+  // Check sample has the same number of Histograms as the contianer
+  const size_t sampleHist = sampleWs->getNumberHistograms();
+  const size_t containerHist = containerWs->getNumberHistograms();
+
+  if (sampleHist != containerHist) {
+    uiv.addErrorMessage(
+        " Sample and Container do not have a matching number of Histograms.");
+  }
 
   // Show errors if there are any
   if (!uiv.isAllInputValid())
