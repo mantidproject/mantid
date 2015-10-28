@@ -155,6 +155,7 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
             if api.AnalysisDataService.doesExist(wsname):
                 delete = self.createChildAlgorithm('DeleteWorkspace')
                 delete.setProperty("Workspace", wsname)
+                delete.execute()
         return
 
     def _fr_correction(self):
