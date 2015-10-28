@@ -45,7 +45,7 @@ which can currently be achieved as in the following example:
     SetUB(ws, a=5.5, b=6.5, c=8.1, u='12,1,1', v='0,4,9')
 
     # Set an arbitrary crystal structure with 2 atoms and some
-    # systematic absences due to space group Pnma
+    # systematic absences due to space group Pbca
     cs = CrystalStructure('5.5 6.5 8.1', 'P b c a',
                           """Ni 0.232 0.114 0.543 1.0 0.00843;
                              Al 0.434 0.041 0.854 1.0 0.01120""")
@@ -80,6 +80,9 @@ with predicted structure factor very close to 0, which are absent:
     Peaks with relative intensity < 1%: 94
     Number of absences: 16
     Absent HKLs: [[2,0,-1], [3,0,-1], [4,0,-1], [5,0,-1], [6,0,-3], [6,0,-1], [7,0,-3], [7,0,-1], [8,0,-3], [8,0,-1], [9,-1,0], [9,0,-3], [9,0,-1], [10,0,-5], [10,0,-3], [10,0,-1]]
+
+All absent HKLs have the form H0L with odd L. This fits with the reflection
+conditions given for :math:`Pbca` in the International Tables for Crystallography A.
 
 Please note that the calculated structure factors are currently not
 corrected for any instrument effects, so depending on instrument
