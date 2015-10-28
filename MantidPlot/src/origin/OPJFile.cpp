@@ -260,6 +260,7 @@ int OPJFile::Parse() {
     printf(" WARNING : could not move to position %d from the beginning of the "
            "file\n",
            0x7);
+    fclose(f);
     return -1;
   }
 
@@ -268,6 +269,7 @@ int OPJFile::Parse() {
     printf(" WARNING : could not read four bytes with the version information, "
            "read: %d bytes\n",
            retval);
+    fclose(f);
     return -1;
   }
 
