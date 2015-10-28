@@ -50,9 +50,8 @@ private:
   void setRunNumberFromInputWorkspace(const API::ExperimentInfo_sptr &inWS);
 
   void fillPossibleHKLsUsingGenerator(
-      const Kernel::DblMatrix &ub,
       const Geometry::OrientedLattice &orientedLattice,
-      std::vector<Kernel::V3D> &possibleHKLs);
+      std::vector<Kernel::V3D> &possibleHKLs) const;
 
   void fillPossibleHKLsUsingPeaksWorkspace(
       const DataObjects::PeaksWorkspace_sptr &possibleHKLWorkspace,

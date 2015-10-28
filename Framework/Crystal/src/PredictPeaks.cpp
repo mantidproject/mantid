@@ -218,12 +218,18 @@ void PredictPeaks::exec() {
   PeaksWorkspace_sptr possibleHKLWorkspace = getProperty("HKLPeaksWorkspace");
 
   if (!possibleHKLWorkspace) {
-    fillPossibleHKLsUsingGenerator(ub, orientedLattice, possibleHKLs);
+    fillPossibleHKLsUsingGenerator(orientedLattice, possibleHKLs);
   } else {
     fillPossibleHKLsUsingPeaksWorkspace(possibleHKLWorkspace, possibleHKLs);
   }
 
   setStructureFactorCalculatorFromSample(sample);
+
+  /* The wavelength filtering can not be done before because it depends
+   * on q being correctly oriented, so an additional filtering step is required.
+   */
+  double lambdaMin = getProperty("WavelengthMin");
+  double lambdaMax = getProperty("WavelengthMax");
 
   Progress prog(this, 0.0, 1.0, possibleHKLs.size() * gonioVec.size());
   prog.setNotifyStep(0.01);
@@ -233,12 +239,21 @@ void PredictPeaks::exec() {
     // Final transformation matrix (HKL to Q in lab frame)
     DblMatrix orientedUB = (*goniometerMatrix) * ub;
 
+    /* Because of the additional filtering step it's better to keep track of the
+     * allowed peaks with a counter. */
+    HKLFilterWavelength lambdaFilter(orientedUB, lambdaMin, lambdaMax);
+
+    size_t allowedPeakCount = 0;
+
     for (auto hkl = possibleHKLs.begin(); hkl != possibleHKLs.end(); ++hkl) {
-      calculateQAndAddToOutput(*hkl, orientedUB, *goniometerMatrix);
+      if (lambdaFilter.isAllowed(*hkl)) {
+        ++allowedPeakCount;
+        calculateQAndAddToOutput(*hkl, orientedUB, *goniometerMatrix);
+      }
       prog.report();
     }
 
-    g_log.notice() << "Out of " << possibleHKLs.size()
+    g_log.notice() << "Out of " << allowedPeakCount
                    << " allowed peaks within parameters, "
                    << m_pw->getNumberPeaks()
                    << " were found to hit a detector.\n";
@@ -285,10 +300,8 @@ void PredictPeaks::checkBeamDirection() const {
 /// Fills possibleHKLs with all HKLs that are allowed within d- and
 /// lambda-limits.
 void PredictPeaks::fillPossibleHKLsUsingGenerator(
-    const DblMatrix &ub, const OrientedLattice &orientedLattice,
-    std::vector<V3D> &possibleHKLs) {
-  double lambdaMin = getProperty("WavelengthMin");
-  double lambdaMax = getProperty("WavelengthMax");
+    const OrientedLattice &orientedLattice,
+    std::vector<V3D> &possibleHKLs) const {
   double dMin = getProperty("MinDSpacing");
   double dMax = getProperty("MaxDSpacing");
 
@@ -304,8 +317,7 @@ void PredictPeaks::fillPossibleHKLsUsingGenerator(
   HKLGenerator gen(orientedLattice, dMin);
   auto filter =
       boost::make_shared<HKLFilterCentering>(refCond) &
-      boost::make_shared<HKLFilterDRange>(orientedLattice, dMin, dMax) &
-      boost::make_shared<HKLFilterWavelength>(ub, lambdaMin, lambdaMax);
+      boost::make_shared<HKLFilterDRange>(orientedLattice, dMin, dMax);
 
   V3D hklMin = *(gen.begin());
 
