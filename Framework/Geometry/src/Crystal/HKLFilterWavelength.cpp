@@ -1,4 +1,5 @@
 #include "MantidGeometry/Crystal/HKLFilterWavelength.h"
+#include <exception>
 
 namespace Mantid {
 namespace Geometry {
