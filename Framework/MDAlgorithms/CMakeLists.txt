@@ -12,7 +12,7 @@ set ( SRC_FILES
 	src/CentroidPeaksMD.cpp
 	src/CentroidPeaksMD2.cpp
 	src/CloneMDWorkspace.cpp
-    src/CompactMD.cpp
+	src/CompactMD.cpp
 	src/CompareMDWorkspaces.cpp
 	src/ConvToMDBase.cpp
 	src/ConvToMDEventsWS.cpp
@@ -31,10 +31,11 @@ set ( SRC_FILES
 	src/ConvertToMDMinMaxLocal.cpp
 	src/ConvertToMDParent.cpp
 	src/ConvertToReflectometryQ.cpp
+	src/CreateMD.cpp
 	src/CreateMDHistoWorkspace.cpp
 	src/CreateMDWorkspace.cpp
 	src/CutMD.cpp
-	src/DisplayNormalizationSetter.cpp	
+	src/DisplayNormalizationSetter.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
 	src/EvaluateMDFunction.cpp
@@ -136,8 +137,8 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CentroidPeaksMD.h
 	inc/MantidMDAlgorithms/CentroidPeaksMD2.h
 	inc/MantidMDAlgorithms/CloneMDWorkspace.h
+	inc/MantidMDAlgorithms/CompactMD.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
-    inc/MantidMDAlgorithms/CompactMD.h
 	inc/MantidMDAlgorithms/ConvToMDBase.h
 	inc/MantidMDAlgorithms/ConvertCWPDMDToSpectra.h
 	inc/MantidMDAlgorithms/ConvertCWSDExpToMomentum.h
@@ -152,6 +153,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToMDMinMaxLocal.h
 	inc/MantidMDAlgorithms/ConvertToMDParent.h
 	inc/MantidMDAlgorithms/ConvertToReflectometryQ.h
+	inc/MantidMDAlgorithms/CreateMD.h
 	inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/CreateMDWorkspace.h
 	inc/MantidMDAlgorithms/CutMD.h
@@ -258,8 +260,8 @@ set ( TEST_FILES
 	CentroidPeaksMD2Test.h
 	CentroidPeaksMDTest.h
 	CloneMDWorkspaceTest.h
+	CompactMDTest.h
 	CompareMDWorkspacesTest.h
-    CompactMDTest.h
 	ConvertCWPDMDToSpectraTest.h
 	ConvertCWSDExpToMomentumTest.h
 	ConvertCWSDMDtoHKLTest.h
@@ -276,6 +278,7 @@ set ( TEST_FILES
 	ConvertToQ3DdETest.h
 	ConvertToReflectometryQTest.h
 	CreateMDHistoWorkspaceTest.h
+	CreateMDTest.h
 	CreateMDWorkspaceTest.h
 	CutMDTest.h
 	DisplayNormalizationSetterTest.h
