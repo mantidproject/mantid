@@ -2,7 +2,7 @@
 #define MANTID_KERNEL_OPTIONALBOOLTEST_H_
 
 #include <cxxtest/TestSuite.h>
-
+#include <sstream>
 #include "MantidKernel/OptionalBool.h"
 
 using namespace Mantid::Kernel;
@@ -54,6 +54,65 @@ public:
     OptionalBool arg(OptionalBool::False);
     arg = OptionalBool(OptionalBool::True);
     TS_ASSERT_EQUALS(OptionalBool::True, arg.getValue());
+  }
+
+  void test_ostream() {
+    std::stringstream buffer;
+
+    OptionalBool notTrue(OptionalBool::False);
+    buffer << notTrue;
+    TS_ASSERT_EQUALS("False", buffer.str());
+    buffer = std::stringstream();
+
+    OptionalBool isTrue(OptionalBool::True);
+    buffer << isTrue;
+    TS_ASSERT_EQUALS("True", buffer.str());
+    buffer = std::stringstream();
+
+    OptionalBool unset(OptionalBool::Unset);
+    buffer << unset;
+    TS_ASSERT_EQUALS("Unset", buffer.str());
+    buffer = std::stringstream();
+  }
+
+  void test_istream_to_false() {
+    OptionalBool target;
+    std::stringstream buffer;
+    buffer << "False";
+    buffer >> target;
+    TS_ASSERT_EQUALS(target, OptionalBool(OptionalBool::False));
+  }
+
+  void test_istream_to_true() {
+    OptionalBool target;
+    std::stringstream buffer;
+    buffer << "True";
+    buffer >> target;
+    TS_ASSERT_EQUALS(target, OptionalBool(OptionalBool::True));
+  }
+
+  void test_istream_to_unset() {
+    OptionalBool target;
+    std::stringstream buffer;
+    buffer << "Unset";
+    buffer >> target;
+    TS_ASSERT_EQUALS(target, OptionalBool(OptionalBool::Unset));
+  }
+
+  void test_str_map() {
+    auto map = OptionalBool::strToEmumMap();
+    TS_ASSERT_EQUALS(3, map.size());
+    TS_ASSERT_EQUALS(map[OptionalBool::StrUnset], OptionalBool::Unset);
+    TS_ASSERT_EQUALS(map[OptionalBool::StrFalse], OptionalBool::False);
+    TS_ASSERT_EQUALS(map[OptionalBool::StrTrue], OptionalBool::True);
+  }
+
+  void test_value_map() {
+    auto map = OptionalBool::enumToStrMap();
+    TS_ASSERT_EQUALS(3, map.size());
+    TS_ASSERT_EQUALS(OptionalBool::StrUnset, map[OptionalBool::Unset]);
+    TS_ASSERT_EQUALS(OptionalBool::StrFalse, map[OptionalBool::False]);
+    TS_ASSERT_EQUALS(OptionalBool::StrTrue, map[OptionalBool::True]);
   }
 };
 

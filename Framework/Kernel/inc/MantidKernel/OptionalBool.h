@@ -2,6 +2,9 @@
 #define MANTID_KERNEL_OPTIONALBOOL_H_
 
 #include "MantidKernel/DllConfig.h"
+#include <iosfwd>
+#include <map>
+#include <string>
 
 namespace Mantid {
 namespace Kernel {
@@ -41,9 +44,23 @@ public:
   bool operator==(const OptionalBool &other) const;
   Value getValue() const;
 
+  static std::map<std::string, Value> strToEmumMap();
+  static std::map<Value, std::string> enumToStrMap();
+  const static std::string StrUnset;
+  const static std::string StrFalse;
+  const static std::string StrTrue;
+
+  // or out-of-class friend (friend declaration inside class only)
+  friend std::ostream &operator<<(std::ostream &os, OptionalBool const &object);
+  friend std::istream &operator>>(std::istream &istream, OptionalBool &object);
+
 private:
   Value m_arg;
 };
+
+std::ostream &operator<<(std::ostream &os, OptionalBool const &object);
+
+std::istream &operator>>(std::istream &istream, OptionalBool &object);
 
 } // namespace Kernel
 } // namespace Mantid
