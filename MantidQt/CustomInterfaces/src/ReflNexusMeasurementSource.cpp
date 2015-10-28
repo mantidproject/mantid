@@ -1,6 +1,7 @@
 
 #include "MantidQtCustomInterfaces/ReflNexusMeasurementSource.h"
 #include <Poco/File.h>
+#include <Poco/Exception.h>
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -33,9 +34,15 @@ ReflNexusMeasurementSource::obtain(const std::string &definedPath,
   std::string filenameArg = fuzzyName;
   if (!definedPath.empty()) {
     Poco::File file(definedPath);
-    if (file.exists() && file.isFile()) {
-      // Load the exact path
-      filenameArg = definedPath;
+    try {
+      if (file.exists() && file.isFile()) {
+        // Load the exact path
+        filenameArg = definedPath;
+      }
+    } catch (Poco::PathNotFoundException &) {
+      /* Deliberately swallow the exception.
+         Poco::File::exists throws for network drives
+      */
     }
   }
   try {
@@ -84,7 +91,7 @@ ReflNexusMeasurementSource::obtain(const std::string &definedPath,
     return Measurement(measurementId, measurementSubId, measurementLabel,
                        measurementType, theta, runNumber);
 
-  } catch (std::runtime_error &ex) {
+  } catch (std::invalid_argument &ex) {
     std::stringstream buffer;
     buffer << "Meta-data load attemped a load using: " << filenameArg
            << std::endl;
