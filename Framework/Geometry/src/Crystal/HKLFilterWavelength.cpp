@@ -12,6 +12,7 @@ HKLFilterWavelength::HKLFilterWavelength(const Kernel::DblMatrix &ub,
   checkProperLambdaRangeValues();
 }
 
+/// Returns a description for the filter.
 std::string HKLFilterWavelength::getDescription() const {
   std::ostringstream strm;
   strm << "(" << m_lambdaMin << " <= lambda <= " << m_lambdaMax << ")";
@@ -19,6 +20,7 @@ std::string HKLFilterWavelength::getDescription() const {
   return strm.str();
 }
 
+/// Returns true if lambda of the reflection is within the limits.
 bool HKLFilterWavelength::isAllowed(const Kernel::V3D &hkl) const {
   V3D q = m_ub * hkl;
   double lambda = (2.0 * q.Z()) / (q.norm2());
@@ -26,6 +28,7 @@ bool HKLFilterWavelength::isAllowed(const Kernel::V3D &hkl) const {
   return lambda >= m_lambdaMin && lambda <= m_lambdaMax;
 }
 
+/// Throws std::range_error exceptions if limits are <= 0 or max >= min.
 void HKLFilterWavelength::checkProperLambdaRangeValues() const {
   if (m_lambdaMin <= 0.0) {
     throw std::range_error("LambdaMin cannot be <= 0.");
