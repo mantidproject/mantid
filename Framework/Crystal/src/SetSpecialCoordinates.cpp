@@ -3,7 +3,6 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/Logger.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

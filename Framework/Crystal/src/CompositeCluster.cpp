@@ -1,5 +1,4 @@
 #include "MantidCrystal/CompositeCluster.h"
-#include <stdexcept>
 
 namespace {
 /**

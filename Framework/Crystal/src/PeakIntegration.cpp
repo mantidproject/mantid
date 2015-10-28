@@ -13,7 +13,6 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 
 namespace Mantid {
 namespace Crystal {
