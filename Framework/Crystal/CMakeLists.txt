@@ -28,7 +28,6 @@ set ( SRC_FILES
 	src/IntegratePeakTimeSlices.cpp
 	src/IntegratePeaksHybrid.cpp
 	src/IntegratePeaksUsingClusters.cpp
-	src/LatticeErrors.cpp
 	src/LoadHKL.cpp
 	src/LoadIsawPeaks.cpp
 	src/LoadIsawSpectrum.cpp
@@ -102,7 +101,6 @@ set ( INC_FILES
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
 	inc/MantidCrystal/IntegratePeaksHybrid.h
 	inc/MantidCrystal/IntegratePeaksUsingClusters.h
-	inc/MantidCrystal/LatticeErrors.h
 	inc/MantidCrystal/LoadHKL.h
 	inc/MantidCrystal/LoadIsawPeaks.h
 	inc/MantidCrystal/LoadIsawSpectrum.h
