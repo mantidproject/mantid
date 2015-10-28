@@ -6,6 +6,13 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
+void padParameterVector(std::vector<double> &param_vector,
+                        unsigned long grow_to_size);
+
+bool any_given(const std::vector<std::vector<double>> &params);
+
+bool all_given(const std::vector<std::vector<double>> &params);
+
 /** CreateMD : This workflow algorithm creates MDWorkspaces in the Q3D, HKL
   frame using ConvertToMD
 
@@ -61,7 +68,8 @@ private:
                                           bool in_place,
                                           Mantid::API::Workspace_sptr out_mdws);
 
-  Mantid::API::Workspace_sptr merge_runs(const std::string &to_merge);
+  Mantid::API::Workspace_sptr
+  merge_runs(const std::vector<std::string> &to_merge);
 
   Mantid::API::Workspace_sptr
   single_run(Mantid::API::Workspace_sptr input_workspace,

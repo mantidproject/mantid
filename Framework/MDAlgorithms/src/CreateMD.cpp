@@ -3,6 +3,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include <boost/filesystem.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -13,6 +14,46 @@ namespace MDAlgorithms {
 
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+
+/*
+ * Pad the vector of parameter values to the same size as data sources
+ */
+void padParameterVector(std::vector<double> &param_vector,
+                        unsigned long grow_to_size) {
+  if (param_vector.size() == 0) {
+    param_vector.resize(grow_to_size, 0.0);
+  } else if (param_vector.size() == 1) {
+    param_vector.resize(grow_to_size, param_vector[0]);
+  }
+}
+
+/*
+ * Returns true if any of the vectors in params are not empty
+ */
+bool any_given(const std::vector<std::vector<double>> &params) {
+  std::vector<double> param;
+  for (auto iter = params.begin(); iter != params.end(); ++iter) {
+    param = *iter;
+    if (!param.empty()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/*
+ * Returns true if all of the vectors in params are not empty
+ */
+bool all_given(const std::vector<std::vector<double>> &params) {
+  std::vector<double> param;
+  for (auto iter = params.begin(); iter != params.end(); ++iter) {
+    param = *iter;
+    if (param.empty()) {
+      return false;
+    }
+  }
+  return true;
+}
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateMD)
@@ -116,7 +157,82 @@ void CreateMD::init() {
 /** Execute the algorithm.
  */
 void CreateMD::exec() {
-  // TODO Auto-generated execute stub
+
+  const std::string emode = this->getProperty("Emode");
+  const std::vector<double> alatt = this->getProperty("Alatt");
+  const std::vector<double> angdeg = this->getProperty("Angdeg");
+  const std::vector<double> u = this->getProperty("u");
+  const std::vector<double> v = this->getProperty("v");
+  std::vector<double> psi = this->getProperty("Psi");
+  std::vector<double> gl = this->getProperty("Gl");
+  std::vector<double> gs = this->getProperty("Gs");
+  std::vector<double> efix = this->getProperty("Efix");
+  bool in_place = this->getProperty("InPlace");
+  const std::vector<std::string> data_sources =
+      this->getProperty("DataSources");
+
+  const unsigned long entries = data_sources.size();
+
+  padParameterVector(psi, entries);
+  padParameterVector(gl, entries);
+  padParameterVector(gs, entries);
+  padParameterVector(efix, entries);
+
+  int counter = 0;
+  std::vector<std::string> to_merge_names;
+  std::string to_merge_name;
+  Workspace_sptr workspace;
+  std::stringstream ws_name;
+  for (unsigned long entry_number = 0; entry_number < entries; ++entry_number) {
+    ws_name.str(std::string());
+
+    // If data source is not an existing workspace it must be a file we need to
+    // load
+    if (!AnalysisDataService::Instance().doesExist(
+            data_sources[entry_number])) {
+      // Strip off any file extension or path to leave just the stem filename
+      std::string filename_noext =
+          boost::filesystem::path(data_sources[entry_number]).stem().string();
+
+      // Create workspace name of form {filename}_md_{n}
+      ws_name << filename_noext << "_md_" << counter;
+      to_merge_name = ws_name.str();
+      workspace = loadWs(data_sources[entry_number], to_merge_name);
+    } else {
+      workspace =
+          AnalysisDataService::Instance().retrieve(data_sources[entry_number]);
+      ws_name << data_sources[entry_number] << "_md";
+      to_merge_name = ws_name.str();
+    }
+
+    // We cannot process in place until we have an output MDWorkspace to use.
+    bool do_in_place = in_place && (counter > 0);
+    Workspace_sptr run_md =
+        single_run(workspace, emode, efix[entry_number], psi[entry_number],
+                   gl[entry_number], gs[entry_number], do_in_place, alatt,
+                   angdeg, u, v, run_md);
+    to_merge_names.push_back(to_merge_name);
+
+    AnalysisDataService::Instance().addOrReplace(to_merge_name, run_md);
+
+    counter++;
+  }
+
+  Workspace_sptr output_workspace;
+  if (to_merge_names.size() > 1 && !in_place) {
+    output_workspace = merge_runs(to_merge_names);
+  } else {
+    output_workspace =
+        AnalysisDataService::Instance().retrieve(to_merge_names[0]);
+  }
+
+  // Clean up temporary workspaces
+  for (auto ws_iter = to_merge_names.begin(); ws_iter != to_merge_names.end();
+       ++ws_iter) {
+    AnalysisDataService::Instance().remove(*ws_iter);
+  }
+
+  this->setProperty("OutputWorkspace", output_workspace);
 }
 
 /*
@@ -222,7 +338,8 @@ CreateMD::convertToMD(Mantid::API::Workspace_sptr workspace,
 /*
  * Merge input workspaces
  */
-Mantid::API::Workspace_sptr CreateMD::merge_runs(const std::string &to_merge) {
+Mantid::API::Workspace_sptr
+CreateMD::merge_runs(const std::vector<std::string> &to_merge) {
   Algorithm_sptr merge_alg = createChildAlgorithm("MergeMD");
 
   merge_alg->setProperty("InputWorkspaces", to_merge);
@@ -242,27 +359,22 @@ Mantid::API::Workspace_sptr CreateMD::single_run(
     const std::vector<double> &u, const std::vector<double> &v,
     Mantid::API::Workspace_sptr out_mdws) {
 
-  std::vector<std::string> goniometer_params;
-  goniometer_params.push_back(psi);
-  goniometer_params.push_back(gl);
-  goniometer_params.push_back(gs);
-
-  std::vector<std::string> ub_params;
+  std::vector<std::vector<double>> ub_params;
   ub_params.push_back(alatt);
   ub_params.push_back(angdeg);
   ub_params.push_back(u);
   ub_params.push_back(v);
 
-  if (std::any_of(ub_params.begin(), ub_params.end(),
-                  [](const std::string &param) { return param.empty(); }) &&
-      !std::all_of(ub_params.begin(), ub_params.end(),
-                   [](const std::string &param) { return param.empty(); })) {
+  std::vector<double> goniometer_params;
+  goniometer_params.push_back(psi);
+  goniometer_params.push_back(gl);
+  goniometer_params.push_back(gs);
+
+  if (any_given(ub_params) && !all_given(ub_params)) {
     throw std::invalid_argument(
         "Either specify all of alatt, angledeg, u, v or none of them");
-  } else if (std::all_of(
-                 ub_params.begin(), ub_params.end(),
-                 [](const std::string &param) { return param.empty(); })) {
-    if (true) { // TODO check if UB set already
+  } else {
+    if (false) { // TODO check if UB set already
       g_log.warning() << "Sample already has a UB. This will not be "
                          "overwritten. Use ClearUB and re-run." << std::endl;
     } else {
@@ -282,9 +394,7 @@ Mantid::API::Workspace_sptr CreateMD::single_run(
       setGoniometer(input_workspace);
     }
 
-    Mantid::API::Workspace_sptr output_run =
-        convertToMD(input_workspace, emode, in_place, out_mdws);
-    return output_run;
+    return convertToMD(input_workspace, emode, in_place, out_mdws);
   }
 }
 
