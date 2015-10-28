@@ -25,7 +25,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
     WIDTH = WIDTH_END + " "
     AUTOSCRIPTNAME = 'SNSPowderReductionScript_AutoSave.py'
 
-    def __init__(self, name="VULCAN", facility="SNS"):
+    def __init__(self, name, facility='SNS'):
         """ Initialization
         """
         # Call base class
@@ -36,14 +36,17 @@ class DiffractionReductionScripter(BaseReductionScripter):
         mantidconfigdir = os.path.join(homedir, ".mantid")
         self.configDir = mantidconfigdir
 
-        # create configuratin dir if it has not been
+        # create configuration dir if it has not been
         if os.path.exists(self.configDir) is False:
             os.makedirs(self.configDir)
 
         # Information output
-        print "[diffraction_reduction_script]  Facility = %s,  Instrument = %s" % (
-                self.facility_name, self.instrument_name)
-        print "Auto-save Directory %s. " % (mantidconfigdir)
+        if self.facility_name is False:
+            self.facility_name = 'SNS'
+        dbmsg = '[SNS Powder Reduction]  Facility = %s,  Instrument = %s\n' \
+                'Auto-save Directory %s' % (self.facility_name, self.instrument_name,
+                       mantidconfigdir)
+        print dbmsg
 
         return
 

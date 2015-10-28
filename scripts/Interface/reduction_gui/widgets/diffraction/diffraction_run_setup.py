@@ -37,12 +37,17 @@ class RunSetupWidget(BaseWidget):
             def __init__(self, parent=None):
                 QtGui.QFrame.__init__(self, parent)
                 self.setupUi(self)
-        #END-DEF RunSetFrame
+        # END-DEF RunSetFrame
+
+        # Instrument and facility information
+        self._instrument_name = settings.instrument_name
+        self._facility_name = settings.facility_name
+
+        print '[DB] run_setup: facility = ', self._facility_name, 'instrument = ', self._instrument_name
 
         self._content = RunSetFrame(self)
         self._layout.addWidget(self._content)
-        self._instrument_name = settings.instrument_name
-        self._facility_name = settings.facility_name
+
         self.initialize_content()
 
         if state is not None:
@@ -71,6 +76,19 @@ class RunSetupWidget(BaseWidget):
         self._content.disablevancorr_chkbox.setChecked(False)
         self._content.disablevanbkgdcorr_chkbox.setChecked(False)
 
+        # Label
+        if self._instrument_name is not False:
+            self._content.label.setText('Instrument: %s' % self._instrument_name.upper())
+        else:
+            self._content.label.setText('Instrument has not been set up.  You may not launch correctly.')
+
+        # Enable disable
+        if self._instrument_name.lower().startswith('nom') is False:
+            self._content.lineEdit_expIniFile.setEnabled(False)
+            self._content.pushButton_browseExpIniFile.setEnabled(False)
+        else:
+            self._content.lineEdit_expIniFile.setEnabled(True)
+            self._content.pushButton_browseExpIniFile.setEnabled(True)
         #self._content.override_emptyrun_checkBox.setChecked(False)
         #self._content.override_vanrun_checkBox.setChecked(False)
         #self._content.override_vanbkgdrun_checkBox.setChecked(False)
@@ -108,7 +126,6 @@ class RunSetupWidget(BaseWidget):
         self._content.binning_edit.setValidator(fiv)
 
         # Default states
-
         # self._handle_tzero_guess(self._content.use_ei_guess_chkbox.isChecked())
 
         # Connections from action/event to function to handle
