@@ -15,16 +15,7 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="layoutMain">
-    <property name="leftMargin">
-     <number>1</number>
-    </property>
-    <property name="topMargin">
-     <number>1</number>
-    </property>
-    <property name="rightMargin">
-     <number>1</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>1</number>
     </property>
     <item>
@@ -49,20 +40,14 @@
         <property name="spacing">
          <number>1</number>
         </property>
-        <property name="leftMargin">
-         <number>1</number>
-        </property>
-        <property name="topMargin">
-         <number>1</number>
-        </property>
-        <property name="rightMargin">
-         <number>1</number>
-        </property>
-        <property name="bottomMargin">
+        <property name="margin">
          <number>1</number>
         </property>
         <item>
          <layout class="QFormLayout" name="layoutSearchForm">
+          <property name="fieldGrowthPolicy">
+           <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+          </property>
           <item row="0" column="0">
            <widget class="QLabel" name="labelInstrument">
             <property name="text">
@@ -158,6 +143,13 @@
             </property>
            </widget>
           </item>
+          <item row="2" column="0">
+           <widget class="QComboBox" name="comboTransferMethod">
+            <property name="whatsThis">
+             <string>The strategy for searching and transfering files. See help.</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item>
@@ -204,9 +196,6 @@
            </spacer>
           </item>
           <item>
-           <widget class="QComboBox" name="comboTransferMethod"/>
-          </item>
-          <item>
            <widget class="QToolButton" name="buttonTransfer">
             <property name="text">
              <string>Transfer</string>
@@ -228,16 +217,7 @@
         <property name="spacing">
          <number>1</number>
         </property>
-        <property name="leftMargin">
-         <number>1</number>
-        </property>
-        <property name="topMargin">
-         <number>1</number>
-        </property>
-        <property name="rightMargin">
-         <number>1</number>
-        </property>
-        <property name="bottomMargin">
+        <property name="margin">
          <number>1</number>
         </property>
         <item>
@@ -306,16 +286,7 @@
           </item>
           <item>
            <layout class="QHBoxLayout" name="layoutRowButtons">
-            <property name="leftMargin">
-             <number>1</number>
-            </property>
-            <property name="topMargin">
-             <number>1</number>
-            </property>
-            <property name="rightMargin">
-             <number>1</number>
-            </property>
-            <property name="bottomMargin">
+            <property name="margin">
              <number>1</number>
             </property>
             <item>
@@ -387,7 +358,7 @@
      <x>0</x>
      <y>0</y>
      <width>959</width>
-     <height>22</height>
+     <height>18</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
