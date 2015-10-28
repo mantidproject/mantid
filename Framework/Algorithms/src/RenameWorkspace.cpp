@@ -22,7 +22,7 @@ void RenameWorkspace::init() {
       new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input));
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
                                                    Direction::Output));
-  declareProperty(
+  declareProperty<bool>(
       "RenameMonitors", false,
       "If true, and monitor workspace found attached"
       " to the source workspace, the monitors workspace is renamed too.\n"
