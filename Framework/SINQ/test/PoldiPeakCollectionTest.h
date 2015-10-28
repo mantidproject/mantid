@@ -388,7 +388,7 @@ private:
         "IsotropicAtomBraggScatterer",
         "{\"Element\":\"Cs\",\"Position\":\"0.5,0.5,0.5\",\"U\":\"0.005\"}");
     BraggScatterer_sptr cl = BraggScattererFactory::Instance().createScatterer(
-        "IsotropicAtomBraggScatterer", 
+        "IsotropicAtomBraggScatterer",
         "{\"Element\":\"Cl\",\"Position\":\"0,0,0\",\"U\":\"0.005\"}");
 
     CompositeBraggScatterer_sptr atoms = CompositeBraggScatterer::create();

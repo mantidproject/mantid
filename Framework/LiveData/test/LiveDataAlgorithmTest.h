@@ -122,7 +122,7 @@ public:
       TS_ASSERT_THROWS_NOTHING(
           alg.setPropertyValue(prefix + "ProcessingAlgorithm", "Rebin"));
       TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        prefix + "ProcessingProperties", "{\"Params\":\"0,100,1000\"}"));
+          prefix + "ProcessingProperties", "{\"Params\":\"0,100,1000\"}"));
 
       procAlg = alg.makeAlgorithm(post > 0);
       TSM_ASSERT("Non-NULL algorithm pointer", procAlg);

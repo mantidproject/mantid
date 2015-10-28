@@ -176,7 +176,7 @@ BraggScatterer_sptr IsotropicAtomBraggScattererParser::getScatterer(
   }
 
   std::vector<std::string> cleanScattererTokens =
-     getCleanScattererTokens(tokens);
+      getCleanScattererTokens(tokens);
   std::vector<std::string> properties =
       boost::assign::list_of("Element")("Position")("Occupancy")("U")
           .convert_to_container<std::vector<std::string>>();

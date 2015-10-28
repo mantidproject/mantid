@@ -89,7 +89,7 @@ public:
 
   /// Return the property manager serialized as a string.
   virtual std::string asString(bool withDefaultValues = false) const;
-  
+
   /// Return the property manager serialized as a json object.
   virtual ::Json::Value asJson(bool withDefaultValues = false) const;
 

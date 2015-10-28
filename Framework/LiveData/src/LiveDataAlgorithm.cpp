@@ -245,14 +245,14 @@ IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm(bool postProcessing) {
 
     // Create the UNMANAGED algorithm
     IAlgorithm_sptr alg = this->createChildAlgorithm(algoName);
-    
+
     // Skip some of the properties when setting
     std::set<std::string> ignoreProps;
     ignoreProps.insert("InputWorkspace");
     ignoreProps.insert("OutputWorkspace");
 
     // ...and pass it the properties
-    alg->setProperties(props,ignoreProps);
+    alg->setProperties(props, ignoreProps);
 
     // Warn if someone put both values.
     if (!script.empty())

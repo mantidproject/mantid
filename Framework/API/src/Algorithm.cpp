@@ -613,8 +613,8 @@ bool Algorithm::execute() {
         throw;
       else {
         getLogger().error() << "Error in execution of algorithm "
-                            << this->name() << std::endl << ex.what()
-                            << std::endl;
+                            << this->name() << std::endl
+                            << ex.what() << std::endl;
       }
       notificationCenter().postNotification(
           new ErrorNotification(this, ex.what()));
@@ -625,8 +625,8 @@ bool Algorithm::execute() {
         throw;
       else {
         getLogger().error() << "Logic Error in execution of algorithm "
-                            << this->name() << std::endl << ex.what()
-                            << std::endl;
+                            << this->name() << std::endl
+                            << ex.what() << std::endl;
       }
       notificationCenter().postNotification(
           new ErrorNotification(this, ex.what()));
@@ -890,11 +890,11 @@ IAlgorithm_sptr Algorithm::fromString(const std::string &input) {
     int version = 0;
     try {
       version = root["version"].asInt();
-    } catch (std::runtime_error&)
-    {
-      //do nothing - the next test will catch it
+    } catch (std::runtime_error &) {
+      // do nothing - the next test will catch it
     }
-    if (version==0) version = -1;
+    if (version == 0)
+      version = -1;
 
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().createUnmanaged(algName, version);
