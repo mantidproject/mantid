@@ -2084,13 +2084,10 @@ class ConvertToQISIS(ReductionStep):
         Gets the sigma moderator workspace.
         @returns the sigma moderator workspace
         '''
-        moderator_ws = Load(Filename = self.get_q_resolution_moderator())
-        moderator_histogram_ws = ConvertToHistogram(InputWorkspace = moderator_ws)
-        moderator_wavelength_ws = ConvertUnits(InputWorkspace=moderator_histogram_ws,Target="Wavelength")
-
+        moderator_ws = LoadRKH(Filename = self.get_q_resolution_moderator(),  FirstColumnValue="Wavelength")
+        moderator_wavelength_ws = ConvertToHistogram(InputWorkspace = moderator_ws)
         DeleteWorkspace(moderator_ws)
-        DeleteWorkspace(moderator_histogram_ws)
-        return moderator_wavelength_ws
+        return moderator_histogram_ws
 
     def _get_existing_q_resolution(self, det_bank_workspace):
         '''
