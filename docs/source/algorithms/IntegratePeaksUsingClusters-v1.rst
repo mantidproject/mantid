@@ -95,17 +95,34 @@ Usage
 
 .. testcode:: IntegratePeaksUsingClustersExample
 
-   # Load an MDEventWorkspace (QLab) containing some SC diffration peaks
-   mdew = Load("TOPAZ_3680_5_sec_MDEW.nxs")
-   # The following algorithms need to know that frame to use, this is an older file. Newer files will automaticall have this.
-   SetSpecialCoordinates(InputWorkspace=mdew, SpecialCoordinates='Q (lab frame)')
-   # Find the 5 most intense peaks
-   peaks = FindPeaksMD(InputWorkspace=mdew, MaxPeaks=5)
-   # Bin to a 100 by 100 by 100 image. A 300 by 300 by 300 image is better.
-   mdhw = BinMD(InputWorkspace=mdew, AxisAligned=True,AlignedDim0='Q_lab_x,0,8,100', AlignedDim1='Q_lab_y,-10,10,100', AlignedDim2='Q_lab_z,0,10,100') 
-   # Perform the integration
-   integrated_peaks, cluster_image = IntegratePeaksUsingClusters(InputWorkspace=mdhw, PeaksWorkspace=peaks, Threshold=1e7)
+  import os
+  def make_input_workspaces():
+      instrument_path = os.path.join(config.getInstrumentDirectory(), 'SXD_Definition.xml')
+      sxd = LoadEmptyInstrument(Filename=instrument_path)
+      # Set lattice parameters
+      SetUB(sxd, 5.6, 5.6, 5.6, 90, 90, 90)
+      # Predict peaks
+      predicted = PredictPeaks(sxd)
+      # Keep every 20th predicted peak for speed
+      rows_to_delete = set(range(predicted.getNumberPeaks())) - set([i for i in range(predicted.getNumberPeaks()) if i % 20 == 0]) 
+      DeleteTableRows(predicted, Rows=list(rows_to_delete))
 
+      # Set the Frame to QLab
+      mdws = CreateMDWorkspace(Dimensions=3, Extents='-10,10,-10,10,-10,10', 
+                                             Names='Q_lab_x,Q_lab_y,Q_lab_z', Frames = "QLab,QLab,QLab",
+                                             Units='U,U,U')
+      qlab = predicted.column('QLab')
+      peak_radius = 0.1
+      n_events = 1000
+      for coords in qlab:
+          FakeMDEventData(InputWorkspace=mdws, PeakParams=[n_events, coords.X(), coords.Y(), coords.Z(), peak_radius])
+      # Create MDHisto workspace
+      mdws_binned = BinMD(InputWorkspace=mdws, AlignedDim0='Q_lab_x,-10,10,20', AlignedDim1='Q_lab_y,-10,10,200', AlignedDim2='Q_lab_z,-10,10,200')
+      return (predicted, mdws_binned, peak_radius)
+
+  predicted, mdws_binned, peak_radius = make_input_workspaces()
+  # Perform the integration
+  integrated, clusters = IntegratePeaksUsingClusters(InputWorkspace=mdws_binned, PeaksWorkspace=predicted, Threshold=1e7)
 
 .. categories::
 

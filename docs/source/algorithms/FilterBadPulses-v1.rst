@@ -40,8 +40,8 @@ Output:
 
 .. testoutput:: Filter
 
-    The number of events that remain: 4058 
-    compared to the number in the unfiltered workspace: 8000
+    The number of events that remain: 950 
+    compared to the number in the unfiltered workspace: 1900
 
 
 .. categories::

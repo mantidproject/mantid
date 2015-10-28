@@ -9,6 +9,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
 
 using Mantid::MDAlgorithms::ConvertCWSDExpToMomentum;
 using namespace Mantid;
@@ -68,6 +69,13 @@ public:
     ExperimentInfo_const_sptr expinfo0 = outws->getExperimentInfo(0);
     Geometry::Instrument_const_sptr instrument = expinfo0->getInstrument();
     TS_ASSERT_EQUALS(instrument->getNumberDetectors(), 256);
+
+    // Test the frame type
+    for (size_t dim = 0; dim < outws->getNumDims(); ++dim) {
+      const auto &frame = outws->getDimension(dim)->getMDFrame();
+      TSM_ASSERT_EQUALS("Should be convertible to a QSample frame",
+                        Mantid::Geometry::QSample::QSampleName, frame.name());
+    }
 
     return;
   }

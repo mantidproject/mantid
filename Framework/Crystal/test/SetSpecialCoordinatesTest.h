@@ -90,8 +90,10 @@ public:
 
     auto outWS =
         AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("inWS");
-    TS_ASSERT_EQUALS(Mantid::Kernel::QSample,
-                     outWS->getSpecialCoordinateSystem());
+    TSM_ASSERT_EQUALS(
+        "Should still be still with the same special coordinate system",
+        inWS->getSpecialCoordinateSystem(),
+        outWS->getSpecialCoordinateSystem());
     AnalysisDataService::Instance().remove("inWS");
   }
 
@@ -109,8 +111,10 @@ public:
 
     auto outWS =
         AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("inWS");
-    TS_ASSERT_EQUALS(Mantid::Kernel::QSample,
-                     outWS->getSpecialCoordinateSystem());
+    TSM_ASSERT_EQUALS(
+        "Should still be still with the same special coordinate system",
+        inWS->getSpecialCoordinateSystem(),
+        outWS->getSpecialCoordinateSystem());
     AnalysisDataService::Instance().remove("inWS");
   }
 

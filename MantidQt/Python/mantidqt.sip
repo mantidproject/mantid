@@ -1171,9 +1171,9 @@ void SliceViewer::setRebinNumBins(int xBins, int yBins)
 
 %End
 
-  void setRebinMode(bool mode, bool locked)   throw (std::runtime_error);
+  void setRebinMode(bool mode)   throw (std::runtime_error);
 %Docstring
-void SliceViewer::setRebinMode(bool mode, bool locked)
+void SliceViewer::setRebinMode(bool mode)
 ------------------------------------------------------
     Sets the SliceViewer in dynamic rebin mode.
     In this mode, the current view area (see setXYLimits()) is used as the
@@ -1183,8 +1183,6 @@ void SliceViewer::setRebinMode(bool mode, bool locked)
 
     Args:
         mode :: true for rebinning mode
-        locked :: if true, then the rebinned area is only refreshed manually
-           or when changing rebinning parameters.
 
 %End
 
@@ -1443,6 +1441,8 @@ SlitCalculator
 public:
   SlitCalculator(QWidget* parent);
   virtual ~SlitCalculator();
+  void setCurrentInstrumentName(char*);
+  void processInstrumentHasBeenChanged();
 
 };
 

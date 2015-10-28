@@ -9,9 +9,11 @@
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Utils.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDFramesToSpecialCoordinateSystem.h"
 #include "MantidDataObjects/MDGridBox.h"
 #include "MantidDataObjects/MDLeanEvent.h"
 #include <iomanip>
@@ -20,6 +22,14 @@
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/Exception.h"
+
+// Test for gcc 4.4
+#if __GNUC__ > 4 || \
+    (__GNUC__ == 4 && (__GNUC_MINOR__ > 4 || \
+		       (__GNUC_MINOR__ == 4 && \
+			__GNUC_PATCHLEVEL__ > 0)))
+GCC_DIAG_OFF(strict-aliasing)
+#endif
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -796,7 +806,14 @@ Get the coordinate system (if any) to use.
 */
 TMDE(Kernel::SpecialCoordinateSystem
          MDEventWorkspace)::getSpecialCoordinateSystem() const {
-  return m_coordSystem;
+  MDFramesToSpecialCoordinateSystem converter;
+  auto coordinatesFromMDFrames = converter(this);
+  auto coordinates = m_coordSystem;
+
+  if (coordinatesFromMDFrames) {
+    coordinates = coordinatesFromMDFrames.get();
+  }
+  return coordinates;
 }
 
 /**

@@ -1,6 +1,12 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidGeometry/MDGeometry/QLab.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
@@ -53,7 +59,17 @@ void CreateMDWorkspace::init() {
 
   declareProperty(new ArrayProperty<std::string>("Units"),
                   "A comma separated list of the units of each dimension.");
-
+  declareProperty(
+      new ArrayProperty<std::string>("Frames"),
+      " A comma separated list of the frames of each dimension. "
+      " The frames can be"
+      " **General Frame**: Any frame which is not a Q-based frame."
+      " **QLab**: Wave-vector converted into the lab frame."
+      " **QSample**: Wave-vector converted into the frame of the sample."
+      " **HKL**: Wave-vector converted into the crystal's HKL indices."
+      " Note if nothing is specified then the **General Frame** is being "
+      "selected. Also note that if you select a frame then this might override "
+      "your unit selection if it is not compatible with the frame.");
   // Set the box controller properties
   this->initBoxControllerProps("5", 1000, 5);
 
@@ -130,6 +146,7 @@ void CreateMDWorkspace::exec() {
   std::vector<double> extents = getProperty("Extents");
   std::vector<std::string> names = getProperty("Names");
   std::vector<std::string> units = getProperty("Units");
+  std::vector<std::string> frames = getProperty("Frames");
 
   if (extents.size() != ndims * 2)
     throw std::invalid_argument("You must specify twice as many extents "
@@ -140,6 +157,19 @@ void CreateMDWorkspace::exec() {
   if (units.size() != ndims)
     throw std::invalid_argument(
         "You must specify as many units as there are dimensions.");
+  // If no frames are specified we want to default to the General Frame,
+  // to ensure backward compatibility. But if they are only partly specified,
+  // then we want to throw an error. It should be either used correctly or not
+  // at all
+  if (!frames.empty() && frames.size() != ndims) {
+    throw std::invalid_argument(
+        "You must specify as many frames as there are dimensions.");
+  }
+
+  if (frames.empty()) {
+    frames.resize(ndims);
+    std::fill(frames.begin(), frames.end(), GeneralFrame::GeneralFrameName);
+  }
 
   // Have the factory create it
   IMDEventWorkspace_sptr out =
@@ -147,8 +177,9 @@ void CreateMDWorkspace::exec() {
 
   // Give all the dimensions
   for (size_t d = 0; d < ndims; d++) {
+    auto frame = createMDFrame(frames[d], units[d]);
     MDHistoDimension *dim = new MDHistoDimension(
-        names[d], names[d], units[d], static_cast<coord_t>(extents[d * 2]),
+        names[d], names[d], *frame, static_cast<coord_t>(extents[d * 2]),
         static_cast<coord_t>(extents[d * 2 + 1]), 1);
     out->addDimension(MDHistoDimension_sptr(dim));
   }
@@ -184,6 +215,65 @@ void CreateMDWorkspace::exec() {
 
   // Save it on the output.
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(out));
+}
+
+MDFrame_uptr CreateMDWorkspace::createMDFrame(std::string frame,
+                                              std::string unit) {
+  auto frameFactory = makeMDFrameFactoryChain();
+  MDFrameArgument frameArg(frame, unit);
+  return frameFactory->create(frameArg);
+}
+
+std::map<std::string, std::string> CreateMDWorkspace::validateInputs() {
+  // Check Frame names
+  std::map<std::string, std::string> errors;
+  std::string framePropertyName = "Frames";
+  std::vector<std::string> frames = getProperty(framePropertyName);
+  int ndims_prop = getProperty("Dimensions");
+  auto ndims = static_cast<size_t>(ndims_prop);
+
+  std::vector<std::string> targetFrames;
+  targetFrames.push_back(Mantid::Geometry::GeneralFrame::GeneralFrameName);
+  targetFrames.push_back(Mantid::Geometry::HKL::HKLName);
+  targetFrames.push_back(Mantid::Geometry::QLab::QLabName);
+  targetFrames.push_back(Mantid::Geometry::QSample::QSampleName);
+
+  auto isValidFrame = true;
+  for (auto it = frames.begin(); it != frames.end(); ++it) {
+    auto result = checkIfFrameValid(*it, targetFrames);
+    if (!result) {
+      isValidFrame = result;
+    }
+  }
+
+  if (!frames.empty() && frames.size() != ndims) {
+    isValidFrame = false;
+  }
+
+  if (!isValidFrame) {
+    std::string message = "The selected frames can be 'HKL', 'QSample', 'QLab' "
+                          "or 'General Frame'. You must specify as many frames "
+                          "as there are dimensions.";
+    errors.insert(std::make_pair(framePropertyName, message));
+  }
+  return errors;
+}
+
+/**
+ * Check if the specified frame matches a target frame
+ * @param frame: the frame name under investigation
+ * @param targetFrames: the allowed frame names
+ * @returns true if the frame name is valid else false
+ */
+bool CreateMDWorkspace::checkIfFrameValid(
+    const std::string &frame, const std::vector<std::string> &targetFrames) {
+  for (auto targetFrame = targetFrames.begin();
+       targetFrame != targetFrames.end(); ++targetFrame) {
+    if (*targetFrame == frame) {
+      return true;
+    }
+  }
+  return false;
 }
 
 } // namespace Mantid

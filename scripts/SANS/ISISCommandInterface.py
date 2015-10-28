@@ -1,3 +1,4 @@
+#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 """
     Enables the SANS commands (listed at http://www.mantidproject.org/SANS) to
@@ -10,7 +11,7 @@ sanslog = Logger("SANS")
 
 import isis_reduction_steps
 import isis_reducer
-from centre_finder import CentreFinder as CentreFinder
+from centre_finder import *
 #import SANSReduction
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup
@@ -24,7 +25,8 @@ try:
     import mantidplot
 except:
     mantidplot = None
-    #this should happen when this is called from outside Mantidplot and only then, the result is that attempting to plot will raise an exception
+    #this should happen when this is called from outside Mantidplot and only then,
+    #the result is that attempting to plot will raise an exception
     pass
 
 try:
@@ -339,7 +341,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
 
         @param wav_start: the first wavelength to be in the output data
         @param wav_end: the last wavelength in the output data
-        @param full_trans_wav: if to use a wide wavelength range, the instrument's default wavelength range, for the transmission correction, false by default
+        @param full_trans_wav: if to use a wide wavelength range, the instrument's default wavelength range,
+                               for the transmission correction, false by default
         @param name_suffix: append the created output workspace with this
         @param combineDet: combineDet can be one of the following:
                            'rear'                (run one reduction for the 'rear' detector data)
@@ -349,7 +352,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                             None                 (run one reduction for whatever detector has been set as the current detector
                                                   before running this method. If front apply rescale+shift)
         @param resetSetup: if true reset setup at the end
-        @param out_fit_settings: An output parameter. It is used, specially when resetSetup is True, in order to remember the 'scale and fit' of the fitting algorithm.
+        @param out_fit_settings: An output parameter. It is used, specially when resetSetup is True, in order to remember the
+                                 'scale and fit' of the fitting algorithm.
         @return Name of one of the workspaces created
     """
     _printMessage('WavRangeReduction(' + str(wav_start) + ', ' + str(wav_end) + ', '+str(full_trans_wav)+')')
@@ -497,10 +501,26 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                 Cf_can = CropWorkspace(InputWorkspace=Cf_can, OutputWorkspace=Cf_can, XMin=minQ, XMax=maxQ)
                 Cr_can = CropWorkspace(InputWorkspace=Cr_can, OutputWorkspace=Cr_can, XMin=minQ, XMax=maxQ)
 
-            mergedQ = (Cf+shift*Nf+Cr)/(Nf/scale + Nr)
+            # We want: (Cf+shift*Nf+Cr)/(Nf/scale + Nr)
+            shifted_norm_front = Scale(InputWorkspace = Nf, Operation = "Multiply", Factor = shift)
+            scaled_norm_front = Scale(InputWorkspace = Nf, Operation = "Multiply", Factor = (1./scale))
+            dividend = Cf + shifted_norm_front + Cr
+            divisor = scaled_norm_front + Nr
+            mergedQ = dividend/divisor
+
+            DeleteWorkspace(dividend)
+            DeleteWorkspace(divisor)
+            DeleteWorkspace(scaled_norm_front)
+            DeleteWorkspace(shifted_norm_front)
+
             if consider_can:
                 mergedQ -= (Cf_can+Cr_can)/(Nf_can/scale + Nr_can)
 
+            # We need to correct the errors. Note that the Can contribution is ignored here.
+            su.correct_q_resolution_for_merged(count_ws_front = Cf,
+                                               count_ws_rear = Cr,
+                                               output_ws = mergedQ,
+                                               scale = scale)
             RenameWorkspace(InputWorkspace=mergedQ,OutputWorkspace= retWSname_merged)
 
             # save the properties Transmission and TransmissionCan inside the merged workspace
@@ -530,8 +550,10 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     #applying scale and shift on the front detector reduced data
     if reduce_front_flag:
         frontWS = mtd[retWSname_front]
-        frontWS = (frontWS+shift)*scale
+        buffer = Scale(InputWorkspace = frontWS, Operation = "Add", Factor = shift)
+        frontWS = Scale(InputWorkspace = buffer, Operation = "Multiply", Factor = scale)
         RenameWorkspace(InputWorkspace=frontWS,OutputWorkspace= retWSname_front)
+        DeleteWorkspace(buffer)
 
     # finished calculating cross section so can restore these value
     ReductionSingleton().to_Q.outputParts = toRestoreOutputParts
@@ -574,7 +596,7 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
 
     # We need to make sure at this point that the workspaces are 1D. We
     # don't really know how to match the workspaces for the 2D case.
-    if (not su.is_1D_workspace(mtd[frontData]) or not su.is_1D_workspace(mtd[rearData])):
+    if not su.is_1D_workspace(mtd[frontData]) or not su.is_1D_workspace(mtd[rearData]):
         sanslog.warning("Request to perform a fit to find the shift and scale values for"
                         "a non-1D workspace is not possible. Default values are provided.")
         scale = rAnds.scale
@@ -673,7 +695,8 @@ def _WavRangeReduction(name_suffix=None):
     def _common_substring(val1, val2):
         l = []
         for i in range(len(val1)):
-            if val1[i]==val2[i]: l.append(val1[i])
+            if val1[i]==val2[i]:
+                l.append(val1[i])
             else:
                 return ''.join(l)
 
@@ -877,9 +900,11 @@ def SetDetectorOffsets(bank, x, y, z, rot, radius, side, xtilt=0.0, ytilt=0.0 ):
     detector.y_tilt = ytilt
 
 def SetCorrectionFile(bank, filename):
-    # 10/03/15 RKH, create a new routine that allows change of "direct beam file" = correction file, for a given
-    # detector, this simplify the iterative process used to adjust it. Will still have to keep changing the name of the file
-    # for each iteratiom to avoid Mantid using a cached version, but can then use only a single user (=mask) file for each set of iterations.
+    # 10/03/15 RKH, create a new routine that allows change of "direct beam file" = correction file,
+    # for a given detector, this simplify the iterative process used to adjust it.
+    # Will still have to keep changing the name of the file
+    # for each iteratiom to avoid Mantid using a cached version, but can then use
+    # only a single user (=mask) file for each set of iterations.
     # Modelled this on SetDetectorOffsets above ...
     """
         @param bank: Must be either 'front' or 'rear' (not case sensitive)
@@ -904,8 +929,11 @@ def LimitsR(rmin, rmax, quiet=False, reducer=None):
 def LimitsWav(lmin, lmax, step, bin_type):
     _printMessage('LimitsWav(' + str(lmin) + ', ' + str(lmax) + ', ' + str(step) + ', '  + bin_type + ')')
 
-    if  bin_type.upper().strip() == 'LINEAR': bin_type = 'LIN'
-    if  bin_type.upper().strip() == 'LOGARITHMIC': bin_type = 'LOG'
+    if  bin_type.upper().strip() == 'LINEAR':
+        bin_type = 'LIN'
+    if  bin_type.upper().strip() == 'LOGARITHMIC':
+        bin_type = 'LOG'
+
     if bin_type == 'LOG':
         bin_sym = '-'
     else:
@@ -1060,7 +1088,7 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
 
     return script
 
-def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, tolerance=1.251e-4):
+def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, tolerance=1.251e-4, find_direction = FindDirectionEnum.ALL):
     """
         Estimates the location of the effective beam centre given a good initial estimate. For more
         information go to this page
@@ -1068,20 +1096,27 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
         @param rlow: mask around the (estimated) centre to this radius (in millimetres)
         @param rupp: don't include further out than this distance (mm) from the centre point
         @param MaxInter: don't calculate more than this number of iterations (default = 10)
-        @param xstart: initial guess for the horizontal distance of the beam centre from the
-                        detector centre in meters (default the values in the mask file)
-        @param ystart: initial guess for the distance of the beam centre from the detector
-                       centre vertically in metres (default the values in the mask file)
-    @param tolerance: define the precision of the search. If the step is smaller than the tolerance,
-                      it will be considered stop searching the centre (default=1.251e-4 or 1.251um)
+        @param xstart: initial guess for the horizontal distance of the beam centre
+                       from the detector centre in meters (default the values in the mask file), or in the
+                       case of rotated instruments a rotation about the y axis. The unit is degree/XSF
+        @param ystart: initial guess for the distance of the beam centre from the detector centre
+                       vertically in metres (default the values in the mask file)
+        @param tolerance: define the precision of the search. If the step is smaller than the
+                          tolerance, it will be considered stop searching the centre (default=1.251e-4 or 1.251um)
+        @param find_only: if only Up/Down or only Left/Right is
+                          required then variable is set to
         @return: the best guess for the beam centre point
     """
-    XSTEP = ReductionSingleton().inst.cen_find_step
-    YSTEP = ReductionSingleton().inst.cen_find_step2
+    COORD1STEP = ReductionSingleton().inst.cen_find_step
+    COORD2STEP = ReductionSingleton().inst.cen_find_step2
 
     XSF = ReductionSingleton().inst.beam_centre_scale_factor1
     YSF = ReductionSingleton().inst.beam_centre_scale_factor2
+    coord1_scale_factor = XSF
+    coord2_scale_factor = YSF
 
+    # Here we have to be careful as the original position can be either in [m, m] or [degree, m], we need to make sure
+    # that we are consistent to not mix with [degree/XSF, m]
     original = ReductionSingleton().get_instrument().cur_detector_position(ReductionSingleton().get_sample().get_wksp_name())
 
     if ReductionSingleton().instrument.lowAngDetSet:
@@ -1095,43 +1130,61 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
             float(xstart), float(ystart)),det_bank)
 
     beamcoords = ReductionSingleton().get_beam_center()
-    XNEW = beamcoords[0]
-    YNEW = beamcoords[1]
-    xstart = beamcoords[0]
-    ystart = beamcoords[1]
-
 
     #remove this if we know running the Reducer() doesn't change i.e. all execute() methods are const
     centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
 
-    centre = CentreFinder(original)
-    centre.logger.notice("xstart,ystart="+str(XNEW*1000.)+" "+str(YNEW*1000.))
-    centre.logger.notice("Starting centre finding routine ...")
-    #this function moves the detector to the beam center positions defined above and
+    # Create an object which handles the positions and increments
+    centre_positioner = CentrePositioner(reducer = centre_reduction,
+                                         position_type = find_direction,
+                                         coord1_start = beamcoords[0],
+                                         coord2_start = beamcoords[1],
+                                         coord1_step = COORD1STEP,
+                                         coord2_step = COORD2STEP,
+                                         tolerance = tolerance)
+
+    # Produce the initial position
+    COORD1NEW, COORD2NEW = centre_positioner.produce_initial_position()
+
+    # Set the CentreFinder
+    sign_policy = centre_positioner.produce_sign_policy()
+    centre = CentreFinder(original, sign_policy, find_direction)
+
+    # Produce a logger for this the Beam Centre Finder
+    beam_center_logger = BeamCenterLogger(centre_reduction,
+                                          coord1_scale_factor,
+                                          coord2_scale_factor)
+
+    # If we have 0 iterations then we should return here
+    if MaxIter <= 0:
+        zero_iterations_msg = ("You have selected 0 iterations. The beam centre" +
+                               "will be positioned at (" + str(xstart) + ", " + str(ystart) +")")
+        beam_center_logger.report(zero_iterations_msg)
+        return xstart, ystart
+
+    beam_center_logger.report_init(COORD1NEW, COORD2NEW)
+
+    # this function moves the detector to the beam center positions defined above and
     # returns an estimate of where the beam center is relative to the new center
-    resX_old, resY_old = centre.SeekCentre(centre_reduction, [XNEW, YNEW])
+    resCoord1_old, resCoord2_old = centre.SeekCentre(centre_reduction, [COORD1NEW, COORD2NEW])
     centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
-
-    logger.notice(centre.status_str(0, resX_old, resY_old))
-
+    beam_center_logger.report_status(0, original[0], original[1], resCoord1_old, resCoord2_old)
     # take first trial step
-    XNEW = xstart + XSTEP
-    YNEW = ystart + YSTEP
+    COORD1NEW, COORD2NEW = centre_positioner.increment_position(COORD1NEW, COORD2NEW)
     graph_handle = None
     it = 0
     for i in range(1, MaxIter+1):
         it = i
-
         centre_reduction.set_beam_finder(
-            isis_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
+            isis_reduction_steps.BaseBeamFinder(COORD1NEW, COORD2NEW), det_bank)
+        resCoord1, resCoord2 = centre.SeekCentre(centre_reduction, [COORD1NEW, COORD2NEW])
 
-        resX, resY = centre.SeekCentre(centre_reduction, [XNEW, YNEW])
         centre_reduction = copy.deepcopy(ReductionSingleton().reference())
         LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
 
-        centre.logger.notice(centre.status_str(it, resX, resY))
+        beam_center_logger.report_status(it, COORD1NEW, COORD2NEW, resCoord1, resCoord2)
 
         if mantidplot:
             try :
@@ -1139,37 +1192,38 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
                     #once we have a plot it will be updated automatically when the workspaces are updated
                     graph_handle = mantidplot.plotSpectrum(centre.QUADS, 0)
                 graph_handle.activeLayer().setTitle(\
-                        centre.status_str(it, resX, resY))
+                         beam_center_logger.get_status_message(it, COORD1NEW, COORD2NEW, resCoord1, resCoord2))
             except :
                 #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot
                 pass
-
         #have we stepped across the y-axis that goes through the beam center?
-        if resX > resX_old:
+        if resCoord1 > resCoord1_old:
             # yes with stepped across the middle, reverse direction and half the step size
-            XSTEP = -XSTEP/2.
-        if resY > resY_old:
-            YSTEP = -YSTEP/2.
-        if abs(XSTEP) < tolerance and abs(YSTEP) < tolerance :
+            centre_positioner.set_new_increment_coord1()
+        if resCoord2 > resCoord2_old:
+            centre_positioner.set_new_increment_coord2()
+        if (centre_positioner.is_increment_coord1_smaller_than_tolerance() and
+            centre_positioner.is_increment_coord2_smaller_than_tolerance()):
             # this is the success criteria, we've close enough to the center
-            centre.logger.notice("Converged - check if stuck in local minimum!")
+            beam_center_logger.report("Converged - check if stuck in local minimum!")
             break
 
-        resX_old = resX
-        resY_old = resY
-        XNEW += XSTEP
-        YNEW += YSTEP
+        resCoord1_old = resCoord1
+        resCoord2_old = resCoord2
 
-    if it == MaxIter:
-        centre.logger.notice("Out of iterations, new coordinates may not be the best!")
-        XNEW -= XSTEP
-        YNEW -= YSTEP
+        if it != MaxIter:
+            COORD1NEW, COORD2NEW = centre_positioner.increment_position(COORD1NEW, COORD2NEW)
+        else:
+            beam_center_logger.report("Out of iterations, new coordinates may not be the best!")
+
+    # Create the appropriate return values
+    coord1_centre, coord2_centre = centre_positioner.produce_final_position(COORD1NEW, COORD2NEW)
 
     ReductionSingleton().set_beam_finder(
-        isis_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
-    centre.logger.notice("Centre coordinates updated: [" + str(XNEW*XSF) + ", " + str(YNEW*YSF) + ']')
+        isis_reduction_steps.BaseBeamFinder(coord1_centre, coord2_centre), det_bank)
+    beam_center_logger.report_final(coord1_centre, coord2_centre)
 
-    return XNEW, YNEW
+    return coord1_centre, coord2_centre
 
 
 ###################### Utility functions ####################################################
@@ -1407,6 +1461,268 @@ def AddRuns(runs, instrument ='sans2d', saveAsEvent=False, binning = "Monitors",
              isOverlay = isOverlay,
              time_shifts = time_shifts)
 
+
+
+##################### Accesor functions for QResolution
+def get_q_resolution_moderator():
+    '''
+    Gets the moderator file path
+    @returns the moderator file path or nothing
+    '''
+    val = ReductionSingleton().to_Q.get_q_resolution_moderator()
+    if val == None:
+        val = ''
+    print str(val)
+    return val
+
+def set_q_resolution_moderator(file_name):
+    '''
+    Sets the moderator file path
+    @param file_name: the full file path
+    '''
+    try:
+        ReductionSingleton().to_Q.set_q_resolution_moderator(file_name)
+    except RuntimeError, details:
+        sanslog.error("The specified moderator file could not be found. Please specify a file"
+                      "which exists in the search directories. See details: %s" %str(details))
+
+#-- Use q resoltion
+def get_q_resultution_use():
+    '''
+    Gets if the q resolution option is being used
+    @returns true if the resolution option is being used, else false
+    '''
+    val = ReductionSingleton().to_Q.get_use_q_resolution()
+    print str(val)
+    return val
+
+def set_q_resolution_use(use):
+    '''
+    Sets if the q resolution option is being used
+    @param use: use flag
+    '''
+    if use == True:
+        ReductionSingleton().to_Q.set_use_q_resolution(True)
+    elif use == False:
+        ReductionSingleton().to_Q.set_use_q_resolution(False)
+    else:
+        sanslog.warning('Warning: Could could not set useage of QResolution')
+
+#-- Collimation length
+def get_q_resolution_collimation_length():
+    '''
+    Get the collimation length
+    @returns the collimation length in mm
+    '''
+    element = ReductionSingleton().to_Q.get_q_resolution_collimation_length()
+    msg = "CollimationLength"
+    if su.is_convertible_to_float(element) or not element:
+        pass
+    else:
+        sanslog.warning('Warning: Could not convert %s to float.' % msg)
+    print str(element)
+    return element
+
+def set_q_resolution_collimation_length(collimation_length):
+    '''
+    Sets the collimation length
+    @param collimation_length: the collimation length
+    '''
+    if collimation_length == None:
+        return
+    msg = "Collimation Length"
+    if su.is_convertible_to_float(collimation_length):
+        c_l = float(collimation_length)
+        ReductionSingleton().to_Q.set_q_resolution_collimation_length(c_l)
+    else:
+        sanslog.warning('Warning: Could not convert %s to float.' % msg)
+
+
+#-- Delta R
+def get_q_resolution_delta_r():
+    '''
+    Get the delta r value
+    @returns the delta r in mm
+    '''
+    val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_delta_r, "DeltaR")
+    print str(val)
+    return val
+
+def set_q_resolution_delta_r(delta_r):
+    '''
+    Sets the delta r value
+    @param delta_r: the delta r value
+    '''
+    set_q_resolution_float(ReductionSingleton().to_Q.set_q_resolution_delta_r, delta_r, "DeltaR")
+
+#-- A1
+def get_q_resolution_a1():
+    '''
+    Get the A1 diameter
+    @returns the diameter for the first aperature in mm
+    '''
+    val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_a1, "A1")
+    print str(val)
+    return val
+
+def set_q_resolution_a1(a1):
+    '''
+    Sets the a1 value
+    @param a1: the a1 value in mm
+    '''
+    set_q_resolution_float(ReductionSingleton().to_Q.set_q_resolution_a1, a1, "A1")
+
+#-- A2
+def get_q_resolution_a2():
+    '''
+    Get the A2 diameter
+    @returns the diameter for the second aperature in mm
+    '''
+    val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_a2, "A2")
+    print str(val)
+    return val
+
+def set_q_resolution_a2(a2):
+    '''
+    Sets the a2 value
+    @param a2: the a2 value in mm
+    '''
+    set_q_resolution_float(ReductionSingleton().to_Q.set_q_resolution_a2, a2, "A2")
+
+#-- H1
+def get_q_resolution_h1():
+    '''
+    Get the first height for rectangular apertures
+    @returns the first height in mm
+    '''
+    val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_h1, "H1")
+    print str(val)
+    return val
+
+def set_q_resolution_h1(h1):
+    '''
+    Set the first height for rectangular apertures
+    @param h1: the first height in mm
+    '''
+    set_q_resolution_float(ReductionSingleton().to_Q.set_q_resolution_h1, h1, "H1")
+
+#-- H2
+def get_q_resolution_h2():
+    '''
+    Get the second height for rectangular apertures
+    @returns the second height in mm
+    '''
+    val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_h2, "H2")
+    print str(val)
+    return val
+
+def set_q_resolution_h2(h2):
+    '''
+    Set the second height for rectangular apertures
+    @param h2: the second height in mm
+    '''
+    set_q_resolution_float(ReductionSingleton().to_Q.set_q_resolution_h2, h2, "H2")
+
+#-- W1
+def get_q_resolution_w1():
+    '''
+    Get the first width for rectangular apertures
+    @returns the first width in mm
+    '''
+    val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_w1, "W1")
+    print str(val)
+    return val
+
+def set_q_resolution_w1(w1):
+    '''
+    Set the first width for rectangular apertures
+    @param w1: the first width in mm
+    '''
+    set_q_resolution_float(ReductionSingleton().to_Q.set_q_resolution_w1, w1, "W1")
+
+#-- W2
+def get_q_resolution_w2():
+    '''
+    Get the second width for rectangular apertures
+    @returns the second width in mm
+    '''
+    val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_w2, "W2")
+    print str(val)
+    return val
+
+def set_q_resolution_w2(w2):
+    '''
+    Set the second width for rectangular apertures
+    @param w1: the second width in mm
+    '''
+    set_q_resolution_float(ReductionSingleton().to_Q.set_q_resolution_w2, w2, "W2")
+
+
+#-- Reset
+def reset_q_resolution_settings():
+    '''
+    Resets the q settings
+    '''
+    ReductionSingleton().to_Q.reset_q_settings()
+
+#-- Set float value
+def set_q_resolution_float(func, arg, msg):
+    '''
+    Set a q resolution value
+    @param func: the speficied function to run
+    @param arg: the argument
+    @param mgs: error message
+    '''
+    if arg == None:
+        return
+
+    if su.is_convertible_to_float(arg):
+        d_r = su.millimeter_2_meter(float(arg))
+        func(d_r)
+    else:
+        sanslog.warning('Warning: Could not convert %s to float.' % msg)
+
+def get_q_resolution_float(func, msg):
+    '''
+    Gets a q resolution value and checks if it has been set.
+    @param func: the speficied function to run
+    @param mgs: error message
+    @return the correct value
+    '''
+    element = func()
+
+    if su.is_convertible_to_float(element):
+        element = su.meter_2_millimeter(element)
+    elif not element:
+        pass
+    else:
+        sanslog.warning('Warning: Could not convert %s to float.' % msg)
+    return element
+
+def are_settings_consistent():
+    '''
+    Runs the consistency check over all reductionssteps and reports cosistency
+    issues to the user. The user needs to sort out these issues.
+    '''
+    try:
+        ReductionSingleton().perform_consistency_check()
+    except RuntimeError, details:
+        sanslog.error("There was an inconsistency issue with your settings. See details: %s" % str(details))
+        raise RuntimeError("Please fix the following inconsistencies: %s" % str(details))
+
+def is_current_workspace_an_angle_workspace():
+    '''
+    Queries if the current workspace, stored in the reducer is a workspace
+    which uses [angle, pos] to denote its location
+    @returns true if it is an angle workspace else false
+    '''
+    is_angle = False
+    # pylint: disable=bare-except
+    try:
+        is_angle = is_workspace_which_requires_angle(reducer = ReductionSingleton())
+    except:
+        is_angle = False
+    return is_angle
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>950</width>
-    <height>545</height>
+    <height>605</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -868,73 +868,119 @@ Zero Error</string>
         <string>Reduction Settings</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_13">
-        <item row="0" column="0">
-         <layout class="QHBoxLayout" name="horizontalLayout">
+        <item row="1" column="1">
+         <layout class="QVBoxLayout" name="verticalLayout_8">
           <item>
-           <widget class="QLabel" name="label_23">
-            <property name="text">
-             <string>Account for gravity</string>
+           <widget class="QGroupBox" name="groupBox_18">
+            <property name="title">
+             <string>Transmission Settings</string>
             </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_15">
+             <item>
+              <layout class="QGridLayout" name="gridLayout_32">
+               <item row="1" column="4">
+                <widget class="QLineEdit" name="trans_roi_files_line_edit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>200</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="2">
+                <widget class="QLineEdit" name="trans_radius_line_edit"/>
+               </item>
+               <item row="0" column="0">
+                <layout class="QHBoxLayout" name="horizontalLayout_25">
+                 <item>
+                  <widget class="QCheckBox" name="trans_M3_check_box">
+                   <property name="text">
+                    <string>M3</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="trans_M4_check_box">
+                   <property name="text">
+                    <string>M4</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item row="0" column="2">
+                <widget class="QCheckBox" name="trans_radius_check_box">
+                 <property name="text">
+                  <string>Radius</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="4">
+                <widget class="QCheckBox" name="trans_roi_files_checkbox">
+                 <property name="text">
+                  <string>ROI files</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1" rowspan="2">
+                <widget class="QFrame" name="frame">
+                 <property name="frameShape">
+                  <enum>QFrame::VLine</enum>
+                 </property>
+                 <property name="frameShadow">
+                  <enum>QFrame::Raised</enum>
+                 </property>
+                 <property name="lineWidth">
+                  <number>1</number>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="3" rowspan="2">
+                <widget class="QFrame" name="frame_2">
+                 <property name="frameShape">
+                  <enum>QFrame::VLine</enum>
+                 </property>
+                 <property name="frameShadow">
+                  <enum>QFrame::Raised</enum>
+                 </property>
+                 <property name="lineWidth">
+                  <number>1</number>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <layout class="QHBoxLayout" name="horizontalLayout_28">
+                 <item>
+                  <widget class="QLabel" name="label_17">
+                   <property name="text">
+                    <string>Shift:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="trans_M3M4_line_edit"/>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_26">
+               <item>
+                <widget class="QLabel" name="label_16">
+                 <property name="text">
+                  <string>Masking files:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="trans_masking_line_edit"/>
+               </item>
+              </layout>
+             </item>
+            </layout>
            </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="gravity_check">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_23">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_15">
-            <property name="text">
-             <string>Extra Length (m)</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="gravity_extra_length_line_edit">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>70</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
           </item>
          </layout>
         </item>
@@ -1620,121 +1666,218 @@ intermediate ranges are there for comparison</string>
           </item>
          </layout>
         </item>
-        <item row="1" column="1">
-         <layout class="QVBoxLayout" name="verticalLayout_8">
+        <item row="0" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
-           <widget class="QGroupBox" name="groupBox_18">
-            <property name="title">
-             <string>Transmission Settings</string>
+           <widget class="QLabel" name="label_23">
+            <property name="text">
+             <string>Account for gravity</string>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_15">
-             <item>
-              <layout class="QGridLayout" name="gridLayout_32">
-               <item row="1" column="4">
-                <widget class="QLineEdit" name="trans_roi_files_line_edit">
-                 <property name="minimumSize">
-                  <size>
-                   <width>200</width>
-                   <height>0</height>
-                  </size>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="2">
-                <widget class="QLineEdit" name="trans_radius_line_edit"/>
-               </item>
-               <item row="0" column="0">
-                <layout class="QHBoxLayout" name="horizontalLayout_25">
-                 <item>
-                  <widget class="QCheckBox" name="trans_M3_check_box">
-                   <property name="text">
-                    <string>M3</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QCheckBox" name="trans_M4_check_box">
-                   <property name="text">
-                    <string>M4</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item row="0" column="2">
-                <widget class="QCheckBox" name="trans_radius_check_box">
-                 <property name="text">
-                  <string>Radius</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="4">
-                <widget class="QCheckBox" name="trans_roi_files_checkbox">
-                 <property name="text">
-                  <string>ROI files</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="1" rowspan="2">
-                <widget class="QFrame" name="frame">
-                 <property name="frameShape">
-                  <enum>QFrame::VLine</enum>
-                 </property>
-                 <property name="frameShadow">
-                  <enum>QFrame::Raised</enum>
-                 </property>
-                 <property name="lineWidth">
-                  <number>1</number>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="3" rowspan="2">
-                <widget class="QFrame" name="frame_2">
-                 <property name="frameShape">
-                  <enum>QFrame::VLine</enum>
-                 </property>
-                 <property name="frameShadow">
-                  <enum>QFrame::Raised</enum>
-                 </property>
-                 <property name="lineWidth">
-                  <number>1</number>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <layout class="QHBoxLayout" name="horizontalLayout_28">
-                 <item>
-                  <widget class="QLabel" name="label_17">
-                   <property name="text">
-                    <string>Shift:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLineEdit" name="trans_M3M4_line_edit"/>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_26">
-               <item>
-                <widget class="QLabel" name="label_16">
-                 <property name="text">
-                  <string>Masking files:</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="trans_masking_line_edit"/>
-               </item>
-              </layout>
-             </item>
-            </layout>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="gravity_check">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_23">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_15">
+            <property name="text">
+             <string>Extra Length (m)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="gravity_extra_length_line_edit">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>70</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
          </layout>
+        </item>
+        <item row="3" column="0">
+         <widget class="QGroupBox" name="groupBox_6">
+          <property name="title">
+           <string>Efficiency correction</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_2">
+           <item row="0" column="1">
+            <widget class="QLabel" name="label_27">
+             <property name="text">
+              <string>Rear</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QLineEdit" name="direct_file">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>275</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLabel" name="label_28">
+             <property name="text">
+              <string>Front</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QLineEdit" name="front_direct_file">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="4" column="0" rowspan="2">
+         <widget class="QGroupBox" name="groupBox_17">
+          <property name="title">
+           <string>Apply flood correction file</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_13">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_21">
+             <item>
+              <widget class="QCheckBox" name="enableRearFlood_ck">
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodRearFile" native="true">
+               <property name="findRunFiles" stdset="0">
+                <bool>false</bool>
+               </property>
+               <property name="label" stdset="0">
+                <string>Rear Flood File</string>
+               </property>
+               <property name="multipleFiles" stdset="0">
+                <bool>false</bool>
+               </property>
+               <property name="optional" stdset="0">
+                <bool>false</bool>
+               </property>
+               <property name="multiEntry" stdset="0">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_22">
+             <item>
+              <widget class="QCheckBox" name="enableFrontFlood_ck">
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodFrontFile" native="true">
+               <property name="findRunFiles" stdset="0">
+                <bool>false</bool>
+               </property>
+               <property name="label" stdset="0">
+                <string>Front Flood File</string>
+               </property>
+               <property name="multipleFiles" stdset="0">
+                <bool>false</bool>
+               </property>
+               <property name="optional" stdset="0">
+                <bool>false</bool>
+               </property>
+               <property name="multiEntry" stdset="0">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="7" column="1">
+         <spacer name="verticalSpacer_8">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
         </item>
         <item row="2" column="1" rowspan="3">
          <layout class="QVBoxLayout" name="verticalLayout_11">
@@ -1981,136 +2124,6 @@ intermediate ranges are there for comparison</string>
           </item>
          </layout>
         </item>
-        <item row="3" column="0">
-         <widget class="QGroupBox" name="groupBox_6">
-          <property name="title">
-           <string>Efficiency correction</string>
-          </property>
-          <layout class="QGridLayout" name="gridLayout_2">
-           <item row="0" column="1">
-            <widget class="QLabel" name="label_27">
-             <property name="text">
-              <string>Rear</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2">
-            <widget class="QLineEdit" name="direct_file">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>275</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QLabel" name="label_28">
-             <property name="text">
-              <string>Front</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="2">
-            <widget class="QLineEdit" name="front_direct_file">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item row="4" column="0" rowspan="2">
-         <widget class="QGroupBox" name="groupBox_17">
-          <property name="title">
-           <string>Apply flood correction file</string>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_13">
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_21">
-             <item>
-              <widget class="QCheckBox" name="enableRearFlood_ck">
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodRearFile" native="true">
-               <property name="findRunFiles" stdset="0">
-                <bool>false</bool>
-               </property>
-               <property name="label" stdset="0">
-                <string>Rear Flood File</string>
-               </property>
-               <property name="multipleFiles" stdset="0">
-                <bool>false</bool>
-               </property>
-               <property name="optional" stdset="0">
-                <bool>false</bool>
-               </property>
-               <property name="multiEntry" stdset="0">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_22">
-             <item>
-              <widget class="QCheckBox" name="enableFrontFlood_ck">
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodFrontFile" native="true">
-               <property name="findRunFiles" stdset="0">
-                <bool>false</bool>
-               </property>
-               <property name="label" stdset="0">
-                <string>Front Flood File</string>
-               </property>
-               <property name="multipleFiles" stdset="0">
-                <bool>false</bool>
-               </property>
-               <property name="optional" stdset="0">
-                <bool>false</bool>
-               </property>
-               <property name="multiEntry" stdset="0">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </widget>
-        </item>
         <item row="5" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_6">
           <item>
@@ -2310,6 +2323,200 @@ intermediate ranges are there for comparison</string>
               <widget class="QLabel" name="label_39">
                <property name="text">
                 <string>For transmissions</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="7" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout_27">
+          <item>
+           <widget class="QGroupBox" name="q_resolution_group_box">
+            <property name="title">
+             <string>QResolution</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_33">
+             <item row="2" column="9">
+              <widget class="QLabel" name="q_resolution_delta_r_label">
+               <property name="text">
+                <string>Delta R [mm]:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QLineEdit" name="q_resolution_a1_h1_input">
+               <property name="maximumSize">
+                <size>
+                 <width>35</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="7">
+              <widget class="QLabel" name="q_resolution_collimation_length_label">
+               <property name="text">
+                <string>LCollim [m]:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="2">
+              <widget class="QLineEdit" name="q_resolution_a2_h2_input">
+               <property name="maximumSize">
+                <size>
+                 <width>35</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="8" colspan="3">
+              <widget class="QLineEdit" name="q_resolution_moderator_input">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="readOnly">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="10">
+              <widget class="QLineEdit" name="q_resolution_delta_r_input">
+               <property name="maximumSize">
+                <size>
+                 <width>35</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="8">
+              <widget class="QLineEdit" name="q_resolution_collimation_length_input">
+               <property name="maximumSize">
+                <size>
+                 <width>35</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="4">
+              <widget class="QLabel" name="q_resolution_w1_label">
+               <property name="maximumSize">
+                <size>
+                 <width>40</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>W1[mm]</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLabel" name="q_resolution_a1_h1_label">
+               <property name="maximumSize">
+                <size>
+                 <width>40</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>A1[mm]:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QComboBox" name="q_resolution_combo_box">
+               <property name="maximumSize">
+                <size>
+                 <width>50</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Circ.</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Rect.</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLabel" name="q_resolution_a2_h2_label">
+               <property name="maximumSize">
+                <size>
+                 <width>40</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>A2[mm]:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="5">
+              <widget class="QLineEdit" name="q_resolution_w2_input">
+               <property name="maximumSize">
+                <size>
+                 <width>35</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="4">
+              <widget class="QLabel" name="q_resolution_w2_label">
+               <property name="maximumSize">
+                <size>
+                 <width>40</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>W2[mm]</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="7">
+              <widget class="QLabel" name="q_resolution_moderator_label">
+               <property name="text">
+                <string>Moderator:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="5">
+              <widget class="QLineEdit" name="q_resolution_w1_input">
+               <property name="maximumSize">
+                <size>
+                 <width>35</width>
+                 <height>16777215</height>
+                </size>
                </property>
               </widget>
              </item>
@@ -3201,9 +3408,9 @@ p, li { white-space: pre-wrap; }
           <property name="checkable">
            <bool>false</bool>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_12" stretch="1,1,2">
+          <layout class="QVBoxLayout" name="verticalLayout_12" stretch="0,1,2">
            <item>
-            <widget class="QGroupBox" name="groupBox_12">
+            <widget class="QGroupBox" name="beam_centre_finder_groupbox">
              <property name="title">
               <string>Current ( x , y ) [mm]</string>
              </property>
@@ -3271,6 +3478,37 @@ p, li { white-space: pre-wrap; }
                 </property>
                </widget>
               </item>
+              <item row="1" column="3">
+               <layout class="QHBoxLayout" name="horizontalLayout_24">
+                <item>
+                 <widget class="QCheckBox" name="left_right_checkbox">
+                  <property name="text">
+                   <string>Left/Right</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="up_down_checkbox">
+                  <property name="text">
+                   <string>Up/Down</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item row="0" column="3">
+               <widget class="QLabel" name="label_16">
+                <property name="text">
+                 <string>Find Beam Centre for:</string>
+                </property>
+               </widget>
+              </item>
              </layout>
              <zorder>rear_beam_y</zorder>
              <zorder>rear_radio</zorder>
@@ -3278,6 +3516,7 @@ p, li { white-space: pre-wrap; }
              <zorder>front_beam_x</zorder>
              <zorder>front_radio</zorder>
              <zorder>rear_beam_x</zorder>
+             <zorder>label_16</zorder>
             </widget>
            </item>
            <item>

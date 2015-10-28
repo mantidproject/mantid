@@ -201,6 +201,8 @@ public:
     TS_ASSERT_DELTA(result->readE(0)[2], 404981, 10)
     TS_ASSERT_DELTA(result->readE(0)[10], 489710.39, 100)
     TS_ASSERT(boost::math::isnan(result->readE(0)[7]))
+
+    TSM_ASSERT("Should not have a DX value", !result->hasDx(0))
   }
 
   void testInvalidPixelAdj() {
@@ -397,6 +399,7 @@ public:
                                value2);
 
     // Act
+    TSM_ASSERT("Resolution workspace should not be NULL", qResolution)
     Mantid::Algorithms::Q1D2 Q1D;
     TS_ASSERT_THROWS_NOTHING(Q1D.initialize());
     TS_ASSERT(Q1D.isInitialized())
@@ -426,6 +429,7 @@ public:
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 outputWS + "_sumOfCounts")))
 
+    TSM_ASSERT("Should have the x error flag set", result->hasDx(0));
     // That output will be SUM_i(Yin_i*QRES_in_i)/(SUM_i(Y_in_i)) for each q
     // value
     // In our test workspace we set QRes_in_1 to 1, this means that all DX

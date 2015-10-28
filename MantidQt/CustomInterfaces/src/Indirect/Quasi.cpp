@@ -124,22 +124,22 @@ void Quasi::run() {
   // Using 1/0 instead of True/False for compatibility with underlying Fortran
   // code
   // in some places
-  QString save("False");
-  QString elasticPeak("False");
-  QString sequence("False");
+  bool save = false;
+  bool elasticPeak = false;
+  bool sequence = false;
 
-  QString fixedWidth("False");
-  QString fixedWidthFile("");
+  bool fixedWidth = false;
+  std::string fixedWidthFile("");
 
-  QString useResNorm("False");
-  QString resNormFile("");
+  bool useResNorm = false;
+  std::string resNormFile("");
 
-  QString pyInput = "from IndirectBayes import QLRun\n";
+  std::string sampleName =
+      m_uiForm.dsSample->getCurrentDataName().toStdString();
+  std::string resName =
+      m_uiForm.dsResolution->getCurrentDataName().toStdString();
 
-  QString sampleName = m_uiForm.dsSample->getCurrentDataName();
-  QString resName = m_uiForm.dsResolution->getCurrentDataName();
-
-  QString program = m_uiForm.cbProgram->currentText();
+  std::string program = m_uiForm.cbProgram->currentText().toStdString();
 
   if (program == "Lorentzians") {
     program = "QL";
@@ -148,59 +148,78 @@ void Quasi::run() {
   }
 
   // Collect input from fit options section
-  QString background = m_uiForm.cbBackground->currentText();
+  std::string background = m_uiForm.cbBackground->currentText().toStdString();
 
   if (m_uiForm.chkElasticPeak->isChecked()) {
-    elasticPeak = "True";
+    elasticPeak = true;
   }
   if (m_uiForm.chkSequentialFit->isChecked()) {
-    sequence = "True";
+    sequence = true;
   }
 
   if (m_uiForm.chkFixWidth->isChecked()) {
-    fixedWidth = "True";
-    fixedWidthFile = m_uiForm.mwFixWidthDat->getFirstFilename();
+    fixedWidth = true;
+    fixedWidthFile = m_uiForm.mwFixWidthDat->getFirstFilename().toStdString();
   }
 
   if (m_uiForm.chkUseResNorm->isChecked()) {
-    useResNorm = "True";
-    resNormFile = m_uiForm.dsResNorm->getCurrentDataName();
+    useResNorm = true;
+    resNormFile = m_uiForm.dsResNorm->getCurrentDataName().toStdString();
   }
 
-  QString fitOps = "[" + elasticPeak + ", '" + background + "', " + fixedWidth +
-                   ", " + useResNorm + "]";
-
   // Collect input from the properties browser
-  QString eMin = m_properties["EMin"]->valueText();
-  QString eMax = m_properties["EMax"]->valueText();
-  QString eRange = "[" + eMin + "," + eMax + "]";
+  double eMin = m_properties["EMin"]->valueText().toDouble();
+  double eMax = m_properties["EMax"]->valueText().toDouble();
 
-  QString sampleBins = m_properties["SampleBinning"]->valueText();
-  QString resBins = m_properties["ResBinning"]->valueText();
-  QString nBins = "[" + sampleBins + "," + resBins + "]";
+  long sampleBins = m_properties["SampleBinning"]->valueText().toLong();
+  long resBins = m_properties["ResBinning"]->valueText().toLong();
 
   // Output options
   if (m_uiForm.chkSave->isChecked()) {
-    save = "True";
+    save = true;
   }
-  QString plot = m_uiForm.cbPlot->currentText();
+  std::string plot = m_uiForm.cbPlot->currentText().toStdString();
 
-  pyInput += "QLRun('" + program + "','" + sampleName + "','" + resName +
-             "','" + resNormFile + "'," + eRange + ","
-                                                   " " +
-             nBins + "," + fitOps + ",'" + fixedWidthFile + "'," + sequence +
-             ", "
-             " Save=" +
-             save + ", Plot='" + plot + "')\n";
+  IAlgorithm_sptr runAlg = AlgorithmManager::Instance().create("BayesQuasi");
+  runAlg->initialize();
+  runAlg->setProperty("Program", program);
+  runAlg->setProperty("SampleWorkspace", sampleName);
+  runAlg->setProperty("ResolutionWorkspace", resName);
+  runAlg->setProperty("ResNormWorkspace", resNormFile);
+  runAlg->setProperty("OutputWorkspaceFit", "fit");
+  runAlg->setProperty("OutputWorkspaceProb", "prob");
+  runAlg->setProperty("OutputWorkspaceResult", "result");
+  runAlg->setProperty("MinRange", eMin);
+  runAlg->setProperty("MaxRange", eMax);
+  runAlg->setProperty("SampleBins", sampleBins);
+  runAlg->setProperty("ResolutionBins", resBins);
+  runAlg->setProperty("Elastic", elasticPeak);
+  runAlg->setProperty("Background", background);
+  runAlg->setProperty("FixedWidth", fixedWidth);
+  runAlg->setProperty("UseResNorm", useResNorm);
+  runAlg->setProperty("WidthFile", fixedWidthFile);
+  runAlg->setProperty("Loop", sequence);
+  runAlg->setProperty("Save", save);
+  runAlg->setProperty("Plot", plot);
 
-  runPythonScript(pyInput);
-
-  updateMiniPlot();
+  m_QuasiAlg = runAlg;
+  m_batchAlgoRunner->addAlgorithm(runAlg);
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(algorithmComplete(bool)));
+  m_batchAlgoRunner->executeBatchAsync();
 }
 
 /**
  * Updates the data and fit curves on the mini plot.
  */
+void Quasi::algorithmComplete(bool error) {
+
+  if (error)
+    return;
+  else
+    updateMiniPlot();
+}
+
 void Quasi::updateMiniPlot() {
   // Update sample plot
   if (!m_uiForm.dsSample->isValid())

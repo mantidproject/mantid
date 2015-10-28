@@ -1,3 +1,4 @@
+#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 from numpy import zeros, arctan2, arange, shape, sqrt, fliplr, asfarray, mean, sum, NAN
 from mantid.simpleapi import *

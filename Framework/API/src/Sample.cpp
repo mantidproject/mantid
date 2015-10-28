@@ -4,6 +4,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleEnvironment.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Strings.h"
@@ -22,8 +23,9 @@ using Geometry::ShapeFactory;
  * Default constructor. Required for cow_ptr.
  */
 Sample::Sample()
-    : m_name(), m_shape(), m_environment(), m_lattice(NULL), m_samples(),
-      m_geom_id(0), m_thick(0.0), m_height(0.0), m_width(0.0) {}
+    : m_name(), m_shape(), m_environment(), m_lattice(NULL),
+      m_crystalStructure(), m_samples(), m_geom_id(0), m_thick(0.0),
+      m_height(0.0), m_width(0.0) {}
 
 /**
  * Copy constructor
@@ -31,11 +33,16 @@ Sample::Sample()
  */
 Sample::Sample(const Sample &copy)
     : m_name(copy.m_name), m_shape(copy.m_shape),
-      m_environment(copy.m_environment), m_lattice(NULL),
+      m_environment(copy.m_environment), m_lattice(NULL), m_crystalStructure(),
       m_samples(copy.m_samples), m_geom_id(copy.m_geom_id),
       m_thick(copy.m_thick), m_height(copy.m_height), m_width(copy.m_width) {
   if (copy.m_lattice)
     m_lattice = new OrientedLattice(copy.getOrientedLattice());
+
+  if (copy.hasCrystalStructure()) {
+    m_crystalStructure.reset(
+        new Geometry::CrystalStructure(copy.getCrystalStructure()));
+  }
 }
 
 /// Destructor
@@ -63,6 +70,12 @@ Sample &Sample::operator=(const Sample &rhs) {
     m_lattice = new OrientedLattice(rhs.getOrientedLattice());
   else
     m_lattice = NULL;
+
+  m_crystalStructure.reset();
+  if (rhs.hasCrystalStructure()) {
+    m_crystalStructure.reset(
+        new Geometry::CrystalStructure(rhs.getCrystalStructure()));
+  }
 
   return *this;
 }
@@ -160,6 +173,35 @@ void Sample::setOrientedLattice(OrientedLattice *latt) {
 
 /** @return true if the sample has an OrientedLattice  */
 bool Sample::hasOrientedLattice() const { return (m_lattice != NULL); }
+
+const Geometry::CrystalStructure &Sample::getCrystalStructure() const {
+  if (!hasCrystalStructure()) {
+    throw std::runtime_error(
+        "Sample::getCrystalStructure - No CrystalStructure has been defined.");
+  }
+
+  return *m_crystalStructure;
+}
+
+/// Resets the internal pointer to the new CrystalStructure (it's copied).
+void Sample::setCrystalStructure(
+    const Geometry::CrystalStructure &newCrystalStructure) {
+  m_crystalStructure.reset(new Geometry::CrystalStructure(newCrystalStructure));
+}
+
+/// Returns true if the sample actually holds a CrystalStructure.
+bool Sample::hasCrystalStructure() const {
+  // Conversion to bool seems to be a problem in VS2012, so this is a bit more
+  // verbose than it should be.
+  if (m_crystalStructure) {
+    return true;
+  }
+
+  return false;
+}
+
+/// Destroys the internally stored CrystalStructure-object.
+void Sample::clearCrystalStructure() { m_crystalStructure.reset(); }
 
 /**
  * Set the geometry flag that is specfied in the raw file within the SPB_STRUCT

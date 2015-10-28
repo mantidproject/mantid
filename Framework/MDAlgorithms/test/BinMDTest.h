@@ -10,6 +10,7 @@
 #include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidMDAlgorithms/BinMD.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
@@ -114,11 +115,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
 
+    Mantid::Geometry::QSample frame;
     IMDEventWorkspace_sptr in_ws =
-        MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, numEventsPerBox);
+        MDEventsTestHelper::makeAnyMDEWWithFrames<MDLeanEvent<3>, 3>(
+            10, 0.0, 10.0, frame, numEventsPerBox);
     Mantid::Kernel::SpecialCoordinateSystem appliedCoord =
         Mantid::Kernel::QSample;
-    in_ws->setCoordinateSystem(appliedCoord);
+
     auto eventNorm = Mantid::API::MDNormalization::VolumeNormalization;
     auto histoNorm = Mantid::API::MDNormalization::NumEventsNormalization;
     in_ws->setDisplayNormalization(eventNorm);

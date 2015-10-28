@@ -46,6 +46,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                              doc='The output corrections workspace.')
 
 
+
     def PyExec(self):
         self._setup()
 
@@ -89,15 +90,17 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             self._subtract()
             correction_type = 'can_subtraction'
             # Add container filename to log values
+            can_cut = self._can_ws_name.index('_')
+            can_base = self._can_ws_name[:can_cut]
             AddSampleLog(Workspace=self._output_ws_name,
                          LogName='container_filename',
                          LogType='String',
-                         LogText=self._can_ws_name)
+                         LogText=can_base)
 
         # Record the container scale factor
         if self._use_can and self._scale_can:
             AddSampleLog(Workspace=self._output_ws_name,
-                         LogName='apply_corr_can_scale_factor',
+                         LogName='container_scale',
                          LogType='Number',
                          LogText=str(self._can_scale_factor))
 
@@ -108,10 +111,12 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                      LogText=correction_type)
 
         # Add original sample as log entry
+        sam_cut = self._sample_ws_name.index('_')
+        sam_base = self._sample_ws_name[:sam_cut]
         AddSampleLog(Workspace=self._output_ws_name,
                      LogName='sample_filename',
                      LogType='String',
-                     LogText=self._sample_ws_name)
+                     LogText=sam_base)
 
         self.setPropertyValue('OutputWorkspace', self._output_ws_name)
 
@@ -246,6 +251,12 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         """
         Do a simple container subtraction (when no corrections are given).
         """
+
+
+        logger.information('Rebining container to ensure Minus')
+        RebinToWorkspace(WorkspaceToRebin=self._can_ws_name,
+                         WorkspaceToMatch=self._sample_ws_name,
+                         OutputWorkspace=self._can_ws_name)
 
         logger.information('Using simple container subtraction')
 

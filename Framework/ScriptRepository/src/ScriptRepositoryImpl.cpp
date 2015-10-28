@@ -49,13 +49,11 @@ using Mantid::Kernel::NetworkProxy;
 #include <Poco/DateTimeFormatter.h>
 
 // from boost
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 
-using boost::property_tree::ptree;
+#include <json/json.h>
 
 namespace Mantid {
 namespace API {
@@ -71,6 +69,60 @@ const char *emptyURL =
     "to the central repository.\nThis entry should be defined at the "
     "properties file, "
     "at ScriptRepository";
+
+/**
+Write json object to file
+*/
+void writeJsonFile(const std::string &filename, Json::Value json,
+                   const std::string &error) {
+  Poco::FileOutputStream filestream(filename);
+  if (!filestream.good()) {
+    g_log.error() << error << std::endl;
+  }
+  Json::StyledWriter writer;
+  filestream << writer.write(json);
+  filestream.close();
+}
+
+/**
+Read json object from file
+*/
+Json::Value readJsonFile(const std::string &filename,
+                         const std::string &error) {
+  Poco::FileInputStream filestream(filename);
+  if (!filestream.good()) {
+    g_log.error() << error << std::endl;
+  }
+  Json::Reader json_reader;
+  Json::Value read;
+  json_reader.parse(filestream, read);
+  return read;
+}
+
+/**
+Write string to file
+*/
+void writeStringFile(const std::string &filename,
+                     const std::string &stringToWrite,
+                     const std::string &error) {
+  Poco::FileStream filestream(filename);
+  if (!filestream.good()) {
+    g_log.error() << error << std::endl;
+  }
+  filestream << stringToWrite;
+  filestream.close();
+}
+
+/**
+Test if a file with this filename already exists
+*/
+bool fileExists(const std::string &filename) {
+  Poco::File test_file(filename);
+  if (test_file.exists()) {
+    return true;
+  }
+  return false;
+}
 
 DECLARE_SCRIPTREPOSITORY(ScriptRepositoryImpl)
 /**
@@ -272,10 +324,9 @@ void ScriptRepositoryImpl::install(const std::string &path) {
   g_log.debug() << "ScriptRepository downloaded repository information"
                 << std::endl;
   // creation of the instance of local_json file
-  Poco::File local(local_json_file);
-  if (!local.exists()) {
-    ptree pt;
-    write_json(local_json_file, pt);
+  if (!fileExists(local_json_file)) {
+    writeStringFile(local_json_file, "{\n}",
+                    "ScriptRepository failed to create local repository");
     g_log.debug() << "ScriptRepository created the local repository information"
                   << std::endl;
   }
@@ -608,7 +659,7 @@ void ScriptRepositoryImpl::download_directory(
       it->second.downloaded_pubdate = it->second.pub_date;
       updateLocalJson(it->first, it->second);
 
-    }                                   // end donwloading directory
+    }                                   // end downloading directory
                                         // update the status
     it->second.status = BOTH_UNCHANGED; // update this entry
   }                                     // end interaction with all entries
@@ -822,19 +873,17 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
     std::string detail;
     std::string published_date;
 
-    ptree pt;
-    try {
-      read_json(answer, pt);
-      info = pt.get<std::string>("message", "");
-      detail = pt.get<std::string>("detail", "");
-      published_date = pt.get<std::string>("pub_date", "");
-      std::string cmd = pt.get<std::string>("shell", "");
-      if (!cmd.empty())
-        detail.append("\nFrom Command: ").append(cmd);
-
-    } catch (boost::property_tree::json_parser_error &ex) {
-      throw ScriptRepoException("Bad answer from the Server", ex.what());
+    Json::Value pt;
+    Json::Reader json_reader;
+    if (!json_reader.parse(answer, pt)) {
+      throw ScriptRepoException("Bad answer from the Server");
     }
+    info = pt.get("message", "").asString();
+    detail = pt.get("detail", "").asString();
+    published_date = pt.get("pub_date", "").asString();
+    std::string cmd = pt.get("shell", "").asString();
+    if (!cmd.empty())
+      detail.append("\nFrom Command: ").append(cmd);
 
     if (info == "success") {
       g_log.notice() << "ScriptRepository:" << file_path << " uploaded!"
@@ -890,24 +939,22 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
 void ScriptRepositoryImpl::updateRepositoryJson(const std::string &path,
                                                 const RepositoryEntry &entry) {
 
-  ptree repository_json;
+  Json::Value repository_json;
   std::string filename =
       std::string(local_repository).append(".repository.json");
-  read_json(filename, repository_json);
+  repository_json =
+      readJsonFile(filename, "Error reading .repository.json file");
 
-  ptree::const_assoc_iterator it = repository_json.find(path);
-  if (it == repository_json.not_found()) {
-    boost::property_tree::ptree array;
-    array.put(std::string("author"), entry.author);
-    array.put(std::string("description"), entry.description);
-    std::string directory =
-        (const char *)((entry.directory) ? "true" : "false");
-    array.put(std::string("directory"), directory);
-    array.put(std::string("pub_date"), entry.pub_date.toFormattedString());
-    repository_json.push_back(
-        std::pair<std::string,
-                  boost::property_tree::basic_ptree<std::string, std::string>>(
-            path, array));
+  if (!repository_json.isMember(path)) {
+    // Create Json value for entry
+    Json::Value entry_json;
+    entry_json["author"] = entry.author;
+    entry_json["description"] = entry.description;
+    entry_json["directory"] = (entry.directory ? "true" : "false");
+    entry_json["pub_date"] = entry.pub_date.toFormattedString();
+
+    // Add Json value for entry to repository Json value
+    repository_json[path] = entry_json;
   }
 
   g_log.debug() << "Update LOCAL JSON FILE" << std::endl;
@@ -915,7 +962,8 @@ void ScriptRepositoryImpl::updateRepositoryJson(const std::string &path,
   // set the .repository.json and .local.json not hidden to be able to edit it
   SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_NORMAL);
 #endif
-  write_json(filename, repository_json);
+  writeJsonFile(filename, repository_json,
+                "Error writing .repository.json file");
 #if defined(_WIN32) || defined(_WIN64)
   // set the .repository.json and .local.json hidden
   SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_HIDDEN);
@@ -1016,21 +1064,18 @@ void ScriptRepositoryImpl::remove(const std::string &file_path,
     // not.
     std::string info;
     std::string detail;
-    ptree pt;
-    try {
-      read_json(answer, pt);
-      info = pt.get<std::string>("message", "");
-      detail = pt.get<std::string>("detail", "");
-      std::string cmd = pt.get<std::string>("shell", "");
-      if (!cmd.empty())
-        detail.append("\nFrom Command: ").append(cmd);
+    Json::Value answer_json;
 
-    } catch (boost::property_tree::json_parser_error &ex) {
-      // this should not occurr in production. The answer from the
-      // server should always be a valid json file
-      g_log.debug() << "Bad answer: " << ex.what() << std::endl;
-      throw ScriptRepoException("Bad answer from the Server", ex.what());
+    Json::Reader json_reader;
+    if (!json_reader.parse(answer, answer_json)) {
+      throw ScriptRepoException("Bad answer from the Server");
     }
+    info = answer_json.get("message", "").asString();
+    detail = answer_json.get("detail", "").asString();
+    std::string cmd = answer_json.get("shell", "").asString();
+
+    if (!cmd.empty())
+      detail.append("\nFrom Command: ").append(cmd);
 
     g_log.debug() << "Checking if success info=" << info << std::endl;
     // check if the server removed the file from the central repository
@@ -1048,31 +1093,22 @@ void ScriptRepositoryImpl::remove(const std::string &file_path,
     // dealt with locally.
     //
     {
-      ptree pt;
       std::string filename =
           std::string(local_repository).append(".repository.json");
-      try {
-        read_json(filename, pt);
-        pt.erase(relative_path); // remove the entry
-#if defined(_WIN32) || defined(_WIN64)
-        // set the .repository.json and .local.json not hidden (to be able to
-        // edit it)
-        SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_NORMAL);
-#endif
-        write_json(filename, pt);
-#if defined(_WIN32) || defined(_WIN64)
-        // set the .repository.json and .local.json hidden
-        SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_HIDDEN);
-#endif
-      } catch (boost::property_tree::json_parser_error &ex) {
-        std::stringstream ss;
-        ss << "corrupted central copy of database : " << filename;
 
-        g_log.error() << "ScriptRepository: " << ss.str()
-                      << "\nDetails: deleting entries - json_parser_error: "
-                      << ex.what() << std::endl;
-        throw ScriptRepoException(ss.str(), ex.what());
-      }
+      Json::Value pt =
+          readJsonFile(filename, "Error reading .repository.json file");
+      pt.removeMember(relative_path); // remove the entry
+#if defined(_WIN32) || defined(_WIN64)
+      // set the .repository.json and .local.json not hidden (to be able to
+      // edit it)
+      SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_NORMAL);
+#endif
+      writeJsonFile(filename, pt, "Error writing .repository.json file");
+#if defined(_WIN32) || defined(_WIN64)
+      // set the .repository.json and .local.json hidden
+      SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_HIDDEN);
+#endif
     }
 
     // update the repository list variable
@@ -1385,32 +1421,31 @@ void ScriptRepositoryImpl::doDownloadFile(const std::string &url_file,
  @todo describe
  */
 void ScriptRepositoryImpl::parseCentralRepository(Repository &repo) {
-  ptree pt;
   std::string filename =
       std::string(local_repository).append(".repository.json");
   try {
-    read_json(filename, pt);
+    Json::Value pt =
+        readJsonFile(filename, "Error reading .repository.json file");
 
-    BOOST_FOREACH (ptree::value_type &file, pt) {
-      if (!isEntryValid(file.first))
+    // This is looping through the member name list rather than using
+    // Json::ValueIterator
+    // as a workaround for a bug in the JsonCpp library (Json::ValueIterator is
+    // not exported)
+    Json::Value::Members member_names = pt.getMemberNames();
+    for (unsigned int i = 0; i < member_names.size(); ++i) {
+      std::string filepath = member_names[i];
+      if (!isEntryValid(filepath))
         continue;
-      // g_log.debug() << "Inserting : file.first " << file.first << std::endl;
-      RepositoryEntry &entry = repo[file.first];
+      Json::Value entry_json = pt.get(filepath, "");
+      RepositoryEntry &entry = repo[filepath];
       entry.remote = true;
-      entry.directory = file.second.get("directory", false);
-      entry.pub_date = DateAndTime(file.second.get<std::string>("pub_date"));
-      entry.description = file.second.get("description", "");
-      entry.author = file.second.get("author", "");
+      entry.directory = entry_json.get("directory", false).asBool();
+      entry.pub_date = DateAndTime(entry_json.get("pub_date", "").asString());
+      entry.description = entry_json.get("description", "").asString();
+      entry.author = entry_json.get("author", "").asString();
       entry.status = BOTH_UNCHANGED;
     }
 
-  } catch (boost::property_tree::json_parser_error &ex) {
-    std::stringstream ss;
-    ss << "Corrupted database : " << filename;
-
-    g_log.error() << "ScriptRepository: " << ss.str()
-                  << "\nDetails: json_parser_error: " << ex.what() << std::endl;
-    throw ScriptRepoException(ss.str(), ex.what());
   } catch (std::exception &ex) {
     std::stringstream ss;
     ss << "RuntimeError: checking database >> " << ex.what();
@@ -1450,15 +1485,24 @@ void ScriptRepositoryImpl::parseLocalRepository(Repository &repo) {
 
  */
 void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
-  ptree pt;
   std::string filename = std::string(local_repository).append(".local.json");
   std::vector<std::string> entries_to_delete;
   Repository::iterator entry_it;
   std::set<std::string> folders_of_deleted;
+
   try {
-    read_json(filename, pt);
-    BOOST_FOREACH (ptree::value_type &file, pt) {
-      entry_it = repo.find(file.first);
+    Json::Value pt = readJsonFile(filename, "Error reading .local.json file");
+
+    // This is looping through the member name list rather than using
+    // Json::ValueIterator
+    // as a workaround for a bug in the JsonCpp library (Json::ValueIterator is
+    // not exported)
+    Json::Value::Members member_names = pt.getMemberNames();
+    for (unsigned int i = 0; i < member_names.size(); ++i) {
+      std::string filepath = member_names[i];
+      Json::Value entry_json = pt.get(filepath, "");
+
+      entry_it = repo.find(filepath);
       if (entry_it != repo.end()) {
         // entry found, so, lets update the entry
         if (entry_it->second.local && entry_it->second.remote) {
@@ -1466,24 +1510,25 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
           // was found at the local file system and at the remote repository
 
           entry_it->second.downloaded_pubdate =
-              DateAndTime(file.second.get<std::string>("downloaded_pubdate"));
+              DateAndTime(entry_json.get("downloaded_pubdate", "").asString());
           entry_it->second.downloaded_date =
-              DateAndTime(file.second.get<std::string>("downloaded_date"));
+              DateAndTime(entry_json.get("downloaded_date", "").asString());
+          std::string auto_update =
+              entry_json.get("auto_update", "false").asString();
           entry_it->second.auto_update =
-              (file.second.get<std::string>("auto_update", std::string()) ==
-               "true");
+              (auto_update == "true"); // get().asBool() fails here on OS X
 
         } else {
-          // if the entry was not found locally or remotelly, this means
-          // that this entry was deleted (remotelly or locally),
+          // if the entry was not found locally or remotely, this means
+          // that this entry was deleted (remotely or locally),
           // so it should not appear at local_repository json any more
-          entries_to_delete.push_back(file.first);
-          folders_of_deleted.insert(getParentFolder(file.first));
+          entries_to_delete.push_back(filepath);
+          folders_of_deleted.insert(getParentFolder(filepath));
         }
       } else {
         // this entry was never created before, so it should not
         // exist in local repository json
-        entries_to_delete.push_back(file.first);
+        entries_to_delete.push_back(filepath);
       }
 
     } // end loop FOREACH entry in local json
@@ -1493,8 +1538,7 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
 
       // clear the auto_update flag from the folders if the user deleted files
       BOOST_FOREACH (const std::string &folder, folders_of_deleted) {
-        ptree::assoc_iterator pt_entry = pt.find(folder);
-        if (pt_entry == pt.not_found())
+        if (!pt.isMember(folder))
           continue;
 
         entry_it = repo.find(folder);
@@ -1510,27 +1554,19 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
       for (std::vector<std::string>::iterator it = entries_to_delete.begin();
            it != entries_to_delete.end(); ++it) {
         // remove this entry
-        pt.erase(*it);
+        pt.removeMember(*it);
       }
 #if defined(_WIN32) || defined(_WIN64)
       // set the .repository.json and .local.json not hidden (to be able to edit
       // it)
       SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_NORMAL);
 #endif
-      write_json(filename, pt);
+      writeJsonFile(filename, pt, "Error writing .local.json file");
 #if defined(_WIN32) || defined(_WIN64)
       // set the .repository.json and .local.json hidden
       SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_HIDDEN);
 #endif
     }
-  } catch (boost::property_tree::json_parser_error &ex) {
-    std::stringstream ss;
-    ss << "Corrupted local database : " << filename;
-
-    g_log.error() << "ScriptRepository: " << ss.str()
-                  << "\nDetails: downloaded entries - json_parser_error: "
-                  << ex.what() << std::endl;
-    throw ScriptRepoException(ss.str(), ex.what());
   } catch (std::exception &ex) {
     std::stringstream ss;
     ss << "RuntimeError: checking downloaded entries >> " << ex.what();
@@ -1546,41 +1582,41 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
 
 void ScriptRepositoryImpl::updateLocalJson(const std::string &path,
                                            const RepositoryEntry &entry) {
-  ptree local_json;
-  std::string filename = std::string(local_repository).append(".local.json");
-  read_json(filename, local_json);
 
-  ptree::const_assoc_iterator it = local_json.find(path);
-  if (it == local_json.not_found()) {
-    boost::property_tree::ptree array;
-    array.put(std::string("downloaded_date"),
-              entry.downloaded_date.toFormattedString());
-    array.put(std::string("downloaded_pubdate"),
-              entry.downloaded_pubdate.toFormattedString());
-    //      array.push_back(std::make_pair("auto_update",entry.auto_update)));
-    local_json.push_back(
-        std::pair<std::string,
-                  boost::property_tree::basic_ptree<std::string, std::string>>(
-            path, array));
+  std::string filename = std::string(local_repository).append(".local.json");
+  Json::Value local_json =
+      readJsonFile(filename, "Error reading .local.json file");
+
+  if (!local_json.isMember(path)) {
+
+    // Create new entry
+    Json::Value new_entry;
+    new_entry["downloaded_date"] = entry.downloaded_date.toFormattedString();
+    new_entry["downloaded_pubdate"] =
+        entry.downloaded_pubdate.toFormattedString();
+
+    // Add new entry to repository json value
+    local_json[path] = new_entry;
+
   } else {
-    local_json.put(boost::property_tree::ptree::path_type(
-                       std::string(path).append("!downloaded_pubdate"), '!'),
-                   entry.downloaded_pubdate.toFormattedString().c_str());
-    local_json.put(boost::property_tree::ptree::path_type(
-                       std::string(path).append("!downloaded_date"), '!'),
-                   entry.downloaded_date.toFormattedString().c_str());
-    std::string auto_update_op =
-        (const char *)((entry.auto_update) ? "true" : "false");
-    std::string key = std::string(path).append("!auto_update");
-    local_json.put(boost::property_tree::ptree::path_type(key, '!'),
-                   auto_update_op);
+
+    Json::Value replace_entry;
+    replace_entry["downloaded_date"] =
+        entry.downloaded_date.toFormattedString();
+    replace_entry["downloaded_pubdate"] =
+        entry.downloaded_pubdate.toFormattedString();
+    replace_entry["auto_update"] = ((entry.auto_update) ? "true" : "false");
+
+    // Replace existing entry for this file
+    local_json.removeMember(path);
+    local_json[path] = replace_entry;
   }
-// g_log.debug() << "Update LOCAL JSON FILE" << std::endl;
+
 #if defined(_WIN32) || defined(_WIN64)
   // set the .repository.json and .local.json not hidden to be able to edit it
   SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_NORMAL);
 #endif
-  write_json(filename, local_json);
+  writeJsonFile(filename, local_json, "Error writing .local.json file");
 #if defined(_WIN32) || defined(_WIN64)
   // set the .repository.json and .local.json hidden
   SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_HIDDEN);

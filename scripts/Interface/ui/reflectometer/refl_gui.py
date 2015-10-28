@@ -1,10 +1,10 @@
+#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 import ui_refl_window
 import refl_save
 import refl_choose_col
 import refl_options
 import csv
-import string
 import os
 import re
 from operator import itemgetter
@@ -210,6 +210,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
     def _show_slit_calculator(self):
         calc = mantidqtpython.MantidQt.MantidWidgets.SlitCalculator(self)
+        calc.setCurrentInstrumentName(self.current_instrument)
+        calc.processInstrumentHasBeenChanged()
         calc.exec_()
 
     def _polar_corr_selected(self):
@@ -671,6 +673,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         Process has been pressed, check what has been selected then pass the selection (or whole table) to quick
         """
 #--------- If "Process" button pressed, convert raw files to IvsLam and IvsQ and combine if checkbox ticked -------------
+        _overallQMin = float("inf")
+        _overallQMax = float("-inf")
         try:
             willProcess = True
             rows = self.tableMain.selectionModel().selectedRows()
@@ -759,7 +763,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
                         # Populate runlist
                         first_wq = None
-                        for i in range(len(runno)):
+                        for i in range(0,len(runno)):
                             theta, qmin, qmax, wlam, wq = self._do_run(runno[i], row, i)
                             if not first_wq:
                                 first_wq = wq # Cache the first Q workspace
@@ -790,32 +794,33 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                             #Scale each run
                             if self.tableMain.item(row, self.scale_col).text():
                                 Scale(InputWorkspace=wksp[i], OutputWorkspace=wksp[i], Factor=1 / float(self.tableMain.item(row, self.scale_col).text()))
-
-                        if self.__checked_row_stiched(row):
-                            if len(runno) == 1:
-                                logger.notice("Nothing to combine for processing row : " + str(row))
-                            else:
-                                w1 = getWorkspace(wksp[0])
-                                w2 = getWorkspace(wksp[-1])
-                                if len(runno) == 2:
-                                    outputwksp = runno[0] + '_' + runno[1][3:5]
+                            if self.__checked_row_stiched(row):
+                                if len(runno) == 1:
+                                    logger.notice("Nothing to combine for processing row : " + str(row))
                                 else:
-                                    outputwksp = runno[0] + '_' + runno[-1][3:5]
-                                begoverlap = w2.readX(0)[0]
-                                # get Qmax
-                                if self.tableMain.item(row, i * 5 + 4).text() == '':
-                                    overlapHigh = 0.3 * max(w1.readX(0))
+                                    w1 = getWorkspace(wksp[0])
+                                    w2 = getWorkspace(wksp[-1])
+                                    if len(runno) == 2:
+                                        outputwksp = runno[0] + '_' + runno[1][3:]
+                                    else:
+                                        outputwksp = runno[0] + '_' + runno[-1][3:]
+                                    begoverlap = w2.readX(0)[0]
+                                    # get Qmax
+                                    if self.tableMain.item(row, i * 5 + 4).text() == '':
+                                        overlapHigh = 0.3 * max(w1.readX(0))
 
-                                Qmin = min(w1.readX(0))
-                                Qmax = max(w2.readX(0))
+                                    Qmin = min(w1.readX(0))
+                                    Qmax = max(w2.readX(0))
+                                    if len(self.tableMain.item(row, i * 5 + 3).text()) > 0:
+                                        Qmin = float(self.tableMain.item(row, i * 5 + 3).text())
+                                    if len(self.tableMain.item(row, i * 5 + 4).text()) > 0:
+                                        Qmax = float(self.tableMain.item(row, i * 5 + 4).text())
+                                    if Qmax > _overallQMax:
+                                        _overallQMax = Qmax
+                                    if Qmin < _overallQMin :
+                                        _overallQMin = Qmin
 
-                                if len(self.tableMain.item(row, i * 5 + 3).text()) > 0:
-                                    Qmin = float(self.tableMain.item(row, i * 5 + 3).text())
-
-                                if len(self.tableMain.item(row, i * 5 + 4).text()) > 0:
-                                    Qmax = float(self.tableMain.item(row, i * 5 + 4).text())
-
-                                wcomb = combineDataMulti(wksp, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1, keep=True)
+                                    _wcomb = combineDataMulti(wksp, outputwksp, overlapLow, overlapHigh, _overallQMin, _overallQMax, -dqq, 1, keep=True)
 
 
                         # Enable the plot button
@@ -903,9 +908,9 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         # Create and plot stitched outputs
         if self.__checked_row_stiched(row):
             if len(runno) == 2:
-                outputwksp = runno[0] + '_' + runno[1][3:5]
+                outputwksp = runno[0] + '_' + runno[1][3:]
             else:
-                outputwksp = runno[0] + '_' + runno[2][3:5]
+                outputwksp = runno[0] + '_' + runno[2][3:]
             if not getWorkspace(outputwksp, report_error=False):
                 # Stitching has not been done as part of processing, so we need to do it here.
                 wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1, keep=True)

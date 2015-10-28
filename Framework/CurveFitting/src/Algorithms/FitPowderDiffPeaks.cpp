@@ -2081,7 +2081,8 @@ bool FitPowderDiffPeaks::doFitMultiplePeaks(
     bool fitgood = doFitNPeaksSimple(dataws, wsindex, peaksfunc, peakfuncs,
                                      "Levenberg-MarquardtMD", 1000, chi2);
 
-    evergood = evergood || fitgood;
+    // not required. before loop starts, evergood=fitgood WITH fitgood==true
+    // evergood = evergood || fitgood;
 
     // c) Process the result
     if (!fitgood)
@@ -2098,7 +2099,8 @@ bool FitPowderDiffPeaks::doFitMultiplePeaks(
   storeFunctionParameters(peaksfunc, peaksfuncparams);
   fitgood = doFitNPeaksSimple(dataws, wsindex, peaksfunc, peakfuncs,
                               "Levenberg-MarquardtMD", 1000, chi2);
-  evergood = evergood || fitgood;
+  // not required. before, evergood=fitgood WITH fitgood==true
+  // evergood = evergood || fitgood;
 
   if (!fitgood)
     restoreFunctionParameters(peaksfunc, peaksfuncparams);

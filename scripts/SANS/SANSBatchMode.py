@@ -178,7 +178,8 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                                                        original_settings = settings,
                                                        original_prop_man_settings = prop_man_settings)
         except (RunTimeError, ValueError) as e:
-            sanslog.warning("Error in Batchmode user files: Could not reset the specified user file %s. More info: %s" %(str(run['user_file']),str(e)))
+            sanslog.warning("Error in Batchmode user files: Could not reset the specified user file %s. More info: %s" %(
+                str(run['user_file']),str(e)))
 
         local_settings = copy.deepcopy(ReductionSingleton().reference())
         local_prop_man_settings = ReductionSingleton().settings.clone("TEMP_SETTINGS")

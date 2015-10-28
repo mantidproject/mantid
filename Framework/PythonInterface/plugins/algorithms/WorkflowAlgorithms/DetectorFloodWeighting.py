@@ -86,14 +86,14 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
         divide.setProperty("RHSWorkspace", rhs)
         divide.execute()
         return divide.getProperty("OutputWorkspace").value
-        
+
     def _add(self, lhs, rhs):
         divide = self.createChildAlgorithm("Plus")
         divide.setProperty("LHSWorkspace", lhs)
         divide.setProperty("RHSWorkspace", rhs)
         divide.execute()
         return divide.getProperty("OutputWorkspace").value
-        
+
     def _integrate_bands(self, bands, in_ws):
         # Formulate bands, integrate and sum
         accumulated_output = None

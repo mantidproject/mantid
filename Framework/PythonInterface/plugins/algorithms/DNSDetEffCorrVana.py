@@ -141,15 +141,14 @@ class DNSDetEffCorrVana(PythonAlgorithm):
         wslist = [self.dataws.getName(), self.vanaws.getName(), self.bkgws.getName()]
         mlzutils.same_dimensions(wslist)
         # check if the _NORM workspaces exist
-        wslist = [self.vanaws.getName() + '_NORM', self.bkgws.getName() + '_NORM']
-        mlzutils.ws_exist(wslist, self.log())
+        wslist_norm = [self.vanaws.getName() + '_NORM', self.bkgws.getName() + '_NORM']
+        mlzutils.ws_exist(wslist_norm, self.log())
 
         # check sample logs, produce warnings if different
-        drun = self.dataws.getRun()
-        vrun = self.vanaws.getRun()
-        brun = self.bkgws.getRun()
-        mlzutils.compare_properties(drun, vrun, self.properties_to_compare, self.log())
-        mlzutils.compare_properties(vrun, brun, self.properties_to_compare, self.log())
+        result = api.CompareSampleLogs(wslist, self.properties_to_compare, 5e-3)
+        if len(result) > 0:
+            self.log().warning("Sample logs " + result + " do not match!")
+
         # apply correction
         outws = self._vana_correct()
         if not outws:

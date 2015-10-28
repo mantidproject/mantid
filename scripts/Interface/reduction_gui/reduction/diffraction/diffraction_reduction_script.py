@@ -84,7 +84,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
                 file_name, autosavexmlfname)
         wbuf += script
         wbuf += "\n========== End of Script ==========="
-        print (wbuf)
+        print wbuf
 
         return script
 

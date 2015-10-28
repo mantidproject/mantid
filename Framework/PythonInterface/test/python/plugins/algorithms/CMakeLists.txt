@@ -5,9 +5,12 @@
 set ( TEST_PY_FILES
   AddSampleLogMultipleTest.py
   ApplyPaalmanPingsCorrectionTest.py
+  BayesQuasiTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
+  CompareSampleLogsTest.py
+  ComputeCalibrationCoefVanTest.py
   CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
   CreateMDTest.py
