@@ -51,6 +51,21 @@ private:
                     const std::string &log_name, int log_number);
 
   void setGoniometer(Mantid::API::Workspace_sptr workspace);
+
+  Mantid::API::Workspace_sptr convertToMD(Mantid::API::Workspace_sptr workspace,
+                                          const std::string &analysis_mode,
+                                          bool in_place,
+                                          Mantid::API::Workspace_sptr out_mdws);
+
+  Mantid::API::Workspace_sptr merge_runs(const std::string &to_merge);
+
+  Mantid::API::Workspace_sptr
+  single_run(Mantid::API::Workspace_sptr input_workspace,
+             const std::string &emode, const std::string &efix,
+             const std::string &psi, const std::string &gl,
+             const std::string &gs, bool in_place, const std::string &alatt,
+             const std::string &angdeg, const std::string &u,
+             const std::string &v, Mantid::API::Workspace_sptr out_mdws);
 };
 
 } // namespace MDAlgorithms
