@@ -231,8 +231,8 @@ be calculated
 class MANTID_GEOMETRY_DLL SurfPoint : public Rule {
 private:
   boost::shared_ptr<Surface> m_key; ///< Actual Surface Base Object
-  int keyN;                     ///< Key Number (identifer)
-  int sign;                     ///< +/- in Object unit
+  int keyN;                         ///< Key Number (identifer)
+  int sign;                         ///< +/- in Object unit
 public:
   SurfPoint();
   SurfPoint(const SurfPoint &);
