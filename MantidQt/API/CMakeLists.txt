@@ -35,6 +35,7 @@
 	src/RepoModel.cpp
 	src/ScaleEngine.cpp
 	src/ScriptRepositoryView.cpp
+        src/ScrollableDialog.cpp
 	src/SelectionNotificationService.cpp
 	src/SignalBlocker.cpp
 	src/SignalRange.cpp
@@ -42,6 +43,7 @@
 	src/TextPropertyWidget.cpp
 	src/UserSubWindow.cpp
 	src/VatesViewerInterface.cpp
+        src/WidgetScrollbarFeature.cpp
 	src/WorkspaceObserver.cpp
 )
 
@@ -64,6 +66,7 @@ set ( MOC_FILES
   inc/MantidQtAPI/ScriptRepositoryView.h
   inc/MantidQtAPI/RepoTreeView.h
   inc/MantidQtAPI/RepoModel.h
+  inc/MantidQtAPI/ScrollableDialog.h
   inc/MantidQtAPI/SyncedCheckboxes.h
   inc/MantidQtAPI/TextPropertyWidget.h
   inc/MantidQtAPI/UserSubWindow.h
@@ -104,6 +107,7 @@ set ( INC_FILES
 	inc/MantidQtAPI/SignalBlocker.h
 	inc/MantidQtAPI/SignalRange.h
 	inc/MantidQtAPI/qwt_compat.h
+        inc/MantidQtAPI/WidgetScrollbarFeature.h
 )
 
 set ( UI_FILES
