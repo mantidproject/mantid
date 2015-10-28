@@ -42,7 +42,7 @@ void filterToExistingSources(std::vector<std::string> &input_data,
 Return true if dataName is an existing workspace or file
 */
 bool dataExists(const std::string &data_name) {
-  std::string filepath =
+  const std::string filepath =
       Mantid::API::FileFinder::Instance().getFullPath(data_name);
   // Calls to the ADS in algorithms like this should ordinarily
   // be avoided, unfortunately we have little choice in this case.
@@ -319,7 +319,7 @@ void AccumulateMD::exec() {
   IMDWorkspace_sptr tmp_ws = createMDWorkspace(input_data, psi, gl, gs, efix);
   this->interruption_point();
 
-  std::string temp_ws_name = "TEMP_WORKSPACE_ACCUMULATEMD";
+  const std::string temp_ws_name = "TEMP_WORKSPACE_ACCUMULATEMD";
   // Currently have to us ADS here as list of workspaces can only be passed as a
   // string of names
   AnalysisDataService::Instance().add(temp_ws_name, tmp_ws);

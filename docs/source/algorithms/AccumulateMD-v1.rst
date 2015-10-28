@@ -11,15 +11,19 @@ Description
 
 This workflow algorithm appends new data to an existing multidimensional workspace. It allows the accumulation of data in a single MDWorkspace as you go, e.g. during an experiment.
 
-For more information on the input properties, see :ref:`algm-CreateMD`.
+Input properties which are not described here are identical to those in the :ref:`algm-CreateMD` algorithm.
+
+InputWorkspace
+##############
+The MDEventWorkspace to append data to.
 
 DataSources
 ###########
-These can be workspace names, file names or full file paths. Not all of the data need to exist when the algorithm is called. If data are named which have previously been appended to the workspace they will not be appended again. Note that data is known by name, it is therefore possible to append the same data again if the data file or workspace is renamed.
+These can be workspace names, file names or full file paths. Not all of the data need to exist when the algorithm is called. If data are named which have previously been appended to the workspace they will not be appended again. Note that data are known by name, it is therefore possible to append the same data again if the data source is renamed.
 
 Clean
 ###########
-It is possible to get confused about what data has been included in an MDWorkspace if it is built up slowly over an experiment. Use this option to start afresh; it creates a new workspace using all of the data in DataSources which are available rather then appending to the existing workspace.
+It is possible to get confused about what data has been included in an MDWorkspace if it is built up slowly over an experiment. Use this option to start afresh; it creates a new workspace using all of the data in DataSources which are available, rather then appending to the existing workspace.
 
 Usage
 -----

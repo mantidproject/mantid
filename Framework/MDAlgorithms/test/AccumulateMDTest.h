@@ -3,11 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidMDAlgorithms/AccumulateMD.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include <Poco/Path.h>
 #include <Poco/File.h>
 
@@ -98,9 +97,9 @@ public:
 
     // Create a cheap workspace
     std::string ws_name = "ACCUMULATEMDTEST_EXISTENTWORKSPACE";
-    auto bkgWS = WorkspaceCreationHelper::Create1DWorkspaceRand(1);
+    auto bkg_ws = WorkspaceCreationHelper::Create1DWorkspaceRand(1);
     // add to ADS
-    AnalysisDataService::Instance().add(ws_name, bkgWS);
+    AnalysisDataService::Instance().add(ws_name, bkg_ws);
 
     data_sources.push_back(ws_name);
 
@@ -201,48 +200,91 @@ public:
   }
 
   void test_insert_data_sources() {
-    std::string dataSources = "test1,test2,test3";
-    std::set<std::string> dataSourcesSet;
-    Mantid::MDAlgorithms::insertDataSources(dataSources, dataSourcesSet);
+    std::string data_sources = "test1,test2,test3";
+    std::set<std::string> data_sources_set;
+    Mantid::MDAlgorithms::insertDataSources(data_sources, data_sources_set);
 
     // Check set contains "test1", "test2" and "test3"
     std::set<std::string>::iterator iter;
-    iter = dataSourcesSet.find("test1");
-    TS_ASSERT(iter != dataSourcesSet.end());
+    iter = data_sources_set.find("test1");
+    TS_ASSERT(iter != data_sources_set.end());
 
-    iter = dataSourcesSet.find("test2");
-    TS_ASSERT(iter != dataSourcesSet.end());
+    iter = data_sources_set.find("test2");
+    TS_ASSERT(iter != data_sources_set.end());
 
-    iter = dataSourcesSet.find("test3");
-    TS_ASSERT(iter != dataSourcesSet.end());
+    iter = data_sources_set.find("test3");
+    TS_ASSERT(iter != data_sources_set.end());
   }
 
   void test_insert_data_sources_with_whitespace() {
-    std::string dataSources = " test1,test2 , test3";
-    std::set<std::string> dataSourcesSet;
-    Mantid::MDAlgorithms::insertDataSources(dataSources, dataSourcesSet);
+    std::string data_sources = " test1,test2 , test3";
+    std::set<std::string> data_sources_set;
+    Mantid::MDAlgorithms::insertDataSources(data_sources, data_sources_set);
 
     // Check set contains "test1", "test2" and "test3"
     std::set<std::string>::iterator iter;
-    iter = dataSourcesSet.find("test1");
-    TS_ASSERT(iter != dataSourcesSet.end());
+    iter = data_sources_set.find("test1");
+    TS_ASSERT(iter != data_sources_set.end());
 
-    iter = dataSourcesSet.find("test2");
-    TS_ASSERT(iter != dataSourcesSet.end());
+    iter = data_sources_set.find("test2");
+    TS_ASSERT(iter != data_sources_set.end());
 
-    iter = dataSourcesSet.find("test3");
-    TS_ASSERT(iter != dataSourcesSet.end());
+    iter = data_sources_set.find("test3");
+    TS_ASSERT(iter != data_sources_set.end());
   }
 
-  void test_get_historical_data_sources() {
-    // Create workspace with CreateMD
-    // Add workspace to ADS
-    // Append data with AccumulateMD
-    // const WorkspaceHistory wsHistory = input_ws->getHistory();
-    // std::vector<std::string> current_data =
-    // getHistoricalDataSources(wsHistory);
-    // Test all the data sources from CreateMD and AccumulateMD are in resultant
-    // vector
+  void test_algorithm_append_data() {
+
+    const std::string out_ws_name = "mdew_output";
+    const std::string in_ws_name = "mdew_input";
+    const std::string sample_ws_name = "sample_data_1";
+
+    auto alg = Mantid::API::AlgorithmManager::Instance().create(
+        "CreateSimulationWorkspace");
+    alg->initialize();
+    alg->setPropertyValue("Instrument", "MAR");
+    alg->setPropertyValue("BinParams", "-3,1,3");
+    alg->setPropertyValue("UnitX", "DeltaE");
+    alg->setProperty("OutputWorkspace", sample_ws_name);
+    alg->execute();
+
+    alg = Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
+    alg->initialize();
+    alg->setPropertyValue("Workspace", sample_ws_name);
+    alg->setPropertyValue("LogName", "Ei");
+    alg->setPropertyValue("LogText", "3.0");
+    alg->setPropertyValue("LogType", "Number");
+    alg->execute();
+
+    Mantid::API::IMDEventWorkspace_sptr in_ws =
+        MDEventsTestHelper::makeFakeMDEventWorkspace(in_ws_name, 500);
+
+    AccumulateMD acc_alg;
+    acc_alg.initialize();
+    acc_alg.setPropertyValue("InputWorkspace", in_ws_name);
+    acc_alg.setPropertyValue("OutputWorkspace", out_ws_name);
+    acc_alg.setPropertyValue("DataSources", sample_ws_name);
+    acc_alg.setPropertyValue("Alatt", "1.4165,1.4165,1.4165");
+    acc_alg.setPropertyValue("Angdeg", "90,90,90");
+    acc_alg.setPropertyValue("u", "1,0,0");
+    acc_alg.setPropertyValue("v", "0,1,0");
+    acc_alg.execute();
+
+    // TODO Get output workspace and check it has the sum of the number of
+    // events in sample_data_1 and mdew_input
+    auto sample_ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            sample_ws_name);
+    auto out_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        out_ws_name);
+
+    // Clean up
+    // Remove workspaces from the data service.
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_algorithm_clean_option() {
+    // Same as previous test but with Clean option
   }
 };
 
