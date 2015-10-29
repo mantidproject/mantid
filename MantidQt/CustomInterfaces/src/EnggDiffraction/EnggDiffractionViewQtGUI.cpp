@@ -451,6 +451,11 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabFocus.pushButton_focus->setEnabled(enable);
   m_uiTabFocus.pushButton_focus_cropped->setEnabled(enable);
   m_uiTabFocus.pushButton_focus_texture->setEnabled(enable);
+
+  // pre-processing
+  m_uiTabPreproc.MWRunFiles_preproc_run_num->setEnabled(enable);
+  m_uiTabPreproc.pushButton_rebin_time->setEnabled(enable);
+  m_uiTabPreproc.pushButton_rebin_multiperiod->setEnabled(enable);
 }
 
 void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
@@ -467,12 +472,12 @@ double EnggDiffractionViewQtGUI::rebinningTimeBin() const {
   return m_uiTabPreproc.doubleSpinBox_time_bin->value();
 }
 
-size_t EnggDiffractionViewQtGUI::rebinningNumberPeriods() const {
+size_t EnggDiffractionViewQtGUI::rebinningPulsesNumberPeriods() const {
   return m_uiTabPreproc.spinBox_nperiods->value();
 }
 
-size_t EnggDiffractionViewQtGUI::rebinningPulsesPerPeriod() const {
-  return m_uiTabPreproc.spinBox_pulses_per_period->value();
+double EnggDiffractionViewQtGUI::rebinningPulsesTime() const {
+  return m_uiTabPreproc.doubleSpinBox_step_time->value();
 }
 
 void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {

@@ -35,6 +35,7 @@ int EnggDiffractionPresenter::g_croppedCounter = 0;
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(NULL), m_calibFinishedOK(false), m_focusFinishedOK(false),
+      m_rebinningFinishedOK(false),
       m_view(view) /*, m_model(new EnggDiffractionModel()), */ {
   if (!m_view) {
     throw std::runtime_error(
@@ -260,16 +261,52 @@ void EnggDiffractionPresenter::startFocusing(const std::string &runNo,
 void EnggDiffractionPresenter::processResetFocus() { m_view->resetFocus(); }
 
 void EnggDiffractionPresenter::processRebinTime() {
-  std::string runno= m_view->currentPreprocRunNo();
+  std::string runNo = m_view->currentPreprocRunNo();
   double bin = m_view->rebinningTimeBin();
-  // TODO: rebin, start worker
+
+  try {
+    inputChecksBeforeRebinTime(runNo, bin);
+  } catch (std::invalid_argument &ia) {
+    m_view->userWarning(
+        "Error in the inputs required to pre-process (rebin) a run", ia.what());
+    return;
+  }
+
+  const std::string outWSName = "engggui_preproc_time_ws";
+  g_log.notice() << "EnggDiffraction GUI: starting new pre-processing "
+                    "(re-binning) with a TOF bin. This"
+                    "may take some seconds... " << std::endl;
+
+  m_view->enableCalibrateAndFocusActions(false);
+  // GUI-blocking alternative:
+  // doRebinningTime(runNo, bin, outWSName)
+  // rebinningFinished()
+  startAsyncRebinningTimeWorker(runNo, bin, outWSName);
 }
 
 void EnggDiffractionPresenter::processRebinMultiperiod() {
-  std::string runno = m_view->currentPreprocRunNo();
-  size_t nperiods = m_view->rebinningNumberPeriods();
-  size_t ppp = m_view->rebinningPulsesPerPeriod();
-  // TODO: rebin, start worker
+  std::string runNo = m_view->currentPreprocRunNo();
+  size_t nperiods = m_view->rebinningPulsesNumberPeriods();
+  double timeStep = m_view->rebinningPulsesTime();
+
+  try {
+    inputChecksBeforeRebinPulses(runNo, nperiods, timeStep);
+  } catch (std::invalid_argument &ia) {
+    m_view->userWarning("Error in the inputs required to pre-process (rebin) a "
+                        "run by pulse times",
+                        ia.what());
+    return;
+  }
+  const std::string outWSName = "engggui_preproc_by_pulse_time_ws";
+  g_log.notice() << "EnggDiffraction GUI: starting new pre-processing "
+                    "(re-binning) by pulse times. This"
+                    "may take some seconds... " << std::endl;
+
+  m_view->enableCalibrateAndFocusActions(false);
+  // GUI-blocking alternative:
+  // doRebinningPulses(runNo, nperiods, timeStep, outWSName)
+  // rebinningFinished()
+  startAsyncRebinningPulsesWorker(runNo, nperiods, timeStep, outWSName);
 }
 
 void EnggDiffractionPresenter::processLogMsg() {
@@ -1379,6 +1416,146 @@ void EnggDiffractionPresenter::calcVanadiumWorkspaces(
 
   vanIntegWS = ADS.retrieveWS<ITableWorkspace>(integName);
   vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesName);
+}
+
+void EnggDiffractionPresenter::doRebinningTime(const std::string &runNo,
+                                               double bin,
+                                               const std::string &outWSName) {
+  // TODO:
+  // Load() then Rebin()
+
+  // TOOD: set m_rebinningFinishedOK;
+}
+
+void EnggDiffractionPresenter::inputChecksBeforeRebin(
+    const std::string &runNo) {
+  if (runNo.empty()) {
+    throw std::invalid_argument("The run to pre-process cannot be empty");
+  }
+}
+
+void EnggDiffractionPresenter::inputChecksBeforeRebinTime(
+    const std::string &runNo, double bin) {
+  inputChecksBeforeRebin(runNo);
+
+  if (bin <= 0) {
+    throw std::invalid_argument("The bin width must be strictly positive");
+  }
+}
+
+/**
+ * Starts the Rebin algorithm(s) without blocking the GUI. This is
+ * based on Qt connect / signals-slots so that it goes in sync with
+ * the Qt event loop. For that reason this class needs to be a
+ * Q_OBJECT.
+ *
+ * @param runNo run number(s)
+ * @param bin bin width parameter for Rebin
+ * @param outWSName name for the output workspace produced here
+ */
+void EnggDiffractionPresenter::startAsyncRebinningTimeWorker(
+    const std::string &runNo, double bin, const std::string &outWSName) {
+
+  delete m_workerThread;
+  m_workerThread = new QThread(this);
+  EnggDiffWorker *worker = new EnggDiffWorker(this, runNo, bin, outWSName);
+  worker->moveToThread(m_workerThread);
+
+  connect(m_workerThread, SIGNAL(started()), worker, SLOT(rebinTime()));
+  connect(worker, SIGNAL(finished()), this, SLOT(rebinningFinished()));
+  // early delete of thread and worker
+  connect(m_workerThread, SIGNAL(finished()), m_workerThread,
+          SLOT(deleteLater()), Qt::DirectConnection);
+  connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
+  m_workerThread->start();
+}
+
+void EnggDiffractionPresenter::inputChecksBeforeRebinPulses(
+    const std::string &runNo, size_t nperiods, double timeStep) {
+  inputChecksBeforeRebin(runNo);
+
+  if (0 == nperiods) {
+    throw std::invalid_argument("The number of periods has been set to 0 so "
+                                "none of the periods will be processed");
+  }
+
+  if (timeStep <= 0) {
+    throw std::invalid_argument(
+        "The bin or step for the time axis must be strictly positive");
+  }
+}
+
+void EnggDiffractionPresenter::doRebinningPulses(const std::string &runNo,
+                                                 size_t nperiods, double bin,
+                                                 const std::string &outWSName) {
+  // TODO: rebin
+  // run a command similar to this:
+  // ws.isMultiPeriod()
+  // True
+  // ws = mtd['nxs_ENGINX00197019']
+  // ws1 = ws.getItem(0)
+  // start=wsrun.startTime()
+  // end=wsrun.endTime()
+  // get seconds from: end-start
+  //
+  // rbpt=RebinByPulseTimes(InputWorkspace='ws', Params=[0, step_on_time_axis,
+  // *end-start*])
+
+  // TOOD: set m_rebinningFinishedOK;
+}
+
+/**
+ * Starts the Rebin (by pulses) algorithm(s) without blocking the
+ * GUI. This is based on Qt connect / signals-slots so that it goes in
+ * sync with the Qt event loop. For that reason this class needs to be
+ * a Q_OBJECT.
+ *
+ * @param runNo run number(s)
+ * @param nperiods max number of periods to process
+ * @param timeStep bin width parameter for the x (time) axis
+ * @param outWSName name for the output workspace produced here
+ */
+void EnggDiffractionPresenter::startAsyncRebinningPulsesWorker(
+    const std::string &runNo, size_t nperiods, double timeStep,
+    const std::string &outWSName) {
+
+  delete m_workerThread;
+  m_workerThread = new QThread(this);
+  EnggDiffWorker *worker =
+      new EnggDiffWorker(this, runNo, nperiods, timeStep, outWSName);
+  worker->moveToThread(m_workerThread);
+
+  connect(m_workerThread, SIGNAL(started()), worker, SLOT(rebinPulses()));
+  connect(worker, SIGNAL(finished()), this, SLOT(rebinningFinished()));
+  // early delete of thread and worker
+  connect(m_workerThread, SIGNAL(finished()), m_workerThread,
+          SLOT(deleteLater()), Qt::DirectConnection);
+  connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
+  m_workerThread->start();
+}
+
+/**
+ * Method (Qt slot) to call when the rebin work has finished,
+ * possibly from a separate thread but sometimes not (as in this
+ * presenter class' test).
+ */
+void EnggDiffractionPresenter::rebinningFinished() {
+  if (!m_view)
+    return;
+
+  m_view->enableCalibrateAndFocusActions(true);
+  if (!m_focusFinishedOK) {
+    g_log.warning()
+        << "The pre-processing (re-binning) did not finished correctly."
+        << std::endl;
+  } else {
+    g_log.notice() << "Pre-processing (re-binning) finished - the output "
+                      "workspace is ready." << std::endl;
+  }
+  if (m_workerThread) {
+    delete m_workerThread;
+    m_workerThread = NULL;
+  }
 }
 
 /**

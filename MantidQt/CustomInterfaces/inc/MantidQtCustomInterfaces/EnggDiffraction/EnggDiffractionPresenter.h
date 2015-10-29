@@ -71,6 +71,13 @@ public:
                   const std::string &runNo, const std::vector<bool> &banks,
                   const std::string &specNos, const std::string &dgFile);
 
+  /// pre-processing re-binning with Rebin, for a worker/thread
+  void doRebinningTime(const std::string &runNo, double bin,
+                       const std::string &outWSName);
+
+  /// pre-processing re-binning with RebinByPulseTimes, for a worker/thread
+  void doRebinningPulses(const std::string &runNo, size_t nperiods, double bin,
+                         const std::string &outWSName);
 protected:
   void initialize();
 
@@ -94,6 +101,7 @@ protected:
 protected slots:
   void calibrationFinished();
   void focusingFinished();
+  void rebinningFinished();
 
 private:
   bool validateRBNumber(const std::string &rbn) const;
@@ -183,6 +191,23 @@ private:
                               Mantid::API::ITableWorkspace_sptr &vanIntegWS,
                               Mantid::API::MatrixWorkspace_sptr &vanCurvesWS);
 
+  /// @name Methods related to pre-processing / re-binning
+  //@{
+  void inputChecksBeforeRebin(const std::string &runNo);
+
+  void inputChecksBeforeRebinTime(const std::string &runNo, double bin);
+
+  void inputChecksBeforeRebinPulses(const std::string &runNo, size_t nperiods,
+                                    double timeStep);
+
+  void startAsyncRebinningTimeWorker(const std::string &runNo, double bin,
+                                     const std::string &outWSName);
+
+  void startAsyncRebinningPulsesWorker(const std::string &runNo,
+                                       size_t nperiods, double timeStep,
+                                       const std::string &outWSName);
+  //@}
+
   // plots workspace according to the user selection
   void plotFocusedWorkspace(std::string outWSName, std::string bank);
 
@@ -215,6 +240,8 @@ private:
   bool m_calibFinishedOK;
   /// true if the last focusing completed successfully
   bool m_focusFinishedOK;
+  /// true if the last pre-processing/re-binning completed successfully
+  bool m_rebinningFinishedOK;
 
   /// Counter for the cropped output files
   static int g_croppedCounter;

@@ -111,10 +111,10 @@ public:
   MOCK_CONST_METHOD0(rebinningTimeBin, double());
 
   // virtual size_t rebinningNumberPeriods() const;
-  MOCK_CONST_METHOD0(rebinningNumberPeriods, size_t());
+  MOCK_CONST_METHOD0(rebinningPulsesNumberPeriods, size_t());
 
-  // virtual size_t rebinningPulsesPerPeriod() const;
-  MOCK_CONST_METHOD0(rebinningPulsesPerPeriod, size_t());
+  // virtual double rebinningPulsesPerPeriod() const;
+  MOCK_CONST_METHOD0(rebinningPulsesTime, double());
 
   // virtual bool focusedOutWorkspace() const;
   MOCK_CONST_METHOD0(focusedOutWorkspace, bool());

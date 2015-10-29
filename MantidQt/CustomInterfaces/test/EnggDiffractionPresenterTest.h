@@ -685,8 +685,8 @@ public:
 
     // inputs from user
     EXPECT_CALL(mockView, currentPreprocRunNo()).Times(1).WillOnce(Return(""));
-    EXPECT_CALL(mockView, rebinningNumberPeriods()).Times(1).WillOnce(Return(0));
-    EXPECT_CALL(mockView, rebinningPulsesPerPeriod()).Times(1).WillOnce(Return(0));
+    EXPECT_CALL(mockView, rebinningPulsesNumberPeriods()).Times(1).WillOnce(Return(0));
+    EXPECT_CALL(mockView, rebinningPulsesTime()).Times(1).WillOnce(Return(0));
 
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -694,6 +694,7 @@ public:
 
     pres.notify(IEnggDiffractionPresenter::RebinMultiperiod);
   }
+
   void test_logMsg() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);

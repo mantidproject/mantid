@@ -284,7 +284,8 @@ public:
 
   /**
    * For when pre-processing from event to histo data using a regular
-   * time bin.
+   * time bin. Here time refers to time units for rebinning in
+   * time-of-flight.
    *
    * @param time bin to re-bin in microseconds
    */
@@ -295,14 +296,14 @@ public:
    *
    * @param number of periods to use
    */
-  virtual size_t rebinningNumberPeriods() const = 0;
+  virtual size_t rebinningPulsesNumberPeriods() const = 0;
 
   /**
    * For when pre-processing from multiperiod event to histo data.
    *
-   * @param number of pulses per period
+   * @param the time parameter (bin width) when rebinning by pulses.
    */
-  virtual size_t rebinningPulsesPerPeriod() const = 0;
+  virtual double rebinningPulsesTime() const = 0;
   //@}
 
   /**

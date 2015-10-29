@@ -126,9 +126,9 @@ public:
 
   virtual double rebinningTimeBin() const;
 
-  virtual size_t rebinningNumberPeriods() const;
+  virtual size_t rebinningPulsesNumberPeriods() const;
 
-  virtual size_t rebinningPulsesPerPeriod() const;
+  virtual double rebinningPulsesTime() const;
 
   virtual void plotFocusedSpectrum(const std::string &wsName);
 
