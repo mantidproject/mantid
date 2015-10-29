@@ -365,23 +365,7 @@ void AlignAndFocusPowder::exec() {
   // set up a progress bar with the "correct" number of steps
   m_progress = new Progress(this, 0., 1., 22);
 
-  // filter the input events if appropriate
   if (m_inputEW) {
-    double removePromptPulseWidth = getProperty("RemovePromptPulseWidth");
-    if (removePromptPulseWidth > 0.) {
-      g_log.information() << "running RemovePromptPulse(Width="
-                          << removePromptPulseWidth << ")\n";
-      API::IAlgorithm_sptr filterPAlg =
-          createChildAlgorithm("RemovePromptPulse");
-      filterPAlg->setProperty("InputWorkspace", m_outputW);
-      filterPAlg->setProperty("OutputWorkspace", m_outputW);
-      filterPAlg->setProperty("Width", removePromptPulseWidth);
-      filterPAlg->executeAsChildAlg();
-      m_outputW = filterPAlg->getProperty("OutputWorkspace");
-      m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
-    }
-    m_progress->report();
-
     double tolerance = getProperty("CompressTolerance");
     if (tolerance > 0.) {
       g_log.information() << "running CompressEvents(Tolerance=" << tolerance
@@ -398,10 +382,8 @@ void AlignAndFocusPowder::exec() {
       g_log.information() << "Not compressing event list\n";
       doSortEvents(m_outputW); // still sort to help some thing out
     }
-    m_progress->report();
-  } else {
-    m_progress->reportIncrement(2);
   }
+  m_progress->report();
 
   if (xmin > 0. || xmax > 0.) {
     bool doCorrection(true);
@@ -414,8 +396,8 @@ void AlignAndFocusPowder::exec() {
       double tempmax;
       m_outputW->getXMinMax(tempmin, tempmax);
 
-      g_log.information() << "running CropWorkspace(Xmin=" << xmin
-                          << ", Xmax=" << xmax << ")\n";
+      g_log.information() << "running CropWorkspace(TOFmin=" << xmin
+                          << ", TOFmax=" << xmax << ")\n";
       API::IAlgorithm_sptr cropAlg = createChildAlgorithm("CropWorkspace");
       cropAlg->setProperty("InputWorkspace", m_outputW);
       cropAlg->setProperty("OutputWorkspace", m_outputW);
@@ -425,7 +407,24 @@ void AlignAndFocusPowder::exec() {
         cropAlg->setProperty("Xmax", xmax);
       cropAlg->executeAsChildAlg();
       m_outputW = cropAlg->getProperty("OutputWorkspace");
+      m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
     }
+  }
+  m_progress->report();
+
+  // filter the input events if appropriate
+  double removePromptPulseWidth = getProperty("RemovePromptPulseWidth");
+  if (removePromptPulseWidth > 0.) {
+    g_log.information() << "running RemovePromptPulse(Width="
+                        << removePromptPulseWidth << ")\n";
+    API::IAlgorithm_sptr filterPAlg =
+            createChildAlgorithm("RemovePromptPulse");
+    filterPAlg->setProperty("InputWorkspace", m_outputW);
+    filterPAlg->setProperty("OutputWorkspace", m_outputW);
+    filterPAlg->setProperty("Width", removePromptPulseWidth);
+    filterPAlg->executeAsChildAlg();
+    m_outputW = filterPAlg->getProperty("OutputWorkspace");
+    m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
   m_progress->report();
 
@@ -437,6 +436,7 @@ void AlignAndFocusPowder::exec() {
     alg->setProperty("MaskingInformation", maskBinTableWS);
     alg->executeAsChildAlg();
     m_outputW = alg->getProperty("OutputWorkspace");
+    m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
   m_progress->report();
 
@@ -448,6 +448,7 @@ void AlignAndFocusPowder::exec() {
     maskAlg->executeAsChildAlg();
     Workspace_sptr tmpW = maskAlg->getProperty("Workspace");
     m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(tmpW);
+    m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
   m_progress->report();
 
