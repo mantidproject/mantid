@@ -128,20 +128,19 @@ void ContainerSubtraction::run() {
           containerWsName.toStdString());
   std::string runNum = "";
   int containerNameCutIndex = 0;
-  if(containerWs->run().hasProperty("run_number")){
-	runNum = containerWs->run().getProperty("run_number")->value();
-  }else{
-	containerNameCutIndex = containerWsName.indexOf("_");
-	if (containerNameCutIndex == -1)
-		containerNameCutIndex = containerWsName.length();
+  if (containerWs->run().hasProperty("run_number")) {
+    runNum = containerWs->run().getProperty("run_number")->value();
+  } else {
+    containerNameCutIndex = containerWsName.indexOf("_");
+    if (containerNameCutIndex == -1)
+      containerNameCutIndex = containerWsName.length();
   }
 
   QString outputWsName = sampleWsName.left(sampleNameCutIndex) + "_Subtract_";
   if (runNum.compare("") != 0) {
-	  outputWsName += QString::fromStdString(runNum);
+    outputWsName += QString::fromStdString(runNum);
   } else {
-    auto canCut = containerWsName.left(containerNameCutIndex);
-    outputWsName += canCut;
+    outputWsName += containerWsName.left(containerNameCutIndex);
   }
 
   outputWsName += "_red";
