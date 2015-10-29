@@ -42,6 +42,23 @@ Usage
    print "As myWs is just a refence to the workspace it now refers to the workspace with the new name"
    print "myWs name:", myWs.name()
    print "Does 'myWs' exist in Mantid?", mtd.doesExist("myWs")
+   #
+   print "Does 'mon_ws' exist in Mantid",mtd.doesExist("mon_ws")   
+   print "***************************************************"   
+   print "Renaming workspace and monitors workspace together:"
+   #
+   newName1Ws = RenameWorkspace(myWs,RenameMonitors=True)
+   #
+   print "**** Renamed workspaces exist in mtd:"
+   print "Does 'newName1Ws' exist in Mantid?", mtd.doesExist("newName1Ws")
+   print "Does 'newName1Ws_monitors' exist in Mantid?", mtd.doesExist("newName1Ws_monitors") 
+   print "**** old workspaces have disappeared"
+   print "Does 'newNameWs' exist in Mantid?", mtd.doesExist("newNameWs")
+   print "Does 'mon_ws' exist in Mantid?", mtd.doesExist("mon_ws") 
+   # 
+   print "The name of the monitor workspace attached to workspace:",\
+            newName1Ws.name(),"\nIs: ",\
+            newName1Ws.getMonitorWorkspace().name()
 
 
 Output:
@@ -55,7 +72,17 @@ Output:
     As myWs is just a refence to the workspace it now refers to the workspace with the new name
     myWs name: newNameWs
     Does 'myWs' exist in Mantid? False
-
+	Does 'mon_ws' exist in Mantid True
+	***************************************************
+	Renaming workspace and monitors workspace together:
+	**** Renamed workspaces exist in mtd:
+	Does 'newName1Ws' exist in Mantid? True
+	Does 'newName1Ws_monitors' exist in Mantid? True
+	**** old workspaces have disappeared
+	Does 'newNameWs' exist in Mantid? False
+	Does 'mon_ws' exist in Mantid? False
+	The name of the monitor workspace attached to workspace: newName1Ws 
+	Is:  newName1Ws_monitors
 
 .. categories::
 

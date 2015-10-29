@@ -195,8 +195,8 @@ void LoadRaw3::exec() {
 
   if (bseparateMonitors) {
     if (normalwsSpecs == 0) {
-      // Ensure we fill the correct group as if we are only loading monitors
-      // then
+      // Ensure we fill the correct group as if we are only
+      // loading monitors then
       // we essentially want normal behavior
       // with no extra _monitors workspace
       ws_grp = monitorws_grp;
