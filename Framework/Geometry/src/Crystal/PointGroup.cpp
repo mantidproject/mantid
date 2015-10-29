@@ -327,5 +327,10 @@ getLatticeSystemFromString(const std::string &latticeSystem) {
   }
 }
 
+bool CrystalSystemComparator::operator()(const PointGroup::CrystalSystem &lhs,
+                                         const PointGroup::CrystalSystem &rhs) {
+  return static_cast<int>(lhs) < static_cast<int>(rhs);
+}
+
 } // namespace Mantid
 } // namespace Geometry

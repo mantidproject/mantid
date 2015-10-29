@@ -85,10 +85,6 @@ typedef boost::shared_ptr<PointGroup> PointGroup_sptr;
 
 MANTID_GEOMETRY_DLL std::vector<PointGroup_sptr> getAllPointGroups();
 
-typedef std::multimap<PointGroup::CrystalSystem, PointGroup_sptr>
-    PointGroupCrystalSystemMap;
-MANTID_GEOMETRY_DLL PointGroupCrystalSystemMap getPointGroupsByCrystalSystem();
-
 MANTID_GEOMETRY_DLL
 std::string
 getCrystalSystemAsString(const PointGroup::CrystalSystem &crystalSystem);
@@ -104,6 +100,18 @@ getLatticeSystemAsString(const PointGroup::LatticeSystem &latticeSystem);
 MANTID_GEOMETRY_DLL
 PointGroup::LatticeSystem
 getLatticeSystemFromString(const std::string &latticeSystem);
+
+/// This is necessary to make the map work with older compilers. Can be removed
+/// when GCC 4.4 is not used anymore.
+struct MANTID_GEOMETRY_DLL CrystalSystemComparator {
+  bool operator()(const PointGroup::CrystalSystem &lhs,
+                  const PointGroup::CrystalSystem &rhs);
+};
+
+typedef std::multimap<PointGroup::CrystalSystem, PointGroup_sptr,
+                      CrystalSystemComparator> PointGroupCrystalSystemMap;
+
+MANTID_GEOMETRY_DLL PointGroupCrystalSystemMap getPointGroupsByCrystalSystem();
 
 } // namespace Mantid
 } // namespace Geometry
