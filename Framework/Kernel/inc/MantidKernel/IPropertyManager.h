@@ -76,10 +76,10 @@ public:
     @param ignoreProperties :: A set of names of any properties NOT to set
     from the propertiesArray
   */
-  virtual void
-  setPropertiesWithSimpleString(const std::string &propertiesString,
-                const std::set<std::string> &
-                    ignoreProperties = std::set<std::string>()) = 0;
+  virtual void setPropertiesWithSimpleString(
+      const std::string &propertiesString,
+      const std::set<std::string> &
+          ignoreProperties = std::set<std::string>()) = 0;
 
   /** Sets all the declared properties from a string.
       @param propertiesJson :: A string of name = value pairs formatted

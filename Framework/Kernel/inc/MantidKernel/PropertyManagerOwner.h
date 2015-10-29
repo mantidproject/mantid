@@ -69,7 +69,7 @@ public:
       const ::Json::Value &jsonValue,
       const std::set<std::string> &ignoreProperties = std::set<std::string>());
 
-  //sets all the declared properties using a simple string format
+  // sets all the declared properties using a simple string format
   void setPropertiesWithSimpleString(
       const std::string &propertiesString,
       const std::set<std::string> &ignoreProperties = std::set<std::string>());

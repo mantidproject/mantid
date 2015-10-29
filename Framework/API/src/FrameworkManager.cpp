@@ -310,7 +310,7 @@ FrameworkManagerImpl::createAlgorithm(const std::string &algName,
                         .create(algName, version)
                         .get(); // createAlgorithm(algName);
   alg->setPropertiesWithSimpleString(propertiesArray);
-  
+
   return alg;
 }
 
