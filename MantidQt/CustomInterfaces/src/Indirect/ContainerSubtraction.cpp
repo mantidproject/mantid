@@ -122,13 +122,29 @@ void ContainerSubtraction::run() {
   int sampleNameCutIndex = sampleWsName.lastIndexOf("_");
   if (sampleNameCutIndex == -1)
     sampleNameCutIndex = sampleWsName.length();
-  int containerNameCutIndex = containerWsName.indexOf("_");
-  if (containerNameCutIndex == -1)
-    containerNameCutIndex = containerWsName.length();
 
-  const QString outputWsName = sampleWsName.left(sampleNameCutIndex) +
-                               "_Subtract_" +
-                               containerWsName.left(containerNameCutIndex);
+  MatrixWorkspace_sptr containerWs =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          containerWsName.toStdString());
+  std::string runNum = "";
+  int containerNameCutIndex = 0;
+  if(containerWs->run().hasProperty("run_number")){
+	runNum = containerWs->run().getProperty("run_number")->value();
+  }else{
+	containerNameCutIndex = containerWsName.indexOf("_");
+	if (containerNameCutIndex == -1)
+		containerNameCutIndex = containerWsName.length();
+  }
+
+  QString outputWsName = sampleWsName.left(sampleNameCutIndex) + "_Subtract_";
+  if (runNum.compare("") != 0) {
+	  outputWsName += QString::fromStdString(runNum);
+  } else {
+    auto canCut = containerWsName.left(containerNameCutIndex);
+    outputWsName += canCut;
+  }
+
+  outputWsName += "_red";
 
   applyCorrAlg->setProperty("OutputWorkspace", outputWsName.toStdString());
 
