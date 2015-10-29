@@ -98,6 +98,14 @@ void EnggDiffractionPresenter::notify(
     processResetFocus();
     break;
 
+  case IEnggDiffractionPresenter::RebinTime:
+    processRebinTime();
+    break;
+
+  case IEnggDiffractionPresenter::RebinMultiperiod:
+    processRebinMultiperiod();
+    break;
+
   case IEnggDiffractionPresenter::LogMsg:
     processLogMsg();
     break;
@@ -250,6 +258,19 @@ void EnggDiffractionPresenter::startFocusing(const std::string &runNo,
 }
 
 void EnggDiffractionPresenter::processResetFocus() { m_view->resetFocus(); }
+
+void EnggDiffractionPresenter::processRebinTime() {
+  std::string runno= m_view->currentPreprocRunNo();
+  double bin = m_view->rebinningTimeBin();
+  // TODO: rebin, start worker
+}
+
+void EnggDiffractionPresenter::processRebinMultiperiod() {
+  std::string runno = m_view->currentPreprocRunNo();
+  size_t nperiods = m_view->rebinningNumberPeriods();
+  size_t ppp = m_view->rebinningPulsesPerPeriod();
+  // TODO: rebin, start worker
+}
 
 void EnggDiffractionPresenter::processLogMsg() {
   std::vector<std::string> msgs = m_view->logMsgs();

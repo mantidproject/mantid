@@ -84,6 +84,8 @@ protected:
   void processFocusCropped();
   void processFocusTexture();
   void processResetFocus();
+  void processRebinTime();
+  void processRebinMultiperiod();
   void processLogMsg();
   void processInstChange();
   void processRBNumberChange();

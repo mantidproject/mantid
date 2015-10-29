@@ -273,6 +273,38 @@ public:
    */
   virtual void resetFocus() = 0;
 
+  /// @name Pre-processing (of event data, rebinning)
+  //@{
+  /**
+   * One or more run numbers to pre-process.
+   *
+   * @return run number(s), as a string
+   */
+  virtual std::string currentPreprocRunNo() const = 0;
+
+  /**
+   * For when pre-processing from event to histo data using a regular
+   * time bin.
+   *
+   * @param time bin to re-bin in microseconds
+   */
+  virtual double rebinningTimeBin() const = 0;
+
+  /**
+   * For when pre-processing from multiperiod event to histo data.
+   *
+   * @param number of periods to use
+   */
+  virtual size_t rebinningNumberPeriods() const = 0;
+
+  /**
+   * For when pre-processing from multiperiod event to histo data.
+   *
+   * @param number of pulses per period
+   */
+  virtual size_t rebinningPulsesPerPeriod() const = 0;
+  //@}
+
   /**
    * Save settings (normally when closing the interface). This
    * concerns only GUI settings, such as window max/min status and

@@ -104,6 +104,18 @@ public:
   // virtual void resetFocus();
   MOCK_METHOD0(resetFocus, void());
 
+  // virtual std::string currentPreprocRunNo() const;
+  MOCK_CONST_METHOD0(currentPreprocRunNo, std::string());
+
+  // virtual double rebinningTimeBin() const;
+  MOCK_CONST_METHOD0(rebinningTimeBin, double());
+
+  // virtual size_t rebinningNumberPeriods() const;
+  MOCK_CONST_METHOD0(rebinningNumberPeriods, size_t());
+
+  // virtual size_t rebinningPulsesPerPeriod() const;
+  MOCK_CONST_METHOD0(rebinningPulsesPerPeriod, size_t());
+
   // virtual bool focusedOutWorkspace() const;
   MOCK_CONST_METHOD0(focusedOutWorkspace, bool());
 

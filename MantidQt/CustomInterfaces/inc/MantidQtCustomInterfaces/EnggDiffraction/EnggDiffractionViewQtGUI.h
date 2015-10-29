@@ -122,6 +122,14 @@ public:
 
   virtual void resetFocus();
 
+  virtual std::string currentPreprocRunNo() const;
+
+  virtual double rebinningTimeBin() const;
+
+  virtual size_t rebinningNumberPeriods() const;
+
+  virtual size_t rebinningPulsesPerPeriod() const;
+
   virtual void plotFocusedSpectrum(const std::string &wsName);
 
   virtual void plotWaterfallSpectrum(const std::string &wsName);
@@ -133,12 +141,14 @@ public:
   int currentPlotType() const { return m_currentType; }
 
 private slots:
-  /// for buttons, do calibrate, focus and similar
+  /// for buttons, do calibrate, focus, event->histo rebin, and similar
   void loadCalibrationClicked();
   void calibrateClicked();
   void focusClicked();
   void focusCroppedClicked();
   void focusTextureClicked();
+  void rebinTimeClicked();
+  void rebinMultiperiodClicked();
 
   // slots of the settings tab/section of the interface
   void browseInputDirCalib();
@@ -172,8 +182,9 @@ private:
   virtual void initLayout();
   void doSetupGeneralWidgets();
   void doSetupTabCalib();
-  void doSetupTabSettings();
   void doSetupTabFocus();
+  void doSetupTabPreproc();
+  void doSetupTabSettings();
 
   std::string guessGSASTemplatePath() const;
 
