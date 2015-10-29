@@ -204,10 +204,16 @@ void LoadSpice2D::exec() {
   double sample_apert = 0.0;
   from_element<double>(sample_apert, sasEntryElem, "sample_aperture_size",
                        fileName);
-
   double source_distance = 0.0;
   from_element<double>(source_distance, sasEntryElem, "source_distance",
                        fileName);
+
+  // Header/tank_internal_offset
+  double sample_detector_distance_offset = 0;
+  from_element<double>(sample_detector_distance_offset, sasEntryElem, "tank_internal_offset", fileName);
+  // Header/sample_to_flange
+  double sample_si_window_distance = 0;
+  from_element<double>(sample_si_window_distance, sasEntryElem, "sample_to_flange", fileName);
 
   // Read in wavelength and wavelength spread
   double wavelength = 0;
@@ -230,9 +236,10 @@ void LoadSpice2D::exec() {
   from_element<int>(nguides, sasEntryElem, "nguides", fileName);
 
   // Read in sample-detector distance in mm
-  double distance = 0;
-  from_element<double>(distance, sasEntryElem, "sample_det_dist", fileName);
-  distance *= 1000.0;
+  // Motor_Positions/sample_det_dist
+  double sample_detector_distance = 0;
+  from_element<double>(sample_detector_distance, sasEntryElem, "sample_det_dist", fileName);
+  sample_detector_distance *= 1000.0;
 
   // Read in beam trap positions
   double highest_trap = 0;
@@ -298,7 +305,7 @@ void LoadSpice2D::exec() {
   // fileName);
 
   // Store sample-detector distance
-  declareProperty("SampleDetectorDistance", distance,
+  declareProperty("SampleDetectorDistance", sample_detector_distance,
                   Kernel::Direction::Output);
 
   // Create the output workspace
@@ -373,8 +380,12 @@ void LoadSpice2D::exec() {
   }
 
   // Set the run properties
-  ws->mutableRun().addProperty("sample-detector-distance", distance, "mm",
+  ws->mutableRun().addProperty("sample-detector-distance", sample_detector_distance, "mm",
                                true);
+  ws->mutableRun().addProperty("sample-detector-distance-offset", sample_detector_distance_offset, "mm",
+                                 true);
+  ws->mutableRun().addProperty("sample-si-window-distance", sample_si_window_distance, "mm",
+                                 true);
   ws->mutableRun().addProperty("beam-trap-diameter", beam_trap_diam, "mm",
                                true);
   ws->mutableRun().addProperty("number-of-guides", nguides, true);
@@ -409,7 +420,7 @@ void LoadSpice2D::exec() {
   try {
     mover->setProperty<API::MatrixWorkspace_sptr>("Workspace", ws);
     mover->setProperty("ComponentName", detID);
-    mover->setProperty("Z", distance / 1000.0);
+    mover->setProperty("Z", sample_detector_distance / 1000.0);
     mover->execute();
   } catch (std::invalid_argument &e) {
     g_log.error("Invalid argument to MoveInstrumentComponent Child Algorithm");
