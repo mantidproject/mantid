@@ -80,6 +80,9 @@ public:
   void setProperties(
       const ::Json::Value &jsonValue,
       const std::set<std::string> &ignoreProperties = std::set<std::string>());
+  void setPropertiesWithSimpleString(
+      const std::string &propertiesString,
+      const std::set<std::string> &ignoreProperties = std::set<std::string>());
   void setPropertyValue(const std::string &name, const std::string &value);
   void setPropertyOrdinal(const int &index, const std::string &value);
 

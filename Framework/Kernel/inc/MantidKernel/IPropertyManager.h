@@ -71,6 +71,17 @@ public:
                               const bool delproperty = true) = 0;
 
   /** Sets all the declared properties from a string.
+    @param propertiesString :: A list of name = value pairs separated by a
+     semicolon
+    @param ignoreProperties :: A set of names of any properties NOT to set
+    from the propertiesArray
+  */
+  virtual void
+  setPropertiesWithSimpleString(const std::string &propertiesString,
+                const std::set<std::string> &
+                    ignoreProperties = std::set<std::string>()) = 0;
+
+  /** Sets all the declared properties from a string.
       @param propertiesJson :: A string of name = value pairs formatted
         as a json name value pair collection
       @param ignoreProperties :: A set of names of any properties NOT to set

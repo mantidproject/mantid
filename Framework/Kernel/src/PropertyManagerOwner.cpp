@@ -68,6 +68,19 @@ void PropertyManagerOwner::setProperties(
   m_properties->setProperties(jsonValue, ignoreProperties);
 }
 
+/** Sets all the declared properties from a string.
+  @param propertiesString :: A list of name = value pairs separated by a
+    semicolon
+  @param ignoreProperties :: A set of names of any properties NOT to set
+  from the propertiesArray
+*/
+void PropertyManagerOwner::setPropertiesWithSimpleString(
+    const std::string &propertiesString,
+    const std::set<std::string> &ignoreProperties) {
+  m_properties->setPropertiesWithSimpleString(propertiesString,
+                                              ignoreProperties);
+}
+
 /** Set the value of a property by string
 *  N.B. bool properties must be set using 1/0 rather than true/false
 *  @param name :: The name of the property (case insensitive)

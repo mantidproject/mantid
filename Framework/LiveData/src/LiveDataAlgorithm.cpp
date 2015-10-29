@@ -252,7 +252,7 @@ IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm(bool postProcessing) {
     ignoreProps.insert("OutputWorkspace");
 
     // ...and pass it the properties
-    alg->setProperties(props, ignoreProps);
+    alg->setPropertiesWithSimpleString(props, ignoreProps);
 
     // Warn if someone put both values.
     if (!script.empty())

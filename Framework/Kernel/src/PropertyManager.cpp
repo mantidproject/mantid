@@ -263,6 +263,51 @@ void PropertyManager::setProperties(
   }
 }
 
+/** Sets all the declared properties from a string.
+  @param propertiesString :: A list of name = value pairs separated by a
+    semicolon
+  @param ignoreProperties :: A set of names of any properties NOT to set
+  from the propertiesArray
+*/
+void PropertyManager::setPropertiesWithSimpleString(
+    const std::string &propertiesString,
+    const std::set<std::string> &ignoreProperties) {
+  ::Json::Value propertyJson;
+  // Split up comma-separated properties
+  typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+
+  boost::char_separator<char> sep(";");
+  tokenizer propPairs(propertiesString, sep);
+  int index = 0;
+  // Iterate over the properties
+  for (tokenizer::iterator it = propPairs.begin(); it != propPairs.end();
+       ++it) {
+    // Pair of the type "
+    std::string pair = *it;
+
+    size_t n = pair.find('=');
+    if (n != std::string::npos) {
+      // Normal "PropertyName=value" string.
+      std::string propName = "";
+      std::string value = "";
+
+      // Extract the value string
+      if (n < pair.size() - 1) {
+        propName = pair.substr(0, n);
+        value = pair.substr(n + 1, pair.size() - n - 1);
+      } else {
+        // String is "PropertyName="
+        propName = pair.substr(0, n);
+        value = "";
+      }
+      // Set it
+      propertyJson[propName] = value;
+    }
+    index++;
+  }
+  setProperties(propertyJson, ignoreProperties);
+}
+
 //-----------------------------------------------------------------------------------------------
 /** Set the value of a property by string
  *  N.B. bool properties must be set using 1/0 rather than true/false
