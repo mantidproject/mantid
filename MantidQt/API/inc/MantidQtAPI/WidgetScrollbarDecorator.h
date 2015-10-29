@@ -75,6 +75,15 @@ public:
   /// Enable or disable scrollable behaviour
   void setEnabled(bool enable);
 
+  /// Set the width, in pixels, at which scrollbars should appear
+  void setThresholdWidth(int width);
+
+  /// Set the height, in pixels, at which scrollbars should appear
+  void setThresholdHeight(int height);
+
+  /// Set the size, in pixels, at which scrollbars should appear
+  void setThresholdSize(int width, int height);
+
 private:
   QVBoxLayout *m_layout;     ///< Main layout used when scrollable
   QScrollArea *m_scrollarea; ///< Used to provide scrolling functionality

@@ -3,6 +3,7 @@
 //----------------------------------
 #include "MantidQtAPI/WidgetScrollbarDecorator.h"
 
+#include <QMainWindow>
 #include <QScrollArea>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -35,6 +36,11 @@ WidgetScrollbarDecorator::WidgetScrollbarDecorator(QWidget *target)
   m_viewport = new QWidget(m_scrollarea);
   m_scrollarea->setWidget(m_viewport);
   m_scrollarea->setWidgetResizable(true);
+
+  // With QMainWindows we must work on the centralWidget instead
+  auto mainwindow = dynamic_cast<QMainWindow*>(m_target);
+  if (mainwindow)
+    m_target = mainwindow->centralWidget();
 }
 
 //-----------------------------------------------------------------------------
@@ -90,4 +96,59 @@ void WidgetScrollbarDecorator::setEnabled(bool enable) {
   }
 
   m_enabled = enable;
+}
+
+//-----------------------------------------------------------------------------
+/**
+ * Set the width, in pixels, at which scrollbars should appear.
+ *
+ * This overrides the default behaviour of preferring to shrink widgets until
+ * they reach their minimum size before enabling scrollbars. Note that
+ * scrollbars will be enabled before reaching this size setting if the
+ * minimum size of all widgets is reached first.
+ *
+ * Set to 0 to reset to default behaviour.
+ *
+ * @param width Minimum width target may shrink to before scrollbars appear
+ */
+void WidgetScrollbarDecorator::setThresholdWidth(int width)
+{
+  m_viewport->setMinimumWidth(width);
+}
+
+//-----------------------------------------------------------------------------
+/**
+ * Set the height, in pixels, at which scrollbars should appear.
+ *
+ * This overrides the default behaviour of preferring to shrink widgets until
+ * they reach their minimum size before enabling scrollbars. Note that
+ * scrollbars will be enabled before reaching this size setting if the
+ * minimum size of all widgets is reached first.
+ *
+ * Set to 0 to reset to default behaviour.
+ *
+ * @param height Minimum height target may shrink to before scrollbars appear
+ */
+void WidgetScrollbarDecorator::setThresholdHeight(int height)
+{
+  m_viewport->setMinimumHeight(height);
+}
+
+//-----------------------------------------------------------------------------
+/**
+ * Set the size, in pixels, at which scrollbars should appear.
+ *
+ * This overrides the default behaviour of preferring to shrink widgets until
+ * they reach their minimum size before enabling scrollbars. Note that
+ * scrollbars will be enabled before reaching this size setting if the
+ * minimum size of all widgets is reached first.
+ *
+ * Set to (0, 0) to reset to default behaviour.
+ *
+ * @param width Minimum width target may shrink to before scrollbars appear
+ * @param height Minimum height target may shrink to before scrollbars appear
+ */
+void WidgetScrollbarDecorator::setThresholdSize(int width, int height)
+{
+  m_viewport->setMinimumSize(width, height);
 }
