@@ -56,10 +56,10 @@ Usage
    print "Does 'newNameWs' exist in Mantid?", mtd.doesExist("newNameWs")
    print "Does 'mon_ws' exist in Mantid?", mtd.doesExist("mon_ws") 
    # 
+   mon_ws1 = newName1Ws.getMonitorWorkspace()
    print "The name of the monitor workspace attached to workspace:",\
             newName1Ws.name(),"\nIs: ",\
-            newName1Ws.getMonitorWorkspace().name()
-
+            mon_ws1.name()
 
 Output:
 
