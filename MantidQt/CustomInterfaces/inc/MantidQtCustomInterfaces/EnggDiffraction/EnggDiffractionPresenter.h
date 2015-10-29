@@ -78,6 +78,7 @@ public:
   /// pre-processing re-binning with RebinByPulseTimes, for a worker/thread
   void doRebinningPulses(const std::string &runNo, size_t nperiods, double bin,
                          const std::string &outWSName);
+
 protected:
   void initialize();
 
@@ -199,6 +200,8 @@ private:
 
   void inputChecksBeforeRebinPulses(const std::string &runNo, size_t nperiods,
                                     double timeStep);
+
+  Mantid::API::MatrixWorkspace_sptr loadToPreproc(const std::string runNo);
 
   void startAsyncRebinningTimeWorker(const std::string &runNo, double bin,
                                      const std::string &outWSName);

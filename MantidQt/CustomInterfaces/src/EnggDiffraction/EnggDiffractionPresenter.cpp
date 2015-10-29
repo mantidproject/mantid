@@ -537,6 +537,7 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
     conf.appendDataSearchDir(cs.m_inputDirRaw);
 
   try {
+    m_calibFinishedOK = false;
     doCalib(cs, vanNo, ceriaNo, outFilename);
     m_calibFinishedOK = true;
   } catch (std::runtime_error &) {
@@ -633,7 +634,7 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
     auto load = Algorithm::fromString("Load");
     load->initialize();
     load->setPropertyValue("Filename", instStr + ceriaNo);
-    std::string ceriaWSName = "engggui_calibration_sample_ws";
+    const std::string ceriaWSName = "engggui_calibration_sample_ws";
     load->setPropertyValue("OutputWorkspace", ceriaWSName);
     load->execute();
 
@@ -982,6 +983,7 @@ void EnggDiffractionPresenter::doFocusRun(
                           ") for run " + runNo +
                           " into: " << effectiveFilenames[idx] << std::endl;
     try {
+      m_focusFinishedOK = false;
       doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
       m_focusFinishedOK = true;
     } catch (std::runtime_error &) {
@@ -1418,13 +1420,61 @@ void EnggDiffractionPresenter::calcVanadiumWorkspaces(
   vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesName);
 }
 
+MatrixWorkspace_sptr
+EnggDiffractionPresenter::loadToPreproc(const std::string runNo) {
+  MatrixWorkspace_sptr inWS;
+
+  try {
+    auto load = Algorithm::fromString("Load");
+    load->initialize();
+    load->setPropertyValue("Filename", runNo);
+    const std::string inWSName = "engggui_preproc_input_ws";
+    load->setPropertyValue("OutputWorkspace", inWSName);
+
+    load->execute();
+
+    auto &ADS = Mantid::API::AnalysisDataService::Instance();
+    inWS = ADS.retrieveWS<MatrixWorkspace>(inWSName);
+  } catch (std::runtime_error &re) {
+    g_log.error()
+        << "Error while loading run data to pre-process. "
+           "Could not run the algorithm Load succesfully for the run number: " +
+               runNo + "). Error description: " + re.what() +
+               " Please check also the previous log messages for details.";
+    throw;
+  }
+
+  return inWS;
+}
+
 void EnggDiffractionPresenter::doRebinningTime(const std::string &runNo,
                                                double bin,
                                                const std::string &outWSName) {
-  // TODO:
-  // Load() then Rebin()
 
-  // TOOD: set m_rebinningFinishedOK;
+  // Runs something like:
+  // Rebin(InputWorkspace='ws_runNo', outputWorkspace=outWSName,Params=bin)
+
+  m_rebinningFinishedOK = false;
+  MatrixWorkspace_sptr inWS = loadToPreproc(runNo);
+
+  const std::string rebinName = "Rebin";
+  try {
+    auto alg = Algorithm::fromString(rebinName);
+    alg->initialize();
+    alg->setProperty("InputWorkspace", inWS);
+    alg->setPropertyValue("OutputWorkspace", outWSName);
+    alg->setProperty("Params", bin);
+
+    alg->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Error when rebinning with a regular bin width in time. "
+                     "Coult not run the algorithm " +
+                         rebinName + " successfully. Error description: " +
+                         re.what() + ".";
+    throw;
+  }
+
+  m_rebinningFinishedOK = true;
 }
 
 void EnggDiffractionPresenter::inputChecksBeforeRebin(
@@ -1486,22 +1536,36 @@ void EnggDiffractionPresenter::inputChecksBeforeRebinPulses(
 }
 
 void EnggDiffractionPresenter::doRebinningPulses(const std::string &runNo,
-                                                 size_t nperiods, double bin,
+                                                 size_t nperiods,
+                                                 double timeStep,
                                                  const std::string &outWSName) {
-  // TODO: rebin
-  // run a command similar to this:
-  // ws.isMultiPeriod()
-  // True
-  // ws = mtd['nxs_ENGINX00197019']
-  // ws1 = ws.getItem(0)
-  // start=wsrun.startTime()
-  // end=wsrun.endTime()
-  // get seconds from: end-start
-  //
-  // rbpt=RebinByPulseTimes(InputWorkspace='ws', Params=[0, step_on_time_axis,
-  // *end-start*])
+  UNUSED_ARG(nperiods);
 
-  // TOOD: set m_rebinningFinishedOK;
+  // Runs something like:
+  // RebinByPulseTimes(InputWorkspace='ws_runNo', outputWorkspace=outWSName,
+  //                   Params=timeStepstep)
+
+  m_rebinningFinishedOK = false;
+  MatrixWorkspace_sptr inWS = loadToPreproc(runNo);
+
+  const std::string rebinName = "RebinByPulseTimes";
+  try {
+    auto alg = Algorithm::fromString(rebinName);
+    alg->initialize();
+    alg->setProperty("InputWorkspace", inWS);
+    alg->setPropertyValue("OutputWorkspace", outWSName);
+    alg->setProperty("Params", timeStep);
+
+    alg->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Error when rebinning by pulse times. "
+                     "Coult not run the algorithm " +
+                         rebinName + " successfully. Error description: " +
+                         re.what() + ".";
+    throw;
+  }
+
+  m_rebinningFinishedOK = true;
 }
 
 /**
