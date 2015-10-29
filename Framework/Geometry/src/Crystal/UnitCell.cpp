@@ -21,7 +21,7 @@ UnitCell::UnitCell() : da(6), ra(6), errorda(6), G(3, 3), Gstar(3, 3), B(3, 3) {
   da[0] = da[1] = da[2] = 1.;
   da[3] = da[4] = da[5] = deg2rad * 90.0;
   errorda[0] = errorda[1] = errorda[2] = errorda[3] = errorda[4] = errorda[5] =
-      0.0;
+      errorda[6] = 0.0;
   recalculate();
 }
 
@@ -50,7 +50,7 @@ UnitCell::UnitCell(double _a, double _b, double _c)
   // Angles are 90 degrees in radians ->Pi/2
   da[3] = da[4] = da[5] = 0.5 * M_PI;
   errorda[0] = errorda[1] = errorda[2] = errorda[3] = errorda[4] = errorda[5] =
-      0.0;
+      errorda[6] = 0.0;
   recalculate();
 }
 
@@ -75,7 +75,7 @@ UnitCell::UnitCell(double _a, double _b, double _c, double _alpha, double _beta,
     da[5] = _gamma;
   }
   errorda[0] = errorda[1] = errorda[2] = errorda[3] = errorda[4] = errorda[5] =
-      0.0;
+      errorda[6] = 0.0;
   recalculate();
 }
 
@@ -266,6 +266,11 @@ double UnitCell::errorgamma(const int angleunit) const {
   }
 }
 
+/** Get lattice parameter error
+@return errorc :: errorlattice parameter \f$ volume \f$ (in \f$ \mbox{\AA} \f$ )
+*/
+double UnitCell::errorvolume() const { return errorda[6]; }
+
 /** Set lattice parameters
   @param _a, _b, _c, _alpha, _beta, _gamma :: lattice parameters\n
 @param angleunit :: units for angle, of type #AngleUnits . Default is degrees.
@@ -404,6 +409,11 @@ void UnitCell::setErrorgamma(double _gammaerr, const int angleunit) {
   else
     errorda[5] = _gammaerr;
 }
+
+/** Set lattice parameter error
+@param _cerr :: lattice parameter \f$ volume \f$ error (in \f$ \mbox{\AA} \f$
+)*/
+void UnitCell::setErrorvolume(double _volerr) { errorda[6] = _volerr; }
 
 /// Return d-spacing (\f$ \mbox{ \AA } \f$) for a given h,k,l coordinate
 double UnitCell::d(double h, double k, double l) const {
@@ -575,7 +585,8 @@ std::ostream &operator<<(std::ostream &out, const UnitCell &unitCell) {
       << std::setw(12) << unitCell.c() << std::fixed << std::setprecision(6)
       << std::setw(12) << unitCell.alpha() << std::fixed << std::setprecision(6)
       << std::setw(12) << unitCell.beta() << std::fixed << std::setprecision(6)
-      << std::setw(12) << unitCell.gamma();
+      << std::setw(12) << unitCell.gamma() << std::fixed << std::setprecision(6)
+      << std::setw(12) << unitCell.volume();
 
   // write out the uncertainty if there is a positive one somewhere
   if ((unitCell.errora() > 0) || (unitCell.errorb() > 0) ||
@@ -589,7 +600,8 @@ std::ostream &operator<<(std::ostream &out, const UnitCell &unitCell) {
         << std::setw(12) << unitCell.erroralpha() << std::fixed
         << std::setprecision(6) << std::setw(12) << unitCell.errorbeta()
         << std::fixed << std::setprecision(6) << std::setw(12)
-        << unitCell.errorgamma();
+        << unitCell.errorgamma() << std::fixed << std::setprecision(6)
+        << std::setw(12) << unitCell.errorvolume();
 
   return out;
 }
@@ -607,12 +619,12 @@ std::string unitCellToStr(const UnitCell &unitCell) {
 
 UnitCell strToUnitCell(const std::string &unitCellString) {
   boost::char_separator<char> separator(" ");
-  boost::tokenizer<boost::char_separator<char>> cellTokens(unitCellString,
-                                                           separator);
+  boost::tokenizer<boost::char_separator<char> > cellTokens(unitCellString,
+                                                            separator);
 
   std::vector<double> components;
 
-  for (boost::tokenizer<boost::char_separator<char>>::iterator token =
+  for (boost::tokenizer<boost::char_separator<char> >::iterator token =
            cellTokens.begin();
        token != cellTokens.end(); ++token) {
     components.push_back(boost::lexical_cast<double>(*token));
