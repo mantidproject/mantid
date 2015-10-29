@@ -32,7 +32,7 @@ from mantid.api._aliases import *
 
 #------------------------ Specialized function calls --------------------------
 # List of specialized algorithms
-__SPECIALIZED_FUNCTIONS__ = ["Load", "CutMD","RenameWorkspace"]
+__SPECIALIZED_FUNCTIONS__ = ["Load", "CutMD", "RenameWorkspace"]
 # List of specialized algorithms
 __MDCOORD_FUNCTIONS__ = ["PeakIntensityVsRadius", "CentroidPeaksMD","IntegratePeaksMD"]
 # The "magic" keyword to enable/disable logging
@@ -422,28 +422,29 @@ def rename_wrapper(f):
         arguments = {}
         lhs = _kernel.funcreturns.lhs_info()
         if lhs[0]>0:
-           if 'OutputWorkspace' not in kwargs:
+            if 'OutputWorkspace' not in kwargs:
                 arguments['OutputWorkspace'] = lhs[1][0]
-                pos_arg={0:"InputWorkspace",1:"RenameMonitors"}
-           else:
-               pos_arg={0:"InputWorkspace",1:"OutputWorkspace",2:"RenameMonitors"}
+                pos_arg = {0:"InputWorkspace",1:"RenameMonitors"}
+            else:
+               pos_arg = {0:"InputWorkspace", 1:"OutputWorkspace", 2:"RenameMonitors"}
         else:
-            pos_arg={0:"InputWorkspace",1:"OutputWorkspace",2:"RenameMonitors"}
+            pos_arg = {0:"InputWorkspace", 1:"OutputWorkspace", 2:"RenameMonitors"}
 
 
 
-        for ind,arg in enumerate(args):
+        for ind, arg in enumerate(args):
             arguments[pos_arg[ind]] = arg
-        for key,val in kwargs.items():
+        for key, val in kwargs.items():
             arguments[key] = val
         if 'OutputWorkspace' not in arguments:
-            raise RuntimeError("Unable to set output workspace name. Please either assign the output of "
+            raise RuntimeError("Unable to set output workspace name."\
+                  " Please either assign the output of "\
                   "RenameWorkspace to a variable or use the OutputWorkspace keyword.")
-            
+
         # Create and execute
         algm = _create_algorithm_object(function_name)
         _set_logging_option(algm, kwargs)
-        for key,val in arguments.items():
+        for key, val in arguments.items():
             algm.setProperty(key, val)
 
         algm.execute()
@@ -456,13 +457,15 @@ def rename_wrapper(f):
     _f = wrapper.func_code
     # Creating a new code object nearly identical, but with the two variable names replaced
     # by the property list.
-    _c = _f.__new__(_f.__class__, _f.co_argcount, _f.co_nlocals, _f.co_stacksize, _f.co_flags, _f.co_code, _f.co_consts, _f.co_names,\
-           (_signature, "kwargs"), _f.co_filename, _f.co_name, _f.co_firstlineno, _f.co_lnotab, _f.co_freevars)
+    _c = _f.__new__(_f.__class__, _f.co_argcount, _f.co_nlocals, _f.co_stacksize, _f.co_flags,\
+            _f.co_code, _f.co_consts, _f.co_names,\
+            (_signature, "kwargs"), _f.co_filename,\
+            _f.co_name, _f.co_firstlineno, _f.co_lnotab, _f.co_freevars)
 
     # Replace the code object of the wrapper function
     wrapper.func_code = _c
     wrapper.__doc__ = f.__doc__
-    
+
     return wrapper
 
 @rename_wrapper
