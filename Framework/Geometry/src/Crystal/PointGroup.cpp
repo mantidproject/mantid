@@ -117,6 +117,17 @@ std::vector<V3D> PointGroup::getEquivalentSet(const Kernel::V3D &hkl) const {
   return equivalents;
 }
 
+/**
+ * Returns the CrystalSystem determined from symmetry elements
+ *
+ * This method determines the crystal system of the point group. It makes
+ * use of the fact that each crystal system has a characteristic set of
+ * symmetry elements. The requirement for the cubic system is for example
+ * that four 3-fold axes are present, whereas one 3-fold axis indicates
+ * that the group belongs to the trigonal system.
+ *
+ * @return Crystal system that the point group belongs to.
+ */
 PointGroup::CrystalSystem PointGroup::getCrystalSystemFromGroup() const {
   std::map<std::string, std::set<V3D>> symbolMap;
 
@@ -161,6 +172,17 @@ PointGroup::CrystalSystem PointGroup::getCrystalSystemFromGroup() const {
   return CrystalSystem::Triclinic;
 }
 
+/**
+ * Returns the LatticeSystem of the point group, using the crystal system
+ *
+ * This function uses the crystal system argument and the coordinate system
+ * stored in Group to determine the lattice system. For all crystal systems
+ * except trigonal there is a 1:1 correspondence, but for trigonal groups
+ * the lattice system can be either rhombohedral or hexagonal.
+ *
+ * @param crystalSystem :: CrystalSystem of the point group.
+ * @return LatticeSystem the point group belongs to.
+ */
 PointGroup::LatticeSystem PointGroup::getLatticeSystemFromCrystalSystemAndGroup(
     const CrystalSystem &crystalSystem) const {
   switch (crystalSystem) {
@@ -199,6 +221,7 @@ std::vector<PointGroup_sptr> getAllPointGroups() {
   return out;
 }
 
+/// Returns a multimap with crystal system as key and point groups as values.
 PointGroupCrystalSystemMap getPointGroupsByCrystalSystem() {
   PointGroupCrystalSystemMap map;
 
@@ -231,6 +254,8 @@ getCrystalSystemAsString(const PointGroup::CrystalSystem &crystalSystem) {
   }
 }
 
+/// Returns the crystal system enum that corresponds to the supplied string or
+/// throws an invalid_argument exception.
 PointGroup::CrystalSystem
 getCrystalSystemFromString(const std::string &crystalSystem) {
   std::string crystalSystemLC = boost::algorithm::to_lower_copy(crystalSystem);
@@ -255,6 +280,7 @@ getCrystalSystemFromString(const std::string &crystalSystem) {
   }
 }
 
+/// Returns the supplied LatticeSystem as a string.
 std::string
 getLatticeSystemAsString(const PointGroup::LatticeSystem &latticeSystem) {
   switch (latticeSystem) {
@@ -275,6 +301,8 @@ getLatticeSystemAsString(const PointGroup::LatticeSystem &latticeSystem) {
   }
 }
 
+/// Returns the lattice system enum that corresponds to the supplied string or
+/// throws an invalid_argument exception.PointGroup::LatticeSystem
 PointGroup::LatticeSystem
 getLatticeSystemFromString(const std::string &latticeSystem) {
   std::string latticeSystemLC = boost::algorithm::to_lower_copy(latticeSystem);
