@@ -417,8 +417,7 @@ void AlignAndFocusPowder::exec() {
   if (removePromptPulseWidth > 0.) {
     g_log.information() << "running RemovePromptPulse(Width="
                         << removePromptPulseWidth << ")\n";
-    API::IAlgorithm_sptr filterPAlg =
-            createChildAlgorithm("RemovePromptPulse");
+    API::IAlgorithm_sptr filterPAlg = createChildAlgorithm("RemovePromptPulse");
     filterPAlg->setProperty("InputWorkspace", m_outputW);
     filterPAlg->setProperty("OutputWorkspace", m_outputW);
     filterPAlg->setProperty("Width", removePromptPulseWidth);
