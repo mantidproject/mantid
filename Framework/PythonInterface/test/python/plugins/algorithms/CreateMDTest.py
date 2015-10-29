@@ -17,7 +17,7 @@ class CreateMDTest(unittest.TestCase):
         alg.initialize()
         self.assertRaises(ValueError, alg.setProperty, "DataSources", [])
 
-    def test_set_up_madatory(self):
+    def test_set_up_mandatory(self):
 
         alg = AlgorithmManager.create("CreateMD")
         alg.setRethrows(True)
@@ -48,7 +48,7 @@ class CreateMDTest(unittest.TestCase):
         alg.setProperty("Psi", [0, 0, 0]) # Too large
         alg.setProperty("Gl", [0]) # Right size
         alg.setProperty("Gs", [0]) # Right size
-        self.assertRaises(RuntimeError, alg.execute)
+        self.assertRaises(ValueError, alg.execute)
         DeleteWorkspace(input_workspace)
         
     def test_gl_right_size(self):
@@ -69,7 +69,7 @@ class CreateMDTest(unittest.TestCase):
         alg.setProperty("Psi", [0]) # Right size
         alg.setProperty("Gl", [0, 0]) # Too many
         alg.setProperty("Gs", [0]) # Right size
-        self.assertRaises(RuntimeError, alg.execute)
+        self.assertRaises(ValueError, alg.execute)
         DeleteWorkspace(input_workspace)
         
     def test_gs_right_size(self):
@@ -90,7 +90,7 @@ class CreateMDTest(unittest.TestCase):
         alg.setProperty("Psi", [0]) # Right size
         alg.setProperty("Gl", [0]) # Right size
         alg.setProperty("Gs", [0,0]) # Too large
-        self.assertRaises(RuntimeError, alg.execute)
+        self.assertRaises(ValueError, alg.execute)
         DeleteWorkspace(input_workspace)
         
 
@@ -129,24 +129,7 @@ class CreateMDTest(unittest.TestCase):
         out_ws = AnalysisDataService.retrieve("mdworkspace")
 
         self.assertTrue(isinstance(out_ws, IMDEventWorkspace), "Expected an MDEventWorkspace back")
-        
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                
 
 if __name__ == '__main__':
     unittest.main()

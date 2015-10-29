@@ -24,6 +24,9 @@ void padParameterVector(std::vector<double> &param_vector,
     param_vector.resize(grow_to_size, 0.0);
   } else if (param_vector.size() == 1) {
     param_vector.resize(grow_to_size, param_vector[0]);
+  } else if (param_vector.size() != grow_to_size) {
+    throw std::invalid_argument("Psi, Gl, Gs and EFix must each be a single "
+                                "value for all runs or one value per run.");
   }
 }
 
@@ -387,12 +390,10 @@ Mantid::API::Workspace_sptr CreateMD::single_run(
       addSampleLog(input_workspace, "Ei", efix);
     }
 
-    if (true) { // TODO if any of gl, gs, psi are given
-      addSampleLog(input_workspace, "gl", gl);
-      addSampleLog(input_workspace, "gs", gs);
-      addSampleLog(input_workspace, "psi", psi);
-      setGoniometer(input_workspace);
-    }
+    addSampleLog(input_workspace, "gl", gl);
+    addSampleLog(input_workspace, "gs", gs);
+    addSampleLog(input_workspace, "psi", psi);
+    setGoniometer(input_workspace);
 
     return convertToMD(input_workspace, emode, in_place, out_mdws);
   }
