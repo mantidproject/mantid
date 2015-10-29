@@ -1296,7 +1296,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
   // Check for x errors; as with fracArea we set it to xbins
   // although in this case it would never be used.
   auto hasXErrors = wksp_cls.isValid("xerrors");
-  NXDouble &xErrors = hasXErrors ? wksp_cls.openNXDouble("xerrors") : xbins;
+  auto xErrors = hasXErrors ? wksp_cls.openNXDouble("xerrors") : errors;
 
   int64_t blocksize(8);
   // const int fullblocks = nspectra / blocksize;
@@ -1330,13 +1330,14 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
                        progressScaler * static_cast<double>(hist_index) /
                            static_cast<double>(read_stop),
                    "Reading workspace data...");
-          loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors, blocksize, nchannels,
-                    hist_index, wsIndex, local_workspace);
+          loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors,
+                    blocksize, nchannels, hist_index, wsIndex, local_workspace);
         }
         int64_t finalblock = m_spec_max - 1 - read_stop;
         if (finalblock > 0) {
-          loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors, finalblock, nchannels,
-                    hist_index, wsIndex, local_workspace);
+          loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors,
+                    finalblock, nchannels, hist_index, wsIndex,
+                    local_workspace);
         }
       }
       // if spectrum list property is set read each spectrum separately by
@@ -1360,13 +1361,13 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
                      progressScaler * static_cast<double>(hist_index) /
                          static_cast<double>(read_stop),
                  "Reading workspace data...");
-        loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors, blocksize, nchannels,
-                  hist_index, wsIndex, local_workspace);
+        loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors,
+                  blocksize, nchannels, hist_index, wsIndex, local_workspace);
       }
       int64_t finalblock = total_specs - read_stop;
       if (finalblock > 0) {
-        loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors, finalblock, nchannels,
-                  hist_index, wsIndex, local_workspace);
+        loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors,
+                  finalblock, nchannels, hist_index, wsIndex, local_workspace);
       }
     }
 
@@ -1388,13 +1389,15 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
                        progressScaler * static_cast<double>(hist_index) /
                            static_cast<double>(read_stop),
                    "Reading workspace data...");
-          loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors, xbins, blocksize,
-                    nchannels, hist_index, wsIndex, local_workspace);
+          loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors,
+                    xbins, blocksize, nchannels, hist_index, wsIndex,
+                    local_workspace);
         }
         int64_t finalblock = m_spec_max - 1 - read_stop;
         if (finalblock > 0) {
-          loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors, xbins, finalblock,
-                    nchannels, hist_index, wsIndex, local_workspace);
+          loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors,
+                    xbins, finalblock, nchannels, hist_index, wsIndex,
+                    local_workspace);
         }
       }
       //
@@ -1406,8 +1409,8 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
                        progressScaler * static_cast<double>(specIndex) /
                            static_cast<double>(read_stop),
                    "Reading workspace data...");
-          loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors, xbins, 1, nchannels,
-                    specIndex, wsIndex, local_workspace);
+          loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors,
+                    xbins, 1, nchannels, specIndex, wsIndex, local_workspace);
         }
       }
     } else {
@@ -1416,13 +1419,15 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
                      progressScaler * static_cast<double>(hist_index) /
                          static_cast<double>(read_stop),
                  "Reading workspace data...");
-        loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors, xbins, blocksize,
-                  nchannels, hist_index, wsIndex, local_workspace);
+        loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors,
+                  xbins, blocksize, nchannels, hist_index, wsIndex,
+                  local_workspace);
       }
       int64_t finalblock = total_specs - read_stop;
       if (finalblock > 0) {
-        loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors, xbins, finalblock,
-                  nchannels, hist_index, wsIndex, local_workspace);
+        loadBlock(data, errors, fracarea, hasFracArea, xErrors, hasXErrors,
+                  xbins, finalblock, nchannels, hist_index, wsIndex,
+                  local_workspace);
       }
     }
   }

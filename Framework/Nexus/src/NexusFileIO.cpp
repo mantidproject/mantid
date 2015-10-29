@@ -431,7 +431,7 @@ int NexusFileIO::writeNexusProcessedData2D(
     dims_array[1] = static_cast<int>(localworkspace->readX(0).size());
     std::string dxErrorName = "xerrors";
     NXcompmakedata(fileID, dxErrorName.c_str(), NX_FLOAT64, 2, dims_array,
-                    m_nexuscompression, asize);
+                   m_nexuscompression, asize);
     NXopendata(fileID, dxErrorName.c_str());
     start[0] = 0;
     asize[1] = dims_array[1];
