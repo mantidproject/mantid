@@ -3,7 +3,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include <boost/filesystem.hpp>
+#include <Poco/Path.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -190,9 +190,10 @@ void CreateMD::exec() {
     // load
     if (!AnalysisDataService::Instance().doesExist(
             data_sources[entry_number])) {
-      // Strip off any file extension or path to leave just the stem filename
+      // Strip off any file extension or path to leave just the stem (base)
+      // filename
       std::string filename_noext =
-          boost::filesystem::path(data_sources[entry_number]).stem().string();
+          Poco::Path(data_sources[entry_number]).getBaseName();
 
       // Create workspace name of form {filename}_md_{n}
       ws_name << filename_noext << "_md_" << counter;
@@ -386,8 +387,7 @@ Mantid::API::Workspace_sptr CreateMD::single_run(
       addSampleLog(input_workspace, "Ei", efix);
     }
 
-    if (std::any_of(goniometer_params.begin(), goniometer_params.end(),
-                    [](const std::string &param) { return param.empty(); })) {
+    if (true) { // TODO if any of gl, gs, psi are given
       addSampleLog(input_workspace, "gl", gl);
       addSampleLog(input_workspace, "gs", gs);
       addSampleLog(input_workspace, "psi", psi);
