@@ -1571,8 +1571,6 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
 
 /**
  * Generates a directory if not found and handles the path
- *
- * @param runNo the run number as a string
  */
 Poco::Path EnggDiffractionPresenter::outFilesDir() {
   Poco::Path saveDir;
