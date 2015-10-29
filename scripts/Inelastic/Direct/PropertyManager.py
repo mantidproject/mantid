@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+﻿#pylint: disable=invalid-name
 from Direct.NonIDF_Properties import *
 
 from collections import OrderedDict,Iterable
@@ -577,7 +577,8 @@ class PropertyManager(NonIDF_Properties):
                 file_errors[prop_name]=file
 
         if self.sum_runs:
-            missing=[]; found=[]
+            missing=[]
+            found=[]
             ok,missing,found=self.find_files_to_sum()
             #Presence of Cashe sum ws assumes that you sum files to workspace as they appear
             # This mean, that we should not expect all files to be there at the begining
@@ -599,6 +600,7 @@ class PropertyManager(NonIDF_Properties):
         except:
             return (False,'Can not write to default save directory {0}.\n Reduction results can be lost'.format(targ_dir))
     #
+#pylint: disable=too-many-branches
     def validate_properties(self,fail_on_errors=True):
         """ Method validates if some properties values for
             properties set up in the property manager are correct
@@ -635,6 +637,7 @@ class PropertyManager(NonIDF_Properties):
         for prop in changed_prop:
             try:
                 theProp =getattr(PropertyManager,prop)
+#pylint: disable=no-exception-type
             except: # not all changed properties are property manager properties
                 continue # we are not validating them
             try:
@@ -650,6 +653,7 @@ class PropertyManager(NonIDF_Properties):
                         self.log(mess,'warning')
                     else:
                         error_list[prop]=mess
+#pylint: disable=no-exception-type
             except: # its simple dictionary value, which do not have validator or
                 pass # other property without validator
         #end
