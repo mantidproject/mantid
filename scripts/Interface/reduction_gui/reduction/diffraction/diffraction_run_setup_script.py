@@ -16,6 +16,7 @@ class RunSetupScript(BaseScriptElement):
     # Class static variables
     runnumbers = ""
     calibfilename = ""
+    exp_ini_file_name = ''
     charfilename = ""
     dosum = False
     binning = -0.0001
@@ -60,6 +61,7 @@ class RunSetupScript(BaseScriptElement):
         self.parnamelist.append("Sum")
         self.parnamelist.append("CalibrationFile")
         self.parnamelist.append("CharacterizationRunsFile")
+        self.parnamelist.append('ExpIniFilename')
         self.parnamelist.append("Binning")
         self.parnamelist.append("ResampleX")
         self.parnamelist.append("BinInDspace")
@@ -85,6 +87,7 @@ class RunSetupScript(BaseScriptElement):
         pardict["RunNumber"] = str(self.runnumbers)
         pardict["Sum"] = str(int(self.dosum))
         pardict["CalibrationFile"] = self.calibfilename
+        pardict['ExpIniFilename'] = self.exp_ini_file_name
         pardict["CharacterizationRunsFile"] = self.charfilename
         if self.binningtype == "Logarithmic":
             pardict["Binning"] = -1.0*abs(self.binning)
@@ -173,6 +176,9 @@ class RunSetupScript(BaseScriptElement):
             self.calibfilename = BaseScriptElement.getStringElement(instrument_dom,\
                     "calibrationfile", default=RunSetupScript.calibfilename)
 
+            self.exp_ini_file_name = BaseScriptElement.getStringElement(instrument_dom, 
+                    'expinifilename', default=RunSetupScript.exp_ini_file_name)
+
             self.charfilename = BaseScriptElement.getStringElement(instrument_dom,\
                     "characterizationrunsfile", default=RunSetupScript.charfilename)
 
@@ -241,6 +247,7 @@ class RunSetupScript(BaseScriptElement):
         """
         self.runnumbers = RunSetupScript.runnumbers
         self.calibfilename = RunSetupScript.calibfilename
+        self.exp_ini_file_name = RunSetupScript.exp_ini_file_name
         self.charfilename  = RunSetupScript.charfilename
         self.dosum = RunSetupScript.dosum
         self.binning = RunSetupScript.binning

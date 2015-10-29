@@ -317,14 +317,14 @@ class DiffractionReductionScripter(BaseReductionScripter):
 
         return datafilenames
 
-
-    def buildPowderDataReductionScript(self, runsetupdict, advsetupdict, runnumber=None, splitwsname=None,
+    def buildPowderDataReductionScript(self, runsetupdict, advsetupdict,
+                                       runnumber=None, splitwsname=None,
                                        splitinfowsname=None):
         """ Build the script to call SNSPowderReduction()
         """
-        # FIXME / TODO - Figure out how to get instrument name and facility name!
-        script  = "SNSPowderReduction(\n"
-        script += "%sInstrument   = '%s',\n" % (DiffractionReductionScripter.WIDTH, self.instrument_name)
+        script = 'SNSPowderReduction(\n'
+        script += "%sInstrument   = '%s',\n" % (DiffractionReductionScripter.WIDTH,
+                                                self.instrument_name)
 
         # 1. Run setup
         # a) determine whether to turn on/off corrections
@@ -344,8 +344,8 @@ class DiffractionReductionScripter(BaseReductionScripter):
             runsetupdict["Binning"] = ''
 
         # NOMAD special
-        if self._instrument_name.lower().startswith('nom') is False:
-            runstepdict.pop('ExpIniFile', None)
+        if self.instrument_name.lower().startswith('nom') is False:
+            runsetupdict.pop('ExpIniFile', None)
 
         # c) all properties
         for propname in runsetupdict.keys():

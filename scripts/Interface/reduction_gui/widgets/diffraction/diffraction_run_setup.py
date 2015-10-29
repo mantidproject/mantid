@@ -129,16 +129,18 @@ class RunSetupWidget(BaseWidget):
         # self._handle_tzero_guess(self._content.use_ei_guess_chkbox.isChecked())
 
         # Connections from action/event to function to handle
-        self.connect(self._content.calfile_browse, QtCore.SIGNAL("clicked()"),\
-                self._calfile_browse)
-        self.connect(self._content.charfile_browse, QtCore.SIGNAL("clicked()"),\
-                self._charfile_browse)
-        self.connect(self._content.outputdir_browse, QtCore.SIGNAL("clicked()"),\
-                self._outputdir_browse)
-        self.connect(self._content.binning_edit, QtCore.SIGNAL("valueChanged"),\
-                self._binvalue_edit)
-        self.connect(self._content.bintype_combo, QtCore.SIGNAL("currentIndexChanged(QString)"),\
-                self._bintype_process)
+        self.connect(self._content.calfile_browse, QtCore.SIGNAL("clicked()"),
+                     self._calfile_browse)
+        self.connect(self._content.charfile_browse, QtCore.SIGNAL("clicked()"),
+                     self._charfile_browse)
+        self.connect(self._content.pushButton_browseExpIniFile, QtCore.SIGNAL('clicked()'),
+                     self.do_browse_ini_file)
+        self.connect(self._content.outputdir_browse, QtCore.SIGNAL("clicked()"),
+                     self._outputdir_browse)
+        self.connect(self._content.binning_edit, QtCore.SIGNAL("valueChanged"),
+                     self._binvalue_edit)
+        self.connect(self._content.bintype_combo, QtCore.SIGNAL("currentIndexChanged(QString)"),
+                     self._bintype_process)
 
         #self.connect(self._content.override_emptyrun_checkBox, QtCore.SIGNAL("clicked()"),
         #        self._overrideemptyrun_clicked)
@@ -172,6 +174,7 @@ class RunSetupWidget(BaseWidget):
         """
         self._content.runnumbers_edit.setText(state.runnumbers)
         self._content.calfile_edit.setText(state.calibfilename)
+        self._content.lineEdit_expIniFile.setText(state.exp_ini_file_name)
         self._content.charfile_edit.setText(state.charfilename)
         self._content.sum_checkbox.setChecked(state.dosum)
         self._content.binning_edit.setText(str(state.binning))
@@ -227,6 +230,7 @@ class RunSetupWidget(BaseWidget):
             raise NotImplementedError("Run number error @ %s" % (rtup[1]))
 
         s.calibfilename = self._content.calfile_edit.text()
+        s.exp_ini_file_name = str(self._content.lineEdit_expIniFile.text())
         s.charfilename = self._content.charfile_edit.text()
         s.dosum = self._content.sum_checkbox.isChecked()
 
@@ -271,7 +275,7 @@ class RunSetupWidget(BaseWidget):
     def _calfile_browse(self):
         """ Event handing for browsing calibrtion file
         """
-        fname = self.data_browse_dialog(data_type="*.cal;;*.*")
+        fname = self.data_browse_dialog(data_type="*.cal;;*.h5;;*.hd5;;*.hdf;;*.*")
         if fname:
             self._content.calfile_edit.setText(fname)
 
@@ -283,6 +287,16 @@ class RunSetupWidget(BaseWidget):
         fname = self.data_browse_dialog("*.txt;;*.*")
         if fname:
             self._content.charfile_edit.setText(fname)
+
+        return
+
+    def do_browse_ini_file(self):
+        """ Event handling for browsing Exp Ini file
+        :return:
+        """
+        exp_ini_file_name = self.data_browse_dialog(data_type="*.ini;;*.*")
+        if exp_ini_file_name:
+            self._content.lineEdit_expIniFile.setText(exp_ini_file_name)
 
         return
 

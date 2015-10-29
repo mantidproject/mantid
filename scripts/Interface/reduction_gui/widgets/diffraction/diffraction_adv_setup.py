@@ -62,6 +62,10 @@ class AdvancedSetupWidget(BaseWidget):
         dv3.setBottom(0.0)
         self._content.cropwavelengthmin_edit.setValidator(dv3)
 
+        dv3b = QtGui.QDoubleValidator(self._content.lineEdit_croppedWavelengthMax)
+        dv3b.setBottom(0.1)
+        self._content.lineEdit_croppedWavelengthMax.setValidator(dv3b)
+
         dv4 = QtGui.QDoubleValidator(self._content.removepromptwidth_edit)
         dv4.setBottom(0.0)
         self._content.removepromptwidth_edit.setValidator(dv4)
@@ -92,7 +96,7 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.filterbadpulses_edit.setValidator(dv8)
         self._content.filterbadpulses_edit.setText("95.")
 
-        self._content.extension_combo.addItems(['.h5', '.hd5'])
+        # self._content.extension_combo.addItems(['.h5', '.hd5'])
 
         # Connections from action/event to function to handle
         self.connect(self._content.stripvanpeaks_chkbox, QtCore.SIGNAL("clicked()"),\
@@ -144,6 +148,7 @@ class AdvancedSetupWidget(BaseWidget):
         s.unwrapref = self._content.unwrap_edit.text()
         s.lowresref = self._content.lowres_edit.text()
         s.cropwavelengthmin = self._content.cropwavelengthmin_edit.text()
+        s.crop_wavelength_max = str(self._content.lineEdit_croppedWavelengthMax.text())
         s.removepropmppulsewidth = self._content.removepromptwidth_edit.text()
         s.maxchunksize = self._content.maxchunksize_edit.text()
         s.scaledata = self._content.scaledata_edit.text()
