@@ -37,6 +37,13 @@ void AddSampleLog::init() {
                   boost::make_shared<StringListValidator>(propOptions),
                   "The type that the log data will be.");
   declareProperty("LogUnit", "", "The units of the log");
+
+  std::vector<std::string> typeOptions;
+  typeOptions.push_back("Int");
+  typeOptions.push_back("Double");
+  declareProperty("NumberType", "String",
+                  boost::make_shared<StringListValidator>(typeOptions),
+                  "Force LogText to be interpreted as a number of type \"int\" or \"double\".");
 }
 
 void AddSampleLog::exec() {
@@ -51,6 +58,11 @@ void AddSampleLog::exec() {
   std::string propValue = getProperty("LogText");
   std::string propUnit = getProperty("LogUnit");
   std::string propType = getPropertyValue("LogType");
+  std::string propNumberType = getPropertyValue("NumberType");
+
+  if (!propNumberType.empty() && (propType != "Number")) {
+    throw std::invalid_argument("You may only use NumberType property if LogType is \"Number\"");
+  }
 
   // Remove any existing log
   if (theRun.hasProperty(propName)) {
