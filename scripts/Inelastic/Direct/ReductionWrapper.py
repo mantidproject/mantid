@@ -605,9 +605,9 @@ def iliad(reduce):
         if output_directory:
             config['defaultsave.directory'] = str(output_directory)
 
-#pylint: disable=access-to-protected-member
+#pylint: disable=protected-access
         if host._run_from_web:
-#pylint: disable=access-to-protected-member
+#pylint: disable=protected-access
             web_vars = host._wvs.get_all_vars()
             host.reducer.prop_man.set_input_parameters(**web_vars)
         else:
@@ -620,7 +620,7 @@ def iliad(reduce):
         rez = reduce(*args)
 
         # prohibit returning workspace to web services.
-#pylint: disable=access-to-protected-member
+#pylint: disable=protected-access
         if host._run_from_web and not isinstance(rez,str):
             rez = ""
         else:
