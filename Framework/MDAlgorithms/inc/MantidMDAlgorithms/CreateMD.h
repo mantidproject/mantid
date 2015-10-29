@@ -3,6 +3,7 @@
 
 #include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 namespace Mantid {
 namespace MDAlgorithms {
 
@@ -63,21 +64,21 @@ private:
              double c, double alpha, double beta, double gamma,
              const std::vector<double> &u, const std::vector<double> &v);
 
-  Mantid::API::Workspace_sptr convertToMD(Mantid::API::Workspace_sptr workspace,
+  Mantid::API::IMDEventWorkspace_sptr convertToMD(Mantid::API::Workspace_sptr workspace,
                                           const std::string &analysis_mode,
                                           bool in_place,
-                                          Mantid::API::Workspace_sptr out_mdws);
+                                          Mantid::API::IMDEventWorkspace_sptr out_mdws);
 
-  Mantid::API::Workspace_sptr
+  Mantid::API::IMDEventWorkspace_sptr
   merge_runs(const std::vector<std::string> &to_merge);
 
-  Mantid::API::Workspace_sptr
+  Mantid::API::IMDEventWorkspace_sptr
   single_run(Mantid::API::Workspace_sptr input_workspace,
              const std::string &emode, double efix, double psi, double gl,
              double gs, bool in_place, const std::vector<double> &alatt,
              const std::vector<double> &angdeg, const std::vector<double> &u,
              const std::vector<double> &v,
-             Mantid::API::Workspace_sptr out_mdws);
+             Mantid::API::IMDEventWorkspace_sptr out_mdws);
 };
 
 } // namespace MDAlgorithms
