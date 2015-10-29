@@ -50,7 +50,7 @@ template <> DLLExport bool checkIsEmpty(const long &value) {
  * @return True if the value is considered empty, see EmptyValues.h
  */
 template <> DLLExport bool checkIsEmpty(const OptionalBool &value) {
-  return (value == OptionalBool::Unset);
+  return (value.getValue() == OptionalBool::Unset);
 }
 }
 }
