@@ -49,13 +49,14 @@ private:
 
   void rotate(const Kernel::Matrix<double> &);
   void displace(const Kernel::V3D &);
+  Surface *doClone() const;
 
 public:
   /// Public identifer
   virtual std::string className() const { return "Cone"; }
   Cone();
   Cone(const Cone &);
-  std::unique_ptr<Surface> clone() const;
+  std::unique_ptr<Cone> clone() const;
   Cone &operator=(const Cone &);
   int operator==(const Cone &) const;
   ~Cone();

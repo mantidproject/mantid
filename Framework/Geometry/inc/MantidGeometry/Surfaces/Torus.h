@@ -50,6 +50,7 @@ private:
 
   void rotate(const Kernel::Matrix<double> &);
   void displace(const Kernel::V3D &);
+  Surface *doClone() const;
 
 public:
   /// Public identifier
@@ -57,7 +58,7 @@ public:
 
   Torus();
   Torus(const Torus &);
-  std::unique_ptr<Surface> clone() const;
+  std::unique_ptr<Torus> clone() const;
   Torus &operator=(const Torus &);
   int operator==(const Torus &) const;
   ~Torus();

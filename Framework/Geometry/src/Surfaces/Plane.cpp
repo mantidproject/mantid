@@ -56,13 +56,22 @@ Plane::Plane(const Plane &A)
 */
 {}
 
-std::unique_ptr<Surface> Plane::clone() const
+Surface *Plane::doClone() const
 /**
   Makes a clone (implicit virtual copy constructor)
   @return new(this)
 */
 {
-  return std::unique_ptr<Surface>(new Plane(*this));
+  return new Plane(*this);
+}
+
+std::unique_ptr<Plane> Plane::clone() const
+/**
+ Makes a clone (implicit virtual copy constructor)
+ @return new(this)
+ */
+{
+  return std::unique_ptr<Plane>(static_cast<Plane *>(doClone()));
 }
 
 Plane &Plane::operator=(const Plane &A)

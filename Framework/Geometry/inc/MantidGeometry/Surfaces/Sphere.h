@@ -49,11 +49,12 @@ private:
   void displace(const Kernel::V3D &);
   /// Compute the distance from the centre of the sphere to the given point
   double centreToPoint(const Kernel::V3D &pt) const;
+  Surface *doClone() const;
 
 public:
   Sphere();
   Sphere(const Sphere &);
-  std::unique_ptr<Surface> clone() const;
+  std::unique_ptr<Sphere> clone() const;
   Sphere &operator=(const Sphere &);
   ~Sphere();
   /// Effective typename

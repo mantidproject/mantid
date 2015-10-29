@@ -73,13 +73,17 @@ Cone::Cone(const Cone &A)
  */
 {}
 
-std::unique_ptr<Surface> Cone::clone() const
+Surface *Cone::doClone() const
 /**
  Makes a clone (implicit virtual copy constructor)
  @return new(*this)
  */
 {
-  return std::unique_ptr<Surface>(new Cone(*this));
+  return new Cone(*this);
+}
+
+std::unique_ptr<Cone> Cone::clone() const {
+  return std::unique_ptr<Cone>(static_cast<Cone *>(doClone()));
 }
 
 Cone &Cone::operator=(const Cone &A)

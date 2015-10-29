@@ -56,6 +56,7 @@ private:
   void rotate(const Kernel::Matrix<double> &);
   void displace(const Kernel::V3D &);
   void setNvec(); ///< check to obtain orientation
+  Surface *doClone() const;
 
 public:
   /// Public identifer
@@ -63,7 +64,7 @@ public:
 
   Cylinder();
   Cylinder(const Cylinder &);
-  std::unique_ptr<Surface> clone() const;
+  std::unique_ptr<Cylinder> clone() const;
   Cylinder &operator=(const Cylinder &);
   ~Cylinder();
 

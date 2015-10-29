@@ -41,10 +41,13 @@ namespace Geometry {
 */
 
 class MANTID_GEOMETRY_DLL General : public Quadratic {
+private:
+  Surface *doClone() const;
+
 public:
   General();
   General(const General &);
-  std::unique_ptr<Surface> clone() const;
+  std::unique_ptr<General> clone() const;
   General &operator=(const General &);
   ~General();
 

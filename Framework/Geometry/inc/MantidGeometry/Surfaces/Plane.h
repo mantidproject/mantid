@@ -53,6 +53,7 @@ private:
   double Dist;       ///< Distance
 
   std::size_t planeType() const; ///< are we alined on an axis
+  Surface *doClone() const;
 
 public:
   /// Effective typename
@@ -60,7 +61,7 @@ public:
 
   Plane();
   Plane(const Plane &);
-  std::unique_ptr<Surface> clone() const;
+  std::unique_ptr<Plane> clone() const;
   Plane &operator=(const Plane &);
   virtual ~Plane();
 
