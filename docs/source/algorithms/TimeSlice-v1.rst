@@ -47,7 +47,7 @@ Output:
 
 .. testoutput:: ExTimeSliceSimple
 
-    ['irs26173_slice']
+    ['iris26173_slice']
 
 .. categories::
 
