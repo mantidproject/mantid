@@ -1,12 +1,10 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name,R0912
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
-import xml.dom.minidom
 import os
-import time
 from reduction_gui.reduction.scripter import BaseReductionScripter
 
 class DiffractionReductionScripter(BaseReductionScripter):
@@ -198,18 +196,17 @@ class DiffractionReductionScripter(BaseReductionScripter):
                             filterdict["FilterLogValueByChangingDirection"])
                     if filterdict["LogValueInterval"] != "":
                         # Filter by log value interval
-                        script += "%sLogValueInterval       = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LogValueInterval"])
-                        #if filterdict["LogName"] == "":
-                        #    # No log value.  Then filter by time interval
-                        #    script += "%sTimeInterval       = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LogValueInterval"])
-                        #else:
-                        #    # Found log value interval
-                        #    script += "%sLogValueInterval       = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LogValueInterval"])
-                    script += "%sLogBoundary    = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LogBoundary"])
+                        script += "%sLogValueInterval       = '%s',\n" % (
+                                DiffractionReductionScripter.WIDTH, 
+                                filterdict["LogValueInterval"])
+                    script += "%sLogBoundary    = '%s',\n" % (
+                            DiffractionReductionScripter.WIDTH, filterdict["LogBoundary"])
                     if filterdict["TimeTolerance"] != "":
-                        script += "%sTimeTolerance  = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["TimeTolerance"])
+                        script += "%sTimeTolerance  = '%s',\n" % (
+                                DiffractionReductionScripter.WIDTH, filterdict["TimeTolerance"])
                     if filterdict["LogValueTolerance"] != "":
-                        script += "%sLogValueTolerance  = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LogValueTolerance"])
+                        script += "%sLogValueTolerance  = '%s',\n" % (
+                                DiffractionReductionScripter.WIDTH, filterdict["LogValueTolerance"])
                 # ENDIF
                 script += ")\n"
 
@@ -345,6 +342,10 @@ class DiffractionReductionScripter(BaseReductionScripter):
         else:
             # turn off the binning
             runsetupdict["Binning"] = ''
+
+        # NOMAD special
+        if self._instrument_name.lower().startswith('nom') is False:
+            runstepdict.pop('ExpIniFile', None)
 
         # c) all properties
         for propname in runsetupdict.keys():
