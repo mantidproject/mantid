@@ -9,7 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidQtAPI/WidgetScrollbarFeature.h"
+#include "MantidQtAPI/WidgetScrollbarDecorator.h"
 
 namespace MantidQt
 {
@@ -52,7 +52,7 @@ private:
   Ui::StartLiveDataDialog ui;
 
   /// This dialog needs scrollbars on small screens
-  API::WidgetScrollbarFeature m_scrollbars;
+  API::WidgetScrollbarDecorator m_scrollbars;
 
   bool m_useProcessAlgo;
   bool m_useProcessScript;

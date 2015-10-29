@@ -1,7 +1,7 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "MantidQtAPI/WidgetScrollbarFeature.h"
+#include "MantidQtAPI/WidgetScrollbarDecorator.h"
 
 #include <QScrollArea>
 #include <QVBoxLayout>
@@ -13,9 +13,9 @@ using namespace MantidQt::API;
 /**
  * Constructor.
  *
- * @param target The target widget to be extended with scrollbar feature.
+ * @param target The target widget to be extended with scrollbar functionality.
  */
-WidgetScrollbarFeature::WidgetScrollbarFeature(QWidget *target)
+WidgetScrollbarDecorator::WidgetScrollbarDecorator(QWidget *target)
     : m_target(target), m_enabled(false) {
   // Off-screen widget to hold layout/widgets when scrolling disabled
   m_offscreen = new QWidget(0);
@@ -39,7 +39,7 @@ WidgetScrollbarFeature::WidgetScrollbarFeature(QWidget *target)
 
 //-----------------------------------------------------------------------------
 /// Destructor
-WidgetScrollbarFeature::~WidgetScrollbarFeature() {
+WidgetScrollbarDecorator::~WidgetScrollbarDecorator() {
   // Must be deleted manually since it has no parent
   delete m_offscreen;
 }
@@ -48,24 +48,42 @@ WidgetScrollbarFeature::~WidgetScrollbarFeature() {
 /**
  * Check whether the target is currently scrollable.
  *
- * @return Returns true if the target is currently scrollable, false otherwise.
+ * @return true if the target is currently scrollable, false otherwise.
  */
-bool WidgetScrollbarFeature::enabled() const { return m_enabled; }
+bool WidgetScrollbarDecorator::enabled() const { return m_enabled; }
 
 //-----------------------------------------------------------------------------
 /**
  * Enable or disable scrollable behaviour on the target.
  *
- * TODO: Explain how this works
+ * This works by shuffling layouts using a sparsely documented feature of
+ * QWidget::setLayout(). Normally, you cannot remove a layout once it is set
+ * without deleting it (and all contained widgets along with it). You also
+ * cannot call setLayout() on a widget that already has a layout.
+ *
+ * However, if the layout you pass to setLayout() is already set on a different
+ * widget, that layout and all contained widgets are reparented, effectively
+ * removing it from the widget it was on. But, for this to work, you need a
+ * layout-less widget to call setLayout() on.
+ *
+ * Since this class works with three widgets (the target widget, the viewport
+ * inside of the scrollable area, and an offscreen dummy widget) and only two
+ * layout (the layout of the target widget and the layout that contains the
+ * scrollarea), there is always one widget that has no layout.
+ *
+ * When scrolling is enabled, m_offscreen is empty.
+ * When scrolling is disabled, m_viewport is empty.
  *
  * @param enable Whether the target should be scrollable or not.
  */
-void WidgetScrollbarFeature::setEnabled(bool enable) {
+void WidgetScrollbarDecorator::setEnabled(bool enable) {
+  // Only enable if scrollbars were previously disabled
   if (enable && !enabled()) {
     m_viewport->setLayout(m_target->layout());
     m_target->setLayout(m_layout);
   }
 
+  // Only disable if scrollbars were previously enabled
   if (!enable && enabled()) {
     m_offscreen->setLayout(m_target->layout());
     m_target->setLayout(m_viewport->layout());

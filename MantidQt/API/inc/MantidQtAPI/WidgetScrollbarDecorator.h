@@ -1,5 +1,5 @@
-#ifndef MANTIDQT_API_WIDGETSCROLLBARFEATURE_H_
-#define MANTIDQT_API_WIDGETSCROLLBARFEATURE_H_
+#ifndef MANTIDQT_API_WIDGETSCROLLBARDECORATOR_H_
+#define MANTIDQT_API_WIDGETSCROLLBARDECORATOR_H_
 
 //----------------------------------
 // Forward declarations
@@ -16,10 +16,10 @@ namespace API {
  *
  * TODO: Add details, usage, etc
  */
-class WidgetScrollbarFeature {
+class WidgetScrollbarDecorator {
 public:
-  explicit WidgetScrollbarFeature(QWidget *target);
-  virtual ~WidgetScrollbarFeature();
+  explicit WidgetScrollbarDecorator(QWidget *target);
+  virtual ~WidgetScrollbarDecorator();
 
   /// Check whether the target is currently scrollable
   bool enabled() const;
@@ -40,4 +40,4 @@ private:
 } // namespace API
 } // namespace MantidQt
 
-#endif // MANTIDQT_API_WIDGETSCROLLBARFEATURE_H_
+#endif // MANTIDQT_API_WIDGETSCROLLBARDECORATOR_H_
