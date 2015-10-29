@@ -375,6 +375,23 @@ int NexusFileIO::writeNexusProcessedData2D(
                 start, asize);
       start[0]++;
     }
+
+    // Potentially x error
+    if (localworkspace->hasDx(0)) {
+      name = "xerrors";
+      NXcompmakedata(fileID, name.c_str(), NX_FLOAT64, 2, dims_array,
+                     m_nexuscompression, asize);
+      NXopendata(fileID, name.c_str());
+      start[0] = 0;
+      for (size_t i = 0; i < nSpect; i++) {
+        int s = spec[i];
+        NXputslab(fileID, reinterpret_cast<void *>(const_cast<double *>(
+                              &(localworkspace->readDx(s)[0]))),
+                  start, asize);
+        start[0]++;
+      }
+    }
+
     if (m_progress != 0)
       m_progress->reportIncrement(1, "Writing data");
 
