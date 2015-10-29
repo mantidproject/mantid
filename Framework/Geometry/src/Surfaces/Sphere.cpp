@@ -88,12 +88,6 @@ Default Assignment operator
   return *this;
 }
 
-Sphere::~Sphere()
-/**
-Destructor
-*/
-{}
-
 int Sphere::setSurface(const std::string &Pstr)
 /**
 Processes a standard MCNPX cone string

@@ -59,8 +59,6 @@ public:
   std::unique_ptr<Cone> clone() const;
   Cone &operator=(const Cone &);
   int operator==(const Cone &) const;
-  ~Cone();
-
   /// Calculate if the point R is within the cone (return -1) or outside (return
   /// 1)
   int side(const Kernel::V3D &R) const;

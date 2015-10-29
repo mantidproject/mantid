@@ -49,7 +49,6 @@ public:
   General(const General &);
   std::unique_ptr<General> clone() const;
   General &operator=(const General &);
-  ~General();
 
   int setSurface(const std::string &);
   void setBaseEqn();

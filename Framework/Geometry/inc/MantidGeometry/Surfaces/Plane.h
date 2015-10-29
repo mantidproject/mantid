@@ -63,7 +63,6 @@ public:
   Plane(const Plane &);
   std::unique_ptr<Plane> clone() const;
   Plane &operator=(const Plane &);
-  virtual ~Plane();
 
   virtual void acceptVisitor(BaseVisit &A) const { A.Accept(*this); }
 

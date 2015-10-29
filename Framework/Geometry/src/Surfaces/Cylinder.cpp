@@ -96,12 +96,6 @@ Cylinder &Cylinder::operator=(const Cylinder &A)
   return *this;
 }
 
-Cylinder::~Cylinder()
-/**
- Standard Destructor
- */
-{}
-
 int Cylinder::setSurface(const std::string &Pstr)
 /**
  Processes a standard MCNPX cone string

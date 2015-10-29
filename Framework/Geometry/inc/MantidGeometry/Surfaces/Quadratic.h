@@ -34,7 +34,6 @@ public:
   Quadratic();
   Quadratic(const Quadratic &);
   Quadratic &operator=(const Quadratic &);
-  virtual ~Quadratic();
 
   /// Accept visitor for line calculation
   virtual void acceptVisitor(BaseVisit &A) const { A.Accept(*this); }

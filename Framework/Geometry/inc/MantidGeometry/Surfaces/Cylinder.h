@@ -66,7 +66,6 @@ public:
   Cylinder(const Cylinder &);
   std::unique_ptr<Cylinder> clone() const;
   Cylinder &operator=(const Cylinder &);
-  ~Cylinder();
 
   // Visit acceptor
   virtual void acceptVisitor(BaseVisit &A) const { A.Accept(*this); }

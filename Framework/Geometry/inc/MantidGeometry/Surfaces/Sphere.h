@@ -56,7 +56,6 @@ public:
   Sphere(const Sphere &);
   std::unique_ptr<Sphere> clone() const;
   Sphere &operator=(const Sphere &);
-  ~Sphere();
   /// Effective typename
   virtual std::string className() const { return "Sphere"; }
   // Visit acceptor

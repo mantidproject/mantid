@@ -103,12 +103,6 @@ Cone &Cone::operator=(const Cone &A)
   return *this;
 }
 
-Cone::~Cone()
-/**
- Destructor
- */
-{}
-
 int Cone::setSurface(const std::string &Pstr)
 /**
  Processes a standard MCNPX cone string

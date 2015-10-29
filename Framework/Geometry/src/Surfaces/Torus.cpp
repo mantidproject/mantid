@@ -103,12 +103,6 @@ Torus &Torus::operator=(const Torus &A)
   return *this;
 }
 
-Torus::~Torus()
-/**
-  Destructor
-*/
-{}
-
 int Torus::operator==(const Torus &A) const
 /**
   Equality operator. Checks angle,centre and

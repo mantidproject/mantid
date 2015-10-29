@@ -52,12 +52,6 @@ General &General::operator=(const General &A)
   return *this;
 }
 
-General::~General()
-/**
-  Destructor
-*/
-{}
-
 int General::setSurface(const std::string &Pstr)
 /**
   Processes a standard MCNPX general string (GQ/SQ types)

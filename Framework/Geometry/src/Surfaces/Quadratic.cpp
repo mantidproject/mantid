@@ -60,12 +60,6 @@ Quadratic &Quadratic::operator=(const Quadratic &A)
   return *this;
 }
 
-Quadratic::~Quadratic()
-/**
-  Destructor
-*/
-{}
-
 double Quadratic::eqnValue(const Kernel::V3D &Pt) const
 /**
   Helper function to calcuate the value

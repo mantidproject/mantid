@@ -89,12 +89,6 @@ Plane &Plane::operator=(const Plane &A)
   return *this;
 }
 
-Plane::~Plane()
-/**
-  Destructor
-*/
-{}
-
 int Plane::setSurface(const std::string &Pstr)
 /**
    processes a standard MCNPX plane string:

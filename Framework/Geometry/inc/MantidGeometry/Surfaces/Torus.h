@@ -61,7 +61,6 @@ public:
   std::unique_ptr<Torus> clone() const;
   Torus &operator=(const Torus &);
   int operator==(const Torus &) const;
-  ~Torus();
 
   /// Accept visitor for line calculation
   virtual void acceptVisitor(BaseVisit &A) const { A.Accept(*this); }
