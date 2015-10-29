@@ -30,6 +30,8 @@ Usage
 .. testcode:: ExRenameWorkspace
 
    myWs=CreateSampleWorkspace()
+   mon_ws = CreateSampleWorkspace() 
+   myWs.setMonitorWorkspace(mon_ws)  
 
    print "myWs name:", myWs.name()
    print "myWs exists in Mantid?", mtd.doesExist(myWs.name())
