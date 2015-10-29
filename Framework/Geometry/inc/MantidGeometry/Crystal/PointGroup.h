@@ -105,7 +105,7 @@ getLatticeSystemFromString(const std::string &latticeSystem);
 /// when GCC 4.4 is not used anymore.
 struct MANTID_GEOMETRY_DLL CrystalSystemComparator {
   bool operator()(const PointGroup::CrystalSystem &lhs,
-                  const PointGroup::CrystalSystem &rhs);
+                  const PointGroup::CrystalSystem &rhs) const;
 };
 
 typedef std::multimap<PointGroup::CrystalSystem, PointGroup_sptr,

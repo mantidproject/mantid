@@ -327,8 +327,9 @@ getLatticeSystemFromString(const std::string &latticeSystem) {
   }
 }
 
-bool CrystalSystemComparator::operator()(const PointGroup::CrystalSystem &lhs,
-                                         const PointGroup::CrystalSystem &rhs) {
+bool CrystalSystemComparator::
+operator()(const PointGroup::CrystalSystem &lhs,
+           const PointGroup::CrystalSystem &rhs) const {
   return static_cast<int>(lhs) < static_cast<int>(rhs);
 }
 
