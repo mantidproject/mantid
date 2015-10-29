@@ -3,7 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MultipleScatteringCylinderAbsorption.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <stdexcept>
@@ -79,9 +81,14 @@ const std::string MultipleScatteringCylinderAbsorption::category() const {
  * Initialize the properties to default values
  */
 void MultipleScatteringCylinderAbsorption::init() {
+  // The input workspace must have an instrument and units of wavelength
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
+  wsValidator->add<InstrumentValidator>();
+
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<InstrumentValidator>()),
+                      wsValidator),
                   "The name of the input workspace.");
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
                       "OutputWorkspace", "", Direction::Output),
@@ -131,7 +138,7 @@ void MultipleScatteringCylinderAbsorption::exec() {
                 << " coeff2=" << coeff2 << " coeff3=" << coeff3 << "\n";
 
   // geometry stuff
-  size_t nHist = in_WS->getNumberHistograms();
+  const size_t NUM_HIST = in_WS->getNumberHistograms();
   Instrument_const_sptr instrument = in_WS->getInstrument();
   if (instrument == NULL)
     throw std::runtime_error(
@@ -144,36 +151,39 @@ void MultipleScatteringCylinderAbsorption::exec() {
   if (sample == NULL)
     throw std::runtime_error(
         "Failed to find sample in the instrument for InputWorkspace");
-  double l1 = source->getDistance(*sample);
 
   // Initialize progress reporting.
-  Progress prog(this, 0.0, 1.0, nHist);
+  Progress prog(this, 0.0, 1.0, NUM_HIST);
 
   EventWorkspace_sptr in_WSevent =
       boost::dynamic_pointer_cast<EventWorkspace>(in_WS);
   if (in_WSevent) {
-    // first compress events just to make sure it is a compressed workspace
-    API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
-    compressAlg->setProperty("InputWorkspace", in_WSevent);
-    compressAlg->setProperty("Tolerance", .01);
-    compressAlg->executeAsChildAlg();
-    EventWorkspace_sptr out_WSevent =
-        compressAlg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr out_WS = getProperty("OutputWorkspace");
+    EventWorkspace_sptr out_WSevent = boost::dynamic_pointer_cast<EventWorkspace>(out_WS);
 
-    // double check the output type
-    if (out_WSevent->getEventType() != API::WEIGHTED_NOTIME)
-      throw std::runtime_error("Can only work with weighted events");
+    // not in-place so create a new copy
+    if (in_WSevent != out_WSevent) {
+        out_WSevent = boost::dynamic_pointer_cast<EventWorkspace>(
+            API::WorkspaceFactory::Instance().create(
+                "EventWorkspace", in_WSevent->getNumberHistograms(), 2, 1));
+        // Copy geometry over.
+        API::WorkspaceFactory::Instance().initializeFromParent(
+            in_WSevent, out_WSevent, false);
+        // You need to copy over the data as well.
+        out_WSevent->copyDataFrom((*in_WSevent));
+    }
+
+    // convert to weighted events
+    out_WSevent->switchEventType(API::WEIGHTED_NOTIME);
 
     // now do the correction
-    for (size_t index = 0; index < nHist; ++index) {
-      IDetector_const_sptr det = in_WS->getDetector(index);
+    for (size_t index = 0; index < NUM_HIST; ++index) {
+      IDetector_const_sptr det = out_WSevent->getDetector(index);
       if (det == NULL)
         throw std::runtime_error("Failed to find detector");
       if (det->isMasked())
         continue;
-      double l2 = det->getDistance(*sample);
-      double tth_rad = in_WS->detectorTwoTheta(det);
-      double total_path = l1 + l2;
+      const double tth_rad = out_WSevent->detectorTwoTheta(det);
 
       EventList &eventList = out_WSevent->getEventList(index);
       vector<double> tof_vec, y_vec, err_vec;
@@ -181,7 +191,7 @@ void MultipleScatteringCylinderAbsorption::exec() {
       eventList.getWeights(y_vec);
       eventList.getWeightErrors(err_vec);
 
-      apply_msa_correction(total_path, tth_rad, radius, coeff1, coeff2, coeff3,
+      apply_msa_correction(tth_rad, radius, coeff1, coeff2, coeff3,
                            tof_vec, y_vec, err_vec);
 
       std::vector<WeightedEventNoTime> &events =
@@ -189,7 +199,6 @@ void MultipleScatteringCylinderAbsorption::exec() {
       for (size_t i = 0; i < events.size(); ++i) {
         events[i] = WeightedEventNoTime(tof_vec[i], y_vec[i], err_vec[i]);
       }
-      eventList.setSortOrder(Mantid::DataObjects::TOF_SORT);
       prog.report();
     }
 
@@ -201,23 +210,21 @@ void MultipleScatteringCylinderAbsorption::exec() {
   {
     // Create the new workspace
     MatrixWorkspace_sptr out_WS = WorkspaceFactory::Instance().create(
-        in_WS, nHist, in_WS->readX(0).size(), in_WS->readY(0).size());
+        in_WS, NUM_HIST, in_WS->readX(0).size(), in_WS->readY(0).size());
 
-    for (size_t index = 0; index < nHist; ++index) {
+    for (size_t index = 0; index < NUM_HIST; ++index) {
       IDetector_const_sptr det = in_WS->getDetector(index);
       if (det == NULL)
         throw std::runtime_error("Failed to find detector");
       if (det->isMasked())
         continue;
-      double l2 = det->getDistance(*sample);
-      double tth_rad = in_WS->detectorTwoTheta(det);
-      double total_path = l1 + l2;
+      const double tth_rad = in_WS->detectorTwoTheta(det);
 
       MantidVec tof_vec = in_WS->readX(index);
       MantidVec y_vec = in_WS->readY(index);
       MantidVec err_vec = in_WS->readE(index);
 
-      apply_msa_correction(total_path, tth_rad, radius, coeff1, coeff2, coeff3,
+      apply_msa_correction(tth_rad, radius, coeff1, coeff2, coeff3,
                            tof_vec, y_vec, err_vec);
 
       out_WS->dataX(index).assign(tof_vec.begin(), tof_vec.end());
@@ -234,7 +241,7 @@ void MultipleScatteringCylinderAbsorption::exec() {
  */
 void MultipleScatteringCylinderAbsorption::ZSet(const double angle_rad,
                                                 vector<double> &Z) {
-  double theta_rad = angle_rad * .5;
+  const double theta_rad = angle_rad * .5;
   int l, J;
   double sum;
 
@@ -281,43 +288,35 @@ double MultipleScatteringCylinderAbsorption::AttFac(const double sigir,
 }
 
 /**
- *  Calculate the wavelength at a specified total path in meters and
- *  time-of-flight in microseconds.
- */
-inline double
-MultipleScatteringCylinderAbsorption::wavelength(double path_length_m,
-                                                 double tof_us) {
-  return ANGST_PER_US_PER_M * tof_us / path_length_m;
-}
-
-/**
  *  This method will change the values in the y_val array to correct for
  *  multiple scattering absorption. Parameter total_path is in meters, and
  *  the sample radius is in cm.
  *
- *  @param total_path ::  The total flight path in meters
  *  @param angle_deg ::   The scattering angle (two theta) in degrees
  *  @param radius ::      The sample rod radius in cm
  *  @param coeff1 ::      The absorption cross section / 1.81
  *  @param coeff2 ::      The density
  *  @param coeff3 ::      The total scattering cross section
- *  @param tof ::         Array of times-of-flight at bin boundaries
- *                     (or bin centers) for the spectrum, in microseconds
+ *  @param wavelength ::          Array of wavelengths at bin boundaries
+    *                     (or bin centers) for the spectrum, in Angstroms
  *  @param y_val ::       The spectrum values
  *  @param errors ::      The spectrum errors
  */
 void MultipleScatteringCylinderAbsorption::apply_msa_correction(
-    double total_path, double angle_deg, double radius, double coeff1,
-    double coeff2, double coeff3, vector<double> &tof, vector<double> &y_val,
-    std::vector<double> &errors) {
+    const double angle_deg, const double radius, const double coeff1,
+    const double coeff2, const double coeff3, const vector<double> &wavelength,
+    vector<double> &y_val, std::vector<double> &errors) {
   const double coeff4 = 1.1967;
   const double coeff5 = -0.8667;
 
+  const size_t NUM_Y = y_val.size();
   bool is_histogram = false;
-  if (tof.size() == y_val.size() + 1)
+  if (wavelength.size() == NUM_Y + 1)
     is_histogram = true;
-  else if (tof.size() == y_val.size())
+  else if (wavelength.size() == NUM_Y)
     is_histogram = false;
+  else
+    throw std::runtime_error("Data is neither historgram or density");
 
   vector<double> Z(Z_initial,
                    Z_initial + Z_size); // initialize Z array for this angle
@@ -325,16 +324,13 @@ void MultipleScatteringCylinderAbsorption::apply_msa_correction(
 
   double Q2 = coeff1 * coeff2;
   double sigsct = coeff2 * coeff3;
-  size_t n_ys = y_val.size();
 
-  for (size_t j = 0; j < n_ys; j++) {
+  for (size_t j = 0; j < NUM_Y; j++) {
     double wl_val;
     if (is_histogram)
-      wl_val = (wavelength(total_path, tof[j]) +
-                wavelength(total_path, tof[j + 1])) /
-               2;
+      wl_val = .5*(wavelength[j] + wavelength[j + 1]);
     else
-      wl_val = wavelength(total_path, tof[j]);
+      wl_val = wavelength[j];
 
     double sigabs = Q2 * wl_val;
     double sigir = (sigabs + sigsct) * radius;

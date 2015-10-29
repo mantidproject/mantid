@@ -74,15 +74,11 @@ private:
   // Set up "Z" array for specified angle
   void ZSet(const double angle_deg, std::vector<double> &Z);
 
-  // Wavelength function
-  double wavelength(double path_length_m, double tof_us);
-
   /// MultipleScatteringCylinderAbsorption correction calculation.
-  void apply_msa_correction(double total_path, double angle_deg, double radius,
-                            double coeff1, double coeff2, double coeff3,
-                            std::vector<double> &tof,
-                            std::vector<double> &y_val,
-                            std::vector<double> &errors);
+  void apply_msa_correction(const double angle_deg, const double radius, const double coeff1,
+                            const double coeff2, const double coeff3,
+                            const std::vector<double> &wavelength,
+                            std::vector<double> &y_val, std::vector<double> &errors);
 };
 
 } // namespace Algorithm

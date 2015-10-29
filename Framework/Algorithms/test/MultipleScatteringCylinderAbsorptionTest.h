@@ -6,6 +6,7 @@
 
 #include "MantidAlgorithms/MultipleScatteringCylinderAbsorption.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
@@ -65,7 +66,17 @@ public:
         WorkspaceCreationHelper::Create2DWorkspaceBinned(9, 16, 1000, 1000);
     wksp->setInstrument(
         ComponentCreationHelper::createTestInstrumentCylindrical(1));
+    wksp->getAxis(0)->setUnit("TOF");
     AnalysisDataService::Instance().add("TestInputWS", wksp);
+
+    // convert to wavelength
+    auto convertUnitsAlg
+            = Mantid::API::FrameworkManager::Instance().createAlgorithm("ConvertUnits");
+    convertUnitsAlg->setPropertyValue("InputWorkspace", "TestInputWS");
+    convertUnitsAlg->setPropertyValue("OutputWorkspace", "TestInputWS");
+    convertUnitsAlg->setProperty("Target", "Wavelength");
+    convertUnitsAlg->execute();
+
 
     // create and execute the algorithm
     Mantid::Algorithms::MultipleScatteringCylinderAbsorption algorithm_c;
@@ -128,10 +139,16 @@ public:
   }
 
   void testCalculationEvent() {
+    const std::string outName("MultipleScatteringCylinderAbsorptionEventOutput");
+
     // setup the test workspace
     EventWorkspace_sptr wksp =
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 1,
                                                                         false);
+    wksp->getAxis(0)->setUnit("Wavelength"); // cheat and set the units to Wavelength
+    wksp->getEventList(0).convertTof(.09,1.); // convert to be from 1->10 (about)
+    const std::size_t NUM_EVENTS = wksp->getNumberEvents();
+    AnalysisDataService::Instance().add(outName, wksp);
 
     // create the algorithm
     Mantid::Algorithms::MultipleScatteringCylinderAbsorption algorithm;
@@ -139,7 +156,6 @@ public:
     TS_ASSERT(algorithm.isInitialized());
 
     // execute the algorithm
-    std::string outName("MultipleScatteringCylinderAbsorptionEventOutput");
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("InputWorkspace", wksp));
     TS_ASSERT_THROWS_NOTHING(
         algorithm.setPropertyValue("OutputWorkspace", outName));
@@ -149,16 +165,18 @@ public:
     // quick checks on the output workspace
     MatrixWorkspace_sptr outputWS;
     TS_ASSERT_THROWS_NOTHING(
-        outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outName));
-    TS_ASSERT(boost::dynamic_pointer_cast<EventWorkspace>(outputWS));
+                outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+                    outName));
+    wksp = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
+    TS_ASSERT(wksp);
+    TS_ASSERT_EQUALS(wksp->getNumberEvents(), NUM_EVENTS);
 
     // do the final comparison - this is done by bounding
-    const MantidVec &y_actual = outputWS->readY(0);
-    TS_ASSERT_EQUALS(y_actual.size(), 100);
+    std::vector<double> y_actual;
+    wksp->getEventList(0).getWeights(y_actual);
     for (size_t i = 0; i < y_actual.size(); ++i) {
-      TS_ASSERT_LESS_THAN(2.1248, y_actual[i]);
-      TS_ASSERT_LESS_THAN(y_actual[i], 2.1313);
+      TS_ASSERT_LESS_THAN(1.19811, y_actual[i]);
+      TS_ASSERT_LESS_THAN(y_actual[i], 3.3324);
     }
 
     // cleanup
