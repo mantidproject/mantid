@@ -186,7 +186,7 @@ set ( INC_FILES
 	inc/MantidKernel/MRUList.h
 	inc/MantidKernel/MagneticFormFactorTable.h
 	inc/MantidKernel/MagneticIon.h
-        inc/MantidKernel/make_unique.h
+	inc/MantidKernel/make_unique.h
 	inc/MantidKernel/MandatoryValidator.h
 	inc/MantidKernel/MantidVersion.h
 	inc/MantidKernel/MaskedProperty.h
@@ -323,7 +323,7 @@ set ( TEST_FILES
 	MRUListTest.h
 	MagneticFormFactorTableTest.h
 	MagneticIonTest.h
-        MakeUniqueTest.h
+	MakeUniqueTest.h
 	MandatoryValidatorTest.h
 	MaskedPropertyTest.h
 	MaterialTest.h
