@@ -233,11 +233,7 @@ API::ILatticeFunction_sptr
 OptimizeLatticeForCellType::getLatticeFunction(const std::string &cellType,
                                                const UnitCell &cell) const {
   std::ostringstream fun_str;
-  // TODO remove next 3 lines when PointGroup is changed
-  if (cellType == "Rhombohedral")
-    fun_str << "name=LatticeFunction,CrystalSystem=Trigonal";
-  else
-    fun_str << "name=LatticeFunction,CrystalSystem=" << cellType;
+  fun_str << "name=LatticeFunction,LatticeSystem=" << cellType;
 
   API::IFunction_sptr rawFunction =
       API::FunctionFactory::Instance().createInitialized(fun_str.str());

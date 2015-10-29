@@ -546,13 +546,13 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionPawley(
                                 "peaks do not have point group.");
   }
 
-  std::string crystalSystem = getCrystalSystemFromPointGroup(pointGroup);
-  pawleyFunction->setCrystalSystem(crystalSystem);
+  std::string latticeSystem = getLatticeSystemFromPointGroup(pointGroup);
+  pawleyFunction->setLatticeSystem(latticeSystem);
 
   UnitCell cell = peakCollection->unitCell();
   // Extract unit cell from peak collection
   pawleyFunction->setUnitCell(getRefinedStartingCell(
-      unitCellToStr(cell), crystalSystem, peakCollection));
+      unitCellToStr(cell), latticeSystem, peakCollection));
 
   IPeakFunction_sptr pFun = boost::dynamic_pointer_cast<IPeakFunction>(
       FunctionFactory::Instance().createFunction(profileFunctionName));
@@ -575,32 +575,21 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionPawley(
 }
 
 /**
- * Returns the crystal system for the specified point group
+ * Returns the lattice system for the specified point group
  *
- * This function simply uses Geometry::getCrystalSystemAsString(), except when
- * the crystal system is trigonal but the point group uses hexagonal axes. In
- * that case this function returns the string for PointGroup::Hexagonal.
+ * This function simply uses Geometry::getLatticeSystemAsString().
  *
  * @param pointGroup :: The point group for which to find the crystal system
  * @return The crystal system for the point group
  */
-std::string PoldiFitPeaks2D::getCrystalSystemFromPointGroup(
+std::string PoldiFitPeaks2D::getLatticeSystemFromPointGroup(
     const PointGroup_sptr &pointGroup) const {
   if (!pointGroup) {
     throw std::invalid_argument(
-        "Cannot return crystal system for null PointGroup.");
+        "Cannot return lattice system for null PointGroup.");
   }
 
-  PointGroup::CrystalSystem crystalSystem = pointGroup->crystalSystem();
-
-  if (crystalSystem == PointGroup::CrystalSystem::Trigonal) {
-    if (pointGroup->getCoordinateSystem() ==
-        Group::CoordinateSystem::Hexagonal) {
-      return getCrystalSystemAsString(PointGroup::CrystalSystem::Hexagonal);
-    }
-  }
-
-  return getCrystalSystemAsString(crystalSystem);
+  return Geometry::getLatticeSystemAsString(pointGroup->latticeSystem());
 }
 
 /**
@@ -618,7 +607,7 @@ std::string PoldiFitPeaks2D::getCrystalSystemFromPointGroup(
  * @return String for refined unit cell
  */
 std::string PoldiFitPeaks2D::getRefinedStartingCell(
-    const std::string &initialCell, const std::string &crystalSystem,
+    const std::string &initialCell, const std::string &latticeSystem,
     const PoldiPeakCollection_sptr &peakCollection) {
 
   Geometry::UnitCell cell = Geometry::strToUnitCell(initialCell);
@@ -627,7 +616,7 @@ std::string PoldiFitPeaks2D::getRefinedStartingCell(
       boost::dynamic_pointer_cast<ILatticeFunction>(
           FunctionFactory::Instance().createFunction("LatticeFunction"));
 
-  latticeFunction->setCrystalSystem(crystalSystem);
+  latticeFunction->setLatticeSystem(latticeSystem);
   latticeFunction->fix(latticeFunction->parameterIndex("ZeroShift"));
   latticeFunction->setUnitCell(cell);
 
