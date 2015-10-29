@@ -183,7 +183,7 @@ void CreateMD::exec() {
   int counter = 0;
   std::vector<std::string> to_merge_names;
   std::string to_merge_name;
-  Workspace_sptr workspace;
+  MatrixWorkspace_sptr workspace;
   std::stringstream ws_name;
   for (unsigned long entry_number = 0; entry_number < entries; ++entry_number) {
     ws_name.str(std::string());
@@ -200,10 +200,11 @@ void CreateMD::exec() {
       // Create workspace name of form {filename}_md_{n}
       ws_name << filename_noext << "_md_" << counter;
       to_merge_name = ws_name.str();
-      workspace = loadWs(data_sources[entry_number], to_merge_name);
+      workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+          loadWs(data_sources[entry_number], to_merge_name));
     } else {
-      workspace =
-          AnalysisDataService::Instance().retrieve(data_sources[entry_number]);
+      workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+          AnalysisDataService::Instance().retrieve(data_sources[entry_number]));
       ws_name << data_sources[entry_number] << "_md";
       to_merge_name = ws_name.str();
     }
@@ -255,13 +256,19 @@ Mantid::API::Workspace_sptr CreateMD::loadWs(const std::string &filename,
 /*
  * Set the sample log for the workspace
  */
-void CreateMD::addSampleLog(Mantid::API::Workspace_sptr workspace,
+void CreateMD::addSampleLog(Mantid::API::MatrixWorkspace_sptr workspace,
                             const std::string &log_name, double log_number) {
   Algorithm_sptr log_alg = createChildAlgorithm("AddSampleLog");
 
+  std::ostringstream log_number_ss;
+  log_number_ss << std::fixed << std::setprecision(6) << log_number;
+
+  // TODO sort out this after changing AddSampleLog algorithm in issue #14178
   log_alg->setProperty("Workspace", workspace);
   log_alg->setProperty("LogName", log_name);
-  log_alg->setProperty("LogText", boost::lexical_cast<std::string>(log_number));
+  log_alg->setProperty(
+      "LogText",
+      log_number_ss.str()); // boost::lexical_cast<std::string>(log_number)
   log_alg->setProperty("LogType", "Number");
 
   log_alg->executeAsChildAlg();
@@ -270,9 +277,14 @@ void CreateMD::addSampleLog(Mantid::API::Workspace_sptr workspace,
 /*
  * Set the goniometer values for the workspace
  */
-void CreateMD::setGoniometer(Mantid::API::Workspace_sptr workspace) {
+void CreateMD::setGoniometer(Mantid::API::MatrixWorkspace_sptr workspace) {
   Algorithm_sptr log_alg = createChildAlgorithm("SetGoniometer");
-
+  if (!workspace->run().getProperty("gl")) {
+    std::ostringstream temp_ss;
+    temp_ss << "Value of gl in log is: "
+            << workspace->run().getPropertyAsSingleValue("gl");
+    throw std::invalid_argument(temp_ss.str());
+  }
   log_alg->setProperty("Workspace", workspace);
   log_alg->setProperty("Axis0", "gl,0,0,1,1");
   log_alg->setProperty("Axis1", "gs,1,0,0,1");
@@ -284,9 +296,9 @@ void CreateMD::setGoniometer(Mantid::API::Workspace_sptr workspace) {
 /*
  * Set UB for the workspace
  */
-void CreateMD::setUB(Mantid::API::Workspace_sptr workspace, double a, double b,
-                     double c, double alpha, double beta, double gamma,
-                     const std::vector<double> &u,
+void CreateMD::setUB(Mantid::API::MatrixWorkspace_sptr workspace, double a,
+                     double b, double c, double alpha, double beta,
+                     double gamma, const std::vector<double> &u,
                      const std::vector<double> &v) {
   Algorithm_sptr set_ub_alg = createChildAlgorithm("SetUB");
 
@@ -353,7 +365,7 @@ CreateMD::merge_runs(const std::vector<std::string> &to_merge) {
  * Add parameter logs and convert to MD for a single run
  */
 Mantid::API::IMDEventWorkspace_sptr CreateMD::single_run(
-    Mantid::API::Workspace_sptr input_workspace, const std::string &emode,
+    Mantid::API::MatrixWorkspace_sptr input_workspace, const std::string &emode,
     double efix, double psi, double gl, double gs, bool in_place,
     const std::vector<double> &alatt, const std::vector<double> &angdeg,
     const std::vector<double> &u, const std::vector<double> &v,

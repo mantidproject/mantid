@@ -55,12 +55,12 @@ private:
   Mantid::API::Workspace_sptr loadWs(const std::string &filename,
                                      const std::string &wsname);
 
-  void addSampleLog(Mantid::API::Workspace_sptr workspace,
+  void addSampleLog(Mantid::API::MatrixWorkspace_sptr workspace,
                     const std::string &log_name, double log_number);
 
-  void setGoniometer(Mantid::API::Workspace_sptr workspace);
+  void setGoniometer(Mantid::API::MatrixWorkspace_sptr workspace);
 
-  void setUB(Mantid::API::Workspace_sptr workspace, double a, double b,
+  void setUB(Mantid::API::MatrixWorkspace_sptr workspace, double a, double b,
              double c, double alpha, double beta, double gamma,
              const std::vector<double> &u, const std::vector<double> &v);
 
@@ -73,7 +73,7 @@ private:
   merge_runs(const std::vector<std::string> &to_merge);
 
   Mantid::API::IMDEventWorkspace_sptr
-  single_run(Mantid::API::Workspace_sptr input_workspace,
+  single_run(Mantid::API::MatrixWorkspace_sptr input_workspace,
              const std::string &emode, double efix, double psi, double gl,
              double gs, bool in_place, const std::vector<double> &alatt,
              const std::vector<double> &angdeg, const std::vector<double> &u,
