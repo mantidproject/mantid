@@ -1420,7 +1420,7 @@ TMDE(void MDGridBox)::integrateCylinder(
       std::vector<coord_t> coordTable;
       size_t nColumns;
       box->getEventsData(coordTable, nColumns);
-      if (nColumns > 0) {
+      if (nColumns > 0 && nd > 1) {
         size_t nEvents = coordTable.size() / nColumns;
         size_t skipCol = 2; // lean events
         if (nColumns == 7)
