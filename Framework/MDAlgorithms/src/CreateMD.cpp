@@ -1,4 +1,3 @@
-#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidMDAlgorithms/CreateMD.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -20,7 +19,7 @@ using Mantid::API::WorkspaceProperty;
  */
 void padParameterVector(std::vector<double> &param_vector,
                         unsigned long grow_to_size) {
-  if (param_vector.size() == 0) {
+  if (param_vector.empty()) {
     param_vector.resize(grow_to_size, 0.0);
   } else if (param_vector.size() == 1) {
     param_vector.resize(grow_to_size, param_vector[0]);
@@ -94,7 +93,7 @@ void CreateMD::init() {
 
   declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
                       "OutputWorkspace", "", Direction::Output),
-                  "MDHistoWorkspace with new data appended.");
+                  "MDEventWorkspace with new data appended.");
 
   declareProperty(
       new ArrayProperty<std::string>(
@@ -211,7 +210,7 @@ void CreateMD::exec() {
 
     // We cannot process in place until we have an output MDWorkspace to use.
     bool do_in_place = in_place && (counter > 0);
-    Workspace_sptr run_md =
+    IMDEventWorkspace_sptr run_md =
         single_run(workspace, emode, efix[entry_number], psi[entry_number],
                    gl[entry_number], gs[entry_number], do_in_place, alatt,
                    angdeg, u, v, run_md);
@@ -260,12 +259,9 @@ void CreateMD::addSampleLog(Mantid::API::Workspace_sptr workspace,
                             const std::string &log_name, double log_number) {
   Algorithm_sptr log_alg = createChildAlgorithm("AddSampleLog");
 
-  std::stringstream log_num_str;
-  log_num_str << log_number;
-
   log_alg->setProperty("Workspace", workspace);
   log_alg->setProperty("LogName", log_name);
-  log_alg->setProperty("LogText", log_num_str.str());
+  log_alg->setProperty("LogText", boost::lexical_cast<std::string>(log_number));
   log_alg->setProperty("LogType", "Number");
 
   log_alg->executeAsChildAlg();
@@ -309,10 +305,10 @@ void CreateMD::setUB(Mantid::API::Workspace_sptr workspace, double a, double b,
 /*
  * Convert the workspace to an MDWorkspace
  */
-Mantid::API::Workspace_sptr
+Mantid::API::IMDEventWorkspace_sptr
 CreateMD::convertToMD(Mantid::API::Workspace_sptr workspace,
                       const std::string &analysis_mode, bool in_place,
-                      Mantid::API::Workspace_sptr out_mdws) {
+                      Mantid::API::IMDEventWorkspace_sptr out_mdws) {
   Algorithm_sptr min_max_alg = createChildAlgorithm("ConvertToMDMinMaxGlobal");
   min_max_alg->setProperty("InputWorkspace", workspace);
   min_max_alg->setProperty("QDimensions", "Q3D");
@@ -342,7 +338,7 @@ CreateMD::convertToMD(Mantid::API::Workspace_sptr workspace,
 /*
  * Merge input workspaces
  */
-Mantid::API::Workspace_sptr
+Mantid::API::IMDEventWorkspace_sptr
 CreateMD::merge_runs(const std::vector<std::string> &to_merge) {
   Algorithm_sptr merge_alg = createChildAlgorithm("MergeMD");
 
@@ -356,12 +352,12 @@ CreateMD::merge_runs(const std::vector<std::string> &to_merge) {
 /*
  * Add parameter logs and convert to MD for a single run
  */
-Mantid::API::Workspace_sptr CreateMD::single_run(
+Mantid::API::IMDEventWorkspace_sptr CreateMD::single_run(
     Mantid::API::Workspace_sptr input_workspace, const std::string &emode,
     double efix, double psi, double gl, double gs, bool in_place,
     const std::vector<double> &alatt, const std::vector<double> &angdeg,
     const std::vector<double> &u, const std::vector<double> &v,
-    Mantid::API::Workspace_sptr out_mdws) {
+    Mantid::API::IMDEventWorkspace_sptr out_mdws) {
 
   std::vector<std::vector<double>> ub_params;
   ub_params.push_back(alatt);
