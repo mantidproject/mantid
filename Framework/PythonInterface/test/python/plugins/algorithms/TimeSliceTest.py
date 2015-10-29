@@ -16,7 +16,7 @@ class TimeSliceTest(unittest.TestCase):
                   OutputWorkspace='SliceTestOut')
 
         self.assertTrue(mtd.doesExist('SliceTestOut'))
-        self.assertTrue(mtd.doesExist('irs26173_slice'))
+        self.assertTrue(mtd.doesExist('iris26173_slice'))
 
 
     def test_suffix(self):
@@ -31,7 +31,7 @@ class TimeSliceTest(unittest.TestCase):
                   OutputNameSuffix='_graphite002_slice',
                   OutputWorkspace='SliceTestOut')
 
-        self.assertTrue(mtd.doesExist('irs26173_graphite002_slice'))
+        self.assertTrue(mtd.doesExist('iris26173_graphite002_slice'))
 
 
     def test_validation_peak_range_order(self):

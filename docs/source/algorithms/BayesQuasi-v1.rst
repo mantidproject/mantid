@@ -23,9 +23,9 @@ exp[-2\pi(\sigma k)\beta]. This, in the energy to time FT transformation, is \ps
 Usage
 -----
 
-**Example - QLRun**
+**Example - BayesQuasi**
 
-.. testcode:: QLRunExample
+.. testcode:: BayesQuasiExample
 
     # Check OS support for F2Py
     from IndirectImport import is_supported_f2py_platform
@@ -34,8 +34,8 @@ Usage
         sampleWs = Load('irs26176_graphite002_red.nxs')
         resWs = Load('irs26173_graphite002_red.nxs')
 
-        # Run QLRun algorithm
-        fit_ws, result_ws, prob_ws = QLRun(Program='QL', SampleWorkspace=sampleWs, ResolutionWorkspace=resWs,
+        # Run BayesQuasi algorithm
+        fit_ws, result_ws, prob_ws = BayesQuasi(Program='QL', SampleWorkspace=sampleWs, ResolutionWorkspace=resWs,
                                             MinRange=-0.547607, MaxRange=0.543216, SampleBins=1, ResolutionBins=1,
                                             Elastic=False, Background='Sloping', FixedWidth=False, UseResNorm=False,
                                             WidthFile='', Loop=True, Save=False, Plot='None')

@@ -99,9 +99,9 @@ Output:
 
    Number of spectra: 200
    Number of bins: 100
-   Number of events: 800000
+   Number of events: 190000
    Event Workspaces come with bins set by default to a bin width of 200.0
-   Each spectra has a level backgound of 30.0 counts and a peak in the centre of 1030.0 counts.
+   Each spectra has a level backgound of 7.0 counts and a peak in the centre of 257.0 counts.
 
 **Example - Using the preset functions:**
 

@@ -314,6 +314,11 @@ wish to transfer, and click the **Transfer** button. You can also right-click
 on one of the selected runs and select *Transfer* in the context menu that
 appears.
 
+Description Based Search Transfer
+==================================
+
+Description based search transfer uses the descriptions associated with raw files from the experiment.
+
 If a run's description contains the text ``in 0.7 theta``, or ``th=0.7``, or
 ``th:0.7``, then the interface will deduce that the run's angle (also known
 as theta), was ``0.7``, and enter this value into the angle column for you.
@@ -328,6 +333,16 @@ behaviour of this is as follows:
 - Any runs with the same description, including their theta value, will be
   merged into a single row, with all the runs listed in the **Run(s)** column
   in the format, ``123+124+125``.
+
+Measure Based Search Transfer
+==============================
+
+Measure based search transfer uses the log-values within nexus files from the experiment to assemble the batch. Since the files themselves are required, not just the overview metadata, the files must be accessible by mantid. One way of doing this is to mount the archive and set the user property ``icatDownload.mountPoint`` to your mount point. It may end up looking something like this ``icatDownload.mountPoint=/Volumes/inst$``. Alternately, you can download the files to your local disk and simply add that directory to the managed search directories in ``Manage User Directories``.
+
+- Any runs with the measurement_id log, will be
+  placed into the same group.
+- Any runs with the ``same measurement_id`` and the same ``measurement_subid`` logs, will be merged into a single row, with all the runs listed in the **Run(s)** column in the format, ``123+124+125``. 
+
 
 Options
 ~~~~~~~

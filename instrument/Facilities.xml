@@ -14,7 +14,7 @@
     <soapendpoint url="https://icatisis.esc.rl.ac.uk/ICATService/ICAT"></soapendpoint>
     <externaldownload url="https://isisicatds.stfc.ac.uk/idsbeta/"></externaldownload>
     <filelocation>
-      <prefix regex="\\\\isis\\inst\$\\Instruments\$"></prefix>
+      <prefix regex="\\\\isis\\inst\$"></prefix>
       <windows replacement=""></windows>
       <linux replacement="/archive"></linux>
       <mac replacement="/archive"></mac>

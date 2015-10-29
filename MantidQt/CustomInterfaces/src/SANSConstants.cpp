@@ -23,8 +23,8 @@ QString SANSConstants::getPythonSuccessKeyword() {
  * @returns the python keyword for an empty object
  */
 QString SANSConstants::getPythonEmptyKeyword() {
-  const static QString pythonSuccessKeyword = "None";
-  return pythonSuccessKeyword;
+  const static QString pythonEmptyKeyword = "None";
+  return pythonEmptyKeyword;
 }
 
 /**
@@ -32,9 +32,55 @@ QString SANSConstants::getPythonEmptyKeyword() {
  * @returns the python true keyword
  */
 QString SANSConstants::getPythonTrueKeyword() {
-  const static QString pythonSuccessKeyword = "True";
-  return pythonSuccessKeyword;
+  const static QString pythonTrueKeyword = "True";
+  return pythonTrueKeyword;
 }
+
+/**
+ * Defines the python keyword for false , ie False
+ * @returns the python false keyword
+ */
+QString SANSConstants::getPythonFalseKeyword() {
+  const static QString pythonFalseKeyword = "False";
+  return pythonFalseKeyword;
+}
+
+/**
+ * Gets the tooltip for h11 for QResolution
+ * @returns tooltip text for h1
+ */
+QString SANSConstants::getQResolutionH1ToolTipText() {
+  const QString qResolutionH1ToolTipText = "The height of the first aperture in mm.";
+  return qResolutionH1ToolTipText;
+}
+
+/**
+ * Gets the tooltip for h2 for QResolution
+ * @returns tooltip text for h2
+ */
+QString SANSConstants::getQResolutionH2ToolTipText() {
+  const QString qResolutionH2ToolTipText = "The height of the seoncd aperture in mm.";
+  return qResolutionH2ToolTipText;
+}
+
+/**
+ * Gets the tooltip for a1 for QResolution
+ * @returns tooltip text for a1
+ */
+QString SANSConstants::getQResolutionA1ToolTipText() {
+  const QString qResolutionA1ToolTipText = "The diameter for the first aperture";
+  return qResolutionA1ToolTipText;
+}
+
+/**
+ * Gets the tooltip for a2 for QResolution
+ * @returns tooltip text for a2
+ */
+QString SANSConstants::getQResolutionA2ToolTipText() {
+  const QString qResolutionA2ToolTipText = "The diameter for the second aperture";
+  return qResolutionA2ToolTipText;
+}
+
 
 /**
  * Gets the max double value

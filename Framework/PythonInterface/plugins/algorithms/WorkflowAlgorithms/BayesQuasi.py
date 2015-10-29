@@ -13,7 +13,7 @@ if is_supported_f2py_platform():
     QLd     = import_f2py("QLdata")
     Qse     = import_f2py("QLse")
 
-class QLRun(PythonAlgorithm):
+class BayesQuasi(PythonAlgorithm):
 
     _program = None
     _samWS = None
@@ -143,7 +143,7 @@ class QLRun(PythonAlgorithm):
         from IndirectCommon import (CheckXrange, CheckAnalysers, getEfixed, GetThetaQ,
                                     CheckHistZero, CheckHistSame)
 
-        self.log().information('QLRun input')
+        self.log().information('BayesQuasi input')
 
         erange = [self._e_min, self._e_max]
         nbins = [self._sam_bins, self._res_bins]
@@ -358,4 +358,4 @@ class QLRun(PythonAlgorithm):
 
 if is_supported_f2py_platform():
     # Register algorithm with Mantid
-    AlgorithmFactory.subscribe(QLRun)
+    AlgorithmFactory.subscribe(BayesQuasi)

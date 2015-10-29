@@ -565,13 +565,7 @@ def rename_reduction(workspace_name, multiple_files):
     logger.information('Run number for workspace %s is %s' % (workspace_name, run_number))
 
     inst_name = instrument.getName()
-    for facility in config.getFacilities():
-        try:
-            short_inst_name = facility.instrument(inst_name).shortName()
-            break
-        except _:
-            pass
-    logger.information('Short name for instrument %s is %s' % (inst_name, short_inst_name))
+    inst_name = inst_name.lower()
 
     # Get run title
     if is_multi_frame:
@@ -591,12 +585,12 @@ def rename_reduction(workspace_name, multiple_files):
     elif convention == 'RunTitle':
         valid = "-_.() %s%s" % (string.ascii_letters, string.digits)
         formatted_title = ''.join([c for c in run_title if c in valid])
-        new_name = '%s%s%s-%s' % (short_inst_name.lower(), run_number, multi_run_marker, formatted_title)
+        new_name = '%s%s%s-%s' % (inst_name.lower(), run_number, multi_run_marker, formatted_title)
 
     elif convention == 'AnalyserReflection':
         analyser = instrument.getStringParameter('analyser')[0]
         reflection = instrument.getStringParameter('reflection')[0]
-        new_name = '%s%s%s_%s%s_red' % (short_inst_name.upper(), run_number, multi_run_marker,
+        new_name = '%s%s%s_%s%s_red' % (inst_name.lower(), run_number, multi_run_marker,
                                         analyser, reflection)
 
     else:

@@ -42,16 +42,16 @@ Usage
 
 Input:
 
-.. figure:: /images/RebbinedWorkspaceNoCompactMDApplied.jpg
-   :alt: RebbinedWorkspaceNoCompactMDApplied.jpg
+.. figure:: /images/RebinnedWorkspaceNoCompactMDApplied.png
+   :alt: RebinnedWorkspaceNoCompactMDApplied.png
    :width: 400px
    :align: center
 
    
 Output:
 
-.. figure:: /images/RebbinedWorkspaceWithCompactMDApplied.jpg
-   :alt: RebbinedWorkspaceWithCompactMDApplied.jpg
+.. figure:: /images/RebinnedWorkspaceWithCompactMDApplied.png
+   :alt: RebinnedWorkspaceWithCompactMDApplied.png
    :width: 400px
    :align: center
 
