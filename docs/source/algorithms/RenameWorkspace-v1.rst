@@ -72,17 +72,17 @@ Output:
     As myWs is just a refence to the workspace it now refers to the workspace with the new name
     myWs name: newNameWs
     Does 'myWs' exist in Mantid? False
-	Does 'mon_ws' exist in Mantid True
-	***************************************************
-	Renaming workspace and monitors workspace together:
-	**** Renamed workspaces exist in mtd:
-	Does 'newName1Ws' exist in Mantid? True
-	Does 'newName1Ws_monitors' exist in Mantid? True
-	**** old workspaces have disappeared
-	Does 'newNameWs' exist in Mantid? False
-	Does 'mon_ws' exist in Mantid? False
-	The name of the monitor workspace attached to workspace: newName1Ws 
-	Is:  newName1Ws_monitors
+    Does 'mon_ws' exist in Mantid True
+    ***************************************************
+    Renaming workspace and monitors workspace together:
+    **** Renamed workspaces exist in mtd:
+    Does 'newName1Ws' exist in Mantid? True
+    Does 'newName1Ws_monitors' exist in Mantid? True
+    **** old workspaces have disappeared
+    Does 'newNameWs' exist in Mantid? False
+    Does 'mon_ws' exist in Mantid? False
+    The name of the monitor workspace attached to workspace: newName1Ws 
+    Is:  newName1Ws_monitors
 
 .. categories::
 
