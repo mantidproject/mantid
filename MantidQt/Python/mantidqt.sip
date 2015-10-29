@@ -1448,3 +1448,60 @@ public:
 
 }; // end namespace MantidWidgets
 }; // end namespace MantidQt
+
+
+
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
+
+namespace MantidQt
+{
+namespace API
+{
+
+class WidgetScrollbarDecorator
+{
+%TypeHeaderCode
+#include "MantidQtAPI/WidgetScrollbarDecorator.h"
+%End
+%Docstring
+
+WidgetScrollbarDecorator
+=================
+
+    Adds scrollbar functionality to a QWidget
+
+    Mainly intended to make QDialogs and QMainWindows scrollable since this
+    feature is missing in Qt. This allows particularly large dialogs to be
+    used on laptops and other devices with small screens.
+
+%End
+
+public:
+    explicit WidgetScrollbarDecorator(QWidget *target);
+    %Docstring
+    WidgetScrollbarDecorator::WidgetScrollbarDecorator(QWidget *target)
+    ------------------------------
+        Constructor. Decorates the target widget to add scrollbars to it.
+
+    %End
+
+    virtual ~WidgetScrollbarDecorator();
+
+    bool enabled() const;
+    void setEnabled(bool enable);
+    %Docstring
+    WidgetScrollbarDecorator::setEnabled(bool enable)
+    ------------------------------
+        Enables or disables scrollbars on the target widget.
+
+        Note: setupUi() MUST be called before scrollbars are enabled.
+
+    %End
+};
+
+}; // end namespace API
+}; // end namespace MantidQt
+
+
