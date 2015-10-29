@@ -1485,6 +1485,9 @@ public:
     ------------------------------
         Constructor. Decorates the target widget to add scrollbars to it.
 
+        Scrollbars are disabled by default and must be enabled using:
+        setEnabled(True)
+
     %End
 
     virtual ~WidgetScrollbarDecorator();
@@ -1499,6 +1502,31 @@ public:
         Note: setupUi() MUST be called before scrollbars are enabled.
 
     %End
+
+    void setThresholdWidth(int width);
+    %Docstring
+    setThresholdWidth(int width)
+    ------------------------------
+        Set the width, in pixels, at which scrollbars should appear
+
+    %End
+
+    void setThresholdHeight(int height);
+    %Docstring
+    setThresholdHeight(int height)
+    ------------------------------
+        Set the height, in pixels, at which scrollbars should appear
+
+    %End
+
+    void setThresholdSize(int width, int height);
+    %Docstring
+    setThresholdSize(int width, int height)
+    ------------------------------
+        Set the size, in pixels, at which scrollbars should appear
+
+    %End
+
 };
 
 }; // end namespace API
