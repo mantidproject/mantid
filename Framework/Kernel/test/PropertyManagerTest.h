@@ -11,8 +11,7 @@
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 
 #include <boost/scoped_ptr.hpp>
-#include <jsoncpp/json/value.h>
-#include <jsoncpp/json/reader.h>
+#include <json/json.h>
 
 using namespace Mantid::Kernel;
 
