@@ -54,10 +54,20 @@ void export_PointGroup() {
       .value("Trigonal", PointGroup::CrystalSystem::Trigonal)
       .value("Cubic", PointGroup::CrystalSystem::Cubic);
 
+  enum_<PointGroup::LatticeSystem>("LatticeSystem")
+      .value("Triclinic", PointGroup::LatticeSystem::Triclinic)
+      .value("Monoclinic", PointGroup::LatticeSystem::Monoclinic)
+      .value("Orthorhombic", PointGroup::LatticeSystem::Orthorhombic)
+      .value("Tetragonal", PointGroup::LatticeSystem::Tetragonal)
+      .value("Hexagonal", PointGroup::LatticeSystem::Hexagonal)
+      .value("Rhombohedral", PointGroup::LatticeSystem::Rhombohedral)
+      .value("Cubic", PointGroup::LatticeSystem::Cubic);
+
   class_<PointGroup, boost::noncopyable, bases<Group>>("PointGroup", no_init)
       .def("getName", &PointGroup::getName, arg("self"))
       .def("getHMSymbol", &PointGroup::getSymbol, arg("self"))
       .def("getCrystalSystem", &PointGroup::crystalSystem, arg("self"))
+      .def("getLatticeSystem", &PointGroup::latticeSystem, arg("self"))
       .def("isEquivalent", &isEquivalent,
            (arg("self"), arg("hkl1"), arg("hkl2")),
            "Check whether the two HKLs are symmetrically equivalent.")
