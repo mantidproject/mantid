@@ -177,7 +177,9 @@ void MultipleScatteringCylinderAbsorption::exec() {
     out_WSevent->switchEventType(API::WEIGHTED_NOTIME);
 
     // now do the correction
+    PARALLEL_FOR1(out_WSevent)
     for (size_t index = 0; index < NUM_HIST; ++index) {
+      PARALLEL_START_INTERUPT_REGION
       IDetector_const_sptr det = out_WSevent->getDetector(index);
       if (det == NULL)
         throw std::runtime_error("Failed to find detector");
@@ -200,7 +202,9 @@ void MultipleScatteringCylinderAbsorption::exec() {
         events[i] = WeightedEventNoTime(tof_vec[i], y_vec[i], err_vec[i]);
       }
       prog.report();
+      PARALLEL_END_INTERUPT_REGION
     }
+    PARALLEL_CHECK_INTERUPT_REGION
 
     // set the output workspace
     this->setProperty(
