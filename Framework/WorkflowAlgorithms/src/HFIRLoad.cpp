@@ -36,11 +36,15 @@ void HFIRLoad::init() {
   declareProperty("BeamCenterY", EMPTY_DBL(),
                   "Beam position in Y pixel coordinates");
   declareProperty(
-      "SampleDetectorDistance", EMPTY_DBL(),
-      "Sample to detector distance to use (overrides meta data), in mm");
-  declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(),
-                  "Offset to the sample to detector distance (use only when "
-                  "using the distance found in the meta data), in mm");
+		  "SampleDetectorDistance", EMPTY_DBL(),
+          "Sample to detector distance to use (overrides meta data), in mm");
+  declareProperty(
+          "SampleSiWindowDistance", EMPTY_DBL(),
+          "Sample to Silicon window distance to use (overrides meta data), in mm");
+  declareProperty(
+		  "SampleDetectorDistanceOffset", EMPTY_DBL(),
+          "Offset to the sample to detector distance (use only when "
+          "using the distance found in the meta data), in mm");
 
   // Optionally, we can specify the wavelength and wavelength spread and
   // overwrite
@@ -163,9 +167,12 @@ void HFIRLoad::exec() {
   // Get the sample-detector distance
   double sdd = 0.0;
   const double sample_det_dist = getProperty("SampleDetectorDistance");
+
   if (!isEmpty(sample_det_dist)) {
+	// if SampleDetectorDistance is given as input property
     sdd = sample_det_dist;
   } else {
+	// if SampleDetectorDistance comes from the file parsed (i.e. in the run.properties)
     const std::string sddName = "sample-detector-distance";
     Mantid::Kernel::Property *prop = dataWS->run().getProperty(sddName);
     Mantid::Kernel::PropertyWithValue<double> *dp =
@@ -177,11 +184,17 @@ void HFIRLoad::exec() {
     sdd = *dp;
 
     // Modify SDD according to offset if given
-    const double sample_det_offset =
-        getProperty("SampleDetectorDistanceOffset");
+    const double sample_det_offset = getProperty("SampleDetectorDistanceOffset");
     if (!isEmpty(sample_det_offset)) {
       sdd += sample_det_offset;
     }
+
+    // Modify SDD according to distance to the silicon window if given
+    const double sample_si_window_distance = getProperty("SampleSiWindowDistance");
+    if (!isEmpty(sample_si_window_distance)) {
+      sdd += sample_si_window_distance;
+    }
+
   }
   dataWS->mutableRun().addProperty("sample_detector_distance", sdd, "mm", true);
 
