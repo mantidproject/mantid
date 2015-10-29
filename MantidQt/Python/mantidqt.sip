@@ -1476,6 +1476,13 @@ WidgetScrollbarDecorator
     feature is missing in Qt. This allows particularly large dialogs to be
     used on laptops and other devices with small screens.
 
+    Usage:
+        from mantidqtpython import MantidQt
+
+        # Usually in __init__ or other setup function
+        self._scrollbars = MantidQt.API.WidgetScrollbarDecorator(self)
+        self._scrollbars.setEnabled(True) # Must come after setupUi(self)!
+
 %End
 
 public:
