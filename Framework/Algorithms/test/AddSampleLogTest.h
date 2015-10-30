@@ -105,11 +105,11 @@ public:
   }
 
   template <typename T>
-  void ExecuteAlgorithm(MatrixWorkspace_sptr testWS, std::string LogName,
-                        std::string LogType, std::string LogText,
-                        T expectedValue, bool fails = false,
-                        std::string LogUnit = "", std::string NumberType = "",
-                        bool throws = false) {
+  void
+  ExecuteAlgorithm(MatrixWorkspace_sptr testWS, std::string LogName,
+                   std::string LogType, std::string LogText, T expectedValue,
+                   bool fails = false, std::string LogUnit = "",
+                   std::string NumberType = "AutoDetect", bool throws = false) {
     // add the workspace to the ADS
     AnalysisDataService::Instance().addOrReplace("AddSampleLogTest_Temporary",
                                                  testWS);

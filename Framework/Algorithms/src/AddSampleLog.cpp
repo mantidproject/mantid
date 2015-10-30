@@ -10,6 +10,17 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include <string>
 
+namespace {
+
+static const std::string intTypeOption = "Int";
+static const std::string doubleTypeOption = "Double";
+static const std::string autoTypeOption = "AutoDetect";
+
+static const std::string stringLogOption = "String";
+static const std::string numberLogOption = "Number";
+static const std::string numberSeriesLogOption = "Number Series";
+}
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -30,19 +41,19 @@ void AddSampleLog::init() {
   declareProperty("LogText", "", "The content of the log");
 
   std::vector<std::string> propOptions;
-  propOptions.push_back("String");
-  propOptions.push_back("Number");
-  propOptions.push_back("Number Series");
-  declareProperty("LogType", "String",
+  propOptions.push_back(stringLogOption);
+  propOptions.push_back(numberLogOption);
+  propOptions.push_back(numberSeriesLogOption);
+  declareProperty("LogType", stringLogOption,
                   boost::make_shared<StringListValidator>(propOptions),
                   "The type that the log data will be.");
   declareProperty("LogUnit", "", "The units of the log");
 
   std::vector<std::string> typeOptions;
-  typeOptions.push_back("Int");
-  typeOptions.push_back("Double");
-  typeOptions.push_back("");
-  declareProperty("NumberType", "",
+  typeOptions.push_back(intTypeOption);
+  typeOptions.push_back(doubleTypeOption);
+  typeOptions.push_back(autoTypeOption);
+  declareProperty("NumberType", autoTypeOption,
                   boost::make_shared<StringListValidator>(typeOptions),
                   "Force LogText to be interpreted as a number of type 'int' "
                   "or 'double'.");
@@ -62,10 +73,11 @@ void AddSampleLog::exec() {
   std::string propType = getPropertyValue("LogType");
   std::string propNumberType = getPropertyValue("NumberType");
 
-  if (!propNumberType.empty() &&
-      ((propType != "Number") && (propType != "Number Series"))) {
-    throw std::invalid_argument("You may only use NumberType property if "
-                                "LogType is 'Number' or 'Number Series'");
+  if ((propNumberType != autoTypeOption) &&
+      ((propType != numberLogOption) && (propType != numberSeriesLogOption))) {
+    throw std::invalid_argument(
+        "You may only use NumberType 'Int' or 'Double' options if "
+        "LogType is 'Number' or 'Number Series'");
   }
 
   // Remove any existing log
@@ -73,7 +85,7 @@ void AddSampleLog::exec() {
     theRun.removeLogData(propName);
   }
 
-  if (propType == "String") {
+  if (propType == stringLogOption) {
     theRun.addLogData(new PropertyWithValue<std::string>(propName, propValue));
     theRun.getProperty(propName)->setUnits(propUnit);
     return;
@@ -83,8 +95,8 @@ void AddSampleLog::exec() {
   double dblVal;
   bool value_is_int = false;
 
-  if (!propNumberType.empty()) {
-    value_is_int = (propNumberType == "Int");
+  if (propNumberType != autoTypeOption) {
+    value_is_int = (propNumberType == intTypeOption);
     if (value_is_int) {
       if (!Strings::convert(propValue, intVal)) {
         throw std::invalid_argument("Error interpreting string '" + propValue +
@@ -103,12 +115,12 @@ void AddSampleLog::exec() {
     }
   }
 
-  if (propType == "Number") {
+  if (propType == numberLogOption) {
     if (value_is_int)
       theRun.addLogData(new PropertyWithValue<int>(propName, intVal));
     else
       theRun.addLogData(new PropertyWithValue<double>(propName, dblVal));
-  } else if (propType == "Number Series") {
+  } else if (propType == numberSeriesLogOption) {
     Kernel::DateAndTime startTime;
     try {
       startTime = theRun.startTime();
