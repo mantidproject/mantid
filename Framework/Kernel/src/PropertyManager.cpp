@@ -239,6 +239,22 @@ void PropertyManager::setProperties(
 void PropertyManager::setProperties(
     const ::Json::Value &jsonValue,
     const std::set<std::string> &ignoreProperties) {
+  setProperties(jsonValue,this,ignoreProperties);
+}
+
+//-----------------------------------------------------------------------------------------------
+/** Set the ordered list of properties by a json value collection
+ *
+ *  @param jsonValue :: The jsonValue of property values
+ *  @param ignoreProperties :: A set of names of any properties NOT to set
+ *      from the propertiesArray
+ *  @param targetPropertyManager :: the propertymanager to make the changes to,
+ *      most of the time this will be *this
+ */
+void PropertyManager::setProperties(
+    const ::Json::Value &jsonValue,
+    IPropertyManager* targetPropertyManager,
+    const std::set<std::string> &ignoreProperties) {
   if (jsonValue.type() == ::Json::ValueType::objectValue) {
 
     // Some algorithms require Filename to be set first do that here
@@ -247,7 +263,7 @@ void PropertyManager::setProperties(
     if (!filenameValue.isNull()) {
       const std::string value = jsonValue[propFilename].asString();
       // Set it
-      setPropertyValue(propFilename, value);
+      targetPropertyManager->setPropertyValue(propFilename, value);
     }
 
     for (::Json::ArrayIndex i = 0; i < jsonValue.size(); i++) {
@@ -257,7 +273,7 @@ void PropertyManager::setProperties(
         ::Json::Value propValue = jsonValue[propName];
         const std::string value = propValue.asString();
         // Set it
-        setPropertyValue(propName, value);
+        targetPropertyManager->setPropertyValue(propName, value);
       }
     }
   }

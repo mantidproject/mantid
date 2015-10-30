@@ -54,7 +54,7 @@ void PropertyManagerOwner::declareProperty(Property *p,
 void PropertyManagerOwner::setProperties(
     const std::string &propertiesJson,
     const std::set<std::string> &ignoreProperties) {
-  m_properties->setProperties(propertiesJson, ignoreProperties);
+  m_properties->setProperties(propertiesJson, this, ignoreProperties);
 }
 
 /** Sets all the declared properties from a json object
@@ -65,7 +65,7 @@ void PropertyManagerOwner::setProperties(
 void PropertyManagerOwner::setProperties(
     const ::Json::Value &jsonValue,
     const std::set<std::string> &ignoreProperties) {
-  m_properties->setProperties(jsonValue, ignoreProperties);
+  m_properties->setProperties(jsonValue, this, ignoreProperties);
 }
 
 /** Sets all the declared properties from a string.
