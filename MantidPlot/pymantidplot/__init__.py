@@ -320,8 +320,8 @@ def plotMD(source, plot_axis=-2, normalization=DEFAULT_MD_NORMALIZATION, error_b
         source: Workspace(s) to plot
         plot_axis: Index of the plot axis (defaults to auto-select)
         normalization: Type of normalization required (defaults to volume, options available:
-                       MDNormalization.NoNormalization, MDNormalization.NumEventsNormalization, and
-                       MDNormalization.VolumeNormalization).
+        MDNormalization.NoNormalization, MDNormalization.NumEventsNormalization, and
+        MDNormalization.VolumeNormalization).
         error_bars: Flag for error bar plotting.
         window: window used for plotting. If None a new one will be created
         clearWindow: if is True, the window specified will be cleared before adding new curve
