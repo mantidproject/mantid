@@ -375,6 +375,7 @@ int NexusFileIO::writeNexusProcessedData2D(
                 start, asize);
       start[0]++;
     }
+
     if (m_progress != 0)
       m_progress->reportIncrement(1, "Writing data");
 
@@ -398,6 +399,25 @@ int NexusFileIO::writeNexusProcessedData2D(
         m_progress->reportIncrement(1, "Writing data");
     }
 
+    // Potentially x error
+    if (localworkspace->hasDx(0)) {
+      dims_array[0] = static_cast<int>(nSpect);
+      dims_array[1] = static_cast<int>(localworkspace->readX(0).size());
+      std::string dxErrorName = "xerrors";
+      NXcompmakedata(fileID, dxErrorName.c_str(), NX_FLOAT64, 2, dims_array,
+                     m_nexuscompression, asize);
+      NXopendata(fileID, dxErrorName.c_str());
+      start[0] = 0;
+      asize[1] = dims_array[1];
+      for (size_t i = 0; i < nSpect; i++) {
+        int s = spec[i];
+        NXputslab(fileID, reinterpret_cast<void *>(const_cast<double *>(
+                              &(localworkspace->readDx(s)[0]))),
+                  start, asize);
+        start[0]++;
+      }
+    }
+
     NXclosedata(fileID);
   }
 
@@ -408,6 +428,7 @@ int NexusFileIO::writeNexusProcessedData2D(
     NXopendata(fileID, "axis1");
     NXputdata(fileID, reinterpret_cast<void *>(const_cast<double *>(
                           &(localworkspace->readX(0)[0]))));
+
   } else {
     dims_array[0] = static_cast<int>(nSpect);
     dims_array[1] = static_cast<int>(localworkspace->readX(0).size());
@@ -422,6 +443,7 @@ int NexusFileIO::writeNexusProcessedData2D(
       start[0]++;
     }
   }
+
   std::string dist = (localworkspace->isDistribution()) ? "1" : "0";
   NXputattr(fileID, "distribution",
             reinterpret_cast<void *>(const_cast<char *>(dist.c_str())), 2,

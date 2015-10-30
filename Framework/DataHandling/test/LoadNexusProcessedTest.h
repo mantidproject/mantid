@@ -1010,106 +1010,16 @@ public:
     }
   }
 
-  void test_SaveAndLoadOnHistogramWS() {
-    // Test SaveNexusProcessed/LoadNexusProcessed on a histogram workspace
+  void test_SaveAndLoadOnHistogramWS() { doTestLoadAndSaveHistogramWS(false); }
 
-    // Create histogram workspace with two spectra and 4 points
-    std::vector<double> x1 = boost::assign::list_of(1)(2)(3);
-    std::vector<double> y1 = boost::assign::list_of(1)(2);
-    std::vector<double> x2 = boost::assign::list_of(1)(2)(3);
-    std::vector<double> y2 = boost::assign::list_of(1)(2);
-    MatrixWorkspace_sptr inputWs = WorkspaceFactory::Instance().create(
-        "Workspace2D", 2, x1.size(), y1.size());
-    inputWs->dataX(0) = x1;
-    inputWs->dataX(1) = x2;
-    inputWs->dataY(0) = y1;
-    inputWs->dataY(1) = y2;
-
-    // Save workspace
-    IAlgorithm_sptr save =
-        AlgorithmManager::Instance().create("SaveNexusProcessed");
-    save->initialize();
-    TS_ASSERT(save->isInitialized());
-    TS_ASSERT_THROWS_NOTHING(save->setProperty("InputWorkspace", inputWs));
-    TS_ASSERT_THROWS_NOTHING(save->setPropertyValue(
-        "Filename", "TestSaveAndLoadNexusProcessed.nxs"));
-    TS_ASSERT_THROWS_NOTHING(save->execute());
-
-    // Load workspace
-    IAlgorithm_sptr load =
-        AlgorithmManager::Instance().create("LoadNexusProcessed");
-    load->initialize();
-    TS_ASSERT(load->isInitialized());
-    TS_ASSERT_THROWS_NOTHING(load->setPropertyValue(
-        "Filename", "TestSaveAndLoadNexusProcessed.nxs"));
-    TS_ASSERT_THROWS_NOTHING(
-        load->setPropertyValue("OutputWorkspace", "output"));
-    TS_ASSERT_THROWS_NOTHING(load->execute());
-
-    // Check spectra in loaded workspace
-    MatrixWorkspace_sptr outputWs =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output");
-    TS_ASSERT_EQUALS(inputWs->readX(0), outputWs->readX(0));
-    TS_ASSERT_EQUALS(inputWs->readX(1), outputWs->readX(1));
-    TS_ASSERT_EQUALS(inputWs->readY(0), outputWs->readY(0));
-    TS_ASSERT_EQUALS(inputWs->readY(1), outputWs->readY(1));
-    TS_ASSERT_EQUALS(inputWs->readE(0), outputWs->readE(0));
-    TS_ASSERT_EQUALS(inputWs->readE(1), outputWs->readE(1));
-
-    // Remove workspace and saved nexus file
-    AnalysisDataService::Instance().remove("output");
-    Poco::File("TestSaveAndLoadNexusProcessed.nxs").remove();
+  void test_SaveAndLoadOnHistogramWSwithXErrors() {
+    doTestLoadAndSaveHistogramWS(true);
   }
 
-  void test_SaveAndLoadOnPointLikeWS() {
-    // Test SaveNexusProcessed/LoadNexusProcessed on a point-like workspace
+  void test_SaveAndLoadOnPointLikeWS() { doTestLoadAndSavePointWS(false); }
 
-    // Create histogram workspace with two spectra and 4 points
-    std::vector<double> x1 = boost::assign::list_of(1)(2)(3);
-    std::vector<double> y1 = boost::assign::list_of(1)(2)(3);
-    std::vector<double> x2 = boost::assign::list_of(10)(20)(30);
-    std::vector<double> y2 = boost::assign::list_of(10)(20)(30);
-    MatrixWorkspace_sptr inputWs = WorkspaceFactory::Instance().create(
-        "Workspace2D", 2, x1.size(), y1.size());
-    inputWs->dataX(0) = x1;
-    inputWs->dataX(1) = x2;
-    inputWs->dataY(0) = y1;
-    inputWs->dataY(1) = y2;
-
-    // Save workspace
-    IAlgorithm_sptr save =
-        AlgorithmManager::Instance().create("SaveNexusProcessed");
-    save->initialize();
-    TS_ASSERT(save->isInitialized());
-    TS_ASSERT_THROWS_NOTHING(save->setProperty("InputWorkspace", inputWs));
-    TS_ASSERT_THROWS_NOTHING(save->setPropertyValue(
-        "Filename", "TestSaveAndLoadNexusProcessed.nxs"));
-    TS_ASSERT_THROWS_NOTHING(save->execute());
-
-    // Load workspace
-    IAlgorithm_sptr load =
-        AlgorithmManager::Instance().create("LoadNexusProcessed");
-    load->initialize();
-    TS_ASSERT(load->isInitialized());
-    TS_ASSERT_THROWS_NOTHING(load->setPropertyValue(
-        "Filename", "TestSaveAndLoadNexusProcessed.nxs"));
-    TS_ASSERT_THROWS_NOTHING(
-        load->setPropertyValue("OutputWorkspace", "output"));
-    TS_ASSERT_THROWS_NOTHING(load->execute());
-
-    // Check spectra in loaded workspace
-    MatrixWorkspace_sptr outputWs =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output");
-    TS_ASSERT_EQUALS(inputWs->readX(0), outputWs->readX(0));
-    TS_ASSERT_EQUALS(inputWs->readX(1), outputWs->readX(1));
-    TS_ASSERT_EQUALS(inputWs->readY(0), outputWs->readY(0));
-    TS_ASSERT_EQUALS(inputWs->readY(1), outputWs->readY(1));
-    TS_ASSERT_EQUALS(inputWs->readE(0), outputWs->readE(0));
-    TS_ASSERT_EQUALS(inputWs->readE(1), outputWs->readE(1));
-
-    // Remove workspace and saved nexus file
-    AnalysisDataService::Instance().remove("output");
-    Poco::File("TestSaveAndLoadNexusProcessed.nxs").remove();
+  void test_SaveAndLoadOnPointLikeWSWithXErrors() {
+    doTestLoadAndSavePointWS(true);
   }
 
   void do_load_multiperiod_workspace(bool fast) {
@@ -1258,6 +1168,131 @@ private:
     if (!m_savedTmpEventFile.empty() &&
         Poco::File(m_savedTmpEventFile).exists())
       Poco::File(m_savedTmpEventFile).remove();
+  }
+
+  void doTestLoadAndSaveHistogramWS(bool useXErrors = false) {
+    // Test SaveNexusProcessed/LoadNexusProcessed on a histogram workspace with
+    // x errors
+
+    // Create histogram workspace with two spectra and 4 points
+    std::vector<double> x1 = boost::assign::list_of(1)(2)(3);
+    std::vector<double> dx1 = boost::assign::list_of(3)(2)(1);
+    std::vector<double> y1 = boost::assign::list_of(1)(2);
+    std::vector<double> x2 = boost::assign::list_of(1)(2)(3);
+    std::vector<double> dx2 = boost::assign::list_of(3)(2)(1);
+    std::vector<double> y2 = boost::assign::list_of(1)(2);
+    MatrixWorkspace_sptr inputWs = WorkspaceFactory::Instance().create(
+        "Workspace2D", 2, x1.size(), y1.size());
+    inputWs->dataX(0) = x1;
+    inputWs->dataX(1) = x2;
+    inputWs->dataY(0) = y1;
+    inputWs->dataY(1) = y2;
+    if (useXErrors) {
+      inputWs->dataDx(0) = dx1;
+      inputWs->dataDx(1) = dx2;
+    }
+
+    // Save workspace
+    IAlgorithm_sptr save =
+        AlgorithmManager::Instance().create("SaveNexusProcessed");
+    save->initialize();
+    TS_ASSERT(save->isInitialized());
+    TS_ASSERT_THROWS_NOTHING(save->setProperty("InputWorkspace", inputWs));
+    TS_ASSERT_THROWS_NOTHING(save->setPropertyValue(
+        "Filename", "TestSaveAndLoadNexusProcessed.nxs"));
+    TS_ASSERT_THROWS_NOTHING(save->execute());
+
+    // Load workspace
+    IAlgorithm_sptr load =
+        AlgorithmManager::Instance().create("LoadNexusProcessed");
+    load->initialize();
+    TS_ASSERT(load->isInitialized());
+    TS_ASSERT_THROWS_NOTHING(load->setPropertyValue(
+        "Filename", "TestSaveAndLoadNexusProcessed.nxs"));
+    TS_ASSERT_THROWS_NOTHING(
+        load->setPropertyValue("OutputWorkspace", "output"));
+    TS_ASSERT_THROWS_NOTHING(load->execute());
+
+    // Check spectra in loaded workspace
+    MatrixWorkspace_sptr outputWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output");
+    TS_ASSERT_EQUALS(inputWs->readX(0), outputWs->readX(0));
+    TS_ASSERT_EQUALS(inputWs->readX(1), outputWs->readX(1));
+    TS_ASSERT_EQUALS(inputWs->readY(0), outputWs->readY(0));
+    TS_ASSERT_EQUALS(inputWs->readY(1), outputWs->readY(1));
+    TS_ASSERT_EQUALS(inputWs->readE(0), outputWs->readE(0));
+    TS_ASSERT_EQUALS(inputWs->readE(1), outputWs->readE(1));
+    if (useXErrors) {
+      TSM_ASSERT("Should have an x error", outputWs->hasDx(0));
+      TS_ASSERT_EQUALS(inputWs->readDx(0), outputWs->readDx(0));
+      TS_ASSERT_EQUALS(inputWs->readDx(1), outputWs->readDx(1));
+    }
+
+    // Remove workspace and saved nexus file
+    AnalysisDataService::Instance().remove("output");
+    Poco::File("TestSaveAndLoadNexusProcessed.nxs").remove();
+  }
+
+  void doTestLoadAndSavePointWS(bool useXErrors = false) {
+    // Test SaveNexusProcessed/LoadNexusProcessed on a point-like workspace
+
+    // Create histogram workspace with two spectra and 4 points
+    std::vector<double> x1 = boost::assign::list_of(1)(2)(3);
+    std::vector<double> dx1 = boost::assign::list_of(3)(2)(1);
+    std::vector<double> y1 = boost::assign::list_of(1)(2)(3);
+    std::vector<double> x2 = boost::assign::list_of(10)(20)(30);
+    std::vector<double> dx2 = boost::assign::list_of(30)(22)(10);
+    std::vector<double> y2 = boost::assign::list_of(10)(20)(30);
+    MatrixWorkspace_sptr inputWs = WorkspaceFactory::Instance().create(
+        "Workspace2D", 2, x1.size(), y1.size());
+    inputWs->dataX(0) = x1;
+    inputWs->dataX(1) = x2;
+    inputWs->dataY(0) = y1;
+    inputWs->dataY(1) = y2;
+    if (useXErrors) {
+      inputWs->dataDx(0) = dx1;
+      inputWs->dataDx(1) = dx2;
+    }
+
+    // Save workspace
+    IAlgorithm_sptr save =
+        AlgorithmManager::Instance().create("SaveNexusProcessed");
+    save->initialize();
+    TS_ASSERT(save->isInitialized());
+    TS_ASSERT_THROWS_NOTHING(save->setProperty("InputWorkspace", inputWs));
+    TS_ASSERT_THROWS_NOTHING(save->setPropertyValue(
+        "Filename", "TestSaveAndLoadNexusProcessed.nxs"));
+    TS_ASSERT_THROWS_NOTHING(save->execute());
+
+    // Load workspace
+    IAlgorithm_sptr load =
+        AlgorithmManager::Instance().create("LoadNexusProcessed");
+    load->initialize();
+    TS_ASSERT(load->isInitialized());
+    TS_ASSERT_THROWS_NOTHING(load->setPropertyValue(
+        "Filename", "TestSaveAndLoadNexusProcessed.nxs"));
+    TS_ASSERT_THROWS_NOTHING(
+        load->setPropertyValue("OutputWorkspace", "output"));
+    TS_ASSERT_THROWS_NOTHING(load->execute());
+
+    // Check spectra in loaded workspace
+    MatrixWorkspace_sptr outputWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output");
+    TS_ASSERT_EQUALS(inputWs->readX(0), outputWs->readX(0));
+    TS_ASSERT_EQUALS(inputWs->readX(1), outputWs->readX(1));
+    TS_ASSERT_EQUALS(inputWs->readY(0), outputWs->readY(0));
+    TS_ASSERT_EQUALS(inputWs->readY(1), outputWs->readY(1));
+    TS_ASSERT_EQUALS(inputWs->readE(0), outputWs->readE(0));
+    TS_ASSERT_EQUALS(inputWs->readE(1), outputWs->readE(1));
+    if (useXErrors) {
+      TSM_ASSERT("Should have an x error", outputWs->hasDx(0));
+      TS_ASSERT_EQUALS(inputWs->readDx(0), outputWs->readDx(0));
+      TS_ASSERT_EQUALS(inputWs->readDx(1), outputWs->readDx(1));
+    }
+
+    // Remove workspace and saved nexus file
+    AnalysisDataService::Instance().remove("output");
+    Poco::File("TestSaveAndLoadNexusProcessed.nxs").remove();
   }
 
   std::string testFile, output_ws;
