@@ -90,6 +90,7 @@ void EnggDiffractionViewQtGUI::initLayout() {
   doSetupGeneralWidgets();
   doSetupTabCalib();
   doSetupTabFocus();
+  doSetupTabPreproc();
   doSetupTabSettings();
 
   // presenter that knows how to handle a IEnggDiffractionView should take care
@@ -263,6 +264,20 @@ void EnggDiffractionViewQtGUI::readSettings() {
 
   m_uiTabFocus.comboBox_PlotData->setCurrentIndex(0);
 
+  // pre-processing (re-binning)
+  m_uiTabPreproc.MWRunFiles_preproc_run_num->setUserInput(
+      qs.value("user-params-preproc-runno", "").toString());
+
+  m_uiTabPreproc.doubleSpinBox_time_bin->setValue(
+      qs.value("user-params-time-bin", 0.1).toDouble());
+
+  m_uiTabPreproc.spinBox_nperiods->setValue(
+      qs.value("user-params-nperiods", 2).toInt());
+
+  m_uiTabPreproc.doubleSpinBox_step_time->setValue(
+      qs.value("user-params-step-time", 1).toDouble());
+
+  // settings
   QString lastPath =
       MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
   // TODO: this should become << >> operators on
@@ -331,6 +346,18 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
               m_uiTabFocus.lineEdit_texture_grouping_file->text());
 
   qs.setValue("value", m_uiTabFocus.checkBox_FocusedWS->isChecked());
+
+  // pre-processing (re-binning)
+  qs.setValue("user-params-preproc-runno",
+              m_uiTabPreproc.MWRunFiles_preproc_run_num->getText());
+
+  qs.setValue("user-params-time-bin",
+              m_uiTabPreproc.doubleSpinBox_time_bin->value());
+
+  qs.setValue("user-params-nperiods", m_uiTabPreproc.spinBox_nperiods->value());
+
+  qs.value("user-params-step-time",
+           m_uiTabPreproc.doubleSpinBox_step_time->value());
 
   // TODO: this should become << >> operators on EnggDiffCalibSettings
   qs.setValue("input-dir-calib-files",

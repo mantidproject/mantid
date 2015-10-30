@@ -3,6 +3,7 @@
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
@@ -201,14 +202,15 @@ private:
   void inputChecksBeforeRebinPulses(const std::string &runNo, size_t nperiods,
                                     double timeStep);
 
-  Mantid::API::MatrixWorkspace_sptr loadToPreproc(const std::string runNo);
+  Mantid::API::Workspace_sptr loadToPreproc(const std::string runNo);
 
-  void startAsyncRebinningTimeWorker(const std::string &runNo, double bin,
-                                     const std::string &outWSName);
+  virtual void startAsyncRebinningTimeWorker(const std::string &runNo,
+                                             double bin,
+                                             const std::string &outWSName);
 
-  void startAsyncRebinningPulsesWorker(const std::string &runNo,
-                                       size_t nperiods, double timeStep,
-                                       const std::string &outWSName);
+  virtual void startAsyncRebinningPulsesWorker(const std::string &runNo,
+                                               size_t nperiods, double timeStep,
+                                               const std::string &outWSName);
   //@}
 
   // plots workspace according to the user selection

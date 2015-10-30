@@ -274,8 +274,9 @@ void EnggDiffractionPresenter::processRebinTime() {
 
   const std::string outWSName = "engggui_preproc_time_ws";
   g_log.notice() << "EnggDiffraction GUI: starting new pre-processing "
-                    "(re-binning) with a TOF bin. This"
-                    "may take some seconds... " << std::endl;
+                    "(re-binning) with a TOF bin into workspace '" +
+                        outWSName + "'. This "
+                                    "may take some seconds... " << std::endl;
 
   m_view->enableCalibrateAndFocusActions(false);
   // GUI-blocking alternative:
@@ -299,8 +300,9 @@ void EnggDiffractionPresenter::processRebinMultiperiod() {
   }
   const std::string outWSName = "engggui_preproc_by_pulse_time_ws";
   g_log.notice() << "EnggDiffraction GUI: starting new pre-processing "
-                    "(re-binning) by pulse times. This"
-                    "may take some seconds... " << std::endl;
+                    "(re-binning) by pulse times into workspace '" +
+                        outWSName + "'. This "
+                                    "may take some seconds... " << std::endl;
 
   m_view->enableCalibrateAndFocusActions(false);
   // GUI-blocking alternative:
@@ -563,7 +565,7 @@ void EnggDiffractionPresenter::calibrationFinished() {
 
   m_view->enableCalibrateAndFocusActions(true);
   if (!m_calibFinishedOK) {
-    g_log.warning() << "The cablibration did not finished correctly."
+    g_log.warning() << "The cablibration did not finish correctly."
                     << std::endl;
   } else {
     const std::string vanNo = m_view->newVanadiumNo();
@@ -1068,7 +1070,7 @@ void EnggDiffractionPresenter::focusingFinished() {
 
   m_view->enableCalibrateAndFocusActions(true);
   if (!m_focusFinishedOK) {
-    g_log.warning() << "The cablibration did not finished correctly."
+    g_log.warning() << "The cablibration did not finish correctly."
                     << std::endl;
   } else {
     g_log.notice() << "Focusing finished - focused run(s) are ready."
@@ -1420,9 +1422,16 @@ void EnggDiffractionPresenter::calcVanadiumWorkspaces(
   vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesName);
 }
 
-MatrixWorkspace_sptr
+/**
+ * Loads a workspace to pre-process (rebin, etc.). The workspace
+ * loaded can be a MatrixWorkspace or a group of MatrixWorkspace (for
+ * multiperiod data).
+ *
+ * @param runNo run number to search for the file with 'Load'.
+ */
+Workspace_sptr
 EnggDiffractionPresenter::loadToPreproc(const std::string runNo) {
-  MatrixWorkspace_sptr inWS;
+  Workspace_sptr inWS;
 
   try {
     auto load = Algorithm::fromString("Load");
@@ -1434,7 +1443,7 @@ EnggDiffractionPresenter::loadToPreproc(const std::string runNo) {
     load->execute();
 
     auto &ADS = Mantid::API::AnalysisDataService::Instance();
-    inWS = ADS.retrieveWS<MatrixWorkspace>(inWSName);
+    inWS = ADS.retrieveWS<Workspace>(inWSName);
   } catch (std::runtime_error &re) {
     g_log.error()
         << "Error while loading run data to pre-process. "
@@ -1455,25 +1464,35 @@ void EnggDiffractionPresenter::doRebinningTime(const std::string &runNo,
   // Rebin(InputWorkspace='ws_runNo', outputWorkspace=outWSName,Params=bin)
 
   m_rebinningFinishedOK = false;
-  MatrixWorkspace_sptr inWS = loadToPreproc(runNo);
+  const Workspace_sptr inWS = loadToPreproc(runNo);
+  if (!inWS)
+    g_log.error() << "Error: could not load the input workspace for rebinning."
+                  << std::endl;
 
   const std::string rebinName = "Rebin";
   try {
     auto alg = Algorithm::fromString(rebinName);
     alg->initialize();
-    alg->setProperty("InputWorkspace", inWS);
+    alg->setPropertyValue("InputWorkspace", inWS->name());
     alg->setPropertyValue("OutputWorkspace", outWSName);
-    alg->setProperty("Params", bin);
+    alg->setProperty("Params", boost::lexical_cast<std::string>(bin));
 
     alg->execute();
+  } catch (std::invalid_argument &ia) {
+    g_log.error() << "Error when rebinning with a regular bin width in time. "
+                     "There was an error in the inputs to the algorithm " +
+                         rebinName + ". Error description: " + ia.what() +
+                         "." << std::endl;
+    return;
   } catch (std::runtime_error &re) {
     g_log.error() << "Error when rebinning with a regular bin width in time. "
                      "Coult not run the algorithm " +
                          rebinName + " successfully. Error description: " +
-                         re.what() + ".";
-    throw;
+                         re.what() + "." << std::endl;
+    return;
   }
 
+  // succesful completion
   m_rebinningFinishedOK = true;
 }
 
@@ -1539,6 +1558,7 @@ void EnggDiffractionPresenter::doRebinningPulses(const std::string &runNo,
                                                  size_t nperiods,
                                                  double timeStep,
                                                  const std::string &outWSName) {
+  // TOOD: not clear what will be the role of this parameter for now
   UNUSED_ARG(nperiods);
 
   // Runs something like:
@@ -1546,25 +1566,35 @@ void EnggDiffractionPresenter::doRebinningPulses(const std::string &runNo,
   //                   Params=timeStepstep)
 
   m_rebinningFinishedOK = false;
-  MatrixWorkspace_sptr inWS = loadToPreproc(runNo);
+  const Workspace_sptr inWS = loadToPreproc(runNo);
+  if (!inWS)
+    g_log.error() << "Error: could not load the input workspace for rebinning."
+                  << std::endl;
 
   const std::string rebinName = "RebinByPulseTimes";
   try {
     auto alg = Algorithm::fromString(rebinName);
     alg->initialize();
-    alg->setProperty("InputWorkspace", inWS);
+    alg->setPropertyValue("InputWorkspace", inWS->name());
     alg->setPropertyValue("OutputWorkspace", outWSName);
-    alg->setProperty("Params", timeStep);
+    alg->setProperty("Params", boost::lexical_cast<std::string>(timeStep));
 
     alg->execute();
+  } catch (std::invalid_argument &ia) {
+    g_log.error() << "Error when rebinning by pulse times. "
+                     "There was an error in the inputs to the algorithm " +
+                         rebinName + ". Error description: " + ia.what() +
+                         "." << std::endl;
+    return;
   } catch (std::runtime_error &re) {
     g_log.error() << "Error when rebinning by pulse times. "
                      "Coult not run the algorithm " +
                          rebinName + " successfully. Error description: " +
-                         re.what() + ".";
-    throw;
+                         re.what() + "." << std::endl;
+    return;
   }
 
+  // successful execution
   m_rebinningFinishedOK = true;
 }
 
@@ -1608,9 +1638,9 @@ void EnggDiffractionPresenter::rebinningFinished() {
     return;
 
   m_view->enableCalibrateAndFocusActions(true);
-  if (!m_focusFinishedOK) {
+  if (!m_rebinningFinishedOK) {
     g_log.warning()
-        << "The pre-processing (re-binning) did not finished correctly."
+        << "The pre-processing (re-binning) did not finish correctly."
         << std::endl;
   } else {
     g_log.notice() << "Pre-processing (re-binning) finished - the output "

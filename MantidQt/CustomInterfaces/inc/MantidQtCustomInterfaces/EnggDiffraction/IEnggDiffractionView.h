@@ -287,21 +287,21 @@ public:
    * time bin. Here time refers to time units for rebinning in
    * time-of-flight.
    *
-   * @param time bin to re-bin in microseconds
+   * @return time bin to re-bin in microseconds
    */
   virtual double rebinningTimeBin() const = 0;
 
   /**
    * For when pre-processing from multiperiod event to histo data.
    *
-   * @param number of periods to use
+   * @return number of periods to use
    */
   virtual size_t rebinningPulsesNumberPeriods() const = 0;
 
   /**
    * For when pre-processing from multiperiod event to histo data.
    *
-   * @param the time parameter (bin width) when rebinning by pulses.
+   * @return the time parameter (bin width) when rebinning by pulses.
    */
   virtual double rebinningPulsesTime() const = 0;
   //@}
