@@ -83,7 +83,7 @@ public:
   void setLocalParameterTie(const QString& parName, int i, QString tie);
 
   /// Make it public
-  API::UserSubWindow::runPythonCode;
+  using API::UserSubWindow::runPythonCode;
 
 public slots:
   void reset();
