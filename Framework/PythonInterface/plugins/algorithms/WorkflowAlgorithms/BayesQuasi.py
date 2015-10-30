@@ -376,7 +376,7 @@ class BayesQuasi(PythonAlgorithm):
             SaveNexusProcessed(InputWorkspace=outWS, Filename=out_path)
             logger.information('Output fit file created : ' + fit_path)
             logger.information('Output paramter file created : ' + out_path)
-		    log_prog.report('Files Saved')
+            log_prog.report('Files Saved')
 
         self.setProperty('OutputWorkspaceFit', fitWS)
         self.setProperty('OutputWorkspaceResult', outWS)
