@@ -294,8 +294,8 @@ void AlignAndFocusPowder::exec() {
       }
     }
   }
-  xmin = 0;
-  xmax = 0;
+  xmin = 0.;
+  xmax = 0.;
   if (tmin > 0.) {
     xmin = tmin;
   }
