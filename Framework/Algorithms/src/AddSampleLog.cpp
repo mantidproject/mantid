@@ -44,8 +44,8 @@ void AddSampleLog::init() {
   typeOptions.push_back("");
   declareProperty("NumberType", "",
                   boost::make_shared<StringListValidator>(typeOptions),
-                  "Force LogText to be interpreted as a number of type \"int\" "
-                  "or \"double\".");
+                  "Force LogText to be interpreted as a number of type 'int' "
+                  "or 'double'.");
 }
 
 void AddSampleLog::exec() {
