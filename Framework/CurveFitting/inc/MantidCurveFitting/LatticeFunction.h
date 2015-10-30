@@ -51,7 +51,7 @@ public:
   void functionLattice(const API::LatticeDomain &latticeDomain,
                        API::FunctionValues &values) const;
 
-  void setCrystalSystem(const std::string &crystalSystem);
+  void setLatticeSystem(const std::string &crystalSystem);
   void setUnitCell(const std::string &unitCellString);
   void setUnitCell(const Geometry::UnitCell &unitCell);
   Geometry::UnitCell getUnitCell() const;

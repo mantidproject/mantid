@@ -52,7 +52,7 @@ public:
     IAlgorithm_sptr pFit = AlgorithmManager::Instance().create("PawleyFit");
     pFit->setProperty("InputWorkspace", ws);
     pFit->setProperty("WorkspaceIndex", 0);
-    pFit->setProperty("CrystalSystem", "Hexagonal");
+    pFit->setProperty("LatticeSystem", "Hexagonal");
     pFit->setProperty("InitialCell", "2.444 2.441 3.937 90 90 120");
     pFit->setProperty("PeakTable", hkls);
     pFit->setProperty("OutputWorkspace", "HCP_output");
@@ -101,7 +101,7 @@ public:
     IAlgorithm_sptr pFit = AlgorithmManager::Instance().create("PawleyFit");
     pFit->setProperty("InputWorkspace", ws);
     pFit->setProperty("WorkspaceIndex", 0);
-    pFit->setProperty("CrystalSystem", "Orthorhombic");
+    pFit->setProperty("LatticeSystem", "Orthorhombic");
     pFit->setProperty("InitialCell", "2.44 3.13 4.07 90 90 90");
     pFit->setProperty("PeakTable", hkls);
     pFit->setProperty("EnableChebyshevBackground", true);

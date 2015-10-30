@@ -141,7 +141,7 @@ void DataController::checkSpectra()
   auto& ADS = Mantid::API::AnalysisDataService::Instance();
   for( int row = 0; row < nrows; ++row)
   {
-    auto wsName = getWorkspaceName( row );
+    auto wsName = getWorkspaceName( row ).toStdString();
     auto i = getWorkspaceIndex( row );
     if ( !ADS.doesExist( wsName ) )
     {
@@ -161,9 +161,9 @@ void DataController::checkSpectra()
 
 /// Get the workspace name of the i-th spectrum.
 /// @param i :: Index of a spectrum in the data table.
-std::string DataController::getWorkspaceName(int i) const
+QString DataController::getWorkspaceName(int i) const
 {
-  return m_dataTable->item(i, wsColumn)->text().toStdString();
+  return m_dataTable->item(i, wsColumn)->text();
 }
 
 /// Get the workspace index of the i-th spectrum.
