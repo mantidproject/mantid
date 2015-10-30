@@ -147,9 +147,6 @@ void OptimizeLatticeForCellType::exec() {
 
     double chisq = fit_alg->getProperty("OutputChi2overDoF");
     Geometry::UnitCell refinedCell = latticeFunction->getUnitCell();
-    /*std::vector<double> sigabc;
-    for (size_t i = 0; i < latticeFunction->nParams(); i++)
-      sigabc.push_back(latticeFunction->getError(i));*/
 
     IAlgorithm_sptr ub_alg;
     try {
