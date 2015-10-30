@@ -13,7 +13,7 @@ class DNSDetEffCorrVana(PythonAlgorithm):
     """
     properties_to_compare = ['deterota', 'wavelength', 'slit_i_left_blade_position',
                              'slit_i_right_blade_position', 'slit_i_lower_blade_position',
-                             'slit_i_upper_blade_position', 'polarisation', 'flipper']
+                             'slit_i_upper_blade_position', 'polarisation', 'polarisation_comment', 'flipper']
 
     def __init__(self):
         """
@@ -102,15 +102,8 @@ class DNSDetEffCorrVana(PythonAlgorithm):
         creates the corrected workspace
         """
         wslist = []
-        # 1. normalize Vanadium and Background
-        vana_normws = api.mtd[self.vanaws.getName() + '_NORM']
-        bkg_normws = api.mtd[self.bkgws.getName() + '_NORM']
-        _vana_norm_ = api.Divide(self.vanaws, vana_normws)
-        wslist.append(_vana_norm_.getName())
-        _bkg_norm_ = api.Divide(self.bkgws, bkg_normws)
-        wslist.append(_bkg_norm_.getName())
-        # 2. substract background from Vanadium
-        _vana_bg_ = _vana_norm_ - _bkg_norm_
+        # 1. substract background from Vanadium
+        _vana_bg_ = self.vanaws - self.bkgws
         wslist.append(_vana_bg_.getName())
         # check negative values, throw exception
         arr = np.array(_vana_bg_.extractY()).flatten()
@@ -131,7 +124,7 @@ class DNSDetEffCorrVana(PythonAlgorithm):
             wslist.append(_vana_mean_ws_.getName())
         _coef_ws_ = api.Divide(LHSWorkspace=_vana_bg_, RHSWorkspace=_vana_mean_ws_, WarnOnZeroDivide=True)
         wslist.append(_coef_ws_.getName())
-        # 4. correct raw data (not normalized!)
+        # 4. correct raw data
         api.Divide(LHSWorkspace=self.dataws, RHSWorkspace=_coef_ws_, WarnOnZeroDivide=True,
                    OutputWorkspace=self.outws_name)
         outws = api.mtd[self.outws_name]
@@ -163,6 +156,15 @@ class DNSDetEffCorrVana(PythonAlgorithm):
         if bkgws.blocksize() != nblocks:
             issues["BkgWorkspace"] = "Number of blocks does not match to the data workspace."
 
+        # workspaces must be normalized either to monitor or duration
+        result = api.CompareSampleLogs([dataws, vanaws, bkgws], 'normalized')
+        if len(result) > 0:
+            issues['InputWorkspace'] = "All given workspaces must have the same normalization."
+        else:
+            norm = dataws.getRun().getProperty('normalized').value
+            if norm == 'no':
+                issues['InputWorkspace'] = "Data must be normalized before Vanadium correction."
+
         return issues
 
     def PyExec(self):
@@ -172,13 +174,6 @@ class DNSDetEffCorrVana(PythonAlgorithm):
         self.vanaws = api.mtd[self.getPropertyValue("VanaWorkspace")]
         self.bkgws = api.mtd[self.getPropertyValue("BkgWorkspace")]
         self.vana_mean_name = self.getPropertyValue("VanadiumMean")
-
-        # check if the _NORM workspaces exist
-        wslist_norm = [self.vanaws.getName() + '_NORM', self.bkgws.getName() + '_NORM']
-        for wsname in wslist_norm:
-            if not api.AnalysisDataService.doesExist(wsname):
-                message = "Workspace " + wsname + " does not exist!"
-                raise RuntimeError(message)
 
         # check sample logs, produce warnings if different
         wslist = [self.dataws.getName(), self.vanaws.getName(), self.bkgws.getName()]
@@ -195,11 +190,6 @@ class DNSDetEffCorrVana(PythonAlgorithm):
         api.CopyLogs(InputWorkspace=self.dataws.getName(), OutputWorkspace=outws.getName(),
                      MergeStrategy='MergeReplaceExisting')
         self.setProperty("OutputWorkspace", outws)
-
-        # clone the normalization workspace for data if it exists
-        if api.mtd.doesExist(self.dataws.getName()+'_NORM'):
-            api.CloneWorkspace(InputWorkspace=self.dataws.getName()+'_NORM', OutputWorkspace=self.outws_name+'_NORM')
-        self.log().debug('DNSDetEffCorrVana: OK. The result has been saved to ' + self.outws_name)
 
         return
 
