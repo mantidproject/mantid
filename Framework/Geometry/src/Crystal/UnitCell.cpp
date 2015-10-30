@@ -647,12 +647,12 @@ std::string unitCellToStr(const UnitCell &unitCell) {
 
 UnitCell strToUnitCell(const std::string &unitCellString) {
   boost::char_separator<char> separator(" ");
-  boost::tokenizer<boost::char_separator<char> > cellTokens(unitCellString,
-                                                            separator);
+  boost::tokenizer<boost::char_separator<char>> cellTokens(unitCellString,
+                                                           separator);
 
   std::vector<double> components;
 
-  for (boost::tokenizer<boost::char_separator<char> >::iterator token =
+  for (boost::tokenizer<boost::char_separator<char>>::iterator token =
            cellTokens.begin();
        token != cellTokens.end(); ++token) {
     components.push_back(boost::lexical_cast<double>(*token));
