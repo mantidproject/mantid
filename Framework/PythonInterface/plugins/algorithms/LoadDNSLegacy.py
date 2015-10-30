@@ -63,8 +63,7 @@ class LoadDNSLegacy(PythonAlgorithm):
             raise RuntimeError("Invalid coil currents table: " + str(err))
         poltable = []
         colnames = currents.dtype.names
-        for row in range(len(currents)):
-            poltable.append({colnames[idx]: currents[row][idx] for idx in range(len(colnames))})
+        poltable = [dict(zip(colnames, cur)) for cur in currents]
         self.log().debug("Loaded polarisation table:\n" + str(poltable))
         return poltable
 
