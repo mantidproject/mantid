@@ -121,7 +121,6 @@ public:
   void setErroralpha(double _alphaerr, const int angleunit = angDegrees);
   void setErrorbeta(double _betaerr, const int angleunit = angDegrees);
   void setErrorgamma(double _gammaerr, const int angleunit = angDegrees);
-  void setErrorvolume(double _volerr);
   // Get errors in latice parameters
   double errora() const;
   double errorb() const;

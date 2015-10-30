@@ -21,7 +21,7 @@ UnitCell::UnitCell() : da(6), ra(6), errorda(6), G(3, 3), Gstar(3, 3), B(3, 3) {
   da[0] = da[1] = da[2] = 1.;
   da[3] = da[4] = da[5] = deg2rad * 90.0;
   errorda[0] = errorda[1] = errorda[2] = errorda[3] = errorda[4] = errorda[5] =
-      errorda[6] = 0.0;
+      0.0;
   recalculate();
 }
 
@@ -50,7 +50,7 @@ UnitCell::UnitCell(double _a, double _b, double _c)
   // Angles are 90 degrees in radians ->Pi/2
   da[3] = da[4] = da[5] = 0.5 * M_PI;
   errorda[0] = errorda[1] = errorda[2] = errorda[3] = errorda[4] = errorda[5] =
-      errorda[6] = 0.0;
+      0.0;
   recalculate();
 }
 
@@ -75,7 +75,7 @@ UnitCell::UnitCell(double _a, double _b, double _c, double _alpha, double _beta,
     da[5] = _gamma;
   }
   errorda[0] = errorda[1] = errorda[2] = errorda[3] = errorda[4] = errorda[5] =
-      errorda[6] = 0.0;
+      0.0;
   recalculate();
 }
 
@@ -269,7 +269,40 @@ double UnitCell::errorgamma(const int angleunit) const {
 /** Get lattice parameter error
 @return errorc :: errorlattice parameter \f$ volume \f$ (in \f$ \mbox{\AA} \f$ )
 */
-double UnitCell::errorvolume() const { return errorda[6]; }
+double UnitCell::errorvolume() const {
+  // From latcon.py by Art Schultz
+  double V = volume();
+  double delta_V_alphaV = 0.0;
+  if (erroralpha() > 0.0) {
+    double alpha1 = alpha() - 0.5 * erroralpha();
+    double Va1 = UnitCell(a(), b(), c(), alpha1, beta(), gamma()).volume();
+    double alpha2 = alpha() + 0.5 * erroralpha();
+    double Va2 = UnitCell(a(), b(), c(), alpha2, beta(), gamma()).volume();
+    delta_V_alphaV = (Va2 - Va1) / V;
+  }
+
+  double delta_V_betaV = 0.0;
+  if (errorbeta() > 0.0) {
+    double beta1 = beta() - 0.5 * errorbeta();
+    double Va1 = UnitCell(a(), b(), c(), alpha(), beta1, gamma()).volume();
+    double beta2 = beta() + 0.5 * errorbeta();
+    double Va2 = UnitCell(a(), b(), c(), alpha(), beta2, gamma()).volume();
+    delta_V_betaV = (Va2 - Va1) / V;
+  }
+
+  double delta_V_gammaV = 0.0;
+  if (errorgamma() > 0.0) {
+    double gamma1 = gamma() - 0.5 * errorgamma();
+    double Va1 = UnitCell(a(), b(), c(), alpha(), beta(), gamma1).volume();
+    double gamma2 = gamma() + 0.5 * errorgamma();
+    double Va2 = UnitCell(a(), b(), c(), alpha(), beta(), gamma2).volume();
+    delta_V_gammaV = (Va2 - Va1) / V;
+  }
+
+  return V * sqrt(std::pow(errora() / a(), 2) + std::pow(errorb() / b(), 2) +
+                  std::pow(errorc() / c(), 2) + std::pow(delta_V_alphaV, 2) +
+                  std::pow(delta_V_betaV, 2) + std::pow(delta_V_gammaV, 2));
+}
 
 /** Set lattice parameters
   @param _a, _b, _c, _alpha, _beta, _gamma :: lattice parameters\n
@@ -409,11 +442,6 @@ void UnitCell::setErrorgamma(double _gammaerr, const int angleunit) {
   else
     errorda[5] = _gammaerr;
 }
-
-/** Set lattice parameter error
-@param _cerr :: lattice parameter \f$ volume \f$ error (in \f$ \mbox{\AA} \f$
-)*/
-void UnitCell::setErrorvolume(double _volerr) { errorda[6] = _volerr; }
 
 /// Return d-spacing (\f$ \mbox{ \AA } \f$) for a given h,k,l coordinate
 double UnitCell::d(double h, double k, double l) const {

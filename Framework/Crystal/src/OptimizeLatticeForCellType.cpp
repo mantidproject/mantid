@@ -177,44 +177,8 @@ void OptimizeLatticeForCellType::exec() {
                        refinedCell.errorc(), refinedCell.erroralpha(),
                        refinedCell.errorbeta(), refinedCell.errorgamma());
 
-    // From latcon.py by Art Schultz
-    double alpha1 = refinedCell.alpha() - 0.5 * refinedCell.erroralpha();
-    double Va1 =
-        UnitCell(refinedCell.a(), refinedCell.b(), refinedCell.c(), alpha1,
-                 refinedCell.beta(), refinedCell.gamma()).volume();
-    double alpha2 = refinedCell.alpha() + 0.5 * refinedCell.erroralpha();
-    double Va2 =
-        UnitCell(refinedCell.a(), refinedCell.b(), refinedCell.c(), alpha2,
-                 refinedCell.beta(), refinedCell.gamma()).volume();
-    double delta_V_alpha = Va2 - Va1;
-
-    double beta1 = refinedCell.beta() - 0.5 * refinedCell.errorbeta();
-    Va1 = UnitCell(refinedCell.a(), refinedCell.b(), refinedCell.c(),
-                   refinedCell.alpha(), beta1, refinedCell.gamma()).volume();
-    double beta2 = refinedCell.beta() + 0.5 * refinedCell.errorbeta();
-    Va2 = UnitCell(refinedCell.a(), refinedCell.b(), refinedCell.c(),
-                   refinedCell.alpha(), beta2, refinedCell.gamma()).volume();
-    double delta_V_beta = Va2 - Va1;
-
-    double gamma1 = refinedCell.gamma() - 0.5 * refinedCell.errorgamma();
-    Va1 = UnitCell(refinedCell.a(), refinedCell.b(), refinedCell.c(),
-                   refinedCell.alpha(), refinedCell.beta(), gamma1).volume();
-    double gamma2 = refinedCell.gamma() + 0.5 * refinedCell.errorgamma();
-    Va2 = UnitCell(refinedCell.a(), refinedCell.b(), refinedCell.c(),
-                   refinedCell.alpha(), refinedCell.beta(), gamma2).volume();
-    double delta_V_gamma = Va2 - Va1;
-
-    double sigV = refinedCell.volume() *
-                  sqrt(std::pow(refinedCell.errora() / refinedCell.a(), 2) +
-                       std::pow(refinedCell.errorb() / refinedCell.b(), 2) +
-                       std::pow(refinedCell.errorc() / refinedCell.c(), 2) +
-                       std::pow(delta_V_alpha / refinedCell.volume(), 2) +
-                       std::pow(delta_V_beta / refinedCell.volume(), 2) +
-                       std::pow(delta_V_gamma / refinedCell.volume(), 2));
-
     // Show the modified lattice parameters
-    g_log.notice() << runWS[i_run]->getName() << "  " << o_lattice << "  "
-                   << sigV << "\n";
+    g_log.notice() << runWS[i_run]->getName() << "  " << o_lattice << "\n";
 
     runWS[i_run]->mutableSample().setOrientedLattice(&o_lattice);
 
