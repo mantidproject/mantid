@@ -354,7 +354,7 @@ class BayesQuasi(PythonAlgorithm):
             if self._plot != 'None':
                 QuasiPlot(fname,self._plot,res_plot,self._loop)
 
-        log_prog = Progress(self, start=0.8, end =1.0, nreports=4)
+        log_prog = Progress(self, start=0.8, end =1.0, nreports=8)
         #Add some sample logs to the output workspaces
         log_prog.report('Copying Logs to outputWorkspace')
         CopyLogs(InputWorkspace=self._samWS, OutputWorkspace=outWS)
@@ -366,6 +366,7 @@ class BayesQuasi(PythonAlgorithm):
         log_prog.report('Adding sample logs to QL fit workspace')
         QLAddSampleLogs(fitWS, self._resWS, prog, self._background, self._elastic, erange,
                         (nbin, nrbin), self._resnormWS, self._wfile)
+        log_prog.report('Finialising log copying')
 
         if self._save:
             log_prog.report('Saving workspaces')
@@ -375,9 +376,11 @@ class BayesQuasi(PythonAlgorithm):
             SaveNexusProcessed(InputWorkspace=outWS, Filename=out_path)
             logger.information('Output fit file created : ' + fit_path)
             logger.information('Output paramter file created : ' + out_path)
+		    log_prog.report('Files Saved')
 
         self.setProperty('OutputWorkspaceFit', fitWS)
         self.setProperty('OutputWorkspaceResult', outWS)
+        log_prog.report('Setting workspace properties')
 
         if self._program == 'QL':
             self.setProperty('OutputWorkspaceProb', probWS)
