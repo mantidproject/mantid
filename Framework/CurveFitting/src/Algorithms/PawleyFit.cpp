@@ -199,21 +199,21 @@ void PawleyFit::init() {
   declareProperty("StartX", 0.0, "Lower border of fitted data range.");
   declareProperty("EndX", 0.0, "Upper border of fitted data range.");
 
-  std::vector<std::string> crystalSystems;
-  crystalSystems.push_back("Cubic");
-  crystalSystems.push_back("Tetragonal");
-  crystalSystems.push_back("Hexagonal");
-  crystalSystems.push_back("Trigonal");
-  crystalSystems.push_back("Orthorhombic");
-  crystalSystems.push_back("Monoclinic");
-  crystalSystems.push_back("Triclinic");
+  std::vector<std::string> latticeSystems;
+  latticeSystems.push_back("Cubic");
+  latticeSystems.push_back("Tetragonal");
+  latticeSystems.push_back("Hexagonal");
+  latticeSystems.push_back("Rhombohedral");
+  latticeSystems.push_back("Orthorhombic");
+  latticeSystems.push_back("Monoclinic");
+  latticeSystems.push_back("Triclinic");
 
-  auto crystalSystemValidator =
-      boost::make_shared<StringListValidator>(crystalSystems);
+  auto latticeSystemValidator =
+      boost::make_shared<StringListValidator>(latticeSystems);
 
-  declareProperty("CrystalSystem", crystalSystems.back(),
-                  crystalSystemValidator,
-                  "Crystal system to use for refinement.");
+  declareProperty("LatticeSystem", latticeSystems.back(),
+                  latticeSystemValidator,
+                  "Lattice system to use for refinement.");
 
   declareProperty("InitialCell", "1.0 1.0 1.0 90.0 90.0 90.0",
                   "Specification of initial unit cell, given as 'a, b, c, "
@@ -282,9 +282,9 @@ void PawleyFit::exec() {
   g_log.information() << "  Selected profile function: " << profileFunction
                       << std::endl;
 
-  std::string crystalSystem = getProperty("CrystalSystem");
-  pawleyFn->setCrystalSystem(crystalSystem);
-  g_log.information() << "  Selected crystal system: " << crystalSystem
+  std::string latticeSystem = getProperty("LatticeSystem");
+  pawleyFn->setLatticeSystem(latticeSystem);
+  g_log.information() << "  Selected crystal system: " << latticeSystem
                       << std::endl;
 
   pawleyFn->setUnitCell(getProperty("InitialCell"));

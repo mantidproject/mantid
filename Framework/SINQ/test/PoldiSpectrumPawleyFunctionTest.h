@@ -30,7 +30,7 @@ public:
   MOCK_CONST_METHOD2(function, void(const FunctionDomain &, FunctionValues &));
 
   // IPawleyFunction interface
-  MOCK_METHOD1(setCrystalSystem, void(const std::string &));
+  MOCK_METHOD1(setLatticeSystem, void(const std::string &));
   MOCK_METHOD1(setProfileFunction, void(const std::string &));
   MOCK_METHOD1(setUnitCell, void(const std::string &));
 
@@ -132,7 +132,7 @@ public:
 
     IPawleyFunction_sptr pFn = fn.getPawleyFunction();
     pFn->setProfileFunction("Gaussian");
-    pFn->setCrystalSystem("Cubic");
+    pFn->setLatticeSystem("Cubic");
     // Only the first figure matters, because of cubic
     pFn->setUnitCell("5.43122617238802162554 5.431 5.431 90 90 90");
     pFn->addPeak(V3D(4, 2, 2), 0.0027446316797104233, 679.59369981039407842726);

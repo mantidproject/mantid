@@ -214,7 +214,7 @@ private:
   //@}
 
   // plots workspace according to the user selection
-  void plotFocusedWorkspace(std::string outWSName, std::string bank);
+  void plotFocusedWorkspace(std::string outWSName, int bank);
 
   // algorithms to save the generated workspace
   void saveGSS(std::string inputWorkspace, std::string bank, std::string runNo);
@@ -228,7 +228,7 @@ private:
                                  std::string bank, std::string format);
 
   // generates a directory if not found and handles the path
-  Poco::Path outFilesDir(std::string runNo);
+  Poco::Path outFilesDir();
 
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;
@@ -250,6 +250,9 @@ private:
 
   /// Counter for the cropped output files
   static int g_croppedCounter;
+
+  /// counter for the plotting workspace
+  static int g_plottingCounter;
 
   /// Associated view for this presenter (MVP pattern)
   IEnggDiffractionView *const m_view;

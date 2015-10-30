@@ -37,7 +37,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
                                          SpectraRange=[3, 53])
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(wks.getNames()[0], 'IRS26176_graphite002_red')
+        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
 
         red_ws = wks.getItem(0)
         self.assertEqual(red_ws.getNumberHistograms(), 51)
@@ -56,7 +56,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
                                          SpectraRange=[35, 40])
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(wks.getNames()[0], 'IRS26176_graphite002_red')
+        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
 
         red_ws = wks.getItem(0)
         self.assertEqual(red_ws.getNumberHistograms(), 6)
@@ -75,7 +75,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
                                          GroupingMethod='All')
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(wks.getNames()[0], 'IRS26176_graphite002_red')
+        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
 
         red_ws = wks.getItem(0)
         self.assertEqual(red_ws.getNumberHistograms(), 1)
@@ -94,7 +94,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
                                          GroupingMethod='Individual')
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(wks.getNames()[0], 'IRS26176_graphite002_red')
+        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
 
         red_ws = wks.getItem(0)
         self.assertEqual(red_ws.getNumberHistograms(), 51)
@@ -113,7 +113,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
                                          BackgroundRange=[70000, 75000])
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(wks.getNames()[0], 'IRS26176_graphite002_red')
+        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
 
 
     def test_reduction_with_output_unit(self):
@@ -129,7 +129,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
                                          UnitX='DeltaE_inWavenumber')
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(wks.getNames()[0], 'IRS26176_graphite002_red')
+        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
 
         red_ws = wks.getItem(0)
         self.assertEqual(red_ws.getNumberHistograms(), 51)
@@ -150,7 +150,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
                                          DetailedBalance='300')
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(wks.getNames()[0], 'IRS26176_graphite002_red')
+        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
 
         red_ws = wks.getItem(0)
         self.assertEqual(red_ws.getNumberHistograms(), 51)
@@ -171,7 +171,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
                                          MapFile='osi_002_14Groups.map')
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(wks.getNames()[0], 'OSI97919_graphite002_red')
+        self.assertEqual(wks.getNames()[0], 'osiris97919_graphite002_red')
 
         red_ws = wks.getItem(0)
         self.assertEqual(red_ws.getNumberHistograms(), 14)
@@ -191,7 +191,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
                                          CalibrationWorkspace=_generate_calibration_workspace('IRIS'))
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(wks.getNames()[0], 'IRS26176_graphite002_red')
+        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
 
         red_ws = wks.getItem(0)
         self.assertEqual(red_ws.getNumberHistograms(), 51)
@@ -211,7 +211,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
                                          CalibrationWorkspace=_generate_calibration_workspace('IRIS'))
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(wks.getNames()[0], 'IRS26176_graphite002_red')
+        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
 
         red_ws = wks.getItem(0)
         self.assertEqual(red_ws.getNumberHistograms(), 6)
@@ -230,8 +230,8 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
         self.assertEqual(len(wks), 2)
-        self.assertEqual(wks.getNames()[0], 'IRS26176_graphite002_red')
-        self.assertEqual(wks.getNames()[1], 'IRS26173_graphite002_red')
+        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
+        self.assertEqual(wks.getNames()[1], 'iris26173_graphite002_red')
 
 
     def test_sum_files(self):
@@ -248,7 +248,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
         self.assertEqual(len(wks), 1)
-        self.assertEqual(wks.getNames()[0], 'IRS26176_multi_graphite002_red')
+        self.assertEqual(wks.getNames()[0], 'iris26176_multi_graphite002_red')
 
         red_ws = wks[0]
         self.assertTrue('multi_run_numbers' in red_ws.getRun())
@@ -301,7 +301,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
                                          Efixed=1.9)
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(wks.getNames()[0], 'IRS26176_graphite002_red')
+        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
 
         red_ws = wks.getItem(0)
         self.assertEqual(red_ws.getNumberHistograms(), 51)
