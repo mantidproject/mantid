@@ -67,13 +67,6 @@ private:
   void init();
   void exec();
 
-  // Attenuation Factor
-  double AttFac(const double sigir, const double sigsr,
-                const std::vector<double> &Z);
-
-  // Set up "Z" array for specified angle
-  void ZSet(const double angle_deg, std::vector<double> &Z);
-
   /// MultipleScatteringCylinderAbsorption correction calculation.
   void apply_msa_correction(const double angle_deg, const double radius, const double coeff1,
                             const double coeff2, const double coeff3,

@@ -27,7 +27,7 @@ using namespace Mantid::PhysicalConstants;
 using namespace Geometry;
 
 // Constants required internally only, so make them static
-
+namespace { // anonymous
 static const double C[] = {
     0.730284,  -0.249987, 0.019448,  -0.000006, 0.000249,  -0.000004, 0.848859,
     -0.452690, 0.056557,  -0.000009, 0.000000,  -0.000006, 1.133129,  -0.749962,
@@ -61,6 +61,9 @@ static const double MN_KG =
 static const double ANGST_PER_US_PER_M = H_ES / MN_KG / 1000.;
 static const double LAMBDA_REF =
     1.81; ///< Wavelength that the calculations are based on
+static const double COEFF4 = 1.1967;
+static const double COEFF5 = -0.8667;
+} // end of anonymous
 
 MultipleScatteringCylinderAbsorption::MultipleScatteringCylinderAbsorption()
     : API::Algorithm() {}
@@ -240,11 +243,13 @@ void MultipleScatteringCylinderAbsorption::exec() {
   }
 }
 
-/**
- * Set up the Z table for the specified two theta angle (in degrees).
- */
-void MultipleScatteringCylinderAbsorption::ZSet(const double angle_rad,
-                                                vector<double> &Z) {
+namespace { // anonymous namespace
+            /**
+             * Set up the Z table for the specified two theta angle (in degrees).
+             */
+vector<double> createZ(const double angle_rad) {
+  vector<double> Z(Z_initial, Z_initial + Z_size);
+
   const double theta_rad = angle_rad * .5;
   int l, J;
   double sum;
@@ -266,14 +271,13 @@ void MultipleScatteringCylinderAbsorption::ZSet(const double angle_rad,
       }
     }
   }
+  return Z;
 }
 
 /**
  * Evaluate the AttFac function for a given sigir and sigsr.
  */
-double MultipleScatteringCylinderAbsorption::AttFac(const double sigir,
-                                                    const double sigsr,
-                                                    const vector<double> &Z) {
+double AttFac(const double sigir, const double sigsr, const vector<double> &Z) {
   double facti = 1.0;
   double att = 0.0;
 
@@ -290,6 +294,22 @@ double MultipleScatteringCylinderAbsorption::AttFac(const double sigir,
   }
   return att;
 }
+
+double calculate_msa_factor(const double radius, const double Q2,
+                            const double sigsct, const vector<double> &Z,
+                            const double wavelength) {
+
+  const double sigabs = Q2 * wavelength;
+  const double sigir = (sigabs + sigsct) * radius;
+  const double sigsr = sigir;
+
+  const double delta = COEFF4 * sigir + COEFF5 * sigir * sigir;
+  const double deltp = (delta * sigsct) / (sigsct + sigabs);
+
+  double temp = AttFac(sigir, sigsr, Z);
+  return ((1.0 - deltp) / temp);
+}
+} // namespace
 
 /**
  *  This method will change the values in the y_val array to correct for
@@ -310,8 +330,6 @@ void MultipleScatteringCylinderAbsorption::apply_msa_correction(
     const double angle_deg, const double radius, const double coeff1,
     const double coeff2, const double coeff3, const vector<double> &wavelength,
     vector<double> &y_val, std::vector<double> &errors) {
-  const double coeff4 = 1.1967;
-  const double coeff5 = -0.8667;
 
   const size_t NUM_Y = y_val.size();
   bool is_histogram = false;
@@ -322,12 +340,11 @@ void MultipleScatteringCylinderAbsorption::apply_msa_correction(
   else
     throw std::runtime_error("Data is neither historgram or density");
 
-  vector<double> Z(Z_initial,
-                   Z_initial + Z_size); // initialize Z array for this angle
-  ZSet(angle_deg, Z);
+  // initialize Z array for this angle
+  vector<double> Z = createZ(angle_deg);
 
-  double Q2 = coeff1 * coeff2;
-  double sigsct = coeff2 * coeff3;
+  const double Q2 = coeff1 * coeff2;
+  const double sigsct = coeff2 * coeff3;
 
   for (size_t j = 0; j < NUM_Y; j++) {
     double wl_val;
@@ -336,15 +353,8 @@ void MultipleScatteringCylinderAbsorption::apply_msa_correction(
     else
       wl_val = wavelength[j];
 
-    double sigabs = Q2 * wl_val;
-    double sigir = (sigabs + sigsct) * radius;
-    double sigsr = sigir;
-    double temp = AttFac(sigir, sigsr, Z);
+    const double temp = calculate_msa_factor(radius, Q2, sigsct, Z, wl_val);
 
-    double delta = coeff4 * sigir + coeff5 * sigir * sigir;
-    double deltp = (delta * sigsct) / (sigsct + sigabs);
-
-    temp = (1.0 - deltp) / temp;
     y_val[j] *= temp;
     errors[j] *= temp;
   }
