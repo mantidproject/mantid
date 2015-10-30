@@ -3,5 +3,6 @@
         <file>zoom.png</file>
         <file>panning.png</file>
         <file>range.png</file>
+        <file>export-graph.png</file>
     </qresource>
 </RCC>

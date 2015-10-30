@@ -147,15 +147,17 @@ void MultiDatasetFit::createPlotToolbar()
   group->addAction(action);
 
   toolBar->addActions(group->actions());
+  toolBar->addSeparator();
+
+  action = new QAction(this);
+  action->setIcon(QIcon(":/MultiDatasetFit/icons/export-graph.png"));
+  action->setToolTip("Export current plot");
+  connect(action,SIGNAL(triggered()),this,SLOT(exportCurrentPlot()));
+
+  toolBar->addAction(action);
 
   m_uiForm.horizontalLayout->insertWidget(3,toolBar);
 
-}
-
-/// Get the name of the output workspace
-QString MultiDatasetFit::getOutputWorkspaceName() const
-{
-  return QString::fromStdString(m_outputWorkspaceName);
 }
 
 /// Create a multi-domain function to fit all the spectra in the data table.
@@ -174,7 +176,7 @@ void MultiDatasetFit::fitSequential()
     int n = getNumberOfSpectra();
     for(int ispec = 0; ispec < n; ++ispec)
     {
-      input << getWorkspaceName(ispec) << ",i" << getWorkspaceIndex(ispec) << ";";
+      input << getWorkspaceName(ispec).toStdString() << ",i" << getWorkspaceIndex(ispec) << ";";
     }
 
     auto fun = m_functionBrowser->getFunction();
@@ -188,7 +190,7 @@ void MultiDatasetFit::fitSequential()
 
     m_fitOptionsBrowser->copyPropertiesToAlgorithm(*fit);
 
-    m_outputWorkspaceName = m_fitOptionsBrowser->getProperty("OutputWorkspace").toStdString() + "_Workspaces";
+    m_outputWorkspaceName = m_fitOptionsBrowser->getProperty("OutputWorkspace") + "_Workspaces";
 
     removeOldOutput();
 
@@ -220,7 +222,7 @@ void MultiDatasetFit::fitSimultaneous()
     auto fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
     fit->initialize();
     fit->setProperty("Function", fun );
-    fit->setPropertyValue("InputWorkspace", getWorkspaceName(0));
+    fit->setPropertyValue("InputWorkspace", getWorkspaceName(0).toStdString());
     fit->setProperty("WorkspaceIndex", getWorkspaceIndex(0));
     auto range = getFittingRange(0);
     fit->setProperty( "StartX", range.first );
@@ -230,7 +232,7 @@ void MultiDatasetFit::fitSimultaneous()
     for(int ispec = 1; ispec < n; ++ispec)
     {
       std::string suffix = boost::lexical_cast<std::string>(ispec);
-      fit->setPropertyValue( "InputWorkspace_" + suffix, getWorkspaceName(ispec) );
+      fit->setPropertyValue( "InputWorkspace_" + suffix, getWorkspaceName(ispec).toStdString() );
       fit->setProperty( "WorkspaceIndex_" + suffix, getWorkspaceIndex(ispec) );
       auto range = getFittingRange(ispec);
       fit->setProperty( "StartX_" + suffix, range.first );
@@ -239,11 +241,11 @@ void MultiDatasetFit::fitSimultaneous()
 
     m_fitOptionsBrowser->copyPropertiesToAlgorithm(*fit);
 
-    m_outputWorkspaceName = m_fitOptionsBrowser->getProperty("Output").toStdString();
-    if ( m_outputWorkspaceName.empty() )
+    m_outputWorkspaceName = m_fitOptionsBrowser->getProperty("Output");
+    if ( m_outputWorkspaceName.isEmpty() )
     {
       m_outputWorkspaceName = "out";
-      fit->setPropertyValue("Output",m_outputWorkspaceName);
+      fit->setPropertyValue("Output",m_outputWorkspaceName.toStdString());
       m_fitOptionsBrowser->setProperty("Output","out");
     }
     if (n == 1)
@@ -303,7 +305,7 @@ void MultiDatasetFit::fit()
 
 /// Get the workspace name of the i-th spectrum.
 /// @param i :: Index of a spectrum in the data table.
-std::string MultiDatasetFit::getWorkspaceName(int i) const
+QString MultiDatasetFit::getWorkspaceName(int i) const
 {
   return m_dataController->getWorkspaceName(i);
 }
@@ -313,6 +315,21 @@ std::string MultiDatasetFit::getWorkspaceName(int i) const
 int MultiDatasetFit::getWorkspaceIndex(int i) const
 {
   return m_dataController->getWorkspaceIndex(i);
+}
+
+/// Get the name of the output workspace
+/// @param i :: Index of a spectrum in the data table.
+QString MultiDatasetFit::getOutputWorkspaceName(int i) const
+{
+  auto wsName = m_outputWorkspaceName.toStdString();
+  if (!wsName.empty() &&
+      Mantid::API::AnalysisDataService::Instance().doesExist(wsName)) {
+    auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
+    if (auto  group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
+      wsName = group->getItem(i)->name();
+    }
+  }
+  return QString::fromStdString(wsName);
 }
 
 /// Get the fitting range for the i-th spectrum
@@ -513,6 +530,12 @@ void MultiDatasetFit::enableRange()
   m_uiForm.toolOptions->setCurrentIndex(rangeToolPage);
 }
 
+/// Export current plot 
+void MultiDatasetFit::exportCurrentPlot()
+{
+  m_plotController->exportCurrentPlot();
+}
+
 /// Set value of a local parameter
 /// @param parName : Name of a local parameter.
 /// @param i :: Index of the dataset (spectrum).
@@ -617,7 +640,7 @@ void MultiDatasetFit::setLogNames()
   {
     try
     {
-      auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(getWorkspaceName(0));
+      auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(getWorkspaceName(0).toStdString());
       const std::vector<Mantid::Kernel::Property*> logs = ws->run().getLogData();
       QStringList logNames;
       for(int i=0;i<static_cast<int>(logs.size());++i)
@@ -640,13 +663,11 @@ void MultiDatasetFit::setLogNames()
 /// Remove old output from Fit.
 void MultiDatasetFit::removeOldOutput()
 {
-  if (Mantid::API::AnalysisDataService::Instance().doesExist(
-          m_outputWorkspaceName) &&
-      Mantid::API::AnalysisDataService::Instance()
-          .retrieveWS<Mantid::API::WorkspaceGroup>(m_outputWorkspaceName)) 
+  auto outWS = m_outputWorkspaceName.toStdString();
+  if (Mantid::API::AnalysisDataService::Instance().doesExist(outWS) &&
+      Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>(outWS))
   {
-    Mantid::API::AnalysisDataService::Instance().deepRemoveGroup(
-        m_outputWorkspaceName);
+    Mantid::API::AnalysisDataService::Instance().deepRemoveGroup(outWS);
   }
 }
 

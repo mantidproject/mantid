@@ -62,6 +62,7 @@ public slots:
   void showDataErrors(bool);
   void resetRange();
   void zoomToRange();
+  void exportCurrentPlot();
 private slots:
   void tableUpdated();
   void prevPlot();

@@ -55,10 +55,10 @@ public:
   MultiDatasetFit(QWidget *parent = NULL);
   /// Destructor
   ~MultiDatasetFit();
-  /// Get the name of the output workspace
-  QString getOutputWorkspaceName() const;
+  /// Get the name of the output matrix workspace for the i-th spectrum
+  QString getOutputWorkspaceName(int i) const;
   /// Workspace name for the i-th spectrum
-  std::string getWorkspaceName(int i) const;
+  QString getWorkspaceName(int i) const;
   /// Workspace index of the i-th spectrum
   int getWorkspaceIndex(int i) const;
   /// Get the fitting range for the i-th spectrum
@@ -82,6 +82,9 @@ public:
   /// Set a tie for a local parameter.
   void setLocalParameterTie(const QString& parName, int i, QString tie);
 
+  /// Make it public
+  API::UserSubWindow::runPythonCode;
+
 public slots:
   void reset();
 
@@ -92,6 +95,7 @@ private slots:
   void enableZoom();
   void enablePan();
   void enableRange();
+  void exportCurrentPlot();
   void checkFittingType();
   void setLogNames();
   void invalidateOutput();
@@ -126,7 +130,7 @@ private:
   /// Browser for setting other Fit properties
   MantidWidgets::FitOptionsBrowser *m_fitOptionsBrowser;
   /// Name of the output workspace
-  std::string m_outputWorkspaceName;
+  QString m_outputWorkspaceName;
   /// Fit algorithm runner
   boost::shared_ptr<API::AlgorithmRunner> m_fitRunner;
 };
