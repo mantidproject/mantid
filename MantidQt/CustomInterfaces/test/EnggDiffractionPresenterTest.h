@@ -702,9 +702,10 @@ public:
     pres.notify(IEnggDiffractionPresenter::RebinTime);
   }
 
+  // this test does run Load and then Rebin
   void test_preproc_event_time_ok() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
-    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+    EnggDiffPresenterNoThread pres(&mockView);
 
     // inputs from user
     EXPECT_CALL(mockView, currentPreprocRunNo())
@@ -751,6 +752,7 @@ public:
     pres.notify(IEnggDiffractionPresenter::RebinMultiperiod);
   }
 
+  // this test does run Load but then RebinByPulseTimes should fail
   void test_preproc_event_multiperiod_file_wrong_type() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     EnggDiffPresenterNoThread pres(&mockView);
