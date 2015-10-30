@@ -1581,6 +1581,8 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
 
 /**
  * Generates a directory if not found and handles the path
+ *
+ * @param addToDir directs to right dir by passing focus or calibration
  */
 Poco::Path EnggDiffractionPresenter::outFilesDir(std::string addToDir) {
   Poco::Path saveDir;
