@@ -24,7 +24,7 @@ Usage
 .. testcode:: ExOSIRISDiffractionReductionSimple
 
     import os
-
+    from mantid.kernel import OptionalBoolValue
     def createDummyOSIRISWorkspace(name, func, xmin, xmax, bin_width):
       """Creates a workspace that looks something like an OSIRIS diffraction run"""
       #create workspace according to function
@@ -33,7 +33,7 @@ Usage
       AddSampleLog(ws, 'gd_prtn_chrg', '30.01270866394043',  'Number')
 
       #load instrument parameters
-      LoadInstrument(ws, InstrumentName='OSIRIS')
+      LoadInstrument(ws, OverwriteSpectraMap=OptionalBoolValue.True, InstrumentName='OSIRIS')
       param_file = config['instrumentDefinition.directory'] + 'OSIRIS_diffraction_diffspec_Parameters.xml'
       LoadParameterFile(ws, Filename=param_file)
       return ws

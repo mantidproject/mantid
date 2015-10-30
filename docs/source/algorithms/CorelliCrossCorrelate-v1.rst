@@ -24,7 +24,7 @@ Usage
 **Example - CorelliCrossCorrelate**
 
 .. testcode:: CorelliCrossCorrelateExample
-    from mantid.kernel import OptionalBool
+    from mantid.kernel import OptionalBoolValue
     # Load a Corelli data file.
     ws = Load('CORELLI_2100')
 
