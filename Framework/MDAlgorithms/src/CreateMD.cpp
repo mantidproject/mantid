@@ -263,13 +263,15 @@ void CreateMD::addSampleLog(Mantid::API::MatrixWorkspace_sptr workspace,
   std::ostringstream log_number_ss;
   log_number_ss << std::fixed << std::setprecision(6) << log_number;
 
-  // TODO sort out this after changing AddSampleLog algorithm in issue #14178
   log_alg->setProperty("Workspace", workspace);
   log_alg->setProperty("LogName", log_name);
   log_alg->setProperty(
       "LogText",
-      log_number_ss.str()); // boost::lexical_cast<std::string>(log_number)
+      log_number_ss.str());//boost::lexical_cast<std::string>(log_number));
   log_alg->setProperty("LogType", "Number");
+  // TODO uncomment below after #14187 PR completed and master merged
+  // and switch to using lexical_cast above
+  //log_alg->setProperty("NumberType", "Double");
 
   log_alg->executeAsChildAlg();
 }
@@ -386,7 +388,7 @@ Mantid::API::IMDEventWorkspace_sptr CreateMD::single_run(
     throw std::invalid_argument(
         "Either specify all of alatt, angledeg, u, v or none of them");
   } else {
-    if (false) { // TODO check if UB set already
+    if (input_workspace->sample().hasOrientedLattice()) {
       g_log.warning() << "Sample already has a UB. This will not be "
                          "overwritten. Use ClearUB and re-run." << std::endl;
     } else {
