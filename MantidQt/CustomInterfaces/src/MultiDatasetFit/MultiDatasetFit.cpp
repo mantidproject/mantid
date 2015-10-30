@@ -150,10 +150,15 @@ void MultiDatasetFit::createPlotToolbar()
   toolBar->addSeparator();
 
   action = new QAction(this);
-  action->setIcon(QIcon(":/MultiDatasetFit/icons/export-graph.png"));
+  action->setIcon(QIcon(":/MultiDatasetFit/icons/export-plot.png"));
   action->setToolTip("Export current plot");
   connect(action,SIGNAL(triggered()),this,SLOT(exportCurrentPlot()));
+  toolBar->addAction(action);
 
+  action = new QAction(this);
+  action->setIcon(QIcon(":/MultiDatasetFit/icons/export-all-plots.png"));
+  action->setToolTip("Export all plots");
+  connect(action,SIGNAL(triggered()),this,SLOT(exportAllPlots()));
   toolBar->addAction(action);
 
   m_uiForm.horizontalLayout->insertWidget(3,toolBar);
@@ -534,6 +539,12 @@ void MultiDatasetFit::enableRange()
 void MultiDatasetFit::exportCurrentPlot()
 {
   m_plotController->exportCurrentPlot();
+}
+
+/// Export all plots 
+void MultiDatasetFit::exportAllPlots()
+{
+  m_plotController->exportAllPlots();
 }
 
 /// Set value of a local parameter

@@ -96,6 +96,7 @@ private slots:
   void enablePan();
   void enableRange();
   void exportCurrentPlot();
+  void exportAllPlots();
   void checkFittingType();
   void setLogNames();
   void invalidateOutput();

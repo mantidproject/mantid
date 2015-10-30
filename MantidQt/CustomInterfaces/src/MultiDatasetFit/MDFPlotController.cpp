@@ -228,18 +228,53 @@ void PlotController::zoomToRange()
   m_zoomer->zoom(rect);
 }
 
+/// Make a string of python code to be used as 'source, indices' arguments
+/// to plotSpectrum(...)
+QString PlotController::makePyPlotSource(int index) const
+{
+  QString pyCode;
+  auto outputWsorkspaceName = owner()->getOutputWorkspaceName(index);
+  auto wsIndex = owner()->getWorkspaceIndex(index);
+  if (outputWsorkspaceName.isEmpty()) {
+    pyCode = QString("['%1'], %2").arg(owner()->getWorkspaceName(index)).arg(wsIndex);
+  } else {
+    pyCode = QString("['%1'], [0,1,2]").arg(outputWsorkspaceName);
+  }
+  return pyCode;
+}
+
+/// Export i-th plot.
+/// @param index :: Index of a plot to export.
+void PlotController::exportPlot(int index)
+{
+  if (index < 0) return;
+  QString pyInput = "from mantidplot import plotSpectrum\n";
+  pyInput += QString("plotSpectrum(%1)\n").arg(makePyPlotSource(index));
+  owner()->runPythonCode(pyInput);
+}
+
 /// Export current plot
 void PlotController::exportCurrentPlot()
 {
-  if (m_currentIndex < 0) return;
-  QString pyInput = "from mantidplot import plotSpectrum\n";
-  auto outputWsorkspaceName = owner()->getOutputWorkspaceName(m_currentIndex);
-  auto wsIndex = owner()->getWorkspaceIndex(m_currentIndex);
-  if (outputWsorkspaceName.isEmpty()) {
-    pyInput += QString("plotSpectrum(['%1'], %2)\n").arg(owner()->getWorkspaceName(m_currentIndex)).arg(wsIndex);
-  } else {
-    pyInput += QString("plotSpectrum(['%1'], [0,1,2])\n").arg(outputWsorkspaceName);
+  exportPlot(m_currentIndex);
+}
+
+/// Export all plots
+void PlotController::exportAllPlots()
+{
+  int nPlots = owner()->getNumberOfSpectra();
+  if (nPlots <= 0) return;
+  QString pyInput = "from mantidplot import newTiledWindow\n";
+  pyInput += "newTiledWindow(sources=[";
+  for(int index = 0; index < nPlots; ++index)
+  {
+    if (index > 0)
+    {
+      pyInput += ",";
+    }
+    pyInput += QString("(%1)").arg(makePyPlotSource(index));
   }
+  pyInput += "])\n";
   owner()->runPythonCode(pyInput);
 }
 

@@ -63,6 +63,7 @@ public slots:
   void resetRange();
   void zoomToRange();
   void exportCurrentPlot();
+  void exportAllPlots();
 private slots:
   void tableUpdated();
   void prevPlot();
@@ -75,6 +76,8 @@ private:
   template<class Tool>
   void enableTool(Tool* tool, int cursor);
   boost::shared_ptr<DatasetPlotData> getData(int i);
+  void exportPlot(int index);
+  QString makePyPlotSource(int index) const;
 
   /// The plot widget
   QwtPlot *m_plot;
