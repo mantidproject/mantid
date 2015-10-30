@@ -77,6 +77,9 @@ public:
   void setProperties(
       const std::string &propertiesJson,
       const std::set<std::string> &ignoreProperties = std::set<std::string>());
+  void setProperties(const std::string &propertiesJson,
+                     IPropertyManager *targetPropertyManager,
+                     const std::set<std::string> &ignoreProperties);
   void setProperties(
       const ::Json::Value &jsonValue,
       const std::set<std::string> &ignoreProperties = std::set<std::string>());

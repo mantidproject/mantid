@@ -220,11 +220,30 @@ void PropertyManager::declareProperty(Property *p, const std::string &doc) {
 void PropertyManager::setProperties(
     const std::string &propertiesJson,
     const std::set<std::string> &ignoreProperties) {
+  setProperties(propertiesJson,this,ignoreProperties);
+}
+//-----------------------------------------------------------------------------------------------
+/** Set the ordered list of properties by one string of values, separated by
+ *semicolons.
+ *
+ * The string should be a json formatted collection of name value pairs
+ *
+ *  @param propertiesJson :: The string of property values
+ *  @param ignoreProperties :: A set of names of any properties NOT to set
+ *      from the propertiesArray
+ *  @param targetPropertyManager :: the propertymanager to make the changes to,
+ *      most of the time this will be *this
+ *  @throw invalid_argument if error in parameters
+ */
+void PropertyManager::setProperties(
+    const std::string &propertiesJson,
+    IPropertyManager* targetPropertyManager,
+    const std::set<std::string> &ignoreProperties) {
   ::Json::Reader reader;
   ::Json::Value jsonValue;
 
   if (reader.parse(propertiesJson, jsonValue)) {
-    setProperties(jsonValue, ignoreProperties);
+    setProperties(jsonValue, targetPropertyManager, ignoreProperties);
   } else {
     throw std::invalid_argument("propertiesArray was not valid json");
   }
