@@ -105,12 +105,12 @@ protected:
   getFunctionPawley(std::string profileFunctionName,
                     const PoldiPeakCollection_sptr &peakCollection);
 
-  std::string getCrystalSystemFromPointGroup(
+  std::string getLatticeSystemFromPointGroup(
       const Geometry::PointGroup_sptr &pointGroup) const;
 
   std::string
   getRefinedStartingCell(const std::string &initialCell,
-                         const std::string &crystalSystem,
+                         const std::string &latticeSystem,
                          const PoldiPeakCollection_sptr &peakCollection);
 
   std::string getUserSpecifiedTies(const API::IFunction_sptr &poldiFn);
