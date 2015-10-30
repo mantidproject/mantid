@@ -636,12 +636,16 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                    << std::endl;
   }
 
+  // Creates appropriate directory
+  Poco::Path saveDir = outFilesDir("Calibration");
+
   // Double horror: 1st use a python script
   // 2nd: because runPythonCode does this by emitting a signal that goes to
   // MantidPlot,
   // it has to be done in the view (which is a UserSubWindow).
-  Poco::Path outFullPath(cs.m_inputDirCalib);
+  Poco::Path outFullPath(saveDir);
   outFullPath.append(outFilename);
+
   m_view->writeOutCalibFile(outFullPath.toString(), difc, tzero);
   g_log.notice() << "Calibration file written as " << outFullPath.toString()
                  << std::endl;
@@ -1432,7 +1436,7 @@ void EnggDiffractionPresenter::saveFocusedXYE(const std::string inputWorkspace,
       outFileNameFactory(inputWorkspace, runNo, bank, ".dat");
 
   // Creates appropriate directory
-  Poco::Path saveDir = outFilesDir();
+  Poco::Path saveDir = outFilesDir("Focus");
 
   // append the full file name in the end
   saveDir.append(fullFilename);
@@ -1476,7 +1480,7 @@ void EnggDiffractionPresenter::saveGSS(const std::string inputWorkspace,
       outFileNameFactory(inputWorkspace, runNo, bank, ".gss");
 
   // Creates appropriate directory
-  Poco::Path saveDir = outFilesDir();
+  Poco::Path saveDir = outFilesDir("Focus");
 
   // append the full file name in the end
   saveDir.append(fullFilename);
@@ -1523,7 +1527,7 @@ void EnggDiffractionPresenter::saveOpenGenie(const std::string inputWorkspace,
       outFileNameFactory(inputWorkspace, runNo, bank, ".his");
 
   // Creates appropriate directory
-  Poco::Path saveDir = outFilesDir();
+  Poco::Path saveDir = outFilesDir("Focus");
 
   // append the full file name in the end
   saveDir.append(fullFilename);
@@ -1578,7 +1582,7 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
 /**
  * Generates a directory if not found and handles the path
  */
-Poco::Path EnggDiffractionPresenter::outFilesDir() {
+Poco::Path EnggDiffractionPresenter::outFilesDir(std::string addToDir) {
   Poco::Path saveDir;
   std::string rbn = m_view->getRBNumber();
 
@@ -1591,10 +1595,11 @@ Poco::Path EnggDiffractionPresenter::outFilesDir() {
     saveDir.append("EnginX_Mantid");
     saveDir.append("User");
     saveDir.append(rbn);
-    saveDir.append("Focus");
+    saveDir.append(addToDir);
 #else
     // else or for windows run this
-    saveDir = (saveDir).expand("C:/EnginX_Mantid/User/" + rbn + "/Focus/");
+    saveDir =
+        (saveDir).expand("C:/EnginX_Mantid/User/" + rbn + "/" + addToDir + "/");
 #endif
 
     if (!Poco::File(saveDir.toString()).exists()) {
