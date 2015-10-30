@@ -2,6 +2,11 @@
 #define MANTIDQT_API_WIDGETSCROLLBARDECORATOR_H_
 
 //----------------------------------
+// Includes
+//----------------------------------
+#include "MantidKernel/System.h"
+
+//----------------------------------
 // Forward declarations
 //----------------------------------
 class QScrollArea;
@@ -64,7 +69,7 @@ namespace API {
  * you created. So, if you want to access your layout or add more widgets
  * later, you should keep a pointer to it and work with that.
  */
-class WidgetScrollbarDecorator {
+class DLLExport WidgetScrollbarDecorator {
 public:
   explicit WidgetScrollbarDecorator(QWidget *target);
   virtual ~WidgetScrollbarDecorator();

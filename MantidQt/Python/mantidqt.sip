@@ -1487,52 +1487,52 @@ WidgetScrollbarDecorator
 
 public:
     explicit WidgetScrollbarDecorator(QWidget *target);
-    %Docstring
-    WidgetScrollbarDecorator::WidgetScrollbarDecorator(QWidget *target)
-    ------------------------------
-        Constructor. Decorates the target widget to add scrollbars to it.
+%Docstring
+WidgetScrollbarDecorator::WidgetScrollbarDecorator(QWidget *target)
+------------------------------
+    Constructor. Decorates the target widget to add scrollbars to it.
 
-        Scrollbars are disabled by default and must be enabled using:
-        setEnabled(True)
+    Scrollbars are disabled by default and must be enabled using:
+    setEnabled(True)
 
-    %End
+%End
 
     virtual ~WidgetScrollbarDecorator();
 
     bool enabled() const;
     void setEnabled(bool enable);
-    %Docstring
-    WidgetScrollbarDecorator::setEnabled(bool enable)
-    ------------------------------
-        Enables or disables scrollbars on the target widget.
+%Docstring
+WidgetScrollbarDecorator::setEnabled(bool enable)
+------------------------------
+    Enables or disables scrollbars on the target widget.
 
-        Note: setupUi() MUST be called before scrollbars are enabled.
+    Note: setupUi() MUST be called before scrollbars are enabled.
 
-    %End
+%End
 
     void setThresholdWidth(int width);
-    %Docstring
-    setThresholdWidth(int width)
-    ------------------------------
-        Set the width, in pixels, at which scrollbars should appear
+%Docstring
+setThresholdWidth(int width)
+------------------------------
+    Set the width, in pixels, at which scrollbars should appear
 
-    %End
+%End
 
     void setThresholdHeight(int height);
-    %Docstring
-    setThresholdHeight(int height)
-    ------------------------------
-        Set the height, in pixels, at which scrollbars should appear
+%Docstring
+setThresholdHeight(int height)
+------------------------------
+    Set the height, in pixels, at which scrollbars should appear
 
-    %End
+%End
 
     void setThresholdSize(int width, int height);
-    %Docstring
-    setThresholdSize(int width, int height)
-    ------------------------------
-        Set the size, in pixels, at which scrollbars should appear
+%Docstring
+setThresholdSize(int width, int height)
+------------------------------
+    Set the size, in pixels, at which scrollbars should appear
 
-    %End
+%End
 
 };
 
