@@ -11,6 +11,7 @@ set ( SRC_FILES
 	src/Crystal/CrystalStructure.cpp
 	src/Crystal/CyclicGroup.cpp
 	src/Crystal/Group.cpp
+	src/Crystal/GroupTransformation.cpp
 	src/Crystal/HKLFilter.cpp
 	src/Crystal/HKLFilterWavelength.cpp
 	src/Crystal/HKLGenerator.cpp
@@ -148,6 +149,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/CrystalStructure.h
 	inc/MantidGeometry/Crystal/CyclicGroup.h
 	inc/MantidGeometry/Crystal/Group.h
+	inc/MantidGeometry/Crystal/GroupTransformation.h
 	inc/MantidGeometry/Crystal/HKLFilter.h
 	inc/MantidGeometry/Crystal/HKLFilterWavelength.h
 	inc/MantidGeometry/Crystal/HKLGenerator.h
@@ -297,6 +299,7 @@ set ( TEST_FILES
 	GeneralTest.h
 	GoniometerTest.h
 	GroupTest.h
+	GroupTransformationTest.h
 	HKLFilterTest.h
 	HKLFilterWavelengthTest.h
 	HKLGeneratorTest.h
