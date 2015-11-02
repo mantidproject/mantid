@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+﻿#pylint: disable=invalid-name
 from mantid.simpleapi import *
 from mantid import config,api
 from mantid.kernel import funcreturns
@@ -379,14 +379,14 @@ class ReductionWrapper(object):
         timeToWait = self._wait_for_file
         wait_counter=0
         if timeToWait > 0:
-            Found,input_file = PropertyManager.sample_run.find_file(be_quet=True)
+            Found,input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man,be_quet=True)
             while not Found:
                 file_hint,fext = PropertyManager.sample_run.file_hint()
                 self.reducer.prop_man.log("*** Waiting {0} sec for file {1} to appear on the data search path"\
                     .format(timeToWait,file_hint),'notice')
 
                 self._run_pause(timeToWait)
-                Found,input_file = PropertyManager.sample_run.find_file(file_hint=file_hint,be_quet=True)
+                Found,input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man,file_hint=file_hint,be_quet=True)
                 if Found:
                     file,found_ext=os.path.splitext(input_file)
                     if found_ext != fext:

@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+﻿#pylint: disable=invalid-name
 from Direct.PropertiesDescriptors import *
 from Direct.RunDescriptor import RunDescriptor,RunDescriptorDependent
 
@@ -165,13 +165,13 @@ class NonIDF_Properties(object):
                 except KeyError: # the instrument pointer is not found in any facility but we have it after all
                     new_name = instr_name
                     full_name = instr_name
-                    facility_ = 'TEST'
+                    facility_ = config.getFacility('TEST_LIVE')
                 #end
 
 
             elif isinstance(Instrument,str): # instrument name defined
                 new_name,full_name,facility_ = prop_helpers.check_instrument_name(None,Instrument)
-                idf_dir = config.getString('instrumentDefinition.directory')
+                #idf_dir = config.getString('instrumentDefinitgeton.directory')
                 idf_file = api.ExperimentInfo.getInstrumentFilename(full_name)
                 tmp_ws_name = '__empty_' + full_name
                 if not mtd.doesExist(tmp_ws_name):

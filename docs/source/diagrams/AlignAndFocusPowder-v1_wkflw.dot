@@ -52,16 +52,18 @@ digraph AlignAndFocusPowder {
 
   InputWorkspace         -> isEventWorkspace1
 
-  isEventWorkspace1      -> removePromptPulse    [label="Yes"]
-  RemovePromptPulseWidth -> removePromptPulse
-  removePromptPulse      -> compressEvents
+  isEventWorkspace1      -> compressEvents       [label="Yes"]
   CompressTolerance      -> compressEvents
+
   compressEvents         -> cropWorkspace
 
   isEventWorkspace1      -> cropWorkspace        [label="No"]
   CropWaveLengthMin      -> cropWorkspace
+  cropWorkspace          -> removePromptPulse
 
-  cropWorkspace          -> maskDetectors
+  RemovePromptPulseWidth -> removePromptPulse
+
+  removePromptPulse      -> maskDetectors
   MaskWorkspace          -> maskDetectors
   maskDetectors          -> isDspace1
   isDspace1              -> resampleX            [label="Yes"]
