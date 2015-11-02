@@ -226,7 +226,7 @@ void vtkDataSetToNonOrthogonalDataSet::execute() {
   vtkFloatArray *points =
       vtkFloatArray::SafeDownCast(data->GetPoints()->GetData());
   if (points == NULL) {
-    throw std::runtime_error("Failed to cast VtkDataArray to vtkFloatArray.");
+    throw std::runtime_error("Failed to cast vtkDataArray to vtkFloatArray.");
   } else if (points->GetNumberOfComponents() != 3) {
     throw std::runtime_error("points array must have 3 components.");
   }

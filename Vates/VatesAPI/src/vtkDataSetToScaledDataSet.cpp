@@ -91,7 +91,7 @@ vtkDataSetToScaledDataSet::execute(double xScale, double yScale, double zScale,
       vtkFloatArray::SafeDownCast(newPoints->GetData());
 
   if (oldPointsArray == NULL || newPointsArray == NULL) {
-    throw std::runtime_error("Failed to cast VtkDataArray to vtkFloatArray.");
+    throw std::runtime_error("Failed to cast vtkDataArray to vtkFloatArray.");
   } else if (oldPointsArray->GetNumberOfComponents() != 3 ||
              newPointsArray->GetNumberOfComponents() != 3) {
     throw std::runtime_error("points array must have 3 components.");
