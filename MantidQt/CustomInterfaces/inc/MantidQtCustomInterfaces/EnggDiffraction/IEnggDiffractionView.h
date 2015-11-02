@@ -96,9 +96,9 @@ public:
   virtual std::vector<std::string> logMsgs() const = 0;
 
   /**
-   * Username entered by the user
+   * RB Number entered by the user
    *
-   * @return username to log in to the compute resource
+   * @return RB number as string as provided by the user
    */
   virtual std::string getRBNumber() const = 0;
 
@@ -189,6 +189,16 @@ public:
   virtual void writeOutCalibFile(const std::string &outFilename,
                                  const std::vector<double> &difc,
                                  const std::vector<double> &tzero) = 0;
+
+  /**
+   * Enable/disable all the sections or tabs of the interface. To be
+   * used with required parameters, like a valid instrument, a valid
+   * RB number, etc. This should effectively disable/enable all
+   * actions, including calibration, focusing, event mode, etc.
+   *
+   * @param enable true to enable all tabs of the interface
+   */
+  virtual void enableTabs(bool enable) = 0;
 
   /**
    * Enable/disable calibrate+focus actions. The idea is that actions

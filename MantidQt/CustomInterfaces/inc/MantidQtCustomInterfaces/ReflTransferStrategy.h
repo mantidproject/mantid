@@ -5,10 +5,31 @@
 #include <string>
 #include <vector>
 
+namespace Mantid {
+namespace Kernel {
+// Forward dec
+class ProgressBase;
+}
+}
 namespace MantidQt
 {
   namespace CustomInterfaces
   {
+
+  /**
+  * The SearchResult struct provides search metadata information
+  */
+  struct SearchResult {
+    SearchResult() {}
+    SearchResult(const std::string &desc, const std::string &loc)
+        : description(desc), location(loc) {}
+    std::string description;
+    std::string location;
+    std::string issues;
+  };
+
+  /// Helper typdef for map of SearchResults keyed by run
+  typedef std::map<std::string, SearchResult> SearchResultMap;
 
     /** ReflTransferStrategy : Provides an stratgegy for transferring runs from search results to a format suitable for processing.
 
@@ -38,10 +59,31 @@ namespace MantidQt
       virtual ~ReflTransferStrategy() {};
 
       /**
-       * @param runRows : A map where the keys are the runs and the values the descriptions
-       * @returns A vector of maps where each map represents a row, with values for "runs", "theta", and "group"
+       * @param searchResults : A map where the keys are the runs and the values
+       * the
+       * descriptions, location etc.
+       * @param progress : Progress object to notify.
+       * @returns A vector of maps where each map represents a row,
+       * with Keys matching Column headings and Values matching the row entries
+       * for those columns
        */
-      virtual std::vector<std::map<std::string,std::string> > transferRuns(const std::map<std::string,std::string>& runRows) = 0;
+      virtual std::vector<std::map<std::string, std::string>>
+      transferRuns(SearchResultMap &searchResults,
+                   Mantid::Kernel::ProgressBase &progress) = 0;
+
+      /**
+      * Virtual constructor
+      * @return : A new instance of this.
+      */
+      virtual ReflTransferStrategy *clone() const = 0;
+
+      /**
+      * Filter. Individual transfer strategies may veto file types they
+      * do not understand and will be unable to extract metadata for.
+      * @param filename : Full name of the file.
+      * @return True only if the file type is known.
+      */
+      virtual bool knownFileType(const std::string &filename) const = 0;
     };
   }
 }

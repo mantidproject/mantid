@@ -175,18 +175,36 @@ void ApplyPaalmanPings::run() {
   case 1:
     correctionType = "cyl";
     break;
+  case 2:
+    correctionType = "anl";
+	break;
   }
-  QString outputWsName =
-      sampleWsName.left(nameCutIndex) + +"_" + correctionType + "_Corrected";
 
-  if (useCan) {
-    auto containerWsName = m_uiForm.dsContainer->getCurrentDataName();
-    int cutIndex = containerWsName.indexOf("_");
-    if (cutIndex == -1) {
-      cutIndex = containerWsName.length();
-    }
-	outputWsName += "_Subtract_" + containerWsName.left(cutIndex);
+  QString outputWsName = sampleWsName.left(nameCutIndex);
+  // Using corrections
+  if (m_uiForm.ckUseCorrections->isChecked()) {
+    outputWsName += "_" + correctionType + "_Corrected";
+  } else {
+    outputWsName += "_Subtracted";
   }
+
+  // Using container
+  if (m_uiForm.ckUseCan->isChecked()) {
+    auto containerWsName = m_uiForm.dsContainer->getCurrentDataName();
+    MatrixWorkspace_sptr containerWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            containerWsName.toStdString());
+    auto run = containerWs->run();
+    if (run.hasProperty("run_number")) {
+      outputWsName +=
+          "_" + QString::fromStdString(run.getProperty("run_number")->value());
+    } else {
+      auto canCutIndex = containerWsName.indexOf("_");
+      outputWsName += "_" + containerWsName.left(canCutIndex);
+    }
+  }
+
+  outputWsName += "_red";
 
   applyCorrAlg->setProperty("OutputWorkspace", outputWsName.toStdString());
 

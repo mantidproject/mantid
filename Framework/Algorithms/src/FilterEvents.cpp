@@ -39,7 +39,7 @@ FilterEvents::FilterEvents()
     : m_eventWS(), m_splittersWorkspace(), m_matrixSplitterWS(),
       m_detCorrectWorkspace(), m_useTableSplitters(false), m_workGroupIndexes(),
       m_splitters(), m_outputWS(), m_wsNames(), m_detTofOffsets(),
-      m_detTofShifts(), m_FilterByPulseTime(false), m_informationWS(),
+      m_detTofFactors(), m_FilterByPulseTime(false), m_informationWS(),
       m_hasInfoWS(), m_progress(0.), m_outputWSNameBase(), m_toGroupWS(false),
       m_vecSplitterTime(), m_vecSplitterGroup(), m_splitSampleLogs(false),
       m_useDBSpectrum(false), m_dbWSIndex(-1), m_tofCorrType(),
@@ -580,8 +580,8 @@ void FilterEvents::setupDetectorTOFCalibration() {
   setProperty("OutputTOFCorrectionWorkspace", corrws);
 
   // Set up the size of correction and output correction workspace
-  m_detTofOffsets.resize(numhist, 1.0);
-  m_detTofShifts.resize(numhist, 0.0);
+  m_detTofOffsets.resize(numhist, 0.0); // unit of TOF
+  m_detTofFactors.resize(numhist, 1.0); // multiplication factor
 
   // Set up detector values
   std::unique_ptr<TimeAtSampleStrategy> strategy;
@@ -604,10 +604,10 @@ void FilterEvents::setupDetectorTOFCalibration() {
 
         Correction correction = strategy->calculate(i);
         m_detTofOffsets[i] = correction.offset;
-        m_detTofShifts[i] = correction.factor;
+        m_detTofFactors[i] = correction.factor;
 
-        corrws->dataY(i)[0] = correction.offset;
-        corrws->dataY(i)[1] = correction.factor;
+        corrws->dataY(i)[0] = correction.factor;
+        corrws->dataY(i)[1] = correction.offset;
       }
     }
   }
@@ -673,24 +673,26 @@ void FilterEvents::setupCustomizedTOFCorrection() {
     throw runtime_error(errss.str());
   }
 
-  // Parse detector and its TOF offset (i.e., correction) to a map
-  map<detid_t, double> correctmap;
-  map<detid_t, double> shiftmap;
+  // Parse detector and its TOF correction (i.e., offset factor and tof shift)
+  // to a map
+  map<detid_t, double> toffactormap;
+  map<detid_t, double> tofshiftmap;
   size_t numrows = m_detCorrectWorkspace->rowCount();
   for (size_t i = 0; i < numrows; ++i) {
     TableRow row = m_detCorrectWorkspace->getRow(i);
 
     // Parse to map
     detid_t detid;
-    double offset;
-    row >> detid >> offset;
-    if (offset >= 0 && offset <= 1) {
+    double offset_factor;
+    row >> detid >> offset_factor;
+    if (offset_factor >= 0 && offset_factor <= 1) {
       // Valid offset (factor value)
-      correctmap.insert(make_pair(detid, offset));
+      toffactormap.insert(make_pair(detid, offset_factor));
     } else {
       // Error, throw!
       stringstream errss;
-      errss << "Correction (i.e., offset) equal to " << offset << " of row "
+      errss << "Correction (i.e., offset) equal to " << offset_factor
+            << " of row "
             << "is out of range [0, 1].";
       throw runtime_error(errss.str());
     }
@@ -699,22 +701,22 @@ void FilterEvents::setupCustomizedTOFCorrection() {
     if (hasshift) {
       double shift;
       row >> shift;
-      shiftmap.insert(make_pair(detid, shift));
+      tofshiftmap.insert(make_pair(detid, shift));
     }
   } // ENDFOR(row i)
 
   // Check size of TOF correction map
   size_t numhist = m_eventWS->getNumberHistograms();
-  if (correctmap.size() > numhist) {
+  if (toffactormap.size() > numhist) {
     g_log.warning() << "Input correction table workspace has more detectors ("
-                    << correctmap.size() << ") than input workspace "
+                    << toffactormap.size() << ") than input workspace "
                     << m_eventWS->name() << "'s spectra number (" << numhist
                     << ".\n";
-  } else if (correctmap.size() < numhist) {
+  } else if (toffactormap.size() < numhist) {
     stringstream errss;
     errss << "Input correction table workspace has more detectors ("
-          << correctmap.size() << ") than input workspace " << m_eventWS->name()
-          << "'s spectra number (" << numhist << ".\n";
+          << toffactormap.size() << ") than input workspace "
+          << m_eventWS->name() << "'s spectra number (" << numhist << ".\n";
     throw runtime_error(errss.str());
   }
 
@@ -751,9 +753,9 @@ void FilterEvents::setupCustomizedTOFCorrection() {
     for (size_t i = 0; i < numhist; ++i) {
       detid_t detid = vecDetIDs[i];
       // correction (factor) map
-      fiter = correctmap.find(detid);
-      if (fiter != correctmap.end())
-        m_detTofOffsets[i] = fiter->second;
+      fiter = toffactormap.find(detid);
+      if (fiter != toffactormap.end())
+        m_detTofFactors[i] = fiter->second;
       else {
         stringstream errss;
         errss << "Detector "
@@ -763,18 +765,18 @@ void FilterEvents::setupCustomizedTOFCorrection() {
         throw runtime_error(errss.str());
       }
       // correction shift map
-      fiter = shiftmap.find(detid);
-      if (fiter != shiftmap.end())
-        m_detTofShifts[i] = fiter->second;
+      fiter = tofshiftmap.find(detid);
+      if (fiter != tofshiftmap.end())
+        m_detTofOffsets[i] = fiter->second;
     } // ENDFOR (each spectrum i)
   } else {
     // It is spectrum ID already
     map<detid_t, double>::iterator fiter;
     // correction factor
-    for (fiter = correctmap.begin(); fiter != correctmap.end(); ++fiter) {
+    for (fiter = toffactormap.begin(); fiter != toffactormap.end(); ++fiter) {
       size_t wsindex = static_cast<size_t>(fiter->first);
       if (wsindex < numhist)
-        m_detTofOffsets[wsindex] = fiter->second;
+        m_detTofFactors[wsindex] = fiter->second;
       else {
         stringstream errss;
         errss << "Workspace index " << wsindex << " is out of range.";
@@ -782,10 +784,10 @@ void FilterEvents::setupCustomizedTOFCorrection() {
       }
     }
     // correction shift
-    for (fiter = shiftmap.begin(); fiter != shiftmap.end(); ++fiter) {
+    for (fiter = tofshiftmap.begin(); fiter != tofshiftmap.end(); ++fiter) {
       size_t wsindex = static_cast<size_t>(fiter->first);
       if (wsindex < numhist)
-        m_detTofShifts[wsindex] = fiter->second;
+        m_detTofOffsets[wsindex] = fiter->second;
       else {
         stringstream errss;
         errss << "Workspace index " << wsindex << " is out of range.";
@@ -838,7 +840,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
         input_el.splitByPulseTime(m_splitters, outputs);
       } else if (m_tofCorrType != NoneCorrect) {
         input_el.splitByFullTime(m_splitters, outputs, true,
-                                 m_detTofOffsets[iws], m_detTofShifts[iws]);
+                                 m_detTofFactors[iws], m_detTofOffsets[iws]);
       } else {
         input_el.splitByFullTime(m_splitters, outputs, false, 1.0, 0.0);
       }
@@ -947,7 +949,7 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
       } else if (m_tofCorrType != NoneCorrect) {
         logmessage = input_el.splitByFullTimeMatrixSplitter(
             m_vecSplitterTime, m_vecSplitterGroup, outputs, true,
-            m_detTofOffsets[iws], m_detTofShifts[iws]);
+            m_detTofFactors[iws], m_detTofOffsets[iws]);
       } else {
         logmessage = input_el.splitByFullTimeMatrixSplitter(
             m_vecSplitterTime, m_vecSplitterGroup, outputs, false, 1.0, 0.0);

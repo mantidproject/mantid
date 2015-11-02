@@ -58,9 +58,7 @@ class LRScalingFactors(PythonAlgorithm):
                              "Pixel range defining the data peak")
         self.declareProperty(IntArrayProperty("SignalBackgroundPixelRange", [147, 163]),
                              "Pixel range defining the background")
-        self.declareProperty(IntArrayProperty("LowResolutionPixelRange", [94, 160],
-                                              IntArrayLengthValidator(2),
-                                              direction=Direction.Input),
+        self.declareProperty(IntArrayProperty("LowResolutionPixelRange", [94, 160]),
                              "Pixel range defining the region to use in the low-resolution direction")
         self.declareProperty("IncidentMedium", "Air", doc="Name of the incident medium")
         self.declareProperty("FrontSlitName", "S1", doc="Name of the front slit")
@@ -96,6 +94,7 @@ class LRScalingFactors(PythonAlgorithm):
         # Get peak ranges
         peak_range = self.getProperty("SignalPeakPixelRange").value
         background_range = self.getProperty("SignalBackgroundPixelRange").value
+        lowres_range = self.getProperty("LowResolutionPixelRange").value
 
         # Supply good values for peak ranges
         # If we supplied two values, use those boundaries for each run
@@ -118,6 +117,16 @@ class LRScalingFactors(PythonAlgorithm):
                 background_range[2*i+1] = x_max
         elif len(background_range) < 2:
             raise RuntimeError("SignalBackgroundPixelRange should have a length of at least 2.")
+
+        if len(lowres_range)==2:
+            x_min = int(lowres_range[0])
+            x_max = int(lowres_range[1])
+            lowres_range = 2*len(data_runs)*[0]
+            for i in range(len(data_runs)):
+                lowres_range[2*i] = x_min
+                lowres_range[2*i+1] = x_max
+        elif len(lowres_range) < 2:
+            raise RuntimeError("LowResolutionPixelRange should have a length of at least 2.")
 
         # Check that the peak range arrays are of the proper length
         if not (len(peak_range) == 2*len(data_runs) \
@@ -170,9 +179,11 @@ class LRScalingFactors(PythonAlgorithm):
 
             peak = [int(peak_range[2*i]), int(peak_range[2*i+1])]
             background = [int(background_range[2*i]), int(background_range[2*i+1])]
+            low_res = [int(lowres_range[2*i]), int(lowres_range[2*i+1])]
             self.process_data(workspace,
                               peak_range=peak,
-                              background_range=background)
+                              background_range=background,
+                              low_res_range=low_res)
 
             # If we don't have the attenuator information and we have the
             # same slit settings as the previous run, it means we added an
@@ -351,12 +362,13 @@ class LRScalingFactors(PythonAlgorithm):
             fd.write("error_b=%s\n" % item["error_b"])
         fd.close()
 
-    def process_data(self, workspace, peak_range, background_range):
+    def process_data(self, workspace, peak_range, background_range, low_res_range):
         """
             Common processing for both sample data and normalization.
             @param workspace: name of the workspace to work with
             @param peak_range: range of pixels defining the peak
             @param background_range: range of pixels defining the background
+            @param low_res_range: range of pixels in the x-direction
         """
         # Rebin TOF axis
         tof_range = self.getProperty("TOFRange").value
@@ -364,16 +376,11 @@ class LRScalingFactors(PythonAlgorithm):
         workspace = Rebin(InputWorkspace=workspace, Params=[tof_range[0], tof_step, tof_range[1]],
                           PreserveEvents=False, OutputWorkspace=str(workspace))
 
-        # Integrate over low resolution range
-        low_res_range = self.getProperty("LowResolutionPixelRange").value
-        x_min = int(low_res_range[0])
-        x_max = int(low_res_range[1])
-
         # Subtract background
         workspace = LRSubtractAverageBackground(InputWorkspace=workspace,
                                                 PeakRange=peak_range,
                                                 BackgroundRange=background_range,
-                                                LowResolutionRange=[x_min, x_max],
+                                                LowResolutionRange=low_res_range,
                                                 OutputWorkspace=str(workspace))
 
         # Normalize by current proton charge

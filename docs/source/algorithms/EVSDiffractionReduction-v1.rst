@@ -35,7 +35,7 @@ Output:
 
 .. testoutput:: ExEVSDiffractionReductionSimple
 
-    Workspace name: EVS15289_diffspec_red
+    Workspace name: vesuvio15289_diffspec_red
     Number of spectra: 1
     Number of bins: 3875
 

@@ -32,6 +32,7 @@ const bool EnggDiffractionPresenter::g_askUserCalibFilename = false;
 const std::string EnggDiffractionPresenter::g_vanIntegrationWSName =
     "engggui_vanadium_integration_ws";
 int EnggDiffractionPresenter::g_croppedCounter = 0;
+int EnggDiffractionPresenter::g_plottingCounter = 0;
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(NULL), m_calibFinishedOK(false), m_focusFinishedOK(false),
@@ -105,6 +106,10 @@ void EnggDiffractionPresenter::notify(
 
   case IEnggDiffractionPresenter::InstrumentChange:
     processInstChange();
+    break;
+
+  case IEnggDiffractionPresenter::RBNumberChange:
+    processRBNumberChange();
     break;
 
   case IEnggDiffractionPresenter::ShutDown:
@@ -262,9 +267,24 @@ void EnggDiffractionPresenter::processInstChange() {
   m_view->userError("Fatal error", err);
 }
 
+void EnggDiffractionPresenter::processRBNumberChange() {
+  const std::string rbn = m_view->getRBNumber();
+  m_view->enableTabs(validateRBNumber(rbn));
+}
+
 void EnggDiffractionPresenter::processShutDown() {
   m_view->saveSettings();
   cleanup();
+}
+
+/**
+ * Check if an RB number is valid to work with it (retrieve data,
+ * calibrate, focus, etc.).
+ *
+ * @param rbn RB number as given by the user
+ */
+bool EnggDiffractionPresenter::validateRBNumber(const std::string &rbn) const {
+  return !rbn.empty();
 }
 
 /**
@@ -1101,8 +1121,13 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     // TODO: use detector positions (from calibrate full) when available
     // alg->setProperty(DetectorPositions, TableWorkspace)
     alg->execute();
-    // plot Focused workspace according to the data type selected
-    plotFocusedWorkspace(outWSName, boost::lexical_cast<std::string>(bank));
+    g_plottingCounter++;
+    if (outWSName == "engggui_focusing_output_ws_cropped") {
+      plotFocusedWorkspace(outWSName, g_plottingCounter);
+    } else {
+      // plot Focused workspace according to the data type selected
+      plotFocusedWorkspace(outWSName, static_cast<int>(bank));
+    }
   } catch (std::runtime_error &re) {
     g_log.error() << "Error in calibration. ",
         "Could not run the algorithm EnggCalibrate succesfully for bank " +
@@ -1131,14 +1156,23 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
                  << std::endl;
 
   bool saveOutputFiles = m_view->saveOutputFiles();
+
   if (saveOutputFiles) {
-    saveFocusedXYE(outWSName, boost::lexical_cast<std::string>(bank), runNo);
-    saveGSS(outWSName, boost::lexical_cast<std::string>(bank), runNo);
-    saveOpenGenie(outWSName, specNumsOpenGenie,
-                  boost::lexical_cast<std::string>(bank), runNo);
+    try {
+      saveFocusedXYE(outWSName, boost::lexical_cast<std::string>(bank), runNo);
+      saveGSS(outWSName, boost::lexical_cast<std::string>(bank), runNo);
+      saveOpenGenie(outWSName, specNumsOpenGenie,
+                    boost::lexical_cast<std::string>(bank), runNo);
+    } catch (std::runtime_error &re) {
+      g_log.error() << "Error saving focused data. ",
+          "There was an error while saving focused data. "
+          "Error Description: " +
+              std::string(re.what()) +
+              "Please check log messages for more details.";
+      throw;
+    }
   }
 }
-
 /**
  * Produce the two workspaces that are required to apply Vanadium
  * corrections. Try to load them if precalculated results are
@@ -1198,10 +1232,10 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
       throw;
     }
   } else {
-    g_log.notice()
-        << "Found precalculated Vanadium correction features for Vanadium run "
-        << vanNo << ". Re-using these files: " << preIntegFilename << ", and "
-        << preCurvesFilename << std::endl;
+    g_log.notice() << "Found precalculated Vanadium correction features for "
+                      "Vanadium run "
+                   << vanNo << ". Re-using these files: " << preIntegFilename
+                   << ", and " << preCurvesFilename << std::endl;
     try {
       loadVanadiumPrecalcWorkspaces(preIntegFilename, preCurvesFilename,
                                     vanIntegWS, vanCurvesWS);
@@ -1210,7 +1244,8 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
           "The files with precalculated Vanadium corection features (spectra "
           "integration and per-bank curves) were found (with names '" +
               preIntegFilename + "' and '" + preCurvesFilename +
-              "', respectively, but there was a problem with the inputs to the "
+              "', respectively, but there was a problem with the inputs to "
+              "the "
               "load algorithms to load them: " +
               std::string(ia.what());
       throw;
@@ -1221,7 +1256,8 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
               preIntegFilename + "' and '" + preCurvesFilename +
               "', respectively, but there was a problem while loading them. "
               "Please check the log messages for details. You might want to "
-              "delete those files or force recalculations (in settings). Error "
+              "delete those files or force recalculations (in settings). "
+              "Error "
               "details: " +
               std::string(re.what());
       throw;
@@ -1333,7 +1369,8 @@ void EnggDiffractionPresenter::calcVanadiumWorkspaces(
   load->execute();
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   MatrixWorkspace_sptr vanWS = ADS.retrieveWS<MatrixWorkspace>(vanWSName);
-  // TODO?: maybe use setChild() and then load->getProperty("OutputWorkspace");
+  // TODO?: maybe use setChild() and then
+  // load->getProperty("OutputWorkspace");
 
   auto alg = Algorithm::fromString("EnggVanadiumCorrections");
   alg->initialize();
@@ -1358,19 +1395,19 @@ void EnggDiffractionPresenter::calcVanadiumWorkspaces(
  * @param bank the number of bank
  */
 void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName,
-                                                    std::string bank) {
+                                                    int bank) {
   const bool plotFocusedWS = m_view->focusedOutWorkspace();
   int plotType = m_view->currentPlotType();
   if (plotFocusedWS) {
     if (plotType == 0) {
-      if (bank == "1")
+      if (bank == 1)
         m_view->plotFocusedSpectrum(outWSName);
-      if (bank == "2")
+      if (bank >= 2)
         m_view->plotReplacingWindow(outWSName);
     } else if (1 == plotType) {
-      if (bank == "1")
+      if (bank == 1)
         m_view->plotFocusedSpectrum(outWSName);
-      if (bank == "2")
+      if (bank >= 2)
         m_view->plotWaterfallSpectrum(outWSName);
     } else if (2 == plotType) {
       m_view->plotFocusedSpectrum(outWSName);
@@ -1395,7 +1432,7 @@ void EnggDiffractionPresenter::saveFocusedXYE(const std::string inputWorkspace,
       outFileNameFactory(inputWorkspace, runNo, bank, ".dat");
 
   // Creates appropriate directory
-  Poco::Path saveDir = outFilesDir(runNo);
+  Poco::Path saveDir = outFilesDir();
 
   // append the full file name in the end
   saveDir.append(fullFilename);
@@ -1439,7 +1476,7 @@ void EnggDiffractionPresenter::saveGSS(const std::string inputWorkspace,
       outFileNameFactory(inputWorkspace, runNo, bank, ".gss");
 
   // Creates appropriate directory
-  Poco::Path saveDir = outFilesDir(runNo);
+  Poco::Path saveDir = outFilesDir();
 
   // append the full file name in the end
   saveDir.append(fullFilename);
@@ -1486,7 +1523,7 @@ void EnggDiffractionPresenter::saveOpenGenie(const std::string inputWorkspace,
       outFileNameFactory(inputWorkspace, runNo, bank, ".his");
 
   // Creates appropriate directory
-  Poco::Path saveDir = outFilesDir(runNo);
+  Poco::Path saveDir = outFilesDir();
 
   // append the full file name in the end
   saveDir.append(fullFilename);
@@ -1540,11 +1577,11 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
 
 /**
  * Generates a directory if not found and handles the path
- *
- * @param runNo the run number as a string
  */
-Poco::Path EnggDiffractionPresenter::outFilesDir(std::string runNo) {
+Poco::Path EnggDiffractionPresenter::outFilesDir() {
   Poco::Path saveDir;
+  std::string rbn = m_view->getRBNumber();
+
   try {
 
 // takes to the root of directory according to the platform
@@ -1553,11 +1590,11 @@ Poco::Path EnggDiffractionPresenter::outFilesDir(std::string runNo) {
     saveDir = Poco::Path().home();
     saveDir.append("EnginX_Mantid");
     saveDir.append("User");
-    saveDir.append(runNo);
+    saveDir.append(rbn);
     saveDir.append("Focus");
 #else
     // else or for windows run this
-    saveDir = (saveDir).expand("C:/EnginX_Mantid/User/" + runNo + "/Focus/");
+    saveDir = (saveDir).expand("C:/EnginX_Mantid/User/" + rbn + "/Focus/");
 #endif
 
     if (!Poco::File(saveDir.toString()).exists()) {

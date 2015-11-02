@@ -28,22 +28,22 @@ using namespace Kernel;
 
 /// Constructor
 PawleyParameterFunction::PawleyParameterFunction()
-    : ParamFunction(), m_crystalSystem(PointGroup::Triclinic),
+    : ParamFunction(), m_latticeSystem(PointGroup::LatticeSystem::Triclinic),
       m_profileFunctionCenterParameterName() {}
 
 /**
  * @brief Sets the supplied attribute value
  *
  * The function calls ParamFunction::setAttribute, but performs additional
- * actions for CrystalSystem and ProfileFunction.
+ * actions for latticeSystem and ProfileFunction.
  *
  * @param attName :: Name of the attribute
  * @param attValue :: Value of the attribute
  */
 void PawleyParameterFunction::setAttribute(const std::string &attName,
                                            const Attribute &attValue) {
-  if (attName == "CrystalSystem") {
-    setCrystalSystem(attValue.asString());
+  if (attName == "LatticeSystem") {
+    setLatticeSystem(attValue.asString());
   } else if (attName == "ProfileFunction") {
     setProfileFunction(attValue.asString());
   }
@@ -52,41 +52,61 @@ void PawleyParameterFunction::setAttribute(const std::string &attName,
 }
 
 /// Returns the crystal system
-PointGroup::CrystalSystem PawleyParameterFunction::getCrystalSystem() const {
-  return m_crystalSystem;
+PointGroup::LatticeSystem PawleyParameterFunction::getLatticeSystem() const {
+  return m_latticeSystem;
 }
 
 /// Returns a UnitCell object constructed from the function's parameters.
 UnitCell PawleyParameterFunction::getUnitCellFromParameters() const {
-  switch (m_crystalSystem) {
-  case PointGroup::Cubic: {
+  switch (m_latticeSystem) {
+  case PointGroup::LatticeSystem::Cubic: {
     double a = getParameter("a");
-    return UnitCell(a, a, a);
+    double aErr = getError(0);
+    UnitCell uc(a, a, a);
+    uc.setError(aErr, aErr, aErr, 0.0, 0.0, 0.0);
+    return uc;
   }
-  case PointGroup::Tetragonal: {
+  case PointGroup::LatticeSystem::Tetragonal: {
     double a = getParameter("a");
-    return UnitCell(a, a, getParameter("c"));
+    double aErr = getError(0);
+    UnitCell uc(a, a, getParameter("c"));
+    uc.setError(aErr, aErr, getError(1), 0.0, 0.0, 0.0);
+    return uc;
   }
-  case PointGroup::Hexagonal: {
+  case PointGroup::LatticeSystem::Hexagonal: {
     double a = getParameter("a");
-    return UnitCell(a, a, getParameter("c"), 90, 90, 120);
+    double aErr = getError(0);
+    UnitCell uc(a, a, getParameter("c"), 90, 90, 120);
+    uc.setError(aErr, aErr, getError(1), 0.0, 0.0, 0.0);
+    return uc;
   }
-  case PointGroup::Trigonal: {
+  case PointGroup::LatticeSystem::Rhombohedral: {
     double a = getParameter("a");
     double alpha = getParameter("Alpha");
-    return UnitCell(a, a, a, alpha, alpha, alpha);
+    double aErr = getError(0);
+    double alphaErr = getError(1);
+    UnitCell uc(a, a, a, alpha, alpha, alpha);
+    uc.setError(aErr, aErr, aErr, alphaErr, alphaErr, alphaErr);
+    return uc;
   }
-  case PointGroup::Orthorhombic: {
-    return UnitCell(getParameter("a"), getParameter("b"), getParameter("c"));
+  case PointGroup::LatticeSystem::Orthorhombic: {
+    UnitCell uc(getParameter("a"), getParameter("b"), getParameter("c"));
+    uc.setError(getError(0), getError(1), getError(2), 0.0, 0.0, 0.0);
+    return uc;
   }
-  case PointGroup::Monoclinic: {
-    return UnitCell(getParameter("a"), getParameter("b"), getParameter("c"), 90,
-                    getParameter("Beta"), 90);
+  case PointGroup::LatticeSystem::Monoclinic: {
+    UnitCell uc(getParameter("a"), getParameter("b"), getParameter("c"), 90,
+                getParameter("Beta"), 90);
+    uc.setError(getError(0), getError(1), getError(2), 0.0, getError(3), 0.0);
+    return uc;
   }
-  case PointGroup::Triclinic: {
-    return UnitCell(getParameter("a"), getParameter("b"), getParameter("c"),
-                    getParameter("Alpha"), getParameter("Beta"),
-                    getParameter("Gamma"));
+  case PointGroup::LatticeSystem::Triclinic: {
+    UnitCell uc(getParameter("a"), getParameter("b"), getParameter("c"),
+                getParameter("Alpha"), getParameter("Beta"),
+                getParameter("Gamma"));
+    uc.setError(getError(0), getError(1), getError(2), getError(3), getError(4),
+                getError(5));
+    return uc;
   }
   }
 
@@ -143,10 +163,10 @@ void PawleyParameterFunction::functionDeriv(const FunctionDomain &domain,
 
 /// Declares attributes and generates parameters based on the defaults.
 void PawleyParameterFunction::init() {
-  declareAttribute("CrystalSystem", IFunction::Attribute("Triclinic"));
+  declareAttribute("LatticeSystem", IFunction::Attribute("Triclinic"));
   declareAttribute("ProfileFunction", IFunction::Attribute("Gaussian"));
 
-  setCrystalSystem("Triclinic");
+  setLatticeSystem("Triclinic");
   setProfileFunction("Gaussian");
 }
 
@@ -173,44 +193,44 @@ void PawleyParameterFunction::setProfileFunction(
 }
 
 /**
- * Assigns the crystal system
+ * Assigns the lattice system
  *
- * This method takes the name of a crystal system (case insensitive) and stores
+ * This method takes the name of a lattice system (case insensitive) and stores
  * it. Furthermore it creates the necessary parameters, which means that after
  * calling this function, PawleyParameterFunction potentially exposes a
  * different number of parameters. The parameters are constrained to physically
  * meaningful values (angles between 0 and 180 degrees, cell edges above 0).
  *
- * @param crystalSystem :: Crystal system, case insensitive.
+ * @param latticeSystem :: Crystal system, case insensitive.
  */
-void PawleyParameterFunction::setCrystalSystem(
-    const std::string &crystalSystem) {
-  m_crystalSystem = Geometry::getCrystalSystemFromString(crystalSystem);
+void PawleyParameterFunction::setLatticeSystem(
+    const std::string &latticeSystem) {
+  m_latticeSystem = Geometry::getLatticeSystemFromString(latticeSystem);
 
-  createCrystalSystemParameters(m_crystalSystem);
+  createLatticeSystemParameters(m_latticeSystem);
 }
 
 /// This method clears all parameters and declares parameters according to the
 /// supplied crystal system.
-void PawleyParameterFunction::createCrystalSystemParameters(
-    PointGroup::CrystalSystem crystalSystem) {
+void PawleyParameterFunction::createLatticeSystemParameters(
+    PointGroup::LatticeSystem latticeSystem) {
 
   clearAllParameters();
-  switch (crystalSystem) {
-  case PointGroup::Cubic:
+  switch (latticeSystem) {
+  case PointGroup::LatticeSystem::Cubic:
     declareParameter("a", 1.0);
     addLengthConstraint("a");
     break;
 
-  case PointGroup::Hexagonal:
-  case PointGroup::Tetragonal:
+  case PointGroup::LatticeSystem::Hexagonal:
+  case PointGroup::LatticeSystem::Tetragonal:
     declareParameter("a", 1.0);
     declareParameter("c", 1.0);
     addLengthConstraint("a");
     addLengthConstraint("c");
     break;
 
-  case PointGroup::Orthorhombic:
+  case PointGroup::LatticeSystem::Orthorhombic:
     declareParameter("a", 1.0);
     declareParameter("b", 1.0);
     declareParameter("c", 1.0);
@@ -219,7 +239,7 @@ void PawleyParameterFunction::createCrystalSystemParameters(
     addLengthConstraint("c");
     break;
 
-  case PointGroup::Monoclinic:
+  case PointGroup::LatticeSystem::Monoclinic:
     declareParameter("a", 1.0);
     declareParameter("b", 1.0);
     declareParameter("c", 1.0);
@@ -231,7 +251,7 @@ void PawleyParameterFunction::createCrystalSystemParameters(
     addAngleConstraint("Beta");
     break;
 
-  case PointGroup::Trigonal:
+  case PointGroup::LatticeSystem::Rhombohedral:
     declareParameter("a", 1.0);
     declareParameter("Alpha", 90.0);
     addLengthConstraint("a");
@@ -326,8 +346,8 @@ void PawleyFunction::setMatrixWorkspace(
 
 /// Sets the crystal system on the internal parameter function and updates the
 /// exposed parameters
-void PawleyFunction::setCrystalSystem(const std::string &crystalSystem) {
-  m_pawleyParameterFunction->setAttributeValue("CrystalSystem", crystalSystem);
+void PawleyFunction::setLatticeSystem(const std::string &latticeSystem) {
+  m_pawleyParameterFunction->setAttributeValue("LatticeSystem", latticeSystem);
   m_compositeFunction->checkFunction();
 }
 

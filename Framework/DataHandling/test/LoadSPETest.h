@@ -61,7 +61,7 @@ public:
     TS_ASSERT_EQUALS(ws->readX(0)[0], -20.0);
     TS_ASSERT_EQUALS(ws->readX(22)[86], -2.8);
     TS_ASSERT_EQUALS(ws->readX(31)[195], 19.0);
-
+    // verify result is NaN
     TS_ASSERT_DIFFERS(ws->readY(4)[99], ws->readY(4)[99]);
     TS_ASSERT_EQUALS(ws->readY(5)[0], 0.0);
     TS_ASSERT_EQUALS(ws->readY(9)[48], -3.911);

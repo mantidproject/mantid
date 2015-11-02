@@ -1,8 +1,8 @@
 #include "MantidICat/CatalogAlgorithmHelper.h"
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 #include <boost/assign/list_of.hpp>
+#include <json/reader.h>
+#include <json/value.h>
 
 namespace Mantid {
 namespace ICat {
@@ -26,12 +26,13 @@ const std::string CatalogAlgorithmHelper::getIDSError(
   // from the server is not in our successHTTPStatus set.
   if (successHTTPStatus.find(HTTPStatus) == successHTTPStatus.end()) {
     // Stores the contents of `jsonResponseData` as a json property tree.
-    boost::property_tree::ptree json;
+    Json::Value json;
     // Convert the stream to a JSON tree.
-    boost::property_tree::read_json(responseStream, json);
+    Json::Reader json_reader;
+    json_reader.parse(responseStream, json);
     // Return the message returned by the server.
-    return json.get<std::string>("code") + ": " +
-           json.get<std::string>("message");
+    return json.get("code", "UTF-8").asString() + ": " +
+           json.get("message", "UTF-8").asString();
   }
   // No error occurred, so return an empty string for verification.
   return "";
