@@ -347,11 +347,9 @@ void MultipleScatteringCylinderAbsorption::apply_msa_correction(
   const double sigsct = coeff2 * coeff3;
 
   for (size_t j = 0; j < NUM_Y; j++) {
-    double wl_val;
-    if (is_histogram)
-      wl_val = .5*(wavelength[j] + wavelength[j + 1]);
-    else
-      wl_val = wavelength[j];
+    double wl_val = wavelength[j];
+    if (is_histogram) // average with next value
+      wl_val = .5*(wl_val + wavelength[j + 1]);
 
     const double temp = calculate_msa_factor(radius, Q2, sigsct, Z, wl_val);
 
