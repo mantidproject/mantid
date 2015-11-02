@@ -57,7 +57,7 @@ void DataController::addWorkspace()
         auto grp = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>( wsName.toStdString() );
         if ( grp )
         {
-          for(size_t i = 0; i < grp->getNumberOfEntries(); ++i)
+          for(size_t i = 0; i < static_cast<size_t>(grp->getNumberOfEntries()); ++i)
           {
             mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(grp->getItem(i));
             if ( mws )
