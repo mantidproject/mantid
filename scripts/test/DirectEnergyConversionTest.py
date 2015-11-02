@@ -1,4 +1,4 @@
-import os, sys
+﻿import os, sys
 #os.environ["PATH"] = r"c:\Mantid\_builds\br_master\bin\Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
@@ -625,6 +625,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
 
 if __name__=="__main__":
-   #test = DirectEnergyConversionTest('test_sum_monitors')
-   #test.test_sum_monitors()
+   #test = DirectEnergyConversionTest('test_multirep_mode')
+   #test.test_multirep_mode()
    unittest.main()

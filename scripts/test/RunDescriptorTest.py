@@ -575,19 +575,48 @@ class RunDescriptorTest(unittest.TestCase):
         wksp=CreateSampleWorkspace(Function='Multiple Peaks',WorkspaceType='Event',
                                 NumBanks=1, BankPixelWidth=1, NumEvents=1, XUnit='TOF',
                                 XMin=2000, XMax=20000, BinWidth=1)
-        wksp_mon=CreateSampleWorkspace(Function='Multiple Peaks',WorkspaceType='Histogram',
-                                NumBanks=1, BankPixelWidth=1, NumEvents=1, XUnit='TOF',
+        wksp_monitors=CreateSampleWorkspace(Function='Multiple Peaks',WorkspaceType='Histogram',
+                                NumBanks=3, BankPixelWidth=1, NumEvents=1, XUnit='TOF',
                                 XMin=2000, XMax=20000, BinWidth=1)
-        wksp.setMonitorWorkspace(wksp_mon);
+        propman  = self.prop_man
+
+        propman.sample_run = wksp
+
+        fail = False
+        try:
+            mon_ws = wksp.getMonitorWorkspace()
+        except:
+            fail= True
+        self.assertFalse(fail)
+
+        mon_ws = PropertyManager.sample_run.get_monitors_ws()
+        self.assertEqual(mon_ws.name(),'SR_wksp_monitors')
 
         wsr = RenameWorkspace(wksp,OutputWorkspace='Renamed1',RenameMonitors=True)
-        mon_ws = wsr.getMonitorWorkspace()
-        wsr = RenameWorkspace(wksp,OutputWorkspace='Renamed2',RenameMonitors=True)
+        PropertyManager.sample_run.synchronize_ws(wsr)
 
-        mon_ws_name = mon_ws.name()
-        self.assertEquals(mon_ws_name,'Renamed2_monitors')
+        mon_ws = PropertyManager.sample_run.get_monitors_ws()
+        self.assertEqual(mon_ws.name(),'SR_wksp_monitors')
+
+        wsr.clearMonitorWorkspace()
+        fail = False
+        try:
+            mon_ws = wksp.getMonitorWorkspace()
+        except:
+            fail= True
+        self.assertTrue(fail)
+
+        mon_ws = PropertyManager.sample_run.get_monitors_ws()
+
+        fail = False
+        try:
+            mon_ws = wksp.getMonitorWorkspace()
+        except:
+            fail= True
+        self.assertFalse(fail)
+
 
 if __name__=="__main__":
-    #tester=RunDescriptorTest('test_strange_behaviour')
-    #tester.test_strange_behaviour()
+    #tester=RunDescriptorTest('test_monitors_renamed')
+    #tester.test_monitors_renamed()
     unittest.main()

@@ -707,10 +707,10 @@ class RunDescriptor(PropDescriptor):
         new_name = self._build_ws_name()
         old_name = workspace.name()
         if new_name != old_name:
-            # Compartibility with old test code comes here:
-			try:
-            	mon_ws = workspace.getMonitorWorkspace()
-			except RuntimeError:# Its possible that monitor workspace for some reason was not attached
+            # Compatibility with old test code comes here:
+            try:
+                mon_ws = workspace.getMonitorWorkspace()
+            except RuntimeError: # Its possible that monitor workspace for some reason was not attached
                 mon_ws_name = old_name + '_monitors' # to current workspace
                 if mon_ws_name in mtd:
                     mon_ws = mtd[mon_ws_name]
@@ -788,22 +788,27 @@ class RunDescriptor(PropDescriptor):
 #--------------------------------------------------------------------------------------------------------------------
 #pylint: disable=too-many-arguments
     def chop_ws_part(self,origin,tof_range,rebin,chunk_num,n_chunks):
-        """Chop part of the original workspace and sets it up to this run as new original
+        """Chop part of the original workspace and sets it up to this run as new original.
+
            Return the pointer to the original workspace (the chunk has been taken) if the
-           chunk is not the last one, and pointer to last chunk when the last chunk was taken
+           chunk is not the last one, or pointer to last chunk if the last chunk was taken
            (original workspace was destroyed in this case)
         """
         if not origin:
             origin = self.get_workspace()
 
         origin_name = origin.name()
-        # separate monitor's ws 
-        mon_ws = self.get_monitors_ws()
-		#
-		origin_name = origin.name()
-        mon_ws_name = mon_ws.name()
-		if origin_name = mon_ws_name:
-			mon_ws = None
+        # Check separate monitor's ws, attached to origin workspace (not to runWorkspace)
+        try:
+            mon_ws = origin.getMonitorWorkspace()
+        except RuntimeError:
+            mon_ws_name = origin_name+'_monitors'
+            if mon_ws_name in mtd:
+                mon_ws = mtd[mon_ws_name]
+                origin.setMonitorWorkspace(mon_ws)
+            else:
+                mon_ws = None
+        #
 
         target_name = '#{0}/{1}#'.format(chunk_num,n_chunks) + origin_name
         if chunk_num == n_chunks:
@@ -848,16 +853,16 @@ class RunDescriptor(PropDescriptor):
         if not data_ws:
             return None
 
-		try:
-	        mon_ws = data_ws.getMonitorWorkspace()
-		except RuntimeError: # May be old code or some problem connecting workspace with monitor workspace
+        try:
+            mon_ws = data_ws.getMonitorWorkspace()
+        except RuntimeError: # May be old code or some problem connecting workspace with monitor workspace
             ws_name = data_ws.name()
             mon_ws_name = ws_name+'_monitors'
             if mon_ws_name in mtd:
                 mon_ws = mtd[mon_ws_name]
                 data_ws.setMonitorWorkspace(mon_ws) # connect workspace and monitors together
-			else:
-				mon_ws = None
+            else:
+                mon_ws = None
 
         if mon_ws is None:
             monitors_separate = False
@@ -867,7 +872,7 @@ class RunDescriptor(PropDescriptor):
 
         spec_to_mon = RunDescriptor._holder.spectra_to_monitors_list
         if monitors_separate and spec_to_mon:
-			mon_ws_name = mon_ws.name()
+            mon_ws_name = mon_ws.name()
             for specID in spec_to_mon:
                 mon_ws = self.copy_spectrum2monitors(data_ws,mon_ws,specID)
             if mon_ws:
@@ -892,7 +897,7 @@ class RunDescriptor(PropDescriptor):
         #
         for monID in mon_list:
             try:
-#pylint: disable=unused-variable			
+#pylint: disable=unused-variable
                 ws_ind = mon_ws.getIndexFromSpectrumNumber(int(monID))
 #pylint: disable=bare-except
             except:
@@ -1115,7 +1120,7 @@ class RunDescriptor(PropDescriptor):
                         raise RuntimeError('Can not find defined in run {0} calibration file {1}\n'\
                                            'Define det_cal_file reduction parameter properly'.format(loaded_ws.name(),test_name))
                     RunDescriptor._logger('*** load_data: Calibrating data using workspace defined calibration file: {0}'.\
-									      format(ws_calibration),'notice')
+                                            format(ws_calibration),'notice')
             except KeyError: # no det_cal_file defined in workspace
                 if calibration:
                     ws_calibration = calibration
@@ -1184,7 +1189,7 @@ class RunDescriptor(PropDescriptor):
             # Spectra is already in the monitor workspace
             return mon_ws
 # no exception type specified -- do not know what it throws
-#pylint: disable=bare-except			
+#pylint: disable=bare-except
         except:
             try:
                 ws_index = data_ws.getIndexFromSpectrumNumber(spectraID)
@@ -1249,7 +1254,7 @@ class RunDescriptor(PropDescriptor):
             DeleteWorkspace(mon_name)
         if self._run_list:
             ind = self._run_list.add_or_replace_run(self._run_number)
-#pylint: disable=protected-access 			
+#pylint: disable=protected-access
             self._run_file_path = self._run_list._file_path[ind]
             self._fext = self._run_list.get_fext(ind)
 #--------------------------------------------------------------------------------------------------------------------
@@ -1302,9 +1307,9 @@ class RunDescriptor(PropDescriptor):
         if self._run_number:
             instr_name = self._instr_name()
             name = name.replace(instr_name,'',1)
-# Hell knows how to redefine thes warnings or if they are valid or not
+# Hell knows how to redefine these warnings or if they are valid or not
 #pylint: disable=W0141
-#pylint: disable=W0110	
+#pylint: disable=W0110
             self._ws_cname = part_ind + filter(lambda c: not c.isdigit(), name)
         else:
 #pylint: disable=attribute-defined-outside-init		
@@ -1333,9 +1338,9 @@ class RunDescriptor(PropDescriptor):
                 rl = self._run_list
                 self._clear_all()
                 rl.set_last_ind2sum(-1) # this will reset index to default
-# disable attribute defined outside __init__. This is where it value changes, 
-# what to do about it?				
-#pylint: disable=attribute-defined-outside-init				
+# disable attribute defined outside __init__. This is where it value changes,
+# what to do about it?
+#pylint: disable=attribute-defined-outside-init
                 self._run_list = rl
                 run_num,file_path,main_fext,ind = self._run_list.get_current_run_info(new_value)
                 self._run_list.set_last_ind2sum(ind)
@@ -1537,7 +1542,7 @@ class RunDescriptorDependent(RunDescriptor):
     def get_monitors_ws(self,monitor_ID=None,otherWS=None):
         if self._has_own_value:
             return super(RunDescriptorDependent,self).\
-			       get_monitors_ws(monitor_ID,otherWS)
+                   get_monitors_ws(monitor_ID,otherWS)
         else:
             return self._host.get_monitors_ws(monitor_ID,otherWS)
 
@@ -1606,6 +1611,7 @@ class RunDescriptorDependent(RunDescriptor):
             return self._host.export_normalization(other_workspace)
 #--------------------------------------------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------------------------------------------
+
 def build_run_file_name(run_num,inst,file_path='',fext=''):
     """Build the full name of a runfile from all possible components"""
     if fext is None:
@@ -1615,8 +1621,8 @@ def build_run_file_name(run_num,inst,file_path='',fext=''):
     else:
 #pylint: disable=protected-access
         fac = RunDescriptor._holder.facility
-        zero_padding    = fac.instrument(inst).zeroPadding(run_num)
-        run_num_str = str(run_num).zfill(zero_padding)
+        zero_padding = fac.instrument(inst).zeroPadding(run_num)
+        run_num_str  = str(run_num).zfill(zero_padding)
 
     fname = '{0}{1}{2}'.format(inst,run_num_str,fext)
     if not file_path is None:

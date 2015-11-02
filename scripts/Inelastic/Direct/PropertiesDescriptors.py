@@ -524,7 +524,7 @@ class DetCalFile(PropDescriptor):
     def __set__(self,instance,val):
         """ set detector calibration file using various formats """
 
-        if val is None or isinstance(val,api.Workspace) or isinstance(val,str):
+        if val is None or isinstance(val,api.Workspace):
        # nothing provided or workspace provided or filename probably provided
             if str(val) in mtd:
              # workspace name provided
@@ -532,6 +532,20 @@ class DetCalFile(PropDescriptor):
             self._det_cal_file = val
             self._calibrated_by_run = False
             return
+        if isinstance(val,str):
+            if val in mtd:
+                val = mtd[val]
+                self._det_cal_file = val
+                self._calibrated_by_run = False
+                return
+            try:
+                intVal = int(val)
+            except ValueError:
+                self._det_cal_file = val
+                self._calibrated_by_run = False
+                return
+            val = intVal
+
 
 
         if isinstance(val,int):
