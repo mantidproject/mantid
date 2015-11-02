@@ -134,19 +134,19 @@ void vtkDataSetToNonOrthogonalDataSet::execute() {
     API::IMDHistoWorkspace_const_sptr infoWs =
         boost::dynamic_pointer_cast<const API::IMDHistoWorkspace>(ws);
 
-    m_boundingBox[0] = infoWs->getDimension(0)->getMinimum();
-    m_boundingBox[1] = infoWs->getDimension(0)->getMaximum();
-    m_boundingBox[2] = infoWs->getDimension(1)->getMinimum();
-    m_boundingBox[3] = infoWs->getDimension(1)->getMaximum();
-    m_boundingBox[4] = infoWs->getDimension(2)->getMinimum();
-    m_boundingBox[5] = infoWs->getDimension(2)->getMaximum();
+    m_boundingBox[0] = infoWs->getXDimension()->getMinimum();
+    m_boundingBox[1] = infoWs->getXDimension()->getMaximum();
+    m_boundingBox[2] = infoWs->getYDimension()->getMinimum();
+    m_boundingBox[3] = infoWs->getYDimension()->getMaximum();
+    m_boundingBox[4] = infoWs->getZDimension()->getMinimum();
+    m_boundingBox[5] = infoWs->getZDimension()->getMaximum();
 
     m_numDims = infoWs->getNumDims();
-    m_coordType = infoWs->getSpecialCoordinateSystem();
-    if (Kernel::HKL != m_coordType) {
-      throw std::invalid_argument(
-          "Cannot create non-orthogonal view for non-HKL coordinates");
-    }
+    // m_coordType = infoWs->getSpecialCoordinateSystem();
+    // if (Kernel::HKL != m_coordType) {
+    //  throw std::invalid_argument(
+    //      "Cannot create non-orthogonal view for non-HKL coordinates");
+    //}
     const API::Sample sample = infoWs->getExperimentInfo(0)->sample();
     if (!sample.hasOrientedLattice()) {
       throw std::invalid_argument(
@@ -172,6 +172,14 @@ void vtkDataSetToNonOrthogonalDataSet::execute() {
   if (boost::algorithm::find_first(wsType, "MDEventWorkspace")) {
     API::IMDEventWorkspace_const_sptr infoWs =
         boost::dynamic_pointer_cast<const API::IMDEventWorkspace>(ws);
+
+    m_boundingBox[0] = infoWs->getXDimension()->getMinimum();
+    m_boundingBox[1] = infoWs->getXDimension()->getMaximum();
+    m_boundingBox[2] = infoWs->getYDimension()->getMinimum();
+    m_boundingBox[3] = infoWs->getYDimension()->getMaximum();
+    m_boundingBox[4] = infoWs->getZDimension()->getMinimum();
+    m_boundingBox[5] = infoWs->getZDimension()->getMaximum();
+
     m_numDims = infoWs->getNumDims();
     m_coordType = infoWs->getSpecialCoordinateSystem();
     if (Kernel::HKL != m_coordType) {
@@ -203,7 +211,7 @@ void vtkDataSetToNonOrthogonalDataSet::execute() {
   this->createSkewInformation(oLatt, wTrans, affMat);
 
   /// Put together the skew matrix for use
-  double skew[9];
+  float skew[9];
 
   // Create from the internal skew matrix
   std::size_t index = 0;
@@ -214,17 +222,24 @@ void vtkDataSetToNonOrthogonalDataSet::execute() {
     }
   }
 
-  vtkNew<vtkPoints> newPoints;
-  double outPoint[3];
   // Get the original points
-  vtkPoints *points = data->GetPoints();
-  newPoints->Allocate(points->GetNumberOfPoints());
-  for (int i = 0; i < points->GetNumberOfPoints(); i++) {
-    points->GetPoint(i, outPoint);
-    vtkMatrix3x3::MultiplyPoint(skew, outPoint, outPoint);
-    newPoints->InsertNextPoint(outPoint);
+  vtkFloatArray *points =
+      vtkFloatArray::SafeDownCast(data->GetPoints()->GetData());
+  if (points == NULL) {
+    throw std::runtime_error("Failed to cast VtkDataArray to vtkFloatArray.");
+  } else if (points->GetNumberOfComponents() != 3) {
+    throw std::runtime_error("points array must have 3 components.");
   }
-  data->SetPoints(newPoints.GetPointer());
+
+  float *end = points->GetPointer(points->GetNumberOfTuples() * 3);
+  for (float *i = points->GetPointer(0); i < end; std::advance(i, 3)) {
+    float v1 = i[0];
+    float v2 = i[1];
+    float v3 = i[2];
+    i[0] = v1 * skew[0] + v2 * skew[1] + v3 * skew[2];
+    i[1] = v1 * skew[3] + v2 * skew[4] + v3 * skew[5];
+    i[2] = v1 * skew[6] + v2 * skew[7] + v3 * skew[8];
+  }
   this->updateMetaData(data);
 }
 
