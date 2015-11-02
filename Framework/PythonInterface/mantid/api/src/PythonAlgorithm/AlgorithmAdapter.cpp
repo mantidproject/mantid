@@ -86,7 +86,7 @@ bool AlgorithmAdapter<BaseAlgorithm>::checkGroupsDefault() {
  */
 template <typename BaseAlgorithm>
 const std::string AlgorithmAdapter<BaseAlgorithm>::category() const {
-  return CallMethod0<std::string>::dispatchWithDefaultReturn(
+    return CallMethod0<std::string>::dispatchWithDefaultReturn(
       getSelf(), "category", defaultCategory());
 }
 
@@ -96,6 +96,11 @@ const std::string AlgorithmAdapter<BaseAlgorithm>::category() const {
  */
 template <typename BaseAlgorithm>
 std::string AlgorithmAdapter<BaseAlgorithm>::defaultCategory() const {
+  const std::string& name = getSelf()->ob_type->tp_name;
+  int version = CallMethod0<int>::dispatchWithDefaultReturn(getSelf(), "version",
+                                                     defaultVersion());
+  this->getLogger().warning()<<"Python Algorithm "<<name<<" v"<<version<< 
+    " does not have a category defined. See http://www.mantidproject.org/Basic_PythonAlgorithm_Structure" << std::endl;
   return "PythonAlgorithms";
 }
 
