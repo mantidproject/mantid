@@ -37,7 +37,7 @@ void HFIRLoad::init() {
                   "Beam position in Y pixel coordinates");
   declareProperty(
 		  "SampleDetectorDistance", EMPTY_DBL(),
-          "Sample to detector distance to use (overrides meta data), in mm");
+          "Nominal Si-Window to detector distance to use (overrides meta data), in mm");
   declareProperty(
           "SampleSiWindowDistance", EMPTY_DBL(),
           "Sample to Silicon window distance to use (overrides meta data), in mm");
@@ -45,6 +45,10 @@ void HFIRLoad::init() {
 		  "SampleDetectorDistanceOffset", EMPTY_DBL(),
           "Offset to the sample to detector distance (use only when "
           "using the distance found in the meta data), in mm");
+  declareProperty(
+  		  "TotalDetectorDistance", EMPTY_DBL(),
+          "Total detector distance (normally the sum of the three other distances)."
+          "If used, it will ignore the other three distances (in mm)");
 
   // Optionally, we can specify the wavelength and wavelength spread and
   // overwrite
@@ -165,37 +169,53 @@ void HFIRLoad::exec() {
   dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_tmp);
 
   // Get the sample-detector distance
+  // LoadSpice2D provides the properties with distances:
+
   double sdd = 0.0;
-  const double sample_det_dist = getProperty("SampleDetectorDistance");
-
-  if (!isEmpty(sample_det_dist)) {
-	// if SampleDetectorDistance is given as input property
-    sdd = sample_det_dist;
-  } else {
-	// if SampleDetectorDistance comes from the file parsed (i.e. in the run.properties)
-    const std::string sddName = "sample-detector-distance";
-    Mantid::Kernel::Property *prop = dataWS->run().getProperty(sddName);
-    Mantid::Kernel::PropertyWithValue<double> *dp =
-        dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
-    if (!dp) {
-      throw std::runtime_error("Could not cast (interpret) the property " +
-                               sddName + " as a floating point numeric value.");
-    }
-    sdd = *dp;
-
-    // Modify SDD according to offset if given
-    const double sample_det_offset = getProperty("SampleDetectorDistanceOffset");
-    if (!isEmpty(sample_det_offset)) {
-      sdd += sample_det_offset;
-    }
-
-    // Modify SDD according to distance to the silicon window if given
-    const double sample_si_window_distance = getProperty("SampleSiWindowDistance");
-    if (!isEmpty(sample_si_window_distance)) {
-      sdd += sample_si_window_distance;
-    }
-
-  }
+  const double total_det_dist = getProperty("TotalDetectorDistance");
+	if (!isEmpty(total_det_dist)) {
+		// if TotalDetectorDistance is given as input property
+		sdd = total_det_dist;
+	} else {
+		// Otherwise Let's get the other 3 distances
+		  const double sample_det_dist = getProperty("SampleDetectorDistance");
+		  const double sample_si_win_dist = getProperty("SampleSiWindowDistance");
+		  const double sample_det_offset = getProperty("SampleDetectorDistanceOffset");
+		// sample-detector-distance - sample_det_dist
+		if (!isEmpty(sample_det_dist)) {
+			sdd+=sample_det_dist;
+		}
+		else{
+			if (dataWS->run().hasProperty("sample-detector-distance")) {
+				sdd += dataWS->run().getPropertyValueAsType<double>("sample-detector-distance");
+			}
+			else
+				throw std::runtime_error("Property sample-detector-distance not found in the data file. Use input SampleDetectorDistance property instead");
+		}
+		// sample-detector-distance-offset - tank_internal_offset
+		if (!isEmpty(sample_det_offset)) {
+			sdd+=sample_det_offset;
+		}
+		else{
+			if (dataWS->run().hasProperty("sample-detector-distance-offset")) {
+				sdd += dataWS->run().getPropertyValueAsType<double>("sample-detector-distance-offset");
+			}
+			else
+				throw std::runtime_error("Property sample-detector-distance-offset not found in the data file. Use input SampleDetectorDistanceOffset property instead");
+		}
+		// sample-si-window-distance - sample_to_flange
+		if (!isEmpty(sample_si_win_dist)) {
+			sdd += sample_si_win_dist;
+		} else {
+			if (dataWS->run().hasProperty("sample-si-window-distance")) {
+				sdd += dataWS->run().getPropertyValueAsType<double>(
+						"sample-si-window-distance");
+			}
+			else
+				throw std::runtime_error("Property sample-si-window-distance not found in the data file. Use input SampleSiWindowDistance property instead");
+		}
+	}
+  // Not the different name in the overwritten property: sample_detector_distance
   dataWS->mutableRun().addProperty("sample_detector_distance", sdd, "mm", true);
 
   // Move the detector to its correct position
