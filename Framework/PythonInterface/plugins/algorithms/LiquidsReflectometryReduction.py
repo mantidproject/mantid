@@ -156,6 +156,8 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
 
         # Get scattering angle theta
         theta = self.calculate_scattering_angle(ws_event_data)
+        two_theta_degrees = 2.0*theta*180.0/math.pi
+        AddSampleLog(Workspace=ws_event_data, LogName='two_theta', LogText=str(two_theta_degrees), LogType='Number')
 
         # ----- Process Sample Data -------------------------------------------
         crop_request = self.getProperty("LowResDataAxisPixelRangeFlag").value
@@ -195,8 +197,10 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             AnalysisDataService.remove(str(data_cropped))
             AnalysisDataService.remove(str(norm_cropped))
             AnalysisDataService.remove(str(norm_summed))
+            AddSampleLog(Workspace=normalized_data, LogName='normalization_run', LogText=str(normalizationRunNumber))
         else:
             normalized_data = data_cropped
+            AddSampleLog(Workspace=normalized_data, LogName='normalization_run', LogText="None")
 
         # At this point, the workspace should be considered a distribution of points
         normalized_data = ConvertToPointData(InputWorkspace=normalized_data,
@@ -229,6 +233,17 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         constant = 4e-4 * math.pi * m * source_detector_distance / h * math.sin(theta)
         q_range = [qMin, qStep, constant / TOFrange[0] * 1.2]
 
+        q_min_from_data = constant / TOFrange[1]
+        q_max_from_data = constant / TOFrange[0]
+        AddSampleLog(Workspace=q_workspace, LogName='q_min', LogText=str(q_min_from_data), LogType='Number')
+        AddSampleLog(Workspace=q_workspace, LogName='q_max', LogText=str(q_max_from_data), LogType='Number')
+
+        tof_to_lambda = 1.0e4 * h / (m * source_detector_distance)
+        lambda_min = tof_to_lambda * TOFrange[0]
+        lambda_max = tof_to_lambda * TOFrange[1]
+        AddSampleLog(Workspace=q_workspace, LogName='lambda_min', LogText=str(lambda_min), LogType='Number')
+        AddSampleLog(Workspace=q_workspace, LogName='lambda_max', LogText=str(lambda_max), LogType='Number')
+
         data_x = q_workspace.dataX(0)
         for i in range(len(data_x)):
             data_x[i] = constant / data_x[i]
@@ -248,6 +263,8 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                                                       ErrorValue=primary_fraction[1])
             q_rebin = Multiply(LHSWorkspace=q_rebin, RHSWorkspace=ws_fraction,
                                OutputWorkspace=name_output_ws)
+        AddSampleLog(Workspace=q_rebin, LogName='primary_fraction', LogText=str(primary_fraction[0]), LogType='Number')
+        AddSampleLog(Workspace=q_rebin, LogName='primary_fraction_error', LogText=str(primary_fraction[1]), LogType='Number')
 
         # Replace NaNs by zeros
         q_rebin = ReplaceSpecialValues(InputWorkspace=q_rebin,
@@ -304,7 +321,6 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                 AnalysisDataService.remove(ws)
 
         self.setProperty('OutputWorkspace', mtd[name_output_ws])
-
 
     def calculate_scattering_angle(self, ws_event_data):
         """
@@ -524,10 +540,10 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             b = float(data_found['b'])
             a_error = float(data_found['error_a'])
             b_error = float(data_found['error_b'])
-            AddSampleLog(Workspace=workspace, LogName='scaling_factor_a', LogText=str(a))
-            AddSampleLog(Workspace=workspace, LogName='scaling_factor_b', LogText=str(b))
-            AddSampleLog(Workspace=workspace, LogName='scaling_factor_a_error', LogText=str(a_error))
-            AddSampleLog(Workspace=workspace, LogName='scaling_factor_b_error', LogText=str(b_error))
+            AddSampleLog(Workspace=workspace, LogName='scaling_factor_a', LogText=str(a), LogType='Number')
+            AddSampleLog(Workspace=workspace, LogName='scaling_factor_b', LogText=str(b), LogType='Number')
+            AddSampleLog(Workspace=workspace, LogName='scaling_factor_a_error', LogText=str(a_error), LogType='Number')
+            AddSampleLog(Workspace=workspace, LogName='scaling_factor_b_error', LogText=str(b_error), LogType='Number')
 
             # Extract a single spectrum, just so we have the TOF axis
             # to create a normalization workspace
@@ -549,6 +565,5 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         else:
             logger.error("Could not find scaling factor for %s" % str(workspace))
         return workspace
-
 
 AlgorithmFactory.subscribe(LiquidsReflectometryReduction)

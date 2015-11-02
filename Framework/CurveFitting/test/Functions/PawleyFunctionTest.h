@@ -23,85 +23,100 @@ public:
   static PawleyFunctionTest *createSuite() { return new PawleyFunctionTest(); }
   static void destroySuite(PawleyFunctionTest *suite) { delete suite; }
 
-  void testCrystalSystem() {
+  void testLatticeSystem() {
     PawleyParameterFunction fn;
     fn.initialize();
 
-    TS_ASSERT(fn.hasAttribute("CrystalSystem"));
+    TS_ASSERT(fn.hasAttribute("LatticeSystem"));
 
     // Cubic, check case insensitivity
-    TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("CrystalSystem", "cubic"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Cubic);
-    TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("CrystalSystem", "Cubic"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Cubic);
-    TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("CrystalSystem", "CUBIC"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Cubic);
+    TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("LatticeSystem", "cubic"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(), PointGroup::LatticeSystem::Cubic);
+    TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("LatticeSystem", "Cubic"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(), PointGroup::LatticeSystem::Cubic);
+    TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("LatticeSystem", "CUBIC"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(), PointGroup::LatticeSystem::Cubic);
 
     // Tetragonal
     TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("CrystalSystem", "tetragonal"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Tetragonal);
+        fn.setAttributeValue("LatticeSystem", "tetragonal"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
+                     PointGroup::LatticeSystem::Tetragonal);
     TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("CrystalSystem", "Tetragonal"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Tetragonal);
+        fn.setAttributeValue("LatticeSystem", "Tetragonal"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
+                     PointGroup::LatticeSystem::Tetragonal);
     TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("CrystalSystem", "TETRAGONAL"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Tetragonal);
+        fn.setAttributeValue("LatticeSystem", "TETRAGONAL"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
+                     PointGroup::LatticeSystem::Tetragonal);
 
     // Hexagonal
     TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("CrystalSystem", "hexagonal"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Hexagonal);
+        fn.setAttributeValue("LatticeSystem", "hexagonal"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
+                     PointGroup::LatticeSystem::Hexagonal);
     TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("CrystalSystem", "Hexagonal"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Hexagonal);
+        fn.setAttributeValue("LatticeSystem", "Hexagonal"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
+                     PointGroup::LatticeSystem::Hexagonal);
     TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("CrystalSystem", "HEXAGONAL"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Hexagonal);
+        fn.setAttributeValue("LatticeSystem", "HEXAGONAL"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
+                     PointGroup::LatticeSystem::Hexagonal);
 
     // Orthorhombic
     TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("CrystalSystem", "orthorhombic"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Orthorhombic);
+        fn.setAttributeValue("LatticeSystem", "orthorhombic"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
+                     PointGroup::LatticeSystem::Orthorhombic);
     TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("CrystalSystem", "Orthorhombic"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Orthorhombic);
+        fn.setAttributeValue("LatticeSystem", "Orthorhombic"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
+                     PointGroup::LatticeSystem::Orthorhombic);
     TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("CrystalSystem", "ORTHORHOMBIC"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Orthorhombic);
+        fn.setAttributeValue("LatticeSystem", "ORTHORHOMBIC"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
+                     PointGroup::LatticeSystem::Orthorhombic);
 
     // Monoclinic
     TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("CrystalSystem", "monoclinic"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Monoclinic);
+        fn.setAttributeValue("LatticeSystem", "monoclinic"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
+                     PointGroup::LatticeSystem::Monoclinic);
     TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("CrystalSystem", "Monoclinic"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Monoclinic);
+        fn.setAttributeValue("LatticeSystem", "Monoclinic"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
+                     PointGroup::LatticeSystem::Monoclinic);
     TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("CrystalSystem", "MONOCLINIC"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Monoclinic);
+        fn.setAttributeValue("LatticeSystem", "MONOCLINIC"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
+                     PointGroup::LatticeSystem::Monoclinic);
 
     // Triclinic
     TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("CrystalSystem", "triclinic"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Triclinic);
+        fn.setAttributeValue("LatticeSystem", "triclinic"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
+                     PointGroup::LatticeSystem::Triclinic);
     TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("CrystalSystem", "Triclinic"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Triclinic);
+        fn.setAttributeValue("LatticeSystem", "Triclinic"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
+                     PointGroup::LatticeSystem::Triclinic);
     TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("CrystalSystem", "TRICLINIC"));
-    TS_ASSERT_EQUALS(fn.getCrystalSystem(), PointGroup::Triclinic);
+        fn.setAttributeValue("LatticeSystem", "TRICLINIC"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
+                     PointGroup::LatticeSystem::Triclinic);
 
     // invalid string
-    TS_ASSERT_THROWS(fn.setAttributeValue("CrystalSystem", "invalid"),
+    TS_ASSERT_THROWS(fn.setAttributeValue("LatticeSystem", "invalid"),
                      std::invalid_argument);
   }
 
-  void testCrystalSystemConstraintsCubic() {
+  void testLatticeSystemConstraintsCubic() {
     PawleyParameterFunction fn;
     fn.initialize();
 
-    fn.setAttributeValue("CrystalSystem", "Cubic");
+    fn.setAttributeValue("LatticeSystem", "Cubic");
 
     TS_ASSERT_EQUALS(fn.nParams(), 2);
 
@@ -118,11 +133,11 @@ public:
     cellParametersAre(cell, 3.0, 3.0, 3.0, 90.0, 90.0, 90.0);
   }
 
-  void testCrystalSystemConstraintsTetragonal() {
+  void testLatticeSystemConstraintsTetragonal() {
     PawleyParameterFunction fn;
     fn.initialize();
 
-    fn.setAttributeValue("CrystalSystem", "Tetragonal");
+    fn.setAttributeValue("LatticeSystem", "Tetragonal");
 
     TS_ASSERT_EQUALS(fn.nParams(), 3);
 
@@ -140,11 +155,11 @@ public:
     cellParametersAre(cell, 3.0, 3.0, 5.0, 90.0, 90.0, 90.0);
   }
 
-  void testCrystalSystemConstraintsHexagonal() {
+  void testLatticeSystemConstraintsHexagonal() {
     PawleyParameterFunction fn;
     fn.initialize();
 
-    fn.setAttributeValue("CrystalSystem", "Hexagonal");
+    fn.setAttributeValue("LatticeSystem", "Hexagonal");
 
     TS_ASSERT_EQUALS(fn.nParams(), 3);
 
@@ -162,11 +177,11 @@ public:
     cellParametersAre(cell, 3.0, 3.0, 5.0, 90.0, 90.0, 120.0);
   }
 
-  void testCrystalSystemConstraintsTrigonal() {
+  void testLatticeSystemConstraintsRhombohedral() {
     PawleyParameterFunction fn;
     fn.initialize();
 
-    fn.setAttributeValue("CrystalSystem", "Trigonal");
+    fn.setAttributeValue("LatticeSystem", "Rhombohedral");
 
     TS_ASSERT_EQUALS(fn.nParams(), 3);
 
@@ -184,11 +199,11 @@ public:
     cellParametersAre(cell, 3.0, 3.0, 3.0, 101.0, 101.0, 101.0);
   }
 
-  void testCrystalSystemConstraintsOrthorhombic() {
+  void testLatticeSystemConstraintsOrthorhombic() {
     PawleyParameterFunction fn;
     fn.initialize();
 
-    fn.setAttributeValue("CrystalSystem", "Orthorhombic");
+    fn.setAttributeValue("LatticeSystem", "Orthorhombic");
 
     TS_ASSERT_EQUALS(fn.nParams(), 4);
 
@@ -207,11 +222,11 @@ public:
     cellParametersAre(cell, 3.0, 4.0, 5.0, 90.0, 90.0, 90.0);
   }
 
-  void testCrystalSystemConstraintsMonoclinic() {
+  void testLatticeSystemConstraintsMonoclinic() {
     PawleyParameterFunction fn;
     fn.initialize();
 
-    fn.setAttributeValue("CrystalSystem", "Monoclinic");
+    fn.setAttributeValue("LatticeSystem", "Monoclinic");
 
     TS_ASSERT_EQUALS(fn.nParams(), 5);
 
@@ -231,11 +246,11 @@ public:
     cellParametersAre(cell, 3.0, 4.0, 5.0, 90.0, 101.0, 90.0);
   }
 
-  void testCrystalSystemConstraintsTriclinic() {
+  void testLatticeSystemConstraintsTriclinic() {
     PawleyParameterFunction fn;
     fn.initialize();
 
-    fn.setAttributeValue("CrystalSystem", "Triclinic");
+    fn.setAttributeValue("LatticeSystem", "Triclinic");
 
     TS_ASSERT_EQUALS(fn.nParams(), 7);
 
@@ -260,7 +275,7 @@ public:
     PawleyParameterFunction fn;
     fn.initialize();
 
-    fn.setAttributeValue("CrystalSystem", "Triclinic");
+    fn.setAttributeValue("LatticeSystem", "Triclinic");
 
     UnitCell cell(3., 4., 5., 101., 111., 103.);
 
@@ -273,7 +288,7 @@ public:
     TS_ASSERT_EQUALS(fn.getParameter("Beta"), 111.0);
     TS_ASSERT_EQUALS(fn.getParameter("Gamma"), 103.0);
 
-    fn.setAttributeValue("CrystalSystem", "Cubic");
+    fn.setAttributeValue("LatticeSystem", "Cubic");
 
     cell.seta(5.43);
     TS_ASSERT_THROWS_NOTHING(fn.setParametersFromUnitCell(cell));
@@ -308,13 +323,13 @@ public:
     TS_ASSERT_EQUALS(fn.nParams(), 7);
   }
 
-  void testPawleyFunctionSetCrystalSystem() {
+  void testPawleyFunctionSetLatticeSystem() {
     PawleyFunction fn;
     fn.initialize();
 
     TS_ASSERT_EQUALS(fn.nParams(), 7);
 
-    fn.setCrystalSystem("Cubic");
+    fn.setLatticeSystem("Cubic");
 
     TS_ASSERT_EQUALS(fn.nParams(), 2);
   }
@@ -424,7 +439,7 @@ public:
 
     PawleyFunction_sptr pawleyFn = boost::make_shared<PawleyFunction>();
     pawleyFn->initialize();
-    pawleyFn->setCrystalSystem("Cubic");
+    pawleyFn->setLatticeSystem("Cubic");
     pawleyFn->addPeak(V3D(1, 1, 1), 0.0065, 35.0);
     pawleyFn->addPeak(V3D(2, 2, 0), 0.0045, 110.0);
     pawleyFn->setUnitCell("5.4295 5.4295 5.4295");
@@ -460,7 +475,7 @@ public:
 
     PawleyFunction_sptr pawleyFn = boost::make_shared<PawleyFunction>();
     pawleyFn->initialize();
-    pawleyFn->setCrystalSystem("Cubic");
+    pawleyFn->setLatticeSystem("Cubic");
     pawleyFn->addPeak(V3D(1, 1, 1), 0.0065, 35.0);
     pawleyFn->addPeak(V3D(2, 2, 0), 0.0045, 115.0);
     pawleyFn->addPeak(V3D(3, 1, 1), 0.0035, 115.0);

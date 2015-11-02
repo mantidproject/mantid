@@ -108,7 +108,13 @@ Plots: will replace the previous graph and plot a new graph on top.
 One Window - Waterfall: will plot all the generated focused
 workspace graphs in one window which can be useful while comparing
 various graphs. The Multiple Windows: will plot graph in
-separate windows.
+separate windows. However, user may also change the Plot Data
+Representation drop-down box while a run is being carried out. This
+will update the interface and plot workspace according to the new
+given input. For example, if a user has selected One Window -
+Replacing Plots and then decides to change it to One Window -
+Waterfall during a run, the interface will carry on by plotting
+Waterfall within the same window.
 
 The user also has an option of generated GSS, XYE and OpenGenie
 formatted file by clicking the Output Files checkbox. This will

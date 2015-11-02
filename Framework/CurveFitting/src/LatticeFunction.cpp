@@ -27,10 +27,10 @@ void LatticeFunction::functionLattice(const LatticeDomain &latticeDomain,
 
 /// Assigns the crystal system to the internally stored function. Number of
 /// parameters may change after this function call.
-void LatticeFunction::setCrystalSystem(const std::string &crystalSystem) {
+void LatticeFunction::setLatticeSystem(const std::string &crystalSystem) {
   throwIfNoFunctionSet();
 
-  m_cellParameters->setAttributeValue("CrystalSystem", crystalSystem);
+  m_cellParameters->setAttributeValue("LatticeSystem", crystalSystem);
 }
 
 /// Sets the unit cell parameters from a string that can be parsed by
