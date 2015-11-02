@@ -74,7 +74,7 @@ bool WidgetScrollbarDecorator::enabled() const { return m_enabled; }
  *
  * Since this class works with three widgets (the target widget, the viewport
  * inside of the scrollable area, and an offscreen dummy widget) and only two
- * layout (the layout of the target widget and the layout that contains the
+ * layouts (the layout of the target widget and the layout that contains the
  * scrollarea), there is always one widget that has no layout.
  *
  * When scrolling is enabled, m_offscreen is empty.
