@@ -98,7 +98,10 @@ vtkDataSetToScaledDataSet::execute(double xScale, double yScale, double zScale,
   }
 
   // only cast once;
-  float Scale[3] {static_cast<float>(xScale),static_cast<float>(yScale),static_cast<float>(zScale)};
+  float Scale[3];
+  Scale[0] = static_cast<float>(xScale);
+  Scale[1] = static_cast<float>(yScale);
+  Scale[2] = static_cast<float>(zScale);
   vtkIdType numberElements = points->GetNumberOfPoints() * 3;
   float *end = oldPointsArray->GetPointer(numberElements);
   float *newPoint = newPointsArray->WritePointer(0, numberElements);
