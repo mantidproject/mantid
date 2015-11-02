@@ -83,6 +83,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
     ConvolutionFitSequentialTest.h
+    HFIRLoadTest.h
 	LoadEventAndCompressTest.h
 	MuonCalculateAsymmetryTest.h
 	MuonLoadTest.h
