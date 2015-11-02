@@ -70,13 +70,13 @@ public:
     AnalysisDataService::Instance().add("TestInputWS", wksp);
 
     // convert to wavelength
-    auto convertUnitsAlg
-            = Mantid::API::FrameworkManager::Instance().createAlgorithm("ConvertUnits");
+    auto convertUnitsAlg =
+        Mantid::API::FrameworkManager::Instance().createAlgorithm(
+            "ConvertUnits");
     convertUnitsAlg->setPropertyValue("InputWorkspace", "TestInputWS");
     convertUnitsAlg->setPropertyValue("OutputWorkspace", "TestInputWS");
     convertUnitsAlg->setProperty("Target", "Wavelength");
     convertUnitsAlg->execute();
-
 
     // create and execute the algorithm
     Mantid::Algorithms::MultipleScatteringCylinderAbsorption algorithm_c;
@@ -139,14 +139,17 @@ public:
   }
 
   void testCalculationEvent() {
-    const std::string outName("MultipleScatteringCylinderAbsorptionEventOutput");
+    const std::string outName(
+        "MultipleScatteringCylinderAbsorptionEventOutput");
 
     // setup the test workspace
     EventWorkspace_sptr wksp =
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 1,
                                                                         false);
-    wksp->getAxis(0)->setUnit("Wavelength"); // cheat and set the units to Wavelength
-    wksp->getEventList(0).convertTof(.09,1.); // convert to be from 1->10 (about)
+    wksp->getAxis(0)
+        ->setUnit("Wavelength"); // cheat and set the units to Wavelength
+    wksp->getEventList(0)
+        .convertTof(.09, 1.); // convert to be from 1->10 (about)
     const std::size_t NUM_EVENTS = wksp->getNumberEvents();
     AnalysisDataService::Instance().add(outName, wksp);
 
@@ -165,8 +168,8 @@ public:
     // quick checks on the output workspace
     MatrixWorkspace_sptr outputWS;
     TS_ASSERT_THROWS_NOTHING(
-                outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-                    outName));
+        outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outName));
     wksp = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
     TS_ASSERT(wksp);
     TS_ASSERT_EQUALS(wksp->getNumberEvents(), NUM_EVENTS);

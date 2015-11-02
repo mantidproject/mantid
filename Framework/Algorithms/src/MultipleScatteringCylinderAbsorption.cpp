@@ -90,8 +90,7 @@ void MultipleScatteringCylinderAbsorption::init() {
   wsValidator->add<InstrumentValidator>();
 
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
-                      "InputWorkspace", "", Direction::Input,
-                      wsValidator),
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace.");
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
                       "OutputWorkspace", "", Direction::Output),
@@ -162,18 +161,19 @@ void MultipleScatteringCylinderAbsorption::exec() {
       boost::dynamic_pointer_cast<EventWorkspace>(in_WS);
   if (in_WSevent) {
     MatrixWorkspace_sptr out_WS = getProperty("OutputWorkspace");
-    EventWorkspace_sptr out_WSevent = boost::dynamic_pointer_cast<EventWorkspace>(out_WS);
+    EventWorkspace_sptr out_WSevent =
+        boost::dynamic_pointer_cast<EventWorkspace>(out_WS);
 
     // not in-place so create a new copy
     if (in_WSevent != out_WSevent) {
-        out_WSevent = boost::dynamic_pointer_cast<EventWorkspace>(
-            API::WorkspaceFactory::Instance().create(
-                "EventWorkspace", in_WSevent->getNumberHistograms(), 2, 1));
-        // Copy geometry over.
-        API::WorkspaceFactory::Instance().initializeFromParent(
-            in_WSevent, out_WSevent, false);
-        // You need to copy over the data as well.
-        out_WSevent->copyDataFrom((*in_WSevent));
+      out_WSevent = boost::dynamic_pointer_cast<EventWorkspace>(
+          API::WorkspaceFactory::Instance().create(
+              "EventWorkspace", in_WSevent->getNumberHistograms(), 2, 1));
+      // Copy geometry over.
+      API::WorkspaceFactory::Instance().initializeFromParent(
+          in_WSevent, out_WSevent, false);
+      // You need to copy over the data as well.
+      out_WSevent->copyDataFrom((*in_WSevent));
     }
 
     // convert to weighted events
@@ -196,8 +196,8 @@ void MultipleScatteringCylinderAbsorption::exec() {
       eventList.getWeights(y_vec);
       eventList.getWeightErrors(err_vec);
 
-      apply_msa_correction(tth_rad, radius, coeff1, coeff2, coeff3,
-                           tof_vec, y_vec, err_vec);
+      apply_msa_correction(tth_rad, radius, coeff1, coeff2, coeff3, tof_vec,
+                           y_vec, err_vec);
 
       std::vector<WeightedEventNoTime> &events =
           eventList.getWeightedEventsNoTime();
@@ -231,8 +231,8 @@ void MultipleScatteringCylinderAbsorption::exec() {
       MantidVec y_vec = in_WS->readY(index);
       MantidVec err_vec = in_WS->readE(index);
 
-      apply_msa_correction(tth_rad, radius, coeff1, coeff2, coeff3,
-                           tof_vec, y_vec, err_vec);
+      apply_msa_correction(tth_rad, radius, coeff1, coeff2, coeff3, tof_vec,
+                           y_vec, err_vec);
 
       out_WS->dataX(index).assign(tof_vec.begin(), tof_vec.end());
       out_WS->dataY(index).assign(y_vec.begin(), y_vec.end());
@@ -349,7 +349,7 @@ void MultipleScatteringCylinderAbsorption::apply_msa_correction(
   for (size_t j = 0; j < NUM_Y; j++) {
     double wl_val = wavelength[j];
     if (is_histogram) // average with next value
-      wl_val = .5*(wl_val + wavelength[j + 1]);
+      wl_val = .5 * (wl_val + wavelength[j + 1]);
 
     const double temp = calculate_msa_factor(radius, Q2, sigsct, Z, wl_val);
 

@@ -68,10 +68,12 @@ private:
   void exec();
 
   /// MultipleScatteringCylinderAbsorption correction calculation.
-  void apply_msa_correction(const double angle_deg, const double radius, const double coeff1,
-                            const double coeff2, const double coeff3,
+  void apply_msa_correction(const double angle_deg, const double radius,
+                            const double coeff1, const double coeff2,
+                            const double coeff3,
                             const std::vector<double> &wavelength,
-                            std::vector<double> &y_val, std::vector<double> &errors);
+                            std::vector<double> &y_val,
+                            std::vector<double> &errors);
 };
 
 } // namespace Algorithm
