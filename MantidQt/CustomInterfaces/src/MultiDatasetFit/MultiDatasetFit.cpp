@@ -91,6 +91,7 @@ void MultiDatasetFit::initLayout()
   connect(m_functionBrowser,SIGNAL(localParameterButtonClicked(const QString&)),this,SLOT(editLocalParameterValues(const QString&)));
   connect(m_functionBrowser,SIGNAL(functionStructureChanged()),this,SLOT(reset()));
   connect(m_functionBrowser,SIGNAL(globalsChanged()),this,SLOT(checkFittingType()));
+  connect(m_functionBrowser,SIGNAL(globalsChanged()),this,SLOT(setParameterNamesForPlotting()));
   connect(m_plotController,SIGNAL(currentIndexChanged(int)),m_functionBrowser,SLOT(setCurrentDataset(int)));
   connect(m_dataController,SIGNAL(spectraRemoved(QList<int>)),m_functionBrowser,SLOT(removeDatasets(QList<int>)));
   connect(m_dataController,SIGNAL(spectraAdded(int)),m_functionBrowser,SLOT(addDatasets(int)));
@@ -569,6 +570,7 @@ void MultiDatasetFit::reset()
 {
   m_functionBrowser->resetLocalParameters();
   m_functionBrowser->setNumberOfDatasets( getNumberOfSpectra() );
+  setParameterNamesForPlotting();
 }
 
 /// Check if a local parameter is fixed
@@ -669,6 +671,12 @@ void MultiDatasetFit::setLogNames()
     catch (...) 
     {/*Maybe the data table hasn't updated yet*/}
   }
+}
+
+/// Collect names of local parameters and pass them to m_fitOptionsBrowser.
+void MultiDatasetFit::setParameterNamesForPlotting()
+{
+  m_fitOptionsBrowser->setParameterNamesForPlotting(m_functionBrowser->getLocalParameters());
 }
 
 /// Remove old output from Fit.

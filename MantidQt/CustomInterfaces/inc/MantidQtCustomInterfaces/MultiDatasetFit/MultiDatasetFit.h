@@ -99,6 +99,7 @@ private slots:
   void exportAllPlots();
   void checkFittingType();
   void setLogNames();
+  void setParameterNamesForPlotting();
   void invalidateOutput();
 
 protected:
