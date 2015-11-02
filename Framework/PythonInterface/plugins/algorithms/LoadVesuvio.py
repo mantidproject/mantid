@@ -363,7 +363,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 out_name, out_mon = SUMMED_WS + 'tmp', SUMMED_MON + 'tmp'
 
             # Load data
-            file = FileFinder.findRuns(run)
+            file = FileFinder.findRuns(run)[0]
             ms.LoadRaw(Filename=file,
                        SpectrumList=spectra,
                        OutputWorkspace=out_name,
