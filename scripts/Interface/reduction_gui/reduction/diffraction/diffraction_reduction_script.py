@@ -5,6 +5,7 @@
     be used independently of the interface implementation
 """
 import os
+from mantid.kernel import Logger
 from reduction_gui.reduction.scripter import BaseReductionScripter
 
 class DiffractionReductionScripter(BaseReductionScripter):
@@ -44,7 +45,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
         dbmsg = '[SNS Powder Reduction]  Facility = %s,  Instrument = %s\n' \
                 'Auto-save Directory %s' % (self.facility_name, self.instrument_name,
                        mantidconfigdir)
-        print dbmsg
+        Logger("DiffractionReductionScripter").debug(str(dbmsg))
 
         return
 
@@ -197,7 +198,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
                     if filterdict["LogValueInterval"] != "":
                         # Filter by log value interval
                         script += "%sLogValueInterval       = '%s',\n" % (
-                                DiffractionReductionScripter.WIDTH, 
+                                DiffractionReductionScripter.WIDTH,
                                 filterdict["LogValueInterval"])
                     script += "%sLogBoundary    = '%s',\n" % (
                             DiffractionReductionScripter.WIDTH, filterdict["LogBoundary"])
@@ -412,4 +413,3 @@ class DiffractionReductionScripter(BaseReductionScripter):
                 self.instrument_name = observer._subject._instrument_name
 
         return
-

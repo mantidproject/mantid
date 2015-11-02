@@ -6,6 +6,7 @@ from PyQt4 import QtGui, uic, QtCore
 from functools import partial
 from reduction_gui.widgets.base_widget import BaseWidget
 import reduction_gui.widgets.util as util
+from mantid.kernel import Logger
 
 from reduction_gui.reduction.diffraction.diffraction_run_setup_script import RunSetupScript
 import ui.diffraction.ui_diffraction_run_setup
@@ -43,7 +44,9 @@ class RunSetupWidget(BaseWidget):
         self._instrument_name = settings.instrument_name
         self._facility_name = settings.facility_name
 
-        print '[DB] run_setup: facility = ', self._facility_name, 'instrument = ', self._instrument_name
+        msg='run_setup: facility = %s instrument = % s' % \
+            (self._facility_name, self._instrument_name)
+        Logger("RunSetupWidget").debug(str(msg))
 
         self._content = RunSetFrame(self)
         self._layout.addWidget(self._content)
