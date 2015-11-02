@@ -48,14 +48,18 @@ void export_PropertyWithValueOptionalBool() {
   private:
     OptionalBool fromPyObj(const boost::python::object &value) const {
       OptionalBool target;
-      extract<OptionalBool> asDirect(value);
-      extract<OptionalBool::Value> asEnum(value);
+      const extract<OptionalBool> asDirect(value);
+      const extract<OptionalBool::Value> asEnum(value);
+      const extract<bool> asBool(value);
 
       if (asDirect.check()) {
         target = asDirect();
       } else if (asEnum.check()) {
         target = OptionalBool(asEnum());
-      } else {
+      } else if (asBool.check()) {
+        target = OptionalBool(asBool());
+      }
+      else {
         throw std::invalid_argument("Unknown conversion to OptionalBool");
       }
       return target;
@@ -97,7 +101,4 @@ void export_PropertyWithValueOptionalBool() {
   };
 
   Registry::TypeRegistry::subscribe<OptionalBoolPropertyValueHandler>();
-
-  // Registry::TypeRegistry::subscribe<Registry::TypedPropertyValueHandler<OptionalBool>
-  // >();
 }
