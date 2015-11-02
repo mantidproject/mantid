@@ -182,7 +182,9 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
   QObject::connect(&m_rebinnedSourcesManager, SIGNAL(switchSources(std::string, std::string)),
                    this, SLOT(onSwitchSources(std::string, std::string)));
 
-
+  //reset the qt error redirection that Paraview puts in place
+  // this may not be necessary if we move to qt5
+  qInstallMsgHandler(0);
 }
 
 /**

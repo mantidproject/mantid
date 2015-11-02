@@ -171,6 +171,10 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   // --------- Rescaler --------------------
   m_rescaler = new QwtPlotRescaler(m_plot->canvas());
+  
+  //reset the qt error redirection that Paraview puts in place
+  // this may not be necessary if we move to qt5
+  qInstallMsgHandler(0);
 }
 
 void SliceViewer::updateAspectRatios() {
