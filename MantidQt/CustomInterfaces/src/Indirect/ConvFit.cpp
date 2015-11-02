@@ -119,8 +119,10 @@ void ConvFit::setup() {
   m_properties["DeltaFunction"] = m_grpManager->addProperty("Delta Function");
   m_properties["UseDeltaFunc"] = m_blnManager->addProperty("Use");
   m_properties["DeltaHeight"] = m_dblManager->addProperty("Height");
+  m_properties["DeltaCentre"] = m_dblManager->addProperty("Centre");
   m_dblManager->setDecimals(m_properties["DeltaHeight"], NUM_DECIMALS);
   m_properties["DeltaFunction"]->addSubProperty(m_properties["UseDeltaFunc"]);
+  m_dblManager->setDecimals(m_properties["DeltaCentre"], NUM_DECIMALS);
   m_cfTree->addProperty(m_properties["DeltaFunction"]);
 
   // Fit functions
@@ -1103,7 +1105,8 @@ void ConvFit::singleFit() {
       runPythonCode(
           QString(
               "from IndirectCommon import getWSprefix\nprint getWSprefix('") +
-          m_cfInputWSName + QString("')\n")).trimmed();
+          m_cfInputWSName + QString("')\n"))
+          .trimmed();
   m_singleFitOutputName +=
       QString("conv_") + fitType + bgType + m_uiForm.spPlotSpectrum->text();
   int maxIterations =
@@ -1333,9 +1336,14 @@ void ConvFit::checkBoxUpdate(QtProperty *prop, bool checked) {
       m_properties["DeltaFunction"]->addSubProperty(
           m_properties["DeltaHeight"]);
       m_dblManager->setValue(m_properties["DeltaHeight"], 1.0000);
+      m_properties["DeltaFunction"]->addSubProperty(
+          m_properties["DeltaCentre"]);
+      m_dblManager->setValue(m_properties["DeltaCentre"], 0.0000);
     } else {
       m_properties["DeltaFunction"]->removeSubProperty(
           m_properties["DeltaHeight"]);
+      m_properties["DeltaFunction"]->removeSubProperty(
+          m_properties["DeltaCentre"]);
     }
   } else if (prop == m_properties["UseFABADA"]) {
     if (checked) {
