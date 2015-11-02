@@ -1,7 +1,8 @@
 #pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init
 from IndirectImport import *
 
-from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, WorkspaceGroupProperty
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode,
+                        WorkspaceGroupProperty, Progress)
 from mantid.kernel import StringListValidator, Direction
 from mantid.simpleapi import *
 from mantid import config, logger
@@ -142,18 +143,19 @@ class BayesQuasi(PythonAlgorithm):
                                    C2Se, QuasiPlot)
         from IndirectCommon import (CheckXrange, CheckAnalysers, getEfixed, GetThetaQ,
                                     CheckHistZero, CheckHistSame)
-
+        setup_prog = Progress(self, start=0.0, end=0.3, nreports = 5)
         self.log().information('BayesQuasi input')
 
         erange = [self._e_min, self._e_max]
         nbins = [self._sam_bins, self._res_bins]
-
+        setup_prog.report('Converting to binary for Fortran')
         #convert true/false to 1/0 for fortran
         o_el = 1 if self._elastic else 0
         o_w1 = 1 if self._width else 0
         o_res = 1 if self._res_norm else 0
 
         #fortran code uses background choices defined using the following numbers
+        setup_prog.report('Encoding input options')
         if self._background == 'Sloping':
             o_bgd = 2
         elif self._background == 'Flat':
@@ -163,12 +165,14 @@ class BayesQuasi(PythonAlgorithm):
 
         fitOp = [o_el, o_bgd, o_w1, o_res]
 
+        setup_prog.report('Establishing save path')
         workdir = config['defaultsave.directory']
         if not os.path.isdir(workdir):
             workdir = os.getcwd()
             logger.information('Default Save directory is not set. Defaulting to current working Directory: ' + workdir)
 
         array_len = 4096                           # length of array in Fortran
+        setup_prog.report('Checking X Range')
         CheckXrange(erange,'Energy')
 
         nbin,nrbin = nbins[0], nbins[1]
@@ -176,7 +180,9 @@ class BayesQuasi(PythonAlgorithm):
         logger.information('Sample is ' + self._samWS)
         logger.information('Resolution is ' + self._resWS)
 
+        setup_prog.report('Checking Analysers')
         CheckAnalysers(self._samWS,self._resWS)
+        setup_prog.report('Obtaining EFixed, theta and Q')
         efix = getEfixed(self._samWS)
         theta, Q = GetThetaQ(self._samWS)
 
@@ -190,6 +196,7 @@ class BayesQuasi(PythonAlgorithm):
 
         nres = CheckHistZero(self._resWS)[0]
 
+        setup_prog.report('Checking Histograms')
         if self._program == 'QL':
             if nres == 1:
                 prog = 'QLr'                        # res file
@@ -206,9 +213,11 @@ class BayesQuasi(PythonAlgorithm):
         logger.information(' Number of spectra = '+str(nsam))
         logger.information(' Erange : '+str(erange[0])+' to '+str(erange[1]))
 
+        setup_prog.report('Reading files')
         Wy,We = ReadWidthFile(self._width,self._wfile,totalNoSam)
         dtn,xsc = ReadNormFile(self._res_norm,self._resnormWS,totalNoSam)
 
+        setup_prog.report('Establishing output workspace name')
         fname = self._samWS[:-4] + '_'+ prog
         probWS = fname + '_Prob'
         fitWS = fname + '_Fit'
@@ -219,6 +228,7 @@ class BayesQuasi(PythonAlgorithm):
         wrkr=self._resWS
         wrkr.ljust(140,' ')
 
+        setup_prog.report('Initialising probability list')
         # initialise probability list
         if self._program == 'QL':
             prob0 = []
@@ -233,6 +243,7 @@ class BayesQuasi(PythonAlgorithm):
         eProb = np.zeros(3*nsam)
 
         group = ''
+        workflow_prog = Progress(self, start=0.3, end=0.7, nreports=nsam*3)
         for m in range(0,nsam):
             logger.information('Group ' +str(m)+ ' at angle '+ str(theta[m]))
             nsp = m+1
@@ -250,18 +261,21 @@ class BayesQuasi(PythonAlgorithm):
             reals = [efix, theta[m], rscl, bnorm]
 
             if prog == 'QLr':
+                workflow_prog.report('Running QLr for input %i' % nsam)
                 nd,xout,yout,eout,yfit,yprob=QLr.qlres(numb,Xv,Yv,Ev,reals,fitOp,
                                                        Xdat,Xb,Yb,Wy,We,dtn,xsc,
                                                        wrks,wrkr,lwrk)
                 message = ' Log(prob) : '+str(yprob[0])+' '+str(yprob[1])+' '+str(yprob[2])+' '+str(yprob[3])
                 logger.information(message)
             if prog == 'QLd':
+                workflow_prog.report('Running QLd for input %i' % nsam)
                 nd,xout,yout,eout,yfit,yprob=QLd.qldata(numb,Xv,Yv,Ev,reals,fitOp,
                                                         Xdat,Xb,Yb,Eb,Wy,We,
                                                         wrks,wrkr,lwrk)
                 message = ' Log(prob) : '+str(yprob[0])+' '+str(yprob[1])+' '+str(yprob[2])+' '+str(yprob[3])
                 logger.information(message)
             if prog == 'QSe':
+                workflow_prog.report('Running QSe for input %i' % nsam)
                 nd,xout,yout,eout,yfit,yprob=Qse.qlstexp(numb,Xv,Yv,Ev,reals,fitOp,\
                                                         Xdat,Xb,Yb,Wy,We,dtn,xsc,\
                                                         wrks,wrkr,lwrk)
@@ -271,6 +285,7 @@ class BayesQuasi(PythonAlgorithm):
             dataF1 = yfit_list[1]
             if self._program == 'QL':
                 dataF2 = yfit_list[2]
+            workflow_prog.report('Processing data')
             dataG = np.zeros(nd)
             datX = dataX
             datY = yout[:nd]
@@ -286,6 +301,7 @@ class BayesQuasi(PythonAlgorithm):
             names = 'data,fit.1,diff.1'
             res_plot = [0, 1, 2]
             if self._program == 'QL':
+                workflow_prog.report('Processing QL data')
                 datX = np.append(datX,dataX)
                 datY = np.append(datY,dataF2[:nd])
                 datE = np.append(datE,dataG)
@@ -304,15 +320,19 @@ class BayesQuasi(PythonAlgorithm):
             fitWS = fname+'_Workspaces'
             fout = fname+'_Workspace_'+ str(m)
 
+            workflow_prog.report('Creating OutputWorkspace')
             CreateWorkspace(OutputWorkspace=fout, DataX=datX, DataY=datY, DataE=datE,\
                 Nspec=nsp, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues=names)
 
             # append workspace to list of results
             group += fout + ','
 
+        comp_prog = Progress(self, start=0.7, end=0.8, nreports=2)
+        comp_prog.report('Creating Group Workspace')
         GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS)
 
         if self._program == 'QL':
+            comp_prog.report('Processing QLr probability data')
             yPr0 = np.array([prob0[0]])
             yPr1 = np.array([prob1[0]])
             yPr2 = np.array([prob2[0]])
@@ -329,28 +349,38 @@ class BayesQuasi(PythonAlgorithm):
             if self._plot != 'None':
                 QuasiPlot(fname,self._plot,res_plot,self._loop)
         if self._program == 'QSe':
+            comp_prog.report('Runnning C2Se')
             outWS = C2Se(fname)
             if self._plot != 'None':
                 QuasiPlot(fname,self._plot,res_plot,self._loop)
 
+        log_prog = Progress(self, start=0.8, end =1.0, nreports=8)
         #Add some sample logs to the output workspaces
+        log_prog.report('Copying Logs to outputWorkspace')
         CopyLogs(InputWorkspace=self._samWS, OutputWorkspace=outWS)
+        log_prog.report('Adding Sample logs to QL output workspace')
         QLAddSampleLogs(outWS, self._resWS, prog, self._background, self._elastic, erange,
                         (nbin, nrbin), self._resnormWS, self._wfile)
+        log_prog.report('Copying logs to fit Workspace')
         CopyLogs(InputWorkspace=self._samWS, OutputWorkspace=fitWS)
+        log_prog.report('Adding sample logs to QL fit workspace')
         QLAddSampleLogs(fitWS, self._resWS, prog, self._background, self._elastic, erange,
                         (nbin, nrbin), self._resnormWS, self._wfile)
+        log_prog.report('Finialising log copying')
 
         if self._save:
+            log_prog.report('Saving workspaces')
             fit_path = os.path.join(workdir,fitWS+'.nxs')
             SaveNexusProcessed(InputWorkspace=fitWS, Filename=fit_path)
             out_path = os.path.join(workdir, outWS+'.nxs')                    # path name for nxs file
             SaveNexusProcessed(InputWorkspace=outWS, Filename=out_path)
             logger.information('Output fit file created : ' + fit_path)
             logger.information('Output paramter file created : ' + out_path)
+            log_prog.report('Files Saved')
 
         self.setProperty('OutputWorkspaceFit', fitWS)
         self.setProperty('OutputWorkspaceResult', outWS)
+        log_prog.report('Setting workspace properties')
 
         if self._program == 'QL':
             self.setProperty('OutputWorkspaceProb', probWS)

@@ -196,7 +196,7 @@ private:
                                  std::string bank, std::string format);
 
   // generates a directory if not found and handles the path
-  Poco::Path outFilesDir(std::string runNo);
+  Poco::Path outFilesDir();
 
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;

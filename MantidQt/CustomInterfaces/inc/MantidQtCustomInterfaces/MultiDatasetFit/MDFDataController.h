@@ -45,7 +45,7 @@ class DataController: public QObject
   Q_OBJECT
 public:
   DataController(MultiDatasetFit *parent, QTableWidget *dataTable);
-  std::string getWorkspaceName(int i) const;
+  QString getWorkspaceName(int i) const;
   int getWorkspaceIndex(int i) const;
   int getNumberOfSpectra() const;
   void checkSpectra();
