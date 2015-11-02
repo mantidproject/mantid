@@ -637,7 +637,7 @@ class PropertyManager(NonIDF_Properties):
         for prop in changed_prop:
             try:
                 theProp =getattr(PropertyManager,prop)
-#pylint: disable=W0702
+#pylint: disable=bare-except
             except: # not all changed properties are property manager properties
                 continue # we are not validating them
             try:
@@ -653,7 +653,7 @@ class PropertyManager(NonIDF_Properties):
                         self.log(mess,'warning')
                     else:
                         error_list[prop]=mess
-#pylint: disable=W0702
+#pylint: disable=bare-except
             except: # its simple dictionary value, which do not have validator or
                 pass # other property without validator
         #end

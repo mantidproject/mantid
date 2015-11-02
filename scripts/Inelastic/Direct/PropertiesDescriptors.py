@@ -13,6 +13,7 @@ from mantid import api,geometry,config
 import numpy as np
 
 import Direct.ReductionHelpers as prop_helpers
+#pylint: disable=unused-import
 import Direct.CommonFunctions as common
 from collections import Iterable
 
@@ -25,6 +26,7 @@ class PropDescriptor(object):
     def dependencies(self):
         """Returns the list of other properties names, this property depends on"""
         return []
+#pylint: disable=unused-argument		
     def validate(self,instance, owner):
         """Interface to validate property descriptor,
            provided to check properties interaction before long run
@@ -1176,7 +1178,7 @@ class MonoCorrectionFactor(PropDescriptor):
         self._cor_factor = value
     #
         if value is None:
-#pylint: disable=W0212
+#pylint: disable=protected-access
             self._mono_run_prop._in_cash = False # enable monovan run validation if any
     #
     def set_val_to_cash(self,instance,value):
@@ -1330,7 +1332,7 @@ class RotationAngle(PropDescriptor):
                 working_ws = mtd[external_ws]
 
         value = None
-#pylint: disable=W0212
+#pylint: disable=protected-access
         log_names = self._motor_log._log_names
         for name in log_names:
             try:
@@ -1344,7 +1346,7 @@ class RotationAngle(PropDescriptor):
         """Independent method to read rotation angle from workspace and
          previously set log and offset parameters
         """
-#pylint: disable=W0212
+#pylint: disable=protected-access
         offset = self._mot_offset._offset
         if offset is None:
             return np.NaN

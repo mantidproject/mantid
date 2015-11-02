@@ -148,9 +148,7 @@ class NonIDF_Properties(object):
     #
 
     def _set_instrument_and_facility(self,Instrument,run_workspace=None):
-        """simple method used to obtain default instrument for testing """
-        # TODO: implement advanced instrument setter, used in DirectEnergy
-        # conversion
+        """Obtain default instrument and facility and store it in properties"""
 
         if run_workspace:
             instrument = run_workspace.getInstrument()

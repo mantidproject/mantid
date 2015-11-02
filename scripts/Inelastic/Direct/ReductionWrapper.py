@@ -544,9 +544,9 @@ def MainProperties(main_prop_definition):
         prop_dict = main_prop_definition(*args)
         #print "in decorator: ",properties
         host = args[0]
-#pylint: disable=access-to-protected-member
+#pylint: disable=protected-access
         if not host._run_from_web: # property run locally
-#pylint: disable=access-to-protected-member
+#pylint: disable=protected-access
             host._wvs.standard_vars = prop_dict
             host.reducer.prop_man.set_input_parameters(**prop_dict)
         return prop_dict
