@@ -321,8 +321,8 @@ WorkspaceGroup_sptr PolarizationCorrection::execPA(WorkspaceGroup_sptr inWS) {
   dataOut->addWorkspace(nIpa);
   dataOut->addWorkspace(nIap);
   dataOut->addWorkspace(nIaa);
-
-  for (size_t i = 1; i < dataOut->getNumberOfEntries(); i++) {
+  size_t totalGroupEntries(dataOut->getNumberOfEntries());
+  for (size_t i = 1; i < totalGroupEntries; i++) {
     auto alg = this->createChildAlgorithm("ReplaceSpecialValues");
     alg->setProperty("InputWorkspace", dataOut->getItem(i));
     alg->setProperty("OutputWorkspace",
