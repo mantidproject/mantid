@@ -97,15 +97,16 @@ vtkDataSetToScaledDataSet::execute(double xScale, double yScale, double zScale,
     throw std::runtime_error("points array must have 3 components.");
   }
 
+  // only cast once;
+  float Scale[3] {static_cast<float>(xScale),static_cast<float>(yScale),static_cast<float>(zScale)};
   vtkIdType numberElements = points->GetNumberOfPoints() * 3;
-
   float *end = oldPointsArray->GetPointer(numberElements);
   float *newPoint = newPointsArray->WritePointer(0, numberElements);
   for (float *oldPoint = oldPointsArray->GetPointer(0); oldPoint < end;
        std::advance(oldPoint, 3), std::advance(newPoint, 3)) {
-    newPoint[0] = xScale * oldPoint[0];
-    newPoint[1] = yScale * oldPoint[1];
-    newPoint[2] = zScale * oldPoint[2];
+    newPoint[0] = Scale[0] * oldPoint[0];
+    newPoint[1] = Scale[1] * oldPoint[1];
+    newPoint[2] = Scale[2] * oldPoint[2];
   }
 
   // Shallow copy the input.

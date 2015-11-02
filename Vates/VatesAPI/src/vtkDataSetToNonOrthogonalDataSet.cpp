@@ -211,13 +211,13 @@ void vtkDataSetToNonOrthogonalDataSet::execute() {
   this->createSkewInformation(oLatt, wTrans, affMat);
 
   /// Put together the skew matrix for use
-  float skew[9];
+  Mantid::coord_t skew[9];
 
   // Create from the internal skew matrix
   std::size_t index = 0;
   for (std::size_t i = 0; i < m_skewMat.numRows(); i++) {
     for (std::size_t j = 0; j < m_skewMat.numCols(); j++) {
-      skew[index] = m_skewMat[i][j];
+      skew[index] = static_cast<Mantid::coord_t>(m_skewMat[i][j]);
       index++;
     }
   }
@@ -232,13 +232,13 @@ void vtkDataSetToNonOrthogonalDataSet::execute() {
   }
 
   float *end = points->GetPointer(points->GetNumberOfTuples() * 3);
-  for (float *i = points->GetPointer(0); i < end; std::advance(i, 3)) {
-    float v1 = i[0];
-    float v2 = i[1];
-    float v3 = i[2];
-    i[0] = v1 * skew[0] + v2 * skew[1] + v3 * skew[2];
-    i[1] = v1 * skew[3] + v2 * skew[4] + v3 * skew[5];
-    i[2] = v1 * skew[6] + v2 * skew[7] + v3 * skew[8];
+  for (float *it = points->GetPointer(0); it < end; std::advance(it, 3)) {
+    float v1 = it[0];
+    float v2 = it[1];
+    float v3 = it[2];
+    it[0] = v1 * skew[0] + v2 * skew[1] + v3 * skew[2];
+    it[1] = v1 * skew[3] + v2 * skew[4] + v3 * skew[5];
+    it[2] = v1 * skew[6] + v2 * skew[7] + v3 * skew[8];
   }
   this->updateMetaData(data);
 }

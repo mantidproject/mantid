@@ -144,25 +144,25 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
 
   vtkNew<vtkPoints> points;
 
-  float in[2];
+  Mantid::coord_t in[2];
 
-  const float maxX = m_workspace->getXDimension()->getMaximum();
-  const float minX = m_workspace->getXDimension()->getMinimum();
-  const float maxY = m_workspace->getYDimension()->getMaximum();
-  const float minY = m_workspace->getYDimension()->getMinimum();
-  const float maxZ = m_workspace->getZDimension()->getMaximum();
-  const float minZ = m_workspace->getZDimension()->getMinimum();
+  const coord_t maxX = m_workspace->getXDimension()->getMaximum();
+  const coord_t minX = m_workspace->getXDimension()->getMinimum();
+  const coord_t maxY = m_workspace->getYDimension()->getMaximum();
+  const coord_t minY = m_workspace->getYDimension()->getMinimum();
+  const coord_t maxZ = m_workspace->getZDimension()->getMaximum();
+  const coord_t minZ = m_workspace->getZDimension()->getMinimum();
 
-  const float incrementX = (maxX - minX) / static_cast<float>(nBinsX);
-  const float incrementY = (maxY - minY) / static_cast<float>(nBinsY);
-  const float incrementZ = (maxZ - minZ) / static_cast<float>(nBinsZ);
+  const coord_t incrementX = (maxX - minX) / static_cast<coord_t>(nBinsX);
+  const coord_t incrementY = (maxY - minY) / static_cast<coord_t>(nBinsY);
+  const coord_t incrementZ = (maxZ - minZ) / static_cast<coord_t>(nBinsZ);
 
-  vtkIdType nPointsX = nBinsX + 1;
-  vtkIdType nPointsY = nBinsY + 1;
-  vtkIdType nPointsZ = nBinsZ + 1;
+  const vtkIdType nPointsX = nBinsX + 1;
+  const vtkIdType nPointsY = nBinsY + 1;
+  const vtkIdType nPointsZ = nBinsZ + 1;
 
   vtkFloatArray *pointsarray = vtkFloatArray::SafeDownCast(points->GetData());
-  float *i = pointsarray->WritePointer(0, nPointsX * nPointsY * nPointsZ * 3);
+  float *it = pointsarray->WritePointer(0, nPointsX * nPointsY * nPointsZ * 3);
   // Array with the point IDs (only set where needed)
   progressFactor = 0.5 / static_cast<double>(nPointsZ);
   double progressOffset = 0.5;
@@ -170,16 +170,16 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
     // Report progress updates for the last 50%
     progressUpdate.eventRaised(double(z) * progressFactor + progressOffset);
     in[1] = (minZ +
-             (static_cast<float>(z) * incrementZ)); // Calculate increment in z;
+             (static_cast<coord_t>(z) * incrementZ)); // Calculate increment in z;
     for (int y = 0; y < nPointsY; y++) {
-      in[0] = (minY + (static_cast<float>(y) *
+      in[0] = (minY + (static_cast<coord_t>(y) *
                        incrementY)); // Calculate increment in y;
       for (int x = 0; x < nPointsX; x++) {
-        i[0] = (minX + (static_cast<float>(x) *
+        it[0] = (minX + (static_cast<coord_t>(x) *
                         incrementX)); // Calculate increment in x;
-        i[1] = in[0];
-        i[2] = in[1];
-        std::advance(i, 3);
+        it[1] = in[0];
+        it[2] = in[1];
+        std::advance(it, 3);
       }
     }
   }
