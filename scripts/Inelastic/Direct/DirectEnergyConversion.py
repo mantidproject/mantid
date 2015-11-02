@@ -31,7 +31,7 @@ def setup_reducer(inst_name,reload_instrument=False):
 
 #How could it be that abstract class is not referenced R0921? What it means?
 #pylint: disable=R0921
-#pylint: disable=max-attributes
+#pylint: disable=too-many-instance-attributes
 class DirectEnergyConversion(object):
     """
     Performs a convert to energy assuming the provided instrument is
@@ -232,6 +232,7 @@ class DirectEnergyConversion(object):
 #pylint: disable=access-member-before-definition
         if self.second_white:
             #TODO: fix THIS DOES NOT WORK!
+#pylint: disable=unused-variable
             second_white = self.second_white
             other_whiteintegrals = self.do_white(PropertyManager.second_white, None, None) # No grouping yet
 #pylint: disable=attribute-defined-outside-init
@@ -781,7 +782,7 @@ class DirectEnergyConversion(object):
 
 
         # Calculate the incident energy
-#pylit: disable=unused-variable
+#pylint: disable=unused-variable
         ei,mon1_peak,mon1_index,tzero = \
             GetEi(InputWorkspace=monitor_ws, Monitor1Spec=ei_mon_spectra[0],
                   Monitor2Spec=ei_mon_spectra[1],
@@ -1249,6 +1250,7 @@ class DirectEnergyConversion(object):
             else:
                 self._spectra_masks = None
         else:
+#pylint: disable=attribute-defined-outside-init
             self._spectra_masks = None
         return
 #-------------------------------------------------------------------------------

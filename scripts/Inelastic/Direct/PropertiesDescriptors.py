@@ -91,7 +91,7 @@ class IncidentEnergy(PropDescriptor):
         if instance is None:
             return self
         return self._incident_energy
-
+#pylint: disable=too-many-branches
     def __set__(self,instance,value):
         """ Set up incident energy or range of energies in various formats """
         if value != None:
@@ -133,7 +133,7 @@ class IncidentEnergy(PropDescriptor):
         else:
             self._num_energies = 1
         self._cur_iter_en = 0
-
+#pylint: disable=unused-variable
         ok,sev,message = self.validate(instance)
         if not ok:
             raise KeyError(message)
@@ -346,6 +346,7 @@ class SaveFileName(PropDescriptor):
                 if owner.monovan_run.run_number():
                     name +='_Abs'
                 name = name.replace('.','d')
+#pylint: disable=bare-except
             except:
                 name = None
         return name
@@ -371,7 +372,7 @@ class InstrumentDependentProp(PropDescriptor):
 
         if instance is None:
             return self
-
+#pylint: disable=protected-access
         if instance._pInstrument is None:
             raise KeyError("Attempt to use uninitialized property manager")
         else:
@@ -499,6 +500,7 @@ class PropertyFromRange(PropDescriptor):
 
     def __set__(self,instance,val):
         if val in self._availible_values:
+#pylint: disable=attribute-defined-outside-init
             self._current_value = val
         else:
             raise KeyError(' Property can not have value {0}'.format(val))
@@ -570,7 +572,7 @@ class DetCalFile(PropDescriptor):
     def calibrated_by_run(self):
         """ reports if the detector calibration is in a run-file or separate file(workspace)"""
         return self._calibrated_by_run
-
+#pylint: disable=unused-argument
     def find_file(self,instance,**kwargs):
         """ Method to find file, correspondent to
             current _det_cal_file file hint
@@ -607,6 +609,7 @@ class DetCalFile(PropDescriptor):
         if len(file_name) == 0: # it still can be a run number as string
             try:
                 file_name = FileFinder.findRuns(self._det_cal_file)[0]
+#pylint: disable=bare-except
             except:
                 return (False,"Can not find file or run file corresponding to name : {0}".format(self._det_cal_file))
         else:
@@ -633,6 +636,7 @@ class MapMaskFile(PropDescriptor):
 
     def __set__(self,instance,value):
         if not value is None:
+#pylint: disable=unused-variable
             fileName, fileExtension = os.path.splitext(value)
             if not fileExtension:
                 value = value + self._file_ext
@@ -665,7 +669,7 @@ class HardMaskPlus(prop_helpers.ComplexProperty):
     """
     def __init__(self):
         prop_helpers.ComplexProperty.__init__(self,['use_hard_mask_only','run_diagnostics'])
-    def __get__(self,instance,type=None):
+    def __get__(self,instance,class_type=None):
         if instance is None:
             return self
 
@@ -673,6 +677,7 @@ class HardMaskPlus(prop_helpers.ComplexProperty):
 
     def __set__(self,instance,value):
         if value != None:
+#pylint: disable=unused-variable
             fileName, fileExtension = os.path.splitext(value)
             if not fileExtension:
                 value = value + '.msk'
@@ -681,7 +686,9 @@ class HardMaskPlus(prop_helpers.ComplexProperty):
         else:
             prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[True,False])
         try:
+#pylint: disable=protected-access
             del instance.__changed_properties['hardmaskOnly']
+#pylint: disable=bare-except
         except:
             pass
 
@@ -728,7 +735,9 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
             run_diagnostics = True
         prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[use_hard_mask_only,run_diagnostics])
         try:
+#pylint: disable=protected-access
             del instance.__changed_properties['hardmaskPlus']
+#pylint: disable=bare-except
         except:
             pass
 #end HardMaskOnly
@@ -785,7 +794,7 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
 
     def __set__(self,instance,value):
         if isinstance(instance,dict):
-            dDict = instance
+            tDict = instance
         else:
             tDict = instance.__dict__
         if value is None:
@@ -858,7 +867,7 @@ class EiMonSpectra(prop_helpers.ComplexProperty):
             return
 
         if isinstance(instance,dict):
-            dDict = instance
+            tDict = instance
         else:
             tDict = instance.__dict__
 
@@ -1352,6 +1361,7 @@ class RotationAngle(PropDescriptor):
             try:
                 value = working_ws.getRun().getLogData(name).timeAverageValue()
                 break
+#pylint: disable=bare-except
             except:
                 pass
         return value

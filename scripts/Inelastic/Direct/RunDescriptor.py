@@ -53,7 +53,7 @@ class RunList(object):
                     local_fext.append(fext)
             else:
                 runs.append(int(item))
-#pylint: disable=protected-access				
+#pylint: disable=attribute-defined-outside-init
         self._run_numbers = runs
         self._set_fnames(local_fnames,local_fext)
 #--------------------------------------------------------------------------------------------------
@@ -145,7 +145,7 @@ class RunList(object):
         """
         fext_given =self._fext[index]
         if fext_given is None:
-#pylint: disable=protected-access		
+#pylint: disable=protected-access
             return self._theRun._holder.data_file_ext
         else:
             return fext_given
@@ -347,7 +347,7 @@ class RunDescriptor(PropDescriptor):
         if not self._run_number:
             return 0
         if self._run_list:
-#pylint: disable=protected-access		
+#pylint: disable=protected-access
             return len(self._run_list._run_numbers)
         else:
             return 1
@@ -515,7 +515,7 @@ class RunDescriptor(PropDescriptor):
         """
         if not noutputs:
             try:
-#pylint: disable=unused-variable			
+#pylint: disable=unused-variable
                 noutputs,r = funcreturns.lhs_info('both')
 #pylint: disable=bare-except
             except:
@@ -544,7 +544,7 @@ class RunDescriptor(PropDescriptor):
            to use with this run workspace
         """
         if self._mask_ws_name:
-#pylint: disable=unused-variable		
+#pylint: disable=unused-variable
             mask_ws = mtd[self._mask_ws_name]
             add_mask_name = self._prop_name + '_tmp_masking'
         else:
@@ -552,7 +552,7 @@ class RunDescriptor(PropDescriptor):
 #pylint: disable=unused-variable
         masks,spectra = ExtractMask(InputWorkspace=masked_ws,OutputWorkspace=add_mask_name)
         if self._mask_ws_name:
-#pylint: disable=unused-variable		
+#pylint: disable=unused-variable
             mask_ws +=masks
             DeleteWorkspace(add_mask_name)
         else:
@@ -657,7 +657,6 @@ class RunDescriptor(PropDescriptor):
 
         if run_list:
             existing = self._run_list.get_all_run_list()
-            non_existing = []
             for run in run_list:
                 if not run in existing:
                     raise RuntimeError('run {0} is not in the existing run list'.format(run))
@@ -756,7 +755,7 @@ class RunDescriptor(PropDescriptor):
                     ws = self._load_and_sum_runs(inst_name,RunDescriptor._holder.load_monitors_with_workspace)
                 else: # load current workspace
                     ws = self.load_run(inst_name, calibration,False, \
-					     RunDescriptor._holder.load_monitors_with_workspace,prefer_ws_calibration)
+                         RunDescriptor._holder.load_monitors_with_workspace,prefer_ws_calibration)
 
 
                 self.synchronize_ws(ws)
@@ -816,7 +815,7 @@ class RunDescriptor(PropDescriptor):
             origin_name = target_name
         else:
             if mon_ws:
-               mon_ws = CloneWorkspace(InputWorkspace=mon_ws,OutputWorkspace=target_name + '_monitors')
+                mon_ws = CloneWorkspace(InputWorkspace=mon_ws,OutputWorkspace=target_name + '_monitors')
 
         if rebin: # debug and compatibility mode with old reduction
             target=Rebin(origin_name,OutputWorkspace=target_name,Params=[tof_range[0],tof_range[1],tof_range[2]],PreserveEvents=False)
@@ -960,7 +959,7 @@ class RunDescriptor(PropDescriptor):
         if os.path.exists(fname):
             return fname,old_ext
         else:
-#pylint: disable=unused-variable		
+#pylint: disable=unused-variable
             fp,hint = os.path.split(fname)
         return hint,old_ext
 #--------------------------------------------------------------------------------------------------------------------
@@ -1012,7 +1011,7 @@ class RunDescriptor(PropDescriptor):
     def load_file(self,inst_name,ws_name,run_number=None,load_mon_with_workspace=False,filePath=None,fileExt=None,**kwargs):
         """Load run for the instrument name provided. If run_numner is None, look for the current run"""
 
-        ok,data_file = self.find_file(RunDescriptor._holder,None,run_number,filePath,fileExt,**kwargs)
+        ok,data_file = self.find_file(RunDescriptor._holder,inst_name,run_number,filePath,fileExt,**kwargs)
         if not ok:
             self._ws_name = None
             raise IOError(data_file)
@@ -1039,6 +1038,7 @@ class RunDescriptor(PropDescriptor):
             mon_load_option = 'Separate'
         #
         nxs_file=False
+#pylint: disable=unused-variable
         file_name,ext = os.path.splitext(data_file)
         if ext == '.nxs':
             nxs_file = True
@@ -1054,6 +1054,7 @@ class RunDescriptor(PropDescriptor):
             if instr_name == 'LET' and self._run_number>14151 and self._run_number<14382:
                 FrameworkManager.clearInstruments()
                 idf_file = api.ExperimentInfo.getInstrumentFilename(instr_name)
+#pylint: disable=unused-variable
                 idf_path,tile = os.path.split(idf_file)
                 idf_file = os.path.join(idf_path,'LET_Definition.xml')
                 LoadInstrument(ws_name,idf_file,RewriteSpectraMap='0')
@@ -1245,6 +1246,7 @@ class RunDescriptor(PropDescriptor):
 
         self._ws_name = ''
         self._ws_cname = ''
+#pylint: disable=attribute-defined-outside-init
         self._ws_suffix = ''
         if ws_name in mtd:
             ws = mtd[ws_name]
@@ -1312,7 +1314,7 @@ class RunDescriptor(PropDescriptor):
 #pylint: disable=W0110
             self._ws_cname = part_ind + filter(lambda c: not c.isdigit(), name)
         else:
-#pylint: disable=attribute-defined-outside-init		
+#pylint: disable=attribute-defined-outside-init
             self._ws_cname = part_ind + name
     #
     def _instr_name(self):
@@ -1532,7 +1534,7 @@ class RunDescriptorDependent(RunDescriptor):
         else:
             return self._host.get_ws_clone(clone_name)
 #pylint: disable=too-many-arguments
-#pylint: disable=max-public-methods
+#pylint: disable=too-many-public-methods
     def chop_ws_part(self,origin,tof_range,rebin,chunk_num,n_chunks):
         if self._has_own_value:
             return super(RunDescriptorDependent,self).chop_ws_part(origin,tof_range,rebin,chunk_num,n_chunks)
@@ -1567,7 +1569,7 @@ class RunDescriptorDependent(RunDescriptor):
     def load_file(self,inst_name,ws_name,run_number=None,load_mon_with_workspace=False,filePath=None,fileExt=None,**kwargs):
         if self._has_own_value:
             return super(RunDescriptorDependent,self).load_file(inst_name,ws_name,run_number,\
-			             load_mon_with_workspace,filePath,fileExt,**kwargs)
+                        load_mon_with_workspace,filePath,fileExt,**kwargs)
         else:
             return self._host.load_file(inst_name,ws_name,run_number,load_mon_with_workspace,filePath,fileExt,**kwargs)
 #pylint: disable=too-many-arguments
@@ -1629,4 +1631,3 @@ def build_run_file_name(run_num,inst,file_path='',fext=''):
         if os.path.exists(file_path):
             fname = os.path.join(file_path,fname)
     return fname
-
