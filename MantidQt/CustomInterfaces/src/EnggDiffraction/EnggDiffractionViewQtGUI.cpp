@@ -96,6 +96,7 @@ void EnggDiffractionViewQtGUI::initLayout() {
   // it will know what compute resources and tools we have available:
   // This view doesn't even know the names of compute resources, etc.
   m_presenter->notify(IEnggDiffractionPresenter::Start);
+  m_presenter->notify(IEnggDiffractionPresenter::RBNumberChange);
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabCalib() {
@@ -178,6 +179,8 @@ void EnggDiffractionViewQtGUI::doSetupTabFocus() {
 }
 
 void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
+  enableTabs(false);
+
   // change instrument
   connect(m_ui.comboBox_instrument, SIGNAL(currentIndexChanged(int)), this,
           SLOT(instrumentChanged(int)));
@@ -186,13 +189,16 @@ void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
   // may remain open and visible after this close
   connect(m_ui.pushButton_close, SIGNAL(released()), this->parent(),
           SLOT(close()));
+
+  connect(m_ui.lineEdit_RBNumber, SIGNAL(editingFinished()), this,
+          SLOT(RBNumberChanged()));
 }
 
 void EnggDiffractionViewQtGUI::readSettings() {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
 
-  m_uiTabCalib.lineEdit_RBNumber->setText(
+  m_ui.lineEdit_RBNumber->setText(
       qs.value("user-params-RBNumber", "").toString());
 
   m_uiTabCalib.lineEdit_current_vanadium_num->setText(
@@ -277,7 +283,7 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
 
-  qs.setValue("user-params-RBNumber", m_uiTabCalib.lineEdit_RBNumber->text());
+  qs.setValue("user-params-RBNumber", m_ui.lineEdit_RBNumber->text());
 
   qs.setValue("user-params-current-vanadium-num",
               m_uiTabCalib.lineEdit_current_vanadium_num->text());
@@ -377,7 +383,7 @@ std::string EnggDiffractionViewQtGUI::askNewCalibrationFilename(
 }
 
 std::string EnggDiffractionViewQtGUI::getRBNumber() const {
-  return m_uiTabCalib.lineEdit_RBNumber->text().toStdString();
+  return m_ui.lineEdit_RBNumber->text().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::currentVanadiumNo() const {
@@ -419,7 +425,6 @@ void EnggDiffractionViewQtGUI::newCalibLoaded(const std::string &vanadiumNo,
 
 void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   // calibrate
-  m_uiTabCalib.lineEdit_RBNumber->setEnabled(enable);
   m_uiTabCalib.groupBox_make_new_calib->setEnabled(enable);
   m_uiTabCalib.groupBox_current_calib->setEnabled(enable);
 
@@ -434,6 +439,12 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabFocus.pushButton_focus->setEnabled(enable);
   m_uiTabFocus.pushButton_focus_cropped->setEnabled(enable);
   m_uiTabFocus.pushButton_focus_texture->setEnabled(enable);
+}
+
+void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
+  for (int ti = 0; ti < m_ui.tabMain->count(); ++ti) {
+    m_ui.tabMain->setTabEnabled(ti, enable);
+  }
 }
 
 void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
@@ -740,6 +751,10 @@ void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
     return;
   m_currentInst = inst->currentText().toStdString();
   m_presenter->notify(IEnggDiffractionPresenter::InstrumentChange);
+}
+
+void EnggDiffractionViewQtGUI::RBNumberChanged() {
+  m_presenter->notify(IEnggDiffractionPresenter::RBNumberChange);
 }
 
 void EnggDiffractionViewQtGUI::userSelectInstrument(const QString &prefix) {

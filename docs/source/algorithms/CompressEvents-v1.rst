@@ -54,8 +54,8 @@ Output:
 .. testoutput:: CompressEvents
     :options: +NORMALIZE_WHITESPACE
 
-    The unfiltered workspace ws has 8000 events and a peak value of 1030.00
-    The compressed workspace ws still has 8000 events and a peak value of 1030.00
+    The unfiltered workspace ws has 1900 events and a peak value of 257.00
+    The compressed workspace ws still has 1900 events and a peak value of 257.00
     However it now takes up less memory.
 
 

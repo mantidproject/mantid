@@ -572,7 +572,7 @@ class PropertyManager(NonIDF_Properties):
         file_errors={}
         for prop_name in file_prop_names:
             theProp = getattr(PropertyManager,prop_name)
-            ok,file = theProp.find_file(be_quet=True)
+            ok,file = theProp.find_file(self,be_quet=True)
             if not ok:
                 file_errors[prop_name]=file
 

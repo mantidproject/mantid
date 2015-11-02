@@ -294,8 +294,8 @@ void AlignAndFocusPowder::exec() {
       }
     }
   }
-  xmin = 0;
-  xmax = 0;
+  xmin = 0.;
+  xmax = 0.;
   if (tmin > 0.) {
     xmin = tmin;
   }
@@ -365,23 +365,7 @@ void AlignAndFocusPowder::exec() {
   // set up a progress bar with the "correct" number of steps
   m_progress = new Progress(this, 0., 1., 22);
 
-  // filter the input events if appropriate
   if (m_inputEW) {
-    double removePromptPulseWidth = getProperty("RemovePromptPulseWidth");
-    if (removePromptPulseWidth > 0.) {
-      g_log.information() << "running RemovePromptPulse(Width="
-                          << removePromptPulseWidth << ")\n";
-      API::IAlgorithm_sptr filterPAlg =
-          createChildAlgorithm("RemovePromptPulse");
-      filterPAlg->setProperty("InputWorkspace", m_outputW);
-      filterPAlg->setProperty("OutputWorkspace", m_outputW);
-      filterPAlg->setProperty("Width", removePromptPulseWidth);
-      filterPAlg->executeAsChildAlg();
-      m_outputW = filterPAlg->getProperty("OutputWorkspace");
-      m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
-    }
-    m_progress->report();
-
     double tolerance = getProperty("CompressTolerance");
     if (tolerance > 0.) {
       g_log.information() << "running CompressEvents(Tolerance=" << tolerance
@@ -398,10 +382,8 @@ void AlignAndFocusPowder::exec() {
       g_log.information() << "Not compressing event list\n";
       doSortEvents(m_outputW); // still sort to help some thing out
     }
-    m_progress->report();
-  } else {
-    m_progress->reportIncrement(2);
   }
+  m_progress->report();
 
   if (xmin > 0. || xmax > 0.) {
     bool doCorrection(true);
@@ -414,8 +396,8 @@ void AlignAndFocusPowder::exec() {
       double tempmax;
       m_outputW->getXMinMax(tempmin, tempmax);
 
-      g_log.information() << "running CropWorkspace(Xmin=" << xmin
-                          << ", Xmax=" << xmax << ")\n";
+      g_log.information() << "running CropWorkspace(TOFmin=" << xmin
+                          << ", TOFmax=" << xmax << ")\n";
       API::IAlgorithm_sptr cropAlg = createChildAlgorithm("CropWorkspace");
       cropAlg->setProperty("InputWorkspace", m_outputW);
       cropAlg->setProperty("OutputWorkspace", m_outputW);
@@ -425,7 +407,23 @@ void AlignAndFocusPowder::exec() {
         cropAlg->setProperty("Xmax", xmax);
       cropAlg->executeAsChildAlg();
       m_outputW = cropAlg->getProperty("OutputWorkspace");
+      m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
     }
+  }
+  m_progress->report();
+
+  // filter the input events if appropriate
+  double removePromptPulseWidth = getProperty("RemovePromptPulseWidth");
+  if (removePromptPulseWidth > 0.) {
+    g_log.information() << "running RemovePromptPulse(Width="
+                        << removePromptPulseWidth << ")\n";
+    API::IAlgorithm_sptr filterPAlg = createChildAlgorithm("RemovePromptPulse");
+    filterPAlg->setProperty("InputWorkspace", m_outputW);
+    filterPAlg->setProperty("OutputWorkspace", m_outputW);
+    filterPAlg->setProperty("Width", removePromptPulseWidth);
+    filterPAlg->executeAsChildAlg();
+    m_outputW = filterPAlg->getProperty("OutputWorkspace");
+    m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
   m_progress->report();
 
@@ -437,6 +435,7 @@ void AlignAndFocusPowder::exec() {
     alg->setProperty("MaskingInformation", maskBinTableWS);
     alg->executeAsChildAlg();
     m_outputW = alg->getProperty("OutputWorkspace");
+    m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
   m_progress->report();
 
@@ -448,6 +447,7 @@ void AlignAndFocusPowder::exec() {
     maskAlg->executeAsChildAlg();
     Workspace_sptr tmpW = maskAlg->getProperty("Workspace");
     m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(tmpW);
+    m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
   m_progress->report();
 
@@ -494,11 +494,6 @@ void AlignAndFocusPowder::exec() {
     // turn off the low res stuff
     m_processLowResTOF = false;
 
-    g_log.information() << "running CropWorkspace(MinWavelength=" << minwl;
-    if (!isEmpty(maxwl))
-      g_log.information() << ", MaxWavelength=" << maxwl;
-    g_log.information() << ")\n";
-
     EventWorkspace_sptr ews =
         boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
     if (ews)
@@ -508,6 +503,11 @@ void AlignAndFocusPowder::exec() {
 
     m_outputW = convertUnits(m_outputW, "Wavelength");
 
+    g_log.information() << "running CropWorkspace(WavelengthMin=" << minwl;
+    if (!isEmpty(maxwl))
+      g_log.information() << ", WavelengthMax=" << maxwl;
+    g_log.information() << ")\n";
+
     API::IAlgorithm_sptr removeAlg = createChildAlgorithm("CropWorkspace");
     removeAlg->setProperty("InputWorkspace", m_outputW);
     removeAlg->setProperty("OutputWorkspace", m_outputW);
@@ -515,6 +515,9 @@ void AlignAndFocusPowder::exec() {
     removeAlg->setProperty("XMax", maxwl);
     removeAlg->executeAsChildAlg();
     m_outputW = removeAlg->getProperty("OutputWorkspace");
+    if (ews)
+      g_log.information() << "Number of events = " << ews->getNumberEvents()
+                          << ". ";
   } else if (DIFCref > 0.) {
     g_log.information() << "running RemoveLowResTof(RefDIFC=" << DIFCref
                         << ",K=3.22)\n";
@@ -729,7 +732,7 @@ AlignAndFocusPowder::diffractionFocus(API::MatrixWorkspace_sptr ws) {
 API::MatrixWorkspace_sptr
 AlignAndFocusPowder::convertUnits(API::MatrixWorkspace_sptr matrixws,
                                   std::string target) {
-  g_log.information() << "running ConvertUnits(Target=dSpacing)\n";
+  g_log.information() << "running ConvertUnits(Target=" << target << ")\n";
 
   API::IAlgorithm_sptr convert2Alg = createChildAlgorithm("ConvertUnits");
   convert2Alg->setProperty("InputWorkspace", matrixws);
