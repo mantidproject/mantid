@@ -145,7 +145,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         dataA3 = []
         dataA4 = []
 
-        data_prog = Progress(self, start=0.0, end=0.85, nreports=len(self._angles))
+        data_prog = Progress(self, start=0.1, end=0.85, nreports=len(self._angles))
         for angle in self._angles:
             (A1, A2, A3, A4) = self._cyl_abs(angle)
             logger.information('Angle : %f * successful' % (angle))
@@ -232,6 +232,8 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 #------------------------------------------------------------------------------
 
     def _setup(self):
+        setup_prog = Progress(self, start=0.00, end=0.01, nreports=2)
+        setup_prog.report('Obtaining input properties')
         self._sample_ws_name = self.getPropertyValue('SampleWorkspace')
         self._sample_chemical_formula = self.getPropertyValue('SampleChemicalFormula')
         self._sample_number_density = self.getProperty('SampleNumberDensity').value
@@ -268,7 +270,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                 raise ValueError('Can outer radius not > sample outer radius')
             else:
                 logger.information('Can : inner radius = %f ; outer radius = %f' % (self._radii[1], self._radii[2]))
-
+        setup_prog.report('Obtaining beam values')
         beam_width = self.getProperty('BeamWidth').value
         beam_height = self.getProperty('BeamHeight').value
         self._beam = [beam_height,
@@ -292,6 +294,8 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 #------------------------------------------------------------------------------
 
     def _sample(self):
+        sample_prog = Progress(self, start=0.01, end=0.03, nreports=2)
+        sample_prog.report('Setting Sample Material for Sample') 
         SetSampleMaterial(self._sample_ws_name , ChemicalFormula=self._sample_chemical_formula,
                           SampleNumberDensity=self._sample_number_density)
         sample = mtd[self._sample_ws_name].sample()
@@ -307,6 +311,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         self._density[0] = self._sample_number_density
 
         if self._use_can:
+            sample_prog.report('Setting Sample Material for Container') 
             SetSampleMaterial(InputWorkspace=self._can_ws_name, ChemicalFormula=self._can_chemical_formula,
                               SampleNumberDensity=self._can_number_density)
             can_sample = mtd[self._can_ws_name].sample()
@@ -319,11 +324,13 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
     def _get_angles(self):
         num_hist = mtd[self._sample_ws_name].getNumberHistograms()
+        angle_prog = Progress(self, start=0.03, end=0.07, nreports=num_hist)
         source_pos = mtd[self._sample_ws_name].getInstrument().getSource().getPos()
         sample_pos = mtd[self._sample_ws_name].getInstrument().getSample().getPos()
         beam_pos = sample_pos - source_pos
         self._angles = list()
         for index in range(0, num_hist):
+            angle_prog.report('Obtaining data for detector angle %i' % index)
             detector = mtd[self._sample_ws_name].getDetector(index)
             two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi
             self._angles.append(two_theta)
@@ -342,7 +349,9 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         wave_bin = (wave_max - wave_min) / (number_waves-1)
 
         self._waves = list()
+        wave_prog = Progress(self, start=0.07, end = 0.10, nreports=number_waves)
         for idx in range(0, number_waves):
+            wave_prog.report('Appending wave data: %i' % idx)
             self._waves.append(wave_min + idx * wave_bin)
         DeleteWorkspace(wave_range)
 
