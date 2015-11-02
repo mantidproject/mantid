@@ -145,11 +145,11 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         dataA3 = []
         dataA4 = []
 
-        data_prog = Progress(self, start=0.0, end=0.6, nreports=len(self._angles))
+        data_prog = Progress(self, start=0.0, end=0.85, nreports=len(self._angles))
         for angle in self._angles:
             (A1, A2, A3, A4) = self._cyl_abs(angle)
             logger.information('Angle : %f * successful' % (angle))
-            data_prog.report('Populating data for angle %f' % (angle))
+            data_prog.report('Appending data for angle %f' % (angle))
             dataA1 = np.append(dataA1, A1)
             dataA2 = np.append(dataA2, A2)
             dataA3 = np.append(dataA3, A3)
@@ -160,7 +160,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         wrk_reports = 5
         if self._use_can:
             wrk_reports = 8
-        workflow_prog = Progress(self, start=0.6, end=0.9, nreports=wrk_reports)
+        workflow_prog = Progress(self, start=0.85, end=1.0, nreports=wrk_reports)
         # Create the output workspaces
         ass_ws = self._output_ws_name + '_ass'
         workflow_prog.report('Creating Workspace')
@@ -227,6 +227,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         workflow_prog.report('Create GroupWorkpsace Output')
         GroupWorkspaces(InputWorkspaces=','.join(workspaces), OutputWorkspace=self._output_ws_name)
         self.setPropertyValue('OutputWorkspace', self._output_ws_name)
+        workflow_prog.report('Algorithm complete')
 
 #------------------------------------------------------------------------------
 
