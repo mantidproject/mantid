@@ -1,4 +1,4 @@
-import os,sys,inspect
+﻿import os,sys,inspect
 #os.environ["PATH"] =r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
@@ -86,7 +86,7 @@ class RunDescriptorTest(unittest.TestCase):
         propman  = self.prop_man
         propman.sample_run = 11001
 
-        ok,file=PropertyManager.sample_run.find_file()
+        ok,file=PropertyManager.sample_run.find_file(propman)
         self.assertTrue(ok)
         self.assertTrue(len(file)>0)
 
@@ -115,10 +115,10 @@ class RunDescriptorTest(unittest.TestCase):
         propman.sample_run = 101111
         PropertyManager.sample_run.set_file_ext('nxs')
 
-        ok,file=PropertyManager.sample_run.find_file()
+        ok,file=PropertyManager.sample_run.find_file(propman)
         self.assertEqual(testFile1,os.path.normpath(file))
         PropertyManager.sample_run.set_file_ext('.raw')
-        ok,file=PropertyManager.sample_run.find_file()
+        ok,file=PropertyManager.sample_run.find_file(propman)
         self.assertEqual(testFile2,os.path.normpath(file))
 
         os.remove(testFile1)
@@ -567,11 +567,6 @@ class RunDescriptorTest(unittest.TestCase):
 
         propman.sample_run = None
         DeleteWorkspace(a_wksp)
-
-
-
-
-
 
 
 
