@@ -4,6 +4,7 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFDataController.h"
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFDatasetPlotData.h"
 
+#include "MantidQtAPI/PythonRunner.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -114,19 +115,11 @@ boost::shared_ptr<DatasetPlotData> PlotController::getData(int index)
   if (index < 0) return data;
   if ( !m_plotData.contains(index) )
   {
-    QString wsName = m_table->item( index, wsColumn )->text();
-    int wsIndex = m_table->item( index, wsIndexColumn )->text().toInt();
-    QString outputWorkspaceName = owner()->getOutputWorkspaceName();
-    std::string outName = outputWorkspaceName.toStdString();
-    if (!outputWorkspaceName.isEmpty() &&
-        Mantid::API::AnalysisDataService::Instance().doesExist(outName)) {
-      auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(outName);
-      if (auto  group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
-        outputWorkspaceName = QString::fromStdString(group->getItem(index)->name());
-      }
-    }
+    QString wsName = owner()->getWorkspaceName(index);
+    int wsIndex = owner()->getWorkspaceIndex(index);
+    QString outputWorkspaceName = owner()->getOutputWorkspaceName(index);
     try {
-      data = boost::make_shared<DatasetPlotData>( wsName, wsIndex, outputWorkspaceName );
+      data = boost::make_shared<DatasetPlotData>(wsName, wsIndex, outputWorkspaceName);
       m_plotData.insert(index, data );
     }
     catch(std::exception& e)
@@ -233,6 +226,56 @@ void PlotController::zoomToRange()
   m_zoomer->zoom(-1);
   // Set new zoom level.
   m_zoomer->zoom(rect);
+}
+
+/// Make a string of python code to be used as 'source, indices' arguments
+/// to plotSpectrum(...)
+QString PlotController::makePyPlotSource(int index) const
+{
+  QString pyCode;
+  auto outputWsorkspaceName = owner()->getOutputWorkspaceName(index);
+  auto wsIndex = owner()->getWorkspaceIndex(index);
+  if (outputWsorkspaceName.isEmpty()) {
+    pyCode = QString("['%1'], %2").arg(owner()->getWorkspaceName(index)).arg(wsIndex);
+  } else {
+    pyCode = QString("['%1'], [0,1,2]").arg(outputWsorkspaceName);
+  }
+  return pyCode;
+}
+
+/// Export i-th plot.
+/// @param index :: Index of a plot to export.
+void PlotController::exportPlot(int index)
+{
+  if (index < 0) return;
+  QString pyInput = "from mantidplot import plotSpectrum\n";
+  pyInput += QString("plotSpectrum(%1)\n").arg(makePyPlotSource(index));
+  owner()->runPythonCode(pyInput);
+}
+
+/// Export current plot
+void PlotController::exportCurrentPlot()
+{
+  exportPlot(m_currentIndex);
+}
+
+/// Export all plots
+void PlotController::exportAllPlots()
+{
+  int nPlots = owner()->getNumberOfSpectra();
+  if (nPlots <= 0) return;
+  QString pyInput = "from mantidplot import newTiledWindow\n";
+  pyInput += "newTiledWindow(sources=[";
+  for(int index = 0; index < nPlots; ++index)
+  {
+    if (index > 0)
+    {
+      pyInput += ",";
+    }
+    pyInput += QString("(%1)").arg(makePyPlotSource(index));
+  }
+  pyInput += "])\n";
+  owner()->runPythonCode(pyInput);
 }
 
 /// Disable all plot tools. It is a helper method 

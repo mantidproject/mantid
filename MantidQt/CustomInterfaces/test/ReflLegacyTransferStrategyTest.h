@@ -5,177 +5,225 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <gmock/gmock.h>
 
 #include "MantidQtCustomInterfaces/ReflLegacyTransferStrategy.h"
+#include "MantidQtCustomInterfaces/ReflTableSchema.h"
+#include "ReflMainViewMockObjects.h"
 
 using namespace MantidQt::CustomInterfaces;
+using namespace testing;
 
-class ReflLegacyTransferStrategyTest : public CxxTest::TestSuite
-{
+class ReflLegacyTransferStrategyTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ReflLegacyTransferStrategyTest *createSuite() { return new ReflLegacyTransferStrategyTest(); }
-  static void destroySuite( ReflLegacyTransferStrategyTest *suite ) { delete suite; }
-
-  ReflLegacyTransferStrategyTest()
-  {
+  static ReflLegacyTransferStrategyTest *createSuite() {
+    return new ReflLegacyTransferStrategyTest();
+  }
+  static void destroySuite(ReflLegacyTransferStrategyTest *suite) {
+    delete suite;
   }
 
-  void testBasicTransfer()
-  {
-    std::map<std::string,std::string> input;
-    input["1234"] = "fictitious run on gold";
-    input["1235"] = "fictitious run on silver";
-    input["1236"] = "fictitious run on bronze";
+  ReflLegacyTransferStrategyTest() {}
 
-    std::vector<std::map<std::string,std::string> > expected;
-    std::map<std::string,std::string> expectedRow;
+  void testBasicTransfer() {
+    SearchResultMap input;
+    input["1234"] = SearchResult("fictitious run on gold", "");
+    input["1235"] = SearchResult("fictitious run on silver", "");
+    input["1236"] = SearchResult("fictitious run on bronze", "");
 
-    expectedRow["runs"] = "1234";
-    expectedRow["theta"] = "";
-    expectedRow["group"] = "0";
+    std::vector<std::map<std::string, std::string>> expected;
+    std::map<std::string, std::string> expectedRow;
+
+    expectedRow[ReflTableSchema::RUNS] = "1234";
+    expectedRow[ReflTableSchema::ANGLE] = "";
+    expectedRow[ReflTableSchema::GROUP] = "0";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1235";
-    expectedRow["theta"] = "";
-    expectedRow["group"] = "1";
+    expectedRow[ReflTableSchema::RUNS] = "1235";
+    expectedRow[ReflTableSchema::ANGLE] = "";
+    expectedRow[ReflTableSchema::GROUP] = "1";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1236";
-    expectedRow["theta"] = "";
-    expectedRow["group"] = "2";
+    expectedRow[ReflTableSchema::RUNS] = "1236";
+    expectedRow[ReflTableSchema::ANGLE] = "";
+    expectedRow[ReflTableSchema::GROUP] = "2";
     expected.push_back(expectedRow);
 
     ReflLegacyTransferStrategy strategy;
-    auto output = strategy.transferRuns(input);
+
+    MockProgressBase progress;
+    EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
+
+    auto output = strategy.transferRuns(input, progress);
 
     TS_ASSERT_EQUALS(output, expected);
+    TS_ASSERT(Mock::VerifyAndClear(&progress));
   }
 
-  void testGroupedTransfer()
-  {
-    std::map<std::string,std::string> input;
-    input["1233"] = "fictitious run on platinum";
-    input["1234"] = "fictitious run on gold";
-    input["1235"] = "fictitious run on gold";
-    input["1236"] = "fictitious run on silver";
+  void testGroupedTransfer() {
+    SearchResultMap input;
+    input["1233"] = SearchResult("fictitious run on platinum", "");
+    input["1234"] = SearchResult("fictitious run on gold", "");
+    input["1235"] = SearchResult("fictitious run on gold", "");
+    input["1236"] = SearchResult("fictitious run on silver", "");
 
-    std::vector<std::map<std::string,std::string> > expected;
-    std::map<std::string,std::string> expectedRow;
+    std::vector<std::map<std::string, std::string>> expected;
+    std::map<std::string, std::string> expectedRow;
 
-    expectedRow["runs"] = "1233";
-    expectedRow["theta"] = "";
-    expectedRow["group"] = "0";
+    expectedRow[ReflTableSchema::RUNS] = "1233";
+    expectedRow[ReflTableSchema::ANGLE] = "";
+    expectedRow[ReflTableSchema::GROUP] = "0";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1234+1235";
-    expectedRow["theta"] = "";
-    expectedRow["group"] = "1";
+    expectedRow[ReflTableSchema::RUNS] = "1234+1235";
+    expectedRow[ReflTableSchema::ANGLE] = "";
+    expectedRow[ReflTableSchema::GROUP] = "1";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1236";
-    expectedRow["theta"] = "";
-    expectedRow["group"] = "2";
+    expectedRow[ReflTableSchema::RUNS] = "1236";
+    expectedRow[ReflTableSchema::ANGLE] = "";
+    expectedRow[ReflTableSchema::GROUP] = "2";
     expected.push_back(expectedRow);
 
     ReflLegacyTransferStrategy strategy;
-    auto output = strategy.transferRuns(input);
+
+    MockProgressBase progress;
+    EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
+
+    auto output = strategy.transferRuns(input, progress);
 
     TS_ASSERT_EQUALS(output, expected);
+    TS_ASSERT(Mock::VerifyAndClear(&progress));
   }
 
-  void testThetaExtraction()
-  {
-    std::map<std::string,std::string> input;
-    input["1234"] = "fictitious run on gold";
-    input["1235"] = "fictitious run on silver in 3.14 theta";
-    input["1236"] = "fictitious run on bronze th=2.17";
-    input["1237"] = "fictitious run on platinum th:1.23 and pH=12";
+  void testThetaExtraction() {
+    SearchResultMap input;
+    input["1234"] = SearchResult("fictitious run on gold", "");
+    input["1235"] = SearchResult("fictitious run on silver in 3.14 theta", "");
+    input["1236"] = SearchResult("fictitious run on bronze th=2.17", "");
+    input["1237"] =
+        SearchResult("fictitious run on platinum th:1.23 and pH=12", "");
 
-    std::vector<std::map<std::string,std::string> > expected;
-    std::map<std::string,std::string> expectedRow;
+    std::vector<std::map<std::string, std::string>> expected;
+    std::map<std::string, std::string> expectedRow;
 
-    expectedRow["runs"] = "1234";
-    expectedRow["theta"] = "";
-    expectedRow["group"] = "0";
+    expectedRow[ReflTableSchema::RUNS] = "1234";
+    expectedRow[ReflTableSchema::ANGLE] = "";
+    expectedRow[ReflTableSchema::GROUP] = "0";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1235";
-    expectedRow["theta"] = "3.14";
-    expectedRow["group"] = "1";
+    expectedRow[ReflTableSchema::RUNS] = "1235";
+    expectedRow[ReflTableSchema::ANGLE] = "3.14";
+    expectedRow[ReflTableSchema::GROUP] = "1";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1236";
-    expectedRow["theta"] = "2.17";
-    expectedRow["group"] = "2";
+    expectedRow[ReflTableSchema::RUNS] = "1236";
+    expectedRow[ReflTableSchema::ANGLE] = "2.17";
+    expectedRow[ReflTableSchema::GROUP] = "2";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1237";
-    expectedRow["theta"] = "1.23";
-    expectedRow["group"] = "3";
+    expectedRow[ReflTableSchema::RUNS] = "1237";
+    expectedRow[ReflTableSchema::ANGLE] = "1.23";
+    expectedRow[ReflTableSchema::GROUP] = "3";
     expected.push_back(expectedRow);
+
+    std::sort(expected.begin(), expected.end());
 
     ReflLegacyTransferStrategy strategy;
-    auto output = strategy.transferRuns(input);
+
+    MockProgressBase progress;
+    EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
+
+    auto output = strategy.transferRuns(input, progress);
 
     TS_ASSERT_EQUALS(output, expected);
+    TS_ASSERT(Mock::VerifyAndClear(&progress));
   }
 
-  void testComplexExtraction()
-  {
-    std::map<std::string,std::string> input;
-    input["1230"] = "fictitious run on gold";
-    input["1231"] = "fictitious run on silver in 3.14 theta";
-    input["1232"] = "fictitious run on silver in 3.14 theta";
-    input["1233"] = "fictitious run on silver in 2.17 theta";
-    input["1234"] = "fictitious run on bronze th=2.17";
-    input["1235"] = "fictitious run on bronze th=1.23";
-    input["1236"] = "fictitious run on platinum th:1.23 and pH=12";
-    input["1237"] = "fictitious run on fool's gold";
+  void testComplexExtraction() {
+    SearchResultMap input;
+    input["1230"] = SearchResult("fictitious run on gold", "");
+    input["1231"] = SearchResult("fictitious run on silver in 3.14 theta", "");
+    input["1232"] = SearchResult("fictitious run on silver in 3.14 theta", "");
+    input["1233"] = SearchResult("fictitious run on silver in 2.17 theta", "");
+    input["1234"] = SearchResult("fictitious run on bronze th=2.17", "");
+    input["1235"] = SearchResult("fictitious run on bronze th=1.23", "");
+    input["1236"] =
+        SearchResult("fictitious run on platinum th:1.23 and pH=12", "");
+    input["1237"] = SearchResult("fictitious run on fool's gold", "");
 
-    std::vector<std::map<std::string,std::string> > expected;
-    std::map<std::string,std::string> expectedRow;
+    std::vector<std::map<std::string, std::string>> expected;
+    std::map<std::string, std::string> expectedRow;
 
-    expectedRow["runs"] = "1230";
-    expectedRow["theta"] = "";
-    expectedRow["group"] = "0";
+    expectedRow[ReflTableSchema::RUNS] = "1230";
+    expectedRow[ReflTableSchema::ANGLE] = "";
+    expectedRow[ReflTableSchema::GROUP] = "0";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1231+1232";
-    expectedRow["theta"] = "3.14";
-    expectedRow["group"] = "1";
+    expectedRow[ReflTableSchema::RUNS] = "1231+1232";
+    expectedRow[ReflTableSchema::ANGLE] = "3.14";
+    expectedRow[ReflTableSchema::GROUP] = "1";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1233";
-    expectedRow["theta"] = "2.17";
-    expectedRow["group"] = "1";
+    expectedRow[ReflTableSchema::RUNS] = "1233";
+    expectedRow[ReflTableSchema::ANGLE] = "2.17";
+    expectedRow[ReflTableSchema::GROUP] = "1";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1234";
-    expectedRow["theta"] = "2.17";
-    expectedRow["group"] = "2";
+    expectedRow[ReflTableSchema::RUNS] = "1234";
+    expectedRow[ReflTableSchema::ANGLE] = "2.17";
+    expectedRow[ReflTableSchema::GROUP] = "2";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1235";
-    expectedRow["theta"] = "1.23";
-    expectedRow["group"] = "2";
+    expectedRow[ReflTableSchema::RUNS] = "1235";
+    expectedRow[ReflTableSchema::ANGLE] = "1.23";
+    expectedRow[ReflTableSchema::GROUP] = "2";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1236";
-    expectedRow["theta"] = "1.23";
-    expectedRow["group"] = "3";
+    expectedRow[ReflTableSchema::RUNS] = "1236";
+    expectedRow[ReflTableSchema::ANGLE] = "1.23";
+    expectedRow[ReflTableSchema::GROUP] = "3";
     expected.push_back(expectedRow);
 
-    expectedRow["runs"] = "1237";
-    expectedRow["theta"] = "";
-    expectedRow["group"] = "4";
+    expectedRow[ReflTableSchema::RUNS] = "1237";
+    expectedRow[ReflTableSchema::ANGLE] = "";
+    expectedRow[ReflTableSchema::GROUP] = "4";
     expected.push_back(expectedRow);
+
+    std::sort(expected.begin(), expected.end());
 
     ReflLegacyTransferStrategy strategy;
-    auto output = strategy.transferRuns(input);
+
+    MockProgressBase progress;
+    EXPECT_CALL(progress, doReport(_)).Times(AtLeast(1));
+
+    auto output = strategy.transferRuns(input, progress);
 
     TS_ASSERT_EQUALS(output, expected);
+    TS_ASSERT(Mock::VerifyAndClear(&progress));
+  }
+
+  void test_clone() {
+    ReflLegacyTransferStrategy strategy;
+    auto *clone = strategy.clone();
+    TS_ASSERT(dynamic_cast<ReflLegacyTransferStrategy *>(clone));
+    delete clone;
+  }
+
+  void test_filtering() {
+    ReflLegacyTransferStrategy strategy;
+
+    // Raw file where written with the description information needed for this
+    // sort of transfer
+    TSM_ASSERT("Yes this transfer mechanism should know about raw formats",
+               strategy.knownFileType("madeup.raw"));
+
+    // Nexus file may not have this description information.
+    TSM_ASSERT(
+        "No this transfer mechanism should know about anything but raw formats",
+        !strategy.knownFileType("madeup.nxs"));
   }
 };
 

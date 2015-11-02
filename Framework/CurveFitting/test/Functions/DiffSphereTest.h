@@ -69,7 +69,7 @@ public:
     funtion_string = "(composite=Convolution,NumDeriv=true;name=Gaussian,"
                      "Height=1.0,PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,"
                      "PeakCentre=0.0,Sigma=0.002);name=ElasticDiffSphere,Q=0.5,"
-                     "Height=47.014,Radius=6.0,ties=(Height=47.014))";
+                     "Height=47.014,Radius=6.0,ties=(Height=47.014,Centre=0))";
     fitalg.setProperty("Function", funtion_string);
     fitalg.setProperty("InputWorkspace", data_workspace);
     fitalg.setPropertyValue("WorkspaceIndex", "0");

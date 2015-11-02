@@ -8,7 +8,7 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/scoped_ptr.hpp>
+#include <boost/scoped_array.hpp>
 
 #include <Poco/BinaryReader.h>
 #include <Poco/FileStream.h>
@@ -816,7 +816,7 @@ void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
       uint8_t const *const buffer8Start = buffer8 + start;
       // Reverse byte order of current value. Make sure we allocate enough
       // enough space to hold the size
-      boost::scoped_ptr<uint8_t> byteValue(new uint8_t[bytespp]);
+      boost::scoped_array<uint8_t> byteValue(new uint8_t[bytespp]);
       std::reverse_copy(buffer8Start, buffer8Start + bytespp, byteValue.get());
 
       double val = 0;
