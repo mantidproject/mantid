@@ -144,7 +144,7 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
 
   vtkNew<vtkPoints> points;
 
-  float in[3];
+  float in[2];
 
   const float maxX = m_workspace->getXDimension()->getMaximum();
   const float minX = m_workspace->getXDimension()->getMinimum();
@@ -169,16 +169,16 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   for (int z = 0; z < nPointsZ; z++) {
     // Report progress updates for the last 50%
     progressUpdate.eventRaised(double(z) * progressFactor + progressOffset);
-    in[2] = (minZ +
+    in[1] = (minZ +
              (static_cast<float>(z) * incrementZ)); // Calculate increment in z;
     for (int y = 0; y < nPointsY; y++) {
-      in[1] = (minY + (static_cast<float>(y) *
+      in[0] = (minY + (static_cast<float>(y) *
                        incrementY)); // Calculate increment in y;
       for (int x = 0; x < nPointsX; x++) {
         i[0] = (minX + (static_cast<float>(x) *
                         incrementX)); // Calculate increment in x;
-        i[1] = in[1];
-        i[2] = in[2];
+        i[1] = in[0];
+        i[2] = in[1];
         std::advance(i, 3);
       }
     }

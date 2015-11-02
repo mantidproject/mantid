@@ -142,11 +142,11 @@ void vtkDataSetToNonOrthogonalDataSet::execute() {
     m_boundingBox[5] = infoWs->getZDimension()->getMaximum();
 
     m_numDims = infoWs->getNumDims();
-    // m_coordType = infoWs->getSpecialCoordinateSystem();
-    // if (Kernel::HKL != m_coordType) {
-    //  throw std::invalid_argument(
-    //      "Cannot create non-orthogonal view for non-HKL coordinates");
-    //}
+    m_coordType = infoWs->getSpecialCoordinateSystem();
+    if (Kernel::HKL != m_coordType) {
+      throw std::invalid_argument(
+          "Cannot create non-orthogonal view for non-HKL coordinates");
+    }
     const API::Sample sample = infoWs->getExperimentInfo(0)->sample();
     if (!sample.hasOrientedLattice()) {
       throw std::invalid_argument(
