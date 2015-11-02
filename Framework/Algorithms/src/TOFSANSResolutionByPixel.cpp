@@ -113,6 +113,12 @@ void TOFSANSResolutionByPixel::exec() {
     }
   }
 
+  // Calculate the L1 distance
+  const V3D samplePos = inWS->getInstrument()->getSample()->getPos();
+  const V3D sourcePos = inWS->getInstrument()->getSource()->getPos();
+  const V3D SSD = samplePos - sourcePos;
+  const double L1 = SSD.norm();
+
   // Get the collimation length
   double LCollim = getProperty("CollimationLength");
 
@@ -188,9 +194,9 @@ void TOFSANSResolutionByPixel::exec() {
       const double sigmaSpreadFromBin = xIn[j + 1] - xIn[j];
 
       // Get the uncertainty in Q
-      auto sigmaQ = calculator.getSigmaQValue(
-          lookUpTable.value(wl), waveLengthIndependentFactor, q, wl,
-          sigmaSpreadFromBin, LCollim, L2);
+      auto sigmaQ = calculator.getSigmaQValue(lookUpTable.value(wl),
+                                              waveLengthIndependentFactor, q,
+                                              wl, sigmaSpreadFromBin, L1, L2);
 
       // Insert the Q value and the Q resolution into the outputworkspace
       yOut[j] = sigmaQ;

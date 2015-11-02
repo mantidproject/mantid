@@ -182,7 +182,7 @@ def newNote(name=None):
         return new_proxy(proxies.MDIWindow, _qti.app.newNote, name)
 
 
-def newTiledWindow(name=None):
+def newTiledWindow(name=None, sources = None, ncols = None):
     """Create an empty tiled window.
 
     Args:
@@ -192,9 +192,28 @@ def newTiledWindow(name=None):
         A handle to the created window.
     """
     if name is None:
-        return new_proxy(proxies.TiledWindowProxy, _qti.app.newTiledWindow)
+        proxy = new_proxy(proxies.TiledWindowProxy, _qti.app.newTiledWindow)
     else:
-        return new_proxy(proxies.TiledWindowProxy, _qti.app.newTiledWindow, name)
+        proxy = new_proxy(proxies.TiledWindowProxy, _qti.app.newTiledWindow, name)
+
+    if ncols is None:
+        ncols = proxy.columnCount()
+ 
+    if not sources is None:
+        row = 0
+        col = 0
+        for source in sources:
+            if isinstance(source, tuple):
+                ws = source[0]
+                indices = source[1]
+                source = plotSpectrum(ws, indices)
+            proxy.addWidget(source, row, col)
+            col += 1
+            if col == ncols:
+                col = 0
+                row += 1
+
+    return proxy
 
 
 # ----------------------------------------------------------------------------------------------------
@@ -301,8 +320,8 @@ def plotMD(source, plot_axis=-2, normalization=DEFAULT_MD_NORMALIZATION, error_b
         source: Workspace(s) to plot
         plot_axis: Index of the plot axis (defaults to auto-select)
         normalization: Type of normalization required (defaults to volume, options available:
-                       MDNormalization.NoNormalization, MDNormalization.NumEventsNormalization, and
-                       MDNormalization.VolumeNormalization).
+        MDNormalization.NoNormalization, MDNormalization.NumEventsNormalization, and
+        MDNormalization.VolumeNormalization).
         error_bars: Flag for error bar plotting.
         window: window used for plotting. If None a new one will be created
         clearWindow: if is True, the window specified will be cleared before adding new curve

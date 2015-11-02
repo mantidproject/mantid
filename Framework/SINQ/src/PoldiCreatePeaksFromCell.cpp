@@ -139,22 +139,22 @@ UnitCell PoldiCreatePeaksFromCell::getConstrainedUnitCell(
     const UnitCell &unitCell, const PointGroup::CrystalSystem &crystalSystem,
     const Group::CoordinateSystem &coordinateSystem) const {
   switch (crystalSystem) {
-  case PointGroup::Cubic:
+  case PointGroup::CrystalSystem::Cubic:
     return UnitCell(unitCell.a(), unitCell.a(), unitCell.a());
-  case PointGroup::Tetragonal:
+  case PointGroup::CrystalSystem::Tetragonal:
     return UnitCell(unitCell.a(), unitCell.a(), unitCell.c());
-  case PointGroup::Orthorhombic:
+  case PointGroup::CrystalSystem::Orthorhombic:
     return UnitCell(unitCell.a(), unitCell.b(), unitCell.c());
-  case PointGroup::Monoclinic:
+  case PointGroup::CrystalSystem::Monoclinic:
     return UnitCell(unitCell.a(), unitCell.b(), unitCell.c(), 90.0,
                     unitCell.beta(), 90.0);
-  case PointGroup::Trigonal:
+  case PointGroup::CrystalSystem::Trigonal:
     if (coordinateSystem == Group::Orthogonal) {
       return UnitCell(unitCell.a(), unitCell.a(), unitCell.a(),
                       unitCell.alpha(), unitCell.alpha(), unitCell.alpha());
     }
   // fall through to hexagonal.
-  case PointGroup::Hexagonal:
+  case PointGroup::CrystalSystem::Hexagonal:
     return UnitCell(unitCell.a(), unitCell.a(), unitCell.c(), 90.0, 90.0,
                     120.0);
   default:

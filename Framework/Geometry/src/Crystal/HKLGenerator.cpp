@@ -30,7 +30,8 @@ HKLGenerator::HKLGenerator(int hMinMax, int kMinMax, int lMinMax) {
 /// Constructs a generator that creates all indices for the given cell up to
 /// dMin.
 HKLGenerator::HKLGenerator(const UnitCell &unitCell, double dMin) {
-  m_hklMax = V3D(unitCell.a() / dMin, unitCell.b() / dMin, unitCell.c() / dMin);
+  m_hklMax = V3D(floor(unitCell.a() / dMin), floor(unitCell.b() / dMin),
+                 floor(unitCell.c() / dMin));
   m_hklMin = m_hklMax * -1;
   m_size = getSize(m_hklMin, m_hklMax);
 

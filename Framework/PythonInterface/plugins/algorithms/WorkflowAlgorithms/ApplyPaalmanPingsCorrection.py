@@ -1,7 +1,7 @@
 #pylint: disable=no-init,too-many-instance-attributes
 from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, \
-                       PropertyMode, MatrixWorkspace
+                       PropertyMode, MatrixWorkspace, Progress
 from mantid.kernel import Direction, logger
 
 
@@ -56,18 +56,23 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             logger.information('Not using container')
 
         # Apply container scale factor if needed
+        prog_container = Progress(self, start=0.0, end=0.2, nreports=1)
         if self._use_can:
             if self._scale_can:
                 # Use temp workspace so we don't modify original data
+                prog_container.report('Scaling can')
                 Scale(InputWorkspace=self._can_ws_name,
                       OutputWorkspace=self._scaled_container,
                       Factor=self._can_scale_factor,
                       Operation='Multiply')
                 logger.information('Container scaled by %f' % self._can_scale_factor)
             else:
+                prog_container.report('Cloning Workspace')
                 CloneWorkspace(InputWorkspace=self._can_ws_name,
                                OutputWorkspace=self._scaled_container)
 
+
+        prog_corr = Progress(self, start=0.2, end=0.6, nreports=1)
         if self._use_corrections:
             self._pre_process_corrections()
 
@@ -75,6 +80,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 # Use container factors
                 self._correct_sample_can()
                 correction_type = 'sample_and_can_corrections'
+                prog_corr.report('Correcting sample and can')
             else:
                 # Use sample factor only
                 self._correct_sample()
@@ -84,6 +90,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                              LogName='corrections_filename',
                              LogType='String',
                              LogText=self._corrections_ws_name)
+                prog_corr.report('Correcting sample')
 
         else:
             # Do simple subtraction
@@ -96,19 +103,23 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                          LogName='container_filename',
                          LogType='String',
                          LogText=can_base)
+            prog_corr.report('Adding container filename')
 
+        prog_wrkflow = Progress(self, 0.6, 1.0, nreports=4)
         # Record the container scale factor
         if self._use_can and self._scale_can:
             AddSampleLog(Workspace=self._output_ws_name,
                          LogName='container_scale',
                          LogType='Number',
                          LogText=str(self._can_scale_factor))
+        prog_wrkflow.report('Adding container scaling')
 
         # Record the type of corrections applied
         AddSampleLog(Workspace=self._output_ws_name,
                      LogName='corrections_type',
                      LogType='String',
                      LogText=correction_type)
+        prog_wrkflow.report('Adding correction type')
 
         # Add original sample as log entry
         sam_cut = self._sample_ws_name.index('_')
@@ -117,6 +128,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                      LogName='sample_filename',
                      LogType='String',
                      LogText=sam_base)
+        prog_wrkflow.report('Adding sample filename')
 
         self.setPropertyValue('OutputWorkspace', self._output_ws_name)
 
@@ -125,6 +137,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             DeleteWorkspace(self._corrections)
         if self._scaled_container in mtd:
             DeleteWorkspace(self._scaled_container)
+        prog_wrkflow.report('Deleting Workspaces')
 
 
     def validateInputs(self):

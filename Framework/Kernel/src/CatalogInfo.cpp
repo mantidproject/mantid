@@ -3,9 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/CatalogInfo.h"
 
-#include <boost/regex.hpp>
-#include <boost/algorithm/string.hpp>
-
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
@@ -25,6 +22,13 @@ CatalogInfo::CatalogInfo(const Poco::XML::Element *element) {
   m_macPrefix = getAttribute(element, "mac", "replacement");
   m_linuxPrefix = getAttribute(element, "linux", "replacement");
 }
+
+CatalogInfo::CatalogInfo(const CatalogInfo &other)
+    : m_catalogName(other.m_catalogName), m_soapEndPoint(other.m_soapEndPoint),
+      m_externalDownloadURL(other.m_externalDownloadURL),
+      m_catalogPrefix(other.m_catalogPrefix),
+      m_windowsPrefix(other.m_windowsPrefix), m_macPrefix(other.m_macPrefix),
+      m_linuxPrefix(other.m_linuxPrefix) {}
 
 /**
  * Obtain catalog name from the facility file.
@@ -68,61 +72,10 @@ const std::string CatalogInfo::macPrefix() const { return (m_macPrefix); }
 const std::string CatalogInfo::linuxPrefix() const { return (m_linuxPrefix); }
 
 /**
- * Transform's the archive path based on operating system (OS) used.
- * @param path :: The archive path from ICAT to perform the transform on.
- * @return The path to the archive for the user's OS.
+ * Virtual constructor
+ * @return deep copy of this
  */
-std::string CatalogInfo::transformArchivePath(std::string &path) {
-  std::string ret;
-#ifdef __linux__
-  path = replacePrefix(path, catalogPrefix(), linuxPrefix());
-  path = replaceAllOccurences(path, "\\", "/");
-  ret = path;
-#elif __APPLE__
-  path = replacePrefix(path, catalogPrefix(), macPrefix());
-  path = replaceAllOccurences(path, "\\", "/");
-  ret = path;
-#elif _WIN32
-  // Check to see if path is a windows path.
-  if (path.find("\\") == std::string::npos) {
-    path = replacePrefix(path, linuxPrefix(), windowsPrefix());
-    path = replaceAllOccurences(path, "/", "\\");
-  }
-  ret = path;
-#endif
-  return ret;
-}
-
-/**
- * Replace the content of a string using regex.
- * @param path   :: An string to search and replace on.
- * @param regex  :: The regex to search for.
- * @param prefix :: Replace result of regex with this prefix.
- * @return A string containing the replacement.
- */
-std::string CatalogInfo::replacePrefix(std::string &path,
-                                       const std::string &regex,
-                                       const std::string &prefix) {
-  boost::regex re(regex);
-  // Assign the result of the replacement back to path and return it.
-  path = boost::regex_replace(path, re, prefix);
-  return (path);
-}
-
-/**
- * Replace all occurrences of the search string in the input with the format
- * string.
- * @param path    :: An string to search and replace on.
- * @param search  :: A substring to be searched for.
- * @param format  :: A substitute string.
- * @return A string containing the replacement.
- */
-std::string CatalogInfo::replaceAllOccurences(std::string &path,
-                                              const std::string &search,
-                                              const std::string &format) {
-  boost::replace_all(path, search, format);
-  return (path);
-}
+CatalogInfo *CatalogInfo::clone() const { return new CatalogInfo(*this); }
 
 /**
  * Obtain the attribute from a given element tag and attribute name.

@@ -152,22 +152,48 @@ namespace CustomInterfaces
   {
   }
 
-  void ISISCalibration::run()
-  {
+  void ISISCalibration::run() {
     // Get properties
-    QString firstFile = m_uiForm.leRunNo->getFirstFilename();
     QStringList filenameList = m_uiForm.leRunNo->getFilenames();
     QString filenames = filenameList.join(",");
+    QString userInFiles = m_uiForm.leRunNo->getText();
+    QString firstFileNumber("");
+    auto cutIndexDash = userInFiles.indexOf("-");
+    auto cutIndexComma = userInFiles.indexOf(",");
+
+    if (cutIndexDash == -1 && cutIndexComma == -1) {
+      firstFileNumber = userInFiles;
+    } else {
+      if (cutIndexDash != -1) {
+        firstFileNumber = userInFiles.left(cutIndexDash);
+      } else {
+        firstFileNumber = userInFiles.left(cutIndexComma);
+      }
+      if (cutIndexDash != -1 && cutIndexComma != -1) {
+        if (cutIndexDash < cutIndexComma) {
+          firstFileNumber = userInFiles.left(cutIndexDash);
+        } else {
+          firstFileNumber = userInFiles.left(cutIndexComma);
+        }
+      }
+    }
 
     auto instDetails = getInstrumentDetails();
-    QString instDetectorRange = instDetails["spectra-min"] + "," + instDetails["spectra-max"];
+    QString instDetectorRange =
+        instDetails["spectra-min"] + "," + instDetails["spectra-max"];
 
-    QString peakRange = m_properties["CalPeakMin"]->valueText() + "," + m_properties["CalPeakMax"]->valueText();
-    QString backgroundRange = m_properties["CalBackMin"]->valueText() + "," + m_properties["CalBackMax"]->valueText();
+    QString peakRange = m_properties["CalPeakMin"]->valueText() + "," +
+                        m_properties["CalPeakMax"]->valueText();
+    QString backgroundRange = m_properties["CalBackMin"]->valueText() + "," +
+                              m_properties["CalBackMax"]->valueText();
 
-    QFileInfo firstFileInfo(firstFile);
-    QString outputWorkspaceNameStem = firstFileInfo.baseName() + "_" + getInstrumentConfiguration()->getAnalyserName()
-                                      + getInstrumentConfiguration()->getReflectionName();
+    QString outputWorkspaceNameStem =
+        getInstrumentConfiguration()->getInstrumentName() + firstFileNumber +
+        QString::fromStdString("_") +
+        getInstrumentConfiguration()->getAnalyserName() +
+        getInstrumentConfiguration()->getReflectionName();
+
+        outputWorkspaceNameStem = outputWorkspaceNameStem.toLower();
 
     m_outputCalibrationName = outputWorkspaceNameStem;
     if(filenameList.size() > 1)
@@ -443,7 +469,7 @@ namespace CustomInterfaces
     {
       g_log.warning("No result workspaces, cannot plot energy preview.");
       return;
-    }
+	}
 
     MatrixWorkspace_sptr energyWs = boost::dynamic_pointer_cast<MatrixWorkspace>(reductionOutputGroup->getItem(0));
     if(!energyWs)

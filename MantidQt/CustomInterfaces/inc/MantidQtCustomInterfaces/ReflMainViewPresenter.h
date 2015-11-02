@@ -4,19 +4,23 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidKernel/System.h"
+#include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/IReflSearcher.h"
-#include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/ReflTransferStrategy.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/NObserver.h>
+#include <memory>
 
 namespace MantidQt
 {
   namespace CustomInterfaces
   {
+  // Forward decs
+  class ProgressableView;
+
     /** @class ReflMainViewPresenter
 
     ReflMainViewPresenter is a presenter class for teh Reflectometry Interface. It handles any interface functionality and model manipulation.
@@ -44,7 +48,10 @@ namespace MantidQt
     class DLLExport ReflMainViewPresenter: public IReflPresenter
     {
     public:
-      ReflMainViewPresenter(ReflMainView* view, boost::shared_ptr<IReflSearcher> searcher = boost::shared_ptr<IReflSearcher>());
+      ReflMainViewPresenter(ReflMainView *mainView,
+                            ProgressableView *progressView,
+                            boost::shared_ptr<IReflSearcher> searcher =
+                                boost::shared_ptr<IReflSearcher>());
       virtual ~ReflMainViewPresenter();
       virtual void notify(IReflPresenter::Flag flag);
       virtual const std::map<std::string,QVariant>& options() const;
@@ -57,15 +64,16 @@ namespace MantidQt
       ReflSearchModel_sptr m_searchModel;
       //the name of the workspace/table/model in the ADS, blank if unsaved
       std::string m_wsName;
-      //the view we're managing
+      // the main view we're managing
       ReflMainView* m_view;
+      // The progress view
+      ProgressableView *m_progressView;
       //stores whether or not the table has changed since it was last saved
       bool m_tableDirty;
       //stores the user options for the presenter
       std::map<std::string,QVariant> m_options;
       //the search implementation
       boost::shared_ptr<IReflSearcher> m_searcher;
-      boost::shared_ptr<ReflTransferStrategy> m_transferStrategy;
 
       //process selected rows
       void process();
@@ -151,16 +159,13 @@ namespace MantidQt
 
       void saveNotebook(std::map<int,std::set<int>> groups, std::set<int> rows);
 
-    public:
-      static const int COL_RUNS         = 0;
-      static const int COL_ANGLE        = 1;
-      static const int COL_TRANSMISSION = 2;
-      static const int COL_QMIN         = 3;
-      static const int COL_QMAX         = 4;
-      static const int COL_DQQ          = 5;
-      static const int COL_SCALE        = 6;
-      static const int COL_GROUP        = 7;
-      static const int COL_OPTIONS      = 8;
+    private:
+
+      static const std::string LegacyTransferMethod;
+      static const std::string MeasureTransferMethod;
+
+      std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
+
     };
   }
 }
