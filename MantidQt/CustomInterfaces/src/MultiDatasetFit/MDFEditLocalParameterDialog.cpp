@@ -40,7 +40,7 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit, co
     auto cell = new QTableWidgetItem( makeNumber(value) );
     m_uiForm.tableWidget->setItem( i, 0, cell );
     auto headerItem = new QTableWidgetItem(
-        QString::fromStdString(multifit->getWorkspaceName(i)) + " (" +
+        multifit->getWorkspaceName(i) + " (" +
         QString::number(multifit->getWorkspaceIndex(i)) + ")");
     m_uiForm.tableWidget->setVerticalHeaderItem(i, headerItem);
   }
