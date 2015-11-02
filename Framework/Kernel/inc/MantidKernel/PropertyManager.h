@@ -83,8 +83,8 @@ public:
   void setProperties(
       const ::Json::Value &jsonValue,
       const std::set<std::string> &ignoreProperties = std::set<std::string>());
-  void setProperties(const ::Json::Value &jsonValue,
-      IPropertyManager *targetPropertyManager,
+  void setProperties(
+      const ::Json::Value &jsonValue, IPropertyManager *targetPropertyManager,
       const std::set<std::string> &ignoreProperties = std::set<std::string>());
   void setPropertiesWithSimpleString(
       const std::string &propertiesString,

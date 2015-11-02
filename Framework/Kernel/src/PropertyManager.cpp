@@ -220,7 +220,7 @@ void PropertyManager::declareProperty(Property *p, const std::string &doc) {
 void PropertyManager::setProperties(
     const std::string &propertiesJson,
     const std::set<std::string> &ignoreProperties) {
-  setProperties(propertiesJson,this,ignoreProperties);
+  setProperties(propertiesJson, this, ignoreProperties);
 }
 //-----------------------------------------------------------------------------------------------
 /** Set the ordered list of properties by one string of values, separated by
@@ -236,8 +236,7 @@ void PropertyManager::setProperties(
  *  @throw invalid_argument if error in parameters
  */
 void PropertyManager::setProperties(
-    const std::string &propertiesJson,
-    IPropertyManager* targetPropertyManager,
+    const std::string &propertiesJson, IPropertyManager *targetPropertyManager,
     const std::set<std::string> &ignoreProperties) {
   ::Json::Reader reader;
   ::Json::Value jsonValue;
@@ -258,7 +257,7 @@ void PropertyManager::setProperties(
 void PropertyManager::setProperties(
     const ::Json::Value &jsonValue,
     const std::set<std::string> &ignoreProperties) {
-  setProperties(jsonValue,this,ignoreProperties);
+  setProperties(jsonValue, this, ignoreProperties);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -271,8 +270,7 @@ void PropertyManager::setProperties(
  *      most of the time this will be *this
  */
 void PropertyManager::setProperties(
-    const ::Json::Value &jsonValue,
-    IPropertyManager* targetPropertyManager,
+    const ::Json::Value &jsonValue, IPropertyManager *targetPropertyManager,
     const std::set<std::string> &ignoreProperties) {
   if (jsonValue.type() == ::Json::ValueType::objectValue) {
 
