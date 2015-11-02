@@ -740,14 +740,15 @@ void MantidUI::showVatesSimpleInterface()
       m_vatesSubWindow->setWindowIcon(icon);
       connect(m_appWindow, SIGNAL(shutting_down()), m_vatesSubWindow, SLOT(close()));
 
-      //reset the qt error redirection that Paraview puts in place
-      // this may not be necessary if we move to qt5
-      qInstallMsgHandler(0);
-
+ 
       MantidQt::API::InterfaceManager interfaceManager;
       MantidQt::API::VatesViewerInterface *vsui = interfaceManager.createVatesSimpleGui();
       if (vsui)
-      {
+      {     
+        //reset the qt error redirection that Paraview puts in place
+        // this may not be necessary if we move to qt5
+        qInstallMsgHandler(0);
+
         connect(m_appWindow, SIGNAL(shutting_down()),
           vsui, SLOT(shutdown()));
         connect(vsui, SIGNAL(requestClose()), m_vatesSubWindow, SLOT(close()));
