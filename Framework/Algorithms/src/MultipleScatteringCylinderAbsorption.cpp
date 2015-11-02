@@ -139,7 +139,7 @@ void MultipleScatteringCylinderAbsorption::exec() {
                 << " coeff2=" << coeff2 << " coeff3=" << coeff3 << "\n";
 
   // geometry stuff
-  const size_t NUM_HIST = in_WS->getNumberHistograms();
+  const int64_t NUM_HIST = static_cast<int64_t>(in_WS->getNumberHistograms());
   Instrument_const_sptr instrument = in_WS->getInstrument();
   if (instrument == NULL)
     throw std::runtime_error(
@@ -180,7 +180,7 @@ void MultipleScatteringCylinderAbsorption::exec() {
 
     // now do the correction
     PARALLEL_FOR1(out_WSevent)
-    for (size_t index = 0; index < NUM_HIST; ++index) {
+    for (int64_t index = 0; index < NUM_HIST; ++index) {
       PARALLEL_START_INTERUPT_REGION
       IDetector_const_sptr det = out_WSevent->getDetector(index);
       if (det == NULL)
@@ -218,7 +218,7 @@ void MultipleScatteringCylinderAbsorption::exec() {
     MatrixWorkspace_sptr out_WS = WorkspaceFactory::Instance().create(
         in_WS, NUM_HIST, in_WS->readX(0).size(), in_WS->readY(0).size());
 
-    for (size_t index = 0; index < NUM_HIST; ++index) {
+    for (int64_t index = 0; index < NUM_HIST; ++index) {
       IDetector_const_sptr det = in_WS->getDetector(index);
       if (det == NULL)
         throw std::runtime_error("Failed to find detector");
