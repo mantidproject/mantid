@@ -1203,9 +1203,8 @@ void ConvFit::singleFitComplete(bool error) {
       key += "f0.";
     }
 
-    key += "Height";
-
-    m_dblManager->setValue(m_properties["DeltaHeight"], parameters[key]);
+    m_dblManager->setValue(m_properties["DeltaHeight"], parameters[key + "Height"]);
+	m_dblManager->setValue(m_properties["DeltaCentre"], parameters[key + "Centre"]);
     funcIndex++;
   }
 
