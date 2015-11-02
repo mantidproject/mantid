@@ -55,9 +55,6 @@ static const double Z_initial[] = {
     2.0,          0.0,          0.0, 0.0,         0.0, 0.0,
     3.104279270,  0.0,          0.0, 0.0,         0.0, 0.0};
 
-static const double H_ES = PhysicalConstants::h * 1e7; ///< h in erg seconds
-static const double MN_KG =
-    PhysicalConstants::NeutronMass; ///< mass of neutron(kg)
 static const double LAMBDA_REF =
     1.81; ///< Wavelength that the calculations are based on
 static const double COEFF4 = 1.1967;
