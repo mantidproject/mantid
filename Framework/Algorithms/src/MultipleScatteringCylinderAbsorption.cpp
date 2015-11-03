@@ -119,7 +119,8 @@ void MultipleScatteringCylinderAbsorption::exec() {
                         << "\" from workspace\n";
     if (std::abs(coeff1 - 2.8) < std::numeric_limits<double>::epsilon())
       coeff1 = sampleMaterial.absorbXSection(LAMBDA_REF) / LAMBDA_REF;
-    if (std::abs(coeff2 - 0.0721) < std::numeric_limits<double>::epsilon() && (!isEmpty(sampleMaterial.numberDensity()))
+    if ((std::abs(coeff2 - 0.0721) < std::numeric_limits<double>::epsilon()) &&
+        (!isEmpty(sampleMaterial.numberDensity())))
       coeff2 = sampleMaterial.numberDensity();
     if (std::abs(coeff3 - 5.1) < std::numeric_limits<double>::epsilon())
       coeff3 = sampleMaterial.totalScatterXSection(LAMBDA_REF);
