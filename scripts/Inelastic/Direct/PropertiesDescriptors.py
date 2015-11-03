@@ -112,11 +112,11 @@ class IncidentEnergy(PropDescriptor):
                     currentRun = instance.sample_run
                     if isinstance(currentRun,api.Workspace):
                         currentRun = currentRun.getRunNumber()
-                    if currentRun != self._autoEiRunNumber:
+                    if currentRun != self._autoEiRunNumber or currentRun is None:
                         self._autoEiRunNumber = currentRun
                         self._autoEiCalculated = False
                         self._incident_energy  = 0
-                    self._cur_iter_en = 0
+                    self._cur_iter_en = -1
                     return
                 # Ei in string form is provided
                 else:
@@ -167,8 +167,8 @@ class IncidentEnergy(PropDescriptor):
         return self._use_autoEi
     #
     def multirep_mode(self):
-        """ return true if energy is defined as list of energies and false otherwise """
-        if isinstance(self._incident_energy,list):
+        """ return true if energy is defined as list of energies or multirep m and false otherwise """
+        if isinstance(self._incident_energy,list) or self.autoEi_mode:
             return True
         else:
             return False
@@ -232,10 +232,9 @@ class IncidentEnergy(PropDescriptor):
         # Calculate autoEi
         self._autoEiCalculated = False
         ei_mon = instance.ei_mon_spectra;
-        guess_ei_ws = GetAllEi(InputWorkspace=monitor_ws,Monitor1SpecID = ei_mon[0],\
+        guess_ei_ws = GetAllEi(Workspace=monitor_ws,Monitor1SpecID = ei_mon[0],\
                                Monitor2SpecID = ei_mon[1])
-        allEi  = guess_ei_ws.readX(0);
-        guesEi = allEi[0]
+        guessEi  = guess_ei_ws.readX(0);
         fin_ei = []
         for ei in guessEi:
             try:
@@ -252,7 +251,9 @@ class IncidentEnergy(PropDescriptor):
         self._autoEiRunNumber  = newRunNum
         self._incident_energy = fin_ei
         self._num_energies = len(fin_ei)
-        self._cur_iter_en = 0
+        self._cur_iter_en = -1
+        # Clear IDF from unnecessary workspace
+        DeleteWorkspace(guess_ei_ws)
 
 
     def validate(self,instance,owner=None):

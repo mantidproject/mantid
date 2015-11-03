@@ -554,26 +554,8 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # create test workspace
         monitor_ws=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=6, BankPixelWidth=1,\
                                             NumEvents=100000, XUnit='Energy', XMin=3, XMax=200, BinWidth=0.1)
-
-        # Place all detectors into appropriate positions as the distance for all detectors
-        # to sum have to be equal
-        mon1_det = monitor_ws.getDetector(0)
-        mon1_pos = mon1_det.getPos()
-        MoveInstrumentComponent(Workspace=monitor_ws,ComponentName= 'Detector', DetectorID=2,
-                                X=mon1_pos.getX(),Y=mon1_pos.getY(), Z=mon1_pos.getZ(),
-                                 RelativePosition=False)
-        MoveInstrumentComponent(Workspace=monitor_ws,ComponentName= 'Detector', DetectorID=3,
-                                X=mon1_pos.getX(),Y=mon1_pos.getY(), Z=mon1_pos.getZ(),
-                                 RelativePosition=False)
-        mon2_det = monitor_ws.getDetector(3)
-        mon2_pos = mon2_det.getPos()
-        MoveInstrumentComponent(Workspace=monitor_ws,ComponentName= 'Detector', DetectorID=4,
-                                X=mon2_pos.getX(),Y=mon2_pos.getY(), Z=mon2_pos.getZ(),
-                                 RelativePosition=False)
-        MoveInstrumentComponent(Workspace=monitor_ws,ComponentName= 'Detector', DetectorID=5,
-                                X=mon2_pos.getX(),Y=mon2_pos.getY(), Z=mon2_pos.getZ(),
-                                 RelativePosition=False)
         ConvertUnits(InputWorkspace=monitor_ws, OutputWorkspace='monitor_ws', Target='TOF')
+
         # Rebin to "formally" make common bin boundaries as it is not considered as such
         #any more after converting units (Is this a bug?)
         xx = monitor_ws.readX(0)
