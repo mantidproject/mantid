@@ -121,7 +121,7 @@ public:
 
   /// Algorithm's category for identification
   virtual const std::string category() const {
-    return "Diffraction\\ConstantWavelength;Diffraction\\Focussing;MDAlgorithms";
+    return "Diffraction\\ConstantWavelength;Diffraction\\Focussing";
   }
 
 private:

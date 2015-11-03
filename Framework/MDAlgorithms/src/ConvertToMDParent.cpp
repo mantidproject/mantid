@@ -20,7 +20,7 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ConvertToMDParent::category() const { return "MDAlgorithms"; }
+const std::string ConvertToMDParent::category() const { return "MDAlgorithms\\Creation"; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

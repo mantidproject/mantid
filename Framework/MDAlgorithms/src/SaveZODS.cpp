@@ -34,7 +34,7 @@ const std::string SaveZODS::name() const { return "SaveZODS"; }
 int SaveZODS::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SaveZODS::category() const { return "MDAlgorithms"; }
+const std::string SaveZODS::category() const { return "MDAlgorithms\\DataHandling"; }
 
 //----------------------------------------------------------------------------------------------
 

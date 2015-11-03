@@ -47,7 +47,7 @@ const std::string TransposeMD::name() const { return "TransposeMD"; }
 int TransposeMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string TransposeMD::category() const { return "MDAlgorithms"; }
+const std::string TransposeMD::category() const { return "MDAlgorithms\\Transforms"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string TransposeMD::summary() const {
