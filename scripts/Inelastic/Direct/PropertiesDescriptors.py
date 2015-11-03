@@ -161,9 +161,11 @@ class IncidentEnergy(PropDescriptor):
         ok,sev,message = self.validate(instance)
         if not ok:
             raise KeyError(message)
+    #
     def autoEi_mode(self):
         """Return true if energies should be calculated in autoEi mode"""
         return self._use_autoEi
+    #
     def multirep_mode(self):
         """ return true if energy is defined as list of energies and false otherwise """
         if isinstance(self._incident_energy,list):
@@ -174,7 +176,7 @@ class IncidentEnergy(PropDescriptor):
     def get_EiRange(self):
         """Return incident energy(ies) range, defined by the property"""
         return self._incident_energy
-
+    #
     def get_current(self):
         """ Return current energy out of range of energies"""
         if isinstance(self._incident_energy,list):
@@ -230,14 +232,17 @@ class IncidentEnergy(PropDescriptor):
         # Calculate autoEi
         self._autoEiCalculated = False
         ei_mon = instance.ei_mon_spectra;
-        guess_ei_ws = GetAllEi(monitor_ws,ei_mon[0],ei_mon[1])
+        guess_ei_ws = GetAllEi(InputWorkspace=monitor_ws,Monitor1SpecID = ei_mon[0],\
+                               Monitor2SpecID = ei_mon[1])
         allEi  = guess_ei_ws.readX(0);
         guesEi = allEi[0]
         fin_ei = []
         for ei in guessEi:
             try:
-                ei_ref,t_peak,monIndex,tZero=GetEi(InputWorkspace=monitor_ws, Monitor1Spec=ei_mon[0], Monitor2Spec=ei_mon[1], EnergyEstimate=ei)
+                ei_ref,t_peak,monIndex,tZero=GetEi(InputWorkspace=monitor_ws,\
+                                             Monitor1Spec=ei_mon[0], Monitor2Spec=ei_mon[1], EnergyEstimate=ei)
                 fin_ei.append(ei_ref)
+#pylint: disable=broad-except
             except:
                 instance.log("Can not refine guess energy {0:f}. Ignoring it.".format(ei),'warning')
         if len(fin_ei) == 0:

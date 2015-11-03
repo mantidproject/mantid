@@ -450,12 +450,15 @@ class DirectEnergyConversion(object):
         #Set or clear monovan run number to use in cash ID to return correct
         #cashed value of monovan integral
         PropertyManager.mono_correction_factor.set_cash_mono_run_number(MonovanCashNum)
+        # Check auto-ei mode and calculate incident energies if necessary
+        if PropertyManager.incident_energy.autoEi_mode():
+            mon_ws = PropertyManager.sample_run.get_monitors_ws()
+            PropertyManager.sample_run.set_auto_Ei(mon_ws,prop_man)
 
         mono_ws_base = None
         if PropertyManager.incident_energy.multirep_mode():
             self._multirep_mode = True
             ws_base = None
-            num_ei_cuts = len(self.incident_energy)
             if self.check_background:
                 # find the count rate seen in the regions of the histograms defined
                 # as the background regions, if the user defined such region.
@@ -468,14 +471,15 @@ class DirectEnergyConversion(object):
         else:
 #pylint: disable=attribute-defined-outside-init
             self._multirep_mode = False
-            num_ei_cuts = 0
+
 #------------------------------------------------------------------------------------------
 # Main loop over incident energies
 #------------------------------------------------------------------------------------------
-        cut_ind = 0 # do not do enumerate if it generates all sequence at once
+        # do not do enumerate if it generates all sequence at once
         #  -- code below uses current energy state from PropertyManager.incident_energy
         for ei_guess in PropertyManager.incident_energy:
-            cut_ind +=1
+            cut_ind,num_ei_cuts=PropertyManager.incident_energy.get_nIter()
+            #cut_ind +=1
             #---------------
             if self._multirep_mode:
                 tof_range = self.find_tof_range_for_multirep(ws_base)
