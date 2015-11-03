@@ -93,7 +93,6 @@ set ( MtdVersion_WC_LAST_CHANGED_DATE Unknown )
 set ( MtdVersion_WC_LAST_CHANGED_DATETIME 0 )
 set ( NOT_GIT_REPO "Not" )
 
-find_package ( Git )
 if ( GIT_FOUND )
   # Get the last revision
   execute_process ( COMMAND ${GIT_EXECUTABLE} describe --long

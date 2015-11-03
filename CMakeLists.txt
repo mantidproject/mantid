@@ -39,11 +39,9 @@ set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #e
 set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 
 ###########################################################################
-# Third party for Visual Studio
+# Bootstrap any dependencies
 ###########################################################################
-if ( MSVC )
-  include ( MSVCSetup )
-endif()
+include ( Bootstrap )
 
 ###########################################################################
 # Cross-platform setup

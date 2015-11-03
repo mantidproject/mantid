@@ -1,24 +1,3 @@
-##########################################################################
-# Set include and library directories so that CMake finds THIRD_PARTY_DIR
-###########################################################################
-set ( THIRD_PARTY_DIR ${PROJECT_SOURCE_DIR}/thirdparty CACHE PATH
-     "Root directory of the third-party dependencies. " )
-if( NOT IS_DIRECTORY ${THIRD_PARTY_DIR} )
-  message ( FATAL_ERROR "Third-party directory '${THIRD_PARTY_DIR}' does not point to a valid directory" )
-endif()
-# Print out where we think we are looking for 3rd party stuff
-set ( THIRD_PARTY_BIN "${THIRD_PARTY_DIR}/bin;${THIRD_PARTY_DIR}/lib/qt4/bin" )
-message ( STATUS "Looking for third-dependencies in ${THIRD_PARTY_DIR}. " 
-                  " NOTE: Please check '${THIRD_PARTY_BIN}' are on the PATH")
-set ( ENV{PATH} "${THIRD_PARTY_BIN};$ENV{PATH}" )
-
-set ( CMAKE_INCLUDE_PATH "${THIRD_PARTY_DIR}/include" )
-set ( CMAKE_LIBRARY_PATH "${THIRD_PARTY_DIR}/lib" )
-set ( CMAKE_PREFIX_PATH "${THIRD_PARTY_DIR};${THIRD_PARTY_DIR}/lib/qt4" )
-
-set ( BOOST_INCLUDEDIR "${CMAKE_INCLUDE_PATH}" )
-set ( BOOST_LIBRARYDIR "${CMAKE_LIBRARY_PATH}" )
-set ( Boost_NO_SYSTEM_PATHS TRUE )
 
 ##########################################################################
 # Set the SYSTEM_PACKAGE_TARGET to RUNTIME as we only want to package
