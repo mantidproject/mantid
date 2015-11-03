@@ -171,7 +171,7 @@ logging.channels.fileFilterChannel.channel= fileChannel
 logging.channels.fileFilterChannel.level= information
 
 # output to the console - primarily for console based apps
-logging.channels.consoleChannel.class = ConsoleChannel
+logging.channels.consoleChannel.class = StdoutChannel
 logging.channels.consoleChannel.formatter = f1
 
 # output to a file (For error capturing and debugging)
