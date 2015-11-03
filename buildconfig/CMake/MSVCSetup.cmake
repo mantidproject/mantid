@@ -82,7 +82,7 @@ set ( PYTHONW_EXECUTABLE "${PYTHON_DIR}/pythonw.exe" CACHE FILEPATH
 ###########################################################################
 # If required, find tcmalloc
 ###########################################################################
-set ( USE_TCMALLOC ON CACHE BOOL "If true, link with tcmalloc" )
+set ( USE_TCMALLOC OFF CACHE BOOL "If true, link with tcmalloc" )
 # If not wanted, just carry on without it
 if ( USE_TCMALLOC )
   set ( TCMALLOC_LIBRARIES optimized "${CMAKE_LIBRARY_PATH}/libtcmalloc_minimal.lib" debug "${CMAKE_LIBRARY_PATH}/libtcmalloc_minimal-debug.lib" )
