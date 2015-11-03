@@ -117,7 +117,7 @@ class CreateMD(DataProcessorAlgorithm):
 
 
     def category(self):
-        return 'MDAlgorithms'
+        return 'MDAlgorithms;Utility\\Workspaces'
 
     def summary(self):
         return 'Creates a mutlidimensional workspace by transforming and combining individual runs.'

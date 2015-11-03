@@ -21,7 +21,7 @@ class Symmetrise(PythonAlgorithm):
     _negative_min_index = None
 
     def category(self):
-        return 'PythonAlgorithms'
+        return 'Transforms'
 
 
     def summary(self):
