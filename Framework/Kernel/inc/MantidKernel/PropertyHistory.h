@@ -4,10 +4,11 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/DllConfig.h"
+#include "MantidKernel/EmptyValues.h"
 #include <string>
 #include <vector>
 #include <boost/shared_ptr.hpp>
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace Kernel {
@@ -69,6 +70,8 @@ public:
   unsigned int direction() const { return m_direction; };
   /// print contents of object
   void printSelf(std::ostream &, const int indent = 0) const;
+  /// get whether algorithm parameter was left as default EMPTY_INT,LONG,DBL const
+  bool isEmptyDefault() const;
 
   /// this is required for boost.python
   bool operator==(const PropertyHistory &other) const {
