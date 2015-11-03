@@ -154,7 +154,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="layoutWidget">
+      <widget class="QWidget" name="layoutWidget1">
        <layout class="QGridLayout" name="gridLayout_7" rowstretch="0,1">
         <property name="sizeConstraint">
          <enum>QLayout::SetMaximumSize</enum>
