@@ -81,7 +81,7 @@ public:
 
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const {
-    return "DataHandling;DataHandling\\Tomography";
+    return "DataHandling\\Tomography";
   }
 
   /// Returns a confidence value that this algorithm can load a file

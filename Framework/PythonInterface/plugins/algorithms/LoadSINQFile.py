@@ -20,7 +20,7 @@ import re
 
 class LoadSINQFile(PythonAlgorithm):
     def category(self):
-        return "DataHandling"
+        return "DataHandling\Nexus"
 
     def summary(self):
         return "Load a SINQ file with the right dictionary."

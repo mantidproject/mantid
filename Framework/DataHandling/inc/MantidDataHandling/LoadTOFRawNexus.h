@@ -61,7 +61,7 @@ public:
 
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const {
-    return "DataHandling;DataHandling\\Nexus";
+    return "DataHandling\\Nexus";
   }
 
   static std::string getEntryName(const std::string &filename);

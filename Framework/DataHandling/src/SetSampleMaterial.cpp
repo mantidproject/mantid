@@ -30,7 +30,7 @@ const std::string SetSampleMaterial::name() const {
 int SetSampleMaterial::version() const { return (1); }
 
 const std::string SetSampleMaterial::category() const {
-  return "Sample;DataHandling";
+  return "Sample";
 }
 
 using namespace Mantid::DataHandling;

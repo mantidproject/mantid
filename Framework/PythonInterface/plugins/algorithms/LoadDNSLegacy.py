@@ -28,7 +28,7 @@ class LoadDNSLegacy(PythonAlgorithm):
         """
         Returns category
         """
-        return 'Workflow\\MLZ\\DNS;DataHandling\\FileTypes'
+        return 'Workflow\\MLZ\\DNS;DataHandling\\Text'
 
     def name(self):
         """

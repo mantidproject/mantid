@@ -24,7 +24,7 @@ class LoadEmptyVesuvio(PythonAlgorithm):
     def category(self):
         """ Defines the category the algorithm will be put in the algorithm browser
         """
-        return 'DataHandling\\FileTypes'
+        return 'DataHandling\\Raw'
 #----------------------------------------------------------------------------------------
 
     def PyInit(self):
