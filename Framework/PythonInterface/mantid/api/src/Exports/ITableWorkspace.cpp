@@ -203,13 +203,15 @@ PyObject *row(ITableWorkspace &self, int row) {
 }
 
 /**
- * Adds a new row in the table, where the items are given in a
- * dictionary object mapping {column name:value}
+ * Adds a new row in the table, where the items are given in a dictionary
+ * object mapping {column name:value}. It must contain a key-value entry for
+ * every column in the row, otherwise the insert will fail.
+ *
  * @param self :: A reference to the ITableWorkspace object
- * @param rowItems :: A dictionary defining the items in the row. It must
- * be the same length as the number of columns or the insert will fail
+ * @param rowItems :: A dictionary defining the items in the row
  */
 void addRowFromDict(ITableWorkspace &self, const bpl::dict &rowItems) {
+  // rowItems must contain an entry for every column
   bpl::ssize_t nitems = boost::python::len(rowItems);
   if (nitems != static_cast<bpl::ssize_t>(self.columnCount())) {
     throw std::invalid_argument(
@@ -217,38 +219,59 @@ void addRowFromDict(ITableWorkspace &self, const bpl::dict &rowItems) {
         "Expected: " +
         boost::lexical_cast<std::string>(self.columnCount()));
   }
+
+  // Add a new row to populate with values
   const int rowIndex = static_cast<int>(self.rowCount());
-  TableRow newRow = self.appendRow();
-  boost::python::object iter = rowItems.iteritems();
-  while (true) {
-    bpl::object keyValue;
-    try {
-      keyValue = iter.attr("next")();
-    } catch (bpl::error_already_set &) {
-      PyErr_Clear(); // Clear the raised StopIteration exception
-      break;
+  self.appendRow();
+
+  // Declared in this scope so we can access them in catch block
+  Column_sptr column;   // Column in table
+  bpl::object value;    // Value from dictionary
+
+  try {
+    // Retrieve and set the value for each column
+    auto columns = self.getColumnNames();
+    for (auto iter = columns.begin(); iter != columns.end(); ++iter) {
+      column = self.getColumn(*iter);
+      value = rowItems[*iter];
+      setValue(column, rowIndex, value);
     }
-    const std::string columnName =
-        boost::python::extract<std::string>(keyValue[0]);
-    const Column_sptr column = self.getColumn(columnName);
-    try {
-      setValue(column, rowIndex, keyValue[1]);
-    } catch (bpl::error_already_set &) {
-      std::ostringstream os;
-      os << "Incorrect type passed for \"" << columnName << "\"";
-      throw std::invalid_argument(os.str());
+  } catch (bpl::error_already_set &) {
+    // One of the columns wasn't found in the dictionary
+    if (PyErr_ExceptionMatches(PyExc_KeyError)) {
+      std::ostringstream msg;
+      msg << "Missing key-value entry for column ";
+      msg << "<" << column->name() << ">";
+      PyErr_SetString(PyExc_KeyError, msg.str().c_str());
     }
+
+    // Wrong type of data for one of the columns
+    if (PyErr_ExceptionMatches(PyExc_TypeError)) {
+      std::ostringstream msg;
+      msg << "Wrong datatype <";
+      msg << std::string(bpl::extract<std::string>(
+               value.attr("__class__").attr("__name__")));
+      msg << "> for column <" << column->name() << "> ";
+      msg << "(expected <" << column->type() << ">)";
+      PyErr_SetString(PyExc_TypeError, msg.str().c_str());
+    }
+
+    // Remove the new row since populating it has failed
+    self.removeRow(rowIndex);
+    throw;
   }
 }
 
 /**
- * Adds a new row in the table, where the items are given in a
- * dictionary object mapping {column name:value}
+ * Adds a new row in the table, where the items are given in an ordered python
+ * sequence type (list, tuple, numpy array, etc). It must be the same length as
+ * the number of columns or the insert will fail.
+ *
  * @param self :: A reference to the ITableWorkspace object
- * @param rowItems :: A dictionary defining the items in the row. It must
- * be the same length as the number of columns or the insert will fail
+ * @param rowItems :: A sequence containing the column values in the row
  */
-void addRowFromList(ITableWorkspace &self, const bpl::list &rowItems) {
+void addRowFromSequence(ITableWorkspace &self, const bpl::object &rowItems) {
+  // rowItems must contain an entry for every column
   bpl::ssize_t nitems = boost::python::len(rowItems);
   if (nitems != static_cast<bpl::ssize_t>(self.columnCount())) {
     throw std::invalid_argument(
@@ -256,16 +279,33 @@ void addRowFromList(ITableWorkspace &self, const bpl::list &rowItems) {
         "Expected: " +
         boost::lexical_cast<std::string>(self.columnCount()));
   }
+
+  // Add a new row to populate with values
   const int rowIndex = static_cast<int>(self.rowCount());
-  TableRow newRow = self.appendRow();
+  self.appendRow();
+
+  // Loop over sequence and set each column value in same order
   for (bpl::ssize_t i = 0; i < nitems; ++i) {
-    const Column_sptr column = self.getColumn(i);
+    auto column = self.getColumn(i);
+    auto value = rowItems[i];
+
     try {
-      setValue(column, rowIndex, rowItems[i]);
+      setValue(column, rowIndex, value);
     } catch (bpl::error_already_set &) {
-      std::ostringstream os;
-      os << "Incorrect type passed for item \"" << i << "\" in list";
-      throw std::invalid_argument(os.str());
+      // Wrong type of data for one of the columns
+      if (PyErr_ExceptionMatches(PyExc_TypeError)) {
+        std::ostringstream msg;
+        msg << "Wrong datatype <";
+        msg << std::string(bpl::extract<std::string>(
+                 value.attr("__class__").attr("__name__")));
+        msg << "> for column <" << column->name() << "> ";
+        msg << "(expected <" << column->type() << ">)";
+        PyErr_SetString(PyExc_TypeError, msg.str().c_str());
+      }
+
+      // Remove the new row since populating it has failed
+      self.removeRow(rowIndex);
+      throw;
     }
   }
 }
@@ -372,13 +412,15 @@ void export_ITableWorkspace() {
       .def("row", &row, (arg("self"), arg("row")),
            "Return all values of a specific row as a dict")
 
-      .def("addRow", &addRowFromDict, (arg("self"), arg("row_items_dict")),
-           "Appends a row with the values from the dictionary")
-
-      .def("addRow", &addRowFromList, (arg("self"), arg("row_items_list")),
-           "Appends a row with the values from the given list. "
+      // FromSequence must come first since it takes an object parameter
+      // Otherwise, FromDict will never be called as object accepts anything
+      .def("addRow", &addRowFromSequence, (arg("self"), arg("row_items_seq")),
+           "Appends a row with the values from the given sequence. "
            "It it assumed that the items are in the correct order for the "
            "defined columns")
+
+      .def("addRow", &addRowFromDict, (arg("self"), arg("row_items_dict")),
+           "Appends a row with the values from the dictionary")
 
       .def("cell", &cell, (arg("self"), arg("value"), arg("row_or_column")),
            "Return the given cell. If the first argument is a "
