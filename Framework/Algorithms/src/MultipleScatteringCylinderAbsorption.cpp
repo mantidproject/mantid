@@ -117,11 +117,11 @@ void MultipleScatteringCylinderAbsorption::exec() {
   if (sampleMaterial.totalScatterXSection(LAMBDA_REF) != 0.0) {
     g_log.information() << "Using material \"" << sampleMaterial.name()
                         << "\" from workspace\n";
-    if (coeff1 == 2.8)
+    if (std::abs(coeff1 - 2.8) < std::numeric_limits<double>::epsilon())
       coeff1 = sampleMaterial.absorbXSection(LAMBDA_REF) / LAMBDA_REF;
-    if ((coeff2 == 0.0721) && (!isEmpty(sampleMaterial.numberDensity())))
+    if ((std::abs(coeff2 - 0.0721) < std::numeric_limits<double>::epsilon() && (!isEmpty(sampleMaterial.numberDensity())))
       coeff2 = sampleMaterial.numberDensity();
-    if (coeff3 == 5.1)
+    if (std::abs(coeff3 - 5.1) < std::numeric_limits<double>::epsilon())
       coeff3 = sampleMaterial.totalScatterXSection(LAMBDA_REF);
   } else // Save input in Sample with wrong atomic number and name
   {
