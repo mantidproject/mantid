@@ -1119,7 +1119,7 @@ Values can be selected by hand by checking the boxes below.</string>
             <item row="2" column="3" alignment="Qt::AlignRight">
              <widget class="QCheckBox" name="total_detector_distance_chk">
               <property name="toolTip">
-               <string extracomment="Sum of all distances. If edit will overwrite all distances."/>
+               <string extracomment="Sum of all distances. If edit will overwrite all distances.">Checking this field will ignore the other 3 distances.</string>
               </property>
               <property name="text">
                <string>Total Detector Distance [mm]</string>
@@ -1406,6 +1406,22 @@ Values can be selected by hand by checking the boxes below.</string>
              </layout>
             </item>
             <item>
+             <spacer name="verticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
              <widget class="QLabel" name="label_5">
               <property name="font">
                <font>
@@ -1502,22 +1518,6 @@ The mask information is saved separately so that your data file will NOT be modi
           </item>
          </layout>
         </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Expanding</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
        </item>
       </layout>
      </widget>

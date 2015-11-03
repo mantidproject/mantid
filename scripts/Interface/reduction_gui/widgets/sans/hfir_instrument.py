@@ -11,9 +11,12 @@ import ui.sans.ui_hfir_instrument
 IS_IN_MANTIDPLOT = False
 try:
     import mantidplot
+    from mantid.kernel import logger
     IS_IN_MANTIDPLOT = True
 except:
-    pass
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
+    logger = logging.getLogger("hfir_instrument")
 
 class SANSInstrumentWidget(BaseWidget):
     """
@@ -25,6 +28,8 @@ class SANSInstrumentWidget(BaseWidget):
     # Place holder for data read from file
     _sample_detector_distance = None
     _sample_detector_distance_supplied = True
+    _sample_detector_distance_offset = None
+    _sample_si_window_distance = None
     _beam_diameter = None
     _beam_diameter_supplied = True
     _wavelength = None
@@ -75,6 +80,19 @@ class SANSInstrumentWidget(BaseWidget):
             if not self._summary.sample_dist_chk.isChecked():
                 self._summary.sample_dist_edit.setText(str(value))
                 util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0.0)
+        
+        if key == "sample_detector_distance_offset":
+            self._sample_detector_distance_offset = value
+            if not self._summary.detector_offset_chk.isChecked():
+                self._summary.detector_offset_edit.setText(str(value))
+                util._check_and_get_float_line_edit(self._summary.detector_offset_edit, min=0.0)
+        
+        if key == "sample_si_window_distance":
+            self._sample_si_window_distance = value
+            if not self._summary.sample_si_dist_chk.isChecked():
+                self._summary.sample_si_dist_edit.setText(str(value))
+                util._check_and_get_float_line_edit(self._summary.sample_si_dist_edit, min=0.0)
+        
         elif key == "wavelength":
             self._wavelength = value
             if not self._summary.wavelength_chk.isChecked():
@@ -98,6 +116,8 @@ class SANSInstrumentWidget(BaseWidget):
         # Validators
         self._summary.detector_offset_edit.setValidator(QtGui.QDoubleValidator(self._summary.detector_offset_edit))
         self._summary.sample_dist_edit.setValidator(QtGui.QDoubleValidator(self._summary.sample_dist_edit))
+        self._summary.sample_si_dist_edit.setValidator(QtGui.QDoubleValidator(self._summary.sample_si_dist_edit))
+        self._summary.total_detector_distance_edit.setValidator(QtGui.QDoubleValidator(self._summary.total_detector_distance_edit))
         self._summary.wavelength_edit.setValidator(QtGui.QDoubleValidator(self._summary.wavelength_edit))
         self._summary.wavelength_spread_edit.setValidator(QtGui.QDoubleValidator(self._summary.wavelength_spread_edit))
         self._summary.n_q_bins_edit.setValidator(QtGui.QIntValidator(self._summary.n_q_bins_edit))
@@ -106,7 +126,14 @@ class SANSInstrumentWidget(BaseWidget):
         # Event connections
         self.connect(self._summary.detector_offset_chk, QtCore.SIGNAL("clicked(bool)"), self._det_offset_clicked)
         self.connect(self._summary.sample_dist_chk, QtCore.SIGNAL("clicked(bool)"), self._sample_dist_clicked)
+        self.connect(self._summary.sample_si_dist_chk, QtCore.SIGNAL("clicked(bool)"), self._sample_si_dist_clicked)
+        self.connect(self._summary.total_detector_distance_chk, QtCore.SIGNAL("clicked(bool)"), self._total_dist_clicked)
         self.connect(self._summary.wavelength_chk, QtCore.SIGNAL("clicked(bool)"), self._wavelength_clicked)
+
+
+        self._summary.sample_dist_edit.textChanged.connect(self._update_total_distance)
+        self._summary.sample_si_dist_edit.textChanged.connect(self._update_total_distance)
+        self._summary.detector_offset_edit.textChanged.connect(self._update_total_distance)
 
         self.connect(self._summary.dark_current_check, QtCore.SIGNAL("clicked(bool)"), self._dark_clicked)
         self.connect(self._summary.dark_browse_button, QtCore.SIGNAL("clicked()"), self._dark_browse)
@@ -219,27 +246,48 @@ class SANSInstrumentWidget(BaseWidget):
 
     def _det_offset_clicked(self, is_checked):
         self._summary.detector_offset_edit.setEnabled(is_checked)
-
-        if is_checked:
-            self._summary.sample_dist_chk.setChecked(not is_checked)
-            self._summary.sample_dist_edit.setEnabled(not is_checked)
-            self._sample_dist_clicked(not is_checked)
+#         if is_checked:
+#             self._summary.sample_dist_chk.setChecked(not is_checked)
+#             self._summary.sample_dist_edit.setEnabled(not is_checked)
+#             self._sample_dist_clicked(not is_checked)
 
     def _sample_dist_clicked(self, is_checked):
         self._summary.sample_dist_edit.setEnabled(is_checked)
 
-        if is_checked:
-            self._summary.detector_offset_chk.setChecked(not is_checked)
-            self._summary.detector_offset_edit.setEnabled(not is_checked)
+#         if is_checked:
+#             self._summary.sample_dist_chk.setChecked(not is_checked)
+#             self._summary.sample_dist_edit.setEnabled(not is_checked)
 
         # Keep track of current value so we can restore it if the check box is clicked again
-        if self._sample_detector_distance_supplied != is_checked:
-            current_value = util._check_and_get_float_line_edit(self._summary.sample_dist_edit)
-            self._summary.sample_dist_edit.setText(str(self._sample_detector_distance))
-            util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0)
-            self._sample_detector_distance = current_value
+#         if self._sample_detector_distance_supplied != is_checked:
+#             current_value = util._check_and_get_float_line_edit(self._summary.sample_dist_edit)
+#             self._summary.sample_dist_edit.setText(str(self._sample_detector_distance))
+#             util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0)
+#             self._sample_detector_distance = current_value
+#             self._sample_detector_distance_supplied = is_checked
 
-            self._sample_detector_distance_supplied = is_checked
+
+    def _sample_si_dist_clicked(self, is_checked):
+        self._summary.sample_si_dist_edit.setEnabled(is_checked)
+#         if is_checked:
+#             print '_sample_si_dist_clicked ->', not is_checked
+#             self._summary.sample_si_dist_chk.setChecked(not is_checked)
+#             self._summary.sample_si_dist_edit.setEnabled(not is_checked)
+        
+    def _total_dist_clicked(self, is_checked):
+        self._summary.total_detector_distance_edit.setEnabled(is_checked)
+# 
+#         if is_checked:
+#             self._summary.total_detector_distance_chk.setChecked(not is_checked)
+#             self._summary.total_detector_distance_edit.setEnabled(not is_checked)
+
+    def _update_total_distance(self, text):
+        distance = 0;
+        distance += float(self._summary.sample_dist_edit.text())
+        distance += float(self._summary.detector_offset_edit.text())
+        distance += float(self._summary.sample_si_dist_edit.text())
+        self._summary.total_detector_distance_edit.setText(str(distance))
+        util._check_and_get_float_line_edit(self._summary.total_detector_distance_edit, min=0.0)
 
     def _wavelength_clicked(self, is_checked):
         self._summary.wavelength_edit.setEnabled(is_checked)
@@ -275,6 +323,8 @@ class SANSInstrumentWidget(BaseWidget):
             Populate the UI elements with the data from the given state.
             @param state: InstrumentDescription object
         """
+        logger.debug("Set state")
+        
         self._summary.instr_name_label.setText(state.instrument_name)
         #npixels = "%d x %d" % (state.nx_pixels, state.ny_pixels)
         #self._summary.n_pixel_label.setText(QtCore.QString(npixels))
@@ -296,23 +346,28 @@ class SANSInstrumentWidget(BaseWidget):
         self._scale_clicked(self._summary.scale_chk.isChecked())
 
         # Detector offset input
-        self._prepare_field(state.detector_offset != 0,
-                            state.detector_offset,
-                            self._summary.detector_offset_chk,
-                            self._summary.detector_offset_edit)
-
-        # Sample-detector distance
-        self._prepare_field(state.sample_detector_distance != 0,
-                            state.sample_detector_distance,
-                            self._summary.sample_dist_chk,
-                            self._summary.sample_dist_edit)
+        # is_enabled, stored_value, chk_widget, edit_widget, suppl_value=None, suppl_edit=None
+#         self._prepare_field(state.detector_offset != 0,
+#                             state.detector_offset,
+#                             self._summary.detector_offset_chk,
+#                             self._summary.detector_offset_edit)
+# 
+#         # Sample-detector distance
+#         self._prepare_field(state.sample_detector_distance != 0,
+#                             state.sample_detector_distance,
+#                             self._summary.sample_dist_chk,
+#                             self._summary.sample_dist_edit)
+#         
         util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0)
-        if self._sample_detector_distance is None:
-            self._sample_detector_distance = state.sample_detector_distance
-        self._sample_detector_distance_supplied = self._summary.sample_dist_chk.isChecked()
-
-        # Sample-detector distance takes precedence over offset if both are non-zero
-        self._sample_dist_clicked(self._summary.sample_dist_chk.isChecked())
+        util._check_and_get_float_line_edit(self._summary.sample_si_dist_edit, min=0)
+        util._check_and_get_float_line_edit(self._summary.detector_offset_edit, min=0)
+        util._check_and_get_float_line_edit(self._summary.total_detector_distance_edit, min=0)
+#         if self._sample_detector_distance is None:
+#             self._sample_detector_distance = state.sample_detector_distance
+#         self._sample_detector_distance_supplied = self._summary.sample_dist_chk.isChecked()
+# 
+#         # Sample-detector distance takes precedence over offset if both are non-zero
+#         self._sample_dist_clicked(self._summary.sample_dist_chk.isChecked())
 
         # Wavelength value
         self._prepare_field(state.wavelength != 0,

@@ -22,8 +22,11 @@ class ReductionOptions(BaseScriptElement):
 
     # Sample-detector distance to force on the data set [mm]
     sample_detector_distance = 0.0
+    sample_si_window_distance = 0.0
     # Detector distance offset [mm]
-    detector_offset = 837.9
+    detector_offset = 0.0
+    sample_total_distance = 0.0
+    
     # Wavelength value to force on the data set [Angstrom]
     wavelength = 0.0
     wavelength_spread = 0.1
@@ -94,6 +97,9 @@ class ReductionOptions(BaseScriptElement):
 
         if self.sample_detector_distance != 0:
             script += "SetSampleDetectorDistance(%g)\n" % self.sample_detector_distance
+        if self.sample_si_window_distance !=0:
+            script += "SetSampleSiWindowDistance(%g)\n" % self.sample_si_window_distance
+        
         if self.detector_offset != 0:
             script += "SetSampleDetectorOffset(%g)\n" % self.detector_offset
         if self.wavelength != 0:
@@ -438,8 +444,10 @@ class ReductionOptions(BaseScriptElement):
 
         self.sample_detector_distance = ReductionOptions.sample_detector_distance
         self.detector_offset = ReductionOptions.detector_offset
-        if self.instrument_name.upper() == "GPSANS":
-            self.detector_offset = 711.0
+        self.sample_si_window_distance = ReductionOptions.sample_si_window_distance
+        self.sample_total_distance =  ReductionOptions.sample_total_distance
+#         if self.instrument_name.upper() == "GPSANS":
+#             self.detector_offset = 711.0
         self.wavelength = ReductionOptions.wavelength
         self.wavelength_spread = ReductionOptions.wavelength_spread
 
