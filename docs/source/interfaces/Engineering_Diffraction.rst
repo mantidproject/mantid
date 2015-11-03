@@ -8,9 +8,10 @@ Overview
 --------
 
 This custom interface integrates several tasks related to engineeering
-diffraction. It provides calibration and focusing functionality which
-can be expected to expand for next releases as it is under active
-development. The following sections describe the different tabs or
+diffraction. It provides functionality for calibration, focusing, and
+pre-processing of event mode data. Further extensions can be expected
+for next releases as it is under active development. Feedback is very
+much welcome. The following sections describe the different tabs or
 functionality areas of the interface.
 
 .. interface:: Engineering Diffraction
@@ -62,8 +63,8 @@ the details on how the input runs are focused.
 The interface will also create workspaces that can be inspected in the
 workspaces window:
 
-1. The *engg_focusing_input_ws workspace* for the data being focused
-2. The *engg_focusing_output_ws... workspace* for the corresponding
+1. The *engggui_focusing_input_ws workspace* for the data being focused
+2. The *engggui_focusing_output_ws... workspace* for the corresponding
    focused data (where the ... denotes a suffix explained below).
 
 Three focusing alternatives are provided:
@@ -122,6 +123,46 @@ generated three different files for each focused output workspace
 in Mantid. These files can be found with appropriate name at location:
 C:\EnginX_Mantid\User\236516\Focus on Windows, the
 EnginX_Mantid folder can be found on Desktop/Home on other platforms.
+
+Pre-processing
+--------------
+
+.. warning:: This is a new capability that is currently in a very
+             early stage of definition and implementation. Not all
+             options may be supported and/or consistent at the moment.
+
+The focusing options can be applied directly to histogram data. For
+event mode experiments, the event data (which would be loaded as event
+workspaces in Mantid) need to be pre-processed.
+
+The simplest pre-processing option is "regular time binning" which
+will produce a histogram data workspace (as a :ref:`Workspace2D
+<Workspace2D>`). The only parameter required is the bin width. The
+workspace will be named with the following convention:
+
+- *engggui_preproc_time_ws*
+
+When the input run file contains multiple workspaces (it would be
+loaded by :ref:`Load <algm-Load>` as multiple :ref:`EventWorkspace
+<EventWorkspace>` workspaces) the output workspace will be a group
+with the corresponding number of histogram workspaces, binned
+separately. This is the case when the input run file comes from a
+multi-period experiment. Note that the time bin can be a multiple of
+the pulse time.
+
+A different way of pre-processing event data is by rebinning
+multi-period data by pulse times. In this case the input required is
+the time step for the binning (the x axis of the output will be time
+instead of time-of-flight). It is also possible to specify the number
+of periods that will be processed (starting from the first one). This
+type of pre-processing produces workspaces with the following naming
+convention:
+
+- *engggui_preproc_by_pulse_time_ws*
+
+This tab uses the algorithms :ref:`Rebin <algm-Rebin>` and :ref:`Rebin
+<algm-RebinByPulseTimes>` to bin the data in different ways when
+converting event data into histogram data.
 
 Settings
 --------
