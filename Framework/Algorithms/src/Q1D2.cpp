@@ -235,7 +235,8 @@ void Q1D2::exec() {
           EOutTo2[bin] += (*EIn) * (*EIn);
           normError2[bin] += *normETo2s;
           if (useQResolution) {
-            qResolutionOut[bin] += (*YIn) * (*QResIn);
+            auto QBin = (QOut[bin + 1] - QOut[bin])/std::sqrt(12.);
+            qResolutionOut[bin] += (*YIn) * (*QResIn) * QBin;
           }
         }
       }
