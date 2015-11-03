@@ -390,10 +390,21 @@ class SampleDataWidget(BaseWidget):
         return flist_str.split(';')
 
     def _emit_experiment_parameters(self):
+        '''
+        This will send the pair key,values below to other tabs.
+        '''
         sdd = util._check_and_get_float_line_edit(self._content.sample_dist_edit, min=0.0)
         self._settings.emit_key_value("sample_detector_distance", str(sdd))
+        
+        value  = util._check_and_get_float_line_edit(self._content.sample_dist_offset_edit, min=0.0)
+        self._settings.emit_key_value("sample_detector_distance_offset", str(value))
+
+        value  = util._check_and_get_float_line_edit(self._content.sample_si_window_dist_edit, min=0.0)
+        self._settings.emit_key_value("sample_si_window_distance", str(value))
+        
         wavelength = util._check_and_get_float_line_edit(self._content.wavelength_edit, min=0.0)
         self._settings.emit_key_value("wavelength", str(wavelength))
+        
         spread = self._content.wavelength_spread_edit.text()
         self._settings.emit_key_value("wavelength_spread", spread)
 
@@ -401,6 +412,8 @@ class SampleDataWidget(BaseWidget):
     def get_data_info(self):
         """
             Retrieve information from the data file and update the display
+            See hfir_data_proxy.py for the attributes parsed from the data file
+            
         """
         if self._data_proxy is None:
             return
@@ -419,6 +432,15 @@ class SampleDataWidget(BaseWidget):
             if dataproxy.sample_detector_distance is not None:
                 self._content.sample_dist_edit.setText(str(dataproxy.sample_detector_distance))
                 util._check_and_get_float_line_edit(self._content.sample_dist_edit, min=0.0)
+            
+            if dataproxy.sample_detector_distance_offset is not None:
+                self._content.sample_dist_offset_edit.setText(str(dataproxy.sample_detector_distance_offset))
+                util._check_and_get_float_line_edit(self._content.sample_dist_offset_edit, min=0.0)
+            
+            if dataproxy.sample_si_window_distance is not None:
+                self._content.sample_si_window_dist_edit.setText(str(dataproxy.sample_si_window_distance))
+                util._check_and_get_float_line_edit(self._content.sample_si_window_dist_edit, min=0.0)            
+            
             if dataproxy.wavelength is not None:
                 self._content.wavelength_edit.setText(str(dataproxy.wavelength))
                 util._check_and_get_float_line_edit(self._content.wavelength_edit, min=0.0)
