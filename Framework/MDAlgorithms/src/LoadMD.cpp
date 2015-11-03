@@ -48,7 +48,8 @@ LoadMD::LoadMD()
     : m_numDims(0), // uninitialized incorrect value
       m_coordSystem(None),
       m_BoxStructureAndMethadata(true), // this is faster but rarely needed.
-      m_saveMDVersion(false) {}
+      m_saveMDVersion(false),
+      m_requiresMDFrameCorrection(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -223,6 +224,12 @@ void LoadMD::exec() {
     // Wrapper to cast to MDEventWorkspace then call the function
     CALL_MDEVENT_FUNCTION(this->doLoad, ws);
 
+
+    // Check if a MDFrame adjustment is required
+    if (m_requiresMDFrameCorrection) {
+      setMDFrameOnWorkspaceFromLegacyFile(ws);
+    }
+
     // Save to output
     setProperty("OutputWorkspace",
                 boost::dynamic_pointer_cast<IMDWorkspace>(ws));
@@ -305,6 +312,11 @@ void LoadMD::loadHisto() {
 
   m_file->close();
 
+  // Check if a MDFrame adjustment is required
+  if (m_requiresMDFrameCorrection) {
+      setMDFrameOnWorkspaceFromLegacyFile(ws);
+  }
+
   // Save to output
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(ws));
 }
@@ -355,6 +367,7 @@ void LoadMD::loadDimensions2() {
       m_file->getAttr("frame", frame);
     } catch (std::exception &) {
       frame = Mantid::Geometry::UnknownFrame::UnknownFrameName;
+      m_requiresMDFrameCorrection = true;
     }
     Geometry::MDFrame_const_uptr mdFrame =
         Geometry::makeMDFrameFactoryChain()->create(
@@ -600,6 +613,46 @@ CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name) {
                       type);
   }
   return transform;
+}
+
+/**
+ * Set MDFrames for workspaces from legacy files
+ * @param ws:: poitner to the workspace which needs to be corrected
+ */
+void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(
+    API::IMDWorkspace_sptr ws) const {
+  // Get number of dimensions, only up to the first three dimension are set
+  // different
+  // from a General Frame. Everything else will be set to a General Frame
+  auto numberOfDimensions = ws->getNumDims();
+
+  // Get the special coordinate
+  auto specialCoordinateSystem = ws->getSpecialCoordinateSystem();
+
+  // Select an MDFrame based on the special coordinates.
+  // Note that for None, we select a General Coordinate System,
+  // unless the name is "Unknown frame"
+  std::string selectedFrame;
+  switch (specialCoordinateSystem) {
+  case Mantid::Kernel::QLab:
+    selectedFrame = Mantid::Geometry::QLab::QLabName;
+    break;
+  case Mantid::Kernel::QSample:
+    selectedFrame = Mantid::Geometry::QSample::QSampleName;
+    break;
+  case Mantid::Kernel::HKL:
+    selectedFrame = Mantid::Geometry::HKL::HKLName;
+    break;
+  default:
+    selectedFrame = Mantid::Geometry::GeneralFrame::GeneralFrameName;
+  }
+
+  // Set the MDFrames. If we encounter an issue, then leave everything as is and
+  // report the issue.
+  try {
+    //TODO pace SetMDFrames in here once it is ready.
+  } catch (...) {
+  }
 }
 
 const std::string LoadMD::VISUAL_NORMALIZATION_KEY = "visual_normalization";

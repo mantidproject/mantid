@@ -90,6 +90,9 @@ private:
   /// Load a given affine matrix
   API::CoordTransform *loadAffineMatrix(std::string entry_name);
 
+  /// Sets MDFrames for workspaces from legacy files
+  void setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws) const;
+
   /// Open file handle
   // clang-format off
   boost::scoped_ptr< ::NeXus::File> m_file;
@@ -118,6 +121,9 @@ private:
   /// Named entry
   static const std::string VISUAL_NORMALIZATION_KEY;
   static const std::string VISUAL_NORMALIZATION_KEY_HISTO;
+
+  /// MDFrame correction flag
+  bool m_requiresMDFrameCorrection;
 };
 
 } // namespace DataObjects
