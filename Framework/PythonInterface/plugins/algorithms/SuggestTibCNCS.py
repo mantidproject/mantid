@@ -25,7 +25,7 @@ class SuggestTibCNCS(PythonAlgorithm):
     def category(self):
         """ Return category
         """
-        return "Utility;Inelastic"
+        return "Inelastic\\Utility"
 
     def name(self):
         """ Return name

@@ -57,7 +57,7 @@ class TimeSlice(PythonAlgorithm):
     _out_ws_group = None
 
     def category(self):
-        return 'Inelastic'
+        return 'Inelastic\\Utility'
 
 
     def summary(self):
