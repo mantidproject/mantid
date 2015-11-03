@@ -6,6 +6,7 @@
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
 #include "MantidKernel/System.h"
 #include <MantidGeometry/Crystal/OrientedLattice.h>
+#include <MantidGeometry/Crystal/StructureFactorCalculator.h>
 #include "MantidKernel/Matrix.h"
 
 namespace Mantid {
@@ -44,7 +45,23 @@ private:
   /// Run the algorithm
   void exec();
 
-  void doHKL(const double h, const double k, const double l, bool doFilter);
+  void checkBeamDirection() const;
+  void setInstrumentFromInputWorkspace(const API::ExperimentInfo_sptr &inWS);
+  void setRunNumberFromInputWorkspace(const API::ExperimentInfo_sptr &inWS);
+
+  void fillPossibleHKLsUsingGenerator(
+      const Geometry::OrientedLattice &orientedLattice,
+      std::vector<Kernel::V3D> &possibleHKLs) const;
+
+  void fillPossibleHKLsUsingPeaksWorkspace(
+      const DataObjects::PeaksWorkspace_sptr &possibleHKLWorkspace,
+      std::vector<Kernel::V3D> &possibleHKLs) const;
+
+  void setStructureFactorCalculatorFromSample(const API::Sample &sample);
+
+  void calculateQAndAddToOutput(const Kernel::V3D &hkl,
+                                const Kernel::DblMatrix &orientedUB,
+                                const Kernel::DblMatrix &goniometerMatrix);
 
 private:
   /// Reflection conditions possible
@@ -52,26 +69,12 @@ private:
 
   /// Run number of input workspace
   int m_runNumber;
-  /// Min wavelength parameter
-  double m_wlMin;
-  /// Max wavelength parameter
-  double m_wlMax;
   /// Instrument reference
   Geometry::Instrument_const_sptr m_inst;
   /// Output peaks workspace
   Mantid::DataObjects::PeaksWorkspace_sptr m_pw;
-  /// Counter of possible peaks
-  size_t m_numInRange;
-  /// Crystal applied
-  Geometry::OrientedLattice m_crystal;
-  /// Min D spacing to apply.
-  double m_minD;
-  /// Max D spacing to apply.
-  double m_maxD;
-  /// HKL->Q matrix (Goniometer * UB)
-  Mantid::Kernel::DblMatrix m_mat;
-  /// Goniometer rotation matrix
-  Mantid::Kernel::DblMatrix m_gonio;
+
+  Geometry::StructureFactorCalculator_sptr m_sfCalculator;
 };
 
 } // namespace Mantid

@@ -42,6 +42,7 @@
 	src/TextPropertyWidget.cpp
 	src/UserSubWindow.cpp
 	src/VatesViewerInterface.cpp
+        src/WidgetScrollbarDecorator.cpp
 	src/WorkspaceObserver.cpp
 )
 
@@ -104,6 +105,7 @@ set ( INC_FILES
 	inc/MantidQtAPI/SignalBlocker.h
 	inc/MantidQtAPI/SignalRange.h
 	inc/MantidQtAPI/qwt_compat.h
+        inc/MantidQtAPI/WidgetScrollbarDecorator.h
 )
 
 set ( UI_FILES

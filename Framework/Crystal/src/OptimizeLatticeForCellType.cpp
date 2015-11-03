@@ -147,9 +147,6 @@ void OptimizeLatticeForCellType::exec() {
 
     double chisq = fit_alg->getProperty("OutputChi2overDoF");
     Geometry::UnitCell refinedCell = latticeFunction->getUnitCell();
-    /*std::vector<double> sigabc;
-    for (size_t i = 0; i < latticeFunction->nParams(); i++)
-      sigabc.push_back(latticeFunction->getError(i));*/
 
     IAlgorithm_sptr ub_alg;
     try {
@@ -234,11 +231,7 @@ API::ILatticeFunction_sptr
 OptimizeLatticeForCellType::getLatticeFunction(const std::string &cellType,
                                                const UnitCell &cell) const {
   std::ostringstream fun_str;
-  // TODO remove next 3 lines when PointGroup is changed
-  if (cellType == "Rhombohedral")
-    fun_str << "name=LatticeFunction,CrystalSystem=Trigonal";
-  else
-    fun_str << "name=LatticeFunction,CrystalSystem=" << cellType;
+  fun_str << "name=LatticeFunction,LatticeSystem=" << cellType;
 
   API::IFunction_sptr rawFunction =
       API::FunctionFactory::Instance().createInitialized(fun_str.str());
