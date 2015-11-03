@@ -83,36 +83,60 @@ class IncidentEnergy(PropDescriptor):
        as absolute energy values.
     """
     def __init__(self):
-        self._incident_energy = 0
+        self._incident_energy = None
         self._num_energies = 1
         self._cur_iter_en = 0
+        # Properties related to autoEi
+        self._use_autoEi = False
+        self._autoEiRunNumber = None
+        self._autoEiCalculated = False
+
+
     def __get__(self,instance,owner=None):
         """ return  incident energy or list of incident energies """
         if instance is None:
             return self
-        return self._incident_energy
+        if self._use_autoEi:
+            return 'AUTO'
+        else:
+            return self._incident_energy
 #pylint: disable=too-many-branches
     def __set__(self,instance,value):
-        """ Set up incident energy or range of energies in various formats """
+        """ Set up incident energy or range of energies in various formats 
+            or define autoEi"""
         if value != None:
             if isinstance(value,str):
-                if value.find('[') > -1:
-                    energy_list = True
-                    value = value.translate(None, '[]').strip()
+                # Check autoEi
+                if value.lower() == 'auto':
+                    self._use_autoEi = True
+                    currentRun = instance.sample_run
+                    if isinstance(currentRun,api.Workspace):
+                        currentRun = currentRun.getRunNumber()
+                    if currentRun != self._autoEiRunNumber:
+                        self._autoEiRunNumber = currentRun
+                        self._autoEiCalculated = False
+                        self._incident_energy  = None
+                    self._cur_iter_en = 0
+                    return
+                # Ei in string form is provided
                 else:
-                    energy_list = False
-                en_list = str.split(value,',')
-                if len(en_list) > 1:
-                    rez = []
-                    for en_str in en_list:
-                        val = float(en_str)
-                        rez.append(val)
-                    self._incident_energy = rez
-                else:
-                    if energy_list:
-                        self._incident_energy = [float(value)]
+                    if value.find('[') > -1:
+                        energy_list = True
+                        value = value.translate(None, '[]').strip()
                     else:
-                        self._incident_energy = float(value)
+                        energy_list = False
+                    en_list = str.split(value,',')
+                    if len(en_list) > 1:
+                        rez = []
+                        for en_str in en_list:
+                            val = float(en_str)
+                            rez.append(val)
+                        self._incident_energy = rez
+                    else:
+                        if energy_list:
+                            self._incident_energy = [float(value)]
+                        else:
+                            self._incident_energy = float(value)
             else:
                 if isinstance(value,list):
                     rez = []
@@ -137,13 +161,19 @@ class IncidentEnergy(PropDescriptor):
         ok,sev,message = self.validate(instance)
         if not ok:
             raise KeyError(message)
-
+    def autoEi_mode(self):
+        """Return true if energies should be calculated in autoEi mode"""
+        return self._use_autoEi
     def multirep_mode(self):
         """ return true if energy is defined as list of energies and false otherwise """
         if isinstance(self._incident_energy,list):
             return True
         else:
             return False
+    #
+    def get_EiRange(self):
+        """Return incident energy(ies) range, defined by the property"""
+        return self._incident_energy
 
     def get_current(self):
         """ Return current energy out of range of energies"""
@@ -152,6 +182,10 @@ class IncidentEnergy(PropDescriptor):
             return self._incident_energy[ind]
         else:
             return self._incident_energy
+    #
+    def get_nIter(self):
+        """Return current iteration number and total number of energies to iterate through"""
+        return (self._cur_iter_en,self._num_energies)
     #
     def set_current(self,value,ind=None):
         """ set current energy value (used in multirep mode) as
@@ -168,8 +202,7 @@ class IncidentEnergy(PropDescriptor):
             self._incident_energy[ind] = value
         else:
             self._incident_energy = value
-
-
+    #
     def __iter__(self):
         """ iterator over energy range, initializing iterations over energies """
         self._cur_iter_en = -1
@@ -186,6 +219,36 @@ class IncidentEnergy(PropDescriptor):
                 return self._incident_energy
         else:
             raise StopIteration
+    #
+    def set_auto_Ei(self,monitor_ws,instance):
+        """Calculate autoEi and set it as input for iterations over energy"""
+        if not self._use_autoEi:
+            return
+        newRunNum = monitor_ws.getRunNumber()
+        if self._autoEiCalculated and newRunNum == self._autoEiRunNumber:
+            return
+        # Calculate autoEi
+        self._autoEiCalculated = False
+        ei_mon = instance.ei_mon_spectra;
+        guess_ei_ws = GetAllEi(monitor_ws,ei_mon[0],ei_mon[1])
+        allEi  = guess_ei_ws.readX(0);
+        guesEi = allEi[0]
+        fin_ei = []
+        for ei in guessEi:
+            try:
+                ei_ref,t_peak,monIndex,tZero=GetEi(InputWorkspace=monitor_ws, Monitor1Spec=ei_mon[0], Monitor2Spec=ei_mon[1], EnergyEstimate=ei)
+                fin_ei.append(ei_ref)
+            except:
+                instance.log("Can not refine guess energy {0:f}. Ignoring it.".format(ei),'warning')
+        if len(fin_ei) == 0:
+            raise RuntimeError("Was not able to identify auto-energies for workspace: {0}".format(monitor_ws.name()))
+        # Success! Set up estimated energies
+        self._autoEiCalculated = True
+        self._autoEiRunNumber  = newRunNum
+        self._incident_energy = fin_ei
+        self._num_energies = len(fin_ei)
+        self._cur_iter_en = 0
+
 
     def validate(self,instance,owner=None):
        #
@@ -240,23 +303,20 @@ class EnergyBins(PropDescriptor):
                 if len(value) != 3:
                     raise KeyError("Energy_bin value has to be a tuple of 3 elements or string of 3 comma-separated numbers")
                 value = (float(value[0]),float(value[1]),float(value[2]))
-          # Let's not support list of multiple absolute energy bins for the
-          # time being
-          # nBlocks = len(value)
-          #if nBlocks % 3 != 0:
-          #     raise KeyError("Energy_bin value has to be either list of
-          #     n-blocks of 3 number each or string representation of this list
-          #     with numbers separated by commas")
         else:
             value = None
        #TODO: implement single value settings according to rebin?
         self._energy_bins = value
 
     def get_abs_range(self,instance=None):
-        """ return energies related to incident energies either as
+        """ return energies related to incident energies.
         """
         if self._incident_energy.multirep_mode(): # Relative energy
             ei = self._incident_energy.get_current()
+            if self._incident_energy.autoEi_mode():
+                # we need to average ei nicely, as it will give energy jitter otherwise
+                ei = round(ei,0) #TODO!
+
             if self._energy_bins:
                 if self.is_range_valid():
                     rez = self._calc_relative_range(ei)
