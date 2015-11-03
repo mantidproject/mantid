@@ -32,7 +32,7 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         """
         Returns category
         """
-        return 'Workflow\\MLZ\\DNS;CorrectionFunctions'
+        return 'Workflow\\MLZ\\DNS;;CorrectionFunctions\\SpecialCorrections'
 
     def name(self):
         """
