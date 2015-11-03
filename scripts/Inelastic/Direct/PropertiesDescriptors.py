@@ -83,7 +83,7 @@ class IncidentEnergy(PropDescriptor):
        as absolute energy values.
     """
     def __init__(self):
-        self._incident_energy = None
+        self._incident_energy = 0
         self._num_energies = 1
         self._cur_iter_en = 0
         # Properties related to autoEi
@@ -115,7 +115,7 @@ class IncidentEnergy(PropDescriptor):
                     if currentRun != self._autoEiRunNumber:
                         self._autoEiRunNumber = currentRun
                         self._autoEiCalculated = False
-                        self._incident_energy  = None
+                        self._incident_energy  = 0
                     self._cur_iter_en = 0
                     return
                 # Ei in string form is provided
@@ -173,7 +173,7 @@ class IncidentEnergy(PropDescriptor):
         else:
             return False
     #
-    def get_EiRange(self):
+    def getAllEi(self):
         """Return incident energy(ies) range, defined by the property"""
         return self._incident_energy
     #

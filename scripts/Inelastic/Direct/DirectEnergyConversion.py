@@ -383,6 +383,11 @@ class DirectEnergyConversion(object):
 
         PropertyManager.sample_run.set_action_suffix('')
         sample_ws = PropertyManager.sample_run.get_workspace()
+        # Check auto-ei mode and calculate incident energies if necessary
+        if PropertyManager.incident_energy.autoEi_mode():
+            mon_ws = PropertyManager.sample_run.get_monitors_ws()
+            PropertyManager.sample_run.set_auto_Ei(mon_ws,prop_man)
+
 
         # Update reduction properties which may change in the workspace but have
         # not been modified from input parameters.
@@ -450,10 +455,6 @@ class DirectEnergyConversion(object):
         #Set or clear monovan run number to use in cash ID to return correct
         #cashed value of monovan integral
         PropertyManager.mono_correction_factor.set_cash_mono_run_number(MonovanCashNum)
-        # Check auto-ei mode and calculate incident energies if necessary
-        if PropertyManager.incident_energy.autoEi_mode():
-            mon_ws = PropertyManager.sample_run.get_monitors_ws()
-            PropertyManager.sample_run.set_auto_Ei(mon_ws,prop_man)
 
         mono_ws_base = None
         if PropertyManager.incident_energy.multirep_mode():

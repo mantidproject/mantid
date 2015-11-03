@@ -714,7 +714,7 @@ class PropertyManager(NonIDF_Properties):
 
           # now let's report on normal run.
             if PropertyManager.incident_energy.multirep_mode():
-                ei = self.incident_energy
+                ei = PropertyManager.incident_energy.getAllEi()
                 mess = "*** Provisional Incident energies: {0:>8.3f}".format(ei[0])
                 for en in ei[1:]:
                     mess += "; {0:>8.3f}".format(en)
