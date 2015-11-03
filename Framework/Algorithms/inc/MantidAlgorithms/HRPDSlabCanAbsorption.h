@@ -84,7 +84,7 @@ public:
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Diffraction"; }
+  virtual const std::string category() const { return "CorrectionFunctions\\AbsorptionCorrections"; }
 
 private:
   /// Initialisation code

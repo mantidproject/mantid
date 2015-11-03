@@ -63,7 +63,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
     _info = None
 
     def category(self):
-        return "Diffraction"
+        return "Diffraction\\Reduction"
 
     def name(self):
         return "SNSPowderReduction"

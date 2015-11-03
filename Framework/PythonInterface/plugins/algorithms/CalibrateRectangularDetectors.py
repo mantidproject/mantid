@@ -39,7 +39,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
     _binning = None
 
     def category(self):
-        return "Diffraction"
+        return "Diffraction\\Calibration"
 
     def name(self):
         return "CalibrateRectangularDetectors"

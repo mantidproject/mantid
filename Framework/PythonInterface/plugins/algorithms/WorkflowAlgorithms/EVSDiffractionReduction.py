@@ -23,7 +23,7 @@ class EVSDiffractionReduction(DataProcessorAlgorithm):
 
 
     def category(self):
-        return 'Diffraction'
+        return 'Diffraction\\Reduction'
 
 
     def summary(self):
