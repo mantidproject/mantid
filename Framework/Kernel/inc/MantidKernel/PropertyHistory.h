@@ -70,7 +70,8 @@ public:
   unsigned int direction() const { return m_direction; };
   /// print contents of object
   void printSelf(std::ostream &, const int indent = 0) const;
-  /// get whether algorithm parameter was left as default EMPTY_INT,LONG,DBL const
+  /// get whether algorithm parameter was left as default EMPTY_INT,LONG,DBL
+  /// const
   bool isEmptyDefault() const;
 
   /// this is required for boost.python

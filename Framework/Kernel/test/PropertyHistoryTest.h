@@ -67,10 +67,10 @@ public:
     TS_ASSERT_EQUALS(prop.isEmptyDefault(), false);
   }
 
-/**
-  * Test the isEmptyDefault method returns false if the parameter type is not
-  * "number"
-  */
+  /**
+    * Test the isEmptyDefault method returns false if the parameter type is not
+    * "number"
+    */
   void testIsEmptyDefault_WrongType() {
     PropertyHistory prop("arg",
                          boost::lexical_cast<std::string>(Mantid::EMPTY_INT()),
@@ -78,16 +78,15 @@ public:
     TS_ASSERT_EQUALS(prop.isEmptyDefault(), false);
   }
 
-/**
-  * Test the isEmptyDefault method returns false if the value is not EMPTY_XXX
-  */
+  /**
+    * Test the isEmptyDefault method returns false if the value is not EMPTY_XXX
+    */
   void testIsEmptyDefault_NotEmpty() {
     PropertyHistory prop(
         "arg", boost::lexical_cast<std::string>(Mantid::EMPTY_INT() - 1),
         "number", true, Direction::Input);
     TS_ASSERT_EQUALS(prop.isEmptyDefault(), false);
   }
-
 };
 
 #endif /* PROPERTYHISTORYTEST_H_*/
