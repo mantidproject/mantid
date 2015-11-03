@@ -21,7 +21,12 @@ class ComplexProperty(object):
         rez = list()
         for key in self._other_prop:
             rez.append(spec_dict[key])
-        return rez
+        # process very important case of property dependent on two other properties. Make it tuple
+        if len(rez) == 2:
+            return (rez[0],rez[1])
+        else:
+            return rez
+    #
     def __set__(self,instance,value):
         try:
             lv = len(value)
