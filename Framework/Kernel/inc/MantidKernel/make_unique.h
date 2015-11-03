@@ -112,4 +112,4 @@ make_unique(Arg1 param1, Arg2 param2, Arg3 param3, Arg4 param4,
 #endif // __cplusplus == 201402L
 }
 }
-#endif /* defined(__SpinWaveGenie_Memory__) */
+#endif
