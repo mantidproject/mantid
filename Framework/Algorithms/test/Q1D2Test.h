@@ -430,11 +430,13 @@ public:
                 outputWS + "_sumOfCounts")))
 
     TSM_ASSERT("Should have the x error flag set", result->hasDx(0));
-    // That output will be SUM_i(Yin_i*QRES_in_i*QBinWidth/sqrt(12))/(SUM_i(Y_in_i)) for each q
+    // That output will be
+    // SUM_i(Yin_i*QRES_in_i*QBinWidth/sqrt(12))/(SUM_i(Y_in_i)) for each q
     // value
     // In our test workspace we set QRes_in_1 to 1, this means that all DX
     // values should be SUM_i(Y_in_i*QBinWidth/sqrt(12))/(SUM_i(Y_in_i))
-    // which is either 0.1/sqrt(12) or 0. It can be 0 if no data falls into this bin. We
+    // which is either 0.1/sqrt(12) or 0. It can be 0 if no data falls into this
+    // bin. We
     // make sure that there is at least one bin
     // with a count of 1
     auto &dataDX = result->dataDx(0);
@@ -445,7 +447,8 @@ public:
       // our value with 0.1/sqrt(12). Hence it is enough for us to confirm
       // that the values lie in an interval around this value
       auto isZeroValue = *it == 0.0;
-      auto isCloseToZeroPoint1DividedByRootTwelve = (*it > 0.0288674) && (*it < 0.0288676);
+      auto isCloseToZeroPoint1DividedByRootTwelve =
+          (*it > 0.0288674) && (*it < 0.0288676);
 
       if (isCloseToZeroPoint1DividedByRootTwelve) {
         counter++;
