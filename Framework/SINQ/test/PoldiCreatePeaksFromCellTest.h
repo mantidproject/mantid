@@ -142,37 +142,38 @@ public:
     UnitCell rawCell(2.0, 3.0, 4.0, 91.0, 92.0, 93.0);
 
     checkUnitCellParameters(
-        alg.getConstrainedUnitCell(rawCell, PointGroup::Cubic), 2.0, 2.0, 2.0,
-        90.0, 90.0, 90.0, "Cubic");
+        alg.getConstrainedUnitCell(rawCell, PointGroup::CrystalSystem::Cubic),
+        2.0, 2.0, 2.0, 90.0, 90.0, 90.0, "Cubic");
+
+    checkUnitCellParameters(alg.getConstrainedUnitCell(
+                                rawCell, PointGroup::CrystalSystem::Tetragonal),
+                            2.0, 2.0, 4.0, 90.0, 90.0, 90.0, "Tetragonal");
 
     checkUnitCellParameters(
-        alg.getConstrainedUnitCell(rawCell, PointGroup::Tetragonal), 2.0, 2.0,
-        4.0, 90.0, 90.0, 90.0, "Tetragonal");
+        alg.getConstrainedUnitCell(rawCell,
+                                   PointGroup::CrystalSystem::Orthorhombic),
+        2.0, 3.0, 4.0, 90.0, 90.0, 90.0, "Orthorhombic");
+
+    checkUnitCellParameters(alg.getConstrainedUnitCell(
+                                rawCell, PointGroup::CrystalSystem::Monoclinic),
+                            2.0, 3.0, 4.0, 90.0, 92.0, 90.0, "Monoclinic");
+
+    checkUnitCellParameters(alg.getConstrainedUnitCell(
+                                rawCell, PointGroup::CrystalSystem::Triclinic),
+                            2.0, 3.0, 4.0, 91.0, 92.0, 93.0, "Triclinic");
+
+    checkUnitCellParameters(alg.getConstrainedUnitCell(
+                                rawCell, PointGroup::CrystalSystem::Hexagonal),
+                            2.0, 2.0, 4.0, 90.0, 90.0, 120.0, "Hexagonal");
+
+    checkUnitCellParameters(alg.getConstrainedUnitCell(
+                                rawCell, PointGroup::CrystalSystem::Trigonal),
+                            2.0, 2.0, 2.0, 91.0, 91.0, 91.0, "Trigonal");
 
     checkUnitCellParameters(
-        alg.getConstrainedUnitCell(rawCell, PointGroup::Orthorhombic), 2.0, 3.0,
-        4.0, 90.0, 90.0, 90.0, "Orthorhombic");
-
-    checkUnitCellParameters(
-        alg.getConstrainedUnitCell(rawCell, PointGroup::Monoclinic), 2.0, 3.0,
-        4.0, 90.0, 92.0, 90.0, "Monoclinic");
-
-    checkUnitCellParameters(
-        alg.getConstrainedUnitCell(rawCell, PointGroup::Triclinic), 2.0, 3.0,
-        4.0, 91.0, 92.0, 93.0, "Triclinic");
-
-    checkUnitCellParameters(
-        alg.getConstrainedUnitCell(rawCell, PointGroup::Hexagonal), 2.0, 2.0,
-        4.0, 90.0, 90.0, 120.0, "Hexagonal");
-
-    checkUnitCellParameters(
-        alg.getConstrainedUnitCell(rawCell, PointGroup::Trigonal), 2.0, 2.0,
-        2.0, 91.0, 91.0, 91.0, "Trigonal");
-
-    checkUnitCellParameters(alg.getConstrainedUnitCell(rawCell,
-                                                       PointGroup::Trigonal,
-                                                       Group::Hexagonal),
-                            2.0, 2.0, 4.0, 90.0, 90.0, 120.0, "Trigonal");
+        alg.getConstrainedUnitCell(rawCell, PointGroup::CrystalSystem::Trigonal,
+                                   Group::Hexagonal),
+        2.0, 2.0, 4.0, 90.0, 90.0, 120.0, "Trigonal");
   }
 
 private:

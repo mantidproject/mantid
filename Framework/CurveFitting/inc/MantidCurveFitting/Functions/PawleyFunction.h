@@ -36,7 +36,7 @@ public:
 
   void setAttribute(const std::string &attName, const Attribute &attValue);
 
-  Geometry::PointGroup::CrystalSystem getCrystalSystem() const;
+  Geometry::PointGroup::LatticeSystem getLatticeSystem() const;
   Geometry::UnitCell getUnitCellFromParameters() const;
   void setParametersFromUnitCell(const Geometry::UnitCell &cell);
 
@@ -59,10 +59,10 @@ protected:
   void init();
 
   void setProfileFunction(const std::string &profileFunction);
-  void setCrystalSystem(const std::string &crystalSystem);
+  void setLatticeSystem(const std::string &latticeSystem);
 
-  void createCrystalSystemParameters(
-      Geometry::PointGroup::CrystalSystem crystalSystem);
+  void createLatticeSystemParameters(
+      Geometry::PointGroup::LatticeSystem latticeSystem);
 
   void addLengthConstraint(const std::string &parameterName);
   void addAngleConstraint(const std::string &parameterName);
@@ -70,7 +70,7 @@ protected:
   void setCenterParameterNameFromFunction(
       const API::IPeakFunction_sptr &profileFunction);
 
-  Geometry::PointGroup::CrystalSystem m_crystalSystem;
+  Geometry::PointGroup::LatticeSystem m_latticeSystem;
   std::string m_profileFunctionCenterParameterName;
 };
 
@@ -123,7 +123,7 @@ public:
   setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
                      size_t wi, double startX, double endX);
 
-  void setCrystalSystem(const std::string &crystalSystem);
+  void setLatticeSystem(const std::string &latticeSystem);
   void setProfileFunction(const std::string &profileFunction);
   void setUnitCell(const std::string &unitCellString);
 

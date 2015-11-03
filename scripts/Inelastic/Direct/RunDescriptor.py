@@ -1,4 +1,4 @@
-#pylint: disable=too-many-lines
+﻿#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 """ File contains Descriptors used describe run for direct inelastic reduction """
 
@@ -914,16 +914,18 @@ class RunDescriptor(PropDescriptor):
         return hint,old_ext
 #--------------------------------------------------------------------------------------------------------------------
 
-    def find_file(self,inst_name=None,run_num=None,filePath=None,fileExt=None,**kwargs):
+    def find_file(self,propman,inst_name=None,run_num=None,filePath=None,fileExt=None,**kwargs):
         """Use Mantid to search for the given run. """
 
         if not inst_name:
-            inst_name = RunDescriptor._holder.short_inst_name
+            inst_name = propman.short_inst_name
 
-        if run_num:
-            run_num_str = str(run_num)
-        else:
-            run_num_str = str(self.run_number())
+        if not run_num:
+            run_num = self.run_number()
+
+        fac             = propman.facility
+        zero_padding    = fac.instrument(inst_name).zeroPadding(run_num)
+        run_num_str = str(run_num).zfill(zero_padding)
         #
         file_hint,old_ext = self.file_hint(run_num_str,filePath,fileExt,**kwargs)
 
@@ -958,7 +960,7 @@ class RunDescriptor(PropDescriptor):
     def load_file(self,inst_name,ws_name,run_number=None,load_mon_with_workspace=False,filePath=None,fileExt=None,**kwargs):
         """Load run for the instrument name provided. If run_numner is None, look for the current run"""
 
-        ok,data_file = self.find_file(None,run_number,filePath,fileExt,**kwargs)
+        ok,data_file = self.find_file(RunDescriptor._holder,None,run_number,filePath,fileExt,**kwargs)
         if not ok:
             self._ws_name = None
             raise IOError(data_file)
@@ -1362,6 +1364,7 @@ class RunDescriptor(PropDescriptor):
 #-------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------
+#pylint: disable=too-many-public-methods
 class RunDescriptorDependent(RunDescriptor):
     """Simple RunDescriptor class dependent on another RunDescriptor,
        providing the host descriptor if current descriptor value is not defined
@@ -1461,18 +1464,18 @@ class RunDescriptorDependent(RunDescriptor):
             return super(RunDescriptorDependent,self).get_ws_clone(clone_name)
         else:
             return self._host.get_ws_clone(clone_name)
-
+#pylint: disable=too-many-arguments
     def chop_ws_part(self,origin,tof_range,rebin,chunk_num,n_chunks):
         if self._has_own_value:
             return super(RunDescriptorDependent,self).chop_ws_part(origin,tof_range,rebin,chunk_num,n_chunks)
         else:
             return self._host.chop_ws_part(origin,tof_range,rebin,chunk_num,n_chunks)
 
-    def get_monitors_ws(self,monitor_ID=None):
+    def get_monitors_ws(self,monitor_ID=None,otherWS=None):
         if self._has_own_value:
-            return super(RunDescriptorDependent,self).get_monitors_ws(monitor_ID)
+            return super(RunDescriptorDependent,self).get_monitors_ws(monitor_ID,otherWS)
         else:
-            return self._host.get_monitors_ws(monitor_ID)
+            return self._host.get_monitors_ws(monitor_ID,otherWS)
 
     def is_existing_ws(self):
         if self._has_own_value:
@@ -1485,19 +1488,20 @@ class RunDescriptorDependent(RunDescriptor):
             return super(RunDescriptorDependent,self).file_hint(run_num_str,filePath,fileExt,**kwargs)
         else:
             return self._host.file_hint(run_num_str,filePath,fileExt,**kwargs)
-
-    def find_file(self,inst_name=None,run_num=None,filePath=None,fileExt=None,**kwargs):
+#pylint: disable=too-many-arguments
+    def find_file(self,propman,inst_name=None,run_num=None,filePath=None,fileExt=None,**kwargs):
         if self._has_own_value:
-            return super(RunDescriptorDependent,self).find_file(inst_name,run_num,filePath,fileExt,**kwargs)
+            return super(RunDescriptorDependent,self).find_file(propman,inst_name,run_num,filePath,fileExt,**kwargs)
         else:
-            return self._host.find_file(inst_name,run_num,filePath,fileExt,**kwargs)
-
+            return self._host.find_file(propman,inst_name,run_num,filePath,fileExt,**kwargs)
+#pylint: disable=too-many-arguments
     def load_file(self,inst_name,ws_name,run_number=None,load_mon_with_workspace=False,filePath=None,fileExt=None,**kwargs):
         if self._has_own_value:
-            return super(RunDescriptorDependent,self).load_file(inst_name,ws_name,run_number,load_mon_with_workspace,filePath,fileExt,**kwargs)
+            return super(RunDescriptorDependent,self).load_file(inst_name,ws_name,run_number,load_mon_with_workspace,\
+                         filePath,fileExt,**kwargs)
         else:
             return self._host.load_file(inst_name,ws_name,run_number,load_mon_with_workspace,filePath,fileExt,**kwargs)
-
+#pylint: disable=too-many-arguments
     def load_run(self,inst_name, calibration=None, force=False, mon_load_option=False,use_ws_calibration=True,\
                  filePath=None,fileExt=None,**kwargs):
         if self._has_own_value:
@@ -1542,12 +1546,17 @@ def build_run_file_name(run_num,inst,file_path='',fext=''):
     """Build the full name of a runfile from all possible components"""
     if fext is None:
         fext = ''
-    #HACK: current ISIS File format consist of 5 digit. It is defined somewhere in Mantid
-    # but redefined here. Should pick things up from MANTID
-    fname = '{0}{1:0>5}{2}'.format(inst,run_num,fext)
+    if isinstance(run_num,str):
+        run_num_str = run_num
+    else:
+#pylint: disable=W0212
+        fac = RunDescriptor._holder.facility
+        zero_padding    = fac.instrument(inst).zeroPadding(run_num)
+        run_num_str = str(run_num).zfill(zero_padding)
+
+    fname = '{0}{1}{2}'.format(inst,run_num_str,fext)
     if not file_path is None:
         if os.path.exists(file_path):
             fname = os.path.join(file_path,fname)
     return fname
-
 

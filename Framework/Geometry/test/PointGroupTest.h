@@ -230,58 +230,58 @@ public:
 
   void testCrystalSystems() {
     std::map<std::string, PointGroup::CrystalSystem> crystalSystemsMap;
-    crystalSystemsMap["1"] = PointGroup::Triclinic;
-    crystalSystemsMap["-1"] = PointGroup::Triclinic;
+    crystalSystemsMap["1"] = PointGroup::CrystalSystem::Triclinic;
+    crystalSystemsMap["-1"] = PointGroup::CrystalSystem::Triclinic;
 
-    crystalSystemsMap["2"] = PointGroup::Monoclinic;
-    crystalSystemsMap["m"] = PointGroup::Monoclinic;
-    crystalSystemsMap["2/m"] = PointGroup::Monoclinic;
-    crystalSystemsMap["112/m"] = PointGroup::Monoclinic;
+    crystalSystemsMap["2"] = PointGroup::CrystalSystem::Monoclinic;
+    crystalSystemsMap["m"] = PointGroup::CrystalSystem::Monoclinic;
+    crystalSystemsMap["2/m"] = PointGroup::CrystalSystem::Monoclinic;
+    crystalSystemsMap["112/m"] = PointGroup::CrystalSystem::Monoclinic;
 
-    crystalSystemsMap["222"] = PointGroup::Orthorhombic;
-    crystalSystemsMap["mm2"] = PointGroup::Orthorhombic;
-    crystalSystemsMap["mmm"] = PointGroup::Orthorhombic;
+    crystalSystemsMap["222"] = PointGroup::CrystalSystem::Orthorhombic;
+    crystalSystemsMap["mm2"] = PointGroup::CrystalSystem::Orthorhombic;
+    crystalSystemsMap["mmm"] = PointGroup::CrystalSystem::Orthorhombic;
 
-    crystalSystemsMap["4"] = PointGroup::Tetragonal;
-    crystalSystemsMap["-4"] = PointGroup::Tetragonal;
-    crystalSystemsMap["4/m"] = PointGroup::Tetragonal;
-    crystalSystemsMap["422"] = PointGroup::Tetragonal;
-    crystalSystemsMap["4mm"] = PointGroup::Tetragonal;
-    crystalSystemsMap["-42m"] = PointGroup::Tetragonal;
-    crystalSystemsMap["-4m2"] = PointGroup::Tetragonal;
-    crystalSystemsMap["4/mmm"] = PointGroup::Tetragonal;
+    crystalSystemsMap["4"] = PointGroup::CrystalSystem::Tetragonal;
+    crystalSystemsMap["-4"] = PointGroup::CrystalSystem::Tetragonal;
+    crystalSystemsMap["4/m"] = PointGroup::CrystalSystem::Tetragonal;
+    crystalSystemsMap["422"] = PointGroup::CrystalSystem::Tetragonal;
+    crystalSystemsMap["4mm"] = PointGroup::CrystalSystem::Tetragonal;
+    crystalSystemsMap["-42m"] = PointGroup::CrystalSystem::Tetragonal;
+    crystalSystemsMap["-4m2"] = PointGroup::CrystalSystem::Tetragonal;
+    crystalSystemsMap["4/mmm"] = PointGroup::CrystalSystem::Tetragonal;
 
-    crystalSystemsMap["3"] = PointGroup::Trigonal;
-    crystalSystemsMap["-3"] = PointGroup::Trigonal;
-    crystalSystemsMap["321"] = PointGroup::Trigonal;
-    crystalSystemsMap["32"] = PointGroup::Trigonal;
-    crystalSystemsMap["312"] = PointGroup::Trigonal;
-    crystalSystemsMap["3m1"] = PointGroup::Trigonal;
-    crystalSystemsMap["3m"] = PointGroup::Trigonal;
-    crystalSystemsMap["31m"] = PointGroup::Trigonal;
-    crystalSystemsMap["-3m1"] = PointGroup::Trigonal;
-    crystalSystemsMap["-3m"] = PointGroup::Trigonal;
-    crystalSystemsMap["-31m"] = PointGroup::Trigonal;
-    crystalSystemsMap["3 r"] = PointGroup::Trigonal;
-    crystalSystemsMap["-3 r"] = PointGroup::Trigonal;
-    crystalSystemsMap["32 r"] = PointGroup::Trigonal;
-    crystalSystemsMap["3m r"] = PointGroup::Trigonal;
-    crystalSystemsMap["-3m r"] = PointGroup::Trigonal;
+    crystalSystemsMap["3"] = PointGroup::CrystalSystem::Trigonal;
+    crystalSystemsMap["-3"] = PointGroup::CrystalSystem::Trigonal;
+    crystalSystemsMap["321"] = PointGroup::CrystalSystem::Trigonal;
+    crystalSystemsMap["32"] = PointGroup::CrystalSystem::Trigonal;
+    crystalSystemsMap["312"] = PointGroup::CrystalSystem::Trigonal;
+    crystalSystemsMap["3m1"] = PointGroup::CrystalSystem::Trigonal;
+    crystalSystemsMap["3m"] = PointGroup::CrystalSystem::Trigonal;
+    crystalSystemsMap["31m"] = PointGroup::CrystalSystem::Trigonal;
+    crystalSystemsMap["-3m1"] = PointGroup::CrystalSystem::Trigonal;
+    crystalSystemsMap["-3m"] = PointGroup::CrystalSystem::Trigonal;
+    crystalSystemsMap["-31m"] = PointGroup::CrystalSystem::Trigonal;
+    crystalSystemsMap["3 r"] = PointGroup::CrystalSystem::Trigonal;
+    crystalSystemsMap["-3 r"] = PointGroup::CrystalSystem::Trigonal;
+    crystalSystemsMap["32 r"] = PointGroup::CrystalSystem::Trigonal;
+    crystalSystemsMap["3m r"] = PointGroup::CrystalSystem::Trigonal;
+    crystalSystemsMap["-3m r"] = PointGroup::CrystalSystem::Trigonal;
 
-    crystalSystemsMap["6"] = PointGroup::Hexagonal;
-    crystalSystemsMap["-6"] = PointGroup::Hexagonal;
-    crystalSystemsMap["6/m"] = PointGroup::Hexagonal;
-    crystalSystemsMap["622"] = PointGroup::Hexagonal;
-    crystalSystemsMap["6mm"] = PointGroup::Hexagonal;
-    crystalSystemsMap["-62m"] = PointGroup::Hexagonal;
-    crystalSystemsMap["-6m2"] = PointGroup::Hexagonal;
-    crystalSystemsMap["6/mmm"] = PointGroup::Hexagonal;
+    crystalSystemsMap["6"] = PointGroup::CrystalSystem::Hexagonal;
+    crystalSystemsMap["-6"] = PointGroup::CrystalSystem::Hexagonal;
+    crystalSystemsMap["6/m"] = PointGroup::CrystalSystem::Hexagonal;
+    crystalSystemsMap["622"] = PointGroup::CrystalSystem::Hexagonal;
+    crystalSystemsMap["6mm"] = PointGroup::CrystalSystem::Hexagonal;
+    crystalSystemsMap["-62m"] = PointGroup::CrystalSystem::Hexagonal;
+    crystalSystemsMap["-6m2"] = PointGroup::CrystalSystem::Hexagonal;
+    crystalSystemsMap["6/mmm"] = PointGroup::CrystalSystem::Hexagonal;
 
-    crystalSystemsMap["23"] = PointGroup::Cubic;
-    crystalSystemsMap["m-3"] = PointGroup::Cubic;
-    crystalSystemsMap["432"] = PointGroup::Cubic;
-    crystalSystemsMap["-43m"] = PointGroup::Cubic;
-    crystalSystemsMap["m-3m"] = PointGroup::Cubic;
+    crystalSystemsMap["23"] = PointGroup::CrystalSystem::Cubic;
+    crystalSystemsMap["m-3"] = PointGroup::CrystalSystem::Cubic;
+    crystalSystemsMap["432"] = PointGroup::CrystalSystem::Cubic;
+    crystalSystemsMap["-43m"] = PointGroup::CrystalSystem::Cubic;
+    crystalSystemsMap["m-3m"] = PointGroup::CrystalSystem::Cubic;
 
     std::vector<PointGroup_sptr> pointgroups = getAllPointGroups();
 
@@ -299,17 +299,18 @@ public:
 
     TS_ASSERT_EQUALS(pointgroups.size(), pgMap.size());
 
-    TS_ASSERT_EQUALS(pgMap.count(PointGroup::Triclinic), 2);
+    TS_ASSERT_EQUALS(pgMap.count(PointGroup::CrystalSystem::Triclinic), 2);
 
     // 2/m with axis b and c, so one more
-    TS_ASSERT_EQUALS(pgMap.count(PointGroup::Monoclinic), 3 + 1);
-    TS_ASSERT_EQUALS(pgMap.count(PointGroup::Orthorhombic), 3);
-    TS_ASSERT_EQUALS(pgMap.count(PointGroup::Tetragonal), 8);
+    TS_ASSERT_EQUALS(pgMap.count(PointGroup::CrystalSystem::Monoclinic), 3 + 1);
+    TS_ASSERT_EQUALS(pgMap.count(PointGroup::CrystalSystem::Orthorhombic), 3);
+    TS_ASSERT_EQUALS(pgMap.count(PointGroup::CrystalSystem::Tetragonal), 8);
 
     // 5 with rhombohedral axes and 8 with hexagonal and 3 for defaults
-    TS_ASSERT_EQUALS(pgMap.count(PointGroup::Trigonal), 5 + 8 + 3);
-    TS_ASSERT_EQUALS(pgMap.count(PointGroup::Hexagonal), 8);
-    TS_ASSERT_EQUALS(pgMap.count(PointGroup::Cubic), 5);
+    TS_ASSERT_EQUALS(pgMap.count(PointGroup::CrystalSystem::Trigonal),
+                     5 + 8 + 3);
+    TS_ASSERT_EQUALS(pgMap.count(PointGroup::CrystalSystem::Hexagonal), 8);
+    TS_ASSERT_EQUALS(pgMap.count(PointGroup::CrystalSystem::Cubic), 5);
   }
 
   void testPerformance() {
@@ -318,48 +319,101 @@ public:
   }
 
   void testCrystalSystemNames() {
-    TS_ASSERT_EQUALS(getCrystalSystemFromString("Cubic"), PointGroup::Cubic);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString("cubic"), PointGroup::Cubic);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString("CUBIC"), PointGroup::Cubic);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString("CuBiC"), PointGroup::Cubic);
+    TS_ASSERT_EQUALS(getCrystalSystemFromString("Cubic"),
+                     PointGroup::CrystalSystem::Cubic);
+    TS_ASSERT_EQUALS(getCrystalSystemFromString("cubic"),
+                     PointGroup::CrystalSystem::Cubic);
+    TS_ASSERT_EQUALS(getCrystalSystemFromString("CUBIC"),
+                     PointGroup::CrystalSystem::Cubic);
+    TS_ASSERT_EQUALS(getCrystalSystemFromString("CuBiC"),
+                     PointGroup::CrystalSystem::Cubic);
 
     TS_ASSERT_EQUALS(getCrystalSystemFromString("Tetragonal"),
-                     PointGroup::Tetragonal);
+                     PointGroup::CrystalSystem::Tetragonal);
     TS_ASSERT_EQUALS(getCrystalSystemFromString("Hexagonal"),
-                     PointGroup::Hexagonal);
+                     PointGroup::CrystalSystem::Hexagonal);
     TS_ASSERT_EQUALS(getCrystalSystemFromString("Trigonal"),
-                     PointGroup::Trigonal);
+                     PointGroup::CrystalSystem::Trigonal);
     TS_ASSERT_EQUALS(getCrystalSystemFromString("Orthorhombic"),
-                     PointGroup::Orthorhombic);
+                     PointGroup::CrystalSystem::Orthorhombic);
     TS_ASSERT_EQUALS(getCrystalSystemFromString("Monoclinic"),
-                     PointGroup::Monoclinic);
+                     PointGroup::CrystalSystem::Monoclinic);
     TS_ASSERT_EQUALS(getCrystalSystemFromString("Triclinic"),
-                     PointGroup::Triclinic);
+                     PointGroup::CrystalSystem::Triclinic);
 
     TS_ASSERT_THROWS(getCrystalSystemFromString("DoesNotExist"),
                      std::invalid_argument);
 
-    TS_ASSERT_EQUALS(
-        getCrystalSystemFromString(getCrystalSystemAsString(PointGroup::Cubic)),
-        PointGroup::Cubic);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString(
-                         getCrystalSystemAsString(PointGroup::Tetragonal)),
-                     PointGroup::Tetragonal);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString(
-                         getCrystalSystemAsString(PointGroup::Hexagonal)),
-                     PointGroup::Hexagonal);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString(
-                         getCrystalSystemAsString(PointGroup::Trigonal)),
-                     PointGroup::Trigonal);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString(
-                         getCrystalSystemAsString(PointGroup::Orthorhombic)),
-                     PointGroup::Orthorhombic);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString(
-                         getCrystalSystemAsString(PointGroup::Monoclinic)),
-                     PointGroup::Monoclinic);
-    TS_ASSERT_EQUALS(getCrystalSystemFromString(
-                         getCrystalSystemAsString(PointGroup::Triclinic)),
-                     PointGroup::Triclinic);
+    TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(
+                         PointGroup::CrystalSystem::Cubic)),
+                     PointGroup::CrystalSystem::Cubic);
+    TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(
+                         PointGroup::CrystalSystem::Tetragonal)),
+                     PointGroup::CrystalSystem::Tetragonal);
+    TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(
+                         PointGroup::CrystalSystem::Hexagonal)),
+                     PointGroup::CrystalSystem::Hexagonal);
+    TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(
+                         PointGroup::CrystalSystem::Trigonal)),
+                     PointGroup::CrystalSystem::Trigonal);
+    TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(
+                         PointGroup::CrystalSystem::Orthorhombic)),
+                     PointGroup::CrystalSystem::Orthorhombic);
+    TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(
+                         PointGroup::CrystalSystem::Monoclinic)),
+                     PointGroup::CrystalSystem::Monoclinic);
+    TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(
+                         PointGroup::CrystalSystem::Triclinic)),
+                     PointGroup::CrystalSystem::Triclinic);
+  }
+
+  void testLatticeSystemNames() {
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("Cubic"),
+                     PointGroup::LatticeSystem::Cubic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("cubic"),
+                     PointGroup::LatticeSystem::Cubic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("CUBIC"),
+                     PointGroup::LatticeSystem::Cubic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("CuBiC"),
+                     PointGroup::LatticeSystem::Cubic);
+
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("Tetragonal"),
+                     PointGroup::LatticeSystem::Tetragonal);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("Hexagonal"),
+                     PointGroup::LatticeSystem::Hexagonal);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("Rhombohedral"),
+                     PointGroup::LatticeSystem::Rhombohedral);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("Orthorhombic"),
+                     PointGroup::LatticeSystem::Orthorhombic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("Monoclinic"),
+                     PointGroup::LatticeSystem::Monoclinic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString("Triclinic"),
+                     PointGroup::LatticeSystem::Triclinic);
+
+    TS_ASSERT_THROWS(getLatticeSystemFromString("DoesNotExist"),
+                     std::invalid_argument);
+
+    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(
+                         PointGroup::LatticeSystem::Cubic)),
+                     PointGroup::LatticeSystem::Cubic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(
+                         PointGroup::LatticeSystem::Tetragonal)),
+                     PointGroup::LatticeSystem::Tetragonal);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(
+                         PointGroup::LatticeSystem::Hexagonal)),
+                     PointGroup::LatticeSystem::Hexagonal);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(
+                         PointGroup::LatticeSystem::Rhombohedral)),
+                     PointGroup::LatticeSystem::Rhombohedral);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(
+                         PointGroup::LatticeSystem::Orthorhombic)),
+                     PointGroup::LatticeSystem::Orthorhombic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(
+                         PointGroup::LatticeSystem::Monoclinic)),
+                     PointGroup::LatticeSystem::Monoclinic);
+    TS_ASSERT_EQUALS(getLatticeSystemFromString(getLatticeSystemAsString(
+                         PointGroup::LatticeSystem::Triclinic)),
+                     PointGroup::LatticeSystem::Triclinic);
   }
 
 private:
