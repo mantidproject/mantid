@@ -8,7 +8,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
     def category(self):
         """ Category
         """
-        return "Utility"
+        return "DataHandling\\Plots"
 
     def name(self):
         """ Algorithm name
