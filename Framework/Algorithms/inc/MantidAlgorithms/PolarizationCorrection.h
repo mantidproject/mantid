@@ -60,6 +60,9 @@ private:
   add(boost::shared_ptr<Mantid::API::MatrixWorkspace> &lhsWS,
       const double &rhs);
   boost::shared_ptr<Mantid::API::MatrixWorkspace>
+  multiply(boost::shared_ptr<Mantid::API::MatrixWorkspace> &lhsWS,
+           const double &rhs);
+  boost::shared_ptr<Mantid::API::MatrixWorkspace>
   copyShapeAndFill(boost::shared_ptr<Mantid::API::MatrixWorkspace> &base,
                    const double &value);
   bool isPropertyDefault(const std::string &propertyName) const;
