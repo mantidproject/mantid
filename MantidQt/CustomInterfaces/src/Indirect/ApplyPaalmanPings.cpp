@@ -71,24 +71,26 @@ void ApplyPaalmanPings::run() {
     absCorProps["SampleWorkspace"] = sampleWsName.toStdString();
   }
 
+  const bool useCan = m_uiForm.ckUseCan->isChecked();
+  const bool useShift = m_uiForm.ckShiftCan->isChecked();
+  const bool useCorrections = m_uiForm.ckUseCorrections->isChecked();
   // Get Can and Clone
-  QString canWsName = m_uiForm.dsContainer->getCurrentDataName();
-  MatrixWorkspace_sptr canWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          canWsName.toStdString());
-  QString canCloneName = canWsName + "_Shifted";
-  IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
-  clone->initialize();
-  clone->setProperty("InputWorkspace", canWs);
-  clone->setProperty("Outputworkspace", canCloneName.toStdString());
-  clone->execute();
-  MatrixWorkspace_sptr canCloneWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          canCloneName.toStdString());
-
-  // If using Can
-  bool useCan = m_uiForm.ckUseCan->isChecked();
   if (useCan) {
+    QString canWsName = m_uiForm.dsContainer->getCurrentDataName();
+    MatrixWorkspace_sptr canWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            canWsName.toStdString());
+    QString canCloneName = canWsName + "_Shifted";
+    IAlgorithm_sptr clone =
+        AlgorithmManager::Instance().create("CloneWorkspace");
+    clone->initialize();
+    clone->setProperty("InputWorkspace", canWs);
+    clone->setProperty("Outputworkspace", canCloneName.toStdString());
+    clone->execute();
+    MatrixWorkspace_sptr canCloneWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            canCloneName.toStdString());
+
     IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
     scaleX->initialize();
     scaleX->setProperty("InputWorkspace", canCloneWs);
@@ -121,7 +123,7 @@ void ApplyPaalmanPings::run() {
       applyCorrAlg->setProperty("CanScaleFactor", canScaleFactor);
     }
 
-    if (useCan) {
+    if (useShift) {
       addRebinStep(canCloneName, sampleWsName);
     } else {
       // Check for same binning across sample and container
@@ -146,7 +148,6 @@ void ApplyPaalmanPings::run() {
     }
   }
 
-  bool useCorrections = m_uiForm.ckUseCorrections->isChecked();
   if (useCorrections) {
     QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
 
@@ -307,7 +308,8 @@ void ApplyPaalmanPings::addInterpolationStep(MatrixWorkspace_sptr toInterpolate,
 void ApplyPaalmanPings::absCorComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(absCorComplete(bool)));
-
+  const bool useCan = m_uiForm.ckUseCan->isChecked();
+  const bool useShift = m_uiForm.ckShiftCan->isChecked();
   if (error) {
     emit showMessageBox(
         "Unable to apply corrections.\nSee Results Log for more details.");
@@ -328,20 +330,20 @@ void ApplyPaalmanPings::absCorComplete(bool error) {
   bool save = m_uiForm.ckSave->isChecked();
   if (save)
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+  if (useCan) {
+    if (useShift) {
+      IAlgorithm_sptr shiftLog =
+          AlgorithmManager::Instance().create("AddSampleLog");
+      shiftLog->initialize();
 
-  if (m_uiForm.ckShiftCan->isChecked()) {
-    IAlgorithm_sptr shiftLog =
-        AlgorithmManager::Instance().create("AddSampleLog");
-    shiftLog->initialize();
-
-    shiftLog->setProperty("Workspace", m_pythonExportWsName);
-    shiftLog->setProperty("LogName", "container_shift");
-    shiftLog->setProperty("LogType", "Number");
-    shiftLog->setProperty(
-        "LogText", boost::lexical_cast<std::string>(m_uiForm.spCanShift->value()));
-    m_batchAlgoRunner->addAlgorithm(shiftLog);
+      shiftLog->setProperty("Workspace", m_pythonExportWsName);
+      shiftLog->setProperty("LogName", "container_shift");
+      shiftLog->setProperty("LogType", "Number");
+      shiftLog->setProperty("LogText", boost::lexical_cast<std::string>(
+                                           m_uiForm.spCanShift->value()));
+      m_batchAlgoRunner->addAlgorithm(shiftLog);
+    }
   }
-
   // Run algorithm queue
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(postProcessComplete(bool)));
@@ -503,34 +505,36 @@ void ApplyPaalmanPings::plotPreview(int specIndex) {
         Qt::green);
 
   // Scale can
-  if (m_uiForm.ckScaleCan->isChecked()) {
-    auto canName = m_uiForm.dsContainer->getCurrentDataName();
-    if (m_uiForm.ckShiftCan->isChecked()) {
-      canName += "_Shifted";
+  if (useCan) {
+    if (m_uiForm.ckScaleCan->isChecked()) {
+      auto canName = m_uiForm.dsContainer->getCurrentDataName();
+      if (m_uiForm.ckShiftCan->isChecked()) {
+        canName += "_Shifted";
+      }
+      IAlgorithm_sptr scaleCan = AlgorithmManager::Instance().create("Scale");
+      scaleCan->initialize();
+      scaleCan->setProperty("InputWorkspace", canName.toStdString());
+      scaleCan->setProperty("OutputWorkspace", "__container_corrected");
+      scaleCan->setProperty("Factor", m_uiForm.spCanScale->value());
+      scaleCan->setProperty("Operation", "Multiply");
+      scaleCan->execute();
     }
-    IAlgorithm_sptr scaleCan = AlgorithmManager::Instance().create("Scale");
-    scaleCan->initialize();
-    scaleCan->setProperty("InputWorkspace", canName.toStdString());
-    scaleCan->setProperty("OutputWorkspace", "__container_corrected");
-    scaleCan->setProperty("Factor", m_uiForm.spCanScale->value());
-    scaleCan->setProperty("Operation", "Multiply");
-    scaleCan->execute();
-  }
 
-  // Plot container
-  if (m_uiForm.ckScaleCan->isChecked()) {
-    m_uiForm.ppPreview->addSpectrum("Container", "__container_corrected",
-                                    specIndex, Qt::red);
-  } else {
-    if (m_uiForm.ckShiftCan->isChecked()) {
-      m_uiForm.ppPreview->addSpectrum(
-          "Container",
-          (m_uiForm.dsContainer->getCurrentDataName() + "_Shifted"), specIndex,
-          Qt::red);
+    // Plot container
+    if (m_uiForm.ckScaleCan->isChecked()) {
+      m_uiForm.ppPreview->addSpectrum("Container", "__container_corrected",
+                                      specIndex, Qt::red);
     } else {
-      m_uiForm.ppPreview->addSpectrum(
-          "Container", m_uiForm.dsContainer->getCurrentDataName(), specIndex,
-          Qt::red);
+      if (m_uiForm.ckShiftCan->isChecked()) {
+        m_uiForm.ppPreview->addSpectrum(
+            "Container",
+            (m_uiForm.dsContainer->getCurrentDataName() + "_Shifted"),
+            specIndex, Qt::red);
+      } else {
+        m_uiForm.ppPreview->addSpectrum(
+            "Container", m_uiForm.dsContainer->getCurrentDataName(), specIndex,
+            Qt::red);
+      }
     }
   }
 }
