@@ -197,8 +197,8 @@ void LoadInstrument::exec() {
   // Rebuild the spectra map for this workspace so that it matches the
   // instrument
   // if required
-  const OptionalBool rewriteSpectraMap = getProperty("OverwriteSpectraMap");
-  if (rewriteSpectraMap == OptionalBool::True)
+  const OptionalBool OverwriteSpectraMap = getProperty("OverwriteSpectraMap");
+  if (OverwriteSpectraMap == OptionalBool::True)
     m_workspace->rebuildSpectraMapping();
 }
 

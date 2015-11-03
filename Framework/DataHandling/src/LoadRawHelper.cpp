@@ -544,8 +544,10 @@ void LoadRawHelper::runLoadInstrument(
   try {
     loadInst->setPropertyValue("InstrumentName", instrumentID);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
+    loadInst->setProperty("OverwriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(true));
     loadInst->setProperty(
-        "RewriteSpectraMap",
+        "OverwriteSpectraMap",
         false); // No point as we will load the one from the file
     loadInst->execute();
   } catch (std::invalid_argument &) {
