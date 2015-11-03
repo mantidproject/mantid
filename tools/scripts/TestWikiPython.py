@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 ###########################################################################################
 # Extracts code blocks marked as python from mediawiki pages and checks they run
 # run with -h for command line arguments
@@ -7,7 +8,6 @@ import os
 import re
 import sys
 import urllib2
-import urlparse
 import argparse
 import json
 
@@ -31,6 +31,7 @@ def getTestablePages(url):
 
 def convertURLToRaw(url):
     return url.replace(" ","%20") + "?action=raw"
+
 def writeTestRst(filepath,mediawikiText,pageName):
     '''
     for a block of wiki text, writes out all tests found to an rst page
@@ -133,7 +134,7 @@ parser.add_argument('-o', '--o',
                     help='Provide a path to output to an output directory')
 
 args = parser.parse_args()
-urlList = [];
+urlList = []
 baseUrl = "http://www.mantidproject.org/"
 if args.s is not None:
     baseUrl = args.s
@@ -164,6 +165,3 @@ for url in urlList:
     #run pandoc and get the output in rst
     mediawikiText = readWebPage(convertURLToRaw(baseUrl + url))
     writeTestRst(outputFile,mediawikiText,pageName)
-
-
-

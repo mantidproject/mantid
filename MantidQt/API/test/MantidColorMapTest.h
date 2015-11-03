@@ -2,8 +2,6 @@
 #define MANTIDQT_API_MANTIDCOLORMAPTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <iostream>
-#include <iomanip>
 #include "MantidQtAPI/MantidColorMap.h"
 #include <limits>
 #include <QRgb>

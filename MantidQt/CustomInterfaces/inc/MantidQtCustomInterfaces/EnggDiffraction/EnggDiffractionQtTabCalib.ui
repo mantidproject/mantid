@@ -13,35 +13,8 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_3">
-   <item row="0" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QLabel" name="label_RBNumber">
-       <property name="text">
-        <string>RB Number:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="lineEdit_RBNumber"/>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_5">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>358</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
-   <item row="1" column="0">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
     <widget class="QGroupBox" name="groupBox_current_calib">
      <property name="title">
       <string>Current calibration:</string>
@@ -144,7 +117,7 @@
      </layout>
     </widget>
    </item>
-   <item row="2" column="0">
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <spacer name="horizontalSpacer_6">
@@ -168,31 +141,29 @@
         <bool>false</bool>
        </property>
        <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_new_vanadium_num">
-          <property name="text">
-           <string>Vanadium #:</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="1" colspan="2">
-         <widget class="QLineEdit" name="lineEdit_new_vanadium_num">
-          <property name="text">
+         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="lineEdit_new_vanadium_num" native="true">
+          <property name="text" stdset="0">
            <string>236516</string>
           </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_new_ceria_num">
-          <property name="text">
-           <string>Calibration sample #:</string>
+          <property name="label" stdset="0">
+           <string>Vanadium #:</string>
+          </property>
+          <property name="multipleFiles" stdset="0">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
         <item row="1" column="1" colspan="2">
-         <widget class="QLineEdit" name="lineEdit_new_ceria_num">
-          <property name="text">
+         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="lineEdit_new_ceria_num" native="true">
+          <property name="text" stdset="0">
            <string>241391</string>
+          </property>
+          <property name="label" stdset="0">
+           <string>Calibration sample #:</string>
+          </property>
+          <property name="multipleFiles" stdset="0">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -216,12 +187,26 @@
           </property>
          </widget>
         </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_new_ceria_num">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_new_vanadium_num">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
      </item>
     </layout>
    </item>
-   <item row="3" column="0">
+   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -236,6 +221,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

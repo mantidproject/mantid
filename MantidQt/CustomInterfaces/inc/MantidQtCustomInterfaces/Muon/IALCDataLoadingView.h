@@ -119,14 +119,14 @@ namespace CustomInterfaces
     /// @param tMax :: Maximum X value available
     virtual void setTimeRange(double tMin, double tMax) = 0;
 
-    /// Set waiting cursor for long operation
-    virtual void setWaitingCursor() = 0;
-
-    /// Restore the original cursor
-    virtual void restoreCursor() = 0;
-
     /// Opens the Mantid Wiki web page
     virtual void help() = 0;
+
+    /// Disables all the widgets
+    virtual void disableAll() = 0;
+
+    /// Enables all the widgets
+    virtual void enableAll() = 0;
 
   signals:
     /// Request to load data
@@ -134,6 +134,9 @@ namespace CustomInterfaces
 
     /// User has selected the first run
     void firstRunSelected();
+
+    /// New data have been loaded
+    void dataChanged();
 
   };
 

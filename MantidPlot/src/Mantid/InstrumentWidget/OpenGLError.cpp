@@ -1,5 +1,4 @@
 #include "OpenGLError.h"
-#include <iostream>
 #include <sstream>
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
@@ -33,4 +32,9 @@ bool OpenGLError::check(const std::string& funName)
 std::ostream& OpenGLError::log()
 {
   return g_log.error();
+}
+
+std::ostream& OpenGLError::logDebug()
+{
+  return g_log.debug();
 }

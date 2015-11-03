@@ -433,6 +433,41 @@ public:
     TS_ASSERT_EQUALS(refinedCell, "5 5 5 90 90 90");
   }
 
+  void testGetCrystalSystemFromPointGroup() {
+    TestablePoldiFitPeaks2D alg;
+
+    auto pgCubic = PointGroupFactory::Instance().createPointGroup("m-3m");
+    TS_ASSERT_EQUALS(alg.getLatticeSystemFromPointGroup(pgCubic), "Cubic");
+
+    auto pgTetra = PointGroupFactory::Instance().createPointGroup("4/mmm");
+    TS_ASSERT_EQUALS(alg.getLatticeSystemFromPointGroup(pgTetra), "Tetragonal");
+
+    auto pgOrtho = PointGroupFactory::Instance().createPointGroup("mmm");
+    TS_ASSERT_EQUALS(alg.getLatticeSystemFromPointGroup(pgOrtho),
+                     "Orthorhombic");
+
+    auto pgMono = PointGroupFactory::Instance().createPointGroup("2/m");
+    TS_ASSERT_EQUALS(alg.getLatticeSystemFromPointGroup(pgMono), "Monoclinic");
+
+    auto pgTric = PointGroupFactory::Instance().createPointGroup("-1");
+    TS_ASSERT_EQUALS(alg.getLatticeSystemFromPointGroup(pgTric), "Triclinic");
+
+    auto pgHex = PointGroupFactory::Instance().createPointGroup("6/mmm");
+    TS_ASSERT_EQUALS(alg.getLatticeSystemFromPointGroup(pgHex), "Hexagonal");
+
+    auto pgTrigRh = PointGroupFactory::Instance().createPointGroup("-3m r");
+    TS_ASSERT_EQUALS(alg.getLatticeSystemFromPointGroup(pgTrigRh),
+                     "Rhombohedral");
+
+    auto pgTrigHex = PointGroupFactory::Instance().createPointGroup("-3m");
+    TS_ASSERT_EQUALS(alg.getLatticeSystemFromPointGroup(pgTrigHex),
+                     "Hexagonal");
+
+    PointGroup_sptr invalid;
+    TS_ASSERT_THROWS(alg.getLatticeSystemFromPointGroup(invalid),
+                     std::invalid_argument);
+  }
+
 private:
   PoldiInstrumentAdapter_sptr m_instrument;
   PoldiTimeTransformer_sptr m_timeTransformer;

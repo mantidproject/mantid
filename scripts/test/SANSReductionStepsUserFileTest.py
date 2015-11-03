@@ -40,5 +40,101 @@ class SANSReductionStepsUserFileTest(unittest.TestCase):
         self.assertEqual(None, start_TOF_ROI, 'The start time should not have been set')
         self.assertEqual(None, end_TOF_ROI, 'The end time should not have been set')
 
+
+
+class MockConvertTOQISISQResolution(object):
+    def __init__(self):
+        super(MockConvertTOQISISQResolution, self).__init__()
+
+        self.delta_r = None
+        self.a1 = None
+        self.a2 = None
+        self.w1 = None
+        self.h1 = None
+        self.w2 = None
+        self.h2 = None
+        self.collim = None
+        self.on_off = None
+
+    def set_q_resolution_delta_r(self, delta_r):
+        self.delta_r = delta_r
+
+    def set_q_resolution_a1(self, a1):
+        self.a1 = a1
+
+    def set_q_resolution_a2(self, a2):
+        self.a2 = a2
+
+    def set_q_resolution_collimation_length(self, collimation_length):
+        self.collim = collimation_length
+
+    def set_q_resolution_h1(self, h1):
+        self.h1 = h1
+
+    def set_q_resolution_h2(self, h2):
+        self.h2 = h2
+
+    def set_q_resolution_w1(self, w1):
+        self.w1 = w1
+
+    def set_q_resolution_w2(self, w2):
+        self.w2 = w2
+
+    def set_use_q_resolution(self, enabled):
+        self.on_off = enabled
+
+class MockReducerQResolution(object):
+    def __init__(self):
+        super(MockReducerQResolution, self).__init__()
+        self.to_Q = MockConvertTOQISISQResolution()
+
+class TestQResolutionInUserFile(unittest.TestCase):
+    def test_that_good_input_is_accepted(self):
+        # Arrange
+        reducer = MockReducerQResolution()
+        user_file = reduction_steps.UserFile()
+
+        a1_val = 1
+        a2_val = 2
+        h1_val = 3
+        w1_val = 4
+        h2_val = 5
+        w2_val = 6
+        lcollim_val = 7
+        delta_r_val = 8
+        on_off_val = True
+        values = ["QRESOL/A1=" + str(a1_val), "QRESOL/A2  =" + str(a2_val), "QRESOL/H1  =" + str(h1_val),
+                  "QRESOL/W1 =" + str(w1_val), "QRESOL/H2=" + str(h2_val), "QRESOL/W2=  " + str(w2_val),
+                  "QRESOL/LCOLLIM=  " + str(lcollim_val),"QRESOL/LCOLLIM=  " + str(lcollim_val),
+                  "QRESOL/DELTAR=  " + str(delta_r_val),"QRESOL/ ON"]
+
+        # Act
+        for value in values:
+            user_file.read_line(value, reducer)
+
+        # Assert
+        self.assertEqual(reducer.to_Q.a1,a1_val/1000., "Should be the input in meters")
+        self.assertEqual(reducer.to_Q.a2,a2_val/1000., "Should be the input in meters")
+        self.assertEqual(reducer.to_Q.h1,h1_val/1000., "Should be the input in meters")
+        self.assertEqual(reducer.to_Q.h2,h2_val/1000., "Should be the input in meters")
+        self.assertEqual(reducer.to_Q.w1,w1_val/1000., "Should be the input in meters")
+        self.assertEqual(reducer.to_Q.w2,w2_val/1000., "Should be the input in meters")
+        self.assertEqual(reducer.to_Q.delta_r,delta_r_val/1000., "Should be the input in meters")
+        self.assertEqual(reducer.to_Q.collim,lcollim_val, "Should be the input in meters")
+        self.assertEqual(reducer.to_Q.on_off,on_off_val, "Should be set to True")
+
+    def test_that_non_float_type_for_a1_causes_error_warning(self):
+        # Arrange
+        reducer = MockReducerQResolution()
+        user_file = reduction_steps.UserFile()
+        a1_val = "sdf"
+        value = "A1=" + str(a1_val)
+        # Act
+        error = user_file._read_q_resolution_line(value, reducer)
+        # Assert
+        self.assertTrue(error != None)
+
+
+
 if __name__ == "__main__":
     unittest.main()

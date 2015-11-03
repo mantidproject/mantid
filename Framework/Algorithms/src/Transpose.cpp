@@ -3,8 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Transpose.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 
 namespace Mantid {

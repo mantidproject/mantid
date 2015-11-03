@@ -70,6 +70,33 @@ def provide_histo_workspace_with_one_spectrum(ws_name, x_start, x_end, bin_width
                           BinWidth = bin_width)
 
 
+def provide_workspace_with_x_errors(workspace_name,use_xerror = True, nspec = 1,
+                                    x_in = [1,2,3,4,5,6,7,8,9,10],
+                                    y_in = [2,2,2,2,2,2,2,2,2],
+                                    e_in = [1,1,1,1,1,1,1,1,1],
+                                    x_error = [1.1,2.2,3.3,4.4,5.5,6.6,7.7,8.8,9.9, 10.1]):
+    x = []
+    y = []
+    e = []
+    for item in range(0, nspec):
+        x = x + x_in
+        y = y + y_in
+        e = e + e_in
+
+    CreateWorkspace(DataX = x,
+                    DataY =y,
+                    DataE = e,
+                    NSpec = nspec,
+                    UnitX = "MomentumTransfer",
+                    OutputWorkspace = workspace_name)
+    if use_xerror:
+        ws = mtd[workspace_name]
+        for hists in range(0, nspec):
+            x_error_array = np.asarray(x_error)
+            ws.setDx(hists, x_error_array)
+
+
+
 # This test does not pass and was not used before 1/4/2015. SansUtilitytests was disabled.
 
 class SANSUtilityTest(unittest.TestCase):
@@ -984,6 +1011,162 @@ class TestErrorPropagationFitAndRescale(unittest.TestCase):
         # Clean up
         DeleteWorkspace(front)
         DeleteWorkspace(rear)
+
+
+class TestGetCorrectQResolution(unittest.TestCase):
+    def test_error_is_passed_from_original_to_subtracted_workspace(self):
+        # Arrange
+        orig_name = "orig"
+        can_name = "can"
+        result_name = "result"
+        provide_workspace_with_x_errors(orig_name, True)
+        provide_workspace_with_x_errors(can_name, True)
+        provide_workspace_with_x_errors(result_name, False)
+        orig = mtd[orig_name]
+        can = mtd[can_name]
+        result = mtd[result_name]
+        # Act
+        su.correct_q_resolution_for_can(orig, can, result)
+        # Assert
+        dx_orig = orig.dataDx(0)
+        dx_result = result.dataDx(0)
+        self.assertTrue(result.hasDx(0))
+        for index in range(0, len(dx_orig)):
+            self.assertEqual(dx_orig[index], dx_result[index])
+        # Clean up
+        DeleteWorkspace(orig)
+        DeleteWorkspace(can)
+        DeleteWorkspace(result)
+
+    def test_error_is_ignored_for_more_than_one_spectrum(self):
+        # Arrange
+        orig_name = "orig"
+        can_name = "can"
+        result_name = "result"
+        provide_workspace_with_x_errors(orig_name, True, 2)
+        provide_workspace_with_x_errors(can_name, True, 2)
+        provide_workspace_with_x_errors(result_name, False, 2)
+        orig = mtd[orig_name]
+        can = mtd[can_name]
+        result = mtd[result_name]
+        # Act
+        su.correct_q_resolution_for_can(orig, can, result)
+        # Assert
+        self.assertFalse(result.hasDx(0))
+        # Clean up
+        DeleteWorkspace(orig)
+        DeleteWorkspace(can)
+        DeleteWorkspace(result)
+
+
+class TestGetQResolutionForMergedWorkspaces(unittest.TestCase):
+    def test_error_is_ignored_for_more_than_one_spectrum(self):
+        # Arrange
+        front_name = "front"
+        rear_name = "rear"
+        result_name = "result"
+        provide_workspace_with_x_errors(front_name, True, 2)
+        provide_workspace_with_x_errors(rear_name, True, 2)
+        provide_workspace_with_x_errors(result_name, False, 2)
+        front = mtd[front_name]
+        rear = mtd[rear_name]
+        result = mtd[result_name]
+        scale = 2.
+        # Act
+        su.correct_q_resolution_for_merged(front, rear,result, scale)
+        # Assert
+        self.assertFalse(result.hasDx(0))
+        # Clean up
+        DeleteWorkspace(front)
+        DeleteWorkspace(rear)
+        DeleteWorkspace(result)
+
+    def test_error_is_ignored_when_only_one_input_has_dx(self):
+        # Arrange
+        front_name = "front"
+        rear_name = "rear"
+        result_name = "result"
+        provide_workspace_with_x_errors(front_name, True, 1)
+        provide_workspace_with_x_errors(rear_name, False, 1)
+        provide_workspace_with_x_errors(result_name, False, 1)
+        front = mtd[front_name]
+        rear = mtd[rear_name]
+        result = mtd[result_name]
+        scale = 2.
+        # Act
+        su.correct_q_resolution_for_merged(front, rear,result, scale)
+        # Assert
+        self.assertFalse(result.hasDx(0))
+        # Clean up
+        DeleteWorkspace(front)
+        DeleteWorkspace(rear)
+        DeleteWorkspace(result)
+
+    def test_that_non_matching_workspaces_are_detected(self):
+        # Arrange
+        front_name = "front"
+        rear_name = "rear"
+        result_name = "result"
+        x1 = [1,2,3]
+        e1 = [1,1]
+        y1 = [2,2]
+        dx1 = [1.,2.,3.]
+        x2 = [1,2,3,4]
+        e2 = [1,1, 1]
+        y2 = [2,2, 2]
+        dx2 = [1.,2.,3.,4.]
+        provide_workspace_with_x_errors(front_name, True, 1, x1, y1, e1, dx1)
+        provide_workspace_with_x_errors(rear_name, True, 1, x2, y2, e2, dx2)
+        provide_workspace_with_x_errors(result_name, False, 1)
+        front = mtd[front_name]
+        rear = mtd[rear_name]
+        result = mtd[result_name]
+        scale = 2.
+        # Act
+        su.correct_q_resolution_for_merged(front, rear,result, scale)
+        # Assert
+        self.assertFalse(result.hasDx(0))
+        # Clean up
+        DeleteWorkspace(front)
+        DeleteWorkspace(rear)
+        DeleteWorkspace(result)
+
+    def test_correct_x_error_is_produced(self):
+        # Arrange
+        x = [1,2,3]
+        e = [1,1]
+        y_front = [2,2]
+        dx_front = [1.,2.,3.]
+        y_rear = [1.5,1.5]
+        dx_rear = [3.,2.,1.]
+        front_name = "front"
+        rear_name = "rear"
+        result_name = "result"
+        provide_workspace_with_x_errors(front_name, True, 1, x, y_front, e, dx_front)
+        provide_workspace_with_x_errors(rear_name, True, 1, x, y_rear, e, dx_rear)
+        provide_workspace_with_x_errors(result_name, False, 1, x, y_front, e)
+        front = mtd[front_name]
+        rear = mtd[rear_name]
+        result = mtd[result_name]
+        scale = 2.
+        # Act
+        su.correct_q_resolution_for_merged(front, rear,result, scale)
+        # Assert
+        self.assertTrue(result.hasDx(0))
+
+        dx_expected_0 = (dx_front[0]*y_front[0]*scale + dx_rear[0]*y_rear[0])/(y_front[0]*scale + y_rear[0])
+        dx_expected_1 = (dx_front[1]*y_front[1]*scale + dx_rear[1]*y_rear[1])/(y_front[1]*scale + y_rear[1])
+        dx_expected_2 = dx_expected_1
+        dx_result = result.readDx(0)
+        self.assertTrue(len(dx_result) ==3)
+        self.assertEqual(dx_result[0], dx_expected_0)
+        self.assertEqual(dx_result[1], dx_expected_1)
+        self.assertEqual(dx_result[2], dx_expected_2)
+
+        # Clean up
+        DeleteWorkspace(front)
+        DeleteWorkspace(rear)
+        DeleteWorkspace(result)
 
 
 if __name__ == "__main__":

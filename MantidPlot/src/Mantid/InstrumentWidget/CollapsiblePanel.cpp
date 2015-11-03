@@ -6,7 +6,6 @@
 #include <QPolygon>
 
 #include <stdexcept>
-#include <iostream>
 
 CaptionLabel::CaptionLabel(const QString& caption,QWidget* parent):QLabel(caption,parent),m_collapsed(false)
 {

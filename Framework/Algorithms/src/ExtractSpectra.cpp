@@ -3,13 +3,11 @@
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <algorithm>
-#include <iostream>
 
 namespace {
 /// The percentage 'fuzziness' to use when comparing to bin boundaries

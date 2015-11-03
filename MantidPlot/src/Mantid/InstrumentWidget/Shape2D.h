@@ -147,6 +147,13 @@ protected:
   bool m_visible;  ///< flag to show or hide the shape
 };
 
+/**
+ * An ellipse with the axes parallel to the x and y axes on the screen.
+ *
+ * It has a QPointF property "center" defining the centre of the ellipse
+ * and double properties "radius1" and "radius2" equal to distances from
+ * the centre to the curve along the x and y axes.
+ */
 class Shape2DEllipse: public Shape2D
 {
 public:
@@ -169,6 +176,11 @@ protected:
   virtual void refit(){}
 };
 
+/**
+ * A axis aligned rectangle.
+ *
+ * No specific properties.
+ */
 class Shape2DRectangle: public Shape2D
 {
 public:
@@ -184,6 +196,13 @@ protected:
   virtual void refit(){}
 };
 
+/**
+ * A ring: area bounded by two curves of the same shape but different size.
+ *
+ * The constructor takes a curve shape and the ring widths in the x and y
+ * directions.
+ * It has QPointF "centre" property and "xwidth" and "ywidth" double properties.
+ */
 class Shape2DRing: public Shape2D
 {
 public:
@@ -214,6 +233,32 @@ protected:
   Shape2D* m_inner_shape;
   double m_xWidth;
   double m_yWidth;
+};
+
+/**
+ * An arbitrary shape. Implemented as a polygon.
+ * It can have disjointed parts and holes.
+ *
+ * No shape specific properties.
+ */
+class Shape2DFree: public Shape2D
+{
+public:
+  Shape2DFree(const QPointF& p);
+  virtual Shape2D* clone()const{return new Shape2DFree(*this);}
+  virtual bool selectAt(const QPointF& p)const;
+  virtual bool contains(const QPointF& p)const;
+  virtual void addToPath(QPainterPath& path) const;
+  void addPolygon(const QPolygonF& polygon);
+  void subtractPolygon(const QPolygonF& polygon);
+protected:
+  virtual void drawShape(QPainter& painter) const;
+  virtual void refit();
+  virtual void resetBoundingRect();
+private:
+  RectF getPolygonBoundingRect() const;
+  QPolygonF m_polygon;    ///< Implements the shape.
+  QPainterPath m_outline; ///< Object to draw the shape's border.
 };
 
 

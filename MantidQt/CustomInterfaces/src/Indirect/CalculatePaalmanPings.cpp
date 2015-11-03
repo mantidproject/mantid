@@ -122,8 +122,9 @@ void CalculatePaalmanPings::run() {
     break;
   }
 
-  const QString outputWsName =
+  QString outputWsName =
       sampleWsName.left(nameCutIndex) + "_" + correctionType + "_abs";
+
   absCorAlgo->setProperty("OutputWorkspace", outputWsName.toStdString());
 
   // Add corrections algorithm to queue

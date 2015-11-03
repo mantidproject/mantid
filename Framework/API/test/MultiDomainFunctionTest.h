@@ -12,7 +12,6 @@
 #include <cxxtest/TestSuite.h>
 #include <boost/make_shared.hpp>
 #include <algorithm>
-#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::API;

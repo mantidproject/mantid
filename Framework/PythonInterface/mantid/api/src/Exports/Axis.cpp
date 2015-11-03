@@ -25,8 +25,18 @@ namespace {
 namespace bpl = boost::python;
 
 //------------------------------- Overload macros ---------------------------
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
+
 // Overloads for operator() function which has 1 optional argument
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Axis_getValue, Axis::getValue, 1, 2)
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 /**
  * Extract the axis values as a sequence. A numpy array is used if the
@@ -73,33 +83,41 @@ void export_Axis() {
 
   // Class
   class_<Axis, boost::noncopyable>("MantidAxis", no_init)
-      .def("length", &Axis::length, "Returns the length of the axis")
+      .def("length", &Axis::length, arg("self"),
+           "Returns the length of the axis")
       .def("title", (const std::string &(Axis::*)() const) & Axis::title,
-           return_value_policy<copy_const_reference>(), "Get the axis title")
-      .def("isSpectra", &Axis::isSpectra,
+           arg("self"), return_value_policy<copy_const_reference>(),
+           "Get the axis title")
+      .def("isSpectra", &Axis::isSpectra, arg("self"),
            "Returns true if this is a SpectraAxis")
-      .def("isNumeric", &Axis::isNumeric,
+      .def("isNumeric", &Axis::isNumeric, arg("self"),
            "Returns true if this is a NumericAxis")
-      .def("isText", &Axis::isText, "Returns true if this is a TextAxis")
-      .def("label", &Axis::label, "Return the axis label")
+      .def("isText", &Axis::isText, arg("self"),
+           "Returns true if this is a TextAxis")
+      .def("label", &Axis::label, (arg("self"), arg("index")),
+           "Return the axis label")
       .def("getUnit", (const Unit_sptr &(Axis::*)() const) & Axis::unit,
-           return_value_policy<copy_const_reference>(),
+           arg("self"), return_value_policy<copy_const_reference>(),
            "Returns the unit object for the axis")
       .def("getValue", &Axis::getValue,
-           Axis_getValue(args("index", "vertical_index"),
+           Axis_getValue((arg("self"), arg("index"), arg("vertical_index")),
                          "Returns the value at the given point on the Axis. "
                          "The vertical axis index [default=0]"))
-      .def("extractValues", &extractAxisValues,
+      .def("extractValues", &extractAxisValues, arg("self"),
            "Return a numpy array of the axis values")
-      .def("setUnit", &Axis::setUnit,
+      .def("setUnit", &Axis::setUnit, (arg("self"), arg("unit_name")),
            return_value_policy<copy_const_reference>(),
            "Set the unit for this axis by name.")
-      .def("setValue", &Axis::setValue, "Set a value at the given index")
-      .def("getMin", &Axis::getMin, "Get min value specified on the axis")
-      .def("getMax", &Axis::getMax, "Get max value specified on the axis")
+      .def("setValue", &Axis::setValue,
+           (arg("self"), arg("index"), arg("value")),
+           "Set a value at the given index")
+      .def("getMin", &Axis::getMin, arg("self"),
+           "Get min value specified on the axis")
+      .def("getMax", &Axis::getMax, arg("self"),
+           "Get max value specified on the axis")
       //------------------------------------ Special methods
       //------------------------------------
-      .def("__len__", &Axis::length);
+      .def("__len__", &Axis::length, arg("self"));
 }
 
 // --------------------------------------------------------------------------------------------
@@ -118,7 +136,8 @@ void export_NumericAxis() {
   /// Exported so that Boost.Python can give back a NumericAxis class when an
   /// Axis* is returned
   class_<NumericAxis, bases<Axis>, boost::noncopyable>("NumericAxis", no_init)
-      .def("create", &createNumericAxis, return_internal_reference<>(),
+      .def("create", &createNumericAxis, arg("length"),
+           return_internal_reference<>(),
            "Creates a new NumericAxis of a specified length")
       .staticmethod("create");
 }
@@ -141,7 +160,8 @@ void export_BinEdgeAxis() {
   /// Axis* is returned
   class_<BinEdgeAxis, bases<NumericAxis>, boost::noncopyable>("BinEdgeAxis",
                                                               no_init)
-      .def("create", &createBinEdgeAxis, return_internal_reference<>(),
+      .def("create", &createBinEdgeAxis, arg("length"),
+           return_internal_reference<>(),
            "Creates a new BinEdgeAxis of a specified length")
       .staticmethod("create");
 }
@@ -159,9 +179,13 @@ Axis *createTextAxis(int length) { return new Mantid::API::TextAxis(length); }
 
 void export_TextAxis() {
   class_<TextAxis, bases<Axis>, boost::noncopyable>("TextAxis", no_init)
-      .def("setLabel", &TextAxis::setLabel, "Set the label at the given entry")
-      .def("label", &TextAxis::label, "Return the label at the given position")
-      .def("create", &createTextAxis, return_internal_reference<>(),
+      .def("setLabel", &TextAxis::setLabel,
+           (arg("self"), arg("index"), arg("label")),
+           "Set the label at the given entry")
+      .def("label", &TextAxis::label, (arg("self"), arg("index")),
+           "Return the label at the given position")
+      .def("create", &createTextAxis, arg("length"),
+           return_internal_reference<>(),
            "Creates a new TextAxis of a specified length")
       .staticmethod("create");
 }

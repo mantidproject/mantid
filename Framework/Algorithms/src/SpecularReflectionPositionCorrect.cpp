@@ -1,12 +1,10 @@
 #include "MantidAlgorithms/SpecularReflectionPositionCorrect.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
-#include <boost/make_shared.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;

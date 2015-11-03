@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """A script for generating DataCite DOI's for Mantid releases, to be called by
 a Jenkins job during the release process.  When given a major, minor and patch
 release number along with username and password credentials, it will build a
@@ -60,7 +61,6 @@ import xml.etree.ElementTree as ET
 
 import subprocess
 import re
-import os
 from datetime import date
 
 import authors
@@ -69,7 +69,7 @@ import authors
 # two forms:
 # - 'OK'
 # - 'OK ([DOI])'
-SUCCESS_RESPONSE = '^OK( \((.+)\))?$'
+SUCCESS_RESPONSE = r'^OK( \((.+)\))?$'
 
 # Point all "deleted" DOIs to here:
 INVALID_URL = 'http://www.datacite.org/invalidDOI'
@@ -210,8 +210,10 @@ def _http_request(body, method, url, options):
     ]
 
     # Set how loud cURL should be while running.
-    if options.debug: args.append('--verbose')
-    else: args.append('--silent')
+    if options.debug:
+        args.append('--verbose')
+    else:
+        args.append('--silent')
 
     args.append(url)
 

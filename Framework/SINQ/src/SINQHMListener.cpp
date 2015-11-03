@@ -4,7 +4,6 @@
  *  Created on: Nov 14, 2012
  *      Author: mark.koennecke@psi.ch
  */
-#include <iostream>
 #include <sstream>
 
 #include "MantidAPI/LiveListenerFactory.h"
@@ -103,8 +102,9 @@ boost::shared_ptr<Workspace> SINQHMListener::extractData() {
 
   std::vector<MDHistoDimension_sptr> dimensions;
   for (int i = 0; i < rank; i++) {
+    Mantid::Geometry::GeneralFrame frame(dimNames[i], "");
     dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(
-        dimNames[i], dimNames[i], "", .0, coord_t(dim[i]), dim[i])));
+        dimNames[i], dimNames[i], frame, .0, coord_t(dim[i]), dim[i])));
   }
   MDHistoWorkspace_sptr ws(new MDHistoWorkspace(dimensions));
   ws->setTo(.0, .0, .0);

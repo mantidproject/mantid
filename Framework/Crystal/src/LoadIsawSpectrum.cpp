@@ -1,5 +1,4 @@
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidCrystal/LoadIsawSpectrum.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -69,38 +68,24 @@ void LoadIsawSpectrum::exec() {
   std::vector<std::vector<double>> spectra;
   std::vector<std::vector<double>> time;
   int iSpec = 0;
-  if (iSpec == 1) {
-    while (!infile.eof()) // To get you all the lines.
-    {
-      // Set up sizes. (HEIGHT x WIDTH)
-      spectra.resize(a + 1);
-      getline(infile, STRING); // Saves the line in STRING.
-      infile >> spec[0] >> spec[1] >> spec[2] >> spec[3] >> spec[4] >>
-          spec[5] >> spec[6] >> spec[7] >> spec[8] >> spec[9] >> spec[10];
-      for (int i = 0; i < 11; i++)
-        spectra[a].push_back(spec[i]);
-      a++;
-    }
-  } else {
-    for (int wi = 0; wi < 8; wi++)
-      getline(infile, STRING); // Saves the line in STRING.
-    while (!infile.eof())      // To get you all the lines.
-    {
-      time.resize(a + 1);
-      spectra.resize(a + 1);
-      getline(infile, STRING); // Saves the line in STRING.
-      if (infile.eof())
-        break;
-      std::stringstream ss(STRING);
-      if (STRING.find("Bank") == std::string::npos) {
-        double time0, spectra0;
-        ss >> time0 >> spectra0;
-        time[a].push_back(time0);
-        spectra[a].push_back(spectra0);
+  for (int wi = 0; wi < 8; wi++)
+    getline(infile, STRING); // Saves the line in STRING.
+  while (!infile.eof())      // To get you all the lines.
+  {
+    time.resize(a + 1);
+    spectra.resize(a + 1);
+    getline(infile, STRING); // Saves the line in STRING.
+    if (infile.eof())
+      break;
+    std::stringstream ss(STRING);
+    if (STRING.find("Bank") == std::string::npos) {
+      double time0, spectra0;
+      ss >> time0 >> spectra0;
+      time[a].push_back(time0);
+      spectra[a].push_back(spectra0);
 
-      } else {
-        a++;
-      }
+    } else {
+      a++;
     }
   }
   infile.close();

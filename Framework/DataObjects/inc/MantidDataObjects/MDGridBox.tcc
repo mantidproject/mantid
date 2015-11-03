@@ -40,10 +40,10 @@ namespace DataObjects {
  */
 TMDE(MDGridBox)::MDGridBox(
     BoxController *const bc, const uint32_t depth,
-    const std::vector<
-        Mantid::Geometry::MDDimensionExtents<coord_t>> &extentsVector)
-    : MDBoxBase<MDE, nd>(bc, depth, UNDEF_SIZET, extentsVector),
-      numBoxes(0), m_Children(), diagonalSquared(0.f), nPoints(0) {
+    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
+        extentsVector)
+    : MDBoxBase<MDE, nd>(bc, depth, UNDEF_SIZET, extentsVector), numBoxes(0),
+      m_Children(), diagonalSquared(0.f), nPoints(0) {
   initGridBox();
 }
 
@@ -55,8 +55,8 @@ TMDE(MDGridBox)::MDGridBox(
 */
 TMDE(MDGridBox)::MDGridBox(
     boost::shared_ptr<API::BoxController> &bc, const uint32_t depth,
-    const std::vector<
-        Mantid::Geometry::MDDimensionExtents<coord_t>> &extentsVector)
+    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
+        extentsVector)
     : MDBoxBase<MDE, nd>(bc.get(), depth, UNDEF_SIZET, extentsVector),
       numBoxes(0), m_Children(), diagonalSquared(0.f), nPoints(0) {
   initGridBox();
@@ -68,17 +68,16 @@ template <typename MDE, size_t nd> size_t MDGridBox<MDE, nd>::initGridBox() {
         "MDGridBox::ctor(): No BoxController specified in box.");
 
   // How many is it split?
-  // If we are at the top level and we have a specific top level split, then set it.
-  boost::optional<std::vector<size_t>> splitTopInto = this->m_BoxController->getSplitTopInto();
-  if (this->getDepth() == 0 && splitTopInto)
-  {
+  // If we are at the top level and we have a specific top level split, then set
+  // it.
+  boost::optional<std::vector<size_t>> splitTopInto =
+      this->m_BoxController->getSplitTopInto();
+  if (this->getDepth() == 0 && splitTopInto) {
     for (size_t d = 0; d < nd; d++)
       split[d] = splitTopInto.get()[d];
-  }
-  else
-  {
-   for (size_t d = 0; d < nd; d++)
-    split[d] = this->m_BoxController->getSplitInto(d);
+  } else {
+    for (size_t d = 0; d < nd; d++)
+      split[d] = this->m_BoxController->getSplitInto(d);
   }
 
   // Compute sizes etc.
@@ -94,10 +93,9 @@ template <typename MDE, size_t nd> size_t MDGridBox<MDE, nd>::initGridBox() {
  * @param box :: MDBox containing the events to split
  */
 TMDE(MDGridBox)::MDGridBox(MDBox<MDE, nd> *box)
-    : MDBoxBase<MDE, nd>(*box, box->getBoxController()), split(),
-      splitCumul(), m_SubBoxSize(), numBoxes(0), m_Children(),
-      diagonalSquared(0.f), nPoints(0)
-{
+    : MDBoxBase<MDE, nd>(*box, box->getBoxController()), split(), splitCumul(),
+      m_SubBoxSize(), numBoxes(0), m_Children(), diagonalSquared(0.f),
+      nPoints(0) {
   size_t totalSize = initGridBox();
 
   double ChildVol(1);
@@ -188,10 +186,10 @@ void MDGridBox<MDE, nd>::fillBoxShell(const size_t tot,
  */
 TMDE(MDGridBox)::MDGridBox(const MDGridBox<MDE, nd> &other,
                            Mantid::API::BoxController *const otherBC)
-    : MDBoxBase<MDE, nd>(other, otherBC), numBoxes(other.numBoxes), m_Children(),
-      diagonalSquared(other.diagonalSquared), nPoints(other.nPoints) {
-  for (size_t d = 0; d < nd; d++) 
-  {
+    : MDBoxBase<MDE, nd>(other, otherBC), numBoxes(other.numBoxes),
+      m_Children(), diagonalSquared(other.diagonalSquared),
+      nPoints(other.nPoints) {
+  for (size_t d = 0; d < nd; d++) {
     split[d] = other.split[d];
     splitCumul[d] = other.splitCumul[d];
     m_SubBoxSize[d] = other.m_SubBoxSize[d];
@@ -415,7 +413,7 @@ TMDE(std::vector<MDE> *MDGridBox)::getEventsCopy() {
  */
 TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
                                size_t maxDepth, bool leafOnly) {
- //Add this box, unless we only want the leaves
+  // Add this box, unless we only want the leaves
   if (!leafOnly)
     outBoxes.push_back(this);
 
@@ -1422,7 +1420,7 @@ TMDE(void MDGridBox)::integrateCylinder(
       std::vector<coord_t> coordTable;
       size_t nColumns;
       box->getEventsData(coordTable, nColumns);
-      if (nColumns > 0) {
+      if (nColumns > 0 && nd > 1) {
         size_t nEvents = coordTable.size() / nColumns;
         size_t skipCol = 2; // lean events
         if (nColumns == 7)
@@ -1464,9 +1462,10 @@ TMDE(void MDGridBox)::integrateCylinder(
       // Distance from center to the peak integration center
       coord_t out[nd];
       radiusTransform.apply(boxCenter, out);
-      if (out[0] < std::sqrt(diagonalSquared * 0.72 + radius * radius) &&
-          std::fabs(out[1]) <
-              std::sqrt(diagonalSquared * 0.72 + 0.25 * length * length)) {
+      if ((nd >= 1) && out[0] < std::sqrt(diagonalSquared * 0.72 + radius * radius) &&
+          (nd >= 2 &&
+           std::fabs(out[1]) <
+               std::sqrt(diagonalSquared * 0.72 + 0.25 * length * length))) {
         // If the center is closer than the size of the box, then it MIGHT be
         // touching.
         // (We multiply by 0.72 (about sqrt(2)) to look for half the diagonal).

@@ -2,13 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CropWorkspace.h"
-
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/TextAxis.h"
-#include "MantidKernel/VectorHelper.h"
-#include <iostream>
-#include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
@@ -71,6 +64,9 @@ void CropWorkspace::exec() {
   MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
   extract->setProperty("InputWorkspace", inputWorkspace);
 
+  MatrixWorkspace_sptr outputWorkspace = getProperty("OutputWorkspace");
+  extract->setProperty("OutputWorkspace", outputWorkspace);
+
   double xmin = getProperty("XMin");
   extract->setProperty("XMin", xmin);
 
@@ -85,8 +81,7 @@ void CropWorkspace::exec() {
 
   extract->execute();
 
-  MatrixWorkspace_sptr outputWorkspace =
-      extract->getProperty("OutputWorkspace");
+  outputWorkspace = extract->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", outputWorkspace);
 }
 

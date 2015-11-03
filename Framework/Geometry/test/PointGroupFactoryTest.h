@@ -67,14 +67,14 @@ public:
   void testGetAllPointGroupSymbolsCrystalSystems() {
     std::vector<std::string> cubic =
         PointGroupFactory::Instance().getPointGroupSymbols(
-            PointGroup::Monoclinic);
+            PointGroup::CrystalSystem::Monoclinic);
 
     TS_ASSERT_DIFFERS(findString(cubic, "monoclinicA"), cubic.end());
     TS_ASSERT_DIFFERS(findString(cubic, "monoclinicB"), cubic.end());
 
     std::vector<std::string> triclinic =
         PointGroupFactory::Instance().getPointGroupSymbols(
-            PointGroup::Triclinic);
+            PointGroup::CrystalSystem::Triclinic);
     TS_ASSERT_DIFFERS(findString(triclinic, "triclinic"), triclinic.end());
   }
 

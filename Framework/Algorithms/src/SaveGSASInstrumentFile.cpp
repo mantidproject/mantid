@@ -7,7 +7,6 @@
 #include "MantidAPI/TableRow.h"
 
 #include <stdio.h>
-#include <iomanip>
 
 using namespace Mantid;
 using namespace Mantid::API;

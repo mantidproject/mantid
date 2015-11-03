@@ -1,10 +1,11 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/FunctionTask.h"
@@ -12,6 +13,7 @@
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/UnitLabelTypes.h"
 #include "MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
@@ -363,9 +365,13 @@ void ConvertToDiffractionMDWorkspace::exec() {
   // -------------------------------------
 
   std::string dimensionNames[3] = {"Q_lab_x", "Q_lab_y", "Q_lab_z"};
-  std::string dimensionUnits = "Angstroms^-1";
   Mantid::Kernel::SpecialCoordinateSystem coordinateSystem =
       Mantid::Kernel::QLab;
+
+  // Setup the MDFrame
+  auto frameFactory = makeMDFrameFactoryChain();
+  Mantid::Geometry::MDFrame_uptr frame;
+
   if (OutputDimensions == "Q (sample frame)") {
     // Set the matrix based on goniometer angles
     mat = m_inWS->mutableRun().getGoniometerMatrix();
@@ -376,6 +382,10 @@ void ConvertToDiffractionMDWorkspace::exec() {
     dimensionNames[1] = "Q_sample_y";
     dimensionNames[2] = "Q_sample_z";
     coordinateSystem = Mantid::Kernel::QSample;
+    // Frame
+    MDFrameArgument frameArgQSample(QSample::QSampleName, "");
+    frame = frameFactory->create(frameArgQSample);
+
   } else if (OutputDimensions == "HKL") {
     // Set the matrix based on UB etc.
     Kernel::Matrix<double> ub =
@@ -391,8 +401,12 @@ void ConvertToDiffractionMDWorkspace::exec() {
     dimensionNames[0] = "H";
     dimensionNames[1] = "K";
     dimensionNames[2] = "L";
-    dimensionUnits = "lattice";
     coordinateSystem = Mantid::Kernel::HKL;
+    MDFrameArgument frameArgQLab(HKL::HKLName, Units::Symbol::RLU.ascii());
+    frame = frameFactory->create(frameArgQLab);
+  } else {
+    MDFrameArgument frameArgQLab(QLab::QLabName, "");
+    frame = frameFactory->create(frameArgQLab);
   }
   // Q in the lab frame is the default, so nothing special to do.
 
@@ -429,10 +443,10 @@ void ConvertToDiffractionMDWorkspace::exec() {
 
     // Give all the dimensions
     for (size_t d = 0; d < nd; d++) {
-      MDHistoDimension *dim = new MDHistoDimension(
-          dimensionNames[d], dimensionNames[d], dimensionUnits,
-          static_cast<coord_t>(extents[d * 2]),
-          static_cast<coord_t>(extents[d * 2 + 1]), 10);
+      MDHistoDimension *dim =
+          new MDHistoDimension(dimensionNames[d], dimensionNames[d], *frame,
+                               static_cast<coord_t>(extents[d * 2]),
+                               static_cast<coord_t>(extents[d * 2 + 1]), 10);
       ws->addDimension(MDHistoDimension_sptr(dim));
     }
     ws->initialize();

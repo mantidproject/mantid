@@ -2,21 +2,21 @@
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/LoadQKK.h"
+
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/UnitFactory.h"
+
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+
+#include "MantidKernel/UnitFactory.h"
 
 #include "MantidNexus/NexusClasses.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <Poco/File.h>
-#include <iostream>
 #include <fstream>
-#include <iomanip>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;

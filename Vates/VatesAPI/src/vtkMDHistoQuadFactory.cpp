@@ -92,6 +92,12 @@ namespace Mantid
         coord_t incrementX = (maxX - minX) / static_cast<coord_t>(nBinsX);
         coord_t incrementY = (maxY - minY) / static_cast<coord_t>(nBinsY);
 
+        boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(dynamic_cast<MDHistoWorkspaceIterator*>(createIteratorWithNormalization(m_normalizationOption, m_workspace.get())));
+        if (!iterator) {
+          throw std::runtime_error(
+              "Could not convert IMDIterator to a MDHistoWorkspaceIterator");
+        }
+
         const int imageSize = (nBinsX ) * (nBinsY );
         vtkPoints *points = vtkPoints::New();
         points->Allocate(static_cast<int>(imageSize));
@@ -119,8 +125,7 @@ namespace Mantid
 
         double progressFactor = 0.5/double(nBinsX);
         double progressOffset = 0.5;
-        boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(dynamic_cast<MDHistoWorkspaceIterator*>(createIteratorWithNormalization(m_normalizationOption, m_workspace.get())));
-    
+
         size_t index = 0;
         for (int i = 0; i < nBinsX; i++)
         {

@@ -72,6 +72,7 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
+  std::map<std::string, std::string> validateInputs();
 };
 
 } // namespace Algorithm

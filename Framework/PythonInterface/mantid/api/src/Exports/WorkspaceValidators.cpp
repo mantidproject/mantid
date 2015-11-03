@@ -1,4 +1,9 @@
-#include "MantidAPI/WorkspaceValidators.h" // They are all defined in one file so export them in one
+#include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/NumericAxisValidator.h"
+#include "MantidAPI/RawCountValidator.h"
+#include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidPythonInterface/kernel/TypedValidatorExporter.h"
 #include <boost/python/class.hpp>
 

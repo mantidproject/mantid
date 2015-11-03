@@ -157,10 +157,12 @@ double GSLVector::dot(const GSLVector &v) const {
 
 /// The << operator.
 std::ostream &operator<<(std::ostream &ostr, const GSLVector &v) {
+  std::ios::fmtflags fflags(ostr.flags());
   ostr << std::scientific << std::setprecision(6);
   for (size_t j = 0; j < v.size(); ++j) {
     ostr << std::setw(13) << v[j] << ' ';
   }
+  ostr.flags(fflags);
   return ostr;
 }
 

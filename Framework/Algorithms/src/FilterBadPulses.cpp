@@ -2,16 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FilterBadPulses.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/FileProperty.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
-
-#include <fstream>
-#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
 namespace Algorithms {

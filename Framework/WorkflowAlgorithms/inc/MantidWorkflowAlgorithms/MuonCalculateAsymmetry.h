@@ -49,12 +49,22 @@ private:
   void init();
   void exec();
 
-  /// Converts given workspace according to the OutputType
-  API::MatrixWorkspace_sptr convertWorkspace(API::MatrixWorkspace_sptr ws);
-
-  /// Merges two period workspaces according to PeriodOperation specified
-  API::MatrixWorkspace_sptr mergePeriods(API::MatrixWorkspace_sptr ws1,
-                                         API::MatrixWorkspace_sptr ws2);
+  // Calculates raw counts
+  API::MatrixWorkspace_sptr
+  calculateGroupCounts(const API::MatrixWorkspace_sptr &firstPeriodWS,
+                       const API::MatrixWorkspace_sptr &secondPeriodWS,
+                       int groupIndex, std::string op);
+  // Calculates asymmetry for specified spectrum
+  API::MatrixWorkspace_sptr
+  calculateGroupAsymmetry(const API::MatrixWorkspace_sptr &firstPeriodWS,
+                          const API::MatrixWorkspace_sptr &secondPeriodWS,
+                          int groupIndex, std::string op);
+  // Calculates asymmetry for a pair of spectra
+  API::MatrixWorkspace_sptr
+  calculatePairAsymmetry(const API::MatrixWorkspace_sptr &firstPeriodWS,
+                         const API::MatrixWorkspace_sptr &secondPeriodWS,
+                         int firstPairIndex, int secondPairIndex, double alpha,
+                         std::string op);
 };
 
 } // namespace WorkflowAlgorithms

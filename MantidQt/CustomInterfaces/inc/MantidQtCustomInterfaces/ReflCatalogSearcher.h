@@ -35,7 +35,7 @@ namespace MantidQt
     {
     public:
       virtual ~ReflCatalogSearcher() {};
-      Mantid::API::ITableWorkspace_sptr search(const std::string& text, const std::string& instrument);
+      Mantid::API::ITableWorkspace_sptr search(const std::string &text);
     };
   }
 }

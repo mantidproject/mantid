@@ -93,7 +93,7 @@ private:
   /// Vertex descriptor object for Graph
   typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
   /// map object of int to Graph Vertex descriptor
-  typedef boost::unordered_map<specid_t, Vertex> MapIV;
+  typedef std::unordered_map<specid_t, Vertex> MapIV;
 
   /// Construct the graph based on the given number of neighbours and the
   /// current instument and spectra-detector mapping

@@ -16,7 +16,6 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
 #include "MantidKernel/ConfigService.h"
-#include <iomanip>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;

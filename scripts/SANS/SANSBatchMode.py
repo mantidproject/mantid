@@ -178,7 +178,8 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                                                        original_settings = settings,
                                                        original_prop_man_settings = prop_man_settings)
         except (RunTimeError, ValueError) as e:
-            sanslog.warning("Error in Batchmode user files: Could not reset the specified user file %s. More info: %s" %(str(run['user_file']),str(e)))
+            sanslog.warning("Error in Batchmode user files: Could not reset the specified user file %s. More info: %s" %(
+                str(run['user_file']),str(e)))
 
         local_settings = copy.deepcopy(ReductionSingleton().reference())
         local_prop_man_settings = ReductionSingleton().settings.clone("TEMP_SETTINGS")
@@ -300,8 +301,8 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                     else:
                         exec(algor+"('" + save_names_dict[workspace_name] + "', workspace_name+ext)")
             # If we performed a zero-error correction, then we should get rid of the cloned workspaces
-            #if save_as_zero_error_free:
-            #    delete_cloned_workspaces(save_names_dict)
+            if save_as_zero_error_free:
+                delete_cloned_workspaces(save_names_dict)
 
         if plotresults == 1:
             for final_name in names:

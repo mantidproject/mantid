@@ -9,8 +9,9 @@
 Description
 -----------
 
-This algorithm removes the exponential time decay from a specified muon
-spectra. By default, all the spectra in a workspace will be corrected.
+This algorithm removes the exponential time decay from the specified muon
+spectra, leaving the rest unchanged. By default, all the spectra
+in a workspace will be corrected.
 
 The formula for removing the exponential decay is given by:
 

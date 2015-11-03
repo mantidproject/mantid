@@ -15,7 +15,6 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-#include "MantidDataHandling/LoadISISNexus.h"
 #include "MantidDataHandling/LoadISISNexus2.h"
 
 #include <cmath>
@@ -546,14 +545,6 @@ public:
                      "Always");
   }
 
-  // Test the stub remnant of version 1 of this algorithm - that it can be run
-  // without setting any properties, and throws an exception.
-  void testRemovedVersion1Throws() {
-    LoadISISNexus v1;
-    v1.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(v1.initialize());
-    TS_ASSERT_THROWS(v1.execute(), Exception::NotImplementedError)
-  }
   void testExecMonExcluded() {
     Mantid::API::FrameworkManager::Instance();
     LoadISISNexus2 ld;
@@ -734,6 +725,50 @@ public:
                      monPeriod2Run.getLogData().size());
     TS_ASSERT(monPeriod1Run.hasProperty("period 1"))
     TS_ASSERT(monPeriod2Run.hasProperty("period 2"))
+  }
+
+  std::string extractStringLog(const MatrixWorkspace &matrixWS,
+                               const std::string &logName) {
+    auto run = matrixWS.run();
+    PropertyWithValue<std::string> *log =
+        dynamic_cast<PropertyWithValue<std::string> *>(run.getLogData(logName));
+    return log->value();
+  }
+
+  void testExecExtractMeasurmentData() {
+    LoadISISNexus2 ld;
+    ld.setChild(true);
+    ld.initialize();
+    ld.setPropertyValue("Filename", "POLREF00014966.nxs");
+    ld.setPropertyValue("OutputWorkspace", "__unused_for_child");
+    ld.setPropertyValue("LoadMonitors", "Separate");
+    ld.execute();
+
+    Workspace_sptr detWS = ld.getProperty("OutputWorkspace");
+
+    auto groupWS = boost::dynamic_pointer_cast<WorkspaceGroup>(detWS);
+    TSM_ASSERT("Should have got back a workspace group", groupWS);
+
+    auto firstMatrixWS =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(0));
+
+    TS_ASSERT_EQUALS("34", extractStringLog(*firstMatrixWS, "measurement_id"));
+    TS_ASSERT_EQUALS("0",
+                     extractStringLog(*firstMatrixWS, "measurement_subid"));
+    TS_ASSERT_EQUALS("", extractStringLog(*firstMatrixWS, "measurement_label"));
+    TS_ASSERT_EQUALS("PNR",
+                     extractStringLog(*firstMatrixWS, "measurement_type"));
+
+    auto secondMatrixWS =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(1));
+
+    TS_ASSERT_EQUALS("34", extractStringLog(*secondMatrixWS, "measurement_id"));
+    TS_ASSERT_EQUALS("0",
+                     extractStringLog(*secondMatrixWS, "measurement_subid"));
+    TS_ASSERT_EQUALS("",
+                     extractStringLog(*secondMatrixWS, "measurement_label"));
+    TS_ASSERT_EQUALS("PNR",
+                     extractStringLog(*secondMatrixWS, "measurement_type"));
   }
 };
 

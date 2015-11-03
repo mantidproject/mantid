@@ -2,9 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Max.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/Progress.h"
+#include "MantidAPI/HistogramValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {

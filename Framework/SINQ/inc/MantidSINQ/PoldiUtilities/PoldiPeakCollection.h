@@ -50,7 +50,7 @@ public:
 
   PoldiPeakCollection(IntensityType intensityType = Maximum);
   PoldiPeakCollection(const DataObjects::TableWorkspace_sptr &workspace);
-  PoldiPeakCollection(const Geometry::CrystalStructure_sptr &crystalStructure,
+  PoldiPeakCollection(const Geometry::CrystalStructure &crystalStructure,
                       double dMin, double dMax);
 
   virtual ~PoldiPeakCollection() {}

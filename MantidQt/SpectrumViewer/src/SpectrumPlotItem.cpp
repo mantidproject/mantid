@@ -1,4 +1,3 @@
-#include <iostream>
 #include <QThread>
 #include "MantidQtSpectrumViewer/SpectrumPlotItem.h"
 

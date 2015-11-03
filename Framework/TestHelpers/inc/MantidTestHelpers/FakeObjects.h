@@ -18,19 +18,19 @@
  *      Author: Janik Zikovsky
  */
 
+#include <fstream>
+#include <map>
+#include <string>
+
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/INearestNeighbours.h"
-#include <iostream>
-#include <fstream>
-#include <map>
-#include <string>
+#include "MantidKernel/cow_ptr.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -118,7 +118,7 @@ public:
     m_axes[1] = new Mantid::API::SpectraAxis(this);
   }
   size_t size() const { return vec.size() * blocksize(); }
-  size_t blocksize() const { return vec[0].dataY().size(); }
+  size_t blocksize() const { return vec.empty() ? 0 : vec[0].dataY().size(); }
   ISpectrum *getSpectrum(const size_t index) { return &vec[index]; }
   const ISpectrum *getSpectrum(const size_t index) const {
     return &vec[index];

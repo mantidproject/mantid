@@ -34,6 +34,11 @@ PyObject *getCategories(IFunction &self) {
 // -- Set property overloads --
 // setProperty(index,value,explicit)
 typedef void (IFunction::*setParameterType1)(size_t, const double &value, bool);
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType1_Overloads,
                                        setParameter, 2, 3)
 // setProperty(index,value,explicit)
@@ -41,7 +46,9 @@ typedef void (IFunction::*setParameterType2)(const std::string &,
                                              const double &value, bool);
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType2_Overloads,
                                        setParameter, 2, 3)
-
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 ///@endcond
 }
 
@@ -51,82 +58,96 @@ void export_IFunction() {
 
   class_<IFunction, IFunctionAdapter, boost::noncopyable>(
       "IFunction", "Base class for all functions", no_init)
-      .def("name", &IFunction::name, "Return the name of the function")
+      .def("name", &IFunction::name, arg("self"),
+           "Return the name of the function")
 
-      .def("category", &IFunctionAdapter::category,
+      .def("category", &IFunctionAdapter::category, arg("self"),
            "Return a semi-colon(;) separated string for the categories this "
            "class should belong to. For sub-categories use a \\ separator")
 
-      .def("initialize", &IFunction::initialize,
+      .def("initialize", &IFunction::initialize, arg("self"),
            "Declares any parameters and attributes on the function")
 
-      .def("getCategories", &getCategories,
+      .def("getCategories", &getCategories, arg("self"),
            "Returns a list of the categories for an algorithm")
 
-      .def("nAttributes", &IFunction::nAttributes,
+      .def("nAttributes", &IFunction::nAttributes, arg("self"),
            "Return the number of attributes (non-fitting arguments)")
 
-      .def("attributeNames", &IFunction::getAttributeNames,
+      .def("attributeNames", &IFunction::getAttributeNames, arg("self"),
            "The names of all the attributes")
 
-      .def("nParams", &IFunction::nParams, "Return the number of parameters")
+      .def("nParams", &IFunction::nParams, arg("self"),
+           "Return the number of parameters")
 
-      .def("parameterName", &IFunction::parameterName,
+      .def("parameterName", &IFunction::parameterName, (arg("self"), arg("i")),
            "Return the name of the ith parameter")
 
       .def("paramDescription", &IFunction::parameterDescription,
-           "Return a description of the ith parameter")
+           (arg("self"), arg("i")), "Return a description of the ith parameter")
 
       .def("isExplicitlySet", &IFunction::isExplicitlySet,
+           (arg("self"), arg("i")),
            "Return whether the ith parameter needs to be explicitely set")
 
       .def("getParameterValue",
            (double (IFunction::*)(size_t) const) & IFunction::getParameter,
-           "Get the value of the ith parameter")
+           (arg("self"), arg("i")), "Get the value of the ith parameter")
 
       .def("getParameterValue",
            (double (IFunction::*)(const std::string &) const) &
                IFunction::getParameter,
-           "Get the value of the named parameter")
+           (arg("self"), arg("name")), "Get the value of the named parameter")
 
       .def("setParameter", (setParameterType1)&IFunction::setParameter,
-           setParameterType1_Overloads("Sets the value of the ith parameter"))
+           setParameterType1_Overloads(
+               (arg("self"), arg("i"), arg("value"), arg("explicitlySet")),
+               "Sets the value of the ith parameter"))
 
       .def("setParameter", (setParameterType2)&IFunction::setParameter,
-           setParameterType2_Overloads("Sets the value of the named parameter"))
+           setParameterType2_Overloads(
+               (arg("self"), arg("name"), arg("value"), arg("explicitlySet")),
+               "Sets the value of the named parameter"))
 
       .def("declareAttribute", &IFunctionAdapter::declareAttribute,
+           (arg("self"), arg("name"), arg("default_value")),
            "Declare an attribute with an initial value")
 
       .def("getAttributeValue",
            (PyObject * (IFunctionAdapter::*)(const std::string &)) &
                IFunctionAdapter::getAttributeValue,
+           (arg("self"), arg("name")),
            "Return the value of the named attribute")
 
       .def("declareParameter", &IFunctionAdapter::declareFitParameter,
+           (arg("self"), arg("name"), arg("init_value"), arg("description")),
            "Declare a fitting parameter settings its default value & "
            "description")
 
       .def("declareParameter", &IFunctionAdapter::declareFitParameterNoDescr,
+           (arg("self"), arg("name"), arg("init_value")),
            "Declare a fitting parameter settings its default value")
 
       .def("declareParameter", &IFunctionAdapter::declareFitParameterZeroInit,
+           (arg("self"), arg("name")),
            "Declare a fitting parameter settings its default value to 0.0")
 
       //-- Deprecated functions that have the wrong names --
-      .def("categories", &getCategories,
+      .def("categories", &getCategories, arg("self"),
            "Returns a list of the categories for an algorithm")
-      .def("numParams", &IFunction::nParams, "Return the number of parameters")
-      .def("getParamName", &IFunction::parameterName,
+      .def("numParams", &IFunction::nParams, arg("self"),
+           "Return the number of parameters")
+      .def("getParamName", &IFunction::parameterName, (arg("self"), arg("i")),
            "Return the name of the ith parameter")
       .def("getParamDescr", &IFunction::parameterDescription,
-           "Return a description of the ith parameter")
+           (arg("self"), arg("i")), "Return a description of the ith parameter")
       .def("getParamExplicit", &IFunction::isExplicitlySet,
+           (arg("self"), arg("i")),
            "Return whether the ith parameter needs to be explicitely set")
       .def("getParamValue",
            (double (IFunction::*)(std::size_t) const) & IFunction::getParameter,
-           "Get the value of the ith parameter")
+           (arg("self"), arg("i")), "Get the value of the ith parameter")
       //-- Python special methods --
-      .def("__repr__", &IFunction::asString,
+      .def("__repr__", &IFunction::asString, arg("self"),
            "Return a string representation of the function");
 }

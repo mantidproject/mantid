@@ -1,5 +1,4 @@
 #include <cfloat>
-#include <iostream>
 
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidKernel/ConfigService.h"

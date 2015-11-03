@@ -11,7 +11,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include <cxxtest/TestSuite.h>
-#include <iostream>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::API;

@@ -68,7 +68,6 @@
 #include <locale>
 #include <set>
 #include <fstream>
-#include <iostream>
 #include <sstream>
 
 #include <boost/tokenizer.hpp>
@@ -617,6 +616,9 @@ MultiLayer* MantidUI::plotMDList(const QStringList& wsNames, const int plotAxis,
       data->setPreviewMode(false);
       data->setPlotAxisChoice(plotAxis);
       data->setNormalization(normalization);
+
+      g->setNormalizableMD(true);
+      g->setNormalizationMD(normalization);
 
       // Using information from the first graph
       if( i == 0 && isGraphNew )
@@ -3129,7 +3131,8 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
     if (ask.clickedButton() != confirmButton) return NULL;
   }
   // Force waterfall option to false if only 1 curve
-  if(toPlot.size() == 1) waterfallPlot = false;
+  if ((NULL == plotWindow || clearWindow == true) && toPlot.size() == 1)
+    waterfallPlot = false;
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 

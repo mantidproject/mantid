@@ -61,7 +61,7 @@ Output:
 
 .. testoutput:: ExUnwrapSNS
 
-    Input 30.0
+    Input 7.0
     Output 0.0
 
 .. categories::

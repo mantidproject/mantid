@@ -11,8 +11,6 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidAPI/FrameworkManager.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;

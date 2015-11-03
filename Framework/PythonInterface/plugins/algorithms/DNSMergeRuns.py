@@ -84,12 +84,10 @@ class DNSMergeRuns(PythonAlgorithm):
         self._same_wavelength()
 
         # algorithm must warn if some properties_to_compare are different
-        ws1 = api.AnalysisDataService.retrieve(self.workspace_names[0])
-        run1 = ws1.getRun()
-        for wsname in self.workspace_names[1:]:
-            wks = api.AnalysisDataService.retrieve(wsname)
-            run = wks.getRun()
-            mlzutils.compare_properties(run1, run, self.properties_to_compare, self.log())
+        result = api.CompareSampleLogs(self.workspace_names, self.properties_to_compare, 5e-3)
+        if len(result) > 0:
+            self.log().warning("Sample logs " + result + " do not match!")
+
         return True
 
     def _same_wavelength(self):

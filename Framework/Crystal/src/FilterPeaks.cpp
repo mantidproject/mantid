@@ -98,6 +98,8 @@ void FilterPeaks::exec() {
     filterFunction = &intensity;
   else if (FilterVariable == "Signal/Noise")
     filterFunction = &SN;
+  else
+    throw std::invalid_argument("Unknown FilterVariable: " + FilterVariable);
 
   const double FilterValue = getProperty("FilterValue");
   const std::string Operator = getProperty("Operator");

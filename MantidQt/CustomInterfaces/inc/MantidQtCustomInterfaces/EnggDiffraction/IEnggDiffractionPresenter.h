@@ -38,16 +38,19 @@ public:
   /// These are user actions, triggered from the (passive) view, that need
   /// handling by the presenter
   enum Notification {
-    Start,                 ///< Start and setup interface
-    LoadExistingCalib,     ///< Load a calibration already availble on disk
-    CalcCalib,             ///< Calculate a (new) calibration
-    FocusRun,              ///< Focus one or more run files
-    FocusCropped,          ///< Focus one or more run files, cropped variant
-    FocusTexture,          ///< Focus one or more run files, texture variant
-    ResetFocus,            ///< Re-set / clear all focus inputs and options
-    LogMsg,                ///< need to send a message to the Mantid log system
-    InstrumentChange,      ///< Instrument selection updated
-    ShutDown               ///< closing the interface
+    Start,             ///< Start and setup interface
+    LoadExistingCalib, ///< Load a calibration already availble on disk
+    CalcCalib,         ///< Calculate a (new) calibration
+    FocusRun,          ///< Focus one or more run files
+    FocusCropped,      ///< Focus one or more run files, cropped variant
+    FocusTexture,      ///< Focus one or more run files, texture variant
+    ResetFocus,        ///< Re-set / clear all focus inputs and options
+    RebinTime,         ///< From event to histo, with a time bin
+    RebinMultiperiod,  ///< From event to histo, multiperiod event data
+    LogMsg,            ///< need to send a message to the Mantid log system
+    InstrumentChange,  ///< Instrument selection updated
+    RBNumberChange,    ///< RBNumber filled-in/changed
+    ShutDown           ///< closing the interface
   };
 
   /**

@@ -81,6 +81,9 @@ public:
       TS_ASSERT_DELTA(dim->getMinimum(), 0, 1e-5);
       TS_ASSERT_DELTA(dim->getMaximum(), 10, 1e-5);
       TS_ASSERT_EQUALS(dim->getUnits(), "pixel");
+      TSM_ASSERT_EQUALS("Should be convertible to a General frame",
+                        Mantid::Geometry::GeneralFrame::GeneralFrameName,
+                        dim->getMDFrame().name());
     }
     IMDDimension_const_sptr dim = ws->getDimension(2);
     TS_ASSERT_EQUALS(dim->getName(), "dSpacing");
@@ -88,6 +91,9 @@ public:
     TS_ASSERT_DELTA(dim->getMinimum(), 0, 1e-5);
     TS_ASSERT_DELTA(dim->getMaximum(), 100, 1e-5);
     TS_ASSERT_EQUALS(dim->getUnits(), "Angstrom");
+    TSM_ASSERT_EQUALS("Should be convertible to a General frame",
+                      Mantid::Geometry::GeneralFrame::GeneralFrameName,
+                      dim->getMDFrame().name());
 
     return ws;
   }

@@ -1,6 +1,5 @@
 #include "MantidWorkflowAlgorithms/DgsProcessDetectorVanadium.h"
 #include "MantidAPI/PropertyManagerDataService.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"

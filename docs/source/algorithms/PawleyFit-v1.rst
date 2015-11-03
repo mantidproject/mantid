@@ -51,7 +51,7 @@ For the usage example there is a calculated, theoretical diffraction pattern (in
 
     # Run the actual fit with lattice parameters that are slightly off
     si_fitted, si_cell, si_params, chi_square = PawleyFit(si_spectrum,
-                          CrystalSystem='Cubic',
+                          LatticeSystem='Cubic',
                           InitialCell='5.436 5.436 5.436',
                           PeakTable=si_peaks_indexed)
 

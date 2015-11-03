@@ -5,7 +5,6 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -14,10 +13,8 @@
 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <Poco/File.h>
-#include <iostream>
 #include <fstream>
 #include <sstream>
-#include <iomanip>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
@@ -35,7 +32,8 @@ DECLARE_FILELOADER_ALGORITHM(LoadGSS)
  * be used
   */
 int LoadGSS::confidence(Kernel::FileDescriptor &descriptor) const {
-  if (!descriptor.isAscii())
+
+  if (!descriptor.isAscii() || descriptor.extension() == ".tar")
     return 0;
 
   std::string str;

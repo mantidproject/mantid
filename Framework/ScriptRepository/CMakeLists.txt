@@ -35,6 +35,6 @@ set ( LIBS ${MANTIDLIBS} )
 
 include_directories(inc)
 
-target_link_libraries(ScriptRepository LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${LIBS})
+target_link_libraries(ScriptRepository LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${LIBS} ${JSONCPP_LIBRARIES})
 
 install (TARGETS ScriptRepository ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )

@@ -1,6 +1,6 @@
-from base import AlgorithmBaseDirective
+#pylint: disable=invalid-name
+from mantiddoc.directives.base import AlgorithmBaseDirective
 import string
-
 
 class PropertiesDirective(AlgorithmBaseDirective):
 
@@ -33,14 +33,14 @@ class PropertiesDirective(AlgorithmBaseDirective):
             header = ('Name', 'Default', 'Description')
 
             for i in xrange(ifunc.numParams()):
-                properties.append((
-                                  ifunc.parameterName(i),
-                                  str(ifunc.getParameterValue(i)),
-                                  ifunc.paramDescription(i)
-                                  ))
+                properties.append((ifunc.parameterName(i),
+                                   str(ifunc.getParameterValue(i)),
+                                   ifunc.paramDescription(i)
+                ))
             self.add_rst(self.make_header("Properties (fitting parameters)"))
         else: # this is an Algorithm
-            alg = self.create_mantid_algorithm(self.algorithm_name(), self.algorithm_version())
+            alg = self.create_mantid_algorithm(self.algorithm_name(),
+                                               self.algorithm_version())
             alg_properties = alg.getProperties()
             if len(alg_properties) == 0:
                 return False
@@ -100,7 +100,7 @@ class PropertiesDirective(AlgorithmBaseDirective):
         # Added 10 to the length to ensure if table_content is 0 that
         # the table is still displayed.
         col_sizes = [max( (len(row[i] * 10) + 10) for row in table_content)
-                for i in range(len(header_content))]
+                     for i in range(len(header_content))]
 
         # Use the column widths as a means to formatting columns.
         formatter = ' '.join('{%d:<%d}' % (index,col) for index, col in enumerate(col_sizes))
@@ -138,7 +138,7 @@ class PropertiesDirective(AlgorithmBaseDirective):
         if (direction_string[prop.direction] == "Output") and \
            (not isinstance(prop, IWorkspaceProperty)):
             default_prop = ""
-        elif (prop.isValid == ""):
+        elif prop.isValid == "":
             default_prop = self._create_property_default_string(prop)
         else:
             default_prop = "*Mandatory*"
@@ -161,14 +161,14 @@ class PropertiesDirective(AlgorithmBaseDirective):
         # Convert to int, then float, then any string
         try:
             val = int(default)
-            if (val >= 2147483647):
+            if val >= 2147483647:
                 defaultstr = "*Optional*"
             else:
                 defaultstr = str(val)
         except:
             try:
                 val = float(default)
-                if (val >= 1e+307):
+                if val >= 1e+307:
                     defaultstr = "*Optional*"
                 else:
                     defaultstr = str(val)
@@ -214,7 +214,7 @@ class PropertiesDirective(AlgorithmBaseDirective):
 
         allowedValueString = str(prop.allowedValues)
         # 4 allows for ['']
-        if len(allowedValueString) > 4: 
+        if len(allowedValueString) > 4:
             ##make sure the last sentence ended with a full stop (or equivalent)
             if (not desc.rstrip().endswith("."))      \
                 and (not desc.rstrip().endswith("!")) \
@@ -227,7 +227,7 @@ class PropertiesDirective(AlgorithmBaseDirective):
                 if (not item.startswith(".")) and (not item[-4:].startswith(".")):
                     isFileExts = False
                     break
-                    
+
             prefixString = " Allowed values: "
             if isFileExts:
                 prefixString = " Allowed extensions: "

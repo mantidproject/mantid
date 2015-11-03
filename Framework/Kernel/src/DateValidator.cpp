@@ -28,6 +28,10 @@ struct tm getTimeValue(const std::string &sDate, std::string &error) {
   timeinfo.tm_wday = 0;
   timeinfo.tm_yday = 0;
   timeinfo.tm_isdst = -1;
+#ifndef _WIN32
+  timeinfo.tm_gmtoff = 0;
+  timeinfo.tm_zone = 0;
+#endif
 
   std::basic_string<char>::size_type index, off = 0;
   int day, month, year;

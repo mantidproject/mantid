@@ -1,3 +1,4 @@
+#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 #########################################################
 # This module contains utility functions common to the
@@ -975,12 +976,19 @@ def is_convertible_to_float(input_value):
     '''
     Check if the input can be converted to float
     @param input_value :: a general input
+    @returns true if input can be converted to float else false
     '''
-    try:
-        dummy_converted = float(input_value)
-    except ValueError:
-        return False
-    return True
+    is_convertible = True
+    if not input_value:
+        is_convertible = False
+    else:
+        try:
+            dummy_converted = float(input_value)
+            is_convertible = True
+        except ValueError:
+            is_convertible = False
+    return is_convertible
+
 
 def is_valid_xml_file_list(input_value):
     '''
@@ -1132,6 +1140,104 @@ def is_1D_workspace(workspace):
     else:
         return False
 
+def meter_2_millimeter(num):
+    '''
+    Converts from m to mm
+    @param float in m
+    @returns float in mm
+    '''
+    return num*1000.
+
+def millimeter_2_meter(num):
+    '''
+    Converts from mm to m
+    @param float in mm
+    @returns float in m
+    '''
+    return num/1000.
+
+def correct_q_resolution_for_can(original_workspace, can_workspace, subtracted_workspace):
+    '''
+    We need to transfer the DX error values from the original workspaces to the subtracted
+    workspace. Richard wants us to ignore potential DX values for the CAN workspace (they
+    would be very small any way). The Q Resolution functionality only exists currently
+    for 1D, ie when only one spectrum is present.
+    @param original_workspace: the original workspace
+    @param can_workspace: the can workspace
+    @param subtracted_workspace: the subtracted workspace
+    '''
+    dummy1 = can_workspace
+    if original_workspace.getNumberHistograms() == 1:
+        subtracted_workspace.setDx(0, original_workspace.dataDx(0))
+
+def correct_q_resolution_for_merged(count_ws_front, count_ws_rear,
+                                    output_ws, scale):
+    '''
+    We need to transfer the DX error values from the original workspaces to the merged worksapce.
+    We have:
+    C(Q) = Sum_all_lambda_for_particular_Q(Counts(lambda))
+    weightedQRes(Q) = Sum_all_lambda_for_particular_Q(Counts(lambda)* qRes(lambda))
+    ResQ(Q) = weightedQRes(Q)/C(Q)
+    Richard suggested:
+    ResQMerged(Q) = (weightedQRes_FRONT(Q)*scale + weightedQRes_REAR(Q))/
+                    (C_FRONT(Q)*scale + C_REAR(Q))
+    Note that we drop the shift here.
+    The Q Resolution functionality only exists currently
+    for 1D, ie when only one spectrum is present.
+    @param count_ws_front: the front counts
+    @param count_ws_rear: the rear counts
+    @param output_ws: the output workspace
+    '''
+    def divide_q_resolution_by_counts(q_res, counts):
+        # We are dividing DX by Y. Note that len(DX) = len(Y) + 1
+        # Unfortunately, we need some knowlege about the Q1D algorithm here.
+        # The two last entries of DX are duplicate in Q1D and this is how we
+        # treat it here.
+        q_res_buffer = np.divide(q_res[0:-1],counts)
+        q_res_buffer = np.append(q_res_buffer, q_res_buffer[-1])
+        return q_res_buffer
+
+    def multiply_q_resolution_by_counts(q_res, counts):
+         # We are dividing DX by Y. Note that len(DX) = len(Y) + 1
+        # Unfortunately, we need some knowlege about the Q1D algorithm here.
+        # The two last entries of DX are duplicate in Q1D and this is how we
+        # treat it here.
+        q_res_buffer = np.multiply(q_res[0:-1],counts)
+        q_res_buffer = np.append(q_res_buffer, q_res_buffer[-1])
+        return q_res_buffer
+
+    if count_ws_rear.getNumberHistograms() != 1:
+        return
+
+    # We require both count workspaces to contain the DX value
+    if not count_ws_rear.hasDx(0) or not count_ws_front.hasDx(0):
+        return
+
+    q_resolution_front = count_ws_front.readDx(0)
+    q_resolution_rear = count_ws_rear.readDx(0)
+    counts_front = count_ws_front.readY(0)
+    counts_rear = count_ws_rear.readY(0)
+
+    # We need to make sure that the workspaces match in length
+    if ((len(q_resolution_front) != len(q_resolution_rear)) or
+       (len(counts_front) != len(counts_rear))):
+        return
+
+    # Get everything for the FRONT detector
+    q_res_front_norm_free = multiply_q_resolution_by_counts(q_resolution_front, counts_front)
+    q_res_front_norm_free = q_res_front_norm_free*scale
+    counts_front = counts_front*scale
+
+    # Get everything for the REAR detector
+    q_res_rear_norm_free = multiply_q_resolution_by_counts(q_resolution_rear, counts_rear)
+
+    # Now add and divide
+    new_q_res= np.add(q_res_front_norm_free, q_res_rear_norm_free)
+    new_counts = np.add(counts_front,counts_rear)
+    q_resolution = divide_q_resolution_by_counts(new_q_res,new_counts)
+
+    # Set the dx error
+    output_ws.setDx(0, q_resolution)
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################

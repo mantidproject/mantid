@@ -405,7 +405,7 @@ void ISISDiagnostics::updatePreviewPlot() {
   if (!m_uiForm.dsInputFiles->isValid())
     return;
 
-  QString suffix = getInstrumentConfiguration()->getAnalyserName() +
+  QString suffix = "_" + getInstrumentConfiguration()->getAnalyserName() +
                    getInstrumentConfiguration()->getReflectionName() + "_slice";
   QString filenames = m_uiForm.dsInputFiles->getFilenames().join(",");
 

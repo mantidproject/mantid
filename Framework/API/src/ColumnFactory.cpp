@@ -1,4 +1,3 @@
-#include <iostream>
 #include <sstream>
 #include "MantidAPI/ColumnFactory.h"
 #include "MantidAPI/Column.h"

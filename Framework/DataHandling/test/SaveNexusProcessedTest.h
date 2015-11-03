@@ -62,59 +62,32 @@ public:
   }
 
   void testExec() {
+    auto useXErrors = false;
+    std::string outputFile = "SaveNexusProcessedTest_testExec.nxs";
+    outputFile = doExec(outputFile, useXErrors);
 
-    SaveNexusProcessed algToBeTested;
-    if (!algToBeTested.isInitialized())
-      algToBeTested.initialize();
-
-    // Should fail because mandatory parameter has not been set
-    TS_ASSERT_THROWS(algToBeTested.execute(), std::runtime_error);
-
-    // create dummy 2D-workspace
-    Workspace2D_sptr localWorkspace2D =
-        boost::dynamic_pointer_cast<Workspace2D>(
-            WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
-    localWorkspace2D->getAxis(0)->unit() =
-        UnitFactory::Instance().create("TOF");
-    double d = 0.0;
-    for (int i = 0; i < 10; ++i, d += 0.1) {
-      localWorkspace2D->dataX(0)[i] = d;
-      localWorkspace2D->dataY(0)[i] = d;
-      localWorkspace2D->dataE(0)[i] = d;
-    }
-
-    AnalysisDataService::Instance().addOrReplace("testSpace", localWorkspace2D);
-
-    // Now set it...
-    // specify name of file to save workspace to
-    algToBeTested.setPropertyValue("InputWorkspace", "testSpace");
-    outputFile = "SaveNexusProcessedTest_testExec.nxs";
-    // entryName = "test";
-    dataName = "spectra";
-    title = "A simple workspace saved in Processed Nexus format";
-    TS_ASSERT_THROWS_NOTHING(
-        algToBeTested.setPropertyValue("Filename", outputFile));
-    outputFile = algToBeTested.getPropertyValue("Filename");
-    // algToBeTested.setPropertyValue("EntryName", entryName);
-    algToBeTested.setPropertyValue("Title", title);
-    if (Poco::File(outputFile).exists())
-      Poco::File(outputFile).remove();
-
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING(result =
-                                 algToBeTested.getPropertyValue("Filename"));
-    TS_ASSERT(!result.compare(outputFile));
-    // TS_ASSERT_THROWS_NOTHING( result =
-    // algToBeTested.getPropertyValue("EntryName") )
-    // TS_ASSERT( ! result.compare(entryName));
-
-    // changed so that 1D workspaces are no longer written.
-    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
-    TS_ASSERT(algToBeTested.isExecuted());
-
+    // Clean up
     if (clearfiles)
       Poco::File(outputFile).remove();
+    AnalysisDataService::Instance().remove("testSpace");
+  }
 
+  void testExecWithXErrors() {
+    auto useXErrors = true;
+    std::string outputFile = "SaveNexusProcessedTest_testExec.nxs";
+    outputFile = doExec(outputFile, useXErrors);
+
+    // Assert XError correctness
+    NeXus::File savedNexus(outputFile);
+    savedNexus.openGroup("mantid_workspace_1", "NXentry");
+    savedNexus.openGroup("workspace", "NXdata");
+
+    TSM_ASSERT_THROWS_NOTHING("Should find xerrors entry",
+                              savedNexus.openData("xerrors"));
+    savedNexus.close();
+    // Clean up
+    if (clearfiles)
+      Poco::File(outputFile).remove();
     AnalysisDataService::Instance().remove("testSpace");
   }
 
@@ -816,6 +789,62 @@ private:
           name + ", item #" + boost::lexical_cast<std::string>(i);
       TSM_ASSERT_EQUALS(mess, data[i], expectedData[i]);
     };
+  }
+
+  std::string
+  doExec(std::string outputFile = "SaveNexusProcessedTest_testExec.nxs",
+         bool useXErrors = false) {
+    SaveNexusProcessed algToBeTested;
+    if (!algToBeTested.isInitialized())
+      algToBeTested.initialize();
+
+    // Should fail because mandatory parameter has not been set
+    TS_ASSERT_THROWS(algToBeTested.execute(), std::runtime_error);
+
+    // create dummy 2D-workspace
+    Workspace2D_sptr localWorkspace2D =
+        boost::dynamic_pointer_cast<Workspace2D>(
+            WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
+    localWorkspace2D->getAxis(0)->unit() =
+        UnitFactory::Instance().create("TOF");
+    double d = 0.0;
+    for (int i = 0; i < 10; ++i, d += 0.1) {
+      localWorkspace2D->dataX(0)[i] = d;
+      localWorkspace2D->dataY(0)[i] = d;
+      localWorkspace2D->dataE(0)[i] = d;
+      if (useXErrors) {
+        localWorkspace2D->dataDx(0)[i] = d;
+      }
+    }
+
+    AnalysisDataService::Instance().addOrReplace("testSpace", localWorkspace2D);
+
+    // Now set it...
+    // specify name of file to save workspace to
+    algToBeTested.setPropertyValue("InputWorkspace", "testSpace");
+    // entryName = "test";
+    dataName = "spectra";
+    title = "A simple workspace saved in Processed Nexus format";
+    TS_ASSERT_THROWS_NOTHING(
+        algToBeTested.setPropertyValue("Filename", outputFile));
+    outputFile = algToBeTested.getPropertyValue("Filename");
+    // algToBeTested.setPropertyValue("EntryName", entryName);
+    algToBeTested.setPropertyValue("Title", title);
+    if (Poco::File(outputFile).exists())
+      Poco::File(outputFile).remove();
+
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING(result =
+                                 algToBeTested.getPropertyValue("Filename"));
+    TS_ASSERT(!result.compare(outputFile));
+    // TS_ASSERT_THROWS_NOTHING( result =
+    // algToBeTested.getPropertyValue("EntryName") )
+    // TS_ASSERT( ! result.compare(entryName));
+
+    // changed so that 1D workspaces are no longer written.
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
+    TS_ASSERT(algToBeTested.isExecuted());
+    return outputFile;
   }
 
   std::string outputFile;

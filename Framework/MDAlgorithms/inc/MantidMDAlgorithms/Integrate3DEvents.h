@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <boost/shared_ptr.hpp>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
 
@@ -53,9 +53,9 @@ namespace MDAlgorithms {
                  <http://doxygen.mantidproject.org>
  */
 
-typedef boost::unordered_map<
+typedef std::unordered_map<
     int64_t, std::vector<std::pair<double, Mantid::Kernel::V3D>>> EventListMap;
-typedef boost::unordered_map<int64_t, Mantid::Kernel::V3D> PeakQMap;
+typedef std::unordered_map<int64_t, Mantid::Kernel::V3D> PeakQMap;
 
 class DLLExport Integrate3DEvents {
 public:
@@ -127,10 +127,10 @@ private:
   double detectorQ(std::vector<Kernel::V3D> E1Vec,
                    const Mantid::Kernel::V3D QLabFrame, std::vector<double> &r);
   // Private data members
-  PeakQMap peak_qs;         // hashtable with peak Q-vectors
-  EventListMap event_lists; // hashtable with lists of events for each peak
-  Kernel::DblMatrix UBinv;  // matrix mapping from Q to h,k,l
-  double radius;            // size of sphere to use for events around a peak
+  PeakQMap m_peak_qs;         // hashtable with peak Q-vectors
+  EventListMap m_event_lists; // hashtable with lists of events for each peak
+  Kernel::DblMatrix m_UBinv;  // matrix mapping from Q to h,k,l
+  double m_radius;            // size of sphere to use for events around a peak
 };
 
 } // namespace MDAlgorithms

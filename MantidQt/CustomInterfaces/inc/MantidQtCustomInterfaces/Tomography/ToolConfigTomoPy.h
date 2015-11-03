@@ -14,7 +14,7 @@ Third party tomographic reconstruction tool configuration class
 specialized for TomoPy (Python + C++):
 https://www1.aps.anl.gov/Science/Scientific-Software/TomoPy
 
-Copyright &copy; 2014,205 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -37,14 +37,14 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport ToolConfigTomoPy : public TomoRecToolConfig {
 public:
-  ToolConfigTomoPy() { }
+  ToolConfigTomoPy();
 
   ToolConfigTomoPy(const std::string &runnable, const std::string &pathOut,
                    const std::string &pathDark, const std::string &pathOpen,
                    const std::string &pathSample, double centerRot,
                    double angleMin, double angleMax);
 
-  ~ToolConfigTomoPy() { }
+  ~ToolConfigTomoPy() {}
 
 protected:
   virtual std::string makeCmdLineOptions() const;

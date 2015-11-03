@@ -25,13 +25,15 @@ void setLabelFromStdString(Label &self, const std::string &caption,
 // have additional functionality over the base class
 void export_Label() {
   class_<Label, bases<Unit>, boost::noncopyable>("Label", no_init)
-      .def("setLabel", &setLabelFromStdString, (arg("caption"), arg("label")),
+      .def("setLabel", &setLabelFromStdString,
+           (arg("self"), arg("caption"), arg("label")),
            "Set the caption (e.g.Temperature) & label (K) on the unit")
 
       .def("setLabel",
            (void (Label::*)(const std::string &, const UnitLabel &)) &
                Label::setLabel,
-           (arg("caption"), arg("label")), "Set the caption (e.g.Temperature) "
-                                           "& label (K) on the unit, See the "
-                                           "UnitLabel class");
+           (arg("self"), arg("caption"), arg("label")),
+           "Set the caption (e.g.Temperature) "
+           "& label (K) on the unit, See the "
+           "UnitLabel class");
 }

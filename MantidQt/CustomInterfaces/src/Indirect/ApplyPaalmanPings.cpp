@@ -145,6 +145,7 @@ void ApplyPaalmanPings::run() {
         switch (result) {
         case QMessageBox::YesToAll:
           interpolateAll = true;
+          //fall through
         case QMessageBox::Yes:
           addInterpolationStep(factorWs, absCorProps["SampleWorkspace"]);
           break;
@@ -174,9 +175,36 @@ void ApplyPaalmanPings::run() {
   case 1:
     correctionType = "cyl";
     break;
+  case 2:
+    correctionType = "anl";
+	break;
   }
-  const QString outputWsName =
-      sampleWsName.left(nameCutIndex) + +"_" + correctionType + "_Corrected";
+
+  QString outputWsName = sampleWsName.left(nameCutIndex);
+  // Using corrections
+  if (m_uiForm.ckUseCorrections->isChecked()) {
+    outputWsName += "_" + correctionType + "_Corrected";
+  } else {
+    outputWsName += "_Subtracted";
+  }
+
+  // Using container
+  if (m_uiForm.ckUseCan->isChecked()) {
+    auto containerWsName = m_uiForm.dsContainer->getCurrentDataName();
+    MatrixWorkspace_sptr containerWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            containerWsName.toStdString());
+    auto run = containerWs->run();
+    if (run.hasProperty("run_number")) {
+      outputWsName +=
+          "_" + QString::fromStdString(run.getProperty("run_number")->value());
+    } else {
+      auto canCutIndex = containerWsName.indexOf("_");
+      outputWsName += "_" + containerWsName.left(canCutIndex);
+    }
+  }
+
+  outputWsName += "_red";
 
   applyCorrAlg->setProperty("OutputWorkspace", outputWsName.toStdString());
 

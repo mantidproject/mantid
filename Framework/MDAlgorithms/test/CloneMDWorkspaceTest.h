@@ -190,11 +190,12 @@ public:
   void test_MDHistoWorkspace_2D_uneven_bins() {
     // Make the number of bins uneven in both dimensions
     Mantid::DataObjects::MDHistoWorkspace *ws = NULL;
+    Mantid::Geometry::GeneralFrame frame("General Frame", "m");
     ws = new Mantid::DataObjects::MDHistoWorkspace(
         MDHistoDimension_sptr(
-            new MDHistoDimension("x", "x", "m", 0.0, 10.0, 50)),
+            new MDHistoDimension("x", "x", frame, 0.0, 10.0, 50)),
         MDHistoDimension_sptr(
-            new MDHistoDimension("y", "y", "m", 0.0, 10.0, 100)));
+            new MDHistoDimension("y", "y", frame, 0.0, 10.0, 100)));
     Mantid::DataObjects::MDHistoWorkspace_sptr ws1(ws);
     ws1->setTo(1.234, 5.678, 1.0);
     do_test_MDHisto(ws1);

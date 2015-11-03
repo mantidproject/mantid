@@ -25,17 +25,17 @@ void export_IMDWorkspace() {
   // EventWorkspace class
   class_<IMDWorkspace, bases<Workspace, MDGeometry>, boost::noncopyable>(
       "IMDWorkspace", no_init)
-      .def("getNPoints", &IMDWorkspace::getNPoints, args("self"),
+      .def("getNPoints", &IMDWorkspace::getNPoints, arg("self"),
            "Returns the total number of points within the workspace")
-      .def("getNEvents", &IMDWorkspace::getNEvents, args("self"),
+      .def("getNEvents", &IMDWorkspace::getNEvents, arg("self"),
            "Returns the total number of events, contributed to the workspace")
       .def("getSpecialCoordinateSystem",
-           &IMDWorkspace::getSpecialCoordinateSystem, args("self"),
+           &IMDWorkspace::getSpecialCoordinateSystem, arg("self"),
            "Returns the special coordinate system of the workspace")
       .def("displayNormalization", &IMDWorkspace::displayNormalization,
            args("self"), "Returns the visual normalization of the workspace.")
       .def("displayNormalizationHisto",
-           &IMDWorkspace::displayNormalizationHisto, args("self"),
+           &IMDWorkspace::displayNormalizationHisto, arg("self"),
            "For MDEventWorkspaces returns the visual normalization of dervied "
            "MDHistoWorkspaces."
            "For all others returns the same as displayNormalization.");

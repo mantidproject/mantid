@@ -2,13 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Qhelper.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidDataObjects/Histogram1D.h"
 
 namespace Mantid {
 namespace Algorithms {

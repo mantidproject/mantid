@@ -502,10 +502,19 @@ void FitOneSinglePeak::highBkgdFit() {
     g_log.warning(outss.str());
 
     size_t numpts = i_maxFitX - i_minFitX;
-    i_minPeakX += static_cast<size_t>(static_cast<double>(numpts) / 6.);
-    m_minPeakX = m_dataWS->readX(m_wsIndex)[i_minPeakX];
-    i_maxPeakX -= static_cast<size_t>(static_cast<double>(numpts) / 6.);
-    m_maxPeakX = m_dataWS->readX(m_wsIndex)[i_maxPeakX];
+    size_t shift = static_cast<size_t>(static_cast<double>(numpts) / 6.);
+    i_minPeakX += shift;
+    auto Xdata = m_dataWS->readX(m_wsIndex);
+    if (i_minPeakX >= Xdata.size())
+      i_minPeakX = Xdata.size() - 1;
+    m_minPeakX = Xdata[i_minPeakX];
+
+    if (i_maxPeakX < shift) {
+      i_maxPeakX = 0;
+    } else {
+      i_maxPeakX -= shift;
+    }
+    m_maxPeakX = Xdata[i_maxPeakX];
   }
 
   m_bkgdFunc = fitBackground(m_bkgdFunc);
@@ -1288,7 +1297,8 @@ void FitPeak::processProperties() {
   // Peak range
   vector<double> peakrange = getProperty("PeakRange");
   if (peakrange.size() != 2) {
-    throw runtime_error("Must enter 2 and only 2 items in fit window. ");
+    throw runtime_error(
+        "Must enter 2 and only 2 items for PeakRange in fit window. ");
   }
   m_minPeakX = peakrange[0];
   m_maxPeakX = peakrange[1];

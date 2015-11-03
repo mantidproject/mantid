@@ -96,9 +96,9 @@ public:
   virtual std::vector<std::string> logMsgs() const = 0;
 
   /**
-   * Username entered by the user
+   * RB Number entered by the user
    *
-   * @return username to log in to the compute resource
+   * @return RB number as string as provided by the user
    */
   virtual std::string getRBNumber() const = 0;
 
@@ -114,6 +114,14 @@ public:
    * @return current instrument selection
    */
   virtual std::string currentInstrument() const = 0;
+
+  /**
+  * Selected plot data representation will be applied, which will
+  * ran through python script
+  *
+  * @return which format should to applied for plotting data
+  */
+  virtual int currentPlotType() const = 0;
 
   /**
    * The Vanadium run number used in the current calibration
@@ -181,6 +189,16 @@ public:
   virtual void writeOutCalibFile(const std::string &outFilename,
                                  const std::vector<double> &difc,
                                  const std::vector<double> &tzero) = 0;
+
+  /**
+   * Enable/disable all the sections or tabs of the interface. To be
+   * used with required parameters, like a valid instrument, a valid
+   * RB number, etc. This should effectively disable/enable all
+   * actions, including calibration, focusing, event mode, etc.
+   *
+   * @param enable true to enable all tabs of the interface
+   */
+  virtual void enableTabs(bool enable) = 0;
 
   /**
    * Enable/disable calibrate+focus actions. The idea is that actions
@@ -255,6 +273,39 @@ public:
    */
   virtual void resetFocus() = 0;
 
+  /// @name Pre-processing (of event data, rebinning)
+  //@{
+  /**
+   * One or more run numbers to pre-process.
+   *
+   * @return run number(s), as a string
+   */
+  virtual std::string currentPreprocRunNo() const = 0;
+
+  /**
+   * For when pre-processing from event to histo data using a regular
+   * time bin. Here time refers to time units for rebinning in
+   * time-of-flight.
+   *
+   * @return time bin to re-bin in microseconds
+   */
+  virtual double rebinningTimeBin() const = 0;
+
+  /**
+   * For when pre-processing from multiperiod event to histo data.
+   *
+   * @return number of periods to use
+   */
+  virtual size_t rebinningPulsesNumberPeriods() const = 0;
+
+  /**
+   * For when pre-processing from multiperiod event to histo data.
+   *
+   * @return the time parameter (bin width) when rebinning by pulses.
+   */
+  virtual double rebinningPulsesTime() const = 0;
+  //@}
+
   /**
    * Save settings (normally when closing the interface). This
    * concerns only GUI settings, such as window max/min status and
@@ -263,12 +314,36 @@ public:
   virtual void saveSettings() const = 0;
 
   /**
+ * Saves the ouput files which are generated, this can be done
+ * via Output Files checkbox on the focus tab
+ *
+ * @return bool
+ */
+  virtual bool saveOutputFiles() const = 0;
+
+  /**
   * Produces a single spectrum graph for focused output. Runs
   * plotSpectrum function via python.
   *
   * @param wsName name of the workspace to plot (must be in the ADS)
   */
   virtual void plotFocusedSpectrum(const std::string &wsName) = 0;
+
+  /**
+ * Produces a waterfall spectrum graph for focused output. Runs
+ * plotSpectrum function via python.
+ *
+ * @param wsName name of the workspace to plot (must be in the ADS)
+ */
+  virtual void plotWaterfallSpectrum(const std::string &wsName) = 0;
+
+  /**
+  * Produces a replaceable spectrum graph for focused output. Runs
+  * plotSpectrum function via python.
+  *
+  * @param wsName name of the workspace to plot (must be in the ADS)
+  */
+  virtual void plotReplacingWindow(const std::string &wsName) = 0;
 };
 
 } // namespace CustomInterfaces

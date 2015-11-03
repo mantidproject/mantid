@@ -12,7 +12,7 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidCurveFitting/MultiDomainCreator.h"
 #include "MantidCurveFitting/FitMW.h"
-#include "MantidCurveFitting/UserFunction.h"
+#include "MantidCurveFitting/Functions/UserFunction.h"
 #include "MantidKernel/PropertyManager.h"
 
 #include "MantidTestHelpers/FakeObjects.h"
@@ -20,11 +20,11 @@
 #include <cxxtest/TestSuite.h>
 #include <boost/make_shared.hpp>
 #include <algorithm>
-#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::CurveFitting::Functions;
 
 class MultiDomainCreatorTest_Fun : public IFunction1D, public ParamFunction {
 public:

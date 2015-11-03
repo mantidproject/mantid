@@ -14,7 +14,7 @@
     <soapendpoint url="https://icatisis.esc.rl.ac.uk/ICATService/ICAT"></soapendpoint>
     <externaldownload url="https://isisicatds.stfc.ac.uk/idsbeta/"></externaldownload>
     <filelocation>
-      <prefix regex="\\\\isis\\inst\$\\Instruments\$"></prefix>
+      <prefix regex="\\\\isis\\inst\$"></prefix>
       <windows replacement=""></windows>
       <linux replacement="/archive"></linux>
       <mac replacement="/archive"></mac>
@@ -637,6 +637,13 @@
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
+  </instrument>
+</facility>
+
+<!-- ANSTO -->
+<facility name="ANSTO" FileExtensions=".nxs,.tar">
+  <instrument name="Bilby">
+    <technique>Small Angle Scattering</technique>
   </instrument>
 </facility>
 

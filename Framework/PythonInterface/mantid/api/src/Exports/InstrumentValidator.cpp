@@ -1,4 +1,4 @@
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidPythonInterface/kernel/TypedValidatorExporter.h"
 #include <boost/python/class.hpp>
 

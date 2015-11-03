@@ -12,8 +12,6 @@
 #include "MantidDataObjects/MDBox.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 #include <gmock/gmock.h>
 
 using namespace Mantid::DataObjects;

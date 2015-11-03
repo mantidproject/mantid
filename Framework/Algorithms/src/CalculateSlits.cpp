@@ -38,7 +38,9 @@ const std::string CalculateSlits::category() const {
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string CalculateSlits::summary() const {
-  return "Calculates appropriate slit widths for reflectometry instruments.";
+  return "Calculates appropriate slit widths for reflectometry instruments "
+         "based on the instrument setup, desired resolution, and desired "
+         "footprint of the experiment.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -46,16 +48,21 @@ const std::string CalculateSlits::summary() const {
 */
 void CalculateSlits::init() {
   declareProperty("Slit1Slit2", Mantid::EMPTY_DBL(),
-                  "Distance between slit 1 and slit 2 in mm");
+                  "Distance between Slit 1 and Slit 2 in mm. Where Slit 1 and "
+                  "Slit 2 are the two slits before the sample holder.");
   declareProperty("Slit2SA", Mantid::EMPTY_DBL(),
-                  "Offset in the beam direction in mm");
-  declareProperty("Resolution", Mantid::EMPTY_DBL(), "Resolution");
-  declareProperty("Footprint", Mantid::EMPTY_DBL(), "Footprint in mm");
-  declareProperty("Angle", Mantid::EMPTY_DBL(), "Angle in degrees");
+                  "Offset in the beam direction in mm. (Due to Slit 2 being "
+                  "translatable in the vertical axis)");
+  declareProperty("Resolution", Mantid::EMPTY_DBL(),
+                  "The Resolution that you desire to obtain in the experiment");
+  declareProperty(
+      "Footprint", Mantid::EMPTY_DBL(),
+      "The Footprint you wish to achieve for the experiment, in mm");
+  declareProperty("Angle", Mantid::EMPTY_DBL(), "Incident angle in degrees.");
 
-  declareProperty("Slit1", Mantid::EMPTY_DBL(), "Slit 1 width in mm",
+  declareProperty("Slit1", Mantid::EMPTY_DBL(), "Calculated Slit 1 width in mm",
                   Direction::Output);
-  declareProperty("Slit2", Mantid::EMPTY_DBL(), "Slit 2 width in mm",
+  declareProperty("Slit2", Mantid::EMPTY_DBL(), "Calculated Slit 2 width in mm",
                   Direction::Output);
 }
 

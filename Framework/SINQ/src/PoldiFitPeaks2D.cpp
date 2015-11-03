@@ -546,14 +546,13 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionPawley(
                                 "peaks do not have point group.");
   }
 
-  std::string crystalSystem =
-      getCrystalSystemAsString(pointGroup->crystalSystem());
-  pawleyFunction->setCrystalSystem(crystalSystem);
+  std::string latticeSystem = getLatticeSystemFromPointGroup(pointGroup);
+  pawleyFunction->setLatticeSystem(latticeSystem);
 
   UnitCell cell = peakCollection->unitCell();
   // Extract unit cell from peak collection
   pawleyFunction->setUnitCell(getRefinedStartingCell(
-      unitCellToStr(cell), crystalSystem, peakCollection));
+      unitCellToStr(cell), latticeSystem, peakCollection));
 
   IPeakFunction_sptr pFun = boost::dynamic_pointer_cast<IPeakFunction>(
       FunctionFactory::Instance().createFunction(profileFunctionName));
@@ -576,6 +575,24 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionPawley(
 }
 
 /**
+ * Returns the lattice system for the specified point group
+ *
+ * This function simply uses Geometry::getLatticeSystemAsString().
+ *
+ * @param pointGroup :: The point group for which to find the crystal system
+ * @return The crystal system for the point group
+ */
+std::string PoldiFitPeaks2D::getLatticeSystemFromPointGroup(
+    const PointGroup_sptr &pointGroup) const {
+  if (!pointGroup) {
+    throw std::invalid_argument(
+        "Cannot return lattice system for null PointGroup.");
+  }
+
+  return Geometry::getLatticeSystemAsString(pointGroup->latticeSystem());
+}
+
+/**
  * Tries to refine the initial cell using the supplied peaks
  *
  * This method tries to refine the initial unit cell using the indexed peaks
@@ -590,7 +607,7 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionPawley(
  * @return String for refined unit cell
  */
 std::string PoldiFitPeaks2D::getRefinedStartingCell(
-    const std::string &initialCell, const std::string &crystalSystem,
+    const std::string &initialCell, const std::string &latticeSystem,
     const PoldiPeakCollection_sptr &peakCollection) {
 
   Geometry::UnitCell cell = Geometry::strToUnitCell(initialCell);
@@ -599,7 +616,7 @@ std::string PoldiFitPeaks2D::getRefinedStartingCell(
       boost::dynamic_pointer_cast<ILatticeFunction>(
           FunctionFactory::Instance().createFunction("LatticeFunction"));
 
-  latticeFunction->setCrystalSystem(crystalSystem);
+  latticeFunction->setLatticeSystem(latticeSystem);
   latticeFunction->fix(latticeFunction->parameterIndex("ZeroShift"));
   latticeFunction->setUnitCell(cell);
 

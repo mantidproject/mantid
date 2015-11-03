@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 __author__ = 'Stuart Campbell'
@@ -87,6 +88,7 @@ if __name__ == '__main__':
     domains = {}
     domains = {'stfc.ac.uk': 'STFC',
                'clrc.ac.uk': 'STFC',
+               'tessella.com': 'STFC',
                'ornl.gov': 'ORNL',
                'sns.gov': 'ORNL',
                'esss.se': 'ESS',
@@ -123,7 +125,8 @@ if __name__ == '__main__':
                'matd10@yahoo.com': 'OTHERS',
                'diegomon93@gmail.com': 'OTHERS',
                'mgt110@ic.ac.uk': 'OTHERS',
-               'granrothge@users.noreply.github.com': 'ORNL'
+               'granrothge@users.noreply.github.com': 'ORNL',
+               'tom.g.r.brooks@gmail.com': 'STFC'
                }
 
     days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
@@ -174,14 +177,14 @@ if __name__ == '__main__':
             print("Getting stats for {0}-{1:02d}".format(str(year), month))
             since = "--since='{0}-{1}-1'".format(str(year), str(month))
             until = "--before='{0}-{1}-{2}'".format(str(year), str(month), str(days_in_month[month-1]))
-            
+
             date_key = str(year)+'-{0:02d}'.format(month)
 
             facility_commits[date_key] = {}
             facility_changed[date_key] = {}
             facility_added[date_key] = {}
             facility_removed[date_key] = {}
-            
+
             freading = open('facility-file-changes-{0}.stdout'.format(date_key),'r',buffering=0)
 
             # initialize facility counters
@@ -195,7 +198,7 @@ if __name__ == '__main__':
                 changed = 0
                 added = 0
                 removed = 0
-                
+
                 # Is the line blank (or None)
                 if line is None or len(line) is 0:
                     # print("BLANK:'{0}'".format(str(line)))

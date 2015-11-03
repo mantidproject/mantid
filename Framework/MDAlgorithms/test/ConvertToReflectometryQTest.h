@@ -3,6 +3,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -11,6 +12,9 @@
 #include "MantidMDAlgorithms/ConvertToReflectometryQ.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
+
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidGeometry/MDGeometry/QLab.h"
 
 #include <boost/assign.hpp>
 
@@ -152,6 +156,13 @@ public:
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != NULL);
     TS_ASSERT_EQUALS(2, ws->getExperimentInfo(0)->run().getLogData().size());
+    // Assert that dimensions should be a general frame
+    const auto &frame0 = ws->getDimension(0)->getMDFrame();
+    TSM_ASSERT_EQUALS("Should be a QLab frame",
+                      Mantid::Geometry::QLab::QLabName, frame0.name());
+    TSM_ASSERT_EQUALS(
+        "Should have a special coordinate system selection of QLab",
+        ws->getSpecialCoordinateSystem(), Mantid::Kernel::QLab);
   }
 
   void test_execute_kikf_md() {
@@ -161,6 +172,12 @@ public:
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != NULL);
+    // Assert that dimensions should be a general frame
+    const auto &frame0 = ws->getDimension(0)->getMDFrame();
+    TSM_ASSERT_EQUALS("Should be a general frame", "KiKf", frame0.name());
+    TSM_ASSERT_EQUALS(
+        "Should have a special coordinate system selection of None",
+        ws->getSpecialCoordinateSystem(), Mantid::Kernel::None);
   }
 
   void test_execute_pipf_md() {
@@ -170,6 +187,12 @@ public:
         Mantid::API::AnalysisDataService::Instance().retrieve(
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != NULL);
+    // Assert that dimensions should be a general frame
+    const auto &frame0 = ws->getDimension(0)->getMDFrame();
+    TSM_ASSERT_EQUALS("Should be a general frame", "P", frame0.name());
+    TSM_ASSERT_EQUALS(
+        "Should have a special coordinate system selection of None",
+        ws->getSpecialCoordinateSystem(), Mantid::Kernel::None);
   }
 
   void test_execute_qxqz_2D() {
@@ -193,6 +216,18 @@ public:
             "OutputTransformedWorkspace"));
     TS_ASSERT(ws != NULL);
     TS_ASSERT_EQUALS(2, ws->run().getLogData().size());
+  }
+
+  void test_execute_qxqz_normalized_polygon_md() {
+    const bool outputAsMD = true;
+    auto alg = make_standard_algorithm("Q (lab frame)", outputAsMD);
+    alg->setProperty("Method", "NormalisedPolygon");
+    alg->execute();
+    auto ws = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(
+            "OutputTransformedWorkspace"));
+    TS_ASSERT(ws != NULL);
+    TS_ASSERT_EQUALS(2, ws->getExperimentInfo(0)->run().getLogData().size());
   }
 
   void test_execute_kikf_2D() {

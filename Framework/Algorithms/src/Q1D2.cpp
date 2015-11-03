@@ -2,16 +2,19 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Q1D2.h"
+#include "MantidAlgorithms/Qhelper.h"
+#include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidDataObjects/Histogram1D.h"
-#include "MantidAlgorithms/Qhelper.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidAPI/ISpectrum.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -116,6 +119,9 @@ void Q1D2::exec() {
   // define the (large number of) data objects that are going to be used in all
   // iterations of the loop below
 
+  // Flag to decide if Q Resolution is to be used
+  auto useQResolution = qResolution ? true : false;
+
   // this will become the output workspace from this algorithm
   MatrixWorkspace_sptr outputWS =
       setUpOutputWorkspace(getProperty("OutputBinning"));
@@ -127,14 +133,18 @@ void Q1D2::exec() {
   MantidVec normSum(YOut.size(), 0.0);
   // the error on the normalisation
   MantidVec normError2(YOut.size(), 0.0);
-  // the averaged Q resolution
-  MantidVec &qResolutionOut = outputWS->dataDx(0);
+
+  // the averaged Q resolution. We need the a named dummy variable although it
+  // won't be
+  // used since we only want to create a reference to DX if it is really
+  // required. Referencing
+  // DX sets a flag which might not be desirable.
+  MantidVec dummy;
+  MantidVec &qResolutionOut =
+      useQResolution ? outputWS->dataDx(0) : outputWS->dataY(0);
 
   const int numSpec = static_cast<int>(m_dataWS->getNumberHistograms());
   Progress progress(this, 0.05, 1.0, numSpec + 1);
-
-  // Flag to decide if Q Resolution is to be used
-  auto useQResolution = qResolution ? true : false;
 
   PARALLEL_FOR3(m_dataWS, outputWS, pixelAdj)
   for (int i = 0; i < numSpec; ++i) {
@@ -275,7 +285,9 @@ void Q1D2::exec() {
         WorkspaceFactory::Instance().create(outputWS);
     ws_sumOfCounts->dataX(0) = outputWS->dataX(0);
     ws_sumOfCounts->dataY(0) = outputWS->dataY(0);
-    ws_sumOfCounts->dataDx(0) = outputWS->dataDx(0);
+    if (useQResolution) {
+      ws_sumOfCounts->dataDx(0) = outputWS->dataDx(0);
+    }
     for (size_t i = 0; i < outputWS->dataE(0).size(); i++) {
       ws_sumOfCounts->dataE(0)[i] = sqrt(outputWS->dataE(0)[i]);
     }
@@ -283,7 +295,9 @@ void Q1D2::exec() {
     MatrixWorkspace_sptr ws_sumOfNormFactors =
         WorkspaceFactory::Instance().create(outputWS);
     ws_sumOfNormFactors->dataX(0) = outputWS->dataX(0);
-    ws_sumOfNormFactors->dataDx(0) = outputWS->dataDx(0);
+    if (useQResolution) {
+      ws_sumOfNormFactors->dataDx(0) = outputWS->dataDx(0);
+    }
     for (size_t i = 0; i < ws_sumOfNormFactors->dataY(0).size(); i++) {
       ws_sumOfNormFactors->dataY(0)[i] = normSum[i];
       ws_sumOfNormFactors->dataE(0)[i] = sqrt(normError2[i]);

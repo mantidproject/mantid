@@ -91,6 +91,9 @@ public:
   void write(std::ostream &OX) const;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin);
+#ifdef ENABLE_OPENCASCADE
+  virtual TopoDS_Shape createShape();
+#endif
 };
 
 } // NAMESPACE

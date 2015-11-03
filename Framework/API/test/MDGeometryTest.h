@@ -6,12 +6,11 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 #include "MantidKernel/VMD.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidAPI/NullCoordTransform.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -28,8 +27,9 @@ public:
   void test_initGeometry() {
     MDGeometry g;
     std::vector<IMDDimension_sptr> dims;
-    IMDDimension_sptr dim1(new MDHistoDimension("Qx", "Qx", "Ang", -1, +1, 10));
-    IMDDimension_sptr dim2(new MDHistoDimension("Qy", "Qy", "Ang", -1, +1, 20));
+    const Mantid::Geometry::QSample frame;
+    IMDDimension_sptr dim1(new MDHistoDimension("Qx", "Qx", frame, -1, +1, 10));
+    IMDDimension_sptr dim2(new MDHistoDimension("Qy", "Qy", frame, -1, +1, 20));
     dims.push_back(dim1);
     dims.push_back(dim2);
     g.initGeometry(dims);
@@ -86,8 +86,9 @@ public:
   void test_copy_constructor() {
     MDGeometry g;
     std::vector<IMDDimension_sptr> dims;
-    IMDDimension_sptr dim0(new MDHistoDimension("Qx", "Qx", "Ang", -1, +1, 0));
-    IMDDimension_sptr dim1(new MDHistoDimension("Qy", "Qy", "Ang", -1, +1, 0));
+    const Mantid::Geometry::QSample frame;
+    IMDDimension_sptr dim0(new MDHistoDimension("Qx", "Qx", frame, -1, +1, 0));
+    IMDDimension_sptr dim1(new MDHistoDimension("Qy", "Qy", frame, -1, +1, 0));
     dims.push_back(dim0);
     dims.push_back(dim1);
     g.initGeometry(dims);
@@ -136,11 +137,12 @@ public:
   /** Adding dimension info and searching for it back */
   void test_addDimension_getDimension() {
     MDGeometry g;
+    const Mantid::Geometry::QSample frame;
     MDHistoDimension_sptr dim(
-        new MDHistoDimension("Qx", "Qx", "Ang", -1, +1, 0));
+        new MDHistoDimension("Qx", "Qx", frame, -1, +1, 0));
     TS_ASSERT_THROWS_NOTHING(g.addDimension(dim);)
     MDHistoDimension_sptr dim2(
-        new MDHistoDimension("Qy", "Qy", "Ang", -1, +1, 0));
+        new MDHistoDimension("Qy", "Qy", frame, -1, +1, 0));
     TS_ASSERT_THROWS_NOTHING(g.addDimension(dim2);)
     TS_ASSERT_EQUALS(g.getNumDims(), 2);
     TS_ASSERT_EQUALS(g.getDimension(0)->getName(), "Qx");
@@ -152,11 +154,12 @@ public:
 
   void test_transformDimensions() {
     MDGeometry g;
+    const Mantid::Geometry::QSample frame;
     MDHistoDimension_sptr dim(
-        new MDHistoDimension("Qx", "Qx", "Ang", -1, +1, 0));
+        new MDHistoDimension("Qx", "Qx", frame, -1, +1, 0));
     TS_ASSERT_THROWS_NOTHING(g.addDimension(dim);)
     MDHistoDimension_sptr dim2(
-        new MDHistoDimension("Qy", "Qy", "Ang", -2, +2, 0));
+        new MDHistoDimension("Qy", "Qy", frame, -2, +2, 0));
     TS_ASSERT_THROWS_NOTHING(g.addDimension(dim2);)
     TS_ASSERT_EQUALS(g.getNumDims(), 2);
     boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
@@ -262,8 +265,9 @@ public:
   void test_all_normalized() {
     MDGeometry geometry;
     std::vector<IMDDimension_sptr> dims;
-    IMDDimension_sptr dim1(new MDHistoDimension("Qx", "Qx", "Ang", -1, +1, 10));
-    IMDDimension_sptr dim2(new MDHistoDimension("Qy", "Qy", "Ang", -1, +1, 20));
+    const Mantid::Geometry::QSample frame;
+    IMDDimension_sptr dim1(new MDHistoDimension("Qx", "Qx", frame, -1, +1, 10));
+    IMDDimension_sptr dim2(new MDHistoDimension("Qy", "Qy", frame, -1, +1, 20));
     dims.push_back(dim1);
     dims.push_back(dim2);
     geometry.initGeometry(dims);

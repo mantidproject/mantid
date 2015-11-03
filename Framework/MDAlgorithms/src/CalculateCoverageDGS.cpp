@@ -1,5 +1,5 @@
 #include "MantidMDAlgorithms/CalculateCoverageDGS.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
@@ -367,18 +367,25 @@ void CalculateCoverageDGS::exec() {
 
   // create the output workspace
   std::vector<Mantid::Geometry::MDHistoDimension_sptr> binDimensions;
+
+  // Define frames
+  Mantid::Geometry::GeneralFrame frame1("Q1", "");
+  Mantid::Geometry::GeneralFrame frame2("Q2", "");
+  Mantid::Geometry::GeneralFrame frame3("Q3", "");
+  Mantid::Geometry::GeneralFrame frame4("meV", "");
   MDHistoDimension_sptr out1(
-      new MDHistoDimension("Q1", "Q1", "", static_cast<coord_t>(q1min),
+      new MDHistoDimension("Q1", "Q1", frame1, static_cast<coord_t>(q1min),
                            static_cast<coord_t>(q1max), q1NumBins));
   MDHistoDimension_sptr out2(
-      new MDHistoDimension("Q2", "Q2", "", static_cast<coord_t>(q2min),
+      new MDHistoDimension("Q2", "Q2", frame2, static_cast<coord_t>(q2min),
                            static_cast<coord_t>(q2max), q2NumBins));
   MDHistoDimension_sptr out3(
-      new MDHistoDimension("Q3", "Q3", "", static_cast<coord_t>(q3min),
+      new MDHistoDimension("Q3", "Q3", frame3, static_cast<coord_t>(q3min),
                            static_cast<coord_t>(q3max), q3NumBins));
   MDHistoDimension_sptr out4(new MDHistoDimension(
-      "DeltaE", "DeltaE", "meV", static_cast<coord_t>(m_dEmin),
+      "DeltaE", "DeltaE", frame4, static_cast<coord_t>(m_dEmin),
       static_cast<coord_t>(m_dEmax), dENumBins));
+
   for (size_t row = 0; row <= 3; row++) {
     if (affineMat[row][0] == 1.) {
       binDimensions.push_back(out1);
