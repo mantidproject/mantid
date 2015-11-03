@@ -338,7 +338,7 @@ void ApplyPaalmanPings::absCorComplete(bool error) {
     shiftLog->setProperty("LogName", "container_shift");
     shiftLog->setProperty("LogType", "Number");
     shiftLog->setProperty(
-        "LogText", boost::lexical_cast<std::string>(m_uiForm.spShift->value()));
+        "LogText", boost::lexical_cast<std::string>(m_uiForm.spCanShift->value()));
     m_batchAlgoRunner->addAlgorithm(shiftLog);
   }
 

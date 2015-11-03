@@ -191,19 +191,6 @@
                     </property>
                   </widget>
                 </item>
-                <item>
-                  <spacer name="horizontalSpacer">
-                    <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                      <size>
-                        <width>40</width>
-                        <height>20</height>
-                      </size>
-                    </property>
-                  </spacer>
-                </item>
               </layout>
             </item>
             <item row="4" column="0">
@@ -229,6 +216,9 @@
                     <property name="decimals">
                       <number>5</number>
                     </property>
+                    <property name="minimum">
+                      <double>-999.990000000000009</double>
+                    </property>
                     <property name="maximum">
                       <double>999.990000000000009</double>
                     </property>
@@ -239,19 +229,6 @@
                       <double>0.000000000000000</double>
                     </property>
                   </widget>
-                </item>
-                <item>
-                  <spacer name="horizontalSpacer">
-                    <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                      <size>
-                        <width>40</width>
-                        <height>20</height>
-                      </size>
-                    </property>
-                  </spacer>
                 </item>
               </layout>
             </item>
