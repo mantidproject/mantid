@@ -57,7 +57,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Crystal"; }
+  virtual const std::string category() const { return "Crystal\\Corrections"; }
   /// Call TOFExtinction as a Child Algorithm to get statistics of the peaks
   double fitMosaic(double mosaic, double rcrystallite, std::string inname,
                    std::string corrOption, std::string pointOption,

@@ -34,7 +34,7 @@ public:
 
   /// Algorithm's category for identification
   virtual const std::string category() const {
-    return "Crystal;DataHandling\\Isaw";
+    return "Crystal\\DataHandling;DataHandling\\Isaw";
   }
 
   /// Returns a confidence value that this algorithm can load a file

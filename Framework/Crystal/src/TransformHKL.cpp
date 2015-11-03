@@ -31,7 +31,7 @@ const std::string TransformHKL::name() const { return "TransformHKL"; }
 
 int TransformHKL::version() const { return 1; }
 
-const std::string TransformHKL::category() const { return "Crystal"; }
+const std::string TransformHKL::category() const { return "Crystal\\Peaks"; }
 
 //--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

@@ -34,7 +34,7 @@ const std::string CalculatePeaksHKL::name() const {
 int CalculatePeaksHKL::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CalculatePeaksHKL::category() const { return "Crystal"; }
+const std::string CalculatePeaksHKL::category() const { return "Crystal\\Peaks"; }
 
 //----------------------------------------------------------------------------------------------
 

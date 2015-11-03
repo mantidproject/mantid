@@ -60,7 +60,7 @@ public:
 
   virtual int version() const { return 1; };
 
-  const std::string category() const { return "Crystal"; };
+  const std::string category() const { return "Crystal\\Corrections"; };
 
 private:
   void init();
