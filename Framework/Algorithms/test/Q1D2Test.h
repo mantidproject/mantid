@@ -409,7 +409,7 @@ public:
     Q1D.setProperty("WavelengthAdj", m_wavNorm);
     Q1D.setProperty("PixelAdj", m_pixel);
     Q1D.setPropertyValue("OutputWorkspace", outputWS);
-    Q1D.setPropertyValue("OutputBinning", "0.1,0.1,1.0");
+    Q1D.setPropertyValue("OutputBinning", "0.5,0.5,10.0");
     Q1D.setProperty("QResolution", qResolution);
     Q1D.setProperty("OutputParts", true);
 
@@ -431,31 +431,31 @@ public:
 
     TSM_ASSERT("Should have the x error flag set", result->hasDx(0));
     // That output will be
-    // SUM_i(Yin_i*QRES_in_i*QBinWidth/sqrt(12))/(SUM_i(Y_in_i)) for each q
+    // SUM_i(Yin_i*sqrt(QRES_in_i^2 + *QBinWidth^2/sqrt(12)^2))/(SUM_i(Y_in_i))
+    // for each q
     // value
     // In our test workspace we set QRes_in_1 to 1, this means that all DX
-    // values should be SUM_i(Y_in_i*QBinWidth/sqrt(12))/(SUM_i(Y_in_i))
-    // which is either 0.1/sqrt(12) or 0. It can be 0 if no data falls into this
-    // bin. We
-    // make sure that there is at least one bin
-    // with a count of 1
+    // values should be SUM_i(Y_in_i*sqrt((1+ QBinWidth^2/12)/(SUM_i(Y_in_i))
+    // which is either sqrt(1 + 0.5^2/12) or 0. It can be 0 if no data falls
+    // into this
+    // bin. We make sure that there is at least one bin with a count
+    // of sqrt(1 + 0.5^2/12) ~ 1.01036297108
     auto &dataDX = result->dataDx(0);
     unsigned int counter = 0;
     for (auto it = dataDX.begin(); it != dataDX.end(); ++it) {
 
       // Since we are dealing with a float it can be difficult to compare
-      // our value with 0.1/sqrt(12). Hence it is enough for us to confirm
+      // our value with sqrt(1 + 0.5^2/12). Hence it is enough for us to confirm
       // that the values lie in an interval around this value
       auto isZeroValue = *it == 0.0;
       auto isCloseToZeroPoint1DividedByRootTwelve =
-          (*it > 0.0288674) && (*it < 0.0288676);
-
+          (*it > 1.01035) && (*it < 1.01037);
       if (isCloseToZeroPoint1DividedByRootTwelve) {
         counter++;
       }
 
-      // Make sure that the value is either 1 or 0
-      TSM_ASSERT("The DX value should be either 0.1/sqrt(12) or 0",
+      // Make sure that the value is either sqrt(1 + 0.5^2/12) or 0
+      TSM_ASSERT("The DX value should be either sqrt(1 + 0.5^2/12) or 0",
                  isCloseToZeroPoint1DividedByRootTwelve || isZeroValue);
     }
     TSM_ASSERT("There should be at least one bin which is not 0", counter > 0);
