@@ -5,6 +5,7 @@
 #include "GLActor.h"
 #include "GLActorCollection.h"
 #include "GLActorVisitor.h"
+#include "MaskBinsData.h"
 #include "SampleActor.h"
 #include "MantidQtAPI/MantidColorMap.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
@@ -84,6 +85,8 @@ public:
   void applyMaskWorkspace();
   /// Remove the attached mask workspace without applying the mask.
   void clearMaskWorkspace();
+  /// Add a range of bins for masking
+  void addMaskBinsData(const QList<int>& detIDs);
 
   /// Get the color map.
   const MantidColorMap & getColorMap() const;
@@ -185,6 +188,7 @@ private:
   void saveSettings();
   void setDataMinMaxRange(double vmin, double vmax);
   void setDataIntegrationRange(const double& xmin,const double& xmax);
+  void calculateIntegratedSpectra(const Mantid::API::MatrixWorkspace& workspace);
   /// Sum the counts in detectors if the workspace has equal bins for all spectra
   void sumDetectorsUniform(QList<int>& dets, std::vector<double>&x, std::vector<double>&y) const;
   /// Sum the counts in detectors if the workspace is ragged
@@ -200,6 +204,8 @@ private:
   const boost::weak_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
   /// The helper masking workspace keeping the mask build in the mask tab but not applied to the data workspace.
   mutable boost::shared_ptr<Mantid::API::MatrixWorkspace> m_maskWorkspace;
+  /// A helper object that keeps bin masking data.
+  mutable MaskBinsData m_maskBinsData;
   /// The colormap
   MantidColorMap m_colorMap;
   QString m_currentColorMapFilename;

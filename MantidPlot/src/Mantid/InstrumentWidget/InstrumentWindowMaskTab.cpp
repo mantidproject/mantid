@@ -202,6 +202,10 @@ m_left(NULL), m_top(NULL), m_right(NULL), m_bottom(NULL)
   m_clear_all->setToolTip("Clear all masking that have not been applied to the data.");
   connect(m_clear_all,SIGNAL(clicked()),this,SLOT(clearMask()));
 
+  m_maskBins = new QPushButton("Mask bins");
+  m_maskBins->setToolTip("Mask bins.");
+  connect(m_maskBins,SIGNAL(clicked()),this,SLOT(maskBins()));
+
 
   m_save_as_workspace_exclude = new QAction("As Mask to workspace",this);
   m_save_as_workspace_exclude->setToolTip("Save current mask to mask workspace.");
@@ -286,7 +290,8 @@ m_left(NULL), m_top(NULL), m_right(NULL), m_bottom(NULL)
 
   QGroupBox *box = new QGroupBox("View");
   QGridLayout* buttons = new QGridLayout();
-  buttons->addWidget(m_apply_to_view,0,0,1,2);
+  buttons->addWidget(m_apply_to_view,0,0);//,1,2);
+  buttons->addWidget(m_maskBins,0,1);
   buttons->addWidget(m_saveButton,1,0);
   buttons->addWidget(m_clear_all,1,1);
 
@@ -1142,4 +1147,16 @@ void InstrumentWindowMaskTab::storeMask(bool isROI)
   // remove masking shapes
   clearShapes();
   QApplication::restoreOverrideCursor();
+}
+
+
+void InstrumentWindowMaskTab::maskBins()
+{
+  QList<int> dets;
+  // get detectors covered by the shapes
+  m_instrWindow->getSurface()->getMaskedDetectors(dets);
+  // mask some bins
+  m_instrWindow->getInstrumentActor()->addMaskBinsData(dets);
+  // remove masking shapes
+  clearShapes();
 }

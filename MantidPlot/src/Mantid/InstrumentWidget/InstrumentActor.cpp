@@ -1174,14 +1174,20 @@ void InstrumentActor::setDataMinMaxRange(double vmin, double vmax)
   m_DataMaxScaleValue = vmax;
 }
 
+void InstrumentActor::calculateIntegratedSpectra(const Mantid::API::MatrixWorkspace& workspace)
+{
+  //Use the workspace function to get the integrated spectra
+  workspace.getIntegratedSpectra(m_specIntegrs, m_BinMinValue, m_BinMaxValue, wholeRange());
+  m_maskBinsData.subtractIntegratedSpectra(workspace, m_specIntegrs);
+}
+
 void InstrumentActor::setDataIntegrationRange(const double& xmin,const double& xmax)
 {
   m_BinMinValue = xmin;
   m_BinMaxValue = xmax;
 
   auto workspace = getWorkspace();
-  //Use the workspace function to get the integrated spectra
-  workspace->getIntegratedSpectra(m_specIntegrs, m_BinMinValue, m_BinMaxValue, wholeRange());
+  calculateIntegratedSpectra(*workspace);
 
   // get the workspace indices of monitors in order to exclude them from finding of the max value
   auto monitorIDs = getInstrument()->getMonitors();
@@ -1242,6 +1248,21 @@ void InstrumentActor::setDataIntegrationRange(const double& xmin,const double& x
     m_DataMinScaleValue = m_DataMinValue;
     m_DataMaxScaleValue = m_DataMaxValue;
   }
+}
+
+/// Add a range of bins for masking
+void InstrumentActor::addMaskBinsData(const QList<int>& detIDs)
+{
+  QList<int> indices;
+  foreach(int id, detIDs)
+  {
+    auto index = m_detid2index_map[id];
+    indices.append(static_cast<int>(index));
+  }
+  m_maskBinsData.addXRange(m_BinMinValue, m_BinMaxValue, indices);
+  auto workspace = getWorkspace();
+  calculateIntegratedSpectra(*workspace);
+  resetColors();
 }
 
 //-------------------------------------------------------------------------//

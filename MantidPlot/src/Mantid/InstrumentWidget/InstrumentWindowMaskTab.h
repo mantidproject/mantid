@@ -88,6 +88,7 @@ protected slots:
   void saveExcludeGroupToFile();
   void showSaveMenuTooltip(QAction*);
   void toggleMaskGroup();
+  void maskBins();
 
   void doubleChanged(QtProperty*);
 protected:
@@ -135,6 +136,7 @@ protected:
   QPushButton* m_apply_to_view;
   QPushButton* m_clear_all;
   QPushButton* m_saveButton;
+  QPushButton* m_maskBins;
 
 
   QMenu* m_saveMask;
