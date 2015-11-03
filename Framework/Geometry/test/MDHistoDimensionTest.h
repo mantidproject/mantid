@@ -102,7 +102,7 @@ public:
     // Assert
     TSM_ASSERT_EQUALS("Should now be a QLab frame",
                       dimension.getMDFrame().name(),
-                      Mantid::Geometry::QLab::QLabName());
+                      Mantid::Geometry::QLab::QLabName);
   }
 };
 

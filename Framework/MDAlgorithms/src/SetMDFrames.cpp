@@ -145,7 +145,9 @@ std::map<std::string, std::string> SetMDFrames::validateInputs() {
 
 /**
  * Creates an MDFrame based on the users selection
- * @param
+ * @param frameSelection :: the selected frame type
+ * @param oldFrame :: a refrence to the frame we want to replace
+ * @returns :: a unique pointer to the new MDFrame
  */
 Mantid::Geometry::MDFrame_uptr
 SetMDFrames::createMDFrame(const std::string &frameSelection,
