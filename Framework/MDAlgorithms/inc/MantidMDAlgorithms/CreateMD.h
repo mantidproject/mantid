@@ -8,7 +8,7 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 void padParameterVector(std::vector<double> &param_vector,
-                        unsigned long grow_to_size);
+                        const unsigned long grow_to_size);
 
 bool any_given(const std::vector<std::vector<double>> &params);
 
@@ -79,6 +79,8 @@ private:
              const std::vector<double> &angdeg, const std::vector<double> &u,
              const std::vector<double> &v,
              Mantid::API::IMDEventWorkspace_sptr out_mdws);
+
+  virtual std::map<std::string, std::string> validateInputs();
 };
 
 } // namespace MDAlgorithms

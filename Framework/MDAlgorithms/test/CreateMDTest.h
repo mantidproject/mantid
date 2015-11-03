@@ -50,7 +50,7 @@ public:
     alg.setPropertyValue("Gl", "0");      // Right size
     alg.setPropertyValue("Gs", "0");      // Right size
 
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
 
     // Clean up
     Mantid::API::AnalysisDataService::Instance().remove(
@@ -76,7 +76,7 @@ public:
     alg.setPropertyValue("Gl", "0,0"); // Too large
     alg.setPropertyValue("Gs", "0");   // Right size
 
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
 
     // Clean up
     Mantid::API::AnalysisDataService::Instance().remove(
@@ -102,7 +102,7 @@ public:
     alg.setPropertyValue("Gl", "0");   // Right size
     alg.setPropertyValue("Gs", "0,0"); // Too large
 
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
 
     // Clean up
     Mantid::API::AnalysisDataService::Instance().remove(
@@ -110,6 +110,9 @@ public:
   }
 
   void test_execute_single_workspace() {
+    std::string s;
+    std::getline(std::cin,s); //pause to attach debugger
+
     CreateMD alg;
     alg.setRethrows(true);
     alg.initialize();
@@ -118,13 +121,12 @@ public:
     alg.setPropertyValue("Alatt", "1,1,1");
     alg.setPropertyValue("Angdeg", "90,90,90");
     alg.setPropertyValue("Efix", "12.0");
-    alg.setPropertyValue("u", "0,0,1");
-    alg.setPropertyValue("v", "1,0,0");
+    alg.setPropertyValue("u", "1,0,0");
+    alg.setPropertyValue("v", "0,1,0");
+
     TS_ASSERT_THROWS_NOTHING(alg.execute());
-    Mantid::API::Workspace_sptr out_ws =
-        Mantid::API::AnalysisDataService::Instance().retrieve(
-            "__CreateMDTest_mdworkspace");
-    TS_ASSERT(out_ws);
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist(
+        "__CreateMDTest_mdworkspace"));
 
     // Clean up
     Mantid::API::AnalysisDataService::Instance().remove(
@@ -136,21 +138,21 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     alg.setPropertyValue("OutputWorkspace", "__CreateMDTest_mdworkspace");
-    alg.setPropertyValue("DataSources", "CNCS_7860_event.nxs,CNCS_7860_event.nxs");
+    alg.setPropertyValue("DataSources",
+                         "CNCS_7860_event.nxs,CNCS_7860_event.nxs");
     alg.setPropertyValue("Alatt", "1,1,1");
     alg.setPropertyValue("Angdeg", "90,90,90");
     alg.setPropertyValue("Efix", "12.0,13.0");
-    alg.setPropertyValue("u", "0,0,1");
-    alg.setPropertyValue("v", "1,0,0");
+    alg.setPropertyValue("u", "1,0,0");
+    alg.setPropertyValue("v", "0,1,0");
+
     TS_ASSERT_THROWS_NOTHING(alg.execute());
-    Mantid::API::Workspace_sptr out_ws =
-      Mantid::API::AnalysisDataService::Instance().retrieve(
-        "__CreateMDTest_mdworkspace");
-    TS_ASSERT(out_ws);
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist(
+      "__CreateMDTest_mdworkspace"));
 
     // Clean up
     Mantid::API::AnalysisDataService::Instance().remove(
-      "__CreateMDTest_mdworkspace");
+        "__CreateMDTest_mdworkspace");
   }
 };
 

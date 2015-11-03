@@ -18,14 +18,14 @@ using Mantid::API::WorkspaceProperty;
  * Pad the vector of parameter values to the same size as data sources
  */
 void padParameterVector(std::vector<double> &param_vector,
-                        unsigned long grow_to_size) {
+                        const unsigned long grow_to_size) {
   if (param_vector.empty()) {
     param_vector.resize(grow_to_size, 0.0);
   } else if (param_vector.size() == 1) {
     param_vector.resize(grow_to_size, param_vector[0]);
   } else if (param_vector.size() != grow_to_size) {
-    throw std::invalid_argument("Psi, Gl, Gs and EFix must each be a single "
-                                "value for all runs or one value per run.");
+    throw std::invalid_argument(
+        "Psi, Gl, Gs and EFix must have one value per run.");
   }
 }
 
@@ -178,6 +178,9 @@ void CreateMD::exec() {
   padParameterVector(psi, entries);
   padParameterVector(gl, entries);
   padParameterVector(gs, entries);
+  if (efix.empty()) {
+    efix.push_back(-1.0);
+  }
   padParameterVector(efix, entries);
 
   int counter = 0;
@@ -401,6 +404,63 @@ Mantid::API::IMDEventWorkspace_sptr CreateMD::single_run(
 
     return convertToMD(input_workspace, emode, in_place, out_mdws);
   }
+}
+
+/*
+ * Validate input properties
+ */
+std::map<std::string, std::string> CreateMD::validateInputs() {
+  // Create the map
+  std::map<std::string, std::string> validation_output;
+
+  // Get properties to validate
+  const std::vector<std::string> data_sources =
+      this->getProperty("DataSources");
+  const std::vector<double> u = this->getProperty("u");
+  const std::vector<double> v = this->getProperty("v");
+  const std::vector<double> alatt = this->getProperty("Alatt");
+  const std::vector<double> angdeg = this->getProperty("Angdeg");
+  const std::vector<double> psi = this->getProperty("Psi");
+  const std::vector<double> gl = this->getProperty("Gl");
+  const std::vector<double> gs = this->getProperty("Gs");
+  const std::vector<double> efix = this->getProperty("Efix");
+
+  const unsigned long ws_entries = data_sources.size();
+
+  if (u.size() < 3) {
+    validation_output["u"] = "u must have 3 components";
+  }
+  if (v.size() < 3) {
+    validation_output["v"] = "v must have 3 components";
+  }
+  if (alatt.size() < 3) {
+    validation_output["Alatt"] = "Lattice parameters must have 3 components";
+  }
+  if (angdeg.size() < 3) {
+    validation_output["Angdeg"] = "Angle must have 3 components";
+  }
+  if (!psi.empty() && psi.size() != ws_entries) {
+    validation_output["Psi"] = "If Psi is given an entry "
+                               "should be provided for "
+                               "every input datasource";
+  }
+  if (!gl.empty() && gl.size() != ws_entries) {
+    validation_output["Gl"] = "If Gl is given an entry "
+                              "should be provided for "
+                              "every input datasource";
+  }
+  if (!gs.empty() && gs.size() != ws_entries) {
+    validation_output["Gs"] = "If Gs is given an entry "
+                              "should be provided for "
+                              "every input datasource";
+  }
+  if (efix.size() > 1 && efix.size() != ws_entries) {
+    validation_output["EFix"] =
+        "Either specify a single EFix value, or as many "
+        "as there are input datasources";
+  }
+
+  return validation_output;
 }
 
 } // namespace MDAlgorithms
