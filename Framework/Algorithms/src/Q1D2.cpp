@@ -376,7 +376,7 @@ void Q1D2::calculateNormalization(const size_t wavStart, const size_t specInd,
   // use that the normalization array ends at the start of the error array
   for (MantidVec::iterator n = norm, e = normETo2; n != normETo2; ++n, ++e) {
     *n = detectorAdj;
-    *e = detAdjErr * detAdjErr;
+    *e = detAdjErr *detAdjErr;
   }
 
   if (binNorms && binNormEs) {
@@ -583,7 +583,7 @@ void Q1D2::convertWavetoQ(const size_t specInd, const bool doGravity,
       // different for each bin with each detector
       const double sinTheta = grav.calcSinTheta(lambda);
       // Now we're ready to go to Q
-      *Qs = FOUR_PI * sinTheta / lambda;
+      *Qs = FOUR_PI *sinTheta / lambda;
     }
   } else {
     // Calculate the Q values for the current spectrum, using Q =
