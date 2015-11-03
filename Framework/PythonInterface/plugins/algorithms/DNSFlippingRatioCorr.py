@@ -32,7 +32,7 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         """
         Returns category
         """
-        return 'PythonAlgorithms\\MLZ\\DNS;CorrectionFunctions'
+        return 'Workflow\\MLZ\\DNS;CorrectionFunctions'
 
     def name(self):
         """
@@ -41,7 +41,7 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         return "DNSFlippingRatioCorr"
 
     def summary(self):
-        return "Peforms flipping ratio correction on a given dataset using the NiCr data."
+        return "Performs flipping ratio correction on a given dataset using the NiCr data."
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("SFDataWorkspace", "", direction=Direction.Input),

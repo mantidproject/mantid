@@ -7,7 +7,7 @@ class GetEiT0atSNS(mantid.api.PythonAlgorithm):
     def category(self):
         """ Return category
         """
-        return "PythonAlgorithms;Inelastic"
+        return "Inelastic"
 
     def name(self):
         """ Return name

@@ -15,7 +15,7 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
 
 
     def category(self):
-        return 'PythonAlgorithms;Inelastic;CorrectionFunctions'
+        return 'Inelastic;CorrectionFunctions'
 
 
     def summary(self):

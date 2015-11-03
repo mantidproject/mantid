@@ -10,7 +10,7 @@ class SuggestTibHYSPEC(PythonAlgorithm):
     def category(self):
         """ Return category
         """
-        return "PythonAlgorithms;Utility;Inelastic"
+        return "Utility;Inelastic"
 
     def name(self):
         """ Return name

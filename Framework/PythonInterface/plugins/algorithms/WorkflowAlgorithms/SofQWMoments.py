@@ -12,7 +12,7 @@ import numpy as np
 class SofQWMoments(DataProcessorAlgorithm):
 
     def category(self):
-        return "Workflow\\MIDAS;PythonAlgorithms"
+        return "Workflow\\MIDAS"
 
 
     def summary (self):

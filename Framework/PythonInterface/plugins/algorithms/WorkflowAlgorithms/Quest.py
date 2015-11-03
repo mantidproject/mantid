@@ -8,7 +8,7 @@ import os
 class Quest(PythonAlgorithm):
 
     def category(self):
-        return "Workflow\\MIDAS;PythonAlgorithms"
+        return "Workflow\\MIDAS"
 
     def summary(self):
         return "This is a variation of the stretched exponential option of Quasi."

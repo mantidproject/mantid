@@ -7,7 +7,7 @@ import datetime
 
 class ViewBOA(PythonAlgorithm):
     def category(self):
-        return 'PythonAlgorithms;SINQ'
+        return 'SINQ'
 
     def summary(self):
         return "Load a BOA file and create the 3 BOA plots."

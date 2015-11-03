@@ -11,7 +11,7 @@ class GetEiMonDet(PythonAlgorithm):
     def category(self):
         """ Return category
         """
-        return "PythonAlgorithms;Inelastic"
+        return "Inelastic"
 
     def name(self):
         """ Return name
