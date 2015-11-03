@@ -260,18 +260,12 @@ void CreateMD::addSampleLog(Mantid::API::MatrixWorkspace_sptr workspace,
                             const std::string &log_name, double log_number) {
   Algorithm_sptr log_alg = createChildAlgorithm("AddSampleLog");
 
-  std::ostringstream log_number_ss;
-  log_number_ss << std::fixed << std::setprecision(6) << log_number;
-
   log_alg->setProperty("Workspace", workspace);
   log_alg->setProperty("LogName", log_name);
-  log_alg->setProperty(
-      "LogText",
-      log_number_ss.str());//boost::lexical_cast<std::string>(log_number));
+  log_alg->setProperty("LogText", boost::lexical_cast<std::string>(log_number));
   log_alg->setProperty("LogType", "Number");
-  // TODO uncomment below after #14187 PR completed and master merged
-  // and switch to using lexical_cast above
-  //log_alg->setProperty("NumberType", "Double");
+  // Force log to be of type double, even if integer value is passed
+  log_alg->setProperty("NumberType", "Double");
 
   log_alg->executeAsChildAlg();
 }
