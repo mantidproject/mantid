@@ -395,7 +395,7 @@ std::string EnggDiffractionViewQtGUI::currentVanadiumNo() const {
     Poco::Path vanadiumDir = vanstr;
     auto vanadium = vanadiumDir.getFileName();
 
-    for (int i = 0; i < vanadium.length(); i++) {
+    for (int i = 0; i < static_cast<int>(vanadium.length()); i++) {
       if (isdigit(vanadium[i]))
         vanno += vanadium[i];
     }
