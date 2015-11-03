@@ -60,7 +60,7 @@
             <item row="1" column="0">
               <widget class="QCheckBox" name="ckUseCan">
                 <property name="text">
-                  <string>Use Can:</string>
+                  <string>Use Container:</string>
                 </property>
               </widget>
             </item>
@@ -163,7 +163,7 @@
                   <bool>false</bool>
                 </property>
                 <property name="text">
-                  <string>Scale Can by factor:</string>
+                  <string>Scale Container by factor:</string>
                 </property>
                 <property name="checked">
                   <bool>false</bool>
