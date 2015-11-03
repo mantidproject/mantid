@@ -113,6 +113,14 @@ public:
     m_binWidth = (m_max - m_min) / static_cast<coord_t>(m_numBins);
   }
 
+  /**
+   * Set the MDFrame
+   * @param frame:: a reference to a new MDFrame
+   */
+  void setMDFrame(const MDFrame &frame) {
+    m_frame.reset(frame.clone());
+  }
+
 private:
   /// Name
   std::string m_name;
