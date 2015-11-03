@@ -416,7 +416,7 @@ std::string EnggDiffractionViewQtGUI::currentCeriaNo() const {
     Poco::Path ceriaDir = ceria_str;
     auto ceria = ceriaDir.getFileName();
 
-    for (int i = 0; i < ceria.length(); i++) {
+    for (int i = 0; i < static_cast<int>(ceria.length()); i++) {
       if (isdigit(ceria[i]))
         ceria_num += ceria[i];
     }
@@ -435,7 +435,7 @@ std::string EnggDiffractionViewQtGUI::newVanadiumNo() const {
     Poco::Path vanadiumDir = vanstr;
     auto vanadium = vanadiumDir.getFileName();
 
-    for (int i = 0; i < vanadium.length(); i++) {
+    for (int i = 0; i < static_cast<int>(vanadium.length()); i++) {
       if (isdigit(vanadium[i]))
         vanno += vanadium[i];
     }
@@ -454,7 +454,7 @@ std::string EnggDiffractionViewQtGUI::newCeriaNo() const {
     Poco::Path ceriaDir = ceria_str;
     auto ceria = ceriaDir.getFileName();
 
-    for (int i = 0; i < ceria.length(); i++) {
+    for (int i = 0; i < static_cast<int>(ceria.length()); i++) {
       if (isdigit(ceria[i]))
         ceria_num += ceria[i];
     }
@@ -762,7 +762,7 @@ std::string EnggDiffractionViewQtGUI::focusingRunNo() const {
     Poco::Path focusDir = focus_str;
     auto focus = focusDir.getFileName();
 
-    for (int i = 0; i < focus.length(); i++) {
+    for (int i = 0; i < static_cast<int>(focus.length()); i++) {
       if (isdigit(focus[i]))
         focus_num += focus[i];
     }
@@ -782,7 +782,7 @@ std::string EnggDiffractionViewQtGUI::focusingCroppedRunNo() const {
     Poco::Path focusDir = cropped_str;
     auto focus = focusDir.getFileName();
 
-    for (int i = 0; i < focus.length(); i++) {
+    for (int i = 0; i < static_cast<int>(focus.length()); i++) {
       if (isdigit(focus[i]))
         focus_num += focus[i];
     }
@@ -802,7 +802,7 @@ std::string EnggDiffractionViewQtGUI::focusingTextureRunNo() const {
     Poco::Path focusDir = texture_str;
     auto focus = focusDir.getFileName();
 
-    for (int i = 0; i < focus.length(); i++) {
+    for (int i = 0; i < static_cast<int>(focus.length()); i++) {
       if (isdigit(focus[i]))
         focus_num += focus[i];
     }
