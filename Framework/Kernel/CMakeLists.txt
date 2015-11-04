@@ -543,6 +543,7 @@ else ()
   set ( CONSOLEPATTERN "%s-[%p] %t" )
 endif ()
 
+set ( CONSOLECHANNELCLASS "ConsoleChannel" )
 configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
 )
@@ -617,6 +618,7 @@ else ()
   set ( PV_PLUGINS ${MANTID_ROOT}/${PVPLUGINS_SUBDIR} )
 endif ()
 
+set ( CONSOLECHANNELCLASS "StdoutChannel" )
 configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
 )
