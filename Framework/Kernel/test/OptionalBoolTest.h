@@ -56,23 +56,28 @@ public:
     TS_ASSERT_EQUALS(OptionalBool::True, arg.getValue());
   }
 
-  void test_ostream() {
+  void test_ostream_false() {
     std::stringstream buffer;
 
     OptionalBool notTrue(OptionalBool::False);
     buffer << notTrue;
     TS_ASSERT_EQUALS("False", buffer.str());
-    buffer = std::stringstream();
+  }
+
+  void test_ostream_true() {
+    std::stringstream buffer;
 
     OptionalBool isTrue(OptionalBool::True);
     buffer << isTrue;
     TS_ASSERT_EQUALS("True", buffer.str());
-    buffer = std::stringstream();
+  }
 
-    OptionalBool unset(OptionalBool::Unset);
-    buffer << unset;
+  void test_ostream_unset() {
+    std::stringstream buffer;
+
+    OptionalBool notTrue(OptionalBool::Unset);
+    buffer << notTrue;
     TS_ASSERT_EQUALS("Unset", buffer.str());
-    buffer = std::stringstream();
   }
 
   void test_istream_to_false() {
