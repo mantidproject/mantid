@@ -19,7 +19,7 @@ set GREP_EXE=%GIT_ROOT_DIR%bin\grep.exe
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: All nodes currently have PARAVIEW_DIR=4.3.b40280, PARAVIEW_NEXT_DIR=4.3.1
-:: and PARAVIEW_MSVC2015_DIR=4.3.b40280
+:: and PARAVIEW_MSVC2015_DIR=4.3.b40280-msvc2015
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 call cmake.exe --version
 echo %sha1%
@@ -111,7 +111,7 @@ if not "%JOB_NAME%"=="%JOB_NAME:relwithdbg=%" (
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: CMake configuration
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-"%CMAKE_BIN_DIR%\cmake.exe" -G "@CM_GENERATOR@" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_DOCS% ..
+call cmake.exe -G "@CM_GENERATOR@" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%PARAVIEW_MSVC2015_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_DOCS% ..
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
