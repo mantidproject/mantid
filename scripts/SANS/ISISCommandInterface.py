@@ -1156,7 +1156,15 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
                                           coord1_scale_factor,
                                           coord2_scale_factor)
 
-    # If we have 0 iterations then we should return here
+    # this function moves the detector to the beam center positions defined above and
+    # returns an estimate of where the beam center is relative to the new center
+    resCoord1_old, resCoord2_old = centre.SeekCentre(centre_reduction, [COORD1NEW, COORD2NEW])
+    centre_reduction = copy.deepcopy(ReductionSingleton().reference())
+    LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
+    beam_center_logger.report_status(0, original[0], original[1], resCoord1_old, resCoord2_old)
+
+    # If we have 0 iterations then we should return here. At this point the
+    # Left/Right/Up/Down workspaces have been already created by the SeekCentre function.
     if MaxIter <= 0:
         zero_iterations_msg = ("You have selected 0 iterations. The beam centre" +
                                "will be positioned at (" + str(xstart) + ", " + str(ystart) +")")
@@ -1165,12 +1173,6 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
 
     beam_center_logger.report_init(COORD1NEW, COORD2NEW)
 
-    # this function moves the detector to the beam center positions defined above and
-    # returns an estimate of where the beam center is relative to the new center
-    resCoord1_old, resCoord2_old = centre.SeekCentre(centre_reduction, [COORD1NEW, COORD2NEW])
-    centre_reduction = copy.deepcopy(ReductionSingleton().reference())
-    LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
-    beam_center_logger.report_status(0, original[0], original[1], resCoord1_old, resCoord2_old)
     # take first trial step
     COORD1NEW, COORD2NEW = centre_positioner.increment_position(COORD1NEW, COORD2NEW)
     graph_handle = None
