@@ -3,9 +3,18 @@
     from the the interface class so that the HFIRReduction class could
     be used independently of the interface implementation
 """
+import inspect
 import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement
-
+from pprint import pformat
+try:
+    import mantidplot
+    from mantid.kernel import logger
+except:
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
+    logger = logging.getLogger("hfir_options")
+    
 class ReductionOptions(BaseScriptElement):
     instrument_name = "BIOSANS"
     nx_pixels = 192
@@ -88,20 +97,34 @@ class ReductionOptions(BaseScriptElement):
     def __init__(self):
         super(ReductionOptions, self).__init__()
         self.reset()
+    
+    def get_this_class_variables(self):
+        '''
+        Just for debug purposes
+        Return: pairs of (var_name,var_value)
+        '''
+        attributes = inspect.getmembers(self, lambda a:not(inspect.isroutine(a)))
+        pairs = [a for a in attributes if not(a[0].startswith('__') and a[0].endswith('__'))]
+        return pairs
 
     def to_script(self):
         """
             Generate reduction script
         """
+        
+        #logger.debug(pformat(self.get_this_class_variables()))
+        
         script  = "%s()\n" % self.instrument_name
 
         if self.sample_detector_distance != 0:
             script += "SetSampleDetectorDistance(%g)\n" % self.sample_detector_distance
         if self.sample_si_window_distance !=0:
             script += "SetSampleSiWindowDistance(%g)\n" % self.sample_si_window_distance
-        
         if self.detector_offset != 0:
             script += "SetSampleDetectorOffset(%g)\n" % self.detector_offset
+        if self.sample_total_distance != 0:
+            script += "SetSampleTotalDistance(%g)\n" % self.sample_total_distance
+            
         if self.wavelength != 0:
             script += "SetWavelength(%g, %g)\n" % (self.wavelength, self.wavelength_spread)
 
@@ -188,6 +211,8 @@ class ReductionOptions(BaseScriptElement):
 
         xml += "  <sample_det_dist>%g</sample_det_dist>\n" % self.sample_detector_distance
         xml += "  <detector_offset>%g</detector_offset>\n" % self.detector_offset
+        xml += "  <sample_si_window_distance>%g</sample_si_window_distance>\n" % self.sample_si_window_distance
+        xml += "  <sample_total_distance>%g</sample_total_distance>\n" % self.sample_total_distance
         xml += "  <wavelength>%g</wavelength>\n" % self.wavelength
         xml += "  <wavelength_spread>%g</wavelength_spread>\n" % self.wavelength_spread
 
@@ -265,6 +290,13 @@ class ReductionOptions(BaseScriptElement):
                                                                           default=ReductionOptions.sample_detector_distance)
         self.detector_offset = BaseScriptElement.getFloatElement(instrument_dom, "detector_offset",
                                                                  default=ReductionOptions.detector_offset)
+
+        self.sample_si_window_distance =  BaseScriptElement.getFloatElement(instrument_dom, "sample_si_window_distance",
+                                                                          default=ReductionOptions.sample_si_window_distance)
+        
+        self.sample_total_distance =  BaseScriptElement.getFloatElement(instrument_dom, "sample_total_distance",
+                                                                          default=ReductionOptions.sample_total_distance)
+        
         self.wavelength = BaseScriptElement.getFloatElement(instrument_dom, "wavelength",
                                                             default=ReductionOptions.wavelength)
         self.wavelength_spread = BaseScriptElement.getFloatElement(instrument_dom, "wavelength_spread",\
@@ -365,6 +397,10 @@ class ReductionOptions(BaseScriptElement):
 
         self.sample_detector_distance = BaseScriptElement.getPropertyValue(alg, "SampleDetectorDistance", default=ReductionOptions.sample_detector_distance)
         self.detector_offset = BaseScriptElement.getPropertyValue(alg, "SampleDetectorDistanceOffset", default=ReductionOptions.detector_offset)
+        
+        self.sample_si_window_distance = BaseScriptElement.getPropertyValue(alg, "SampleSiWindowDistance", default=ReductionOptions.sample_si_window_distance)
+        self.sample_total_distance = BaseScriptElement.getPropertyValue(alg, "TotalDetectorDistance", default=ReductionOptions.sample_total_distance)
+        
         self.wavelength = BaseScriptElement.getPropertyValue(alg, "Wavelength", default=ReductionOptions.wavelength)
         self.wavelength_spread = BaseScriptElement.getPropertyValue(alg, "WavelengthSpread", default=ReductionOptions.wavelength_spread)
 
@@ -444,6 +480,7 @@ class ReductionOptions(BaseScriptElement):
 
         self.sample_detector_distance = ReductionOptions.sample_detector_distance
         self.detector_offset = ReductionOptions.detector_offset
+        
         self.sample_si_window_distance = ReductionOptions.sample_si_window_distance
         self.sample_total_distance =  ReductionOptions.sample_total_distance
 #         if self.instrument_name.upper() == "GPSANS":
