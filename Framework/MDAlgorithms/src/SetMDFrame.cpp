@@ -1,4 +1,4 @@
-#include "MantidMDAlgorithms/SetMDFrames.h"
+#include "MantidMDAlgorithms/SetMDFrame.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -9,7 +9,8 @@
 #include "MantidGeometry/MDGeometry/QLab.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidGeometry/MDGeometry/UnknownFrame.h"
-#include "MantidKernel/Strings.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 
 #include <map>
@@ -23,44 +24,45 @@ using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(SetMDFrames)
+DECLARE_ALGORITHM(SetMDFrame)
 
-const std::string SetMDFrames::mdFrameSpecifier = "MDFrame";
+const std::string SetMDFrame::mdFrameSpecifier = "MDFrame";
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-SetMDFrames::SetMDFrames() {}
+SetMDFrame::SetMDFrame() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-SetMDFrames::~SetMDFrames() {}
+SetMDFrame::~SetMDFrame() {}
 
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string SetMDFrames::name() const { return "SetMDFrames"; }
+const std::string SetMDFrame::name() const { return "SetMDFrame"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int SetMDFrames::version() const { return 1; }
+int SetMDFrame::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SetMDFrames::category() const {
+const std::string SetMDFrame::category() const {
   return "MDAlgorithms";
   ;
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string SetMDFrames::summary() const {
-  return "Set the MDFrame for each axis for legacy MDHisto and MDEvent "
+const std::string SetMDFrame::summary() const {
+  return "Sets a new MDFrame type for a selection of axes for legacy MDHisto "
+         "and MDEvent "
          "workspaces.";
 }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void SetMDFrames::init() {
+void SetMDFrame::init() {
   declareProperty(new WorkspaceProperty<Mantid::API::IMDWorkspace>(
                       "InputWorkspace", "", Direction::InOut),
                   "The workspace for which the MDFrames are to be changed. "
@@ -76,38 +78,45 @@ void SetMDFrames::init() {
   mdFrames.push_back(Mantid::Geometry::UnknownFrame::UnknownFrameName);
 
   // Create a selection of MDFrames and units for each dimension
-  std::string dimChars = getDimensionChars();
-  for (size_t i = 0; i < dimChars.size(); i++) {
-    std::string dim(" ");
-    dim[0] = dimChars[i];
-    std::string propName = mdFrameSpecifier + dim;
+  std::string propName = mdFrameSpecifier;
 
-    declareProperty(
-        propName, Mantid::Geometry::GeneralFrame::GeneralFrameName,
-        boost::make_shared<Mantid::Kernel::StringListValidator>(mdFrames),
-        "MDFrame selection for the " + Mantid::Kernel::Strings::toString(i) +
-            "th dimension.\n");
+  declareProperty(
+      propName, Mantid::Geometry::GeneralFrame::GeneralFrameName,
+      boost::make_shared<Mantid::Kernel::StringListValidator>(mdFrames),
+      "MDFrame type selection.\n");
 
-    setPropertyGroup(propName, "MDFrames");
-  }
+  auto axisValidator =
+      boost::make_shared<Mantid::Kernel::ArrayBoundedValidator<int>>();
+  axisValidator->clearUpper();
+  axisValidator->setLower(0);
+  declareProperty(
+      new Mantid::Kernel::ArrayProperty<int>("Axes", std::vector<int>(0),
+                                             axisValidator, Direction::Input),
+      "Selects the axes which are going to be set to the new MDFrame type.");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void SetMDFrames::exec() {
+void SetMDFrame::exec() {
   Mantid::API::IMDWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
-  // Get the units information for each dimension
-  auto numberOfDimensions = inputWorkspace->getNumDims();
-  for (size_t index = 0; index < numberOfDimensions; ++index) {
-    auto dimension = inputWorkspace->getDimension(index);
 
-    // Get frame specifier
-    std::string propertyID =
-        mdFrameSpecifier + boost::lexical_cast<std::string>(index);
-    std::string frameSelection = getProperty(propertyID);
+  // Make sure that the selected axes are compatible with the workspace
+  auto numberOfDimensions = inputWorkspace->getNumDims();
+  std::vector<int> axesInts = this->getProperty("Axes");
+  std::vector<size_t> axes(axesInts.begin(), axesInts.end());
+
+  // If no axes were specified, then don't do anything
+  if (axes.empty()) {
+    return;
+  }
+
+  for (auto index = axes.begin(); index != axes.end(); ++index) {
+    // Get associated dimension
+    auto dimension = inputWorkspace->getDimension(*index);
 
     // Provide a new MDFrame
+    std::string frameSelection = getProperty(mdFrameSpecifier);
     const auto &mdFrame = dimension->getMDFrame();
     auto newMDFrame = createMDFrame(frameSelection, mdFrame);
 
@@ -119,8 +128,7 @@ void SetMDFrames::exec() {
             boost::dynamic_pointer_cast<
                 const Mantid::Geometry::MDHistoDimension>(dimension));
     if (!mdHistoDimension) {
-      throw std::runtime_error(
-          "SetMDFrames: Cannot convert to MDHistDimension");
+      throw std::runtime_error("SetMDFrame: Cannot convert to MDHistDimension");
     }
     mdHistoDimension->setMDFrame(*newMDFrame);
   }
@@ -130,7 +138,7 @@ void SetMDFrames::exec() {
  * Check the inputs for invalid values
  * @returns A map with validation warnings.
  */
-std::map<std::string, std::string> SetMDFrames::validateInputs() {
+std::map<std::string, std::string> SetMDFrame::validateInputs() {
   std::map<std::string, std::string> invalidProperties;
   Mantid::API::IMDWorkspace_sptr ws = getProperty("InputWorkspace");
 
@@ -140,6 +148,31 @@ std::map<std::string, std::string> SetMDFrames::validateInputs() {
         std::make_pair("InputWorkspace", "The input workspace has to be either "
                                          "an MDEvent or MDHisto Workspace."));
   }
+
+  std::vector<int> axesInts = this->getProperty("Axes");
+  std::vector<size_t> axes(axesInts.begin(), axesInts.end());
+  auto axesAreEmpty = axes.empty();
+  if (axesAreEmpty) {
+    invalidProperties.insert(std::make_pair("Axes", "No index was specified."));
+  } else {
+    // Make sure that there are fewer axes specified than there exist on the
+    // workspace
+    if (axes.size() > ws->getNumDims()) {
+      invalidProperties.insert(std::make_pair(
+          "Axes",
+          "More axis specified than dimensions are avaiable in the input"));
+    }
+
+    // Ensure that the axes selection is within the number of dimensions of the
+    // workspace
+    auto it = std::max_element(axes.begin(), axes.end());
+    if (*it >= ws->getNumDims()) {
+      invalidProperties.insert(
+          std::make_pair("Axes", "One of the axis indexes specified indexes a "
+                                 "dimension outside the real dimension range"));
+    }
+  }
+
   return invalidProperties;
 }
 
@@ -150,8 +183,8 @@ std::map<std::string, std::string> SetMDFrames::validateInputs() {
  * @returns :: a unique pointer to the new MDFrame
  */
 Mantid::Geometry::MDFrame_uptr
-SetMDFrames::createMDFrame(const std::string &frameSelection,
-                           const Mantid::Geometry::MDFrame &oldFrame) const {
+SetMDFrame::createMDFrame(const std::string &frameSelection,
+                          const Mantid::Geometry::MDFrame &oldFrame) const {
   auto mdFrameFactory = Mantid::Geometry::makeMDFrameFactoryChain();
   if (frameSelection == Mantid::Geometry::GeneralFrame::GeneralFrameName) {
     Mantid::Geometry::MDFrameArgument argument(
@@ -174,7 +207,7 @@ SetMDFrames::createMDFrame(const std::string &frameSelection,
     Mantid::Geometry::HKLFrameFactory hklFrameFactory;
     auto canInterpret = hklFrameFactory.canInterpret(argument);
     if (!canInterpret) {
-      throw std::invalid_argument("SetMDFrames: " + frameSelection +
+      throw std::invalid_argument("SetMDFrame: " + frameSelection +
                                   " does not have units which are compatible "
                                   "with an HKL frame. Please contact the "
                                   "Mantid team if you believe that the units "
@@ -190,7 +223,7 @@ SetMDFrames::createMDFrame(const std::string &frameSelection,
     return mdFrameFactory->create(argument);
   } else {
     throw std::invalid_argument(
-        "SetMDFrames: The selected MDFrame does not seem to be supported");
+        "SetMDFrame: The selected MDFrame does not seem to be supported");
   }
 }
 

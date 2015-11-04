@@ -1,5 +1,5 @@
-#ifndef MANTID_MDALGORITHMS_SETMDFRAMES_H_
-#define MANTID_MDALGORITHMS_SETMDFRAMES_H_
+#ifndef MANTID_MDALGORITHMS_SetMDFrame_H_
+#define MANTID_MDALGORITHMS_SetMDFrame_H_
 
 #include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
@@ -8,7 +8,7 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-/** SetMDFrames : This algorithm changes the MDFrame stored alongside the
+/** SetMDFrame : This algorithm changes the MDFrame stored alongside the
     dimension of MDWorkspaes.The algorithm should primarily be used to
     introduce the correct MDFrame type to workspaces based on legacy files.
 
@@ -33,12 +33,11 @@ namespace MDAlgorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_MDALGORITHMS_DLL SetMDFrames : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL SetMDFrame : public API::Algorithm {
 public:
-  static std::string getDimensionChars() { return "012345"; }
   static const std::string mdFrameSpecifier;
-  SetMDFrames();
-  virtual ~SetMDFrames();
+  SetMDFrame();
+  virtual ~SetMDFrame();
 
   virtual const std::string name() const;
   virtual int version() const;
@@ -57,4 +56,4 @@ private:
 } // namespace MDAlgorithms
 } // namespace Mantid
 
-#endif /* MANTID_MDALGORITHMS_SETMDFRAMES_H_ */
+#endif /* MANTID_MDALGORITHMS_SetMDFrame_H_ */

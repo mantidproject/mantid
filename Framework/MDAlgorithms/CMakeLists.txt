@@ -107,7 +107,7 @@ set ( SRC_FILES
 	src/SaveMD.cpp
 	src/SaveMD2.cpp
 	src/SaveZODS.cpp
-	src/SetMDFrames.cpp
+	src/SetMDFrame.cpp
 	src/SetMDUsingMask.cpp
 	src/SliceMD.cpp
 	src/SlicingAlgorithm.cpp
@@ -231,7 +231,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/SaveMD.h
 	inc/MantidMDAlgorithms/SaveMD2.h
 	inc/MantidMDAlgorithms/SaveZODS.h
-	inc/MantidMDAlgorithms/SetMDFrames.h
+	inc/MantidMDAlgorithms/SetMDFrame.h
 	inc/MantidMDAlgorithms/SetMDUsingMask.h
 	inc/MantidMDAlgorithms/SliceMD.h
 	inc/MantidMDAlgorithms/SlicingAlgorithm.h
@@ -339,7 +339,7 @@ set ( TEST_FILES
 	SaveMD2Test.h
 	SaveMDTest.h
 	SaveZODSTest.h
-	SetMDFramesTest.h
+	SetMDFrameTest.h
 	SetMDUsingMaskTest.h
 	SimulateResolutionConvolvedModelTest.h
 	SliceMDTest.h

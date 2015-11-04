@@ -114,7 +114,11 @@ public:
   }
 
   /**
-   * Set the MDFrame
+   * Set the MDFrame. This method was added in order to set the correct
+   * MDFrame information on workspaces which are loaded from legacy files.
+   * This is currently being used by SetMDFrame. Except for legacy corrections
+   * you should not have to use of this method. If you think you do, it
+   * is advisible to consolut with other Mantid team members before using it.
    * @param frame:: a reference to a new MDFrame
    */
   void setMDFrame(const MDFrame &frame) { m_frame.reset(frame.clone()); }
