@@ -159,12 +159,14 @@ void DiffractionFocussing2::exec() {
   }
 
   // Check valida detectors are found in the .Cal file
-  if(nGroups <= 0){
-	  throw std::runtime_error("No selected Detectors found in .cal file for input range. Please ensure spectra range has atleast one selected detector.");
+  if (nGroups <= 0) {
+    throw std::runtime_error("No selected Detectors found in .cal file for "
+                             "input range. Please ensure spectra range has "
+                             "atleast one selected detector.");
   }
   // Check the number of points
-  if(nPoints <= 0){
-	  throw std::runtime_error("No points found in the data range.");
+  if (nPoints <= 0) {
+    throw std::runtime_error("No points found in the data range.");
   }
   API::MatrixWorkspace_sptr out = API::WorkspaceFactory::Instance().create(
       m_matrixInputW, nGroups, nPoints + 1, nPoints);
@@ -605,9 +607,10 @@ void DiffractionFocussing2::determineRebinParameters() {
 
     // Create the group range in the map if it isn't already there
     if (gpit == group2minmax.end()) {
-      gpit = group2minmax.insert(std::make_pair(
-                                     group, std::make_pair(
-                                                BIGGEST, -1. * BIGGEST))).first;
+      gpit = group2minmax.insert(
+                             std::make_pair(
+                                 group, std::make_pair(BIGGEST, -1. * BIGGEST)))
+                 .first;
     }
     const double min = (gpit->second).first;
     const double max = (gpit->second).second;

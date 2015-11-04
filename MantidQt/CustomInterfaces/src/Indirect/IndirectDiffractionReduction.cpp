@@ -345,8 +345,10 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
                                    m_uiForm.ckLoadLogs->isChecked());
   osirisDiffReduction->setProperty("OutputWorkspace",
                                    drangeWsName.toStdString());
-  auto specMin = boost::lexical_cast<std::string, int>(m_uiForm.spSpecMin->value());
-  auto specMax = boost::lexical_cast<std::string, int>(m_uiForm.spSpecMax->value());
+  auto specMin =
+      boost::lexical_cast<std::string, int>(m_uiForm.spSpecMin->value());
+  auto specMax =
+      boost::lexical_cast<std::string, int>(m_uiForm.spSpecMax->value());
   osirisDiffReduction->setProperty("SpectraMin", specMin);
   osirisDiffReduction->setProperty("SpectraMax", specMax);
 
@@ -551,7 +553,8 @@ void IndirectDiffractionReduction::loadSettings() {
   QSettings settings;
   QString dataDir = QString::fromStdString(
                         Mantid::Kernel::ConfigService::Instance().getString(
-                            "datasearch.directories")).split(";")[0];
+                            "datasearch.directories"))
+                        .split(";")[0];
 
   settings.beginGroup(m_settingsGroup);
   settings.setValue("last_directory", dataDir);
