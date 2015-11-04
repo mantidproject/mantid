@@ -55,7 +55,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
                 v=v.unfiltered()
             for tt in v.times:
                 times2.append((datetime.datetime(*(time.strptime(str(tt),"%Y-%m-%dT%H:%M:%S")[0:6]))-begin).total_seconds())
-        except:
+        except StandardError:
             # print "probably not a time series"
             pass
         if name[0:8]=="Beamlog_" and (name.find("Counts")>0 or name.find("Frames")>0):
@@ -137,7 +137,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
             try:
                 #try to set MetaDataOnly
                 loadAlg.setProperty('MetaDataOnly', True)
-            except:
+            except (ValueError,RuntimeError):
                 #If that fails set SpectrumMin and SpectrumMax
                 loadAlg.setProperty('SpectrumMin', 1)
                 loadAlg.setProperty('SpectrumMax', 1)
@@ -156,7 +156,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
     def getRunNumber(self, fileName):
         # Find last . and step back until you find a digit
         lastDigitIndex = fileName.rindex('.')
-        while (not fileName[lastDigitIndex - 1].isdigit()):
+        while not fileName[lastDigitIndex - 1].isdigit():
             lastDigitIndex -= 1
 
         # Keep going back until you find the start of the number sequence
