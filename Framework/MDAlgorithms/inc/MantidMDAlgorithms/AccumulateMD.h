@@ -83,6 +83,8 @@ private:
       const std::vector<std::string> &data_sources,
       const std::vector<double> &psi, const std::vector<double> &gl,
       const std::vector<double> &gs, const std::vector<double> &efix);
+
+  std::map<std::string, std::string> validateInputs();
 };
 
 } // namespace MDAlgorithms

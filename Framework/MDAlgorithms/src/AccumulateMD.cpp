@@ -256,7 +256,7 @@ void AccumulateMD::init() {
 
   declareProperty(new PropertyWithValue<bool>("Clean", false, Direction::Input),
                   "Create workspace from fresh rather than appending to "
-                  "existing workspace.");
+                  "existing workspace data.");
 }
 
 /*
@@ -321,7 +321,7 @@ void AccumulateMD::exec() {
 
   const std::string temp_ws_name = "TEMP_WORKSPACE_ACCUMULATEMD";
   // Currently have to us ADS here as list of workspaces can only be passed as a
-  // string of names
+  // list of workspace names as a string
   AnalysisDataService::Instance().add(temp_ws_name, tmp_ws);
   std::string ws_names_to_merge = input_ws->getName();
   ws_names_to_merge.append(",");
@@ -365,6 +365,60 @@ IMDWorkspace_sptr AccumulateMD::createMDWorkspace(
   create_alg->executeAsChildAlg();
 
   return create_alg->getProperty("OutputWorkspace");
+}
+
+std::map<std::string, std::string> AccumulateMD::validateInputs() {
+  // Create the map
+  std::map<std::string, std::string> validation_output;
+
+// Get properties to validate
+  const std::vector<std::string> data_sources =
+    this->getProperty("DataSources");
+  const std::vector<double> u = this->getProperty("u");
+  const std::vector<double> v = this->getProperty("v");
+  const std::vector<double> alatt = this->getProperty("Alatt");
+  const std::vector<double> angdeg = this->getProperty("Angdeg");
+  const std::vector<double> psi = this->getProperty("Psi");
+  const std::vector<double> gl = this->getProperty("Gl");
+  const std::vector<double> gs = this->getProperty("Gs");
+  const std::vector<double> efix = this->getProperty("Efix");
+
+  const size_t ws_entries = data_sources.size();
+
+  if (u.size() < 3) {
+    validation_output["u"] = "u must have 3 components";
+  }
+  if (v.size() < 3) {
+    validation_output["v"] = "v must have 3 components";
+  }
+  if (alatt.size() < 3) {
+    validation_output["Alatt"] = "Lattice parameters must have 3 components";
+  }
+  if (angdeg.size() < 3) {
+    validation_output["Angdeg"] = "Angle must have 3 components";
+  }
+  if (!psi.empty() && psi.size() != ws_entries) {
+    validation_output["Psi"] = "If Psi is given an entry "
+      "should be provided for "
+      "every input datasource";
+  }
+  if (!gl.empty() && gl.size() != ws_entries) {
+    validation_output["Gl"] = "If Gl is given an entry "
+      "should be provided for "
+      "every input datasource";
+  }
+  if (!gs.empty() && gs.size() != ws_entries) {
+    validation_output["Gs"] = "If Gs is given an entry "
+      "should be provided for "
+      "every input datasource";
+  }
+  if (efix.size() > 1 && efix.size() != ws_entries) {
+    validation_output["EFix"] =
+      "Either specify a single EFix value, or as many "
+        "as there are input datasources";
+  }
+
+  return validation_output;
 }
 
 } // namespace MDAlgorithms
