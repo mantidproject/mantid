@@ -111,7 +111,7 @@ if not "%JOB_NAME%"=="%JOB_NAME:relwithdbg=%" (
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: CMake configuration
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-call cmake.exe -G "@CM_GENERATOR@" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%PARAVIEW_MSVC2015_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_DOCS% ..
+call cmake.exe -G "%CM_GENERATOR%" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%PARAVIEW_MSVC2015_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_DOCS% ..
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -126,7 +126,13 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :: Remove the user properties file just in case anything polluted it
 set USERPROPS=bin\%BUILD_CONFIG%\Mantid.user.properties
 del %USERPROPS%
-"%CMAKE_BIN_DIR%\ctest.exe" -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on-failure
+
+:: TODO - Utilise generated buildenv.bat 
+set THIRD_PARTY_DIR=%WORKSPACE%\external\thirdparty-msvc2015
+set PYTHONHOME=%THIRD_PARTY_DIR%\lib\python2.7
+set PATH=%THIRD_PARTY_DIR%\bin;%PYTHONHOME%;%THIRD_PARTY_DIR%\lib\qt4\bin
+
+call ctest.exe -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on-failure
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -141,5 +147,5 @@ if "%BUILDPKG%" == "yes" (
   :: It always marks the build as a failure even thought the MantidPlot exit
   :: code is correct!
   ::if ERRORLEVEL 1 exit /B %ERRORLEVEL%
-  "%CMAKE_BIN_DIR%\cpack.exe" -C %BUILD_CONFIG% --config CPackConfig.cmake
+  call cpack.exe -C %BUILD_CONFIG% --config CPackConfig.cmake
 )
