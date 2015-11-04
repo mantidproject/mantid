@@ -6,6 +6,7 @@ from PyQt4 import QtGui, uic, QtCore
 from functools import partial
 from reduction_gui.widgets.base_widget import BaseWidget
 import reduction_gui.widgets.util as util
+from mantid.kernel import Logger
 
 from reduction_gui.reduction.diffraction.diffraction_run_setup_script import RunSetupScript
 import ui.diffraction.ui_diffraction_run_setup
@@ -37,12 +38,19 @@ class RunSetupWidget(BaseWidget):
             def __init__(self, parent=None):
                 QtGui.QFrame.__init__(self, parent)
                 self.setupUi(self)
-        #END-DEF RunSetFrame
+        # END-DEF RunSetFrame
+
+        # Instrument and facility information
+        self._instrument_name = settings.instrument_name
+        self._facility_name = settings.facility_name
+
+        msg='run_setup: facility = %s instrument = % s' % \
+            (self._facility_name, self._instrument_name)
+        Logger("RunSetupWidget").debug(str(msg))
 
         self._content = RunSetFrame(self)
         self._layout.addWidget(self._content)
-        self._instrument_name = settings.instrument_name
-        self._facility_name = settings.facility_name
+
         self.initialize_content()
 
         if state is not None:
@@ -71,6 +79,19 @@ class RunSetupWidget(BaseWidget):
         self._content.disablevancorr_chkbox.setChecked(False)
         self._content.disablevanbkgdcorr_chkbox.setChecked(False)
 
+        # Label
+        if self._instrument_name is not False:
+            self._content.label.setText('Instrument: %s' % self._instrument_name.upper())
+        else:
+            self._content.label.setText('Instrument has not been set up.  You may not launch correctly.')
+
+        # Enable disable
+        if self._instrument_name.lower().startswith('nom') is False:
+            self._content.lineEdit_expIniFile.setEnabled(False)
+            self._content.pushButton_browseExpIniFile.setEnabled(False)
+        else:
+            self._content.lineEdit_expIniFile.setEnabled(True)
+            self._content.pushButton_browseExpIniFile.setEnabled(True)
         #self._content.override_emptyrun_checkBox.setChecked(False)
         #self._content.override_vanrun_checkBox.setChecked(False)
         #self._content.override_vanbkgdrun_checkBox.setChecked(False)
@@ -108,20 +129,21 @@ class RunSetupWidget(BaseWidget):
         self._content.binning_edit.setValidator(fiv)
 
         # Default states
-
         # self._handle_tzero_guess(self._content.use_ei_guess_chkbox.isChecked())
 
         # Connections from action/event to function to handle
-        self.connect(self._content.calfile_browse, QtCore.SIGNAL("clicked()"),\
-                self._calfile_browse)
-        self.connect(self._content.charfile_browse, QtCore.SIGNAL("clicked()"),\
-                self._charfile_browse)
-        self.connect(self._content.outputdir_browse, QtCore.SIGNAL("clicked()"),\
-                self._outputdir_browse)
-        self.connect(self._content.binning_edit, QtCore.SIGNAL("valueChanged"),\
-                self._binvalue_edit)
-        self.connect(self._content.bintype_combo, QtCore.SIGNAL("currentIndexChanged(QString)"),\
-                self._bintype_process)
+        self.connect(self._content.calfile_browse, QtCore.SIGNAL("clicked()"),
+                     self._calfile_browse)
+        self.connect(self._content.charfile_browse, QtCore.SIGNAL("clicked()"),
+                     self._charfile_browse)
+        self.connect(self._content.pushButton_browseExpIniFile, QtCore.SIGNAL('clicked()'),
+                     self.do_browse_ini_file)
+        self.connect(self._content.outputdir_browse, QtCore.SIGNAL("clicked()"),
+                     self._outputdir_browse)
+        self.connect(self._content.binning_edit, QtCore.SIGNAL("valueChanged"),
+                     self._binvalue_edit)
+        self.connect(self._content.bintype_combo, QtCore.SIGNAL("currentIndexChanged(QString)"),
+                     self._bintype_process)
 
         #self.connect(self._content.override_emptyrun_checkBox, QtCore.SIGNAL("clicked()"),
         #        self._overrideemptyrun_clicked)
@@ -155,6 +177,7 @@ class RunSetupWidget(BaseWidget):
         """
         self._content.runnumbers_edit.setText(state.runnumbers)
         self._content.calfile_edit.setText(state.calibfilename)
+        self._content.lineEdit_expIniFile.setText(state.exp_ini_file_name)
         self._content.charfile_edit.setText(state.charfilename)
         self._content.sum_checkbox.setChecked(state.dosum)
         self._content.binning_edit.setText(str(state.binning))
@@ -210,6 +233,7 @@ class RunSetupWidget(BaseWidget):
             raise NotImplementedError("Run number error @ %s" % (rtup[1]))
 
         s.calibfilename = self._content.calfile_edit.text()
+        s.exp_ini_file_name = str(self._content.lineEdit_expIniFile.text())
         s.charfilename = self._content.charfile_edit.text()
         s.dosum = self._content.sum_checkbox.isChecked()
 
@@ -254,7 +278,7 @@ class RunSetupWidget(BaseWidget):
     def _calfile_browse(self):
         """ Event handing for browsing calibrtion file
         """
-        fname = self.data_browse_dialog(data_type="*.cal;;*.*")
+        fname = self.data_browse_dialog(data_type="*.cal;;*.h5;;*.hd5;;*.hdf;;*.*")
         if fname:
             self._content.calfile_edit.setText(fname)
 
@@ -266,6 +290,16 @@ class RunSetupWidget(BaseWidget):
         fname = self.data_browse_dialog("*.txt;;*.*")
         if fname:
             self._content.charfile_edit.setText(fname)
+
+        return
+
+    def do_browse_ini_file(self):
+        """ Event handling for browsing Exp Ini file
+        :return:
+        """
+        exp_ini_file_name = self.data_browse_dialog(data_type="*.ini;;*.*")
+        if exp_ini_file_name:
+            self._content.lineEdit_expIniFile.setText(exp_ini_file_name)
 
         return
 

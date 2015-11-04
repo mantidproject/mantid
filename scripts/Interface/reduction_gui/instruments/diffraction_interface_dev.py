@@ -14,8 +14,9 @@ class DiffractionInterface(InstrumentInterface):
     # Allowed extensions for loading data files
     data_type = "Data files *.* (*.*)"
 
-
     def __init__(self, name, settings):
+        """
+        """
         super(DiffractionInterface, self).__init__(name, settings)
 
         self.ERROR_REPORT_NAME = "diffraction_error_report.xml"
