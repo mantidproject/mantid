@@ -84,6 +84,8 @@ class ITableWorkspaceTest(unittest.TestCase):
         incorrect_type = {'index':1, 'value':10}
         self.assertRaises(TypeError, table.addRow, incorrect_type)
 
+        incorrect_key = {'notindex': 2, 'notvalue': '20'}
+        self.assertRaises(KeyError, table.addRow, incorrect_key)
 
     def test_adding_table_data_using_list(self):
         table = WorkspaceFactory.createTable()
@@ -94,12 +96,47 @@ class ITableWorkspaceTest(unittest.TestCase):
 
         nextrow = {'index':1, 'value':'10'}
         values = nextrow.values()
-        table.addRow(nextrow)
+        table.addRow(values)
         self.assertEquals(len(table), 1)
         insertedrow = table.row(0)
         self.assertEquals(insertedrow, nextrow)
+
+        incorrect_type = [1, 10]
+        self.assertRaises(TypeError, table.addRow, incorrect_type)
+
+    def test_adding_table_data_using_tuple(self):
+        table = WorkspaceFactory.createTable()
+        table.addColumn(type="int",name="index")
+        self.assertEquals(table.columnCount(), 1)
+        table.addColumn(type="str",name="value")
+        self.assertEquals(table.columnCount(), 2)
+
+        nextrow = {'index':1, 'value':'10'}
+        values = tuple(nextrow.values())
+        table.addRow(values)
+        self.assertEquals(len(table), 1)
         insertedrow = table.row(0)
         self.assertEquals(insertedrow, nextrow)
+
+        incorrect_type = (1, 10)
+        self.assertRaises(TypeError, table.addRow, incorrect_type)
+
+    def test_adding_table_data_using_numpy(self):
+        table = WorkspaceFactory.createTable()
+        table.addColumn(type="int",name="index")
+        self.assertEquals(table.columnCount(), 1)
+        table.addColumn(type="int",name="value")
+        self.assertEquals(table.columnCount(), 2)
+
+        nextrow = {'index': 1, 'value': 10}
+        values = numpy.array(nextrow.values())
+        table.addRow(values)
+        self.assertEquals(len(table), 1)
+        insertedrow = table.row(0)
+        self.assertEquals(insertedrow, nextrow)
+
+        incorrect_type = numpy.array(['1', '10'])
+        self.assertRaises(TypeError, table.addRow, incorrect_type)
 
     def test_set_and_extract_boolean_columns(self):
         table = WorkspaceFactory.createTable()
