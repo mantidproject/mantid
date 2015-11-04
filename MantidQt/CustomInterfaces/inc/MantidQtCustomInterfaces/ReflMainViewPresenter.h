@@ -1,9 +1,9 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
 
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidKernel/System.h"
+#include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/IReflSearcher.h"
@@ -11,7 +11,7 @@
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 
 #include <Poco/AutoPtr.h>
-#include <Poco/NObserver.h>
+//#include <Poco/NObserver.h>
 #include <memory>
 
 namespace MantidQt
@@ -22,30 +22,24 @@ namespace MantidQt
   class ProgressableView;
 
     /** @class ReflMainViewPresenter
-
     ReflMainViewPresenter is a presenter class for teh Reflectometry Interface. It handles any interface functionality and model manipulation.
-
     Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
-
     This file is part of Mantid.
-
     Mantid is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 3 of the License, or
     (at your option) any later version.
-
     Mantid is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport ReflMainViewPresenter: public IReflPresenter
+    class DLLExport ReflMainViewPresenter: public IReflPresenter,
+                                           public MantidQt::API::WorkspaceObserver
     {
     public:
       ReflMainViewPresenter(ReflMainView *mainView,
@@ -84,7 +78,7 @@ namespace MantidQt
       //prepare a run or list of runs for processing
       Mantid::API::Workspace_sptr prepareRunWorkspace(const std::string& run);
       //load a run into the ADS, or re-use one in the ADS if possible
-      Mantid::API::Workspace_sptr loadRun(const std::string& run, const std::string& instrument);
+      Mantid::API::Workspace_sptr loadRun(const std::string& run, const std::string& instrument); //change
       //get the run number of a TOF workspace
       std::string getRunNumber(const Mantid::API::Workspace_sptr& ws);
       //get an unused group id
@@ -145,18 +139,22 @@ namespace MantidQt
       std::set<std::string> m_workspaceList;
 
       //To maintain a list of workspaces the user may open, we observe the ADS
-      Poco::NObserver<ReflMainViewPresenter, Mantid::API::WorkspaceAddNotification> m_addObserver;
-      Poco::NObserver<ReflMainViewPresenter, Mantid::API::WorkspacePostDeleteNotification> m_remObserver;
-      Poco::NObserver<ReflMainViewPresenter, Mantid::API::ClearADSNotification> m_clearObserver;
-      Poco::NObserver<ReflMainViewPresenter, Mantid::API::WorkspaceRenameNotification> m_renameObserver;
-      Poco::NObserver<ReflMainViewPresenter, Mantid::API::WorkspaceAfterReplaceNotification> m_replaceObserver;
+      //Poco::NObserver<ReflMainViewPresenter, Mantid::API::WorkspaceAddNotification> m_addObserver;
+      //Poco::NObserver<ReflMainViewPresenter, Mantid::API::WorkspacePostDeleteNotification> m_remObserver;
+      //Poco::NObserver<ReflMainViewPresenter, Mantid::API::ClearADSNotification> m_clearObserver;
+      //Poco::NObserver<ReflMainViewPresenter, Mantid::API::WorkspaceRenameNotification> m_renameObserver;
+      //Poco::NObserver<ReflMainViewPresenter, Mantid::API::WorkspaceAfterReplaceNotification> m_replaceObserver;
 
-      void handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf);
-      void handleRemEvent(Mantid::API::WorkspacePostDeleteNotification_ptr pNf);
-      void handleClearEvent(Mantid::API::ClearADSNotification_ptr pNf);
-      void handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf);
-      void handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
-
+     // void handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf);
+      void addHandle(const std::string &name, Mantid::API::Workspace_sptr workspace);
+     // void handleRemEvent(Mantid::API::WorkspacePostDeleteNotification_ptr pNf);
+      void postDeleteHandle(const std::string &name);
+      //void handleClearEvent(Mantid::API::ClearADSNotification_ptr pNf);
+      void clearADSHandle();
+      //void handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf);
+      void renameHandle(const std::string& oldName,const std::string& newName);
+      //void handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
+      void afterReplaceHandle(const std::string& name, Mantid::API::Workspace_sptr workspace);
       void saveNotebook(std::map<int,std::set<int>> groups, std::set<int> rows);
 
     private:

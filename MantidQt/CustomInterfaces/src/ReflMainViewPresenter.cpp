@@ -142,11 +142,12 @@ ReflMainViewPresenter::ReflMainViewPresenter(
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressView), m_tableDirty(false),
       m_searcher(searcher),
-      m_addObserver(*this, &ReflMainViewPresenter::handleAddEvent),
-      m_remObserver(*this, &ReflMainViewPresenter::handleRemEvent),
-      m_clearObserver(*this, &ReflMainViewPresenter::handleClearEvent),
-      m_renameObserver(*this, &ReflMainViewPresenter::handleRenameEvent),
-      m_replaceObserver(*this, &ReflMainViewPresenter::handleReplaceEvent) {
+      /*m_addObserver(*this, &ReflMainViewPresenter::handleAddEvent),*/
+      /*m_remObserver(*this, &ReflMainViewPresenter::handleRemEvent),*/
+      /*m_clearObserver(*this, &ReflMainViewPresenter::handleClearEvent),*/
+      /*m_renameObserver(*this, &ReflMainViewPresenter::handleRenameEvent),*/
+     /* m_replaceObserver(*this, &ReflMainViewPresenter::handleReplaceEvent),*/
+      WorkspaceObserver(){
 
   // TODO. Select strategy.
   /*
@@ -192,12 +193,16 @@ ReflMainViewPresenter::ReflMainViewPresenter(
       m_workspaceList.insert(name);
   }
 
-  ads.notificationCenter.addObserver(m_addObserver);
-  ads.notificationCenter.addObserver(m_remObserver);
-  ads.notificationCenter.addObserver(m_renameObserver);
-  ads.notificationCenter.addObserver(m_clearObserver);
-  ads.notificationCenter.addObserver(m_replaceObserver);
-
+  //ads.notificationCenter.addObserver(m_addObserver);
+  observeAdd();
+  //ads.notificationCenter.addObserver(m_remObserver);
+  observePostDelete();
+  //ads.notificationCenter.addObserver(m_renameObserver);
+  observeRename();
+  //ads.notificationCenter.addObserver(m_clearObserver);
+  observeADSClear();
+  //ads.notificationCenter.addObserver(m_replaceObserver);
+  observeAfterReplace();
   m_view->setTableList(m_workspaceList);
 
   // Provide autocompletion hints for the options column. We use the algorithm's
@@ -234,11 +239,11 @@ ReflMainViewPresenter::ReflMainViewPresenter(
 ReflMainViewPresenter::~ReflMainViewPresenter() {
   Mantid::API::AnalysisDataServiceImpl &ads =
       Mantid::API::AnalysisDataService::Instance();
-  ads.notificationCenter.removeObserver(m_addObserver);
-  ads.notificationCenter.removeObserver(m_remObserver);
-  ads.notificationCenter.removeObserver(m_clearObserver);
-  ads.notificationCenter.removeObserver(m_renameObserver);
-  ads.notificationCenter.removeObserver(m_replaceObserver);
+ // ads.notificationCenter.removeObserver(m_addObserver);
+  //ads.notificationCenter.removeObserver(m_remObserver);
+  //ads.notificationCenter.removeObserver(m_clearObserver);
+  //ads.notificationCenter.removeObserver(m_renameObserver);
+  //ads.notificationCenter.removeObserver(m_replaceObserver);
 }
 
 /**
@@ -1277,15 +1282,12 @@ void ReflMainViewPresenter::exportTable() {
 /**
 Handle ADS add events
 */
-void ReflMainViewPresenter::handleAddEvent(
-    Mantid::API::WorkspaceAddNotification_ptr pNf) {
-  const std::string name = pNf->objectName();
-
+void ReflMainViewPresenter::addHandle(const std::string &name, Mantid::API::Workspace_sptr workspace) {
   if (Mantid::API::AnalysisDataService::Instance().isHiddenDataServiceObject(
           name))
     return;
 
-  if (!isValidModel(pNf->object()))
+  if (!isValidModel(workspace))
     return;
 
   m_workspaceList.insert(name);
@@ -1295,9 +1297,7 @@ void ReflMainViewPresenter::handleAddEvent(
 /**
 Handle ADS remove events
 */
-void ReflMainViewPresenter::handleRemEvent(
-    Mantid::API::WorkspacePostDeleteNotification_ptr pNf) {
-  const std::string name = pNf->objectName();
+void ReflMainViewPresenter::postDeleteHandle(const std::string &name) {
   m_workspaceList.erase(name);
   m_view->setTableList(m_workspaceList);
 }
@@ -1305,8 +1305,7 @@ void ReflMainViewPresenter::handleRemEvent(
 /**
 Handle ADS clear events
 */
-void ReflMainViewPresenter::handleClearEvent(
-    Mantid::API::ClearADSNotification_ptr) {
+void ReflMainViewPresenter::clearADSHandle() {
   m_workspaceList.clear();
   m_view->setTableList(m_workspaceList);
 }
@@ -1314,16 +1313,13 @@ void ReflMainViewPresenter::handleClearEvent(
 /**
 Handle ADS rename events
 */
-void ReflMainViewPresenter::handleRenameEvent(
-    Mantid::API::WorkspaceRenameNotification_ptr pNf) {
-  // If we have this workspace, rename it
-  const std::string name = pNf->objectName();
-  const std::string newName = pNf->newObjectName();
+void ReflMainViewPresenter::renameHandle(const std::string& oldName,const std::string& newName) {
 
-  if (m_workspaceList.find(name) == m_workspaceList.end())
+// if a workspace with oldName exists then replace it for the same workspace with newName
+  if (m_workspaceList.find(oldName) == m_workspaceList.end())
     return;
 
-  m_workspaceList.erase(name);
+  m_workspaceList.erase(oldName);
   m_workspaceList.insert(newName);
   m_view->setTableList(m_workspaceList);
 }
@@ -1331,14 +1327,12 @@ void ReflMainViewPresenter::handleRenameEvent(
 /**
 Handle ADS replace events
 */
-void ReflMainViewPresenter::handleReplaceEvent(
-    Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf) {
-  const std::string name = pNf->objectName();
+void ReflMainViewPresenter::afterReplaceHandle(const std::string& name, Mantid::API::Workspace_sptr workspace) {
   // Erase it
   m_workspaceList.erase(name);
 
   // If it's a table workspace, bring it back
-  if (isValidModel(pNf->object()))
+  if (isValidModel(workspace))
     m_workspaceList.insert(name);
 
   m_view->setTableList(m_workspaceList);
