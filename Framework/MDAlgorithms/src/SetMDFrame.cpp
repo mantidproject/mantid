@@ -100,9 +100,6 @@ void SetMDFrame::init() {
  */
 void SetMDFrame::exec() {
   Mantid::API::IMDWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
-
-  // Make sure that the selected axes are compatible with the workspace
-  auto numberOfDimensions = inputWorkspace->getNumDims();
   std::vector<int> axesInts = this->getProperty("Axes");
   std::vector<size_t> axes(axesInts.begin(), axesInts.end());
 
