@@ -64,10 +64,10 @@ private:
              double c, double alpha, double beta, double gamma,
              const std::vector<double> &u, const std::vector<double> &v);
 
-  Mantid::API::IMDEventWorkspace_sptr convertToMD(Mantid::API::Workspace_sptr workspace,
-                                          const std::string &analysis_mode,
-                                          bool in_place,
-                                          Mantid::API::IMDEventWorkspace_sptr out_mdws);
+  Mantid::API::IMDEventWorkspace_sptr
+  convertToMD(Mantid::API::Workspace_sptr workspace,
+              const std::string &analysis_mode, bool in_place,
+              Mantid::API::IMDEventWorkspace_sptr out_mdws);
 
   Mantid::API::IMDEventWorkspace_sptr
   merge_runs(const std::vector<std::string> &to_merge);

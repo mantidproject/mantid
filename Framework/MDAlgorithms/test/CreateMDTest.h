@@ -145,7 +145,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist(
-      "__CreateMDTest_mdworkspace"));
+        "__CreateMDTest_mdworkspace"));
 
     // Clean up
     Mantid::API::AnalysisDataService::Instance().remove(
