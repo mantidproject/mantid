@@ -16,9 +16,12 @@ using Mantid::API::WorkspaceProperty;
 
 /*
  * Pad the vector of parameter values to the same size as data sources
+ *
+ * @param param_vector :: a vector of parameter values to pad
+ * @param grow_to_size :: the parameter vector will be padded to this size
  */
 void padParameterVector(std::vector<double> &param_vector,
-                        const unsigned long grow_to_size) {
+                        const size_t grow_to_size) {
   if (param_vector.empty()) {
     param_vector.resize(grow_to_size, 0.0);
   } else if (param_vector.size() == 1) {
@@ -31,6 +34,9 @@ void padParameterVector(std::vector<double> &param_vector,
 
 /*
  * Returns true if any of the vectors in params are not empty
+ *
+ * @param params :: a vector of vectors of parameters
+ * @returns true if any the vectors of parameters contain one or more values
  */
 bool any_given(const std::vector<std::vector<double>> &params) {
   std::vector<double> param;
@@ -45,6 +51,9 @@ bool any_given(const std::vector<std::vector<double>> &params) {
 
 /*
  * Returns true if all of the vectors in params are not empty
+ *
+ * @param params :: a vector of vectors of parameters
+ * @returns true if all of the vectors of parameters contain one or more values
  */
 bool all_given(const std::vector<std::vector<double>> &params) {
   std::vector<double> param;
@@ -173,7 +182,7 @@ void CreateMD::exec() {
   const std::vector<std::string> data_sources =
       this->getProperty("DataSources");
 
-  const unsigned long entries = data_sources.size();
+  const size_t entries = data_sources.size();
 
   padParameterVector(psi, entries);
   padParameterVector(gl, entries);
@@ -245,6 +254,10 @@ void CreateMD::exec() {
 
 /*
  * Load data from file
+ *
+ * @param filename :: the name of the file to load
+ * @param wsname :: the name of the workspace to create with the loaded data in
+ * @returns the workspace of loaded data
  */
 Mantid::API::Workspace_sptr CreateMD::loadWs(const std::string &filename,
                                              const std::string &wsname) {
@@ -259,6 +272,10 @@ Mantid::API::Workspace_sptr CreateMD::loadWs(const std::string &filename,
 
 /*
  * Set the sample log for the workspace
+ *
+ * @param workspace :: the workspace to add the log to
+ * @param log_name :: the name of the log
+ * @param log_number :: the value to record in the log
  */
 void CreateMD::addSampleLog(Mantid::API::MatrixWorkspace_sptr workspace,
                             const std::string &log_name, double log_number) {
@@ -276,6 +293,8 @@ void CreateMD::addSampleLog(Mantid::API::MatrixWorkspace_sptr workspace,
 
 /*
  * Set the goniometer values for the workspace
+ *
+ * @param workspace :: the workspace to set the goniometer values in
  */
 void CreateMD::setGoniometer(Mantid::API::MatrixWorkspace_sptr workspace) {
   Algorithm_sptr log_alg = createChildAlgorithm("SetGoniometer");
@@ -295,6 +314,16 @@ void CreateMD::setGoniometer(Mantid::API::MatrixWorkspace_sptr workspace) {
 
 /*
  * Set UB for the workspace
+ *
+ * @param workspace :: the workspace to set the UB matrix in
+ * @param a :: length of crystal lattice parameter in angstroms
+ * @param b :: length of crystal lattice parameter in angstroms
+ * @param c :: length of crystal lattice parameter in angstroms
+ * @param alpha :: lattice angle
+ * @param beta :: lattice angle
+ * @param gamma :: lattice angle
+ * @param u :: lattice vector parallel to incident neutron beam
+ * @param v :: lattice vector perpendicular to u in the horizontal plane
  */
 void CreateMD::setUB(Mantid::API::MatrixWorkspace_sptr workspace, double a,
                      double b, double c, double alpha, double beta,
@@ -316,6 +345,12 @@ void CreateMD::setUB(Mantid::API::MatrixWorkspace_sptr workspace, double a,
 
 /*
  * Convert the workspace to an MDWorkspace
+ *
+ * @param workspace :: the workspace to convert to an MDWorkspace
+ * @param analysis_mode :: the analysis mode "Direct", "Indirect" or "Elastic"
+ * @param in_place :: true if merge step should be carried out at the same time
+ * @out_mdws :: output workspace to use if merge step is carried out
+ * @returns the output converted workspace
  */
 Mantid::API::IMDEventWorkspace_sptr
 CreateMD::convertToMD(Mantid::API::Workspace_sptr workspace,
@@ -349,6 +384,9 @@ CreateMD::convertToMD(Mantid::API::Workspace_sptr workspace,
 
 /*
  * Merge input workspaces
+ *
+ * @param to_merge :: vector of workspaces to merge
+ * @returns MDEventWorkspace containing merged data of input workspaces
  */
 Mantid::API::IMDEventWorkspace_sptr
 CreateMD::merge_runs(const std::vector<std::string> &to_merge) {
@@ -363,6 +401,20 @@ CreateMD::merge_runs(const std::vector<std::string> &to_merge) {
 
 /*
  * Add parameter logs and convert to MD for a single run
+ *
+ * @param input_workspace :: datasource workspace
+ * @param emode :: analysis mode "Elastic", "Direct" or "Indirect"
+ * @param efix :: datasource engery values in meV
+ * @param psi :: goniometer rotation in degrees
+ * @param gl :: goniometer rotation in degrees
+ * @param gs :: goniometer rotation in degrees
+ * @param in_place :: do merge step at the same time as converting to
+ *MDWorkspace
+ * @param alatt :: length of crystal lattice parameter in angstroms
+ * @param angdeg :: lattice angle
+ * @param u :: lattice vector parallel to incident neutron beam
+ * @param v :: lattice vector perpendicular to u in the horizontal plane
+ * @param out_mdws :output workspace to use if merge step is carried out
  */
 Mantid::API::IMDEventWorkspace_sptr CreateMD::single_run(
     Mantid::API::MatrixWorkspace_sptr input_workspace, const std::string &emode,
@@ -409,6 +461,9 @@ Mantid::API::IMDEventWorkspace_sptr CreateMD::single_run(
 
 /*
  * Validate input properties
+ *
+ * @returns map with keys corresponding to properties with errors and values
+ *containing the error messages
  */
 std::map<std::string, std::string> CreateMD::validateInputs() {
   // Create the map
@@ -426,7 +481,7 @@ std::map<std::string, std::string> CreateMD::validateInputs() {
   const std::vector<double> gs = this->getProperty("Gs");
   const std::vector<double> efix = this->getProperty("Efix");
 
-  const unsigned long ws_entries = data_sources.size();
+  const size_t ws_entries = data_sources.size();
 
   if (u.size() < 3) {
     validation_output["u"] = "u must have 3 components";

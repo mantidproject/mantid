@@ -52,26 +52,33 @@ private:
   void init();
   void exec();
 
+  /// Load data from file into a workspace
   Mantid::API::Workspace_sptr loadWs(const std::string &filename,
                                      const std::string &wsname);
 
+  /// Add a sample log to a workspace
   void addSampleLog(Mantid::API::MatrixWorkspace_sptr workspace,
                     const std::string &log_name, double log_number);
 
+  /// Set the goniometer values in a workspace
   void setGoniometer(Mantid::API::MatrixWorkspace_sptr workspace);
 
+  /// Set the UB matrix in a workspace
   void setUB(Mantid::API::MatrixWorkspace_sptr workspace, double a, double b,
              double c, double alpha, double beta, double gamma,
              const std::vector<double> &u, const std::vector<double> &v);
 
+  /// Convert a workspace to MDWorkspace
   Mantid::API::IMDEventWorkspace_sptr
   convertToMD(Mantid::API::Workspace_sptr workspace,
               const std::string &analysis_mode, bool in_place,
               Mantid::API::IMDEventWorkspace_sptr out_mdws);
 
+  /// Merge input workspaces
   Mantid::API::IMDEventWorkspace_sptr
   merge_runs(const std::vector<std::string> &to_merge);
 
+  /// Add logs and convert to MDWorkspace for a single run
   Mantid::API::IMDEventWorkspace_sptr
   single_run(Mantid::API::MatrixWorkspace_sptr input_workspace,
              const std::string &emode, double efix, double psi, double gl,
@@ -80,6 +87,7 @@ private:
              const std::vector<double> &v,
              Mantid::API::IMDEventWorkspace_sptr out_mdws);
 
+  /// Validate the algorithm's input properties
   virtual std::map<std::string, std::string> validateInputs();
 };
 
