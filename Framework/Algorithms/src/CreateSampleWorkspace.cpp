@@ -203,21 +203,27 @@ void CreateSampleWorkspace::exec() {
     }
     m_randGen = new Kernel::MersenneTwister(seedValue);
   }
+
+
   // Create an instrument with one or more rectangular banks.
   Instrument_sptr inst = createTestInstrumentRectangular(
       numBanks, bankPixelWidth, pixelSpacing, bankDistanceFromSample,
       sourceSampleDistance);
 
   int num_bins = static_cast<int>((xMax - xMin) / binWidth);
+
+  int numPixels = numBanks * bankPixelWidth * bankPixelWidth;
+ 
+  Progress progress(this, 0, 1, numPixels);
+
   MatrixWorkspace_sptr ws;
   if (wsType == "Event") {
-    ws = createEventWorkspace(numBanks * bankPixelWidth * bankPixelWidth,
-                              num_bins, numEvents, xMin, binWidth,
+    ws = createEventWorkspace(progress, numPixels, num_bins, numEvents, xMin, binWidth,
                               bankPixelWidth * bankPixelWidth, inst,
                               functionString, isRandom);
   } else {
     ws = createHistogramWorkspace(
-        numBanks * bankPixelWidth * bankPixelWidth, num_bins, xMin, binWidth,
+        progress, numPixels, num_bins, xMin, binWidth,
         bankPixelWidth * bankPixelWidth, inst, functionString, isRandom);
   }
   // add chopper
@@ -282,8 +288,8 @@ void CreateSampleWorkspace::addChopperParameters(
 /** Create histogram workspace
  */
 MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
-    int numPixels, int numBins, double x0, double binDelta,
-    int start_at_pixelID, Geometry::Instrument_sptr inst,
+    API::Progress &progress, int numPixels, int numBins, double x0, 
+	double binDelta, int start_at_pixelID, Geometry::Instrument_sptr inst,
     const std::string &functionString, bool isRandom) {
   MantidVecPtr x, y, e;
   x.access().resize(numBins + 1);
@@ -311,6 +317,8 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
     retVal->setData(wi, y, e);
     retVal->getSpectrum(wi)->setDetectorID(detid_t(start_at_pixelID + wi));
     retVal->getSpectrum(wi)->setSpectrumNo(specid_t(wi + 1));
+
+	progress.report();
   }
 
   return retVal;
@@ -319,8 +327,8 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
 /** Create event workspace
  */
 EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
-    int numPixels, int numBins, int numEvents, double x0, double binDelta,
-    int start_at_pixelID, Geometry::Instrument_sptr inst,
+    API::Progress &progress, int numPixels, int numBins, int numEvents, double x0, 
+	double binDelta, int start_at_pixelID, Geometry::Instrument_sptr inst,
     const std::string &functionString, bool isRandom) {
   DateAndTime run_start("2010-01-01T00:00:00");
 
@@ -375,6 +383,8 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
             run_start + (m_randGen->nextValue() * hourInSeconds);
         el += TofEvent((i + m_randGen->nextValue()) * binDelta, pulseTime);
       }
+
+	  progress.report();
     }
     workspaceIndex++;
   }
