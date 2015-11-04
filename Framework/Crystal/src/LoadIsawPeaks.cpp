@@ -1,3 +1,4 @@
+#include "MantidKernel/OptionalBool.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
