@@ -343,6 +343,29 @@ void ConvFit::algorithmComplete(bool error) {
     }
   }
 
+
+  // Obtain WorkspaceGroup from ADS
+  std::string groupName = m_baseName.toStdString() + "_Workspaces";
+  WorkspaceGroup_sptr groupWs =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
+
+  // Log for Resolution to result Ws
+  auto resLog = AlgorithmManager::Instance().create("AddSampleLog");
+  resLog->setProperty("Workspace", resultWs->getName());
+  resLog->setProperty("LogName", "resolution_filename");
+  resLog->setProperty("LogText", m_uiForm.dsResInput->getCurrentDataName().toStdString());
+  resLog->setProperty("LogType", "String");
+  m_batchAlgoRunner->addAlgorithm(resLog);
+
+  // Log for resolution to group Ws
+  auto resLogGrp = AlgorithmManager::Instance().create("AddSampleLog");
+  resLogGrp->setProperty("Workspace", groupWs->getName());
+  resLogGrp->setProperty("LogName", "resolution_filename");
+  resLogGrp->setProperty("LogText", m_uiForm.dsResInput->getCurrentDataName().toStdString());
+  resLogGrp->setProperty("LogType", "String");
+  m_batchAlgoRunner->addAlgorithm(resLogGrp);
+
+
   // Handle Temperature logs
   if (m_uiForm.ckTempCorrection->isChecked()) {
     QString temperature = m_uiForm.leTempCorrection->text();
@@ -352,32 +375,37 @@ void ConvFit::algorithmComplete(bool error) {
     }
 
     if (temp != 0.0) {
-      // Obtain WorkspaceGroup from ADS
-      std::string groupName = m_baseName.toStdString() + "_Workspaces";
-      WorkspaceGroup_sptr groupWs =
-          AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
+	  // Log for temp value in result Ws
+      auto valMtx = AlgorithmManager::Instance().create("AddSampleLog");
+      valMtx->setProperty("Workspace", resultWs->getName());
+      valMtx->setProperty("LogName", "temperature_value");
+      valMtx->setProperty("LogText", temperature.toStdString());
+      valMtx->setProperty("LogType", "Number");
+      m_batchAlgoRunner->addAlgorithm(valMtx);
 
-      auto addSample = AlgorithmManager::Instance().create("AddSampleLog");
-      addSample->setProperty("Workspace", resultWs);
-      addSample->setProperty("LogName", "temperature_value");
-      addSample->setProperty("LogText", temperature.toStdString());
-      addSample->setProperty("LogType", "Number");
-      addSample->execute();
-      addSample->setProperty("Workspace", resultWs);
-      addSample->setProperty("LogName", "temperature_correction");
-      addSample->setProperty("LogText", "true");
-      addSample->setProperty("LogType", "String");
-      addSample->execute();
-      addSample->setProperty("Workspace", groupWs);
-      addSample->setProperty("LogName", "temperature_value");
-      addSample->setProperty("LogText", temperature.toStdString());
-      addSample->setProperty("LogType", "Number");
-      addSample->execute();
-      addSample->setProperty("Workspace", groupWs);
-      addSample->setProperty("LogName", "temperature_correction");
-      addSample->setProperty("LogText", "true");
-      addSample->setProperty("LogType", "String");
-      addSample->execute();
+	  // Log for temp bool in result Ws
+      auto corrMtx = AlgorithmManager::Instance().create("AddSampleLog");
+      corrMtx->setProperty("Workspace", resultWs->getName());
+      corrMtx->setProperty("LogName", "temperature_correction");
+      corrMtx->setProperty("LogText", "true");
+      corrMtx->setProperty("LogType", "String");
+      m_batchAlgoRunner->addAlgorithm(corrMtx);
+
+	  // Log for temp value in group Ws
+      auto valGrp = AlgorithmManager::Instance().create("AddSampleLog");
+      valGrp->setProperty("Workspace", groupWs->getName());
+      valGrp->setProperty("LogName", "temperature_value");
+      valGrp->setProperty("LogText", temperature.toStdString());
+      valGrp->setProperty("LogType", "Number");
+      m_batchAlgoRunner->addAlgorithm(valGrp);
+
+	  // Log for temp bool in group Ws
+      auto corrGrp = AlgorithmManager::Instance().create("AddSampleLog");
+      corrGrp->setProperty("Workspace", groupWs->getName());
+      corrGrp->setProperty("LogName", "temperature_correction");
+      corrGrp->setProperty("LogText", "true");
+      corrGrp->setProperty("LogType", "String");
+      m_batchAlgoRunner->addAlgorithm(corrGrp);
     }
   }
   m_batchAlgoRunner->executeBatchAsync();
