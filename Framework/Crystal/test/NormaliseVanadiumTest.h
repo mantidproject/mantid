@@ -75,6 +75,7 @@ public:
     loadInst->setPropertyValue(
         "Filename", "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", retVal);
+    loadInst->setProperty("OverwriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
     delete loadInst;
     // Populate the instrument parameters in this workspace - this works around

@@ -8,6 +8,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -67,8 +69,8 @@ void LoadInstrument::init() {
       "Name of instrument. Can be used instead of Filename to specify an IDF");
   declareProperty("InstrumentXML", "",
                   "The full XML instrument definition as a string.");
-  declareProperty(
-      "RewriteSpectraMap", true,
+  declareProperty(new PropertyWithValue<OptionalBool>(
+      "OverwriteSpectraMap", OptionalBool::Unset, boost::make_shared<MandatoryValidator<OptionalBool>>()),
       "If true then a 1:1 map between the spectrum numbers and "
       "detector/monitor IDs is set up as follows: the detector/monitor IDs in "
       "the IDF are ordered from smallest to largest number and then assigned "
@@ -195,8 +197,8 @@ void LoadInstrument::exec() {
   // Rebuild the spectra map for this workspace so that it matches the
   // instrument
   // if required
-  const bool rewriteSpectraMap = getProperty("RewriteSpectraMap");
-  if (rewriteSpectraMap)
+  const OptionalBool OverwriteSpectraMap = getProperty("OverwriteSpectraMap");
+  if (OverwriteSpectraMap == OptionalBool::True)
     m_workspace->rebuildSpectraMapping();
 }
 

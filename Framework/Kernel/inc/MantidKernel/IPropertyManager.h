@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/OptionalBool.h"
 #include <vector>
 #include <map>
 
@@ -56,6 +57,7 @@ template <typename T> class Matrix;
  */
 class MANTID_KERNEL_DLL IPropertyManager {
 public:
+
   // IPropertyManager(){}
   virtual ~IPropertyManager() {}
 
@@ -295,6 +297,7 @@ protected:
                     boost::make_shared<NullValidator>(), "", direction);
   }
 
+
   /// Get a property by an index
   virtual Property *getPointerToPropertyOrdinal(const int &index) const = 0;
 
@@ -344,6 +347,8 @@ protected:
     operator uint32_t();
     operator int64_t();
     operator uint64_t();
+    operator OptionalBool();
+
 #ifdef __APPLE__
     operator unsigned long();
 #endif
@@ -435,7 +440,7 @@ private:
   namespace Kernel {                                                           \
   template <>                                                                  \
   DLLExport type                                                               \
-  IPropertyManager::getValue<type>(const std::string &name) const {            \
+      IPropertyManager::getValue<type>(const std::string &name) const {        \
     PropertyWithValue<type> *prop =                                            \
         dynamic_cast<PropertyWithValue<type> *>(getPointerToProperty(name));   \
     if (prop) {                                                                \

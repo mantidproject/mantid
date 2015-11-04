@@ -28,10 +28,10 @@ Usage
 In the first example, POLDI data is cropped to the correct workspace size:
 
 .. testcode:: PoldiTruncateDataCrop
-    
+    from mantid.kernel import OptionalBoolValue 
     # Load data and instrument - this is important, as the chopper configuration must be known.
     raw_6903 = LoadSINQFile(Filename = "poldi2013n006903.hdf", Instrument = "POLDI")
-    LoadInstrument(raw_6903, InstrumentName = "POLDI")
+    LoadInstrument(raw_6903, InstrumentName = "POLDI", OverwriteSpectraMap=OptionalBoolValue.True)
 
     print "The raw data workspace contains", len(raw_6903.readX(0)), "time bins."
     

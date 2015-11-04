@@ -1054,7 +1054,7 @@ createEventWorkspace3(Mantid::DataObjects::EventWorkspace_const_sptr sourceWS,
   loadInst->setPropertyValue("InstrumentName",
                              sourceWS->getInstrument()->getName());
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", outputWS);
-  loadInst->setProperty("RewriteSpectraMap", true);
+  loadInst->setProperty("OverwriteSpectraMap", true);
   loadInst->executeAsChildAlg();
   // Populate the instrument parameters in this workspace - this works around a
   // bug

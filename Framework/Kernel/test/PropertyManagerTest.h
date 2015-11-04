@@ -409,6 +409,15 @@ public:
     TS_ASSERT_EQUALS(i, 655);
   }
 
+  void test_char_array(){
+      PropertyManagerHelper mgr;
+
+      auto nonEmptyString = boost::make_shared<MandatoryValidator<std::string>>();
+      mgr.declareProperty("SampleChemicalFormula", "",
+                              "Chemical composition of the sample material", nonEmptyString, Direction::Input);
+
+  }
+
 private:
   PropertyManagerHelper *manager;
 };

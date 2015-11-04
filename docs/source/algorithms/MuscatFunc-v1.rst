@@ -27,7 +27,7 @@ Usage
 **Example - a basic example using MuscatFunc.**
 
 .. code-block:: python
-
+                from mantid.kernel import OptionalBoolValue
 		def createSampleWorkspace(name, random=False):
 			""" Creates a sample workspace with a single lorentzian that looks like IRIS data"""
 			import os
@@ -38,7 +38,7 @@ Usage
 			ws = ScaleX(ws, 0.1, "Multiply")
 			
 			#load instrument and instrument parameters
-			LoadInstrument(ws, InstrumentName='IRIS')
+			LoadInstrument(ws, InstrumentName='IRIS', OverwriteSpectraMap=OptionalBoolValue.True)
 			path = os.path.join(config['instrumentDefinition.directory'], 'IRIS_graphite_002_Parameters.xml')
 			LoadParameterFile(ws, Filename=path)
 			ws = RenameWorkspace(ws, OutputWorkspace=name)

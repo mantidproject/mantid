@@ -32,9 +32,9 @@ Usage
 .. include:: ../usagedata-note.txt
 
 .. testcode:: GetEiT0atSNS
-    
+    from mantid.kernel import OptionalBoolValue
     w=Load('ADARAMonitors.nxs')
-    LoadInstrument(Workspace=w,InstrumentName='SEQUOIA',RewriteSpectraMap='0')
+    LoadInstrument(Workspace=w,InstrumentName='SEQUOIA',OverwriteSpectraMap=OptionalBoolValue.False)
     AddSampleLog(Workspace=w,LogName='vChTrans',LogText='1',LogType='Number Series')
     AddSampleLog(Workspace=w,LogName='EnergyRequest',LogText='20',LogType='Number Series')
     res=GetEiT0atSNS(w)    

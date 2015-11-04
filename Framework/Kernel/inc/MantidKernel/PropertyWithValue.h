@@ -8,6 +8,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NullValidator.h"
+#include "MantidKernel/OptionalBool.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
@@ -160,6 +161,8 @@ void toValue(const std::string &strvalue, std::vector<T> &value) {
   }
 }
 
+
+
 template <typename T>
 void toValue(const std::string &strvalue, std::vector<std::vector<T>> &value,
              const std::string &outerDelimiter = ",",
@@ -182,6 +185,13 @@ void toValue(const std::string &strvalue, std::vector<std::vector<T>> &value,
     value.push_back(vect);
   }
 }
+
+/*
+template<>
+void toValue(const std::string& strvalue, OptionalBool &value){
+    value = OptionalBool::strToEmumMap()[strvalue];
+}
+*/
 
 /*Used specifically to retrieve a vector of type T populated with values
  * given to it from strvalue parameter, Using toValue method.
@@ -241,10 +251,11 @@ inline void addingOperator(std::vector<T> &lhs, const std::vector<T> &rhs) {
   }
 }
 
-template <> inline void addingOperator(bool &, const bool &) {
+template <> inline void addingOperator(OptionalBool &, const OptionalBool &) {
   throw Exception::NotImplementedError(
       "PropertyWithValue.h: += operator not implemented for type bool");
 }
+
 
 template <typename T>
 inline void addingOperator(boost::shared_ptr<T> &lhs,

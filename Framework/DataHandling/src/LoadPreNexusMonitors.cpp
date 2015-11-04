@@ -233,7 +233,7 @@ void LoadPreNexusMonitors::runLoadInstrument(
   try {
     loadInst->setPropertyValue("InstrumentName", instrument);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap",
+    loadInst->setProperty("OverwriteSpectraMap",
                           false); // We have a custom mapping
     loadInst->execute();
 

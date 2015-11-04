@@ -103,7 +103,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
     def test_diagnostics_wb(self):
         wb_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000)
-        LoadInstrument(wb_ws,InstrumentName='MARI')
+        LoadInstrument(wb_ws,InstrumentName='MARI', OverwriteSpectraMap=True)
 
         tReducer = DirectEnergyConversion(wb_ws.getInstrument())
 
@@ -117,7 +117,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_do_white_wb(self) :
         wb_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000)
         #LoadParameterFile(Workspace=wb_ws,ParameterXML = used_parameters)
-        LoadInstrument(wb_ws,InstrumentName='MARI')
+        LoadInstrument(wb_ws,InstrumentName='MARI', OverwriteSpectraMap=True)
 
         tReducer = DirectEnergyConversion(wb_ws.getInstrument())
 
@@ -152,7 +152,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
     def test_get_abs_normalization_factor(self) :
         mono_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000,XUnit='DeltaE',XMin=-5,XMax=15,BinWidth=0.1,function='Flat background')
-        LoadInstrument(mono_ws,InstrumentName='MARI')
+        LoadInstrument(mono_ws,InstrumentName='MARI', OverwriteSpectraMap=True)
 
         tReducer = DirectEnergyConversion(mono_ws.getInstrument())
         tReducer.prop_man.incident_energy = 5.
@@ -167,7 +167,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         # check warning. WB spectra with 0 signal indicate troubles.
         mono_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000,XUnit='DeltaE',XMin=-5,XMax=15,BinWidth=0.1,function='Flat background')
-        LoadInstrument(mono_ws,InstrumentName='MARI')
+        LoadInstrument(mono_ws,InstrumentName='MARI', OverwriteSpectraMap=True)
         sig = mono_ws.dataY(0)
         sig[:]=0
 
@@ -182,7 +182,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_dgreduce_works(self):
         """ Test for old interface """
         run_ws = CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=10000)
-        LoadInstrument(run_ws,InstrumentName='MARI')
+        LoadInstrument(run_ws,InstrumentName='MARI', OverwriteSpectraMap=True)
 
         #mono_ws = CloneWorkspace(run_ws)
         wb_ws   = CloneWorkspace(run_ws)
@@ -204,7 +204,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_dgreduce_works_with_name(self):
         """ Test for old interface """
         run_ws = CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=10000)
-        LoadInstrument(run_ws,InstrumentName='MARI')
+        LoadInstrument(run_ws,InstrumentName='MARI', OverwriteSpectraMap=True)
         AddSampleLog(run_ws,LogName='run_number',LogText='200',LogType='Number')
         #mono_ws = CloneWorkspace(run_ws)
         wb_ws   = CloneWorkspace(run_ws)
@@ -273,7 +273,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_late_rebinning(self):
         run_monitors=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1, NumEvents=100000, XUnit='Energy',
                                                      XMin=3, XMax=200, BinWidth=0.1)
-        LoadInstrument(run_monitors,InstrumentName='MARI')
+        LoadInstrument(run_monitors,InstrumentName='MARI', OverwriteSpectraMap=True)
         ConvertUnits(InputWorkspace='run_monitors', OutputWorkspace='run_monitors', Target='TOF')
         run_monitors = mtd['run_monitors']
         tof = run_monitors.dataX(3)
@@ -281,7 +281,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tMax = tof[-1]
         run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=8, BankPixelWidth=1, NumEvents=100000,
                                     XUnit='TOF',xMin=tMin,xMax=tMax)
-        LoadInstrument(run,InstrumentName='MARI')
+        LoadInstrument(run,InstrumentName='MARI', OverwriteSpectraMap=True)
         wb_ws   = Rebin(run,Params=[tMin,1,tMax],PreserveEvents=False)
 
         # References used to test against ordinary reduction
@@ -308,7 +308,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         run=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=6, BankPixelWidth=1, NumEvents=10,\
                                   XUnit='Energy', XMin=5, XMax=75, BinWidth=0.2)
-        LoadInstrument(run,InstrumentName='MARI')
+        LoadInstrument(run,InstrumentName='MARI', OverwriteSpectraMap=True)
 
         red = DirectEnergyConversion(run.getInstrument())
 
@@ -354,7 +354,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # create test workspace
         run_monitors=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1,\
                                            NumEvents=100000,XUnit='Energy', XMin=3, XMax=200, BinWidth=0.1)
-        LoadInstrument(run_monitors,InstrumentName='MARI')
+        LoadInstrument(run_monitors,InstrumentName='MARI', OverwriteSpectraMap=True)
         ConvertUnits(InputWorkspace='run_monitors', OutputWorkspace='run_monitors', Target='TOF')
         run_monitors = mtd['run_monitors']
         tof = run_monitors.dataX(3)
@@ -362,7 +362,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tMax = tof[-1]
         run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=8, BankPixelWidth=1,\
                                      NumEvents=100000, XUnit='TOF',xMin=tMin,xMax=tMax)
-        LoadInstrument(run,InstrumentName='MARI')
+        LoadInstrument(run,InstrumentName='MARI', OverwriteSpectraMap=True)
         MoveInstrumentComponent(Workspace='run', ComponentName='Detector', DetectorID=1102,Z=1)
        # MoveInstrumentComponent(Workspace='run', ComponentName='Detector', DetectorID=1103,Z=4)
        # MoveInstrumentComponent(Workspace='run', ComponentName='Detector', DetectorID=1104,Z=5)
@@ -414,7 +414,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # create test workspace
         run_monitors=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1,\
                                             NumEvents=100000, XUnit='Energy', XMin=3, XMax=200, BinWidth=0.1)
-        LoadInstrument(run_monitors,InstrumentName='MARI')
+        LoadInstrument(run_monitors,InstrumentName='MARI', OverwriteSpectraMap=True)
         ConvertUnits(InputWorkspace='run_monitors', OutputWorkspace='run_monitors', Target='TOF')
         run_monitors = mtd['run_monitors']
         tof = run_monitors.dataX(3)
@@ -422,7 +422,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tMax = tof[-1]
         run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=8, BankPixelWidth=1,\
                                      NumEvents=100000, XUnit='TOF',xMin=tMin,xMax=tMax)
-        LoadInstrument(run,InstrumentName='MARI')
+        LoadInstrument(run,InstrumentName='MARI', OverwriteSpectraMap=True)
 
         # build "monovanadium"
         mono = CloneWorkspace(run)
@@ -479,7 +479,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # create test workspace
         run_monitors=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1,\
                                             NumEvents=100000, XUnit='Energy', XMin=3, XMax=200, BinWidth=0.1)
-        LoadInstrument(run_monitors,InstrumentName='MARI')
+        LoadInstrument(run_monitors,InstrumentName='MARI', OverwriteSpectraMap=True)
         ConvertUnits(InputWorkspace='run_monitors', OutputWorkspace='run_monitors', Target='TOF')
         run_monitors = mtd['run_monitors']
         tof = run_monitors.dataX(3)
@@ -487,7 +487,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tMax = tof[-1]
         run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=8, BankPixelWidth=1,\
                                      NumEvents=100000, XUnit='TOF',xMin=tMin,xMax=tMax)
-        LoadInstrument(run,InstrumentName='MARI')
+        LoadInstrument(run,InstrumentName='MARI', OverwriteSpectraMap=True)
         AddSampleLog(run,LogName='gd_prtn_chrg',LogText='1.',LogType='Number')
 
         # build "monovanadium"

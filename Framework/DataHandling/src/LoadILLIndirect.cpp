@@ -340,6 +340,8 @@ void LoadILLIndirect::runLoadInstrument() {
   try {
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+    loadInst->setProperty("OverwriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
 
   } catch (...) {

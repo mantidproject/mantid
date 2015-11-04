@@ -162,6 +162,8 @@ public:
     std::string inputFile = "INES_Definition.xml";
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", m_WB1Name);
+    loader.setProperty("OverwriteSpectraMap",
+                       Mantid::Kernel::OptionalBool(true));
     loader.execute();
     // both workspaces should use the same instrument information
     loader.setPropertyValue("Workspace", m_WB2Name);
