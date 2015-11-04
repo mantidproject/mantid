@@ -195,7 +195,7 @@ public:
     TS_ASSERT(Mock::VerifyAndClear(mockMeasurementSource));
   }
 
-  void test_complex_example_two_groups_of_two() {
+    void test_complex_example_two_groups_of_two() {
 
     // Search result inforation not used in the following since we mock the
     // return from the measurementSource
@@ -244,14 +244,15 @@ public:
     TSM_ASSERT_DIFFERS("Runs should be the different for both columns",
                        transferResult[0][ReflTableSchema::RUNS],
                        transferResult[1][ReflTableSchema::RUNS]);
-    TSM_ASSERT_EQUALS("Runs should be summed. Sub ids are the same.",
-                      "14913+14914", transferResult[0][ReflTableSchema::RUNS]);
-    TSM_ASSERT_EQUALS("Runs should be summed. Sub ids are the same.",
-                      "14915+14916", transferResult[1][ReflTableSchema::RUNS]);
+    TSM_ASSERT_EQUALS("Runs should be summed. Sub ids are the same.", "14913+14914",
+                      transferResult[0][ReflTableSchema::RUNS]);
+    TSM_ASSERT_EQUALS("Runs should be summed. Sub ids are the same.", "14915+14916",
+                      transferResult[1][ReflTableSchema::RUNS]);
 
     TS_ASSERT(Mock::VerifyAndClear(mockCatInfo));
     TS_ASSERT(Mock::VerifyAndClear(mockMeasurementSource));
   }
+
 
   void test_do_not_include_invalid_measurements() {
     // Search result inforation not used in the following since we mock the
@@ -329,5 +330,3 @@ public:
                !strategy.knownFileType("madeup.raw"));
   }
 };
-
-#endif /* MANTID_CUSTOMINTERFACES_REFLMEASURETRANSFERSTRATEGYTEST_H_ */
