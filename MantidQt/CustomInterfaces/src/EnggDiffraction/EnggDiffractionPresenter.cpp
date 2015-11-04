@@ -142,8 +142,8 @@ void EnggDiffractionPresenter::processLoadExistingCalib() {
 }
 
 void EnggDiffractionPresenter::processCalcCalib() {
-  const std::string vanNo = m_view->newVanadiumNo();
-  const std::string ceriaNo = m_view->newCeriaNo();
+  const std::string vanNo = isValidRunNumber(m_view->newVanadiumNo());
+  const std::string ceriaNo = isValidRunNumber(m_view->newCeriaNo());
   try {
     inputChecksBeforeCalibrate(vanNo, ceriaNo);
   } catch (std::invalid_argument &ia) {
@@ -165,7 +165,7 @@ void EnggDiffractionPresenter::processCalcCalib() {
 }
 
 void EnggDiffractionPresenter::processFocusBasic() {
-  const std::string runNo = m_view->focusingRunNo();
+  const std::string runNo = isValidRunNumber(m_view->focusingRunNo());
   const std::vector<bool> banks = m_view->focusingBanks();
 
   try {
@@ -180,7 +180,7 @@ void EnggDiffractionPresenter::processFocusBasic() {
 }
 
 void EnggDiffractionPresenter::processFocusCropped() {
-  const std::string runNo = m_view->focusingCroppedRunNo();
+  const std::string runNo = isValidRunNumber(m_view->focusingCroppedRunNo());
   const std::vector<bool> banks = m_view->focusingBanks();
   const std::string specNos = m_view->focusingCroppedSpectrumIDs();
 
@@ -197,7 +197,7 @@ void EnggDiffractionPresenter::processFocusCropped() {
 }
 
 void EnggDiffractionPresenter::processFocusTexture() {
-  const std::string runNo = m_view->focusingTextureRunNo();
+  const std::string runNo = isValidRunNumber(m_view->focusingTextureRunNo());
   const std::string dgFile = m_view->focusingTextureGroupingFile();
 
   try {
@@ -285,6 +285,61 @@ void EnggDiffractionPresenter::processShutDown() {
  */
 bool EnggDiffractionPresenter::validateRBNumber(const std::string &rbn) const {
   return !rbn.empty();
+}
+
+/**
+ * Checks if the string/char is a digit
+ *
+ * @param str checks the string if it is a digit
+ *
+ * @return bool if the char is a digit
+ */
+bool EnggDiffractionPresenter::numInStr(const std::string &str) {
+  return !str.empty() &&
+         std::find_if(str.begin(), str.end(),
+                      [](char chr) { return !std::isdigit(chr); }) == str.end();
+}
+
+/**
+ * Checks if the provided run number is valid and if a direcotory is provided
+ * it will convert it to a run number
+ *
+ * @param dir takes the input/directory of the user
+ *
+ * @return run_number 6 character string of a run number
+ */
+std::string EnggDiffractionPresenter::isValidRunNumber(std::string dir) {
+  std::string run_number = dir;
+  try {
+    if (dir.length() > 6 && Poco::File(dir).exists()) {
+      run_number = "";
+      // get file name name via poco::path
+      Poco::Path inputDir = dir;
+      std::string filename = inputDir.getFileName();
+
+      // convert to int or assign it to size_t
+      for (size_t i = 0; i < filename.size(); i++) {
+        auto file = filename[i];
+
+        if (numInStr(&file)) {
+          run_number += filename[i];
+        }
+      }
+      run_number.erase(0, run_number.find_first_not_of('0'));
+    } else {
+      g_log.warning()
+          << (run_number +
+              " is not a valid run number, please provide a valid run number. ")
+          << std::endl;
+    }
+
+  } catch (std::runtime_error &re) {
+    throw std::invalid_argument("Error browsing selected file: " +
+                                static_cast<std::string>(re.what()));
+
+    g_log.debug() << "run number is: " << run_number << std::endl;
+  }
+  return run_number;
 }
 
 /**
@@ -512,8 +567,9 @@ void EnggDiffractionPresenter::calibrationFinished() {
     g_log.warning() << "The cablibration did not finished correctly."
                     << std::endl;
   } else {
-    const std::string vanNo = m_view->newVanadiumNo();
-    const std::string ceriaNo = m_view->newCeriaNo();
+    const std::string vanNo = isValidRunNumber(m_view->newVanadiumNo());
+
+    const std::string ceriaNo = isValidRunNumber(m_view->newCeriaNo());
     const std::string outFilename =
         buildCalibrateSuggestedFilename(vanNo, ceriaNo);
     m_view->newCalibLoaded(vanNo, ceriaNo, outFilename);

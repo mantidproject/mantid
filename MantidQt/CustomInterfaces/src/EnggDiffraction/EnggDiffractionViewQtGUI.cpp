@@ -387,81 +387,19 @@ std::string EnggDiffractionViewQtGUI::getRBNumber() const {
 }
 
 std::string EnggDiffractionViewQtGUI::currentVanadiumNo() const {
-  std::string vanstr =
-      m_uiTabCalib.lineEdit_current_vanadium_num->text().toStdString();
-  if (vanstr.length() > 6) {
-    std::string vanno = "";
-
-    Poco::Path vanadiumDir = vanstr;
-    auto vanadium = vanadiumDir.getFileName();
-
-    for (int i = 0; i < static_cast<int>(vanadium.length()); i++) {
-      if (isdigit(vanadium[i]))
-        vanno += vanadium[i];
-    }
-
-    vanno.erase(0, vanno.find_first_not_of('0'));
-
-    vanstr = vanno;
-  }
-  return vanstr;
+  return m_uiTabCalib.lineEdit_current_vanadium_num->text().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::currentCeriaNo() const {
-  std::string ceria_str =
-      m_uiTabCalib.lineEdit_current_ceria_num->text().toStdString();
-  if (ceria_str.length() > 6) {
-    std::string ceria_num = "";
-
-    Poco::Path ceriaDir = ceria_str;
-    auto ceria = ceriaDir.getFileName();
-
-    for (int i = 0; i < static_cast<int>(ceria.length()); i++) {
-      if (isdigit(ceria[i]))
-        ceria_num += ceria[i];
-    }
-    ceria_num.erase(0, ceria_num.find_first_not_of('0'));
-    ceria_str = ceria_num;
-  }
-  return ceria_str;
+  return m_uiTabCalib.lineEdit_current_ceria_num->text().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::newVanadiumNo() const {
-  std::string vanstr =
-      m_uiTabCalib.lineEdit_new_vanadium_num->getText().toStdString();
-  if (vanstr.length() > 6) {
-    std::string vanno = "";
-
-    Poco::Path vanadiumDir = vanstr;
-    auto vanadium = vanadiumDir.getFileName();
-
-    for (int i = 0; i < static_cast<int>(vanadium.length()); i++) {
-      if (isdigit(vanadium[i]))
-        vanno += vanadium[i];
-    }
-    vanno.erase(0, vanno.find_first_not_of('0'));
-    vanstr = vanno;
-  }
-  return vanstr;
+  return m_uiTabCalib.lineEdit_new_vanadium_num->getText().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::newCeriaNo() const {
-  std::string ceria_str =
-      m_uiTabCalib.lineEdit_new_ceria_num->getText().toStdString();
-  if (ceria_str.length() > 6) {
-    std::string ceria_num = "";
-
-    Poco::Path ceriaDir = ceria_str;
-    auto ceria = ceriaDir.getFileName();
-
-    for (int i = 0; i < static_cast<int>(ceria.length()); i++) {
-      if (isdigit(ceria[i]))
-        ceria_num += ceria[i];
-    }
-    ceria_num.erase(0, ceria_num.find_first_not_of('0'));
-    ceria_str = ceria_num;
-  }
-  return ceria_str;
+  return m_uiTabCalib.lineEdit_new_ceria_num->getText().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::currentCalibFile() const {
@@ -754,62 +692,15 @@ void EnggDiffractionViewQtGUI::browseTextureDetGroupingFile() {
 }
 
 std::string EnggDiffractionViewQtGUI::focusingRunNo() const {
-  std::string focus_str =
-      m_uiTabFocus.lineEdit_run_num->getText().toStdString();
-  if (focus_str.length() > 6) {
-    std::string focus_num = "";
-
-    Poco::Path focusDir = focus_str;
-    auto focus = focusDir.getFileName();
-
-    for (int i = 0; i < static_cast<int>(focus.length()); i++) {
-      if (isdigit(focus[i]))
-        focus_num += focus[i];
-    }
-    focus_num.erase(0, focus_num.find_first_not_of('0'));
-    focus_str = focus_num;
-  }
-  return focus_str;
+  return m_uiTabFocus.lineEdit_run_num->getText().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::focusingCroppedRunNo() const {
-
-  std::string cropped_str =
-      m_uiTabFocus.lineEdit_cropped_run_num->getText().toStdString();
-  if (cropped_str.length() > 6) {
-    std::string focus_num = "";
-
-    Poco::Path focusDir = cropped_str;
-    auto focus = focusDir.getFileName();
-
-    for (int i = 0; i < static_cast<int>(focus.length()); i++) {
-      if (isdigit(focus[i]))
-        focus_num += focus[i];
-    }
-    focus_num.erase(0, focus_num.find_first_not_of('0'));
-    cropped_str = focus_num;
-  }
-  return cropped_str;
+  return m_uiTabFocus.lineEdit_cropped_run_num->getText().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::focusingTextureRunNo() const {
-
-  std::string texture_str =
-      m_uiTabFocus.lineEdit_texture_run_num->getText().toStdString();
-  if (texture_str.length() > 6) {
-    std::string focus_num = "";
-
-    Poco::Path focusDir = texture_str;
-    auto focus = focusDir.getFileName();
-
-    for (int i = 0; i < static_cast<int>(focus.length()); i++) {
-      if (isdigit(focus[i]))
-        focus_num += focus[i];
-    }
-    focus_num.erase(0, focus_num.find_first_not_of('0'));
-    texture_str = focus_num;
-  }
-  return texture_str;
+  return m_uiTabFocus.lineEdit_texture_run_num->getText().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::focusingDir() const {
