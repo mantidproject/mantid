@@ -144,7 +144,7 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
 
   vtkNew<vtkPoints> points;
 
-  Mantid::coord_t in[3];
+  Mantid::coord_t in[2];
 
   const coord_t maxX = m_workspace->getXDimension()->getMaximum();
   const coord_t minX = m_workspace->getXDimension()->getMinimum();
@@ -157,25 +157,34 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   const coord_t incrementY = (maxY - minY) / static_cast<coord_t>(nBinsY);
   const coord_t incrementZ = (maxZ - minZ) / static_cast<coord_t>(nBinsZ);
 
-  const int nPointsX = nBinsX + 1;
-  const int nPointsY = nBinsY + 1;
-  const int nPointsZ = nBinsZ + 1;
+  const vtkIdType nPointsX = nBinsX + 1;
+  const vtkIdType nPointsY = nBinsY + 1;
+  const vtkIdType nPointsZ = nBinsZ + 1;
 
+  vtkFloatArray *pointsarray = vtkFloatArray::SafeDownCast(points->GetData());
+  if (pointsarray == NULL) {
+    throw std::runtime_error("Failed to cast vtkDataArray to vtkFloatArray.");
+  } else if (pointsarray->GetNumberOfComponents() != 3) {
+    throw std::runtime_error("points array must have 3 components.");
+  }
+  float *it = pointsarray->WritePointer(0, nPointsX * nPointsY * nPointsZ * 3);
   // Array with the point IDs (only set where needed)
   progressFactor = 0.5 / static_cast<double>(nPointsZ);
   double progressOffset = 0.5;
   for (int z = 0; z < nPointsZ; z++) {
     // Report progress updates for the last 50%
     progressUpdate.eventRaised(double(z) * progressFactor + progressOffset);
-    in[2] = (minZ + (static_cast<coord_t>(z) *
-                     incrementZ)); // Calculate increment in z;
+    in[1] = (minZ +
+             (static_cast<coord_t>(z) * incrementZ)); // Calculate increment in z;
     for (int y = 0; y < nPointsY; y++) {
-      in[1] = (minY + (static_cast<coord_t>(y) *
+      in[0] = (minY + (static_cast<coord_t>(y) *
                        incrementY)); // Calculate increment in y;
       for (int x = 0; x < nPointsX; x++) {
-        in[0] = (minX + (static_cast<coord_t>(x) *
-                         incrementX)); // Calculate increment in x;
-        points->InsertNextPoint(in);
+        it[0] = (minX + (static_cast<coord_t>(x) *
+                        incrementX)); // Calculate increment in x;
+        it[1] = in[0];
+        it[2] = in[1];
+        std::advance(it, 3);
       }
     }
   }
