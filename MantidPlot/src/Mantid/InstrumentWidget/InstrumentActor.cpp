@@ -292,27 +292,35 @@ IMaskWorkspace_sptr InstrumentActor::getMaskWorkspaceIfExists() const
   */
 void InstrumentActor::applyMaskWorkspace()
 {
-    if ( !m_maskWorkspace ) return;
-    try
-    {
-        Mantid::API::IAlgorithm * alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("MaskDetectors",-1);
-        alg->setPropertyValue( "Workspace", getWorkspace()->name() );
-        alg->setProperty( "MaskedWorkspace", m_maskWorkspace );
-        alg->execute();
-        // After the algorithm finishes the InstrumentWindow catches the after-replace notification
-        // and updates this instrument actor.
+  auto wsName = getWorkspace()->name();
+  if (m_maskWorkspace) {
+    // Mask detectors
+    try {
+      Mantid::API::IAlgorithm *alg =
+          Mantid::API::FrameworkManager::Instance().createAlgorithm(
+              "MaskDetectors", -1);
+      alg->setPropertyValue("Workspace", wsName);
+      alg->setProperty("MaskedWorkspace", m_maskWorkspace);
+      alg->execute();
+      // After the algorithm finishes the InstrumentWindow catches the
+      // after-replace notification
+      // and updates this instrument actor.
+    } catch (...) {
+      QMessageBox::warning(NULL, "MantidPlot - Warning",
+                           "An error accured when applying the mask.", "OK");
     }
-    catch(...)
-    {
-        QMessageBox::warning(NULL,"MantidPlot - Warning","An error accured when applying the mask.","OK");
-    }
-    clearMaskWorkspace();
+  }
+
+  // Mask bins
+  m_maskBinsData.mask(wsName);
+
+  clearMasks();
 }
 
 /**
   * Removes the mask workspace.
   */
-void InstrumentActor::clearMaskWorkspace()
+void InstrumentActor::clearMasks()
 {
     bool needColorRecalc = false;
     if ( m_maskWorkspace )
@@ -320,6 +328,13 @@ void InstrumentActor::clearMaskWorkspace()
         needColorRecalc = getMaskWorkspace()->getNumberMasked() > 0;
     }
     m_maskWorkspace.reset();
+    if (!m_maskBinsData.isEmpty())
+    {
+      m_maskBinsData.clear();
+      auto workspace = getWorkspace();
+      calculateIntegratedSpectra(*workspace);
+      needColorRecalc = true;
+    }
     if ( needColorRecalc )
     {
         resetColors();
@@ -1263,6 +1278,12 @@ void InstrumentActor::addMaskBinsData(const QList<int>& detIDs)
   auto workspace = getWorkspace();
   calculateIntegratedSpectra(*workspace);
   resetColors();
+}
+
+/// Show if bin masks have been defined.
+bool InstrumentActor::hasBinMask() const
+{
+  return ! m_maskBinsData.isEmpty();
 }
 
 //-------------------------------------------------------------------------//

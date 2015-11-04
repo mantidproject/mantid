@@ -83,10 +83,11 @@ public:
   boost::shared_ptr<Mantid::API::IMaskWorkspace> getMaskWorkspace() const;
   /// Apply the mask in the attached mask workspace to the data.
   void applyMaskWorkspace();
-  /// Remove the attached mask workspace without applying the mask.
-  void clearMaskWorkspace();
   /// Add a range of bins for masking
   void addMaskBinsData(const QList<int>& detIDs);
+  /// Remove the attached mask workspace without applying the mask.
+  /// Remove the bin masking data.
+  void clearMasks();
 
   /// Get the color map.
   const MantidColorMap & getColorMap() const;
@@ -177,6 +178,7 @@ public:
 
   void initMaskHelper() const;
   bool hasMaskWorkspace() const;
+  bool hasBinMask() const;
 signals:
   void colorMapChanged();
 
@@ -212,11 +214,14 @@ private:
   /// integrated spectra
   std::vector<double> m_specIntegrs;
   /// The workspace data and bin range limits
-  double m_WkspBinMinValue, m_WkspBinMaxValue;                         ///< x-values min and max over whole workspace
-  /// The user requested data and bin ranges
-  double m_DataMinValue, m_DataMaxValue, m_DataPositiveMinValue;    ///< y-values min and max for current bin (x integration) range
-  double m_DataMinScaleValue, m_DataMaxScaleValue;           ///< min and max of the color map scale
-  double m_BinMinValue, m_BinMaxValue;                       ///< x integration range
+  double m_WkspBinMinValue, m_WkspBinMaxValue;
+  // The user requested data and bin ranges
+  /// y-values min and max for current bin (x integration) range
+  double m_DataMinValue, m_DataMaxValue, m_DataPositiveMinValue;
+  /// min and max of the color map scale
+  double m_DataMinScaleValue, m_DataMaxScaleValue;
+  /// x integration range
+  double m_BinMinValue, m_BinMaxValue;
   /// Hint on whether the workspace is ragged or not
   bool m_ragged;
   /// Flag to rescale the colormap axis automatically when the data or integration range change

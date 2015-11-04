@@ -28,7 +28,7 @@ void MaskBinsData::mask(const std::string& wsName) const
   {
     auto &spectra = range.value();
     std::vector<int> spectraList(spectra.begin(), spectra.end());
-    auto alg = Mantid::API::AlgorithmManager::Instance().create("MaskDetectors",-1);
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("MaskBins",-1);
     alg->setPropertyValue("InputWorkspace", wsName);
     alg->setPropertyValue("OutputWorkspace", wsName);
     alg->setProperty("SpectraList", spectraList);
@@ -61,4 +61,10 @@ void MaskBinsData::subtractIntegratedSpectra(const Mantid::API::MatrixWorkspace&
       spectraIntgrs[*ispec] = counts >= 0.0 ? counts : 0.0;
     }
   }
+}
+
+/// Clear the masking data
+void MaskBinsData::clear()
+{
+  m_xRanges.clear();
 }

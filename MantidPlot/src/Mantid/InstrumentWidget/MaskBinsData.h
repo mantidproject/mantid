@@ -37,6 +37,7 @@ public:
   void mask(const std::string& wsName) const;
   bool isEmpty() const;
   void subtractIntegratedSpectra(const Mantid::API::MatrixWorkspace& workspace, std::vector<double>& spectraIntgrs) const;
+  void clear();
 private:
   /// Range of x values to mask in a spectrum. (Using MaskBins)
   struct XRange

@@ -254,6 +254,11 @@ void XIntegrationControl::sliderChanged(double minimum,double maximum)
   double w = m_totalMaximum - m_totalMinimum;
   m_minimum = m_totalMinimum + minimum * w;
   m_maximum = m_totalMinimum + maximum * w;
+  if (w > 0 && (m_maximum - m_minimum) / w >= 0.98)
+  {
+    m_minimum = m_totalMinimum;
+    m_maximum = m_totalMaximum;
+  }
   updateTextBoxes();
   emit changed(m_minimum,m_maximum);
 }
