@@ -235,7 +235,12 @@ void Q1D2::exec() {
           EOutTo2[bin] += (*EIn) * (*EIn);
           normError2[bin] += *normETo2s;
           if (useQResolution) {
-            qResolutionOut[bin] += (*YIn) * (*QResIn);
+            auto QBin = (QOut[bin + 1] - QOut[bin]);
+            // Here we need to take into account the Bin width and the count
+            // weigthing. The
+            // formula should be YIN* sqrt(QResIn^2 + (QBin/sqrt(12))^2)
+            qResolutionOut[bin] +=
+                (*YIn) * std::sqrt((*QResIn) * (*QResIn) + QBin * QBin / 12.0);
           }
         }
       }
