@@ -221,6 +221,8 @@ void CreateMD::exec() {
                         angdeg, u, v, run_md);
     to_merge_names.push_back(to_merge_name);
 
+    // We are stuck using ADS as we can't pass workspace pointers to MergeMD
+    // There is currently no way to pass a list of workspace pointers
     AnalysisDataService::Instance().addOrReplace(to_merge_name, run_md);
   }
 
