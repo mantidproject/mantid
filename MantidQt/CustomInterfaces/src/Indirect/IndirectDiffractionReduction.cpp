@@ -345,10 +345,10 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
                                    m_uiForm.ckLoadLogs->isChecked());
   osirisDiffReduction->setProperty("OutputWorkspace",
                                    drangeWsName.toStdString());
-  auto min = boost::lexical_cast<std::string, int>(m_uiForm.spSpecMin->value());
-  auto max = boost::lexical_cast<std::string, int>(m_uiForm.spSpecMax->value());
-  osirisDiffReduction->setProperty("SpectrumMin", min);
-  osirisDiffReduction->setProperty("SpectrumMax", max);
+  auto specMin = boost::lexical_cast<std::string, int>(m_uiForm.spSpecMin->value());
+  auto specMax = boost::lexical_cast<std::string, int>(m_uiForm.spSpecMax->value());
+  osirisDiffReduction->setProperty("SpectraMin", specMin);
+  osirisDiffReduction->setProperty("SpectraMax", specMax);
 
   osirisDiffReduction->setProperty("DetectDRange", !manualDRange);
   if (manualDRange)
@@ -511,9 +511,6 @@ void IndirectDiffractionReduction::instrumentSelected(
     m_uiForm.ckSumFiles->setEnabled(false);
     m_uiForm.ckSumFiles->setChecked(false);
 
-    // Disable spectra range
-    //m_uiForm.spSpecMin->setEnabled(false);
-    //m_uiForm.spSpecMax->setEnabled(false);
   } else {
     // Re-enable sum files
     m_uiForm.ckSumFiles->setToolTip("");

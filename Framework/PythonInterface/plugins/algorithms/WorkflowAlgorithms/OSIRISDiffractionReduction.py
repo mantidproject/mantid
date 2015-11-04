@@ -236,9 +236,9 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                              doc='Filename of the .cal file to use in the [[AlignDetectors]] and '+\
                                  '[[DiffractionFocussing]] child algorithms.')
 
-        self.declareProperty('SpectrumMin', 3, doc='Minimum Spectrum to Load from (Must be more than 3)')
+        self.declareProperty('SpectraMin', 3, doc='Minimum Spectrum to Load from (Must be more than 3)')
 
-        self.declareProperty('SpectrumMax', 962, doc='Maximum Spectrum to Load from file (Must be less than 962)')
+        self.declareProperty('SpectraMax', 962, doc='Maximum Spectrum to Load from file (Must be less than 962)')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', Direction.Output),
                              doc="Name to give the output workspace. If no name is provided, "+\
@@ -276,8 +276,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         if self._container_file != '':
             self._container_file = self._find_runs([self._container_file])[0]
 
-        self._spec_min = self.getPropertyValue("SpectrumMin")
-        self._spec_max = self.getPropertyValue("SpectrumMax")
+        self._spec_min = self.getPropertyValue("SpectraMin")
+        self._spec_max = self.getPropertyValue("SpectraMax")
 
         self._man_d_range = None
         if not self.getProperty("DetectDRange").value:
