@@ -205,6 +205,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
     _man_d_range = None
     _load_logs = None
     _spec_min = None
+    _spec_max = None
 
 
     def category(self):
