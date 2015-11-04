@@ -225,8 +225,8 @@ void addRowFromDict(ITableWorkspace &self, const bpl::dict &rowItems) {
   self.appendRow();
 
   // Declared in this scope so we can access them in catch block
-  Column_sptr column;   // Column in table
-  bpl::object value;    // Value from dictionary
+  Column_sptr column; // Column in table
+  bpl::object value;  // Value from dictionary
 
   try {
     // Retrieve and set the value for each column
@@ -249,8 +249,8 @@ void addRowFromDict(ITableWorkspace &self, const bpl::dict &rowItems) {
     if (PyErr_ExceptionMatches(PyExc_TypeError)) {
       std::ostringstream msg;
       msg << "Wrong datatype <";
-      msg << std::string(bpl::extract<std::string>(
-               value.attr("__class__").attr("__name__")));
+      msg << std::string(
+          bpl::extract<std::string>(value.attr("__class__").attr("__name__")));
       msg << "> for column <" << column->name() << "> ";
       msg << "(expected <" << column->type() << ">)";
       PyErr_SetString(PyExc_TypeError, msg.str().c_str());
@@ -297,7 +297,7 @@ void addRowFromSequence(ITableWorkspace &self, const bpl::object &rowItems) {
         std::ostringstream msg;
         msg << "Wrong datatype <";
         msg << std::string(bpl::extract<std::string>(
-                 value.attr("__class__").attr("__name__")));
+            value.attr("__class__").attr("__name__")));
         msg << "> for column <" << column->name() << "> ";
         msg << "(expected <" << column->type() << ">)";
         PyErr_SetString(PyExc_TypeError, msg.str().c_str());
