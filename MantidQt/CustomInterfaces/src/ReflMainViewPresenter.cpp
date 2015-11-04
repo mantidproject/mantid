@@ -57,7 +57,8 @@ public:
       throw std::runtime_error("ProgressableView is null");
     }
     m_progressableView->clearProgress();
-    m_progressableView->setProgressRange(static_cast<int>(start), static_cast<int>(end));
+    m_progressableView->setProgressRange(static_cast<int>(start),
+                                         static_cast<int>(end));
   }
 
   void doReport(const std::string &) {
@@ -140,8 +141,8 @@ namespace CustomInterfaces {
 ReflMainViewPresenter::ReflMainViewPresenter(
     ReflMainView *mainView, ProgressableView *progressView,
     boost::shared_ptr<IReflSearcher> searcher)
-    : WorkspaceObserver(), m_view(mainView), m_progressView(progressView), m_tableDirty(false),
-      m_searcher(searcher){
+    : WorkspaceObserver(), m_view(mainView), m_progressView(progressView),
+      m_tableDirty(false), m_searcher(searcher) {
 
   // TODO. Select strategy.
   /*
@@ -224,8 +225,7 @@ ReflMainViewPresenter::ReflMainViewPresenter(
   newTable();
 }
 
-ReflMainViewPresenter::~ReflMainViewPresenter() {
-}
+ReflMainViewPresenter::~ReflMainViewPresenter() {}
 
 /**
  * Finds the first unused group id
@@ -281,7 +281,8 @@ void ReflMainViewPresenter::process() {
   std::map<int, std::set<int>> groups;
   for (auto it = rows.begin(); it != rows.end(); ++it)
     groups[m_model->data(m_model->index(*it, ReflTableSchema::COL_GROUP))
-               .toInt()].insert(*it);
+               .toInt()]
+        .insert(*it);
 
   // Check each group and warn if we're only partially processing it
   for (auto gIt = groups.begin(); gIt != groups.end(); ++gIt) {
@@ -1263,7 +1264,8 @@ void ReflMainViewPresenter::exportTable() {
 /**
 Handle ADS add events
 */
-void ReflMainViewPresenter::addHandle(const std::string &name, Mantid::API::Workspace_sptr workspace) {
+void ReflMainViewPresenter::addHandle(const std::string &name,
+                                      Mantid::API::Workspace_sptr workspace) {
   if (Mantid::API::AnalysisDataService::Instance().isHiddenDataServiceObject(
           name))
     return;
@@ -1294,9 +1296,11 @@ void ReflMainViewPresenter::clearADSHandle() {
 /**
 Handle ADS rename events
 */
-void ReflMainViewPresenter::renameHandle(const std::string& oldName,const std::string& newName) {
+void ReflMainViewPresenter::renameHandle(const std::string &oldName,
+                                         const std::string &newName) {
 
-// if a workspace with oldName exists then replace it for the same workspace with newName
+  // if a workspace with oldName exists then replace it for the same workspace
+  // with newName
   if (m_workspaceList.find(oldName) == m_workspaceList.end())
     return;
 
@@ -1308,7 +1312,8 @@ void ReflMainViewPresenter::renameHandle(const std::string& oldName,const std::s
 /**
 Handle ADS replace events
 */
-void ReflMainViewPresenter::afterReplaceHandle(const std::string& name, Mantid::API::Workspace_sptr workspace) {
+void ReflMainViewPresenter::afterReplaceHandle(
+    const std::string &name, Mantid::API::Workspace_sptr workspace) {
   // Erase it
   m_workspaceList.erase(name);
 
@@ -1429,7 +1434,7 @@ void ReflMainViewPresenter::pasteSelected() {
     // Paste as many columns as we can from this line
     for (int col = ReflTableSchema::COL_RUNS;
          col <= ReflTableSchema::COL_OPTIONS &&
-             col < static_cast<int>(values.size());
+         col < static_cast<int>(values.size());
          ++col)
       m_model->setData(m_model->index(*rowIt, col),
                        QString::fromStdString(values[col]));
