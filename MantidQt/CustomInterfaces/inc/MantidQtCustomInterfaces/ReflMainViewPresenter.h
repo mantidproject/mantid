@@ -11,7 +11,6 @@
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 
 #include <Poco/AutoPtr.h>
-//#include <Poco/NObserver.h>
 #include <memory>
 
 namespace MantidQt
@@ -68,7 +67,6 @@ namespace MantidQt
       std::map<std::string,QVariant> m_options;
       //the search implementation
       boost::shared_ptr<IReflSearcher> m_searcher;
-
       //process selected rows
       void process();
       //process groups of rows
@@ -138,22 +136,11 @@ namespace MantidQt
       //List of workspaces the user can open
       std::set<std::string> m_workspaceList;
 
-      //To maintain a list of workspaces the user may open, we observe the ADS
-      //Poco::NObserver<ReflMainViewPresenter, Mantid::API::WorkspaceAddNotification> m_addObserver;
-      //Poco::NObserver<ReflMainViewPresenter, Mantid::API::WorkspacePostDeleteNotification> m_remObserver;
-      //Poco::NObserver<ReflMainViewPresenter, Mantid::API::ClearADSNotification> m_clearObserver;
-      //Poco::NObserver<ReflMainViewPresenter, Mantid::API::WorkspaceRenameNotification> m_renameObserver;
-      //Poco::NObserver<ReflMainViewPresenter, Mantid::API::WorkspaceAfterReplaceNotification> m_replaceObserver;
 
-     // void handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf);
       void addHandle(const std::string &name, Mantid::API::Workspace_sptr workspace);
-     // void handleRemEvent(Mantid::API::WorkspacePostDeleteNotification_ptr pNf);
       void postDeleteHandle(const std::string &name);
-      //void handleClearEvent(Mantid::API::ClearADSNotification_ptr pNf);
       void clearADSHandle();
-      //void handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf);
       void renameHandle(const std::string& oldName,const std::string& newName);
-      //void handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
       void afterReplaceHandle(const std::string& name, Mantid::API::Workspace_sptr workspace);
       void saveNotebook(std::map<int,std::set<int>> groups, std::set<int> rows);
 

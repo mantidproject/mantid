@@ -140,14 +140,8 @@ namespace CustomInterfaces {
 ReflMainViewPresenter::ReflMainViewPresenter(
     ReflMainView *mainView, ProgressableView *progressView,
     boost::shared_ptr<IReflSearcher> searcher)
-    : m_view(mainView), m_progressView(progressView), m_tableDirty(false),
-      m_searcher(searcher),
-      /*m_addObserver(*this, &ReflMainViewPresenter::handleAddEvent),*/
-      /*m_remObserver(*this, &ReflMainViewPresenter::handleRemEvent),*/
-      /*m_clearObserver(*this, &ReflMainViewPresenter::handleClearEvent),*/
-      /*m_renameObserver(*this, &ReflMainViewPresenter::handleRenameEvent),*/
-     /* m_replaceObserver(*this, &ReflMainViewPresenter::handleReplaceEvent),*/
-      WorkspaceObserver(){
+    : WorkspaceObserver(), m_view(mainView), m_progressView(progressView), m_tableDirty(false),
+      m_searcher(searcher){
 
   // TODO. Select strategy.
   /*
@@ -192,16 +186,10 @@ ReflMainViewPresenter::ReflMainViewPresenter(
     if (isValidModel(ws))
       m_workspaceList.insert(name);
   }
-
-  //ads.notificationCenter.addObserver(m_addObserver);
   observeAdd();
-  //ads.notificationCenter.addObserver(m_remObserver);
   observePostDelete();
-  //ads.notificationCenter.addObserver(m_renameObserver);
   observeRename();
-  //ads.notificationCenter.addObserver(m_clearObserver);
   observeADSClear();
-  //ads.notificationCenter.addObserver(m_replaceObserver);
   observeAfterReplace();
   m_view->setTableList(m_workspaceList);
 
@@ -237,13 +225,6 @@ ReflMainViewPresenter::ReflMainViewPresenter(
 }
 
 ReflMainViewPresenter::~ReflMainViewPresenter() {
-  Mantid::API::AnalysisDataServiceImpl &ads =
-      Mantid::API::AnalysisDataService::Instance();
- // ads.notificationCenter.removeObserver(m_addObserver);
-  //ads.notificationCenter.removeObserver(m_remObserver);
-  //ads.notificationCenter.removeObserver(m_clearObserver);
-  //ads.notificationCenter.removeObserver(m_renameObserver);
-  //ads.notificationCenter.removeObserver(m_replaceObserver);
 }
 
 /**
