@@ -1441,7 +1441,19 @@ def AddRuns(runs, instrument ='sans2d', saveAsEvent=False, binning = "Monitors",
     Method to expose the add_runs functionality for custom scripting.
     @param runs: a list with the requested run numbers
     @param instrument: the name of the selected instrument
-    @param binning: the where to get the binnings from. This can either be "Monitors
+    @param saveAsEvent: when adding event-type data, then this can be stored as event-type data
+    @param binning: where to get the binnings from. This is relevant when adding Event-type data.
+                    The property can be set to "Monitors" in order to emulate the binning of the monitors or to a
+                    string list with the same format that is used for the Rebin algorithm. This property is ignored
+                    when saving as event data.
+    @param isOverlay: sets if the the overlay mechanism should be used when the saveAsEvent flag is set
+    @param time_shifts: provides additional time shifts if the isOverlay flag is specified. The time shifts are specifed
+                        in a string list. Either time_shifts is not used or a list with times in secomds. Note that there
+                        has to be one entry fewer than the number of workspaces to add.
+    @param defType: the file type
+    @param rawTypes: the raw types
+    @param lowMem: if the lowMem option should be used
+    @returns a success message
     '''
     # Need at least two runs to work
     if len(runs) < 1:
@@ -1451,15 +1463,15 @@ def AddRuns(runs, instrument ='sans2d', saveAsEvent=False, binning = "Monitors",
     if time_shifts is None:
         time_shifts = []
 
-    add_runs(runs = runs,
-             inst = instrument,
-             defType = defType,
-             rawTypes = rawTypes,
-             lowMem = lowMem,
-             binning = binning,
-             saveAsEvent=saveAsEvent,
-             isOverlay = isOverlay,
-             time_shifts = time_shifts)
+    return add_runs(runs = runs,
+                    inst = instrument,
+                    defType = defType,
+                    rawTypes = rawTypes,
+                    lowMem = lowMem,
+                    binning = binning,
+                    saveAsEvent=saveAsEvent,
+                    isOverlay = isOverlay,
+                    time_shifts = time_shifts)
 
 
 

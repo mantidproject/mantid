@@ -12,7 +12,7 @@ set ( SRC_FILES
 	src/CentroidPeaksMD.cpp
 	src/CentroidPeaksMD2.cpp
 	src/CloneMDWorkspace.cpp
-    src/CompactMD.cpp
+	src/CompactMD.cpp
 	src/CompareMDWorkspaces.cpp
 	src/ConvToMDBase.cpp
 	src/ConvToMDEventsWS.cpp
@@ -34,7 +34,7 @@ set ( SRC_FILES
 	src/CreateMDHistoWorkspace.cpp
 	src/CreateMDWorkspace.cpp
 	src/CutMD.cpp
-	src/DisplayNormalizationSetter.cpp	
+	src/DisplayNormalizationSetter.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
 	src/EvaluateMDFunction.cpp
@@ -107,6 +107,7 @@ set ( SRC_FILES
 	src/SaveMD.cpp
 	src/SaveMD2.cpp
 	src/SaveZODS.cpp
+	src/SetMDFrame.cpp
 	src/SetMDUsingMask.cpp
 	src/SliceMD.cpp
 	src/SlicingAlgorithm.cpp
@@ -136,8 +137,8 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CentroidPeaksMD.h
 	inc/MantidMDAlgorithms/CentroidPeaksMD2.h
 	inc/MantidMDAlgorithms/CloneMDWorkspace.h
+	inc/MantidMDAlgorithms/CompactMD.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
-    inc/MantidMDAlgorithms/CompactMD.h
 	inc/MantidMDAlgorithms/ConvToMDBase.h
 	inc/MantidMDAlgorithms/ConvertCWPDMDToSpectra.h
 	inc/MantidMDAlgorithms/ConvertCWSDExpToMomentum.h
@@ -230,6 +231,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/SaveMD.h
 	inc/MantidMDAlgorithms/SaveMD2.h
 	inc/MantidMDAlgorithms/SaveZODS.h
+	inc/MantidMDAlgorithms/SetMDFrame.h
 	inc/MantidMDAlgorithms/SetMDUsingMask.h
 	inc/MantidMDAlgorithms/SliceMD.h
 	inc/MantidMDAlgorithms/SlicingAlgorithm.h
@@ -258,8 +260,8 @@ set ( TEST_FILES
 	CentroidPeaksMD2Test.h
 	CentroidPeaksMDTest.h
 	CloneMDWorkspaceTest.h
+	CompactMDTest.h
 	CompareMDWorkspacesTest.h
-    CompactMDTest.h
 	ConvertCWPDMDToSpectraTest.h
 	ConvertCWSDExpToMomentumTest.h
 	ConvertCWSDMDtoHKLTest.h
@@ -337,6 +339,7 @@ set ( TEST_FILES
 	SaveMD2Test.h
 	SaveMDTest.h
 	SaveZODSTest.h
+	SetMDFrameTest.h
 	SetMDUsingMaskTest.h
 	SimulateResolutionConvolvedModelTest.h
 	SliceMDTest.h
