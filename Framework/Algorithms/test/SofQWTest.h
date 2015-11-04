@@ -61,11 +61,6 @@ public:
     TS_ASSERT_EQUALS(sqw.version(), 1);
   }
 
-  void testCategory() {
-    Mantid::Algorithms::SofQW sqw;
-    TS_ASSERT_EQUALS(sqw.category(), "Inelastic");
-  }
-
   void testInit() {
     Mantid::Algorithms::SofQW sqw;
     TS_ASSERT_THROWS_NOTHING(sqw.initialize());

@@ -7,7 +7,7 @@ class TestWorkspaceGroupProperty(PythonAlgorithm):
     """
 
     def category(self):
-        return "Workflow\Testing"
+        return "Workflow\\Testing"
 
     def name(self):
         return "WorkspaceGroupProperty"

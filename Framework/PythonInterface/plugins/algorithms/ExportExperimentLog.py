@@ -30,8 +30,7 @@ class ExportExperimentLog(PythonAlgorithm):
 
     def summmary(self):
         return "Exports experimental log."
-        
-    
+
     def category(self):
         """ Defines the category the algorithm will be put in the algorithm browser
         """
