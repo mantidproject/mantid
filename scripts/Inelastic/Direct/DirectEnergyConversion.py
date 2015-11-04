@@ -386,7 +386,13 @@ class DirectEnergyConversion(object):
         # Check auto-ei mode and calculate incident energies if necessary
         if PropertyManager.incident_energy.autoEi_mode():
             mon_ws = PropertyManager.sample_run.get_monitors_ws()
-            PropertyManager.sample_run.set_auto_Ei(mon_ws,prop_man)
+            try:
+                PropertyManager.sample_run.set_auto_Ei(mon_ws,prop_man)
+                EiToProcessAvailible = True
+            except RuntimeError:
+                EiToProcessAvailible = False
+        else:
+            EiToProcessAvailible = True
 
 
         # Update reduction properties which may change in the workspace but have
@@ -404,6 +410,11 @@ class DirectEnergyConversion(object):
         # inform user on what parameters have changed from script or gui
         # if monovan present, check if abs_norm_ parameters are set
         self.prop_man.log_changed_values('notice')
+        if not EiToProcessAvailible:
+            prop_man.log("*** NO GUESS INCIDENT ENERGIES IDENTIFIED FOR THIS RUN *********")
+            prop_man.log("****  NOTHING TO REDUCE ****************************************")
+            prop_man.log("****************************************************************")
+            return None
 
         masking = None
         masks_done = False

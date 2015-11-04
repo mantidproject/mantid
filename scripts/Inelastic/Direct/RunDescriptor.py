@@ -875,7 +875,7 @@ class RunDescriptor(PropDescriptor):
             for specID in spec_to_mon:
                 mon_ws = self.copy_spectrum2monitors(data_ws,mon_ws,specID)
             if mon_ws:
-                mon_ws=mtd[mon_ws_name] # very weird operation needed
+                #mon_ws=mtd[mon_ws_name] # very weird operation needed
                 data_ws.setMonitorWorkspace(mon_ws)
 
         if monitors_ID:

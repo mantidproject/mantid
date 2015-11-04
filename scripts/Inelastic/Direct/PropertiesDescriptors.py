@@ -151,6 +151,8 @@ class IncidentEnergy(PropDescriptor):
                     self._incident_energy = float(value)
         else:
             raise KeyError("Incident energy have to be positive number of list of positive numbers. Got None")
+        # here we have set specific energy or range of incident energies
+        self._use_autoEi = False
 
         if isinstance(self._incident_energy,list):
             self._num_energies = len(self._incident_energy)
@@ -168,14 +170,17 @@ class IncidentEnergy(PropDescriptor):
     #
     def multirep_mode(self):
         """ return true if energy is defined as list of energies or multirep m and false otherwise """
-        if isinstance(self._incident_energy,list) or self.autoEi_mode:
+        if isinstance(self._incident_energy,list) or self._use_autoEi:
             return True
         else:
             return False
     #
     def getAllEi(self):
         """Return incident energy(ies) range, defined by the property"""
-        return self._incident_energy
+        if not isinstance(self._incident_energy,list) and self._incident_energy==0:
+            return []
+        else:
+            return self._incident_energy
     #
     def get_current(self):
         """ Return current energy out of range of energies"""
