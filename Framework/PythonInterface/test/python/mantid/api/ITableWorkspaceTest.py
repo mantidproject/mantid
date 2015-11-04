@@ -82,7 +82,7 @@ class ITableWorkspaceTest(unittest.TestCase):
         self.assertEquals(insertedrow, nextrow)
 
         incorrect_type = {'index':1, 'value':10}
-        self.assertRaises(ValueError, table.addRow, incorrect_type)
+        self.assertRaises(TypeError, table.addRow, incorrect_type)
 
 
     def test_adding_table_data_using_list(self):
