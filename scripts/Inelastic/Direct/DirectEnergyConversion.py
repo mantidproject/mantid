@@ -387,9 +387,11 @@ class DirectEnergyConversion(object):
         if PropertyManager.incident_energy.autoEi_mode():
             mon_ws = PropertyManager.sample_run.get_monitors_ws()
             try:
-                PropertyManager.sample_run.set_auto_Ei(mon_ws,prop_man)
+                PropertyManager.incident_energy.set_auto_Ei(mon_ws,prop_man)
                 EiToProcessAvailible = True
-            except RuntimeError:
+            except RuntimeError as er:
+                prop_man.log('*** Error while calculating autoEi: {0}'.\
+                format(str(err)))
                 EiToProcessAvailible = False
         else:
             EiToProcessAvailible = True
@@ -412,7 +414,7 @@ class DirectEnergyConversion(object):
         self.prop_man.log_changed_values('notice')
         if not EiToProcessAvailible:
             prop_man.log("*** NO GUESS INCIDENT ENERGIES IDENTIFIED FOR THIS RUN *********")
-            prop_man.log("****  NOTHING TO REDUCE ****************************************")
+            prop_man.log("*** NOTHING TO REDUCE ******************************************")
             prop_man.log("****************************************************************")
             return None
 
@@ -489,9 +491,12 @@ class DirectEnergyConversion(object):
 #------------------------------------------------------------------------------------------
         # do not do enumerate if it generates all sequence at once
         #  -- code below uses current energy state from PropertyManager.incident_energy
-        for ei_guess in PropertyManager.incident_energy:
-            cut_ind,num_ei_cuts=PropertyManager.incident_energy.get_nIter()
-            #cut_ind +=1
+        AllEn = PropertyManager.incident_energy.getAllEiList()
+        num_ei_cuts = len(AllEn)
+        for ind,ei_guess in enumerate(AllEn):
+            PropertyManager.incident_energy.set_current_ind(ind)
+
+            cut_ind =ind + 1 # nice printing convention (1 of 1 rather them 0 of 1)
             #---------------
             if self._multirep_mode:
                 tof_range = self.find_tof_range_for_multirep(ws_base)

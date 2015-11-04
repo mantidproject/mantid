@@ -635,15 +635,23 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
 
     def test_multirep_ei_iterate_over(self):
+
         propman = self.prop_man
         propman.incident_energy = 20
         propman.energy_bins = [-2,0.1,0.8]
         self.assertFalse(PropertyManager.incident_energy.multirep_mode())
 
-        ic = 0
-        for en in PropertyManager.incident_energy:
-            ic+=1
+
+        AllEn = PropertyManager.incident_energy.getAllEiList()
+        for ind,en in enumerate(AllEn):
+            PropertyManager.incident_energy.set_current_ind(ind)
+
+            cen = PropertyManager.incident_energy.get_current()
+            self.assertAlmostEqual(en,cen)
+
             self.assertAlmostEqual(en,20)
+
+
             bins = propman.energy_bins
             self.assertAlmostEqual(bins[0],-2)
             self.assertAlmostEqual(bins[1],0.1)
@@ -655,15 +663,17 @@ class DirectPropertyManagerTest(unittest.TestCase):
             self.assertAlmostEqual(bins[2],0.8)
 
 
-        self.assertEqual(ic,1)
-
         propman.incident_energy = [20]
         propman.energy_bins = [-2,0.1,0.8]
         self.assertTrue(PropertyManager.incident_energy.multirep_mode())
 
-        ic = 0
-        for en in PropertyManager.incident_energy:
-            ic+=1
+        AllEn = PropertyManager.incident_energy.getAllEiList()
+        for ind,en in enumerate(AllEn):
+            PropertyManager.incident_energy.set_current_ind(ind)
+
+            cen = PropertyManager.incident_energy.get_current()
+            self.assertAlmostEqual(en,cen)
+
             self.assertAlmostEqual(en,20)
 
             bins = propman.energy_bins
@@ -677,36 +687,43 @@ class DirectPropertyManagerTest(unittest.TestCase):
             self.assertAlmostEqual(bins[1],0.1 * 20)
             self.assertAlmostEqual(bins[2],0.8 * 20)
 
-        self.assertEqual(ic,1)
 
         eng = [20,40,60]
         propman.incident_energy = eng
         propman.energy_bins = [-2,0.1,0.8]
+
         self.assertTrue(PropertyManager.incident_energy.multirep_mode())
-        ic = 0
-        for en in PropertyManager.incident_energy:
+
+        AllEn = PropertyManager.incident_energy.getAllEiList()
+        for ic,en in enumerate(AllEn):
+            PropertyManager.incident_energy.set_current_ind(ic)
+
             self.assertAlmostEqual(en,eng[ic])
+            cen = PropertyManager.incident_energy.get_current()
+            self.assertAlmostEqual(en,cen)
+
+
             bins = PropertyManager.energy_bins.get_abs_range(propman)
             self.assertAlmostEqual(bins[0],-2 * en)
             self.assertAlmostEqual(bins[1],0.1 * en)
             self.assertAlmostEqual(bins[2],0.8 * en)
-            ic+=1
-        self.assertEqual(ic,3)
         #
-        ic = 0
-        for en in PropertyManager.incident_energy:
+        AllEn = PropertyManager.incident_energy.getAllEiList()
+        for ic,en in enumerate(AllEn):
+            PropertyManager.incident_energy.set_current_ind(ic)
+
             self.assertAlmostEqual(en,eng[ic])
             ei_stored = PropertyManager.incident_energy.get_current()
             self.assertAlmostEqual(en,ei_stored)
 
-            PropertyManager.incident_energy.set_current(en)
+            cen = PropertyManager.incident_energy.get_current()
+            self.assertAlmostEqual(en,cen)
+
 
             bins = PropertyManager.energy_bins.get_abs_range(propman)
             self.assertAlmostEqual(bins[0],-2 * eng[ic])
             self.assertAlmostEqual(bins[1],0.1 * eng[ic])
             self.assertAlmostEqual(bins[2],0.8 * eng[ic])
-            ic+=1
-        self.assertEqual(ic,3)
 
     def test_incident_energy_custom_enum(self):
     ##### Custom enum works in a peculiar way
@@ -716,15 +733,14 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman.energy_bins = [-2,0.1,0.8]
         self.assertTrue(PropertyManager.incident_energy.multirep_mode())
 
-        ic = 0
-        for ind,en in enumerate(PropertyManager.incident_energy):
-            ic+=1
+        AllEn = PropertyManager.incident_energy.getAllEiList()
+        for ic,en in enumerate(AllEn):
+            PropertyManager.incident_energy.set_current_ind(ic)
+
             # propagate current energy value to incident energy class
-            PropertyManager.incident_energy.set_current(en,ind)
-            self.assertAlmostEqual(en,en_source[ind])
+            self.assertAlmostEqual(en,en_source[ic])
             en_internal = PropertyManager.incident_energy.get_current()
-            self.assertAlmostEqual(en_internal,en_source[ind])
-            self.assertEqual(ind,ic - 1)
+            self.assertAlmostEqual(en_internal,en_source[ic])
 
     def test_auto_ei(self):
         propman = self.prop_man
@@ -749,12 +765,17 @@ class DirectPropertyManagerTest(unittest.TestCase):
         AddTimeSeriesLog(mon_ws, Name="is_running", Time="2010-01-01T00:00:00", Value=1 ,DeleteExisting=True)
         AddTimeSeriesLog(mon_ws, Name="is_running", Time="2010-01-01T00:30:00", Value=1 )
 
+        valid= PropertyManager.incident_energy.validate(propman,PropertyManager)
+        self.assertTrue(valid[0])
+        valid= PropertyManager.energy_bins.validate(propman,PropertyManager)
+        self.assertTrue(valid[0])
+
 
         # define monitors, used to calculate ei
         propman.ei_mon_spectra=(1,2)
         PropertyManager.incident_energy.set_auto_Ei(mon_ws,propman)
 
-        allEi = PropertyManager.incident_energy.getAllEi()
+        allEi = PropertyManager.incident_energy.getAllEiList()
 
         self.assertAlmostEqual(allEi[0],8.8,1)
         self.assertAlmostEqual(allEi[1],15.8,1)
@@ -1194,6 +1215,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    #tester = DirectPropertyManagerTest('test_auto_ei')
+    #tester = DirectPropertyManagerTest('test_multirep_ei_iterate_over')
     #tester.run()
     unittest.main()

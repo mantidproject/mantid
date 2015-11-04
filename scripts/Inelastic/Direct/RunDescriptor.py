@@ -805,8 +805,10 @@ class RunDescriptor(PropDescriptor):
             if mon_ws_name in mtd:
                 mon_ws = mtd[mon_ws_name]
                 origin.setMonitorWorkspace(mon_ws)
-            else:
-                mon_ws = None
+            else: # may be monitors are stored together with ws. We can not chop it
+                # so only way ahead is: TODO: Its possible to perform better here (take only monitors)
+                mon_ws = CloneWorkspace(InputWorkspace=origin_name,OutputWorkspace=origin_name + '_monitors')
+                origin.setMonitorWorkspace(mon_ws)
         #
 
         target_name = '#{0}/{1}#'.format(chunk_num,n_chunks) + origin_name

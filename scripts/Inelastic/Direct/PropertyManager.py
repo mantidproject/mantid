@@ -714,7 +714,7 @@ class PropertyManager(NonIDF_Properties):
 
           # now let's report on normal run.
             if PropertyManager.incident_energy.multirep_mode():
-                ei = PropertyManager.incident_energy.getAllEi()
+                ei = PropertyManager.incident_energy.getAllEiList()
                 if len(ei) == 0:
                     mess = "*** No provisional incident energy was identified"
                 else:
