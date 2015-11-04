@@ -110,9 +110,6 @@ public:
   }
 
   void test_execute_single_workspace() {
-    std::string s;
-    std::getline(std::cin,s); //pause to attach debugger
-
     CreateMD alg;
     alg.setRethrows(true);
     alg.initialize();

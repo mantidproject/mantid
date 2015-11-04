@@ -188,7 +188,8 @@ void CreateMD::exec() {
   std::string to_merge_name;
   MatrixWorkspace_sptr workspace;
   std::stringstream ws_name;
-  for (unsigned long entry_number = 0; entry_number < entries; ++entry_number) {
+  IMDEventWorkspace_sptr run_md;
+  for (unsigned long entry_number = 0; entry_number < entries; ++entry_number, ++counter) {
     ws_name.str(std::string());
 
     // If data source is not an existing workspace it must be a file we need to
@@ -214,15 +215,13 @@ void CreateMD::exec() {
 
     // We cannot process in place until we have an output MDWorkspace to use.
     bool do_in_place = in_place && (counter > 0);
-    IMDEventWorkspace_sptr run_md =
+    run_md =
         single_run(workspace, emode, efix[entry_number], psi[entry_number],
                    gl[entry_number], gs[entry_number], do_in_place, alatt,
                    angdeg, u, v, run_md);
     to_merge_names.push_back(to_merge_name);
 
     AnalysisDataService::Instance().addOrReplace(to_merge_name, run_md);
-
-    counter++;
   }
 
   Workspace_sptr output_workspace;
