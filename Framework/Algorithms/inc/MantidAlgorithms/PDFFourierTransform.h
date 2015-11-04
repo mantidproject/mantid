@@ -25,7 +25,7 @@ public:
   /// Algorithm's version for identification
   virtual int version() const;
   /// Algorithm's category for identification
-  virtual const std::string category() const; 
+  virtual const std::string category() const;
   /// @copydoc Algorithm::validateInputs()
   virtual std::map<std::string, std::string> validateInputs();
 

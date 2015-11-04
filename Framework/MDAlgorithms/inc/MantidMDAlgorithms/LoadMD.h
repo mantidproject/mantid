@@ -52,7 +52,9 @@ public:
   /// Algorithm's version for identification
   virtual int version() const { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "MDAlgorithms\\DataHandling"; }
+  virtual const std::string category() const {
+    return "MDAlgorithms\\DataHandling";
+  }
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const;
