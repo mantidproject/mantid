@@ -53,17 +53,17 @@ private:
   void exec();
 
   DataObjects::EventWorkspace_sptr
-  createEventWorkspace(API::Progress &progress, int numPixels, int numBins, int numEvents, double x0,
+  createEventWorkspace(int numPixels, int numBins, int numEvents, double x0,
                        double binDelta, int start_at_pixelID,
                        Geometry::Instrument_sptr inst,
                        const std::string &functionString, bool isRandom);
   API::MatrixWorkspace_sptr
-  createHistogramWorkspace(API::Progress &progress, int numPixels, int numBins, double x0,
+  createHistogramWorkspace(int numPixels, int numBins, double x0,
                            double binDelta, int start_at_pixelID,
                            Geometry::Instrument_sptr inst,
                            const std::string &functionString, bool isRandom);
   Geometry::Instrument_sptr createTestInstrumentRectangular(
-      int num_banks, int pixels, double pixelSpacing,
+      API::Progress &progress, int num_banks, int pixels, double pixelSpacing,
       const double bankDistanceFromSample, const double sourceSampleDistance);
   Geometry::Object_sptr createCappedCylinder(double radius, double height,
                                              const Kernel::V3D &baseCentre,

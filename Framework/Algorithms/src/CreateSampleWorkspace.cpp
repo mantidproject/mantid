@@ -204,26 +204,25 @@ void CreateSampleWorkspace::exec() {
     m_randGen = new Kernel::MersenneTwister(seedValue);
   }
 
+  int numPixels = numBanks * bankPixelWidth * bankPixelWidth;
+ 
+  Progress progress(this, 0, 1, numBanks);
 
   // Create an instrument with one or more rectangular banks.
   Instrument_sptr inst = createTestInstrumentRectangular(
-      numBanks, bankPixelWidth, pixelSpacing, bankDistanceFromSample,
+      progress, numBanks, bankPixelWidth, pixelSpacing, bankDistanceFromSample,
       sourceSampleDistance);
 
   int num_bins = static_cast<int>((xMax - xMin) / binWidth);
 
-  int numPixels = numBanks * bankPixelWidth * bankPixelWidth;
- 
-  Progress progress(this, 0, 1, numPixels);
-
   MatrixWorkspace_sptr ws;
   if (wsType == "Event") {
-    ws = createEventWorkspace(progress, numPixels, num_bins, numEvents, xMin, binWidth,
+    ws = createEventWorkspace(numPixels, num_bins, numEvents, xMin, binWidth,
                               bankPixelWidth * bankPixelWidth, inst,
                               functionString, isRandom);
   } else {
     ws = createHistogramWorkspace(
-        progress, numPixels, num_bins, xMin, binWidth,
+        numPixels, num_bins, xMin, binWidth,
         bankPixelWidth * bankPixelWidth, inst, functionString, isRandom);
   }
   // add chopper
@@ -235,7 +234,7 @@ void CreateSampleWorkspace::exec() {
   } catch (Exception::NotFoundError &) {
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
     Unit_sptr unit = ws->getAxis(0)->unit();
-    boost::shared_ptr<Units::Label> label =
+    boost::shared_ptr<Units::Label> label = 
         boost::dynamic_pointer_cast<Units::Label>(unit);
     label->setLabel(xUnit, xUnit);
   }
@@ -288,8 +287,8 @@ void CreateSampleWorkspace::addChopperParameters(
 /** Create histogram workspace
  */
 MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
-    API::Progress &progress, int numPixels, int numBins, double x0, 
-	double binDelta, int start_at_pixelID, Geometry::Instrument_sptr inst,
+    int numPixels, int numBins, double x0, double binDelta, 
+	int start_at_pixelID, Geometry::Instrument_sptr inst,
     const std::string &functionString, bool isRandom) {
   MantidVecPtr x, y, e;
   x.access().resize(numBins + 1);
@@ -297,6 +296,7 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
   for (int i = 0; i < numBins + 1; ++i) {
     x.access()[i] = x0 + i * binDelta;
   }
+
 
   std::vector<double> xValues(x.access().begin(), x.access().end() - 1);
   y.access() = evalFunction(functionString, xValues, isRandom ? 1 : 0);
@@ -317,8 +317,6 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
     retVal->setData(wi, y, e);
     retVal->getSpectrum(wi)->setDetectorID(detid_t(start_at_pixelID + wi));
     retVal->getSpectrum(wi)->setSpectrumNo(specid_t(wi + 1));
-
-	progress.report();
   }
 
   return retVal;
@@ -327,8 +325,8 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
 /** Create event workspace
  */
 EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
-    API::Progress &progress, int numPixels, int numBins, int numEvents, double x0, 
-	double binDelta, int start_at_pixelID, Geometry::Instrument_sptr inst,
+    int numPixels, int numBins, int numEvents, double x0, double binDelta, 
+	int start_at_pixelID, Geometry::Instrument_sptr inst,
     const std::string &functionString, bool isRandom) {
   DateAndTime run_start("2010-01-01T00:00:00");
 
@@ -383,8 +381,6 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
             run_start + (m_randGen->nextValue() * hourInSeconds);
         el += TofEvent((i + m_randGen->nextValue()) * binDelta, pulseTime);
       }
-
-	  progress.report();
     }
     workspaceIndex++;
   }
@@ -464,6 +460,7 @@ void CreateSampleWorkspace::replaceAll(std::string &str,
  *(pixels*0.008, pixels*0.008, Z)
  * Pixels are 4 mm wide.
  *
+ * @param progress :: progress indicator
  * @param num_banks :: number of rectangular banks to create
  * @param pixels :: number of pixels in each direction.
  * @param pixelSpacing :: padding between pixels
@@ -473,7 +470,7 @@ void CreateSampleWorkspace::replaceAll(std::string &str,
  * @returns A shared pointer to the generated instrument
  */
 Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
-    int num_banks, int pixels, double pixelSpacing,
+    API::Progress &progress, int num_banks, int pixels, double pixelSpacing,
     const double bankDistanceFromSample, const double sourceSampleDistance) {
   boost::shared_ptr<Instrument> testInst(new Instrument("basic_rect"));
   // The instrument is going to be set up with z as the beam axis and y as the
@@ -509,6 +506,8 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
     testInst->add(bank);
     // Set the bank along the z-axis of the instrument. (beam direction).
     bank->setPos(V3D(0.0, 0.0, bankDistanceFromSample * banknum));
+
+	progress.report();
   }
 
   // Define a source component
