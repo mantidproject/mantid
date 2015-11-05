@@ -274,17 +274,91 @@ public:
     create_alg->setPropertyValue("u", "1,0,0");
     create_alg->setPropertyValue("v", "0,1,0");
     create_alg->execute();
+    // IMDEventWorkspace_sptr in_ws =
+    // create_alg->getProperty("OutputWorkspace");
+    IMDEventWorkspace_sptr in_ws =
+        boost::dynamic_pointer_cast<IMDEventWorkspace>(
+            AnalysisDataService::Instance().retrieve("md_sample_workspace"));
 
     AccumulateMD acc_alg;
     acc_alg.initialize();
     acc_alg.setPropertyValue("InputWorkspace", "md_sample_workspace");
     acc_alg.setPropertyValue("OutputWorkspace", "accumulated_workspace");
-    acc_alg.setPropertyValue("DataSources", "data_source_1,data_source_2");
+    acc_alg.setPropertyValue("DataSources", "data_source_2");
     acc_alg.setPropertyValue("Alatt", "1.4165,1.4165,1.4165");
     acc_alg.setPropertyValue("Angdeg", "90,90,90");
     acc_alg.setPropertyValue("u", "1,0,0");
     acc_alg.setPropertyValue("v", "0,1,0");
     TS_ASSERT_THROWS_NOTHING(acc_alg.execute());
+    // IMDEventWorkspace_sptr out_ws = acc_alg.getProperty("OutputWorkspace");
+    IMDEventWorkspace_sptr out_ws =
+        boost::dynamic_pointer_cast<IMDEventWorkspace>(
+            AnalysisDataService::Instance().retrieve("accumulated_workspace"));
+
+    // Should have the same number of events in output as the sum of the inputs
+    TS_ASSERT_EQUALS(2 * in_ws->getNEvents(), out_ws->getNEvents());
+  }
+
+  void test_algorithm_success_clean() {
+
+    auto sim_alg = Mantid::API::AlgorithmManager::Instance().create(
+        "CreateSimulationWorkspace");
+    sim_alg->initialize();
+    sim_alg->setPropertyValue("Instrument", "MAR");
+    sim_alg->setPropertyValue("BinParams", "-3,1,3");
+    sim_alg->setPropertyValue("UnitX", "DeltaE");
+    sim_alg->setPropertyValue("OutputWorkspace", "data_source_1");
+    sim_alg->execute();
+
+    sim_alg->setPropertyValue("OutputWorkspace", "data_source_2");
+    sim_alg->execute();
+
+    auto log_alg =
+        Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
+    log_alg->initialize();
+    log_alg->setProperty("Workspace", "data_source_1");
+    log_alg->setPropertyValue("LogName", "Ei");
+    log_alg->setPropertyValue("LogText", "3.0");
+    log_alg->setPropertyValue("LogType", "Number");
+    log_alg->execute();
+
+    log_alg->setProperty("Workspace", "data_source_2");
+    log_alg->execute();
+
+    auto create_alg =
+        Mantid::API::AlgorithmManager::Instance().create("CreateMD");
+    create_alg->setRethrows(true);
+    create_alg->initialize();
+    create_alg->setPropertyValue("OutputWorkspace", "md_sample_workspace");
+    create_alg->setPropertyValue("DataSources", "data_source_1");
+    create_alg->setPropertyValue("Alatt", "1,1,1");
+    create_alg->setPropertyValue("Angdeg", "90,90,90");
+    create_alg->setPropertyValue("Efix", "12.0");
+    create_alg->setPropertyValue("u", "1,0,0");
+    create_alg->setPropertyValue("v", "0,1,0");
+    create_alg->execute();
+    IMDEventWorkspace_sptr in_ws =
+        boost::dynamic_pointer_cast<IMDEventWorkspace>(
+            AnalysisDataService::Instance().retrieve("md_sample_workspace"));
+
+    AccumulateMD acc_alg;
+    acc_alg.initialize();
+    acc_alg.setPropertyValue("InputWorkspace", "md_sample_workspace");
+    acc_alg.setPropertyValue("OutputWorkspace", "accumulated_workspace");
+    acc_alg.setPropertyValue("DataSources", "data_source_2");
+    acc_alg.setPropertyValue("Alatt", "1.4165,1.4165,1.4165");
+    acc_alg.setPropertyValue("Angdeg", "90,90,90");
+    acc_alg.setPropertyValue("u", "1,0,0");
+    acc_alg.setPropertyValue("v", "0,1,0");
+    acc_alg.setProperty("Clean", true);
+    TS_ASSERT_THROWS_NOTHING(acc_alg.execute());
+    IMDEventWorkspace_sptr out_ws =
+        boost::dynamic_pointer_cast<IMDEventWorkspace>(
+            AnalysisDataService::Instance().retrieve("accumulated_workspace"));
+
+    // Should only have the same number of events as data_source_2 this time
+    // as create from clean so lost data in data_source_1
+    TS_ASSERT_EQUALS(in_ws->getNEvents(), out_ws->getNEvents());
   }
 };
 

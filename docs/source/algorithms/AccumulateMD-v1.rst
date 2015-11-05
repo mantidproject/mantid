@@ -39,12 +39,12 @@ Usage
     AddSampleLog(Workspace=sample_data_2,LogName='Ei',LogText='3.0',LogType='Number')
 
     # Create an MDWorkspace withdata from sample_data_1
-    md_ws = CreateMD(sample_data_1, Emode='Direct', Alatt=[1.4165, 1.4165,1.4165], Angdeg=[90, 90, 90], u=[1, 0, 0,], v=[0,1,0], Psi=6, Gs=0, Gl=[0])
+    md_ws = CreateMD(sample_data_1, Emode='Direct', Alatt=[1.4165, 1.4165,1.4165], Angdeg=[90, 90, 90], u=[1, 0, 0,], v=[0,1,0])
 
     # Append data from sample_data_2 to the existing workspace
     # Note: sample_data_1 will not be appended as it is already in the workspace
     #       sample_data_3 will not be appended as it does not exist
-    acc_ws = AccumulateMD(md_ws, 'sample_data_1,sample_data_2,sample_data_3', Alatt=[1.4165, 1.4165, 1.4165], Angdeg=[90, 90, 90], u=[1, 0, 0,], v=[0,1,0] , Psi=6, Gs=0, Gl=[0])
+    acc_ws = AccumulateMD(md_ws, 'sample_data_1,sample_data_2,sample_data_3', Alatt=[1.4165, 1.4165, 1.4165], Angdeg=[90, 90, 90], u=[1, 0, 0,], v=[0,1,0])
 
     # acc_ws should have double the number of events that md_ws has
     print "There are {kwarg} events in each of the two data workspaces.".format(kwarg=md_ws.getNEvents()) 
