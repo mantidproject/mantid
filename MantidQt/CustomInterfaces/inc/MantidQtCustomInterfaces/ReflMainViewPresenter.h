@@ -2,12 +2,12 @@
 #define MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidKernel/System.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
-#include "MantidQtCustomInterfaces/ReflMainView.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/IReflSearcher.h"
 #include "MantidQtCustomInterfaces/ReflTransferStrategy.h"
+#include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 
 #include <Poco/AutoPtr.h>
@@ -37,7 +37,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ReflMainViewPresenter
+class MANTIDQT_CUSTOMINTERFACES_DLL ReflMainViewPresenter
     : public IReflPresenter,
       public MantidQt::API::WorkspaceObserver {
 public:
