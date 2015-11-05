@@ -179,6 +179,7 @@ class AlignComponents(PythonAlgorithm):
     #pylint: disable=too-many-branches
     def PyExec(self):
         calWS = self.getProperty('CalibrationTable').value
+        calWS = api.SortTableWorkspace(calWS, Columns='detid')
         maskWS = self.getProperty("MaskWorkspace").value
 
         if maskWS != None:
