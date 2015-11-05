@@ -71,7 +71,8 @@ public:
                   const std::string &runNo, const std::vector<bool> &banks,
                   const std::string &specNos, const std::string &dgFile);
 
-  std::string isValidRunNumber(std::string dir);
+  /// checks if its a valid run number
+  std::string isValidRunNumber(std::vector<std::string> dir);
 
 protected:
   void initialize();
@@ -97,8 +98,6 @@ protected slots:
 
 private:
   bool validateRBNumber(const std::string &rbn) const;
-
-  bool numInStr(const std::string &str);
 
   /// @name Calibration related private methods
   //@{

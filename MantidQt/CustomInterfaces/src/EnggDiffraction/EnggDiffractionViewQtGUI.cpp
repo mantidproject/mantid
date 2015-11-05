@@ -4,6 +4,7 @@
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
+#include "MantidQtMantidWidgets/MWRunFiles.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -394,12 +395,12 @@ std::string EnggDiffractionViewQtGUI::currentCeriaNo() const {
   return m_uiTabCalib.lineEdit_current_ceria_num->text().toStdString();
 }
 
-std::string EnggDiffractionViewQtGUI::newVanadiumNo() const {
-  return m_uiTabCalib.lineEdit_new_vanadium_num->getText().toStdString();
+std::vector<std::string> EnggDiffractionViewQtGUI::newVanadiumNo() const {
+  return qListToVector(m_uiTabCalib.lineEdit_new_vanadium_num->getFilenames());
 }
 
-std::string EnggDiffractionViewQtGUI::newCeriaNo() const {
-  return m_uiTabCalib.lineEdit_new_ceria_num->getText().toStdString();
+std::vector<std::string> EnggDiffractionViewQtGUI::newCeriaNo() const {
+  return qListToVector(m_uiTabCalib.lineEdit_new_ceria_num->getFilenames());
 }
 
 std::string EnggDiffractionViewQtGUI::currentCalibFile() const {
@@ -691,16 +692,25 @@ void EnggDiffractionViewQtGUI::browseTextureDetGroupingFile() {
   m_uiTabFocus.lineEdit_texture_grouping_file->setText(path);
 }
 
-std::string EnggDiffractionViewQtGUI::focusingRunNo() const {
-  return m_uiTabFocus.lineEdit_run_num->getText().toStdString();
+std::vector<std::string> EnggDiffractionViewQtGUI::focusingRunNo() const {
+  return qListToVector(m_uiTabFocus.lineEdit_run_num->getFilenames());
 }
 
-std::string EnggDiffractionViewQtGUI::focusingCroppedRunNo() const {
-  return m_uiTabFocus.lineEdit_cropped_run_num->getText().toStdString();
+std::vector<std::string>
+EnggDiffractionViewQtGUI::focusingCroppedRunNo() const {
+  return qListToVector(m_uiTabFocus.lineEdit_cropped_run_num->getFilenames());
 }
 
-std::string EnggDiffractionViewQtGUI::focusingTextureRunNo() const {
-  return m_uiTabFocus.lineEdit_texture_run_num->getText().toStdString();
+std::vector<std::string>
+EnggDiffractionViewQtGUI::focusingTextureRunNo() const {
+  return qListToVector(m_uiTabFocus.lineEdit_texture_run_num->getFilenames());
+}
+
+std::vector<std::string>
+EnggDiffractionViewQtGUI::qListToVector(QStringList list) const {
+  std::vector<std::string> vec;
+  foreach (QString str, list) { vec.push_back(str.toStdString()); }
+  return vec;
 }
 
 std::string EnggDiffractionViewQtGUI::focusingDir() const {

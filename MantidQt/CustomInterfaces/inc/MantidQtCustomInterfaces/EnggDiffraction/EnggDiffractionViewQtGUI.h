@@ -86,9 +86,11 @@ public:
 
   std::string currentCalibFile() const;
 
-  std::string newVanadiumNo() const;
+  std::vector<std::string> newVanadiumNo() const;
 
-  std::string newCeriaNo() const;
+  std::vector<std::string> newCeriaNo() const;
+
+  std::vector<std::string> qListToVector(QStringList list) const;
 
   std::string outCalibFilename() const { return m_outCalibFilename; }
 
@@ -105,11 +107,11 @@ public:
 
   virtual std::string focusingDir() const;
 
-  virtual std::string focusingRunNo() const;
+  virtual std::vector<std::string> focusingRunNo() const;
 
-  virtual std::string focusingCroppedRunNo() const;
+  virtual std::vector<std::string> focusingCroppedRunNo() const;
 
-  virtual std::string focusingTextureRunNo() const;
+  virtual std::vector<std::string> focusingTextureRunNo() const;
 
   virtual std::vector<bool> focusingBanks() const;
 

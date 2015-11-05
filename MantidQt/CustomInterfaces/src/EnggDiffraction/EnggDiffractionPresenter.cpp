@@ -288,19 +288,6 @@ bool EnggDiffractionPresenter::validateRBNumber(const std::string &rbn) const {
 }
 
 /**
- * Checks if the string/char is a digit
- *
- * @param str checks the string if it is a digit
- *
- * @return bool if the char is a digit
- */
-bool EnggDiffractionPresenter::numInStr(const std::string &str) {
-  return !str.empty() &&
-         std::find_if(str.begin(), str.end(),
-                      [](char chr) { return !std::isdigit(chr); }) == str.end();
-}
-
-/**
  * Checks if the provided run number is valid and if a direcotory is provided
  * it will convert it to a run number
  *
@@ -308,37 +295,45 @@ bool EnggDiffractionPresenter::numInStr(const std::string &str) {
  *
  * @return run_number 6 character string of a run number
  */
-std::string EnggDiffractionPresenter::isValidRunNumber(std::string dir) {
-  std::string run_number = dir;
-  try {
-    if (dir.length() > 6 && Poco::File(dir).exists()) {
-      run_number = "";
-      // get file name name via poco::path
-      Poco::Path inputDir = dir;
-      std::string filename = inputDir.getFileName();
+std::string
+EnggDiffractionPresenter::isValidRunNumber(std::vector<std::string> dir) {
 
-      // convert to int or assign it to size_t
-      for (size_t i = 0; i < filename.size(); i++) {
-        auto file = filename[i];
+  auto run_vec = dir;
+  std::string run_number;
 
-        if (numInStr(&file)) {
-          run_number += filename[i];
+  auto p = run_vec.begin();
+  int i = 0;
+  while (p != run_vec.end()) {
+
+    run_number = *p;
+    p++;
+    i++;
+
+    try {
+      if (Poco::File(run_number).exists()) {
+        Poco::Path inputDir = run_number;
+        run_number = "";
+        // get file name name via poco::path
+
+        std::string filename = inputDir.getFileName();
+
+        // convert to int or assign it to size_t
+        for (size_t i = 0; i < filename.size(); i++) {
+          char *str = &filename[i];
+          if (std::isdigit(*str)) {
+            run_number += filename[i];
+          }
         }
+        run_number.erase(0, run_number.find_first_not_of('0'));
       }
-      run_number.erase(0, run_number.find_first_not_of('0'));
-    } else {
-      g_log.warning()
-          << (run_number +
-              " is not a valid run number, please provide a valid run number. ")
-          << std::endl;
+
+    } catch (std::runtime_error &re) {
+      throw std::invalid_argument("Error browsing selected file: " +
+                                  static_cast<std::string>(re.what()));
     }
-
-  } catch (std::runtime_error &re) {
-    throw std::invalid_argument("Error browsing selected file: " +
-                                static_cast<std::string>(re.what()));
-
-    g_log.debug() << "run number is: " << run_number << std::endl;
   }
+  g_log.debug() << "run number is: " << run_number << std::endl;
+
   return run_number;
 }
 
