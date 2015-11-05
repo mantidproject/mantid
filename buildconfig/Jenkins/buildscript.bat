@@ -18,6 +18,7 @@ echo %sha1%
 :: Environment setup
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Source the VS setup script
+set VS_VERSION=14
 call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" amd64
 set CM_GENERATOR=Visual Studio 14 2015 Win64
 set PARAVIEW_DIR=%PARAVIEW_MSVC2015_DIR%
@@ -64,15 +65,18 @@ if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
 ::                            the links helps keep it fresh
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set BUILD_DIR=%WORKSPACE%\build
-if exist %BUILD_DIR%\CMakeCache.txt (
-  "%GREP_EXE%" CMAKE_LINKER:FILEPATH %BUILD_DIR%\CMakeCache.txt | "%GREP_EXE%" %VisualStudioVersion%
-  if %ERRORLEVEL% EQU 0 (
-    echo Previous build was with Visual Studio 2015, not cleaning build directory
-  ) else (
+
+if EXIST %BUILD_DIR%\CMakeCache.txt (
+  call "%GREP_EXE%" CMAKE_LINKER:FILEPATH %BUILD_DIR%\CMakeCache.txt > compiler_version.log
+  call "%GREP_EXE%" %VS_VERSION% compiler_version.log
+  if ERRORLEVEL 1 (
     set CLEANBUILD=yes
-    echo Previous build was with Visual Studio 2012, build directory will be cleaned
+    echo Previous build used a different compiler. Performing a clean build
+  ) else (
+    echo Previous build used the same compiler. No need to clean
   )
 )
+
 if "!CLEANBUILD!" == "yes" (
   rmdir /S /Q %BUILD_DIR%
 )
