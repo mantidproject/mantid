@@ -22,7 +22,7 @@ Usage
 **Example: A simple cylindrical sample**
 
 .. testcode:: ExMultipleScatteringCylinderAbsorption
-       
+
     ws = CreateSampleWorkspace("Histogram",NumBanks=1,BankPixelWidth=1)
     ws = ConvertUnits(ws,"Wavelength")
     ws = Rebin(ws,Params=[1])
@@ -30,15 +30,15 @@ Usage
 
     #restrict the number of wavelength points to speed up the example
     wsOut = MultipleScatteringCylinderAbsorption(ws,CylinderSampleRadius=0.2)
-    
+
     print "Output: ", wsOut.readY(0)
 
 Output:
 
 .. testoutput:: ExMultipleScatteringCylinderAbsorption
 
-    Output:  [  5.90548152   5.90559329  16.28933615   5.90581685   5.90592863
-       1.62244888]
+    Output:  [  6.1210107    6.57502041  19.47638255   7.58160094   8.13860778
+       2.33885171]
 
 
 References

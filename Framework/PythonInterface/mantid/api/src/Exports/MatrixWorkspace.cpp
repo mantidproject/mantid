@@ -2,7 +2,6 @@
 #include "MantidAPI/WorkspaceOpOverloads.h"
 
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
-#include "MantidPythonInterface/api/ExtractWorkspace.h"
 #include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
@@ -349,7 +348,7 @@ void export_MatrixWorkspace() {
       //-----------------------------------
       .def("equals", &Mantid::API::equals, args("self", "other", "tolerance"),
            "Performs a comparison operation on two workspaces, using the "
-           "CheckWorkspacesMatch algorithm")
+           "CompareWorkspaces algorithm")
       //---------   monitor workspace --------------------------------------
       .def("getMonitorWorkspace", &getMonitorWorkspace, args("self"),
            "Return internal monitor workspace bound to current workspace.")

@@ -94,14 +94,11 @@ void TransposeMD::exec() {
   std::vector<size_t> axes(axesInts.begin(), axesInts.end());
   Property *axesProperty = this->getProperty("Axes");
   if (!axesProperty->isDefault()) {
-    if (axes.size() > nDimsInput) {
-      throw std::invalid_argument(
-          "More axis specified than dimensions are avaiable in the input");
-    }
-    auto it = std::max_element(axes.begin(), axes.end());
-    if (*it > nDimsInput) {
-      throw std::invalid_argument("One of the axis indexes specified indexes a "
-                                  "dimension outside the real dimension range");
+    Kernel::MDAxisValidator checker(axesInts, nDimsInput, false);
+    auto axisErrors = checker.validate();
+    if (!axisErrors.empty()) {
+      std::string error = axisErrors.begin()->second;
+      throw std::invalid_argument(error.c_str());
     }
     nDimsOutput = axes.size();
   } else {

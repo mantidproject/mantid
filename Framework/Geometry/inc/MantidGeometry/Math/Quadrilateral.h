@@ -73,6 +73,8 @@ public:
   virtual double maxY() const;
   /// Return a new Polygon based on the current Quadrilateral
   virtual ConvexPolygon toPoly() const;
+  /// Shifts the vertexes in a clockwise manner
+  virtual void shiftVertexesClockwise();
 
 private:
   /// Lower left
