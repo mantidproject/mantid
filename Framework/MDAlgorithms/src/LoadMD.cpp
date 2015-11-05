@@ -49,7 +49,7 @@ LoadMD::LoadMD()
     : m_numDims(0), // uninitialized incorrect value
       m_coordSystem(None),
       m_BoxStructureAndMethadata(true), // this is faster but rarely needed.
-      m_saveMDVersion(false), m_requiresMDFrameCorrection(false){}
+      m_saveMDVersion(false), m_requiresMDFrameCorrection(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -623,6 +623,7 @@ CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name) {
  * @param ws:: poitner to the workspace which needs to be corrected
  */
 void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws) {
+
   g_log.notice()
       << "LoadMD: Encountered a legacy file which has a mismatch between "
          "its MDFrames and its Special Coordinate System. "
@@ -651,9 +652,10 @@ void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws) {
   // Get the old frames just in case something goes wrong. In this case we
   // reset the frames.
 
-  std::vector<std::string> oldFrames(numberOfDimensions, "");
+  std::vector<std::string> oldFrames(
+      numberOfDimensions, Mantid::Geometry::GeneralFrame::GeneralFrameName);
   for (size_t index = 0; index < numberOfDimensions; ++index) {
-    oldFrames.push_back(ws->getDimension(index)->getMDFrame().name());
+    oldFrames[index] = ws->getDimension(index)->getMDFrame().name();
   }
 
   // We want to set only up to the first three dimensions to the selected Frame;
@@ -699,8 +701,7 @@ void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws) {
 void LoadMD::checkForRequiredLegacyFixup(API::IMDWorkspace_sptr ws) {
   // Check if the special coordinate is not none
   auto isQBasedSpecialCoordinateSystem = true;
-  if (m_coordSystem ==
-      Mantid::Kernel::SpecialCoordinateSystem::None) {
+  if (m_coordSystem == Mantid::Kernel::SpecialCoordinateSystem::None) {
     isQBasedSpecialCoordinateSystem = false;
   }
 

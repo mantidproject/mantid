@@ -858,14 +858,15 @@ public:
     // We expect the first three dimensions to be QSample and the fourth to be a
     // GeneralFrame
     for (int index = 0; index < 3; ++index) {
-      TSM_ASSERT_EQUALS("The first three dimension should contain a QSample Frame",
-                        iws->getDimension(index)->getMDFrame().name(),
-                        Mantid::Geometry::QSample::QSampleName);
+      TSM_ASSERT_EQUALS(
+          "The first three dimension should contain a QSample Frame",
+          iws->getDimension(index)->getMDFrame().name(),
+          Mantid::Geometry::QSample::QSampleName);
     }
 
     TSM_ASSERT_EQUALS("The fourth dimension should contain a General Frame",
-                        iws->getDimension(3)->getMDFrame().name(),
-                        Mantid::Geometry::GeneralFrame::GeneralFrameName);
+                      iws->getDimension(3)->getMDFrame().name(),
+                      Mantid::Geometry::GeneralFrame::GeneralFrameName);
     // Clean up
     if (iws) {
       AnalysisDataService::Instance().remove(outWSName);
@@ -910,8 +911,58 @@ public:
     }
 
     TSM_ASSERT_EQUALS("The fourth dimension should contain a General Frame",
-                        iws->getDimension(3)->getMDFrame().name(),
-                        Mantid::Geometry::GeneralFrame::GeneralFrameName);
+                      iws->getDimension(3)->getMDFrame().name(),
+                      Mantid::Geometry::GeneralFrame::GeneralFrameName);
+    // Clean up
+    if (iws) {
+      AnalysisDataService::Instance().remove(outWSName);
+    }
+  }
+
+  void
+  test_loading_legacy_HKL_file_with_MDHisto_with_incorrect_HKLUnits_doesnt_make_changes() {
+    // Arrange
+    std::string filename(
+        "MDHisto_wo_MDFrames_w_HKL_flag_w_invalid_HKLUnits.nxs");
+    std::string outWSName("LoadMD_legacy_test_file");
+
+    // Act
+    LoadMD alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileBackEnd", false));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MetadataOnly", false));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service.
+    IMDHistoWorkspace_sptr iws;
+    TS_ASSERT_THROWS_NOTHING(
+        iws = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
+            outWSName));
+    TS_ASSERT(iws);
+
+    if (!iws) {
+      return;
+    }
+
+    // Assert
+    // We expect the first three dimensions to be QSample and the fourth to be a
+    // GeneralFrame
+    for (int index = 0; index < 3; ++index) {
+      TSM_ASSERT_EQUALS(
+          "The first three dimension should contain an Unkown frame",
+          iws->getDimension(index)->getMDFrame().name(),
+          Mantid::Geometry::UnknownFrame::UnknownFrameName);
+    }
+
+    TSM_ASSERT_EQUALS("The fourth dimension should contain an Unkown frame",
+                      iws->getDimension(3)->getMDFrame().name(),
+                      Mantid::Geometry::UnknownFrame::UnknownFrameName);
     // Clean up
     if (iws) {
       AnalysisDataService::Instance().remove(outWSName);
