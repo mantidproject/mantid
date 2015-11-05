@@ -129,10 +129,17 @@ class ITableWorkspaceTest(unittest.TestCase):
         self.assertEquals(table.columnCount(), 2)
 
         nextrow = {'index': 1, 'value': 10}
-        values = numpy.array(nextrow.values())
-        table.addRow(values)
+        values32 = numpy.array(nextrow.values()).astype(numpy.int32)
+        values64 = numpy.array(nextrow.values()).astype(numpy.int64)
+
+        table.addRow(values32)
         self.assertEquals(len(table), 1)
         insertedrow = table.row(0)
+        self.assertEquals(insertedrow, nextrow)
+
+        table.addRow(values64)
+        self.assertEquals(len(table), 2)
+        insertedrow = table.row(1)
         self.assertEquals(insertedrow, nextrow)
 
         incorrect_type = numpy.array(['1', '10'])
