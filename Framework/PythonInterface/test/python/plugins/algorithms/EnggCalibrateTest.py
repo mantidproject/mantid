@@ -110,9 +110,9 @@ class EnggCalibrateTest(unittest.TestCase):
         if "darwin" == sys.platform:
             return
         elif "win32" == sys.platform:
-            # win7 with MSVC 2015 results were ~4% different (19322.20981) from linux expected values,
-            expected_difc = 19322.209881
-            expected_zero = -1086.58997387
+            # win7 with MSVC 2015 results were ~0.1% different (18508.753055) from linux expected values,
+            expected_difc = 18508.753055
+            expected_zero = 309.719443
         else:
             expected_difc = 18446.903615
             expected_zero = 416.082164
