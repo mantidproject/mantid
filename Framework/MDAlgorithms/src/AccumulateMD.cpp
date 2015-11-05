@@ -180,11 +180,11 @@ const std::string AccumulateMD::summary() const {
 void AccumulateMD::init() {
   declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
                                                            Direction::Input),
-                  "An input MDHistoWorkspace to append data to.");
+                  "An input MDEventWorkspace to append data to.");
 
   declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
                       "OutputWorkspace", "", Direction::Output),
-                  "MDHistoWorkspace with new data appended.");
+                  "MDEventWorkspace with new data appended.");
 
   declareProperty(
       new ArrayProperty<std::string>(
@@ -282,7 +282,8 @@ void AccumulateMD::exec() {
   // delete the old one, note this means we don't retain workspace history...
   bool do_clean = this->getProperty("Clean");
   if (do_clean) {
-    IMDWorkspace_sptr out_ws = createMDWorkspace(input_data, psi, gl, gs, efix);
+    IMDEventWorkspace_sptr out_ws =
+        createMDWorkspace(input_data, psi, gl, gs, efix);
     this->setProperty("OutputWorkspace", out_ws);
     g_log.notice() << this->name() << " succesfully created a clean workspace"
                    << std::endl;
@@ -307,11 +308,13 @@ void AccumulateMD::exec() {
   // If we reach here then new data exists to append to the input workspace
   // Use CreateMD with the new data to make a temp workspace
   // Merge the temp workspace with the input workspace using MergeMD
-  IMDWorkspace_sptr tmp_ws = createMDWorkspace(input_data, psi, gl, gs, efix);
+  IMDEventWorkspace_sptr tmp_ws =
+      createMDWorkspace(input_data, psi, gl, gs, efix);
   this->interruption_point();
 
   const std::string temp_ws_name = "TEMP_WORKSPACE_ACCUMULATEMD";
-  // Currently have to us ADS here as list of workspaces can only be passed as a
+  // Currently have to use ADS here as list of workspaces can only be passed as
+  // a
   // list of workspace names as a string
   AnalysisDataService::Instance().add(temp_ws_name, tmp_ws);
   std::string ws_names_to_merge = input_ws->getName();
@@ -335,7 +338,7 @@ void AccumulateMD::exec() {
 /*
  Use the CreateMD algorithm to create an MD workspace
  */
-IMDWorkspace_sptr AccumulateMD::createMDWorkspace(
+IMDEventWorkspace_sptr AccumulateMD::createMDWorkspace(
     const std::vector<std::string> &data_sources,
     const std::vector<double> &psi, const std::vector<double> &gl,
     const std::vector<double> &gs, const std::vector<double> &efix) {
@@ -362,9 +365,9 @@ std::map<std::string, std::string> AccumulateMD::validateInputs() {
   // Create the map
   std::map<std::string, std::string> validation_output;
 
-// Get properties to validate
+  // Get properties to validate
   const std::vector<std::string> data_sources =
-    this->getProperty("DataSources");
+      this->getProperty("DataSources");
   const std::vector<double> u = this->getProperty("u");
   const std::vector<double> v = this->getProperty("v");
   const std::vector<double> alatt = this->getProperty("Alatt");
@@ -390,22 +393,22 @@ std::map<std::string, std::string> AccumulateMD::validateInputs() {
   }
   if (!psi.empty() && psi.size() != ws_entries) {
     validation_output["Psi"] = "If Psi is given an entry "
-      "should be provided for "
-      "every input datasource";
+                               "should be provided for "
+                               "every input datasource";
   }
   if (!gl.empty() && gl.size() != ws_entries) {
     validation_output["Gl"] = "If Gl is given an entry "
-      "should be provided for "
-      "every input datasource";
+                              "should be provided for "
+                              "every input datasource";
   }
   if (!gs.empty() && gs.size() != ws_entries) {
     validation_output["Gs"] = "If Gs is given an entry "
-      "should be provided for "
-      "every input datasource";
+                              "should be provided for "
+                              "every input datasource";
   }
   if (efix.size() > 1 && efix.size() != ws_entries) {
     validation_output["EFix"] =
-      "Either specify a single EFix value, or as many "
+        "Either specify a single EFix value, or as many "
         "as there are input datasources";
   }
 

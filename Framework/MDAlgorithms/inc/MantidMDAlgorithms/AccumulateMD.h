@@ -4,7 +4,8 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceHistory.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
+//#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include <set>
 
 namespace {}
@@ -79,7 +80,7 @@ private:
   void init();
   void exec();
 
-  Mantid::API::IMDWorkspace_sptr createMDWorkspace(
+  Mantid::API::IMDEventWorkspace_sptr createMDWorkspace(
       const std::vector<std::string> &data_sources,
       const std::vector<double> &psi, const std::vector<double> &gl,
       const std::vector<double> &gs, const std::vector<double> &efix);

@@ -7,12 +7,15 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include <Poco/Path.h>
 #include <Poco/File.h>
 
 using Mantid::MDAlgorithms::AccumulateMD;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+
+using Mantid::DataObjects::MDEventsTestHelper::makeAnyMDEW;
 
 class AccumulateMDTest : public CxxTest::TestSuite {
 public:
@@ -233,55 +236,55 @@ public:
     TS_ASSERT(iter != data_sources_set.end());
   }
 
-  void test_algorithm_append_data() {
+  void test_algorithm_success_append_data() {
 
-    const std::string out_ws_name = "mdew_output";
-    const std::string in_ws_name = "mdew_input";
-    const std::string sample_ws_name = "sample_data_1";
-
-    auto alg = Mantid::API::AlgorithmManager::Instance().create(
+    auto sim_alg = Mantid::API::AlgorithmManager::Instance().create(
         "CreateSimulationWorkspace");
-    alg->initialize();
-    alg->setPropertyValue("Instrument", "MAR");
-    alg->setPropertyValue("BinParams", "-3,1,3");
-    alg->setPropertyValue("UnitX", "DeltaE");
-    alg->setProperty("OutputWorkspace", sample_ws_name);
-    alg->execute();
+    sim_alg->initialize();
+    sim_alg->setPropertyValue("Instrument", "MAR");
+    sim_alg->setPropertyValue("BinParams", "-3,1,3");
+    sim_alg->setPropertyValue("UnitX", "DeltaE");
+    sim_alg->setPropertyValue("OutputWorkspace", "data_source_1");
+    sim_alg->execute();
 
-    alg = Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
-    alg->initialize();
-    alg->setPropertyValue("Workspace", sample_ws_name);
-    alg->setPropertyValue("LogName", "Ei");
-    alg->setPropertyValue("LogText", "3.0");
-    alg->setPropertyValue("LogType", "Number");
-    alg->execute();
+    sim_alg->setPropertyValue("OutputWorkspace", "data_source_2");
+    sim_alg->execute();
 
-    Mantid::API::IMDEventWorkspace_sptr in_ws =
-        MDEventsTestHelper::makeFakeMDEventWorkspace(in_ws_name, 500);
+    auto log_alg =
+        Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
+    log_alg->initialize();
+    log_alg->setProperty("Workspace", "data_source_1");
+    log_alg->setPropertyValue("LogName", "Ei");
+    log_alg->setPropertyValue("LogText", "3.0");
+    log_alg->setPropertyValue("LogType", "Number");
+    log_alg->execute();
+
+    log_alg->setProperty("Workspace", "data_source_2");
+    log_alg->execute();
+
+    auto create_alg =
+        Mantid::API::AlgorithmManager::Instance().create("CreateMD");
+    create_alg->setRethrows(true);
+    create_alg->initialize();
+    create_alg->setPropertyValue("OutputWorkspace", "md_sample_workspace");
+    create_alg->setPropertyValue("DataSources", "data_source_1");
+    create_alg->setPropertyValue("Alatt", "1,1,1");
+    create_alg->setPropertyValue("Angdeg", "90,90,90");
+    create_alg->setPropertyValue("Efix", "12.0");
+    create_alg->setPropertyValue("u", "1,0,0");
+    create_alg->setPropertyValue("v", "0,1,0");
+    create_alg->execute();
 
     AccumulateMD acc_alg;
     acc_alg.initialize();
-    acc_alg.setPropertyValue("InputWorkspace", in_ws_name);
-    acc_alg.setPropertyValue("OutputWorkspace", out_ws_name);
-    acc_alg.setPropertyValue("DataSources", sample_ws_name);
+    acc_alg.setPropertyValue("InputWorkspace", "md_sample_workspace");
+    acc_alg.setPropertyValue("OutputWorkspace", "accumulated_workspace");
+    acc_alg.setPropertyValue("DataSources", "data_source_1,data_source_2");
     acc_alg.setPropertyValue("Alatt", "1.4165,1.4165,1.4165");
     acc_alg.setPropertyValue("Angdeg", "90,90,90");
     acc_alg.setPropertyValue("u", "1,0,0");
     acc_alg.setPropertyValue("v", "0,1,0");
     TS_ASSERT_THROWS_NOTHING(acc_alg.execute());
-
-    // TODO Get output workspace and check it has the sum of the number of
-    // events in sample_data_1 and mdew_input
-    auto sample_ws = alg->getProperty("Workspace");
-    auto out_ws = acc_alg.getProperty("OutputWorkspace");
-
-    // Clean up
-    // Remove workspaces from the data service.
-    AnalysisDataService::Instance().clear();
-  }
-
-  void test_algorithm_clean_option() {
-    // Same as previous test but with Clean option
   }
 };
 
