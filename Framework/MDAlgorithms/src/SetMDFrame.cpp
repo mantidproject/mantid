@@ -12,6 +12,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MDAxisValidator.h"
 
 #include <map>
 #include <boost/pointer_cast.hpp>
@@ -147,27 +148,10 @@ std::map<std::string, std::string> SetMDFrame::validateInputs() {
   }
 
   std::vector<int> axesInts = this->getProperty("Axes");
-  std::vector<size_t> axes(axesInts.begin(), axesInts.end());
-  auto axesAreEmpty = axes.empty();
-  if (axesAreEmpty) {
-    invalidProperties.insert(std::make_pair("Axes", "No index was specified."));
-  } else {
-    // Make sure that there are fewer axes specified than there exist on the
-    // workspace
-    if (axes.size() > ws->getNumDims()) {
-      invalidProperties.insert(std::make_pair(
-          "Axes",
-          "More axis specified than dimensions are avaiable in the input"));
-    }
-
-    // Ensure that the axes selection is within the number of dimensions of the
-    // workspace
-    auto it = std::max_element(axes.begin(), axes.end());
-    if (*it >= ws->getNumDims()) {
-      invalidProperties.insert(
-          std::make_pair("Axes", "One of the axis indexes specified indexes a "
-                                 "dimension outside the real dimension range"));
-    }
+  Kernel::MDAxisValidator axisChecker(axesInts, ws->getNumDims(), true);
+  auto axisErrors = axisChecker.validate();
+  for (auto iter = axisErrors.begin(); iter != axisErrors.end(); iter++) {
+    invalidProperties.insert(*iter);
   }
 
   return invalidProperties;
