@@ -309,6 +309,22 @@ IPropertyManager::getValue<DataObjects::TableWorkspace_sptr>(
   }
 }
 
+template <>
+DLLExport DataObjects::TableWorkspace_const_sptr
+IPropertyManager::getValue<DataObjects::TableWorkspace_const_sptr>(
+    const std::string &name) const {
+  PropertyWithValue<DataObjects::TableWorkspace_sptr> *prop =
+      dynamic_cast<PropertyWithValue<DataObjects::TableWorkspace_sptr> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    return prop->operator()();
+  } else {
+    std::string message = "Attempt to assign property " + name +
+                          " to incorrect type. Expected TableWorkspace.";
+    throw std::runtime_error(message);
+  }
+}
+
 } // namespace Kernel
 } // namespace Mantid
 

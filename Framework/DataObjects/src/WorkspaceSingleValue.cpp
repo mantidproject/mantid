@@ -99,6 +99,23 @@ IPropertyManager::getValue<Mantid::DataObjects::WorkspaceSingleValue_sptr>(
   }
 }
 
+template <>
+DLLExport Mantid::DataObjects::WorkspaceSingleValue_const_sptr
+IPropertyManager::getValue<Mantid::DataObjects::WorkspaceSingleValue_const_sptr>(
+    const std::string &name) const {
+  PropertyWithValue<Mantid::DataObjects::WorkspaceSingleValue_sptr> *prop =
+      dynamic_cast<
+          PropertyWithValue<Mantid::DataObjects::WorkspaceSingleValue_sptr> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    return prop->operator()();
+  } else {
+    throw std::runtime_error("Attempt to assign property of incorrect type. "
+                             "Expected WorkspaceSingleValue.");
+  }
+}
+
+
 } // namespace Kernel
 } // namespace Mantid
 
