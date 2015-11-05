@@ -160,3 +160,4 @@ if "%BUILDPKG%" == "yes" (
    "%CMAKE_BIN_DIR%\cpack.exe" -C %BUILD_CONFIG% --config CPackConfig.cmake
 )
 echo Done!
+exit /B 0
