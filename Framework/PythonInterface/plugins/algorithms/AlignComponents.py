@@ -298,7 +298,7 @@ class AlignComponents(PythonAlgorithm):
             api.RotateInstrumentComponent(wks, component, X=rotx, Y=roty, Z=rotz, Angle=rotw,
                                           RelativeRotation=False)
 
-        wks = api.CalculateDIFC(wks)
+        wks = api.CalculateDIFC(wks, OutputWorkspace=wks)
 
         difc_new = wks.extractY().flatten()[firstIndex:lastIndex + 1]
 

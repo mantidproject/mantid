@@ -77,11 +77,14 @@ void CalculateDIFC::exec() {
 void CalculateDIFC::createOutputWorkspace() {
   m_inputWS = getProperty("InputWorkspace");
 
-  m_outputWS =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(SpecialWorkspace2D_sptr(
-          new SpecialWorkspace2D(m_inputWS->getInstrument())));
-  m_outputWS->setTitle("DIFC workspace");
-
+  m_outputWS = getProperty("OutputWorkspace");
+  if (bool(boost::dynamic_pointer_cast<SpecialWorkspace2D>(m_outputWS))
+          && !bool(m_inputWS == m_outputWS)) {
+      std::cout << "creating output workspace" << std::endl;
+      m_outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(SpecialWorkspace2D_sptr(
+                                         new SpecialWorkspace2D(m_inputWS->getInstrument())));
+      m_outputWS->setTitle("DIFC workspace");
+}
   return;
 }
 
