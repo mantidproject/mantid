@@ -19,10 +19,10 @@ if( MSVC )
                      WORKING_DIRECTORY ${THIRD_PARTY_DIR} )
   else()
     message ( STATUS "Found existing ${THIRD_PARTY_DIR}. Updating to ${THIRD_PARTY_GIT_SHA1}" )
-    execute_process( COMMAND "${GIT_EXECUTABLE}" checkout ${THIRD_PARTY_GIT_SHA1}
-                     WORKING_DIRECTORY ${THIRD_PARTY_DIR} )
-    execute_process( COMMAND "${GIT_EXECUTABLE}" pull --rebase
-                     WORKING_DIRECTORY ${THIRD_PARTY_DIR} )
+    # execute_process( COMMAND "${GIT_EXECUTABLE}" checkout ${THIRD_PARTY_GIT_SHA1}
+                     # WORKING_DIRECTORY ${THIRD_PARTY_DIR} )
+    # execute_process( COMMAND "${GIT_EXECUTABLE}" pull --rebase
+                     # WORKING_DIRECTORY ${THIRD_PARTY_DIR} )
   endif()
 
   # Print out where we think we are looking for 3rd party stuff

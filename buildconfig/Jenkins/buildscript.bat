@@ -7,23 +7,26 @@ setlocal enableextensions enabledelayedexpansion
 :: WORKSPACE & JOB_NAME are environment variables that are set by Jenkins.
 :: BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each slave.
 :: CMake, git & git-lfs should be on the PATH
+::
+:: All nodes currently have PARAVIEW_DIR=4.3.b40280, PARAVIEW_NEXT_DIR=4.3.1
+:: and PARAVIEW_MSVC2015_DIR=4.3.b40280-msvc2015
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Required variable on machines with multiple VS versions
-set VisualStudioVersion=14.0
+call cmake.exe --version
+echo %sha1%
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Environment setup
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Source the VS setup script
+call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" amd64
 set CM_GENERATOR=Visual Studio 14 2015 Win64
+set PARAVIEW_DIR=%PARAVIEW_MSVC2015_DIR%
 
 :: While we transition between VS 2012 & 2015 we need to be able to clean the build directory
 :: if the previous build was not with the same compiler
 for /f "delims=" %%I in ('where git') do @set GIT_EXE_DIR=%%~dpI
 set GIT_ROOT_DIR=%GIT_EXE_DIR:~0,-4%
 set GREP_EXE=%GIT_ROOT_DIR%bin\grep.exe
-
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: All nodes currently have PARAVIEW_DIR=4.3.b40280, PARAVIEW_NEXT_DIR=4.3.1
-:: and PARAVIEW_MSVC2015_DIR=4.3.b40280-msvc2015
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-call cmake.exe --version
-echo %sha1%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Set up the location for local object store outside of the build and source
@@ -112,7 +115,7 @@ if not "%JOB_NAME%"=="%JOB_NAME:relwithdbg=%" (
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: CMake configuration
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-call cmake.exe -G "%CM_GENERATOR%" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%PARAVIEW_MSVC2015_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_DOCS% ..
+call cmake.exe -G "%CM_GENERATOR%" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_DOCS% ..
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
