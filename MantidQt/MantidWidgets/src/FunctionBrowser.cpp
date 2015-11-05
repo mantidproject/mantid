@@ -2011,6 +2011,10 @@ void FunctionBrowser::setCurrentDataset(int i)
 /// @param indices :: A list of indices of datasets to remove.
 void FunctionBrowser::removeDatasets(QList<int> indices)
 {
+  if (indices.size() > m_numberOfDatasets)
+  {
+    throw std::runtime_error("FunctionBrowser asked to removed too many datasets");
+  }
   int newSize = m_numberOfDatasets;
   qSort(indices);
   for(auto par = m_localParameterValues.begin(); par != m_localParameterValues.end(); ++par)
@@ -2018,34 +2022,39 @@ void FunctionBrowser::removeDatasets(QList<int> indices)
     for(int i = indices.size() - 1; i >= 0; --i)
     {
       int index = indices[i];
+      if (index < 0)
+      {
+        throw std::runtime_error("Index of a dataset in FunctionBrowser cannot be negative.");
+      }
       if ( index < m_numberOfDatasets )
       {
         par.value().remove(index);
       }
+      else
+      {
+        throw std::runtime_error("Index of a dataset in FunctionBrowser is out of range.");
+      }
     }
-    newSize = par.value().size();
   }
-  setNumberOfDatasets( newSize );
+  setNumberOfDatasets( m_numberOfDatasets - indices.size() );
 }
 
 /// Add local parameters for additional datasets.
 /// @param n :: Number of datasets added.
 void FunctionBrowser::addDatasets(int n)
 {
-  if ( getNumberOfDatasets() == 0 )
+  if ( m_numberOfDatasets == 0 )
   {
     setNumberOfDatasets( n );
     return;
   }
-  int newSize = m_numberOfDatasets;
   for(auto par = m_localParameterValues.begin(); par != m_localParameterValues.end(); ++par)
   {
     auto &values = par.value();
     double value = values.back().value;
     values.insert(values.end(),n,LocalParameterData(value));
-    newSize = values.size();
   }
-  setNumberOfDatasets(newSize);
+  setNumberOfDatasets(m_numberOfDatasets + n);
 }
 
 /// Return the multidomain function for multi-dataset fitting
