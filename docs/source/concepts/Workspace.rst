@@ -1,10 +1,14 @@
 .. _Workspace:
 
+=========
 Workspace
 =========
 
-What are they?
---------------
+.. contents::
+  :local:
+
+What are Workspaces?
+--------------------
 
 Workspaces are the nouns of Mantid (while :ref:`algorithms <algorithm>` are
 the verbs). Workspaces hold the data in Mantid.

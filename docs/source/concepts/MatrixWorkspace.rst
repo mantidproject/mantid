@@ -6,8 +6,9 @@ Matrix Workspace
 ================
 
 .. contents::
+  :local:
 
-A MatrixWorkspace is a generic name for any workspace that can be access like a table of X, Y and E values.  This is the prime interface for accesing workspace data in Mantid.  This covers several workspace types including:
+A MatrixWorkspace is a generic name for any workspace that can be access like a table of X, Y and E values.  This is the prime interface for accessing workspace data in Mantid.  This covers several workspace types including:
 
 -  :ref:`Workspace2D <Workspace2D>` - A workspace for holding two       dimensional data in memory, this is the most commonly used workspace.
 -  :ref:`EventWorkspace <EventWorkspace>` - A workspace that retains the       individual neutron event data.            
@@ -17,7 +18,7 @@ What information is in a MatrixWorkspace
 
 All Matrix Workspaces contain:
 
--  Measured or derived data with associated errors, this is refenced as a 2D array of counts and error data.  The axes are commonly "SpectraNumber" and another unit of measure, but are very flexible.
+-  Measured or derived data with associated errors, this is referenced as a 2D array of counts and error data.  The axes are commonly "SpectraNumber" and another unit of measure, but are very flexible.
 
 Also they may contain:
 
@@ -31,8 +32,8 @@ Also they may contain:
 -  A distribution flag
 -  A list of 'masked' bins
 
-Working with Workspaces in Python
----------------------------------
+Working with Matrix Workspaces in Python
+----------------------------------------
 
 MatrixWorkspace is an abstract description of an specific workspace implementation. It provides access to a common way of accessing the data for a 2D workspace without needing to know the details of how that data is actually stored.
 
@@ -43,7 +44,7 @@ You can look at the :ref:`Matrix Workspace API reference <mantid.api.MatrixWorks
 Accessing Workspaces
 ####################
 
-The methods for getting a variable to a MatrixWorkspace is the same as shown in the :ref:`Workspace-Accessing_Workspaces <Workspace>` help page.
+The methods for getting a variable to a MatrixWorkspace is the same as shown in the :ref:`Workspace <Workspace-Accessing_Workspaces>` help page.
 
 If you want to check if a variable points to something that is a Matrix Workspace you can use this:
 
@@ -164,12 +165,9 @@ Axes
 Axes are used primarily for labeling plots, but are also used as validation criteria for several algorithms.
 You can list out the axes of a workspace using the following code.
 
-.. testsetup:: MatrixWorkspaceAxes
-
-  ws = Load("MAR11015")
-
 .. testcode:: MatrixWorkspaceAxes
 
+  ws = CreateSampleWorkspace()
   for i in range(ws.axes()):
       axis = ws.getAxis(i)
       print "Axis {0} is a {1}{2}{3}".format(i,
@@ -197,12 +195,10 @@ Output:
 
 **Setting the axisLabel**
 
-.. testsetup:: MatrixWorkspaceAxesLabel
-
-  ws = Load("MAR11015")
 
 .. testcode:: MatrixWorkspaceAxesLabel
 
+  ws = CreateSampleWorkspace()
   axis = ws.getAxis(1)
   # Create a new axis
   axis.setUnit("Label").setLabel('Temperature', 'K')
@@ -373,6 +369,8 @@ The data is accessed using the ``readX()``, ``readY()`` and ``readE()`` commands
     ...
     62.0
     95.0
+
+There are more examples how to `Extract and manipulate workspace data here <http://www.mantidproject.org/Extracting_And_Manipulating_Data>`_.
 
 Workspace algebra
 #################
