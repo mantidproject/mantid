@@ -34,7 +34,7 @@ void filterToExistingSources(std::vector<std::string> &input_data,
                              std::vector<double> &psi, std::vector<double> &gl,
                              std::vector<double> &gs,
                              std::vector<double> &efix) {
-  for (unsigned long i = input_data.size(); i > 0; i--) {
+  for (size_t i = input_data.size(); i > 0; i--) {
     if (!dataExists(input_data[i - 1])) {
       input_data.erase(input_data.begin() + i - 1);
       psi.erase(psi.begin() + i - 1);
@@ -91,7 +91,7 @@ void filterToNew(std::vector<std::string> &input_data,
                  std::vector<std::string> &current_data,
                  std::vector<double> &psi, std::vector<double> &gl,
                  std::vector<double> &gs, std::vector<double> &efix) {
-  for (unsigned long i = input_data.size(); i > 0; i--) {
+  for (size_t i = input_data.size(); i > 0; i--) {
     if (appearsInCurrentData(input_data[i - 1], current_data)) {
       input_data.erase(input_data.begin() + i - 1);
       psi.erase(psi.begin() + i - 1);

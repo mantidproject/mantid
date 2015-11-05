@@ -53,7 +53,7 @@ bool fileExists(const std::string &filename);
 
 /// Pad vector of parameters to given length
 void padParameterVector(std::vector<double> &param_vector,
-                        unsigned long grow_to_size);
+                        const unsigned long grow_to_size);
 
 /** AccumulateMD : Algorithm for appending new data to a MDHistoWorkspace
 
