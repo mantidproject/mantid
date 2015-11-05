@@ -1,6 +1,7 @@
 #ifndef MANTID_MDALGORITHMS_LOADMD_H_
 #define MANTID_MDALGORITHMS_LOADMD_H_
 
+#include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidKernel/System.h"
@@ -91,7 +92,10 @@ private:
   API::CoordTransform *loadAffineMatrix(std::string entry_name);
 
   /// Sets MDFrames for workspaces from legacy files
-  void setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws) const;
+  void setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws);
+
+  /// Checks if a worspace is a certain type of legacy file
+  void checkForRequiredLegacyFixup(API::IMDWorkspace_sptr ws);
 
   /// Open file handle
   // clang-format off

@@ -16,6 +16,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/LoadMD.h"
+#include "MantidMDAlgorithms/SetMDFrame.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDBoxFlatTree.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
@@ -48,8 +49,7 @@ LoadMD::LoadMD()
     : m_numDims(0), // uninitialized incorrect value
       m_coordSystem(None),
       m_BoxStructureAndMethadata(true), // this is faster but rarely needed.
-      m_saveMDVersion(false),
-      m_requiresMDFrameCorrection(false) {}
+      m_saveMDVersion(false), m_requiresMDFrameCorrection(false){}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -224,12 +224,11 @@ void LoadMD::exec() {
     // Wrapper to cast to MDEventWorkspace then call the function
     CALL_MDEVENT_FUNCTION(this->doLoad, ws);
 
-
     // Check if a MDFrame adjustment is required
+    checkForRequiredLegacyFixup(ws);
     if (m_requiresMDFrameCorrection) {
       setMDFrameOnWorkspaceFromLegacyFile(ws);
     }
-
     // Save to output
     setProperty("OutputWorkspace",
                 boost::dynamic_pointer_cast<IMDWorkspace>(ws));
@@ -313,8 +312,9 @@ void LoadMD::loadHisto() {
   m_file->close();
 
   // Check if a MDFrame adjustment is required
+  checkForRequiredLegacyFixup(ws);
   if (m_requiresMDFrameCorrection) {
-      setMDFrameOnWorkspaceFromLegacyFile(ws);
+    setMDFrameOnWorkspaceFromLegacyFile(ws);
   }
 
   // Save to output
@@ -335,6 +335,9 @@ void LoadMD::loadDimensions() {
     // Use the dimension factory to read the XML
     m_dims.push_back(createDimension(dimXML));
   }
+  // Since this is an old algorithm we will
+  // have to provide an MDFrame correction
+  m_requiresMDFrameCorrection = true;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -619,21 +622,19 @@ CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name) {
  * Set MDFrames for workspaces from legacy files
  * @param ws:: poitner to the workspace which needs to be corrected
  */
-void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(
-    API::IMDWorkspace_sptr ws) const {
-  // Get number of dimensions, only up to the first three dimension are set
-  // different
-  // from a General Frame. Everything else will be set to a General Frame
+void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws) {
+  g_log.notice()
+      << "LoadMD: Encountered a legacy file which has a mismatch between "
+         "its MDFrames and its Special Coordinate System. "
+         "Attempting to convert MDFrames." << std::endl;
   auto numberOfDimensions = ws->getNumDims();
-
-  // Get the special coordinate
-  auto specialCoordinateSystem = ws->getSpecialCoordinateSystem();
 
   // Select an MDFrame based on the special coordinates.
   // Note that for None, we select a General Coordinate System,
   // unless the name is "Unknown frame"
   std::string selectedFrame;
-  switch (specialCoordinateSystem) {
+
+  switch (m_coordSystem) {
   case Mantid::Kernel::QLab:
     selectedFrame = Mantid::Geometry::QLab::QLabName;
     break;
@@ -647,14 +648,77 @@ void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(
     selectedFrame = Mantid::Geometry::GeneralFrame::GeneralFrameName;
   }
 
-  // Set the MDFrames. If we encounter an issue, then leave everything as is and
-  // report the issue.
+  // Get the old frames just in case something goes wrong. In this case we
+  // reset the frames.
+
+  std::vector<std::string> oldFrames(numberOfDimensions, "");
+  for (size_t index = 0; index < numberOfDimensions; ++index) {
+    oldFrames.push_back(ws->getDimension(index)->getMDFrame().name());
+  }
+
+  // We want to set only up to the first three dimensions to the selected Frame;
+  // Everything else will be set to a General Frame
+  std::vector<std::string> framesToSet(
+      numberOfDimensions, Mantid::Geometry::GeneralFrame::GeneralFrameName);
+  auto fillUpTo = numberOfDimensions > 3 ? 3 : numberOfDimensions;
+  std::fill_n(framesToSet.begin(), fillUpTo, selectedFrame);
+
   try {
-    //TODO pace SetMDFrames in here once it is ready.
+    // Set the MDFrames for each axes
+    Algorithm_sptr setMDFrameAlg = this->createChildAlgorithm("SetMDFrame");
+    int axesCounter = 0;
+    for (auto frame = framesToSet.begin(); frame != framesToSet.end();
+         ++frame) {
+      setMDFrameAlg->setProperty("InputWorkspace", ws);
+      setMDFrameAlg->setProperty("MDFrame", *frame);
+      setMDFrameAlg->setProperty("Axes", std::vector<int>(1, axesCounter));
+      ++axesCounter;
+      setMDFrameAlg->executeAsChildAlg();
+    }
   } catch (...) {
+    g_log.warning() << "LoadMD: An issue occured while trying to correct "
+                       "MDFrames. Trying to revert to original." << std::endl;
+    // Revert to the old frames.
+    Algorithm_sptr setMDFrameAlg = this->createChildAlgorithm("SetMDFrame");
+    int axesCounter = 0;
+    for (auto frame = oldFrames.begin(); frame != oldFrames.end(); ++frame) {
+      setMDFrameAlg->setProperty("InputWorkspace", ws);
+      setMDFrameAlg->setProperty("MDFrame", *frame);
+      setMDFrameAlg->setProperty("Axes", std::vector<int>(1, axesCounter));
+      ++axesCounter;
+      setMDFrameAlg->executeAsChildAlg();
+    }
   }
 }
 
+/**
+ * Check for required legacy fix up for certain file types. Namely the case
+ * where
+ * all MDFrames were stored as MDFrames
+ */
+void LoadMD::checkForRequiredLegacyFixup(API::IMDWorkspace_sptr ws) {
+  // Check if the special coordinate is not none
+  auto isQBasedSpecialCoordinateSystem = true;
+  if (m_coordSystem ==
+      Mantid::Kernel::SpecialCoordinateSystem::None) {
+    isQBasedSpecialCoordinateSystem = false;
+  }
+
+  // Check if all MDFrames are of type Unknown frame
+  auto containsOnlyUnkownFrames = true;
+  for (size_t index = 0; index < ws->getNumDims(); ++index) {
+    if (ws->getDimension(index)->getMDFrame().name() !=
+        Mantid::Geometry::UnknownFrame::UnknownFrameName) {
+      containsOnlyUnkownFrames = false;
+      break;
+    }
+  }
+
+  // Check if a fix up is required
+  if (isQBasedSpecialCoordinateSystem && containsOnlyUnkownFrames) {
+    m_requiresMDFrameCorrection = true;
+  }
+}
 const std::string LoadMD::VISUAL_NORMALIZATION_KEY = "visual_normalization";
 const std::string LoadMD::VISUAL_NORMALIZATION_KEY_HISTO =
     "visual_normalization_histo";
