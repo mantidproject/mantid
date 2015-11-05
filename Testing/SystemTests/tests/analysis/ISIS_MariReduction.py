@@ -1,8 +1,7 @@
 ﻿#pylint: disable=invalid-name
 """ Sample MARI reduction scrip used in testing ReductionWrapper """
 import os
-#os.environ["PATH"] =\
-#r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+#
 from Direct.ReductionWrapper import *
 try:
     import reduce_vars as web_var
@@ -337,6 +336,8 @@ class ReduceMARIAutoEi(ReductionWrapper):
         prop['hard_mask_file'] = "mar11015.msk"
         prop['det_cal_file'] = 11060
         prop['save_format'] = ''
+        #prop['check_background'] = False
+
         return prop
       #
     @iliad

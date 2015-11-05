@@ -111,7 +111,8 @@ class MARIReductionAutoEi(ISISDirectInelasticReduction):
         self.red.def_advanced_properties()
         self.red.def_main_properties()
     # temporary fix to account for different monovan integral
-        self.scale_to_fix_abf = 0.997979227566217
+        self.scale_to_fix_abf = 1
+        self.tolerance = 1e-6
         self.ws_name = "outWS"
 
     def runTest(self):
@@ -122,11 +123,13 @@ class MARIReductionAutoEi(ISISDirectInelasticReduction):
         outWS*=self.scale_to_fix_abf
         self.ws_name = outWS.name()
 
+
+
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""
         return self.ws_name
     def get_reference_file(self):
-        return "MARIReduction.nxs"
+        return "MARIReductionAutoEi.nxs"
 
 class MARIReductionFromFileCache(ISISDirectInelasticReduction):
     _counter=0
