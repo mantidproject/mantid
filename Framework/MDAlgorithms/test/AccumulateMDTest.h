@@ -98,7 +98,7 @@ public:
     // Create a cheap workspace
     std::string ws_name = "ACCUMULATEMDTEST_EXISTENTWORKSPACE";
     auto bkg_ws = WorkspaceCreationHelper::Create1DWorkspaceRand(1);
-    // add to ADS
+    // add to ADS (no choice but to use ADS here)
     AnalysisDataService::Instance().add(ws_name, bkg_ws);
 
     data_sources.push_back(ws_name);
@@ -268,15 +268,12 @@ public:
     acc_alg.setPropertyValue("Angdeg", "90,90,90");
     acc_alg.setPropertyValue("u", "1,0,0");
     acc_alg.setPropertyValue("v", "0,1,0");
-    acc_alg.execute();
+    TS_ASSERT_THROWS_NOTHING(acc_alg.execute());
 
     // TODO Get output workspace and check it has the sum of the number of
     // events in sample_data_1 and mdew_input
-    auto sample_ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            sample_ws_name);
-    auto out_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        out_ws_name);
+    auto sample_ws = alg->getProperty("Workspace");
+    auto out_ws = acc_alg.getProperty("OutputWorkspace");
 
     // Clean up
     // Remove workspaces from the data service.

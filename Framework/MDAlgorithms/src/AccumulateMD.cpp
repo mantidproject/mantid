@@ -147,15 +147,6 @@ void insertDataSources(const std::string &data_sources,
   }
 }
 
-void padParameterVector(std::vector<double> &param_vector,
-                        unsigned long grow_to_size) {
-  if (param_vector.size() == 0) {
-    param_vector.resize(grow_to_size, 0.0);
-  } else if (param_vector.size() == 1) {
-    param_vector.resize(grow_to_size, param_vector[0]);
-  }
-}
-
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(AccumulateMD)
 
