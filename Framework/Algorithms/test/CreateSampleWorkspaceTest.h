@@ -217,16 +217,29 @@ public:
     // Name of the output workspace.
     std::string outWSName("CreateSampleWorkspaceTest_OutputWS_event");
 
-    // Retrieve the workspace from data service. TODO: Change to your desired
-    // type
-    MatrixWorkspace_sptr ws = createSampleWorkspace(outWSName, "Event");
+    auto ws = boost::dynamic_pointer_cast<IEventWorkspace>(
+        createSampleWorkspace(outWSName, "Event"));
+    TS_ASSERT(ws);
     if (!ws)
       return;
-    TS_ASSERT_DELTA(ws->readY(0)[20], 30, 0.0001);
-    TS_ASSERT_DELTA(ws->readY(0)[40], 30, 0.0001);
-    TS_ASSERT_DELTA(ws->readY(0)[50], 1030, 0.0001);
-    TS_ASSERT_DELTA(ws->readY(0)[60], 30, 0.0001);
-    TS_ASSERT_DELTA(ws->readY(0)[80], 30, 0.0001);
+
+    // The number of events per spectrum is not simply nhist*events_per_hist
+    // The algorithm computes the number of events required per bin to give the
+    // total per spectrum as requested but can only add integer numbers of
+    // events
+    // so the number added will always be less than expected.
+    // In this case the background has 99 bins at 0.3 & 1 bin at 10.3 => total
+    // sum=40
+    //    signal_scale_factor = events_per_spec/40 = 1000/40=25  =>
+    //      background Y = 0.3*25 = 7.5 => int(7.5)=7
+    //      peak Y = 10.3*25 = 257.5 => int(257.5)=257
+    // Therefore in total we lose 0.5*100*200=10000 events
+    TS_ASSERT_EQUALS(ws->getNumberEvents(), 190000);
+    TS_ASSERT_DELTA(ws->readY(0)[20], 7, 0.0001);
+    TS_ASSERT_DELTA(ws->readY(0)[40], 7, 0.0001);
+    TS_ASSERT_DELTA(ws->readY(0)[50], 257, 0.0001);
+    TS_ASSERT_DELTA(ws->readY(0)[60], 7, 0.0001);
+    TS_ASSERT_DELTA(ws->readY(0)[80], 7, 0.0001);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -354,11 +367,11 @@ public:
     MatrixWorkspace_sptr ws = createSampleWorkspace(outWSName, "Event");
     if (!ws)
       return;
-    TS_ASSERT_DELTA(ws->readY(0)[20], 30, 50);
-    TS_ASSERT_DELTA(ws->readY(0)[40], 30, 50);
-    TS_ASSERT_DELTA(ws->readY(0)[50], 1030, 50);
-    TS_ASSERT_DELTA(ws->readY(0)[60], 30, 50);
-    TS_ASSERT_DELTA(ws->readY(0)[80], 3, 50);
+    TS_ASSERT_DELTA(ws->readY(0)[20], 7, 50);
+    TS_ASSERT_DELTA(ws->readY(0)[40], 7, 50);
+    TS_ASSERT_DELTA(ws->readY(0)[50], 257, 50);
+    TS_ASSERT_DELTA(ws->readY(0)[60], 7, 50);
+    TS_ASSERT_DELTA(ws->readY(0)[80], 7, 50);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);

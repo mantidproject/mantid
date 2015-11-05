@@ -57,11 +57,13 @@ PointGroup::PointGroup(const std::string &symbolHM, const Group &group,
     : Group(group), m_symbolHM(symbolHM),
       m_name(symbolHM + " (" + description + ")") {
   m_crystalSystem = getCrystalSystemFromGroup();
+  m_latticeSystem = getLatticeSystemFromCrystalSystemAndGroup(m_crystalSystem);
 }
 
 PointGroup::PointGroup(const PointGroup &other)
     : Group(other), m_symbolHM(other.m_symbolHM), m_name(other.m_name),
-      m_crystalSystem(other.m_crystalSystem) {}
+      m_crystalSystem(other.m_crystalSystem),
+      m_latticeSystem(other.m_latticeSystem) {}
 
 PointGroup &PointGroup::operator=(const PointGroup &other) {
   Group::operator=(other);
@@ -69,6 +71,7 @@ PointGroup &PointGroup::operator=(const PointGroup &other) {
   m_symbolHM = other.m_symbolHM;
   m_name = other.m_name;
   m_crystalSystem = other.m_crystalSystem;
+  m_latticeSystem = other.m_latticeSystem;
 
   return *this;
 }
@@ -114,6 +117,17 @@ std::vector<V3D> PointGroup::getEquivalentSet(const Kernel::V3D &hkl) const {
   return equivalents;
 }
 
+/**
+ * Returns the CrystalSystem determined from symmetry elements
+ *
+ * This method determines the crystal system of the point group. It makes
+ * use of the fact that each crystal system has a characteristic set of
+ * symmetry elements. The requirement for the cubic system is for example
+ * that four 3-fold axes are present, whereas one 3-fold axis indicates
+ * that the group belongs to the trigonal system.
+ *
+ * @return Crystal system that the point group belongs to.
+ */
 PointGroup::CrystalSystem PointGroup::getCrystalSystemFromGroup() const {
   std::map<std::string, std::set<V3D>> symbolMap;
 
@@ -131,31 +145,67 @@ PointGroup::CrystalSystem PointGroup::getCrystalSystemFromGroup() const {
   }
 
   if (symbolMap["3"].size() == 4) {
-    return Cubic;
+    return CrystalSystem::Cubic;
   }
 
   if (symbolMap["6"].size() == 1 || symbolMap["-6"].size() == 1) {
-    return Hexagonal;
+    return CrystalSystem::Hexagonal;
   }
 
   if (symbolMap["3"].size() == 1) {
-    return Trigonal;
+    return CrystalSystem::Trigonal;
   }
 
   if (symbolMap["4"].size() == 1 || symbolMap["-4"].size() == 1) {
-    return Tetragonal;
+    return CrystalSystem::Tetragonal;
   }
 
   if (symbolMap["2"].size() == 3 ||
       (symbolMap["2"].size() == 1 && symbolMap["m"].size() == 2)) {
-    return Orthorhombic;
+    return CrystalSystem::Orthorhombic;
   }
 
   if (symbolMap["2"].size() == 1 || symbolMap["m"].size() == 1) {
-    return Monoclinic;
+    return CrystalSystem::Monoclinic;
   }
 
-  return Triclinic;
+  return CrystalSystem::Triclinic;
+}
+
+/**
+ * Returns the LatticeSystem of the point group, using the crystal system
+ *
+ * This function uses the crystal system argument and the coordinate system
+ * stored in Group to determine the lattice system. For all crystal systems
+ * except trigonal there is a 1:1 correspondence, but for trigonal groups
+ * the lattice system can be either rhombohedral or hexagonal.
+ *
+ * @param crystalSystem :: CrystalSystem of the point group.
+ * @return LatticeSystem the point group belongs to.
+ */
+PointGroup::LatticeSystem PointGroup::getLatticeSystemFromCrystalSystemAndGroup(
+    const CrystalSystem &crystalSystem) const {
+  switch (crystalSystem) {
+  case CrystalSystem::Cubic:
+    return LatticeSystem::Cubic;
+  case CrystalSystem::Hexagonal:
+    return LatticeSystem::Hexagonal;
+  case CrystalSystem::Tetragonal:
+    return LatticeSystem::Tetragonal;
+  case CrystalSystem::Orthorhombic:
+    return LatticeSystem::Orthorhombic;
+  case CrystalSystem::Monoclinic:
+    return LatticeSystem::Monoclinic;
+  case CrystalSystem::Triclinic:
+    return LatticeSystem::Triclinic;
+  default: {
+    if (getCoordinateSystem() == Group::Hexagonal) {
+      return LatticeSystem::Hexagonal;
+    }
+
+    return LatticeSystem::Rhombohedral;
+  }
+  }
 }
 
 /** @return a vector with all possible PointGroup objects */
@@ -171,6 +221,7 @@ std::vector<PointGroup_sptr> getAllPointGroups() {
   return out;
 }
 
+/// Returns a multimap with crystal system as key and point groups as values.
 PointGroupCrystalSystemMap getPointGroupsByCrystalSystem() {
   PointGroupCrystalSystemMap map;
 
@@ -186,45 +237,100 @@ PointGroupCrystalSystemMap getPointGroupsByCrystalSystem() {
 std::string
 getCrystalSystemAsString(const PointGroup::CrystalSystem &crystalSystem) {
   switch (crystalSystem) {
-  case PointGroup::Cubic:
+  case PointGroup::CrystalSystem::Cubic:
     return "Cubic";
-  case PointGroup::Tetragonal:
+  case PointGroup::CrystalSystem::Tetragonal:
     return "Tetragonal";
-  case PointGroup::Hexagonal:
+  case PointGroup::CrystalSystem::Hexagonal:
     return "Hexagonal";
-  case PointGroup::Trigonal:
+  case PointGroup::CrystalSystem::Trigonal:
     return "Trigonal";
-  case PointGroup::Orthorhombic:
+  case PointGroup::CrystalSystem::Orthorhombic:
     return "Orthorhombic";
-  case PointGroup::Monoclinic:
+  case PointGroup::CrystalSystem::Monoclinic:
     return "Monoclinic";
   default:
     return "Triclinic";
   }
 }
 
+/// Returns the crystal system enum that corresponds to the supplied string or
+/// throws an invalid_argument exception.
 PointGroup::CrystalSystem
 getCrystalSystemFromString(const std::string &crystalSystem) {
   std::string crystalSystemLC = boost::algorithm::to_lower_copy(crystalSystem);
 
   if (crystalSystemLC == "cubic") {
-    return PointGroup::Cubic;
+    return PointGroup::CrystalSystem::Cubic;
   } else if (crystalSystemLC == "tetragonal") {
-    return PointGroup::Tetragonal;
+    return PointGroup::CrystalSystem::Tetragonal;
   } else if (crystalSystemLC == "hexagonal") {
-    return PointGroup::Hexagonal;
+    return PointGroup::CrystalSystem::Hexagonal;
   } else if (crystalSystemLC == "trigonal") {
-    return PointGroup::Trigonal;
+    return PointGroup::CrystalSystem::Trigonal;
   } else if (crystalSystemLC == "orthorhombic") {
-    return PointGroup::Orthorhombic;
+    return PointGroup::CrystalSystem::Orthorhombic;
   } else if (crystalSystemLC == "monoclinic") {
-    return PointGroup::Monoclinic;
+    return PointGroup::CrystalSystem::Monoclinic;
   } else if (crystalSystemLC == "triclinic") {
-    return PointGroup::Triclinic;
+    return PointGroup::CrystalSystem::Triclinic;
   } else {
     throw std::invalid_argument("Not a valid crystal system: '" +
                                 crystalSystem + "'.");
   }
+}
+
+/// Returns the supplied LatticeSystem as a string.
+std::string
+getLatticeSystemAsString(const PointGroup::LatticeSystem &latticeSystem) {
+  switch (latticeSystem) {
+  case PointGroup::LatticeSystem::Cubic:
+    return "Cubic";
+  case PointGroup::LatticeSystem::Tetragonal:
+    return "Tetragonal";
+  case PointGroup::LatticeSystem::Hexagonal:
+    return "Hexagonal";
+  case PointGroup::LatticeSystem::Rhombohedral:
+    return "Rhombohedral";
+  case PointGroup::LatticeSystem::Orthorhombic:
+    return "Orthorhombic";
+  case PointGroup::LatticeSystem::Monoclinic:
+    return "Monoclinic";
+  default:
+    return "Triclinic";
+  }
+}
+
+/// Returns the lattice system enum that corresponds to the supplied string or
+/// throws an invalid_argument exception.PointGroup::LatticeSystem
+PointGroup::LatticeSystem
+getLatticeSystemFromString(const std::string &latticeSystem) {
+  std::string latticeSystemLC = boost::algorithm::to_lower_copy(latticeSystem);
+
+  if (latticeSystemLC == "cubic") {
+    return PointGroup::LatticeSystem::Cubic;
+  } else if (latticeSystemLC == "tetragonal") {
+    return PointGroup::LatticeSystem::Tetragonal;
+  } else if (latticeSystemLC == "hexagonal") {
+    return PointGroup::LatticeSystem::Hexagonal;
+  } else if (latticeSystemLC == "rhombohedral") {
+    return PointGroup::LatticeSystem::Rhombohedral;
+  } else if (latticeSystemLC == "orthorhombic") {
+    return PointGroup::LatticeSystem::Orthorhombic;
+  } else if (latticeSystemLC == "monoclinic") {
+    return PointGroup::LatticeSystem::Monoclinic;
+  } else if (latticeSystemLC == "triclinic") {
+    return PointGroup::LatticeSystem::Triclinic;
+  } else {
+    throw std::invalid_argument("Not a valid lattice system: '" +
+                                latticeSystem + "'.");
+  }
+}
+
+bool CrystalSystemComparator::
+operator()(const PointGroup::CrystalSystem &lhs,
+           const PointGroup::CrystalSystem &rhs) const {
+  return static_cast<int>(lhs) < static_cast<int>(rhs);
 }
 
 } // namespace Mantid

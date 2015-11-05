@@ -7,7 +7,7 @@ import isis_reduction_steps as reduction_steps
 from mantid.simpleapi import *
 from mantid.kernel import DateAndTime
 import random
-
+import math
 class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
     def test_that_gets_transmission_monitor(self):
         # Arrange
@@ -254,6 +254,137 @@ class TestFitRescaleAndShift(unittest.TestCase):
         # Clean up
         DeleteWorkspace(ws1)
         DeleteWorkspace(ws2)
+
+
+
+class SANSCommandInterfaceGetAndSetQResolutionSettings(unittest.TestCase):
+    '''
+    Test the input and output mechanims for the QResolution settings
+    '''
+    def test_full_setup_for_circular_apertures(self):
+        # Arrange
+        command_iface.Clean()
+        command_iface.SANS2D()
+        a1 = 2 # in mm
+        a2 = 3 # in mm
+        delta_r = 4 # in mm
+        collimation_length = 10 # in m
+        norm = reduction_steps.CalculateNormISIS()
+        ReductionSingleton().to_Q = reduction_steps.ConvertToQISIS(norm)
+
+        # Act
+        command_iface.set_q_resolution_a1(a1 = a1)
+        command_iface.set_q_resolution_a2(a2 = a2)
+        command_iface.set_q_resolution_delta_r(delta_r = delta_r)
+        command_iface.set_q_resolution_collimation_length(collimation_length = collimation_length)
+        command_iface.set_q_resolution_use(use = True)
+        ReductionSingleton().to_Q._set_up_q_resolution_parameters()
+
+        # Assert
+        a1_stored = ReductionSingleton().to_Q.get_q_resolution_a1() # in m 
+        a1_expected = a1/1000.
+        self.assertEqual(a1_stored, a1_expected)
+
+        a2_stored = ReductionSingleton().to_Q.get_q_resolution_a2() # in m
+        a2_expected = a2/1000.
+        self.assertEqual(a2_stored, a2_expected)
+
+        collimation_length_stored = ReductionSingleton().to_Q.get_q_resolution_collimation_length() # in m
+        collimation_length_expected = collimation_length
+        self.assertEqual(collimation_length_stored, collimation_length_expected)
+
+        delta_r_stored = ReductionSingleton().to_Q.get_q_resolution_delta_r() # in m
+        delta_r_expected = delta_r/1000.
+        self.assertEqual(delta_r_stored, delta_r_expected)
+
+    def test_full_setup_for_rectangular_apertures(self):
+        # Arrange
+        command_iface.Clean()
+        command_iface.SANS2D()
+        a1 = 2 # in mm
+        a2 = 3 # in mm
+        delta_r = 4 # in mm
+        collimation_length = 10 # in m
+        h1 = 9 # in mm
+        w1 = 8 # in mm
+        h2 = 7 # in mm
+        w2 = 5 # in mm
+        norm = reduction_steps.CalculateNormISIS()
+        ReductionSingleton().to_Q = reduction_steps.ConvertToQISIS(norm)
+
+        # Act
+        command_iface.set_q_resolution_a1(a1 = a1)
+        command_iface.set_q_resolution_a2(a2 = a2)
+        command_iface.set_q_resolution_delta_r(delta_r = delta_r)
+        command_iface.set_q_resolution_h1(h1 = h1)
+        command_iface.set_q_resolution_w1(w1 = w1)
+        command_iface.set_q_resolution_h2(h2 = h2)
+        command_iface.set_q_resolution_w2(w2 = w2)
+        command_iface.set_q_resolution_collimation_length(collimation_length = collimation_length)
+        command_iface.set_q_resolution_use(use = True)
+        ReductionSingleton().to_Q._set_up_q_resolution_parameters()
+
+        # Assert
+        a1_stored = ReductionSingleton().to_Q.get_q_resolution_a1() # in m 
+        a1_expected = 2*math.sqrt((h1/1000.*h1/1000. + w1/1000.*w1/1000.)/6)
+        self.assertEqual(a1_stored, a1_expected)
+
+        a2_stored = ReductionSingleton().to_Q.get_q_resolution_a2() # in m
+        a2_expected = 2*math.sqrt((h2/1000.*h2/1000. + w2/1000.*w2/1000.)/6)
+        self.assertEqual(a2_stored, a2_expected)
+
+        collimation_length_stored = ReductionSingleton().to_Q.get_q_resolution_collimation_length() # in m
+        collimation_length_expected = collimation_length
+        self.assertEqual(collimation_length_stored, collimation_length_expected)
+
+        delta_r_stored = ReductionSingleton().to_Q.get_q_resolution_delta_r() # in m
+        delta_r_expected = delta_r/1000.
+        self.assertEqual(delta_r_stored, delta_r_expected)
+
+
+    def test_full_setup_for_rectangular_apertures_which_are_only_partially_specified(self):
+        # Arrange
+        command_iface.Clean()
+        command_iface.SANS2D()
+        a1 = 2 # in mm
+        a2 = 3 # in mm
+        delta_r = 4 # in mm
+        collimation_length = 10 # in m
+        h1 = 9 # in mm
+        w1 = 8 # in mm
+        h2 = 7 # in mm
+        # We take out w2, hence we don't have a full rectangular spec
+        norm = reduction_steps.CalculateNormISIS()
+        ReductionSingleton().to_Q = reduction_steps.ConvertToQISIS(norm)
+
+        # Act
+        command_iface.set_q_resolution_a1(a1 = a1)
+        command_iface.set_q_resolution_a2(a2 = a2)
+        command_iface.set_q_resolution_delta_r(delta_r = delta_r)
+        command_iface.set_q_resolution_h1(h1 = h1)
+        command_iface.set_q_resolution_w1(w1 = w1)
+        command_iface.set_q_resolution_h2(h2 = h2)
+
+        command_iface.set_q_resolution_collimation_length(collimation_length = collimation_length)
+        command_iface.set_q_resolution_use(use = True)
+        ReductionSingleton().to_Q._set_up_q_resolution_parameters()
+
+        # Assert
+        a1_stored = ReductionSingleton().to_Q.get_q_resolution_a1() # in m 
+        a1_expected = a1/1000.
+        self.assertEqual(a1_stored, a1_expected)
+
+        a2_stored = ReductionSingleton().to_Q.get_q_resolution_a2() # in m
+        a2_expected = a2/1000.
+        self.assertEqual(a2_stored, a2_expected)
+
+        collimation_length_stored = ReductionSingleton().to_Q.get_q_resolution_collimation_length() # in m
+        collimation_length_expected = collimation_length
+        self.assertEqual(collimation_length_stored, collimation_length_expected)
+
+        delta_r_stored = ReductionSingleton().to_Q.get_q_resolution_delta_r() # in m
+        delta_r_expected = delta_r/1000.
+        self.assertEqual(delta_r_stored, delta_r_expected)
 
 
 if __name__ == "__main__":

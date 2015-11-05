@@ -9,6 +9,7 @@
 #include "ui_EnggDiffractionQtGUI.h"
 #include "ui_EnggDiffractionQtTabCalib.h"
 #include "ui_EnggDiffractionQtTabFocus.h"
+#include "ui_EnggDiffractionQtTabPreproc.h"
 #include "ui_EnggDiffractionQtTabSettings.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -99,6 +100,8 @@ public:
                          const std::vector<double> &difc,
                          const std::vector<double> &tzero);
 
+  virtual void enableTabs(bool enable);
+
   virtual void enableCalibrateAndFocusActions(bool enable);
 
   virtual std::string focusingDir() const;
@@ -119,6 +122,14 @@ public:
 
   virtual void resetFocus();
 
+  virtual std::string currentPreprocRunNo() const;
+
+  virtual double rebinningTimeBin() const;
+
+  virtual size_t rebinningPulsesNumberPeriods() const;
+
+  virtual double rebinningPulsesTime() const;
+
   virtual void plotFocusedSpectrum(const std::string &wsName);
 
   virtual void plotWaterfallSpectrum(const std::string &wsName);
@@ -130,12 +141,14 @@ public:
   int currentPlotType() const { return m_currentType; }
 
 private slots:
-  /// for buttons, do calibrate, focus and similar
+  /// for buttons, do calibrate, focus, event->histo rebin, and similar
   void loadCalibrationClicked();
   void calibrateClicked();
   void focusClicked();
   void focusCroppedClicked();
   void focusTextureClicked();
+  void rebinTimeClicked();
+  void rebinMultiperiodClicked();
 
   // slots of the settings tab/section of the interface
   void browseInputDirCalib();
@@ -153,6 +166,8 @@ private slots:
   // slots of the general part of the interface
   void instrumentChanged(int idx);
 
+  void RBNumberChanged();
+
   // slots of the focus part of the interface
   void plotRepChanged(int idx);
 
@@ -167,8 +182,9 @@ private:
   virtual void initLayout();
   void doSetupGeneralWidgets();
   void doSetupTabCalib();
-  void doSetupTabSettings();
   void doSetupTabFocus();
+  void doSetupTabPreproc();
+  void doSetupTabSettings();
 
   std::string guessGSASTemplatePath() const;
 
@@ -193,10 +209,17 @@ private:
   // but they could be separate dialogs, widgets, etc.
   Ui::EnggDiffractionQtTabCalib m_uiTabCalib;
   Ui::EnggDiffractionQtTabFocus m_uiTabFocus;
+  Ui::EnggDiffractionQtTabPreproc m_uiTabPreproc;
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
 
   /// instrument selected (ENGIN-X, etc.)
   std::string m_currentInst;
+
+  /// User select instrument
+  void userSelectInstrument(const QString &prefix);
+
+  /// setting the instrument prefix ahead of the run number
+  void setPrefix(std::string prefix);
 
   // plot data representation type selected
   int static m_currentType;

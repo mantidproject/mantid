@@ -244,6 +244,10 @@ void SANSRunWindow::initLayout() {
   m_uiForm.centre_logging->attachLoggingChannel();
   connect(m_uiForm.clear_centre_log, SIGNAL(clicked()), m_uiForm.centre_logging,
           SLOT(clear()));
+  connect(m_uiForm.up_down_checkbox, SIGNAL(stateChanged(int)), this,
+          SLOT(onUpDownCheckboxChanged()));
+  connect(m_uiForm.left_right_checkbox, SIGNAL(stateChanged(int)), this,
+          SLOT(onLeftRightCheckboxChanged()));
 
   // Create the widget hash maps
   initWidgetMaps();
@@ -316,6 +320,9 @@ void SANSRunWindow::initLayout() {
 
   // Setup the Transmission Settings
   initTransmissionSettings();
+
+  // Setup the QResolution Settings
+  initQResolutionSettings();
 
   // Set the validators
   setValidators();
@@ -422,7 +429,7 @@ void SANSRunWindow::setupSaveBox() {
             SLOT(enableOrDisableDefaultSave()));
   }
 }
-/** Raises a saveWorkspaces dialog which allows people to save any workspace or
+/** Raises a saveWorkspaces dialog which allows people to save any workspace
 *  workspaces the user chooses
 */
 void SANSRunWindow::saveWorkspacesDialog() {
@@ -969,11 +976,14 @@ bool SANSRunWindow::loadUserFile() {
   m_uiForm.smpl_offset->setText(QString::number(dbl_param * unit_conv));
 
   // Centre coordinates
-  // from the ticket #5942 both detectors have center coordinates
+  // Update the beam centre coordinates
+  updateBeamCenterCoordinates();
+  // Set the beam finder specific settings
+  setBeamFinderDetails();
+  // get the scale factor1 for the beam centre to scale it correctly
   dbl_param =
       runReduceScriptFunction(
           "print i.ReductionSingleton().get_beam_center('rear')[0]").toDouble();
-  // get the scale factor1 for the beam centre to scale it correctly
   double dbl_paramsf =
       runReduceScriptFunction(
           "print i.ReductionSingleton().get_beam_center_scale_factor1()")
@@ -997,7 +1007,6 @@ bool SANSRunWindow::loadUserFile() {
                   "print i.ReductionSingleton().get_beam_center('front')[1]")
                   .toDouble();
   m_uiForm.front_beam_y->setText(QString::number(dbl_param * 1000.0));
-
   // Gravity switch
   QString param =
       runReduceScriptFunction("print i.ReductionSingleton().to_Q.get_gravity()")
@@ -1038,6 +1047,9 @@ bool SANSRunWindow::loadUserFile() {
 
   // Masking table
   updateMaskTable();
+
+  // Setup the QResolution
+  retrieveQResolutionSettings();
 
   if (runReduceScriptFunction("print i.ReductionSingleton().mask.phi_mirror")
           .trimmed() == "True") {
@@ -2096,8 +2108,14 @@ bool SANSRunWindow::handleLoadButtonClick() {
   m_sample_file = sample;
   setProcessingState(Ready);
   m_uiForm.load_dataBtn->setText("Load Data");
+
+  // Update the beam center position
+  updateBeamCenterCoordinates();
+  // Set the beam finder specific settings
+  setBeamFinderDetails();
   return true;
 }
+
 /** Queries the number of periods from the Python object whose name was passed
 *  @param RunStep name of the RunStep Python object
 *  @param output where the number will be displayed
@@ -2295,6 +2313,9 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type) {
   // Set the Transmision settings
   writeTransmissionSettingsToPythonScript(exec_reduce);
 
+  // Set the QResolution settings
+  writeQResolutionSettingsToPythonScript(exec_reduce);
+
   // set the user defined center (Geometry Tab)
   // this information is used just after loading the data in order to move to
   // the center
@@ -2397,6 +2418,12 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
   // Need to check which mode we're in
   if (runMode == SingleMode) {
     py_code += readSampleObjectGUIChanges();
+
+    // Provide a final check here to ensure that the settings are consistent. If
+    // they are not consistent, the function
+    // throws and the user has to fix these inconsistencies
+    py_code += "\ni.are_settings_consistent()";
+
     py_code += reduceSingleRun();
     // output the name of the output workspace, this is returned up by the
     // runPythonCode() call below
@@ -2721,6 +2748,9 @@ void SANSRunWindow::handleRunFindCentre() {
   if (m_uiForm.front_radio->isChecked())
     py_code += "i.SetDetectorFloodFile('')\n";
 
+  // We need to load the FinDirectionEnum class
+  py_code +=
+      "from centre_finder import FindDirectionEnum as FindDirectionEnum \n";
   // Find centre function
   py_code += "i.FindBeamCentre(rlow=" + m_uiForm.beam_rmin->text() + ",rupp=" +
              m_uiForm.beam_rmax->text() + ",MaxIter=" +
@@ -2747,9 +2777,21 @@ void SANSRunWindow::handleRunFindCentre() {
     setProcessingState(Ready);
     return;
   }
-  py_code += ", tolerance=" + QString::number(tolerance) + ")";
+  py_code += ", tolerance=" + QString::number(tolerance);
 
-  g_centreFinderLog.notice("Iteration 1\n");
+  // Set which part of the beam centre finder should be used
+  auto updownIsRequired = m_uiForm.up_down_checkbox->isChecked();
+  auto leftRightIsRequired = m_uiForm.left_right_checkbox->isChecked();
+  if (updownIsRequired && leftRightIsRequired) {
+    py_code += ", find_direction=FindDirectionEnum.ALL";
+  } else if (updownIsRequired) {
+    py_code += ", find_direction=FindDirectionEnum.UP_DOWN";
+  } else if (leftRightIsRequired) {
+    py_code += ", find_direction=FindDirectionEnum.LEFT_RIGHT";
+  }
+  py_code += ")";
+
+  g_centreFinderLog.notice("Beam Centre Finder Start\n");
   m_uiForm.beamstart_box->setFocus();
 
   // Execute the code
@@ -3997,6 +4039,29 @@ void SANSRunWindow::setM3M4Logic(TransSettings setting, bool isNowChecked) {
 }
 
 /**
+ * React to changes of the Up/Down checkbox
+ */
+void SANSRunWindow::onUpDownCheckboxChanged() {
+  auto checked = m_uiForm.up_down_checkbox->isChecked();
+  if (m_uiForm.rear_radio->isChecked()) {
+    m_uiForm.rear_beam_y->setEnabled(checked);
+  } else {
+    m_uiForm.front_beam_y->setEnabled(checked);
+  }
+}
+
+/**
+ * React to changes of the Left/Right checkbox
+ */
+void SANSRunWindow::onLeftRightCheckboxChanged() {
+  auto checked = m_uiForm.left_right_checkbox->isChecked();
+  if (m_uiForm.rear_radio->isChecked()) {
+    m_uiForm.rear_beam_x->setEnabled(checked);
+  } else {
+    m_uiForm.front_beam_x->setEnabled(checked);
+  }
+}
+/**
  * Set beam stop logic for Radius, ROI and Mask
  * @param setting :: the checked item
  * @param isNowChecked :: What is the current check-state of the setting?
@@ -4335,8 +4400,9 @@ bool SANSRunWindow::areSettingsValid() {
                             m_uiForm.q_dq_opt, "Qx");
 
   // TRANS SAMPLE
-  checkWaveLengthAndQValues(isValid, message, m_uiForm.trans_min,
-                            m_uiForm.trans_max, m_uiForm.trans_opt, "Trans");
+  if (m_uiForm.transFit_ck->isChecked())
+    checkWaveLengthAndQValues(isValid, message, m_uiForm.trans_min,
+                              m_uiForm.trans_max, m_uiForm.trans_opt, "Trans");
 
   // TRANS CAN
   if (m_uiForm.trans_selector_opt->currentText().toUpper().contains(
@@ -4403,6 +4469,385 @@ void SANSRunWindow::checkWaveLengthAndQValues(bool &isValid, QString &message,
     message += " issue: Trying to use Logarithmic steps and values which are "
                "<= 0.0. \n";
   }
+}
+
+/**
+ *  Update the beam centre coordinates
+ */
+void SANSRunWindow::updateBeamCenterCoordinates() {
+  // Centre coordinates
+  // from the ticket #5942 both detectors have center coordinates
+  double dbl_param =
+      runReduceScriptFunction(
+          "print i.ReductionSingleton().get_beam_center('rear')[0]").toDouble();
+  // get the scale factor1 for the beam centre to scale it correctly
+  double dbl_paramsf =
+      runReduceScriptFunction(
+          "print i.ReductionSingleton().get_beam_center_scale_factor1()")
+          .toDouble();
+  m_uiForm.rear_beam_x->setText(QString::number(dbl_param * dbl_paramsf));
+  // get scale factor2 for the beam centre to scale it correctly
+  dbl_paramsf =
+      runReduceScriptFunction(
+          "print i.ReductionSingleton().get_beam_center_scale_factor2()")
+          .toDouble();
+  dbl_param =
+      runReduceScriptFunction(
+          "print i.ReductionSingleton().get_beam_center('rear')[1]").toDouble();
+  m_uiForm.rear_beam_y->setText(QString::number(dbl_param * dbl_paramsf));
+  // front
+  dbl_param = runReduceScriptFunction(
+                  "print i.ReductionSingleton().get_beam_center('front')[0]")
+                  .toDouble();
+  m_uiForm.front_beam_x->setText(QString::number(dbl_param * 1000.0));
+  dbl_param = runReduceScriptFunction(
+                  "print i.ReductionSingleton().get_beam_center('front')[1]")
+                  .toDouble();
+  m_uiForm.front_beam_y->setText(QString::number(dbl_param * 1000.0));
+}
+
+/**
+ * Set the beam finder details
+ */
+void SANSRunWindow::setBeamFinderDetails() {
+  // The instrument name
+  auto instrumentName = m_uiForm.inst_opt->currentText();
+
+  // Set the labels according to the instrument
+  auto requiresAngle =
+      runReduceScriptFunction(
+          "print i.is_current_workspace_an_angle_workspace()").simplified();
+  QString labelPosition;
+  if (requiresAngle == m_constants.getPythonTrueKeyword()) {
+    labelPosition = "Current ( " + QString(QChar(0x03B2)) + " , y ) [";
+    labelPosition.append(QChar(0xb0));
+    labelPosition += ",mm]";
+  } else {
+    labelPosition = "Current ( x , y ) [mm,mm]";
+  }
+  m_uiForm.beam_centre_finder_groupbox->setTitle(labelPosition);
+}
+
+/**
+ * Retrieves the Q resolution settings and apply them to the GUI
+ */
+void SANSRunWindow::retrieveQResolutionSettings() {
+  // Set if the QResolution should be used at all
+  QString getUseage = "i.get_q_resultution_use()\n";
+  QString resultUsage(runPythonCode(getUseage, false));
+  resultUsage = resultUsage.simplified();
+  if (resultUsage == m_constants.getPythonTrueKeyword()) {
+    m_uiForm.q_resolution_group_box->setChecked(true);
+  } else if (resultUsage == m_constants.getPythonFalseKeyword()) {
+    m_uiForm.q_resolution_group_box->setChecked(false);
+  } else {
+    g_log.warning(resultUsage.toStdString());
+    g_log.warning("Not a valid setting for the useage of QResolution");
+    m_uiForm.q_resolution_group_box->setChecked(false);
+  }
+
+  // Set the Collimation length
+  auto resultCollimationLength =
+      retrieveQResolutionGeometry("i.get_q_resolution_collimation_length()\n");
+  m_uiForm.q_resolution_collimation_length_input->setText(
+      resultCollimationLength);
+
+  // Set the Delta R value
+  auto resultDeltaR =
+      retrieveQResolutionGeometry("i.get_q_resolution_delta_r()\n");
+  m_uiForm.q_resolution_delta_r_input->setText(resultDeltaR);
+
+  // Set the moderator file
+  QString getModeratorFile = "i.get_q_resolution_moderator()\n";
+  QString resultModeratorFile = runPythonCode(getModeratorFile, false);
+  if (resultModeratorFile == m_constants.getPythonEmptyKeyword()) {
+    resultModeratorFile = "";
+  }
+  m_uiForm.q_resolution_moderator_input->setText(resultModeratorFile);
+
+  // Set the geometry, ie if rectangular or circular aperture
+  retrieveQResolutionAperture();
+}
+
+/**
+ * Retrieve the QResolution setting for the aperture. Select the aperture
+ * type depending on the available values, ie if there are H1, W1, H2, W2
+ * specified,
+ * then we are dealing with are rectangular aperture, else with a circular
+ */
+void SANSRunWindow::retrieveQResolutionAperture() {
+  // Get the H1, W1, H2, W2
+  auto h1 = retrieveQResolutionGeometry("i.get_q_resolution_h1()\n");
+  auto w1 = retrieveQResolutionGeometry("i.get_q_resolution_w1()\n");
+  auto h2 = retrieveQResolutionGeometry("i.get_q_resolution_h2()\n");
+  auto w2 = retrieveQResolutionGeometry("i.get_q_resolution_w2()\n");
+
+  // If at least one of them is empty, then use circular, otherwise use
+  // rectangular
+  auto useCircular =
+      h1.isEmpty() || w1.isEmpty() || h2.isEmpty() || w2.isEmpty();
+  if (useCircular) {
+    setupQResolutionCircularAperture();
+  } else {
+    setupQResolutionRectangularAperture(h1, w1, h2, w2);
+  }
+}
+
+/**
+ * Gets the geometry settings and checks if they are empty or not
+ * @param command: the python command to execute
+ * @returns either a length (string) in mm or an empty string
+ */
+QString SANSRunWindow::retrieveQResolutionGeometry(QString command) {
+  QString result(runPythonCode(command, false));
+  result = result.simplified();
+  if (result == m_constants.getPythonEmptyKeyword()) {
+    result = "";
+  }
+  return result;
+}
+
+/**
+ * Setup the GUI for use with a circular aperture
+ */
+void SANSRunWindow::setupQResolutionCircularAperture() {
+  // Get the apertures of the diameter
+  auto a1 = retrieveQResolutionGeometry("i.get_q_resolution_a1()\n");
+  auto a2 = retrieveQResolutionGeometry("i.get_q_resolution_a2()\n");
+
+  setQResolutionApertureType(QResoluationAperture::CIRCULAR, "A1 [mm]",
+                             "A2 [mm]", a1, a2,
+                             m_constants.getQResolutionA1ToolTipText(),
+                             m_constants.getQResolutionA2ToolTipText(), true);
+}
+
+/**
+ * Setup the GUI for use with a rectangular aperture
+ * @param h1: the height of the first aperture
+ * @param w1: the width of the first aperture
+ * @param h2: the height of the second aperture
+ * @param w2: the width of the second aperture
+ */
+void SANSRunWindow::setupQResolutionRectangularAperture(QString h1, QString w1,
+                                                        QString h2,
+                                                        QString w2) {
+  // Set the QResolution Aperture
+  setQResolutionApertureType(QResoluationAperture::RECTANGULAR, "H1 [mm]",
+                             "H2 [mm]", h1, h2,
+                             m_constants.getQResolutionH1ToolTipText(),
+                             m_constants.getQResolutionH2ToolTipText(), false);
+
+  // Set the W1 and W2 values
+  m_uiForm.q_resolution_w1_input->setText(w1);
+  m_uiForm.q_resolution_w2_input->setText(w2);
+
+  // Set the ToolTip for a1
+  m_uiForm.q_resolution_a1_h1_input->setToolTip(
+      m_constants.getQResolutionH1ToolTipText());
+  m_uiForm.q_resolution_a1_h1_label->setToolTip(
+      m_constants.getQResolutionH1ToolTipText());
+
+  // Set the ToolTip for a2
+  m_uiForm.q_resolution_a2_h2_input->setToolTip(
+      m_constants.getQResolutionH2ToolTipText());
+  m_uiForm.q_resolution_a2_h2_label->setToolTip(
+      m_constants.getQResolutionH2ToolTipText());
+}
+
+/**
+ * Setup the GUI for use iwth a rectangular aperture
+ */
+void SANSRunWindow::setupQResolutionRectangularAperture() {
+  auto h1 = retrieveQResolutionGeometry("i.get_q_resolution_h1()\n");
+  auto w1 = retrieveQResolutionGeometry("i.get_q_resolution_w1()\n");
+  auto h2 = retrieveQResolutionGeometry("i.get_q_resolution_h2()\n");
+  auto w2 = retrieveQResolutionGeometry("i.get_q_resolution_w2()\n");
+
+  setupQResolutionRectangularAperture(h1, w1, h2, w2);
+}
+
+/**
+ * Set the QResolution aperture GUI
+ * @param apertureType: the type of the aperture
+ * @param a1H1Label: the label for the a1/h1 input
+ * @param a2H2Label: the label for the a2/h2 input
+ * @param a1H1: the a1H1 value
+ * @param a2H2: the a2H2 value
+ * @param toolTipA1H1: the tooltip text for the first aperture parameter
+ * @param toolTipA2H2: the tooltip text for the second aperture parameter
+ * @param w1W2Disabled: if the w1W2Inputs should be disabled
+ */
+void SANSRunWindow::setQResolutionApertureType(
+    QResoluationAperture apertureType, QString a1H1Label, QString a2H2Label,
+    QString a1H1, QString a2H2, QString toolTipA1H1, QString toolTipA2H2,
+    bool w1W2Disabled) {
+  // Set the labels
+  m_uiForm.q_resolution_a1_h1_label->setText(a1H1Label);
+  m_uiForm.q_resolution_a2_h2_label->setText(a2H2Label);
+
+  // Set the values
+  m_uiForm.q_resolution_a1_h1_input->setText(a1H1);
+  m_uiForm.q_resolution_a2_h2_input->setText(a2H2);
+
+  // Ensure that the W1 and W2 boxes are not accesible
+  m_uiForm.q_resolution_w1_label->setDisabled(w1W2Disabled);
+  m_uiForm.q_resolution_w2_label->setDisabled(w1W2Disabled);
+  m_uiForm.q_resolution_w1_input->setDisabled(w1W2Disabled);
+  m_uiForm.q_resolution_w2_input->setDisabled(w1W2Disabled);
+
+  // Set the QCheckBox to the correct value
+  m_uiForm.q_resolution_combo_box->setCurrentIndex(apertureType);
+
+  // Set the ToolTip for a1/a2
+  m_uiForm.q_resolution_a1_h1_input->setToolTip(toolTipA1H1);
+  m_uiForm.q_resolution_a1_h1_label->setToolTip(toolTipA1H1);
+
+  // Set the ToolTip for a2
+  m_uiForm.q_resolution_a2_h2_input->setToolTip(toolTipA2H2);
+  m_uiForm.q_resolution_a2_h2_label->setToolTip(toolTipA2H2);
+}
+
+/**
+ * Write the GUI changes for the QResolution settings to the python code string
+ * @param pythonCode: A reference to the python code
+ */
+void SANSRunWindow::writeQResolutionSettingsToPythonScript(
+    QString &pythonCode) {
+  // Clear the current settings
+  pythonCode += "i.reset_q_resolution_settings()\n";
+  const QString lineEnding1 = ")\n";
+  const QString lineEnding2 = "')\n";
+  // Set usage of QResolution
+  auto usageGUI = m_uiForm.q_resolution_group_box->isChecked();
+  QString useage = usageGUI ? m_constants.getPythonTrueKeyword()
+                            : m_constants.getPythonFalseKeyword();
+  pythonCode += "i.set_q_resolution_use(use=" + useage + ")\n";
+
+  // Set collimation length
+  auto collimationLength =
+      m_uiForm.q_resolution_collimation_length_input->text().simplified();
+  writeQResolutionSettingsToPythonScriptSingleEntry(
+      collimationLength,
+      "i.set_q_resolution_collimation_length(collimation_length=", lineEnding1,
+      pythonCode);
+  // Set the moderator file
+  auto moderatorFile =
+      m_uiForm.q_resolution_moderator_input->text().simplified();
+  writeQResolutionSettingsToPythonScriptSingleEntry(
+      moderatorFile, "i.set_q_resolution_moderator(file_name='", lineEnding2,
+      pythonCode);
+  // Set the delta r value
+  auto deltaR = m_uiForm.q_resolution_delta_r_input->text().simplified();
+  writeQResolutionSettingsToPythonScriptSingleEntry(
+      deltaR, "i.set_q_resolution_delta_r(delta_r=", lineEnding1, pythonCode);
+  // Set the aperture properties depending on the aperture type
+  auto a1H1 = m_uiForm.q_resolution_a1_h1_input->text().simplified();
+  auto a2H2 = m_uiForm.q_resolution_a2_h2_input->text().simplified();
+  if (m_uiForm.q_resolution_combo_box->currentIndex() ==
+      QResoluationAperture::CIRCULAR) {
+    writeQResolutionSettingsToPythonScriptSingleEntry(
+        a1H1, "i.set_q_resolution_a1(a1=", lineEnding1, pythonCode);
+    writeQResolutionSettingsToPythonScriptSingleEntry(
+        a2H2, "i.set_q_resolution_a2(a2=", lineEnding1, pythonCode);
+  } else if (m_uiForm.q_resolution_combo_box->currentIndex() ==
+             QResoluationAperture::RECTANGULAR) {
+    writeQResolutionSettingsToPythonScriptSingleEntry(
+        a1H1, "i.set_q_resolution_h1(h1=", lineEnding1, pythonCode);
+    writeQResolutionSettingsToPythonScriptSingleEntry(
+        a2H2, "i.set_q_resolution_h2(h2=", lineEnding1, pythonCode);
+    // Set the W1 and W2 parameters
+    auto w1 = m_uiForm.q_resolution_w1_input->text().simplified();
+    writeQResolutionSettingsToPythonScriptSingleEntry(
+        w1, "i.set_q_resolution_w1(w1=", lineEnding1, pythonCode);
+    auto w2 = m_uiForm.q_resolution_w2_input->text().simplified();
+    writeQResolutionSettingsToPythonScriptSingleEntry(
+        w2, "i.set_q_resolution_w2(w2=", lineEnding1, pythonCode);
+  } else {
+    g_log.error("SANSRunWindow: Tried to select a QResolution aperture which "
+                "does not seem to exist");
+  }
+}
+
+/**
+ * Write a single line of python code for Q Resolution
+ * @param value: The value to set
+ * @param code_entry: tye python method to run
+ * @param lineEnding: the line ending
+ * @param py_code: the code segment to which we want to append
+ */
+void SANSRunWindow::writeQResolutionSettingsToPythonScriptSingleEntry(
+    QString value, QString code_entry, const QString lineEnding,
+    QString &py_code) const {
+  if (!value.isEmpty()) {
+    py_code += code_entry + value + lineEnding;
+  }
+}
+
+/**
+ * Handle a chagne of the QResolution aperture selection
+ * @param aperture: the current index
+ */
+void SANSRunWindow::handleQResolutionApertureChange(int aperture) {
+  if (aperture == QResoluationAperture::CIRCULAR) {
+    setupQResolutionCircularAperture();
+  } else if (aperture == QResoluationAperture::RECTANGULAR) {
+    setupQResolutionRectangularAperture();
+  } else {
+    g_log.error("SANSRunWindow: Tried to select a QResolution aperture which "
+                "does not seem to exist");
+  }
+}
+
+/**
+ * Initialize the QResolution settings
+ */
+void SANSRunWindow::initQResolutionSettings() {
+  // Connect the change of the change of the aperture
+  QObject::connect(m_uiForm.q_resolution_combo_box,
+                   SIGNAL(currentIndexChanged(int)), this,
+                   SLOT(handleQResolutionApertureChange(int)));
+
+  // Set the Tooltips for Moderator
+  const QString moderator("The full path to the moderator file.");
+  m_uiForm.q_resolution_moderator_input->setToolTip(moderator);
+  m_uiForm.q_resolution_moderator_label->setToolTip(moderator);
+
+  // Set the ToolTip for the Collimation length
+  const QString collimationLength("The collimation length in m.");
+  m_uiForm.q_resolution_collimation_length_input->setToolTip(collimationLength);
+  m_uiForm.q_resolution_collimation_length_label->setToolTip(collimationLength);
+
+  // Set the ToolTip for Delta R
+  const QString deltaR("The delta r in mm.");
+  m_uiForm.q_resolution_delta_r_input->setToolTip(deltaR);
+  m_uiForm.q_resolution_delta_r_label->setToolTip(deltaR);
+
+  // Set the ToolTip for w1
+  const QString w1("The width of the first aperture in mm.");
+  m_uiForm.q_resolution_w1_input->setToolTip(w1);
+  m_uiForm.q_resolution_w1_label->setToolTip(w1);
+
+  // Set the ToolTip for w2
+  const QString w2("The width of the second aperture in mm.");
+  m_uiForm.q_resolution_w2_input->setToolTip(w2);
+  m_uiForm.q_resolution_w2_label->setToolTip(w2);
+
+  // Set the dropdown menu
+  const QString aperture("Select if a circular or rectangular aperture \n"
+                         "should be used");
+  m_uiForm.q_resolution_combo_box->setToolTip(aperture);
+
+  // Set the ToolTip for a1
+  m_uiForm.q_resolution_a1_h1_input->setToolTip(
+      m_constants.getQResolutionA1ToolTipText());
+  m_uiForm.q_resolution_a1_h1_label->setToolTip(
+      m_constants.getQResolutionA1ToolTipText());
+
+  // Set the ToolTip for a2
+  m_uiForm.q_resolution_a2_h2_input->setToolTip(
+      m_constants.getQResolutionA2ToolTipText());
+  m_uiForm.q_resolution_a2_h2_label->setToolTip(
+      m_constants.getQResolutionA2ToolTipText());
 }
 
 } // namespace CustomInterfaces

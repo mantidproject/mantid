@@ -726,6 +726,50 @@ public:
     TS_ASSERT(monPeriod1Run.hasProperty("period 1"))
     TS_ASSERT(monPeriod2Run.hasProperty("period 2"))
   }
+
+  std::string extractStringLog(const MatrixWorkspace &matrixWS,
+                               const std::string &logName) {
+    auto run = matrixWS.run();
+    PropertyWithValue<std::string> *log =
+        dynamic_cast<PropertyWithValue<std::string> *>(run.getLogData(logName));
+    return log->value();
+  }
+
+  void testExecExtractMeasurmentData() {
+    LoadISISNexus2 ld;
+    ld.setChild(true);
+    ld.initialize();
+    ld.setPropertyValue("Filename", "POLREF00014966.nxs");
+    ld.setPropertyValue("OutputWorkspace", "__unused_for_child");
+    ld.setPropertyValue("LoadMonitors", "Separate");
+    ld.execute();
+
+    Workspace_sptr detWS = ld.getProperty("OutputWorkspace");
+
+    auto groupWS = boost::dynamic_pointer_cast<WorkspaceGroup>(detWS);
+    TSM_ASSERT("Should have got back a workspace group", groupWS);
+
+    auto firstMatrixWS =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(0));
+
+    TS_ASSERT_EQUALS("34", extractStringLog(*firstMatrixWS, "measurement_id"));
+    TS_ASSERT_EQUALS("0",
+                     extractStringLog(*firstMatrixWS, "measurement_subid"));
+    TS_ASSERT_EQUALS("", extractStringLog(*firstMatrixWS, "measurement_label"));
+    TS_ASSERT_EQUALS("PNR",
+                     extractStringLog(*firstMatrixWS, "measurement_type"));
+
+    auto secondMatrixWS =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(1));
+
+    TS_ASSERT_EQUALS("34", extractStringLog(*secondMatrixWS, "measurement_id"));
+    TS_ASSERT_EQUALS("0",
+                     extractStringLog(*secondMatrixWS, "measurement_subid"));
+    TS_ASSERT_EQUALS("",
+                     extractStringLog(*secondMatrixWS, "measurement_label"));
+    TS_ASSERT_EQUALS("PNR",
+                     extractStringLog(*secondMatrixWS, "measurement_type"));
+  }
 };
 
 //------------------------------------------------------------------------------

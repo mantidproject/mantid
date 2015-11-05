@@ -49,7 +49,7 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         """
 
         DeleteWorkspace(self._sample_ws)
-        DeleteWorkspace(self._can_ws)
+        DeleteWorkspace(mtd['can_ws'])
         DeleteWorkspace(self._corrections_ws)
 
 

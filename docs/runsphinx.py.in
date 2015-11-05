@@ -58,6 +58,7 @@ def main(sysarg):
     output_dir = pathjoin(SPHINX_BUILD_DIR, BUILDER)
     doctree_dir = pathjoin(SPHINX_BUILD_DIR, "doctrees")
     argv = [sys.executable,
+            "-N",
             "-b", BUILDER,
             "-d", doctree_dir,
             "-c", CONF_DIR,
@@ -71,7 +72,7 @@ def main(sysarg):
                                 % opts.testinclude)
 
     # Run
-    import sphinx
+    import sphinx.cmdline
     # IPython monkey patches the RegexLexer.get_tokens_unprocessed method and
     # causes Sphinx to fall over. We need to put it back while processing
     # the documentation
@@ -83,7 +84,7 @@ def main(sysarg):
     except AttributeError:
         pass
     try:
-        return_value = sphinx.main(argv)
+        return_value = sphinx.cmdline.main(argv)
     finally:
         from IPython.qt.console import pygments_highlighter
         RegexLexer.get_tokens_unprocessed = pygments_highlighter.get_tokens_unprocessed

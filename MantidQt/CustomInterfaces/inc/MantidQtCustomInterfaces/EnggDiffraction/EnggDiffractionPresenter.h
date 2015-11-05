@@ -3,6 +3,7 @@
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
@@ -71,6 +72,14 @@ public:
                   const std::string &runNo, const std::vector<bool> &banks,
                   const std::string &specNos, const std::string &dgFile);
 
+  /// pre-processing re-binning with Rebin, for a worker/thread
+  void doRebinningTime(const std::string &runNo, double bin,
+                       const std::string &outWSName);
+
+  /// pre-processing re-binning with RebinByPulseTimes, for a worker/thread
+  void doRebinningPulses(const std::string &runNo, size_t nperiods, double bin,
+                         const std::string &outWSName);
+
 protected:
   void initialize();
 
@@ -84,15 +93,21 @@ protected:
   void processFocusCropped();
   void processFocusTexture();
   void processResetFocus();
+  void processRebinTime();
+  void processRebinMultiperiod();
   void processLogMsg();
   void processInstChange();
+  void processRBNumberChange();
   void processShutDown();
 
 protected slots:
   void calibrationFinished();
   void focusingFinished();
+  void rebinningFinished();
 
 private:
+  bool validateRBNumber(const std::string &rbn) const;
+
   /// @name Calibration related private methods
   //@{
   void inputChecksBeforeCalibrate(const std::string &newVanNo,
@@ -178,8 +193,28 @@ private:
                               Mantid::API::ITableWorkspace_sptr &vanIntegWS,
                               Mantid::API::MatrixWorkspace_sptr &vanCurvesWS);
 
+  /// @name Methods related to pre-processing / re-binning
+  //@{
+  void inputChecksBeforeRebin(const std::string &runNo);
+
+  void inputChecksBeforeRebinTime(const std::string &runNo, double bin);
+
+  void inputChecksBeforeRebinPulses(const std::string &runNo, size_t nperiods,
+                                    double timeStep);
+
+  Mantid::API::Workspace_sptr loadToPreproc(const std::string runNo);
+
+  virtual void startAsyncRebinningTimeWorker(const std::string &runNo,
+                                             double bin,
+                                             const std::string &outWSName);
+
+  virtual void startAsyncRebinningPulsesWorker(const std::string &runNo,
+                                               size_t nperiods, double timeStep,
+                                               const std::string &outWSName);
+  //@}
+
   // plots workspace according to the user selection
-  void plotFocusedWorkspace(std::string outWSName, std::string bank);
+  void plotFocusedWorkspace(std::string outWSName, int bank);
 
   // algorithms to save the generated workspace
   void saveGSS(std::string inputWorkspace, std::string bank, std::string runNo);
@@ -193,7 +228,7 @@ private:
                                  std::string bank, std::string format);
 
   // generates a directory if not found and handles the path
-  Poco::Path outFilesDir(std::string runNo);
+  Poco::Path outFilesDir(std::string addToDir);
 
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;
@@ -210,9 +245,14 @@ private:
   bool m_calibFinishedOK;
   /// true if the last focusing completed successfully
   bool m_focusFinishedOK;
+  /// true if the last pre-processing/re-binning completed successfully
+  bool m_rebinningFinishedOK;
 
   /// Counter for the cropped output files
   static int g_croppedCounter;
+
+  /// counter for the plotting workspace
+  static int g_plottingCounter;
 
   /// Associated view for this presenter (MVP pattern)
   IEnggDiffractionView *const m_view;

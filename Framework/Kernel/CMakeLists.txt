@@ -31,6 +31,7 @@ set ( SRC_FILES
 	src/FloatingPointComparison.cpp
 	src/FreeBlock.cpp
 	src/Glob.cpp
+	src/ICatalogInfo.cpp
 	src/IPropertyManager.cpp
 	src/ISaveable.cpp
 	src/InstrumentInfo.cpp
@@ -99,6 +100,7 @@ set ( SRC_FILES
 	src/UnitFactory.cpp
 	src/UnitLabel.cpp
 	src/UnitLabelTypes.cpp
+	src/UserCatalogInfo.cpp
 	src/UserStringParser.cpp
 	src/Utils.cpp
 	src/V2D.cpp
@@ -166,6 +168,7 @@ set ( INC_FILES
 	inc/MantidKernel/FreeBlock.h
 	inc/MantidKernel/FunctionTask.h
 	inc/MantidKernel/Glob.h
+	inc/MantidKernel/ICatalogInfo.h
 	inc/MantidKernel/IPropertyManager.h
 	inc/MantidKernel/IPropertySettings.h
 	inc/MantidKernel/ISaveable.h
@@ -186,6 +189,7 @@ set ( INC_FILES
 	inc/MantidKernel/MRUList.h
 	inc/MantidKernel/MagneticFormFactorTable.h
 	inc/MantidKernel/MagneticIon.h
+	inc/MantidKernel/make_unique.h
 	inc/MantidKernel/MandatoryValidator.h
 	inc/MantidKernel/MantidVersion.h
 	inc/MantidKernel/MaskedProperty.h
@@ -254,6 +258,7 @@ set ( INC_FILES
 	inc/MantidKernel/UnitFactory.h
 	inc/MantidKernel/UnitLabel.h
 	inc/MantidKernel/UnitLabelTypes.h
+	inc/MantidKernel/UserCatalogInfo.h
 	inc/MantidKernel/UserStringParser.h
 	inc/MantidKernel/Utils.h
 	inc/MantidKernel/V2D.h
@@ -322,6 +327,7 @@ set ( TEST_FILES
 	MRUListTest.h
 	MagneticFormFactorTableTest.h
 	MagneticIonTest.h
+	MakeUniqueTest.h
 	MandatoryValidatorTest.h
 	MaskedPropertyTest.h
 	MaterialTest.h
@@ -370,6 +376,7 @@ set ( TEST_FILES
 	UnitFactoryTest.h
 	UnitLabelTest.h
 	UnitTest.h
+	UserCatalogInfoTest.h
 	UserStringParserTest.h
 	UtilsTest.h
 	V2DTest.h
@@ -536,6 +543,7 @@ else ()
   set ( CONSOLEPATTERN "%s-[%p] %t" )
 endif ()
 
+set ( CONSOLECHANNELCLASS "ConsoleChannel" )
 configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
 )
@@ -610,6 +618,7 @@ else ()
   set ( PV_PLUGINS ${MANTID_ROOT}/${PVPLUGINS_SUBDIR} )
 endif ()
 
+set ( CONSOLECHANNELCLASS "StdoutChannel" )
 configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
 )

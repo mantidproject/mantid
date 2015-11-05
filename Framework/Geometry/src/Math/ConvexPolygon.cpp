@@ -66,8 +66,7 @@ void ConvexPolygon::clear() {
 }
 
 /**
- * Insert a new vertex. It is assumed this point is the next
- * point in anti-clockwise manner
+ * Insert a new vertex.
  * @param pt A new point for the shape
  */
 void ConvexPolygon::insert(const V2D &pt) {
@@ -75,12 +74,12 @@ void ConvexPolygon::insert(const V2D &pt) {
   // Update extrema
   if (pt.X() < m_minX)
     m_minX = pt.X();
-  else if (pt.X() > m_maxX)
+  if (pt.X() > m_maxX)
     m_maxX = pt.X();
 
   if (pt.Y() < m_minY)
     m_minY = pt.Y();
-  else if (pt.Y() > m_maxY)
+  if (pt.Y() > m_maxY)
     m_maxY = pt.Y();
 }
 

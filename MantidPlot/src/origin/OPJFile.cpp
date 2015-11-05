@@ -27,22 +27,6 @@
  *                                                                         *
  ***************************************************************************/
 
-// Disable various warnings as this is not our code
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
-#define GCC_VERSION                                                            \
-  (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
-#pragma GCC diagnostic ignored "-Wreorder"
-#pragma GCC diagnostic ignored "-Wformat"
-// This option seems to have disappeared in 4.4.4, but came back in 4.5.x?!?!?
-#if GCC_VERSION < 40404 || GCC_VERSION > 40500
-#pragma GCC diagnostic ignored "-Wunused-result"
-#endif
-#pragma GCC diagnostic ignored "-Wunused"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wconversion"
-#pragma GCC diagnostic ignored "-Wtype-limits"
-#endif
-
 #ifdef _WIN32
 #pragma warning(disable : 4800)
 #endif
@@ -101,10 +85,10 @@ int strcmp_i(const char *s1,
   {                                                                            \
     size_t retval = fread(ptr, size, nmemb, stream);                           \
     if (static_cast<size_t>(size * nmemb) != retval) {                         \
-      fprintf(                                                                 \
-          debug,                                                               \
-          " WARNING : could not read %d bytes from file, read: %d bytes\n",    \
-          size *nmemb);                                                        \
+      fprintf(debug, " WARNING : could not read %llu bytes from file, read: "  \
+                     "%llu bytes\n",                                           \
+              static_cast<unsigned long long>(size) * nmemb,                   \
+              static_cast<unsigned long long>(retval));                        \
     }                                                                          \
   }
 
@@ -276,6 +260,7 @@ int OPJFile::Parse() {
     printf(" WARNING : could not move to position %d from the beginning of the "
            "file\n",
            0x7);
+    fclose(f);
     return -1;
   }
 
@@ -284,6 +269,7 @@ int OPJFile::Parse() {
     printf(" WARNING : could not read four bytes with the version information, "
            "read: %d bytes\n",
            retval);
+    fclose(f);
     return -1;
   }
 
@@ -434,11 +420,13 @@ int OPJFile::ParseFormatOld() {
 
       spread = compareSpreadnames(sname);
 
-      current_col = static_cast<int>(SPREADSHEET[spread].column.size());
+      if (spread >= 0) {
+        current_col = static_cast<int>(SPREADSHEET[spread].column.size());
 
-      if (!current_col)
-        current_col = 1;
-      current_col++;
+        if (!current_col)
+          current_col = 1;
+        current_col++;
+      }
     }
     fprintf(debug, "SPREADSHEET = %s COLUMN %d NAME = %s (@0x%X)\n", sname,
             current_col, cname, (unsigned int)ftell(f));
@@ -490,7 +478,7 @@ int OPJFile::ParseFormatOld() {
           stmp = char(i + 0x41);
         else if (i < 26 * 26) {
           stmp = char(0x40 + i / 26);
-          stmp[1] = i % 26 + 0x41;
+          stmp[1] = char(i % 26 + 0x41);
         } else {
           stmp = char(0x40 + i / 26 / 26);
           stmp[1] = char(i / 26 % 26 + 0x41);
@@ -785,7 +773,7 @@ int OPJFile::ParseFormatNew() {
   int file_size = 0;
   {
     CHECKED_FSEEK(debug, f, 0, SEEK_END);
-    file_size = ftell(f);
+    file_size = static_cast<int>(ftell(f));
     CHECKED_FSEEK(debug, f, 0, SEEK_SET);
   }
 
@@ -979,7 +967,7 @@ int OPJFile::ParseFormatNew() {
             fprintf(debug, "%g ", MATRIX.back().data.back());
           }
           break;
-        case 0x6801: // int
+        case 0x6801:            // int
           if (data_type_u == 8) // unsigned
             for (i = 0; i < size; i++) {
               unsigned int value;
@@ -999,7 +987,7 @@ int OPJFile::ParseFormatNew() {
               fprintf(debug, "%g ", MATRIX.back().data.back());
             }
           break;
-        case 0x6803: // short
+        case 0x6803:            // short
           if (data_type_u == 8) // unsigned
             for (i = 0; i < size; i++) {
               unsigned short value;
@@ -1019,7 +1007,7 @@ int OPJFile::ParseFormatNew() {
               fprintf(debug, "%g ", MATRIX.back().data.back());
             }
           break;
-        case 0x6821: // char
+        case 0x6821:            // char
           if (data_type_u == 8) // unsigned
             for (i = 0; i < size; i++) {
               unsigned char value;
@@ -1272,7 +1260,8 @@ int OPJFile::ParseFormatNew() {
     CHECKED_FSEEK(debug, f, POS + 0x4A, SEEK_SET);
     CHECKED_FREAD(debug, &object_type, 10, 1, f);
 
-    CHECKED_FSEEK(debug, f, POS, SEEK_SET);
+    if (POS >= 0)
+      CHECKED_FSEEK(debug, f, POS, SEEK_SET);
 
     if (compareSpreadnames(object_name) != -1)
       readSpreadInfo(f, file_size, debug);
@@ -1393,6 +1382,9 @@ int OPJFile::ParseFormatNew() {
 
 void OPJFile::readSpreadInfo(FILE *f, int file_size, FILE *debug) {
   int POS = int(ftell(f));
+
+  if (POS < 0)
+    return;
 
   int headersize;
   CHECKED_FREAD(debug, &headersize, 4, 1, f);
@@ -1931,6 +1923,9 @@ void OPJFile::readMatrixInfo(FILE *f, int file_size, FILE *debug) {
   CHECKED_FREAD(debug, &name, 25, 1, f);
 
   int idx = compareMatrixnames(name);
+  if (idx < 0)
+    return;
+
   MATRIX[idx].name = name;
   readWindowProperties(MATRIX[idx], f, debug, POS, headersize);
 
@@ -3219,12 +3214,15 @@ void OPJFile::readProjectTreeFolder(FILE *f, FILE *debug,
                                     tree<projectNode>::iterator parent) {
   int POS = int(ftell(f));
 
+  if (POS < 0)
+    return;
+
   int file_size = 0;
   {
     int rv = fseek(f, 0, SEEK_END);
     if (rv < 0)
       fprintf(debug, "Error: could not move to the end of the file\n");
-    file_size = ftell(f);
+    file_size = static_cast<int>(ftell(f));
     rv = fseek(f, POS, SEEK_SET);
     if (rv < 0)
       fprintf(debug, "Error: could not move to the beginning of the file\n");

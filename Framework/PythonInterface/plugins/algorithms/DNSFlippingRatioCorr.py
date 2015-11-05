@@ -148,12 +148,9 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         self._flipper_valid()
 
         # algorithm must warn if some properties_to_compare are different
-        ws1 = api.AnalysisDataService.retrieve(self.input_workspaces.values()[0])
-        run1 = ws1.getRun()
-        for wsname in self.input_workspaces.values()[1:]:
-            wks = api.AnalysisDataService.retrieve(wsname)
-            run = wks.getRun()
-            mlzutils.compare_properties(run1, run, self.properties_to_compare, self.log())
+        result = api.CompareSampleLogs(self.input_workspaces.values(), self.properties_to_compare, 5e-3)
+        if len(result) > 0:
+            self.log().warning("Sample logs " + result + " do not match!")
         return True
 
     def _fr_correction(self):
