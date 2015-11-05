@@ -49,17 +49,17 @@ namespace Converters = Mantid::PythonInterface::Converters;
  */
 PyObject *getValue(Mantid::API::Column_const_sptr column,
                    const std::type_info &typeID, const int row) {
-  if (typeID == typeid(Mantid::API::Boolean)) {
+  if (typeID.hash_code() == typeid(Mantid::API::Boolean).hash_code()) {
     bool res = column->cell<Mantid::API::Boolean>(row);
     return to_python_value<const bool &>()(res);
   }
 
 #define GET_BUILTIN(R, _, T)                                                   \
-  else if (typeID == typeid(T)) {                                              \
+  else if (typeID.hash_code() == typeid(T).hash_code()) {                      \
     result = to_python_value<const T &>()(column->cell<T>(row));               \
   }
 #define GET_USER(R, _, T)                                                      \
-  else if (typeID == typeid(T)) {                                              \
+  else if (typeID.hash_code() == typeid(T).hash_code()) {                      \
     const converter::registration *entry =                                     \
         converter::registry::query(typeid(T));                                 \
     if (!entry)                                                                \
@@ -67,7 +67,7 @@ PyObject *getValue(Mantid::API::Column_const_sptr column,
     result = entry->to_python((const void *)&column->cell<T>(row));            \
   }
 #define GET_ARRAY(R, _, T)                                                     \
-  else if (typeID == typeid(T)) {                                              \
+  else if (typeID.hash_code() == typeid(T).hash_code()) {                      \
     result = Converters::Clone::apply<T::value_type>::create1D(                \
         column->cell<T>(row));                                                 \
   }
@@ -99,24 +99,25 @@ void setValue(const Column_sptr column, const int row,
   const auto &typeID = column->get_type_info();
 
   // Special case: Treat Mantid Boolean as normal bool
-  if (typeID == typeid(Mantid::API::Boolean)) {
+  if (typeID.hash_code() == typeid(Mantid::API::Boolean).hash_code()) {
     column->cell<Mantid::API::Boolean>(row) = bpl::extract<bool>(value)();
     return;
   }
 
   // Special case: Boost has issues with NumPy ints, so use Python API instead
-  if (typeID == typeid(int)&&PyArray_IsIntegerScalar(value.ptr())) {
+  if (typeID.hash_code() == typeid(int).hash_code() &&
+      PyArray_IsIntegerScalar(value.ptr())) {
     column->cell<int>(row) = static_cast<int>(PyInt_AsLong(value.ptr()));
     return;
   }
 
 // Macros for all other types
 #define SET_CELL(R, _, T)                                                      \
-  else if (typeID == typeid(T)) {                                              \
+  else if (typeID.hash_code() == typeid(T).hash_code()) {                      \
     column->cell<T>(row) = bpl::extract<T>(value)();                           \
   }
 #define SET_VECTOR_CELL(R, _, T)                                               \
-  else if (typeID == typeid(T)) {                                              \
+  else if (typeID.hash_code() == typeid(T).hash_code()) {                      \
     if (!PyArray_Check(value.ptr())) {                                         \
       column->cell<T>(row) =                                                   \
           Converters::PySequenceToVector<T::value_type>(value)();              \
