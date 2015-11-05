@@ -20,6 +20,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 
 #include "MantidKernel/PropertyManager.h"
 #include "MantidGeometry/Instrument.h"
@@ -188,6 +189,39 @@ public:
 
     TS_ASSERT_DELTA(fun->getParameter("Height"), 11.5639, 1e-3);
     TS_ASSERT_DELTA(fun->getParameter("Lifetime"), 1.0, 1e-4);
+  }
+
+  void test_exec_distribution_data_produces_distribution_data() {
+    // Arrange
+    const bool histogram(true);
+    auto ws3 = createTestWorkspace(histogram);
+    API::WorkspaceHelpers::makeDistribution(ws3);
+
+    API::IFunction_sptr fun(new ExpDecay);
+    fun->setParameter("Height", 1.);
+    fun->setParameter("Lifetime", 1.);
+
+    // Act
+    Fit fit;
+    fit.initialize();
+
+    fit.setProperty("Function", fun);
+    fit.setProperty("InputWorkspace", ws3);
+    fit.setProperty("WorkspaceIndex", 0);
+    fit.setProperty("CreateOutput", true);
+    fit.setProperty("Output", "out");
+
+    fit.execute();
+
+    TS_ASSERT(fit.isExecuted());
+
+    // Assert
+    Mantid::API::MatrixWorkspace_sptr out_ws =
+        Mantid::API::AnalysisDataService::Instance()
+            .retrieveWS<Mantid::API::MatrixWorkspace>("out_Workspace");
+    TS_ASSERT(out_ws);
+    TSM_ASSERT("Output should be a distribution", out_ws->isDistribution());
+    API::AnalysisDataService::Instance().clear();
   }
 
   // test that errors of the calculated output are reasonable
