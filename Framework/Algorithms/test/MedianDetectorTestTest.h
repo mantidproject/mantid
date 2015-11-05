@@ -227,6 +227,8 @@ public:
     std::string inputFile = "INES_Definition.xml";
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", m_IWSName);
+    loader.setProperty("OverwriteSpectraMap",
+                       Mantid::Kernel::OptionalBool(true));
     loader.execute();
 
     m_2DWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
