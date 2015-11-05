@@ -105,12 +105,12 @@ void setValue(const Column_sptr column, const int row,
   }
 
   // Special case: Boost has issues with NumPy ints, so use Python API instead
-  if (typeID == typeid(int) && PyArray_IsIntegerScalar(value.ptr())) {
+  if (typeID == typeid(int)&&PyArray_IsIntegerScalar(value.ptr())) {
     column->cell<int>(row) = static_cast<int>(PyInt_AsLong(value.ptr()));
     return;
   }
 
-  // Macros for all other types
+// Macros for all other types
 #define SET_CELL(R, _, T)                                                      \
   else if (typeID == typeid(T)) {                                              \
     column->cell<T>(row) = bpl::extract<T>(value)();                           \
