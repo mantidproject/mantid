@@ -153,9 +153,10 @@ msbuild /nologo /nr:false /p:Configuration=%BUILD_CONFIG% docs/docs-qthelp.vcxpr
 :: Ignore errors as the exit code of msbuild is wrong here.
 :: It always marks the build as a failure even thought the MantidPlot exit
 :: code is correct!
-::if ERRORLEVEL 1 exit /B %ERRORLEVEL%
+if ERRORLEVEL 1 set ERRORLEVEL=0
 
 if "%BUILDPKG%" == "yes" (
    echo Building package
    "%CMAKE_BIN_DIR%\cpack.exe" -C %BUILD_CONFIG% --config CPackConfig.cmake
 )
+echo Done!
