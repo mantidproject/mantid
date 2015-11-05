@@ -158,4 +158,4 @@ msbuild /nologo /nr:false /p:Configuration=%BUILD_CONFIG% docs/docs-qthelp.vcxpr
 if "%BUILDPKG%" == "yes" (
    echo Building package
    "%CMAKE_BIN_DIR%\cpack.exe" -C %BUILD_CONFIG% --config CPackConfig.cmake
-   )
+)
