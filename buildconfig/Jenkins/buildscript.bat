@@ -148,16 +148,14 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :: Disabled while it takes 10 minutes to create & 5-10 mins to archive!
 :: Just create the docs to check they work
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Build offline documentation
-msbuild /nologo /nr:false /p:Configuration=%BUILD_CONFIG% docs/docs-qthelp.vcxproj
-:: Ignore errors as the exit code of msbuild is wrong here.
-:: It always marks the build as a failure even thought the MantidPlot exit
-:: code is correct!
-if ERRORLEVEL 1 set ERRORLEVEL=0
 
 if "%BUILDPKG%" == "yes" (
-   echo Building package
-   "%CMAKE_BIN_DIR%\cpack.exe" -C %BUILD_CONFIG% --config CPackConfig.cmake
+  :: Build offline documentation
+  msbuild /nologo /nr:false /p:Configuration=%BUILD_CONFIG% docs/docs-qthelp.vcxproj
+  :: Ignore errors as the exit code of msbuild is wrong here.
+  :: It always marks the build as a failure even thought the MantidPlot exit
+  :: code is correct!
+  echo Building package
+  "%CMAKE_BIN_DIR%\cpack.exe" -C %BUILD_CONFIG% --config CPackConfig.cmake
 )
-echo Done!
-exit /B 0
+
