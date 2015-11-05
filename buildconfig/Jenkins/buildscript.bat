@@ -58,7 +58,7 @@ if not "%JOB_NAME%" == "%JOB_NAME:clean=%" (
 )
 
 if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
-  set BUILDPKG=yes
+  set BUILDPKG=no
 )
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -157,7 +157,7 @@ msbuild /nologo /nr:false /p:Configuration=%BUILD_CONFIG% docs/docs-qthelp.vcxpr
 :: It always marks the build as a failure even thought the MantidPlot exit
 :: code is correct!
 ::if ERRORLEVEL 1 exit /B %ERRORLEVEL%
-:: if "%BUILDPKG%" == "yes" (
-::   echo Building package
-::   "%CMAKE_BIN_DIR%\cpack.exe" -C %BUILD_CONFIG% --config CPackConfig.cmake
-:: )
+if "%BUILDPKG%" == "yes" (
+   echo Building package
+   "%CMAKE_BIN_DIR%\cpack.exe" -C %BUILD_CONFIG% --config CPackConfig.cmake
+)
