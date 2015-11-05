@@ -1140,7 +1140,6 @@ IPropertyManager::getValue<boost::shared_ptr<const Mantid::API::IFunction>>(
   }
 }
 
-
 } // namespace Kernel
 } // namespace Mantid
 ///\endcond TEMPLATE

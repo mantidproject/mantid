@@ -101,7 +101,8 @@ IPropertyManager::getValue<Mantid::DataObjects::WorkspaceSingleValue_sptr>(
 
 template <>
 DLLExport Mantid::DataObjects::WorkspaceSingleValue_const_sptr
-IPropertyManager::getValue<Mantid::DataObjects::WorkspaceSingleValue_const_sptr>(
+IPropertyManager::getValue<
+    Mantid::DataObjects::WorkspaceSingleValue_const_sptr>(
     const std::string &name) const {
   PropertyWithValue<Mantid::DataObjects::WorkspaceSingleValue_sptr> *prop =
       dynamic_cast<
@@ -114,7 +115,6 @@ IPropertyManager::getValue<Mantid::DataObjects::WorkspaceSingleValue_const_sptr>
                              "Expected WorkspaceSingleValue.");
   }
 }
-
 
 } // namespace Kernel
 } // namespace Mantid
