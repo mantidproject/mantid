@@ -1,4 +1,4 @@
-# pylint: disable=no-init
+# pylint: disable=no-init,too-few-public-methods
 #
 # Here weighted least squares fitting tests, for which:
 #
@@ -22,19 +22,19 @@ import stresstesting
 from mantid.simpleapi import *
 
 
-def runFit(ws, fn, minimizer):
+def run_fit(wks, function, minimizer):
     """
     Checks that a value 'val' does not differ from a reference value 'ref' by 'epsilon'
     or more. This method compares the relative error. An epsilon of 0.1 means a relative
     difference of 10 % = 100*0.1 %
 
-    @param ws :: workspace with data
-    @param fn :: model + initial parameters to use to fit the data
+    @param wks :: workspace with data
+    @param function :: model + initial parameters to use to fit the data
     @param epsilon :: name of minimizer to use
 
     @returns the fitted parameter values and error estimates for these
     """
-    Fit(fn, ws, Output='ws',
+    Fit(function, wks, Output='ws',
         Minimizer=minimizer,
         CostFunction="Least squares")
 
@@ -45,22 +45,22 @@ def runFit(ws, fn, minimizer):
 
     return params, errors
 
-def getEVS14188_90processed():
+def get_evs14188_90processed():
     """
     Load a processed ISIS Vesuvio data. This processed data contains a couple of peaks.
 
     @returns this data as a workspace
     """
-    ws = Load(Filename='EVS14188-90_processed.txt')
+    wks = Load(Filename='EVS14188-90_processed.txt')
 
-    return ws
+    return wks
 
 class WeigthedLSGaussPeaksEVSdataTest1(stresstesting.MantidStressTest):
     def runTest(self):
         # Use default Mantid Levenberg-Marquardt minimizer, which for this example it does not get to the expected
         # solution (minimum), starting from the below specified initial guess of the fitting parameters
 
-        ws = getEVS14188_90processed()
+        wks = get_evs14188_90processed()
 
         function = ("name=Gaussian,Height=0.01,PeakCentre=0.00037,Sigma=1e-05;name=LinearBackground,A0=0,A1=0;"
                     "name=Gaussian,Height=0.0979798,PeakCentre=0.000167,Sigma=1e-05")
@@ -71,7 +71,7 @@ class WeigthedLSGaussPeaksEVSdataTest1(stresstesting.MantidStressTest):
         expected_errors = [0.007480178355054269, 9.93278345856534e-07, 9.960514853350883e-07, 0.0017945463077016224,
                            4.9824412855830404, 0.004955791268590802, 3.695975249653185e-07, 3.8197105944596216e-07]
 
-        params, errors = runFit(ws, function, 'Levenberg-Marquardt')
+        params, errors = run_fit(wks, function, 'Levenberg-Marquardt')
 
         for err, expected in zip(errors, expected_errors):
             self.assertDelta(err / expected - 1.0, 0.0, 1e-2)
@@ -84,7 +84,7 @@ class WeigthedLSGaussPeaksEVSdataTest2(stresstesting.MantidStressTest):
         # Same as WeigthedLSGaussPeaksEVSdataTest1 but starting from a different initial guess of the fitting
         # parameters. Here the minmizer gets to the expected solution (minimum), i.e. do the right thing
 
-        ws = getEVS14188_90processed()
+        wks = get_evs14188_90processed()
 
         function = ("name=Gaussian,Height=0.0271028,PeakCentre=0.000371946,Sigma=1e-05;name=LinearBackground,A0=0,A1=0;"
                     "name=Gaussian,Height=0.0979798,PeakCentre=0.000167,Sigma=1.7267e-05")
@@ -95,7 +95,7 @@ class WeigthedLSGaussPeaksEVSdataTest2(stresstesting.MantidStressTest):
         expected_errors = [0.006556603145956651, 3.021546058414828e-07, 3.0277910994217546e-07, 0.0023835827954566324,
                            5.996463420450515, 0.003059328883379551, 6.632752531256318e-07, 7.707070805005831e-07]
 
-        params, errors = runFit(ws, function, 'Levenberg-Marquardt')
+        params, errors = run_fit(wks, function, 'Levenberg-Marquardt')
 
         for err, expected in zip(errors, expected_errors):
             self.assertDelta(err / expected - 1.0, 0.0, 1e-2)
