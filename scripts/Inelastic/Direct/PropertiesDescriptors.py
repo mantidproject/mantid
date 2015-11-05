@@ -3,19 +3,21 @@
 """ File contains collection of Descriptors used to define complex
     properties in NonIDF_Properties and PropertyManager classes
 """
-
 import os
+import numpy as np
+import math
+from collections import Iterable
+
 from mantid.simpleapi import *
 #pylint: disable=unused-import
 from mantid.kernel import funcreturns
 #pylint: disable=unused-import
 from mantid import api,geometry,config
-import numpy as np
 
 import Direct.ReductionHelpers as prop_helpers
 #pylint: disable=unused-import
 import Direct.CommonFunctions as common
-from collections import Iterable
+
 
 #-----------------------------------------------------------------------------------------
 # Descriptors, providing overloads for complex properties in NonIDF_Properties
@@ -71,6 +73,62 @@ class SumRuns(PropDescriptor):
         #
         if old_value != self._sum_runs:
             self._sample_run.notify_sum_runs_changed(old_value,self._sum_runs)
+#--------------------------------------------------------------------------------------------------------------------
+class AvrgAccuracy(PropDescriptor):
+    """Property-helper to round-of data nicely to provide consistent binning
+       in auto-ei mode.
+    """
+    def __init__(self):
+        self._accuracy = 2
+
+
+    def __get__(self,instance,owner=None):
+        """ return current number of significant digits"""
+        if instance is None:
+            return self
+        else:
+            return self._accuracy
+    def __set__(self,instance,value):
+        """ Set up incident energy or range of energies in various formats 
+            or define autoEi"""
+        val = int(value)
+        if val < 1:
+            raise ValueError("Averaging accuracy can be only a positive number >= 1")
+        self._accuracy = val
+    def roundoff(self,value):
+        """Round specified sequence for specified number of significant digits"""
+        if isinstance(value,Iterable):
+            vallist = value
+        else:
+            vallist = [value]
+        rez = []
+        lim = 10**(self._accuracy-1)
+        for val in vallist:
+            if abs(val) > lim:
+                rez.append(round(val,0))
+                continue
+            elif abs(val) < lim:
+                mult = 10
+            else:
+                mult = 1
+
+            def out(a,b):
+                if mult>1:
+                   return a<b
+                else: 
+                   return false
+            tv = abs(val)
+            fin_mult  = 1
+            while out(tv,lim):
+                fin_mult*=mult
+                tv      *= mult
+            fin_rez = math.copysign(round(tv,0)/fin_mult,val)
+            rez.append(fin_rez)
+        if len(rez) == 1:
+            return rez[0]
+        else:
+            return rez
+
 
 #--------------------------------------------------------------------------------------------------------------------
 class IncidentEnergy(PropDescriptor):
@@ -284,8 +342,9 @@ class EnergyBins(PropDescriptor):
        The list of energies can contain only single value.
        (e.g. prop_man.incident_energy=[100])/
     """
-    def __init__(self,IncidentEnergyProp):
+    def __init__(self,IncidentEnergyProp,AccuracyProp):
         self._incident_energy = IncidentEnergyProp
+        self._averager = AccuracyProp
         self._energy_bins = None
         # how close you are ready to rebin w.r.t.  the incident energy
         self._range = 0.99999
@@ -321,7 +380,7 @@ class EnergyBins(PropDescriptor):
             ei = self._incident_energy.get_current()
             if self._incident_energy.autoEi_mode():
                 # we need to average ei nicely, as it will give energy jitter otherwise
-                ei = round(ei,0) #TODO!
+                ei = self._averager.roundoff(ei)
 
             if self._energy_bins:
                 if self.is_range_valid():
@@ -333,6 +392,8 @@ class EnergyBins(PropDescriptor):
                                 "warning")
                     mult = self._range / self._energy_bins[2]
                     rez = self._calc_relative_range(ei,mult)
+                if self._incident_energy.autoEi_mode():
+                    rez = self._averager.roundoff(rez)
                 return rez
             else:
                 return None

@@ -1,5 +1,4 @@
 ﻿import os
-#os.environ["PATH"] = r"c:/Mantid/_builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -1213,8 +1212,17 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(spectra[1],11)
         self.assertFalse(PropertyManager.ei_mon_spectra.need_to_sum_monitors(propman))
 
+    def test_average_accuracy(self):
+        #
+        val =     [0.0452,0.0455,-0.045, -0.236, 1, 0.98,1.02,2.333, 2.356,21.225,21.5,301.99,305]
+        exp_rez = [0.045,  0.046, -0.045,-0.24 , 1, 0.98,1.0, 2.3,   2.4,  21.   ,22. ,302.,  305]
+        rez = PropertyManager.auto_accuracy.roundoff(val)
+
+        for valExp,valReal in zip(exp_rez,rez):
+            self.assertAlmostEqual(valExp,valReal)
+
 
 if __name__ == "__main__":
-    #tester = DirectPropertyManagerTest('test_multirep_ei_iterate_over')
-    #tester.run()
-    unittest.main()
+    tester = DirectPropertyManagerTest('test_average_accuracy')
+    tester.run()
+    #unittest.main()

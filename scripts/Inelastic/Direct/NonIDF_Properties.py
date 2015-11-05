@@ -72,7 +72,9 @@ class NonIDF_Properties(object):
     #-----------------------------------------------------------------------------
     incident_energy = IncidentEnergy()
     #
-    energy_bins = EnergyBins(incident_energy)
+    auto_accuracy  = AvrgAccuracy()
+    #
+    energy_bins = EnergyBins(incident_energy,auto_accuracy)
     #
     save_file_name = SaveFileName()
     #
