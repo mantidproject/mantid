@@ -8,7 +8,8 @@ setlocal enableextensions enabledelayedexpansion
 :: BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each slave.
 :: CMake, git & git-lfs should be on the PATH
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-set VS_VERSION=14
+:: Required variable on machines with multiple VS versions
+set VisualStudioVersion=14.0
 set CM_GENERATOR=Visual Studio 14 2015 Win64
 
 :: While we transition between VS 2012 & 2015 we need to be able to clean the build directory
@@ -61,7 +62,7 @@ if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set BUILD_DIR=%WORKSPACE%\build
 if exist %BUILD_DIR%\CMakeCache.txt (
-  "%GREP_EXE%" CMAKE_LINKER:FILEPATH %BUILD_DIR%\CMakeCache.txt | "%GREP_EXE%" @VS_VERSION@
+  "%GREP_EXE%" CMAKE_LINKER:FILEPATH %BUILD_DIR%\CMakeCache.txt | "%GREP_EXE%" %VisualStudioVersion%
   if %ERRORLEVEL% EQU 0 (
     echo Previous build was with Visual Studio 2015, not cleaning build directory
   ) else (
