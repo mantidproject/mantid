@@ -78,9 +78,9 @@ class ReduceMARIFromFile(ReductionWrapper):
         return None
 
 
-    def __init__(self,web_var=None):
+    def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
-        ReductionWrapper.__init__(self,'MAR',web_var)
+        ReductionWrapper.__init__(self,'MAR',web_var_val)
 #-------------------------------------------------------------------------------------------------#
 #-------------------------------------------------------------------------------------------------#
 #-------------------------------------------------------------------------------------------------#
@@ -147,9 +147,9 @@ class ReduceMARIFromWorkspace(ReductionWrapper):
      #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
         return ws
 
-    def __init__(self,web_var=None):
+    def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
-        ReductionWrapper.__init__(self,'MAR',web_var)
+        ReductionWrapper.__init__(self,'MAR',web_var_val)
 #----------------------------------------------------------------------------------------------------------------------
 class ReduceMARIMon2Norm(ReductionWrapper):
 
@@ -199,9 +199,9 @@ class ReduceMARIMon2Norm(ReductionWrapper):
      #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
         return outWS
 
-    def __init__(self,web_var=None):
+    def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
-        ReductionWrapper.__init__(self,'MAR',web_var)
+        ReductionWrapper.__init__(self,'MAR',web_var_val)
 #----------------------------------------------------------------------------------------------------------------------
 class MARIReductionSum(ReductionWrapper):
     @MainProperties
@@ -243,9 +243,9 @@ class MARIReductionSum(ReductionWrapper):
      #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
         return ws
 
-    def __init__(self,web_var=None):
+    def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
-        ReductionWrapper.__init__(self,'MAR',web_var)
+        ReductionWrapper.__init__(self,'MAR',web_var_val)
 #----------------------------------------------------------------------------------------------------------------------
 class ReduceMARIMonitorsSeparate(ReductionWrapper):
 
@@ -293,9 +293,9 @@ class ReduceMARIMonitorsSeparate(ReductionWrapper):
      #SaveNexus(outWS,Filename = 'MARNewReduction.nxs')
         return outWS
 
-    def __init__(self,web_var=None):
+    def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
-        ReductionWrapper.__init__(self,'MAR',web_var)
+        ReductionWrapper.__init__(self,'MAR',web_var_val)
 
 class ReduceMARIAutoEi(ReductionWrapper):
     @MainProperties
@@ -375,9 +375,9 @@ class ReduceMARIAutoEi(ReductionWrapper):
         return None
 
 
-    def __init__(self,web_var=None):
+    def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
-        ReductionWrapper.__init__(self,'MAR',web_var)
+        ReductionWrapper.__init__(self,'MAR',web_var_val)
 #-------------------------------------------------------------------------------------------------#
 
 
