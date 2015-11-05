@@ -208,6 +208,8 @@ class CWSCDReductionControl(object):
         self._myUBPeakWSDict = dict()
         # Container for UB  matrix
         self._myUBMatrixDict = dict()
+        # Container for Merged:(merged_md_ws, target_frame, exp_no, scan_no, None)
+        self._mergedWSManager = dict()
 
         # Peak Info
         self._myPeakInfoDict = dict()
@@ -608,6 +610,17 @@ class CWSCDReductionControl(object):
 
         return md_ws.getExperimentInfo(0).run().getProperty(log_name).value
 
+    def get_merged_scan_info(self, ws_name):
+        """
+        Get some information of merged scan
+        :param ws_name:
+        :return:
+        """
+        if ws_name in self._mergedWSManager is False:
+            return False, 'Unable to locate merged scan MDWorkspace %s' % ws_name
+
+        return True, self._mergedWSManager[ws_name]
+
     def get_peak_info(self, exp_number, scan_number, pt_number):
         """
         get peak information instance
@@ -946,6 +959,8 @@ class CWSCDReductionControl(object):
 
         ws_names_str = ws_names_str[:-1]
         api.MergeMD(InputWorkspaces=ws_names_str, OutputWorkspace=out_ws_name, SplitInto=max_pts)
+        out_ws = AnalysisDataService.retrieve(out_ws_name)
+        self._mergedWSManager[out_ws_name] = (out_ws, target_frame, exp_no, scan_no, None)
 
         # Group workspaces
         group_name = 'Group_Exp406_Scan%d' % scan_no

@@ -11,7 +11,8 @@ Peak_Integration_Table_Setup = [('Scan', 'int'),
                                 ('Q_x', 'float'),
                                 ('Q_y', 'float'),
                                 ('Q_z', 'float'),
-                                ('Intensity', 'float')]
+                                ('Intensity', 'float'),
+                                ('Selected', 'checkbox')]
 
 
 class IntegratePeaksTableWidget(tableBase.NTableWidget):
@@ -23,6 +24,21 @@ class IntegratePeaksTableWidget(tableBase.NTableWidget):
         :param parent:
         """
         tableBase.NTableWidget.__init__(self, parent)
+
+        return
+
+    def append_scan(self, info_tuple):
+        """
+        out_ws, target_frame, exp_no, scan_no, None
+        :param info_tuple:
+        :return:
+        """
+        out_ws_name = info_tuple[0]
+        target_frame = info_tuple[1]
+        exp_no = info_tuple[2]
+        scan_no = info_tuple[3]
+
+        self.append_row([scan_no, '', 0., 0., 0., 0., 0., 0., 0, False])
 
         return
 
@@ -297,6 +313,32 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return
 
+    def get_merged_ws_name(self, i_row):
+        """
+        Get ...
+        :param i_row:
+        :return:
+        """
+        j_col_merged = Process_Table_Setup.index(('Merged Workspace', 'str'))
+
+        return self.get_cell_value(i_row, j_col_merged)
+
+    def get_scan_list(self):
+        """ Get list of scans to merge from table
+        :return: list of 2-tuples (scan number, row number)
+        """
+        scan_list = list()
+        num_rows = self.rowCount()
+        j_select = Process_Table_Setup.index(('Select', 'checkbox'))
+        j_scan = Process_Table_Setup.index(('Scan', 'int'))
+
+        for i_row in xrange(num_rows):
+            if self.get_cell_value(i_row, j_select) is True:
+                scan_num = self.get_cell_value(i_row, j_scan)
+                scan_list.append((scan_num, i_row))
+
+        return scan_list
+
     def setup(self):
         """
         Init setup
@@ -330,6 +372,21 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return ''
 
+    def set_pt_by_row(self, row_number, pt_list):
+        """
+        :param scan_no:
+        :param pt_list:
+        :return:
+        """
+        # Check
+        assert isinstance(row_number, int)
+        assert isinstance(pt_list, list)
+
+        j_pt = Process_Table_Setup.index(('Number Pt', 'int'))
+        self.update_cell_value(row_number, j_pt, len(pt_list))
+
+        return ''
+
     def set_status(self, scan_no, status):
         """
         Set the status for merging scan to QTable
@@ -353,6 +410,23 @@ class ProcessTableWidget(tableBase.NTableWidget):
             return 'Unable to find scan %d in table.' % scan_no
 
         return ''
+
+    def set_status_by_row(self, row_number, status):
+        """
+        Set status to a specified row according to row number
+        :param row_number:
+        :param status:
+        :return:
+        """
+        # Check
+        assert isinstance(row_number, int)
+        assert isinstance(status, str)
+
+        # Set
+        i_status = Process_Table_Setup.index(('Status', 'str'))
+        self.update_cell_value(row_number, i_status, status)
+
+        return
 
     def set_ws_names(self, scan_num, merged_md_name, ws_group_name):
         """
@@ -381,5 +455,28 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         if set_done is False:
             return 'Unable to find scan %d in table.' % scan_num
+
+        return
+
+    def set_ws_names_by_row(self, row_number, merged_md_name, ws_group_name):
+        """
+        Set the workspaces' names to this table
+        :param row_number:
+        :param merged_md_name:
+        :param ws_group_name:
+        :return:
+        """
+        # Check
+        assert isinstance(row_number, int)
+        assert isinstance(merged_md_name, str) or merged_md_name is None
+        assert isinstance(ws_group_name, str) or ws_group_name is None
+
+        j_ws_name = Process_Table_Setup.index(('Merged Workspace', 'str'))
+        j_group_name = Process_Table_Setup.index(('Group Name', 'str'))
+
+        if merged_md_name is not None:
+            self.update_cell_value(row_number, j_ws_name, merged_md_name)
+        if ws_group_name is not None:
+            self.update_cell_value(row_number, j_group_name, ws_group_name)
 
         return

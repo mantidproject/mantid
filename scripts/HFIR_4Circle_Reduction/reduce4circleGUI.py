@@ -94,11 +94,15 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_resetPeakHKLs, QtCore.SIGNAL('clicked()'),
                      self.do_reset_ub_peaks_hkl)
 
-        # Tab 'Slice View'
+        # Tab 'Merge'
         self.connect(self.ui.pushButton_setUBSliceView, QtCore.SIGNAL('clicked()'),
                      self.do_set_ub_sv)
+        self.connect(self.ui.pushButton_addScanSliceView, QtCore.SIGNAL('clicked()'),
+                     self.do_add_scans_merge)
         self.connect(self.ui.pushButton_process4SliceView, QtCore.SIGNAL('clicked()'),
                      self.do_merge_scans)
+        self.connect(self.ui.pushButton_readyToIntegratePeak, QtCore.SIGNAL('clicked()'),
+                     self.do_advance_to_integrate_peaks)
 
         # Tab 'Advanced'
         self.connect(self.ui.pushButton_useDefaultDir, QtCore.SIGNAL('clicked()'),
@@ -164,24 +168,8 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_integrate_peaks(self):
-        """
-        Integrate peaks
-        :return:
-        """
-
-        self._myControl.integrate_peaks()
-
-
-    def do_refine_ub(self):
-        """
-
-        :return:
-        """
-        raise RuntimeError('Next Release')
-
     def _init_table_widgets(self):
-        """ DOC
+        """ DOC / TODO
         :return:
         """
         # UB-peak table
@@ -190,13 +178,76 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.tableWidget_peaksCalUB.setup()
 
         self.ui.tableWidget_ubMatrix.setup()
-        self.ui.tableWidget_ubSiceView.setup()
+        self.ui.tableWidget_ubMergeScan.setup()
         self.ui.tableWidget_refinedUB.setup()
-        self.ui.tableWidget_peakIndex.setup()
+        self.ui.tableWidget_peakIntegration.setup()
 
-        self.ui.tableWidget_sliceViewProgress.setup()
+        self.ui.tableWidget_mergeScans.setup()
 
         return
+
+    def do_advance_to_integrate_peaks(self):
+        """
+        Advance from 'merge'-tab to peak integration tab
+        :return:
+        """
+        # Check whether there is any scan merged and selected
+        ret_list = self.ui.tableWidget_mergeScans.get_selected_rows(status='Done')
+        if len(ret_list) == 0:
+            self.pop_one_button_dialog('No scan is selected for integration!')
+            return
+
+        # Switch tab
+        self.ui.tabWidget.setCurrentIndex(5)
+
+        # Add table
+        for row_index in ret_list:
+            merged_ws_name = self.ui.tableWidget_mergeScans.get_merged_ws_name(row_index)
+            status, merged_info = self._myControl.get_merged_scan_info(merged_ws_name)
+            if status is False:
+                err_msg = merged_info
+                self.pop_one_button_dialog(err_msg)
+                return
+            self.ui.tableWidget_peakIntegration.append_scan(merged_info)
+        # END-FOR
+
+        return
+
+    def do_integrate_peaks(self):
+        """
+        Integrate peaks
+        :return:
+        """
+        # Get peak integration parameters
+        # TODO/FIXME
+        """
+        lineEdit_peakRadius
+        lineEdit_bkgdInnerR
+        lineEdit_bkgdOuterR
+        checkBox_cylinder
+        checkBox_adaptQBkgd
+        checkBox_integrateOnEdge
+        """
+
+        # Choose the peaks to be integrated
+        row_index_list = self.ui.tableWidget_peakIntegration.get_selected_rows()
+
+        for i_row in row_index_list:
+            ws_name = self.ui.tableWidget_peakIntegration.get_md_ws_name(i_row)
+
+            self._myControl.integrate_peaks(exp_num, scan_num, pt_list, md_ws_name,
+                                            peak_radius, bkgd_inner_radius, bkgd_outer_radius,
+                                            is_cylinder)
+        # END-FOR
+
+        return
+
+    def do_refine_ub(self):
+        """
+
+        :return:
+        """
+        raise RuntimeError('Next Release')
 
     def change_data_access_mode(self):
         """ Change data access mode between downloading from server and local
@@ -675,30 +726,40 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_merge_scans(self):
-        """ Process data for slicing view
+    def do_add_scans_merge(self):
+        """ Add scans to merge
         :return:
         """
-        # Get UB matrix
-        ub_matrix = self.ui.tableWidget_ubSiceView.get_matrix()
-        self._myControl.set_ub_matrix(exp_number=None, ub_matrix=ub_matrix)
-
         # Get list of scans
         scan_list = gutil.parse_integer_list(str(self.ui.lineEdit_listScansSliceView.text()))
         if len(scan_list) == 0:
             self.pop_one_button_dialog('Scan list is empty.')
 
         # Set table
-        self.ui.tableWidget_sliceViewProgress.append_scans(scans=scan_list)
+        self.ui.tableWidget_mergeScans.append_scans(scans=scan_list)
+
+        return
+
+    def do_merge_scans(self):
+        """ Process data for slicing view
+        :return:
+        """
+        # Get UB matrix
+        ub_matrix = self.ui.tableWidget_ubMergeScan.get_matrix()
+        self._myControl.set_ub_matrix(exp_number=None, ub_matrix=ub_matrix)
 
         # Warning
         self.pop_one_button_dialog('Data processing is long. Be patient!')
 
         # Process
         base_name = str(self.ui.lineEdit_baseMergeMDName.text())
-        scan_list.sort()
+        scan_row_list = self.ui.tableWidget_mergeScans.get_scan_list()
+        print '[DB] %d scans have been selected to merge.' % len(scan_row_list)
         frame = str(self.ui.comboBox_mergeScanFrame.currentText())
-        for scan_no in scan_list:
+        for tup2 in scan_row_list:
+            #
+            scan_no, i_row = tup2
+
             # Download/check SPICE file
             self._myControl.download_spice_file(None, scan_no, over_write=False)
 
@@ -710,12 +771,12 @@ class MainWindow(QtGui.QMainWindow):
                 return
             else:
                 # Set information to table
-                err_msg = self.ui.tableWidget_sliceViewProgress.set_scan_pt(scan_no, pt_list)
+                err_msg = self.ui.tableWidget_mergeScans.set_scan_pt(scan_no, pt_list)
                 if len(err_msg) > 0:
                     self.pop_one_button_dialog(err_msg)
 
             out_ws_name = base_name + '%04d' % scan_no
-            self.ui.tableWidget_sliceViewProgress.set_scan_pt(scan_no, 'In Processing')
+            self.ui.tableWidget_mergeScans.set_status_by_row(i_row, 'In Processing')
             merge_status = 'UNKNOWN'
             merged_name = '???'
             group_name = '???'
@@ -732,8 +793,8 @@ class MainWindow(QtGui.QMainWindow):
                 group_name = ''
                 print merge_status
             finally:
-                self.ui.tableWidget_sliceViewProgress.set_status(scan_no, merge_status)
-                self.ui.tableWidget_sliceViewProgress.set_ws_names(scan_no, merged_name, group_name)
+                self.ui.tableWidget_mergeScans.set_status_by_row(i_row, merge_status)
+                self.ui.tableWidget_mergeScans.set_ws_names_by_row(i_row, merged_name, group_name)
 
             # Sleep for a while
             time.sleep(0.1)
@@ -787,9 +848,9 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         if self.ui.radioButton_ubFromTab1.isChecked():
-            self.ui.tableWidget_ubSiceView.set_from_matrix(self.ui.tableWidget_ubMatrix.get_matrix())
+            self.ui.tableWidget_ubMergeScan.set_from_matrix(self.ui.tableWidget_ubMatrix.get_matrix())
         elif self.ui.radioButton_ubFromTab3.isChecked():
-            self.ui.tableWidget_ubSiceView.set_from_matrix(self.ui.tableWidget_refinedUB.get_matrix())
+            self.ui.tableWidget_ubMergeScan.set_from_matrix(self.ui.tableWidget_refinedUB.get_matrix())
         elif self.ui.radioButton_ubFromList.isChecked():
             status, ret_obj = gutil.parse_float_array(str(self.ui.plainTextEdit_ubInput.toPlainText()))
             if status is False:
@@ -797,7 +858,7 @@ class MainWindow(QtGui.QMainWindow):
             elif len(ret_obj) != 9:
                 self.pop_one_button_dialog('Requiring 9 floats for UB matrix.  Only %d are given.' % len(ret_obj))
             else:
-                self.ui.tableWidget_ubSiceView.set_from_list(ret_obj)
+                self.ui.tableWidget_ubMergeScan.set_from_list(ret_obj)
         else:
             self.pop_one_button_dialog('None is selected to set UB matrix.')
 
