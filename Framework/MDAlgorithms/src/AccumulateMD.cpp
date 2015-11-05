@@ -10,8 +10,6 @@
 #include "MantidAPI/HistoryView.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include <Poco/File.h>
-#include <boost/algorithm/string.hpp>
-#include "MantidAPI/IMDEventWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -21,7 +19,16 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 /*
-Return names of data sources which are found as a workspace or file.
+ * Reduce the vector of input data to only data files and workspaces which can
+ * be found
+ * @param input_data :: Vector of input data sources
+ * @param psi :: Vector of goniometer angle psi containing a value for each data
+ * source
+ * @param gl :: Vector of goniometer anglegl containing a value for each data
+ * source
+ * @param gs :: Vector of goniometer angle gs containing a value for each data
+ * source
+ * @param efix :: Vector of data source energy values in meV
 */
 void filterToExistingSources(std::vector<std::string> &input_data,
                              std::vector<double> &psi, std::vector<double> &gl,
@@ -39,7 +46,9 @@ void filterToExistingSources(std::vector<std::string> &input_data,
 }
 
 /*
-Return true if dataName is an existing workspace or file
+ * Return true if dataName is an existing workspace or file
+ * @param data_name :: Workspace name or file name
+ * @returns true if a workspace or file with given name exists
 */
 bool dataExists(const std::string &data_name) {
   const std::string filepath =
@@ -54,7 +63,9 @@ bool dataExists(const std::string &data_name) {
 }
 
 /*
-Test if a file with this full path exists
+ * Test if a file with this full path exists
+ * @param filename :: full path of a file to test existance of
+ * @returns true if the file exists
 */
 bool fileExists(const std::string &filename) {
   if (filename.empty())
@@ -64,7 +75,17 @@ bool fileExists(const std::string &filename) {
 }
 
 /*
-Remove anything from input_data which is already in current_data
+ * Remove anything from input_data which is already in current_data
+ * @param input_data :: Vector of input data sources
+ * @param current_data :: Vector of data sources previously appended to
+ * workspace
+ * @param psi :: Vector of goniometer angle psi containing a value for each data
+ * source
+ * @param gl :: Vector of goniometer anglegl containing a value for each data
+ * source
+ * @param gs :: Vector of goniometer angle gs containing a value for each data
+ * source
+ * @param efix :: Vector of data source energy values in meV
 */
 void filterToNew(std::vector<std::string> &input_data,
                  std::vector<std::string> &current_data,
@@ -81,6 +102,14 @@ void filterToNew(std::vector<std::string> &input_data,
   }
 }
 
+/*
+ * Check if the named data source is in the vector of data currently in the
+ * workspace
+ * @param data_source :: Name of a data source
+ * @param current_data :: Vector of data sources previously appended to
+ * workspace
+ * @returns true if the named data source appears in the vector of current data
+*/
 bool appearsInCurrentData(const std::string &data_source,
                           std::vector<std::string> &current_data) {
   for (auto reverse_iter = current_data.rbegin();
@@ -93,8 +122,11 @@ bool appearsInCurrentData(const std::string &data_source,
 }
 
 /*
-Return a vector of the names of files and workspaces which have previously added
-to the workspace
+ * Return a vector of the names of files and workspaces which have been
+ * previously added to the workspace
+ * @param ws_history :: History of the workspace
+ * @returns a vector of the names of data_sources which have previously been
+ * appended to the workspace
 */
 std::vector<std::string>
 getHistoricalDataSources(const WorkspaceHistory &ws_history) {
@@ -127,8 +159,11 @@ getHistoricalDataSources(const WorkspaceHistory &ws_history) {
 }
 
 /*
-Split string of data sources from workspace history and insert them into
-complete set of historical data sources
+ * Split string of data sources from workspace history and insert them into
+ * complete set of historical data sources
+ * @param data_sources :: string from workspace history containing list of data
+ * sources
+ * @param historical_data_sources :: set of data sources
 */
 void insertDataSources(const std::string &data_sources,
                        std::set<std::string> &historical_data_sources) {
@@ -151,13 +186,13 @@ void insertDataSources(const std::string &data_sources,
 DECLARE_ALGORITHM(AccumulateMD)
 
 /*
- Constructor
- */
+ * Constructor
+*/
 AccumulateMD::AccumulateMD() {}
 
 /*
- Destructor
- */
+ * Destructor
+*/
 AccumulateMD::~AccumulateMD() {}
 
 /// Algorithms name for identification. @see Algorithm::name
@@ -175,8 +210,8 @@ const std::string AccumulateMD::summary() const {
 }
 
 /*
- Initialize the algorithm's properties.
- */
+ * Initialize the algorithm's properties.
+*/
 void AccumulateMD::init() {
   declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
                                                            Direction::Input),
@@ -251,8 +286,8 @@ void AccumulateMD::init() {
 }
 
 /*
- Execute the algorithm.
- */
+ * Execute the algorithm.
+*/
 void AccumulateMD::exec() {
 
   IMDEventWorkspace_sptr input_ws = this->getProperty("InputWorkspace");
@@ -336,8 +371,17 @@ void AccumulateMD::exec() {
 }
 
 /*
- Use the CreateMD algorithm to create an MD workspace
- */
+ * Use the CreateMD algorithm to create an MD workspace
+ * @param data_sources :: Vector of input data sources
+ * @param psi :: Vector of goniometer angle psi containing a value for each data
+ * source
+ * @param gl :: Vector of goniometer anglegl containing a value for each data
+ * source
+ * @param gs :: Vector of goniometer angle gs containing a value for each data
+ * source
+ * @param efix :: Vector of data source energy values in meV
+ * @returns the newly created workspace
+*/
 IMDEventWorkspace_sptr AccumulateMD::createMDWorkspace(
     const std::vector<std::string> &data_sources,
     const std::vector<double> &psi, const std::vector<double> &gl,
@@ -361,6 +405,10 @@ IMDEventWorkspace_sptr AccumulateMD::createMDWorkspace(
   return create_alg->getProperty("OutputWorkspace");
 }
 
+/*
+ * Validate the input properties
+ * @returns a map of properties names with errors
+ */
 std::map<std::string, std::string> AccumulateMD::validateInputs() {
   // Create the map
   std::map<std::string, std::string> validation_output;

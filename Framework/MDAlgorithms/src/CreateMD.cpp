@@ -404,7 +404,7 @@ CreateMD::merge_runs(const std::vector<std::string> &to_merge) {
  *
  * @param input_workspace :: datasource workspace
  * @param emode :: analysis mode "Elastic", "Direct" or "Indirect"
- * @param efix :: datasource engery values in meV
+ * @param efix :: datasource energy values in meV
  * @param psi :: goniometer rotation in degrees
  * @param gl :: goniometer rotation in degrees
  * @param gs :: goniometer rotation in degrees
