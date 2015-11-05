@@ -150,8 +150,7 @@ void OptimizeLatticeForCellType::exec() {
 
     IAlgorithm_sptr ub_alg;
     try {
-      ub_alg =
-          createChildAlgorithm("CalculateUMatrix", -1, -1, false);
+      ub_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
     } catch (Exception::NotFoundError &) {
       g_log.error("Can't locate CalculateUMatrix algorithm");
       throw;
