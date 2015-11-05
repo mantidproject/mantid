@@ -59,7 +59,7 @@ PyObject *getValue(Mantid::API::Column_const_sptr column,
     result = to_python_value<const T &>()(column->cell<T>(row));               \
   }
 #define GET_USER(R, _, T)                                                      \
-  else if (strcmp(typeID.name(), typeid(T).name()) == 0) {                     \
+  else if (typeID == typeid(T)) {                                              \
     const converter::registration *entry =                                     \
         converter::registry::query(typeid(T));                                 \
     if (!entry)                                                                \
@@ -97,13 +97,22 @@ PyObject *getValue(Mantid::API::Column_const_sptr column,
 void setValue(const Column_sptr column, const int row,
               const bpl::object &value) {
   const auto &typeID = column->get_type_info();
+
+  // Special case: Treat Mantid Boolean as normal bool
   if (typeID == typeid(Mantid::API::Boolean)) {
     column->cell<Mantid::API::Boolean>(row) = bpl::extract<bool>(value)();
     return;
   }
 
+  // Special case: Boost has issues with NumPy ints, so use Python API instead
+  if (typeID == typeid(int) && PyArray_IsIntegerScalar(value.ptr())) {
+    column->cell<int>(row) = static_cast<int>(PyInt_AsLong(value.ptr()));
+    return;
+  }
+
+  // Macros for all other types
 #define SET_CELL(R, _, T)                                                      \
-  else if (strcmp(typeID.name(), typeid(T).name()) == 0) {                     \
+  else if (typeID == typeid(T)) {                                              \
     column->cell<T>(row) = bpl::extract<T>(value)();                           \
   }
 #define SET_VECTOR_CELL(R, _, T)                                               \
@@ -118,8 +127,7 @@ void setValue(const Column_sptr column, const int row,
   }
 
   // -- Use the boost preprocessor to generate a list of else if clause to cut
-  // out copy
-  // and pasted code.
+  // out copy and pasted code.
   if (false) {
   } // So that it always falls through to the list checking
   BOOST_PP_LIST_FOR_EACH(SET_CELL, _, BUILTIN_TYPES)
