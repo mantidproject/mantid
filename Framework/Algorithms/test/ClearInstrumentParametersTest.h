@@ -79,7 +79,7 @@ public:
         "Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
     loaderIDF2.setPropertyValue("Workspace", wsName);
     loaderIDF2.setProperty("OverwriteSpectraMap",
-                           Mantid::Kernel::OpitonalBool(true));
+                           Mantid::Kernel::OptionalBool(true));
     TS_ASSERT_THROWS_NOTHING(loaderIDF2.execute());
     TS_ASSERT(loaderIDF2.isExecuted());
 
