@@ -83,20 +83,39 @@ vtkDataSetToScaledDataSet::execute(double xScale, double yScale, double zScale,
 
   vtkPoints *points = inputData->GetPoints();
 
-  double *point;
-  vtkPoints *newPoints = vtkPoints::New();
-  newPoints->Allocate(points->GetNumberOfPoints());
-  for (int i = 0; i < points->GetNumberOfPoints(); i++) {
-    point = points->GetPoint(i);
-    point[0] *= xScale;
-    point[1] *= yScale;
-    point[2] *= zScale;
-    newPoints->InsertNextPoint(point);
+  vtkNew<vtkPoints> newPoints;
+
+  vtkFloatArray *oldPointsArray =
+      vtkFloatArray::SafeDownCast(points->GetData());
+  vtkFloatArray *newPointsArray =
+      vtkFloatArray::SafeDownCast(newPoints->GetData());
+
+  if (oldPointsArray == NULL || newPointsArray == NULL) {
+    throw std::runtime_error("Failed to cast vtkDataArray to vtkFloatArray.");
+  } else if (oldPointsArray->GetNumberOfComponents() != 3 ||
+             newPointsArray->GetNumberOfComponents() != 3) {
+    throw std::runtime_error("points array must have 3 components.");
   }
+
+  // only cast once;
+  float Scale[3];
+  Scale[0] = static_cast<float>(xScale);
+  Scale[1] = static_cast<float>(yScale);
+  Scale[2] = static_cast<float>(zScale);
+  vtkIdType numberElements = points->GetNumberOfPoints() * 3;
+  float *end = oldPointsArray->GetPointer(numberElements);
+  float *newPoint = newPointsArray->WritePointer(0, numberElements);
+  for (float *oldPoint = oldPointsArray->GetPointer(0); oldPoint < end;
+       std::advance(oldPoint, 3), std::advance(newPoint, 3)) {
+    newPoint[0] = Scale[0] * oldPoint[0];
+    newPoint[1] = Scale[1] * oldPoint[1];
+    newPoint[2] = Scale[2] * oldPoint[2];
+  }
+
   // Shallow copy the input.
   outputData->ShallowCopy(inputData);
   // Give the output dataset the scaled set of points.
-  outputData->SetPoints(newPoints);
+  outputData->SetPoints(newPoints.GetPointer());
 
   this->updateMetaData(xScale, yScale, zScale, inputData, outputData);
   return outputData;

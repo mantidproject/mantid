@@ -12,6 +12,13 @@ setlocal enableextensions enabledelayedexpansion
 :: and PARAVIEW_MSVC2015_DIR=4.3.b40280-msvc2015
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 call cmake.exe --version
+set VS_VERSION=14
+
+:: While we transition between VS 2012 & 2015 we need to be able to clean the build directory
+:: if the previous build was not with the same compiler. Find grep for later
+for /f "delims=" %%I in ('where git') do @set GIT_EXE_DIR=%%~dpI
+set GIT_ROOT_DIR=%GIT_EXE_DIR:~0,-4%
+set GREP_EXE=%GIT_ROOT_DIR%bin\grep.exe
 echo %sha1%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -141,15 +148,16 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create the install kit if required
+:: Disabled while it takes 10 minutes to create & 5-10 mins to archive!
+:: Just create the docs to check they work
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-if "%BUILDPKG%" == "yes" (
-  echo Building package
-  :: Build offline documentation
-  msbuild /nologo /nr:false /p:Configuration=%BUILD_CONFIG% docs/docs-qthelp.vcxproj
-
-  :: Ignore errors as the exit code of msbuild is wrong here.
-  :: It always marks the build as a failure even thought the MantidPlot exit
-  :: code is correct!
-  ::if ERRORLEVEL 1 exit /B %ERRORLEVEL%
-  call cpack.exe -C %BUILD_CONFIG% --config CPackConfig.cmake
-)
+:: Build offline documentation
+msbuild /nologo /nr:false /p:Configuration=%BUILD_CONFIG% docs/docs-qthelp.vcxproj
+:: Ignore errors as the exit code of msbuild is wrong here.
+:: It always marks the build as a failure even thought the MantidPlot exit
+:: code is correct!
+::if ERRORLEVEL 1 exit /B %ERRORLEVEL%
+:: if "%BUILDPKG%" == "yes" (
+::   echo Building package
+::   "%CMAKE_BIN_DIR%\cpack.exe" -C %BUILD_CONFIG% --config CPackConfig.cmake
+:: )

@@ -144,6 +144,25 @@ const std::string PolarizationCorrection::summary() const {
 }
 
 /**
+ * Multiply a workspace by a constant value
+ * @param lhsWS : WS to be multiplied
+ * @param rhs : WS to multiply by (constant value)
+ * @return Multiplied Workspace.
+ */
+MatrixWorkspace_sptr
+PolarizationCorrection::multiply(MatrixWorkspace_sptr &lhsWS,
+                                 const double &rhs) {
+  auto multiply = this->createChildAlgorithm("Multiply");
+  auto rhsWS = boost::make_shared<DataObjects::WorkspaceSingleValue>(rhs);
+  multiply->initialize();
+  multiply->setProperty("LHSWorkspace", lhsWS);
+  multiply->setProperty("RHSWorkspace", rhsWS);
+  multiply->execute();
+  MatrixWorkspace_sptr outWS = multiply->getProperty("OutputWorkspace");
+  return outWS;
+}
+
+/**
  * Add a constant value to a workspace
  * @param lhsWS WS to add to
  * @param rhs Value to add
@@ -220,7 +239,8 @@ PolarizationCorrection::copyShapeAndFill(MatrixWorkspace_sptr &base,
   for (size_t i = 0; i < wsTemplate->getNumberHistograms(); ++i) {
     wsTemplate->setX(i, base->readX(i));
   }
-  auto filled = this->add(wsTemplate, value);
+  auto zeroed = this->multiply(wsTemplate, 0);
+  auto filled = this->add(zeroed, value);
   return filled;
 }
 
@@ -237,14 +257,26 @@ WorkspaceGroup_sptr PolarizationCorrection::execPA(WorkspaceGroup_sptr inWS) {
   size_t itemIndex = 0;
   MatrixWorkspace_sptr Ipp =
       boost::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
-  MatrixWorkspace_sptr Iaa =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
   MatrixWorkspace_sptr Ipa =
       boost::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
   MatrixWorkspace_sptr Iap =
       boost::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
+  MatrixWorkspace_sptr Iaa =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
 
-  MatrixWorkspace_sptr ones = copyShapeAndFill(Iaa, 1.0);
+  Ipp->setTitle("Ipp");
+  Iaa->setTitle("Iaa");
+  Ipa->setTitle("Ipa");
+  Iap->setTitle("Iap");
+
+  auto cropAlg = this->createChildAlgorithm("CropWorkspace");
+  cropAlg->initialize();
+  cropAlg->setProperty("InputWorkspace", Ipp);
+  cropAlg->setProperty("EndWorkspaceIndex", 0);
+  cropAlg->execute();
+  MatrixWorkspace_sptr croppedIpp = cropAlg->getProperty("OutputWorkspace");
+
+  MatrixWorkspace_sptr ones = copyShapeAndFill(croppedIpp, 1.0);
   // The ones workspace is now identical to the input workspaces in x, but has 1
   // as y values. It can therefore be used to build real polynomial functions.
 
@@ -262,41 +294,50 @@ WorkspaceGroup_sptr PolarizationCorrection::execPA(WorkspaceGroup_sptr inWS) {
   const auto ap = this->execPolynomialCorrection(
       ones, c_ap); // Execute polynomial expression
 
-  const auto A0 =
-      (Iaa + ap * Ipa * rho + ap * Iap * alpha + Ipp * ap * alpha * rho) * pp;
+  const auto A0 = (Iaa * pp * ap) + (ap * Ipa * rho * pp) +
+                  (ap * Iap * alpha * pp) + (Ipp * ap * alpha * rho * pp);
   const auto A1 = pp * Iaa;
   const auto A2 = pp * Iap;
   const auto A3 = ap * Iaa;
   const auto A4 = ap * Ipa;
-  const auto apAlpha = ap * alpha;
-  const auto A5 = apAlpha * Ipp;
-  const auto A6 = apAlpha * Iap;
-  const auto ppRho = pp * rho;
-  const auto A7 = ppRho * Ipp;
-  const auto A8 = ppRho * Ipa;
+  const auto A5 = ap * alpha * Ipp;
+  const auto A6 = ap * alpha * Iap;
+  const auto A7 = pp * rho * Ipp;
+  const auto A8 = pp * rho * Ipa;
 
-  const auto D = pp * ap * (rho + alpha + 1.0 + rho * alpha);
-  const auto IppPlusIaaMinusIpaMinusIap = Ipp + Iaa - Ipa - Iap;
-  const auto IpaPlusIapMinusIppMinusIaa = Ipa + Iap - Ipp - Iaa;
-  const auto AOperations = A0 - A1 + A2 - A3 + A4 + A5 - A6 + A7 - A8;
-  const auto negateAOperations = A0 + A1 - A2 - A3 + A4 + A5 - A6 - A7 + A8;
+  const auto D = pp * ap * (rho + alpha + 1.0 + (rho * alpha));
 
-  const auto nIpp = (AOperations + IppPlusIaaMinusIpaMinusIap) / D;
-  const auto nIaa = (negateAOperations + IppPlusIaaMinusIpaMinusIap) / D;
-  const auto nIpa = (AOperations + IpaPlusIapMinusIppMinusIaa) / D;
-  const auto nIap = (negateAOperations + IpaPlusIapMinusIppMinusIaa) / D;
+  const auto nIpp =
+      (A0 - A1 + A2 - A3 + A4 + A5 - A6 + A7 - A8 + Ipp + Iaa - Ipa - Iap) / D;
+  const auto nIaa =
+      (A0 + A1 - A2 + A3 - A4 - A5 + A6 - A7 + A8 + Ipp + Iaa - Ipa - Iap) / D;
+  const auto nIpa =
+      (A0 - A1 + A2 + A3 - A4 - A5 + A6 + A7 - A8 - Ipp - Iaa + Ipa + Iap) / D;
+  const auto nIap =
+      (A0 + A1 - A2 - A3 + A4 + A5 - A6 - A7 + A8 - Ipp - Iaa + Ipa + Iap) / D;
 
+  WorkspaceGroup_sptr dataOut = boost::make_shared<WorkspaceGroup>();
+  dataOut->addWorkspace(nIpp);
+  dataOut->addWorkspace(nIpa);
+  dataOut->addWorkspace(nIap);
+  dataOut->addWorkspace(nIaa);
+  size_t totalGroupEntries(dataOut->getNumberOfEntries());
+  for (size_t i = 1; i < totalGroupEntries; i++) {
+    auto alg = this->createChildAlgorithm("ReplaceSpecialValues");
+    alg->setProperty("InputWorkspace", dataOut->getItem(i));
+    alg->setProperty("OutputWorkspace",
+                     "dataOut_" + boost::lexical_cast<std::string>(i));
+    alg->setProperty("NaNValue", 0.0);
+    alg->setProperty("NaNError", 0.0);
+    alg->setProperty("InfinityValue", 0.0);
+    alg->setProperty("InfinityError", 0.0);
+    alg->execute();
+  }
   // Preserve the history of the inside workspaces
   nIpp->history().addHistory(Ipp->getHistory());
   nIaa->history().addHistory(Iaa->getHistory());
   nIpa->history().addHistory(Ipa->getHistory());
   nIap->history().addHistory(Iap->getHistory());
-
-  WorkspaceGroup_sptr dataOut = boost::make_shared<WorkspaceGroup>();
-  dataOut->addWorkspace(nIpp);
-  dataOut->addWorkspace(nIaa);
-  dataOut->addWorkspace(nIpa);
-  dataOut->addWorkspace(nIap);
 
   return dataOut;
 }

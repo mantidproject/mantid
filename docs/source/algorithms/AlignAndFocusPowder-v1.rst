@@ -13,9 +13,9 @@ This is a workflow algorithm that does the bulk of the work for time
 focusing diffraction data. This is done by executing several
 sub-algorithms as listed below.
 
-#. :ref:`algm-RemovePromptPulse` (event workspace only)
 #. :ref:`algm-CompressEvents` (event workspace only)
 #. :ref:`algm-CropWorkspace`
+#. :ref:`algm-RemovePromptPulse`
 #. :ref:`algm-MaskDetectors`
 #. :ref:`algm-Rebin` or :ref:`algm-ResampleX` if not d-space binning
 #. :ref:`algm-AlignDetectors`
@@ -51,9 +51,9 @@ and
 You will have to rename :literal:`pg3_mantid_det.cal` manually, as its name in the link above is a list of random characters.
 
 .. code-block:: python
-    
+
     PG3_9830_event = Load('PG3_9830_event.nxs')
-    PG3_9830_event = AlignAndFocusPowder(PG3_9830_event, 
+    PG3_9830_event = AlignAndFocusPowder(PG3_9830_event,
         CalFileName='pg3_mantid_det.cal', Params='100')
 
 

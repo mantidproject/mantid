@@ -80,6 +80,12 @@ public:
                                  calculateDim1(lamUpper));
 
     Mantid::Geometry::Quadrilateral quad(ll, lr, ur, ul);
+
+    while ((quad.at(0).X() > quad.at(3).X()) ||
+           (quad.at(0).Y() > quad.at(1).Y())) {
+      quad.shiftVertexesClockwise();
+    }
+
     return quad;
   }
 };
