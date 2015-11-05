@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_SPECULARREFLECTIONALGORITHM_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
 
@@ -34,7 +34,8 @@ namespace Algorithms {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport SpecularReflectionAlgorithm : public Mantid::API::Algorithm {
+class DLLExport SpecularReflectionAlgorithm
+    : public Mantid::API::DataProcessorAlgorithm {
 protected:
   /// Constructor
   SpecularReflectionAlgorithm();

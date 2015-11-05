@@ -72,6 +72,10 @@ void EnggDiffractionViewQtGUI::initLayout() {
   m_uiTabFocus.setupUi(wFocus);
   m_ui.tabMain->addTab(wFocus, QString("Focus"));
 
+  QWidget *wPreproc = new QWidget(m_ui.tabMain);
+  m_uiTabPreproc.setupUi(wPreproc);
+  m_ui.tabMain->addTab(wPreproc, QString("Pre-processing"));
+
   QWidget *wSettings = new QWidget(m_ui.tabMain);
   m_uiTabSettings.setupUi(wSettings);
   m_ui.tabMain->addTab(wSettings, QString("Settings"));
@@ -86,6 +90,7 @@ void EnggDiffractionViewQtGUI::initLayout() {
   doSetupGeneralWidgets();
   doSetupTabCalib();
   doSetupTabFocus();
+  doSetupTabPreproc();
   doSetupTabSettings();
 
   // presenter that knows how to handle a IEnggDiffractionView should take care
@@ -120,6 +125,38 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
   enableCalibrateAndFocusActions(true);
 }
 
+void EnggDiffractionViewQtGUI::doSetupTabFocus() {
+
+  connect(m_uiTabFocus.pushButton_focus, SIGNAL(released()), this,
+          SLOT(focusClicked()));
+
+  connect(m_uiTabFocus.pushButton_focus_cropped, SIGNAL(released()), this,
+          SLOT(focusCroppedClicked()));
+
+  connect(m_uiTabFocus.pushButton_texture_browse_grouping_file,
+          SIGNAL(released()), this, SLOT(browseTextureDetGroupingFile()));
+
+  connect(m_uiTabFocus.pushButton_focus_texture, SIGNAL(released()), this,
+          SLOT(focusTextureClicked()));
+
+  connect(m_uiTabFocus.pushButton_reset, SIGNAL(released()), this,
+          SLOT(focusResetClicked()));
+
+  connect(m_uiTabFocus.comboBox_PlotData, SIGNAL(currentIndexChanged(int)),
+          this, SLOT(plotRepChanged(int)));
+
+  connect(m_uiTabFocus.checkBox_FocusedWS, SIGNAL(clicked()), this,
+          SLOT(plotFocusStatus()));
+}
+
+void EnggDiffractionViewQtGUI::doSetupTabPreproc() {
+  connect(m_uiTabPreproc.pushButton_rebin_time, SIGNAL(released()), this,
+          SLOT(rebinTimeClicked()));
+
+  connect(m_uiTabPreproc.pushButton_rebin_multiperiod, SIGNAL(released()), this,
+          SLOT(rebinMultiperiodClicked()));
+}
+
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
   // line edits that display paths and the like
   m_uiTabSettings.lineEdit_input_dir_calib->setText(
@@ -152,30 +189,6 @@ void EnggDiffractionViewQtGUI::doSetupTabSettings() {
 
   connect(m_uiTabSettings.pushButton_browse_dir_focusing, SIGNAL(released()),
           this, SLOT(browseDirFocusing()));
-}
-
-void EnggDiffractionViewQtGUI::doSetupTabFocus() {
-
-  connect(m_uiTabFocus.pushButton_focus, SIGNAL(released()), this,
-          SLOT(focusClicked()));
-
-  connect(m_uiTabFocus.pushButton_focus_cropped, SIGNAL(released()), this,
-          SLOT(focusCroppedClicked()));
-
-  connect(m_uiTabFocus.pushButton_texture_browse_grouping_file,
-          SIGNAL(released()), this, SLOT(browseTextureDetGroupingFile()));
-
-  connect(m_uiTabFocus.pushButton_focus_texture, SIGNAL(released()), this,
-          SLOT(focusTextureClicked()));
-
-  connect(m_uiTabFocus.pushButton_reset, SIGNAL(released()), this,
-          SLOT(focusResetClicked()));
-
-  connect(m_uiTabFocus.comboBox_PlotData, SIGNAL(currentIndexChanged(int)),
-          this, SLOT(plotRepChanged(int)));
-
-  connect(m_uiTabFocus.checkBox_FocusedWS, SIGNAL(clicked()), this,
-          SLOT(plotFocusStatus()));
 }
 
 void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
@@ -251,6 +264,20 @@ void EnggDiffractionViewQtGUI::readSettings() {
 
   m_uiTabFocus.comboBox_PlotData->setCurrentIndex(0);
 
+  // pre-processing (re-binning)
+  m_uiTabPreproc.MWRunFiles_preproc_run_num->setUserInput(
+      qs.value("user-params-preproc-runno", "").toString());
+
+  m_uiTabPreproc.doubleSpinBox_time_bin->setValue(
+      qs.value("user-params-time-bin", 0.1).toDouble());
+
+  m_uiTabPreproc.spinBox_nperiods->setValue(
+      qs.value("user-params-nperiods", 2).toInt());
+
+  m_uiTabPreproc.doubleSpinBox_step_time->setValue(
+      qs.value("user-params-step-time", 1).toDouble());
+
+  // settings
   QString lastPath =
       MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
   // TODO: this should become << >> operators on
@@ -319,6 +346,18 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
               m_uiTabFocus.lineEdit_texture_grouping_file->text());
 
   qs.setValue("value", m_uiTabFocus.checkBox_FocusedWS->isChecked());
+
+  // pre-processing (re-binning)
+  qs.setValue("user-params-preproc-runno",
+              m_uiTabPreproc.MWRunFiles_preproc_run_num->getText());
+
+  qs.setValue("user-params-time-bin",
+              m_uiTabPreproc.doubleSpinBox_time_bin->value());
+
+  qs.setValue("user-params-nperiods", m_uiTabPreproc.spinBox_nperiods->value());
+
+  qs.value("user-params-step-time",
+           m_uiTabPreproc.doubleSpinBox_step_time->value());
 
   // TODO: this should become << >> operators on EnggDiffCalibSettings
   qs.setValue("input-dir-calib-files",
@@ -439,12 +478,33 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabFocus.pushButton_focus->setEnabled(enable);
   m_uiTabFocus.pushButton_focus_cropped->setEnabled(enable);
   m_uiTabFocus.pushButton_focus_texture->setEnabled(enable);
+
+  // pre-processing
+  m_uiTabPreproc.MWRunFiles_preproc_run_num->setEnabled(enable);
+  m_uiTabPreproc.pushButton_rebin_time->setEnabled(enable);
+  m_uiTabPreproc.pushButton_rebin_multiperiod->setEnabled(enable);
 }
 
 void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
   for (int ti = 0; ti < m_ui.tabMain->count(); ++ti) {
     m_ui.tabMain->setTabEnabled(ti, enable);
   }
+}
+
+std::string EnggDiffractionViewQtGUI::currentPreprocRunNo() const {
+  return m_uiTabPreproc.MWRunFiles_preproc_run_num->getText().toStdString();
+}
+
+double EnggDiffractionViewQtGUI::rebinningTimeBin() const {
+  return m_uiTabPreproc.doubleSpinBox_time_bin->value();
+}
+
+size_t EnggDiffractionViewQtGUI::rebinningPulsesNumberPeriods() const {
+  return m_uiTabPreproc.spinBox_nperiods->value();
+}
+
+double EnggDiffractionViewQtGUI::rebinningPulsesTime() const {
+  return m_uiTabPreproc.doubleSpinBox_step_time->value();
 }
 
 void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
@@ -573,7 +633,14 @@ void EnggDiffractionViewQtGUI::focusTextureClicked() {
 
 void EnggDiffractionViewQtGUI::focusResetClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::ResetFocus);
-  // TODO
+}
+
+void EnggDiffractionViewQtGUI::rebinTimeClicked() {
+  m_presenter->notify(IEnggDiffractionPresenter::RebinTime);
+}
+
+void EnggDiffractionViewQtGUI::rebinMultiperiodClicked() {
+  m_presenter->notify(IEnggDiffractionPresenter::RebinMultiperiod);
 }
 
 void EnggDiffractionViewQtGUI::browseInputDirCalib() {
