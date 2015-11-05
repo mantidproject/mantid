@@ -125,6 +125,11 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Build step
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: TODO - Utilise generated buildenv.bat
+set THIRD_PARTY_DIR=%WORKSPACE%\external\thirdparty-msvc2015
+set PYTHONHOME=%THIRD_PARTY_DIR%\lib\python2.7
+set PATH=%THIRD_PARTY_DIR%\bin;%PYTHONHOME%;%THIRD_PARTY_DIR%\lib\qt4\bin;%PATH%
+
 msbuild /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=%BUILD_CONFIG% Mantid.sln
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
@@ -134,11 +139,6 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :: Remove the user properties file just in case anything polluted it
 set USERPROPS=bin\%BUILD_CONFIG%\Mantid.user.properties
 del %USERPROPS%
-
-:: TODO - Utilise generated buildenv.bat 
-set THIRD_PARTY_DIR=%WORKSPACE%\external\thirdparty-msvc2015
-set PYTHONHOME=%THIRD_PARTY_DIR%\lib\python2.7
-set PATH=%THIRD_PARTY_DIR%\bin;%PYTHONHOME%;%THIRD_PARTY_DIR%\lib\qt4\bin
 
 call ctest.exe -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on-failure
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
