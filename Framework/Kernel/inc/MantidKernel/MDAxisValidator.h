@@ -8,6 +8,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 namespace Mantid {
 namespace Kernel {
