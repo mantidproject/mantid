@@ -19,17 +19,16 @@ if( MSVC )
                      WORKING_DIRECTORY ${THIRD_PARTY_DIR} )
   else()
     message ( STATUS "Found existing ${THIRD_PARTY_DIR}. Updating to ${THIRD_PARTY_GIT_SHA1}" )
-    # execute_process( COMMAND "${GIT_EXECUTABLE}" checkout ${THIRD_PARTY_GIT_SHA1}
-                     # WORKING_DIRECTORY ${THIRD_PARTY_DIR} )
-    # execute_process( COMMAND "${GIT_EXECUTABLE}" pull --rebase
-                     # WORKING_DIRECTORY ${THIRD_PARTY_DIR} )
+    execute_process( COMMAND "${GIT_EXECUTABLE}" checkout ${THIRD_PARTY_GIT_SHA1}
+                     WORKING_DIRECTORY ${THIRD_PARTY_DIR} )
+    execute_process( COMMAND "${GIT_EXECUTABLE}" pull --rebase origin master
+                     WORKING_DIRECTORY ${THIRD_PARTY_DIR} )
   endif()
 
   # Print out where we think we are looking for 3rd party stuff
   set ( THIRD_PARTY_BIN "${THIRD_PARTY_DIR}/bin;${THIRD_PARTY_DIR}/lib/qt4/bin;${THIRD_PARTY_DIR}/lib/python2.7" )
-  message ( STATUS "Looking for third-dependencies in ${THIRD_PARTY_DIR}. " 
-                    " NOTE: Please check '${THIRD_PARTY_BIN}' are on the PATH")
-  # Add to the path so that cmake can configure correctly
+  message ( STATUS "Thirdparty dependencies are in ${THIRD_PARTY_DIR}. " )
+  # Add to the path so that cmake can configure correctly without the user having to do it
   set ( ENV{PATH} "${THIRD_PARTY_BIN};$ENV{PATH}" )
 
   # Set variables to help CMake find components
