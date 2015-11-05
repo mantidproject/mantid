@@ -128,7 +128,7 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :: TODO - Utilise generated buildenv.bat
 set THIRD_PARTY_DIR=%WORKSPACE%\external\thirdparty-msvc2015
 set PYTHONHOME=%THIRD_PARTY_DIR%\lib\python2.7
-set PATH=%THIRD_PARTY_DIR%\bin;%PYTHONHOME%;%THIRD_PARTY_DIR%\lib\qt4\bin;%PATH%
+set PATH=%THIRD_PARTY_DIR%\bin;%PYTHONHOME%;%THIRD_PARTY_DIR%\lib\qt4\bin;%THIRD_PARTY_DIR%\lib\qt4\lib;%PATH%
 
 msbuild /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=%BUILD_CONFIG% Mantid.sln
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
