@@ -231,6 +231,9 @@ class AlignComponents(PythonAlgorithm):
 
             if self._masking:
                 mask_out = mask[firstIndex:lastIndex + 1]
+                if mask_out.sum() == mask_out.size:
+                    self.log().warning("All pixels in '%s' are masked. Skipping calibration." % component)
+                    continue
             else:
                 mask_out = None
 
