@@ -2015,7 +2015,6 @@ void FunctionBrowser::removeDatasets(QList<int> indices)
   {
     throw std::runtime_error("FunctionBrowser asked to removed too many datasets");
   }
-  int newSize = m_numberOfDatasets;
   qSort(indices);
   for(auto par = m_localParameterValues.begin(); par != m_localParameterValues.end(); ++par)
   {
