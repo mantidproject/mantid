@@ -72,13 +72,20 @@ else ( USE_TCMALLOC )
   message ( STATUS "TCMalloc will not be included." )
 endif ()
 
-
 set ( CONSOLE ON CACHE BOOL "Switch for enabling/disabling the console" )
 
 ###########################################################################
 # Windows import library needs to go to bin as well
 ###########################################################################
 set ( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
+
+###########################################################################
+# Configure IDE/commandline startup scripts
+###########################################################################
+set ( WINDOWS_BUILDCONFIG ${PROJECT_SOURCE_DIR}/buildconfig/Windows )
+configure_file ( ${WINDOWS_BUILDCONFIG}/buildenv.bat.in ${PROJECT_BINARY_DIR}/buildenv.bat @ONLY )
+configure_file ( ${WINDOWS_BUILDCONFIG}/command-prompt.bat ${PROJECT_BINARY_DIR}/command-prompt.bat @ONLY )
+configure_file ( ${WINDOWS_BUILDCONFIG}/visual-studio.bat ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY )
 
 ###########################################################################
 # (Fake) installation variables to keep windows sweet
