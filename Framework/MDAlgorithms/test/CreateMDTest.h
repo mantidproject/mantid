@@ -5,8 +5,9 @@
 
 #include "MantidMDAlgorithms/CreateMD.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include <stdexcept>
-#include <MantidAPI/IMDEventWorkspace_fwd.h>
 
 using Mantid::MDAlgorithms::CreateMD;
 
@@ -110,11 +111,29 @@ public:
   }
 
   void test_execute_single_workspace() {
+    auto sim_alg = Mantid::API::AlgorithmManager::Instance().create(
+        "CreateSimulationWorkspace");
+    sim_alg->initialize();
+    sim_alg->setPropertyValue("Instrument", "MAR");
+    sim_alg->setPropertyValue("BinParams", "-3,1,3");
+    sim_alg->setPropertyValue("UnitX", "DeltaE");
+    sim_alg->setPropertyValue("OutputWorkspace", "data_source_1");
+    sim_alg->execute();
+
+    auto log_alg =
+        Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
+    log_alg->initialize();
+    log_alg->setProperty("Workspace", "data_source_1");
+    log_alg->setPropertyValue("LogName", "Ei");
+    log_alg->setPropertyValue("LogText", "3.0");
+    log_alg->setPropertyValue("LogType", "Number");
+    log_alg->execute();
+
     CreateMD alg;
     alg.setRethrows(true);
     alg.initialize();
     alg.setPropertyValue("OutputWorkspace", "__CreateMDTest_mdworkspace");
-    alg.setPropertyValue("DataSources", "CNCS_7860_event.nxs");
+    alg.setPropertyValue("DataSources", "data_source_1");
     alg.setPropertyValue("Alatt", "1,1,1");
     alg.setPropertyValue("Angdeg", "90,90,90");
     alg.setPropertyValue("Efix", "12.0");
@@ -131,12 +150,35 @@ public:
   }
 
   void test_execute_multi_file() {
+    auto sim_alg = Mantid::API::AlgorithmManager::Instance().create(
+        "CreateSimulationWorkspace");
+    sim_alg->initialize();
+    sim_alg->setPropertyValue("Instrument", "MAR");
+    sim_alg->setPropertyValue("BinParams", "-3,1,3");
+    sim_alg->setPropertyValue("UnitX", "DeltaE");
+    sim_alg->setPropertyValue("OutputWorkspace", "data_source_1");
+    sim_alg->execute();
+
+    sim_alg->setPropertyValue("OutputWorkspace", "data_source_2");
+    sim_alg->execute();
+
+    auto log_alg =
+        Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
+    log_alg->initialize();
+    log_alg->setProperty("Workspace", "data_source_1");
+    log_alg->setPropertyValue("LogName", "Ei");
+    log_alg->setPropertyValue("LogText", "3.0");
+    log_alg->setPropertyValue("LogType", "Number");
+    log_alg->execute();
+
+    log_alg->setProperty("Workspace", "data_source_2");
+    log_alg->execute();
+
     CreateMD alg;
     alg.setRethrows(true);
     alg.initialize();
     alg.setPropertyValue("OutputWorkspace", "__CreateMDTest_mdworkspace");
-    alg.setPropertyValue("DataSources",
-                         "CNCS_7860_event.nxs,CNCS_7860_event.nxs");
+    alg.setPropertyValue("DataSources", "data_source_1,data_source_2");
     alg.setPropertyValue("Alatt", "1,1,1");
     alg.setPropertyValue("Angdeg", "90,90,90");
     alg.setPropertyValue("Efix", "12.0,13.0");
