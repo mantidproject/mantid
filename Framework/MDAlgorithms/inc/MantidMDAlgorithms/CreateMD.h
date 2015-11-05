@@ -7,7 +7,7 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-void padParameterVector(std::vector<double> &param_vector,
+void MANTID_MDALGORITHMS_DLL padParameterVector(std::vector<double> &param_vector,
                         const unsigned long grow_to_size);
 
 bool any_given(const std::vector<std::vector<double>> &params);
