@@ -50,7 +50,7 @@ private:
 
   void rotate(const Kernel::Matrix<double> &);
   void displace(const Kernel::V3D &);
-  Surface *doClone() const;
+  Torus *doClone() const;
 
 public:
   /// Public identifier

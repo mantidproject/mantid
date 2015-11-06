@@ -49,7 +49,7 @@ private:
   void displace(const Kernel::V3D &);
   /// Compute the distance from the centre of the sphere to the given point
   double centreToPoint(const Kernel::V3D &pt) const;
-  Surface *doClone() const;
+  Sphere *doClone() const;
 
 public:
   Sphere();

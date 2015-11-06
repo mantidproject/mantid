@@ -384,6 +384,10 @@ void Quadratic::write(std::ostream &OX) const
   return;
 }
 
+std::unique_ptr<Quadratic> Quadratic::clone() const {
+  return std::unique_ptr<Quadratic>(doClone());
+}
+
 } // NAMESPACE Geometry
 
 } // NAMESPACE Mantid

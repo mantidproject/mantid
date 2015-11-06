@@ -42,7 +42,7 @@ namespace Geometry {
 
 class MANTID_GEOMETRY_DLL General : public Quadratic {
 private:
-  Surface *doClone() const;
+  General *doClone() const;
 
 public:
   General();

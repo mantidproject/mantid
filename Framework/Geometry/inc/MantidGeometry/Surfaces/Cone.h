@@ -49,7 +49,7 @@ private:
 
   void rotate(const Kernel::Matrix<double> &);
   void displace(const Kernel::V3D &);
-  Surface *doClone() const;
+  Cone *doClone() const;
 
 public:
   /// Public identifer

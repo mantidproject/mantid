@@ -21,7 +21,7 @@ General::General(const General &A)
 */
 {}
 
-Surface *General::doClone() const
+General *General::doClone() const
 /**
 Makes a clone (implicit virtual copy constructor)
 @return General(this)
@@ -36,7 +36,7 @@ std::unique_ptr<General> General::clone() const
   @return General(this)
 */
 {
-  return std::unique_ptr<General>(static_cast<General *>(doClone()));
+  return std::unique_ptr<General>(doClone());
 }
 
 General &General::operator=(const General &A)

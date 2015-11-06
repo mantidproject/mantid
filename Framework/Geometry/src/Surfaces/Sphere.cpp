@@ -55,7 +55,7 @@ Default Copy constructor
 */
 {}
 
-Surface *Sphere::doClone() const
+Sphere *Sphere::doClone() const
 /**
 Makes a clone (implicit virtual copy constructor)
 @return new (*this)
@@ -70,7 +70,7 @@ Makes a clone (implicit virtual copy constructor)
 @return new (*this)
 */
 {
-  return std::unique_ptr<Sphere>(static_cast<Sphere *>(doClone()));
+  return std::unique_ptr<Sphere>(doClone());
 }
 
 Sphere &Sphere::operator=(const Sphere &A)

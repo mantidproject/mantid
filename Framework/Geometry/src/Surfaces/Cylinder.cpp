@@ -61,7 +61,7 @@ Cylinder::Cylinder(const Cylinder &A)
  */
 {}
 
-Surface *Cylinder::doClone() const
+Cylinder *Cylinder::doClone() const
 /**
  Makes a clone (implicit virtual copy constructor)
  @return Copy(*this)
@@ -76,7 +76,7 @@ Makes a clone (implicit virtual copy constructor)
 @return Copy(*this)
 */
 {
-  return std::unique_ptr<Cylinder>(static_cast<Cylinder *>(doClone()));
+  return std::unique_ptr<Cylinder>(doClone());
 }
 
 Cylinder &Cylinder::operator=(const Cylinder &A)

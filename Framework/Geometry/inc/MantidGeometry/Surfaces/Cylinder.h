@@ -56,7 +56,7 @@ private:
   void rotate(const Kernel::Matrix<double> &);
   void displace(const Kernel::V3D &);
   void setNvec(); ///< check to obtain orientation
-  Surface *doClone() const;
+  Cylinder *doClone() const;
 
 public:
   /// Public identifer

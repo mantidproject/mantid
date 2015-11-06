@@ -53,7 +53,7 @@ private:
   double Dist;       ///< Distance
 
   std::size_t planeType() const; ///< are we alined on an axis
-  Surface *doClone() const;
+  Plane *doClone() const;
 
 public:
   /// Effective typename
