@@ -580,11 +580,15 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # DirectEnergyConversion class properly
         SetInstrumentParameter(monitor_ws,ParameterName='fix_ei',ParameterType='Number',Value='0')
         SetInstrumentParameter(monitor_ws,DetectorList=[1,2,3,6],ParameterName='DelayTime',\
-                               ParameterType='Number',Value='0.5') 
+                               ParameterType='Number',Value='0.5')
+        SetInstrumentParameter(monitor_ws,ParameterName='mon2_norm_spec',\
+                               ParameterType='Number',Value='1')
+
         # initiate test reducer
         tReducer = DirectEnergyConversion(monitor_ws.getInstrument())
         tReducer.prop_man.ei_mon_spectra= ([1,2,3],6)
         tReducer.prop_man.normalise_method = 'current'
+        tReducer.prop_man.mon2_norm_spec = 2
         ei_mon_spectra  = tReducer.prop_man.ei_mon_spectra
         ei_mon_spectra,monitor_ws  = tReducer.sum_monitors_spectra(monitor_ws,ei_mon_spectra)
         #
@@ -601,11 +605,12 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # use it for is to retrieve monitor workspace from Mantid using its name
         ei2,mon1_peak2=tReducer.get_ei(monitor_ws,62.2)
         self.assertAlmostEqual(ei2,64.95,2)
+        self.assertEqual(tReducer.prop_man.mon2_norm_spec,1)
 
 
 
 
 if __name__=="__main__":
-   #test = DirectEnergyConversionTest('test_multirep_mode')
-   #test.test_multirep_mode()
+   #test = DirectEnergyConversionTest('test_sum_monitors')
+   #test.run()
    unittest.main()

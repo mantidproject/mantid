@@ -872,10 +872,22 @@ class RunDescriptor(PropDescriptor):
             monitors_separate = True
 
         spec_to_mon = RunDescriptor._holder.spectra_to_monitors_list
+        combined_spec_list = []
         if monitors_separate and spec_to_mon:
             mon_ws_name = mon_ws.name()
+            if mon_ws.run().hasProperty("CombinedSpectraIDList"):
+                spec_id_str = mon_ws.run().getProperty('CombinedSpectraIDList').value
+                spec_id_str = spec_id_str.translate(None,'[]').strip()
+                spec_id_listS = spec_id_str.split(',')
+                combined_spec_list = []
+                for val in spec_id_listS:
+                    combined_spec_list.append(int(val))
+            else:
+                combined_spec_list = []
+
             for specID in spec_to_mon:
-                mon_ws = self.copy_spectrum2monitors(data_ws,mon_ws,specID)
+                if not specID in combined_spec_list:
+                    mon_ws = self.copy_spectrum2monitors(data_ws,mon_ws,specID)
             if mon_ws:
                 #mon_ws=mtd[mon_ws_name] # very weird operation needed
                 data_ws.setMonitorWorkspace(mon_ws)
@@ -895,11 +907,12 @@ class RunDescriptor(PropDescriptor):
                 mon_list = [monitors_ID]
         else:
             mon_list = self._holder.get_used_monitors_list()
-        #
+        # Check if all requested spectra are indeed availible
         for monID in mon_list:
+            if monID in combined_spec_list:
+                continue
             try:
-#pylint: disable=unused-variable
-                ws_ind = mon_ws.getIndexFromSpectrumNumber(int(monID))
+                mon_ws.getIndexFromSpectrumNumber(int(monID))
 #pylint: disable=bare-except
             except:
                 try:

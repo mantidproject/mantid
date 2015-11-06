@@ -1223,6 +1223,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    tester = DirectPropertyManagerTest('test_average_accuracy')
-    tester.run()
-    #unittest.main()
+    #tester = DirectPropertyManagerTest('test_average_accuracy')
+    #tester.run()
+    unittest.main()

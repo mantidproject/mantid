@@ -389,7 +389,8 @@ class DirectEnergyConversion(object):
             # sum monitor spectra if this is requested
             ei_mon_spec = self.ei_mon_spectra
             if PropertyManager.ei_mon_spectra.need_to_sum_monitors(prop_man):
-                ei_mon_spec,mon_ws = self.sum_monitors_spectra(mon_ws,sample_ws,ei_mon_spec)
+                ei_mon_spec,mon_ws = self.sum_monitors_spectra(mon_ws,ei_mon_spec)
+                sample_ws.setMonitorWorkspace(mon_ws)
             else:
                 pass
 
@@ -719,7 +720,7 @@ class DirectEnergyConversion(object):
         return mono_s
 
 #-------------------------------------------------------------------------------
-    def sum_monitors_spectra(self,monitor_ws,sample_ws,ei_mon_spectra):
+    def sum_monitors_spectra(self,monitor_ws,ei_mon_spectra):
         """Sum monitors spectra for all spectra, specified in the spectra list(s)
            and create monitor workspace containing only the spectra summed and organized
            according to ei_mon_spectra tuple.
@@ -731,26 +732,28 @@ class DirectEnergyConversion(object):
         spectra_list2=ei_mon_spectra[1]
         if not isinstance(spectra_list1,list):
             spectra_list1 = [spectra_list1]
-        spec_num1 = self._process_spectra_list(monitor_ws,spectra_list1,'spectr_ws1')
+        spec_num1,wsIDs1 = self._process_spectra_list(monitor_ws,spectra_list1,'spectr_ws1')
 
         if not isinstance(spectra_list2,list):
             spectra_list2 = [spectra_list2]
-        spec_num2 = self._process_spectra_list(monitor_ws,spectra_list2,'spectr_ws2')
+        spec_num2,wsIDs2 = self._process_spectra_list(monitor_ws,spectra_list2,'spectr_ws2')
         monitor_ws_name = monitor_ws.name()
         DeleteWorkspace(monitor_ws_name)
         AppendSpectra(InputWorkspace1='spectr_ws1',InputWorkspace2='spectr_ws2',OutputWorkspace=monitor_ws_name)
+        wsIDs = wsIDs1+wsIDs2
+
         if 'spectr_ws1' in mtd:
             DeleteWorkspace('spectr_ws1')
         if 'spectr_ws2' in mtd:
             DeleteWorkspace('spectr_ws2')
         monitor_ws = mtd[monitor_ws_name]
+        AddSampleLog(monitor_ws,LogName='CombinedSpectraIDList',LogText=str(spectra_list1+spectra_list2),LogType='String')
         # Weird operation. It looks like the spectra numbers obtained from
         # AppendSpectra operation depend on instrument.
         # Looks like a bug in AppendSpectra
         spec_num1 = monitor_ws.getSpectrum(0).getSpectrumNo()
         spec_num2 = monitor_ws.getSpectrum(1).getSpectrumNo()
 
-        sample_ws.setMonitorWorkspace(monitor_ws)
         self.prop_man.ei_mon_spectra = (spec_num1,spec_num2)
         mon2_norm_spec = self.prop_man.mon2_norm_spec
         if mon2_norm_spec in spectra_list1:
@@ -789,7 +792,7 @@ class DirectEnergyConversion(object):
         ws = mtd[target_ws_name]
         sp = ws.getSpectrum(0)
         spectrum_num = sp.getSpectrumNo()
-        return spectrum_num
+        return spectrum_num,wsIDs
 #-------------------------------------------------------------------------------
     def get_ei(self, data_run, ei_guess):
         """ Calculate incident energy of neutrons and the time of the of the
@@ -816,6 +819,7 @@ class DirectEnergyConversion(object):
         # sum monitor spectra if this is requested
         if PropertyManager.ei_mon_spectra.need_to_sum_monitors(self.prop_man):
             ei_mon_spectra,monitor_ws = self.sum_monitors_spectra(monitor_ws,ei_mon_spectra)
+            data_ws.setMonitorWorkspace(monitor_ws)
 
 
         # Calculate the incident energy
