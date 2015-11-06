@@ -25,23 +25,22 @@ mark_as_advanced(WINDOWS_DEPLOYMENT_TYPE)
 ###########################################################################
 # External dependency DLLs
 ###########################################################################
-# MSVC runtime & openmp libs for Visual Studio (v110 of the runtime).
-# They are in the locations defined by the VS110COMNTOOLS environment variable
-set ( RUNTIME_VER 140 )
-file ( TO_CMAKE_PATH $ENV{VS${RUNTIME_VER}COMNTOOLS}/../../VC/redist/x64 VC_REDIST )
-set ( REDIST_SUBDIR Microsoft.VC${RUNTIME_VER}.CRT )
-file ( GLOB RUNTIME_DLLS ${VC_REDIST}/REDIST_SUBDIR "*.dll" )
-foreach( DLL ${RUNTIME_DLLS} )
-  install ( FILES ${VC_REDIST}/${REDIST_SUBDIR}/${DLL} DESTINATION bin )
+# MSVC runtime & openmp libs for Visual Studio
+# They are in the locations defined by the VS***COMNTOOLS environment variable
+set ( _RT 140 )
+file ( TO_CMAKE_PATH $ENV{VS${_RT}COMNTOOLS}../../VC/redist/x64 X64_REDIST_DIR )
+# CRT libraries
+set ( CRT_DLLS concrt${_RT}.dll msvcp${_RT}.dll vccorlib${_RT}.dll vcruntime${_RT}.dll )
+foreach( DLL ${CRT_DLLS} )
+  install ( FILES ${X64_REDIST_DIR}/Microsoft.VC${_RT}.CRT/${DLL} DESTINATION bin )
 endforeach()
-# openmp library(s)
-set ( OPENMP_DLLS vcomp${RUNTIME_VER}.dll )
-set ( REDIST_SUBDIR Microsoft.VC${RUNTIME_VER}.OpenMP )
-foreach( DLL ${OPENMP_DLLS} )
-    install ( FILES ${VC_REDIST}/${REDIST_SUBDIR}/${DLL} DESTINATION bin )
+# OpenMP
+set ( OMP_DLLS vcomp${_RT}.dll )
+foreach( DLL ${OMP_DLLS} )
+    install ( FILES ${X64_REDIST_DIR}/Microsoft.VC${_RT}.OpenMP/${DLL} DESTINATION bin )
 endforeach()
 
-# Lists of included DLLs
+# Other third party dependencies
 set ( BOOST_DIST_DLLS
     boost_date_time-mt.dll
     boost_python-mt.dll
