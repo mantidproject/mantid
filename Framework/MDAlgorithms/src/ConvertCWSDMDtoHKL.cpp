@@ -138,7 +138,8 @@ void ConvertCWSDMDtoHKL::exec() {
   // Experiment info
   ExperimentInfo_sptr expinfo = boost::make_shared<ExperimentInfo>();
   expinfo->setInstrument(inputWS->getExperimentInfo(0)->getInstrument());
-  expinfo->mutableRun().setGoniometer(inputWS->getExperimentInfo(0)->run().getGoniometer(), false);
+  expinfo->mutableRun().setGoniometer(
+      inputWS->getExperimentInfo(0)->run().getGoniometer(), false);
   expinfo->mutableRun().addProperty("run_number", 1);
   m_outputWS->addExperimentInfo(expinfo);
 

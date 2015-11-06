@@ -406,8 +406,8 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
   }
 
   g_log.information() << "Imported Matrixworkspace of run number " << runnumber
-                      << ": Max. Signal = " << maxsignal
-                      << ", Add " << nummdevents << " MDEvents "
+                      << ": Max. Signal = " << maxsignal << ", Add "
+                      << nummdevents << " MDEvents "
                       << "\n";
 
   // Add experiment info including instrument, goniometer and run number
