@@ -277,7 +277,7 @@ class IncidentEnergy(PropDescriptor):
         else:
             self._cur_iter_en = 0
     #
-    def set_auto_Ei(self,monitor_ws,instance):
+    def set_auto_Ei(self,monitor_ws,instance,ei_mon_spec=None):
         """Calculate autoEi and set it as input for iterations over energy"""
         if not self._use_autoEi:
             return
@@ -286,7 +286,7 @@ class IncidentEnergy(PropDescriptor):
             return
         # Calculate autoEi
         self._autoEiCalculated = False
-
+        if ei_mon_spec is None:
         ei_mon_spec = instance.ei_mon_spectra;
         guess_ei_ws = GetAllEi(Workspace=monitor_ws,Monitor1SpecID = ei_mon_spec[0],\
                                Monitor2SpecID = ei_mon_spec[1])
