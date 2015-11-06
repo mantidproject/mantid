@@ -112,7 +112,7 @@ public:
     // Create the x-axis for histogramming.
     MantidVecPtr x1;
     MantidVec &xRef = x1.access();
-    xRef.resize(numBins);bi
+    xRef.resize(numBins);
     for (int i = 0; i < numBins; ++i) {
       xRef[i] = i * binDelta;
     }
