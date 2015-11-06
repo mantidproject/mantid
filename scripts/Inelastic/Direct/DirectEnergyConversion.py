@@ -580,7 +580,7 @@ class DirectEnergyConversion(object):
         # clear combined mask
         self.spectra_masks = None
         end_time = time.time()
-        prop_man.log("*** ISIS CONVERT TO ENERGY TRANSFER WRORKFLOW FINISHED *********")
+        prop_man.log("*** ISIS CONVERT TO ENERGY TRANSFER WORKFLOW FINISHED  *********")
         prop_man.log("*** Elapsed time : {0:>9.2f} sec                       *********".\
                     format(end_time - start_time),'notice')
         prop_man.log("****************************************************************")
