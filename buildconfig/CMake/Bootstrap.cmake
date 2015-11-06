@@ -29,14 +29,38 @@ if( MSVC )
   set ( _tmp_dir ${EXTERNAL_ROOT}/tmp )
   if ( NOT EXISTS ${THIRD_PARTY_DIR}/.git )
     message ( STATUS "Fetching third party dependencies" )
+    # As of git lfs 1.02 the default 'git checkout' behaviour is very slow for a large amount of data. Running the
+    # 'git lfs fetch' command however produces better suitable performance as it downloads everything in parallel.
+    # We there for first clone the bare repository containing the data pointers and update them manually
+    # see https://github.com/github/git-lfs/issues/376 for more information
+    set ( ENV{GIT_LFS_SKIP_SMUDGE} 1 )
     execute_process ( COMMAND ${CMAKE_COMMAND} ARGS -P ${_tmp_dir}/${_project_name}-gitclone.cmake
-                      COMMENT 
                       RESULT_VARIABLE error_code )
     if ( error_code )
-      message(FATAL_ERROR "Failed to clone repository: 'THIRD_PARTY_GIT_URL'")
+      message(FATAL_ERROR "Failed to clone repository: '${THIRD_PARTY_GIT_URL}'")
     endif ()
+    unset ( ENV{GIT_LFS_SKIP_SMUDGE} )
+    # Fetch the binary data
+    execute_process ( COMMAND ${GIT_EXECUTABLE} lfs fetch
+                      WORKING_DIRECTORY ${THIRD_PARTY_DIR}
+                      RESULT_VARIABLE error_code )
+    if ( error_code )
+      message(FATAL_ERROR "Failed to download third party binary data. Check your network connection")
+    endif ()
+    # Checkout the data from the index to the working directory
+    execute_process ( COMMAND ${GIT_EXECUTABLE} lfs checkout
+                      WORKING_DIRECTORY ${THIRD_PARTY_DIR}
+                      RESULT_VARIABLE error_code )
   else ()
     message ( STATUS "Updating third party dependencies" )
+    # Run a manual 'git lfs fetch' (see comments above) before doing real update just in case there has
+    # been a large amount of data uploaded
+    execute_process ( COMMAND ${GIT_EXECUTABLE} lfs fetch
+                      WORKING_DIRECTORY ${THIRD_PARTY_DIR}
+                      RESULT_VARIABLE error_code )
+    if ( error_code )
+      message(FATAL_ERROR "Failed to download third party binary data. Check your network connection")
+    endif ()
     execute_process ( COMMAND ${CMAKE_COMMAND} ARGS -P ${_tmp_dir}/${_project_name}-gitupdate.cmake
                       RESULT_VARIABLE error_code )
     if ( error_code )
