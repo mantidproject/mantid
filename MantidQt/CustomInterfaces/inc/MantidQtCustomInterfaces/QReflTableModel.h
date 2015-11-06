@@ -1,8 +1,10 @@
 #ifndef MANTID_CUSTOMINTERFACES_QREFLTABLEMODEL_H_
 #define MANTID_CUSTOMINTERFACES_QREFLTABLEMODEL_H_
 
+
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtCustomInterfaces/ReflTableSchema.h"
 #include <QAbstractTableModel>
 #include <boost/shared_ptr.hpp>
 #include <map>
@@ -61,50 +63,6 @@ namespace MantidQt
       bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex());
     private:
 
-      typedef QString ColumnNameType;
-      typedef QString ColumnValueType;
-      typedef std::map<int, ColumnNameType> ColumnIndexNameMap;
-
-    public:
-      /// Label for run number column
-      static const QString RUNS;
-      /// Label for angle column
-      static const QString ANGLE;
-      /// Label for transmission column
-      static const QString TRANSMISSION;
-      /// Label for qmin column
-      static const QString QMIN;
-      /// Label for qmax column
-      static const QString QMAX;
-      /// Label for dq/q column
-      static const QString DQQ;
-      /// Label for scale column
-      static const QString SCALE;
-      /// Label for group column
-      static const QString GROUP;
-      /// Label for options column
-      static const QString OPTIONS;
-
-    private:
-      /// Index for run number column
-      static const int COL_RUNS;
-      /// Index for angle column
-      static const int COL_ANGLE;
-      /// Index for transmission column
-      static const int COL_TRANSMISSION;
-      /// Index for qmin column
-      static const int COL_QMIN;
-      /// Index for qmax column
-      static const int COL_QMAX;
-      /// Index for dq/q column
-      static const int COL_DQQ;
-      /// Index for scale column
-      static const int COL_SCALE;
-      /// Index for group column
-      static const int COL_GROUP;
-      /// Index for options column
-      static const int COL_OPTIONS;
-
       //cache for a row's data
       mutable std::vector<QString> m_dataCache;
       //the index of the current row held in cache
@@ -121,7 +79,7 @@ namespace MantidQt
       Mantid::API::ITableWorkspace_sptr m_tWS;
 
       /// Map of column indexes to names
-      ColumnIndexNameMap m_columnNameMap;
+      ReflTableSchema::ColumnIndexNameMap m_columnNameMap;
     };
 
     /// Typedef for a shared pointer to \c QReflTableModel

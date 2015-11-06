@@ -42,7 +42,7 @@ Output:
 
 .. testoutput:: ExIRISReduction
 
-   IRS21360_graphite002_red
+   iris21360_graphite002_red
 
 .. categories::
 

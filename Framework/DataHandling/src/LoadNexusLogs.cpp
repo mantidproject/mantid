@@ -28,6 +28,52 @@ using API::MatrixWorkspace_sptr;
 using API::FileProperty;
 using std::size_t;
 
+namespace {
+
+/**
+ * @brief loadAndApplyMeasurementInfo
+ * @param file : Nexus::File pointer
+ * @param workspace : Pointer to the workspace to set logs on
+ * @return True only if reading and execution successful.
+ */
+bool loadAndApplyMeasurementInfo(::NeXus::File *const file,
+                                 API::MatrixWorkspace &workspace) {
+
+  bool successfullyApplied = false;
+  try {
+    file->openGroup("measurement", "NXcollection");
+
+    // If we can open the measurement group. We assume that the following will
+    // be avaliable.
+    file->openData("id");
+    workspace.mutableRun().addLogData(
+        new Mantid::Kernel::PropertyWithValue<std::string>("measurement_id",
+                                                           file->getStrData()));
+    file->closeData();
+    file->openData("label");
+    workspace.mutableRun().addLogData(
+        new Mantid::Kernel::PropertyWithValue<std::string>("measurement_label",
+                                                           file->getStrData()));
+    file->closeData();
+    file->openData("subid");
+    workspace.mutableRun().addLogData(
+        new Mantid::Kernel::PropertyWithValue<std::string>("measurement_subid",
+                                                           file->getStrData()));
+    file->closeData();
+    file->openData("type");
+    workspace.mutableRun().addLogData(
+        new Mantid::Kernel::PropertyWithValue<std::string>("measurement_type",
+                                                           file->getStrData()));
+    file->closeData();
+    file->closeGroup();
+    successfullyApplied = true;
+  } catch (::NeXus::Exception &) {
+    successfullyApplied = false;
+  }
+  return successfullyApplied;
+}
+}
+
 /// Empty default constructor
 LoadNexusLogs::LoadNexusLogs() {}
 
@@ -123,6 +169,9 @@ void LoadNexusLogs::exec() {
       loadNPeriods(file, workspace);
     }
   }
+
+  // If there's measurement information, load that info as logs.
+  loadAndApplyMeasurementInfo(&file, *workspace);
 
   // Freddie Akeroyd 12/10/2011
   // current ISIS implementation contains an additional indirection between

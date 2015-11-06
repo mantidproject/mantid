@@ -6,6 +6,11 @@
 namespace Mantid {
 namespace Algorithms {
 
+/**
+ * @brief The Correction struct
+ * offset:: TOF offset in unit of TOF
+ * factor:  TOF correction factor to multiply with
+ */
 struct Correction {
   Correction(double tOffset, double tFactor)
       : offset(tOffset), factor(tFactor) {}

@@ -610,7 +610,12 @@ class ISISIndirectInelasticDiagnostics(ISISIndirectInelasticBase):
                   SpectraRange=self.spectra)
 
         # Construct the result ws name.
-        self.result_names = [os.path.splitext(self.rawfiles[0])[0] + self.suffix]
+        Load(Filename=self.rawfiles[0],
+             OutputWorkspace='__temp')
+        resultWs = mtd['__temp']
+        inst_name = resultWs.getInstrument().getFullName().lower()
+        run_number = resultWs.run().getProperty('run_number').value
+        self.result_names = [inst_name + run_number + self.suffix]
 
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''

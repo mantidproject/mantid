@@ -44,7 +44,8 @@
    fun:_ZN28BRepAlgoAPI_BooleanOperation5BuildEv
    fun:_ZN18BRepAlgoAPI_CommonC1ERK12TopoDS_ShapeS2_
    ...
-   fun:_ZN6Mantid8Geometry19OCGeometryGenerator11AnalyzeRuleEPNS0_4RuleE
+   fun:_ZN6Mantid8Geometry19OCGeometryGenerator13AnalyzeObjectEv
+   ...
 }
 {
    <OpenCascade_conditional_jump_2>
@@ -54,5 +55,6 @@
    fun:_ZN28BRepAlgoAPI_BooleanOperation5BuildEv
    fun:_ZN18BRepAlgoAPI_CommonC1ERK12TopoDS_ShapeS2_
    ...
-   fun:_ZN6Mantid8Geometry19OCGeometryGenerator11AnalyzeRuleEPNS0_4RuleE
+   fun:_ZN6Mantid8Geometry19OCGeometryGenerator13AnalyzeObjectEv
+   ...
 }

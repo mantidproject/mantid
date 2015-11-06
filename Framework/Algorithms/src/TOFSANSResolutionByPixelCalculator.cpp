@@ -28,18 +28,16 @@ double TOFSANSResolutionByPixelCalculator::getWavelengthIndependentFactor(
  * @param q: the momentum transfer
  * @param wavelength: the neutron's wavelength
  * @param deltaWavelength: the wavelength spread for that wavelength
- * @param lCollim: the collimation length
+ * @param l1: the l1 length
  * @param l2: the L2 length
  * @returns the sigma q value
  */
 
 double TOFSANSResolutionByPixelCalculator::getSigmaQValue(
     double moderatorValue, double wavlengthIndependentFactor, double q,
-    double wavelength, double deltaWavelength, double lCollim,
-    double l2) const {
+    double wavelength, double deltaWavelength, double l1, double l2) const {
   // Calculate the moderator uncertainty
-  const double sigModerator =
-      moderatorValue * 3.9560 / (1000.0 * (lCollim + l2));
+  const double sigModerator = moderatorValue * 3.9560 / (1000.0 * (l1 + l2));
 
   // Calculate the wavelength uncertainty
   const double sigWavelengthSquared =
