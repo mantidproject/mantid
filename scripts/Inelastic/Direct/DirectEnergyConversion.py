@@ -370,7 +370,7 @@ class DirectEnergyConversion(object):
         # and verify some other properties which can be wrong before starting a
         # long run.
         prop_man.log("****************************************************************")
-        prop_man.log("*** ISIS CONVERT TO ENERGY TRANSFER WRORKFLOW STARTED **********")
+        prop_man.log("*** ISIS CONVERT TO ENERGY TRANSFER WORKFLOW STARTED  **********")
         prop_man.validate_properties()
         prop_man.log("*** Loading or retrieving sample run: {0}".format(prop_man.sample_run))
         prop_man.log("****************************************************************")
@@ -386,6 +386,13 @@ class DirectEnergyConversion(object):
         # Check auto-ei mode and calculate incident energies if necessary
         if PropertyManager.incident_energy.autoEi_mode():
             mon_ws = PropertyManager.sample_run.get_monitors_ws()
+            # sum monitor spectra if this is requested
+            ei_mon_spec = self.ei_mon_spectra
+            if PropertyManager.ei_mon_spectra.need_to_sum_monitors(prop_man):
+                ei_mon_spec,mon_ws = self.sum_monitors_spectra(mon_ws,sample_ws,ei_mon_spec)
+            else:
+                pass
+
             try:
                 PropertyManager.incident_energy.set_auto_Ei(mon_ws,prop_man)
                 EiToProcessAvailible = True
@@ -712,7 +719,7 @@ class DirectEnergyConversion(object):
         return mono_s
 
 #-------------------------------------------------------------------------------
-    def sum_monitors_spectra(self,monitor_ws,ei_mon_spectra):
+    def sum_monitors_spectra(self,monitor_ws,sample_ws,ei_mon_spectra):
         """Sum monitors spectra for all spectra, specified in the spectra list(s)
            and create monitor workspace containing only the spectra summed and organized
            according to ei_mon_spectra tuple.
@@ -742,6 +749,15 @@ class DirectEnergyConversion(object):
         # Looks like a bug in AppendSpectra
         spec_num1 = monitor_ws.getSpectrum(0).getSpectrumNo()
         spec_num2 = monitor_ws.getSpectrum(1).getSpectrumNo()
+
+        sample_ws.setMonitorWorkspace(monitor_ws)
+        self.prop_man.ei_mon_spectra = (spec_num1,spec_num2)
+        mon2_norm_spec = self.prop_man.mon2_norm_spec
+        if mon2_norm_spec in spectra_list1:
+            self.prop_man.mon2_norm_spec = spec_num1
+        if mon2_norm_spec in spectra_list2:
+            self.prop_man.mon2_norm_spec = spec_num2
+
 
         return (spec_num1,spec_num2),monitor_ws
 

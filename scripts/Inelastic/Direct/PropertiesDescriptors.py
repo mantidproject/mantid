@@ -286,15 +286,16 @@ class IncidentEnergy(PropDescriptor):
             return
         # Calculate autoEi
         self._autoEiCalculated = False
-        ei_mon = instance.ei_mon_spectra;
-        guess_ei_ws = GetAllEi(Workspace=monitor_ws,Monitor1SpecID = ei_mon[0],\
-                               Monitor2SpecID = ei_mon[1])
+
+        ei_mon_spec = instance.ei_mon_spectra;
+        guess_ei_ws = GetAllEi(Workspace=monitor_ws,Monitor1SpecID = ei_mon_spec[0],\
+                               Monitor2SpecID = ei_mon_spec[1])
         guessEi  = guess_ei_ws.readX(0);
         fin_ei = []
         for ei in guessEi:
             try:
                 ei_ref,t_peak,monIndex,tZero=GetEi(InputWorkspace=monitor_ws,\
-                                             Monitor1Spec=ei_mon[0], Monitor2Spec=ei_mon[1], EnergyEstimate=ei)
+                                             Monitor1Spec=ei_mon_spec[0], Monitor2Spec=ei_mon_spec[1], EnergyEstimate=ei)
                 fin_ei.append(ei_ref)
 #pylint: disable=broad-except
             except:
