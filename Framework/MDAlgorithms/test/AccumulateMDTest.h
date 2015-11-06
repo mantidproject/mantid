@@ -32,7 +32,7 @@ public:
 
   void test_pad_parameter_vector_empty() {
     std::vector<double> test_param_vector;
-    unsigned long grow_to = 8;
+    size_t grow_to = 8;
     Mantid::MDAlgorithms::padParameterVector(test_param_vector, grow_to);
 
     TS_ASSERT_EQUALS(test_param_vector.size(), 8);
@@ -41,7 +41,7 @@ public:
 
   void test_pad_parameter_vector_values() {
     std::vector<double> test_param_vector(1, 3.7);
-    unsigned long grow_to = 8;
+    size_t grow_to = 8;
     Mantid::MDAlgorithms::padParameterVector(test_param_vector, grow_to);
 
     TS_ASSERT_EQUALS(test_param_vector.size(), 8);

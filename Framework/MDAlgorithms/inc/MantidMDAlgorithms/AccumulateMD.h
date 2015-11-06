@@ -1,6 +1,7 @@
 #ifndef MANTID_MDALGORITHMS_ACCUMULATEMD_H_
 #define MANTID_MDALGORITHMS_ACCUMULATEMD_H_
 
+#include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceHistory.h"
@@ -18,7 +19,7 @@ namespace MDAlgorithms {
 
 /// Reduce the vector of input data to only data files and workspaces which can
 /// be found
-void filterToExistingSources(std::vector<std::string> &input_data,
+void MANTID_MDALGORITHMS_DLL filterToExistingSources(std::vector<std::string> &input_data,
                              std::vector<double> &psi, std::vector<double> &gl,
                              std::vector<double> &gs,
                              std::vector<double> &efix);
@@ -28,7 +29,7 @@ bool dataExists(const std::string &data_name);
 
 /// Reduce the vector of input data to only data files and workspaces which are
 /// not found in the vector of data currently in the workspace
-void filterToNew(std::vector<std::string> &input_data,
+void MANTID_MDALGORITHMS_DLL filterToNew(std::vector<std::string> &input_data,
                  std::vector<std::string> &current_data,
                  std::vector<double> &psi, std::vector<double> &gl,
                  std::vector<double> &gs, std::vector<double> &efix);
@@ -45,14 +46,14 @@ getHistoricalDataSources(const API::WorkspaceHistory &ws_history);
 
 /// Extract names of data sources from workspace history and form a set of
 /// historical data sources
-void insertDataSources(const std::string &data_sources,
+void MANTID_MDALGORITHMS_DLL insertDataSources(const std::string &data_sources,
                        std::set<std::string> &historical_data_sources);
 
 /// Test if a file with the given full path name exists
 bool fileExists(const std::string &filename);
 
 /// Pad vector of parameters to given length
-extern void padParameterVector(std::vector<double> &param_vector,
+extern void MANTID_MDALGORITHMS_DLL padParameterVector(std::vector<double> &param_vector,
                         const size_t grow_to_size);
 
 /** AccumulateMD : Algorithm for appending new data to a MDHistoWorkspace
