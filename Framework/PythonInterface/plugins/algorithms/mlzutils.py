@@ -3,60 +3,6 @@ from mantid.api import AlgorithmManager
 import numpy as np
 
 
-def cleanup(wslist):
-    """
-    deletes workspaces from list
-        @param wslist List of names of workspaces to delete.
-    """
-    for wsname in wslist:
-        if api.AnalysisDataService.doesExist(wsname):
-            api.DeleteWorkspace(wsname)
-    return
-
-
-def same_dimensions(wslist):
-    """
-    Checks whether all given workspaces have
-    the same number of dimensions
-    and the same number of histograms
-    and the same number of bins
-        @param wslist List of workspace names
-        @returns True if all dimensions are the same or raises exception if not
-    """
-    ndims = []
-    nhists = []
-    nbins = []
-    for wsname in wslist:
-        wks = api.AnalysisDataService.retrieve(wsname)
-        ndims.append(wks.getNumDims())
-        nhists.append(wks.getNumberHistograms())
-        nbins.append(wks.blocksize())
-
-    ndi = ndims[0]
-    nhi = nhists[0]
-    nbi = nbins[0]
-    if ndims.count(ndi) == len(ndims) and nhists.count(nhi) == len(nhists) and nbins.count(nbi) == len(nbins):
-        return True
-    else:
-        raise RuntimeError("Error: all input workspaces must have the same dimensions!.")
-
-
-def ws_exist(wslist, logger):
-    """
-    Checks whether all workspaces from the given list exist
-        @param wslist List of workspaces
-        @param logger Logger self.log()
-        @returns True if all workspaces exist or raises exception if not
-    """
-    for wsname in wslist:
-        if not api.AnalysisDataService.doesExist(wsname):
-            message = "Workspace " + wsname + " does not exist!"
-            logger.error(message)
-            raise RuntimeError(message)
-
-    return True
-
-
 def do_fit_gaussian(workspace, index, logger):
     """
     Calculates guess values on peak centre, sigma and peak height.
