@@ -1,11 +1,16 @@
 .. _Run:
 
+===
 Run
 ===
 
-What is it?
------------
 
+.. contents::
+  :local:
+
+What the Run object
+-------------------
+    
 A Run holds data related to the properties of the experimental run, e.g.
 good proton charge, total frames etc. It also holds all of the sample
 log files as sets of time-series data. Currently used properties within
@@ -14,6 +19,137 @@ collected. Where an instrument has been modified over time, and multiple
 :ref:`instrument definition files <InstrumentDefinitionFile>` have been
 defined for it, this property is used to loads the IDF valid when the
 data were collected.
+
+
+Working with Run object in Python
+---------------------------------
+
+You can look at the :ref:`Run API reference <mantid.api.Run>` for a full list of properties and operations, but here are some of the key ones.
+
+Getting the Run Object from a Workspace
+#######################################
+
+The methods for getting a variable to a MatrixWorkspace is the same as shown in the :ref:`Workspace <Workspace-Accessing_Workspaces>` help page.
+
+If you want to check if a variable points to something that is a Matrix Workspace you can use this:
+
+.. testsetup:: WorkspaceRun
+
+  ws = CreateSampleWorkspace()
+
+.. testcode:: WorkspaceRun
+
+  run = ws.getRun()
+
+.. testoutput:: WorkspaceRun
+  :hide:
+
+
+Run Properties
+##############
+
+.. testSetup:: RunPropertiestest
+
+  ws = Load("MAR11060")
+
+.. testcode:: RunPropertiestest
+
+  run = ws.getRun()
+
+  # Set the start and end time of a run
+  run.setStartAndEndTime(DateAndTime("2015-01-27T11:00:00"),
+  DateAndTime("2015-01-27T11:57:51"))
+
+  # Get the start and end time of a run
+  print run.startTime()
+  print run.endTime()
+   
+  # Get the total good proton charge
+  print run.getProtonCharge()
+
+.. testoutput:: RunPropertiestest
+  :hide:
+  :options: +ELLIPSIS,+NORMALIZE_WHITESPACE
+
+  2015-01-27T11:00:00 
+  2015-01-27T11:57:51 
+  121.470...
+  
+
+Accessing Properties
+####################
+
+Listing all properties
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. testcode:: RunListPropertiestest
+
+  ws = Load("MAR11060")
+
+  run = ws.getRun()
+
+  # Get a list of the property names 
+  print run.keys()
+
+  # Loop over all of the Properties
+  for prop in run.getProperties():
+      print prop.name, prop.value
+
+.. testoutput:: RunListPropertiestest
+  :hide:
+  :options: +ELLIPSIS,+NORMALIZE_WHITESPACE
+
+  ['run_header', ... 'run_title']
+  run_header MAR 11060                      Vanadium white beam      23-JUN-2005  10:18:46    121.5
+  ...
+  run_title Vanadium white beam                              jaws=50x50 nim=50 dsc=0        
+
+Getting a specific property
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. testcode:: GetPropertytest
+
+  ws = CreateSampleWorkspace()
+
+  run = ws.getRun()
+
+  # Check a propetry exists
+  print "Is runstart present: {0}".format(("run_start" in run.keys()))
+  # or
+  print "Is runstart present: {0}".format(run.hasProperty("run_start"))
+
+  #get the Property
+  runStart = run.getProperty("run_start")
+  print "Property name: " + runStart.name
+  print "Property value: " + runStart.value
+
+.. testoutput:: GetPropertytest
+  :hide:
+  :options: +ELLIPSIS,+NORMALIZE_WHITESPACE
+
+  Is runstart present: True
+  Is runstart present: True
+  Property name: run_start
+  Property value: 2010-01-01T00:00:00
+
+The Gonioneter
+##############
+
+If the instrument conatains a Goniometer it can be accessed from the run object.
+
+.. testcode:: GetGoniometertest
+
+  wg=CreateSingleValuedWorkspace()
+  AddSampleLog(wg,"Motor1","45.","Number")
+  SetGoniometer(wg,Axis0="Motor1,0,1,0,1",Axis1="5,0,1,0,1")
+
+  print "Goniometer angles: ",wg.getRun().getGoniometer().getEulerAngles('YZY')
+
+.. testoutput:: GetPropertytest
+  :hide:
+  :options: +NORMALIZE_WHITESPACE
+
+  Goniometer angles:  [50,0,0]
 
 What information is stored here?
 --------------------------------
