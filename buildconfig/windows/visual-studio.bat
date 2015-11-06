@@ -7,4 +7,4 @@
 call %~dp0buildenv.bat
 
 :: Start IDE
-"%VS140COMNTOOLS%\..\IDE\devenv.exe"
+"%VS140COMNTOOLS%\..\IDE\devenv.exe" Mantid.sln
