@@ -98,6 +98,7 @@ private:
   Kernel::V3D m_samplePos;
   Kernel::V3D m_sourcePos;
 
+  size_t m_iColPt;
   size_t m_iColFilename;
   size_t m_iColStartDetID;
 

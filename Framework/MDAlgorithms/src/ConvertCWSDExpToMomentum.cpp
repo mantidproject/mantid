@@ -25,7 +25,7 @@ DECLARE_ALGORITHM(ConvertCWSDExpToMomentum)
 /** Constructor
  */
 ConvertCWSDExpToMomentum::ConvertCWSDExpToMomentum()
-    : m_iColFilename(2), m_iColStartDetID(3), m_setQRange(true),
+    : m_iColPt(1), m_iColFilename(2), m_iColStartDetID(3), m_setQRange(true),
       m_isBaseName(false) {}
 
 //----------------------------------------------------------------------------------------------
@@ -255,7 +255,8 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
     }
 
     // Convert from MatrixWorkspace to MDEvents and add events to
-    int runid = static_cast<int>(ir) + 1;
+    // int runid = static_cast<int>(ir) + 1;
+    int runid = m_expDataTableWS->cell<int>(ir, m_iColPt);
     if (!usevirtual)
       start_detid = 0;
     convertSpiceMatrixToMomentumMDEvents(spicews, usevirtual, start_detid,
@@ -404,7 +405,8 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
     ++nummdevents;
   }
 
-  g_log.information() << "Imported Matrixworkspace: Max. Signal = " << maxsignal
+  g_log.information() << "Imported Matrixworkspace of run number " << runnumber
+                      << ": Max. Signal = " << maxsignal
                       << ", Add " << nummdevents << " MDEvents "
                       << "\n";
 
