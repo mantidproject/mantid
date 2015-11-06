@@ -266,7 +266,7 @@ public:
     // search result.
     EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
         .Times(Exactly(static_cast<int>(data.size())))
-        .WillRepeatedly(Return(MeasurementItem::InvalidMeasurement("Abort!")));
+        .WillRepeatedly(Return(MeasurementItem::InvalidMeasurementItem("Abort!")));
 
     auto mockCatInfo = new MockICatalogInfo;
     // We expect that every location will be translated/transformed to make it
