@@ -11,7 +11,7 @@
 #include <algorithm>
 
 #include "MantidKernel/Exception.h"
-
+#include "MantidKernel/make_unique.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Strings.h"
@@ -72,15 +72,16 @@ void SurfaceFactory::registerSurface()
   Register tallies to be used
 */
 {
-  SGrid.push_back(std::make_pair("Plane", std::unique_ptr<Surface>(new Plane)));
   SGrid.push_back(
-      std::make_pair("Cylinder", std::unique_ptr<Surface>(new Cylinder)));
-  SGrid.push_back(std::make_pair("Cone", std::unique_ptr<Surface>(new Cone)));
+      std::make_pair("Plane", Mantid::Kernel::make_unique<Plane>()));
+  SGrid.push_back(
+      std::make_pair("Cylinder", Mantid::Kernel::make_unique<Cylinder>()));
+  SGrid.push_back(std::make_pair("Cone", Mantid::Kernel::make_unique<Cone>()));
   // SGrid["Torus"]=new Torus;
   SGrid.push_back(
-      std::make_pair("General", std::unique_ptr<Surface>(new General)));
+      std::make_pair("General", Mantid::Kernel::make_unique<General>()));
   SGrid.push_back(
-      std::make_pair("Sphere", std::unique_ptr<Surface>(new Sphere)));
+      std::make_pair("Sphere", Mantid::Kernel::make_unique<Sphere>()));
 
   ID['c'] = "Cylinder";
   ID['k'] = "Cone";

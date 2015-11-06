@@ -25,6 +25,8 @@ class MANTID_GEOMETRY_DLL Quadratic : public Surface {
 private:
   void matrixForm(Kernel::Matrix<double> &, Kernel::V3D &, double &) const;
   Quadratic *doClone() const = 0;
+  Quadratic(const Quadratic &);
+  Quadratic &operator=(const Quadratic &);
 
 protected:
   std::vector<double> BaseEqn; ///< Base equation (as a 10 point vector)
@@ -33,8 +35,6 @@ public:
   static const int Nprecision = 10; ///< Precision of the output
 
   Quadratic();
-  Quadratic(const Quadratic &);
-  Quadratic &operator=(const Quadratic &);
   std::unique_ptr<Quadratic> clone() const;
 
   /// Accept visitor for line calculation

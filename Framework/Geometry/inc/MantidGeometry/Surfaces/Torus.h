@@ -51,15 +51,16 @@ private:
   void rotate(const Kernel::Matrix<double> &);
   void displace(const Kernel::V3D &);
   Torus *doClone() const;
+  Torus &operator=(const Torus &);
+  Torus(const Torus &);
 
 public:
   /// Public identifier
   virtual std::string className() const { return "Torus"; }
 
   Torus();
-  Torus(const Torus &);
   std::unique_ptr<Torus> clone() const;
-  Torus &operator=(const Torus &);
+
   int operator==(const Torus &) const;
 
   /// Accept visitor for line calculation
