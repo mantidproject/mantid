@@ -435,11 +435,13 @@ std::string EnggDiffractionViewQtGUI::currentCeriaNo() const {
 }
 
 std::vector<std::string> EnggDiffractionViewQtGUI::newVanadiumNo() const {
-  return qListToVector(m_uiTabCalib.lineEdit_new_vanadium_num->getFilenames());
+  return qListToVector(m_uiTabCalib.lineEdit_new_vanadium_num->getFilenames(),
+                       m_uiTabCalib.lineEdit_new_vanadium_num->isValid());
 }
 
 std::vector<std::string> EnggDiffractionViewQtGUI::newCeriaNo() const {
-  return qListToVector(m_uiTabCalib.lineEdit_new_ceria_num->getFilenames());
+  return qListToVector(m_uiTabCalib.lineEdit_new_ceria_num->getFilenames(),
+                       m_uiTabCalib.lineEdit_new_ceria_num->isValid());
 }
 
 std::string EnggDiffractionViewQtGUI::currentCalibFile() const {
@@ -760,24 +762,32 @@ void EnggDiffractionViewQtGUI::browseTextureDetGroupingFile() {
 }
 
 std::vector<std::string> EnggDiffractionViewQtGUI::focusingRunNo() const {
-  return qListToVector(m_uiTabFocus.lineEdit_run_num->getFilenames());
+  return qListToVector(m_uiTabFocus.lineEdit_run_num->getFilenames(),
+                       m_uiTabFocus.lineEdit_run_num->isValid());
 }
 
 std::vector<std::string>
 EnggDiffractionViewQtGUI::focusingCroppedRunNo() const {
-  return qListToVector(m_uiTabFocus.lineEdit_cropped_run_num->getFilenames());
+  return qListToVector(m_uiTabFocus.lineEdit_cropped_run_num->getFilenames(),
+                       m_uiTabFocus.lineEdit_cropped_run_num->isValid());
 }
 
 std::vector<std::string>
 EnggDiffractionViewQtGUI::focusingTextureRunNo() const {
-  return qListToVector(m_uiTabFocus.lineEdit_texture_run_num->getFilenames());
+  return qListToVector(m_uiTabFocus.lineEdit_texture_run_num->getFilenames(),
+                       m_uiTabFocus.lineEdit_texture_run_num->isValid());
 }
 
 std::vector<std::string>
-EnggDiffractionViewQtGUI::qListToVector(QStringList list) const {
+EnggDiffractionViewQtGUI::qListToVector(QStringList list,
+                                        bool validator) const {
   std::vector<std::string> vec;
-  foreach (QString str, list) { vec.push_back(str.toStdString()); }
-  return vec;
+  if (validator) {
+    foreach (QString str, list) { vec.push_back(str.toStdString()); }
+    return vec;
+  } else {
+    return vec;
+  }
 }
 
 std::string EnggDiffractionViewQtGUI::focusingDir() const {

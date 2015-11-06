@@ -236,6 +236,9 @@ private:
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;
 
+  /// string to use for invalid run number error message
+  const static std::string g_runNumberErrorStr;
+
   /// whether to allow users to give the output calibration filename
   const static bool g_askUserCalibFilename;
 

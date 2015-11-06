@@ -91,7 +91,8 @@ public:
 
   std::vector<std::string> newCeriaNo() const;
 
-  std::vector<std::string> qListToVector(QStringList list) const;
+  std::vector<std::string> qListToVector(QStringList list,
+                                         bool validator) const;
 
   std::string outCalibFilename() const { return m_outCalibFilename; }
 
