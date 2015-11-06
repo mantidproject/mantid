@@ -1,1 +1,2 @@
-thirdparty-msvc2015
+src/*
+tmp/*
