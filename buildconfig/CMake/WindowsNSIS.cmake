@@ -103,16 +103,20 @@ set ( QT_DIST_DLLS
     QtTest4.dll
     QtWebKit4.dll
     QtXml4.dll
-    QtXmlPatterns4.dll )
+    QtXmlPatterns4.dll 
+    qscintilla2.dll )
 set ( MISC_GUI_DIST_DLLS
-    qscintilla2.dll
     qwt5.dll
     qwtplot3d.dll
 )
-set ( DIST_DLLS ${BOOST_DIST_DLLS} ${POCO_DIST_DLLS} ${OCC_DIST_DLLS} ${MISC_CORE_DIST_DLLS}
-                ${QT_DIST_DLLS} ${MISC_GUI_DIST_DLLS} )
-foreach( DLL ${DIST_DLLS} )
+set ( BIN_DLLS ${BOOST_DIST_DLLS} ${POCO_DIST_DLLS} ${OCC_DIST_DLLS} ${MISC_CORE_DIST_DLLS}
+                 ${MISC_GUI_DIST_DLLS} )
+foreach( DLL ${BIN_DLLS} )
   install ( FILES ${THIRD_PARTY_DIR}/bin/${DLL} DESTINATION bin )
+endforeach()
+set ( QT_INSTALL_PREFIX ${THIRD_PARTY_DIR}/lib/qt4 )
+foreach( DLL ${QT_DIST_DLLS} )
+  install ( FILES ${QT_INSTALL_PREFIX}/lib/${DLL} DESTINATION bin )
 endforeach()
 
 ###########################################################################
@@ -121,7 +125,7 @@ endforeach()
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/installers/WinInstaller/qt.conf DESTINATION bin )
 # imageformats
 set ( QT_PLUGINS_IMAGEFORMAT qgif4.dll qico4.dll qjpeg4.dll qmng4.dll qsvg4.dll qtga4.dll qtiff4.dll )
-set ( QT_PLUGIN_DIR ${THIRD_PARTY_DIR}/lib/qt4/plugins )
+set ( QT_PLUGIN_DIR ${QT_INSTALL_PREFIX}/plugins )
 foreach( DLL ${QT_PLUGINS_IMAGEFORMAT} )
   install ( FILES ${QT_PLUGIN_DIR}/imageformats/${DLL} DESTINATION plugins/qt/imageformats )
 endforeach()
