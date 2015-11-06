@@ -7,7 +7,8 @@
 :: It is assumed that tools such as CMake & Git are already on the PATH
 
 :: Third Party 
-set THIRD_PARTY_DIR=@THIRD_PARTY_DIR@
+set CM_THIRD_PARTY_DIR=@THIRD_PARTY_DIR@
+set THIRD_PARTY_DIR=%CM_THIRD_PARTY_DIR:/=\%
 
 :: Qt4 - exes are in bin & dlls are in lib
 set QT4_BIN=%THIRD_PARTY_DIR%\lib\qt4\bin;%THIRD_PARTY_DIR%\lib\qt4\lib
