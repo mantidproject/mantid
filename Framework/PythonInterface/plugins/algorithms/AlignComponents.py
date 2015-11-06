@@ -196,6 +196,7 @@ class AlignComponents(PythonAlgorithm):
         if wks is None:
             wks = api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value,
                                           OutputWorkspace="alignedWorkspace")
+        wks_name=wks.getName()
 
         components = self.getProperty("ComponentList").value
 
@@ -263,7 +264,7 @@ class AlignComponents(PythonAlgorithm):
                                    self._initialPos[5] + self.getProperty("MaxRotZ").value))
 
             results = minimize(self._minimisation_func, x0=x0List,
-                               args=(wks,
+                               args=(wks_name,
                                      component,
                                      firstIndex,
                                      lastIndex,
@@ -273,6 +274,7 @@ class AlignComponents(PythonAlgorithm):
 
             # Apply the results to the output workspace
             xmap = self._mapOptions(results.x)
+            wks=api.mtd[wks_name]
 
             if self._move:
                 api.MoveInstrumentComponent(wks, component, X=xmap[0], Y=xmap[1], Z=xmap[2],
@@ -290,20 +292,20 @@ class AlignComponents(PythonAlgorithm):
                           " Final rotation is " + str(comp.getRotation().getEulerAngles()))
 
     #pylint: disable=too-many-arguments
-    def _minimisation_func(self, x_0, wks, component, firstIndex, lastIndex, difc, mask):
+    def _minimisation_func(self, x_0, wks_name, component, firstIndex, lastIndex, difc, mask):
         xmap = self._mapOptions(x_0)
 
         if self._move:
-            api.MoveInstrumentComponent(wks, component, X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False)
+            api.MoveInstrumentComponent(wks_name, component, X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False)
 
         if self._rotate:
             (rotw, rotx, roty, rotz) = self._eulerToAngleAxis(xmap[3], xmap[4], xmap[5])
-            api.RotateInstrumentComponent(wks, component, X=rotx, Y=roty, Z=rotz, Angle=rotw,
+            api.RotateInstrumentComponent(wks_name, component, X=rotx, Y=roty, Z=rotz, Angle=rotw,
                                           RelativeRotation=False)
 
-        wks = api.CalculateDIFC(wks, OutputWorkspace=wks)
+        wks_new = api.CalculateDIFC(InputWorkspace=wks_name, OutputWorkspace=wks_name)
 
-        difc_new = wks.extractY().flatten()[firstIndex:lastIndex + 1]
+        difc_new = wks_new.extractY().flatten()[firstIndex:lastIndex + 1]
 
         if self._masking:
             difc_new = np.ma.masked_array(difc_new, mask)
