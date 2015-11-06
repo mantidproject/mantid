@@ -57,6 +57,7 @@ find_package ( MuParser REQUIRED )
 find_package ( JsonCPP REQUIRED )
 include_directories ( SYSTEM ${JSONCPP_INCLUDE_DIR} )
 
+set ( ENABLE_OPENCASCADE ON CACHE BOOL "Enable OpenCascade-based 3D visualisation" )
 if (ENABLE_OPENCASCADE)
   find_package ( OpenCascade REQUIRED )
   add_definitions ( -DENABLE_OPENCASCADE )

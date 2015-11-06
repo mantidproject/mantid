@@ -82,10 +82,6 @@ if (COVERALLS)
     coveralls_turn_on_coverage()
 endif()
 
-if (NOT ENABLE_OPENCASCADE)
- set ( ENABLE_OPENCASCADE ON CACHE BOOL "Enable OpenCascade-based 3D visualisation")
-endif()
-
 ###########################################################################
 # Find qwt. Needs to be version 5
 ###########################################################################
