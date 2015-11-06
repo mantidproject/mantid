@@ -872,18 +872,9 @@ class RunDescriptor(PropDescriptor):
             monitors_separate = True
 
         spec_to_mon = RunDescriptor._holder.spectra_to_monitors_list
-        combined_spec_list = []
+        combined_spec_list = prop_helpers.process_prop_list(mon_ws,"CombinedSpectraIDList")
         if monitors_separate and spec_to_mon:
             mon_ws_name = mon_ws.name()
-            if mon_ws.run().hasProperty("CombinedSpectraIDList"):
-                spec_id_str = mon_ws.run().getProperty('CombinedSpectraIDList').value
-                spec_id_str = spec_id_str.translate(None,'[]').strip()
-                spec_id_listS = spec_id_str.split(',')
-                combined_spec_list = []
-                for val in spec_id_listS:
-                    combined_spec_list.append(int(val))
-            else:
-                combined_spec_list = []
 
             for specID in spec_to_mon:
                 if not specID in combined_spec_list:

@@ -15,7 +15,7 @@ import Direct.CommonFunctions  as common
 import Direct.diagnostics      as diagnostics
 from Direct.PropertyManager  import PropertyManager
 from Direct.RunDescriptor    import RunDescriptor
-from Direct.ReductionHelpers import extract_non_system_names
+from Direct.ReductionHelpers import extract_non_system_names,process_prop_list
 
 
 
@@ -395,7 +395,7 @@ class DirectEnergyConversion(object):
                 pass
 
             try:
-                PropertyManager.incident_energy.set_auto_Ei(mon_ws,prop_man)
+                PropertyManager.incident_energy.set_auto_Ei(mon_ws,prop_man,ei_mon_spec)
                 EiToProcessAvailible = True
             except RuntimeError as er:
                 prop_man.log('*** Error while calculating autoEi: {0}. See algorithm log for details.'.\
@@ -728,42 +728,46 @@ class DirectEnergyConversion(object):
            Returns tuple of two spectra numbers, containing in the
            new summed monitors workspace and pointer to the new workspace itself.
         """
-        spectra_list1=ei_mon_spectra[0]
-        spectra_list2=ei_mon_spectra[1]
-        if not isinstance(spectra_list1,list):
-            spectra_list1 = [spectra_list1]
-        spec_num1,wsIDs1 = self._process_spectra_list(monitor_ws,spectra_list1,'spectr_ws1')
-
-        if not isinstance(spectra_list2,list):
-            spectra_list2 = [spectra_list2]
-        spec_num2,wsIDs2 = self._process_spectra_list(monitor_ws,spectra_list2,'spectr_ws2')
+        existing_list = process_prop_list(monitor_ws,"CombinedSpectraIDList")
         monitor_ws_name = monitor_ws.name()
-        DeleteWorkspace(monitor_ws_name)
-        AppendSpectra(InputWorkspace1='spectr_ws1',InputWorkspace2='spectr_ws2',OutputWorkspace=monitor_ws_name)
-        wsIDs = wsIDs1+wsIDs2
+        if len(existing_list) == 0:
+            spectra_list1=ei_mon_spectra[0]
+            spectra_list2=ei_mon_spectra[1]
+            if not isinstance(spectra_list1,list):
+                spectra_list1 = [spectra_list1]
+            spec_num1 = self._process_spectra_list(monitor_ws,spectra_list1,'spectr_ws1')
 
-        if 'spectr_ws1' in mtd:
-            DeleteWorkspace('spectr_ws1')
-        if 'spectr_ws2' in mtd:
-            DeleteWorkspace('spectr_ws2')
-        monitor_ws = mtd[monitor_ws_name]
-        AddSampleLog(monitor_ws,LogName='CombinedSpectraIDList',LogText=str(spectra_list1+spectra_list2),LogType='String')
+            if not isinstance(spectra_list2,list):
+                spectra_list2 = [spectra_list2]
+            spec_num2 = self._process_spectra_list(monitor_ws,spectra_list2,'spectr_ws2')
+
+            DeleteWorkspace(monitor_ws_name)
+            AppendSpectra(InputWorkspace1='spectr_ws1',InputWorkspace2='spectr_ws2',OutputWorkspace=monitor_ws_name)
+
+            if 'spectr_ws1' in mtd:
+                DeleteWorkspace('spectr_ws1')
+            if 'spectr_ws2' in mtd:
+                DeleteWorkspace('spectr_ws2')
+            monitor_ws = mtd[monitor_ws_name]
+            AddSampleLog(monitor_ws,LogName='CombinedSpectraIDList',LogText=str(spectra_list1+spectra_list2),LogType='String')
+        else:
+            pass
         # Weird operation. It looks like the spectra numbers obtained from
         # AppendSpectra operation depend on instrument.
         # Looks like a bug in AppendSpectra
         spec_num1 = monitor_ws.getSpectrum(0).getSpectrumNo()
         spec_num2 = monitor_ws.getSpectrum(1).getSpectrumNo()
 
-        self.prop_man.ei_mon_spectra = (spec_num1,spec_num2)
-        mon2_norm_spec = self.prop_man.mon2_norm_spec
-        if mon2_norm_spec in spectra_list1:
-            self.prop_man.mon2_norm_spec = spec_num1
-        if mon2_norm_spec in spectra_list2:
-            self.prop_man.mon2_norm_spec = spec_num2
+        #self.prop_man.ei_mon_spectra = (spec_num1,spec_num2)
+        #mon2_norm_spec = self.prop_man.mon2_norm_spec
+        #if mon2_norm_spec in spectra_list1:
+        #    self.prop_man.mon2_norm_spec = spec_num1
+        #if mon2_norm_spec in spectra_list2:
+        #    self.prop_man.mon2_norm_spec = spec_num2
 
 
         return (spec_num1,spec_num2),monitor_ws
-
+    #
     def _process_spectra_list(self,workspace,spectra_list,target_ws_name='SpectraWS'):
         """Method moves all detectors of the spectra list into the same position and
            sums the specified spectra in the workspace"""
@@ -792,7 +796,7 @@ class DirectEnergyConversion(object):
         ws = mtd[target_ws_name]
         sp = ws.getSpectrum(0)
         spectrum_num = sp.getSpectrumNo()
-        return spectrum_num,wsIDs
+        return spectrum_num
 #-------------------------------------------------------------------------------
     def get_ei(self, data_run, ei_guess):
         """ Calculate incident energy of neutrons and the time of the of the

@@ -385,3 +385,19 @@ def parse_run_file_name(run_string):
         fext     = fext[0]
     # extensions should be either all the same or all defined
     return (filepath,filenum,fext)
+#
+def process_prop_list(workspace,logName="CombinedSpectraIDList"):
+    """Method process log, which discribes list of spectra, attached to
+       the workspace
+    """
+    if workspace.run().hasProperty(logName):
+        spec_id_str = workspace.run().getProperty(logName).value
+        spec_id_str = spec_id_str.translate(None,'[]').strip()
+        spec_id_listS = spec_id_str.split(',')
+        spec_list = []
+        for val in spec_id_listS:
+            spec_list.append(int(val))
+    else:
+        spec_list = []
+    return spec_list
+

@@ -605,7 +605,9 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # use it for is to retrieve monitor workspace from Mantid using its name
         ei2,mon1_peak2=tReducer.get_ei(monitor_ws,62.2)
         self.assertAlmostEqual(ei2,64.95,2)
-        self.assertEqual(tReducer.prop_man.mon2_norm_spec,1)
+
+        ei2b,mon1_peak2=tReducer.get_ei(monitor_ws,62.2)
+        self.assertAlmostEqual(ei2b,64.95,2)
 
 
 
