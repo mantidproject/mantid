@@ -37,7 +37,7 @@ public:
   DateAndTime(const double seconds, const double nanoseconds);
   DateAndTime(const int32_t seconds, const int32_t nanoseconds);
   DateAndTime(const int64_t seconds, const int64_t nanoseconds);
-  DateAndTime(const std::string ISO8601_string);
+  DateAndTime(const std::string ISO8601_string, bool displayLogs = true);
   DateAndTime(const boost::posix_time::ptime _ptime);
 
   void set_from_ptime(boost::posix_time::ptime _ptime);
@@ -49,7 +49,7 @@ public:
   std::time_t to_localtime_t() const;
   std::tm to_tm() const;
 
-  void setFromISO8601(const std::string str);
+  void setFromISO8601(const std::string str, bool displayLogs = true);
   std::string toSimpleString() const;
   std::string
   toFormattedString(const std::string format = "%Y-%b-%d %H:%M:%S") const;

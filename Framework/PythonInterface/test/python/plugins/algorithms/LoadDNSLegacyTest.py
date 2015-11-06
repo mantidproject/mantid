@@ -7,12 +7,18 @@ from mantid.simpleapi import LoadDNSLegacy
 
 
 class LoadDNSLegacyTest(unittest.TestCase):
+    def setUp(self):
+        self.curtable = 'dns_coil_currents.txt'
+        self._createCurrentsTable(self.curtable)
+
+    def tearDown(self):
+        os.remove(self.curtable)
 
     def test_LoadValidData(self):
         outputWorkspaceName = "LoadDNSLegacyTest_Test1"
         filename = "dn134011vana.d_dat"
-        alg_test = run_algorithm("LoadDNSLegacy", Filename=filename,
-                                 OutputWorkspace=outputWorkspaceName, Polarisation='y')
+        alg_test = run_algorithm("LoadDNSLegacy", Filename=filename, Normalization='no',
+                                 OutputWorkspace=outputWorkspaceName, CoilCurrentsTable=self.curtable)
         self.assertTrue(alg_test.isExecuted())
 
         # Verify some values
@@ -27,7 +33,9 @@ class LoadDNSLegacyTest(unittest.TestCase):
         run = ws.getRun()
         self.assertEqual(-8.54, run.getProperty('deterota').value)
         self.assertEqual(8332872, run.getProperty('mon_sum').value)
-        self.assertEqual('y', run.getProperty('polarisation').value)
+        self.assertEqual('z', run.getProperty('polarisation').value)
+        self.assertEqual('7', run.getProperty('polarisation_comment').value)
+        self.assertEqual('no', run.getProperty('normalized').value)
         # check whether detector bank is rotated
         det = ws.getDetector(0)
         self.assertAlmostEqual(8.54, ws.detectorSignedTwoTheta(det)*180/pi)
@@ -46,14 +54,77 @@ class LoadDNSLegacyTest(unittest.TestCase):
             f.close()
         return
 
+    def _createCurrentsTable(self, filename):
+        """
+        creates a text file with the coil currents table
+        """
+        with open(filename, "w") as f:
+            f.write("polarisation\t comment\t C_a\t C_b\t C_c\t C_z\n")
+            f.write("x\t 7\t 0\t -2\t -0.77\t -2.21\n")
+            f.write("y\t 7\t 0\t 1.60\t -2.77\t -2.21\n")
+            f.write("z\t 7\t 0\t 0.11\t -0.5\t 0\n")
+            f.close()
+        return
+
     def test_LoadInvalidData(self):
         outputWorkspaceName = "LoadDNSLegacyTest_Test2"
         filename = "dns-incomplete.d_dat"
         self._createIncompleteFile(filename)
         self.assertRaises(RuntimeError, LoadDNSLegacy,  Filename=filename,
-                          OutputWorkspace=outputWorkspaceName, Polarisation='y')
+                          OutputWorkspace=outputWorkspaceName, CoilCurrentsTable=self.curtable)
         os.remove(filename)
 
+    def test_LoadNormalizeToDuration(self):
+        outputWorkspaceName = "LoadDNSLegacyTest_Test1"
+        filename = "dn134011vana.d_dat"
+        alg_test = run_algorithm("LoadDNSLegacy", Filename=filename, Normalization='duration',
+                                 OutputWorkspace=outputWorkspaceName, CoilCurrentsTable=self.curtable)
+        self.assertTrue(alg_test.isExecuted())
+
+        # Verify some values
+        ws = AnalysisDataService.retrieve(outputWorkspaceName)
+        # dimensions
+        self.assertEqual(24, ws.getNumberHistograms())
+        self.assertEqual(2,  ws.getNumDims())
+        # data array
+        self.assertAlmostEqual(31461.0/600.0, ws.readY(1))
+        self.assertAlmostEqual(13340.0/600.0, ws.readY(23))
+        # sample logs
+        run = ws.getRun()
+        self.assertEqual(-8.54, run.getProperty('deterota').value)
+        self.assertEqual(8332872, run.getProperty('mon_sum').value)
+        self.assertEqual('duration', run.getProperty('normalized').value)
+        # check whether detector bank is rotated
+        det = ws.getDetector(0)
+        self.assertAlmostEqual(8.54, ws.detectorSignedTwoTheta(det)*180/pi)
+        run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName)
+        return
+
+    def test_LoadNormalizeToMonitor(self):
+        outputWorkspaceName = "LoadDNSLegacyTest_Test5"
+        filename = "dn134011vana.d_dat"
+        alg_test = run_algorithm("LoadDNSLegacy", Filename=filename, Normalization='monitor',
+                                 OutputWorkspace=outputWorkspaceName, CoilCurrentsTable=self.curtable)
+        self.assertTrue(alg_test.isExecuted())
+
+        # Verify some values
+        ws = AnalysisDataService.retrieve(outputWorkspaceName)
+        # dimensions
+        self.assertEqual(24, ws.getNumberHistograms())
+        self.assertEqual(2,  ws.getNumDims())
+        # data array
+        self.assertAlmostEqual(31461.0/8332872.0, ws.readY(1))
+        self.assertAlmostEqual(13340.0/8332872.0, ws.readY(23))
+        # sample logs
+        run = ws.getRun()
+        self.assertEqual(-8.54, run.getProperty('deterota').value)
+        self.assertEqual(8332872, run.getProperty('mon_sum').value)
+        self.assertEqual('monitor', run.getProperty('normalized').value)
+        # check whether detector bank is rotated
+        det = ws.getDetector(0)
+        self.assertAlmostEqual(8.54, ws.detectorSignedTwoTheta(det)*180/pi)
+        run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName)
+        return
 
 if __name__ == '__main__':
     unittest.main()
