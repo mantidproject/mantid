@@ -48,6 +48,7 @@ public:
     LogMsg,            ///< need to send a message to the Mantid log system
     InstrumentChange,  ///< Instrument selection updated
     RBNumberChange,    ///< RBNumber filled-in/changed
+	PlotType,          ///< When the plot changes
     ShutDown           ///< closing the interface
   };
 
