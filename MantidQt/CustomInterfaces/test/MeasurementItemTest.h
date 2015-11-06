@@ -16,7 +16,7 @@ public:
 
   void test_invalid_construction_via_constructional_method() {
     std::string message = "Gave up";
-    auto measure = MeasurementItem::InvalidMeasurement(message);
+    auto measure = MeasurementItem::InvalidMeasurementItem(message);
     TS_ASSERT(!measure.isUseable());
     TS_ASSERT_EQUALS(message, measure.whyUnuseable());
   }
