@@ -112,7 +112,7 @@ IPropertyManager::getValue<
     return prop->operator()();
   } else {
     throw std::runtime_error("Attempt to assign property of incorrect type. "
-                             "Expected WorkspaceSingleValue.");
+                             "Expected const WorkspaceSingleValue.");
   }
 }
 

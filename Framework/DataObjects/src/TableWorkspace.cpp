@@ -320,7 +320,7 @@ IPropertyManager::getValue<DataObjects::TableWorkspace_const_sptr>(
     return prop->operator()();
   } else {
     std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected TableWorkspace.";
+                          " to incorrect type. Expected const TableWorkspace.";
     throw std::runtime_error(message);
   }
 }
