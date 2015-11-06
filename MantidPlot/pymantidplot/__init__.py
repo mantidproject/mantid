@@ -265,6 +265,36 @@ def plotSpectrum(source, indices, error_bars=False, type=-1, window=None,
 
 
 # ----------------------------------------------------------------------------------------------------
+def plotTableColumns(table, columns, type = -1):
+    """
+    This plots one or more columns from a table.
+
+    Args:
+        table: a qtiplot or mantid table (not a TableWorkspace)
+        columns: a list or a tuple of columns names to plot or a string for a single column.
+                To plot error bars add their column name(s).
+        type: curve style for plot (-1: unspecified; 0: line, default; 1: scatter/dots)
+    Returns:
+        A handle to the created window. None in case of error.
+    """
+    # This function uses qtiplot's methods for plotting tables.
+    # To be able to plot error bars all column names must be prefixed
+    # with the table name.
+    if isinstance(columns, tuple) or isinstance(columns, list):
+        columns = ['%s_%s' % (table.name(), column) for column in columns]
+        columns = tuple(columns)
+    else:
+        columns = '%s_%s' % (table.name(), columns)
+
+    graph = proxies.Graph(threadsafe_call(_qti.app.plot, table._getHeldObject(), columns, type))
+
+    if graph._getHeldObject() == None:
+        raise RuntimeError("Cannot create graph, see log for details.")
+    else:
+        return graph
+
+
+# ----------------------------------------------------------------------------------------------------
 # IPython auto-complete can't handle enumerations as defaults
 DEFAULT_2D_STYLE = int(_qti.Layer.ColorMap)
 
