@@ -4,7 +4,8 @@ import NTableWidget as tableBase
 
 # UB peak information table
 Peak_Integration_Table_Setup = [('Scan', 'int'),
-                                ('Pt', 'int'),
+                                ('Pt', 'str'),
+                                ('Merged Workspace', 'str'),
                                 ('H', 'float'),
                                 ('K', 'float'),
                                 ('L', 'float'),
@@ -34,13 +35,32 @@ class IntegratePeaksTableWidget(tableBase.NTableWidget):
         :return:
         """
         out_ws_name = info_tuple[0]
-        target_frame = info_tuple[1]
+        # target_frame = info_tuple[1]
         exp_no = info_tuple[2]
         scan_no = info_tuple[3]
 
-        self.append_row([scan_no, '', 0., 0., 0., 0., 0., 0., 0, False])
+        self.append_row([exp_no, scan_no, '', out_ws_name, 0., 0., 0., 0., 0., 0., 0, False])
 
         return
+
+    def get_md_ws_name(self, row_index):
+        """ Get MD workspace name
+        :param row_index:
+        :return:
+        """
+        j_col = Peak_Integration_Table_Setup.index(('Merged Workspace', 'str'))
+
+        return self.get_cell_value(row_index, j_col)
+
+
+    def get_scan_number(self, row_index):
+        """ Get scan number of the row
+        :param row_index:
+        :return:
+        """
+        j_col = Peak_Integration_Table_Setup.index(('Scan', 'int'))
+
+        return self.get_cell_value(row_index, j_col)
 
     def setup(self):
         """
@@ -48,6 +68,34 @@ class IntegratePeaksTableWidget(tableBase.NTableWidget):
         :return:
         """
         self.init_setup(Peak_Integration_Table_Setup)
+
+        return
+
+    def set_hkl(self, row_index, vec_hkl):
+        """
+        Set up HKL value
+        """
+        assert len(vec_hkl, 3)
+
+        # locate
+        index_h = Peak_Integration_Table_Setup.index(('H', 'float'))
+        for j in xrange(3):
+            col_index = j + index_h
+            self.update_cell_value(row_index, col_index, vec_hkl[j])
+
+        return
+
+    def set_q(self, row_index, vec_q):
+        """
+        Set up Q value
+        """
+        assert len(vec_q, 3)
+
+        # locate
+        index_q_x = Peak_Integration_Table_Setup.index(('Q_x', 'float'))
+        for j in xrange(3):
+            col_index = j + index_q_x
+            self.update_cell_value(row_index, col_index, vec_q[j])
 
         return
 

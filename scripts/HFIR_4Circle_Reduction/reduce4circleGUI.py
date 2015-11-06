@@ -127,6 +127,8 @@ class MainWindow(QtGui.QMainWindow):
         # Tab 'Integrate Peaks'
         self.connect(self.ui.pushButton_integratePeak, QtCore.SIGNAL('clicked()'),
                      self.do_integrate_peaks)
+        self.connect(self.ui.pushButton_findPeaks, QtCore.SIGNAL('clicked()'),
+                     self.do_find_peaks_integrate)
 
         # Menu
         self.connect(self.ui.actionExit, QtCore.SIGNAL('triggered()'),
@@ -169,7 +171,7 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def _init_table_widgets(self):
-        """ DOC / TODO
+        """ Initialize the table widgets
         :return:
         """
         # UB-peak table
@@ -213,28 +215,58 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_find_peaks_integrate(self):
+        """ Find the centre of the 3D peak of the merged MD workspace
+        :return:
+        """
+        row_index_list = self.ui.tableWidget_peakIntegration.get_selected_rows()
+
+        for i_row in row_index_list:
+            md_ws_name = self.ui.tableWidget_peakIntegration.get_md_ws_name(i_row)
+            status, peak_centre_tuple = self._myControl.find_peak_centre_md(md_ws_name)
+            if status is True:
+                q_centre, hkl_centre = peak_centre_tuple
+                self.ui.tableWidget_peakIntegration.set_q(i_row, q_centre)
+                self.ui.tableWidget_peakIntegration.set_hkl(i_row, hkl_centre)
+            # END-IF
+        # END-FOR
+
+        return
+
     def do_integrate_peaks(self):
         """
         Integrate peaks
         :return:
         """
         # Get peak integration parameters
-        # TODO/FIXME
-        """
-        lineEdit_peakRadius
-        lineEdit_bkgdInnerR
-        lineEdit_bkgdOuterR
-        checkBox_cylinder
-        checkBox_adaptQBkgd
-        checkBox_integrateOnEdge
-        """
+        line_editors = [self.ui.lineEdit_peakRadius,
+                        self.ui.lineEdit_bkgdInnerR,
+                        self.ui.lineEdit_bkgdOuterR
+                        ]
+        status, value_list = gutil.parse_float_editors(line_editors)
+        if status is False:
+            err_msg = value_list
+            print '[DB] Error message: %s' % err_msg
+            return
+        else:
+            peak_radius = value_list[0]
+            bkgd_inner_radius = value_list[1]
+            bkgd_outer_radius = value_list[2]
+
+        # Get peak integration options
+        adapt_q_bkgd = self.ui.checkBox_adaptQBkgd.isChecked()
+        integrate_on_edge = self.ui.checkBox_integrateOnEdge.isChecked()
+        is_cylinder = self.ui.checkBox_cylinder.isChecked()
+
 
         # Choose the peaks to be integrated
         row_index_list = self.ui.tableWidget_peakIntegration.get_selected_rows()
 
         for i_row in row_index_list:
-            ws_name = self.ui.tableWidget_peakIntegration.get_md_ws_name(i_row)
-
+            md_ws_name = self.ui.tableWidget_peakIntegration.get_md_ws_name(i_row)
+            exp_num = None
+            scan_num = self.ui.tableWidget_peakIntegration.get_scan_number(i_row)
+            pt_list = None
             self._myControl.integrate_peaks(exp_num, scan_num, pt_list, md_ws_name,
                                             peak_radius, bkgd_inner_radius, bkgd_outer_radius,
                                             is_cylinder)
