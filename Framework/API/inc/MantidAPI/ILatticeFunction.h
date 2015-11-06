@@ -55,7 +55,7 @@ public:
                                     Jacobian &jacobian);
 
   /// A string that names the crystal system.
-  virtual void setCrystalSystem(const std::string &crystalSystem) = 0;
+  virtual void setLatticeSystem(const std::string &crystalSystem) = 0;
 
   /// Set the function parameters according to the supplied unit cell.
   virtual void setUnitCell(const std::string &unitCellString) = 0;

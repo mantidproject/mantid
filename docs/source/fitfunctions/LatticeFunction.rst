@@ -14,7 +14,7 @@ been used to assign indices. LatticeFunction can be used to achieve that task wi
 work with a PeaksWorkspace or with a TableWorkspace that contains two columns named `HKL` and `d` (see
 :ref:`algm-PawleyFit` for specification of the table).
 
-After setting the `CrystalSystem` attribute to one of the seven crystal systems, the function exposes the
+After setting the `LatticeSystem` attribute to one of the seven lattice systems, the function exposes the
 corresponding lattice parameters, as well as a `ZeroShift`. In most cases it's recommended to fix this additional
 parameter as this is often taken care of in earlier steps of the data reduction.
 
@@ -38,7 +38,7 @@ used to generate Bragg reflections that are expected for the crystal structure o
                 LatticeSpacingMin=0.7)
 
     # Fit a cubic cell, starting parameter is 5
-    Fit(Function="name=LatticeFunction,CrystalSystem=Cubic,a=5",
+    Fit(Function="name=LatticeFunction,LatticeSystem=Cubic,a=5",
         InputWorkspace=peaks_Si,
         Ties="ZeroShift=0.0",
         CreateOutput=True,

@@ -44,7 +44,7 @@ public:
   virtual ~IPawleyFunction() {}
 
   /// A string that names the crystal system.
-  virtual void setCrystalSystem(const std::string &crystalSystem) = 0;
+  virtual void setLatticeSystem(const std::string &crystalSystem) = 0;
 
   /// Sets the name of the profile function used for the reflections.
   virtual void setProfileFunction(const std::string &profileFunction) = 0;

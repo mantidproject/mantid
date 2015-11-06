@@ -100,6 +100,18 @@ public:
     TS_ASSERT_EQUALS(smallTriangle.contains(largeTriangle), false);
   }
 
+  void test_Insert_Points_In_Random_Order() {
+    ConvexPolygon triangle;
+    triangle.insert(1.5, 2.5);
+    triangle.insert(1.0, 2.0);
+    triangle.insert(0.5, 1.5);
+
+    TS_ASSERT_EQUALS(triangle.minX(), 0.5);
+    TS_ASSERT_EQUALS(triangle.maxX(), 1.5);
+    TS_ASSERT_EQUALS(triangle.minY(), 1.5);
+    TS_ASSERT_EQUALS(triangle.maxY(), 2.5);
+  }
+
   // ------------------------ Failure cases --------------------------------
 
   void test_Invalid_Index_Access_Throws_For_At() {

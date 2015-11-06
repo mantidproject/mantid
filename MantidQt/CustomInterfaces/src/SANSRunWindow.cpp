@@ -981,6 +981,9 @@ bool SANSRunWindow::loadUserFile() {
   // Set the beam finder specific settings
   setBeamFinderDetails();
   // get the scale factor1 for the beam centre to scale it correctly
+  dbl_param =
+      runReduceScriptFunction(
+          "print i.ReductionSingleton().get_beam_center('rear')[0]").toDouble();
   double dbl_paramsf =
       runReduceScriptFunction(
           "print i.ReductionSingleton().get_beam_center_scale_factor1()")

@@ -9,6 +9,8 @@
 Description
 -----------
 
+This algorithm is deprecated. Please use CompareWorkspaces instead.
+
 Compares two workspaces for equality. This algorithm is mainly intended
 for use by Mantid developers as part of the testing process.
 

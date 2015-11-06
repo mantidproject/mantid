@@ -17,7 +17,7 @@ class EVDDiffractionReductionTest(unittest.TestCase):
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
         self.assertEqual(len(wks), 1)
-        self.assertEqual(wks.getNames()[0], 'EVS15289_diffspec_red')
+        self.assertEqual(wks.getNames()[0], 'vesuvio15289_diffspec_red')
 
         red_ws = wks[0]
         self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), 'dSpacing')

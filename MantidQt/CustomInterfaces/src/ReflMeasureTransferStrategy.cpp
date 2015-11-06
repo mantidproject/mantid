@@ -100,8 +100,8 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
         std::stringstream buffer;
         buffer << nextGroupId;
         row[ReflTableSchema::GROUP] = buffer.str();
-        subIdMap.insert(std::make_pair(measurement.subId(), i));
         output.push_back(row);
+        subIdMap.insert(std::make_pair(measurement.subId(), output.size()-1 /*Record actual row index*/));
       }
     }
     ++nextGroupId;
