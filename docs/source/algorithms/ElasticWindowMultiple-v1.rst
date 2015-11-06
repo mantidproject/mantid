@@ -57,7 +57,7 @@ Usage
                Params=[-0.2,0.004,0.2])
 
         LoadInstrument(Workspace=ws_name,
-                       InstrumentName='IRIS', OverwriteSpectraMap=OptionalBoolValue.True)
+                       InstrumentName='IRIS', RewriteSpectraMap=OptionalBoolValue.True)
 
         SetInstrumentParameter(Workspace=ws_name,
                                ParameterName='Efixed',

@@ -948,8 +948,8 @@ class LOQ(ISISInstrument):
             Loads information about the setup used for LOQ transmission runs
         """
         trans_definition_file = os.path.join(config.getString('instrumentDefinition.directory'), self._NAME+'_trans_Definition.xml')
-        LoadInstrument(Workspace=ws_trans,Filename= trans_definition_file, OverwriteSpectraMap=False)
-        LoadInstrument(Workspace=ws_direct, Filename = trans_definition_file, OverwriteSpectraMap=False)
+        LoadInstrument(Workspace=ws_trans,Filename= trans_definition_file, RewriteSpectraMap=False)
+        LoadInstrument(Workspace=ws_direct, Filename = trans_definition_file, RewriteSpectraMap=False)
 
     def cur_detector_position(self, ws_name):
         """Return the position of the center of the detector bank"""

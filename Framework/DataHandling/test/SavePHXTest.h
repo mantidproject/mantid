@@ -194,7 +194,7 @@ private:
     std::string inputFile = "INES_Definition.xml";
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", input);
-    loader.setProperty("OverwriteSpectraMap", Mantid::Kernel::OptionalBool(true));
+    loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     loader.execute();
 
     // mask the detector

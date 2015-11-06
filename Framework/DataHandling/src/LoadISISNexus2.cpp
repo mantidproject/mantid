@@ -886,7 +886,7 @@ void LoadISISNexus2::runLoadInstrument(
   try {
     loadInst->setPropertyValue("InstrumentName", m_instrument_name);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-    loadInst->setProperty("OverwriteSpectraMap",
+    loadInst->setProperty("RewriteSpectraMap",
                           Mantid::Kernel::OptionalBool(false));
     loadInst->execute();
   } catch (std::invalid_argument &) {

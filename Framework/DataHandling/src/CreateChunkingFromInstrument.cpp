@@ -376,7 +376,7 @@ Instrument_const_sptr CreateChunkingFromInstrument::getInstrument() {
   childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
   childAlg->setPropertyValue("Filename", instFilename);
   childAlg->setPropertyValue("InstrumentName", instName);
-  childAlg->setProperty("OverwriteSpectraMap",
+  childAlg->setProperty("RewriteSpectraMap",
                         Mantid::Kernel::OptionalBool(true));
   childAlg->executeAsChildAlg();
   return tempWS->getInstrument();

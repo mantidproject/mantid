@@ -104,7 +104,7 @@ void CreateSimulationWorkspace::createInstrument() {
   } else {
     loadInstrument->setPropertyValue("InstrumentName", instrProp);
   }
-  loadInstrument->setProperty("OverwriteSpectraMap",
+  loadInstrument->setProperty("RewriteSpectraMap",
                               Kernel::OptionalBool(true));
   loadInstrument->executeAsChildAlg();
   tempWS = loadInstrument->getProperty("Workspace");

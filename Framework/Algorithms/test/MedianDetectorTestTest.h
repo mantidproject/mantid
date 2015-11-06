@@ -227,7 +227,7 @@ public:
     std::string inputFile = "INES_Definition.xml";
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", m_IWSName);
-    loader.setProperty("OverwriteSpectraMap",
+    loader.setProperty("RewriteSpectraMap",
                        Mantid::Kernel::OptionalBool(true));
     loader.execute();
 

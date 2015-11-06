@@ -21,7 +21,7 @@ class POLDIAnalyseResidualsTest(stresstesting.MantidStressTest):
     def runResidualAnalysis(self, filenames):
         for dataFile in filenames:
             LoadSINQFile(Instrument='POLDI',Filename=dataFile + ".hdf",OutputWorkspace=dataFile)
-            LoadInstrument(Workspace=dataFile, InstrumentName="POLDI", OverwriteSpectraMap=True)
+            LoadInstrument(Workspace=dataFile, InstrumentName="POLDI", RewriteSpectraMap=True)
             PoldiTruncateData(InputWorkspace=dataFile,OutputWorkspace=dataFile)
             PoldiAnalyseResiduals(MeasuredCountData=dataFile, FittedCountData="%s_fortran_fit" % (dataFile),
                                   MaxIterations=1, OutputWorkspace=dataFile + "Residuals")

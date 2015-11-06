@@ -798,7 +798,7 @@ public:
 
     // Path to test input file
     loaderGEM.setPropertyValue("Filename", "GEM_Definition.xml");
-    loaderGEM.setProperty("OverwriteSpectraMap",
+    loaderGEM.setProperty("RewriteSpectraMap",
                           Mantid::Kernel::OptionalBool(true));
     // inputFile = loaderIDF2.getPropertyValue("Filename");
     loaderGEM.setPropertyValue("Workspace", workspaceName);

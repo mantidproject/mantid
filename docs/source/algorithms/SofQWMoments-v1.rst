@@ -31,7 +31,7 @@ Usage
     ws = ScaleX(ws, -5, "Add") #shift to center on 0
     ws = ScaleX(ws, 0.1) #scale to size
     ws = RenameWorkspace(ws, OutputWorkspace="irs21760_graphite002_red")
-    LoadInstrument(ws, InstrumentName='IRIS', OverwriteSpectraMap=OptionalBoolValue.True)
+    LoadInstrument(ws, InstrumentName='IRIS', RewriteSpectraMap=OptionalBoolValue.True)
 
     #Run SofQW and then SofQWMoments
     ws = SofQW(ws, '0.4, 0.1, 1.8', EMode='Indirect', EFixed='1.845', OutputWorkspace="irs00001_graphite002_red")

@@ -30,7 +30,7 @@ Usage
   # Create a workspace
   ws = CreateSampleWorkspace()
   # Replace the instrument in the workspace with HRPD
-  LoadInstrument(ws,InstrumentName='HRPD', OverwriteSpectraMap=OptionalBoolValue.True)
+  LoadInstrument(ws,InstrumentName='HRPD', RewriteSpectraMap=OptionalBoolValue.True)
   # Map spectra to detectors according to an HRPD raw file.
   LoadMappingTable('HRP39180.RAW',ws)
 

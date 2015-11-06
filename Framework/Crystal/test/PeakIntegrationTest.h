@@ -72,7 +72,7 @@ public:
     loadInst->setPropertyValue(
         "Filename", "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", retVal);
-    loadInst->setProperty("OverwriteSpectraMap",
+    loadInst->setProperty("RewriteSpectraMap",
                           Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
     delete loadInst;

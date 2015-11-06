@@ -47,7 +47,7 @@ class POLDIMergeTest(stresstesting.MantidStressTest):
     def loadData(self, filenames):
         for dataFile in filenames:
             LoadSINQFile(Instrument='POLDI',Filename=dataFile + ".hdf",OutputWorkspace=dataFile)
-            LoadInstrument(Workspace=dataFile, InstrumentName="POLDI", OverwriteSpectraMap=True)
+            LoadInstrument(Workspace=dataFile, InstrumentName="POLDI", RewriteSpectraMap=True)
 
     def runPoldiMerge(self, workspaceNames, outputWorkspaceName):
         PoldiMerge(WorkspaceNames=workspaceNames, OutputWorkspace=outputWorkspaceName)

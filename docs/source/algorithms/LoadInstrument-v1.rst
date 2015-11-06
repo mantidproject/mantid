@@ -40,7 +40,7 @@ Usage
    print "Default workspace has instrument: {0} with {1} parameters".format(inst0.getName(),len(inst0.getParameterNames()));
 
    # load MARI
-   det=LoadInstrument(ws,InstrumentName='MARI', OverwriteSpectraMap=OptionalBoolValue.True)
+   det=LoadInstrument(ws,InstrumentName='MARI', RewriteSpectraMap=OptionalBoolValue.True)
    inst1=ws.getInstrument();
 
    print "Modified workspace has instrument: {0} with {1} parameters".format(inst1.getName(),len(inst1.getParameterNames()));

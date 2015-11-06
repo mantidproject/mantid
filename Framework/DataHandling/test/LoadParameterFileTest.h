@@ -221,7 +221,7 @@ public:
         "Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
     // inputFile = loaderIDF2.getPropertyValue("Filename");
     pLoadInstrument->setPropertyValue("Workspace", wsName);
-    pLoadInstrument->setProperty("OverwriteSpectraMap",
+    pLoadInstrument->setProperty("RewriteSpectraMap",
                                  Mantid::Kernel::OptionalBool(true));
     TS_ASSERT_THROWS_NOTHING(pLoadInstrument->execute());
     TS_ASSERT(pLoadInstrument->isExecuted());

@@ -100,7 +100,7 @@ Usage
    ws=CreateSampleWorkspace();  
    #--------------------------------------------------------------------------------------      
    # load MARI
-   det=LoadInstrument(ws,InstrumentName='MARI', OverwriteSpectraMap=OptionalBoolValue.True)   
+   det=LoadInstrument(ws,InstrumentName='MARI', RewriteSpectraMap=OptionalBoolValue.True)   
    inst1=ws.getInstrument();   
    #   
    print_10_detectors('unCalibrated',inst1);

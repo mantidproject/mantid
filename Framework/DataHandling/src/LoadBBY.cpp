@@ -404,7 +404,7 @@ void LoadBBY::exec() {
       createChildAlgorithm("LoadInstrument");
   loadInstrumentAlg->setProperty("Workspace", eventWS);
   loadInstrumentAlg->setPropertyValue("InstrumentName", "BILBY");
-  loadInstrumentAlg->setProperty("OverwriteSpectraMap",
+  loadInstrumentAlg->setProperty("RewriteSpectraMap",
                                  Mantid::Kernel::OptionalBool(false));
   loadInstrumentAlg->executeAsChildAlg();
 

@@ -29,7 +29,7 @@ Usage
     ws = CreateSampleWorkspace("Histogram", Function="User Defined", UserDefinedFunction=function, XMin=0, XMax=0.5, BinWidth=0.01, XUnit="Time", NumBanks=1)
 
     #load instrument defintion and parameters
-    LoadInstrument(ws, InstrumentName='IRIS', OverwriteSpectraMap=OptionalBoolValue.True)
+    LoadInstrument(ws, InstrumentName='IRIS', RewriteSpectraMap=OptionalBoolValue.True)
     param_file = config['instrumentDefinition.directory'] + 'IRIS_graphite_002_Parameters.xml'
     LoadParameterFile(ws, param_file)
 

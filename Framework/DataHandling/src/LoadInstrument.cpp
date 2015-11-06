@@ -70,7 +70,7 @@ void LoadInstrument::init() {
   declareProperty("InstrumentXML", "",
                   "The full XML instrument definition as a string.");
   declareProperty(new PropertyWithValue<OptionalBool>(
-      "OverwriteSpectraMap", OptionalBool::Unset, boost::make_shared<MandatoryValidator<OptionalBool>>()),
+      "RewriteSpectraMap", OptionalBool::Unset, boost::make_shared<MandatoryValidator<OptionalBool>>()),
       "If true then a 1:1 map between the spectrum numbers and "
       "detector/monitor IDs is set up as follows: the detector/monitor IDs in "
       "the IDF are ordered from smallest to largest number and then assigned "
@@ -197,8 +197,8 @@ void LoadInstrument::exec() {
   // Rebuild the spectra map for this workspace so that it matches the
   // instrument
   // if required
-  const OptionalBool OverwriteSpectraMap = getProperty("OverwriteSpectraMap");
-  if (OverwriteSpectraMap == OptionalBool::True)
+  const OptionalBool RewriteSpectraMap = getProperty("RewriteSpectraMap");
+  if (RewriteSpectraMap == OptionalBool::True)
     m_workspace->rebuildSpectraMapping();
 }
 

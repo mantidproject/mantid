@@ -362,7 +362,7 @@ that the first three detectors (monitors) were not touched and the next three we
    ws=CreateSampleWorkspace();  
    #--------------------------------------------------------------------------------------      
    # load MARI
-   det=LoadInstrument(ws,InstrumentName='MARI', OverwriteSpectraMap=OptionalBoolValue.True)   
+   det=LoadInstrument(ws,InstrumentName='MARI', RewriteSpectraMap=OptionalBoolValue.True)   
    inst1=ws.getInstrument();   
    #   
    write_detectors('unCalibrated',inst1,10);

@@ -98,7 +98,7 @@ void LoadDetectorsGroupingFile::exec() {
       MatrixWorkspace_sptr tempWS(new DataObjects::Workspace2D());
       childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
       childAlg->setPropertyValue("Filename", instrumentFilename);
-      childAlg->setProperty("OverwriteSpectraMap",
+      childAlg->setProperty("RewriteSpectraMap",
                             Mantid::Kernel::OptionalBool(false));
       childAlg->executeAsChildAlg();
       m_instrument = tempWS->getInstrument();

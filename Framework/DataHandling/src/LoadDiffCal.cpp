@@ -252,7 +252,7 @@ void LoadDiffCal::getInstrument(H5File &file) {
   } else {
     childAlg->setPropertyValue("Filename", idf);
   }
-  childAlg->setProperty("OverwriteSpectraMap",
+  childAlg->setProperty("RewriteSpectraMap",
                         Mantid::Kernel::OptionalBool(false));
   childAlg->executeAsChildAlg();
 

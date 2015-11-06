@@ -461,7 +461,7 @@ void ISISHistoDataListener::runLoadInstrument(
   try {
     loadInst->setPropertyValue("InstrumentName", iName);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-    loadInst->setProperty("OverwriteSpectraMap",
+    loadInst->setProperty("RewriteSpectraMap",
                           Mantid::Kernel::OptionalBool(false));
     loadInst->executeAsChildAlg();
   } catch (std::invalid_argument &) {

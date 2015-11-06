@@ -20,7 +20,7 @@ class POLDIFitPeaks2DTest(stresstesting.MantidStressTest):
     def loadAndPrepareData(self, filenames):
         for dataFile in filenames:
             LoadSINQFile(Instrument='POLDI', Filename=dataFile + ".hdf", OutputWorkspace=dataFile)
-            LoadInstrument(Workspace=dataFile, InstrumentName="POLDI", OverwriteSpectraMap=True)
+            LoadInstrument(Workspace=dataFile, InstrumentName="POLDI", RewriteSpectraMap=True)
             PoldiTruncateData(InputWorkspace=dataFile, OutputWorkspace=dataFile)
 
     def loadReferencePeakData(self, filenames):
@@ -31,7 +31,7 @@ class POLDIFitPeaks2DTest(stresstesting.MantidStressTest):
         for dataFile in filenames:
             Load(Filename="%s_2d_reference_Spectrum.nxs" % (dataFile),
                  OutputWorkspace="%s_2d_reference_Spectrum" % (dataFile))
-            LoadInstrument(Workspace="%s_2d_reference_Spectrum" % (dataFile), InstrumentName="POLDI", OverwriteSpectraMap=True)
+            LoadInstrument(Workspace="%s_2d_reference_Spectrum" % (dataFile), InstrumentName="POLDI", RewriteSpectraMap=True)
             Load(Filename="%s_1d_reference_Spectrum.nxs" % (dataFile),
                  OutputWorkspace="%s_1d_reference_Spectrum" % (dataFile))
 

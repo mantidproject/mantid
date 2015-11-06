@@ -178,7 +178,7 @@ private:
     if (!instrument.empty()) {
       DataHandling::LoadInstrument load;
       load.initialize();
-      load.setProperty("OverwriteSpectraMap",
+      load.setProperty("RewriteSpectraMap",
                        Mantid::Kernel::OptionalBool(true));
       load.setProperty("Workspace", ws);
       load.setProperty("InstrumentName", instrument);

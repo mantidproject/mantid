@@ -296,7 +296,7 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
 
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("InstrumentName", C_Instrument);
-  loadInst->setProperty("OverwriteSpectraMap",
+  loadInst->setProperty("RewriteSpectraMap",
                         Mantid::Kernel::OptionalBool(true));
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
   loadInst->executeAsChildAlg();

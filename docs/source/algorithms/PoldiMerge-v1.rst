@@ -36,7 +36,7 @@ This small usage example merges two compatible POLDI-files which have been loade
     from mantid.kernel import OptionalBoolValue
     # Load the first data file and the correct instrument
     raw_6903 = LoadSINQFile(Filename = "poldi2013n006903.hdf", Instrument = "POLDI")
-    LoadInstrument(raw_6903, OverwriteSpectraMap=OptionalBoolValue.True, InstrumentName = "POLDI")
+    LoadInstrument(raw_6903, RewriteSpectraMap=OptionalBoolValue.True, InstrumentName = "POLDI")
 
     # Use Integration and SumSpectra to sum all counts in the spectrum.
     # The data must be converted to histogram data for Integration to work.
@@ -50,7 +50,7 @@ This small usage example merges two compatible POLDI-files which have been loade
     
     # The same with the second data file
     raw_6904 = LoadSINQFile(Filename = "poldi2013n006904.hdf", Instrument = "POLDI")
-    LoadInstrument(raw_6904, OverwriteSpectraMap=OptionalBoolValue.True, InstrumentName = "POLDI")
+    LoadInstrument(raw_6904, RewriteSpectraMap=OptionalBoolValue.True, InstrumentName = "POLDI")
     histo_6904 = ConvertToHistogram(raw_6904)
     spectra_6904 = Integration(histo_6904)
     total_6904 = SumSpectra(spectra_6904)

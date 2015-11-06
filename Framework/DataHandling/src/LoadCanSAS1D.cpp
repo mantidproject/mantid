@@ -301,7 +301,7 @@ void LoadCanSAS1D::runLoadInstrument(const std::string &inst_name,
     loadInst->setPropertyValue("InstrumentName", inst_name);
     loadInst->setProperty<API::MatrixWorkspace_sptr>("Workspace",
                                                      localWorkspace);
-    loadInst->setProperty("OverwriteSpectraMap",
+    loadInst->setProperty("RewriteSpectraMap",
                           Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
   } catch (std::invalid_argument &) {
