@@ -390,8 +390,8 @@ class DirectEnergyConversion(object):
                 PropertyManager.incident_energy.set_auto_Ei(mon_ws,prop_man)
                 EiToProcessAvailible = True
             except RuntimeError as er:
-                prop_man.log('*** Error while calculating autoEi: {0}'.\
-                format(str(err)))
+                prop_man.log('*** Error while calculating autoEi: {0}. See algorithm log for details.'.\
+                format(str(er)))
                 EiToProcessAvailible = False
         else:
             EiToProcessAvailible = True
