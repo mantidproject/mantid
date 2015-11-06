@@ -1,7 +1,7 @@
 #pylint: disable=no-init
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, \
     ITableWorkspaceProperty, FileAction, FileProperty, WorkspaceProperty, InstrumentValidator
-from mantid.kernel import Direction, FloatBoundedValidator, PropertyCriterion, EnabledWhenProperty, logger, Quat, V3D
+from mantid.kernel import Direction, FloatBoundedValidator, PropertyCriterion, EnabledWhenProperty, logger, Quat, V3D, StringArrayProperty
 import mantid.simpleapi as api
 from scipy.stats import chisquare
 from scipy.optimize import minimize
@@ -58,8 +58,8 @@ class AlignComponents(PythonAlgorithm):
                                                direction=Direction.InOut),
                              doc="Workspace containing the instrument to be calibrated.")
 
-        self.declareProperty("ComponentList", "",
-                             direction=Direction.Input,
+        self.declareProperty(StringArrayProperty("ComponentList",
+                             direction=Direction.Input),
                              doc="Comma separated list on instrument components to refine.")
 
         # X position
@@ -165,7 +165,7 @@ class AlignComponents(PythonAlgorithm):
                 wks = api.LoadEmptyInstrument(Filename=inputFilename,
                                               OutputWorkspace="alignedWorkspace")
 
-        components = self.getProperty("ComponentList").value.split(',')
+        components = self.getProperty("ComponentList").value
         for component in components:
             if wks.getInstrument().getComponentByName(component) is None:
                 issues['ComponentList'] = "Instrument has no component \"" + component + "\""
@@ -197,7 +197,7 @@ class AlignComponents(PythonAlgorithm):
             wks = api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value,
                                           OutputWorkspace="alignedWorkspace")
 
-        components = self.getProperty("ComponentList").value.split(',')
+        components = self.getProperty("ComponentList").value
 
         for opt in self._optionsList:
             self._optionsDict[opt] = self.getProperty(opt).value
