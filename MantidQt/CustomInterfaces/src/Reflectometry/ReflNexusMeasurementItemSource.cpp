@@ -60,13 +60,13 @@ ReflNexusMeasurementItemSource::obtain(const std::string &definedPath,
     algLoadRun->execute();
 
     auto run = hostWorkspace->run();
-    const std::string measurementId =
+    const std::string measurementItemId =
         run.getPropertyValueAsType<std::string>("measurement_id");
-    const std::string measurementSubId =
+    const std::string measurementItemSubId =
         run.getPropertyValueAsType<std::string>("measurement_subid");
-    const std::string measurementLabel =
+    const std::string measurementItemLabel =
         run.getPropertyValueAsType<std::string>("measurement_label");
-    const std::string measurementType =
+    const std::string measurementItemType =
         run.getPropertyValueAsType<std::string>("measurement_type");
     std::string runNumber;
     try {
@@ -88,8 +88,8 @@ ReflNexusMeasurementItemSource::obtain(const std::string &definedPath,
     } catch (Exception::NotFoundError &) {
     }
 
-    return MeasurementItem(measurementId, measurementSubId, measurementLabel,
-                       measurementType, theta, runNumber);
+    return MeasurementItem(measurementItemId, measurementItemSubId, measurementItemLabel,
+                       measurementItemType, theta, runNumber);
 
   } catch (std::invalid_argument &ex) {
     std::stringstream buffer;
@@ -97,7 +97,7 @@ ReflNexusMeasurementItemSource::obtain(const std::string &definedPath,
            << std::endl;
     buffer << ex.what();
     const std::string message = buffer.str();
-    return MeasurementItem::InvalidMeasurement(message);
+    return MeasurementItem::InvalidMeasurementItem(message);
   }
 }
 

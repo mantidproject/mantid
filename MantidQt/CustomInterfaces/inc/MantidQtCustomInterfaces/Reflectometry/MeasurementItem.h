@@ -41,7 +41,7 @@ public:
               const double angle, const std::string &run);
 
   /// Constructional method
-  static MeasurementItem InvalidMeasurement(const std::string &why);
+  static MeasurementItem InvalidMeasurementItem(const std::string &why);
 
   /// Copy constructor
   MeasurementItem(const MeasurementItem &other);

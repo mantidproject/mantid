@@ -54,7 +54,7 @@ MeasurementItem::~MeasurementItem() {}
  * InvalidMeasurement static creational method
  * @return Invalid measurement
  */
-MeasurementItem MeasurementItem::InvalidMeasurement(const std::string &why) {
+MeasurementItem MeasurementItem::InvalidMeasurementItem(const std::string &why) {
   return MeasurementItem(why);
 }
 
