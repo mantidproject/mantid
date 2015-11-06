@@ -112,7 +112,8 @@ void DimensionSliceWidget::setShownDim(int dim)
   ui.btnY->setChecked( m_shownDim == 1 );
   ui.btnX->blockSignals(false);
   ui.btnY->blockSignals(false);
-  bool slicing = m_shownDim == -1;
+  /// Slice if dimension is not X or Y AND is not integrated
+  bool slicing = (m_shownDim == -1 && !m_dim->getIsIntegrated());
   ui.horizontalSlider->setVisible( slicing );
   ui.doubleSpinBox->setVisible( slicing );
   ui.lblUnits->setVisible( slicing );
