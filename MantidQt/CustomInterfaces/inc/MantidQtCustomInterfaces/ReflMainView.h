@@ -66,19 +66,16 @@ namespace MantidQt
       //Plotting
       virtual void plotWorkspaces(const std::set<std::string>& workspaces) = 0;
 
-      //Set the status of the progress bar
-      virtual void setProgressRange(int min, int max) = 0;
-      virtual void setProgress(int progress) = 0;
-
       //Get status of the checkbox which dictates whether an ipython notebook is produced
       virtual bool getEnableNotebook() = 0;
 
-      //Settor methods
+      //Setter methods
       virtual void setSelection(const std::set<int>& rows) = 0;
       virtual void setTableList(const std::set<std::string>& tables) = 0;
       virtual void setInstrumentList(const std::vector<std::string>& instruments, const std::string& defaultInstrument) = 0;
       virtual void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy* hintStrategy) = 0;
       virtual void setClipboard(const std::string& text) = 0;
+      virtual void setTransferMethods(const std::set<std::string>& methods) = 0;
 
       //Accessor methods
       virtual std::set<int> getSelectedRows() const = 0;
@@ -88,6 +85,7 @@ namespace MantidQt
       virtual std::string getWorkspaceToOpen() const = 0;
       virtual std::string getClipboard() const = 0;
       virtual std::string getSearchString() const = 0;
+      virtual std::string getTransferMethod() const = 0;
 
       virtual boost::shared_ptr<IReflPresenter> getPresenter() const = 0;
     };

@@ -119,6 +119,9 @@ void Q1D2::exec() {
   // define the (large number of) data objects that are going to be used in all
   // iterations of the loop below
 
+  // Flag to decide if Q Resolution is to be used
+  auto useQResolution = qResolution ? true : false;
+
   // this will become the output workspace from this algorithm
   MatrixWorkspace_sptr outputWS =
       setUpOutputWorkspace(getProperty("OutputBinning"));
@@ -130,14 +133,18 @@ void Q1D2::exec() {
   MantidVec normSum(YOut.size(), 0.0);
   // the error on the normalisation
   MantidVec normError2(YOut.size(), 0.0);
-  // the averaged Q resolution
-  MantidVec &qResolutionOut = outputWS->dataDx(0);
+
+  // the averaged Q resolution. We need the a named dummy variable although it
+  // won't be
+  // used since we only want to create a reference to DX if it is really
+  // required. Referencing
+  // DX sets a flag which might not be desirable.
+  MantidVec dummy;
+  MantidVec &qResolutionOut =
+      useQResolution ? outputWS->dataDx(0) : outputWS->dataY(0);
 
   const int numSpec = static_cast<int>(m_dataWS->getNumberHistograms());
   Progress progress(this, 0.05, 1.0, numSpec + 1);
-
-  // Flag to decide if Q Resolution is to be used
-  auto useQResolution = qResolution ? true : false;
 
   PARALLEL_FOR3(m_dataWS, outputWS, pixelAdj)
   for (int i = 0; i < numSpec; ++i) {
@@ -228,7 +235,12 @@ void Q1D2::exec() {
           EOutTo2[bin] += (*EIn) * (*EIn);
           normError2[bin] += *normETo2s;
           if (useQResolution) {
-            qResolutionOut[bin] += (*YIn) * (*QResIn);
+            auto QBin = (QOut[bin + 1] - QOut[bin]);
+            // Here we need to take into account the Bin width and the count
+            // weigthing. The
+            // formula should be YIN* sqrt(QResIn^2 + (QBin/sqrt(12))^2)
+            qResolutionOut[bin] +=
+                (*YIn) * std::sqrt((*QResIn) * (*QResIn) + QBin * QBin / 12.0);
           }
         }
       }
@@ -278,7 +290,9 @@ void Q1D2::exec() {
         WorkspaceFactory::Instance().create(outputWS);
     ws_sumOfCounts->dataX(0) = outputWS->dataX(0);
     ws_sumOfCounts->dataY(0) = outputWS->dataY(0);
-    ws_sumOfCounts->dataDx(0) = outputWS->dataDx(0);
+    if (useQResolution) {
+      ws_sumOfCounts->dataDx(0) = outputWS->dataDx(0);
+    }
     for (size_t i = 0; i < outputWS->dataE(0).size(); i++) {
       ws_sumOfCounts->dataE(0)[i] = sqrt(outputWS->dataE(0)[i]);
     }
@@ -286,7 +300,9 @@ void Q1D2::exec() {
     MatrixWorkspace_sptr ws_sumOfNormFactors =
         WorkspaceFactory::Instance().create(outputWS);
     ws_sumOfNormFactors->dataX(0) = outputWS->dataX(0);
-    ws_sumOfNormFactors->dataDx(0) = outputWS->dataDx(0);
+    if (useQResolution) {
+      ws_sumOfNormFactors->dataDx(0) = outputWS->dataDx(0);
+    }
     for (size_t i = 0; i < ws_sumOfNormFactors->dataY(0).size(); i++) {
       ws_sumOfNormFactors->dataY(0)[i] = normSum[i];
       ws_sumOfNormFactors->dataE(0)[i] = sqrt(normError2[i]);

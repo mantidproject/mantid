@@ -260,6 +260,7 @@ int OPJFile::Parse() {
     printf(" WARNING : could not move to position %d from the beginning of the "
            "file\n",
            0x7);
+    fclose(f);
     return -1;
   }
 
@@ -268,6 +269,7 @@ int OPJFile::Parse() {
     printf(" WARNING : could not read four bytes with the version information, "
            "read: %d bytes\n",
            retval);
+    fclose(f);
     return -1;
   }
 
@@ -418,11 +420,13 @@ int OPJFile::ParseFormatOld() {
 
       spread = compareSpreadnames(sname);
 
-      current_col = static_cast<int>(SPREADSHEET[spread].column.size());
+      if (spread >= 0) {
+        current_col = static_cast<int>(SPREADSHEET[spread].column.size());
 
-      if (!current_col)
-        current_col = 1;
-      current_col++;
+        if (!current_col)
+          current_col = 1;
+        current_col++;
+      }
     }
     fprintf(debug, "SPREADSHEET = %s COLUMN %d NAME = %s (@0x%X)\n", sname,
             current_col, cname, (unsigned int)ftell(f));
@@ -1256,7 +1260,8 @@ int OPJFile::ParseFormatNew() {
     CHECKED_FSEEK(debug, f, POS + 0x4A, SEEK_SET);
     CHECKED_FREAD(debug, &object_type, 10, 1, f);
 
-    CHECKED_FSEEK(debug, f, POS, SEEK_SET);
+    if (POS >= 0)
+      CHECKED_FSEEK(debug, f, POS, SEEK_SET);
 
     if (compareSpreadnames(object_name) != -1)
       readSpreadInfo(f, file_size, debug);
@@ -1377,6 +1382,9 @@ int OPJFile::ParseFormatNew() {
 
 void OPJFile::readSpreadInfo(FILE *f, int file_size, FILE *debug) {
   int POS = int(ftell(f));
+
+  if (POS < 0)
+    return;
 
   int headersize;
   CHECKED_FREAD(debug, &headersize, 4, 1, f);
@@ -1915,6 +1923,9 @@ void OPJFile::readMatrixInfo(FILE *f, int file_size, FILE *debug) {
   CHECKED_FREAD(debug, &name, 25, 1, f);
 
   int idx = compareMatrixnames(name);
+  if (idx < 0)
+    return;
+
   MATRIX[idx].name = name;
   readWindowProperties(MATRIX[idx], f, debug, POS, headersize);
 
@@ -3202,6 +3213,9 @@ void OPJFile::readProjectTree(FILE *f, FILE *debug) {
 void OPJFile::readProjectTreeFolder(FILE *f, FILE *debug,
                                     tree<projectNode>::iterator parent) {
   int POS = int(ftell(f));
+
+  if (POS < 0)
+    return;
 
   int file_size = 0;
   {

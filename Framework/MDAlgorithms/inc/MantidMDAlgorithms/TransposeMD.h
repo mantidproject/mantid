@@ -3,6 +3,7 @@
 
 #include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/MDAxisValidator.h"
 namespace Mantid {
 namespace MDAlgorithms {
 
@@ -39,6 +40,8 @@ public:
   virtual int version() const;
   virtual const std::string category() const;
   virtual const std::string summary() const;
+
+  virtual const std::string alias() const { return "PermuteMD"; }
 
 private:
   void init();

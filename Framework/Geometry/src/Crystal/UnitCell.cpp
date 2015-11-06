@@ -266,6 +266,44 @@ double UnitCell::errorgamma(const int angleunit) const {
   }
 }
 
+/** Get lattice parameter error
+@return errorc :: errorlattice parameter \f$ volume \f$ (in \f$ \mbox{\AA} \f$ )
+*/
+double UnitCell::errorvolume() const {
+  // From latcon.py by Art Schultz
+  double V = volume();
+  double delta_V_alphaV = 0.0;
+  if (erroralpha() > 0.0) {
+    double alpha1 = alpha() - 0.5 * erroralpha();
+    double Va1 = UnitCell(a(), b(), c(), alpha1, beta(), gamma()).volume();
+    double alpha2 = alpha() + 0.5 * erroralpha();
+    double Va2 = UnitCell(a(), b(), c(), alpha2, beta(), gamma()).volume();
+    delta_V_alphaV = (Va2 - Va1) / V;
+  }
+
+  double delta_V_betaV = 0.0;
+  if (errorbeta() > 0.0) {
+    double beta1 = beta() - 0.5 * errorbeta();
+    double Va1 = UnitCell(a(), b(), c(), alpha(), beta1, gamma()).volume();
+    double beta2 = beta() + 0.5 * errorbeta();
+    double Va2 = UnitCell(a(), b(), c(), alpha(), beta2, gamma()).volume();
+    delta_V_betaV = (Va2 - Va1) / V;
+  }
+
+  double delta_V_gammaV = 0.0;
+  if (errorgamma() > 0.0) {
+    double gamma1 = gamma() - 0.5 * errorgamma();
+    double Va1 = UnitCell(a(), b(), c(), alpha(), beta(), gamma1).volume();
+    double gamma2 = gamma() + 0.5 * errorgamma();
+    double Va2 = UnitCell(a(), b(), c(), alpha(), beta(), gamma2).volume();
+    delta_V_gammaV = (Va2 - Va1) / V;
+  }
+
+  return V * sqrt(std::pow(errora() / a(), 2) + std::pow(errorb() / b(), 2) +
+                  std::pow(errorc() / c(), 2) + std::pow(delta_V_alphaV, 2) +
+                  std::pow(delta_V_betaV, 2) + std::pow(delta_V_gammaV, 2));
+}
+
 /** Set lattice parameters
   @param _a, _b, _c, _alpha, _beta, _gamma :: lattice parameters\n
 @param angleunit :: units for angle, of type #AngleUnits . Default is degrees.
@@ -575,7 +613,8 @@ std::ostream &operator<<(std::ostream &out, const UnitCell &unitCell) {
       << std::setw(12) << unitCell.c() << std::fixed << std::setprecision(6)
       << std::setw(12) << unitCell.alpha() << std::fixed << std::setprecision(6)
       << std::setw(12) << unitCell.beta() << std::fixed << std::setprecision(6)
-      << std::setw(12) << unitCell.gamma();
+      << std::setw(12) << unitCell.gamma() << std::fixed << std::setprecision(6)
+      << std::setw(12) << unitCell.volume();
 
   // write out the uncertainty if there is a positive one somewhere
   if ((unitCell.errora() > 0) || (unitCell.errorb() > 0) ||
@@ -589,7 +628,8 @@ std::ostream &operator<<(std::ostream &out, const UnitCell &unitCell) {
         << std::setw(12) << unitCell.erroralpha() << std::fixed
         << std::setprecision(6) << std::setw(12) << unitCell.errorbeta()
         << std::fixed << std::setprecision(6) << std::setw(12)
-        << unitCell.errorgamma();
+        << unitCell.errorgamma() << std::fixed << std::setprecision(6)
+        << std::setw(12) << unitCell.errorvolume();
 
   return out;
 }

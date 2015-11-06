@@ -5,13 +5,14 @@
 set ( TEST_PY_FILES
   AddSampleLogMultipleTest.py
   ApplyPaalmanPingsCorrectionTest.py
+  BayesQuasiTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
+  CompareSampleLogsTest.py
   ComputeCalibrationCoefVanTest.py
   CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
-  CreateMDTest.py
   DetectorFloodWeightingTest.py
   IndirectCalibrationTest.py
   CreateWorkspaceTest.py
@@ -77,6 +78,7 @@ set ( TEST_PY_FILES
   UpdatePeakParameterTableValueTest.py
   SANSSubtractTest.py
   TimeSliceTest.py
+  TOFTOFConvertTofToDeltaETest.py
   TOFTOFCropWorkspaceTest.py
   TOFTOFMergeRunsTest.py
   TOSCABankCorrectionTest.py

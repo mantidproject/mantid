@@ -18,11 +18,18 @@ public:
   QString getPythonSuccessKeyword();
   QString getPythonEmptyKeyword();
   QString getPythonTrueKeyword();
+  QString getPythonFalseKeyword();
 
+  QString getQResolutionH1ToolTipText();
+  QString getQResolutionH2ToolTipText();
+  QString getQResolutionA1ToolTipText();
+  QString getQResolutionA2ToolTipText();
+  
   // Input related
   double getMaxDoubleValue();
   int getMaxIntValue();
   int getDecimals();
+  
 };
 
 }

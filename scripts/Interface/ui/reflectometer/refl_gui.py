@@ -210,6 +210,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
     def _show_slit_calculator(self):
         calc = mantidqtpython.MantidQt.MantidWidgets.SlitCalculator(self)
+        calc.setCurrentInstrumentName(self.current_instrument)
+        calc.processInstrumentHasBeenChanged()
         calc.exec_()
 
     def _polar_corr_selected(self):
@@ -799,9 +801,9 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                                     w1 = getWorkspace(wksp[0])
                                     w2 = getWorkspace(wksp[-1])
                                     if len(runno) == 2:
-                                        outputwksp = runno[0] + '_' + runno[1][3:5]
+                                        outputwksp = runno[0] + '_' + runno[1][3:]
                                     else:
-                                        outputwksp = runno[0] + '_' + runno[-1][3:5]
+                                        outputwksp = runno[0] + '_' + runno[-1][3:]
                                     begoverlap = w2.readX(0)[0]
                                     # get Qmax
                                     if self.tableMain.item(row, i * 5 + 4).text() == '':
@@ -906,9 +908,9 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         # Create and plot stitched outputs
         if self.__checked_row_stiched(row):
             if len(runno) == 2:
-                outputwksp = runno[0] + '_' + runno[1][3:5]
+                outputwksp = runno[0] + '_' + runno[1][3:]
             else:
-                outputwksp = runno[0] + '_' + runno[2][3:5]
+                outputwksp = runno[0] + '_' + runno[2][3:]
             if not getWorkspace(outputwksp, report_error=False):
                 # Stitching has not been done as part of processing, so we need to do it here.
                 wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1, keep=True)

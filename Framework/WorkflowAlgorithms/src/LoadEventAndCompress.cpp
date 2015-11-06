@@ -219,7 +219,13 @@ void LoadEventAndCompress::exec() {
   for (size_t i = 1; i < numRows; ++i) {
     MatrixWorkspace_sptr temp = loadChunk(i);
     temp = processChunk(temp);
-    resultWS = plus(resultWS, temp);
+    auto plusAlg = createChildAlgorithm("Plus");
+    plusAlg->setProperty("LHSWorkspace", resultWS);
+    plusAlg->setProperty("RHSWorkspace", temp);
+    plusAlg->setProperty("OutputWorkspace", resultWS);
+    plusAlg->setProperty("ClearRHSWorkspace", true);
+    plusAlg->executeAsChildAlg();
+    resultWS = plusAlg->getProperty("OutputWorkspace");
   }
   Workspace_sptr total = assemble(resultWS);
 

@@ -42,7 +42,8 @@ public:
   EnggDiffWorker(EnggDiffractionPresenter *pres, const std::string &outFilename,
                  const std::string &vanNo, const std::string &ceriaNo)
       : m_pres(pres), m_outFilenames(), m_outCalibFilename(outFilename),
-        m_vanNo(vanNo), m_ceriaNo(ceriaNo), m_banks() {}
+        m_vanNo(vanNo), m_ceriaNo(ceriaNo), m_banks(), m_bin(.0),
+        m_nperiods(0) {}
 
   /// for focusing
   EnggDiffWorker(EnggDiffractionPresenter *pres, const std::string &outDir,
@@ -51,7 +52,19 @@ public:
                  const std::string &specIDs, const std::string &dgFile)
       : m_pres(pres), m_outFilenames(outFilenames), m_outCalibFilename(),
         m_runNo(runNo), m_outDir(outDir), m_banks(banks), m_specIDs(specIDs),
-        m_dgFile(dgFile) {}
+        m_dgFile(dgFile), m_bin(.0), m_nperiods(0) {}
+
+  // for rebinning (ToF)
+  EnggDiffWorker(EnggDiffractionPresenter *pres, const std::string &runNo,
+                 double bin, const std::string &outWSName)
+      : m_pres(pres), m_runNo(runNo), m_bin(bin), m_nperiods(0),
+        m_outWSName(outWSName) {}
+
+  // for rebinning (by pulse times)
+  EnggDiffWorker(EnggDiffractionPresenter *pres, const std::string &runNo,
+                 size_t nperiods, double timeStep, const std::string &outWSName)
+      : m_pres(pres), m_runNo(runNo), m_bin(timeStep), m_nperiods(nperiods),
+        m_outWSName(outWSName) {}
 
 private slots:
 
@@ -74,6 +87,16 @@ private slots:
     emit finished();
   }
 
+  void rebinTime() {
+    m_pres->doRebinningTime(m_runNo, m_bin, m_outWSName);
+    emit finished();
+  }
+
+  void rebinPulses() {
+    m_pres->doRebinningPulses(m_runNo, m_nperiods, m_bin, m_outWSName);
+    emit finished();
+  }
+
 signals:
   void finished();
 
@@ -93,6 +116,10 @@ private:
   const std::string m_specIDs;
   // for focusing "texture"
   const std::string m_dgFile;
+  // parameters for pre-processing/rebinning
+  const double m_bin;
+  const size_t m_nperiods;
+  const std::string m_outWSName;
 };
 
 } // namespace CustomInterfaces

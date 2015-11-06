@@ -165,6 +165,7 @@ private:
   void loadBlock(Mantid::NeXus::NXDataSetTyped<double> &data,
                  Mantid::NeXus::NXDataSetTyped<double> &errors,
                  Mantid::NeXus::NXDataSetTyped<double> &farea, bool hasFArea,
+                 Mantid::NeXus::NXDouble &xErrors, bool hasXErrors,
                  int64_t blocksize, int64_t nchannels, int64_t &hist,
                  API::MatrixWorkspace_sptr local_workspace);
 
@@ -173,12 +174,14 @@ private:
   void loadBlock(Mantid::NeXus::NXDataSetTyped<double> &data,
                  Mantid::NeXus::NXDataSetTyped<double> &errors,
                  Mantid::NeXus::NXDataSetTyped<double> &farea, bool hasFArea,
+                 Mantid::NeXus::NXDouble &xErrors, bool hasXErrors,
                  int64_t blocksize, int64_t nchannels, int64_t &hist,
                  int64_t &wsIndex, API::MatrixWorkspace_sptr local_workspace);
   /// Load a block of data into the workspace
   void loadBlock(Mantid::NeXus::NXDataSetTyped<double> &data,
                  Mantid::NeXus::NXDataSetTyped<double> &errors,
                  Mantid::NeXus::NXDataSetTyped<double> &farea, bool hasFArea,
+                 Mantid::NeXus::NXDouble &xErrors, bool hasXErrors,
                  Mantid::NeXus::NXDouble &xbins, int64_t blocksize,
                  int64_t nchannels, int64_t &hist, int64_t &wsIndex,
                  API::MatrixWorkspace_sptr local_workspace);

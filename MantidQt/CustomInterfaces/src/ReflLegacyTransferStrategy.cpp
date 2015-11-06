@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/ReflLegacyTransferStrategy.h"
-
+#include "MantidQtCustomInterfaces/ReflTableSchema.h"
+#include "MantidKernel/ProgressBase.h"
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
@@ -8,8 +9,9 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    std::vector<std::map<std::string,std::string> > ReflLegacyTransferStrategy::transferRuns(const std::map<std::string,std::string>& runRows)
-    {
+  std::vector<std::map<std::string, std::string>>
+  ReflLegacyTransferStrategy::transferRuns(
+      SearchResultMap &searchResults, Mantid::Kernel::ProgressBase &progress) {
       /*
        * If the descriptions are the same except for theta: same group, different rows.
        * If the descriptions are the same including theta: same row with runs separated by '+'
@@ -26,10 +28,10 @@ namespace MantidQt
       std::map<std::string,std::string> thetaByDesc;
 
       //Iterate over the input and build the maps
-      for(auto rowIt = runRows.begin(); rowIt != runRows.end(); ++rowIt)
-      {
+      for (auto rowIt = searchResults.begin(); rowIt != searchResults.end();
+           ++rowIt) {
         const std::string run = rowIt->first;
-        const std::string desc = rowIt->second;
+        const std::string desc = rowIt->second.description;
         std::string cleanDesc = desc;
 
         //See if theta is in the description
@@ -59,6 +61,8 @@ namespace MantidQt
 
         //Assign this description to the group it belongs to
         groupsByDesc[desc] = groupsByDesc[cleanDesc];
+
+        progress.report();
       }
 
       //All the data we need is now properly organised, so we can quickly throw out the rows needed
@@ -66,13 +70,24 @@ namespace MantidQt
       for(auto run = runsByDesc.begin(); run != runsByDesc.end(); ++run)
       {
         std::map<std::string,std::string> row;
-        row["runs"] = run->second;
-        row["theta"] = thetaByDesc[run->first];
-        row["group"] = groupsByDesc[run->first];
+        row[ReflTableSchema::RUNS] = run->second;
+        row[ReflTableSchema::ANGLE] = thetaByDesc[run->first];
+        row[ReflTableSchema::GROUP] = groupsByDesc[run->first];
         output.push_back(row);
       }
       std::sort(output.begin(), output.end());
       return output;
-    }
+  }
+
+  ReflLegacyTransferStrategy *ReflLegacyTransferStrategy::clone() const {
+    return new ReflLegacyTransferStrategy(*this);
+  }
+
+  bool MantidQt::CustomInterfaces::ReflLegacyTransferStrategy::knownFileType(
+      const std::string &filename) const {
+    boost::regex pattern("raw$", boost::regex::icase);
+    boost::smatch match; // Unused.
+    return boost::regex_search(filename, match, pattern);
+  }
   }
 }
