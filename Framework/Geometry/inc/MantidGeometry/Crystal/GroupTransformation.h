@@ -49,7 +49,7 @@ namespace Geometry {
 */
 class MANTID_GEOMETRY_DLL GroupTransformation {
 public:
-  GroupTransformation(const SymmetryOperation &operation);
+  GroupTransformation(const MatrixVectorPair<int, V3R> &operation);
   GroupTransformation(const std::string &operationString);
 
   virtual ~GroupTransformation() {}
@@ -62,7 +62,7 @@ private:
   SymmetryOperation
   transformOperation(const SymmetryOperation &operation) const;
 
-  SymmetryOperation m_symOp;
+  MatrixVectorPair<int, V3R> m_symOp;
 };
 
 } // namespace Geometry

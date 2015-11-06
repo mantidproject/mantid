@@ -21,7 +21,7 @@ void MatrixVectorPairParser::MatrixVectorPairBuilder::setCurrentFactor(
       boost::fusion::at_c<1>(rationalNumberComponents);
 
   if (denominator.is_initialized()) {
-    m_currentFactor = RationalNumber(numerator, denominator.value());
+    m_currentFactor = RationalNumber(numerator, denominator.get());
   } else {
     m_currentFactor = RationalNumber(numerator);
   }

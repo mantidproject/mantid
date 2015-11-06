@@ -19,7 +19,7 @@ public:
   static void destroySuite(GroupTransformationTest *suite) { delete suite; }
 
   void test_ConstructionSymmetryOperation() {
-    TS_ASSERT_THROWS_NOTHING(GroupTransformation(SymmetryOperation("x,y,z")));
+    TS_ASSERT_THROWS_NOTHING(GroupTransformation("x,y,z"));
   }
 
   void test_ConstructionSymmetryOperationString() {
