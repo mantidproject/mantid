@@ -28,13 +28,13 @@ private:
 
 protected:
   std::vector<double> BaseEqn; ///< Base equation (as a 10 point vector)
+  Quadratic(const Quadratic &);
+  Quadratic &operator=(const Quadratic &);
 
 public:
   static const int Nprecision = 10; ///< Precision of the output
 
   Quadratic();
-  Quadratic(const Quadratic &);
-  Quadratic &operator=(const Quadratic &);
   std::unique_ptr<Quadratic> clone() const;
 
   /// Accept visitor for line calculation

@@ -55,14 +55,16 @@ private:
   std::size_t planeType() const; ///< are we alined on an axis
   Plane *doClone() const;
 
+protected:
+  Plane(const Plane &);
+  Plane &operator=(const Plane &);
+
 public:
   /// Effective typename
   virtual std::string className() const { return "Plane"; }
 
   Plane();
-  Plane(const Plane &);
   std::unique_ptr<Plane> clone() const;
-  Plane &operator=(const Plane &);
 
   virtual void acceptVisitor(BaseVisit &A) const { A.Accept(*this); }
 

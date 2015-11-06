@@ -335,7 +335,7 @@ ShapeFactory::parseSphere(Poco::XML::Element *pElem,
 
   // create sphere
   const V3D centre = pElemCentre ? parsePosition(pElemCentre) : DEFAULT_CENTRE;
-  auto pSphere = boost::shared_ptr<Sphere>(new Sphere);
+  auto pSphere = boost::make_shared<Sphere>();
   pSphere->setCentre(centre);
   pSphere->setRadius(radius);
   prim[l_id] = pSphere;

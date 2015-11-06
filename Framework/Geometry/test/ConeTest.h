@@ -32,15 +32,6 @@ public:
     TS_ASSERT_EQUALS(extractString(A), "-1  k/x 1 1 1 1\n");
   }
 
-  void testCopyConstructor() {
-    Cone A;
-    TS_ASSERT_EQUALS(A.setSurface("k/x 1.0 1.0 1.0 1.0\n"), 0);
-    Cone B(A);
-    TS_ASSERT_EQUALS(B.getNormal(), V3D(1.0, 0.0, 0.0));
-    TS_ASSERT_EQUALS(B.getCentre(), V3D(1.0, 1.0, 1.0));
-    TS_ASSERT_EQUALS(extractString(B), "-1  k/x 1 1 1 1\n");
-  }
-
   void testClone() {
     Cone A;
     TS_ASSERT_EQUALS(A.setSurface("k/x 1.0 1.0 1.0 1.0\n"), 0);
@@ -50,16 +41,6 @@ public:
     TS_ASSERT_EQUALS(C->getNormal(), V3D(1.0, 0.0, 0.0));
     TS_ASSERT_EQUALS(C->getCentre(), V3D(1.0, 1.0, 1.0));
     TS_ASSERT_EQUALS(extractString(*C), "-1  k/x 1 1 1 1\n");
-  }
-
-  void testAssignment() {
-    Cone A, B;
-    TS_ASSERT_EQUALS(A.setSurface("k/x 1.0 1.0 1.0 1.0\n"), 0);
-    TS_ASSERT_DIFFERS(extractString(B), extractString(A));
-    B = A;
-    TS_ASSERT_EQUALS(B.getNormal(), V3D(1.0, 0.0, 0.0));
-    TS_ASSERT_EQUALS(B.getCentre(), V3D(1.0, 1.0, 1.0));
-    TS_ASSERT_EQUALS(extractString(B), "-1  k/x 1 1 1 1\n");
   }
 
   void testSide() {

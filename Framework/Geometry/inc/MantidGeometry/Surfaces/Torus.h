@@ -52,14 +52,16 @@ private:
   void displace(const Kernel::V3D &);
   Torus *doClone() const;
 
+protected:
+  Torus(const Torus &);
+  Torus &operator=(const Torus &);
+
 public:
   /// Public identifier
   virtual std::string className() const { return "Torus"; }
 
   Torus();
-  Torus(const Torus &);
   std::unique_ptr<Torus> clone() const;
-  Torus &operator=(const Torus &);
   int operator==(const Torus &) const;
 
   /// Accept visitor for line calculation
