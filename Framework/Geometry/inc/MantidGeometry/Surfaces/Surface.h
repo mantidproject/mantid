@@ -49,16 +49,15 @@ class MANTID_GEOMETRY_DLL Surface {
 private:
   int Name;                             ///< Surface number (MCNPX identifier)
   virtual Surface *doClone() const = 0; ///< Abstract clone function
-  Surface(const Surface &);
-  Surface &operator=(const Surface &);
-
 public:
   static const int Nprecision = 10; ///< Precision of the output
 
   Surface();
+  Surface(const Surface &);
   std::unique_ptr<Surface> clone() const {
     return std::unique_ptr<Surface>(doClone());
   };
+  Surface &operator=(const Surface &);
   virtual ~Surface();
 
   /// Effective typeid

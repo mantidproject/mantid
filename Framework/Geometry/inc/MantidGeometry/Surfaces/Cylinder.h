@@ -57,15 +57,15 @@ private:
   void displace(const Kernel::V3D &);
   void setNvec(); ///< check to obtain orientation
   Cylinder *doClone() const;
-  Cylinder(const Cylinder &);
-  Cylinder &operator=(const Cylinder &);
 
 public:
   /// Public identifer
   virtual std::string className() const { return "Cylinder"; }
 
   Cylinder();
+  Cylinder(const Cylinder &);
   std::unique_ptr<Cylinder> clone() const;
+  Cylinder &operator=(const Cylinder &);
 
   // Visit acceptor
   virtual void acceptVisitor(BaseVisit &A) const { A.Accept(*this); }
