@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/ReflTableSchema.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
 #include <utility>
 
 namespace MantidQt {

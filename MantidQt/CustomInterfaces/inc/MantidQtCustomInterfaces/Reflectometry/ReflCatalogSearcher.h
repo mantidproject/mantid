@@ -1,7 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLCATALOGSEARCHER_H
 #define MANTID_CUSTOMINTERFACES_REFLCATALOGSEARCHER_H
 
-#include "MantidQtCustomInterfaces/IReflSearcher.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSearcher.h"
 
 namespace MantidQt
 {

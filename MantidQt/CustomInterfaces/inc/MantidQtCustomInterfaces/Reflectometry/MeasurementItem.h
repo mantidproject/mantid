@@ -1,5 +1,5 @@
-#ifndef MANTIDQT_CUSTOMINTERFACES_MEASUREMENT_H_
-#define MANTIDQT_CUSTOMINTERFACES_MEASUREMENT_H_
+#ifndef MANTIDQT_CUSTOMINTERFACES_MEASUREMENTITEM_H_
+#define MANTIDQT_CUSTOMINTERFACES_MEASUREMENTITEM_H_
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include <string>
@@ -30,24 +30,24 @@ namespace CustomInterfaces {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL Measurement {
+class MANTIDQT_CUSTOMINTERFACES_DLL MeasurementItem {
 
 public:
   typedef std::string IDType;
 
   /// Constructor
-  Measurement(const IDType &measurementId, const IDType &subId,
+  MeasurementItem(const IDType &measurementItemId, const IDType &subId,
               const std::string &label, const std::string &type,
               const double angle, const std::string &run);
 
   /// Constructional method
-  static Measurement InvalidMeasurement(const std::string &why);
+  static MeasurementItem InvalidMeasurement(const std::string &why);
 
   /// Copy constructor
-  Measurement(const Measurement &other);
+  MeasurementItem(const MeasurementItem &other);
 
   /// Destructor
-  ~Measurement();
+  ~MeasurementItem();
 
   bool isUseable() const;
   std::string whyUnuseable() const;
@@ -58,12 +58,12 @@ public:
   std::string label() const;
   double angle() const;
   std::string angleStr() const;
-  Measurement &operator=(const Measurement &);
+  MeasurementItem &operator=(const MeasurementItem &);
 
 private:
   /// Constructor
-  Measurement(const std::string &why);
-  IDType m_measurementId;
+  MeasurementItem(const std::string &why);
+  IDType m_measurementItemId;
   IDType m_subId;
   std::string m_label;
   std::string m_type;
@@ -76,4 +76,4 @@ private:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTIDQT_CUSTOMINTERFACES_MEASUREMENT_H_ */
+#endif /* MANTIDQT_CUSTOMINTERFACES_MEASUREMENTITEM_H_ */

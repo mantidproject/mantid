@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/ReflCatalogSearcher.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"

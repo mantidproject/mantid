@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -13,16 +13,16 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UserCatalogInfo.h"
 #include "MantidKernel/Utils.h"
-#include "MantidQtCustomInterfaces/ReflNexusMeasurementSource.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h"
 #include "MantidQtCustomInterfaces/ProgressableView.h"
-#include "MantidQtCustomInterfaces/ReflCatalogSearcher.h"
-#include "MantidQtCustomInterfaces/ReflLegacyTransferStrategy.h"
-#include "MantidQtCustomInterfaces/ReflMeasureTransferStrategy.h"
-#include "MantidQtCustomInterfaces/ReflMainView.h"
-#include "MantidQtCustomInterfaces/ReflSearchModel.h"
-#include "MantidQtCustomInterfaces/QReflTableModel.h"
-#include "MantidQtCustomInterfaces/QtReflOptionsDialog.h"
-#include "MantidQtCustomInterfaces/ReflGenerateNotebook.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/QtReflOptionsDialog.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflGenerateNotebook.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 #include "MantidQtCustomInterfaces/ParseKeyValueString.h"
 
@@ -1694,7 +1694,7 @@ ReflMainViewPresenter::getTransferStrategy() {
     // We are going to load from disk to pick up the meta data, so provide the
     // right repository to do this.
     auto source =
-        std::unique_ptr<ReflMeasurementSource>(new ReflNexusMeasurementSource);
+        std::unique_ptr<ReflMeasurementItemSource>(new ReflNexusMeasurementItemSource);
 
     // Finally make and return the Measure based transfer strategy.
     return std::unique_ptr<ReflTransferStrategy>(

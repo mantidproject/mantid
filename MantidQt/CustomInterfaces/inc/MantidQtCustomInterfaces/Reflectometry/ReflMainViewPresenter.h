@@ -4,11 +4,11 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/IReflPresenter.h"
-#include "MantidQtCustomInterfaces/IReflSearcher.h"
-#include "MantidQtCustomInterfaces/ReflTransferStrategy.h"
-#include "MantidQtCustomInterfaces/ReflMainView.h"
-#include "MantidQtCustomInterfaces/QReflTableModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSearcher.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h"
+#include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
 
 #include <Poco/AutoPtr.h>
 #include <memory>

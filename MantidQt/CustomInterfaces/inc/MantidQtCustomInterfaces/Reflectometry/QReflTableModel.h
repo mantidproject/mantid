@@ -4,7 +4,7 @@
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/ReflTableSchema.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
 #include <QAbstractTableModel>
 #include <boost/shared_ptr.hpp>
 #include <map>

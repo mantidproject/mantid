@@ -1,5 +1,5 @@
-#include "MantidQtCustomInterfaces/ReflLegacyTransferStrategy.h"
-#include "MantidQtCustomInterfaces/ReflTableSchema.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
 #include "MantidKernel/ProgressBase.h"
 #include <algorithm>
 #include <boost/lexical_cast.hpp>

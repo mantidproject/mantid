@@ -1,20 +1,15 @@
-#ifndef MANTID_CUSTOMINTERFACES_QTREFLOPTIONSDIALOG_H
-#define MANTID_CUSTOMINTERFACES_QTREFLOPTIONSDIALOG_H
+#ifndef MANTID_CUSTOMINTERFACES_REFLLEGACYTRANSFERSTRATEGY_H
+#define MANTID_CUSTOMINTERFACES_REFLLEGACYTRANSFERSTRATEGY_H
 
 #include "MantidKernel/System.h"
-#include "MantidQtCustomInterfaces/IReflPresenter.h"
-#include "MantidQtCustomInterfaces/ReflMainView.h"
-
-#include <QDialog>
-
-#include "ui_ReflOptionsDialog.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h"
 
 namespace MantidQt
 {
   namespace CustomInterfaces
   {
 
-    /** QtReflOptionsDialog : Provides a dialog for setting Reflectometry UI options.
+    /** ReflLegacyTransferStrategy : Replicates the old Reflectometry UI's transfer behaviour.
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
@@ -36,29 +31,18 @@ namespace MantidQt
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-
-    class DLLExport QtReflOptionsDialog : public QDialog
+    class DLLExport ReflLegacyTransferStrategy : public ReflTransferStrategy
     {
-    Q_OBJECT
     public:
-      QtReflOptionsDialog(ReflMainView* view, boost::shared_ptr<IReflPresenter> presenter);
-      virtual ~QtReflOptionsDialog();
-    protected:
-      void initLayout();
-      void initBindings();
-    protected slots:
-      void saveOptions();
-      void loadOptions();
-    protected:
-      //the interface
-      Ui::reflOptionsDialog ui;
-      //the presenter
-      boost::shared_ptr<IReflPresenter> m_presenter;
-      //maps option names to widget names
-      std::map<std::string,QString> m_bindings;
+      virtual std::vector<std::map<std::string, std::string>>
+      transferRuns(SearchResultMap &searchResults,
+                   Mantid::Kernel::ProgressBase &progress);
+
+      virtual ReflLegacyTransferStrategy *clone() const;
+
+      virtual bool knownFileType(const std::string &filename) const;
     };
+  }
+}
 
-  } //CustomInterfaces
-} //MantidQt
-
-#endif /* MANTID_CUSTOMINTERFACES_QTREFLOPTIONSDIALOG_H */
+#endif

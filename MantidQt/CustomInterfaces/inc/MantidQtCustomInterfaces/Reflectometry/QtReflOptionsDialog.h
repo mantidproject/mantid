@@ -1,15 +1,20 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLLEGACYTRANSFERSTRATEGY_H
-#define MANTID_CUSTOMINTERFACES_REFLLEGACYTRANSFERSTRATEGY_H
+#ifndef MANTID_CUSTOMINTERFACES_QTREFLOPTIONSDIALOG_H
+#define MANTID_CUSTOMINTERFACES_QTREFLOPTIONSDIALOG_H
 
 #include "MantidKernel/System.h"
-#include "MantidQtCustomInterfaces/ReflTransferStrategy.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
+
+#include <QDialog>
+
+#include "ui_ReflOptionsDialog.h"
 
 namespace MantidQt
 {
   namespace CustomInterfaces
   {
 
-    /** ReflLegacyTransferStrategy : Replicates the old Reflectometry UI's transfer behaviour.
+    /** QtReflOptionsDialog : Provides a dialog for setting Reflectometry UI options.
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
@@ -31,18 +36,29 @@ namespace MantidQt
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport ReflLegacyTransferStrategy : public ReflTransferStrategy
+
+    class DLLExport QtReflOptionsDialog : public QDialog
     {
+    Q_OBJECT
     public:
-      virtual std::vector<std::map<std::string, std::string>>
-      transferRuns(SearchResultMap &searchResults,
-                   Mantid::Kernel::ProgressBase &progress);
-
-      virtual ReflLegacyTransferStrategy *clone() const;
-
-      virtual bool knownFileType(const std::string &filename) const;
+      QtReflOptionsDialog(ReflMainView* view, boost::shared_ptr<IReflPresenter> presenter);
+      virtual ~QtReflOptionsDialog();
+    protected:
+      void initLayout();
+      void initBindings();
+    protected slots:
+      void saveOptions();
+      void loadOptions();
+    protected:
+      //the interface
+      Ui::reflOptionsDialog ui;
+      //the presenter
+      boost::shared_ptr<IReflPresenter> m_presenter;
+      //maps option names to widget names
+      std::map<std::string,QString> m_bindings;
     };
-  }
-}
 
-#endif
+  } //CustomInterfaces
+} //MantidQt
+
+#endif /* MANTID_CUSTOMINTERFACES_QTREFLOPTIONSDIALOG_H */

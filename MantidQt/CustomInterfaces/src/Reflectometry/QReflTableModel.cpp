@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/QReflTableModel.h"
+#include "MantidQtCustomInterfaces//Reflectometry/QReflTableModel.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 

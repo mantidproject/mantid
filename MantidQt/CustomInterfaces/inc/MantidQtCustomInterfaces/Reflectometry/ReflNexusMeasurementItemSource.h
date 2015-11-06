@@ -1,17 +1,17 @@
-#ifndef MANTIDQT_CUSTOMINTERFACES_REFLMEASUREMENTSOURCE_H_
-#define MANTIDQT_CUSTOMINTERFACES_REFLMEASUREMENTSOURCE_H_
+#ifndef MANTIDQT_CUSTOMINTERFACES_REFLNEXUSMEASUREMENTITEMSOURCE_H_
+#define MANTIDQT_CUSTOMINTERFACES_REFLNEXUSMEASUREMENTITEMSOURCE_H_
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/Measurement.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMeasurementItemSource.h"
+#include "MantidQtCustomInterfaces/Reflectometry/MeasurementItem.h"
+
 #include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-
-/** ReflMeasurementSource : Repository pattern abstracting data mapping from
- domain. Specifically for accessing
- * measurement information from some data map/repository.
+/** ReflNexusMeasurementSource : ReflMeasurementSource repository realization that
+  fetches data out off disk using load algorithms and Nexus formats.
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -34,18 +34,18 @@ namespace CustomInterfaces {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL ReflMeasurementSource {
+class MANTIDQT_CUSTOMINTERFACES_DLL ReflNexusMeasurementItemSource : public ReflMeasurementItemSource {
 public:
-  /// Get the measurement somehow using location, or fuzzy path
-  virtual Measurement obtain(const std::string &definedPath,
-                             const std::string &fuzzyName) const = 0;
+  ReflNexusMeasurementItemSource();
+  virtual MeasurementItem obtain(const std::string &definedPath,
+                             const std::string &fuzzyName) const;
   /// Virtual destructor
-  virtual ReflMeasurementSource *clone() const = 0;
-  /// Destructor
-  virtual ~ReflMeasurementSource(){};
+  virtual ReflNexusMeasurementItemSource *clone() const;
+  virtual ~ReflNexusMeasurementItemSource();
+
 };
 
 } // namespace CustomInterfaces
 } // namespace Mantid
 
-#endif /* MANTIDQT_CUSTOMINTERFACES_REFLMEASUREMENTSOURCE_H_ */
+#endif /* MANTIDQT_CUSTOMINTERFACES_REFLNEXUSMEASUREMENTSOURCE_H_ */

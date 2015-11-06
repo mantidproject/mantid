@@ -2,9 +2,9 @@
 #define MANTID_CUSTOMINTERFACES_REFLMAINVIEW_H
 
 #include "MantidKernel/System.h"
-#include "MantidQtCustomInterfaces/IReflPresenter.h"
-#include "MantidQtCustomInterfaces/ReflSearchModel.h"
-#include "MantidQtCustomInterfaces/QReflTableModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
 #include "MantidQtMantidWidgets/HintStrategy.h"
 
 #include <map>

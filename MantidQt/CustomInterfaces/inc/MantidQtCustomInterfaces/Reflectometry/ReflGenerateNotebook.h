@@ -28,7 +28,7 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-#include "MantidQtCustomInterfaces/QReflTableModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
 #include "MantidKernel/System.h"
 
 #include <set>
