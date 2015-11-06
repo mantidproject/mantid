@@ -32,16 +32,18 @@ class IntegratePeaksTableWidget(tableBase.NTableWidget):
         """
         out_ws, target_frame, exp_no, scan_no, None
         :param info_tuple:
-        :return:
+        :return: 2-tuple as boolean and error message
         """
         out_ws_name = info_tuple[0]
         # target_frame = info_tuple[1]
         exp_no = info_tuple[2]
         scan_no = info_tuple[3]
 
-        self.append_row([exp_no, scan_no, '', out_ws_name, 0., 0., 0., 0., 0., 0., 0, False])
+        status, msg = self.append_row([scan_no, '', out_ws_name, 0., 0., 0., 0., 0., 0., 0, False])
+        if status is False:
+            msg = 'Unable to append row to peak integration table due to %s' % msg
 
-        return
+        return status, msg
 
     def get_md_ws_name(self, row_index):
         """ Get MD workspace name

@@ -716,7 +716,7 @@ class CWSCDReductionControl(object):
                         is_cylinder):
         """
         Integrate peaks
-        :return:
+        :return: Boolean as successful or failed
         """
         # Check input
         if is_cylinder is True:

@@ -198,6 +198,8 @@ class MainWindow(QtGui.QMainWindow):
         if len(ret_list) == 0:
             self.pop_one_button_dialog('No scan is selected for integration!')
             return
+        else:
+            print '[DB] Total %d rows are selected for peak integration.' % len(ret_list)
 
         # Switch tab
         self.ui.tabWidget.setCurrentIndex(5)
@@ -210,7 +212,11 @@ class MainWindow(QtGui.QMainWindow):
                 err_msg = merged_info
                 self.pop_one_button_dialog(err_msg)
                 return
-            self.ui.tableWidget_peakIntegration.append_scan(merged_info)
+            else:
+                print '[DB] Add selected row %d. ' % row_index
+                status, msg = self.ui.tableWidget_peakIntegration.append_scan(merged_info)
+                if status is False:
+                    self.pop_one_button_dialog(msg)
         # END-FOR
 
         return
@@ -880,17 +886,29 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         if self.ui.radioButton_ubFromTab1.isChecked():
+            # from tab 'calculate UB'
             self.ui.tableWidget_ubMergeScan.set_from_matrix(self.ui.tableWidget_ubMatrix.get_matrix())
         elif self.ui.radioButton_ubFromTab3.isChecked():
+            # from tab 'refine UB'
             self.ui.tableWidget_ubMergeScan.set_from_matrix(self.ui.tableWidget_refinedUB.get_matrix())
         elif self.ui.radioButton_ubFromList.isChecked():
-            status, ret_obj = gutil.parse_float_array(str(self.ui.plainTextEdit_ubInput.toPlainText()))
+            # set ub matrix manually
+            ub_str = str(self.ui.plainTextEdit_ubInput.toPlainText())
+            status, ret_obj = gutil.parse_float_array(ub_str)
             if status is False:
+                # unable to parse to float arrays
                 self.pop_one_button_dialog(ret_obj)
             elif len(ret_obj) != 9:
+                # number of floats is not 9
                 self.pop_one_button_dialog('Requiring 9 floats for UB matrix.  Only %d are given.' % len(ret_obj))
             else:
-                self.ui.tableWidget_ubMergeScan.set_from_list(ret_obj)
+                # in good UB matrix format
+                ub_str = ret_obj
+                option = str(self.ui.comboBox_ubOption.currentText())
+                if option.lower().count('spice') > 0:
+                    # TODO/FIXME ASAP
+                    ub_str = self._myControl.convert_from_spice_ub(ub_str)
+                self.ui.tableWidget_ubMergeScan.set_from_list(ub_str)
         else:
             self.pop_one_button_dialog('None is selected to set UB matrix.')
 

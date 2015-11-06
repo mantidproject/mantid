@@ -34,7 +34,7 @@ class NTableWidget(QtGui.QTableWidget):
         """
 
         :param row_value_list:
-        :return:
+        :return: 2-tuple as (boolean, message)
         """
         # Check input
         assert isinstance(row_value_list, list)
