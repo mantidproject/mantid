@@ -287,7 +287,7 @@ class IncidentEnergy(PropDescriptor):
         # Calculate autoEi
         self._autoEiCalculated = False
         if ei_mon_spec is None:
-        ei_mon_spec = instance.ei_mon_spectra;
+            ei_mon_spec = instance.ei_mon_spectra;
         guess_ei_ws = GetAllEi(Workspace=monitor_ws,Monitor1SpecID = ei_mon_spec[0],\
                                Monitor2SpecID = ei_mon_spec[1])
         guessEi  = guess_ei_ws.readX(0);
