@@ -90,6 +90,20 @@ public:
 
     TS_ASSERT_EQUALS(expectedXML, actualXML);
   }
+
+  void test_reset_the_md_frame_type() {
+    // Arrange
+    Kernel::UnitLabel unitLabel("Meters");
+    Mantid::Geometry::GeneralFrame frameGeneral("Length", unitLabel);
+    Mantid::Geometry::QLab frameQLab;
+    MDHistoDimension dimension("Distance", "Dist", frameGeneral, 0, 10, 1);
+    // Act
+    dimension.setMDFrame(frameQLab);
+    // Assert
+    TSM_ASSERT_EQUALS("Should now be a QLab frame",
+                      dimension.getMDFrame().name(),
+                      Mantid::Geometry::QLab::QLabName);
+  }
 };
 
 #endif /* MANTID_GEOMETRY_MDHISTODIMENSIONTEST_H_ */

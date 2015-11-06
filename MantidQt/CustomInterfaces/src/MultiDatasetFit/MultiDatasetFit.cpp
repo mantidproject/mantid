@@ -91,6 +91,7 @@ void MultiDatasetFit::initLayout()
   connect(m_functionBrowser,SIGNAL(localParameterButtonClicked(const QString&)),this,SLOT(editLocalParameterValues(const QString&)));
   connect(m_functionBrowser,SIGNAL(functionStructureChanged()),this,SLOT(reset()));
   connect(m_functionBrowser,SIGNAL(globalsChanged()),this,SLOT(checkFittingType()));
+  connect(m_functionBrowser,SIGNAL(globalsChanged()),this,SLOT(setParameterNamesForPlotting()));
   connect(m_plotController,SIGNAL(currentIndexChanged(int)),m_functionBrowser,SLOT(setCurrentDataset(int)));
   connect(m_dataController,SIGNAL(spectraRemoved(QList<int>)),m_functionBrowser,SLOT(removeDatasets(QList<int>)));
   connect(m_dataController,SIGNAL(spectraAdded(int)),m_functionBrowser,SLOT(addDatasets(int)));
@@ -381,11 +382,13 @@ void MultiDatasetFit::finishFit(bool error)
     Mantid::API::IFunction_sptr fun;
     if (m_fitOptionsBrowser->getCurrentFittingType() == MantidWidgets::FitOptionsBrowser::Simultaneous)
     {
+      // After a simultaneous fit
       fun = m_fitRunner->getAlgorithm()->getProperty("Function");
       updateParameters( *fun );
     }
     else 
     {
+      // After a sequential fit
       auto paramsWSName = m_fitOptionsBrowser->getProperty("OutputWorkspace").toStdString();
       if (!Mantid::API::AnalysisDataService::Instance().doesExist(paramsWSName)) return;
       size_t nSpectra = getNumberOfSpectra();
@@ -408,6 +411,7 @@ void MultiDatasetFit::finishFit(bool error)
         }
       }
       updateParameters( *fun );
+      showParameterPlot();
     }
   }
 }
@@ -569,6 +573,7 @@ void MultiDatasetFit::reset()
 {
   m_functionBrowser->resetLocalParameters();
   m_functionBrowser->setNumberOfDatasets( getNumberOfSpectra() );
+  setParameterNamesForPlotting();
 }
 
 /// Check if a local parameter is fixed
@@ -671,6 +676,12 @@ void MultiDatasetFit::setLogNames()
   }
 }
 
+/// Collect names of local parameters and pass them to m_fitOptionsBrowser.
+void MultiDatasetFit::setParameterNamesForPlotting()
+{
+  m_fitOptionsBrowser->setParameterNamesForPlotting(m_functionBrowser->getLocalParameters());
+}
+
 /// Remove old output from Fit.
 void MultiDatasetFit::removeOldOutput()
 {
@@ -688,6 +699,21 @@ void MultiDatasetFit::invalidateOutput()
   m_outputWorkspaceName = "";
   m_plotController->clear();
   m_plotController->update();
+}
+
+/// Open a new graph window and plot a fitting parameter
+/// against a log value. The name of the parameter to plot
+/// and the log name must be selected in m_fitOptionsBrowser.
+void MultiDatasetFit::showParameterPlot()
+{
+  auto table = m_fitOptionsBrowser->getProperty("OutputWorkspace");
+  auto logValue = m_fitOptionsBrowser->getProperty("LogValue");
+  auto parName  = m_fitOptionsBrowser->getParameterToPlot();
+  if (table.isEmpty() || logValue.isEmpty() || parName.isEmpty()) return;
+
+  auto pyInput = QString("table = importTableWorkspace('%1')\n"
+                         "plotTableColumns(table, ('%2','%3_Err'))\n").arg(table, parName, parName);
+  runPythonCode(pyInput);
 }
 
 } // CustomInterfaces
