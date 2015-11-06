@@ -5,14 +5,14 @@
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::API::MatrixWorkspace;
-using Mantid::API::WorkspaceProperty;
-using Mantid::DataObjects::OffsetsWorkspace;
-using Mantid::DataObjects::OffsetsWorkspace_sptr;
-using Mantid::DataObjects::SpecialWorkspace2D;
-using Mantid::DataObjects::SpecialWorkspace2D_sptr;
-using Mantid::Geometry::Instrument_const_sptr;
-using Mantid::Kernel::Direction;
+//using Mantid::API::MatrixWorkspace;
+//using Mantid::API::WorkspaceProperty;
+//using Mantid::DataObjects::OffsetsWorkspace;
+//using Mantid::DataObjects::OffsetsWorkspace_sptr;
+//using Mantid::DataObjects::SpecialWorkspace2D;
+//using Mantid::DataObjects::SpecialWorkspace2D_sptr;
+//using Mantid::Geometry::Instrument_const_sptr;
+//using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateDIFC)
@@ -65,40 +65,39 @@ void CalculateDIFC::init() {
 /** Execute the algorithm.
  */
 void CalculateDIFC::exec() {
-  m_offsetsWS = getProperty("OffsetsWorkspace");
+  
+  DataObjects::OffsetsWorkspace_sptr offsetsWs = getProperty("OffsetsWorkspace");
+  API::MatrixWorkspace_sptr  inputWs = getProperty("InputWorkspace");
+  API::MatrixWorkspace_sptr  outputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(SpecialWorkspace2D_sptr(
+          new SpecialWorkspace2D(inputWs->getInstrument())));
+  
+  outputWs->setTitle("DIFC workspace");
 
-  createOutputWorkspace();
+  Instrument_const_sptr instrument = inputWs->getInstrument();
 
-  calculate();
-
-  setProperty("OutputWorkspace", m_outputWS);
-}
-
-void CalculateDIFC::createOutputWorkspace() {
-  m_inputWS = getProperty("InputWorkspace");
-
-  m_outputWS =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(SpecialWorkspace2D_sptr(
-          new SpecialWorkspace2D(m_inputWS->getInstrument())));
-  m_outputWS->setTitle("DIFC workspace");
-
-  return;
-}
-
-void CalculateDIFC::calculate() {
-  Instrument_const_sptr instrument = m_inputWS->getInstrument();
-
-  SpecialWorkspace2D_sptr localWS =
-      boost::dynamic_pointer_cast<SpecialWorkspace2D>(m_outputWS);
-
-  double l1;
+   double l1;
   Kernel::V3D beamline, samplePos;
-  double beamline_norm;
-  instrument->getInstrumentParameters(l1, beamline, beamline_norm, samplePos);
+  double beamlineNorm;
+
+  instrument->getInstrumentParameters(l1, beamline, beamlineNorm, samplePos);
 
   // To get all the detector ID's
   detid2det_map allDetectors;
   instrument->getDetectors(allDetectors);
+
+  API::Progress progress(this, 0, 1, allDetectors.size());
+  calculate(progress, inputWs, outputWs, offsetsWs, l1, beamlineNorm, beamline, samplePos, allDetectors);
+
+  setProperty("OutputWorkspace", outputWs);
+}
+
+void CalculateDIFC::calculate(API::Progress &progress, API::MatrixWorkspace_sptr &inputWs, 
+							  API::MatrixWorkspace_sptr &outputWs, DataObjects::OffsetsWorkspace_sptr &offsetsWS, 
+							  double l1, double beamlineNorm, Kernel::V3D &beamline, Kernel::V3D &samplePos, 
+							  detid2det_map &allDetectors) 
+{
+  SpecialWorkspace2D_sptr localWS =
+      boost::dynamic_pointer_cast<SpecialWorkspace2D>(outputWs);
 
   // Now go through all
   detid2det_map::const_iterator it = allDetectors.begin();
@@ -107,14 +106,16 @@ void CalculateDIFC::calculate() {
     if ((!det->isMasked()) && (!det->isMonitor())) {
       const detid_t detID = it->first;
       double offset = 0.;
-      if (m_offsetsWS)
-        offset = m_offsetsWS->getValue(detID, 0.);
+      if (offsetsWS)
+        offset = offsetsWS->getValue(detID, 0.);
 
       double difc = Geometry::Instrument::calcConversion(
-          l1, beamline, beamline_norm, samplePos, det, offset);
+          l1, beamline, beamlineNorm, samplePos, det, offset);
       difc = 1. / difc; // calcConversion gives 1/DIFC
-      localWS->setValue(detID, difc);
+      localWS->setValue(detID, difc); 
     }
+
+	progress.report("Calculate DIFC");
   }
 }
 
