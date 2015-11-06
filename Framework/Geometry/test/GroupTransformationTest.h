@@ -100,6 +100,18 @@ public:
     // Same group again
     TS_ASSERT_EQUALS(reversed, group);
   }
+
+  void test_TransformGroup_Rhombohedral() {
+    SpaceGroup_const_sptr r3cHex =
+        SpaceGroupFactory::Instance().createSpaceGroup("R -3 c");
+
+    /* 2/3 -1/3 -1/3    0
+     * 1/3  1/3 -2/3    0
+     * 1/3  1/3  1/3    0
+     */
+    Group r3cRh = GroupTransformation(
+        "2/3x-1/3y-1/3z,1/3x+1/3y-2/3z,1/3x+1/3y+1/3z")(*r3cHex);
+  }
 };
 
 #endif /* MANTID_GEOMETRY_GROUPTRANSFORMATIONTEST_H_ */

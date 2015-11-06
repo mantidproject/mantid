@@ -4,6 +4,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Crystal/V3R.h"
+#include "MantidGeometry/Crystal/MatrixVectorPair.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -139,11 +140,7 @@ public:
 
   /// Returns the transformed vector.
   template <typename T> T operator*(const T &operand) const {
-    if (!hasTranslation()) {
-      return m_matrix * operand;
-    }
-
-    return (m_matrix * operand) + m_vector;
+    return m_matrixVectorPair * operand;
   }
 
   Kernel::V3D transformHKL(const Kernel::V3D &hkl) const;
@@ -167,11 +164,11 @@ protected:
                        const V3R &vector) const;
 
   size_t m_order;
-  Kernel::IntMatrix m_matrix;
   Kernel::IntMatrix m_inverseMatrix;
-  V3R m_vector;
   V3R m_reducedVector;
   std::string m_identifier;
+
+  MatrixVectorPair<int, V3R> m_matrixVectorPair;
 };
 
 MANTID_GEOMETRY_DLL std::ostream &

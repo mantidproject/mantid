@@ -19,6 +19,7 @@ set ( SRC_FILES
 	src/Crystal/IndexingUtils.cpp
 	src/Crystal/IsotropicAtomBraggScatterer.cpp
 	src/Crystal/MatrixVectorPair.cpp
+	src/Crystal/MatrixVectorPairParser.cpp
 	src/Crystal/NiggliCell.cpp
 	src/Crystal/OrientedLattice.cpp
 	src/Crystal/PeakTransform.cpp
@@ -158,6 +159,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/IndexingUtils.h
 	inc/MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h
 	inc/MantidGeometry/Crystal/MatrixVectorPair.h
+	inc/MantidGeometry/Crystal/MatrixVectorPairParser.h
 	inc/MantidGeometry/Crystal/NiggliCell.h
 	inc/MantidGeometry/Crystal/OrientedLattice.h
 	inc/MantidGeometry/Crystal/PeakShape.h
@@ -326,6 +328,7 @@ set ( TEST_FILES
 	MDPlaneTest.h
 	MapSupportTest.h
 	MathSupportTest.h
+	MatrixVectorPairParserTest.h
 	MatrixVectorPairTest.h
 	NearestNeighboursFactoryTest.h
 	NearestNeighboursTest.h
