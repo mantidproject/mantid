@@ -53,18 +53,11 @@ if( MSVC )
                       RESULT_VARIABLE error_code )
   else ()
     message ( STATUS "Updating third party dependencies" )
-    # Run a manual 'git lfs fetch' (see comments above) before doing real update just in case there has
-    # been a large amount of data uploaded
-    execute_process ( COMMAND ${GIT_EXECUTABLE} lfs fetch
-                      WORKING_DIRECTORY ${THIRD_PARTY_DIR}
-                      RESULT_VARIABLE error_code )
-    if ( error_code )
-      message(FATAL_ERROR "Failed to download third party binary data. Check your network connection")
-    endif ()
+    # Assume the updates are small & don't run git lfs fetch
     execute_process ( COMMAND ${CMAKE_COMMAND} ARGS -P ${_tmp_dir}/${_project_name}-gitupdate.cmake
                       RESULT_VARIABLE error_code )
     if ( error_code )
-      message(FATAL_ERROR "Failed to update repository: 'THIRD_PARTY_GIT_URL'")
+      message(FATAL_ERROR "Failed to update repository: '${THIRD_PARTY_GIT_URL}'")
     endif ()
   endif ()
   unset ( _tmp_dir )
