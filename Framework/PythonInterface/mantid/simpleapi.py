@@ -825,7 +825,7 @@ def _create_algorithm_function(algorithm, version, _algm_object):
                 # Check for missing mandatory parameters
                 _check_mandatory_args(algorithm, _algm_object, e, *args, **kwargs)
             else:
-                raise RuntimeError(str(e))
+                raise
         return _gather_returns(algorithm, lhs, algm)
 
 
