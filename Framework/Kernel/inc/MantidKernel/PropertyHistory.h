@@ -7,9 +7,10 @@
 #include "MantidKernel/EmptyValues.h"
 #include <string>
 #include <vector>
+#ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
-
+#endif
 namespace Mantid {
 namespace Kernel {
 //----------------------------------------------------------------------
