@@ -61,13 +61,20 @@ set ( PYTHONW_EXECUTABLE "${PYTHON_DIR}/pythonw.exe" CACHE FILEPATH
 ###########################################################################
 # If required, find tcmalloc
 ###########################################################################
-set ( USE_TCMALLOC OFF CACHE BOOL "If true, link with tcmalloc" )
+option ( USE_TCMALLOC "If true, link with tcmalloc" ON )
 # If not wanted, just carry on without it
 if ( USE_TCMALLOC )
-  set ( TCMALLOC_LIBRARIES optimized "${CMAKE_LIBRARY_PATH}/libtcmalloc_minimal.lib" debug "${CMAKE_LIBRARY_PATH}/libtcmalloc_minimal-debug.lib" )
+  # Only link in release configurations. There seems to be problem linking in debug mode
+  set ( TCMALLOC_LIBRARIES optimized "${CMAKE_LIBRARY_PATH}/libtcmalloc_minimal.lib" )
   # Use an alternate variable name so that it is only set on Windows
   set ( TCMALLOC_LIBRARIES_LINKTIME ${TCMALLOC_LIBRARIES})
-  set ( CMAKE_SHARED_LINKER_FLAGS /INCLUDE:"__tcmalloc" )
+  set ( _configs RELEASE RELWITHDEBINFO MINSIZEREL )
+  set ( _targets EXE SHARED )
+  foreach ( _tgt ${_targets})
+    foreach ( _cfg ${_configs})
+      set ( CMAKE_${_tgt}_LINKER_FLAGS_${_cfg} "${CMAKE_${_tgt}_LINKER_FLAGS_${_cfg}} /INCLUDE:__tcmalloc" )
+    endforeach ()
+  endforeach ()
 else ( USE_TCMALLOC )
   message ( STATUS "TCMalloc will not be included." )
 endif ()
