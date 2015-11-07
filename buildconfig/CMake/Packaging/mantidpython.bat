@@ -28,5 +28,4 @@ set PATH=%_EXTRA_PATH_DIRS%;%PATH%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Start python
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-start "Mantid Python" /B /WAIT %_BIN_DIR%\python.exe %_BIN_DIR%\Scripts\ipython.py %*
-
+start "Mantid Python" /B /WAIT %_BIN_DIR%\Scripts\ipython.cmd %*
