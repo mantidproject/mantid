@@ -26,11 +26,11 @@ Usage
 -----
 
 .. testcode::
-  from mantid.kernel import OptionalBoolValue
+  
   # Create a workspace
   ws = CreateSampleWorkspace()
   # Replace the instrument in the workspace with HRPD
-  LoadInstrument(ws,InstrumentName='HRPD', RewriteSpectraMap=OptionalBoolValue.True)
+  LoadInstrument(ws,InstrumentName='HRPD', RewriteSpectraMap=True)
   # Map spectra to detectors according to an HRPD raw file.
   LoadMappingTable('HRP39180.RAW',ws)
 

@@ -74,7 +74,7 @@ Usage
 **Example - Update Instrument:**
 
 .. testcode:: exUpdateInstrumentFromFile
-   from mantid.kernel import OptionalBoolValue
+   
    import math
    import os
    # priting procedure
@@ -100,7 +100,7 @@ Usage
    ws=CreateSampleWorkspace();  
    #--------------------------------------------------------------------------------------      
    # load MARI
-   det=LoadInstrument(ws,InstrumentName='MARI', RewriteSpectraMap=OptionalBoolValue.True)   
+   det=LoadInstrument(ws,InstrumentName='MARI', RewriteSpectraMap=True)   
    inst1=ws.getInstrument();   
    #   
    print_10_detectors('unCalibrated',inst1);
