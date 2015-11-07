@@ -69,8 +69,10 @@ void LoadInstrument::init() {
       "Name of instrument. Can be used instead of Filename to specify an IDF");
   declareProperty("InstrumentXML", "",
                   "The full XML instrument definition as a string.");
-  declareProperty(new PropertyWithValue<OptionalBool>(
-      "RewriteSpectraMap", OptionalBool::Unset, boost::make_shared<MandatoryValidator<OptionalBool>>()),
+  declareProperty(
+      new PropertyWithValue<OptionalBool>(
+          "RewriteSpectraMap", OptionalBool::Unset,
+          boost::make_shared<MandatoryValidator<OptionalBool>>()),
       "If true then a 1:1 map between the spectrum numbers and "
       "detector/monitor IDs is set up as follows: the detector/monitor IDs in "
       "the IDF are ordered from smallest to largest number and then assigned "

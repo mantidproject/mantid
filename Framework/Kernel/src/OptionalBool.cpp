@@ -32,7 +32,6 @@ bool OptionalBool::operator==(const OptionalBool &other) const {
 
 OptionalBool::Value OptionalBool::getValue() const { return m_arg; }
 
-
 std::ostream &operator<<(std::ostream &os, OptionalBool const &object) {
   os << OptionalBool::enumToStrMap()[object.getValue()];
   return os;
@@ -47,25 +46,25 @@ std::istream &operator>>(std::istream &istream, OptionalBool &object) {
   return istream;
 }
 
-const  std::string OptionalBool::StrUnset = "Unset";
-const  std::string OptionalBool::StrFalse = "False";
-const  std::string OptionalBool::StrTrue = "True";
+const std::string OptionalBool::StrUnset = "Unset";
+const std::string OptionalBool::StrFalse = "False";
+const std::string OptionalBool::StrTrue = "True";
 
 std::map<std::string, OptionalBool::Value> OptionalBool::strToEmumMap() {
-    std::map<std::string, Value> map;
-    map.insert(std::make_pair(StrUnset, OptionalBool::Unset));
-    map.insert(std::make_pair(StrFalse, OptionalBool::False));
-    map.insert(std::make_pair(StrTrue, OptionalBool::True));
-    return map;
+  std::map<std::string, Value> map;
+  map.insert(std::make_pair(StrUnset, OptionalBool::Unset));
+  map.insert(std::make_pair(StrFalse, OptionalBool::False));
+  map.insert(std::make_pair(StrTrue, OptionalBool::True));
+  return map;
 }
 
-std::map<OptionalBool::Value, std::string> OptionalBool::enumToStrMap(){
-    std::map<Value, std::string> map;
-    auto opposite = strToEmumMap();
-    for(auto it = opposite.begin(); it != opposite.end(); ++it){
-        map.insert(std::make_pair(it->second, it->first));
-    }
-    return map;
+std::map<OptionalBool::Value, std::string> OptionalBool::enumToStrMap() {
+  std::map<Value, std::string> map;
+  auto opposite = strToEmumMap();
+  for (auto it = opposite.begin(); it != opposite.end(); ++it) {
+    map.insert(std::make_pair(it->second, it->first));
+  }
+  return map;
 }
 
 } // namespace Kernel

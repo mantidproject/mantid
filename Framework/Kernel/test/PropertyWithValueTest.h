@@ -666,21 +666,20 @@ public:
     TS_ASSERT_EQUALS(value, "World");
   }
 
-  void test_optional_bool_propert_made_from_optional_bool(){
-      OptionalBool inputValue(OptionalBool::False);
-      PropertyWithValue<OptionalBool> prop("bool_property", inputValue);
-      OptionalBool heldValue = prop();
-      TS_ASSERT_EQUALS(heldValue, inputValue);
+  void test_optional_bool_propert_made_from_optional_bool() {
+    OptionalBool inputValue(OptionalBool::False);
+    PropertyWithValue<OptionalBool> prop("bool_property", inputValue);
+    OptionalBool heldValue = prop();
+    TS_ASSERT_EQUALS(heldValue, inputValue);
   }
 
+  void test_optional_bool_to_setValue() {
 
-  void test_optional_bool_to_setValue(){
+    std::string input = OptionalBool::StrTrue;
 
-      std::string input = OptionalBool::StrTrue;
-
-      PropertyWithValue<OptionalBool> property("myproperty", OptionalBool::Unset, Direction::Input);
-      property.setValue(input);
-
+    PropertyWithValue<OptionalBool> property("myproperty", OptionalBool::Unset,
+                                             Direction::Input);
+    property.setValue(input);
   }
 
 private:

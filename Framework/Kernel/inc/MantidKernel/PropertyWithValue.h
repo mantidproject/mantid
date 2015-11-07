@@ -161,8 +161,6 @@ void toValue(const std::string &strvalue, std::vector<T> &value) {
   }
 }
 
-
-
 template <typename T>
 void toValue(const std::string &strvalue, std::vector<std::vector<T>> &value,
              const std::string &outerDelimiter = ",",
@@ -255,7 +253,6 @@ template <> inline void addingOperator(OptionalBool &, const OptionalBool &) {
   throw Exception::NotImplementedError(
       "PropertyWithValue.h: += operator not implemented for type bool");
 }
-
 
 template <typename T>
 inline void addingOperator(boost::shared_ptr<T> &lhs,

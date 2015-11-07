@@ -57,7 +57,6 @@ template <typename T> class Matrix;
  */
 class MANTID_KERNEL_DLL IPropertyManager {
 public:
-
   // IPropertyManager(){}
   virtual ~IPropertyManager() {}
 
@@ -296,7 +295,6 @@ protected:
     declareProperty(name, std::string(value),
                     boost::make_shared<NullValidator>(), "", direction);
   }
-
 
   /// Get a property by an index
   virtual Property *getPointerToPropertyOrdinal(const int &index) const = 0;
