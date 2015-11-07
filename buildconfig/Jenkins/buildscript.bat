@@ -161,3 +161,4 @@ if "%BUILDPKG%" == "yes" (
   echo Building package
   cpack.exe -C %BUILD_CONFIG% --config CPackConfig.cmake
 )
+

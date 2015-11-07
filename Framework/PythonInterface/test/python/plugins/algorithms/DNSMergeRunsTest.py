@@ -27,24 +27,23 @@ class DNSMergeRunsTest(unittest.TestCase):
 
     def tearDown(self):
         for wsname in self.workspaces:
-            if api.AnalysisDataService.doesExist(wsname + '_NORM'):
-                api.DeleteWorkspace(wsname + '_NORM')
             if api.AnalysisDataService.doesExist(wsname):
                 api.DeleteWorkspace(wsname)
         self.workspaces = []
 
-    def test_DNSNormWorkspaceExists(self):
+    def test_DNSSameWavelength(self):
         outputWorkspaceName = "DNSMergeRunsTest_Test1"
-        api.DeleteWorkspace(self.workspaces[0] + '_NORM')
+        ws = api.AnalysisDataService.retrieve(self.workspaces[0])
+        api.AddSampleLog(ws, LogName='wavelength', LogText=str(5.0),
+                         LogType='Number', LogUnit='Angstrom')
         self.assertRaises(RuntimeError, DNSMergeRuns, WorkspaceNames=self.workspaces,
                           OutputWorkspace=outputWorkspaceName)
         return
 
-    def test_DNSSameWavelength(self):
+    def test_DNSSameNormalization(self):
         outputWorkspaceName = "DNSMergeRunsTest_Test2"
         ws = api.AnalysisDataService.retrieve(self.workspaces[0])
-        api.AddSampleLog(ws, LogName='wavelength', LogText=str(5.0),
-                         LogType='Number', LogUnit='Angstrom')
+        api.AddSampleLog(ws, LogName='normalized', LogText='no', LogType='String')
         self.assertRaises(RuntimeError, DNSMergeRuns, WorkspaceNames=self.workspaces,
                           OutputWorkspace=outputWorkspaceName)
         return
