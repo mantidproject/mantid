@@ -8,7 +8,6 @@
 #include "MantidKernel/Exception.h"
 
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/qi_auto.hpp>
 
 namespace Mantid {
 namespace Geometry {
