@@ -6,8 +6,10 @@
 #include "MantidGeometry/Crystal/GroupTransformation.h"
 #include "MantidGeometry/Crystal/SymmetryElementFactory.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
+#include "MantidGeometry/Crystal/CenteringGroup.h"
 
 using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
 
 class GroupTransformationTest : public CxxTest::TestSuite {
 public:
@@ -109,8 +111,42 @@ public:
      * 1/3  1/3 -2/3    0
      * 1/3  1/3  1/3    0
      */
-    Group r3cRh = GroupTransformation(
-        "2/3x-1/3y-1/3z,1/3x+1/3y-2/3z,1/3x+1/3y+1/3z")(*r3cHex);
+    GroupTransformation hexToRhom(
+        "2/3x-1/3y-1/3z,1/3x+1/3y-2/3z,1/3x+1/3y+1/3z");
+    Group r3cRh = hexToRhom(*r3cHex);
+
+    GroupTransformation rhomToHex("x+z,-x+y+z,-y+z");
+
+    Group r3cHexBack = rhomToHex(r3cRh) * CenteringGroup("R");
+
+    TS_ASSERT(r3cHexBack.isGroup());
+    TS_ASSERT_EQUALS(r3cHex->order(), r3cHexBack.order());
+
+    V3D point(0.882, 0.112, 0.126);
+
+    std::vector<V3D> ptsOrig = r3cHex->getEquivalentPositions(point);
+    std::vector<V3D> ptsTrfm = r3cHexBack * point;
+
+    TS_ASSERT_EQUALS(ptsOrig.size(), ptsTrfm.size());
+
+    std::sort(ptsOrig.begin(), ptsOrig.end());
+    std::sort(ptsTrfm.begin(), ptsTrfm.end());
+
+    for (size_t i = 0; i < ptsOrig.size(); ++i) {
+      std::cout << i << " " << ptsOrig[i] << " " << ptsTrfm[i] << std::endl;
+    }
+
+    for (size_t i = 0; i < r3cHex->order(); ++i) {
+      std::cout << r3cHex->getSymmetryOperations()[i] << " "
+                << r3cHexBack.getSymmetryOperations()[i] << std::endl;
+    }
+
+    std::vector<SymmetryOperation> ops = r3cRh.getSymmetryOperations();
+
+    std::cout << std::endl;
+    for (auto op : ops) {
+      std::cout << op << std::endl;
+    }
   }
 };
 

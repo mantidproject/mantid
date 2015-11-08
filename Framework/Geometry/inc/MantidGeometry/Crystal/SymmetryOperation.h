@@ -123,6 +123,7 @@ public:
   SymmetryOperation();
   SymmetryOperation(const std::string &identifier);
   SymmetryOperation(const Kernel::IntMatrix &matrix, const V3R &vector);
+  SymmetryOperation(const Kernel::DblMatrix &matrix, const V3R &vector);
 
   SymmetryOperation(const SymmetryOperation &other);
   SymmetryOperation &operator=(const SymmetryOperation &other);
@@ -130,6 +131,7 @@ public:
   ~SymmetryOperation() {}
 
   const Kernel::IntMatrix &matrix() const;
+  Kernel::DblMatrix doubleMatrix() const;
   const V3R &vector() const;
   const V3R &reducedVector() const;
 
@@ -177,6 +179,19 @@ MANTID_GEOMETRY_DLL std::istream &operator>>(std::istream &stream,
 
 MANTID_GEOMETRY_DLL V3R getWrappedVector(const V3R &vector);
 MANTID_GEOMETRY_DLL Kernel::V3D getWrappedVector(const Kernel::V3D &vector);
+
+template <typename T, typename U>
+Kernel::Matrix<T> convertMatrix(const Kernel::Matrix<U> &matrix) {
+  Kernel::Matrix<T> converted(matrix.numRows(), matrix.numCols());
+
+  for (size_t i = 0; i < converted.numRows(); ++i) {
+    for (size_t j = 0; j < converted.numCols(); ++j) {
+      converted[i][j] = static_cast<int>(matrix[i][j]);
+    }
+  }
+
+  return converted;
+}
 
 } // namespace Geometry
 } // namespace Mantid

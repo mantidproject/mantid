@@ -11,13 +11,13 @@ using namespace Kernel;
 
 /// Constructor using SymmetryOperation.
 GroupTransformation::GroupTransformation(
-    const MatrixVectorPair<int, V3R> &operation)
+    const MatrixVectorPair<double, V3R> &operation)
     : m_symOp(operation) {}
 
 /// Constructor using SymmetruOperation string, uses SymmetryOperationFactory.
 GroupTransformation::GroupTransformation(const std::string &operationString) {
   MatrixVectorPairParser parser;
-  m_symOp = parser.parse<int>(operationString);
+  m_symOp = parser.parse<double>(operationString);
 }
 
 /// Transforms the supplied group and returns the result.
@@ -57,10 +57,15 @@ GroupTransformation GroupTransformation::getInverse() const {
  */
 SymmetryOperation GroupTransformation::transformOperation(
     const SymmetryOperation &operation) const {
-  MatrixVectorPair<int, V3R> op =
-      m_symOp.getInverse() *
-      MatrixVectorPair<int, V3R>(operation.matrix(), operation.vector()) *
+  MatrixVectorPair<double, V3R> op =
+      m_symOp.getInverse() * MatrixVectorPair<double, V3R>(
+                                 operation.doubleMatrix(), operation.vector()) *
       m_symOp;
+
+  std::cout << m_symOp.getMatrix() << " " << m_symOp.getInverse().getMatrix()
+            << " " << operation.identifier() << " " << op.getMatrix() << " "
+            << V3D(op.getVector()) << std::endl;
+
   return SymmetryOperation(op.getMatrix(), op.getVector());
 }
 

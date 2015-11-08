@@ -39,6 +39,12 @@ SymmetryOperation::SymmetryOperation(const Kernel::IntMatrix &matrix,
   init(matrix, vector);
 }
 
+/// Convenience constructor for double-matrices.
+SymmetryOperation::SymmetryOperation(const Mantid::Kernel::DblMatrix &matrix,
+                                     const Mantid::Geometry::V3R &vector) {
+  init(convertMatrix<int>(matrix), vector);
+}
+
 /// Copy-constructor
 SymmetryOperation::SymmetryOperation(const SymmetryOperation &other)
     : m_order(other.m_order), m_inverseMatrix(other.m_inverseMatrix),
@@ -79,6 +85,10 @@ void SymmetryOperation::init(const Kernel::IntMatrix &matrix,
 /// Returns a const reference to the internally stored matrix
 const Kernel::IntMatrix &SymmetryOperation::matrix() const {
   return m_matrixVectorPair.getMatrix();
+}
+
+Kernel::DblMatrix SymmetryOperation::doubleMatrix() const {
+  return convertMatrix<double>(m_matrixVectorPair.getMatrix());
 }
 
 /// Returns a const reference to the internall stored vector
