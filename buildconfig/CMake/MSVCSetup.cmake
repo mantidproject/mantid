@@ -18,9 +18,9 @@ add_definitions ( -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS )
 # Additional compiler flags
 ##########################################################################
 # /MP     - Compile .cpp files in parallel
-# /w34296 - Treat warning C4396, about comparison on unsigned and zero, 
+# /w34296 - Treat warning C4396, about comparison on unsigned and zero,
 #           as a level 3 warning
-# /w34389 - Treat warning C4389, about equality comparison on unsigned 
+# /w34389 - Treat warning C4389, about equality comparison on unsigned
 #           and signed, as a level 3 warning
 # /Zc:wchar_t- - Do not treat wchar_t as a builtin type. Required for Qt to
 #           work with wstring
@@ -28,7 +28,7 @@ set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /w34296 /w34389 /Zc:wchar_t-" )
 
 # As discussed here: http://code.google.com/p/googletest/issues/detail?id=412
 # gtest requires changing the _VARAIDIC_MAX value for VS2012 as it defaults to 5
-add_definitions ( -D_variadic_max=10 ) 
+add_definitions ( -D_variadic_max=10 )
 
 # Set PCH heap limit, the default does not work when running msbuild from the commandline for some reason
 # Any other value lower or higher seems to work but not the default. It it is fine without this when compiling
@@ -56,12 +56,13 @@ set ( PYTHON_LIBRARIES ${PYTHON_DIR}/libs/python27.lib )
 set ( PYTHON_EXECUTABLE "${PYTHON_DIR}/python.exe" CACHE FILEPATH "The location of the python executable" FORCE )
 # The "pythonw" executable that avoids raising another terminal when it runs. Used for IPython
 set ( PYTHONW_EXECUTABLE "${PYTHON_DIR}/pythonw.exe" CACHE FILEPATH
-      "The location of the pythonw executable. This suppresses the new terminal window on startup" FORCE ) 
+      "The location of the pythonw executable. This suppresses the new terminal window on startup" FORCE )
 
 ###########################################################################
 # If required, find tcmalloc
 ###########################################################################
-option ( USE_TCMALLOC "If true, link with tcmalloc" ON )
+# Not ready for production use with MSVC 2015
+option ( USE_TCMALLOC "If true, link with tcmalloc" OFF )
 # If not wanted, just carry on without it
 if ( USE_TCMALLOC )
   # Only link in release configurations. There seems to be problem linking in debug mode
@@ -102,4 +103,3 @@ set ( LIB_DIR ${BIN_DIR} )
 set ( PLUGINS_DIR plugins )
 set ( PVPLUGINS_DIR PVPlugins )
 set ( PVPLUGINS_SUBDIR PVPlugins ) # Need to tidy these things up!
-
