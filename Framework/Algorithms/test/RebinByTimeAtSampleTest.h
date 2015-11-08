@@ -192,9 +192,9 @@ public:
                                                   // neutrons 2.2km/s would take
                                                   // to cover a 10m distance.
 
-    const double L1 = 10;           // 10 meters
-    const double L2_spec1 = 0;      // Therefore L1 / (L1 + L2) == 1
-    const double L2_spec2 = L1;     // Therefore L1 / (L1 + L2) == 1 / 2
+    const double L1 = 10;             // 10 meters
+    const double L2_spec1 = 0;        // Therefore L1 / (L1 + L2) == 1
+    const double L2_spec2 = L1;       // Therefore L1 / (L1 + L2) == 1 / 2
     const double L2_spec3 = 2.0 * L1; // Therefore L1 / (L1 + L2) == 1 / 3
 
     V3D sample(L1, 0, 0); // Sample at L1

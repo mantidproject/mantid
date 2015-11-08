@@ -138,14 +138,14 @@ public:
     TS_ASSERT_DELTA(out->getParameter("Beta0"), 31.9, 0.0001);
     TS_ASSERT_DELTA(out->getParameter("Kappa"), 46.0, 0.0001);
     TS_ASSERT_DELTA(out->getParameter("SigmaSquared"), 99.935, 0.1);
-    TS_ASSERT_DELTA(out->getParameter("Gamma"), 0.0 ,0.1);
+    TS_ASSERT_DELTA(out->getParameter("Gamma"), 0.0, 0.1);
     TS_ASSERT_DELTA(out->getParameter("X0"), 49.984, 0.1);
 
     // could set workspace here but makes no difference since
     // regardless m_wavelength set to zero in IC code
     // pk->setMatrixWorkspace(ws2D, 0);
 
-   size_t timechannels = mockDataWS->readX(0).size();
+    size_t timechannels = mockDataWS->readX(0).size();
 
     const double *x = &mockDataWS->readX(0)[0];
     boost::scoped_array<double> yy(new double[timechannels]);
@@ -160,7 +160,6 @@ public:
     TS_ASSERT_DELTA(yy[13], 86.442, 0.1);
     TS_ASSERT_DELTA(yy[14], 64.769, 0.1);
 
-  
     // check its categories
     const std::vector<std::string> categories = out->categories();
     TS_ASSERT(categories.size() == 1);

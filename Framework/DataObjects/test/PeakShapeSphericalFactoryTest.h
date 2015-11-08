@@ -2,12 +2,13 @@
 #define MANTID_DATAOBJECTS_PEAKSHAPESPHERICALFACTORYTEST_H_
 
 #ifdef _MSC_VER
-// 'identifier' : class 'type' needs to have dll-interface to be used by clients of class 'type2'
+// 'identifier' : class 'type' needs to have dll-interface to be used by clients
+// of class 'type2'
 #pragma warning(disable : 4251)
-// JSON: non – DLL-interface classkey 'identifier' used as base for DLL-interface classkey 'identifier'
+// JSON: non- DLL-interface classkey 'identifier' used as base for
+// DLL-interface classkey 'identifier'
 #pragma warning(disable : 4275)
 #endif
-
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>

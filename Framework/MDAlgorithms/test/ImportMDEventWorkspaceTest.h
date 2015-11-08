@@ -83,8 +83,10 @@ public:
   ~MDFileObject() {
     m_file.close();
     if (remove(m_filename.c_str()) != 0)
-        // destructors shouldn't throw exceptions so we have to resort to printing an error
-        std::cerr << "~MDFileObject() - Error deleting file '" << m_filename << "'\n";
+      // destructors shouldn't throw exceptions so we have to resort to printing
+      // an error
+      std::cerr << "~MDFileObject() - Error deleting file '" << m_filename
+                << "'\n";
   }
 
 private:

@@ -402,9 +402,8 @@ private:
     void init() { declareParameter("Slope", 1.0); }
   };
 
-  class SeqDomainCreatorTestFunctionComplex
-      : public IFunction1DSpectrum,
-        public ParamFunction {
+  class SeqDomainCreatorTestFunctionComplex : public IFunction1DSpectrum,
+                                              public ParamFunction {
   public:
     ~SeqDomainCreatorTestFunctionComplex() {}
 

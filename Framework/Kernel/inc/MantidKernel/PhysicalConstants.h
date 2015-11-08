@@ -5,8 +5,8 @@
 
 // NAN is not defined in Visual C++ < 2013
 #if (defined(_MSC_VER) && (_MSC_VER <= 1800))
-  #define INFINITY (DBL_MAX + DBL_MAX)
-  #define NAN (INFINITY - INFINITY)
+#define INFINITY (DBL_MAX + DBL_MAX)
+#define NAN (INFINITY - INFINITY)
 #endif
 
 namespace Mantid {
