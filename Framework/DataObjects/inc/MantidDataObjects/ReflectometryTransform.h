@@ -107,9 +107,9 @@ public:
 
 /// Create a new x-axis for the output workspace
 MANTID_DATAOBJECTS_DLL MantidVec
-    createXAxis(Mantid::API::MatrixWorkspace *const ws, const double gradQx,
-                const double cxToUnit, const size_t nBins,
-                const std::string &caption, const std::string &units);
+createXAxis(Mantid::API::MatrixWorkspace *const ws, const double gradQx,
+            const double cxToUnit, const size_t nBins,
+            const std::string &caption, const std::string &units);
 
 /// Create a new y(vertical)-axis for the output workspace
 MANTID_DATAOBJECTS_DLL void
@@ -120,7 +120,7 @@ createVerticalAxis(Mantid::API::MatrixWorkspace *const ws,
 
 /// Create angular caches.
 MANTID_DATAOBJECTS_DLL DetectorAngularCache
-    initAngularCaches(const Mantid::API::MatrixWorkspace *const workspace);
+initAngularCaches(const Mantid::API::MatrixWorkspace *const workspace);
 
 // Helper typedef for scoped pointer of this type.
 typedef boost::shared_ptr<ReflectometryTransform> ReflectometryTransform_sptr;
