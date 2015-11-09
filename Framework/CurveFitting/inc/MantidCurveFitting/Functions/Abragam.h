@@ -41,9 +41,9 @@ National Laboratory & European Spallation Source
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class DLLExport Abragam : public virtual API::ParamFunction,
-                          public virtual API::IFunctionMW,
-                          public virtual API::IFunction1D {
+class DLLExport Abragam : public API::ParamFunction,
+                          public API::IFunctionMW,
+                          public API::IFunction1D {
 public:
   /// Destructor
   virtual ~Abragam() {}

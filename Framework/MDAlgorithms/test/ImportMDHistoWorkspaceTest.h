@@ -40,8 +40,9 @@ public:
   /// Free up resources.
   ~MDFileObject() {
     m_file.close();
-    if (remove(m_filename.c_str()) != 0)
-      throw std::runtime_error("cannot remove " + m_filename);
+    if (remove(m_filename.c_str()) != 0) {
+      std::cerr << "Cannot remove '" << m_filename << "'\n";
+    }
   }
 
 private:

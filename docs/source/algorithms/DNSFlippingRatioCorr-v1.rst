@@ -18,51 +18,30 @@ This algorithm applies flipping ratio correction to a given data workspaces. As 
 
 -  output workspace with corrected spin-flip data. Sample logs will be copied from the data spin-flip workspace. 
 -  output workspace with corrected non-spin-flip data. Sample logs will be copied from the data non-spin-flip workspace. 
--  if data workspaces have workspaces with normalization data (monitor counts or experiment duration by user's choice), this normalization workspaces will be cloned. The normalization workspace is named same as the output workspace, but has suffix "_NORM". 
 
-Flipping ratio correction is performed using the measurements of :math:`Ni_{0.89}\,Cr_{0.11}` standard sample (hereafter NiCr). Background for NiCr must be also measured and provided to the algorithm as an input. Both, spin-flip anf non-spin-flip measurements are required. This algorithm performs the flipping ratio correction for a particular run in following steps:
+Flipping ratio correction is performed using the measurements of :math:`Ni_{0.89}\,Cr_{0.11}` standard sample (hereafter NiCr). Background for NiCr must be also measured and provided to the algorithm as an input. Both, spin-flip anf non-spin-flip measurements are required. This algorithm performs the flipping ratio correction according to J. Appl. Cryst. 42, 69-84, 2009. Calculations are made in a following steps:
 
-1. Normalize both, spin-flip (hereafter SF) and non-spin-flip (hereafter NSF), workspaces to a chosen normalization:
+1. Subtract Background from NiCr:
 
-   :math:`(N^{SF}_i)_{Norm} = \frac{(N^{SF}_i)_{Raw}}{(C^{SF}_i)_N}`
-
-   :math:`(N^{NSF}_i)_{Norm} = \frac{(N^{NSF}_i)_{Raw}}{(C^{NSF}_i)_N}`
-
-   where :math:`(N^{SF,\,NSF}_i)_{Raw}` is the signal from the :math:`i` th detector in the NiCr spin-flip and non-spin-flip workspace, respectively and :math:`(C^{SF,\,NSF}_i)_N` is the number in the corresponding bin of the normalization workspace. The :ref:`algm-Divide` algorithm is used for this step.
-
-2. Normalize Background workspace to a chosen normalization:
-
-   :math:`(B^{SF,\,NSF}_i)_{Norm} = \frac{(B^{SF,\,NSF}_i)_{Raw}}{(C^{SF,\,NSF}_i)_B}`
-   
-   where :math:`(B^{SF,\,NSF}_i)_{Raw}` is the signal from the :math:`i` th detector in the spin-flip and non-spin-flip background workspace, respectively and :math:`(C^{SF,\,NSF}_i)_B` is the number in the corresponding bin of the normalization workspace. The :ref:`algm-Divide` algorithm is used for this step.
-
-.. warning::
-
-    Normalization workspaces are created by the :ref:`algm-LoadDNSLegacy` algorithm. 
-    It is responsibility of the user to take care about the same type of normalization (either monitor counts or run duration) 
-    for given workspaces.
-
-3. Subtract Background from NiCr:
-
-   :math:`N^{SF,\,NSF}_i = (N^{SF,\,NSF}_i)_{Norm} - (B^{SF,\,NSF}_i)_{Norm}`
+   :math:`N^{SF,\,NSF}_i = (N^{SF,\,NSF}_i)_{raw} - (B^{SF,\,NSF}_i)`
 
    The :ref:`algm-Minus` algorithm is used for this step. In the case of negative result, the error message will be produced and the algorithm terminates.
 
-4. Calculate the correction coefficients:
+2. Calculate the correction coefficients:
 
-   :math:`k_i = \frac{N^{NSF}_i}{N^{SF}_i}`
+   :math:`k_i = \frac{N^{NSF}_i}{N^{SF}_i} - 1`
 
    The :ref:`algm-Divide` algorithm is used for this step.
 
-5. Apply correction to the data:
+3. Apply correction to the data:
 
-   :math:`(I^{NSF}_i)_{corr0} = I^{NSF}_i - \frac{I^{SF}_i}{k_i}`
+   :math:`(I^{NSF}_i)_{corr0} = I^{NSF}_i + \frac{1}{k_i}\cdot\left(I^{NSF}_i - I^{SF}_i\right)`
    
-   :math:`(I^{SF}_i)_{corr0} = I^{SF}_i - \frac{I^{NSF}_i}{k_i}`
+   :math:`(I^{SF}_i)_{corr0} = I^{SF}_i - \frac{1}{k_i}\cdot\left(I^{NSF}_i - I^{SF}_i\right)`
 
    where :math:`I^{SF,\,NSF}_i` are the neutron counts in the **SFDataWorkspace** and **NSFDataWorkspace**, respectively.
 
-6. Apply correction for a double spin-flip scattering:
+4. Apply correction for a double spin-flip scattering in a sample:
 
    :math:`(I^{NSF}_i)_{corr} = (I^{NSF}_i)_{corr0} - (I^{SF}_i)_{corr0}\cdot f`
 
@@ -79,8 +58,9 @@ The input workspaces have to have the following in order to be valid inputs for 
 -  The same number of dimensions
 -  The same number of spectra
 -  The same number of bins
--  All workspaces except of **SFDataWorkspace** and **NSFDataWorkspace** must have the corresponding normalization workspace
--  All given workspaces must have the same polarisation (algorithm checks for the 'polarisation' sample log)
+-  All given workspaces must have the same polarisation (algorithm checks for the 'polarisation' and 'polarisation_comment' sample logs)
+-  All given workspaces must be normalized either to monitor counts or to experiment duration
+-  All given workspaces must have the same kind of normalization (algorithm checks for 'normalized' sample log)
 -  All given workspaces must have the appropriate flipper status (algorithm checks for 'flipper' sample log): spin-flip workspaces must have flipper 'ON' and non-spin-flip workspaces must have flipper 'OFF'
 
 If any of these conditions is not fulfilled, the algorithm terminates.
@@ -99,6 +79,7 @@ Usage
     import numpy as np
 
     datapath = "/path/to/data/dns/rc36b_standard_dz"
+    coilcurrents = join(datapath, 'currents.txt')
 
     # define input files.
     sf_vanafile = join(datapath, 'dz29100525vana.d_dat')
@@ -111,25 +92,19 @@ Usage
     nsf_nicrfile = join(datapath, 'dz29100586nicr.d_dat')
 
     # load files to workspaces
-    sf_vana = LoadDNSLegacy(sf_vanafile, Normalization='duration', Polarisation='x')
-    nsf_vana = LoadDNSLegacy(nsf_vanafile, Normalization='duration', Polarisation='x')
+    sf_vana = LoadDNSLegacy(sf_vanafile, Normalization='duration', CoilCurrentsTable=coilcurrents)
+    nsf_vana = LoadDNSLegacy(nsf_vanafile, Normalization='duration', CoilCurrentsTable=coilcurrents)
 
-    sf_nicr = LoadDNSLegacy(sf_nicrfile, Normalization='duration', Polarisation='x')
-    nsf_nicr = LoadDNSLegacy(nsf_nicrfile, Normalization='duration', Polarisation='x')
+    sf_nicr = LoadDNSLegacy(sf_nicrfile, Normalization='duration', CoilCurrentsTable=coilcurrents)
+    nsf_nicr = LoadDNSLegacy(nsf_nicrfile, Normalization='duration', CoilCurrentsTable=coilcurrents)
 
-    sf_bkgr = LoadDNSLegacy(sf_bkgrfile, Normalization='duration', Polarisation='x')
-    nsf_bkgr = LoadDNSLegacy(nsf_bkgrfile, Normalization='duration', Polarisation='x')
+    sf_bkgr = LoadDNSLegacy(sf_bkgrfile, Normalization='duration', CoilCurrentsTable=coilcurrents)
+    nsf_bkgr = LoadDNSLegacy(nsf_bkgrfile, Normalization='duration', CoilCurrentsTable=coilcurrents)
 
     # for a physically meaningful correction, we must subtract background from Vanadium
     # this step is usually not required for other kinds of samples
-    # retrieve normalization workspaces
-    sf_vana_norm = mtd['sf_vana_NORM']
-    sf_bkgr_norm = mtd['sf_bkgr_NORM']
-    nsf_vana_norm = mtd['nsf_vana_NORM']
-    nsf_bkgr_norm = mtd['nsf_bkgr_NORM']
-    # subtract background
-    sf_vana_bg = sf_vana/sf_vana_norm - sf_bkgr/sf_bkgr_norm
-    nsf_vana_bg = nsf_vana/nsf_vana_norm - nsf_bkgr/nsf_bkgr_norm
+    sf_vana_bg = sf_vana - sf_bkgr
+    nsf_vana_bg = nsf_vana - nsf_bkgr
 
     # apply correction
     DNSFlippingRatioCorr(sf_vana_bg, nsf_vana_bg, sf_nicr, nsf_nicr, sf_bkgr, nsf_bkgr,

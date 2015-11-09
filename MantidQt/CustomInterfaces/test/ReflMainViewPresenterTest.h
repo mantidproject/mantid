@@ -13,7 +13,6 @@
 #include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
 
 #include "ReflMainViewMockObjects.h"
-#include "../inc/MantidQtCustomInterfaces/IReflPresenter.h"
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;

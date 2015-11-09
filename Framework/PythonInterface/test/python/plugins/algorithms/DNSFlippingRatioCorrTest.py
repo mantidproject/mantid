@@ -34,21 +34,9 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
 
     def tearDown(self):
         for wsname in self.workspaces:
-            if api.AnalysisDataService.doesExist(wsname + '_NORM'):
-                api.DeleteWorkspace(wsname + '_NORM')
             if api.AnalysisDataService.doesExist(wsname):
                 api.DeleteWorkspace(wsname)
         self.workspaces = []
-
-    def test_DNSNormWorkspaceExists(self):
-        outputWorkspaceName = "DNSFlippingRatioCorrTest_Test1"
-        api.DeleteWorkspace(self.__sf_bkgrws.getName() + '_NORM')
-        self.assertRaises(RuntimeError, DNSFlippingRatioCorr, SFDataWorkspace=self.__sf_nicrws.getName(),
-                          NSFDataWorkspace=self.__nsf_nicrws.getName(), SFNiCrWorkspace=self.__sf_nicrws.getName(),
-                          NSFNiCrWorkspace=self.__nsf_nicrws.getName(), SFBkgrWorkspace=self.__sf_bkgrws.getName(),
-                          NSFBkgrWorkspace=self.__nsf_bkgrws.getName(), SFOutputWorkspace=outputWorkspaceName+'SF',
-                          NSFOutputWorkspace=outputWorkspaceName+'NSF')
-        return
 
     def test_DNSFlipperValid(self):
         outputWorkspaceName = "DNSFlippingRatioCorrTest_Test2"
@@ -95,7 +83,7 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
         # data array: non spin-flip must be nsf - sf^2/nsf
         nsf = np.array(dataws_nsf.extractY())
         sf = np.array(dataws_sf.extractY())
-        refdata = nsf - sf*sf/nsf
+        refdata = nsf + sf
         for i in range(24):
             self.assertAlmostEqual(refdata[i], ws_nsf.readY(i))
 

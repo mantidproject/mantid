@@ -1,17 +1,23 @@
 ###########################################################################
 # CMake version check.
-# Only versions after 2.8.12 will find the HL component for HDF5
+# Require >= 3.3 for Windows as previous versions contained a bug that
+# prevented external data from working correctly. Other systems require
+# 2.8.12 to avoid recompiling system packages
 ###########################################################################
-cmake_minimum_required ( VERSION 2.8.12 )
+if (CMAKE_HOST_WIN32)
+  cmake_minimum_required ( VERSION 3.3.0 )
+else()
+  cmake_minimum_required ( VERSION 2.8.12 )
+endif()
+
+# Define the project name.
+project ( Mantid )
 
 # System package target is important for the windows builds as it allows us to package only the dlls and exes and exclude libs. Defaults to empty for other platforms.
 set ( SYSTEM_PACKAGE_TARGET "")
 
 # Add the path to our custom 'find' modules
 set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
-
-# Define the project name.
-project ( Mantid )
 
 SET (CPACK_INSTALL_CMAKE_PROJECTS
      "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
@@ -33,6 +39,16 @@ set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #e
 set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 
 ###########################################################################
+# Bootstrap any dependencies
+###########################################################################
+include ( Bootstrap )
+
+###########################################################################
+# Cross-platform setup
+###########################################################################
+include ( CommonSetup )
+
+###########################################################################
 # Check for Qt (DarwinSetup below needs a variable from this)
 ###########################################################################
 find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg Qt3Support REQUIRED )
@@ -52,29 +68,6 @@ endif ()
 include ( ParaViewSetup )
 
 ###########################################################################
-# Set paths to Third_Party for Windows builds
-###########################################################################
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-
-  if ( NOT THIRD_PARTY )
-      set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/Third_Party" )
-  endif ()
-  # Print out where we think we are looking for 3rd party stuff
-  message (STATUS "Setting THIRD_PARTY to be ${THIRD_PARTY}." )
-
-  # Check that the 3rd party directory exists.
-  if (NOT IS_DIRECTORY "${THIRD_PARTY}")
-        message ( WARNING "Specified THIRD_PARTY directory doesn't exist!" )
-  endif()
-
-  include ( WindowsSetup )
-
-  # Settings for generating the windows Nullsoft package via CPack
-  include ( WindowsNSIS )
-
-ENDIF()
-
-###########################################################################
 # Set paths to Third_Party for Mac builds
 ###########################################################################
 IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -88,14 +81,6 @@ if (COVERALLS)
     include(Coveralls)
     coveralls_turn_on_coverage()
 endif()
-
-###########################################################################
-# Call our setup script
-###########################################################################
-if (NOT ENABLE_OPENCASCADE)
- set ( ENABLE_OPENCASCADE ON CACHE BOOL "Enable OpenCascade-based 3D visualisation")
-endif()
-include ( CommonSetup )
 
 ###########################################################################
 # Find qwt. Needs to be version 5
@@ -152,6 +137,9 @@ add_dependencies ( check GUITests )
 add_custom_target ( AllTests )
 add_dependencies ( AllTests FrameworkTests GUITests )
 
+if ( MSVC )
+  add_definitions ( -DQWT_DLL )
+endif ()
 add_subdirectory ( MantidQt )
 
 if ( UNIX )
@@ -240,7 +228,9 @@ if ( ENABLE_CPACK )
     # Mac package settings
     set ( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/installers/WinInstaller/License.txt )
 
-    IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+    if(CMAKE_HOST_WIN32)
+      include ( WindowsNSIS )
+    elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
       include ( CPackLinuxSetup )
       # let people know what is coming out the other end
       message ( STATUS " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
