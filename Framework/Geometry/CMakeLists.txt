@@ -18,8 +18,6 @@ set ( SRC_FILES
 	src/Crystal/IPeak.cpp
 	src/Crystal/IndexingUtils.cpp
 	src/Crystal/IsotropicAtomBraggScatterer.cpp
-	src/Crystal/MatrixVectorPair.cpp
-	src/Crystal/MatrixVectorPairParser.cpp
 	src/Crystal/NiggliCell.cpp
 	src/Crystal/OrientedLattice.cpp
 	src/Crystal/PeakTransform.cpp
