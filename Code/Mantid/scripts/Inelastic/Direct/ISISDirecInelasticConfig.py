@@ -1,4 +1,5 @@
 ﻿import os
+import sys
 import platform
 import shutil
 import re
@@ -10,7 +11,7 @@ from xml.dom import minidom
 # the list of instruments this configuration is applicable to
 INELASTIC_INSTRUMENTS = ['MAPS','LET','MERLIN','MARI','HET']
 # the list of the parameters, which can be replaced if found in user files
-USER_PROPERTIES=['instrument', 'cycleID', 'start_date', 'rb_folder']
+USER_PROPERTIES=['instrument','userID', 'cycleID', 'start_date', 'rb_folder']
 
 class UserProperties(object):
     """Helper class to define & retrieve user properties
@@ -314,9 +315,9 @@ class MantidConfigDirectInelastic(object):
         #Always replace sample file if it has not been touched
         start_date = self._user.start_date
         # this time is set up to the file, copied from the repository
-        sample_file_time = time.mktime(start_date.timetuple())
+        unmodified_file_time = time.mktime(start_date.timetuple())
         targ_file_time  = os.path.getmtime(target_script_name)
-        if sample_file_time  ==  targ_file_time:
+        if unmodified_file_time ==  targ_file_time:
             return True
         else: # somebody have modified the target file. Leave it alone
             return False
@@ -345,9 +346,9 @@ class MantidConfigDirectInelastic(object):
         """
         if users_file_description is None:
             users_file_description = self._user_files_descr
-        files_to_copy = self._parse_user_files_description(users_file_description)
-        for files in files_to_copy:
-            self._copy_user_file_job(files[0],files[1],files[2])
+        info_to_copy = self._parse_user_files_description(users_file_description)
+        for info in info_to_copy:
+            self._copy_user_file_job(info[0],info[1],info[2])
 
 
     def _copy_and_parse_user_file(self,input_file,output_file,replacemets_list):
@@ -690,6 +691,11 @@ class MantidConfigDirectInelastic(object):
             os.system('chown -R {0}:{0} {1}'.format(self._fedid,config_file_name))
 
 if __name__ == "__main__":
+
+    if len(sys.argv) <=1 :
+        print "usage: Config instrument cycle_ID rb_number user_id start_date"
+        exit()
+    inp = {}
     if len(sys.argv) < 5:
         inp["inst_name"] = str(raw_input('Enter instrument name: ').upper())
         inp["cycleID"]  = int(raw_input('Enter cycle ID as 3 digit number (e.g. 153 for cycle 2015/3): '))
@@ -703,16 +709,19 @@ if __name__ == "__main__":
         inp["userID"] = str(sys.argv[4])
         inp["startDate"] = str(sys.argv[5])  # cast to int to test RB
 
+    inp["cycleID"] = "CYCLE20{0}".format(inp["cycleID"])
+
     if platform.system() == 'Windows':
         sys.path.insert(0,'c:/Mantid/scripts/Inelastic/Direct')
+
+        base = 'd:/Data/Mantid_Testing/config_script_test_folder'
+        analysisDir= base
 
         MantidDir = r"c:\Mantid\_builds\br_master\bin\Release"
         UserScriptRepoDir = os.path.join(analysisDir,"UserScripts")
         MapMaskDir =  os.path.join(analysisDir,"InstrumentFiles")
-        # windebug base folder
-        base = 'd:/Data/Mantid_Testing/config_script_test_folder'
+
         rootDir = os.path.join(base,'users')
-        analysisDir= base
     else:
         sys.path.insert(0,'/opt/Mantid/scripts/Inelastic/Direct/')
         #sys.path.insert(0,'/opt/mantidnightly/scripts/Inelastic/Direct/')
@@ -735,12 +744,13 @@ if __name__ == "__main__":
 
     user = UserProperties(inp["userID"])
 
-    rb_user_folder = os.path.join(mcf._home_path,inp["userID"],str(inp["rbNum"]))
+    rb_user_folder = os.path.join(mcf._home_path,inp["userID"],'RB'+str(inp["rbNum"]))
     # rb folder must be present!
-    current_user.set_user_properties(inp["inst_name"],inp["startDate"],inp["cycleID"],rb_user_folder)
+    user.set_user_properties(inp["inst_name"],inp["startDate"],inp["cycleID"],rb_user_folder)
 
     mcf.init_user(user)
     mcf.generate_config()
+    print "Successfully Configured user: ",inp["userID"]," for instrument: ",inp["inst_name"]
 
 
 
