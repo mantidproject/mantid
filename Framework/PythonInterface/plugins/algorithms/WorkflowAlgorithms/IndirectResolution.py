@@ -59,22 +59,29 @@ class IndirectResolution(DataProcessorAlgorithm):
     def PyExec(self):
         self._setup()
 
-        ISISIndirectEnergyTransfer(Instrument=self._instrument,
-                                   Analyser=self._analyser,
-                                   Reflection=self._reflection,
-                                   GroupingMethod='All',
-                                   SumFiles=True,
-                                   InputFiles=self._input_files,
-                                   SpectraRange=self._detector_range,
-                                   OutputWorkspace='__et_ws_group')
+        iet_alg = self.createChildAlgorithm(name='ISISIndirectEnergyTransfer', startProgress=0.0,
+                                            endProgress=0.7, enableLogging=True)
+        iet_alg.setProperty('Instrument', self._instrument)
+        iet_alg.setProperty('Analyser', self._analyser)
+        iet_alg.setProperty('Reflection', self._reflection)
+        iet_alg.setProperty('GroupingMethod', 'All')
+        iet_alg.setProperty('SumFiles', True)
+        iet_alg.setProperty('InputFiles', self._input_files)
+        iet_alg.setProperty('SpectraRange', self._detector_range)
+        iet_alg.execute()
 
-        icon_ws = mtd['__et_ws_group'].getItem(0).getName()
+        group_ws = iet_alg.getProperty('OutputWorkspace').value
+        icon_ws = group_ws.getItem(0).getName()
+
+        workflow_prog = Progress(self, start=0.7, end=0.9, nreports=4)
 
         if self._scale_factor != 1.0:
+            workflow_prog.report('Scaling Workspace')
             Scale(InputWorkspace=icon_ws,
                   OutputWorkspace=icon_ws,
                   Factor=self._scale_factor)
 
+        workflow_prog.report('Calculating flat background')
         CalculateFlatBackground(InputWorkspace=icon_ws,
                                 OutputWorkspace=self._out_ws,
                                 StartX=self._background[0],
@@ -82,10 +89,12 @@ class IndirectResolution(DataProcessorAlgorithm):
                                 Mode='Mean',
                                 OutputMode='Subtract Background')
 
+        workflow_prog.report('Rebinning Workspace')
         Rebin(InputWorkspace=self._out_ws,
               OutputWorkspace=self._out_ws,
               Params=self._rebin_string)
 
+        workflow_prog.report('Completing Post Processing')
         self._post_process()
         self.setProperty('OutputWorkspace', self._out_ws)
 
@@ -125,9 +134,11 @@ class IndirectResolution(DataProcessorAlgorithm):
             sample_logs.append(('rebin_width', rebin_params[1]))
             sample_logs.append(('rebin_high', rebin_params[2]))
 
-        AddSampleLogMultiple(Workspace=self._out_ws,
-                             LogNames=[log[0] for log in sample_logs],
-                             LogValues=[log[1] for log in sample_logs])
+        log_alg = self.createChildAlgorithm(name='AddSampleLogMultiple', startProgress=0.9,
+                                            endProgress=1.0, enableLogging=True)
+        log_alg.setProperty('Workspace', self._out_ws)
+        log_alg.setProperty('LogNames', [log[0] for log in sample_logs])
+        log_alg.setProperty('LogValues',[log[1] for log in sample_logs])
 
         self.setProperty('OutputWorkspace', self._out_ws)
 

@@ -78,6 +78,37 @@ void setSpectrumFromPyObject(MatrixWorkspace &self, data_modifier accessor,
 }
 
 /**
+ * Set a workspace as monitor workspace for current workspace.
+ *
+ * @param self  :: A reference to the calling object
+ * @param value :: The python pointer to the workspace to set
+ */
+void setMonitorWorkspace(MatrixWorkspace &self,
+                         const boost::python::object &value) {
+
+  MatrixWorkspace_sptr monWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      Mantid::PythonInterface::ExtractWorkspace(value)());
+  self.setMonitorWorkspace(monWS);
+}
+/**
+* @param self  :: A reference to the calling object
+*
+*@return weak pointer to monitor workspace used by python
+*/
+boost::weak_ptr<Workspace> getMonitorWorkspace(MatrixWorkspace &self) {
+  return boost::weak_ptr<Workspace>(self.monitorWorkspace());
+}
+/**
+ * Clear monitor workspace attached to for current workspace.
+ *
+ * @param self  :: A reference to the calling object
+*/
+void clearMonitorWorkspace(MatrixWorkspace &self) {
+  MatrixWorkspace_sptr monWS;
+  self.setMonitorWorkspace(monWS);
+}
+
+/**
  * Set the X values from an python array-style object
  * @param self :: A reference to the calling object
  * @param wsIndex :: The workspace index for the spectrum to set
@@ -317,7 +348,19 @@ void export_MatrixWorkspace() {
       //-----------------------------------
       .def("equals", &Mantid::API::equals, args("self", "other", "tolerance"),
            "Performs a comparison operation on two workspaces, using the "
-           "CheckWorkspacesMatch algorithm");
+           "CompareWorkspaces algorithm")
+      //---------   monitor workspace --------------------------------------
+      .def("getMonitorWorkspace", &getMonitorWorkspace, args("self"),
+           "Return internal monitor workspace bound to current workspace.")
+      .def("setMonitorWorkspace", &setMonitorWorkspace,
+           args("self", "MonitorWS"),
+           "Set specified workspace as monitor workspace for"
+           "current workspace. "
+           "Note: The workspace does not have to contain monitors though "
+           "some subsequent algorithms may expect it to be "
+           "monitor workspace later.")
+      .def("clearMonitorWorkspace", &clearMonitorWorkspace, args("self"),
+           "Forget about monitor workspace, attached to the current workspace");
 
   RegisterWorkspacePtrToPython<MatrixWorkspace>();
 }

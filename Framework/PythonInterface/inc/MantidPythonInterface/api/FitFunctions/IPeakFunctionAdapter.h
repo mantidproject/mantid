@@ -40,8 +40,8 @@ namespace PythonInterface {
  * This is essentially a transparent layer that handles the function calls up
  *into Python.
  */
-class IPeakFunctionAdapter : public virtual API::IPeakFunction,
-                             public virtual IFunction1DAdapter {
+class IPeakFunctionAdapter : public API::IPeakFunction,
+                             public IFunction1DAdapter {
 public:
   /// A constructor that looks like a Python __init__ method
   IPeakFunctionAdapter(PyObject *self);
@@ -87,7 +87,6 @@ public:
 
 private:
   /// The PyObject must be supplied to construct the object
-  DISABLE_DEFAULT_CONSTRUCT(IPeakFunctionAdapter)
   DISABLE_COPY_AND_ASSIGN(IPeakFunctionAdapter)
 };
 }

@@ -206,6 +206,7 @@ boost::shared_ptr<API::Workspace> FitMD::createEventOutputWorkspace(
     builder.setNumBins(inputDim->getNBins());
     builder.setMin(inputDim->getMinimum());
     builder.setMax(inputDim->getMaximum());
+    builder.setFrameName(inputDim->getMDFrame().name());
 
     outputWS->addDimension(builder.create());
   }

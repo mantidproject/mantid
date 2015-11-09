@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/Crystal/CyclicGroup.cpp
 	src/Crystal/Group.cpp
 	src/Crystal/HKLFilter.cpp
+	src/Crystal/HKLFilterWavelength.cpp
 	src/Crystal/HKLGenerator.cpp
 	src/Crystal/IPeak.cpp
 	src/Crystal/IndexingUtils.cpp
@@ -80,6 +81,7 @@ set ( SRC_FILES
 	src/MDGeometry/NullImplicitFunction.cpp
 	src/MDGeometry/QLab.cpp
 	src/MDGeometry/QSample.cpp
+	src/MDGeometry/UnknownFrame.cpp
 	src/Math/Acomp.cpp
 	src/Math/Algebra.cpp
 	src/Math/BnId.cpp
@@ -147,6 +149,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/CyclicGroup.h
 	inc/MantidGeometry/Crystal/Group.h
 	inc/MantidGeometry/Crystal/HKLFilter.h
+	inc/MantidGeometry/Crystal/HKLFilterWavelength.h
 	inc/MantidGeometry/Crystal/HKLGenerator.h
 	inc/MantidGeometry/Crystal/IPeak.h
 	inc/MantidGeometry/Crystal/IndexingUtils.h
@@ -229,6 +232,7 @@ set ( INC_FILES
 	inc/MantidGeometry/MDGeometry/NullImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/QLab.h
 	inc/MantidGeometry/MDGeometry/QSample.h
+	inc/MantidGeometry/MDGeometry/UnknownFrame.h
 	inc/MantidGeometry/Math/Acomp.h
 	inc/MantidGeometry/Math/Algebra.h
 	inc/MantidGeometry/Math/BnId.h
@@ -294,6 +298,7 @@ set ( TEST_FILES
 	GoniometerTest.h
 	GroupTest.h
 	HKLFilterTest.h
+	HKLFilterWavelengthTest.h
 	HKLGeneratorTest.h
 	HKLTest.h
 	IDFObjectTest.h
@@ -398,10 +403,8 @@ endif(UNITY_BUILD)
 
 # ===================== Open Cascade ===================
 if (ENABLE_OPENCASCADE)
-  find_package ( OpenCascade REQUIRED )
   include_directories ( system ${OPENCASCADE_INCLUDE_DIR} )
   set (SRC_FILES ${SRC_FILES} ${OPENCASCADE_SRC} )
-  add_definitions ( -DENABLE_OPENCASCADE )
 endif ()
 
 # A few defines needed for OpenCascade on the Mac

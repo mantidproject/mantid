@@ -20,7 +20,8 @@ namespace FractionalRebinning {
 
 /**
  * Find the possible region of intersection on the output workspace for the
- * given polygon. The given polygon must have a CLOCKWISE winding.
+ * given polygon. The given polygon must have a CLOCKWISE winding and the
+ * first vertex must be the "lowest left" point.
  * @param outputWS A pointer to the output workspace
  * @param verticalAxis A vector containing the output vertical axis edges
  * @param inputQ The input polygon (Polygon winding must be clockwise)

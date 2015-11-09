@@ -35,8 +35,8 @@ Output:
 
 .. testoutput:: ExFilterTofByMax
 
-    8000 events before filtering
-    6500 events after filtering
+    1900 events before filtering
+    1550 events after filtering
 
 **Example: Applying Max and Min in Wavelength**
 
@@ -53,8 +53,8 @@ Output:
 
 .. testoutput:: ExFilterWavelengthByMinMax
 
-    8000 events before filtering
-    4653 events after filtering
+    1900 events before filtering
+    1118 events after filtering
 
 
 .. categories::

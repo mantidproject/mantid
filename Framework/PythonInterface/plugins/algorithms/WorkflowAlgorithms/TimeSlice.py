@@ -126,24 +126,31 @@ class TimeSlice(PythonAlgorithm):
 
         # CheckXrange(xRange, 'Time')
         out_ws_list = []
-
+        i = 0
+        workflow_prog = Progress(self, start=0.0, end=0.96, nreports=len(self._raw_files)*3)
         for index, filename in enumerate(self._raw_files):
+            workflow_prog.report('Reading file: ' + str(i))
             raw_file = self._read_raw_file(filename)
 
             # Only need to process the calib file once
             if index == 0 and self._calib_ws is not None:
                 self._process_calib(raw_file)
 
+            workflow_prog.report('Transposing Workspace: ' + str(i))
             slice_file = self._process_raw_file(raw_file)
             Transpose(InputWorkspace=slice_file, OutputWorkspace=slice_file)
             unit = mtd[slice_file].getAxis(0).setUnit("Label")
             unit.setLabel("Spectrum Number", "")
 
+            workflow_prog.report('Deleting Workspace')
             out_ws_list.append(slice_file)
             DeleteWorkspace(raw_file)
 
         all_workspaces = ','.join(out_ws_list)
+        final_prog = Progress(self, start=0.96, end=1.0, nreports=2)
+        final_prog.report('Grouping result')
         GroupWorkspaces(InputWorkspaces=all_workspaces, OutputWorkspace=self._out_ws_group)
+        final_prog.report('setting result')
         self.setProperty('OutputWorkspace', self._out_ws_group)
 
 
@@ -237,7 +244,8 @@ class TimeSlice(PythonAlgorithm):
 
         # Construct output workspace name
         run = mtd[raw_file].getRun().getLogData('run_number').value
-        slice_file = raw_file[:3].lower() + run + self._output_ws_name_suffix
+        inst = mtd[raw_file].getInstrument().getName()
+        slice_file = inst.lower() + run + self._output_ws_name_suffix
 
         if self._background_range is None:
             Integration(InputWorkspace=raw_file,

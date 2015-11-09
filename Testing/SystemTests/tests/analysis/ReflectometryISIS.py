@@ -80,9 +80,9 @@ class ReflectometryISIS(stresstesting.MantidStressTest):
               OutputExtents='0,0.1,-0.02,0.15',OutputBins='50,50',Parallel='1',OutputWorkspace='PiPf_rebinned')
 
         # Fetch benchmarks for testing against
-        LoadMD(Filename="POLREF_qxqy_benchmark.nxs", OutputWorkspace="QxQy_benchmark")
-        LoadMD(Filename="POLREF_kikf_benchmark.nxs", OutputWorkspace="KiKf_benchmark")
-        LoadMD(Filename="POLREF_pipf_benchmark.nxs", OutputWorkspace="PiPf_benchmark")
+        LoadMD(Filename="POLREF_qxqy_benchmark_v2.nxs", OutputWorkspace="QxQy_benchmark")
+        LoadMD(Filename="POLREF_kikf_benchmark_v2.nxs", OutputWorkspace="KiKf_benchmark")
+        LoadMD(Filename="POLREF_pipf_benchmark_v2.nxs", OutputWorkspace="PiPf_benchmark")
 
         # Check the outputs
         qxqy_comparison = CompareMDWorkspaces(Workspace1='QxQy_rebinned',Workspace2='QxQy_benchmark', Tolerance=0.01, CheckEvents=False)

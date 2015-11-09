@@ -5,7 +5,11 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidGeometry/MDGeometry/QLab.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
 #include <algorithm>
 
 using namespace Mantid::API;
@@ -63,6 +67,17 @@ void ImportMDHistoWorkspaceBase::initGenericImportProps() {
   declareProperty(new WorkspaceProperty<IMDHistoWorkspace>(
                       "OutputWorkspace", "", Direction::Output),
                   "MDHistoWorkspace reflecting the input text file.");
+  declareProperty(
+      new ArrayProperty<std::string>("Frames"),
+      " A comma separated list of the frames of each dimension. "
+      " The frames can be"
+      " **General Frame**: Any frame which is not a Q-based frame."
+      " **QLab**: Wave-vector converted into the lab frame."
+      " **QSample**: Wave-vector converted into the frame of the sample."
+      " **HKL**: Wave-vector converted into the crystal's HKL indices."
+      " Note if nothing is specified then the **General Frame** is being "
+      "selected. Also note that if you select a frame then this might override "
+      "your unit selection if it is not compatible with the frame.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -81,6 +96,7 @@ MDHistoWorkspace_sptr ImportMDHistoWorkspaceBase::createEmptyOutputWorkspace() {
   std::vector<int> nbins = getProperty("NumberOfBins");
   std::vector<std::string> names = getProperty("Names");
   std::vector<std::string> units = getProperty("Units");
+  std::vector<std::string> frames = getProperty("Frames");
 
   // Perform all validation on inputs
   if (extents.size() != ndims * 2)
@@ -96,11 +112,26 @@ MDHistoWorkspace_sptr ImportMDHistoWorkspaceBase::createEmptyOutputWorkspace() {
     throw std::invalid_argument(
         "You must specify as many units as there are dimensions.");
 
+  // If no frames are specified we want to default to the General Frame,
+  // to ensure backward compatibility. But if they are only partly specified,
+  // then we want to throw an error. It should be either used correctly or not
+  // at all
+  if (!frames.empty() && frames.size() != ndims) {
+    throw std::invalid_argument(
+        "You must specify as many frames as there are dimensions.");
+  }
+
+  if (frames.empty()) {
+    frames.resize(ndims);
+    std::fill(frames.begin(), frames.end(), GeneralFrame::GeneralFrameName);
+  }
+
   // Fabricate new dimensions from inputs
   std::vector<MDHistoDimension_sptr> dimensions;
   for (size_t k = 0; k < ndims; ++k) {
+    auto frame = createMDFrame(frames[k], units[k]);
     dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(
-        names[k], names[k], units[k], static_cast<coord_t>(extents[k * 2]),
+        names[k], names[k], *frame, static_cast<coord_t>(extents[k * 2]),
         static_cast<coord_t>(extents[(k * 2) + 1]), nbins[k])));
   }
 
@@ -110,6 +141,72 @@ MDHistoWorkspace_sptr ImportMDHistoWorkspaceBase::createEmptyOutputWorkspace() {
 
   MDHistoWorkspace_sptr ws(new MDHistoWorkspace(dimensions));
   return ws;
+}
+
+/**
+ * Create an MDFrame
+ * @param frame: the selected frame
+ * @param unit: the selected unit
+ * @returns a unique pointer to an MDFrame
+ */
+MDFrame_uptr ImportMDHistoWorkspaceBase::createMDFrame(std::string frame,
+                                                       std::string unit) {
+  auto frameFactory = makeMDFrameFactoryChain();
+  MDFrameArgument frameArg(frame, unit);
+  return frameFactory->create(frameArg);
+}
+
+std::map<std::string, std::string>
+ImportMDHistoWorkspaceBase::validateInputs() {
+  // Check Frame names
+  std::map<std::string, std::string> errors;
+  std::string framePropertyName = "Frames";
+  std::vector<std::string> frames = getProperty(framePropertyName);
+  int ndims_prop = getProperty("Dimensionality");
+  auto ndims = static_cast<size_t>(ndims_prop);
+
+  std::vector<std::string> targetFrames;
+  targetFrames.push_back(Mantid::Geometry::GeneralFrame::GeneralFrameName);
+  targetFrames.push_back(Mantid::Geometry::HKL::HKLName);
+  targetFrames.push_back(Mantid::Geometry::QLab::QLabName);
+  targetFrames.push_back(Mantid::Geometry::QSample::QSampleName);
+
+  auto isValidFrame = true;
+  for (auto it = frames.begin(); it != frames.end(); ++it) {
+    auto result = checkIfFrameValid(*it, targetFrames);
+    if (!result) {
+      isValidFrame = result;
+    }
+  }
+
+  if (!frames.empty() && frames.size() != ndims) {
+    isValidFrame = false;
+  }
+
+  if (!isValidFrame) {
+    std::string message = "The selected frames can be 'HKL', 'QSample', 'QLab' "
+                          "or 'General Frame'. You must specify as many frames "
+                          "as there are dimensions.";
+    errors.insert(std::make_pair(framePropertyName, message));
+  }
+  return errors;
+}
+
+/**
+ * Check if the specified frame matches a target frame
+ * @param frame: the frame name under investigation
+ * @param targetFrames: the allowed frame names
+ * @returns true if the frame name is valid else false
+ */
+bool ImportMDHistoWorkspaceBase::checkIfFrameValid(
+    const std::string &frame, const std::vector<std::string> &targetFrames) {
+  for (auto targetFrame = targetFrames.begin();
+       targetFrame != targetFrames.end(); ++targetFrame) {
+    if (*targetFrame == frame) {
+      return true;
+    }
+  }
+  return false;
 }
 
 } // namespace Mantid

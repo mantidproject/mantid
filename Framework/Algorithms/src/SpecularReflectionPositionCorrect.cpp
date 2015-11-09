@@ -23,10 +23,10 @@ const std::string pointDetectorAnalysis = "PointDetectorAnalysis";
  * @return : Parent component.
  */
 IComponent_const_sptr
-getRootComponent(IComponent_const_sptr &currentComponent) {
+getParentComponent(IComponent_const_sptr &currentComponent) {
   if (IComponent_const_sptr parent = currentComponent->getParent()) {
     if (!dynamic_cast<Instrument *>(const_cast<IComponent *>(parent.get()))) {
-      return getRootComponent(parent);
+      currentComponent = parent;
     }
   }
   return currentComponent;
@@ -173,7 +173,7 @@ void SpecularReflectionPositionCorrect::moveDetectors(
         this->createChildAlgorithm("MoveInstrumentComponent");
     moveComponentAlg->initialize();
     moveComponentAlg->setProperty("Workspace", toCorrect);
-    IComponent_const_sptr root = getRootComponent(detector);
+    IComponent_const_sptr root = getParentComponent(detector);
     const std::string componentName = root->getName();
     moveComponentAlg->setProperty("ComponentName", componentName);
     moveComponentAlg->setProperty("RelativePosition", false);

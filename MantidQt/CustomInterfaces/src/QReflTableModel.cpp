@@ -7,26 +7,7 @@ namespace MantidQt
   namespace CustomInterfaces
   {
     using namespace Mantid::API;
-
-    const QString QReflTableModel::RUNS = "Run(s)";
-    const QString QReflTableModel::ANGLE = "Angle";
-    const QString QReflTableModel::TRANSMISSION = "Transmission Run(s)";
-    const QString QReflTableModel::QMIN = "Q min";
-    const QString QReflTableModel::QMAX = "Q max";
-    const QString QReflTableModel::DQQ = "dQ/Q";
-    const QString QReflTableModel::SCALE = "Scale";
-    const QString QReflTableModel::GROUP = "Group";
-    const QString QReflTableModel::OPTIONS = "Options";
-
-    const int QReflTableModel::COL_RUNS(0);
-    const int QReflTableModel::COL_ANGLE(1);
-    const int QReflTableModel::COL_TRANSMISSION(2);
-    const int QReflTableModel::COL_QMIN(3);
-    const int QReflTableModel::COL_QMAX(4);
-    const int QReflTableModel::COL_DQQ(5);
-    const int QReflTableModel::COL_SCALE(6);
-    const int QReflTableModel::COL_GROUP(7);
-    const int QReflTableModel::COL_OPTIONS(8);
+    using namespace ReflTableSchema;
 
     //----------------------------------------------------------------------------------------------
     /** Constructor
@@ -34,15 +15,7 @@ namespace MantidQt
     */
     QReflTableModel::QReflTableModel(ITableWorkspace_sptr tableWorkspace) : m_dataCachePeakIndex(-1), m_tWS(tableWorkspace)
     {
-      m_columnNameMap.insert(std::make_pair(COL_RUNS, RUNS));
-      m_columnNameMap.insert(std::make_pair(COL_ANGLE, ANGLE));
-      m_columnNameMap.insert(std::make_pair(COL_TRANSMISSION, TRANSMISSION));
-      m_columnNameMap.insert(std::make_pair(COL_QMIN, QMIN));
-      m_columnNameMap.insert(std::make_pair(COL_QMAX, QMAX));
-      m_columnNameMap.insert(std::make_pair(COL_DQQ, DQQ));
-      m_columnNameMap.insert(std::make_pair(COL_SCALE, SCALE));
-      m_columnNameMap.insert(std::make_pair(COL_GROUP, GROUP));
-      m_columnNameMap.insert(std::make_pair(COL_OPTIONS, OPTIONS));
+      m_columnNameMap = ReflTableSchema::makeColumnIndexMap();
     }
 
     //----------------------------------------------------------------------------------------------
@@ -125,7 +98,7 @@ namespace MantidQt
       {
         throw std::runtime_error("Unknown column requested");
       }
-      return foundColName->second;
+      return QString(foundColName->second.c_str());
     }
 
     /**

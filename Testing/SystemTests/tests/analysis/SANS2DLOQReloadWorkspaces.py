@@ -199,7 +199,7 @@ class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1(stresstesting.Mant
 
     def validate(self):
         self.disableChecking.append('Instrument')
-        return '54431main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed.nxs'
+        return '54431main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed_V2.nxs'
 
 class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_2(stresstesting.MantidStressTest):
     """Before ticket #8461 test LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1 used
@@ -238,7 +238,7 @@ class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_2(stresstesting.Mant
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
 
-        return '54431main_1D_3.0_9.0','LOQCentreNoGrav.nxs'
+        return '54431main_1D_3.0_9.0','LOQCentreNoGrav_V2.nxs'
 
 
 class SANSLOQCan2DReloadWorkspace(stresstesting.MantidStressTest):

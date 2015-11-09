@@ -85,6 +85,16 @@
     <item row="0" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
+       <widget class="QLabel" name="label_RBNumber">
+        <property name="text">
+         <string>RB Number:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="lineEdit_RBNumber"/>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -108,7 +118,7 @@
        <widget class="QComboBox" name="comboBox_instrument">
         <item>
          <property name="text">
-          <string>ENGIN-X</string>
+          <string>ENGINX</string>
          </property>
         </item>
        </widget>

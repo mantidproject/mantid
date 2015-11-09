@@ -55,8 +55,9 @@ Usage
     ws2 = LoadMLZ(Filename='TOFTOFTestdata.nxs')
 
     # change sample logs for a second workspace, not needed for real workspaces
+    AddSampleLog(ws1, 'temperature', str(294.14), 'Number')
     lognames = 'temperature,run_start,run_end,monitor_counts,run_number'
-    logvalues = '296.15,2013-07-28T11:32:19+0053,2013-07-28T12:32:19+0053,145145,TOFTOFTestdata2'
+    logvalues = '296.16,2013-07-28T11:32:19+0053,2013-07-28T12:32:19+0053,145145,TOFTOFTestdata2'
     AddSampleLogMultiple(ws2, lognames, logvalues)
 
     # Input = list of workspaces
@@ -97,9 +98,9 @@ Output:
 
 .. testoutput:: ExTOFTOFMergeRuns2ws
 
-    Temperature of experiment for 1st workspace (in K):  294.149414
-    Temperature of experiment for 2nd workspace (in K):  296.15
-    Temperature of experiment for merged workspaces = average over workspaces (in K):  295.149707
+    Temperature of experiment for 1st workspace (in K):  294.14
+    Temperature of experiment for 2nd workspace (in K):  296.16
+    Temperature of experiment for merged workspaces = average over workspaces (in K):  295.15
     Duration of experiment for 1st workspace (in s):  3601
     Duration of experiment for 2nd workspace (in s):  3601
     Duration of experiment for merged workspaces = sum of all durations (in s):  7202
@@ -114,7 +115,7 @@ Output:
     Run number for merged workspaces = list of all workspaces:  ['TOFTOFTestdata', 'TOFTOFTestdata2']
     Monitor counts for 1st workspace:  136935
     Monitor counts for 2nd workspace:  145145
-    Monitor counts for merged workspaces = sum over all workspaces:  282080
+    Monitor counts for merged workspaces = sum over all workspaces:  282080    
 
 **Example - Merge group of workspaces**
 
@@ -124,8 +125,9 @@ Output:
     ws2 = LoadMLZ(Filename='TOFTOFTestdata.nxs')
 
     # change sample logs for a second workspace, not needed for real workspaces
+    AddSampleLog(ws1, 'temperature', str(294.14), 'Number')
     lognames = 'temperature,run_start,run_end,monitor_counts,run_number'
-    logvalues = '296.15,2013-07-28T11:32:19+0053,2013-07-28T12:32:19+0053,145145,TOFTOFTestdata2'
+    logvalues = '296.16,2013-07-28T11:32:19+0053,2013-07-28T12:32:19+0053,145145,TOFTOFTestdata2'
     AddSampleLogMultiple(ws2, lognames, logvalues)
 
     group=GroupWorkspaces('ws1,ws2')

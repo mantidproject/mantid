@@ -1,6 +1,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitLabelTypes.h"
+#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -8,7 +9,7 @@ namespace Geometry {
 /// Constructor
 MDHistoDimensionBuilder::MDHistoDimensionBuilder()
     : m_units(Kernel::Units::Symbol::EmptyLabel), m_min(0), m_max(0),
-      m_nbins(0), m_minSet(false), m_maxSet(false) {}
+      m_nbins(0), m_minSet(false), m_maxSet(false), m_frameName("") {}
 
 /// Destructor
 MDHistoDimensionBuilder::~MDHistoDimensionBuilder() {}
@@ -38,6 +39,7 @@ operator=(const MDHistoDimensionBuilder &other) {
     m_nbins = other.m_nbins;
     m_maxSet = other.m_maxSet;
     m_minSet = other.m_minSet;
+    m_frameName = other.m_frameName;
   }
   return *this;
 }
@@ -89,6 +91,14 @@ Setter for the dimension nbins
 */
 void MDHistoDimensionBuilder::setNumBins(size_t nbins) { m_nbins = nbins; }
 
+/**
+ * Setter for the frame name
+ * @param frameName: the frame name
+ */
+void MDHistoDimensionBuilder::setFrameName(std::string frameName) {
+  m_frameName = frameName;
+}
+
 /*
 Creational method
 @return fully constructed MDHistoDimension instance.
@@ -122,7 +132,14 @@ MDHistoDimension *MDHistoDimensionBuilder::createRaw() {
     throw std::invalid_argument(
         "Cannot create MDHistogramDimension without setting a n bins.");
   }
-  return new MDHistoDimension(m_name, m_id, m_units, coord_t(m_min),
+
+  // Select a Mantid Frame. Use FrameName if available else just use name.
+  auto frameFactory = Mantid::Geometry::makeMDFrameFactoryChain();
+  std::string frameNameForFactory = m_frameName.empty() ? m_name : m_frameName;
+  Mantid::Geometry::MDFrameArgument frameArgument(frameNameForFactory, m_units);
+  auto frame = frameFactory->create(frameArgument);
+
+  return new MDHistoDimension(m_name, m_id, *frame, coord_t(m_min),
                               coord_t(m_max), m_nbins);
 }
 

@@ -9,10 +9,13 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
-
+#include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidKernel/UnitLabelTypes.h"
+
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/assign/list_of.hpp>
 #include <math.h>
@@ -60,7 +63,14 @@ private:
     std::vector<double> errorValues(totalBins, errorValue);
     mdworkspaceAlg->setProperty("ErrorInput", errorValues);
     mdworkspaceAlg->setPropertyValue("Names", "H,K,L");
-    mdworkspaceAlg->setPropertyValue("Units", "-,-,-");
+    std::string units = Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
+                        Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
+                        Mantid::Kernel::Units::Symbol::RLU.ascii();
+    std::string frames = Mantid::Geometry::HKL::HKLName + "," +
+                         Mantid::Geometry::HKL::HKLName + "," +
+                         Mantid::Geometry::HKL::HKLName;
+    TS_ASSERT_THROWS_NOTHING(mdworkspaceAlg->setProperty("Frames", frames));
+    TS_ASSERT_THROWS_NOTHING(mdworkspaceAlg->setProperty("Units", units));
     mdworkspaceAlg->setPropertyValue("OutputWorkspace",
                                      "IntegratePeaksMDTest_MDEWS");
     mdworkspaceAlg->execute();
@@ -89,8 +99,9 @@ public:
   PeakClusterProjectionTest() { FrameworkManager::Instance(); }
 
   void test_throws_if_mdws_has_no_coordinate_system() {
+    Mantid::Geometry::UnknownFrame frame("testunit");
     IMDHistoWorkspace_sptr inWS =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 3, 1);
+        MDEventsTestHelper::makeFakeMDHistoWorkspaceWithMDFrame(1, 3, frame, 1);
     inWS->setCoordinateSystem(Mantid::Kernel::None);
 
     TSM_ASSERT_THROWS("Must have a known coordinate system",
@@ -99,8 +110,13 @@ public:
   }
 
   void test_throws_if_mdws_is_less_than_three_dimensional() {
+    auto frameFactory = Mantid::Geometry::makeMDFrameFactoryChain();
+    Mantid::Geometry::MDFrameArgument frameArg(
+        Mantid::Geometry::HKL::HKLName, Mantid::Kernel::Units::Symbol::RLU);
+    auto frame = frameFactory->create(frameArg);
     IMDHistoWorkspace_sptr inWS =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 2, 1);
+        MDEventsTestHelper::makeFakeMDHistoWorkspaceWithMDFrame(1, 2, *frame,
+                                                                1);
     inWS->setCoordinateSystem(Mantid::Kernel::HKL);
 
     TSM_ASSERT_THROWS("Must be +3 dimensional",

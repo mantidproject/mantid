@@ -5,6 +5,33 @@
 #include <cfloat>
 #include <iostream>
 
+#ifdef ENABLE_OPENCASCADE
+// Opencascade defines _USE_MATH_DEFINES without checking whether it is already
+// used.
+// Undefine it here before we include the headers to avoid a warning
+#ifdef _MSC_VER
+#undef _USE_MATH_DEFINES
+#ifdef M_SQRT1_2
+#undef M_SQRT1_2
+#endif
+#endif
+
+#include "MantidKernel/WarningSuppressions.h"
+GCC_DIAG_OFF(conversion)
+// clang-format off
+GCC_DIAG_OFF(cast-qual)
+// clang-format on
+#include <BRepPrimAPI_MakeBox.hxx>
+#include <BRepBuilderAPI_MakeFace.hxx>
+#include <BRepPrimAPI_MakeHalfSpace.hxx>
+#include <BRepAlgoAPI_Common.hxx>
+#include <gp_Pln.hxx>
+GCC_DIAG_ON(conversion)
+// clang-format off
+GCC_DIAG_ON(cast-qual)
+// clang-format on
+#endif
+
 namespace Mantid {
 
 namespace Geometry {
@@ -233,7 +260,7 @@ void Plane::print() const
   return;
 }
 
-int Plane::planeType() const
+std::size_t Plane::planeType() const
 /**
    Find if the normal vector allows it to be a special
    type of plane (x,y,z direction)
@@ -242,7 +269,7 @@ int Plane::planeType() const
    @retval 0 :: general plane
 */
 {
-  for (int i = 0; i < 3; i++)
+  for (std::size_t i = 0; i < 3; i++)
     if (fabs(NormV[i]) > (1.0 - Tolerance))
       return i + 1;
   return 0;
@@ -274,7 +301,7 @@ void Plane::write(std::ostream &OX) const {
   std::ostringstream cx;
   Surface::writeHeader(cx);
   cx.precision(Surface::Nprecision);
-  const int ptype = planeType();
+  const std::size_t ptype = planeType();
   if (!ptype)
     cx << "p " << NormV[0] << " " << NormV[1] << " " << NormV[2] << " " << Dist;
   else if (NormV[ptype - 1] < 0)
@@ -412,6 +439,28 @@ void Plane::getBoundingBox(double &xmax, double &ymax, double &zmax,
     }
   }
 }
+
+#ifdef ENABLE_OPENCASCADE
+TopoDS_Shape Plane::createShape() {
+  // Get Plane normal and distance.
+  V3D normal = this->getNormal();
+  double norm2 = normal.norm2();
+  if (norm2 == 0.0) {
+    throw std::runtime_error("Cannot create a plane with zero normal");
+  }
+  double distance = this->getDistance();
+  // Find point closest to origin
+  double t = distance / norm2;
+  // Create Half Space
+  TopoDS_Face P = BRepBuilderAPI_MakeFace(gp_Pln(normal[0], normal[1],
+                                                 normal[2], -distance)).Face();
+
+  TopoDS_Shape Result = BRepPrimAPI_MakeHalfSpace(
+                            P, gp_Pnt(normal[0] * (1 + t), normal[1] * (1 + t),
+                                      normal[2] * (1 + t))).Solid();
+  return Result.Complemented();
+}
+#endif
 
 } // NAMESPACE MonteCarlo
 

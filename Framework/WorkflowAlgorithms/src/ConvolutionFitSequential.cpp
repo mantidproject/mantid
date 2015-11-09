@@ -194,7 +194,7 @@ void ConvolutionFitSequential::exec() {
     std::string nextWs = tempFitWsName + ",i";
     nextWs += boost::lexical_cast<std::string>(i);
     plotPeakInput += nextWs + ";";
-    plotPeakStringProg.report();
+    plotPeakStringProg.report("Constructing PlotPeak name");
   }
 
   // passWSIndex
@@ -227,12 +227,12 @@ void ConvolutionFitSequential::exec() {
   deleter->setProperty("WorkSpace",
                        outputWsName + "_NormalisedCovarianceMatrices");
   deleter->executeAsChildAlg();
-  deleteProgress.report();
+  deleteProgress.report("Deleting PlotPeak Output");
 
   deleter = createChildAlgorithm("DeleteWorkspace");
   deleter->setProperty("WorkSpace", outputWsName + "_Parameters");
   deleter->executeAsChildAlg();
-  deleteProgress.report();
+  deleteProgress.report("Deleting PlotPeak Output");
 
   std::string paramTableName = outputWsName + "_Parameters";
   AnalysisDataService::Instance().add(paramTableName, outputWs);
@@ -251,7 +251,7 @@ void ConvolutionFitSequential::exec() {
     }
     for (size_t i = 0; i < func->nParams(); i++) {
       paramNames.push_back(func->parameterName(i));
-      workflowProg.report();
+      workflowProg.report("Finding parameters to process");
     }
     if (funcName.compare("Lorentzian") == 0) {
       // remove peak centre
@@ -268,7 +268,7 @@ void ConvolutionFitSequential::exec() {
     calculateEISF(outputWs);
   }
 
-  // Construct comma separated list for ProcessIndirectFirParameters
+  // Construct comma separated list for ProcessIndirectFitParameters
   std::string paramNamesList = "";
   const size_t maxNames = paramNames.size();
   for (size_t i = 0; i < maxNames; i++) {
@@ -276,7 +276,7 @@ void ConvolutionFitSequential::exec() {
     if (i != (maxNames - 1)) {
       paramNamesList += ",";
     }
-    workflowProg.report();
+    workflowProg.report("Constructing indirectFitParams input");
   }
 
   // Run ProcessIndirectFitParameters
@@ -319,7 +319,7 @@ void ConvolutionFitSequential::exec() {
     logAdder->setProperty("LogText", it->second);
     logAdder->setProperty("LogType", "String");
     logAdder->executeAsChildAlg();
-    logAdderProg.report();
+    logAdderProg.report("Add text logs");
   }
 
   // Add Numeric Logs
@@ -329,7 +329,7 @@ void ConvolutionFitSequential::exec() {
     logAdder->setProperty("LogText", it->second);
     logAdder->setProperty("LogType", "Number");
     logAdder->executeAsChildAlg();
-    logAdderProg.report();
+    logAdderProg.report("Adding Numerical logs");
   }
   // Copy Logs to GroupWorkspace
   logCopier = createChildAlgorithm("CopyLogs", 0.97, 0.98, true);
@@ -352,7 +352,7 @@ void ConvolutionFitSequential::exec() {
     outName += "_Workspace";
     renamer->setProperty("OutputWorkspace", outName);
     renamer->executeAsChildAlg();
-    renamerProg.report();
+    renamerProg.report("Renaming group workspaces");
   }
 
   AnalysisDataService::Instance().addOrReplace(resultWsName, resultWs);

@@ -75,7 +75,7 @@ void SliceMDHisto::exec() {
   for (unsigned int k = 0; k < m_rank; ++k) {
     boost::shared_ptr<const IMDDimension> arDim = inWS->getDimension(k);
     dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(
-        arDim->getName(), arDim->getName(), arDim->getUnits(),
+        arDim->getName(), arDim->getName(), arDim->getMDFrame(),
         arDim->getX(start[k]), arDim->getX(end[k]), end[k] - start[k])));
   }
   MDHistoWorkspace_sptr outWS(new MDHistoWorkspace(dimensions));
