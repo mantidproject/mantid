@@ -508,7 +508,7 @@ int Object::createSurfaceList(const int outFlag) {
 
     std::vector<const Surface *>::const_iterator vc;
     for (vc = SurList.begin(); vc != SurList.end(); ++vc) {
-      std::cerr << "Point == " << reinterpret_cast<long int>(*vc) << std::endl;
+      std::cerr << "Point == " << *vc << std::endl;
       std::cerr << (*vc)->getName() << std::endl;
     }
   }

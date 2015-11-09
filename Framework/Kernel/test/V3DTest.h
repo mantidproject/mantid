@@ -333,8 +333,8 @@ public:
     TS_ASSERT_DELTA(b.Z(), 3.0 / sqrt(2.0), 0.0001);
     // Test getSpherical returns the original values
     TS_ASSERT_THROWS_NOTHING(b.getSpherical(r, theta, phi));
-    TS_ASSERT_EQUALS(r, 3.0);
-    TS_ASSERT_EQUALS(theta, 45.0);
+    TS_ASSERT_DELTA(r, 3.0, 1e-12);
+    TS_ASSERT_DELTA(theta, 45.0, 1e-12);
     TS_ASSERT_EQUALS(phi, 45.0);
   }
 

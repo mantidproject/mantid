@@ -380,8 +380,8 @@ private:
     ~TestableSeqDomainSpectrumCreator() {}
   };
 
-  class SeqDomainCreatorTestFunction : public virtual IFunction1DSpectrum,
-                                       public virtual ParamFunction {
+  class SeqDomainCreatorTestFunction : public IFunction1DSpectrum,
+                                       public ParamFunction {
   public:
     ~SeqDomainCreatorTestFunction() {}
 
@@ -402,9 +402,8 @@ private:
     void init() { declareParameter("Slope", 1.0); }
   };
 
-  class SeqDomainCreatorTestFunctionComplex
-      : public virtual IFunction1DSpectrum,
-        public virtual ParamFunction {
+  class SeqDomainCreatorTestFunctionComplex : public IFunction1DSpectrum,
+                                              public ParamFunction {
   public:
     ~SeqDomainCreatorTestFunctionComplex() {}
 

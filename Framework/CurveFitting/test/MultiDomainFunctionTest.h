@@ -25,8 +25,8 @@ using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::CostFunctions;
 using namespace Mantid::CurveFitting::Algorithms;
 
-class MultiDomainFunctionTest_Function : public virtual IFunction1D,
-                                         public virtual ParamFunction {
+class MultiDomainFunctionTest_Function : public IFunction1D,
+                                         public ParamFunction {
 public:
   MultiDomainFunctionTest_Function() : IFunction1D(), ParamFunction() {
     this->declareParameter("A", 0);

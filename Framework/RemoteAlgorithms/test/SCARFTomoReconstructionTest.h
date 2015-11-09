@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidRemoteAlgorithms/SCARFTomoReconstruction.h"
 
 using namespace Mantid::RemoteAlgorithms;
@@ -141,7 +142,14 @@ public:
   static SCARFTomoReconstructionTest *createSuite() {
     return new SCARFTomoReconstructionTest();
   }
+
   static void destroySuite(SCARFTomoReconstructionTest *suite) { delete suite; }
+
+  void setUp() {
+    const Mantid::Kernel::FacilityInfo &fac =
+        Mantid::Kernel::ConfigService::Instance().getFacility();
+    m_facility = fac.name();
+  }
 
   void test_castAlgorithm() {
     // can create
@@ -243,14 +251,14 @@ public:
   /// Login is required before running the other actions (except ping)
   // The good username is: foo_user
   void test_login() {
-    goodUsername = "foo_user";
-    goodPassword = "foo_password";
+    m_goodUsername = "foo_user";
+    m_goodPassword = "foo_password";
 
     // severe (connection) error
     MockedConnectionError_SCARFTomo err;
     TS_ASSERT_THROWS_NOTHING(err.initialize());
-    TS_ASSERT_THROWS_NOTHING(err.setProperty("UserName", goodUsername));
-    TS_ASSERT_THROWS_NOTHING(err.setProperty("Password", goodPassword));
+    TS_ASSERT_THROWS_NOTHING(err.setProperty("UserName", m_goodUsername));
+    TS_ASSERT_THROWS_NOTHING(err.setProperty("Password", m_goodPassword));
     TS_ASSERT_THROWS_NOTHING(err.setProperty("Action", "LogIn"));
 
     TS_ASSERT_THROWS_NOTHING(err.execute());
@@ -259,8 +267,8 @@ public:
     // standard mocked response: looks like an unsuccessful login attempt
     MockedSCARFTomo tomo;
     TS_ASSERT_THROWS_NOTHING(tomo.initialize());
-    TS_ASSERT_THROWS_NOTHING(tomo.setProperty("UserName", goodUsername));
-    TS_ASSERT_THROWS_NOTHING(tomo.setProperty("Password", goodPassword));
+    TS_ASSERT_THROWS_NOTHING(tomo.setProperty("UserName", m_goodUsername));
+    TS_ASSERT_THROWS_NOTHING(tomo.setProperty("Password", m_goodPassword));
     TS_ASSERT_THROWS_NOTHING(tomo.setProperty("Action", "LogIn"));
 
     TS_ASSERT_THROWS_NOTHING(tomo.execute());
@@ -269,11 +277,20 @@ public:
     // successful login attempt
     MockedGoodLoginResponse_SCARFTomo login;
     TS_ASSERT_THROWS_NOTHING(login.initialize());
-    TS_ASSERT_THROWS_NOTHING(login.setProperty("UserName", goodUsername));
-    TS_ASSERT_THROWS_NOTHING(login.setProperty("Password", goodPassword));
+    TS_ASSERT_THROWS_NOTHING(login.setProperty("UserName", m_goodUsername));
+    TS_ASSERT_THROWS_NOTHING(login.setProperty("Password", m_goodPassword));
     TS_ASSERT_THROWS_NOTHING(login.setProperty("Action", "LogIn"));
 
     TS_ASSERT_THROWS_NOTHING(login.execute());
+
+    if (g_supportedFacility != m_facility) {
+      TSM_ASSERT(
+          "This algorithm / login should fail when the facility is not " +
+              g_supportedFacility,
+          !login.isExecuted());
+      return;
+    }
+
     TS_ASSERT(login.isExecuted());
   }
 
@@ -301,7 +318,7 @@ public:
     MockedSCARFTomo tomo;
     TS_ASSERT_THROWS_NOTHING(tomo.initialize());
     TS_ASSERT_THROWS_NOTHING(
-        tomo.setProperty("UserName", "fail_" + goodUsername));
+        tomo.setProperty("UserName", "fail_" + m_goodUsername));
     TS_ASSERT_THROWS_NOTHING(tomo.setProperty("Action", "JobStatus"));
     TS_ASSERT_THROWS_NOTHING(tomo.setProperty("RunnablePath", "/foo/bar.sh"));
     TS_ASSERT_THROWS_NOTHING(tomo.setProperty("JobOptions", "--test --baz"));
@@ -323,7 +340,7 @@ public:
     MockedSCARFTomo alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Action", "Ping"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Username", goodUsername));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Username", m_goodUsername));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -332,18 +349,27 @@ public:
   void test_submit() {
     MockedSCARFTomo alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UserName", goodUsername));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UserName", m_goodUsername));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Action", "SubmitJob"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RunnablePath", "/foo/bar.sh"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("JobOptions", "--test --baz"));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    if (g_supportedFacility != m_facility) {
+      TSM_ASSERT(
+          "This algorithm / submit should fail when the facility is not " +
+              g_supportedFacility,
+          !alg.isExecuted());
+      return;
+    }
+
     TS_ASSERT(alg.isExecuted());
 
     // second submit in a row
     MockedSCARFTomo tomo;
     TS_ASSERT_THROWS_NOTHING(tomo.initialize());
-    TS_ASSERT_THROWS_NOTHING(tomo.setProperty("UserName", goodUsername));
+    TS_ASSERT_THROWS_NOTHING(tomo.setProperty("UserName", m_goodUsername));
     TS_ASSERT_THROWS_NOTHING(tomo.setProperty("Action", "SubmitJob"));
     TS_ASSERT_THROWS_NOTHING(tomo.setProperty("RunnablePath", "/foo/bar.sh"));
     TS_ASSERT_THROWS_NOTHING(tomo.setProperty("JobOptions", "--random --baz"));
@@ -357,10 +383,19 @@ public:
     // that we need
     MockedSCARFTomo err;
     TS_ASSERT_THROWS_NOTHING(err.initialize());
-    TS_ASSERT_THROWS_NOTHING(err.setProperty("UserName", goodUsername));
+    TS_ASSERT_THROWS_NOTHING(err.setProperty("UserName", m_goodUsername));
     TS_ASSERT_THROWS_NOTHING(err.setProperty("Action", "JobStatus"));
 
     TS_ASSERT_THROWS_NOTHING(err.execute());
+
+    if (g_supportedFacility != m_facility) {
+      TSM_ASSERT(
+          "This algorithm / queryStatus should fail when the facility is not " +
+              g_supportedFacility,
+          !err.isExecuted());
+      return;
+    }
+
     TS_ASSERT(err.isExecuted());
 
     std::vector<std::string> vec;
@@ -376,10 +411,19 @@ public:
     // this one gives a basic/sufficient response with job status information
     MockedGoodJobStatus_SCARFTomo alg("wrong id");
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UserName", goodUsername));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UserName", m_goodUsername));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Action", "JobStatus"));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    if (g_supportedFacility != m_facility) {
+      TSM_ASSERT(
+          "This algorithm / queryStatus should fail when the facility is not " +
+              g_supportedFacility,
+          !alg.isExecuted());
+      return;
+    }
+
     TS_ASSERT(alg.isExecuted());
 
     // the mock produces info on one job
@@ -402,11 +446,20 @@ public:
     // we need
     MockedSCARFTomo err;
     TS_ASSERT_THROWS_NOTHING(err.initialize());
-    TS_ASSERT_THROWS_NOTHING(err.setProperty("UserName", goodUsername));
+    TS_ASSERT_THROWS_NOTHING(err.setProperty("UserName", m_goodUsername));
     TS_ASSERT_THROWS_NOTHING(err.setProperty("Action", "JobStatusByID"));
     TS_ASSERT_THROWS_NOTHING(err.setProperty("JobID", 123456789));
 
     TS_ASSERT_THROWS_NOTHING(err.execute());
+
+    if (g_supportedFacility != m_facility) {
+      TSM_ASSERT("This algorithm / queryStatusByID should fail when the "
+                 "facility is not " +
+                     g_supportedFacility,
+                 !err.isExecuted());
+      return;
+    }
+
     TS_ASSERT(err.isExecuted());
 
     std::string tmp;
@@ -421,11 +474,20 @@ public:
     std::string jobID = "444449";
     MockedGoodJobStatus_SCARFTomo alg(jobID);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UserName", goodUsername));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UserName", m_goodUsername));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Action", "JobStatusByID"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("JobID", jobID));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    if (g_supportedFacility != m_facility) {
+      TSM_ASSERT("This algorithm / queryStatusByID should fail when the "
+                 "facility is not " +
+                     g_supportedFacility,
+                 !alg.isExecuted());
+      return;
+    }
+
     TS_ASSERT(alg.isExecuted());
 
     // It could also check that it gets the names, etc. that the mock-up
@@ -441,24 +503,42 @@ public:
   void test_cancel() {
     MockedSCARFTomo alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UserName", goodUsername));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UserName", m_goodUsername));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Action", "CancelJob"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("CancelJobID", 123456789));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    if (g_supportedFacility != m_facility) {
+      TSM_ASSERT(
+          "This algorithm / cancel should fail when the facility is not " +
+              g_supportedFacility,
+          !alg.isExecuted());
+      return;
+    }
+
     TS_ASSERT(alg.isExecuted());
   }
 
   void test_upload() {
     MockedSCARFTomo alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Username", goodUsername));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Username", m_goodUsername));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Action", "Upload"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileToUpload", "random_file"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("DestinationDirectory", "random_path/"));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    if (g_supportedFacility != m_facility) {
+      TSM_ASSERT(
+          "This algorithm / upload should fail when the facility is not " +
+              g_supportedFacility,
+          !alg.isExecuted());
+      return;
+    }
+
     TS_ASSERT(alg.isExecuted());
   }
 
@@ -467,19 +547,28 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     // Download with empty filename (get all files)
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UserName", goodUsername));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UserName", m_goodUsername));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Action", "Download"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("DownloadJobID", 12345));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RemoteJobFilename", ""));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LocalDirectory", "/tmp/foo"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    if (g_supportedFacility != m_facility) {
+      TSM_ASSERT(
+          "This algorithm / download should fail when the facility is not " +
+              g_supportedFacility,
+          !alg.isExecuted());
+      return;
+    }
+
     TS_ASSERT(alg.isExecuted());
 
     MockedSCARFTomo alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
 
     // Download a single file (giving its name)
-    TS_ASSERT_THROWS_NOTHING(alg2.setProperty("UserName", goodUsername));
+    TS_ASSERT_THROWS_NOTHING(alg2.setProperty("UserName", m_goodUsername));
     TS_ASSERT_THROWS_NOTHING(alg2.setProperty("Action", "Download"));
     TS_ASSERT_THROWS_NOTHING(alg2.setProperty("DownloadJobID", 12345));
     TS_ASSERT_THROWS_NOTHING(
@@ -492,7 +581,7 @@ public:
   void test_errorResponseFromServer() {
     MockedErrorResponse_SCARFTomo err;
     TS_ASSERT_THROWS_NOTHING(err.initialize());
-    TS_ASSERT_THROWS_NOTHING(err.setPropertyValue("Username", goodUsername));
+    TS_ASSERT_THROWS_NOTHING(err.setPropertyValue("Username", m_goodUsername));
     TS_ASSERT_THROWS_NOTHING(err.setPropertyValue("Action", "JobStatus"));
 
     TS_ASSERT_THROWS_NOTHING(err.execute());
@@ -503,10 +592,19 @@ public:
   void test_logout() {
     MockedSCARFTomo alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UserName", goodUsername));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UserName", m_goodUsername));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Action", "LogOut"));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    if (g_supportedFacility != m_facility) {
+      TSM_ASSERT(
+          "This algorithm / logout should fail when the facility is not " +
+              g_supportedFacility,
+          !alg.isExecuted());
+      return;
+    }
+
     TS_ASSERT(alg.isExecuted());
   }
 
@@ -516,7 +614,7 @@ public:
     // the username given
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("UserName", "fail_" + goodUsername));
+        alg.setProperty("UserName", "fail_" + m_goodUsername));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Action", "JobStatus"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RunnablePath", "/foo/bar.sh"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("JobOptions", "--test --baz"));
@@ -526,7 +624,7 @@ public:
 
     MockedSCARFTomo alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
-    TS_ASSERT_THROWS_NOTHING(alg2.setProperty("UserName", goodUsername));
+    TS_ASSERT_THROWS_NOTHING(alg2.setProperty("UserName", m_goodUsername));
     TS_ASSERT_THROWS_NOTHING(alg2.setProperty("Action", "JobStatus"));
     TS_ASSERT_THROWS_NOTHING(alg2.setProperty("RunnablePath", "/foo/bar.sh"));
     TS_ASSERT_THROWS_NOTHING(alg2.setProperty("JobOptions", "--test --baz"));
@@ -565,11 +663,15 @@ public:
   }
 
 private:
-  std::string goodUsername;
-  std::string goodPassword;
-  static const std::string SCARFName;
+  std::string m_goodUsername;
+  std::string m_goodPassword;
+  std::string m_facility;
+  static const std::string g_supportedFacility;
+  static const std::string g_SCARFName;
 };
 
-const std::string SCARFTomoReconstructionTest::SCARFName = "SCARF@STFC";
+const std::string SCARFTomoReconstructionTest::g_SCARFName = "SCARF@STFC";
+// This algorithm work only for ISIS
+const std::string SCARFTomoReconstructionTest::g_supportedFacility = "ISIS";
 
 #endif // MANTID_REMOTEALGORITHMS_SCARFTOMORECONSTRUCTION_H_

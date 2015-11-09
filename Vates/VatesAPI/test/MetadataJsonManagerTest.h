@@ -1,8 +1,9 @@
 #ifndef METADATA_JSON_MANAGER_TEST
 #define METADATA_JSON_MANAGER_TEST
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 // Disabling Json warnings regarding non-export of Json::Reader and Json::Writer
+#pragma warning(disable : 4275)
 #pragma warning(disable : 4251)
 #endif
 

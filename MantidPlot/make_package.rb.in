@@ -161,6 +161,12 @@ end
 
 #Fix remaining QT-related linking issues.
 `install_name_tool -id @rpath/libqsqlite.dylib Contents/Frameworks/plugins/sqldrivers/libqsqlite.dylib`
+`install_name_tool -id @rpath/libqsqlite.dylib Contents/PlugIns/sqldrivers/libqsqlite.dylib`
+`install_name_tool -id @rpath/libqtaccessiblecompatwidgets.dylib Contents/PlugIns/accessible/libqtaccessiblecompatwidgets.dylib`
+`install_name_tool -id @rpath/libqtaccessiblewidgets.dylib Contents/PlugIns/accessible/libqtaccessiblewidgets.dylib`
+`install_name_tool -id @rpath/libqcorewlanbearer.dylib Contents/PlugIns/bearer/libqcorewlanbearer.dylib`
+`install_name_tool -id @rpath/libqgenericbearer.dylib  Contents/PlugIns/bearer/libqgenericbearer.dylib`
+`install_name_tool -id @rpath/libqsvgicon.dylib Contents/PlugIns/iconengines/libqsvgicon.dylib`
 
 #change id of all Qt4 imageformats libraries
 qt4_patterns = ["**/imageformats/*.dylib"]
@@ -169,6 +175,26 @@ qt4_patterns.each do |pattern|
     basename =  File.basename(library)
     `chmod +w Contents/Frameworks/plugins/imageformats/#{basename}`
     `install_name_tool -id @rpath/#{basename} Contents/Frameworks/plugins/imageformats/#{basename}`
+  end
+end
+
+#change id of all Qt4 imageformats libraries
+qt4_patterns = ["**/imageformats/*.dylib"]
+qt4_patterns.each do |pattern|
+  Dir[pattern].each do |library|
+    basename =  File.basename(library)
+    `chmod +w Contents/PlugIns/imageformats/#{basename}`
+    `install_name_tool -id @rpath/#{basename} Contents/PlugIns/imageformats/#{basename}`
+  end
+end
+
+#change id of all Qt4 codecs libraries
+qt4_patterns = ["**/codecs/*.dylib"]
+qt4_patterns.each do |pattern|
+  Dir[pattern].each do |library|
+    basename =  File.basename(library)
+    `chmod +w Contents/PlugIns/codecs/#{basename}`
+    `install_name_tool -id @rpath/#{basename} Contents/PlugIns/codecs/#{basename}`
   end
 end
 
