@@ -67,7 +67,7 @@ Create a python driver script called test_mpi.py
 
 And run it using the following commands
 
-.. code-block::
+.. code-block:: bash
 
     $ module load mpi/openmpi-x86_64
     $ export LD_PRELOAD=/usr/lib64/openmpi/lib/libmpi.so
@@ -75,7 +75,7 @@ And run it using the following commands
 
 to run without mpi is simply
 
-.. code-block::
+.. code-block:: bash
 
     $ mantidpython test_mpi.py
 

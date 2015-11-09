@@ -13,7 +13,6 @@ set ( TEST_PY_FILES
   ComputeCalibrationCoefVanTest.py
   CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
-  CreateMDTest.py
   DetectorFloodWeightingTest.py
   IndirectCalibrationTest.py
   CreateWorkspaceTest.py

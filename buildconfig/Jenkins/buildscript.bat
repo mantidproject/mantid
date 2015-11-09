@@ -7,6 +7,14 @@ setlocal enableextensions enabledelayedexpansion
 :: WORKSPACE & JOB_NAME are environment variables that are set by Jenkins.
 :: BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each slave.
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Current version of Visual Studio
+set VS_VERSION=11
+
+:: While we transition between VS 2012 & 2015 we need to be able to clean the build directory
+:: if the previous build was not with the same compiler. Find grep for later
+for /f "delims=" %%I in ('where git') do @set GIT_EXE_DIR=%%~dpI
+set GIT_ROOT_DIR=%GIT_EXE_DIR:~0,-4%
+set GREP_EXE=%GIT_ROOT_DIR%bin\grep.exe
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: All nodes currently have PARAVIEW_DIR=4.3.b40280 and PARAVIEW_NEXT_DIR=4.3.1
@@ -59,6 +67,18 @@ if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
 ::                            the links helps keep it fresh
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set BUILD_DIR=%WORKSPACE%\build
+
+if EXIST %BUILD_DIR%\CMakeCache.txt (
+  call "%GREP_EXE%" CMAKE_LINKER:FILEPATH %BUILD_DIR%\CMakeCache.txt > compiler_version.log
+  call "%GREP_EXE%" %VS_VERSION% compiler_version.log
+  if ERRORLEVEL 1 (
+    set CLEANBUILD=yes
+    echo Previous build used a different compiler. Performing a clean build
+  ) else (
+    echo Previous build used the same compiler. No need to clean
+  )
+)
+
 if "%CLEANBUILD%" == "yes" (
   rmdir /S /Q %BUILD_DIR%
 )
