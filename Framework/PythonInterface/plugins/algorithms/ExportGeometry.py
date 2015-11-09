@@ -1,9 +1,7 @@
+#pylint: disable=no-init
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, \
     InstrumentValidator, FileProperty, FileAction
 from mantid.kernel import Direction, StringArrayProperty
-
-import mantid.simpleapi as api
-
 
 SOURCE_XML = """  <!--SOURCE-->
   <component type="moderator">
@@ -68,7 +66,7 @@ class ExportGeometry(PythonAlgorithm):
             issues['Components'] = "Must supply components"
         else:
             components = [component for component in components
-                          if (wksp.getInstrument().getComponentByName(component) is None)]
+                          if wksp.getInstrument().getComponentByName(component) is None]
             if len(components) > 0:
                 issues['Components'] = "Instrument has no component \"" \
                                        + ','.join(components) + "\""
@@ -97,7 +95,7 @@ class ExportGeometry(PythonAlgorithm):
 
     def __writexml(self, handle, component):
         info = {'name': component.getName()}
-        pos = self.__updatePos(info, component)
+        self.__updatePos(info, component)
 
         handle.write(COMPONENT_XML % info)
 
