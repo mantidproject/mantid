@@ -79,6 +79,7 @@ protected slots:
   void applyMaskToView();
   void storeDetectorMask(bool isROI = false);
   void storeBinMask();
+  void storeMask();
   void clearMask();
   void saveInvertedMaskToWorkspace();
   void saveInvertedMaskToFile();

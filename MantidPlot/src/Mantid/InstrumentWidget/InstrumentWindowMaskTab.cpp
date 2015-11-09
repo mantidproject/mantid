@@ -591,7 +591,7 @@ void InstrumentWindowMaskTab::doubleChanged(QtProperty* prop)
   */
 void InstrumentWindowMaskTab::applyMask()
 {
-  storeDetectorMask(getMode()==Mode::ROI);
+  storeMask();
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   m_instrWindow->getInstrumentActor()->applyMaskWorkspace();
   enableApplyButtons();
@@ -603,14 +603,7 @@ void InstrumentWindowMaskTab::applyMask()
   */
 void InstrumentWindowMaskTab::applyMaskToView()
 {
-  if (m_maskBins)
-  {
-    storeBinMask();
-  }
-  else
-  {
-    storeDetectorMask(getMode()==Mode::ROI);
-  }
+  storeMask();
   enableApplyButtons();
 }
 
@@ -1024,7 +1017,7 @@ void InstrumentWindowMaskTab::enableApplyButtons()
 
     bool enableBinMasking = hasMaskShapes && m_maskBins && mode == Mode::Mask;
 
-    if (enableBinMasking) 
+    if (m_maskBins && mode == Mode::Mask)
     {
       m_applyToView->setText("Apply bin mask to View");
     }
@@ -1181,6 +1174,19 @@ void InstrumentWindowMaskTab::storeBinMask()
   // remove masking shapes
   clearShapes();
   enableApplyButtons();
+}
+
+/// Store current shapes as a mask (detector or bin)
+void InstrumentWindowMaskTab::storeMask()
+{
+  if (m_maskBins && getMode() == Mode::Mask)
+  {
+    storeBinMask();
+  }
+  else
+  {
+    storeDetectorMask(getMode() == Mode::ROI);
+  }
 }
 
 void InstrumentWindowMaskTab::changedIntegrationRange(double, double)
