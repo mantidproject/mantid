@@ -42,9 +42,8 @@ namespace Functions {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_CURVEFITTING_DLL ComptonProfile
-    : public virtual API::ParamFunction,
-      public virtual API::IFunction1D {
+class MANTID_CURVEFITTING_DLL ComptonProfile : public API::ParamFunction,
+                                               public API::IFunction1D {
 public:
   /// Default constructor required for factory
   ComptonProfile();
