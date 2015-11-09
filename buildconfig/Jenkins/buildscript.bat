@@ -6,30 +6,35 @@ setlocal enableextensions enabledelayedexpansion
 ::
 :: WORKSPACE & JOB_NAME are environment variables that are set by Jenkins.
 :: BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each slave.
+:: CMake, git & git-lfs should be on the PATH
+::
+:: All nodes currently have PARAVIEW_DIR=4.3.b40280, PARAVIEW_NEXT_DIR=4.3.1
+:: and PARAVIEW_MSVC2015_DIR=4.3.b40280-msvc2015
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Current version of Visual Studio
-set VS_VERSION=11
+call cmake.exe --version
+set VS_VERSION=14
 
 :: While we transition between VS 2012 & 2015 we need to be able to clean the build directory
 :: if the previous build was not with the same compiler. Find grep for later
 for /f "delims=" %%I in ('where git') do @set GIT_EXE_DIR=%%~dpI
 set GIT_ROOT_DIR=%GIT_EXE_DIR:~0,-4%
 set GREP_EXE=%GIT_ROOT_DIR%bin\grep.exe
-
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: All nodes currently have PARAVIEW_DIR=4.3.b40280 and PARAVIEW_NEXT_DIR=4.3.1
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-set CMAKE_BIN_DIR=C:\Program Files (x86)\CMake 2.8\bin
-"%CMAKE_BIN_DIR%\cmake.exe" --version
 echo %sha1%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Get or update the third party dependencies
+:: Environment setup
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-cd %WORKSPACE%
-call fetch_Third_Party win64
-cd %WORKSPACE%
+:: Source the VS setup script
+set VS_VERSION=14
+call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" amd64
+set CM_GENERATOR=Visual Studio 14 2015 Win64
+set PARAVIEW_DIR=%PARAVIEW_MSVC2015_DIR%
+
+:: While we transition between VS 2012 & 2015 we need to be able to clean the build directory
+:: if the previous build was not with the same compiler
+for /f "delims=" %%I in ('where git') do @set GIT_EXE_DIR=%%~dpI
+set GIT_ROOT_DIR=%GIT_EXE_DIR:~0,-4%
+set GREP_EXE=%GIT_ROOT_DIR%bin\grep.exe
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Set up the location for local object store outside of the build and source
@@ -53,7 +58,7 @@ if not "%JOB_NAME%" == "%JOB_NAME:clean=%" (
 )
 
 if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
-  set BUILDPKG=yes
+  set BUILDPKG=no
 )
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -79,7 +84,7 @@ if EXIST %BUILD_DIR%\CMakeCache.txt (
   )
 )
 
-if "%CLEANBUILD%" == "yes" (
+if "!CLEANBUILD!" == "yes" (
   rmdir /S /Q %BUILD_DIR%
 )
 
@@ -117,20 +122,17 @@ if not "%JOB_NAME%"=="%JOB_NAME:relwithdbg=%" (
 ) else (
     set BUILD_CONFIG=Release
     ))
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Update the PATH so that we can find everything
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-set PATH=%WORKSPACE%\Third_Party\lib\win64;%WORKSPACE%\Third_Party\lib\win64\Python27;%WORKSPACE%\Third_Party\lib\win64\mingw;%PARAVIEW_DIR%\bin\%BUILD_CONFIG%;%PATH%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: CMake configuration
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-"%CMAKE_BIN_DIR%\cmake.exe" -G "Visual Studio 11 Win64" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_DOCS% ..
+call cmake.exe -G "%CM_GENERATOR%" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_DOCS% ..
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Build step
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+call %BUILD_DIR%\buildenv.bat
 msbuild /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=%BUILD_CONFIG% Mantid.sln
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
@@ -140,20 +142,23 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :: Remove the user properties file just in case anything polluted it
 set USERPROPS=bin\%BUILD_CONFIG%\Mantid.user.properties
 del %USERPROPS%
-"%CMAKE_BIN_DIR%\ctest.exe" -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on-failure
+
+call ctest.exe -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on-failure
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create the install kit if required
+:: Disabled while it takes 10 minutes to create & 5-10 mins to archive!
+:: Just create the docs to check they work
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 if "%BUILDPKG%" == "yes" (
-  echo Building package
   :: Build offline documentation
   msbuild /nologo /nr:false /p:Configuration=%BUILD_CONFIG% docs/docs-qthelp.vcxproj
-
   :: Ignore errors as the exit code of msbuild is wrong here.
   :: It always marks the build as a failure even thought the MantidPlot exit
   :: code is correct!
-  ::if ERRORLEVEL 1 exit /B %ERRORLEVEL%
-  "%CMAKE_BIN_DIR%\cpack.exe" -C %BUILD_CONFIG% --config CPackConfig.cmake
+  echo Building package
+  cpack.exe -C %BUILD_CONFIG% --config CPackConfig.cmake
 )
+

@@ -1,6 +1,13 @@
 #ifndef METADATAEXTRACTORUTILS_TEST_H
 #define METADATAEXTRACTORUTILS_TEST_H
 
+#ifdef _MSC_VER
+// Disabling Json warnings regarding non-export of Json::Reader and Json::Writer
+#pragma warning(disable : 4275)
+#pragma warning(disable : 4251)
+#endif
+
+
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
 
 #include <cxxtest/TestSuite.h>

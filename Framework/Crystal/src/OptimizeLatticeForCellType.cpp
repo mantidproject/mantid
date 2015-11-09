@@ -150,10 +150,9 @@ void OptimizeLatticeForCellType::exec() {
 
     IAlgorithm_sptr ub_alg;
     try {
-      ub_alg =
-          createChildAlgorithm("FindUBUsingLatticeParameters", -1, -1, false);
+      ub_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
     } catch (Exception::NotFoundError &) {
-      g_log.error("Can't locate FindUBUsingLatticeParameters algorithm");
+      g_log.error("Can't locate CalculateUMatrix algorithm");
       throw;
     }
 
@@ -164,8 +163,6 @@ void OptimizeLatticeForCellType::exec() {
     ub_alg->setProperty("alpha", refinedCell.alpha());
     ub_alg->setProperty("beta", refinedCell.beta());
     ub_alg->setProperty("gamma", refinedCell.gamma());
-    ub_alg->setProperty("NumInitial", 15);
-    ub_alg->setProperty("Tolerance", tolerance);
     ub_alg->executeAsChildAlg();
     DblMatrix UBnew = peakWS->mutableSample().getOrientedLattice().getUB();
     OrientedLattice o_lattice;
