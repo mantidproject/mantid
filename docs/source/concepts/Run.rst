@@ -29,10 +29,6 @@ You can look at the :ref:`Run API reference <mantid.api.Run>` for a full list of
 Getting the Run Object from a Workspace
 #######################################
 
-The methods for getting a variable to a MatrixWorkspace is the same as shown in the :ref:`Workspace <Workspace-Accessing_Workspaces>` help page.
-
-If you want to check if a variable points to something that is a Matrix Workspace you can use this:
-
 .. testsetup:: WorkspaceRun
 
   ws = CreateSampleWorkspace()

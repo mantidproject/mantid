@@ -24,8 +24,8 @@ Also they may contain:
 
 -  Axes with
    :ref:`Units <Unit Factory>`
--  Sample and sample environment data
--  Run logs
+-  :ref:`Sample` and sample environment data
+-  :ref:`Run` logs
 -  A full :ref:`instrument <instrument>` geometric definition, along with
    an instrument parameter map
 -  A spectra - detector mapping
@@ -141,8 +141,8 @@ You can get access to the :ref:`Instrument` for a workspace with
 
 For the properties and operations of the instrument look at the :ref:`Instrument help <Instrument>`.
 
-Run - to access logs, sample and other run information
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Run - to access logs, and other run information
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You can get access to the :ref:`Run` for a workspace with
 
