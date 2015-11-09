@@ -62,6 +62,8 @@ public:
   void lockCurrentFittingType(FittingType fitType);
   void unlockCurrentFittingType();
   void setLogNames(const QStringList& logNames);
+  void setParameterNamesForPlotting(const QStringList& parNames);
+  QString getParameterToPlot() const;
 
 signals:
   void changedToSequentialFitting();
@@ -101,6 +103,8 @@ private:
   void setStringEnumProperty(QtProperty*, const QString&);
   QString getStringProperty(QtProperty*) const;
   void setStringProperty(QtProperty*, const QString&);
+
+  void setPropertyEnumValues(QtProperty* prop, const QStringList& values);
 
   /// Qt property browser which displays properties
   QtTreePropertyBrowser* m_browser;
@@ -142,6 +146,9 @@ private:
   QtProperty* m_outputWorkspace;
   /// LogValue property
   QtProperty* m_logValue;
+  /// Property for a name of a parameter to plot
+  /// against LogValue
+  QtProperty* m_plotParameter;
 
   /// Precision of doubles in m_doubleManager
   int m_decimals;

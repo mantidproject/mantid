@@ -317,7 +317,7 @@ void CompareMDWorkspaces::doComparison() {
   MatrixWorkspace_sptr mws2 = boost::dynamic_pointer_cast<MatrixWorkspace>(ws2);
   if (mws1 || mws2)
     throw std::invalid_argument("Cannot compare MatrixWorkspaces. Please use "
-                                "CheckWorkspacesMatch algorithm instead.");
+                                "CompareWorkspaces algorithm instead.");
 
   MDHistoWorkspace_sptr histo1 =
       boost::dynamic_pointer_cast<MDHistoWorkspace>(ws1);

@@ -124,22 +124,22 @@ public:
 
     // test the output from fit is what you expect
     double chi2 = alg->getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA(chi2, 13.13, 1);
+    TS_ASSERT_DELTA(chi2, 0.0, 0.1);
 
     IFunction_sptr out = alg->getProperty("Function");
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get());
 
-    TS_ASSERT_DELTA(pk->height(), 13.99, 1);
-    TS_ASSERT_DELTA(pk->centre(), 48.229, 1);
-    TS_ASSERT_DELTA(pk->fwhm(), 0.4816, 0.01);
-    TS_ASSERT_DELTA(out->getParameter("I"), 374.93, 1);
-    TS_ASSERT_DELTA(out->getParameter("Alpha0"), 1.597107, 0.0001);
-    TS_ASSERT_DELTA(out->getParameter("Alpha1"), 1.496805, 0.001);
-    TS_ASSERT_DELTA(out->getParameter("Beta0"), 31.891718, 0.0001);
-    TS_ASSERT_DELTA(out->getParameter("Kappa"), 46.025921, 0.0001);
-    TS_ASSERT_DELTA(out->getParameter("SigmaSquared"), 0.0338, 0.001);
-    TS_ASSERT_DELTA(out->getParameter("Gamma"), 0.0484, 0.01);
-    TS_ASSERT_DELTA(out->getParameter("X0"), 48.229, 0.1);
+    TS_ASSERT_DELTA(pk->height(), 69.802, 0.1);
+    TS_ASSERT_DELTA(pk->centre(), 49.984, 0.1);
+    TS_ASSERT_DELTA(pk->fwhm(), 23.541, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("I"), 3101.672, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("Alpha0"), 1.6, 0.0001);
+    TS_ASSERT_DELTA(out->getParameter("Alpha1"), 1.5, 0.001);
+    TS_ASSERT_DELTA(out->getParameter("Beta0"), 31.9, 0.0001);
+    TS_ASSERT_DELTA(out->getParameter("Kappa"), 46.0, 0.0001);
+    TS_ASSERT_DELTA(out->getParameter("SigmaSquared"), 99.935, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("Gamma"), 0.0, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("X0"), 49.984, 0.1);
 
     // could set workspace here but makes no difference since
     // regardless m_wavelength set to zero in IC code
@@ -153,12 +153,12 @@ public:
 
     // note that fitting a none-totally optimized IC to a Gaussian peak so
     // not a perfect fit - but pretty ok result
-    TS_ASSERT_DELTA(yy[9], 1.22099, 0.1);
-    TS_ASSERT_DELTA(yy[10], 90.7193, 4);
-    TS_ASSERT_DELTA(yy[11], 93.1314, 4);
-    TS_ASSERT_DELTA(yy[12], 41.1798, 2);
-    TS_ASSERT_DELTA(yy[13], 15.0869, 1);
-    TS_ASSERT_DELTA(yy[14], 5.55355, 1);
+    TS_ASSERT_DELTA(yy[9], 43.359, 0.1);
+    TS_ASSERT_DELTA(yy[10], 69.884, 0.1);
+    TS_ASSERT_DELTA(yy[11], 91.288, 0.1);
+    TS_ASSERT_DELTA(yy[12], 97.563, 0.1);
+    TS_ASSERT_DELTA(yy[13], 86.442, 0.1);
+    TS_ASSERT_DELTA(yy[14], 64.769, 0.1);
 
     // check its categories
     const std::vector<std::string> categories = out->categories();
@@ -197,7 +197,7 @@ public:
     TS_ASSERT(alg->isExecuted());
     // test the output from fit is what you expect
     double chi2 = alg->getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA(chi2, 31.8966, 1);
+    TS_ASSERT_DELTA(chi2, 22.745, 0.1);
 
     // set efixed for indirect
     mockDataWS->mutableRun().addProperty<std::string>("deltaE-mode", "indirect",
@@ -262,11 +262,13 @@ private:
     icpv.initialize();
 
     icpv.setParameter("I", 1000);
-    icpv.tie("Alpha0", "1.597107");
-    icpv.tie("Alpha1", "1.496805");
-    icpv.tie("Beta0", "31.891718");
-    icpv.tie("Kappa", "46.025921");
-    icpv.setParameter("X0", 45.0);
+    icpv.tie("Alpha0", "1.6");
+    icpv.tie("Alpha1", "1.5");
+    icpv.tie("Beta0", "31.9");
+    icpv.tie("Kappa", "46.0");
+    icpv.setParameter("SigmaSquared", 25.0);
+    icpv.setParameter("Gamma", 0.1);
+    icpv.setParameter("X0", 50.0);
 
     auto alg = boost::shared_ptr<IAlgorithm>(new Algorithms::Fit);
     alg->initialize();

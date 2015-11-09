@@ -345,6 +345,12 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
                                    m_uiForm.ckLoadLogs->isChecked());
   osirisDiffReduction->setProperty("OutputWorkspace",
                                    drangeWsName.toStdString());
+  auto specMin =
+      boost::lexical_cast<std::string, int>(m_uiForm.spSpecMin->value());
+  auto specMax =
+      boost::lexical_cast<std::string, int>(m_uiForm.spSpecMax->value());
+  osirisDiffReduction->setProperty("SpectraMin", specMin);
+  osirisDiffReduction->setProperty("SpectraMax", specMax);
 
   osirisDiffReduction->setProperty("DetectDRange", !manualDRange);
   if (manualDRange)
@@ -507,9 +513,6 @@ void IndirectDiffractionReduction::instrumentSelected(
     m_uiForm.ckSumFiles->setEnabled(false);
     m_uiForm.ckSumFiles->setChecked(false);
 
-    // Disable spectra range
-    m_uiForm.spSpecMin->setEnabled(false);
-    m_uiForm.spSpecMax->setEnabled(false);
   } else {
     // Re-enable sum files
     m_uiForm.ckSumFiles->setToolTip("");
@@ -550,7 +553,8 @@ void IndirectDiffractionReduction::loadSettings() {
   QSettings settings;
   QString dataDir = QString::fromStdString(
                         Mantid::Kernel::ConfigService::Instance().getString(
-                            "datasearch.directories")).split(";")[0];
+                            "datasearch.directories"))
+                        .split(";")[0];
 
   settings.beginGroup(m_settingsGroup);
   settings.setValue("last_directory", dataDir);
