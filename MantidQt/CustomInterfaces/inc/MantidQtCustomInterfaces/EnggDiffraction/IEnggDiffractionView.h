@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <QStringList>
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h"
