@@ -35,7 +35,7 @@ find_library( MUPARSER_LIBRARY NAMES muparser
               DOC "The muParser library"
 )
 
-find_library( MUPARSER_LIBRARY_DEBUG muparser_d )
+find_library( MUPARSER_LIBRARY_DEBUG NAMES muparser_d muparserd )
 
 # handle the QUIETLY and REQUIRED arguments and set MUPARSER_FOUND to TRUE if
 # all listed variables are TRUE
