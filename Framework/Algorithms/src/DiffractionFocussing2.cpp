@@ -158,7 +158,16 @@ void DiffractionFocussing2::exec() {
     }
   }
 
-  // No problem! It is a normal Workspace2D
+  // Check valida detectors are found in the .Cal file
+  if (nGroups <= 0) {
+    throw std::runtime_error("No selected Detectors found in .cal file for "
+                             "input range. Please ensure spectra range has "
+                             "atleast one selected detector.");
+  }
+  // Check the number of points
+  if (nPoints <= 0) {
+    throw std::runtime_error("No points found in the data range.");
+  }
   API::MatrixWorkspace_sptr out = API::WorkspaceFactory::Instance().create(
       m_matrixInputW, nGroups, nPoints + 1, nPoints);
   // Caching containers that are either only read from or unused. Initialize

@@ -66,8 +66,10 @@ public:
   // -------------------------- Print/error message handling ------------------
   /// Connects the python stdout to a Qt signal
   inline void write(const QString &text) { emit print(text); }
-  /// 'Fake' method needed for IPython import
+  /// Simulate file-like object (required for IPython)
   inline void flush() {}
+  /// Simulate file-like object (required for colorama)
+  inline bool closed() { return false;  }
   /// Is the given code complete
   bool compilesToCompleteStatement(const QString & code) const;
 

@@ -84,11 +84,32 @@ public:
                      "stringUnit");
   }
 
+  void test_number_type() {
+    MatrixWorkspace_sptr ws =
+        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    ws->mutableRun().setStartAndEndTime(DateAndTime("2013-12-18T13:40:00"),
+                                        DateAndTime("2013-12-18T13:42:00"));
+    ExecuteAlgorithm(ws, "My Name", "Number Series", "1.234", 1.234, false,
+                     "myUnit", "Double");
+    ExecuteAlgorithm(ws, "My New Name", "Number", "963", 963, false,
+                     "differentUnit", "Int");
+    // Can force '963' to be interpreted as a double
+    ExecuteAlgorithm(ws, "My New Name", "Number", "963", 963.0, false,
+                     "differentUnit", "Double");
+    // Should throw error as NumberType defined for a String
+    ExecuteAlgorithm(ws, "My Name", "String", "My Value", 0.0, true,
+                     "stringUnit", "Double", true);
+    // Should throw error trying to interpret '1.234' as Int
+    ExecuteAlgorithm(ws, "My Name", "Number Series", "1.234", 1.234, true,
+                     "myUnit", "Int", true);
+  }
+
   template <typename T>
-  void ExecuteAlgorithm(MatrixWorkspace_sptr testWS, std::string LogName,
-                        std::string LogType, std::string LogText,
-                        T expectedValue, bool fails = false,
-                        std::string LogUnit = "") {
+  void
+  ExecuteAlgorithm(MatrixWorkspace_sptr testWS, std::string LogName,
+                   std::string LogType, std::string LogText, T expectedValue,
+                   bool fails = false, std::string LogUnit = "",
+                   std::string NumberType = "AutoDetect", bool throws = false) {
     // add the workspace to the ADS
     AnalysisDataService::Instance().addOrReplace("AddSampleLogTest_Temporary",
                                                  testWS);
@@ -96,6 +117,8 @@ public:
     // execute algorithm
     AddSampleLog alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    if (throws)
+      alg.setRethrows(true);
     TS_ASSERT(alg.isInitialized())
 
     alg.setPropertyValue("Workspace", "AddSampleLogTest_Temporary");
@@ -103,6 +126,11 @@ public:
     alg.setPropertyValue("LogText", LogText);
     alg.setPropertyValue("LogUnit", LogUnit);
     alg.setPropertyValue("LogType", LogType);
+    alg.setPropertyValue("NumberType", NumberType);
+    if (throws) {
+      TS_ASSERT_THROWS_ANYTHING(alg.execute())
+      return;
+    }
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     if (fails) {
       TS_ASSERT(!alg.isExecuted())

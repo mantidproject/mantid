@@ -1684,7 +1684,7 @@ void LoadNexusProcessed::loadNonSpectraAxis(
   } else if (axis->isText()) {
     NXChar axisData = data.openNXChar("axis2");
     axisData.load();
-    std::string axisLabels = axisData();
+    std::string axisLabels(axisData(), axisData.dim0());
     // Use boost::tokenizer to split up the input
     boost::char_separator<char> sep("\n");
     boost::tokenizer<boost::char_separator<char>> tokenizer(axisLabels, sep);
