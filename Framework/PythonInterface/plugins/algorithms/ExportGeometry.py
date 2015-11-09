@@ -32,7 +32,7 @@ COMPONENT_XML = """      <location x="%(x)f" y="%(y)f" z="%(z)f" name="%(name)s"
 
 class ExportGeometry(PythonAlgorithm):
     def category(self):
-        return "Utililty"
+        return "Utility"
 
     def name(self):
         return "ExportGeometry"
