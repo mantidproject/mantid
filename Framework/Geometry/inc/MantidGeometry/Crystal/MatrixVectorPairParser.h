@@ -129,7 +129,7 @@ public:
     std::string::const_iterator strIterator = matrixVectorString.begin();
     std::string::const_iterator strEnd = matrixVectorString.end();
 
-    qi::phrase_parse(strIterator, strEnd, *this, qi::space);
+    qi::phrase_parse(strIterator, strEnd, m_parser, qi::space);
 
     if (std::distance(strIterator, strEnd) > 0) {
       throw Kernel::Exception::ParseError(
