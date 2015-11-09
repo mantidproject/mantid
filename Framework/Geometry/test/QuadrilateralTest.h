@@ -85,6 +85,22 @@ public:
     TS_ASSERT(!smallRectangle.contains(largeRectangle));
   }
 
+  void test_clockwise_rotation() {
+    Quadrilateral quad(V2D(0.0, 0.0), V2D(1.0, 3.0), V2D(4.0, 4.0),
+                       V2D(4.0, 1.0));
+
+    quad.shiftVertexesClockwise();
+
+    TS_ASSERT_EQUALS(quad.at(0).X(), 4.0);
+    TS_ASSERT_EQUALS(quad.at(0).Y(), 1.0);
+    TS_ASSERT_EQUALS(quad.at(1).X(), 4.0);
+    TS_ASSERT_EQUALS(quad.at(1).Y(), 4.0);
+    TS_ASSERT_EQUALS(quad.at(2).X(), 1.0);
+    TS_ASSERT_EQUALS(quad.at(2).Y(), 3.0);
+    TS_ASSERT_EQUALS(quad.at(3).X(), 0.0);
+    TS_ASSERT_EQUALS(quad.at(3).Y(), 0.0);
+  }
+
 private:
   Quadrilateral makeRectangle() {
     return Quadrilateral(V2D(), V2D(2.0, 0.0), V2D(2.0, 1.5), V2D(0.0, 1.5));

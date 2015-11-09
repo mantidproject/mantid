@@ -255,6 +255,12 @@ void FitOptionsBrowser::createSequentialFitProperties()
     addProperty("LogValue", m_logValue, &FitOptionsBrowser::getStringEnumProperty, &FitOptionsBrowser::setStringEnumProperty);
     m_sequentialProperties << m_logValue;
   }
+
+  // Create LogValue property
+  m_plotParameter = m_enumManager->addProperty("Plot parameter");
+  {
+    m_sequentialProperties << m_plotParameter;
+  }
 }
 
 void FitOptionsBrowser::addProperty(const QString& name, QtProperty* prop,
@@ -703,30 +709,58 @@ void FitOptionsBrowser::unlockCurrentFittingType()
 }
 
 /**
+ * Set values for an enum property.
+ * @param prop :: A property to set the values to.
+ * @param values :: New enum values.
+ */
+void FitOptionsBrowser::setPropertyEnumValues(QtProperty* prop, const QStringList& values)
+{
+  auto i = m_enumManager->value(prop);
+  if (!values.isEmpty() && values.front().isEmpty())
+  {
+    m_enumManager->setEnumNames(prop, values);
+  }
+  else
+  {
+    QStringList names = values;
+    names.insert(0,"");
+    m_enumManager->setEnumNames(prop, names);
+  }
+  if (i < values.size())
+  {
+    m_enumManager->setValue(prop, i);
+  }
+  else
+  {
+    m_enumManager->setValue(prop, 0);
+  }
+}
+
+/**
  * Define log names to use with the LogValue property.
  * @param logNames :: The log names
  */
 void FitOptionsBrowser::setLogNames(const QStringList& logNames)
 {
-  auto i = m_enumManager->value(m_logValue);
-  if (!logNames.isEmpty() && logNames.front().isEmpty())
-  {
-    m_enumManager->setEnumNames(m_logValue, logNames);
-  }
-  else
-  {
-    QStringList names = logNames;
-    names.insert(0,"");
-    m_enumManager->setEnumNames(m_logValue, names);
-  }
-  if (i < logNames.size())
-  {
-    m_enumManager->setValue(m_logValue, i);
-  }
-  else
-  {
-    m_enumManager->setValue(m_logValue, 0);
-  }
+  setPropertyEnumValues(m_logValue, logNames);
+}
+
+/**
+ * Define names of function parameters that can be plotted against the LogValue.
+ */
+void FitOptionsBrowser::setParameterNamesForPlotting(const QStringList& parNames)
+{
+  setPropertyEnumValues(m_plotParameter, parNames);
+}
+
+/**
+ * Get name of a function parameter to plot against LogValue after sequential fitting.
+ */
+QString FitOptionsBrowser::getParameterToPlot() const
+{
+  auto i = m_enumManager->value(m_plotParameter);
+  if (i < 0) i = 0;
+  return m_enumManager->enumNames(m_plotParameter)[i];
 }
 
 } // MantidWidgets

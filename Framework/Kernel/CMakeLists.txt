@@ -43,6 +43,7 @@ set ( SRC_FILES
 	src/LogFilter.cpp
 	src/LogParser.cpp
 	src/Logger.cpp
+	src/MDAxisValidator.cpp
 	src/MDUnit.cpp
 	src/MDUnitFactory.cpp
 	src/MagneticFormFactorTable.cpp
@@ -184,11 +185,13 @@ set ( INC_FILES
 	inc/MantidKernel/LogFilter.h
 	inc/MantidKernel/LogParser.h
 	inc/MantidKernel/Logger.h
+	inc/MantidKernel/MDAxisValidator.h
 	inc/MantidKernel/MDUnit.h
 	inc/MantidKernel/MDUnitFactory.h
 	inc/MantidKernel/MRUList.h
 	inc/MantidKernel/MagneticFormFactorTable.h
 	inc/MantidKernel/MagneticIon.h
+	inc/MantidKernel/make_unique.h
 	inc/MantidKernel/MandatoryValidator.h
 	inc/MantidKernel/MantidVersion.h
 	inc/MantidKernel/MaskedProperty.h
@@ -321,11 +324,13 @@ set ( TEST_FILES
 	LogFilterTest.h
 	LogParserTest.h
 	LoggerTest.h
+	MDAxisValidatorTest.h
 	MDUnitFactoryTest.h
 	MDUnitTest.h
 	MRUListTest.h
 	MagneticFormFactorTableTest.h
 	MagneticIonTest.h
+	MakeUniqueTest.h
 	MandatoryValidatorTest.h
 	MaskedPropertyTest.h
 	MaterialTest.h
@@ -541,6 +546,7 @@ else ()
   set ( CONSOLEPATTERN "%s-[%p] %t" )
 endif ()
 
+set ( CONSOLECHANNELCLASS "ConsoleChannel" )
 configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
 )
@@ -615,6 +621,7 @@ else ()
   set ( PV_PLUGINS ${MANTID_ROOT}/${PVPLUGINS_SUBDIR} )
 endif ()
 
+set ( CONSOLECHANNELCLASS "StdoutChannel" )
 configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
 )

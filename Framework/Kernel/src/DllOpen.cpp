@@ -130,12 +130,8 @@ void *DllOpen::OpenDllImpl(const std::string &filePath) {
     size_t n = lstrlen((LPCTSTR)lpMsgBuf) + 40;
 
     lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, n * sizeof(TCHAR));
-    //        StringCchPrintf((LPTSTR)lpDisplayBuf,
-    //          LocalSize(lpDisplayBuf) / sizeof(TCHAR),
-    //          TEXT("failed with error %d: %s"),
-    //          dw, lpMsgBuf);
     _snprintf((char *)lpDisplayBuf, n, "failed with error %lu: %s", dw,
-              lpMsgBuf);
+              (char *)lpMsgBuf);
     g_log.error() << "Could not open library " << filePath << ": "
                   << (LPCTSTR)lpDisplayBuf << std::endl;
 

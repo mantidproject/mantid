@@ -22,21 +22,9 @@ class DNSDetEffCorrVanaTest(unittest.TestCase):
         self.__dataws = create_fake_dns_workspace('__dataws', dataY=dataY)
 
     def tearDown(self):
-        api.DeleteWorkspace(self.__vanaws.getName() + '_NORM')
-        api.DeleteWorkspace(self.__dataws.getName() + '_NORM')
-        if api.mtd.doesExist(self.__bkgrws.getName() + '_NORM'):
-            api.DeleteWorkspace(self.__bkgrws.getName() + '_NORM')
         api.DeleteWorkspace(self.__bkgrws)
         api.DeleteWorkspace(self.__vanaws)
         api.DeleteWorkspace(self.__dataws)
-
-    def test_DNSNormWorkspaceExists(self):
-        outputWorkspaceName = "DNSDetCorrVanaTest_Test1"
-        api.DeleteWorkspace(self.__bkgrws.getName() + '_NORM')
-        self.assertRaises(RuntimeError, DNSDetEffCorrVana, InputWorkspace=self.__dataws.getName(),
-                          OutputWorkspace=outputWorkspaceName, VanaWorkspace=self.__vanaws.getName(),
-                          BkgWorkspace=self.__bkgrws.getName())
-        return
 
     def test_VanaMeanDimensions(self):
         outputWorkspaceName = "DNSDetCorrVanaTest_Test2"
