@@ -59,8 +59,8 @@ class UserProperties(object):
     def replace_variables(self,data_string):
         """Replace variables defined in USER_PROPERTIES
             and enclosed in $ sign with their values
-		   defined for a user
-		"""
+            defined for a user
+        """
         str_parts = data_string.split('$')
         for prop in USER_PROPERTIES:
             try:
@@ -82,6 +82,19 @@ class UserProperties(object):
             return RBfolder[2:]
         else:
             return None
+#
+    @property
+    def rb_folder(self):
+        """Returns short name of user's RB folder
+           consisting of string RB and string representation of
+           RB number e.g. RB1510324
+        """
+        if self._user_id:
+            RBfolder = os.path.basename(self.rb_dir)
+            return RBfolder
+        else:
+            return None
+
 #
     @property
     def start_date(self):
@@ -281,8 +294,8 @@ class MantidConfigDirectInelastic(object):
     @property
     def user_file_description(self):
         """defines full file name (with path) for an xml file which describes
-		   files, which should be copied to a user
-		"""
+           files, which should be copied to a user
+        """
         if self._user:
             return os.path.join(self._script_repo,'direct_inelastic',self._user.instrument,
                                 self._user_files_descr)
@@ -675,5 +688,59 @@ class MantidConfigDirectInelastic(object):
         fp.close()
         if platform.system() != 'Windows':
             os.system('chown -R {0}:{0} {1}'.format(self._fedid,config_file_name))
+
+if __name__ == "__main__":
+    if len(sys.argv) < 5:
+        inp["inst_name"] = str(raw_input('Enter instrument name: ').upper())
+        inp["cycleID"]  = int(raw_input('Enter cycle ID as 3 digit number (e.g. 153 for cycle 2015/3): '))
+        inp["rbNum"]   = int(raw_input('Enter RB number as 7 digit number (e.g. 1520374): '))
+        inp["userID"] =  raw_input('enter user ID to configure: ').lower()
+        inp["startDate"] = raw_input('enter experiment start date: as YYYYYMMDD integer 20151104').lower()
+    else:
+        inp["inst_name"] = str(sys.argv[1]).upper()
+        inp["cycleID"] = int(sys.argv[2])
+        inp["rbNum"] = int(sys.argv[3])
+        inp["userID"] = str(sys.argv[4])
+        inp["startDate"] = str(sys.argv[5])  # cast to int to test RB
+
+    if platform.system() == 'Windows':
+        sys.path.insert(0,'c:/Mantid/scripts/Inelastic/Direct')
+
+        MantidDir = r"c:\Mantid\_builds\br_master\bin\Release"
+        UserScriptRepoDir = os.path.join(analysisDir,"UserScripts")
+        MapMaskDir =  os.path.join(analysisDir,"InstrumentFiles")
+        # windebug base folder
+        base = 'd:/Data/Mantid_Testing/config_script_test_folder'
+        rootDir = os.path.join(base,'users')
+        analysisDir= base
+    else:
+        sys.path.insert(0,'/opt/Mantid/scripts/Inelastic/Direct/')
+        #sys.path.insert(0,'/opt/mantidnightly/scripts/Inelastic/Direct/')
+        WinDebug=False
+
+        MantidDir = '/opt/Mantid'
+        MapMaskDir = '/usr/local/mprogs/InstrumentFiles/'
+        UserScriptRepoDir = '/opt/UserScripts'
+        home = '/home'
+        #
+        rootDir = "/home/"
+        analysisDir = "/instrument/"
+
+    # initialize Mantid configuration
+
+    from ISISDirecInelasticConfig import MantidConfigDirectInelastic,UserProperties
+
+    mcf = MantidConfigDirectInelastic(MantidDir,rootDir,UserScriptRepoDir,MapMaskDir)
+    print "Successfully initialized ISIS Inelastic Configuration script generator"
+
+    user = UserProperties(inp["userID"])
+
+    rb_user_folder = os.path.join(mcf._home_path,inp["userID"],str(inp["rbNum"]))
+    # rb folder must be present!
+    current_user.set_user_properties(inp["inst_name"],inp["startDate"],inp["cycleID"],rb_user_folder)
+
+    mcf.init_user(user)
+    mcf.generate_config()
+
 
 

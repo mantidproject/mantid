@@ -1,5 +1,4 @@
 ﻿import os
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 import unittest
 import shutil
 import datetime
