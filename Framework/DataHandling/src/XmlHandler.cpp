@@ -64,7 +64,6 @@ XmlHandler::get_attributes_from_tag(const std::string &xpath) {
   Poco::XML::NodeIterator it(pDoc, Poco::XML::NodeFilter::SHOW_ELEMENT);
   Poco::XML::Node *pNode = it.nextNode();
   Poco::XML::Node *detectorNode = pNode->getNodeByPath(xpath);
-  std::string value("");
   if (detectorNode) {
     Poco::XML::NamedNodeMap *attributes = detectorNode->attributes();
     for (unsigned int i = 0; i < attributes->length(); i++) {
