@@ -166,9 +166,14 @@ class AlignComponents(PythonAlgorithm):
                                               OutputWorkspace="alignedWorkspace")
 
         components = self.getProperty("ComponentList").value
-        for component in components:
-            if wks.getInstrument().getComponentByName(component) is None:
-                issues['ComponentList'] = "Instrument has no component \"" + component + "\""
+        if len(components) <= 0:
+            issues['ComponentList'] = "Must supply components"
+        else:
+            components = [component for component in components
+                          if (wksp.getInstrument().getComponentByName(component) is None)]
+            if len(components) > 0:
+                issues['ComponentList'] = "Instrument has no component \"" \
+                                       + ','.join(components) + "\""
 
         if not (self.getProperty("PosX").value or self.getProperty("PosY").value or self.getProperty("PosZ").value or
                     self.getProperty("RotX").value or self.getProperty("RotY").value or self.getProperty("RotZ").value):
