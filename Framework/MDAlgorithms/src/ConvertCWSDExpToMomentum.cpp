@@ -67,10 +67,17 @@ void ConvertCWSDExpToMomentum::init() {
                                       "file names listed in InputWorkspace are "
                                       "base name without directory.");
 
+  declareProperty("NormalizeByMonitor", true, "TODO/FIXME");
+
+  declareProperty("ScaleFactor", EMPTY_DBL(), "TODO/FIXME");
+
+  declareProperty("MaskWorkspace", "", "TODO/FIXME");
+
   declareProperty(
       new FileProperty("Directory", "", FileProperty::OptionalDirectory),
       "Directory where data files are if InputWorkspace gives data file name "
       "as the base file name as indicated by 'IsBaseName'.");
+
 }
 
 //----------------------------------------------------------------------------------------------
@@ -467,6 +474,8 @@ bool ConvertCWSDExpToMomentum::getInputs(bool virtualinstrument,
             << "\n";
   }
   g_log.warning("Finished parsing Data Table");
+
+  // FIXME/TODO: Add the code to read monitor counts from input table workspace
 
   // Set up parameters for creating virtual instrument
   g_log.warning() << "About to deal with virtual instrument"
