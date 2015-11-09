@@ -87,10 +87,6 @@ const Kernel::IntMatrix &SymmetryOperation::matrix() const {
   return m_matrixVectorPair.getMatrix();
 }
 
-Kernel::DblMatrix SymmetryOperation::doubleMatrix() const {
-  return convertMatrix<double>(m_matrixVectorPair.getMatrix());
-}
-
 /// Returns a const reference to the internall stored vector
 const V3R &SymmetryOperation::vector() const {
   return m_matrixVectorPair.getVector();

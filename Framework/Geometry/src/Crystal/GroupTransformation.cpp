@@ -58,13 +58,10 @@ GroupTransformation GroupTransformation::getInverse() const {
 SymmetryOperation GroupTransformation::transformOperation(
     const SymmetryOperation &operation) const {
   MatrixVectorPair<double, V3R> op =
-      m_symOp.getInverse() * MatrixVectorPair<double, V3R>(
-                                 operation.doubleMatrix(), operation.vector()) *
+      m_symOp.getInverse() *
+      MatrixVectorPair<double, V3R>(convertMatrix<double>(operation.matrix()),
+                                    operation.vector()) *
       m_symOp;
-
-  std::cout << m_symOp.getMatrix() << " " << m_symOp.getInverse().getMatrix()
-            << " " << operation.identifier() << " " << op.getMatrix() << " "
-            << V3D(op.getVector()) << std::endl;
 
   return SymmetryOperation(op.getMatrix(), op.getVector());
 }

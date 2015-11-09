@@ -70,10 +70,6 @@ public:
 
   /// Operator to transform a vector or point.
   template <typename T> T operator*(const T &operand) const {
-    if (m_vector == 0) {
-      return m_matrix * operand;
-    }
-
     return (m_matrix * operand) + m_vector;
   }
 
@@ -97,6 +93,12 @@ public:
   bool operator==(
       const MatrixVectorPair<MatrixNumericType, VectorType> &other) const {
     return m_matrix == other.m_matrix && m_vector == other.m_vector;
+  }
+
+  /// Inequality operator.
+  bool operator!=(
+      const MatrixVectorPair<MatrixNumericType, VectorType> &other) const {
+    return !operator==(other);
   }
 
 private:

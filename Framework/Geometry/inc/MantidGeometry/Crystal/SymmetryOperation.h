@@ -131,7 +131,6 @@ public:
   ~SymmetryOperation() {}
 
   const Kernel::IntMatrix &matrix() const;
-  Kernel::DblMatrix doubleMatrix() const;
   const V3R &vector() const;
   const V3R &reducedVector() const;
 
