@@ -63,7 +63,6 @@ void GetNegMuMuonicXRDDialog::initLayout() {
   // YPosition LineEdit Attributes
   m_yPosition->setMaximumWidth(250);
   m_yPosition->setRange(-100, 100);
-  // m_yPosition->setValidator(m_yPositionNumericValidator);
   m_yPosition->setSingleStep(0.1);
 
   // Run Button Attributes and signal/slot assignment
@@ -143,12 +142,6 @@ void GetNegMuMuonicXRDDialog::runClicked() {
   if (validateDialogInput(elementsSelectedStr)) {
     storePropertyValue("Elements", elementsSelectedStr);
     if (validateDialogInput(m_yPosition->text())) {
-      storePropertyValue("YAxisPosition",
-                         QString::number(m_yPosition->value()));
-    } else {
-      // used as default value for m_yPosition property if the user does not
-      // input
-      // one.
       storePropertyValue("YAxisPosition",
                          QString::number(m_yPosition->value()));
     }
