@@ -40,14 +40,14 @@ public:
   void clear();
 private:
   /// Range of x values to mask in a spectrum. (Using MaskBins)
-  struct XRange
+  struct BinMask
   {
-    XRange(double s = 0.0, double e = 0.0): start(s), end(e) {}
+    BinMask(double s = 0.0, double e = 0.0): start(s), end(e) {}
     double start;
     double end;
-    bool operator<(const XRange& other) const;
+    QList<int> spectra;
   };
-  QMap<XRange, QList<int>> m_xRanges;
+  QList<BinMask> m_masks;
 };
 
 #endif /*MASKBINSDATA_H_*/
