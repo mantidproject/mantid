@@ -116,9 +116,9 @@ int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
 
 /// Constructor
 LoadSpice2D::LoadSpice2D() :
-		wavelength_input(0), wavelength_spread_input(0),
-		numberXPixels(0), numberYPixels(0),
-		wavelength(0), dwavelength(0){
+		m_wavelength_input(0), m_wavelength_spread_input(0),
+		m_numberXPixels(0), m_numberYPixels(0),
+		m_wavelength(0), m_dwavelength(0){
 }
 
 /// Destructor
@@ -151,7 +151,45 @@ void LoadSpice2D::init() {
 					"the value found in the data file.");
 }
 
+
+/*
+ * Main method.
+ * Creates an XML handler. All tag values will be a map.
+ * Creates and loads the workspace with the data
+ *
+ */
+void LoadSpice2D::exec() {
+
+	setInputPropertiesAsMemberProperties();
+	std::map<std::string, std::string> metadata = m_xmlHandler.get_metadata("Detector");
+	setWavelength(metadata);
+
+	std::vector<int> data = getData("//Data/Detector" );
+	double monitorCounts = 0;
+	from_string<double>(monitorCounts, metadata["Counters/monitor"], std::dec);
+	double countingTime = 0;
+	from_string<double>(countingTime, metadata["Counters/time"], std::dec);
+	createWorkspace(data, metadata["Header/Scan_Title"], monitorCounts, countingTime );
+
+	// Add all metadata to the WS
+	addMetadataAsRunProperties(metadata);
+
+	setMetadataAsRunProperties(metadata);
+
+	// run load instrument
+	std::string instrument = metadata["Header/Instrument"];
+	runLoadInstrument(instrument, m_workspace);
+	runLoadMappingTable(m_workspace, m_numberXPixels, m_numberYPixels);
+
+	// sample_detector_distances
+	double detector_distance = totalDetectorDistance(metadata);
+	moveDetector(detector_distance);
+
+
+}
+
 /**
+ * Parse the 2 integers of the form: INT32[192,256]
  * @param dims_str : INT32[192,256]
  */
 void LoadSpice2D::parseDetectorDimensions(const std::string &dims_str) {
@@ -163,8 +201,8 @@ void LoadSpice2D::parseDetectorDimensions(const std::string &dims_str) {
 		boost::match_results<std::string::const_iterator> match;
 		boost::regex_search(dims_str, match, b_re_sig);
 		// match[0] is the full string
-		Kernel::Strings::convert(match[1], numberXPixels);
-		Kernel::Strings::convert(match[2], numberYPixels);
+		Kernel::Strings::convert(match[1], m_numberXPixels);
+		Kernel::Strings::convert(match[2], m_numberYPixels);
 	}
 
 }
@@ -173,49 +211,56 @@ void LoadSpice2D::parseDetectorDimensions(const std::string &dims_str) {
  * Adds map of the form key:value
  * as Workspace run properties
  */
-void LoadSpice2D::addMapAsRunProperties(
+void LoadSpice2D::addMetadataAsRunProperties(
 		const std::map<std::string, std::string> &metadata) {
 
 	for (auto it = metadata.begin(); it != metadata.end(); it++) {
 		std::string key = it->first;
 		std::replace( key.begin(), key.end(), '/', '_');
-		ws->mutableRun().addProperty(key, it->second, true);
+		m_workspace->mutableRun().addProperty(key, it->second, true);
 	}
 
 }
 
+/**
+ * Get the input algorithm properties and sets them as class attributes
+ */
 void LoadSpice2D::setInputPropertiesAsMemberProperties() {
 
-	wavelength_input = getProperty("Wavelength");
-	wavelength_spread_input = getProperty("WavelengthSpread");
+	m_wavelength_input = getProperty("Wavelength");
+	m_wavelength_spread_input = getProperty("WavelengthSpread");
 
-	g_log.debug() << "setInputPropertiesAsMemberProperties: "<< wavelength_input << " , " << wavelength_input << std::endl;
+	g_log.debug() << "setInputPropertiesAsMemberProperties: "<< m_wavelength_input << " , " << m_wavelength_input << std::endl;
 
 	std::string fileName = getPropertyValue("Filename");
 	// Set up the XmlHandler handler and parse xml file
 	try {
-		xmlHandler = XmlHandler(fileName);
+		m_xmlHandler = XmlHandler(fileName);
 	} catch (...) {
 		throw Kernel::Exception::FileError("Unable to parse File:", fileName);
 	}
 }
 
+/**
+ * Gets the wavelenght and wavelength spread from the  metadata
+ * and sets them as class attributes
+ */
 void LoadSpice2D::setWavelength(std::map<std::string, std::string> &metadata){
 	// Read in wavelength and wavelength spread
 
-	g_log.debug() << "setWavelength: "<< wavelength_input << " , " << wavelength_input << std::endl;
+	g_log.debug() << "setWavelength: "<< m_wavelength_input << " , " << m_wavelength_input << std::endl;
 
-	if (isEmpty(wavelength_input)) {
+	if (isEmpty(m_wavelength_input)) {
 		std::string s = metadata["Header/wavelength"];
-		from_string<double>(wavelength, s , std::dec);
+		from_string<double>(m_wavelength, s , std::dec);
 		s = metadata["Header/wavelength_spread"];
-		from_string<double>(dwavelength,s, std::dec);
+		from_string<double>(m_dwavelength,s, std::dec);
 
-		g_log.debug() << "setWavelength: "<< wavelength << " , " << dwavelength << std::endl;
+		g_log.debug() << "setWavelength: "<< m_wavelength << " , " << m_dwavelength << std::endl;
 
 	} else {
-		wavelength = wavelength_input;
-		dwavelength = wavelength_spread_input;
+		m_wavelength = m_wavelength_input;
+		m_dwavelength = m_wavelength_spread_input;
 	}
 }
 /**
@@ -225,13 +270,13 @@ void LoadSpice2D::setWavelength(std::map<std::string, std::string> &metadata){
 std::vector<int> LoadSpice2D::getData(const std::string &dataXpath = "//Data/Detector" ) {
 	//type : INT32[192,256]
 	std::map<std::string, std::string> attributes =
-			xmlHandler.get_attributes_from_tag(dataXpath);
+			m_xmlHandler.get_attributes_from_tag(dataXpath);
 	parseDetectorDimensions(attributes["type"]);
-	if (numberXPixels == 0 || numberYPixels == 0)
+	if (m_numberXPixels == 0 || m_numberYPixels == 0)
 		g_log.notice() << "Could not read in the number of pixels!"
 				<< std::endl;
 
-	std::string data_str = xmlHandler.get_text_from_tag(dataXpath);
+	std::string data_str = m_xmlHandler.get_text_from_tag(dataXpath);
 	//convert string data into a vector<int>
 	std::vector<int> data;
 	std::stringstream iss( data_str );
@@ -240,7 +285,7 @@ std::vector<int> LoadSpice2D::getData(const std::string &dataXpath = "//Data/Det
 	  data.push_back( number );
 	}
 
-	if (data.size() != static_cast<size_t>(numberXPixels * numberYPixels))
+	if (data.size() != static_cast<size_t>(m_numberXPixels * m_numberYPixels))
 		throw Kernel::Exception::NotImplementedError("Inconsistent data set: There were more data pixels found than declared in the Spice XML meta-data.");
 	return data;
 }
@@ -251,24 +296,24 @@ std::vector<int> LoadSpice2D::getData(const std::string &dataXpath = "//Data/Det
 void LoadSpice2D::createWorkspace(const std::vector<int> &data, const std::string &title,
 		double monitor1_counts, double monitor2_counts) {
 	int nBins = 1;
-	int numSpectra = numberXPixels * numberYPixels + LoadSpice2D::nMonitors;
+	int numSpectra = m_numberXPixels * m_numberYPixels + LoadSpice2D::nMonitors;
 
-	ws = boost::dynamic_pointer_cast<
+	m_workspace = boost::dynamic_pointer_cast<
 			DataObjects::Workspace2D>(
 			API::WorkspaceFactory::Instance().create("Workspace2D", numSpectra,
 					nBins + 1, nBins));
-	ws->setTitle(title);
-	ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create(
+	m_workspace->setTitle(title);
+	m_workspace->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create(
 			"Wavelength");
-	ws->setYUnit("");
+	m_workspace->setYUnit("");
 	API::Workspace_sptr workspace = boost::static_pointer_cast<API::Workspace>(
-			ws);
+			m_workspace);
 	setProperty("OutputWorkspace", workspace);
 
 	int specID = 0;
 	// Store monitor counts in the beggining
-	store_value(ws, specID++, monitor1_counts, monitor1_counts > 0 ? sqrt(monitor1_counts) : 0.0, wavelength, dwavelength);
-	store_value(ws, specID++, monitor2_counts, 0.0, wavelength, dwavelength);
+	store_value(m_workspace, specID++, monitor1_counts, monitor1_counts > 0 ? sqrt(monitor1_counts) : 0.0, m_wavelength, m_dwavelength);
+	store_value(m_workspace, specID++, monitor2_counts, 0.0, m_wavelength, m_dwavelength);
 
 	// Store detector pixels
 	for(auto it = data.begin(); it != data.end(); ++it) {
@@ -277,7 +322,7 @@ void LoadSpice2D::createWorkspace(const std::vector<int> &data, const std::strin
 		// The following is what I would suggest instead...
 		// error = count > 0 ? sqrt((double)count) : 0.0;
 		double error = sqrt(0.5 + fabs(count - 0.5));
-		store_value(ws, specID++, count, error, wavelength, dwavelength);
+		store_value(m_workspace, specID++, count, error, m_wavelength, m_dwavelength);
 	}
 }
 
@@ -292,15 +337,19 @@ T LoadSpice2D::addRunProperty(
 	std::string value_str = metadata[oldName];
 	T value;
 	from_string<T>(value, value_str, std::dec);
-	ws->mutableRun().addProperty(newName, value, units, true);
+	m_workspace->mutableRun().addProperty(newName, value, units, true);
 	return value;
 }
 
 template<class T>
 void LoadSpice2D::addRunProperty(const std::string &name, const T &value, const std::string &units) {
-	ws->mutableRun().addProperty(name, value, units, true);
+	m_workspace->mutableRun().addProperty(name, value, units, true);
 }
 
+
+/**
+ * Sets the beam trap as Run Property
+ */
 void LoadSpice2D::setBeamTrapRunProperty(std::map<std::string, std::string> &metadata){
 
 	// Read in beam trap positions
@@ -330,30 +379,38 @@ void LoadSpice2D::setBeamTrapRunProperty(std::map<std::string, std::string> &met
 
 	addRunProperty<double>("beam-trap-diameter",beam_trap_diam,"mm");
 }
-
-/// Overwrites Algorithm exec method
-void LoadSpice2D::exec() {
-
-	setInputPropertiesAsMemberProperties();
-	std::map<std::string, std::string> metadata = xmlHandler.get_metadata("Detector");
-	setWavelength(metadata);
-
-	std::vector<int> data = getData("//Data/Detector" );
-	double monitorCounts = 0;
-	from_string<double>(monitorCounts, metadata["Counters/monitor"], std::dec);
-	double countingTime = 0;
-	from_string<double>(countingTime, metadata["Counters/time"], std::dec);
-	createWorkspace(data, metadata["Header/Scan_Title"], monitorCounts, countingTime );
-
-	// Add all metadata to the WS
-	addMapAsRunProperties(metadata);
-
+void LoadSpice2D::setMetadataAsRunProperties(std::map<std::string, std::string> &metadata){
 	setBeamTrapRunProperty(metadata);
 
 	// start_time
-	std::map<std::string, std::string> attributes = xmlHandler.get_attributes_from_tag("/");
+	std::map<std::string, std::string> attributes = m_xmlHandler.get_attributes_from_tag("/");
 	addRunProperty<std::string>(attributes,"start_time", "start_time","");
 	addRunProperty<std::string>(attributes,"start_time", "run_start","");
+
+
+	//sample thickness
+	addRunProperty<double>(metadata,"Header/Sample_Thickness", "sample-thickness","mm");
+
+	addRunProperty<double>(metadata,"Header/source_aperture_size", "source-aperture-diameter","mm");
+	addRunProperty<double>(metadata,"Header/sample_aperture_size", "sample-aperture-diameter","mm");
+	addRunProperty<double>(metadata,"Header/source_distance", "source-sample-distance","mm");
+	addRunProperty<int>(metadata,"Motor_Positions/nguides", "number-of-guides","");
+
+	addRunProperty<double>("wavelength",m_wavelength,"Angstrom");
+	addRunProperty<double>("wavelength-spread",m_dwavelength,"Angstrom");
+
+	addRunProperty<double>(metadata,"Counters/monitor", "monitor","");
+	addRunProperty<double>(metadata,"Counters/time", "timer","sec");
+
+
+}
+
+
+/**
+ * Calculates all the detector distances and sets them as Run properties
+ * @return : total_sample_detector_distance
+ */
+double LoadSpice2D::totalDetectorDistance(std::map<std::string, std::string> &metadata){
 
 	// sample_detector_distances
 	double sample_detector_distance = 0;
@@ -365,37 +422,24 @@ void LoadSpice2D::exec() {
 	double sample_si_window_distance = addRunProperty<double>(metadata,"Header/sample_to_flange", "sample-si-window-distance","mm");
 	double total_sample_detector_distance = sample_detector_distance + sample_detector_distance_offset + sample_si_window_distance;
 	addRunProperty<double>("total-sample-detector-distance",total_sample_detector_distance,"mm");
+	return total_sample_detector_distance;
+}
 
-	//sample thickness
-	addRunProperty<double>(metadata,"Header/Sample_Thickness", "sample-thickness","mm");
-
-	addRunProperty<double>(metadata,"Header/source_aperture_size", "source-aperture-diameter","mm");
-	addRunProperty<double>(metadata,"Header/sample_aperture_size", "sample-aperture-diameter","mm");
-	addRunProperty<double>(metadata,"Header/source_distance", "source-sample-distance","mm");
-	addRunProperty<int>(metadata,"Motor_Positions/nguides", "number-of-guides","");
-
-	addRunProperty<double>("wavelength",wavelength,"Angstrom");
-	addRunProperty<double>("wavelength-spread",dwavelength,"Angstrom");
-
-	addRunProperty<double>(metadata,"Counters/monitor", "monitor","");
-	addRunProperty<double>(metadata,"Counters/time", "timer","sec");
-
-	// run load instrument
-	std::string instrument = metadata["Header/Instrument"];
-	runLoadInstrument(instrument, ws);
-	runLoadMappingTable(ws, numberXPixels, numberYPixels);
-
+/**
+ * Places the detector at the right sample_detector_distance
+ */
+void LoadSpice2D::moveDetector(double sample_detector_distance) {
 	// Move the detector to the right position
 	API::IAlgorithm_sptr mover = createChildAlgorithm(
 			"MoveInstrumentComponent");
 
 	// Finding the name of the detector object.
 	std::string detID =
-			ws->getInstrument()->getStringParameter("detector-name")[0];
+			m_workspace->getInstrument()->getStringParameter("detector-name")[0];
 
 	g_log.information("Moving " + detID);
 	try {
-		mover->setProperty<API::MatrixWorkspace_sptr>("Workspace", ws);
+		mover->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_workspace);
 		mover->setProperty("ComponentName", detID);
 		mover->setProperty("Z", sample_detector_distance / 1000.0);
 		mover->execute();

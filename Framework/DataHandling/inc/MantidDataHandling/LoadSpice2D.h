@@ -97,7 +97,7 @@ private:
 
 	void setInputPropertiesAsMemberProperties();
 
-	void addMapAsRunProperties(const std::map<std::string, std::string> &);
+	void addMetadataAsRunProperties(const std::map<std::string, std::string> &);
 	void parseDetectorDimensions(const std::string&);
 	void createWorkspace();
 	std::vector<int> getData(const std::string &);
@@ -112,16 +112,19 @@ private:
 	void addRunProperty(const std::string &name, const T &value,
 			const std::string &units = "");
 	void setBeamTrapRunProperty(std::map<std::string, std::string> &metadata);
+	void moveDetector(double sample_detector_distance);
+	double totalDetectorDistance(std::map<std::string, std::string> &metadata);
+	void setMetadataAsRunProperties(std::map<std::string, std::string> &metadata);
 
 	// Member variables:
-	DataObjects::Workspace2D_sptr ws;
-	double wavelength_input;
-	double wavelength_spread_input;
-	Mantid::DataHandling::XmlHandler xmlHandler;
-	int numberXPixels;
-	int numberYPixels;
-	double wavelength;
-	double dwavelength;
+	DataObjects::Workspace2D_sptr m_workspace;
+	double m_wavelength_input;
+	double m_wavelength_spread_input;
+	Mantid::DataHandling::XmlHandler m_xmlHandler;
+	int m_numberXPixels;
+	int m_numberYPixels;
+	double m_wavelength;
+	double m_dwavelength;
 };
 }
 }
