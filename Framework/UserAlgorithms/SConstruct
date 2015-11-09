@@ -8,7 +8,7 @@ import os
 import platform
 
 # Must be the same version that Mantid uses
-MSVC_VERSION=11.0
+MSVC_VERSION=14.0
 
 include_dir = '../include'
 install_dir = '../plugins'
