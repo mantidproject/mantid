@@ -703,14 +703,6 @@ SurfPoint::SurfPoint()
 */
 {}
 
-SurfPoint::SurfPoint(const SurfPoint &A)
-    : Rule(), m_key(A.m_key), keyN(A.keyN), sign(A.sign)
-/**
-  Copy constructor
-  @param A :: SurfPoint to copy
-*/
-{}
-
 SurfPoint *SurfPoint::clone() const
 /**
   Clone constructor
@@ -719,27 +711,6 @@ SurfPoint *SurfPoint::clone() const
 {
   return new SurfPoint(*this);
 }
-
-SurfPoint &SurfPoint::operator=(const SurfPoint &A)
-/**
-  Assigment operator
-  @param A :: Object to copy
-  @return *this
-*/
-{
-  if (&A != this) {
-    m_key = A.m_key;
-    keyN = A.keyN;
-    sign = A.sign;
-  }
-  return *this;
-}
-
-SurfPoint::~SurfPoint()
-/**
-  Destructor
-*/
-{}
 
 void SurfPoint::setLeaf(Rule *nR, const int)
 /**

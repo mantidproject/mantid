@@ -61,8 +61,7 @@ SurfaceFactory::SurfaceFactory(const SurfaceFactory &A)
 {
   MapType::const_iterator vc;
   for (vc = A.SGrid.begin(); vc != A.SGrid.end(); ++vc)
-    SGrid.push_back(MapType::value_type(
-        vc->first, std::unique_ptr<Surface>(vc->second->clone())));
+    SGrid.push_back(MapType::value_type(vc->first, vc->second->clone()));
 }
 
 SurfaceFactory::~SurfaceFactory() {}
@@ -120,7 +119,7 @@ SurfaceFactory::createSurface(const std::string &Key) const
     throw Kernel::Exception::NotFoundError("SurfaceFactory::createSurface",
                                            Key);
   }
-  return std::unique_ptr<Surface>(vc->second->clone());
+  return vc->second->clone();
 }
 
 std::unique_ptr<Surface>

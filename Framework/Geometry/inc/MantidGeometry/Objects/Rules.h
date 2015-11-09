@@ -235,10 +235,7 @@ private:
   int sign;                         ///< +/- in Object unit
 public:
   SurfPoint();
-  SurfPoint(const SurfPoint &);
   SurfPoint *clone() const;
-  SurfPoint &operator=(const SurfPoint &);
-  ~SurfPoint();
   virtual std::string className() const {
     return "SurfPoint";
   } ///< Returns class name as string
