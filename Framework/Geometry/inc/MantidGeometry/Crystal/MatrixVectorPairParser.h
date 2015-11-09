@@ -242,7 +242,6 @@ private:
 
 /// Tries to parse the given string. Throws a ParseError-exception if there is
 /// unparsable string left at the end.
-MANTID_GEOMETRY_DLL
 template <typename T>
 MatrixVectorPair<T, V3R>
 parseMatrixVectorPair(const std::string &matrixVectorString) {
