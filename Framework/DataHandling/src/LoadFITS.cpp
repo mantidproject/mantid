@@ -202,7 +202,8 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
       // http://archive.stsci.edu/fits/fits_standard/node39.html#SECTION00941000000000000000
       if (headers[i].bitsPerPixel != 8 && headers[i].bitsPerPixel != 16 &&
           headers[i].bitsPerPixel != 32 && headers[i].bitsPerPixel != 64)
-        // this implicitly includes when 'headers[i].bitsPerPixel > g_maxBitDepth'
+        // this implicitly includes when 'headers[i].bitsPerPixel >
+        // g_maxBitDepth'
         throw std::runtime_error(
             "This algorithm only supports 8, 16, 32 or 64 "
             "bits per pixel as allowed in the FITS standard. The header of "
