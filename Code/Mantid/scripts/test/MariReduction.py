@@ -1,7 +1,5 @@
 """ Sample MARI reduction scrip used in testing ReductionWrapper """
 import os
-#os.environ["PATH"] =\
-#r"c:/Mantid/Code/builds/br_10881/bin/Release;"+os.environ["PATH"]
 
 from Direct.ReductionWrapper import *
 try:
