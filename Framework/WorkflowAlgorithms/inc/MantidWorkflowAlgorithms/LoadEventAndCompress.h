@@ -43,16 +43,12 @@ public:
 
 protected:
   API::ITableWorkspace_sptr determineChunk(const std::string &filename);
-  API::MatrixWorkspace_sptr loadChunk(const size_t rowIndex);
-  API::MatrixWorkspace_sptr processChunk(API::MatrixWorkspace_sptr wksp);
+  API::MatrixWorkspace_sptr loadChunk(const size_t rowIndex, API::ITableWorkspace_sptr &chunkingTable);
+  API::MatrixWorkspace_sptr processChunk(API::MatrixWorkspace_sptr &wksp, double filterBadPulses);
 
 private:
   void init();
   void exec();
-
-  std::string m_filename;
-  double m_filterBadPulses;
-  API::ITableWorkspace_sptr m_chunkingTable;
 };
 
 } // namespace WorkflowAlgorithms
