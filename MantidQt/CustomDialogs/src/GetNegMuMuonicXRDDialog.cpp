@@ -54,12 +54,6 @@ void GetNegMuMuonicXRDDialog::initLayout() {
   // label for the QLineEdit for m_yPosition property
   auto *m_yPositionLabel = new QLabel("Y Position");
 
-  /*validator allows only numeric input for m_yPosition
-   *this helps with validating the input.
-   *Does not detect empty string as invalid input.
-   */
-  auto m_yPositionNumericValidator = new QDoubleValidator();
-
   // YPosition LineEdit Attributes
   m_yPosition->setMaximumWidth(250);
   m_yPosition->setRange(-100, 100);
