@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+﻿#pylint: disable=invalid-name
 from mantid.simpleapi import *
 from mantid import config,api
 from mantid.kernel import funcreturns
@@ -360,6 +360,8 @@ class ReductionWrapper(object):
         """
 
         if not self._debug_wait_for_files_operation is None:
+# it is callable and the idea is that it is callable
+#pylint: disable=E1102
             self._debug_wait_for_files_operation()
         else:
             Pause(timeToWait)
@@ -379,14 +381,14 @@ class ReductionWrapper(object):
         timeToWait = self._wait_for_file
         wait_counter=0
         if timeToWait > 0:
-            Found,input_file = PropertyManager.sample_run.find_file(be_quet=True)
+            Found,input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man,be_quet=True)
             while not Found:
                 file_hint,fext = PropertyManager.sample_run.file_hint()
                 self.reducer.prop_man.log("*** Waiting {0} sec for file {1} to appear on the data search path"\
                     .format(timeToWait,file_hint),'notice')
 
                 self._run_pause(timeToWait)
-                Found,input_file = PropertyManager.sample_run.find_file(file_hint=file_hint,be_quet=True)
+                Found,input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man,file_hint=file_hint,be_quet=True)
                 if Found:
                     file,found_ext=os.path.splitext(input_file)
                     if found_ext != fext:
@@ -542,7 +544,9 @@ def MainProperties(main_prop_definition):
         prop_dict = main_prop_definition(*args)
         #print "in decorator: ",properties
         host = args[0]
+#pylint: disable=access-to-protected-member
         if not host._run_from_web: # property run locally
+#pylint: disable=access-to-protected-member
             host._wvs.standard_vars = prop_dict
             host.reducer.prop_man.set_input_parameters(**prop_dict)
         return prop_dict
@@ -564,7 +568,7 @@ def AdvancedProperties(adv_prop_definition):
 
     return advanced_prop_wrapper
 
-
+#pylint: disable=too-many-branches
 def iliad(reduce):
     """ This decorator wraps around main procedure and switch input from
         web variables to properties or vise versa depending on web variables
@@ -601,7 +605,9 @@ def iliad(reduce):
         if output_directory:
             config['defaultsave.directory'] = str(output_directory)
 
+#pylint: disable=protected-access
         if host._run_from_web:
+#pylint: disable=protected-access
             web_vars = host._wvs.get_all_vars()
             host.reducer.prop_man.set_input_parameters(**web_vars)
         else:
@@ -614,14 +620,17 @@ def iliad(reduce):
         rez = reduce(*args)
 
         # prohibit returning workspace to web services.
+#pylint: disable=protected-access
         if host._run_from_web and not isinstance(rez,str):
             rez = ""
         else:
-            if isinstance(rez,list):
+            if isinstance(rez, list):
               # multirep run, just return as it is
                 return rez
-            if out_ws_name and rez.name() != out_ws_name :
-                rez = RenameWorkspace(InputWorkspace=rez,OutputWorkspace=out_ws_name)
+            if out_ws_name and rez.name() != out_ws_name:
+# the function does not return None, pylint is wrong
+#pylint: disable=W1111
+                rez = RenameWorkspace(InputWorkspace=rez, OutputWorkspace=out_ws_name)
 
         return rez
 

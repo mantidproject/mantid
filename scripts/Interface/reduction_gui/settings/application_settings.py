@@ -90,7 +90,12 @@ class GeneralSettings(QtCore.QObject):
 
     @property
     def instrument_name(self):
-        self._instrument_name = unicode(self._settings.value("instrument_name", 'true')).lower()=='true'
+        """ Get instrument name
+        :return: instrument name or False
+        """
+        self._instrument_name = unicode(self._settings.value("instrument_name", 'true'))
+        if self._instrument_name.lower() == 'true':
+            self._instrument_name = False
         return self._instrument_name
 
     @instrument_name.setter
@@ -101,7 +106,9 @@ class GeneralSettings(QtCore.QObject):
 
     @property
     def facility_name(self):
-        self._facility_name = unicode(self._settings.value("facility_name", 'true')).lower()=='true'
+        self._facility_name = unicode(self._settings.value("facility_name", 'true'))
+        if self._facility_name.lower() == 'true':
+            self._facility_name = False
         return self._facility_name
 
     @facility_name.setter

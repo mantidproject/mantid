@@ -10,6 +10,7 @@ set ( TEST_PY_FILES
   SimpleAPITest.py
   SimpleAPILoadTest.py
   SimpleAPIFitTest.py
+  SimpleAPIRenameWorkspaceTest.py  
 )
 
 # Prefix for test=PythonInterface

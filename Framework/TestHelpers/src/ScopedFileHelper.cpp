@@ -4,6 +4,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidTestHelpers/ScopedFileHelper.h"
+#include <iostream>
 
 namespace ScopedFileHelper {
 /**
@@ -75,8 +76,12 @@ ScopedFile::~ScopedFile() {
   if (!m_filename.empty()) // check that file should be disposed.
   {
     m_file.close();
-    if (remove(m_filename.c_str()) != 0)
-      throw std::runtime_error("cannot remove " + m_filename);
+    if (remove(m_filename.c_str()) != 0) {
+      // destructors shouldn't throw exceptions so we have to resort to printing
+      // an error
+      std::cerr << "~ScopedFile() - Error deleting file '" << m_filename
+                << "'\n";
+    }
   }
 }
 }

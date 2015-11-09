@@ -25,27 +25,26 @@ mark_as_advanced(WINDOWS_DEPLOYMENT_TYPE)
 ###########################################################################
 # External dependency DLLs
 ###########################################################################
-# MSVC runtime & openmp libs for Visual Studio (v110 of the runtime).
-# They are in the locations defined by the VS110COMNTOOLS environment variable
-set ( RUNTIME_VER 110 )
-file ( TO_CMAKE_PATH $ENV{VS${RUNTIME_VER}COMNTOOLS}/../../VC/redist/x64 VC_REDIST )
-set ( RUNTIME_DLLS msvcp${RUNTIME_VER}.dll msvcr${RUNTIME_VER}.dll )
-set ( REDIST_SUBDIR Microsoft.VC${RUNTIME_VER}.CRT )
-foreach( DLL ${RUNTIME_DLLS} )
-  install ( FILES ${VC_REDIST}/${REDIST_SUBDIR}/${DLL} DESTINATION bin )
+# MSVC runtime & openmp libs for Visual Studio
+# They are in the locations defined by the VS***COMNTOOLS environment variable
+set ( _RT 140 )
+file ( TO_CMAKE_PATH $ENV{VS${_RT}COMNTOOLS}../../VC/redist/x64 X64_REDIST_DIR )
+# CRT libraries
+set ( CRT_DLLS concrt${_RT}.dll msvcp${_RT}.dll vccorlib${_RT}.dll vcruntime${_RT}.dll )
+foreach( DLL ${CRT_DLLS} )
+  install ( FILES ${X64_REDIST_DIR}/Microsoft.VC${_RT}.CRT/${DLL} DESTINATION bin )
 endforeach()
-# openmp library(s)
-set ( OPENMP_DLLS vcomp${RUNTIME_VER}.dll )
-set ( REDIST_SUBDIR Microsoft.VC${RUNTIME_VER}.OpenMP )
-foreach( DLL ${OPENMP_DLLS} )
-    install ( FILES ${VC_REDIST}/${REDIST_SUBDIR}/${DLL} DESTINATION bin )
+# OpenMP
+set ( OMP_DLLS vcomp${_RT}.dll )
+foreach( DLL ${OMP_DLLS} )
+    install ( FILES ${X64_REDIST_DIR}/Microsoft.VC${_RT}.OpenMP/${DLL} DESTINATION bin )
 endforeach()
 
-# Lists of included DLLs
+# Other third party dependencies
 set ( BOOST_DIST_DLLS
-    boost_date_time-vc110-mt-1_52.dll
-    boost_python-vc110-mt-1_52.dll
-    boost_regex-vc110-mt-1_52.dll
+    boost_date_time-mt.dll
+    boost_python-mt.dll
+    boost_regex-mt.dll
 )
 set ( POCO_DIST_DLLS
     PocoCrypto64.dll
@@ -71,17 +70,14 @@ set ( OCC_DIST_DLLS
 set ( MISC_CORE_DIST_DLLS
     cblas.dll
     gsl.dll
-    hdf5_cppdll.dll
-    hdf5_hl_cppdll.dll
-    hdf5_hldll.dll
-    hdf5dll.dll
+    hdf5_cpp.dll
+    hdf5_hl_cpp.dll
+    hdf5_hl.dll
+    hdf5.dll
     jsoncpp.dll
     libeay32.dll
     libNeXus-0.dll
     libNeXusCPP-0.dll
-    libtcmalloc_minimal.dll
-    muparser.dll
-    mxml1.dll
     ssleay32.dll
     szip.dll
     zlib.dll
@@ -106,15 +102,20 @@ set ( QT_DIST_DLLS
     QtTest4.dll
     QtWebKit4.dll
     QtXml4.dll
-    QtXmlPatterns4.dll )
+    QtXmlPatterns4.dll 
+    qscintilla2.dll )
 set ( MISC_GUI_DIST_DLLS
-    qscintilla2.dll
+    qwt5.dll
     qwtplot3d.dll
 )
-set ( DIST_DLLS ${BOOST_DIST_DLLS} ${POCO_DIST_DLLS} ${OCC_DIST_DLLS} ${MISC_CORE_DIST_DLLS}
-                ${QT_DIST_DLLS} ${MISC_GUI_DIST_DLLS} )
-foreach( DLL ${DIST_DLLS} )
-  install ( FILES ${CMAKE_LIBRARY_PATH}/${DLL} DESTINATION bin )
+set ( BIN_DLLS ${BOOST_DIST_DLLS} ${POCO_DIST_DLLS} ${OCC_DIST_DLLS} ${MISC_CORE_DIST_DLLS}
+                 ${MISC_GUI_DIST_DLLS} )
+foreach( DLL ${BIN_DLLS} )
+  install ( FILES ${THIRD_PARTY_DIR}/bin/${DLL} DESTINATION bin )
+endforeach()
+set ( QT_INSTALL_PREFIX ${THIRD_PARTY_DIR}/lib/qt4 )
+foreach( DLL ${QT_DIST_DLLS} )
+  install ( FILES ${QT_INSTALL_PREFIX}/lib/${DLL} DESTINATION bin )
 endforeach()
 
 ###########################################################################
@@ -123,19 +124,20 @@ endforeach()
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/installers/WinInstaller/qt.conf DESTINATION bin )
 # imageformats
 set ( QT_PLUGINS_IMAGEFORMAT qgif4.dll qico4.dll qjpeg4.dll qmng4.dll qsvg4.dll qtga4.dll qtiff4.dll )
+set ( QT_PLUGIN_DIR ${QT_INSTALL_PREFIX}/plugins )
 foreach( DLL ${QT_PLUGINS_IMAGEFORMAT} )
-  install ( FILES ${CMAKE_LIBRARY_PATH}/qt_plugins/imageformats/${DLL} DESTINATION plugins/qt/imageformats )
+  install ( FILES ${QT_PLUGIN_DIR}/imageformats/${DLL} DESTINATION plugins/qt/imageformats )
 endforeach()
 # sqlite
-install ( FILES ${CMAKE_LIBRARY_PATH}/qt_plugins/sqldrivers/qsqlite4.dll DESTINATION plugins/qt/sqldrivers )
+install ( FILES ${QT_PLUGIN_DIR}/sqldrivers/qsqlite4.dll DESTINATION plugins/qt/sqldrivers )
 
 ###########################################################################
 # Include files/libraries required for User compilation
 ###########################################################################
-install ( DIRECTORY ${CMAKE_INCLUDE_PATH}/boost DESTINATION include PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
-install ( DIRECTORY ${CMAKE_INCLUDE_PATH}/Poco DESTINATION include PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
-install ( DIRECTORY ${CMAKE_INCLUDE_PATH}/nexus DESTINATION include PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
-install ( FILES ${CMAKE_INCLUDE_PATH}/napi.h DESTINATION include )
+install ( DIRECTORY ${THIRD_PARTY_DIR}/include/boost DESTINATION include PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
+install ( DIRECTORY  ${THIRD_PARTY_DIR}/include/Poco DESTINATION include PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
+install ( DIRECTORY  ${THIRD_PARTY_DIR}/include/nexus DESTINATION include PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
+install ( FILES ${THIRD_PARTY_DIR}/include/napi.h DESTINATION include )
 install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel DESTINATION include
           PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
 install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry DESTINATION include
@@ -157,8 +159,8 @@ install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/${WINDOWS_DEPLOYMENT_TYPE}/Mant
 install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/${WINDOWS_DEPLOYMENT_TYPE}/MantidDataObjects.lib" DESTINATION UserAlgorithms)
 install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/${WINDOWS_DEPLOYMENT_TYPE}/MantidCurveFitting.lib" DESTINATION UserAlgorithms)
 # Third Party libs for building
-install ( FILES ${CMAKE_LIBRARY_PATH}/PocoFoundation.lib ${CMAKE_LIBRARY_PATH}/PocoXML.lib DESTINATION UserAlgorithms)
-install ( FILES ${CMAKE_LIBRARY_PATH}/boost_date_time-vc110-mt-1_52.lib DESTINATION UserAlgorithms )
+install ( FILES ${THIRD_PARTY_DIR}/lib/PocoFoundation.lib ${THIRD_PARTY_DIR}/lib/PocoXML.lib DESTINATION UserAlgorithms)
+install ( FILES ${THIRD_PARTY_DIR}/lib/boost_date_time-mt.lib DESTINATION UserAlgorithms )
 
 ###########################################################################
 # Startup files

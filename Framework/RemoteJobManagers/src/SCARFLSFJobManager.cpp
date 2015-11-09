@@ -133,7 +133,7 @@ bool SCARFLSFJobManager::ping() {
     }
   } else {
     throw std::runtime_error(
-        "Failed to ping the web service at:" + fullURL.toString() +
+        "Failed to ping the web service at: " + fullURL.toString() +
         ". Please check your parameters, software version, "
         "etc.");
   }
