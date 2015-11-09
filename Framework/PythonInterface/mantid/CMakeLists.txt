@@ -29,15 +29,8 @@ copy_files_to_dir ( ${VERSION_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR}
 # Package version
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${VERSION_PY}.install.py )
 
-if ( MSVC )
-  # On windows copy over the python wrapper to the build directory (hang it off kernel build)
-  add_custom_command ( OUTPUT ${PYTHON_EXE_WRAPPER}
-                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
-                       ${PYTHON_EXE_WRAPPER_SRC} ${PYTHON_EXE_WRAPPER} )
-endif()
-
 # There is no library target for the top level package just the python files
-add_custom_target ( PythonModule DEPENDS ${PYTHON_PKGROOT_INSTALL_FILES} ${PYTHON_EXE_WRAPPER} SOURCES ${PY_FILES} ${PYTHON_EXE_WRAPPER_SRC} )
+add_custom_target ( PythonModule DEPENDS ${PYTHON_PKGROOT_INSTALL_FILES} ${PYTHON_EXE_WRAPPER} SOURCES ${PY_FILES} )
 set_property ( TARGET PythonModule PROPERTY FOLDER "MantidFramework/Python" )
 
 ####################################################################################
@@ -55,7 +48,7 @@ add_custom_target ( PythonInterface DEPENDS PythonKernelModule PythonGeometryMod
 set_property ( TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python" )
 
 ###########################################################################
-# Bundle Python (where appropriate)
+# Bundle Python DLL (where appropriate)
 ###########################################################################
 # Defines the target the will cause the Python bundle to be copied
 set ( PYBUNDLE_POST_TARGET PythonModule ) 

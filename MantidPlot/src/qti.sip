@@ -1287,8 +1287,10 @@ class PythonScripting
 %End
 public:
   void write(const QString&);
-  // 'Fake' methods needed for IPython import
+  // Simulate file-like object (required for IPython)
   void flush();
+  // Simulate file-like object (required for colorama)
+  bool closed();
   void set_parent(SIP_PYOBJECT);
 private:
   PythonScripting(const PythonScripting&);
@@ -1300,8 +1302,10 @@ class PythonScript
 %End
 public:
   void write(const QString&);
-  // 'Fake' method needed for IPython import
+  // Simulate file-like object (required for IPython)
   void flush();
+  // Simulate file-like object (required for colorama)
+  bool closed();
   // Line number trace
   void lineNumberChanged(SIP_PYOBJECT,int);
 private:

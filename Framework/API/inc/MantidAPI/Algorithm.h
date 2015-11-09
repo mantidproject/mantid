@@ -117,7 +117,7 @@ public:
       return "FinishedNotification";
     }             ///< class name
     bool success; ///< true if the finished algorithm was successful or false if
-    /// it failed.
+                  /// it failed.
   };
 
   /// An algorithm can report its progress by sending ProgressNotification. Use
@@ -137,7 +137,7 @@ public:
     std::string message;   ///< Message sent with notification
     double estimatedTime;  ///<Estimated time to completion
     int progressPrecision; ///<Digits of precision to the progress (after the
-    /// decimal).
+                           /// decimal).
   };
 
   /// ErrorNotification is sent when an exception is caught during execution of
@@ -226,7 +226,7 @@ public:
   bool isChild() const;
   void setChild(const bool isChild);
   void enableHistoryRecordingForChild(const bool on);
-  bool isRecordingHistoryForChild() { return m_recordHistoryForChild; };
+  bool isRecordingHistoryForChild() { return m_recordHistoryForChild; }
   void setAlwaysStoreInADS(const bool doStore);
   void setRethrows(const bool rethrow);
 
@@ -318,6 +318,8 @@ protected:
   void setInitialized();
   void setExecuted(bool state);
 
+  void store();
+
   /** @name Progress Reporting functions */
   friend class Progress;
   void progress(double p, const std::string &msg = "",
@@ -388,7 +390,6 @@ private:
   void lockWorkspaces();
   void unlockWorkspaces();
 
-  void store();
   void linkHistoryWithLastChild();
 
   void logAlgorithmInfo() const;

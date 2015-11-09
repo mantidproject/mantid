@@ -25,7 +25,7 @@ class LOQCentreNoGrav(stresstesting.MantidStressTest):
 
     def validate(self):
         self.disableChecking.append('Instrument')
-        return '54431main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed.nxs'
+        return '54431main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed_V2.nxs'
 
 class LOQCentreNoGravDefineCentre(stresstesting.MantidStressTest):
     def runTest(self):
@@ -53,5 +53,5 @@ class LOQCentreNoGravDefineCentre(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
 
-        return '54431main_1D_3.0_9.0','LOQCentreNoGrav.nxs'
+        return '54431main_1D_3.0_9.0','LOQCentreNoGrav_V2.nxs'
 
