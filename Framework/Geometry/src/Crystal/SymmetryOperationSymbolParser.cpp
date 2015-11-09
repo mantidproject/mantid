@@ -48,8 +48,7 @@ void SymmetryOperationSymbolParser::verifyMatrix(
  */
 std::pair<Kernel::IntMatrix, V3R>
 SymmetryOperationSymbolParser::parseIdentifier(const std::string &identifier) {
-  MatrixVectorPairParser parser;
-  MatrixVectorPair<int, V3R> pair = parser.parse<int>(identifier);
+  MatrixVectorPair<int, V3R> pair = parseMatrixVectorPair<int>(identifier);
 
   verifyMatrix(pair.getMatrix());
 

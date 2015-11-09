@@ -17,21 +17,16 @@ public:
   }
   static void destroySuite(MatrixVectorPairParserTest *suite) { delete suite; }
 
-  void test_Construction() {
-    TS_ASSERT_THROWS_NOTHING(MatrixVectorPairParser parser);
-  }
-
   void test_throws_on_additional_input() {
     std::string tooLong("1/2x,-4y,-2-z,x");
-    MatrixVectorPairParser parser;
 
-    TS_ASSERT_THROWS(parser.parse<double>(tooLong), Exception::ParseError);
+    TS_ASSERT_THROWS(parseMatrixVectorPair<double>(tooLong),
+                     Exception::ParseError);
   }
 
   void test_parseResult() {
     std::string allowed("1/2x,-4y,-2-z");
-    MatrixVectorPairParser parser;
-    MatrixVectorPair<double, V3R> pair = parser.parse<double>(allowed);
+    MatrixVectorPair<double, V3R> pair = parseMatrixVectorPair<double>(allowed);
 
     DblMatrix matrix = pair.getMatrix();
     TS_ASSERT_EQUALS(matrix[0][0], 0.5);

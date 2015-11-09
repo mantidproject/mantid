@@ -16,8 +16,7 @@ GroupTransformation::GroupTransformation(
 
 /// Constructor using SymmetruOperation string, uses SymmetryOperationFactory.
 GroupTransformation::GroupTransformation(const std::string &operationString) {
-  MatrixVectorPairParser parser;
-  m_symOp = parser.parse<double>(operationString);
+  m_symOp = parseMatrixVectorPair<double>(operationString);
 }
 
 /// Transforms the supplied group and returns the result.

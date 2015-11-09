@@ -12,7 +12,7 @@
 namespace Mantid {
 namespace Geometry {
 
-typedef boost::fusion::vector<int, boost::optional<int> > ParsedRationalNumber;
+typedef boost::fusion::vector<int, boost::optional<int>> ParsedRationalNumber;
 
 using boost::spirit::qi::grammar;
 using boost::spirit::qi::rule;
@@ -57,9 +57,9 @@ using boost::spirit::qi::rule;
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+template <typename Iterator, typename Skipper>
 class MANTID_GEOMETRY_DLL MatrixVectorPairParser
-    : public grammar<std::string::const_iterator,
-                     boost::spirit::qi::space_type> {
+    : public grammar<Iterator, Skipper> {
 public:
   MatrixVectorPairParser()
       : MatrixVectorPairParser::base_type(m_parser), m_directions(),
@@ -77,19 +77,19 @@ public:
     using qi::lit;
 
     // Switch sign in the builder
-    m_sign =
-        lit('+')
-            [std::bind(&MatrixVectorPairParser::setCurrentSignPositive, this)] |
-        lit('-')
-            [std::bind(&MatrixVectorPairParser::setCurrentSignNegative, this)];
+    m_sign = lit('+')[std::bind(&MatrixVectorPairParser::setCurrentSignPositive,
+                                this)] |
+             lit('-')[std::bind(&MatrixVectorPairParser::setCurrentSignNegative,
+                                this)];
 
     // This matches a rational number (also things like -1/-2 -> 1/2)
-    m_rational = (int_ >> -('/' >> int_))
-        [std::bind(&MatrixVectorPairParser::setCurrentFactor, this, _1)];
+    m_rational = (int_ >> -('/' >> int_))[std::bind(
+        &MatrixVectorPairParser::setCurrentFactor, this, _1)];
 
     // Matches x, y or z.
-    m_direction = (qi::string("x") | qi::string("y") | qi::string("z"))
-        [std::bind(&MatrixVectorPairParser::setCurrentDirection, this, _1)];
+    m_direction =
+        (qi::string("x") | qi::string("y") | qi::string("z"))[std::bind(
+            &MatrixVectorPairParser::setCurrentDirection, this, _1)];
 
     /* A "component", which is either a rational number possibly followed by a
      * vector
@@ -105,7 +105,7 @@ public:
         m_component[std::bind(&MatrixVectorPairParser::addCurrentStateToResult,
                               this)] >>
         *(m_component[std::bind(
-             &MatrixVectorPairParser::addCurrentStateToResult, this)]);
+            &MatrixVectorPairParser::addCurrentStateToResult, this)]);
 
     // The entire matrix/vector pair is defined by three comma separated of
     // those
@@ -118,30 +118,6 @@ public:
          m_componentSeries);
   }
 
-  /// Tries to parse the given string. Throws a ParseError-exception if there is
-  /// unparsable string left at the end.
-  template <typename T>
-  MatrixVectorPair<T, V3R> parse(const std::string &matrixVectorString) {
-    reset();
-
-    namespace qi = boost::spirit::qi;
-
-    std::string::const_iterator strIterator = matrixVectorString.begin();
-    std::string::const_iterator strEnd = matrixVectorString.end();
-
-    qi::phrase_parse(strIterator, strEnd, m_parser, qi::space);
-
-    if (std::distance(strIterator, strEnd) > 0) {
-      throw Kernel::Exception::ParseError(
-          "Additional characters at end of string: '" +
-              std::string(strIterator, strEnd) + "'.",
-          "", 0);
-    }
-
-    return getMatrixVectorPair<T>();
-  }
-
-private:
   /// Construct and return the actual matrix/vector pair, the rational matrix
   /// components are castd to T.
   template <typename T> MatrixVectorPair<T, V3R> getMatrixVectorPair() const {
@@ -162,6 +138,7 @@ private:
     return MatrixVectorPair<T, V3R>(mat, m_vector);
   }
 
+private:
   /// Set the current factor, which is a rational number. Depending on whether a
   /// direction definition follows, it's processed differently later on.
   void setCurrentFactor(ParsedRationalNumber rationalNumberComponents) {
@@ -248,8 +225,8 @@ private:
     m_currentRow = 0;
   }
 
-  rule<std::string::const_iterator, boost::spirit::qi::space_type> m_sign,
-      m_rational, m_direction, m_component, m_componentSeries, m_parser;
+  rule<Iterator, Skipper> m_sign, m_rational, m_direction, m_component,
+      m_componentSeries, m_parser;
 
   std::map<std::string, V3R> m_directions;
 
@@ -262,6 +239,31 @@ private:
 
   size_t m_currentRow;
 };
+
+/// Tries to parse the given string. Throws a ParseError-exception if there is
+/// unparsable string left at the end.
+MANTID_GEOMETRY_DLL
+template <typename T>
+MatrixVectorPair<T, V3R>
+parseMatrixVectorPair(const std::string &matrixVectorString) {
+  namespace qi = boost::spirit::qi;
+
+  MatrixVectorPairParser<std::string::const_iterator, qi::space_type> parser;
+
+  std::string::const_iterator strIterator = matrixVectorString.begin();
+  std::string::const_iterator strEnd = matrixVectorString.end();
+
+  qi::phrase_parse(strIterator, strEnd, parser, qi::space);
+
+  if (std::distance(strIterator, strEnd) > 0) {
+    throw Kernel::Exception::ParseError(
+        "Additional characters at end of string: '" +
+            std::string(strIterator, strEnd) + "'.",
+        "", 0);
+  }
+
+  return parser.getMatrixVectorPair<T>();
+}
 
 } // namespace Geometry
 } // namespace Mantid
