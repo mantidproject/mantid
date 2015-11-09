@@ -433,6 +433,14 @@ bool ConvFit::validate() {
       !m_blnManager->value(m_properties["UseDeltaFunc"]))
     uiv.addErrorMessage("No fit function has been selected.");
 
+  if (m_uiForm.ckTempCorrection->isChecked()) {
+	  std::string test = m_uiForm.leTempCorrection->text();
+    if (m_uiForm.leTempCorrection->text().compare("") == 0) {
+      uiv.addErrorMessage("Temperature correction has been checked in the "
+                          "interface, but no value has been given.");
+    }
+  }
+
   QString error = uiv.generateErrorMessage();
   showMessageBox(error);
 
