@@ -29,7 +29,7 @@ void GetNegMuMuonicXRDDialog::initLayout() {
   m_periodicTable = new PeriodicTableWidget();
 
   // assign m_yPosition member to a new QLineEdit
-  m_yPosition = new QLineEdit();
+  m_yPosition = new QDoubleSpinBox();
   // assign GroupWorkspaceName member to a new QLineEdit
   m_groupWorkspaceNameInput = new QLineEdit();
   auto *groupWsInputLabel = new QLabel("OutputWorkspace");
@@ -62,8 +62,9 @@ void GetNegMuMuonicXRDDialog::initLayout() {
 
   // YPosition LineEdit Attributes
   m_yPosition->setMaximumWidth(250);
-  m_yPosition->setPlaceholderText("-0.01");
-  m_yPosition->setValidator(m_yPositionNumericValidator);
+  m_yPosition->setRange(-100, 100);
+  // m_yPosition->setValidator(m_yPositionNumericValidator);
+  m_yPosition->setSingleStep(0.1);
 
   // Run Button Attributes and signal/slot assignment
   runButton->setMaximumWidth(100);
@@ -142,12 +143,14 @@ void GetNegMuMuonicXRDDialog::runClicked() {
   if (validateDialogInput(elementsSelectedStr)) {
     storePropertyValue("Elements", elementsSelectedStr);
     if (validateDialogInput(m_yPosition->text())) {
-      storePropertyValue("YAxisPosition", m_yPosition->text());
+      storePropertyValue("YAxisPosition",
+                         QString::number(m_yPosition->value()));
     } else {
       // used as default value for m_yPosition property if the user does not
       // input
       // one.
-      storePropertyValue("YAxisPosition", m_yPosition->placeholderText());
+      storePropertyValue("YAxisPosition",
+                         QString::number(m_yPosition->value()));
     }
     if (validateDialogInput(m_groupWorkspaceNameInput->text())) {
       storePropertyValue("OutputWorkspace", m_groupWorkspaceNameInput->text());
