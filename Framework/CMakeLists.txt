@@ -150,7 +150,7 @@ add_custom_target( Framework DEPENDS ${FRAMEWORK_LIBS} )
 # N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)
 ###########################################################################
 
-# Create instrument directory and make it writable so vtp files can go there
+# Create instrument directory
 install ( DIRECTORY ../instrument/ DESTINATION ${INBUNDLE}instrument
           PATTERN "*UNIT_TESTING*" EXCLUDE
           PATTERN ".gitignore" EXCLUDE
