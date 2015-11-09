@@ -434,7 +434,6 @@ bool ConvFit::validate() {
     uiv.addErrorMessage("No fit function has been selected.");
 
   if (m_uiForm.ckTempCorrection->isChecked()) {
-	  std::string test = m_uiForm.leTempCorrection->text();
     if (m_uiForm.leTempCorrection->text().compare("") == 0) {
       uiv.addErrorMessage("Temperature correction has been checked in the "
                           "interface, but no value has been given.");
