@@ -1,5 +1,5 @@
 
-#include "MantidQtCustomInterfaces/ReflNexusMeasurementSource.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h"
 #include <Poco/File.h>
 #include <Poco/Exception.h>
 #include "MantidAPI/AlgorithmManager.h"
@@ -21,15 +21,15 @@ namespace CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ReflNexusMeasurementSource::ReflNexusMeasurementSource() {}
+ReflNexusMeasurementItemSource::ReflNexusMeasurementItemSource() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ReflNexusMeasurementSource::~ReflNexusMeasurementSource() {}
+ReflNexusMeasurementItemSource::~ReflNexusMeasurementItemSource() {}
 
-Measurement
-ReflNexusMeasurementSource::obtain(const std::string &definedPath,
+MeasurementItem
+ReflNexusMeasurementItemSource::obtain(const std::string &definedPath,
                                    const std::string &fuzzyName) const {
   std::string filenameArg = fuzzyName;
   if (!definedPath.empty()) {
@@ -60,13 +60,13 @@ ReflNexusMeasurementSource::obtain(const std::string &definedPath,
     algLoadRun->execute();
 
     auto run = hostWorkspace->run();
-    const std::string measurementId =
+    const std::string measurementItemId =
         run.getPropertyValueAsType<std::string>("measurement_id");
-    const std::string measurementSubId =
+    const std::string measurementItemSubId =
         run.getPropertyValueAsType<std::string>("measurement_subid");
-    const std::string measurementLabel =
+    const std::string measurementItemLabel =
         run.getPropertyValueAsType<std::string>("measurement_label");
-    const std::string measurementType =
+    const std::string measurementItemType =
         run.getPropertyValueAsType<std::string>("measurement_type");
     std::string runNumber;
     try {
@@ -88,8 +88,8 @@ ReflNexusMeasurementSource::obtain(const std::string &definedPath,
     } catch (Exception::NotFoundError &) {
     }
 
-    return Measurement(measurementId, measurementSubId, measurementLabel,
-                       measurementType, theta, runNumber);
+    return MeasurementItem(measurementItemId, measurementItemSubId, measurementItemLabel,
+                       measurementItemType, theta, runNumber);
 
   } catch (std::invalid_argument &ex) {
     std::stringstream buffer;
@@ -97,12 +97,12 @@ ReflNexusMeasurementSource::obtain(const std::string &definedPath,
            << std::endl;
     buffer << ex.what();
     const std::string message = buffer.str();
-    return Measurement::InvalidMeasurement(message);
+    return MeasurementItem::InvalidMeasurementItem(message);
   }
 }
 
-ReflNexusMeasurementSource *ReflNexusMeasurementSource::clone() const {
-  return new ReflNexusMeasurementSource(*this);
+ReflNexusMeasurementItemSource *ReflNexusMeasurementItemSource::clone() const {
+  return new ReflNexusMeasurementItemSource(*this);
 }
 
 } // namespace CustomInterfaces

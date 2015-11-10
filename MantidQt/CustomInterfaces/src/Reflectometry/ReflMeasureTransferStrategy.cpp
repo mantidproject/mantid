@@ -1,6 +1,6 @@
-#include "MantidQtCustomInterfaces/ReflMeasureTransferStrategy.h"
-#include "MantidQtCustomInterfaces/ReflMeasurementSource.h"
-#include "MantidQtCustomInterfaces/ReflTableSchema.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMeasurementItemSource.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/UserCatalogInfo.h"
@@ -23,14 +23,14 @@ namespace CustomInterfaces {
  */
 ReflMeasureTransferStrategy::ReflMeasureTransferStrategy(
     std::unique_ptr<ICatalogInfo> catInfo,
-    std::unique_ptr<ReflMeasurementSource> measurementSource)
+    std::unique_ptr<ReflMeasurementItemSource> measurementItemSource)
     : m_catInfo(std::move(catInfo)),
-      m_measurementSource(std::move(measurementSource)) {}
+      m_measurementItemSource(std::move(measurementItemSource)) {}
 
 ReflMeasureTransferStrategy::ReflMeasureTransferStrategy(
     const ReflMeasureTransferStrategy &other)
     : m_catInfo(other.m_catInfo->clone()),
-      m_measurementSource(other.m_measurementSource->clone())
+      m_measurementItemSource(other.m_measurementItemSource->clone())
 
 {}
 
@@ -43,8 +43,8 @@ std::vector<std::map<std::string, std::string>>
 MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
     SearchResultMap &searchResults, Mantid::Kernel::ProgressBase &progress) {
 
-  typedef std::vector<Measurement> VecSameMeasurement;
-  typedef std::map<Measurement::IDType, VecSameMeasurement>
+  typedef std::vector<MeasurementItem> VecSameMeasurement;
+  typedef std::map<MeasurementItem::IDType, VecSameMeasurement>
       MapGroupedMeasurement;
 
   MapGroupedMeasurement mapOfMeasurements;
@@ -55,7 +55,7 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
     const auto definedPath = m_catInfo->transformArchivePath(location);
 
     // This is where we read the meta data.
-    Measurement metaData = m_measurementSource->obtain(definedPath, fuzzyName);
+    MeasurementItem metaData = m_measurementItemSource->obtain(definedPath, fuzzyName);
 
     // If the measurement information is not consistent, or could not be
     // obtained. skip this measurement.
@@ -86,22 +86,22 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
     // Map keyed by subId to index of exisiting subid written.
     std::map<std::string, size_t> subIdMap;
     for (size_t i = 0; i < group->second.size(); ++i) {
-      const Measurement &measurement = group->second[i];
-      if (subIdMap.find(measurement.subId()) != subIdMap.end()) {
+      const MeasurementItem &measurementItem = group->second[i];
+      if (subIdMap.find(measurementItem.subId()) != subIdMap.end()) {
         // We already have that subid.
-        const size_t rowIndex = subIdMap[measurement.subId()];
+        const size_t rowIndex = subIdMap[measurementItem.subId()];
         std::string currentRuns = output[rowIndex][ReflTableSchema::RUNS];
         output[rowIndex][ReflTableSchema::RUNS] =
-            currentRuns + "+" + measurement.run();
+            currentRuns + "+" + measurementItem.run();
       } else {
         std::map<std::string, std::string> row;
-        row[ReflTableSchema::RUNS] = measurement.run();
-        row[ReflTableSchema::ANGLE] = measurement.angleStr();
+        row[ReflTableSchema::RUNS] = measurementItem.run();
+        row[ReflTableSchema::ANGLE] = measurementItem.angleStr();
         std::stringstream buffer;
         buffer << nextGroupId;
         row[ReflTableSchema::GROUP] = buffer.str();
         output.push_back(row);
-        subIdMap.insert(std::make_pair(measurement.subId(), output.size()-1 /*Record actual row index*/));
+        subIdMap.insert(std::make_pair(measurementItem.subId(), output.size()-1 /*Record actual row index*/));
       }
     }
     ++nextGroupId;

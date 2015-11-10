@@ -2,7 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_REFLMEASURETRANSFERSTRATEGY_H_
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/ReflTransferStrategy.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h"
 
 #include <vector>
 #include <map>
@@ -20,7 +20,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 // Forward dec
-class ReflMeasurementSource;
+class ReflMeasurementItemSource;
 
 /** ReflMeasureTransferStrategy : Transfer strategy that uses the measurement
   information
@@ -52,7 +52,7 @@ class MANTIDQT_CUSTOMINTERFACES_DLL ReflMeasureTransferStrategy
 public:
   ReflMeasureTransferStrategy(
       std::unique_ptr<Mantid::Kernel::ICatalogInfo> catInfo,
-      std::unique_ptr<ReflMeasurementSource> measurementSource);
+      std::unique_ptr<ReflMeasurementItemSource> measurementItemSource);
 
   ReflMeasureTransferStrategy(const ReflMeasureTransferStrategy &other);
 
@@ -71,7 +71,7 @@ private:
   std::unique_ptr<Mantid::Kernel::ICatalogInfo> m_catInfo;
 
   /// Measurement source for loading.
-  std::unique_ptr<ReflMeasurementSource> m_measurementSource;
+  std::unique_ptr<ReflMeasurementItemSource> m_measurementItemSource;
 };
 
 } // namespace CustomInterfaces

@@ -1,22 +1,22 @@
-#ifndef MANTIDQT_CUSTOMINTERFACES_MEASUREMENTTEST_H_
-#define MANTIDQT_CUSTOMINTERFACES_MEASUREMENTTEST_H_
+#ifndef MANTIDQT_CUSTOMINTERFACES_MEASUREMENTITEMTEST_H_
+#define MANTIDQT_CUSTOMINTERFACES_MEASUREMENTITEMTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidQtCustomInterfaces/Measurement.h"
+#include "MantidQtCustomInterfaces/Reflectometry/MeasurementItem.h"
 
 using namespace MantidQt::CustomInterfaces;
 
-class MeasurementTest : public CxxTest::TestSuite {
+class MeasurementItemTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MeasurementTest *createSuite() { return new MeasurementTest(); }
-  static void destroySuite(MeasurementTest *suite) { delete suite; }
+  static MeasurementItemTest *createSuite() { return new MeasurementItemTest(); }
+  static void destroySuite(MeasurementItemTest *suite) { delete suite; }
 
   void test_invalid_construction_via_constructional_method() {
     std::string message = "Gave up";
-    auto measure = Measurement::InvalidMeasurement(message);
+    auto measure = MeasurementItem::InvalidMeasurementItem(message);
     TS_ASSERT(!measure.isUseable());
     TS_ASSERT_EQUALS(message, measure.whyUnuseable());
   }
@@ -29,7 +29,7 @@ public:
     const double angle = 0.1;
     const std::string run = "123";
 
-    Measurement measurement(measurementId, measurementSubId, measurementLabel,
+    MeasurementItem measurement(measurementId, measurementSubId, measurementLabel,
                             measurementType, angle, run);
 
     TS_ASSERT(measurement.isUseable());
@@ -43,7 +43,7 @@ public:
 
   void test_invalid_construction_when_measurementId_empty() {
 
-    Measurement measurement("", "measurementSubId", "measurementLabel",
+    MeasurementItem measurement("", "measurementSubId", "measurementLabel",
                             "measurementType", 0.1, "111");
 
     TS_ASSERT(!measurement.isUseable());
@@ -51,7 +51,7 @@ public:
 
   void test_invalid_construction_when_measurementSubId_empty() {
 
-    Measurement measurement("measurementId", "", "measurementLabel",
+    MeasurementItem measurement("measurementId", "", "measurementLabel",
                             "measurementType", 0.1, "111");
 
     TS_ASSERT(!measurement.isUseable());
@@ -59,18 +59,18 @@ public:
 
   void test_valid_construction_when_label_empty() {
 
-    Measurement measurement("measurementId", "measurementSubId", "",
+    MeasurementItem measurement("measurementId", "measurementSubId", "",
                             "measurementType", 0.1, "111");
 
     TSM_ASSERT("Empty labels are not terminal", measurement.isUseable());
   }
 
   void test_valid_construction_when_type_empty() {
-    Measurement measurement("measurementId", "measurementSubId",
+    MeasurementItem measurement("measurementId", "measurementSubId",
                             "measurementLabel", "", 0.1, "111");
 
     TSM_ASSERT("Empty type info is not terminal",measurement.isUseable());
   }
 };
 
-#endif /* MANTIDQT_CUSTOMINTERFACES_MEASUREMENTTEST_H_ */
+#endif /* MANTIDQT_CUSTOMINTERFACES_MEASUREMENTITEMTEST_H_ */

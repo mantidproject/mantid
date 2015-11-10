@@ -5,10 +5,10 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/ProgressableView.h"
-#include "MantidQtCustomInterfaces/ReflMainView.h"
-#include "MantidQtCustomInterfaces/IReflPresenter.h"
-#include "MantidQtCustomInterfaces/ReflSearchModel.h"
-#include "MantidQtCustomInterfaces/QReflTableModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
 #include "MantidQtMantidWidgets/SlitCalculator.h"
 #include <boost/scoped_ptr.hpp>
 #include <QSignalMapper>

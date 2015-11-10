@@ -1,5 +1,5 @@
-#include "MantidQtCustomInterfaces/ReflSearchModel.h"
-#include "MantidQtCustomInterfaces/ReflTransferStrategy.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 
