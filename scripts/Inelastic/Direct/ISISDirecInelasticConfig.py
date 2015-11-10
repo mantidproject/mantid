@@ -285,9 +285,13 @@ class MantidConfigDirectInelastic(object):
         # missing file should always be replaced
         if not os.path.isfile(config_file_name):
             return True
-        modification_date = date.fromtimestamp(os.path.getmtime(config_file_name))
+
         start_date = self._user.start_date
-        if modification_date<start_date:
+        unmodified_creation_time = time.mktime(start_date.timetuple())
+        targ_config_time  = os.path.getmtime(config_file_name)
+
+        # Only rewrite configuration if nobody have touched it
+        if unmodified_creation_time  == targ_config_time:
             return True
         else:
             return False
@@ -689,6 +693,12 @@ class MantidConfigDirectInelastic(object):
         fp.close()
         if platform.system() != 'Windows':
             os.system('chown -R {0}:{0} {1}'.format(self._fedid,config_file_name))
+        # Set up configuration for the specific time, which should change only if user 
+        # modified this configuration
+        start_date = self._user.start_date
+        file_time = time.mktime(start_date.timetuple())
+        os.utime(config_file_name,(file_time,file_time))
+
 
 if __name__ == "__main__":
 
@@ -725,7 +735,7 @@ if __name__ == "__main__":
     else:
         sys.path.insert(0,'/opt/Mantid/scripts/Inelastic/Direct/')
         #sys.path.insert(0,'/opt/mantidnightly/scripts/Inelastic/Direct/')
-        WinDebug=False
+
 
         MantidDir = '/opt/Mantid'
         MapMaskDir = '/usr/local/mprogs/InstrumentFiles/'
