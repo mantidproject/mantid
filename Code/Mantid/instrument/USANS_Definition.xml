@@ -66,7 +66,7 @@
   </type>
   <type name="bank2">
     <component type="fourpack">
-      <location y="0.0" x="-0.0096266" z="2.04175" />
+      <location y="0.0" x="0.0096266" z="2.04175" />
     </component>
   </type>
   <type name="bank3">
@@ -76,7 +76,7 @@
   </type>
   <type name="bank4">
     <component type="fourpack">
-      <location y="0.0" x="-0.0096266" z="0.720316" />
+      <location y="0.0" x="0.0096266" z="0.720316" />
     </component>
   </type>
 
