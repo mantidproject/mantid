@@ -86,15 +86,13 @@ void CalculateDIFC::exec() {
   instrument->getDetectors(allDetectors);
 
   API::Progress progress(this, 0, 1, allDetectors.size());
-  calculate(progress, inputWs, outputWs, offsetsWs, l1, beamlineNorm, beamline, samplePos, allDetectors);
+  calculate(progress, outputWs, offsetsWs, l1, beamlineNorm, beamline, samplePos, allDetectors);
 
   setProperty("OutputWorkspace", outputWs);
 }
 
-void CalculateDIFC::calculate(API::Progress &progress, API::MatrixWorkspace_sptr &inputWs, 
-							  API::MatrixWorkspace_sptr &outputWs, DataObjects::OffsetsWorkspace_sptr &offsetsWS, 
-							  double l1, double beamlineNorm, Kernel::V3D &beamline, Kernel::V3D &samplePos, 
-							  detid2det_map &allDetectors) 
+void CalculateDIFC::calculate(API::Progress &progress, API::MatrixWorkspace_sptr &outputWs, DataObjects::OffsetsWorkspace_sptr &offsetsWS, 
+							  double l1, double beamlineNorm, Kernel::V3D &beamline, Kernel::V3D &samplePos, detid2det_map &allDetectors) 
 {
   SpecialWorkspace2D_sptr localWS =
       boost::dynamic_pointer_cast<SpecialWorkspace2D>(outputWs);

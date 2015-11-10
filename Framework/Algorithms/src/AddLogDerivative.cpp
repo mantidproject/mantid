@@ -49,7 +49,7 @@ void AddLogDerivative::init() {
 //----------------------------------------------------------------------------------------------
 /** Perform the N^th derivative of a log
  *
- * @param progess :: Progress indicator
+ * @param progress :: Progress indicator
  * @param input :: input TSP. Must have N+1 log entries
  * @param name :: name of the resulting log
  * @param numDerivatives :: number of times to perform derivative.
