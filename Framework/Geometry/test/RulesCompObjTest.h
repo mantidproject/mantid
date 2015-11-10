@@ -59,12 +59,10 @@ public:
     CompObj A;
     A.setObj(&cpCylinder);
     A.setObjN(10);
-    CompObj *B;
-    B = A.clone();
+    auto B = A.clone();
     TS_ASSERT_EQUALS(B->display(), "#10");
     TS_ASSERT_EQUALS(B->getObjN(), 10);
     TS_ASSERT_EQUALS(B->getObj(), &cpCylinder);
-    delete B;
   }
 
   void testAssignment() {
@@ -85,7 +83,7 @@ public:
     A.setObj(&cpCylinder);
     A.setObjN(10);
     CompObj B;
-    B.setLeaves(&A, (Rule *)0);
+    B.setLeaves(A.clone(), std::unique_ptr<Rule>());
     TS_ASSERT_EQUALS(B.display(), "#10");
     TS_ASSERT_EQUALS(B.getObjN(), 10);
     TS_ASSERT_EQUALS(B.getObj(), &cpCylinder);
@@ -97,7 +95,7 @@ public:
     A.setObj(&cpCylinder);
     A.setObjN(10);
     CompObj B;
-    B.setLeaf(&A, 0);
+    B.setLeaf(A.clone(), 0);
     TS_ASSERT_EQUALS(B.display(), "#10");
     TS_ASSERT_EQUALS(B.getObjN(), 10);
     TS_ASSERT_EQUALS(B.getObj(), &cpCylinder);

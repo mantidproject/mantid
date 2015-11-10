@@ -15,6 +15,7 @@
 #include "MantidGeometry/Math/Triple.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
@@ -207,8 +208,7 @@ int Rule::makeCNFcopy(Rule *&TopRule)
         if (tmpB->type() == -1 ||
             tmpC->type() == -1) // this is a union expand....
         {
-          Rule *partReplace;
-          Rule *alpha, *beta, *gamma;
+          std::unique_ptr<Rule> alpha, beta, gamma;
           if (tmpB->type() ==
               -1) // ok the LHS is a union. (a ^ b) v g ==> (a v g) ^ (b v g )
           {
@@ -231,16 +231,22 @@ int Rule::makeCNFcopy(Rule *&TopRule)
           // Note:: no part of this can be memory copy
           // hence we have to play games with a second
           // gamma->clone()
-          partReplace = new Union(new Intersection(alpha, gamma),
-                                  new Intersection(beta, gamma->clone()));
+          std::unique_ptr<Rule> tmp1 =
+              std::unique_ptr<Rule>(Mantid::Kernel::make_unique<Intersection>(
+                  std::move(alpha), std::move(gamma)));
+          std::unique_ptr<Rule> tmp2 =
+              std::unique_ptr<Rule>(Mantid::Kernel::make_unique<Intersection>(
+                  std::move(beta), std::move(gamma)));
+          std::unique_ptr<Rule> partReplace =
+              std::make_unique<Union>(std::move(tmp1), std::move(tmp2));
           //
           // General replacement
           //
           if (TreeComp.first) // Not the top rule (so replace parents leaf)
-            TreeComp.first->setLeaf(partReplace, TreeComp.second);
+            TreeComp.first->setLeaf(std::move(partReplace), TreeComp.second);
           else
             // It is the top rule therefore, replace the toprule
-            TopRule = partReplace;
+            TopRule = partReplace.release();
 
           // Clear up the mess and delete the rule that we have changes
           delete tmpA;
@@ -323,34 +329,37 @@ int Rule::makeCNF(Rule *&TopRule)
         if (tmpB->type() == -1 ||
             tmpC->type() == -1) // this is a union expand....
         {
-          Rule *partReplace;
-          Rule *alpha, *beta, *gamma, *Uobj; // Uobj to be deleted
+          std::unique_ptr<Rule> alpha, beta, gamma, Uobj; // Uobj to be deleted
           if (tmpB->type() ==
               -1) // ok the LHS is a union. (a ^ b) v g ==> (a v g) ^ (b v g )
           {
             // Make copies of the Unions leaves (allowing for null union)
-            alpha = tmpB->leaf(0);
-            beta = tmpB->leaf(1);
-            gamma = tmpC;
-            Uobj = tmpB;
+            alpha = tmpB->leaf(0)->clone();
+            beta = tmpB->leaf(1)->clone();
+            gamma = tmpC->clone();
+            Uobj = tmpB->clone();
           } else // RHS a v (b ^ g) ==> (a v b) ^ (a v g )
           {
             // Make copies of the Unions leaves (allowing for null union)
             // Note :: alpha designated as beta , gamma plays the role of alpha
             // in the RHS part of the above equation (allows common replace
             // block below.
-            alpha = tmpC->leaf(0);
-            beta = tmpC->leaf(1);
-            gamma = tmpB;
-            Uobj = tmpC;
+            alpha = tmpC->leaf(0)->clone();
+            beta = tmpC->leaf(1)->clone();
+            gamma = tmpB->clone();
+            Uobj = tmpC->clone();
           }
           // Have bit to replace
 
           // Note:: no part of this can be memory copy
           // hence we have to play games with a second
           // gamma->clone()
-          partReplace = new Union(new Intersection(alpha, gamma),
-                                  new Intersection(beta, gamma->clone()));
+          std::unique_ptr<Rule> tmp1 = std::make_unique<Intersection>(
+              std::move(alpha), std::move(gamma));
+          std::unique_ptr<Rule> tmp2 =
+              std::make_unique<Intersection>(std::move(beta), std::move(gamma));
+          std::unique_ptr<Rule> partReplace =
+              std::make_unique<Union>(std::move(tmp1), std::move(tmp2));
           //
           // General replacement
           //
@@ -358,9 +367,9 @@ int Rule::makeCNF(Rule *&TopRule)
           if (Pnt) // Not the top rule (so replace parents leaf)
           {
             const int leafN = Pnt->findLeaf(tmpA);
-            Pnt->setLeaf(partReplace, leafN);
+            Pnt->setLeaf(std::move(partReplace), leafN);
           } else
-            TopRule = partReplace;
+            TopRule = partReplace.release();
 
           // Clear up the mess and delete the rule that we have changes
           // Set the cutoffs in the correct place to avoid a complete
@@ -368,7 +377,6 @@ int Rule::makeCNF(Rule *&TopRule)
           tmpA->setLeaves(0, 0);
           delete tmpA;
           Uobj->setLeaves(0, 0);
-          delete Uobj;
           // Now we have to go back to the begining again and start again.
           active = 1; // Exit loop
         }
@@ -402,7 +410,7 @@ int Rule::removeItem(Rule *&TRule, const int SurfN)
       //
       LevelOne->setLeaves(0, 0); // Delete from Ptr, and copy
       const int side = (LevelTwo->leaf(0) != LevelOne) ? 1 : 0;
-      LevelTwo->setLeaf(PObj, side);
+      LevelTwo->setLeaf(std::unique_ptr<Rule>(PObj), side);
     } else if (LevelOne) // LevelOne is the top rule
     {
       // Decide which of the pairs is to be copied

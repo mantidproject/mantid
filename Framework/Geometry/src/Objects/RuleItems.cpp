@@ -54,14 +54,14 @@ namespace Geometry {
 using Kernel::V3D;
 
 Intersection::Intersection()
-    : Rule(), A(0), B(0)
+    : Rule(), A(), B()
 /**
   Standard Constructor with null leaves
 */
 {}
 
-Intersection::Intersection(Rule *Ix, Rule *Iy)
-    : Rule(), A(Iy), B(Ix)
+Intersection::Intersection(std::unique_ptr<Rule> Ix, std::unique_ptr<Rule> Iy)
+    : Rule(), A(std::move(Iy)), B(std::move(Ix))
 /**
   Intersection constructor from two Rule ptrs.
   - Sets A,B's parents to *this
@@ -76,8 +76,9 @@ Intersection::Intersection(Rule *Ix, Rule *Iy)
     B->setParent(this);
 }
 
-Intersection::Intersection(Rule *Parent, Rule *Ix, Rule *Iy)
-    : Rule(Parent), A(Ix), B(Iy)
+Intersection::Intersection(Rule *Parent, std::unique_ptr<Rule> Ix,
+                           std::unique_ptr<Rule> Iy)
+    : Rule(Parent), A(std::move(Ix)), B(std::move(Iy))
 /**
   Intersection constructor from two Rule ptrs
   - Sets A,B's parents to *this.
@@ -93,7 +94,7 @@ Intersection::Intersection(Rule *Parent, Rule *Ix, Rule *Iy)
 }
 
 Intersection::Intersection(const Intersection &Iother)
-    : Rule(), A(0), B(0)
+    : Rule(), A(), B()
 /**
   Copy constructor:
   Does a clone on the sub-tree below
@@ -122,15 +123,11 @@ Intersection &Intersection::operator=(const Intersection &Iother)
     Rule::operator=(Iother);
     // first create new copy all fresh
     if (Iother.A) {
-      Rule *Xa = Iother.A->clone();
-      delete A;
-      A = Xa;
+      A = Iother.A->clone();
       A->setParent(this);
     }
     if (Iother.B) {
-      Rule *Xb = Iother.B->clone();
-      delete B;
-      B = Xb;
+      B = Iother.B->clone();
       B->setParent(this);
     }
   }
@@ -143,17 +140,24 @@ Intersection::~Intersection()
   leaf intersections.
 */
 {
-  delete A;
-  delete B;
 }
 
-Intersection *Intersection::clone() const
+Intersection *Intersection::doClone() const
 /**
   Virtual copy constructor
   @return new Intersection(this)
 */
 {
   return new Intersection(*this);
+}
+
+std::unique_ptr<Intersection> Intersection::clone() const
+/**
+  Virtual copy constructor
+  @return new Intersection(this)
+*/
+{
+  return std::unique_ptr<Intersection>(doClone());
 }
 
 int Intersection::isComplementary() const
@@ -173,7 +177,7 @@ int Intersection::isComplementary() const
   return 0;
 }
 
-void Intersection::setLeaves(Rule *aR, Rule *bR)
+void Intersection::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> bR)
 /**
   Replaces a both with a rule.
   No deletion is carried out but sets the parents.
@@ -181,8 +185,8 @@ void Intersection::setLeaves(Rule *aR, Rule *bR)
   @param bR :: Rule on the right
 */
 {
-  A = aR;
-  B = bR;
+  A = std::move(aR);
+  B = std::move(bR);
   if (A)
     A->setParent(this);
   if (B)
@@ -190,7 +194,7 @@ void Intersection::setLeaves(Rule *aR, Rule *bR)
   return;
 }
 
-void Intersection::setLeaf(Rule *nR, const int side)
+void Intersection::setLeaf(std::unique_ptr<Rule> nR, const int side)
 /**
   Replaces a leaf with a rule.
   Calls delete on previous leaf.
@@ -201,13 +205,11 @@ void Intersection::setLeaf(Rule *nR, const int side)
 */
 {
   if (side) {
-    delete B;
-    B = nR;
+    B = std::move(nR);
     if (B)
       B->setParent(this);
   } else {
-    delete A;
-    A = nR;
+    A = std::move(nR);
     if (A)
       A->setParent(this);
   }
@@ -223,9 +225,9 @@ int Intersection::findLeaf(const Rule *R) const
   @retval -1 :: neither leaf
 */
 {
-  if (A == R)
+  if (A.get() == R)
     return 0;
-  if (B == R)
+  if (B.get() == R)
     return 1;
   return -1;
 }
@@ -378,14 +380,14 @@ TopoDS_Shape Intersection::analyze() {
 //---------------------------------------------------------------
 
 Union::Union()
-    : Rule(), A(0), B(0)
+    : Rule(), A(), B()
 /**
   Standard Constructor with null leaves
 */
 {}
 
-Union::Union(Rule *Parent, Rule *Ix, Rule *Iy)
-    : Rule(Parent), A(Ix), B(Iy)
+Union::Union(Rule *Parent, std::unique_ptr<Rule> Ix, std::unique_ptr<Rule> Iy)
+    : Rule(Parent), A(std::move(Ix)), B(std::move(Iy))
 /**
   Union constructor from two Rule ptrs.
   - Sets A,B's parents to *this
@@ -401,8 +403,8 @@ Union::Union(Rule *Parent, Rule *Ix, Rule *Iy)
     B->setParent(this);
 }
 
-Union::Union(Rule *Ix, Rule *Iy)
-    : Rule(), A(Ix), B(Iy)
+Union::Union(std::unique_ptr<Rule> Ix, std::unique_ptr<Rule> Iy)
+    : Rule(), A(std::move(Ix)), B(std::move(Iy))
 /**
   Union constructor from two Rule ptrs
   - Sets A,B's parents to *this.
@@ -418,7 +420,7 @@ Union::Union(Rule *Ix, Rule *Iy)
 }
 
 Union::Union(const Union &Iother)
-    : Rule(Iother), A(0), B(0)
+    : Rule(Iother), A(), B()
 /**
   Copy constructor:
   Does a clone on the sub-tree below
@@ -447,15 +449,11 @@ Union &Union::operator=(const Union &Iother)
     Rule::operator=(Iother);
     // first create new copy all fresh
     if (Iother.A) {
-      Rule *Xa = Iother.A->clone();
-      delete A;
-      A = Xa;
+      A = Iother.A->clone();
       A->setParent(this);
     }
     if (Iother.B) {
-      Rule *Xb = Iother.B->clone();
-      delete B;
-      B = Xb;
+      B = Iother.B->clone();
       B->setParent(this);
     }
   }
@@ -467,11 +465,9 @@ Union::~Union()
   Delete operator : deletes both leaves
 */
 {
-  delete A;
-  delete B;
 }
 
-Union *Union::clone() const
+Union *Union::doClone() const
 /**
   Clone allows deep virtual coping
   @return new Union copy.
@@ -480,7 +476,16 @@ Union *Union::clone() const
   return new Union(*this);
 }
 
-void Union::setLeaf(Rule *nR, const int side)
+std::unique_ptr<Union> Union::clone() const
+/**
+  Clone allows deep virtual coping
+  @return new Union copy.
+*/
+{
+  return std::unique_ptr<Union>(doClone());
+}
+
+void Union::setLeaf(std::unique_ptr<Rule> nR, const int side)
 /**
   Replaces a leaf with a rule.
   Calls delete on previous leaf.
@@ -491,20 +496,18 @@ void Union::setLeaf(Rule *nR, const int side)
 */
 {
   if (side) {
-    delete B;
-    B = nR;
+    B = std::move(nR);
     if (B)
       B->setParent(this);
   } else {
-    delete A;
-    A = nR;
+    A = std::move(nR);
     if (A)
       A->setParent(this);
   }
   return;
 }
 
-void Union::setLeaves(Rule *aR, Rule *bR)
+void Union::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> bR)
 /**
    Replaces a both with a rule.
   No deletion is carried out but sets the parents.
@@ -512,8 +515,8 @@ void Union::setLeaves(Rule *aR, Rule *bR)
   @param bR :: Rule on the right
 */
 {
-  A = aR;
-  B = bR;
+  A = std::move(aR);
+  B = std::move(bR);
   if (A)
     A->setParent(this);
   if (B)
@@ -530,9 +533,9 @@ int Union::findLeaf(const Rule *R) const
   @retval -1 :: neither leaf
 */
 {
-  if (A == R)
+  if (A.get() == R)
     return 0;
-  if (B == R)
+  if (B.get() == R)
     return 1;
   return -1;
 }
@@ -703,7 +706,7 @@ SurfPoint::SurfPoint()
 */
 {}
 
-SurfPoint *SurfPoint::clone() const
+SurfPoint *SurfPoint::doClone() const
 /**
   Clone constructor
   @return new(*this)
@@ -712,7 +715,16 @@ SurfPoint *SurfPoint::clone() const
   return new SurfPoint(*this);
 }
 
-void SurfPoint::setLeaf(Rule *nR, const int)
+std::unique_ptr<SurfPoint> SurfPoint::clone() const
+/**
+ Clone constructor
+ @return new(*this)
+ */
+{
+  return std::unique_ptr<SurfPoint>(doClone());
+}
+
+void SurfPoint::setLeaf(std::unique_ptr<Rule> nR, const int)
 /**
   Replaces a leaf with a rule.
   This REQUIRES that nR is of type SurfPoint
@@ -721,13 +733,14 @@ void SurfPoint::setLeaf(Rule *nR, const int)
 */
 {
   // std::cerr<<"Calling SurfPoint setLeaf"<<std::endl;
-  SurfPoint *newX = dynamic_cast<SurfPoint *>(nR);
+
+  SurfPoint *newX = dynamic_cast<SurfPoint *>(nR.release());
   if (newX)
     *this = *newX;
   return;
 }
 
-void SurfPoint::setLeaves(Rule *aR, Rule *)
+void SurfPoint::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule>)
 /**
   Replaces a leaf with a rule.
   This REQUIRES that nR is of type SurfPoint
@@ -735,7 +748,7 @@ void SurfPoint::setLeaves(Rule *aR, Rule *)
 */
 {
   // std::cerr<<"Calling SurfPoint setLeaf"<<std::endl;
-  SurfPoint *newX = dynamic_cast<SurfPoint *>(aR);
+  SurfPoint *newX = dynamic_cast<SurfPoint *>(aR.release());
   if (newX)
     *this = *newX;
   return;
@@ -1008,13 +1021,22 @@ CompObj::~CompObj()
 */
 {}
 
-CompObj *CompObj::clone() const
+CompObj *CompObj::doClone() const
 /**
   Clone of this
   @return new copy of this
 */
 {
   return new CompObj(*this);
+}
+
+std::unique_ptr<CompObj> CompObj::clone() const
+/**
+ Clone of this
+ @return new copy of this
+*/
+{
+  return std::unique_ptr<CompObj>(doClone());
 }
 
 void CompObj::setObjN(const int Ky)
@@ -1037,7 +1059,7 @@ void CompObj::setObj(Object *val)
   return;
 }
 
-void CompObj::setLeaf(Rule *aR, const int)
+void CompObj::setLeaf(std::unique_ptr<Rule> aR, const int)
 /**
   Replaces a leaf with a rule.
   This REQUIRES that aR is of type SurfPoint
@@ -1045,14 +1067,14 @@ void CompObj::setLeaf(Rule *aR, const int)
   @param :: Null side point
 */
 {
-  CompObj *newX = dynamic_cast<CompObj *>(aR);
+  CompObj *newX = dynamic_cast<CompObj *>(aR.release());
   // Make a copy
   if (newX)
     *this = *newX;
   return;
 }
 
-void CompObj::setLeaves(Rule *aR, Rule *oR)
+void CompObj::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> oR)
 /**
   Replaces a leaf with a rule.
   This REQUIRES that aR is of type CompObj
@@ -1062,7 +1084,7 @@ void CompObj::setLeaves(Rule *aR, Rule *oR)
 {
   (void)oR; // Avoid compiler warning
 
-  CompObj *newX = dynamic_cast<CompObj *>(aR);
+  CompObj *newX = dynamic_cast<CompObj *>(aR.release());
   if (newX)
     *this = *newX;
   return;
@@ -1293,7 +1315,7 @@ BoolValue &BoolValue::operator=(const BoolValue &A)
   return *this;
 }
 
-BoolValue *BoolValue::clone() const
+BoolValue *BoolValue::doClone() const
 /**
   Clone constructor
   @return new(*this)
@@ -1302,13 +1324,22 @@ BoolValue *BoolValue::clone() const
   return new BoolValue(*this);
 }
 
+std::unique_ptr<BoolValue> BoolValue::clone() const
+/**
+  Clone constructor
+  @return new(*this)
+*/
+{
+  return std::unique_ptr<BoolValue>(doClone());
+}
+
 BoolValue::~BoolValue()
 /**
   Destructor
 */
 {}
 
-void BoolValue::setLeaf(Rule *aR, const int)
+void BoolValue::setLeaf(std::unique_ptr<Rule> aR, const int)
 /**
   Replaces a leaf with a rule.
   This REQUIRES that aR is of type SurfPoint
@@ -1318,13 +1349,13 @@ void BoolValue::setLeaf(Rule *aR, const int)
 */
 {
   // std::cerr<<"Calling BoolValue setLeaf"<<std::endl;
-  BoolValue *newX = dynamic_cast<BoolValue *>(aR);
+  BoolValue *newX = dynamic_cast<BoolValue *>(aR.release());
   if (newX)
     *this = *newX;
   return;
 }
 
-void BoolValue::setLeaves(Rule *aR, Rule *oR)
+void BoolValue::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> oR)
 /**
   Replaces a leaf with a rule.
   This REQUIRES that aR is of type SurfPoint
@@ -1334,7 +1365,7 @@ void BoolValue::setLeaves(Rule *aR, Rule *oR)
 {
   (void)oR; // Avoid compiler warning
   // std::cerr<<"Calling BoolValue setLeaves"<<std::endl;
-  BoolValue *newX = dynamic_cast<BoolValue *>(aR);
+  BoolValue *newX = dynamic_cast<BoolValue *>(aR.release());
   if (newX)
     *this = *newX;
   return;
@@ -1426,14 +1457,14 @@ void BoolValue::getBoundingBox(double &xmax, double &ymax, double &zmax,
 //----------------------------------------
 
 CompGrp::CompGrp()
-    : Rule(), A(0)
+    : Rule(), A()
 /**
   Constructor
 */
 {}
 
-CompGrp::CompGrp(Rule *Parent, Rule *Cx)
-    : Rule(Parent), A(Cx)
+CompGrp::CompGrp(Rule *Parent, std::unique_ptr<Rule> Cx)
+    : Rule(Parent), A(std::move(Cx))
 /**
   Constructor to build parent and complent tree
   @param Parent :: Rule that is the parent to this
@@ -1445,14 +1476,14 @@ CompGrp::CompGrp(Rule *Parent, Rule *Cx)
 }
 
 CompGrp::CompGrp(const CompGrp &Cother)
-    : Rule(Cother), A(0)
+    : Rule(Cother), A()
 /**
   Standard copy constructor
   @param Cother :: CompGrp to copy
  */
 {
   if (Cother.A) {
-    A = Cother.A->clone();
+    A = std::unique_ptr<Rule>(Cother.A->clone());
     A->setParent(this);
   }
 }
@@ -1467,9 +1498,7 @@ CompGrp &CompGrp::operator=(const CompGrp &Cother)
   if (this != &Cother) {
     Rule::operator=(Cother);
     if (Cother.A) {
-      Rule *Xa = Cother.A->clone();
-      delete A;
-      A = Xa;
+      A = std::unique_ptr<Rule>(Cother.A->clone());
       A->setParent(this);
     }
   }
@@ -1481,10 +1510,9 @@ CompGrp::~CompGrp()
   Destructor
 */
 {
-  delete A;
 }
 
-CompGrp *CompGrp::clone() const
+CompGrp *CompGrp::doClone() const
 /**
   Clone of this
   @return new copy of this
@@ -1493,7 +1521,16 @@ CompGrp *CompGrp::clone() const
   return new CompGrp(*this);
 }
 
-void CompGrp::setLeaf(Rule *nR, const int side)
+std::unique_ptr<CompGrp> CompGrp::clone() const
+/**
+  Clone of this
+  @return new copy of this
+*/
+{
+  return std::unique_ptr<CompGrp>(doClone());
+}
+
+void CompGrp::setLeaf(std::unique_ptr<Rule> nR, const int side)
 /**
   Replaces a leaf with a rule.
   No deletion is carried out
@@ -1502,13 +1539,13 @@ void CompGrp::setLeaf(Rule *nR, const int side)
 */
 {
   (void)side; // Avoid compiler warning
-  A = nR;
+  A = std::move(nR);
   if (A)
     A->setParent(this);
   return;
 }
 
-void CompGrp::setLeaves(Rule *aR, Rule *oR)
+void CompGrp::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> oR)
 /**
   Replaces a leaf with a rule.
   No deletion is carried out but sets the parents.
@@ -1517,7 +1554,7 @@ void CompGrp::setLeaves(Rule *aR, Rule *oR)
 */
 {
   (void)oR; // Avoid compiler warning
-  A = aR;
+  A = std::move(aR);
   if (A)
     A->setParent(this);
   return;
@@ -1543,7 +1580,7 @@ int CompGrp::findLeaf(const Rule *R) const
   @retval 0 on success -ve on failuire
 */
 {
-  return (A == R) ? 0 : -1;
+  return (A.get() == R) ? 0 : -1;
 }
 
 bool CompGrp::isValid(const Kernel::V3D &Pt) const

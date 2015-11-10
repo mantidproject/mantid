@@ -60,7 +60,8 @@ Object::Object(const std::string &shapeXML)
 * @param A :: The object to initialise this copy from
 */
 Object::Object(const Object &A)
-    : ObjName(A.ObjName), TopRule((A.TopRule) ? A.TopRule->clone() : NULL),
+    : ObjName(A.ObjName),
+      TopRule((A.TopRule) ? A.TopRule->clone().release() : NULL),
       m_boundingBox(A.m_boundingBox), AABBxMax(A.AABBxMax),
       AABByMax(A.AABByMax), AABBzMax(A.AABBzMax), AABBxMin(A.AABBxMin),
       AABByMin(A.AABByMin), AABBzMin(A.AABBzMin), boolBounded(A.boolBounded),
@@ -80,7 +81,7 @@ Object &Object::operator=(const Object &A) {
   if (this != &A) {
     ObjName = A.ObjName;
     delete TopRule;
-    TopRule = (A.TopRule) ? A.TopRule->clone() : 0;
+    TopRule = (A.TopRule) ? A.TopRule->clone().release() : 0;
     AABBxMax = A.AABBxMax;
     AABByMax = A.AABByMax;
     AABBzMax = A.AABBzMax;
@@ -352,9 +353,11 @@ int Object::procPair(std::string &Ln, std::map<int, Rule *> &Rlist,
   // Get rules
   Rule *RRA = Rlist[Ra];
   Rule *RRB = Rlist[Rb];
-  Rule *Join = (type) ? static_cast<Rule *>(new Union(RRA, RRB))
-                      : static_cast<Rule *>(new Intersection(RRA, RRB));
-  Rlist[Ra] = Join;
+  auto Join = (type) ? std::unique_ptr<Rule>(
+                           std::make_unique<Union>(RRA->clone(), RRB->clone()))
+                     : std::unique_ptr<Rule>(std::make_unique<Intersection>(
+                           RRA->clone(), RRB->clone()));
+  Rlist[Ra] = Join.release();
   Rlist.erase(Rlist.find(Rb));
 
   // Remove space round pair
@@ -383,12 +386,13 @@ CompGrp *Object::procComp(Rule *RItem) const {
     return new CompGrp();
 
   Rule *Pptr = RItem->getParent();
-  CompGrp *CG = new CompGrp(Pptr, RItem);
+  auto CG = std::make_unique<CompGrp>(Pptr, std::unique_ptr<Rule>(RItem));
+  auto ptrCG = CG.get();
   if (Pptr) {
     const int Ln = Pptr->findLeaf(RItem);
-    Pptr->setLeaf(CG, Ln);
+    Pptr->setLeaf(std::move(CG), Ln);
   }
-  return CG;
+  return ptrCG;
 }
 
 /**
