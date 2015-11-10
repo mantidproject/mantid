@@ -11,7 +11,7 @@ class AlgorithmPropertyTest(unittest.TestCase):
 
     def test_value_method_returns_an_algorithm_type(self):
         prop = AlgorithmProperty("TestProperty")
-        prop.valueAsStr = 'CreateWorkspace(OutputWorkspace="ws",DataY="1",DataX="1",NSpec=1'
+        prop.valueAsStr = '{"name":"CreateWorkspace","paramters":{"OutputWorkspace":"ws","DataY":"1","DataX":"1","NSpec":"1"}}'
 
         alg = prop.value
         self.assertTrue(isinstance(alg,IAlgorithm))

@@ -11,25 +11,20 @@ execute_process(
 # Strip off any /CR or /LF
 string(STRIP ${OSX_VERSION} OSX_VERSION)
 
-if (OSX_VERSION VERSION_LESS 10.6)
-  message (FATAL_ERROR "The minimum supported version of Mac OS X is 10.6 (Snow Leopard).")
-endif()
-
-if (OSX_VERSION VERSION_GREATER 10.6 OR OSX_VERSION VERSION_EQUAL 10.6)
-  set ( OSX_CODENAME "Snow Leopard" )
-endif()
-
-if (OSX_VERSION VERSION_GREATER 10.7 OR OSX_VERSION VERSION_EQUAL 10.7)
-  set ( OSX_CODENAME "Lion")
-endif()
-
-if (OSX_VERSION VERSION_GREATER 10.8 OR OSX_VERSION VERSION_EQUAL 10.8)
-  set ( OSX_CODENAME "Mountain Lion")
+if (OSX_VERSION VERSION_LESS 10.9)
+  message (FATAL_ERROR "The minimum supported version of Mac OS X is 10.9 (Mavericks).")
 endif()
 
 if (OSX_VERSION VERSION_GREATER 10.9 OR OSX_VERSION VERSION_EQUAL 10.9)
   set ( OSX_CODENAME "Mavericks")
+endif()
 
+if (OSX_VERSION VERSION_GREATER 10.10 OR OSX_VERSION VERSION_EQUAL 10.10)
+  set ( OSX_CODENAME "Yosemite")
+endif()
+
+if (OSX_VERSION VERSION_GREATER 10.11 OR OSX_VERSION VERSION_EQUAL 10.11)
+  set ( OSX_CODENAME "El Capitan")
 endif()
 
 # Export variables globally
@@ -37,23 +32,6 @@ set(OSX_VERSION ${OSX_VERSION} CACHE INTERNAL "")
 set(OSX_CODENAME ${OSX_CODENAME} CACHE INTERNAL "")
 
 message (STATUS "Operating System: Mac OS X ${OSX_VERSION} (${OSX_CODENAME})")
-
-###########################################################################
-# Set include and library directories so that CMake finds Third_Party
-###########################################################################
-
-# Only use Third_Party for OS X older than Mavericks (10.9)
-if (OSX_VERSION VERSION_LESS 10.9)
-  message ( STATUS "Using Third_Party.")
-
-  set ( CMAKE_INCLUDE_PATH "${THIRD_PARTY}/include" )
-  set ( BOOST_INCLUDEDIR "${THIRD_PARTY}/include" )
-
-  set ( CMAKE_LIBRARY_PATH "${THIRD_PARTY}/lib/mac64" )
-  set ( BOOST_LIBRARYDIR  "${THIRD_PARTY}/lib/mac64" )
-else()
-  message ( STATUS "OS X Mavericks - Not using Mantid Third_Party libraries.")
-endif()
 
 # Enable the use of the -isystem flag to mark headers in Third_Party as system headers
 set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
@@ -210,11 +188,7 @@ if (OSX_VERSION VERSION_LESS 10.9)
   endforeach( PYPACKAGE )
 endif ()
 
-install ( DIRECTORY ${QT_PLUGINS_DIR}/imageformats DESTINATION MantidPlot.app/Contents/Frameworks/plugins )
-install ( DIRECTORY ${QT_PLUGINS_DIR}/sqldrivers DESTINATION MantidPlot.app/Contents/Frameworks/plugins )
-
 install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidPlot.icns
-                ${CMAKE_SOURCE_DIR}/installers/MacInstaller/qt.conf
           DESTINATION MantidPlot.app/Contents/Resources/
 )
 

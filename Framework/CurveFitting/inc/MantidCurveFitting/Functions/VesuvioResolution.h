@@ -54,9 +54,8 @@ struct ResolutionParams {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_CURVEFITTING_DLL VesuvioResolution
-    : public virtual API::ParamFunction,
-      public virtual API::IFunction1D {
+class MANTID_CURVEFITTING_DLL VesuvioResolution : public API::ParamFunction,
+                                                  public API::IFunction1D {
 public:
   /// Creates a POD struct containing the required resolution parameters for
   /// this spectrum

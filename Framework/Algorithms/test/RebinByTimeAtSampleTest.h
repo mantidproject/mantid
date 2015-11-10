@@ -192,10 +192,10 @@ public:
                                                   // neutrons 2.2km/s would take
                                                   // to cover a 10m distance.
 
-    const double L1 = 10;           // 10 meters
-    const double L2_spec1 = 0;      // Therefore L1 / (L1 + L2) == 1
-    const double L2_spec2 = L1;     // Therefore L1 / (L1 + L2) == 1 / 2
-    const double L2_spec3 = 2 * L1; // Therefore L1 / (L1 + L2) == 1 / 3
+    const double L1 = 10;             // 10 meters
+    const double L2_spec1 = 0;        // Therefore L1 / (L1 + L2) == 1
+    const double L2_spec2 = L1;       // Therefore L1 / (L1 + L2) == 1 / 2
+    const double L2_spec3 = 2.0 * L1; // Therefore L1 / (L1 + L2) == 1 / 3
 
     V3D sample(L1, 0, 0); // Sample at L1
     V3D source(0, 0, 0);
@@ -250,13 +250,13 @@ public:
                       result->getNumberHistograms());
 
     auto y1 = result->readY(0);
-    auto y1Sum = std::accumulate(y1.begin(), y1.end(), 0);
+    auto y1Sum = std::accumulate(y1.begin(), y1.end(), 0.0);
 
     auto y2 = result->readY(1);
-    auto y2Sum = std::accumulate(y2.begin(), y2.end(), 0);
+    auto y2Sum = std::accumulate(y2.begin(), y2.end(), 0.0);
 
     auto y3 = result->readY(2);
-    auto y3Sum = std::accumulate(y3.begin(), y3.end(), 0);
+    auto y3Sum = std::accumulate(y3.begin(), y3.end(), 0.0);
 
     TSM_ASSERT_EQUALS("Spectrum 1 not rebinned to sample time correctly", 1.0,
                       y1[4]);

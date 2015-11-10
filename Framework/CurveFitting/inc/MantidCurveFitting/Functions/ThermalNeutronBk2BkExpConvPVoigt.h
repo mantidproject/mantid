@@ -38,8 +38,6 @@ namespace Functions {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-// virtual public API::ParamFunction,public virtual API::IFunction1D, virtual
-// public API::IFunctionMW
 class DLLExport ThermalNeutronBk2BkExpConvPVoigt
     : public API::IPowderDiffPeakFunction {
 public:

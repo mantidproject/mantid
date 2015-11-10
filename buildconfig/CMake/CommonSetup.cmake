@@ -42,7 +42,7 @@ set ( TESTING_TIMEOUT 300 CACHE INTEGER
 set ( Boost_NO_BOOST_CMAKE TRUE )
 find_package ( Boost REQUIRED date_time regex )
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
-add_definitions ( -DBOOST_ALL_DYN_LINK )
+add_definitions ( -DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB )
 # Need this defined globally for our log time values
 add_definitions ( -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG )
 
@@ -57,6 +57,7 @@ find_package ( MuParser REQUIRED )
 find_package ( JsonCPP REQUIRED )
 include_directories ( SYSTEM ${JSONCPP_INCLUDE_DIR} )
 
+set ( ENABLE_OPENCASCADE ON CACHE BOOL "Enable OpenCascade-based 3D visualisation" )
 if (ENABLE_OPENCASCADE)
   find_package ( OpenCascade REQUIRED )
   add_definitions ( -DENABLE_OPENCASCADE )
@@ -64,32 +65,25 @@ endif ()
 
 find_package ( Doxygen ) # optional
 
-# Need to change search path to find zlib include on Windows.
-# Couldn't figure out how to extend CMAKE_INCLUDE_PATH variable for extra path
-# so I'm caching old value, changing it temporarily and then setting it back
-set ( MAIN_CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} )
-set ( CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH}/zlib123 )
-find_package ( ZLIB REQUIRED )
-set ( CMAKE_INCLUDE_PATH ${MAIN_CMAKE_INCLUDE_PATH} )
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows" OR (APPLE AND OSX_VERSION VERSION_LESS 10.9))
-  set (HDF5_DIR "${CMAKE_MODULE_PATH}")
+if(CMAKE_HOST_WIN32)
+  find_package ( ZLIB REQUIRED 
+    CONFIGS zlib-config.cmake )
+  set (HDF5_DIR "${THIRD_PARTY_DIR}/cmake")
   find_package ( HDF5 COMPONENTS CXX HL REQUIRED
     CONFIGS hdf5-config.cmake )
-  add_definitions ( -DH5_BUILT_AS_DYNAMIC_LIB )
 else()
-  find_package ( HDF5 COMPONENTS CXX HL REQUIRED )
+  find_package ( ZLIB REQUIRED )
+  if (APPLE AND OSX_VERSION VERSION_LESS 10.9)
+    set (HDF5_DIR "${CMAKE_MODULE_PATH}")
+    find_package ( HDF5 COMPONENTS CXX HL REQUIRED
+      CONFIGS hdf5-config.cmake )
+    add_definitions ( -DH5_BUILT_AS_DYNAMIC_LIB )
+  else()
+    find_package ( HDF5 COMPONENTS CXX HL REQUIRED )
+  endif()
 endif()
 
 find_package ( PythonInterp )
-
-if ( MSVC )
-  # Wrapper script to call either python or python_d depending on directory contents
-  set ( PYTHON_EXE_WRAPPER_SRC "${CMAKE_MODULE_PATH}/../win_python.bat" )
-  set ( PYTHON_EXE_WRAPPER "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/win_python.bat" )
-else()
-  set ( PYTHON_EXE_WRAPPER ${PYTHON_EXECUTABLE} )
-endif()
 
 ###########################################################################
 # Look for Git. Used for version headers - faked if not found.
@@ -100,7 +94,6 @@ set ( MtdVersion_WC_LAST_CHANGED_DATE Unknown )
 set ( MtdVersion_WC_LAST_CHANGED_DATETIME 0 )
 set ( NOT_GIT_REPO "Not" )
 
-find_package ( Git )
 if ( GIT_FOUND )
   # Get the last revision
   execute_process ( COMMAND ${GIT_EXECUTABLE} describe --long
