@@ -12,7 +12,7 @@ class CorrectLogTimes(mantid.api.PythonAlgorithm):
     def category(self):
         """ Mantid required
         """
-        return "PythonAlgorithms;DataHandling\\Logs"
+        return "DataHandling\\Logs"
 
     def name(self):
         """ Mantid required

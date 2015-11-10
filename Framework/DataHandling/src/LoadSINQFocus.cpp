@@ -44,7 +44,9 @@ const std::string LoadSINQFocus::name() const { return "LoadSINQFocus"; }
 int LoadSINQFocus::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadSINQFocus::category() const { return "DataHandling"; }
+const std::string LoadSINQFocus::category() const {
+  return "DataHandling\\Nexus";
+}
 
 //----------------------------------------------------------------------------------------------
 

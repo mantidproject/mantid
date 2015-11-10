@@ -9,6 +9,10 @@ from mantid.kernel import *
 #
 class Squares(PythonAlgorithm):
 
+    def category(self):
+        # defines the category the algorithm will be put in the algorithm browser
+        return 'Examples'
+
     def PyInit(self):
         # Integer property. IntBoundedValidator restricts values to be greater than 0
         self.declareProperty("MaxRange", -1, validator = IntBoundedValidator(lower=0), doc = "A value for the end of the range(inclusive)")

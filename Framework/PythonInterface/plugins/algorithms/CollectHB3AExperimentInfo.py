@@ -38,7 +38,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
     def category(self):
         """ Category
         """
-        return "Diffraction"
+        return "Diffraction\\ConstantWavelength"
 
     def name(self):
         """ Algorithm name

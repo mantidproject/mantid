@@ -36,7 +36,9 @@ const std::string CalculateDIFC::name() const { return "CalculateDIFC"; }
 int CalculateDIFC::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CalculateDIFC::category() const { return "Diffraction"; }
+const std::string CalculateDIFC::category() const {
+  return "Diffraction\\Utility";
+}
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string CalculateDIFC::summary() const {

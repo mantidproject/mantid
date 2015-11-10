@@ -61,7 +61,7 @@ const std::string EstimateResolutionDiffraction::summary() const {
 int EstimateResolutionDiffraction::version() const { return 1; }
 
 const std::string EstimateResolutionDiffraction::category() const {
-  return "Diffraction";
+  return "Diffraction\\Utility";
 }
 
 //----------------------------------------------------------------------------------------------

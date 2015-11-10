@@ -145,7 +145,9 @@ const std::string AlignDetectors::name() const { return "AlignDetectors"; }
 
 int AlignDetectors::version() const { return 1; }
 
-const std::string AlignDetectors::category() const { return "Diffraction"; }
+const std::string AlignDetectors::category() const {
+  return "Diffraction\\Calibration";
+}
 
 const std::string AlignDetectors::summary() const {
   return "Performs a unit change from TOF to dSpacing, correcting the X "

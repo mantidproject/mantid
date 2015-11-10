@@ -10,7 +10,7 @@ class SortDetectors(PythonAlgorithm):
     def category(self):
         """ Return category
         """
-        return "PythonAlgorithms;Utility"
+        return "Utility\\Sorting"
 
     def name(self):
         """ Return name

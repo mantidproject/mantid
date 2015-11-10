@@ -44,7 +44,7 @@ public:
     return "Slices multidimensional workspaces using input projection "
            "information and binning limits.";
   }
-  virtual const std::string category() const { return "MDAlgorithms"; }
+  virtual const std::string category() const { return "MDAlgorithms\\Slicing"; }
 
   virtual void init();
   virtual void exec();

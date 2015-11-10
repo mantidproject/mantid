@@ -26,7 +26,7 @@ class DPDFreduction(PythonAlgorithm):
     _ebins = None
 
     def category(self):
-        return "Inelastic;PythonAlgorithms;Utility\\Development"
+        return "Inelastic\\Reduction;Utility\\Development"
 
     def name(self):
         return 'DPDFreduction'
