@@ -250,7 +250,16 @@ class UserProperties(object):
            rb_folder_or_id = "RB{0:07}".format(rb_folder_or_id)
         if not isinstance(rb_folder_or_id,str):
             raise RuntimeError("RB Folder {0} should be a string".format(rb_folder_or_id))
-
+        else:
+            base,rbf = os.path.split(rb_folder_or_id)
+            if(len(rbf) != 9):
+                try:
+                    rbf = int(rbf)
+                    rbf = "RB{0:07}".format(rbf)
+                    rb_folder_or_id = os.path.join(base,rbf)
+                except ValueError:
+                    raise RuntimeError("RB Folder {0} should be a string".format(rb_folder_or_id))
+        #end
         if os.path.exists(rb_folder_or_id) and os.path.isdir(rb_folder_or_id):
             rb_exist = True
         else:
@@ -613,7 +622,7 @@ class MantidConfigDirectInelastic(object):
             if isinstance(fedIDorUser,UserProperties):
                 theUser = fedIDorUser
             else:
-                raise RuntimeError("self.init_user(val) has to have val of UserProperty type only")
+                raise RuntimeError("self.init_user(val) has to have val of UserProperty type only and got")
         else:
             theUser.userID = fedIDorUser
         #
@@ -805,7 +814,8 @@ if __name__ == "__main__":
         print "usage: Config.py instrument userID cycleID start_date rb_folder"
         exit()
 
-    user = UserProperties(sys.argv[1:])
+    argi  = sys.argv[1:]
+    user = UserProperties(*argi)
 
 
     if platform.system() == 'Windows':
@@ -847,7 +857,8 @@ if __name__ == "__main__":
         print "RB folder {0} for user {1} should exist and be accessible to configure this user".format(user.rb_dir,user.userID)
         exit()
     # Configure user
-    mcf.init_user(user)
+    mcf.init_user(user.userID,user)
     mcf.generate_config()
-    print "Successfully Configured user: ",user.userID," for instrument: ",user.instrument
+    print "Successfully Configured user: {0} for instrument {1} and RBNum: {2}"\
+           .format(user.userID,user.instrument,user.rb_folder)
 
