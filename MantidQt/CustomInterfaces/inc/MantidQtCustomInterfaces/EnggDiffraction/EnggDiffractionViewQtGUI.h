@@ -91,9 +91,6 @@ public:
 
   std::vector<std::string> newCeriaNo() const;
 
-  std::vector<std::string> qListToVector(QStringList list,
-                                         bool validator) const;
-
   std::string outCalibFilename() const { return m_outCalibFilename; }
 
   void newCalibLoaded(const std::string &vanadiumNo, const std::string &ceriaNo,
@@ -214,6 +211,10 @@ private:
   Ui::EnggDiffractionQtTabFocus m_uiTabFocus;
   Ui::EnggDiffractionQtTabPreproc m_uiTabPreproc;
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
+
+  /// converts QList to a vector
+  std::vector<std::string> qListToVector(QStringList list,
+	  bool validator) const;
 
   /// instrument selected (ENGIN-X, etc.)
   std::string m_currentInst;

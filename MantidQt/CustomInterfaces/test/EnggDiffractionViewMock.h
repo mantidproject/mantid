@@ -59,11 +59,6 @@ public:
   // virtual std::vector<std::string> newCeriaNo() const;
   MOCK_CONST_METHOD0(newCeriaNo, std::vector<std::string>());
 
-  // virtual std::vector<std::string> qListToVector(QStringList list, bool
-  // validator) const;
-  MOCK_CONST_METHOD2(qListToVector, std::vector<std::string>(QStringList list,
-                                                             bool validator));
-
   // virtual std::string outCalibFilename() const;
   MOCK_CONST_METHOD0(outCalibFilename, std::string());
 
