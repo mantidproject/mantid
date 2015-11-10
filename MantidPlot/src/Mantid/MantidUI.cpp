@@ -740,10 +740,11 @@ void MantidUI::showVatesSimpleInterface()
       m_vatesSubWindow->setWindowIcon(icon);
       connect(m_appWindow, SIGNAL(shutting_down()), m_vatesSubWindow, SLOT(close()));
 
+ 
       MantidQt::API::InterfaceManager interfaceManager;
       MantidQt::API::VatesViewerInterface *vsui = interfaceManager.createVatesSimpleGui();
       if (vsui)
-      {
+      {     
         connect(m_appWindow, SIGNAL(shutting_down()),
           vsui, SLOT(shutdown()));
         connect(vsui, SIGNAL(requestClose()), m_vatesSubWindow, SLOT(close()));
@@ -769,7 +770,11 @@ void MantidUI::showVatesSimpleInterface()
   }
   catch (...)
   {
-  }
+  }     
+  //reset the qt error redirection that Paraview puts in place
+  // this may not be necessary if we move to qt5
+  qInstallMsgHandler(0);
+
 }
 
 void MantidUI::showSpectrumViewer()
@@ -1537,24 +1542,7 @@ void MantidUI::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg)
   executeAlgorithmAsync(alg);
 }
 
-/**
-* Execute an algorithm
-* @param algName :: The algorithm name
-* @param paramList :: A list of algorithm properties to be passed to Algorithm::setProperties
-* @param obs :: A pointer to an instance of AlgorithmObserver which will be attached to the finish notification
-*/
-void MantidUI::executeAlgorithm(const QString & algName, const QString & paramList, Mantid::API::AlgorithmObserver* obs)
-{
-  //Get latest version of the algorithm
-  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, -1);
-  if( !alg ) return;
-  if (obs)
-  {
-    obs->observeFinish(alg);
-  }
-  alg->setProperties(paramList.toStdString());
-  executeAlgorithmAsync(alg);
-}
+
 
 /**
 * This creates an algorithm dialog (the default property entry thingie).
@@ -3617,7 +3605,7 @@ bool MantidUI::workspacesDockPlot1To1()
 
 struct mem_block
 {
-  int size;
+  SIZE_T size;
   int state;
 };
 

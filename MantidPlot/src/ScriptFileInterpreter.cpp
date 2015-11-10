@@ -294,15 +294,15 @@ void ScriptFileInterpreter::emitZoomOut()
 }
 
 /**
- * Set up the widget from a given scripting environment
- * @param environ :: A pointer to the current scripting environment
+ * Set up the widget from a given scripting envment
+ * @param env :: A pointer to the current scripting envment
  * @param identifier :: A string identifier, used mainly in error messages to identify the
  * current script
  */
-void ScriptFileInterpreter::setup(const ScriptingEnv & environ, const QString & identifier)
+void ScriptFileInterpreter::setup(const ScriptingEnv & env, const QString & identifier)
 {
-  setupEditor(environ, identifier);
-  setupScriptRunner(environ, identifier);
+  setupEditor(env, identifier);
+  setupScriptRunner(env, identifier);
   connect(m_runner.data(), SIGNAL(autoCompleteListGenerated(const QStringList &)),
           m_editor, SLOT(updateCompletionAPI(const QStringList &)));
   m_runner->generateAutoCompleteList();
@@ -443,7 +443,7 @@ void ScriptFileInterpreter::executeSelection(const Script::ExecutionMode mode)
 }
 
 /**
- * The environment has to support this behaviour or is does nothing
+ * The envment has to support this behaviour or is does nothing
  */
 void ScriptFileInterpreter::abort() {
   m_runner->abort();
@@ -501,17 +501,17 @@ void ScriptFileInterpreter::setupChildWidgets()
 }
 
 /**
- * @param environ :: A pointer to the current scripting environment
+ * @param env :: A pointer to the current scripting envment
  * @param identifier :: A string identifier, used mainly in error messages to identify the
  * current script
  */
-void ScriptFileInterpreter::setupEditor(const ScriptingEnv & environ, const QString & identifier)
+void ScriptFileInterpreter::setupEditor(const ScriptingEnv & env, const QString & identifier)
 {
   if(QFileInfo(identifier).exists())
   {
     readFileIntoEditor(identifier);
   }
-  m_editor->setLexer(environ.createCodeLexer());
+  m_editor->setLexer(env.createCodeLexer());
   m_editor->setSettingsGroup("ScriptWindow");
   m_editor->padMargin();
   m_editor->setAutoMarginResize();
@@ -525,13 +525,13 @@ void ScriptFileInterpreter::setupEditor(const ScriptingEnv & environ, const QStr
 }
 
 /**
- * @param environ :: A pointer to the current scripting environment
+ * @param env :: A pointer to the current scripting envment
  * @param identifier :: A string identifier, used mainly in error messages to identify the
  * current script
  */
-void ScriptFileInterpreter::setupScriptRunner(const ScriptingEnv & environ, const QString & identifier)
+void ScriptFileInterpreter::setupScriptRunner(const ScriptingEnv & env, const QString & identifier)
 {
-  m_runner = QSharedPointer<Script>(environ.newScript(identifier,this, Script::Interactive));
+  m_runner = QSharedPointer<Script>(env.newScript(identifier,this, Script::Interactive));
 
   connect(m_runner.data(), SIGNAL(started(const QString &)), this, SLOT(setExecutingStatus()));
   connect(m_runner.data(), SIGNAL(started(const QString &)), m_messages, SLOT(displayMessageWithTimestamp(const QString &)));

@@ -9,8 +9,8 @@
 
 class MullerAnsatzTest : public CxxTest::TestSuite {
 private:
-  class FakeFGModelFitFunction : public virtual Mantid::API::IFunctionMD,
-                                 public virtual Mantid::API::ParamFunction {
+  class FakeFGModelFitFunction : public Mantid::API::IFunctionMD,
+                                 public Mantid::API::ParamFunction {
   public:
     FakeFGModelFitFunction(Mantid::MDAlgorithms::ForegroundModel &fgModel) {
       fgModel.setFunctionUnderMinimization(*this);
