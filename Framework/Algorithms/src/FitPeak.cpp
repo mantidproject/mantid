@@ -322,6 +322,9 @@ bool FitOneSinglePeak::simpleFit() {
 
   // Fit with different starting values of peak width
   size_t numfits = m_vecFWHM.size();
+
+  Progress progress(this, 0, 1, numfits);
+
   for (size_t i = 0; i < numfits; ++i) {
     // set FWHM
     m_sstream << "[SingleStepFit] FWHM = " << m_vecFWHM[i] << "\n";
@@ -337,6 +340,8 @@ bool FitOneSinglePeak::simpleFit() {
       pop(m_bkupPeakFunc, m_peakFunc);
       pop(m_bkupBkgdFunc, m_bkgdFunc);
     }
+
+    progress.report();
   }
 
   // Retrieve the best result stored
@@ -533,6 +538,8 @@ void FitOneSinglePeak::highBkgdFit() {
   // Store starting setup
   push(m_peakFunc, m_bkupPeakFunc);
 
+  Progress progress(this, 0, 1, m_vecFWHM.size());
+
   // Fit with different starting values of peak width
   for (size_t i = 0; i < m_vecFWHM.size(); ++i) {
     // Restore
@@ -552,6 +559,8 @@ void FitOneSinglePeak::highBkgdFit() {
 
     // Store result
     processNStoreFitResult(rwp, false);
+
+    progress.report();
   }
 
   // Get best fitting peak function and Make a combo fit
@@ -1406,7 +1415,8 @@ void FitPeak::createFunctions() {
   if (m_bkgdParameterNames.size() != vec_bkgdparvalues.size()) {
     stringstream errss;
     errss << "Input background properties' arrays are incorrect: # of "
-             "parameter names = " << m_bkgdParameterNames.size()
+             "parameter names = "
+          << m_bkgdParameterNames.size()
           << ", # of parameter values = " << vec_bkgdparvalues.size() << "\n";
     g_log.error(errss.str());
     throw runtime_error(errss.str());
@@ -1443,7 +1453,8 @@ void FitPeak::createFunctions() {
   if (m_peakParameterNames.size() != vec_peakparvalues.size()) {
     stringstream errss;
     errss << "Input peak properties' arrays are incorrect: # of parameter "
-             "names = " << m_peakParameterNames.size()
+             "names = "
+          << m_peakParameterNames.size()
           << ", # of parameter values = " << vec_peakparvalues.size() << "\n";
     throw runtime_error(errss.str());
   }
