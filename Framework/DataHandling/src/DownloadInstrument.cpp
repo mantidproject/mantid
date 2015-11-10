@@ -350,18 +350,18 @@ int DownloadInstrument::doDownloadFile(const std::string &urlFile,
                                        const StringToStringMap &headers) {
   Poco::File localFile(localFilePath);
   if (localFile.exists()) {
-      if (!localFile.canWrite()) {
-          std::stringstream msg;
-          msg << "Cannot write file \"" << localFilePath << "\"";
-          throw std::runtime_error(msg.str());
-      }
+    if (!localFile.canWrite()) {
+      std::stringstream msg;
+      msg << "Cannot write file \"" << localFilePath << "\"";
+      throw std::runtime_error(msg.str());
+    }
   } else {
-      localFile = Poco::File(Poco::Path(localFilePath).parent().toString());
-      if (!localFile.canWrite()) {
-          std::stringstream msg;
-          msg << "Cannot write file \"" << localFilePath << "\"";
-          throw std::runtime_error(msg.str());
-      }
+    localFile = Poco::File(Poco::Path(localFilePath).parent().toString());
+    if (!localFile.canWrite()) {
+      std::stringstream msg;
+      msg << "Cannot write file \"" << localFilePath << "\"";
+      throw std::runtime_error(msg.str());
+    }
   }
 
   int retStatus = 0;
