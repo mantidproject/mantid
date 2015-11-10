@@ -7,6 +7,7 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
+#include "PropertyManagerHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -91,6 +92,38 @@ public:
     TS_ASSERT_EQUALS(map[9], 1);
     TS_ASSERT_EQUALS(map[10], 2);
     TS_ASSERT_EQUALS(map[45], 5);
+  }
+
+  /**
+  * Test declaring an input workspace property and retrieving as const_sptr or
+  * sptr
+  */
+  void testGetProperty_const_sptr() {
+    const std::string wsName = "InputWorkspace";
+    GroupingWorkspace_sptr wsInput(new GroupingWorkspace());
+    PropertyManagerHelper manager;
+    manager.declareProperty(wsName, wsInput, Mantid::Kernel::Direction::Input);
+
+    // Check property can be obtained as const_sptr or sptr
+    GroupingWorkspace_const_sptr wsConst;
+    GroupingWorkspace_sptr wsNonConst;
+    TS_ASSERT_THROWS_NOTHING(
+        wsConst = manager.getValue<GroupingWorkspace_const_sptr>(wsName));
+    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(
+        wsNonConst = manager.getValue<GroupingWorkspace_sptr>(wsName));
+    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT_EQUALS(wsConst, wsNonConst);
+
+    // Check TypedValue can be cast to const_sptr or to sptr
+    PropertyManagerHelper::TypedValue val(manager, wsName);
+    GroupingWorkspace_const_sptr wsCastConst;
+    GroupingWorkspace_sptr wsCastNonConst;
+    TS_ASSERT_THROWS_NOTHING(wsCastConst = (GroupingWorkspace_const_sptr)val);
+    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (GroupingWorkspace_sptr)val);
+    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };
 
