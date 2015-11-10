@@ -77,11 +77,11 @@ public:
     //   Y[1] = 0.0398848*3600; Y[2] = 0.0371762*3600; Y[30] = 0.030971*3600;
     //   Y[80] = 0.0275545*3600; Y[90] = 0.0270528*3600
     TS_ASSERT_EQUALS(result->dataX(0)[0], 0.01);
-    TS_ASSERT_DELTA(result->dataY(0)[30], 110.9651, tolerance);
-    TS_ASSERT_DELTA(result->dataY(0)[1], 143.2190, tolerance);
-    TS_ASSERT_DELTA(result->dataY(0)[2], 134.2864, tolerance);
-    TS_ASSERT_DELTA(result->dataY(0)[80], 98.3834, tolerance);
-    TS_ASSERT_DELTA(result->dataY(0)[90], 95.9322, tolerance);
+    TS_ASSERT_DELTA(result->dataY(0)[30], 110.0275, tolerance);
+    TS_ASSERT_DELTA(result->dataY(0)[1], 132.1825, tolerance);
+    TS_ASSERT_DELTA(result->dataY(0)[2], 125.9807, tolerance);
+    TS_ASSERT_DELTA(result->dataY(0)[80], 95.6189, tolerance);
+    TS_ASSERT_DELTA(result->dataY(0)[90], 92.0839, tolerance);
 
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);

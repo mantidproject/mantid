@@ -74,10 +74,10 @@ public:
     // Spot check (multiply by counting time to be on the same scale as the IGOR
     // result)
     int id = 4 + Mantid::DataHandling::LoadSpice2D::nMonitors;
-    TS_ASSERT_DELTA(result->dataY(id)[0], 640.5134, 0.001)
+    TS_ASSERT_DELTA(result->dataY(id)[0], 640.3985, 0.001)
 
     id = 176 + Mantid::DataHandling::LoadSpice2D::nMonitors;
-    TS_ASSERT_DELTA(result->dataY(id)[0], 798.8448, 0.001)
+    TS_ASSERT_DELTA(result->dataY(id)[0],798.7303, 0.001)
 
     Mantid::API::AnalysisDataService::Instance().remove(transWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
@@ -109,10 +109,10 @@ public:
     // Spot check (multiply by counting time to be on the same scale as the IGOR
     // result)
     int id = 4 + Mantid::DataHandling::LoadSpice2D::nMonitors;
-    TS_ASSERT_DELTA(result->dataY(id)[0], 640.5134, 0.001)
+    TS_ASSERT_DELTA(result->dataY(id)[0], 640.3985, 0.001)
 
     id = 176 + Mantid::DataHandling::LoadSpice2D::nMonitors;
-    TS_ASSERT_DELTA(result->dataY(id)[0], 798.8448, 0.001)
+    TS_ASSERT_DELTA(result->dataY(id)[0], 798.7303, 0.001)
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
