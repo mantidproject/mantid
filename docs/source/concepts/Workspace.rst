@@ -64,6 +64,7 @@ Working with Workspaces in Python
 Workspace is an abstract description of an specific workspace implementation. It provides access to a few common properties without any knowledge of what the type of the workspace.
 
 .. _Workspace-Accessing_Workspaces:
+
 Accessing Workspaces
 ####################
 
@@ -115,10 +116,6 @@ You can look at the :ref:`Workspace API reference <mantid.api.Workspace>` for a 
 
     print "getMemorySize = " + str(myWS.getMemorySize())
 
-    #You can also rename a workspace
-    Berty = myWS.rename()
-    print "my new name = " + myWS.getName()
-
 Output:
 
 .. testoutput:: WorkspaceProperties
@@ -129,7 +126,6 @@ Output:
     comment = This is my comment
     id = Workspace2D
     getMemorySize = ...
-    my new name = Berty
 
 
 Workspace Types

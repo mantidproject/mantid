@@ -37,19 +37,16 @@ Getting the Run Object from a Workspace
 
   run = ws.getRun()
 
-.. testoutput:: WorkspaceRun
-  :hide:
-
-
 Run Properties
 ##############
 
-.. testSetup:: RunPropertiestest
+.. testsetup:: RunPropertiestest
 
   ws = Load("MAR11060")
 
 .. testcode:: RunPropertiestest
-
+  
+  from mantid.kernel import DateAndTime
   run = ws.getRun()
 
   # Set the start and end time of a run
@@ -69,8 +66,7 @@ Run Properties
 
   2015-01-27T11:00:00 
   2015-01-27T11:57:51 
-  121.470...
-  
+  121...
 
 Accessing Properties
 ####################
@@ -103,7 +99,7 @@ Listing all properties
 Getting a specific property
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. testcode:: GetPropertytest
+.. testcode:: RunGetPropertytest
 
   ws = CreateSampleWorkspace()
 
@@ -119,7 +115,7 @@ Getting a specific property
   print "Property name: " + runStart.name
   print "Property value: " + runStart.value
 
-.. testoutput:: GetPropertytest
+.. testoutput:: RunGetPropertytest
   :hide:
   :options: +ELLIPSIS,+NORMALIZE_WHITESPACE
 
@@ -129,7 +125,7 @@ Getting a specific property
   Property value: 2010-01-01T00:00:00
 
 The Gonioneter
-##############
+############## 
 
 If the instrument conatains a Goniometer it can be accessed from the run object.
 
@@ -141,11 +137,14 @@ If the instrument conatains a Goniometer it can be accessed from the run object.
 
   print "Goniometer angles: ",wg.getRun().getGoniometer().getEulerAngles('YZY')
 
-.. testoutput:: GetPropertytest
+.. testoutput:: GetGoniometertest
   :hide:
   :options: +NORMALIZE_WHITESPACE
 
   Goniometer angles:  [50,0,0]
+
+Listing all properties
+^^^^^^^^^^^^^^^^^^^^^^
 
 What information is stored here?
 --------------------------------
@@ -154,7 +153,7 @@ On loading experimental data there is a default set of properties that
 are populated within the run. These are as follows:
 
 ISIS (not including ISIS Muon data)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###################################
 
 -  **run\_header** - The complete header for this run
 -  **run\_title** - The run title
@@ -183,7 +182,7 @@ ISIS (not including ISIS Muon data)
 -  **rb\_proposal** - The proposal number
 
 ISIS Muon data
-^^^^^^^^^^^^^^
+##############
 
 -  **run\_title** - The run title
 -  **run\_start** - Start date and time. Format: YYYY-MM-DD HH:MM:SS (+)

@@ -136,9 +136,6 @@ You can get access to the :ref:`Instrument` for a workspace with
 
   instrument = ws.getInstrument()
 
-.. testoutput:: MatrixWorkspaceInstrument
-  :hide:
-
 For the properties and operations of the instrument look at the :ref:`Instrument help <Instrument>`.
 
 Run - to access logs, and other run information
@@ -153,9 +150,6 @@ You can get access to the :ref:`Run` for a workspace with
 .. testcode:: MatrixWorkspaceRun
 
   instrument = ws.getRun()
-
-.. testoutput:: MatrixWorkspaceRun
-  :hide:
 
 For the properties and operations of the run object and how to access log data look at the :ref:`Run help <Run>`.
 
@@ -396,10 +390,6 @@ The expected operations of +,-,*,/ are supported with either a single number or 
   # Multiply the new workspace by 2 and place the output into a new workspace
   w4 = w3 * 2
 
-.. testoutput:: MatrixWorkspaceAlgebra
-    :hide:
-
-
 It is also possible to replace one of the input workspaces using one of +=,-=,*=,/= e.g.
 
 .. testsetup:: MatrixWorkspaceAlgebra2
@@ -415,15 +405,8 @@ It is also possible to replace one of the input workspaces using one of +=,-=,*=
   # Add 'workspace2' to 'workspace1' and replace 'workspace1' with the output
   w1 += w2
 
-.. testoutput:: MatrixWorkspaceAlgebra2
-    :hide:
-
-
 
 .. include:: WorkspaceNavigation.txt
    
-
-
-
 
 .. categories:: Concepts

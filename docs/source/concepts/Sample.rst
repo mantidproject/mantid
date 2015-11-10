@@ -30,9 +30,6 @@ Getting the Sample Object from a Workspace
   ws=CreateWorkspace(DataX='1,2',DataY='1')
   s=ws.sample()
 
-.. testoutput:: WorkspaceSample
-  :hide:
-
 
 Sample Properties
 #################
@@ -88,10 +85,6 @@ The ``Sample()`` method actually returns a collection, however if you do not spe
 
   # You can ask how many samples there are with
   size = ws.sample().size()
-
-.. testoutput:: MultiSample
-  :hide:
-  :options: +ELLIPSIS,+NORMALIZE_WHITESPACE
 
 
 .. categories:: Concepts

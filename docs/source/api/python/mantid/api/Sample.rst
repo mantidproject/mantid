@@ -1,4 +1,4 @@
-.. _mantid.api.Run:
+.. _mantid.api.Sample:
 
 ========
  Sample

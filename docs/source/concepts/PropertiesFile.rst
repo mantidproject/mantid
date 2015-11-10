@@ -119,7 +119,7 @@ to alter and those properties are detailed below.
 |                                           |will apply.                                        |                       |
 +-------------------------------------------+---------------------------------------------------+-----------------------+
 |logging.channels.consoleFilterChannel.level|The lowest level messages to output to the console.|debug, information,    |
-|                                           | The default is warning, but this can be           |notice, warning,       |
+|                                           |The default is warning, but this can be            |notice, warning,       |
 |                                           |lowered to debug for more detailed feedback. The   |error, critical        |
 |                                           |higher level of this and logging.loggers.root.level|or fatal               |
 |                                           |will apply.                                        |                       |
