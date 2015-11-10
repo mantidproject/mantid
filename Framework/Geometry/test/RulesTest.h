@@ -15,6 +15,8 @@
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Cone.h"
 
+#include "boost/make_shared.hpp"
+
 using namespace Mantid;
 using namespace Geometry;
 
@@ -65,10 +67,12 @@ public:
 
   void testSubstituteSurf() {
     Rule *uTree = createAUnionTree();
-    TS_ASSERT_EQUALS(uTree->substituteSurf(11, 13, new Cone()), 1);
+    TS_ASSERT_EQUALS(uTree->substituteSurf(11, 13, boost::make_shared<Cone>()),
+                     1);
     TS_ASSERT_EQUALS(uTree->display(), "10 : 10 : 12 : 13");
-    TS_ASSERT_EQUALS(uTree->substituteSurf(10, 14, new Sphere()),
-                     2); // its suppose to return 2
+    TS_ASSERT_EQUALS(
+        uTree->substituteSurf(10, 14, boost::make_shared<Sphere>()),
+        2); // its suppose to return 2
     TS_ASSERT_EQUALS(uTree->display(), "14 : 14 : 12 : 13");
     delete uTree;
   }
@@ -80,13 +84,13 @@ private:
     // A Node
     SurfPoint *A, *B, *C;
     A = new SurfPoint();
-    A->setKey(new Plane());
+    A->setKey(boost::make_shared<Plane>());
     A->setKeyN(10);
     B = new SurfPoint();
-    B->setKey(new Sphere());
+    B->setKey(boost::make_shared<Sphere>());
     B->setKeyN(11);
     C = new SurfPoint();
-    C->setKey(new Cylinder());
+    C->setKey(boost::make_shared<Cylinder>());
     C->setKeyN(12);
 
     Union *Left;
@@ -104,13 +108,13 @@ private:
     // A Node
     SurfPoint *A, *B, *C;
     A = new SurfPoint();
-    A->setKey(new Plane());
+    A->setKey(boost::make_shared<Plane>());
     A->setKeyN(10);
     B = new SurfPoint();
-    B->setKey(new Sphere());
+    B->setKey(boost::make_shared<Sphere>());
     B->setKeyN(11);
     C = new SurfPoint();
-    C->setKey(new Cylinder());
+    C->setKey(boost::make_shared<Cylinder>());
     C->setKeyN(12);
     Intersection *Root;
     Root = new Intersection();
@@ -130,13 +134,13 @@ private:
   Rule *createAMixedTree() { // A B : C A
     SurfPoint *A, *B, *C;
     A = new SurfPoint();
-    A->setKey(new Plane());
+    A->setKey(boost::make_shared<Plane>());
     A->setKeyN(10);
     B = new SurfPoint();
-    B->setKey(new Sphere());
+    B->setKey(boost::make_shared<Sphere>());
     B->setKeyN(11);
     C = new SurfPoint();
-    C->setKey(new Cylinder());
+    C->setKey(boost::make_shared<Cylinder>());
     C->setKeyN(12);
     Union *Root;
     Root = new Union();

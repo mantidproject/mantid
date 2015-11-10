@@ -15,6 +15,8 @@
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Cone.h"
 
+#include "boost/make_shared.hpp"
+
 using namespace Mantid;
 using namespace Geometry;
 using Mantid::Kernel::V3D;
@@ -190,10 +192,10 @@ private:
     std::string C33 = "px -3.2";
 
     // First create some surfaces
-    std::map<int, Surface *> CylSurMap;
-    CylSurMap[31] = new Cylinder();
-    CylSurMap[32] = new Plane();
-    CylSurMap[33] = new Plane();
+    std::map<int, boost::shared_ptr<Surface>> CylSurMap;
+    CylSurMap[31] = boost::make_shared<Cylinder>();
+    CylSurMap[32] = boost::make_shared<Plane>();
+    CylSurMap[33] = boost::make_shared<Plane>();
 
     CylSurMap[31]->setSurface(C31);
     CylSurMap[32]->setSurface(C32);
