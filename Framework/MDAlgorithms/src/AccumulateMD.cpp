@@ -314,7 +314,7 @@ void AccumulateMD::exec() {
   padParameterVector(efix, input_data.size());
 
   // Create progress reporting object
-  //Progress prog = Progress(this, 0.0, 1.0, 2);
+  // Progress prog = Progress(this, 0.0, 1.0, 2);
   this->progress(0);
 
   const std::string nonexistent =
