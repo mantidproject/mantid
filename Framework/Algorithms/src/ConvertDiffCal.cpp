@@ -44,7 +44,9 @@ const std::string ConvertDiffCal::name() const { return "ConvertDiffCal"; }
 int ConvertDiffCal::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ConvertDiffCal::category() const { return "Diffraction"; }
+const std::string ConvertDiffCal::category() const {
+  return "Diffraction\\Utility";
+}
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ConvertDiffCal::summary() const {

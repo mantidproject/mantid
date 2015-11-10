@@ -59,7 +59,9 @@ public:
   }
 
   virtual int version() const { return (1); }
-  virtual const std::string category() const { return "CorrectionFunctions"; }
+  virtual const std::string category() const {
+    return "Arithmetic;CorrectionFunctions";
+  }
 
 private:
   /// Initialisation code

@@ -34,7 +34,7 @@ class BayesQuasi(PythonAlgorithm):
     _plot = None
 
     def category(self):
-        return "Workflow\\MIDAS;PythonAlgorithms"
+        return "Workflow\\MIDAS"
 
     def summary(self):
         return "This algorithm runs the Fortran QLines programs which fits a Delta function of"+\

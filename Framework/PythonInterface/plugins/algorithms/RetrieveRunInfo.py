@@ -177,7 +177,7 @@ class FileBackedWsIterator(object):
 
 class RetrieveRunInfo(PythonAlgorithm):
     def category(self):
-        return 'Utility;PythonAlgorithms'
+        return 'DataHandling\\Catalog'
 
     def summary(self):
         return "Given a range of run numbers and an output workspace name, will compile a table of info for "+\

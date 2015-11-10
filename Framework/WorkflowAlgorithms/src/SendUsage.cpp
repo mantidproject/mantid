@@ -76,7 +76,7 @@ const std::string SendUsage::name() const { return "SendUsage"; }
 int SendUsage::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SendUsage::category() const { return "Workflow"; }
+const std::string SendUsage::category() const { return "Workflow\\Reporting"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string SendUsage::summary() const {

@@ -72,7 +72,7 @@ public:
   const std::string name() const { return "PawleyFit"; }
   int version() const { return 1; }
   const std::string summary() const;
-  const std::string category() const { return "Diffraction"; }
+  const std::string category() const { return "Diffraction\\Fitting"; }
 
 protected:
   double getTransformedCenter(double d, const Kernel::Unit_sptr &unit) const;

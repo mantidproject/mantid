@@ -36,7 +36,7 @@ public:
   virtual int version() const { return 1; };
   /// Algorithm's category for identification
   virtual const std::string category() const {
-    return "DataHandling\\Text;Diffraction";
+    return "DataHandling\\Text;Diffraction\\DataHandling\\CalFiles";
   }
 
   static void getInstrument3WaysInit(Mantid::API::Algorithm *alg);

@@ -8,7 +8,7 @@ import numpy as np
 class VisionLoadDetectorTable(PythonAlgorithm):
 
     def category(self):
-        return "Utility\\Development;PythonAlgorithms"
+        return "Utility\\Development"
 
     def summary(self):
         return "Warning - This is under development - Algorithm to load detector parameters for VISION."

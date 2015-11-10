@@ -56,7 +56,7 @@ int VesuvioL1ThetaResolution::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string VesuvioL1ThetaResolution::category() const {
-  return "CorrectionFunctions";
+  return "CorrectionFunctions\\SpecialCorrections";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary

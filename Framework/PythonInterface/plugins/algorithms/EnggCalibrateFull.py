@@ -8,7 +8,7 @@ class EnggCalibrateFull(PythonAlgorithm):
     INDICES_PROP_NAME = 'SpectrumNumbers'
 
     def category(self):
-        return "Diffraction\\Engineering;PythonAlgorithms"
+        return "Diffraction\\Engineering"
 
     def name(self):
         return "EnggCalibrateFull"

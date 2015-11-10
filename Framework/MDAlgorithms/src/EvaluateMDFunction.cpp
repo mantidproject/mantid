@@ -32,7 +32,7 @@ int EvaluateMDFunction::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string EvaluateMDFunction::category() const {
-  return "MDAlgorithms";
+  return "MDAlgorithms\\Creation";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary

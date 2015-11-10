@@ -22,8 +22,6 @@ public:
 
   void testVersion() { TS_ASSERT_EQUALS(loader.version(), 1); }
 
-  void testCategory() { TS_ASSERT_EQUALS(loader.category(), "DataHandling"); }
-
   void testInit() {
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());

@@ -9,7 +9,7 @@ class EnggFitPeaks(PythonAlgorithm):
     PEAK_TYPE = 'BackToBackExponential'
 
     def category(self):
-        return "Diffraction\\Engineering;PythonAlgorithms"
+        return "Diffraction\\Engineering"
 
     def name(self):
         return "EnggFitPeaks"

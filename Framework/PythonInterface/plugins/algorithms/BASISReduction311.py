@@ -38,7 +38,7 @@ class BASISReduction311(PythonAlgorithm):
     _samSqwWs = None
 
     def category(self):
-        return "Inelastic;PythonAlgorithms"
+        return "Inelastic\\Reduction"
 
     def name(self):
         return "BASISReduction311"

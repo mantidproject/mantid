@@ -38,7 +38,7 @@ int DetectorEfficiencyCorUser::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string DetectorEfficiencyCorUser::category() const {
-  return "CorrectionFunctions\\EfficiencyCorrections;Inelastic";
+  return "CorrectionFunctions\\EfficiencyCorrections;Inelastic\\Corrections";
 }
 
 //----------------------------------------------------------------------------------------------

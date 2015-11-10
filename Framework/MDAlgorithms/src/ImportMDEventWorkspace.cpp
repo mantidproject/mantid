@@ -93,7 +93,7 @@ int ImportMDEventWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ImportMDEventWorkspace::category() const {
-  return "MDAlgorithms";
+  return "MDAlgorithms\\DataHandling";
 }
 
 //----------------------------------------------------------------------------------------------

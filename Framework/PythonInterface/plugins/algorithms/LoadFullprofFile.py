@@ -16,7 +16,7 @@ class LoadFullprofFile(PythonAlgorithm):
     def category(self):
         """
         """
-        return "Diffraction;Utility"
+        return "Diffraction\\DataHandling"
 
     def name(self):
         """

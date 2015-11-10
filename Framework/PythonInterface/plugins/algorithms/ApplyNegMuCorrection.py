@@ -70,7 +70,7 @@ class ApplyNegMuCorrection(PythonAlgorithm):
         self.declareProperty(name="OffsetISISLowE",defaultValue=0.0,doc="OffSet ISIS Low E")
 
     def category(self):
-        return "CorrectionFunctions;Muon"
+        return "CorrectionFunctions\\SpecialCorrections;Muon"
 
     def PyExec(self):
 
