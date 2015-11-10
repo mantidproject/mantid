@@ -17,17 +17,47 @@ class UserProperties(object):
     """Helper class to define & retrieve user properties
        as retrieved from file provided by user office
     """
-    def __init__(self,user_id=None):
-        """ None is done for com"""
-        self._user_id = str(user_id)
+    def __init__(self,*args):
+        """ Build user properties from space separated string in the form:
+            "userId instr_name rb_num cycle_mu start_date"
+            or list of five elements with the same meaning
+        """
         self._instrument={}
         self._rb_dirs = {}
         self._cycle_IDs={}
         self._start_dates = {}
+        self._rb_exist={}
+        # 
+        self._user_id = None
         self._recent_dateID=None
+        if args[0] is None:
+            return
+        if len(args) == 1:
+            input = str(args[0])
+            param = input.split()
+            self._user_id = param[0]
+            if len(param) == 5:
+                self.set_user_properties(param[1],param[2],param[3],param[4])
+            else: # only userID was provided, nothing else is defined
+                return
+        elif len(args) == 5:
+            self._user_id = str(args[0])
+            self.set_user_properties(args[1],args[2],args[3],args[4])
+        else:
+            raise RuntimeError("User has to be defined by the list of 5 components in the form:\n{0}".\
+                format("[userId,instr_name,rb_num,cycle_mu,start_date]"))
 
+    def __str__(self):
+        """Convert class to string. Only last cycle settings are returned"""
+        if self._user_id:
+            return "{0} {1} {2} {3} {4}".format(self._user_id,self.instrument,\
+                    self.rb_folder,self.cycleID,str(self.start_date))
+        else:
+            return "None"
+
+       
 #
-    def set_user_properties(self,instrument,start_date,cycle,rb_folder):
+    def set_user_properties(self,instrument,rb_folder_or_id,cycle,start_date):
         """Define the information, user office provides about user.
 
            The info has the form:
@@ -38,16 +68,18 @@ class UserProperties(object):
            rb_folder  -- string containing the full path to working folder available
                         for all users and IS participating in the experiment.
         """
-        self.check_input(instrument,start_date,cycle,rb_folder)
+        instrument,start_date,cycle,rb_folder_or_id,rb_exist =self.check_input(instrument,start_date,cycle,rb_folder_or_id)
         #when user starts
         recent_date = date(int(start_date[0:4]),int(start_date[4:6]),int(start_date[6:8]))
         recent_date_id = str(recent_date)
         self._start_dates[recent_date_id]=recent_date
+        self._rb_exist[recent_date_id]  = rb_exist
+
 
         # a data which define the cycle ID e.g 2014_3 or something
-        self._cycle_IDs[recent_date_id] = (str(cycle[5:9]),str(cycle[9:10]))
-        self._instrument[recent_date_id]   = str(instrument).upper()
-        self._rb_dirs[recent_date_id]       = rb_folder
+        self._cycle_IDs[recent_date_id]  = (str(cycle[5:9]),str(cycle[9:10]))
+        self._instrument[recent_date_id] = str(instrument).upper()
+        self._rb_dirs[recent_date_id]    = rb_folder_or_id
         if self._recent_dateID:
             max_date = self._start_dates[self._recent_dateID]
             for date_key,a_date in self._start_dates.iteritems():
@@ -95,6 +127,14 @@ class UserProperties(object):
             return RBfolder
         else:
             return None
+    @property
+    def rb_id(self):
+        """the same as rb_folder:
+           returns string with RB and string representation of
+           RB number e.g. RB1510324
+        """
+        return self.rb_folder
+
 
 #
     @property
@@ -120,6 +160,25 @@ class UserProperties(object):
             return  self._rb_dirs[self._recent_dateID]
         else:
             raise RuntimeError("User's experiment date is not defined. User undefined")
+    @rb_dir.setter
+    def rb_dir(self,user_home_path):
+        """Set user's rb-folder path"""
+        rb_path = self.rb_folder
+        full_path = os.path.join(user_home_path,rb_path)
+        if os.path.exists(full_path) and os.path.isdir(full_path):
+            self._rb_dirs[self._recent_dateID] = full_path
+            self._rb_exist[self._recent_dateID] = True
+        else:
+            pass
+    #
+    @property
+    def rb_dir_exist(self):
+        """return true if user's rb dir exist and false otherwise"""
+        if self._recent_dateID:
+            return  self._rb_exist[self._recent_dateID]
+        else:
+            raise RuntimeError("User's experiment date is not defined. User undefined")
+
 #
     @property
     def cycleID(self):
@@ -145,19 +204,59 @@ class UserProperties(object):
         self._user_id = str(val)
 
 #
-    def check_input(self,instrument,start_date,cycle,rb_folder):
+    def check_input(self,instrument,start_date,cycle,rb_folder_or_id):
         """Verify that input is correct"""
         if not instrument in INELASTIC_INSTRUMENTS:
             raise RuntimeError("Instrument {0} has to be one of "\
                   "ISIS inelastic instruments".format(instrument))
-        if not (isinstance(start_date,str) and len(start_date) == 8):
-            raise RuntimeError("Experiment start date {0} should be defined as"\
-                  " a sting in the form YYYYMMDD but it is not".format(start_date))
-        if not (isinstance(cycle,str) and len(cycle) == 10 and re.match('^CYCLE',cycle)) :
-            raise RuntimeError("Cycle {0} should have form CYCLEYYYYN where "\
-                  "N-- the cycle's number in a year but it is not".format(cycle))
-        if not (os.path.exists(rb_folder) and os.path.isdir(rb_folder)):
-            raise RuntimeError("Folder {0} have to exist".format(rb_folder))
+        if isinstance(start_date,str):
+            start_date = start_date.replace('-','')
+            if len(start_date) != 8:
+                start_date = '20'+start_date
+            if len(start_date) == 8:
+                error = False
+            else:
+                error = True
+        else:
+            error = True
+        if error:
+            raise RuntimeError("Experiment start date should be defined as"\
+            " a sting in the form YYYYMMDD or YYMMDD but it is: {0}".format(start_date))
+        #
+        def convert_cycle_int(cycle_int):
+            if cycle_int > 999: # Full cycle format 20151
+               cycle = "CYCLE{0:05}".format(cycle_int)
+            else:
+               cycle = "CYCLE20{0:03}".format(cycle_int)
+            return cycle
+
+        if isinstance(cycle,int):
+            cycle = convert_cycle_int(cycle)
+        if isinstance(cycle,str):
+            if not(len(cycle) == 10):
+                cycle = cycle.replace('_','')
+                try:
+                    cycle = int(cycle)
+                except ValueError:
+                    raise RuntimeError("Cycle should be a string in the form CYCLEYYYYN "\
+                    "N-- the cycle's number in a year or integer in the form: YYYYN or YYN "\
+                    "but it is {0}".format(cycle))
+                cycle = convert_cycle_int(cycle)
+                if not(len(cycle) == 10 and re.match('^CYCLE',cycle)):
+                    raise RuntimeError("Cycle should be a string in form CYCLEYYYYN "\
+                    "N-- the cycle's number in a year or integer in the form: YYYYN or YYN "\
+                    "but it is {0}".format(cycle))
+        if isinstance(rb_folder_or_id,int):
+           rb_folder_or_id = "RB{0:07}".format(rb_folder_or_id)
+        if not isinstance(rb_folder_or_id,str):
+            raise RuntimeError("RB Folder {0} should be a string".format(rb_folder_or_id))
+
+        if os.path.exists(rb_folder_or_id) and os.path.isdir(rb_folder_or_id):
+            rb_exist = True
+        else:
+            rb_exist = False
+
+        return instrument,start_date,cycle,rb_folder_or_id,rb_exist
 #
 #--------------------------------------------------------------------#
 #
@@ -702,24 +801,12 @@ class MantidConfigDirectInelastic(object):
 
 if __name__ == "__main__":
 
-    if len(sys.argv) <=1 :
-        print "usage: Config instrument cycle_ID rb_number user_id start_date"
+    if len(sys.argv) != 6:
+        print "usage: Config.py instrument userID cycleID start_date rb_folder"
         exit()
-    inp = {}
-    if len(sys.argv) < 5:
-        inp["inst_name"] = str(raw_input('Enter instrument name: ').upper())
-        inp["cycleID"]  = int(raw_input('Enter cycle ID as 3 digit number (e.g. 153 for cycle 2015/3): '))
-        inp["rbNum"]   = int(raw_input('Enter RB number as 7 digit number (e.g. 1520374): '))
-        inp["userID"] =  raw_input('enter user ID to configure: ').lower()
-        inp["startDate"] = raw_input('enter experiment start date: as YYYYYMMDD integer 20151104').lower()
-    else:
-        inp["inst_name"] = str(sys.argv[1]).upper()
-        inp["cycleID"] = int(sys.argv[2])
-        inp["rbNum"] = int(sys.argv[3])
-        inp["userID"] = str(sys.argv[4])
-        inp["startDate"] = str(sys.argv[5])  # cast to int to test RB
 
-    inp["cycleID"] = "CYCLE20{0}".format(inp["cycleID"])
+    user = UserProperties(sys.argv[1:])
+
 
     if platform.system() == 'Windows':
         sys.path.insert(0,'c:/Mantid/scripts/Inelastic/Direct')
@@ -752,15 +839,15 @@ if __name__ == "__main__":
     mcf = MantidConfigDirectInelastic(MantidDir,rootDir,UserScriptRepoDir,MapMaskDir)
     print "Successfully initialized ISIS Inelastic Configuration script generator"
 
-    user = UserProperties(inp["userID"])
 
-    rb_user_folder = os.path.join(mcf._home_path,inp["userID"],'RB'+str(inp["rbNum"]))
-    # rb folder must be present!
-    user.set_user_properties(inp["inst_name"],inp["startDate"],inp["cycleID"],rb_user_folder)
 
+    rb_user_folder = os.path.join(mcf._home_path,user.userID)
+    user.rb_dir = rb_user_folder
+    if not user.rb_dir_exist:
+        print "RB folder {0} for user {1} should exist and be accessible to configure this user".format(user.rb_dir,user.userID)
+        exit()
+    # Configure user
     mcf.init_user(user)
     mcf.generate_config()
-    print "Successfully Configured user: ",inp["userID"]," for instrument: ",inp["inst_name"]
-
-
+    print "Successfully Configured user: ",user.userID," for instrument: ",user.instrument
 
