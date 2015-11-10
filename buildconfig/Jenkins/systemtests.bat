@@ -37,9 +37,11 @@ cd %WORKSPACE%\build
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if not EXIST %WORKSPACE%\build\CMakeCache.txt (
   call cmake -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DDATA_TARGETS_ONLY=ON ..
+  if ERRORLEVEL 1 exit /b %ERRORLEVEL%
 ) else (
   :: This ensures that any new data files are picked up by the cmake globbing
   call cmake .
+  if ERRORLEVEL 1 exit /b %ERRORLEVEL%
 )
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
