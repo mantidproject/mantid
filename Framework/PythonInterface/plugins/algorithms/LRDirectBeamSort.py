@@ -90,22 +90,27 @@ class LRDirectBeamSort(PythonAlgorithm):
         return "Sort a set of direct beams for the purpose of calculating scaling factors."
 
     def PyInit(self):
-        self.declareProperty(IntArrayProperty("RunList", [], direction=Direction.Input))
+        self.declareProperty(IntArrayProperty("RunList", [], direction=Direction.Input),
+                             "List of run numbers (integers) to be sorted - takes precedence over WorkspaceList")
         self.declareProperty(StringArrayProperty("WorkspaceList", [], direction=Direction.Input),
                              "List of workspace names to be sorted")
-        self.declareProperty("UseLowResCut", False, direction=Direction.Input)
-        self.declareProperty("ComputeScalingFactors", True, direction=Direction.Input)
-        self.declareProperty("TOFSteps", 200.0)
+        self.declareProperty("UseLowResCut", False, direction=Direction.Input,
+                             doc="If True, an x-direction cut will be determined and used")
+        self.declareProperty("ComputeScalingFactors", True, direction=Direction.Input,
+                             doc="If True, the scaling factors will be computed")
+        self.declareProperty("TOFSteps", 200.0, doc="TOF bin width")
         self.declareProperty(FileProperty("ScalingFactorFile","",
-                                          action=FileAction.Save,
-                                          extensions=['cfg']))
+                                          action=FileAction.OptionalSave,
+                                          extensions=['cfg']),
+                             "Scaling factor file to be created")
         
-        self.declareProperty(IntArrayProperty("OrderedRunList", [], direction=Direction.Output))
-        self.declareProperty(StringArrayProperty("OrderedNameList", [], direction=Direction.Output))
+        self.declareProperty(IntArrayProperty("OrderedRunList", [], direction=Direction.Output),
+                             "Ordered list of run numbers")
+        self.declareProperty(StringArrayProperty("OrderedNameList", [], direction=Direction.Output),
+                             "Ordered list of workspace names corresponding to the run list")
 
     def PyExec(self):
         compute = self.getProperty("ComputeScalingFactors").value
-    
         lr_data = []
         run_list = self.getProperty("RunList").value
         if len(run_list) > 0:
@@ -125,8 +130,13 @@ class LRDirectBeamSort(PythonAlgorithm):
         self.setProperty("OrderedRunList", run_numbers)
         self.setProperty("OrderedNameList", ws_names)
 
+        # Compute the scaling factors if requested
         if compute:
-            self._compute_scaling_factors(lr_data_sorted)
+            sf_file = self.getProperty("ScalingFactorFile").value
+            if len(sf_file)==0:
+                logger.error("Scaling factors were requested but no output file was set")
+            else:
+                self._compute_scaling_factors(lr_data_sorted)
             
     def _compute_scaling_factors(self, lr_data_sorted):
         """

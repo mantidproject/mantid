@@ -207,7 +207,7 @@ class LRPeakSelection(PythonAlgorithm):
         self.declareProperty(IntArrayProperty("PeakRange", [0,0], direction=Direction.Output))
         self.declareProperty(IntArrayProperty("LowResRange", [0,0], direction=Direction.Output))
         self.declareProperty(IntArrayProperty("PrimaryRange", [0,0], direction=Direction.Output))
-        self.declareProperty("ComputePrimaryRange", False)
+        self.declareProperty("ComputePrimaryRange", False, doc="If True, the primary fraction range will be determined")
 
     def PyExec(self):
         workspace = self.getProperty("InputWorkspace").value
