@@ -71,7 +71,7 @@ void ConvertCWSDExpToMomentum::init() {
                   "monitor counts");
 
   declareProperty("ScaleFactor", EMPTY_DBL(), "If it is given, then all the signals of MDEvent "
-                  "shall be scaled up by this factor".);
+                  "shall be scaled up by this factor");
 
   declareProperty(new WorkspaceProperty<MatrixWorkspace>(
                     "BackgroundWorkspace", "", Direction::Input, PropertyMode::Optional),
@@ -106,7 +106,7 @@ void ConvertCWSDExpToMomentum::exec() {
   }
   // background
   std::string bkgdwsname = getPropertyValue("BackgroundWorkspace");
-  if (len(bkgdwsname) > 0)
+  if (bkgdwsname.size() > 0)
   {
     m_removeBackground = true;
     m_backgroundWS = getProperty("BackgroundWorkspace");
