@@ -340,22 +340,22 @@ axis-aligned, you will likely have to specify a
 Bounding-Box
 ------------
 
-When a geometric shape is rendered in the MantidPlot instrument viewer, Mantid
+When a geometric shape is rendered in the MantidPlot instrument viewer, Mantid 
 will attempt to automatically construct an axis-aligned bounding box for every 
-geometric shape that does not have one yet. Well-defined bounding boxes are
-required by many features of Mantid, from corectly rendering the instrument to 
-performing calculations in various algorithms.
+geometric shape that does not have one yet. Well-defined bounding boxes are 
+required by many features of Mantid, from correctly rendering the instrument 
+to performing calculations in various algorithms.
 
 For axis-aligned shapes, the automatically calculated bounding boxes can 
 generally be relied upon and are usually ideal. However, if a shape is not 
-aligned to the X, Y or Z-axis, or if a shape contains surfaces that are not
+aligned to the X, Y or Z-axis, or if a shape contains surfaces that are not 
 axis-aligned, then the automatic calculations will often fail or produce 
 bounding boxes that are far too large and not at all representative of the 
 shape they are meant to contain.
 
 A typical symptom of this is your instrument appearing very small when viewed 
-(forcing you to have to zoom in for a long time to see it). In such cases, the
-axis visualizations also tend to not display properly.
+(forcing you to have to zoom in for a long time to see it). In such cases, 
+the axis visualizations also tend to not display properly.
 
 This can be fixed by explicitly adding a custom bounding-box to shapes that 
 are not axis-aligned or contain surfaces that are not axis-aligned. This can 
