@@ -519,7 +519,7 @@ MatrixWorkspace_sptr
 create2DWorkspaceWithReflectometryInstrument(double startX) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
   instrument->setReferenceFrame(
-      boost::make_shared<ReferenceFrame>(Y, X, Left, "0,0,0"));
+      boost::make_shared<ReferenceFrame>(Y /*up*/, X /*along*/, Left, "0,0,0"));
 
   ObjComponent *source = new ObjComponent("source");
   source->setPos(V3D(0, 0, 0));
@@ -536,7 +536,10 @@ create2DWorkspaceWithReflectometryInstrument(double startX) {
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
-  Detector *det = new Detector("point-detector", 2, NULL);
+  // Where 0.01 is half detector width etc.
+  Detector *det = new Detector(
+      "point-detector", 2,
+      ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03), NULL);
   det->setPos(20, (20 - sample->getPos().X()), 0);
   instrument->add(det);
   instrument->markAsDetector(det);

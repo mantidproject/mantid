@@ -276,7 +276,7 @@ std::string Intersection::displayAddress() const
 */
 {
   std::stringstream cx;
-  cx << " [ " << reinterpret_cast<long>(this);
+  cx << " [ " << this;
   if (A && B)
     cx << " ] (" + A->displayAddress() + " " + B->displayAddress() + ") ";
   else if (A)
@@ -641,7 +641,7 @@ std::string Union::displayAddress() const
 */
 {
   std::stringstream cx;
-  cx << " [ " << reinterpret_cast<long int>(this);
+  cx << " [ " << this;
 
   if (A && B)
     cx << " ] (" + A->displayAddress() + " : " + B->displayAddress() + ") ";
@@ -878,7 +878,7 @@ std::string SurfPoint::displayAddress() const
 */
 {
   std::stringstream cx;
-  cx << reinterpret_cast<long int>(this);
+  cx << this;
   return cx.str();
 }
 
@@ -1179,7 +1179,7 @@ std::string CompObj::displayAddress() const
 */
 {
   std::stringstream cx;
-  cx << reinterpret_cast<long int>(this);
+  cx << this;
   return cx.str();
 }
 
@@ -1431,7 +1431,7 @@ std::string BoolValue::displayAddress() const
 */
 {
   std::stringstream cx;
-  cx << reinterpret_cast<long int>(this);
+  cx << this;
   return cx.str();
 }
 
@@ -1640,7 +1640,7 @@ std::string CompGrp::displayAddress() const
 */
 {
   std::stringstream cx;
-  cx << "#( [" << reinterpret_cast<long int>(this) << "] ";
+  cx << "#( [" << this << "] ";
   if (A)
     cx << A->displayAddress();
   else

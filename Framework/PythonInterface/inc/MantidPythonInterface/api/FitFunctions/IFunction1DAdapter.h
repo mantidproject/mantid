@@ -41,9 +41,18 @@ namespace PythonInterface {
  * This is essentially a transparent layer that handles the function calls up
  *into Python.
  */
+#if defined(_MSC_VER) && _MSC_VER >= 1900
+// All Python tests segfault on MSVC 2015 if the virtual specifiers are included
+// The segault happens on initializing this constructor. Conversely on all other
+// compilers it won't even compile without the virtual specifier.
+class IFunction1DAdapter : public API::ParamFunction,
+                           public API::IFunction1D,
+                           public IFunctionAdapter {
+#else
 class IFunction1DAdapter : public virtual API::ParamFunction,
                            public virtual API::IFunction1D,
-                           public virtual IFunctionAdapter {
+                           public IFunctionAdapter {
+#endif
 public:
   /// A constructor that looks like a Python __init__ method
   IFunction1DAdapter(PyObject *self);
@@ -62,7 +71,6 @@ public:
 
 private:
   /// The PyObject must be supplied to construct the object
-  DISABLE_DEFAULT_CONSTRUCT(IFunction1DAdapter)
   DISABLE_COPY_AND_ASSIGN(IFunction1DAdapter)
 
   /// Flag if the functionDeriv1D method is overridden (avoids multiple checks)

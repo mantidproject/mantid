@@ -37,8 +37,8 @@ public:
   double a0, a1, att0, att1;
 };
 
-class Fake1DFunction : public virtual Mantid::API::ParamFunction,
-                       public virtual Mantid::API::IFunction1D {
+class Fake1DFunction : public Mantid::API::ParamFunction,
+                       public Mantid::API::IFunction1D {
 public:
   Fake1DFunction()
       : Mantid::API::ParamFunction(), Mantid::API::IFunction1D(), a0(1.5),
@@ -71,8 +71,8 @@ public:
 };
 
 /// Sets all of the parameters to 1
-class FakeMDFunction : public virtual Mantid::API::IFunctionMD,
-                       public virtual Mantid::API::ParamFunction {
+class FakeMDFunction : public Mantid::API::IFunctionMD,
+                       public Mantid::API::ParamFunction {
   std::string name() const { return "Fake"; }
   double functionMD(const Mantid::API::IMDIterator &) const { return 0.0; }
 };
