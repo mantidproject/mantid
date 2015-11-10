@@ -624,7 +624,7 @@ CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name) {
  */
 void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws) {
 
-  g_log.notice()
+  g_log.information()
       << "LoadMD: Encountered a legacy file which has a mismatch between "
          "its MDFrames and its Special Coordinate System. "
          "Attempting to convert MDFrames." << std::endl;
