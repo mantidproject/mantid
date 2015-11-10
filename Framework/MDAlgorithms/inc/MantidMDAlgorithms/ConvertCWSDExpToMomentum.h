@@ -114,6 +114,9 @@ private:
   std::string m_dataDir;
   /// Flag to use m_dataDir
   bool m_isBaseName;
+  /// Flag to normalize and scale up
+  bool m_normalizeByMon;
+  double m_scaleFactor;
 };
 
 } // namespace MDAlgorithms

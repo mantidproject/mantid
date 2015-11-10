@@ -26,7 +26,7 @@ DECLARE_ALGORITHM(ConvertCWSDExpToMomentum)
  */
 ConvertCWSDExpToMomentum::ConvertCWSDExpToMomentum()
     : m_iColPt(1), m_iColFilename(2), m_iColStartDetID(3), m_setQRange(true),
-      m_isBaseName(false) {}
+      m_isBaseName(false), m_normalizeByMon(false), m_scaleFactor(1.){}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -67,11 +67,11 @@ void ConvertCWSDExpToMomentum::init() {
                                       "file names listed in InputWorkspace are "
                                       "base name without directory.");
 
-  declareProperty("NormalizeByMonitor", true, "TODO/FIXME");
+  declareProperty("NormalizeByMonitor", true, "Flag to normalize the signal of each MDEvent by "
+                  "monitor counts");
 
-  declareProperty("ScaleFactor", EMPTY_DBL(), "TODO/FIXME");
-
-  declareProperty("MaskWorkspace", "", "TODO/FIXME");
+  declareProperty("ScaleFactor", EMPTY_DBL(), "If it is given, then all the signals of MDEvent "
+                  "shall be scaled up by this factor".);
 
   declareProperty(
       new FileProperty("Directory", "", FileProperty::OptionalDirectory),
@@ -92,6 +92,13 @@ void ConvertCWSDExpToMomentum::exec() {
   if (!inputvalid) {
     g_log.error() << "Importing error: " << errmsg << "\n";
     throw std::runtime_error(errmsg);
+  }
+  m_normalizeByMon = getProperty("NormalizeByMonitor");
+  if (m_normalizeByMon)
+  {
+    m_scaleFactor = getProperty("ScaleFactor");
+    if (isEmpty(m_scaleFactor))
+      throw std::runtime_error("As NormalizeByMonitor is true, ScaleFactor must be given!");
   }
 
   // Create output MDEventWorkspace
@@ -351,6 +358,9 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
   // Create transformation matrix from which the transformation is
   Kernel::DblMatrix rotationMatrix;
   setupTransferMatrix(dataws, rotationMatrix);
+  double monitor_counts(1);
+  if (m_normalizeByMon)
+    monitor_counts = dataws->run().getPropertyAsSingleValue("Monitor");
 
   g_log.information() << "Before insert new event, output workspace has "
                       << m_outputWS->getNEvents() << "Events.\n";
@@ -383,9 +393,11 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
     // Get detector positions and signal
     double signal = dataws->readY(iws)[0];
     // Skip event with 0 signal
-    if (signal < 0.001)
+    if (fabs(signal) < 0.001)
       continue;
-    double error = dataws->readE(iws)[0];
+    if (m_normalizeByMon)
+      signal *= monitor_counts * m_scaleFactor;
+    double error = sqrt(fabs(signal));
     Kernel::V3D detpos = dataws->getDetector(iws)->getPos();
     std::vector<Mantid::coord_t> q_sample(3);
 
