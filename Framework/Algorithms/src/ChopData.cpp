@@ -58,7 +58,7 @@ void ChopData::exec() {
   if (rLower != EMPTY_DBL() && rUpper != EMPTY_DBL() &&
       monitorWi != EMPTY_INT()) {
 
-	progress = boost::make_shared<Progress>(this, 0, 1, chops * 2);
+    progress = boost::make_shared<Progress>(this, 0, 1, chops * 2);
 
     // Select the spectrum that is to be used to compare the sections of the
     // workspace
@@ -87,16 +87,15 @@ void ChopData::exec() {
         lowest = i;
       }
 
-	  progress->report();
+      progress->report();
     }
 
     std::map<int, double>::iterator nlow = intMap.find(lowest - 1);
     if (nlow != intMap.end() && intMap[lowest] < (0.1 * nlow->second)) {
       prelow = nlow->first;
     }
-  }
-  else
-	  progress = boost::make_shared<Progress>(this, 0, 1, chops);
+  } else
+    progress = boost::make_shared<Progress>(this, 0, 1, chops);
 
   int wsCounter(1);
 
@@ -158,7 +157,7 @@ void ChopData::exec() {
 
     workspaces.push_back(workspace);
 
-	progress->report();
+    progress->report();
   }
 
   // Create workspace group that holds output workspaces

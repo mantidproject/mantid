@@ -112,7 +112,7 @@ void CalculateZscore::exec() {
     vecY = yzscores;
     vecE = ezscores;
 
-	progress.report("Calculating Z Score");
+    progress.report("Calculating Z Score");
   } // ENDFOR
 
   // 4. Set the output

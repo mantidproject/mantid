@@ -56,8 +56,8 @@ void AddLogDerivative::init() {
  * @return
  */
 Mantid::Kernel::TimeSeriesProperty<double> *AddLogDerivative::makeDerivative(
-    API::Progress &progress, Mantid::Kernel::TimeSeriesProperty<double> *input, const std::string &name,
-    int numDerivatives) {
+    API::Progress &progress, Mantid::Kernel::TimeSeriesProperty<double> *input,
+    const std::string &name, int numDerivatives) {
   if (input->size() < numDerivatives + 1)
     throw std::runtime_error(
         "Log " + input->name() + " only has " +
@@ -91,7 +91,7 @@ Mantid::Kernel::TimeSeriesProperty<double> *AddLogDerivative::makeDerivative(
     times = dTime;
     values = dVal;
 
-	progress.report("Add Log Derivative");
+    progress.report("Add Log Derivative");
   }
 
   if (times.empty())
