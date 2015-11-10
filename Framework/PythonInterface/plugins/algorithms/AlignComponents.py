@@ -170,7 +170,7 @@ class AlignComponents(PythonAlgorithm):
             issues['ComponentList'] = "Must supply components"
         else:
             components = [component for component in components
-                          if (wksp.getInstrument().getComponentByName(component) is None)]
+                          if (wks.getInstrument().getComponentByName(component) is None)]
             if len(components) > 0:
                 issues['ComponentList'] = "Instrument has no component \"" \
                                        + ','.join(components) + "\""
