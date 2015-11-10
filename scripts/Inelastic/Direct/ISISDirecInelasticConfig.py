@@ -811,7 +811,7 @@ class MantidConfigDirectInelastic(object):
 if __name__ == "__main__":
 
     if len(sys.argv) != 6:
-        print "usage: Config.py instrument userID cycleID start_date rb_folder"
+        print "usage: Config.py userID instrument RBNumber cycleID start_date"
         exit()
 
     argi  = sys.argv[1:]
