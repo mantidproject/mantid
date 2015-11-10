@@ -132,7 +132,7 @@ void CreateFlatEventWorkspace::exec() {
     outputWS = plus_alg->getProperty("OutputWorkspace");
     tmpChunkWs = plus_alg->getProperty("RHSWorkspace");
 
-	progress.report();
+    progress.report();
   }
 
   // Crop the output workspace to be the same range as the input data
