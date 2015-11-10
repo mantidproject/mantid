@@ -42,9 +42,11 @@ public:
   virtual const std::string summary() const;
 
 protected:
-  virtual API::ITableWorkspace_sptr determineChunk(const std::string &filename) override;
+  virtual API::ITableWorkspace_sptr
+  determineChunk(const std::string &filename) override;
   virtual API::MatrixWorkspace_sptr loadChunk(const size_t rowIndex) override;
-  API::MatrixWorkspace_sptr processChunk(API::MatrixWorkspace_sptr &wksp, double filterBadPulses);
+  API::MatrixWorkspace_sptr processChunk(API::MatrixWorkspace_sptr &wksp,
+                                         double filterBadPulses);
 
 private:
   void init();

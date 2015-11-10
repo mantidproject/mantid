@@ -174,10 +174,12 @@ MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex) {
 /**
  * Process a chunk in-place
  *
+ * @param filterBadPulses
  * @param wksp
  */
 API::MatrixWorkspace_sptr
-LoadEventAndCompress::processChunk(API::MatrixWorkspace_sptr &wksp, double filterBadPulses) {
+LoadEventAndCompress::processChunk(API::MatrixWorkspace_sptr &wksp,
+                                   double filterBadPulses) {
   EventWorkspace_sptr eventWS =
       boost::dynamic_pointer_cast<EventWorkspace>(wksp);
 
@@ -234,7 +236,7 @@ void LoadEventAndCompress::exec() {
     plusAlg->executeAsChildAlg();
     resultWS = plusAlg->getProperty("OutputWorkspace");
 
-	progress.report();
+    progress.report();
   }
   Workspace_sptr total = assemble(resultWS);
 
