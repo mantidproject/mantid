@@ -3,8 +3,8 @@
 
 #include <cmath>
 
-// NAN is not defined in visual c++
-#ifdef _MSC_VER
+// NAN is not defined in Visual C++ < 2013
+#if (defined(_MSC_VER) && (_MSC_VER <= 1800))
 #define INFINITY (DBL_MAX + DBL_MAX)
 #define NAN (INFINITY - INFINITY)
 #endif
@@ -13,9 +13,6 @@ namespace Mantid {
 
 /** A namespace containing physical constants that are required by algorithms
    and unit routines.
-
-    @author Russell Taylor, Tessella Support Services plc
-    @date 30/10/2007
 
     Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
    Ridge National Laboratory & European Spallation Source

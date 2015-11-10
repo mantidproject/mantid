@@ -250,7 +250,7 @@
                    <item>
                     <widget class="QLabel" name="MinMagQ_lbl">
                      <property name="text">
-                      <string>Min |Q| to Map to MD</string>
+                      <string>Qmin to Map to MD</string>
                      </property>
                     </widget>
                    </item>
@@ -282,7 +282,7 @@
                       </size>
                      </property>
                      <property name="toolTip">
-                      <string>Specify value to use as bound on |Qx|, |Qy| and |Qz|</string>
+                      <string>Specify value to use as lower bound of Qx, Qy and Qz. Default is -Qmax</string>
                      </property>
                     </widget>
                    </item>
@@ -293,7 +293,7 @@
                    <item>
                     <widget class="QLabel" name="MaxMagQ_lbl">
                      <property name="text">
-                      <string>Max |Q| to Map to MD</string>
+                      <string>Qmax to Map to MD</string>
                      </property>
                     </widget>
                    </item>
@@ -325,7 +325,7 @@
                       </size>
                      </property>
                      <property name="toolTip">
-                      <string>Specify value to use as bound on |Qx|, |Qy| and |Qz|</string>
+                      <string>Specify value to use as upper bound of Qx, Qy and Qz</string>
                      </property>
                     </widget>
                    </item>

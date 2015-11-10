@@ -42,6 +42,7 @@ set ( SRC_FILES
 	src/CloneWorkspace.cpp
 	src/Comment.cpp
 	src/CommutativeBinaryOperation.cpp
+	src/CompareWorkspaces.cpp
 	src/ConjoinWorkspaces.cpp
 	src/ConvertAxesToRealSpace.cpp
 	src/ConvertAxisByFormula.cpp
@@ -319,6 +320,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CloneWorkspace.h
 	inc/MantidAlgorithms/Comment.h
 	inc/MantidAlgorithms/CommutativeBinaryOperation.h
+	inc/MantidAlgorithms/CompareWorkspaces.h
 	inc/MantidAlgorithms/ConjoinWorkspaces.h
 	inc/MantidAlgorithms/ConvertAxesToRealSpace.h
 	inc/MantidAlgorithms/ConvertAxisByFormula.h
@@ -608,6 +610,7 @@ set ( TEST_FILES
 	CloneWorkspaceTest.h
 	CommentTest.h
 	CommutativeBinaryOperationTest.h
+	CompareWorkspacesTest.h
 	ConjoinWorkspacesTest.h
 	ConvertAxesToRealSpaceTest.h
 	ConvertAxisByFormulaTest.h

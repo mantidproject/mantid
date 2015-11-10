@@ -41,7 +41,7 @@ BraggScatterer_sptr CompositeBraggScatterer::clone() const {
 
   clone->setScatterers(m_scatterers);
 
-  clone->setProperties(this->asString(false, ';'));
+  clone->setProperties(this->asString(false));
 
   return clone;
 }
