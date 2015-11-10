@@ -15,6 +15,7 @@
 #include <Poco/File.h>
 
 #include <QThread>
+#include <MantidAPI/AlgorithmManager.h>
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -1465,7 +1466,7 @@ EnggDiffractionPresenter::loadToPreproc(const std::string runNo) {
   Workspace_sptr inWS;
 
   try {
-    auto load = Algorithm::fromString("Load");
+    auto load = Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
     load->initialize();
     load->setPropertyValue("Filename", runNo);
     const std::string inWSName = "engggui_preproc_input_ws";
