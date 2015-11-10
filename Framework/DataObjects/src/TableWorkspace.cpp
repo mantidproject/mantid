@@ -303,8 +303,9 @@ IPropertyManager::getValue<DataObjects::TableWorkspace_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected TableWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<TableWorkspace>.";
     throw std::runtime_error(message);
   }
 }
@@ -319,8 +320,9 @@ IPropertyManager::getValue<DataObjects::TableWorkspace_const_sptr>(
   if (prop) {
     return prop->operator()();
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected const TableWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<TableWorkspace>.";
     throw std::runtime_error(message);
   }
 }

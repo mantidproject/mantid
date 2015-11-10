@@ -51,8 +51,9 @@ IPropertyManager::getValue<Mantid::API::IMDHistoWorkspace_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected IMDHistoWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<IMDHistoWorkspace>.";
     throw std::runtime_error(message);
   }
 }
@@ -71,7 +72,7 @@ IPropertyManager::getValue<Mantid::API::IMDHistoWorkspace_const_sptr>(
   } else {
     std::string message =
         "Attempt to assign property " + name +
-        " to incorrect type. Expected const IMDHistoWorkspace.";
+        " to incorrect type. Expected const shared_ptr<IMDHistoWorkspace>.";
     throw std::runtime_error(message);
   }
 }

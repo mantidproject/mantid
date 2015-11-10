@@ -401,8 +401,9 @@ IPropertyManager::getValue<Mantid::API::WorkspaceGroup_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected WorkspaceGroup.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<WorkspaceGroup>.";
     throw std::runtime_error(message);
   }
 }
@@ -417,8 +418,9 @@ IPropertyManager::getValue<Mantid::API::WorkspaceGroup_const_sptr>(
   if (prop) {
     return prop->operator()();
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected const WorkspaceGroup.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<WorkspaceGroup>.";
     throw std::runtime_error(message);
   }
 }

@@ -1644,8 +1644,8 @@ IPropertyManager::getValue<API::IAlgorithm_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message =
-        "Attempt to assign property " + name + " to incorrect type";
+    std::string message = "Attempt to assign property " + name +
+                          " to incorrect type. Expected shared_ptr<IAlgorithm>";
     throw std::runtime_error(message);
   }
 }
@@ -1667,7 +1667,8 @@ IPropertyManager::getValue<API::IAlgorithm_const_sptr>(
     return prop->operator()();
   } else {
     std::string message =
-        "Attempt to assign property " + name + " to incorrect type";
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<IAlgorithm>";
     throw std::runtime_error(message);
   }
 }
