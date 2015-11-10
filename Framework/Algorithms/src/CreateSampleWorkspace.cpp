@@ -183,7 +183,8 @@ void CreateSampleWorkspace::exec() {
     // down
     binWidth = xMax - xMin;
     g_log.warning() << "The bin width is so large that there is less than one "
-                       "bin - it has been changed to " << binWidth << std::endl;
+                       "bin - it has been changed to "
+                    << binWidth << std::endl;
   }
 
   std::string functionString = "";
@@ -205,7 +206,7 @@ void CreateSampleWorkspace::exec() {
   }
 
   int numPixels = numBanks * bankPixelWidth * bankPixelWidth;
- 
+
   Progress progress(this, 0, 1, numBanks);
 
   // Create an instrument with one or more rectangular banks.
@@ -221,9 +222,9 @@ void CreateSampleWorkspace::exec() {
                               bankPixelWidth * bankPixelWidth, inst,
                               functionString, isRandom);
   } else {
-    ws = createHistogramWorkspace(
-        numPixels, num_bins, xMin, binWidth,
-        bankPixelWidth * bankPixelWidth, inst, functionString, isRandom);
+    ws = createHistogramWorkspace(numPixels, num_bins, xMin, binWidth,
+                                  bankPixelWidth * bankPixelWidth, inst,
+                                  functionString, isRandom);
   }
   // add chopper
   this->addChopperParameters(ws);
@@ -234,7 +235,7 @@ void CreateSampleWorkspace::exec() {
   } catch (Exception::NotFoundError &) {
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
     Unit_sptr unit = ws->getAxis(0)->unit();
-    boost::shared_ptr<Units::Label> label = 
+    boost::shared_ptr<Units::Label> label =
         boost::dynamic_pointer_cast<Units::Label>(unit);
     label->setLabel(xUnit, xUnit);
   }
@@ -287,8 +288,8 @@ void CreateSampleWorkspace::addChopperParameters(
 /** Create histogram workspace
  */
 MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
-    int numPixels, int numBins, double x0, double binDelta, 
-	int start_at_pixelID, Geometry::Instrument_sptr inst,
+    int numPixels, int numBins, double x0, double binDelta,
+    int start_at_pixelID, Geometry::Instrument_sptr inst,
     const std::string &functionString, bool isRandom) {
   MantidVecPtr x, y, e;
   x.access().resize(numBins + 1);
@@ -296,7 +297,6 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
   for (int i = 0; i < numBins + 1; ++i) {
     x.access()[i] = x0 + i * binDelta;
   }
-
 
   std::vector<double> xValues(x.access().begin(), x.access().end() - 1);
   y.access() = evalFunction(functionString, xValues, isRandom ? 1 : 0);
@@ -325,8 +325,8 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
 /** Create event workspace
  */
 EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
-    int numPixels, int numBins, int numEvents, double x0, double binDelta, 
-	int start_at_pixelID, Geometry::Instrument_sptr inst,
+    int numPixels, int numBins, int numEvents, double x0, double binDelta,
+    int start_at_pixelID, Geometry::Instrument_sptr inst,
     const std::string &functionString, bool isRandom) {
   DateAndTime run_start("2010-01-01T00:00:00");
 
@@ -507,7 +507,7 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
     // Set the bank along the z-axis of the instrument. (beam direction).
     bank->setPos(V3D(0.0, 0.0, bankDistanceFromSample * banknum));
 
-	progress.report();
+    progress.report();
   }
 
   // Define a source component

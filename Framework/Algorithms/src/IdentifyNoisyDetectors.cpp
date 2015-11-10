@@ -42,7 +42,7 @@ void IdentifyNoisyDetectors::exec() {
         "It does not seem to make sense and the calculations done here will "
         "will cause a division by zero.");
 
-  Progress progress(this, 0, 1, (nHist * 7)+6);
+  Progress progress(this, 0, 1, (nHist * 7) + 6);
 
   // Create the output workspace a single value for each spectra.
   MatrixWorkspace_sptr outputWs;
@@ -60,7 +60,6 @@ void IdentifyNoisyDetectors::exec() {
   integ->setProperty<double>("RangeUpper", rangeUpper);
   integ->execute();
 
-
   MatrixWorkspace_sptr int1 = integ->getProperty("OutputWorkspace");
 
   progress.report("Power...");
@@ -72,7 +71,6 @@ void IdentifyNoisyDetectors::exec() {
   power->execute();
 
   MatrixWorkspace_sptr power_tmp = power->getProperty("OutputWorkspace");
-
 
   progress.report("Integrating...");
 
@@ -122,7 +120,7 @@ void IdentifyNoisyDetectors::exec() {
     outputWs->dataX(i)[0] = 0.0;
     outputWs->dataY(i)[0] = 1.0;
 
-	progress.report();
+    progress.report();
   }
 
   getStdDev(progress, outputWs, stdDevWs);
@@ -142,7 +140,7 @@ void IdentifyNoisyDetectors::exec() {
 * @param values :: stddeviations of each spectra (I think)
 */
 void IdentifyNoisyDetectors::getStdDev(API::Progress &progress,
-									   MatrixWorkspace_sptr valid,
+                                       MatrixWorkspace_sptr valid,
                                        MatrixWorkspace_sptr values) {
   const int nhist = static_cast<int>(valid->getNumberHistograms());
   int count = 0;
@@ -155,8 +153,8 @@ void IdentifyNoisyDetectors::getStdDev(API::Progress &progress,
       mean2 += std::pow(values->readY(i)[0], 2);
       count++;
     }
-	
-	progress.report();
+
+    progress.report();
   }
 
   if (0 == count) {
@@ -181,7 +179,7 @@ void IdentifyNoisyDetectors::getStdDev(API::Progress &progress,
       valid->dataY(i)[0] = 0.0;
     }
 
-	progress.report("Calculating StdDev...");
+    progress.report("Calculating StdDev...");
   }
 }
 
