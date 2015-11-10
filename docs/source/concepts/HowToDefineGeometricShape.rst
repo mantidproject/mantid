@@ -58,15 +58,15 @@ plane. Hence, when planning to use
 should be defined such that the positive y-axis is considered to be up,
 the x-axis the width, and the z-axis the depth of the shape.
 
-To be aware off
----------------
+To be aware of
+--------------
 
 When defining a shape you have complete freedom to define it with
 respect to whatever coordinate system you like. However, we have a least
 the following recommendation
 
 -  The origin of coordinate system of a shape is used for calculating
-   the L2 distances. Therefore at least for any TOF instruments where
+   the L2 distances. Therefore, at least for any TOF instruments where
    you care about L2 distances, the origin should be chosen to be at the
    position on your detector shape that is best used for calculation the
    L2 distance
@@ -150,6 +150,10 @@ Cylinder
 
    XMLcylinderDescription.png‎
 
+If a cylinder is not axis-aligned (more than one of the axis x, y, z 
+properties are non-zero) then you will need to specify a custom
+:ref:`Bounding-Box <Bounding-Box>`.
+
 Infinite cylinder
 ~~~~~~~~~~~~~~~~~
 
@@ -160,6 +164,10 @@ Infinite cylinder
         <axis x="0.0" y="0.2" z="0" />
         <radius val="1" />
       </infinite-cylinder>
+
+If a cylinder is not axis-aligned (more than one of the axis x, y, z 
+properties are non-zero) then you will need to specify a custom
+:ref:`Bounding-Box <Bounding-Box>`.
 
 Slice of cylinder ring
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -181,7 +189,7 @@ the part of this shape facing the sample is flat and looks like this:
 
    XMLsliceCylinderRingDescription.png
 
-For this shape you may find it useful to specify a
+For this shape, you will likely need to specify a custom
 :ref:`Bounding-Box <Bounding-Box>`.
 
 Cone
@@ -200,6 +208,10 @@ Cone
    :alt: XMLconeDescription.png
 
    XMLconeDescription.png
+
+If a cone is not axis-aligned (more than one of the axis x, y, z 
+properties are non-zero) then you will need to specify a custom
+:ref:`Bounding-Box <Bounding-Box>`.
 
 Infinite cone
 ~~~~~~~~~~~~~
@@ -266,6 +278,9 @@ x-axis). The origin is assumed to be the centre of this front surface,
 which has dimensions 200mm along y and 20mm along z. The depth of this
 cuboid is taken to be 1mm (along x).
 
+If a cuboid has one or more surfaces that are not axis-aligned, then you will 
+need to specify a custom :ref:`Bounding-Box <Bounding-Box>`.
+
 Hexahedron
 ~~~~~~~~~~
 
@@ -288,7 +303,8 @@ Hexahedron
 
    XMLhexahedronDescription.png
 
-For this shape you may find it useful to specify a
+Since hexahedrons typically have at least one surface that is not 
+axis-aligned, you will likely have to specify a 
 :ref:`Bounding-Box <Bounding-Box>`.
 
 Tapered Guide
@@ -315,7 +331,8 @@ axis runs from the start aperture to the end aperture. "Height" is along
 the y-axis and "width" runs along the x-axis, before the application of
 the "axis" rotation.
 
-For this shape you may find it useful to specify a
+Since hexahedrons typically have at least one surface that is not 
+axis-aligned, you will likely have to specify a 
 :ref:`Bounding-Box <Bounding-Box>`.
 
 .. _Bounding-Box:
@@ -323,16 +340,26 @@ For this shape you may find it useful to specify a
 Bounding-Box
 ------------
 
-When a geometric shape is rendered in the MantidPlot instrument viewer a
-bounding box is automatically created for each geometric shape. This
-works well for shapes such as cylinders and cuboids. However, for more
-complex shapes and combined shapes the library used for the
-visualization sometimes struggle, which can results in your instrument
-being viewed artificially very small (and you have to zoom in for a long
-time to see your instrument) and often in this context that the
-visualization axes does not display properly. For such cases this can be
-fixed by explicitly adding a bounding-box using the notation
-demonstrated below
+When a geometric shape is rendered in the MantidPlot instrument viewer, Mantid
+will attempt to automatically construct an axis-aligned bounding box for every 
+geometric shape that does not have one yet. Well-defined bounding boxes are
+required by many features of Mantid, from corectly rendering the instrument to 
+performing calculations in various algorithms.
+
+For axis-aligned shapes, the automatically calculated bounding boxes can 
+generally be relied upon and are usually ideal. However, if a shape is not 
+aligned to the X, Y or Z-axis, or if a shape contains surfaces that are not
+axis-aligned, then the automatic calculations will often fail or produce 
+bounding boxes that are far too large and not at all representative of the 
+shape they are meant to contain.
+
+A typical symptom of this is your instrument appearing very small when viewed 
+(forcing you to have to zoom in for a long time to see it). In such cases, the
+axis visualizations also tend to not display properly.
+
+This can be fixed by explicitly adding a custom bounding-box to shapes that 
+are not axis-aligned or contain surfaces that are not axis-aligned. This can 
+be done using the following notation:
 
 .. code-block:: xml
 
@@ -359,5 +386,13 @@ demonstrated below
 
 Note for the best effect this bounding box should be enclosing the shape
 as tight as possible.
+
+Another option, in some cases, may be to change the shape definition so that 
+it is axis-aligned and then later rotate it using the 
+`facing <InstrumentDefinitionFile#using-facing>`__ tag or the axis rotation
+properties of the `location <InstrumentDefinitionFile#using-locations>`__ tag.
+
+As long as the actual shape definition is axis-aligned, Mantid is usually able
+to construct a reasonable bounding box even if the shape is later rotated.
 
 .. categories:: Concepts
