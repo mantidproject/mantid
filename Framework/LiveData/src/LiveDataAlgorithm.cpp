@@ -246,38 +246,13 @@ IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm(bool postProcessing) {
     // Create the UNMANAGED algorithm
     IAlgorithm_sptr alg = this->createChildAlgorithm(algoName);
 
+    // Skip some of the properties when setting
+    std::set<std::string> ignoreProps;
+    ignoreProps.insert("InputWorkspace");
+    ignoreProps.insert("OutputWorkspace");
+
     // ...and pass it the properties
-    boost::char_separator<char> sep(";");
-    typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-    tokenizer propPairs(props, sep);
-    // Iterate over the properties
-    for (tokenizer::iterator it = propPairs.begin(); it != propPairs.end();
-         ++it) {
-      // Pair of the type "
-      std::string pair = *it;
-
-      size_t n = pair.find('=');
-      if (n == std::string::npos) {
-        // Do nothing
-      } else {
-        // Normal "PropertyName=value" string.
-        std::string propName = "";
-        std::string value = "";
-
-        // Extract the value string
-        if (n < pair.size() - 1) {
-          propName = pair.substr(0, n);
-          value = pair.substr(n + 1, pair.size() - n - 1);
-        } else {
-          // String is "PropertyName="
-          propName = pair.substr(0, n);
-          value = "";
-        }
-        // Skip some of the properties when setting
-        if ((propName != "InputWorkspace") && (propName != "OutputWorkspace"))
-          alg->setPropertyValue(propName, value);
-      }
-    }
+    alg->setPropertiesWithSimpleString(props, ignoreProps);
 
     // Warn if someone put both values.
     if (!script.empty())

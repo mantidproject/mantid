@@ -23,7 +23,7 @@ using namespace boost::python;
  * @param self A reference to the calling Python object
  */
 IPeakFunctionAdapter::IPeakFunctionAdapter(PyObject *self)
-    : API::IPeakFunction(), IFunctionAdapter(self), IFunction1DAdapter(self) {}
+    : API::IPeakFunction(), IFunction1DAdapter(self) {}
 
 /**
  */

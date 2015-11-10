@@ -200,6 +200,78 @@ void createVerticalAxis(MatrixWorkspace *const ws, const MantidVec &xAxisVec,
     verticalAxis->setValue(i, qzIncrement);
   }
 }
+
+/**
+ * A map detector ID and Q ranges
+ * This method looks unnecessary as it could be calculated on the fly but
+ * the parallelization means that lazy instantation slows it down due to the
+ * necessary CRITICAL sections required to update the cache. The Q range
+ * values are required very frequently so the total time is more than
+ * offset by this precaching step
+ */
+DetectorAngularCache initAngularCaches(const MatrixWorkspace *const workspace) {
+  const size_t nhist = workspace->getNumberHistograms();
+  std::vector<double> thetas(nhist);
+  std::vector<double> thetaWidths(nhist);
+  std::vector<double> detectorHeights(nhist);
+
+  auto inst = workspace->getInstrument();
+  const auto samplePos = inst->getSample()->getPos();
+  const V3D upDirVec = inst->getReferenceFrame()->vecPointingUp();
+
+  for (size_t i = 0; i < nhist; ++i) // signed for OpenMP
+  {
+    IDetector_const_sptr det;
+    try {
+      det = workspace->getDetector(i);
+    } catch (Exception::NotFoundError &) {
+      // Catch if no detector. Next line tests whether this happened - test
+      // placed
+      // outside here because Mac Intel compiler doesn't like 'continue' in a
+      // catch
+      // in an openmp block.
+    }
+    // If no detector found, skip onto the next spectrum
+    if (!det || det->isMonitor()) {
+      thetas[i] = -1.0; // Indicates a detector to skip
+      thetaWidths[i] = -1.0;
+      continue;
+    }
+    // We have to convert theta from radians to degrees
+    const double theta = workspace->detectorSignedTwoTheta(det) * 180.0 / M_PI;
+    thetas[i] = theta;
+    /**
+     * Determine width from shape geometry. A group is assumed to contain
+     * detectors with the same shape & r, theta value, i.e. a ring mapped-group
+     * The shape is retrieved and rotated to match the rotation of the detector.
+     * The angular width is computed using the l2 distance from the sample
+     */
+    if (auto group = boost::dynamic_pointer_cast<const DetectorGroup>(det)) {
+      // assume they all have same shape and same r,theta
+      auto dets = group->getDetectors();
+      det = dets[0];
+    }
+    const auto pos = det->getPos() - samplePos;
+    double l2(0.0), t(0.0), p(0.0);
+    pos.getSpherical(l2, t, p);
+    // Get the shape
+    auto shape =
+        det->shape(); // Defined in its own reference frame with centre at 0,0,0
+    BoundingBox bbox = shape->getBoundingBox();
+    auto maxPoint(bbox.maxPoint());
+    auto minPoint(bbox.minPoint());
+    auto span = maxPoint - minPoint;
+    detectorHeights[i] = span.scalar_prod(upDirVec);
+    thetaWidths[i] = 2.0 * std::fabs(std::atan((detectorHeights[i] / 2) / l2)) *
+                     180.0 / M_PI;
+  }
+  DetectorAngularCache cache;
+  cache.thetas = thetas;
+  cache.thetaWidths = thetaWidths;
+  cache.detectorHeights = detectorHeights;
+  return cache;
+}
+
 /**
  * Performs centre-point rebinning and produces an MDWorkspace
  * @param inputWs : The workspace you wish to perform centre-point rebinning on.
@@ -380,7 +452,9 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
   verticalAxis->title() = m_d1Label;
 
   // Prepare the required theta values
-  initAngularCaches(inputWS);
+  DetectorAngularCache cache = initAngularCaches(inputWS.get());
+  m_theta = cache.thetas;
+  m_thetaWidths = cache.thetaWidths;
 
   const size_t nHistos = inputWS->getNumberHistograms();
   const size_t nBins = inputWS->blocksize();
@@ -412,21 +486,6 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
       const double signal = Y[j];
       const double error = E[j];
 
-      // fractional rebin
-      /*
-      m_calculator->setThetaFinal(thetaLower);
-      const V2D ur(m_calculator->calculateDim0(lamLower), // highest qx
-                   m_calculator->calculateDim1(lamLower));
-      const V2D lr(m_calculator->calculateDim0(lamUpper),
-                   m_calculator->calculateDim1(lamUpper)); // lowest qz
-      m_calculator->setThetaFinal(thetaUpper);
-      const V2D ul(m_calculator->calculateDim0(lamLower),
-                   m_calculator->calculateDim1(lamLower)); // highest qz
-      const V2D ll(m_calculator->calculateDim0(lamUpper), // lowest qx
-                   m_calculator->calculateDim1(lamUpper));
-
-      Quadrilateral inputQ(ll, lr, ur, ul);
-      */
       auto inputQ =
           m_calculator->createQuad(lamUpper, lamLower, thetaUpper, thetaLower);
       FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j, outWS,
@@ -460,73 +519,6 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
   outWS->setYUnitLabel("Intensity");
 
   return outWS;
-}
-
-/**
- * A map detector ID and Q ranges
- * This method looks unnecessary as it could be calculated on the fly but
- * the parallelization means that lazy instantation slows it down due to the
- * necessary CRITICAL sections required to update the cache. The Q range
- * values are required very frequently so the total time is more than
- * offset by this precaching step
- */
-void ReflectometryTransform::initAngularCaches(
-    const API::MatrixWorkspace_const_sptr &workspace) const {
-  const size_t nhist = workspace->getNumberHistograms();
-  m_theta = std::vector<double>(nhist);
-  m_thetaWidths = std::vector<double>(nhist);
-
-  auto inst = workspace->getInstrument();
-  const auto samplePos = inst->getSample()->getPos();
-  const V3D upDirVec = inst->getReferenceFrame()->vecPointingUp();
-
-  for (size_t i = 0; i < nhist; ++i) // signed for OpenMP
-  {
-    IDetector_const_sptr det;
-    try {
-      det = workspace->getDetector(i);
-    } catch (Kernel::Exception::NotFoundError &) {
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
-    }
-    // If no detector found, skip onto the next spectrum
-    if (!det || det->isMonitor()) {
-      m_theta[i] = -1.0; // Indicates a detector to skip
-      m_thetaWidths[i] = -1.0;
-      continue;
-    }
-    // We have to convert theta from radians to degrees
-    const double theta = workspace->detectorSignedTwoTheta(det) * 180.0 / M_PI;
-    m_theta[i] = theta;
-    /**
-     * Determine width from shape geometry. A group is assumed to contain
-     * detectors with the same shape & r, theta value, i.e. a ring mapped-group
-     * The shape is retrieved and rotated to match the rotation of the detector.
-     * The angular width is computed using the l2 distance from the sample
-     */
-    if (auto group = boost::dynamic_pointer_cast<const DetectorGroup>(det)) {
-      // assume they all have same shape and same r,theta
-      auto dets = group->getDetectors();
-      det = dets[0];
-    }
-    const auto pos = det->getPos() - samplePos;
-    double l2(0.0), t(0.0), p(0.0);
-    pos.getSpherical(l2, t, p);
-    // Get the shape
-    auto shape =
-        det->shape(); // Defined in its own reference frame with centre at 0,0,0
-    auto rot = det->getRotation();
-    BoundingBox bbox = shape->getBoundingBox();
-    auto maxPoint(bbox.maxPoint());
-    rot.rotate(maxPoint);
-    double halfBoxHeight = maxPoint.scalar_prod(upDirVec);
-
-    m_thetaWidths[i] =
-        2.0 * std::fabs(std::atan(halfBoxHeight / l2)) * 180.0 / M_PI;
-  }
 }
 }
 }

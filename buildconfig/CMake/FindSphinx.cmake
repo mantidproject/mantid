@@ -11,8 +11,8 @@
 # main()
 #=============================================================
 
-find_program( SPHINX_EXECUTABLE NAME sphinx-build
-  PATHS ${CMAKE_LIBRARY_PATH}/Python27/Scripts
+find_program( SPHINX_EXECUTABLE NAME sphinx-build.cmd sphinx-build
+  PATHS ${CMAKE_LIBRARY_PATH}/python2.7/Scripts
   PATH_SUFFIXES bin
   DOC "Sphinx documentation generator"
 )
