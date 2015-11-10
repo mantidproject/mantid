@@ -137,7 +137,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
             shutil.rmtree(rbdir)
 
         self.assertEqual(len(user.instrument),6)
-        self.assertEqual(len(user._instrument),3)
+        self.assertEqual(len(user._instrument),2)
 
         self.assertEqual(user._recent_dateID,id)
         self.assertEqual(user._start_dates['2000-01-12'],datetime.date(2000,01,12))
@@ -150,7 +150,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         if os.path.exists(rbdir):
             shutil.rmtree(rbdir)
 
-        self.assertEqual(len(user._instrument),4)
+        self.assertEqual(len(user._instrument),3)
         id = user._recent_dateID
         self.assertEqual(id,'2016-12-01')
         self.assertEqual(user._instrument[id],'MERLIN')
