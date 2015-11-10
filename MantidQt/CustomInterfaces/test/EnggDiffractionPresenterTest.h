@@ -57,7 +57,7 @@ private:
 class EnggDiffractionPresenterTest : public CxxTest::TestSuite {
 
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
+  // This pair of boilerplate methods prevent tghe suite being created statically
   // This means the constructor isn't called when running other tests
   static EnggDiffractionPresenterTest *createSuite() {
     return new EnggDiffractionPresenterTest();
@@ -79,6 +79,11 @@ public:
 
     m_ex_enginx_banks.push_back(true);
     m_ex_enginx_banks.push_back(false);
+	m_ex_empty_run_num.push_back("");
+	m_invalid_run_number.push_back("999999");
+	m_ex_run_number.push_back("228061");
+	g_vanNo.push_back("8899999988");
+	g_ceriaNo.push_back("9999999999");
   }
 
   void tearDown() {
@@ -197,9 +202,9 @@ public:
         .Times(1)
         .WillOnce(Return(calibSettings));
 
-    EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(vanNo));
+    EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
 
-    EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(ceriaNo));
+    EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(g_ceriaNo));
 
     // 1 warning because some required settings are missing/empty
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
@@ -236,9 +241,9 @@ public:
         .Times(2)
         .WillRepeatedly(Return(calibSettings));
 
-    EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(vanNo));
+    EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
 
-    EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(ceriaNo));
+    EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(g_ceriaNo));
 
     EXPECT_CALL(mockView, currentInstrument()).Times(1).WillOnce(Return(instr));
 
@@ -301,7 +306,7 @@ public:
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
     // empty run number!
-    EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return(m_invalid_run_number));
     EXPECT_CALL(mockView, focusingBanks())
         .Times(1)
         .WillOnce(Return(m_ex_enginx_banks));
@@ -328,7 +333,7 @@ public:
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return("999999"));
+    EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return(m_invalid_run_number));
     // missing bank on/off vector!
     std::vector<bool> banks;
     banks.push_back(false);
@@ -362,7 +367,7 @@ public:
     EnggDiffPresenterNoThread pres(&mockView);
 
     // wrong run number!
-    EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return("999999"));
+    EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return(m_invalid_run_number));
     EXPECT_CALL(mockView, focusingBanks())
         .Times(1)
         .WillOnce(Return(m_ex_enginx_banks));
@@ -398,7 +403,7 @@ public:
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
     // an example run available in unit test data:
-    EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return("228061"));
+    EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return(m_ex_run_number));
     EXPECT_CALL(mockView, focusingBanks())
         .Times(1)
         .WillOnce(Return(m_ex_enginx_banks));
@@ -435,7 +440,7 @@ public:
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
     // an example run available in unit test data:
-    EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return("228061"));
+    EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return(m_ex_run_number));
     std::vector<bool> banks;
     banks.push_back(false);
     banks.push_back(false);
@@ -462,7 +467,7 @@ public:
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
     // empty run number!
-    EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(1).WillOnce(Return(m_ex_empty_run_num));
     EXPECT_CALL(mockView, focusingBanks())
         .Times(1)
         .WillOnce(Return(m_ex_enginx_banks));
@@ -495,7 +500,7 @@ public:
     // ok run number
     EXPECT_CALL(mockView, focusingCroppedRunNo())
         .Times(1)
-        .WillOnce(Return("228061"));
+        .WillOnce(Return(m_ex_run_number));
     EXPECT_CALL(mockView, focusingBanks())
         .Times(1)
         .WillOnce(Return(std::vector<bool>()));
@@ -528,7 +533,7 @@ public:
     // ok run number
     EXPECT_CALL(mockView, focusingCroppedRunNo())
         .Times(1)
-        .WillOnce(Return("228061"));
+        .WillOnce(Return(m_ex_run_number));
     EXPECT_CALL(mockView, focusingBanks())
         .Times(1)
         .WillOnce(Return(m_ex_enginx_banks));
@@ -559,7 +564,7 @@ public:
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
     // empty run number!
-    EXPECT_CALL(mockView, focusingTextureRunNo()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, focusingTextureRunNo()).Times(1).WillOnce(Return(m_ex_empty_run_num));
     EXPECT_CALL(mockView, focusingTextureGroupingFile())
         .Times(1)
         .WillOnce(Return(""));
@@ -588,7 +593,7 @@ public:
     // goo run number
     EXPECT_CALL(mockView, focusingTextureRunNo())
         .Times(1)
-        .WillOnce(Return("228061"));
+        .WillOnce(Return(m_ex_run_number));
     EXPECT_CALL(mockView, focusingBanks()).Times(0);
     EXPECT_CALL(mockView, focusingTextureGroupingFile())
         .Times(1)
@@ -617,7 +622,7 @@ public:
     // goo run number
     EXPECT_CALL(mockView, focusingTextureRunNo())
         .Times(1)
-        .WillOnce(Return("228061"));
+        .WillOnce(Return(m_ex_run_number));
     // non empty but absurd csv file of detector groups
     EXPECT_CALL(mockView, focusingTextureGroupingFile())
         .Times(1)
@@ -663,7 +668,7 @@ public:
     pres.notify(IEnggDiffractionPresenter::ResetFocus);
 
     // empty run number!
-    EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return(m_ex_empty_run_num));
     EXPECT_CALL(mockView, focusingBanks())
         .Times(1)
         .WillOnce(Return(m_ex_enginx_banks));
@@ -850,8 +855,14 @@ private:
       m_presenter;
 
   std::vector<bool> m_ex_enginx_banks;
+  std::vector<std::string> m_ex_empty_run_num;
+  std::vector<std::string> m_invalid_run_number;
+  std::vector<std::string> m_ex_run_number;
+  std::vector<std::string> g_vanNo;
+  std::vector<std::string> g_ceriaNo;
   const static std::string g_eventModeRunNo;
 };
+
 
 // Note this is not a correct event mode run number. Using it here just
 // as a run number that is found.
