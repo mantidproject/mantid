@@ -131,10 +131,10 @@ LoadEventAndCompress::determineChunk(const std::string &filename) {
 }
 
 /// @see DataProcessorAlgorithm::loadChunk(const size_t)
-MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex, API::ITableWorkspace_sptr &chunkingTable) {
+MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex) {
   g_log.debug() << "loadChunk(" << rowIndex << ")\n";
 
-  double rowCount = static_cast<double>(chunkingTable->rowCount());
+  double rowCount = static_cast<double>(m_chunkingTable->rowCount());
   double progStart = static_cast<double>(rowIndex) / rowCount;
   double progStop = static_cast<double>(rowIndex + 1) / rowCount;
 
@@ -160,9 +160,9 @@ MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex, API:
 
   // set chunking information
   if (rowCount > 0.) {
-    const std::vector<string> COL_NAMES = chunkingTable->getColumnNames();
+    const std::vector<string> COL_NAMES = m_chunkingTable->getColumnNames();
     for (auto name = COL_NAMES.begin(); name != COL_NAMES.end(); ++name) {
-      alg->setProperty(*name, chunkingTable->getRef<int>(*name, rowIndex));
+      alg->setProperty(*name, m_chunkingTable->getRef<int>(*name, rowIndex));
     }
   }
 
@@ -177,17 +177,17 @@ MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex, API:
  * @param wksp
  */
 API::MatrixWorkspace_sptr
-LoadEventAndCompress::processChunk(API::MatrixWorkspace_sptr &wksp, double filterPulses) {
+LoadEventAndCompress::processChunk(API::MatrixWorkspace_sptr &wksp, double filterBadPulses) {
   EventWorkspace_sptr eventWS =
       boost::dynamic_pointer_cast<EventWorkspace>(wksp);
 
-  if (filterPulses > 0.) {
-    auto filterBadPulses = createChildAlgorithm("FilterBadPulses");
-    filterBadPulses->setProperty("InputWorkspace", eventWS);
-    filterBadPulses->setProperty("OutputWorkspace", eventWS);
-    filterBadPulses->setProperty("LowerCutoff", filterPulses);
-    filterBadPulses->executeAsChildAlg();
-    eventWS = filterBadPulses->getProperty("OutputWorkspace");
+  if (filterBadPulses > 0.) {
+    auto filterBadPulsesAlgo = createChildAlgorithm("FilterBadPulses");
+    filterBadPulsesAlgo->setProperty("InputWorkspace", eventWS);
+    filterBadPulsesAlgo->setProperty("OutputWorkspace", eventWS);
+    filterBadPulsesAlgo->setProperty("LowerCutoff", filterBadPulses);
+    filterBadPulsesAlgo->executeAsChildAlg();
+    eventWS = filterBadPulsesAlgo->getProperty("OutputWorkspace");
   }
 
   auto compressEvents = createChildAlgorithm("CompressEvents");
@@ -206,27 +206,25 @@ LoadEventAndCompress::processChunk(API::MatrixWorkspace_sptr &wksp, double filte
  */
 void LoadEventAndCompress::exec() {
   std::string filename = getPropertyValue("Filename");
-  double filterBadPulses;
-  filterBadPulses = EMPTY_DBL();
-  filterBadPulses = getProperty("FilterBadPulses");
+  double filterBadPulses = getProperty("FilterBadPulses");
 
-  API::ITableWorkspace_sptr chunkingTable = determineChunk(filename);
+  m_chunkingTable = determineChunk(filename);
 
   Progress progress(this, 0, 1, 2);
 
   // first run is free
   progress.report("Loading Chunk");
-  MatrixWorkspace_sptr resultWS = loadChunk(0, chunkingTable);
+  MatrixWorkspace_sptr resultWS = loadChunk(0);
   progress.report("Process Chunk");
   resultWS = processChunk(resultWS, filterBadPulses);
 
   // load the other chunks
-  const size_t numRows = chunkingTable->rowCount();
+  const size_t numRows = m_chunkingTable->rowCount();
 
   progress.resetNumSteps(numRows, 0, 1);
 
   for (size_t i = 1; i < numRows; ++i) {
-    MatrixWorkspace_sptr temp = loadChunk(i, chunkingTable);
+    MatrixWorkspace_sptr temp = loadChunk(i);
     temp = processChunk(temp, filterBadPulses);
     auto plusAlg = createChildAlgorithm("Plus");
     plusAlg->setProperty("LHSWorkspace", resultWS);

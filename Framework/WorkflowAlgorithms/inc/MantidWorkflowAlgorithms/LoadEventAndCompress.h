@@ -42,13 +42,15 @@ public:
   virtual const std::string summary() const;
 
 protected:
-  API::ITableWorkspace_sptr determineChunk(const std::string &filename);
-  API::MatrixWorkspace_sptr loadChunk(const size_t rowIndex, API::ITableWorkspace_sptr &chunkingTable);
+  virtual API::ITableWorkspace_sptr determineChunk(const std::string &filename) override;
+  virtual API::MatrixWorkspace_sptr loadChunk(const size_t rowIndex) override;
   API::MatrixWorkspace_sptr processChunk(API::MatrixWorkspace_sptr &wksp, double filterBadPulses);
 
 private:
   void init();
   void exec();
+
+  API::ITableWorkspace_sptr m_chunkingTable;
 };
 
 } // namespace WorkflowAlgorithms
