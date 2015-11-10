@@ -1,6 +1,7 @@
 #ifndef MANTID_MDALGORITHMS_LOADMD_H_
 #define MANTID_MDALGORITHMS_LOADMD_H_
 
+#include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidKernel/System.h"
@@ -90,6 +91,12 @@ private:
   /// Load a given affine matrix
   API::CoordTransform *loadAffineMatrix(std::string entry_name);
 
+  /// Sets MDFrames for workspaces from legacy files
+  void setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws);
+
+  /// Checks if a worspace is a certain type of legacy file
+  void checkForRequiredLegacyFixup(API::IMDWorkspace_sptr ws);
+
   /// Open file handle
   // clang-format off
   boost::scoped_ptr< ::NeXus::File> m_file;
@@ -118,6 +125,9 @@ private:
   /// Named entry
   static const std::string VISUAL_NORMALIZATION_KEY;
   static const std::string VISUAL_NORMALIZATION_KEY_HISTO;
+
+  /// MDFrame correction flag
+  bool m_requiresMDFrameCorrection;
 };
 
 } // namespace DataObjects
