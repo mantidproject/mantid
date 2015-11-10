@@ -29,13 +29,17 @@ namespace MDAlgorithms {
  * @param gs :: Vector of goniometer angle gs containing a value for each data
  * source
  * @param efix :: Vector of data source energy values in meV
+ * @returns names of data sources which cannot be found
 */
-void filterToExistingSources(std::vector<std::string> &input_data,
-                             std::vector<double> &psi, std::vector<double> &gl,
-                             std::vector<double> &gs,
-                             std::vector<double> &efix) {
+std::string filterToExistingSources(std::vector<std::string> &input_data,
+                                    std::vector<double> &psi,
+                                    std::vector<double> &gl,
+                                    std::vector<double> &gs,
+                                    std::vector<double> &efix) {
+  std::ostringstream nonexistent;
   for (size_t i = input_data.size(); i > 0; i--) {
     if (!dataExists(input_data[i - 1])) {
+      nonexistent << input_data[i - 1] << ",";
       input_data.erase(input_data.begin() + i - 1);
       psi.erase(psi.begin() + i - 1);
       gl.erase(gl.begin() + i - 1);
@@ -43,6 +47,7 @@ void filterToExistingSources(std::vector<std::string> &input_data,
       efix.erase(efix.begin() + i - 1);
     }
   }
+  return nonexistent.str();
 }
 
 /*
@@ -56,7 +61,7 @@ bool dataExists(const std::string &data_name) {
   // Calls to the ADS in algorithms like this should ordinarily
   // be avoided, unfortunately we have little choice in this case.
   // If we gave FileFinder an absolute path it just returns it (whether or not
-  // the file exists) so we must check the full path returned with
+  // the file exists) so we must also check the full path returned with
   // fileExists()
   return (AnalysisDataService::Instance().doesExist(data_name) ||
           fileExists(filepath));
@@ -64,7 +69,7 @@ bool dataExists(const std::string &data_name) {
 
 /*
  * Test if a file with this full path exists
- * @param filename :: full path of a file to test existance of
+ * @param filename :: full path of a file to test existence of
  * @returns true if the file exists
 */
 bool fileExists(const std::string &filename) {
@@ -86,13 +91,16 @@ bool fileExists(const std::string &filename) {
  * @param gs :: Vector of goniometer angle gs containing a value for each data
  * source
  * @param efix :: Vector of data source energy values in meV
+ * @returns data sources which are already in the workspace
 */
-void filterToNew(std::vector<std::string> &input_data,
-                 std::vector<std::string> &current_data,
-                 std::vector<double> &psi, std::vector<double> &gl,
-                 std::vector<double> &gs, std::vector<double> &efix) {
+std::string filterToNew(std::vector<std::string> &input_data,
+                        std::vector<std::string> &current_data,
+                        std::vector<double> &psi, std::vector<double> &gl,
+                        std::vector<double> &gs, std::vector<double> &efix) {
+  std::ostringstream old_sources;
   for (size_t i = input_data.size(); i > 0; i--) {
     if (appearsInCurrentData(input_data[i - 1], current_data)) {
+      old_sources << input_data[i - 1] << ",";
       input_data.erase(input_data.begin() + i - 1);
       psi.erase(psi.begin() + i - 1);
       gl.erase(gl.begin() + i - 1);
@@ -100,6 +108,7 @@ void filterToNew(std::vector<std::string> &input_data,
       efix.erase(efix.begin() + i - 1);
     }
   }
+  return old_sources.str();
 }
 
 /*
@@ -129,7 +138,9 @@ bool appearsInCurrentData(const std::string &data_source,
  * appended to the workspace
 */
 std::vector<std::string>
-getHistoricalDataSources(const WorkspaceHistory &ws_history) {
+getHistoricalDataSources(const WorkspaceHistory &ws_history,
+                         const std::string &create_alg_name,
+                         const std::string &accumulate_alg_name) {
   // Using a set so we only insert unique names
   std::set<std::string> historical_data_sources;
 
@@ -140,8 +151,8 @@ getHistoricalDataSources(const WorkspaceHistory &ws_history) {
   const std::vector<HistoryItem> history_items = view->getAlgorithmsList();
   for (auto iter = history_items.begin(); iter != history_items.end(); ++iter) {
     auto alg_history = iter->getAlgorithmHistory();
-    if (alg_history->name() == "CreateMD" ||
-        alg_history->name() == "AccumulateMD") {
+    if (alg_history->name() == create_alg_name ||
+        alg_history->name() == accumulate_alg_name) {
       auto props = alg_history->getProperties();
       for (auto prop_iter = props.begin(); prop_iter != props.end();
            ++prop_iter) {
@@ -302,7 +313,14 @@ void AccumulateMD::exec() {
   std::vector<double> efix = this->getProperty("EFix");
   padParameterVector(efix, input_data.size());
 
-  filterToExistingSources(input_data, psi, gl, gs, efix);
+  // Create progress reporting object
+  //Progress prog = Progress(this, 0.0, 1.0, 2);
+  this->progress(0);
+
+  const std::string nonexistent =
+      filterToExistingSources(input_data, psi, gl, gs, efix);
+  g_log.notice() << "These data sources were not found: " << nonexistent
+                 << std::endl;
 
   // If we can't find any data, we can't do anything
   if (input_data.empty()) {
@@ -317,21 +335,31 @@ void AccumulateMD::exec() {
   // delete the old one, note this means we don't retain workspace history...
   bool do_clean = this->getProperty("Clean");
   if (do_clean) {
+    this->progress(0.5);
     IMDEventWorkspace_sptr out_ws =
         createMDWorkspace(input_data, psi, gl, gs, efix);
     this->setProperty("OutputWorkspace", out_ws);
     g_log.notice() << this->name() << " succesfully created a clean workspace"
                    << std::endl;
+    this->progress(1.0);
     return; // POSSIBLE EXIT POINT
   }
   this->interruption_point();
 
   // Find what files and workspaces have already been included in the workspace.
   const WorkspaceHistory ws_history = input_ws->getHistory();
-  std::vector<std::string> current_data = getHistoricalDataSources(ws_history);
+  // Get name from algorithm like this so that an error is thrown if the
+  // name of the algorithm is changed
+  Algorithm_sptr create_alg = createChildAlgorithm("CreateMD");
+  std::vector<std::string> current_data =
+      getHistoricalDataSources(ws_history, create_alg->name(), this->name());
 
   // If there's no new data, we don't have anything to do
-  filterToNew(input_data, current_data, psi, gl, gs, efix);
+  const std::string old_sources =
+      filterToNew(input_data, current_data, psi, gl, gs, efix);
+  g_log.notice() << "Data from these sources are already in the workspace: "
+                 << old_sources << std::endl;
+
   if (input_data.empty()) {
     g_log.notice() << "No new data to append to workspace in " << this->name()
                    << std::endl;
@@ -346,11 +374,11 @@ void AccumulateMD::exec() {
   IMDEventWorkspace_sptr tmp_ws =
       createMDWorkspace(input_data, psi, gl, gs, efix);
   this->interruption_point();
+  this->progress(0.5); // Report as CreateMD is complete
 
   const std::string temp_ws_name = "TEMP_WORKSPACE_ACCUMULATEMD";
   // Currently have to use ADS here as list of workspaces can only be passed as
-  // a
-  // list of workspace names as a string
+  // a list of workspace names as a string
   AnalysisDataService::Instance().add(temp_ws_name, tmp_ws);
   std::string ws_names_to_merge = input_ws->getName();
   ws_names_to_merge.append(",");
@@ -365,6 +393,8 @@ void AccumulateMD::exec() {
 
   this->setProperty("OutputWorkspace", out_ws);
   g_log.notice() << this->name() << " successfully appended data" << std::endl;
+
+  this->progress(1.0); // Report as MergeMD is complete
 
   // Clean up temporary workspace
   AnalysisDataService::Instance().remove(temp_ws_name);
