@@ -467,8 +467,18 @@ const PropertyHistories& AlgHistoryProperties:: getAlgProperties()
 {
   return m_Histprop;
 }
-void AlgHistoryProperties::displayAlgHistoryProperties()
-{
+
+/**
+ * @brief Populates the Algorithm History display
+ * with property names, values, directions and whether their values were the
+ * defaults.
+ *
+ * If a value was unset and its default value is EMPTY_INT, EMPTY_DBL
+ * or EMPTY_LONG, display an empty space to the user rather than the
+ * internal numeric representation of an empty value.
+ *
+ */
+void AlgHistoryProperties::displayAlgHistoryProperties() {
   QStringList propList;
   std::string sProperty;
   for ( std::vector<PropertyHistory_sptr>::const_iterator pIter = m_Histprop.begin();
@@ -476,12 +486,17 @@ void AlgHistoryProperties::displayAlgHistoryProperties()
   {
     sProperty=(*pIter)->name();
     propList.append(sProperty.c_str());
-    sProperty=(*pIter)->value();
+
+    sProperty = (*pIter)->value();
+    bool bisDefault = (*pIter)->isDefault();
+    if (bisDefault == true) {
+      if ((*pIter)->isEmptyDefault()) {
+        sProperty = ""; // replace EMPTY_XXX with empty string
+      }
+    }
     propList.append(sProperty.c_str());
 
-    bool bisDefault=(*pIter)->isDefault();
     bisDefault? (sProperty="Yes"):(sProperty="No");
-
     propList.append(sProperty.c_str());
     int nDirection=(*pIter)->direction();
     switch(nDirection)
