@@ -84,8 +84,8 @@ namespace Functions {
    Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 class DLLExport BivariateNormal : public API::ParamFunction,
-                                  public virtual API::IFunction1D,
-                                  public virtual API::IFunctionMW {
+                                  public API::IFunction1D,
+                                  public API::IFunctionMW {
 public:
   BivariateNormal();
   /// Destructor

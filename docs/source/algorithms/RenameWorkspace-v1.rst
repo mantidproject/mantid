@@ -29,34 +29,55 @@ Usage
 
 .. testcode:: ExRenameWorkspace
 
+   AnalysisDataService.clear()
    myWs=CreateSampleWorkspace()
+   mon_ws = CreateSampleWorkspace() 
+   myWs.setMonitorWorkspace(mon_ws)  
+   print "*********************************************************************"   
+   print "{0:20}|{1:>20}|{2:>20}|".format("Existing WS names: ",myWs.name(),mon_ws.name())
+   obj_inADS = AnalysisDataService.getObjectNames()
+   print "{0:20}|{1:>6}| With Names: |{2:>20}|{3:>20}|".format("Exist in ADS: ",len(obj_inADS),obj_inADS[0],obj_inADS[1])
+   #
+   NameA = RenameWorkspace(myWs)
+   #
+   print "***** After simple rename:"
+   print "{0:20}|{1:>20}|{2:>20}|".format("Existing WS names: ",NameA.name(),mon_ws.name())
+   obj_inADS = AnalysisDataService.getObjectNames()
+   print "{0:20}|{1:>6}| With Names: |{2:>20}|{3:>20}|".format("Exist in ADS: ",len(obj_inADS),obj_inADS[0],obj_inADS[1])  
 
-   print "myWs name:", myWs.name()
-   print "myWs exists in Mantid?", mtd.doesExist(myWs.name())
-
-   newNameWs = RenameWorkspace(myWs)
-
-   print "newNameWs name:", newNameWs.name()
-   print "newNameWs exists in Mantid?", mtd.doesExist(newNameWs.name())
-
-   print "As myWs is just a refence to the workspace it now refers to the workspace with the new name"
-   print "myWs name:", myWs.name()
-   print "Does 'myWs' exist in Mantid?", mtd.doesExist("myWs")
-
-
+   print "Old pointer to myWs refers to workspace with new name: ",myWs.name()
+   print "*********************************************************************"
+   print "***** After renaming workspace and monitors workspace together:"
+   #
+   NameB = RenameWorkspace(myWs,RenameMonitors=True)
+   #
+   print "{0:20}|{1:>20}|{2:>20}|".format("Existing WS names: ",NameB.name(),mon_ws.name())   
+   obj_inADS = AnalysisDataService.getObjectNames()
+   print "{0:20}|{1:>6}| With Names: |{2:>20}|{3:>20}|".format("Exist in ADS: ",len(obj_inADS),obj_inADS[0],obj_inADS[1])
+   # 
+   mon_ws1 = NameB.getMonitorWorkspace()
+   print "The name of the monitor workspace attached to workspace:{0:>6}| Is:  {1:>10}|".\
+            format(NameB.name(),mon_ws1.name())
+   print "*********************************************************************"  
+             
 Output:
 
 .. testoutput:: ExRenameWorkspace
 
-    myWs name: myWs
-    myWs exists in Mantid? True
-    newNameWs name: newNameWs
-    newNameWs exists in Mantid? True
-    As myWs is just a refence to the workspace it now refers to the workspace with the new name
-    myWs name: newNameWs
-    Does 'myWs' exist in Mantid? False
-
-
+    *********************************************************************
+    Existing WS names:  |                myWs|              mon_ws|
+    Exist in ADS:       |     2| With Names: |              mon_ws|                myWs|
+    ***** After simple rename: 
+    Existing WS names:  |               NameA|              mon_ws|
+    Exist in ADS:       |     2| With Names: |               NameA|              mon_ws|
+    Old pointer to myWs refers to workspace with new name:  NameA
+    *********************************************************************
+    ***** After renaming workspace and monitors workspace together:
+    Existing WS names:  |               NameB|      NameB_monitors|
+    Exist in ADS:       |     2| With Names: |               NameB|      NameB_monitors|
+    The name of the monitor workspace attached to workspace: NameB| Is:  NameB_monitors|
+    *********************************************************************
+    
 .. categories::
 
 .. sourcelink::

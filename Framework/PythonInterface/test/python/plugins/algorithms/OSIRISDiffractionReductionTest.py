@@ -14,7 +14,9 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
 
         wks = OSIRISDiffractionReduction(Sample=['OSI89813.raw'],
                                          CalFile='osiris_041_RES10.cal',
-                                         Vanadium=['osi89757.raw'])
+                                         Vanadium=['osi89757.raw'],
+                                         SpectraMin=3,
+                                         SpectraMax=361)
 
         self.assertTrue(isinstance(wks, MatrixWorkspace), 'Result workspace should be a matrix workspace.')
         self.assertEqual(wks.getAxis(0).getUnit().unitID(), 'dSpacing')
@@ -30,6 +32,8 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
         wks = OSIRISDiffractionReduction(Sample=['OSI10203.raw'],
                                          CalFile='osiris_041_RES10.cal',
                                          Vanadium=['OSI10156.raw'],
+                                         SpectraMin=3,
+                                         SpectraMax=361,
                                          DetectDRange=False,
                                          DRange=4)
 
@@ -47,6 +51,8 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
                                          CalFile='osiris_041_RES10.cal',
                                          Vanadium=['OSI10156.raw'],
                                          Container='OSI10241.raw',
+                                         SpectraMin=3,
+                                         SpectraMax=361,
                                          DetectDRange=False,
                                          DRange=4)
 
@@ -65,12 +71,29 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
                                          Vanadium=['OSI10156.raw'],
                                          Container='OSI10241.raw',
                                          ContainerScaleFactor=0.5,
+                                         SpectraMin=3,
+                                         SpectraMax=361,
                                          DetectDRange=False,
                                          DRange=4)
 
         self.assertTrue(isinstance(wks, MatrixWorkspace), 'Result workspace should be a matrix workspace.')
         self.assertEqual(wks.getAxis(0).getUnit().unitID(), 'dSpacing')
         self.assertEqual(wks.getNumberHistograms(), 1)
+
+
+    def test_spectra_with_bad_detectors(self):
+        """
+        Tests reduction with a spectra range that includes no selected Detectors from the Cal file
+        """
+
+        self.assertRaises(RuntimeError,
+                          OSIRISDiffractionReduction,
+                          Sample=['OSI10203.raw'],
+                          CalFile='osiris_041_RES10.cal',
+                          Vanadium=['OSI10156.raw'],
+                          Container='OSI10241.raw',
+                          SpectraMin=16,
+                          SpectraMax=17)
 
 
     def test_failure_no_vanadium(self):
@@ -81,7 +104,9 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
                           OSIRISDiffractionReduction,
                           Sample=['OSI89813.raw'],
                           CalFile='osiris_041_RES10.cal',
-                          Vanadium=['osi89757.raw'])
+                          Vanadium=['osi89757.raw'],
+                          SpectraMin=3,
+                          SpectraMax=361)
 
 
 if __name__ == '__main__':

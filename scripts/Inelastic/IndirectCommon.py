@@ -61,9 +61,13 @@ def getInstrRun(ws_name):
 
     instrument = mtd[ws_name].getInstrument().getName()
     if instrument != '':
-        facility = config.getFacility()
-        instrument = facility.instrument(instrument).filePrefix(int(run_number))
-        instrument = instrument.lower()
+        for facility in config.getFacilities():
+            try:
+                instrument = facility.instrument(instrument).filePrefix(int(run_number))
+                instrument = instrument.lower()
+                break
+            except RuntimeError:
+                continue
 
     return instrument, run_number
 

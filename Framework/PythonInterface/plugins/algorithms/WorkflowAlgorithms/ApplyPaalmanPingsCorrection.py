@@ -56,7 +56,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             logger.information('Not using container')
 
         # Apply container scale factor if needed
-        prog_container = Progress(self, start=0.0, end=0.2, nreports=1)
+        prog_container = Progress(self, start=0.0, end=0.2, nreports=2)
+        prog_container.report('Starting algorithm')
         if self._use_can:
             if self._scale_can:
                 # Use temp workspace so we don't modify original data
@@ -72,25 +73,27 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                                OutputWorkspace=self._scaled_container)
 
 
-        prog_corr = Progress(self, start=0.2, end=0.6, nreports=1)
+        prog_corr = Progress(self, start=0.2, end=0.6, nreports=2)
         if self._use_corrections:
+            prog_corr.report('Preprocessing corrections')
             self._pre_process_corrections()
 
             if self._use_can:
                 # Use container factors
+                prog_corr.report('Correcting sample and can')
                 self._correct_sample_can()
                 correction_type = 'sample_and_can_corrections'
-                prog_corr.report('Correcting sample and can')
             else:
                 # Use sample factor only
                 self._correct_sample()
                 correction_type = 'sample_corrections_only'
                 # Add corrections filename to log values
+                prog_corr.report('Correcting sample')
                 AddSampleLog(Workspace=self._output_ws_name,
                              LogName='corrections_filename',
                              LogType='String',
                              LogText=self._corrections_ws_name)
-                prog_corr.report('Correcting sample')
+
 
         else:
             # Do simple subtraction
@@ -99,45 +102,47 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             # Add container filename to log values
             can_cut = self._can_ws_name.index('_')
             can_base = self._can_ws_name[:can_cut]
+            prog_corr.report('Adding container filename')
             AddSampleLog(Workspace=self._output_ws_name,
                          LogName='container_filename',
                          LogType='String',
                          LogText=can_base)
-            prog_corr.report('Adding container filename')
 
         prog_wrkflow = Progress(self, 0.6, 1.0, nreports=4)
         # Record the container scale factor
         if self._use_can and self._scale_can:
+            prog_wrkflow.report('Adding container scaling')
             AddSampleLog(Workspace=self._output_ws_name,
                          LogName='container_scale',
                          LogType='Number',
                          LogText=str(self._can_scale_factor))
-        prog_wrkflow.report('Adding container scaling')
 
         # Record the type of corrections applied
+        prog_wrkflow.report('Adding correction type')
         AddSampleLog(Workspace=self._output_ws_name,
                      LogName='corrections_type',
                      LogType='String',
                      LogText=correction_type)
-        prog_wrkflow.report('Adding correction type')
 
         # Add original sample as log entry
         sam_cut = self._sample_ws_name.index('_')
         sam_base = self._sample_ws_name[:sam_cut]
+        prog_wrkflow.report('Adding sample filename')
         AddSampleLog(Workspace=self._output_ws_name,
                      LogName='sample_filename',
                      LogType='String',
                      LogText=sam_base)
-        prog_wrkflow.report('Adding sample filename')
 
         self.setPropertyValue('OutputWorkspace', self._output_ws_name)
 
         # Remove temporary workspaces
+        prog_wrkflow.report('Deleting Workspaces')
         if self._corrections in mtd:
             DeleteWorkspace(self._corrections)
         if self._scaled_container in mtd:
             DeleteWorkspace(self._scaled_container)
-        prog_wrkflow.report('Deleting Workspaces')
+        prog_wrkflow.report('Algorithm Complete')
+
 
 
     def validateInputs(self):

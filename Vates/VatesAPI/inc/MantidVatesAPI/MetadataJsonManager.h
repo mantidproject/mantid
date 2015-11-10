@@ -1,14 +1,15 @@
 #ifndef METADATA_JSON_MANAGER_H
 #define METADATA_JSON_MANAGER_H
 
-#include <json/json.h>
 #include "MantidKernel/System.h"
+#include <json/json.h>
 #include <string>
+
 namespace Mantid
 {
   namespace VATES
   {
-   /** Metadata container and handler to handle json data which is passed between filters and sources through 
+   /** Metadata container and handler to handle json data which is passed between filters and sources through
        VTK field data
 
    @date 31/11/2014
@@ -33,7 +34,7 @@ namespace Mantid
    File change history is stored at: <https://github.com/mantidproject/mantid>
    Code Documentation is available at: <http://doxygen.mantidproject.org>
    */
-    
+
   class DLLExport MetadataJsonManager
   {
     public:
@@ -44,7 +45,7 @@ namespace Mantid
       std::string getSerializedJson();
 
       void readInSerializedJson(std::string serializedJson);
-      
+
       void setInstrument(std::string instrument);
       std::string& getInstrument();
 
