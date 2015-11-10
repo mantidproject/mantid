@@ -170,6 +170,7 @@ set ( TEST_FILES
 	PeaksWorkspaceTest.h
 	RebinnedOutputTest.h
 	RefAxisTest.h
+        ReflectometryTransformTest.h
 	SkippingPolicyTest.h
 	SpecialWorkspace2DTest.h
 	SplittersWorkspaceTest.h

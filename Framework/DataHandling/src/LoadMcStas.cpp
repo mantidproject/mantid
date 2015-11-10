@@ -44,7 +44,7 @@ const std::string LoadMcStas::name() const { return "LoadMcStas"; }
 int LoadMcStas::version() const { return 1; }
 
 // Algorithm's category for identification. @see Algorithm::category
-const std::string LoadMcStas::category() const { return "DataHandling"; }
+const std::string LoadMcStas::category() const { return "DataHandling\\Nexus"; }
 
 //----------------------------------------------------------------------------------------------
 

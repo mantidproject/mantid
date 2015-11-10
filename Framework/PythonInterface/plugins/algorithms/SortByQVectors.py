@@ -11,7 +11,7 @@ class SortByQVectors(PythonAlgorithm):
     """
 
     def category(self):
-        return "Transforms\\Merging;PythonAlgorithms"
+        return "Transforms\\Merging;Utility\\Sorting"
 
     def name(self):
         return "SortByQVectors"

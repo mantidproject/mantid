@@ -10,13 +10,15 @@ import os
 import re
 from abc import abstractmethod
 
-
+#pylint: disable=R0921
+#pylint: disable=too-many-instance-attributes
 class ReductionWrapper(object):
     """ Abstract class provides interface to direct inelastic reduction
         allowing it to be run  from Mantid, web services, or system tests
         using the same interface and the same run file placed in different
         locations.
     """
+#pylint: disable=too-few-public-methods
     class var_holder(object):
         """ A simple wrapper class to keep web variables"""
         def __init__(self,Web_vars=None):
@@ -135,6 +137,7 @@ class ReductionWrapper(object):
                     docstring = prop.__doc__
                     if not docstring:
                         continue
+#pylint: disable=bare-except
                 except:
                     continue
                 contents = self._do_format(docstring)
@@ -190,7 +193,9 @@ class ReductionWrapper(object):
             The method can be overloaded to return a workspace
             or workspace name to validate results against.
         """
+#pylint: disable=protected-access
         if not PropertyManager.save_file_name._file_name is None:
+#pylint: disable=protected-access
             file_name = PropertyManager.save_file_name._file_name
             if isinstance(file_name,api.Workspace):
                 return file_name
@@ -225,7 +230,7 @@ class ReductionWrapper(object):
           User expected to overload this method within class instantiation """
         return None
 
-
+#pylint: disable=too-many-branches
     def build_or_validate_result(self,Error=1.e-6,ToleranceRelErr=True):
         """ Method validates results of the reduction against reference file or workspace.
 
@@ -258,12 +263,14 @@ class ReductionWrapper(object):
                     config.appendDataSearchDir(path)
                 # it there bug in getFullPath? It returns the same string if given full path
                 # but file has not been found
+#pylint: disable=unused-variable
                 name,fext=os.path.splitext(name)
                 fileName = FileFinder.getFullPath(name+'.nxs')
                 if len(fileName)>0:
                     build_validation = False
                     try:
                         reference_ws = Load(fileName)
+#pylint: disable=bare-except
                     except:
                         build_validation = True
                 else:
@@ -325,6 +332,7 @@ class ReductionWrapper(object):
             return True,'Reference file and reduced workspace are equal with accuracy {0:<3.2f}'\
                         .format(TOLL)
         else:
+#pylint: disable=unused-variable
             fname,ext = os.path.splitext(fileName)
             filename = fname+'-mismatch.nxs'
             self.reducer.prop_man.log("***WARNING: can not get results matching the reference file.\n"\
@@ -374,6 +382,7 @@ class ReductionWrapper(object):
             reduction properties between script and web variables
         """
         if input_file:
+#pylint: disable=attribute-defined-outside-init
             self.reducer.sample_run = str(input_file)
         if output_directory:
             config['defaultsave.directory'] = str(output_directory)
@@ -390,7 +399,8 @@ class ReductionWrapper(object):
                 self._run_pause(timeToWait)
                 Found,input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man,file_hint=file_hint,be_quet=True)
                 if Found:
-                    file,found_ext=os.path.splitext(input_file)
+#pylint: disable=unused-variable
+                    file_name,found_ext=os.path.splitext(input_file)
                     if found_ext != fext:
                         wait_counter+=1
                         if wait_counter<2:
@@ -415,6 +425,7 @@ class ReductionWrapper(object):
         """ procedure used to sum and reduce runs in case when not all files
            are available and user have to wait for these files to appear
        """
+#pylint: disable=protected-access
         if not PropertyManager.sample_run._run_list:
             raise RuntimeError("sum_and_reduce expects run file list to be defined")
 
@@ -506,14 +517,14 @@ class ReductionWrapper(object):
 # --------### reduce list of runs one by one ----------------------------###
             runfiles = PropertyManager.sample_run.get_run_file_list()
             if out_ws_name is None:
-                for file in runfiles:
-                    self.reduce(file)
+                for file_name in runfiles:
+                    self.reduce(file_name)
                 return None
             else:
                 results = []
                 nruns = len(runfiles)
-                for num,file in enumerate(runfiles):
-                    red_ws = self.reduce(file)
+                for num,file_name in enumerate(runfiles):
+                    red_ws = self.reduce(file_name)
                     if isinstance(red_ws,list):
                         for ws in red_ws:
                             results.append(ws)
@@ -544,9 +555,9 @@ def MainProperties(main_prop_definition):
         prop_dict = main_prop_definition(*args)
         #print "in decorator: ",properties
         host = args[0]
-#pylint: disable=access-to-protected-member
+#pylint: disable=protected-access
         if not host._run_from_web: # property run locally
-#pylint: disable=access-to-protected-member
+#pylint: disable=protected-access
             host._wvs.standard_vars = prop_dict
             host.reducer.prop_man.set_input_parameters(**prop_dict)
         return prop_dict
@@ -561,7 +572,9 @@ def AdvancedProperties(adv_prop_definition):
         prop_dict = adv_prop_definition(*args)
         #print "in decorator: ",properties
         host = args[0]
+#pylint: disable=protected-access
         if not host._run_from_web: # property run locally
+#pylint: disable=protected-access
             host._wvs.advanced_vars = prop_dict
             host.reducer.prop_man.set_input_parameters(**prop_dict)
         return prop_dict
@@ -578,6 +591,7 @@ def iliad(reduce):
         #seq = inspect.stack()
         # output workspace name.
         try:
+#pylint: disable=unused-variable
             n,r = funcreturns.lhs_info('both')
             out_ws_name = r[0]
         except:
@@ -600,6 +614,7 @@ def iliad(reduce):
                 try:
                     config.appendDataSearchDir(str(data_path))
                     args[1] = os.path.basename(input_file)
+#pylint: disable=bare-except
                 except: # if mantid is not available, this should ignore config
                     pass
         if output_directory:

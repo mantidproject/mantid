@@ -29,7 +29,9 @@ const std::string ResetNegatives::name() const { return "ResetNegatives"; }
 int ResetNegatives::version() const { return 1; }
 
 /// @copydoc Mantid::API::IAlgorithm::category()
-const std::string ResetNegatives::category() const { return "Utility"; }
+const std::string ResetNegatives::category() const {
+  return "CorrectionFunctions\\SpecialCorrections";
+}
 
 //----------------------------------------------------------------------------------------------
 /// @copydoc Mantid::API::Algorithm::init()

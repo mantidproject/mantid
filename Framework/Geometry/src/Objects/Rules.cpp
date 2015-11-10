@@ -421,7 +421,7 @@ int Rule::removeItem(Rule *&TRule, const int SurfN)
         throw std::logic_error("Failed to cast Rule object to SurfPoint");
       }
       SX->setKeyN(0);
-      SX->setKey(0);
+      SX->setKey(boost::shared_ptr<Surface>());
       return cnt + 1;
     }
     delete Ptr;
@@ -578,7 +578,8 @@ int Rule::commonType() const
   return rtype;
 }
 
-int Rule::substituteSurf(const int SurfN, const int newSurfN, Surface *SPtr)
+int Rule::substituteSurf(const int SurfN, const int newSurfN,
+                         const boost::shared_ptr<Surface> &SPtr)
 /**
   Substitues a surface item if within a rule
   @param SurfN :: Number number to change
@@ -591,12 +592,11 @@ int Rule::substituteSurf(const int SurfN, const int newSurfN, Surface *SPtr)
   SurfPoint *Ptr = dynamic_cast<SurfPoint *>(findKey(SurfN));
   while (Ptr) {
     Ptr->setKeyN(Ptr->getSign() * newSurfN);
-    Ptr->setKey(SPtr->clone()); // Clone to ensure uniqueness
+    Ptr->setKey(SPtr);
     cnt++;
     // get next key
     Ptr = dynamic_cast<SurfPoint *>(findKey(SurfN));
   }
-  delete SPtr; // Delete incoming pointer
   return cnt;
 }
 

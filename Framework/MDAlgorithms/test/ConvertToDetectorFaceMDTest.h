@@ -118,11 +118,6 @@ public:
     TS_ASSERT_EQUALS("ConvertToDetectorFaceMD", alg.name())
   }
 
-  void test_categories() {
-    ConvertToDetectorFaceMD alg;
-    TS_ASSERT_EQUALS("MDAlgorithms", alg.category());
-  }
-
   //----------------------------------------------------------------------------
   void test_oneBank() {
     MDEventWorkspace3::sptr ws = doTest<MDEventWorkspace3>(TOF, "1");

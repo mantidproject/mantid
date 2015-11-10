@@ -11,7 +11,7 @@
 #include <algorithm>
 
 #include "MantidKernel/Exception.h"
-
+#include "MantidKernel/make_unique.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Strings.h"
@@ -61,30 +61,23 @@ SurfaceFactory::SurfaceFactory(const SurfaceFactory &A)
 {
   MapType::const_iterator vc;
   for (vc = A.SGrid.begin(); vc != A.SGrid.end(); ++vc)
-    SGrid.insert(MapType::value_type(vc->first, vc->second->clone()));
+    SGrid.push_back(MapType::value_type(vc->first, vc->second->clone()));
 }
 
-SurfaceFactory::~SurfaceFactory()
-/**
-  Destructor removes memory for atom/cluster list
-*/
-{
-  MapType::iterator vc;
-  for (vc = SGrid.begin(); vc != SGrid.end(); ++vc)
-    delete vc->second;
-}
+SurfaceFactory::~SurfaceFactory() {}
 
 void SurfaceFactory::registerSurface()
 /**
   Register tallies to be used
 */
 {
-  SGrid["Plane"] = new Plane;
-  SGrid["Cylinder"] = new Cylinder;
-  SGrid["Cone"] = new Cone;
+  using Mantid::Kernel::make_unique;
+  SGrid.push_back(std::make_pair("Plane", make_unique<Plane>()));
+  SGrid.push_back(std::make_pair("Cylinder", make_unique<Cylinder>()));
+  SGrid.push_back(std::make_pair("Cone", make_unique<Cone>()));
   // SGrid["Torus"]=new Torus;
-  SGrid["General"] = new General;
-  SGrid["Sphere"] = new Sphere;
+  SGrid.push_back(std::make_pair("General", make_unique<General>()));
+  SGrid.push_back(std::make_pair("Sphere", make_unique<Sphere>()));
 
   ID['c'] = "Cylinder";
   ID['k'] = "Cone";
@@ -95,7 +88,22 @@ void SurfaceFactory::registerSurface()
   return;
 }
 
-Surface *SurfaceFactory::createSurface(const std::string &Key) const
+namespace {
+class KeyEquals {
+public:
+  KeyEquals(std::string key) : m_key(std::move(key)) {}
+  bool
+  operator()(const std::pair<std::string, std::unique_ptr<Surface>> &element) {
+    return m_key == element.first;
+  }
+
+private:
+  std::string m_key;
+};
+}
+
+std::unique_ptr<Surface>
+SurfaceFactory::createSurface(const std::string &Key) const
 /**
   Creates an instance of tally
   given a valid key.
@@ -106,16 +114,16 @@ Surface *SurfaceFactory::createSurface(const std::string &Key) const
 */
 {
   MapType::const_iterator vc;
-  vc = SGrid.find(Key);
+  vc = std::find_if(SGrid.begin(), SGrid.end(), KeyEquals(Key));
   if (vc == SGrid.end()) {
     throw Kernel::Exception::NotFoundError("SurfaceFactory::createSurface",
                                            Key);
   }
-  Surface *X = vc->second->clone();
-  return X;
+  return vc->second->clone();
 }
 
-Surface *SurfaceFactory::createSurfaceID(const std::string &Key) const
+std::unique_ptr<Surface>
+SurfaceFactory::createSurfaceID(const std::string &Key) const
 /**
   Creates an instance of tally
   given a valid key.
@@ -136,7 +144,8 @@ Surface *SurfaceFactory::createSurfaceID(const std::string &Key) const
   return createSurface(mc->second);
 }
 
-Surface *SurfaceFactory::processLine(const std::string &Line) const
+std::unique_ptr<Surface>
+SurfaceFactory::processLine(const std::string &Line) const
 /**
   Creates an instance of a surface
   given a valid line
@@ -150,7 +159,7 @@ Surface *SurfaceFactory::processLine(const std::string &Line) const
   if (!Mantid::Kernel::Strings::convert(Line, key))
     throw Kernel::Exception::NotFoundError("SurfaceFactory::processLine", Line);
 
-  Surface *X = createSurfaceID(key);
+  std::unique_ptr<Surface> X = createSurfaceID(key);
   if (X->setSurface(Line)) {
     std::cerr << "X:: " << X->setSurface(Line) << std::endl;
     throw Kernel::Exception::NotFoundError("SurfaceFactory::processLine", Line);

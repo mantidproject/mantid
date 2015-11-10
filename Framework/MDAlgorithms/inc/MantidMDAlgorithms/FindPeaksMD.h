@@ -37,7 +37,7 @@ public:
   virtual int version() const { return 1; };
   /// Algorithm's category for identification
   virtual const std::string category() const {
-    return "Optimization\\PeakFinding;MDAlgorithms";
+    return "Optimization\\PeakFinding;MDAlgorithms\\Peaks";
   }
 
 private:

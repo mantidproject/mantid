@@ -28,7 +28,9 @@ const std::string UpdateScriptRepository::name() const {
 int UpdateScriptRepository::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string UpdateScriptRepository::category() const { return "Utility"; }
+const std::string UpdateScriptRepository::category() const {
+  return "Utility\\Python";
+}
 
 //----------------------------------------------------------------------------------------------
 

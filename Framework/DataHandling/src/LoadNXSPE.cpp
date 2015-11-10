@@ -368,14 +368,14 @@ Geometry::Object_sptr LoadNXSPE::createCuboid(double dx, double dy, double dz) {
   std::string S41 = "so 0.01"; // Sphere at origin radius 0.01
 
   // First create some surfaces
-  std::map<int, Geometry::Surface *> SphSurMap;
-  SphSurMap[41] = new Geometry::Sphere();
+  std::map<int, boost::shared_ptr<Geometry::Surface>> SphSurMap;
+  SphSurMap[41] = boost::make_shared<Geometry::Sphere>();
   SphSurMap[41]->setSurface(S41);
   SphSurMap[41]->setName(41);
 
   // A sphere
   std::string ObjSphere = "-41";
-  Geometry::Object_sptr retVal = Geometry::Object_sptr(new Geometry::Object);
+  Geometry::Object_sptr retVal = boost::make_shared<Geometry::Object>();
   retVal->setObject(41, ObjSphere);
   retVal->populate(SphSurMap);
 

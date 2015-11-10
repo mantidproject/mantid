@@ -1,5 +1,5 @@
-import os, sys
-#os.environ["PATH"] = r"c:\Mantid\Code\builds\br_master\bin\Release;"+os.environ["PATH"]
+﻿import os, sys
+#os.environ["PATH"] = r"c:\Mantid\_builds\br_master\bin\Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -282,11 +282,14 @@ class DirectEnergyConversionTest(unittest.TestCase):
         run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=8, BankPixelWidth=1, NumEvents=100000,
                                     XUnit='TOF',xMin=tMin,xMax=tMax)
         LoadInstrument(run,InstrumentName='MARI')
+        run.setMonitorWorkspace(run_monitors)
+
         wb_ws   = Rebin(run,Params=[tMin,1,tMax],PreserveEvents=False)
 
         # References used to test against ordinary reduction
         ref_ws = Rebin(run,Params=[tMin,1,tMax],PreserveEvents=False)
         ref_ws_monitors = CloneWorkspace('run_monitors')
+        ref_ws.setMonitorWorkspace(ref_ws_monitors)
         # just in case, wb should work without clone too.
         wb_clone = CloneWorkspace(wb_ws)
 
@@ -489,10 +492,12 @@ class DirectEnergyConversionTest(unittest.TestCase):
                                      NumEvents=100000, XUnit='TOF',xMin=tMin,xMax=tMax)
         LoadInstrument(run,InstrumentName='MARI')
         AddSampleLog(run,LogName='gd_prtn_chrg',LogText='1.',LogType='Number')
+        run.setMonitorWorkspace(run_monitors)
 
         # build "monovanadium"
         mono = CloneWorkspace(run)
         mono_monitors = CloneWorkspace(run_monitors)
+        mono.setMonitorWorkspace(mono_monitors)
 
         # build "White-beam"
         wb_ws   = Rebin(run,Params=[tMin,1,tMax],PreserveEvents=False)
@@ -500,6 +505,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # build "second run" to ensure repeated execution
         run2 = CloneWorkspace(run)
         run2_monitors = CloneWorkspace(run_monitors)
+        run2.setMonitorWorkspace(run2_monitors)
 
         # Run multirep
         tReducer = DirectEnergyConversion(run.getInstrument())
@@ -619,6 +625,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
 
 if __name__=="__main__":
-   #test = DirectEnergyConversionTest('test_sum_monitors')
-   #test.test_sum_monitors()
+   #test = DirectEnergyConversionTest('test_multirep_mode')
+   #test.test_multirep_mode()
    unittest.main()

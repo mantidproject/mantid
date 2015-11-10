@@ -194,7 +194,7 @@ void SaveCanSAS1D2::createSASTransElement(std::string &sasTrans,
   std::stringstream trans;
 
   trans << "\n\t\t<SAStransmission_spectrum name=\"" << name << "\">";
-  std::string t_unit = m_ws->YUnitLabel();
+  std::string t_unit = m_ws->YUnit();
   std::string lambda_unit = m_ws->getAxis(0)->unit()->label();
   if (t_unit.empty())
     t_unit = "none";

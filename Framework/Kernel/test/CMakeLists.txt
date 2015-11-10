@@ -14,7 +14,8 @@ if ( CXXTEST_FOUND )
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             ${GMOCK_LIBRARIES}
-            ${GTEST_LIBRARIES} )
+            ${GTEST_LIBRARIES}
+            ${JSONCPP_LIBRARIES} )
   add_dependencies ( FrameworkTests KernelTest )
   # Test data
   add_dependencies ( KernelTest StandardTestData )

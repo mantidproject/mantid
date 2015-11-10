@@ -6,7 +6,11 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyWithValue.h"
 #include <vector>
-#include <map>
+#include <set>
+
+namespace Json {
+class Value;
+}
 
 namespace Mantid {
 
@@ -67,10 +71,36 @@ public:
                               const bool delproperty = true) = 0;
 
   /** Sets all the declared properties from a string.
-      @param propertiesArray :: A list of name = value pairs separated by a
+    @param propertiesString :: A list of name = value pairs separated by a
      semicolon
+    @param ignoreProperties :: A set of names of any properties NOT to set
+    from the propertiesArray
+  */
+  virtual void setPropertiesWithSimpleString(
+      const std::string &propertiesString,
+      const std::set<std::string> &
+          ignoreProperties = std::set<std::string>()) = 0;
+
+  /** Sets all the declared properties from a string.
+      @param propertiesJson :: A string of name = value pairs formatted
+        as a json name value pair collection
+      @param ignoreProperties :: A set of names of any properties NOT to set
+      from the propertiesArray
    */
-  virtual void setProperties(const std::string &propertiesArray) = 0;
+  virtual void
+  setProperties(const std::string &propertiesJson,
+                const std::set<std::string> &
+                    ignoreProperties = std::set<std::string>()) = 0;
+
+  /** Sets all the declared properties from a json object
+     @param jsonValue :: A json name value pair collection
+     @param ignoreProperties :: A set of names of any properties NOT to set
+     from the propertiesArray
+  */
+  virtual void
+  setProperties(const ::Json::Value &jsonValue,
+                const std::set<std::string> &
+                    ignoreProperties = std::set<std::string>()) = 0;
 
   /** Sets property value from a string
       @param name :: Property name
@@ -141,8 +171,10 @@ public:
   void updatePropertyValues(const IPropertyManager &other);
 
   /// Return the property manager serialized as a string.
-  virtual std::string asString(bool withDefaultValues = false,
-                               char separator = ',') const = 0;
+  virtual std::string asString(bool withDefaultValues = false) const = 0;
+
+  /// Return the property manager serialized as a json object.
+  virtual ::Json::Value asJson(bool withDefaultValues = false) const = 0;
 
   /** Give settings to a property to determine when it gets enabled/hidden.
    * Passes ownership of the given IPropertySettings object to the named

@@ -1,30 +1,11 @@
 #ifndef PYTHONSYSTEMHEADER_H_
 #define PYTHONSYSTEMHEADER_H_
 
-// The pythonX.X/object.h file for versions <2.5 uses the 'slots' word that gets redefined in
-// Qt. Need to code around this
-#include <patchlevel.h> //Contains Python version number
-
-#if PY_VERSION_HEX < 0x02050000
- #undef slots
- #include <Python.h>
- #define slots
-
- typedef int Py_ssize_t;
- #if PY_VERSION_HEX < 0x020400A1 
-  // Also need to typedef this for early 2.4 relases
-  typedef struct _traceback 
-  {
-    PyObject_HEAD
-    struct _traceback *tb_next;
-    PyFrameObject *tb_frame;
-    int tb_lasti;
-    int tb_lineno;
-  } PyTracebackObject;
- #endif
-#else
- #include <Python.h>
-#endif
+//  This file serves as a wrapper around <Python.h> which allows it to be
+//  compiled with GCC 2.95.2 under Win32 and which disables the default MSVC
+//  behavior so that a program may be compiled in debug mode without requiring a
+//  special debugging build of the Python library.
+#include <boost/python/detail/wrap_python.hpp>
 
 // A few more Python headers
 #include <compile.h>

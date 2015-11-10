@@ -5,7 +5,7 @@ from mantid.kernel import *
 class MergeCalFiles(PythonAlgorithm):
 
     def category(self):
-        return "DataHandling\\Text;Diffraction;PythonAlgorithms"
+        return "DataHandling\\Text;Diffraction\\DataHandling\\CalFiles"
 
     def name(self):
         return "MergeCalFiles"

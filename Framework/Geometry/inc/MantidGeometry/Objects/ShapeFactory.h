@@ -83,32 +83,47 @@ public:
 
 private:
   std::string parseSphere(Poco::XML::Element *pElem,
-                          std::map<int, Surface *> &prim, int &l_id);
-  std::string parseInfinitePlane(Poco::XML::Element *pElem,
-                                 std::map<int, Surface *> &prim, int &l_id);
-  std::string parseInfiniteCylinder(Poco::XML::Element *pElem,
-                                    std::map<int, Surface *> &prim, int &l_id);
+                          std::map<int, boost::shared_ptr<Surface>> &prim,
+                          int &l_id);
+  std::string
+  parseInfinitePlane(Poco::XML::Element *pElem,
+                     std::map<int, boost::shared_ptr<Surface>> &prim,
+                     int &l_id);
+  std::string
+  parseInfiniteCylinder(Poco::XML::Element *pElem,
+                        std::map<int, boost::shared_ptr<Surface>> &prim,
+                        int &l_id);
   std::string parseCylinder(Poco::XML::Element *pElem,
-                            std::map<int, Surface *> &prim, int &l_id);
-  std::string parseSegmentedCylinder(Poco::XML::Element *pElem,
-                                     std::map<int, Surface *> &prim, int &l_id);
+                            std::map<int, boost::shared_ptr<Surface>> &prim,
+                            int &l_id);
+  std::string
+  parseSegmentedCylinder(Poco::XML::Element *pElem,
+                         std::map<int, boost::shared_ptr<Surface>> &prim,
+                         int &l_id);
 
   CuboidCorners parseCuboid(Poco::XML::Element *pElem);
   std::string parseCuboid(Poco::XML::Element *pElem,
-                          std::map<int, Surface *> &prim, int &l_id);
+                          std::map<int, boost::shared_ptr<Surface>> &prim,
+                          int &l_id);
   std::string parseInfiniteCone(Poco::XML::Element *pElem,
-                                std::map<int, Surface *> &prim, int &l_id);
+                                std::map<int, boost::shared_ptr<Surface>> &prim,
+                                int &l_id);
   std::string parseCone(Poco::XML::Element *pElem,
-                        std::map<int, Surface *> &prim, int &l_id);
+                        std::map<int, boost::shared_ptr<Surface>> &prim,
+                        int &l_id);
   std::string parseHexahedron(Poco::XML::Element *pElem,
-                              std::map<int, Surface *> &prim, int &l_id);
+                              std::map<int, boost::shared_ptr<Surface>> &prim,
+                              int &l_id);
   std::string parseTaperedGuide(Poco::XML::Element *pElem,
-                                std::map<int, Surface *> &prim, int &l_id);
+                                std::map<int, boost::shared_ptr<Surface>> &prim,
+                                int &l_id);
   std::string parseTorus(Poco::XML::Element *pElem,
-                         std::map<int, Surface *> &prim, int &l_id);
-  std::string parseSliceOfCylinderRing(Poco::XML::Element *pElem,
-                                       std::map<int, Surface *> &prim,
-                                       int &l_id);
+                         std::map<int, boost::shared_ptr<Surface>> &prim,
+                         int &l_id);
+  std::string
+  parseSliceOfCylinderRing(Poco::XML::Element *pElem,
+                           std::map<int, boost::shared_ptr<Surface>> &prim,
+                           int &l_id);
 
   Poco::XML::Element *getShapeElement(Poco::XML::Element *pElem,
                                       const std::string &name);

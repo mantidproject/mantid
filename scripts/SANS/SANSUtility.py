@@ -1,4 +1,4 @@
-#pylint: disable=too-many-lines
+﻿#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 #########################################################
 # This module contains utility functions common to the
@@ -1167,7 +1167,7 @@ def correct_q_resolution_for_can(original_workspace, can_workspace, subtracted_w
     @param subtracted_workspace: the subtracted workspace
     '''
     dummy1 = can_workspace
-    if original_workspace.getNumberHistograms() == 1:
+    if original_workspace.getNumberHistograms() == 1 and original_workspace.hasDx(0):
         subtracted_workspace.setDx(0, original_workspace.dataDx(0))
 
 def correct_q_resolution_for_merged(count_ws_front, count_ws_rear,

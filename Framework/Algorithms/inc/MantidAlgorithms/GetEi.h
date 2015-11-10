@@ -63,9 +63,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
-    return "Inelastic; CorrectionFunctions";
-  }
+  virtual const std::string category() const { return "Inelastic\\Ei"; }
 
 private:
   /// name of the tempory workspace that we create and use

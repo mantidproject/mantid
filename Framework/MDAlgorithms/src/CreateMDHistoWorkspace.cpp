@@ -42,7 +42,7 @@ int CreateMDHistoWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string CreateMDHistoWorkspace::category() const {
-  return "MDAlgorithms";
+  return "MDAlgorithms\\Creation";
 }
 
 //----------------------------------------------------------------------------------------------

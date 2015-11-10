@@ -39,8 +39,8 @@ namespace Poldi {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class MANTID_SINQ_DLL Poldi2DFunction : virtual public API::IFunction1DSpectrum,
-                                        virtual public API::CompositeFunction,
+class MANTID_SINQ_DLL Poldi2DFunction : public API::IFunction1DSpectrum,
+                                        public API::CompositeFunction,
                                         public IPoldiFunction1D {
 public:
   Poldi2DFunction();

@@ -7,6 +7,7 @@
 
 namespace{
   QString makeNumber(double d) {return QString::number(d,'g',16);}
+  const int valueColumn = 0;
 }
 
 namespace MantidQt
@@ -23,8 +24,8 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit, co
   m_uiForm.setupUi(this);
   QHeaderView *header = m_uiForm.tableWidget->horizontalHeader();
   header->setResizeMode(0,QHeaderView::Stretch);
-  header->setResizeMode(1,QHeaderView::Stretch);
   connect(m_uiForm.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(valueChanged(int,int)));
+  m_uiForm.lblParameterName->setText("Parameter: " + parName);
 
   auto n = multifit->getNumberOfSpectra();
   for(int i = 0; i < n; ++i)
@@ -36,13 +37,15 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit, co
     auto tie = multifit->getLocalParameterTie(parName,i);
     m_ties.push_back(tie);
     m_uiForm.tableWidget->insertRow(i);
-    auto cell = new QTableWidgetItem( QString("f%1.").arg(i) + parName );
+    auto cell = new QTableWidgetItem( makeNumber(value) );
     m_uiForm.tableWidget->setItem( i, 0, cell );
-    cell = new QTableWidgetItem( makeNumber(value) );
-    m_uiForm.tableWidget->setItem( i, 1, cell );
+    auto headerItem = new QTableWidgetItem(
+        multifit->getWorkspaceName(i) + " (" +
+        QString::number(multifit->getWorkspaceIndex(i)) + ")");
+    m_uiForm.tableWidget->setVerticalHeaderItem(i, headerItem);
   }
   auto deleg = new LocalParameterItemDelegate(this);
-  m_uiForm.tableWidget->setItemDelegateForColumn(1,deleg);
+  m_uiForm.tableWidget->setItemDelegateForColumn(valueColumn, deleg);
   connect(deleg,SIGNAL(setAllValues(double)),this,SLOT(setAllValues(double)));
   connect(deleg,SIGNAL(fixParameter(int,bool)),this,SLOT(fixParameter(int,bool)));
   connect(deleg,SIGNAL(setAllFixed(bool)),this,SLOT(setAllFixed(bool)));
@@ -57,7 +60,7 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit, co
 /// @param col :: Column index of the changed cell.
 void EditLocalParameterDialog::valueChanged(int row, int col)
 {
-  if ( col == 1 )
+  if ( col == valueColumn )
   {
     QString text = m_uiForm.tableWidget->item(row,col)->text();
     try
@@ -80,7 +83,7 @@ void EditLocalParameterDialog::setAllValues(double value)
   for(int i = 0; i < n; ++i)
   {
     m_values[i] = value;
-    m_uiForm.tableWidget->item(i,1)->setText( makeNumber(value) );
+    m_uiForm.tableWidget->item(i, valueColumn)->setText( makeNumber(value) );
   }
 }
 
@@ -164,7 +167,7 @@ void EditLocalParameterDialog::showContextMenu()
 
   for(auto index = selection.begin(); index != selection.end(); ++index)
   {
-    if ( index->column() == 1 ) hasSelection = true;
+    if ( index->column() == valueColumn ) hasSelection = true;
   }
 
   if ( !hasSelection ) return;
@@ -224,8 +227,8 @@ void EditLocalParameterDialog::redrawCells()
   {
     // it's the only way I am able to make the table to repaint itself
     auto text = makeNumber(m_values[i]);
-    m_uiForm.tableWidget->item(i,1)->setText( text + " " );
-    m_uiForm.tableWidget->item(i,1)->setText( text );
+    m_uiForm.tableWidget->item(i, valueColumn)->setText( text + " " );
+    m_uiForm.tableWidget->item(i, valueColumn)->setText( text );
   }
 }
 
