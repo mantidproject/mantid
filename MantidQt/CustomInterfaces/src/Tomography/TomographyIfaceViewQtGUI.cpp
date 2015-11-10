@@ -77,6 +77,7 @@ void TomographyIfaceViewQtGUI::initLayout() {
   m_ui.tabMain->addTab(tabROIW, QString("ROI etc."));
 
   QWidget *tabFiltersW = new QWidget();
+  m_uiTabFilters.setupUi(tabFiltersW);
   m_ui.tabMain->addTab(tabFiltersW, QString("Filters"));
 
   QWidget *tabVizW = new QWidget();
