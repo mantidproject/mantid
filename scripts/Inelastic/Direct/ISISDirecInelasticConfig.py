@@ -258,7 +258,7 @@ class UserProperties(object):
                     rbf = "RB{0:07}".format(rbf)
                     rb_folder_or_id = os.path.join(base,rbf)
                 except ValueError:
-                    raise RuntimeError("RB Folder {0} should be a string".format(rb_folder_or_id))
+                    raise RuntimeError("RB Folder {0} should be a string containing RB number at the end".format(rb_folder_or_id))
         #end
         if os.path.exists(rb_folder_or_id) and os.path.isdir(rb_folder_or_id):
             rb_exist = True
