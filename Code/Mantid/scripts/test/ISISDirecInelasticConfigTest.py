@@ -123,8 +123,8 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         self.assertRaises(RuntimeError,user.set_user_properties,'HET',self.rbdir,'CYC20144',self.start_date)
         self.assertRaises(RuntimeError,user.set_user_properties,'HET',self.rbdir,'CYCLE201444',self.start_date)
 
-        #self.assertRaises(RuntimeError,user.set_user_properties,'HET',self.start_date,'missing/folder')
-        user.set_user_properties('HET','missing/folder',self.cycle,"19990101")
+        self.assertRaises(RuntimeError,user.set_user_properties,'HET','missing/folder',self.cycle,"19990101")
+        #user.set_user_properties('HET','missing/folder',self.cycle,"19990101")
         # this refers to recent experiment, not the old one
         self.assertTrue(user.rb_dir_exist)
 
@@ -419,7 +419,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
 
 if __name__=="__main__":
-   #test = ISISDirectInelasticConfigTest('test_init_user')
+   #test = ISISDirectInelasticConfigTest('test_UserProperties')
    #test._set_up()
    #test.run()
    #test._tear_down()
