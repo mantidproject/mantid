@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/Crystal/CyclicGroup.cpp
 	src/Crystal/Group.cpp
 	src/Crystal/HKLFilter.cpp
+	src/Crystal/HKLFilterWavelength.cpp
 	src/Crystal/HKLGenerator.cpp
 	src/Crystal/IPeak.cpp
 	src/Crystal/IndexingUtils.cpp
@@ -148,6 +149,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/CyclicGroup.h
 	inc/MantidGeometry/Crystal/Group.h
 	inc/MantidGeometry/Crystal/HKLFilter.h
+	inc/MantidGeometry/Crystal/HKLFilterWavelength.h
 	inc/MantidGeometry/Crystal/HKLGenerator.h
 	inc/MantidGeometry/Crystal/IPeak.h
 	inc/MantidGeometry/Crystal/IndexingUtils.h
@@ -263,6 +265,17 @@ set ( INC_FILES
 	inc/MantidGeometry/Rendering/vtkGeometryCacheReader.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheWriter.h
 	inc/MantidGeometry/Surfaces/BaseVisit.h
+	inc/MantidGeometry/Surfaces/Cone.h
+	inc/MantidGeometry/Surfaces/Cylinder.h
+	inc/MantidGeometry/Surfaces/General.h
+	inc/MantidGeometry/Surfaces/Line.h
+	inc/MantidGeometry/Surfaces/LineIntersectVisit.h
+	inc/MantidGeometry/Surfaces/Plane.h
+	inc/MantidGeometry/Surfaces/Quadratic.h
+	inc/MantidGeometry/Surfaces/Sphere.h
+	inc/MantidGeometry/Surfaces/Surface.h
+	inc/MantidGeometry/Surfaces/SurfaceFactory.h
+	inc/MantidGeometry/Surfaces/Torus.h
 )
 
 set ( TEST_FILES
@@ -296,6 +309,7 @@ set ( TEST_FILES
 	GoniometerTest.h
 	GroupTest.h
 	HKLFilterTest.h
+	HKLFilterWavelengthTest.h
 	HKLGeneratorTest.h
 	HKLTest.h
 	IDFObjectTest.h
@@ -428,7 +442,7 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( Geometry LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}  ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} )
+target_link_libraries ( Geometry LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}  ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${JSONCPP_LIBRARIES} )
 
 if (ENABLE_OPENCASCADE)
   target_link_libraries ( Geometry LINK_PRIVATE ${OPENCASCADE_LIBRARIES} )

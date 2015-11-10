@@ -1,7 +1,5 @@
-#pylint: disable=invalid-name
+﻿#pylint: disable=invalid-name
 """ Sample LET reduction script """
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
-
 
 from Direct.ReductionWrapper import *
 try:
@@ -20,6 +18,8 @@ def find_binning_range(energy,ebin):
     """
 
     InstrName =  config['default.instrument'][0:3]
+    if not InstrName in ['MER','LET']:
+        InstrName = 'LET'
     if InstrName.find('LET')>-1:
         ls  =25
         lm2 =23.5

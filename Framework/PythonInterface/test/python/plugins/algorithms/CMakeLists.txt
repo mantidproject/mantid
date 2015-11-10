@@ -5,6 +5,7 @@
 set ( TEST_PY_FILES
   AddSampleLogMultipleTest.py
   ApplyPaalmanPingsCorrectionTest.py
+  BayesQuasiTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
@@ -12,7 +13,6 @@ set ( TEST_PY_FILES
   ComputeCalibrationCoefVanTest.py
   CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
-  CreateMDTest.py
   DetectorFloodWeightingTest.py
   IndirectCalibrationTest.py
   CreateWorkspaceTest.py
@@ -60,7 +60,6 @@ set ( TEST_PY_FILES
   MSDFitTest.py
   MuscatSofQWTest.py
   OSIRISDiffractionReductionTest.py
-  QLRunTest.py
   ResNorm2Test.py
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py
@@ -79,6 +78,7 @@ set ( TEST_PY_FILES
   UpdatePeakParameterTableValueTest.py
   SANSSubtractTest.py
   TimeSliceTest.py
+  TOFTOFConvertTofToDeltaETest.py
   TOFTOFCropWorkspaceTest.py
   TOFTOFMergeRunsTest.py
   TOSCABankCorrectionTest.py

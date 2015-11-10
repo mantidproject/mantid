@@ -24,13 +24,23 @@ namespace Geometry {
  */
 class MANTID_GEOMETRY_DLL PointGroup : public Group {
 public:
-  enum CrystalSystem {
+  enum class CrystalSystem {
     Triclinic,
     Monoclinic,
     Orthorhombic,
     Tetragonal,
     Hexagonal,
     Trigonal,
+    Cubic
+  };
+
+  enum class LatticeSystem {
+    Triclinic,
+    Monoclinic,
+    Orthorhombic,
+    Tetragonal,
+    Hexagonal,
+    Rhombohedral,
     Cubic
   };
 
@@ -47,6 +57,7 @@ public:
   std::string getSymbol() const;
 
   CrystalSystem crystalSystem() const { return m_crystalSystem; }
+  LatticeSystem latticeSystem() const { return m_latticeSystem; }
 
   /// Return true if the hkls are in same group
   bool isEquivalent(const Kernel::V3D &hkl, const Kernel::V3D &hkl2) const;
@@ -60,20 +71,19 @@ protected:
   std::vector<Kernel::V3D> getEquivalentSet(const Kernel::V3D &hkl) const;
 
   CrystalSystem getCrystalSystemFromGroup() const;
+  LatticeSystem getLatticeSystemFromCrystalSystemAndGroup(
+      const CrystalSystem &crystalSystem) const;
 
   std::string m_symbolHM;
   std::string m_name;
   CrystalSystem m_crystalSystem;
+  LatticeSystem m_latticeSystem;
 };
 
 /// Shared pointer to a PointGroup
 typedef boost::shared_ptr<PointGroup> PointGroup_sptr;
 
 MANTID_GEOMETRY_DLL std::vector<PointGroup_sptr> getAllPointGroups();
-
-typedef std::multimap<PointGroup::CrystalSystem, PointGroup_sptr>
-    PointGroupCrystalSystemMap;
-MANTID_GEOMETRY_DLL PointGroupCrystalSystemMap getPointGroupsByCrystalSystem();
 
 MANTID_GEOMETRY_DLL
 std::string
@@ -82,6 +92,26 @@ getCrystalSystemAsString(const PointGroup::CrystalSystem &crystalSystem);
 MANTID_GEOMETRY_DLL
 PointGroup::CrystalSystem
 getCrystalSystemFromString(const std::string &crystalSystem);
+
+MANTID_GEOMETRY_DLL
+std::string
+getLatticeSystemAsString(const PointGroup::LatticeSystem &latticeSystem);
+
+MANTID_GEOMETRY_DLL
+PointGroup::LatticeSystem
+getLatticeSystemFromString(const std::string &latticeSystem);
+
+/// This is necessary to make the map work with older compilers. Can be removed
+/// when GCC 4.4 is not used anymore.
+struct MANTID_GEOMETRY_DLL CrystalSystemComparator {
+  bool operator()(const PointGroup::CrystalSystem &lhs,
+                  const PointGroup::CrystalSystem &rhs) const;
+};
+
+typedef std::multimap<PointGroup::CrystalSystem, PointGroup_sptr,
+                      CrystalSystemComparator> PointGroupCrystalSystemMap;
+
+MANTID_GEOMETRY_DLL PointGroupCrystalSystemMap getPointGroupsByCrystalSystem();
 
 } // namespace Mantid
 } // namespace Geometry

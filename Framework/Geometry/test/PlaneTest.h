@@ -29,33 +29,15 @@ public:
     // TS_ASSERT_EQUALS(extractString(A),"-1 p 0.6666666667 0.6666666667
     // 0.3333333333 5\n");
   }
-  void testCopyConstructor() {
-    Plane A;
-    A.setPlane(V3D(3.0, 3.0, 3.0), V3D(2.0 / 9.0, 2.0 / 9.0, 1.0 / 9.0));
-    Plane B(A);
-    TS_ASSERT_EQUALS(A.getNormal(), V3D(2.0 / 3.0, 2.0 / 3.0, 1.0 / 3.0));
-    TS_ASSERT_EQUALS(A.getDistance(), 5.0);
-    // TS_ASSERT_EQUALS(extractString(A),"-1 p 0.6666666667 0.6666666667
-    // 0.3333333333 5\n");
-  }
 
   void testClone() {
     Plane A;
     A.setPlane(V3D(3.0, 3.0, 3.0), V3D(2.0 / 9.0, 2.0 / 9.0, 1.0 / 9.0));
-    Plane *B = A.clone();
+    auto B = A.clone();
     TS_ASSERT_EQUALS(A.getNormal(), V3D(2.0 / 3.0, 2.0 / 3.0, 1.0 / 3.0));
     TS_ASSERT_EQUALS(A.getDistance(), 5.0);
     // TS_ASSERT_EQUALS(extractString(*B),"-1 p 0.6666666667 0.6666666667
     // 0.3333333333 5\n");
-    delete B;
-  }
-
-  void testAssignment() {
-    Plane A, B;
-    A.setPlane(V3D(3.0, 3.0, 3.0), V3D(2.0 / 9.0, 2.0 / 9.0, 1.0 / 9.0));
-    TS_ASSERT_DIFFERS(extractString(B), extractString(A));
-    B = A;
-    TS_ASSERT_EQUALS(extractString(B), extractString(A));
   }
 
   void testSide() {

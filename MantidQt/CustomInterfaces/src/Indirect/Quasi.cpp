@@ -124,6 +124,23 @@ void Quasi::run() {
   // Using 1/0 instead of True/False for compatibility with underlying Fortran
   // code
   // in some places
+
+  auto saveDirectory = Mantid::Kernel::ConfigService::Instance().getString(
+      "defaultsave.directory");
+  if (saveDirectory.compare("") == 0) {
+    QString textMessage = "BayesQuasi requires a default save directory and "
+                          "one is not currently set."
+                          " If run, the algorithm will default to saving files "
+                          "to the current working directory."
+                          " Would you still like to run the algorithm?";
+    int result = QMessageBox::question(NULL, tr("Save Directory"),
+                                       tr(textMessage), QMessageBox::Yes,
+                                       QMessageBox::No, QMessageBox::NoButton);
+    if (result == QMessageBox::No) {
+      return;
+    }
+  }
+
   bool save = false;
   bool elasticPeak = false;
   bool sequence = false;
@@ -180,7 +197,7 @@ void Quasi::run() {
   }
   std::string plot = m_uiForm.cbPlot->currentText().toStdString();
 
-  IAlgorithm_sptr runAlg = AlgorithmManager::Instance().create("QLRun");
+  IAlgorithm_sptr runAlg = AlgorithmManager::Instance().create("BayesQuasi");
   runAlg->initialize();
   runAlg->setProperty("Program", program);
   runAlg->setProperty("SampleWorkspace", sampleName);

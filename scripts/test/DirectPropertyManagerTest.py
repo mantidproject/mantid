@@ -1,5 +1,5 @@
 import os
-os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;" + os.environ["PATH"]
+#os.environ["PATH"] = r"c:/Mantid/_builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -1044,6 +1044,8 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         ok,fail_list = propman._check_file_properties()
         self.assertTrue(ok)
+        if not ok:
+            print "fail prop list: ",fail_list
 
         api.AnalysisDataService.clear()
 
@@ -1158,7 +1160,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
     #tester = DirectPropertyManagerTest('test_set_energy_bins_and_ei')
     #tester.run()
-
+    unittest.main()

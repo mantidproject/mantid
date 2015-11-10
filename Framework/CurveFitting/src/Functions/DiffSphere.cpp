@@ -353,7 +353,7 @@ void DiffSphere::init() {
   setAlias("f1.Shift", "Shift");
 
   // Set the ties between Elastic and Inelastic parameters
-  addDefaultTies("f0.Height=f1.Intensity,f0.Radius=f1.Radius");
+  addDefaultTies("f0.Height=f1.Intensity,f0.Radius=f1.Radius,f0.Centre=0");
   applyTies();
 }
 

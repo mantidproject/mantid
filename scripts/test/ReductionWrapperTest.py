@@ -179,6 +179,9 @@ class ReductionWrapperTest(unittest.TestCase):
         red._wvs.standard_vars={}
         red._wvs.advanced_vars={}
         ok,level,errors = red.validate_settings()
+        if not ok:
+            print "Errors found at level",level
+            print errors
 
         self.assertTrue(ok)
         self.assertEqual(level,0)

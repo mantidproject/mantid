@@ -1,4 +1,4 @@
-#pylint: disable=too-many-lines
+﻿#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 """ File contains collection of Descriptors used to define complex
     properties in NonIDF_Properties and PropertyManager classes
@@ -6,11 +6,14 @@
 
 import os
 from mantid.simpleapi import *
+#pylint: disable=unused-import
 from mantid.kernel import funcreturns
+#pylint: disable=unused-import
 from mantid import api,geometry,config
 import numpy as np
 
 import Direct.ReductionHelpers as prop_helpers
+#pylint: disable=unused-import
 import Direct.CommonFunctions as common
 from collections import Iterable
 
@@ -23,6 +26,7 @@ class PropDescriptor(object):
     def dependencies(self):
         """Returns the list of other properties names, this property depends on"""
         return []
+#pylint: disable=unused-argument		
     def validate(self,instance, owner):
         """Interface to validate property descriptor,
            provided to check properties interaction before long run
@@ -87,7 +91,7 @@ class IncidentEnergy(PropDescriptor):
         if instance is None:
             return self
         return self._incident_energy
-
+#pylint: disable=too-many-branches
     def __set__(self,instance,value):
         """ Set up incident energy or range of energies in various formats """
         if value != None:
@@ -129,7 +133,7 @@ class IncidentEnergy(PropDescriptor):
         else:
             self._num_energies = 1
         self._cur_iter_en = 0
-
+#pylint: disable=unused-variable
         ok,sev,message = self.validate(instance)
         if not ok:
             raise KeyError(message)
@@ -342,6 +346,7 @@ class SaveFileName(PropDescriptor):
                 if owner.monovan_run.run_number():
                     name +='_Abs'
                 name = name.replace('.','d')
+#pylint: disable=bare-except
             except:
                 name = None
         return name
@@ -367,13 +372,13 @@ class InstrumentDependentProp(PropDescriptor):
 
         if instance is None:
             return self
-
+#pylint: disable=protected-access
         if instance._pInstrument is None:
             raise KeyError("Attempt to use uninitialized property manager")
         else:
             return getattr(instance,self._prop_name)
     def __set__(self,instance,values):
-        raise AttributeError("Property {0} can not be assigned".format(self._prop_name))
+        raise AttributeError("Property {0} can not be assigned. It defined by instrument".format(self._prop_name))
 #end InstrumentDependentProp
 #-----------------------------------------------------------------------------------------
 class VanadiumRMM(PropDescriptor):
@@ -495,6 +500,7 @@ class PropertyFromRange(PropDescriptor):
 
     def __set__(self,instance,val):
         if val in self._availible_values:
+#pylint: disable=attribute-defined-outside-init
             self._current_value = val
         else:
             raise KeyError(' Property can not have value {0}'.format(val))
@@ -520,7 +526,7 @@ class DetCalFile(PropDescriptor):
     def __set__(self,instance,val):
         """ set detector calibration file using various formats """
 
-        if val is None or isinstance(val,api.Workspace) or isinstance(val,str):
+        if val is None or isinstance(val,api.Workspace):
        # nothing provided or workspace provided or filename probably provided
             if str(val) in mtd:
              # workspace name provided
@@ -528,6 +534,20 @@ class DetCalFile(PropDescriptor):
             self._det_cal_file = val
             self._calibrated_by_run = False
             return
+        if isinstance(val,str):
+            if val in mtd:
+                val = mtd[val]
+                self._det_cal_file = val
+                self._calibrated_by_run = False
+                return
+            try:
+                intVal = int(val)
+            except ValueError:
+                self._det_cal_file = val
+                self._calibrated_by_run = False
+                return
+            val = intVal
+
 
 
         if isinstance(val,int):
@@ -552,30 +572,44 @@ class DetCalFile(PropDescriptor):
     def calibrated_by_run(self):
         """ reports if the detector calibration is in a run-file or separate file(workspace)"""
         return self._calibrated_by_run
-
-    def find_file(self,**kwargs):
+#pylint: disable=unused-argument
+    def find_file(self,instance,**kwargs):
         """ Method to find file, correspondent to
             current _det_cal_file file hint
         """
         if self._det_cal_file is None:
         # nothing to look for
             return (True,"No Detector calibration file defined")
-        if isinstance(self._det_cal_file,int): # this can be only a run number
-            file_hint = str(self._det_cal_file)
+
+        if isinstance(self._det_cal_file,api.Workspace):
+        # nothing to do.  Workspace used for calibration
+            return (True,'Workspace {0} used for detectors calibration'.format(self._det_cal_file.name()))
+
+        dcf_val = self._det_cal_file
+        if isinstance(dcf_val,str): # it may be string representation of runN
+            try:
+                dcf_val = int(dcf_val)
+            except ValueError:
+                pass
+
+        if isinstance(dcf_val,int): # this is a run number
+            inst_short_name = instance.short_inst_name
+            fac             = instance.facility
+            zero_padding    = fac.instrument(inst_short_name).zeroPadding(dcf_val)
+            file_hint = inst_short_name+str(dcf_val).zfill(zero_padding)
             try:
                 file_name = FileFinder.findRuns(file_hint)[0]
             except:
                 return (False,"Can not find run file corresponding to run N: {0}".format(file_hint))
             self._det_cal_file = file_name
             return (True,file_name)
-        if isinstance(self._det_cal_file,api.Workspace):
-        # nothing to do.  Workspace used for calibration
-            return (True,'Workspace {0} used for detectors calibration'.format(self._det_cal_file.name()))
-        # string can be a run number or a file name:
+
+         # string can be a run number or a file name:
         file_name = prop_helpers.findFile(self._det_cal_file)
         if len(file_name) == 0: # it still can be a run number as string
             try:
                 file_name = FileFinder.findRuns(self._det_cal_file)[0]
+#pylint: disable=bare-except
             except:
                 return (False,"Can not find file or run file corresponding to name : {0}".format(self._det_cal_file))
         else:
@@ -594,7 +628,7 @@ class MapMaskFile(PropDescriptor):
         if not doc_string is None:
             self.__doc__ = doc_string
 
-    def __get__(self,instance,type=None):
+    def __get__(self,instance,class_type=None):
         if instance is None:
             return self
 
@@ -602,12 +636,13 @@ class MapMaskFile(PropDescriptor):
 
     def __set__(self,instance,value):
         if not value is None:
+#pylint: disable=unused-variable
             fileName, fileExtension = os.path.splitext(value)
             if not fileExtension:
                 value = value + self._file_ext
         self._file_name = value
-
-    def find_file(self,**kwargs):
+#pylint: disable=unused-argument
+    def find_file(self,instance,**kwargs):
         """ Method to find file, correspondent to
            current MapMaskFile file hint
        """
@@ -634,7 +669,7 @@ class HardMaskPlus(prop_helpers.ComplexProperty):
     """
     def __init__(self):
         prop_helpers.ComplexProperty.__init__(self,['use_hard_mask_only','run_diagnostics'])
-    def __get__(self,instance,type=None):
+    def __get__(self,instance,class_type=None):
         if instance is None:
             return self
 
@@ -642,6 +677,7 @@ class HardMaskPlus(prop_helpers.ComplexProperty):
 
     def __set__(self,instance,value):
         if value != None:
+#pylint: disable=unused-variable
             fileName, fileExtension = os.path.splitext(value)
             if not fileExtension:
                 value = value + '.msk'
@@ -650,7 +686,9 @@ class HardMaskPlus(prop_helpers.ComplexProperty):
         else:
             prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[True,False])
         try:
+#pylint: disable=protected-access
             del instance.__changed_properties['hardmaskOnly']
+#pylint: disable=bare-except
         except:
             pass
 
@@ -697,7 +735,9 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
             run_diagnostics = True
         prop_helpers.ComplexProperty.__set__(self,instance.__dict__,[use_hard_mask_only,run_diagnostics])
         try:
+#pylint: disable=protected-access
             del instance.__changed_properties['hardmaskPlus']
+#pylint: disable=bare-except
         except:
             pass
 #end HardMaskOnly
@@ -754,7 +794,7 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
 
     def __set__(self,instance,value):
         if isinstance(instance,dict):
-            dDict = instance
+            tDict = instance
         else:
             tDict = instance.__dict__
         if value is None:
@@ -827,7 +867,7 @@ class EiMonSpectra(prop_helpers.ComplexProperty):
             return
 
         if isinstance(instance,dict):
-            dDict = instance
+            tDict = instance
         else:
             tDict = instance.__dict__
 
@@ -1161,6 +1201,7 @@ class MonoCorrectionFactor(PropDescriptor):
         self._cor_factor = value
     #
         if value is None:
+#pylint: disable=protected-access
             self._mono_run_prop._in_cash = False # enable monovan run validation if any
     #
     def set_val_to_cash(self,instance,value):
@@ -1314,11 +1355,13 @@ class RotationAngle(PropDescriptor):
                 working_ws = mtd[external_ws]
 
         value = None
+#pylint: disable=protected-access
         log_names = self._motor_log._log_names
         for name in log_names:
             try:
                 value = working_ws.getRun().getLogData(name).timeAverageValue()
                 break
+#pylint: disable=bare-except
             except:
                 pass
         return value
@@ -1327,6 +1370,7 @@ class RotationAngle(PropDescriptor):
         """Independent method to read rotation angle from workspace and
          previously set log and offset parameters
         """
+#pylint: disable=protected-access
         offset = self._mot_offset._offset
         if offset is None:
             return np.NaN

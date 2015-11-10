@@ -38,6 +38,7 @@
 
 namespace Mantid {
 namespace DataHandling {
+
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadISISNexus2)
 
 using namespace Kernel;

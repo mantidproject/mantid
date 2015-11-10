@@ -31,7 +31,7 @@ Usage
     FindUBUsingFFT(ws,MinD=8.0,MaxD=13.0)
     print "Before Optimization:"
     print ws.sample().getOrientedLattice().getUB()
-    OptimizeLatticeForCellType(ws,CellType="Monoclinic ( a unique )")
+    OptimizeLatticeForCellType(ws,CellType="Monoclinic")
     print "\nAfter Optimization:"
     print ws.sample().getOrientedLattice().getUB()
 
@@ -46,9 +46,9 @@ Output:
      [-0.02737294 -0.08973552 -0.02525994]]
 
     After Optimization:
-    [[-0.04772517  0.04134355 -0.00058175]
-     [-0.0055954  -0.00905383  0.12507404]
-     [ 0.06103109  0.03149982  0.01101201]]
+    [[-0.04519948  0.04084577 -0.01259083]
+     [ 0.00160373 -0.00322317  0.11582993]
+     [ 0.05743318  0.03223531  0.02753568]]
 
 .. categories::
 

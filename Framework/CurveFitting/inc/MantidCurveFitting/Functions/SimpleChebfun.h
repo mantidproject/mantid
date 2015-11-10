@@ -72,12 +72,16 @@ public:
   std::vector<double> operator()(const std::vector<double> &x) const;
   /// Create a vector of x values linearly spaced on the approximation interval
   std::vector<double> linspace(size_t n) const;
+  /// Get the accuracy of the approximation
+  double accuracy() const;
   /// Create a derivative of this function.
   SimpleChebfun derivative() const;
   /// Create an integral of this function.
   SimpleChebfun integral() const;
   /// Get rough estimates of the roots
   std::vector<double> roughRoots(double level = 0.0) const;
+  /// Integrate the function on its interval
+  double integrate() const;
   /// Add a C++ function to the function
   SimpleChebfun &operator+=(ChebfunFunctionType fun);
 

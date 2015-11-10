@@ -14,7 +14,8 @@ using namespace MantidQt::CustomInterfaces;
 using testing::TypedEq;
 using testing::Return;
 
-// Use this mocked presenter for tests that will start the calibration thread.
+// Use this mocked presenter for tests that will start the calibration,
+// focusing, rebinning, etc. workers/threads.
 // Otherwise you'll run into trouble with issues like "QEventLoop: Cannot be
 // used without QApplication", as there is not Qt application here and the
 // normal Qt thread used by the presenter uses signals/slots.
@@ -41,6 +42,19 @@ private:
     std::cerr << "focus run " << std::endl;
     doFocusRun(dir, outFilenames, runNo, banks, specNos, dgFile);
     focusingFinished();
+  }
+
+  void startAsyncRebinningTimeWorker(const std::string &runNo, double bin,
+                                     const std::string &outWSName) {
+    doRebinningTime(runNo, bin, outWSName);
+    rebinningFinished();
+  }
+
+  void startAsyncRebinningPulsesWorker(const std::string &runNo,
+                                       size_t nperiods, double timeStep,
+                                       const std::string &outWSName) {
+    doRebinningPulses(runNo, nperiods, timeStep, outWSName);
+    rebinningFinished();
   }
 };
 
@@ -682,6 +696,103 @@ public:
     pres.notify(IEnggDiffractionPresenter::FocusRun);
   }
 
+  void test_preproc_event_time_bin_missing_runno() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+    pres.notify(IEnggDiffractionPresenter::RebinTime);
+  }
+
+  void test_preproc_event_time_wrong_bin() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+    // inputs from user
+    EXPECT_CALL(mockView, currentPreprocRunNo())
+        .Times(1)
+        .WillOnce(Return(g_eventModeRunNo));
+    EXPECT_CALL(mockView, rebinningTimeBin()).Times(1).WillOnce(Return(0));
+
+    // No errors/warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+    pres.notify(IEnggDiffractionPresenter::RebinTime);
+  }
+
+  // this test does run Load and then Rebin
+  void test_preproc_event_time_ok() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    EnggDiffPresenterNoThread pres(&mockView);
+
+    // inputs from user
+    EXPECT_CALL(mockView, currentPreprocRunNo())
+        .Times(1)
+        .WillOnce(Return(g_eventModeRunNo));
+    EXPECT_CALL(mockView, rebinningTimeBin()).Times(1).WillOnce(Return(1.0));
+
+    // No errors/warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IEnggDiffractionPresenter::RebinTime);
+  }
+
+  void test_preproc_event_multiperiod_missing_runno() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+    // inputs from user
+    EXPECT_CALL(mockView, currentPreprocRunNo()).Times(1).WillOnce(Return(""));
+    // should not even call this one when the run number is obviously wrong
+    EXPECT_CALL(mockView, rebinningTimeBin()).Times(0);
+
+    pres.notify(IEnggDiffractionPresenter::RebinMultiperiod);
+  }
+
+  void test_preproc_event_multiperiod_wrong_bin() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+    // inputs from user
+    EXPECT_CALL(mockView, currentPreprocRunNo())
+        .Times(1)
+        .WillOnce(Return(g_eventModeRunNo));
+    EXPECT_CALL(mockView, rebinningPulsesNumberPeriods())
+        .Times(1)
+        .WillOnce(Return(1));
+    EXPECT_CALL(mockView, rebinningPulsesTime()).Times(1).WillOnce(Return(0));
+
+    // No errors, warning because of wrong bin
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+    pres.notify(IEnggDiffractionPresenter::RebinMultiperiod);
+  }
+
+  // this test does run Load but then RebinByPulseTimes should fail
+  void test_preproc_event_multiperiod_file_wrong_type() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    EnggDiffPresenterNoThread pres(&mockView);
+
+    // inputs from user
+    // This file will be found but it is not a valid file for this re-binning
+    EXPECT_CALL(mockView, currentPreprocRunNo())
+        .Times(1)
+        .WillOnce(Return(g_eventModeRunNo));
+    EXPECT_CALL(mockView, rebinningPulsesNumberPeriods())
+        .Times(1)
+        .WillOnce(Return(1000));
+    // 1s is big enough
+    EXPECT_CALL(mockView, rebinningPulsesTime()).Times(1).WillOnce(Return(1));
+
+    // No errors/warnings. There will be an error log from the algorithms
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IEnggDiffractionPresenter::RebinMultiperiod);
+  }
+
   void test_logMsg() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
@@ -756,6 +867,14 @@ private:
       m_presenter;
 
   std::vector<bool> m_ex_enginx_banks;
+  const static std::string g_eventModeRunNo;
 };
+
+// Note this is not a correct event mode run number. Using it here just
+// as a run number that is found.
+// A possible event mode file would be: 197019, but it is too big for
+// unit test data. TODO: find a small one or crop a big one.
+const std::string EnggDiffractionPresenterTest::g_eventModeRunNo =
+    "ENGINX228061";
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONPRESENTERTEST_H

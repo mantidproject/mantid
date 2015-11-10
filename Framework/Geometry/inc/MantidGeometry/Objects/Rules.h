@@ -2,6 +2,7 @@
 #define Rules_h
 
 #include <map>
+#include <boost/shared_ptr.hpp>
 
 class TopoDS_Shape;
 
@@ -95,7 +96,8 @@ public:
   } ///< Always returns false (0)
 
   int Eliminate(); ///< elimination not written
-  int substituteSurf(const int SurfN, const int newSurfN, Surface *SPtr);
+  int substituteSurf(const int SurfN, const int newSurfN,
+                     const boost::shared_ptr<Surface> &SPtr);
 
   /// Abstract Display
   virtual std::string display() const = 0;
@@ -228,15 +230,12 @@ be calculated
 
 class MANTID_GEOMETRY_DLL SurfPoint : public Rule {
 private:
-  Surface *key; ///< Actual Surface Base Object
-  int keyN;     ///< Key Number (identifer)
-  int sign;     ///< +/- in Object unit
+  boost::shared_ptr<Surface> m_key; ///< Actual Surface Base Object
+  int keyN;                         ///< Key Number (identifer)
+  int sign;                         ///< +/- in Object unit
 public:
   SurfPoint();
-  SurfPoint(const SurfPoint &);
   SurfPoint *clone() const;
-  SurfPoint &operator=(const SurfPoint &);
-  ~SurfPoint();
   virtual std::string className() const {
     return "SurfPoint";
   } ///< Returns class name as string
@@ -250,14 +249,14 @@ public:
   int type() const { return 0; } ///< Effective name
 
   void setKeyN(const int Ky); ///< set keyNumber
-  void setKey(Surface *);
+  void setKey(const boost::shared_ptr<Surface> &key);
   bool isValid(const Kernel::V3D &) const;
   bool isValid(const std::map<int, int> &) const;
   int getSign() const { return sign; } ///< Get Sign
   int getKeyN() const { return keyN; } ///< Get Key
   int simplify();
 
-  Surface *getKey() const { return key; } ///< Get Surface Ptr
+  Surface *getKey() const { return m_key.get(); } ///< Get Surface Ptr
   std::string display() const;
   std::string displayAddress() const;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,

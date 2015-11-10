@@ -267,7 +267,7 @@ int Object::hasComplement() const {
 * @retval 1000+ keyNumber :: Error with keyNumber
 * @retval 0 :: successfully populated all the whole Object.
 */
-int Object::populate(const std::map<int, Surface *> &Smap) {
+int Object::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
   std::deque<Rule *> Rst;
   Rst.push_back(TopRule);
   Rule *TA, *TB; // Tmp. for storage
@@ -281,7 +281,8 @@ int Object::populate(const std::map<int, Surface *> &Smap) {
       SurfPoint *KV = dynamic_cast<SurfPoint *>(T1);
       if (KV) {
         // Ensure that we have a it in the surface list:
-        std::map<int, Surface *>::const_iterator mf = Smap.find(KV->getKeyN());
+        std::map<int, boost::shared_ptr<Surface>>::const_iterator mf =
+            Smap.find(KV->getKeyN());
         if (mf != Smap.end()) {
           KV->setKey(mf->second);
           Rcount++;
@@ -507,7 +508,7 @@ int Object::createSurfaceList(const int outFlag) {
 
     std::vector<const Surface *>::const_iterator vc;
     for (vc = SurList.begin(); vc != SurList.end(); ++vc) {
-      std::cerr << "Point == " << reinterpret_cast<long int>(*vc) << std::endl;
+      std::cerr << "Point == " << *vc << std::endl;
       std::cerr << (*vc)->getName() << std::endl;
     }
   }
@@ -549,7 +550,8 @@ int Object::removeSurface(const int SurfN) {
 * @param SPtr :: Surface pointer for surface NsurfN
 * @return number of surfaces substituted
 */
-int Object::substituteSurf(const int SurfN, const int NsurfN, Surface *SPtr) {
+int Object::substituteSurf(const int SurfN, const int NsurfN,
+                           const boost::shared_ptr<Surface> &SPtr) {
   if (!TopRule)
     return 0;
   const int out = TopRule->substituteSurf(SurfN, NsurfN, SPtr);

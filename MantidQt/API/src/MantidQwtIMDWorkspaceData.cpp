@@ -17,16 +17,6 @@ using Mantid::API::IMDWorkspace;
 using Mantid::API::IMDWorkspace_const_sptr;
 using Mantid::coord_t;
 
-///@cond
-/** This is needed to successfully compile on windows. 
- 
-  Part of Qwt, so we ignored this documentation.
-*/
-QwtData & QwtData::operator=(class QwtData const &)
-{
-  throw std::runtime_error("QwtData::operator=() not implemented on the abstract base class.");
-}
-///@endcond
 
 /** Constructor
  *
