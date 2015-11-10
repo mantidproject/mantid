@@ -90,6 +90,9 @@ private:
 
   void updateQRange(const std::vector<Mantid::coord_t> &vec_q);
 
+  /// Remove background from
+  void removeBackground(API::MatrixWorkspace_sptr dataws);
+
   API::ITableWorkspace_sptr m_expDataTableWS;
   API::ITableWorkspace_sptr m_detectorListTableWS;
   API::IMDEventWorkspace_sptr m_outputWS;
@@ -117,6 +120,9 @@ private:
   /// Flag to normalize and scale up
   bool m_normalizeByMon;
   double m_scaleFactor;
+  /// Background workspace
+  bool m_removeBackground;
+  API::MatrixWorkspace_const_sptr m_backgroundWS;
 };
 
 } // namespace MDAlgorithms

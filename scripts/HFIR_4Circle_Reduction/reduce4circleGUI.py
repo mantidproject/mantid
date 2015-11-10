@@ -818,19 +818,20 @@ class MainWindow(QtGui.QMainWindow):
             merge_status = 'UNKNOWN'
             merged_name = '???'
             group_name = '???'
-            try:
-                ret_tup = self._myControl.merge_pts_in_scan(exp_no=None, scan_no=scan_no,
+
+            status, ret_tup = self._myControl.merge_pts_in_scan_v2(exp_no=None, scan_no=scan_no,
                                                             target_ws_name=out_ws_name,
                                                             target_frame=frame)
-                merge_status = 'Done'
-                merged_name = ret_tup[0]
-                group_name = ret_tup[1]
-            except RuntimeError as e:
+            merge_status = 'Done'
+            merged_name = ret_tup[0]
+            group_name = ret_tup[1]
+
+            if status is False:
                 merge_status = 'Failed. Reason: %s' % str(e)
                 merged_name = ''
                 group_name = ''
                 print merge_status
-            finally:
+            else:
                 self.ui.tableWidget_mergeScans.set_status_by_row(i_row, merge_status)
                 self.ui.tableWidget_mergeScans.set_ws_names_by_row(i_row, merged_name, group_name)
 
@@ -906,9 +907,12 @@ class MainWindow(QtGui.QMainWindow):
                 ub_str = ret_obj
                 option = str(self.ui.comboBox_ubOption.currentText())
                 if option.lower().count('spice') > 0:
-                    # TODO/FIXME ASAP
-                    ub_str = self._myControl.convert_from_spice_ub(ub_str)
-                self.ui.tableWidget_ubMergeScan.set_from_list(ub_str)
+                    # convert from SPICE UB matrix to Mantid one
+                    spice_ub = gutil.convert_str_to_matrix(ub_str, (3, 3))
+                    mantid_ub = r4c.convert_spice_ub_to_mantid(spice_ub)
+                    self.ui.tableWidget_ubMergeScan.set_from_matrix(mantid_ub)
+                else:
+                    self.ui.tableWidget_ubMergeScan.set_from_list(ub_str)
         else:
             self.pop_one_button_dialog('None is selected to set UB matrix.')
 

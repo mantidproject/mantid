@@ -972,6 +972,102 @@ class CWSCDReductionControl(object):
 
         return ret_tup
 
+    def merge_pts_in_scan_v2(self, exp_no, scan_no, target_ws_name, target_frame):
+        """
+        Merge Pts in Scan
+        All the workspaces generated as internal results will be grouped
+        :param exp_no:
+        :param scan_no:
+        :param target_ws_name:
+        :param target_frame:
+        :return: (merged workspace name, workspace group name)
+        """
+        # Check
+        if exp_no is None:
+            exp_no = self._expNumber
+        assert isinstance(exp_no, int)
+        assert isinstance(scan_no, int)
+        assert isinstance(target_frame, str)
+        assert isinstance(target_ws_name, str)
+
+        ub_matrix_1d = None
+
+        # Target frame
+        if target_frame.lower().startswith('hkl'):
+            target_frame = 'hkl'
+            ub_matrix_1d = self._myUBMatrixDict[self._expNumber].reshape(9,)
+        elif target_frame.lower().startswith('q-sample'):
+            target_frame = 'qsample'
+
+        else:
+            raise RuntimeError('Target frame %s is not supported.' % target_frame)
+
+        # Process data and save
+        status, pt_num_list = self.get_pt_numbers(exp_no, scan_no, True)
+        if status is False:
+            err_msg = pt_num_list
+            return False, err_msg
+        else:
+            print '[DB] Number of Pts for Scan %d is %d' % (scan_no, len(pt_num_list))
+            print '[DB] Data directory: %s' % self._dataDir
+        max_pts = 0
+        ws_names_str = ''
+        ws_names_to_group = ''
+
+        # construct a list of Pt as the input of CollectHB3AExperimentInfo
+        pt_list_str = '-1'
+        err_msg = ''
+        for pt in pt_num_list:
+            # Download file
+            try:
+                self.download_spice_xml_file(scan_no, pt, overwrite=False)
+            except RuntimeError as e:
+                err_msg += 'Unable to download xml file for pt %d due to %s\n' % (pt, str(e))
+                continue
+            pt_list_str += ',%d' % pt
+        # END-FOR (pt)
+        print '[DB] Pt list = %s' % pt_list_str
+        if pt_list_str == '-1':
+            return False, err_msg
+
+        # Collect HB3A Exp/Scan information
+        try:
+            api.CollectHB3AExperimentInfo(ExperimentNumber=exp_no, ScanList='%d' % scan_no, PtLists=pt_list_str,
+                                          DataDirectory=self._dataDir,
+                                          GenerateVirtualInstrument=False,
+                                          OutputWorkspace='ScanPtInfo_Exp%d_Scan%d' % (exp_no, scan_no),
+                                          DetectorTableWorkspace='MockDetTable')
+        except RuntimeError as e:
+            err_msg += 'Unable to reduce scan %d due to %s' % (scan_no, str(e))
+            return False, err_msg
+        # END-FOR(pt)
+
+        # Convert to Q-sample
+        out_q_name = 'HB3A_Exp%d_Scan%d_MD' % (exp_no, scan_no)
+        try:
+            api.ConvertCWSDExpToMomentum(InputWorkspace='ScanPtInfo_Exp%d_Scan%d' % (exp_no, scan_no),
+                                         CreateVirtualInstrument=False,
+                                         OutputWorkspace=out_q_name,
+                                         Directory=self._dataDir)
+        except RuntimeError as e:
+            err_msg += 'Unable to convert scan %d data to Q-sample MDEvents due to %s' % (scan_no, str(e))
+            return False, err_msg
+
+        if target_frame == 'hkl':
+            out_hkl_name = 'HKL_Scan%d' % (scan_no)
+            try:
+                api.ConvertCWSDMDtoHKL(InputWorkspace=out_q_name,
+                                       UBMatrix=ub_matrix_1d,
+                                       OutputWorkspace=out_hkl_name)
+
+            except RuntimeError as e:
+                err_msg += 'Failed to reduce scan %d due to %s' % (scan_no, str(e))
+                return False, err_msg
+
+        ret_tup = out_ws_name, group_name
+
+        return ret_tup
+
     def set_server_url(self, server_url):
         """
         Set URL for server to download the data
@@ -1250,6 +1346,32 @@ class CWSCDReductionControl(object):
 
         return ptlist
 
+    def estimate_detector_background(self, bkgd_scan_list):
+        """ Integrate peak with background and etc...
+        """
+        # TODO/FIXME - Add me into workflow!
+        # Check
+        assert isinstance(bkgd_scan_list, list)
+        assert len(bkgd_scan_list) > 2
+
+        # Load and sum
+        bkgd_ws = None
+        for pt_num in bkgd_scan_list:
+            self.load_spice_xml_file(exp_no=exp_number, scan_no=scan_number, pt_no=pt_num)
+            this_matrix_ws = AnalysisDataService.retrieve(get_raw_data_workspace_name(exp_number, scan_number, pt_num))
+            if bkgd_ws is None:
+                bkgd_ws = api.CloneWorkspace(InputWorkspace=this_matrix_ws, OutputWorkspace=special_name)
+            else:
+                bkgd_ws = bkgd_ws + this_matrix_ws
+        # END-FOR
+
+        # Average
+        bkgd_ws *= 1./len(bkgd_scan_list)
+
+        return bkgd_ws.name()
+
+
+
 
 def get_spice_file_name(exp_number, scan_number):
     """
@@ -1335,3 +1457,22 @@ def get_virtual_instrument_table_name(exp_number, scan_number, pt_number):
     ws_name = 'VirtualInstrument_Exp%d_Scan%d_Pt%d_Table' % (exp_number, scan_number, pt_number)
 
     return ws_name
+
+
+def convert_spice_ub_to_mantid(spice_ub):
+    """ Convert SPICE UB matrix to Mantid UB matrix
+    :param spice_ub:
+    :return: UB matrix in Mantid format
+    """
+    mantid_ub = numpy.ndarray((3, 3), 'float')
+    # row 0
+    for i in xrange(3):
+        mantid_ub[0][i] = spice_ub[0][i]
+    # row 1
+    for i in xrange(3):
+        mantid_ub[1][i] = spice_ub[2][i]
+    # row 2
+    for i in xrange(3):
+        mantid_ub[2][i] = -1.*spice_ub[1][i]
+
+    return mantid_ub

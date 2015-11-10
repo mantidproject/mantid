@@ -26,7 +26,7 @@ DECLARE_ALGORITHM(ConvertCWSDExpToMomentum)
  */
 ConvertCWSDExpToMomentum::ConvertCWSDExpToMomentum()
     : m_iColPt(1), m_iColFilename(2), m_iColStartDetID(3), m_setQRange(true),
-      m_isBaseName(false), m_normalizeByMon(false), m_scaleFactor(1.){}
+      m_isBaseName(false), m_normalizeByMon(false), m_scaleFactor(1.), m_removeBackground(false){}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -73,6 +73,10 @@ void ConvertCWSDExpToMomentum::init() {
   declareProperty("ScaleFactor", EMPTY_DBL(), "If it is given, then all the signals of MDEvent "
                   "shall be scaled up by this factor".);
 
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+                    "BackgroundWorkspace", "", Direction::Input, PropertyMode::Optional),
+                  "Name of optional background workspace.");
+
   declareProperty(
       new FileProperty("Directory", "", FileProperty::OptionalDirectory),
       "Directory where data files are if InputWorkspace gives data file name "
@@ -99,6 +103,20 @@ void ConvertCWSDExpToMomentum::exec() {
     m_scaleFactor = getProperty("ScaleFactor");
     if (isEmpty(m_scaleFactor))
       throw std::runtime_error("As NormalizeByMonitor is true, ScaleFactor must be given!");
+  }
+  // background
+  std::string bkgdwsname = getPropertyValue("BackgroundWorkspace");
+  if (len(bkgdwsname) > 0)
+  {
+    m_removeBackground = true;
+    m_backgroundWS = getProperty("BackgroundWorkspace");
+    // check background
+    if (m_backgroundWS->getNumberHistograms() != 256*256)
+      throw std::invalid_argument("Input background workspace does not have correct number of spectra.");
+  }
+  else
+  {
+    m_removeBackground = false;
   }
 
   // Create output MDEventWorkspace
@@ -266,6 +284,10 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
       g_log.error(errmsg);
       ++numFileNotLoaded;
       continue;
+    }
+    if (m_removeBackground)
+    {
+      removeBackground(spicews);
     }
 
     // Convert from MatrixWorkspace to MDEvents and add events to
@@ -649,6 +671,29 @@ void ConvertCWSDExpToMomentum::updateQRange(
       m_minQVec[i] = vec_q[i];
     else if (vec_q[i] > m_maxQVec[i])
       m_maxQVec[i] = vec_q[i];
+  }
+
+  return;
+}
+
+/** Remove background per pixel
+ * @brief ConvertCWSDExpToMomentum::removeBackground
+ * @param dataws
+ */
+void ConvertCWSDExpToMomentum::removeBackground(API::MatrixWorkspace_sptr dataws)
+{
+  if (dataws->getNumberHistograms() != m_backgroundWS->getNumberHistograms())
+    throw std::runtime_error("Impossible to have this situation");
+
+  size_t numhist = dataws->getNumberHistograms();
+  for (size_t i = 0; i < numhist; ++i)
+  {
+    double bkgd_y = m_backgroundWS->readY(i)[0];
+    if (fabs(bkgd_y) > 1.E-2)
+    {
+      dataws->dataY(i)[0] -= bkgd_y;
+      dataws->dataE(i)[0] = std::sqrt(dataws->readY(i)[0]);
+    }
   }
 
   return;
