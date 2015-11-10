@@ -58,6 +58,11 @@ class AlignComponents(PythonAlgorithm):
                                                direction=Direction.InOut),
                              doc="Workspace containing the instrument to be calibrated.")
 
+        # L1
+        self.declareProperty(name="FitL1", defaultValue=False,
+                             doc="Fit the L1 (source to sample) distance. Uses entire instrument. Occurs before Components are Aligned.")
+
+        # List of components
         self.declareProperty(StringArrayProperty("ComponentList",
                              direction=Direction.Input),
                              doc="Comma separated list on instrument components to refine.")
@@ -166,7 +171,7 @@ class AlignComponents(PythonAlgorithm):
                                               OutputWorkspace="alignedWorkspace")
 
         components = self.getProperty("ComponentList").value
-        if len(components) <= 0:
+        if len(components) <= 0 and not self.getProperty("FitL1").value:
             issues['ComponentList'] = "Must supply components"
         else:
             components = [component for component in components
@@ -176,7 +181,8 @@ class AlignComponents(PythonAlgorithm):
                                        + ','.join(components) + "\""
 
         if not (self.getProperty("PosX").value or self.getProperty("PosY").value or self.getProperty("PosZ").value or
-                    self.getProperty("RotX").value or self.getProperty("RotY").value or self.getProperty("RotZ").value):
+                self.getProperty("RotX").value or self.getProperty("RotY").value or self.getProperty("RotZ").value or
+                self.getProperty("FitL1").value):
             issues["PosX"] = "You must calibrate at least one property"
 
         return issues
@@ -203,6 +209,32 @@ class AlignComponents(PythonAlgorithm):
                                           OutputWorkspace="alignedWorkspace")
         wks_name=wks.getName()
 
+        # First fit L1 if selected
+        if self.getProperty("FitL1").value:
+            source_name = wks.getInstrument().getSource().getFullName()
+            source_Z = wks.getInstrument().getSource().getPos().getZ()
+            logger.notice("Working on " + source_name +
+                          " Starting position is " + str(source_Z))
+            firstIndex = 0
+            lastIndex = len(difc)
+            if self._masking:
+                mask_out = mask[firstIndex:lastIndex + 1]
+            else:
+                mask_out = None
+            new_source_Z = minimize(self._minimisation_func_L1, x0=source_Z,
+                               args=(wks_name,
+                                     source_name,
+                                     firstIndex,
+                                     lastIndex,
+                                     difc[firstIndex:lastIndex + 1],
+                                     mask_out),
+                               bounds=[(source_Z-1,source_Z+1)])
+            api.MoveInstrumentComponent(wks_name, source_name, Z=new_source_Z.x[0],
+                                        RelativePosition=False)
+            logger.notice("Finished " + source_name +
+                          " Final position is " + str(new_source_Z.x[0]))
+
+        # Now fit all the components if any
         components = self.getProperty("ComponentList").value
 
         for opt in self._optionsList:
@@ -308,6 +340,17 @@ class AlignComponents(PythonAlgorithm):
             api.RotateInstrumentComponent(wks_name, component, X=rotx, Y=roty, Z=rotz, Angle=rotw,
                                           RelativeRotation=False)
 
+        wks_new = api.CalculateDIFC(InputWorkspace=wks_name, OutputWorkspace=wks_name)
+
+        difc_new = wks_new.extractY().flatten()[firstIndex:lastIndex + 1]
+
+        if self._masking:
+            difc_new = np.ma.masked_array(difc_new, mask)
+
+        return chisquare(f_obs=difc, f_exp=difc_new)[0]
+
+    def _minimisation_func_L1(self, x_0, wks_name, component, firstIndex, lastIndex, difc, mask):
+        api.MoveInstrumentComponent(wks_name, component, Z=x_0[0], RelativePosition=False)
         wks_new = api.CalculateDIFC(InputWorkspace=wks_name, OutputWorkspace=wks_name)
 
         difc_new = wks_new.extractY().flatten()[firstIndex:lastIndex + 1]
