@@ -1,4 +1,4 @@
-#pylint: disable=too-many-lines
+﻿#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 from mantid.simpleapi import *
 from mantid.kernel import funcreturns
@@ -29,7 +29,9 @@ def setup_reducer(inst_name,reload_instrument=False):
     except RuntimeError:
         raise RuntimeError('Unknown instrument "%s" or wrong IDF file for this instrument, cannot continue' % inst_name)
 
-
+#How could it be that abstract class is not referenced R0921? What it means?
+#pylint: disable=R0921
+#pylint: disable=too-many-instance-attributes
 class DirectEnergyConversion(object):
     """
     Performs a convert to energy assuming the provided instrument is
@@ -138,6 +140,8 @@ class DirectEnergyConversion(object):
    hardmaskOnly=Filename :load a hardmask and use as only mask
    """
 #-------------------------------------------------------------------------------
+#pylint: disable=too-many-branches
+#pylint: disable=too-many-locals
     def diagnose(self, white,diag_sample=None,**kwargs):
         """run diagnostics on the provided workspaces.
 
@@ -185,8 +189,10 @@ class DirectEnergyConversion(object):
         """
         # output workspace name.
         try:
+#pylint: disable=unused-variable
             n,r = funcreturns.lhs_info('both')
             out_ws_name = r[0]
+#pylint: disable=bare-except
         except:
             out_ws_name = None
         # modify properties using input arguments
@@ -223,10 +229,13 @@ class DirectEnergyConversion(object):
 
         # Get the white beam vanadium integrals
         whiteintegrals = self.do_white(white, None, None) # No grouping yet
+#pylint: disable=access-member-before-definition
         if self.second_white:
             #TODO: fix THIS DOES NOT WORK!
+#pylint: disable=unused-variable
             second_white = self.second_white
             other_whiteintegrals = self.do_white(PropertyManager.second_white, None, None) # No grouping yet
+#pylint: disable=attribute-defined-outside-init
             self.second_white = other_whiteintegrals
 
         # Get the background/total counts from the sample run if present
@@ -300,7 +309,7 @@ class DirectEnergyConversion(object):
                 white.add_masked_ws(white_masked_ws)
                 DeleteWorkspace(white_masked_ws)
         else:
-            for index, bank in enumerate(diag_spectra_blocks):
+            for bank in diag_spectra_blocks:
                 diag_params['start_index'] = bank[0] - 1
                 diag_params['end_index'] = bank[1] - 1
                 white_masked_ws = diagnostics.diagnose(whiteintegrals, **diag_params)
@@ -314,7 +323,8 @@ class DirectEnergyConversion(object):
                 mask = diag_sample.get_masking(1)
                 diag_mask = CloneWorkspace(mask,OutputWorkspace=out_ws_name)
             else: # either WB was diagnosed or WB masks were applied to it
-                # Extract a mask workspace
+                # Extract the mask workspace
+#pylint: disable=unused-variable
                 diag_mask, det_ids = ExtractMask(InputWorkspace=whiteintegrals,OutputWorkspace=out_ws_name)
         else:
             diag_mask = None
@@ -332,6 +342,9 @@ class DirectEnergyConversion(object):
 
         return diag_mask
 #-------------------------------------------------------------------------------
+#pylint: disable=too-many-arguments
+#pylint: disable=too-many-branches
+#pylint: disable=too-many-locals
     def convert_to_energy(self,wb_run=None,sample_run=None,ei_guess=None,rebin=None,map_file=None,
                           monovan_run=None,wb_for_monovan_run=None,**kwargs):
         """ One step conversion of run into workspace containing information about energy transfer
@@ -345,8 +358,10 @@ class DirectEnergyConversion(object):
 
         # output workspace name.
         try:
+#pylint: disable=unused-variable
             n,r = funcreturns.lhs_info('both')
             out_ws_name = r[0]
+#pylint: disable=bare-except
         except:
             out_ws_name = None
         prop_man = self.prop_man
@@ -451,6 +466,7 @@ class DirectEnergyConversion(object):
             # initialize list to store resulting workspaces to return
             result = []
         else:
+#pylint: disable=attribute-defined-outside-init
             self._multirep_mode = False
             num_ei_cuts = 0
 #------------------------------------------------------------------------------------------
@@ -541,7 +557,7 @@ class DirectEnergyConversion(object):
                     format(end_time - start_time),'notice')
         prop_man.log("****************************************************************")
         return result
-
+#pylint: disable=too-many-arguments
     def _do_abs_corrections(self,deltaE_ws_sample,cashed_mono_int,ei_guess,\
         mono_ws_base,tof_range, cut_ind,num_ei_cuts):
         """Do absolute corrections using various sources of such corrections
@@ -561,6 +577,7 @@ class DirectEnergyConversion(object):
             deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,\
                                                             ei_guess,PropertyManager.wb_for_monovan_run,\
                                                              ' -cached- ')
+#pylint: disable=attribute-defined-outside-init
             self.mono_correction_factor = None
         else:   # Calculate corrections
             if self._multirep_mode:
@@ -576,7 +593,9 @@ class DirectEnergyConversion(object):
             # calculations and result placed in cash. Workspace unsuitable
             # for further calculations. Mark it cashed not to verify presence on consecutive runs
             # with the same monovan ws
+#pylint: disable=protected-access
             PropertyManager.monovan_run._in_cash = True
+#pylint: disable=attribute-defined-outside-init
         self.check_background = current_bkg_opt
         return deltaE_ws_sample,mono_ws_base
 
@@ -654,7 +673,7 @@ class DirectEnergyConversion(object):
         return bleed_mask
 
 
-
+#pylint: disable=too-many-arguments
     def mono_sample(self, mono_run, ei_guess, white_run=None, map_file=None,
                     spectra_masks=None, result_name=None, Tzero=None):
         """Convert a mono-chromatic sample run to DeltaE.
@@ -763,6 +782,7 @@ class DirectEnergyConversion(object):
 
 
         # Calculate the incident energy
+#pylint: disable=unused-variable
         ei,mon1_peak,mon1_index,tzero = \
             GetEi(InputWorkspace=monitor_ws, Monitor1Spec=ei_mon_spectra[0],
                   Monitor2Spec=ei_mon_spectra[1],
@@ -1031,6 +1051,9 @@ class DirectEnergyConversion(object):
         return (0.95*tof_min,t_step,1.05*tof_max)
         #return (tof_min,t_step,tof_max)
     #
+#pylint: disable=too-many-arguments
+#pylint: disable=too-many-branches
+#pylint: disable=too-many-locals
     def get_TOF_for_energies(self,workspace,energy_list,specID_list,ei=None,debug_mode=False):
         """ Method to find what TOF range corresponds to given energy range
            for given workspace and detectors.
@@ -1067,6 +1090,7 @@ class DirectEnergyConversion(object):
 
                 # Calculate the incident energy and TOF when the particles access Monitor1
                 try:
+#pylint: disable=unused-variable
                     ei,mon1_peak,mon1_index,tzero = \
                     GetEi(InputWorkspace=monitor_ws, Monitor1Spec=mon_1_spec_ID,
                         Monitor2Spec=mon_2_spec_ID,
@@ -1074,7 +1098,8 @@ class DirectEnergyConversion(object):
                     mon1_det = monitor_ws.getDetector(mon1_index)
                     mon1_pos = mon1_det.getPos()
                     src_name = monitor_ws.getInstrument().getSource().getName()
-                except :
+#pylint: disable=bare-except
+                except:
                     src_name = None
                     mon1_peak = 0
                     en_bin  = [energy_list[0],energy_list[1]-energy_list[0],energy_list[3]]
@@ -1119,6 +1144,7 @@ class DirectEnergyConversion(object):
 
         return TOF_range
     #
+#pylint: disable=too-many-branches
     def save_results(self, workspace, save_file=None, formats=None):
         """
         Save the result workspace to the specified filename using the list of formats specified in
@@ -1224,9 +1250,11 @@ class DirectEnergyConversion(object):
             else:
                 self._spectra_masks = None
         else:
+#pylint: disable=attribute-defined-outside-init
             self._spectra_masks = None
         return
 #-------------------------------------------------------------------------------
+#pylint: disable=too-many-arguments
     def apply_absolute_normalization(self,sample_ws,monovan_run=None,ei_guess=None,wb_mono=None,abs_norm_factor_is=None):
         """  Function applies absolute normalization factor to the target workspace
              and calculates this factor if necessary
@@ -1286,6 +1314,8 @@ class DirectEnergyConversion(object):
 
         return sample_ws
 #-------------------------------------------------------------------------------
+#pylint: disable=too-many-branches
+#pylint: disable=too-many-locals
     def get_abs_normalization_factor(self,monovan_run,ei_monovan):
         """get absolute normalization factor for monochromatic vanadium
 
@@ -1324,6 +1354,7 @@ class DirectEnergyConversion(object):
         for i in range(nhist):
             try:
                 det = data_ws.getDetector(i)
+#pylint: disable=broad-except
             except Exception:
                 continue
             if det.isMasked():
@@ -1390,8 +1421,8 @@ class DirectEnergyConversion(object):
 
         scale_factor = van_multiplier * sample_multiplier / xsection
 
-        for type,val in norm_factor.iteritems():
-            norm_factor[type] = val * scale_factor
+        for norm_type,val in norm_factor.iteritems():
+            norm_factor[norm_type] = val * scale_factor
 
         # check for NaN
         if (norm_factor['LibISIS'] != norm_factor['LibISIS']) | (izerc != 0):    # It is an error, print diagnostics:
@@ -1484,14 +1515,18 @@ class DirectEnergyConversion(object):
         to be always set-up from a calling script
         """
         # Internal properties and keys
+#pylint: disable=attribute-defined-outside-init
         self._keep_wb_workspace = True # for the time being.  May be auto-calculated later but should it?
+#pylint: disable=attribute-defined-outside-init
         self._do_ISIS_reduction = True
         # if normalized by monitor-2, range have to be established before
         # shifting the instrument
+#pylint: disable=attribute-defined-outside-init
         self._mon2_norm_time_range = None
         # WB may not have monitors. In this case the property have to be set to True
         # and WB normalization will not fail but will run normalize by current
         self.__in_white_normalization = False
+#pylint: disable=attribute-defined-outside-init
         self._debug_mode = False
         self.spectra_masks = None
 
@@ -1506,6 +1541,7 @@ class DirectEnergyConversion(object):
                 self._propMan = PropertyManager(instr)
         else:
             old_name = self._propMan.instrument.getName()
+#pylint: disable=protected-access
             if isinstance(instr,geometry._geometry.Instrument):
                 new_name = self._propMan.instrument.getName()
             elif isinstance(instr,PropertyManager):
@@ -1514,10 +1550,11 @@ class DirectEnergyConversion(object):
                 new_name = instr
             #end if
             if old_name != new_name or reload_instrument:
+#pylint: disable=attribute-defined-outside-init
                 self._propMan = PropertyManager(new_name)
             #end if
         #
-
+#pylint: disable=unused-argument
     def setup_instrument_properties(self, workspace=None,reload_instrument=False):
         if workspace != None:
             instrument = workspace.getInstrument()
@@ -1532,6 +1569,7 @@ class DirectEnergyConversion(object):
            if it is what provided.
        """
         if not isinstance(run,RunDescriptor):
+#pylint: disable=protected-access
             tRun = copy.copy(PropertyManager._tmp_run)
             tRun.__set__(None,run)
             return tRun
@@ -1542,6 +1580,7 @@ class DirectEnergyConversion(object):
 #         This actually does the conversion for the mono-sample and
 #         mono-vanadium runs
 # -------------------------------------------------------------------------------------------
+#pylint: disable=too-many-arguments
     def _do_mono_SNS(self, data_ws, result_name, ei_guess,\
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
         # does not work -- retrieve from repo and fix if this functionality is needed.
@@ -1549,10 +1588,13 @@ class DirectEnergyConversion(object):
                                   " if necessary and fix")
         #return
 #-------------------------------------------------------------------------------
+#pylint: disable=too-many-arguments
+#pylint: disable=unused-argument
     def _do_mono_ISIS(self, data_run, ei_guess,\
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
 
         # Do ISIS stuff for Ei
+#pylint: disable=unused-variable
         ei_value, mon1_peak = self.get_ei(data_run, ei_guess)
 
 
@@ -1651,6 +1693,7 @@ class DirectEnergyConversion(object):
 
         return bkgr_ws
 #-------------------------------------------------------------------------------
+#pylint disable=too-many-arguments
     def _do_mono(self, run,  ei_guess,
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
         """
@@ -1734,6 +1777,7 @@ class DirectEnergyConversion(object):
         # Normalize
         self.__in_white_normalization = True
         white_ws = self.normalise(run, self.normalise_method,0.0)
+#pylint: disable=attribute-defined-outside-init
         self.__in_white_normalization = False
         new_ws_name = run.set_action_suffix('_norm_white')
         old_name = white_ws.name()
@@ -1785,7 +1829,8 @@ def get_failed_spectra_list_from_masks(masked_wksp,prop_man):
         return (failed_spectra,0)
     try:
         masked_wksp.name()
-    except Exeption as ex:
+#pylint: disable=broad-except
+    except Exeption:
         prop_man.log("***WARNING: cached mask workspace invalidated. Incorrect masking reported")
         return (failed_spectra,0)
 
