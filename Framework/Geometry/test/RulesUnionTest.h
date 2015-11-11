@@ -15,6 +15,8 @@
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Cone.h"
 
+#include "boost/make_shared.hpp"
+
 using namespace Mantid;
 using namespace Geometry;
 using Mantid::Kernel::V3D;
@@ -29,8 +31,8 @@ public:
 
   void testTwoRuleConstructor() {
     SurfPoint *S1, *S2;
-    Plane *P1 = new Plane;
-    Sphere *Sp1 = new Sphere;
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
@@ -49,8 +51,8 @@ public:
   void testThreeRuleConstructor() {
     Union Parent;
     SurfPoint *S1, *S2;
-    Plane *P1 = new Plane;
-    Sphere *Sp1 = new Sphere;
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
@@ -69,8 +71,8 @@ public:
 
   void testUnionConstructor() {
     SurfPoint *S1, *S2;
-    Plane *P1 = new Plane;
-    Sphere *Sp1 = new Sphere;
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
@@ -92,8 +94,8 @@ public:
 
   void testClone() {
     SurfPoint *S1, *S2;
-    Plane *P1 = new Plane;
-    Sphere *Sp1 = new Sphere;
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
@@ -117,8 +119,8 @@ public:
 
   void testAssignment() {
     SurfPoint *S1, *S2;
-    Plane *P1 = new Plane;
-    Sphere *Sp1 = new Sphere;
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
@@ -141,8 +143,8 @@ public:
 
   void testSetLeaves() {
     SurfPoint *S1, *S2;
-    Plane *P1 = new Plane;
-    Sphere *Sp1 = new Sphere;
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
@@ -161,8 +163,8 @@ public:
 
   void testSetLeaf() {
     SurfPoint *S1, *S2;
-    Plane *P1 = new Plane;
-    Sphere *Sp1 = new Sphere;
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
@@ -184,8 +186,8 @@ public:
 
   void testFindLeaf() {
     SurfPoint *S1, *S2, S3;
-    Plane *P1 = new Plane;
-    Sphere *Sp1 = new Sphere;
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
@@ -207,8 +209,8 @@ public:
 
   void testFindKey() {
     SurfPoint *S1, *S2;
-    Plane *P1 = new Plane;
-    Sphere *Sp1 = new Sphere;
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
@@ -231,8 +233,8 @@ public:
   void testIsComplementary() { // Problem: it only detects whether first leaf or
                                // second leaf but not both
     SurfPoint *S1, *S2;
-    Plane *P1 = new Plane;
-    Sphere *Sp1 = new Sphere;
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
@@ -257,8 +259,8 @@ public:
 
   void testIsValid() {
     SurfPoint *S1, *S2;
-    Plane *P1 = new Plane;
-    Sphere *Sp1 = new Sphere;
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
@@ -282,8 +284,8 @@ public:
 
   void testIsValidMap() {
     SurfPoint *S1, *S2;
-    Plane *P1 = new Plane;
-    Sphere *Sp1 = new Sphere;
+    auto P1 = boost::make_shared<Plane>();
+    auto Sp1 = boost::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin

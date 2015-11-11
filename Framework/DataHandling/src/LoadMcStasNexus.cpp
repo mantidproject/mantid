@@ -35,7 +35,9 @@ const std::string LoadMcStasNexus::name() const { return "LoadMcStasNexus"; }
 int LoadMcStasNexus::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadMcStasNexus::category() const { return "DataHandling"; }
+const std::string LoadMcStasNexus::category() const {
+  return "DataHandling\\Nexus";
+}
 
 /**
  * Return the confidence with with this algorithm can load the file

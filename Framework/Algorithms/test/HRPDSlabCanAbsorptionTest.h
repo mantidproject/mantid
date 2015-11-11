@@ -17,8 +17,6 @@ public:
 
   void testVersion() { TS_ASSERT_EQUALS(atten.version(), 1); }
 
-  void testCategory() { TS_ASSERT_EQUALS(atten.category(), "Diffraction"); }
-
   void testInit() {
     TS_ASSERT_THROWS_NOTHING(atten.initialize());
     TS_ASSERT(atten.isInitialized());

@@ -53,7 +53,7 @@ int LoadILLReflectometry::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadILLReflectometry::category() const {
-  return "DataHandling";
+  return "DataHandling\\Nexus";
 }
 
 /**

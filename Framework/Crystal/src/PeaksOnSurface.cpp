@@ -30,7 +30,7 @@ const std::string PeaksOnSurface::name() const { return "PeaksOnSurface"; }
 int PeaksOnSurface::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string PeaksOnSurface::category() const { return "Crystal"; }
+const std::string PeaksOnSurface::category() const { return "Crystal\\Peaks"; }
 
 //----------------------------------------------------------------------------------------------
 

@@ -3,6 +3,7 @@
 
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtMantidWidgets/PeriodicTableWidget.h"
+#include <QDoubleSpinBox>
 
 namespace MantidQt {
 
@@ -44,7 +45,7 @@ private:
   /// Periodic Table widget used for selection of elements property
   PeriodicTableWidget *m_periodicTable;
   /// QLineEdit used for input of y-position property
-  QLineEdit *m_yPosition;
+  QDoubleSpinBox *m_yPosition;
   /// QLineEdit used for input of GroupWorkspaceSpace
   QLineEdit *m_groupWorkspaceNameInput;
   // Check box for showing or hiding the Legend for PeriodicTableWidget

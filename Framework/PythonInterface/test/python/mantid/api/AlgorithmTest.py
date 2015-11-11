@@ -49,7 +49,7 @@ class AlgorithmTest(unittest.TestCase):
         self.assertTrue(ws.getMemorySize() > 0.0 )
 
         as_str = str(alg)
-        self.assertEquals(as_str, "CreateWorkspace.1(OutputWorkspace=UNUSED_NAME_FOR_CHILD,DataX=1,2,3,DataY=1,2,3,UnitX=Wavelength)")
+        self.assertEquals(as_str, '{"name":"CreateWorkspace","properties":{"DataX":"1,2,3","DataY":"1,2,3","OutputWorkspace":"UNUSED_NAME_FOR_CHILD","UnitX":"Wavelength"},"version":1}\n')
 
     def test_getAlgorithmID_returns_AlgorithmID_object(self):
         alg = AlgorithmManager.createUnmanaged('Load')

@@ -47,7 +47,7 @@
     <!--description is="The component provides sample-choper distance, used
     to estimate chopper delay time and Tobyfit resolution calculations."/-->
     <parameter name="initial_phase">    
-        <value val="130000."/>
+        <value val="-389000."/>
         <description is="The initial rotation phase of the disk used to caluclate the time
         for neutrons arriving at the chopper according to the formula time = delay + initial_phase/Speed"/>    
     </parameter>

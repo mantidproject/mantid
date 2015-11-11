@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -10,6 +11,7 @@
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 
 #include <boost/scoped_ptr.hpp>
+#include <json/json.h>
 
 using namespace Mantid::Kernel;
 
@@ -192,19 +194,43 @@ public:
     PropertyManagerHelper mgr;
     mgr.declareProperty("APROP", 1);
     mgr.declareProperty("anotherProp", 1.0);
-    TS_ASSERT_THROWS_NOTHING(mgr.setProperties("APROP=15;anotherProp=1.3"));
-    TS_ASSERT(!mgr.getPropertyValue("APROP").compare("15"));
-    TS_ASSERT(!mgr.getPropertyValue("anotherProp").compare("1.3"));
+
+    std::string jsonString = "{\"APROP\":\"15\",\"anotherProp\":\"1.3\"}\n";
+    TS_ASSERT_THROWS_NOTHING(mgr.setProperties(jsonString));
+    TS_ASSERT_EQUALS(mgr.getPropertyValue("APROP"), "15");
+    TS_ASSERT_EQUALS(mgr.getPropertyValue("anotherProp"), "1.3");
   }
 
   void testSetProperties_complicatedValueString() {
     PropertyManagerHelper mgr;
     mgr.declareProperty("APROP", "1");
     mgr.declareProperty("anotherProp", "1");
-    TS_ASSERT_THROWS_NOTHING(
-        mgr.setProperties("APROP=equation=12+3;anotherProp=1.3,2.5"));
+    std::string jsonString =
+        "{\"APROP\":\"equation=12+3\",\"anotherProp\":\"1.3,2.5\"}\n";
+    TS_ASSERT_THROWS_NOTHING(mgr.setProperties(jsonString));
     TS_ASSERT_EQUALS(mgr.getPropertyValue("APROP"), "equation=12+3");
     TS_ASSERT_EQUALS(mgr.getPropertyValue("anotherProp"), "1.3,2.5");
+  }
+
+  void testSetProperties_complicatedValueString2() {
+    PropertyManagerHelper mgr;
+    mgr.declareProperty("APROP", "1");
+    mgr.declareProperty("anotherProp", "1");
+
+    std::string jsonString =
+        "{\"APROP\":\"equation = 12 + 3\",\"anotherProp\":\"-1.3, +2.5\"}\n";
+    TS_ASSERT_THROWS_NOTHING(mgr.setProperties(jsonString));
+    TS_ASSERT_EQUALS(mgr.getPropertyValue("APROP"), "equation = 12 + 3");
+    TS_ASSERT_EQUALS(mgr.getPropertyValue("anotherProp"), "-1.3, +2.5");
+  }
+
+  void testSetProperties_arrayValueString() {
+    PropertyManagerHelper mgr;
+    mgr.declareProperty(new ArrayProperty<double>("ArrayProp"));
+
+    std::string jsonString = "{\"ArrayProp\":\"10,12,23\"}";
+    TS_ASSERT_THROWS_NOTHING(mgr.setProperties(jsonString));
+    TS_ASSERT_EQUALS(mgr.getPropertyValue("ArrayProp"), "10,12,23");
   }
 
   void testSetPropertyValue() {
@@ -356,15 +382,61 @@ public:
     PropertyManagerHelper mgr;
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Prop1", 10));
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Prop2", 15));
-    TSM_ASSERT_EQUALS("Empty string when all are default", mgr.asString(), "");
+
+    ::Json::Reader reader;
+    ::Json::Value value;
+
+    /// TSM_ASSERT_EQUALS("Empty string when all are default", mgr.asString(),
+    /// "");
+    TSM_ASSERT("value was not valid JSON", reader.parse(mgr.asString(), value));
+
+    TSM_ASSERT_EQUALS("value was not empty", value.size(), 0);
+
     TSM_ASSERT_EQUALS("Show the default", mgr.asString(true),
-                      "Prop1=10,Prop2=15");
-    TSM_ASSERT_EQUALS("Different separator", mgr.asString(true, ';'),
-                      "Prop1=10;Prop2=15");
+                      "{\"Prop1\":\"10\",\"Prop2\":\"15\"}\n");
+
+    TSM_ASSERT("value was not valid JSON",
+               reader.parse(mgr.asString(true), value));
+    TS_ASSERT_EQUALS(boost::lexical_cast<int>(value["Prop1"].asString()), 10);
+    TS_ASSERT_EQUALS(boost::lexical_cast<int>(value["Prop2"].asString()), 15);
     mgr.setProperty("Prop1", 123);
     mgr.setProperty("Prop2", 456);
-    TSM_ASSERT_EQUALS("Change the values", mgr.asString(false, ';'),
-                      "Prop1=123;Prop2=456");
+    TSM_ASSERT_EQUALS("Change the values", mgr.asString(false),
+                      "{\"Prop1\":\"123\",\"Prop2\":\"456\"}\n");
+
+    TSM_ASSERT("value was not valid JSON",
+               reader.parse(mgr.asString(false), value));
+    TS_ASSERT_EQUALS(boost::lexical_cast<int>(value["Prop1"].asString()), 123);
+    TS_ASSERT_EQUALS(boost::lexical_cast<int>(value["Prop2"].asString()), 456);
+  }
+
+  void test_asStringWithArrayProperty() {
+    PropertyManagerHelper mgr;
+    TS_ASSERT_THROWS_NOTHING(
+        mgr.declareProperty(new ArrayProperty<double>("ArrayProp")));
+
+    ::Json::Reader reader;
+    ::Json::Value value;
+
+    /// TSM_ASSERT_EQUALS("Empty string when all are default", mgr.asString(),
+    /// "");
+    TSM_ASSERT("value was not valid JSON", reader.parse(mgr.asString(), value));
+
+    TSM_ASSERT_EQUALS("value was not empty", value.size(), 0);
+
+    TSM_ASSERT_EQUALS("Show the default", mgr.asString(true),
+                      "{\"ArrayProp\":\"\"}\n");
+
+    TSM_ASSERT("value was not valid JSON",
+               reader.parse(mgr.asString(true), value));
+
+    mgr.setProperty("ArrayProp", "10,12,23");
+
+    TSM_ASSERT_EQUALS("Change the values", mgr.asString(false),
+                      "{\"ArrayProp\":\"10,12,23\"}\n");
+
+    TSM_ASSERT("value was not valid JSON",
+               reader.parse(mgr.asString(false), value));
   }
 
   //-----------------------------------------------------------------------------------------------------------

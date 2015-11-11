@@ -166,7 +166,9 @@ const std::string LoadSpiceXML2DDet::name() const {
 int LoadSpiceXML2DDet::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
-const std::string LoadSpiceXML2DDet::category() const { return "DataHandling"; }
+const std::string LoadSpiceXML2DDet::category() const {
+  return "DataHandling\\XML";
+}
 
 //----------------------------------------------------------------------------------------------
 const std::string LoadSpiceXML2DDet::summary() const {

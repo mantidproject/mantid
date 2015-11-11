@@ -83,7 +83,10 @@ public:
   ~MDFileObject() {
     m_file.close();
     if (remove(m_filename.c_str()) != 0)
-      throw std::runtime_error("cannot remove " + m_filename);
+      // destructors shouldn't throw exceptions so we have to resort to printing
+      // an error
+      std::cerr << "~MDFileObject() - Error deleting file '" << m_filename
+                << "'\n";
   }
 
 private:
@@ -117,11 +120,6 @@ public:
     return new ImportMDEventWorkspaceTest();
   }
   static void destroySuite(ImportMDEventWorkspaceTest *suite) { delete suite; }
-
-  void test_catagory() {
-    ImportMDEventWorkspace alg;
-    TS_ASSERT_EQUALS("MDAlgorithms", alg.category());
-  }
 
   void test_name() {
     ImportMDEventWorkspace alg;

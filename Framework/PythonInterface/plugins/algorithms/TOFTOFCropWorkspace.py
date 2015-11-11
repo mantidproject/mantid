@@ -12,7 +12,7 @@ class TOFTOFCropWorkspace(PythonAlgorithm):
     def category(self):
         """ Return category
         """
-        return "PythonAlgorithms\\MLZ\\TOFTOF;Utility"
+        return "Workflow\\MLZ\\TOFTOF;Transforms\\Splitting"
 
     def name(self):
         """ Return summary

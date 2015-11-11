@@ -39,7 +39,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
     _binning = None
 
     def category(self):
-        return "Diffraction;PythonAlgorithms"
+        return "Diffraction\\Calibration"
 
     def name(self):
         return "CalibrateRectangularDetectors"
@@ -137,6 +137,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         return
 
     def validateInputs(self):
+        """
+        Validate inputs
+        :return:
+        """
         messages = {}
 
         detectors = self.getProperty("DetectorsPeaks").value
@@ -144,7 +148,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             positions = self.getProperty("PeakPositions").value
             if len(detectors) <= 1:
                 if len(positions) != 1:
-                    messages["PeakPositions"] = "Can only have one cross correlation peak without specifying 'DetectorsPeaks'"
+                    messages["PeakPositions"] = "Can only have one cross correlation peak without " \
+                                                "specifying 'DetectorsPeaks'"
             else:
                 if len(detectors) != len(positions):
                     messages["PeakPositions"] = "Must be the same length as 'DetectorsPeaks' (%d != %d)" \
@@ -519,6 +524,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 self._peakmin3 = self._peakpos3-peakhalfwidth
                 self._peakmax3 = self._peakpos3+peakhalfwidth
             detectors = self.getProperty("DetectorsPeaks").value
+            if len(detectors) == 0:
+                detectors = [0]
             if detectors[0]:
                 self._lastpixel = int(detectors[0])
                 self._lastpixel3 = self._lastpixel

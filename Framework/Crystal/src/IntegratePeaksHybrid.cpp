@@ -102,7 +102,7 @@ int IntegratePeaksHybrid::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string IntegratePeaksHybrid::category() const {
-  return "MDAlgorithms";
+  return "MDAlgorithms\\Peaks;Crystal\\Integration";
 }
 
 //----------------------------------------------------------------------------------------------

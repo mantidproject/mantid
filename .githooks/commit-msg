@@ -18,6 +18,10 @@
 # Prepare a copy of the message:
 #  - strip comment lines
 #  - stop at "diff --git" (git commit -v)
+# Later versions of git gui on Windows don't set this properly
+if [ -z "$GIT_DIR" ]; then
+  GIT_DIR=$(git rev-parse --git-dir)
+fi
 commit_msg="$GIT_DIR/COMMIT_MSG"
 sed -n -e '/^#/d' -e '/^diff --git/q' -e 'p;d' "$1" > "$commit_msg"
 

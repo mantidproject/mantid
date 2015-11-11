@@ -9,6 +9,9 @@ class CreateEmptyTableWorkspace(PythonAlgorithm):
         return "Creates an empty TableWorkspace which can be populated with various "\
                "types of information."
 
+    def category(self):
+        return 'Utility\\Workspaces'
+
     def PyInit(self):
         # Declare properties
         self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output),

@@ -61,13 +61,22 @@ Cylinder::Cylinder(const Cylinder &A)
  */
 {}
 
-Cylinder *Cylinder::clone() const
+Cylinder *Cylinder::doClone() const
 /**
  Makes a clone (implicit virtual copy constructor)
  @return Copy(*this)
  */
 {
   return new Cylinder(*this);
+}
+
+std::unique_ptr<Cylinder> Cylinder::clone() const
+/**
+Makes a clone (implicit virtual copy constructor)
+@return Copy(*this)
+*/
+{
+  return std::unique_ptr<Cylinder>(doClone());
 }
 
 Cylinder &Cylinder::operator=(const Cylinder &A)
@@ -86,12 +95,6 @@ Cylinder &Cylinder::operator=(const Cylinder &A)
   }
   return *this;
 }
-
-Cylinder::~Cylinder()
-/**
- Standard Destructor
- */
-{}
 
 int Cylinder::setSurface(const std::string &Pstr)
 /**

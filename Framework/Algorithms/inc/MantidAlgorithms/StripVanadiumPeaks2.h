@@ -44,7 +44,8 @@ public:
   virtual int version() const { return 2; }
   /// Algorithm's category for identification
   virtual const std::string category() const {
-    return "CorrectionFunctions;Optimization\\PeakFinding;Diffraction";
+    return "CorrectionFunctions\\PeakCorrections;Optimization\\PeakFinding;"
+           "Diffraction\\Corrections";
   }
   /// Summary of algorithms purpose
   virtual const std::string summary() const {

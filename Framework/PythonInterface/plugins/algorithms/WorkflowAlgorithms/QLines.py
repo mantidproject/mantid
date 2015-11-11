@@ -8,7 +8,7 @@ import os
 class QLines(PythonAlgorithm):
 
     def category(self):
-        return "Workflow\\MIDAS;PythonAlgorithms"
+        return "Workflow\\MIDAS"
 
     def summary(self):
         return "The program estimates the quasielastic components of each of the groups of spectra and "+\

@@ -52,8 +52,10 @@ public:
   ~PythonScripting();
   /// Write text to std out
   void write(const QString &text) { emit print(text); }
-  /// 'Fake' method needed for IPython import
-  void flush() {}
+  /// Simulate file-like object (required for IPython)
+  inline void flush() {}
+  /// Simulate file-like object (required for colorama)
+  inline bool closed() { return false; }
   /// 'Fake' method needed for IPython import
   void set_parent(PyObject*) {}
 

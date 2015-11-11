@@ -61,7 +61,7 @@ const std::string LoadMLZ::name() const { return "LoadMLZ"; }
 int LoadMLZ::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadMLZ::category() const { return "DataHandling"; }
+const std::string LoadMLZ::category() const { return "DataHandling\\Nexus"; }
 
 //---------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

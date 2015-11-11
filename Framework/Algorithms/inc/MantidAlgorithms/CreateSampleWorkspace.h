@@ -63,7 +63,7 @@ private:
                            Geometry::Instrument_sptr inst,
                            const std::string &functionString, bool isRandom);
   Geometry::Instrument_sptr createTestInstrumentRectangular(
-      int num_banks, int pixels, double pixelSpacing,
+      API::Progress &progress, int num_banks, int pixels, double pixelSpacing,
       const double bankDistanceFromSample, const double sourceSampleDistance);
   Geometry::Object_sptr createCappedCylinder(double radius, double height,
                                              const Kernel::V3D &baseCentre,

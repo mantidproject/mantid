@@ -18,7 +18,7 @@ class IndirectCalibration(DataProcessorAlgorithm):
 
 
     def category(self):
-        return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'
+        return 'Workflow\\Inelastic;Inelastic\\Calibration'
 
 
     def summary(self):

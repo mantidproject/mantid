@@ -48,7 +48,7 @@ int SofQWNormalisedPolygon::version() const { return 1; }
  * @return the category list for the Algorithm
  */
 const std::string SofQWNormalisedPolygon::category() const {
-  return "Inelastic";
+  return "Inelastic\\SofQW";
 }
 
 /**

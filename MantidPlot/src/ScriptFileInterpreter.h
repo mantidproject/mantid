@@ -37,8 +37,8 @@ public:
   ~ScriptFileInterpreter();
   /// Determine if the script is ready to be closed
   virtual bool shouldClose();
-  /// Setup from a script environment
-  virtual void setup(const ScriptingEnv & environ, const QString & identifier);
+  /// Setup from a script envment
+  virtual void setup(const ScriptingEnv & env, const QString & identifier);
 
   /// Return the filename of the script in the editor
   virtual QString filename() const;
@@ -145,8 +145,8 @@ private:
   Q_DISABLE_COPY(ScriptFileInterpreter)
   void setupChildWidgets();
 
-  void setupEditor(const ScriptingEnv & environ, const QString & identifier);
-  void setupScriptRunner(const ScriptingEnv & environ, const QString & identifier);
+  void setupEditor(const ScriptingEnv & env, const QString & identifier);
+  void setupScriptRunner(const ScriptingEnv & env, const QString & identifier);
 
   bool readFileIntoEditor(const QString & filename);
   void executeCode(const ScriptCode & code, const Script::ExecutionMode mode);

@@ -40,7 +40,9 @@ const std::string ThresholdMD::name() const { return "ThresholdMD"; }
 int ThresholdMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ThresholdMD::category() const { return "MDAlgorithms"; }
+const std::string ThresholdMD::category() const {
+  return "MDAlgorithms\\Transforms";
+}
 
 //----------------------------------------------------------------------------------------------
 

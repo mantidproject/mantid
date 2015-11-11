@@ -41,7 +41,9 @@ const std::string LoadILLIndirect::name() const { return "LoadILLIndirect"; }
 int LoadILLIndirect::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadILLIndirect::category() const { return "DataHandling"; }
+const std::string LoadILLIndirect::category() const {
+  return "DataHandling\\Nexus";
+}
 
 //----------------------------------------------------------------------------------------------
 

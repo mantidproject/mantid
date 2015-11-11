@@ -27,7 +27,7 @@ def _get_instrument_property_list(instrument, property_name):
 class IndirectTransmission(PythonAlgorithm):
 
     def category(self):
-        return "Workflow\\MIDAS;PythonAlgorithms"
+        return "Workflow\\MIDAS"
 
 
     def summary(self):

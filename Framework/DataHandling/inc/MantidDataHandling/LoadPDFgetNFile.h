@@ -49,7 +49,7 @@ public:
 
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const {
-    return "Diffraction;DataHandling\\Text";
+    return "Diffraction\\DataHandling;DataHandling\\Text";
   }
 
 private:

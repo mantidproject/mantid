@@ -276,7 +276,7 @@ std::string Intersection::displayAddress() const
 */
 {
   std::stringstream cx;
-  cx << " [ " << reinterpret_cast<long>(this);
+  cx << " [ " << this;
   if (A && B)
     cx << " ] (" + A->displayAddress() + " " + B->displayAddress() + ") ";
   else if (A)
@@ -641,7 +641,7 @@ std::string Union::displayAddress() const
 */
 {
   std::stringstream cx;
-  cx << " [ " << reinterpret_cast<long int>(this);
+  cx << " [ " << this;
 
   if (A && B)
     cx << " ] (" + A->displayAddress() + " : " + B->displayAddress() + ") ";
@@ -697,17 +697,9 @@ TopoDS_Shape Union::analyze() {
 //---------------------------------------------------------------
 
 SurfPoint::SurfPoint()
-    : Rule(), key(NULL), keyN(0), sign(1)
+    : Rule(), m_key(), keyN(0), sign(1)
 /**
   Constructor with null key/number
-*/
-{}
-
-SurfPoint::SurfPoint(const SurfPoint &A)
-    : Rule(), key(A.key->clone()), keyN(A.keyN), sign(A.sign)
-/**
-  Copy constructor
-  @param A :: SurfPoint to copy
 */
 {}
 
@@ -718,30 +710,6 @@ SurfPoint *SurfPoint::clone() const
 */
 {
   return new SurfPoint(*this);
-}
-
-SurfPoint &SurfPoint::operator=(const SurfPoint &A)
-/**
-  Assigment operator
-  @param A :: Object to copy
-  @return *this
-*/
-{
-  if (&A != this) {
-    delete key;
-    key = A.key->clone();
-    keyN = A.keyN;
-    sign = A.sign;
-  }
-  return *this;
-}
-
-SurfPoint::~SurfPoint()
-/**
-  Destructor
-*/
-{
-  delete key;
 }
 
 void SurfPoint::setLeaf(Rule *nR, const int)
@@ -806,15 +774,13 @@ void SurfPoint::setKeyN(const int Ky)
   return;
 }
 
-void SurfPoint::setKey(Surface *Spoint)
+void SurfPoint::setKey(const boost::shared_ptr<Surface> &Spoint)
 /**
   Sets the key pointer. The class takes ownership.
   @param Spoint :: new key values
 */
 {
-  if (key != Spoint)
-    delete key;
-  key = Spoint;
+  m_key = Spoint;
   return;
 }
 
@@ -837,8 +803,8 @@ bool SurfPoint::isValid(const Kernel::V3D &Pt) const
   @retval 0 :: Pt is on the -ve side of the surface
 */
 {
-  if (key) {
-    return (key->side(Pt) * sign) >= 0;
+  if (m_key) {
+    return (m_key->side(Pt) * sign) >= 0;
   }
   return false;
 }
@@ -878,7 +844,7 @@ std::string SurfPoint::displayAddress() const
 */
 {
   std::stringstream cx;
-  cx << reinterpret_cast<long int>(this);
+  cx << this;
   return cx.str();
 }
 
@@ -894,7 +860,7 @@ std::string SurfPoint::displayAddress() const
 void SurfPoint::getBoundingBox(double &xmax, double &ymax, double &zmax,
                                double &xmin, double &ymin, double &zmin) {
   if (this->sign < 1) // If the object sign is positive then include
-    key->getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
+    m_key->getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
   else { // if the object sign is negative then get the complement
     std::vector<V3D> listOfPoints;
     double gXmax, gYmax, gZmax, gXmin, gYmin, gZmin;
@@ -904,7 +870,7 @@ void SurfPoint::getBoundingBox(double &xmax, double &ymax, double &zmax,
     gXmin = xmin;
     gYmin = ymin;
     gZmin = zmin;
-    key->getBoundingBox(gXmax, gYmax, gZmax, gXmin, gYmin, gZmin);
+    m_key->getBoundingBox(gXmax, gYmax, gZmax, gXmin, gYmin, gZmin);
     if (!((xmax <= gXmax && xmax >= gXmin) &&
           (ymax <= gYmax && ymax >= gYmin) && (zmax <= gZmax && zmax >= gZmin)))
       listOfPoints.push_back(V3D(xmax, ymax, zmax));
@@ -990,10 +956,10 @@ void SurfPoint::getBoundingBox(double &xmax, double &ymax, double &zmax,
 #ifdef ENABLE_OPENCASCADE
 TopoDS_Shape SurfPoint::analyze() {
   // Check for individual type of surfaces
-  TopoDS_Shape Result = key->createShape();
+  TopoDS_Shape Result = m_key->createShape();
   if (sign > 0)
     Result.Complement();
-  if (key->className() == "Plane") {
+  if (m_key->className() == "Plane") {
     // build a box
     gp_Pnt p(-1000.0, -1000.0, -1000.0);
     TopoDS_Shape world = BRepPrimAPI_MakeBox(p, 2000.0, 2000.0, 2000.0).Shape();
@@ -1179,7 +1145,7 @@ std::string CompObj::displayAddress() const
 */
 {
   std::stringstream cx;
-  cx << reinterpret_cast<long int>(this);
+  cx << this;
   return cx.str();
 }
 
@@ -1431,7 +1397,7 @@ std::string BoolValue::displayAddress() const
 */
 {
   std::stringstream cx;
-  cx << reinterpret_cast<long int>(this);
+  cx << this;
   return cx.str();
 }
 
@@ -1640,7 +1606,7 @@ std::string CompGrp::displayAddress() const
 */
 {
   std::stringstream cx;
-  cx << "#( [" << reinterpret_cast<long int>(this) << "] ";
+  cx << "#( [" << this << "] ";
   if (A)
     cx << A->displayAddress();
   else
