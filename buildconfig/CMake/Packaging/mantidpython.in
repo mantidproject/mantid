@@ -7,8 +7,7 @@
 # Find out where we are
 SCRIPTFILE=$(readlink -f "$0")
 INSTALLDIR=$(echo $SCRIPTFILE | sed -r -e 's|^(.*)/(.*)$|\1|g') #.* is greedy and eats up until the final slash
-IPYTHON=$(command -v ipython)
-PYTHON=$(command -v python)
+PROG=$(command -v ipython)
 
 # Define extra libraries and load paths
 LOCAL_PRELOAD=`readlink --no-newline --canonicalize-existing @TCMALLOC_LIBRARIES@`
@@ -34,8 +33,6 @@ fi
 if [ -n "$1" ] && [ "$1" = "--classic" ]; then
     shift
     PROG=$(command -v python)
-else
-    PROG=$(command -v ipython)
 fi
 
 # Launch ipython or python
