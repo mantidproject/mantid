@@ -1,5 +1,4 @@
 ﻿import os,sys,inspect
-#os.environ["PATH"] =r"c:/Mantid/_builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest

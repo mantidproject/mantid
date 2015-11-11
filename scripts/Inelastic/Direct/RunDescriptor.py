@@ -805,8 +805,10 @@ class RunDescriptor(PropDescriptor):
             if mon_ws_name in mtd:
                 mon_ws = mtd[mon_ws_name]
                 origin.setMonitorWorkspace(mon_ws)
-            else:
-                mon_ws = None
+            else: # may be monitors are stored together with ws. We can not chop it
+                # so only way ahead is: TODO: Its possible to perform better here (take only monitors)
+                mon_ws = CloneWorkspace(InputWorkspace=origin_name,OutputWorkspace=origin_name + '_monitors')
+                origin.setMonitorWorkspace(mon_ws)
         #
 
         target_name = '#{0}/{1}#'.format(chunk_num,n_chunks) + origin_name
@@ -870,12 +872,15 @@ class RunDescriptor(PropDescriptor):
             monitors_separate = True
 
         spec_to_mon = RunDescriptor._holder.spectra_to_monitors_list
+        combined_spec_list = prop_helpers.process_prop_list(mon_ws,"CombinedSpectraIDList")
         if monitors_separate and spec_to_mon:
             mon_ws_name = mon_ws.name()
+
             for specID in spec_to_mon:
-                mon_ws = self.copy_spectrum2monitors(data_ws,mon_ws,specID)
+                if not specID in combined_spec_list:
+                    mon_ws = self.copy_spectrum2monitors(data_ws,mon_ws,specID)
             if mon_ws:
-                mon_ws=mtd[mon_ws_name] # very weird operation needed
+                #mon_ws=mtd[mon_ws_name] # very weird operation needed
                 data_ws.setMonitorWorkspace(mon_ws)
 
         if monitors_ID:
@@ -893,11 +898,12 @@ class RunDescriptor(PropDescriptor):
                 mon_list = [monitors_ID]
         else:
             mon_list = self._holder.get_used_monitors_list()
-        #
+        # Check if all requested spectra are indeed availible
         for monID in mon_list:
+            if monID in combined_spec_list:
+                continue
             try:
-#pylint: disable=unused-variable
-                ws_ind = mon_ws.getIndexFromSpectrumNumber(int(monID))
+                mon_ws.getIndexFromSpectrumNumber(int(monID))
 #pylint: disable=bare-except
             except:
                 try:

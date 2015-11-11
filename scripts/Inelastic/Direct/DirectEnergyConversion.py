@@ -15,7 +15,7 @@ import Direct.CommonFunctions  as common
 import Direct.diagnostics      as diagnostics
 from Direct.PropertyManager  import PropertyManager
 from Direct.RunDescriptor    import RunDescriptor
-from Direct.ReductionHelpers import extract_non_system_names
+from Direct.ReductionHelpers import extract_non_system_names,process_prop_list
 
 
 
@@ -370,7 +370,7 @@ class DirectEnergyConversion(object):
         # and verify some other properties which can be wrong before starting a
         # long run.
         prop_man.log("****************************************************************")
-        prop_man.log("*** ISIS CONVERT TO ENERGY TRANSFER WRORKFLOW STARTED **********")
+        prop_man.log("*** ISIS CONVERT TO ENERGY TRANSFER WORKFLOW STARTED  **********")
         prop_man.validate_properties()
         prop_man.log("*** Loading or retrieving sample run: {0}".format(prop_man.sample_run))
         prop_man.log("****************************************************************")
@@ -383,6 +383,27 @@ class DirectEnergyConversion(object):
 
         PropertyManager.sample_run.set_action_suffix('')
         sample_ws = PropertyManager.sample_run.get_workspace()
+        # Check auto-ei mode and calculate incident energies if necessary
+        if PropertyManager.incident_energy.autoEi_mode():
+            mon_ws = PropertyManager.sample_run.get_monitors_ws()
+            # sum monitor spectra if this is requested
+            ei_mon_spec = self.ei_mon_spectra
+            if PropertyManager.ei_mon_spectra.need_to_sum_monitors(prop_man):
+                ei_mon_spec,mon_ws = self.sum_monitors_spectra(mon_ws,ei_mon_spec)
+                sample_ws.setMonitorWorkspace(mon_ws)
+            else:
+                pass
+
+            try:
+                PropertyManager.incident_energy.set_auto_Ei(mon_ws,prop_man,ei_mon_spec)
+                EiToProcessAvailible = True
+            except RuntimeError as er:
+                prop_man.log('*** Error while calculating autoEi: {0}. See algorithm log for details.'.\
+                format(str(er)))
+                EiToProcessAvailible = False
+        else:
+            EiToProcessAvailible = True
+
 
         # Update reduction properties which may change in the workspace but have
         # not been modified from input parameters.
@@ -399,6 +420,11 @@ class DirectEnergyConversion(object):
         # inform user on what parameters have changed from script or gui
         # if monovan present, check if abs_norm_ parameters are set
         self.prop_man.log_changed_values('notice')
+        if not EiToProcessAvailible:
+            prop_man.log("*** NO GUESS INCIDENT ENERGIES IDENTIFIED FOR THIS RUN *********")
+            prop_man.log("*** NOTHING TO REDUCE ******************************************")
+            prop_man.log("****************************************************************")
+            return None
 
         masking = None
         masks_done = False
@@ -455,7 +481,6 @@ class DirectEnergyConversion(object):
         if PropertyManager.incident_energy.multirep_mode():
             self._multirep_mode = True
             ws_base = None
-            num_ei_cuts = len(self.incident_energy)
             if self.check_background:
                 # find the count rate seen in the regions of the histograms defined
                 # as the background regions, if the user defined such region.
@@ -468,14 +493,18 @@ class DirectEnergyConversion(object):
         else:
 #pylint: disable=attribute-defined-outside-init
             self._multirep_mode = False
-            num_ei_cuts = 0
+
 #------------------------------------------------------------------------------------------
 # Main loop over incident energies
 #------------------------------------------------------------------------------------------
-        cut_ind = 0 # do not do enumerate if it generates all sequence at once
+        # do not do enumerate if it generates all sequence at once
         #  -- code below uses current energy state from PropertyManager.incident_energy
-        for ei_guess in PropertyManager.incident_energy:
-            cut_ind +=1
+        AllEn = PropertyManager.incident_energy.getAllEiList()
+        num_ei_cuts = len(AllEn)
+        for ind,ei_guess in enumerate(AllEn):
+            PropertyManager.incident_energy.set_current_ind(ind)
+
+            cut_ind =ind + 1 # nice printing convention (1 of 1 rather them 0 of 1)
             #---------------
             if self._multirep_mode:
                 tof_range = self.find_tof_range_for_multirep(ws_base)
@@ -552,7 +581,7 @@ class DirectEnergyConversion(object):
         # clear combined mask
         self.spectra_masks = None
         end_time = time.time()
-        prop_man.log("*** ISIS CONVERT TO ENERGY TRANSFER WRORKFLOW FINISHED *********")
+        prop_man.log("*** ISIS CONVERT TO ENERGY TRANSFER WORKFLOW FINISHED  *********")
         prop_man.log("*** Elapsed time : {0:>9.2f} sec                       *********".\
                     format(end_time - start_time),'notice')
         prop_man.log("****************************************************************")
@@ -699,31 +728,46 @@ class DirectEnergyConversion(object):
            Returns tuple of two spectra numbers, containing in the
            new summed monitors workspace and pointer to the new workspace itself.
         """
-        spectra_list1=ei_mon_spectra[0]
-        spectra_list2=ei_mon_spectra[1]
-        if not isinstance(spectra_list1,list):
-            spectra_list1 = [spectra_list1]
-        spec_num1 = self._process_spectra_list(monitor_ws,spectra_list1,'spectr_ws1')
-
-        if not isinstance(spectra_list2,list):
-            spectra_list2 = [spectra_list2]
-        spec_num2 = self._process_spectra_list(monitor_ws,spectra_list2,'spectr_ws2')
+        existing_list = process_prop_list(monitor_ws,"CombinedSpectraIDList")
         monitor_ws_name = monitor_ws.name()
-        DeleteWorkspace(monitor_ws_name)
-        AppendSpectra(InputWorkspace1='spectr_ws1',InputWorkspace2='spectr_ws2',OutputWorkspace=monitor_ws_name)
-        if 'spectr_ws1' in mtd:
-            DeleteWorkspace('spectr_ws1')
-        if 'spectr_ws2' in mtd:
-            DeleteWorkspace('spectr_ws2')
-        monitor_ws = mtd[monitor_ws_name]
+        if len(existing_list) == 0:
+            spectra_list1=ei_mon_spectra[0]
+            spectra_list2=ei_mon_spectra[1]
+            if not isinstance(spectra_list1,list):
+                spectra_list1 = [spectra_list1]
+            spec_num1 = self._process_spectra_list(monitor_ws,spectra_list1,'spectr_ws1')
+
+            if not isinstance(spectra_list2,list):
+                spectra_list2 = [spectra_list2]
+            spec_num2 = self._process_spectra_list(monitor_ws,spectra_list2,'spectr_ws2')
+
+            DeleteWorkspace(monitor_ws_name)
+            AppendSpectra(InputWorkspace1='spectr_ws1',InputWorkspace2='spectr_ws2',OutputWorkspace=monitor_ws_name)
+
+            if 'spectr_ws1' in mtd:
+                DeleteWorkspace('spectr_ws1')
+            if 'spectr_ws2' in mtd:
+                DeleteWorkspace('spectr_ws2')
+            monitor_ws = mtd[monitor_ws_name]
+            AddSampleLog(monitor_ws,LogName='CombinedSpectraIDList',LogText=str(spectra_list1+spectra_list2),LogType='String')
+        else:
+            pass
         # Weird operation. It looks like the spectra numbers obtained from
         # AppendSpectra operation depend on instrument.
         # Looks like a bug in AppendSpectra
         spec_num1 = monitor_ws.getSpectrum(0).getSpectrumNo()
         spec_num2 = monitor_ws.getSpectrum(1).getSpectrumNo()
 
-        return (spec_num1,spec_num2),monitor_ws
+        #self.prop_man.ei_mon_spectra = (spec_num1,spec_num2)
+        #mon2_norm_spec = self.prop_man.mon2_norm_spec
+        #if mon2_norm_spec in spectra_list1:
+        #    self.prop_man.mon2_norm_spec = spec_num1
+        #if mon2_norm_spec in spectra_list2:
+        #    self.prop_man.mon2_norm_spec = spec_num2
 
+
+        return (spec_num1,spec_num2),monitor_ws
+    #
     def _process_spectra_list(self,workspace,spectra_list,target_ws_name='SpectraWS'):
         """Method moves all detectors of the spectra list into the same position and
            sums the specified spectra in the workspace"""
@@ -779,6 +823,7 @@ class DirectEnergyConversion(object):
         # sum monitor spectra if this is requested
         if PropertyManager.ei_mon_spectra.need_to_sum_monitors(self.prop_man):
             ei_mon_spectra,monitor_ws = self.sum_monitors_spectra(monitor_ws,ei_mon_spectra)
+            data_ws.setMonitorWorkspace(monitor_ws)
 
 
         # Calculate the incident energy

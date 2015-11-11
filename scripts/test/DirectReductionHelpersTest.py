@@ -1,5 +1,4 @@
-import os
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release"+os.environ["PATH"]
+﻿import os
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -217,7 +216,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
         subst_dict,descr = helpers.build_properties_dict(kkdict,subst)
         self.assertEqual(helpers.gen_getter(subst_dict,'kkk1'),19)
         self.assertEqual(helpers.gen_getter(subst_dict,'kkk2'),1000)
-        self.assertEqual(helpers.gen_getter(subst_dict,'first'),[19,1000])
+        self.assertEqual(helpers.gen_getter(subst_dict,'first'),(19,1000))
         self.assertEqual(helpers.gen_getter(subst_dict,'other'),'unrelated')
         self.assertEqual(helpers.gen_getter(subst_dict,'second'),[19,'unrelated','Babara'])
         self.assertEqual(helpers.gen_getter(subst_dict,'third'),'Babara')
@@ -297,7 +296,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
 
 
         t1.A = [1,10]
-        self.assertEqual(t1.A,[1,10])
+        self.assertEqual(t1.A,(1,10))
 
         # This does not work as the assignment occurs to temporary vector
         # lets ban partial assignment
@@ -306,9 +305,14 @@ class DirectReductionHelpersTest(unittest.TestCase):
         # This kind of assignment requests the whole list to be setup
         self.assertRaises(KeyError,setattr,t1,'A',200)
 
-        # Very bad -- fails silently
-        t1.A[0] = 10
-        self.assertEqual(t1.A,[1,10])
+        # Good: prohibit assignment
+        try:
+            t1.A[0] = 10
+            Fail = False
+        except TypeError:
+            Fail = True
+        self.assertTrue(Fail)
+        self.assertEqual(t1.A,(1,10))
 
 
         t1.oveloaded_prop = 'BlaBla'
@@ -370,7 +374,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
 
 
         t1.A = [1,10]
-        self.assertEqual(t1.A,[1,10])
+        self.assertEqual(t1.A,(1,10))
 
         # This does not work as the assignment occurs to temporary vector
         # lets ban partial assignment
@@ -379,9 +383,14 @@ class DirectReductionHelpersTest(unittest.TestCase):
         # This kind of assignment requests the whole list to be setup
         self.assertRaises(KeyError,setattr,t1,'A',200)
 
-        # Very bad -- fails silently
-        t1.A[0] = 10
-        self.assertEqual(t1.A,[1,10])
+        # Good, fail partial assignment
+        try:
+            t1.A[0] = 10
+            Fail = False
+        except TypeError:
+            Fail = True
+        self.assertTrue(Fail)
+        self.assertEqual(t1.A,(1,10))
 
         t1.special = 10
         self.assertEqual(t1.special,'D')
@@ -453,8 +462,8 @@ class DirectReductionHelpersTest(unittest.TestCase):
         self.assertRaises(KeyError,setattr,t1,'non_existing_property','some value')
 
 
-        t1.A = [1,10]
-        self.assertEqual(t1.A,[1,10])
+        t1.A = (1,10)
+        self.assertEqual(t1.A,(1,10))
 
         # This does not work as the assignment occurs to temporary vector
         # lets ban partial assignment
@@ -463,9 +472,14 @@ class DirectReductionHelpersTest(unittest.TestCase):
         # This kind of assignment requests the whole list to be setup
         self.assertRaises(KeyError,setattr,t1,'A',200)
 
-        # Very bad -- fails silently
-        t1.A[0] = 10
-        self.assertEqual(t1.A,[1,10])
+        # Good, fail partial assignment
+        try:
+            t1.A[0] = 10
+            Fail = False
+        except TypeError:
+            Fail = True
+        self.assertTrue(Fail)
+        self.assertEqual(t1.A,(1,10))
 
 
         t1.some_descriptor = 'blaBla'

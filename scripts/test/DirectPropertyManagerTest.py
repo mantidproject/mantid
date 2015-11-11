@@ -1,5 +1,4 @@
-import os
-#os.environ["PATH"] = r"c:/Mantid/_builds/br_master/bin/Release;"+os.environ["PATH"]
+﻿import os
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -635,15 +634,23 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
 
     def test_multirep_ei_iterate_over(self):
+
         propman = self.prop_man
         propman.incident_energy = 20
         propman.energy_bins = [-2,0.1,0.8]
         self.assertFalse(PropertyManager.incident_energy.multirep_mode())
 
-        ic = 0
-        for en in PropertyManager.incident_energy:
-            ic+=1
+
+        AllEn = PropertyManager.incident_energy.getAllEiList()
+        for ind,en in enumerate(AllEn):
+            PropertyManager.incident_energy.set_current_ind(ind)
+
+            cen = PropertyManager.incident_energy.get_current()
+            self.assertAlmostEqual(en,cen)
+
             self.assertAlmostEqual(en,20)
+
+
             bins = propman.energy_bins
             self.assertAlmostEqual(bins[0],-2)
             self.assertAlmostEqual(bins[1],0.1)
@@ -655,15 +662,17 @@ class DirectPropertyManagerTest(unittest.TestCase):
             self.assertAlmostEqual(bins[2],0.8)
 
 
-        self.assertEqual(ic,1)
-
         propman.incident_energy = [20]
         propman.energy_bins = [-2,0.1,0.8]
         self.assertTrue(PropertyManager.incident_energy.multirep_mode())
 
-        ic = 0
-        for en in PropertyManager.incident_energy:
-            ic+=1
+        AllEn = PropertyManager.incident_energy.getAllEiList()
+        for ind,en in enumerate(AllEn):
+            PropertyManager.incident_energy.set_current_ind(ind)
+
+            cen = PropertyManager.incident_energy.get_current()
+            self.assertAlmostEqual(en,cen)
+
             self.assertAlmostEqual(en,20)
 
             bins = propman.energy_bins
@@ -677,36 +686,43 @@ class DirectPropertyManagerTest(unittest.TestCase):
             self.assertAlmostEqual(bins[1],0.1 * 20)
             self.assertAlmostEqual(bins[2],0.8 * 20)
 
-        self.assertEqual(ic,1)
 
         eng = [20,40,60]
         propman.incident_energy = eng
         propman.energy_bins = [-2,0.1,0.8]
+
         self.assertTrue(PropertyManager.incident_energy.multirep_mode())
-        ic = 0
-        for en in PropertyManager.incident_energy:
+
+        AllEn = PropertyManager.incident_energy.getAllEiList()
+        for ic,en in enumerate(AllEn):
+            PropertyManager.incident_energy.set_current_ind(ic)
+
             self.assertAlmostEqual(en,eng[ic])
+            cen = PropertyManager.incident_energy.get_current()
+            self.assertAlmostEqual(en,cen)
+
+
             bins = PropertyManager.energy_bins.get_abs_range(propman)
             self.assertAlmostEqual(bins[0],-2 * en)
             self.assertAlmostEqual(bins[1],0.1 * en)
             self.assertAlmostEqual(bins[2],0.8 * en)
-            ic+=1
-        self.assertEqual(ic,3)
         #
-        ic = 0
-        for en in PropertyManager.incident_energy:
+        AllEn = PropertyManager.incident_energy.getAllEiList()
+        for ic,en in enumerate(AllEn):
+            PropertyManager.incident_energy.set_current_ind(ic)
+
             self.assertAlmostEqual(en,eng[ic])
             ei_stored = PropertyManager.incident_energy.get_current()
             self.assertAlmostEqual(en,ei_stored)
 
-            PropertyManager.incident_energy.set_current(en)
+            cen = PropertyManager.incident_energy.get_current()
+            self.assertAlmostEqual(en,cen)
+
 
             bins = PropertyManager.energy_bins.get_abs_range(propman)
             self.assertAlmostEqual(bins[0],-2 * eng[ic])
             self.assertAlmostEqual(bins[1],0.1 * eng[ic])
             self.assertAlmostEqual(bins[2],0.8 * eng[ic])
-            ic+=1
-        self.assertEqual(ic,3)
 
     def test_incident_energy_custom_enum(self):
     ##### Custom enum works in a peculiar way
@@ -716,15 +732,53 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman.energy_bins = [-2,0.1,0.8]
         self.assertTrue(PropertyManager.incident_energy.multirep_mode())
 
-        ic = 0
-        for ind,en in enumerate(PropertyManager.incident_energy):
-            ic+=1
+        AllEn = PropertyManager.incident_energy.getAllEiList()
+        for ic,en in enumerate(AllEn):
+            PropertyManager.incident_energy.set_current_ind(ic)
+
             # propagate current energy value to incident energy class
-            PropertyManager.incident_energy.set_current(en,ind)
-            self.assertAlmostEqual(en,en_source[ind])
+            self.assertAlmostEqual(en,en_source[ic])
             en_internal = PropertyManager.incident_energy.get_current()
-            self.assertAlmostEqual(en_internal,en_source[ind])
-            self.assertEqual(ind,ic - 1)
+            self.assertAlmostEqual(en_internal,en_source[ic])
+
+    def test_auto_ei(self):
+        propman = self.prop_man
+        propman.incident_energy = 'Auto'
+        propman.energy_bins = [-2,0.1,0.8]
+        self.assertTrue(PropertyManager.incident_energy.multirep_mode())
+
+        # create test workspace
+        wsEn=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=1, BankPixelWidth=2, NumEvents=10000, XUnit='Energy', XMin=10, XMax=200, BinWidth=0.1)
+        # convert units to TOF to simulate real workspace obtained from experiment
+        mon_ws = ConvertUnits(InputWorkspace=wsEn, Target='TOF')
+        # find chopper log values would be present in real workspace
+        l_chop = 7.5  # chopper position build into test workspace
+        l_mon1 = 15. # monitor 1 position (detector 1), build into test workspace
+        t_mon1 = 3100. # the time of flight defined by incident energy of the peak generated by CreateSampelpWorkspace algorithm.
+        t_chop = (l_chop/l_mon1)*t_mon1
+        # Add these log values to simulated workspace to represent real sample logs
+        AddTimeSeriesLog(mon_ws, Name="fermi_delay", Time="2010-01-01T00:00:00", Value=t_chop ,DeleteExisting=True)
+        AddTimeSeriesLog(mon_ws, Name="fermi_delay", Time="2010-01-01T00:30:00", Value=t_chop )
+        AddTimeSeriesLog(mon_ws, Name="fermi_speed", Time="2010-01-01T00:00:00", Value=900 ,DeleteExisting=True)
+        AddTimeSeriesLog(mon_ws, Name="fermi_speed", Time="2010-01-01T00:30:00", Value=900)
+        AddTimeSeriesLog(mon_ws, Name="is_running", Time="2010-01-01T00:00:00", Value=1 ,DeleteExisting=True)
+        AddTimeSeriesLog(mon_ws, Name="is_running", Time="2010-01-01T00:30:00", Value=1 )
+
+        valid= PropertyManager.incident_energy.validate(propman,PropertyManager)
+        self.assertTrue(valid[0])
+        valid= PropertyManager.energy_bins.validate(propman,PropertyManager)
+        self.assertTrue(valid[0])
+
+
+        # define monitors, used to calculate ei
+        propman.ei_mon_spectra=(1,2)
+        PropertyManager.incident_energy.set_auto_Ei(mon_ws,propman)
+
+        allEi = PropertyManager.incident_energy.getAllEiList()
+
+        self.assertAlmostEqual(allEi[0],8.8,1)
+        self.assertAlmostEqual(allEi[1],15.8,1)
+
 
     def test_ignore_complex_defailts_changes_fom_instrument(self) :
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
@@ -1158,8 +1212,17 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(spectra[1],11)
         self.assertFalse(PropertyManager.ei_mon_spectra.need_to_sum_monitors(propman))
 
+    def test_average_accuracy(self):
+        #
+        val =     [0.0452,0.0455,-0.045, -0.236, 1, 0.98,1.02,2.333, 2.356,21.225,21.5,301.99,305]
+        exp_rez = [0.045,  0.046, -0.045,-0.24 , 1, 0.98,1.0, 2.3,   2.4,  21.   ,22. ,302.,  305]
+        rez = PropertyManager.auto_accuracy.roundoff(val)
+
+        for valExp,valReal in zip(exp_rez,rez):
+            self.assertAlmostEqual(valExp,valReal)
+
 
 if __name__ == "__main__":
-    #tester = DirectPropertyManagerTest('test_set_energy_bins_and_ei')
+    #tester = DirectPropertyManagerTest('test_average_accuracy')
     #tester.run()
     unittest.main()
