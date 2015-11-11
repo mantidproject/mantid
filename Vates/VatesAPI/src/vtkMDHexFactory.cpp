@@ -4,6 +4,7 @@
 #include "MantidAPI/IMDNode.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
@@ -11,9 +12,12 @@
 #include <vtkCellData.h>
 #include <vtkFloatArray.h>
 #include <vtkHexahedron.h>
+#include <vtkNew.h>
 #include <vtkPoints.h>
 #include <vtkUnstructuredGrid.h>
 #include "MantidKernel/ReadLock.h"
+
+#include <iterator>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -77,23 +81,22 @@ void vtkMDHexFactory::doCreate(
               << " boxes down to depth " << m_maxDepth << std::endl;
 
   // Create 8 points per box.
-  vtkPoints *points = vtkPoints::New();
-  points->Allocate(numBoxes * 8);
-  points->SetNumberOfPoints(numBoxes * 8);
+  vtkNew<vtkPoints> points;
+  vtkFloatArray *pointsArray = vtkFloatArray::SafeDownCast(points->GetData());
+  float *pointsPtr = pointsArray->WritePointer(0, numBoxes * 8 * 3);
 
   // One scalar per box
-  vtkFloatArray *signals = vtkFloatArray::New();
-  signals->Allocate(numBoxes);
+  vtkNew<vtkFloatArray> signals;
+  ;
   signals->SetName(ScalarName.c_str());
   signals->SetNumberOfComponents(1);
-  // signals->SetNumberOfValues(numBoxes);
+  float *signalArrayPtr = signals->WritePointer(0, numBoxes);
 
-  // To cache the signal
-  float *signalArray = new float[numBoxes];
+  auto signalArray = Mantid::Kernel::make_unique<float[]>(numBoxes);
 
   // True for boxes that we will use
-  bool *useBox = new bool[numBoxes];
-  memset(useBox, 0, sizeof(bool) * numBoxes);
+  auto useBox = Mantid::Kernel::make_unique<bool[]>(numBoxes);
+  memset(useBox.get(), 0, sizeof(bool) * numBoxes);
 
   // Create the data set
   vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
@@ -122,34 +125,27 @@ void vtkMDHexFactory::doCreate(
 
         // Get the coordinates.
         size_t numVertexes = 0;
-        coord_t *coords;
+        std::unique_ptr<coord_t[]> coords;
 
         // If slicing down to 3D, specify which dimensions to keep.
         if (this->slice)
-          coords = box->getVertexesArray(numVertexes, 3, this->sliceMask);
+          coords = std::unique_ptr<coord_t[]>(
+              box->getVertexesArray(numVertexes, 3, this->sliceMask));
         else
-          coords = box->getVertexesArray(numVertexes);
+          coords =
+              std::unique_ptr<coord_t[]>(box->getVertexesArray(numVertexes));
 
         if (numVertexes == 8) {
-          // Iterate through all coordinates. Candidate for speed improvement.
-          for (size_t v = 0; v < numVertexes; v++) {
-            coord_t *coord = coords + v * 3;
-            // Set the point at that given ID
-            points->SetPoint(i * 8 + v, coord[0], coord[1], coord[2]);
-            std::string msg;
-          }
-
-        } // valid number of vertexes returned
-
-        // Free memory
-        delete[] coords;
+          std::copy(coords.get(), std::advance(coords.get(), numVertexes * 3),
+                    std::advance(pointsPtr, i * 8 * 3));
+        }
       }
     } // For each box
 
     if (VERBOSE)
       std::cout << tim << " to create the necessary points." << std::endl;
     // Add points
-    visualDataSet->SetPoints(points);
+    visualDataSet->SetPoints(points.GetPointer());
 
     for (size_t i = 0; i < boxes.size(); i++) {
       if (useBox[i]) {
@@ -157,7 +153,8 @@ void vtkMDHexFactory::doCreate(
         vtkIdType pointIds = i * 8;
 
         // Add signal
-        signals->InsertNextValue(signalArray[i]);
+        *signalArrayPtr = signalArray[i];
+        ++signalArrayPtr;
 
         hexPointList->SetId(0, pointIds + 0); // xyx
         hexPointList->SetId(1, pointIds + 1); // dxyz
@@ -176,21 +173,18 @@ void vtkMDHexFactory::doCreate(
         visualDataSet->GetCellBounds(imageSizeActual, bounds);
 
         if (bounds[0] < -10 || bounds[2] < -10 || bounds[4] < -10) {
-          std::string msg = "";
+          std::string msg = "??";
         }
         imageSizeActual++;
       }
     } // for each box.
-
-    delete[] signalArray;
-    delete[] useBox;
 
     // Shrink to fit
     signals->Squeeze();
     visualDataSet->Squeeze();
 
     // Add scalars
-    visualDataSet->GetCellData()->SetScalars(signals);
+    visualDataSet->GetCellData()->SetScalars(signals.GetPointer());
 
     // Hedge against empty data sets
     if (visualDataSet->GetNumberOfPoints() <= 0) {
