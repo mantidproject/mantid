@@ -24,7 +24,7 @@ public:
     dProp = new PropertyWithValue<double>("doubleProp", 9.99);
     sProp = new PropertyWithValue<std::string>("stringProp", "theValue");
     lProp = new PropertyWithValue<long long>("int64Prop", -9876543210987654LL);
-    bProp = new PropertyWithValue<OptionalBool>("boolProp", true);
+    bProp = new PropertyWithValue<OptionalBool>("boolProp", bool(true));
   }
 
   ~PropertyWithValueTest() {
