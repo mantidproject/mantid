@@ -110,6 +110,8 @@ void MuonLoad::init() {
  * Execute the algorithm.
  */
 void MuonLoad::exec() {
+  Progress progress(this, 0, 1, 6);
+
   const std::string filename = getProperty("Filename");
 
   // Whether Dead Time Correction should be applied
@@ -129,11 +131,14 @@ void MuonLoad::exec() {
   if (autoGroup) // Load grouping as well, if needed
     load->setProperty("DetectorGroupingTable", "__NotUsed");
 
+  progress.report();
   load->execute();
 
   Workspace_sptr loadedWS = load->getProperty("OutputWorkspace");
 
   MatrixWorkspace_sptr firstPeriodWS, secondPeriodWS;
+
+  progress.report();
 
   // Deal with single-period workspace
   if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS)) {
@@ -157,6 +162,7 @@ void MuonLoad::exec() {
     throw std::runtime_error("Loaded workspace is of invalid type");
   }
 
+  progress.report();
   // Deal with dead time correction (if required)
   if (applyDtc) {
     TableWorkspace_sptr deadTimes = getProperty("CustomDeadTimeTable");
@@ -188,6 +194,7 @@ void MuonLoad::exec() {
 
   TableWorkspace_sptr grouping;
 
+  progress.report();
   if (autoGroup) {
     Workspace_sptr loadedGrouping = load->getProperty("DetectorGroupingTable");
 
@@ -206,6 +213,8 @@ void MuonLoad::exec() {
   } else {
     grouping = getProperty("DetectorGroupingTable");
   }
+
+  progress.report();
 
   // Deal with grouping
   firstPeriodWS = groupWorkspace(firstPeriodWS, grouping);
@@ -243,6 +252,8 @@ void MuonLoad::exec() {
   calcAssym->setProperty("Alpha", static_cast<double>(getProperty("Alpha")));
   calcAssym->setProperty("GroupIndex",
                          static_cast<int>(getProperty("GroupIndex")));
+
+  progress.report();
 
   calcAssym->execute();
 

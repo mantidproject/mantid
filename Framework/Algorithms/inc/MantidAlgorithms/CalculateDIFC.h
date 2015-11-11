@@ -4,6 +4,17 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidDataObjects/SpecialWorkspace2D.h"
+#include "MantidGeometry/IDetector.h"
+
+using Mantid::API::MatrixWorkspace;
+using Mantid::API::WorkspaceProperty;
+using Mantid::DataObjects::OffsetsWorkspace;
+using Mantid::DataObjects::OffsetsWorkspace_sptr;
+using Mantid::DataObjects::SpecialWorkspace2D;
+using Mantid::DataObjects::SpecialWorkspace2D_sptr;
+using Mantid::Geometry::Instrument_const_sptr;
+using Mantid::Kernel::Direction;
 
 namespace Mantid {
 namespace Algorithms {
@@ -45,20 +56,11 @@ private:
   void init();
   void exec();
 
-  /// Create output workspace
-  void createOutputWorkspace();
-
   /// Calculate the DIFC for every pixel
-  void calculate();
-
-  /// Input workspace
-  API::MatrixWorkspace_sptr m_inputWS;
-
-  /// Offsets workspace
-  DataObjects::OffsetsWorkspace_sptr m_offsetsWS;
-
-  /// Output workspace
-  API::MatrixWorkspace_sptr m_outputWS;
+  void calculate(API::Progress &progress, API::MatrixWorkspace_sptr &outputWs,
+                 DataObjects::OffsetsWorkspace_sptr &offsetsWs, double l1,
+                 double beamlineNorm, Kernel::V3D &beamline,
+                 Kernel::V3D &samplePos, detid2det_map &allDetectors);
 };
 
 } // namespace Algorithms

@@ -642,7 +642,7 @@ def iliad(reduce):
             if isinstance(rez, list):
               # multirep run, just return as it is
                 return rez
-            if out_ws_name and rez.name() != out_ws_name:
+            if not(rez is None) and out_ws_name and rez.name() != out_ws_name:
 # the function does not return None, pylint is wrong
 #pylint: disable=W1111
                 rez = RenameWorkspace(InputWorkspace=rez, OutputWorkspace=out_ws_name)
