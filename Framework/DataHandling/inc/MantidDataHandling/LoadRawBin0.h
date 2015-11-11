@@ -81,7 +81,9 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Diagnostics"; }
+  virtual const std::string category() const {
+    return "Diagnostics\\Raw;DataHandling\\Raw";
+  }
 
 private:
   /// Overwrites Algorithm method.

@@ -41,7 +41,9 @@ const std::string SCDCalibratePanels::name() const {
 
 int SCDCalibratePanels::version() const { return 1; }
 
-const std::string SCDCalibratePanels::category() const { return "Crystal"; }
+const std::string SCDCalibratePanels::category() const {
+  return "Crystal\\Corrections";
+}
 
 /**
  * Converts a Quaternion to a corresponding matrix produce Rotx*Roty*Rotz,

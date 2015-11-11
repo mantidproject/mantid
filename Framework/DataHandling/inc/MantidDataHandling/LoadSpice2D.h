@@ -66,7 +66,7 @@ public:
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const {
-    return "DataHandling\\Text;SANS";
+    return "DataHandling\\Text;SANS\\DataHandling";
   }
   /// Number of monitors
   static const int nMonitors = 2;

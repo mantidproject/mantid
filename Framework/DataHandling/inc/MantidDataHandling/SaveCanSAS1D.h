@@ -106,7 +106,7 @@ public:
   }
   virtual int version() const { return 1; }
   virtual const std::string category() const {
-    return "DataHandling\\XML;SANS";
+    return "DataHandling\\XML;SANS\\DataHandling";
   }
 
 protected:

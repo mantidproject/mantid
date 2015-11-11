@@ -45,7 +45,7 @@ class GetNegMuMuonicXRD(PythonAlgorithm):
         return muon_xr_ws
 
     def category(self):
-        return "Muon;PythonAlgorithms"
+        return "Muon"
 
     def PyExec(self):
         elements = self.getProperty("Elements").value

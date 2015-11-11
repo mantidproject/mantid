@@ -30,7 +30,7 @@ class DNSDetEffCorrVana(PythonAlgorithm):
         """
         Returns category
         """
-        return 'PythonAlgorithms\\MLZ\\DNS;CorrectionFunctions\\EfficiencyCorrections'
+        return 'Workflow\\MLZ\\DNS;CorrectionFunctions\\SpecialCorrections'
 
     def name(self):
         """

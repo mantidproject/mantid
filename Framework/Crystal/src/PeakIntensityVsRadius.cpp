@@ -34,7 +34,9 @@ const std::string PeakIntensityVsRadius::name() const {
 int PeakIntensityVsRadius::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string PeakIntensityVsRadius::category() const { return "Crystal"; }
+const std::string PeakIntensityVsRadius::category() const {
+  return "Crystal\\Integration";
+}
 
 //----------------------------------------------------------------------------------------------
 

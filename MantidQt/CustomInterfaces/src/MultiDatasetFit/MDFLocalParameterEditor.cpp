@@ -36,7 +36,7 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index, bool fixe
   m_editor->setValidator(validator);
   m_editor->setToolTip("Edit local parameter value. Press F to fix/unfix it.");
 
-  auto button = new QPushButton("Set");
+  auto button = new QPushButton("&Set");
   button->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Expanding);
 
   this->setFocusPolicy(Qt::NoFocus);

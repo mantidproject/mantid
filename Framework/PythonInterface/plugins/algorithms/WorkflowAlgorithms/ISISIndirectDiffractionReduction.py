@@ -29,7 +29,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 #------------------------------------------------------------------------------
 
     def category(self):
-        return 'Diffraction;PythonAlgorithms'
+        return 'Diffraction\\Reduction'
 
 
     def summary(self):

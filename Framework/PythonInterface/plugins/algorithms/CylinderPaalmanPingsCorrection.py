@@ -39,7 +39,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 #------------------------------------------------------------------------------
 
     def category(self):
-        return "Workflow\\MIDAS;PythonAlgorithms;CorrectionFunctions\\AbsorptionCorrections"
+        return "Workflow\\MIDAS;CorrectionFunctions\\AbsorptionCorrections"
 
     def summary(self):
         return "Calculates absorption corrections for a cylindrical or annular sample using Paalman & Pings format."

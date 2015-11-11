@@ -69,7 +69,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 2; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Inelastic"; }
+  virtual const std::string category() const { return "Inelastic\\Ei"; }
 
 private:
   /// Calculate Ei from the initial guess given

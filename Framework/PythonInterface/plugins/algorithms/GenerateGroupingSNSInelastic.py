@@ -13,7 +13,7 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
     def category(self):
         """ Mantid required
         """
-        return "Inelastic;PythonAlgorithms;Transforms\\Grouping"
+        return "Inelastic\\Utility;Transforms\\Grouping"
 
     def name(self):
         """ Mantid required

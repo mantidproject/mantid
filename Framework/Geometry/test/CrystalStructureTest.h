@@ -28,7 +28,8 @@ public:
     m_scatterers = CompositeBraggScatterer::create();
     m_scatterers->addScatterer(
         BraggScattererFactory::Instance().createScatterer(
-            "IsotropicAtomBraggScatterer", "Element=Si;Position=[0,0,0]"));
+            "IsotropicAtomBraggScatterer",
+            "{\"Element\":\"Si\",\"Position\":\"0,0,0\"}"));
   }
 
   void testConstructionSpaceGroup() {

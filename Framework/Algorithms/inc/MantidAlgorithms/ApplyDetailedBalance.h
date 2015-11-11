@@ -49,7 +49,9 @@ public:
   /// Algorithm's version for identification
   virtual int version() const { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Inelastic"; }
+  virtual const std::string category() const {
+    return "Inelastic\\Corrections";
+  }
 
 private:
   /// Initialise the properties

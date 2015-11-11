@@ -56,7 +56,7 @@ public:
   virtual int version() const { return 1; };
   /// Algorithm's category for identification
   virtual const std::string category() const {
-    return "DataHandling\\Nexus;DataHandling\\SPE;Inelastic";
+    return "DataHandling\\Nexus;DataHandling\\SPE;Inelastic\\DataHandling";
   }
 
   /// Returns a confidence value that this algorithm can load a file

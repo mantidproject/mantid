@@ -28,7 +28,7 @@ const std::string ClearUB::name() const { return "ClearUB"; }
 int ClearUB::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ClearUB::category() const { return "Crystal"; }
+const std::string ClearUB::category() const { return "Crystal\\UBMatrix"; }
 
 //----------------------------------------------------------------------------------------------
 
