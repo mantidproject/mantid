@@ -51,7 +51,7 @@ const std::string PDFFourierTransform::name() const {
 int PDFFourierTransform::version() const { return 1; }
 
 const std::string PDFFourierTransform::category() const {
-  return "Diffraction";
+  return "Diffraction\\Utility";
 }
 
 //----------------------------------------------------------------------------------------------

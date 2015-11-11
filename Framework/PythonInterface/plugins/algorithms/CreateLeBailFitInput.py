@@ -15,7 +15,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
     def category(self):
         """
         """
-        return "Diffraction;Utility"
+        return "Diffraction\\Fitting;Utility\\Workspaces"
 
     def name(self):
         """

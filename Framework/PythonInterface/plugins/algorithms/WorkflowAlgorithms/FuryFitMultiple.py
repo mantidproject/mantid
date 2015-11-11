@@ -8,7 +8,7 @@ import os.path
 class FuryFitMultiple(PythonAlgorithm):
 
     def category(self):
-        return "Workflow\\MIDAS;PythonAlgorithms"
+        return "Workflow\\MIDAS"
 
     def summary(self):
         #pylint: disable=anomalous-backslash-in-string

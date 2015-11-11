@@ -11,7 +11,7 @@ class DakotaChiSquared(PythonAlgorithm):
     def category(self):
         """ Return category
         """
-        return "PythonAlgorithms;Utility\\Workspaces"
+        return "Utility\\Workspaces"
 
     def name(self):
         """ Return name

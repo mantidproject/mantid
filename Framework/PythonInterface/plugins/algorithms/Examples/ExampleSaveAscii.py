@@ -11,6 +11,10 @@ from mantid.api import *
 
 class ExampleSaveAscii(PythonAlgorithm):
 
+    def category(self):
+        # defines the category the algorithm will be put in the algorithm browser
+        return 'Examples'
+
     def PyInit(self):
 
         # Declare properties

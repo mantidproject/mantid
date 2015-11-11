@@ -32,7 +32,6 @@ public:
   void testTheBasics() {
     TS_ASSERT_EQUALS(offsets.name(), "GetDetOffsetsMultiPeaks");
     TS_ASSERT_EQUALS(offsets.version(), 1);
-    TS_ASSERT_EQUALS(offsets.category(), "Diffraction");
   }
 
   void testInit() {

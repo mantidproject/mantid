@@ -62,7 +62,7 @@ public:
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const {
-    return "Diffraction;DataHandling\\Isaw";
+    return "Diffraction\\DataHandling;DataHandling\\Isaw";
   }
   /// Function to optimize
   void center(double x, double y, double z, std::string detname,

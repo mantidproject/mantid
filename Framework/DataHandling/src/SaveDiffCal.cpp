@@ -48,7 +48,7 @@ int SaveDiffCal::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string SaveDiffCal::category() const {
-  return "DataHandling;Diffraction";
+  return "DataHandling\\Instrument;Diffraction\\DataHandling";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary

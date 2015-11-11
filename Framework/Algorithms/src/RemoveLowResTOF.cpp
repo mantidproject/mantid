@@ -42,7 +42,9 @@ const string RemoveLowResTOF::name() const { return "RemoveLowResTOF"; }
 int RemoveLowResTOF::version() const { return 1; }
 
 /// Algorithm's category for identification overriding a virtual method
-const string RemoveLowResTOF::category() const { return "Diffraction"; }
+const string RemoveLowResTOF::category() const {
+  return "Diffraction\\Corrections";
+}
 
 void RemoveLowResTOF::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();

@@ -60,7 +60,20 @@ public:
   using IPropertyManager::declareProperty;
 
   // Sets all the declared properties from
-  void setProperties(const std::string &propertiesArray);
+  void setProperties(
+      const std::string &propertiesJson,
+      const std::set<std::string> &ignoreProperties = std::set<std::string>());
+
+  // Sets all the declared properties from a json object
+  void setProperties(
+      const ::Json::Value &jsonValue,
+      const std::set<std::string> &ignoreProperties = std::set<std::string>());
+
+  // sets all the declared properties using a simple string format
+  void setPropertiesWithSimpleString(
+      const std::string &propertiesString,
+      const std::set<std::string> &ignoreProperties = std::set<std::string>());
+
   void setPropertyValue(const std::string &name, const std::string &value);
   void setPropertyOrdinal(const int &index, const std::string &value);
 
@@ -78,9 +91,12 @@ public:
 
   /// Get the value of a property
   virtual TypedValue getProperty(const std::string &name) const;
+
   /// Return the property manager serialized as a string.
-  virtual std::string asString(bool withDefaultValues = false,
-                               char separator = ',') const;
+  virtual std::string asString(bool withDefaultValues = false) const;
+
+  /// Return the property manager serialized as a json object.
+  virtual ::Json::Value asJson(bool withDefaultValues = false) const;
 
   bool isDefault(const std::string &name) const;
 

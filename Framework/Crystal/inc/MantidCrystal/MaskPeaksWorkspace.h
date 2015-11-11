@@ -48,7 +48,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Crystal"; }
+  virtual const std::string category() const { return "Crystal\\Peaks"; }
 
   /// Summary of algorithms purpose
   virtual const std::string summary() const {

@@ -9,7 +9,7 @@ import os
 class ResNorm(PythonAlgorithm):
 
     def category(self):
-        return "Workflow\\MIDAS;PythonAlgorithms"
+        return "Workflow\\MIDAS"
 
 
     def summary(self):

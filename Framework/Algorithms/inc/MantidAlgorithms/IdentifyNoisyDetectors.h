@@ -62,7 +62,8 @@ private:
   void init(); ///< Initialise the algorithm. Declare properties, etc.
   void exec(); ///< Executes the algorithm.
 
-  void getStdDev(Mantid::API::MatrixWorkspace_sptr valid,
+  void getStdDev(API::Progress &progress,
+                 Mantid::API::MatrixWorkspace_sptr valid,
                  Mantid::API::MatrixWorkspace_sptr values);
 };
 }
