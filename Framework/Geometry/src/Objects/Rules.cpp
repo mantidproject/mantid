@@ -106,12 +106,17 @@ int Rule::removeComplementary(std::unique_ptr<Rule> &TopRule)
         if (tcount == 1) // Deep simplification
         {
           active = 1;
-        } else if (tcount == -1) // replacement simplificationnn
+        } else if (tcount == -1) // replacement simplification
         {
           if (TreeComp.first) {
             TreeComp.first = tmpA->leaf(0);
+            // delete tmpA
             tmpA->setLeaf(0, 0);
-            delete tmpA;
+            Rule *parentOfA = tmpA->getParent();
+            if (parentOfA) {
+              int leafNumber = parentOfA->findLeaf(tmpA);
+              parentOfA->setLeaf(NULL, leafNumber);
+            }
           }
         }
       }
@@ -424,8 +429,6 @@ int Rule::removeItem(std::unique_ptr<Rule> &TRule, const int SurfN)
       SX->setKey(boost::shared_ptr<Surface>());
       return cnt + 1;
     }
-    // delete Ptr;
-    // delete LevelOne; // Shouldn't delete now we're deleting in setLeaf.
     Ptr = TRule->findKey(SurfN);
     cnt++;
   }

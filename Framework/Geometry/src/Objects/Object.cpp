@@ -61,8 +61,7 @@ Object::Object(const std::string &shapeXML)
 * @param A :: The object to initialise this copy from
 */
 Object::Object(const Object &A)
-    : ObjName(A.ObjName),
-      TopRule((A.TopRule) ? A.TopRule->clone().release() : NULL),
+    : ObjName(A.ObjName), TopRule((A.TopRule) ? A.TopRule->clone() : NULL),
       m_boundingBox(A.m_boundingBox), AABBxMax(A.AABBxMax),
       AABByMax(A.AABByMax), AABBzMax(A.AABBzMax), AABBxMin(A.AABBxMin),
       AABByMin(A.AABByMin), AABBzMin(A.AABBzMin), boolBounded(A.boolBounded),
@@ -81,7 +80,6 @@ Object::Object(const Object &A)
 Object &Object::operator=(const Object &A) {
   if (this != &A) {
     ObjName = A.ObjName;
-    // delete TopRule;
     TopRule = (A.TopRule) ? A.TopRule->clone() : 0;
     AABBxMax = A.AABBxMax;
     AABByMax = A.AABByMax;
@@ -272,8 +270,6 @@ int Object::hasComplement() const {
 int Object::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
   std::deque<Rule *> Rst;
   Rst.push_back(TopRule.get());
-  Rule *TA, *TB; // Tmp. for storage
-
   int Rcount(0);
   while (!Rst.empty()) {
     Rule *T1 = Rst.front();
@@ -295,8 +291,8 @@ int Object::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
       }
       // Not a surface : Determine leaves etc and add to stack:
       else {
-        TA = T1->leaf(0);
-        TB = T1->leaf(1);
+        Rule *TA = T1->leaf(0);
+        Rule *TB = T1->leaf(1);
         if (TA)
           Rst.push_back(TA);
         if (TB)
@@ -672,7 +668,6 @@ void Object::write(std::ostream &OX) const {
 * @returns 1 on success
 */
 int Object::procString(const std::string &Line) {
-  // delete TopRule;
   TopRule = 0;
   std::map<int, std::unique_ptr<Rule>> RuleList; // List for the rules
   int Ridx = 0; // Current index (not necessary size of RuleList
