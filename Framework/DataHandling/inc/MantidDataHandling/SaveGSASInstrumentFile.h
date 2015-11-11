@@ -53,7 +53,7 @@ public:
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const {
-    return "DataHandling\\Instrument";
+    return "Diffraction\\DataHandling";
   }
 
 private:
@@ -84,16 +84,15 @@ private:
       std::map<unsigned int, std::map<std::string, double>> &profilemap);
 
   /// Convert to GSAS instrument file
-  void
-  convertToGSAS(const std::vector<unsigned int> &outputbankids,
-                const std::string &gsasinstrfilename,
-                const std::map<unsigned int, std::map<std::string, double>> &
-                    bankprofilemap);
+  void convertToGSAS(const std::vector<unsigned int> &outputbankids,
+                     const std::string &gsasinstrfilename,
+                     const std::map<unsigned int, std::map<std::string, double>>
+                         &bankprofilemap);
 
   /// Build a data structure for GSAS's tabulated peak profile
   void buildGSASTabulatedProfile(
-      const std::map<unsigned int, std::map<std::string, double>> &
-          bankprofilemap,
+      const std::map<unsigned int, std::map<std::string, double>>
+          &bankprofilemap,
       unsigned int bankid);
 
   /// Write the header of the file
@@ -101,10 +100,10 @@ private:
                       const std::string &prmfilename);
 
   /// Write out .prm/.iparm file
-  void writePRMSingleBank(
-      const std::map<unsigned int, std::map<std::string, double>> &
-          bankprofilemap,
-      unsigned int bankid, const std::string &prmfilename);
+  void
+  writePRMSingleBank(const std::map<unsigned int, std::map<std::string, double>>
+                         &bankprofilemap,
+                     unsigned int bankid, const std::string &prmfilename);
 
   /// Caclualte L2 from DIFFC and L1
   double calL2FromDtt1(double difc, double L1, double twotheta);

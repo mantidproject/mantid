@@ -702,8 +702,8 @@ SaveGSASInstrumentFile::setupNOMConstants(int intfrequency) {
 void SaveGSASInstrumentFile::convertToGSAS(
     const std::vector<unsigned int> &outputbankids,
     const std::string &gsasinstrfilename,
-    const std::map<unsigned int, std::map<std::string, double>> &
-        bankprofilemap) {
+    const std::map<unsigned int, std::map<std::string, double>>
+        &bankprofilemap) {
   // Check
   if (!m_configuration)
     throw runtime_error("Not set up yet!");
