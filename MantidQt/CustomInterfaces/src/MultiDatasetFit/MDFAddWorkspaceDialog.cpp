@@ -2,6 +2,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 
@@ -24,8 +25,9 @@ AddWorkspaceDialog::AddWorkspaceDialog(QWidget *parent):QDialog(parent),m_maxInd
   auto wsNames = Mantid::API::AnalysisDataService::Instance().getObjectNames();
   for(auto name = wsNames.begin(); name != wsNames.end(); ++name)
   {
-    auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>( *name );
-    if ( ws )
+    auto mws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>( *name );
+    auto grp = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>( *name );
+    if ( mws || grp )
     {
       workspaceNames << QString::fromStdString( *name );
     }
@@ -40,15 +42,24 @@ AddWorkspaceDialog::AddWorkspaceDialog(QWidget *parent):QDialog(parent),m_maxInd
 /// @param wsName :: Name of newly selected workspace.
 void AddWorkspaceDialog::workspaceNameChanged(const QString& wsName)
 {
-  auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>( wsName.toStdString() );
-  if ( ws )
+  auto stdWsName = wsName.toStdString();
+  auto mws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>( stdWsName );
+
+  auto grp = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>( stdWsName );
+  if ( grp && !grp->isEmpty() )
   {
-    int maxValue = static_cast<int>(ws->getNumberHistograms()) - 1;
+    mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(grp->getItem(0));
+  }
+
+  if ( mws )
+  {
+    int maxValue = static_cast<int>(mws->getNumberHistograms()) - 1;
     if ( maxValue < 0 ) maxValue = 0;
     m_maxIndex = maxValue;
-    if ( m_uiForm.cbAllSpectra->isChecked() )
+    if ( m_uiForm.cbAllSpectra->isChecked() || m_maxIndex == 0 )
     {
-      m_uiForm.leWSIndices->setText(QString("0-%1").arg(m_maxIndex));
+      auto text = m_maxIndex > 0 ? QString("0-%1").arg(m_maxIndex) : "0";
+      m_uiForm.leWSIndices->setText(text);
     }
     else
     {

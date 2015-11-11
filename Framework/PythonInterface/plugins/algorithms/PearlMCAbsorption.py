@@ -7,7 +7,7 @@ import math
 class PearlMCAbsorption(PythonAlgorithm):
 
     def category(self):
-        return "CorrectionFunctions\\AbsorptionCorrections;PythonAlgorithms"
+        return "CorrectionFunctions\\AbsorptionCorrections"
 
     def summary(self):
         return "Loads pre-calculated or measured absorption correction files for Pearl."

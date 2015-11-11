@@ -41,7 +41,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
 
     def category(self):
-        return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'
+        return 'Workflow\\Inelastic;Inelastic\\Indirect'
 
 
     def summary(self):

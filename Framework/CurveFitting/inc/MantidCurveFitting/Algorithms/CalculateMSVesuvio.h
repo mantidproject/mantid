@@ -74,7 +74,9 @@ public:
   /// @copydoc Algorithm::version
   virtual int version() const { return 1; }
   /// @copydoc Algorithm::category
-  virtual const std::string category() const { return "ISIS"; }
+  virtual const std::string category() const {
+    return "CorrectionFunctions\\SpecialCorrections";
+  }
   /// @copydoc Algorithm::summary
   virtual const std::string summary() const {
     return "Calculates the contributions of multiple scattering "

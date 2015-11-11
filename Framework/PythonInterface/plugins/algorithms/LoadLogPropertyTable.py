@@ -33,7 +33,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty("OutputWorkspace","",Direction.Output),"Table of results")
 
     def category(self):
-        return "Utility;Muon"
+        return "DataHandling\\Logs;Muon\\DataHandling"
 
     def getGeneralLogValue(self,ws,name,begin):
         # get log value

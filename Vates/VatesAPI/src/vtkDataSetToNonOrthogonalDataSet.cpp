@@ -66,7 +66,6 @@ void addChangeOfBasisMatrixToFieldData(
                   "the data set.\n");
   }
 }
-
 }
 
 namespace Mantid {
@@ -115,8 +114,7 @@ vtkDataSetToNonOrthogonalDataSet::~vtkDataSetToNonOrthogonalDataSet() {}
 void vtkDataSetToNonOrthogonalDataSet::execute() {
   // Downcast to a vtkPointSet
   vtkPointSet *data = vtkPointSet::SafeDownCast(m_dataSet);
-  if (NULL == data)
-  {
+  if (NULL == data) {
     throw std::runtime_error("VTK dataset does not inherit from vtkPointSet");
   }
 
@@ -159,7 +157,7 @@ void vtkDataSetToNonOrthogonalDataSet::execute() {
     }
     wMatArr = run.getPropertyValueAsType<std::vector<double>>("W_MATRIX");
     try {
-      API::CoordTransform const * transform = infoWs->getTransformToOriginal();
+      API::CoordTransform const *transform = infoWs->getTransformToOriginal();
       affMat = transform->makeAffineMatrix();
     } catch (std::runtime_error &) {
       // Create identity matrix of dimension+1
@@ -356,8 +354,7 @@ void vtkDataSetToNonOrthogonalDataSet::stripMatrix(Kernel::DblMatrix &mat) {
  * VTK dataset.
  * @param ugrid : The VTK dataset to add the metadata to
  */
-void vtkDataSetToNonOrthogonalDataSet::updateMetaData(vtkDataSet *ugrid)
-{
+void vtkDataSetToNonOrthogonalDataSet::updateMetaData(vtkDataSet *ugrid) {
   // Create and add the change of basis matrix
   addChangeOfBasisMatrixToFieldData(ugrid, m_basisX, m_basisY, m_basisZ,
                                     m_boundingBox);

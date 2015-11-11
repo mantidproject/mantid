@@ -20,7 +20,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
 
     def category(self):
-        return "Workflow\\MIDAS;PythonAlgorithms"
+        return "Workflow\\MIDAS"
 
 
     def summary(self):

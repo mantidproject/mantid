@@ -59,7 +59,7 @@ public:
   int version() const { return 1; }
 
   /// Algorithm's category for identification
-  const std::string category() const { return "Crystal"; }
+  const std::string category() const { return "Crystal\\Goniometer"; }
 
 private:
   /// Initialise the properties

@@ -6,7 +6,7 @@ import os
 
 class ConjoinFiles(PythonAlgorithm):
     def category(self):
-        return "DataHandling;PythonAlgorithms"
+        return "DataHandling\\Text"
 
     def name(self):
         return "ConjoinFiles"

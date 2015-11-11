@@ -36,29 +36,12 @@ public:
     TS_ASSERT_EQUALS(extractString(A), "-1 s [1.1,-2.1,1.1] 2\n");
   }
 
-  void testCopyConstructor() {
-    Sphere A;
-    A.setSurface("s 1.1 -2.1 1.1 2");
-    TS_ASSERT_EQUALS(extractString(A), "-1 s [1.1,-2.1,1.1] 2\n");
-    Sphere B(A);
-    TS_ASSERT_EQUALS(extractString(B), "-1 s [1.1,-2.1,1.1] 2\n");
-  }
-
   void testClone() {
     Sphere A;
     A.setSurface("s 1.1 -2.1 1.1 2");
     TS_ASSERT_EQUALS(extractString(A), "-1 s [1.1,-2.1,1.1] 2\n");
-    Sphere *B = A.clone();
+    auto B = A.clone();
     TS_ASSERT_EQUALS(extractString(*B), "-1 s [1.1,-2.1,1.1] 2\n");
-    delete B;
-  }
-
-  void testAssignment() {
-    Sphere A, B;
-    A.setSurface("s 1.1 -2.1 1.1 2");
-    TS_ASSERT_DIFFERS(extractString(B), extractString(A));
-    B = A;
-    TS_ASSERT_EQUALS(extractString(B), extractString(A));
   }
 
   /// is a point inside outside or on the side!

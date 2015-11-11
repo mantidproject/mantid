@@ -23,7 +23,9 @@ if( MSVC )
     INSTALL_COMMAND ""
     TEST_COMMAND ""
   )
-  set_property ( TARGET ${_project_name} PROPERTY EXCLUDE_FROM_ALL )
+  set_target_properties ( ${_project_name} PROPERTIES
+                           EXCLUDE_FROM_DEFAULT_BUILD 1
+                           EXCLUDE_FROM_ALL 1)
 
   # Do fetch/update now as we need the dependencies to configure
   set ( _tmp_dir ${EXTERNAL_ROOT}/tmp )
