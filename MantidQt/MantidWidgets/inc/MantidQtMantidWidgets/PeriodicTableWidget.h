@@ -75,6 +75,9 @@ public:
   ///Displays or hides the Legend for the colour coding of periodic groups
   void showGroupLegend(bool checked);
 
+  QString getValue();
+
+
 private:
   ///The Form containing the PeriodicTableWidget
   Ui::PeriodicTable ui;

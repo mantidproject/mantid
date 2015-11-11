@@ -49,13 +49,12 @@ private:
   QLineEdit *m_groupWorkspaceNameInput;
   // Check box for showing or hiding the Legend for PeriodicTableWidget
   QCheckBox *m_showLegendCheck;
-
-  /// Validate that the input is not empty before running algorithm
-  bool validateDialogInput(QString input);
   /** Enables a the buttons corresponding to the elements
       for which data exists in GetNegMuMuonicXRD.py
   */
   void enableElementsForGetNegMuMuonicXRD();
+
+
 
 private slots:
   virtual void parseInput();

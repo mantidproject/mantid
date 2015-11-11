@@ -33,6 +33,21 @@ class GetNegMuMuonicXRD(PythonAlgorithm):
         #retrieve peak values from dictionary Muonic_XR
         peak_values = self.muonic_xr[element]
         return peak_values
+        
+    def validateInput(self):
+        issues = dict()
+        
+        elements = self.getProperty('Elements').value()
+        if elements == "":
+            issues["Elements"] = 'No elements have been selected from the periodic table'
+        y_axis_position = self.getProperty('YAxisPosition').value()
+        if y_axis_position == "":
+            issues["YAxisPosition"] = 'No y-shift value has been entered'
+        outputworkspace_str = self.getProperty('OutputWorkspace').value()
+        if outputworkspace_str == "":
+            issues['OutputWorkspace'] = 'No output workspace name has been specified'
+            
+        return issues
 
     def create_muonic_xr_ws(self, element, y_pos):
         #retrieve the values from Muonic_XR
