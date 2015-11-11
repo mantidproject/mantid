@@ -177,7 +177,7 @@ void LoadSpice2D::exec() {
   runLoadMappingTable(m_workspace, m_numberXPixels, m_numberYPixels);
 
   // sample_detector_distances
-  double detector_distance = totalDetectorDistance(metadata);
+  double detector_distance = detectorDistance(metadata);
   moveDetector(detector_distance);
 }
 
@@ -418,32 +418,43 @@ void LoadSpice2D::setMetadataAsRunProperties(
 }
 
 /**
- * Calculates all the detector distances and sets them as Run properties
- * @return : total_sample_detector_distance
+ * Calculates the detector distances and sets them as Run properties
+ * Here fog starts:
+ * BioSANS: distance = sample_det_dist + offset!
+ * GPSANS: distance = sample_det_dist + offset + sample_to_flange!
+ * Mathieu is using sample_det_dist to move the detector later
+ * So I'll do the same (Ricardo)
+ * @return : sample_detector_distance
  */
-double LoadSpice2D::totalDetectorDistance(
-    std::map<std::string, std::string> &metadata) {
+double
+LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
 
   // sample_detector_distances
   double sample_detector_distance = 0;
   from_string<double>(sample_detector_distance,
                       metadata["Motor_Positions/sample_det_dist"], std::dec);
   sample_detector_distance *= 1000.0;
-  addRunProperty<double>("sample_detector_distance", sample_detector_distance,
-                         "mm");
   addRunProperty<double>("sample-detector-distance", sample_detector_distance,
                          "mm");
+
   double sample_detector_distance_offset =
       addRunProperty<double>(metadata, "Header/tank_internal_offset",
                              "sample-detector-distance-offset", "mm");
+
   double sample_si_window_distance = addRunProperty<double>(
       metadata, "Header/sample_to_flange", "sample-si-window-distance", "mm");
+
   double total_sample_detector_distance = sample_detector_distance +
                                           sample_detector_distance_offset +
                                           sample_si_window_distance;
   addRunProperty<double>("total-sample-detector-distance",
                          total_sample_detector_distance, "mm");
-  return total_sample_detector_distance;
+
+  // Store sample-detector distance
+  declareProperty("SampleDetectorDistance", sample_detector_distance,
+                  Kernel::Direction::Output);
+
+  return sample_detector_distance;
 }
 
 /**

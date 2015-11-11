@@ -7,6 +7,9 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/XmlHandler.h"
+#include <map>
+#include <string>
+#include <vector>
 //----------------------------------------------------------------------
 
 namespace Poco {
@@ -28,6 +31,7 @@ namespace DataHandling {
  </UL>
 
  @author Mathieu Doucet, Oak Ridge National Laboratory
+ @author Ricardo Leal, Oak Ridge National Laboratory
 
  This file is part of Mantid.
 
@@ -109,7 +113,7 @@ private:
                       const std::string &units = "");
   void setBeamTrapRunProperty(std::map<std::string, std::string> &metadata);
   void moveDetector(double sample_detector_distance);
-  double totalDetectorDistance(std::map<std::string, std::string> &metadata);
+  double detectorDistance(std::map<std::string, std::string> &metadata);
   void setMetadataAsRunProperties(std::map<std::string, std::string> &metadata);
 
   // Member variables:
@@ -122,7 +126,7 @@ private:
   double m_wavelength;
   double m_dwavelength;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif
