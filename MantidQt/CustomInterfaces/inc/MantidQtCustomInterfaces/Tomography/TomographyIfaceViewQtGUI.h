@@ -110,6 +110,10 @@ public:
     return m_toolsSettings;
   }
 
+  TomoReconFiltersSettings prePostProcSettings() const {
+    return m_filtersSettings;
+  }
+
   std::string currentComputeResource() const { return m_currentComputeRes; }
   std::string currentReconTool() const { return m_currentReconTool; }
 
@@ -143,6 +147,9 @@ private slots:
   void flatPathBrowseClicked();
   void darkPathBrowseClicked();
 
+  /// For the filters tab
+  void resetPrePostFilters();
+
   /// open the MantidQT help window for this interface
   void openHelpWin();
 
@@ -164,7 +171,9 @@ private:
 
   void doSetupSectionSetup();
   void doSetupSectionRun();
+  void doSetupSectionFilters();
   void doSetupGeneralWidgets();
+
   void doSetupSavu();
 
   /// Load default interface settings for each tab, normally on startup
@@ -251,6 +260,7 @@ private:
 
   /// Settings for the third party (tomographic reconstruction) tools
   TomoReconToolsUserSettings m_toolsSettings;
+  TomoReconFiltersSettings m_filtersSettings;
 
   // Basic representation of user settings, read/written on startup/close.
   // TODO: this could be done more sophisticated, with a class using

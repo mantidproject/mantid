@@ -95,6 +95,7 @@ void TomographyIfaceViewQtGUI::initLayout() {
   doSetupGeneralWidgets();
   doSetupSectionSetup();
   doSetupSectionRun();
+  doSetupSectionFilters();
 
   // presenter that knows how to handle a ITomographyIfaceView should take care
   // of all the logic
@@ -197,6 +198,11 @@ void TomographyIfaceViewQtGUI::doSetupSectionRun() {
 
   connect(m_uiTabRun.comboBox_run_tool, SIGNAL(currentIndexChanged(int)), this,
           SLOT(runToolIndexChanged(int)));
+}
+
+void TomographyIfaceViewQtGUI::doSetupSectionFilters() {
+  connect(m_uiTabFilters.pushButton_reset, SIGNAL(released()), this,
+          SLOT(resetPrePostFilters()));
 }
 
 void TomographyIfaceViewQtGUI::setComputeResources(
@@ -846,7 +852,7 @@ void TomographyIfaceViewQtGUI::showImage(const MatrixWorkspace_sptr &ws) {
   QImage rawImg(QSize(static_cast<int>(width), static_cast<int>(height)),
                 QImage::Format_RGB32);
   const double max_min = max - min;
-  const double scaleFactor = 255.0/max_min;
+  const double scaleFactor = 255.0 / max_min;
   for (size_t yi = 0; yi < width; ++yi) {
     for (size_t xi = 0; xi < width; ++xi) {
       const double &v = ws->readY(yi)[xi];
@@ -868,6 +874,14 @@ void TomographyIfaceViewQtGUI::showImage(const MatrixWorkspace_sptr &ws) {
   m_uiTabRun.label_image->show();
 
   m_uiTabRun.label_image_name->setText(QString::fromStdString(name));
+}
+
+void TomographyIfaceViewQtGUI::resetPrePostFilters() {
+  // default constructors with factory defaults
+  TomoReconFiltersSettings def;
+
+  m_uiTabFilters.checkBox_normalize_flat_dark->setChecked(
+      def.prep.normalizeByFlatDark);
 }
 
 /**

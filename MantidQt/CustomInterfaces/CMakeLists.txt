@@ -97,11 +97,13 @@ set ( SRC_FILES
 	src/Tomography/ImageStackPreParams.cpp
 	src/Tomography/SavuConfigDialog.cpp
 	src/Tomography/StackOfImagesDirs.cpp
-	src/Tomography/TomoPathsConfig.cpp
-	src/Tomography/TomoToolConfigDialog.cpp
 	src/Tomography/TomographyIfaceModel.cpp
 	src/Tomography/TomographyIfacePresenter.cpp
 	src/Tomography/TomographyIfaceViewQtGUI.cpp
+	src/Tomography/TomoPathsConfig.cpp
+	src/Tomography/TomoReconPostprocSettings.cpp
+	src/Tomography/TomoReconPreprocSettings.cpp
+	src/Tomography/TomoToolConfigDialog.cpp
 	src/Tomography/ToolConfig.cpp
 	src/UserInputValidator.cpp
 	src/background.cpp
@@ -229,13 +231,15 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h
 	inc/MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h
 	inc/MantidQtCustomInterfaces/Tomography/StackOfImagesDirs.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoRecToolConfig.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h
 	inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h
 	inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
 	inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoReconPostprocSettings.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoReconPreprocSettings.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoRecToolConfig.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h
 	inc/MantidQtCustomInterfaces/Tomography/ToolConfigAstraToolbox.h
 	inc/MantidQtCustomInterfaces/Tomography/ToolConfigCustom.h
 	inc/MantidQtCustomInterfaces/Tomography/ToolConfigTomoPy.h
