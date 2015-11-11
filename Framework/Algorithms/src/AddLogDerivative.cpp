@@ -49,14 +49,15 @@ void AddLogDerivative::init() {
 //----------------------------------------------------------------------------------------------
 /** Perform the N^th derivative of a log
  *
+ * @param progress :: Progress indicator
  * @param input :: input TSP. Must have N+1 log entries
  * @param name :: name of the resulting log
  * @param numDerivatives :: number of times to perform derivative.
  * @return
  */
 Mantid::Kernel::TimeSeriesProperty<double> *AddLogDerivative::makeDerivative(
-    Mantid::Kernel::TimeSeriesProperty<double> *input, const std::string &name,
-    int numDerivatives) {
+    API::Progress &progress, Mantid::Kernel::TimeSeriesProperty<double> *input,
+    const std::string &name, int numDerivatives) {
   if (input->size() < numDerivatives + 1)
     throw std::runtime_error(
         "Log " + input->name() + " only has " +
@@ -89,6 +90,8 @@ Mantid::Kernel::TimeSeriesProperty<double> *AddLogDerivative::makeDerivative(
     }
     times = dTime;
     values = dVal;
+
+    progress.report("Add Log Derivative");
   }
 
   if (times.empty())
@@ -140,9 +143,11 @@ void AddLogDerivative::exec() {
                                                    ") so we can't perform its "
                                                    "derivative.");
 
+  Progress progress(this, 0, 1, Derivative);
+
   // Perform derivative
   TimeSeriesProperty<double> *output =
-      makeDerivative(tsp, NewLogName, Derivative);
+      makeDerivative(progress, tsp, NewLogName, Derivative);
   // Add the log
   run.addProperty(output, true);
 
