@@ -51,8 +51,8 @@ public:
   const static std::string StrTrue;
 
   // or out-of-class friend (friend declaration inside class only)
-  friend std::ostream &operator<<(std::ostream &os, OptionalBool const &object);
-  friend std::istream &operator>>(std::istream &istream, OptionalBool &object);
+  friend MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &os, OptionalBool const &object);
+  friend MANTID_KERNEL_DLL std::istream &operator>>(std::istream &istream, OptionalBool &object);
 
 private:
   Value m_arg;
