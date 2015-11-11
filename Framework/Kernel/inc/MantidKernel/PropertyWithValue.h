@@ -184,13 +184,6 @@ void toValue(const std::string &strvalue, std::vector<std::vector<T>> &value,
   }
 }
 
-/*
-template<>
-void toValue(const std::string& strvalue, OptionalBool &value){
-    value = OptionalBool::strToEmumMap()[strvalue];
-}
-*/
-
 /*Used specifically to retrieve a vector of type T populated with values
  * given to it from strvalue parameter, Using toValue method.
  (See constructor used specifically for vector assignments)

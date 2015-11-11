@@ -36,7 +36,7 @@ class MANTID_KERNEL_DLL OptionalBool {
 public:
   enum Value { Unset, True, False };
   OptionalBool();
-  OptionalBool(bool arg);
+  explicit OptionalBool(bool arg);
   OptionalBool(Value arg);
   virtual ~OptionalBool();
   OptionalBool(const OptionalBool &other);
@@ -58,9 +58,9 @@ private:
   Value m_arg;
 };
 
-std::ostream &operator<<(std::ostream &os, OptionalBool const &object);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &os, OptionalBool const &object);
 
-std::istream &operator>>(std::istream &istream, OptionalBool &object);
+MANTID_KERNEL_DLL std::istream &operator>>(std::istream &istream, OptionalBool &object);
 
 } // namespace Kernel
 } // namespace Mantid
