@@ -34,9 +34,10 @@ public:
   void testTwoRuleConstructor() {
     Intersection Parent;
     auto uSC = createUnionSphereAndCylinder();
+    auto ptruSC = uSC.get();
     CompGrp A(&Parent, std::move(uSC));
     TS_ASSERT_EQUALS(A.getParent(), &Parent);
-    // TS_ASSERT_EQUALS(A.leaf(0), uSC);
+    TS_ASSERT_EQUALS(A.leaf(0), ptruSC);
     TS_ASSERT_EQUALS(A.isComplementary(), 1);
     TS_ASSERT_EQUALS(A.display(), "#( -10 : -11 )");
   }
@@ -44,31 +45,35 @@ public:
   void testCompGrpConstructor() {
     CompGrp A;
     auto uSC = createUnionSphereAndCylinder();
+    auto ptruSC = uSC.get();
     A.setLeaf(std::move(uSC), 0);
-    // TS_ASSERT_EQUALS(A.leaf(0), uSC);
+    TS_ASSERT_EQUALS(A.leaf(0), ptruSC);
   }
 
   void testClone() {
     CompGrp A;
     auto uSC = createUnionSphereAndCylinder();
+    auto ptruSC = uSC.get();
     A.setLeaf(std::move(uSC), 0);
-    // TS_ASSERT_EQUALS(A.leaf(0), uSC);
+    TS_ASSERT_EQUALS(A.leaf(0), ptruSC);
     auto B = A.clone();
-    // TS_ASSERT_EQUALS(B->leaf(0)->display(), uSC->display());
+    TS_ASSERT_EQUALS(B->leaf(0)->display(), ptruSC->display());
   }
 
   void testAssignment() {
     CompGrp A;
     auto uSC = createUnionSphereAndCylinder();
+    auto ptruSC = uSC.get();
     A.setLeaf(std::move(uSC), 0);
-    // TS_ASSERT_EQUALS(A.leaf(0), uSC);
+    TS_ASSERT_EQUALS(A.leaf(0), ptruSC);
   }
 
   void testSetLeaves() {
     CompGrp A;
     auto uSC = createUnionSphereAndCylinder();
+    auto ptruSC = uSC.get();
     A.setLeaves(std::move(uSC), std::unique_ptr<Rule>());
-    // TS_ASSERT_EQUALS(A.leaf(0), uSC);
+    TS_ASSERT_EQUALS(A.leaf(0), ptruSC);
     TS_ASSERT_EQUALS(A.display(), "#( -10 : -11 )");
   }
 
@@ -85,16 +90,18 @@ public:
   void testFindKey() {
     CompGrp A;
     auto uSC = createUnionSphereAndCylinder();
+    auto ptruSC = uSC.get();
     A.setLeaf(std::move(uSC), 0);
-    // TS_ASSERT_EQUALS(A.leaf(0), uSC);
+    TS_ASSERT_EQUALS(A.leaf(0), ptruSC);
     TS_ASSERT_EQUALS(A.findKey(0), (Rule *)0); // Always returns 0
   }
 
   void testIsValid() {
     CompGrp A;
     auto uSC = createUnionSphereAndCylinder();
+    auto ptruSC = uSC.get();
     A.setLeaf(std::move(uSC), 0);
-    // TS_ASSERT_EQUALS(A.leaf(0), uSC);
+    TS_ASSERT_EQUALS(A.leaf(0), ptruSC);
     TS_ASSERT_EQUALS(A.isValid(V3D(0.0, 0.0, 0.0)),
                      false); // inside the sphere and cylinder
     TS_ASSERT_EQUALS(A.isValid(V3D(4.1, 0.0, 0.0)), true);  // outside sphere

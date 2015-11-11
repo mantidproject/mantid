@@ -55,9 +55,11 @@ public:
     S1->setKeyN(10);
     S2->setKey(Sp1);
     S2->setKeyN(-11);
+    auto ptrS1 = S1.get();
+    auto ptrS2 = S2.get();
     Intersection A(std::move(S1), std::move(S2));
-    // TS_ASSERT_EQUALS(A.leaf(0), S2);
-    // TS_ASSERT_EQUALS(A.leaf(1), S1);
+    TS_ASSERT_EQUALS(A.leaf(0), ptrS2);
+    TS_ASSERT_EQUALS(A.leaf(1), ptrS1);
     TS_ASSERT_EQUALS(A.display(), "-11 10");
   }
 
@@ -74,10 +76,12 @@ public:
     S1->setKeyN(10);
     S2->setKey(Sp1);
     S2->setKeyN(11);
+    auto ptrS1 = S1.get();
+    auto ptrS2 = S2.get();
     Intersection Parent;
     Intersection A(&Parent, std::move(S1), std::move(S2));
-    // TS_ASSERT_EQUALS(A.leaf(0), S1);
-    // TS_ASSERT_EQUALS(A.leaf(1), S2);
+    TS_ASSERT_EQUALS(A.leaf(0), ptrS1);
+    TS_ASSERT_EQUALS(A.leaf(1), ptrS2);
     TS_ASSERT_EQUALS(A.display(), "10 11");
     TS_ASSERT_EQUALS(A.getParent(), &Parent);
   }
@@ -95,13 +99,15 @@ public:
     S2->setKey(Sp1);
     S2->setKeyN(11);
     Intersection A;
+    auto ptrS1 = S1.get();
+    auto ptrS2 = S2.get();
     A.setLeaves(std::move(S1), std::move(S2));
-    // TS_ASSERT_EQUALS(A.leaf(0), S1);
-    // TS_ASSERT_EQUALS(A.leaf(1), S2);
+    TS_ASSERT_EQUALS(A.leaf(0), ptrS1);
+    TS_ASSERT_EQUALS(A.leaf(1), ptrS2);
     TS_ASSERT_EQUALS(A.display(), "10 11");
     auto B = A.clone();
-    // TS_ASSERT_EQUALS(B->leaf(0)->display(), S1->display());
-    // TS_ASSERT_EQUALS(B->leaf(1)->display(), S2->display());
+    TS_ASSERT_EQUALS(B->leaf(0)->display(), ptrS1->display());
+    TS_ASSERT_EQUALS(B->leaf(1)->display(), ptrS2->display());
     TS_ASSERT_EQUALS(B->display(), "10 11");
   }
 
@@ -118,9 +124,11 @@ public:
     S2->setKey(Sp1);
     S2->setKeyN(11);
     Intersection A;
+    auto ptrS1 = S1.get();
+    auto ptrS2 = S2.get();
     A.setLeaves(std::move(S1), std::move(S2));
-    // TS_ASSERT_EQUALS(A.leaf(0), S1);
-    // TS_ASSERT_EQUALS(A.leaf(1), S2);
+    TS_ASSERT_EQUALS(A.leaf(0), ptrS1);
+    TS_ASSERT_EQUALS(A.leaf(1), ptrS2);
     TS_ASSERT_EQUALS(A.display(), "10 11");
   }
 
@@ -138,9 +146,11 @@ public:
     S2->setKey(Sp1);
     S2->setKeyN(11);
     Intersection A;
+    auto ptrS1 = S1.get();
+    auto ptrS2 = S2.get();
     A.setLeaves(std::move(S1), std::move(S2));
-    // TS_ASSERT_EQUALS(A.leaf(0), S1);
-    // TS_ASSERT_EQUALS(A.leaf(1), S2);
+    TS_ASSERT_EQUALS(A.leaf(0), ptrS1);
+    TS_ASSERT_EQUALS(A.leaf(1), ptrS2);
     TS_ASSERT_EQUALS(A.display(), "10 11");
   }
 
@@ -158,12 +168,14 @@ public:
     S2->setKey(Sp1);
     S2->setKeyN(11);
     Intersection A;
+    auto ptrS1 = S1.get();
+    auto ptrS2 = S2.get();
     A.setLeaves(std::move(S1), std::move(S2));
-    // TS_ASSERT_EQUALS(A.leaf(0), S1);
-    // TS_ASSERT_EQUALS(A.leaf(1), S2);
+    TS_ASSERT_EQUALS(A.leaf(0), ptrS1);
+    TS_ASSERT_EQUALS(A.leaf(1), ptrS2);
     TS_ASSERT_EQUALS(A.display(), "10 11");
-    // TS_ASSERT_EQUALS(A.findLeaf(S1), 0);
-    // TS_ASSERT_EQUALS(A.findLeaf(S2), 1);
+    TS_ASSERT_EQUALS(A.findLeaf(ptrS1), 0);
+    TS_ASSERT_EQUALS(A.findLeaf(ptrS2), 1);
     TS_ASSERT_EQUALS(A.findLeaf(&S3), -1);
   }
 
@@ -180,13 +192,15 @@ public:
     S1->setKeyN(10);
     S2->setKey(Sp1);
     S2->setKeyN(11);
+    auto ptrS1 = S1.get();
+    auto ptrS2 = S2.get();
     Intersection A;
     A.setLeaves(std::move(S1), std::move(S2));
-    // TS_ASSERT_EQUALS(A.leaf(0), S1);
-    // TS_ASSERT_EQUALS(A.leaf(1), S2);
+    TS_ASSERT_EQUALS(A.leaf(0), ptrS1);
+    TS_ASSERT_EQUALS(A.leaf(1), ptrS2);
     TS_ASSERT_EQUALS(A.display(), "10 11");
-    // TS_ASSERT_EQUALS(A.findKey(10), S1);
-    // TS_ASSERT_EQUALS(A.findKey(11), S2);
+    TS_ASSERT_EQUALS(A.findKey(10), ptrS1);
+    TS_ASSERT_EQUALS(A.findKey(11), ptrS2);
     TS_ASSERT_EQUALS(A.findKey(12), (Rule *)0);
   }
 
@@ -202,11 +216,13 @@ public:
     S1->setKeyN(10);
     S2->setKey(Sp1);
     S2->setKeyN(11);
+    auto ptrS1 = S1.get();
+    auto ptrS2 = S2.get();
     Intersection A;
     A.setLeaves(std::move(S1), std::move(S2));
     TS_ASSERT_EQUALS(A.display(), "10 11");
-    // TS_ASSERT_EQUALS(A.leaf(0), S1);
-    // TS_ASSERT_EQUALS(A.leaf(1), S2);
+    TS_ASSERT_EQUALS(A.leaf(0), ptrS1);
+    TS_ASSERT_EQUALS(A.leaf(1), ptrS2);
     TS_ASSERT_EQUALS(A.isComplementary(), 0);
     auto B = Mantid::Kernel::make_unique<CompObj>();
     auto C = Mantid::Kernel::make_unique<CompObj>();
@@ -229,10 +245,12 @@ public:
     S1->setKeyN(10);
     S2->setKey(Sp1);
     S2->setKeyN(-11);
+    auto ptrS1 = S1.get();
+    auto ptrS2 = S2.get();
     Intersection A;
     A.setLeaves(std::move(S1), std::move(S2));
-    // TS_ASSERT_EQUALS(A.leaf(0), S1);
-    // TS_ASSERT_EQUALS(A.leaf(1), S2);
+    TS_ASSERT_EQUALS(A.leaf(0), ptrS1);
+    TS_ASSERT_EQUALS(A.leaf(1), ptrS2);
     TS_ASSERT_EQUALS(A.display(), "10 -11");
     TS_ASSERT_EQUALS(A.isValid(V3D(5.0, 0.0, 0.0)), true); // on surface
     TS_ASSERT_EQUALS(A.isValid(V3D(5.1, 0.0, 0.0)), true); // inside surface

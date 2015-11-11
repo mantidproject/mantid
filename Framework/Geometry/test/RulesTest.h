@@ -37,7 +37,7 @@ public:
   void testRemoveComplementary() {
     auto tree = createAUnionTree();
     TS_ASSERT_EQUALS(tree->display(), "10 : 10 : 12 : 11");
-    // TS_ASSERT_EQUALS(tree->removeComplementary(tree), 1);
+    TS_ASSERT_EQUALS(tree->removeComplementary(tree), 1);
     //		TS_ASSERT_EQUALS(tree->display(),"10 : 12 : 11"); //Problem: The
     // comments don't match to the functionaility it is supposed to do
   }
@@ -45,10 +45,10 @@ public:
   void testRemoveItem() { // Problem: in removing the item of the tree that has
                           // more than one instances,possibly double deletion
                           auto tree = createAUnionTree();
-                          // TS_ASSERT_EQUALS(tree->removeItem(tree, 11), 1);
+                          TS_ASSERT_EQUALS(tree->removeItem(tree, 11), 1);
                           //		TS_ASSERT_EQUALS(tree->removeItem(tree,10),2);
-                          // TS_ASSERT_EQUALS(tree->removeItem(tree, 11), 0);
-                          // TS_ASSERT_EQUALS(tree->removeItem(tree, 12), 1);
+                          TS_ASSERT_EQUALS(tree->removeItem(tree, 11), 0);
+                          TS_ASSERT_EQUALS(tree->removeItem(tree, 12), 1);
   }
 
   void testCommonType() {
