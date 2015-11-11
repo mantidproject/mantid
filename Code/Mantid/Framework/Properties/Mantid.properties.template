@@ -40,7 +40,7 @@ instrumentDefinition.directory = @MANTID_ROOT@/instrument
 
 # Whether to check for updated instrument definitions on startup of Mantid
 UpdateInstrumentDefinitions.OnStartup = @UPDATE_INSTRUMENT_DEFINTITIONS@
-UpdateInstrumentDefinitions.URL = https://api.github.com/repos/mantidproject/mantid/contents/Code/Mantid/instrument
+UpdateInstrumentDefinitions.URL = https://api.github.com/repos/mantidproject/mantid/contents/instrument
 
 # Whether to check for newer mantid versions on startup
 CheckMantidVersion.OnStartup = @CHECK_FOR_NEW_MANTID_VERSION@
