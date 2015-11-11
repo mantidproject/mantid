@@ -45,7 +45,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 
 class MANTID_GEOMETRY_DLL Rule {
 private:
-  Rule *Parent; ///< Parent object (for tree)
+  Rule *Parent;                      ///< Parent object (for tree)
   virtual Rule *doClone() const = 0; ///< abstract clone object
 
   static int addToKey(std::vector<int> &AV, const int passN = -1);
@@ -87,10 +87,10 @@ public:
   virtual void setLeaves(std::unique_ptr<Rule>,
                          std::unique_ptr<Rule>) = 0; ///< abstract set leaves
   virtual void setLeaf(std::unique_ptr<Rule>,
-                       const int = 0) = 0;         ///< Abstract set
-  virtual int findLeaf(const Rule *) const = 0;    ///< Abstract find
-  virtual Rule *findKey(const int) = 0;            ///< Abstract key find
-  virtual int type() const { return 0; }           ///< Null rule
+                       const int = 0) = 0;      ///< Abstract set
+  virtual int findLeaf(const Rule *) const = 0; ///< Abstract find
+  virtual Rule *findKey(const int) = 0;         ///< Abstract key find
+  virtual int type() const { return 0; }        ///< Null rule
 
   /// Abstract: The point is within the object
   virtual bool isValid(const Kernel::V3D &) const = 0;
@@ -152,7 +152,7 @@ public:
 
   Rule *leaf(const int ipt = 0) const {
     return ipt ? B.get() : A.get();
-  }                                           ///< selects leaf component
+  } ///< selects leaf component
   void setLeaves(std::unique_ptr<Rule>, std::unique_ptr<Rule>); ///< set leaves
   void setLeaf(std::unique_ptr<Rule> nR, const int side = 0); ///< set one leaf.
   int findLeaf(const Rule *) const;
@@ -207,7 +207,7 @@ public:
 
   Rule *leaf(const int ipt = 0) const {
     return ipt ? B.get() : A.get();
-  }                               ///< Select a leaf component
+  } ///< Select a leaf component
   void setLeaves(std::unique_ptr<Rule>, std::unique_ptr<Rule>); ///< set leaves
   void setLeaf(std::unique_ptr<Rule>, const int side = 0);
   int findLeaf(const Rule *) const;
@@ -244,8 +244,8 @@ class MANTID_GEOMETRY_DLL SurfPoint : public Rule {
 private:
   boost::shared_ptr<Surface> m_key; ///< Actual Surface Base Object
   SurfPoint *doClone() const;
-  int keyN;                         ///< Key Number (identifer)
-  int sign;                         ///< +/- in Object unit
+  int keyN; ///< Key Number (identifer)
+  int sign; ///< +/- in Object unit
 public:
   SurfPoint();
   virtual std::string className() const {

@@ -166,7 +166,7 @@ public:
   std::string getShapeXML() const;
 
 private:
-  int ObjName;   ///< Creation number
+  int ObjName;                   ///< Creation number
   std::unique_ptr<Rule> TopRule; ///< Top rule [ Geometric scope of object]
 
   int procPair(std::string &Ln, std::map<int, std::unique_ptr<Rule>> &Rlist,

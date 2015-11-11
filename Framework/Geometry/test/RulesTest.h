@@ -43,12 +43,12 @@ public:
   }
 
   void testRemoveItem() { // Problem: in removing the item of the tree that has
-                          // more than one instances,possibly double deletion
-                          auto tree = createAUnionTree();
-                          TS_ASSERT_EQUALS(tree->removeItem(tree, 11), 1);
-                          //		TS_ASSERT_EQUALS(tree->removeItem(tree,10),2);
-                          TS_ASSERT_EQUALS(tree->removeItem(tree, 11), 0);
-                          TS_ASSERT_EQUALS(tree->removeItem(tree, 12), 1);
+    // more than one instances,possibly double deletion
+    auto tree = createAUnionTree();
+    TS_ASSERT_EQUALS(tree->removeItem(tree, 11), 1);
+    //		TS_ASSERT_EQUALS(tree->removeItem(tree,10),2);
+    TS_ASSERT_EQUALS(tree->removeItem(tree, 11), 0);
+    TS_ASSERT_EQUALS(tree->removeItem(tree, 12), 1);
   }
 
   void testCommonType() {
