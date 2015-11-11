@@ -18,7 +18,9 @@ DECLARE_DIALOG(GetNegMuMuonicXRDDialog)
 
 GetNegMuMuonicXRDDialog::GetNegMuMuonicXRDDialog(QWidget *parent)
     : API::AlgorithmDialog(parent), m_periodicTable(NULL), m_yPosition(NULL),
-      m_groupWorkspaceNameInput(NULL), m_showLegendCheck(NULL) {}
+      m_groupWorkspaceNameInput(NULL), m_showLegendCheck(NULL) {
+  m_autoParseOnInit = false;
+}
 
 /// Initialise the layout
 void GetNegMuMuonicXRDDialog::initLayout() {
@@ -27,7 +29,6 @@ void GetNegMuMuonicXRDDialog::initLayout() {
   this->setMaximumWidth(675);
   // assign periodicTable member to a new periodicTable
   m_periodicTable = new PeriodicTableWidget();
-
   // assign m_yPosition member to a new QLineEdit
   m_yPosition = new QLineEdit();
   // assign GroupWorkspaceName member to a new QLineEdit
@@ -48,9 +49,6 @@ void GetNegMuMuonicXRDDialog::initLayout() {
   // main layout for the dialog (everything will be added to this)
   auto *main_layout = new QVBoxLayout(this);
 
-  // run button for executing the algorithm
-  auto *runButton = new QPushButton("Run");
-
   // label for the QLineEdit for m_yPosition property
   auto *m_yPositionLabel = new QLabel("Y Position");
 
@@ -64,11 +62,7 @@ void GetNegMuMuonicXRDDialog::initLayout() {
   m_yPosition->setMaximumWidth(250);
   m_yPosition->setPlaceholderText("-0.01");
   m_yPosition->setValidator(m_yPositionNumericValidator);
-
-  // Run Button Attributes and signal/slot assignment
-  runButton->setMaximumWidth(100);
-  connect(runButton, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(this, SIGNAL(validInput()), this, SLOT(accept()));
+  auto default_button_layout = this->createDefaultButtonLayout();
 
   // Show Legend button attributes and signal/slot asssignment
   m_showLegendCheck = new QCheckBox("Show Legend");
@@ -80,7 +74,7 @@ void GetNegMuMuonicXRDDialog::initLayout() {
   main_layout->addWidget(m_yPosition);
   main_layout->addWidget(groupWsInputLabel);
   main_layout->addWidget(m_groupWorkspaceNameInput);
-  main_layout->addWidget(runButton);
+  main_layout->addLayout(default_button_layout);
 }
 
 /**
@@ -126,7 +120,7 @@ bool GetNegMuMuonicXRDDialog::validateDialogInput(QString input) {
  * The Slot to gather input from the dialog, store it in the propertyValue
  * and then emit the signal for valid input. Preparing for accept() to be run.
 */
-void GetNegMuMuonicXRDDialog::runClicked() {
+void GetNegMuMuonicXRDDialog::parseInput() {
   // getting a list of strings of elements selected from periodicTableWidget
   QString elementsSelectedStr = m_periodicTable->getAllCheckedElementsStr();
   // if no elements are selected from the PeriodicTableWidget, a pop-up appears

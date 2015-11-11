@@ -58,8 +58,7 @@ private:
   void enableElementsForGetNegMuMuonicXRD();
 
 private slots:
-  /// When the "Run" button is clicked, the algorithm is executed with inputs
-  void runClicked();
+  virtual void parseInput();
   void showLegend();
 
 protected:
