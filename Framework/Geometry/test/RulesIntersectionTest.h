@@ -122,10 +122,6 @@ public:
     // TS_ASSERT_EQUALS(A.leaf(0), S1);
     // TS_ASSERT_EQUALS(A.leaf(1), S2);
     TS_ASSERT_EQUALS(A.display(), "10 11");
-    Intersection B(A);
-    // TS_ASSERT_EQUALS(B.leaf(0)->display(), S1->display());
-    // TS_ASSERT_EQUALS(B.leaf(1)->display(), S2->display());
-    TS_ASSERT_EQUALS(B.display(), "10 11");
   }
 
   void testAssignment() {
@@ -146,11 +142,6 @@ public:
     // TS_ASSERT_EQUALS(A.leaf(0), S1);
     // TS_ASSERT_EQUALS(A.leaf(1), S2);
     TS_ASSERT_EQUALS(A.display(), "10 11");
-    Intersection B;
-    B = A;
-    // TS_ASSERT_EQUALS(B.leaf(0)->display(), S1->display());
-    // TS_ASSERT_EQUALS(B.leaf(1)->display(), S2->display());
-    TS_ASSERT_EQUALS(B.display(), "10 11");
   }
 
   void testFindLeaf() {

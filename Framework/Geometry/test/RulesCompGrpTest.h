@@ -46,8 +46,6 @@ public:
     auto uSC = createUnionSphereAndCylinder();
     A.setLeaf(std::move(uSC), 0);
     // TS_ASSERT_EQUALS(A.leaf(0), uSC);
-    CompGrp B(A);
-    //TS_ASSERT_EQUALS(B.leaf(0)->display(), uSC->display());
   }
 
   void testClone() {
@@ -64,9 +62,6 @@ public:
     auto uSC = createUnionSphereAndCylinder();
     A.setLeaf(std::move(uSC), 0);
     // TS_ASSERT_EQUALS(A.leaf(0), uSC);
-    CompGrp B;
-    B = A;
-    // TS_ASSERT_EQUALS(B.leaf(0)->display(), uSC->display());
   }
 
   void testSetLeaves() {

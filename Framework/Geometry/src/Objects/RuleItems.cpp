@@ -134,14 +134,6 @@ Intersection &Intersection::operator=(const Intersection &Iother)
   return *this;
 }
 
-Intersection::~Intersection()
-/**
-  Destructor :: responsible for the two
-  leaf intersections.
-*/
-{
-}
-
 Intersection *Intersection::doClone() const
 /**
   Virtual copy constructor
@@ -460,13 +452,6 @@ Union &Union::operator=(const Union &Iother)
   return *this;
 }
 
-Union::~Union()
-/**
-  Delete operator : deletes both leaves
-*/
-{
-}
-
 Union *Union::doClone() const
 /**
   Clone allows deep virtual coping
@@ -734,7 +719,7 @@ void SurfPoint::setLeaf(std::unique_ptr<Rule> nR, const int)
 {
   // std::cerr<<"Calling SurfPoint setLeaf"<<std::endl;
 
-  SurfPoint *newX = dynamic_cast<SurfPoint *>(nR.release());
+  SurfPoint *newX = dynamic_cast<SurfPoint *>(nR.get());
   if (newX)
     *this = *newX;
   return;
@@ -748,7 +733,7 @@ void SurfPoint::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule>)
 */
 {
   // std::cerr<<"Calling SurfPoint setLeaf"<<std::endl;
-  SurfPoint *newX = dynamic_cast<SurfPoint *>(aR.release());
+  SurfPoint *newX = dynamic_cast<SurfPoint *>(aR.get());
   if (newX)
     *this = *newX;
   return;
@@ -1015,12 +1000,6 @@ CompObj &CompObj::operator=(const CompObj &A)
   return *this;
 }
 
-CompObj::~CompObj()
-/**
-  Destructor
-*/
-{}
-
 CompObj *CompObj::doClone() const
 /**
   Clone of this
@@ -1067,7 +1046,7 @@ void CompObj::setLeaf(std::unique_ptr<Rule> aR, const int)
   @param :: Null side point
 */
 {
-  CompObj *newX = dynamic_cast<CompObj *>(aR.release());
+  CompObj *newX = dynamic_cast<CompObj *>(aR.get());
   // Make a copy
   if (newX)
     *this = *newX;
@@ -1084,7 +1063,7 @@ void CompObj::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> oR)
 {
   (void)oR; // Avoid compiler warning
 
-  CompObj *newX = dynamic_cast<CompObj *>(aR.release());
+  CompObj *newX = dynamic_cast<CompObj *>(aR.get());
   if (newX)
     *this = *newX;
   return;
@@ -1333,12 +1312,6 @@ std::unique_ptr<BoolValue> BoolValue::clone() const
   return std::unique_ptr<BoolValue>(doClone());
 }
 
-BoolValue::~BoolValue()
-/**
-  Destructor
-*/
-{}
-
 void BoolValue::setLeaf(std::unique_ptr<Rule> aR, const int)
 /**
   Replaces a leaf with a rule.
@@ -1349,7 +1322,7 @@ void BoolValue::setLeaf(std::unique_ptr<Rule> aR, const int)
 */
 {
   // std::cerr<<"Calling BoolValue setLeaf"<<std::endl;
-  BoolValue *newX = dynamic_cast<BoolValue *>(aR.release());
+  BoolValue *newX = dynamic_cast<BoolValue *>(aR.get());
   if (newX)
     *this = *newX;
   return;
@@ -1365,7 +1338,7 @@ void BoolValue::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> oR)
 {
   (void)oR; // Avoid compiler warning
   // std::cerr<<"Calling BoolValue setLeaves"<<std::endl;
-  BoolValue *newX = dynamic_cast<BoolValue *>(aR.release());
+  BoolValue *newX = dynamic_cast<BoolValue *>(aR.get());
   if (newX)
     *this = *newX;
   return;
@@ -1503,13 +1476,6 @@ CompGrp &CompGrp::operator=(const CompGrp &Cother)
     }
   }
   return *this;
-}
-
-CompGrp::~CompGrp()
-/**
-  Destructor
-*/
-{
 }
 
 CompGrp *CompGrp::doClone() const

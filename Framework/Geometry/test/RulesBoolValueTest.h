@@ -42,10 +42,6 @@ public:
     TS_ASSERT_EQUALS(A.leaf(1), (Rule *)0);
     A.setStatus(0);
     TS_ASSERT_EQUALS(A.display(), " False ");
-    BoolValue B(A);
-    TS_ASSERT_EQUALS(B.leaf(0), (Rule *)0);
-    TS_ASSERT_EQUALS(B.leaf(1), (Rule *)0);
-    TS_ASSERT_EQUALS(B.display(), " False ");
   }
 
   void testClone() {
@@ -68,12 +64,6 @@ public:
     TS_ASSERT_EQUALS(A.leaf(1), (Rule *)0);
     A.setStatus(0);
     TS_ASSERT_EQUALS(A.display(), " False ");
-    BoolValue B;
-    TS_ASSERT_EQUALS(B.display(), " Unknown ");
-    B = A;
-    TS_ASSERT_EQUALS(B.leaf(0), (Rule *)0);
-    TS_ASSERT_EQUALS(B.leaf(1), (Rule *)0);
-    TS_ASSERT_EQUALS(B.display(), " False ");
   }
 
   void testLeafOperations() {
@@ -105,10 +95,11 @@ public:
     auto B = Mantid::Kernel::make_unique<BoolValue>();
     TS_ASSERT_EQUALS(B->display(), " Unknown ");
     B->setStatus(1);
+    Rule *ptrB = B.get();
     A.setLeaves(std::move(B), std::unique_ptr<Rule>());
     TS_ASSERT_EQUALS(A.display(), " True ");
     TS_ASSERT_EQUALS(A.findLeaf(&A), 0);
-    // TS_ASSERT_EQUALS(A.findLeaf(B), -1);
+    TS_ASSERT_EQUALS(A.findLeaf(ptrB), -1);
     TS_ASSERT_EQUALS(A.findKey(0), (Rule *)0);
   }
 

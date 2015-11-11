@@ -84,10 +84,6 @@ public:
     TS_ASSERT_EQUALS(A.display(), "10 : 11");
     // TS_ASSERT_EQUALS(A.leaf(0), S1);
     // TS_ASSERT_EQUALS(A.leaf(1), S2);
-    Union B(A);
-    TS_ASSERT_EQUALS(B.display(), "10 : 11");
-    // TS_ASSERT_EQUALS(B.leaf(0)->display(), S1->display());
-    // TS_ASSERT_EQUALS(B.leaf(1)->display(), S2->display());
   }
 
   void testClone() {
@@ -128,11 +124,6 @@ public:
     TS_ASSERT_EQUALS(A.display(), "10 : 11");
     // TS_ASSERT_EQUALS(A.leaf(0), S1);
     // TS_ASSERT_EQUALS(A.leaf(1), S2);
-    Union B;
-    B = A;
-    TS_ASSERT_EQUALS(B.display(), "10 : 11");
-    // TS_ASSERT_EQUALS(B.leaf(0)->display(), S1->display());
-    // TS_ASSERT_EQUALS(B.leaf(1)->display(), S2->display());
   }
 
   void testSetLeaves() {

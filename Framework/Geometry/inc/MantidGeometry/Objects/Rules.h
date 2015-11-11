@@ -52,6 +52,9 @@ private:
 
   int getBaseKeys(
       std::vector<int> &) const; ///< Fills the vector with the surfaces
+protected:
+  Rule(const Rule &);
+  Rule &operator=(const Rule &);
 
 public:
   static int
@@ -64,8 +67,6 @@ public:
 
   Rule();
   Rule(Rule *);
-  Rule(const Rule &);
-  Rule &operator=(const Rule &);
   std::unique_ptr<Rule> clone() const {
     return std::unique_ptr<Rule>(doClone());
   }
@@ -135,6 +136,9 @@ private:
   std::unique_ptr<Rule> A;       ///< Rule 1
   std::unique_ptr<Rule> B;       ///< Rule 2
   Intersection *doClone() const; ///< Makes a copy of the whole downward tree
+protected:
+  Intersection(const Intersection &);
+  Intersection &operator=(const Intersection &);
 
 public:
   Intersection();
@@ -146,9 +150,6 @@ public:
     return "Intersection";
   } ///< Returns class name as string
 
-  Intersection(const Intersection &);
-  Intersection &operator=(const Intersection &);
-  ~Intersection();
   Rule *leaf(const int ipt = 0) const {
     return ipt ? B.get() : A.get();
   }                                           ///< selects leaf component
@@ -190,15 +191,16 @@ private:
   std::unique_ptr<Rule> B; ///< Leaf rule B
   Union *doClone() const;
 
+protected:
+  Union(const Union &);
+  Union &operator=(const Union &);
+
 public:
   Union();
   explicit Union(std::unique_ptr<Rule>, std::unique_ptr<Rule>);
   explicit Union(Rule *, std::unique_ptr<Rule>, std::unique_ptr<Rule>);
-  Union(const Union &);
 
   std::unique_ptr<Union> clone() const;
-  Union &operator=(const Union &);
-  ~Union();
   virtual std::string className() const {
     return "Union";
   } ///< Returns class name as string
@@ -295,12 +297,13 @@ private:
   Object *key; ///< Object Pointer
   CompObj *doClone() const;
 
+protected:
+  CompObj(const CompObj &);
+  CompObj &operator=(const CompObj &);
+
 public:
   CompObj();
-  CompObj(const CompObj &);
   std::unique_ptr<CompObj> clone() const;
-  CompObj &operator=(const CompObj &);
-  ~CompObj();
   virtual std::string className() const {
     return "CompObj";
   } ///< Returns class name as string
@@ -348,14 +351,15 @@ private:
   std::unique_ptr<Rule> A; ///< The rule
   CompGrp *doClone() const;
 
+protected:
+  CompGrp(const CompGrp &);
+  CompGrp &operator=(const CompGrp &);
+
 public:
   CompGrp();
   // explicit CompGrp(std::unique_ptr<Rule>, std::unique_ptr<Rule>);
   explicit CompGrp(Rule *, std::unique_ptr<Rule>);
-  CompGrp(const CompGrp &);
   std::unique_ptr<CompGrp> clone() const;
-  CompGrp &operator=(const CompGrp &);
-  ~CompGrp();
   virtual std::string className() const {
     return "CompGrp";
   } ///< Returns class name as string
@@ -398,12 +402,13 @@ private:
   int status; ///< Three values 0 False : 1 True : -1 doesn't matter
   BoolValue *doClone() const;
 
+protected:
+  BoolValue(const BoolValue &);
+  BoolValue &operator=(const BoolValue &);
+
 public:
   BoolValue();
-  BoolValue(const BoolValue &);
   std::unique_ptr<BoolValue> clone() const;
-  BoolValue &operator=(const BoolValue &);
-  ~BoolValue();
   virtual std::string className() const {
     return "BoolValue";
   } ///< Returns class name as string

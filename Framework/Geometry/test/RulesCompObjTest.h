@@ -43,17 +43,6 @@ public:
     TS_ASSERT_EQUALS(A.getObj(), &cpCylinder);
   }
 
-  void testCompObjConstructor() {
-    Object cpCylinder = createCappedCylinder();
-    CompObj A;
-    A.setObj(&cpCylinder);
-    A.setObjN(10);
-    CompObj B(A);
-    TS_ASSERT_EQUALS(B.display(), "#10");
-    TS_ASSERT_EQUALS(B.getObjN(), 10);
-    TS_ASSERT_EQUALS(B.getObj(), &cpCylinder);
-  }
-
   void testClone() {
     Object cpCylinder = createCappedCylinder();
     CompObj A;
@@ -63,18 +52,6 @@ public:
     TS_ASSERT_EQUALS(B->display(), "#10");
     TS_ASSERT_EQUALS(B->getObjN(), 10);
     TS_ASSERT_EQUALS(B->getObj(), &cpCylinder);
-  }
-
-  void testAssignment() {
-    Object cpCylinder = createCappedCylinder();
-    CompObj A;
-    A.setObj(&cpCylinder);
-    A.setObjN(10);
-    CompObj B;
-    B = A;
-    TS_ASSERT_EQUALS(B.display(), "#10");
-    TS_ASSERT_EQUALS(B.getObjN(), 10);
-    TS_ASSERT_EQUALS(B.getObj(), &cpCylinder);
   }
 
   void testSetLeaves() {
@@ -108,8 +85,6 @@ public:
     A.setObjN(10);
     CompObj B;
     TS_ASSERT_EQUALS(A.findLeaf(&A), 0);
-    TS_ASSERT_EQUALS(A.findLeaf(&B), -1);
-    B = A;
     TS_ASSERT_EQUALS(A.findLeaf(&B), -1);
   }
 
