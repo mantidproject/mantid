@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/SaveGSASInstrumentFile.h"
+#include "MantidDataHandling/SaveGSASInstrumentFile.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -16,7 +16,7 @@ using namespace Mantid::DataObjects;
 using namespace std;
 
 namespace Mantid {
-namespace Algorithms {
+namespace DataHandling {
 
 DECLARE_ALGORITHM(SaveGSASInstrumentFile)
 

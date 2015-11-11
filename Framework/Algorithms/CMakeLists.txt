@@ -224,7 +224,6 @@ set ( SRC_FILES
 	src/SampleCorrections/MayersSampleCorrection.cpp
 	src/SampleCorrections/MayersSampleCorrectionStrategy.cpp
 	src/SassenaFFT.cpp
-	src/SaveGSASInstrumentFile.cpp
 	src/Scale.cpp
 	src/ScaleX.cpp
 	src/Segfault.cpp
@@ -503,7 +502,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h
 	inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h
 	inc/MantidAlgorithms/SassenaFFT.h
-	inc/MantidAlgorithms/SaveGSASInstrumentFile.h
 	inc/MantidAlgorithms/Scale.h
 	inc/MantidAlgorithms/ScaleX.h
 	inc/MantidAlgorithms/Segfault.h
@@ -776,7 +774,6 @@ set ( TEST_FILES
 	RingProfileTest.h
 	SANSCollimationLengthEstimatorTest.h
 	SassenaFFTTest.h
-	SaveGSASInstrumentFileTest.h
 	ScaleTest.h
 	ScaleXTest.h
 	SetInstrumentParameterTest.h
