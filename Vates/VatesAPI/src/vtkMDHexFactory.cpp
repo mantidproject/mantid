@@ -87,11 +87,11 @@ void vtkMDHexFactory::doCreate(
 
   // One scalar per box
   vtkNew<vtkFloatArray> signals;
-  ;
   signals->SetName(ScalarName.c_str());
   signals->SetNumberOfComponents(1);
-  float *signalArrayPtr = signals->WritePointer(0, numBoxes);
+  float *signalsPtr = signals->WritePointer(0, numBoxes);
 
+  // To cache the signal
   auto signalArray = Mantid::Kernel::make_unique<float[]>(numBoxes);
 
   // True for boxes that we will use
@@ -136,8 +136,7 @@ void vtkMDHexFactory::doCreate(
               std::unique_ptr<coord_t[]>(box->getVertexesArray(numVertexes));
 
         if (numVertexes == 8) {
-          std::copy(coords.get(), std::advance(coords.get(), numVertexes * 3),
-                    std::advance(pointsPtr, i * 8 * 3));
+          std::copy_n(coords.get(), 24, pointsPtr + i * 24);
         }
       }
     } // For each box
@@ -153,8 +152,8 @@ void vtkMDHexFactory::doCreate(
         vtkIdType pointIds = i * 8;
 
         // Add signal
-        *signalArrayPtr = signalArray[i];
-        ++signalArrayPtr;
+        *signalsPtr = signalArray[i];
+        std::advance(signalsPtr, 1);
 
         hexPointList->SetId(0, pointIds + 0); // xyx
         hexPointList->SetId(1, pointIds + 1); // dxyz
@@ -173,13 +172,14 @@ void vtkMDHexFactory::doCreate(
         visualDataSet->GetCellBounds(imageSizeActual, bounds);
 
         if (bounds[0] < -10 || bounds[2] < -10 || bounds[4] < -10) {
-          std::string msg = "??";
+          std::string msg = "";
         }
         imageSizeActual++;
       }
     } // for each box.
 
     // Shrink to fit
+    signals->Resize(imageSizeActual);
     signals->Squeeze();
     visualDataSet->Squeeze();
 
