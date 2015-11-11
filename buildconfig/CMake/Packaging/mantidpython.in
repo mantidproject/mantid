@@ -8,13 +8,14 @@
 SCRIPTFILE=$(readlink -f "$0")
 INSTALLDIR=$(echo $SCRIPTFILE | sed -r -e 's|^(.*)/(.*)$|\1|g') #.* is greedy and eats up until the final slash
 IPYTHON=$(command -v ipython)
+PYTHON=$(command -v python)
 
 # Define extra libraries and load paths
-LOCAL_PRELOAD=`readlink --no-newline --canonicalize-existing @TCMALLOC_LIBRARIES@`
+LOCAL_PRELOAD=`readlink --no-newline --canonicalize-existing /usr/lib/libtcmalloc_minimal.so`
 if [ -n "${LD_PRELOAD}" ]; then
     LOCAL_PRELOAD=${LOCAL_PRELOAD}:${LD_PRELOAD}
 fi
-LOCAL_LDPATH=@EXTRA_LDPATH@:${LD_LIBRARY_PATH}
+LOCAL_LDPATH=${INSTALLDIR}/../lib/paraview-4.3:${LD_LIBRARY_PATH}
 if [ -z "${TCMALLOC_RELEASE_RATE}" ]; then
     TCM_RELEASE=10000
 else
@@ -30,9 +31,22 @@ if [ -n "${PYTHONPATH}" ]; then
     LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
 fi
 
-# Launch
-LD_PRELOAD=${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=${TCM_RELEASE} \
+if [ -n "$1" ] && [ "$1" = "--classic" ]; then
+    shift
+    # Launch python
+    LD_PRELOAD=${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=${TCM_RELEASE} \
     LD_LIBRARY_PATH=${LOCAL_LDPATH} QT_API=pyqt \
     PV_PLUGIN_PATH=${PV_PLUGIN_PATH} \
     PYTHONPATH=${LOCAL_PYTHONPATH} \
-    @WRAPPER_PREFIX@${IPYTHON} $*@WRAPPER_POSTFIX@
+    ${PYTHON} $*
+
+else
+
+    # Launch ipython
+    LD_PRELOAD=${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=${TCM_RELEASE} \
+    LD_LIBRARY_PATH=${LOCAL_LDPATH} QT_API=pyqt \
+    PV_PLUGIN_PATH=${PV_PLUGIN_PATH} \
+    PYTHONPATH=${LOCAL_PYTHONPATH} \
+    ${IPYTHON} $*
+fi
+
