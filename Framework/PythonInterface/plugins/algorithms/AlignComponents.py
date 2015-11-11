@@ -58,13 +58,17 @@ class AlignComponents(PythonAlgorithm):
                                                direction=Direction.InOut),
                              doc="Workspace containing the instrument to be calibrated.")
 
-        # L1
-        self.declareProperty(name="FitL1", defaultValue=False,
-                             doc="Fit the L1 (source to sample) distance. Uses entire instrument. Occurs before Components are Aligned.")
+        # Source
+        self.declareProperty(name="FitSourcePosition", defaultValue=False,
+                             doc="Fit the source position, changes L1 (source to sample) distance. Uses entire instrument. Occurs before Components are Aligned.")
+
+        # Sample
+        self.declareProperty(name="FitSamplePosition", defaultValue=False,
+                             doc="Fit the sample position, changes L1 (source to sample) and L2 (sample to detector) distance. Uses entire instrument. Occurs before Components are Aligned.")
 
         # List of components
         self.declareProperty(StringArrayProperty("ComponentList",
-                             direction=Direction.Input),
+                                                 direction=Direction.Input),
                              doc="Comma separated list on instrument components to refine.")
 
         # X position
@@ -171,18 +175,18 @@ class AlignComponents(PythonAlgorithm):
                                               OutputWorkspace="alignedWorkspace")
 
         components = self.getProperty("ComponentList").value
-        if len(components) <= 0 and not self.getProperty("FitL1").value:
+        if len(components) <= 0 and not self.getProperty("FitSourcePosition").value and not self.getProperty("FitSamplePosition").value:
             issues['ComponentList'] = "Must supply components"
         else:
             components = [component for component in components
-                          if (wks.getInstrument().getComponentByName(component) is None)]
+                          if wks.getInstrument().getComponentByName(component) is None]
             if len(components) > 0:
                 issues['ComponentList'] = "Instrument has no component \"" \
                                        + ','.join(components) + "\""
 
         if not (self.getProperty("PosX").value or self.getProperty("PosY").value or self.getProperty("PosZ").value or
                 self.getProperty("RotX").value or self.getProperty("RotY").value or self.getProperty("RotZ").value or
-                self.getProperty("FitL1").value):
+                self.getProperty("FitSourcePosition").value or self.getProperty("FitSamplePosition").value):
             issues["PosX"] = "You must calibrate at least one property"
 
         return issues
@@ -210,31 +214,38 @@ class AlignComponents(PythonAlgorithm):
         wks_name=wks.getName()
 
         # First fit L1 if selected
-        if self.getProperty("FitL1").value:
-            source_name = wks.getInstrument().getSource().getFullName()
-            source_Z = wks.getInstrument().getSource().getPos().getZ()
-            logger.notice("Working on " + source_name +
-                          " Starting position is " + str(source_Z))
-            firstIndex = 0
-            lastIndex = len(difc)
-            if self._masking:
-                mask_out = mask[firstIndex:lastIndex + 1]
-            else:
-                mask_out = None
-            new_source_Z = minimize(self._minimisation_func_L1, x0=source_Z,
-                               args=(wks_name,
-                                     source_name,
-                                     firstIndex,
-                                     lastIndex,
-                                     difc[firstIndex:lastIndex + 1],
-                                     mask_out),
-                               bounds=[(source_Z-1,source_Z+1)])
-            api.MoveInstrumentComponent(wks_name, source_name, Z=new_source_Z.x[0],
-                                        RelativePosition=False)
-            logger.notice("Finished " + source_name +
-                          " Final position is " + str(new_source_Z.x[0]))
+        for component in "Source", "Sample":
+            if self.getProperty("Fit"+component+"Position").value:
+                wks=api.mtd[wks_name]
+                if component == "Sample":
+                    componentName = wks.getInstrument().getSample().getFullName()
+                    componentZ = wks.getInstrument().getSample().getPos().getZ()
+                else:
+                    componentName = wks.getInstrument().getSource().getFullName()
+                    componentZ = wks.getInstrument().getSource().getPos().getZ()
+                logger.notice("Working on " + componentName +
+                              " Starting position is " + str(componentZ))
+                firstIndex = 0
+                lastIndex = len(difc)
+                if self._masking:
+                    mask_out = mask[firstIndex:lastIndex + 1]
+                else:
+                    mask_out = None
+                newZ = minimize(self._minimisation_func_L1, x0=componentZ,
+                                args=(wks_name,
+                                      componentName,
+                                      firstIndex,
+                                      lastIndex,
+                                      difc[firstIndex:lastIndex + 1],
+                                      mask_out),
+                                bounds=[(componentZ-1,componentZ+1)])
+                api.MoveInstrumentComponent(wks_name, componentName, Z=newZ.x[0],
+                                            RelativePosition=False)
+                logger.notice("Finished " + componentName +
+                              " Final position is " + str(newZ.x[0]))
 
         # Now fit all the components if any
+        wks=api.mtd[wks_name]
         components = self.getProperty("ComponentList").value
 
         for opt in self._optionsList:
