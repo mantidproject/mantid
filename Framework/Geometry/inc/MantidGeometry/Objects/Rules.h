@@ -357,7 +357,6 @@ protected:
 
 public:
   CompGrp();
-  // explicit CompGrp(std::unique_ptr<Rule>, std::unique_ptr<Rule>);
   explicit CompGrp(Rule *, std::unique_ptr<Rule>);
   std::unique_ptr<CompGrp> clone() const;
   virtual std::string className() const {

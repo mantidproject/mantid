@@ -254,8 +254,6 @@ int Rule::makeCNFcopy(std::unique_ptr<Rule> &TopRule)
             // It is the top rule therefore, replace the toprule
             TopRule = std::move(partReplace);
 
-          // Clear up the mess and delete the rule that we have changes
-          // delete tmpA;
           // Now we have to go back to the begining again and start again.
           active = 1; // Exit loop
         }
@@ -405,7 +403,6 @@ int Rule::removeItem(std::unique_ptr<Rule> &TRule, const int SurfN)
       Rule *PObj =
           (LevelOne->leaf(0) != Ptr) ? LevelOne->leaf(0) : LevelOne->leaf(1);
       //
-      // LevelOne->setLeaves(0, 0); // Delete from Ptr, and copy
       const int side = (LevelTwo->leaf(0) != LevelOne) ? 1 : 0;
       LevelTwo->setLeaf(PObj->clone(), side);
     } else if (LevelOne) // LevelOne is the top rule
@@ -416,9 +413,6 @@ int Rule::removeItem(std::unique_ptr<Rule> &TRule, const int SurfN)
 
       PObj->setParent(0); /// New Top rule
       TRule = PObj->clone();
-      // LevelOne->setLeaves(0, 0); // Delete from Ptr, and copy
-      // Note we now need to delete this
-      // delete LevelOne;
     } else // Basic surf object
     {
       SurfPoint *SX = dynamic_cast<SurfPoint *>(Ptr);
