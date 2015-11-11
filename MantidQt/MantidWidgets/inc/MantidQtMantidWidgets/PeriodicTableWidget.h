@@ -37,7 +37,8 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS PeriodicTableWidget : public QWidget {
 public:
   ///Constructor
   PeriodicTableWidget(QWidget *parent = 0);
-
+  ///Destructor
+  virtual ~PeriodicTableWidget() {};
   /// Vectors to Hold the QPushButtons of Elements in corresponding Groups
   QVector<QPushButton *> OtherNonMetals;
   QVector<QPushButton *> AlkaliMetals;
