@@ -365,40 +365,47 @@ bool EnggDiffractionPresenter::validateRBNumber(const std::string &rbn) const {
 std::string
 EnggDiffractionPresenter::isValidRunNumber(std::vector<std::string> dir) {
 
-  std::vector<std::string> run_vec = dir;
-  std::string run_number;
+		std::vector<std::string> run_vec = dir;
+		std::string run_number;
+		//if empty string
+		if (run_vec[0] != "") {
 
-  auto p = run_vec.begin();
-  int i = 0;
-  while (p != run_vec.end()) {
+		auto p = run_vec.begin();
+		int i = 0;
+		while (p != run_vec.end()) {
 
-    run_number = *p;
-    p++;
-    i++;
+			run_number = *p;
+			p++;
+			i++;
 
-    try {
-      if (Poco::File(run_number).exists()) {
-        Poco::Path inputDir = run_number;
-        run_number = "";
-        // get file name name via poco::path
+			try {
+				if (Poco::File(run_number).exists()) {
+					Poco::Path inputDir = run_number;
+					run_number = "";
+					// get file name name via poco::path
 
-        std::string filename = inputDir.getFileName();
+					std::string filename = inputDir.getFileName();
 
-        // convert to int or assign it to size_t
-        for (size_t i = 0; i < filename.size(); i++) {
-          char *str = &filename[i];
-          if (std::isdigit(*str)) {
-            run_number += filename[i];
-          }
-        }
-        run_number.erase(0, run_number.find_first_not_of('0'));
-      }
+					// convert to int or assign it to size_t
+					for (size_t i = 0; i < filename.size(); i++) {
+						char *str = &filename[i];
+						if (std::isdigit(*str)) {
+							run_number += filename[i];
+						}
+					}
+					run_number.erase(0, run_number.find_first_not_of('0'));
+				}
 
-    } catch (std::runtime_error &re) {
-      throw std::invalid_argument("Error browsing selected file: " +
-                                  static_cast<std::string>(re.what()));
-    }
-  }
+			}
+			catch (std::runtime_error &re) {
+				throw std::invalid_argument("Error browsing selected file: " +
+					static_cast<std::string>(re.what()));
+			}
+			catch (...) {
+				throw std::invalid_argument("Error browsing selected file: ");
+			}
+		}
+	}
   g_log.debug() << "run number is: " << run_number << std::endl;
 
   return run_number;

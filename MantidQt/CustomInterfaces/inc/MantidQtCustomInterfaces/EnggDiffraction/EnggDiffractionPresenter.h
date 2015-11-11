@@ -141,12 +141,11 @@ private:
                      const std::string &specNos = "",
                      const std::string &dgFile = "");
 
-  void startAsyncFocusWorker(const std::string &dir,
-                             const std::vector<std::string> &outFilenames,
-                             const std::string &runNo,
-                             const std::vector<bool> &banks,
-                             const std::string &specNos,
-                             const std::string &dgFile);
+  virtual void startAsyncFocusWorker(
+	  const std::string &dir, const std::vector<std::string> &outFilenames,
+	  const std::string &runNo, const std::vector<bool> &banks,
+	  const std::string &specNos, const std::string &dgFile);
+
 
   void inputChecksBeforeFocusBasic(const std::string &runNo,
                                    const std::vector<bool> &banks);
@@ -269,5 +268,4 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
 #endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESENTER_H_

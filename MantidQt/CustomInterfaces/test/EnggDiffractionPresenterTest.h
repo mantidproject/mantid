@@ -31,13 +31,14 @@ private:
   }
 
   void startAsyncFocusWorker(const std::string &dir,
-                             const std::vector<std::string> &outFilenames,
-                             const std::string &runNo,
-                             const std::vector<bool> banks,
-                             const std::string &specIDs,
-                             const std::string &dgFile) {
-    doFocusRun(dir, outFilenames, runNo, banks, specIDs, dgFile);
-    focusingFinished();
+	  const std::vector<std::string> &outFilenames,
+	  const std::string &runNo,
+	  const std::vector<bool> &banks,
+	  const std::string &specNos,
+	  const std::string &dgFile) {
+	  std::cerr << "focus run " << std::endl;
+	  doFocusRun(dir, outFilenames, runNo, banks, specNos, dgFile);
+	  focusingFinished();
   }
 
   void startAsyncRebinningTimeWorker(const std::string &runNo, double bin,
@@ -77,13 +78,46 @@ public:
     m_presenter.reset(
         new MantidQt::CustomInterfaces::EnggDiffractionPresenter(m_view.get()));
 
+	// default banks
     m_ex_enginx_banks.push_back(true);
     m_ex_enginx_banks.push_back(false);
+
+	// default run number
 	m_ex_empty_run_num.push_back("");
-	m_invalid_run_number.push_back("999999");
-	m_ex_run_number.push_back("228061");
+	m_invalid_run_number.push_back("");
+	m_ex_run_number.push_back(g_eventModeRunNo);
 	g_vanNo.push_back("8899999988");
 	g_ceriaNo.push_back("9999999999");
+
+	/* shahroz
+	// default EnggDiffCalibSettings
+	m_basicCalibSettings.m_inputDirCalib =
+		"C:/Users/RYQ25391/Desktop/GUI_calib_folder/";
+	m_basicCalibSettings.m_templateGSAS_PRM =
+		"C:/Users/RYQ25391/Desktop/GUI_calib_folder/"
+		"template_ENGINX_241391_236516_North_and_South_banks.prm";
+	m_basicCalibSettings.m_pixelCalibFilename = "C:/Users/RYQ25391/Desktop/"
+		"GUI_calib_folder/"
+		"ENGINX_full_calib_3peaks.csv";
+	m_basicCalibSettings.m_inputDirRaw = "C:/Users/RYQ25391/Desktop/GUI_calib_folder/";
+	m_basicCalibSettings.m_forceRecalcOverwrite = false;
+	m_basicCalibSettings.m_rebinCalibrate = false; */
+
+
+	// provide personal directories in order to carry out the full disable tests
+	m_basicCalibSettings.m_inputDirCalib =
+		"GUI_calib_folder/";
+	m_basicCalibSettings.m_inputDirRaw = "GUI_calib_folder/";
+
+	m_basicCalibSettings.m_pixelCalibFilename =
+		"ENGINX_full_pixel_calibration.csv";
+
+	m_basicCalibSettings.m_templateGSAS_PRM =
+		"GUI_calib_folder/template_ENGINX_241391_236516_North_and_South_banks.prm";
+
+	m_basicCalibSettings.m_forceRecalcOverwrite = false;
+	m_basicCalibSettings.m_rebinCalibrate = 1;
+
   }
 
   void tearDown() {
@@ -372,12 +406,6 @@ public:
         .Times(1)
         .WillOnce(Return(m_ex_enginx_banks));
 
-    // needs basic calibration settings from the user to start focusing
-    EnggDiffCalibSettings calibSettings;
-    EXPECT_CALL(mockView, currentCalibSettings())
-        .Times(1)
-        .WillOnce(Return(calibSettings));
-
     // Should not try to use options for other types of focusing
     EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
     EXPECT_CALL(mockView, focusingTextureRunNo()).Times(0);
@@ -398,41 +426,51 @@ public:
   }
 
   // TODO: disabled for now, as this one would need to load files
-  void disabled_test_focusOK() {
-    testing::NiceMock<MockEnggDiffractionView> mockView;
-    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+  void disable_test_focusOK() {
+	  testing::NiceMock<MockEnggDiffractionView> mockView;
+	  EnggDiffPresenterNoThread pres(&mockView);
 
-    // an example run available in unit test data:
-    EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return(m_ex_run_number));
-    EXPECT_CALL(mockView, focusingBanks())
-        .Times(1)
-        .WillOnce(Return(m_ex_enginx_banks));
 
-    // will need basic calibration settings from the user
-    EnggDiffCalibSettings calibSettings;
-    EXPECT_CALL(mockView, currentCalibSettings())
-        .Times(1)
-        .WillOnce(Return(calibSettings));
+	  const std::string instr = "ENGINX";
+	  const std::string vanNo = "236516"; // use a number that can be found!
 
-    // check automatic plotting
-    EXPECT_CALL(mockView, focusedOutWorkspace())
-        .Times(1)
-        .WillOnce(Return(true));
-    EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(1);
-    // There are two/three other tests that have the disabled_ prefix so they
-    // normally run
+										  // an example run available in unit test data:
+	  EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return(m_ex_run_number));
+	  std::vector<bool> banks;
+	  banks.push_back(true); // 1 bank used
+	  banks.push_back(false);
+	  EXPECT_CALL(mockView, focusingBanks()).Times(1).WillOnce(Return(banks));
 
-    // Should not try to use options for other types of focusing
-    EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
-    EXPECT_CALL(mockView, focusingTextureRunNo()).Times(0);
-    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
-    EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
+	  EXPECT_CALL(mockView, currentInstrument())
+		  .Times(2)
+		  .WillRepeatedly(Return(instr));
 
-    // No errors/warnings
-    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+	  EXPECT_CALL(mockView, currentCalibSettings())
+		  .Times(2)
+		  .WillRepeatedly(Return(m_basicCalibSettings));
 
-    pres.notify(IEnggDiffractionPresenter::FocusRun);
+	  // when two banks are used then it will utlise currentVanadiumNo two times
+	  EXPECT_CALL(mockView, currentVanadiumNo()).Times(1).WillOnce(Return(vanNo));
+
+	  // it will not reach here on wards, would finish with a Warning message
+	  // "The Calibration did not finish correctly"
+
+	  // this is because of the python algorithm cannot be used with in c++ test
+
+	  // the test will not be able to read the python algorithm from here on
+	  EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
+
+	  // Should not try to use options for other types of focusing
+	  EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
+	  EXPECT_CALL(mockView, focusingTextureRunNo()).Times(0);
+	  EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
+	  EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
+
+	  // 0 errors/ 0 warnings
+	  EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+	  EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+	  pres.notify(IEnggDiffractionPresenter::FocusRun);
   }
 
   void disabled_test_focusOK_allBanksOff() {
@@ -450,7 +488,7 @@ public:
     EnggDiffCalibSettings calibSettings;
     EXPECT_CALL(mockView, currentCalibSettings())
         .Times(1)
-        .WillOnce(Return(calibSettings));
+        .WillOnce(Return(m_basicCalibSettings));
 
     EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
@@ -708,16 +746,17 @@ public:
     pres.notify(IEnggDiffractionPresenter::RebinTime);
   }
 
-  // this test does run Load and then Rebin
+
+  // this test does run Load and then Rebin // shahroz, test doesnt work 
   void test_preproc_event_time_ok() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     EnggDiffPresenterNoThread pres(&mockView);
-
+	double bin = 1.0;
     // inputs from user
     EXPECT_CALL(mockView, currentPreprocRunNo())
         .Times(1)
-        .WillOnce(Return(g_eventModeRunNo));
-    EXPECT_CALL(mockView, rebinningTimeBin()).Times(1).WillOnce(Return(1.0));
+        .WillRepeatedly(Return(g_eventModeRunNo));
+    EXPECT_CALL(mockView, rebinningTimeBin()).Times(1).WillOnce(Return(bin));
 
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -758,7 +797,7 @@ public:
     pres.notify(IEnggDiffractionPresenter::RebinMultiperiod);
   }
 
-  // this test does run Load but then RebinByPulseTimes should fail
+  // this test does run Load but then RebinByPulseTimes should fail, shahroz doesnt work
   void test_preproc_event_multiperiod_file_wrong_type() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     EnggDiffPresenterNoThread pres(&mockView);
@@ -849,26 +888,32 @@ public:
     pres.notify(IEnggDiffractionPresenter::ShutDown);
   }
 
+
 private:
   boost::scoped_ptr<testing::NiceMock<MockEnggDiffractionView>> m_view;
   boost::scoped_ptr<MantidQt::CustomInterfaces::EnggDiffractionPresenter>
       m_presenter;
 
   std::vector<bool> m_ex_enginx_banks;
+  const static std::string g_eventModeRunNo;
+  const static std::string g_eventModeVan;
+  EnggDiffCalibSettings m_basicCalibSettings;
+
   std::vector<std::string> m_ex_empty_run_num;
   std::vector<std::string> m_invalid_run_number;
   std::vector<std::string> m_ex_run_number;
   std::vector<std::string> g_vanNo;
   std::vector<std::string> g_ceriaNo;
-  const static std::string g_eventModeRunNo;
-};
 
+};
 
 // Note this is not a correct event mode run number. Using it here just
 // as a run number that is found.
 // A possible event mode file would be: 197019, but it is too big for
 // unit test data. TODO: find a small one or crop a big one.
 const std::string EnggDiffractionPresenterTest::g_eventModeRunNo =
-    "ENGINX228061";
+    "228061";
 
+const std::string EnggDiffractionPresenterTest::g_eventModeVan =
+"236516";
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONPRESENTERTEST_H
