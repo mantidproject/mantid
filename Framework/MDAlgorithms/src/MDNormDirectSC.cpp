@@ -45,7 +45,9 @@ MDNormDirectSC::MDNormDirectSC()
 int MDNormDirectSC::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string MDNormDirectSC::category() const { return "MDAlgorithms"; }
+const std::string MDNormDirectSC::category() const {
+  return "MDAlgorithms\\Normalisation";
+}
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string MDNormDirectSC::summary() const {

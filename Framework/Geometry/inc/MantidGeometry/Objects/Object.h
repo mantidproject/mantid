@@ -85,11 +85,12 @@ public:
                           std::string &Ln); ///< Process a complementary object
   int hasComplement() const;
 
-  int populate(const std::map<int, Surface *> &);
+  int populate(const std::map<int, boost::shared_ptr<Surface>> &);
   int createSurfaceList(const int outFlag = 0); ///< create Surface list
   int addSurfString(const std::string &);       ///< Not implemented
   int removeSurface(const int SurfN);
-  int substituteSurf(const int SurfN, const int NsurfN, Surface *SPtr);
+  int substituteSurf(const int SurfN, const int NsurfN,
+                     const boost::shared_ptr<Surface> &SPtr);
   void makeComplement();
   void convertComplement(const std::map<int, Object> &);
 

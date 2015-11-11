@@ -28,7 +28,9 @@ const std::string FindUBUsingFFT::name() const { return "FindUBUsingFFT"; }
 
 int FindUBUsingFFT::version() const { return 1; }
 
-const std::string FindUBUsingFFT::category() const { return "Crystal"; }
+const std::string FindUBUsingFFT::category() const {
+  return "Crystal\\UBMatrix";
+}
 
 //--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

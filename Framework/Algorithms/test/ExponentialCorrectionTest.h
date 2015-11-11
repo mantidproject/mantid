@@ -18,10 +18,6 @@ public:
 
   void testVersion() { TS_ASSERT_EQUALS(expon.version(), 1) }
 
-  void testCategory() {
-    TS_ASSERT_EQUALS(expon.category(), "CorrectionFunctions;Arithmetic")
-  }
-
   void testInit() {
     Mantid::Algorithms::ExponentialCorrection expon2;
     TS_ASSERT_THROWS_NOTHING(expon2.initialize())

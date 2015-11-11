@@ -34,7 +34,7 @@ int CreateSimulationWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string CreateSimulationWorkspace::category() const {
-  return "Quantification";
+  return "Inelastic\\Quantification";
 }
 
 //----------------------------------------------------------------------------------------------

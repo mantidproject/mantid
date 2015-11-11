@@ -87,7 +87,7 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
 #-------------------------------------------------------------------------------
 
     def category(self):
-        return 'PythonAlgorithms;Inelastic;Simulation'
+        return 'Inelastic\\DataHandling;Simulation'
 
 #-------------------------------------------------------------------------------
 

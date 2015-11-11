@@ -10,11 +10,11 @@
 Description
 -----------
 
-Checks if a new release of Mantid is available using the Github API for inspecting the most recent release.  
+Checks if a new release of Mantid is available using the Github API for inspecting the most recent release.
 In order to reduce API usage and optimise performance the request is sent with a "if-modified-since" header
 with the date of the current release.
 
-This algorithm is run on asynchronously on start-up in release builds and official releases of Mantid.  
+This algorithm is run on asynchronously on start-up in release builds and official releases of Mantid.
 It only outputs messages to the logs and outpus properties, it does not change anything else.
 
 If you want to disable the check on start-up add this to your mantid.user.properties file::
@@ -26,7 +26,7 @@ Usage
 
 **Example - CheckMantidVersion**
 
-.. testcode:: CheckMantidVersionExample
+.. code::
 
     (current_version, most_recent_version, is_new_version_available)=CheckMantidVersion()
     print "Current Version: " + current_version
@@ -35,9 +35,8 @@ Usage
 
 Output:
 
-.. testoutput:: CheckMantidVersionExample
-   :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
-   
+.. code::
+
     Current Version: ...
     Most Recent Version: ...
     Is a newer version available? ...
@@ -46,4 +45,3 @@ Output:
 .. categories::
 
 .. sourcelink::
-

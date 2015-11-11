@@ -27,7 +27,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     _calibration_workspace = None
 
     def category(self):
-        return "Workflow\\MIDAS;Inelastic;PythonAlgorithms"
+        return "Workflow\\MIDAS;Inelastic\\Reduction"
 
 
     def summary(self):

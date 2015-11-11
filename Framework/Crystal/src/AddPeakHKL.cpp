@@ -34,7 +34,7 @@ const std::string AddPeakHKL::name() const { return "AddPeakHKL"; }
 int AddPeakHKL::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string AddPeakHKL::category() const { return "Crystal"; }
+const std::string AddPeakHKL::category() const { return "Crystal\\Peaks"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string AddPeakHKL::summary() const {

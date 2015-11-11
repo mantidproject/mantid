@@ -27,7 +27,7 @@ class DNSMergeRuns(PythonAlgorithm):
         """
         Returns category
         """
-        return 'PythonAlgorithms\\MLZ\\DNS'
+        return 'Workflow\\MLZ\\DNS'
 
     def name(self):
         """

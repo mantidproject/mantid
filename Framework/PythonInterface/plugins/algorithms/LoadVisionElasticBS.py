@@ -13,7 +13,7 @@ class LoadVisionElasticBS(PythonAlgorithm):
     __backscattering = "bank15,bank16,bank17,bank18,bank19,bank20,bank21,bank22,bank23,bank24"
 
     def category(self):
-        return "DataHandling;PythonAlgorithms"
+        return "DataHandling\\Nexus"
 
     def name(self):
         return "LoadVisionElasticBS"

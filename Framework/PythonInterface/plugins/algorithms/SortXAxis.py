@@ -8,7 +8,7 @@ import numpy as np
 class SortXAxis(PythonAlgorithm):
 
     def category(self):
-        return "Transforms\\Axes"
+        return "Transforms\\Axes;Utility\\Sorting"
 
 
     def name(self):

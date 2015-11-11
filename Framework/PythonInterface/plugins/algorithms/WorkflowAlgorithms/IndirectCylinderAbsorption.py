@@ -25,7 +25,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
 
 
     def category(self):
-        return "Workflow\\Inelastic;PythonAlgorithms;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
+        return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
 
 
     def summary(self):

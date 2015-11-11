@@ -6,7 +6,7 @@ from mantid.api import PythonAlgorithm, AlgorithmFactory
 class MuscatFunc(PythonAlgorithm):
 
     def category(self):
-        return "Workflow\\MIDAS;PythonAlgorithms"
+        return "Workflow\\MIDAS"
 
     def summary(self):
         return "Calculates multiple scattering using S(Q,w) from specified functions."

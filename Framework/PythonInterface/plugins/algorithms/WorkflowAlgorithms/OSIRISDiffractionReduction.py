@@ -209,7 +209,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
 
     def category(self):
-        return 'Diffraction;PythonAlgorithms'
+        return 'Diffraction\\Reduction'
 
     def summary(self):
         return "This Python algorithm performs the operations necessary for the reduction of diffraction data "+\
