@@ -14,6 +14,7 @@
 #include "MantidGeometry/Rendering/CacheGeometryHandler.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidKernel/RegexStrings.h"
 #include "MantidKernel/Tolerance.h"
 #include <deque>
@@ -30,7 +31,7 @@ using Kernel::Quat;
 *  Default constuctor
 */
 Object::Object()
-    : ObjName(0), TopRule(0), m_boundingBox(), AABBxMax(0), AABByMax(0),
+    : ObjName(0), TopRule(), m_boundingBox(), AABBxMax(0), AABByMax(0),
       AABBzMax(0), AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false),
       handle(), bGeometryCaching(false),
       vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()),
@@ -45,7 +46,7 @@ Object::Object()
 *  @param shapeXML : string with original shape xml.
 */
 Object::Object(const std::string &shapeXML)
-    : ObjName(0), TopRule(0), m_boundingBox(), AABBxMax(0), AABByMax(0),
+    : ObjName(0), TopRule(), m_boundingBox(), AABBxMax(0), AABByMax(0),
       AABBzMax(0), AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false),
       handle(), bGeometryCaching(false),
       vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()),
@@ -80,8 +81,8 @@ Object::Object(const Object &A)
 Object &Object::operator=(const Object &A) {
   if (this != &A) {
     ObjName = A.ObjName;
-    delete TopRule;
-    TopRule = (A.TopRule) ? A.TopRule->clone().release() : 0;
+    // delete TopRule;
+    TopRule = (A.TopRule) ? A.TopRule->clone() : 0;
     AABBxMax = A.AABBxMax;
     AABByMax = A.AABByMax;
     AABBzMax = A.AABBzMax;
@@ -106,7 +107,7 @@ Object &Object::operator=(const Object &A) {
 * Destructor
 * Deletes the rule
 */
-Object::~Object() { delete TopRule; }
+Object::~Object() {}
 
 /**
  * @param material The new Material that the object is composed from
@@ -270,7 +271,7 @@ int Object::hasComplement() const {
 */
 int Object::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
   std::deque<Rule *> Rst;
-  Rst.push_back(TopRule);
+  Rst.push_back(TopRule.get());
   Rule *TA, *TB; // Tmp. for storage
 
   int Rcount(0);
@@ -318,7 +319,8 @@ int Object::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
 * @retval 0 :: No rule to find
 * @retval 1 :: A rule has been combined
 */
-int Object::procPair(std::string &Ln, std::map<int, Rule *> &Rlist,
+int Object::procPair(std::string &Ln,
+                     std::map<int, std::unique_ptr<Rule>> &Rlist,
                      int &compUnit) const
 
 {
@@ -351,13 +353,14 @@ int Object::procPair(std::string &Ln, std::map<int, Rule *> &Rlist,
     ;
 
   // Get rules
-  Rule *RRA = Rlist[Ra];
-  Rule *RRB = Rlist[Rb];
-  auto Join = (type) ? std::unique_ptr<Rule>(
-                           std::make_unique<Union>(RRA->clone(), RRB->clone()))
-                     : std::unique_ptr<Rule>(std::make_unique<Intersection>(
-                           RRA->clone(), RRB->clone()));
-  Rlist[Ra] = Join.release();
+  auto RRA = std::move(Rlist[Ra]);
+  auto RRB = std::move(Rlist[Rb]);
+  auto Join =
+      (type) ? std::unique_ptr<Rule>(Mantid::Kernel::make_unique<Union>(
+                   std::move(RRA), std::move(RRB)))
+             : std::unique_ptr<Rule>(Mantid::Kernel::make_unique<Intersection>(
+                   std::move(RRA), std::move(RRB)));
+  Rlist[Ra] = std::move(Join);
   Rlist.erase(Rlist.find(Rb));
 
   // Remove space round pair
@@ -381,18 +384,19 @@ int Object::procPair(std::string &Ln, std::map<int, Rule *> &Rlist,
 * @param RItem :: to encapsulate
 * @returns the complementary group
 */
-CompGrp *Object::procComp(Rule *RItem) const {
+std::unique_ptr<CompGrp> Object::procComp(std::unique_ptr<Rule> RItem) const {
   if (!RItem)
-    return new CompGrp();
+    return Mantid::Kernel::make_unique<CompGrp>();
 
   Rule *Pptr = RItem->getParent();
-  auto CG = std::make_unique<CompGrp>(Pptr, std::unique_ptr<Rule>(RItem));
+  Rule *RItemptr = RItem.get();
+  auto CG = std::make_unique<CompGrp>(Pptr, std::move(RItem));
   auto ptrCG = CG.get();
   if (Pptr) {
-    const int Ln = Pptr->findLeaf(RItem);
+    const int Ln = Pptr->findLeaf(RItemptr);
     Pptr->setLeaf(std::move(CG), Ln);
   }
-  return ptrCG;
+  return ptrCG->clone();
 }
 
 /**
@@ -490,7 +494,7 @@ bool Object::isValid(const std::map<int, int> &SMap) const {
 int Object::createSurfaceList(const int outFlag) {
   SurList.clear();
   std::stack<const Rule *> TreeLine;
-  TreeLine.push(TopRule);
+  TreeLine.push(TopRule.get());
   while (!TreeLine.empty()) {
     const Rule *tmpA = TreeLine.top();
     TreeLine.pop();
@@ -571,7 +575,7 @@ void Object::print() const {
   std::deque<Rule *> Rst;
   std::vector<int> Cells;
   int Rcount(0);
-  Rst.push_back(TopRule);
+  Rst.push_back(TopRule.get());
   Rule *TA, *TB; // Temp. for storage
 
   while (!Rst.empty()) {
@@ -608,8 +612,8 @@ void Object::print() const {
 * Takes the complement of a group
 */
 void Object::makeComplement() {
-  Rule *NCG = procComp(TopRule);
-  TopRule = NCG;
+  std::unique_ptr<Rule> NCG = procComp(std::move(TopRule));
+  TopRule = std::move(NCG);
   return;
 }
 
@@ -668,14 +672,14 @@ void Object::write(std::ostream &OX) const {
 * @returns 1 on success
 */
 int Object::procString(const std::string &Line) {
-  delete TopRule;
+  // delete TopRule;
   TopRule = 0;
-  std::map<int, Rule *> RuleList; // List for the rules
+  std::map<int, std::unique_ptr<Rule>> RuleList; // List for the rules
   int Ridx = 0; // Current index (not necessary size of RuleList
   // SURFACE REPLACEMENT
   // Now replace all free planes/Surfaces with appropiate Rxxx
-  SurfPoint *TmpR(0); // Tempory Rule storage position
-  CompObj *TmpO(0);   // Tempory Rule storage position
+  std::unique_ptr<SurfPoint> TmpR; // Tempory Rule storage position
+  std::unique_ptr<CompObj> TmpO;   // Tempory Rule storage position
 
   std::string Ln = Line;
   // Remove all surfaces :
@@ -690,14 +694,14 @@ int Object::procString(const std::string &Line) {
             "Invalid surface string in Object::ProcString : " + Line);
       // Process #Number
       if (i != 0 && Ln[i - 1] == '#') {
-        TmpO = new CompObj();
+        TmpO = Mantid::Kernel::make_unique<CompObj>();
         TmpO->setObjN(SN);
-        RuleList[Ridx] = TmpO;
+        RuleList[Ridx] = std::move(TmpO);
       } else // Normal rule
       {
-        TmpR = new SurfPoint();
+        TmpR = Mantid::Kernel::make_unique<SurfPoint>();
         TmpR->setKeyN(SN);
-        RuleList[Ridx] = TmpR;
+        RuleList[Ridx] = std::move(TmpR);
       }
       cx << " R" << Ridx << " ";
       Ridx++;
@@ -726,7 +730,7 @@ int Object::procString(const std::string &Line) {
            hCnt--)
         ;
       if (hCnt >= 0 && Ln[hCnt] == '#') {
-        RuleList[compUnit] = procComp(RuleList[compUnit]);
+        RuleList[compUnit] = procComp(std::move(RuleList[compUnit]));
         Ln.erase(hCnt, lbrack - hCnt);
       }
     } else
@@ -743,7 +747,7 @@ int Object::procString(const std::string &Line) {
     exit(1);
     return 0;
   }
-  TopRule = (RuleList.begin())->second;
+  TopRule = std::move((RuleList.begin())->second);
   return 1;
 }
 

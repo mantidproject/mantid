@@ -48,7 +48,7 @@ int Rule::addToKey(std::vector<int> &AV, const int passN)
   return -1;
 }
 
-int Rule::removeComplementary(Rule *&TopRule)
+int Rule::removeComplementary(std::unique_ptr<Rule> &TopRule)
 /**
   Given a rule tree remove any parts that
   are (-A B C D A) -> (B C D) and
@@ -76,7 +76,7 @@ int Rule::removeComplementary(Rule *&TopRule)
   while (active) {
     active = 0;
     std::stack<DTriple<Rule *, int, Rule *>> TreeLine; // Tree stack of rules
-    TreeLine.push(DTriple<Rule *, int, Rule *>(0, 0, TopRule));
+    TreeLine.push(DTriple<Rule *, int, Rule *>(0, 0, TopRule.get()));
 
     while (!active && !TreeLine.empty()) // need to exit on active
     {
@@ -120,7 +120,7 @@ int Rule::removeComplementary(Rule *&TopRule)
   return 1;
 }
 
-int Rule::makeCNFcopy(Rule *&TopRule)
+int Rule::makeCNFcopy(std::unique_ptr<Rule> &TopRule)
 /**
   Static Function::
 
@@ -148,7 +148,7 @@ int Rule::makeCNFcopy(Rule *&TopRule)
   /*
     The process works by below value deletion:
     This is when the tree is modified at a particular
-    point, each memeber of the tree below the modification
+    point, each member of the tree below the modification
     point is deleted and the modification point is
     replaced with a new version (normally a cloned copy).
     This is fine for small items (eg here the memory footprint
@@ -169,13 +169,13 @@ int Rule::makeCNFcopy(Rule *&TopRule)
 
     // Start by putting the top item on the Tree Stack.
     // Note that it doesn't have a parent.
-    TreeLine.push(DTriple<Rule *, int, Rule *>(0, 0, TopRule));
+    TreeLine.push(DTriple<Rule *, int, Rule *>(0, 0, TopRule.get()));
 
     // Exit condition is that nothing changed last time
     // or the tree is Empty.
 
     while (!active && !TreeLine.empty()) {
-      // Ok get and remvoe the top item from the stack.
+      // Ok get and remove the top item from the stack.
       TreeComp = TreeLine.top();
       TreeLine.pop();
 
@@ -232,13 +232,14 @@ int Rule::makeCNFcopy(Rule *&TopRule)
           // hence we have to play games with a second
           // gamma->clone()
           std::unique_ptr<Rule> tmp1 =
-              std::unique_ptr<Rule>(Mantid::Kernel::make_unique<Intersection>(
-                  std::move(alpha), std::move(gamma)));
+              Mantid::Kernel::make_unique<Intersection>(std::move(alpha),
+                                                        std::move(gamma));
           std::unique_ptr<Rule> tmp2 =
-              std::unique_ptr<Rule>(Mantid::Kernel::make_unique<Intersection>(
-                  std::move(beta), std::move(gamma)));
+              Mantid::Kernel::make_unique<Intersection>(std::move(beta),
+                                                        std::move(gamma));
           std::unique_ptr<Rule> partReplace =
-              std::make_unique<Union>(std::move(tmp1), std::move(tmp2));
+              Mantid::Kernel::make_unique<Union>(std::move(tmp1),
+                                                 std::move(tmp2));
           //
           // General replacement
           //
@@ -246,10 +247,10 @@ int Rule::makeCNFcopy(Rule *&TopRule)
             TreeComp.first->setLeaf(std::move(partReplace), TreeComp.second);
           else
             // It is the top rule therefore, replace the toprule
-            TopRule = partReplace.release();
+            TopRule = std::move(partReplace);
 
           // Clear up the mess and delete the rule that we have changes
-          delete tmpA;
+          // delete tmpA;
           // Now we have to go back to the begining again and start again.
           active = 1; // Exit loop
         }
@@ -259,7 +260,7 @@ int Rule::makeCNFcopy(Rule *&TopRule)
   return count - 1; // return number of changes
 }
 
-int Rule::makeCNF(Rule *&TopRule)
+int Rule::makeCNF(std::unique_ptr<Rule> &TopRule)
 /**
   Static Function::
 
@@ -296,7 +297,7 @@ int Rule::makeCNF(Rule *&TopRule)
 
     // Start by putting the top item on the Tree Stack.
     // Note that it doesn't have a parent.
-    TreeLine.push(TopRule);
+    TreeLine.push(TopRule.get());
 
     // Exit condition is that nothing changed last time
     // or the tree is Empty.
@@ -329,7 +330,7 @@ int Rule::makeCNF(Rule *&TopRule)
         if (tmpB->type() == -1 ||
             tmpC->type() == -1) // this is a union expand....
         {
-          std::unique_ptr<Rule> alpha, beta, gamma, Uobj; // Uobj to be deleted
+          std::unique_ptr<Rule> alpha, beta, gamma; // Uobj to be deleted
           if (tmpB->type() ==
               -1) // ok the LHS is a union. (a ^ b) v g ==> (a v g) ^ (b v g )
           {
@@ -337,7 +338,6 @@ int Rule::makeCNF(Rule *&TopRule)
             alpha = tmpB->leaf(0)->clone();
             beta = tmpB->leaf(1)->clone();
             gamma = tmpC->clone();
-            Uobj = tmpB->clone();
           } else // RHS a v (b ^ g) ==> (a v b) ^ (a v g )
           {
             // Make copies of the Unions leaves (allowing for null union)
@@ -347,7 +347,6 @@ int Rule::makeCNF(Rule *&TopRule)
             alpha = tmpC->leaf(0)->clone();
             beta = tmpC->leaf(1)->clone();
             gamma = tmpB->clone();
-            Uobj = tmpC->clone();
           }
           // Have bit to replace
 
@@ -369,14 +368,7 @@ int Rule::makeCNF(Rule *&TopRule)
             const int leafN = Pnt->findLeaf(tmpA);
             Pnt->setLeaf(std::move(partReplace), leafN);
           } else
-            TopRule = partReplace.release();
-
-          // Clear up the mess and delete the rule that we have changes
-          // Set the cutoffs in the correct place to avoid a complete
-          // tree deletion
-          tmpA->setLeaves(0, 0);
-          delete tmpA;
-          Uobj->setLeaves(0, 0);
+            TopRule = std::move(partReplace);
           // Now we have to go back to the begining again and start again.
           active = 1; // Exit loop
         }
@@ -386,7 +378,7 @@ int Rule::makeCNF(Rule *&TopRule)
   return count - 1; // return number of changes
 }
 
-int Rule::removeItem(Rule *&TRule, const int SurfN)
+int Rule::removeItem(std::unique_ptr<Rule> &TRule, const int SurfN)
 /**
   Given an item as a surface name,
   remove the surface from the Rule tree.
@@ -408,9 +400,9 @@ int Rule::removeItem(Rule *&TRule, const int SurfN)
       Rule *PObj =
           (LevelOne->leaf(0) != Ptr) ? LevelOne->leaf(0) : LevelOne->leaf(1);
       //
-      LevelOne->setLeaves(0, 0); // Delete from Ptr, and copy
+      // LevelOne->setLeaves(0, 0); // Delete from Ptr, and copy
       const int side = (LevelTwo->leaf(0) != LevelOne) ? 1 : 0;
-      LevelTwo->setLeaf(std::unique_ptr<Rule>(PObj), side);
+      LevelTwo->setLeaf(PObj->clone(), side);
     } else if (LevelOne) // LevelOne is the top rule
     {
       // Decide which of the pairs is to be copied
@@ -418,10 +410,10 @@ int Rule::removeItem(Rule *&TRule, const int SurfN)
           (LevelOne->leaf(0) != Ptr) ? LevelOne->leaf(0) : LevelOne->leaf(1);
 
       PObj->setParent(0); /// New Top rule
-      TRule = PObj;
-      LevelOne->setLeaves(0, 0); // Delete from Ptr, and copy
+      TRule = PObj->clone();
+      // LevelOne->setLeaves(0, 0); // Delete from Ptr, and copy
       // Note we now need to delete this
-      delete LevelOne;
+      // delete LevelOne;
     } else // Basic surf object
     {
       SurfPoint *SX = dynamic_cast<SurfPoint *>(Ptr);
@@ -432,7 +424,7 @@ int Rule::removeItem(Rule *&TRule, const int SurfN)
       SX->setKey(boost::shared_ptr<Surface>());
       return cnt + 1;
     }
-    delete Ptr;
+    // delete Ptr;
     // delete LevelOne; // Shouldn't delete now we're deleting in setLeaf.
     Ptr = TRule->findKey(SurfN);
     cnt++;

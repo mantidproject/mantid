@@ -54,11 +54,13 @@ private:
       std::vector<int> &) const; ///< Fills the vector with the surfaces
 
 public:
-  static int makeCNFcopy(Rule *&); ///< Make Rule into a CNF format (slow)
-  static int makeFullDNF(Rule *&); ///< Make Rule into a full DNF format
-  static int makeCNF(Rule *&);     ///< Make Rule into a CNF format
-  static int removeComplementary(Rule *&); ///< NOT WORKING
-  static int removeItem(Rule *&TRule, const int SurfN);
+  static int
+  makeCNFcopy(std::unique_ptr<Rule> &); ///< Make Rule into a CNF format (slow)
+  static int
+  makeFullDNF(std::unique_ptr<Rule> &); ///< Make Rule into a full DNF format
+  static int makeCNF(std::unique_ptr<Rule> &); ///< Make Rule into a CNF format
+  static int removeComplementary(std::unique_ptr<Rule> &); ///< NOT WORKING
+  static int removeItem(std::unique_ptr<Rule> &TRule, const int SurfN);
 
   Rule();
   Rule(Rule *);

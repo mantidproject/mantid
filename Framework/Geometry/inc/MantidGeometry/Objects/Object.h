@@ -69,7 +69,7 @@ public:
   virtual ~Object();
 
   /// Return the top rule
-  const Rule *topRule() const { return TopRule; }
+  const Rule *topRule() const { return TopRule.get(); }
 
   void setName(const int nx) { ObjName = nx; } ///< Set Name
   int getName() const { return ObjName; }      ///< Get Name
@@ -167,11 +167,11 @@ public:
 
 private:
   int ObjName;   ///< Creation number
-  Rule *TopRule; ///< Top rule [ Geometric scope of object]
+  std::unique_ptr<Rule> TopRule; ///< Top rule [ Geometric scope of object]
 
-  int procPair(std::string &Ln, std::map<int, Rule *> &Rlist,
+  int procPair(std::string &Ln, std::map<int, std::unique_ptr<Rule>> &Rlist,
                int &compUnit) const;
-  CompGrp *procComp(Rule *) const;
+  std::unique_ptr<CompGrp> procComp(std::unique_ptr<Rule>) const;
   int checkSurfaceValid(const Kernel::V3D &, const Kernel::V3D &) const;
   BoundingBox m_boundingBox; ///< Object's bounding box
 
