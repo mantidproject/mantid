@@ -103,11 +103,18 @@ void ResNorm::run() {
   double eMax(m_dblManager->value(m_properties["EMax"]));
 
   QString outputWsName = getWorkspaceBasename(vanWsName) + "_ResNorm";
+  QString resCloneName = "__" + resWsName + "_temp";
+  IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
+  clone->initialize();
+  clone->setProperty("InputWorkspace", resWsName.toStdString());
+  clone->setProperty("OutputWorkspace", resCloneName.toStdString());
+  clone->execute();
+
 
   IAlgorithm_sptr resNorm = AlgorithmManager::Instance().create("ResNorm", 2);
   resNorm->initialize();
   resNorm->setProperty("VanadiumWorkspace", vanWsName.toStdString());
-  resNorm->setProperty("ResolutionWorkspace", resWsName.toStdString());
+  resNorm->setProperty("ResolutionWorkspace", resCloneName.toStdString());
   resNorm->setProperty("EnergyMin", eMin);
   resNorm->setProperty("EnergyMax", eMax);
   resNorm->setProperty("CreateOutput", true);
