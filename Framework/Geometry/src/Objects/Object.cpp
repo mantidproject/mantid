@@ -386,7 +386,7 @@ std::unique_ptr<CompGrp> Object::procComp(std::unique_ptr<Rule> RItem) const {
 
   Rule *Pptr = RItem->getParent();
   Rule *RItemptr = RItem.get();
-  auto CG = std::make_unique<CompGrp>(Pptr, std::move(RItem));
+  auto CG = Mantid::Kernel::make_unique<CompGrp>(Pptr, std::move(RItem));
   if (Pptr) {
     const int Ln = Pptr->findLeaf(RItemptr);
     Pptr->setLeaf(std::move(CG), Ln);
