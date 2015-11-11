@@ -11,11 +11,11 @@ IPYTHON=$(command -v ipython)
 PYTHON=$(command -v python)
 
 # Define extra libraries and load paths
-LOCAL_PRELOAD=`readlink --no-newline --canonicalize-existing /usr/lib/libtcmalloc_minimal.so`
+LOCAL_PRELOAD=`readlink --no-newline --canonicalize-existing @TCMALLOC_LIBRARIES@`
 if [ -n "${LD_PRELOAD}" ]; then
     LOCAL_PRELOAD=${LOCAL_PRELOAD}:${LD_PRELOAD}
 fi
-LOCAL_LDPATH=${INSTALLDIR}/../lib/paraview-4.3:${LD_LIBRARY_PATH}
+LOCAL_LDPATH=@EXTRA_LDPATH@:${LD_LIBRARY_PATH}
 if [ -z "${TCMALLOC_RELEASE_RATE}" ]; then
     TCM_RELEASE=10000
 else
@@ -35,18 +35,18 @@ if [ -n "$1" ] && [ "$1" = "--classic" ]; then
     shift
     # Launch python
     LD_PRELOAD=${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=${TCM_RELEASE} \
-    LD_LIBRARY_PATH=${LOCAL_LDPATH} QT_API=pyqt \
-    PV_PLUGIN_PATH=${PV_PLUGIN_PATH} \
-    PYTHONPATH=${LOCAL_PYTHONPATH} \
-    ${PYTHON} $*
+        LD_LIBRARY_PATH=${LOCAL_LDPATH} QT_API=pyqt \
+        PV_PLUGIN_PATH=${PV_PLUGIN_PATH} \
+        PYTHONPATH=${LOCAL_PYTHONPATH} \
+        @WRAPPER_PREFIX@${PYTHON} $*@WRAPPER_POSTFIX@
 
 else
 
     # Launch ipython
     LD_PRELOAD=${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=${TCM_RELEASE} \
-    LD_LIBRARY_PATH=${LOCAL_LDPATH} QT_API=pyqt \
-    PV_PLUGIN_PATH=${PV_PLUGIN_PATH} \
-    PYTHONPATH=${LOCAL_PYTHONPATH} \
-    ${IPYTHON} $*
+        LD_LIBRARY_PATH=${LOCAL_LDPATH} QT_API=pyqt \
+        PV_PLUGIN_PATH=${PV_PLUGIN_PATH} \
+        PYTHONPATH=${LOCAL_PYTHONPATH} \
+        @WRAPPER_PREFIX@${IPYTHON} $*@WRAPPER_POSTFIX@
 fi
 
