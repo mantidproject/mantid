@@ -35,6 +35,7 @@ class AlignComponents(PythonAlgorithm):
         """
         return "Align a component by minimising difference to an offset workspace"
 
+    #pylint: disable=too-many-locals
     def PyInit(self):
         self.declareProperty(ITableWorkspaceProperty("CalibrationTable", "",
                                                      optional=PropertyMode.Mandatory,
@@ -60,11 +61,13 @@ class AlignComponents(PythonAlgorithm):
 
         # Source
         self.declareProperty(name="FitSourcePosition", defaultValue=False,
-                             doc="Fit the source position, changes L1 (source to sample) distance. Uses entire instrument. Occurs before Components are Aligned.")
+                             doc="Fit the source position, changes L1 (source to sample) distance."
+                             "Uses entire instrument. Occurs before Components are Aligned.")
 
         # Sample
         self.declareProperty(name="FitSamplePosition", defaultValue=False,
-                             doc="Fit the sample position, changes L1 (source to sample) and L2 (sample to detector) distance. Uses entire instrument. Occurs before Components are Aligned.")
+                             doc="Fit the sample position, changes L1 (source to sample) and L2 (sample to detector) distance."
+                             "Uses entire instrument. Occurs before Components are Aligned.")
 
         # List of components
         self.declareProperty(StringArrayProperty("ComponentList",
