@@ -79,6 +79,10 @@ void SphericalAbsorption::exec() {
   correctionFactors->setYUnitLabel("Attenuation factor");
   double m_sphRadius = getProperty("SphericalSampleRadius"); // in cm
 
+  Progress progress(this, 0, 1, 2);
+
+  progress.report("AnvredCorrection");
+
   IAlgorithm_sptr anvred = createChildAlgorithm("AnvredCorrection");
   anvred->setProperty<MatrixWorkspace_sptr>("InputWorkspace", m_inputWS);
   anvred->setProperty<MatrixWorkspace_sptr>("OutputWorkspace",
@@ -89,6 +93,9 @@ void SphericalAbsorption::exec() {
   anvred->setProperty("LinearAbsorptionCoef", m_refAtten);
   anvred->setProperty("Radius", m_sphRadius);
   anvred->executeAsChildAlg();
+
+  progress.report();
+
   // Get back the result
   correctionFactors = anvred->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", correctionFactors);
