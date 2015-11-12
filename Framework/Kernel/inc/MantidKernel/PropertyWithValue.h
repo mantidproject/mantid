@@ -242,16 +242,19 @@ inline void addingOperator(std::vector<T> &lhs, const std::vector<T> &rhs) {
   }
 }
 
-template <> inline void addingOperator(OptionalBool &, const OptionalBool &) {
+template <> inline void addingOperator(bool &, const bool &) {
   throw Exception::NotImplementedError(
       "PropertyWithValue.h: += operator not implemented for type bool");
 }
 
+template <> inline void addingOperator(OptionalBool &, const OptionalBool &) {
+  throw Exception::NotImplementedError(
+      "PropertyWithValue.h: += operator not implemented for type OptionalBool");
+}
+
 template <typename T>
-inline void addingOperator(boost::shared_ptr<T> &lhs,
-                           const boost::shared_ptr<T> &rhs) {
-  UNUSED_ARG(lhs);
-  UNUSED_ARG(rhs);
+inline void addingOperator(boost::shared_ptr<T> &,
+                           const boost::shared_ptr<T> &) {
   throw Exception::NotImplementedError(
       "PropertyWithValue.h: += operator not implemented for boost::shared_ptr");
 }
