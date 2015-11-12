@@ -1,7 +1,8 @@
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
+
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h"

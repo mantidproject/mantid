@@ -1,7 +1,5 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/PythonRunner.h"
 // #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionModel.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
