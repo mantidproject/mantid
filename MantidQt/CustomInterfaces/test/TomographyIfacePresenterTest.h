@@ -349,7 +349,7 @@ public:
                       def.prep.normalizeByProtonCharge, true);
 
     TSM_ASSERT_EQUALS("Pre-processing settings default values should be as "
-                      "expected (flat/dark normalization)",
+                      "expected (median filter width)",
                       def.prep.medianFilterWidth, 3);
 
     TSM_ASSERT_EQUALS("Pre-processing settings default values should be as "
