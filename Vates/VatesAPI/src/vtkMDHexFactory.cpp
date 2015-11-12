@@ -65,7 +65,7 @@ void vtkMDHexFactory::doCreate(
   std::vector<API::IMDNode *> boxes;
   if (this->slice)
     ws->getBox()->getBoxes(boxes, m_maxDepth, true,
-                           this->sliceImplicitFunction);
+                           this->sliceImplicitFunction.get());
   else
     ws->getBox()->getBoxes(boxes, m_maxDepth, true);
 
@@ -77,30 +77,30 @@ void vtkMDHexFactory::doCreate(
               << " boxes down to depth " << m_maxDepth << std::endl;
 
   // Create 8 points per box.
-  vtkPoints *points = vtkPoints::New();
+  vtkNew<vtkPoints> points;
   points->Allocate(numBoxes * 8);
   points->SetNumberOfPoints(numBoxes * 8);
 
   // One scalar per box
-  vtkFloatArray *signals = vtkFloatArray::New();
+  vtkNew<vtkFloatArray> signals;
   signals->Allocate(numBoxes);
   signals->SetName(ScalarName.c_str());
   signals->SetNumberOfComponents(1);
-  // signals->SetNumberOfValues(numBoxes);
 
   // To cache the signal
-  float *signalArray = new float[numBoxes];
+  std::vector<float> signalCache;
+  signalCache.reserve(numBoxes);
 
   // True for boxes that we will use
-  bool *useBox = new bool[numBoxes];
-  memset(useBox, 0, sizeof(bool) * numBoxes);
+  boost::container::vector<bool> useBox;
+  useBox.assign(numBoxes, false);
 
-  // Create the data set
+  // Create the data set (will outlive this object - output of create)
   vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
   this->dataSet = visualDataSet;
   visualDataSet->Allocate(numBoxes);
 
-  vtkIdList *hexPointList = vtkIdList::New();
+  vtkNew<vtkIdList> hexPointList;
   hexPointList->SetNumberOfIds(8);
 
   NormFuncIMDNodePtr normFunction = makeMDEventNormalizationFunction(m_normalizationOption, ws.get());
@@ -117,16 +117,18 @@ void vtkMDHexFactory::doCreate(
       if (!isSpecial(signal_normalized) &&
           m_thresholdRange->inRange(signal_normalized)) {
         // Cache the signal and using of it
-        signalArray[i] = float(signal_normalized);
+        signalCache.push_back(float(signal_normalized));
         useBox[i] = true;
 
         // Get the coordinates.
         size_t numVertexes = 0;
-        coord_t *coords;
+        coord_t *coords; // raw pointer as comment below suggests it is
+                         // speed-critical
 
         // If slicing down to 3D, specify which dimensions to keep.
         if (this->slice)
-          coords = box->getVertexesArray(numVertexes, 3, this->sliceMask);
+          coords =
+              box->getVertexesArray(numVertexes, 3, this->sliceMask.data());
         else
           coords = box->getVertexesArray(numVertexes);
 
@@ -143,13 +145,15 @@ void vtkMDHexFactory::doCreate(
 
         // Free memory
         delete[] coords;
+      } else {
+        signalCache.push_back(0);
       }
     } // For each box
 
     if (VERBOSE)
       std::cout << tim << " to create the necessary points." << std::endl;
     // Add points
-    visualDataSet->SetPoints(points);
+    visualDataSet->SetPoints(points.GetPointer());
 
     for (size_t i = 0; i < boxes.size(); i++) {
       if (useBox[i]) {
@@ -157,7 +161,7 @@ void vtkMDHexFactory::doCreate(
         vtkIdType pointIds = i * 8;
 
         // Add signal
-        signals->InsertNextValue(signalArray[i]);
+        signals->InsertNextValue(signalCache[i]);
 
         hexPointList->SetId(0, pointIds + 0); // xyx
         hexPointList->SetId(1, pointIds + 1); // dxyz
@@ -169,7 +173,8 @@ void vtkMDHexFactory::doCreate(
         hexPointList->SetId(7, pointIds + 6); // xdydz
 
         // Add cells
-        visualDataSet->InsertNextCell(VTK_HEXAHEDRON, hexPointList);
+        visualDataSet->InsertNextCell(VTK_HEXAHEDRON,
+                                      hexPointList.GetPointer());
 
         double bounds[6];
 
@@ -182,15 +187,12 @@ void vtkMDHexFactory::doCreate(
       }
     } // for each box.
 
-    delete[] signalArray;
-    delete[] useBox;
-
     // Shrink to fit
     signals->Squeeze();
     visualDataSet->Squeeze();
 
     // Add scalars
-    visualDataSet->GetCellData()->SetScalars(signals);
+    visualDataSet->GetCellData()->SetScalars(signals.GetPointer());
 
     // Hedge against empty data sets
     if (visualDataSet->GetNumberOfPoints() <= 0) {
@@ -226,13 +228,13 @@ vtkDataSet *vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
     if (nd > 3) {
       // Slice from >3D down to 3D
       this->slice = true;
-      this->sliceMask = new bool[nd];
-      this->sliceImplicitFunction = new MDImplicitFunction();
+      this->sliceImplicitFunction = boost::make_shared<MDImplicitFunction>();
 
       // Make the mask of dimensions
       // TODO: Smarter mapping
+      this->sliceMask.clear();
       for (size_t d = 0; d < nd; d++)
-        this->sliceMask[d] = (d < 3);
+        this->sliceMask.push_back(d < 3);
 
       // Define where the slice is in 4D
       // TODO: Where to slice? Right now is just 0
@@ -260,12 +262,6 @@ vtkDataSet *vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
     // Macro to call the right instance of the
     CALL_MDEVENT_FUNCTION(this->doCreate, imdws);
     progressUpdating.eventRaised(1.0);
-
-    // Clean up
-    if (this->slice) {
-      delete[] this->sliceMask;
-      delete this->sliceImplicitFunction;
-    }
 
     // The macro does not allow return calls, so we used a member variable.
     return this->dataSet;

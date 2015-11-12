@@ -9,8 +9,10 @@
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
-
+#include <vtkNew.h>
+#include <boost/container/vector.hpp>
 #include <boost/shared_ptr.hpp>
+#include <vector>
 
 using Mantid::DataObjects::MDEventWorkspace;
 
@@ -101,10 +103,11 @@ private:
   mutable bool slice;
 
   /// Mask for choosing along which dimensions to slice
-  mutable bool * sliceMask;
+  mutable boost::container::vector<bool> sliceMask;
 
   /// Implicit function to define which boxes to render.
-  mutable Mantid::Geometry::MDImplicitFunction * sliceImplicitFunction;
+  mutable boost::shared_ptr<Mantid::Geometry::MDImplicitFunction>
+      sliceImplicitFunction;
 
   /// Time value.
   double m_time;
