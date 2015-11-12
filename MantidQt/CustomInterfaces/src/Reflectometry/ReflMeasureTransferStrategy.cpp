@@ -47,6 +47,10 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
   typedef std::map<MeasurementItem::IDType, VecSameMeasurement>
       MapGroupedMeasurement;
 
+  std::vector<std::map<std::string, std::string>> runs;
+  std::vector<std::map<std::string, std::string>> errors;
+
+  TransferResults results(runs, errors);
   MapGroupedMeasurement mapOfMeasurements;
   for (auto it = searchResults.begin(); it != searchResults.end(); ++it) {
     const auto location = it->second.location;
@@ -70,6 +74,7 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
       }
     } else {
       it->second.issues = metaData.whyUnuseable();
+      results.addErrorRow(metaData.id(), metaData.whyUnuseable());
     }
 
     // Obtaining metadata could take time.
@@ -100,7 +105,8 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
         std::stringstream buffer;
         buffer << nextGroupId;
         row[ReflTableSchema::GROUP] = buffer.str();
-        output.push_back(row);
+        //output.push_back(row);
+        results.addTransferRow(row);
         subIdMap.insert(std::make_pair(measurementItem.subId(), output.size()-1 /*Record actual row index*/));
       }
     }

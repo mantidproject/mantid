@@ -3,6 +3,7 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h"
+#include "MantidQtCustomInterfaces/Reflectometry/TransferResults.h"
 
 #include <vector>
 #include <map>

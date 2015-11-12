@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "MantidQtCustomInterfaces/Reflectometry/TransferResults.h"
+
 namespace Mantid {
 namespace Kernel {
 // Forward dec
