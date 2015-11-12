@@ -323,6 +323,30 @@ void TomographyIfaceViewQtGUI::updateCompResourceStatus(bool online) {
     m_uiTabRun.pushButton_remote_status->setText("Offline");
 }
 
+QDataStream &operator>>(QDataStream &stream, size_t &num) {
+  qint64 i;
+  stream >> i;
+  if (QDataStream::Ok == stream.status()) {
+    num = i;
+  }
+  return stream;
+}
+
+/// To serialize a filters settings, from a QDataStream <= QByteArray
+QDataStream &operator>>(QDataStream &stream, TomoReconFiltersSettings &fs) {
+  // clang-format off
+  return stream >> fs.prep.normalizeByProtonCharge
+                >> fs.prep.normalizeByFlatDark
+                >> fs.prep.medianFilterWidth
+                >> fs.prep.rotation
+                >> fs.prep.maxAngle
+                >> fs.prep.scaleDownFactor
+                >> fs.postp.circMaskRadius
+                >> fs.postp.cutOffLevel
+                >> fs.outputPreprocImages;
+  // clang-format on
+}
+
 /**
  * Load the settings for the tabs and widgets of the interface. This
  * relies on Qt settings functionality (QSettings class).
@@ -340,18 +364,53 @@ void TomographyIfaceViewQtGUI::readSettings() {
           .toString()
           .toStdString();
   // WARNING: it's critical to keep 'false' as default value, otherwise
-  // scripted runs may have issues. The CI builds could get stuck when
-  // closing this interface.
+  // tests and scripted runs may have issues. The CI builds could get stuck
+  // when closing this interface.
   m_settings.onCloseAskForConfirmation =
       qs.value("on-close-ask-for-confirmation", false).toBool();
 
   m_settings.useKeepAlive =
       qs.value("use-keep-alive", m_settings.useKeepAlive).toInt();
+
+  QByteArray rawFiltersSettings = qs.value("filters-settings").toByteArray();
+  QDataStream stream(rawFiltersSettings);
+  TomoReconFiltersSettings filtersSettings;
+  stream >> filtersSettings;
+  if (QDataStream::Ok == stream.status()) {
+    setPrePostProcSettings(filtersSettings);
+  } else {
+    // something wrong in the settings previously saved => go back to factory
+    // defaults
+    TomoReconFiltersSettings def;
+    setPrePostProcSettings(def);
+  }
+
   restoreGeometry(qs.value("interface-win-geometry").toByteArray());
+
   qs.endGroup();
 
   m_uiTabSetup.lineEdit_SCARF_path->setText(
       QString::fromStdString(m_settings.SCARFBasePath));
+}
+
+QDataStream &operator<<(QDataStream &stream, size_t const &num) {
+  return stream << static_cast<qint64>(num);
+}
+
+/// To serialize a filters settings, as a QDataStream => QByteArray
+QDataStream &operator<<(QDataStream &stream,
+                        TomoReconFiltersSettings const &fs) {
+  // clang-format off
+  return stream << fs.prep.normalizeByProtonCharge
+                << fs.prep.normalizeByFlatDark
+                << fs.prep.medianFilterWidth
+                << fs.prep.rotation
+                << fs.prep.maxAngle
+                << fs.prep.scaleDownFactor
+                << fs.postp.circMaskRadius
+                << fs.postp.cutOffLevel
+                << fs.outputPreprocImages;
+  // clang-format on
 }
 
 /**
@@ -365,7 +424,14 @@ void TomographyIfaceViewQtGUI::saveSettings() const {
   qs.setValue("on-close-ask-for-confirmation",
               m_settings.onCloseAskForConfirmation);
   qs.setValue("use-keep-alive", m_settings.useKeepAlive);
+
+  QByteArray filtersSettings;
+  QDataStream stream(&filtersSettings, QIODevice::WriteOnly);
+  stream << grabPrePostProcSettings();
+  qs.setValue("filters-settings", filtersSettings);
+
   qs.setValue("interface-win-geometry", saveGeometry());
+
   qs.endGroup();
 }
 
