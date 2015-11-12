@@ -7,6 +7,7 @@
 #include "MantidKernel/System.h"
 #include <cfloat>
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/Rules.h"
@@ -41,10 +42,6 @@ public:
     TS_ASSERT_EQUALS(A.leaf(1), (Rule *)0);
     A.setStatus(0);
     TS_ASSERT_EQUALS(A.display(), " False ");
-    BoolValue B(A);
-    TS_ASSERT_EQUALS(B.leaf(0), (Rule *)0);
-    TS_ASSERT_EQUALS(B.leaf(1), (Rule *)0);
-    TS_ASSERT_EQUALS(B.display(), " False ");
   }
 
   void testClone() {
@@ -54,12 +51,10 @@ public:
     TS_ASSERT_EQUALS(A.leaf(1), (Rule *)0);
     A.setStatus(0);
     TS_ASSERT_EQUALS(A.display(), " False ");
-    BoolValue *B;
-    B = A.clone();
+    auto B = A.clone();
     TS_ASSERT_EQUALS(B->leaf(0), (Rule *)0);
     TS_ASSERT_EQUALS(B->leaf(1), (Rule *)0);
     TS_ASSERT_EQUALS(B->display(), " False ");
-    delete B;
   }
 
   void testAssignment() {
@@ -69,12 +64,6 @@ public:
     TS_ASSERT_EQUALS(A.leaf(1), (Rule *)0);
     A.setStatus(0);
     TS_ASSERT_EQUALS(A.display(), " False ");
-    BoolValue B;
-    TS_ASSERT_EQUALS(B.display(), " Unknown ");
-    B = A;
-    TS_ASSERT_EQUALS(B.leaf(0), (Rule *)0);
-    TS_ASSERT_EQUALS(B.leaf(1), (Rule *)0);
-    TS_ASSERT_EQUALS(B.display(), " False ");
   }
 
   void testLeafOperations() {
@@ -84,18 +73,16 @@ public:
     TS_ASSERT_EQUALS(A.leaf(1), (Rule *)0);
     A.setStatus(0);
     TS_ASSERT_EQUALS(A.display(), " False ");
-    BoolValue *B = new BoolValue();
+    auto B = Mantid::Kernel::make_unique<BoolValue>();
     TS_ASSERT_EQUALS(B->display(), " Unknown ");
     B->setStatus(1);
-    A.setLeaves(B, (Rule *)0);
+    A.setLeaves(std::move(B), std::unique_ptr<Rule>());
     TS_ASSERT_EQUALS(A.display(), " True ");
-    BoolValue *C = new BoolValue();
+    auto C = Mantid::Kernel::make_unique<BoolValue>();
     TS_ASSERT_EQUALS(C->display(), " Unknown ");
     C->setStatus(0);
-    A.setLeaf(C, 1);
+    A.setLeaf(std::move(C), 1);
     TS_ASSERT_EQUALS(A.display(), " False ");
-    delete B;
-    delete C;
   }
 
   void testFindOperations() {
@@ -105,15 +92,15 @@ public:
     TS_ASSERT_EQUALS(A.leaf(1), (Rule *)0);
     A.setStatus(0);
     TS_ASSERT_EQUALS(A.display(), " False ");
-    BoolValue *B = new BoolValue();
+    auto B = Mantid::Kernel::make_unique<BoolValue>();
     TS_ASSERT_EQUALS(B->display(), " Unknown ");
     B->setStatus(1);
-    A.setLeaves(B, (Rule *)0);
+    Rule *ptrB = B.get();
+    A.setLeaves(std::move(B), std::unique_ptr<Rule>());
     TS_ASSERT_EQUALS(A.display(), " True ");
     TS_ASSERT_EQUALS(A.findLeaf(&A), 0);
-    TS_ASSERT_EQUALS(A.findLeaf(B), -1);
+    TS_ASSERT_EQUALS(A.findLeaf(ptrB), -1);
     TS_ASSERT_EQUALS(A.findKey(0), (Rule *)0);
-    delete B;
   }
 
   void testIsValid() {
