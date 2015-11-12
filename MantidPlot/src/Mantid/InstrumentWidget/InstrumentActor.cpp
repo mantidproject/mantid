@@ -1278,10 +1278,13 @@ void InstrumentActor::addMaskBinsData(const QList<int>& detIDs)
     auto index = m_detid2index_map[id];
     indices.append(static_cast<int>(index));
   }
-  m_maskBinsData.addXRange(m_BinMinValue, m_BinMaxValue, indices);
-  auto workspace = getWorkspace();
-  calculateIntegratedSpectra(*workspace);
-  resetColors();
+  if (!indices.isEmpty())
+  {
+    m_maskBinsData.addXRange(m_BinMinValue, m_BinMaxValue, indices);
+    auto workspace = getWorkspace();
+    calculateIntegratedSpectra(*workspace);
+    resetColors();
+  }
 }
 
 /// Show if bin masks have been defined.
