@@ -390,6 +390,8 @@ void TomographyIfaceViewQtGUI::readSettings() {
     setPrePostProcSettings(def);
   }
 
+  m_ui.tabMain->setCurrentIndex(qs.value("selected-tab-index").toInt());
+
   restoreGeometry(qs.value("interface-win-geometry").toByteArray());
 
   qs.endGroup();
@@ -438,6 +440,8 @@ void TomographyIfaceViewQtGUI::saveSettings() const {
   QDataStream stream(&filtersSettings, QIODevice::WriteOnly);
   stream << grabPrePostProcSettings();
   qs.setValue("filters-settings", filtersSettings);
+
+  qs.setValue("selected-tab-index", m_ui.tabMain->currentIndex());
 
   qs.setValue("interface-win-geometry", saveGeometry());
 
