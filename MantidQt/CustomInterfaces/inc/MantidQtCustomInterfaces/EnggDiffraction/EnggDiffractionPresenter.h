@@ -138,12 +138,10 @@ private:
                      const std::string &specNos = "",
                      const std::string &dgFile = "");
 
-  void startAsyncFocusWorker(const std::string &dir,
-                             const std::vector<std::string> &outFilenames,
-                             const std::string &runNo,
-                             const std::vector<bool> &banks,
-                             const std::string &specNos,
-                             const std::string &dgFile);
+  virtual void startAsyncFocusWorker(
+      const std::string &dir, const std::vector<std::string> &outFilenames,
+      const std::string &runNo, const std::vector<bool> &banks,
+      const std::string &specNos, const std::string &dgFile);
 
   void inputChecksBeforeFocusBasic(const std::string &runNo,
                                    const std::vector<bool> &banks);
@@ -172,7 +170,10 @@ private:
                   const std::string &fullFilename, const std::string &runNo,
                   size_t bank, const std::string &specNos,
                   const std::string &dgFile);
+  //@}
 
+  /// @name Vanadium corrections
+  //@{
   void loadOrCalcVanadiumWorkspaces(
       const std::string &vanNo, const std::string &inputDirCalib,
       Mantid::API::ITableWorkspace_sptr &vanIntegWS,
@@ -183,6 +184,7 @@ private:
                                         std::string &preIntegFilename,
                                         std::string &preCurvesFilename,
                                         bool &found);
+
   void
   loadVanadiumPrecalcWorkspaces(const std::string &preIntegFilename,
                                 const std::string &preCurvesFilename,
@@ -192,6 +194,7 @@ private:
   void calcVanadiumWorkspaces(const std::string &vanNo,
                               Mantid::API::ITableWorkspace_sptr &vanIntegWS,
                               Mantid::API::MatrixWorkspace_sptr &vanCurvesWS);
+  //@}
 
   /// @name Methods related to pre-processing / re-binning
   //@{

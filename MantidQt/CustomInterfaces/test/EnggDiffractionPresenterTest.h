@@ -1,12 +1,15 @@
 #ifndef MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONPRESENTERTEST_H
 #define MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONPRESENTERTEST_H
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 
 #include <cxxtest/TestSuite.h>
 #include "EnggDiffractionViewMock.h"
 
+
+using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 using testing::TypedEq;
 using testing::Return;
@@ -33,10 +36,11 @@ private:
   void startAsyncFocusWorker(const std::string &dir,
                              const std::vector<std::string> &outFilenames,
                              const std::string &runNo,
-                             const std::vector<bool> banks,
-                             const std::string &specIDs,
+                             const std::vector<bool> &banks,
+                             const std::string &specNos,
                              const std::string &dgFile) {
-    doFocusRun(dir, outFilenames, runNo, banks, specIDs, dgFile);
+    std::cerr << "focus run " << std::endl;
+    doFocusRun(dir, outFilenames, runNo, banks, specNos, dgFile);
     focusingFinished();
   }
 
@@ -55,6 +59,8 @@ private:
 };
 
 class EnggDiffractionPresenterTest : public CxxTest::TestSuite {
+
+ // EnggDiffractionPresenter *EnggDiff;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -79,6 +85,7 @@ public:
 
     m_ex_enginx_banks.push_back(true);
     m_ex_enginx_banks.push_back(false);
+
   }
 
   void tearDown() {
@@ -244,9 +251,10 @@ public:
 
     const std::string filename =
         "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
-    EXPECT_CALL(mockView, askNewCalibrationFilename(
-                              "UNKNOWNINST_" + vanNo + "_" + ceriaNo +
-                              "_both_banks.prm")).Times(0);
+    EXPECT_CALL(mockView,
+                askNewCalibrationFilename("UNKNOWNINST_" + vanNo + "_" +
+                                          ceriaNo + "_both_banks.prm"))
+        .Times(0);
     //  .WillOnce(Return(filename)); // if enabled ask user output filename
 
     // Should not try to use options for focusing
@@ -392,29 +400,52 @@ public:
   }
 
   // TODO: disabled for now, as this one would need to load files
-  void disabled_test_focusOK() {
+  void test_focusOK() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
-    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+    EnggDiffPresenterNoThread pres(&mockView);
+
+    const std::string instr = "ENGINX";
+    const std::string vanNo = "236516"; // use a number that can be found!
 
     // an example run available in unit test data:
     EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return("228061"));
-    EXPECT_CALL(mockView, focusingBanks())
-        .Times(1)
-        .WillOnce(Return(m_ex_enginx_banks));
+    std::vector<bool> banks;
+    banks.push_back(true); // 1 bank used
+    banks.push_back(false);
+    EXPECT_CALL(mockView, focusingBanks()).Times(1).WillOnce(Return(banks));
+
+    EXPECT_CALL(mockView, currentInstrument())
+        .Times(2)
+        .WillRepeatedly(Return(instr));
 
     // will need basic calibration settings from the user
     EnggDiffCalibSettings calibSettings;
-    EXPECT_CALL(mockView, currentCalibSettings())
-        .Times(1)
-        .WillOnce(Return(calibSettings));
+    calibSettings.m_pixelCalibFilename = "C:/Users/RYQ25391/Desktop/"
+                                         "GUI_calib_folder/"
+                                         "ENGINX_full_calib_3peaks.csv";
+    calibSettings.m_inputDirCalib =
+        "C:/Users/RYQ25391/Desktop/GUI_calib_folder/";
+    calibSettings.m_templateGSAS_PRM =
+        "C:/Users/RYQ25391/Desktop/GUI_calib_folder/"
+        "ENGINX_236516_241391_both_banks.prm";
+    calibSettings.m_inputDirRaw = "C:/Users/RYQ25391/Desktop/GUI_calib_folder/";
+    calibSettings.m_forceRecalcOverwrite = false;
+    calibSettings.m_rebinCalibrate = false;
 
-    // check automatic plotting
-    EXPECT_CALL(mockView, focusedOutWorkspace())
-        .Times(1)
-        .WillOnce(Return(true));
-    EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(1);
-    // There are two/three other tests that have the disabled_ prefix so they
-    // normally run
+    EXPECT_CALL(mockView, currentCalibSettings())
+        .Times(2)
+        .WillRepeatedly(Return(calibSettings));
+
+    // when two banks are used then it will utlise currentVanadiumNo two times
+    EXPECT_CALL(mockView, currentVanadiumNo()).Times(1).WillOnce(Return(vanNo));
+
+    // the test will not be able to read the python algorithm from here on
+
+    EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
+
+    calibSettings.m_templateGSAS_PRM =
+        "C:/Users/RYQ25391/Desktop/GUI_calib_folder/"
+        "ENGINX_236516_241391_both_banks.prm";
 
     // Should not try to use options for other types of focusing
     EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
@@ -422,7 +453,7 @@ public:
     EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
     EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
 
-    // No errors/warnings
+    // 0 errors/ 0 warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
@@ -432,19 +463,6 @@ public:
   void disabled_test_focusOK_allBanksOff() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
-
-    // an example run available in unit test data:
-    EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return("228061"));
-    std::vector<bool> banks;
-    banks.push_back(false);
-    banks.push_back(false);
-    EXPECT_CALL(mockView, focusingBanks()).Times(1).WillOnce(Return(banks));
-
-    // will need basic calibration settings from the user
-    EnggDiffCalibSettings calibSettings;
-    EXPECT_CALL(mockView, currentCalibSettings())
-        .Times(1)
-        .WillOnce(Return(calibSettings));
 
     EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);

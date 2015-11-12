@@ -1000,10 +1000,11 @@ void EnggDiffractionPresenter::doFocusRun(
       m_focusFinishedOK = false;
       doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
       m_focusFinishedOK = true;
-    } catch (std::runtime_error &) {
+    } catch (std::runtime_error &re) {
       g_log.error()
-          << "The focusing calculations failed. One of the algorithms"
-             "did not execute correctly. See log messages for details."
+          << "The focusing calculations failed. One of the algorithms "
+             "did not execute correctly. See log messages for details. " <<
+			 "Further details: " <<  re.what()
           << std::endl;
     } catch (std::invalid_argument &ia) {
       g_log.error()
@@ -1129,6 +1130,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
 
   const std::string inWSName = "engggui_focusing_input_ws";
   const std::string instStr = m_view->currentInstrument();
+
   try {
     auto load = Algorithm::fromString("Load");
     load->initialize();
@@ -1148,6 +1150,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     throw;
   }
 
+  // defo up till here as it asks sfor second current Instrument, shahroz
   std::string outWSName;
   std::string specNumsOpenGenie;
   if (!dgFile.empty()) {
@@ -1172,8 +1175,19 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     outWSName = "engggui_focusing_output_ws_cropped";
     specNumsOpenGenie = specNos;
   }
+
+  // works fine uptil here
+
+  // test stuck after this....
+
   try {
+
+    g_log.error() << "..... JUST BEFORE - EnggFocus" << std::endl; // delete later
+
     auto alg = Algorithm::fromString("EnggFocus");
+
+    g_log.error() << std::endl << "..... JUST AFTER - EnggFocus" << std::endl; // delete later
+
     alg->initialize();
     alg->setProperty("InputWorkspace", inWSName);
     alg->setProperty("OutputWorkspace", outWSName);
@@ -1196,12 +1210,13 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
       plotFocusedWorkspace(outWSName, static_cast<int>(bank));
     }
   } catch (std::runtime_error &re) {
-    g_log.error() << "Error in calibration. ",
-        "Could not run the algorithm EnggCalibrate succesfully for bank " +
+    g_log.error() << "Error in focusing. ",
+        "Could not run the algorithm EnggFocus succesfully for bank " +
             boost::lexical_cast<std::string>(bank) + ". Error description: " +
             re.what() + " Please check also the log messages for details.";
     throw;
   }
+
   g_log.notice() << "Produced focused workspace: " << outWSName << std::endl;
 
   try {
@@ -1214,7 +1229,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     alg->execute();
   } catch (std::runtime_error &re) {
     g_log.error() << "Error in calibration. ",
-        "Could not run the algorithm EnggCalibrate succesfully for bank " +
+        "Could not run the algorithm SaveFocus succesfully for bank " +
             boost::lexical_cast<std::string>(bank) + ". Error description: " +
             re.what() + " Please check also the log messages for details.";
     throw;
