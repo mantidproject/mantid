@@ -4,6 +4,8 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoReconPreprocSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconPostprocSettings.h"
 
+#include "MantidKernel/System.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
