@@ -345,6 +345,7 @@ QDataStream &operator>>(QDataStream &stream, TomoReconFiltersSettings &fs) {
                 >> fs.postp.cutOffLevel
                 >> fs.outputPreprocImages;
   // clang-format on
+  fs.prep.rotation *= 90;
 }
 
 /**
@@ -404,7 +405,7 @@ QDataStream &operator<<(QDataStream &stream,
   return stream << fs.prep.normalizeByProtonCharge
                 << fs.prep.normalizeByFlatDark
                 << fs.prep.medianFilterWidth
-                << fs.prep.rotation
+                << (fs.prep.rotation/90)
                 << fs.prep.maxAngle
                 << fs.prep.scaleDownFactor
                 << fs.postp.circMaskRadius
@@ -961,7 +962,7 @@ TomographyIfaceViewQtGUI::grabPrePostProcSettings() const {
       m_uiTabFilters.spinBox_prep_median_filter_width->value());
 
   opts.prep.rotation =
-      90 * m_uiTabFilters.comboBox_prep_rotation->currentIndex();
+    90 * m_uiTabFilters.comboBox_prep_rotation->currentIndex();
 
   opts.prep.maxAngle = m_uiTabFilters.doubleSpinBox_prep_max_angle->value();
 

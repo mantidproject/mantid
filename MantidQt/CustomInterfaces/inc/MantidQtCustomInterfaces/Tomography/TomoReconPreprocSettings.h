@@ -36,9 +36,13 @@ struct TomoReconPreprocSettings {
   bool normalizeByProtonCharge;
   bool normalizeByFlatDark;
 
+  // block-size in pixels
   size_t medianFilterWidth;
+  // rotation to correct raw images, in degrees. Only multiples of 90
   int rotation;
+  // maximum angle, in degrees
   double maxAngle;
+  // block size in pixels
   size_t scaleDownFactor;
 
   TomoReconPreprocSettings();
