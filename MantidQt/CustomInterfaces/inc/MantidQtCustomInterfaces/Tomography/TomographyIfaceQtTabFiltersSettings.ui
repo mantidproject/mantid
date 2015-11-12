@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>TomographyIfaceQtTabFiltersOptions</class>
- <widget class="QWidget" name="TomographyIfaceQtTabFiltersOptions">
+ <class>TomographyIfaceQtTabFiltersSettings</class>
+ <widget class="QWidget" name="TomographyIfaceQtTabFiltersSettings">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -48,6 +48,9 @@
       </item>
       <item row="1" column="0" colspan="2">
        <widget class="QCheckBox" name="checkBox_normalize_proton_charge">
+        <property name="statusTip">
+         <string>Normalize every image by their relative proton charges</string>
+        </property>
         <property name="text">
          <string>Normalize by proton charge</string>
         </property>
@@ -71,8 +74,11 @@
       </item>
       <item row="2" column="0">
        <widget class="QCheckBox" name="checkBox_normalize_flat_dark">
+        <property name="statusTip">
+         <string>Normalize every image with respect to the reference flat and dark images, if available</string>
+        </property>
         <property name="text">
-         <string>Normalize by flat/dark field images</string>
+         <string>Normalize by flat (open beam) and dark field images</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -214,7 +220,7 @@
    <item>
     <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
-      <string>Reconstructed volume:</string>
+      <string>Post-processing (reconstructed volume)</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0">
@@ -240,7 +246,7 @@
       <item row="0" column="2">
        <widget class="QDoubleSpinBox" name="doubleSpinBox_post_circ_mask">
         <property name="toolTip">
-         <string>Set the radius (relative to the smaller width of the images). All pixels outside the mask are zeroed.</string>
+         <string>Set the radius (relative to the smaller edge of the images). All pixels outside the mask are zeroed.</string>
         </property>
         <property name="decimals">
          <number>3</number>

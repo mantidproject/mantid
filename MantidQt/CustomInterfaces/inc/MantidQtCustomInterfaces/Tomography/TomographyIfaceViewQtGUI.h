@@ -12,7 +12,7 @@
 
 #include "ui_ImageSelectCoRAndRegions.h"
 #include "ui_TomographyIfaceQtGUI.h"
-#include "ui_TomographyIfaceQtTabFiltersOptions.h"
+#include "ui_TomographyIfaceQtTabFiltersSettings.h"
 #include "ui_TomographyIfaceQtTabSetup.h"
 #include "ui_TomographyIfaceQtTabRun.h"
 
@@ -227,7 +227,7 @@ private:
   // And its sections/tabs. Note that for compactness they're called simply
   // 'tabs'
   // but they could be separate dialogs, widgets, etc.
-  Ui::TomographyIfaceQtTabFiltersOptions m_uiTabFilters;
+  Ui::TomographyIfaceQtTabFiltersSettings m_uiTabFilters;
   Ui::TomographyIfaceQtTabSetup m_uiTabSetup;
   Ui::TomographyIfaceQtTabRun m_uiTabRun;
   Ui::ImageSelectCoRAndRegions m_uiTabCoR;
