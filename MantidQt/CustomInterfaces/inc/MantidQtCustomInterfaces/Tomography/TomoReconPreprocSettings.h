@@ -32,7 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-struct TomoReconPreprocSettings {
+struct DLLExport TomoReconPreprocSettings {
   bool normalizeByProtonCharge;
   bool normalizeByFlatDark;
 
