@@ -8,7 +8,8 @@ namespace CustomInterfaces {
 
 /**
 Settings for pre-processing of the raw input images before
-reconstructing a volume.
+reconstructing a volume. Note this is in principle not tied to any
+particular tool.
 
 Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
@@ -37,7 +38,7 @@ struct TomoReconPreprocSettings {
 
   size_t medianFilterWidth;
   int rotation;
-  float maxAngle;
+  double maxAngle;
   size_t scaleDownFactor;
 
   TomoReconPreprocSettings();

@@ -876,12 +876,81 @@ void TomographyIfaceViewQtGUI::showImage(const MatrixWorkspace_sptr &ws) {
   m_uiTabRun.label_image_name->setText(QString::fromStdString(name));
 }
 
+TomoReconFiltersSettings TomographyIfaceViewQtGUI::prePostProcSettings() const {
+  return grabPrePostProcSettings();
+}
+
+TomoReconFiltersSettings
+TomographyIfaceViewQtGUI::grabPrePostProcSettings() const {
+  TomoReconFiltersSettings opts;
+
+  // pre-processing
+  opts.prep.normalizeByProtonCharge =
+      m_uiTabFilters.checkBox_normalize_proton_charge->isChecked();
+
+  opts.prep.normalizeByFlatDark =
+      m_uiTabFilters.checkBox_normalize_flat_dark->isChecked();
+
+  opts.prep.medianFilterWidth = static_cast<size_t>(
+      m_uiTabFilters.spinBox_prep_median_filter_width->value());
+
+  opts.prep.rotation =
+      90 * m_uiTabFilters.comboBox_prep_rotation->currentIndex();
+
+  opts.prep.maxAngle = m_uiTabFilters.doubleSpinBox_prep_max_angle->value();
+
+  opts.prep.scaleDownFactor =
+      static_cast<size_t>(m_uiTabFilters.spinBox_prep_scale_factor->value());
+
+  // post-processing
+  opts.postp.circMaskRadius =
+      m_uiTabFilters.doubleSpinBox_post_circ_mask->value();
+
+  opts.postp.cutOffLevel = m_uiTabFilters.doubleSpinBox_post_cutoff->value();
+
+  // outputs
+  opts.outputPreprocImages =
+      m_uiTabFilters.checkBox_out_preproc_images->isChecked();
+
+  return opts;
+}
+
+void TomographyIfaceViewQtGUI::setPrePostProcSettings(
+    TomoReconFiltersSettings &opts) const {
+
+  // pre-processing
+  m_uiTabFilters.checkBox_normalize_proton_charge->setChecked(
+      opts.prep.normalizeByProtonCharge);
+
+  m_uiTabFilters.checkBox_normalize_flat_dark->setChecked(
+      opts.prep.normalizeByFlatDark);
+
+  m_uiTabFilters.spinBox_prep_median_filter_width->setValue(
+      static_cast<int>(opts.prep.medianFilterWidth));
+
+  m_uiTabFilters.comboBox_prep_rotation->setCurrentIndex(opts.prep.rotation /
+                                                         90);
+
+  m_uiTabFilters.doubleSpinBox_prep_max_angle->setValue(opts.prep.maxAngle);
+
+  m_uiTabFilters.spinBox_prep_scale_factor->setValue(
+      static_cast<int>(opts.prep.scaleDownFactor));
+
+  // post-processing
+  m_uiTabFilters.doubleSpinBox_post_circ_mask->setValue(
+      opts.postp.circMaskRadius);
+
+  m_uiTabFilters.doubleSpinBox_post_cutoff->setValue(opts.postp.cutOffLevel);
+
+  // outputs
+  m_uiTabFilters.checkBox_out_preproc_images->setChecked(
+      opts.outputPreprocImages);
+}
+
 void TomographyIfaceViewQtGUI::resetPrePostFilters() {
   // default constructors with factory defaults
   TomoReconFiltersSettings def;
-
-  m_uiTabFilters.checkBox_normalize_flat_dark->setChecked(
-      def.prep.normalizeByFlatDark);
+  setPrePostProcSettings(def);
 }
 
 /**

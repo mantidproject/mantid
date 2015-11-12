@@ -6,10 +6,7 @@ namespace CustomInterfaces {
 
 /**
 Settings for post-processing a reconstructed volume.
-
-Settings for pre-/post-/other-processing filters to run a
-reconstruction jobs. Note this has been defined as general processing
-steps, not tied to any particular tool.
+Note this is in principle not tied to any particular tool.
 
 Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
@@ -33,8 +30,8 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 struct TomoReconPostprocSettings {
-  float circMaskRadius;
-  float cutOffLevel;
+  double circMaskRadius;
+  double cutOffLevel;
 
   TomoReconPostprocSettings();
 };

@@ -47,7 +47,7 @@
        </spacer>
       </item>
       <item row="1" column="0" colspan="2">
-       <widget class="QCheckBox" name="checkBox">
+       <widget class="QCheckBox" name="checkBox_normalize_proton_charge">
         <property name="text">
          <string>Normalize by proton charge</string>
         </property>
@@ -93,14 +93,14 @@
        </spacer>
       </item>
       <item row="7" column="0">
-       <widget class="QLabel" name="label_4">
+       <widget class="QLabel" name="label_prep_scale_factor">
         <property name="text">
          <string>Scale down factor:</string>
         </property>
        </widget>
       </item>
       <item row="6" column="2">
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_rotation_2">
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_prep_max_angle">
         <property name="decimals">
          <number>3</number>
         </property>
@@ -116,14 +116,14 @@
        </widget>
       </item>
       <item row="4" column="0">
-       <widget class="QLabel" name="label_2">
+       <widget class="QLabel" name="label_prep_rotation">
         <property name="text">
          <string>Rotation (°, clockwise)</string>
         </property>
        </widget>
       </item>
       <item row="3" column="2">
-       <widget class="QSpinBox" name="spinBox_median_filter_width">
+       <widget class="QSpinBox" name="spinBox_prep_median_filter_width">
         <property name="minimum">
          <number>3</number>
         </property>
@@ -133,21 +133,21 @@
        </widget>
       </item>
       <item row="6" column="0">
-       <widget class="QLabel" name="label_3">
+       <widget class="QLabel" name="label_prep_max_angle">
         <property name="text">
          <string>Maximum angle:</string>
         </property>
        </widget>
       </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="label_prep_median">
         <property name="text">
-         <string>Median filter width:</string>
+         <string>Dots removal (median filter width):</string>
         </property>
        </widget>
       </item>
       <item row="7" column="2">
-       <widget class="QSpinBox" name="spinBox_rotation_3">
+       <widget class="QSpinBox" name="spinBox_prep_scale_factor">
         <property name="minimum">
          <number>0</number>
         </property>
@@ -160,7 +160,7 @@
        </widget>
       </item>
       <item row="4" column="2">
-       <widget class="QComboBox" name="comboBox">
+       <widget class="QComboBox" name="comboBox_prep_rotation">
         <item>
          <property name="text">
           <string>0</string>
@@ -206,7 +206,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0">
-       <widget class="QLabel" name="label_6">
+       <widget class="QLabel" name="label_post_cir_mask">
         <property name="text">
          <string>Circular mask radius [0,1]:</string>
         </property>
@@ -226,7 +226,7 @@
        </spacer>
       </item>
       <item row="0" column="2">
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_rotation_5">
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_post_circ_mask">
         <property name="decimals">
          <number>3</number>
         </property>
@@ -239,7 +239,7 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="label_5">
+       <widget class="QLabel" name="label_post_cutoff">
         <property name="text">
          <string>Cut-off level (%)</string>
         </property>
@@ -259,15 +259,9 @@
        </spacer>
       </item>
       <item row="1" column="2">
-       <widget class="QSpinBox" name="spinBox_rotation_4">
-        <property name="minimum">
-         <number>0</number>
-        </property>
-        <property name="maximum">
-         <number>100</number>
-        </property>
-        <property name="value">
-         <number>0</number>
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_post_cutoff">
+        <property name="singleStep">
+         <double>0.010000000000000</double>
         </property>
        </widget>
       </item>
@@ -295,6 +289,9 @@
      <layout class="QGridLayout" name="gridLayout_4">
       <item row="0" column="0">
        <widget class="QCheckBox" name="checkBox_out_preproc_images">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="text">
          <string>Produce pre-processed images stack</string>
         </property>
@@ -304,7 +301,10 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QGroupBox" name="groupBox_4">
+       <widget class="QGroupBox" name="groupBox_out_intermediate_prep">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="title">
          <string>Produce intermediate pre-processed images</string>
         </property>
@@ -316,28 +316,28 @@
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
          <item row="0" column="0">
-          <widget class="QCheckBox" name="checkBox_2">
+          <widget class="QCheckBox" name="checkBox_output_cropped_images">
            <property name="text">
             <string>Cropped</string>
            </property>
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QCheckBox" name="checkBox_3">
+          <widget class="QCheckBox" name="checkBox_output_normalized_proton_images">
            <property name="text">
             <string>Normalized - proton charge</string>
            </property>
           </widget>
          </item>
          <item row="2" column="0">
-          <widget class="QCheckBox" name="checkBox_4">
+          <widget class="QCheckBox" name="checkBox_output_normalized_flat_images">
            <property name="text">
             <string>Normalized - flat, dark images</string>
            </property>
           </widget>
          </item>
          <item row="3" column="0">
-          <widget class="QCheckBox" name="checkBox_5">
+          <widget class="QCheckBox" name="checkBox_output_dot_removal">
            <property name="text">
             <string>Dots removed (median filter)</string>
            </property>

@@ -110,9 +110,7 @@ public:
     return m_toolsSettings;
   }
 
-  TomoReconFiltersSettings prePostProcSettings() const {
-    return m_filtersSettings;
-  }
+  TomoReconFiltersSettings prePostProcSettings() const;
 
   std::string currentComputeResource() const { return m_currentComputeRes; }
   std::string currentReconTool() const { return m_currentReconTool; }
@@ -187,6 +185,10 @@ private:
 
   void processPathBrowseClick(QLineEdit *le, std::string &data);
 
+  TomoReconFiltersSettings grabPrePostProcSettings() const;
+
+  void setPrePostProcSettings(TomoReconFiltersSettings &opts) const;
+
   // Begin of Savu related functionality. This will grow and will need
   // separation. They should find a better place to live.
   ///@name Savu related methods
@@ -260,7 +262,6 @@ private:
 
   /// Settings for the third party (tomographic reconstruction) tools
   TomoReconToolsUserSettings m_toolsSettings;
-  TomoReconFiltersSettings m_filtersSettings;
 
   // Basic representation of user settings, read/written on startup/close.
   // TODO: this could be done more sophisticated, with a class using
