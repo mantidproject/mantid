@@ -488,6 +488,10 @@ public:
     mgr.declareProperty("SampleChemicalFormula", "",
                         "Chemical composition of the sample material",
                         nonEmptyString, Direction::Input);
+
+    TSM_ASSERT("Mandatory validator unsatisified.", !mgr.validateProperties());
+    mgr.setProperty("SampleChemicalFormula", "CH3");
+    TSM_ASSERT("Mandatory validator should be satisfied.", mgr.validateProperties());
   }
 
 private:
