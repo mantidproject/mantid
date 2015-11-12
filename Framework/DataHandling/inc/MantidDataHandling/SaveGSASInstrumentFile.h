@@ -177,7 +177,7 @@ private:
   std::map<unsigned int, double> m_bank_mxtof;
 };
 
-} // namespace Algorithms
+} // namespace DataHandling
 } // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_SAVEGSASINSTRUMENTFILE_H_ */

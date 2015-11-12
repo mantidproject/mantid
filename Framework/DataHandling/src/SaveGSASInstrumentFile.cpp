@@ -1161,5 +1161,5 @@ double SaveGSASInstrumentFile::erfc(double xx) {
   return y;
 }
 
-} // namespace Algorithms
+} // namespace DataHandling
 } // namespace Mantid
