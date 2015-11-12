@@ -3,6 +3,7 @@
 
 #include <QString>
 
+#include <boost/shared_ptr.hpp>
 #include <qwt_double_rect.h>
 
 // Forward declarations

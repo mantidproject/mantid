@@ -26,7 +26,10 @@ namespace {
 }
   
 /// Constructor.
-/// @param fun :: A function to plot
+/// @param fun :: A function to plot.
+/// @param startX :: A lower bound of the evaluation interval.
+/// @param endX :: An upper bound of the evaluation interval.
+/// @param nX :: A number of values to evaluate.
 MDFFunctionPlotData::MDFFunctionPlotData(
     boost::shared_ptr<Mantid::API::IFunction> fun, double startX, double endX,
     size_t nX)
