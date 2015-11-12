@@ -101,6 +101,7 @@ public:
   vtkIdType InsertNextTupleValue(const Scalar *t);
   void SetValue(vtkIdType idx, Scalar value);
   vtkIdType InsertNextValue(Scalar v);
+  void InsertVariantValue(vtkIdType idx, vtkVariant value);
   void InsertValue(vtkIdType idx, Scalar v);
 
 protected:
@@ -483,6 +484,12 @@ vtkIdType vtkMDHWSignalArray<Scalar>::InsertNextValue(Scalar) {
 //------------------------------------------------------------------------------
 template <class Scalar>
 void vtkMDHWSignalArray<Scalar>::InsertValue(vtkIdType, Scalar) {
+  vtkErrorMacro("Read only container.") return;
+}
+
+template <class Scalar>
+void vtkMDHWSignalArray<Scalar>::InsertVariantValue(vtkIdType idx,
+                                                    vtkVariant value) {
   vtkErrorMacro("Read only container.") return;
 }
 

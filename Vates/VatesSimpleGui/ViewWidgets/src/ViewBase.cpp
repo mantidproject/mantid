@@ -66,13 +66,12 @@ namespace SimpleGui
  * @param parent the parent widget for the view
  * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
  */
-ViewBase::ViewBase(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) :
-  QWidget(parent), m_rebinnedSourcesManager(rebinnedSourcesManager),
-  m_currentColorMapModel(NULL), m_internallyRebinnedWorkspaceIdentifier("rebinned_vsi"),
-  m_vtkConnections(vtkSmartPointer<vtkEventQtSlotConnect>::New()),
-  m_pythonGIL(), m_colorScaleLock(NULL)
-{
-}
+ViewBase::ViewBase(QWidget *parent,
+                   RebinnedSourcesManager *rebinnedSourcesManager)
+    : QWidget(parent), m_rebinnedSourcesManager(rebinnedSourcesManager),
+      m_internallyRebinnedWorkspaceIdentifier("rebinned_vsi"),
+      m_vtkConnections(vtkSmartPointer<vtkEventQtSlotConnect>::New()),
+      m_pythonGIL(), m_colorScaleLock(NULL) {}
 
 /**
  * This function creates a single standard ParaView view instance.
@@ -261,8 +260,7 @@ void ViewBase::releasePyGIL() {
  * This function sets the requested color map on the data.
  * @param model the color map to use
  */
-void ViewBase::onColorMapChange(const pqColorMapModel *model)
-{
+void ViewBase::onColorMapChange(const char *model) {
   pqPipelineRepresentation *rep = this->getRep();
   if (NULL == rep)
   {
@@ -290,7 +288,7 @@ void ViewBase::onColorMapChange(const pqColorMapModel *model)
   }
 
   // Workaround for colormap but when changing the visbility of a source
-  this->m_currentColorMapModel = model;
+  // this->m_currentColorMapModel = model;
 }
 
 /**
@@ -928,9 +926,9 @@ void ViewBase::onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)
   if (colorUpdater.isAutoScale())
   {
     // Workaround: A ParaView bug requires us to reload the ColorMap when the visibility changes.
-    if (m_currentColorMapModel) {
-      onColorMapChange(m_currentColorMapModel);
-    }
+    // if (m_currentColorMapModel) {
+    //  onColorMapChange(m_currentColorMapModel);
+    //}
     this->setAutoColorScale();
   }
 }

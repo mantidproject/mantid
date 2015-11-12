@@ -11,11 +11,7 @@
   #pragma warning disable 1170
 #endif
 
-#include <pqBuiltinColorMaps.h>
-#include <pqChartValue.h>
-#include <pqColorMapModel.h>
-#include <pqColorPresetManager.h>
-#include <pqColorPresetModel.h>
+#include "pqPresetDialog.h"
 
 #include <vtkPVXMLElement.h>
 #include <vtkPVXMLParser.h>
@@ -49,8 +45,8 @@ ColorSelectionWidget::ColorSelectionWidget(QWidget *parent): QWidget(parent),
   this->m_ui.autoColorScaleCheckBox->setChecked(true);
   this->setEditorStatus(false);
 
-  this->m_presets = new pqColorPresetManager(this);
-  this->m_presets->restoreSettings();
+  // this->m_presets = new pqColorPresetManager(this);
+  // this->m_presets->restoreSettings();
 
   this->loadBuiltinColorPresets();
 
@@ -99,24 +95,25 @@ void ColorSelectionWidget::setEditorStatus(bool status)
  */
 void ColorSelectionWidget::loadBuiltinColorPresets()
 {
-  pqColorPresetModel *presetModel = this->m_presets->getModel();
+  // pqColorPresetModel *presetModel = this->m_presets->getModel();
 
   // Associate the colormap value with the index a continuous index
 
   // create xml parser
   vtkPVXMLParser *xmlParser = vtkPVXMLParser::New();
 
-  // 1. Get builtinw color maps (Reading fragment requires: InitializeParser, ParseChunk, CleanupParser) 
-  const char *xml = pqComponentsGetColorMapsXML();
-  xmlParser->InitializeParser();
-  xmlParser->ParseChunk(xml, static_cast<unsigned>(strlen(xml)));
-  xmlParser->CleanupParser();
-  this->addColorMapsFromXML(xmlParser, presetModel);
- 
+  // 1. Get builtinw color maps (Reading fragment requires: InitializeParser, ParseChunk, CleanupParser)
+  // const char *xml = pqComponentsGetColorMapsXML();
+  // xmlParser->InitializeParser();
+  // xmlParser->ParseChunk(xml, static_cast<unsigned>(strlen(xml)));
+  // xmlParser->CleanupParser();
+  // this->addColorMapsFromXML(xmlParser, presetModel);
+
   // 2. Add color maps from Slice Viewer, IDL and Matplotlib
-  this->addColorMapsFromFile("All_slice_viewer_cmaps_for_vsi.xml", xmlParser, presetModel);
-  this->addColorMapsFromFile("All_idl_cmaps.xml", xmlParser, presetModel);
-  this->addColorMapsFromFile("All_mpl_cmaps.xml", xmlParser, presetModel);
+  // this->addColorMapsFromFile("All_slice_viewer_cmaps_for_vsi.xml", xmlParser,
+  // presetModel);
+  // this->addColorMapsFromFile("All_idl_cmaps.xml", xmlParser, presetModel);
+  // this->addColorMapsFromFile("All_mpl_cmaps.xml", xmlParser, presetModel);
 
   // cleanup parser
   xmlParser->Delete();
@@ -130,12 +127,13 @@ void ColorSelectionWidget::loadBuiltinColorPresets()
   {
     int defaultColorMapIndex = this->colorMapManager->getDefaultColorMapIndex(viewSwitched);
 
-    const pqColorMapModel *colorMap = this->m_presets->getModel()->getColorMap(defaultColorMapIndex);
+    // const pqColorMapModel *colorMap =
+    // this->m_presets->getModel()->getColorMap(defaultColorMapIndex);
 
-    if (colorMap)
-    {
-      emit this->colorMapChanged(colorMap);
-    }
+    // if (colorMap)
+    //{
+    //  emit this->colorMapChanged(colorMap);
+    //}
   }
 
 /**
@@ -183,19 +181,19 @@ void ColorSelectionWidget::addColorMapsFromXML(vtkPVXMLParser *parser,
     }
 
     // load color map from its XML
-    pqColorMapModel colorMap =
-        pqColorPresetManager::createColorMapFromXML(colorMapElement);
-    QString name = colorMapElement->GetAttribute("name");
+    // pqColorMapModel colorMap =
+    //    pqColorPresetManager::createColorMapFromXML(colorMapElement);
+    // QString name = colorMapElement->GetAttribute("name");
 
     // Only add the color map if the name does not exist yet
-    if (!this->colorMapManager->isRecordedColorMap(name.toStdString()))
-    {
-      // add color map to the model
-      model->addBuiltinColorMap(colorMap, name);
+    // if (!this->colorMapManager->isRecordedColorMap(name.toStdString()))
+    //{
+    // add color map to the model
+    // model->addBuiltinColorMap(colorMap, name);
 
       // add color map to the color map manager
-      this->colorMapManager->readInColorMap(name.toStdString());
-    }
+    // this->colorMapManager->readInColorMap(name.toStdString());
+    //}
   }
 }
 
@@ -274,21 +272,22 @@ void ColorSelectionWidget::autoCheckBoxClicked(bool wasOn)
 void ColorSelectionWidget::loadPreset()
 {
   Mantid::VATES::ColorScaleLockGuard guard(m_colorScaleLock);
-  this->m_presets->setUsingCloseButton(false);
-  if (this->m_presets->exec() == QDialog::Accepted)
-  {
-    // Get the color map from the selection.
-    QItemSelectionModel *selection = this->m_presets->getSelectionModel();
-    QModelIndex index = selection->currentIndex();
-    const pqColorMapModel *colorMap = this->m_presets->getModel()->getColorMap(index.row());
+  // this->m_presets->setUsingCloseButton(false);
+  // if (this->m_presets->exec() == QDialog::Accepted)
+  //{
+  // Get the color map from the selection.
+  // QItemSelectionModel *selection = this->m_presets->getSelectionModel();
+  // QModelIndex index = selection->currentIndex();
+  // const pqColorMapModel *colorMap =
+  // this->m_presets->getModel()->getColorMap(index.row());
 
-    if (colorMap)
-    {
-      // Persist the color map change
-      this->colorMapManager->setNewActiveColorMap(index.row());
-      emit this->colorMapChanged(colorMap);
-    }
-  }
+  // if (colorMap)
+  //{
+  // Persist the color map change
+  // this->colorMapManager->setNewActiveColorMap(index.row());
+  // emit this->colorMapChanged(colorMap);
+  //}
+  //}
 }
 
 /**

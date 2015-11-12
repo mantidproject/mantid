@@ -10,7 +10,6 @@
 #include <QPointer>
 #include <QWidget>
 
-class pqColorMapModel;
 class pqDataRepresentation;
 class pqObjectBuilder;
 class pqPipelineSource;
@@ -152,7 +151,7 @@ public slots:
   /// Set the color scale back to the original bounds.
   void onAutoScale(ColorSelectionWidget* colorSelectionWidget);
   /// Set the requested color map on the data.
-  void onColorMapChange(const pqColorMapModel *model);
+  void onColorMapChange(const char *model);
   /// Set the data color scale range to the requested bounds.
   void onColorScaleChange(double min, double max);
   /// Set the view to use a LOD threshold.
@@ -262,7 +261,7 @@ private:
   ColorUpdater colorUpdater; ///< Handle to the color updating delegator
   BackgroundRgbProvider backgroundRgbProvider; /// < Holds the manager for background color related tasks.
   RebinnedSourcesManager* m_rebinnedSourcesManager;
-  const pqColorMapModel* m_currentColorMapModel;
+  // const pqColorMapModel* m_currentColorMapModel;
 
   QString m_internallyRebinnedWorkspaceIdentifier;
 

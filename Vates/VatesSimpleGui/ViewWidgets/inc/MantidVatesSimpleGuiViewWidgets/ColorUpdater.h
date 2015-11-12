@@ -65,8 +65,7 @@ public:
    * @param repr the representation to change the color map on
    * @param model the color map to use
    */
-  void colorMapChange(pqPipelineRepresentation *repr,
-                      const pqColorMapModel *model);
+  void colorMapChange(pqPipelineRepresentation *repr, const char *model);
   /**
    * Set the data color scale range to the requested bounds.
    * @param min the minimum bound for the color scale

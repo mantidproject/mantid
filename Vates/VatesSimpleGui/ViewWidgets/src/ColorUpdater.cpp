@@ -15,8 +15,8 @@
 
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
-#include <pqChartValue.h>
-#include <pqColorMapModel.h>
+//#include <pqChartValue.h>
+//#include <pqColorMapModel.h>
 #include <pqDataRepresentation.h>
 #include <pqPipelineRepresentation.h>
 #include <pqScalarsToColors.h>
@@ -81,8 +81,7 @@ VsiColorScale ColorUpdater::autoScale()
 }
 
 void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
-                                  const pqColorMapModel *model)
-{
+                                  const char *model) {
   pqScalarsToColors *lut = repr->getLookupTable();
   if (NULL == lut)
   {
@@ -97,18 +96,18 @@ void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
 
   // Set the ColorSpace
   pqSMAdaptor::setElementProperty(lutProxy->GetProperty("ColorSpace"),
-                                  model->getColorSpace());
+                                  QVariant());
   // Set the NaN color
   QList<QVariant> values;
   QColor nanColor;
-  model->getNanColor(nanColor);
+  // model->getNanColor(nanColor);
   values << nanColor.redF() << nanColor.greenF() << nanColor.blueF();
   pqSMAdaptor::setMultipleElementProperty(lutProxy->GetProperty("NanColor"),
                                           values);
 
   // Set the RGB points
   QList<QVariant> rgbPoints;
-  for(int i = 0; i < model->getNumberOfPoints(); i++)
+  /*for(int i = 0; i < model->getNumberOfPoints(); i++)
   {
     QColor rgbPoint;
     pqChartValue fraction;
@@ -116,7 +115,7 @@ void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
     model->getPointValue(i, fraction);
     rgbPoints << fraction.getDoubleValue() * bounds.second << rgbPoint.redF()
               << rgbPoint.greenF() << rgbPoint.blueF();
-  }
+  }*/
   pqSMAdaptor::setMultipleElementProperty(lutProxy->GetProperty("RGBPoints"),
                                           rgbPoints);
 

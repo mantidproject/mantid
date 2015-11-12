@@ -151,7 +151,7 @@ private:
 
   MantidQt::API::MdConstants m_mdConstants;
 
-  pqColorPresetManager *m_presets; ///< Dialog for choosing color presets
+  // pqColorPresetManager *m_presets; ///< Dialog for choosing color presets
   Ui::ColorSelectionWidgetClass m_ui; ///< The mode control widget's UI form
   bool m_ignoreColorChangeCallbacks; ///< Effectively blocks/disables callbacks
 
