@@ -79,7 +79,7 @@ void FFTSmooth2::exec() {
   API::MatrixWorkspace_sptr symmWS = API::WorkspaceFactory::Instance().create(
       "Workspace2D", 1, inWS->readX(0).size() + dn, inWS->readY(0).size() + dn);
 
-  Progress progress(this, 0, 1, 4 * (s0 - send));
+  Progress progress(this, 0, 1, 4 * (send - s0));
 
   for (int spec = s0; spec < send; spec++) {
     // Save the starting x value so it can be restored after all transforms.
