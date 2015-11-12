@@ -74,7 +74,14 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
 
     def _prepare_non_uniform_correction(self, workspace, dark_run, normalization_ratio):
         # Make sure that the binning is the same for the scattering data and the dark run
-        dark_run_clone = dark_run.clone()
+        dark_run_clone_name = dark_run.name() + "_cloned"
+        alg_clone = AlgorithmManager.create("CloneWorkspace")
+        alg_clone.initialize()
+        alg_clone.setChild(True)
+        alg_clone.setProperty("InputWorkspace", dark_run)
+        alg_clone.setProperty("OutputWorkspace", dark_run_clone_name)
+        alg_clone.execute()
+        dark_run_clone = alg_clone.getProperty("OutputWorkspace").value
 
         dark_run_rebin_name = "_dark_run_rebinned"
         alg_rebin = AlgorithmManager.create("RebinToWorkspace")

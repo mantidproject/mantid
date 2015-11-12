@@ -1,4 +1,5 @@
 ﻿#pylint: disable=invalid-name
+import mantid
 from mantid.simpleapi import *
 from mantid.kernel import time_duration
 
@@ -20,7 +21,6 @@ class DarkRunCorrection(object):
 
         # Should we use time logs or uamph logs to calculat the normalization ratio.
         self._use_time = True
-        self._normalization_ratio = 1.
 
     def set_use_mean(self, use_mean):
         self._use_mean = use_mean
@@ -29,23 +29,26 @@ class DarkRunCorrection(object):
         self._use_uniform = use_uniform
 
     def set_use_time(self, use_time):
-        self._use_time
+        self._use_time = use_time
 
     def execute(self, scatter_workspace, dark_run):
         '''
         Perform the dark run correction.
         '''
         # Get the normalization ratio from the workspaces
-        self._normalization_ratio = self._normalization_extractor.extract_normalization(scatter_workspace,
-                                                                                        dark_run)
+        normalization_ratio = self._normalization_extractor.extract_normalization(scatter_workspace,
+                                                                                  dark_run, self._use_time)
         # Run the correction algorithm with the user settings
         corrected_ws_name = scatter_workspace.name() + "_dark_workspace_corrected"
-        alg_dark = AlgorithmManager.create("Minus")
+        alg_dark = AlgorithmManager.create("SANSDarkRunBackgroundCorrection")
         alg_dark.initialize()
         alg_dark.setChild(True)
-        alg_dark.setProperty("LHSWorkspace", workspace)
-        alg_dark.setProperty("RHSWorkspace", dark_run)
-        alg_dark.setProperty("OutputWorkspace", subtracted_ws_name)
+        alg_dark.setProperty("InputWorkspace", scatter_workspace)
+        alg_dark.setProperty("DarkRun", dark_run)
+        alg_dark.setProperty("Mean", self._use_mean)
+        alg_dark.setProperty("Uniform", self._use_uniform)
+        alg_dark.setProperty("NormalizationRatio", normalization_ratio)
+        alg_dark.setProperty("OutputWorkspace", corrected_ws_name)
         alg_dark.execute()
 
         return alg_dark.getProperty("OutputWorkspace").value
@@ -94,4 +97,3 @@ class DarkRunNormalizationExtractor(object):
         first_time = entry.firstTime()
         last_time = entry.lastTime()
         return time_duration.total_nanoseconds(last_time- first_time)/1e9
-
