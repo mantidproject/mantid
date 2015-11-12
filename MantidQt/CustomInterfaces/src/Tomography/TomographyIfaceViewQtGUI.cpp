@@ -369,7 +369,8 @@ void TomographyIfaceViewQtGUI::saveSettings() const {
 void TomographyIfaceViewQtGUI::loadSavuTomoConfig(
     std::string &filePath, Mantid::API::ITableWorkspace_sptr &currentPlugins) {
   // try to load tomo reconstruction parametereization file
-  auto alg = Algorithm::fromString("LoadSavuTomoConfig");
+  auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "LoadSavuTomoConfig");
   alg->initialize();
   alg->setPropertyValue("Filename", filePath);
   alg->setPropertyValue("OutputWorkspace", createUniqueNameHidden());
@@ -845,7 +846,7 @@ void TomographyIfaceViewQtGUI::showImage(const MatrixWorkspace_sptr &ws) {
   QImage rawImg(QSize(static_cast<int>(width), static_cast<int>(height)),
                 QImage::Format_RGB32);
   const double max_min = max - min;
-  const double scaleFactor = 255.0/max_min;
+  const double scaleFactor = 255.0 / max_min;
   for (size_t yi = 0; yi < width; ++yi) {
     for (size_t xi = 0; xi < width; ++xi) {
       const double &v = ws->readY(yi)[xi];
