@@ -4,17 +4,6 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidDataObjects/SpecialWorkspace2D.h"
-#include "MantidGeometry/IDetector.h"
-
-using Mantid::API::MatrixWorkspace;
-using Mantid::API::WorkspaceProperty;
-using Mantid::DataObjects::OffsetsWorkspace;
-using Mantid::DataObjects::OffsetsWorkspace_sptr;
-using Mantid::DataObjects::SpecialWorkspace2D;
-using Mantid::DataObjects::SpecialWorkspace2D_sptr;
-using Mantid::Geometry::Instrument_const_sptr;
-using Mantid::Kernel::Direction;
 
 namespace Mantid {
 namespace Algorithms {
