@@ -323,6 +323,7 @@ void TomographyIfaceViewQtGUI::updateCompResourceStatus(bool online) {
     m_uiTabRun.pushButton_remote_status->setText("Offline");
 }
 
+#ifndef _MSC_VER
 QDataStream &operator>>(QDataStream &stream, size_t &num) {
   qint64 i;
   stream >> i;
@@ -331,11 +332,12 @@ QDataStream &operator>>(QDataStream &stream, size_t &num) {
   }
   return stream;
 }
+#endif
 
-/// To serialize a filters settings, from a QDataStream <= QByteArray
+/// deserialize a filters settings, from a QDataStream <= QByteArray
 QDataStream &operator>>(QDataStream &stream, TomoReconFiltersSettings &fs) {
   // clang-format off
-  return stream >> fs.prep.normalizeByProtonCharge
+  stream >> fs.prep.normalizeByProtonCharge
                 >> fs.prep.normalizeByFlatDark
                 >> fs.prep.medianFilterWidth
                 >> fs.prep.rotation
@@ -346,6 +348,8 @@ QDataStream &operator>>(QDataStream &stream, TomoReconFiltersSettings &fs) {
                 >> fs.outputPreprocImages;
   // clang-format on
   fs.prep.rotation *= 90;
+
+  return stream;
 }
 
 /**
@@ -394,15 +398,17 @@ void TomographyIfaceViewQtGUI::readSettings() {
       QString::fromStdString(m_settings.SCARFBasePath));
 }
 
+#ifndef _MSC_VER
 QDataStream &operator<<(QDataStream &stream, size_t const &num) {
   return stream << static_cast<qint64>(num);
 }
+#endif
 
-/// To serialize a filters settings, as a QDataStream => QByteArray
+/// serialize a filters settings, as a QDataStream => QByteArray
 QDataStream &operator<<(QDataStream &stream,
                         TomoReconFiltersSettings const &fs) {
   // clang-format off
-  return stream << fs.prep.normalizeByProtonCharge
+  stream << fs.prep.normalizeByProtonCharge
                 << fs.prep.normalizeByFlatDark
                 << fs.prep.medianFilterWidth
                 << (fs.prep.rotation/90)
@@ -412,6 +418,8 @@ QDataStream &operator<<(QDataStream &stream,
                 << fs.postp.cutOffLevel
                 << fs.outputPreprocImages;
   // clang-format on
+
+  return stream;
 }
 
 /**
@@ -962,7 +970,7 @@ TomographyIfaceViewQtGUI::grabPrePostProcSettings() const {
       m_uiTabFilters.spinBox_prep_median_filter_width->value());
 
   opts.prep.rotation =
-    90 * m_uiTabFilters.comboBox_prep_rotation->currentIndex();
+      90 * m_uiTabFilters.comboBox_prep_rotation->currentIndex();
 
   opts.prep.maxAngle = m_uiTabFilters.doubleSpinBox_prep_max_angle->value();
 
@@ -995,8 +1003,8 @@ void TomographyIfaceViewQtGUI::setPrePostProcSettings(
   m_uiTabFilters.spinBox_prep_median_filter_width->setValue(
       static_cast<int>(opts.prep.medianFilterWidth));
 
-  m_uiTabFilters.comboBox_prep_rotation->setCurrentIndex(opts.prep.rotation /
-                                                         90);
+  m_uiTabFilters.comboBox_prep_rotation->setCurrentIndex(
+      static_cast<int>(opts.prep.rotation / 90));
 
   m_uiTabFilters.doubleSpinBox_prep_max_angle->setValue(opts.prep.maxAngle);
 
