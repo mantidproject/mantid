@@ -491,7 +491,8 @@ public:
 
     TSM_ASSERT("Mandatory validator unsatisified.", !mgr.validateProperties());
     mgr.setProperty("SampleChemicalFormula", "CH3");
-    TSM_ASSERT("Mandatory validator should be satisfied.", mgr.validateProperties());
+    TSM_ASSERT("Mandatory validator should be satisfied.",
+               mgr.validateProperties());
   }
 
 private:
