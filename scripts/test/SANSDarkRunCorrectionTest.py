@@ -22,7 +22,7 @@ def create_sample_workspace_with_log(name, x_start, x_end, bin_width,
 
 class DarkRunCorrectionTest(unittest.TestCase):
 
-    def _do_test_dark_run_correction(self, use_mean, use_uniform, use_time, log_name):
+    def _do_test_dark_run_correction(self, use_mean, use_time, log_name):
          # Arrange
         x_start = 0
         x_end = 10
@@ -43,7 +43,6 @@ class DarkRunCorrectionTest(unittest.TestCase):
         # Arrange
         correction = dc.DarkRunCorrection()
         correction.set_use_mean(use_mean)
-        correction.set_use_uniform(use_uniform)
         correction.set_use_time(use_time)
 
         # Act 
@@ -57,61 +56,30 @@ class DarkRunCorrectionTest(unittest.TestCase):
         mtd.remove(ws_scatter_name)
         mtd.remove(ws_dark_name)
 
-    def test__mean__uniform__time__dark_run_correction_runs(self):
+    def test__mean__time__dark_run_correction_runs(self):
         use_mean = True
-        use_uniform = True
         use_time = True 
         log_name = "good_frames"
-        self._do_test_dark_run_correction(use_mean, use_uniform, use_time, log_name)
+        self._do_test_dark_run_correction(use_mean, use_time, log_name)
 
-    def test__mean__uniform__no_time__dark_run_correction_runs(self):
+    def test__mean__no_time__dark_run_correction_runs(self):
         use_mean = True
-        use_uniform = True
         use_time = False
         log_name = "good_uah_log"
-        self._do_test_dark_run_correction(use_mean, use_uniform, use_time, log_name)
-
-    def test__mean__no_uniform__time__dark_run_correction_runs(self):
-        use_mean = True
-        use_uniform = False
+        self._do_test_dark_run_correction(use_mean, use_time, log_name)
+        
+    def test__no_mean__time__dark_run_correction_runs(self):
+        use_mean = False
         use_time = True 
         log_name = "good_frames"
-        self._do_test_dark_run_correction(use_mean, use_uniform, use_time, log_name)
+        self._do_test_dark_run_correction(use_mean, use_time, log_name)
 
-    def test__mean__no_uniform__no_time__dark_run_correction_runs(self):
-        use_mean = True
-        use_uniform = False
+    def test__no_mean__no_time__dark_run_correction_runs(self):
+        use_mean = False
         use_time = False
         log_name = "good_uah_log"
-        self._do_test_dark_run_correction(use_mean, use_uniform, use_time, log_name)
+        self._do_test_dark_run_correction(use_mean, use_time, log_name)
 
-    def test__no_mean__uniform__time__dark_run_correction_runs(self):
-        use_mean = False
-        use_uniform = True
-        use_time = True 
-        log_name = "good_frames"
-        self._do_test_dark_run_correction(use_mean, use_uniform, use_time, log_name)
-
-    def test__no_mean__uniform__no_time__dark_run_correction_runs(self):
-        use_mean = False
-        use_uniform = True
-        use_time = False
-        log_name = "good_uah_log"
-        self._do_test_dark_run_correction(use_mean, use_uniform, use_time, log_name)
-
-    def test__no_mean__no_uniform__time__dark_run_correction_runs(self):
-        use_mean = False
-        use_uniform = False
-        use_time = True 
-        log_name = "good_frames"
-        self._do_test_dark_run_correction(use_mean, use_uniform, use_time, log_name)
-
-    def test__no_mean__no_uniform__no_time__dark_run_correction_runs(self):
-        use_mean = False
-        use_uniform = False
-        use_time = False
-        log_name = "good_uah_log"
-        self._do_test_dark_run_correction(use_mean, use_uniform, use_time, log_name)
 
 class DarkRunNormalizationExtractorTest(unittest.TestCase):
 

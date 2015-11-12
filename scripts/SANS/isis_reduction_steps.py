@@ -1,4 +1,4 @@
-#pylint: disable=too-many-lines
+﻿#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 """
     This file defines what happens in each step in the data reduction, it's
@@ -28,6 +28,7 @@ from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                           can_load_as_event_workspace, is_convertible_to_float,correct_q_resolution_for_can)
 import isis_instrument
 import isis_reducer
+import SANSUserFileParser as UserFileParser
 from reducer_singleton import ReductionStep
 
 
@@ -2928,10 +2929,16 @@ class UserFile(ReductionStep):
             @param reducer: the object that contains all the settings
             @return any errors encountered or ''
         """
-        #a list of the key words this function can read and the functions it calls in response
-        keys = ['MON/TIMES', 'M', 'TRANS']
-        funcs = [self._read_default_back_region, self._read_back_region, self._read_back_trans_roi]
-        self._process(keys, funcs, arguments, reducer)
+        # Check with a BACK/ User file parser if the desired keywords are in here
+        # else handle in a standard way
+        back_parser = UserFileParser.BackCommandParser()
+        if back_parser.can_attempt_to_parse(arguments):
+            back_parser.parse_and_set(arguments, reducer)
+        else:
+            #a list of the key words this function can read and the functions it calls in response
+            keys = ['MON/TIMES', 'M', 'TRANS']
+            funcs = [self._read_default_back_region, self._read_back_region, self._read_back_trans_roi]
+            self._process(keys, funcs, arguments, reducer)
 
     def _read_back_region(self, arguments, reducer):
         """

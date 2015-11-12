@@ -11,22 +11,18 @@ class DarkRunCorrection(object):
         super(DarkRunCorrection, self).__init__()
         self._normalization_extractor = DarkRunNormalizationExtractor()
 
-        # Should we treat the dark run signal as uniform,
-        #ie constant (stat. fluctuations) over time
-        self._use_uniform = True
-
         # Should we look at a mean value of the dark count over all pixels.
         # Only applicable if the data is uniform
         self._use_mean = False
 
         # Should we use time logs or uamph logs to calculat the normalization ratio.
+        # In the former case we treat the dark run signal as uniform, ie constant 
+        # (excpt for stat. fluctuations) over time. In the latter case it is treated
+        # as non-uniform
         self._use_time = True
 
     def set_use_mean(self, use_mean):
         self._use_mean = use_mean
-
-    def set_use_uniform(self, use_uniform):
-        self._use_uniform = use_uniform
 
     def set_use_time(self, use_time):
         self._use_time = use_time
@@ -46,7 +42,7 @@ class DarkRunCorrection(object):
         alg_dark.setProperty("InputWorkspace", scatter_workspace)
         alg_dark.setProperty("DarkRun", dark_run)
         alg_dark.setProperty("Mean", self._use_mean)
-        alg_dark.setProperty("Uniform", self._use_uniform)
+        alg_dark.setProperty("Uniform", self._use_time) # If we use time, then it is uniform
         alg_dark.setProperty("NormalizationRatio", normalization_ratio)
         alg_dark.setProperty("OutputWorkspace", corrected_ws_name)
         alg_dark.execute()
