@@ -252,12 +252,13 @@ class CategoriesDirective(AlgorithmBaseDirective):
                 else:
                     break
                 # remove the last item
-                categs.pop()
+                subcat = Category(categ_name, env.docname) #create the category with the full name
+                subcat.name=categs.pop() # and then replace it with the last token of the name
                 parent_category = r"\\".join(categs)
 
                 #register the parent category
                 parent = self.register_category(parent_category, env)
-                parent.subcategories.add(Category(categ_name, env.docname))
+                parent.subcategories.add(subcat)
 
             # endwhile
 
@@ -322,6 +323,17 @@ def create_category_pages(app):
         context = {}
         # First write out the named page
         context["title"] = category.name
+
+        #get parent category
+        if "\\" in category.name:
+            categs = category.name.split("\\")
+            categs.pop()
+            parent_category = r"\\".join(categs)
+            parent_category_link = "../" + categs[-1] + ".html"
+            parent_category = "<b>Category:</b> <a href='{0}'>{1}</a>"\
+                .format(parent_category_link,parent_category)
+            context["parentcategory"] = parent_category
+
         # sort subcategories & pages alphabetically
         context["subcategories"] = sorted(category.subcategories, key = lambda x: x.name)
         context["pages"] = sorted(category.pages, key = lambda x: x.name)
