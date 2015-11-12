@@ -28,8 +28,8 @@ namespace{
   const int wsIndexColumn = 1;
   const int startXColumn  = 2;
   const int endXColumn    = 3;
-  QColor rangeSelectorDisabledColor(Qt::darkGray);
-  QColor rangeSelectorEnabledColor(Qt::blue);
+  QColor rangeSelectorDisabledColor = Qt::darkGray;
+  QColor rangeSelectorEnabledColor = Qt::blue;
 }
 
 namespace MantidQt
@@ -179,8 +179,9 @@ void PlotController::plotDataSet(int index)
   auto zoomRect = m_zoomer->zoomRect();
   if (!zoomRect.intersects( dataRect ) || resetZoom)
   {
-    m_plot->setAxisAutoScale(QwtPlot::xBottom);
-    m_plot->setAxisAutoScale(QwtPlot::yLeft);
+    dataRect = plotData->boundingRect();
+    m_plot->setAxisScale(QwtPlot::xBottom, dataRect.left(), dataRect.right());
+    m_plot->setAxisScale(QwtPlot::yLeft, dataRect.top(), dataRect.bottom());
   }
   // change the current data set index
   m_currentIndex = index;
@@ -202,10 +203,10 @@ void PlotController::plotDataSet(int index)
 }
 
 /// Clear all plot data.
-void PlotController::clear(bool keepGuess)
+void PlotController::clear(bool clearGuess)
 {
   m_plotData.clear();
-  if (!keepGuess)
+  if (clearGuess)
   {
     m_guessFunctionData.reset();
   }
@@ -391,6 +392,7 @@ void PlotController::setGuessFunction(const QString& funStr)
   if (funStr.isEmpty())
   {
     m_guessFunctionData.reset();
+    m_plot->replot();
   }
   else
   {
@@ -405,7 +407,6 @@ void PlotController::setGuessFunction(const QString& funStr)
       plotGuess();
     }
   }
-  std::cerr << "Function:\n" << funStr.toStdString() << std::endl;
 }
 
 void PlotController::plotGuess()

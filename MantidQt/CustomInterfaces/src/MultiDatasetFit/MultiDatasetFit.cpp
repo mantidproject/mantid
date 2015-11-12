@@ -42,7 +42,8 @@ MultiDatasetFit::MultiDatasetFit(QWidget *parent)
 MultiDatasetFit::~MultiDatasetFit()
 {
   saveSettings();
-  m_plotController->clear();
+  bool clearGuess = true;
+  m_plotController->clear(clearGuess);
 }
 
 /// Initilize the layout. 
@@ -379,8 +380,7 @@ void MultiDatasetFit::finishFit(bool error)
 {
   if ( !error )
   {
-    const bool keepGuessFunction = true;
-    m_plotController->clear(keepGuessFunction);
+    m_plotController->clear();
     m_plotController->update();
     Mantid::API::IFunction_sptr fun;
     if (m_fitOptionsBrowser->getCurrentFittingType() == MantidWidgets::FitOptionsBrowser::Simultaneous)

@@ -56,7 +56,7 @@ class PlotController: public QObject
 public:
   PlotController(MultiDatasetFit *parent, QwtPlot *plot, QTableWidget *table, QComboBox *plotSelector, QPushButton *prev, QPushButton *next);
   ~PlotController();
-  void clear(bool keepGuess = false);
+  void clear(bool clearGuess = false);
   void update();
   int getCurrentIndex() const {return m_currentIndex;}
   bool isZoomEnabled() const;
