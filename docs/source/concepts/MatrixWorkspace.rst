@@ -149,7 +149,7 @@ You can get access to the :ref:`Run` for a workspace with
 
 .. testcode:: MatrixWorkspaceRun
 
-  instrument = ws.getRun()
+  run = ws.getRun()
 
 For the properties and operations of the run object and how to access log data look at the :ref:`Run help <Run>`.
 
