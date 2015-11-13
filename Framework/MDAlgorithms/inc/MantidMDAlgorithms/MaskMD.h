@@ -3,9 +3,17 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidMDAlgorithms/DllConfig.h"
+#include <boost/regex.hpp>
 
 namespace Mantid {
 namespace MDAlgorithms {
+
+std::vector<std::string> MANTID_MDALGORITHMS_DLL
+splitByCommas(const std::string &input_string);
+
+std::vector<std::string> MANTID_MDALGORITHMS_DLL
+findNamesInBrackets(const std::string &names_string, boost::regex re);
 
 /** MaskMD : Mask an MDWorkspace. Can provide complex masking shapes over an
   exisitng MDWorkspace. Operates on a MDWorkspace in-situ.
@@ -33,7 +41,7 @@ namespace MDAlgorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MaskMD : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL MaskMD : public API::Algorithm {
 public:
   MaskMD();
   virtual ~MaskMD();
@@ -50,6 +58,8 @@ public:
 private:
   void init();
   void exec();
+
+  std::vector<std::string> parseDimensionNames(std::string &names_string);
 };
 
 } // namespace MDAlgorithms
