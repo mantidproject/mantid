@@ -711,6 +711,7 @@ void MuonAnalysis::userSelectInstrument(const QString& prefix)
   {
     runClearGroupingButton();
     m_curInterfaceSetup = prefix;
+    clearLoadedRun();
 
     // save this new choice
     QSettings group;
@@ -1934,6 +1935,16 @@ void MuonAnalysis::clearTablesAndCombo()
   }
 
   m_uiForm.groupDescription->clear();
+}
+
+/**
+ * Clear loaded run, run info and delete loaded workspaces
+ */
+void MuonAnalysis::clearLoadedRun() {
+  m_uiForm.mwRunFiles->clear();
+  m_uiForm.infoBrowser->clear();
+  deleteWorkspaceIfExists(m_workspace_name);
+  deleteWorkspaceIfExists(m_grouped_name);
 }
 
 /**
