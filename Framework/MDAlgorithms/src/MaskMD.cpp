@@ -17,6 +17,10 @@ namespace MDAlgorithms {
 
 static const std::string REGEX_STR = "\\[[^\\[\\]]*\\]";
 
+/*
+ * Split the input string on commas and trim leading and trailing whitespace
+ * from the results
+ */
 std::vector<std::string> splitByCommas(const std::string &names_string) {
   std::vector<std::string> names_split_by_commas;
   boost::split(names_split_by_commas, names_string, boost::is_any_of(","));
@@ -28,6 +32,10 @@ std::vector<std::string> splitByCommas(const std::string &names_string) {
   return names_split_by_commas;
 }
 
+/*
+ * Return a vector of only those names from the input string which are within
+ * brackets
+ */
 std::vector<std::string> findNamesInBrackets(const std::string &names_string) {
   std::vector<std::string> names_result;
 
@@ -45,6 +53,10 @@ std::vector<std::string> findNamesInBrackets(const std::string &names_string) {
   return names_result;
 }
 
+/*
+ * Return a vector of names from the string, but with names in brackets reduced
+ * to '[]'
+ */
 std::vector<std::string> removeBracketedNames(const std::string &names_string) {
   regex re(REGEX_STR);
   const std::string names_string_reduced =
