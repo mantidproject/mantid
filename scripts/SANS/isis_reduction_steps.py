@@ -26,6 +26,7 @@ from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          extract_child_ws_for_added_eventdata, load_monitors_for_multiperiod_event_data,
                           MaskWithCylinder, get_masked_det_ids, get_masked_det_ids_from_mask_file, INCIDENT_MONITOR_TAG,
                           can_load_as_event_workspace, is_convertible_to_float,correct_q_resolution_for_can)
+import DarkRunCorrection as DarkCorr
 import isis_instrument
 import isis_reducer
 import SANSUserFileParser as UserFileParser
@@ -1142,7 +1143,6 @@ class Mask_ISIS(ReductionStep):
             '    rear time mask: ', str(self.time_mask_r)+'\n'+\
             '    front time mask: ', str(self.time_mask_f)+'\n'
 
-
 class LoadSample(LoadRun):
     """
         Handles loading the sample run, this is the main experimental run with data
@@ -1176,6 +1176,113 @@ class LoadSample(LoadRun):
                 break
             self.move2ws(num)
         self.move2ws(0)
+
+
+class DarkRunSubtraction(object):
+    '''
+    This class handles the subtraction of a dark run from the sample workspace. It has not been
+    promoted to a reduction step, but it is kept in a way, that this should not be a problem
+    if this is desired one day.
+    The dark run subtraction does not take place and just passes the workspace through
+    if the parameters are not fully specified. This step happens after CropDetector.
+    First the dark run gets cropped in order to match the current detector.
+    '''
+    def __init__(self):
+        super(DarkRunSubtraction, self).__init__()
+        # This is a list with settings for the dark run subtraction
+        # Each element in the list will be struct-like and contain
+        # the relevant information for a dark-run subtraction
+        self._dark_run_settings = []
+
+    def add_setting(self, dark_run_setting):
+        '''
+        We add a dark run setting to our list of settings
+        @param dark_run_setting
+        '''
+        if not isinstance(result, UserFileParser.DarkRunSettings):
+            raise RuntimeError("DarkRunSubtraction: The provided settings "
+                               "object is not of type DarkRunSettings")
+        self._dark_run_settings.append(dark_run_setting)
+
+    def execute(self, reducer, workspace):
+        '''
+        Load the dark run. Cropt it to the current detector. Find out what kind of subtraction
+        to perform and subtract the dark run from the workspace. Delete the dark run workspace.
+        @param reducer: a reducer object
+        @param workspace: the workspace to alter
+        '''
+        # The workspace signature of the execute method exists to make it an easy step
+        # to convert to a full-grown reduction step for now we add it when converting
+        # the data to histogram
+        dummy = reducer
+        if not self.has_dark_runs():
+            return
+
+        # Subtract for each setting
+        for setting in applicable_settings:
+            self._execute_dark_run_subtraction(workspace, setting)
+
+    def has_dark_runs(self):
+        '''
+        Check if there are any dark run settings which are to be applied
+        @returns true if there are any dark runs settings which are to be applied
+        '''
+        if not self._dark_run_settings:
+            return False
+        else:
+            return True
+
+    def _execute_dark_run_subtraction(self, workspace, setting):
+        '''
+        Apply one dark run setting to the workspace
+        @param worksapce: the SANS data set
+        @param setting: a dark run settings tuple
+        '''
+        # Load the dark run workspace is it has not already been loaded
+        dark_run_ws = self._load_dark_run(setting)
+
+        # Clone the workspace and crop it to match the main workspace
+        dark_run_cropped = self._provide_cropped_workspace(dark_run_ws)
+
+        # Subtract the dar run from the workspace
+        self._subract_dark_run(workspace, dark_run_cropped, settings)
+
+        # Delete the cropped dark run
+
+    def _subtract_dark_run(self, workspace, dark_run, settings):
+        '''
+        Subtract the dark run from the SANS workspace
+        @param worksapce: the SANS data set
+        @param dark_run: the dark run workspace
+        @param setting: a dark run settings tuple
+        '''
+        dark_run_correction = DarkCorr.DarkRunCorrection()
+        dark_run_correction.set_use_mean(setting.time)
+        dark_run_correction.set_use_time(setting.mean)
+
+        dark_run_correction.execute(scatter_workspace = workspace,
+                                    dark_run = dark_run)
+
+    def _load_dark_run(self, setting):
+        '''
+        Loads a dark run workspace if it has not already been loaded
+        @param settings: a dark run settings tuple
+        @raise RuntimeError: If the dark run file cannot be found or loaded.
+        '''
+        dark_run_ws = None
+        try:
+             dark_run_file_path, dark_run_ws_name = getFileAndName(setting.run_number)
+
+             # If the workspace is already loaded then don't reload it
+             if mtd.doesExist(dark_run_ws_name):
+                 dark_run_ws = mtd[dark_run_ws_name]
+             else:
+                dark_run_file_path = dark_run_file_path.replace("\\", "/")
+                dark_run_ws = Load(Filename = dark_run_file_path, OutputWorkspace=dark_run_ws_name)
+        except:
+            raise RuntimeError("DarkRunSubtration: The specified dark run file cannot be found or loaded. "
+                               "Please make sure that that it exists in your search directory.")
+        return dark_run_ws
 
 
 class CropDetBank(ReductionStep):
@@ -2340,25 +2447,37 @@ class SliceEvent(ReductionStep):
     def __init__(self):
         super(SliceEvent, self).__init__()
         self.scale = 1
+        self._dark_run_subtraction = DarkRunSubtraction()
+
+    def add_dark_run_subtraction(self, dark_run_setting):
+        '''
+        Adds a dark run setting to the dark run subtraction
+        @param dark_run_setting: a dark run setting
+        '''
+        self._dark_run_subtraction.add_setting(dark_run_setting)
 
     def execute(self, reducer, workspace):
         ws_pointer = getWorkspaceReference(workspace)
-
+        ws_for_dark_run = ws_pointer
         # it applies only for event workspace
         if not isinstance(ws_pointer, IEventWorkspace):
             self.scale = 1
-            return
-        start, stop = reducer.getCurrSliceLimit()
-
-        _monitor = reducer.get_sample().get_monitor()
-
-        if "events.binning" in reducer.settings:
-            binning = reducer.settings["events.binning"]
         else:
-            binning = ""
-        hist, (tot_t, tot_c, part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor, binning)
-        self.scale = part_c / tot_c
+            start, stop = reducer.getCurrSliceLimit()
 
+            _monitor = reducer.get_sample().get_monitor()
+
+            if "events.binning" in reducer.settings:
+                binning = reducer.settings["events.binning"]
+            else:
+                binning = ""
+            hist, (tot_t, tot_c, part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor, binning)
+            ws_for_dark_run = hist
+            self.scale = part_c / tot_c
+
+        # If the user has selected a dark run subtraction then it will be performed here
+        if self._dark_run_subtraction.has_dark_runs():
+            self._dark_run_subtraction.execute(reducer, ws_pointer)
 
 class BaseBeamFinder(ReductionStep):
     """
@@ -2933,7 +3052,8 @@ class UserFile(ReductionStep):
         # else handle in a standard way
         back_parser = UserFileParser.BackCommandParser()
         if back_parser.can_attempt_to_parse(arguments):
-            back_parser.parse_and_set(arguments, reducer)
+            dark_run_settings = back_parser.parse_and_set(arguments, reducer)
+            # TODO: Apply settings to redcuer
         else:
             #a list of the key words this function can read and the functions it calls in response
             keys = ['MON/TIMES', 'M', 'TRANS']

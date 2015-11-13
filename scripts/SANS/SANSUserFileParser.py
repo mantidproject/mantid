@@ -1,6 +1,12 @@
 ﻿#pylint: disable=invalid-name
 import mantid
 from mantid.kernel import Logger
+from collections import namedtuple
+import re
+
+# A settings tuple for dark runs.
+DarkRunSettings = namedtuple("DarkRunSettings", "run_number time mean mon mon_number")
+
 
 class BackCommandParser(object):
     def __init__(self):
@@ -10,33 +16,39 @@ class BackCommandParser(object):
         # Parse results
         self._use_mean = None
         self._use_time = None
-        self._detector = None
+        self._mon = False
         self._run_number = None
+        self._mon_number = 0
 
+    def _reset_parse_results(self):
+        self._use_mean = None
+        self._use_time = None
+        self._mon = False
+        self._run_number = None
+        self._mon_number = 0
 
     def _set_parser_chain(self):
-        # Standard because they all have the same pattern, eg REAR/TIME/MEAN/RUN=1234
-        self._first_level_keys_standard = ['REAR','MAIN', 'FRONT', 'HAB']
-
-        # Special because they are not standard, eg MON/RUN=1234/MEAN/TIME
-        self._first_level_keys_special = ['MON']
-
         self._uniform_key = ['TIME', 'UAMP']
         self._mean_key = ['MEAN', 'TOF']
         self._run_key = ['RUN=']
 
+        # Standard because they all have the same pattern, eg /TIME/MEAN/RUN=1234
+        self._first_level_keys_standard = self._uniform_key
+
+        # Special because they are not standard, eg MON/RUN=1234/MEAN/TIME or M4/RUN=1234/MEAN/TIME
+        self._first_level_keys_special = ['MON', "^M[1-9][0-9]*$"]
+
         # Evaluation chains 
-        self._standard_chain = [self._first_level_keys_standard, self._uniform_key, self._mean_key, self._run_key]
+        self._standard_chain = [self._first_level_keys_standard, self._mean_key, self._run_key]
         self._special_chain = [self._first_level_keys_special, self._run_key, self._uniform_key, self._mean_key]
         self._evaluation_chain = None
 
         # Key - method mapping
         self._set_up_method_map()
 
-
     def _set_up_method_map(self):
-         self._method_map = {''.join(self._first_level_keys_standard): self._evaluate_detector,
-                             ''.join(self._first_level_keys_special): self._evaluate_detector,
+         self._method_map = {''.join(self._first_level_keys_standard): self._evaluate_uniform,
+                             ''.join(self._first_level_keys_special): self._evaluate_mon,
                              ''.join(self._uniform_key): self._evaluate_uniform,
                              ''.join(self._mean_key):self._evaluate_mean,
                              ''.join(self._run_key):self._evaluate_run}
@@ -48,6 +60,7 @@ class BackCommandParser(object):
         '''
         Evalutes if the argument is either MEAN, TOF or something else.
         @param argument: string to investigate
+        @raise RuntimeError: If the argument cannot be parsed correctly
         '''
         if argument == self._mean_key[0]:
             self._use_mean = True
@@ -62,6 +75,7 @@ class BackCommandParser(object):
         '''
         Evalutes if the argument is eithe TIME, UAMP or something else.
         @param argument: string to investigate
+        @raise RuntimeError: If the argument cannot be parsed correctly
         '''
         if argument == self._uniform_key[0]:
             self._use_time = True
@@ -76,6 +90,7 @@ class BackCommandParser(object):
         '''
         Evalutes if the argument is RUN=
         @param argument: string to investigate
+        @raise RuntimeError: If the argument cannot be parsed correctly
         '''
         if not argument.startswith(self._run_key[0]):
             raise RuntimeError("BackCommandParser: Cannot parse the RUN= value. "
@@ -86,14 +101,23 @@ class BackCommandParser(object):
         # check if it is a valid run
         self._run_number  = argument.replace(self._run_key[0], "")
 
-    def _evaluate_detector(self, argument):
+    def _evaluate_mon(self, argument):
         '''
         Evaluates which detector to use. At this point the validty of this has already been checkd, so
         we can just take it as is.
         @param argument: string to investigate
+        @raise RuntimeError: If the argument cannot be parsed correctly
         '''
-        self._detector = argument
-
+        if argument == self._first_level_keys_special[0]: # Check if MON
+            self._mon = True
+        elif re.match(self._first_level_keys_special[1], argument):
+            self._mon = True
+            mon_number = argument.replace("M", "")
+            self._mon_number=mon_number
+        else:
+            raise RuntimeError("BackCommandParser: Cannot parse the MON value. "
+                               "Read in " + argument +". "+
+                               "Make sure it is set correctly.")
 
     def can_attempt_to_parse(self, arguments):
         '''
@@ -104,8 +128,9 @@ class BackCommandParser(object):
         # Convert to capital and split the string
         to_check = self._prepare_argument(arguments)
 
-        # We expect 4 arguments
-        if len(to_check) != 4:
+        # We expect 3 arguemnts for the standard chain and 4 arguments
+        # for the special monitor chain
+        if len(to_check) != 4 and len(to_check) != 3:
             return False
 
         can_parse = False
@@ -124,10 +149,14 @@ class BackCommandParser(object):
         Check if the first entry corresponds to a standard chain, i.e. starting with monitor and followed by run spec.
         @param arguments: the string list containing the arguments
         '''
-        if argument[0] in self._special_chain[0] and argument[1].startswith(self._special_chain[1][0]):
-            return True
-        else:
-            return False
+        can_parse = False
+
+        if argument[0] == self._first_level_keys_special[0] and argument[1].startswith(self._special_chain[1][0]):
+            can_parse = True
+        elif re.match(self._first_level_keys_special[1], argument[0]) and argument[1].startswith(self._special_chain[1][0]):
+            can_parse = True
+
+        return can_parse
 
     def _is_parsable_with_standard_chain(self, argument):
         '''
@@ -159,14 +188,24 @@ class BackCommandParser(object):
         # Parse the arguments.
         self._parse(arguments)
 
-        # Now we set the arguments on the reducer
-        #self._set_arguments_on_reducer(reducer)
+        # Now pass the arguments back in a defined format
+        setting =  DarkRunSettings(mon = self._mon,
+                               run_number = self._run_number,
+                               time = self._use_time,
+                               mean = self._use_mean,
+                               mon_number = self._mon_number)
+
+        # Reset the parse results just in case we want to use it again
+        self._reset_parse_results()
+
+        return setting
 
 
     def _parse(self, arguments):
         '''
         Parse the arguments and store the results
         @param arguments: the string containing the arguments
+        @raise RuntimeError: If the argument cannot be parsed correctly
         '''
         to_parse = self._prepare_argument(arguments)
 
@@ -180,13 +219,3 @@ class BackCommandParser(object):
             evaluation_method = self._get_method(key)
             evaluation_method(element)
             index +=  1
-
-    def _set_arguments_on_reducer(reducer):
-        # Set the mean selection
-
-        # Set the time selection
-
-        # Set the detector selection
-
-        # Set the run number
-        pass

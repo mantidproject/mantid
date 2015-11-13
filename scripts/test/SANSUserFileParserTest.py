@@ -2,30 +2,25 @@
 import mantid
 import SANSUserFileParser as UserFileParser
 
+
 class BackCommandParserTest(unittest.TestCase):
     def test_can_parse_correctly_initial_command(self):
         # Arrange
-        correct1 = "MAIN/sdlf/sdf/sdf" # Correct MAIN
-        correct2 = "hab /sdlf/sdf /sdf"  # Correct HAB
-        correct3 = "FRoNT/sdlf/sdf/sdf" # Correct FRONT
-        correct4 = " REAR/sdlf/sdf/sdf" # Correct REAR
-        correct5 = "MON/RUN=1234/sdf/sdf" # Correct Mon/RUN=
+        correct1 = "TImE /sdlf/sdf" # Correct MAIN
+        correct2 = "UAMp/sdlf/sdf"  # Correct HAB
+        correct3 = "MON/RUN=1234/sdf/sdf" # Correct Mon/RUN=
         parser = UserFileParser.BackCommandParser()
 
         # Act and assert
         self.assertTrue(parser.can_attempt_to_parse(correct1))
         self.assertTrue(parser.can_attempt_to_parse(correct2))
         self.assertTrue(parser.can_attempt_to_parse(correct3))
-        self.assertTrue(parser.can_attempt_to_parse(correct4))
-        self.assertTrue(parser.can_attempt_to_parse(correct5))
 
     def test_cannot_parse_correctly_initial_command(self):
         # Arrange
-        correct1 = "MAI/sdlf/sdf/sdf"
-        correct2 = "habj/sdlf/sdf/sdf"
-        correct3 = "FRoNT=/sdlf/sdf/sdf"
-        correct4 = "MON/sdf/sdf/sdf"
-        correct5 = "MAIN/sdf" # Correct first but incorrect length
+        correct1 = "FRoNT=/sdlf/sdf" # Wrong specifier
+        correct2 = "MON/sdf/sdf/sdf" # No run number
+        correct3 = "Time/sdf" # Correct first but incorrect length
 
         parser = UserFileParser.BackCommandParser()
 
@@ -33,26 +28,23 @@ class BackCommandParserTest(unittest.TestCase):
         self.assertFalse(parser.can_attempt_to_parse(correct1))
         self.assertFalse(parser.can_attempt_to_parse(correct2))
         self.assertFalse(parser.can_attempt_to_parse(correct3))
-        self.assertFalse(parser.can_attempt_to_parse(correct4))
-        self.assertFalse(parser.can_attempt_to_parse(correct5))
 
     def do_test_can_parse_correctly(self, arguments, expected_uniform,
                                     expected_mean, expected_run_number,
-                                    expected_detector):
+                                    is_mon, expected_mon_number):
         # Arrange
         parser = UserFileParser.BackCommandParser()
         # Act
         reducer = None
-        parser.parse_and_set(arguments,reducer)
+        result = parser.parse_and_set(arguments,reducer)
         # Assert
-        self.assertEquals(parser._use_mean, expected_mean)
-        self.assertEquals(parser._use_time, expected_uniform)
-        self.assertEquals(parser._detector, expected_detector)
-        self.assertEquals(parser._run_number, expected_run_number)
+        self.assertEquals(result.mean, expected_mean)
+        self.assertEquals(result.time, expected_uniform)
+        self.assertEquals(result.mon, is_mon)
+        self.assertEquals(result.run_number, expected_run_number)
+        self.assertEquals(result.mon_number, expected_mon_number)
 
-    def do_test_parsing_fails(self, arguments, expected_uniform,
-                                    expected_mean, expected_run_number,
-                                    expected_detector):
+    def do_test_parsing_fails(self, arguments):
         # Arrange
         parser = UserFileParser.BackCommandParser()
         # Act
@@ -60,78 +52,75 @@ class BackCommandParserTest(unittest.TestCase):
         args = [arguments,reducer]
         self.assertRaises(RuntimeError, parser.parse_and_set,*args)
 
-    def test_that_can_parse_MAIN_TIME_MEAN_RUN(self):
-        argument = "MAIN/TIME/ mEAN/RuN=SANS2D1111111"
+    def test_that_can_parse_TIME_MEAN_RUN(self):
+        argument = "TIME/ mEAN/RuN=SANS2D1111111"
         uniform = True
         mean = True
-        run_number ="SANS2D1111111" 
-        detector = "MAIN"
-        self.do_test_can_parse_correctly(argument, uniform, mean, run_number, detector)
+        run_number ="SANS2D1111111"
+        is_mon = False
+        mon_number = 0
+        self.do_test_can_parse_correctly(argument, uniform, mean, run_number, is_mon, mon_number)
 
-    def test_that_can_parse_REAR_UAMP_TOF_RUN(self):
-        argument = "ReaR/Uamp/ToF /Run=2222"
+    def test_that_can_parse_UAMP_TOF_RUN(self):
+        argument = "Uamp/ToF /Run=2222"
         uniform = False
         mean = False
         run_number ="2222"
-        detector = "REAR"
-        self.do_test_can_parse_correctly(argument, uniform, mean, run_number, detector)
+        is_mon = False
+        mon_number = 0
+        self.do_test_can_parse_correctly(argument, uniform, mean, run_number, is_mon, mon_number)
 
-    def test_that_can_parse_FRONT_TIME_MEAN_RUN(self):
-        argument = "FRoNT/TIME/tof/run=LOQ33333333"
+    def test_that_can_parse_TIME_MEAN_RUN(self):
+        argument = "TIME/tof/run=LOQ33333333"
         uniform = True
         mean = False
         run_number ="LOQ33333333"
-        detector = "FRONT"
-        self.do_test_can_parse_correctly(argument, uniform, mean, run_number, detector)
+        is_mon = False
+        mon_number = 0
+        self.do_test_can_parse_correctly(argument, uniform, mean, run_number, is_mon, mon_number)
 
-    def test_that_can_parse_REAR_UAMP_TOF_RUN(self):
-        argument = "HAB/UAMP/mean/RuN=444444444"
+    def test_that_can_parse_UAMP_MEAN_RUN(self):
+        argument = " UAMP/mean /RuN=444444444"
         uniform = False
         mean = True
         run_number ="444444444"
-        detector = "HAB"
-        self.do_test_can_parse_correctly(argument, uniform, mean, run_number, detector)
-
+        is_mon = False
+        mon_number = 0
+        self.do_test_can_parse_correctly(argument, uniform, mean, run_number, is_mon, mon_number)
 
     def test_that_can_parse_MON_RUN_TIME_MEAN(self):
-        argument = "MON/RUN=123124/time/mean  "
+        argument = "MON/RUN=123124/time/mean"
         uniform = True
         mean = True
         run_number ="123124"
-        detector = "MON"
-        self.do_test_can_parse_correctly(argument, uniform, mean, run_number, detector)
+        is_mon = True
+        mon_number = 0
+        self.do_test_can_parse_correctly(argument, uniform, mean, run_number, is_mon, mon_number)
 
     def test_rejects_bad_first_value(self):
         argument = "GUN/RUN=123124/time/mean  "
+        self.do_test_parsing_fails(argument)
+
+    def test_rejects_bad_first_value(self):
+        argument = "mean/UAMP//RuN=444444444"
+        self.do_test_parsing_fails(argument)
+
+    def test_rejects_bad_second_value(self):
+        argument = "UAMP/meanTT/RuN=444444444"
+        self.do_test_parsing_fails(argument)
+
+    def test_rejects_bad_third_value(self):
+        argument = "UAMP/mean/RuN 44444"
+        self.do_test_parsing_fails(argument)
+
+    def test_that_can_pars_M3_RUN_TIM_MEAN(self):
+        argument = "M3/RUN=123124/time/mean"
         uniform = True
         mean = True
         run_number ="123124"
-        detector = "MON"
-        self.do_test_parsing_fails(argument, uniform, mean, run_number, detector)
-
-    def test_rejects_bad_second_value(self):
-        argument = "HAB/mean/UAMP//RuN=444444444"
-        uniform = False
-        mean = True
-        run_number ="444444444"
-        detector = "HAB"
-        self.do_test_parsing_fails(argument, uniform, mean, run_number, detector)
-
-    def test_rejects_bad_third_value(self):
-        argument = "HAB/UAMP/meanTT/RuN=444444444"
-        uniform = False
-        mean = True
-        run_number ="444444444"
-        detector = "HAB"
-        self.do_test_parsing_fails(argument, uniform, mean, run_number, detector)
-
-    def test_rejects_bad_fourth_value(self):
-        argument = "HAB/UAMP/mean/RuN 44444"
-        uniform = False
-        mean = True
-        run_number ="444444444"
-        detector = "HAB"
-        self.do_test_parsing_fails(argument, uniform, mean, run_number, detector)
+        is_mon = True
+        mon_number = "3"
+        self.do_test_can_parse_correctly(argument, uniform, mean, run_number, is_mon, mon_number)
 
 
 if __name__ == "__main__":
