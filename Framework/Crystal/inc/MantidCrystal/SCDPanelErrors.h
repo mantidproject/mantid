@@ -167,7 +167,8 @@ private:
 
   boost::shared_ptr<const Geometry::IComponent> findBank(std::string bankName);
 
-  std::map<std::string,boost::shared_ptr<const Geometry::IComponent> > bankDetMap;
+  std::map<std::string, boost::shared_ptr<const Geometry::IComponent>>
+      bankDetMap;
 
   /**
    * Get the peaks workspace that was specified.

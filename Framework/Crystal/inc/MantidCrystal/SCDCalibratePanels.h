@@ -183,7 +183,7 @@ public:
   void CalculateGroups(std::set<std::string, compareBanks> &AllBankNames,
                        std::string Grouping, std::string bankPrefix,
                        std::string bankingCode,
-                       std::vector<std::vector<std::string> > &Groups);
+                       std::vector<std::vector<std::string>> &Groups);
 
   /**
    * Calculate the Workspace2D associated with a Peaksworkspace for Composite
@@ -347,7 +347,7 @@ private:
    *Groups
    */
   void saveXmlFile(std::string const FileName,
-                   std::vector<std::vector<std::string> > const Groups,
+                   std::vector<std::vector<std::string>> const Groups,
                    Geometry::Instrument_const_sptr const instrument) const;
 };
 

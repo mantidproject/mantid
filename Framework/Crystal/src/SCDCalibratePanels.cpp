@@ -179,7 +179,7 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
  */
 void SCDCalibratePanels::CalculateGroups(
     set<string, compareBanks> &AllBankNames, string Grouping, string bankPrefix,
-    string bankingCode, vector<vector<string> > &Groups) {
+    string bankingCode, vector<vector<string>> &Groups) {
   Groups.clear();
 
   if (Grouping == "OnePanelPerGroup") {
@@ -597,7 +597,7 @@ void SCDCalibratePanels::exec() {
   for (int i = 0; i < peaksWs->getNumberPeaks(); ++i)
     AllBankNames.insert(peaksWs->getPeak(i).getBankName());
 
-  vector<vector<string> > Groups;
+  vector<vector<string>> Groups;
   CalculateGroups(AllBankNames, Grouping, bankPrefix, bankingCode, Groups);
 
   //----------------- Calculate & Create Qerror table------------------
@@ -1010,8 +1010,7 @@ void SCDCalibratePanels::exec() {
           row << bankNum << pk << calculated.getCol() << theoretical.getCol()
               << calculated.getRow() << theoretical.getRow()
               << calculated.getTOF() << theoretical.getTOF();
-        }
-        catch (...) {
+        } catch (...) {
           g_log.debug() << "Problem only in printing peaks" << std::endl;
         }
       }
@@ -1365,7 +1364,7 @@ void SCDCalibratePanels::init() {
                   "A bracketed([]) list of groupings( comma or :(for range) "
                   "separated list of bank numbers");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
   declareProperty("a", EMPTY_DBL(), mustBePositive,
@@ -1552,9 +1551,9 @@ void SCDCalibratePanels::CreateFxnGetValues(
   fit->setAttribute("NGroups", IFunction::Attribute(NGroups));
   fit->setAttribute("BankNames", IFunction::Attribute(BankNameString));
 
-  string fieldBase[8] = { "detWidthScale", "detHeightScale", "Xoffset",
-                          "Yoffset",       "Zoffset",        "Xrot",
-                          "Yrot",          "Zrot" };
+  string fieldBase[8] = {"detWidthScale", "detHeightScale", "Xoffset",
+                         "Yoffset",       "Zoffset",        "Xrot",
+                         "Yrot",          "Zrot"};
   set<string> FieldB(fieldBase, fieldBase + 8);
 
   for (int g = 0; g < NGroups; ++g) {
@@ -1740,10 +1739,9 @@ void writeXmlParameter(ofstream &ostream, const string &name,
           << "\" /> </parameter>" << endl;
 }
 
-void
-SCDCalibratePanels::saveXmlFile(string const FileName,
-                                vector<vector<string> > const Groups,
-                                Instrument_const_sptr const instrument) const {
+void SCDCalibratePanels::saveXmlFile(
+    string const FileName, vector<vector<string>> const Groups,
+    Instrument_const_sptr const instrument) const {
   if (FileName.empty())
     return;
 
@@ -1758,7 +1756,7 @@ SCDCalibratePanels::saveXmlFile(string const FileName,
   ParameterMap_sptr pmap = instrument->getParameterMap();
 
   // write out the detector banks
-  for (vector<vector<string> >::const_iterator it = Groups.begin();
+  for (vector<vector<string>>::const_iterator it = Groups.begin();
        it != Groups.end(); ++it) {
     for (vector<string>::const_iterator it1 = (*it).begin(); it1 != (*it).end();
          ++it1) {

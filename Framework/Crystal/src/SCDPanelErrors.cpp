@@ -467,8 +467,7 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
     Geometry::OrientedLattice lat;
     lat.setUB(UB);
     lattice.setU(lat.getU());
-  }
-  catch (...) {
+  } catch (...) {
     for (size_t i = StartX; i <= EndX; ++i)
       out[i] = 10000;
     g_log.debug() << "Could Not find a UB matix" << std::endl;
@@ -546,8 +545,7 @@ Matrix<double> SCDPanelErrors::CalcDiffDerivFromdQ(
     Kernel::DblMatrix Deriv = Matrix<double>(DerivQ) - dQtheor * M_2_PI;
 
     return Deriv;
-  }
-  catch (...) {
+  } catch (...) {
 
     for (size_t i = 0; i < nParams(); ++i)
       g_log.debug() << getParameter(i) << ",";
@@ -763,18 +761,15 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
 
   try {
     Geometry::IndexingUtils::Optimize_UB(UB, hkl, qXtal);
-  }
-  catch (std::exception &s) {
+  } catch (std::exception &s) {
 
     g_log.error("Not enough points to find Optimized UB1 =" +
                 std::string(s.what()));
     throw runtime_error("Not enough good points to find Optimized UB");
-  }
-  catch (char *s1) {
+  } catch (char *s1) {
     g_log.error("Not enough points to find Optimized UB2=" + std::string(s1));
     throw runtime_error("Not enough good points to find Optimized UB");
-  }
-  catch (...) {
+  } catch (...) {
     g_log.error("Not enough points to find Optimized UB3");
     throw runtime_error("Not enough good points to find Optimized UB");
   }
@@ -840,8 +835,8 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
       for (size_t peak = 0; peak < qlab.size(); ++peak)
         if (bankName2Group[m_peaks->getPeak(peakIndx[peak]).getBankName()] !=
             gr) {
-          Unrot_dQ[param - StartPos]
-              .push_back(V3D(0.0, 0.0, 0.0)); // Save for later calculations
+          Unrot_dQ[param - StartPos].push_back(
+              V3D(0.0, 0.0, 0.0)); // Save for later calculations
 
           Result[0][peak] = 0;
           Result[1][peak] = 0;
@@ -863,8 +858,8 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
           GonMatrix.Invert();
           V3D dQsamp = GonMatrix * dQlab;
 
-          Unrot_dQ[param - StartPos]
-              .push_back(dQlab); // Save for later calculations
+          Unrot_dQ[param - StartPos].push_back(
+              dQlab); // Save for later calculations
 
           Result[0][peak] = dQsamp.X();
           Result[1][peak] = dQsamp.Y();

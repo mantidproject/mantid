@@ -90,7 +90,7 @@ void LoadIsawDetCal::exec() {
   std::string line;
   std::string detname;
   // Build a list of Rectangular Detectors
-  std::vector<boost::shared_ptr<RectangularDetector> > detList;
+  std::vector<boost::shared_ptr<RectangularDetector>> detList;
   for (int i = 0; i < inst->nelements(); i++) {
     boost::shared_ptr<RectangularDetector> det;
     boost::shared_ptr<ICompAssembly> assem;
