@@ -23,9 +23,9 @@ For more details on interacting with Table Workspaces in Python, please see :py:
 Accessing Workspaces
 ####################
 
-The methods for getting a variable to an EventWorkspace is the same as shown in the :ref:`Workspace <Workspace-Accessing_Workspaces>` help page.
+The methods for getting a variable to an Table Workspace is the same as shown in the :ref:`Workspace <Workspace-Accessing_Workspaces>` help page.
 
-If you want to check if a variable points to something that is an Event Workspace you can use this:
+If you want to check if a variable points to something that is an Table Workspace you can use this:
 
 .. testcode:: CheckTableWorkspace
 
