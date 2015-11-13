@@ -50,8 +50,8 @@ Viewing a MDHistoWorkspace
       multiple-dimension workspace.
 
 
-Working with Table Workspaces in Python
----------------------------------------
+Working with MD Histo Workspaces in Python
+------------------------------------------
 
 Accessing Workspaces
 ####################
