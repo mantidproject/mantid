@@ -343,7 +343,6 @@ class DiffractionReductionScripter(BaseReductionScripter):
         else:
             # turn off the binning
             runsetupdict["Binning"] = ''
-            runsetupdict['ResampleX'] = -1*int(runsetupdict['ResampleX'])
 
         # NOMAD special
         if self.instrument_name.lower().startswith('nom') is False:
