@@ -37,7 +37,7 @@ vtkMDHexFactory::vtkMDHexFactory(ThresholdRange_scptr thresholdRange,
                                  const size_t maxDepth)
     : m_thresholdRange(thresholdRange),
       m_normalizationOption(normalizationOption), m_maxDepth(maxDepth),
-      dataSet(NULL), slice(false), sliceMask(NULL), sliceImplicitFunction(NULL),
+      dataSet(NULL), slice(false), sliceImplicitFunction(NULL),
       m_time(0) {}
 
 /// Destructor
