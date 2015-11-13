@@ -1059,7 +1059,7 @@ void SCDCalibratePanels::exec() {
   }
 
   Statistics stats = getStatistics(l0vec);
-  outfile << std::setprecision(4) << std::fixed << (stats.mean);
+  outfile << "7  " << std::setprecision(4) << std::fixed << (stats.mean);
   Zscore = getZscore(t0vec);
   banned.clear();
   for (size_t i = 0; i < t0vec.size(); ++i) {
