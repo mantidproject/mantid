@@ -101,7 +101,7 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
         dataws_nsf = self.__nsf_nicrws - self.__nsf_bkgrws
         wslist = [dataws_sf, dataws_nsf, self.__sf_nicrws, self.__nsf_nicrws, self.__sf_bkgrws, self.__nsf_bkgrws]
         for wks in wslist:
-            api.LoadInstrument(wks, InstrumentName='DNS')
+            api.LoadInstrument(wks, InstrumentName='DNS', RewriteSpectraMap=True)
         api.RotateInstrumentComponent(dataws_sf, "bank0", X=0, Y=1, Z=0, Angle=-7.53)
         api.RotateInstrumentComponent(dataws_nsf, "bank0", X=0, Y=1, Z=0, Angle=-7.53)
         api.RotateInstrumentComponent(self.__sf_nicrws, "bank0", X=0, Y=1, Z=0, Angle=-8.02)

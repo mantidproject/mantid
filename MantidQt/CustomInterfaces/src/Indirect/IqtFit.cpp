@@ -400,33 +400,40 @@ void IqtFit::typeSelection(int index) {
   case 0:
     m_ffTree->addProperty(m_properties["Exponential1"]);
 
-    // remove option to plot beta
-    m_uiForm.cbPlotType->removeItem(4);
+    // remove option to plot beta and add all
+	m_uiForm.cbPlotType->removeItem(4);
+    m_uiForm.cbPlotType->removeItem(3);
+	m_uiForm.cbPlotType->addItem("All");
     break;
   case 1:
     m_ffTree->addProperty(m_properties["Exponential1"]);
     m_ffTree->addProperty(m_properties["Exponential2"]);
 
-    // remove option to plot beta
-    m_uiForm.cbPlotType->removeItem(4);
+    // remove option to plot beta and add all
+	m_uiForm.cbPlotType->removeItem(4);
+	m_uiForm.cbPlotType->removeItem(3);
+
+	m_uiForm.cbPlotType->addItem("All");
     break;
   case 2:
     m_ffTree->addProperty(m_properties["StretchedExp"]);
 
-    // add option to plot beta
-    if (m_uiForm.cbPlotType->count() == 4) {
-      m_uiForm.cbPlotType->addItem("Beta");
-    }
+	// add option to plot beta and all
+	m_uiForm.cbPlotType->removeItem(4);
+	m_uiForm.cbPlotType->removeItem(3);
+	m_uiForm.cbPlotType->addItem("Beta");
+	m_uiForm.cbPlotType->addItem("All");
 
     break;
   case 3:
     m_ffTree->addProperty(m_properties["Exponential1"]);
     m_ffTree->addProperty(m_properties["StretchedExp"]);
 
-    // add option to plot beta
-    if (m_uiForm.cbPlotType->count() == 4) {
-      m_uiForm.cbPlotType->addItem("Beta");
-    }
+    // add option to plot beta and all
+	m_uiForm.cbPlotType->removeItem(4);
+	m_uiForm.cbPlotType->removeItem(3);
+	m_uiForm.cbPlotType->addItem("Beta");
+	m_uiForm.cbPlotType->addItem("All");
 
     break;
   }

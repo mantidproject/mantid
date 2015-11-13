@@ -51,6 +51,7 @@ set ( SRC_FILES
 	src/MultiDatasetFit/MDFDataController.cpp
 	src/MultiDatasetFit/MDFDatasetPlotData.cpp
 	src/MultiDatasetFit/MDFEditLocalParameterDialog.cpp
+	src/MultiDatasetFit/MDFFunctionPlotData.cpp
 	src/MultiDatasetFit/MDFLocalParameterEditor.cpp
 	src/MultiDatasetFit/MDFLocalParameterItemDelegate.cpp
 	src/MultiDatasetFit/MDFPlotController.cpp
@@ -168,6 +169,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFDataController.h
 	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFDatasetPlotData.h
 	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFEditLocalParameterDialog.h
+	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFFunctionPlotData.h
 	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterEditor.h
 	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterItemDelegate.h
 	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFPlotController.h

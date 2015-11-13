@@ -5,6 +5,15 @@
 namespace Mantid {
 namespace Algorithms {
 
+using Mantid::API::MatrixWorkspace;
+using Mantid::API::WorkspaceProperty;
+using Mantid::DataObjects::OffsetsWorkspace;
+using Mantid::DataObjects::OffsetsWorkspace_sptr;
+using Mantid::DataObjects::SpecialWorkspace2D;
+using Mantid::DataObjects::SpecialWorkspace2D_sptr;
+using Mantid::Geometry::Instrument_const_sptr;
+using Mantid::Kernel::Direction;
+
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateDIFC)
 

@@ -37,7 +37,7 @@ if "%1"=="--classic" (
 )
 
 :: Start ipython and pass through all arguments to it
-start "Mantid Python" /B /WAIT %_BIN_DIR%\python.exe %_BIN_DIR%\Scripts\ipython.py %*
+start "Mantid Python" /B /WAIT %_BIN_DIR%\Scripts\ipython.cmd %*
 goto TheEnd
 
 :StartPython

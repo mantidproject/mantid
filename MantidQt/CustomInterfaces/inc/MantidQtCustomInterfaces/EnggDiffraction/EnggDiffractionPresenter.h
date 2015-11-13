@@ -72,6 +72,9 @@ public:
                   const std::string &runNo, const std::vector<bool> &banks,
                   const std::string &specNos, const std::string &dgFile);
 
+  /// checks if its a valid run number
+  std::string isValidRunNumber(std::vector<std::string> dir);
+
   /// pre-processing re-binning with Rebin, for a worker/thread
   void doRebinningTime(const std::string &runNo, double bin,
                        const std::string &outWSName);
@@ -138,12 +141,11 @@ private:
                      const std::string &specNos = "",
                      const std::string &dgFile = "");
 
-  void startAsyncFocusWorker(const std::string &dir,
-                             const std::vector<std::string> &outFilenames,
-                             const std::string &runNo,
-                             const std::vector<bool> &banks,
-                             const std::string &specNos,
-                             const std::string &dgFile);
+  virtual void startAsyncFocusWorker(
+	  const std::string &dir, const std::vector<std::string> &outFilenames,
+	  const std::string &runNo, const std::vector<bool> &banks,
+	  const std::string &specNos, const std::string &dgFile);
+
 
   void inputChecksBeforeFocusBasic(const std::string &runNo,
                                    const std::vector<bool> &banks);
@@ -233,6 +235,9 @@ private:
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;
 
+  /// string to use for invalid run number error message
+  const static std::string g_runNumberErrorStr;
+
   /// whether to allow users to give the output calibration filename
   const static bool g_askUserCalibFilename;
 
@@ -263,5 +268,4 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
 #endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESENTER_H_

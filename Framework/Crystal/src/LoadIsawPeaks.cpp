@@ -1,3 +1,4 @@
+#include "MantidKernel/OptionalBool.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
@@ -295,6 +296,8 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
 
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("InstrumentName", C_Instrument);
+  loadInst->setProperty("RewriteSpectraMap",
+                        Mantid::Kernel::OptionalBool(true));
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
   loadInst->executeAsChildAlg();
 
