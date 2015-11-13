@@ -3124,6 +3124,16 @@ void MuonAnalysis::openSequentialFitDialog()
   {
     loadAlg = createLoadAlgorithm();
   }
+  catch (const std::runtime_error &err) {
+    QString message("Error while setting load properties.\n"
+                    "If instrument was changed, properties will have been "
+                    "cleared and should be reset.\n\n"
+                    "Error was: ");
+    message.append(err.what());
+    QMessageBox::critical(this, "Unable to open dialog", message);
+    g_log.error(message.ascii());
+    return;
+  }
   catch(...)
   {
     QMessageBox::critical(this, "Unable to open dialog", "Error while setting load properties");
