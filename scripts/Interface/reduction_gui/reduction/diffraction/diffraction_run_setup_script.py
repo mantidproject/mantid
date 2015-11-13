@@ -99,6 +99,8 @@ class RunSetupScript(BaseScriptElement):
             else:
                 resamplex = abs(resamplex)
             pardict["ResampleX"] = str(resamplex)
+        else:
+            pardict["ResampleX"] = ''
         # END-IF
         pardict["BinInDspace"] = str(int(self.binindspace))
         pardict["SaveAs"] = self.saveas
