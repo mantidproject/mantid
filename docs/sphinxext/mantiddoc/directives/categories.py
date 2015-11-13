@@ -245,7 +245,7 @@ class CategoriesDirective(AlgorithmBaseDirective):
             category.pages.add(PageRef(page_name, env.docname))
 
             #now step up a step up each time the category hierarchy
-            parent_category = categ_name;
+            parent_category = categ_name
             while True:
                 if r"\\" in parent_category:
                     categs = parent_category.split(r"\\")
