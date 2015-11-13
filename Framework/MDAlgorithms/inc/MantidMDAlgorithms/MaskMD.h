@@ -4,47 +4,50 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidMDAlgorithms/DllConfig.h"
-#include <boost/regex.hpp>
 
 namespace Mantid {
 namespace MDAlgorithms {
 
 std::vector<std::string> MANTID_MDALGORITHMS_DLL
-splitByCommas(const std::string &input_string);
+splitByCommas(const std::string &names_string);
 
 std::vector<std::string> MANTID_MDALGORITHMS_DLL
-findNamesInBrackets(const std::string &names_string, boost::regex re);
+findNamesInBrackets(const std::string &names_string);
 
 std::vector<std::string> MANTID_MDALGORITHMS_DLL
 parseDimensionNames(const std::string &names_string);
 
-/** MaskMD : Mask an MDWorkspace. Can provide complex masking shapes over an
-  exisitng MDWorkspace. Operates on a MDWorkspace in-situ.
+std::vector<std::string> MANTID_MDALGORITHMS_DLL
+removeBracketedNames(const std::string &names_string);
 
-  @date 2012-03-01
+    /** MaskMD : Mask an MDWorkspace. Can provide complex masking shapes over an
+      exisitng MDWorkspace. Operates on a MDWorkspace in-situ.
 
-  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
+      @date 2012-03-01
 
-  This file is part of Mantid.
+      Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+      National Laboratory & European Spallation Source
 
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
+      This file is part of Mantid.
 
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+      Mantid is free software; you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation; either version 3 of the License, or
+      (at your option) any later version.
 
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+      Mantid is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
 
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-class MANTID_MDALGORITHMS_DLL MaskMD : public API::Algorithm {
+      You should have received a copy of the GNU General Public License
+      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+      File change history is stored at:
+      <https://github.com/mantidproject/mantid>
+      Code Documentation is available at: <http://doxygen.mantidproject.org>
+    */
+    class MANTID_MDALGORITHMS_DLL MaskMD : public API::Algorithm {
 public:
   MaskMD();
   virtual ~MaskMD();

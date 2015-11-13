@@ -5,6 +5,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -14,21 +15,23 @@ using boost::regex;
 namespace Mantid {
 namespace MDAlgorithms {
 
-std::vector<std::string> splitByCommas(const std::string &input_string) {
+static const std::string REGEX_STR = "\\[[^\\[\\]]*\\]";
+
+std::vector<std::string> splitByCommas(const std::string &names_string) {
   std::vector<std::string> names_split_by_commas;
-  boost::split(names_split_by_commas, input_string, boost::is_any_of(","));
+  boost::split(names_split_by_commas, names_string, boost::is_any_of(","));
 
   // Remove leading/trailing whitespace from potential dimension name
-  for (auto name : names_split_by_commas) {
+  for (auto &name : names_split_by_commas) {
     boost::trim(name);
   }
   return names_split_by_commas;
 }
 
-std::vector<std::string> findNamesInBrackets(const std::string &names_string,
-                                             regex re) {
+std::vector<std::string> findNamesInBrackets(const std::string &names_string) {
   std::vector<std::string> names_result;
 
+  regex re(REGEX_STR);
   boost::sregex_token_iterator iter(names_string.begin(), names_string.end(),
                                     re, 0);
   boost::sregex_token_iterator end;
@@ -42,10 +45,21 @@ std::vector<std::string> findNamesInBrackets(const std::string &names_string,
   return names_result;
 }
 
+std::vector<std::string> removeBracketedNames(const std::string &names_string) {
+  regex re(REGEX_STR);
+  const std::string names_string_reduced = regex_replace(names_string, re, "[]");
+
+  std::vector<std::string> remainder_split =
+      splitByCommas(names_string_reduced);
+
+  return remainder_split;
+}
+
 /*
- * Dimension names often look like "[H,0,0]" but getProperty returns a vector of
+ * The list of dimension names often looks like "[H,0,0],[0,K,0]" with "[H,0,0]"
+ * being the first dimension but getProperty returns a vector of
  * the string split on every comma
- * This function rejoins dimension names which use square brackets
+ * This function parses the string, and does not split on commas within brackets
  */
 std::vector<std::string> parseDimensionNames(const std::string &names_string) {
 
@@ -55,25 +69,22 @@ std::vector<std::string> parseDimensionNames(const std::string &names_string) {
     return splitByCommas(names_string);
   }
 
-  // Find brackets that don't contain other brackets
-  regex re("\\[[^\\[\\]]*\\]");
-  std::vector<std::string> names_result = findNamesInBrackets(names_string, re);
-
-  // Remove bracketed names from string
-  std::string names_string_reduced = regex_replace(names_string, re, "[]");
-
-  std::vector<std::string> remainder_split =
-      splitByCommas(names_string_reduced);
+  std::vector<std::string> names_result = findNamesInBrackets(names_string);
+  std::vector<std::string> remainder_split = removeBracketedNames(names_string);
 
   // Insert these into results vector if they are not "[]"
   // if they are "[]" then skip a position in the vector instead
   // This preserves the original order of the names,
-  // it is also inefficient, but the name list is not expected to be long
+  // it is also inefficient, but the name list is expected to be short
   size_t names_position = 0;
   auto begin_it = names_result.begin();
-  for (const auto &name : remainder_split) {
+  for (std::string name : remainder_split) {
     if (name != "[]") {
-      names_result.insert(begin_it + names_position, name);
+      if (names_position == names_result.size()) {
+        names_result.push_back(name);
+      } else {
+        names_result.insert(begin_it + names_position, name);
+      }
     }
     ++names_position;
   }
