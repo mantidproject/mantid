@@ -15,7 +15,6 @@
 #include <vtkNew.h>
 #include "MantidKernel/ReadLock.h"
 #include "MantidKernel/Logger.h"
-#include <boost/container/vector.hpp>
 
 using namespace Mantid::API;
 
@@ -68,11 +67,11 @@ namespace Mantid
         /*
         Write mask array with correct order for each internal dimension.
         */
-        boost::container::vector<bool> masks;
+        std::unique_ptr<bool[]> masks(new bool[nDims]);
         for(size_t i_dim = 0; i_dim < nDims; ++i_dim)
         {
           bool bIntegrated = imdws->getDimension(i_dim)->getIsIntegrated();
-          masks.push_back(!bIntegrated); //TRUE for unmaksed, integrated dimensions are masked.
+          masks[i_dim] = (!bIntegrated); //TRUE for unmaksed, integrated dimensions are masked.
         }
         
         //Ensure destruction in any event.
@@ -103,8 +102,7 @@ namespace Mantid
         }
 
         Mantid::coord_t out[1];
-        boost::container::vector<bool> useBox;
-        useBox.reserve(it->getDataSize());
+        std::unique_ptr<bool[]> useBox(new bool[it->getDataSize()]);
 
         double progressFactor = 0.5/double(it->getDataSize());
         double progressOffset = 0.5;
@@ -117,10 +115,10 @@ namespace Mantid
           Mantid::signal_t signal_normalized= it->getNormalizedSignal();
           if (!isSpecial( signal_normalized ) && m_thresholdRange->inRange(signal_normalized))
           {
-            useBox.push_back(true);
+            useBox[iBox] = true;
             signals->InsertNextValue(static_cast<float>(signal_normalized));
 
-            coord_t* coords = it->getVertexesArray(nVertexes, nNonIntegrated, masks.data());
+            coord_t* coords = it->getVertexesArray(nVertexes, nNonIntegrated, masks.get());
 
             //Iterate through all coordinates. Candidate for speed improvement.
             for(size_t v = 0; v < nVertexes; ++v)
@@ -142,7 +140,7 @@ namespace Mantid
           } // valid number of vertexes returned
           else
           {
-            useBox.push_back(false);
+            useBox[iBox] = false;
           }
           ++iBox;
         } while (it->next());

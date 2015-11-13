@@ -92,8 +92,8 @@ void vtkMDHexFactory::doCreate(
   signalCache.reserve(numBoxes);
 
   // True for boxes that we will use
-  boost::container::vector<bool> useBox;
-  useBox.assign(numBoxes, false);
+  std::unique_ptr<bool[]> useBox(new bool[numBoxes]);
+  memset(useBox.get(), 0, sizeof(bool) * numBoxes);
 
   // Create the data set (will outlive this object - output of create)
   vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
@@ -128,7 +128,7 @@ void vtkMDHexFactory::doCreate(
         // If slicing down to 3D, specify which dimensions to keep.
         if (this->slice)
           coords =
-              box->getVertexesArray(numVertexes, 3, this->sliceMask.data());
+              box->getVertexesArray(numVertexes, 3, this->sliceMask.get());
         else
           coords = box->getVertexesArray(numVertexes);
 
@@ -228,13 +228,13 @@ vtkDataSet *vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
     if (nd > 3) {
       // Slice from >3D down to 3D
       this->slice = true;
+      this->sliceMask = std::unique_ptr<bool[]>(new bool[nd]);
       this->sliceImplicitFunction = boost::make_shared<MDImplicitFunction>();
 
       // Make the mask of dimensions
       // TODO: Smarter mapping
-      this->sliceMask.clear();
       for (size_t d = 0; d < nd; d++)
-        this->sliceMask.push_back(d < 3);
+        this->sliceMask[d] = (d < 3);
 
       // Define where the slice is in 4D
       // TODO: Where to slice? Right now is just 0

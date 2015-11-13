@@ -16,8 +16,6 @@
 #include <vector>
 #include "MantidKernel/ReadLock.h"
 #include "MantidKernel/Logger.h"
-#include <boost/container/vector.hpp>
-
 
 using Mantid::API::IMDWorkspace;
 using Mantid::Kernel::CPUTimer;
@@ -120,11 +118,10 @@ namespace Mantid
         is set so that all required vertices are marked, and created in a second step. */
 
         // Array of the points that should be created, set to false
-        boost::container::vector<bool> pointNeeded;
-        pointNeeded.assign(nPointsX * nPointsY, false);
+        std::unique_ptr<bool[]> pointNeeded(new bool[nPointsX * nPointsY]);
+        memset(pointNeeded.get(), 0, nPointsX * nPointsY * sizeof(bool));
         // Array with true where the voxel should be shown
-        boost::container::vector<bool> voxelShown;
-        voxelShown.assign(nBinsX * nBinsY, false);
+        std::unique_ptr<bool[]> voxelShown(new bool[nBinsX * nBinsY]);
 
         double progressFactor = 0.5/double(nBinsX);
         double progressOffset = 0.5;

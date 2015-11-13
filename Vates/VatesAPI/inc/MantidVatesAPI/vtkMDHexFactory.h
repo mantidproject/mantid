@@ -10,7 +10,6 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
 #include <vtkNew.h>
-#include <boost/container/vector.hpp>
 #include <boost/shared_ptr.hpp>
 #include <vector>
 
@@ -103,7 +102,7 @@ private:
   mutable bool slice;
 
   /// Mask for choosing along which dimensions to slice
-  mutable boost::container::vector<bool> sliceMask;
+  mutable std::unique_ptr<bool[]> sliceMask;
 
   /// Implicit function to define which boxes to render.
   mutable boost::shared_ptr<Mantid::Geometry::MDImplicitFunction>
