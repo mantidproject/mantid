@@ -12,8 +12,10 @@
 #include <vtkFloatArray.h>
 #include <vtkLine.h>
 #include <vtkCellData.h>
+#include <vtkNew.h>
 #include "MantidKernel/ReadLock.h"
 #include "MantidKernel/Logger.h"
+#include <boost/container/vector.hpp>
 
 using namespace Mantid::API;
 
@@ -66,22 +68,22 @@ namespace Mantid
         /*
         Write mask array with correct order for each internal dimension.
         */
-        bool* masks = new bool[nDims];
+        boost::container::vector<bool> masks;
         for(size_t i_dim = 0; i_dim < nDims; ++i_dim)
         {
           bool bIntegrated = imdws->getDimension(i_dim)->getIsIntegrated();
-          masks[i_dim] = !bIntegrated; //TRUE for unmaksed, integrated dimensions are masked.
+          masks.push_back(!bIntegrated); //TRUE for unmaksed, integrated dimensions are masked.
         }
         
         //Ensure destruction in any event.
         boost::scoped_ptr<IMDIterator> it(createIteratorWithNormalization(m_normalizationOption, imdws.get()));
 
         // Create 2 points per box.
-        vtkPoints *points = vtkPoints::New();
+        vtkNew<vtkPoints> points;
         points->SetNumberOfPoints(it->getDataSize() * 2);
 
         // One scalar per box
-        vtkFloatArray * signals = vtkFloatArray::New();
+        vtkNew<vtkFloatArray> signals;
         signals->Allocate(it->getDataSize());
         signals->SetName(vtkDataSetFactory::ScalarName.c_str());
         signals->SetNumberOfComponents(1);
@@ -91,7 +93,7 @@ namespace Mantid
         vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
         visualDataSet->Allocate(it->getDataSize());
 
-        vtkIdList * linePointList = vtkIdList::New();
+        vtkNew<vtkIdList> linePointList;
         linePointList->SetNumberOfIds(2);
 
         Mantid::API::CoordTransform const* transform = NULL;
@@ -101,7 +103,8 @@ namespace Mantid
         }
 
         Mantid::coord_t out[1];
-        bool* useBox = new bool[it->getDataSize()];
+        boost::container::vector<bool> useBox;
+        useBox.reserve(it->getDataSize());
 
         double progressFactor = 0.5/double(it->getDataSize());
         double progressOffset = 0.5;
@@ -114,12 +117,10 @@ namespace Mantid
           Mantid::signal_t signal_normalized= it->getNormalizedSignal();
           if (!isSpecial( signal_normalized ) && m_thresholdRange->inRange(signal_normalized))
           {
-            useBox[iBox] = true;
+            useBox.push_back(true);
             signals->InsertNextValue(static_cast<float>(signal_normalized));
 
-            coord_t* coords = it->getVertexesArray(nVertexes, nNonIntegrated, masks);
-            delete [] coords;
-            coords = it->getVertexesArray(nVertexes, nNonIntegrated, masks);
+            coord_t* coords = it->getVertexesArray(nVertexes, nNonIntegrated, masks.data());
 
             //Iterate through all coordinates. Candidate for speed improvement.
             for(size_t v = 0; v < nVertexes; ++v)
@@ -141,12 +142,11 @@ namespace Mantid
           } // valid number of vertexes returned
           else
           {
-            useBox[iBox] = false;
+            useBox.push_back(false);
           }
           ++iBox;
         } while (it->next());
 
-        delete[] masks;
         for(size_t ii = 0; ii < it->getDataSize() ; ++ii)
         {
           progressUpdating.eventRaised((double(ii)*progressFactor) + progressOffset);
@@ -157,22 +157,16 @@ namespace Mantid
 
             linePointList->SetId(0, pointIds + 0); //xyx
             linePointList->SetId(1, pointIds + 1); //dxyz
-            visualDataSet->InsertNextCell(VTK_LINE, linePointList);
+            visualDataSet->InsertNextCell(VTK_LINE, linePointList.GetPointer());
           } // valid number of vertexes returned
         }
-
-        delete[] useBox;
 
         signals->Squeeze();
         points->Squeeze();
 
-        visualDataSet->SetPoints(points);
-        visualDataSet->GetCellData()->SetScalars(signals);
+        visualDataSet->SetPoints(points.GetPointer());
+        visualDataSet->GetCellData()->SetScalars(signals.GetPointer());
         visualDataSet->Squeeze();
-
-        signals->Delete();
-        points->Delete();
-        linePointList->Delete();
 
         // Hedge against empty data sets
         if (visualDataSet->GetNumberOfPoints() <= 0)

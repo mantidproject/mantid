@@ -86,10 +86,10 @@ namespace Mantid
         coord_t incrementX = (maxX - minX) / coord_t(nBinsX-1);
 
         const int imageSize = nBinsX;
-        vtkPoints *points = vtkPoints::New();
+        vtkNew<vtkPoints> points;
         points->Allocate(static_cast<int>(imageSize));
 
-        vtkFloatArray * signal = vtkFloatArray::New();
+        vtkNew<vtkFloatArray> signal;
         signal->Allocate(imageSize);
         signal->SetName(vtkDataSetFactory::ScalarName.c_str());
         signal->SetNumberOfComponents(1);
@@ -140,8 +140,8 @@ namespace Mantid
 
         vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
         visualDataSet->Allocate(imageSize);
-        visualDataSet->SetPoints(points);
-        visualDataSet->GetCellData()->SetScalars(signal);
+        visualDataSet->SetPoints(points.GetPointer());
+        visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
 
         for (int i = 0; i < nBinsX - 1; i++)
         {
@@ -156,8 +156,6 @@ namespace Mantid
           }
         }
 
-        points->Delete();
-        signal->Delete();
         visualDataSet->Squeeze();
 
         // Hedge against empty data sets

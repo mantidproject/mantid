@@ -8,6 +8,7 @@
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include <vtkNew.h>
 
 namespace Mantid
 {
