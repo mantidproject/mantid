@@ -91,7 +91,15 @@ class RunSetupScript(BaseScriptElement):
             pardict["Binning"] = -1.0*abs(self.binning)
         else:
             pardict["Binning"] = self.binning
-        pardict["ResampleX"] = str(self.resamplex)
+        if str(self.resamplex) != '':
+            # ResampleX is used instead binning
+            resamplex = int(str(self.resamplex))
+            if self.binningtype == "Logarithmic":
+                resamplex = -1*abs(resamplex)
+            else:
+                resamplex = abs(resamplex)
+            pardict["ResampleX"] = str(resamplex)
+        # END-IF
         pardict["BinInDspace"] = str(int(self.binindspace))
         pardict["SaveAs"] = self.saveas
         pardict["OutputDirectory"] = self.outputdir
