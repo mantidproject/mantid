@@ -93,8 +93,8 @@ For texture focusing, the detector grouping file is a text (csv) file
 with one line per bank. Each line must contain at least two numeric
 fields, where the first one specifies the bank ID, and the second and
 subsequent ones different spectrum numbers or ranges of spectrum
-numbers. For example:
-::
+numbers. For example::
+
    # Bank ID, spectrum numbers
    1, 205-210
    2, 100, 102, 107

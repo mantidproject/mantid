@@ -128,7 +128,7 @@ The **Reflectometry** menu provides access to the following functionality:
 |                  | by the :ref:`CalculateSlits <algm-CalculateSlits>`       |
 |                  | algorithm.                                               |
 +------------------+----------------------------------------------------------+
-| Options          | Opens the `Options`_ menu.                               |
+| Options          | Opens the `Options <ISIS_Reflectomety-Options>`_ menu.   |
 +------------------+----------------------------------------------------------+
 
 The **Edit** menu provides access to the same actions found in the tool bar.
@@ -343,9 +343,10 @@ Measure based search transfer uses the log-values within nexus files from the ex
   placed into the same group.
 - Any runs with the ``same measurement_id`` and the same ``measurement_subid`` logs, will be merged into a single row, with all the runs listed in the **Run(s)** column in the format, ``123+124+125``. 
 
+.. _ISIS_Reflectomety-Options:
 
 Options
-~~~~~~~
+-------
 
 Through the options menu, a small number of options may be configured to adjust
 the behaviour of the interface.
