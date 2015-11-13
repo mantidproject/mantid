@@ -1237,9 +1237,9 @@ void LoadEventPreNexus2::setProtonCharge(
   log->addValues(this->pulsetimes, this->proton_charge);
 
   /// TODO set the units for the log
-  run.addLogData(log);	
-	// Force re-integration
-	run.integrateProtonCharge();
+  run.addLogData(log);
+  // Force re-integration
+  run.integrateProtonCharge();
   double integ = run.getProtonCharge();
 
   g_log.information() << "Total proton charge of " << integ

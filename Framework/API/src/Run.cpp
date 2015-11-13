@@ -23,9 +23,9 @@ namespace {
 const int ADDABLES = 12;
 /// The names of the log entries summed when adding two runs together
 const std::string ADDABLE[ADDABLES] = {
-    "tot_prtn_chrg",   "rawfrm",          "goodfrm",         "dur",
-    "gd_prtn_chrg",    "uA.hour",         "monitor0_counts", "monitor1_counts",
-    "monitor2_counts", "monitor3_counts", "monitor4_counts", "monitor5_counts"};
+    "tot_prtn_chrg", "rawfrm", "goodfrm", "dur", "gd_prtn_chrg", "uA.hour",
+    "monitor0_counts", "monitor1_counts", "monitor2_counts", "monitor3_counts",
+    "monitor4_counts", "monitor5_counts"};
 /// Name of the goniometer log when saved to a NeXus file
 const char *GONIOMETER_LOG_NAME = "goniometer";
 /// Name of the stored histogram bins log when saved to NeXus
@@ -244,8 +244,8 @@ void Run::storeHistogramBinBoundaries(const std::vector<double> &histoBins) {
   if (histoBins.front() >= histoBins.back()) {
     std::ostringstream os;
     os << "Run::storeEnergyBinBoundaries - Inconsistent start & end values "
-          "given, size="
-       << histoBins.size() << ". Cannot interpret values as bin boundaries.";
+          "given, size=" << histoBins.size()
+       << ". Cannot interpret values as bin boundaries.";
     throw std::out_of_range(os.str());
   }
   m_histoBins = histoBins;
@@ -268,15 +268,13 @@ Run::histogramBinBoundaries(const double value) const {
   if (value < m_histoBins.front()) {
     std::ostringstream os;
     os << "Run::histogramBinBoundaries- Value lower than first bin boundary. "
-          "Value= "
-       << value << ", first boundary=" << m_histoBins.front();
+          "Value= " << value << ", first boundary=" << m_histoBins.front();
     throw std::out_of_range(os.str());
   }
   if (value > m_histoBins.back()) {
     std::ostringstream os;
     os << "Run::histogramBinBoundaries- Value greater than last bin boundary. "
-          "Value= "
-       << value << ", last boundary=" << m_histoBins.back();
+          "Value= " << value << ", last boundary=" << m_histoBins.back();
     throw std::out_of_range(os.str());
   }
   const int index = VectorHelper::getBinIndex(m_histoBins, value);

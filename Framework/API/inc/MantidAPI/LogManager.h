@@ -9,9 +9,8 @@
 #include <vector>
 
 namespace NeXus {
-	class File;
+class File;
 }
-
 
 namespace Mantid {
 namespace Kernel {

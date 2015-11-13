@@ -2335,8 +2335,8 @@ void FilterEventsByLogValuePreNexus::setProtonCharge(
 
   // TODO set the units for the log
   run.addLogData(log);
-	// Force re-integration
-	run.integrateProtonCharge();
+  // Force re-integration
+  run.integrateProtonCharge();
   double integ = run.getProtonCharge();
   this->g_log.information() << "Total proton charge of " << integ
                             << " microAmp*hours found by integrating.\n";
