@@ -29,6 +29,8 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         self.declareProperty("Mean", False, "If True then a mean value of all spectra is used to" 
                                              "calculate the value to subtract")
         self.declareProperty("Uniform", True, "If True then we treat the treat the tim ebins a")
+        self.declareProperty("ApplyToDetectors", True, "If True then we apply the correction to the detector pixels")
+        self.declareProperty("ApplyToMonitors", False, "If True then we apply the correction to the monitors")
 
     def PyExec(self):
         # Get the workspaces
@@ -59,6 +61,17 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace", output_ws)
 
+    def validateInputs(self):
+        issues = dict()
+
+        # Either the detectors and/or the monitors need to be selected
+        applyToDetectors = self.getProperty("ApplyToDetectors").value
+        applyToMonitors = self.getProperty("ApplyToMonitors").value
+
+        if not applyToDetectors and not applyToMonitors:
+            error_msg = 'Must provide either ApplyToDetectors or ApplyToMonitors or both'
+            issues['ApplyToDetectors'] = error_msg
+
     def _subtract_dark_run_from_sans_data(self, workspace, dark_run):
         # Subtract the dark_run from the workspace
         subtracted_ws_name = "_dark_run_corrected_ws"
@@ -82,6 +95,9 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         alg_clone.setProperty("OutputWorkspace", dark_run_clone_name)
         alg_clone.execute()
         dark_run_clone = alg_clone.getProperty("OutputWorkspace").value
+
+        # Remove the detectors which are unwanted
+        dark_run_monitor_corrected = self._remove_unwanted_detectors(dark_run_clone)
 
         dark_run_rebin_name = "_dark_run_rebinned"
         alg_rebin = AlgorithmManager.create("RebinToWorkspace")
@@ -182,6 +198,50 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
 
         # Now that we have a unity workspace multiply with the unit value
         return self._scale_dark_run(dark_run_unity,averaged_value)
+
+    def _remove_unwanted_detectors(self, dark_run):
+        # If we want both the monitors and the detectors, then we don't have to do anything
+        applyToDetectors = self.getProperty("ApplyToDetectors").value
+        applyToMonitors = self.getProperty("ApplyToMonitors").value
+
+        if applyToDetectors and applyToMonitors:
+            return dark_run
+
+        # Find all monitors
+        monitor_list = self._find_monitor_workspace_indices(dark_run)
+
+        # If the user only wants the detector selection. Then we we cannot subtract
+        # anything from the monitor spectra. This is true the other way around of course.
+        # The minus algorithm will need to map all spectra from the LHS to some spectra
+        # of the RHS, hence it does not quite do what we want. In order to circumvent the
+        # issue here, we set all spectra to 0 which should not contribute to the dark run
+        # correction.
+        detector_cleaned_dark_run = None
+        if applyToDetectors:
+            detector_cleaned_dark_run = self._set_pure_detector_dark_run(dark_run, monitor_list)
+        elif applyToMonitors:
+            detector_cleaned_dark_run = self._set_pure_monitor_dark_run(dark_run, monitor_list)
+        else:
+            raise RuntimeError("SANSDarkRunBackgroundCorrection: Must provide either "
+                               "ApplyToDetectors or ApplyToMonitors or both")
+
+    def _set_pure_detector_dark_run(monitor_list):
+        # Since we only have around 1 monitors we set them manually to 0
+        for index in monitor_list:
+            data = dark_run.dataX(index) # TODO: Continue here
+
+    def _find_monitor_workspace_indices(dark_run):
+        monitor_list = []
+        try:
+            num_histograms = dark_run.getNumHistograms()
+            for index in range(0, num_histograms):
+                det = dark_run.getDetector(index)
+                if det.isMonitor():
+                    monitor_list.append(index)
+        except:
+            # TODO: PRODUCE WARNING
+            pass
+        return monitor_list
 
 #############################################################################################
 
