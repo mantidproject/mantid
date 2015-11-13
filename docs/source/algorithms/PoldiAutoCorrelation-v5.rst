@@ -47,7 +47,7 @@ PoldiAutoCorrelation operates on a MatrixWorkspace with a valid POLDI instrument
     print "The workspace contains", raw_6904.getNumberHistograms(), "spectra."
     
     # For most calculations, an instrument definition is needed, so it's loaded as well
-    LoadInstrument(raw_6904, InstrumentName = "POLDI")
+    LoadInstrument(raw_6904, InstrumentName = "POLDI", RewriteSpectraMap=True)
     
     # Call the actual algorithm.
     correlated_6904 = PoldiAutoCorrelation(raw_6904)

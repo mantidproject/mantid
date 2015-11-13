@@ -67,6 +67,7 @@ set ( SRC_FILES
 	src/NDRandomNumberGenerator.cpp
 	src/NeutronAtom.cpp
 	src/NexusDescriptor.cpp
+	src/OptionalBool.cpp
 	src/ParaViewVersion.cpp
 	src/ProgressBase.cpp
 	src/ProgressText.cpp
@@ -215,6 +216,7 @@ set ( INC_FILES
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusDescriptor.h
 	inc/MantidKernel/NullValidator.h
+	inc/MantidKernel/OptionalBool.h
 	inc/MantidKernel/ParaViewVersion.h
 	inc/MantidKernel/PhysicalConstants.h
 	inc/MantidKernel/PocoVersion.h
@@ -346,6 +348,7 @@ set ( TEST_FILES
 	NeutronAtomTest.h
 	NexusDescriptorTest.h
 	NullValidatorTest.h
+	OptionalBoolTest.h
 	ProgressBaseTest.h
 	ProgressTextTest.h
 	PropertyHistoryTest.h

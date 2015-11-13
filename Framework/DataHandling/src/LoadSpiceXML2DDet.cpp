@@ -676,7 +676,8 @@ void LoadSpiceXML2DDet::loadInstrument(API::MatrixWorkspace_sptr matrixws,
     loadinst->setProperty("Filename", idffilename);
   } else
     loadinst->setProperty("InstrumentName", "HB3A");
-  loadinst->setProperty("RewriteSpectraMap", true);
+  loadinst->setProperty("RewriteSpectraMap",
+                        Mantid::Kernel::OptionalBool(true));
   loadinst->execute();
   if (loadinst->isExecuted())
     matrixws = loadinst->getProperty("Workspace");

@@ -64,9 +64,9 @@ class DNSDetEffCorrVanaTest(unittest.TestCase):
         # check whether the 2theta angles the same as in the data workspace
         outputWorkspaceName = "DNSDetCorrVanaTest_Test5"
         # rotate detector bank to different angles
-        api.LoadInstrument(self.__dataws, InstrumentName='DNS')
-        api.LoadInstrument(self.__vanaws, InstrumentName='DNS')
-        api.LoadInstrument(self.__bkgrws, InstrumentName='DNS')
+        api.LoadInstrument(self.__dataws, InstrumentName='DNS', RewriteSpectraMap=True)
+        api.LoadInstrument(self.__vanaws, InstrumentName='DNS', RewriteSpectraMap=True)
+        api.LoadInstrument(self.__bkgrws, InstrumentName='DNS', RewriteSpectraMap=True)
 
         api.RotateInstrumentComponent(self.__dataws, "bank0", X=0, Y=1, Z=0, Angle=-7.53)
         api.RotateInstrumentComponent(self.__vanaws, "bank0", X=0, Y=1, Z=0, Angle=-8.02)

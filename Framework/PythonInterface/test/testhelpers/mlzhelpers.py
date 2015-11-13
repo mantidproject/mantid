@@ -27,7 +27,7 @@ def create_fake_dns_workspace(wsname, angle=-7.53, flipper='ON', dataY=None, loa
     api.AddSampleLogMultiple(Workspace=outws, LogNames=p_names, LogValues=p_values, ParseType=True)
     # rotate instrument component
     if loadinstrument:
-        api.LoadInstrument(outws, InstrumentName='DNS')
+        api.LoadInstrument(outws, InstrumentName='DNS', RewriteSpectraMap=True)
         api.RotateInstrumentComponent(outws, "bank0", X=0, Y=1, Z=0, Angle=angle)
 
     return outws
