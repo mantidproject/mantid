@@ -5,11 +5,8 @@ from mantid.simpleapi import *
 from mantid import config
 import os.path
 import stresstesting
-import sys
 import unittest
 
-F_DIR = FileFinder.getFullPath("PowderISIS")
-sys.path.append(F_DIR)
 import cry_ini
 import cry_focus
 
@@ -97,9 +94,9 @@ class LoadTests(unittest.TestCase):
         self.wsname = "CalWorkspace1"
         calfile1 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/hrpd_new_072_01_corr.cal')
         calfile2 = (DIRS[0] + 'hrpd/test/cycle_09_2/tester/hrpd_new_072_01_corr.cal')
-        data1 = LoadCalFile(InstrumentName="ENGIN-X", CalFilename=calfile1,
+        data1 = LoadCalFile(InstrumentName="hrpd", CalFilename=calfile1,
                             WorkspaceName=self.wsname)
-        data2 = LoadCalFile(InstrumentName="ENGIN-X", CalFilename=calfile2,
+        data2 = LoadCalFile(InstrumentName="hrpd", CalFilename=calfile2,
                             WorkspaceName="CalWorkspace2")
 
         self.assertTrue(isinstance(data1[0], MatrixWorkspace))
