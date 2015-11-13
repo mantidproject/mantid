@@ -150,9 +150,6 @@ Cylinder
 
    XMLcylinderDescription.png‎
 
-If a cylinder is not axis-aligned (more than one of the axis x, y, z 
-properties are non-zero) then you will need to specify a custom
-:ref:`Bounding-Box <Bounding-Box>`.
 
 Infinite cylinder
 ~~~~~~~~~~~~~~~~~
@@ -165,9 +162,6 @@ Infinite cylinder
         <radius val="1" />
       </infinite-cylinder>
 
-If a cylinder is not axis-aligned (more than one of the axis x, y, z 
-properties are non-zero) then you will need to specify a custom
-:ref:`Bounding-Box <Bounding-Box>`.
 
 Slice of cylinder ring
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -189,8 +183,6 @@ the part of this shape facing the sample is flat and looks like this:
 
    XMLsliceCylinderRingDescription.png
 
-For this shape, you will likely need to specify a custom
-:ref:`Bounding-Box <Bounding-Box>`.
 
 Cone
 ~~~~
@@ -209,9 +201,6 @@ Cone
 
    XMLconeDescription.png
 
-If a cone is not axis-aligned (more than one of the axis x, y, z 
-properties are non-zero) then you will need to specify a custom
-:ref:`Bounding-Box <Bounding-Box>`.
 
 Infinite cone
 ~~~~~~~~~~~~~
@@ -278,8 +267,6 @@ x-axis). The origin is assumed to be the centre of this front surface,
 which has dimensions 200mm along y and 20mm along z. The depth of this
 cuboid is taken to be 1mm (along x).
 
-If a cuboid has one or more surfaces that are not axis-aligned, then you will 
-need to specify a custom :ref:`Bounding-Box <Bounding-Box>`.
 
 Hexahedron
 ~~~~~~~~~~
@@ -303,9 +290,6 @@ Hexahedron
 
    XMLhexahedronDescription.png
 
-Since hexahedrons typically have at least one surface that is not 
-axis-aligned, you will likely have to specify a 
-:ref:`Bounding-Box <Bounding-Box>`.
 
 Tapered Guide
 ~~~~~~~~~~~~~
@@ -331,9 +315,6 @@ axis runs from the start aperture to the end aperture. "Height" is along
 the y-axis and "width" runs along the x-axis, before the application of
 the "axis" rotation.
 
-Since hexahedrons typically have at least one surface that is not 
-axis-aligned, you will likely have to specify a 
-:ref:`Bounding-Box <Bounding-Box>`.
 
 .. _Bounding-Box:
 
@@ -346,20 +327,18 @@ geometric shape that does not have one yet. Well-defined bounding boxes are
 required by many features of Mantid, from correctly rendering the instrument 
 to performing calculations in various algorithms.
 
-For axis-aligned shapes, the automatically calculated bounding boxes can 
-generally be relied upon and are usually ideal. However, if a shape is not 
-aligned to the X, Y or Z-axis, or if a shape contains surfaces that are not 
-axis-aligned, then the automatic calculations will often fail or produce 
-bounding boxes that are far too large and not at all representative of the 
-shape they are meant to contain.
+The automatically calculated bounding boxes can generally be relied upon and 
+are usually ideal. However, if the automatic calculation fails to produce a 
+reasonable bounding box, or if performance becomes an issue with particularly
+complex shapes, you have the option of adding a manually pre-calculated 
+bounding box.
 
-A typical symptom of this is your instrument appearing very small when viewed 
-(forcing you to have to zoom in for a long time to see it). In such cases, 
-the axis visualizations also tend to not display properly.
+A typical symptom of the automatic calculation creating an incorrect bounding
+box is your instrument appearing very small when viewed (forcing you to zoom 
+in for a long time to see it). In such cases, the axis visualizations also 
+tend to not display properly.
 
-This can be fixed by explicitly adding a custom bounding-box to shapes that 
-are not axis-aligned or contain surfaces that are not axis-aligned. This can 
-be done using the following notation:
+A custom bounding-box can be added to shapes using the following notation:
 
 .. code-block:: xml
 
@@ -387,12 +366,5 @@ be done using the following notation:
 Note for the best effect this bounding box should be enclosing the shape
 as tight as possible.
 
-Another option, in some cases, may be to change the shape definition so that 
-it is axis-aligned and then later rotate it using the 
-`facing <InstrumentDefinitionFile#using-facing>`__ tag or the axis rotation
-properties of the `location <InstrumentDefinitionFile#using-locations>`__ tag.
-
-As long as the actual shape definition is axis-aligned, Mantid is usually able
-to construct a reasonable bounding box even if the shape is later rotated.
 
 .. categories:: Concepts
