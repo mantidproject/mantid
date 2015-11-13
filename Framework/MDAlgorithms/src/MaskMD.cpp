@@ -47,7 +47,8 @@ std::vector<std::string> findNamesInBrackets(const std::string &names_string) {
 
 std::vector<std::string> removeBracketedNames(const std::string &names_string) {
   regex re(REGEX_STR);
-  const std::string names_string_reduced = regex_replace(names_string, re, "[]");
+  const std::string names_string_reduced =
+      regex_replace(names_string, re, "[]");
 
   std::vector<std::string> remainder_split =
       splitByCommas(names_string_reduced);
