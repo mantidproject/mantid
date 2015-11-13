@@ -127,72 +127,14 @@ void ColorSelectionWidget::loadBuiltinColorPresets()
         }
       }
     }
+
+    // currently incorrect. json document more than just a number!
     const Json::Value &colorMap = m_presets->GetFirstPresetWithName(
         defaultColorMap.toStdString().c_str());
     if (!colorMap.empty()) {
-      emit this->colorMapChanged(colorMap);
+      // emit this->colorMapChanged(colorMap);
     }
   }
-
-/**
- * This function takes color maps from a XML file, parses them and loads and
- * adds them to the color preset model.
- * @param fileName : The file with color maps to parse.
- * @param parser : The XML parser with the color maps.
- * @param model : The color preset model to add the maps too.
- */
-  /*void ColorSelectionWidget::addColorMapsFromFile(std::string fileName,
-                                                  const char *model)
-  {
-    std::string colorMapDir =
-  Kernel::ConfigService::Instance().getString("colormaps.directory");
-    if (!colorMapDir.empty())
-    {
-      QFileInfo cmaps(QDir(QString::fromStdString(colorMapDir)),
-                      QString::fromStdString(fileName));
-      if (cmaps.exists())
-      {
-        parser->SetFileName(cmaps.absoluteFilePath().toStdString().c_str());
-        parser->Parse();
-        this->addColorMapsFromXML(parser, model);
-      }
-    }
-  }*/
-
-/**
- * This function takes a XML parser and loads and adds color maps to the color
- * preset model.
- * @param parser : The XML parser with the color maps.
- * @param model : The color preset model to add the maps too.
- */
-  /*void ColorSelectionWidget::addColorMapsFromXML(const char *model)
-  {
-    // parse each color map element
-    vtkPVXMLElement *root = parser->GetRootElement();
-    for(unsigned int i = 0; i < root->GetNumberOfNestedElements(); i++)
-    {
-      vtkPVXMLElement *colorMapElement = root->GetNestedElement(i);
-      if(std::string("ColorMap") != colorMapElement->GetName())
-      {
-        continue;
-      }
-
-      // load color map from its XML
-      pqColorMapModel colorMap =
-  pqColorPresetManager::createColorMapFromXML(colorMapElement);
-      QString name = colorMapElement->GetAttribute("name");
-
-      // Only add the color map if the name does not exist yet
-      if (!this->colorMapManager->isRecordedColorMap(name.toStdString()))
-      {
-        // add color map to the model
-        model->addBuiltinColorMap(colorMap, name);
-
-        // add color map to the color map manager
-        this->colorMapManager->readInColorMap(name.toStdString());
-      }
-    }
-  }*/
 
 /**
  * Changes the status of the autoScaling checkbox. This is in
@@ -268,9 +210,18 @@ void ColorSelectionWidget::autoCheckBoxClicked(bool wasOn)
  */
 void ColorSelectionWidget::loadPreset()
 {
-  Mantid::VATES::ColorScaleLockGuard guard(m_colorScaleLock);
+  // Mantid::VATES::ColorScaleLockGuard guard(m_colorScaleLock);
+  pqPresetDialog dialog(this, pqPresetDialog::SHOW_NON_INDEXED_COLORS_ONLY);
+  // dialog.setCurrentPreset(presetName);
+  dialog.setCustomizableLoadColors(false);
+  dialog.setCustomizableLoadOpacities(false);
+  dialog.setCustomizableUsePresetRange(false);
+  dialog.setCustomizableLoadAnnotations(true);
+  this->connect(&dialog, SIGNAL(applyPreset(const Json::Value &)), this,
+                SLOT(onApplyPreset(const Json::Value &)));
+  dialog.exec();
   // this->m_presets->setUsingCloseButton(false);
-  // if (this->m_presets->exec() == QDialog::Accepted)
+  // if (dialog.exec() == QDialog::Accepted)
   // {
   // Get the color map from the selection.
   // QItemSelectionModel *selection = this->m_presets->getSelectionModel();
@@ -344,6 +295,10 @@ void ColorSelectionWidget::useLogScalingClicked(bool on)
   getColorScaleRange();
 
   emit this->logScale(on);
+}
+
+void ColorSelectionWidget::onApplyPreset(const Json::Value &value) {
+  emit this->colorMapChanged(value);
 }
 
 /**

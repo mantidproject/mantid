@@ -125,12 +125,10 @@ protected slots:
   void useLogScaling(int state);
   /// Set log color scaling, on user click
   void useLogScalingClicked(bool wasOn);
+  /// Get the Applied preset
+  void onApplyPreset(const Json::Value &);
 
 private:
-  /// Add color maps from XML files.
-  // void addColorMapsFromFile(std::string fileName, const char *model);
-  /// Add color maps from XML fragments.
-  // void addColorMapsFromXML(const char *model);
   /// Set up various color maps.
   void loadBuiltinColorPresets();
   /// Set status of the color selection editor widgets.

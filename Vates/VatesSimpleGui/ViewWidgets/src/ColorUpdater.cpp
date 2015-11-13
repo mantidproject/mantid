@@ -12,7 +12,7 @@
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
 #endif
-
+#include "vtk_jsoncpp.h"
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
 //#include <pqChartValue.h>
@@ -82,45 +82,8 @@ VsiColorScale ColorUpdater::autoScale()
 
 void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
                                   const Json::Value &model) {
-  pqScalarsToColors *lut = repr->getLookupTable();
-  if (NULL == lut)
-  {
-    // Got a bad proxy, so just return
-    return;
-  }
-
-  // Need the scalar bounds to calculate the color point settings
-  // QPair<double, double> bounds = lut->getScalarRange();
-
-  vtkSMProxy *lutProxy = lut->getProxy();
-
-  // Set the ColorSpace
-  pqSMAdaptor::setElementProperty(lutProxy->GetProperty("ColorSpace"),
-                                  QVariant());
-  // Set the NaN color
-  // QList<QVariant> values;
-  // QColor nanColor;
-  // model->getNanColor(nanColor);
-  // values << nanColor.redF() << nanColor.greenF() << nanColor.blueF();
-  // pqSMAdaptor::setMultipleElementProperty(lutProxy->GetProperty("NanColor"),
-  //                                        values);
-
-  // Set the RGB points
-  // QList<QVariant> rgbPoints;
-  /*for(int i = 0; i < model->getNumberOfPoints(); i++)
-  {
-    QColor rgbPoint;
-    pqChartValue fraction;
-    model->getPointColor(i, rgbPoint);
-    model->getPointValue(i, fraction);
-    rgbPoints << fraction.getDoubleValue() * bounds.second << rgbPoint.redF()
-              << rgbPoint.greenF() << rgbPoint.blueF();
-  }*/
-  // pqSMAdaptor::setMultipleElementProperty(lutProxy->GetProperty("RGBPoints"),
-  //                                        rgbPoints);
-  vtkSMTransferFunctionProxy::ApplyPreset(lutProxy, model);
-
-  lutProxy->UpdateVTKObjects();
+  vtkSMProxy *lutProxy = repr->getLookupTable()->getProxy();
+  vtkSMTransferFunctionProxy::ApplyPreset(lutProxy, model, true);
 }
 
 /**
