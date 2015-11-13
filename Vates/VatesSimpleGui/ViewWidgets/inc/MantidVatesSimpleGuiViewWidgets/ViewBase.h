@@ -151,7 +151,7 @@ public slots:
   /// Set the color scale back to the original bounds.
   void onAutoScale(ColorSelectionWidget* colorSelectionWidget);
   /// Set the requested color map on the data.
-  void onColorMapChange(const char *model);
+  void onColorMapChange(const Json::Value &model);
   /// Set the data color scale range to the requested bounds.
   void onColorScaleChange(double min, double max);
   /// Set the view to use a LOD threshold.

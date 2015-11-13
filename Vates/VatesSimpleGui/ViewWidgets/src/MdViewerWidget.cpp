@@ -1334,9 +1334,9 @@ void MdViewerWidget::connectColorSelectionWidget()
 {
   // Set the color selection widget signal -> view slot connection
   QObject::connect(this->ui.colorSelectionWidget,
-                   SIGNAL(colorMapChanged(const pqColorMapModel *)),
+                   SIGNAL(colorMapChanged(const Json::Value &)),
                    this->currentView,
-                   SLOT(onColorMapChange(const pqColorMapModel *)));
+                   SLOT(onColorMapChange(const Json::Value &)));
   QObject::connect(this->ui.colorSelectionWidget,
                    SIGNAL(colorScaleChanged(double, double)),
                    this->currentView,

@@ -260,7 +260,7 @@ void ViewBase::releasePyGIL() {
  * This function sets the requested color map on the data.
  * @param model the color map to use
  */
-void ViewBase::onColorMapChange(const char *model) {
+void ViewBase::onColorMapChange(const Json::Value &model) {
   pqPipelineRepresentation *rep = this->getRep();
   if (NULL == rep)
   {

@@ -81,7 +81,7 @@ VsiColorScale ColorUpdater::autoScale()
 }
 
 void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
-                                  const char *model) {
+                                  const Json::Value &model) {
   pqScalarsToColors *lut = repr->getLookupTable();
   if (NULL == lut)
   {
@@ -90,7 +90,7 @@ void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
   }
 
   // Need the scalar bounds to calculate the color point settings
-  QPair<double, double> bounds = lut->getScalarRange();
+  // QPair<double, double> bounds = lut->getScalarRange();
 
   vtkSMProxy *lutProxy = lut->getProxy();
 
@@ -98,15 +98,15 @@ void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
   pqSMAdaptor::setElementProperty(lutProxy->GetProperty("ColorSpace"),
                                   QVariant());
   // Set the NaN color
-  QList<QVariant> values;
-  QColor nanColor;
+  // QList<QVariant> values;
+  // QColor nanColor;
   // model->getNanColor(nanColor);
-  values << nanColor.redF() << nanColor.greenF() << nanColor.blueF();
-  pqSMAdaptor::setMultipleElementProperty(lutProxy->GetProperty("NanColor"),
-                                          values);
+  // values << nanColor.redF() << nanColor.greenF() << nanColor.blueF();
+  // pqSMAdaptor::setMultipleElementProperty(lutProxy->GetProperty("NanColor"),
+  //                                        values);
 
   // Set the RGB points
-  QList<QVariant> rgbPoints;
+  // QList<QVariant> rgbPoints;
   /*for(int i = 0; i < model->getNumberOfPoints(); i++)
   {
     QColor rgbPoint;
@@ -116,8 +116,9 @@ void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
     rgbPoints << fraction.getDoubleValue() * bounds.second << rgbPoint.redF()
               << rgbPoint.greenF() << rgbPoint.blueF();
   }*/
-  pqSMAdaptor::setMultipleElementProperty(lutProxy->GetProperty("RGBPoints"),
-                                          rgbPoints);
+  // pqSMAdaptor::setMultipleElementProperty(lutProxy->GetProperty("RGBPoints"),
+  //                                        rgbPoints);
+  vtkSMTransferFunctionProxy::ApplyPreset(lutProxy, model);
 
   lutProxy->UpdateVTKObjects();
 }

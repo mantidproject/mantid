@@ -154,6 +154,7 @@ ${PYTHON_LIBRARIES}
 MantidWidgets
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
+${JSONCPP_LIBRARIES}
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
@@ -181,7 +182,8 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
   ${POCO_LIBRARIES}
   ${Boost_LIBRARIES}
   ${GMOCK_LIBRARIES} 
-  ${GTEST_LIBRARIES})
+  ${GTEST_LIBRARIES}
+  ${JSONCPP_LIBRARIES})
 
   add_dependencies( AllTests VatesSimpleGuiViewWidgetsTest )
   # Add to the 'UnitTests' group in VS
