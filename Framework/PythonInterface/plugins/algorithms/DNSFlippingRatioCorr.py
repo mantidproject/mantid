@@ -1,7 +1,7 @@
 # pylint: disable=too-many-locals
 import mantid.simpleapi as api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty
-from mantid.kernel import Direction, FloatBoundedValidator
+from mantid.kernel import Direction
 import numpy as np
 
 
