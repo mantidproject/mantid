@@ -25,18 +25,58 @@ std::vector<std::string> splitByCommas(const std::string &input_string) {
   return names_split_by_commas;
 }
 
-std::vector<std::string> findNamesInBrackets(const std::string &names_string, regex re) {
+std::vector<std::string> findNamesInBrackets(const std::string &names_string,
+                                             regex re) {
   std::vector<std::string> names_result;
 
-  boost::sregex_token_iterator iter(names_string.begin(), names_string.end(), re, 0);
+  boost::sregex_token_iterator iter(names_string.begin(), names_string.end(),
+                                    re, 0);
   boost::sregex_token_iterator end;
   std::ostringstream ss;
-  for( ; iter != end; ++iter ) {
+  for (; iter != end; ++iter) {
     ss.str(std::string());
     ss << *iter;
     names_result.push_back(ss.str());
   }
 
+  return names_result;
+}
+
+/*
+ * Dimension names often look like "[H,0,0]" but getProperty returns a vector of
+ * the string split on every comma
+ * This function rejoins dimension names which use square brackets
+ */
+std::vector<std::string> parseDimensionNames(const std::string &names_string) {
+
+  // If there are no brackets then simply split the string on commas
+  if (!boost::contains(names_string, "[")) {
+    // Split input string by commas
+    return splitByCommas(names_string);
+  }
+
+  // Find brackets that don't contain other brackets
+  regex re("\\[[^\\[\\]]*\\]");
+  std::vector<std::string> names_result = findNamesInBrackets(names_string, re);
+
+  // Remove bracketed names from string
+  std::string names_string_reduced = regex_replace(names_string, re, "[]");
+
+  std::vector<std::string> remainder_split =
+      splitByCommas(names_string_reduced);
+
+  // Insert these into results vector if they are not "[]"
+  // if they are "[]" then skip a position in the vector instead
+  // This preserves the original order of the names,
+  // it is also inefficient, but the name list is not expected to be long
+  size_t names_position = 0;
+  auto begin_it = names_result.begin();
+  for (const auto &name : remainder_split) {
+    if (name != "[]") {
+      names_result.insert(begin_it + names_position, name);
+    }
+    ++names_position;
+  }
   return names_result;
 }
 
@@ -145,6 +185,11 @@ void MaskMD::exec() {
   // so getProperty would return an incorrect vector of names
   // instead get the string and parse it here
   std::vector<std::string> dimensions = parseDimensionNames(dimensions_string);
+  // Report what dimension names were found
+  g_log.notice() << "Dimension names parsed as: " << std::endl;
+  for (const auto &name : dimensions) {
+    g_log.notice() << name << std::endl;
+  }
 
   size_t nDims = ws->getNumDims();
   size_t nDimensionIds = dimensions.size();
@@ -217,56 +262,6 @@ void MaskMD::exec() {
     // Add new masking.
     ws->setMDMasking(new MDBoxImplicitFunction(mins, maxs));
   }
-}
-
-/*
- * Dimension names often look like "[H,0,0]" but getProperty returns a vector of
- * the string split on every comma
- * This function rejoins dimension names which use square brackets
- */
-std::vector<std::string> MaskMD::parseDimensionNames(std::string &names_string) {
-
-  // Split input string by commas
-  std::vector<std::string> names_split_by_commas = splitByCommas(names_string);
-
-  // If no element of names_split_commas contains a '[' then return
-  // this vector
-  if (std::none_of(
-          names_split_by_commas.begin(), names_split_by_commas.end(),
-          [](const std::string &name) { return boost::contains(name, "["); })) {
-    // EXIT POINT
-    return names_split_by_commas;
-  }
-
-  regex re("\\[[^\\[\\]]*\\]");
-  std::vector<std::string> names_result = findNamesInBrackets(names_string, re);
-
-  // Remove bracketed names from string
-  names_string = regex_replace(names_string, re, "[]");
-
-  std::vector<std::string> remainder_split = splitByCommas(names_string);
-
-  // Insert these into results vector, if they are not "[]"
-  // if they are "[]" then skip a position in the vector instead
-  // This preserves the original order of the names,
-  // it is also inefficient, but the name list is not expected to be long
-  size_t names_position = 0;
-  auto begin_it = names_result.begin();
-  for (const auto &name : remainder_split) {
-    if (name != "[]") {
-      names_result.insert(begin_it + names_position, name);
-    }
-    ++names_position;
-  }
-
-  // Report what dimension names were found
-  g_log.notice()
-      << "Dimension names contained brackets, found the following names: " << std::endl;
-  for (const auto &name : names_result) {
-    g_log.notice() << name << std::endl;
-  }
-
-  return names_result;
 }
 
 } // namespace Mantid

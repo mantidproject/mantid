@@ -15,6 +15,9 @@ splitByCommas(const std::string &input_string);
 std::vector<std::string> MANTID_MDALGORITHMS_DLL
 findNamesInBrackets(const std::string &names_string, boost::regex re);
 
+std::vector<std::string> MANTID_MDALGORITHMS_DLL
+parseDimensionNames(const std::string &names_string);
+
 /** MaskMD : Mask an MDWorkspace. Can provide complex masking shapes over an
   exisitng MDWorkspace. Operates on a MDWorkspace in-situ.
 
@@ -58,8 +61,6 @@ public:
 private:
   void init();
   void exec();
-
-  std::vector<std::string> parseDimensionNames(std::string &names_string);
 };
 
 } // namespace MDAlgorithms
