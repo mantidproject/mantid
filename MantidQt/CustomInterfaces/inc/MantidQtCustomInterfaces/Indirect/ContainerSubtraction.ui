@@ -114,7 +114,7 @@
             <item row="0" column="0">
               <widget class="QCheckBox" name="ckScaleCan">
                 <property name="text">
-                  <string>Scale Can by factor:</string>
+                  <string>Scale Container by factor:</string>
                 </property>
                 <property name="checked">
                   <bool>false</bool>
@@ -134,6 +134,9 @@
                     <property name="maximum">
                       <double>999.990000000000009</double>
                     </property>
+                    <property name="minimum">
+                      <double>-0.000000000000000</double>
+                    </property>
                     <property name="singleStep">
                       <double>0.100000000000000</double>
                     </property>
@@ -142,18 +145,41 @@
                     </property>
                   </widget>
                 </item>
+              </layout>
+            </item>
+            <item row="1" column="0">
+              <widget class="QCheckBox" name="ckShiftCan">
+                <property name="text">
+                  <string>Shift x-values of container by adding:</string>
+                </property>
+                <property name="checked">
+                  <bool>false</bool>
+                </property>
+              </widget>
+            </item>
+            <item row="1" column="1">
+              <layout class="QHBoxLayout" name="loShift">
                 <item>
-                  <spacer name="horizontalSpacer">
-                    <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
+                  <widget class="QDoubleSpinBox" name="spShift">
+                    <property name="enabled">
+                      <bool>false</bool>
                     </property>
-                    <property name="sizeHint" stdset="0">
-                      <size>
-                        <width>40</width>
-                        <height>20</height>
-                      </size>
+                    <property name="decimals">
+                      <number>5</number>
                     </property>
-                  </spacer>
+                    <property name="maximum">
+                      <double>999.990000000000009</double>
+                    </property>
+                    <property name="minimum">
+                      <double>-999.990000000000009</double>
+                    </property>
+                    <property name="singleStep">
+                      <double>0.010000000000000</double>
+                    </property>
+                    <property name="value">
+                      <double>0.000000000000000</double>
+                    </property>
+                  </widget>
                 </item>
               </layout>
             </item>
@@ -342,9 +368,9 @@
       </hints>
     </connection>
     <connection>
-      <sender>ckUseCorrections</sender>
+      <sender>ckShiftCan</sender>
       <signal>toggled(bool)</signal>
-      <receiver>dsCorrections</receiver>
+      <receiver>spShift</receiver>
       <slot>setEnabled(bool)</slot>
       <hints>
         <hint type="sourcelabel">

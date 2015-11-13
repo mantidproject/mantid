@@ -39,7 +39,7 @@ const std::string RadiusSum::name() const { return "RadiusSum"; }
 int RadiusSum::version() const { return 1; }
 
 /// Algorithm's category for identification.
-const std::string RadiusSum::category() const { return "Transforms"; }
+const std::string RadiusSum::category() const { return "Transforms\\Grouping"; }
 
 //----------------------------------------------------------------------------------------------
 

@@ -124,14 +124,6 @@ void CalculatePaalmanPings::run() {
 
   QString outputWsName =
       sampleWsName.left(nameCutIndex) + "_" + correctionType + "_abs";
-  if (useCan) {
-    auto containerWsName = m_uiForm.dsContainer->getCurrentDataName();
-    int cutIndex = containerWsName.indexOf("_");
-    if (cutIndex == -1) {
-      cutIndex = containerWsName.length();
-    }
-    outputWsName += "_Subtract_" + containerWsName.left(cutIndex);
-  }
 
   absCorAlgo->setProperty("OutputWorkspace", outputWsName.toStdString());
 

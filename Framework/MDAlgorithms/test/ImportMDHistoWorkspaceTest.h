@@ -4,7 +4,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidMDAlgorithms/ImportMDHistoWorkspace.h"
-
+#include "MantidGeometry/MDGeometry/QSample.h"
 #include <cxxtest/TestSuite.h>
 
 #include <Poco/Path.h>
@@ -40,8 +40,9 @@ public:
   /// Free up resources.
   ~MDFileObject() {
     m_file.close();
-    if (remove(m_filename.c_str()) != 0)
-      throw std::runtime_error("cannot remove " + m_filename);
+    if (remove(m_filename.c_str()) != 0) {
+      std::cerr << "Cannot remove '" << m_filename << "'\n";
+    }
   }
 
 private:
@@ -83,11 +84,6 @@ public:
     return new ImportMDHistoWorkspaceTest();
   }
   static void destroySuite(ImportMDHistoWorkspaceTest *suite) { delete suite; }
-
-  void test_catagory() {
-    ImportMDHistoWorkspace alg;
-    TS_ASSERT_EQUALS("MDAlgorithms", alg.category());
-  }
 
   void test_name() {
     ImportMDHistoWorkspace alg;
@@ -277,7 +273,9 @@ public:
     alg->setPropertyValue("Extents", "-1,1,-1,1,-1,1");
     alg->setPropertyValue("NumberOfBins", "2,2,2");
     alg->setPropertyValue("Names", "A,B,C");
-    alg->setPropertyValue("Units", "U1,U2,U3");
+    alg->setPropertyValue("Units", "U,U,U");
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setPropertyValue("Frames", "QSample, QSample, QSample"));
     alg->setPropertyValue("OutputWorkspace", "test_workspace");
     alg->setRethrows(true);
     alg->execute();
@@ -295,6 +293,16 @@ public:
 
     // Check the dimensionality
     TS_ASSERT_EQUALS(3, outWs->getNumDims());
+
+    // Check frame
+    for (size_t dim = 0; dim < outWs->getNumDims(); ++dim) {
+      auto dimension = outWs->getDimension(dim);
+      const auto &frame = dimension->getMDFrame();
+      TSM_ASSERT_EQUALS("Should be convertible to a QSample frame",
+                        Mantid::Geometry::QSample::QSampleName, frame.name());
+      TSM_ASSERT("Should not be set to U any longer",
+                 "U" != dimension->getUnits().ascii());
+    }
 
     ADS.remove("test_workspace");
   }

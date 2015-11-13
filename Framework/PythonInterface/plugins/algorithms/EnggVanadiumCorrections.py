@@ -13,7 +13,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
 
 
     def category(self):
-        return ("Diffraction\\Engineering;PythonAlgorithms;CorrectionFunctions\\BackgroundCorrections;"
+        return ("Diffraction\\Engineering;CorrectionFunctions\\BackgroundCorrections;"
                 "CorrectionFunctions\\EfficiencyCorrections;CorrectionFunctions\\NormalisationCorrections")
 
     def name(self):
@@ -258,7 +258,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
 
         success = fitAlg.getProperty('OutputStatus').value
         self.log().information("Fitting Vanadium curve for bank %s, using function '%s', result: %s" %
-                                 (bank, functionDesc, success))
+                               (bank, functionDesc, success))
 
         detailMsg = ("It seems that this algorithm failed to to fit a function to the summed "
                      "spectra of a bank. The function definiton was: '%s'") % functionDesc

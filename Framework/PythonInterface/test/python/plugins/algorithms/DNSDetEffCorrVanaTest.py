@@ -22,21 +22,9 @@ class DNSDetEffCorrVanaTest(unittest.TestCase):
         self.__dataws = create_fake_dns_workspace('__dataws', dataY=dataY)
 
     def tearDown(self):
-        api.DeleteWorkspace(self.__vanaws.getName() + '_NORM')
-        api.DeleteWorkspace(self.__dataws.getName() + '_NORM')
-        if api.mtd.doesExist(self.__bkgrws.getName() + '_NORM'):
-            api.DeleteWorkspace(self.__bkgrws.getName() + '_NORM')
         api.DeleteWorkspace(self.__bkgrws)
         api.DeleteWorkspace(self.__vanaws)
         api.DeleteWorkspace(self.__dataws)
-
-    def test_DNSNormWorkspaceExists(self):
-        outputWorkspaceName = "DNSDetCorrVanaTest_Test1"
-        api.DeleteWorkspace(self.__bkgrws.getName() + '_NORM')
-        self.assertRaises(RuntimeError, DNSDetEffCorrVana, InputWorkspace=self.__dataws.getName(),
-                          OutputWorkspace=outputWorkspaceName, VanaWorkspace=self.__vanaws.getName(),
-                          BkgWorkspace=self.__bkgrws.getName())
-        return
 
     def test_VanaMeanDimensions(self):
         outputWorkspaceName = "DNSDetCorrVanaTest_Test2"
@@ -76,9 +64,9 @@ class DNSDetEffCorrVanaTest(unittest.TestCase):
         # check whether the 2theta angles the same as in the data workspace
         outputWorkspaceName = "DNSDetCorrVanaTest_Test5"
         # rotate detector bank to different angles
-        api.LoadInstrument(self.__dataws, InstrumentName='DNS')
-        api.LoadInstrument(self.__vanaws, InstrumentName='DNS')
-        api.LoadInstrument(self.__bkgrws, InstrumentName='DNS')
+        api.LoadInstrument(self.__dataws, InstrumentName='DNS', RewriteSpectraMap=True)
+        api.LoadInstrument(self.__vanaws, InstrumentName='DNS', RewriteSpectraMap=True)
+        api.LoadInstrument(self.__bkgrws, InstrumentName='DNS', RewriteSpectraMap=True)
 
         api.RotateInstrumentComponent(self.__dataws, "bank0", X=0, Y=1, Z=0, Angle=-7.53)
         api.RotateInstrumentComponent(self.__vanaws, "bank0", X=0, Y=1, Z=0, Angle=-8.02)

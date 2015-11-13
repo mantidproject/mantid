@@ -34,7 +34,9 @@ class LinkItem(object):
           name (str): Display name of document
           location (str): Location of item relative to source directory
         """
-        self.name = str(name)
+        name = str(name)
+        name = name.replace("\\\\","\\")
+        self.name = name
         self.location = location
 
     def __eq__(self, other):
@@ -61,6 +63,7 @@ class LinkItem(object):
 
         Arguments:
           base (str): The path to the referrer
+          ext (str):  The extension to use
 
         Returns:
           str: A string containing the link to reach this item
@@ -101,15 +104,16 @@ class Category(LinkItem):
           name (str): The name of the category
           docname (str): Relative path to document from root directory
         """
+
         if "\\" in docname:
             docname = docname.replace("\\", "/")
         dirpath, filename = os.path.split(docname)
         html_dir = dirpath + "/" + CATEGORIES_DIR
-        self.html_path = html_dir + "/" + name + ".html"
-
+        self.html_path = html_dir + "/" + name.replace("\\\\", "/") + ".html"
         super(Category, self).__init__(name, self.html_path)
         self.pages = set([])
         self.subcategories = set([])
+
 
 #endclass
 
@@ -235,31 +239,32 @@ class CategoriesDirective(AlgorithmBaseDirective):
 
         link_rst = ""
         ncategs = 0
-        for item in category_list:
-            if r"\\" in item:
-                categs = item.split(r"\\")
-            else:
-                categs = [item]
-            # endif
+        for categ_name in category_list:
+            #categ_name is the full category name - register that
+            category = self.register_category(categ_name, env)
+            category.pages.add(PageRef(page_name, env.docname))
 
-            parent = None
-            for index, categ_name in enumerate(categs):
-                if categ_name not in env.categories:
-                    category = Category(categ_name, env.docname)
-                    env.categories[categ_name] = category
+            #now step up a step up each time the category hierarchy
+            parent_category = categ_name
+            while True:
+                if r"\\" in parent_category:
+                    categs = parent_category.split(r"\\")
                 else:
-                    category = env.categories[categ_name]
-                #endif
+                    break
+                # remove the last item
+                subcat = Category(categ_name, env.docname) #create the category with the full name
+                subcat.name=categs.pop() # and then replace it with the last token of the name
+                parent_category = r"\\".join(categs)
 
-                category.pages.add(PageRef(page_name, env.docname))
-                if index > 0: # first is never a child
-                    parent.subcategories.add(Category(categ_name, env.docname))
-                #endif
+                #register the parent category
+                parent = self.register_category(parent_category, env)
+                parent.subcategories.add(subcat)
 
-                link_rst += "`%s <%s>`_ | " % (categ_name, category.link(env.docname))
-                ncategs += 1
-                parent = category
-            # endfor
+            # endwhile
+
+            #category should be the last subcategory by this point
+            link_rst += "`%s <%s>`_ | " % (categ_name, category.link(env.docname))
+            ncategs += 1
         # endfor
 
         link_rst = "**%s**: " + link_rst.rstrip(" | ") # remove final separator
@@ -271,6 +276,16 @@ class CategoriesDirective(AlgorithmBaseDirective):
 
         return link_rst
     #end def
+
+    def register_category(self, categ_name, env):
+        category = Category(categ_name, env.docname)
+        if categ_name not in env.categories:
+            category = Category(categ_name, env.docname)
+            env.categories[categ_name] = category
+        else:
+            category = env.categories[categ_name]
+        return category
+
 
 #---------------------------------------------------------------------------------
 
@@ -308,6 +323,17 @@ def create_category_pages(app):
         context = {}
         # First write out the named page
         context["title"] = category.name
+
+        #get parent category
+        if "\\" in category.name:
+            categs = category.name.split("\\")
+            categs.pop()
+            parent_category = r"\\".join(categs)
+            parent_category_link = "../" + categs[-1] + ".html"
+            parent_category = "<b>Category:</b> <a href='{0}'>{1}</a>"\
+                .format(parent_category_link,parent_category)
+            context["parentcategory"] = parent_category
+
         # sort subcategories & pages alphabetically
         context["subcategories"] = sorted(category.subcategories, key = lambda x: x.name)
         context["pages"] = sorted(category.pages, key = lambda x: x.name)

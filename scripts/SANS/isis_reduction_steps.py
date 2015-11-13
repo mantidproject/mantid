@@ -1,3 +1,4 @@
+#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 """
     This file defines what happens in each step in the data reduction, it's
@@ -12,7 +13,7 @@ import math
 import copy
 import re
 import traceback
-
+import math
 from mantid.kernel import Logger
 sanslog = Logger("SANS")
 
@@ -24,10 +25,17 @@ from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          mask_detectors_with_masking_ws, check_child_ws_for_name_and_type_for_added_eventdata, extract_spectra,
                          extract_child_ws_for_added_eventdata, load_monitors_for_multiperiod_event_data,
                           MaskWithCylinder, get_masked_det_ids, get_masked_det_ids_from_mask_file, INCIDENT_MONITOR_TAG,
-                          can_load_as_event_workspace)
+                          can_load_as_event_workspace, is_convertible_to_float,correct_q_resolution_for_can)
 import isis_instrument
 import isis_reducer
 from reducer_singleton import ReductionStep
+
+
+DEBUG = False
+
+# A global name for the Q Resolution workspace which lives longer than a reducer core
+QRESOLUTION_WORKSPACE_NAME = "Q_Resolution_ISIS_SANS"
+QRESOLUTION_MODERATOR_WORKSPACE_NAME = "Q_Resolution_MODERATOR_ISIS_SANS"
 
 def _issueWarning(msg):
     """
@@ -492,6 +500,8 @@ class CanSubtraction(ReductionStep):
 
         #we now have the can workspace, use it
         Minus(LHSWorkspace=tmp_smp,RHSWorkspace= tmp_can,OutputWorkspace= workspace)
+        # Correct the Q resolution entries in the output workspace
+        correct_q_resolution_for_can(mtd[tmp_smp], mtd[tmp_can], mtd[workspace])
 
         #clean up the workspaces ready users to see them if required
         if reducer.to_Q.output_type == '1D':
@@ -520,6 +530,17 @@ class CanSubtraction(ReductionStep):
             GroupWorkspaces([sample_name, can_name], OutputWorkspace=gp_name)
 
     periods_in_file = property(get_periods_in_file, None, None, None)
+
+    def _pass_dx_values_to_can_subtracted_if_required(self, original_ws, subtracted_ws):
+        '''
+        We pass the DX values from the original workspace to the subtracted workspace.
+        This means we currently do nothing with potential DX values in the can workspace.
+        Also that if there are DX values, then they are in all spectra
+        '''
+        if not original_ws.hasDx(0):
+            return
+        for index in range(0, original_ws.getNumHistograms()):
+            subtraced_ws.setDx(index, original_ws.dataDX(index))
 
 class Mask_ISIS(ReductionStep):
     """
@@ -748,7 +769,8 @@ class Mask_ISIS(ReductionStep):
                     self.arm_x=0.0
                     self.arm_y=0.0
                 else:
-                    _issueWarning('Unrecognized line masking command "' + details + '" syntax is MASK/LINE width angle or MASK/LINE width angle x y')
+                    _issueWarning('Unrecognized line masking command "' + details +
+                                  '" syntax is MASK/LINE width angle or MASK/LINE width angle x y')
             else:
                 _issueWarning('Unrecognized masking option "' + details + '"')
         elif len(parts) == 3:
@@ -767,7 +789,9 @@ class Mask_ISIS(ReductionStep):
                     elif detname.upper() == 'REAR':
                         self.time_mask_r += ';' + bin_range
                     else:
-                        _issueWarning('Detector \'' + detname + '\' not found in currently selected instrument ' + self.instrument.name() + '. Skipping line.')
+                        _issueWarning('Detector \'' + detname +
+                                      '\' not found in currently selected instrument ' +
+                                      self.instrument.name() + '. Skipping line.')
                 else:
                     _issueWarning('Unrecognized masking line "' + details + '"')
         else:
@@ -779,7 +803,9 @@ class Mask_ISIS(ReductionStep):
         elif detect.upper() == 'REAR':
             self.spec_mask_r += ',' + mask_string
         else:
-            _issueWarning('Detector \'' + detect + '\' not found in currently selected instrument ' + self.instrument.name() + '. Skipping line.')
+            _issueWarning('Detector \'' + detect +
+                          '\' not found in currently selected instrument ' +
+                          self.instrument.name() + '. Skipping line.')
 
     def _ConvertToSpecList(self, maskstring, detector):
         '''
@@ -862,11 +888,16 @@ class Mask_ISIS(ReductionStep):
             Purpose of this method is to populate self._lim_phi_xml
         '''
         # convert all angles to be between 0 and 360
-        while phimax > 360 : phimax -= 360
-        while phimax < 0 : phimax += 360
-        while phimin > 360 : phimin -= 360
-        while phimin < 0 : phimin += 360
-        while phimax<phimin : phimax += 360
+        while phimax > 360 :
+            phimax -= 360
+        while phimax < 0 :
+            phimax += 360
+        while phimin > 360 :
+            phimin -= 360
+        while phimin < 0 :
+            phimin += 360
+        while phimax<phimin :
+            phimax += 360
 
         #Convert to radians
         phimin = math.pi*phimin/180.0
@@ -878,7 +909,8 @@ class Mask_ISIS(ReductionStep):
             + self._infinite_plane(id+'_plane2',centre, [-math.cos(-phimax + math.pi/2.0),-math.sin(-phimax + math.pi/2.0),0])
 
         if use_mirror:
-            self._lim_phi_xml += self._infinite_plane(id+'_plane3',centre, [math.cos(-phimax + math.pi/2.0),math.sin(-phimax + math.pi/2.0),0]) \
+            self._lim_phi_xml += self._infinite_plane(id+'_plane3',centre,
+                                                      [math.cos(-phimax + math.pi/2.0),math.sin(-phimax + math.pi/2.0),0]) \
             + self._infinite_plane(id+'_plane4',centre, [-math.cos(-phimin + math.pi/2.0),-math.sin(-phimin + math.pi/2.0),0]) \
             + '<algebra val="#(('+id+'_plane1 '+id+'_plane2):('+id+'_plane3 '+id+'_plane4))" />'
         else:
@@ -1137,6 +1169,7 @@ class LoadSample(LoadRun):
         num = 0
         while True:
             reducer.instrument.on_load_sample(self.wksp_name, reducer.get_beam_center(), isSample)
+            reducer.update_beam_center()
             num += 1
             if num == self.periods_in_file:
                 break
@@ -1840,6 +1873,18 @@ class ConvertToQISIS(ReductionStep):
         self.w_cut = 0.0
         # Whether to output parts when running either Q1D2 or Qxy
         self.outputParts = False
+        # Flag if a QResolution workspace should be used
+        self.use_q_resolution = False
+        # QResolution settings
+        self._q_resolution_moderator_file_name = None
+        self._q_resolution_delta_r = None
+        self._q_resolution_a1 = None
+        self._q_resolution_a2 = None
+        self._q_resolution_h1 = None
+        self._q_resolution_w1 = None
+        self._q_resolution_h2 = None
+        self._q_resolution_w2 = None
+        self._q_resolution_collimation_length = None
 
     def set_output_type(self, descript):
         """
@@ -1891,7 +1936,8 @@ class ConvertToQISIS(ReductionStep):
         if (not self._grav_extra_length_set) or override:
             self._grav_extra_length = extra_length
         else:
-            msg = "User file can't override previous extra length setting for gravity correction; extra length remains " + str(self._grav_extra_length)
+            msg = ("User file can't override previous extra length setting for" +
+                  " gravity correction; extra length remains " + str(self._grav_extra_length))
             print msg
             sanslog.warning(msg)
 
@@ -1914,6 +1960,26 @@ class ConvertToQISIS(ReductionStep):
         else:
             raise RuntimeError('Normalization workspaces must be created by CalculateNorm() and passed to this step')
 
+        # Create the QResolution workspace, but only if it A) is requested by the user and does not exist
+        #                                                  B) is requested by the user, exists, but does not
+        #                                                     have the correct binning --> This is currently not implemented,
+        #                                                     but should be addressed in an optimization step
+        qResolution = self._get_q_resolution_workspace(det_bank_workspace = workspace)
+
+        # Debug output
+        if DEBUG:
+            sanslog.warning("###############################################")
+            sanslog.warning("File : %s" % str(self._q_resolution_moderator_file_name))
+            sanslog.warning("A1 : %s" % str(self._q_resolution_a1))
+            sanslog.warning("A2 : %s" % str(self._q_resolution_a2))
+            sanslog.warning("H1 : %s" % str(self._q_resolution_h1))
+            sanslog.warning("H2 : %s" % str(self._q_resolution_h1))
+            sanslog.warning("W1 : %s" % str(self._q_resolution_w1))
+            sanslog.warning("W2 : %s" % str(self._q_resolution_w2))
+            sanslog.warning("LCol: %s" % str(self._q_resolution_collimation_length))
+            sanslog.warning("DR : %s" % str(self._q_resolution_delta_r))
+            sanslog.warning("Exists: %s" % str(qResolution != None))
+
         try:
             if self._Q_alg == 'Q1D':
                 Q1D(DetBankWorkspace=workspace,
@@ -1926,7 +1992,8 @@ class ConvertToQISIS(ReductionStep):
                     WaveCut=self.w_cut,
                     OutputParts=self.outputParts,
                     WavePixelAdj = wavepixeladj,
-                    ExtraLength=self._grav_extra_length)
+                    ExtraLength=self._grav_extra_length,
+                    QResolution=qResolution)
             elif self._Q_alg == 'Qxy':
                 Qxy(InputWorkspace=workspace,
                     OutputWorkspace= workspace,
@@ -1950,6 +2017,227 @@ class ConvertToQISIS(ReductionStep):
             raise
 
         reducer.deleteWorkspaces([wave_adj, pixel_adj, wavepixeladj])
+
+    def _get_q_resolution_workspace(self, det_bank_workspace):
+        '''
+        Calculates the QResolution workspace if this is required
+        @param det_bank_workspace: the main worspace which is being reduced
+        @returns the QResolution workspace or None
+        '''
+        # Check if the a calculation is asked for by the user
+        if self.use_q_resolution == False:
+            return None
+
+        # Make sure that all parameters that are needed are available
+        self._set_up_q_resolution_parameters()
+
+        # Run a consistency check
+        try:
+            self.run_consistency_check()
+        except RuntimeError, details:
+            sanslog.warning("ConverToQISIS: There was something wrong with the Q Resolution"
+                            " settings. Running the reduction without the Q Resolution"
+                            " Setting. See details %s" % str(details))
+            return None
+
+        # Check if Q Resolution exists in mtd
+        exists = mtd.doesExist(QRESOLUTION_WORKSPACE_NAME)
+
+        # Future improvement here: If the binning has not changed and the instrument is
+        # the same then we can reuse the existing QResolution workspace if it exists
+        if exists:
+            #return self._get_existing_q_resolution(det_bank_workspace)
+            return self._create_q_resolution(det_bank_workspace = det_bank_workspace)
+        else:
+            return self._create_q_resolution(det_bank_workspace = det_bank_workspace)
+
+    def _create_q_resolution(self, det_bank_workspace):
+        '''
+        Creates the Q Resolution workspace
+        @returns the q resolution workspace
+        '''
+        sigma_moderator = self._get_sigma_moderator_workspace()
+
+        # We need the radius, not the diameter in the TOFSANSResolutionByPixel algorithm
+        sample_radius = 0.5*self.get_q_resolution_a2()
+        source_radius = 0.5*self.get_q_resolution_a1()
+
+        # The radii and the deltaR are expected to be in mm
+        TOFSANSResolutionByPixel(InputWorkspace = det_bank_workspace,
+                                 OutputWorkspace = QRESOLUTION_WORKSPACE_NAME,
+                                 DeltaR = self.get_q_resolution_delta_r()*1000.,
+                                 SampleApertureRadius = sample_radius*1000.,
+                                 SourceApertureRadius = source_radius*1000.,
+                                 SigmaModerator = sigma_moderator,
+                                 CollimationLength = self.get_q_resolution_collimation_length(),
+                                 AccountForGravity=self._use_gravity,
+                                 ExtraLength=self._grav_extra_length)
+
+        if not mtd.doesExist(QRESOLUTION_WORKSPACE_NAME):
+            raise RuntimeError("ConvertTpQIsis: Could not create the q resolution workspace")
+
+        DeleteWorkspace(sigma_moderator)
+        return mtd[QRESOLUTION_WORKSPACE_NAME]
+
+    def _get_sigma_moderator_workspace(self):
+        '''
+        Gets the sigma moderator workspace.
+        @returns the sigma moderator workspace
+        '''
+        moderator_ws = LoadRKH(Filename = self.get_q_resolution_moderator(),  FirstColumnValue="Wavelength")
+        moderator_histogram_ws = ConvertToHistogram(InputWorkspace = moderator_ws)
+        DeleteWorkspace(moderator_ws)
+        return moderator_histogram_ws
+
+    def _get_existing_q_resolution(self, det_bank_workspace):
+        '''
+        If the existing Q Resolution workspace has the correct binning,
+        then we use it, else we have to create it
+        @det_bank_workspace: the main workspace
+        '''
+        if self._has_matching_binning(det_bank_workspace):
+            return mtd[QRESOLUTION_WORKSPACE_NAME]
+        else:
+            return self._create_q_resolution(det_bank_workspace = det_bank_workspace)
+
+    def _has_matching_binning(self, det_bank_workspace):
+        '''
+        Check if the binning of the q resolution workspace
+        and the main workspace do not match
+        @det_bank_workspace: the main workspace
+        '''
+        # Here we need to check if the binning has changed, ie if the
+        # existing
+        dummy_ws = det_bank_workspace
+        raise RuntimeError("The QResolution optimization has not been implemented yet")
+
+    def set_q_resolution_moderator(self, file_name):
+        '''
+        Sets the moderator file name for Q Resolution
+        @param file_name: the name of the moderator file
+        '''
+        try:
+            q_res_file_path, dummy_suggested_name = getFileAndName(file_name)
+        except:
+            raise RuntimeError("Invalid input for mask file. (%s)" % str(file_name))
+        q_res_file_path = q_res_file_path.replace("\\", "/")
+        self._q_resolution_moderator_file_name = q_res_file_path
+
+    def get_q_resolution_moderator(self):
+        return self._q_resolution_moderator_file_name
+
+    def set_q_resolution_a1(self, a1):
+        self._q_resolution_a1 = a1
+
+    def get_q_resolution_a1(self):
+        return self._q_resolution_a1
+
+    def set_q_resolution_a2(self, a2):
+        self._q_resolution_a2 = a2
+
+    def get_q_resolution_a2(self):
+        return self._q_resolution_a2
+
+    def set_q_resolution_delta_r(self, delta_r):
+        self._q_resolution_delta_r = delta_r
+
+    def get_q_resolution_delta_r(self):
+        return self._q_resolution_delta_r
+
+    def set_q_resolution_h1(self, h1):
+        self._q_resolution_h1 = h1
+
+    def get_q_resolution_h1(self):
+        return self._q_resolution_h1
+
+    def set_q_resolution_h2(self, h2):
+        self._q_resolution_h2 = h2
+
+    def get_q_resolution_h2(self):
+        return self._q_resolution_h2
+
+    def set_q_resolution_w1(self, w1):
+        self._q_resolution_w1 = w1
+
+    def get_q_resolution_w1(self):
+        return self._q_resolution_w1
+
+    def set_q_resolution_w2(self, w2):
+        self._q_resolution_w2 = w2
+
+    def get_q_resolution_w2(self):
+        return self._q_resolution_w2
+
+    def set_q_resolution_collimation_length(self, collimation_length):
+        self._q_resolution_collimation_length = collimation_length
+
+    def get_q_resolution_collimation_length(self):
+        return self._q_resolution_collimation_length
+
+    def set_use_q_resolution(self, enabled):
+        self.use_q_resolution = enabled
+
+    def get_use_q_resolution(self):
+        return self.use_q_resolution
+
+    def run_consistency_check(self):
+        '''
+        Provides the consistency check for the ConvertTOQISIS
+        '''
+        # Make sure that everythign for the QResolution calculation is setup correctly
+        if self.use_q_resolution:
+            self._check_q_settings_complete()
+
+    def _check_q_settings_complete(self):
+        '''
+        Check that the q resolution settings are complete.
+        We need a moderator file path. And the other settings have to be self consistent
+        '''
+        try:
+            dummy_file_path, dummy_suggested_name = getFileAndName(self._q_resolution_moderator_file_name)
+        except:
+            raise RuntimeError("The specified moderator file is not valid. Please make sure that that it exists in your search directory.")
+
+        # If A1 is set, then A2 should be set and vice versa
+        if ((self.get_q_resolution_a1() is None and self.get_q_resolution_a2() is not None) or
+            (self.get_q_resolution_a2() is None and self.get_q_resolution_a1() is not None)):
+            raise RuntimeError("Both, A1 and A2, need to be specified.")
+
+    def _set_up_q_resolution_parameters(self):
+        '''
+        Prepare the parameters which need preparing
+        '''
+        # If we have values for H1 and W1 then set A1 to the correct value
+        if self._q_resolution_h1 and self._q_resolution_w1 and self._q_resolution_h2 and self._q_resolution_w2:
+            self._q_resolution_a1 = self._set_up_diameter(self._q_resolution_h1, self._q_resolution_w1)
+            self._q_resolution_a2 = self._set_up_diameter(self._q_resolution_h2, self._q_resolution_w2)
+
+
+    def _set_up_diameter(self, h, w):
+        '''
+        Prepare the diameter parameter. If there are corresponding H and W values, then
+        use them instead. Richard provided the formula: A = 2*sqrt((H^2 + W^2)/6)
+        @param h: the height
+        @param w: the width
+        @returns the new diameter
+        '''
+        return 2*math.sqrt((h*h + w*w)/6)
+
+    def reset_q_settings(self):
+        '''
+        Reset of the q resolution settings
+        '''
+        self.use_q_resolution = False
+        self._q_resolution_moderator_file_name = None
+        self._q_resolution_delta_r = None
+        self._q_resolution_a1 = None
+        self._q_resolution_a2 = None
+        self._q_resolution_h1 = None
+        self._q_resolution_w1 = None
+        self._q_resolution_h2 = None
+        self._q_resolution_w2 = None
+        self._q_resolution_collimation_length = None
+
 
 class UnitsConvert(ReductionStep):
     """
@@ -2103,6 +2391,15 @@ class BaseBeamFinder(ReductionStep):
     def execute(self, reducer, workspace=None):
         return "Beam Center set at: %s %s" % (str(self._beam_center_x), str(self._beam_center_y))
 
+    def update_beam_center(self, beam_center_x, beam_center_y):
+        '''
+        Update the beam center position of the BeamBaseFinder
+        @param beam_center_x: The first position
+        @param beam_center_y: The second position
+        '''
+        self._beam_center_x = beam_center_x
+        self._beam_center_y = beam_center_y
+
 
 class UserFile(ReductionStep):
     """
@@ -2123,7 +2420,8 @@ class UserFile(ReductionStep):
             'TRANS/': self._read_trans_line,
             'MON/' : self._read_mon_line,
             'TUBECALIBFILE': self._read_calibfile_line,
-            'MASKFILE': self._read_maskfile_line}
+            'MASKFILE': self._read_maskfile_line,
+            'QRESOL/': self._read_q_resolution_line}
 
     def __deepcopy__(self, memo):
         """Called when a deep copy is requested
@@ -2136,7 +2434,8 @@ class UserFile(ReductionStep):
             'TRANS/': fresh._read_trans_line,
             'MON/' : fresh._read_mon_line,
             'TUBECALIBFILE': self._read_calibfile_line,
-            'MASKFILE': self._read_maskfile_line
+            'MASKFILE': self._read_maskfile_line,
+            'QRESOL/': self._read_q_resolution_line
             }
         return fresh
 
@@ -2170,6 +2469,9 @@ class UserFile(ReductionStep):
 
         # Check if one of the efficency files hasn't been set and assume the other is to be used
         reducer.instrument.copy_correction_files()
+
+        # Run a consistency check
+        reducer.perform_consistency_check()
 
         self.executed = True
         return self.executed
@@ -2774,6 +3076,77 @@ class UserFile(ReductionStep):
             return 'Unrecognised line: '
 
         reducer.transmission_calculator.calculated_can = arguments[1]
+
+    def _read_q_resolution_line(self, arguments, reducer):
+        '''
+        Parses the input for QResolution
+        @param arguments: the arguments of a QResolution line
+        @param reducer: a reducer object
+        '''
+        arguments = arguments.upper()
+        if arguments.find('=') == -1:
+            return self._read_q_resolution_line_on_off(arguments, reducer)
+
+        # Split and remove the white spaces
+        arguments = arguments.split('=')
+        arguments = [element.strip() for element in arguments]
+
+        # Check if it is the moderator file name, if so add it and return
+        if arguments[0].startswith('MODERATOR'):
+            try:
+                reducer.to_Q.set_q_resolution_moderator(file_name = arguments[1])
+            except:
+                sanslog.error("The specified moderator file could not be found. Please specify a file which exists in the search directories.")
+            return
+
+        # All arguments need to be convertible to a float
+        if not is_convertible_to_float(arguments[1]):
+             return 'Value not a float in line: '
+
+        # Now check for the actual key
+        if arguments[0].startswith('DELTAR'):
+             reducer.to_Q.set_q_resolution_delta_r(delta_r= float(arguments[1])/1000.)
+        elif arguments[0].startswith('A1'):
+            # Input is in mm but we need m later on 
+            reducer.to_Q.set_q_resolution_a1(a1 = float(arguments[1])/1000.)
+        elif arguments[0].startswith('A2'):
+            # Input is in mm but we need m later on 
+            reducer.to_Q.set_q_resolution_a2(a2 = float(arguments[1])/1000.)
+        elif arguments[0].startswith('LCOLLIM'):
+            # Input is in m and we need it to be in m later on
+            reducer.to_Q.set_q_resolution_collimation_length(collimation_length = float(arguments[1]))
+        elif arguments[0].startswith('H1'):
+            # Input is in mm but we need m later on
+            reducer.to_Q.set_q_resolution_h1(h1 = float(arguments[1])/1000.)
+        elif arguments[0].startswith('W1'):
+            # Input is in mm but we need m later on
+            reducer.to_Q.set_q_resolution_w1(w1 = float(arguments[1])/1000.)
+        elif arguments[0].startswith('H2'):
+            # Input is in mm but we need m later on
+            reducer.to_Q.set_q_resolution_h2(h2 = float(arguments[1])/1000.)
+        elif arguments[0].startswith('W2'):
+            # Input is in mm but we need m later on
+            reducer.to_Q.set_q_resolution_w2(w2 = float(arguments[1])/1000.)
+        else:
+            return 'Unrecognised line: '
+
+    def _read_q_resolution_line_on_off(self, arguments, reducer):
+        '''
+        Handles the ON/OFF setting for QResolution
+        @param arguements: the line arguments
+        @param reducer: a reducer object
+        '''
+        # Remove white space
+        on_off = "".join(arguments.split())
+
+        # We expect only ON or OFF
+        if on_off  == "ON":
+            reducer.to_Q.set_use_q_resolution(enabled = True)
+        elif on_off  == "OFF":
+            reducer.to_Q.set_use_q_resolution(enabled = False)
+        else:
+            return 'Unrecognised line: '
+
 
     def _check_instrument(self, inst_name, reducer):
         if reducer.instrument is None:

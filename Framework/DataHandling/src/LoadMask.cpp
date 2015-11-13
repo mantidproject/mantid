@@ -853,7 +853,8 @@ void LoadMask::intializeMaskWorkspace() {
   else
     loadInst->setPropertyValue("Filename", m_instrumentPropValue);
 
-  loadInst->setProperty("RewriteSpectraMap", false);
+  loadInst->setProperty("RewriteSpectraMap",
+                        Mantid::Kernel::OptionalBool(false));
   loadInst->executeAsChildAlg();
 
   if (!loadInst->isExecuted()) {

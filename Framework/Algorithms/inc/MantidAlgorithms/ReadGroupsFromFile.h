@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -93,12 +93,14 @@ public:
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Diffraction"; }
+  virtual const std::string category() const {
+    return "Diffraction\\DataHandling\\CalFiles";
+  }
 
 private:
   /// Map containing the detector entries found in the *.cal file. The key is
   /// the udet number, the value of is a pair of <group,selected>.
-  typedef boost::unordered_map<int, std::pair<int, int>> calmap;
+  typedef std::unordered_map<int, std::pair<int, int>> calmap;
   /// Initialisation code
   void init();
   /// Execution code

@@ -53,7 +53,7 @@ int LoadILLReflectometry::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadILLReflectometry::category() const {
-  return "DataHandling";
+  return "DataHandling\\Nexus";
 }
 
 /**
@@ -102,6 +102,8 @@ void LoadILLReflectometry::runLoadInstrument() {
   try {
 
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
+    loadInst->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(true));
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
     loadInst->execute();
 

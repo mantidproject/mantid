@@ -15,6 +15,8 @@
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Cone.h"
 
+#include "boost/make_shared.hpp"
+
 using namespace Mantid;
 using namespace Geometry;
 using Mantid::Kernel::V3D;
@@ -41,40 +43,15 @@ public:
     TS_ASSERT_EQUALS(A.getObj(), &cpCylinder);
   }
 
-  void testCompObjConstructor() {
-    Object cpCylinder = createCappedCylinder();
-    CompObj A;
-    A.setObj(&cpCylinder);
-    A.setObjN(10);
-    CompObj B(A);
-    TS_ASSERT_EQUALS(B.display(), "#10");
-    TS_ASSERT_EQUALS(B.getObjN(), 10);
-    TS_ASSERT_EQUALS(B.getObj(), &cpCylinder);
-  }
-
   void testClone() {
     Object cpCylinder = createCappedCylinder();
     CompObj A;
     A.setObj(&cpCylinder);
     A.setObjN(10);
-    CompObj *B;
-    B = A.clone();
+    auto B = A.clone();
     TS_ASSERT_EQUALS(B->display(), "#10");
     TS_ASSERT_EQUALS(B->getObjN(), 10);
     TS_ASSERT_EQUALS(B->getObj(), &cpCylinder);
-    delete B;
-  }
-
-  void testAssignment() {
-    Object cpCylinder = createCappedCylinder();
-    CompObj A;
-    A.setObj(&cpCylinder);
-    A.setObjN(10);
-    CompObj B;
-    B = A;
-    TS_ASSERT_EQUALS(B.display(), "#10");
-    TS_ASSERT_EQUALS(B.getObjN(), 10);
-    TS_ASSERT_EQUALS(B.getObj(), &cpCylinder);
   }
 
   void testSetLeaves() {
@@ -83,7 +60,7 @@ public:
     A.setObj(&cpCylinder);
     A.setObjN(10);
     CompObj B;
-    B.setLeaves(&A, (Rule *)0);
+    B.setLeaves(A.clone(), std::unique_ptr<Rule>());
     TS_ASSERT_EQUALS(B.display(), "#10");
     TS_ASSERT_EQUALS(B.getObjN(), 10);
     TS_ASSERT_EQUALS(B.getObj(), &cpCylinder);
@@ -95,7 +72,7 @@ public:
     A.setObj(&cpCylinder);
     A.setObjN(10);
     CompObj B;
-    B.setLeaf(&A, 0);
+    B.setLeaf(A.clone(), 0);
     TS_ASSERT_EQUALS(B.display(), "#10");
     TS_ASSERT_EQUALS(B.getObjN(), 10);
     TS_ASSERT_EQUALS(B.getObj(), &cpCylinder);
@@ -108,8 +85,6 @@ public:
     A.setObjN(10);
     CompObj B;
     TS_ASSERT_EQUALS(A.findLeaf(&A), 0);
-    TS_ASSERT_EQUALS(A.findLeaf(&B), -1);
-    B = A;
     TS_ASSERT_EQUALS(A.findLeaf(&B), -1);
   }
 
@@ -190,10 +165,10 @@ private:
     std::string C33 = "px -3.2";
 
     // First create some surfaces
-    std::map<int, Surface *> CylSurMap;
-    CylSurMap[31] = new Cylinder();
-    CylSurMap[32] = new Plane();
-    CylSurMap[33] = new Plane();
+    std::map<int, boost::shared_ptr<Surface>> CylSurMap;
+    CylSurMap[31] = boost::make_shared<Cylinder>();
+    CylSurMap[32] = boost::make_shared<Plane>();
+    CylSurMap[33] = boost::make_shared<Plane>();
 
     CylSurMap[31]->setSurface(C31);
     CylSurMap[32]->setSurface(C32);

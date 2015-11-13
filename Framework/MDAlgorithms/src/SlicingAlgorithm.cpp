@@ -186,10 +186,6 @@ void SlicingAlgorithm::makeBasisVectorFromString(const std::string &str) {
                                 "input dimensions) in the dimensions string: " +
                                 str);
 
-  // Extract the arguments
-  std::string id = name;
-  std::string units = Strings::strip(strs[0]);
-
   // Get the number of bins from
   int numBins = m_numBins[dim];
   if (numBins < 1)
@@ -250,9 +246,16 @@ void SlicingAlgorithm::makeBasisVectorFromString(const std::string &str) {
   // BIN number
   double binningScaling = double(numBins) / (lengthInInput);
 
+  // Extract the arguments
+  std::string id = name;
+  std::string units = Strings::strip(strs[0]);
+
+  // Create the appropriate frame
+  auto frame = createMDFrameForNonAxisAligned(units, basis);
+
   // Create the output dimension
   MDHistoDimension_sptr out(
-      new MDHistoDimension(name, id, units, static_cast<coord_t>(min),
+      new MDHistoDimension(name, id, *frame, static_cast<coord_t>(min),
                            static_cast<coord_t>(max), numBins));
 
   // Put both in the algo for future use
@@ -510,9 +513,10 @@ void SlicingAlgorithm::makeAlignedDimensionFromString(const std::string &str) {
 
     // Copy the dimension name, ID and units
     IMDDimension_const_sptr inputDim = m_inWS->getDimension(dim_index);
+    const auto &frame = inputDim->getMDFrame();
     m_binDimensions.push_back(MDHistoDimension_sptr(
         new MDHistoDimension(inputDim->getName(), inputDim->getDimensionId(),
-                             inputDim->getUnits(), min, max, numBins)));
+                             frame, min, max, numBins)));
 
     // Add the index from which we're binning to the vector
     this->m_dimensionToBinFrom.push_back(dim_index);
@@ -1000,6 +1004,98 @@ SlicingAlgorithm::getImplicitFunctionForChunk(const size_t *const chunkMin,
     // General implicit function
     return getGeneralImplicitFunction(chunkMin, chunkMax);
   }
+}
+
+/**
+ * Create an MDFrame for the Non-Axis-Aligned case. Make sure that
+ * MDFrames onto which the basis vector projects are not mixed, e.g. no mixing
+ * of HKL and GenerFrame
+ * @param units: the units
+ * @param basisVector: the basis vector
+ * @returns the unique pointer
+ */
+Mantid::Geometry::MDFrame_uptr SlicingAlgorithm::createMDFrameForNonAxisAligned(
+    std::string units, Mantid::Kernel::VMD basisVector) const {
+  // Get set of basis vectors
+  auto oldBasis = getOldBasis(m_inWS->getNumDims());
+
+  // Get indices onto which the vector projects
+  auto indicesWithProjection = getIndicesWithProjection(basisVector, oldBasis);
+
+  // Extract MDFrame
+  return extractMDFrameForNonAxisAligned(indicesWithProjection, units);
+}
+
+std::vector<Mantid::Kernel::VMD>
+SlicingAlgorithm::getOldBasis(size_t dimension) const {
+  std::vector<Mantid::Kernel::VMD> oldBasis;
+  for (size_t i = 0; i < dimension; ++i) {
+    Mantid::Kernel::VMD basisVector(dimension);
+    basisVector[i] = 1.0;
+    oldBasis.push_back(basisVector);
+  }
+  return oldBasis;
+}
+
+/**
+ * Check if the two vectors are orthogonal or not
+ * @param oldVector: the old vector
+ * @param basisVector: the vector under investigation
+ * @returns true if there is a projection  else false
+ */
+bool SlicingAlgorithm::isProjectingOnFrame(
+    const Mantid::Kernel::VMD &oldVector,
+    const Mantid::Kernel::VMD &basisVector) const {
+  return std::fabs(oldVector.scalar_prod(basisVector)) > 0.0;
+}
+
+/**
+ * Get indices which have a projection contribution
+ * @param basisVector: the vector under investigation
+ * @param oldBasis: the old basis vectors
+ * @returns the indices of vectors onto which the basisVector projects
+ */
+std::vector<size_t> SlicingAlgorithm::getIndicesWithProjection(
+    const Mantid::Kernel::VMD &basisVector,
+    const std::vector<Mantid::Kernel::VMD> &oldBasis) const {
+  std::vector<size_t> indexWithProjection;
+  for (size_t index = 0; index < oldBasis.size(); ++index) {
+    if (isProjectingOnFrame(oldBasis[index], basisVector)) {
+      indexWithProjection.push_back(index);
+    }
+  }
+  return indexWithProjection;
+}
+
+/**
+ * Extract the MDFrame. Make sure that all MDFrames are compatible -- if not
+ * throw
+ * @param indicesWithProjection: list of indices of dimensions which have a
+ * projection
+ * @param units: the units
+ */
+Mantid::Geometry::MDFrame_uptr
+SlicingAlgorithm::extractMDFrameForNonAxisAligned(
+    std::vector<size_t> indicesWithProjection, std::string) const {
+  if (indicesWithProjection.empty()) {
+    g_log.warning() << "Slicing Algorithm: Chosen vector does not "
+                       "project on any vector of the old basis.";
+  }
+  // Get a reference frame to perform pairwise comparison
+  const auto &referenceMDFrame =
+      m_inWS->getDimension(indicesWithProjection[0])->getMDFrame();
+
+  for (auto it = indicesWithProjection.begin();
+       it != indicesWithProjection.end(); ++it) {
+    const auto &toCheckMDFrame = m_inWS->getDimension(*it)->getMDFrame();
+    if (!referenceMDFrame.isSameType(toCheckMDFrame)) {
+      g_log.warning() << "Slicing Algorithm: New basis vector tries to "
+                         "mix un-mixable MDFrame types.";
+    }
+  }
+
+  Mantid::Geometry::MDFrame_uptr mdFrame(referenceMDFrame.clone());
+  return mdFrame;
 }
 
 } // namespace Mantid

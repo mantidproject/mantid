@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -22,7 +23,7 @@ class EVSDiffractionReduction(DataProcessorAlgorithm):
 
 
     def category(self):
-        return 'Diffraction;PythonAlgorithms'
+        return 'Diffraction\\Reduction'
 
 
     def summary(self):

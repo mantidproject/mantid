@@ -44,9 +44,8 @@ class ForegroundModel;
  * Defines a Fit function that calculates the convolution
  * of a foreground model with a resolution calculation for an MD workspace.
  */
-class DLLExport ResolutionConvolvedCrossSection
-    : public virtual API::ParamFunction,
-      public virtual API::IFunctionMD {
+class DLLExport ResolutionConvolvedCrossSection : public API::ParamFunction,
+                                                  public API::IFunctionMD {
 public:
   /// Constructor
   ResolutionConvolvedCrossSection();

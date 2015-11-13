@@ -4,7 +4,8 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
-
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidMDAlgorithms/CreateMDHistoWorkspace.h"
 
 using namespace Mantid;
@@ -41,11 +42,6 @@ public:
     return new CreateMDHistoWorkspaceTest();
   }
   static void destroySuite(CreateMDHistoWorkspaceTest *suite) { delete suite; }
-
-  void test_catagory() {
-    CreateMDHistoWorkspace alg;
-    TS_ASSERT_EQUALS("MDAlgorithms", alg.category());
-  }
 
   void test_name() {
     CreateMDHistoWorkspace alg;
@@ -103,6 +99,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Extents", "-1,1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Names", "A"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Units", "U"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Frames", "QSample"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
@@ -122,7 +119,12 @@ public:
 
     TS_ASSERT_EQUALS("A", dim1->getName());
     TS_ASSERT_EQUALS("A", dim1->getDimensionId());
-    TS_ASSERT_EQUALS("U", dim1->getUnits().ascii());
+    TSM_ASSERT("Should not be set to U any longer",
+               "U" != dim1->getUnits().ascii());
+    TSM_ASSERT_EQUALS("Should be a QSample frame",
+                      Mantid::Geometry::QSample::QSampleName,
+                      dim1->getMDFrame().name());
+
     TS_ASSERT_EQUALS(1, dim1->getMaximum());
     TS_ASSERT_EQUALS(-1, dim1->getMinimum());
     TS_ASSERT_EQUALS(5, dim1->getNBins());
@@ -176,6 +178,15 @@ public:
 
     TS_ASSERT_EQUALS(2, dim1->getNBins());
     TS_ASSERT_EQUALS(3, dim2->getNBins());
+
+    // Check frame and label
+    TSM_ASSERT("Should be set to U", "U" == dim1->getUnits().ascii());
+    TSM_ASSERT_EQUALS("Should be convertible to a General Frame",
+                      Mantid::Geometry::GeneralFrame::GeneralFrameName,
+                      dim1->getMDFrame().name());
+    TSM_ASSERT_EQUALS("Should be convertible to a General Frame",
+                      Mantid::Geometry::GeneralFrame::GeneralFrameName,
+                      dim2->getMDFrame().name());
 
     // Check the data
     double *signals = outWs->getSignalArray();

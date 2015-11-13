@@ -2,6 +2,29 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
 
+#ifdef ENABLE_OPENCASCADE
+// Opencascade defines _USE_MATH_DEFINES without checking whether it is already
+// used.
+// Undefine it here before we include the headers to avoid a warning
+#ifdef _MSC_VER
+#undef _USE_MATH_DEFINES
+#ifdef M_SQRT1_2
+#undef M_SQRT1_2
+#endif
+#endif
+
+#include "MantidKernel/WarningSuppressions.h"
+GCC_DIAG_OFF(conversion)
+// clang-format off
+GCC_DIAG_OFF(cast-qual)
+// clang-format on
+#include <BRepPrimAPI_MakeSphere.hxx>
+GCC_DIAG_ON(conversion)
+// clang-format off
+GCC_DIAG_ON(cast-qual)
+// clang-format on
+#endif
+
 namespace Mantid {
 
 namespace Geometry {
@@ -32,13 +55,22 @@ Default Copy constructor
 */
 {}
 
-Sphere *Sphere::clone() const
+Sphere *Sphere::doClone() const
 /**
 Makes a clone (implicit virtual copy constructor)
 @return new (*this)
 */
 {
   return new Sphere(*this);
+}
+
+std::unique_ptr<Sphere> Sphere::clone() const
+/**
+Makes a clone (implicit virtual copy constructor)
+@return new (*this)
+*/
+{
+  return std::unique_ptr<Sphere>(doClone());
 }
 
 Sphere &Sphere::operator=(const Sphere &A)
@@ -55,12 +87,6 @@ Default Assignment operator
   }
   return *this;
 }
-
-Sphere::~Sphere()
-/**
-Destructor
-*/
-{}
 
 int Sphere::setSurface(const std::string &Pstr)
 /**
@@ -84,14 +110,15 @@ Valid input is:
   if (item.length() == 2) // sx/sy/sz
   {
     if (tolower(item[1]) != 'o') {
-      const int pType = static_cast<int>(tolower(item[1]) - 'x');
-      if (pType < 0 || pType > 2)
+      const std::size_t pType =
+          static_cast<std::size_t>(tolower(item[1]) - 'x');
+      if (pType > 2)
         return -3;
       if (!Mantid::Kernel::Strings::section(Line, cent[pType]))
         return -4;
     }
   } else if (item.length() == 1) {
-    int index;
+    std::size_t index;
     for (index = 0;
          index < 3 && Mantid::Kernel::Strings::section(Line, cent[index]);
          index++)
@@ -256,6 +283,13 @@ void Sphere::getBoundingBox(double &xmax, double &ymax, double &zmax,
   ymin = Centre[1] - Radius;
   zmin = Centre[2] - Radius;
 }
+
+#ifdef ENABLE_OPENCASCADE
+TopoDS_Shape Sphere::createShape() {
+  return BRepPrimAPI_MakeSphere(gp_Pnt(Centre[0], Centre[1], Centre[2]), Radius)
+      .Shape();
+}
+#endif
 
 } // NAMESPACE Geometry
 

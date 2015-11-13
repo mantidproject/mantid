@@ -1,12 +1,11 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name,R0912
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
-import xml.dom.minidom
 import os
-import time
+from mantid.kernel import Logger
 from reduction_gui.reduction.scripter import BaseReductionScripter
 
 class DiffractionReductionScripter(BaseReductionScripter):
@@ -25,7 +24,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
     WIDTH = WIDTH_END + " "
     AUTOSCRIPTNAME = 'SNSPowderReductionScript_AutoSave.py'
 
-    def __init__(self, name="VULCAN", facility="SNS"):
+    def __init__(self, name, facility='SNS'):
         """ Initialization
         """
         # Call base class
@@ -36,14 +35,17 @@ class DiffractionReductionScripter(BaseReductionScripter):
         mantidconfigdir = os.path.join(homedir, ".mantid")
         self.configDir = mantidconfigdir
 
-        # create configuratin dir if it has not been
+        # create configuration dir if it has not been
         if os.path.exists(self.configDir) is False:
             os.makedirs(self.configDir)
 
         # Information output
-        print "[diffraction_reduction_script]  Facility = %s,  Instrument = %s" % (
-                self.facility_name, self.instrument_name)
-        print "Auto-save Directory %s. " % (mantidconfigdir)
+        if self.facility_name is False:
+            self.facility_name = 'SNS'
+        dbmsg = '[SNS Powder Reduction]  Facility = %s,  Instrument = %s\n' \
+                'Auto-save Directory %s' % (self.facility_name, self.instrument_name,
+                       mantidconfigdir)
+        Logger("DiffractionReductionScripter").debug(str(dbmsg))
 
         return
 
@@ -84,7 +86,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
                 file_name, autosavexmlfname)
         wbuf += script
         wbuf += "\n========== End of Script ==========="
-        print (wbuf)
+        print wbuf
 
         return script
 
@@ -195,18 +197,17 @@ class DiffractionReductionScripter(BaseReductionScripter):
                             filterdict["FilterLogValueByChangingDirection"])
                     if filterdict["LogValueInterval"] != "":
                         # Filter by log value interval
-                        script += "%sLogValueInterval       = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LogValueInterval"])
-                        #if filterdict["LogName"] == "":
-                        #    # No log value.  Then filter by time interval
-                        #    script += "%sTimeInterval       = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LogValueInterval"])
-                        #else:
-                        #    # Found log value interval
-                        #    script += "%sLogValueInterval       = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LogValueInterval"])
-                    script += "%sLogBoundary    = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LogBoundary"])
+                        script += "%sLogValueInterval       = '%s',\n" % (
+                                DiffractionReductionScripter.WIDTH,
+                                filterdict["LogValueInterval"])
+                    script += "%sLogBoundary    = '%s',\n" % (
+                            DiffractionReductionScripter.WIDTH, filterdict["LogBoundary"])
                     if filterdict["TimeTolerance"] != "":
-                        script += "%sTimeTolerance  = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["TimeTolerance"])
+                        script += "%sTimeTolerance  = '%s',\n" % (
+                                DiffractionReductionScripter.WIDTH, filterdict["TimeTolerance"])
                     if filterdict["LogValueTolerance"] != "":
-                        script += "%sLogValueTolerance  = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LogValueTolerance"])
+                        script += "%sLogValueTolerance  = '%s',\n" % (
+                                DiffractionReductionScripter.WIDTH, filterdict["LogValueTolerance"])
                 # ENDIF
                 script += ")\n"
 
@@ -317,13 +318,14 @@ class DiffractionReductionScripter(BaseReductionScripter):
 
         return datafilenames
 
-
-    def buildPowderDataReductionScript(self, runsetupdict, advsetupdict, runnumber=None, splitwsname=None,
+    def buildPowderDataReductionScript(self, runsetupdict, advsetupdict,
+                                       runnumber=None, splitwsname=None,
                                        splitinfowsname=None):
         """ Build the script to call SNSPowderReduction()
         """
-        script  = "SNSPowderReduction(\n"
-        script += "%sInstrument   = '%s',\n" % (DiffractionReductionScripter.WIDTH, self.instrument_name)
+        script = 'SNSPowderReduction(\n'
+        script += "%sInstrument   = '%s',\n" % (DiffractionReductionScripter.WIDTH,
+                                                self.instrument_name)
 
         # 1. Run setup
         # a) determine whether to turn on/off corrections
@@ -341,6 +343,10 @@ class DiffractionReductionScripter(BaseReductionScripter):
         else:
             # turn off the binning
             runsetupdict["Binning"] = ''
+
+        # NOMAD special
+        if self.instrument_name.lower().startswith('nom') is False:
+            runsetupdict.pop('ExpIniFile', None)
 
         # c) all properties
         for propname in runsetupdict.keys():
@@ -407,4 +413,3 @@ class DiffractionReductionScripter(BaseReductionScripter):
                 self.instrument_name = observer._subject._instrument_name
 
         return
-

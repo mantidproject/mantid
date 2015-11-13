@@ -389,7 +389,7 @@ class IndirectCommonTests(unittest.TestCase):
 
     def load_instrument(self, ws, instrument, analyser='graphite', reflection='002'):
         """Load an instrument parameter from the ipf directory"""
-        LoadInstrument(ws, InstrumentName=instrument)
+        LoadInstrument(ws, InstrumentName=instrument, RewriteSpectraMap=True)
 
         if config['default.facility'] != 'ILL':
             parameter_file_name = '%s_%s_%s_Parameters.xml' % (instrument, analyser, reflection)

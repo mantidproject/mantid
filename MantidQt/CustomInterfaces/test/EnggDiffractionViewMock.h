@@ -53,11 +53,11 @@ public:
   // std::string currentPlotType
   MOCK_CONST_METHOD0(currentPlotType, int());
 
-  // virtual std::string newVanadiumNo() const;
-  MOCK_CONST_METHOD0(newVanadiumNo, std::string());
+  // virtual std::vector<std::string> newVanadiumNo() const;
+  MOCK_CONST_METHOD0(newVanadiumNo, std::vector<std::string>());
 
-  // virtual std::string newCeriaNo() const;
-  MOCK_CONST_METHOD0(newCeriaNo, std::string());
+  // virtual std::vector<std::string> newCeriaNo() const;
+  MOCK_CONST_METHOD0(newCeriaNo, std::vector<std::string>());
 
   // virtual std::string outCalibFilename() const;
   MOCK_CONST_METHOD0(outCalibFilename, std::string());
@@ -74,20 +74,23 @@ public:
                void(const std::string &, const std::vector<double> &,
                     const std::vector<double> &));
 
+  // virtual void enableTabs(bool enable);
+  MOCK_METHOD1(enableTabs, void(bool));
+
   // virtual void enableCalibrateAndFocusActions(bool enable);
   MOCK_METHOD1(enableCalibrateAndFocusActions, void(bool));
 
   // virtual std::string focusingDir() const;
   MOCK_CONST_METHOD0(focusingDir, std::string());
 
-  // virtual std::string focusingRunNo() const;
-  MOCK_CONST_METHOD0(focusingRunNo, std::string());
+  // virtual std::vector<std::string> focusingRunNo() const;
+  MOCK_CONST_METHOD0(focusingRunNo, std::vector<std::string>());
 
-  // virtual std::string focusingCroppedRunNo() const;
-  MOCK_CONST_METHOD0(focusingCroppedRunNo, std::string());
+  // virtual std::vector<std::string> focusingCroppedRunNo() const;
+  MOCK_CONST_METHOD0(focusingCroppedRunNo, std::vector<std::string>());
 
-  // virtual std::string focusingTextureRunNo() const;
-  MOCK_CONST_METHOD0(focusingTextureRunNo, std::string());
+  // virtual std::vector<std::string> focusingTextureRunNo() const;
+  MOCK_CONST_METHOD0(focusingTextureRunNo, std::vector<std::string>());
 
   // virtual int focusingBank() const;
   MOCK_CONST_METHOD0(focusingBanks, std::vector<bool>());
@@ -100,6 +103,18 @@ public:
 
   // virtual void resetFocus();
   MOCK_METHOD0(resetFocus, void());
+
+  // virtual std::string currentPreprocRunNo() const;
+  MOCK_CONST_METHOD0(currentPreprocRunNo, std::string());
+
+  // virtual double rebinningTimeBin() const;
+  MOCK_CONST_METHOD0(rebinningTimeBin, double());
+
+  // virtual size_t rebinningNumberPeriods() const;
+  MOCK_CONST_METHOD0(rebinningPulsesNumberPeriods, size_t());
+
+  // virtual double rebinningPulsesPerPeriod() const;
+  MOCK_CONST_METHOD0(rebinningPulsesTime, double());
 
   // virtual bool focusedOutWorkspace() const;
   MOCK_CONST_METHOD0(focusedOutWorkspace, bool());
@@ -124,8 +139,6 @@ public:
 
   // virtual void plotReplacingWindow
   MOCK_METHOD1(plotReplacingWindow, void(const std::string &wsName));
-
-
 };
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H

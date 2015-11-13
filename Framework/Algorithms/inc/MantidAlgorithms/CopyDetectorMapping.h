@@ -53,7 +53,7 @@ public:
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "DataHandling"; }
+  virtual const std::string category() const { return "Utility\\Workspaces"; }
 
   /// Input property validation
   virtual std::map<std::string, std::string> validateInputs();

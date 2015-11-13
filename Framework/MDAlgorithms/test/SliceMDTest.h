@@ -5,6 +5,7 @@
 #include "MantidMDAlgorithms/SliceMD.h"
 #include "MantidDataObjects/CoordTransformAffine.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -145,9 +146,10 @@ public:
     SliceMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-
+    Mantid::Geometry::QSample frame;
     IMDEventWorkspace_sptr in_ws =
-        MDEventsTestHelper::makeAnyMDEW<MDE, nd>(10, 0.0, 10.0, 1);
+        MDEventsTestHelper::makeAnyMDEWWithFrames<MDE, nd>(10, 0.0, 10.0, frame,
+                                                           1);
     Mantid::Kernel::SpecialCoordinateSystem appliedCoord =
         Mantid::Kernel::QSample;
     in_ws->setCoordinateSystem(appliedCoord);

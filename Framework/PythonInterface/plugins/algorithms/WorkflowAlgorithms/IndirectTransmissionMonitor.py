@@ -14,7 +14,7 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
 
     def category(self):
-        return "Workflow\\Inelastic;PythonAlgorithms;Inelastic"
+        return "Workflow\\Inelastic;Inelastic\\Indirect"
 
 
     def summary(self):
@@ -33,31 +33,41 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
 
     def PyExec(self):
+        setup_prog = Progress(self, start=0.0, end=0.05, nreports=5)
+        setup_prog.report('Setting up algorithm')
         self._setup()
 
         ws_basename = str(self._sample_ws_in)
 
+        trans_prog = Progress(self, start=0.05, end=0.04, nreports=2)
+        trans_prog.report('Transforming monitor for Sample')
         self._trans_mon(ws_basename, 'Sam', self._sample_ws_in)
+        trans_prog.report('Transforming monitor for Contianer')
         self._trans_mon(ws_basename, 'Can', self._can_ws_in)
 
+        workflow_prog = Progress(self, start=0.4, end=1.0, nreports=4)
         # Generate workspace names
         sam_ws = ws_basename + '_Sam'
         can_ws = ws_basename + '_Can'
         trans_ws = ws_basename + '_Trans'
 
         # Divide sample and can workspaces
+        workflow_prog.report('Dividing Sample by Container')
         Divide(LHSWorkspace=sam_ws, RHSWorkspace=can_ws, OutputWorkspace=trans_ws)
 
         trans = numpy.average(mtd[trans_ws].readY(0))
         logger.information('Average Transmission: ' + str(trans))
 
+        workflow_prog.report('Adding Sample logs')
         AddSampleLog(Workspace=trans_ws, LogName='can_workspace', LogType='String', LogText=self._can_ws_in)
 
         # Group workspaces
+        workflow_prog.report('Creating output GroupWorkspace')
         group = sam_ws + ',' + can_ws + ',' + trans_ws
         GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=self._out_ws)
 
         self.setProperty('OutputWorkspace', self._out_ws)
+        workflow_prog.report('Algorithm complete')
 
 
     def _setup(self):

@@ -3,7 +3,6 @@ from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, Wor
 import mantid.simpleapi as api
 import numpy as np
 from dateutil.parser import parse
-import mlzutils
 
 
 class TOFTOFMergeRuns(PythonAlgorithm):
@@ -24,7 +23,7 @@ class TOFTOFMergeRuns(PythonAlgorithm):
     def category(self):
         """ Return category
         """
-        return "PythonAlgorithms\\MLZ\\TOFTOF;Utility"
+        return "Workflow\\MLZ\\TOFTOF;Transforms\\Splitting"
 
     def name(self):
         """ Return summary
@@ -45,19 +44,24 @@ class TOFTOFMergeRuns(PythonAlgorithm):
                              doc="Name of the workspace that will contain the merged workspaces.")
         return
 
-    def _validate_input(self):
+    def validateInputs(self):
+        issues = dict()
+        # workspaces or groups must exist
+        workspaces = self.getProperty("InputWorkspaces").value
+        for wsname in workspaces:
+            if not api.AnalysisDataService.doesExist(wsname):
+                issues["InputWorkspaces"] = "Workspace " + wsname + " does not exist!"
+
+        return issues
+
+    def _expand_groups(self):
         """
         Checks for the valid input:
             all given workspaces and/or groups must exist
             gets names of the grouped workspaces
         """
-        workspaces = self.getProperty("InputWorkspaces").value
-        mlzutils.ws_exist(workspaces, self.log())
         input_workspaces = []
-        if len(workspaces) < 1:
-            message = "List of workspaces is empty. Nothing to merge."
-            self.log().error(message)
-            raise RuntimeError(message)
+        workspaces = self.getProperty("InputWorkspaces").value
         for wsname in workspaces:
             wks = api.AnalysisDataService.retrieve(wsname)
             if isinstance(wks, WorkspaceGroup):
@@ -71,7 +75,9 @@ class TOFTOFMergeRuns(PythonAlgorithm):
         Checks whether given workspaces can be merged
         """
         # mandatory properties must be identical
-        mlzutils.compare_mandatory(wsnames, self.mandatory_properties, self.log())
+        result = api.CompareSampleLogs(wsnames, self.mandatory_properties, 0.01)
+        if len(result) > 0:
+            raise RuntimeError("Sample logs " + result + " do not match!")
 
         # timing (x-axis binning) must match
         # is it possible to use WorkspaceHelpers::matchingBins from python?
@@ -89,19 +95,17 @@ class TOFTOFMergeRuns(PythonAlgorithm):
                     raise RuntimeError(message)
 
         # warnig if optional properties are not identical must be given
-        ws1 = api.AnalysisDataService.retrieve(wsnames[0])
-        run1 = ws1.getRun()
-        for wsname in wsnames[1:]:
-            wks = api.AnalysisDataService.retrieve(wsname)
-            run = wks.getRun()
-            mlzutils.compare_properties(run1, run, self.optional_properties, self.log(), tolerance=0.01)
+        result = api.CompareSampleLogs(wsnames, self.optional_properties, 0.01)
+        if len(result) > 0:
+            self.log().warning("Sample logs " + result + " do not match!")
+
         return True
 
     def PyExec(self):
         """ Main execution body
         """
         # get list of input workspaces
-        input_workspace_list = self._validate_input()
+        input_workspace_list = self._expand_groups()
         workspaceCount = len(input_workspace_list)
         self.log().information("Workspaces to merge " + str(workspaceCount))
         wsOutput = self.getPropertyValue("OutputWorkspace")

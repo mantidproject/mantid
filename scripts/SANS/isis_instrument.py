@@ -1,3 +1,4 @@
+#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 import math
 import os
@@ -506,6 +507,9 @@ class ISISInstrument(BaseInstrument):
         self.monitor_zs = {}
         # Used when new calibration required.
         self._newCalibrationWS = None
+        # Centre of beam after a move has been applied, 
+        self.beam_centre_pos1_after_move = 0.0
+        self.beam_centre_pos2_after_move = 0.0
 
     def get_incident_mon(self):
         """
@@ -711,8 +715,35 @@ class ISISInstrument(BaseInstrument):
         """Define how to move the bank to position beamX and beamY must be implemented"""
         raise RuntimeError("Not Implemented")
 
+    def elementary_displacement_of_single_component(self, workspace, component_name, coord1, coord2,
+                                                    coord1_scale_factor = 1., coord2_scale_factor = 1.,relative_displacement = True):
+        """
+        A simple elementary displacement of a single component.
+        This provides the adequate displacement for finding the beam centre.
+        @param workspace: the workspace which needs to have the move applied to it
+        @param component_name: the name of the component which being displaced
+        @param coord1: the first coordinate, which is x here
+        @param coord2: the second coordinate, which is y here
+        @param coord1_scale_factor: scale factor for the first coordinate
+        @param coord2_scale_factor: scale factor for the second coordinate
+        @param relative_displacement: If the the displacement is to be relative (it normally should be)
+        """
+        dummy_1 = workspace
+        dummy_2 = component_name
+        dummy_3 = coord1
+        dummy_3 = coord2
+        dummy_4 = relative_displacement
+        dummy_5 = coord1_scale_factor
+        dummy_6 = coord2_scale_factor
+        raise RuntimeError("Not Implemented")
+
     def cur_detector_position(self, ws_name):
-        """Return the position of the center of the detector bank"""
+        '''
+        Return the position of the center of the detector bank
+        @param ws_name: the input workspace name
+        @raise RuntimeError: Not implemented
+        '''
+        dummy_1 = ws_name
         raise RuntimeError("Not Implemented")
 
     def on_load_sample(self, ws_name, beamcentre, isSample):
@@ -732,10 +763,17 @@ class ISISInstrument(BaseInstrument):
             self.set_up_for_run(run_num)
 
         if self._newCalibrationWS:
+            # We are about to transfer the Instrument Parameter File from the
+            # calibration to the original workspace. We want to add new parameters
+            # which the calibration file has not yet picked up.
+            # IMPORTANT NOTE: This takes the parameter settings from the original workspace
+            # if they are old too, then we don't pick up newly added parameters
+            self._add_parmeters_absent_in_calibration(ws_name, self._newCalibrationWS)
             self.changeCalibration(ws_name)
 
         # centralize the bank to the centre
-        self.move_components(ws_name, beamcentre[0], beamcentre[1])
+        dummy_centre, centre_shift = self.move_components(ws_name, beamcentre[0], beamcentre[1])
+        return centre_shift
 
     def load_transmission_inst(self, ws_trans, ws_direct, beamcentre):
         """
@@ -754,6 +792,69 @@ class ISISInstrument(BaseInstrument):
         # this forces us to have 'copyable' objects.
         self._newCalibrationWS = str(ws_reference)
 
+    def get_updated_beam_centre_after_move(self):
+        '''
+        @returns the beam centre position after the instrument has moved
+        '''
+        return self.beam_centre_pos1_after_move, self.beam_centre_pos2_after_move
+
+    def _add_parmeters_absent_in_calibration(self, ws_name, calib_name):
+        '''
+        We load the instrument specific Instrument Parameter File (IPF) and check if
+        there are any settings which the calibration workspace does not have. The calibration workspace
+        has its own parameter map stored in the nexus file. This means that if we add new
+        entries to the IPF, then they are not being picked up. We do not want to change the existing
+        values, just add new entries.
+        @param ws_name: the name of the main workspace with the data
+        @param calibration_workspace: the name of the calibration workspace
+        '''
+        if calib_name == None or ws_name == None:
+            return
+        workspace = mtd[ws_name]
+        calibration_workspace = mtd[calib_name]
+
+        # 1.Iterate over all parameters in the original workspace
+        # 2. Compare with the calibration workspace
+        # 3. If it does not exist, then add it
+        original_parmeters = workspace.getInstrument().getParameterNames()
+        for param in original_parmeters:
+            if not calibration_workspace.getInstrument().hasParameter(param):
+                self._add_new_parameter_to_calibration(param, workspace, calibration_workspace)
+
+    def _add_new_parameter_to_calibration(self, param_name, workspace, calibration_workspace):
+        '''
+        Adds the missing value from the Instrument Parameter File (IPF) of the workspace to
+        the IPF of the calibration workspace. We check for the
+                                                             1. Type
+                                                             2. Value
+                                                             3. Name
+                                                             4. ComponentName (which is the instrument)
+        @param param_name: the name of the parameter to add
+        @param workspace: the donor of the parameter
+        @param calibration_workspace: the receiver of the parameter
+        '''
+        ws_instrument = workspace.getInstrument()
+        component_name = ws_instrument.getName()
+        ipf_type = ws_instrument.getParameterType(param_name)
+        # For now we only expect string, int and double
+        type_ids = ["string", "int", "double"]
+        value = None
+        type_to_save = "Number"
+        if ipf_type == type_ids[0]:
+            value = ws_instrument.getStringParameter(param_name)
+            type_to_save = "String"
+        elif ipf_type == type_ids[1]:
+            value = ws_instrument.getIntParameter(param_name)
+        elif ipf_type == type_ids[2]:
+            value = ws_instrument.getNumberParameter(param_name)
+        else:
+            raise RuntimeError("ISISInstrument: An Instrument Parameter File value of unknown type"
+                               "is trying to be copied. Cannot handle this currently.")
+        SetInstrumentParameter(Workspace = calibration_workspace,
+                               ComponentName = component_name,
+                               ParameterName = param_name,
+                               ParameterType = type_to_save,
+                               Value = str(value[0]))
 
 
 class LOQ(ISISInstrument):
@@ -789,7 +890,9 @@ class LOQ(ISISInstrument):
 
         xshift = (317.5/1000.) - xbeam
         yshift = (317.5/1000.) - ybeam
-        MoveInstrumentComponent(Workspace=ws,ComponentName= self.cur_detector().name(), X = xshift, Y = yshift, RelativePosition="1")
+        MoveInstrumentComponent(Workspace=ws,
+                                ComponentName= self.cur_detector().name(),
+                                X = xshift, Y = yshift, RelativePosition="1")
 
         # Have a separate move for x_corr, y_coor and z_coor just to make it more obvious in the
         # history, and to expert users what is going on
@@ -799,7 +902,30 @@ class LOQ(ISISInstrument):
             xshift = xshift + det.x_corr/1000.0
             yshift = yshift + det.y_corr/1000.0
 
+        # Set the beam centre position afte the move, leave as they were
+        self.beam_centre_pos1_after_move = xbeam
+        self.beam_centre_pos2_after_move = ybeam
+
         return [xshift, yshift], [xshift, yshift]
+
+    def elementary_displacement_of_single_component(self, workspace, component_name, coord1, coord2,
+                                                    coord1_scale_factor = 1., coord2_scale_factor = 1.,relative_displacement = True):
+        """
+        A simple elementary displacement of a single component.
+        This provides the adequate displacement for finding the beam centre.
+        @param workspace: the workspace which needs to have the move applied to it
+        @param component_name: the name of the component which being displaced
+        @param coord1: the first coordinate, which is x here
+        @param coord2: the second coordinate, which is y here
+        @param coord1_scale_factor: scale factor for the first coordinate
+        @param coord2_scale_factor: scale factor for the second coordinate
+        @param relative_displacement: If the the displacement is to be relative (it normally should be)
+        """
+        MoveInstrumentComponent(Workspace=workspace,
+                                ComponentName=component_name,
+                                X=coord1,
+                                Y=coord2,
+                                RelativePosition=relative_displacement)
 
     def get_marked_dets(self):
         raise NotImplementedError('The marked detector list isn\'t stored for instrument '+self._NAME)
@@ -938,44 +1064,59 @@ class SANS2D(ISISInstrument):
 
         # Deal with front detector
         # 10/03/15 RKH need to add tilt of detector, in degrees, with respect to the horizontal or vertical of the detector plane
-        # this time we can rotate about the detector's own axis so can use RotateInstrumentComponent, ytilt rotates about x axis, xtilt rotates about z axis
+        # this time we can rotate about the detector's own axis so can use RotateInstrumentComponent,
+        # ytilt rotates about x axis, xtilt rotates about z axis
         #
         if frontDet.y_tilt != 0.0:
-            RotateInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X = "1.", Y = "0.", Z = "0.", Angle = frontDet.y_tilt)
+            RotateInstrumentComponent(Workspace=ws,
+                                      ComponentName= self.getDetector('front').name(),
+                                      X = "1.",
+                                      Y = "0.",
+                                      Z = "0.",
+                                      Angle = frontDet.y_tilt)
         if frontDet.x_tilt != 0.0:
-            RotateInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X = "0.", Y = "0.", Z = "1.", Angle = frontDet.x_tilt)
+            RotateInstrumentComponent(Workspace=ws,
+                                      ComponentName= self.getDetector('front').name(),
+                                      X = "0.",
+                                      Y = "0.",
+                                      Z = "1.",
+                                      Angle = frontDet.x_tilt)
         #
         # 9/1/12  this all dates to Richard Heenan & Russell Taylor's original python development for SANS2d
-    	# the rotation axis on the SANS2d front detector is actually set front_det_radius = 306mm behind the detector.
-    	# Since RotateInstrumentComponent will only rotate about the centre of the detector, we have to to the rest here.
+        # the rotation axis on the SANS2d front detector is actually set front_det_radius = 306mm behind the detector.
+        # Since RotateInstrumentComponent will only rotate about the centre of the detector, we have to to the rest here.
         # rotate front detector according to value in log file and correction value provided in user file
         rotateDet = (-FRONT_DET_ROT - frontDet.rot_corr)
         RotateInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X="0.", Y="1.0", Z="0.", Angle=rotateDet)
         RotRadians = math.pi*(FRONT_DET_ROT + frontDet.rot_corr)/180.
         # The rear detector is translated to the beam position using the beam centre coordinates in the user file.
-    	# (Note that the X encoder values in NOT used for the rear detector.)
-    	# The front detector is translated using the difference in X encoder values, with a correction from the user file.
-    	# 21/3/12 RKH [In reality only the DIFFERENCE in X encoders is used, having separate X corrections for both detectors is unnecessary,
-    	# but we will continue with this as it makes the mask file smore logical and avoids a retrospective change.]
-    	# 21/3/12 RKH add .side_corr    allows rotation axis of the front detector being offset from the detector X=0
-    	# this inserts *(1.0-math.cos(RotRadians)) into xshift, and
-    	# - frontDet.side_corr*math.sin(RotRadians) into zshift.
-    	# (Note we may yet need to introduce further corrections for parallax errors in the detectors, which may be wavelength dependent!)
+        # (Note that the X encoder values in NOT used for the rear detector.)
+        # The front detector is translated using the difference in X encoder values, with a correction from the user file.
+        # 21/3/12 RKH [In reality only the DIFFERENCE in X encoders is used, having separate X corrections for
+        # both detectors is unnecessary,
+        # but we will continue with this as it makes the mask file smore logical and avoids a retrospective change.]
+        # 21/3/12 RKH add .side_corr    allows rotation axis of the front detector being offset from the detector X=0
+        # this inserts *(1.0-math.cos(RotRadians)) into xshift, and
+        # - frontDet.side_corr*math.sin(RotRadians) into zshift.
+        # (Note we may yet need to introduce further corrections for parallax errors in the detectors, which may be wavelength dependent!)
         xshift = (REAR_DET_X + rearDet.x_corr -frontDet.x_corr - FRONT_DET_X  -frontDet.side_corr*(1-math.cos(RotRadians)) + (self.FRONT_DET_RADIUS +frontDet.radius_corr)*math.sin(RotRadians) )/1000. - self.FRONT_DET_DEFAULT_X_M - xbeam
         yshift = (frontDet.y_corr/1000.  - ybeam)
-        # Note don't understand the comment below (9/1/12 these are comments from the original python code, you may remove them if you like!)
+        # Note don't understand the comment below (9/1/12 these are comments from the original python code,
+        # you may remove them if you like!)
         # default in instrument description is 23.281m - 4.000m from sample at 19,281m !
         # need to add ~58mm to det1 to get to centre of detector, before it is rotated.
-    	# 21/3/12 RKH add .radius_corr
+        # 21/3/12 RKH add .radius_corr
         zshift = (FRONT_DET_Z + frontDet.z_corr + (self.FRONT_DET_RADIUS +frontDet.radius_corr)*(1 - math.cos(RotRadians)) - frontDet.side_corr*math.sin(RotRadians))/1000.
         zshift -= self.FRONT_DET_DEFAULT_SD_M
-        MoveInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
-
+        MoveInstrumentComponent(Workspace=ws,
+                                ComponentName= self.getDetector('front').name(),
+                                X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
 
         # deal with rear detector
 
         # 10/03/15 RKH need to add tilt of detector, in degrees, with respect to the horizontal or vertical of the detector plane
-        # Best to do the tilts first, while the detector is still centred on the z axis, ytilt rotates about x axis, xtilt rotates about z axis
+        # Best to do the tilts first, while the detector is still centred on the z axis,
+        # ytilt rotates about x axis, xtilt rotates about z axis
         # NOTE the beam centre coordinates may change
         if rearDet.y_tilt != 0.0:
             RotateInstrumentComponent(Workspace=ws,ComponentName= rearDet.name(), X = "1.", Y = "0.", Z = "0.", Angle = rearDet.y_tilt)
@@ -989,9 +1130,7 @@ class SANS2D(ISISInstrument):
         sanslog.notice("Setup move "+str(xshift*1000.)+" "+str(yshift*1000.)+" "+str(zshift*1000.))
         MoveInstrumentComponent(Workspace=ws,ComponentName= rearDet.name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
 
-
         self.move_all_components(ws)
-
         #this implements the TRANS/TRANSPEC=4/SHIFT=... line, this overrides any other monitor move
         if self.monitor_4_offset:
             #get the current location of the monitor
@@ -1019,7 +1158,30 @@ class SANS2D(ISISInstrument):
             beam_cen = [0.0,0.0]
             det_cen = [-xbeam, -ybeam]
 
+        # Set the beam centre position afte the move, leave as they were
+        self.beam_centre_pos1_after_move = xbeam
+        self.beam_centre_pos2_after_move = ybeam
+
         return beam_cen, det_cen
+
+    def elementary_displacement_of_single_component(self, workspace, component_name, coord1, coord2,
+                                                    coord1_scale_factor = 1., coord2_scale_factor = 1.,relative_displacement = True):
+        """
+        A simple elementary displacement of a single component.
+        This provides the adequate displacement for finding the beam centre.
+        @param workspace: the workspace which needs to have the move applied to it
+        @param component_name: the name of the component which being displaced
+        @param coord1: the first coordinate, which is x here
+        @param coord2: the second coordinate, which is y here
+        @param coord1_scale_factor: scale factor for the first coordinate
+        @param coord2_scale_factor: scale factor for the second coordinate
+        @param relative_displacement: If the the displacement is to be relative (it normally should be)
+        """
+        MoveInstrumentComponent(Workspace=workspace,
+                                ComponentName=component_name,
+                                X=coord1,
+                                Y=coord2,
+                                RelativePosition=relative_displacement)
 
     def get_detector_log(self, wksp):
         """
@@ -1386,28 +1548,75 @@ class LARMOR(ISISInstrument):
         zshift = 0
         sanslog.notice("Setup move " + str(xshift*XSF) + " " + str(yshift*YSF) + " " + str(zshift*1000))
         MoveInstrumentComponent(ws, ComponentName=detBench.name(), X=xshift, Y=yshift, Z=zshift)
+
+        # Deal with the angle value
+        total_x_shift = self._rotate_around_y_axis(workspace = ws,
+                                               component_name = detBench.name(),
+                                               x_beam = xbeam,
+                                               x_scale_factor = XSF,
+                                               bench_rotation = BENCH_ROT)
+
+        # Set the beam centre position afte the move
+        self.beam_centre_pos1_after_move = xbeam # Need to provide the angle in 1000th of a degree
+        self.beam_centre_pos2_after_move = ybeam
+
+        # beam centre, translation, new beam position
+        return [0.0, 0.0], [-xbeam, -ybeam]
+
+    def elementary_displacement_of_single_component(self, workspace, component_name, coord1, coord2,
+                                                    coord1_scale_factor = 1., coord2_scale_factor = 1.,relative_displacement = True):
+        """
+        A simple elementary displacement of a single component.
+        This provides the adequate displacement for finding the beam centre.
+        @param workspace: the workspace which needs to have the move applied to it
+        @param component_name: the name of the component which being displaced
+        @param coord1: the first coordinate, which is x here
+        @param coord2: the second coordinate, which is y here
+        @param coord1_scale_factor: scale factor for the first coordinate
+        @param coord2_scale_factor: scale factor for the second coordinate
+        @param relative_displacement: If the the displacement is to be relative (it normally should be)
+        """
+        dummy_coord2_scale_factor = coord2_scale_factor
+        # Shift the component in the y direction
+        MoveInstrumentComponent(Workspace=workspace,
+                                ComponentName=component_name,
+                                Y=coord2,
+                                RelativePosition=relative_displacement)
+
+        # Rotate around the y-axis.
+        self._rotate_around_y_axis(workspace = workspace,
+                                   component_name = component_name,
+                                   x_beam = coord1,
+                                   x_scale_factor = coord1_scale_factor,
+                                   bench_rotation = 0.)
+
+    def _rotate_around_y_axis(self,workspace, component_name, x_beam, x_scale_factor, bench_rotation):
+        '''
+        Rotates the component of the workspace around the y axis or shift along x, depending on the run number
+        @param workspace: a workspace name
+        @param component_name: the component to rotate
+        @param x_beam: either a shift in mm or a angle in degree
+        @param x_scale_factor: 
+        '''
         # in order to avoid rewriting old mask files from initial commisioning during 2014.
-        ws_ref=mtd[ws]
-        try:
-            run_num = ws_ref.getRun().getLogData('run_number').value
-        except:
-            run_num = int(re.findall(r'\d+',str(ws))[0])
+        ws_ref=mtd[workspace]
 
         # The angle value
         # Note that the x position gets converted from mm to m when read from the user file so we need to reverse this if X is now an angle
-        if int(run_num) < 2217:
+        if not LARMOR.is_run_new_style_run(ws_ref):
             # Initial commisioning before run 2217 did not pay much attention to making sure the bench_rot value was meaningful
-            xshift = -xbeam
-            sanslog.notice("Setup move " + str(xshift*XSF) + " " + str(0.0) + " " + str(0.0))
-            MoveInstrumentComponent(ws, ComponentName=detBench.name(), X=xshift, Y=0.0, Z=0.0)
+            xshift = -x_beam
+            sanslog.notice("Setup move " + str(xshift*x_scale_factor) + " " + str(0.0) + " " + str(0.0))
+            MoveInstrumentComponent(workspace, ComponentName=component_name, X=xshift, Y=0.0, Z=0.0)
         else:
-            xshift = BENCH_ROT-xbeam*XSF
-            sanslog.notice("Setup move " + str(xshift*XSF) + " " + str(0.0) + " " + str(0.0))
-            RotateInstrumentComponent(ws, ComponentName=detBench.name(), X=0, Y=1, Z=0, Angle=xshift)
-            #logger.warning("Back from RotateInstrumentComponent")
-
-        # beam centre, translation
-        return [0.0, 0.0], [-xbeam, -ybeam]
+            # The x shift is in degree
+            # IMPORTANT NOTE: It seems that the definition of positive and negative angles is different
+            # between Mantid and the beam scientists. This explains the different signs for x_beam and
+            # bench_rotation.
+            xshift = bench_rotation -x_beam*x_scale_factor
+            sanslog.notice("Setup rotate " + str(xshift*x_scale_factor) + " " + str(0.0) + " " + str(0.0))
+            RotateInstrumentComponent(workspace, ComponentName=component_name, X=0, Y=1, Z=0, Angle=xshift)
+        return xshift
 
     def append_marked(self, detNames):
         self._marked_dets.append(detNames)
@@ -1455,11 +1664,8 @@ class LARMOR(ISISInstrument):
         ws_ref = mtd[str(ws_name)]
         # in order to avoid problems with files from initial commisioning during 2014.
         # these didn't have the required log entries for the detector position
-        try:
-            run_num = ws_ref.getRun().getLogData('run_number').value
-        except:
-            run_num = int(re.findall(r'\d+',str(ws_name))[0])
-        if int(run_num) >= 2217:
+
+        if LARMOR.is_run_new_style_run(ws_ref):
             try:
                 #logger.warning("Trying get_detector_log")
                 log = self.get_detector_log(ws_ref)
@@ -1477,6 +1683,24 @@ class LARMOR(ISISInstrument):
                 self.check_can_logs(log)
 
         ISISInstrument.on_load_sample(self, ws_name, beamcentre,  isSample)
+
+    @staticmethod
+    def is_run_new_style_run(workspace_ref):
+        '''
+        Checks if the run assiated with the workspace is pre or post 2217
+        Original comment:
+        In order to avoid problems with files from initial commisioning during 2014.
+        these didn't have the required log entries for the detector position
+        @param workspace_ref:: A handle to the workspace
+        '''
+        try:
+            run_num = workspace_ref.getRun().getLogData('run_number').value
+        except:
+            run_num = int(re.findall(r'\d+',str(ws_name))[-1])
+        if int(run_num) >= 2217:
+            return True
+        else:
+            return False
 
 if __name__ == '__main__':
     pass

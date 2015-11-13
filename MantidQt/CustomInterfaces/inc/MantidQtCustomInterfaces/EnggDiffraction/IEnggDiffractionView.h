@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <QStringList>
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h"
@@ -96,9 +97,9 @@ public:
   virtual std::vector<std::string> logMsgs() const = 0;
 
   /**
-   * Username entered by the user
+   * RB Number entered by the user
    *
-   * @return username to log in to the compute resource
+   * @return RB number as string as provided by the user
    */
   virtual std::string getRBNumber() const = 0;
 
@@ -150,14 +151,14 @@ public:
    *
    * @return Vanadium run number, as a string
    */
-  virtual std::string newVanadiumNo() const = 0;
+  virtual std::vector<std::string> newVanadiumNo() const = 0;
 
   /**
    * The Ceria (CeO2) run number to use for a new calibration
    *
    * @return Ceria run number, as a string
    */
-  virtual std::string newCeriaNo() const = 0;
+  virtual std::vector<std::string> newCeriaNo() const = 0;
 
   /**
    * The filename (can be full path) selected to write a calibration
@@ -191,6 +192,16 @@ public:
                                  const std::vector<double> &tzero) = 0;
 
   /**
+   * Enable/disable all the sections or tabs of the interface. To be
+   * used with required parameters, like a valid instrument, a valid
+   * RB number, etc. This should effectively disable/enable all
+   * actions, including calibration, focusing, event mode, etc.
+   *
+   * @param enable true to enable all tabs of the interface
+   */
+  virtual void enableTabs(bool enable) = 0;
+
+  /**
    * Enable/disable calibrate+focus actions. The idea is that actions
    * / buttons like 'calibrate', 'load calibration', or 'focus' can be
    * disabled while a calibration of a focusing is being calculated.
@@ -211,21 +222,21 @@ public:
    *
    * @return run number, as a string
    */
-  virtual std::string focusingRunNo() const = 0;
+  virtual std::vector<std::string> focusingRunNo() const = 0;
 
   /**
    * A (sample) run to focus, in "cropped" mode
    *
    * @return run number, as a string
    */
-  virtual std::string focusingCroppedRunNo() const = 0;
+  virtual std::vector<std::string> focusingCroppedRunNo() const = 0;
 
   /**
    * A (sample) run to focus, in "texture" mode
    *
    * @return run number, as a string
    */
-  virtual std::string focusingTextureRunNo() const = 0;
+  virtual std::vector<std::string> focusingTextureRunNo() const = 0;
 
   /**
    * Banks to consider when focusing
@@ -262,6 +273,39 @@ public:
    * Reset all focus inputs/options
    */
   virtual void resetFocus() = 0;
+
+  /// @name Pre-processing (of event data, rebinning)
+  //@{
+  /**
+   * One or more run numbers to pre-process.
+   *
+   * @return run number(s), as a string
+   */
+  virtual std::string currentPreprocRunNo() const = 0;
+
+  /**
+   * For when pre-processing from event to histo data using a regular
+   * time bin. Here time refers to time units for rebinning in
+   * time-of-flight.
+   *
+   * @return time bin to re-bin in microseconds
+   */
+  virtual double rebinningTimeBin() const = 0;
+
+  /**
+   * For when pre-processing from multiperiod event to histo data.
+   *
+   * @return number of periods to use
+   */
+  virtual size_t rebinningPulsesNumberPeriods() const = 0;
+
+  /**
+   * For when pre-processing from multiperiod event to histo data.
+   *
+   * @return the time parameter (bin width) when rebinning by pulses.
+   */
+  virtual double rebinningPulsesTime() const = 0;
+  //@}
 
   /**
    * Save settings (normally when closing the interface). This

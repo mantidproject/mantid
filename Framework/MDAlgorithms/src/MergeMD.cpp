@@ -37,7 +37,7 @@ const std::string MergeMD::name() const { return "MergeMD"; }
 int MergeMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string MergeMD::category() const { return "MDAlgorithms"; }
+const std::string MergeMD::category() const { return "MDAlgorithms\\Creation"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -133,7 +133,7 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
   for (size_t d = 0; d < numDims; d++) {
     IMDDimension_const_sptr dim0 = ws0->getDimension(d);
     MDHistoDimension *dim = new MDHistoDimension(
-        dim0->getName(), dim0->getDimensionId(), dim0->getUnits(), dimMin[d],
+        dim0->getName(), dim0->getDimensionId(), dim0->getMDFrame(), dimMin[d],
         dimMax[d], dim0->getNBins());
     out->addDimension(MDHistoDimension_sptr(dim));
   }

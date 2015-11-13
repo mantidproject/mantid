@@ -754,7 +754,7 @@ bool refineEGuess(const MantidVec &eBins, const MantidVec &signal,
 struct peakKeeper2 {
   double left_rng;
   double right_rng;
-  peakKeeper2(){};
+  peakKeeper2() : left_rng(.0), right_rng(.0){};
   peakKeeper2(double left, double right) : left_rng(left), right_rng(right) {}
 };
 }
@@ -984,6 +984,12 @@ GetAllEi::getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS,
   // validator.
   auto pTimeSeries =
       dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pIProperty);
+
+  if (!pTimeSeries) {
+    throw std::runtime_error(
+        "Could not retrieve a time series property for the property name " +
+        propertyName);
+  }
 
   if (splitter.size() == 0) {
     auto TimeStart = inputWS->run().startTime();

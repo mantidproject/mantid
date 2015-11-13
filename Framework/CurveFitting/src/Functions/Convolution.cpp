@@ -64,6 +64,23 @@ void Convolution::setAttribute(const std::string &attName,
   CompositeFunction::setAttribute(attName, att);
 }
 
+namespace {
+// anonymous namespace for local definitions
+
+// A struct incapsulating workspaces for real fft
+struct RealFFTWorkspace {
+  explicit RealFFTWorkspace(size_t nData)
+      : workspace(gsl_fft_real_workspace_alloc(nData)),
+        wavetable(gsl_fft_real_wavetable_alloc(nData)) {}
+  ~RealFFTWorkspace() {
+    gsl_fft_real_wavetable_free(wavetable);
+    gsl_fft_real_workspace_free(workspace);
+  }
+  gsl_fft_real_workspace *workspace;
+  gsl_fft_real_wavetable *wavetable;
+};
+}
+
 /**
  * Calculates convolution of the two member functions.
  * @param domain :: space on which the function acts
@@ -84,12 +101,10 @@ void Convolution::function(const FunctionDomain &domain,
 
   size_t nData = domain.size();
   const double *xValues = d1d->getPointerAt(0);
-  double *out = values.getPointerToCalculated(0);
 
   refreshResolution();
 
-  gsl_fft_real_workspace *workspace = gsl_fft_real_workspace_alloc(nData);
-  gsl_fft_real_wavetable *wavetable = gsl_fft_real_wavetable_alloc(nData);
+  RealFFTWorkspace workspace(nData);
 
   int n2 = static_cast<int>(nData) / 2;
   bool odd = n2 * 2 != static_cast<int>(nData);
@@ -97,7 +112,7 @@ void Convolution::function(const FunctionDomain &domain,
     m_resolution.resize(nData);
     // the resolution must be defined on interval -L < xr < L, L ==
     // (xValues[nData-1] - xValues[0]) / 2
-    double *xr = new double[nData];
+    std::vector<double> xr(nData);
     double dx =
         (xValues[nData - 1] - xValues[0]) / static_cast<double>((nData - 1));
     // make sure that xr[nData/2] == 0.0
@@ -115,10 +130,9 @@ void Convolution::function(const FunctionDomain &domain,
     IFunction1D_sptr fun =
         boost::dynamic_pointer_cast<IFunction1D>(getFunction(0));
     if (!fun) {
-      delete[] xr;
       throw std::runtime_error("Convolution can work only with IFunction1D");
     }
-    fun->function1D(m_resolution.data(), xr, nData);
+    fun->function1D(m_resolution.data(), xr.data(), nData);
 
     // rotate the data to produce the right transform
     if (odd) {
@@ -135,20 +149,21 @@ void Convolution::function(const FunctionDomain &domain,
         m_resolution[n2 + i] = tmp;
       }
     }
-    gsl_fft_real_transform(m_resolution.data(), 1, nData, wavetable, workspace);
+    gsl_fft_real_transform(m_resolution.data(), 1, nData, workspace.wavetable,
+                           workspace.workspace);
     std::transform(m_resolution.begin(), m_resolution.end(),
                    m_resolution.begin(),
                    std::bind2nd(std::multiplies<double>(), dx));
-    delete[] xr;
   }
 
-  // return the resolution transform for testing
+  // Now m_resolution contains fourier transform of the resolution
+
   if (nFunctions() == 1) {
+    // return the resolution transform for testing
     double dx = 1.; // nData > 1? xValues[1] - xValues[0]: 1.;
-    std::transform(m_resolution.begin(), m_resolution.end(), out,
+    std::transform(m_resolution.begin(), m_resolution.end(),
+                   values.getPointerToCalculated(0),
                    std::bind2nd(std::multiplies<double>(), dx));
-    gsl_fft_real_wavetable_free(wavetable);
-    gsl_fft_real_workspace_free(workspace);
     return;
   }
 
@@ -158,79 +173,105 @@ void Convolution::function(const FunctionDomain &domain,
   // check for delta functions
   std::vector<boost::shared_ptr<DeltaFunction>> dltFuns;
   double dltF = 0;
+  bool deltaFunctionsOnly = false;
+  bool deltaShifted = false;
   CompositeFunction_sptr cf =
       boost::dynamic_pointer_cast<CompositeFunction>(getFunction(1));
   if (cf) {
     for (size_t i = 0; i < cf->nFunctions(); ++i) {
-      boost::shared_ptr<DeltaFunction> df =
-          boost::dynamic_pointer_cast<DeltaFunction>(cf->getFunction(i));
+      auto df = boost::dynamic_pointer_cast<DeltaFunction>(cf->getFunction(i));
       if (df) {
         dltFuns.push_back(df);
-
+        if (df->getParameter("Centre") != 0.0) {
+          deltaShifted = true;
+        }
         dltF += df->getParameter("Height") * df->HeightPrefactor();
       }
     }
-    if (dltFuns.size() ==
-        cf->nFunctions()) { // all delta functions - return scaled reslution
-      resolution->function1D(out, xValues, nData);
-      std::transform(out, out + nData, out,
-                     std::bind2nd(std::multiplies<double>(), dltF));
-      gsl_fft_real_wavetable_free(wavetable);
-      gsl_fft_real_workspace_free(workspace);
-      return;
+    if (dltFuns.size() == cf->nFunctions()) {
+      // all delta functions - return scaled resolution
+      deltaFunctionsOnly = true;
     }
-  } else if (dynamic_cast<DeltaFunction *>(
-                 getFunction(1).get())) { // single delta function - return
-                                          // scaled reslution
-    auto df = boost::dynamic_pointer_cast<DeltaFunction>(getFunction(1));
-    resolution->function1D(out, xValues, nData);
-    std::transform(
-        out, out + nData, out,
-        std::bind2nd(std::multiplies<double>(),
-                     df->getParameter("Height") * df->HeightPrefactor()));
-    gsl_fft_real_wavetable_free(wavetable);
-    gsl_fft_real_workspace_free(workspace);
-    return;
+  } else if (auto df =
+                 boost::dynamic_pointer_cast<DeltaFunction>(getFunction(1))) {
+    // single delta function - return scaled resolution
+    deltaFunctionsOnly = true;
+    dltFuns.push_back(df);
+    if (df->getParameter("Centre") != 0.0) {
+      deltaShifted = true;
+    }
+    dltF = df->getParameter("Height") * df->HeightPrefactor();
   }
 
-  getFunction(1)->function(domain, values);
-  gsl_fft_real_transform(out, 1, nData, wavetable, workspace);
-  gsl_fft_real_wavetable_free(wavetable);
+  // out points to the calculated values in values
+  double *out = values.getPointerToCalculated(0);
 
-  double dx = nData > 1 ? xValues[1] - xValues[0] : 1.;
-  std::transform(out, out + nData, out,
-                 std::bind2nd(std::multiplies<double>(), dx));
+  if (!deltaFunctionsOnly) {
+    // Transform the model function
+    getFunction(1)->function(domain, values);
+    gsl_fft_real_transform(out, 1, nData, workspace.wavetable,
+                           workspace.workspace);
 
-  HalfComplex res(m_resolution.data(), nData);
-  HalfComplex fun(out, nData);
+    // Fourier transform is integration - multiply by the step in the
+    // integration variable
+    double dx = nData > 1 ? xValues[1] - xValues[0] : 1.;
+    std::transform(out, out + nData, out,
+                   std::bind2nd(std::multiplies<double>(), dx));
 
-  for (size_t i = 0; i <= res.size(); i++) {
-    // complex multiplication
-    double res_r = res.real(i);
-    double res_i = res.imag(i);
-    double fun_r = fun.real(i);
-    double fun_i = fun.imag(i);
-    fun.set(i, res_r * fun_r - res_i * fun_i, res_r * fun_i + res_i * fun_r);
+    // now out contains fourier transform of the model function
+
+    HalfComplex res(m_resolution.data(), nData);
+    HalfComplex fun(out, nData);
+
+    // Multiply transforms of the resolution and model functions
+    // Result is stored in fun
+    for (size_t i = 0; i <= res.size(); i++) {
+      // complex multiplication
+      double res_r = res.real(i);
+      double res_i = res.imag(i);
+      double fun_r = fun.real(i);
+      double fun_i = fun.imag(i);
+      fun.set(i, res_r * fun_r - res_i * fun_i, res_r * fun_i + res_i * fun_r);
+    }
+
+    // Inverse fourier transform of fun
+    gsl_fft_halfcomplex_wavetable *wavetable_r =
+        gsl_fft_halfcomplex_wavetable_alloc(nData);
+    gsl_fft_halfcomplex_inverse(out, 1, nData, wavetable_r,
+                                workspace.workspace);
+    gsl_fft_halfcomplex_wavetable_free(wavetable_r);
+
+    // Inverse fourier transform is integration - multiply by the step in the
+    // integration variable
+    dx = nData > 1 ? 1. / (xValues[1] - xValues[0]) : 1.;
+    std::transform(out, out + nData, out,
+                   std::bind2nd(std::multiplies<double>(), dx));
+  } else {
+    values.zeroCalculated();
   }
 
-  gsl_fft_halfcomplex_wavetable *wavetable_r =
-      gsl_fft_halfcomplex_wavetable_alloc(nData);
-  gsl_fft_halfcomplex_inverse(out, 1, nData, wavetable_r, workspace);
-  gsl_fft_halfcomplex_wavetable_free(wavetable_r);
-
-  gsl_fft_real_workspace_free(workspace);
-
-  dx = nData > 1 ? 1. / (xValues[1] - xValues[0]) : 1.;
-  std::transform(out, out + nData, out,
-                 std::bind2nd(std::multiplies<double>(), dx));
-
-  if (dltF != 0.) {
-    double *tmp = new double[nData];
-    resolution->function1D(tmp, xValues, nData);
-    std::transform(tmp, tmp + nData, tmp,
+  if (dltF != 0.0 && !deltaShifted) {
+    // If model contains any delta functions their effect is addition of scaled
+    // resolution
+    std::vector<double> tmp(nData);
+    resolution->function1D(tmp.data(), xValues, nData);
+    std::transform(tmp.begin(), tmp.end(), tmp.begin(),
                    std::bind2nd(std::multiplies<double>(), dltF));
-    std::transform(out, out + nData, tmp, out, std::plus<double>());
-    delete[] tmp;
+    std::transform(out, out + nData, tmp.data(), out, std::plus<double>());
+  } else if (!dltFuns.empty()) {
+    std::vector<double> x(nData);
+    for (auto it = dltFuns.begin(); it != dltFuns.end(); ++it) {
+      auto df = *it;
+      double shift = -df->getParameter("Centre");
+      dltF = df->getParameter("Height") * df->HeightPrefactor();
+      std::transform(xValues, xValues + nData, x.data(),
+                     std::bind2nd(std::plus<double>(), shift));
+      std::vector<double> tmp(nData);
+      resolution->function1D(tmp.data(), x.data(), nData);
+      std::transform(tmp.begin(), tmp.end(), tmp.begin(),
+                     std::bind2nd(std::multiplies<double>(), dltF));
+      std::transform(out, out + nData, tmp.data(), out, std::plus<double>());
+    }
   }
 }
 

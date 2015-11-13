@@ -14,7 +14,7 @@ class SelectPowderDiffPeaks(PythonAlgorithm):
     def category(self):
         """
         """
-        return "Diffraction;Utility"
+        return "Diffraction\\Fitting"
 
     def name(self):
         """

@@ -358,6 +358,8 @@ void CreateGroupingWorkspace::exec() {
     MatrixWorkspace_sptr tempWS(new Workspace2D());
     childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
     childAlg->setPropertyValue("Filename", InstrumentFilename);
+    childAlg->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(true));
     childAlg->setPropertyValue("InstrumentName", InstrumentName);
     childAlg->executeAsChildAlg();
     inst = tempWS->getInstrument();

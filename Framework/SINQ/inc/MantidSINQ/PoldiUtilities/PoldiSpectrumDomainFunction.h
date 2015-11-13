@@ -233,8 +233,8 @@ protected:
   */
 
 class MANTID_SINQ_DLL PoldiSpectrumDomainFunction
-    : virtual public API::FunctionParameterDecorator,
-      virtual public API::IFunction1DSpectrum,
+    : public API::FunctionParameterDecorator,
+      public API::IFunction1DSpectrum,
       public IPoldiFunction1D {
 public:
   PoldiSpectrumDomainFunction();

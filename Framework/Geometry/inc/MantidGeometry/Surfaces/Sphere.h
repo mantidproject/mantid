@@ -6,6 +6,8 @@
 #include "MantidKernel/V3D.h"
 #include <string>
 
+class TopoDS_Shape;
+
 namespace Mantid {
 
 namespace Geometry {
@@ -47,13 +49,15 @@ private:
   void displace(const Kernel::V3D &);
   /// Compute the distance from the centre of the sphere to the given point
   double centreToPoint(const Kernel::V3D &pt) const;
+  Sphere *doClone() const;
+
+protected:
+  Sphere(const Sphere &);
+  Sphere &operator=(const Sphere &);
 
 public:
   Sphere();
-  Sphere(const Sphere &);
-  Sphere *clone() const;
-  Sphere &operator=(const Sphere &);
-  ~Sphere();
+  std::unique_ptr<Sphere> clone() const;
   /// Effective typename
   virtual std::string className() const { return "Sphere"; }
   // Visit acceptor
@@ -89,6 +93,9 @@ public:
   static int g_nslices;
   /// The number of stacks to approximate a sphere
   static int g_nstacks;
+#ifdef ENABLE_OPENCASCADE
+  virtual TopoDS_Shape createShape();
+#endif
 };
 
 } // NAMESPACE Geometry

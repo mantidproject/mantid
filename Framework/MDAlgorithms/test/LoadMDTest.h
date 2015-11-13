@@ -11,6 +11,9 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidMDAlgorithms/LoadMD.h"
 
 #include <cxxtest/TestSuite.h>
@@ -565,8 +568,10 @@ public:
   void test_histo1D() {
     Mantid::coord_t min(-10.0);
     Mantid::coord_t max(10.0);
+    Mantid::Geometry::GeneralFrame frame(
+        Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
     std::vector<Geometry::IMDDimension_sptr> dims(
-        1, boost::make_shared<Geometry::MDHistoDimension>("X", "x", "m", min,
+        1, boost::make_shared<Geometry::MDHistoDimension>("X", "x", frame, min,
                                                           max, 5));
     MDHistoWorkspace_sptr ws =
         boost::make_shared<MDHistoWorkspace>(dims, API::VolumeNormalization);
@@ -591,9 +596,11 @@ public:
 
   /// More of an integration test as it uses both load and save.
   void test_save_and_load_special_coordinates_MDEventWorkspace() {
+    Mantid::Geometry::QSample frame;
     MDEventWorkspace1Lean::sptr mdeventWS =
-        MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 2);
-    const SpecialCoordinateSystem appliedCoordinateSystem = QSample;
+        MDEventsTestHelper::makeMDEWWithFrames<1>(10, 0.0, 10.0, frame, 2);
+    const Mantid::Kernel::SpecialCoordinateSystem appliedCoordinateSystem =
+        Mantid::Kernel::SpecialCoordinateSystem::QSample;
     mdeventWS->setCoordinateSystem(appliedCoordinateSystem);
 
     auto loadedWS = testSaveAndLoadWorkspace(mdeventWS, "MDEventWorkspace");
@@ -605,9 +612,11 @@ public:
 
   // backwards-compatability check for coordinate in log
   void test_load_coordinate_system_MDEventWorkspace_from_experiment_info() {
+    Mantid::Geometry::QSample frame;
     MDEventWorkspace1Lean::sptr mdeventWS =
-        MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 2);
-    const SpecialCoordinateSystem appliedCoordinateSystem = QSample;
+        MDEventsTestHelper::makeMDEWWithFrames<1>(10, 0.0, 10.0, frame, 2);
+    const Mantid::Kernel::SpecialCoordinateSystem appliedCoordinateSystem =
+        Mantid::Kernel::SpecialCoordinateSystem::QSample;
     mdeventWS->setCoordinateSystem(appliedCoordinateSystem);
 
     // Create a log in the first experiment info to simulated an old version of
@@ -626,9 +635,11 @@ public:
   }
 
   void test_save_and_load_special_coordinates_MDHistoWorkspace() {
-    auto mdhistoWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        2.5, 2, 10, 10.0, 3.5, "", 4.5);
-    const SpecialCoordinateSystem appliedCoordinateSystem = QSample;
+    Mantid::Geometry::QSample frame;
+    auto mdhistoWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceWithMDFrame(
+        2.5, 2, frame, 10, 10.0, 3.5, "", 4.5);
+    const Mantid::Kernel::SpecialCoordinateSystem appliedCoordinateSystem =
+        Mantid::Kernel::SpecialCoordinateSystem::QSample;
     mdhistoWS->setCoordinateSystem(appliedCoordinateSystem);
 
     auto loadedWS = testSaveAndLoadWorkspace(mdhistoWS, "MDHistoWorkspace");
@@ -640,9 +651,11 @@ public:
 
   // backwards-compatability check for coordinate in log
   void test_load_coordinate_system_MDHistoWorkspace_from_experiment_info() {
-    auto mdhistoWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        2.5, 2, 10, 10.0, 3.5, "", 4.5);
-    const SpecialCoordinateSystem appliedCoordinateSystem = QSample;
+    Mantid::Geometry::QSample frame;
+    auto mdhistoWS = MDEventsTestHelper::makeFakeMDHistoWorkspaceWithMDFrame(
+        2.5, 2, frame, 10, 10.0, 3.5, "", 4.5);
+    const Mantid::Kernel::SpecialCoordinateSystem appliedCoordinateSystem =
+        Mantid::Kernel::SpecialCoordinateSystem::QSample;
     mdhistoWS->setCoordinateSystem(appliedCoordinateSystem);
 
     // Create a log in the first experiment info to simulated an old version of
@@ -811,6 +824,149 @@ public:
     AnalysisDataService::Instance().remove(
         "SaveMDEventNormalizationFlagTest_ws");
     AnalysisDataService::Instance().remove("reloaded_MDEventNormalization");
+  }
+
+  void test_loading_legacy_QSample_file_with_MDEvent_is_being_corrected() {
+    // Arrange
+    std::string filename("MDEvent_wo_MDFrames_w_QSample_flag.nxs");
+    std::string outWSName("LoadMD_legacy_test_file");
+
+    // Act
+    LoadMD alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileBackEnd", false));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MetadataOnly", false));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service.
+    IMDEventWorkspace_sptr iws;
+    TS_ASSERT_THROWS_NOTHING(
+        iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
+            outWSName));
+    TS_ASSERT(iws);
+
+    if (!iws) {
+      return;
+    }
+
+    // Assert
+    // We expect the first three dimensions to be QSample and the fourth to be a
+    // GeneralFrame
+    for (int index = 0; index < 3; ++index) {
+      TSM_ASSERT_EQUALS(
+          "The first three dimension should contain a QSample Frame",
+          iws->getDimension(index)->getMDFrame().name(),
+          Mantid::Geometry::QSample::QSampleName);
+    }
+
+    TSM_ASSERT_EQUALS("The fourth dimension should contain a General Frame",
+                      iws->getDimension(3)->getMDFrame().name(),
+                      Mantid::Geometry::GeneralFrame::GeneralFrameName);
+    // Clean up
+    if (iws) {
+      AnalysisDataService::Instance().remove(outWSName);
+    }
+  }
+
+  void test_loading_legacy_HKL_file_with_MDHisto_is_being_corrected() {
+    // Arrange
+    std::string filename("MDHisto_wo_MDFrames_w_HKL_flag.nxs");
+    std::string outWSName("LoadMD_legacy_test_file");
+
+    // Act
+    LoadMD alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileBackEnd", false));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MetadataOnly", false));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service.
+    IMDHistoWorkspace_sptr iws;
+    TS_ASSERT_THROWS_NOTHING(
+        iws = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
+            outWSName));
+    TS_ASSERT(iws);
+
+    if (!iws) {
+      return;
+    }
+
+    // Assert
+    // We expect the first three dimensions to be QSample and the fourth to be a
+    // GeneralFrame
+    for (int index = 0; index < 3; ++index) {
+      TSM_ASSERT_EQUALS("The first three dimension should contain an HKL Frame",
+                        iws->getDimension(index)->getMDFrame().name(),
+                        Mantid::Geometry::HKL::HKLName);
+    }
+
+    TSM_ASSERT_EQUALS("The fourth dimension should contain a General Frame",
+                      iws->getDimension(3)->getMDFrame().name(),
+                      Mantid::Geometry::GeneralFrame::GeneralFrameName);
+    // Clean up
+    if (iws) {
+      AnalysisDataService::Instance().remove(outWSName);
+    }
+  }
+
+  void
+  test_loading_legacy_HKL_file_with_MDHisto_with_incorrect_HKLUnits_doesnt_make_changes() {
+    // Arrange
+    std::string filename(
+        "MDHisto_wo_MDFrames_w_HKL_flag_w_invalid_HKLUnits.nxs");
+    std::string outWSName("LoadMD_legacy_test_file");
+
+    // Act
+    LoadMD alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileBackEnd", false));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MetadataOnly", false));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service.
+    IMDHistoWorkspace_sptr iws;
+    TS_ASSERT_THROWS_NOTHING(
+        iws = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
+            outWSName));
+    TS_ASSERT(iws);
+
+    if (!iws) {
+      return;
+    }
+
+    // Assert
+    // We expect the first three dimensions to be QSample and the fourth to be a
+    // GeneralFrame
+    for (int index = 0; index < 3; ++index) {
+      TSM_ASSERT_EQUALS(
+          "The first three dimension should contain an Unkown frame",
+          iws->getDimension(index)->getMDFrame().name(),
+          Mantid::Geometry::UnknownFrame::UnknownFrameName);
+    }
+
+    TSM_ASSERT_EQUALS("The fourth dimension should contain an Unkown frame",
+                      iws->getDimension(3)->getMDFrame().name(),
+                      Mantid::Geometry::UnknownFrame::UnknownFrameName);
+    // Clean up
+    if (iws) {
+      AnalysisDataService::Instance().remove(outWSName);
+    }
   }
 };
 

@@ -57,7 +57,7 @@ int GenerateGroupingPowder::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string GenerateGroupingPowder::category() const {
-  return "DataHandling";
+  return "DataHandling\\Grouping;Transforms\\Grouping;Diffraction\\Utility";
 }
 
 //----------------------------------------------------------------------------------------------

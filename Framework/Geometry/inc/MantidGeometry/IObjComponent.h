@@ -107,7 +107,7 @@ public:
 protected:
   /// Protected copy constructor
   IObjComponent(const IObjComponent &);
-  /// Assignment operato
+  /// Assignment operator
   IObjComponent &operator=(const IObjComponent &);
 
   /// Reset the current geometry handler

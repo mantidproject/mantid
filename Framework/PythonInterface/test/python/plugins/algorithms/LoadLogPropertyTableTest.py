@@ -103,6 +103,27 @@ class LoadLogPropertyTableTest(unittest.TestCase):
 
         return
 
+    def test_LoadValidSNSFiles(self):
+        outputWorskapceName = "LoadLogPropertyTableTest_Test5"
+
+        alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = "BSS_11841_event.nxs",
+                LastFile = "BSS_11841_event.nxs", LogNames="duration", OutputWorkspace = outputWorskapceName)
+
+        self.assertTrue(alg_test.isExecuted())
+
+        #Verify some values
+        tablews = AnalysisDataService.retrieve(outputWorskapceName)
+        self.assertEqual(1, tablews.rowCount())
+        self.assertEqual(2, tablews.columnCount())
+
+        self.assertEqual(14, tablews.cell(0,1))
+        self.assertEqual(11841, tablews.cell(0,0))
+
+        run_algorithm("DeleteWorkspace", Workspace = outputWorskapceName)
+
+        return
+
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -18,7 +18,7 @@ class ResNorm(PythonAlgorithm):
 
 
     def category(self):
-        return "Workflow\\MIDAS;PythonAlgorithms"
+        return "Workflow\\MIDAS"
 
 
     def summary(self):
@@ -55,8 +55,8 @@ class ResNorm(PythonAlgorithm):
                                                     direction=Direction.Output),
                              doc='Fitted parameter output')
 
-        self.declareProperty(ITableWorkspaceProperty('OutputWorkspaceTable', '', 
-                                                     optional=PropertyMode.Optional, 
+        self.declareProperty(ITableWorkspaceProperty('OutputWorkspaceTable', '',
+                                                     optional=PropertyMode.Optional,
                                                      direction=Direction.Output),
                              doc='Table workspace of fit parameters')
 

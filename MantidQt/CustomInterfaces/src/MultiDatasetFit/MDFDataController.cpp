@@ -4,6 +4,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <QTableWidget>
 #include <QMessageBox>
@@ -44,14 +45,42 @@ void DataController::addWorkspace()
     if ( wsName.isEmpty() ) return;
     if ( Mantid::API::AnalysisDataService::Instance().doesExist( wsName.toStdString()) )
     {
-      auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>( wsName.toStdString() );
       auto indices = dialog.workspaceIndices();
-      for(auto i = indices.begin(); i != indices.end(); ++i)
+      std::vector<Mantid::API::MatrixWorkspace_sptr> matrixWorkspaces;
+      auto mws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>( wsName.toStdString() );
+      if ( mws )
       {
-        addWorkspaceSpectrum( wsName, *i, *ws );
+        matrixWorkspaces.push_back(mws);
       }
-      emit spectraAdded(static_cast<int>(indices.size()));
-      emit dataTableUpdated();
+      else
+      {
+        auto grp = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>( wsName.toStdString() );
+        if ( grp )
+        {
+          for(size_t i = 0; i < static_cast<size_t>(grp->getNumberOfEntries()); ++i)
+          {
+            mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(grp->getItem(i));
+            if ( mws )
+            {
+              matrixWorkspaces.push_back(mws);
+            }
+          }
+        }
+      }
+
+      if ( !matrixWorkspaces.empty() )
+      {
+        for(auto iws = matrixWorkspaces.begin(); iws != matrixWorkspaces.end(); ++iws)
+        {
+          auto name = QString::fromStdString((**iws).name());
+          for(auto i = indices.begin(); i != indices.end(); ++i)
+          {
+            addWorkspaceSpectrum( name, *i, **iws );
+          }
+        }
+        emit spectraAdded(static_cast<int>(indices.size() * matrixWorkspaces.size()));
+        emit dataTableUpdated();
+      }
     }
     else
     {
@@ -141,7 +170,7 @@ void DataController::checkSpectra()
   auto& ADS = Mantid::API::AnalysisDataService::Instance();
   for( int row = 0; row < nrows; ++row)
   {
-    auto wsName = getWorkspaceName( row );
+    auto wsName = getWorkspaceName( row ).toStdString();
     auto i = getWorkspaceIndex( row );
     if ( !ADS.doesExist( wsName ) )
     {
@@ -161,9 +190,9 @@ void DataController::checkSpectra()
 
 /// Get the workspace name of the i-th spectrum.
 /// @param i :: Index of a spectrum in the data table.
-std::string DataController::getWorkspaceName(int i) const
+QString DataController::getWorkspaceName(int i) const
 {
-  return m_dataTable->item(i, wsColumn)->text().toStdString();
+  return m_dataTable->item(i, wsColumn)->text();
 }
 
 /// Get the workspace index of the i-th spectrum.

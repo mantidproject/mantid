@@ -40,7 +40,9 @@ set ( SRC_FILES
 	src/ClearInstrumentParameters.cpp
 	src/ClearMaskFlag.cpp
 	src/CloneWorkspace.cpp
+	src/Comment.cpp
 	src/CommutativeBinaryOperation.cpp
+	src/CompareWorkspaces.cpp
 	src/ConjoinWorkspaces.cpp
 	src/ConvertAxesToRealSpace.cpp
 	src/ConvertAxisByFormula.cpp
@@ -126,12 +128,12 @@ set ( SRC_FILES
 	src/FlatPlateAbsorption.cpp
 	src/GeneralisedSecondDifference.cpp
 	src/GenerateEventsFilter.cpp
+	src/GenerateIPythonNotebook.cpp
 	src/GeneratePeaks.cpp
 	src/GeneratePythonScript.cpp
 	src/GetAllEi.cpp
 	src/GetDetOffsetsMultiPeaks.cpp
 	src/GetDetectorOffsets.cpp
-	src/GetAllEi.cpp
 	src/GetEi.cpp
 	src/GetEi2.cpp
 	src/GetTimeSeriesLogInformation.cpp
@@ -222,7 +224,6 @@ set ( SRC_FILES
 	src/SampleCorrections/MayersSampleCorrection.cpp
 	src/SampleCorrections/MayersSampleCorrectionStrategy.cpp
 	src/SassenaFFT.cpp
-	src/SaveGSASInstrumentFile.cpp
 	src/Scale.cpp
 	src/ScaleX.cpp
 	src/Segfault.cpp
@@ -272,7 +273,7 @@ set ( SRC_FILES
 	src/WienerSmooth.cpp
 	src/WorkspaceJoiners.cpp
 	src/XDataConverter.cpp
-    src/GenerateIPythonNotebook.cpp)
+)
 
 set ( INC_FILES
 	#	inc/MantidAlgorithms/Q1DTOF.h
@@ -316,7 +317,9 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ClearInstrumentParameters.h
 	inc/MantidAlgorithms/ClearMaskFlag.h
 	inc/MantidAlgorithms/CloneWorkspace.h
+	inc/MantidAlgorithms/Comment.h
 	inc/MantidAlgorithms/CommutativeBinaryOperation.h
+	inc/MantidAlgorithms/CompareWorkspaces.h
 	inc/MantidAlgorithms/ConjoinWorkspaces.h
 	inc/MantidAlgorithms/ConvertAxesToRealSpace.h
 	inc/MantidAlgorithms/ConvertAxisByFormula.h
@@ -401,11 +404,12 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FixGSASInstrumentFile.h
 	inc/MantidAlgorithms/FlatPlateAbsorption.h
 	inc/MantidAlgorithms/GSLFunctions.h
-	inc/MantidAlgorithms/GetAllEi.h
 	inc/MantidAlgorithms/GeneralisedSecondDifference.h
 	inc/MantidAlgorithms/GenerateEventsFilter.h
+	inc/MantidAlgorithms/GenerateIPythonNotebook.h
 	inc/MantidAlgorithms/GeneratePeaks.h
 	inc/MantidAlgorithms/GeneratePythonScript.h
+	inc/MantidAlgorithms/GetAllEi.h
 	inc/MantidAlgorithms/GetDetOffsetsMultiPeaks.h
 	inc/MantidAlgorithms/GetDetectorOffsets.h
 	inc/MantidAlgorithms/GetEi.h
@@ -498,7 +502,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h
 	inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h
 	inc/MantidAlgorithms/SassenaFFT.h
-	inc/MantidAlgorithms/SaveGSASInstrumentFile.h
 	inc/MantidAlgorithms/Scale.h
 	inc/MantidAlgorithms/ScaleX.h
 	inc/MantidAlgorithms/Segfault.h
@@ -549,7 +552,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/WienerSmooth.h
 	inc/MantidAlgorithms/WorkspaceJoiners.h
 	inc/MantidAlgorithms/XDataConverter.h
-    inc/MantidAlgorithms/GenerateIPythonNotebook.h)
+)
 
 set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp
     src/FFTSmooth.cpp
@@ -603,7 +606,9 @@ set ( TEST_FILES
 	ClearInstrumentParametersTest.h
 	ClearMaskFlagTest.h
 	CloneWorkspaceTest.h
+	CommentTest.h
 	CommutativeBinaryOperationTest.h
+	CompareWorkspacesTest.h
 	ConjoinWorkspacesTest.h
 	ConvertAxesToRealSpaceTest.h
 	ConvertAxisByFormulaTest.h
@@ -769,7 +774,6 @@ set ( TEST_FILES
 	RingProfileTest.h
 	SANSCollimationLengthEstimatorTest.h
 	SassenaFFTTest.h
-	SaveGSASInstrumentFileTest.h
 	ScaleTest.h
 	ScaleXTest.h
 	SetInstrumentParameterTest.h

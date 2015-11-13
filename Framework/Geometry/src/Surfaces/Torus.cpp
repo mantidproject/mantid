@@ -18,6 +18,29 @@
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Surfaces/Torus.h"
 
+#ifdef ENABLE_OPENCASCADE
+// Opencascade defines _USE_MATH_DEFINES without checking whether it is already
+// used.
+// Undefine it here before we include the headers to avoid a warning
+#ifdef _MSC_VER
+#undef _USE_MATH_DEFINES
+#ifdef M_SQRT1_2
+#undef M_SQRT1_2
+#endif
+#endif
+
+#include "MantidKernel/WarningSuppressions.h"
+GCC_DIAG_OFF(conversion)
+// clang-format off
+GCC_DIAG_OFF(cast-qual)
+// clang-format on
+#include <TopoDS_Shape.hxx>
+GCC_DIAG_ON(conversion)
+// clang-format off
+GCC_DIAG_ON(cast-qual)
+// clang-format on
+#endif
+
 namespace Mantid {
 
 namespace Geometry {
@@ -44,13 +67,22 @@ Torus::Torus(const Torus &A)
 */
 {}
 
-Torus *Torus::clone() const
+Torus *Torus::doClone() const
 /**
   Makes a clone (implicit virtual copy constructor)
   @return new(*this)
 */
 {
   return new Torus(*this);
+}
+
+std::unique_ptr<Torus> Torus::clone() const
+/**
+ Makes a clone (implicit virtual copy constructor)
+ @return new(*this)
+ */
+{
+  return std::unique_ptr<Torus>(doClone());
 }
 
 Torus &Torus::operator=(const Torus &A)
@@ -70,12 +102,6 @@ Torus &Torus::operator=(const Torus &A)
   }
   return *this;
 }
-
-Torus::~Torus()
-/**
-  Destructor
-*/
-{}
 
 int Torus::operator==(const Torus &A) const
 /**
@@ -148,8 +174,8 @@ int Torus::setSurface(const std::string &Pstr)
     return errDesc;
 
   // Torus on X/Y/Z axis
-  const int ptype = static_cast<int>(tolower(item[2]) - 'x');
-  if (ptype < 0 || ptype >= 3)
+  const std::size_t ptype = static_cast<std::size_t>(tolower(item[2]) - 'x');
+  if (ptype >= 3)
     return errAxis;
 
   Kernel::V3D Norm;
@@ -332,6 +358,13 @@ void Torus::setDistanceFromCentreToTube(double dist) { Iradius = dist; }
  *  @param dist :: The radius
  */
 void Torus::setTubeRadius(double dist) { Dradius = dist; }
+
+#ifdef ENABLE_OPENCASCADE
+TopoDS_Shape Torus::createShape() {
+  // NOTE:: Not yet implemented
+  return TopoDS_Shape();
+}
+#endif
 
 } // NAMESPACE MonteCarlo
 

@@ -3,6 +3,10 @@
 namespace Mantid {
 namespace Geometry {
 
+const std::string GeneralFrame::GeneralFrameDistance = "Distance";
+const std::string GeneralFrame::GeneralFrameTOF = "Time of Flight";
+const std::string GeneralFrame::GeneralFrameName = "General Frame";
+
 GeneralFrame::GeneralFrame(const std::string &frameName,
                            std::unique_ptr<Kernel::MDUnit> unit)
     : m_unit(unit.release()), m_frameName(frameName) {}
@@ -31,6 +35,24 @@ std::string GeneralFrame::name() const { return m_frameName; }
 GeneralFrame *GeneralFrame::clone() const {
   return new GeneralFrame(m_frameName,
                           std::unique_ptr<Kernel::MDUnit>(m_unit->clone()));
+}
+
+Mantid::Kernel::SpecialCoordinateSystem
+GeneralFrame::equivalientSpecialCoordinateSystem() const {
+  return Mantid::Kernel::SpecialCoordinateSystem::None;
+}
+
+bool GeneralFrame::isQ() const { return false; }
+
+bool GeneralFrame::isSameType(const MDFrame &frame) const {
+  auto isSameType = true;
+  try {
+    const auto &tmp = dynamic_cast<const GeneralFrame &>(frame);
+    UNUSED_ARG(tmp);
+  } catch (std::bad_cast &) {
+    isSameType = false;
+  }
+  return isSameType;
 }
 
 } // namespace Geometry

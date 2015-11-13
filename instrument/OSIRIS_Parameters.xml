@@ -30,6 +30,9 @@
 <parameter name="save-ascii-choice" type="string">
     <value val="false" />
 </parameter>
+<parameter name="fold-frames-choice" type="string">
+    <value val="false" />
+</parameter>
 
 <!-- Reduction workflow parameters under this line -->
 <!-- This is actually spectrum index, NOT spectrum number -->

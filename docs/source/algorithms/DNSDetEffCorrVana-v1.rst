@@ -14,37 +14,21 @@ Description
    This algorithm is being developed for a specific instrument. It might get changed or even 
    removed without a notification, should instrument scientists decide to do so.
 
-This algorithm applies detector efficiency correction to a given data :ref:`Workspace2D <Workspace2D>`. As a result, two workspaces will be created: 
-
--  output workspace with corrected data. Sample logs will be copied from the data workspace. 
--  if **InputWorkspace** has the normalization workspace (which contains monitor counts or experiment duration by user's choice), the copy of it will be created with name **OutputWorkspace_NORM**. 
+This algorithm applies detector efficiency correction to a given data :ref:`Workspace2D <Workspace2D>`. As a result, output workspace with corrected data will be created. Sample logs will be copied from the data workspace. 
 
 Detector efficiency correction is performed using the measurements of vanadium standard sample (hereafter Vanadium). Background for Vanadium must be also measured and provided to the algorithm as an input **BkgWorkspace**. Vanadium and its background can be measured at several detector bank positions.  This algorithm does the detector efficiency for a particular run in following steps:
 
-1. Normalize Vanadium workspace to a chosen normalization:
-
-   :math:`(V_i)_{Norm} = \frac{(V_i)_{Raw}}{(C_i)_V}`
-
-   where :math:`(V_i)_{Raw}` is the signal from the :math:`i` th detector in the Vanadium workspace and :math:`(C_i)_V` is the number in the corresponding bin of the normalization workspace. The :ref:`algm-Divide` algorithm is used for this step.
-
-2. Normalize Background workspace to a chosen normalization:
-
-   :math:`(B_i)_{Norm} = \frac{(B_i)_{Raw}}{(C_i)_B}`
-   
-   where :math:`(B_i)_{Raw}` is the signal from the :math:`i` th detector in the Background workspace and :math:`(C_i)_B` is the number in the corresponding bin of the normalization workspace. The :ref:`algm-Divide` algorithm is used for this step.
-
 .. warning::
 
-    Normalization workspaces are created by the :ref:`algm-LoadDNSLegacy` algorithm. 
-    It is responsibility of the user to take care about the same type of normalization (monitor counts or run duration) for Vanadium and Background.
+    Algorithm requires data normalized either to monitor counts or experiment duration. The normalization must be the same for all input workspaces.
 
-3. Subtract Background from Vanadium:
+1. Subtract Background from Vanadium:
 
-   :math:`V_i = (V_i)_{Norm} - (B_i)_{Norm}`
+   :math:`V_i = (V_i)_{raw} - B_i`
 
    The :ref:`algm-Minus` algorithm is used for this step. In the case of negative result, the error message will be produced and the algorithm terminates.
 
-4. Calculate the correction coefficients:
+2. Calculate the correction coefficients:
 
    :math:`k_i = \frac{<V>}{V_i}`
 
@@ -54,7 +38,7 @@ Detector efficiency correction is performed using the measurements of vanadium s
     
     If no **VanadiumMean** workspace is given as an input, the :math:`<V>` will be calculated as :math:`<V> = \frac{1}{n}\sum V_i`. However, in the case if correction is applied to a group of runs, :math:`<V>` must be calculated as for the whole group, saved to **VanadiumMean** workspace and provided to this algorithm as an input.
 
-5. Apply correction to the data:
+3. Apply correction to the data:
 
    :math:`(I_i)_{corr} = k_i\times I_i`
 
@@ -69,7 +53,7 @@ The input workspaces (**InputWorkspace**, **VanaWorkspace**, **BkgWorkspace**) h
 -  The same number of dimensions
 -  The same number of spectra
 -  The same number of bins
--  **VanaWorkspace** and **BkgWorkspace** must have the corresponding normalization workspaces
+-  The same kind of normalization in the *normalized* sample log.
 
 For the physically meaningful correction it is also important that these workspaces have the same slits size, polarisation, detector bank rotation angle, flipper status and the neutron wavelength. If some of these parameters are different, algorithm produces warning. If these properties are not specified in the workspace sample logs, no comparison is performed.
 
@@ -87,11 +71,12 @@ Usage
    datafile = 'oi196012pbi.d_dat'
    vanafile = 'dn134011vana.d_dat'
    bkgrfile = 'dn134031leer.d_dat'
+   coilcurrents = 'currents.txt'
 
    # Load datasets, loader will create an additional normalization workspace
-   data_ws = LoadDNSLegacy(datafile, Polarisation='x', Normalization='monitor')
-   vana_ws = LoadDNSLegacy(vanafile, Polarisation='x', Normalization='monitor')
-   bkgr_ws = LoadDNSLegacy(bkgrfile, Polarisation='x', Normalization='monitor')
+   data_ws = LoadDNSLegacy(datafile, CoilCurrentsTable=coilcurrents, Normalization='duration')
+   vana_ws = LoadDNSLegacy(vanafile, CoilCurrentsTable=coilcurrents, Normalization='duration')
+   bkgr_ws = LoadDNSLegacy(bkgrfile, CoilCurrentsTable=coilcurrents, Normalization='duration')
 
    corrected = DNSDetEffCorrVana(data_ws, vana_ws, bkgr_ws)
 
@@ -100,11 +85,11 @@ Usage
 
 Output:
 
-   99180.91
+   457.89
 
-   77190.96
-   
-   77265.61
+   268.78
+
+   262.63
 
 .. categories::
 

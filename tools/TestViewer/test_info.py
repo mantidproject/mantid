@@ -1,3 +1,4 @@
+#pylint: disable=too-many-lines,invalid-name
 # -*- coding: utf-8 -*-
 """ Classes describing test projects,
 how they are run,
@@ -77,7 +78,7 @@ class TestResult:
     def __eq__(self, other):
         """ Equality comparison """
         if isinstance(other, TestResult):
-            return ((self.value == other.value) and (self.old == other.old))
+            return (self.value == other.value) and (self.old == other.old)
         else:
             return self.value == other
 
@@ -372,7 +373,7 @@ class TestSuite(object):
             self.contents_changed = True
         else:
             for i in xrange(len(self.tests)):
-                if (self.tests[i].name != other.tests[i].name):
+                if self.tests[i].name != other.tests[i].name:
                     self.contents_changed = True
                 self.tests[i].replace_contents( other.tests[i] )
         # Copy local values
@@ -402,7 +403,7 @@ class TestSuite(object):
         oldtime = self.source_file_mtime
         if os.path.exists(self.source_file):
             self.source_file_mtime = os.path.getmtime(self.source_file)
-        return (self.source_file_mtime != oldtime)
+        return self.source_file_mtime != oldtime
 
     def get_selected(self):
         return self.selected
@@ -587,7 +588,7 @@ class TestSuite(object):
             return
         elif len(suites) > 1:
             for xmlSuite in suites:
-                if (suites[0].getAttribute("name") == self.name):
+                if suites[0].getAttribute("name") == self.name:
                     break
         else:
             xmlSuite = suites[0]
@@ -596,7 +597,7 @@ class TestSuite(object):
         xmlCases = xmlSuite.getElementsByTagName("testcase")
         for case in xmlCases:
             classname = case.getAttribute("classname")
-            if (classname == self.classname):
+            if classname == self.classname:
                 # This is the single test name
                 test_name = case.getAttribute("name")
                 test = self.find_test(test_name)
@@ -752,7 +753,7 @@ class TestProject(object):
         # This will run while calling the stdout callback.
         (status, output) = run_command_with_callback(full_command, callback_func)
 
-        if (status != 0):
+        if status != 0:
             msg = "-------- BUILD FAILED! ---------"
             if not callback_func is None: callback_func("%s" % msg)
             self.build_succeeded = False
@@ -1055,7 +1056,7 @@ class MultipleProjects(object):
             word = val[1:]
             for pj in self.projects:
                 for suite in pj.suites:
-                    suite.selected = not (word in suite.name)
+                    suite.selected = not word in suite.name
                     if suite.selected: num += 1
         else:
             word = val
@@ -1486,14 +1487,14 @@ def test_results_compiling():
 
 def test_age():
     a = TestSingle("my_test_test", None)
-    assert (a.state == TestResult.NOT_RUN)
+    assert a.state == TestResult.NOT_RUN
     a.age()
-    assert (a.state == TestResult.NOT_RUN)
-    assert (a.state.old)
+    assert a.state == TestResult.NOT_RUN
+    assert a.state.old
     a = TestSingle("my_test_test", None)
     a.state = TestResult(TestResult.ALL_PASSED)
     a.age()
-    assert (a.state.old)
+    assert a.state.old
 
 test_results_compiling()
 test_age()

@@ -1,5 +1,4 @@
-import os,sys,inspect
-#os.environ["PATH"] =r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+﻿import os,sys,inspect
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -86,7 +85,7 @@ class RunDescriptorTest(unittest.TestCase):
         propman  = self.prop_man
         propman.sample_run = 11001
 
-        ok,file=PropertyManager.sample_run.find_file()
+        ok,file=PropertyManager.sample_run.find_file(propman)
         self.assertTrue(ok)
         self.assertTrue(len(file)>0)
 
@@ -115,10 +114,10 @@ class RunDescriptorTest(unittest.TestCase):
         propman.sample_run = 101111
         PropertyManager.sample_run.set_file_ext('nxs')
 
-        ok,file=PropertyManager.sample_run.find_file()
+        ok,file=PropertyManager.sample_run.find_file(propman)
         self.assertEqual(testFile1,os.path.normpath(file))
         PropertyManager.sample_run.set_file_ext('.raw')
-        ok,file=PropertyManager.sample_run.find_file()
+        ok,file=PropertyManager.sample_run.find_file(propman)
         self.assertEqual(testFile2,os.path.normpath(file))
 
         os.remove(testFile1)
@@ -144,6 +143,8 @@ class RunDescriptorTest(unittest.TestCase):
         propman  = self.prop_man
         run_ws = CreateSampleWorkspace( Function='Multiple Peaks', WorkspaceType = 'Event',NumBanks=1, BankPixelWidth=5, NumEvents=100)
         run_ws_monitors = CreateSampleWorkspace( Function='Multiple Peaks', WorkspaceType = 'Histogram',NumBanks=2, BankPixelWidth=1, NumEvents=100)
+        run_ws.setMonitorWorkspace(run_ws_monitors)
+
         self.assertEqual(run_ws_monitors.getNumberHistograms(),2)
 
 
@@ -159,8 +160,9 @@ class RunDescriptorTest(unittest.TestCase):
         propman  = self.prop_man
         run_ws = CreateSampleWorkspace( Function='Multiple Peaks', WorkspaceType = 'Event',NumBanks=1, BankPixelWidth=5, NumEvents=100)
         run_ws_monitors = CreateSampleWorkspace( Function='Multiple Peaks', WorkspaceType = 'Histogram',NumBanks=2, BankPixelWidth=1, NumEvents=100)
-
         run_ws_monitors = Rebin(run_ws_monitors,Params='1,-0.01,20000')
+        run_ws.setMonitorWorkspace(run_ws_monitors)
+
         x=run_ws_monitors.readX(0)
         dx = x[1:]-x[:-1]
         min_step0 = min(dx)
@@ -568,12 +570,52 @@ class RunDescriptorTest(unittest.TestCase):
         propman.sample_run = None
         DeleteWorkspace(a_wksp)
 
+    def test_monitors_renamed(self):
+        wksp=CreateSampleWorkspace(Function='Multiple Peaks',WorkspaceType='Event',
+                                NumBanks=1, BankPixelWidth=1, NumEvents=1, XUnit='TOF',
+                                XMin=2000, XMax=20000, BinWidth=1)
+        wksp_monitors=CreateSampleWorkspace(Function='Multiple Peaks',WorkspaceType='Histogram',
+                                NumBanks=3, BankPixelWidth=1, NumEvents=1, XUnit='TOF',
+                                XMin=2000, XMax=20000, BinWidth=1)
+        propman  = self.prop_man
 
+        propman.sample_run = wksp
 
+        fail = False
+        try:
+            mon_ws = wksp.getMonitorWorkspace()
+        except:
+            fail= True
+        self.assertFalse(fail)
 
+        mon_ws = PropertyManager.sample_run.get_monitors_ws()
+        self.assertEqual(mon_ws.name(),'SR_wksp_monitors')
 
+        wsr = RenameWorkspace(wksp,OutputWorkspace='Renamed1',RenameMonitors=True)
+        PropertyManager.sample_run.synchronize_ws(wsr)
 
+        mon_ws = PropertyManager.sample_run.get_monitors_ws()
+        self.assertEqual(mon_ws.name(),'SR_wksp_monitors')
+
+        wsr.clearMonitorWorkspace()
+        fail = False
+        try:
+            mon_ws = wksp.getMonitorWorkspace()
+        except:
+            fail= True
+        self.assertTrue(fail)
+
+        mon_ws = PropertyManager.sample_run.get_monitors_ws()
+
+        fail = False
+        try:
+            mon_ws = wksp.getMonitorWorkspace()
+        except:
+            fail= True
+        self.assertFalse(fail)
 
 
 if __name__=="__main__":
+    #tester=RunDescriptorTest('test_monitors_renamed')
+    #tester.test_monitors_renamed()
     unittest.main()

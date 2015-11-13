@@ -52,17 +52,19 @@ private:
   Kernel::V3D NormV; ///< Normal vector
   double Dist;       ///< Distance
 
-  int planeType() const; ///< are we alined on an axis
+  std::size_t planeType() const; ///< are we alined on an axis
+  Plane *doClone() const;
+
+protected:
+  Plane(const Plane &);
+  Plane &operator=(const Plane &);
 
 public:
   /// Effective typename
   virtual std::string className() const { return "Plane"; }
 
   Plane();
-  Plane(const Plane &);
-  Plane *clone() const;
-  Plane &operator=(const Plane &);
-  virtual ~Plane();
+  std::unique_ptr<Plane> clone() const;
 
   virtual void acceptVisitor(BaseVisit &A) const { A.Accept(*this); }
 
@@ -93,6 +95,9 @@ public:
                                 Kernel::V3D &output);
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin);
+#ifdef ENABLE_OPENCASCADE
+  virtual TopoDS_Shape createShape();
+#endif
 };
 
 } // NAMESPACE Geometry

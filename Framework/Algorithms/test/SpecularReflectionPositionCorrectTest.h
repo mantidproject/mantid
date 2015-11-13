@@ -155,7 +155,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", toConvert);
     alg.setPropertyValue("OutputWorkspace", "test_out");
-    alg.setProperty("TwoThetaIn", currentThetaInDeg);
+    alg.setProperty("TwoThetaIn", 2 * currentThetaInDeg);
     alg.execute();
     MatrixWorkspace_sptr corrected = alg.getProperty("OutputWorkspace");
 
@@ -197,7 +197,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "test_out");
     if (!detectorFindProperty.empty())
       alg.setProperty(detectorFindProperty, stringValue);
-    alg.setProperty("TwoThetaIn", thetaInDegrees);
+    alg.setProperty("TwoThetaIn", 2 * thetaInDegrees);
     alg.execute();
     MatrixWorkspace_sptr corrected = alg.getProperty("OutputWorkspace");
 

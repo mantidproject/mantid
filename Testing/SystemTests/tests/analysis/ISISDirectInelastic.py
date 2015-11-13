@@ -1,4 +1,4 @@
-#pylint: disable=no-init
+﻿#pylint: disable=no-init
 import stresstesting
 from mantid.simpleapi import *
 from mantid.api import Workspace
@@ -100,6 +100,37 @@ class MARIReductionFromFile(ISISDirectInelasticReduction):
     def get_reference_file(self):
         return "MARIReduction.nxs"
 
+class MARIReductionAutoEi(ISISDirectInelasticReduction):
+
+    def __init__(self):
+        ISISDirectInelasticReduction.__init__(self)
+
+        from ISIS_MariReduction import ReduceMARIAutoEi
+
+        self.red = ReduceMARIAutoEi()
+        self.red.def_advanced_properties()
+        self.red.def_main_properties()
+    # temporary fix to account for different monovan integral
+        self.scale_to_fix_abf = 1
+        self.tolerance = 1e-6
+        self.ws_name = "outWS"
+
+    def runTest(self):
+        #self.red.run_reduction()
+        #pylint: disable=unused-variable
+        outWS = self.red.reduce()
+        outWS = outWS[0]
+        outWS*=self.scale_to_fix_abf
+        self.ws_name = outWS.name()
+
+
+
+    def get_result_workspace(self):
+        """Returns the result workspace to be checked"""
+        return self.ws_name
+    def get_reference_file(self):
+        return "MARIReductionAutoEi.nxs"
+
 class MARIReductionFromFileCache(ISISDirectInelasticReduction):
     _counter=0
 
@@ -120,7 +151,7 @@ class MARIReductionFromFileCache(ISISDirectInelasticReduction):
       """
         self._counter+=1
         if self._counter == 2:
-            source =  FileFinder.findRuns('11001')[0]
+            source =  FileFinder.findRuns('MAR11001')[0]
             targ_path = config['defaultsave.directory']
             targ_file = os.path.join(targ_path,'MAR11002.nxs')
             shutil.copy2(source ,targ_file )
@@ -128,7 +159,7 @@ class MARIReductionFromFileCache(ISISDirectInelasticReduction):
         if self._counter>= 3:
             if os.path.exists(self._file_to_clear):
                 os.remove(self._file_to_clear)
-            source =  FileFinder.findRuns('11001')[0]
+            source =  FileFinder.findRuns('MAR11001')[0]
             targ_path = config['defaultsave.directory']
             targ_file = os.path.join(targ_path,'MAR11002.raw')
             shutil.copy2(source ,targ_file )
@@ -310,7 +341,7 @@ class MARIReductionWaitAndSum(ISISDirectInelasticReduction):
       """
         self._counter+=1
         if self._counter>= 3:
-            source =  FileFinder.findRuns('11015')[0]
+            source =  FileFinder.findRuns('MAR11015')[0]
             targ_path = config['defaultsave.directory']
             targ_file = os.path.join(targ_path,'MAR11002.raw')
             shutil.copy2(source ,targ_file )

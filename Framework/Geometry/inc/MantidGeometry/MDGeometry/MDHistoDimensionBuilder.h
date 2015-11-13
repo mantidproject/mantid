@@ -28,6 +28,7 @@ public:
   void setMin(double min);
   void setMax(double max);
   void setNumBins(size_t nbins);
+  void setFrameName(std::string frameName);
 
   size_t getNumBins() const { return m_nbins; }
   MDHistoDimension *createRaw();
@@ -52,6 +53,8 @@ private:
   bool m_minSet;
   /// Flag indicating that max has been set.
   bool m_maxSet;
+  /// Frame name
+  std::string m_frameName;
 };
 
 /// Handy typedef for collection of builders.

@@ -4,6 +4,9 @@
 #include "MantidGeometry/DllConfig.h"
 #include "BaseVisit.h"
 #include <string>
+#include <memory>
+
+class TopoDS_Shape;
 
 namespace Mantid {
 namespace Kernel {
@@ -44,14 +47,16 @@ namespace Geometry {
 */
 class MANTID_GEOMETRY_DLL Surface {
 private:
-  int Name; ///< Surface number (MCNPX identifier)
-
+  int Name;                             ///< Surface number (MCNPX identifier)
+  virtual Surface *doClone() const = 0; ///< Abstract clone function
 public:
   static const int Nprecision = 10; ///< Precision of the output
 
   Surface();
   Surface(const Surface &);
-  virtual Surface *clone() const = 0; ///< Abstract clone function
+  std::unique_ptr<Surface> clone() const {
+    return std::unique_ptr<Surface>(doClone());
+  };
   Surface &operator=(const Surface &);
   virtual ~Surface();
 
@@ -87,6 +92,9 @@ public:
   /// bounding box for the surface
   virtual void getBoundingBox(double &xmax, double &ymax, double &zmax,
                               double &xmin, double &ymin, double &zmin) = 0;
+#ifdef ENABLE_OPENCASCADE
+  virtual TopoDS_Shape createShape();
+#endif
 };
 
 } // NAMESPACE Geometry

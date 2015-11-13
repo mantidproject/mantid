@@ -1,5 +1,6 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 
 #include <QMutex>
@@ -568,7 +569,8 @@ void TomographyIfaceModel::splitCmdLine(const std::string &cmd,
 WorkspaceGroup_sptr
 TomographyIfaceModel::loadFITSImage(const std::string &path) {
   // get fits file into workspace and retrieve it from the ADS
-  auto alg = Algorithm::fromString("LoadFITS");
+  auto alg = AlgorithmManager::Instance().createUnmanaged("LoadFITS");
+  //Algorithm::fromString("LoadFITS");
   alg->initialize();
   alg->setPropertyValue("Filename", path);
   std::string wsName = "__fits_ws_tomography_gui";

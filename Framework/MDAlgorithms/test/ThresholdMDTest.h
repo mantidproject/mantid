@@ -5,7 +5,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidMDAlgorithms/ThresholdMD.h"
-
+#include "MantidGeometry/MDGeometry/QLab.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
@@ -22,12 +22,12 @@ public:
   // This means the constructor isn't called when running other tests
   static ThresholdMDTest *createSuite() { return new ThresholdMDTest(); }
   static void destroySuite(ThresholdMDTest *suite) { delete suite; }
-
+  Mantid::Geometry::QLab frame;
   MDHistoWorkspace_sptr createInputWorkspace(signal_t signal,
                                              signal_t errorSQ = 0,
                                              const int nBins = 1) {
     MDHistoDimension_sptr dim = boost::make_shared<MDHistoDimension>(
-        "X", "X", "", static_cast<coord_t>(0), static_cast<coord_t>(10),
+        "X", "X", frame, static_cast<coord_t>(0), static_cast<coord_t>(10),
         static_cast<size_t>(nBins));
     MDHistoWorkspace_sptr histo = boost::make_shared<MDHistoWorkspace>(dim);
     signal_t *signals = histo->getSignalArray();

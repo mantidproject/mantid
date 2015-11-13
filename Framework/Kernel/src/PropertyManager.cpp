@@ -4,7 +4,7 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 
-#include <boost/algorithm/string/trim.hpp>
+#include <json/json.h>
 
 namespace Mantid {
 namespace Kernel {
@@ -210,19 +210,107 @@ void PropertyManager::declareProperty(Property *p, const std::string &doc) {
 /** Set the ordered list of properties by one string of values, separated by
  *semicolons.
  *
- * The string should be of format "PropertyName=value;Property2=value2; etc..."
+ * The string should be a json formatted collection of name value pairs
  *
- *  @param propertiesArray :: The list of property values
+ *  @param propertiesJson :: The string of property values
+ *  @param ignoreProperties :: A set of names of any properties NOT to set
+ *      from the propertiesArray
  *  @throw invalid_argument if error in parameters
  */
-// Care will certainly be required in the calling of this function or it could
-// all go horribly wrong!
-void PropertyManager::setProperties(const std::string &propertiesArray) {
+void PropertyManager::setProperties(
+    const std::string &propertiesJson,
+    const std::set<std::string> &ignoreProperties) {
+  setProperties(propertiesJson, this, ignoreProperties);
+}
+//-----------------------------------------------------------------------------------------------
+/** Set the ordered list of properties by one string of values, separated by
+ *semicolons.
+ *
+ * The string should be a json formatted collection of name value pairs
+ *
+ *  @param propertiesJson :: The string of property values
+ *  @param ignoreProperties :: A set of names of any properties NOT to set
+ *      from the propertiesArray
+ *  @param targetPropertyManager :: the propertymanager to make the changes to,
+ *      most of the time this will be *this
+ *  @throw invalid_argument if error in parameters
+ */
+void PropertyManager::setProperties(
+    const std::string &propertiesJson, IPropertyManager *targetPropertyManager,
+    const std::set<std::string> &ignoreProperties) {
+  ::Json::Reader reader;
+  ::Json::Value jsonValue;
+
+  if (reader.parse(propertiesJson, jsonValue)) {
+    setProperties(jsonValue, targetPropertyManager, ignoreProperties);
+  } else {
+    throw std::invalid_argument("propertiesArray was not valid json");
+  }
+}
+//-----------------------------------------------------------------------------------------------
+/** Set the ordered list of properties by a json value collection
+ *
+ *  @param jsonValue :: The jsonValue of property values
+ *  @param ignoreProperties :: A set of names of any properties NOT to set
+ *      from the propertiesArray
+ */
+void PropertyManager::setProperties(
+    const ::Json::Value &jsonValue,
+    const std::set<std::string> &ignoreProperties) {
+  setProperties(jsonValue, this, ignoreProperties);
+}
+
+//-----------------------------------------------------------------------------------------------
+/** Set the ordered list of properties by a json value collection
+ *
+ *  @param jsonValue :: The jsonValue of property values
+ *  @param ignoreProperties :: A set of names of any properties NOT to set
+ *      from the propertiesArray
+ *  @param targetPropertyManager :: the propertymanager to make the changes to,
+ *      most of the time this will be *this
+ */
+void PropertyManager::setProperties(
+    const ::Json::Value &jsonValue, IPropertyManager *targetPropertyManager,
+    const std::set<std::string> &ignoreProperties) {
+  if (jsonValue.type() == ::Json::ValueType::objectValue) {
+
+    // Some algorithms require Filename to be set first do that here
+    const std::string propFilename = "Filename";
+    ::Json::Value filenameValue = jsonValue[propFilename];
+    if (!filenameValue.isNull()) {
+      const std::string value = jsonValue[propFilename].asString();
+      // Set it
+      targetPropertyManager->setPropertyValue(propFilename, value);
+    }
+
+    for (::Json::ArrayIndex i = 0; i < jsonValue.size(); i++) {
+      const std::string propName = jsonValue.getMemberNames()[i];
+      if ((propFilename != propName) &&
+          (ignoreProperties.find(propName) == ignoreProperties.end())) {
+        ::Json::Value propValue = jsonValue[propName];
+        const std::string value = propValue.asString();
+        // Set it
+        targetPropertyManager->setPropertyValue(propName, value);
+      }
+    }
+  }
+}
+
+/** Sets all the declared properties from a string.
+  @param propertiesString :: A list of name = value pairs separated by a
+    semicolon
+  @param ignoreProperties :: A set of names of any properties NOT to set
+  from the propertiesArray
+*/
+void PropertyManager::setPropertiesWithSimpleString(
+    const std::string &propertiesString,
+    const std::set<std::string> &ignoreProperties) {
+  ::Json::Value propertyJson;
   // Split up comma-separated properties
   typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
 
   boost::char_separator<char> sep(";");
-  tokenizer propPairs(propertiesArray, sep);
+  tokenizer propPairs(propertiesString, sep);
   int index = 0;
   // Iterate over the properties
   for (tokenizer::iterator it = propPairs.begin(); it != propPairs.end();
@@ -231,13 +319,7 @@ void PropertyManager::setProperties(const std::string &propertiesArray) {
     std::string pair = *it;
 
     size_t n = pair.find('=');
-    if (n == std::string::npos) {
-      // No equals sign
-      // This is for a property with no value. Not clear that we will want such
-      // a thing.
-      // Interpret the string as the index^th property in the list,
-      setPropertyOrdinal(index, pair);
-    } else {
+    if (n != std::string::npos) {
       // Normal "PropertyName=value" string.
       std::string propName = "";
       std::string value = "";
@@ -252,10 +334,11 @@ void PropertyManager::setProperties(const std::string &propertiesArray) {
         value = "";
       }
       // Set it
-      setPropertyValue(propName, value);
+      propertyJson[propName] = value;
     }
     index++;
   }
+  setProperties(propertyJson, ignoreProperties);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -362,25 +445,34 @@ std::string PropertyManager::getPropertyValue(const std::string &name) const {
  * The format is propName=value,propName=value,propName=value
  * @param withDefaultValues :: If true then the value of default parameters will
  *be included
- * @param separator :: character to separate property/value pairs. Default
- *comma.
  * @returns A serialized version of the manager
  */
-std::string PropertyManager::asString(bool withDefaultValues,
-                                      char separator) const {
-  std::ostringstream writer;
+std::string PropertyManager::asString(bool withDefaultValues) const {
+  ::Json::FastWriter writer;
+  const string output = writer.write(asJson(withDefaultValues));
+
+  return output;
+}
+
+//-----------------------------------------------------------------------------------------------
+/** Return the property manager serialized as a json object.
+ * * @param withDefaultValues :: If true then the value of default parameters
+ will
+ *be included
+
+ * @returns A serialized version of the manager
+ */
+::Json::Value PropertyManager::asJson(bool withDefaultValues) const {
+  ::Json::Value jsonMap;
   const size_t count = propertyCount();
-  size_t numAdded = 0;
   for (size_t i = 0; i < count; ++i) {
-    Property *p = getPointerToPropertyOrdinal((int)i);
+    Property *p = getPointerToPropertyOrdinal(static_cast<int>(i));
     if (withDefaultValues || !(p->isDefault())) {
-      if (numAdded > 0)
-        writer << separator;
-      writer << p->name() << "=" << p->value();
-      numAdded++;
+      jsonMap[p->name()] = p->value();
     }
   }
-  return writer.str();
+
+  return jsonMap;
 }
 
 //-----------------------------------------------------------------------------------------------

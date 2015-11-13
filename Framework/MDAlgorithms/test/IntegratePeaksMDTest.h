@@ -8,10 +8,12 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidKernel/UnitLabelTypes.h"
 
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -86,9 +88,16 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         algC.setProperty("Extents", "-10,10,-10,10,-10,10"));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Names", "h,k,l"));
-    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Units", "-,-,-"));
+    std::string units = Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
+                        Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
+                        Mantid::Kernel::Units::Symbol::RLU.ascii();
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Units", units));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("SplitInto", "5"));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("MaxRecursionDepth", "2"));
+    std::string frames = Mantid::Geometry::HKL::HKLName + "," +
+                         Mantid::Geometry::HKL::HKLName + "," +
+                         Mantid::Geometry::HKL::HKLName;
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Frames", frames));
     TS_ASSERT_THROWS_NOTHING(
         algC.setPropertyValue("OutputWorkspace", "IntegratePeaksMDTest_MDEWS"));
     TS_ASSERT_THROWS_NOTHING(algC.execute());
@@ -123,7 +132,9 @@ public:
     MDEventWorkspace3Lean::sptr mdews =
         AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(
             "IntegratePeaksMDTest_MDEWS");
-    mdews->setCoordinateSystem(Mantid::Kernel::HKL);
+    auto &frame = mdews->getDimension(0)->getMDFrame();
+    TSM_ASSERT_EQUALS("Should be HKL", Mantid::Geometry::HKL::HKLName,
+                      frame.name());
     TS_ASSERT_EQUALS(mdews->getNPoints(), 3000);
     TS_ASSERT_DELTA(mdews->getBox()->getSignal(), 3000.0, 1e-2);
 
