@@ -60,20 +60,12 @@ private:
   void init();
   void exec();
 
-  // Smoothing by truncation.
-  void truncate(int n);
   // Smoothing by zeroing.
-  void zero(int n);
+  void zero(int n, API::MatrixWorkspace_sptr &unfilteredWS,
+            API::MatrixWorkspace_sptr &filteredWS);
   // Smoothing using Butterworth filter of any positive order.
-  void Butterworth(int n, int order);
-
-  /// The input workspace
-  API::MatrixWorkspace_sptr m_inWS;
-  /// Temporary workspace for keeping the unfiltered Fourier transform of the
-  /// imput spectrum
-  API::MatrixWorkspace_sptr m_unfilteredWS;
-  /// Temporary workspace for keeping the filtered spectrum
-  API::MatrixWorkspace_sptr m_filteredWS;
+  void Butterworth(int n, int order, API::MatrixWorkspace_sptr &unfilteredWS,
+                   API::MatrixWorkspace_sptr &filteredWS);
 };
 
 } // namespace Algorithm

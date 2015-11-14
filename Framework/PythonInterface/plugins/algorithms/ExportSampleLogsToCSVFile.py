@@ -24,7 +24,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
     def category(self):
         """ Category
         """
-        return "Utility;PythonAlgorithms"
+        return "DataHandling\\Logs"
 
     def name(self):
         """ Algorithm name

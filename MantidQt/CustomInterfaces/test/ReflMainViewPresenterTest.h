@@ -10,10 +10,9 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h"
 
 #include "ReflMainViewMockObjects.h"
-#include "../inc/MantidQtCustomInterfaces/IReflPresenter.h"
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;

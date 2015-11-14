@@ -11,8 +11,7 @@ setlocal enableextensions enabledelayedexpansion
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Print out the versions of things we are using
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-set CMAKE_BIN_DIR=C:\Program Files (x86)\CMake 2.8\bin
-"%CMAKE_BIN_DIR%\cmake" --version 
+call cmake --version 
 echo %sha1%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -37,17 +36,21 @@ cd %WORKSPACE%\build
 :: We use the special flag that only creates the targets for the data
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if not EXIST %WORKSPACE%\build\CMakeCache.txt (
-  "%CMAKE_BIN_DIR%\cmake" -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DDATA_TARGETS_ONLY=ON ..
+  call cmake -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DDATA_TARGETS_ONLY=ON ..
+  if ERRORLEVEL 1 exit /b %ERRORLEVEL%
 ) else (
   :: This ensures that any new data files are picked up by the cmake globbing
-  "%CMAKE_BIN_DIR%\cmake" .
+  call cmake .
+  if ERRORLEVEL 1 exit /b %ERRORLEVEL%
 )
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Build step
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 msbuild /nologo /nr:false /p:Configuration=Release StandardTestData.vcxproj
+if ERRORLEVEL 1 exit /b %ERRORLEVEL%
 msbuild /nologo /nr:false /p:Configuration=Release SystemTestData.vcxproj
+if ERRORLEVEL 1 exit /b %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Run the tests
@@ -64,4 +67,3 @@ echo usagereports.enabled = 0 >> %USERPROPS%
 set PKGDIR=%WORKSPACE%\build
 set PATH=C:\MantidInstall\bin;C:\MantidInstall\plugins;%PATH%
 python %WORKSPACE%\Testing\SystemTests\scripts\InstallerTests.py -o -d %PKGDIR%
-

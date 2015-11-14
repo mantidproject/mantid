@@ -12,7 +12,7 @@ class MolDyn(PythonAlgorithm):
 
 
     def category(self):
-        return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic;Simulation'
+        return 'Workflow\\Inelastic;Inelastic\\DataHandling;Simulation'
 
 
     def summary(self):

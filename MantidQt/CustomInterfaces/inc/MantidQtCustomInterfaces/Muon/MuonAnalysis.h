@@ -317,6 +317,9 @@ private:
   /// Clear tables and front combo box
   void clearTablesAndCombo();
 
+  /// Clear run info and loaded run
+  void clearLoadedRun();
+
   /// Deletes a workspace _or_ a workspace group with the given name, if one exists
   void deleteWorkspaceIfExists(const std::string& wsName);
 

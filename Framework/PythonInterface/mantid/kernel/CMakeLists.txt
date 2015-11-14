@@ -48,6 +48,7 @@ set ( EXPORT_FILES
   src/Exports/ProgressBase.cpp
   src/Exports/Material.cpp
   src/Exports/Statistics.cpp
+  src/Exports/OptionalBool.cpp
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp )
@@ -137,6 +138,7 @@ copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR}
 set ( PACKAGESETUP_PY packagesetup )
 set ( NEXUSLIB ${NEXUS_C_LIBRARIES} )
 if ( WIN32 ) #.lib -> .dll
+  string ( REPLACE "/lib/" "/bin/" NEXUSLIB ${NEXUSLIB} )
   string ( REPLACE ".lib" ".dll" NEXUSLIB ${NEXUSLIB} )
 endif()
 

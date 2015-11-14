@@ -1,7 +1,7 @@
 #pylint: disable=no-init,invalid-name
 from mantid import logger, mtd
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
-                        ITableWorkspaceProperty, PropertyMode, WorkspaceFactory)
+                        ITableWorkspaceProperty, PropertyMode, WorkspaceFactory, Progress)
 from mantid.kernel import Direction, IntArrayProperty
 import mantid.simpleapi as ms
 import math
@@ -21,7 +21,7 @@ class Symmetrise(PythonAlgorithm):
     _negative_min_index = None
 
     def category(self):
-        return 'PythonAlgorithms'
+        return 'CorrectionFunctions\\SpecialCorrections'
 
 
     def summary(self):
@@ -47,6 +47,8 @@ class Symmetrise(PythonAlgorithm):
 
     #pylint: disable=too-many-locals
     def PyExec(self):
+        workflow_prog = Progress(self, start=0.0, end=0.3, nreports=4)
+        workflow_prog.report('Setting up algorithm')
         self._setup()
 
         input_ws = mtd[self._sample]
@@ -55,6 +57,7 @@ class Symmetrise(PythonAlgorithm):
         max_spectrum_index = input_ws.getIndexFromSpectrumNumber(int(self._spectra_range[1]))
 
         # Crop to the required spectra range
+        workflow_prog.report('Cropping Workspace')
         cropped_input = ms.CropWorkspace(InputWorkspace=input_ws,
                                          OutputWorkspace='__symm',
                                          StartWorkspaceIndex=min_spectrum_index,
@@ -70,6 +73,7 @@ class Symmetrise(PythonAlgorithm):
 
         # Get slice bounds of array
         try:
+            workflow_prog.report('Calculating array points')
             self._calculate_array_points(sample_x, sample_array_len)
         except Exception as exc:
             raise RuntimeError('Failed to calculate array slice boundaries: %s' % exc.message)
@@ -95,11 +99,14 @@ class Symmetrise(PythonAlgorithm):
         logger.information('Output array LR split index = %d' % output_cut_index)
 
         # Create an empty workspace with enough storage for the new data
+        workflow_prog.report('Creating OutputWorkspace')
         out_ws = WorkspaceFactory.Instance().create(cropped_input, cropped_input.getNumberHistograms(),
                                                     int(new_array_len), int(new_array_len))
 
         # For each spectrum copy positive values to the negative
+        pop_prog = Progress(self, start=0.3, end=0.95, nreports=out_ws.getNumberHistograms())
         for idx in range(out_ws.getNumberHistograms()):
+            pop_prog.report('Populating data in workspace %i' % idx)
             # Strip any additional array cells
             x_in = cropped_input.readX(idx)[:sample_array_len]
             y_in = cropped_input.readY(idx)[:sample_array_len]
@@ -127,12 +134,16 @@ class Symmetrise(PythonAlgorithm):
 
             logger.information('Symmetrise spectrum %d' % idx)
 
+        end_prog = Progress(self, start=0.95, end=1.0, nreports=3)
+        end_prog.report('Deleting temp workspaces')
         ms.DeleteWorkspace(cropped_input)
 
         if self._props_output_workspace != '':
+            end_prog.report('Generating property table')
             self._generate_props_table()
 
         self.setProperty('OutputWorkspace', out_ws)
+        end_prog.report('Algorithm Complete')
 
 
     def validateInputs(self):

@@ -12,7 +12,7 @@ find_path ( QWT_INCLUDE_DIR qwt.h
             PATH_SUFFIXES qwt5 qwt5-qt4 qwt-qt4 qwt
             NO_DEFAULT_PATH )
 find_library ( QWT_LIBRARY NAMES qwt5-qt4 qwt-qt4 qwt5 qwt HINTS /opt/rh/${MANTIDLIBS}/root/usr/lib64 )
-find_library ( QWT_LIBRARY_DEBUG qwtd )
+find_library ( QWT_LIBRARY_DEBUG NAMES qwtd qwtd5 )
 
 # in REQUIRED mode: terminate if one of the above find commands failed
 include ( FindPackageHandleStandardArgs )

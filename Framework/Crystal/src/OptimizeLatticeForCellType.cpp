@@ -147,16 +147,12 @@ void OptimizeLatticeForCellType::exec() {
 
     double chisq = fit_alg->getProperty("OutputChi2overDoF");
     Geometry::UnitCell refinedCell = latticeFunction->getUnitCell();
-    /*std::vector<double> sigabc;
-    for (size_t i = 0; i < latticeFunction->nParams(); i++)
-      sigabc.push_back(latticeFunction->getError(i));*/
 
     IAlgorithm_sptr ub_alg;
     try {
-      ub_alg =
-          createChildAlgorithm("FindUBUsingLatticeParameters", -1, -1, false);
+      ub_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
     } catch (Exception::NotFoundError &) {
-      g_log.error("Can't locate FindUBUsingLatticeParameters algorithm");
+      g_log.error("Can't locate CalculateUMatrix algorithm");
       throw;
     }
 
@@ -167,8 +163,6 @@ void OptimizeLatticeForCellType::exec() {
     ub_alg->setProperty("alpha", refinedCell.alpha());
     ub_alg->setProperty("beta", refinedCell.beta());
     ub_alg->setProperty("gamma", refinedCell.gamma());
-    ub_alg->setProperty("NumInitial", 15);
-    ub_alg->setProperty("Tolerance", tolerance);
     ub_alg->executeAsChildAlg();
     DblMatrix UBnew = peakWS->mutableSample().getOrientedLattice().getUB();
     OrientedLattice o_lattice;
@@ -234,11 +228,7 @@ API::ILatticeFunction_sptr
 OptimizeLatticeForCellType::getLatticeFunction(const std::string &cellType,
                                                const UnitCell &cell) const {
   std::ostringstream fun_str;
-  // TODO remove next 3 lines when PointGroup is changed
-  if (cellType == "Rhombohedral")
-    fun_str << "name=LatticeFunction,CrystalSystem=Trigonal";
-  else
-    fun_str << "name=LatticeFunction,CrystalSystem=" << cellType;
+  fun_str << "name=LatticeFunction,LatticeSystem=" << cellType;
 
   API::IFunction_sptr rawFunction =
       API::FunctionFactory::Instance().createInitialized(fun_str.str());

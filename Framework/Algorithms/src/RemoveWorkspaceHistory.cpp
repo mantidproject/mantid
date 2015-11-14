@@ -30,7 +30,9 @@ const std::string RemoveWorkspaceHistory::name() const {
 int RemoveWorkspaceHistory::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string RemoveWorkspaceHistory::category() const { return "Utility"; }
+const std::string RemoveWorkspaceHistory::category() const {
+  return "Utility\\Workspaces";
+}
 
 /// Algorithm's summary for identification. @see Algorithm::summary
 const std::string RemoveWorkspaceHistory::summary() const {

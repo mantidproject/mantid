@@ -461,7 +461,8 @@ void ISISHistoDataListener::runLoadInstrument(
   try {
     loadInst->setPropertyValue("InstrumentName", iName);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap", false);
+    loadInst->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(false));
     loadInst->executeAsChildAlg();
   } catch (std::invalid_argument &) {
     g_log.information("Invalid argument to LoadInstrument Child Algorithm");

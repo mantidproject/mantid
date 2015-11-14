@@ -4,6 +4,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "BaseVisit.h"
 #include <string>
+#include <memory>
 
 class TopoDS_Shape;
 
@@ -46,14 +47,16 @@ namespace Geometry {
 */
 class MANTID_GEOMETRY_DLL Surface {
 private:
-  int Name; ///< Surface number (MCNPX identifier)
-
+  int Name;                             ///< Surface number (MCNPX identifier)
+  virtual Surface *doClone() const = 0; ///< Abstract clone function
 public:
   static const int Nprecision = 10; ///< Precision of the output
 
   Surface();
   Surface(const Surface &);
-  virtual Surface *clone() const = 0; ///< Abstract clone function
+  std::unique_ptr<Surface> clone() const {
+    return std::unique_ptr<Surface>(doClone());
+  };
   Surface &operator=(const Surface &);
   virtual ~Surface();
 

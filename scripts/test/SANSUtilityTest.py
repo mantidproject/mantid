@@ -1,4 +1,4 @@
-
+﻿
 import unittest
 # Need to import mantid before we import SANSUtility
 import mantid
@@ -1046,6 +1046,26 @@ class TestGetCorrectQResolution(unittest.TestCase):
         provide_workspace_with_x_errors(orig_name, True, 2)
         provide_workspace_with_x_errors(can_name, True, 2)
         provide_workspace_with_x_errors(result_name, False, 2)
+        orig = mtd[orig_name]
+        can = mtd[can_name]
+        result = mtd[result_name]
+        # Act
+        su.correct_q_resolution_for_can(orig, can, result)
+        # Assert
+        self.assertFalse(result.hasDx(0))
+        # Clean up
+        DeleteWorkspace(orig)
+        DeleteWorkspace(can)
+        DeleteWorkspace(result)
+
+    def test_error_is_not_passed_on_when_did_not_exist_beforehand(self):
+        # Arrange
+        orig_name = "orig"
+        can_name = "can"
+        result_name = "result"
+        provide_workspace_with_x_errors(orig_name, False, 1)
+        provide_workspace_with_x_errors(can_name, False, 1)
+        provide_workspace_with_x_errors(result_name, False, 1)
         orig = mtd[orig_name]
         can = mtd[can_name]
         result = mtd[result_name]

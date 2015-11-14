@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+﻿#pylint: disable=invalid-name
 from Direct.NonIDF_Properties import *
 
 from collections import OrderedDict,Iterable
@@ -345,6 +345,7 @@ class PropertyManager(NonIDF_Properties):
 
         return result
     #
+#pylint: disable=too-many-branches
     def update_defaults_from_instrument(self,pInstrument,ignore_changes=False):
         """ Method used to update default parameters from the same instrument (with different parameters).
 
@@ -379,6 +380,7 @@ class PropertyManager(NonIDF_Properties):
             if not prop_name in param_list:
                 try:
                     dependencies = getattr(PropertyManager,prop_name).dependencies()
+#pylint: disable=bare-except
                 except:
                     dependencies = []
                 modified = False
@@ -409,9 +411,11 @@ class PropertyManager(NonIDF_Properties):
                     cur_val = getattr(self,key)
                     setattr(self,key,val)
                     new_val = getattr(self,key)
+#pylint: disable=bare-except
                 except:
                     try:
                         cur_val = getattr(self,key)
+#pylint: disable=bare-except
                     except:
                         cur_val = "Undefined"
                     self.log("Retrieving or reapplying script property {0} failed. Property value remains: {1}"\
@@ -436,6 +440,7 @@ class PropertyManager(NonIDF_Properties):
                 # dependencies removed either properties are equal or not
                 try:
                     dependencies = getattr(PropertyManager,key).dependencies()
+#pylint: disable=bare-except
                 except:
                     dependencies = []
 
@@ -466,6 +471,7 @@ class PropertyManager(NonIDF_Properties):
                 try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains
                     # properties, not present in recent IDF.
                     cur_val = getattr(self,public_name)
+#pylint: disable=bare-except
                 except:
                     self.log("Can not retrieve property {0} value from existing reduction parameters. Ignoring this property"\
                         .format(public_name),'warning')
@@ -480,6 +486,7 @@ class PropertyManager(NonIDF_Properties):
             # too, as property has been set up as whole.
             try:
                 dependencies = val.dependencies()
+#pylint: disable=bare-except
             except:
                 dependencies =[]
             for dep_name in dependencies:
@@ -555,6 +562,7 @@ class PropertyManager(NonIDF_Properties):
             file list to sum
         """
         # this returns only runs, left to sum with current sample_run sum settings
+#pylint: disable=unused-variable
         runs,sum_ws,added      = PropertyManager.sample_run.get_runs_to_sum(None,num_files)
         if len(runs) == 0:
             return (True,[],[])
@@ -572,15 +580,16 @@ class PropertyManager(NonIDF_Properties):
         file_errors={}
         for prop_name in file_prop_names:
             theProp = getattr(PropertyManager,prop_name)
-            ok,file = theProp.find_file(be_quet=True)
+            ok,file_name = theProp.find_file(self,be_quet=True)
             if not ok:
-                file_errors[prop_name]=file
+                file_errors[prop_name]=file_name
 
         if self.sum_runs:
-            missing=[]; found=[]
+            missing=[]
+#pylint: disable=unused-variable
             ok,missing,found=self.find_files_to_sum()
             #Presence of Cashe sum ws assumes that you sum files to workspace as they appear
-            # This mean, that we should not expect all files to be there at the begining
+            # This mean, that we should not expect all files to be there at the beginning
             if not ok and not self.cashe_sum_ws:
                 file_errors['missing_runs_toSum']=str(missing)
 
@@ -596,15 +605,18 @@ class PropertyManager(NonIDF_Properties):
             fp.close()
             os.remove(test_file)
             return (True,'')
+#pylint: disable=bare-except
         except:
             return (False,'Can not write to default save directory {0}.\n Reduction results can be lost'.format(targ_dir))
     #
+#pylint: disable=too-many-branches
     def validate_properties(self,fail_on_errors=True):
         """ Method validates if some properties values for
             properties set up in the property manager are correct
         """
 
         if self.mono_correction_factor: # disable check for monovan_run, as it is not used if mono_correction provided
+#pylint: disable=protected-access
             PropertyManager.monovan_run._in_cash = True  # as soon as monovan_run is set up (mono correction disabled)
         # this will be dropped
         error_list={}
@@ -635,6 +647,7 @@ class PropertyManager(NonIDF_Properties):
         for prop in changed_prop:
             try:
                 theProp =getattr(PropertyManager,prop)
+#pylint: disable=bare-except
             except: # not all changed properties are property manager properties
                 continue # we are not validating them
             try:
@@ -650,6 +663,7 @@ class PropertyManager(NonIDF_Properties):
                         self.log(mess,'warning')
                     else:
                         error_list[prop]=mess
+#pylint: disable=bare-except
             except: # its simple dictionary value, which do not have validator or
                 pass # other property without validator
         #end
@@ -700,11 +714,14 @@ class PropertyManager(NonIDF_Properties):
 
           # now let's report on normal run.
             if PropertyManager.incident_energy.multirep_mode():
-                ei = self.incident_energy
-                mess = "*** Provisional Incident energies: {0:>8.3f}".format(ei[0])
-                for en in ei[1:]:
-                    mess += "; {0:>8.3f}".format(en)
-                mess+=" mEv"
+                ei = PropertyManager.incident_energy.getAllEiList()
+                if len(ei) == 0:
+                    mess = "*** No provisional incident energy was identified"
+                else:
+                    mess = "*** Provisional Incident energies: {0:>8.3f}".format(ei[0])
+                    for en in ei[1:]:
+                        mess += "; {0:>8.3f}".format(en)
+                    mess+=" mEv"
                 self.log(mess,log_level)
             else:
                 self.log("*** Provisional Incident energy: {0:>12.3f} mEv".format(self.incident_energy),log_level)

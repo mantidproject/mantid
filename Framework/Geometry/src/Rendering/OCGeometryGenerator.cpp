@@ -159,7 +159,7 @@ double *OCGeometryGenerator::getTriangleVertices() {
   double *points = NULL;
   int nPts = this->getNumberOfPoints();
   if (nPts > 0) {
-    points = new double[nPts * 3];
+    points = new double[static_cast<std::size_t>(nPts) * 3];
     int index = 0;
     TopExp_Explorer Ex;
     for (Ex.Init(*ObjSurface, TopAbs_FACE); Ex.More(); Ex.Next()) {
@@ -184,7 +184,7 @@ int *OCGeometryGenerator::getTriangleFaces() {
   int *faces = NULL;
   int nFaces = this->getNumberOfTriangles(); // was Points
   if (nFaces > 0) {
-    faces = new int[nFaces * 3];
+    faces = new int[static_cast<std::size_t>(nFaces) * 3];
     TopExp_Explorer Ex;
     int maxindex = 0;
     int index = 0;

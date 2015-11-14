@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+﻿#pylint: disable=invalid-name
 from Direct.PropertiesDescriptors import *
 from Direct.RunDescriptor import RunDescriptor,RunDescriptorDependent
 
@@ -14,6 +14,7 @@ class NonIDF_Properties(object):
     """
 
     # logging levels available for user
+#pylint: disable=unnecessary-lambda
     log_options = \
         { "error" :       (1,lambda (msg):   logger.error(msg)),
           "warning" :     (2,lambda (msg):   logger.warning(msg)),
@@ -40,7 +41,9 @@ class NonIDF_Properties(object):
         self._set_instrument_and_facility(Instrument,run_workspace)
 
         # set up descriptors holder class reference
+#pylint: disable=protected-access
         RunDescriptor._holder = self
+#pylint: disable=protected-access
         RunDescriptor._logger = self.log
         # Initiate class-level properties to defaults (Each constructor clears class-level properties?)
         super(NonIDF_Properties,self).__setattr__('sample_run',None)
@@ -69,7 +72,9 @@ class NonIDF_Properties(object):
     #-----------------------------------------------------------------------------
     incident_energy = IncidentEnergy()
     #
-    energy_bins = EnergyBins(incident_energy)
+    auto_accuracy  = AvrgAccuracy()
+    #
+    energy_bins = EnergyBins(incident_energy,auto_accuracy)
     #
     save_file_name = SaveFileName()
     #
@@ -132,6 +137,7 @@ class NonIDF_Properties(object):
         return self._cashe_sum_ws
     @cashe_sum_ws.setter
     def cashe_sum_ws(self,val):
+#pylint: disable=attribute-defined-outside-init
         self._cashe_sum_ws = bool(val)
     # -----------------------------------------------------------------------------
     @property
@@ -148,15 +154,14 @@ class NonIDF_Properties(object):
     #
 
     def _set_instrument_and_facility(self,Instrument,run_workspace=None):
-        """simple method used to obtain default instrument for testing """
-        # TODO: implement advanced instrument setter, used in DirectEnergy
-        # conversion
+        """Obtain default instrument and facility and store it in properties"""
 
         if run_workspace:
             instrument = run_workspace.getInstrument()
             instr_name = instrument.getFullName()
             new_name,full_name,facility_ = prop_helpers.check_instrument_name(None,instr_name)
         else:
+#pylint: disable=protected-access
             if isinstance(Instrument,geometry._geometry.Instrument):
                 instrument = Instrument
                 instr_name = instrument.getFullName()
@@ -165,13 +170,13 @@ class NonIDF_Properties(object):
                 except KeyError: # the instrument pointer is not found in any facility but we have it after all
                     new_name = instr_name
                     full_name = instr_name
-                    facility_ = 'TEST'
+                    facility_ = config.getFacility('TEST_LIVE')
                 #end
 
 
             elif isinstance(Instrument,str): # instrument name defined
                 new_name,full_name,facility_ = prop_helpers.check_instrument_name(None,Instrument)
-                idf_dir = config.getString('instrumentDefinition.directory')
+                #idf_dir = config.getString('instrumentDefinitgeton.directory')
                 idf_file = api.ExperimentInfo.getInstrumentFilename(full_name)
                 tmp_ws_name = '__empty_' + full_name
                 if not mtd.doesExist(tmp_ws_name):

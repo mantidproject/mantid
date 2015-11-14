@@ -128,6 +128,7 @@ public:
   double erroralpha(const int angleunit = angDegrees) const;
   double errorbeta(const int angleunit = angDegrees) const;
   double errorgamma(const int angleunit = angDegrees) const;
+  double errorvolume() const;
   // Access private variables
   const Kernel::DblMatrix &getG() const;
   const Kernel::DblMatrix &getGstar() const;

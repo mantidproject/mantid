@@ -31,7 +31,7 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
     def category(self):
         """
         """
-        return "Diffraction;Utility"
+        return "Diffraction\\Utility"
 
     def name(self):
         """

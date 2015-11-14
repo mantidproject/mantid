@@ -259,6 +259,8 @@ ConfigServiceImpl::ConfigServiceImpl()
   file.createDirectories();
   Poco::File vtpDir(getVTPFileDirectory());
   vtpDir.createDirectories();
+  // must update the cache of instrument paths
+  cacheInstrumentPaths();
 }
 
 /** Private Destructor

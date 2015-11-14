@@ -25,7 +25,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
     _sample_inner_radius = 0.
 
     def category(self):
-        return "Workflow\\Inelastic;PythonAlgorithms;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
+        return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
 
 
     def summary(self):

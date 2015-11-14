@@ -10,7 +10,7 @@ class LoadMultipleGSS(PythonAlgorithm):
     __loader = None
 
     def category(self):
-        return "DataHandling;PythonAlgorithms"
+        return "DataHandling\\Text"
 
     def name(self):
         return "LoadMultipleGSS"

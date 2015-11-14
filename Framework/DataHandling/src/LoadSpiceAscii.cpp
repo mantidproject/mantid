@@ -83,7 +83,9 @@ int LoadSpiceAscii::version() const { return 1; }
 //----------------------------------------------------------------------------------------------
 /** Category
  */
-const std::string LoadSpiceAscii::category() const { return "DataHandling"; }
+const std::string LoadSpiceAscii::category() const {
+  return "DataHandling\\Text";
+}
 
 //----------------------------------------------------------------------------------------------
 /** Summary

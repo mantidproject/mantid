@@ -21,7 +21,7 @@ datapath='/afs/psi.ch/project/sinqdata'
 class LoadSINQ(PythonAlgorithm):
 
     def category(self):
-        return "DataHandling;PythonAlgorithms"
+        return "DataHandling\\Nexus"
 
     def summary(self):
         return "SINQ data file loader"

@@ -29,8 +29,6 @@ public:
 
   void testVersion() { TS_ASSERT_EQUALS(focus.version(), 2); }
 
-  void testCategory() { TS_ASSERT_EQUALS(focus.category(), "Diffraction"); }
-
   void testInit() {
     focus.initialize();
     TS_ASSERT(focus.isInitialized());

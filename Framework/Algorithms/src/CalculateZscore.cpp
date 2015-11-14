@@ -76,6 +76,8 @@ void CalculateZscore::exec() {
       WorkspaceFactory::Instance().create("Workspace2D", numspec, sizex,
                                           sizey));
 
+  Progress progress(this, 0, 1, numspec);
+
   // 3. Get Z values
   for (size_t i = 0; i < numspec; ++i) {
     // a) figure out wsindex
@@ -109,6 +111,8 @@ void CalculateZscore::exec() {
     vecX = inpX;
     vecY = yzscores;
     vecE = ezscores;
+
+    progress.report("Calculating Z Score");
   } // ENDFOR
 
   // 4. Set the output

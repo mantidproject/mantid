@@ -27,7 +27,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     _calibration_workspace = None
 
     def category(self):
-        return "Workflow\\MIDAS;Inelastic;PythonAlgorithms"
+        return "Workflow\\MIDAS;Inelastic\\Reduction"
 
 
     def summary(self):
@@ -377,15 +377,24 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         imid = float(npt / 2 + 1)
         gRun = mtd[ws].getRun()
         wave = gRun.getLogData('wavelength').value
-        freq = gRun.getLogData('Doppler.doppler_frequency').value
-        amp = gRun.getLogData('Doppler.doppler_amplitude').value
+        logger.information('Wavelength : %s' % wave)
+        if gRun.hasProperty('Doppler.maximum_delta_energy'):
+            energy = gRun.getLogData('Doppler.maximum_delta_energy').value
+            logger.information('Doppler max energy : %s' % energy)
+        elif gRun.hasProperty('Doppler.doppler_speed'):
+            speed = gRun.getLogData('Doppler.doppler_speed').value
+            amp = gRun.getLogData('Doppler.doppler_amplitude').value
+            logger.information('Doppler speed : %s' % speed)
+            logger.information('Doppler amplitude : %s' % amp)
+            energy = 1.2992581918414711e-4 * speed * amp * 2.0 / wave  # max energy
+        elif gRun.hasProperty('Doppler.doppler_freq'):
+            speed = gRun.getLogData('Doppler.doppler_freq').value
+            amp = gRun.getLogData('Doppler.doppler_amplitude').value
+            logger.information('Doppler freq : %s' % freq)
+            logger.information('Doppler amplitude : %s' % amp)
+            energy = 1.2992581918414711e-4 * freq * amp * 2.0 / wave  # max energy
 
-        logger.information('Wavelength : ' + str(wave))
-        logger.information('Doppler frequency : ' + str(freq))
-        logger.information('Doppler amplitude : ' + str(amp))
-
-        vmax = 1.2992581918414711e-4 * freq * amp * 2.0 / wave  # max energy
-        dele = 2.0 * vmax / npt
+        dele = 2.0 * energy / npt
         formula = '(x-%f)*%f' % (imid, dele)
 
         return formula

@@ -9,6 +9,7 @@
 #include "ui_EnggDiffractionQtGUI.h"
 #include "ui_EnggDiffractionQtTabCalib.h"
 #include "ui_EnggDiffractionQtTabFocus.h"
+#include "ui_EnggDiffractionQtTabPreproc.h"
 #include "ui_EnggDiffractionQtTabSettings.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -86,9 +87,9 @@ public:
 
   std::string currentCalibFile() const;
 
-  std::string newVanadiumNo() const;
+  std::vector<std::string> newVanadiumNo() const;
 
-  std::string newCeriaNo() const;
+  std::vector<std::string> newCeriaNo() const;
 
   std::string outCalibFilename() const { return m_outCalibFilename; }
 
@@ -105,11 +106,11 @@ public:
 
   virtual std::string focusingDir() const;
 
-  virtual std::string focusingRunNo() const;
+  virtual std::vector<std::string> focusingRunNo() const;
 
-  virtual std::string focusingCroppedRunNo() const;
+  virtual std::vector<std::string> focusingCroppedRunNo() const;
 
-  virtual std::string focusingTextureRunNo() const;
+  virtual std::vector<std::string> focusingTextureRunNo() const;
 
   virtual std::vector<bool> focusingBanks() const;
 
@@ -120,6 +121,14 @@ public:
   virtual bool focusedOutWorkspace() const;
 
   virtual void resetFocus();
+
+  virtual std::string currentPreprocRunNo() const;
+
+  virtual double rebinningTimeBin() const;
+
+  virtual size_t rebinningPulsesNumberPeriods() const;
+
+  virtual double rebinningPulsesTime() const;
 
   virtual void plotFocusedSpectrum(const std::string &wsName);
 
@@ -132,12 +141,14 @@ public:
   int currentPlotType() const { return m_currentType; }
 
 private slots:
-  /// for buttons, do calibrate, focus and similar
+  /// for buttons, do calibrate, focus, event->histo rebin, and similar
   void loadCalibrationClicked();
   void calibrateClicked();
   void focusClicked();
   void focusCroppedClicked();
   void focusTextureClicked();
+  void rebinTimeClicked();
+  void rebinMultiperiodClicked();
 
   // slots of the settings tab/section of the interface
   void browseInputDirCalib();
@@ -171,8 +182,9 @@ private:
   virtual void initLayout();
   void doSetupGeneralWidgets();
   void doSetupTabCalib();
-  void doSetupTabSettings();
   void doSetupTabFocus();
+  void doSetupTabPreproc();
+  void doSetupTabSettings();
 
   std::string guessGSASTemplatePath() const;
 
@@ -197,7 +209,12 @@ private:
   // but they could be separate dialogs, widgets, etc.
   Ui::EnggDiffractionQtTabCalib m_uiTabCalib;
   Ui::EnggDiffractionQtTabFocus m_uiTabFocus;
+  Ui::EnggDiffractionQtTabPreproc m_uiTabPreproc;
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
+
+  /// converts QList to a vector
+  std::vector<std::string> qListToVector(QStringList list,
+	  bool validator) const;
 
   /// instrument selected (ENGIN-X, etc.)
   std::string m_currentInst;

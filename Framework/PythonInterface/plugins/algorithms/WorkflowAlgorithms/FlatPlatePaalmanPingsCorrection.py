@@ -1,7 +1,7 @@
 #pylint: disable=no-init,invalid-name
 from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty, \
-                       WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator
+                       WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator, Progress
 from mantid.kernel import StringListValidator, StringMandatoryValidator, IntBoundedValidator, \
                           FloatBoundedValidator, Direction, logger, CompositeValidator
 import math, numpy as np
@@ -32,7 +32,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 #------------------------------------------------------------------------------
 
     def category(self):
-        return "Workflow\\MIDAS;PythonAlgorithms;CorrectionFunctions\\AbsorptionCorrections"
+        return "Workflow\\MIDAS;CorrectionFunctions\\AbsorptionCorrections"
 
 
     def summary(self):
@@ -117,13 +117,16 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self._setup()
         self._wave_range()
 
+        setup_prog = Progress(self, start=0.0, end=0.2, nreports=2)
         # Set sample material form chemical formula
+        setup_prog.report('Set sample material')
         SetSampleMaterial(InputWorkspace=self._sample_ws_name,
                           ChemicalFormula=self._sample_chemical_formula,
                           SampleNumberDensity=self._sample_number_density)
 
         # If using a can, set sample material using chemical formula
         if self._use_can:
+            setup_prog.report('Set contianer sample material')
             SetSampleMaterial(InputWorkspace=self._can_ws_name,
                               ChemicalFormula=self._can_chemical_formula,
                               SampleNumberDensity=self._can_number_density)
@@ -136,17 +139,20 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         self._get_angles()
         num_angles = len(self._angles)
-
+        workflow_prog = Progress(self, start=0.2, end =0.8, nreports=num_angles*2)
         for angle_idx in range(num_angles):
+            workflow_prog.report('Running flat correction for angle %s' % (angle_idx))
             angle = self._angles[angle_idx]
             (ass, assc, acsc, acc) = self._flat_abs(angle)
 
             logger.information('Angle %d: %f successful' % (angle_idx+1, self._angles[angle_idx]))
-
+            workflow_prog.report('Appending data for angle %s' % angle_idx)
             data_ass = np.append(data_ass, ass)
             data_assc = np.append(data_assc, assc)
             data_acsc = np.append(data_acsc, acsc)
             data_acc = np.append(data_acc, acc)
+
+        log_prog = Progress(self, start=0.8, end=1.0, nreports=8)
 
         sample_logs = {'sample_shape': 'flatplate', 'sample_filename': self._sample_ws_name,
                        'sample_thickness': self._sample_thickness, 'sample_angle': self._sample_angle}
@@ -154,6 +160,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         # Create the output workspaces
         ass_ws = self._output_ws_name + '_ass'
+        log_prog.report('Creating ass output Workspace')
         CreateWorkspace(OutputWorkspace=ass_ws,
                         DataX=dataX,
                         DataY=data_ass,
@@ -161,15 +168,18 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                         UnitX='Wavelength',
                         VerticalAxisUnit='SpectraNumber',
                         ParentWorkspace=self._sample_ws_name)
+        log_prog.report('Adding sample logs')
         self._add_sample_logs(ass_ws, sample_logs)
 
         workspaces = [ass_ws]
 
         if self._use_can:
+            log_prog.report('Adding can smaple logs')
             AddSampleLog(Workspace=ass_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
 
             assc_ws = self._output_ws_name + '_assc'
             workspaces.append(assc_ws)
+            log_prog.report('Creating assc output workspace')
             CreateWorkspace(OutputWorkspace=assc_ws,
                             DataX=dataX,
                             DataY=data_assc,
@@ -177,11 +187,13 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                             UnitX='Wavelength',
                             VerticalAxisUnit='SpectraNumber',
                             ParentWorkspace=self._sample_ws_name)
+            log_prog.report('Adding assc sample logs')
             self._add_sample_logs(assc_ws, sample_logs)
             AddSampleLog(Workspace=assc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
 
             acsc_ws = self._output_ws_name + '_acsc'
             workspaces.append(acsc_ws)
+            log_prog.report('Creating acsc outputworkspace')
             CreateWorkspace(OutputWorkspace=acsc_ws,
                             DataX=dataX,
                             DataY=data_acsc,
@@ -189,11 +201,13 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                             UnitX='Wavelength',
                             VerticalAxisUnit='SpectraNumber',
                             ParentWorkspace=self._sample_ws_name)
+            log_prog.report('Adding acsc sample logs')
             self._add_sample_logs(acsc_ws, sample_logs)
             AddSampleLog(Workspace=acsc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
 
             acc_ws = self._output_ws_name + '_acc'
             workspaces.append(acc_ws)
+            log_prog.report('Creating acc workspace')
             CreateWorkspace(OutputWorkspace=acc_ws,
                             DataX=dataX,
                             DataY=data_acc,
@@ -201,12 +215,13 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                             UnitX='Wavelength',
                             VerticalAxisUnit='SpectraNumber',
                             ParentWorkspace=self._sample_ws_name)
+            log_prog.report('Adding acc sample logs')
             self._add_sample_logs(acc_ws, sample_logs)
             AddSampleLog(Workspace=acc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
 
         if self._interpolate:
             self._interpolate_corrections(workspaces)
-
+        log_prog.report('Grouping Output Workspaces')
         GroupWorkspaces(InputWorkspaces=','.join(workspaces), OutputWorkspace=self._output_ws_name)
         self.setPropertyValue('OutputWorkspace', self._output_ws_name)
 

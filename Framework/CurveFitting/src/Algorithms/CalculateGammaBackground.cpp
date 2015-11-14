@@ -73,7 +73,7 @@ const std::string CalculateGammaBackground::name() const {
 int CalculateGammaBackground::version() const { return 1; }
 
 const std::string CalculateGammaBackground::category() const {
-  return "CorrectionFunctions";
+  return "CorrectionFunctions\\BackgroundCorrections";
 }
 
 void CalculateGammaBackground::init() {

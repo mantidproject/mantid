@@ -69,23 +69,6 @@ private:
                        "</Function>");
   }
 
-#ifdef WIN32
-  std::string getXmlRep_noOrigin() {
-    return std::string("<Function>"
-                       "<Type>PlaneImplicitFuction</Type>"
-                       "<ParameterList>"
-                       "<Parameter>"
-                       "<Type>NormalParameter</Type>"
-                       "<Value>1.25 4.5 6.75</Value>"
-                       "</Parameter>"
-                       "<Parameter>"
-                       "<Type>OriginParameter</Type>"
-                       "<Value>1.#QNAN 1.#QNAN 1.#QNAN</Value>"
-                       "</Parameter>"
-                       "</ParameterList>"
-                       "</Function>");
-  }
-#else
   std::string getXmlRep_noOrigin() {
     return std::string("<Function>"
                        "<Type>PlaneImplicitFuction</Type>"
@@ -101,7 +84,6 @@ private:
                        "</ParameterList>"
                        "</Function>");
   }
-#endif
 };
 
 #endif // MANTID_MDGEOMETRY_MDIMPLICITFUNCTIONTEST_H_

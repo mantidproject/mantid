@@ -50,7 +50,7 @@ public:
   /// Algorithm's version for identification. @see Algorithm::version
   virtual int version() const { return 1; };
   /// Algorithm's category for identification. @see Algorithm::category
-  virtual const std::string category() const { return "Inelastic"; };
+  virtual const std::string category() const { return "Inelastic\\Ei"; };
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
   virtual std::map<std::string, std::string> validateInputs();
 
