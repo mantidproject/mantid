@@ -101,12 +101,7 @@ void ColorSelectionWidget::loadBuiltinColorPresets()
   */
   void ColorSelectionWidget::loadColorMap(bool viewSwitched)
   {
-    /*int defaultColorMapIndex =
-    this->colorMapManager->getDefaultColorMapIndex(viewSwitched);
 
-    const pqColorMapModel *colorMap =
-    this->m_presets->getModel()->getColorMap(defaultColorMapIndex);
-    */
     QString defaultColorMap;
 
     // If the view has switched or the VSI is loaded use the last color map
@@ -128,12 +123,14 @@ void ColorSelectionWidget::loadBuiltinColorPresets()
       }
     }
 
-    // currently incorrect. json document more than just a number!
-    const Json::Value &colorMap = m_presets->GetFirstPresetWithName(
-        defaultColorMap.toStdString().c_str());
-    if (!colorMap.empty()) {
-      // emit this->colorMapChanged(colorMap);
-    }
+    // Mantid::VATES::ColorScaleLockGuard guard(m_colorScaleLock);
+    pqPresetDialog dialog(this, pqPresetDialog::SHOW_NON_INDEXED_COLORS_ONLY);
+    dialog.setCurrentPreset(defaultColorMap.toStdString().c_str());
+    Json::Value colorMap = dialog.currentPreset();
+    // cout << "default:" << defaultColorMap.toStdString() << " "  << colorMap
+    // << "\n";
+    if (!colorMap.empty())
+      emit this->colorMapChanged(colorMap);
   }
 
 /**
