@@ -201,7 +201,8 @@ void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
 */
 MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
     API::Progress &progress, const std::string &targetUnit,
-    API::MatrixWorkspace_sptr &inputWS, size_t nHist, int nBins, int nxBins) {
+    API::MatrixWorkspace_sptr &inputWS, size_t nHist, size_t nBins,
+    size_t nxBins) {
   // Create the output workspace. Can not re-use the input one because the
   // spectra are re-ordered.
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
