@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <vtkUnstructuredGrid.h>
-#include <vtkNew.h>
+#include <vtkSmartPointer.h>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -196,14 +196,14 @@ void testDepthChanged()
     //Test that it does work when setup.
     Mantid::API::Workspace_sptr ws = get3DWorkspace(true, true);
     presenter.extractMetadata(boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
-    vtkNew<vtkDataSet> ds;
-    TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds.GetPointer()));
+    auto ds = vtkSmartPointer<vtkDataSet>::Take(vtkUnstructuredGrid::New());
+    TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds));
     TSM_ASSERT_EQUALS("X Label should match exactly",
-                      getStringFieldDataValue(ds.GetPointer(), "AxisTitleForX"), "A ($A$)");
+                      getStringFieldDataValue(ds, "AxisTitleForX"), "A ($A$)");
     TSM_ASSERT_EQUALS("Y Label should match exactly",
-                      getStringFieldDataValue(ds.GetPointer(), "AxisTitleForY"), "B ($A$)");
+                      getStringFieldDataValue(ds, "AxisTitleForY"), "B ($A$)");
     TSM_ASSERT_EQUALS("Z Label should match exactly",
-                      getStringFieldDataValue(ds.GetPointer(), "AxisTitleForZ"), "C ($A$)");
+                      getStringFieldDataValue(ds, "AxisTitleForZ"), "C ($A$)");
   }
 
   void testCanSetAxisLabelsFrom4DData()
@@ -216,14 +216,14 @@ void testDepthChanged()
     //Test that it does work when setup.
     Mantid::API::Workspace_sptr ws = get3DWorkspace(false, true);
     presenter.extractMetadata(boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
-    vtkNew<vtkDataSet> ds;
-    TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds.GetPointer()));
+    auto ds = vtkSmartPointer<vtkDataSet>::Take(vtkUnstructuredGrid::New());
+    TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds));
     TSM_ASSERT_EQUALS("X Label should match exactly",
-                      getStringFieldDataValue(ds.GetPointer(), "AxisTitleForX"), "A ($A$)");
+                      getStringFieldDataValue(ds, "AxisTitleForX"), "A ($A$)");
     TSM_ASSERT_EQUALS("Y Label should match exactly",
-                      getStringFieldDataValue(ds.GetPointer(), "AxisTitleForY"), "B ($A$)");
+                      getStringFieldDataValue(ds, "AxisTitleForY"), "B ($A$)");
     TSM_ASSERT_EQUALS("Z Label should match exactly",
-                      getStringFieldDataValue(ds.GetPointer(), "AxisTitleForZ"), "C ($A$)");
+                      getStringFieldDataValue(ds, "AxisTitleForZ"), "C ($A$)");
   }
 
   void testCanLoadFileBasedOnExtension()
