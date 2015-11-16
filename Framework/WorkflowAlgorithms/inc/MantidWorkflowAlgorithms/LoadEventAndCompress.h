@@ -34,7 +34,7 @@ namespace WorkflowAlgorithms {
 class DLLExport LoadEventAndCompress : public API::DataProcessorAlgorithm {
 public:
   LoadEventAndCompress();
-  virtual ~LoadEventAndCompress();
+  virtual ~LoadEventAndCompress() override;
 
   virtual const std::string name() const override;
   virtual int version() const override;
