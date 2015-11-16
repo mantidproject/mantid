@@ -862,6 +862,7 @@ void MuonAnalysis::runLoadCurrent()
   if ( instname == "ARGUS" )
   {
     QString argusDAE = "\\\\ndw828\\argusdata\\current cycle\\nexus\\argus0000000.nxs";
+    argusDAE = MuonAnalysisHelper::localisePath(argusDAE);
     Poco::File l_path( argusDAE.toStdString() );
     try
     {
@@ -892,6 +893,7 @@ void MuonAnalysis::runLoadCurrent()
       instDirectory = "NDW1030";
     std::string autosavePointsTo = "";
     std::string autosaveFile = "\\\\" + instDirectory.toStdString() + "\\data\\autosave.run";
+    autosaveFile = MuonAnalysisHelper::localisePath(autosaveFile);
     Poco::File pathAutosave( autosaveFile );
     
     try // check if exists
@@ -915,6 +917,7 @@ void MuonAnalysis::runLoadCurrent()
     else
       psudoDAE = "\\\\" + instDirectory + "\\data\\" + autosavePointsTo.c_str();
 
+    psudoDAE = MuonAnalysisHelper::localisePath(psudoDAE);
     Poco::File l_path( psudoDAE.toStdString() );
     try
     {

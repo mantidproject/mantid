@@ -535,6 +535,23 @@ void groupWorkspaces(const std::string& groupName, const std::vector<std::string
   }
 }
 
+/**
+ * Converts platform-specific path to data archive into the correct format for
+ * the current platform (Windows, Linux or Mac)
+ */
+std::string localisePath(const std::string &path) {
+  auto catalogInfo = ConfigService::Instance().getFacility().catalogInfo();
+  return catalogInfo.transformArchivePath(path);
+}
+
+/**
+* Converts platform-specific path to data archive into the correct format for
+* the current platform (Windows, Linux or Mac)
+*/
+QString localisePath(const QString &path) {
+  return QString(localisePath(path.toStdString()).c_str());
+}
+
 } // namespace MuonAnalysisHelper
 } // namespace CustomInterfaces
 } // namespace Mantid
