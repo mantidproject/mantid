@@ -95,7 +95,6 @@ class RunSetupScript(BaseScriptElement):
             pardict["ResampleX"] = ''
             pardict["Binning"] = '%.7f' % self.binning
         # END-IF
-        print '[Trace] ResampleX: ', pardict["ResampleX"], ', Binning', pardict['Binning']
 
         pardict["BinInDspace"] = str(int(self.binindspace))
         pardict["SaveAs"] = self.saveas
@@ -120,7 +119,7 @@ class RunSetupScript(BaseScriptElement):
         Arguments:
          - inst_name:  name of the instrument
         """
-        if inst_name == 'POWGEN':
+        if inst_name == 'PG3':
             pass
         elif inst_name == 'NOM':
             pass

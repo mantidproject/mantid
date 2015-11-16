@@ -283,7 +283,6 @@ class RunSetupWidget(BaseWidget):
                 s.binning = float(self._content.binning_edit.text())
             except ValueError as e:
                 raise RuntimeError('Binning parameter is not given!')
-            print '[CHECK0] Binning = ', s.binning
 
             if s.binning < 0. and bintypestr.startswith('Linear'):
                 self._content.bintype_combo.setCurrentIndex(1)
@@ -291,8 +290,6 @@ class RunSetupWidget(BaseWidget):
                 s.binning = -1 * s.binning
             elif abs(s.binning) < 1.0E-20:
                 raise RuntimeError('Binning\'s parameter cannot be equal to 0!')
-
-            print '[CHECK1] Binning = ', s.binning
         # END-IF-ELSE (binning/resampleX)
 
         s.outputdir = self._content.outputdir_edit.text()
@@ -366,8 +363,6 @@ class RunSetupWidget(BaseWidget):
         """ Handling bin type changed
         """
         currindex = self._content.bintype_combo.currentIndex()
-        # print "New Index = %d" % (currindex)
-
         curbinning = self._content.binning_edit.text()
         if curbinning != "" and curbinning != None:
             curbinning = float(curbinning)
@@ -496,7 +491,6 @@ class RunSetupWidget(BaseWidget):
     def _usebin_clicked(self):
         """ Handling event if 'Binning' button is clicked
         """
-        print '[EVT] Use Bin Button Clicked'
         if self._content.usebin_button.isChecked() is True:
             self._content.binning_edit.setEnabled(True)
             self._content.resamplex_edit.setEnabled(False)
@@ -509,7 +503,6 @@ class RunSetupWidget(BaseWidget):
     def _resamplex_clicked(self):
         """ Handling event if 'ResampleX' is clicked
         """
-        print '[EVT] ResampleX Button Clicked'
         if self._content.resamplex_button.isChecked() is True:
             self._content.binning_edit.setEnabled(False)
             self._content.resamplex_edit.setEnabled(True)
