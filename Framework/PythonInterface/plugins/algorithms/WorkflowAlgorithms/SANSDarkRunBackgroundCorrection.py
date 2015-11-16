@@ -2,6 +2,7 @@
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
+import numpy as np
 
 class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
 
@@ -56,8 +57,11 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
                                                                        dark_run = dark_run,
                                                                        normalization_ratio = normalization_ratio)
 
+        # Remove the detectors which are unwanted
+        dark_run_monitor_corrected = self._remove_unwanted_detectors_and_monitors(dark_run_normalized)
+
         # Subtract the normalizaed dark run from the SANS workspace
-        output_ws = self._subtract_dark_run_from_sans_data(workspace, dark_run_normalized)
+        output_ws = self._subtract_dark_run_from_sans_data(workspace, dark_run_detector_and_monitor_corrected)
 
         self.setProperty("OutputWorkspace", output_ws)
 
@@ -95,9 +99,6 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         alg_clone.setProperty("OutputWorkspace", dark_run_clone_name)
         alg_clone.execute()
         dark_run_clone = alg_clone.getProperty("OutputWorkspace").value
-
-        # Remove the detectors which are unwanted
-        dark_run_monitor_corrected = self._remove_unwanted_detectors(dark_run_clone)
 
         dark_run_rebin_name = "_dark_run_rebinned"
         alg_rebin = AlgorithmManager.create("RebinToWorkspace")
@@ -226,9 +227,27 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
                                "ApplyToDetectors or ApplyToMonitors or both")
 
     def _set_pure_detector_dark_run(monitor_list):
-        # Since we only have around 1 monitors we set them manually to 0
+        # Since we only have around 10 or so monitors
+        # we set them manually to 0
         for index in monitor_list:
-            data = dark_run.dataX(index) # TODO: Continue here
+            data = dark_run.dataY(index)
+            data = data*0
+            dark_run.setY(index,data)
+
+    def _set_pure_monitor_dark_run(dark_run, monitor_list):
+        # Grab the monitor Y and E values
+        list_dataY = []
+        list_dataE = []
+        for index in monitor_list:
+            list_dataY.append(np.copy(dark_run.dataY(index)))
+            list_dataE.append(np.copy(dark_run.dataY(index)))
+
+        # Set everything to 0
+        self._scale_dark_run(dark_run, 0.0)
+
+        # Reset the monitors which are required
+        for i in range(0,len(monitor_list)):
+            dark_run.setY(index, monitor_list[i])
 
     def _find_monitor_workspace_indices(dark_run):
         monitor_list = []
