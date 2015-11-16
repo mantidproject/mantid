@@ -377,6 +377,7 @@ public:
     TS_ASSERT(dProp->allowedValues().empty());
     TS_ASSERT(sProp->allowedValues().empty());
     TS_ASSERT(lProp->allowedValues().empty());
+    TS_ASSERT(!bProp->allowedValues().empty())
     // Tests using a ListValidator are below
   }
 
@@ -676,10 +677,22 @@ public:
   void test_optional_bool_to_setValue() {
 
     std::string input = OptionalBool::StrTrue;
-
     PropertyWithValue<OptionalBool> property("myproperty", OptionalBool::Unset,
                                              Direction::Input);
     property.setValue(input);
+  }
+
+  void test_optional_bool_allowed_values() {
+    PropertyWithValue<OptionalBool> property("myproperty", OptionalBool::Unset,
+                                             Direction::Input);
+
+    auto values = property.allowedValues();
+    auto possibilities = OptionalBool::strToEmumMap();
+    TSM_ASSERT_EQUALS("3 states allowed", possibilities.size(), values.size());
+    for (auto it = values.begin(); it != values.end(); ++it) {
+      TSM_ASSERT("value not a known state",
+                 possibilities.find(*it) != possibilities.end());
+    }
   }
 
 private:
