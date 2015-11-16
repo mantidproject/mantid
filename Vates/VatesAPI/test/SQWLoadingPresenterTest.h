@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <vtkUnstructuredGrid.h>
+#include <vtkSmartPointer.h>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -89,11 +90,13 @@ void testExecutionInMemory()
 {
   using namespace testing;
   //Setup view
-  MockMDLoadingView* view = new MockMDLoadingView;
-  EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1)); 
-  EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1)).WillRepeatedly(Return(true)); // View setup to request loading in memory.
-  EXPECT_CALL(*view, getTime()).Times(AtLeast(1));
-  EXPECT_CALL(*view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
+  MockMDLoadingView view;
+  EXPECT_CALL(view, getRecursionDepth()).Times(AtLeast(1));
+  EXPECT_CALL(view, getLoadInMemory())
+      .Times(AtLeast(1))
+      .WillRepeatedly(Return(true)); // View setup to request loading in memory.
+  EXPECT_CALL(view, getTime()).Times(AtLeast(1));
+  EXPECT_CALL(view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
 
   //Setup rendering factory
   MockvtkDataSetFactory factory;
@@ -108,9 +111,10 @@ void testExecutionInMemory()
   EXPECT_CALL(mockLoadingProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
 
   //Create the presenter and runit!
-  SQWLoadingPresenter presenter(view, getSuitableFileNamePath());
+  SQWLoadingPresenter presenter(&view, getSuitableFileNamePath());
   presenter.executeLoadMetadata();
-  vtkDataSet* product = presenter.execute(&factory, mockLoadingProgressAction, mockDrawingProgressAction);
+  auto product = vtkSmartPointer<vtkDataSet>::Take(presenter.execute(
+      &factory, mockLoadingProgressAction, mockDrawingProgressAction));
 
   std::string fileNameIfGenerated = getFileBackend(getSuitableFileNamePath());
   std::ifstream fileExists(fileNameIfGenerated.c_str(), ifstream::in);
@@ -124,12 +128,10 @@ void testExecutionInMemory()
   TS_ASSERT_THROWS_NOTHING(presenter.getGeometryXML());
   TS_ASSERT(!presenter.getWorkspaceTypeName().empty());
 
-  TS_ASSERT(Mock::VerifyAndClearExpectations(view));
+  TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
 
   TSM_ASSERT("Bad usage of loading algorithm progress updates", Mock::VerifyAndClearExpectations(&mockLoadingProgressAction));
-
-  product->Delete();
 }
 
 void testCallHasTDimThrows()
@@ -169,11 +171,13 @@ void testTimeLabel()
 {
   using namespace testing;
   //Setup view
-  MockMDLoadingView* view = new MockMDLoadingView;
-  EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1));
-  EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1)).WillRepeatedly(Return(true)); // View setup to request loading in memory.
-  EXPECT_CALL(*view, getTime()).Times(AtLeast(1));
-  EXPECT_CALL(*view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
+  MockMDLoadingView view;
+  EXPECT_CALL(view, getRecursionDepth()).Times(AtLeast(1));
+  EXPECT_CALL(view, getLoadInMemory())
+      .Times(AtLeast(1))
+      .WillRepeatedly(Return(true)); // View setup to request loading in memory.
+  EXPECT_CALL(view, getTime()).Times(AtLeast(1));
+  EXPECT_CALL(view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
 
   //Setup rendering factory
   MockvtkDataSetFactory factory;
@@ -188,29 +192,30 @@ void testTimeLabel()
   EXPECT_CALL(mockLoadingProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
 
   //Create the presenter and runit!
-  SQWLoadingPresenter presenter(view, getSuitableFileNamePath());
+  SQWLoadingPresenter presenter(&view, getSuitableFileNamePath());
   presenter.executeLoadMetadata();
-  vtkDataSet* product = presenter.execute(&factory, mockLoadingProgressAction, mockDrawingProgressAction);
+  auto product = vtkSmartPointer<vtkDataSet>::Take(presenter.execute(
+      &factory, mockLoadingProgressAction, mockDrawingProgressAction));
   TSM_ASSERT_EQUALS("Time label should be exact.",
                     presenter.getTimeStepLabel(), "en (meV)");
 
-  TS_ASSERT(Mock::VerifyAndClearExpectations(view));
+  TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
 
   TSM_ASSERT("Bad usage of loading algorithm progress updates", Mock::VerifyAndClearExpectations(&mockLoadingProgressAction));
-
-  product->Delete();
 }
 
 void testAxisLabels()
 {
   using namespace testing;
   //Setup view
-  MockMDLoadingView* view = new MockMDLoadingView;
-  EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1));
-  EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1)).WillRepeatedly(Return(true)); // View setup to request loading in memory.
-  EXPECT_CALL(*view, getTime()).Times(AtLeast(1));
-  EXPECT_CALL(*view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
+  MockMDLoadingView view;
+  EXPECT_CALL(view, getRecursionDepth()).Times(AtLeast(1));
+  EXPECT_CALL(view, getLoadInMemory())
+      .Times(AtLeast(1))
+      .WillRepeatedly(Return(true)); // View setup to request loading in memory.
+  EXPECT_CALL(view, getTime()).Times(AtLeast(1));
+  EXPECT_CALL(view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
 
   //Setup rendering factory
   MockvtkDataSetFactory factory;
@@ -225,9 +230,10 @@ void testAxisLabels()
   EXPECT_CALL(mockLoadingProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
 
   //Create the presenter and runit!
-  SQWLoadingPresenter presenter(view, getSuitableFileNamePath());
+  SQWLoadingPresenter presenter(&view, getSuitableFileNamePath());
   presenter.executeLoadMetadata();
-  vtkDataSet* product = presenter.execute(&factory, mockLoadingProgressAction, mockDrawingProgressAction);
+  auto product = vtkSmartPointer<vtkDataSet>::Take(presenter.execute(
+      &factory, mockLoadingProgressAction, mockDrawingProgressAction));
   TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(product));
   TSM_ASSERT_EQUALS("X Label should match exactly",
                     getStringFieldDataValue(product, "AxisTitleForX"),
@@ -239,11 +245,9 @@ void testAxisLabels()
                     getStringFieldDataValue(product, "AxisTitleForZ"),
                     "qz ($\\AA^{-1}$)");
 
-  TS_ASSERT(Mock::VerifyAndClearExpectations(view));
+  TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
   TSM_ASSERT("Bad usage of loading algorithm progress updates", Mock::VerifyAndClearExpectations(&mockLoadingProgressAction));
-
-  product->Delete();
 }
 
 };

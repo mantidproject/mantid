@@ -56,7 +56,8 @@ public:
   void test_that_non_default_cob_is_created() {
     // Arrange
     MOCKMDLoadingPresenter presenter;
-    auto dataSet = makeDataSet();
+    vtkSmartPointer<vtkUnstructuredGrid> dataSet;
+    dataSet.TakeReference(makeDataSet());
     // Act
     presenter.setDefaultCOBandBoundaries(dataSet);
     // Assert
@@ -91,8 +92,6 @@ public:
     TS_ASSERT_EQUALS(10.0, bounds[3]);
     TS_ASSERT_EQUALS(-10.0, bounds[4]);
     TS_ASSERT_EQUALS(10.0, bounds[5]);
-
-    dataSet->Delete();
   }
 };
 

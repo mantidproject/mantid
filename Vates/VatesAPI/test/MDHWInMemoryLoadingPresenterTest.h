@@ -11,6 +11,7 @@
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDHWInMemoryLoadingPresenter.h"
 #include <vtkUnstructuredGrid.h>
+#include <vtkSmartPointer.h>
 
 using namespace Mantid::VATES;
 using namespace Mantid::API;
@@ -156,7 +157,8 @@ public:
     //Create the presenter and run it!
     MDHWInMemoryLoadingPresenter presenter(view, repository, "_");
     presenter.executeLoadMetadata();
-    vtkDataSet* product = presenter.execute(&factory, mockLoadingProgressAction, mockDrawingProgressAction);
+    auto product = vtkSmartPointer<vtkDataSet>::Take(presenter.execute(
+        &factory, mockLoadingProgressAction, mockDrawingProgressAction));
 
     TSM_ASSERT("Should have generated a vtkDataSet", NULL != product);
     TSM_ASSERT_EQUALS("Wrong type of output generated", "vtkUnstructuredGrid", std::string(product->GetClassName()));
@@ -168,8 +170,6 @@ public:
     TSM_ASSERT("Special coordinate metadata failed.", -1 < presenter.getSpecialCoordinates());
     TS_ASSERT(Mock::VerifyAndClearExpectations(view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
-
-    product->Delete();
   }
 
   void testCallHasTDimThrows()

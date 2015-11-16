@@ -10,6 +10,7 @@
 #include "MantidVatesAPI/MDHWLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidKernel/make_unique.h"
 
 #include "MockObjects.h"
 
@@ -121,54 +122,51 @@ void testLoadInMemoryChanged()
 void testhasTDimensionWhenIntegrated()
 {
   //Setup view
-  auto * view = new NiceMock<MockMDLoadingView>();
+  auto view = Mantid::Kernel::make_unique<NiceMock<MockMDLoadingView>>();
 
-  ConcreteMDHWLoadingPresenter presenter(view);
+  ConcreteMDHWLoadingPresenter presenter(view.get());
 
   //Test that it does work when setup.
   Mantid::API::Workspace_sptr ws = get3DWorkspace(true, false); //Integrated T Dimension
   presenter.extractMetadata(boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
 
   TSM_ASSERT("This is a 4D workspace with an integrated T dimension", !presenter.hasTDimensionAvailable());
-  delete view;
 }
 
 void testHasTDimensionWhenNotIntegrated()
 {
   //Setup view
-  auto * view = new NiceMock<MockMDLoadingView>();
+  auto view = Mantid::Kernel::make_unique<NiceMock<MockMDLoadingView>>();
 
-  ConcreteMDHWLoadingPresenter presenter(view);
+  ConcreteMDHWLoadingPresenter presenter(view.get());
 
   //Test that it does work when setup. 
   Mantid::API::Workspace_sptr ws = get3DWorkspace(false, false); //Non-integrated T Dimension
   presenter.extractMetadata(boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
 
   TSM_ASSERT("This is a 4D workspace with an integrated T dimension", presenter.hasTDimensionAvailable());
-  delete view;
 }
 
 void testHasTimeLabelWithTDimension()
 {
   //Setup view
-  auto * view = new NiceMock<MockMDLoadingView>();
+  auto view = Mantid::Kernel::make_unique<NiceMock<MockMDLoadingView>>();
 
-  ConcreteMDHWLoadingPresenter presenter(view);
+  ConcreteMDHWLoadingPresenter presenter(view.get());
 
   //Test that it does work when setup.
   Mantid::API::Workspace_sptr ws = get3DWorkspace(false, false); //Non-integrated T Dimension
   presenter.extractMetadata(boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
 
   TSM_ASSERT_EQUALS("This is a 4D workspace with a T dimension", "D (A)", presenter.getTimeStepLabel());
-  delete view;
 }
 
 void testCanSetAxisLabelsFrom3DData()
 {
   //Setup view
-  auto * view = new NiceMock<MockMDLoadingView>();
+  auto view = Mantid::Kernel::make_unique<NiceMock<MockMDLoadingView>>();
 
-  ConcreteMDHWLoadingPresenter presenter(view);
+  ConcreteMDHWLoadingPresenter presenter(view.get());
 
   //Test that it does work when setup.
   Mantid::API::Workspace_sptr ws = get3DWorkspace(true, false);
@@ -181,15 +179,14 @@ void testCanSetAxisLabelsFrom3DData()
                     getStringFieldDataValue(ds, "AxisTitleForY"), "B ($A$)");
   TSM_ASSERT_EQUALS("Z Label should match exactly",
                     getStringFieldDataValue(ds, "AxisTitleForZ"), "C ($A$)");
-  delete view;
 }
 
 void testCanSetAxisLabelsFrom4DData()
 {
   //Setup view
-  auto * view = new NiceMock<MockMDLoadingView>();
+  auto view = Mantid::Kernel::make_unique<NiceMock<MockMDLoadingView>>();
 
-  ConcreteMDHWLoadingPresenter presenter(view);
+  ConcreteMDHWLoadingPresenter presenter(view.get());
 
   //Test that it does work when setup.
   Mantid::API::Workspace_sptr ws = get3DWorkspace(false, false);
@@ -203,7 +200,6 @@ void testCanSetAxisLabelsFrom4DData()
   TSM_ASSERT_EQUALS("Z Label should match exactly",
                     getStringFieldDataValue(ds, "AxisTitleForZ"), "C ($A$)");
 
-  delete view;
 }
 
 Mantid::API::IMDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape){

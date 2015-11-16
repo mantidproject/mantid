@@ -124,8 +124,8 @@ public:
 
   void testExecution() {
     auto filename = getSuitableFile();
-    auto product = doExecute(filename);
-    product->Delete();
+    vtkSmartPointer<vtkDataSet> product;
+    product.TakeReference(doExecute(filename));
   }
 
   void testExecutionWithLegacyFile() {
@@ -141,19 +141,19 @@ public:
     NiceMock<MockProgressAction> mockDrawingProgressAction;
 
     // Setup view
-    MockMDLoadingView *view = new MockMDLoadingView;
-    EXPECT_CALL(*view, getTime()).WillRepeatedly(Return(0));
-    EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(0));
-    EXPECT_CALL(*view, getLoadInMemory())
+    MockMDLoadingView view;
+    EXPECT_CALL(view, getTime()).WillRepeatedly(Return(0));
+    EXPECT_CALL(view, getRecursionDepth()).Times(AtLeast(0));
+    EXPECT_CALL(view, getLoadInMemory())
         .Times(AtLeast(0))
         .WillRepeatedly(testing::Return(true));
-    EXPECT_CALL(*view, updateAlgorithmProgress(_, _)).Times(AnyNumber());
+    EXPECT_CALL(view, updateAlgorithmProgress(_, _)).Times(AnyNumber());
 
     ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
 
     // Create the presenter as in the vtkMDHWSource
     auto normalizationOption = Mantid::VATES::VisualNormalization::AutoSelect;
-    MDHWNexusLoadingPresenter presenter(view, filename);
+    MDHWNexusLoadingPresenter presenter(&view, filename);
     const double time = 0.0;
     vtkMD0DFactory *zeroDFactory = new vtkMD0DFactory;
     vtkMDHistoLineFactory *lineFactory =
@@ -162,9 +162,10 @@ public:
         new vtkMDHistoQuadFactory(thresholdRange, normalizationOption);
     vtkMDHistoHexFactory *hexFactory =
         new vtkMDHistoHexFactory(thresholdRange, normalizationOption);
-    vtkMDHistoHex4DFactory<TimeToTimeStep> *factory =
-        new vtkMDHistoHex4DFactory<TimeToTimeStep>(thresholdRange,
-                                                   normalizationOption, time);
+    // Deleting factory should delete the whole chain since it is connected
+    // via smart pointers
+    auto factory = boost::make_shared<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
+        thresholdRange, normalizationOption, time);
 
     factory->SetSuccessor(hexFactory);
     hexFactory->SetSuccessor(quadFactory);
@@ -172,8 +173,8 @@ public:
     lineFactory->SetSuccessor(zeroDFactory);
 
     presenter.executeLoadMetadata();
-    vtkDataSet *product = presenter.execute(factory, mockLoadingProgressAction,
-                                            mockDrawingProgressAction);
+    auto product = vtkSmartPointer<vtkDataSet>::Take(presenter.execute(
+        factory.get(), mockLoadingProgressAction, mockDrawingProgressAction));
 
     // Set the COB
     try {
@@ -227,10 +228,6 @@ public:
                     std::numeric_limits<double>::epsilon());
     TS_ASSERT_DELTA(cobMatrix->GetElement(3, 3), expectedElements[15],
                     std::numeric_limits<double>::epsilon());
-    product->Delete();
-    // Deleting factory should delete the whole chain since it is connected
-    // via smart pointers
-    delete factory;
   }
 
   void testCallHasTDimThrows() {
@@ -284,15 +281,13 @@ public:
     // Create the presenter and runit!
     MDHWNexusLoadingPresenter presenter(view, getSuitableFile());
     presenter.executeLoadMetadata();
-    vtkDataSet *product = presenter.execute(&factory, mockLoadingProgressAction,
-                                            mockDrawingProgressAction);
+    auto product = vtkSmartPointer<vtkDataSet>::Take(presenter.execute(
+        &factory, mockLoadingProgressAction, mockDrawingProgressAction));
     TSM_ASSERT_EQUALS("Time label should be exact.",
                       presenter.getTimeStepLabel(), "DeltaE (DeltaE)");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
-
-    product->Delete();
   }
 
   void testAxisLabels() {
@@ -318,8 +313,8 @@ public:
     // Create the presenter and runit!
     MDHWNexusLoadingPresenter presenter(view, getSuitableFile());
     presenter.executeLoadMetadata();
-    vtkDataSet *product = presenter.execute(&factory, mockLoadingProgressAction,
-                                            mockDrawingProgressAction);
+    auto product = vtkSmartPointer<vtkDataSet>::Take(presenter.execute(
+        &factory, mockLoadingProgressAction, mockDrawingProgressAction));
     TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(product));
 
     TSM_ASSERT_EQUALS("X Label should match exactly",
@@ -334,8 +329,6 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
-
-    product->Delete();
   }
 };
 #endif
