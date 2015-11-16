@@ -156,5 +156,16 @@ ConvexPolygon Quadrilateral::toPoly() const {
   return ConvexPolygon(points);
 }
 
+/// Shifts the vertexes in a clockwise manner
+void Quadrilateral::shiftVertexesClockwise() {
+
+  V2D temp = m_lowerLeft;
+
+  m_lowerLeft = m_upperLeft;
+  m_upperLeft = m_upperRight;
+  m_upperRight = m_lowerRight;
+  m_lowerRight = temp;
+}
+
 } // namespace Mantid
 } // namespace Geometry

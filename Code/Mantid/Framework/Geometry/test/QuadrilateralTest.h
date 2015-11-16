@@ -72,7 +72,7 @@ public:
   void test_contains_single_point()
   {
     Quadrilateral rect = makeRectangle();
-    
+
     TS_ASSERT(rect.contains(V2D(1.0, 0.25)));
     // On edge
     TS_ASSERT(rect.contains(V2D(1.0, 0.0)));
@@ -91,7 +91,22 @@ public:
     TS_ASSERT(largeRectangle.contains(smallRectangle));
     TS_ASSERT(!smallRectangle.contains(largeRectangle));
   }
-  
+
+  void test_clockwise_rotation() {
+    Quadrilateral quad(V2D(0.0, 0.0), V2D(1.0, 3.0), V2D(4.0, 4.0),
+                       V2D(4.0, 1.0));
+
+    quad.shiftVertexesClockwise();
+
+    TS_ASSERT_EQUALS(quad.at(0).X(), 4.0);
+    TS_ASSERT_EQUALS(quad.at(0).Y(), 1.0);
+    TS_ASSERT_EQUALS(quad.at(1).X(), 4.0);
+    TS_ASSERT_EQUALS(quad.at(1).Y(), 4.0);
+    TS_ASSERT_EQUALS(quad.at(2).X(), 1.0);
+    TS_ASSERT_EQUALS(quad.at(2).Y(), 3.0);
+    TS_ASSERT_EQUALS(quad.at(3).X(), 0.0);
+    TS_ASSERT_EQUALS(quad.at(3).Y(), 0.0);
+  }
 
 private:
   Quadrilateral makeRectangle()

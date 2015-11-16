@@ -63,7 +63,7 @@ public:
     double wavenumber = 2 * M_PI / wavelength;
     return wavenumber * m_dirQz;
   }
-   
+
   Mantid::Geometry::Quadrilateral createQuad(double lamUpper, double lamLower, double thetaUpper, double thetaLower){
       setThetaFinal(thetaLower);
       const Mantid::Kernel::V2D ur(calculateDim0(lamLower), // highest qx
@@ -77,6 +77,12 @@ public:
                    calculateDim1(lamUpper));
 
       Mantid::Geometry::Quadrilateral quad(ll, lr, ur, ul);
+
+      while ((quad.at(0).X() > quad.at(3).X()) ||
+             (quad.at(0).Y() > quad.at(1).Y())) {
+        quad.shiftVertexesClockwise();
+      }
+
       return quad;
    }
 };
