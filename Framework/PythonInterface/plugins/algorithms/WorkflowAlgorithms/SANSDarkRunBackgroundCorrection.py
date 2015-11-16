@@ -4,7 +4,6 @@ from mantid.kernel import *
 from mantid.api import *
 import numpy as np
 
-
 class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
     def category(self):
         return "Workflow\\SANS\\UsesPropertyManager"
@@ -33,6 +32,14 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         self.declareProperty("ApplyToDetectors", True, "If True then we apply the correction to the detector pixels")
         self.declareProperty("ApplyToMonitors", False, "If True then we apply the correction to the monitors")
 
+        arrvalidator = IntArrayBoundedValidator()
+        arrvalidator.setLower(0)
+        self.declareProperty(IntArrayProperty("SelectedMonitors", values=[],
+                                              validator=arrvalidator,
+                                              direction=Direction.Input),
+                             "List of selected workspace indices of monitors to which the "
+                             "correction should be applied. If empty, all monitors will "
+                              "be corrected, if ApplyToMonitors has been selected.")
     def PyExec(self):
         # Get the workspaces
         workspace = self.getProperty("InputWorkspace").value
@@ -58,7 +65,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
                                                                        normalization_ratio = normalization_ratio)
 
         # Remove the detectors which are unwanted
-        dark_run_monitor_corrected = self._remove_unwanted_detectors_and_monitors(dark_run_normalized)
+        dark_run_detector_and_monitor_corrected = self._remove_unwanted_detectors_and_monitors(dark_run_normalized)
 
         # Subtract the normalizaed dark run from the SANS workspace
         output_ws = self._subtract_dark_run_from_sans_data(workspace, dark_run_detector_and_monitor_corrected)
@@ -75,6 +82,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         if not applyToDetectors and not applyToMonitors:
             error_msg = 'Must provide either ApplyToDetectors or ApplyToMonitors or both'
             issues['ApplyToDetectors'] = error_msg
+        return issues
 
     def _subtract_dark_run_from_sans_data(self, workspace, dark_run):
         # Subtract the dark_run from the workspace
@@ -200,7 +208,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         # Now that we have a unity workspace multiply with the unit value
         return self._scale_dark_run(dark_run_unity,averaged_value)
 
-    def _remove_unwanted_detectors(self, dark_run):
+    def _remove_unwanted_detectors_and_monitors(self, dark_run):
         # If we want both the monitors and the detectors, then we don't have to do anything
         applyToDetectors = self.getProperty("ApplyToDetectors").value
         applyToMonitors = self.getProperty("ApplyToMonitors").value
@@ -208,23 +216,30 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         if applyToDetectors and applyToMonitors:
             return dark_run
 
-        # Find all monitors
-        monitor_list = self._find_monitor_workspace_indices(dark_run)
-
         # If the user only wants the detector selection. Then we we cannot subtract
         # anything from the monitor spectra. This is true the other way around of course.
         # The minus algorithm will need to map all spectra from the LHS to some spectra
         # of the RHS, hence it does not quite do what we want. In order to circumvent the
         # issue here, we set all spectra to 0 which should not contribute to the dark run
         # correction.
+        remover = DarkRunMonitorAndDetectorRemover()
         detector_cleaned_dark_run = None
         if applyToDetectors:
-            detector_cleaned_dark_run = self._set_pure_detector_dark_run(dark_run, monitor_list)
+            detector_cleaned_dark_run = remover.set_pure_detector_dark_run(dark_run)
         elif applyToMonitors:
-            detector_cleaned_dark_run = self._set_pure_monitor_dark_run(dark_run, monitor_list)
+            selected_monitors = self._get_selected_monitors()
+            detector_cleaned_dark_run = remover.set_pure_monitor_dark_run(dark_run, selected_monitors)
         else:
             raise RuntimeError("SANSDarkRunBackgroundCorrection: Must provide either "
                                "ApplyToDetectors or ApplyToMonitors or both")
+        return detector_cleaned_dark_run
+
+    def _get_selected_monitors(self):
+        '''
+        Gets the selected monitors
+        @returns the selection of monitors
+        '''
+        return self.getProperty("SelectedMonitors").value
 
 
 class DarkRunMonitorAndDetectorRemover(object):
@@ -247,8 +262,11 @@ class DarkRunMonitorAndDetectorRemover(object):
         # we set them manually to 0
         for index in monitor_list:
             data = dark_run.dataY(index)
+            error = dark_run.dataE(index)
             data = data*0
+            error = error*0
             dark_run.setY(index,data)
+            dark_run.setE(index,error)
 
         return dark_run
 
@@ -260,14 +278,14 @@ class DarkRunMonitorAndDetectorRemover(object):
         '''
         monitor_list = []
         try:
-            num_histograms = dark_run.getNumHistograms()
+            num_histograms = dark_run.getNumberHistograms()
             for index in range(0, num_histograms):
                 det = dark_run.getDetector(index)
                 if det.isMonitor():
                     monitor_list.append(index)
         except:
-            # TODO: PRODUCE WARNING
-            pass
+            Logger("DarkRunMonitorAndDetectorRemover").information("There was an issue when trying "
+                                                                   "to extract the monitor list from workspace")
         return monitor_list
 
     def set_pure_monitor_dark_run(self, dark_run, monitor_selection):
@@ -277,27 +295,69 @@ class DarkRunMonitorAndDetectorRemover(object):
         @param dark_run: the dark run
         @param monitor_selection: the monitors which are selected
         @param monitor_list: the list of indices of monitors
+        @raise RuntimeError: If the selected monitor workspace index does not exist.
         '''
         # Get the list of monitor workspace indices
         monitor_list = self.find_monitor_workspace_indices(dark_run)
 
-        dummy = monitor_selection # TODO implement
+        # If there is a monitor selection then make sure that it is compatible
+        # witht list of monitors on the workspace
+        selected_monitors = []
+        if len(monitor_selection) > 0:
+            selected_monitors = set(monitor_selection)
+            if not selected_monitors.issubset(set(monitor_list)):
+                raise RuntimeError("DarkRunMonitorAndDetectorRemover: "
+                                   "The selected monitors are not part of the workspace. "
+                                   "Make sure you have selected a monitor workspace index "
+                                   "which is part of the workspace")
 
         # Grab the monitor Y and E values
         list_dataY = []
         list_dataE = []
         for index in monitor_list:
             list_dataY.append(np.copy(dark_run.dataY(index)))
-            list_dataE.append(np.copy(dark_run.dataY(index)))
+            list_dataE.append(np.copy(dark_run.dataE(index)))
 
         # Set everything to 0
-        self._scale_dark_run(dark_run, 0.0)
+        scale_factor = 0.0
+        dark_run_scaled_name = "dark_run_scaled"
 
-        # Reset the monitors which are required
+        alg_scale  = AlgorithmManager.create("Scale")
+        alg_scale.initialize()
+        alg_scale.setChild(True)
+        alg_scale.setProperty("InputWorkspace", dark_run)
+        alg_scale.setProperty("OutputWorkspace", dark_run_scaled_name)
+        alg_scale.setProperty("Operation", "Multiply")
+        alg_scale.setProperty("Factor", scale_factor)
+        alg_scale.execute()
+        dark_run = alg_scale.getProperty("OutputWorkspace").value
+
+        # Reset the monitors which are required. Either we reset all monitors
+        # or only a specific set of monitors which was selected by the user.
+        if len(selected_monitors) > 0:
+            dark_run = self._set_only_selected_monitors(dark_run, list_dataY, list_dataE,
+                                                        monitor_list, selected_monitors)
+        else:
+            dark_run = self._set_all_monitors(dark_run, list_dataY,
+                                              list_dataE, monitor_list)
+        return dark_run
+
+    def _set_all_monitors(self, dark_run, list_dataY, list_dataE, monitor_list):
+        '''
+        We reset all monitors back to the old values
+        '''
         for i in range(0,len(monitor_list)):
-            dark_run.setY(index, list_dataY[i])
-            dark_run.setE(index, list_dataE[i])
+                dark_run.setY(monitor_list[i], list_dataY[i])
+                dark_run.setE(monitor_list[i], list_dataE[i])
+        return dark_run
 
+    def _set_only_selected_monitors(self, dark_run, list_dataY, list_dataE,
+                                    monitor_list, selected_monitors):
+        for i in range(0,len(monitor_list)):
+            # Only add the data back for the specified monitors
+            if monitor_list[i] in selected_monitors:
+                dark_run.setY(monitor_list[i], list_dataY[i])
+                dark_run.setE(monitor_list[i], list_dataE[i])
         return dark_run
 #############################################################################################
 
