@@ -303,8 +303,26 @@ IPropertyManager::getValue<DataObjects::TableWorkspace_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected TableWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<TableWorkspace>.";
+    throw std::runtime_error(message);
+  }
+}
+
+template <>
+DLLExport DataObjects::TableWorkspace_const_sptr
+IPropertyManager::getValue<DataObjects::TableWorkspace_const_sptr>(
+    const std::string &name) const {
+  PropertyWithValue<DataObjects::TableWorkspace_sptr> *prop =
+      dynamic_cast<PropertyWithValue<DataObjects::TableWorkspace_sptr> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    return prop->operator()();
+  } else {
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<TableWorkspace>.";
     throw std::runtime_error(message);
   }
 }

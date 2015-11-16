@@ -1118,7 +1118,25 @@ IPropertyManager::getValue<boost::shared_ptr<Mantid::API::IFunction>>(
     return *prop;
   } else {
     std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected IFitFunction.";
+                          " to incorrect type. Expected shared_ptr<IFunction>.";
+    throw std::runtime_error(message);
+  }
+}
+
+template <>
+MANTID_API_DLL boost::shared_ptr<const Mantid::API::IFunction>
+IPropertyManager::getValue<boost::shared_ptr<const Mantid::API::IFunction>>(
+    const std::string &name) const {
+  PropertyWithValue<boost::shared_ptr<Mantid::API::IFunction>> *prop =
+      dynamic_cast<
+          PropertyWithValue<boost::shared_ptr<Mantid::API::IFunction>> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    return prop->operator()();
+  } else {
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<IFunction>.";
     throw std::runtime_error(message);
   }
 }

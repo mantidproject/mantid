@@ -1245,8 +1245,9 @@ IPropertyManager::getValue<Mantid::API::ExperimentInfo_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected ExperimentInfo.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<ExperimentInfo>.";
     throw std::runtime_error(message);
   }
 }
@@ -1261,8 +1262,9 @@ IPropertyManager::getValue<Mantid::API::ExperimentInfo_const_sptr>(
   if (prop) {
     return prop->operator()();
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected const ExperimentInfo.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<ExperimentInfo>.";
     throw std::runtime_error(message);
   }
 }
