@@ -436,7 +436,8 @@ void LoadSpice2D::runLoadInstrument(
     loadInst->setPropertyValue("InstrumentName", inst_name);
     loadInst->setProperty<API::MatrixWorkspace_sptr>("Workspace",
                                                      localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap", false);
+    loadInst->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(false));
     loadInst->execute();
   } catch (std::invalid_argument &) {
     g_log.information("Invalid argument to LoadInstrument Child Algorithm");

@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/OptionalBool.h"
 #include <vector>
 #include <set>
 
@@ -376,6 +377,8 @@ protected:
     operator uint32_t();
     operator int64_t();
     operator uint64_t();
+    operator OptionalBool();
+
 #ifdef __APPLE__
     operator unsigned long();
 #endif

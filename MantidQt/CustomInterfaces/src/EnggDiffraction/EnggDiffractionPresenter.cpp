@@ -28,6 +28,11 @@ Mantid::Kernel::Logger g_log("EngineeringDiffractionGUI");
 }
 
 const std::string EnggDiffractionPresenter::g_enginxStr = "ENGINX";
+
+const std::string EnggDiffractionPresenter::g_runNumberErrorStr =
+    " cannot be empty, must be an integer number, a valid ENGINX run number or "
+    "a valid directory.";
+
 // discouraged at the moment
 const bool EnggDiffractionPresenter::g_askUserCalibFilename = false;
 const std::string EnggDiffractionPresenter::g_vanIntegrationWSName =
@@ -152,8 +157,8 @@ void EnggDiffractionPresenter::processLoadExistingCalib() {
 }
 
 void EnggDiffractionPresenter::processCalcCalib() {
-  const std::string vanNo = m_view->newVanadiumNo();
-  const std::string ceriaNo = m_view->newCeriaNo();
+  const std::string vanNo = isValidRunNumber(m_view->newVanadiumNo());
+  const std::string ceriaNo = isValidRunNumber(m_view->newCeriaNo());
   try {
     inputChecksBeforeCalibrate(vanNo, ceriaNo);
   } catch (std::invalid_argument &ia) {
@@ -175,7 +180,7 @@ void EnggDiffractionPresenter::processCalcCalib() {
 }
 
 void EnggDiffractionPresenter::processFocusBasic() {
-  const std::string runNo = m_view->focusingRunNo();
+  const std::string runNo = isValidRunNumber(m_view->focusingRunNo());
   const std::vector<bool> banks = m_view->focusingBanks();
 
   try {
@@ -190,7 +195,7 @@ void EnggDiffractionPresenter::processFocusBasic() {
 }
 
 void EnggDiffractionPresenter::processFocusCropped() {
-  const std::string runNo = m_view->focusingCroppedRunNo();
+  const std::string runNo = isValidRunNumber(m_view->focusingCroppedRunNo());
   const std::vector<bool> banks = m_view->focusingBanks();
   const std::string specNos = m_view->focusingCroppedSpectrumIDs();
 
@@ -207,7 +212,7 @@ void EnggDiffractionPresenter::processFocusCropped() {
 }
 
 void EnggDiffractionPresenter::processFocusTexture() {
-  const std::string runNo = m_view->focusingTextureRunNo();
+  const std::string runNo = isValidRunNumber(m_view->focusingTextureRunNo());
   const std::string dgFile = m_view->focusingTextureGroupingFile();
 
   try {
@@ -280,7 +285,8 @@ void EnggDiffractionPresenter::processRebinTime() {
   g_log.notice() << "EnggDiffraction GUI: starting new pre-processing "
                     "(re-binning) with a TOF bin into workspace '" +
                         outWSName + "'. This "
-                                    "may take some seconds... " << std::endl;
+                                    "may take some seconds... "
+                 << std::endl;
 
   m_view->enableCalibrateAndFocusActions(false);
   // GUI-blocking alternative:
@@ -306,7 +312,8 @@ void EnggDiffractionPresenter::processRebinMultiperiod() {
   g_log.notice() << "EnggDiffraction GUI: starting new pre-processing "
                     "(re-binning) by pulse times into workspace '" +
                         outWSName + "'. This "
-                                    "may take some seconds... " << std::endl;
+                                    "may take some seconds... "
+                 << std::endl;
 
   m_view->enableCalibrateAndFocusActions(false);
   // GUI-blocking alternative:
@@ -349,6 +356,63 @@ bool EnggDiffractionPresenter::validateRBNumber(const std::string &rbn) const {
 }
 
 /**
+ * Checks if the provided run number is valid and if a direcotory is provided
+ * it will convert it to a run number
+ *
+ * @param dir takes the input/directory of the user
+ *
+ * @return run_number 6 character string of a run number
+ */
+std::string
+EnggDiffractionPresenter::isValidRunNumber(std::vector<std::string> dir) {
+
+  std::vector<std::string> run_vec = dir;
+  std::string run_number;
+
+  // if empty string
+  size_t i = 0;
+  if (!dir.empty() && dir.at(i) != "") {
+
+    auto p = run_vec.begin();
+    int i = 0;
+    while (p != run_vec.end()) {
+      run_number = *p;
+      p++;
+      i++;
+
+      try {
+        if (Poco::File(run_number).exists()) {
+          Poco::Path inputDir = run_number;
+          run_number = "";
+          // get file name name via poco::path
+
+          std::string filename = inputDir.getFileName();
+
+          // convert to int or assign it to size_t
+          for (size_t i = 0; i < filename.size(); i++) {
+            char *str = &filename[i];
+            if (std::isdigit(*str)) {
+              run_number += filename[i];
+            }
+          }
+          run_number.erase(0, run_number.find_first_not_of('0'));
+        }
+
+      } catch (std::runtime_error &re) {
+        throw std::invalid_argument("Error browsing selected file: " +
+                                    static_cast<std::string>(re.what()));
+      } catch (...) {
+        throw std::invalid_argument("Error browsing selected file: ");
+      }
+    }
+  }
+
+  g_log.debug() << "run number is: " << run_number << std::endl;
+
+  return run_number;
+}
+
+/**
  * Does several checks on the current inputs and settings. This should
  * be done before starting any calibration work. The message return
  * should in principle be shown to the user as a visible message
@@ -362,12 +426,10 @@ bool EnggDiffractionPresenter::validateRBNumber(const std::string &rbn) const {
 void EnggDiffractionPresenter::inputChecksBeforeCalibrate(
     const std::string &newVanNo, const std::string &newCeriaNo) {
   if (newVanNo.empty()) {
-    throw std::invalid_argument(
-        "The Vanadium number cannot be empty and must be an integer number.");
+    throw std::invalid_argument("The Vanadium number" + g_runNumberErrorStr);
   }
   if (newCeriaNo.empty()) {
-    throw std::invalid_argument(
-        "The Ceria number cannot be empty and must be an integer number.");
+    throw std::invalid_argument("The Ceria number" + g_runNumberErrorStr);
   }
 
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
@@ -574,8 +636,9 @@ void EnggDiffractionPresenter::calibrationFinished() {
     g_log.warning() << "The cablibration did not finish correctly."
                     << std::endl;
   } else {
-    const std::string vanNo = m_view->newVanadiumNo();
-    const std::string ceriaNo = m_view->newCeriaNo();
+    const std::string vanNo = isValidRunNumber(m_view->newVanadiumNo());
+
+    const std::string ceriaNo = isValidRunNumber(m_view->newCeriaNo());
     const std::string outFilename =
         buildCalibrateSuggestedFilename(vanNo, ceriaNo);
     m_view->newCalibLoaded(vanNo, ceriaNo, outFilename);
@@ -604,7 +667,8 @@ std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
   // default and only one supported
   std::string instStr = g_enginxStr;
   std::string nameAppendix = "_both_banks";
-  if ("ENGIN-X" != m_view->currentInstrument()) {
+  std::string curInst = m_view->currentInstrument();
+  if ("ENGIN-X" != curInst && "ENGINX" != curInst) {
     instStr = "UNKNOWNINST";
     nameAppendix = "_calibration";
   }
@@ -727,8 +791,7 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
 void EnggDiffractionPresenter::inputChecksBeforeFocusBasic(
     const std::string &runNo, const std::vector<bool> &banks) {
   if (runNo.empty()) {
-    const std::string msg = "The sample run number to focus cannot be "
-                            "empty and must be an integer number.";
+    const std::string msg = "The sample run number" + g_runNumberErrorStr;
     throw std::invalid_argument(msg);
   }
 
@@ -753,8 +816,8 @@ void EnggDiffractionPresenter::inputChecksBeforeFocusCropped(
     const std::string &runNo, const std::vector<bool> &banks,
     const std::string &specNos) {
   if (runNo.empty()) {
-    throw std::invalid_argument("To focus cropped the sample run number cannot "
-                                "be empty and must be an integer number.");
+    throw std::invalid_argument("To focus cropped the sample run number" +
+                                g_runNumberErrorStr);
   }
 
   if (specNos.empty()) {
@@ -781,9 +844,8 @@ void EnggDiffractionPresenter::inputChecksBeforeFocusCropped(
 void EnggDiffractionPresenter::inputChecksBeforeFocusTexture(
     const std::string &runNo, const std::string &dgFile) {
   if (runNo.empty()) {
-    throw std::invalid_argument("To focus texture banks the sample run number "
-                                "cannot be empty and must be an integer "
-                                "number.");
+    throw std::invalid_argument("To focus texture banks the sample run number" +
+                                g_runNumberErrorStr);
   }
 
   if (dgFile.empty()) {
@@ -1513,14 +1575,15 @@ void EnggDiffractionPresenter::doRebinningTime(const std::string &runNo,
   } catch (std::invalid_argument &ia) {
     g_log.error() << "Error when rebinning with a regular bin width in time. "
                      "There was an error in the inputs to the algorithm " +
-                         rebinName + ". Error description: " + ia.what() +
-                         "." << std::endl;
+                         rebinName + ". Error description: " + ia.what() + "."
+                  << std::endl;
     return;
   } catch (std::runtime_error &re) {
     g_log.error() << "Error when rebinning with a regular bin width in time. "
                      "Coult not run the algorithm " +
                          rebinName + " successfully. Error description: " +
-                         re.what() + "." << std::endl;
+                         re.what() + "."
+                  << std::endl;
     return;
   }
 
@@ -1615,14 +1678,15 @@ void EnggDiffractionPresenter::doRebinningPulses(const std::string &runNo,
   } catch (std::invalid_argument &ia) {
     g_log.error() << "Error when rebinning by pulse times. "
                      "There was an error in the inputs to the algorithm " +
-                         rebinName + ". Error description: " + ia.what() +
-                         "." << std::endl;
+                         rebinName + ". Error description: " + ia.what() + "."
+                  << std::endl;
     return;
   } catch (std::runtime_error &re) {
     g_log.error() << "Error when rebinning by pulse times. "
                      "Coult not run the algorithm " +
                          rebinName + " successfully. Error description: " +
-                         re.what() + "." << std::endl;
+                         re.what() + "."
+                  << std::endl;
     return;
   }
 
@@ -1676,7 +1740,8 @@ void EnggDiffractionPresenter::rebinningFinished() {
         << std::endl;
   } else {
     g_log.notice() << "Pre-processing (re-binning) finished - the output "
-                      "workspace is ready." << std::endl;
+                      "workspace is ready."
+                   << std::endl;
   }
   if (m_workerThread) {
     delete m_workerThread;

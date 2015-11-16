@@ -44,6 +44,13 @@ set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 include ( Bootstrap )
 
 ###########################################################################
+# Set expected variables for OS X
+###########################################################################
+if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
+  include ( DarwinSetup )
+endif ()
+
+###########################################################################
 # Cross-platform setup
 ###########################################################################
 include ( CommonSetup )
@@ -66,13 +73,6 @@ endif ()
 # Set ParaView information since later items depend on it
 ###########################################################################
 include ( ParaViewSetup )
-
-###########################################################################
-# Set paths to Third_Party for Mac builds
-###########################################################################
-IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  include ( DarwinSetup )
-ENDIF()
 
 # We probably don't want this to run on every build.
 option(COVERALLS "Generate coveralls data" OFF)

@@ -230,6 +230,8 @@ void LoadILLAscii::loadIDF(API::MatrixWorkspace_sptr &workspace) {
   try {
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", workspace);
+    loadInst->setProperty("RewriteSpectraMap",
+                          OptionalBool(OptionalBool::True));
     loadInst->execute();
   } catch (...) {
     g_log.information("Cannot load the instrument definition.");

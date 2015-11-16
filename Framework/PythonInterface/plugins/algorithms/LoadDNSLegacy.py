@@ -142,7 +142,7 @@ class LoadDNSLegacy(PythonAlgorithm):
         api.CreateWorkspace(OutputWorkspace=outws_name, DataX=dataX, DataY=dataY,
                             DataE=dataE, NSpec=ndet, UnitX="Wavelength")
         outws = api.AnalysisDataService.retrieve(outws_name)
-        api.LoadInstrument(outws, InstrumentName='DNS')
+        api.LoadInstrument(outws, InstrumentName='DNS', RewriteSpectraMap=True)
 
         run = outws.mutableRun()
         if metadata.start_time and metadata.end_time:

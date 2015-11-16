@@ -33,10 +33,11 @@ private:
   void startAsyncFocusWorker(const std::string &dir,
                              const std::vector<std::string> &outFilenames,
                              const std::string &runNo,
-                             const std::vector<bool> banks,
-                             const std::string &specIDs,
+                             const std::vector<bool> &banks,
+                             const std::string &specNos,
                              const std::string &dgFile) {
-    doFocusRun(dir, outFilenames, runNo, banks, specIDs, dgFile);
+    std::cerr << "focus run " << std::endl;
+    doFocusRun(dir, outFilenames, runNo, banks, specNos, dgFile);
     focusingFinished();
   }
 
@@ -57,7 +58,8 @@ private:
 class EnggDiffractionPresenterTest : public CxxTest::TestSuite {
 
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
+  // This pair of boilerplate methods prevent tghe suite being created
+  // statically
   // This means the constructor isn't called when running other tests
   static EnggDiffractionPresenterTest *createSuite() {
     return new EnggDiffractionPresenterTest();
@@ -77,8 +79,30 @@ public:
     m_presenter.reset(
         new MantidQt::CustomInterfaces::EnggDiffractionPresenter(m_view.get()));
 
+    // default banks
     m_ex_enginx_banks.push_back(true);
     m_ex_enginx_banks.push_back(false);
+
+    // default run number
+    m_ex_empty_run_num.push_back("");
+    m_invalid_run_number.push_back("");
+    m_ex_run_number.push_back(g_validRunNo);
+    g_vanNo.push_back("8899999988");
+    g_ceriaNo.push_back("9999999999");
+
+    // provide personal directories in order to carry out the full disable tests
+    m_basicCalibSettings.m_inputDirCalib = "GUI_calib_folder/";
+    m_basicCalibSettings.m_inputDirRaw = "GUI_calib_folder/";
+
+    m_basicCalibSettings.m_pixelCalibFilename =
+        "ENGINX_full_pixel_calibration.csv";
+
+    m_basicCalibSettings.m_templateGSAS_PRM = "GUI_calib_folder/"
+                                              "template_ENGINX_241391_236516_"
+                                              "North_and_South_banks.prm";
+
+    m_basicCalibSettings.m_forceRecalcOverwrite = false;
+    m_basicCalibSettings.m_rebinCalibrate = 1;
   }
 
   void tearDown() {
@@ -161,8 +185,15 @@ public:
 
     // would need basic calibration settings from the user, but it should not
     // get to that point because of early detected errors:
-    EnggDiffCalibSettings calibSettings;
     EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
+
+    EXPECT_CALL(mockView, newVanadiumNo())
+        .Times(1)
+        .WillOnce(Return(m_ex_empty_run_num));
+
+    EXPECT_CALL(mockView, newCeriaNo())
+        .Times(1)
+        .WillOnce(Return(m_ex_empty_run_num));
 
     // No errors, 1 warning (no Vanadium, no Ceria run numbers given)
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -197,9 +228,9 @@ public:
         .Times(1)
         .WillOnce(Return(calibSettings));
 
-    EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(vanNo));
+    EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
 
-    EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(ceriaNo));
+    EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(g_ceriaNo));
 
     // 1 warning because some required settings are missing/empty
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
@@ -236,17 +267,18 @@ public:
         .Times(2)
         .WillRepeatedly(Return(calibSettings));
 
-    EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(vanNo));
+    EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
 
-    EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(ceriaNo));
+    EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(g_ceriaNo));
 
     EXPECT_CALL(mockView, currentInstrument()).Times(1).WillOnce(Return(instr));
 
     const std::string filename =
         "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
-    EXPECT_CALL(mockView, askNewCalibrationFilename(
-                              "UNKNOWNINST_" + vanNo + "_" + ceriaNo +
-                              "_both_banks.prm")).Times(0);
+    EXPECT_CALL(mockView,
+                askNewCalibrationFilename("UNKNOWNINST_" + vanNo + "_" +
+                                          ceriaNo + "_both_banks.prm"))
+        .Times(0);
     //  .WillOnce(Return(filename)); // if enabled ask user output filename
 
     // Should not try to use options for focusing
@@ -278,15 +310,19 @@ public:
   }
 
   // TODO: disabled for now, as this one would need to load files
-  void disabled_test_calcCalibOK() {
+  void disable_test_calcCalibOK() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
     // will need basic calibration settings from the user
-    EnggDiffCalibSettings calibSettings;
     EXPECT_CALL(mockView, currentCalibSettings())
-        .Times(2)
-        .WillOnce(Return(calibSettings));
+        .Times(1)
+        .WillOnce(Return(m_basicCalibSettings));
+
+    // As this is a positive test, personal directory/files should be
+    // provided here instead
+    EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
+    EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(g_ceriaNo));
 
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -300,7 +336,9 @@ public:
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
     // empty run number!
-    EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, focusingRunNo())
+        .Times(1)
+        .WillOnce(Return(m_invalid_run_number));
     EXPECT_CALL(mockView, focusingBanks())
         .Times(1)
         .WillOnce(Return(m_ex_enginx_banks));
@@ -327,7 +365,9 @@ public:
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return("999999"));
+    EXPECT_CALL(mockView, focusingRunNo())
+        .Times(1)
+        .WillOnce(Return(m_invalid_run_number));
     // missing bank on/off vector!
     std::vector<bool> banks;
     banks.push_back(false);
@@ -361,16 +401,12 @@ public:
     EnggDiffPresenterNoThread pres(&mockView);
 
     // wrong run number!
-    EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return("999999"));
+    EXPECT_CALL(mockView, focusingRunNo())
+        .Times(1)
+        .WillOnce(Return(m_invalid_run_number));
     EXPECT_CALL(mockView, focusingBanks())
         .Times(1)
         .WillOnce(Return(m_ex_enginx_banks));
-
-    // needs basic calibration settings from the user to start focusing
-    EnggDiffCalibSettings calibSettings;
-    EXPECT_CALL(mockView, currentCalibSettings())
-        .Times(1)
-        .WillOnce(Return(calibSettings));
 
     // Should not try to use options for other types of focusing
     EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
@@ -392,29 +428,40 @@ public:
   }
 
   // TODO: disabled for now, as this one would need to load files
-  void disabled_test_focusOK() {
+  void disable_test_focusOK() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
-    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+    EnggDiffPresenterNoThread pres(&mockView);
+
+    const std::string instr = "ENGINX";
+    const std::string vanNo = "236516"; // use a number that can be found!
 
     // an example run available in unit test data:
-    EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return("228061"));
-    EXPECT_CALL(mockView, focusingBanks())
+    EXPECT_CALL(mockView, focusingRunNo())
         .Times(1)
-        .WillOnce(Return(m_ex_enginx_banks));
+        .WillOnce(Return(m_ex_run_number));
+    std::vector<bool> banks;
+    banks.push_back(true); // 1 bank used
+    banks.push_back(false);
+    EXPECT_CALL(mockView, focusingBanks()).Times(1).WillOnce(Return(banks));
 
-    // will need basic calibration settings from the user
-    EnggDiffCalibSettings calibSettings;
+    EXPECT_CALL(mockView, currentInstrument())
+        .Times(2)
+        .WillRepeatedly(Return(instr));
+
     EXPECT_CALL(mockView, currentCalibSettings())
-        .Times(1)
-        .WillOnce(Return(calibSettings));
+        .Times(2)
+        .WillRepeatedly(Return(m_basicCalibSettings));
 
-    // check automatic plotting
-    EXPECT_CALL(mockView, focusedOutWorkspace())
-        .Times(1)
-        .WillOnce(Return(true));
-    EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(1);
-    // There are two/three other tests that have the disabled_ prefix so they
-    // normally run
+    // when two banks are used then it will utlise currentVanadiumNo two times
+    EXPECT_CALL(mockView, currentVanadiumNo()).Times(1).WillOnce(Return(vanNo));
+
+    // it will not reach here on wards, would finish with a Warning message
+    // "The Calibration did not finish correctly"
+
+    // this is because of the python algorithm cannot be used with in c++ test
+
+    // the test will not be able to read the python algorithm from here on
+    EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
 
     // Should not try to use options for other types of focusing
     EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
@@ -422,7 +469,7 @@ public:
     EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
     EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
 
-    // No errors/warnings
+    // 0 errors/ 0 warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
@@ -434,7 +481,9 @@ public:
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
     // an example run available in unit test data:
-    EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return("228061"));
+    EXPECT_CALL(mockView, focusingRunNo())
+        .Times(1)
+        .WillOnce(Return(m_ex_run_number));
     std::vector<bool> banks;
     banks.push_back(false);
     banks.push_back(false);
@@ -444,7 +493,7 @@ public:
     EnggDiffCalibSettings calibSettings;
     EXPECT_CALL(mockView, currentCalibSettings())
         .Times(1)
-        .WillOnce(Return(calibSettings));
+        .WillOnce(Return(m_basicCalibSettings));
 
     EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
@@ -461,7 +510,9 @@ public:
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
     // empty run number!
-    EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, focusingCroppedRunNo())
+        .Times(1)
+        .WillOnce(Return(m_ex_empty_run_num));
     EXPECT_CALL(mockView, focusingBanks())
         .Times(1)
         .WillOnce(Return(m_ex_enginx_banks));
@@ -494,7 +545,7 @@ public:
     // ok run number
     EXPECT_CALL(mockView, focusingCroppedRunNo())
         .Times(1)
-        .WillOnce(Return("228061"));
+        .WillOnce(Return(m_ex_run_number));
     EXPECT_CALL(mockView, focusingBanks())
         .Times(1)
         .WillOnce(Return(std::vector<bool>()));
@@ -527,7 +578,7 @@ public:
     // ok run number
     EXPECT_CALL(mockView, focusingCroppedRunNo())
         .Times(1)
-        .WillOnce(Return("228061"));
+        .WillOnce(Return(m_ex_run_number));
     EXPECT_CALL(mockView, focusingBanks())
         .Times(1)
         .WillOnce(Return(m_ex_enginx_banks));
@@ -558,7 +609,9 @@ public:
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
     // empty run number!
-    EXPECT_CALL(mockView, focusingTextureRunNo()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, focusingTextureRunNo())
+        .Times(1)
+        .WillOnce(Return(m_ex_empty_run_num));
     EXPECT_CALL(mockView, focusingTextureGroupingFile())
         .Times(1)
         .WillOnce(Return(""));
@@ -587,7 +640,7 @@ public:
     // goo run number
     EXPECT_CALL(mockView, focusingTextureRunNo())
         .Times(1)
-        .WillOnce(Return("228061"));
+        .WillOnce(Return(m_ex_run_number));
     EXPECT_CALL(mockView, focusingBanks()).Times(0);
     EXPECT_CALL(mockView, focusingTextureGroupingFile())
         .Times(1)
@@ -616,7 +669,7 @@ public:
     // goo run number
     EXPECT_CALL(mockView, focusingTextureRunNo())
         .Times(1)
-        .WillOnce(Return("228061"));
+        .WillOnce(Return(m_ex_run_number));
     // non empty but absurd csv file of detector groups
     EXPECT_CALL(mockView, focusingTextureGroupingFile())
         .Times(1)
@@ -662,7 +715,9 @@ public:
     pres.notify(IEnggDiffractionPresenter::ResetFocus);
 
     // empty run number!
-    EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, focusingRunNo())
+        .Times(1)
+        .WillOnce(Return(m_ex_empty_run_num));
     EXPECT_CALL(mockView, focusingBanks())
         .Times(1)
         .WillOnce(Return(m_ex_enginx_banks));
@@ -702,15 +757,15 @@ public:
     pres.notify(IEnggDiffractionPresenter::RebinTime);
   }
 
-  // this test does run Load and then Rebin
+  // this test does run Load and then Rebin //
   void test_preproc_event_time_ok() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     EnggDiffPresenterNoThread pres(&mockView);
-
     // inputs from user
     EXPECT_CALL(mockView, currentPreprocRunNo())
         .Times(1)
-        .WillOnce(Return(g_eventModeRunNo));
+        .WillRepeatedly(Return(g_eventModeRunNo));
+
     EXPECT_CALL(mockView, rebinningTimeBin()).Times(1).WillOnce(Return(1.0));
 
     // No errors/warnings
@@ -850,6 +905,14 @@ private:
 
   std::vector<bool> m_ex_enginx_banks;
   const static std::string g_eventModeRunNo;
+  const static std::string g_validRunNo;
+  EnggDiffCalibSettings m_basicCalibSettings;
+
+  std::vector<std::string> m_ex_empty_run_num;
+  std::vector<std::string> m_invalid_run_number;
+  std::vector<std::string> m_ex_run_number;
+  std::vector<std::string> g_vanNo;
+  std::vector<std::string> g_ceriaNo;
 };
 
 // Note this is not a correct event mode run number. Using it here just
@@ -858,5 +921,7 @@ private:
 // unit test data. TODO: find a small one or crop a big one.
 const std::string EnggDiffractionPresenterTest::g_eventModeRunNo =
     "ENGINX228061";
+
+const std::string EnggDiffractionPresenterTest::g_validRunNo = "228061";
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONPRESENTERTEST_H

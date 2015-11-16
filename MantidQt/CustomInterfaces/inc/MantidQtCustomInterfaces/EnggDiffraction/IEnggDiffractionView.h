@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <QStringList>
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h"
@@ -150,14 +151,14 @@ public:
    *
    * @return Vanadium run number, as a string
    */
-  virtual std::string newVanadiumNo() const = 0;
+  virtual std::vector<std::string> newVanadiumNo() const = 0;
 
   /**
    * The Ceria (CeO2) run number to use for a new calibration
    *
    * @return Ceria run number, as a string
    */
-  virtual std::string newCeriaNo() const = 0;
+  virtual std::vector<std::string> newCeriaNo() const = 0;
 
   /**
    * The filename (can be full path) selected to write a calibration
@@ -221,21 +222,21 @@ public:
    *
    * @return run number, as a string
    */
-  virtual std::string focusingRunNo() const = 0;
+  virtual std::vector<std::string> focusingRunNo() const = 0;
 
   /**
    * A (sample) run to focus, in "cropped" mode
    *
    * @return run number, as a string
    */
-  virtual std::string focusingCroppedRunNo() const = 0;
+  virtual std::vector<std::string> focusingCroppedRunNo() const = 0;
 
   /**
    * A (sample) run to focus, in "texture" mode
    *
    * @return run number, as a string
    */
-  virtual std::string focusingTextureRunNo() const = 0;
+  virtual std::vector<std::string> focusingTextureRunNo() const = 0;
 
   /**
    * Banks to consider when focusing
