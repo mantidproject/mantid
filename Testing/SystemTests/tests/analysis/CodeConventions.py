@@ -37,7 +37,8 @@ ALG_BAD_PARAMS = {
     "SetUB(v1)":("a", "b", "c", "alpha", "beta", "gamma", "u", "v"),
     "ViewBOA(v1)":("CD-Distance"),
     "PoldiCreatePeaksFromCell(v1)":("a", "b", "c", "alpha", "beta", "gamma"),
-    "CreateMD(v1)" : ("u", "v")
+    "CreateMD(v1)" : ("u", "v"),
+    "AccumulateMD(v1)" : ("u", "v")
     }
 
 # TODO this list should be empty

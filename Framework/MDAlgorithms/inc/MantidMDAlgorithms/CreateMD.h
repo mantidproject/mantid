@@ -2,17 +2,20 @@
 #define MANTID_MDALGORITHMS_CREATEMD_H_
 
 #include "MantidMDAlgorithms/DllConfig.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 namespace Mantid {
 namespace MDAlgorithms {
 
-void padParameterVector(std::vector<double> &param_vector,
-                        const unsigned long grow_to_size);
+void MANTID_MDALGORITHMS_DLL
+padParameterVector(std::vector<double> &param_vector,
+                   const size_t grow_to_size);
 
 bool any_given(const std::vector<std::vector<double>> &params);
 
 bool all_given(const std::vector<std::vector<double>> &params);
+
+extern bool dataExists(const std::string &data_name);
 
 /** CreateMD : This workflow algorithm creates MDWorkspaces in the Q3D, HKL
   frame using ConvertToMD
@@ -38,7 +41,7 @@ bool all_given(const std::vector<std::vector<double>> &params);
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_MDALGORITHMS_DLL CreateMD : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL CreateMD : public API::DataProcessorAlgorithm {
 public:
   CreateMD();
   virtual ~CreateMD();
