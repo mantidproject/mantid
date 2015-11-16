@@ -544,9 +544,8 @@ void LoadRawHelper::runLoadInstrument(
   try {
     loadInst->setPropertyValue("InstrumentName", instrumentID);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-    loadInst->setProperty(
-        "RewriteSpectraMap",
-        false); // No point as we will load the one from the file
+    loadInst->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(false));
     loadInst->execute();
   } catch (std::invalid_argument &) {
     g_log.information("Invalid argument to LoadInstrument Child Algorithm");

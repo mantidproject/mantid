@@ -49,9 +49,9 @@ public:
     topazWS = WorkspaceCreationHelper::Create2DWorkspace(1, 2);
     AnalysisDataService::Instance().add("TOPAZ_2010", topazWS);
     // Load a small test file
-    FrameworkManager::Instance().exec("LoadInstrument", 4, "Filename",
-                                      "TOPAZ_Definition_2010.xml", "Workspace",
-                                      "TOPAZ_2010");
+    FrameworkManager::Instance().exec(
+        "LoadInstrument", 6, "Filename", "TOPAZ_Definition_2010.xml",
+        "Workspace", "TOPAZ_2010", "RewriteSpectraMap", "True");
   }
 
   ~InstrumentRayTracerTestPerformance() {

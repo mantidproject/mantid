@@ -42,7 +42,7 @@ class Instrument(object):
         if not AnalysisDataService.doesExist(wrksp):
             api.CreateWorkspace(OutputWorkspace=wrksp,DataX="1",DataY="1",DataE="1")
           #read the information about the instrument that stored in its xml
-            api.LoadInstrument(Workspace=wrksp, InstrumentName=self._NAME)
+            api.LoadInstrument(Workspace=wrksp, InstrumentName=self._NAME, RewriteSpectraMap=True)
 
         return AnalysisDataService.retrieve(wrksp).getInstrument()
 

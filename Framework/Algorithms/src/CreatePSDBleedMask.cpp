@@ -30,8 +30,7 @@ using DataObjects::MaskWorkspace_sptr;
 //----------------------------------------------------------------------
 
 /// Default constructor
-CreatePSDBleedMask::CreatePSDBleedMask()
-    : m_maxRate(0.0), m_numIgnoredPixels(0), m_isRawCounts(false) {}
+CreatePSDBleedMask::CreatePSDBleedMask() {}
 
 //----------------------------------------------------------------------
 // Private methods
@@ -89,13 +88,11 @@ void CreatePSDBleedMask::exec() {
 
   // Store the other properties
   double maxFramerate = getProperty("MaxTubeFramerate");
+
   // Multiply by the frames to save a division for each bin when we loop over
   // them later
-  m_maxRate = maxFramerate * goodFrames;
-  m_numIgnoredPixels = getProperty("NIgnoredCentralPixels");
-
-  // Check the input for being a distribution
-  m_isRawCounts = !(inputWorkspace->isDistribution());
+  double maxRate = maxFramerate * goodFrames;
+  int numIgnoredPixels = getProperty("NIgnoredCentralPixels");
 
   // This algorithm assumes that the instrument geometry is tube based, i.e. the
   // parent CompAssembly
@@ -107,6 +104,8 @@ void CreatePSDBleedMask::exec() {
   // Keep track of a map of tubes to lists of indices
   typedef std::map<Geometry::ComponentID, std::vector<int>> TubeIndex;
   TubeIndex tubeMap;
+
+  API::Progress progress(this, 0, 1, numSpectra);
 
   // NOTE: This loop is intentionally left unparallelized as the majority of the
   // work requires a lock around it which actually slows down the loop.
@@ -147,6 +146,8 @@ void CreatePSDBleedMask::exec() {
       tubeMap.insert(std::pair<TubeIndex::key_type, TubeIndex::mapped_type>(
           parentID, TubeIndex::mapped_type(1, i)));
     }
+
+    progress.report();
   }
 
   // Now process the tubes in parallel
@@ -156,13 +157,16 @@ void CreatePSDBleedMask::exec() {
   // Create a mask workspace for output
   MaskWorkspace_sptr outputWorkspace = this->generateEmptyMask(inputWorkspace);
 
+  progress.resetNumSteps(numTubes, 0, 1);
+
   PARALLEL_FOR2(inputWorkspace, outputWorkspace)
   for (int i = 0; i < numTubes; ++i) {
     PARALLEL_START_INTERUPT_REGION
     TubeIndex::iterator current = tubeMap.begin();
     std::advance(current, i);
     const TubeIndex::mapped_type tubeIndices = current->second;
-    bool mask = performBleedTest(tubeIndices, inputWorkspace);
+    bool mask = performBleedTest(tubeIndices, inputWorkspace, maxRate,
+                                 numIgnoredPixels);
     if (mask) {
       maskTube(tubeIndices, outputWorkspace);
       PARALLEL_ATOMIC
@@ -170,6 +174,8 @@ void CreatePSDBleedMask::exec() {
       PARALLEL_ATOMIC
       numTubesMasked += 1;
     }
+
+    progress.report("Performing Bleed Test");
 
     PARALLEL_END_INTERUPT_REGION
   }
@@ -193,11 +199,14 @@ void CreatePSDBleedMask::exec() {
  * @param tubeIndices :: A list of workspace indices that point to members of a
  * single tube
  * @param inputWS :: The workspace containing the rates or counts for each bin
+ * @param maxRate :: Maximum allowed rate
+ * @param numIgnoredPixels :: Number of ignored pixels
  * @returns True if the tube is to be masked, false otherwise
  */
 bool CreatePSDBleedMask::performBleedTest(
     const std::vector<int> &tubeIndices,
-    API::MatrixWorkspace_const_sptr inputWS) {
+    API::MatrixWorkspace_const_sptr inputWS, double maxRate,
+    int numIgnoredPixels) {
 
   // Require ordered pixels so that we can define the centre.
   // This of course assumes that the pixel IDs increase monotonically with the
@@ -205,8 +214,12 @@ bool CreatePSDBleedMask::performBleedTest(
   // and that the above loop that searched for the tubes was NOT run in parallel
   const size_t numSpectra(tubeIndices.size());
   const size_t midIndex(numSpectra / 2);
-  const size_t topEnd(midIndex - m_numIgnoredPixels / 2);
-  const size_t bottomBegin(midIndex + m_numIgnoredPixels / 2);
+  const size_t topEnd(midIndex - numIgnoredPixels / 2);
+  const size_t bottomBegin(midIndex + numIgnoredPixels / 2);
+
+  /// Is the input a distribution or raw counts. If true then bin width division
+  /// is necessary when calculating the rate
+  bool isRawCounts = !(inputWS->isDistribution());
 
   const int numBins = static_cast<int>(inputWS->blocksize());
   std::vector<double> totalRate(numBins, 0.0);
@@ -220,13 +233,13 @@ bool CreatePSDBleedMask::performBleedTest(
     const MantidVec &botX = inputWS->readX(botIndex);
     for (int j = 0; j < numBins; ++j) {
       double topRate(topY[j]), botRate(botY[j]);
-      if (m_isRawCounts) {
+      if (isRawCounts) {
         topRate /= (topX[j + 1] - topX[j]);
         botRate /= (botX[j + 1] - botX[j]);
       }
       totalRate[j] += topRate + botRate;
       // If by now any have hit the allowed maximum then mark this to be masked
-      if (totalRate[j] > m_maxRate) {
+      if (totalRate[j] > maxRate) {
         return true;
       }
     }

@@ -1,16 +1,22 @@
 .. _Unit Factory:
 
-Unit Factory
-============
+=====
+Units
+=====
 
-What is it?
------------
+.. contents::
+  :local:
+
+What are units?
+---------------
+
+Units are a set of small classes in Mantid that define a unit of measure, and the conversions between various units.
 
 The Unit Factory is a :ref:`Dynamic Factory <Dynamic Factory>` that creates
 and hands out instances of Mantid Unit objects.
 
 Available units
-~~~~~~~~~~~~~~~
+---------------
 
 The following units are available in the default Mantid distribution.
 
@@ -52,15 +58,76 @@ here is the Bragg scattering angle (e.g. half of the
 Mantid z-axis)
 
 **Note on Wavelength**: If the emode property in
-`ConvertUnits <http://docs.mantidproject.org/nightly/algorithms/ConvertUnits.html>`__
+:ref: `ConvertUnits <algm-ConvertUnits>`
 is specified as inelastic Direct/Indirect (inelastic) then the
 conversion to wavelength will take into account the fixed initial/final
 energy respectively. Units conversion into elastic momentum transfer
 (MomentumTransfer) will throw in elastic mode (emode=0) on inelastic
 workspace (when energy transfer is specified along x-axis)
 
+
+Working with Units in Python
+----------------------------
+
+Accessing units on workspaces
+#############################
+
+Units on MatrixWorkspaces are accessed via the Axis.
+
+.. testcode:: UnitWorkspaceAxes
+
+
+  ws = CreateSampleWorkspace()
+  for i in range(ws.axes()):
+      axis = ws.getAxis(i)
+      print "Axis {0} is a {1}{2}{3}".format(i,
+                                             "Spectrum Axis" if axis.isSpectra() else "",
+                                             "Text Axis" if axis.isText() else "",
+                                             "Numeric Axis" if axis.isNumeric() else "")
+
+      unit = axis.getUnit()
+      print "\t caption:{0}".format(unit.caption())
+      print "\t symbol:{0}".format(unit.symbol())
+
+Output:
+
+.. testoutput:: UnitWorkspaceAxes
+  :options: +NORMALIZE_WHITESPACE
+
+  Axis 0 is a Numeric Axis
+     caption:Time-of-flight
+     symbol:microsecond
+  Axis 1 is a Spectrum Axis
+     caption:Spectrum
+     symbol:
+
+
+Setting the axisLabel to a Label of your choice
+###############################################
+
+
+.. testcode:: UnitAxesLabel
+
+  ws = CreateSampleWorkspace()
+  axis = ws.getAxis(1)
+  # Create a new axis
+  axis.setUnit("Label").setLabel('Temperature', 'K')
+
+  unit = axis.getUnit()
+  print "New caption:{0}".format(unit.caption())
+  print "New symbol:{0}".format(unit.symbol())
+
+Output:
+
+.. testoutput:: UnitAxesLabel
+  :options: +ELLIPSIS,+NORMALIZE_WHITESPACE
+
+  New caption:Temperature
+  New symbol:K
+
+
 Adding new units
-~~~~~~~~~~~~~~~~
+----------------
 
 Writing and adding a new unit is relatively straightforward.
 Instructions will appear here in due course. In the meantime if a unit

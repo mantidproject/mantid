@@ -344,6 +344,8 @@ void LoadLLB::runLoadInstrument() {
 
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+    loadInst->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
   } catch (...) {
     g_log.information("Cannot load the instrument definition.");
