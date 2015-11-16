@@ -5,7 +5,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceProperty.h"
-
+#include "PropertyManagerHelper.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
 
 using namespace Mantid;
@@ -92,6 +92,38 @@ public:
         "DummyProperty", "DummyWorkspace", Mantid::Kernel::Direction::Input);
     TS_ASSERT_EQUALS("SplittersWorkspace", Mantid::Kernel::getUnmangledTypeName(
                                                *property.type_info()));
+  }
+
+  /**
+  * Test declaring an input SplittersWorkspace and retrieving it as const_sptr
+  * or sptr
+  */
+  void testGetProperty_const_sptr() {
+    const std::string wsName = "InputWorkspace";
+    SplittersWorkspace_sptr wsInput(new SplittersWorkspace());
+    PropertyManagerHelper manager;
+    manager.declareProperty(wsName, wsInput, Mantid::Kernel::Direction::Input);
+
+    // Check property can be obtained as const_sptr or sptr
+    SplittersWorkspace_const_sptr wsConst;
+    SplittersWorkspace_sptr wsNonConst;
+    TS_ASSERT_THROWS_NOTHING(
+        wsConst = manager.getValue<SplittersWorkspace_const_sptr>(wsName));
+    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(
+        wsNonConst = manager.getValue<SplittersWorkspace_sptr>(wsName));
+    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT_EQUALS(wsConst, wsNonConst);
+
+    // Check TypedValue can be cast to const_sptr or to sptr
+    PropertyManagerHelper::TypedValue val(manager, wsName);
+    SplittersWorkspace_const_sptr wsCastConst;
+    SplittersWorkspace_sptr wsCastNonConst;
+    TS_ASSERT_THROWS_NOTHING(wsCastConst = (SplittersWorkspace_const_sptr)val);
+    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (SplittersWorkspace_sptr)val);
+    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };
 

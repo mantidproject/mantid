@@ -14,6 +14,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "FakeAlgorithms.h"
+#include "PropertyManagerHelper.h"
 #include <map>
 
 using namespace Mantid::Kernel;
@@ -735,6 +736,39 @@ public:
     TS_ASSERT_EQUALS(ws2->getTitle(), "A2+D2+D2");
     TS_ASSERT_EQUALS(ws3->name(), "D3");
     TS_ASSERT_EQUALS(ws3->getTitle(), "A3+D3+D3");
+  }
+
+  /**
+  * Test declaring an algorithm property and retrieving as const
+  * and non-const
+  */
+  void testGetProperty_const_sptr() {
+    const std::string algName = "InputAlgorithm";
+    IAlgorithm_sptr algInput(new StubbedWorkspaceAlgorithm());
+    PropertyManagerHelper manager;
+    manager.declareProperty(algName, algInput,
+                            Mantid::Kernel::Direction::Input);
+
+    // Check property can be obtained as const or non-const sptr
+    IAlgorithm_const_sptr algConst;
+    IAlgorithm_sptr algNonConst;
+    TS_ASSERT_THROWS_NOTHING(
+        algConst = manager.getValue<IAlgorithm_const_sptr>(algName));
+    TS_ASSERT(algConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(algNonConst =
+                                 manager.getValue<IAlgorithm_sptr>(algName));
+    TS_ASSERT(algNonConst != NULL);
+    TS_ASSERT_EQUALS(algConst, algNonConst);
+
+    // Check TypedValue can be cast to const_sptr or to sptr
+    PropertyManagerHelper::TypedValue val(manager, algName);
+    IAlgorithm_const_sptr algCastConst;
+    IAlgorithm_sptr algCastNonConst;
+    TS_ASSERT_THROWS_NOTHING(algCastConst = (IAlgorithm_const_sptr)val);
+    TS_ASSERT(algCastConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(algCastNonConst = (IAlgorithm_sptr)val);
+    TS_ASSERT(algCastNonConst != NULL);
+    TS_ASSERT_EQUALS(algCastConst, algCastNonConst);
   }
 
 private:

@@ -19,6 +19,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidKernel/Strings.h"
+#include "PropertyManagerHelper.h"
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataObjects;
@@ -1065,6 +1066,42 @@ public:
     // Quick check of clone
     auto clone = ws3.clone();
     TS_ASSERT_EQUALS(targetDisplayNormalization, clone->displayNormalization());
+  }
+
+  /**
+  * Test declaring an input IMDHistoWorkspace and retrieving as const_sptr or
+  * sptr
+  */
+  void testGetProperty_const_sptr() {
+    const std::string wsName = "InputWorkspace";
+    Mantid::Geometry::GeneralFrame frame("m", "m");
+    MDHistoDimension_sptr dimX(
+        new MDHistoDimension("X", "x", frame, -10, 10, 5));
+    IMDHistoWorkspace_sptr wsInput(new MDHistoWorkspace(
+        dimX, dimX, dimX, dimX, Mantid::API::VolumeNormalization));
+    PropertyManagerHelper manager;
+    manager.declareProperty(wsName, wsInput, Direction::Input);
+
+    // Check property can be obtained as const_sptr or sptr
+    IMDHistoWorkspace_const_sptr wsConst;
+    IMDHistoWorkspace_sptr wsNonConst;
+    TS_ASSERT_THROWS_NOTHING(
+        wsConst = manager.getValue<IMDHistoWorkspace_const_sptr>(wsName));
+    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(
+        wsNonConst = manager.getValue<IMDHistoWorkspace_sptr>(wsName));
+    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT_EQUALS(wsConst, wsNonConst);
+
+    // Check TypedValue can be cast to const_sptr or to sptr
+    PropertyManagerHelper::TypedValue val(manager, wsName);
+    IMDHistoWorkspace_const_sptr wsCastConst;
+    IMDHistoWorkspace_sptr wsCastNonConst;
+    TS_ASSERT_THROWS_NOTHING(wsCastConst = (IMDHistoWorkspace_const_sptr)val);
+    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (IMDHistoWorkspace_sptr)val);
+    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };
 
