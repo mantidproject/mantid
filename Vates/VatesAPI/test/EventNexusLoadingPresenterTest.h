@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <vtkUnstructuredGrid.h>
+#include <vtkSmartPointer.h>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -80,7 +81,7 @@ void testExecution()
   //Create the presenter and runit!
   EventNexusLoadingPresenter presenter(view, getSuitableFile());
   presenter.executeLoadMetadata();
-  vtkDataSet* product = presenter.execute(&factory, mockLoadingProgressUpdate, mockDrawingProgressUpdate);
+  vtkSmartPointer<vtkDataSet> product = presenter.execute(&factory, mockLoadingProgressUpdate, mockDrawingProgressUpdate);
 
   TSM_ASSERT("Should have generated a vtkDataSet", NULL != product);
   TSM_ASSERT_EQUALS("Wrong type of output generated", "vtkUnstructuredGrid", std::string(product->GetClassName()));
@@ -92,8 +93,6 @@ void testExecution()
 
   TS_ASSERT(Mock::VerifyAndClearExpectations(view));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
-
-  product->Delete();
 }
 
 void testGetTDimension()

@@ -17,6 +17,7 @@
 #include <vtkCellData.h>
 #include <vtkDataArray.h>
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
+#include <vtkSmartPointer.h>
 
 using namespace Mantid;
 using namespace Mantid::VATES;
@@ -57,9 +58,8 @@ private:
     else
     {
       TS_ASSERT_THROWS_NOTHING(factory.initialize(binned_ws));
-      vtkDataSet* product = NULL;
+      vtkSmartPointer<vtkDataSet> product;
       TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdater));
-      product->Delete();
     }
   }
 
@@ -158,7 +158,7 @@ public:
     Mantid::DataObjects::MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
     vtkMDHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), VATES::VolumeNormalization);
     factory.initialize(ws);
-    vtkDataSet* product = NULL;
+    vtkSmartPointer<vtkDataSet> product;
 
     TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
 
@@ -180,8 +180,6 @@ public:
     TS_ASSERT_EQUALS(10, bounds[3]);
     TS_ASSERT_EQUALS(0, bounds[4]);
     TS_ASSERT_EQUALS(10, bounds[5]);
-
-    product->Delete();
   }
 
   void test_4DWorkspace()
@@ -192,7 +190,7 @@ public:
     Mantid::DataObjects::MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(5, -10.0, 10.0, 1);
     vtkMDHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), VATES::VolumeNormalization);
     factory.initialize(ws);
-    vtkDataSet* product = NULL;
+    vtkSmartPointer<vtkDataSet> product;
 
     TS_ASSERT_THROWS_NOTHING(product = factory.create(mockProgressAction));
 
@@ -216,8 +214,6 @@ public:
     TS_ASSERT_EQUALS(10, bounds[5]);
 
     TSM_ASSERT("Progress reporting has not been conducted as expected", Mock::VerifyAndClearExpectations(&mockProgressAction));
-
-    product->Delete();
   }
 
 
@@ -249,7 +245,7 @@ public :
 
     vtkMDHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), VATES::VolumeNormalization);
     factory.initialize(m_ws3);
-    vtkDataSet* product = NULL;
+    vtkSmartPointer<vtkDataSet> product;
 
     TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
 
@@ -274,9 +270,6 @@ public :
       TS_ASSERT_EQUALS(0, bounds[4]);
       TS_ASSERT_EQUALS(100, bounds[5]);
     }
-
-
-    product->Delete();
   }
   /* Create 1E6 cells*/
   void test_CreateDataSet_from4D()
@@ -285,7 +278,7 @@ public :
 
     vtkMDHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), VATES::VolumeNormalization);
     factory.initialize(m_ws4);
-    vtkDataSet* product = NULL;
+    vtkSmartPointer<vtkDataSet> product;
 
     TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
 
@@ -298,8 +291,6 @@ public :
     TSM_ASSERT_EQUALS("Wrong number of points to cells. Hexahedron has 8 vertexes.", expected_n_cells * 8,  product->GetNumberOfPoints());
     TSM_ASSERT_EQUALS("No signal Array", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
     TSM_ASSERT_EQUALS("Wrong sized signal Array", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
-
-    product->Delete();
   }
 };
 

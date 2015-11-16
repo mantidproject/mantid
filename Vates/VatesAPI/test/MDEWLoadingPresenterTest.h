@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <vtkUnstructuredGrid.h>
+#include <vtkNew.h>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -147,9 +148,8 @@ void testDepthChanged()
   void testhasTDimensionWhenIntegrated()
   {
     //Setup view
-    MockMDLoadingView* view = new MockMDLoadingView;
-
-    ConcreteMDEWLoadingPresenter presenter(view);
+    MockMDLoadingView view;
+    ConcreteMDEWLoadingPresenter presenter(&view);
     
     //Test that it does work when setup.
     Mantid::API::Workspace_sptr ws = get3DWorkspace(true, true); //Integrated T Dimension
@@ -161,9 +161,9 @@ void testDepthChanged()
   void testHasTDimensionWhenNotIntegrated()
   {
     //Setup view
-    MockMDLoadingView* view = new MockMDLoadingView;
+    MockMDLoadingView view;
 
-    ConcreteMDEWLoadingPresenter presenter(view);
+    ConcreteMDEWLoadingPresenter presenter(&view);
     
     //Test that it does work when setup. 
     Mantid::API::Workspace_sptr ws = get3DWorkspace(false, true); //Non-integrated T Dimension
@@ -175,9 +175,9 @@ void testDepthChanged()
   void testHasTimeLabelWithTDimension()
   {
     //Setup view
-    MockMDLoadingView* view = new MockMDLoadingView;
+    MockMDLoadingView view;
 
-    ConcreteMDEWLoadingPresenter presenter(view);
+    ConcreteMDEWLoadingPresenter presenter(&view);
 
     //Test that it does work when setup.
     Mantid::API::Workspace_sptr ws = get3DWorkspace(false, true); //Non-integrated T Dimension
@@ -189,48 +189,48 @@ void testDepthChanged()
   void testCanSetAxisLabelsFrom3DData()
   {
     //Setup view
-    MockMDLoadingView* view = new MockMDLoadingView;
+    MockMDLoadingView view;
 
-    ConcreteMDEWLoadingPresenter presenter(view);
+    ConcreteMDEWLoadingPresenter presenter(&view);
 
     //Test that it does work when setup.
     Mantid::API::Workspace_sptr ws = get3DWorkspace(true, true);
     presenter.extractMetadata(boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
-    vtkDataSet *ds = vtkUnstructuredGrid::New();
-    TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds));
+    vtkNew<vtkDataSet> ds;
+    TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds.GetPointer()));
     TSM_ASSERT_EQUALS("X Label should match exactly",
-                      getStringFieldDataValue(ds, "AxisTitleForX"), "A ($A$)");
+                      getStringFieldDataValue(ds.GetPointer(), "AxisTitleForX"), "A ($A$)");
     TSM_ASSERT_EQUALS("Y Label should match exactly",
-                      getStringFieldDataValue(ds, "AxisTitleForY"), "B ($A$)");
+                      getStringFieldDataValue(ds.GetPointer(), "AxisTitleForY"), "B ($A$)");
     TSM_ASSERT_EQUALS("Z Label should match exactly",
-                      getStringFieldDataValue(ds, "AxisTitleForZ"), "C ($A$)");
+                      getStringFieldDataValue(ds.GetPointer(), "AxisTitleForZ"), "C ($A$)");
   }
 
   void testCanSetAxisLabelsFrom4DData()
   {
     //Setup view
-    MockMDLoadingView* view = new MockMDLoadingView;
+    MockMDLoadingView view;
 
-    ConcreteMDEWLoadingPresenter presenter(view);
+    ConcreteMDEWLoadingPresenter presenter(&view);
 
     //Test that it does work when setup.
     Mantid::API::Workspace_sptr ws = get3DWorkspace(false, true);
     presenter.extractMetadata(boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
-    vtkDataSet *ds = vtkUnstructuredGrid::New();
-    TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds));
+    vtkNew<vtkDataSet> ds;
+    TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds.GetPointer()));
     TSM_ASSERT_EQUALS("X Label should match exactly",
-                      getStringFieldDataValue(ds, "AxisTitleForX"), "A ($A$)");
+                      getStringFieldDataValue(ds.GetPointer(), "AxisTitleForX"), "A ($A$)");
     TSM_ASSERT_EQUALS("Y Label should match exactly",
-                      getStringFieldDataValue(ds, "AxisTitleForY"), "B ($A$)");
+                      getStringFieldDataValue(ds.GetPointer(), "AxisTitleForY"), "B ($A$)");
     TSM_ASSERT_EQUALS("Z Label should match exactly",
-                      getStringFieldDataValue(ds, "AxisTitleForZ"), "C ($A$)");
+                      getStringFieldDataValue(ds.GetPointer(), "AxisTitleForZ"), "C ($A$)");
   }
 
   void testCanLoadFileBasedOnExtension()
   {
-    MockMDLoadingView* view = new MockMDLoadingView;
+    MockMDLoadingView view;
 
-    ConcreteMDEWLoadingPresenter presenter(view);
+    ConcreteMDEWLoadingPresenter presenter(&view);
 
     // constructive tests
     TSM_ASSERT("Should be an exact match", presenter.canLoadFileBasedOnExtension("somefile.nxs", ".nxs"));
@@ -238,8 +238,6 @@ void testDepthChanged()
     TSM_ASSERT("Should strip off whitespace", presenter.canLoadFileBasedOnExtension("somefile.nxs ", ".nxs"));
     // destructive tests
     TSM_ASSERT("Extensions do not match, should return false.", !presenter.canLoadFileBasedOnExtension("somefile.nx", ".nxs"));
-
-    delete view;
   }
 
 

@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <vtkUnstructuredGrid.h>
+#include <vtkSmartPointer.h>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -84,7 +85,8 @@ void testExecution()
   //Create the presenter and runit!
   MDEWEventNexusLoadingPresenter presenter(view, getSuitableFile());
   presenter.executeLoadMetadata();
-  vtkDataSet* product = presenter.execute(&factory, mockLoadingProgressAction, mockDrawingProgressAction);
+  vtkSmartPointer<vtkDataSet> product = presenter.execute(
+      &factory, mockLoadingProgressAction, mockDrawingProgressAction);
 
   TSM_ASSERT("Should have generated a vtkDataSet", NULL != product);
   TSM_ASSERT_EQUALS("Wrong type of output generated", "vtkUnstructuredGrid", std::string(product->GetClassName()));
@@ -96,8 +98,6 @@ void testExecution()
 
   TS_ASSERT(Mock::VerifyAndClearExpectations(view));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
-
-  product->Delete();
 }
 
 void testCallHasTDimThrows()
@@ -147,14 +147,13 @@ void testTimeLabel()
   //Create the presenter and runit!
   MDEWEventNexusLoadingPresenter presenter(view, getSuitableFile());
   presenter.executeLoadMetadata();
-  vtkDataSet* product = presenter.execute(&factory, mockLoadingProgressAction, mockDrawingProgressAction);
+  vtkSmartPointer<vtkDataSet> product = presenter.execute(
+      &factory, mockLoadingProgressAction, mockDrawingProgressAction);
   TSM_ASSERT_EQUALS("Time label should be exact.",
                     presenter.getTimeStepLabel(), "D (En)");
 
   TS_ASSERT(Mock::VerifyAndClearExpectations(view));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
-
-  product->Delete();
 }
 
 void testAxisLabels()
@@ -180,7 +179,8 @@ void testAxisLabels()
   //Create the presenter and runit!
   MDEWEventNexusLoadingPresenter presenter(view, getSuitableFile());
   presenter.executeLoadMetadata();
-  vtkDataSet* product = presenter.execute(&factory, mockLoadingProgressAction, mockDrawingProgressAction);
+  vtkSmartPointer<vtkDataSet> product = presenter.execute(
+      &factory, mockLoadingProgressAction, mockDrawingProgressAction);
   TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(product));
   TSM_ASSERT_EQUALS("X Label should match exactly",
                     getStringFieldDataValue(product, "AxisTitleForX"),
@@ -194,8 +194,6 @@ void testAxisLabels()
 
   TS_ASSERT(Mock::VerifyAndClearExpectations(view));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
-
-  product->Delete();
 }
 
 };
