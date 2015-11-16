@@ -286,7 +286,8 @@ namespace VATES
 
     // The list of IDs of points used, one ID per point, since points
     // are not reused to form polygon facets, etc.
-    std::vector<vtkIdType> ids; //numPoints
+    std::vector<vtkIdType> ids; 
+    ids.assign(numPoints, 0);
 
     // Only one scalar for each cell, NOT one per point
     vtkFloatArray *signal = vtkFloatArray::New();
