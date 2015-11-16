@@ -16,16 +16,16 @@ class BackCommandParser(object):
         # Parse results
         self._use_mean = None
         self._use_time = None
-        self._mon = False
+        self._mon = None
         self._run_number = None
-        self._mon_number = 0
+        self._mon_number = None
 
     def _reset_parse_results(self):
         self._use_mean = None
         self._use_time = None
-        self._mon = False
+        self._mon = None
         self._run_number = None
-        self._mon_number = 0
+        self._mon_number = None
 
     def _set_parser_chain(self):
         self._uniform_key = ['TIME', 'UAMP']

@@ -1218,9 +1218,11 @@ class DarkRunSubtraction(object):
         if not self.has_dark_runs():
             return
 
-        # Subtract for each setting
-        for setting in applicable_settings:
-            self._execute_dark_run_subtraction(workspace, setting)
+        # Generate the a combined setting
+        setting = self._get_setting()
+
+        # Subtract the dark run
+        self._execute_dark_run_subtraction(workspace, setting)
 
     def has_dark_runs(self):
         '''
@@ -1241,7 +1243,7 @@ class DarkRunSubtraction(object):
         # Load the dark run workspace is it has not already been loaded
         dark_run_ws = self._load_dark_run(setting)
 
-        # Clone the workspace and crop it to match the main workspace
+        # Set the correct binning of the dark run
         dark_run_cropped = self._provide_cropped_workspace(dark_run_ws)
 
         # Subtract the dar run from the workspace
@@ -1283,6 +1285,20 @@ class DarkRunSubtraction(object):
             raise RuntimeError("DarkRunSubtration: The specified dark run file cannot be found or loaded. "
                                "Please make sure that that it exists in your search directory.")
         return dark_run_ws
+
+    def _get_setting(self):
+        '''
+        Create a unifed setting with all the settings which were queried by the user
+        '''
+        use_mean = []
+        use_time = []
+        use_mon = []
+        mon_number = []
+        run_number = []
+
+        for setting in self._dark_run_settings:
+            setting
+
 
 
 class CropDetBank(ReductionStep):
