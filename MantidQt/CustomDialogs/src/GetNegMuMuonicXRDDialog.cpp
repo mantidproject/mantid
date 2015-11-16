@@ -61,7 +61,7 @@ void GetNegMuMuonicXRDDialog::initLayout() {
   // Show Legend button attributes and signal/slot asssignment
   m_showLegendCheck = new QCheckBox("Show Legend");
   connect(m_showLegendCheck, SIGNAL(clicked()), this, SLOT(showLegend()));
-
+  connect(this, SIGNAL(validInput()), this, SLOT(accept));
   // Adding Widgets to Layout
   main_layout->addWidget(m_periodicTable);
   main_layout->addWidget(m_showLegendCheck);
@@ -106,29 +106,32 @@ void GetNegMuMuonicXRDDialog::enableElementsForGetNegMuMuonicXRD() {
 */
 void GetNegMuMuonicXRDDialog::parseInput() {
   // getting a list of strings of elements selected from periodicTableWidget
-  /*QString elementsSelectedStr = m_periodicTable->getValue();
+  QString elementsSelectedStr = m_periodicTable->getAllCheckedElementsStr();
   // if no elements are selected from the PeriodicTableWidget, a pop-up appears
   // to the user.
-  if (!validateDialogInput(elementsSelectedStr)) {
-  QMessageBox::information(
-  this, "GetNegMuMuonicXRDDialog",
-  "No elements were selected, Please select an element from the table");
-
+  if (elementsSelectedStr == "") {
+    QMessageBox::information(
+        this, "GetNegMuMuonicXRDDialog",
+        "No elements were selected, Please select an element from the table");
   }
   // If elements have been selected and y-position text is non-empty then
   // store the inputs as the corresponding propertyValues and emit validInput
   // signal.
-  if (validateDialogInput(elementsSelectedStr)) {
-  storePropertyValue("Elements", elementsSelectedStr);
-  if (validateDialogInput(m_yPosition->text())) {
-  storePropertyValue("YAxisPosition", m_yPosition->text());
+  if (elementsSelectedStr != "") {
+    storePropertyValue("Elements", elementsSelectedStr);
+    if (m_yPosition->text() != "") {
+      storePropertyValue("YAxisPosition", m_yPosition->text());
+    } else {
+      // used as default value for m_yPosition property if the user does not
+      // input
+      // one.
+        storePropertyValue("YAxisPosition", m_yPosition->text());
+    }
+    if (m_groupWorkspaceNameInput->text() != "") {
+      storePropertyValue("OutputWorkspace", m_groupWorkspaceNameInput->text());
+    }
+    emit validInput();
   }
-  if (validateDialogInput(m_groupWorkspaceNameInput->text())) {
-  storePropertyValue("OutputWorkspace", m_groupWorkspaceNameInput->text());
-  }
-  emit validInput();
-  }
-  */
 }
 }
 }
