@@ -321,10 +321,17 @@ bool MDHistoWorkspaceIterator::next() {
     ++m_pos;
   }
   bool ret = m_pos < m_max;
+
   if (ret) {
-    // Keep calling next if the current position is masked and still valid.
-    while (m_skippingPolicy->keepGoing()) {
-      ret = this->next();
+    // Avoid recursion in while loop as m_function does not need to be checked
+    // if skipping_policy is true anyway
+    // This also avoids high recursion depth causing stack overflow, which would
+    // otherwise be a problem for large masked regions
+    // Keep moving to next position if the current position is masked and still
+    // valid.
+    while (m_skippingPolicy->keepGoing()) { //(m_ws->getIsMaskedAt(m_pos)) {
+      ++m_pos;
+      ret = m_pos < m_max;
       if (!ret)
         break;
     }
