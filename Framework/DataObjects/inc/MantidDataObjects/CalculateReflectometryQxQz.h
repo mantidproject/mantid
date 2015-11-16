@@ -2,7 +2,6 @@
 #define MANTID_DATAOBJECTS_CALCULATEREFLECTOMETRYQXQZ_H_
 
 #include "MantidDataObjects/CalculateReflectometry.h"
-#include <cmath>
 
 namespace Mantid {
 namespace DataObjects {

@@ -1,7 +1,6 @@
 #ifndef MANTID_DATAOBJECTS_CALCULATEREFLECTOMETRYKIKF_H_
 #define MANTID_DATAOBJECTS_CALCULATEREFLECTOMETRYKIKF_H_
 #include "MantidDataObjects/CalculateReflectometry.h"
-#include <cmath>
 
 namespace Mantid {
 namespace DataObjects {
