@@ -29,25 +29,28 @@ public:
   }
 
   void getMockData(Mantid::MantidVec &y, Mantid::MantidVec &e) {
-    // Calculated with A = 0.24, Delta = 0.16, Lambda = 0.1 and Beta = 0.1 on
+    // Calculated with A = 0.24, Delta = 0.06, Lambda = 0.63 and Beta = 0.63 on
     // an Excel spreadsheet
     y[0] = 0.24;
-    y[1] = 0.231593592;
-    y[2] = 0.212161973;
-    y[3] = 0.184129727;
-	y[4] = 0.150815346;
-    y[5] = 0.115884651;
-    y[6] = 0.082792865;
-    y[7] = 0.054321822;
-    y[8] = 0.03228742;
-    y[9] = 0.017447284;
-    y[10] = 0.009592987;
-    y[11] = 0.007776424;
-    y[12] = 0.010602737;
-    y[13] = 0.016523386;
-    y[14] = 0.024078397;
+    y[1] = 0.113248409;
+    y[2] = 0.074402367;
+    y[3] = 0.052183632;
+    y[4] = 0.037812471;
+    y[5] = 0.027927981;
+    y[6] = 0.020873965;
+    y[7] = 0.015717258;
+    y[8] = 0.011885418;
+    y[9] = 0.009005914;
+    y[10] = 0.006825573;
+    y[11] = 0.005166593;
+    y[12] = 0.003900885;
+    y[13] = 0.002934321;
+    y[14] = 0.002196637;
+    y[15] = 0.001634742;
+    y[16] = 0.001208136;
+    y[17] = 0.000885707;
 
-    for (int i = 0; i < 15; i++)
+    for (int i = 0; i < 18; i++)
       e[i] = 1.0;
   }
 
@@ -80,10 +83,10 @@ public:
     // create mock data to test against
     std::string wsName = "SKTTimesStretchExpMockData";
     Workspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 15, 15);
+        WorkspaceFactory::Instance().create("Workspace2D", 1, 18, 18);
     Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
 
-    for (int i = 0; i < 15; i++)
+    for (int i = 0; i < 18; i++)
       ws2D->dataX(0)[i] = i;
 
     getMockData(ws2D->dataY(0), ws2D->dataE(0));
@@ -98,7 +101,7 @@ public:
     alg2.setPropertyValue("InputWorkspace", wsName);
     alg2.setPropertyValue("WorkspaceIndex", "0");
     alg2.setPropertyValue("StartX", "0");
-    alg2.setPropertyValue("EndX", "14");
+    alg2.setPropertyValue("EndX", "17");
 
     TS_ASSERT_THROWS_NOTHING(TS_ASSERT(alg2.execute()))
 
@@ -109,9 +112,9 @@ public:
 
     IFunction_sptr out = alg2.getProperty("Function");
     TS_ASSERT_DELTA(out->getParameter("A"), 0.24, 0.0001);
-    TS_ASSERT_DELTA(out->getParameter("Delta"), 0.16, 0.001);
-    TS_ASSERT_DELTA(out->getParameter("Lambda"), 0.1, 0.001);
-    TS_ASSERT_DELTA(out->getParameter("Beta"), 0.1, 0.001);
+    TS_ASSERT_DELTA(out->getParameter("Delta"), 0.06, 0.001);
+    TS_ASSERT_DELTA(out->getParameter("Lambda"), 0.63, 0.001);
+    TS_ASSERT_LESS_THAN(out->getParameter("Beta"), 1.00);
 
     AnalysisDataService::Instance().remove(wsName);
   }

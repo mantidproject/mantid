@@ -35,7 +35,7 @@ void StaticKuboToyabeTimesStretchExp::function1D(double *out,
   for (size_t i = 0; i < nData; i++) {
     double x = xValues[i];
     double DXSquared = pow(D * x, 2);
-    double stretchExp = pow(exp(-L * x), B);
+    double stretchExp = exp(-pow(L * x, B));
     out[i] = A * (exp(-DXSquared / 2) * (1 - DXSquared) * C1 + C2) * stretchExp;
   }
 }
