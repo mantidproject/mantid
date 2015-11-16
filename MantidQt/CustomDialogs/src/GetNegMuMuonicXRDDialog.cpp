@@ -121,11 +121,6 @@ void GetNegMuMuonicXRDDialog::parseInput() {
     storePropertyValue("Elements", elementsSelectedStr);
     if (m_yPosition->text() != "") {
       storePropertyValue("YAxisPosition", m_yPosition->text());
-    } else {
-      // used as default value for m_yPosition property if the user does not
-      // input
-      // one.
-        storePropertyValue("YAxisPosition", m_yPosition->text());
     }
     if (m_groupWorkspaceNameInput->text() != "") {
       storePropertyValue("OutputWorkspace", m_groupWorkspaceNameInput->text());
