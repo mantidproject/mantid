@@ -176,9 +176,8 @@ double Run::getProtonCharge() const {
   if (m_manager.existsProperty(PROTON_CHARGE_LOG_NAME)) {
     charge = m_manager.getProperty(PROTON_CHARGE_LOG_NAME);
   } else {
-    g_log.warning() << PROTON_CHARGE_LOG_NAME
-                    << " log was not found. Proton Charge set to 0.0"
-                    << std::endl;
+    throw Exception::NotFoundError("Proton charge log was not found",
+                                   PROTON_CHARGE_LOG_NAME);
   }
   return charge;
 }
