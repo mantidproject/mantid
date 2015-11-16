@@ -814,7 +814,7 @@ void SCDCalibratePanels::exec() {
     fit_alg->initialize();
 
     int Niterations = getProperty("NumIterations");
-    std::string minimizerError = getProperty("minimizerError");
+    std::string minimizerError = getProperty("MinimizerError");
     fit_alg->setProperty("Function", iFunc);
     fit_alg->setProperty("MaxIterations", Niterations);
     fit_alg->setProperty("InputWorkspace", ws);
@@ -1461,7 +1461,7 @@ void SCDCalibratePanels::init() {
   // settings-------------------------
   declareProperty("tolerance", .12, mustBePositive,
                   "offset of hkl values from integer for GOOD Peaks");
-  declareProperty("minimizerError", 1.e-12, mustBePositive,
+  declareProperty("MinimizerError", 1.e-12, mustBePositive,
                   "error for Levenberg-Marquardt minimizer");
   declareProperty("NumIterations", 60, "Number of iterations");
   declareProperty(
@@ -1474,7 +1474,7 @@ void SCDCalibratePanels::init() {
 
   const string TOLERANCES("Tolerance settings");
   setPropertyGroup("tolerance", TOLERANCES);
-  setPropertyGroup("minimizerError", TOLERANCES);
+  setPropertyGroup("MinimizerError", TOLERANCES);
   setPropertyGroup("NumIterations", TOLERANCES);
   setPropertyGroup("MaxRotationChangeDegrees", TOLERANCES);
   setPropertyGroup("MaxPositionChange_meters", TOLERANCES);
