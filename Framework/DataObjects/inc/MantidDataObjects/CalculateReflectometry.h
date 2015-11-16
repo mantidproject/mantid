@@ -2,6 +2,11 @@
 #define MANTID_DATAOBJECTS_CALCULATEREFLECTOMETRY_H_
 
 #include "MantidGeometry/Math/Quadrilateral.h"
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/polygon.hpp>
+#include <boost/geometry/geometries/adapted/boost_tuple.hpp>
+#include <boost/assign/list_of.hpp>
+#include <boost/geometry/geometries/point_xy.hpp>
 #include <cmath>
 
 namespace Mantid {
