@@ -12,6 +12,7 @@
 #include <vtkFloatArray.h>
 #include <vtkQuad.h>
 #include <vtkCellData.h>
+#include <vtkNew.h>
 #include "MantidKernel/ReadLock.h"
 #include "MantidKernel/Logger.h"
 
@@ -62,7 +63,7 @@ namespace Mantid
         /*
         Write mask array with correct order for each internal dimension.
         */
-        bool* masks = new bool[nDims];
+        std::unique_ptr<bool[]> masks(new bool[nDims]);
         for(size_t i_dim = 0; i_dim < nDims; ++i_dim)
         {
           bool bIntegrated = imdws->getDimension(i_dim)->getIsIntegrated();
@@ -73,11 +74,11 @@ namespace Mantid
         boost::scoped_ptr<IMDIterator> it(createIteratorWithNormalization(m_normalizationOption, imdws.get()));
 
         // Create 4 points per box.
-        vtkPoints *points = vtkPoints::New();
+        vtkNew<vtkPoints> points;
         points->SetNumberOfPoints(it->getDataSize() * 4);
 
         // One scalar per box
-        vtkFloatArray * signals = vtkFloatArray::New();
+        vtkNew<vtkFloatArray> signals;
         signals->Allocate(it->getDataSize());
         signals->SetName(vtkDataSetFactory::ScalarName.c_str());
         signals->SetNumberOfComponents(1);
@@ -87,7 +88,7 @@ namespace Mantid
         vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
         visualDataSet->Allocate(it->getDataSize());
 
-        vtkIdList * quadPointList = vtkIdList::New();
+        vtkNew<vtkIdList> quadPointList;
         quadPointList->SetNumberOfIds(4);
 
         Mantid::API::CoordTransform const* transform = NULL;
@@ -97,7 +98,7 @@ namespace Mantid
         }
 
         Mantid::coord_t out[2];
-        bool* useBox = new bool[it->getDataSize()];
+        std::unique_ptr<bool[]> useBox(new bool[it->getDataSize()]);
 
         double progressFactor = 0.5/double(it->getDataSize());
         double progressOffset = 0.5;
@@ -113,9 +114,7 @@ namespace Mantid
             useBox[iBox] = true;
             signals->InsertNextValue(static_cast<float>(signal));
 
-            coord_t* coords = it->getVertexesArray(nVertexes, nNonIntegrated, masks);
-            delete [] coords;
-            coords = it->getVertexesArray(nVertexes, nNonIntegrated, masks);
+            coord_t* coords = it->getVertexesArray(nVertexes, nNonIntegrated, masks.get());
 
             //Iterate through all coordinates. Candidate for speed improvement.
             for(size_t v = 0; v < nVertexes; ++v)
@@ -142,7 +141,6 @@ namespace Mantid
           ++iBox;
         } while (it->next());
 
-        delete[] masks;
         for(size_t ii = 0; ii < it->getDataSize() ; ++ii)
         {
           progressUpdating.eventRaised((progressFactor * double(ii)) + progressOffset);
@@ -155,22 +153,16 @@ namespace Mantid
             quadPointList->SetId(1, pointIds + 1); //dxyz
             quadPointList->SetId(2, pointIds + 3); //dxdyz
             quadPointList->SetId(3, pointIds + 2); //xdyz
-            visualDataSet->InsertNextCell(VTK_QUAD, quadPointList);
+            visualDataSet->InsertNextCell(VTK_QUAD, quadPointList.GetPointer());
           } // valid number of vertexes returned
         }
-
-        delete[] useBox;
 
         signals->Squeeze();
         points->Squeeze();
 
-        visualDataSet->SetPoints(points);
-        visualDataSet->GetCellData()->SetScalars(signals);
+        visualDataSet->SetPoints(points.GetPointer());
+        visualDataSet->GetCellData()->SetScalars(signals.GetPointer());
         visualDataSet->Squeeze();
-
-        signals->Delete();
-        points->Delete();
-        quadPointList->Delete();
 
         // Hedge against empty data sets
         if (visualDataSet->GetNumberOfPoints() <= 0)

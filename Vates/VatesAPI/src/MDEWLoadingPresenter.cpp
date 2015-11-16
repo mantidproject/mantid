@@ -153,7 +153,7 @@ namespace Mantid
     {
       using namespace Mantid::API;
 
-      vtkFieldData* outputFD = vtkFieldData::New();
+      vtkNew<vtkFieldData> outputFD;
       
       //Serialize metadata
       VatesKnowledgeSerializer serializer;
@@ -167,10 +167,9 @@ namespace Mantid
 
       //Add metadata to dataset.
       MetadataToFieldData convert;
-      convert(outputFD, xmlString, XMLDefinitions::metaDataId().c_str());
-      convert(outputFD, jsonString, m_vatesConfigurations->getMetadataIdJson().c_str());
-      visualDataSet->SetFieldData(outputFD);
-      outputFD->Delete();
+      convert(outputFD.GetPointer(), xmlString, XMLDefinitions::metaDataId().c_str());
+      convert(outputFD.GetPointer(), jsonString, m_vatesConfigurations->getMetadataIdJson().c_str());
+      visualDataSet->SetFieldData(outputFD.GetPointer());
     }
 
     /**

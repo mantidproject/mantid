@@ -201,7 +201,7 @@ void MDHWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet,
                                           const std::string &wsName) {
   using namespace Mantid::API;
 
-  vtkFieldData *outputFD = vtkFieldData::New();
+  vtkNew<vtkFieldData> outputFD;
 
   // Serialize metadata
   VatesKnowledgeSerializer serializer;
@@ -216,11 +216,10 @@ void MDHWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet,
 
   // Add metadata to dataset.
   MetadataToFieldData convert;
-  convert(outputFD, xmlString, XMLDefinitions::metaDataId().c_str());
-  convert(outputFD, jsonString,
+  convert(outputFD.GetPointer(), xmlString, XMLDefinitions::metaDataId().c_str());
+  convert(outputFD.GetPointer(), jsonString,
           m_vatesConfigurations->getMetadataIdJson().c_str());
-  visualDataSet->SetFieldData(outputFD);
-  outputFD->Delete();
+  visualDataSet->SetFieldData(outputFD.GetPointer());
 }
 
 
