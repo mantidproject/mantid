@@ -263,6 +263,98 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
         for index in range(2, ws.getNumberHistograms()):
             comparison(ws.dataY(index), expected_detector_Y)
 
+    def test_that_selecting_monitors_and_detectors_is_allowed(self):
+        # Arrange
+        monY_scatter = 1.
+        monE_scatter = 1.
+        dataY_scatter = 2.
+        dataE_scatter = 2.
+        scatter_ws = self._load_workspace_with_monitors(monY_scatter, monE_scatter,
+                                                        dataY_scatter, dataE_scatter,
+                                                        as_dark_run = False)
+        monY_dark = 3.
+        monE_dark = 3.
+        dataY_dark = 4.
+        dataE_dark = 4.
+        dark_run = self._load_workspace_with_monitors(monY_dark, monE_dark,
+                                                      dataY_dark, dataE_dark,
+                                                      as_dark_run = True)
+
+        mean = False
+        uniform = True
+        normalization_ratio = 0.6
+        applyToMonitors = True
+        applyToDetectors = True
+        out_ws_name = "out_test"
+        selected_monitor = []
+        # Act
+        ws = self._do_run_dark_subtraction(scatter_ws, dark_run, mean, uniform, normalization_ratio,
+                                      out_ws_name, applyToMonitors, applyToDetectors, selected_monitor)
+
+        # Assert
+        self.assertAlmostEquals(ws.getNumberHistograms(), scatter_ws.getNumberHistograms(),
+                         "Should have the same number of histograms", 5)
+
+        comparison = lambda data, expected : all([self.assertAlmostEqual(data[i], expected, 5, "Should be equal")
+                                                  for i in range(0, len(data))])
+
+        # Expected value for monitors
+        expected_monitor_Y = monY_scatter - monY_dark*len(dark_run.dataY(0))/len(scatter_ws.dataY(0))*normalization_ratio
+        comparison(ws.dataY(1), expected_monitor_Y)
+        comparison(ws.dataY(0), expected_monitor_Y)
+
+        # Expected value for detectors
+        expected_detector_Y = dataY_scatter - dataY_dark*len(dark_run.dataY(0))/len(scatter_ws.dataY(0))*normalization_ratio
+        for index in range(2, ws.getNumberHistograms()):
+            comparison(ws.dataY(index), expected_detector_Y)
+
+    def test_that_selecting_invidual_monitors_and_detectors_is_allowed(self):
+        # Arrange
+        monY_scatter = 1.
+        monE_scatter = 1.
+        dataY_scatter = 2.
+        dataE_scatter = 2.
+        scatter_ws = self._load_workspace_with_monitors(monY_scatter, monE_scatter,
+                                                        dataY_scatter, dataE_scatter,
+                                                        as_dark_run = False)
+        monY_dark = 3.
+        monE_dark = 3.
+        dataY_dark = 4.
+        dataE_dark = 4.
+        dark_run = self._load_workspace_with_monitors(monY_dark, monE_dark,
+                                                      dataY_dark, dataE_dark,
+                                                      as_dark_run = True)
+        mean = False
+        uniform = True
+        normalization_ratio = 0.6
+        applyToMonitors = True
+        applyToDetectors = True
+        out_ws_name = "out_test"
+        selected_monitor = [1]
+        # Act
+        ws = self._do_run_dark_subtraction(scatter_ws, dark_run, mean, uniform, normalization_ratio,
+                                      out_ws_name, applyToMonitors, applyToDetectors, selected_monitor)
+
+        # Assert
+        self.assertAlmostEquals(ws.getNumberHistograms(), scatter_ws.getNumberHistograms(),
+                         "Should have the same number of histograms", 5)
+
+        comparison = lambda data, expected : all([self.assertAlmostEqual(data[i], expected, 5, "Should be equal")
+                                                  for i in range(0, len(data))])
+
+        # Expected value for monitor 1
+        expected_monitor_Y_1 = monY_scatter - monY_dark*len(dark_run.dataY(0))/len(scatter_ws.dataY(0))*normalization_ratio
+        comparison(ws.dataY(1), expected_monitor_Y_1)
+
+        # Expected value for monitor 0
+        expected_monitor_Y_0 = monY_scatter
+        comparison(ws.dataY(0), expected_monitor_Y_0)
+
+        # Expected value for detectors
+        expected_detector_Y = dataY_scatter - dataY_dark*len(dark_run.dataY(0))/len(scatter_ws.dataY(0))*normalization_ratio
+        for index in range(2, ws.getNumberHistograms()):
+            comparison(ws.dataY(index), expected_detector_Y)
+
     def test_that_throws_if_monitor_selection_is_invalid(self):
         # Arrange
         monY_scatter = 1.
@@ -319,7 +411,6 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
         scatter_ws = self._load_workspace_with_monitors(monY_scatter, monE_scatter,
                                                         dataY_scatter, dataE_scatter,
                                                         as_dark_run = False)
-
         monY_dark = 3.
         monE_dark = 3.
         dataY_dark = 4.
@@ -327,7 +418,6 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
         dark_run = self._load_workspace_with_monitors(monY_dark, monE_dark,
                                                       dataY_dark, dataE_dark,
                                                       as_dark_run = True)
-
         mean = False
         uniform = True
         normalization_ratio = 0.6
