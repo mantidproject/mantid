@@ -1,4 +1,4 @@
-import unittest
+﻿import unittest
 
 from mantid.kernel import *
 from mantid.api import *
@@ -209,7 +209,17 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
         for ws in ws_to_clean:
             if AnalysisDataService.doesExist(ws):
                 AnalysisDataService.remove(ws)
-            
+
+
+class DarkRunMonitorAndDetectorRemover(unittest.TestCase):
+    def _create_workspace_with_monitors_and_detectors(self):
+        pass
+
+    def test_selects_all_monitors(self):
+        pass
+
+    def test_selects_specific_monitor(self):
+        pass
 
 if __name__ == '__main__':
     unittest.main()

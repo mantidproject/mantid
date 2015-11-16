@@ -4,8 +4,8 @@ from mantid.kernel import *
 from mantid.api import *
 import numpy as np
 
-class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
 
+class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
     def category(self):
         return "Workflow\\SANS\\UsesPropertyManager"
 
@@ -226,7 +226,23 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
             raise RuntimeError("SANSDarkRunBackgroundCorrection: Must provide either "
                                "ApplyToDetectors or ApplyToMonitors or both")
 
-    def _set_pure_detector_dark_run(monitor_list):
+
+class DarkRunMonitorAndDetectorRemover(object):
+    '''
+    This class can set detecors or monitors to 0. Either all monitors can be seletected or only
+    a single one.
+    '''
+    def __init__(self):
+        super(DarkRunMonitorAndDetectorRemover, self).__init__()
+
+    def set_pure_detector_dark_run(self, dark_run):
+        '''
+        Sets all monitors on the dark run workspace to 0.
+        @param dark_run: the dark run workspace
+        '''
+        # Get the list of monitor workspace indices
+        monitor_list = self.find_monitor_workspace_indices(dark_run)
+
         # Since we only have around 10 or so monitors
         # we set them manually to 0
         for index in monitor_list:
@@ -234,22 +250,14 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
             data = data*0
             dark_run.setY(index,data)
 
-    def _set_pure_monitor_dark_run(dark_run, monitor_list):
-        # Grab the monitor Y and E values
-        list_dataY = []
-        list_dataE = []
-        for index in monitor_list:
-            list_dataY.append(np.copy(dark_run.dataY(index)))
-            list_dataE.append(np.copy(dark_run.dataY(index)))
+        return dark_run
 
-        # Set everything to 0
-        self._scale_dark_run(dark_run, 0.0)
-
-        # Reset the monitors which are required
-        for i in range(0,len(monitor_list)):
-            dark_run.setY(index, monitor_list[i])
-
-    def _find_monitor_workspace_indices(dark_run):
+    def find_monitor_workspace_indices(self, dark_run):
+        '''
+        Finds all monitor workspace indices
+        @param dark_run: the dark run workspace
+        @returns a list of indices with monitors
+        '''
         monitor_list = []
         try:
             num_histograms = dark_run.getNumHistograms()
@@ -262,6 +270,35 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
             pass
         return monitor_list
 
+    def set_pure_monitor_dark_run(self, dark_run, monitor_selection):
+        '''
+        We copy the monitors, set everything to 0 and reset the monitors.
+        Since there are only  a few monitors, this should not be very costly.
+        @param dark_run: the dark run
+        @param monitor_selection: the monitors which are selected
+        @param monitor_list: the list of indices of monitors
+        '''
+        # Get the list of monitor workspace indices
+        monitor_list = self.find_monitor_workspace_indices(dark_run)
+
+        dummy = monitor_selection # TODO implement
+
+        # Grab the monitor Y and E values
+        list_dataY = []
+        list_dataE = []
+        for index in monitor_list:
+            list_dataY.append(np.copy(dark_run.dataY(index)))
+            list_dataE.append(np.copy(dark_run.dataY(index)))
+
+        # Set everything to 0
+        self._scale_dark_run(dark_run, 0.0)
+
+        # Reset the monitors which are required
+        for i in range(0,len(monitor_list)):
+            dark_run.setY(index, list_dataY[i])
+            dark_run.setE(index, list_dataE[i])
+
+        return dark_run
 #############################################################################################
 
 AlgorithmFactory.subscribe(SANSDarkRunBackgroundCorrection)
