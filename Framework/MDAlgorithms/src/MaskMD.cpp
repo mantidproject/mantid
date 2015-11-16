@@ -218,34 +218,6 @@ void MaskMD::exec() {
   size_t nDims = ws->getNumDims();
   size_t nDimensionIds = dimensions.size();
 
-  std::stringstream messageStream;
-
-  // Check cardinality on names/ids
-  if (nDimensionIds % nDims != 0) {
-    messageStream << "Number of dimension ids/names must be n * " << nDims;
-    this->g_log.error(messageStream.str());
-    throw std::invalid_argument(messageStream.str());
-  }
-
-  // Check cardinality on extents
-  if (extents.size() != (2 * dimensions.size())) {
-    messageStream << "Number of extents must be " << 2 * dimensions.size();
-    this->g_log.error(messageStream.str());
-    throw std::invalid_argument(messageStream.str());
-  }
-
-  // Check extent value provided.
-  for (size_t i = 0; i < nDimensionIds; ++i) {
-    double min = extents[i * 2];
-    double max = extents[(i * 2) + 1];
-    if (min > max) {
-      messageStream << "Cannot have minimum extents " << min
-                    << " larger than maximum extents " << max;
-      this->g_log.error(messageStream.str());
-      throw std::invalid_argument(messageStream.str());
-    }
-  }
-
   size_t nGroups = nDimensionIds / nDims;
 
   bool bClearExistingMasks = getProperty("ClearExistingMasks");
@@ -286,6 +258,54 @@ void MaskMD::exec() {
     // Add new masking.
     ws->setMDMasking(new MDBoxImplicitFunction(mins, maxs));
   }
+}
+
+std::map<std::string, std::string> MaskMD::validateInputs() {
+  // Create the map
+  std::map<std::string, std::string> validation_output;
+
+  // Get properties to validate
+  IMDWorkspace_sptr ws = getProperty("Workspace");
+  std::string dimensions_string = getPropertyValue("Dimensions");
+  std::vector<double> extents = getProperty("Extents");
+
+  std::vector<std::string> dimensions = parseDimensionNames(dimensions_string);
+
+  size_t nDims = ws->getNumDims();
+  size_t nDimensionIds = dimensions.size();
+
+  std::stringstream messageStream;
+
+  // Check cardinality on names/ids
+  if (nDimensionIds % nDims != 0) {
+    messageStream << "Number of dimension ids/names must be n * " << nDims
+                  << ". The following names were given: ";
+    for (const auto &name : dimensions) {
+      messageStream << name << ", ";
+    }
+
+    validation_output["Dimensions"] = messageStream.str();
+    messageStream.str(std::string());
+  }
+
+  // Check cardinality on extents
+  if (extents.size() != (2 * dimensions.size())) {
+    messageStream << "Number of extents must be " << 2 * dimensions.size()
+                  << ". ";
+    validation_output["Extents"] = messageStream.str();
+  }
+  // Check extent value provided.
+  for (size_t i = 0; i < nDimensionIds; ++i) {
+    double min = extents[i * 2];
+    double max = extents[(i * 2) + 1];
+    if (min > max) {
+      messageStream << "Cannot have minimum extents " << min
+                    << " larger than maximum extents " << max;
+      validation_output["Extents"] = messageStream.str();
+    }
+  }
+
+  return validation_output;
 }
 
 } // namespace Mantid
