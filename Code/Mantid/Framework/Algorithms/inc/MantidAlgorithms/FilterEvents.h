@@ -130,7 +130,7 @@ private:
   std::vector<std::string> m_wsNames;
 
   std::vector<double> m_detTofOffsets;
-  std::vector<double> m_detTofShifts;
+  std::vector<double> m_detTofFactors;
 
   bool m_FilterByPulseTime;
 

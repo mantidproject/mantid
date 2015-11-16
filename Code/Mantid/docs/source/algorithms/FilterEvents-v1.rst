@@ -69,24 +69,24 @@ introduction on event filtering in MantidPlot.
 Usage
 -----
 
-**Example - Filtering event without correction on TOF**  
+**Example - Filtering event without correction on TOF**
 
 .. testcode:: FilterEventNoCorrection
 
     ws = Load(Filename='CNCS_7860_event.nxs')
-    splitws, infows = GenerateEventsFilter(InputWorkspace=ws, UnitOfTime='Nanoseconds', LogName='SampleTemp', 
+    splitws, infows = GenerateEventsFilter(InputWorkspace=ws, UnitOfTime='Nanoseconds', LogName='SampleTemp',
             MinimumLogValue=279.9,  MaximumLogValue=279.98, LogValueInterval=0.01)
-    
+
     FilterEvents(InputWorkspace=ws, SplitterWorkspace=splitws, InformationWorkspace=infows,
-            OutputWorkspaceBaseName='tempsplitws',  GroupWorkspaces=True, 
+            OutputWorkspaceBaseName='tempsplitws',  GroupWorkspaces=True,
             FilterByPulseTime = False, OutputWorkspaceIndexedFrom1 = False,
             CorrectionToSample = "None", SpectrumWithoutDetector = "Skip", SplitSampleLogs = False,
             OutputTOFCorrectionWorkspace='mock')
-   
+
     # Print result
     wsgroup = mtd["tempsplitws"]
     wsnames = wsgroup.getNames()
-    for name in sorted(wsnames): 
+    for name in sorted(wsnames):
         tmpws = mtd[name]
         print "workspace %s has %d events" % (name, tmpws.getNumberEvents())
 
@@ -104,30 +104,30 @@ Output:
     workspace tempsplitws_unfiltered has 50603 events
 
 
-**Example - Filtering event by pulse time**  
+**Example - Filtering event by pulse time**
 
 .. testcode:: FilterEventByPulseTime
 
     ws = Load(Filename='CNCS_7860_event.nxs')
-    splitws, infows = GenerateEventsFilter(InputWorkspace=ws, UnitOfTime='Nanoseconds', LogName='SampleTemp', 
+    splitws, infows = GenerateEventsFilter(InputWorkspace=ws, UnitOfTime='Nanoseconds', LogName='SampleTemp',
             MinimumLogValue=279.9,  MaximumLogValue=279.98, LogValueInterval=0.01)
-    
-    FilterEvents(InputWorkspace=ws, 
-        SplitterWorkspace=splitws, 
+
+    FilterEvents(InputWorkspace=ws,
+        SplitterWorkspace=splitws,
         InformationWorkspace=infows,
-        OutputWorkspaceBaseName='tempsplitws',  
-        GroupWorkspaces=True, 
-        FilterByPulseTime = True, 
+        OutputWorkspaceBaseName='tempsplitws',
+        GroupWorkspaces=True,
+        FilterByPulseTime = True,
         OutputWorkspaceIndexedFrom1 = True,
-        CorrectionToSample = "None", 
-        SpectrumWithoutDetector = "Skip", 
+        CorrectionToSample = "None",
+        SpectrumWithoutDetector = "Skip",
         SplitSampleLogs = False,
-        OutputTOFCorrectionWorkspace='mock') 
+        OutputTOFCorrectionWorkspace='mock')
 
     # Print result
     wsgroup = mtd["tempsplitws"]
     wsnames = wsgroup.getNames()
-    for name in sorted(wsnames): 
+    for name in sorted(wsnames):
         tmpws = mtd[name]
         print "workspace %s has %d events" % (name, tmpws.getNumberEvents())
 
@@ -144,29 +144,29 @@ Output:
     workspace tempsplitws_6 has 5067 events
 
 
-**Example - Filtering event with correction on TOF**  
+**Example - Filtering event with correction on TOF**
 
 .. testcode:: FilterEventTOFCorrection
 
     ws = Load(Filename='CNCS_7860_event.nxs')
-    splitws, infows = GenerateEventsFilter(InputWorkspace=ws, UnitOfTime='Nanoseconds', LogName='SampleTemp', 
+    splitws, infows = GenerateEventsFilter(InputWorkspace=ws, UnitOfTime='Nanoseconds', LogName='SampleTemp',
             MinimumLogValue=279.9,  MaximumLogValue=279.98, LogValueInterval=0.01)
 
     FilterEvents(InputWorkspace=ws, SplitterWorkspace=splitws, InformationWorkspace=infows,
-        OutputWorkspaceBaseName='tempsplitws',  
-        GroupWorkspaces=True, 
-        FilterByPulseTime = False, 
+        OutputWorkspaceBaseName='tempsplitws',
+        GroupWorkspaces=True,
+        FilterByPulseTime = False,
         OutputWorkspaceIndexedFrom1 = False,
-        CorrectionToSample = "Direct", 
+        CorrectionToSample = "Direct",
         IncidentEnergy=3,
-        SpectrumWithoutDetector = "Skip", 
+        SpectrumWithoutDetector = "Skip",
         SplitSampleLogs = False,
         OutputTOFCorrectionWorkspace='mock')
-    
+
     # Print result
     wsgroup = mtd["tempsplitws"]
     wsnames = wsgroup.getNames()
-    for name in sorted(wsnames): 
+    for name in sorted(wsnames):
         tmpws = mtd[name]
         print "workspace %s has %d events" % (name, tmpws.getNumberEvents())
 
@@ -175,14 +175,13 @@ Output:
 
 .. testoutput:: FilterEventTOFCorrection
 
-    workspace tempsplitws_0 has 124 events
-    workspace tempsplitws_1 has 16937 events
-    workspace tempsplitws_2 has 9987 events
-    workspace tempsplitws_3 has 6962 events
-    workspace tempsplitws_4 has 22529 events
-    workspace tempsplitws_5 has 5124 events
-    workspace tempsplitws_unfiltered has 50603 events
-
+    workspace tempsplitws_0 has 123 events
+    workspace tempsplitws_1 has 16951 events
+    workspace tempsplitws_2 has 9972 events
+    workspace tempsplitws_3 has 7019 events
+    workspace tempsplitws_4 has 22514 events
+    workspace tempsplitws_5 has 5082 events
+    workspace tempsplitws_unfiltered has 50605 events
 
 .. categories::
 
