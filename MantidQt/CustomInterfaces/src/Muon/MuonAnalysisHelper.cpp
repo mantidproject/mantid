@@ -2,6 +2,7 @@
 
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/UserCatalogInfo.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -540,7 +541,15 @@ void groupWorkspaces(const std::string& groupName, const std::vector<std::string
  * the current platform (Windows, Linux or Mac)
  */
 std::string localisePath(const std::string &path) {
-  auto catalogInfo = ConfigService::Instance().getFacility().catalogInfo();
+  // Catalog info overrides from the user-based config service
+  std::unique_ptr<CatalogConfigService> catConfigService(
+      makeCatalogConfigServiceAdapter(ConfigService::Instance()));
+
+  // User-based Catalog Info object
+  UserCatalogInfo catalogInfo(
+      ConfigService::Instance().getFacility().catalogInfo(), *catConfigService);
+
+  // Use this Catalog Info object to transform the path
   return catalogInfo.transformArchivePath(path);
 }
 
