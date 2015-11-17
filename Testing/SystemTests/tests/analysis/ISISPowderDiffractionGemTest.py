@@ -1,7 +1,7 @@
 ﻿# pylint: disable=no-init,attribute-defined-outside-init,too-many-public-methods
 
 from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup,\
-    ITableWorkspace, FileFinder
+    ITableWorkspace
 from mantid.simpleapi import *
 from mantid import config
 import os.path
@@ -107,8 +107,8 @@ class LoadTests(unittest.TestCase):
 
     def test_calfile_with_workspace(self):
         self.wsname = "CalWorkspace1"
-        calfile1 = (DIRS[0] + 'GEM/test/cycle_09_5/Calibration/offsets_2009_cycle094.cal')
-        calfile2 = (DIRS[0] + 'GEM/test/cycle_09_5/mantid_tester/offsets_2009_cycle094.cal')
+        calfile1 = (DIRS[0] + 'GEM/test/Cycle_09_5/Calibration/offsets_2009_cycle094.cal')
+        calfile2 = (DIRS[0] + 'GEM/test/Cycle_09_5/mantid_tester/offsets_2009_cycle094.cal')
         data1 = LoadCalFile(InstrumentName="GEM", CalFilename=calfile1,
                             WorkspaceName=self.wsname)
         data2 = LoadCalFile(InstrumentName="GEM", CalFilename=calfile2,
@@ -136,7 +136,7 @@ class LoadTests(unittest.TestCase):
 
     def test_nxsfile_with_workspace(self):
         self.wsname = "NexusWorkspace"
-        nxsfile = (DIRS[0] + "GEM/test/cycle_09_5/mantid_tester/GEM46489.nxs")
+        nxsfile = (DIRS[0] + "GEM/test/Cycle_09_5/mantid_tester/GEM46489.nxs")
         data = LoadNexusProcessed(Filename=nxsfile, OutputWorkspace=self.wsname)
 
         self.assertTrue(isinstance(data[0], WorkspaceGroup))
@@ -159,7 +159,7 @@ class LoadTests(unittest.TestCase):
         self.assertTrue('ResultTOFgrp', self.wsname[0])
 
     def test_gssfile_with_workspace(self):
-        gssfile = (DIRS[0] + "GEM/test/cycle_09_5/mantid_tester/GEM46489.gss")
+        gssfile = (DIRS[0] + "GEM/test/Cycle_09_5/mantid_tester/GEM46489.gss")
         data = LoadGSS(Filename=gssfile, OutputWorkspace=self.wsname)
 
         self.assertTrue(isinstance(data, MatrixWorkspace))
@@ -170,18 +170,18 @@ class LoadTests(unittest.TestCase):
 
 
     def test_datfile_with_workspace(self):
-        datfile1 = (DIRS[0] + "GEM/test/cycle_09_5/mantid_tester/GEM46489_b1_D.dat")
-        datfile2 = (DIRS[0] + "GEM/test/cycle_09_5/mantid_tester/GEM46489_b1_TOF.dat")
-        datfile3 = (DIRS[0] + "GEM/test/cycle_09_5/mantid_tester/GEM46489_b2_D.dat")
-        datfile4 = (DIRS[0] + "GEM/test/cycle_09_5/mantid_tester/GEM46489_b2_TOF.dat")
-        datfile5 = (DIRS[0] + "GEM/test/cycle_09_5/mantid_tester/GEM46489_b3_D.dat")
-        datfile6 = (DIRS[0] + "GEM/test/cycle_09_5/mantid_tester/GEM46489_b3_TOF.dat")
-        datfile7 = (DIRS[0] + "GEM/test/cycle_09_5/mantid_tester/GEM46489_b4_D.dat")
-        datfile8 = (DIRS[0] + "GEM/test/cycle_09_5/mantid_tester/GEM46489_b4_TOF.dat")
-        datfile9 = (DIRS[0] + "GEM/test/cycle_09_5/mantid_tester/GEM46489_b5_D.dat")
-        datfile10 = (DIRS[0] + "GEM/test/cycle_09_5/mantid_tester/GEM46489_b5_TOF.dat")
-        datfile11 = (DIRS[0] + "GEM/test/cycle_09_5/mantid_tester/GEM46489_b6_D.dat")
-        datfile12 = (DIRS[0] + "GEM/test/cycle_09_5/mantid_tester/GEM46489_b6_TOF.dat")
+        datfile1 = (DIRS[0] + "GEM/test/Cycle_09_5/mantid_tester/GEM46489_b1_D.dat")
+        datfile2 = (DIRS[0] + "GEM/test/Cycle_09_5/mantid_tester/GEM46489_b1_TOF.dat")
+        datfile3 = (DIRS[0] + "GEM/test/Cycle_09_5/mantid_tester/GEM46489_b2_D.dat")
+        datfile4 = (DIRS[0] + "GEM/test/Cycle_09_5/mantid_tester/GEM46489_b2_TOF.dat")
+        datfile5 = (DIRS[0] + "GEM/test/Cycle_09_5/mantid_tester/GEM46489_b3_D.dat")
+        datfile6 = (DIRS[0] + "GEM/test/Cycle_09_5/mantid_tester/GEM46489_b3_TOF.dat")
+        datfile7 = (DIRS[0] + "GEM/test/Cycle_09_5/mantid_tester/GEM46489_b4_D.dat")
+        datfile8 = (DIRS[0] + "GEM/test/Cycle_09_5/mantid_tester/GEM46489_b4_TOF.dat")
+        datfile9 = (DIRS[0] + "GEM/test/Cycle_09_5/mantid_tester/GEM46489_b5_D.dat")
+        datfile10 = (DIRS[0] + "GEM/test/Cycle_09_5/mantid_tester/GEM46489_b5_TOF.dat")
+        datfile11 = (DIRS[0] + "GEM/test/Cycle_09_5/mantid_tester/GEM46489_b6_D.dat")
+        datfile12 = (DIRS[0] + "GEM/test/Cycle_09_5/mantid_tester/GEM46489_b6_TOF.dat")
 
         data1 = LoadAscii(Filename=datfile1, OutputWorkspace="datWorkspace1")
         data2 = LoadAscii(Filename=datfile2, OutputWorkspace="datWorkspace2")
