@@ -488,8 +488,7 @@ void vtkMDHWSignalArray<Scalar>::InsertValue(vtkIdType, Scalar) {
 }
 
 template <class Scalar>
-void vtkMDHWSignalArray<Scalar>::InsertVariantValue(vtkIdType idx,
-                                                    vtkVariant value) {
+void vtkMDHWSignalArray<Scalar>::InsertVariantValue(vtkIdType, vtkVariant) {
   vtkErrorMacro("Read only container.") return;
 }
 
