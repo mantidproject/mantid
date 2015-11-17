@@ -94,7 +94,6 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         alg_minus.setProperty("RHSWorkspace", dark_run)
         alg_minus.setProperty("OutputWorkspace", subtracted_ws_name)
         alg_minus.execute()
-        ws = alg_minus.getProperty("OutputWorkspace").value
         return alg_minus.getProperty("OutputWorkspace").value
 
     def _prepare_non_uniform_correction(self, workspace, dark_run, normalization_ratio):
@@ -193,20 +192,14 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         num_pixels = dark_run_integrated.getNumberHistograms()
         averaged_value = summed_value/float(num_pixels)
 
-        # Apply the averaged value to all pixels. Set values to zero and 
-        # multiply by the averaged value.
-        dark_run_divide_name = "_unity_spectra"
-        alg_divide  = AlgorithmManager.create("Divide")
-        alg_divide.initialize()
-        alg_divide.setChild(True)
-        alg_divide.setProperty("LHSWorkspace",  dark_run_integrated)
-        alg_divide.setProperty("RHSWorkspace",  dark_run_integrated)
-        alg_divide.setProperty("OutputWorkspace", dark_run_divide_name)
-        alg_divide.execute()
-        dark_run_unity= alg_divide.getProperty("OutputWorkspace").value
+        # Apply the averaged value to all pixels. Set values to unity. Don't
+        # divide workspaces as this will alter the y unit.
+        for index in range(0, dark_run_integrated.getNumberHistograms()):
+            dark_run_integrated.dataY(index)[0] = 1.0
+            dark_run_integrated.dataE(index)[0] = 1.0
 
         # Now that we have a unity workspace multiply with the unit value
-        return self._scale_dark_run(dark_run_unity,averaged_value)
+        return self._scale_dark_run(dark_run_integrated,averaged_value)
 
     def _remove_unwanted_detectors_and_monitors(self, dark_run):
         # If we want both the monitors and the detectors, then we don't have to do anything

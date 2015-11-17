@@ -1187,6 +1187,12 @@ class DarkRunSubtraction(object):
     if the parameters are not fully specified. This step happens after CropDetector.
     First the dark run gets cropped in order to match the current detector.
     '''
+    # The named tuple contains the information for a dark run subtraction for a single run number ( of 
+    # a dark run file)
+    # The relevant inforamtion is the run number, if we use time or uamp, if we use mean or tof, if we
+    # apply this to all detectors, if we apply this to monitors and if so to which monitors
+    DarkRunSubtractionSettings = namedtuple("DarkRunSettings", "run_number time mean detector mon mon_numbers")
+
     def __init__(self):
         super(DarkRunSubtraction, self).__init__()
         # This is a list with settings for the dark run subtraction
@@ -1218,11 +1224,12 @@ class DarkRunSubtraction(object):
         if not self.has_dark_runs():
             return
 
-        # Generate the a combined setting
-        setting = self._get_setting()
+        # Gets a list of all applicable settings objects
+        settings = self._get_settings()
 
         # Subtract the dark run
-        self._execute_dark_run_subtraction(workspace, setting)
+        for setting in settings:
+            self._execute_dark_run_subtraction(workspace, setting)
 
     def has_dark_runs(self):
         '''
@@ -1249,7 +1256,7 @@ class DarkRunSubtraction(object):
         # Subtract the dar run from the workspace
         self._subract_dark_run(workspace, dark_run_cropped, settings)
 
-        # Delete the cropped dark run
+        # Delete the cropped dark rundetectro)
 
     def _subtract_dark_run(self, workspace, dark_run, settings):
         '''
@@ -1261,6 +1268,9 @@ class DarkRunSubtraction(object):
         dark_run_correction = DarkCorr.DarkRunCorrection()
         dark_run_correction.set_use_mean(setting.time)
         dark_run_correction.set_use_time(setting.mean)
+        dark_run_correction.set_use_detector(setting.detector)
+        dark_run_correction.set_use_monitors(setting.mon)
+        dark_run_correction.set_mon_numbers(setting. mon_numbers)
 
         dark_run_correction.execute(scatter_workspace = workspace,
                                     dark_run = dark_run)
@@ -1289,6 +1299,8 @@ class DarkRunSubtraction(object):
     def _get_setting(self):
         '''
         Create a unifed setting with all the settings which were queried by the user
+        @returns the final settings
+        @raises RuntimeError: if settings values are inconsistent
         '''
         use_mean = []
         use_time = []
@@ -1297,8 +1309,95 @@ class DarkRunSubtraction(object):
         run_number = []
 
         for setting in self._dark_run_settings:
-            setting
+            use_mean.append(setting.mean)
+            use_time.append(setting.time)
+            use_mon.append(setting.mon)
+            mon_number.append(mon_number)
+            run_number.append(run_number)
 
+        # Group the elements by run number
+        unique_runs = set(run_number)
+        final_settings = []
+        for run in unique_runs:
+            # Get all indices of the current run
+            indices = [i for i, val in enumerate(run_number) if val == run]
+            # Get all means, times etc for the specfic run
+            means = [use_mean[i] for i in indices]
+            times = [use_mean[i] for i in indices]
+            mons = [use_mon[i] for i in indices]
+            mon_numbers = [mon_numbers[i] for i in indices]
+            final_settings.append(self._get_final_setting(run, means, times, mons, mon_numbers))
+        return final_settings
+
+    def _get_final_setting(self, run, means, times, mons, mon_numbers):
+        '''
+        Get the final setting for the input. Note that the inputs need to be consistent,
+        eg either all times or not all times
+        @param run: the run number
+        @param means: the mean settings
+        @param times: the times settings
+        @param mons: the mons settings
+        @parm mon_numbers: the mon_number settings
+        @returns the final settings
+        @raise RuntimeError: If the settings are inconsistent or if we cannot extract detectors and monitors
+        '''
+        # Make sure that all means and times are the same
+        compare_all = lambda alist : all([alist[0] == alist[i] for i in range(0, len(alist))])
+        all_means_same = compare_all(means)
+        all_times_same = compare_all(times)
+        if not all_means_same or not all_times_same:
+            raise RuntimeError("DarkRunSubtraction: Multiple inconsistent settings for MEAN/TOF or TIME/UAMP. "
+                               "For a single run number these settings need to be identical")
+
+        final_mean = means[0]
+        final_time = times[0]
+        final_use_detector, final_use_mon, final_mon_numbers = self._get_mon_detector_and_mon_numbers(mons, mon_numbers)
+        return DarkRunSubtractionSettings(run_number = run,
+                                          time = final_time,
+                                          mean = final_mean,
+                                          detector = final_use_detector,
+                                          mon = final_use_mon,
+                                          mon_numbers = final_mon_numbers)
+
+
+    def _get_mon_detector_and_mon_numbers(self, mons, mon_numbers):
+        '''
+        Get the monitor, detector and monitor number settings.
+        If an entry contains mons = False, then we use all detectors.
+        If an entry contains mons = True and no mon_number, then we use all monitors
+        If an entry contains mons = True and mon_numbers, then we need to keep track of the numbers
+        @param mons: the mon settings
+        @param mon_numbers: the monitor number settings
+        @returns if detectors should be used, if monitors should be used and
+        if so which monitors should be used
+        @raise RuntimeError: when there are monitor numbers but no mon setting
+        '''
+        use_detectors = False
+        use_monitors = False
+        use_all_monitors = False
+        mon_numbers_to_use = []
+        for mon, number in zip(mons, mon_numbers):
+            if mon == False:
+                use_detectors = True
+            elif mon == True and number is None:
+                use_monitors = True
+                use_all_monitors = True
+            elif mon == True and number is not None:
+                use_monitors = True
+                mon_numbers_to_use.append(number)
+            else:
+                raise RuntimeError("DarkRunSubtraction: There is an inconsistency "
+                                   "with the monitor setting.")
+
+        # Make the monitor list unique
+        if len(mon_numbers_to_use) != 0:
+            mon_numbers_to_use = set(mon_numbers_to_use)
+
+        # If the all monitors are used, then set the numbers to empty
+        if use_all_monitors:
+            mon_numbers_to_use = []
+
+        return use_detectors, use_monitors, mon_numbers_to_use
 
 
 class CropDetBank(ReductionStep):
