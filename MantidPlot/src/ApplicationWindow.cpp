@@ -166,6 +166,7 @@
 #include <QFontComboBox>
 #include <QSpinBox>
 #include <QMdiArea>
+#include <QMenuItem>
 #include <QMdiSubWindow>
 #include <QSignalMapper>
 #include <QDesktopWidget>
@@ -210,6 +211,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidQtAPI/ScriptRepositoryView.h"
@@ -4529,8 +4531,7 @@ ApplicationWindow *ApplicationWindow::open(const QString &fn,
 }
 
 void ApplicationWindow::openRecentFile(int index) {
-  QString fn = recentFilesMenu->text(index);
-
+  QString fn = recentFilesMenu->findItem(index)->data().asString();
   // if "," found in the QString
   if (fn.find(",", 0)) {
     try {
@@ -14041,9 +14042,31 @@ void ApplicationWindow::updateRecentFilesList(QString fname) {
     recentFiles.pop_back();
 
   recentFilesMenu->clear();
-  for (int i = 0; i < (int)recentFiles.size(); i++)
-    recentFilesMenu->insertItem("&" + QString::number(i + 1) + " " +
-                                recentFiles[i]);
+  for (int i = 0; i < (int)recentFiles.size(); i++) {
+    QMenuItem *mi = new QMenuItem;
+
+    try {
+      Mantid::API::MultipleFileProperty mfp("tester");
+      mfp.setValue(recentFiles[i].toStdString());
+      const std::vector<std::string> files =
+          Mantid::API::MultipleFileProperty::flattenFileNames(mfp());
+      int commaPos = recentFiles[i].find(",", 0);
+      if (files.size() == 1) {
+        mi->setText("&" + QString::number(i + 1) + " " + recentFiles[i]);
+      } else {
+        std::ostringstream ostr;
+        ostr << "&" << QString::number(i + 1).toStdString() << " " << files[0]
+             << " && " << files.size() - 1 << " more";
+        mi->setText(QString::fromStdString(ostr.str()));
+      }
+    } catch (std::runtime_error &ex) {
+      UNUSED_ARG(ex);
+      // The file property could not parse the string, use as is
+      mi->setText("&" + QString::number(i + 1) + " " + recentFiles[i]);
+    }
+    mi->setData(recentFiles[i]);
+    recentFilesMenu->insertItem(mi);
+  }
 }
 
 void ApplicationWindow::translateCurveHor() {
