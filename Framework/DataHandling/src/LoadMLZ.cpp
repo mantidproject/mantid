@@ -444,6 +444,8 @@ void LoadMLZ::runLoadInstrument() {
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
     g_log.debug() << "InstrumentName" << m_instrumentName << std::endl;
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+    loadInst->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
   } catch (...) {
     g_log.information("Cannot load the instrument definition.");

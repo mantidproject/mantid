@@ -173,6 +173,7 @@ API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadInstrument() {
 
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument", 0, 1);
   loadInst->setPropertyValue("Filename", fullPathIDF);
+  loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
   MatrixWorkspace_sptr ws =
       WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", ws);

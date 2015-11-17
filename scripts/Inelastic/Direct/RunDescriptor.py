@@ -1063,7 +1063,7 @@ class RunDescriptor(PropDescriptor):
 #pylint: disable=unused-variable
                 idf_path,tile = os.path.split(idf_file)
                 idf_file = os.path.join(idf_path,'LET_Definition.xml')
-                LoadInstrument(ws_name,idf_file,RewriteSpectraMap='0')
+                LoadInstrument(ws_name,idf_file, RewriteSpectraMap=False)
         #HACK<<<
         RunDescriptor._logger("Loaded {0}".format(data_file),'information')
 

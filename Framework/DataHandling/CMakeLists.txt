@@ -126,6 +126,7 @@ set ( SRC_FILES
 	src/SaveDspacemap.cpp
 	src/SaveFocusedXYE.cpp
 	src/SaveFullprofResolution.cpp
+	src/SaveGSASInstrumentFile.cpp
 	src/SaveGSS.cpp
 	src/SaveILLCosmosAscii.cpp
 	src/SaveISISNexus.cpp
@@ -279,6 +280,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveDspacemap.h
 	inc/MantidDataHandling/SaveFocusedXYE.h
 	inc/MantidDataHandling/SaveFullprofResolution.h
+	inc/MantidDataHandling/SaveGSASInstrumentFile.h
 	inc/MantidDataHandling/SaveGSS.h
 	inc/MantidDataHandling/SaveILLCosmosAscii.h
 	inc/MantidDataHandling/SaveISISNexus.h
@@ -429,6 +431,7 @@ set ( TEST_FILES
 	SaveDspacemapTest.h
 	SaveFocussedXYETest.h
 	SaveFullprofResolutionTest.h
+	SaveGSASInstrumentFileTest.h
 	SaveGSSTest.h
 	SaveILLCosmosAsciiTest.h
 	SaveIsawDetCalTest.h

@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/SaveGSASInstrumentFile.h"
+#include "MantidDataHandling/SaveGSASInstrumentFile.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -17,7 +17,7 @@ using namespace Mantid::DataObjects;
 
 using namespace std;
 
-using Mantid::Algorithms::SaveGSASInstrumentFile;
+using Mantid::DataHandling::SaveGSASInstrumentFile;
 
 class SaveGSASInstrumentFileTest : public CxxTest::TestSuite {
 public:

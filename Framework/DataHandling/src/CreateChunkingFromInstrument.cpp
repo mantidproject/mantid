@@ -1,3 +1,4 @@
+#include "MantidKernel/OptionalBool.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -375,6 +376,8 @@ Instrument_const_sptr CreateChunkingFromInstrument::getInstrument() {
   childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
   childAlg->setPropertyValue("Filename", instFilename);
   childAlg->setPropertyValue("InstrumentName", instName);
+  childAlg->setProperty("RewriteSpectraMap",
+                        Mantid::Kernel::OptionalBool(true));
   childAlg->executeAsChildAlg();
   return tempWS->getInstrument();
 }
