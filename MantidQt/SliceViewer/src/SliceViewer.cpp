@@ -243,6 +243,11 @@ void SliceViewer::loadSettings() {
   bool transparentZeros = settings.value("TransparentZeros", 1).toInt();
   this->setTransparentZeros(transparentZeros);
 
+  int norm = settings.value("Normalization", 1).toInt();
+  Mantid::API::MDNormalization normaliz =
+      static_cast<Mantid::API::MDNormalization>(norm);
+  this->setNormalization(normaliz);
+
   const int aspectRatioOption = settings.value("LockAspectRatios", 0).toInt();
   this->setAspectRatio(static_cast<AspectRatioType>(aspectRatioOption));
 
@@ -260,6 +265,8 @@ void SliceViewer::saveSettings() {
   settings.setValue("LastSavedImagePath", m_lastSavedFile);
   settings.setValue("TransparentZeros",
                     (m_actionTransparentZeros->isChecked() ? 1 : 0));
+  settings.setValue("Normalization",
+                    static_cast<int>(this->getNormalization()));
 
   settings.setValue("LockAspectRatios", static_cast<int>(m_aspectRatioType));
   settings.endGroup();
@@ -667,9 +674,6 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   m_ws = ws;
   m_data->setWorkspace(ws);
   m_plot->setWorkspace(ws);
-
-  // Set the normalization appropriate
-  this->setNormalization(ws->displayNormalization(), false);
 
   // Only allow perpendicular lines if looking at a matrix workspace.
   bool matrix = bool(boost::dynamic_pointer_cast<MatrixWorkspace>(m_ws));
