@@ -141,19 +141,19 @@ public:
     NiceMock<MockProgressAction> mockDrawingProgressAction;
 
     // Setup view
-    MockMDLoadingView view;
-    EXPECT_CALL(view, getTime()).WillRepeatedly(Return(0));
-    EXPECT_CALL(view, getRecursionDepth()).Times(AtLeast(0));
-    EXPECT_CALL(view, getLoadInMemory())
+    MockMDLoadingView *view = new MockMDLoadingView;
+    EXPECT_CALL(*view, getTime()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(0));
+    EXPECT_CALL(*view, getLoadInMemory())
         .Times(AtLeast(0))
         .WillRepeatedly(testing::Return(true));
-    EXPECT_CALL(view, updateAlgorithmProgress(_, _)).Times(AnyNumber());
+    EXPECT_CALL(*view, updateAlgorithmProgress(_, _)).Times(AnyNumber());
 
     ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
 
     // Create the presenter as in the vtkMDHWSource
     auto normalizationOption = Mantid::VATES::VisualNormalization::AutoSelect;
-    MDHWNexusLoadingPresenter presenter(&view, filename);
+    MDHWNexusLoadingPresenter presenter(view, filename);
     const double time = 0.0;
     vtkMD0DFactory *zeroDFactory = new vtkMD0DFactory;
     vtkMDHistoLineFactory *lineFactory =
