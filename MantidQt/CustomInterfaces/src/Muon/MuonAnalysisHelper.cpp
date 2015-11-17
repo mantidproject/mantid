@@ -2,7 +2,6 @@
 
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/EmptyValues.h"
-#include "MantidKernel/UserCatalogInfo.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -15,6 +14,7 @@
 
 #include <stdexcept>
 #include <boost/scope_exit.hpp>
+#include <Poco/Path.h>
 
 namespace MantidQt
 {
@@ -537,28 +537,20 @@ void groupWorkspaces(const std::string& groupName, const std::vector<std::string
 }
 
 /**
- * Converts platform-specific path to data archive into the correct format for
- * the current platform (Windows, Linux or Mac)
+ * Converts Windows-specific path to data archive into the correct format for
+ * the current platform
  */
-std::string localisePath(const std::string &path) {
-  // Catalog info overrides from the user-based config service
-  std::unique_ptr<CatalogConfigService> catConfigService(
-      makeCatalogConfigServiceAdapter(ConfigService::Instance()));
-
-  // User-based Catalog Info object
-  UserCatalogInfo catalogInfo(
-      ConfigService::Instance().getFacility().catalogInfo(), *catConfigService);
-
-  // Use this Catalog Info object to transform the path
-  return catalogInfo.transformArchivePath(path);
+std::string localisePath(const std::string &windowsPath) {
+  Poco::Path path(windowsPath, Poco::Path::PATH_WINDOWS);
+  return path.toString(Poco::Path::PATH_NATIVE);
 }
 
 /**
-* Converts platform-specific path to data archive into the correct format for
-* the current platform (Windows, Linux or Mac)
+* Converts Windows-specific path to data archive into the correct format for
+* the current platform
 */
-QString localisePath(const QString &path) {
-  return QString(localisePath(path.toStdString()).c_str());
+QString localisePath(const QString &windowsPath) {
+  return QString(localisePath(windowsPath.toStdString()).c_str());
 }
 
 } // namespace MuonAnalysisHelper

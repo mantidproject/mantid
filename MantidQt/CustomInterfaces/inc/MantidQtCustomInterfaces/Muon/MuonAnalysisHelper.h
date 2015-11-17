@@ -6,9 +6,6 @@
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/ICatalogInfo.h"
 
 #include <QSettings>
 #include <QVector>
@@ -57,11 +54,11 @@ MANTIDQT_CUSTOMINTERFACES_DLL bool compareByRunNumber(Workspace_sptr ws1, Worksp
 MANTIDQT_CUSTOMINTERFACES_DLL void groupWorkspaces(const std::string& groupName,
                                                    const std::vector<std::string>& inputWorkspaces);
 
-/// Transforms archive path to current platform (Windows/Linux/Mac)
-MANTIDQT_CUSTOMINTERFACES_DLL std::string localisePath(const std::string &path);
+/// Transforms Windows path to current platform (Windows/Linux/Mac)
+MANTIDQT_CUSTOMINTERFACES_DLL std::string localisePath(const std::string &windowsPath);
 
-/// Transforms archive path to current platform (Windows/Linux/Mac)
-MANTIDQT_CUSTOMINTERFACES_DLL QString localisePath(const QString &path);
+/// Transforms Windows path to current platform (Windows/Linux/Mac)
+MANTIDQT_CUSTOMINTERFACES_DLL QString localisePath(const QString &windowsPath);
 
 /**
  * A class which deals with auto-saving the widget values. Widgets are registered and then on any
