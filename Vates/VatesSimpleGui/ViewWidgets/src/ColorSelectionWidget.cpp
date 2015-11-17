@@ -2,7 +2,6 @@
 
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidVatesSimpleGuiViewWidgets/ColorMapManager.h"
 #include "MantidQtAPI/MdConstants.h"
 #include "MantidVatesAPI/ColorScaleGuard.h"
 
@@ -26,10 +25,10 @@ namespace SimpleGui
  * sub-components and connections.
  * @param parent the parent widget of the mode control widget
  */
-ColorSelectionWidget::ColorSelectionWidget(QWidget *parent): QWidget(parent),
-    colorMapManager(new ColorMapManager()), m_minHistoric(0.01), m_maxHistoric(0.01),
-    m_ignoreColorChangeCallbacks(false), m_inProcessUserRequestedAutoScale(false), m_colorScaleLock(NULL)
-{
+ColorSelectionWidget::ColorSelectionWidget(QWidget *parent)
+    : QWidget(parent), m_minHistoric(0.01), m_maxHistoric(0.01),
+      m_ignoreColorChangeCallbacks(false),
+      m_inProcessUserRequestedAutoScale(false), m_colorScaleLock(NULL) {
   this->m_ui.setupUi(this);
   this->m_ui.autoColorScaleCheckBox->setChecked(true);
   this->setEditorStatus(false);

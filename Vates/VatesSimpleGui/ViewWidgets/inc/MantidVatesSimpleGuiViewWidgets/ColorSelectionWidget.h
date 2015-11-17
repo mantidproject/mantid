@@ -2,7 +2,6 @@
 #define COLORSELECTIONWIDGET_H_
 
 #include "ui_ColorSelectionWidget.h"
-#include "MantidVatesSimpleGuiViewWidgets/ColorMapManager.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidVatesAPI/ColorScaleGuard.h"
 #include "MantidQtAPI/MdConstants.h"
@@ -139,8 +138,6 @@ private:
   void setupLogScale(int state);
   /// Set min smaller max, can be used to programmatically set the widgets
   void setMinSmallerMax(double& min, double& max);
-
-  boost::scoped_ptr<ColorMapManager> colorMapManager; ///< Keeps track of the available color maps.
 
   QDoubleValidator* m_minValidator;
   QDoubleValidator* m_maxValidator;
