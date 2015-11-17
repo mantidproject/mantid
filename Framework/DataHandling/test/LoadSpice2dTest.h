@@ -168,7 +168,12 @@ public:
     TS_ASSERT_EQUALS(*np, 4);
 
     // Check detector position
-    TS_ASSERT_EQUALS(i->getComponentByName("detector1")->getPos().Z(), 6.0);
+    prop = ws2d->run().getProperty("sample-detector-distance");
+    Mantid::Kernel::PropertyWithValue<double> *tsdd =
+        dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+    TS_ASSERT_EQUALS(i->getComponentByName("detector1")->getPos().Z(),
+                     *tsdd * 1e-3);
+    assertDetectorDistances(ws2d);
   }
 
   void testExecChooseWavelength() {
@@ -211,6 +216,26 @@ public:
     TS_ASSERT_DELTA(ws2d->dataX(0 + nmon)[0], 4.5, tolerance);
     TS_ASSERT_DELTA(ws2d->dataX(2 + nmon)[0], 4.5, tolerance);
     TS_ASSERT_DELTA(ws2d->dataX(192 + nmon)[0], 4.5, tolerance);
+  }
+
+  void assertDetectorDistances(Mantid::DataObjects::Workspace2D_sptr ws2d) {
+    Mantid::Kernel::Property *prop =
+        ws2d->run().getProperty("sample-detector-distance");
+    Mantid::Kernel::PropertyWithValue<double> *sdd =
+        dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+    prop = ws2d->run().getProperty("sample-detector-distance-offset");
+    Mantid::Kernel::PropertyWithValue<double> *sddo =
+        dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+    prop = ws2d->run().getProperty("sample-si-window-distance");
+    Mantid::Kernel::PropertyWithValue<double> *siwo =
+        dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+    prop = ws2d->run().getProperty("total-sample-detector-distance");
+    Mantid::Kernel::PropertyWithValue<double> *tsdd =
+        dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+    double total_sample_detector_distance = *tsdd;
+    TS_ASSERT_EQUALS((*sdd) + (*sddo) + (*siwo),
+                     total_sample_detector_distance);
+    TS_ASSERT_EQUALS(6811.4, total_sample_detector_distance);
   }
 
 private:
