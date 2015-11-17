@@ -827,8 +827,8 @@ class DirectEnergyConversion(object):
 
 
         # Calculate the incident energy
-#pylint: disable=unused-variable
-        ei,mon1_peak,mon1_index,tzero = \
+#Returns: ei,mon1_peak,mon1_index,tzero
+        ei,mon1_peak,mon1_index,_ = \
             GetEi(InputWorkspace=monitor_ws, Monitor1Spec=ei_mon_spectra[0],
                   Monitor2Spec=ei_mon_spectra[1],
                   EnergyEstimate=ei_guess,FixEi=fix_ei)
@@ -1639,8 +1639,7 @@ class DirectEnergyConversion(object):
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
 
         # Do ISIS stuff for Ei
-#pylint: disable=unused-variable
-        ei_value, mon1_peak = self.get_ei(data_run, ei_guess)
+        _, mon1_peak = self.get_ei(data_run, ei_guess)
 
 
 
@@ -1649,7 +1648,7 @@ class DirectEnergyConversion(object):
         bin_offset = -mon1_peak
         result_name = data_run.set_action_suffix('_spe')
 
-        if self.check_background == True:
+        if self.check_background:
             # Remove the count rate seen in the regions of the histograms
             # defined as the background regions, if the user defined such
             # region
@@ -1663,7 +1662,8 @@ class DirectEnergyConversion(object):
                 bkgr_ws = None
                 CalculateFlatBackground(InputWorkspace=result_ws,OutputWorkspace=result_ws,
                                         StartX= bkg_range_min,EndX= bkg_range_max,
-                                        WorkspaceIndexList= '',Mode= 'Mean',SkipMonitors='1')
+                                        WorkspaceIndexList= '',Mode= 'Mean',SkipMonitors='1',
+                                        OutputMode='Subtract Background')
         else:
             bkgr_ws = None
             result_ws = data_run.get_workspace()
