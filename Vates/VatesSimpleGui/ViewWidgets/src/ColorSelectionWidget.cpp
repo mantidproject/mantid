@@ -7,6 +7,8 @@
 
 #include "pqPresetDialog.h"
 #include "vtk_jsoncpp.h"
+#include "vtkSMTransferFunctionPresets.h"
+#include "vtkNew.h"
 
 #include <QDir>
 #include <QDoubleValidator>
@@ -75,12 +77,21 @@ void ColorSelectionWidget::setEditorStatus(bool status)
 }
 
 /**
- * This function sets up various color maps. This is copied verbaitum from
- * pqColorScaleEditor.
+ * This function sets up various color maps.
  */
 void ColorSelectionWidget::loadBuiltinColorPresets()
 {
-  // still need to add custom colormaps to dialog.
+  // the destructor of vtkSMTransferFunctionPresets copies these colormaps to
+  // the vtkSMSettings singleton.
+  vtkNew<vtkSMTransferFunctionPresets> presets;
+  const std::string filenames[3] = {"All_slice_viewer_cmaps_for_vsi.json",
+                                    "All_idl_cmaps.json", "All_mpl_cmaps.json"};
+  const std::string colorMapDirectory =
+      Kernel::ConfigService::Instance().getString("colormaps.directory");
+  for (const auto &baseName : filenames) {
+    std::string colorMap = colorMapDirectory + baseName;
+    presets->ImportPresets(colorMap.c_str());
+  }
 }
 
  /**
@@ -203,7 +214,7 @@ void ColorSelectionWidget::loadPreset()
   preset.setCustomizableLoadOpacities(false, false);
   preset.setCustomizableUsePresetRange(false, false);
   preset.setCustomizableLoadAnnotations(false, false);
-  dialog.setCurrentPreset(m_mdSettings.getLastSessionColorMap());
+  preset.setCurrentPreset(m_mdSettings.getLastSessionColorMap());
   this->connect(&preset, SIGNAL(applyPreset(const Json::Value &)), this,
                 SLOT(onApplyPreset(const Json::Value &)));
   preset.exec();
