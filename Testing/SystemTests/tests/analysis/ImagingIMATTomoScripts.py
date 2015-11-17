@@ -148,8 +148,16 @@ class ImagingIMATTomoTests(unittest.TestCase):
         self.assertEquals(self._data_vol.shape[1]/2, scaled.shape[1])
         self.assertEquals(self._data_vol.shape[2]/2, scaled.shape[2])
 
-    def test_remove_sinogram_stripes(self):
-        pass
+    def test_remove_sinogram_stripes_raises(self):
+        import IMAT.prep as iprep
+
+        with self.assertRaises(ValueError):
+            vol = iprep.filters.remove_stripes_and_ring_artifacts(self._data_vol,
+                                                                  'funny-method-doesnt-exist')
+
+        with self.assertRaises(RuntimeError):
+            vol = iprep.filters.remove_stripes_and_ring_artifacts(self._data_vol,
+                                                                  'fourier-wavelet')
 
 # Just run the unittest tests defined above
 class ImagingIMATScriptsTest(stresstesting.MantidStressTest):

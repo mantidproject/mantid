@@ -23,7 +23,7 @@ or individual images.
 """
 
 try:
-    import filters
+    import IMAT.prep.filters
 except ImportError:
     raise ImportError("Inconsistency found. Could not import filters which"
                       "should be available in this package.")

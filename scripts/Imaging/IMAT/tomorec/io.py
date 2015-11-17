@@ -24,10 +24,6 @@ of paths, sample, flat, and dark images, file name prefixes, etc.
 
 """
 
-import glob
-import numpy as np
-import os
-
 try:
     import pyfits
 except ImportError:
@@ -46,13 +42,12 @@ except ImportError as exc:
                       "io and exposure which are required to support several "
                       "image formats. Error details: {0}".format(exc))
 
-import numpy as np
-import warnings
-import os
-import pyfits
 import glob
+import os
 
-__agg_img_idx = 0
+import numpy as np
+
+__AGG_IMG_IDX = 0
 
 def _make_dirs_if_needed(dirname):
     """
@@ -139,15 +134,15 @@ def avg_image_files(path, base_path, file_extension=None, agg_method='average'):
     path = os.path.expanduser(path)
 
     img_files = glob.glob(os.path.join(sample_path,
-                                        "*.{1}".format(file_prefix, file_extension)))
+                                       "{0}*.{1}".format(file_prefix, file_extension)))
 
     if len(img_files) <= 0:
         raise RuntimeError("No image files found in " + path)
 
     imgs = pyfits.open(img_files[0])
     if len(imgs) < 1:
-            raise RuntimeError(
-                "Could not load at least one image from path: {0}".format(path_proj))
+        raise RuntimeError(
+            "Could not load at least one image from path: {0}".format(path_proj))
 
     data_dtype = imgs[0].data.dtype
     # from fits files we usually get this, just change it to uint16
@@ -156,9 +151,8 @@ def avg_image_files(path, base_path, file_extension=None, agg_method='average'):
 
     accum = np.zeros((imgs[0].shape[0], imgs[0].shape[1]), dtype=data_dtype)
 
-    
     if 'average' == agg_method:
-        __agg_img_idx = 1
+        __AGG_IMG_IDX = 1
 
     for ifile in img_files:
         hdu = None
@@ -194,7 +188,7 @@ def _agg_img(self, acc, img_data, agg_method=None, index=1):
         acc = np.add(acc, img_data)
     elif 'average' == agg_method:
         acc = np.add((index-1)*acc/index, img_data/index)
-        __agg_img_idx += 1
+        __AGG_IMG_IDX += 1
 
     return acc
 
@@ -231,7 +225,7 @@ def read_stack_of_images(sample_path, open_beam_path=None, dark_field_path=None,
     image0003.fits) these will also be loaded as the usual convention
     in ImageJ and related imaging tools, using the last digits to sort
     the images in the stack.
-    
+
     @param file_extension ::  (not including the dot)
 
     @param sample_path :: path to sample images. Can be a file or directory
@@ -240,7 +234,7 @@ def read_stack_of_images(sample_path, open_beam_path=None, dark_field_path=None,
     @param minIdx :: enforce this minimum image index, lower indices will be ignored
     @param maxIdx :: enforce this maximum image index, higher indices will be ignored
 
-    Returns :: 3 numpy arrays: input data volume (3d), average of flatt images (2d), average of 
+    Returns :: 3 numpy arrays: input data volume (3d), average of flatt images (2d), average of
     dark images(2d)
     """
     # TODO: check file_extension
@@ -263,7 +257,7 @@ def read_stack_of_images(sample_path, open_beam_path=None, dark_field_path=None,
     imgs = pyfits.open(files[0])
     if len(imgs) < 1:
         raise RuntimeError(
-                "Could not load at least one image file from: {0}".format(sample_path))
+            "Could not load at least one image file from: {0}".format(sample_path))
 
     data_dtype = imgs[0].data.dtype
     if '>i2' == data_dtype:
