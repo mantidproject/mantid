@@ -70,8 +70,8 @@ private:
   double m_NBg;
   // time interval for measuring the background
   double m_dtBg;
-  // Squared error of the background for first spectra of a background workspace
-  // double m_ErrSq;
+  // Squared error of the background for first spectra of the background workspace
+  double m_ErrSq;
   // energy conversion mode
   int m_Emode;
   // source-sample distance

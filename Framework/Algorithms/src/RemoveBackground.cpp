@@ -224,12 +224,12 @@ void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
   m_singleValueBackground = false;
   if (bkgWS->getNumberHistograms() == 0)
     m_singleValueBackground = true;
-  const MantidVec &dataX = bkgWS->dataX(0);
-  const MantidVec &dataY = bkgWS->dataY(0);
-  // const MantidVec& dataE = bkgWS->dataE(0);
-  m_NBg = dataY[0];
-  m_dtBg = dataX[1] - dataX[0];
-  // m_ErrSq  = dataE[0]*dataE[0]; // needs further clarification
+  const MantidVec &dataX = bkgWS->readX(0);
+  const MantidVec &dataY = bkgWS->readY(0);
+  const MantidVec& dataE = bkgWS->readE(0);
+  m_NBg   = dataY[0];
+  m_dtBg  = dataX[1] - dataX[0];
+  m_ErrSq = dataE[0]*dataE[0]; // needs further clarification
 
   m_Efix = this->getEi(sourceWS);
 }
@@ -248,18 +248,18 @@ void BackgroundHelper::removeBackground(int nHist, MantidVec &x_data,
                                         MantidVec &y_data, MantidVec &e_data,
                                         int threadNum) const {
 
-  double dtBg, IBg;
+  double dtBg, IBg,ErrBgSq;
   if (m_singleValueBackground) {
-    dtBg = m_dtBg;
-    // ErrSq = m_ErrSq;
+    dtBg     = m_dtBg;
+    ErrBgSq  = m_ErrSq;
     IBg = m_NBg;
   } else {
-    const MantidVec &dataX = m_bgWs->dataX(nHist);
-    const MantidVec &dataY = m_bgWs->dataY(nHist);
-    // const MantidVec& dataE = m_bgWs->dataX(nHist);
-    dtBg = (dataX[1] - dataX[0]);
-    IBg = dataY[0];
-    // ErrSq= dataE[0]*dataE[0]; // Needs further clarification
+    const MantidVec &dataX = m_bgWs->readX(nHist);
+    const MantidVec &dataY = m_bgWs->readY(nHist);
+    const MantidVec& dataE = m_bgWs->readE(nHist);
+    dtBg     = (dataX[1] - dataX[0]);
+    IBg      = dataY[0];
+    ErrBgSq  = dataE[0]*dataE[0]; // Needs further clarification
   }
 
   try {
@@ -284,19 +284,18 @@ void BackgroundHelper::removeBackground(int nHist, MantidVec &x_data,
       double tof2 = unitConv->singleToTOF(X);
       double Jack = std::fabs((tof2 - tof1) / dtBg);
       double normBkgrnd = IBg * Jack;
+      double errBkgSq   = ErrBgSq * Jack * Jack;
       tof1 = tof2;
       if (m_inPlace) {
         y_data[i] -= normBkgrnd;
         // e_data[i]  =std::sqrt((ErrSq*Jack*Jack+e_data[i]*e_data[i])/2.); //
         // needs further clarification -- Gaussian error summation?
         //--> assume error for background is sqrt(signal):
-        e_data[i] = std::sqrt(
-            (normBkgrnd + e_data[i] * e_data[i]) /
-            2.); // needs further clarification -- Gaussian error summation?
+        e_data[i] = std::sqrt((errBkgSq + e_data[i] * e_data[i]));
       } else {
         x_data[i + 1] = X;
         y_data[i] = YValues[i] - normBkgrnd;
-        e_data[i] = std::sqrt((normBkgrnd + YErrors[i] * YErrors[i]) / 2.);
+        e_data[i] = std::sqrt((errBkgSq + YErrors[i] * YErrors[i]));
       }
     }
 
