@@ -1662,8 +1662,8 @@ class DirectEnergyConversion(object):
                 bkgr_ws = None
                 CalculateFlatBackground(InputWorkspace=result_ws,OutputWorkspace=result_ws,
                                         StartX= bkg_range_min,EndX= bkg_range_max,
-                                        WorkspaceIndexList= '',Mode= 'Mean',SkipMonitors='1',
-                                        OutputMode='Subtract Background')
+                                        WorkspaceIndexList= '',Mode= 'Mean',OutputMode='Subtract Background',
+                                        SkipMonitors='1',NullifyNegativeValues='0')
         else:
             bkgr_ws = None
             result_ws = data_run.get_workspace()
