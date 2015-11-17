@@ -203,7 +203,7 @@ void ColorSelectionWidget::loadPreset()
   preset.setCustomizableLoadOpacities(false, false);
   preset.setCustomizableUsePresetRange(false, false);
   preset.setCustomizableLoadAnnotations(false, false);
-  // dialog.setCurrentPreset(presetName);
+  dialog.setCurrentPreset(m_mdSettings.getLastSessionColorMap());
   this->connect(&preset, SIGNAL(applyPreset(const Json::Value &)), this,
                 SLOT(onApplyPreset(const Json::Value &)));
   preset.exec();
