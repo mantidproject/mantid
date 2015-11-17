@@ -1,4 +1,7 @@
 from mantid.api import *  # PythonAlgorithm, registerAlgorithm, WorkspaceProperty
+from mantid.simpleapi import *
+from mantid.kernel import *
+import os
 
 #pylint: disable=no-init, too-many-arguments
 class ApplyNegMuCorrection(PythonAlgorithm):
@@ -59,7 +62,7 @@ class ApplyNegMuCorrection(PythonAlgorithm):
         DeleteWorkspace(ws3000_corr_rebin)
 
     def PyInit(self):
-        self.declareProperty(name="DataDirectory",defaultValue=r'M:\Data\Negative Muons\forMantid',doc="Data directory")
+        self.declareProperty(FileProperty(name="DataDirectory",defaultValue=r'', action=FileAction.OptionalDirectory),doc="Data directory")
         self.declareProperty(name="FirstRunNumber",defaultValue=1718,doc="First Run Number")
         self.declareProperty(name="LastRunNumber",defaultValue=1719,doc="Last Run Number")
         self.declareProperty(name="GainRIKENHighE",defaultValue=1.077,doc="Gain RIKEN High E")
