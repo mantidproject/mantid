@@ -218,6 +218,12 @@ void ColorSelectionWidget::loadPreset()
   this->connect(&preset, SIGNAL(applyPreset(const Json::Value &)), this,
                 SLOT(onApplyPreset(const Json::Value &)));
   preset.exec();
+
+  Json::Value presetValue = preset.currentPreset();
+  std::string presetName = presetValue["Name"].asString();
+  if (!presetName.empty()) {
+    m_mdSettings.setLastSessionColorMap(QString::fromStdString(presetName));
+  }
 }
 
 /**
