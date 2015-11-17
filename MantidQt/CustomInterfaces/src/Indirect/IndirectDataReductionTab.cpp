@@ -174,6 +174,7 @@ namespace CustomInterfaces
     loadInstAlg->initialize();
     loadInstAlg->setProperty("Workspace", energyWs);
     loadInstAlg->setProperty("InstrumentName", instName.toStdString());
+    loadInstAlg->setProperty("RewriteSpectraMap", OptionalBool(true));
     loadInstAlg->execute();
     energyWs = loadInstAlg->getProperty("Workspace");
 
