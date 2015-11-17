@@ -125,7 +125,7 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
 
   bool warningGiven = false;
 
-  for (auto i = 0; i < nHist; ++i) {
+  for (size_t i = 0; i < nHist; ++i) {
     try {
       IDetector_const_sptr det = inputWS->getDetector(i);
       // Invoke relevant member function.
@@ -161,7 +161,7 @@ void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
   else if (emodeStr == "Indirect")
     emode = 2;
 
-  for (auto i = 0; i < nHist; i++) {
+  for (size_t i = 0; i < nHist; i++) {
     IDetector_const_sptr detector = inputWS->getDetector(i);
     double twoTheta(0.0), efixed(0.0);
     if (!detector->isMonitor()) {
