@@ -8,15 +8,10 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/AutoScaleRangeGenerator.h"
 #include "MantidVatesAPI/ColorScaleGuard.h"
-// Have to deal with ParaView warnings and Intel compiler the hard way.
-#if defined(__INTEL_COMPILER)
-  #pragma warning disable 1170
-#endif
+
 #include "vtk_jsoncpp.h"
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
-//#include <pqChartValue.h>
-//#include <pqColorMapModel.h>
 #include <pqDataRepresentation.h>
 #include <pqPipelineRepresentation.h>
 #include <pqScalarsToColors.h>
@@ -28,9 +23,6 @@
 #include <vtkSMIntVectorProperty.h>
 #include <vtkSMProxy.h>
 #include <vtkSMTransferFunctionProxy.h>
-#if defined(__INTEL_COMPILER)
-  #pragma warning enable 1170
-#endif
 
 #include <QColor>
 #include <QList>

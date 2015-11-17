@@ -288,7 +288,8 @@ void ViewBase::onColorMapChange(const Json::Value &model) {
   }
 
   // Workaround for colormap but when changing the visbility of a source
-  // this->m_currentColorMapModel = model;
+  this->m_currentColorMapModel = model;
+  cout << "default:" << m_currentColorMapModel << "\n";
 }
 
 /**
@@ -926,9 +927,9 @@ void ViewBase::onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)
   if (colorUpdater.isAutoScale())
   {
     // Workaround: A ParaView bug requires us to reload the ColorMap when the visibility changes.
-    // if (m_currentColorMapModel) {
-    //  onColorMapChange(m_currentColorMapModel);
-    //}
+    if (!m_currentColorMapModel.empty()) {
+      onColorMapChange(m_currentColorMapModel);
+    }
     this->setAutoColorScale();
   }
 }

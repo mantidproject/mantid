@@ -9,6 +9,7 @@
 #include "MantidVatesAPI/ColorScaleGuard.h"
 #include <QPointer>
 #include <QWidget>
+#include "vtk_jsoncpp.h"
 
 class pqDataRepresentation;
 class pqObjectBuilder;
@@ -261,7 +262,7 @@ private:
   ColorUpdater colorUpdater; ///< Handle to the color updating delegator
   BackgroundRgbProvider backgroundRgbProvider; /// < Holds the manager for background color related tasks.
   RebinnedSourcesManager* m_rebinnedSourcesManager;
-  // const pqColorMapModel* m_currentColorMapModel;
+  Json::Value m_currentColorMapModel;
 
   QString m_internallyRebinnedWorkspaceIdentifier;
 

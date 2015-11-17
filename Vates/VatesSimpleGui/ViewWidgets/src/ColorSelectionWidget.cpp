@@ -6,12 +6,8 @@
 #include "MantidQtAPI/MdConstants.h"
 #include "MantidVatesAPI/ColorScaleGuard.h"
 
-#include "vtk_jsoncpp.h"
 #include "pqPresetDialog.h"
-#include "vtkSMTransferFunctionPresets.h"
-
-#include <vtkPVXMLElement.h>
-#include <vtkPVXMLParser.h>
+#include "vtk_jsoncpp.h"
 
 #include <QDir>
 #include <QDoubleValidator>
@@ -85,14 +81,7 @@ void ColorSelectionWidget::setEditorStatus(bool status)
  */
 void ColorSelectionWidget::loadBuiltinColorPresets()
 {
-  const std::string filenames[3] = {"All_slice_viewer_cmaps_for_vsi.json",
-                                    "All_idl_cmaps.json", "All_mpl_cmaps.json"};
-  const std::string colorMapDirectory =
-      Kernel::ConfigService::Instance().getString("colormaps.directory");
-  for (const auto &baseName : filenames) {
-    std::string colorMap = colorMapDirectory + baseName;
-    this->m_presets->ImportPresets(colorMap.c_str());
-  }
+  // still need to add custom colormaps to dialog.
 }
 
  /**
@@ -123,14 +112,16 @@ void ColorSelectionWidget::loadBuiltinColorPresets()
       }
     }
 
-    // Mantid::VATES::ColorScaleLockGuard guard(m_colorScaleLock);
-    pqPresetDialog dialog(this, pqPresetDialog::SHOW_NON_INDEXED_COLORS_ONLY);
-    dialog.setCurrentPreset(defaultColorMap.toStdString().c_str());
-    Json::Value colorMap = dialog.currentPreset();
-    // cout << "default:" << defaultColorMap.toStdString() << " "  << colorMap
-    // << "\n";
+    // Set the default colormap
+    if (!defaultColorMap.isEmpty()) {
+      m_mdSettings.setLastSessionColorMap(defaultColorMap);
+    }
+    Mantid::VATES::ColorScaleLockGuard guard(m_colorScaleLock);
+    pqPresetDialog preset(this, pqPresetDialog::SHOW_NON_INDEXED_COLORS_ONLY);
+    preset.setCurrentPreset(defaultColorMap.toStdString().c_str());
+    Json::Value colorMap = preset.currentPreset();
     if (!colorMap.empty())
-      emit this->colorMapChanged(colorMap);
+      this->onApplyPreset(colorMap);
   }
 
 /**
@@ -207,32 +198,16 @@ void ColorSelectionWidget::autoCheckBoxClicked(bool wasOn)
  */
 void ColorSelectionWidget::loadPreset()
 {
-  // Mantid::VATES::ColorScaleLockGuard guard(m_colorScaleLock);
-  pqPresetDialog dialog(this, pqPresetDialog::SHOW_NON_INDEXED_COLORS_ONLY);
+  Mantid::VATES::ColorScaleLockGuard guard(m_colorScaleLock);
+  pqPresetDialog preset(this, pqPresetDialog::SHOW_NON_INDEXED_COLORS_ONLY);
+  preset.setCustomizableLoadColors(false, false);
+  preset.setCustomizableLoadOpacities(false, false);
+  preset.setCustomizableUsePresetRange(false, false);
+  preset.setCustomizableLoadAnnotations(false, false);
   // dialog.setCurrentPreset(presetName);
-  dialog.setCustomizableLoadColors(false);
-  dialog.setCustomizableLoadOpacities(false);
-  dialog.setCustomizableUsePresetRange(false);
-  dialog.setCustomizableLoadAnnotations(true);
-  this->connect(&dialog, SIGNAL(applyPreset(const Json::Value &)), this,
+  this->connect(&preset, SIGNAL(applyPreset(const Json::Value &)), this,
                 SLOT(onApplyPreset(const Json::Value &)));
-  dialog.exec();
-  // this->m_presets->setUsingCloseButton(false);
-  // if (dialog.exec() == QDialog::Accepted)
-  // {
-  // Get the color map from the selection.
-  // QItemSelectionModel *selection = this->m_presets->getSelectionModel();
-  // QModelIndex index = selection->currentIndex();
-  // const pqColorMapModel *colorMap =
-  // this->m_presets->getModel()->getColorMap(index.row());
-
-  // if (colorMap)
-  // {
-  //  Persist the color map change
-  //  this->colorMapManager->setNewActiveColorMap(index.row());
-  //  emit this->colorMapChanged(colorMap);
-  //}
-  //}
+  preset.exec();
 }
 
 /**

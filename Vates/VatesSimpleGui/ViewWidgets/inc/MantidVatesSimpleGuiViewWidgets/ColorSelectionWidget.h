@@ -9,10 +9,12 @@
 #include "MantidQtAPI/MdSettings.h"
 #include "boost/scoped_ptr.hpp"
 #include <QWidget>
-#include "vtkNew.h"
-#include "vtkSMTransferFunctionPresets.h"
 
 class QDoubleValidator;
+
+namespace Json {
+class Value;
+};
 
 namespace Mantid
 {
@@ -146,8 +148,6 @@ private:
   double m_maxHistoric;
 
   MantidQt::API::MdConstants m_mdConstants;
-  vtkNew<vtkSMTransferFunctionPresets>
-      m_presets; ///< Dialog for choosing color presets
   MantidQt::API::MdSettings m_mdSettings;
 
   Ui::ColorSelectionWidgetClass m_ui; ///< The mode control widget's UI form
