@@ -24,6 +24,22 @@ namespace Algorithms {
    converted. </LI>
     </UL>
 
+        Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak
+   Ridge
+        National Laboratory & European Spallation Source
+
+        This file is part of Mantid.
+
+        Mantid is free software; you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation; either version 3 of the License, or
+        (at your option) any later version.
+
+        Mantid is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
+
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
@@ -57,22 +73,19 @@ private:
   /// Execution code
   void exec();
   /// Converting to theta.
-  void createThetaMap(const std::string &target);
+  void createThetaMap(API::Progress &progress, const std::string &target,
+                      API::MatrixWorkspace_sptr &inputWS, size_t nHist);
   /// Converting to Q and QSquared
-  void createElasticQMap(const std::string &target);
+  void createElasticQMap(API::Progress &progress, const std::string &target,
+                         API::MatrixWorkspace_sptr &inputWS, size_t nHist);
   /// Creates an output workspace.
-  API::MatrixWorkspace_sptr createOutputWorkspace(const std::string &target);
+  API::MatrixWorkspace_sptr
+  createOutputWorkspace(API::Progress &progress, const std::string &target,
+                        API::MatrixWorkspace_sptr &inputWS, size_t nHist,
+                        size_t nBins, size_t nxBins);
 
-  // Stores the input workspace.
-  API::MatrixWorkspace_const_sptr m_inputWS;
   // Map to which the conversion to the unit is stored.
   std::multimap<double, size_t> m_indexMap;
-  // Stores the number of bins.
-  size_t m_nBins;
-  // Stores the number of x bins.
-  size_t m_nxBins;
-  // Stores the number of histograms.
-  size_t m_nHist;
 
   /// Getting Efixed
   double getEfixed(Geometry::IDetector_const_sptr detector,
