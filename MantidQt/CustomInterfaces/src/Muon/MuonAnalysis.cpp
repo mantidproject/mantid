@@ -2024,7 +2024,9 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, bool logScale)
     const QMap<QString, QString>& params = getPlotStyleParams(wsName);
 
     // Insert real values
-    pyS.replace("%WSNAME%", wsName);
+    QString safeWSName(wsName);
+    safeWSName.replace("'", "\'");
+    pyS.replace("%WSNAME%", safeWSName);
     pyS.replace("%PREV%", m_currentDataName);
     pyS.replace("%ERRORS%", params["ShowErrors"]);
     pyS.replace("%CONNECT%", params["ConnectType"]);
