@@ -289,7 +289,6 @@ void ViewBase::onColorMapChange(const Json::Value &model) {
 
   // Workaround for colormap but when changing the visbility of a source
   this->m_currentColorMapModel = model;
-  cout << "default:" << m_currentColorMapModel << "\n";
 }
 
 /**
