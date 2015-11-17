@@ -1989,35 +1989,31 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, bool logScale)
       hideAllPlotWindows();
     }
 
+    QStringList& s = acquireWindowScript; // To keep short
+    s << "ws = mtd['%WSNAME%']";
+    s << "altName = ws.name() + '-1'";
+
     if ( policy == MuonAnalysisOptionTab::PreviousWindow )
     {
-      QStringList& s = acquireWindowScript; // To keep short
-
-      s << "ew = graph('%WSNAME%-1')";
+      s << "ew = graph(altName)";
       s << "if '%WSNAME%' != '%PREV%' and ew != None:";
       s << "    ew.close()";
 
       s << "pw = graph('%PREV%-1')";
       s << "if pw == None:";
-      s << "  pw = newGraph('%WSNAME%-1', 0)";
-
-      s << "w = plotSpectrum('%WSNAME%', 0, %ERRORS%, %CONNECT%, window = pw, clearWindow = True)";
-      s << "w.setName('%WSNAME%-1')";
-      s << "w.setObjectName('%WSNAME%')";
-      s << "w.show()";
-      s << "w.setFocus()";
+      s << "  pw = newGraph(altName, 0)";
     }
     else if ( policy == MuonAnalysisOptionTab::NewWindow )
     {
-      QStringList& s = acquireWindowScript; // To keep short
-
-      s << "pw = newGraph('%WSNAME%-1', 0)";
-      s << "w = plotSpectrum('%WSNAME%', 0, %ERRORS%, %CONNECT%, window = pw, clearWindow = True)";
-      s << "w.setName('%WSNAME%-1')";
-      s << "w.setObjectName('%WSNAME%')";
-      s << "w.show()";
-      s << "w.setFocus()";
+      s << "pw = newGraph(altName, 0)";
     }
+
+    s << "w = plotSpectrum(ws.name(), 0, %ERRORS%, %CONNECT%, window = pw, "
+      "clearWindow = True)";
+    s << "w.setName(altName)";
+    s << "w.setObjectName(ws.name())";
+    s << "w.show()";
+    s << "w.setFocus()";
 
     QString pyS;
 
@@ -2035,10 +2031,8 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, bool logScale)
 
     // Update titles
     pyS += "l = w.activeLayer()\n"
-           "l.setCurveTitle(0, '%1')\n"
-           "l.setTitle('%2')\n";
-
-    pyS = pyS.arg(wsName).arg(m_title.c_str());
+           "l.setCurveTitle(0, ws.name())\n"
+           "l.setTitle(ws.getTitle())\n";
 
     // Set logarithmic scale if required
     if ( logScale )
