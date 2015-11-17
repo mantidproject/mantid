@@ -858,36 +858,8 @@ void MuonAnalysis::runLoadCurrent()
 {
   QString instname = m_uiForm.instrSelector->currentText().toUpper();
 
-  // If Argus data then simple
-  if ( instname == "ARGUS" )
-  {
-    QString argusDAE = "\\\\ndw828\\argusdata\\current cycle\\nexus\\argus0000000.nxs";
-    argusDAE = MuonAnalysisHelper::localisePath(argusDAE);
-    Poco::File l_path( argusDAE.toStdString() );
-    try
-    {
-      if ( !l_path.exists() )
-      {
-        QMessageBox::warning(this,"Mantid - MuonAnalysis",
-          QString("Can't load ARGUS Current data since\n") +
-          argusDAE + QString("\n") +
-          QString("does not seem to exist"));
-        return;
-      }
-    }
-    catch(Poco::Exception&)
-    {
-       QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't read from the selected directory, either the computer you are trying"
-         "\nto access is down or your computer is not currently connected to the network.");
-       return;
-    }
-    m_uiForm.mwRunFiles->setUserInput(argusDAE);
-    m_uiForm.mwRunFiles->setText("CURRENT RUN");
-    return;
-  }
-
-  if ( instname == "EMU" || instname == "HIFI" || instname == "MUSR" || instname == "CHRONUS")
-  {
+  if (instname == "EMU" || instname == "HIFI" || instname == "MUSR" ||
+      instname == "CHRONUS" || instname == "ARGUS") {
     QString instDirectory = instname;
     if ( instname == "CHRONUS" )
       instDirectory = "NDW1030";
