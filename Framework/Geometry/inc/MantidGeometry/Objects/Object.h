@@ -175,6 +175,15 @@ private:
   int checkSurfaceValid(const Kernel::V3D &, const Kernel::V3D &) const;
   BoundingBox m_boundingBox; ///< Object's bounding box
 
+  /// Calculate bounding box using Rule system
+  void calcBoundingBoxByRule();
+
+  /// Calculate bounding box using object's vertices
+  void calcBoundingBoxByVertices();
+
+  /// Calculate bounding box using object's geometric data
+  void calcBoundingBoxByGeometry();
+
   // -- DEPRECATED --
   mutable double AABBxMax,  ///< xmax of Axis aligned bounding box cache
       AABByMax,             ///< ymax of Axis aligned bounding box cache

@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidTestHelpers/FakeObjects.h"
+#include "PropertyManagerHelper.h"
 
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
@@ -322,6 +323,69 @@ public:
     Workspace_sptr b = boost::make_shared<WorkspaceTester>();
     TS_ASSERT_THROWS(group->isInGroup(*b), std::runtime_error);
     group1->removeAll();
+  }
+
+  /**
+  * Test declaring an input workspace group and retrieving as const_sptr or sptr
+  */
+  void testGetProperty_const_sptr() {
+    const std::string wsName = "InputWorkspace";
+    WorkspaceGroup_sptr wsInput(new WorkspaceGroup());
+    PropertyManagerHelper manager;
+    manager.declareProperty(wsName, wsInput, Direction::Input);
+
+    // Check property can be obtained as const_sptr or sptr
+    WorkspaceGroup_const_sptr wsConst;
+    WorkspaceGroup_sptr wsNonConst;
+    TS_ASSERT_THROWS_NOTHING(
+        wsConst = manager.getValue<WorkspaceGroup_const_sptr>(wsName));
+    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsNonConst =
+                                 manager.getValue<WorkspaceGroup_sptr>(wsName));
+    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT_EQUALS(wsConst, wsNonConst);
+
+    // Check TypedValue can be cast to const_sptr or to sptr
+    PropertyManagerHelper::TypedValue val(manager, wsName);
+    WorkspaceGroup_const_sptr wsCastConst;
+    WorkspaceGroup_sptr wsCastNonConst;
+    TS_ASSERT_THROWS_NOTHING(wsCastConst = (WorkspaceGroup_const_sptr)val);
+    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (WorkspaceGroup_sptr)val);
+    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
+  }
+
+  /**
+  * Test declaring an input workspace and retrieving as const_sptr or sptr
+  * (here Workspace rather than WorkspaceGroup)
+  */
+  void testGetProperty_Workspace_const_sptr() {
+    const std::string wsName = "InputWorkspace";
+    Workspace_sptr wsInput(new WorkspaceTester());
+    PropertyManagerHelper manager;
+    manager.declareProperty(wsName, wsInput, Direction::Input);
+
+    // Check property can be obtained as const_sptr or sptr
+    Workspace_const_sptr wsConst;
+    Workspace_sptr wsNonConst;
+    TS_ASSERT_THROWS_NOTHING(
+        wsConst = manager.getValue<Workspace_const_sptr>(wsName));
+    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsNonConst =
+                                 manager.getValue<Workspace_sptr>(wsName));
+    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT_EQUALS(wsConst, wsNonConst);
+
+    // Check TypedValue can be cast to const_sptr or to sptr
+    PropertyManagerHelper::TypedValue val(manager, wsName);
+    Workspace_const_sptr wsCastConst;
+    Workspace_sptr wsCastNonConst;
+    TS_ASSERT_THROWS_NOTHING(wsCastConst = (Workspace_const_sptr)val);
+    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (Workspace_sptr)val);
+    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };
 

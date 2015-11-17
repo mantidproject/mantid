@@ -325,8 +325,9 @@ IPropertyManager::getValue<Mantid::DataObjects::Workspace2D_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected Workspace2D.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<Workspace2D>.";
     throw std::runtime_error(message);
   }
 }
@@ -341,8 +342,9 @@ IPropertyManager::getValue<Mantid::DataObjects::Workspace2D_const_sptr>(
   if (prop) {
     return prop->operator()();
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected const Workspace2D.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<Workspace2D>.";
     throw std::runtime_error(message);
   }
 }

@@ -403,6 +403,10 @@ protected:
     template <typename T> operator boost::shared_ptr<T>() {
       return pm.getValue<boost::shared_ptr<T>>(prop);
     }
+    /// explicit specialization for boost::shared_ptr to const T
+    template <typename T> operator boost::shared_ptr<const T>() {
+      return pm.getValue<boost::shared_ptr<T>>(prop);
+    }
     /// explicit version for Matrices
     template <typename T> operator Matrix<T>() {
       return pm.getValue<Matrix<T>>(prop);
