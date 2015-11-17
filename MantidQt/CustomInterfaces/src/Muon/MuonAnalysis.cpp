@@ -854,69 +854,77 @@ void MuonAnalysis::runGroupTablePlotButton()
 /**
  * Load current (slot)
  */
-void MuonAnalysis::runLoadCurrent()
-{
+void MuonAnalysis::runLoadCurrent() {
   QString instname = m_uiForm.instrSelector->currentText().toUpper();
 
   if (instname == "EMU" || instname == "HIFI" || instname == "MUSR" ||
       instname == "CHRONUS" || instname == "ARGUS") {
     QString instDirectory = instname;
-    if ( instname == "CHRONUS" )
+    if (instname == "CHRONUS") {
       instDirectory = "NDW1030";
+    }
+
+    // find autosave file
+    Poco::Path path(true);
+    path.setNode(instDirectory.toStdString());
+    path.pushDirectory("data");
+    path.setFileName("autosave.run");
+    Poco::File fileAutosave(path);
+
+    // check if file exists
     std::string autosavePointsTo = "";
-    std::string autosaveFile = "\\\\" + instDirectory.toStdString() + "\\data\\autosave.run";
-    autosaveFile = MuonAnalysisHelper::localisePath(autosaveFile);
-    Poco::File pathAutosave( autosaveFile );
-    
-    try // check if exists
-    {
-      if ( pathAutosave.exists() )
-      {
-        std::ifstream autofileIn(autosaveFile.c_str(), std::ifstream::in);
+    try {
+      if (fileAutosave.exists()) {
+        std::ifstream autofileIn(path.toString(Poco::Path::PATH_NATIVE).c_str(),
+                                 std::ifstream::in);
         autofileIn >> autosavePointsTo;
       }
-    }
-    catch(Poco::Exception&)
-    {
-       QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't read from the selected directory, either the computer you are trying"
-         "\nto access is down or your computer is not currently connected to the network.");
-       return;
+    } catch (Poco::Exception &) {
+      QMessageBox::warning(this, "MantidPlot - MuonAnalysis",
+                           "Can't read from the selected directory, either the "
+                           "computer you are trying"
+                           "\nto access is down or your computer is not "
+                           "currently connected to the network.");
+      return;
     }
 
-    QString psudoDAE;
-    if ( autosavePointsTo.empty() )
-      psudoDAE = "\\\\" + instDirectory + "\\data\\" + instDirectory + "auto_A.tmp";
-    else
-      psudoDAE = "\\\\" + instDirectory + "\\data\\" + autosavePointsTo.c_str();
+    // open the file pointed to by the autosave file
+    path.clear();
+    path.setNode(instDirectory.toStdString());
+    path.pushDirectory("data");
+    if (autosavePointsTo.empty()) {
+      path.pushDirectory(instDirectory.toStdString());
+      path.setFileName("auto_A.tmp");
+    } else {
+      path.setFileName(autosavePointsTo);
+    }
+    QString psudoDAE = QString(path.toString(Poco::Path::PATH_NATIVE).c_str());
+    Poco::File fileCurrent(path);
 
-    psudoDAE = MuonAnalysisHelper::localisePath(psudoDAE);
-    Poco::File l_path( psudoDAE.toStdString() );
-    try
-    {
-      if ( !l_path.exists() )
-      {
-        QMessageBox::warning(this,"Mantid - MuonAnalysis",
-          QString("Can't load ") + "Current data since\n" +
-          psudoDAE + QString("\n") +
-          QString("does not seem to exist"));
+    // check if this file exists
+    try {
+      if (!fileCurrent.exists()) {
+        QMessageBox::warning(this, "Mantid - MuonAnalysis",
+                             QString("Can't load ") + "Current data since\n" +
+                                 psudoDAE + QString("\n") +
+                                 QString("does not seem to exist"));
         return;
       }
-    }
-    catch(Poco::Exception&)
-    {
-      QMessageBox::warning(this,"Mantid - MuonAnalysis",
-        QString("Can't load ") + "Current data since\n" +
-        psudoDAE + QString("\n") +
-        QString("does not seem to exist"));
+    } catch (Poco::Exception &) {
+      QMessageBox::warning(this, "Mantid - MuonAnalysis",
+                           QString("Can't load ") + "Current data since\n" +
+                               psudoDAE + QString("\n") +
+                               QString("does not seem to exist"));
       return;
     }
     m_uiForm.mwRunFiles->setUserInput(psudoDAE);
     m_uiForm.mwRunFiles->setText("CURRENT RUN");
     return;
+  } else {
+    QMessageBox::critical(
+        this, "Unsupported instrument",
+        "Current run loading is not supported for the selected instrument.");
   }
-
-  QMessageBox::critical(this, "Unsupported instrument",
-                        "Current run loading is not supported for the selected instrument.");
 }
 
 /**

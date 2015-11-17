@@ -14,7 +14,6 @@
 
 #include <stdexcept>
 #include <boost/scope_exit.hpp>
-#include <Poco/Path.h>
 
 namespace MantidQt
 {
@@ -534,23 +533,6 @@ void groupWorkspaces(const std::string& groupName, const std::vector<std::string
     groupingAlg->setPropertyValue("OutputWorkspace", groupName);
     groupingAlg->execute();
   }
-}
-
-/**
- * Converts Windows-specific path to data archive into the correct format for
- * the current platform
- */
-std::string localisePath(const std::string &windowsPath) {
-  Poco::Path path(windowsPath, Poco::Path::PATH_WINDOWS);
-  return path.toString(Poco::Path::PATH_NATIVE);
-}
-
-/**
-* Converts Windows-specific path to data archive into the correct format for
-* the current platform
-*/
-QString localisePath(const QString &windowsPath) {
-  return QString(localisePath(windowsPath.toStdString()).c_str());
 }
 
 } // namespace MuonAnalysisHelper

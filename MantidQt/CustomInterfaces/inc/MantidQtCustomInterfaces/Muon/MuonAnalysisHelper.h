@@ -54,12 +54,6 @@ MANTIDQT_CUSTOMINTERFACES_DLL bool compareByRunNumber(Workspace_sptr ws1, Worksp
 MANTIDQT_CUSTOMINTERFACES_DLL void groupWorkspaces(const std::string& groupName,
                                                    const std::vector<std::string>& inputWorkspaces);
 
-/// Transforms Windows path to current platform (Windows/Linux/Mac)
-MANTIDQT_CUSTOMINTERFACES_DLL std::string localisePath(const std::string &windowsPath);
-
-/// Transforms Windows path to current platform (Windows/Linux/Mac)
-MANTIDQT_CUSTOMINTERFACES_DLL QString localisePath(const QString &windowsPath);
-
 /**
  * A class which deals with auto-saving the widget values. Widgets are registered and then on any
  * change, their value is stored using QSettings.
