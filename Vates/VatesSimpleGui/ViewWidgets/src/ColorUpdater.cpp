@@ -133,10 +133,6 @@ void ColorUpdater::updateLookupTable(pqDataRepresentation* representation)
     // Set the scalar range values
     lookupTable->setScalarRange(this->m_minScale, this->m_maxScale);
 
-    // Set the logarithmic scale
-    pqSMAdaptor::setElementProperty(lookupTable->getProxy()->GetProperty("UseLogScale"),
-                                     this->m_logScaleState);
-
     vtkSMProxy* proxy = representation->getProxy();
     vtkSMProxy* lutProxy = pqSMAdaptor::getProxyProperty(proxy->GetProperty("LookupTable"));
     vtkSMProxy* scalarOpacityFunctionProxy = lutProxy?pqSMAdaptor::getProxyProperty(lutProxy->GetProperty("ScalarOpacityFunction")) : NULL;
@@ -166,6 +162,39 @@ void ColorUpdater::updateLookupTable(pqDataRepresentation* representation)
 void ColorUpdater::logScale(int state)
 {
   this->m_logScaleState = state;
+
+  // Update for all sources and all reps
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel =
+      pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources =
+      smModel->findItems<pqPipelineSource *>(server);
+  QList<pqPipelineSource *>::Iterator source;
+
+  // For all sources
+  for (QList<pqPipelineSource *>::iterator source = sources.begin();
+       source != sources.end(); ++source) {
+    QList<pqView *> views = (*source)->getViews();
+
+    // For all views
+    for (QList<pqView *>::iterator view = views.begin(); view != views.end();
+         ++view) {
+      QList<pqDataRepresentation *> reps =
+          (*source)->getRepresentations((*view));
+
+      // For all representations
+      for (QList<pqDataRepresentation *>::iterator rep = reps.begin();
+           rep != reps.end(); ++rep) {
+        // Set the logarithmic (linear) scale
+        if (m_logScaleState)
+          vtkSMTransferFunctionProxy::MapControlPointsToLogSpace(
+              (*rep)->getLookupTable()->getProxy());
+        else
+          vtkSMTransferFunctionProxy::MapControlPointsToLinearSpace(
+              (*rep)->getLookupTable()->getProxy());
+      }
+    }
+  }
 
   this->colorScaleChange(this->m_minScale, this->m_maxScale);
 }
