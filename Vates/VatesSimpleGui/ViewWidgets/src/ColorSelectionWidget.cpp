@@ -122,10 +122,6 @@ void ColorSelectionWidget::loadBuiltinColorPresets()
       }
     }
 
-    // Set the default colormap
-    if (!defaultColorMap.isEmpty()) {
-      m_mdSettings.setLastSessionColorMap(defaultColorMap);
-    }
     Mantid::VATES::ColorScaleLockGuard guard(m_colorScaleLock);
     pqPresetDialog preset(this, pqPresetDialog::SHOW_NON_INDEXED_COLORS_ONLY);
     preset.setCurrentPreset(defaultColorMap.toStdString().c_str());
@@ -218,12 +214,6 @@ void ColorSelectionWidget::loadPreset()
   this->connect(&preset, SIGNAL(applyPreset(const Json::Value &)), this,
                 SLOT(onApplyPreset(const Json::Value &)));
   preset.exec();
-
-  Json::Value presetValue = preset.currentPreset();
-  std::string presetName = presetValue["Name"].asString();
-  if (!presetName.empty()) {
-    m_mdSettings.setLastSessionColorMap(QString::fromStdString(presetName));
-  }
 }
 
 /**
@@ -286,6 +276,10 @@ void ColorSelectionWidget::useLogScalingClicked(bool on)
 }
 
 void ColorSelectionWidget::onApplyPreset(const Json::Value &value) {
+  std::string presetName = value["Name"].asString();
+  if (!presetName.empty()) {
+    m_mdSettings.setLastSessionColorMap(QString::fromStdString(presetName));
+  }
   emit this->colorMapChanged(value);
 }
 

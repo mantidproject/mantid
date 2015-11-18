@@ -186,6 +186,9 @@ void ColorUpdater::logScale(int state)
       for (QList<pqDataRepresentation *>::iterator rep = reps.begin();
            rep != reps.end(); ++rep) {
         // Set the logarithmic (linear) scale
+        pqSMAdaptor::setElementProperty(
+            (*rep)->getLookupTable()->getProxy()->GetProperty("UseLogScale"),
+            this->m_logScaleState);
         if (m_logScaleState)
           vtkSMTransferFunctionProxy::MapControlPointsToLogSpace(
               (*rep)->getLookupTable()->getProxy());
