@@ -14050,7 +14050,6 @@ void ApplicationWindow::updateRecentFilesList(QString fname) {
       mfp.setValue(recentFiles[i].toStdString());
       const std::vector<std::string> files =
           Mantid::API::MultipleFileProperty::flattenFileNames(mfp());
-      int commaPos = recentFiles[i].find(",", 0);
       if (files.size() == 1) {
         mi->setText("&" + QString::number(i + 1) + " " + recentFiles[i]);
       } else {
