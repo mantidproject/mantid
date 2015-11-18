@@ -182,7 +182,7 @@ class AdvancedSetupScript(BaseScriptElement):
             self.cropwavelengthmin = getFloatElement(instrument_dom, "cropwavelengthmin",
                                                      AdvancedSetupScript.cropwavelengthmin)
 
-            self.cropwavelengthmax = getFloatElement(instrument_dom, 'cropwavelengthmax', 
+            self.cropwavelengthmax = getFloatElement(instrument_dom, 'cropwavelengthmax',
                                                      AdvancedSetupScript.cropwavelengthmax)
 
             self.removepropmppulsewidth = getFloatElement(instrument_dom, "removepromptpulsewidth",
