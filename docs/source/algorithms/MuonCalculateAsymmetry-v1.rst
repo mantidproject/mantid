@@ -9,8 +9,8 @@
 Description
 -----------
 
-Converts loaded/prepared Muon data to a data suitable for analysis. Either one or two data acquisition period
-workspaces may be provided (only the first one is mandatory). When both of them are supplied, the algorithm merges the counts and
+Converts loaded/prepared Muon data to a data suitable for analysis. Either one or several data acquisition period
+workspaces may be provided (only the first one is mandatory). When more than one are supplied, the algorithm merges the counts and
 then calculates the asymmetry. PeriodOperation determines in which way period data will be
 merged before the asymmetry calculation.
 

@@ -37,11 +37,12 @@ public:
     const std::string outWSName =
         outputWorkspaceName("GroupCounts_SinglePeriod");
 
-    MatrixWorkspace_sptr inWS = createWorkspace();
+    auto inputWSGroup = boost::shared_ptr<WorkspaceGroup>(new WorkspaceGroup());
+    inputWSGroup->addWorkspace(createWorkspace());
 
     MuonCalculateAsymmetry alg;
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FirstPeriodWorkspace", inWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWSGroup));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 1));
     TS_ASSERT_THROWS_NOTHING(
@@ -82,13 +83,14 @@ public:
 
     MatrixWorkspace_sptr inWSFirst = createWorkspace();
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
+    auto inputWSGroup = boost::shared_ptr<WorkspaceGroup>(new WorkspaceGroup());
+    inputWSGroup->addWorkspace(inWSFirst);
+    inputWSGroup->addWorkspace(inWSSecond);
 
     MuonCalculateAsymmetry alg;
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("FirstPeriodWorkspace", inWSFirst));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("SecondPeriodWorkspace", inWSSecond));
+        alg.setProperty("InputWorkspace", inputWSGroup));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeriodOperation", "+"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 1));
@@ -130,13 +132,14 @@ public:
 
     MatrixWorkspace_sptr inWSFirst = createWorkspace(3);
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
+    auto inputWSGroup = boost::shared_ptr<WorkspaceGroup>(new WorkspaceGroup());
+    inputWSGroup->addWorkspace(inWSFirst);
+    inputWSGroup->addWorkspace(inWSSecond);
 
     MuonCalculateAsymmetry alg;
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("FirstPeriodWorkspace", inWSFirst));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("SecondPeriodWorkspace", inWSSecond));
+        alg.setProperty("InputWorkspace", inputWSGroup));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeriodOperation", "-"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 1));
@@ -176,10 +179,12 @@ public:
     const std::string outWSName = outputWorkspaceName("GroupAsymmetry");
 
     MatrixWorkspace_sptr inWS = createWorkspace();
+    auto inputWSGroup = boost::shared_ptr<WorkspaceGroup>(new WorkspaceGroup());
+    inputWSGroup->addWorkspace(inWS);
 
     MuonCalculateAsymmetry alg;
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FirstPeriodWorkspace", inWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWSGroup));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupAsymmetry"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 2));
     TS_ASSERT_THROWS_NOTHING(
@@ -219,11 +224,13 @@ public:
 
     MatrixWorkspace_sptr inWS = createWorkspace(3);
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
+    auto inputWSGroup = boost::shared_ptr<WorkspaceGroup>(new WorkspaceGroup());
+    inputWSGroup->addWorkspace(inWS);
+    inputWSGroup->addWorkspace(inWSSecond);
 
     MuonCalculateAsymmetry alg;
     alg.initialize();
-    alg.setProperty("FirstPeriodWorkspace", inWS);
-    alg.setProperty("SecondPeriodWorkspace", inWSSecond);
+    alg.setProperty("InputWorkspace", inputWSGroup);
     alg.setProperty("PeriodOperation", "-");
     alg.setProperty("OutputType", "GroupAsymmetry");
     alg.setProperty("GroupIndex", 2);
@@ -264,11 +271,13 @@ public:
 
     MatrixWorkspace_sptr inWS = createWorkspace(3);
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
+    auto inputWSGroup = boost::shared_ptr<WorkspaceGroup>(new WorkspaceGroup());
+    inputWSGroup->addWorkspace(inWS);
+    inputWSGroup->addWorkspace(inWSSecond);
 
     MuonCalculateAsymmetry alg;
     alg.initialize();
-    alg.setProperty("FirstPeriodWorkspace", inWS);
-    alg.setProperty("SecondPeriodWorkspace", inWSSecond);
+    alg.setProperty("InputWorkspace", inputWSGroup);
     alg.setProperty("PeriodOperation", "+");
     alg.setProperty("OutputType", "GroupAsymmetry");
     alg.setProperty("GroupIndex", 1);
@@ -307,10 +316,12 @@ public:
     const std::string outWSName = outputWorkspaceName("GroupAsymmetry");
 
     MatrixWorkspace_sptr inWS = createWorkspace();
+    auto inputWSGroup = boost::shared_ptr<WorkspaceGroup>(new WorkspaceGroup());
+    inputWSGroup->addWorkspace(inWS);
 
     MuonCalculateAsymmetry alg;
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FirstPeriodWorkspace", inWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWSGroup));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "PairAsymmetry"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PairFirstIndex", 2));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PairSecondIndex", 0));
@@ -352,11 +363,13 @@ public:
 
     MatrixWorkspace_sptr inWS = createWorkspace(3);
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
+    auto inputWSGroup = boost::shared_ptr<WorkspaceGroup>(new WorkspaceGroup());
+    inputWSGroup->addWorkspace(inWS);
+    inputWSGroup->addWorkspace(inWSSecond);
 
     MuonCalculateAsymmetry alg;
     alg.initialize();
-    alg.setProperty("FirstPeriodWorkspace", inWS);
-    alg.setProperty("SecondPeriodWorkspace", inWSSecond);
+    alg.setProperty("InputWorkspace", inputWSGroup);
     alg.setProperty("PeriodOperation", "-");
     alg.setProperty("OutputType", "PairAsymmetry");
     alg.setProperty("PeriodOperation", "-");
@@ -399,11 +412,13 @@ public:
 
     MatrixWorkspace_sptr inWS = createWorkspace(3);
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
+    auto inputWSGroup = boost::shared_ptr<WorkspaceGroup>(new WorkspaceGroup());
+    inputWSGroup->addWorkspace(inWS);
+    inputWSGroup->addWorkspace(inWSSecond);
 
     MuonCalculateAsymmetry alg;
     alg.initialize();
-    alg.setProperty("FirstPeriodWorkspace", inWS);
-    alg.setProperty("SecondPeriodWorkspace", inWSSecond);
+    alg.setProperty("InputWorkspace", inputWSGroup);
     alg.setProperty("PeriodOperation", "+");
     alg.setProperty("OutputType", "PairAsymmetry");
     alg.setProperty("PairFirstIndex", 0);
