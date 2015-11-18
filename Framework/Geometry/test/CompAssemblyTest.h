@@ -513,6 +513,9 @@ public:
             ->getFullName(),
         "inst/detectors/Rectangle bank 4/Rectangle bank 4(x=3)/Rectangle bank "
         "4(3,5)");
+		TS_ASSERT_EQUALS(
+			inst->getComponentByName("Rectangle bank 11")->getFullName(),
+			"inst/detectors/Rectangle bank 11");
 
     delete (inst);
   }
