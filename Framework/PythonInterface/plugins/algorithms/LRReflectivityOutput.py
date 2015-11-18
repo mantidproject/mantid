@@ -209,7 +209,7 @@ class LRReflectivityOutput(PythonAlgorithm):
 
         for i in range(len(data_x)):
             # Skip point where the error is larger than the reflectivity value
-            if data_y[i] > 0 and data_y[i] > data_e[i]:
+            if data_y[i] > data_e[i]:
                 content += str(data_x[i])
                 content += ' ' + str(data_y[i])
                 content += ' ' + str(data_e[i])
