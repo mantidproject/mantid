@@ -231,7 +231,6 @@ void MaskMD::exec() {
   // loss of precision does not matter as we are only using the result
   // for reporting algorithm progress
   const double nGroups_double = static_cast<double>(nGroups);
-  double group_double;
   // Loop over all groups
   for (size_t group = 0; group < nGroups; ++group) {
     std::vector<InputArgument> arguments(nDims);
@@ -265,7 +264,7 @@ void MaskMD::exec() {
     // Add new masking.
     ws->setMDMasking(new MDBoxImplicitFunction(mins, maxs));
     this->interruption_point();
-    group_double = static_cast<double>(group);
+    double group_double = static_cast<double>(group);
     this->progress(group_double / nGroups_double);
   }
   this->progress(1.0); // Ensure algorithm progress is reported as complete
