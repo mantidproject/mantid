@@ -97,7 +97,7 @@
 </parameter>
 
 <!-- -->
-<parameter name="ei-mon1-spec"  type="string">
+<parameter name="ei-mon1-spec"  type="int">
   <value val="90118"/>
   <description is="First spectra number (monitor's spectra number) to use when measuring incident energy,
      or comma separated list of such numbers.

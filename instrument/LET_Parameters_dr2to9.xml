@@ -96,7 +96,7 @@
 </parameter>
 
 <!-- -->
-<parameter name="ei-mon1-spec"  type="string">
+<parameter name="ei-mon1-spec"  type="int">
   <value val="57350"/>
   <description is="First spectra number (monitor's spectra number) to use when measuring incident energy,
      or comma separated list of such numbers.
@@ -106,7 +106,7 @@
      as the position of the combined detector will be defined by the position of the first spectra's detector."/>
 </parameter>
 <!-- -->
-<parameter name="ei-mon2-spec"  type="string">
+<parameter name="ei-mon2-spec"  type="int">
   <value val="5506"/>
   <description is="Second spectra number (monitor's spectra number) to use when measuring incident energy,
      or comma separated list of such numbers.
