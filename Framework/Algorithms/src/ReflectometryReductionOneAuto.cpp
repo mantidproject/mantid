@@ -408,7 +408,8 @@ void ReflectometryReductionOneAuto::exec() {
       } catch (std::runtime_error &e) {
         g_log.warning() << "Could not autodetect polynomial correction method. "
                            "Polynomial correction will not be performed. "
-                           "Reason for failure: " << e.what() << std::endl;
+                           "Reason for failure: "
+                        << e.what() << std::endl;
         refRedOne->setProperty("CorrectionAlgorithm", "None");
       }
 
@@ -552,7 +553,7 @@ bool ReflectometryReductionOneAuto::processGroups() {
         AnalysisDataService::Instance().retrieveWS<Workspace>(firstTrans);
     firstTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(firstTransWS);
 
-    if (!firstTransG)
+    if (!firstTransG) // sum over transmission workspaces here?
       alg->setProperty("FirstTransmissionRun", firstTrans);
     else if (group->size() != firstTransG->size())
       throw std::runtime_error("FirstTransmissionRun WorkspaceGroup must be "
@@ -569,7 +570,8 @@ bool ReflectometryReductionOneAuto::processGroups() {
     secondTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(secondTransWS);
 
     if (!secondTransG)
-      alg->setProperty("SecondTransmissionRun", secondTrans);
+      alg->setProperty("SecondTransmissionRun",
+                       secondTrans); // sum over transmission workspaces here?
     else if (group->size() != secondTransG->size())
       throw std::runtime_error("SecondTransmissionRun WorkspaceGroup must be "
                                "the same size as the InputWorkspace "
@@ -592,8 +594,20 @@ bool ReflectometryReductionOneAuto::processGroups() {
     alg->setProperty("OutputWorkspaceWavelength", IvsLamName);
 
     // Handle transmission runs
-    if (firstTransG)
-      alg->setProperty("FirstTransmissionRun", firstTransG->getItem(i)->name());
+    auto transmissionRunSum = firstTransG->getItem(0)->name();
+    if (firstTransG) {
+      for (size_t item = 1; item < firstTransG->size(); item++) {
+        auto plusAlg = this->createChildAlgorithm("Plus");
+        plusAlg->setChild(true);
+        plusAlg->initialize();
+        plusAlg->setProperty("LHSWorkspace", transmissionRunSum);
+        plusAlg->setProperty("RHSWorkspace", firstTransG->getItem(item));
+        plusAlg->setProperty("OutputWorkspace", transmissionRunSum);
+        plusAlg->execute();
+        transmissionRunSum = plusAlg->getProperty("OutputWorkspace");
+      }
+      alg->setProperty("FirstTransmissionRun", transmissionRunSum);
+    }
     if (secondTransG)
       alg->setProperty("SecondTransmissionRun",
                        secondTransG->getItem(i)->name());
@@ -653,6 +667,7 @@ bool ReflectometryReductionOneAuto::processGroups() {
             outputIvsLam + "_" + boost::lexical_cast<std::string>(i + 1);
         alg->setProperty("InputWorkspace", IvsLamName);
         alg->setProperty("OutputWorkspace", IvsQName);
+        alg->setProperty("CorrectionAlgorithm", "None");
         alg->setProperty("OutputWorkspaceWavelength", IvsLamName);
         alg->execute();
       }
