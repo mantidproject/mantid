@@ -1,6 +1,6 @@
 #pylint: disable=no-init
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, \
-    ITableWorkspaceProperty, FileAction, FileProperty, WorkspaceProperty, InstrumentValidator
+    ITableWorkspaceProperty, FileAction, FileProperty, WorkspaceProperty, InstrumentValidator, Progress
 from mantid.kernel import Direction, FloatBoundedValidator, PropertyCriterion, EnabledWhenProperty, logger, Quat, V3D, StringArrayProperty
 import mantid.simpleapi as api
 from scipy.stats import chisquare
@@ -260,6 +260,7 @@ class AlignComponents(PythonAlgorithm):
         if self._optionsDict["RotX"] or self._optionsDict["RotY"] or self._optionsDict["RotZ"]:
             self._rotate = True
 
+        prog = Progress(self, start=0, end=1, nreports=len(components))
         for component in components:
             comp = wks.getInstrument().getComponentByName(component)
             firstDetID = self._getFirstDetID(comp)
@@ -341,6 +342,8 @@ class AlignComponents(PythonAlgorithm):
             logger.notice("Finshed " + comp.getFullName() +
                           " Final position is " + str(comp.getPos()) +
                           " Final rotation is " + str(comp.getRotation().getEulerAngles()))
+
+            prog.report()
 
     #pylint: disable=too-many-arguments
     def _minimisation_func(self, x_0, wks_name, component, firstIndex, lastIndex, difc, mask):
