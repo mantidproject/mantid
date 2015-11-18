@@ -3,7 +3,7 @@ import stresstesting
 import os
 from abc import ABCMeta, abstractmethod
 from mantid.simpleapi import *
-from IndirectImport import is_supported_f2py_platform
+import platform
 
 #==============================================================================
 
@@ -24,10 +24,7 @@ def _cleanup_files(dirname, filenames):
 class QLresTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
-        if is_supported_f2py_platform():
-            return False
-        else:
-            return True
+        return not platform.system() == "Windows"
 
     def runTest(self):
         import IndirectBayes as Main
@@ -63,10 +60,7 @@ class QLresTest(stresstesting.MantidStressTest):
 class ResNormTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
-        if is_supported_f2py_platform():
-            return False
-        else:
-            return True
+        return not platform.system() == "Windows"
 
     def runTest(self):
         import IndirectBayes as Main
@@ -97,10 +91,7 @@ class ResNormTest(stresstesting.MantidStressTest):
 class QuestTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
-        if is_supported_f2py_platform():
-            return False
-        else:
-            return True
+        return not platform.system() == "Windows"
 
     def runTest(self):
         import IndirectBayes as Main
@@ -134,10 +125,7 @@ class QuestTest(stresstesting.MantidStressTest):
 class QSeTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
-        if is_supported_f2py_platform():
-            return False
-        else:
-            return True
+        return not platform.system() == "Windows"
 
     def runTest(self):
         import IndirectBayes as Main
@@ -172,10 +160,7 @@ class QSeTest(stresstesting.MantidStressTest):
 class QLDataTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
-        if is_supported_f2py_platform():
-            return False
-        else:
-            return True
+        return not platform.system() == "Windows"
 
     def runTest(self):
         import IndirectBayes as Main
@@ -211,10 +196,7 @@ class QLDataTest(stresstesting.MantidStressTest):
 class QLResNormTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
-        if is_supported_f2py_platform():
-            return False
-        else:
-            return True
+        return not platform.system() == "Windows"
 
     def runTest(self):
         import IndirectBayes as Main
@@ -253,10 +235,7 @@ class QLResNormTest(stresstesting.MantidStressTest):
 class QLWidthTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
-        if is_supported_f2py_platform():
-            return False
-        else:
-            return True
+        return not platform.system() == "Windows"
 
     def runTest(self):
         import IndirectBayes as Main
