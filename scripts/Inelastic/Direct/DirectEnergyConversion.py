@@ -324,8 +324,7 @@ class DirectEnergyConversion(object):
                 diag_mask = CloneWorkspace(mask,OutputWorkspace=out_ws_name)
             else: # either WB was diagnosed or WB masks were applied to it
                 # Extract the mask workspace
-#pylint: disable=unused-variable
-                diag_mask, det_ids = ExtractMask(InputWorkspace=whiteintegrals,OutputWorkspace=out_ws_name)
+                diag_mask, _ = ExtractMask(InputWorkspace=whiteintegrals,OutputWorkspace=out_ws_name)
         else:
             diag_mask = None
         # Clean up
@@ -491,7 +490,7 @@ class DirectEnergyConversion(object):
             # initialize list to store resulting workspaces to return
             result = []
         else:
-#pylint: disable=attribute-defined-outside-init
+#pylint: disable=W0201
             self._multirep_mode = False
 
 #------------------------------------------------------------------------------------------
@@ -1295,7 +1294,7 @@ class DirectEnergyConversion(object):
             else:
                 self._spectra_masks = None
         else:
-#pylint: disable=attribute-defined-outside-init
+#pylint: disable=W0201
             self._spectra_masks = None
         return
 #-------------------------------------------------------------------------------
@@ -1420,13 +1419,13 @@ class DirectEnergyConversion(object):
         #-------------------------------------------------------------------------
         # Guess which minimizes the value sum(n_i-n)^2/Sigma_i -- this what
         # Libisis had
-        signal_sum = sum(map(lambda s,e: s / e,signal,error))
-        weight_sum = sum(map(lambda e: 1. / e, error))
+        signal_sum = sum([ s / e  for s,e in zip(signal,error)])
+        weight_sum = sum([1. / e  for e   in error])
         norm_factor['LibISIS'] = signal_sum / weight_sum
         #-------------------------------------------------------------------------
         # Guess which minimizes the value sum(n_i-n)^2/Sigma_i^2
-        signal_sum = sum(map(lambda s,e: s / (e * e),signal,error))
-        weight_sum = sum(map(lambda e: 1. / (e * e), error))
+        signal_sum = sum([ s / (e * e)  for s,e in zip(signal,error)])
+        weight_sum = sum([1. / (e * e)  for e   in error])
         norm_factor['SigSq'] = signal_sum / weight_sum
         #-------------------------------------------------------------------------
         # Guess which assumes Poisson distribution with Err=Sqrt(signal) and
@@ -1438,8 +1437,8 @@ class DirectEnergyConversion(object):
         # signal on i-th detector and the WB_average -- average WB vanadium
         # signal.
         # n_i is the modified signal
-        signal_sum = sum(map(lambda e: e * e,error))
-        weight_sum = sum(map(lambda s,e: e * e / s,signal,error))
+        signal_sum = sum([ e * e     for e   in error])
+        weight_sum = sum([ e * e / s for s,e in zip(signal,error)])
         if weight_sum == 0.0:
             prop_man.log("WB integral has been calculated incorrectly, look at van_int workspace: {0}".format(ws_name),'error')
             raise ArithmeticError("Division by 0 weight when calculating WB integrals from workspace {0}".format(ws_name))
@@ -1447,8 +1446,8 @@ class DirectEnergyConversion(object):
         #-------------------------------------------------------------------------
         # Guess which estimates value sum(n_i^2/Sigma_i^2)/sum(n_i/Sigma_i^2)
         # TGP suggestion from 12-2012
-        signal_sum = sum(map(lambda s,e: s * s / (e * e),signal,error))
-        weight_sum = sum(map(lambda s,e: s / (e * e),signal,error))
+        signal_sum = sum([s * s / (e * e) for s,e in zip(signal,error)])
+        weight_sum = sum([s / (e * e)     for s,e in zip(signal,error)])
         if weight_sum == 0.0:
             prop_man.log("WB integral has been calculated incorrectly, look at van_int workspace: {0}".format(ws_name),'error')
             raise ArithmeticError("Division by 0 weight when calculating WB integrals from workspace {0}".format(ws_name))
