@@ -264,6 +264,44 @@ public:
       }
     }
   }
+  void testNullifyNegatives() {
+
+      Algorithms::RemoveBackground bkgRem;
+      bkgRem.initialize();
+      bkgRem.setPropertyValue("InputWorkspace", "sourceWSdE");
+      bkgRem.setPropertyValue("OutputWorkspace", "sourceWSdE");
+      bkgRem.setPropertyValue("BkgWorkspace", BgWS->getName());
+      bkgRem.setPropertyValue("EMode", "Direct");
+      bkgRem.setProperty("NullifyNegativeValues",true);
+
+
+      TS_ASSERT_THROWS_NOTHING(bkgRem.execute());
+
+      auto SampleWS =
+          API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
+              "sampleWSdE");
+      auto result =
+          API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
+              "sourceWSdE");
+
+      size_t spectra[] = { 0, 10, 100, 999 };
+      std::vector<size_t> list_to_check(spectra, spectra + 4);
+
+      for (size_t i = 0; i < list_to_check.size(); i++) {
+          const MantidVec &sampleX = SampleWS->readX(list_to_check[i]);
+          const MantidVec &sampleY = SampleWS->readY(list_to_check[i]);
+
+          const MantidVec &resultX = result->readX(list_to_check[i]);
+          const MantidVec &resultY = result->readY(list_to_check[i]);
+
+          // const MantidVec & sampleE = SampleWS->readE(0);
+          for (size_t i = 0; i < sampleY.size(); i++) {
+              TS_ASSERT_DELTA(resultX[i], sampleX[i], 1.e-7);
+              TS_ASSERT_DELTA(resultY[i], sampleY[i], 1.e-7);
+          }
+      }
+  }
+
 
 private:
   API::MatrixWorkspace_sptr BgWS;

@@ -45,7 +45,7 @@ public:
   void initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
                   const API::MatrixWorkspace_sptr &sourceWS, int emode,
                   Kernel::Logger *pLog = NULL, int nTreads = 1,
-                  bool inPlace = true);
+                  bool inPlace = true,bool nullifyNegative=false);
   void removeBackground(int hist, MantidVec &XValues, MantidVec &y_data,
                         MantidVec &e_data, int tread_num = 0) const;
 
@@ -80,6 +80,8 @@ private:
   double m_Efix;
   // shared pointer to the sample
   Geometry::IComponent_const_sptr m_Sample;
+  // if true, negative signals are nullified
+  bool m_NullifyNegative;
 
   // get Ei attached to direct or indirect instrument workspace
   double getEi(const API::MatrixWorkspace_const_sptr &inputWS) const;
@@ -90,7 +92,8 @@ private:
 class DLLExport RemoveBackground : public API::Algorithm {
 public:
   /// Default constructor
-  RemoveBackground() : API::Algorithm(), m_BackgroundHelper(){};
+  RemoveBackground() : API::Algorithm(),
+  m_BackgroundHelper(){};
   /// Destructor
   virtual ~RemoveBackground(){};
   /// Algorithm's name for identification overriding a virtual method
@@ -116,6 +119,7 @@ protected:
 private:
   // class responsible for background removal
   BackgroundHelper m_BackgroundHelper;
+
 };
 
 } // namespace Algorithms
