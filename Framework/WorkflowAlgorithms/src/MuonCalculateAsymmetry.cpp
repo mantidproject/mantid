@@ -51,12 +51,8 @@ void MuonCalculateAsymmetry::init() {
                   "Workspace group containing period data. If it only contains "
                   "one period, then only one is used.");
 
-  std::vector<std::string> allowedOperations;
-  allowedOperations.push_back("+");
-  allowedOperations.push_back("-");
   declareProperty("PeriodOperation", "+",
-                  boost::make_shared<StringListValidator>(allowedOperations),
-                  "If two periods specified, what operation to apply to "
+                  "If several periods specified, what operation to apply to "
                   "workspaces to get a final one.");
 
   std::vector<std::string> allowedTypes;
