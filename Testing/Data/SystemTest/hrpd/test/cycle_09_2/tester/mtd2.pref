@@ -1,0 +1,179 @@
+#----------------------------------------------------
+# --> DATA access:
+#----------------------------------------------------
+#     Directories searches for RAW/S* DATA files 
+#     empty field ("") sets all to the RawDir read 
+#     in the mtd.ini file or to the RawDir updated below
+#----------------------------------------------------
+#
+RawDir   
+VanDir   
+VEmptyDir
+SEmptyDir
+#
+#----------------------------------------------------
+# --> CALIBRATION & GROUPING (generally the same)
+#----------------------------------------------------
+#     A Default Directory search for Cal/Grouping file: 
+#     is set if GrpDir/OffDir are empty (""). 
+#     This is the ./AnalysisDir/GrpOff directory 
+#----------------------------------------------------
+#
+GrpDir
+OffDir
+Offsets      hrpd_new_072_01_corr.cal
+Grouping     hrpd_new_072_01_corr.cal
+#
+#----------------------------------------------------
+# Calibration Runs Numbers
+#----------------------------------------------------
+#
+Vanadium     39191
+V-Empty      39187
+S-Empty      0
+#
+#----------------------------------------------------
+# VANADIUM 
+#----------------------------------------------------
+# 1 --> Focused/corrected Vanadium Nexus File creation and/or reading Control:
+#
+#       yes : supposed to exist, or create a new one with default 
+#             corrections params and default name van_Vrunno_VErunno.nxs
+#       no  : created with the name CorrVanDir.nxs but add _new.nxs if exists
+#       over: overwrite in any case
+#----------------------------------------------------
+#
+ExistingV                 no
+#
+#----------------------------------------------------
+# 2 --> Directory/File name of the searched/output Van 
+#       corrected nexus file 
+#       By default Dir, this is ./AnalysisDir/Cycle/Calibration: 
+#----------------------------------------------------
+#
+CorrVanDir                
+CorrVanFile               van_s1_old
+#
+#----------------------------------------------------
+# 3 --> Default Params in case of creation are : 
+#----------------------------------------------------
+# a) ABS correction
+#----------------------------------------------------
+# VHeight                    2    
+# VRadius                    0.4  
+# VAttenuationXSection       5.1  
+# VScatteringXSection        5.08 
+# VanaNumberDensity          0.072
+# VNumberOfSlices            10   
+# VNumberOfAnnuli            10   
+# VNumberOfWavelengthPoints  100  
+# VExpMethod                 Normal
+#----------------------------------------------------
+#       Any param can be overrriden below
+#
+VHeight                     2  
+VRadius                     0.4
+#----------------------------------------------------
+# b) V bragg peak removal 
+#----------------------------------------------------
+# VanPeakRemove              interpol (default)/spline 
+# if interpol is used, you can additionally tweak the default params:
+# VanSmooth                  100 
+# VanPeakFile                VanaPeaks.dat
+# if spline, you can additionally tweak the default params:
+# VanSplineCoef              60 
+# VanPeakFile                VanaPeaks.dat
+#
+VanPeakRemove                interpol
+# ***************************************************
+# SOLID ANGLE AND EFFICIENCY CORRECTION 
+# ***************************************************
+# Defaults values are (valid for HRPD)
+# LowerLambda               1.4
+# UpperLambda               3
+#----------------------------------------------------
+#
+LowerLambda                 
+UpperLambda                 
+#
+#----------------------------------------------------
+# An existing Nexus file storing the Sac/eff correction may already exists.
+# It is created/searched by default where the Vanadium Nexus File is searched/created  
+# (hence, in the AnalysisDir+Cycle+"Calibration" directory)
+# Unless this is overriden by...
+#----------------------------------------------------
+#
+SacEffDir
+#
+#----------------------------------------------------
+# ...The Nexus file default name is searched as:
+# CorrVanFile+"_detcorr.nxs" 
+# or
+# corr_Vrunno_VErunno.nxs if CorrVanFile=""
+# ...Defaults are always overriden by...
+#----------------------------------------------------
+#
+SacEffFile                
+#
+# ***************************************************
+# SAMPLE CORRECTION PARAMS (Comming...)
+# ***************************************************
+#CorrectSampleAbs                no    
+#SampleHeight                    0.0   
+#SampleRadius                    0.0   
+#SampleAttenuationXSection       0.0   
+#SampleScatteringXSection        0.0   
+#SampleNumberDensity             1     
+#SampleNumberOfSlices            10    
+#SampleNumberOfAnnuli            10    
+#SampleNumberOfWavelengthPoints  100   
+#SampleExpMethod                 Normal
+#
+CorrectSampleAbs                 no
+SampleHeight                        
+SampleRadius                        
+SampleAttenuationXSection           
+SampleScatteringXSection            
+#
+#
+# ***************************************************
+# FOCUSED FILE OUTPUT
+# ***************************************************
+#
+#----------------------------------------------------
+# Focused files in various format are output in the 
+# ./analysisdir/cycle/user directory 
+# The output File naming convention is (XXXXX:run-num, N: bank):
+# For RAW files: 
+#    XYE (split in banks):
+#       X axis in tof hrpXXXXX_"Output"_bN_tof.dat
+#       X asis in D   hrpXXXXX_"Output"_bN_dspc.dat
+#    GSS :
+#       hrpXXXXX_"Output".gss 
+#    Nexus: 
+#       hrpXXXXX_"Output".nxs 
+#----------------------------------------------------
+#
+Scale        1 
+Output       s1_old
+XYE-TOF      yes
+XYE-D        yes
+GSS          yes
+Nexus        yes
+#----------------------------------------------------
+# TOTAL number of banks on the instrument 
+#----------------------------------------------------
+Nbank        3
+CropRange    0.05 0.95
+CropRange    0.05 0.95
+CropRange    0.05 0.95
+Bining       0.0001
+Bining       0.0001
+Bining       0.0001
+#
+#----------------------------------------------------
+# Outputs only banks in the range, or space separated 
+# list given below  
+#----------------------------------------------------
+#
+BankList     1-3
