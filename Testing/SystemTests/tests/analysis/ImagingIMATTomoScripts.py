@@ -21,7 +21,7 @@ class ImagingIMATTomoTests(unittest.TestCase):
                           'LARMOR00005329_Metals_000_SummedImg_2.fits',
                           'LARMOR00005330_Metals_000_SummedImg_3.fits',
                           'LARMOR00005331_Metals_000_SummedImg_4.fits',
-                          'LARMOR00005332_Metals_000_SummedImg_5.fits',
+                          'LARMOR00005332_Metals_000_SummedImg_5.fits'
         ]
 
         # data volume from a 'stack' of images

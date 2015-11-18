@@ -33,6 +33,7 @@ def _import_tool_tomopy():
     return tomopy
 
 def _import_tool_astra():
+    # current astra distributions install here, so check there by default
     ASTRA_LOCAL_PATH = '/usr/local/python/'
     import sys
     sys.path.append(ASTRA_LOCAL_PATH)
