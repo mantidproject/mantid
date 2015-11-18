@@ -365,6 +365,7 @@ void InstrumentWindowMaskTab::setActivity()
 {
   const QColor borderColor = getShapeBorderColor();
   const QColor fillColor = getShapeFillColor();
+  QString whatIsBeingSelected = m_maskBins && getMode() == Mode::Mask ? "Selecting bins" : "Selecting detectors";
   if (m_move->isChecked())
   {
     m_activity = Move;
@@ -375,42 +376,42 @@ void InstrumentWindowMaskTab::setActivity()
   {
     m_activity = Select;
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
-    m_activeTool->setText("Tool: Shape editing");
+    m_activeTool->setText("Tool: Shape editing. " + whatIsBeingSelected);
   }
   else if (m_ellipse->isChecked())
   {
     m_activity = DrawEllipse;
     m_instrWindow->getSurface()->startCreatingShape2D("ellipse",borderColor,fillColor);
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
-    m_activeTool->setText("Tool: Ellipse");
+    m_activeTool->setText("Tool: Ellipse. " + whatIsBeingSelected);
   }
   else if (m_rectangle->isChecked())
   {
     m_activity = DrawRectangle;
     m_instrWindow->getSurface()->startCreatingShape2D("rectangle",borderColor,fillColor);
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
-    m_activeTool->setText("Tool: Rectangle");
+    m_activeTool->setText("Tool: Rectangle. " + whatIsBeingSelected);
   }
   else if (m_ring_ellipse->isChecked())
   {
     m_activity = DrawEllipticalRing;
     m_instrWindow->getSurface()->startCreatingShape2D("ring ellipse",borderColor,fillColor);
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
-    m_activeTool->setText("Tool: Elliptical ring");
+    m_activeTool->setText("Tool: Elliptical ring. " + whatIsBeingSelected);
   }
   else if (m_ring_rectangle->isChecked())
   {
     m_activity = DrawRectangularRing;
     m_instrWindow->getSurface()->startCreatingShape2D("ring rectangle",borderColor,fillColor);
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
-    m_activeTool->setText("Tool: Rectangular ring");
+    m_activeTool->setText("Tool: Rectangular ring. " + whatIsBeingSelected);
   }
   else if (m_free_draw->isChecked())
   {
     m_activity = DrawFree;
     m_instrWindow->getSurface()->startCreatingFreeShape(borderColor,fillColor);
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawFreeMode);
-    m_activeTool->setText("Tool: Free draw");
+    m_activeTool->setText("Tool: Free draw. " + whatIsBeingSelected);
   }
   m_instrWindow->updateInfoText();
 }
@@ -1039,6 +1040,7 @@ void InstrumentWindowMaskTab::enableApplyButtons()
     }
     m_saveButton->setEnabled(hasDetectorMask && (!enableBinMasking));
     m_clearAll->setEnabled(hasMask);
+    setActivity();
 }
 
 /**
