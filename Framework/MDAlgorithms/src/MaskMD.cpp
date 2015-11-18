@@ -282,10 +282,23 @@ std::map<std::string, std::string> MaskMD::validateInputs() {
 
   std::vector<std::string> dimensions = parseDimensionNames(dimensions_string);
 
+  std::stringstream messageStream;
+
+  // Check named dimensions can be found in workspace
+  for (auto dimension_name : dimensions) {
+    try {
+      tryFetchDimensionIndex(ws, dimension_name);
+    } catch (std::runtime_error) {
+      messageStream << "Dimension '" << dimension_name << "' not found. ";
+    }
+  }
+  if (messageStream.rdbuf()->in_avail() != 0) {
+    validation_output["Dimensions"] = messageStream.str();
+    messageStream.str(std::string());
+  }
+
   size_t nDims = ws->getNumDims();
   size_t nDimensionIds = dimensions.size();
-
-  std::stringstream messageStream;
 
   // Check cardinality on names/ids
   if (nDimensionIds % nDims != 0) {
