@@ -869,8 +869,19 @@ void MuonAnalysis::runLoadCurrent()
         "\\\\" + instDirectory.toStdString() + separator + "data";
 
     // If not Windows, must mount the share and convert the path
+    bool mounted = false;
 #ifndef _WIN32
-    dataDirectory = mountSharedDrive(dataDirectory);
+    try {
+      dataDirectory = mountSharedDrive(dataDirectory);
+      mounted = true;
+    } catch (const std::exception &ex) {
+      QMessageBox::warning(
+          this, "MantidPlot - MuonAnalysis",
+          "Can't mount the remote data share, error given was " +
+              QString(ex.what()) +
+              "\nEnsure you have root permissions and are connected to the "
+              "network.");
+    }
     separator = "/";
 #endif
     std::string autosaveFile = dataDirectory + separator + "autosave.run";
@@ -888,6 +899,9 @@ void MuonAnalysis::runLoadCurrent()
     {
        QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't read from the selected directory, either the computer you are trying"
          "\nto access is down or your computer is not currently connected to the network.");
+       if (mounted) {
+         unmountSharedDrive();
+       }
        return;
     }
 
@@ -907,6 +921,9 @@ void MuonAnalysis::runLoadCurrent()
           QString("Can't load ") + "Current data since\n" +
           psudoDAE + QString("\n") +
           QString("does not seem to exist"));
+        if (mounted) {
+          unmountSharedDrive();
+        }
         return;
       }
     }
@@ -916,10 +933,16 @@ void MuonAnalysis::runLoadCurrent()
         QString("Can't load ") + "Current data since\n" +
         psudoDAE + QString("\n") +
         QString("does not seem to exist"));
+      if (mounted) {
+        unmountSharedDrive();
+      }
       return;
     }
     m_uiForm.mwRunFiles->setUserInput(psudoDAE);
     m_uiForm.mwRunFiles->setText("CURRENT RUN");
+    if (mounted) {
+      unmountSharedDrive();
+    }
     return;
   }
 

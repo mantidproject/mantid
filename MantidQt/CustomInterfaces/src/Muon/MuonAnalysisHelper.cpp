@@ -16,6 +16,25 @@
 #include <stdexcept>
 #include <boost/scope_exit.hpp>
 
+// free functions
+namespace {
+  /**
+  * If current system is Unix-like, run the supplied shell command
+  * @param command Command to run in the shell
+  */
+  void sendCommand(const QString &command) {
+#ifndef _WIN32
+    QString shell("/bin/bash");
+    QString argument = QString("-c \"%1\"").arg(command);
+    QStringList args;
+    args.push_back(argument);
+    QProcess process;
+    process.start(shell, args);
+    process.waitForFinished();
+#endif
+  }
+}
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -564,22 +583,3 @@ void unmountSharedDrive() { sendCommand("umount /mnt/currentdata"); }
 } // namespace MuonAnalysisHelper
 } // namespace CustomInterfaces
 } // namespace Mantid
-
-// free functions
-namespace {
-/**
- * If current system is Unix-like, run the supplied shell command
- * @param command Command to run in the shell
- */
-void sendCommand(const QString &command) {
-#ifndef _WIN32
-  QString shell("/bin/bash");
-  QString argument = QString("-c \"%1\"").arg(command);
-  QStringList args;
-  args.push_back(argument);
-  QProcess process;
-  process.start(shell, args);
-  process.waitForFinished();
-#endif
-}
-}
