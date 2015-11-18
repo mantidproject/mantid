@@ -430,4 +430,8 @@ class AlignComponents(PythonAlgorithm):
         return deg, ax0, ax1, ax2
 
 
-AlgorithmFactory.subscribe(AlignComponents)
+try:
+    from scipy.optimize import minimize
+    AlgorithmFactory.subscribe(AlignComponents)
+except ImportError:
+    logger.debug('Failed to subscribe algorithm AlignComponets; cannot import minimize from scipy.optimize')
