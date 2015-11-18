@@ -90,6 +90,51 @@ void IntegratePeaksCWSD::exec()
   }
 
 
+} //
+
+void IntegratePeaksCWSD::simplePeakIntegration()
+{
+  // Go through to get value
+  IMDIterator *mditer = mdws->createIterator();
+  size_t nextindex = 1;
+  bool scancell = true;
+  size_t currindex = 0;
+  while (scancell) {
+    size_t numevent_cell = mditer->getNumEvents();
+    for (size_t iev = 0; iev < numevent_cell; ++iev) {
+      // Check
+      if (currindex >= vec_event_qsample.size())
+        throw std::runtime_error("Logic error in event size!");
+
+      float tempx = mditer->getInnerPosition(iev, 0);
+      float tempy = mditer->getInnerPosition(iev, 1);
+      float tempz = mditer->getInnerPosition(iev, 2);
+      signal_t signal = mditer->getInnerSignal(iev);
+      detid_t detid = mditer->getInnerDetectorID(iev);
+
+      // FIXME/TODO/NOW - Continue from here!
+      throw std::runtime_error("Need to find out how to deal with detid and signal here!");
+
+      Kernel::V3D qsample(tempx, tempy, tempz);
+      vec_event_qsample[currindex] = qsample;
+      vec_event_signal[currindex] = signal;
+      vec_event_det[currindex] = detid;
+
+      ++currindex;
+    }
+
+    // Advance to next cell
+    if (mditer->next()) {
+      // advance to next cell
+      mditer->jumpTo(nextindex);
+      ++nextindex;
+    } else {
+      // break the loop
+      scancell = false;
+    }
+  }
+
+
 }
 
 } // namespace Mantid
