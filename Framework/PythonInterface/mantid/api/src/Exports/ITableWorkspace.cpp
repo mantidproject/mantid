@@ -143,14 +143,14 @@ void setValue(const Column_sptr column, const int row,
 /**
  * Add a column with a given plot type to the TableWorkspace
  * @param self Reference to TableWorkspace this is called on
- * @param datatype The data type of the column to add
+ * @param type The data type of the column to add
  * @param name The name of the column to add
  * @param plottype The plot type to set on the column
  * @return Boolean true if successful, false otherwise
  */
-bool addColumnPlotType(ITableWorkspace &self, const std::string &datatype,
+bool addColumnPlotType(ITableWorkspace &self, const std::string &type,
                const std::string &name, int plottype) {
-  auto column = self.addColumn(datatype, name);
+  auto column = self.addColumn(type, name);
 
   if (column)
     column->setPlotType(plottype);
@@ -162,15 +162,15 @@ bool addColumnPlotType(ITableWorkspace &self, const std::string &datatype,
  * Add a column to the TableWorkspace (with default plot type)
  * @param self A reference to the TableWorkspace python object that we were
  * called on
- * @param datatype The data type of the column to add
+ * @param type The data type of the column to add
  * @param name The name of the column to add
  * @return A boolean indicating success or failure. Note that this is different
  * to the corresponding C++ method, which returns a pointer to the
  * newly-created column (as the Column class is not exposed to python).
  */
-bool addColumnSimple(ITableWorkspace &self, const std::string &datatype,
+bool addColumnSimple(ITableWorkspace &self, const std::string &type,
                const std::string &name) {
-  return self.addColumn(datatype, name) != 0;
+  return self.addColumn(type, name) != 0;
 }
 
 /**
@@ -442,12 +442,12 @@ void export_ITableWorkspace() {
 
   class_<ITableWorkspace, bases<Workspace>, boost::noncopyable>(
       "ITableWorkspace", iTableWorkspace_docstring.c_str(), no_init)
-      .def("addColumn", &addColumnSimple, (arg("self"), arg("datatype"),
+      .def("addColumn", &addColumnSimple, (arg("self"), arg("type"),
                                            arg("name")),
            "Add a named column with the given type. Recognized types are: "
            "int,float,double,bool,str,V3D,long64")
 
-      .def("addColumn", &addColumnPlotType, (arg("self"), arg("datatype"),
+      .def("addColumn", &addColumnPlotType, (arg("self"), arg("type"),
                                              arg("name"), arg("plottype")),
            "Add a named column with the given datatype "
            "(int,float,double,bool,str,V3D,long64) "
