@@ -72,11 +72,13 @@ void CalculateFlatBackground::init() {
                   "calculated/removed from monitors.",
                   Direction::Input);
   declareProperty("NullifyNegativeValues", true,
-    "When background is subtracted, signals in some time channels may become negative.\n"
-    "If this option is true, signal in such bins is nullified and the module of the removed signal"
-    "is added to the error. If false, the signal and errors are left unchanged",
-    Direction::Input);
-
+                  "When background is subtracted, signals in some time "
+                  "channels may become negative.\n"
+                  "If this option is true, signal in such bins is nullified "
+                  "and the module of the removed signal"
+                  "is added to the error. If false, the signal and errors are "
+                  "left unchanged",
+                  Direction::Input);
 }
 
 void CalculateFlatBackground::exec() {

@@ -58,7 +58,7 @@ private:
             flatBG.setPropertyValue("OutputMode", "Return Background"))
       }
     } else if (functindex == 3 || functindex == 4 || functindex == 5 ||
-      functindex == 6) {
+               functindex == 6) {
       flatBG.setPropertyValue("InputWorkspace",
                               "calculateflatbackgroundtest_ramp");
       flatBG.setPropertyValue("WorkspaceIndexList", "");
@@ -84,12 +84,12 @@ private:
         flatBG.setProperty("EndX", double(NUMBINS));
       } else if (functindex == 6) {
         flatBG.setPropertyValue("OutputWorkspace",
-          "calculateflatbackgroundtest_second");
+                                "calculateflatbackgroundtest_second");
 
         flatBG.setProperty("StartX", 2 * double(NUMBINS) / 3);
         flatBG.setProperty("EndX", double(NUMBINS));
 
-        flatBG.setProperty("NullifyNegativeValues",false);
+        flatBG.setProperty("NullifyNegativeValues", false);
       }
     }
 
@@ -310,15 +310,14 @@ public:
     }
   }
   void testLeaveNegatives() {
-  
 
     runCalculateFlatBackground(6);
     MatrixWorkspace_sptr inputWS =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "calculateflatbackgroundtest_ramp");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "calculateflatbackgroundtest_ramp");
     MatrixWorkspace_sptr outputWS =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "calculateflatbackgroundtest_second");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "calculateflatbackgroundtest_second");
     // The X vectors should be the same
     TS_ASSERT_DELTA(inputWS->readX(0), outputWS->readX(0), 1e-6)
 
@@ -340,12 +339,11 @@ public:
       backError = std::sqrt(backError) / numSummed;
       for (int i = 0; i < NUMBINS; ++i) {
         double correct = (YIn[i] - background);
-        double err     = std::sqrt((EIn[i] * EIn[i]) + (backError * backError));
+        double err = std::sqrt((EIn[i] * EIn[i]) + (backError * backError));
         TS_ASSERT_DELTA(YOut[i], correct, 1e-6)
-        TS_ASSERT_DELTA(EOut[i], err,1e-6)
+        TS_ASSERT_DELTA(EOut[i], err, 1e-6)
       }
     }
-
   }
 
   void testVariedWidths() {

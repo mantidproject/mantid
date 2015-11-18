@@ -103,8 +103,8 @@ protected: // for testing, private otherwise.
 
   /**Auxiliary method to print guess chopper energies in debug mode*/
   void print_debug_mode_info(const std::vector<double> &guess_opening,
-    const std::pair<double, double> & TOF_range,
-    boost::shared_ptr<Kernel::Unit> & destUnit);
+                             const std::pair<double, double> &TOF_range,
+                             boost::shared_ptr<Kernel::Unit> &destUnit);
   /// if true, take derivate of the filter log to identify interval when
   /// instrument is running.
   bool m_FilterWithDerivative;

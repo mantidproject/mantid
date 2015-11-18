@@ -54,8 +54,7 @@ public:
   /// (Empty) Constructor
   CalculateFlatBackground()
       : API::Algorithm(), m_convertedFromRawCounts(false),
-        m_skipMonitors(false), m_nullifyNegative(true),
-        m_progress(NULL) {}
+        m_skipMonitors(false), m_nullifyNegative(true), m_progress(NULL) {}
   /// Virtual destructor
   virtual ~CalculateFlatBackground() {
     if (m_progress)

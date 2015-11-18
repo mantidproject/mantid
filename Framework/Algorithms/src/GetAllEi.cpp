@@ -251,9 +251,9 @@ void GetAllEi::exec() {
         boost::lexical_cast<std::string>(TOF_range.second));
   } else {
     destUnit->initialize(mon1Distance, 0., 0.,
-      static_cast<int>(Kernel::DeltaEMode::Elastic), 0.,
-      unused);
-    print_debug_mode_info(guess_opening,TOF_range,destUnit);
+                         static_cast<int>(Kernel::DeltaEMode::Elastic), 0.,
+                         unused);
+    print_debug_mode_info(guess_opening, TOF_range, destUnit);
   }
   std::pair<double, double> Mon1_Erange =
       monitorWS->getSpectrum(0)->getXDataRange();
@@ -391,14 +391,14 @@ void GetAllEi::exec() {
 *                         to energy in elastic mode using instrument
 *                         parameters.
 */
-void GetAllEi::print_debug_mode_info(const std::vector<double> &guess_opening,
-  const std::pair<double, double> & TOF_range,
-  boost::shared_ptr<Kernel::Unit> & destUnit) {
+void GetAllEi::print_debug_mode_info(
+    const std::vector<double> &guess_opening,
+    const std::pair<double, double> &TOF_range,
+    boost::shared_ptr<Kernel::Unit> &destUnit) {
 
   g_log.debug() << "*Found : " << guess_opening.size()
-    << " chopper prospective opening within time frame: "
-    << TOF_range.first << " to: " << TOF_range.second
-    << std::endl;
+                << " chopper prospective opening within time frame: "
+                << TOF_range.first << " to: " << TOF_range.second << std::endl;
   g_log.debug() << " Timings are:\n";
   for (size_t i = 0; i < guess_opening.size(); i++) {
     g_log.debug() << boost::str(boost::format(" %8.2f; ") % guess_opening[i]);
@@ -410,7 +410,6 @@ void GetAllEi::print_debug_mode_info(const std::vector<double> &guess_opening,
     g_log.debug() << boost::str(boost::format(" %8.2f; ") % ei);
   }
   g_log.debug() << std::endl;
-
 }
 
 // unnamed namespace for auxiliary file-based functions, converted from lambda

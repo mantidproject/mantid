@@ -45,7 +45,7 @@ public:
   void initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
                   const API::MatrixWorkspace_sptr &sourceWS, int emode,
                   Kernel::Logger *pLog = NULL, int nTreads = 1,
-                  bool inPlace = true,bool nullifyNegative=false);
+                  bool inPlace = true, bool nullifyNegative = false);
   void removeBackground(int hist, MantidVec &XValues, MantidVec &y_data,
                         MantidVec &e_data, int tread_num = 0) const;
 
@@ -70,7 +70,8 @@ private:
   double m_NBg;
   // time interval for measuring the background
   double m_dtBg;
-  // Squared error of the background for first spectra of the background workspace
+  // Squared error of the background for first spectra of the background
+  // workspace
   double m_ErrSq;
   // energy conversion mode
   int m_Emode;
@@ -94,8 +95,7 @@ private:
 class DLLExport RemoveBackground : public API::Algorithm {
 public:
   /// Default constructor
-  RemoveBackground() : API::Algorithm(),
-  m_BackgroundHelper(){};
+  RemoveBackground() : API::Algorithm(), m_BackgroundHelper(){};
   /// Destructor
   virtual ~RemoveBackground(){};
   /// Algorithm's name for identification overriding a virtual method
@@ -121,7 +121,6 @@ protected:
 private:
   // class responsible for background removal
   BackgroundHelper m_BackgroundHelper;
-
 };
 
 } // namespace Algorithms

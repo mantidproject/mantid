@@ -1,7 +1,6 @@
 #ifndef REMOVE_BACKGROUD_TEST_H_
 #define REMOVE_BACKGROUD_TEST_H_
 
-
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -10,7 +9,6 @@
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CalculateFlatBackground.h"
-
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 using namespace Mantid;
@@ -207,14 +205,15 @@ public:
     // set negative values to signal
     auto &Y = clone->dataY(0);
     for (size_t i = 0; i < Y.size(); i++) {
-        Y[i] = -1000;
+      Y[i] = -1000;
     }
     // Create zero background workspace
     // Create the workspace
-    auto bgWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D> \
-      (API::WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1));
-    MantidVec & X = bgWS->dataX(0);
-    X[0]=0; X[1] = 1;
+    auto bgWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1));
+    MantidVec &X = bgWS->dataX(0);
+    X[0] = 0;
+    X[1] = 1;
     bgWS->setX(0, X);
     bgWS->getAxis(0)->setUnit("TOF");
     MantidVec &Ybg = bgWS->dataY(0);
@@ -222,9 +221,8 @@ public:
     MantidVec &Ebg = bgWS->dataE(0);
     Ebg[0] = 0;
 
-
-
-    // remove background. If bacground is fully 0, algorithm just removes negative values
+    // remove background. If bacground is fully 0, algorithm just removes
+    // negative values
     Algorithms::RemoveBackground bkgRem;
     bkgRem.initialize();
     bkgRem.setProperty("InputWorkspace", clone);
@@ -233,24 +231,21 @@ public:
     bkgRem.setPropertyValue("EMode", "Direct");
     bkgRem.setProperty("NullifyNegativeValues", true);
 
-
     TS_ASSERT_THROWS_NOTHING(bkgRem.execute());
 
     auto result =
-      API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
-        "RemovedBgWS");
+        API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
+            "RemovedBgWS");
 
     const MantidVec &resY = result->dataY(0);
     const MantidVec &resE = result->readE(0);
 
-    //const MantidVec & sampleE = SampleWS->readE(0);
+    // const MantidVec & sampleE = SampleWS->readE(0);
     for (size_t i = 0; i < resY.size(); i++) {
       TS_ASSERT_DELTA(resY[i], 0, 1.e-7);
-      TS_ASSERT_DELTA(resE[i],1000., 1.e-3);
+      TS_ASSERT_DELTA(resE[i], 1000., 1.e-3);
     }
-
   }
-
 
 private:
   API::MatrixWorkspace_sptr cloneSourceWS() {
@@ -320,7 +315,6 @@ public:
       }
     }
   }
-
 
 private:
   API::MatrixWorkspace_sptr BgWS;
