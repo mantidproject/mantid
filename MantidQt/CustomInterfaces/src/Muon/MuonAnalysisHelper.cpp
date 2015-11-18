@@ -11,7 +11,7 @@
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QComboBox>
-#include <qprocess.h>
+#include <QProcess>
 
 #include <stdexcept>
 #include <boost/scope_exit.hpp>
@@ -541,11 +541,17 @@ void groupWorkspaces(const std::string& groupName, const std::vector<std::string
  * /mnt/currentdata
  * Probably requires root permissions
  * @param source Windows-style path
+ * @returns mount point, or nothing if no mount performed
  */
-void mountSharedDrive(const std::string &source) {
+std::string mountSharedDrive(const std::string &source) {
+  QString mountPoint("");
+#ifndef _WIN32
+  mountPoint = "/mnt/currentdata";
   QString path(source.c_str());
   path.replace("\\", "/");
-  sendCommand(QString("mount -t cifs %1 /mnt/currentdata").arg(path));
+  sendCommand(QString("mount -t cifs %1 %2").arg(path).arg(mountPoint));
+#endif
+  return mountPoint.toStdString();
 }
 
 /**

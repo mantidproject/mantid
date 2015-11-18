@@ -55,7 +55,7 @@ MANTIDQT_CUSTOMINTERFACES_DLL void groupWorkspaces(const std::string& groupName,
                                                    const std::vector<std::string>& inputWorkspaces);
 
 /// Mounts SMB share if current system is Linux/Mac
-MANTIDQT_CUSTOMINTERFACES_DLL void mountSharedDrive(const std::string &source);
+MANTIDQT_CUSTOMINTERFACES_DLL std::string mountSharedDrive(const std::string &source);
 
 /// Unmounts mounted SMB share if current system is Linux/Mac
 MANTIDQT_CUSTOMINTERFACES_DLL void unmountSharedDrive();
