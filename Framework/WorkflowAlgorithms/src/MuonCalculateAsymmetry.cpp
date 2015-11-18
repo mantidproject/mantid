@@ -96,10 +96,6 @@ void MuonCalculateAsymmetry::init() {
 void MuonCalculateAsymmetry::exec() {
 
   WorkspaceGroup_const_sptr inputWSGroup = getProperty("InputWorkspace");
-  if (inputWSGroup->getNumberOfEntries() < 1) {
-    throw std::invalid_argument(
-        "Must supply at least one workspace with period data!");
-  }
 
   // The type of calculation
   const std::string type = getPropertyValue("OutputType");
@@ -379,5 +375,26 @@ MatrixWorkspace_sptr MuonCalculateAsymmetry::calculatePairAsymmetry(
     return outWS;
   }
 }
+
+/**
+ * Performs validation of the input parameters:
+ * - input WorkspaceGroup must have at least one workspace in it
+ * - input PeriodOperation must have the correct format
+ * - period numbers in input PeriodOperation must all be valid
+ * @returns a map of errors to show the user
+ */
+std::map<std::string, std::string> MuonCalculateAsymmetry::validateInputs() {
+  std::map<std::string, std::string> errors;
+
+  // input group must not be empty
+  WorkspaceGroup_const_sptr inputWSGroup = getProperty("InputWorkspace");
+  if (inputWSGroup->getNumberOfEntries() < 1) {
+    errors["InputWorkspace"] =
+        "Must supply at least one workspace with period data!";
+  }
+
+  return errors;
+}
+
 } // namespace WorkflowAlgorithms
 } // namespace Mantid

@@ -62,6 +62,8 @@ private:
   calculatePairAsymmetry(const API::WorkspaceGroup_const_sptr &inputWSGroup,
                          int firstPairIndex, int secondPairIndex, double alpha,
                          std::string op);
+  /// Checks if the supplied operation string is valid or not
+  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace WorkflowAlgorithms

@@ -470,9 +470,9 @@ public:
     alg.setProperty("PairFirstIndex", 0);
     alg.setProperty("PairSecondIndex", 2);
     alg.setPropertyValue("OutputWorkspace", outWSName);
-    // The exception thrown is caught by Algorithm...
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    // ... so check that the algorithm didn't execute.
+    // Should throw an exception
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    // check that the algorithm didn't execute
     TS_ASSERT(!alg.isExecuted());
   }
 
