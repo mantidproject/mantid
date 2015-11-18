@@ -2645,7 +2645,10 @@ class SliceEvent(ReductionStep):
 
         # If the user has selected a dark run subtraction then it will be performed here
         if self._dark_run_subtraction.has_dark_runs():
-            self._dark_run_subtraction.execute(reducer, ws_pointer)
+            ws_subtracted = self._dark_run_subtraction.execute(ws_for_dark_run)
+            # We need to replace the workspace in the ADS
+            ws_name = str(ws_pointer)
+            mtd.addOrReplace(ws_name, ws_subtracted)
 
 class BaseBeamFinder(ReductionStep):
     """
