@@ -604,7 +604,7 @@ bool ReflectometryReductionOneAuto::processGroups() {
         plusAlg->setProperty("RHSWorkspace", firstTransG->getItem(item));
         plusAlg->setProperty("OutputWorkspace", transmissionRunSum);
         plusAlg->execute();
-        transmissionRunSum = plusAlg->getProperty("OutputWorkspace");
+        transmissionRunSum = plusAlg->getPropertyValue("OutputWorkspace");
       }
       alg->setProperty("FirstTransmissionRun", transmissionRunSum);
     }
