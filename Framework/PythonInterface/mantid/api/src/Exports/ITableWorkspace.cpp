@@ -149,7 +149,7 @@ void setValue(const Column_sptr column, const int row,
  * @return Boolean true if successful, false otherwise
  */
 bool addColumnPlotType(ITableWorkspace &self, const std::string &type,
-               const std::string &name, int plottype) {
+                       const std::string &name, int plottype) {
   auto column = self.addColumn(type, name);
 
   if (column)
@@ -169,7 +169,7 @@ bool addColumnPlotType(ITableWorkspace &self, const std::string &type,
  * newly-created column (as the Column class is not exposed to python).
  */
 bool addColumnSimple(ITableWorkspace &self, const std::string &type,
-               const std::string &name) {
+                     const std::string &name) {
   return self.addColumn(type, name) != 0;
 }
 
@@ -179,8 +179,7 @@ bool addColumnSimple(ITableWorkspace &self, const std::string &type,
  * @param column Name or index of column
  * @return PlotType: 0=None, 1=X, 2=Y, 3=Z, 4=xErr, 5=yErr, 6=Label
  */
-int getPlotType(ITableWorkspace &self, const bpl::object &column)
-{
+int getPlotType(ITableWorkspace &self, const bpl::object &column) {
   // Find the column
   Mantid::API::Column_const_sptr colptr;
   if (PyString_Check(column.ptr())) {
@@ -198,8 +197,7 @@ int getPlotType(ITableWorkspace &self, const bpl::object &column)
  * @param column Name or index of column
  * @param ptype PlotType: 0=None, 1=X, 2=Y, 3=Z, 4=xErr, 5=yErr, 6=Label
  */
-void setPlotType(ITableWorkspace &self, const bpl::object &column, int ptype)
-{
+void setPlotType(ITableWorkspace &self, const bpl::object &column, int ptype) {
   // Find the column
   Mantid::API::Column_sptr colptr;
   if (PyString_Check(column.ptr())) {
@@ -442,13 +440,13 @@ void export_ITableWorkspace() {
 
   class_<ITableWorkspace, bases<Workspace>, boost::noncopyable>(
       "ITableWorkspace", iTableWorkspace_docstring.c_str(), no_init)
-      .def("addColumn", &addColumnSimple, (arg("self"), arg("type"),
-                                           arg("name")),
+      .def("addColumn", &addColumnSimple,
+           (arg("self"), arg("type"), arg("name")),
            "Add a named column with the given type. Recognized types are: "
            "int,float,double,bool,str,V3D,long64")
 
-      .def("addColumn", &addColumnPlotType, (arg("self"), arg("type"),
-                                             arg("name"), arg("plottype")),
+      .def("addColumn", &addColumnPlotType,
+           (arg("self"), arg("type"), arg("name"), arg("plottype")),
            "Add a named column with the given datatype "
            "(int,float,double,bool,str,V3D,long64) "
            "\nand plottype "
@@ -459,8 +457,8 @@ void export_ITableWorkspace() {
            "Accepts column name or index. \nPossible return values: "
            "(0 = None, 1 = X, 2 = Y, 3 = Z, 4 = xErr, 5 = yErr, 6 = Label).")
 
-      .def("setPlotType", &setPlotType, (arg("self"), arg("column"),
-                                         arg("ptype")),
+      .def("setPlotType", &setPlotType,
+           (arg("self"), arg("column"), arg("ptype")),
            "Set the plot type of given column. "
            "Accepts column name or index. \nPossible type values: "
            "(0 = None, 1 = X, 2 = Y, 3 = Z, 4 = xErr, 5 = yErr, 6 = Label).")
