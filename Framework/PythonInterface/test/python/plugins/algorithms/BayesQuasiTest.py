@@ -1,9 +1,9 @@
 import unittest
+import platform
 from mantid.simpleapi import *
-from IndirectImport import *
 from mantid.api import MatrixWorkspace, WorkspaceGroup
 
-if is_supported_f2py_platform():
+if platform.system() == "Windows":
     class BayesQuasiTest(unittest.TestCase):
 
         _res_ws = None
