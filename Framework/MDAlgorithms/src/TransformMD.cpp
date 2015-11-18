@@ -35,7 +35,9 @@ const std::string TransformMD::name() const { return "TransformMD"; }
 int TransformMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string TransformMD::category() const { return "MDAlgorithms"; }
+const std::string TransformMD::category() const {
+  return "MDAlgorithms\\Transforms";
+}
 
 //----------------------------------------------------------------------------------------------
 

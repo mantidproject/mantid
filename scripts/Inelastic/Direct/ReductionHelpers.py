@@ -21,12 +21,17 @@ class ComplexProperty(object):
         rez = list()
         for key in self._other_prop:
             rez.append(spec_dict[key])
-        return rez
+        # process very important case of property dependent on two other properties. Make it tuple
+        if len(rez) == 2:
+            return (rez[0],rez[1])
+        else:
+            return rez
+    #
     def __set__(self,instance,value):
         try:
             lv = len(value)
         except:
-            raise KeyError("Complex property values can be assigned only by list of other values")
+            raise KeyError("Complex property values can be assigned only by group of other values")
         if lv != len(self._other_prop):
             raise KeyError("Complex property values can be set equal to the same length values list")
 
@@ -269,8 +274,6 @@ def gen_setter(keyval_dict,key,val):
 
     test_val = keyval_dict[name]
     if isinstance(test_val,ComplexProperty):
-        if not isinstance(val,list):
-            raise KeyError(' You can not assign non-list value to complex property {0}'.format(key))
         # Assigning values for composite function to the function components
         test_val.__set__(keyval_dict,val)
         return None
@@ -382,3 +385,19 @@ def parse_run_file_name(run_string):
         fext     = fext[0]
     # extensions should be either all the same or all defined
     return (filepath,filenum,fext)
+#
+def process_prop_list(workspace,logName="CombinedSpectraIDList"):
+    """Method process log, which discribes list of spectra, attached to
+       the workspace
+    """
+    if workspace.run().hasProperty(logName):
+        spec_id_str = workspace.run().getProperty(logName).value
+        spec_id_str = spec_id_str.translate(None,'[]').strip()
+        spec_id_listS = spec_id_str.split(',')
+        spec_list = []
+        for val in spec_id_listS:
+            spec_list.append(int(val))
+    else:
+        spec_list = []
+    return spec_list
+

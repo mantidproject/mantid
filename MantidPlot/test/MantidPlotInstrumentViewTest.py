@@ -25,7 +25,7 @@ E = np.sqrt(Y)
 CreateWorkspace(OutputWorkspace="loq_inst", DataX=list(X), DataY=list(Y),
                 DataE=list(E), NSpec=2, UnitX="TOF", YUnitLabel="Counts",
                 WorkspaceTitle="Faked data Workspace")
-LoadInstrument(Workspace="loq_inst", InstrumentName="LOQ")
+LoadInstrument(Workspace="loq_inst", InstrumentName="LOQ", RewriteSpectraMap=True)
 INST_WIN = getInstrumentView("loq_inst")
 
 class MantidPlotInstrumentViewTest(unittest.TestCase):

@@ -12,7 +12,7 @@ class PDToPDFgetN(DataProcessorAlgorithm):
     _iparmFile = None
 
     def category(self):
-        return "Workflow\\Diffraction;PythonAlgorithms"
+        return "Workflow\\Diffraction"
 
     def name(self):
         return "PDToPDFgetN"

@@ -50,17 +50,19 @@ private:
 
   void rotate(const Kernel::Matrix<double> &);
   void displace(const Kernel::V3D &);
+  Torus *doClone() const;
+
+protected:
+  Torus(const Torus &);
+  Torus &operator=(const Torus &);
 
 public:
   /// Public identifier
   virtual std::string className() const { return "Torus"; }
 
   Torus();
-  Torus(const Torus &);
-  Torus *clone() const;
-  Torus &operator=(const Torus &);
+  std::unique_ptr<Torus> clone() const;
   int operator==(const Torus &) const;
-  ~Torus();
 
   /// Accept visitor for line calculation
   virtual void acceptVisitor(BaseVisit &A) const { A.Accept(*this); }

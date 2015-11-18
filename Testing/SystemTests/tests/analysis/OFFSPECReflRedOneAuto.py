@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name
+﻿#pylint: disable=no-init,invalid-name
 """
 This system test verifies that OFFSPEC data is processed correctly by
 ReflectometryReductionOneAuto
@@ -16,15 +16,15 @@ class OFFSPECReflRedOneAuto(stresstesting.MantidStressTest):
 
         #Process using ReflectometryReductionOneAuto
         ivq_75, __, __ = ReflectometryReductionOneAuto(offspec75,
-                                                       ThetaIn=0.35,
+                                                       ThetaIn=0.70,#2*th
                                                        FirstTransmissionRun=offspec85)
 
         ivq_76, __, __ = ReflectometryReductionOneAuto(offspec76,
-                                                       ThetaIn=1.00,
+                                                       ThetaIn=2.00,#2*th
                                                        FirstTransmissionRun=offspec85)
 
         ivq_78, __, __ = ReflectometryReductionOneAuto(offspec78,
-                                                       ThetaIn=1.70,
+                                                       ThetaIn=3.40,#2*th
                                                        FirstTransmissionRun=offspec85)
 
         ivq_75_76, __ = Stitch1D(ivq_75, ivq_76, Params="1e-3")

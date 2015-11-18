@@ -10,7 +10,6 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 class RunSetupScript(BaseScriptElement):
     """ Run setup script for tab 'Run Setup'
     """
-
     # Class static variables
     runnumbers = ""
     calibfilename = ""
@@ -18,7 +17,7 @@ class RunSetupScript(BaseScriptElement):
     charfilename = ""
     dosum = False
     binning = -0.0001
-    binningtype = "Logarithmic"
+    doresamplex = False
     tofmin = ""
     tofmax = ""
     resamplex = 0
@@ -87,11 +86,16 @@ class RunSetupScript(BaseScriptElement):
         pardict["CalibrationFile"] = self.calibfilename
         pardict['ExpIniFilename'] = self.exp_ini_file_name
         pardict["CharacterizationRunsFile"] = self.charfilename
-        if self.binningtype == "Logarithmic":
-            pardict["Binning"] = -1.0*abs(self.binning)
+        if self.doresamplex is True:
+            # ResampleX is used instead binning: resamplex is always bigger than 0
+            pardict["ResampleX"] = '%d' % int(self.resamplex)
+            pardict["Binning"] = ''
         else:
-            pardict["Binning"] = self.binning
-        pardict["ResampleX"] = str(self.resamplex)
+            # binnign parameter
+            pardict["ResampleX"] = ''
+            pardict["Binning"] = '%.7f' % self.binning
+        # END-IF
+
         pardict["BinInDspace"] = str(int(self.binindspace))
         pardict["SaveAs"] = self.saveas
         pardict["OutputDirectory"] = self.outputdir
@@ -115,6 +119,15 @@ class RunSetupScript(BaseScriptElement):
         Arguments:
          - inst_name:  name of the instrument
         """
+        if inst_name == 'PG3':
+            pass
+        elif inst_name == 'NOM':
+            pass
+        elif inst_name == 'VULCAN':
+            pass
+        else:
+            print 'Instrument %s is not supported for set default parameter value.' % str(inst_name)
+
         return
 
     def to_script(self):
@@ -138,7 +151,7 @@ class RunSetupScript(BaseScriptElement):
         """
         parnamevaluedict = self.buildParameterDict()
 
-        xml = "<RunSetup>\n"
+        xml_str = "<RunSetup>\n"
         for parname in self.parnamelist:
             keyname = parname.lower()
             parvalue = parnamevaluedict[parname]
@@ -146,11 +159,11 @@ class RunSetupScript(BaseScriptElement):
                 parvalue = "1"
             elif str(parvalue) == "False":
                 parvalue = "0"
-            xml += "  <%s>%s</%s>\n" % (keyname, str(parvalue), keyname)
+            xml_str += "  <%s>%s</%s>\n" % (keyname, str(parvalue), keyname)
         #ENDFOR
-        xml += "</RunSetup>\n"
+        xml_str += "</RunSetup>\n"
 
-        return xml
+        return xml_str
 
     def from_xml(self, xml_str):
         """ 'Public' method to read in data from XML
@@ -180,18 +193,25 @@ class RunSetupScript(BaseScriptElement):
             self.charfilename = BaseScriptElement.getStringElement(instrument_dom,\
                     "characterizationrunsfile", default=RunSetupScript.charfilename)
 
-            self.binning = BaseScriptElement.getFloatElement(instrument_dom,\
-                    "binning", default=RunSetupScript.binning)
-
-            tempbool =  BaseScriptElement.getStringElement(instrument_dom,\
-                    "binindspace", default=str(int(RunSetupScript.binindspace)))
-            self.binindspace = bool(int(tempbool))
+            try:
+                self.binning = BaseScriptElement.getFloatElement(instrument_dom,\
+                        "binning", default=RunSetupScript.binning)
+            except ValueError:
+                self.binning = ''
 
             try:
                 self.resamplex = BaseScriptElement.getIntElement(instrument_dom,\
                         "resamplex", default=RunSetupScript.resamplex)
             except ValueError:
                 self.resamplex = 0
+
+            self.doresamplex = BaseScriptElement.getIntElement(instrument_dom,\
+                        "doresamplex", default=RunSetupScript.resamplex)
+            self.doresamplex = bool(self.doresamplex)
+
+            tempbool =  BaseScriptElement.getStringElement(instrument_dom,\
+                    "binindspace", default=str(int(RunSetupScript.binindspace)))
+            self.binindspace = bool(int(tempbool))
 
             self.saveas = BaseScriptElement.getStringElement(instrument_dom,\
                     "saveas",  default=RunSetupScript.saveas)

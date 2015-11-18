@@ -61,7 +61,7 @@ const std::string LoadMLZ::name() const { return "LoadMLZ"; }
 int LoadMLZ::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadMLZ::category() const { return "DataHandling"; }
+const std::string LoadMLZ::category() const { return "DataHandling\\Nexus"; }
 
 //---------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -444,6 +444,8 @@ void LoadMLZ::runLoadInstrument() {
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
     g_log.debug() << "InstrumentName" << m_instrumentName << std::endl;
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+    loadInst->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
   } catch (...) {
     g_log.information("Cannot load the instrument definition.");

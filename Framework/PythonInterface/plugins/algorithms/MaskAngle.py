@@ -11,7 +11,7 @@ class MaskAngle(mantid.api.PythonAlgorithm):
     def category(self):
         """ Mantid required
         """
-        return "PythonAlgorithms;Transforms\\Masking"
+        return "Transforms\\Masking"
 
     def name(self):
         """ Mantid require

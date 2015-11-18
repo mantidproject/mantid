@@ -28,4 +28,26 @@ set PATH=%_EXTRA_PATH_DIRS%;%PATH%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Start python
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:: If --classic is supplied as the first argument then use python (not ipython) and pass any further arguments to python else launch ipython and pass all arguments to it
+
+if "%1"=="--classic" (
+    :: Can't execute the stuff at StartPython in this if statement because effects of shift are not seen until after the if block
+    goto StartPython
+)
+
+:: Start ipython and pass through all arguments to it
 start "Mantid Python" /B /WAIT %_BIN_DIR%\Scripts\ipython.cmd %*
+goto TheEnd
+
+:StartPython
+:: shift does not affect %* so we are stuck doing this loop to pass any other arguments to python
+shift
+:ArgumentsLoop
+set ArgsExceptFirst=%ArgsExceptFirst% %1
+shift
+if not "%~1"=="" goto ArgumentsLoop
+
+start "Mantid Python" /B /WAIT %_BIN_DIR%\python.exe%ArgsExceptFirst%
+
+:TheEnd

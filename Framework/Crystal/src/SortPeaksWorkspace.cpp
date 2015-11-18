@@ -31,7 +31,9 @@ const std::string SortPeaksWorkspace::name() const {
 int SortPeaksWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SortPeaksWorkspace::category() const { return "Crystal"; }
+const std::string SortPeaksWorkspace::category() const {
+  return "Crystal\\Peaks;Utility\\Sorting";
+}
 
 //----------------------------------------------------------------------------------------------
 

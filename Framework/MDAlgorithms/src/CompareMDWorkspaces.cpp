@@ -52,7 +52,7 @@ int CompareMDWorkspaces::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string CompareMDWorkspaces::category() const {
-  return "MDAlgorithms";
+  return "MDAlgorithms\\Utility\\Workspaces";
 }
 
 //----------------------------------------------------------------------------------------------

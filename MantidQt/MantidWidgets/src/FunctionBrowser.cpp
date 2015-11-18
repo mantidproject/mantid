@@ -404,9 +404,11 @@ FunctionBrowser::AProperty FunctionBrowser::addParameterProperty(QtProperty* par
     throw std::runtime_error("Unexpected error in FunctionBrowser [3]");
   }
   QtProperty* prop = m_parameterManager->addProperty(paramName);
+  m_parameterManager->blockSignals(true);
   m_parameterManager->setDecimals(prop,6);
   m_parameterManager->setValue(prop,paramValue);
   m_parameterManager->setDescription(prop,paramDesc.toStdString());
+  m_parameterManager->blockSignals(false);
 
   if ( m_multiDataset )
   {
@@ -1899,6 +1901,7 @@ void FunctionBrowser::attributeChanged(QtProperty* prop)
   // delete and recreate all function's properties (attributes, parameters, etc)
   setFunction(funProp, fun);
   updateFunctionIndices();
+  emit functionStructureChanged();
 }
 
 /**

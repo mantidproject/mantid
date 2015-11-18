@@ -44,7 +44,7 @@ public:
   virtual const std::string name() const { return "ExportTimeSeriesLog"; };
   virtual int version() const { return 1; };
   virtual const std::string category() const {
-    return "Diffraction;Events\\EventFiltering";
+    return "Diffraction\\DataHandling;Events\\EventFiltering";
   };
 
   /// Summary of algorithms purpose

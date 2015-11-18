@@ -100,6 +100,37 @@ class MARIReductionFromFile(ISISDirectInelasticReduction):
     def get_reference_file(self):
         return "MARIReduction.nxs"
 
+class MARIReductionAutoEi(ISISDirectInelasticReduction):
+
+    def __init__(self):
+        ISISDirectInelasticReduction.__init__(self)
+
+        from ISIS_MariReduction import ReduceMARIAutoEi
+
+        self.red = ReduceMARIAutoEi()
+        self.red.def_advanced_properties()
+        self.red.def_main_properties()
+    # temporary fix to account for different monovan integral
+        self.scale_to_fix_abf = 1
+        self.tolerance = 1e-6
+        self.ws_name = "outWS"
+
+    def runTest(self):
+        #self.red.run_reduction()
+        #pylint: disable=unused-variable
+        outWS = self.red.reduce()
+        outWS = outWS[0]
+        outWS*=self.scale_to_fix_abf
+        self.ws_name = outWS.name()
+
+
+
+    def get_result_workspace(self):
+        """Returns the result workspace to be checked"""
+        return self.ws_name
+    def get_reference_file(self):
+        return "MARIReductionAutoEi.nxs"
+
 class MARIReductionFromFileCache(ISISDirectInelasticReduction):
     _counter=0
 

@@ -16,7 +16,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
     def category(self):
         """ Mantid required
         """
-        return "PythonAlgorithms;Transforms\\Masking;Inelastic"
+        return "Transforms\\Masking;Inelastic\\Utility"
 
     def name(self):
         """ Mantid required

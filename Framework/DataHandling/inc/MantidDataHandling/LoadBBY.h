@@ -78,7 +78,7 @@ public:
   // description
   virtual int version() const { return 1; }
   virtual const std::string name() const { return "LoadBBY"; }
-  virtual const std::string category() const { return "DataHandling"; }
+  virtual const std::string category() const { return "DataHandling\\Nexus"; }
   virtual const std::string summary() const {
     return "Loads a BilBy data file into an workspace.";
   }
