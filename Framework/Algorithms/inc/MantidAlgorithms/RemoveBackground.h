@@ -82,6 +82,8 @@ private:
   Geometry::IComponent_const_sptr m_Sample;
   // if true, negative signals are nullified
   bool m_NullifyNegative;
+  // removing negative values from ws with background removed previously.
+  bool m_previouslyRemovedBkgMode;
 
   // get Ei attached to direct or indirect instrument workspace
   double getEi(const API::MatrixWorkspace_const_sptr &inputWS) const;

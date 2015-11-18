@@ -159,7 +159,8 @@ void RemoveBackground::exec() {
 BackgroundHelper::BackgroundHelper()
     : m_WSUnit(), m_bgWs(), m_wkWS(), m_pgLog(NULL), m_inPlace(true),
       m_singleValueBackground(false), m_NBg(0), m_dtBg(1), // m_ErrSq(0),
-      m_Emode(0), m_L1(0), m_Efix(0), m_Sample(), m_NullifyNegative(false){}
+      m_Emode(0), m_L1(0), m_Efix(0), m_Sample(), m_NullifyNegative(false),
+      m_previouslyRemovedBkgMode(false){}
 /// Destructor
 BackgroundHelper::~BackgroundHelper() { this->deleteUnitsConverters(); }
 
@@ -234,12 +235,19 @@ void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
   m_singleValueBackground = false;
   if (bkgWS->getNumberHistograms() <= 1)
     m_singleValueBackground = true;
+
   const MantidVec &dataX = bkgWS->readX(0);
   const MantidVec &dataY = bkgWS->readY(0);
   const MantidVec& dataE = bkgWS->readE(0);
   m_NBg   = dataY[0];
   m_dtBg  = dataX[1] - dataX[0];
   m_ErrSq = dataE[0]*dataE[0]; // needs further clarification
+
+  m_previouslyRemovedBkgMode = false;
+  if (m_singleValueBackground) {
+    if (m_NBg<1.e-7 && m_ErrSq < 1.e-7)
+       m_previouslyRemovedBkgMode = true;
+  }
 
   m_Efix = this->getEi(sourceWS);
 }
@@ -298,7 +306,7 @@ void BackgroundHelper::removeBackground(int nHist, MantidVec &x_data,
       tof1 = tof2;
       if (m_inPlace) {
         y_data[i] -= normBkgrnd;
-        // e_data[i]  =std::sqrt((ErrSq*Jack*Jack+e_data[i]*e_data[i])/2.); //
+        // e_data[i]  =std::sqrt(ErrSq*Jack*Jack+e_data[i]*e_data[i]); //
         // needs further clarification -- Gaussian error summation?
         //--> assume error for background is sqrt(signal):
         e_data[i] = std::sqrt((errBkgSq + e_data[i] * e_data[i]));
@@ -308,11 +316,18 @@ void BackgroundHelper::removeBackground(int nHist, MantidVec &x_data,
         e_data[i] = std::sqrt((errBkgSq + YErrors[i] * YErrors[i]));
       }
       if (m_NullifyNegative && y_data[i] < 0) {
+          if (m_previouslyRemovedBkgMode) { 
+          // background have been removed
+          // and not we remove negative signal and estimate errors
+            double prev_rem_bkg = -y_data[i];
+            e_data[i] = e_data[i] > prev_rem_bkg ? e_data[i] : prev_rem_bkg;
+          } else {
+            /** The error estimate must go up in this nonideal situation and the
+                value of background is a good estimate for it. However, don't
+                reduce the error if it was already more than that */
+            e_data[i] = e_data[i] > normBkgrnd ? e_data[i] : normBkgrnd;
+          }
           y_data[i] = 0;
-          // The error estimate must go up in this nonideal situation and the
-          // value of background is a good estimate for it. However, don't
-          // reduce the error if it was already more than that
-          e_data[i] = e_data[i] > normBkgrnd ? e_data[i] : normBkgrnd;
       }
     }
 

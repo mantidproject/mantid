@@ -22,6 +22,10 @@ presented below, except intermediate workspaces are not created.
 Errors of the background workspace are currently ignored and their value 
 is calculated as the square root of correspondent background signal.
 
+**NOTE:** If background is a single value workspace with zero signal and error, and property 
+*NullifyNegativeValues* is set to True, the algorithm can be used to remove negative signal values
+and estimate errors during removal.
+
 Proof of concept background removal algorithm::
 
   from mantid.simpleapi import *
