@@ -4,6 +4,7 @@
 #include "MantidKernel/V2D.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Exception.h"
+#include <limits>
 
 #include <ostream>
 
