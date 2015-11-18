@@ -1776,6 +1776,12 @@ class DirectEnergyConversion(object):
 
         if prop_man.energy_bins: # It should already be a distribution.
             ConvertToDistribution(Workspace=result_ws)
+        # nullify negarive signals if necessary
+        if prop_man.check_background and prop_man.nullify_negative_signal:
+            zeroBg = CreateWorkspace(DataX='0,1',DataY=0,DataE=0,UnitX='TOF')
+            result_ws=RemoveBackground(result_ws,BkgWorkspace=zeroBg,Emode='Direct',NullifyNegativeValues=True)
+
+
         # White beam correction
         if white_run is not None:
             white_ws = self.do_white(white_run, spectra_masks, map_file)
