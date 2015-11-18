@@ -453,6 +453,29 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 
+  /// Test that algorithm throws an exception when passed an empty
+  /// WorkspaceGroup as input.
+  void test_throws_emptyGroup() {
+
+    // Name of the output workspace.
+    const std::string outWSName = outputWorkspaceName("GroupAsymmetry");
+
+    auto inputWSGroup = boost::shared_ptr<WorkspaceGroup>(new WorkspaceGroup());
+
+    MuonCalculateAsymmetry alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inputWSGroup);
+    alg.setProperty("PeriodOperation", "+");
+    alg.setProperty("OutputType", "PairAsymmetry");
+    alg.setProperty("PairFirstIndex", 0);
+    alg.setProperty("PairSecondIndex", 2);
+    alg.setPropertyValue("OutputWorkspace", outWSName);
+    // The exception thrown is caught by Algorithm...
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    // ... so check that the algorithm didn't execute.
+    TS_ASSERT(!alg.isExecuted());
+  }
+
 private:
   std::string outputWorkspaceName(std::string testName) {
     return "MuonCalculateAsymmetryTest_" + testName + "_OutputWS";

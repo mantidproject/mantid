@@ -46,15 +46,10 @@ const std::string MuonCalculateAsymmetry::category() const {
  * Initialize the algorithm's properties.
  */
 void MuonCalculateAsymmetry::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("FirstPeriodWorkspace",
-                                                         "", Direction::Input),
-                  "First period data. The only one used if second period is "
-                  "not specified.");
-
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
-                      "SecondPeriodWorkspace", "", Direction::Input,
-                      PropertyMode::Optional),
-                  "Second period data.");
+  declareProperty(new WorkspaceProperty<WorkspaceGroup>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "Workspace group containing period data. If it only contains "
+                  "one period, then only one is used.");
 
   std::vector<std::string> allowedOperations;
   allowedOperations.push_back("+");
@@ -104,8 +99,15 @@ void MuonCalculateAsymmetry::init() {
  */
 void MuonCalculateAsymmetry::exec() {
 
-  MatrixWorkspace_sptr firstPeriodWS = getProperty("FirstPeriodWorkspace");
-  MatrixWorkspace_sptr secondPeriodWS = getProperty("SecondPeriodWorkspace");
+  WorkspaceGroup_const_sptr inputWSGroup = getProperty("InputWorkspace");
+  int numPeriods = inputWSGroup->getNumberOfEntries();
+  if (numPeriods < 1) {
+    throw std::invalid_argument(
+        "Must supply at least one workspace with period data!");
+  }
+
+  MatrixWorkspace_sptr firstPeriodWS;
+  MatrixWorkspace_sptr secondPeriodWS;
 
   // The type of calculation
   const std::string type = getPropertyValue("OutputType");
