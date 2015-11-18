@@ -506,41 +506,37 @@ MatrixWorkspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType, in
 
   alg->initialize();
 
-  auto loadedWS = AnalysisDataService::Instance().retrieveWS<Workspace>(m_grouped_name);
+  auto loadedWS =
+      AnalysisDataService::Instance().retrieveWS<Workspace>(m_grouped_name);
+  auto inputGroup = boost::make_shared<WorkspaceGroup>();
 
-  if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWS) )
-  {
+  if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWS)) {
     // If is a group, will need to handle periods
-    
-    if ( MatrixWorkspace_sptr ws1 = getPeriodWorkspace(First, group) )
-    {
-      alg->setProperty( "FirstPeriodWorkspace", prepareAnalysisWorkspace(ws1, isRaw) );
-    }
-    else
-    {
+
+    if (MatrixWorkspace_sptr ws1 = getPeriodWorkspace(First, group)) {
+      inputGroup->addWorkspace(prepareAnalysisWorkspace(ws1, isRaw));
+    } else {
       // First period should be selected no matter what
       throw std::runtime_error("First period should be specified");
     }
 
-    if ( MatrixWorkspace_sptr ws2 = getPeriodWorkspace(Second, group) )
-    {
-      // If second period was selected, set it up together with selected period arithmetics
+    if (MatrixWorkspace_sptr ws2 = getPeriodWorkspace(Second, group)) {
+      // If second period was selected, set it up together with selected period
+      // arithmetics
+      inputGroup->addWorkspace(prepareAnalysisWorkspace(ws2, isRaw));
 
-      alg->setProperty("SecondPeriodWorkspace", prepareAnalysisWorkspace(ws2, isRaw) );
- 
       // Parse selected operation
-      const std::string op = m_uiForm.homePeriodBoxMath->currentText().toStdString();
+      const std::string op =
+          m_uiForm.homePeriodBoxMath->currentText().toStdString();
       alg->setProperty("PeriodOperation", op);
     }
+  } else if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS)) {
+    // Put this single WS into a group and set it as the input property
+    inputGroup->addWorkspace(prepareAnalysisWorkspace(ws, isRaw));
+  } else {
+    throw std::runtime_error("Unsupported workspace type");
   }
-  else if ( auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS) )
-  {
-    alg->setProperty( "FirstPeriodWorkspace", prepareAnalysisWorkspace(ws, isRaw) );
-  }
-  else
-  {
-    throw std::runtime_error("Usupported workspace type");
-  }
+  alg->setProperty("InputWorkspace", inputGroup);
 
   if ( itemType == Group )
   {
