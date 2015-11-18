@@ -66,7 +66,7 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
                                  NSFDataWorkspace=dataws_nsf, SFNiCrWorkspace=self.__sf_nicrws.getName(),
                                  NSFNiCrWorkspace=self.__nsf_nicrws.getName(), SFBkgrWorkspace=self.__sf_bkgrws.getName(),
                                  NSFBkgrWorkspace=self.__nsf_bkgrws.getName(), SFOutputWorkspace=outputWorkspaceName+'SF',
-                                 NSFOutputWorkspace=outputWorkspaceName+'NSF', DoubleSpinFlipScatteringProbability=0.0)
+                                 NSFOutputWorkspace=outputWorkspaceName+'NSF')
 
         self.assertTrue(alg_test.isExecuted())
         # check whether the data are correct
@@ -113,7 +113,7 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
                                  NSFDataWorkspace=dataws_nsf, SFNiCrWorkspace=self.__sf_nicrws.getName(),
                                  NSFNiCrWorkspace=self.__nsf_nicrws.getName(), SFBkgrWorkspace=self.__sf_bkgrws.getName(),
                                  NSFBkgrWorkspace=self.__nsf_bkgrws.getName(), SFOutputWorkspace=outputWorkspaceName+'SF',
-                                 NSFOutputWorkspace=outputWorkspaceName+'NSF', DoubleSpinFlipScatteringProbability=0.0)
+                                 NSFOutputWorkspace=outputWorkspaceName+'NSF')
 
         self.assertTrue(alg_test.isExecuted())
         ws_sf = AnalysisDataService.retrieve(outputWorkspaceName + 'SF')
@@ -156,7 +156,7 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
                                  NSFDataWorkspace=dataws_nsf, SFNiCrWorkspace=self.__sf_nicrws.getName(),
                                  NSFNiCrWorkspace=self.__nsf_nicrws.getName(), SFBkgrWorkspace=self.__sf_bkgrws.getName(),
                                  NSFBkgrWorkspace=self.__nsf_bkgrws.getName(), SFOutputWorkspace=outputWorkspaceName+'SF',
-                                 NSFOutputWorkspace=outputWorkspaceName+'NSF', DoubleSpinFlipScatteringProbability=0.0)
+                                 NSFOutputWorkspace=outputWorkspaceName+'NSF')
 
         self.assertTrue(alg_test.isExecuted())
         # check whether the data are correct
@@ -177,68 +177,6 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
         run_algorithm("DeleteWorkspace", Workspace=dataws_sf)
         run_algorithm("DeleteWorkspace", Workspace=dataws_nsf)
         run_algorithm("DeleteWorkspace", Workspace=ws)
-        return
-
-    def test_DNSDoubleSpinFlip(self):
-        outputWorkspaceName = "DNSFlippingRatioCorrTest_Test7"
-        f = 0.2
-        # create fake vanadium data workspaces
-        dataY = np.array([1811., 2407., 3558., 3658., 3352., 2321., 2240., 2617., 3245., 3340., 3338., 3310.,
-                          2744., 3212., 1998., 2754., 2791., 2509., 3045., 3429., 3231., 2668., 3373., 2227.])
-        __sf_vanaws = create_fake_dns_workspace('__sf_vanaws', dataY=dataY/58.0, flipper='ON')
-        self.workspaces.append('__sf_vanaws')
-        dataY = np.array([2050., 1910., 2295., 2236., 1965., 1393., 1402., 1589., 1902., 1972., 2091., 1957.,
-                          1593., 1952., 1232., 1720., 1689., 1568., 1906., 2001., 2051., 1687., 1975., 1456.])
-        __nsf_vanaws = create_fake_dns_workspace('__nsf_vanaws', dataY=dataY/58.0, flipper='OFF')
-        self.workspaces.append('__nsf_vanaws')
-        # consider normalization=1.0 as set in self._create_fake_workspace
-        dataws_sf = __sf_vanaws - self.__sf_bkgrws
-        dataws_nsf = __nsf_vanaws - self.__nsf_bkgrws
-        alg_test = run_algorithm("DNSFlippingRatioCorr", SFDataWorkspace=dataws_sf,
-                                 NSFDataWorkspace=dataws_nsf, SFNiCrWorkspace=self.__sf_nicrws.getName(),
-                                 NSFNiCrWorkspace=self.__nsf_nicrws.getName(), SFBkgrWorkspace=self.__sf_bkgrws.getName(),
-                                 NSFBkgrWorkspace=self.__nsf_bkgrws.getName(), SFOutputWorkspace=outputWorkspaceName+'SF',
-                                 NSFOutputWorkspace=outputWorkspaceName+'NSF', DoubleSpinFlipScatteringProbability=0.0)
-
-        self.assertTrue(alg_test.isExecuted())
-        alg_test = run_algorithm("DNSFlippingRatioCorr", SFDataWorkspace=dataws_sf,
-                                 NSFDataWorkspace=dataws_nsf, SFNiCrWorkspace=self.__sf_nicrws.getName(),
-                                 NSFNiCrWorkspace=self.__nsf_nicrws.getName(), SFBkgrWorkspace=self.__sf_bkgrws.getName(),
-                                 NSFBkgrWorkspace=self.__nsf_bkgrws.getName(), SFOutputWorkspace=outputWorkspaceName+'SF1',
-                                 NSFOutputWorkspace=outputWorkspaceName+'NSF1', DoubleSpinFlipScatteringProbability=f)
-
-        self.assertTrue(alg_test.isExecuted())
-
-        # check whether the data are correct
-        ws_sf = AnalysisDataService.retrieve(outputWorkspaceName + 'SF')
-        ws_sf1 = AnalysisDataService.retrieve(outputWorkspaceName + 'SF1')
-        ws_nsf = AnalysisDataService.retrieve(outputWorkspaceName + 'NSF')
-        ws_nsf1 = AnalysisDataService.retrieve(outputWorkspaceName + 'NSF1')
-        # dimensions
-        self.assertEqual(24, ws_sf.getNumberHistograms())
-        self.assertEqual(24, ws_sf1.getNumberHistograms())
-        self.assertEqual(24, ws_nsf.getNumberHistograms())
-        self.assertEqual(24, ws_nsf1.getNumberHistograms())
-        self.assertEqual(2,  ws_sf.getNumDims())
-        self.assertEqual(2,  ws_sf1.getNumDims())
-        self.assertEqual(2,  ws_nsf.getNumDims())
-        self.assertEqual(2,  ws_nsf1.getNumDims())
-        # data array: sf must not change
-        for i in range(24):
-            self.assertAlmostEqual(ws_sf.readY(i), ws_sf1.readY(i))
-        # data array: nsf1 = nsf - sf*f
-        nsf = np.array(ws_nsf.extractY())
-        sf = np.array(ws_sf.extractY())
-        refdata = nsf - sf*f
-        for i in range(24):
-            self.assertAlmostEqual(refdata[i], ws_nsf1.readY(i))
-
-        run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName + 'SF')
-        run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName + 'SF1')
-        run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName + 'NSF')
-        run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName + 'NSF1')
-        run_algorithm("DeleteWorkspace", Workspace=dataws_sf)
-        run_algorithm("DeleteWorkspace", Workspace=dataws_nsf)
         return
 
 if __name__ == '__main__':
