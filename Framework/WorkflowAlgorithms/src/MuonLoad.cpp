@@ -232,12 +232,17 @@ void MuonLoad::exec() {
 
   IAlgorithm_sptr calcAssym = createChildAlgorithm("MuonCalculateAsymmetry");
 
+  // Set input workspace group
+  WorkspaceGroup_sptr inputWSGroup = boost::make_shared<WorkspaceGroup>();
+
   // Set first period workspace
-  calcAssym->setProperty("FirstPeriodWorkspace", firstPeriodWS);
+  inputWSGroup->addWorkspace(firstPeriodWS);
 
   // Set second period workspace, if have one
   if (secondPeriodWS)
-    calcAssym->setProperty("SecondPeriodWorkspace", secondPeriodWS);
+    inputWSGroup->addWorkspace(secondPeriodWS);
+
+  calcAssym->setProperty("InputWorkspace", inputWSGroup);
 
   // Copy similar properties over
   calcAssym->setProperty(
