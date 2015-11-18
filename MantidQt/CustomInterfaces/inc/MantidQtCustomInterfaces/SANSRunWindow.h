@@ -493,6 +493,10 @@ private:
                                   bool w1W2Disabled);
   /// Initialize the QResolution settings
   void initQResolutionSettings();
+  /// Gets the BackgroundCorrection settings
+  void retrieveBackgroundCorrection();
+  /// Sets the BackgroundCorrection settings
+  void writeBackgroundCorrectionToPythonScript(QString &pythonCode);
 
   UserSubWindow *slicingWindow;
 };

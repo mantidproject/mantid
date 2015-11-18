@@ -1051,6 +1051,10 @@ bool SANSRunWindow::loadUserFile() {
   // Setup the QResolution
   retrieveQResolutionSettings();
 
+  // Setup the BackgroundCorrection
+  retrieveBackgroundCorrection();
+
+
   if (runReduceScriptFunction("print i.ReductionSingleton().mask.phi_mirror")
           .trimmed() == "True") {
     m_uiForm.mirror_phi->setChecked(true);
@@ -2315,6 +2319,9 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type) {
 
   // Set the QResolution settings
   writeQResolutionSettingsToPythonScript(exec_reduce);
+
+  // Set the BackgroundCorrection settings
+  writeBackgroundCorrectionToPythonScript(exec_reduce);
 
   // set the user defined center (Geometry Tab)
   // this information is used just after loading the data in order to move to
@@ -4849,6 +4856,26 @@ void SANSRunWindow::initQResolutionSettings() {
   m_uiForm.q_resolution_a2_h2_label->setToolTip(
       m_constants.getQResolutionA2ToolTipText());
 }
+
+/**
+ * Retrieve background correction settings
+ */
+void SANSRunWindow::retrieveBackgroundCorrection() {
+  // Set the time-based selection
+
+
+  // Set the Uamp-based selection
+}
+
+/**
+ * Sends the background correction user setting
+ */
+void SANSRunWindow::writeBackgroundCorrectionToPythonScript(QString &pythonCode) {
+  // Set setting 1
+  
+  // Set setting 2
+}
+
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

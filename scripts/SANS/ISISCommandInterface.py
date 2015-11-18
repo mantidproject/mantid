@@ -1,4 +1,4 @@
-#pylint: disable=too-many-lines
+﻿#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 """
     Enables the SANS commands (listed at http://www.mantidproject.org/SANS) to
@@ -1737,6 +1737,16 @@ def is_current_workspace_an_angle_workspace():
     except:
         is_angle = False
     return is_angle
+
+
+##################### Accesor functions for BackgroundCorrection
+def set_background_correction_time(setting):
+    pass
+
+def set_background_correction_uamp(setting):
+    pass
+
+
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################

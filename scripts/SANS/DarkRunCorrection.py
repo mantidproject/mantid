@@ -80,7 +80,6 @@ class DarkRunCorrection(object):
 
         # Make sure that we forget about the original settings
         self._reset_settings()
-
         return alg_dark.getProperty("OutputWorkspace").value
 
 class DarkRunNormalizationExtractor(object):
@@ -119,7 +118,7 @@ class DarkRunNormalizationExtractor(object):
         '''
         run = workspace.getRun()
         if not run.hasProperty(log_entry):
-            raise RuntimeError("DarkRunCorrection: The workspace does not have a" + log_entry +
+            raise RuntimeError("DarkRunCorrection: The workspace does not have a " + log_entry +
                                "log entry. This is required for calculating the noramlization"
                                "of the dark run.")
 

@@ -73,7 +73,7 @@ class BackCommandParser(object):
 
     def _evaluate_uniform(self, argument):
         '''
-        Evalutes if the argument is eithe TIME, UAMP or something else.
+        Evalutes if the argument is either TIME, UAMP or something else.
         @param argument: string to investigate
         @raise RuntimeError: If the argument cannot be parsed correctly
         '''
@@ -113,7 +113,7 @@ class BackCommandParser(object):
         elif re.match(self._first_level_keys_special[1], argument):
             self._mon = True
             mon_number = argument.replace("M", "")
-            self._mon_number=mon_number
+            self._mon_number=int(mon_number)
         else:
             raise RuntimeError("BackCommandParser: Cannot parse the MON value. "
                                "Read in " + argument +". "+

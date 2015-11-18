@@ -84,6 +84,8 @@ set ( SRC_FILES
 	src/ReflNexusMeasurementSource.cpp
 	src/ReflSearchModel.cpp
 	src/ReflTableSchema.cpp
+	src/SANSBackgroundCorrectionSettings.cpp
+	src/SANSBackgroundCorrectionWidget.cpp
 	src/SANSAddFiles.cpp
 	src/SANSConstants.cpp
 	src/SANSDiagnostics.cpp
@@ -213,6 +215,8 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/ReflTableSchema.h
 	inc/MantidQtCustomInterfaces/ReflTransferStrategy.h
 	inc/MantidQtCustomInterfaces/ReflVectorString.h
+	inc/MantidQtCustomInterfaces/SANSBackgroundCorrectionSettings.h
+	inc/MantidQtCustomInterfaces/SANSBackgroundCorrectionWidget.h
 	inc/MantidQtCustomInterfaces/SANSAddFiles.h
 	inc/MantidQtCustomInterfaces/SANSConstants.h
 	inc/MantidQtCustomInterfaces/SANSDiagnostics.h
@@ -322,6 +326,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/QtReflMainView.h
                 inc/MantidQtCustomInterfaces/QtReflOptionsDialog.h
                 inc/MantidQtCustomInterfaces/SampleTransmission.h
+		inc/MantidQtCustomInterfaces/SANSBackgroundCorrectionWidget.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
                 inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
@@ -388,6 +393,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/ReflOptionsDialog.ui
                inc/MantidQtCustomInterfaces/ReflWindow.ui
                inc/MantidQtCustomInterfaces/SampleTransmission.ui
+	       inc/MantidQtCustomInterfaces/SANSBackgroundCorrectionWidget.ui
                inc/MantidQtCustomInterfaces/SANSPlotSpecial.ui
                inc/MantidQtCustomInterfaces/SANSRunWindow.ui
                inc/MantidQtCustomInterfaces/SANSEventSlicing.ui

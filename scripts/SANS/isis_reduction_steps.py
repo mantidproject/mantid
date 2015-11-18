@@ -30,6 +30,7 @@ import DarkRunCorrection as DarkCorr
 import isis_instrument
 import isis_reducer
 import SANSUserFileParser as UserFileParser
+from collections import namedtuple
 from reducer_singleton import ReductionStep
 
 
@@ -1180,12 +1181,9 @@ class LoadSample(LoadRun):
 
 class DarkRunSubtraction(object):
     '''
-    This class handles the subtraction of a dark run from the sample workspace. It has not been
-    promoted to a reduction step, but it is kept in a way, that this should not be a problem
-    if this is desired one day.
+    This class handles the subtraction of a dark run from the sample workspace. 
     The dark run subtraction does not take place and just passes the workspace through
-    if the parameters are not fully specified. This step happens after CropDetector.
-    First the dark run gets cropped in order to match the current detector.
+    if the parameters are not fully specified. 
     '''
     # The named tuple contains the information for a dark run subtraction for a single run number ( of 
     # a dark run file)
@@ -1199,37 +1197,43 @@ class DarkRunSubtraction(object):
         # Each element in the list will be struct-like and contain
         # the relevant information for a dark-run subtraction
         self._dark_run_settings = []
+        self._dark_run_time_setting = None
+        self._dark_run_uamp_setting = None
 
     def add_setting(self, dark_run_setting):
         '''
         We add a dark run setting to our list of settings
         @param dark_run_setting
         '''
-        if not isinstance(result, UserFileParser.DarkRunSettings):
+        if not isinstance(dark_run_setting, UserFileParser.DarkRunSettings):
             raise RuntimeError("DarkRunSubtraction: The provided settings "
                                "object is not of type DarkRunSettings")
         self._dark_run_settings.append(dark_run_setting)
 
-    def execute(self, reducer, workspace):
+    def execute(self, workspace):
         '''
         Load the dark run. Cropt it to the current detector. Find out what kind of subtraction
         to perform and subtract the dark run from the workspace. Delete the dark run workspace.
-        @param reducer: a reducer object
         @param workspace: the workspace to alter
         '''
         # The workspace signature of the execute method exists to make it an easy step
         # to convert to a full-grown reduction step for now we add it when converting
         # the data to histogram
-        dummy = reducer
         if not self.has_dark_runs():
-            return
+            return workspace
 
-        # Gets a list of all applicable settings objects
-        settings = self._get_settings()
+        # Get the time-based correction settings
+        setting_time = self.get_time_based_setting()
 
-        # Subtract the dark run
-        for setting in settings:
-            self._execute_dark_run_subtraction(workspace, setting)
+        # Get the uamp-based correction settings
+        setting_uamp = self.get_uamp_based_setting()
+
+        # Subtract the dark runs
+        if setting_time is not None:
+            workspace = self._execute_dark_run_subtraction(workspace, setting_time)
+        if setting_uamp is not None:
+            workspace = self._execute_dark_run_subtraction(workspace, setting_uamp)
+        return workspace
 
     def has_dark_runs(self):
         '''
@@ -1250,15 +1254,10 @@ class DarkRunSubtraction(object):
         # Load the dark run workspace is it has not already been loaded
         dark_run_ws = self._load_dark_run(setting)
 
-        # Set the correct binning of the dark run
-        dark_run_cropped = self._provide_cropped_workspace(dark_run_ws)
-
         # Subtract the dar run from the workspace
-        self._subract_dark_run(workspace, dark_run_cropped, settings)
+        return self._subtract_dark_run(workspace, dark_run_ws, setting)
 
-        # Delete the cropped dark rundetectro)
-
-    def _subtract_dark_run(self, workspace, dark_run, settings):
+    def _subtract_dark_run(self, workspace, dark_run, setting):
         '''
         Subtract the dark run from the SANS workspace
         @param worksapce: the SANS data set
@@ -1266,14 +1265,13 @@ class DarkRunSubtraction(object):
         @param setting: a dark run settings tuple
         '''
         dark_run_correction = DarkCorr.DarkRunCorrection()
-        dark_run_correction.set_use_mean(setting.time)
-        dark_run_correction.set_use_time(setting.mean)
-        dark_run_correction.set_use_detector(setting.detector)
+        dark_run_correction.set_use_mean(setting.mean)
+        dark_run_correction.set_use_time(setting.time)
+        dark_run_correction.set_use_detectors(setting.detector)
         dark_run_correction.set_use_monitors(setting.mon)
-        dark_run_correction.set_mon_numbers(setting. mon_numbers)
-
-        dark_run_correction.execute(scatter_workspace = workspace,
-                                    dark_run = dark_run)
+        dark_run_correction.set_mon_numbers(setting.mon_numbers)
+        return dark_run_correction.execute(scatter_workspace = workspace,
+                                           dark_run = dark_run)
 
     def _load_dark_run(self, setting):
         '''
@@ -1283,22 +1281,55 @@ class DarkRunSubtraction(object):
         '''
         dark_run_ws = None
         try:
-             dark_run_file_path, dark_run_ws_name = getFileAndName(setting.run_number)
+            dark_run_file_path, dark_run_ws_name = getFileAndName(setting.run_number)
+            dark_run_file_path = dark_run_file_path.replace("\\", "/")
 
-             # If the workspace is already loaded then don't reload it
-             if mtd.doesExist(dark_run_ws_name):
-                 dark_run_ws = mtd[dark_run_ws_name]
-             else:
-                dark_run_file_path = dark_run_file_path.replace("\\", "/")
-                dark_run_ws = Load(Filename = dark_run_file_path, OutputWorkspace=dark_run_ws_name)
+            alg_load = AlgorithmManager.create("LoadNexusProcessed")
+            alg_load.initialize()
+            alg_load.setChild(True)
+            alg_load.setProperty("Filename", dark_run_file_path)
+            alg_load.setProperty("OutputWorkspace", dark_run_ws_name)
+            alg_load.execute()
+            dark_run_ws= alg_load.getProperty("OutputWorkspace").value
         except:
             raise RuntimeError("DarkRunSubtration: The specified dark run file cannot be found or loaded. "
                                "Please make sure that that it exists in your search directory.")
         return dark_run_ws
 
-    def _get_setting(self):
+    def get_time_based_setting(self):
         '''
-        Create a unifed setting with all the settings which were queried by the user
+        Retrieve the time-based setting if there is one
+        @returns the time-based setting or None
+        '''
+        self._evaluate_settings()
+        return self._dark_run_time_setting
+
+    def get_uamp_based_setting(self):
+        '''
+        Retrieve the uamp-based setting if there is one
+        @returns the uamp-based setting or None
+        '''
+        self._evaluate_settings()
+        return self._dark_run_uamp_setting
+
+    def set_time_based_setting(self, setting):
+        '''
+        Set the time-based setting
+        @param setting: a time-based setting
+        '''
+        self._dark_run_time_setting = setting
+
+    def set_uamp_based_setting(self, setting):
+        '''
+        Set the uamp-based setting
+        @param setting: a uamp-based setting
+        '''
+        self._dark_run_uamp_setting = setting
+
+    def _evaluate_settings(self):
+        '''
+        Takes the dark run settings and merges the appropriate files into
+        a time-based setting and a uamp-based setting. If this
         @returns the final settings
         @raises RuntimeError: if settings values are inconsistent
         '''
@@ -1312,22 +1343,45 @@ class DarkRunSubtraction(object):
             use_mean.append(setting.mean)
             use_time.append(setting.time)
             use_mon.append(setting.mon)
-            mon_number.append(mon_number)
-            run_number.append(run_number)
+            mon_number.append(setting.mon_number)
+            run_number.append(setting.run_number)
 
         # Group the elements by run number
         unique_runs = set(run_number)
+
+        # We currently only support one run for time-based corrections
+        # and one run for uamp-based corrections
+        if len(unique_runs) > 2:
+            raise RuntimeError("DarkRunSubtraction: You are providing more than "
+                               "two runs for dark run subtraction. You can specify "
+                               "one run number for time-based corrections and one "
+                                "run number for uamp-based corrections.")
+
         final_settings = []
         for run in unique_runs:
             # Get all indices of the current run
             indices = [i for i, val in enumerate(run_number) if val == run]
             # Get all means, times etc for the specfic run
             means = [use_mean[i] for i in indices]
-            times = [use_mean[i] for i in indices]
+            times = [use_time[i] for i in indices]
             mons = [use_mon[i] for i in indices]
-            mon_numbers = [mon_numbers[i] for i in indices]
-            final_settings.append(self._get_final_setting(run, means, times, mons, mon_numbers))
-        return final_settings
+            mon_nums= [mon_number[i] for i in indices]
+            final_settings.append(self._get_final_setting(run, means, times, mons, mon_nums))
+
+        # Now that we have all settings parsed we need to make sure that the two settings objects
+        # don't both refer to either time-based or uamp-based settings
+        time_selection = [s.time for s in final_settings]
+        if len(time_selection) > len(set(time_selection)):
+            raise RuntimeError("DarkRunSubtraction: Two different runs were selected which bother "
+                               "require either time-based or uamp-based corrections. You can "
+                               "only specify one of each currently.")
+
+        # Now set the time-based and uamp-based settings
+        for setting in final_settings:
+            if setting.time == True:
+                self._dark_run_time_setting = setting
+            else:
+                self._dark_run_uamp_setting = setting
 
     def _get_final_setting(self, run, means, times, mons, mon_numbers):
         '''
@@ -1345,6 +1399,7 @@ class DarkRunSubtraction(object):
         compare_all = lambda alist : all([alist[0] == alist[i] for i in range(0, len(alist))])
         all_means_same = compare_all(means)
         all_times_same = compare_all(times)
+
         if not all_means_same or not all_times_same:
             raise RuntimeError("DarkRunSubtraction: Multiple inconsistent settings for MEAN/TOF or TIME/UAMP. "
                                "For a single run number these settings need to be identical")
@@ -1352,13 +1407,12 @@ class DarkRunSubtraction(object):
         final_mean = means[0]
         final_time = times[0]
         final_use_detector, final_use_mon, final_mon_numbers = self._get_mon_detector_and_mon_numbers(mons, mon_numbers)
-        return DarkRunSubtractionSettings(run_number = run,
-                                          time = final_time,
-                                          mean = final_mean,
-                                          detector = final_use_detector,
-                                          mon = final_use_mon,
-                                          mon_numbers = final_mon_numbers)
-
+        return DarkRunSubtraction.DarkRunSubtractionSettings(run_number = run,
+                                                             time = final_time,
+                                                             mean = final_mean,
+                                                             detector = final_use_detector,
+                                                             mon = final_use_mon,
+                                                             mon_numbers = final_mon_numbers)
 
     def _get_mon_detector_and_mon_numbers(self, mons, mon_numbers):
         '''
@@ -1384,14 +1438,13 @@ class DarkRunSubtraction(object):
                 use_all_monitors = True
             elif mon == True and number is not None:
                 use_monitors = True
-                mon_numbers_to_use.append(number)
+                mon_numbers_to_use.extend(number)
             else:
                 raise RuntimeError("DarkRunSubtraction: There is an inconsistency "
                                    "with the monitor setting.")
-
         # Make the monitor list unique
         if len(mon_numbers_to_use) != 0:
-            mon_numbers_to_use = set(mon_numbers_to_use)
+            mon_numbers_to_use = list(set(mon_numbers_to_use))
 
         # If the all monitors are used, then set the numbers to empty
         if use_all_monitors:
@@ -2564,7 +2617,7 @@ class SliceEvent(ReductionStep):
         self.scale = 1
         self._dark_run_subtraction = DarkRunSubtraction()
 
-    def add_dark_run_subtraction(self, dark_run_setting):
+    def add_dark_run_setting(self, dark_run_setting):
         '''
         Adds a dark run setting to the dark run subtraction
         @param dark_run_setting: a dark run setting
@@ -3167,8 +3220,8 @@ class UserFile(ReductionStep):
         # else handle in a standard way
         back_parser = UserFileParser.BackCommandParser()
         if back_parser.can_attempt_to_parse(arguments):
-            dark_run_settings = back_parser.parse_and_set(arguments, reducer)
-            # TODO: Apply settings to redcuer
+            dark_run_setting = back_parser.parse_and_set(arguments, reducer)
+            reducer.event2hist.add_dark_run_setting(dark_run_setting)
         else:
             #a list of the key words this function can read and the functions it calls in response
             keys = ['MON/TIMES', 'M', 'TRANS']

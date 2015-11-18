@@ -4,6 +4,7 @@ from mantid.simpleapi import *
 from mantid.kernel import DateAndTime
 import DarkRunCorrection as dc
 
+#--- Helper Functions
 def add_log(ws, number_of_times, log_name, start_time):
     alg_log  = AlgorithmManager.create("AddTimeSeriesLog")
     alg_log.initialize()
@@ -19,7 +20,7 @@ def add_log(ws, number_of_times, log_name, start_time):
         alg_log.setProperty("Time", date.__str__().strip())
         alg_log.setProperty("Value", val)
         alg_log.execute()
-    
+
     return alg_log.getProperty("Workspace").value
 
 def create_sample_workspace_with_log(name, x_start, x_end, bin_width,
@@ -33,7 +34,22 @@ def create_sample_workspace_with_log(name, x_start, x_end, bin_width,
     ws = mtd[name]
     ws = add_log(ws, number_of_times, log_name, start_time)
 
+def create_real_workspace_with_log(name, log_names, start_time, number_of_times):
+        filename = "LOQ48127np.nxs"
+        out_ws_name = name
+        alg_load  = AlgorithmManager.create("LoadNexusProcessed")
+        alg_load.initialize()
+        alg_load.setChild(True)
+        alg_load.setProperty("Filename", filename)
+        alg_load.setProperty("OutputWorkspace", out_ws_name)
+        alg_load.execute()
+        ws = alg_load.getProperty("OutputWorkspace").value
 
+        for log_name in log_names:
+            ws = add_log(ws, number_of_times, log_name, start_time)
+        return ws
+
+# ----- TESTS
 class DarkRunCorrectionTest(unittest.TestCase):
     def _do_test_dark_run_correction(self,  log_name, use_mean, use_time, use_detectors = True,
                                      use_monitors = False, mon_number = None, use_real_data = False):
@@ -59,10 +75,10 @@ class DarkRunCorrectionTest(unittest.TestCase):
 
         # We either load some data or create sample data
         if use_real_data:
-            ws_scatter = self._do_provide_real_data("scatter")
-            ws_dark = self._do_provide_real_data("dark")
-            ws_scatter = add_log(ws_scatter, number_of_times_scatter, log_name, start_time_scatter)
-            ws_dark = add_log(ws_dark, number_of_times_dark_run, log_name, start_time_dark_run)
+            ws_scatter = create_real_workspace_with_log("scatter", [log_name],
+                                                        start_time_scatter, number_of_times_scatter)
+            ws_dark = create_real_workspace_with_log("dark", [log_name],
+                                                        start_time_dark_run, number_of_times_dark_run)
         else:
             create_sample_workspace_with_log(ws_scatter_name, x_start, x_end, bin_width,
                                              log_name, start_time_scatter, number_of_times_scatter)
@@ -90,17 +106,6 @@ class DarkRunCorrectionTest(unittest.TestCase):
         if not use_real_data:
             mtd.remove(ws_scatter_name)
             mtd.remove(ws_dark_name)
-
-    def _do_provide_real_data(self, name):
-        filename = "LOQ48127np.nxs"
-        out_ws_name = name
-        alg_load  = AlgorithmManager.create("LoadNexusProcessed")
-        alg_load.initialize()
-        alg_load.setChild(True)
-        alg_load.setProperty("Filename", filename)
-        alg_load.setProperty("OutputWorkspace", out_ws_name)
-        alg_load.execute()
-        return alg_load.getProperty("OutputWorkspace").value
 
     def test__mean__time__dark_run_correction_runs(self):
         use_mean = True
