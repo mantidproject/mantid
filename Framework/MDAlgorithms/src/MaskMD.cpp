@@ -228,7 +228,7 @@ void MaskMD::exec() {
   this->progress(0.0);
 
   // Explicitly cast nGroups and group to double to avoid compiler warnings
-  // we don't care about loss of precision as we are only using the cast values
+  // loss of precision does not matter as we are only using the result
   // for reporting algorithm progress
   const double nGroups_double = static_cast<double>(nGroups);
   double group_double;
