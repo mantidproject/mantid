@@ -161,8 +161,8 @@ public:
     alg.initialize();
     alg.setPropertyValue("Workspace", wsName);
     alg.setPropertyValue("Dimensions", "Axis0, Axis1, Axis2");
-    alg.setPropertyValue("Extents", "0,10"); // wrong number of extents
-                                             // provided.
+    alg.setPropertyValue("Extents", "0,10");  // wrong number of extents
+                                              // provided.
     TS_ASSERT_THROWS_ANYTHING(alg.execute()); // fail input validators
   }
 
