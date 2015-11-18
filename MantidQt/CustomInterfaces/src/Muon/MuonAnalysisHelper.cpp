@@ -11,6 +11,7 @@
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QComboBox>
+#include <qprocess.h>
 
 #include <stdexcept>
 #include <boost/scope_exit.hpp>
@@ -535,6 +536,44 @@ void groupWorkspaces(const std::string& groupName, const std::vector<std::string
   }
 }
 
+/**
+ * If current system is not Windows, mounts the supplied shared drive to
+ * /mnt/currentdata
+ * Probably requires root permissions
+ * @param source Windows-style path
+ */
+void mountSharedDrive(const std::string &source) {
+  QString path(source.c_str());
+  path.replace("\\", "/");
+  sendCommand(QString("mount -t cifs %1 /mnt/currentdata").arg(path));
+}
+
+/**
+* If current system is not Windows, unmounts whatever is mounted on
+* /mnt/currentdata
+* Probably requires root permissions
+*/
+void unmountSharedDrive() { sendCommand("umount /mnt/currentdata"); }
+
 } // namespace MuonAnalysisHelper
 } // namespace CustomInterfaces
 } // namespace Mantid
+
+// free functions
+namespace {
+/**
+ * If current system is Unix-like, run the supplied shell command
+ * @param command Command to run in the shell
+ */
+void sendCommand(const QString &command) {
+#ifndef _WIN32
+  QString shell("/bin/bash");
+  QString argument = QString("-c \"%1\"").arg(command);
+  QStringList args;
+  args.push_back(argument);
+  QProcess process;
+  process.start(shell, args);
+  process.waitForFinished();
+#endif
+}
+}

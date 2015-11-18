@@ -885,7 +885,7 @@ void MuonAnalysis::runLoadCurrent()
     return;
   }
 
-  if ( instname == "EMU" || instname == "HIFI" || instname == "MUSR" || instname == "CHRONUS")
+  if ( instname == "EMU" || instname == "HIFI" || instname == "MUSR" || instname == "CHRONUS" || instname == "ARGUS")
   {
     QString instDirectory = instname;
     if ( instname == "CHRONUS" )
