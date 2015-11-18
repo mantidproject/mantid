@@ -36,7 +36,9 @@ const std::string LoadILLSANS::name() const { return "LoadILLSANS"; }
 int LoadILLSANS::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadILLSANS::category() const { return "DataHandling"; }
+const std::string LoadILLSANS::category() const {
+  return "DataHandling\\Nexus";
+}
 
 //----------------------------------------------------------------------------------------------
 
@@ -408,6 +410,8 @@ void LoadILLSANS::runLoadInstrument() {
   try {
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+    loadInst->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
   } catch (...) {
     g_log.information("Cannot load the instrument definition.");

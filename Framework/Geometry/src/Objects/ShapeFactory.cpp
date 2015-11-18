@@ -24,6 +24,8 @@
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 
+#include "boost/make_shared.hpp"
+
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
@@ -110,8 +112,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element *pElem) {
 
   std::string shapeXML = xmlstream.str();
 
-  boost::shared_ptr<Object> retVal =
-      boost::shared_ptr<Object>(new Object(shapeXML));
+  boost::shared_ptr<Object> retVal = boost::make_shared<Object>(shapeXML);
 
   bool defaultAlgebra =
       false; // if no <algebra> element then use default algebra
@@ -141,8 +142,9 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element *pElem) {
   unsigned long pNL_length = pNL->length();
   int numPrimitives =
       0; // used for counting number of primitives in this 'type' XML element
-  std::map<int, Surface *> primitives; // stores the primitives that will be
-                                       // used to build final shape
+  std::map<int, boost::shared_ptr<Surface>>
+      primitives; // stores the primitives that will be
+                  // used to build final shape
   int l_id = 1; // used to build up unique id's for each shape added. Must start
                 // from int > zero.
 
@@ -321,9 +323,10 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element *pElem) {
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
  *instrument file
  */
-std::string ShapeFactory::parseSphere(Poco::XML::Element *pElem,
-                                      std::map<int, Surface *> &prim,
-                                      int &l_id) {
+std::string
+ShapeFactory::parseSphere(Poco::XML::Element *pElem,
+                          std::map<int, boost::shared_ptr<Surface>> &prim,
+                          int &l_id) {
   Element *pElemCentre = getOptionalShapeElement(pElem, "centre");
   Element *pElemRadius = getShapeElement(pElem, "radius");
 
@@ -332,7 +335,7 @@ std::string ShapeFactory::parseSphere(Poco::XML::Element *pElem,
 
   // create sphere
   const V3D centre = pElemCentre ? parsePosition(pElemCentre) : DEFAULT_CENTRE;
-  Sphere *pSphere = new Sphere;
+  auto pSphere = boost::make_shared<Sphere>();
   pSphere->setCentre(centre);
   pSphere->setRadius(radius);
   prim[l_id] = pSphere;
@@ -354,14 +357,14 @@ std::string ShapeFactory::parseSphere(Poco::XML::Element *pElem,
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
  *instrument file
  */
-std::string ShapeFactory::parseInfinitePlane(Poco::XML::Element *pElem,
-                                             std::map<int, Surface *> &prim,
-                                             int &l_id) {
+std::string ShapeFactory::parseInfinitePlane(
+    Poco::XML::Element *pElem, std::map<int, boost::shared_ptr<Surface>> &prim,
+    int &l_id) {
   Element *pElemPip = getShapeElement(pElem, "point-in-plane");
   Element *pElemNormal = getShapeElement(pElem, "normal-to-plane");
 
   // create infinite-plane
-  Plane *pPlane = new Plane();
+  auto pPlane = boost::make_shared<Plane>();
   pPlane->setPlane(parsePosition(pElemPip), parsePosition(pElemNormal));
   prim[l_id] = pPlane;
 
@@ -382,9 +385,9 @@ std::string ShapeFactory::parseInfinitePlane(Poco::XML::Element *pElem,
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
  *instrument file
  */
-std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element *pElem,
-                                                std::map<int, Surface *> &prim,
-                                                int &l_id) {
+std::string ShapeFactory::parseInfiniteCylinder(
+    Poco::XML::Element *pElem, std::map<int, boost::shared_ptr<Surface>> &prim,
+    int &l_id) {
   Element *pElemCentre = getShapeElement(pElem, "centre");
   Element *pElemAxis = getShapeElement(pElem, "axis");
   Element *pElemRadius = getShapeElement(pElem, "radius");
@@ -393,7 +396,7 @@ std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element *pElem,
   const double radius = getDoubleAttribute(pElemRadius, "val");
 
   // create infinite-cylinder
-  Cylinder *pCylinder = new Cylinder();
+  auto pCylinder = boost::make_shared<Cylinder>();
   pCylinder->setCentre(parsePosition(pElemCentre));
 
   V3D dummy1 = pCylinder->getCentre();
@@ -421,9 +424,10 @@ std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element *pElem,
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
  *instrument file
  */
-std::string ShapeFactory::parseCylinder(Poco::XML::Element *pElem,
-                                        std::map<int, Surface *> &prim,
-                                        int &l_id) {
+std::string
+ShapeFactory::parseCylinder(Poco::XML::Element *pElem,
+                            std::map<int, boost::shared_ptr<Surface>> &prim,
+                            int &l_id) {
   Element *pElemBase = getShapeElement(pElem, "centre-of-bottom-base");
   Element *pElemAxis = getShapeElement(pElem, "axis");
   Element *pElemRadius = getShapeElement(pElem, "radius");
@@ -437,7 +441,7 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element *pElem,
   const double height = getDoubleAttribute(pElemHeight, "val");
 
   // add infinite cylinder
-  Cylinder *pCylinder = new Cylinder();
+  auto pCylinder = boost::make_shared<Cylinder>();
   V3D centreOfBottomBase = parsePosition(pElemBase);
   pCylinder->setCentre(centreOfBottomBase + normVec * (0.5 * height));
   pCylinder->setNorm(normVec);
@@ -449,7 +453,7 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element *pElem,
   l_id++;
 
   // add top plane
-  Plane *pPlaneTop = new Plane();
+  auto pPlaneTop = boost::make_shared<Plane>();
   // to get point in top plane
   V3D pointInPlane = centreOfBottomBase + (normVec * height);
   pPlaneTop->setPlane(pointInPlane, normVec);
@@ -458,7 +462,7 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element *pElem,
   l_id++;
 
   // add bottom plane
-  Plane *pPlaneBottom = new Plane();
+  auto pPlaneBottom = boost::make_shared<Plane>();
   pPlaneBottom->setPlane(centreOfBottomBase, normVec);
   prim[l_id] = pPlaneBottom;
   retAlgebraMatch << "" << l_id << ")";
@@ -478,9 +482,9 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element *pElem,
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
  *instrument file
  */
-std::string ShapeFactory::parseSegmentedCylinder(Poco::XML::Element *pElem,
-                                                 std::map<int, Surface *> &prim,
-                                                 int &l_id) {
+std::string ShapeFactory::parseSegmentedCylinder(
+    Poco::XML::Element *pElem, std::map<int, boost::shared_ptr<Surface>> &prim,
+    int &l_id) {
   Element *pElemBase = getShapeElement(pElem, "centre-of-bottom-base");
   Element *pElemAxis = getShapeElement(pElem, "axis");
   Element *pElemRadius = getShapeElement(pElem, "radius");
@@ -494,7 +498,7 @@ std::string ShapeFactory::parseSegmentedCylinder(Poco::XML::Element *pElem,
   const double height = getDoubleAttribute(pElemHeight, "val");
 
   // add infinite cylinder
-  Cylinder *pCylinder = new Cylinder();
+  auto pCylinder = boost::make_shared<Cylinder>();
   V3D centreOfBottomBase = parsePosition(pElemBase);
   pCylinder->setCentre(centreOfBottomBase + normVec * (0.5 * height));
   pCylinder->setNorm(normVec);
@@ -506,7 +510,7 @@ std::string ShapeFactory::parseSegmentedCylinder(Poco::XML::Element *pElem,
   l_id++;
 
   // add top plane
-  Plane *pPlaneTop = new Plane();
+  auto pPlaneTop = boost::make_shared<Plane>();
   // to get point in top plane
   V3D pointInPlane = centreOfBottomBase + (normVec * height);
   pPlaneTop->setPlane(pointInPlane, normVec);
@@ -515,7 +519,7 @@ std::string ShapeFactory::parseSegmentedCylinder(Poco::XML::Element *pElem,
   l_id++;
 
   // add bottom plane
-  Plane *pPlaneBottom = new Plane();
+  auto pPlaneBottom = boost::make_shared<Plane>();
   pPlaneBottom->setPlane(centreOfBottomBase, normVec);
   prim[l_id] = pPlaneBottom;
   retAlgebraMatch << "" << l_id << ")";
@@ -626,20 +630,20 @@ CuboidCorners ShapeFactory::parseCuboid(Poco::XML::Element *pElem) {
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
  *instrument file
  */
-std::string ShapeFactory::parseCuboid(Poco::XML::Element *pElem,
-                                      std::map<int, Surface *> &prim,
-                                      int &l_id) {
+std::string
+ShapeFactory::parseCuboid(Poco::XML::Element *pElem,
+                          std::map<int, boost::shared_ptr<Surface>> &prim,
+                          int &l_id) {
   auto corners = parseCuboid(pElem);
 
   V3D pointTowardBack = corners.lbb - corners.lfb;
   pointTowardBack.normalize();
 
   // add front plane cutoff
-  Plane *pPlaneFrontCutoff = new Plane();
+  auto pPlaneFrontCutoff = boost::make_shared<Plane>();
   try {
     pPlaneFrontCutoff->setPlane(corners.lfb, pointTowardBack);
   } catch (std::invalid_argument &) {
-    delete pPlaneFrontCutoff;
     throw;
   }
   prim[l_id] = pPlaneFrontCutoff;
@@ -649,11 +653,10 @@ std::string ShapeFactory::parseCuboid(Poco::XML::Element *pElem,
   l_id++;
 
   // add back plane cutoff
-  Plane *pPlaneBackCutoff = new Plane();
+  auto pPlaneBackCutoff = boost::make_shared<Plane>();
   try {
     pPlaneBackCutoff->setPlane(corners.lbb, pointTowardBack);
   } catch (std::invalid_argument &) {
-    delete pPlaneFrontCutoff;
     throw;
   }
   prim[l_id] = pPlaneBackCutoff;
@@ -664,11 +667,10 @@ std::string ShapeFactory::parseCuboid(Poco::XML::Element *pElem,
   pointTowardRight.normalize();
 
   // add left plane cutoff
-  Plane *pPlaneLeftCutoff = new Plane();
+  auto pPlaneLeftCutoff = boost::make_shared<Plane>();
   try {
     pPlaneLeftCutoff->setPlane(corners.lfb, pointTowardRight);
   } catch (std::invalid_argument &) {
-    delete pPlaneFrontCutoff;
     throw;
   }
   prim[l_id] = pPlaneLeftCutoff;
@@ -676,11 +678,10 @@ std::string ShapeFactory::parseCuboid(Poco::XML::Element *pElem,
   l_id++;
 
   // add right plane cutoff
-  Plane *pPlaneRightCutoff = new Plane();
+  auto pPlaneRightCutoff = boost::make_shared<Plane>();
   try {
     pPlaneRightCutoff->setPlane(corners.rfb, pointTowardRight);
   } catch (std::invalid_argument &) {
-    delete pPlaneFrontCutoff;
     throw;
   }
   prim[l_id] = pPlaneRightCutoff;
@@ -691,11 +692,10 @@ std::string ShapeFactory::parseCuboid(Poco::XML::Element *pElem,
   pointTowardTop.normalize();
 
   // add bottom plane cutoff
-  Plane *pPlaneBottomCutoff = new Plane();
+  auto pPlaneBottomCutoff = boost::make_shared<Plane>();
   try {
     pPlaneBottomCutoff->setPlane(corners.lfb, pointTowardTop);
   } catch (std::invalid_argument &) {
-    delete pPlaneFrontCutoff;
     throw;
   }
   prim[l_id] = pPlaneBottomCutoff;
@@ -703,11 +703,10 @@ std::string ShapeFactory::parseCuboid(Poco::XML::Element *pElem,
   l_id++;
 
   // add top plane cutoff
-  Plane *pPlaneTopCutoff = new Plane();
+  auto pPlaneTopCutoff = boost::make_shared<Plane>();
   try {
     pPlaneTopCutoff->setPlane(corners.lft, pointTowardTop);
   } catch (std::invalid_argument &) {
-    delete pPlaneFrontCutoff;
     throw;
   }
   prim[l_id] = pPlaneTopCutoff;
@@ -728,9 +727,10 @@ std::string ShapeFactory::parseCuboid(Poco::XML::Element *pElem,
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
  *instrument file
  */
-std::string ShapeFactory::parseInfiniteCone(Poco::XML::Element *pElem,
-                                            std::map<int, Surface *> &prim,
-                                            int &l_id) {
+std::string
+ShapeFactory::parseInfiniteCone(Poco::XML::Element *pElem,
+                                std::map<int, boost::shared_ptr<Surface>> &prim,
+                                int &l_id) {
   Element *pElemTipPoint = getShapeElement(pElem, "tip-point");
   Element *pElemAxis = getShapeElement(pElem, "axis");
   Element *pElemAngle = getShapeElement(pElem, "angle");
@@ -742,7 +742,7 @@ std::string ShapeFactory::parseInfiniteCone(Poco::XML::Element *pElem,
   const double angle = getDoubleAttribute(pElemAngle, "val");
 
   // add infinite double cone
-  Cone *pCone = new Cone();
+  auto pCone = boost::make_shared<Cone>();
   pCone->setCentre(parsePosition(pElemTipPoint));
   pCone->setNorm(normVec);
   pCone->setAngle(angle);
@@ -753,7 +753,7 @@ std::string ShapeFactory::parseInfiniteCone(Poco::XML::Element *pElem,
   l_id++;
 
   // plane top cut of top part of double cone
-  Plane *pPlaneBottom = new Plane();
+  auto pPlaneBottom = boost::make_shared<Plane>();
   pPlaneBottom->setPlane(parsePosition(pElemTipPoint), normVec);
   prim[l_id] = pPlaneBottom;
   retAlgebraMatch << "-" << l_id << ")";
@@ -773,8 +773,10 @@ std::string ShapeFactory::parseInfiniteCone(Poco::XML::Element *pElem,
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
  *instrument file
  */
-std::string ShapeFactory::parseCone(Poco::XML::Element *pElem,
-                                    std::map<int, Surface *> &prim, int &l_id) {
+std::string
+ShapeFactory::parseCone(Poco::XML::Element *pElem,
+                        std::map<int, boost::shared_ptr<Surface>> &prim,
+                        int &l_id) {
   Element *pElemTipPoint = getShapeElement(pElem, "tip-point");
   Element *pElemAxis = getShapeElement(pElem, "axis");
   Element *pElemAngle = getShapeElement(pElem, "angle");
@@ -788,7 +790,7 @@ std::string ShapeFactory::parseCone(Poco::XML::Element *pElem,
   const double height = getDoubleAttribute(pElemHeight, "val");
 
   // add infinite double cone
-  Cone *pCone = new Cone();
+  auto pCone = boost::make_shared<Cone>();
   pCone->setCentre(parsePosition(pElemTipPoint));
   pCone->setNorm(normVec);
   pCone->setAngle(angle);
@@ -799,7 +801,7 @@ std::string ShapeFactory::parseCone(Poco::XML::Element *pElem,
   l_id++;
 
   // Plane to cut off cone from below
-  Plane *pPlaneTop = new Plane();
+  auto pPlaneTop = boost::make_shared<Plane>();
   V3D pointInPlane = parsePosition(pElemTipPoint);
   pointInPlane -= (normVec * height);
   pPlaneTop->setPlane(pointInPlane, normVec);
@@ -808,7 +810,7 @@ std::string ShapeFactory::parseCone(Poco::XML::Element *pElem,
   l_id++;
 
   // plane top cut of top part of double cone
-  Plane *pPlaneBottom = new Plane();
+  auto pPlaneBottom = boost::make_shared<Plane>();
   pPlaneBottom->setPlane(parsePosition(pElemTipPoint), normVec);
   prim[l_id] = pPlaneBottom;
   retAlgebraMatch << "-" << l_id << ")";
@@ -836,16 +838,17 @@ struct Hexahedron {
  * the 8 points that make up either shape, the process of parsing them can be
  * exactly the same in both cases.
  */
-std::string parseHexahedronFromStruct(Hexahedron &hex,
-                                      std::map<int, Surface *> &prim,
-                                      int &l_id) {
+std::string
+parseHexahedronFromStruct(Hexahedron &hex,
+                          std::map<int, boost::shared_ptr<Surface>> &prim,
+                          int &l_id) {
   V3D pointTowardBack = hex.lbb - hex.lfb;
   pointTowardBack.normalize();
 
   V3D normal;
 
   // add front face
-  Plane *pPlaneFrontCutoff = new Plane();
+  auto pPlaneFrontCutoff = boost::make_shared<Plane>();
   normal = (hex.rfb - hex.lfb).cross_prod(hex.lft - hex.lfb);
 
   // V3D jjj = (normal*(rfb-rbb));
@@ -858,7 +861,7 @@ std::string parseHexahedronFromStruct(Hexahedron &hex,
   l_id++;
 
   // add back face
-  Plane *pPlaneBackCutoff = new Plane();
+  auto pPlaneBackCutoff = boost::make_shared<Plane>();
   normal = (hex.rbb - hex.lbb).cross_prod(hex.lbt - hex.lbb);
   if (normal.scalar_prod(hex.rfb - hex.rbb) < 0)
     normal *= -1.0;
@@ -868,7 +871,7 @@ std::string parseHexahedronFromStruct(Hexahedron &hex,
   l_id++;
 
   // add left face
-  Plane *pPlaneLeftCutoff = new Plane();
+  auto pPlaneLeftCutoff = boost::make_shared<Plane>();
   normal = (hex.lbb - hex.lfb).cross_prod(hex.lft - hex.lfb);
   if (normal.scalar_prod(hex.rfb - hex.lfb) < 0)
     normal *= -1.0;
@@ -878,7 +881,7 @@ std::string parseHexahedronFromStruct(Hexahedron &hex,
   l_id++;
 
   // add right face
-  Plane *pPlaneRightCutoff = new Plane();
+  auto pPlaneRightCutoff = boost::make_shared<Plane>();
   normal = (hex.rbb - hex.rfb).cross_prod(hex.rft - hex.rfb);
   if (normal.scalar_prod(hex.rfb - hex.lfb) < 0)
     normal *= -1.0;
@@ -888,7 +891,7 @@ std::string parseHexahedronFromStruct(Hexahedron &hex,
   l_id++;
 
   // add top face
-  Plane *pPlaneTopCutoff = new Plane();
+  auto pPlaneTopCutoff = boost::make_shared<Plane>();
   normal = (hex.rft - hex.lft).cross_prod(hex.lbt - hex.lft);
   if (normal.scalar_prod(hex.rft - hex.rfb) < 0)
     normal *= -1.0;
@@ -898,7 +901,7 @@ std::string parseHexahedronFromStruct(Hexahedron &hex,
   l_id++;
 
   // add bottom face
-  Plane *pPlaneBottomCutoff = new Plane();
+  auto pPlaneBottomCutoff = boost::make_shared<Plane>();
   normal = (hex.rfb - hex.lfb).cross_prod(hex.lbb - hex.lfb);
   if (normal.scalar_prod(hex.rft - hex.rfb) < 0)
     normal *= -1.0;
@@ -922,9 +925,10 @@ std::string parseHexahedronFromStruct(Hexahedron &hex,
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
  *instrument file
  */
-std::string ShapeFactory::parseHexahedron(Poco::XML::Element *pElem,
-                                          std::map<int, Surface *> &prim,
-                                          int &l_id) {
+std::string
+ShapeFactory::parseHexahedron(Poco::XML::Element *pElem,
+                              std::map<int, boost::shared_ptr<Surface>> &prim,
+                              int &l_id) {
   Element *pElem_lfb = getShapeElement(pElem, "left-front-bottom-point");
   Element *pElem_lft = getShapeElement(pElem, "left-front-top-point");
   Element *pElem_lbb = getShapeElement(pElem, "left-back-bottom-point");
@@ -959,9 +963,10 @@ std::string ShapeFactory::parseHexahedron(Poco::XML::Element *pElem,
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
  *instrument file
  */
-std::string ShapeFactory::parseTaperedGuide(Poco::XML::Element *pElem,
-                                            std::map<int, Surface *> &prim,
-                                            int &l_id) {
+std::string
+ShapeFactory::parseTaperedGuide(Poco::XML::Element *pElem,
+                                std::map<int, boost::shared_ptr<Surface>> &prim,
+                                int &l_id) {
   Element *pElemApertureStart = getShapeElement(pElem, "aperture-start");
   Element *pElemLength = getShapeElement(pElem, "length");
   Element *pElemApertureEnd = getShapeElement(pElem, "aperture-end");
@@ -1036,9 +1041,10 @@ std::string ShapeFactory::parseTaperedGuide(Poco::XML::Element *pElem,
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
  *instrument file
  */
-std::string ShapeFactory::parseTorus(Poco::XML::Element *pElem,
-                                     std::map<int, Surface *> &prim,
-                                     int &l_id) {
+std::string
+ShapeFactory::parseTorus(Poco::XML::Element *pElem,
+                         std::map<int, boost::shared_ptr<Surface>> &prim,
+                         int &l_id) {
   Element *pElemCentre = getShapeElement(pElem, "centre");
   Element *pElemAxis = getShapeElement(pElem, "axis");
   Element *pElemRadiusFromCentre =
@@ -1053,7 +1059,7 @@ std::string ShapeFactory::parseTorus(Poco::XML::Element *pElem,
   const double radiusTube = getDoubleAttribute(pElemRadiusTube, "val");
 
   // add torus
-  Torus *pTorus = new Torus();
+  auto pTorus = boost::make_shared<Torus>();
   pTorus->setCentre(parsePosition(pElemCentre));
   pTorus->setNorm(normVec);
   pTorus->setDistanceFromCentreToTube(radiusCentre);
@@ -1080,7 +1086,8 @@ std::string ShapeFactory::parseTorus(Poco::XML::Element *pElem,
  *instrument file
  */
 std::string ShapeFactory::parseSliceOfCylinderRing(
-    Poco::XML::Element *pElem, std::map<int, Surface *> &prim, int &l_id) {
+    Poco::XML::Element *pElem, std::map<int, boost::shared_ptr<Surface>> &prim,
+    int &l_id) {
   Element *pElemArc = getShapeElement(pElem, "arc");
   Element *pElemInnerRadius = getShapeElement(pElem, "inner-radius");
   Element *pElemOuterRadius = getShapeElement(pElem, "outer-radius");
@@ -1097,7 +1104,7 @@ std::string ShapeFactory::parseSliceOfCylinderRing(
   V3D centrePoint(-middleRadius, 0, 0);
 
   // add inner infinite cylinder
-  Cylinder *pCylinder1 = new Cylinder();
+  auto pCylinder1 = boost::make_shared<Cylinder>();
   pCylinder1->setCentre(centrePoint);
   pCylinder1->setNorm(normVec);
   pCylinder1->setRadius(innerRadius);
@@ -1107,7 +1114,7 @@ std::string ShapeFactory::parseSliceOfCylinderRing(
   l_id++;
 
   // add outer infinite cylinder
-  Cylinder *pCylinder2 = new Cylinder();
+  auto pCylinder2 = boost::make_shared<Cylinder>();
   pCylinder2->setCentre(centrePoint);
   pCylinder2->setNorm(normVec);
   pCylinder2->setRadius(outerRadius);
@@ -1116,7 +1123,7 @@ std::string ShapeFactory::parseSliceOfCylinderRing(
   l_id++;
 
   // add top cutoff plane of infinite cylinder ring
-  Plane *pPlaneTop = new Plane();
+  auto pPlaneTop = boost::make_shared<Plane>();
   pPlaneTop->setPlane(V3D(0, 0, depth), normVec);
   prim[l_id] = pPlaneTop;
   retAlgebraMatch << "-" << l_id << " ";
@@ -1124,7 +1131,7 @@ std::string ShapeFactory::parseSliceOfCylinderRing(
 
   // add bottom cutoff plane (which is assumed to fase the sample)
   // which at this point will result in a cylinder ring
-  Plane *pPlaneBottom = new Plane();
+  auto pPlaneBottom = boost::make_shared<Plane>();
   pPlaneBottom->setPlane(V3D(0, 0, 0), normVec);
   prim[l_id] = pPlaneBottom;
   retAlgebraMatch << "" << l_id << " ";
@@ -1132,7 +1139,7 @@ std::string ShapeFactory::parseSliceOfCylinderRing(
 
   // the two planes that are going to cut a slice of the cylinder ring
 
-  Plane *pPlaneSlice1 = new Plane();
+  auto pPlaneSlice1 = boost::make_shared<Plane>();
   pPlaneSlice1->setPlane(
       V3D(-middleRadius, 0, 0),
       V3D(cos(arc / 2.0 + M_PI / 2.0), sin(arc / 2.0 + M_PI / 2.0), 0));
@@ -1140,7 +1147,7 @@ std::string ShapeFactory::parseSliceOfCylinderRing(
   retAlgebraMatch << "-" << l_id << " ";
   l_id++;
 
-  Plane *pPlaneSlice2 = new Plane();
+  auto pPlaneSlice2 = boost::make_shared<Plane>();
   pPlaneSlice2->setPlane(
       V3D(-middleRadius, 0, 0),
       V3D(cos(-arc / 2.0 + M_PI / 2.0), sin(-arc / 2.0 + M_PI / 2.0), 0));

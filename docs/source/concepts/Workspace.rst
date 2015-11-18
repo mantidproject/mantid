@@ -1,10 +1,14 @@
 .. _Workspace:
 
+=========
 Workspace
 =========
 
-What are they?
---------------
+.. contents::
+  :local:
+
+What are Workspaces?
+--------------------
 
 Workspaces are the nouns of Mantid (while :ref:`algorithms <algorithm>` are
 the verbs). Workspaces hold the data in Mantid.
@@ -54,15 +58,78 @@ Example Workspaces
    workspaces. Algorithms given a group as input run sequentially on
    each member of the group.
 
-Writing you own workspace
--------------------------
+Working with Workspaces in Python
+---------------------------------
 
-This is perfectly possible, but not as easy as creating your own
-algorithm. Please talk to a member of the development team if you wish
-to implement you own workspace.
+Workspace is an abstract description of an specific workspace implementation. It provides access to a few common properties without any knowledge of what the type of the workspace.
+
+.. _Workspace-Accessing_Workspaces:
+
+Accessing Workspaces
+####################
+
+You can access workspaces using the ``mtd["worskpace_name"]`` command for a specific workspace, or using the ``mtd.ImportAll()`` to create python variables for every workspace in Mantid.  More explanation can be found in `Accessing Workspaces From Python <http://www.mantidproject.org/Accessing_Workspaces_From_Python/>`_.
+
+.. testcode:: AccessingWorkspaces
+
+    # This creates a workspace without explicitly capturing the output
+    CreateSampleWorkspace(OutputWorkspace="MyNewWorkspace")
+
+    # You can get a python variable pointing to the workspace with the command
+    myWS = mtd["MyNewWorkspace"]
+    print "The variable myWS now points to the workspace called ", myWS
+
+    # You can also ask Mantid to create matching python variables for all of it's workspaces
+    mtd.importAll()
+    print "MyNewWorkspace has been created that also points to the workspace called ", MyNewWorkspace 
+
+    # You can assign a python variable when calling an algorithm and the workspace will match the variable name
+    myOtherWS = CreateSampleWorkspace()
+    print "myOtherWS now points to the workspace called ", myOtherWS
+
+Output:
+
+.. testoutput:: AccessingWorkspaces
+    :options: +NORMALIZE_WHITESPACE
+
+    The variable myWS now points to the workspace called MyNewWorkspace
+    MyNewWorkspace has been created that also points to the workspace called MyNewWorkspace
+    myOtherWS now points to the workspace called myOtherWS
+
+Workspace Properties
+####################
+
+You can look at the :ref:`Workspace API reference <mantid.api.Workspace>` for a full list of properties, but here are some of the key ones.
+
+.. testcode:: WorkspaceProperties
+
+    myWS = CreateSampleWorkspace()
+    print "name = " + myWS.getName()
+
+    myWS.setTitle("This is my Title")
+    print "getTitle = " + myWS.getTitle()
+
+    myWS.setComment("This is my comment")
+    print "comment = " + myWS.getComment()
+
+    print "id = " + myWS.id()
+
+    print "getMemorySize = " + str(myWS.getMemorySize())
+
+Output:
+
+.. testoutput:: WorkspaceProperties
+    :options: +ELLIPSIS,+NORMALIZE_WHITESPACE
+
+    name = myWS
+    getTitle = This is my Title
+    comment = This is my comment
+    id = Workspace2D
+    getMemorySize = ...
+
 
 Workspace Types
----------------
+^^^^^^^^^^^^^^^
 
 The workspace type id identifies the type (underlying class) of a
 Workspace object. These IDs are listed here for ease of reference, so
@@ -101,5 +168,47 @@ createWorkspace if you are writing C++ or Python algorithms.
 +-------------------------------+-------------------------------------------+
 
 
+Workspace History
+#################
+
+Workspaces keep a track of all of the algorithms used on them, so you can ask a workspace to tell you about it's history.  The algorithm :ref:`GeneratePythonScript <algm-GeneratePythonScript>` uses this information to create a python script able to re-run the workspace history.
+
+.. testcode:: WorkspaceHistory
+
+    # Run a few algorithms
+    myWS = CreateSampleWorkspace()
+    myWS = ConvertUnits(myWS,Target="Wavelength")
+    myWS = Rebin(myWS,Params=200)
+
+    # You can access the history using getHistory()
+    history = myWS.getHistory()
+    for algHistory in history.getAlgorithmHistories():
+        print algHistory.name()
+        for property in algHistory.getProperties():
+            if not property.isDefault():
+                print "\t" + property.name() + " = " + property.value()
+
+Output:
+
+.. testoutput:: WorkspaceHistory
+    :options: +ELLIPSIS,+NORMALIZE_WHITESPACE
+
+    CreateSampleWorkspace
+        OutputWorkspace = myWS
+    ConvertUnits
+        InputWorkspace = myWS
+        OutputWorkspace = myWS
+        Target = Wavelength
+    Rebin
+        InputWorkspace = myWS
+        OutputWorkspace = myWS
+        Params = 200
+
+Writing you own workspace
+-------------------------
+
+This is perfectly possible, but not as easy as creating your own
+algorithm. Please talk to a member of the development team if you wish
+to implement you own workspace.
 
 .. categories:: Concepts

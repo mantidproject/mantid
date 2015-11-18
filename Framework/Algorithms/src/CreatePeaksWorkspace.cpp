@@ -52,11 +52,14 @@ void CreatePeaksWorkspace::exec() {
   int NumberOfPeaks = getProperty("NumberOfPeaks");
 
   if (instWS) {
+    Progress progress(this, 0, 1, NumberOfPeaks);
+
     out->setInstrument(instWS->getInstrument());
     // Create some default peaks
     for (int i = 0; i < NumberOfPeaks; i++) {
       out->addPeak(Peak(out->getInstrument(),
                         out->getInstrument()->getDetectorIDs(true)[0], 1.0));
+      progress.report();
     }
   }
 }

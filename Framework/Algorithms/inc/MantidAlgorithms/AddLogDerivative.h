@@ -54,7 +54,8 @@ public:
   virtual const std::string category() const { return "DataHandling\\Logs"; }
 
   static Mantid::Kernel::TimeSeriesProperty<double> *
-  makeDerivative(Mantid::Kernel::TimeSeriesProperty<double> *input,
+  makeDerivative(API::Progress &progress,
+                 Mantid::Kernel::TimeSeriesProperty<double> *input,
                  const std::string &name, int numDerivatives);
 
 private:

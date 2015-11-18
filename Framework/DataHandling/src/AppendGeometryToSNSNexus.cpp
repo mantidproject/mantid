@@ -360,7 +360,7 @@ bool AppendGeometryToSNSNexus::runLoadInstrument(
   try {
     loadInst->setPropertyValue("Filename", idf_filename);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap", false);
+    loadInst->setProperty("RewriteSpectraMap", OptionalBool(false));
     loadInst->execute();
   } catch (std::invalid_argument &e) {
     alg->getLogger().information(

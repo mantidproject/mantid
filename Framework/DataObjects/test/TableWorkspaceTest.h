@@ -11,6 +11,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ColumnFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "PropertyManagerHelper.h"
 
 #include <limits>
 
@@ -645,6 +646,70 @@ public:
     TS_ASSERT_EQUALS(data1[0], 3);
     TS_ASSERT_EQUALS(data2[0], "hello");
     TS_ASSERT_EQUALS(data3[0], 5);
+  }
+
+  /**
+  * Test declaring an input TableWorkspace and retrieving it as const_sptr
+  * or sptr
+  */
+  void testGetProperty_const_sptr() {
+    const std::string wsName = "InputWorkspace";
+    TableWorkspace_sptr wsInput(new TableWorkspace());
+    PropertyManagerHelper manager;
+    manager.declareProperty(wsName, wsInput, Mantid::Kernel::Direction::Input);
+
+    // Check property can be obtained as const_sptr or sptr
+    TableWorkspace_const_sptr wsConst;
+    TableWorkspace_sptr wsNonConst;
+    TS_ASSERT_THROWS_NOTHING(
+        wsConst = manager.getValue<TableWorkspace_const_sptr>(wsName));
+    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsNonConst =
+                                 manager.getValue<TableWorkspace_sptr>(wsName));
+    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT_EQUALS(wsConst, wsNonConst);
+
+    // Check TypedValue can be cast to const_sptr or to sptr
+    PropertyManagerHelper::TypedValue val(manager, wsName);
+    TableWorkspace_const_sptr wsCastConst;
+    TableWorkspace_sptr wsCastNonConst;
+    TS_ASSERT_THROWS_NOTHING(wsCastConst = (TableWorkspace_const_sptr)val);
+    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (TableWorkspace_sptr)val);
+    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
+  }
+
+  /**
+  * Test declaring an input ITableWorkspace and retrieving it as const_sptr
+  * or sptr
+  */
+  void testGetProperty_ITableWS_const_sptr() {
+    const std::string wsName = "InputWorkspace";
+    ITableWorkspace_sptr wsInput(new TableWorkspace());
+    PropertyManagerHelper manager;
+    manager.declareProperty(wsName, wsInput, Mantid::Kernel::Direction::Input);
+
+    // Check property can be obtained as const_sptr or sptr
+    ITableWorkspace_const_sptr wsConst;
+    ITableWorkspace_sptr wsNonConst;
+    TS_ASSERT_THROWS_NOTHING(
+        wsConst = manager.getValue<ITableWorkspace_const_sptr>(wsName));
+    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(
+        wsNonConst = manager.getValue<ITableWorkspace_sptr>(wsName));
+    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT_EQUALS(wsConst, wsNonConst);
+
+    // Check TypedValue can be cast to const_sptr or to sptr
+    PropertyManagerHelper::TypedValue val(manager, wsName);
+    ITableWorkspace_const_sptr wsCastConst;
+    ITableWorkspace_sptr wsCastNonConst;
+    TS_ASSERT_THROWS_NOTHING(wsCastConst = (ITableWorkspace_const_sptr)val);
+    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (ITableWorkspace_sptr)val);
+    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };
 

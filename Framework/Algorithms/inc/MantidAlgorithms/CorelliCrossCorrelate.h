@@ -38,7 +38,9 @@ public:
 
   virtual const std::string name() const { return "CorelliCrossCorrelate"; };
   virtual int version() const { return 1; };
-  virtual const std::string category() const { return "Diffraction;Events"; };
+  virtual const std::string category() const {
+    return "Diffraction\\Calibration;Events";
+  };
   virtual const std::string summary() const {
     return "Cross-correlation calculation for the elastic signal from Corelli.";
   };

@@ -67,18 +67,11 @@ private:
 
   /// Process a tube
   bool performBleedTest(const std::vector<int> &tubeIndices,
-                        API::MatrixWorkspace_const_sptr inputWS);
+                        API::MatrixWorkspace_const_sptr inputWS, double maxRate,
+                        int numIgnoredPixels);
   /// Mask a tube with the given workspace indices
   void maskTube(const std::vector<int> &tubeIndices,
                 API::MatrixWorkspace_sptr workspace);
-
-  /// Maximum allowed rate
-  double m_maxRate;
-  /// Number of ignored pixels
-  int m_numIgnoredPixels;
-  /// Is the input a distribution or raw counts. If true then bin width division
-  /// is necessary when calculating the rate
-  bool m_isRawCounts;
 };
 
 } // namespace Algorithms

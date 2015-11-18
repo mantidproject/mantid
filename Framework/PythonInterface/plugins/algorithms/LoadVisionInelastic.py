@@ -13,7 +13,7 @@ class LoadVisionInelastic(PythonAlgorithm):
     __backward = "bank8,bank9,bank10,bank11,bank12,bank13,bank14"
 
     def category(self):
-        return "DataHandling;PythonAlgorithms"
+        return "DataHandling\\Nexus"
 
     def name(self):
         return "LoadVisionInelastic"

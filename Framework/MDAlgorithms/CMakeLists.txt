@@ -3,6 +3,7 @@ set ( SRC_FILES
 	# Old TMP convertToMD code prepared for deprecation:
 	# src/CreateMDFitWorkspace.cpp
 	#end TMP
+    src/AccumulateMD.cpp
 	src/AndMD.cpp
 	src/BinMD.cpp
 	src/BinaryOperationMD.cpp
@@ -129,6 +130,7 @@ set ( SRC_FILES
 
 set ( INC_FILES
 	# inc/MantidMDAlgorithms/CreateMDFitWorkspace.h
+    inc/MantidMDAlgorithms/AccumulateMD.h
 	inc/MantidMDAlgorithms/AndMD.h
 	inc/MantidMDAlgorithms/BinMD.h
 	inc/MantidMDAlgorithms/BinaryOperationMD.h
@@ -254,6 +256,7 @@ set ( TEST_FILES
 	#
 	# these tests are as they test verify different parts of the CPR algorithms
 	#CreateMDFitWorkspaceTest.h
+    AccumulateMDTest.h
 	AndMDTest.h
 	BooleanBinaryOperationMDTest.h
 	BoxControllerSettingsAlgorithmTest.h

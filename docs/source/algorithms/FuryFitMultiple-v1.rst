@@ -23,13 +23,13 @@ Usage
 **Example - Running FuryFitMultiple on an reduced workspace.**
 
 .. code-block:: python
-
+    
     #create a dummy workspace
     function = "name=ExpDecay,Height=1,Lifetime=0.035"
     ws = CreateSampleWorkspace("Histogram", Function="User Defined", UserDefinedFunction=function, XMin=0, XMax=0.5, BinWidth=0.01, XUnit="Time", NumBanks=1)
 
     #load instrument defintion and parameters
-    LoadInstrument(ws, InstrumentName='IRIS')
+    LoadInstrument(ws, InstrumentName='IRIS', RewriteSpectraMap=True)
     param_file = config['instrumentDefinition.directory'] + 'IRIS_graphite_002_Parameters.xml'
     LoadParameterFile(ws, param_file)
 

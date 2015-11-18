@@ -41,7 +41,9 @@ const std::string LoadILLIndirect::name() const { return "LoadILLIndirect"; }
 int LoadILLIndirect::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadILLIndirect::category() const { return "DataHandling"; }
+const std::string LoadILLIndirect::category() const {
+  return "DataHandling\\Nexus";
+}
 
 //----------------------------------------------------------------------------------------------
 
@@ -340,6 +342,8 @@ void LoadILLIndirect::runLoadInstrument() {
   try {
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+    loadInst->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
 
   } catch (...) {

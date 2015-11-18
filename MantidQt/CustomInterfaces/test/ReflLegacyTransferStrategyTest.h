@@ -7,8 +7,8 @@
 #include <vector>
 #include <gmock/gmock.h>
 
-#include "MantidQtCustomInterfaces/ReflLegacyTransferStrategy.h"
-#include "MantidQtCustomInterfaces/ReflTableSchema.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
 #include "ReflMainViewMockObjects.h"
 
 using namespace MantidQt::CustomInterfaces;

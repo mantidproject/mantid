@@ -69,7 +69,7 @@ public:
   virtual ~Object();
 
   /// Return the top rule
-  const Rule *topRule() const { return TopRule; }
+  const Rule *topRule() const { return TopRule.get(); }
 
   void setName(const int nx) { ObjName = nx; } ///< Set Name
   int getName() const { return ObjName; }      ///< Get Name
@@ -85,11 +85,12 @@ public:
                           std::string &Ln); ///< Process a complementary object
   int hasComplement() const;
 
-  int populate(const std::map<int, Surface *> &);
+  int populate(const std::map<int, boost::shared_ptr<Surface>> &);
   int createSurfaceList(const int outFlag = 0); ///< create Surface list
   int addSurfString(const std::string &);       ///< Not implemented
   int removeSurface(const int SurfN);
-  int substituteSurf(const int SurfN, const int NsurfN, Surface *SPtr);
+  int substituteSurf(const int SurfN, const int NsurfN,
+                     const boost::shared_ptr<Surface> &SPtr);
   void makeComplement();
   void convertComplement(const std::map<int, Object> &);
 
@@ -165,14 +166,23 @@ public:
   std::string getShapeXML() const;
 
 private:
-  int ObjName;   ///< Creation number
-  Rule *TopRule; ///< Top rule [ Geometric scope of object]
+  int ObjName;                   ///< Creation number
+  std::unique_ptr<Rule> TopRule; ///< Top rule [ Geometric scope of object]
 
-  int procPair(std::string &Ln, std::map<int, Rule *> &Rlist,
+  int procPair(std::string &Ln, std::map<int, std::unique_ptr<Rule>> &Rlist,
                int &compUnit) const;
-  CompGrp *procComp(Rule *) const;
+  std::unique_ptr<CompGrp> procComp(std::unique_ptr<Rule>) const;
   int checkSurfaceValid(const Kernel::V3D &, const Kernel::V3D &) const;
   BoundingBox m_boundingBox; ///< Object's bounding box
+
+  /// Calculate bounding box using Rule system
+  void calcBoundingBoxByRule();
+
+  /// Calculate bounding box using object's vertices
+  void calcBoundingBoxByVertices();
+
+  /// Calculate bounding box using object's geometric data
+  void calcBoundingBoxByGeometry();
 
   // -- DEPRECATED --
   mutable double AABBxMax,  ///< xmax of Axis aligned bounding box cache

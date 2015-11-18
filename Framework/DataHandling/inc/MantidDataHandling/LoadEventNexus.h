@@ -378,7 +378,8 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
     loadInst->setPropertyValue("InstrumentName", instrument);
     loadInst->setProperty<Mantid::API::MatrixWorkspace_sptr>("Workspace",
                                                              localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap", false);
+    loadInst->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(false));
     loadInst->execute();
 
     // Populate the instrument parameters in this workspace - this works around

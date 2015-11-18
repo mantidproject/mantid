@@ -145,6 +145,7 @@ Raw data correction files
 =========================
 
  1. **Detector efficiency**: 
+ 
   - File name: *HB2A_exp0IJK__GE_abc_XY_vcorr.txt* where
   
     - IJK is the experiment number

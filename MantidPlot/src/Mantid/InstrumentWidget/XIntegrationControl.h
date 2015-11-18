@@ -54,12 +54,13 @@ public:
   void setTotalRange(double minimum,double maximum);
   void setUnits(const QString& units);
   void setRange(double minimum,double maximum);
-  void setWholeRange();
   double getMinimum()const;
   double getMaximum()const;
   double getWidth()const;
 signals:
   void changed(double,double);
+public slots:
+  void setWholeRange();
 private slots:
   void sliderChanged(double,double);
   void sliderRunning(double,double);
@@ -72,6 +73,7 @@ private:
   QLineEdit* m_minText;
   QLineEdit* m_maxText;
   QLabel* m_units;
+  QPushButton* m_setWholeRange;
   double m_totalMinimum;
   double m_totalMaximum;
   double m_minimum;

@@ -33,7 +33,9 @@ const std::string FindUBUsingMinMaxD::name() const {
 
 int FindUBUsingMinMaxD::version() const { return 1; }
 
-const std::string FindUBUsingMinMaxD::category() const { return "Crystal"; }
+const std::string FindUBUsingMinMaxD::category() const {
+  return "Crystal\\UBMatrix";
+}
 
 //--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

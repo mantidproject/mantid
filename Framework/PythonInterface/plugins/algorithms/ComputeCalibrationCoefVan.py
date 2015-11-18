@@ -22,7 +22,7 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
     def category(self):
         """ Return category
         """
-        return "PythonAlgorithms;CorrectionFunctions\\EfficiencyCorrections"
+        return "CorrectionFunctions\\EfficiencyCorrections"
 
     def name(self):
         """ Return summary

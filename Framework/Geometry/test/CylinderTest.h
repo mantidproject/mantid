@@ -35,29 +35,12 @@ public:
     TS_ASSERT_EQUALS(extractString(A), "-1  c/x 0.5 0.5 1\n");
   }
 
-  void testCopyConstructor() {
-    Cylinder A;
-    A.setSurface("c/x 0.5 0.5 1.0");
-    TS_ASSERT_EQUALS(extractString(A), "-1  c/x 0.5 0.5 1\n");
-    Cylinder B(A);
-    TS_ASSERT_EQUALS(extractString(B), extractString(A));
-  }
-
   void testClone() {
     Cylinder A;
     A.setSurface("c/x 0.5 0.5 1.0");
     TS_ASSERT_EQUALS(extractString(A), "-1  c/x 0.5 0.5 1\n");
-    Cylinder *B = A.clone();
+    auto B = A.clone();
     TS_ASSERT_EQUALS(extractString(*B), extractString(A));
-    delete B;
-  }
-
-  void testAssignment() {
-    Cylinder A, B;
-    A.setSurface("c/x 0.5 0.5 1.0");
-    TS_ASSERT_DIFFERS(extractString(B), extractString(A));
-    B = A;
-    TS_ASSERT_EQUALS(extractString(B), extractString(A));
   }
 
   /// is a point inside outside or on the side!

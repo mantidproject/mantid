@@ -18,10 +18,10 @@
 
  <!--Advanced file copying 
     Variables have to be either strings or strings with variables, described above
-  -->    
+  -->
   <file_to_copy file_name="Test_reduction_file.py" copy_as="Test_reduction_file_$cycleID$.py">
     <replace var  ="Test_reduction_file" by_var="$instrument$Test_reduction_file_$cycleID$"/>
-    <replace var  ="AAAA" by_var="BBB"/>  
+    <replace var  ="AAAA" by_var="BBB"/>
   </file_to_copy>
 
 </user_files_description>

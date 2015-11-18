@@ -20,7 +20,11 @@ class LoadEmptyVesuvio(PythonAlgorithm):
 
     def summary(self):
         return "Loads an empty workspace containing the Vesuvio instrument at ISIS."
-
+#----------------------------------------------------------------------------------------
+    def category(self):
+        """ Defines the category the algorithm will be put in the algorithm browser
+        """
+        return 'DataHandling\\Raw'
 #----------------------------------------------------------------------------------------
 
     def PyInit(self):

@@ -93,6 +93,11 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
+    def category(self):
+        """ Defines the category the algorithm will be put in the algorithm browser
+        """
+        return 'DataHandling\\Raw'
+#----------------------------------------------------------------------------------------
     def PyInit(self):
         self.declareProperty(RUN_PROP, "", StringMandatoryValidator(),
                              doc="The run numbers that should be loaded. E.g."

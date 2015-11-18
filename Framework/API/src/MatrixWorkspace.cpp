@@ -2049,8 +2049,9 @@ IPropertyManager::getValue<Mantid::API::MatrixWorkspace_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected MatrixWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<MatrixWorkspace>.";
     throw std::runtime_error(message);
   }
 }
@@ -2065,8 +2066,9 @@ IPropertyManager::getValue<Mantid::API::MatrixWorkspace_const_sptr>(
   if (prop) {
     return prop->operator()();
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected const MatrixWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<MatrixWorkspace>.";
     throw std::runtime_error(message);
   }
 }

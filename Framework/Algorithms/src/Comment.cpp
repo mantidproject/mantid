@@ -31,7 +31,7 @@ const std::string Comment::name() const { return "Comment"; }
 int Comment::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string Comment::category() const { return "DataHandling"; }
+const std::string Comment::category() const { return "Utility\\Workspaces"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string Comment::summary() const {

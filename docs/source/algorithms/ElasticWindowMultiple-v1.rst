@@ -28,7 +28,7 @@ Usage
 -----
 
 .. testcode:: exElasticWindowMultiple
-
+    
     # This test needs the facility to be set to ISIS to load the IRIS instrument
     facility = config['default.facility']
     config['default.facility'] = 'ISIS'
@@ -57,7 +57,7 @@ Usage
                Params=[-0.2,0.004,0.2])
 
         LoadInstrument(Workspace=ws_name,
-                       InstrumentName='IRIS')
+                       InstrumentName='IRIS', RewriteSpectraMap=True)
 
         SetInstrumentParameter(Workspace=ws_name,
                                ParameterName='Efixed',

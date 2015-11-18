@@ -3,10 +3,10 @@
 
 #include <gmock/gmock.h>
 #include "MantidQtCustomInterfaces/ProgressableView.h"
-#include "MantidQtCustomInterfaces/ReflMainView.h"
-#include "MantidQtCustomInterfaces/ReflSearchModel.h"
-#include "MantidQtCustomInterfaces/ReflTableSchema.h"
-#include "MantidQtCustomInterfaces/QReflTableModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
+#include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"

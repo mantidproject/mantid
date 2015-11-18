@@ -16,6 +16,8 @@
 
 #include <Poco/ActiveResult.h>
 
+#include <json/json.h>
+
 #include <cstdarg>
 
 #ifdef _WIN32
@@ -307,7 +309,8 @@ FrameworkManagerImpl::createAlgorithm(const std::string &algName,
   IAlgorithm *alg = AlgorithmManager::Instance()
                         .create(algName, version)
                         .get(); // createAlgorithm(algName);
-  alg->setProperties(propertiesArray);
+  alg->setPropertiesWithSimpleString(propertiesArray);
+
   return alg;
 }
 
