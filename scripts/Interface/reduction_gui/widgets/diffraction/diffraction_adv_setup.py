@@ -134,6 +134,10 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.preserveevents_checkbox.setChecked(state.preserveevents)
         self._content.extension_combo.setCurrentIndex(self._content.extension_combo.findText(state.extension))
         self._content.outputfileprefix_edit.setText(state.outputfileprefix)
+        
+        # range of wavelength
+        self._content.cropwavelengthmin_edit.setText(str(state.cropwavelengthmin))
+        self._content.lineEdit_croppedWavelengthMax.setText(str(state.cropwavelengthmax))
 
         return
 
@@ -147,8 +151,8 @@ class AdvancedSetupWidget(BaseWidget):
         s.pushdatapositive = str(self._content.pushdatapos_combo.currentText())
         s.unwrapref = self._content.unwrap_edit.text()
         s.lowresref = self._content.lowres_edit.text()
-        s.cropwavelengthmin = self._content.cropwavelengthmin_edit.text()
-        s.crop_wavelength_max = str(self._content.lineEdit_croppedWavelengthMax.text())
+        s.cropwavelengthmin = str(self._content.cropwavelengthmin_edit.text())
+        s.cropwavelengthmax = str(self._content.lineEdit_croppedWavelengthMax.text())
         s.removepropmppulsewidth = self._content.removepromptwidth_edit.text()
         s.maxchunksize = self._content.maxchunksize_edit.text()
         s.scaledata = self._content.scaledata_edit.text()
