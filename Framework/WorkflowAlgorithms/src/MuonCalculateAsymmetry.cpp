@@ -388,21 +388,72 @@ MatrixWorkspace_sptr MuonCalculateAsymmetry::calculatePairAsymmetry(
 /**
  * Performs validation of the input parameters:
  * - input WorkspaceGroup must have at least one workspace in it
- * - input PeriodOperation must have the correct format
- * - period numbers in input PeriodOperation must all be valid
+ * - input period sets must contain valid period numbers (0 < n <= numPeriods)
  * @returns a map of errors to show the user
+ * @see Algorithm::validateInputs
  */
 std::map<std::string, std::string> MuonCalculateAsymmetry::validateInputs() {
   std::map<std::string, std::string> errors;
 
   // input group must not be empty
   WorkspaceGroup_const_sptr inputWSGroup = getProperty("InputWorkspace");
-  if (inputWSGroup->getNumberOfEntries() < 1) {
+  int numPeriods = inputWSGroup->getNumberOfEntries();
+  if (numPeriods < 1) {
     errors["InputWorkspace"] =
         "Must supply at least one workspace with period data!";
   }
 
+  // Check SummedPeriodSet for invalid period numbers
+  std::vector<int> summedPeriods = getProperty("SummedPeriodSet");
+  std::vector<int> invalidPeriods = findInvalidPeriods(summedPeriods);
+  if (!invalidPeriods.empty()) {
+    errors["SummedPeriodSet"] = buildErrorString(invalidPeriods);
+  }
+
+  // If SubtractedPeriodSet is not empty, check that too
+  std::vector<int> subtractedPeriods = getProperty("SubtractedPeriodSet");
+  if (!subtractedPeriods.empty()) {
+    invalidPeriods = findInvalidPeriods(subtractedPeriods);
+    if (!invalidPeriods.empty()) {
+      errors["SubtractedPeriodSet"] = buildErrorString(invalidPeriods);
+    }
+  }
+
   return errors;
+}
+
+/**
+ * Checks the supplied list of periods for any invalid values.
+ * Invalid means 0, negative or greater than total number of periods.
+ * @param periodSet :: vector of period numbers to check
+ * @returns a vector of invalid period numbers
+ */
+std::vector<int> MuonCalculateAsymmetry::findInvalidPeriods(
+    const std::vector<int> &periodSet) const {
+  WorkspaceGroup_const_sptr inputWSGroup = getProperty("InputWorkspace");
+  int numPeriods = inputWSGroup->getNumberOfEntries();
+  std::vector<int> invalidPeriods;
+  for (auto it = periodSet.begin(); it != periodSet.end(); it++) {
+    if ((*it < 1) || (*it > numPeriods)) {
+      invalidPeriods.push_back(*it);
+    }
+  }
+  return invalidPeriods;
+}
+
+/**
+ * Uses the supplied list of invalid period numbers to build an error string
+ * @param invalidPeriods :: vector of invalid period numbers
+ * @returns an error message
+ */
+std::string MuonCalculateAsymmetry::buildErrorString(
+    const std::vector<int> &invalidPeriods) const {
+  std::stringstream message;
+  message << "Invalid periods specified: ";
+  for (auto it = invalidPeriods.begin(); it != invalidPeriods.end(); it++) {
+    message << *it << ", ";
+  }
+  return message.str();
 }
 
 } // namespace WorkflowAlgorithms

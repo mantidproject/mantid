@@ -63,8 +63,12 @@ private:
   calculatePairAsymmetry(const API::WorkspaceGroup_const_sptr &inputWSGroup,
                          int firstPairIndex, int secondPairIndex, double alpha,
                          std::string op);
-  /// Checks if the supplied operation string is valid or not
+  /// Checks if the supplied properties are valid or not
   std::map<std::string, std::string> validateInputs() override;
+  /// Checks if periods in set are valid
+  std::vector<int> findInvalidPeriods(const std::vector<int> &periodSet) const;
+  /// Builds error string for invalid period numbers
+  std::string buildErrorString(const std::vector<int> &invalidPeriods) const;
 };
 
 } // namespace WorkflowAlgorithms
