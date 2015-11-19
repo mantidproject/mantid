@@ -463,6 +463,7 @@ void ConvFit::loadSettings(const QSettings &settings) {
 * @param wsName Name of new workspace loaded
 */
 void ConvFit::newDataLoaded(const QString wsName) {
+  std::string name = wsName.toStdString();
   m_cfInputWSName = wsName;
   m_cfInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       m_cfInputWSName.toStdString());
@@ -1523,8 +1524,9 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
 * @param functionName Name of new fit function
 */
 void ConvFit::fitFunctionSelected(const QString &functionName) {
-  double oneLValues[3] = {0.0, 0.0, 0.0};
+  double oneLValues[3] = {0.0, 0.0, 0.0}; //previous values for one lorentzian fit
   bool previouslyOneL = false;
+  // If the previosu fit was One Lorentzian and the new fit is Two Lorentzian preserve the values of One Lorentzian Fit
   if (m_previousFit.compare("One Lorentzian") == 0 &&
       m_uiForm.cbFitType->currentText().compare("Two Lorentzians") == 0) {
     previouslyOneL = true;
@@ -1572,10 +1574,11 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         m_properties[name] = m_dblManager->addProperty(*it);
 
         if (QString(*it).compare("FWHM") == 0) {
+		  double resolution = getInstrumentResolution(m_cfInputWS->getName());
           if (previouslyOneL && count < 3) {
             m_dblManager->setValue(m_properties[name], oneLValues[2]);
           } else {
-            m_dblManager->setValue(m_properties[name], 0.0175);
+            m_dblManager->setValue(m_properties[name], resolution);
           }
         } else if (QString(*it).compare("Amplitude") == 0) {
           if (previouslyOneL && count < 3) {
@@ -1612,7 +1615,8 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         m_properties[name] = m_dblManager->addProperty(*it);
 
         if (QString(*it).compare("FWHM") == 0) {
-          m_dblManager->setValue(m_properties[name], 0.0175);
+	      double resolution = getInstrumentResolution(m_cfInputWS->getName());
+          m_dblManager->setValue(m_properties[name], resolution);
         } else if (QString(*it).compare("Amplitude") == 0 ||
                    QString(*it).compare("Intensity") == 0) {
           m_dblManager->setValue(m_properties[name], 1.0);
