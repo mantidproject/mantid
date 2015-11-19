@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {

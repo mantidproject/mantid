@@ -1,5 +1,6 @@
 #include "MantidWorkflowAlgorithms/MuonCalculateAsymmetry.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -51,9 +52,17 @@ void MuonCalculateAsymmetry::init() {
                   "Workspace group containing period data. If it only contains "
                   "one period, then only one is used.");
 
-  declareProperty("PeriodOperation", "+",
-                  "If several periods specified, what operation to apply to "
-                  "workspaces to get a final one.");
+  declareProperty(
+      new ArrayProperty<int>(
+          "SummedPeriodSet", "1",
+          boost::make_shared<MandatoryValidator<std::vector<int>>>(),
+          Direction::Input),
+      "Comma-separated list of periods to be summed");
+
+  declareProperty(
+      new ArrayProperty<int>("SubtractedPeriodSet", Direction::Input),
+      "Comma-separated list of periods to be subtracted from the "
+      "SummedPeriodSet");
 
   std::vector<std::string> allowedTypes;
   allowedTypes.push_back("PairAsymmetry");
