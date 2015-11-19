@@ -46,9 +46,7 @@ namespace WorkflowAlgorithms {
 class DLLExport HFIRLoad : public API::Algorithm {
 public:
   /// Constructor
-  HFIRLoad() : API::Algorithm(), m_center_x(0), m_center_y(0) {
-    m_output_message = "";
-  }
+  HFIRLoad() : API::Algorithm() {}
   /// Virtual destructor
   virtual ~HFIRLoad() {}
   /// Algorithm's name
@@ -67,12 +65,8 @@ private:
   void init();
   /// Execution code
   void exec();
-  void moveToBeamCenter();
-
-  double m_center_x;
-  double m_center_y;
-  std::string m_output_message;
-  API::MatrixWorkspace_sptr dataWS;
+  void moveToBeamCenter(API::MatrixWorkspace_sptr &dataWS, double &center_x,
+                        double &center_y);
 };
 
 } // namespace Algorithms

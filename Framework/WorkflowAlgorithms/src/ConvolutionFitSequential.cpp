@@ -301,7 +301,7 @@ void ConvolutionFitSequential::exec() {
 
   // Create Sample Log
   auto sampleLogStrings = std::map<std::string, std::string>();
-  sampleLogStrings["sam_workspace"] = inputWs->getName();
+  sampleLogStrings["sample_filename"] = inputWs->getName();
   sampleLogStrings["convolve_members"] = (convolve == 1) ? "true" : "false";
   sampleLogStrings["fit_program"] = "ConvFit";
   sampleLogStrings["background"] = backType;

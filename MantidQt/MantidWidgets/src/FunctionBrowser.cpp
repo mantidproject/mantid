@@ -1915,6 +1915,7 @@ void FunctionBrowser::attributeChanged(QtProperty* prop)
   // delete and recreate all function's properties (attributes, parameters, etc)
   setFunction(funProp, fun);
   updateFunctionIndices();
+  emit functionStructureChanged();
 }
 
 /**

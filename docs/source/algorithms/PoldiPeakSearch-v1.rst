@@ -60,10 +60,10 @@ Usage
 A typical peak search procedure would be performed on correlation data, so this analysis is performed first, followed by a peak search with default parameters.
 
 .. testcode:: ExSiliconPeakSearch
-
+    
     # Load data file and instrument, perform correlation analysis
     raw_6904 = LoadSINQFile(Filename = "poldi2013n006904.hdf", Instrument = "POLDI")
-    LoadInstrument(raw_6904, InstrumentName = "POLDI")
+    LoadInstrument(raw_6904, RewriteSpectraMap=True, InstrumentName = "POLDI")
     correlated_6904 = PoldiAutoCorrelation(raw_6904)
     
     # Run peak search algorithm, store peaks in TableWorkspace

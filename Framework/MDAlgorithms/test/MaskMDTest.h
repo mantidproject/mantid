@@ -5,6 +5,7 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
+#include <stdexcept>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -59,6 +60,62 @@ public:
   static MaskMDTest *createSuite() { return new MaskMDTest(); }
   static void destroySuite(MaskMDTest *suite) { delete suite; }
 
+  void test_split_by_commas() {
+    std::string test_string = "a, b,c ,d,e ";
+    std::vector<std::string> split_test_string = splitByCommas(test_string);
+
+    // String should be split on commas and whitespace trimmed off to result in:
+    TS_ASSERT_EQUALS(split_test_string[0], "a");
+    TS_ASSERT_EQUALS(split_test_string[1], "b");
+    TS_ASSERT_EQUALS(split_test_string[2], "c");
+    TS_ASSERT_EQUALS(split_test_string[3], "d");
+    TS_ASSERT_EQUALS(split_test_string[4], "e");
+  }
+
+  void test_find_names_in_brackets() {
+    std::string test_string = "[a,b,c], [d,e], f, g";
+    std::vector<std::string> names_in_brackets =
+        findNamesInBrackets(test_string);
+
+    TS_ASSERT_EQUALS(names_in_brackets[0], "[a,b,c]");
+    TS_ASSERT_EQUALS(names_in_brackets[1], "[d,e]");
+    TS_ASSERT_EQUALS(names_in_brackets.size(), 2);
+  }
+
+  void test_parse_dimension_names() {
+    // These are default dimension names from CreateMD
+    std::string test_string = "[H,0,0],[0,K,0],[0,0,L],DeltaE";
+    std::vector<std::string> names_result = parseDimensionNames(test_string);
+
+    TS_ASSERT_EQUALS(names_result[0], "[H,0,0]");
+    TS_ASSERT_EQUALS(names_result[1], "[0,K,0]");
+    TS_ASSERT_EQUALS(names_result[2], "[0,0,L]");
+    TS_ASSERT_EQUALS(names_result[3], "DeltaE");
+  }
+
+  void test_remove_bracketed_names() {
+    std::string test_string = "[a,b] , c, [d,e], f";
+    std::vector<std::string> names_result = removeBracketedNames(test_string);
+
+    TS_ASSERT_EQUALS(names_result[0], "[]");
+    TS_ASSERT_EQUALS(names_result[1], "c");
+    TS_ASSERT_EQUALS(names_result[2], "[]");
+    TS_ASSERT_EQUALS(names_result[3], "f");
+  }
+
+  void test_parse_dimension_names_retains_order() {
+
+    std::string test_string = "[a,b],c,[d,e],f";
+    std::vector<std::string> names_result = parseDimensionNames(test_string);
+
+    // Check that order in the vector is the same as order in the original
+    // string
+    TS_ASSERT_EQUALS(names_result[0], "[a,b]");
+    TS_ASSERT_EQUALS(names_result[1], "c");
+    TS_ASSERT_EQUALS(names_result[2], "[d,e]");
+    TS_ASSERT_EQUALS(names_result[3], "f");
+  }
+
   void test_Init() {
     MaskMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -92,7 +149,7 @@ public:
     alg.setPropertyValue(
         "Dimensions", "Axis0, Axis1"); // wrong number of dimenion ids provided.
     alg.setPropertyValue("Extents", "0,10,0,10,0,10");
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS_ANYTHING(alg.execute()); // fail input validators
   }
 
   void test_throw_if_extent_cardinality_wrong() {
@@ -104,9 +161,9 @@ public:
     alg.initialize();
     alg.setPropertyValue("Workspace", wsName);
     alg.setPropertyValue("Dimensions", "Axis0, Axis1, Axis2");
-    alg.setPropertyValue("Extents", "0,10"); // wrong number of extents
-                                             // provided.
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    alg.setPropertyValue("Extents", "0,10");  // wrong number of extents
+                                              // provided.
+    TS_ASSERT_THROWS_ANYTHING(alg.execute()); // fail input validators
   }
 
   void test_throw_if_min_greater_than_max_anywhere() {
@@ -119,7 +176,7 @@ public:
     alg.setPropertyValue("Workspace", wsName);
     alg.setPropertyValue("Dimensions", "Axis0, Axis1, Axis2");
     alg.setPropertyValue("Extents", "0,-10,0,-10,0,-10");
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS_ANYTHING(alg.execute()); // fail input validators
   }
 
   void test_fall_back_to_dimension_names() {

@@ -213,6 +213,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindowMaskTab.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindowTreeTab.cpp
                    src/Mantid/InstrumentWidget/MantidGLWidget.cpp
+                   src/Mantid/InstrumentWidget/MaskBinsData.cpp
                    src/Mantid/InstrumentWidget/ColorMapWidget.cpp
                    src/Mantid/InstrumentWidget/ObjCompAssemblyActor.cpp
                    src/Mantid/InstrumentWidget/ObjComponentActor.cpp
@@ -452,6 +453,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/InstrumentWidget/InstrumentWindowMaskTab.h
                    src/Mantid/InstrumentWidget/InstrumentWindowTreeTab.h
                    src/Mantid/InstrumentWidget/MantidGLWidget.h
+                   src/Mantid/InstrumentWidget/MaskBinsData.h
                    src/Mantid/InstrumentWidget/ColorMapWidget.h
                    src/Mantid/InstrumentWidget/ObjCompAssemblyActor.h
                    src/Mantid/InstrumentWidget/ObjComponentActor.h

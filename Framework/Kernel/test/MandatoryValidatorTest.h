@@ -4,6 +4,7 @@
 #include <string>
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/OptionalBool.h"
 
 using namespace Mantid::Kernel;
 
@@ -84,6 +85,20 @@ public:
     MandatoryValidator<double> validate_dbl;
     TS_ASSERT_EQUALS(validate_dbl.isValid(5.0), "");
     TS_ASSERT_EQUALS(validate_dbl.isValid(-250.0), "");
+  }
+
+  void testMandatoryValidatorOptionalBool() {
+
+    MandatoryValidator<OptionalBool> validator;
+
+    OptionalBool defaultValue;
+    TS_ASSERT(!validator.isValid(defaultValue).empty());
+
+    OptionalBool notDefaultIsTrue(OptionalBool::True);
+    TS_ASSERT(validator.isValid(notDefaultIsTrue).empty());
+
+    OptionalBool notDefaultIsFalse(OptionalBool::False);
+    TS_ASSERT(validator.isValid(notDefaultIsFalse).empty());
   }
 };
 

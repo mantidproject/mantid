@@ -1465,49 +1465,231 @@ double Object::ConeSolidAngle(const V3D &observer,
 
 /**
 * Returns an axis-aligned bounding box that will fit the shape
-* @returns A shared pointer to a bounding box for this shape.
+* @returns A reference to a bounding box for this shape.
 */
 const BoundingBox &Object::getBoundingBox() const {
   // This member function is const given that from a user's perspective it is
-  // perfecly reasonable
-  // to call it on a const object. We need to call a non-const function in
-  // places to update the cache,
-  // which is where the const_cast comes in to play.
+  // perfectly reasonable to call it on a const object. We need to call a
+  // non-const function in places to update the cache, which is where the
+  // const_cast comes into play.
 
+  // If we don't know the extent of the object, the bounding box doesn't mean
+  // anything
   if (!TopRule) {
-    // If we don't know the extent of the object, the bounding box doesn't mean
-    // anything
     const_cast<Object *>(this)->setNullBoundingBox();
-  } else if (m_boundingBox.isNull()) {
-    // First up, construct the trial set of elements from the object's bounding
-    // box
-    const double big(1e10);
-    double minX(-big), maxX(big), minY(-big), maxY(big), minZ(-big), maxZ(big);
-    TopRule->getBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
-    // If the object is not axis aligned then the bounding box will be poor, in
-    // particular the minima are left at the trial start so return
-    // a null object here
-    if (minX < -100 || maxX > 100 || minY < -100 || maxY > 100 || minZ < -100 ||
-        maxZ > 100) {
-      // std::cerr << this->getName() << '(' << minX << ',' << maxX << ") (" <<
-      // minY << ',' << maxY << ") (" << minZ << ',' << maxZ << ")\n";
-      minX = -100;
-      maxX = 100;
-      minY = -100;
-      maxY = 100;
-      minZ = -100;
-      maxZ = 100;
-    }
-    if (minX == -big || minY == -big || minZ == -big) {
-      const_cast<Object *>(this)->setNullBoundingBox();
-    } else {
-      const_cast<Object *>(this)
-          ->defineBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
-    }
-  } else {
+    return m_boundingBox;
   }
 
+  // We have a bounding box already, so just return it
+  if (m_boundingBox.isNonNull())
+    return m_boundingBox;
+
+  // Try to calculate using Rule method first
+  const_cast<Object *>(this)->calcBoundingBoxByRule();
+  if (m_boundingBox.isNonNull())
+    return m_boundingBox;
+
+  // Rule method failed; Try geometric method
+  const_cast<Object *>(this)->calcBoundingBoxByGeometry();
+  if (m_boundingBox.isNonNull())
+    return m_boundingBox;
+
+  // Geometric method failed; try to calculate by vertices
+  const_cast<Object *>(this)->calcBoundingBoxByVertices();
+  if (m_boundingBox.isNonNull())
+    return m_boundingBox;
+
+  // All options failed; give up
+  // Set to a large box so that a) we don't keep trying to calculate a box
+  // every time this is called and b) to serve as a visual indicator that
+  // something went wrong.
+  const_cast<Object *>(this)
+      ->defineBoundingBox(100, 100, 100, -100, -100, -100);
   return m_boundingBox;
+}
+
+/**
+ * Attempts to calculate bounding box using Rule system.
+ *
+ * Stores result in bounding box cache if successful. Will only work for shapes
+ * that consist entirely of axis-aligned surfaces and a few special cases (such
+ * as Spheres).
+ */
+void Object::calcBoundingBoxByRule() {
+  // Must have a top rule for this to work
+  if (!TopRule)
+    return;
+
+  // Set up some unreasonable values that will be refined
+  const double huge(1e10);
+  const double big(1e4);
+  double minX(-huge), minY(-huge), minZ(-huge);
+  double maxX(huge), maxY(huge), maxZ(huge);
+
+  // Try to use the Rule system to derive the box
+  TopRule->getBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
+
+  // Check whether values are reasonable now. Rule system will fail to produce
+  // a reasonable box if the shape is not axis-aligned.
+  if (minX > -big && maxX < big && minY > -big && maxY < big && minZ > -big &&
+      maxZ < big && minX <= maxX && minY <= maxY && minZ <= maxZ) {
+    // Values make sense, cache and return bounding box
+    defineBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
+  }
+}
+
+/**
+ * Attempts to calculate bounding box using vertex array.
+ *
+ * Stores result in bounding box cache if successful. Will only work for shapes
+ * that have handlers capable of providing a vertex mesh.
+ *
+ * @see GeometryHandler::canTriangulate()
+ */
+void Object::calcBoundingBoxByVertices() {
+  // Grab vertex information
+  auto vertCount = this->NumberOfPoints();
+  auto vertArray = this->getTriangleVertices();
+
+  if (vertCount && vertArray) {
+    // Unreasonable extents to be overwritten by loop
+    constexpr double huge = 1e10;
+    double minX, maxX, minY, maxY, minZ, maxZ;
+    minX = minY = minZ = huge;
+    maxX = maxY = maxZ = -huge;
+
+    // Loop over all vertices and determine minima and maxima on each axis
+    for (int i = 0; i < vertCount; ++i) {
+      auto vx = vertArray[3 * i + 0];
+      auto vy = vertArray[3 * i + 1];
+      auto vz = vertArray[3 * i + 2];
+
+      minX = std::min(minX, vx);
+      maxX = std::max(maxX, vx);
+      minY = std::min(minY, vy);
+      maxY = std::max(maxY, vy);
+      minZ = std::min(minZ, vz);
+      maxZ = std::max(maxZ, vz);
+    }
+
+    // Store bounding box in cache
+    defineBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
+  }
+}
+
+/**
+ * Attempts to calculate bounding box using object geometry.
+ *
+ * Stores result in bounding box cache if successful. Will only work for basic
+ * shapes that are handled by GluGeometryHandler.
+ */
+void Object::calcBoundingBoxByGeometry() {
+  // Must have a GeometryHandler for this to work
+  if (!handle)
+    return;
+
+  // Extent of bounding box
+  double minX, maxX, minY, maxY, minZ, maxZ;
+
+  // Shape geometry data
+  int type(0);
+  std::vector<Kernel::V3D> vectors;
+  double radius;
+  double height;
+
+  // Will only work for shapes handled by GluGeometryHandler
+  handle->GetObjectGeom(type, vectors, radius, height);
+
+  // Type of shape is given as a simple integer
+  switch (type) {
+  case 1: // CUBOID
+  {
+    // Points as defined in IDF XML
+    auto &lfb = vectors[0]; // Left-Front-Bottom
+    auto &lft = vectors[1]; // Left-Front-Top
+    auto &lbb = vectors[2]; // Left-Back-Bottom
+    auto &rfb = vectors[3]; // Right-Front-Bottom
+
+    // Calculate and add missing corner points to vectors
+    auto lbt = lft + (lbb - lfb); // Left-Back-Top
+    auto rft = rfb + (lft - lfb); // Right-Front-Top
+    auto rbb = lbb + (rfb - lfb); // Right-Back-Bottom
+    auto rbt = rbb + (rft - rfb); // Right-Back-Top
+
+    vectors.push_back(lbt);
+    vectors.push_back(rft);
+    vectors.push_back(rbb);
+    vectors.push_back(rbt);
+
+    // Unreasonable extents to be replaced by first loop cycle
+    constexpr double huge = 1e10;
+    minX = minY = minZ = huge;
+    maxX = maxY = maxZ = -huge;
+
+    // Loop over all corner points to find minima and maxima on each axis
+    for (auto iter = vectors.cbegin(); iter != vectors.cend(); ++iter) {
+      minX = std::min(minX, iter->X());
+      maxX = std::max(maxX, iter->X());
+      minY = std::min(minY, iter->Y());
+      maxY = std::max(maxY, iter->Y());
+      minZ = std::min(minZ, iter->Z());
+      maxZ = std::max(maxZ, iter->Z());
+    }
+  } break;
+
+  case 3: // CYLINDER
+  case 5: // SEGMENTED_CYLINDER
+  {
+    // Center-point of base and normalized axis based on IDF XML
+    auto &base = vectors[0];
+    auto &axis = vectors[1];
+    auto top = base + (axis * height); // Center-point of other end
+
+    // How much of the radius must be considered for each axis
+    // (If this ever becomes a performance issue, you could use just the radius
+    // for a quick approx that is still guaranteed to fully contain the shape)
+    volatile auto rx = radius * sqrt(pow(axis.Y(), 2) + pow(axis.Z(), 2));
+    volatile auto ry = radius * sqrt(pow(axis.X(), 2) + pow(axis.Z(), 2));
+    volatile auto rz = radius * sqrt(pow(axis.X(), 2) + pow(axis.Y(), 2));
+
+    // The bounding box is drawn around the base and top center-points,
+    // then expanded in order to account for the radius
+    minX = std::min(base.X(), top.X()) - rx;
+    maxX = std::max(base.X(), top.X()) + rx;
+    minY = std::min(base.Y(), top.Y()) - ry;
+    maxY = std::max(base.Y(), top.Y()) + ry;
+    minZ = std::min(base.Z(), top.Z()) - rz;
+    maxZ = std::max(base.Z(), top.Z()) + rz;
+  } break;
+
+  case 4: // CONE
+  {
+    auto &tip = vectors[0];            // Tip-point of cone
+    auto &axis = vectors[1];           // Normalized axis
+    auto base = tip + (axis * height); // Center of base
+
+    // How much of the radius must be considered for each axis
+    // (If this ever becomes a performance issue, you could use just the radius
+    // for a quick approx that is still guaranteed to fully contain the shape)
+    auto rx = radius * sqrt(pow(axis.Y(), 2) + pow(axis.Z(), 2));
+    auto ry = radius * sqrt(pow(axis.X(), 2) + pow(axis.Z(), 2));
+    auto rz = radius * sqrt(pow(axis.X(), 2) + pow(axis.Y(), 2));
+
+    // For a cone, the adjustment is only applied to the base
+    minX = std::min(tip.X(), base.X() - rx);
+    maxX = std::max(tip.X(), base.X() + rx);
+    minY = std::min(tip.Y(), base.Y() - ry);
+    maxY = std::max(tip.Y(), base.Y() + ry);
+    minZ = std::min(tip.Z(), base.Z() - rz);
+    maxZ = std::max(tip.Z(), base.Z() + rz);
+  } break;
+
+  default:  // Invalid (0, -1) or SPHERE (2) which should be handled by Rules
+    return; // Don't store bounding box
+  }
+
+  // Store bounding box in cache
+  defineBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
 }
 
 /**

@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/OptionalBool.h"
 #include <vector>
 #include <set>
 
@@ -376,6 +377,8 @@ protected:
     operator uint32_t();
     operator int64_t();
     operator uint64_t();
+    operator OptionalBool();
+
 #ifdef __APPLE__
     operator unsigned long();
 #endif
@@ -398,6 +401,10 @@ protected:
     }
     /// explicit specialization for boost::shared_ptr
     template <typename T> operator boost::shared_ptr<T>() {
+      return pm.getValue<boost::shared_ptr<T>>(prop);
+    }
+    /// explicit specialization for boost::shared_ptr to const T
+    template <typename T> operator boost::shared_ptr<const T>() {
       return pm.getValue<boost::shared_ptr<T>>(prop);
     }
     /// explicit version for Matrices

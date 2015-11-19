@@ -16,6 +16,7 @@
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
+#include "PropertyManagerHelper.h"
 
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -691,6 +692,38 @@ public:
     std::string params;
     TS_ASSERT_THROWS_NOTHING(ei.loadInstrumentParametersNexus(&nxFile, params));
     TS_ASSERT_EQUALS(params.size(), 613); // Check size of parameter string
+  }
+
+  /**
+  * Test declaring an ExperimentInfo property and retrieving as const or
+  * non-const
+  */
+  void testGetProperty_const_sptr() {
+    const std::string eiName = "InputEi";
+    ExperimentInfo_sptr eiInput(new ExperimentInfo());
+    PropertyManagerHelper manager;
+    manager.declareProperty(eiName, eiInput, Mantid::Kernel::Direction::Input);
+
+    // Check property can be obtained as const_sptr or sptr
+    ExperimentInfo_const_sptr eiConst;
+    ExperimentInfo_sptr eiNonConst;
+    TS_ASSERT_THROWS_NOTHING(
+        eiConst = manager.getValue<ExperimentInfo_const_sptr>(eiName));
+    TS_ASSERT(eiConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(eiNonConst =
+                                 manager.getValue<ExperimentInfo_sptr>(eiName));
+    TS_ASSERT(eiNonConst != NULL);
+    TS_ASSERT_EQUALS(eiConst, eiNonConst);
+
+    // Check TypedValue can be cast to const_sptr or to sptr
+    PropertyManagerHelper::TypedValue val(manager, eiName);
+    ExperimentInfo_const_sptr eiCastConst;
+    ExperimentInfo_sptr eiCastNonConst;
+    TS_ASSERT_THROWS_NOTHING(eiCastConst = (ExperimentInfo_const_sptr)val);
+    TS_ASSERT(eiCastConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(eiCastNonConst = (ExperimentInfo_sptr)val);
+    TS_ASSERT(eiCastNonConst != NULL);
+    TS_ASSERT_EQUALS(eiCastConst, eiCastNonConst);
   }
 
 private:
