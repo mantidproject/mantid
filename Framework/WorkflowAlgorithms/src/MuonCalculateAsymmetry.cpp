@@ -165,25 +165,16 @@ MatrixWorkspace_sptr MuonCalculateAsymmetry::calculateGroupCounts(
 
   int numPeriods = inputWSGroup->getNumberOfEntries();
   if (numPeriods > 1) {
-    // Two periods supplied
+    // Several periods supplied
 
-    MatrixWorkspace_sptr tempWS;
-
-    if (op == "+") {
-
-      IAlgorithm_sptr alg = createChildAlgorithm("Plus");
-      alg->initialize();
-      alg->setProperty("LHSWorkspace", inputWSGroup->getItem(0));
-      alg->setProperty("RHSWorkspace", inputWSGroup->getItem(1));
-      alg->execute();
-      tempWS = alg->getProperty("OutputWorkspace");
-
-    } else if (op == "-") {
-
+    MatrixWorkspace_sptr tempWS = sumPeriods(inputWSGroup, summedPeriods);
+    if (!subtractedPeriods.empty()) {
+      MatrixWorkspace_sptr toSubtractWS =
+          sumPeriods(inputWSGroup, subtractedPeriods);
       IAlgorithm_sptr alg = createChildAlgorithm("Minus");
       alg->initialize();
-      alg->setProperty("LHSWorkspace", inputWSGroup->getItem(0));
-      alg->setProperty("RHSWorkspace", inputWSGroup->getItem(1));
+      alg->setProperty("LHSWorkspace", tempWS);
+      alg->setProperty("RHSWorkspace", toSubtractWS);
       alg->execute();
       tempWS = alg->getProperty("OutputWorkspace");
     }
@@ -229,7 +220,7 @@ MatrixWorkspace_sptr MuonCalculateAsymmetry::calculateGroupAsymmetry(
 
   int numPeriods = inputWSGroup->getNumberOfEntries();
   if (numPeriods > 1) {
-    // Two period workspaces where supplied
+    // Several period workspaces were supplied
 
     if (op == "+") {
 
@@ -437,7 +428,7 @@ std::map<std::string, std::string> MuonCalculateAsymmetry::validateInputs() {
 /**
  * Checks the supplied list of periods for any invalid values.
  * Invalid means 0, negative or greater than total number of periods.
- * @param periodSet :: vector of period numbers to check
+ * @param periodSet :: [input] vector of period numbers to check
  * @returns a vector of invalid period numbers
  */
 std::vector<int> MuonCalculateAsymmetry::findInvalidPeriods(
@@ -455,7 +446,7 @@ std::vector<int> MuonCalculateAsymmetry::findInvalidPeriods(
 
 /**
  * Uses the supplied list of invalid period numbers to build an error string
- * @param invalidPeriods :: vector of invalid period numbers
+ * @param invalidPeriods :: [input] vector of invalid period numbers
  * @returns an error message
  */
 std::string MuonCalculateAsymmetry::buildErrorString(
@@ -466,6 +457,34 @@ std::string MuonCalculateAsymmetry::buildErrorString(
     message << *it << ", ";
   }
   return message.str();
+}
+
+/**
+ * Sums the specified periods of the supplied workspace group
+ * @param inputWSGroup :: [input] WorkspaceGroup containing period workspaces
+ * @param periodsToSum :: [input] List of period indexes (1-based) to be summed
+ * @returns Workspace containing the sum
+ */
+MatrixWorkspace_sptr MuonCalculateAsymmetry::sumPeriods(
+    const WorkspaceGroup_const_sptr &inputWSGroup,
+    const std::vector<int> &periodsToSum) {
+  MatrixWorkspace_sptr outWS;
+  if (!periodsToSum.empty()) {
+    auto LHSWorkspace = inputWSGroup->getItem(periodsToSum[0] - 1);
+    if (periodsToSum.size() > 1) {
+      for (int i = 1; i < periodsToSum.size(); i++) {
+        auto RHSWorkspace = inputWSGroup->getItem(periodsToSum[i] - 1);
+        IAlgorithm_sptr alg = createChildAlgorithm("Plus");
+        alg->initialize();
+        alg->setProperty("LHSWorkspace", LHSWorkspace);
+        alg->setProperty("RHSWorkspace", RHSWorkspace);
+        alg->execute();
+        LHSWorkspace = alg->getProperty("OutputWorkspace");
+      }
+    }
+    outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(LHSWorkspace);
+  }
+  return outWS;
 }
 
 } // namespace WorkflowAlgorithms

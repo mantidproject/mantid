@@ -72,6 +72,10 @@ private:
   std::vector<int> findInvalidPeriods(const std::vector<int> &periodSet) const;
   /// Builds error string for invalid period numbers
   std::string buildErrorString(const std::vector<int> &invalidPeriods) const;
+  /// Sums the specified periods in the supplied workspace group
+  API::MatrixWorkspace_sptr
+  sumPeriods(const API::WorkspaceGroup_const_sptr &inputWSGroup,
+             const std::vector<int> &periodsToSum);
 };
 
 } // namespace WorkflowAlgorithms
