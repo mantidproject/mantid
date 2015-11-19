@@ -98,7 +98,7 @@ public:
     }
   }
 
-  void test_skip_mask_and_function() {
+  void test_edge_of_masked_region_falls_outside_implicit_function_bounds() {
 
     std::vector<coord_t> normal_vector;
     std::vector<coord_t> bound_vector;
