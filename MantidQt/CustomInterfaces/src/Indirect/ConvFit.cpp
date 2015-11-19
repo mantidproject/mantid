@@ -463,7 +463,6 @@ void ConvFit::loadSettings(const QSettings &settings) {
 * @param wsName Name of new workspace loaded
 */
 void ConvFit::newDataLoaded(const QString wsName) {
-  std::string name = wsName.toStdString();
   m_cfInputWSName = wsName;
   m_cfInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       m_cfInputWSName.toStdString());
