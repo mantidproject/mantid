@@ -1739,12 +1739,59 @@ def is_current_workspace_an_angle_workspace():
     return is_angle
 
 
-##################### Accesor functions for BackgroundCorrection
-def set_background_correction_time(setting):
-    pass
 
-def set_background_correction_uamp(setting):
-    pass
+
+##################### Accesor functions for BackgroundCorrection
+def set_background_correction(run_number, is_time_based, is_mon, is_mean, mon_numbers):
+    '''
+    Set a background correction setting.
+    @param run_number: the run number
+    @param is_time_based: if it is time-based or uamp-based
+    @param is_mon: if it is a monitor or a detector
+    @param is_mean: if it is mean or tof
+    @param mon_numbers: the monitor numbers of interest or an empty string
+    '''
+    setting = isis_reduction_steps.DarkRunSubtraction.DarkRunSubtractionSettings(run_number = run_number,
+                                                                                 time = is_time_based,
+                                                                                 mean = is_mean,
+                                                                                 mon = is_mon,
+                                                                                 mon_number = mon_numbers)
+    ReductionSingleton().event2hist.add_setting(setting)
+
+def get_background_correction(is_time, is_mon, component):
+    '''
+        Gets the background corrections settings for a specific configuration
+        This can be: time-based + detector, time_based + monitor,
+                     uamp-based + detector, uamp_based + monitor
+        @param is_time: is it time or uamp based
+        @param is_mon: is it a monitor or a detector
+        @param component: string with a component name (need to do this because of the python-C++ interface)
+    '''
+    def convert_from_int_list_to_string(int_list):
+        '''
+        Convert from a python list of integers to a string with comma-separated values
+        @param int_list: the integer list
+        @returns the string
+        '''
+        string_list = [str(element) for element in int_list]
+        return su.convert_from_string_list(string_list)
+
+    setting = ReductionSingleton().event2hist.get_setting(is_time, is_mon)
+    value = None
+    if component == "run_number":
+        value = setting.run_number
+    elif component == "is_time":
+        value = str(setting.time)
+    elif component == "is_mean":
+        value = str(setting.mean)
+    elif component == "is_mon":
+        value = str(setting.is_mon)
+    elif component == "mon_number":
+        value = convert_from_int_list_to_string(mon_number)
+    else:
+        pass
+
+    return value
 
 
 ###############################################################################

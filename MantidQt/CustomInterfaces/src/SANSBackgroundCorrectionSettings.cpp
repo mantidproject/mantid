@@ -5,7 +5,7 @@ namespace MantidQt
 namespace CustomInterfaces
 {
   SANSBackgroundCorrectionSettings::SANSBackgroundCorrectionSettings(QString runNumber, bool useMean,
-    bool useDet, bool useMon, QString monNumber) : m_runNumber(runNumber), m_useMean(useMean), m_useDet(useDet), m_useMon(useMon), m_monNumber(monNumber) {
+    bool useMon, QString monNumber) : m_runNumber(runNumber), m_useMean(useMean), m_useMon(useMon), m_monNumber(monNumber) {
     hasValidSettings();
   }
 
@@ -19,9 +19,6 @@ namespace CustomInterfaces
 
       // The run number must not be empty
       isValid = m_runNumber.isEmpty() ? false : true;
-
-      // At least the detector or the monitor selection needs to be enabled
-      isValid = m_useDet == false && m_useMon == false ? false : true;
 
       m_hasValidSettings = isValid;
     }
@@ -54,15 +51,7 @@ namespace CustomInterfaces
   }
 
   /**
-  * Get the setting if the entire detector is to be used
-  * @returns the setting or default to true
-  */
-  bool SANSBackgroundCorrectionSettings::getUseDet() const {
-    return m_hasValidSettings ? m_useDet : true;
-  }
-
-  /**
-  * Get the setting if monitors are to be used
+  * Get the setting if monitors or detectors are to be used
   * @returns the setting or default to false
   */
   bool SANSBackgroundCorrectionSettings::getUseMon() const {

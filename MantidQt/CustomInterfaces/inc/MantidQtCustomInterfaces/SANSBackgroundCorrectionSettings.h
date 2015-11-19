@@ -36,22 +36,19 @@ namespace MantidQt
     class MANTIDQT_CUSTOMINTERFACES_DLL SANSBackgroundCorrectionSettings
     {
     public:
-      SANSBackgroundCorrectionSettings(QString runNumber, bool useMean,
-        bool useDet, bool useMon, QString monNumber);
+      SANSBackgroundCorrectionSettings(QString runNumber, bool useMean,  bool useMon, QString monNumber);
 
       bool hasValidSettings();
 
       QString getRunNumber() const;
       QString getMonNumber() const;
       bool getUseMean() const;
-      bool getUseDet() const;
       bool getUseMon() const;
 
     private:
       boost::optional<bool> m_hasValidSettings;
       const QString m_runNumber;
       const bool m_useMean;
-      const bool m_useDet;
       const bool m_useMon;
       const QString m_monNumber;
     };

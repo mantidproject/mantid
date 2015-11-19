@@ -44,13 +44,26 @@ namespace MantidQt
     public:
       SANSBackgroundCorrectionWidget(QWidget* parent = 0);
 
-      void setDarkRunSettingForTime(SANSBackgroundCorrectionSettings setting);
-      SANSBackgroundCorrectionSettings getDarkRunSettingForTime();
+      void setDarkRunSettingForTimeDetectors(SANSBackgroundCorrectionSettings setting);
+      SANSBackgroundCorrectionSettings getDarkRunSettingForTimeDetectors();
+      void setDarkRunSettingForUampDetectors(SANSBackgroundCorrectionSettings setting);
+      SANSBackgroundCorrectionSettings getDarkRunSettingForUampDetectors();
 
-      void setDarkRunForUamp(SANSBackgroundCorrectionSettings setting);
-      SANSBackgroundCorrectionSettings getDarkRunSettingForUamp();
+      void setDarkRunSettingForTimeMonitors(SANSBackgroundCorrectionSettings setting);
+      SANSBackgroundCorrectionSettings getDarkRunSettingForTimeMonitors();
+      void setDarkRunSettingForUampMonitors(SANSBackgroundCorrectionSettings setting);
+      SANSBackgroundCorrectionSettings getDarkRunSettingForUampMonitors();
+
+    private slots:
+      void handleTimeDetectorsOnOff(int state);
+      void handleUampDetectorsOnOff(int state);
+      void handleTimeMonitorsOnOff(int state);
+      void handleUampMonitorsOnOff(int state);
 
     private:
+      /// Setup the connections
+      void setupConnections();
+
       /// UI form
       Ui::SANSBackgroundCorrectionWidget m_ui;
     };

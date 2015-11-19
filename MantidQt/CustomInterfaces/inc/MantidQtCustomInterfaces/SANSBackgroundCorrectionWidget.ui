@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>361</width>
-    <height>111</height>
+    <width>441</width>
+    <height>124</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -46,122 +46,179 @@
         <string>Background Subtraction</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_5">
-        <item row="0" column="3">
-         <widget class="QLabel" name="bckgnd_cor_det_label">
+        <item row="4" column="0">
+         <widget class="QLabel" name="bckgnd_cor_uamp_label">
           <property name="text">
-           <string>Det</string>
+           <string>Uamp</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="3">
-         <widget class="QCheckBox" name="bckgnd_cor_time_det_cbox">
+        <item row="0" column="9">
+         <widget class="QLabel" name="bckgnd_cor_monitors_label">
+          <property name="text">
+           <string>Monitors</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="bckgnd_cor_time_label">
+          <property name="text">
+           <string>Time</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="2">
+         <widget class="QCheckBox" name="bckgnd_cor_det_uamp_use_check_box">
           <property name="text">
            <string/>
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
-         <widget class="QLabel" name="bckgnd_cor_run_label">
+        <item row="4" column="7">
+         <widget class="QCheckBox" name="bckgnd_cor_mon_uamp_use_check_box">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QLabel" name="bckgnd_cor_detector_label">
+          <property name="text">
+           <string>Detectors</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="5">
+         <widget class="QLabel" name="bckgnd_cor_det_mean_label">
+          <property name="text">
+           <string>Mean</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="7">
+         <widget class="QLabel" name="bckgnd_cor_mon_use_label">
+          <property name="text">
+           <string>Use</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="10">
+         <widget class="QLineEdit" name="bckgnd_cor_mon_time_mon_num_line_edit"/>
+        </item>
+        <item row="3" column="9">
+         <widget class="QCheckBox" name="bckgnd_cor_mon_mean_check_box">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="10">
+         <widget class="QLineEdit" name="bckgnd_cor_mon_uamp_mon_num_line_edit"/>
+        </item>
+        <item row="4" column="8">
+         <widget class="QLineEdit" name="bckgnd_cor_mon_uamp_run_line_edit"/>
+        </item>
+        <item row="3" column="7">
+         <widget class="QCheckBox" name="bckgnd_cor_mon_time_use_check_box">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="2">
+         <widget class="QCheckBox" name="bckgnd_cor_det_time_use_check_box">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="8">
+         <widget class="QLineEdit" name="bckgnd_cor_mon_time_run_line_edit"/>
+        </item>
+        <item row="4" column="3" colspan="2">
+         <widget class="QLineEdit" name="bckgnd_cor_det_uamp_run_line_edit"/>
+        </item>
+        <item row="3" column="5">
+         <widget class="QCheckBox" name="bckgnd_cor_det_mean_check_box">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="3" colspan="2">
+         <widget class="QLineEdit" name="bckgnd_cor_det_time_run_line_edit">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="9">
+         <widget class="QLabel" name="bckgnd_cor_mon_mean_label">
+          <property name="text">
+           <string>Mean</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLabel" name="bckgnd_cor_det_use_label">
+          <property name="text">
+           <string>Use</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="8">
+         <widget class="QLabel" name="bckgnd_cor_mon_run_label">
           <property name="text">
            <string>Run</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="bckgnd_cor_time_label">
-          <property name="toolTip">
-           <string/>
-          </property>
+        <item row="1" column="3">
+         <widget class="QLabel" name="bckgnd_cor_det_run_label">
           <property name="text">
-           <string>Time:</string>
+           <string>Run</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="bckgnd_cor_time_run_line_edit"/>
-        </item>
-        <item row="0" column="2">
-         <widget class="QLabel" name="bckgnd_cor_mean_label">
+        <item row="1" column="10">
+         <widget class="QLabel" name="bckgnd_cor_mon_mon_num_line_edit">
           <property name="text">
-           <string>Mean</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
+           <string>Mon Num</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="4">
-         <widget class="QLabel" name="bckgnd_cor_mon_label">
-          <property name="text">
-           <string>Mon</string>
+        <item row="1" column="6" rowspan="4">
+         <widget class="QFrame" name="frame">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::VLine</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <property name="lineWidth">
+           <number>4</number>
           </property>
          </widget>
         </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="bckgnd_cor_uamp_label">
-          <property name="text">
-           <string>Uamp:</string>
+        <item row="1" column="1" rowspan="4">
+         <widget class="QFrame" name="frame_2">
+          <property name="frameShape">
+           <enum>QFrame::VLine</enum>
           </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <layout class="QGridLayout" name="gridLayout_4">
-          <item row="0" column="0">
-           <spacer name="horizontalSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </item>
-        <item row="1" column="4">
-         <widget class="QCheckBox" name="bckgnd_cor_time_mon_cbox">
-          <property name="text">
-           <string/>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
           </property>
-         </widget>
-        </item>
-        <item row="1" column="2">
-         <widget class="QCheckBox" name="bckgnd_cor_time_mean_cbox">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="5">
-         <widget class="QLabel" name="bckgnd_cor_mon_num_label">
-          <property name="text">
-           <string>Mon Num.</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="5">
-         <widget class="QLineEdit" name="bckgnd_cor_time_mon_num_line_edit"/>
-        </item>
-        <item row="2" column="1">
-         <widget class="QLineEdit" name="bckgnd_cor_uamp_run_line_edit"/>
-        </item>
-        <item row="2" column="5">
-         <widget class="QLineEdit" name="bckgnd_cor_uamp_mon_num_line_edit"/>
-        </item>
-        <item row="2" column="3">
-         <widget class="QCheckBox" name="bckgnd_cor_uamp_det_cbox">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="4">
-         <widget class="QCheckBox" name="bckgnd_cor_uamp_mon_cbox">
-          <property name="text">
-           <string/>
+          <property name="lineWidth">
+           <number>4</number>
           </property>
          </widget>
         </item>

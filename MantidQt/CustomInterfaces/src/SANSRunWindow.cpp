@@ -4861,19 +4861,26 @@ void SANSRunWindow::initQResolutionSettings() {
  * Retrieve background correction settings
  */
 void SANSRunWindow::retrieveBackgroundCorrection() {
-  // Set the time-based selection
+  // Get the time-based selection for detectors
 
+  // Get the Uamp-based selection for detectors
 
-  // Set the Uamp-based selection
+  // Get the time-based selection for monitors
+
+  // Get the Uamp-based selection for monitors
 }
 
 /**
  * Sends the background correction user setting
  */
 void SANSRunWindow::writeBackgroundCorrectionToPythonScript(QString &pythonCode) {
-  // Set setting 1
-  
-  // Set setting 2
+  // Get the settings
+  auto timeDetectors = m_uiForm.sansBackgroundCorrectionWidget->getDarkRunSettingForTimeDetectors();
+  auto uampDetectors = m_uiForm.sansBackgroundCorrectionWidget->getDarkRunSettingForUampDetectors();
+  auto timeMonitors = m_uiForm.sansBackgroundCorrectionWidget->getDarkRunSettingForTimeMonitors();
+  auto uampMonitors = m_uiForm.sansBackgroundCorrectionWidget->getDarkRunSettingForUampMonitors();
+
+
 }
 
 
