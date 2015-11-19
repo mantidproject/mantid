@@ -157,7 +157,7 @@ public:
   void testSingleSpectrumNotWS0() {
     RemoveBins rb;
     Workspace2D_sptr inputWS = makeDummyWorkspace2D();
-		std::string outputWSName = "output44";
+    std::string outputWSName = "output44";
     TS_ASSERT_THROWS_NOTHING(rb.initialize())
     TS_ASSERT(rb.isInitialized())
     rb.setPropertyValue("InputWorkspace", inputWS->getName());
@@ -169,7 +169,8 @@ public:
     TS_ASSERT(rb.execute())
 
     MatrixWorkspace_const_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWSName);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outputWSName);
     TS_ASSERT_EQUALS(inputWS->readX(1), outputWS->readX(1))
     TS_ASSERT_EQUALS(inputWS->readX(0), outputWS->readX(0))
     TS_ASSERT_EQUALS(inputWS->readY(0), outputWS->readY(0))
@@ -211,7 +212,7 @@ public:
     TS_ASSERT_EQUALS(outputWS->dataX(0).size(), 1994);
   }
 
-	Workspace2D_sptr makeDummyWorkspace2D() {
+  Workspace2D_sptr makeDummyWorkspace2D() {
     Workspace2D_sptr testWorkspace(new Workspace2D);
 
     testWorkspace->setTitle("input2D");
@@ -244,7 +245,7 @@ public:
 
     AnalysisDataService::Instance().addOrReplace("input2D", testWorkspace);
 
-		return testWorkspace;
+    return testWorkspace;
   }
 
 private:
