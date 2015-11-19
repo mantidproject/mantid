@@ -23,6 +23,11 @@ example). Currently remote jobs are run on the `SCARF cluster
 Computing Department of STFC. You can also use this cluster via remote
 login and through its `web portal <https://portal.scarf.rl.ac.uk/>`_.
 
+.. warning:: This interface is undergoing heavy works. New functionality
+             is being added and the pre-post-processing and reconstruction
+             workflow is being modified based on feedback from initial
+             test data.
+
 Interface at a glance
 ---------------------
 
@@ -113,11 +118,11 @@ relevant file and data formats is given here:
 
 These formats are used in different processing steps and parts of this
 interface. For example, you can visualize FITS and TIFF images in the
-**Run** tab. As another example, the reconstruction tools typically
-need as inputs at least a stack of images which can be in different
-formats, including a set of FITS or TIFF files, or a single DLS NXTomo
-file. Other third party tools use files in these formats as inputs,
-outputs or both.
+**Run** tab and also in the **ROI, etc.** tab. As another example, the
+reconstruction tools typically need as inputs at least a stack of
+images which can be in different formats, including a set of FITS or
+TIFF files, or a single DLS NXTomo file. Other third party tools use
+files in these formats as inputs, outputs or both.
 
 Data locations
 --------------
@@ -143,7 +148,16 @@ run) on remote compute resources in the same tab.
 Setting common parameters for the reconstruction jobs
 -----------------------------------------------------
 
-Several parameters can be set in the "ROI etc." section or tab. These
+Before any reconstruction job is started several pre-/post-processing
+options would normally need to be fine tuned for the sample data to be
+processed correctly. The region of interest and the "air" region (or
+region for normalization) can be set visually in a specific tab. All
+other pre- and post-processing settings are defined in a separate tab.
+
+Regions
+~~~~~~~
+
+Several parameters can be set in the **ROI etc.** section or tab. These
 parameters will be used for all the reconstruction jobs, regardless of
 the tool and/or reconstruction method used.
 
@@ -176,6 +190,24 @@ If when selection a region the mouse is moved outside of the images,
 it is possible to continue the selection of the region (second corner)
 by clicking again inside the image. Alternatively, any selection can
 be reset at any point by using the "reset" buttons.
+
+Pre-/post-processing
+~~~~~~~~~~~~~~~~~~~~
+
+The **Filters** tab can be used to set up the pre- and post-processing
+steps. These are applied regardless of the particular tomographic
+reconstruction tool and algorithm used when running reconstruction
+jobs. Pre-processing filters are applied on the raw input images
+before the reconstruction algorithm is run. Post-processing steps are
+applied on the reconstructed volume produced by the algorithm.
+
+The tab also shows options to define what outputs should be produced
+in addition to the reconstructed volume.
+
+The settings are rememberd between session, and it is possible to
+reset all the settings to their factory default by clicking on the
+reset button.
+
 
 Running jobs locally
 --------------------
