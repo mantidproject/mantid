@@ -13,7 +13,7 @@ class QDoubleValidator;
 
 namespace Json {
 class Value;
-};
+}
 
 namespace Mantid
 {
