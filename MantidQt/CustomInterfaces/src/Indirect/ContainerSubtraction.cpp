@@ -77,6 +77,38 @@ void ContainerSubtraction::run() {
     rebin->execute();
   }
 
+  // Check for same binning across sample and container
+  if (m_uiForm.ckShiftCan->isChecked()) {
+	  addRebinStep(canCloneName, sampleWsName);
+  }
+  else {
+	  if (!checkWorkspaceBinningMatches(sampleWs, canCloneWs)) {
+		  QString text =
+			  "Binning on sample and container does not match."
+			  "Would you like to rebin the container to match the sample?";
+
+		  int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
+			  QMessageBox::Yes, QMessageBox::No,
+			  QMessageBox::NoButton);
+
+		  if (result == QMessageBox::Yes) {
+			  IAlgorithm_sptr rebin =
+				  AlgorithmManager::Instance().create("RebinToWorkspace");
+			  rebin->initialize();
+			  rebin->setProperty("WorkspaceToRebin", canCloneWs);
+			  rebin->setProperty("WorkspaceToMatch", sampleWs);
+			  rebin->setProperty("OutputWorkspace", canCloneName.toStdString());
+			  rebin->execute();
+		  }
+		  else {
+			  m_batchAlgoRunner->clearQueue();
+			  g_log.error("Cannot apply absorption corrections using a sample and "
+				  "container with different binning.");
+			  return;
+		  }
+	  }
+  }
+
   // If not in wavelength then do conversion
   std::string originalCanUnits = canCloneWs->getAxis(0)->unit()->unitID();
   if (originalCanUnits != "Wavelength") {
@@ -91,30 +123,6 @@ void ContainerSubtraction::run() {
   if (useCanScale) {
     double canScaleFactor = m_uiForm.spCanScale->value();
     applyCorrAlg->setProperty("CanScaleFactor", canScaleFactor);
-  }
-
-  // Check for same binning across sample and container
-  if (m_uiForm.ckShiftCan->isChecked()) {
-    addRebinStep(canCloneName, sampleWsName);
-  } else {
-    if (!checkWorkspaceBinningMatches(sampleWs, canCloneWs)) {
-      QString text =
-          "Binning on sample and container does not match."
-          "Would you like to rebin the container to match the sample?";
-
-      int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
-                                         QMessageBox::Yes, QMessageBox::No,
-                                         QMessageBox::NoButton);
-
-      if (result == QMessageBox::Yes) {
-        addRebinStep(canCloneName, sampleWsName);
-      } else {
-        m_batchAlgoRunner->clearQueue();
-        g_log.error("Cannot apply absorption corrections using a sample and "
-                    "container with different binning.");
-        return;
-      }
-    }
   }
 
   // Generate output workspace name
