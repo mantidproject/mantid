@@ -91,7 +91,7 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("InputWorkspace", inputWSGroup));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeriodOperation", "+"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SummedPeriodSet", "1,2"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 1));
     TS_ASSERT_THROWS_NOTHING(
@@ -140,7 +140,8 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("InputWorkspace", inputWSGroup));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeriodOperation", "-"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SummedPeriodSet", "1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SubtractedPeriodSet", "2"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 1));
     TS_ASSERT_THROWS_NOTHING(
@@ -231,7 +232,8 @@ public:
     MuonCalculateAsymmetry alg;
     alg.initialize();
     alg.setProperty("InputWorkspace", inputWSGroup);
-    alg.setProperty("PeriodOperation", "-");
+    alg.setProperty("SummedPeriodSet", "1");
+    alg.setProperty("SubtractedPeriodSet", "2");
     alg.setProperty("OutputType", "GroupAsymmetry");
     alg.setProperty("GroupIndex", 2);
     alg.setPropertyValue("OutputWorkspace", outWSName);
@@ -278,7 +280,7 @@ public:
     MuonCalculateAsymmetry alg;
     alg.initialize();
     alg.setProperty("InputWorkspace", inputWSGroup);
-    alg.setProperty("PeriodOperation", "+");
+    alg.setProperty("SummedPeriodSet", "1,2");
     alg.setProperty("OutputType", "GroupAsymmetry");
     alg.setProperty("GroupIndex", 1);
     alg.setPropertyValue("OutputWorkspace", outWSName);
@@ -370,9 +372,9 @@ public:
     MuonCalculateAsymmetry alg;
     alg.initialize();
     alg.setProperty("InputWorkspace", inputWSGroup);
-    alg.setProperty("PeriodOperation", "-");
+    alg.setProperty("SummedPeriodSet", "1");
+    alg.setProperty("SubtractedPeriodSet", "2");
     alg.setProperty("OutputType", "PairAsymmetry");
-    alg.setProperty("PeriodOperation", "-");
     alg.setProperty("PairFirstIndex", 2);
     alg.setProperty("PairSecondIndex", 0);
     alg.setPropertyValue("OutputWorkspace", outWSName);
@@ -419,7 +421,7 @@ public:
     MuonCalculateAsymmetry alg;
     alg.initialize();
     alg.setProperty("InputWorkspace", inputWSGroup);
-    alg.setProperty("PeriodOperation", "+");
+    alg.setProperty("SummedPeriodSet", "1,2");
     alg.setProperty("OutputType", "PairAsymmetry");
     alg.setProperty("PairFirstIndex", 0);
     alg.setProperty("PairSecondIndex", 2);
@@ -465,7 +467,7 @@ public:
     MuonCalculateAsymmetry alg;
     alg.initialize();
     alg.setProperty("InputWorkspace", inputWSGroup);
-    alg.setProperty("PeriodOperation", "+");
+    alg.setProperty("SummedPeriodSet", "1,2");
     alg.setProperty("OutputType", "PairAsymmetry");
     alg.setProperty("PairFirstIndex", 0);
     alg.setProperty("PairSecondIndex", 2);
