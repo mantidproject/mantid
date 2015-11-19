@@ -214,7 +214,7 @@ class LoadTests(unittest.TestCase):
     # ================ Below test cases use different pref file ==================
     # =================== when 'ExistingV' = 'no' in pref file ===================
 
-    def runTest(self):
+    def runTestTwo(self):
         expt = cry_ini.Files('hrpd', RawDir=(DIRS[0]), Analysisdir='test',
                              forceRootDirFromScripts=False, inputInstDir=DIRS[0])
         expt.initialize('cycle_09_2', user='tester', prefFile='mtd2.pref')
