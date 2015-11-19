@@ -302,7 +302,8 @@ bool MDHistoWorkspaceIterator::valid() const { return (m_pos < m_max); }
 /// @return true if you can continue iterating
 bool MDHistoWorkspaceIterator::next() {
   if (m_function) {
-    bool allIncremented = false;
+    bool allIncremented;
+
     do {
       m_pos++;
       allIncremented =
@@ -311,31 +312,20 @@ bool MDHistoWorkspaceIterator::next() {
       for (size_t d = 0; d < m_nd; d++) {
         m_center[d] =
             m_origin[d] + (coord_t(m_index[d]) + 0.5f) * m_binWidth[d];
-        //          std::cout << m_center[d] << ",";
       }
-      //        std::cout<<std::endl;
-      // Keep incrementing until you are in the implicit function
-    } while (!allIncremented && !m_function->isPointContained(m_center) &&
-             m_pos < m_max);
+      // Keep incrementing until you are in the implicit function and not masked
+    } while (m_pos < m_max &&
+             ((!allIncremented && !m_function->isPointContained(m_center)) ||
+              m_skippingPolicy->keepGoing()));
   } else {
-    ++m_pos;
+    // Keep moving to next position if the current position is masked and
+    // still valid.
+    do {
+      m_pos++;
+    } while (m_skippingPolicy->keepGoing() && m_pos < m_max);
   }
-  bool ret = m_pos < m_max;
 
-  if (ret) {
-    // Avoid recursion in while loop as m_function does not need to be checked
-    // if skipping_policy is true anyway
-    // This also avoids high recursion depth causing stack overflow, which would
-    // otherwise be a problem for large masked regions
-    // Keep moving to next position if the current position is masked and still
-    // valid.
-    while (m_skippingPolicy->keepGoing()) { //(m_ws->getIsMaskedAt(m_pos)) {
-      ++m_pos;
-      ret = m_pos < m_max;
-      if (!ret)
-        break;
-    }
-  }
+  bool ret = m_pos < m_max;
   // Go through every point;
   return ret;
 }
