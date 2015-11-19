@@ -76,6 +76,21 @@ private:
   API::MatrixWorkspace_sptr
   sumPeriods(const API::WorkspaceGroup_const_sptr &inputWSGroup,
              const std::vector<int> &periodsToSum);
+  /// Subtracts one workspace from another (lhs - rhs)
+  API::MatrixWorkspace_sptr
+  subtractWorkspaces(const API::MatrixWorkspace_sptr &lhs,
+                     const API::MatrixWorkspace_sptr &rhs);
+  /// Extracts a single spectrum from a workspace
+  API::MatrixWorkspace_sptr extractSpectrum(const API::Workspace_sptr &inputWS,
+                                            const int index);
+  /// Removes exponential decay from the workspace
+  API::MatrixWorkspace_sptr removeExpDecay(const API::Workspace_sptr &inputWS,
+                                           const int index);
+  /// Performs asymmetry calculation on the workspace
+  API::MatrixWorkspace_sptr asymmetryCalc(const API::Workspace_sptr &inputWS,
+                                          const int firstPairIndex,
+                                          const int secondPairIndex,
+                                          const double alpha);
 };
 
 } // namespace WorkflowAlgorithms
