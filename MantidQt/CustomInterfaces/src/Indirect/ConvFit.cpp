@@ -776,9 +776,10 @@ double ConvFit::getInstrumentResolution(std::string workspaceName) {
 
     // If the analyser component is not already in the data file then load it
     // from the parameter file
-    if (inst->getComponentByName(analyser)
-            ->getNumberParameter("resolution")
-            .size() == 0) {
+    if (inst->getComponentByName(analyser) == NULL ||
+        inst->getComponentByName(analyser)
+                ->getNumberParameter("resolution")
+                .size() == 0) {
       std::string reflection = inst->getStringParameter("reflection")[0];
 
       IAlgorithm_sptr loadParamFile =
@@ -800,9 +801,12 @@ double ConvFit::getInstrumentResolution(std::string workspaceName) {
                  .retrieveWS<MatrixWorkspace>(workspaceName)
                  ->getInstrument();
     }
-
-    resolution =
-        inst->getComponentByName(analyser)->getNumberParameter("resolution")[0];
+    if (inst->getComponentByName(analyser) != NULL) {
+      resolution = inst->getComponentByName(analyser)
+                       ->getNumberParameter("resolution")[0];
+    } else {
+      resolution = inst->getNumberParameter("resolution")[0];
+    }
   } catch (Mantid::Kernel::Exception::NotFoundError &e) {
     UNUSED_ARG(e);
 
