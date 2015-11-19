@@ -169,7 +169,7 @@
      The background region is defined by background_range property."/>
 </parameter>
 <parameter name="nullify_negative_signal"  type="bool">
-  <value val="False"/>
+  <value val="True"/>
   <description is="If True and background removed, nullify the negative signal, which
      may occur at some detectors at some moments of time due to flat background removal and modify errors accordingly.
      If False, leave signals and errors unchanged. "/>
