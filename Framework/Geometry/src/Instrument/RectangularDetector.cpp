@@ -455,14 +455,14 @@ int RectangularDetector::maxDetectorID() {
 boost::shared_ptr<const IComponent>
 RectangularDetector::getComponentByName(const std::string &cname,
                                         int nlevels) const {
-	// exact matches
-	if (cname== this->getName())
-		return boost::shared_ptr<const IComponent>(this);
+  // exact matches
+  if (cname == this->getName())
+    return boost::shared_ptr<const IComponent>(this);
 
   // cache the detector's name as all the other names are longer
   // The extra ( is because all children of this have that as the next character
   // and this prevents Bank11 matching Bank 1
-	const std::string MEMBER_NAME = this->getName() +"(";
+  const std::string MEMBER_NAME = this->getName() + "(";
 
   // if the component name is too short, just return
   if (cname.length() <= MEMBER_NAME.length())

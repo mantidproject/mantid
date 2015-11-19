@@ -509,13 +509,13 @@ public:
         "bank 11(1,1)");
     TS_ASSERT_EQUALS(
         inst->getComponentByName(
-                "inst/detectors/Rectangle bank 4/Rectangle bank 4(3,5)")
+                  "inst/detectors/Rectangle bank 4/Rectangle bank 4(3,5)")
             ->getFullName(),
         "inst/detectors/Rectangle bank 4/Rectangle bank 4(x=3)/Rectangle bank "
         "4(3,5)");
-		TS_ASSERT_EQUALS(
-			inst->getComponentByName("Rectangle bank 11")->getFullName(),
-			"inst/detectors/Rectangle bank 11");
+    TS_ASSERT_EQUALS(
+        inst->getComponentByName("Rectangle bank 11")->getFullName(),
+        "inst/detectors/Rectangle bank 11");
 
     delete (inst);
   }
