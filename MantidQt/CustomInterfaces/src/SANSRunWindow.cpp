@@ -4887,7 +4887,7 @@ bool SANSRunWindow::isUserFileValid() {
   resultCheckValidity = resultCheckValidity.simplified();
   auto isValid = false;
   if (resultCheckValidity == m_constants.getPythonTrueKeyword()) {
-    isValid == true;
+    isValid = true;
   }
 
   if (!isValid) {
