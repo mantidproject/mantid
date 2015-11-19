@@ -3081,7 +3081,7 @@ void SANSRunWindow::handleInstrumentChange() {
       m_uiForm.front_beam_x, m_uiForm.front_beam_y, m_uiForm.front_radio};
   bool loq_selected = (instClass == "LOQ()");
   for (int i = 0; i < 3; i++)
-    front_center_widgets[i]->setEnabled(loq_selected);
+    front_center_widgets[i]->setEnabled(true);
   // Set the label of the radio buttons according to the
   // beamline usage:
   // REAR/FRONT -> SANS2D

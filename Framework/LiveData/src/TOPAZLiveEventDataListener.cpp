@@ -489,6 +489,7 @@ void TOPAZLiveEventDataListener::initWorkspace() {
   //  loadInst->setProperty("InstrumentXML", m_instrumentXML);
   loadInst->setProperty("InstrumentName", "TOPAZ");
   loadInst->setProperty("Workspace", m_eventBuffer);
+  loadInst->setProperty("RewriteSpectraMap", OptionalBool(false));
 
   loadInst->execute();
 

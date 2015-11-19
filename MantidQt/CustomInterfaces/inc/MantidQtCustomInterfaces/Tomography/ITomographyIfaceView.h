@@ -5,6 +5,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoReconFiltersSettings.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -116,11 +117,21 @@ public:
   virtual std::vector<std::string> processingJobsIDs() const = 0;
 
   /**
-   * Get the current reconstruction tooll settings set by the user.
+   * Get the current reconstruction tool settings set by the
+   * user. This is about tool specific options (like reconstruction
+   * method, etc.).
    *
    * @return Settings for the set of supported tools.
    */
   virtual TomoReconToolsUserSettings reconToolsSettings() const = 0;
+
+  /**
+   * The filters settings defined by the user. These options are
+   * general pre-/post-processing options.
+   *
+   * @return Pre-/post-processing filters settings
+   */
+  virtual TomoReconFiltersSettings prePostProcSettings() const = 0;
 
   /**
    * Gets the compute resource that is currently selected by the user.

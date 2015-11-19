@@ -1,9 +1,9 @@
 import unittest
+import platform
 from mantid.simpleapi import *
-from IndirectImport import *
 from mantid.api import MatrixWorkspace, WorkspaceGroup
 
-if is_supported_f2py_platform():
+if platform.system() == "Windows":
     class BayesQuasiTest(unittest.TestCase):
 
         _res_ws = None
@@ -65,25 +65,25 @@ if is_supported_f2py_platform():
 
             # Test values of result
             result_y = result.dataY(0)
-            self.assertEquals(round(result.dataY(0)[0], 5), 6.06105)
-            self.assertEquals(round(result.dataY(1)[0], 4), 68.5744)
-            self.assertEquals(round(result.dataY(2)[0], 7), 0.0589315)
-            self.assertEquals(round(result.dataY(3)[0], 7), 0.0812087)
+            self.assertEquals(round(result.dataY(0)[0], 5), 0.92237)
+            self.assertEquals(round(result.dataY(1)[0], 4), 6.9651)
+            self.assertEquals(round(result.dataY(2)[0], 7), 0.0620143)
+            self.assertEquals(round(result.dataY(3)[0], 7), 0.1169424)
 
             # Test values of probability
             prob_y = probability.dataY(0)
-            self.assertEquals(round(probability.dataY(0)[0], 1), -74176.1)
-            self.assertEquals(round(probability.dataY(1)[0], 3), -404.884)
-            self.assertEquals(round(probability.dataY(2)[0], 6), -0.222565)
+            self.assertEquals(round(probability.dataY(0)[0], 1), -65487.5)
+            self.assertEquals(round(probability.dataY(1)[0], 3), -375.124)
+            self.assertEquals(round(probability.dataY(2)[0], 6), 0)
 
             # Test values of group
             sub_ws = group.getItem(0)
             sub_y = sub_ws.dataY(0)
             self.assertEquals(round(sub_ws.dataY(0)[0], 5), 0.02540)
-            self.assertEquals(round(sub_ws.dataY(1)[0], 5), 0.01903)
-            self.assertEquals(round(sub_ws.dataY(2)[0], 5), -0.00638)
-            self.assertEquals(round(sub_ws.dataY(3)[0], 5), 0.01614)
-            self.assertEquals(round(sub_ws.dataY(4)[0], 5), -0.00926)
+            self.assertEquals(round(sub_ws.dataY(1)[0], 5), 0.01887)
+            self.assertEquals(round(sub_ws.dataY(2)[0], 5), -0.00653)
+            self.assertEquals(round(sub_ws.dataY(3)[0], 5), 0.01605)
+            self.assertEquals(round(sub_ws.dataY(4)[0], 5), -0.00935)
 
 
         def _validate_QSe_shape(self, result, group):
@@ -124,16 +124,16 @@ if is_supported_f2py_platform():
 
             # Test values of result
             result_y = result.dataY(0)
-            self.assertEquals(round(result.dataY(0)[0], 5), 81.12644)
-            self.assertEquals(round(result.dataY(1)[0], 7), 0.0319747)
-            self.assertEquals(round(result.dataY(2)[0], 5), 0.77168)
+            self.assertEquals(round(result.dataY(0)[0], 5), 8.28044)
+            self.assertEquals(round(result.dataY(1)[0], 7), 0.0335993)
+            self.assertEquals(round(result.dataY(2)[0], 5), 0.77844)
 
             # Test values of group
             sub_ws = group.getItem(0)
             sub_y = sub_ws.dataY(0)
             self.assertEquals(round(sub_ws.dataY(0)[0], 5), 0.02540)
-            self.assertEquals(round(sub_ws.dataY(1)[0], 5), 0.01632)
-            self.assertEquals(round(sub_ws.dataY(2)[0], 5), -0.00908)
+            self.assertEquals(round(sub_ws.dataY(1)[0], 5), 0.01656)
+            self.assertEquals(round(sub_ws.dataY(2)[0], 5), -0.00884)
 
 
         def test_QLr_Run(self):

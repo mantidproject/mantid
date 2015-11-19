@@ -1250,6 +1250,7 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
   loadInst->setProperty("InstrumentXML", m_instrumentXML);
   loadInst->setProperty("InstrumentName", m_instrumentName);
   loadInst->setProperty("Workspace", m_eventBuffer);
+  loadInst->setProperty("RewriteSpectraMap", OptionalBool(false));
 
   loadInst->execute();
 

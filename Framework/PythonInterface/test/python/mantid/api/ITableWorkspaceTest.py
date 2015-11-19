@@ -175,5 +175,26 @@ class ITableWorkspaceTest(unittest.TestCase):
         self.assertTrue( numpy.array_equal( table.cell(0,0), numpy.array([1,2,3,4,5]) ) )
         self.assertTrue( numpy.array_equal( table.cell(1,0), numpy.array([6,7,8,9,10]) ) )
 
+    def test_set_and_extract_plot_types(self):
+        table = WorkspaceFactory.createTable()
+
+        table.addColumn("int", "index")
+        table.addColumn("int", "value", 3)
+        self.assertEquals(table.columnCount(), 2)
+
+        self.assertEquals(table.getPlotType(0), -1000) # default plot type
+        self.assertEquals(table.getPlotType(1), 3)
+
+        table.setPlotType(0, 1)
+        table.setPlotType("value", 2)
+
+        self.assertEquals(table.getPlotType("index"), 1)
+        self.assertEquals(table.getPlotType("value"), 2)
+
+        table.addRow([1, 2])
+        table.addRow([3, 4])
+        self.assertEquals(table.rowCount(), 2)
+
+
 if __name__ == '__main__':
     unittest.main()
