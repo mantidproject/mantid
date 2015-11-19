@@ -522,6 +522,23 @@ bool ReflectometryReductionOneAuto::checkGroups() {
   return false;
 }
 
+Mantid::API::Workspace_sptr
+ReflectometryReductionOneAuto::handleTransmissionGroup(
+    Mantid::API::WorkspaceGroup_sptr transG) {
+  // Handle transmission runs
+  auto transmissionRunSum = transG->getItem(0);
+  for (size_t item = 1; item < transG->size(); item++) {
+    auto plusAlg = this->createChildAlgorithm("Plus");
+    plusAlg->setChild(true);
+    plusAlg->initialize();
+    plusAlg->setProperty("LHSWorkspace", transmissionRunSum);
+    plusAlg->setProperty("RHSWorkspace", transG->getItem(item));
+    plusAlg->setProperty("OutputWorkspace", transmissionRunSum);
+    plusAlg->execute();
+  }
+  return transmissionRunSum;
+}
+
 bool ReflectometryReductionOneAuto::processGroups() {
   auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
       getPropertyValue("InputWorkspace"));
@@ -553,12 +570,8 @@ bool ReflectometryReductionOneAuto::processGroups() {
         AnalysisDataService::Instance().retrieveWS<Workspace>(firstTrans);
     firstTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(firstTransWS);
 
-    if (!firstTransG) // sum over transmission workspaces here?
+    if (!firstTransG)
       alg->setProperty("FirstTransmissionRun", firstTrans);
-    else if (group->size() != firstTransG->size())
-      throw std::runtime_error("FirstTransmissionRun WorkspaceGroup must be "
-                               "the same size as the InputWorkspace "
-                               "WorkspaceGroup");
   }
 
   const std::string secondTrans =
@@ -572,13 +585,19 @@ bool ReflectometryReductionOneAuto::processGroups() {
     if (!secondTransG)
       alg->setProperty("SecondTransmissionRun",
                        secondTrans); // sum over transmission workspaces here?
-    else if (group->size() != secondTransG->size())
-      throw std::runtime_error("SecondTransmissionRun WorkspaceGroup must be "
-                               "the same size as the InputWorkspace "
-                               "WorkspaceGroup");
   }
 
   std::vector<std::string> IvsQGroup, IvsLamGroup;
+
+  // Handle transmission runs before processing InputWorkspace group members.
+  if (firstTransG) {
+    auto firstTransmissionSum = handleTransmissionGroup(firstTransG);
+    alg->setProperty("FirstTransmissionRun", firstTransmissionSum);
+  }
+  if (secondTransG) {
+    auto secondTransmissionSum = handleTransmissionGroup(secondTransG);
+    alg->setProperty("SecondTransmissionRun", secondTransmissionSum);
+  }
 
   // Execute algorithm over each group member (or period, if this is
   // multiperiod)
@@ -592,26 +611,6 @@ bool ReflectometryReductionOneAuto::processGroups() {
     alg->setProperty("InputWorkspace", group->getItem(i)->name());
     alg->setProperty("OutputWorkspace", IvsQName);
     alg->setProperty("OutputWorkspaceWavelength", IvsLamName);
-
-    // Handle transmission runs
-    auto transmissionRunSum = firstTransG->getItem(0)->name();
-    if (firstTransG) {
-      for (size_t item = 1; item < firstTransG->size(); item++) {
-        auto plusAlg = this->createChildAlgorithm("Plus");
-        plusAlg->setChild(true);
-        plusAlg->initialize();
-        plusAlg->setProperty("LHSWorkspace", transmissionRunSum);
-        plusAlg->setProperty("RHSWorkspace", firstTransG->getItem(item));
-        plusAlg->setProperty("OutputWorkspace", transmissionRunSum);
-        plusAlg->execute();
-        transmissionRunSum = plusAlg->getPropertyValue("OutputWorkspace");
-      }
-      alg->setProperty("FirstTransmissionRun", transmissionRunSum);
-    }
-    if (secondTransG)
-      alg->setProperty("SecondTransmissionRun",
-                       secondTransG->getItem(i)->name());
-
     alg->execute();
 
     IvsQGroup.push_back(IvsQName);

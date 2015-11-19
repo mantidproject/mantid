@@ -63,6 +63,10 @@ private:
   std::string cAlphaLabel() const { return "CAlpha"; }
   std::string cApLabel() const { return "CAp"; }
   std::string noPolarizationCorrectionMode() const { return "None"; }
+
+  /// Handling transmission Group workspaces by summing over all of them
+  Mantid::API::Workspace_sptr
+  handleTransmissionGroup(Mantid::API::WorkspaceGroup_sptr transG);
 };
 
 } // namespace Algorithms
