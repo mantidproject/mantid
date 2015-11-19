@@ -128,7 +128,7 @@ void MuonCalculateAsymmetry::exec() {
   } else if (type == "GroupAsymmetry") {
 
     auto outWS = calculateGroupAsymmetry(inputWSGroup, groupIndex,
-                                         subtractedPeriods, subtractedPeriods);
+                                         summedPeriods, subtractedPeriods);
 
     setProperty("OutputWorkspace", outWS);
 
@@ -222,58 +222,42 @@ MatrixWorkspace_sptr MuonCalculateAsymmetry::calculateGroupAsymmetry(
   if (numPeriods > 1) {
     // Several period workspaces were supplied
 
-    if (op == "+") {
+    auto summedWS = sumPeriods(inputWSGroup, summedPeriods);
+    auto subtractedWS = sumPeriods(inputWSGroup, subtractedPeriods);
 
-      // Sum
-      IAlgorithm_sptr alg = createChildAlgorithm("Plus");
-      alg->initialize();
-      alg->setProperty("LHSWorkspace", inputWSGroup->getItem(0));
-      alg->setProperty("RHSWorkspace", inputWSGroup->getItem(1));
-      alg->execute();
-      MatrixWorkspace_sptr sumWS = alg->getProperty("OutputWorkspace");
+    // GroupIndex as vector
+    // Necessary if we want RemoveExpDecay to fit only the requested
+    // spectrum
+    std::vector<int> spec(1, groupIndex);
 
-      // GroupIndex as vector
-      // Necessary if we want RemoveExpDecay to fit only the requested
-      // spectrum
-      std::vector<int> spec(1, groupIndex);
+    // Remove decay (summed periods ws)
+    IAlgorithm_sptr asym = createChildAlgorithm("RemoveExpDecay");
+    asym->initialize();
+    asym->setProperty("InputWorkspace", summedWS);
+    asym->setProperty("Spectra", spec);
+    asym->execute();
+    MatrixWorkspace_sptr asymSummedPeriods =
+        asym->getProperty("OutputWorkspace");
 
-      // Remove decay
-      IAlgorithm_sptr asym = createChildAlgorithm("RemoveExpDecay");
-      asym->setProperty("InputWorkspace", sumWS);
-      asym->setProperty("Spectra", spec);
-      asym->execute();
-      tempWS = asym->getProperty("OutputWorkspace");
-
-    } else if (op == "-") {
-
-      // GroupIndex as vector
-      std::vector<int> spec(1, groupIndex);
-
-      // Remove decay (first period ws)
-      IAlgorithm_sptr asym = createChildAlgorithm("RemoveExpDecay");
-      asym->initialize();
-      asym->setProperty("InputWorkspace", inputWSGroup->getItem(0));
-      asym->setProperty("Spectra", spec);
-      asym->execute();
-      MatrixWorkspace_sptr asymFirstPeriod =
-          asym->getProperty("OutputWorkspace");
-
-      // Remove decay (second period ws)
+    if (!subtractedPeriods.empty()) {
+      // Remove decay (subtracted periods ws)
       asym = createChildAlgorithm("RemoveExpDecay");
       asym->initialize();
-      asym->setProperty("InputWorkspace", inputWSGroup->getItem(1));
+      asym->setProperty("InputWorkspace", subtractedWS);
       asym->setProperty("Spectra", spec);
       asym->execute();
-      MatrixWorkspace_sptr asymSecondPeriod =
+      MatrixWorkspace_sptr asymSubtractedPeriods =
           asym->getProperty("OutputWorkspace");
 
       // Now subtract
       IAlgorithm_sptr alg = createChildAlgorithm("Minus");
       alg->initialize();
-      alg->setProperty("LHSWorkspace", asymFirstPeriod);
-      alg->setProperty("RHSWorkspace", asymSecondPeriod);
+      alg->setProperty("LHSWorkspace", asymSummedPeriods);
+      alg->setProperty("RHSWorkspace", asymSubtractedPeriods);
       alg->execute();
       tempWS = alg->getProperty("OutputWorkspace");
+    } else {
+      tempWS = asymSummedPeriods;
     }
   } else {
     // Only one period was supplied
@@ -319,60 +303,42 @@ MatrixWorkspace_sptr MuonCalculateAsymmetry::calculatePairAsymmetry(
 
     MatrixWorkspace_sptr outWS;
 
-    if (op == "+") {
+      auto summedWS = sumPeriods(inputWSGroup, summedPeriods);
+      auto subtractedWS = sumPeriods(inputWSGroup, subtractedPeriods);
 
-      // Sum
-      IAlgorithm_sptr alg = createChildAlgorithm("Plus");
-      alg->initialize();
-      alg->setProperty("LHSWorkspace", inputWSGroup->getItem(0));
-      alg->setProperty("RHSWorkspace", inputWSGroup->getItem(1));
-      alg->execute();
-      MatrixWorkspace_sptr sumWS = alg->getProperty("OutputWorkspace");
-
-      // Asymmetry calculation
-      alg = createChildAlgorithm("AsymmetryCalc");
-      alg->setProperty("InputWorkspace", sumWS);
-      alg->setProperty("ForwardSpectra", fwd);
-      alg->setProperty("BackwardSpectra", bwd);
-      alg->setProperty("Alpha", alpha);
-      alg->execute();
-      outWS = alg->getProperty("OutputWorkspace");
-
-    } else if (op == "-") {
-
-      std::vector<int> fwd(1, firstPairIndex + 1);
-      std::vector<int> bwd(1, secondPairIndex + 1);
-
-      // First period asymmetry
+      // Summed periods asymmetry
       IAlgorithm_sptr alg = createChildAlgorithm("AsymmetryCalc");
-      alg->setProperty("InputWorkspace", inputWSGroup->getItem(0));
+      alg->setProperty("InputWorkspace", summedWS);
       alg->setProperty("ForwardSpectra", fwd);
       alg->setProperty("BackwardSpectra", bwd);
       alg->setProperty("Alpha", alpha);
       alg->execute();
-      MatrixWorkspace_sptr asymFirstPeriod =
+      MatrixWorkspace_sptr asymSummedPeriods =
           alg->getProperty("OutputWorkspace");
 
-      // Second period asymmetry
-      alg = createChildAlgorithm("AsymmetryCalc");
-      alg->setProperty("InputWorkspace", inputWSGroup->getItem(1));
-      alg->setProperty("ForwardSpectra", fwd);
-      alg->setProperty("BackwardSpectra", bwd);
-      alg->setProperty("Alpha", alpha);
-      alg->execute();
-      MatrixWorkspace_sptr asymSecondPeriod =
-          alg->getProperty("OutputWorkspace");
+      if (!subtractedPeriods.empty()) {
+        // Subtracted periods asymmetry
+        alg = createChildAlgorithm("AsymmetryCalc");
+        alg->setProperty("InputWorkspace", subtractedWS);
+        alg->setProperty("ForwardSpectra", fwd);
+        alg->setProperty("BackwardSpectra", bwd);
+        alg->setProperty("Alpha", alpha);
+        alg->execute();
+        MatrixWorkspace_sptr asymSubtractedPeriods =
+            alg->getProperty("OutputWorkspace");
 
-      // Now subtract
-      alg = createChildAlgorithm("Minus");
-      alg->initialize();
-      alg->setProperty("LHSWorkspace", asymFirstPeriod);
-      alg->setProperty("RHSWorkspace", asymSecondPeriod);
-      alg->execute();
-      outWS = alg->getProperty("OutputWorkspace");
-    }
+        // Now subtract
+        alg = createChildAlgorithm("Minus");
+        alg->initialize();
+        alg->setProperty("LHSWorkspace", asymSummedPeriods);
+        alg->setProperty("RHSWorkspace", asymSubtractedPeriods);
+        alg->execute();
+        outWS = alg->getProperty("OutputWorkspace");
+      } else {
+        outWS = asymSummedPeriods;
+      }
 
-    return outWS;
+      return outWS;
 
   } else {
 
@@ -471,18 +437,18 @@ MatrixWorkspace_sptr MuonCalculateAsymmetry::sumPeriods(
   MatrixWorkspace_sptr outWS;
   if (!periodsToSum.empty()) {
     auto LHSWorkspace = inputWSGroup->getItem(periodsToSum[0] - 1);
-    if (periodsToSum.size() > 1) {
+    outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(LHSWorkspace);
+    if (outWS != nullptr && periodsToSum.size() > 1) {
       for (int i = 1; i < periodsToSum.size(); i++) {
         auto RHSWorkspace = inputWSGroup->getItem(periodsToSum[i] - 1);
         IAlgorithm_sptr alg = createChildAlgorithm("Plus");
         alg->initialize();
-        alg->setProperty("LHSWorkspace", LHSWorkspace);
+        alg->setProperty("LHSWorkspace", outWS);
         alg->setProperty("RHSWorkspace", RHSWorkspace);
         alg->execute();
-        LHSWorkspace = alg->getProperty("OutputWorkspace");
+        outWS = alg->getProperty("OutputWorkspace");
       }
     }
-    outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(LHSWorkspace);
   }
   return outWS;
 }
