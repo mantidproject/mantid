@@ -2446,7 +2446,7 @@ class UserFile(ReductionStep):
         user_file = self.filename
 
         # Check that the format is valid, ie txt or 099AA else raise
-        if not su.is_valid_user_file(user_file):
+        if not is_valid_user_file_extension(user_file):
             raise RuntimeError("UseFile: The user file does not seem to be of the correct file type.")
 
         #Check that the file exists.
