@@ -1779,6 +1779,7 @@ class DirectEnergyConversion(object):
         if prop_man.check_background and prop_man.nullify_negative_signal:
             zeroBg = CreateWorkspace(DataX='0,1',DataY=0,DataE=0,UnitX='TOF')
             result_ws=RemoveBackground(result_ws,BkgWorkspace=zeroBg,Emode='Direct',NullifyNegativeValues=True)
+            DeleteWorkspace(zeroBg)
 
 
         # White beam correction
