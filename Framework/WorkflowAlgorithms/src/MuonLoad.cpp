@@ -4,6 +4,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -51,13 +52,17 @@ void MuonLoad::init() {
   declareProperty("SecondPeriod", EMPTY_INT(),
                   "Group index of the second period workspace to use");
 
-  std::vector<std::string> allowedOperations;
-  allowedOperations.push_back("+");
-  allowedOperations.push_back("-");
-  declareProperty("PeriodOperation", "+",
-                  boost::make_shared<StringListValidator>(allowedOperations),
-                  "If two periods specified, what operation to apply to "
-                  "workspaces to get a final one.");
+  declareProperty(
+      new ArrayProperty<int>(
+          "SummedPeriodSet", "1",
+          boost::make_shared<MandatoryValidator<std::vector<int>>>(),
+          Direction::Input),
+      "Comma-separated list of periods to be summed");
+
+  declareProperty(
+      new ArrayProperty<int>("SubtractedPeriodSet", Direction::Input),
+      "Comma-separated list of periods to be subtracted from the "
+      "SummedPeriodSet");
 
   declareProperty(
       "ApplyDeadTimeCorrection", false,
@@ -245,9 +250,10 @@ void MuonLoad::exec() {
   calcAssym->setProperty("InputWorkspace", inputWSGroup);
 
   // Copy similar properties over
-  calcAssym->setProperty(
-      "PeriodOperation",
-      static_cast<std::string>(getProperty("PeriodOperation")));
+  std::vector<int> summedPeriods = getProperty("SummedPeriodSet");
+  std::vector<int> subtractedPeriods = getProperty("SubtractedPeriodSet");
+  calcAssym->setProperty("SummedPeriodSet", summedPeriods);
+  calcAssym->setProperty("SubtractedPeriodSet", subtractedPeriods);
   calcAssym->setProperty("OutputType",
                          static_cast<std::string>(getProperty("OutputType")));
   calcAssym->setProperty("PairFirstIndex",
