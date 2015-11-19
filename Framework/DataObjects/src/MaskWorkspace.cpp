@@ -311,8 +311,9 @@ IPropertyManager::getValue<Mantid::DataObjects::MaskWorkspace_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected MaskWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<MaskWorkspace>.";
     throw std::runtime_error(message);
   }
 }
@@ -328,8 +329,9 @@ IPropertyManager::getValue<Mantid::DataObjects::MaskWorkspace_const_sptr>(
   if (prop) {
     return prop->operator()();
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected const MaskWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected const shared_ptr<MaskWorkspace>.";
     throw std::runtime_error(message);
   }
 }

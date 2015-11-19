@@ -292,27 +292,35 @@ IMaskWorkspace_sptr InstrumentActor::getMaskWorkspaceIfExists() const
   */
 void InstrumentActor::applyMaskWorkspace()
 {
-    if ( !m_maskWorkspace ) return;
-    try
-    {
-        Mantid::API::IAlgorithm * alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("MaskDetectors",-1);
-        alg->setPropertyValue( "Workspace", getWorkspace()->name() );
-        alg->setProperty( "MaskedWorkspace", m_maskWorkspace );
-        alg->execute();
-        // After the algorithm finishes the InstrumentWindow catches the after-replace notification
-        // and updates this instrument actor.
+  auto wsName = getWorkspace()->name();
+  if (m_maskWorkspace) {
+    // Mask detectors
+    try {
+      Mantid::API::IAlgorithm *alg =
+          Mantid::API::FrameworkManager::Instance().createAlgorithm(
+              "MaskDetectors", -1);
+      alg->setPropertyValue("Workspace", wsName);
+      alg->setProperty("MaskedWorkspace", m_maskWorkspace);
+      alg->execute();
+      // After the algorithm finishes the InstrumentWindow catches the
+      // after-replace notification
+      // and updates this instrument actor.
+    } catch (...) {
+      QMessageBox::warning(NULL, "MantidPlot - Warning",
+                           "An error accured when applying the mask.", "OK");
     }
-    catch(...)
-    {
-        QMessageBox::warning(NULL,"MantidPlot - Warning","An error accured when applying the mask.","OK");
-    }
-    clearMaskWorkspace();
+  }
+
+  // Mask bins
+  m_maskBinsData.mask(wsName);
+
+  clearMasks();
 }
 
 /**
   * Removes the mask workspace.
   */
-void InstrumentActor::clearMaskWorkspace()
+void InstrumentActor::clearMasks()
 {
     bool needColorRecalc = false;
     if ( m_maskWorkspace )
@@ -320,6 +328,13 @@ void InstrumentActor::clearMaskWorkspace()
         needColorRecalc = getMaskWorkspace()->getNumberMasked() > 0;
     }
     m_maskWorkspace.reset();
+    if (!m_maskBinsData.isEmpty())
+    {
+      m_maskBinsData.clear();
+      auto workspace = getWorkspace();
+      calculateIntegratedSpectra(*workspace);
+      needColorRecalc = true;
+    }
     if ( needColorRecalc )
     {
         resetColors();
@@ -1178,14 +1193,20 @@ void InstrumentActor::setDataMinMaxRange(double vmin, double vmax)
   m_DataMaxScaleValue = vmax;
 }
 
+void InstrumentActor::calculateIntegratedSpectra(const Mantid::API::MatrixWorkspace& workspace)
+{
+  //Use the workspace function to get the integrated spectra
+  workspace.getIntegratedSpectra(m_specIntegrs, m_BinMinValue, m_BinMaxValue, wholeRange());
+  m_maskBinsData.subtractIntegratedSpectra(workspace, m_specIntegrs);
+}
+
 void InstrumentActor::setDataIntegrationRange(const double& xmin,const double& xmax)
 {
   m_BinMinValue = xmin;
   m_BinMaxValue = xmax;
 
   auto workspace = getWorkspace();
-  //Use the workspace function to get the integrated spectra
-  workspace->getIntegratedSpectra(m_specIntegrs, m_BinMinValue, m_BinMaxValue, wholeRange());
+  calculateIntegratedSpectra(*workspace);
 
   // get the workspace indices of monitors in order to exclude them from finding of the max value
   auto monitorIDs = getInstrument()->getMonitors();
@@ -1246,6 +1267,30 @@ void InstrumentActor::setDataIntegrationRange(const double& xmin,const double& x
     m_DataMinScaleValue = m_DataMinValue;
     m_DataMaxScaleValue = m_DataMaxValue;
   }
+}
+
+/// Add a range of bins for masking
+void InstrumentActor::addMaskBinsData(const QList<int>& detIDs)
+{
+  QList<int> indices;
+  foreach(int id, detIDs)
+  {
+    auto index = m_detid2index_map[id];
+    indices.append(static_cast<int>(index));
+  }
+  if (!indices.isEmpty())
+  {
+    m_maskBinsData.addXRange(m_BinMinValue, m_BinMaxValue, indices);
+    auto workspace = getWorkspace();
+    calculateIntegratedSpectra(*workspace);
+    resetColors();
+  }
+}
+
+/// Show if bin masks have been defined.
+bool InstrumentActor::hasBinMask() const
+{
+  return ! m_maskBinsData.isEmpty();
 }
 
 //-------------------------------------------------------------------------//

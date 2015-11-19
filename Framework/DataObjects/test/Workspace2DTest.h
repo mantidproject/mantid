@@ -9,6 +9,7 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidKernel/CPUTimer.h"
+#include "PropertyManagerHelper.h"
 
 using namespace std;
 using namespace Mantid;
@@ -233,6 +234,39 @@ public:
     TS_ASSERT(spec);
     TS_ASSERT_THROWS_ANYTHING(spec = ws->getSpectrum(4));
   }
+
+  /**
+   * Test that a Workspace2D_sptr can be held as a property and
+   * retrieved as const or non-const sptr,
+   * and that the cast from TypedValue works properly
+   */
+  void testGetProperty_const_sptr() {
+    const std::string wsName = "InputWorkspace";
+    Workspace2D_sptr wsInput(new Workspace2D());
+    PropertyManagerHelper manager;
+    manager.declareProperty(wsName, wsInput, Mantid::Kernel::Direction::Input);
+
+    // Check property can be obtained as const_sptr or sptr
+    Workspace2D_const_sptr wsConst;
+    Workspace2D_sptr wsNonConst;
+    TS_ASSERT_THROWS_NOTHING(
+        wsConst = manager.getValue<Workspace2D_const_sptr>(wsName));
+    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsNonConst =
+                                 manager.getValue<Workspace2D_sptr>(wsName));
+    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT_EQUALS(wsConst, wsNonConst);
+
+    // Check TypedValue can be cast to const_sptr or to sptr
+    PropertyManagerHelper::TypedValue val(manager, wsName);
+    Workspace2D_const_sptr wsCastConst;
+    Workspace2D_sptr wsCastNonConst;
+    TS_ASSERT_THROWS_NOTHING(wsCastConst = (Workspace2D_const_sptr)val);
+    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (Workspace2D_sptr)val);
+    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
+  }
 };
 
 class Workspace2DTestPerformance : public CxxTest::TestSuite {
@@ -291,4 +325,5 @@ public:
               << std::endl;
   }
 };
+
 #endif

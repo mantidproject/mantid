@@ -14,6 +14,7 @@
 #include "MantidTestHelpers/FakeGmockObjects.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
+#include "PropertyManagerHelper.h"
 
 #include <cxxtest/TestSuite.h>
 #include <boost/make_shared.hpp>
@@ -1255,6 +1256,37 @@ public:
     TS_ASSERT_EQUALS(ws.readE(5)[0], 4);
     TS_ASSERT_EQUALS(ws.readE(6)[0], 5);
     TS_ASSERT_EQUALS(ws.readE(7)[0], 6);
+  }
+
+  /**
+  * Test declaring an input workspace and retrieving as const_sptr or sptr
+  */
+  void testGetProperty_const_sptr() {
+    const std::string wsName = "InputWorkspace";
+    MatrixWorkspace_sptr wsInput(new WorkspaceTester());
+    PropertyManagerHelper manager;
+    manager.declareProperty(wsName, wsInput, Direction::Input);
+
+    // Check property can be obtained as const_sptr or sptr
+    MatrixWorkspace_const_sptr wsConst;
+    MatrixWorkspace_sptr wsNonConst;
+    TS_ASSERT_THROWS_NOTHING(
+        wsConst = manager.getValue<MatrixWorkspace_const_sptr>(wsName));
+    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(
+        wsNonConst = manager.getValue<MatrixWorkspace_sptr>(wsName));
+    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT_EQUALS(wsConst, wsNonConst);
+
+    // Check TypedValue can be cast to const_sptr or to sptr
+    PropertyManagerHelper::TypedValue val(manager, wsName);
+    MatrixWorkspace_const_sptr wsCastConst;
+    MatrixWorkspace_sptr wsCastNonConst;
+    TS_ASSERT_THROWS_NOTHING(wsCastConst = (MatrixWorkspace_const_sptr)val);
+    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (MatrixWorkspace_sptr)val);
+    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 
 private:

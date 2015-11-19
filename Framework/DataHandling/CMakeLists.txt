@@ -126,6 +126,7 @@ set ( SRC_FILES
 	src/SaveDspacemap.cpp
 	src/SaveFocusedXYE.cpp
 	src/SaveFullprofResolution.cpp
+	src/SaveGSASInstrumentFile.cpp
 	src/SaveGSS.cpp
 	src/SaveILLCosmosAscii.cpp
 	src/SaveISISNexus.cpp
@@ -153,6 +154,7 @@ set ( SRC_FILES
 	src/SetScalingPSD.cpp
 	src/SortTableWorkspace.cpp
 	src/UpdateInstrumentFromFile.cpp
+	src/XmlHandler.cpp
 )
 
 set ( INC_FILES
@@ -278,6 +280,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveDspacemap.h
 	inc/MantidDataHandling/SaveFocusedXYE.h
 	inc/MantidDataHandling/SaveFullprofResolution.h
+	inc/MantidDataHandling/SaveGSASInstrumentFile.h
 	inc/MantidDataHandling/SaveGSS.h
 	inc/MantidDataHandling/SaveILLCosmosAscii.h
 	inc/MantidDataHandling/SaveISISNexus.h
@@ -305,6 +308,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SetScalingPSD.h
 	inc/MantidDataHandling/SortTableWorkspace.h
 	inc/MantidDataHandling/UpdateInstrumentFromFile.h
+	inc/MantidDataHandling/XmlHandler.h
 	src/LoadRaw/byte_rel_comp.h
 	src/LoadRaw/isisraw.h
 	src/LoadRaw/isisraw2.h
@@ -427,6 +431,7 @@ set ( TEST_FILES
 	SaveDspacemapTest.h
 	SaveFocussedXYETest.h
 	SaveFullprofResolutionTest.h
+	SaveGSASInstrumentFileTest.h
 	SaveGSSTest.h
 	SaveILLCosmosAsciiTest.h
 	SaveIsawDetCalTest.h

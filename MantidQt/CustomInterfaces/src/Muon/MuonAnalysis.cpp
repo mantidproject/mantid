@@ -711,6 +711,7 @@ void MuonAnalysis::userSelectInstrument(const QString& prefix)
   {
     runClearGroupingButton();
     m_curInterfaceSetup = prefix;
+    clearLoadedRun();
 
     // save this new choice
     QSettings group;
@@ -1937,6 +1938,16 @@ void MuonAnalysis::clearTablesAndCombo()
 }
 
 /**
+ * Clear loaded run, run info and delete loaded workspaces
+ */
+void MuonAnalysis::clearLoadedRun() {
+  m_uiForm.mwRunFiles->clear();
+  m_uiForm.infoBrowser->clear();
+  deleteWorkspaceIfExists(m_workspace_name);
+  deleteWorkspaceIfExists(m_grouped_name);
+}
+
+/**
  * Get period labels for the periods selected in the GUI
  * @return Return empty string if no periods (well just one period). If more 
  *         one period then return "_#" string for the periods selected by user
@@ -3123,6 +3134,16 @@ void MuonAnalysis::openSequentialFitDialog()
   try
   {
     loadAlg = createLoadAlgorithm();
+  }
+  catch (const std::runtime_error &err) {
+    QString message("Error while setting load properties.\n"
+                    "If instrument was changed, properties will have been "
+                    "cleared and should be reset.\n\n"
+                    "Error was: ");
+    message.append(err.what());
+    QMessageBox::critical(this, "Unable to open dialog", message);
+    g_log.error(message.ascii());
+    return;
   }
   catch(...)
   {

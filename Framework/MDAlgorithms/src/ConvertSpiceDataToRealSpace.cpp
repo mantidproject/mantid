@@ -339,6 +339,8 @@ MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
   IAlgorithm_sptr instloader = this->createChildAlgorithm("LoadInstrument");
   instloader->initialize();
   instloader->setProperty("InstrumentName", m_instrumentName);
+  instloader->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(true));
   instloader->setProperty("Workspace", tempws);
   instloader->execute();
 

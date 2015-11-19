@@ -631,7 +631,8 @@ void LoadEventPreNexus2::runLoadInstrument(
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   loadInst->setPropertyValue("InstrumentName", instrument);
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-  loadInst->setProperty("RewriteSpectraMap", false);
+  loadInst->setProperty("RewriteSpectraMap",
+                        Mantid::Kernel::OptionalBool(false));
   loadInst->executeAsChildAlg();
 
   // Populate the instrument parameters in this workspace - this works around a

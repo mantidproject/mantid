@@ -404,7 +404,7 @@ CreateMD::merge_runs(const std::vector<std::string> &to_merge) {
  *
  * @param input_workspace :: datasource workspace
  * @param emode :: analysis mode "Elastic", "Direct" or "Indirect"
- * @param efix :: datasource engery values in meV
+ * @param efix :: datasource energy values in meV
  * @param psi :: goniometer rotation in degrees
  * @param gl :: goniometer rotation in degrees
  * @param gs :: goniometer rotation in degrees
@@ -482,17 +482,25 @@ std::map<std::string, std::string> CreateMD::validateInputs() {
   const std::vector<double> efix = this->getProperty("Efix");
 
   const size_t ws_entries = data_sources.size();
+  for (const auto &source : data_sources) {
+    if (!dataExists(source)) {
+      validation_output["DataSources"] =
+          "All given data sources must exist. "
+          "For files, ensure the path is added to "
+          "Mantid's 'Data Search Directories'";
+    }
+  }
 
-  if (u.size() < 3) {
+  if (u.size() != 3) {
     validation_output["u"] = "u must have 3 components";
   }
-  if (v.size() < 3) {
+  if (v.size() != 3) {
     validation_output["v"] = "v must have 3 components";
   }
-  if (alatt.size() < 3) {
+  if (alatt.size() != 3) {
     validation_output["Alatt"] = "Lattice parameters must have 3 components";
   }
-  if (angdeg.size() < 3) {
+  if (angdeg.size() != 3) {
     validation_output["Angdeg"] = "Angle must have 3 components";
   }
   if (!psi.empty() && psi.size() != ws_entries) {

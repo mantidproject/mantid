@@ -245,6 +245,8 @@ void LoadSINQFocus::runLoadInstrument() {
     // different IDF
 
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
+    loadInst->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(true));
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
     loadInst->execute();
   } catch (...) {

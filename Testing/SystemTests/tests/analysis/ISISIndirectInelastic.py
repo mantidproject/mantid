@@ -1032,8 +1032,12 @@ class OSIRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
         self.endx = 0.119681
 
     def get_reference_files(self):
-        return ['II.OSIRISFury.nxs',
-                'II.OSIRISFuryFitMulti.nxs']
+        ref_files = ['II.OSIRISFury.nxs']
+        if platform.system() == "Windows":
+            ref_files += ['II.OSIRISFuryFitMulti_win.nxs']
+        else:
+            ref_files += ['II.OSIRISFuryFitMulti_lin.nxs']
+        return ref_files
 
 #------------------------- IRIS tests -----------------------------------------
 

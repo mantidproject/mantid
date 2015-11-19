@@ -5,6 +5,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
@@ -103,6 +104,7 @@ void CreateSimulationWorkspace::createInstrument() {
   } else {
     loadInstrument->setPropertyValue("InstrumentName", instrProp);
   }
+  loadInstrument->setProperty("RewriteSpectraMap", Kernel::OptionalBool(true));
   loadInstrument->executeAsChildAlg();
   tempWS = loadInstrument->getProperty("Workspace");
 

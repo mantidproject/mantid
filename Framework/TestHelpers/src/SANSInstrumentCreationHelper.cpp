@@ -75,6 +75,8 @@ void SANSInstrumentCreationHelper::runLoadInstrument(
   loadInst.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/" +
                                             instrumentID + "_Definition.xml");
   loadInst.setProperty<MatrixWorkspace_sptr>("Workspace", workspace);
+  loadInst.setProperty("RewriteSpectraMap",
+                       Mantid::Kernel::OptionalBool(false));
   loadInst.execute();
 }
 

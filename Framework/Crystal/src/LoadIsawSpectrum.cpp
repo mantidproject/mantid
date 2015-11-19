@@ -298,7 +298,8 @@ LoadIsawSpectrum::getInstrument3Ways(Algorithm *alg) {
     childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
     childAlg->setPropertyValue("Filename", InstrumentFilename);
     childAlg->setPropertyValue("InstrumentName", InstrumentName);
-    childAlg->setProperty("RewriteSpectraMap", false);
+    childAlg->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(false));
     childAlg->executeAsChildAlg();
     inst = tempWS->getInstrument();
   }

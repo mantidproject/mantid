@@ -117,8 +117,9 @@ IPropertyManager::getValue<Mantid::DataObjects::GroupingWorkspace_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected GroupingWorkspace.";
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<GroupingWorkspace>.";
     throw std::runtime_error(message);
   }
 }
@@ -136,7 +137,7 @@ IPropertyManager::getValue<Mantid::DataObjects::GroupingWorkspace_const_sptr>(
   } else {
     std::string message =
         "Attempt to assign property " + name +
-        " to incorrect type. Expected const GroupingWorkspace.";
+        " to incorrect type. Expected const shared_ptr<GroupingWorkspace>.";
     throw std::runtime_error(message);
   }
 }

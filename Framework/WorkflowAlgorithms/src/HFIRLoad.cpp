@@ -60,7 +60,8 @@ void HFIRLoad::init() {
 }
 
 /// Move the detector according to the beam center
-void HFIRLoad::moveToBeamCenter() {
+void HFIRLoad::moveToBeamCenter(API::MatrixWorkspace_sptr &dataWS,
+                                double &center_x, double &center_y) {
   double default_ctr_x_pix = 0.0;
   double default_ctr_y_pix = 0.0;
   double default_ctr_x = 0.0;
@@ -72,20 +73,20 @@ void HFIRLoad::moveToBeamCenter() {
 
   // Check that we have a beam center defined, otherwise set the
   // default beam center
-  if (isEmpty(m_center_x) || isEmpty(m_center_y)) {
-    m_center_x = default_ctr_x_pix;
-    m_center_y = default_ctr_y_pix;
+  if (isEmpty(center_x) || isEmpty(center_y)) {
+    center_x = default_ctr_x_pix;
+    center_y = default_ctr_y_pix;
     g_log.information() << "Setting beam center to ["
-                        << Poco::NumberFormatter::format(m_center_x, 1) << ", "
-                        << Poco::NumberFormatter::format(m_center_y, 1) << "]"
+                        << Poco::NumberFormatter::format(center_x, 1) << ", "
+                        << Poco::NumberFormatter::format(center_y, 1) << "]"
                         << std::endl;
     return;
   }
 
   double beam_ctr_x = 0.0;
   double beam_ctr_y = 0.0;
-  HFIRInstrument::getCoordinateFromPixel(m_center_x, m_center_y, dataWS,
-                                         beam_ctr_x, beam_ctr_y);
+  HFIRInstrument::getCoordinateFromPixel(center_x, center_y, dataWS, beam_ctr_x,
+                                         beam_ctr_y);
 
   IAlgorithm_sptr mvAlg =
       createChildAlgorithm("MoveInstrumentComponent", 0.5, 0.50);
@@ -95,8 +96,8 @@ void HFIRLoad::moveToBeamCenter() {
   mvAlg->setProperty("Y", default_ctr_y - beam_ctr_y);
   mvAlg->setProperty("RelativePosition", true);
   mvAlg->executeAsChildAlg();
-  g_log.information() << "Moving beam center to " << m_center_x << " "
-                      << m_center_y << std::endl;
+  g_log.information() << "Moving beam center to " << center_x << " " << center_y
+                      << std::endl;
 }
 
 void HFIRLoad::exec() {
@@ -112,6 +113,10 @@ void HFIRLoad::exec() {
                                                         reductionManager);
   }
 
+  Progress progress(this, 0, 1, 5);
+
+  progress.report();
+
   // If the load algorithm isn't in the reduction properties, add it
   if (!reductionManager->existsProperty("LoadAlgorithm")) {
     AlgorithmProperty *algProp = new AlgorithmProperty("LoadAlgorithm");
@@ -122,9 +127,11 @@ void HFIRLoad::exec() {
   const std::string fileName = getPropertyValue("Filename");
 
   // Output log
-  m_output_message = "";
+  std::string output_message = "";
   const double wavelength_input = getProperty("Wavelength");
   const double wavelength_spread_input = getProperty("WavelengthSpread");
+
+  progress.report("LoadSpice2D...");
 
   IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadSpice2D", 0, 0.2);
   loadAlg->setProperty("Filename", fileName);
@@ -158,7 +165,8 @@ void HFIRLoad::exec() {
     return;
   }
   Workspace_sptr dataWS_tmp = loadAlg->getProperty("OutputWorkspace");
-  dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_tmp);
+  API::MatrixWorkspace_sptr dataWS =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_tmp);
 
   // Get the sample-detector distance
   double sdd = 0.0;
@@ -185,6 +193,8 @@ void HFIRLoad::exec() {
   }
   dataWS->mutableRun().addProperty("sample_detector_distance", sdd, "mm", true);
 
+  progress.report("MoveInstrumentComponent...");
+
   // Move the detector to its correct position
   IAlgorithm_sptr mvAlg =
       createChildAlgorithm("MoveInstrumentComponent", 0.2, 0.4);
@@ -194,8 +204,8 @@ void HFIRLoad::exec() {
   mvAlg->setProperty("RelativePosition", false);
   mvAlg->executeAsChildAlg();
   g_log.information() << "Moving detector to " << sdd / 1000.0 << std::endl;
-  m_output_message += "   Detector position: " +
-                      Poco::NumberFormatter::format(sdd / 1000.0, 3) + " m\n";
+  output_message += "   Detector position: " +
+                    Poco::NumberFormatter::format(sdd / 1000.0, 3) + " m\n";
 
   // Compute beam diameter at the detector
   double src_to_sample = 0.0;
@@ -204,16 +214,16 @@ void HFIRLoad::exec() {
     src_to_sample = HFIRInstrument::getSourceToSampleDistance(dataWS);
     dataWS->mutableRun().addProperty("source-sample-distance", src_to_sample,
                                      "mm", true);
-    m_output_message +=
-        "   Computed SSD from number of guides: " +
-        Poco::NumberFormatter::format(src_to_sample / 1000.0, 3) + " \n";
+    output_message += "   Computed SSD from number of guides: " +
+                      Poco::NumberFormatter::format(src_to_sample / 1000.0, 3) +
+                      " \n";
   } catch (...) {
     Mantid::Kernel::Property *prop =
         dataWS->run().getProperty("source-sample-distance");
     Mantid::Kernel::PropertyWithValue<double> *dp =
         dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
     src_to_sample = *dp;
-    m_output_message +=
+    output_message +=
         "   Could not compute SSD from number of guides, taking: " +
         Poco::NumberFormatter::format(src_to_sample / 1000.0, 3) + " \n";
   };
@@ -243,56 +253,60 @@ void HFIRLoad::exec() {
       sdd / src_to_sample * (source_apert + sample_apert) + sample_apert;
   dataWS->mutableRun().addProperty("beam-diameter", beam_diameter, "mm", true);
 
+  progress.report("Move to center beam...");
+
+  double center_x = 0;
+  double center_y = 0;
+
   // Move the beam center to its proper position
   const bool noBeamCenter = getProperty("NoBeamCenter");
   if (!noBeamCenter) {
-    m_center_x = getProperty("BeamCenterX");
-    m_center_y = getProperty("BeamCenterY");
-    if (isEmpty(m_center_x) && isEmpty(m_center_y)) {
+    center_x = getProperty("BeamCenterX");
+    center_y = getProperty("BeamCenterY");
+    if (isEmpty(center_x) && isEmpty(center_y)) {
       if (reductionManager->existsProperty("LatestBeamCenterX") &&
           reductionManager->existsProperty("LatestBeamCenterY")) {
-        m_center_x = reductionManager->getProperty("LatestBeamCenterX");
-        m_center_y = reductionManager->getProperty("LatestBeamCenterY");
+        center_x = reductionManager->getProperty("LatestBeamCenterX");
+        center_y = reductionManager->getProperty("LatestBeamCenterY");
       }
     }
-    moveToBeamCenter();
+
+    moveToBeamCenter(dataWS, center_x, center_y);
+
+    progress.report();
 
     // Add beam center to reduction properties, as the last beam center position
     // that was used.
     // This will give us our default position next time.
     if (!reductionManager->existsProperty("LatestBeamCenterX"))
       reductionManager->declareProperty(
-          new PropertyWithValue<double>("LatestBeamCenterX", m_center_x));
+          new PropertyWithValue<double>("LatestBeamCenterX", center_x));
     else
-      reductionManager->setProperty("LatestBeamCenterX", m_center_x);
+      reductionManager->setProperty("LatestBeamCenterX", center_x);
     if (!reductionManager->existsProperty("LatestBeamCenterY"))
       reductionManager->declareProperty(
-          new PropertyWithValue<double>("LatestBeamCenterY", m_center_y));
+          new PropertyWithValue<double>("LatestBeamCenterY", center_y));
     else
-      reductionManager->setProperty("LatestBeamCenterY", m_center_y);
+      reductionManager->setProperty("LatestBeamCenterY", center_y);
 
-    dataWS->mutableRun().addProperty("beam_center_x", m_center_x, "pixel",
-                                     true);
-    dataWS->mutableRun().addProperty("beam_center_y", m_center_y, "pixel",
-                                     true);
-    m_output_message += "   Beam center: " +
-                        Poco::NumberFormatter::format(m_center_x, 1) + ", " +
-                        Poco::NumberFormatter::format(m_center_y, 1) + "\n";
+    dataWS->mutableRun().addProperty("beam_center_x", center_x, "pixel", true);
+    dataWS->mutableRun().addProperty("beam_center_y", center_y, "pixel", true);
+    output_message += "   Beam center: " +
+                      Poco::NumberFormatter::format(center_x, 1) + ", " +
+                      Poco::NumberFormatter::format(center_y, 1) + "\n";
   } else {
-    HFIRInstrument::getDefaultBeamCenter(dataWS, m_center_x, m_center_y);
+    HFIRInstrument::getDefaultBeamCenter(dataWS, center_x, center_y);
 
-    dataWS->mutableRun().addProperty("beam_center_x", m_center_x, "pixel",
-                                     true);
-    dataWS->mutableRun().addProperty("beam_center_y", m_center_y, "pixel",
-                                     true);
-    m_output_message += "   Default beam center: " +
-                        Poco::NumberFormatter::format(m_center_x, 1) + ", " +
-                        Poco::NumberFormatter::format(m_center_y, 1) + "\n";
+    dataWS->mutableRun().addProperty("beam_center_x", center_x, "pixel", true);
+    dataWS->mutableRun().addProperty("beam_center_y", center_y, "pixel", true);
+    output_message += "   Default beam center: " +
+                      Poco::NumberFormatter::format(center_x, 1) + ", " +
+                      Poco::NumberFormatter::format(center_y, 1) + "\n";
   }
 
   setProperty<MatrixWorkspace_sptr>(
       "OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS));
-  setPropertyValue("OutputMessage", m_output_message);
+  setPropertyValue("OutputMessage", output_message);
 }
 
 } // namespace WorkflowAlgorithms

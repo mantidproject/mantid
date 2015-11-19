@@ -1,7 +1,8 @@
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
+
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h"
@@ -77,6 +78,7 @@ void TomographyIfaceViewQtGUI::initLayout() {
   m_ui.tabMain->addTab(tabROIW, QString("ROI etc."));
 
   QWidget *tabFiltersW = new QWidget();
+  m_uiTabFilters.setupUi(tabFiltersW);
   m_ui.tabMain->addTab(tabFiltersW, QString("Filters"));
 
   QWidget *tabVizW = new QWidget();
@@ -94,6 +96,7 @@ void TomographyIfaceViewQtGUI::initLayout() {
   doSetupGeneralWidgets();
   doSetupSectionSetup();
   doSetupSectionRun();
+  doSetupSectionFilters();
 
   // presenter that knows how to handle a ITomographyIfaceView should take care
   // of all the logic
@@ -196,6 +199,11 @@ void TomographyIfaceViewQtGUI::doSetupSectionRun() {
 
   connect(m_uiTabRun.comboBox_run_tool, SIGNAL(currentIndexChanged(int)), this,
           SLOT(runToolIndexChanged(int)));
+}
+
+void TomographyIfaceViewQtGUI::doSetupSectionFilters() {
+  connect(m_uiTabFilters.pushButton_reset, SIGNAL(released()), this,
+          SLOT(resetPrePostFilters()));
 }
 
 void TomographyIfaceViewQtGUI::setComputeResources(
@@ -316,6 +324,35 @@ void TomographyIfaceViewQtGUI::updateCompResourceStatus(bool online) {
     m_uiTabRun.pushButton_remote_status->setText("Offline");
 }
 
+#ifndef _MSC_VER
+QDataStream &operator>>(QDataStream &stream, size_t &num) {
+  qint64 i;
+  stream >> i;
+  if (QDataStream::Ok == stream.status()) {
+    num = i;
+  }
+  return stream;
+}
+#endif
+
+/// deserialize a filters settings, from a QDataStream <= QByteArray
+QDataStream &operator>>(QDataStream &stream, TomoReconFiltersSettings &fs) {
+  // clang-format off
+  stream >> fs.prep.normalizeByProtonCharge
+                >> fs.prep.normalizeByFlatDark
+                >> fs.prep.medianFilterWidth
+                >> fs.prep.rotation
+                >> fs.prep.maxAngle
+                >> fs.prep.scaleDownFactor
+                >> fs.postp.circMaskRadius
+                >> fs.postp.cutOffLevel
+                >> fs.outputPreprocImages;
+  // clang-format on
+  fs.prep.rotation *= 90;
+
+  return stream;
+}
+
 /**
  * Load the settings for the tabs and widgets of the interface. This
  * relies on Qt settings functionality (QSettings class).
@@ -333,18 +370,59 @@ void TomographyIfaceViewQtGUI::readSettings() {
           .toString()
           .toStdString();
   // WARNING: it's critical to keep 'false' as default value, otherwise
-  // scripted runs may have issues. The CI builds could get stuck when
-  // closing this interface.
+  // tests and scripted runs may have issues. The CI builds could get stuck
+  // when closing this interface.
   m_settings.onCloseAskForConfirmation =
       qs.value("on-close-ask-for-confirmation", false).toBool();
 
   m_settings.useKeepAlive =
       qs.value("use-keep-alive", m_settings.useKeepAlive).toInt();
+
+  QByteArray rawFiltersSettings = qs.value("filters-settings").toByteArray();
+  QDataStream stream(rawFiltersSettings);
+  TomoReconFiltersSettings filtersSettings;
+  stream >> filtersSettings;
+  if (QDataStream::Ok == stream.status()) {
+    setPrePostProcSettings(filtersSettings);
+  } else {
+    // something wrong in the settings previously saved => go back to factory
+    // defaults
+    TomoReconFiltersSettings def;
+    setPrePostProcSettings(def);
+  }
+
+  m_ui.tabMain->setCurrentIndex(qs.value("selected-tab-index").toInt());
+
   restoreGeometry(qs.value("interface-win-geometry").toByteArray());
+
   qs.endGroup();
 
   m_uiTabSetup.lineEdit_SCARF_path->setText(
       QString::fromStdString(m_settings.SCARFBasePath));
+}
+
+#ifndef _MSC_VER
+QDataStream &operator<<(QDataStream &stream, size_t const &num) {
+  return stream << static_cast<qint64>(num);
+}
+#endif
+
+/// serialize a filters settings, as a QDataStream => QByteArray
+QDataStream &operator<<(QDataStream &stream,
+                        TomoReconFiltersSettings const &fs) {
+  // clang-format off
+  stream << fs.prep.normalizeByProtonCharge
+                << fs.prep.normalizeByFlatDark
+                << fs.prep.medianFilterWidth
+                << (fs.prep.rotation/90)
+                << fs.prep.maxAngle
+                << fs.prep.scaleDownFactor
+                << fs.postp.circMaskRadius
+                << fs.postp.cutOffLevel
+                << fs.outputPreprocImages;
+  // clang-format on
+
+  return stream;
 }
 
 /**
@@ -358,7 +436,16 @@ void TomographyIfaceViewQtGUI::saveSettings() const {
   qs.setValue("on-close-ask-for-confirmation",
               m_settings.onCloseAskForConfirmation);
   qs.setValue("use-keep-alive", m_settings.useKeepAlive);
+
+  QByteArray filtersSettings;
+  QDataStream stream(&filtersSettings, QIODevice::WriteOnly);
+  stream << grabPrePostProcSettings();
+  qs.setValue("filters-settings", filtersSettings);
+
+  qs.setValue("selected-tab-index", m_ui.tabMain->currentIndex());
+
   qs.setValue("interface-win-geometry", saveGeometry());
+
   qs.endGroup();
 }
 
@@ -369,7 +456,8 @@ void TomographyIfaceViewQtGUI::saveSettings() const {
 void TomographyIfaceViewQtGUI::loadSavuTomoConfig(
     std::string &filePath, Mantid::API::ITableWorkspace_sptr &currentPlugins) {
   // try to load tomo reconstruction parametereization file
-  auto alg = Algorithm::fromString("LoadSavuTomoConfig");
+  auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "LoadSavuTomoConfig");
   alg->initialize();
   alg->setPropertyValue("Filename", filePath);
   alg->setPropertyValue("OutputWorkspace", createUniqueNameHidden());
@@ -845,7 +933,7 @@ void TomographyIfaceViewQtGUI::showImage(const MatrixWorkspace_sptr &ws) {
   QImage rawImg(QSize(static_cast<int>(width), static_cast<int>(height)),
                 QImage::Format_RGB32);
   const double max_min = max - min;
-  const double scaleFactor = 255.0/max_min;
+  const double scaleFactor = 255.0 / max_min;
   for (size_t yi = 0; yi < width; ++yi) {
     for (size_t xi = 0; xi < width; ++xi) {
       const double &v = ws->readY(yi)[xi];
@@ -867,6 +955,83 @@ void TomographyIfaceViewQtGUI::showImage(const MatrixWorkspace_sptr &ws) {
   m_uiTabRun.label_image->show();
 
   m_uiTabRun.label_image_name->setText(QString::fromStdString(name));
+}
+
+TomoReconFiltersSettings TomographyIfaceViewQtGUI::prePostProcSettings() const {
+  return grabPrePostProcSettings();
+}
+
+TomoReconFiltersSettings
+TomographyIfaceViewQtGUI::grabPrePostProcSettings() const {
+  TomoReconFiltersSettings opts;
+
+  // pre-processing
+  opts.prep.normalizeByProtonCharge =
+      m_uiTabFilters.checkBox_normalize_proton_charge->isChecked();
+
+  opts.prep.normalizeByFlatDark =
+      m_uiTabFilters.checkBox_normalize_flat_dark->isChecked();
+
+  opts.prep.medianFilterWidth = static_cast<size_t>(
+      m_uiTabFilters.spinBox_prep_median_filter_width->value());
+
+  opts.prep.rotation =
+      90 * m_uiTabFilters.comboBox_prep_rotation->currentIndex();
+
+  opts.prep.maxAngle = m_uiTabFilters.doubleSpinBox_prep_max_angle->value();
+
+  opts.prep.scaleDownFactor =
+      static_cast<size_t>(m_uiTabFilters.spinBox_prep_scale_factor->value());
+
+  // post-processing
+  opts.postp.circMaskRadius =
+      m_uiTabFilters.doubleSpinBox_post_circ_mask->value();
+
+  opts.postp.cutOffLevel = m_uiTabFilters.doubleSpinBox_post_cutoff->value();
+
+  // outputs
+  opts.outputPreprocImages =
+      m_uiTabFilters.checkBox_out_preproc_images->isChecked();
+
+  return opts;
+}
+
+void TomographyIfaceViewQtGUI::setPrePostProcSettings(
+    TomoReconFiltersSettings &opts) const {
+
+  // pre-processing
+  m_uiTabFilters.checkBox_normalize_proton_charge->setChecked(
+      opts.prep.normalizeByProtonCharge);
+
+  m_uiTabFilters.checkBox_normalize_flat_dark->setChecked(
+      opts.prep.normalizeByFlatDark);
+
+  m_uiTabFilters.spinBox_prep_median_filter_width->setValue(
+      static_cast<int>(opts.prep.medianFilterWidth));
+
+  m_uiTabFilters.comboBox_prep_rotation->setCurrentIndex(
+      static_cast<int>(opts.prep.rotation / 90));
+
+  m_uiTabFilters.doubleSpinBox_prep_max_angle->setValue(opts.prep.maxAngle);
+
+  m_uiTabFilters.spinBox_prep_scale_factor->setValue(
+      static_cast<int>(opts.prep.scaleDownFactor));
+
+  // post-processing
+  m_uiTabFilters.doubleSpinBox_post_circ_mask->setValue(
+      opts.postp.circMaskRadius);
+
+  m_uiTabFilters.doubleSpinBox_post_cutoff->setValue(opts.postp.cutOffLevel);
+
+  // outputs
+  m_uiTabFilters.checkBox_out_preproc_images->setChecked(
+      opts.outputPreprocImages);
+}
+
+void TomographyIfaceViewQtGUI::resetPrePostFilters() {
+  // default constructors with factory defaults
+  TomoReconFiltersSettings def;
+  setPrePostProcSettings(def);
 }
 
 /**
