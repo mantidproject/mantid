@@ -1,4 +1,4 @@
-#pylint: disable=too-many-lines
+﻿#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 """
     Enables the SANS commands (listed at http://www.mantidproject.org/SANS) to
@@ -1737,6 +1737,15 @@ def is_current_workspace_an_angle_workspace():
     except:
         is_angle = False
     return is_angle
+
+def has_user_file_valid_extension(file_name):
+    '''
+    Checks if the user file has a valid extension
+    @param file_name: the name of the user file
+    @returns true if it is valid else false
+    '''
+    return su.is_valid_user_file_extension(user_file)
+
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################
