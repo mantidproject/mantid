@@ -66,7 +66,8 @@ Output:
    input = GroupWorkspaces([first_period, second_period])
 
    output = MuonCalculateAsymmetry(InputWorkspace = input,
-                                   PeriodOperation = '-',
+                                   SummedPeriodSet = 1,
+				   SubtractedPeriodSet = 2,
                                    OutputType = 'GroupAsymmetry',
                                    GroupIndex = 0)
 
