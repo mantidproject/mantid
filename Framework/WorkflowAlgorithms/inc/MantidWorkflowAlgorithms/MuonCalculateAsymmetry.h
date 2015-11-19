@@ -53,16 +53,19 @@ private:
   // Calculates raw counts
   API::MatrixWorkspace_sptr
   calculateGroupCounts(const API::WorkspaceGroup_const_sptr &inputWSGroup,
-                       int groupIndex, std::string op);
+                       int groupIndex, const std::vector<int> &summedPeriods,
+                       const std::vector<int> &subtractedPeriods);
   // Calculates asymmetry for specified spectrum
   API::MatrixWorkspace_sptr
   calculateGroupAsymmetry(const API::WorkspaceGroup_const_sptr &inputWSGroup,
-                          int groupIndex, std::string op);
+                          int groupIndex, const std::vector<int> &summedPeriods,
+                          const std::vector<int> &subtractedPeriods);
   // Calculates asymmetry for a pair of spectra
   API::MatrixWorkspace_sptr
   calculatePairAsymmetry(const API::WorkspaceGroup_const_sptr &inputWSGroup,
                          int firstPairIndex, int secondPairIndex, double alpha,
-                         std::string op);
+                         const std::vector<int> &summedPeriods,
+                         const std::vector<int> &subtractedPeriods);
   /// Checks if the supplied properties are valid or not
   std::map<std::string, std::string> validateInputs() override;
   /// Checks if periods in set are valid

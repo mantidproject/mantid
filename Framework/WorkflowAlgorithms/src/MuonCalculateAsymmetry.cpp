@@ -112,20 +112,23 @@ void MuonCalculateAsymmetry::exec() {
   // The group index
   int groupIndex = getProperty("GroupIndex");
 
-  // The type of period operation (+ or -)
-  std::string op = getProperty("PeriodOperation");
+  // The periods to sum and subtract
+  // e.g. if summedPeriods is (1,2) and subtractedPeriods is (3,4),
+  // the operation will be (1 + 2) - (3 + 4)
+  std::vector<int> summedPeriods = getProperty("SummedPeriodSet");
+  std::vector<int> subtractedPeriods = getProperty("SubtractedPeriodSet");
 
   if (type == "GroupCounts") {
 
-    auto outWS =
-        calculateGroupCounts(inputWSGroup, groupIndex, op);
+    auto outWS = calculateGroupCounts(inputWSGroup, groupIndex, summedPeriods,
+                                      subtractedPeriods);
 
     setProperty("OutputWorkspace", outWS);
 
   } else if (type == "GroupAsymmetry") {
 
-    auto outWS =
-        calculateGroupAsymmetry(inputWSGroup, groupIndex, op);
+    auto outWS = calculateGroupAsymmetry(inputWSGroup, groupIndex,
+                                         subtractedPeriods, subtractedPeriods);
 
     setProperty("OutputWorkspace", outWS);
 
@@ -136,8 +139,8 @@ void MuonCalculateAsymmetry::exec() {
     double alpha = getProperty("Alpha");
 
     auto outWS =
-        calculatePairAsymmetry(inputWSGroup, pairFirstIndex,
-                               pairSecondIndex, alpha, op);
+        calculatePairAsymmetry(inputWSGroup, pairFirstIndex, pairSecondIndex,
+                               alpha, summedPeriods, subtractedPeriods);
 
     setProperty("OutputWorkspace", outWS);
 
@@ -151,11 +154,14 @@ void MuonCalculateAsymmetry::exec() {
 * Calculates raw counts according to period operation
 * @param inputWSGroup :: [input] WorkspaceGroup containing period workspaces
 * @param groupIndex :: [input] Index of the workspace to extract counts from
-* @param op :: [input] Period operation (+ or -)
+* @param summedPeriods :: [input] Periods to be summed
+* @param subtractedPeriods :: [input] Periods to be summed together and their
+* sum subtracted from summedPeriods
 */
 MatrixWorkspace_sptr MuonCalculateAsymmetry::calculateGroupCounts(
     const WorkspaceGroup_const_sptr &inputWSGroup, int groupIndex,
-    std::string op) {
+    const std::vector<int> &summedPeriods,
+    const std::vector<int> &subtractedPeriods) {
 
   int numPeriods = inputWSGroup->getNumberOfEntries();
   if (numPeriods > 1) {
@@ -209,11 +215,14 @@ MatrixWorkspace_sptr MuonCalculateAsymmetry::calculateGroupCounts(
 * Calculates single-spectrum asymmetry according to period operation
 * @param inputWSGroup :: [input] WorkspaceGroup containing period workspaces
 * @param groupIndex :: [input] Workspace index for which to calculate asymmetry
-* @param op :: [input] Period operation (+ or -)
+* @param summedPeriods :: [input] Periods to be summed
+* @param subtractedPeriods :: [input] Periods to be summed together and their
+* sum subtracted from summedPeriods
 */
 MatrixWorkspace_sptr MuonCalculateAsymmetry::calculateGroupAsymmetry(
     const WorkspaceGroup_const_sptr &inputWSGroup, int groupIndex,
-    std::string op) {
+    const std::vector<int> &summedPeriods,
+    const std::vector<int> &subtractedPeriods) {
 
   // The output workspace
   MatrixWorkspace_sptr tempWS;
@@ -301,11 +310,14 @@ MatrixWorkspace_sptr MuonCalculateAsymmetry::calculateGroupAsymmetry(
 * @param firstPairIndex :: [input] Workspace index for the forward group
 * @param secondPairIndex :: [input] Workspace index for the backward group
 * @param alpha :: [input] The balance parameter
-* @param op :: [input] Period operation (+ or -)
+* @param summedPeriods :: [input] Periods to be summed
+* @param subtractedPeriods :: [input] Periods to be summed together and their
+* sum subtracted from summedPeriods
 */
 MatrixWorkspace_sptr MuonCalculateAsymmetry::calculatePairAsymmetry(
     const WorkspaceGroup_const_sptr &inputWSGroup, int firstPairIndex,
-    int secondPairIndex, double alpha, std::string op) {
+    int secondPairIndex, double alpha, const std::vector<int> &summedPeriods,
+    const std::vector<int> &subtractedPeriods) {
 
   // Pair indices as vectors
   std::vector<int> fwd(1, firstPairIndex + 1);
