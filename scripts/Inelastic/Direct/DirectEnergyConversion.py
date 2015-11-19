@@ -355,10 +355,10 @@ class DirectEnergyConversion(object):
         #
         self.prop_man.set_input_parameters(**kwargs)
 
+
         # output workspace name.
         try:
-#pylint: disable=unused-variable
-            n,r = funcreturns.lhs_info('both')
+            _,r = funcreturns.lhs_info('both')
             out_ws_name = r[0]
 #pylint: disable=bare-except
         except:
@@ -739,16 +739,41 @@ class DirectEnergyConversion(object):
             if not isinstance(spectra_list2,list):
                 spectra_list2 = [spectra_list2]
             spec_num2 = self._process_spectra_list(monitor_ws,spectra_list2,'spectr_ws2')
-
+            # Are other monitors necessary?
+            mon_list = self.prop_man.get_used_monitors_list()
+            monitors_left=[]
+            for mon_id in mon_list:
+                if not(mon_id in spectra_list1 or mon_id in spectra_list2):
+                    monitors_left.append(int(mon_id))
+            n_other_mon = len(monitors_left)
+            if n_other_mon > 0:
+                specN = monitor_ws.getIndexFromSpectrumNumber(monitors_left[0])
+                ExtractSingleSpectrum(InputWorkspace=monitor_ws,OutputWorkspace='_OtherMon',
+                                      WorkspaceIndex=specN)
+                mon_tt = monitors_left[1:]
+                for mon_id in mon_tt:
+                    specN = monitor_ws.getIndexFromSpectrumNumber(int(mon_id))
+                    ExtractSingleSpectrum(InputWorkspace=monitor_ws,OutputWorkspace='_mon_t1',
+                                          WorkspaceIndex=specN)
+                    AppendSpectra(InputWorkspace1='_OtherMon',InputWorkspace2='_mon_t1',OutputWorkspace='_OtherMon')
+                    DeleteWorkspace('_mon_t1')
+            else:
+                pass
+            # Deal with summed monitors
             DeleteWorkspace(monitor_ws_name)
             AppendSpectra(InputWorkspace1='spectr_ws1',InputWorkspace2='spectr_ws2',OutputWorkspace=monitor_ws_name)
+            if '_OtherMon' in mtd:
+                AppendSpectra(InputWorkspace1=monitor_ws_name,InputWorkspace2='_OtherMon',OutputWorkspace=monitor_ws_name)
+                DeleteWorkspace('_OtherMon')
+
 
             if 'spectr_ws1' in mtd:
                 DeleteWorkspace('spectr_ws1')
             if 'spectr_ws2' in mtd:
                 DeleteWorkspace('spectr_ws2')
             monitor_ws = mtd[monitor_ws_name]
-            AddSampleLog(monitor_ws,LogName='CombinedSpectraIDList',LogText=str(spectra_list1+spectra_list2),LogType='String')
+            AddSampleLog(monitor_ws,LogName='CombinedSpectraIDList',\
+                         LogText=str(monitors_left+spectra_list1+spectra_list2),LogType='String')
         else:
             pass
         # Weird operation. It looks like the spectra numbers obtained from
