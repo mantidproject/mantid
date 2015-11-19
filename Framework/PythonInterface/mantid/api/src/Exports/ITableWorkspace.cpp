@@ -140,20 +140,73 @@ void setValue(const Column_sptr column, const int row,
   }
 }
 
-/** Access a cell and return a corresponding Python type
- *  @param self A reference to the TableWorkspace python object that we were
- * called on
- *  @param type The data type of the column to add
- *  @param name The name of the column to add
- *  @return A boolean indicating success or failure. Note that this is different
- * to the
- *          corresponding C++ method, which returns a pointer to the
- * newly-created column
- *          (as the Column class is not exposed to python).
+/**
+ * Add a column with a given plot type to the TableWorkspace
+ * @param self Reference to TableWorkspace this is called on
+ * @param type The data type of the column to add
+ * @param name The name of the column to add
+ * @param plottype The plot type to set on the column
+ * @return Boolean true if successful, false otherwise
  */
-bool addColumn(ITableWorkspace &self, const std::string &type,
-               const std::string &name) {
+bool addColumnPlotType(ITableWorkspace &self, const std::string &type,
+                       const std::string &name, int plottype) {
+  auto column = self.addColumn(type, name);
+
+  if (column)
+    column->setPlotType(plottype);
+
+  return column != 0;
+}
+
+/**
+ * Add a column to the TableWorkspace (with default plot type)
+ * @param self A reference to the TableWorkspace python object that we were
+ * called on
+ * @param type The data type of the column to add
+ * @param name The name of the column to add
+ * @return A boolean indicating success or failure. Note that this is different
+ * to the corresponding C++ method, which returns a pointer to the
+ * newly-created column (as the Column class is not exposed to python).
+ */
+bool addColumnSimple(ITableWorkspace &self, const std::string &type,
+                     const std::string &name) {
   return self.addColumn(type, name) != 0;
+}
+
+/**
+ * Get the plot type of a column given by name or index
+ * @param self Reference to TableWorkspace this is called on
+ * @param column Name or index of column
+ * @return PlotType: 0=None, 1=X, 2=Y, 3=Z, 4=xErr, 5=yErr, 6=Label
+ */
+int getPlotType(ITableWorkspace &self, const bpl::object &column) {
+  // Find the column
+  Mantid::API::Column_const_sptr colptr;
+  if (PyString_Check(column.ptr())) {
+    colptr = self.getColumn(extract<std::string>(column)());
+  } else {
+    colptr = self.getColumn(extract<int>(column)());
+  }
+
+  return colptr->getPlotType();
+}
+
+/**
+ * Set the plot type of a column given by name or index
+ * @param self Reference to TableWorkspace this is called on
+ * @param column Name or index of column
+ * @param ptype PlotType: 0=None, 1=X, 2=Y, 3=Z, 4=xErr, 5=yErr, 6=Label
+ */
+void setPlotType(ITableWorkspace &self, const bpl::object &column, int ptype) {
+  // Find the column
+  Mantid::API::Column_sptr colptr;
+  if (PyString_Check(column.ptr())) {
+    colptr = self.getColumn(extract<std::string>(column)());
+  } else {
+    colptr = self.getColumn(extract<int>(column)());
+  }
+
+  colptr->setPlotType(ptype);
 }
 
 /**
@@ -387,9 +440,28 @@ void export_ITableWorkspace() {
 
   class_<ITableWorkspace, bases<Workspace>, boost::noncopyable>(
       "ITableWorkspace", iTableWorkspace_docstring.c_str(), no_init)
-      .def("addColumn", &addColumn, (arg("self"), arg("type"), arg("name")),
+      .def("addColumn", &addColumnSimple,
+           (arg("self"), arg("type"), arg("name")),
            "Add a named column with the given type. Recognized types are: "
            "int,float,double,bool,str,V3D,long64")
+
+      .def("addColumn", &addColumnPlotType,
+           (arg("self"), arg("type"), arg("name"), arg("plottype")),
+           "Add a named column with the given datatype "
+           "(int,float,double,bool,str,V3D,long64) "
+           "\nand plottype "
+           "(0 = None, 1 = X, 2 = Y, 3 = Z, 4 = xErr, 5 = yErr, 6 = Label).")
+
+      .def("getPlotType", &getPlotType, (arg("self"), arg("column")),
+           "Get the plot type of given column as an integer. "
+           "Accepts column name or index. \nPossible return values: "
+           "(0 = None, 1 = X, 2 = Y, 3 = Z, 4 = xErr, 5 = yErr, 6 = Label).")
+
+      .def("setPlotType", &setPlotType,
+           (arg("self"), arg("column"), arg("ptype")),
+           "Set the plot type of given column. "
+           "Accepts column name or index. \nPossible type values: "
+           "(0 = None, 1 = X, 2 = Y, 3 = Z, 4 = xErr, 5 = yErr, 6 = Label).")
 
       .def("removeColumn", &ITableWorkspace::removeColumn,
            (arg("self"), arg("name")), "Remove the named column")
