@@ -218,6 +218,8 @@ protected:
   bool isIndex(QtProperty* prop) const;
   /// Get the function index for a property
   QString getIndex(QtProperty* prop) const;
+  /// Get name of the parameter for a property
+  QString getParameterName(QtProperty* prop);
   /// Get function property for the index
   QtProperty* getFunctionProperty(const QString& index)const;
   /// Split a qualified parameter name into function index and local parameter name.

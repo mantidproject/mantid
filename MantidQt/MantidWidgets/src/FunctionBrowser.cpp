@@ -9,6 +9,7 @@
 
 #include "MantidKernel/Logger.h"
 
+#include "MantidQtMantidWidgets/DoubleDialogEditor.h"
 #include "MantidQtMantidWidgets/FilenameDialogEditor.h"
 #include "MantidQtMantidWidgets/FormulaDialogEditor.h"
 #include "MantidQtMantidWidgets/SelectFunctionDialog.h"
@@ -104,6 +105,7 @@ void FunctionBrowser::createBrowser()
   {
     options << globalOptionName;
   }
+  m_browser = new QtTreePropertyBrowser(NULL, options);
 
   /* Create property managers: they create, own properties, get and set values  */
   m_functionManager = new QtGroupPropertyManager(this);
@@ -130,11 +132,12 @@ void FunctionBrowser::createBrowser()
   QtAbstractEditorFactory<ParameterPropertyManager> *parameterEditorFactory(NULL);
   if ( m_multiDataset )
   {
-    auto buttonFactory = new DoubleButtonEditorFactory(this);
+    auto buttonFactory = new DoubleDialogEditorFactory(this);
     auto compositeFactory = new CompositeEditorFactory<ParameterPropertyManager>(this,buttonFactory);
     compositeFactory->setSecondaryFactory(globalOptionName, paramEditorFactory);
     parameterEditorFactory = compositeFactory;
     connect(buttonFactory,SIGNAL(buttonClicked(QtProperty*)), this,SLOT(parameterButtonClicked(QtProperty*)));
+    connect(buttonFactory, SIGNAL(closeEditor()), m_browser, SLOT(closeEditor()));
   }
   else
   {
@@ -147,7 +150,6 @@ void FunctionBrowser::createBrowser()
   FormulaDialogEditorFactory* formulaDialogEditFactory = new FormulaDialogEditorFactory(this);
   WorkspaceEditorFactory* workspaceEditorFactory = new WorkspaceEditorFactory(this);
 
-  m_browser = new QtTreePropertyBrowser(NULL,options);
   // assign factories to property managers
   m_browser->setFactoryForManager(m_parameterManager, parameterEditorFactory);
   m_browser->setFactoryForManager(m_attributeStringManager, lineEditFactory);
@@ -179,6 +181,8 @@ void FunctionBrowser::createBrowser()
           SLOT(parameterChanged(QtProperty*)));
 
   connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem*)), SLOT(updateCurrentFunctionIndex()));
+
+  m_browser->setFocusPolicy(Qt::StrongFocus);
 
 }
 
@@ -404,9 +408,11 @@ FunctionBrowser::AProperty FunctionBrowser::addParameterProperty(QtProperty* par
     throw std::runtime_error("Unexpected error in FunctionBrowser [3]");
   }
   QtProperty* prop = m_parameterManager->addProperty(paramName);
+  m_parameterManager->blockSignals(true);
   m_parameterManager->setDecimals(prop,6);
   m_parameterManager->setValue(prop,paramValue);
   m_parameterManager->setDescription(prop,paramDesc.toStdString());
+  m_parameterManager->blockSignals(false);
 
   if ( m_multiDataset )
   {
@@ -427,6 +433,7 @@ void FunctionBrowser::setFunction(QtProperty* prop, Mantid::API::IFunction_sptr 
   {
     removeProperty(child);
   }
+  m_localParameterValues.clear();
   addAttributeAndParameterProperties(prop, fun);
 }
 
@@ -913,6 +920,16 @@ QString FunctionBrowser::getIndex(QtProperty* prop) const
   auto ap = m_properties[prop];
   return getIndex(ap.parent);
 }
+
+/**
+ * Get name of the parameter for a property
+ * @param prop :: A property
+ */
+QString FunctionBrowser::getParameterName(QtProperty* prop)
+{
+  return  getIndex(prop) + prop->propertyName();
+}
+
 
 /**
  * Return function property for a function with given index.
@@ -1532,7 +1549,6 @@ void FunctionBrowser::setParamError(const QString& funcIndex, const QString& par
     {
       if (isParameter(child) && child->propertyName() == paramName)
       {
-//        m_parameterManager->setDescription(child,"");
         m_parameterManager->setError(child, error);
         break;
       }
@@ -1914,6 +1930,10 @@ void FunctionBrowser::attributeVectorDoubleChanged(QtProperty *prop)
 
 void FunctionBrowser::parameterChanged(QtProperty* prop)
 {
+  if (m_currentDataset < getNumberOfDatasets() && !prop->checkOption(globalOptionName))
+  {
+    setLocalParameterValue(getParameterName(prop), m_currentDataset, m_parameterManager->value(prop));
+  }
   emit parameterChanged(getIndex(prop), prop->propertyName());
 }
 
