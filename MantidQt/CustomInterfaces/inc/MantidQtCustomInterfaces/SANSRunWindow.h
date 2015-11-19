@@ -493,6 +493,8 @@ private:
                                   bool w1W2Disabled);
   /// Initialize the QResolution settings
   void initQResolutionSettings();
+  /// Check the user file validity
+  bool isUserFileValid();
 
   UserSubWindow *slicingWindow;
 };

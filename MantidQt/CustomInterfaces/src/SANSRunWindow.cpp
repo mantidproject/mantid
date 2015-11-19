@@ -764,6 +764,12 @@ void SANSRunWindow::trimPyMarkers(QString &txt) {
 *  @return the output printed by the Python commands
 */
 bool SANSRunWindow::loadUserFile() {
+  // Make sure that user file is valid
+  if (!isUserFileValid()) {
+    m_cfg_loaded = false;
+    return false;
+  }
+
   const std::string facility = ConfigService::Instance().getFacility().name();
   if (facility != "ISIS") {
     return false;
@@ -2663,6 +2669,11 @@ QString SANSRunWindow::getInstrumentClass() const {
   return instrum + "()";
 }
 void SANSRunWindow::handleRunFindCentre() {
+  // Make sure that user file is valid
+  if (!isUserFileValid()) {
+    return;
+  }
+
   // Set the log level of to at least notice:
   const auto initialLogLevel = g_centreFinderLog.getLevel();
   auto noticeLevelAsInt = static_cast<int>(Poco::Message::PRIO_NOTICE);
@@ -4863,6 +4874,29 @@ void SANSRunWindow::initQResolutionSettings() {
       m_constants.getQResolutionA2ToolTipText());
   m_uiForm.q_resolution_a2_h2_label->setToolTip(
       m_constants.getQResolutionA2ToolTipText());
+}
+
+/**
+ * Check if the user file has a valid extension
+ */
+bool SANSRunWindow::isUserFileValid() {
+  auto userFile = m_uiForm.userfile_edit->text().trimmed();
+  QString checkValidity = "i.has_user_file_valid_extension('" + userFile +"')\n";
+
+  QString resultCheckValidity(runPythonCode(checkValidity, false));
+  resultCheckValidity = resultCheckValidity.simplified();
+  auto isValid = false;
+  if (resultCheckValidity == m_constants.getPythonTrueKeyword()) {
+    isValid == true;
+  }
+
+  if (!isValid) {
+    QMessageBox::critical(this, "User File extension issue",
+                                "The specified user file does not\n"
+                                "seem to have a valid file extension.");
+  }
+
+  return isValid;
 }
 
 } // namespace CustomInterfaces
