@@ -15,7 +15,7 @@ class DockedWindow: public QMdiSubWindow
 {
   Q_OBJECT
 public:
-  DockedWindow(ApplicationWindow* appWindow);
+  explicit DockedWindow(ApplicationWindow *appWindow);
   MdiSubWindow* mdiSubWindow() const;
   void setMdiSubWindow(MdiSubWindow* sw);
 

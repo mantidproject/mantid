@@ -321,7 +321,7 @@ void Table::cellEdited(int row, int col)
 
     script->setInt(row+1, "i");
     script->setInt(col+1, "j");
-    QVariant ret = script->evaluate(d_table->text(row,col));
+    QVariant ret = script->evaluate(ScriptCode(d_table->text(row, col)));
     if(ret.type()==QVariant::Int || ret.type()==QVariant::UInt || ret.type()==QVariant::LongLong || ret.type()==QVariant::ULongLong)
       d_table->setText(row, col, ret.toString());
     else if(ret.canCast(QVariant::Double))
@@ -560,7 +560,7 @@ bool Table::muParserCalculate(int col, int startRow, int endRow, bool notifyChan
   mup->defineVariable("sr", startRow + 1.0);
   mup->defineVariable("er", endRow + 1.0);
 
-  if (!mup->compile(cmd)){
+  if (!mup->compile(ScriptCode(cmd))) {
       QApplication::restoreOverrideCursor();
       return false;
   }
@@ -579,7 +579,7 @@ bool Table::muParserCalculate(int col, int startRow, int endRow, bool notifyChan
     QVariant ret;
     for (int i = startRow; i <= endRow; i++){
       *r = i + 1.0;
-      ret = mup->evaluate(cmd);
+      ret = mup->evaluate(ScriptCode(cmd));
       if(ret.type() == QVariant::Double) {
         d_table->setText(i, col, loc.toString(ret.toDouble(), f, prec));
       } else if(ret.canConvert(QVariant::String))
@@ -632,7 +632,7 @@ bool Table::calculate(int col, int startRow, int endRow, bool forceMuParser, boo
   connect(colscript, SIGNAL(error(const QString&,const QString&,int)), scriptingEnv(), SIGNAL(error(const QString&,const QString&,int)));
   connect(colscript, SIGNAL(print(const QString&)), scriptingEnv(), SIGNAL(print(const QString&)));
 
-  if (!colscript->compile(cmd)){
+  if (!colscript->compile(ScriptCode(cmd))) {
       QApplication::restoreOverrideCursor();
       return false;
   }
@@ -648,7 +648,7 @@ bool Table::calculate(int col, int startRow, int endRow, bool forceMuParser, boo
   QVariant ret;
   for (int i = startRow; i <= endRow; i++){
     colscript->setDouble(i + 1.0, "i");
-    ret = colscript->evaluate(cmd);
+    ret = colscript->evaluate(ScriptCode(cmd));
     if(ret.type() == QVariant::Double)
       d_table->setText(i, col, loc.toString(ret.toDouble(), f, prec));
     else if(ret.canConvert(QVariant::String))
@@ -2915,7 +2915,7 @@ void Table::restore(const QStringList& lst)
     {
       int col = (*i).mid(9,(*i).length()-11).toInt();
       QString formula;
-      for (i++; i!=lst.end() && *i != "</col>"; ++i)
+      for (++i; i != lst.end() && *i != "</col>"; ++i)
         formula += *i + "\n";
       formula.truncate(formula.length()-1);
       commands[col] = formula;

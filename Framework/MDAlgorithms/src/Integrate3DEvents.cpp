@@ -38,9 +38,8 @@ Integrate3DEvents::Integrate3DEvents(
   m_UBinv = UBinv;
   m_radius = radius;
 
-  int64_t hkl_key;
   for (size_t it = 0; it != peak_q_list.size(); ++it) {
-    hkl_key = getHklKey(peak_q_list[it].second);
+    int64_t hkl_key = getHklKey(peak_q_list[it].second);
     if (hkl_key != 0) // only save if hkl != (0,0,0)
       m_peak_qs[hkl_key] = peak_q_list[it].second;
   }

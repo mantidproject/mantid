@@ -134,7 +134,7 @@ void FilterByLogValue::exec() {
   // Find the start and stop times of the run, but handle it if they are not
   // found.
   DateAndTime run_start(0), run_stop("2100-01-01T00:00:00");
-  double handle_edge_values = false;
+  bool handle_edge_values = false;
   try {
     run_start = inputWS->getFirstPulseTime() - tolerance;
     run_stop = inputWS->getLastPulseTime() + tolerance;

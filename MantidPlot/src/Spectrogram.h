@@ -67,7 +67,7 @@ class Spectrogram: public QObject, public QwtPlotSpectrogram, public MantidQt::A
 
 public:
   Spectrogram();
-  Spectrogram(Matrix *m);
+  explicit Spectrogram(Matrix *m);
   Spectrogram(const QString &wsName, const Mantid::API::IMDWorkspace_const_sptr & workspace);
   Spectrogram(Function2D *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz);//Mantid
   Spectrogram(Function2D *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz);//Mantid
@@ -225,7 +225,7 @@ protected:
 class SpectrogramData: public QwtRasterData
 {
 public:
-  SpectrogramData(const QwtDoubleRect &rect):QwtRasterData(rect){}
+  explicit SpectrogramData(const QwtDoubleRect &rect) : QwtRasterData(rect) {}
   virtual double getMinPositiveValue()const = 0;
 };
 
@@ -233,10 +233,8 @@ public:
 class MatrixData: public SpectrogramData
 {
 public:
-  MatrixData(Matrix *m):
-    SpectrogramData(m->boundingRect()),
-    d_matrix(m)
-  {
+  explicit MatrixData(Matrix *m)
+      : SpectrogramData(m->boundingRect()), d_matrix(m) {
     n_rows = d_matrix->numRows();
     n_cols = d_matrix->numCols();
 

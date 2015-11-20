@@ -244,7 +244,7 @@ protected:
 class Shape2DFree: public Shape2D
 {
 public:
-  Shape2DFree(const QPointF& p);
+  explicit Shape2DFree(const QPointF &p);
   virtual Shape2D* clone()const{return new Shape2DFree(*this);}
   virtual bool selectAt(const QPointF& p)const;
   virtual bool contains(const QPointF& p)const;

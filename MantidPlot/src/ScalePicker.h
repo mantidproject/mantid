@@ -42,9 +42,9 @@ class ScalePicker: public QObject
 {
     Q_OBJECT
 public:
-    ScalePicker(QwtPlot *plot);
+  explicit ScalePicker(QwtPlot *plot);
 
-	//! Returns the bounding rectangle of a scale without the title.
+        //! Returns the bounding rectangle of a scale without the title.
 	QRect scaleRect(const QwtScaleWidget *) const;
 
 	//! Returns the bounding rectangle of a scale excluding the title and the tick labels.

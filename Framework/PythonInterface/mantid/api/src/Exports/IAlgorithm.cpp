@@ -206,7 +206,7 @@ std::string createDocString(IAlgorithm &self) {
  * detailed explanation
  */
 struct AllowCThreads {
-  AllowCThreads(const object &algm)
+  explicit AllowCThreads(const object &algm)
       : m_tracefunc(NULL), m_tracearg(NULL), m_saved(NULL), m_tracking(false) {
     PyThreadState *curThreadState = PyThreadState_GET();
     m_tracefunc = curThreadState->c_tracefunc;

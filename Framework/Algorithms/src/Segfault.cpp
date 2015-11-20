@@ -50,6 +50,7 @@ void Segfault::exec() {
   if (!dryrun) {
     // NULL pointer dereference
     int *ptr = NULL;
+    // cppcheck-suppress nullPointer
     *ptr = 1;
   }
 }
