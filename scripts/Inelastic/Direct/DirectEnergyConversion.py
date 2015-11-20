@@ -734,43 +734,35 @@ class DirectEnergyConversion(object):
             spectra_list2=ei_mon_spectra[1]
             if not isinstance(spectra_list1,list):
                 spectra_list1 = [spectra_list1]
-            spec_num1 = self._process_spectra_list(monitor_ws,spectra_list1,'spectr_ws1')
+            spec_id1 = self._process_spectra_list(monitor_ws,spectra_list1,'spectr_ws1')
 
             if not isinstance(spectra_list2,list):
                 spectra_list2 = [spectra_list2]
-            spec_num2 = self._process_spectra_list(monitor_ws,spectra_list2,'spectr_ws2')
+            spec_id2 = self._process_spectra_list(monitor_ws,spectra_list2,'spectr_ws2')
             # Are other monitors necessary?
             mon_list = self.prop_man.get_used_monitors_list()
+            spectra_needed=[]
             monitors_left=[]
             for mon_id in mon_list:
                 if not(mon_id in spectra_list1 or mon_id in spectra_list2):
+                    wsInd = monitor_ws.getIndexFromSpectrumNumber(int(mon_id))
                     monitors_left.append(int(mon_id))
-            n_other_mon = len(monitors_left)
+                    spectra_needed.append(int(wsInd))
+            n_other_mon = len(spectra_needed)
             if n_other_mon > 0:
-                specN = monitor_ws.getIndexFromSpectrumNumber(monitors_left[0])
-                ExtractSingleSpectrum(InputWorkspace=monitor_ws,OutputWorkspace='_OtherMon',
-                                      WorkspaceIndex=specN)
-                mon_tt = monitors_left[1:]
-                for mon_id in mon_tt:
-                    specN = monitor_ws.getIndexFromSpectrumNumber(int(mon_id))
-                    ExtractSingleSpectrum(InputWorkspace=monitor_ws,OutputWorkspace='_mon_t1',
-                                          WorkspaceIndex=specN)
-                    AppendSpectra(InputWorkspace1='_OtherMon',InputWorkspace2='_mon_t1',OutputWorkspace='_OtherMon')
-                    DeleteWorkspace('_mon_t1')
+                ExtractSpectra(InputWorkspace=monitor_ws,OutputWorkspace='_OtherMon',\
+                               WorkspaceIndexList=spectra_needed)
             else:
                 pass
             # Deal with summed monitors
             DeleteWorkspace(monitor_ws_name)
-            AppendSpectra(InputWorkspace1='spectr_ws1',InputWorkspace2='spectr_ws2',OutputWorkspace=monitor_ws_name)
+            ConjoinWorkspaces(InputWorkspace1='spectr_ws1',InputWorkspace2='spectr_ws2')
+            RenameWorkspace(InputWorkspace='spectr_ws1',OutputWorkspace=monitor_ws_name)
             if '_OtherMon' in mtd:
-                AppendSpectra(InputWorkspace1=monitor_ws_name,InputWorkspace2='_OtherMon',OutputWorkspace=monitor_ws_name)
-                DeleteWorkspace('_OtherMon')
+                ConjoinWorkspaces(InputWorkspace1=monitor_ws_name,InputWorkspace2='_OtherMon')
+            else:
+                pass
 
-
-            if 'spectr_ws1' in mtd:
-                DeleteWorkspace('spectr_ws1')
-            if 'spectr_ws2' in mtd:
-                DeleteWorkspace('spectr_ws2')
             monitor_ws = mtd[monitor_ws_name]
             AddSampleLog(monitor_ws,LogName='CombinedSpectraIDList',\
                          LogText=str(monitors_left+spectra_list1+spectra_list2),LogType='String')
@@ -779,26 +771,19 @@ class DirectEnergyConversion(object):
         # Weird operation. It looks like the spectra numbers obtained from
         # AppendSpectra operation depend on instrument.
         # Looks like a bug in AppendSpectra
-        spec_num1 = monitor_ws.getSpectrum(0).getSpectrumNo()
-        spec_num2 = monitor_ws.getSpectrum(1).getSpectrumNo()
-
-        #self.prop_man.ei_mon_spectra = (spec_num1,spec_num2)
-        #mon2_norm_spec = self.prop_man.mon2_norm_spec
-        #if mon2_norm_spec in spectra_list1:
-        #    self.prop_man.mon2_norm_spec = spec_num1
-        #if mon2_norm_spec in spectra_list2:
-        #    self.prop_man.mon2_norm_spec = spec_num2
+        spec_id1 = monitor_ws.getSpectrum(0).getSpectrumNo()
+        spec_id2 = monitor_ws.getSpectrum(1).getSpectrumNo()
 
 
-        return (spec_num1,spec_num2),monitor_ws
+        return (spec_id1,spec_id2),monitor_ws
     #
     def _process_spectra_list(self,workspace,spectra_list,target_ws_name='SpectraWS'):
         """Method moves all detectors of the spectra list into the same position and
            sums the specified spectra in the workspace"""
         detPos=None
         wsIDs=list()
-        for spec_num in spectra_list:
-            specID = workspace.getIndexFromSpectrumNumber(spec_num)
+        for spec_id in spectra_list:
+            specID = workspace.getIndexFromSpectrumNumber(spec_id)
             if detPos is None:
                 first_detector = workspace.getDetector(specID)
                 detPos = first_detector.getPos()
@@ -851,7 +836,7 @@ class DirectEnergyConversion(object):
 
 
         # Calculate the incident energy
-#Returns: ei,mon1_peak,mon1_index,tzero
+        #Returns: ei,mon1_peak,mon1_index,tzero
         ei,mon1_peak,mon1_index,_ = \
             GetEi(InputWorkspace=monitor_ws, Monitor1Spec=ei_mon_spectra[0],
                   Monitor2Spec=ei_mon_spectra[1],
@@ -1159,15 +1144,14 @@ class DirectEnergyConversion(object):
 
                 # Calculate the incident energy and TOF when the particles access Monitor1
                 try:
-#pylint: disable=unused-variable
-                    ei,mon1_peak,mon1_index,tzero = \
+                    ei,mon1_peak,mon1_index,_ = \
                     GetEi(InputWorkspace=monitor_ws, Monitor1Spec=mon_1_spec_ID,
                         Monitor2Spec=mon_2_spec_ID,
                         EnergyEstimate=ei_guess,FixEi=fix_ei)
                     mon1_det = monitor_ws.getDetector(mon1_index)
                     mon1_pos = mon1_det.getPos()
                     src_name = monitor_ws.getInstrument().getSource().getName()
-#pylint: disable=bare-except
+                #pylint: disable=bare-except
                 except:
                     src_name = None
                     mon1_peak = 0
@@ -1213,7 +1197,7 @@ class DirectEnergyConversion(object):
 
         return TOF_range
     #
-#pylint: disable=too-many-branches
+    #pylint: disable=too-many-branches
     def save_results(self, workspace, save_file=None, formats=None):
         """
         Save the result workspace to the specified filename using the list of formats specified in
