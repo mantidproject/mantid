@@ -195,29 +195,8 @@ public:
     size_t badTofs = 0;
     size_t my_discarded_events(0);
 
-		if (alg->m_specMin != EMPTY_INT() && m_min_id < alg->m_specMin) {
-			if (alg->m_specMin > m_max_id)
-			{ // the minimum spectra to load is more than the max of this bank section
-				return;
-			}
-			// the min spectra to load is higher than the min for this bank section
-			m_min_id = alg->m_specMin;
-		}    
-		if (alg->m_specMax != EMPTY_INT() && m_max_id > alg->m_specMax) {
-			if (alg->m_specMax > m_min_id) { 
-				// the maximum spectra to load is less than the minimum of this bank section
-				return;
-			}
-			// the max spectra to load is lower than the max for this bank section
-			m_max_id = alg->m_specMax;
-		}
-		if (m_min_id > m_max_id) {
-			// the min is now larger than the max, this means the entire block of spectra to load is outside this bank section
-			return;
-		}
-
     prog->report(entry_name + ": precount");
-		    // ---- Pre-counting events per pixel ID ----
+    // ---- Pre-counting events per pixel ID ----
     auto &outputWS = *(alg->m_ws);
     if (alg->precount) {
 
@@ -914,28 +893,55 @@ public:
       return;
     }
 
-    // No error? Launch a new task to process that data.
-    size_t numEvents = m_loadSize[0];
-    size_t startAt = m_loadStart[0];
-
-    // convert things to shared_arrays
-    boost::shared_array<uint32_t> event_id_shrd(m_event_id);
-    boost::shared_array<float> event_time_of_flight_shrd(
-        m_event_time_of_flight);
-    boost::shared_array<float> event_weight_shrd(m_event_weight);
-    boost::shared_ptr<std::vector<uint64_t>> event_index_shrd(event_index_ptr);
+    auto bank_size = m_max_id - m_min_id;
+    // check that if a range of spectra were requested that these fit within
+    // this bank
+    if (alg->m_specMin != EMPTY_INT() && m_min_id < alg->m_specMin) {
+      if (alg->m_specMin > m_max_id) { // the minimum spectra to load is more
+                                       // than the max of this bank
+        return;
+      }
+      // the min spectra to load is higher than the min for this bank
+      m_min_id = alg->m_specMin;
+    }
+    if (alg->m_specMax != EMPTY_INT() && m_max_id > alg->m_specMax) {
+      if (alg->m_specMax > m_min_id) {
+        // the maximum spectra to load is less than the minimum of this bank
+        return;
+      }
+      // the max spectra to load is lower than the max for this bank
+      m_max_id = alg->m_specMax;
+    }
+    if (m_min_id > m_max_id) {
+      // the min is now larger than the max, this means the entire block of
+      // spectra to load is outside this bank
+      return;
+    }
 
     // schedule the job to generate the event lists
     auto mid_id = m_max_id;
-    if (alg->splitProcessing)
+    if (alg->splitProcessing && m_max_id > (m_min_id + (bank_size / 4)))
+      // only split if told to and the section to load is at least 1/4 the size
+      // of the whole bank
       mid_id = (m_max_id + m_min_id) / 2;
+
+		// No error? Launch a new task to process that data.
+		size_t numEvents = m_loadSize[0];
+		size_t startAt = m_loadStart[0];
+
+		// convert things to shared_arrays
+		boost::shared_array<uint32_t> event_id_shrd(m_event_id);
+		boost::shared_array<float> event_time_of_flight_shrd(
+			m_event_time_of_flight);
+		boost::shared_array<float> event_weight_shrd(m_event_weight);
+		boost::shared_ptr<std::vector<uint64_t>> event_index_shrd(event_index_ptr);
 
     ProcessBankData *newTask1 = new ProcessBankData(
         alg, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
         numEvents, startAt, event_index_shrd, thisBankPulseTimes, m_have_weight,
         event_weight_shrd, m_min_id, mid_id);
     scheduler->push(newTask1);
-    if (alg->splitProcessing) {
+    if (alg->splitProcessing && (mid_id < m_max_id)) {
       ProcessBankData *newTask2 = new ProcessBankData(
           alg, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
           numEvents, startAt, event_index_shrd, thisBankPulseTimes,
@@ -1967,11 +1973,13 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
   if (shortest_tof < 0)
     g_log.warning() << "The shortest TOF was negative! At least 1 event has an "
-                       "invalid time-of-flight." << std::endl;
+                       "invalid time-of-flight."
+                    << std::endl;
   if (bad_tofs > 0)
     g_log.warning() << "Found " << bad_tofs << " events with TOF > 2e8. This "
                                                "may indicate errors in the raw "
-                                               "TOF data." << std::endl;
+                                               "TOF data."
+                    << std::endl;
 
   // Use T0 offset from TOPAZ Parameter file if it exists
   if (m_ws->getInstrument()->hasParameter("T0")) {
@@ -2300,7 +2308,8 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
     if (m_instrument_loaded_correctly) {
       m_ws->setInstrument(dataWS->getInstrument());
       g_log.information() << "Instrument data copied into monitors workspace "
-                             " from the data workspace." << std::endl;
+                             " from the data workspace."
+                          << std::endl;
     }
 
     // Perform the load (only events from monitor)
@@ -2322,7 +2331,8 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
         g_log.error()
             << "Could not copy log data into monitors workspace. Some "
                " logs may be wrong and/or missing in the output "
-               "monitors workspace." << std::endl;
+               "monitors workspace."
+            << std::endl;
       }
     }
 
