@@ -260,7 +260,7 @@ void MuonLoad::exec() {
 /**
  * Groups specified workspace group according to specified
  * DetectorGroupingTable.
- * @param ws :: WorkspaceGroup to group
+ * @param wsGroup :: WorkspaceGroup to group
  * @param grouping :: Detector grouping table to use
  * @return Grouped workspaces
  */
@@ -284,7 +284,7 @@ WorkspaceGroup_sptr MuonLoad::groupWorkspaces(WorkspaceGroup_sptr wsGroup,
 
 /**
  * Applies dead time correction to the workspace group.
- * @param ws :: Workspace group to apply correction to
+ * @param wsGroup :: Workspace group to apply correction to
  * @param dt :: Dead time table to use
  * @return Corrected workspace group
  */
@@ -309,7 +309,7 @@ WorkspaceGroup_sptr MuonLoad::applyDTC(WorkspaceGroup_sptr wsGroup,
 /**
  * Applies offset, crops and rebin the workspaces in the group according to
  * specified params.
- * @param ws :: Workspaces to correct
+ * @param wsGroup :: Workspaces to correct
  * @param loadedTimeZero :: Time zero of the data, so we can calculate the
  * offset
  * @return Corrected workspaces
