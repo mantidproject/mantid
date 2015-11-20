@@ -925,16 +925,16 @@ public:
       // of the whole bank
       mid_id = (m_max_id + m_min_id) / 2;
 
-		// No error? Launch a new task to process that data.
-		size_t numEvents = m_loadSize[0];
-		size_t startAt = m_loadStart[0];
+    // No error? Launch a new task to process that data.
+    size_t numEvents = m_loadSize[0];
+    size_t startAt = m_loadStart[0];
 
-		// convert things to shared_arrays
-		boost::shared_array<uint32_t> event_id_shrd(m_event_id);
-		boost::shared_array<float> event_time_of_flight_shrd(
-			m_event_time_of_flight);
-		boost::shared_array<float> event_weight_shrd(m_event_weight);
-		boost::shared_ptr<std::vector<uint64_t>> event_index_shrd(event_index_ptr);
+    // convert things to shared_arrays
+    boost::shared_array<uint32_t> event_id_shrd(m_event_id);
+    boost::shared_array<float> event_time_of_flight_shrd(
+        m_event_time_of_flight);
+    boost::shared_array<float> event_weight_shrd(m_event_weight);
+    boost::shared_ptr<std::vector<uint64_t>> event_index_shrd(event_index_ptr);
 
     ProcessBankData *newTask1 = new ProcessBankData(
         alg, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
@@ -1973,13 +1973,11 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
   if (shortest_tof < 0)
     g_log.warning() << "The shortest TOF was negative! At least 1 event has an "
-                       "invalid time-of-flight."
-                    << std::endl;
+                       "invalid time-of-flight." << std::endl;
   if (bad_tofs > 0)
     g_log.warning() << "Found " << bad_tofs << " events with TOF > 2e8. This "
                                                "may indicate errors in the raw "
-                                               "TOF data."
-                    << std::endl;
+                                               "TOF data." << std::endl;
 
   // Use T0 offset from TOPAZ Parameter file if it exists
   if (m_ws->getInstrument()->hasParameter("T0")) {
@@ -2308,8 +2306,7 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
     if (m_instrument_loaded_correctly) {
       m_ws->setInstrument(dataWS->getInstrument());
       g_log.information() << "Instrument data copied into monitors workspace "
-                             " from the data workspace."
-                          << std::endl;
+                             " from the data workspace." << std::endl;
     }
 
     // Perform the load (only events from monitor)
@@ -2331,8 +2328,7 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
         g_log.error()
             << "Could not copy log data into monitors workspace. Some "
                " logs may be wrong and/or missing in the output "
-               "monitors workspace."
-            << std::endl;
+               "monitors workspace." << std::endl;
       }
     }
 
