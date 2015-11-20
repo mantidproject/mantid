@@ -9,7 +9,6 @@
 #include "MantidVatesSimpleGuiViewWidgets/AutoScaleRangeGenerator.h"
 #include "MantidVatesAPI/ColorScaleGuard.h"
 
-#include "vtk_jsoncpp.h"
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
 #include <pqDataRepresentation.h>
@@ -19,6 +18,10 @@
 #include <pqSMAdaptor.h>
 
 #include <vtkCallbackCommand.h>
+#ifdef JSON_DLL
+#undef JSON_DLL
+#endif
+#include "vtk_jsoncpp.h"
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMIntVectorProperty.h>
 #include <vtkSMProxy.h>
