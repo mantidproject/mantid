@@ -14051,15 +14051,23 @@ void ApplicationWindow::updateRecentFilesList(QString fname) {
       const std::vector<std::string> files =
           Mantid::API::MultipleFileProperty::flattenFileNames(mfp());
       if (files.size() == 1) {
-        mi->setText("&" + QString::number(i + 1) + " " + recentFiles[i]);
-      } else {
+        std::ostringstream ostr;
+        ostr << "&" << QString::number(i + 1).toStdString() << " " << files[0];
+        mi->setText(QString::fromStdString(ostr.str()));
+      } else if (files.size() > 1) {
         std::ostringstream ostr;
         ostr << "&" << QString::number(i + 1).toStdString() << " " << files[0]
              << " && " << files.size() - 1 << " more";
         mi->setText(QString::fromStdString(ostr.str()));
+      } else {
+        // mfp.setValue strips out any filenames that cannot be resolved.
+        // So if your recent file history contains a file that you have
+        // since deleted or renamed, files will be empty so do not
+        // register this entry and go on to the next one
+        delete (mi);
+        continue;
       }
-    } catch (std::runtime_error &ex) {
-      UNUSED_ARG(ex);
+    } catch (std::runtime_error &) {
       // The file property could not parse the string, use as is
       mi->setText("&" + QString::number(i + 1) + " " + recentFiles[i]);
     }
