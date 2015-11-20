@@ -145,11 +145,12 @@ namespace MantidQt
       using namespace Mantid::API;
 
       QString problem = "";
-      const QString wsName = getCurrentDataName();
-
       if(isFileSelectorVisible())
       {
         problem = m_uiForm.rfFileInput->getFileProblem();
+		if (problem.compare("") == 0) {
+			problem = "Input field is empty";
+		}
       }
       else
       {
