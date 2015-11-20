@@ -89,8 +89,7 @@ public:
 
     MuonCalculateAsymmetry alg;
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspace", inputWSGroup));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWSGroup));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SummedPeriodSet", "1,2"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 1));
@@ -138,8 +137,7 @@ public:
 
     MuonCalculateAsymmetry alg;
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspace", inputWSGroup));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWSGroup));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SummedPeriodSet", "1"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SubtractedPeriodSet", "2"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
