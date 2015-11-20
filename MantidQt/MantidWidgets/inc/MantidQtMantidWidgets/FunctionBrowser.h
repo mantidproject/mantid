@@ -296,7 +296,11 @@ protected slots:
   void attributeVectorDoubleChanged(QtProperty*);
   /// Called when a function parameter property is changed
   void parameterChanged(QtProperty*);
+  /// Called when button in local parameter editor was clicked
   void parameterButtonClicked(QtProperty*);
+  /// Called when a tie property changes
+  void tieChanged(QtProperty*);
+  /// Called when "Global" check-box was clicked
   void globalChanged(QtProperty*, const QString&, bool);
   /// Set value of an attribute (as a property) to a function
   void setAttributeToFunction(Mantid::API::IFunction& fun, QtProperty* prop);

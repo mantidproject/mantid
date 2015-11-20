@@ -30,7 +30,6 @@
 #include "qteditorfactory.h"
 #include "DoubleEditorFactory.h"
 #include "CompositeEditorFactory.h"
-#include "ButtonEditorFactory.h"
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1125
 #elif defined(__GNUC__)
@@ -175,8 +174,8 @@ void FunctionBrowser::createBrowser()
   connect(m_attributeBoolManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
   connect(m_formulaManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
   connect(m_filenameManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
-  connect(m_attributeVectorDoubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeVectorDoubleChanged(QtProperty*)));
-
+  connect(m_attributeVectorDoubleManager, SIGNAL(propertyChanged(QtProperty*)), this, SLOT(attributeVectorDoubleChanged(QtProperty*)));
+  connect(m_tieManager, SIGNAL(propertyChanged(QtProperty*)), this, SLOT(tieChanged(QtProperty*)));
   connect(m_parameterManager, SIGNAL(valueChanged(QtProperty*,double)),
           SLOT(parameterChanged(QtProperty*)));
 
@@ -1260,7 +1259,7 @@ void FunctionBrowser::popupMenu(const QPoint &)
   }
   else if (isParameter(prop))
   {// parameters
-    if ( prop->hasOption(globalOptionName) && !prop->checkOption(globalOptionName) ) return;
+    //if ( prop->hasOption(globalOptionName) && !prop->checkOption(globalOptionName) ) return;
     QMenu context(this);
     if ( hasTie(prop) )
     {
@@ -1732,6 +1731,10 @@ void FunctionBrowser::fixParameter()
   {
     ap.prop->setEnabled(false);
   }
+  if (prop->hasOption(globalOptionName) && !prop->checkOption(globalOptionName))
+  {
+    setLocalParameterFixed(getParameterName(prop), m_currentDataset, true);
+  }
 }
 
 /// Get a tie property attached to a parameter property
@@ -1778,7 +1781,14 @@ void FunctionBrowser::addTie()
   QString tie = QInputDialog::getText(this, "Add a tie", "Tie:", QLineEdit::Normal, "", &ok);
   if ( ok && !tie.isEmpty() )
   {
-    addTieProperty(prop, tie);
+    if (prop->hasOption(globalOptionName) && !prop->checkOption(globalOptionName))
+    {
+      setLocalParameterTie(getParameterName(prop), m_currentDataset, tie);
+    }
+    else
+    {
+      addTieProperty(prop, tie);
+    }
   }
 }
 
@@ -1937,6 +1947,35 @@ void FunctionBrowser::parameterChanged(QtProperty* prop)
   }
   emit parameterChanged(getIndex(prop), prop->propertyName());
 }
+
+/// Called when a tie property changes
+void FunctionBrowser::tieChanged(QtProperty* prop)
+{
+  if (m_currentDataset < getNumberOfDatasets() && !prop->checkOption(globalOptionName))
+  {
+    QtProperty* parProp = nullptr;
+    for (auto it = m_ties.begin(); it != m_ties.end(); ++it)
+    {
+      if (it.value().tieProp == prop)
+      {
+        parProp = it.value().paramProp;
+        break;
+      }
+    }
+    if (!parProp) return;
+
+    auto parName = getParameterName(parProp);
+    checkLocalParameter(parName);
+    auto tie = QString::fromStdString(getTie(parProp));
+    auto tieExpr = tie.split('=');
+    if (tieExpr.size() == 2)
+    {
+      tie = tieExpr[1];
+    }
+    m_localParameterValues[parName][m_currentDataset].tie = tie;
+  }
+}
+
 
 void FunctionBrowser::parameterButtonClicked(QtProperty *prop)
 {
@@ -2211,10 +2250,6 @@ void FunctionBrowser::updateLocalTie(const QString& parName)
     else if (!localParam.tie.isEmpty())
     {
       auto ap = addTieProperty(prop, localParam.tie);
-      if (ap.prop)
-      {
-        ap.prop->setEnabled(false);
-      }
     }
 }
 
