@@ -1460,7 +1460,6 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty* prop, bool 
       }
       catch(...)
       {
-        //std::cerr << "tie failed " << it.value().tie.toStdString() << std::endl;
         filedTies << it.value().tieProp;
       }
     }
@@ -1725,6 +1724,7 @@ void FunctionBrowser::fixParameter()
   if ( !item ) return;
   QtProperty* prop = item->property();
   if (!isParameter(prop)) return;
+  m_tieManager->blockSignals(true);
   QString tie = QString::number(getParameter(prop));
   auto ap = addTieProperty(prop, tie);
   if (ap.prop)
@@ -1735,6 +1735,7 @@ void FunctionBrowser::fixParameter()
   {
     setLocalParameterFixed(getParameterName(prop), m_currentDataset, true);
   }
+  m_tieManager->blockSignals(false);
 }
 
 /// Get a tie property attached to a parameter property
@@ -1966,13 +1967,15 @@ void FunctionBrowser::tieChanged(QtProperty* prop)
 
     auto parName = getParameterName(parProp);
     checkLocalParameter(parName);
+    auto &paramValue = m_localParameterValues[parName][m_currentDataset];
+    if (paramValue.fixed) return;
     auto tie = QString::fromStdString(getTie(parProp));
     auto tieExpr = tie.split('=');
     if (tieExpr.size() == 2)
     {
       tie = tieExpr[1];
     }
-    m_localParameterValues[parName][m_currentDataset].tie = tie;
+    paramValue.tie = tie;
   }
 }
 

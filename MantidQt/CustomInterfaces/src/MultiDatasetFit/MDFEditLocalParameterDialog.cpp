@@ -65,7 +65,13 @@ void EditLocalParameterDialog::valueChanged(int row, int col)
     QString text = m_uiForm.tableWidget->item(row,col)->text();
     try
     {
-      m_values[row] = text.toDouble();
+      bool ok = false;
+      double value = text.toDouble(&ok);
+      if (ok) {
+        m_values[row] = value;
+      } else {
+        m_ties[row] = text;
+      }
     }
     catch(std::exception&)
     {

@@ -21,8 +21,8 @@ namespace MDF
 /// @param index :: Index of the spectrum which parameter is edited.
 /// @param fixed :: Is the parameter fixed initially?
 /// @param tie :: Parameter's current tie (or empty string).
-LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index, bool fixed, QString tie):
-  QWidget(parent), m_index(index),m_fixed(fixed), m_tie(tie)
+LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index, double value, bool fixed, QString tie):
+  QWidget(parent), m_index(index), m_value(QString::number(value)), m_fixed(fixed), m_tie(tie)
 {
   auto layout = new QHBoxLayout(this);
   layout->setMargin(0);
@@ -31,20 +31,17 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index, bool fixe
 
   m_editor = new QLineEdit(parent);
   m_editor->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-  auto validator = new QDoubleValidator(this);
-  validator->setDecimals(16);
-  m_editor->setValidator(validator);
   m_editor->setToolTip("Edit local parameter value. Press F to fix/unfix it.");
 
-  auto button = new QPushButton("&Set");
-  button->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Expanding);
+  m_button = new QPushButton("&Set");
+  m_button->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Expanding);
 
   this->setFocusPolicy(Qt::NoFocus);
+  this->setFocusProxy(m_editor);
   layout->addWidget(m_editor);
-  layout->addWidget(button);
+  layout->addWidget(m_button);
   layout->setStretch(0,1);
   layout->setStretch(1,0);
-  this->setFocusProxy(m_editor);
   this->setFocusPolicy(Qt::StrongFocus);
 
   auto setMenu = new QMenu(this);
@@ -91,9 +88,11 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index, bool fixe
   connect(action,SIGNAL(activated()),this,SLOT(removeAllTies()));
   setMenu->addAction(action);
 
-  button->setMenu(setMenu);
+  m_button->setMenu(setMenu);
 
   m_editor->installEventFilter(this);
+
+  setEditorState();
 }
 
 /// Send a signal to set all parameters to the value in the editor.
@@ -107,19 +106,21 @@ void LocalParameterEditor::setAll()
 void LocalParameterEditor::fixParameter()
 {
   m_fixed = !m_fixed;
-  m_fixAction->setText( m_fixed? "Unfix" : "Fix" );
+  setEditorState();
   emit fixParameter(m_index, m_fixed);
 }
 
 /// Send a signal to fix all parameters.
 void LocalParameterEditor::fixAll()
 {
+  setEditorState();
   emit setAllFixed(true);
 }
 
 /// Send a signal to unfix all parameters.
 void LocalParameterEditor::unfixAll()
 {
+  setEditorState();
   emit setAllFixed(false);
 }
 
@@ -130,27 +131,32 @@ void LocalParameterEditor::setTie()
   input.setWindowTitle("Set a tie.");
   input.setTextValue(m_tie);
   if (input.exec() == QDialog::Accepted) {
-    auto tie = input.textValue();
-    emit setTie(m_index, tie);
+    m_tie = input.textValue();
+    emit setTie(m_index, m_tie);
   }
+  setEditorState();
 }
 
 /// Send a signal to remove a tie.
 void LocalParameterEditor::removeTie()
 {
+  m_tie = "";
   emit setTie(m_index, "");
+  setEditorState();
 }
 
 /// Set all ties for all parameters
 void LocalParameterEditor::setTieAll()
 {
   emit setTieAll(m_tie);
+  setEditorState();
 }
 
 /// Remove ties form all parameters
 void LocalParameterEditor::removeAllTies()
 {
   emit setTieAll("");
+  setEditorState();
 }
 
 /// Filter events in the line editor to emulate a shortcut (F to fix/unfix).
@@ -159,13 +165,36 @@ bool LocalParameterEditor::eventFilter(QObject *, QEvent *evn)
   if ( evn->type() == QEvent::KeyPress )
   {
     auto keyEvent = static_cast<QKeyEvent*>(evn);
-    if ( keyEvent->key() == Qt::Key_F )
+    if (keyEvent->key() == Qt::Key_F && keyEvent->modifiers() == Qt::ControlModifier)
     {
       fixParameter();
       return true;
     }
+    if (m_tie.isEmpty())
+    {
+      m_value = m_editor->text();
+    } else {
+      m_tie = m_editor->text();
+      emit setTie(m_index, m_tie);
+    }
   }
   return false;
+}
+
+/// Set the state of the editor elements (the line editor and the button)
+/// according to the state of the parameter (fixed, tied, etc)
+void LocalParameterEditor::setEditorState()
+{
+  m_fixAction->setText(m_fixed ? "Unfix" : "Fix");
+  if (m_tie.isEmpty()) {
+    auto validator = new QDoubleValidator(this);
+    validator->setDecimals(16);
+    m_editor->setValidator(validator);
+    m_editor->setText(m_value);
+  } else {
+    m_editor->setValidator(nullptr);
+    m_editor->setText(m_tie);
+  }
 }
 
 } // MDF

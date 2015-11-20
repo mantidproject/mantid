@@ -5,6 +5,7 @@
 
 class QLineEdit;
 class QAction;
+class QPushButton;
 
 namespace MantidQt
 {
@@ -21,7 +22,7 @@ class LocalParameterEditor: public QWidget
 {
   Q_OBJECT
 public:
-  LocalParameterEditor(QWidget *parent, int index, bool fixed, QString tie);
+  LocalParameterEditor(QWidget *parent, int index, double value, bool fixed, QString tie);
 signals:
   void setAllValues(double);
   void fixParameter(int,bool);
@@ -39,9 +40,12 @@ private slots:
   void removeAllTies();
 private:
   bool eventFilter(QObject *widget, QEvent *evn);
+  void setEditorState();
   QLineEdit* m_editor;
+  QPushButton* m_button;
   QAction *m_fixAction;
   int m_index;
+  QString m_value;
   bool m_fixed;
   QString m_tie;
 };

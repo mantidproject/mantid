@@ -27,6 +27,7 @@ public:
   QList<double> getValues() const;
   QList<bool> getFixes() const;
   QStringList getTies() const;
+  double getValue(int i) const {return m_values[i];}
   bool isFixed(int i) const {return m_fixes[i];}
   QString getTie(int i) const {return m_ties[i];}
 private slots:

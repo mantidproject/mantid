@@ -23,7 +23,7 @@ LocalParameterItemDelegate::LocalParameterItemDelegate(EditLocalParameterDialog 
 QWidget* LocalParameterItemDelegate::createEditor(QWidget * parent, const QStyleOptionViewItem &, const QModelIndex & index) const
 {
   auto row = index.row();
-  m_currentEditor = new LocalParameterEditor(parent,row, owner()->isFixed(row), owner()->getTie(row));
+  m_currentEditor = new LocalParameterEditor(parent, row, owner()->getValue(row), owner()->isFixed(row), owner()->getTie(row));
   connect(m_currentEditor,SIGNAL(setAllValues(double)),this,SIGNAL(setAllValues(double)));
   connect(m_currentEditor,SIGNAL(fixParameter(int,bool)),this,SIGNAL(fixParameter(int,bool)));
   connect(m_currentEditor,SIGNAL(setAllFixed(bool)),this,SIGNAL(setAllFixed(bool)));
