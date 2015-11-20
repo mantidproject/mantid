@@ -324,13 +324,16 @@ public:
     std::string wsName = "test_partial_spectra_loading_SpectrumListISIS";
     std::string wsName2 = "test_partial_spectra_loading_SpectrumListISIS2";
     std::string filename = "OFFSPEC00036416.nxs";
+		std::vector<int32_t> specList;
+		specList.push_back(45);
 
     LoadEventNexus ld;
     ld.initialize();
     ld.setPropertyValue("OutputWorkspace", wsName);
     ld.setPropertyValue("Filename", filename);
     ld.setProperty("SpectrumMin", 10);
-    ld.setProperty("SpectrumMax", 10);
+		ld.setProperty("SpectrumMax", 20);
+		ld.setProperty("SpectrumList", specList);
     ld.setProperty<bool>("Precount", false);
     ld.setProperty<bool>("LoadLogs", false); // Time-saver
 
@@ -341,7 +344,8 @@ public:
     ld2.setPropertyValue("OutputWorkspace", wsName2);
     ld2.setPropertyValue("Filename", filename);
     ld2.setProperty("SpectrumMin", 10);
-    ld2.setProperty("SpectrumMax", 10);
+    ld2.setProperty("SpectrumMax", 20);
+		ld2.setProperty("SpectrumList", specList);
     ld2.setProperty<bool>("Precount", true);
     ld2.setProperty<bool>("LoadLogs", false); // Time-saver
 
@@ -352,8 +356,8 @@ public:
     auto outWs2 =
         AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName2);
 
-    TSM_ASSERT("The number of spectra in the workspace should be 11",
-               outWs->getNumberHistograms() == 11);
+    TSM_ASSERT("The number of spectra in the workspace should be 12",
+               outWs->getNumberHistograms() == 12);
 
     TSM_ASSERT_EQUALS("The number of events in the precount and not precount "
                       "workspaces do not match",
@@ -362,8 +366,10 @@ public:
     TSM_ASSERT("Some spectra were not found in the workspace",
                outWs->getSpectrum(0)->getSpectrumNo() == 10);
 
-    TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(10)->getSpectrumNo() == 20);
+		TSM_ASSERT("Some spectra were not found in the workspace",
+			outWs->getSpectrum(10)->getSpectrumNo() == 20);
+		TSM_ASSERT("Some spectra were not found in the workspace",
+			outWs->getSpectrum(11)->getSpectrumNo() == 45);
 
     AnalysisDataService::Instance().remove(wsName);
     AnalysisDataService::Instance().remove(wsName2);
@@ -750,6 +756,24 @@ public:
     loader.setPropertyValue("OutputWorkspace", "ws");
     TS_ASSERT(loader.execute());
   }
+	void testPartialLoad() {
+		LoadEventNexus loader;
+		loader.initialize();
+		loader.setPropertyValue("Filename", "CNCS_7860_event.nxs");
+		loader.setProperty("SpectrumMin", 10);
+		loader.setProperty("SpectrumMax", 20);
+		loader.setPropertyValue("OutputWorkspace", "ws");
+		TS_ASSERT(loader.execute());
+	}
+	void testPartialLoadBankSplitting() {
+		LoadEventNexus loader;
+		loader.initialize();
+		loader.setPropertyValue("Filename", "OFFSPEC00036416.nxs");
+		loader.setProperty("SpectrumMin", 10);
+		loader.setProperty("SpectrumMax", 20);
+		loader.setPropertyValue("OutputWorkspace", "ws");
+		TS_ASSERT(loader.execute());
+	}
 };
 
 #endif /*LOADEVENTNEXUSTEST_H_*/

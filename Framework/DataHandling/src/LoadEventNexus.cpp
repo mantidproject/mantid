@@ -195,36 +195,49 @@ public:
     size_t badTofs = 0;
     size_t my_discarded_events(0);
 
-    prog->report(entry_name + ": precount");
+		if (alg->m_specMin != EMPTY_INT() && m_min_id < alg->m_specMin) {
+			if (alg->m_specMin > m_max_id)
+			{ // the minimum spectra to load is more than the max of this bank section
+				return;
+			}
+			// the min spectra to load is higher than the min for this bank section
+			m_min_id = alg->m_specMin;
+		}    
+		if (alg->m_specMax != EMPTY_INT() && m_max_id > alg->m_specMax) {
+			if (alg->m_specMax > m_min_id) { 
+				// the maximum spectra to load is less than the minimum of this bank section
+				return;
+			}
+			// the max spectra to load is lower than the max for this bank section
+			m_max_id = alg->m_specMax;
+		}
+		if (m_min_id > m_max_id) {
+			// the min is now larger than the max, this means the entire block of spectra to load is outside this bank section
+			return;
+		}
 
-    // ---- Pre-counting events per pixel ID ----
+    prog->report(entry_name + ": precount");
+		    // ---- Pre-counting events per pixel ID ----
     auto &outputWS = *(alg->m_ws);
     if (alg->precount) {
 
-			auto local_min_id = m_min_id;
-			auto local_max_id = m_max_id;
-      if (alg->m_specMin != EMPTY_INT() && alg->m_specMax != EMPTY_INT()) {
-        local_min_id = alg->m_specMin;
-        local_max_id = alg->m_specMax;
-      }
-
-      std::vector<size_t> counts(local_max_id - local_min_id + 1, 0);
+      std::vector<size_t> counts(m_max_id - m_min_id + 1, 0);
       for (size_t i = 0; i < numEvents; i++) {
         detid_t thisId = detid_t(event_id[i]);
-        if (thisId >= local_min_id && thisId <= local_max_id)
-          counts[thisId - local_min_id]++;
+        if (thisId >= m_min_id && thisId <= m_max_id)
+          counts[thisId - m_min_id]++;
       }
 
       // Now we pre-allocate (reserve) the vectors of events in each pixel
       // counted
       const size_t numEventLists = outputWS.getNumberHistograms();
-      for (detid_t pixID = local_min_id; pixID <= local_max_id; pixID++) {
-        if (counts[pixID - local_min_id] > 0) {
+      for (detid_t pixID = m_min_id; pixID <= m_max_id; pixID++) {
+        if (counts[pixID - m_min_id] > 0) {
           // Find the the workspace index corresponding to that pixel ID
           size_t wi = pixelID_to_wi_vector[pixID + pixelID_to_wi_offset];
           // Allocate it
           if (wi < numEventLists) {
-            outputWS.reserveEventListAt(wi, counts[pixID - local_min_id]);
+            outputWS.reserveEventListAt(wi, counts[pixID - m_min_id]);
           }
           if (alg->getCancel())
             break; // User cancellation
