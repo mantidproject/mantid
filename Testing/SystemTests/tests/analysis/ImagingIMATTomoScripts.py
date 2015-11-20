@@ -4,7 +4,6 @@ import unittest
 import numpy as np
 
 from mantid.api import WorkspaceGroup, MatrixWorkspace, mtd
-from mantid.api import mtd
 import mantid.simpleapi as sapi
 
 #pylint: disable=too-many-public-methods
@@ -152,12 +151,12 @@ class ImagingIMATTomoTests(unittest.TestCase):
         import IMAT.prep as iprep
 
         with self.assertRaises(ValueError):
-            vol = iprep.filters.remove_stripes_and_ring_artifacts(self._data_vol,
-                                                                  'funny-method-doesnt-exist')
+            iprep.filters.remove_stripes_ring_artifacts(self._data_vol,
+                                                        'funny-method-doesnt-exist')
 
         with self.assertRaises(RuntimeError):
-            vol = iprep.filters.remove_stripes_and_ring_artifacts(self._data_vol,
-                                                                  'fourier-wavelet')
+            iprep.filters.remove_stripes_ring_artifacts(self._data_vol,
+                                                        'wavelet-fourier')
 
 # Just run the unittest tests defined above
 class ImagingIMATScriptsTest(stresstesting.MantidStressTest):

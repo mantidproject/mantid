@@ -26,14 +26,14 @@ format conversion routines.
 """
 
 try:
-    import io
+    from . import io
 except ImportError as exc:
     raise ImportError("Inconsistency found. Could not import 'io' (input/output "
                       "routines) which should be available in this package. "
                       "Details/reason: {0}".format(exc))
 
 try:
-    import tool_imports
+    from . import tool_imports
 except ImportError as exc:
     raise ImportError("Inconsistency found. Could not import 'tool_imports' (for third "
                       "party tools such as Tomopy and Astra) which should be available "

@@ -59,11 +59,11 @@ def _make_dirs_if_needed(dirname):
 
     """
     absname = os.path.abspath(dirname)
-    print "Absolute path out: ", absname #TODO
     if not os.path.exists(absname):
         os.makedirs(absname)
 
 #pylint: disable=unused-argument
+#pylint: disable=too-many-arguments
 def _write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=None,
                  rescale_intensity=False):
     """
@@ -110,7 +110,7 @@ def _write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=No
     if rescale_intensity:
         img_data = exposure.rescale_intensity(img_data, out_range=dtype)#'uint16')
 
-    _USING_PLUGIN_TIFFFILE = True # TODO
+    _USING_PLUGIN_TIFFFILE = True
     if img_format == 'tiff' and _USING_PLUGIN_TIFFFILE:
         skio.imsave(filename, img_data, plugin='tifffile')
     else:
@@ -235,7 +235,7 @@ def _read_img(filename, file_extension=None):
 
 # TOD: add flat_files_prefix, dark_files_prefix logic
 #pylint: disable=unused-argument
-#pylint: disable=unused-argument
+#pylint: disable=too-many-arguments
 def read_stack_of_images(sample_path, open_beam_path=None, dark_field_path=None,
                          file_extension='tiff', file_prefix=None,
                          flat_files_prefix=None, dark_files_prefix=None,
