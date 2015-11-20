@@ -44,6 +44,7 @@ except ImportError as exc:
 
 import glob
 import os
+import re
 
 import numpy as np
 
@@ -62,7 +63,9 @@ def _make_dirs_if_needed(dirname):
     if not os.path.exists(absname):
         os.makedirs(absname)
 
-def _write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=None, rescale_intensity=False):
+#pylint: disable=unused-argument
+def _write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=None,
+                 rescale_intensity=False):
     """
     Output image data to a file, in a given image format.
     Assumes that the output directory exists (must be checked before).
@@ -104,7 +107,7 @@ def _write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=No
 
     # this rescale intensity would ignore the range of other images in the stack
     # in addition, it clips if the original values are below/above the destination type limits
-    if False:# and rescale_intensity:
+    if rescale_intensity:
         img_data = exposure.rescale_intensity(img_data, out_range=dtype)#'uint16')
 
     _USING_PLUGIN_TIFFFILE = True # TODO
@@ -115,7 +118,6 @@ def _write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=No
 
     return filename
 
-# TODO: refactor to try to share code with read_stack (fits/tiff reading)
 def avg_image_files(path, base_path, file_extension=None, agg_method='average'):
     """
     Reads files from a directory, assuming they are images from a
@@ -163,11 +165,11 @@ def avg_image_files(path, base_path, file_extension=None, agg_method='average'):
                 ifile, str(exc))
             continue
 
-        accum = self._agg_img(accum, hdu[0].data, agg_method=agg_method)
+        accum = _agg_img(accum, hdu[0].data, agg_method=agg_method)
 
     return accum
 
-def _agg_img(self, acc, img_data, agg_method=None, index=1):
+def _agg_img(acc, img_data, agg_method=None, index=1):
     """
     Adds in (with average, median, etc.) data coming from a new
     image/hdu. Expects a numpy array of shape (N1, N2) where N1 and N2
@@ -182,7 +184,7 @@ def _agg_img(self, acc, img_data, agg_method=None, index=1):
 
     """
     if None == agg_method:
-        agg_method = self._default_agg_method
+        agg_method = 'sum'
 
     if 'sum' == agg_method:
         acc = np.add(acc, img_data)
@@ -210,12 +212,34 @@ def _alphanum_key_split(path_str):
     ALPHA_NUM_SPLIT_RE = re.compile('([0-9]+)')
     return [ int(c) if c.isdigit() else c for c in ALPHA_NUM_SPLIT_RE.split(path_str) ]
 
+def _read_img(filename, file_extension=None):
+    """
+    Read one image and return it as a 2d numpy array
 
-# TODO: add flat_files_prefix, dark_files_prefix logic
+    @param filename :: name of the image file, can be relative or absolute path
+    @param file_extension :: extension and effectively format to use ('tiff', 'fits')
+    """
+    if file_extension in ['fits', 'fit']:
+        imgs = pyfits.open(filename)
+        if len(imgs) < 1:
+            raise RuntimeError(
+                "Could not load at least one FITS image/table file from: {0}".format(sample_path))
+
+        # Input fits files always contain a single image
+        img_arr = imgs[0].data
+
+    elif file_extension in ['tiff', 'tif']:
+        img_arr = skio.imread(filename)
+
+    return img_arr
+
+# TOD: add flat_files_prefix, dark_files_prefix logic
+#pylint: disable=unused-argument
+#pylint: disable=unused-argument
 def read_stack_of_images(sample_path, open_beam_path=None, dark_field_path=None,
-                         file_extension=None, file_prefix=None, flat_files_prefix=None,
-                         dark_files_prefix=None,
-                         minIdx=-1, maxIdx=-1):
+                         file_extension='tiff', file_prefix=None,
+                         flat_files_prefix=None, dark_files_prefix=None,
+                         minIdx=-1, maxIdx=-1, verbose=True):
     """
     Reads a stack of images into memory, assuming dark and flat images
     are in separate directories.
@@ -229,52 +253,58 @@ def read_stack_of_images(sample_path, open_beam_path=None, dark_field_path=None,
     @param file_extension ::  (not including the dot)
 
     @param sample_path :: path to sample images. Can be a file or directory
-    @param open_beam_path :: (optional) path to open beam / white image(s). Can be a file or directory
-    @param dark_field_path :: (optional) path to dark field image(s). Can be a file or directory
+    @param open_beam_path :: (optional) path to open beam / white image(s).
+    Can be a file or directory
+    @param dark_field_path :: (optional) path to dark field image(s).
+    Can be a file or directory
     @param minIdx :: enforce this minimum image index, lower indices will be ignored
     @param maxIdx :: enforce this maximum image index, higher indices will be ignored
 
-    Returns :: 3 numpy arrays: input data volume (3d), average of flatt images (2d), average of
-    dark images(2d)
+    Returns :: 3 numpy arrays: input data volume (3d), average of flatt images (2d),
+    average of dark images(2d)
     """
-    # TODO: check file_extension
+    # TOD: check file_extension
     sample_path = os.path.expanduser(sample_path)
 
     if verbose:
         print "Loading stack of images from {0}".format(sample_path)
 
-    files_list = glob.glob(os.path.join(sample_path,
-                                        "{0}*.{1}".format(file_prefix, file_extension)))
-    if len(files) <= 0:
-        raise RuntimeError("No image files found in " + sample_path)
+    if not file_prefix:
+        file_prefix = ''
+    files_match = glob.glob(os.path.join(sample_path,
+                                         "{0}*.{1}".format(file_prefix, file_extension)))
+    if len(files_match) <= 0:
+        raise RuntimeError("Could not find any image files in " + sample_path)
 
-    files.sort(key=self._alphanum_key_split)
+    files_match.sort(key=_alphanum_key_split)
 
     if verbose:
-        print "Found {0} files".format(len(files))
+        print "Found {0} image files in {1}".format(len(files_match), sample_path)
 
-
-    imgs = pyfits.open(files[0])
-    if len(imgs) < 1:
+    # It is assumed that all images have the same size and properties as the first.
+    try:
+        first_img = _read_img(files_match[0], 'tiff')
+    except RuntimeError as exc:
         raise RuntimeError(
-            "Could not load at least one image file from: {0}".format(sample_path))
+            "Could not load at least one image file from: {0}. Details: {1}".
+            format(sample_path, str(exc)))
 
-    data_dtype = imgs[0].data.dtype
+
+    data_dtype = first_img.dtype
+    # usual type in fits with 16-bit pixel depth
     if '>i2' == data_dtype:
         data_dtype = np.uint16
 
-    sample_data = np.zeros((len(files), imgs[0].shape[0], imgs[0].shape[1]), dtype=data_dtype)
+    sample_data = np.zeros((len(files_match), first_img.shape[0], first_img.shape[1]), dtype=data_dtype)
 
 
-    for idx, ifile in enumerate(files):
-        hdu = None
+    for idx, in_file in enumerate(files_match):
         try:
-            hdu = pyfits.open(ifile)
-            sample_data[idx, :, :] = hdu[0].data
+            sample_data[idx, :, :] = _read_img(in_file, 'tiff')
         except IOError as exc:
             raise RuntimeError("Could not load file {0} from {1}".format(ifile, sample_path))
 
-    flat_avg = None
+    flat_avg = None # avg_flat_files()
     dark_avg = None # avg_image_files()
 
     return sample_data, flat_avg, dark_avg
