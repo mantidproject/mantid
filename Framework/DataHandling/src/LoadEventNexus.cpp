@@ -201,28 +201,30 @@ public:
     auto &outputWS = *(alg->m_ws);
     if (alg->precount) {
 
+			auto local_min_id = m_min_id;
+			auto local_max_id = m_max_id;
       if (alg->m_specMin != EMPTY_INT() && alg->m_specMax != EMPTY_INT()) {
-        m_min_id = alg->m_specMin;
-        m_max_id = alg->m_specMax;
+        local_min_id = alg->m_specMin;
+        local_max_id = alg->m_specMax;
       }
 
-      std::vector<size_t> counts(m_max_id - m_min_id + 1, 0);
+      std::vector<size_t> counts(local_max_id - local_min_id + 1, 0);
       for (size_t i = 0; i < numEvents; i++) {
         detid_t thisId = detid_t(event_id[i]);
-        if (thisId >= m_min_id && thisId <= m_max_id)
-          counts[thisId - m_min_id]++;
+        if (thisId >= local_min_id && thisId <= local_max_id)
+          counts[thisId - local_min_id]++;
       }
 
       // Now we pre-allocate (reserve) the vectors of events in each pixel
       // counted
       const size_t numEventLists = outputWS.getNumberHistograms();
-      for (detid_t pixID = m_min_id; pixID <= m_max_id; pixID++) {
-        if (counts[pixID - m_min_id] > 0) {
+      for (detid_t pixID = local_min_id; pixID <= local_max_id; pixID++) {
+        if (counts[pixID - local_min_id] > 0) {
           // Find the the workspace index corresponding to that pixel ID
           size_t wi = pixelID_to_wi_vector[pixID + pixelID_to_wi_offset];
           // Allocate it
           if (wi < numEventLists) {
-            outputWS.reserveEventListAt(wi, counts[pixID - m_min_id]);
+            outputWS.reserveEventListAt(wi, counts[pixID - local_min_id]);
           }
           if (alg->getCancel())
             break; // User cancellation
