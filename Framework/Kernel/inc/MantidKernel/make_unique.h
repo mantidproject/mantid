@@ -18,7 +18,7 @@ namespace Kernel {
 
 using std::make_unique;
 
-#else // C++11
+#else  // C++11
 
 template <class T> struct _Unique_if {
   typedef std::unique_ptr<T> _Single_object;
