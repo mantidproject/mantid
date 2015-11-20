@@ -50,7 +50,10 @@ class DarkRunCorrection(object):
         self._use_monitors = use_monitors
 
     def set_mon_numbers(self, mon_numbers):
-        self._mon_numbers = mon_numbers
+        if mon_numbers is None:
+            self._mon_numbers = []
+        else:
+            self._mon_numbers = mon_numbers
 
     def execute(self, scatter_workspace, dark_run):
         '''

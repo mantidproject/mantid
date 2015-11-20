@@ -1,4 +1,4 @@
-import unittest
+﻿import unittest
 import mantid
 import isis_instrument as instruments
 import ISISCommandInterface as command_iface
@@ -386,6 +386,25 @@ class SANSCommandInterfaceGetAndSetQResolutionSettings(unittest.TestCase):
         delta_r_expected = delta_r/1000.
         self.assertEqual(delta_r_stored, delta_r_expected)
 
+
+class SANSCommandInterfaceGetAndSetBackgroundCorrectionSettings(unittest.TestCase):
+    def test_that_correct_setting_can_be_passed_in(self):
+        # Arrange
+        run_number = "test12345"
+        is_time_based = True
+        is_mon = True
+        is_mean = False
+        mon_numbers= None
+
+        command_iface.Clean()
+        command_iface.LOQ()
+
+        # Act
+        command_iface.set_background_correction(run_number, is_time_based,
+                                                is_mon, is_mon, mon_numbers)
+
+        # Assert
+        # TODO test here
 
 if __name__ == "__main__":
     unittest.main()

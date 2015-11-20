@@ -1197,8 +1197,13 @@ class DarkRunSubtraction(object):
         # Each element in the list will be struct-like and contain
         # the relevant information for a dark-run subtraction
         self._dark_run_settings = []
-        self._dark_run_time_setting = None
-        self._dark_run_uamp_setting = None
+
+        # We have four types of settings: uamp + det, uamp + mon, time + det, time + mon.
+        # Richard suggested to limit this for now to these four settings.
+        self._dark_run_time_detector_setting = None
+        self._dark_run_uamp_detector_setting = None
+        self._dark_run_time_monitor_setting = None
+        self._dark_run_uamp_monitor_setting = None
 
     def add_setting(self, dark_run_setting):
         '''
@@ -1222,17 +1227,21 @@ class DarkRunSubtraction(object):
         if not self.has_dark_runs():
             return workspace
 
-        # Get the time-based correction settings
-        setting_time = self.get_time_based_setting()
+        # Get the time-based correction settings for detectors
+        setting_time_detectors = self.get_time_based_setting_detectors()
+        # Get the uamp-based correction settings for detectors
+        setting_uamp_detectors = self.get_uamp_based_setting_detectors()
+        # Get the time-based correction settings for monitors
+        setting_time_monitors =  self.get_time_based_setting_monitors()
+        # Get the uamp-based correction settings for monitors
+        setting_uamp_monitors =  self.get_uamp_based_setting_monitors()
 
-        # Get the uamp-based correction settings
-        setting_uamp = self.get_uamp_based_setting()
+        settings = [setting_time_detectors, setting_uamp_detectors, setting_time_monitors, setting_uamp_monitors]
 
         # Subtract the dark runs
-        if setting_time is not None:
-            workspace = self._execute_dark_run_subtraction(workspace, setting_time)
-        if setting_uamp is not None:
-            workspace = self._execute_dark_run_subtraction(workspace, setting_uamp)
+        for setting in settings:
+            if setting is not None:
+                workspace = self._execute_dark_run_subtraction(workspace, setting)
         return workspace
 
     def has_dark_runs(self):
@@ -1296,40 +1305,43 @@ class DarkRunSubtraction(object):
                                "Please make sure that that it exists in your search directory.")
         return dark_run_ws
 
-    def get_time_based_setting(self):
+    def get_time_based_setting_detectors(self):
         '''
-        Retrieve the time-based setting if there is one
+        Retrieve the time-based setting for detectors if there is one
         @returns the time-based setting or None
         '''
         self._evaluate_settings()
-        return self._dark_run_time_setting
+        return self._dark_run_time_detector_setting
 
-    def get_uamp_based_setting(self):
+    def get_uamp_based_setting_detectors(self):
         '''
-        Retrieve the uamp-based setting if there is one
+        Retrieve the uamp-based setting for detectors if there is one
         @returns the uamp-based setting or None
         '''
         self._evaluate_settings()
-        return self._dark_run_uamp_setting
+        return self._dark_run_uamp_detector_setting
 
-    def set_time_based_setting(self, setting):
+    def get_time_based_setting_monitors(self):
         '''
-        Set the time-based setting
-        @param setting: a time-based setting
+        Retrieve the time-based setting for monitors if there is one
+        @returns the time-based setting or None
         '''
-        self._dark_run_time_setting = setting
+        self._evaluate_settings()
+        return self._dark_run_time_monitor_setting
 
-    def set_uamp_based_setting(self, setting):
+    def get_uamp_based_setting_monitors(self):
         '''
-        Set the uamp-based setting
-        @param setting: a uamp-based setting
+        Retrieve the uamp-based setting for monitors if there is one
+        @returns the uamp-based setting or None
         '''
-        self._dark_run_uamp_setting = setting
+        self._evaluate_settings()
+        return self._dark_run_uamp_monitor_setting
 
     def _evaluate_settings(self):
         '''
         Takes the dark run settings and merges the appropriate files into
-        a time-based setting and a uamp-based setting. If this
+        a time-based setting and a uamp-based setting each for detectors
+        and for monitors.
         @returns the final settings
         @raises RuntimeError: if settings values are inconsistent
         '''
@@ -1346,111 +1358,106 @@ class DarkRunSubtraction(object):
             mon_number.append(setting.mon_number)
             run_number.append(setting.run_number)
 
-        # Group the elements by run number
-        unique_runs = set(run_number)
+        # Get the indices with settings which correspond to the individual settings
+        get_indices = lambda time_flag, mon_flag : [i for i, val in enumerate(use_time)
+                                                    if use_time[i] == time_flag and use_mon[i] == mon_flag]
+        indices_time_detector = get_indices(True, False)
+        indices_time_monitor = get_indices(True, True)
+        indices_uamp_detector = get_indices(False, False)
+        indices_uamp_monitor = get_indices(False, True)
 
-        # We currently only support one run for time-based corrections
-        # and one run for uamp-based corrections
-        if len(unique_runs) > 2:
-            raise RuntimeError("DarkRunSubtraction: You are providing more than "
-                               "two runs for dark run subtraction. You can specify "
-                               "one run number for time-based corrections and one "
-                                "run number for uamp-based corrections.")
+        # Check that for each of these settings we only have one run number specified, else raise an error
+        has_max_one_run_number = lambda indices : len(set([run_number[index] for index in indices])) < 2
+        if (not has_max_one_run_number(indices_time_detector) or
+            not has_max_one_run_number(indices_time_monitor) or
+            not has_max_one_run_number(indices_uamp_detector) or
+            not has_max_one_run_number(indices_uamp_monitor) ) :
+            raise RuntimeError("DarkRunSubtraction: More background correction runs have been specified than are allowed. "
+                               "There can be maximally one run number for each time-based detector, "
+                               "uamp-based detector, time-based monitor and uamp-based monitor settings.\n")
 
-        final_settings = []
-        for run in unique_runs:
-            # Get all indices of the current run
-            indices = [i for i, val in enumerate(run_number) if val == run]
-            # Get all means, times etc for the specfic run
-            means = [use_mean[i] for i in indices]
-            times = [use_time[i] for i in indices]
-            mons = [use_mon[i] for i in indices]
-            mon_nums= [mon_number[i] for i in indices]
-            final_settings.append(self._get_final_setting(run, means, times, mons, mon_nums))
+        # Handle detectors
+        self._dark_run_time_detector_setting = self._get_final_setting_detectors(run_number, use_mean,
+                                                                                 use_time, indices_time_detector)
+        self._dark_run_uamp_detector_setting = self._get_final_setting_detectors(run_number, use_mean,
+                                                                                 use_time, indices_uamp_detector)
 
-        # Now that we have all settings parsed we need to make sure that the two settings objects
-        # don't both refer to either time-based or uamp-based settings
-        time_selection = [s.time for s in final_settings]
-        if len(time_selection) > len(set(time_selection)):
-            raise RuntimeError("DarkRunSubtraction: Two different runs were selected which bother "
-                               "require either time-based or uamp-based corrections. You can "
-                               "only specify one of each currently.")
+        # handle monitors
+        self._dark_run_time_monitor_setting = self._get_final_setting_monitors(run_number, use_mean,
+                                                                                 use_time, mon_number, indices_time_monitor)
+        self._dark_run_uamp_monitor_setting = self._get_final_setting_monitors(run_number, use_mean,
+                                                                                 use_time, mon_number, indices_uamp_monitor)
 
-        # Now set the time-based and uamp-based settings
-        for setting in final_settings:
-            if setting.time == True:
-                self._dark_run_time_setting = setting
+    def _get_final_setting_detectors(self, run_number, use_mean, use_time, indices):
+        '''
+        Get the final settings for detectors
+        @param run_number: a list of run numbers
+        @param use_mean: a list of mean flags
+        @param use_time: a list of time flags
+        @param indices: a list if indices
+        @returns a valid setting for detectors or None
+        @raises RuntimeError: if there is more than one index specified
+        '''
+        # We want to make sure that there is only one index here. It might be that the user
+        # specified two settings with the same run number. We need to catch this here.
+        if len(indices) > 1:
+            raise RuntimeError("DarkRunSubtraction: The setting for detectors can only be specified once.")
+
+        detector_runs = [run_number[index] for index in indices]
+        detector_mean = [use_mean[index] for index in indices]
+        detector_time = [use_time[index] for index in indices]
+
+        # Make sure we can pass back a 
+        if len(detector_runs) == 0 or detector_runs[0] == None:
+            return None
+        else:
+            return DarkRunSubtraction.DarkRunSubtractionSettings(run_number = detector_runs[0],
+                                                                 time = detector_time[0],
+                                                                 mean = detector_mean[0],
+                                                                 detector = True,
+                                                                 mon = False,
+                                                                 mon_numbers = None)
+
+    def _get_final_setting_monitors(self, run_number, use_mean, use_time, mon_numbers, indices):
+        '''
+        Get the final settings for monitors
+        @param run_number: a list of run numbers
+        @param use_mean: a list of mean flags
+        @param use_time: a list of time flags
+        @param indices: a list if indices
+        @returns a valid setting for detectors or None
+        @raises RuntimeError: if settings are not consistent
+        '''
+        # Note that we can have several mon settings, e.g several mon numbers etc.
+        # So we cannot treat this like detectors
+        monitor_runs = [run_number[index] for index in indices]
+        monitor_mean = [use_mean[index] for index in indices]
+        monitor_time = [use_time[index] for index in indices]
+        monitor_mon_numbers  = []
+        for index in indices:
+            if isinstance(mon_numbers[index], list):
+                monitor_mon_numbers.extend(mon_numbers[index])
             else:
-                self._dark_run_uamp_setting = setting
+                monitor_mon_numbers.append(mon_numbers[index])
 
-    def _get_final_setting(self, run, means, times, mons, mon_numbers):
-        '''
-        Get the final setting for the input. Note that the inputs need to be consistent,
-        eg either all times or not all times
-        @param run: the run number
-        @param means: the mean settings
-        @param times: the times settings
-        @param mons: the mons settings
-        @parm mon_numbers: the mon_number settings
-        @returns the final settings
-        @raise RuntimeError: If the settings are inconsistent or if we cannot extract detectors and monitors
-        '''
-        # Make sure that all means and times are the same
-        compare_all = lambda alist : all([alist[0] == alist[i] for i in range(0, len(alist))])
-        all_means_same = compare_all(means)
-        all_times_same = compare_all(times)
+        # Check if the mean value is identical for all entries
+        are_all_same = lambda a_list : all([a_list[0] == a_list[i] for i in range(0, len(a_list))])
+        if len(monitor_mean) > 0:
+            if not are_all_same(monitor_mean):
+                raise RuntimeError("DarkRunSubtraction: If several monitors are specified for a certain type "
+                                   "of subtraction, it is required to use either all MEAN or all TOF.")
 
-        if not all_means_same or not all_times_same:
-            raise RuntimeError("DarkRunSubtraction: Multiple inconsistent settings for MEAN/TOF or TIME/UAMP. "
-                               "For a single run number these settings need to be identical")
-
-        final_mean = means[0]
-        final_time = times[0]
-        final_use_detector, final_use_mon, final_mon_numbers = self._get_mon_detector_and_mon_numbers(mons, mon_numbers)
-        return DarkRunSubtraction.DarkRunSubtractionSettings(run_number = run,
-                                                             time = final_time,
-                                                             mean = final_mean,
-                                                             detector = final_use_detector,
-                                                             mon = final_use_mon,
-                                                             mon_numbers = final_mon_numbers)
-
-    def _get_mon_detector_and_mon_numbers(self, mons, mon_numbers):
-        '''
-        Get the monitor, detector and monitor number settings.
-        If an entry contains mons = False, then we use all detectors.
-        If an entry contains mons = True and no mon_number, then we use all monitors
-        If an entry contains mons = True and mon_numbers, then we need to keep track of the numbers
-        @param mons: the mon settings
-        @param mon_numbers: the monitor number settings
-        @returns if detectors should be used, if monitors should be used and
-        if so which monitors should be used
-        @raise RuntimeError: when there are monitor numbers but no mon setting
-        '''
-        use_detectors = False
-        use_monitors = False
-        use_all_monitors = False
-        mon_numbers_to_use = []
-        for mon, number in zip(mons, mon_numbers):
-            if mon == False:
-                use_detectors = True
-            elif mon == True and number is None:
-                use_monitors = True
-                use_all_monitors = True
-            elif mon == True and number is not None:
-                use_monitors = True
-                mon_numbers_to_use.extend(number)
-            else:
-                raise RuntimeError("DarkRunSubtraction: There is an inconsistency "
-                                   "with the monitor setting.")
-        # Make the monitor list unique
-        if len(mon_numbers_to_use) != 0:
-            mon_numbers_to_use = list(set(mon_numbers_to_use))
-
-        # If the all monitors are used, then set the numbers to empty
-        if use_all_monitors:
-            mon_numbers_to_use = []
-
-        return use_detectors, use_monitors, mon_numbers_to_use
+        # If the runs are empty or None then we don't have any settings here
+        unique_runs = list(set(monitor_runs))
+        if len(unique_runs) == 0 or monitor_runs[0] == None:
+            return None
+        else:
+            return DarkRunSubtraction.DarkRunSubtractionSettings(run_number = monitor_runs[0],
+                                                                 time = monitor_time[0],
+                                                                 mean = monitor_mean[0],
+                                                                 detector = False,
+                                                                 mon = True,
+                                                                 mon_numbers = monitor_mon_numbers)
 
 
 class CropDetBank(ReductionStep):
@@ -2623,6 +2630,24 @@ class SliceEvent(ReductionStep):
         @param dark_run_setting: a dark run setting
         '''
         self._dark_run_subtraction.add_setting(dark_run_setting)
+
+    def get_dark_run_setting(self, is_time, is_mon):
+        '''
+        Gets one of the four dark run setttings
+        @param is_time: is it time_based or not
+        @param is_mon: monitors or not
+        @returns the requested setting
+        '''
+        setting = None
+        if is_time and is_mon:
+            setting = self._dark_run_subtraction.get_time_based_setting_monitors()
+        elif is_time and not is_mon:
+            setting = self._dark_run_subtraction.get_time_based_setting_detectors()
+        elif not is_time and is_mon:
+            setting = self._dark_run_subtraction.get_uamp_based_setting_monitors()
+        elif not is_time and not is_mon:
+            setting = self._dark_run_subtraction.get_uamp_based_setting_detectors()
+        return setting
 
     def execute(self, reducer, workspace):
         ws_pointer = getWorkspaceReference(workspace)

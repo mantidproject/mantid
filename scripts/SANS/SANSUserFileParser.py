@@ -16,14 +16,14 @@ class BackCommandParser(object):
         # Parse results
         self._use_mean = None
         self._use_time = None
-        self._mon = None
+        self._mon = False # This is not being parsed by the standard chain
         self._run_number = None
         self._mon_number = None
 
     def _reset_parse_results(self):
         self._use_mean = None
         self._use_time = None
-        self._mon = None
+        self._mon = False # This is not being parsed by the standard chain
         self._run_number = None
         self._mon_number = None
 

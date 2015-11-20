@@ -7,43 +7,57 @@ from SANSUserFileParser import DarkRunSettings
 from SANSDarkRunCorrectionTest import create_real_workspace_with_log
 
 class DarkRunSubtractionTest(unittest.TestCase):
-
-    def test_that_specifying_more_than_two_run_numbers_raises(self):
+    def test_that_specifying_more_than_two_run_numbers_per_category_raises_error(self):
         # Arrange
         dark_run_subtractor = DarkRunSubtraction()
+        # Time-based detectors
         setting1 = self._get_dark_run_settings_object("111111", True, False, False, None)
-        setting2 = self._get_dark_run_settings_object("222222", False, False, False, None)
-        setting3 = self._get_dark_run_settings_object("333333", True, False, False, None)
+        setting2 = self._get_dark_run_settings_object("222222", True, False, False, None)
+        # Uamp-based detectors
+        setting3 = self._get_dark_run_settings_object("111111", False, False, False, None)
+        setting4 = self._get_dark_run_settings_object("222222", False, False, False, None)
+        # Time-based monitors
+        setting5 = self._get_dark_run_settings_object("111111", True, False, True, None)
+        setting6 = self._get_dark_run_settings_object("222222", True, False, True, None)
+        # Uamp-based monitors
+        setting7 = self._get_dark_run_settings_object("111111", False, False, True, None)
+        setting8 = self._get_dark_run_settings_object("222222", False, False, True, None)
 
         dark_run_subtractor.add_setting(setting1)
         dark_run_subtractor.add_setting(setting2)
         dark_run_subtractor.add_setting(setting3)
-
+        dark_run_subtractor.add_setting(setting4)
+        dark_run_subtractor.add_setting(setting5)
+        dark_run_subtractor.add_setting(setting6)
+        dark_run_subtractor.add_setting(setting7)
+        dark_run_subtractor.add_setting(setting8)
         # Act + Assert
-        self.assertRaises(RuntimeError, dark_run_subtractor.get_time_based_setting)
-        self.assertRaises(RuntimeError, dark_run_subtractor.get_uamp_based_setting)
+        self.assertRaises(RuntimeError, dark_run_subtractor.get_time_based_setting_detectors)
+        self.assertRaises(RuntimeError, dark_run_subtractor.get_uamp_based_setting_detectors)
+        self.assertRaises(RuntimeError, dark_run_subtractor.get_time_based_setting_monitors)
+        self.assertRaises(RuntimeError, dark_run_subtractor.get_uamp_based_setting_monitors)
 
-    def test_that_more_than_one_run_number_for_time_based_raises(self):
-        is_time = True
-        self._do_test_more_than_one_run_for_time_uamp_based_settings(is_time)
+    def test_that_raises_when_detector_has_more_than_one_setting(self):
+        # Arrange
+        dark_run_subtractor = DarkRunSubtraction()
+        # We have two settings with different run numbers for detecetor-type corrections
+        setting1 = self._get_dark_run_settings_object("222222", True, False, False, None)
+        setting2 = self._get_dark_run_settings_object("222222", True, False, False, None)
+        dark_run_subtractor.add_setting(setting1)
+        dark_run_subtractor.add_setting(setting2)
+        # Act + Assert
+        self.assertRaises(RuntimeError, dark_run_subtractor.get_time_based_setting_detectors)
 
-    def test_that_more_than_one_run_number_for_uamp_based_raises(self):
-        is_time = False
-        self._do_test_more_than_one_run_for_time_uamp_based_settings(is_time)
-
-    def test_that_raises_when_mixed_mean_and_tof_for_same_run_number(self):
-        time1 = True
-        time2 = True
-        mean1 = True
-        mean2 = False
-        self._do_test_mixed_settings_for_same_run(time1, time2, mean1, mean2)
-
-    def test_that_raises_when_mixed_time_and_uamp_for_same_run_number(self):
-        time1 = False
-        time2 = True
-        mean1 = False
-        mean2 = False
-        self._do_test_mixed_settings_for_same_run(time1, time2, mean1, mean2)
+    def test_that_raises_when_having_mixed_mean_settings_for_monitor_time(self):
+        # Arrange
+        dark_run_subtractor = DarkRunSubtraction()
+        # When having two monitor settings with differing mean selections, this is inconsistent
+        setting1 = self._get_dark_run_settings_object("222222", True, True, True, None)
+        setting2 = self._get_dark_run_settings_object("222222", True, False, True, None)
+        dark_run_subtractor.add_setting(setting1)
+        dark_run_subtractor.add_setting(setting2)
+        # Act + Assert
+        self.assertRaises(RuntimeError, dark_run_subtractor.get_time_based_setting_detectors)
 
     def test_that_subtracts_with_correct_single_dark_run(self):
         # Arrange
@@ -74,7 +88,6 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         for i in range(2, scatter_workspace.getNumberHistograms()):
              self.assertTrue(all_entries_zero(scatter_workspace, i), "Detector entries should all be 0")
-
 
     def test_that_subtracts_with_correct_single_dark_run_and_multiple_settings(self):
         # Arrange
@@ -169,7 +182,6 @@ class DarkRunSubtractionTest(unittest.TestCase):
                                                                 zip(ref_ws.dataY(index), ws.dataY(index))])
         self.assertTrue(some_entries_different(ref_ws, scatter_workspace, 1))
 
-
     #------- HELPER Methods
     def _do_test_valid(self, settings, saved_files, type):
         # Arrange
@@ -225,33 +237,6 @@ class DarkRunSubtractionTest(unittest.TestCase):
                                time = time,
                                mean = mean,
                                mon_number = mon_number)
-
-    def _do_test_more_than_one_run_for_time_uamp_based_settings(self, is_time):
-        # Arrange
-        dark_run_subtractor = DarkRunSubtraction()
-        setting1 = self._get_dark_run_settings_object("111111", is_time, False, False, None)
-        setting2 = self._get_dark_run_settings_object("222222", is_time, False, True, None)
-
-        dark_run_subtractor.add_setting(setting1)
-        dark_run_subtractor.add_setting(setting2)
-
-        # Act + Assert
-        self.assertRaises(RuntimeError, dark_run_subtractor.get_time_based_setting)
-        self.assertRaises(RuntimeError, dark_run_subtractor.get_uamp_based_setting)
-
-    def _do_test_mixed_settings_for_same_run(self, time1, time2, mean1, mean2):
-        # Arrange
-        dark_run_subtractor = DarkRunSubtraction()
-        setting1 = self._get_dark_run_settings_object("111111", time1, mean1, False, None)
-        setting2 = self._get_dark_run_settings_object("111111", time2, mean2, True, None)
-
-        dark_run_subtractor.add_setting(setting1)
-        dark_run_subtractor.add_setting(setting2)
-
-        # Act + Assert
-        self.assertRaises(RuntimeError, dark_run_subtractor.get_time_based_setting)
-        self.assertRaises(RuntimeError, dark_run_subtractor.get_uamp_based_setting)
-
 
 if __name__ == "__main__":
     unittest.main()

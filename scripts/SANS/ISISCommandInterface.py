@@ -1742,7 +1742,7 @@ def is_current_workspace_an_angle_workspace():
 
 
 ##################### Accesor functions for BackgroundCorrection
-def set_background_correction(run_number, is_time_based, is_mon, is_mean, mon_numbers):
+def set_background_correction(run_number, is_time_based, is_mon, is_mean, mon_numbers=""):
     '''
     Set a background correction setting.
     @param run_number: the run number
@@ -1751,12 +1751,28 @@ def set_background_correction(run_number, is_time_based, is_mon, is_mean, mon_nu
     @param is_mean: if it is mean or tof
     @param mon_numbers: the monitor numbers of interest or an empty string
     '''
+    def convert_from_comma_separated_string_to_int_list(input_string):
+        '''
+        Convert from string with comma-separated values to a python int list
+        @param input_string: the input string
+        @returns an integer list
+        @raises RuntimeError: conversion form string to int is not possible
+        '''
+        string_list = convert_to_string_list(input_string)
+        can_convert_to_int = all(is_convertible_to_int(element) for element in string_list)
+        int_list = None
+        if can_convert_to_int:
+            int_list = [int(element) for element in string_list]
+        else:
+            raise RuntimeError("Cannot convert string list to integer list")
+        return int_list
+    mon_numbers_int = convert_from_comma_separated_string_to_int_list(mon_numbers)
     setting = isis_reduction_steps.DarkRunSubtraction.DarkRunSubtractionSettings(run_number = run_number,
                                                                                  time = is_time_based,
                                                                                  mean = is_mean,
                                                                                  mon = is_mon,
                                                                                  mon_number = mon_numbers)
-    ReductionSingleton().event2hist.add_setting(setting)
+    ReductionSingleton().event2hist.add_dark_run_setting(setting)
 
 def get_background_correction(is_time, is_mon, component):
     '''
@@ -1773,24 +1789,26 @@ def get_background_correction(is_time, is_mon, component):
         @param int_list: the integer list
         @returns the string
         '''
-        string_list = [str(element) for element in int_list]
-        return su.convert_from_string_list(string_list)
+        if int_list is None or len(int_list) == 0:
+            return None
+        else:
+            string_list = [str(element) for element in int_list]
+            return su.convert_from_string_list(string_list)
 
-    setting = ReductionSingleton().event2hist.get_setting(is_time, is_mon)
+    setting = ReductionSingleton().event2hist.get_dark_run_setting(is_time, is_mon)
+
     value = None
-    if component == "run_number":
-        value = setting.run_number
-    elif component == "is_time":
-        value = str(setting.time)
-    elif component == "is_mean":
-        value = str(setting.mean)
-    elif component == "is_mon":
-        value = str(setting.is_mon)
-    elif component == "mon_number":
-        value = convert_from_int_list_to_string(mon_number)
-    else:
-        pass
-
+    if setting is not None:
+        if component == "run_number":
+            value = setting.run_number
+        elif component == "is_mean":
+            value = str(setting.mean)
+        elif component == "is_mon":
+            value = str(setting.mon)
+        elif component == "mon_number":
+            value = convert_from_int_list_to_string(setting.mon_numbers)
+        else:
+            pass
     return value
 
 
