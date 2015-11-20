@@ -20,7 +20,7 @@ class StringToPngTest(unittest.TestCase):
             ok2run='Problem importing matplotlib'
         if ok2run=='':
             mantid.simpleapi.StringToPng(String=to_plot,OutputFilename=self.plotfile)
-            self.assertGreater(os.path.getsize(self.plotfile),1e3)
+            self.assertTrue(os.path.getsize(self.plotfile)>1e3)
         self.cleanup()
 
 if __name__=="__main__":
