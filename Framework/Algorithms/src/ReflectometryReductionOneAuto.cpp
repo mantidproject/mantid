@@ -408,8 +408,7 @@ void ReflectometryReductionOneAuto::exec() {
       } catch (std::runtime_error &e) {
         g_log.warning() << "Could not autodetect polynomial correction method. "
                            "Polynomial correction will not be performed. "
-                           "Reason for failure: "
-                        << e.what() << std::endl;
+                           "Reason for failure: " << e.what() << std::endl;
         refRedOne->setProperty("CorrectionAlgorithm", "None");
       }
 
@@ -523,20 +522,19 @@ bool ReflectometryReductionOneAuto::checkGroups() {
 }
 
 Mantid::API::Workspace_sptr
-ReflectometryReductionOneAuto::handleTransmissionGroup(
-    Mantid::API::WorkspaceGroup_sptr transG) {
-  // Handle transmission runs
-  auto transmissionRunSum = transG->getItem(0);
-  for (size_t item = 1; item < transG->size(); item++) {
-    auto plusAlg = this->createChildAlgorithm("Plus");
-    plusAlg->setChild(true);
-    plusAlg->initialize();
-    plusAlg->setProperty("LHSWorkspace", transmissionRunSum);
-    plusAlg->setProperty("RHSWorkspace", transG->getItem(item));
-    plusAlg->setProperty("OutputWorkspace", transmissionRunSum);
-    plusAlg->execute();
-  }
-  return transmissionRunSum;
+ReflectometryReductionOneAuto::sumOverTransmissionGroup(WorkspaceGroup_sptr transGroup) {
+    // Handle transmission runs
+    auto transmissionRunSum = transGroup->getItem(0);
+    for (size_t item = 1; item < transGroup->size(); item++) {
+        auto plusAlg = this->createChildAlgorithm("Plus");
+        plusAlg->setChild(true);
+        plusAlg->initialize();
+        plusAlg->setProperty("LHSWorkspace", transmissionRunSum);
+        plusAlg->setProperty("RHSWorkspace", transGroup->getItem(item));
+        plusAlg->setProperty("OutputWorkspace", transmissionRunSum);
+        plusAlg->execute();
+    }
+    return transmissionRunSum;
 }
 
 bool ReflectometryReductionOneAuto::processGroups() {
@@ -572,6 +570,10 @@ bool ReflectometryReductionOneAuto::processGroups() {
 
     if (!firstTransG)
       alg->setProperty("FirstTransmissionRun", firstTrans);
+    else if (group->size() != firstTransG->size())
+      throw std::runtime_error("FirstTransmissionRun WorkspaceGroup must be "
+                               "the same size as the InputWorkspace "
+                               "WorkspaceGroup");
   }
 
   const std::string secondTrans =
@@ -585,17 +587,21 @@ bool ReflectometryReductionOneAuto::processGroups() {
     if (!secondTransG)
       alg->setProperty("SecondTransmissionRun",
                        secondTrans); // sum over transmission workspaces here?
+    else if (group->size() != secondTransG->size())
+      throw std::runtime_error("SecondTransmissionRun WorkspaceGroup must be "
+                               "the same size as the InputWorkspace "
+                               "WorkspaceGroup");
   }
 
   std::vector<std::string> IvsQGroup, IvsLamGroup;
 
   // Handle transmission runs before processing InputWorkspace group members.
   if (firstTransG) {
-    auto firstTransmissionSum = handleTransmissionGroup(firstTransG);
+    auto firstTransmissionSum = sumOverTransmissionGroup(firstTransG);
     alg->setProperty("FirstTransmissionRun", firstTransmissionSum);
   }
   if (secondTransG) {
-    auto secondTransmissionSum = handleTransmissionGroup(secondTransG);
+    auto secondTransmissionSum = sumOverTransmissionGroup(secondTransG);
     alg->setProperty("SecondTransmissionRun", secondTransmissionSum);
   }
 

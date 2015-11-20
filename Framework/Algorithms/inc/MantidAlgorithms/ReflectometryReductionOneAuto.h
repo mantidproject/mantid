@@ -55,6 +55,8 @@ private:
   double checkForDefault(std::string propName,
                          Mantid::Geometry::Instrument_const_sptr instrument,
                          std::string idf_name = "") const;
+  Mantid::API::Workspace_sptr
+      ReflectometryReductionOneAuto::sumOverTransmissionGroup(Mantid::API::WorkspaceGroup_sptr transGroup);
 
   std::string pNRLabel() const { return "PNR"; }
   std::string pALabel() const { return "PA"; }
@@ -63,10 +65,6 @@ private:
   std::string cAlphaLabel() const { return "CAlpha"; }
   std::string cApLabel() const { return "CAp"; }
   std::string noPolarizationCorrectionMode() const { return "None"; }
-
-  /// Handling transmission Group workspaces by summing over all of them
-  Mantid::API::Workspace_sptr
-  handleTransmissionGroup(Mantid::API::WorkspaceGroup_sptr transG);
 };
 
 } // namespace Algorithms
