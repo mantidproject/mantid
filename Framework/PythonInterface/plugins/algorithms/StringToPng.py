@@ -1,5 +1,5 @@
 #pylint: disable=no-init,invalid-name
-import mantid,sys
+import mantid
 
 class StringToPng(mantid.api.PythonAlgorithm):
 
