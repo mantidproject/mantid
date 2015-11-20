@@ -355,7 +355,8 @@ MatrixWorkspace_sptr MuonCalculateAsymmetry::sumPeriods(
     auto LHSWorkspace = inputWSGroup->getItem(periodsToSum[0] - 1);
     outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(LHSWorkspace);
     if (outWS != nullptr && periodsToSum.size() > 1) {
-      for (int i = 1; i < periodsToSum.size(); i++) {
+      int numPeriods = static_cast<int>(periodsToSum.size());
+      for (int i = 1; i < numPeriods; i++) {
         auto RHSWorkspace = inputWSGroup->getItem(periodsToSum[i] - 1);
         IAlgorithm_sptr alg = createChildAlgorithm("Plus");
         alg->initialize();
