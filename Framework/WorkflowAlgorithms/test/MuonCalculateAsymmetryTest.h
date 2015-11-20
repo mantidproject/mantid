@@ -175,6 +175,113 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 
+  /**
+   * Test period 1+2+3 for group counts
+   */
+  void test_groupCounts_threePeriods_plus() {
+    // Name of the output workspace.
+    const std::string outWSName =
+        outputWorkspaceName("GroupCounts_ThreePeriods_Plus");
+
+    MatrixWorkspace_sptr inWSFirst = createWorkspace();
+    MatrixWorkspace_sptr inWSSecond = createWorkspace();
+    MatrixWorkspace_sptr inWSThird = createWorkspace();
+    auto inputWSGroup = boost::shared_ptr<WorkspaceGroup>(new WorkspaceGroup());
+    inputWSGroup->addWorkspace(inWSFirst);
+    inputWSGroup->addWorkspace(inWSSecond);
+    inputWSGroup->addWorkspace(inWSThird);
+
+    MuonCalculateAsymmetry alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWSGroup));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SummedPeriodSet", "1,2,3"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 1));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service.
+    auto ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
+    TS_ASSERT(ws);
+
+    if (ws) {
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
+      TS_ASSERT_EQUALS(ws->blocksize(), 3);
+
+      TS_ASSERT_EQUALS(ws->readY(0)[0], 12);
+      TS_ASSERT_EQUALS(ws->readY(0)[1], 15);
+      TS_ASSERT_EQUALS(ws->readY(0)[2], 18);
+
+      TS_ASSERT_EQUALS(ws->readX(0)[0], 1);
+      TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
+      TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
+
+      TS_ASSERT_DELTA(ws->readE(0)[0], 0.693, 0.001);
+      TS_ASSERT_DELTA(ws->readE(0)[1], 0.866, 0.001);
+      TS_ASSERT_DELTA(ws->readE(0)[2], 1.039, 0.001);
+    }
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
+  /**
+  * Test period 1+2-3 for group counts
+  */
+  void test_groupCounts_threePeriods_minus() {
+    // Name of the output workspace.
+    const std::string outWSName =
+        outputWorkspaceName("GroupCounts_ThreePeriods_Minus");
+
+    MatrixWorkspace_sptr inWSFirst = createWorkspace();
+    MatrixWorkspace_sptr inWSSecond = createWorkspace();
+    MatrixWorkspace_sptr inWSThird = createWorkspace();
+    auto inputWSGroup = boost::shared_ptr<WorkspaceGroup>(new WorkspaceGroup());
+    inputWSGroup->addWorkspace(inWSFirst);
+    inputWSGroup->addWorkspace(inWSSecond);
+    inputWSGroup->addWorkspace(inWSThird);
+
+    MuonCalculateAsymmetry alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWSGroup));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SummedPeriodSet", "1,2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SubtractedPeriodSet", "3"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 1));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service.
+    auto ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
+    TS_ASSERT(ws);
+
+    if (ws) {
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
+      TS_ASSERT_EQUALS(ws->blocksize(), 3);
+
+      TS_ASSERT_EQUALS(ws->readY(0)[0], 4);
+      TS_ASSERT_EQUALS(ws->readY(0)[1], 5);
+      TS_ASSERT_EQUALS(ws->readY(0)[2], 6);
+
+      TS_ASSERT_EQUALS(ws->readX(0)[0], 1);
+      TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
+      TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
+
+      TS_ASSERT_DELTA(ws->readE(0)[0], 0.693, 0.001);
+      TS_ASSERT_DELTA(ws->readE(0)[1], 0.866, 0.001);
+      TS_ASSERT_DELTA(ws->readE(0)[2], 1.039, 0.001);
+    }
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
   void test_groupAsymmetry_singlePeriod() {
     // Name of the output workspace.
     const std::string outWSName = outputWorkspaceName("GroupAsymmetry");
