@@ -87,22 +87,18 @@ const QString MuonAnalysis::FIRST_GOOD_BIN_DEFAULT("0.3");
 //----------------------
 // Public member functions
 //----------------------
-///Constructor
-MuonAnalysis::MuonAnalysis(QWidget *parent) :
-  UserSubWindow(parent), 
-  m_last_dir(), 
-  m_workspace_name("MuonAnalysis"), m_grouped_name(m_workspace_name + "Grouped"), 
-  m_currentDataName(),
-  m_groupTableRowInFocus(0), m_pairTableRowInFocus(0), 
-  m_currentTab(NULL),
-  m_groupNames(), 
-  m_settingsGroup("CustomInterfaces/MuonAnalysis/"),
-  m_updating(false), m_updatingGrouping(false), m_loaded(false), m_deadTimesChanged(false),
-  m_textToDisplay(""), 
-  m_optionTab(NULL), m_fitDataTab(NULL), m_resultTableTab(NULL), // Will be created in initLayout()
-  m_dataTimeZero(0.0), m_dataFirstGoodData(0.0),
-  m_currentLabel("NoLabelSet")
-{}
+/// Constructor
+MuonAnalysis::MuonAnalysis(QWidget *parent)
+    : UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"),
+      m_grouped_name(m_workspace_name + "Grouped"), m_currentDataName(),
+      m_groupTableRowInFocus(0), m_pairTableRowInFocus(0), m_currentTab(NULL),
+      m_groupNames(), m_settingsGroup("CustomInterfaces/MuonAnalysis/"),
+      m_updating(false), m_updatingGrouping(false), m_loaded(false),
+      m_deadTimesChanged(false), m_textToDisplay(""), m_optionTab(NULL),
+      m_fitDataTab(NULL),
+      m_resultTableTab(NULL), // Will be created in initLayout()
+      m_dataTimeZero(0.0), m_dataFirstGoodData(0.0),
+      m_currentLabel("NoLabelSet"), m_numPeriods(0) {}
 
 /**
  * Initialize local Python environmnet. 
@@ -514,27 +510,17 @@ MatrixWorkspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType, in
 
   if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWS)) {
     // If is a group, will need to handle periods
-
-    if (MatrixWorkspace_sptr ws1 = getPeriodWorkspace(First, group)) {
-      inputGroup->addWorkspace(prepareAnalysisWorkspace(ws1, isRaw));
-    } else {
-      // First period should be selected no matter what
-      throw std::runtime_error("First period should be specified");
+    for (int i = 0; i < group->getNumberOfEntries(); i++) {
+      auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
+      inputGroup->addWorkspace(prepareAnalysisWorkspace(ws, isRaw));
     }
-
-    if (MatrixWorkspace_sptr ws2 = getPeriodWorkspace(Second, group)) {
-      // If second period was selected, set it up together with selected period
-      // arithmetics
-      inputGroup->addWorkspace(prepareAnalysisWorkspace(ws2, isRaw));
-
-      // Parse selected operation
-      const std::string summedPeriods =
-          m_uiForm.homePeriodBox1->text().toStdString();
-      const std::string subtractedPeriods =
-          m_uiForm.homePeriodBox2->text().toStdString();
-      alg->setProperty("SummedPeriodSet", summedPeriods);
-      alg->setProperty("SubtractedPeriodSet", subtractedPeriods);
-    }
+    // Parse selected operation
+    const std::string summedPeriods =
+        m_uiForm.homePeriodBox1->text().toStdString();
+    const std::string subtractedPeriods =
+        m_uiForm.homePeriodBox2->text().toStdString();
+    alg->setProperty("SummedPeriodSet", summedPeriods);
+    alg->setProperty("SubtractedPeriodSet", subtractedPeriods);
   } else if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS)) {
     // Put this single WS into a group and set it as the input property
     inputGroup->addWorkspace(prepareAnalysisWorkspace(ws, isRaw));
@@ -657,45 +643,6 @@ MatrixWorkspace_sptr MuonAnalysis::prepareAnalysisWorkspace(MatrixWorkspace_sptr
   }
 
   return ws;
-}
-
-
-/**
- * Selects a workspace from the group according to what is selected on the interface for the period.
- * @param periodType :: Which period we want
- * @param group      :: Workspace group as loaded from the data file
- * @return Selected workspace
- */ 
-MatrixWorkspace_sptr MuonAnalysis::getPeriodWorkspace(PeriodType periodType, WorkspaceGroup_sptr group)
-{
-  QLineEdit *periodSelector;
-
-  switch(periodType)
-  {
-    case First:
-      periodSelector = m_uiForm.homePeriodBox1; break;
-    case Second:
-      periodSelector = m_uiForm.homePeriodBox2; break;
-    default:
-      throw std::invalid_argument("Unsupported period type");
-  }
-
-  const QString periodLabel = periodSelector->text();
-
-  if ( periodLabel != "None" )
-  {
-    int periodNumber = periodLabel.toInt();aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-    size_t periodIndex = static_cast<size_t>(periodNumber - 1);
-
-    if ( periodNumber < 1 || periodIndex >= group->size() )
-      throw std::runtime_error("Loaded group doesn't seem to have period " + periodLabel.toStdString());
-
-    return boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(periodIndex) );
-  }
-  else
-  {
-    return MatrixWorkspace_sptr();
-  }
 }
 
 /**
@@ -1643,7 +1590,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
 
   // If instrument or number of periods has changed -> update period widgets
   size_t numPeriods = MuonAnalysisHelper::numPeriods(loadResult->loadedWorkspace);
-  if(instrumentChanged || static_cast<int>(numPeriods) != m_uiForm.homePeriodBox1->count())
+  if(instrumentChanged || numPeriods != m_numPeriods)
   {
     updatePeriodWidgets(numPeriods);
   }
@@ -1854,6 +1801,9 @@ void MuonAnalysis::updatePeriodWidgets(size_t numPeriods) {
   } else {
     m_uiForm.homePeriodBox2->setEnabled(false);
   }
+
+  // cache number of periods
+  m_numPeriods = numPeriods;
 }
 
 /**
@@ -3304,17 +3254,12 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
   // -- Period options --------------------------------------------------------
 
   QString periodLabel1 = m_uiForm.homePeriodBox1->text();
-
-  int periodIndex1 = periodLabel1.toInt() - 1;aaaaaaaaaaa
-  loadAlg->setProperty("FirstPeriod", periodIndex1);
+  loadAlg->setProperty("SummedPeriodSet", periodLabel1.toStdString());
 
   QString periodLabel2 = m_uiForm.homePeriodBox2->text();
   if ( periodLabel2 != "None" )
   {
-    int periodIndex2 = periodLabel2.toInt() - 1;aaaaaaaaaaaaaa
-    loadAlg->setProperty("SecondPeriod", periodIndex2);
-
-    loadAlg->setProperty("PeriodOperation", op);
+    loadAlg->setProperty("SubtractedPeriodSet", periodLabel2.toStdString());
   }
 
   return loadAlg;
