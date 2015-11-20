@@ -318,12 +318,13 @@ std::map<std::string, std::string> MaskMD::validateInputs() {
     validation_output["Extents"] = messageStream.str();
   }
   // Check extent value provided.
-  for (size_t i = 0; i < nDimensionIds; ++i) {
+  for (size_t i = 0; (i < nDimensionIds) && ((i * 2 + 1) < extents.size());
+       ++i) {
     double min = extents[i * 2];
     double max = extents[(i * 2) + 1];
     if (min > max) {
       messageStream << "Cannot have minimum extents " << min
-                    << " larger than maximum extents " << max;
+                    << " larger than maximum extents " << max << ". ";
       validation_output["Extents"] = messageStream.str();
     }
   }
