@@ -544,6 +544,10 @@ ReflectometryReductionOneAuto::sumOverTransmissionGroup(
 }
 
 bool ReflectometryReductionOneAuto::processGroups() {
+
+  const bool isPolarizationCorrectionOn =
+      this->getPropertyValue("PolarizationAnalysis") !=
+      noPolarizationCorrectionMode();
   auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
       getPropertyValue("InputWorkspace"));
   const std::string outputIvsQ = this->getPropertyValue("OutputWorkspace");
@@ -574,7 +578,7 @@ bool ReflectometryReductionOneAuto::processGroups() {
         AnalysisDataService::Instance().retrieveWS<Workspace>(firstTrans);
     firstTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(firstTransWS);
 
-    if (!firstTransG)
+    if (!firstTransG && !isPolarizationCorrectionOn)
       alg->setProperty("FirstTransmissionRun", firstTrans);
     else if (group->size() != firstTransG->size())
       throw std::runtime_error("FirstTransmissionRun WorkspaceGroup must be "
@@ -590,7 +594,7 @@ bool ReflectometryReductionOneAuto::processGroups() {
         AnalysisDataService::Instance().retrieveWS<Workspace>(secondTrans);
     secondTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(secondTransWS);
 
-    if (!secondTransG)
+    if (!secondTransG && !isPolarizationCorrectionOn)
       alg->setProperty("SecondTransmissionRun",
                        secondTrans); // sum over transmission workspaces here?
     else if (group->size() != secondTransG->size())
@@ -602,11 +606,12 @@ bool ReflectometryReductionOneAuto::processGroups() {
   std::vector<std::string> IvsQGroup, IvsLamGroup;
 
   // Handle transmission runs before processing InputWorkspace group members.
-  if (firstTransG) {
+
+  if (firstTransG && isPolarizationCorrectionOn) {
     auto firstTransmissionSum = sumOverTransmissionGroup(firstTransG);
     alg->setProperty("FirstTransmissionRun", firstTransmissionSum);
   }
-  if (secondTransG) {
+  if (secondTransG && isPolarizationCorrectionOn) {
     auto secondTransmissionSum = sumOverTransmissionGroup(secondTransG);
     alg->setProperty("SecondTransmissionRun", secondTransmissionSum);
   }
@@ -619,7 +624,11 @@ bool ReflectometryReductionOneAuto::processGroups() {
         outputIvsQ + "_" + boost::lexical_cast<std::string>(i + 1);
     const std::string IvsLamName =
         outputIvsLam + "_" + boost::lexical_cast<std::string>(i + 1);
-
+    if (firstTransG && !isPolarizationCorrectionOn)
+      alg->setProperty("FirstTransmissionRun", firstTransG->getItem(i)->name());
+    if (secondTransG && !isPolarizationCorrectionOn)
+      alg->setProperty("FirstTransmissionRun",
+                       secondTransG->getItem(i)->name());
     alg->setProperty("InputWorkspace", group->getItem(i)->name());
     alg->setProperty("OutputWorkspace", IvsQName);
     alg->setProperty("OutputWorkspaceWavelength", IvsLamName);
