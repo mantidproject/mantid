@@ -222,8 +222,7 @@ class LoadTests(unittest.TestCase):
         cry_focus.focus_all(expt, "43022", Write_ExtV=False)
 
     def test_upstripped_files(self):
-        global DIFF_PLACES
-        DIFF_PLACES = 3
+        loc_diff_p = 3
 
         nxsfile = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new_unstripped.nxs')
         datfile1 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new_unstripped-0.dat')
@@ -238,23 +237,21 @@ class LoadTests(unittest.TestCase):
         self.assertTrue(isinstance(nxsdata, MatrixWorkspace))
         self.assertEquals(3, nxsdata.getNumberHistograms())
         self.assertEquals(23987, nxsdata.blocksize())
-       # self.assertEqual("HRPD", nxsdata.getInstrument())
-        # test above again
 
-        self.assertAlmostEqual(nxsdata.readX(0)[0], data1.readX(0)[0], places=DIFF_PLACES)
-        self.assertAlmostEqual(nxsdata.readX(0)[4500], data1.readX(0)[4500], places=DIFF_PLACES)
-        self.assertAlmostEqual(nxsdata.readX(0)[17000], data1.readX(0)[17000], places=DIFF_PLACES)
-        self.assertAlmostEqual(nxsdata.readX(0)[22000], data1.readX(0)[22000], places=DIFF_PLACES)
+        self.assertAlmostEqual(nxsdata.readX(0)[0], data1.readX(0)[0], places=loc_diff_p)
+        self.assertAlmostEqual(nxsdata.readX(0)[4500], data1.readX(0)[4500], places=loc_diff_p)
+        self.assertAlmostEqual(nxsdata.readX(0)[17000], data1.readX(0)[17000], places=loc_diff_p)
+        self.assertAlmostEqual(nxsdata.readX(0)[22000], data1.readX(0)[22000], places=loc_diff_p)
 
-        self.assertAlmostEqual(nxsdata.readX(1)[0], data2.readX(0)[0], places=DIFF_PLACES)
-        self.assertAlmostEqual(nxsdata.readX(1)[4500], data2.readX(0)[4500], places=DIFF_PLACES)
-        self.assertAlmostEqual(nxsdata.readX(1)[17000], data2.readX(0)[17000], places=DIFF_PLACES)
-        self.assertAlmostEqual(nxsdata.readX(1)[22000], data2.readX(0)[22000], places=DIFF_PLACES)
+        self.assertAlmostEqual(nxsdata.readX(1)[0], data2.readX(0)[0], places=loc_diff_p)
+        self.assertAlmostEqual(nxsdata.readX(1)[4500], data2.readX(0)[4500], places=loc_diff_p)
+        self.assertAlmostEqual(nxsdata.readX(1)[17000], data2.readX(0)[17000], places=loc_diff_p)
+        self.assertAlmostEqual(nxsdata.readX(1)[22000], data2.readX(0)[22000], places=loc_diff_p)
 
-        self.assertAlmostEqual(nxsdata.readX(2)[0], data3.readX(0)[0], places=DIFF_PLACES)
-        self.assertAlmostEqual(nxsdata.readX(2)[4500], data3.readX(0)[4500], places=DIFF_PLACES)
-        self.assertAlmostEqual(nxsdata.readX(2)[17000], data3.readX(0)[17000], places=DIFF_PLACES)
-        self.assertAlmostEqual(nxsdata.readX(2)[22000], data3.readX(0)[22000], places=DIFF_PLACES)
+        self.assertAlmostEqual(nxsdata.readX(2)[0], data3.readX(0)[0], places=loc_diff_p)
+        self.assertAlmostEqual(nxsdata.readX(2)[4500], data3.readX(0)[4500], places=loc_diff_p)
+        self.assertAlmostEqual(nxsdata.readX(2)[17000], data3.readX(0)[17000], places=loc_diff_p)
+        self.assertAlmostEqual(nxsdata.readX(2)[22000], data3.readX(0)[22000], places=loc_diff_p)
 
     def test_van_s1_files(self):
         nxsfile1 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/van_s1_old_new-0.nxs')
