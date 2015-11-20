@@ -64,6 +64,7 @@ public:
 private:
   void init();
   void exec();
+  virtual std::map<std::string, std::string> validateInputs();
 };
 
 } // namespace MDAlgorithms

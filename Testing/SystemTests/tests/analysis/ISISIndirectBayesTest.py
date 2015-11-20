@@ -3,7 +3,7 @@ import stresstesting
 import os
 from abc import ABCMeta, abstractmethod
 from mantid.simpleapi import *
-from IndirectImport import is_supported_f2py_platform
+import platform
 
 #==============================================================================
 
@@ -24,10 +24,7 @@ def _cleanup_files(dirname, filenames):
 class QLresTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
-        if is_supported_f2py_platform():
-            return False
-        else:
-            return True
+        return not platform.system() == "Windows"
 
     def runTest(self):
         import IndirectBayes as Main
@@ -50,6 +47,7 @@ class QLresTest(stresstesting.MantidStressTest):
 
     def validate(self):
         self.tolerance = 1e-4
+        self.disableChecking.append('SpectraMap')
         return 'irs26176_graphite002_QLr_Workspace_0','ISISIndirectBayes_QlresTest.nxs'
 
     def cleanup(self):
@@ -63,10 +61,7 @@ class QLresTest(stresstesting.MantidStressTest):
 class ResNormTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
-        if is_supported_f2py_platform():
-            return False
-        else:
-            return True
+        return not platform.system() == "Windows"
 
     def runTest(self):
         import IndirectBayes as Main
@@ -97,10 +92,7 @@ class ResNormTest(stresstesting.MantidStressTest):
 class QuestTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
-        if is_supported_f2py_platform():
-            return False
-        else:
-            return True
+        return not platform.system() == "Windows"
 
     def runTest(self):
         import IndirectBayes as Main
@@ -122,6 +114,7 @@ class QuestTest(stresstesting.MantidStressTest):
 
     def validate(self):
         self.tolerance = 1e-1
+        self.disableChecking.append('SpectraMap')
         return 'irs26176_graphite002_Qst_Fit','ISISIndirectBayes_QuestTest.nxs'
 
     def cleanup(self):
@@ -134,10 +127,7 @@ class QuestTest(stresstesting.MantidStressTest):
 class QSeTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
-        if is_supported_f2py_platform():
-            return False
-        else:
-            return True
+        return not platform.system() == "Windows"
 
     def runTest(self):
         import IndirectBayes as Main
@@ -160,6 +150,7 @@ class QSeTest(stresstesting.MantidStressTest):
 
     def validate(self):
         self.tolerance = 1e-1
+        self.disableChecking.append('SpectraMap')
         return 'irs26176_graphite002_QSe_Workspace_0','ISISIndirectBayes_QSeTest.nxs'
 
     def cleanup(self):
@@ -172,10 +163,7 @@ class QSeTest(stresstesting.MantidStressTest):
 class QLDataTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
-        if is_supported_f2py_platform():
-            return False
-        else:
-            return True
+        return not platform.system() == "Windows"
 
     def runTest(self):
         import IndirectBayes as Main
@@ -198,6 +186,7 @@ class QLDataTest(stresstesting.MantidStressTest):
 
     def validate(self):
         self.tolerance = 1e-4
+        self.disableChecking.append('SpectraMap')
         return 'irs26176_graphite002_QLd_Workspace_0','ISISIndirectBayes_QLDataTest.nxs'
 
     def cleanup(self):
@@ -211,10 +200,7 @@ class QLDataTest(stresstesting.MantidStressTest):
 class QLResNormTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
-        if is_supported_f2py_platform():
-            return False
-        else:
-            return True
+        return not platform.system() == "Windows"
 
     def runTest(self):
         import IndirectBayes as Main
@@ -240,6 +226,7 @@ class QLResNormTest(stresstesting.MantidStressTest):
 
     def validate(self):
         self.tolerance = 1e-1
+        self.disableChecking.append('SpectraMap')
         return 'irs26176_graphite002_QLr_Workspaces','ISISIndirectBayes_QLr_ResNorm_Test.nxs'
 
     def cleanup(self):
@@ -253,10 +240,7 @@ class QLResNormTest(stresstesting.MantidStressTest):
 class QLWidthTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
-        if is_supported_f2py_platform():
-            return False
-        else:
-            return True
+        return not platform.system() == "Windows"
 
     def runTest(self):
         import IndirectBayes as Main
@@ -280,6 +264,7 @@ class QLWidthTest(stresstesting.MantidStressTest):
 
     def validate(self):
         self.tolerance = 1e-1
+        self.disableChecking.append('SpectraMap')
         return 'irs26176_graphite002_QLr_Workspace_0','ISISIndirectBayes_QLr_width_Test.nxs'
 
     def cleanup(self):
