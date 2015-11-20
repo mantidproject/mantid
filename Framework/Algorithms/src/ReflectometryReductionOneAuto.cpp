@@ -520,21 +520,27 @@ bool ReflectometryReductionOneAuto::checkGroups() {
   }
   return false;
 }
-
+/**
+ * Sum over transmission group workspaces to produce one
+ * workspace.
+ * @param transGroup : The transmission group to be processed
+ * @return A workspace pointer containing the sum of transmission workspaces.
+ */
 Mantid::API::Workspace_sptr
-ReflectometryReductionOneAuto::sumOverTransmissionGroup(WorkspaceGroup_sptr transGroup) {
-    // Handle transmission runs
-    auto transmissionRunSum = transGroup->getItem(0);
-    for (size_t item = 1; item < transGroup->size(); item++) {
-        auto plusAlg = this->createChildAlgorithm("Plus");
-        plusAlg->setChild(true);
-        plusAlg->initialize();
-        plusAlg->setProperty("LHSWorkspace", transmissionRunSum);
-        plusAlg->setProperty("RHSWorkspace", transGroup->getItem(item));
-        plusAlg->setProperty("OutputWorkspace", transmissionRunSum);
-        plusAlg->execute();
-    }
-    return transmissionRunSum;
+ReflectometryReductionOneAuto::sumOverTransmissionGroup(
+    WorkspaceGroup_sptr transGroup) {
+  // Handle transmission runs
+  auto transmissionRunSum = transGroup->getItem(0);
+  for (size_t item = 1; item < transGroup->size(); item++) {
+    auto plusAlg = this->createChildAlgorithm("Plus");
+    plusAlg->setChild(true);
+    plusAlg->initialize();
+    plusAlg->setProperty("LHSWorkspace", transmissionRunSum);
+    plusAlg->setProperty("RHSWorkspace", transGroup->getItem(item));
+    plusAlg->setProperty("OutputWorkspace", transmissionRunSum);
+    plusAlg->execute();
+  }
+  return transmissionRunSum;
 }
 
 bool ReflectometryReductionOneAuto::processGroups() {
