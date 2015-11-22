@@ -46,6 +46,6 @@ inline typename _Unique_if<T>::_Single_object make_unique(Args &&... args) {
 template <class T, class... Args>
 inline typename _Unique_if<T>::_Known_bound make_unique(Args &&...) = delete;
 #endif // __cplusplus == 201402L
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 #endif // Mantid_make_unique_h
