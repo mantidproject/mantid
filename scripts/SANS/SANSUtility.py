@@ -1250,10 +1250,11 @@ def is_valid_user_file_extension(user_file):
     # We need to allow for old user file formats. They started with a number.
     # But there doesn't seem to be a general format. As a very basic check
     # we make sure that the ending starts with a number
-    pattern = '^\.[0-9]+'
+    pattern = r'^\.[0-9]+'
 
     filename, file_extension = os.path.splitext(user_file)
     file_extension = file_extension.upper()
+    dummy_file = file_name
     is_allowed = False
     if file_extension in allowed_values or re.match(pattern, file_extension):
         is_allowed = True

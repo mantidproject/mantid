@@ -206,8 +206,10 @@ def TransFit(mode,lambdamin=None,lambdamax=None, selector='BOTH'):
     """
     mode = str(mode).strip().upper()
     message = mode
-    if lambdamin: message += ', ' + str(lambdamin)
-    if lambdamax: message += ', ' + str(lambdamax)
+    if lambdamin:
+    	message += ', ' + str(lambdamin)
+    if lambdamax:
+    	message += ', ' + str(lambdamax)
     message += ', selector=' + selector
     _printMessage("TransFit(\"" + message + "\")")
 
