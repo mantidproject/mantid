@@ -16,8 +16,8 @@ class loadDAEDlg : public QDialog
 	Q_OBJECT
 	
 public:
-	loadDAEDlg(QWidget *parent = 0);
-	~loadDAEDlg();
+  explicit loadDAEDlg(QWidget *parent = 0);
+        ~loadDAEDlg();
 
 	const QString& getHostName() { return m_hostName; }
 	const QString& getWorkspaceName() { return m_workspaceName; }

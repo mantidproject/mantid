@@ -49,7 +49,7 @@ public:
   enum SelectionType {Single=0,AddPeak,ErasePeak,SingleDetectorSelection,Tube, Draw};
   enum ToolType {Zoom,PixelSelect,TubeSelect,PeakSelect,PeakErase, DrawEllipse, DrawRectangle, DrawFree, EditShape};
 
-  InstrumentWindowPickTab(InstrumentWindow* instrWindow);
+  explicit InstrumentWindowPickTab(InstrumentWindow *instrWindow);
   bool canUpdateTouchedDetector()const;
   void initSurface();
   void saveSettings(QSettings& settings) const;

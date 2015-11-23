@@ -72,7 +72,7 @@ public:
    * @param criteria : a vector with a list of pairs: column name, bool;
    *        where bool = true for ascending, false for descending sort.
    */
-  PeakComparator(std::vector<std::pair<std::string, bool>> &criteria)
+  explicit PeakComparator(std::vector<std::pair<std::string, bool>> &criteria)
       : criteria(criteria) {}
 
   /** Compare two peaks using the stored criteria */

@@ -1317,8 +1317,8 @@ int ScriptRepositoryImpl::setAutoUpdate(const std::string &input_path,
     // for every entry, it takes the path and RepositoryEntry
     std::string entry_path = it->first;
     RepositoryEntry &entry = it->second;
-    if (entry_path.find(path) == 0 && entry.status != REMOTE_ONLY &&
-        entry.status != LOCAL_ONLY)
+    if (entry_path.compare(0, path.size(), path) == 0 &&
+        entry.status != REMOTE_ONLY && entry.status != LOCAL_ONLY)
       files_to_update.push_back(entry_path);
   }
 

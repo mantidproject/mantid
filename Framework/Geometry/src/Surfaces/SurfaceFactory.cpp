@@ -91,7 +91,7 @@ void SurfaceFactory::registerSurface()
 namespace {
 class KeyEquals {
 public:
-  KeyEquals(std::string key) : m_key(std::move(key)) {}
+  explicit KeyEquals(std::string key) : m_key(std::move(key)) {}
   bool
   operator()(const std::pair<std::string, std::unique_ptr<Surface>> &element) {
     return m_key == element.first;

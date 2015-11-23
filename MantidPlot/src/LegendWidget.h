@@ -41,8 +41,8 @@ class LegendWidget: public QWidget
 	Q_OBJECT
 
 public:
-    LegendWidget(Plot *);
-	~LegendWidget();
+  explicit LegendWidget(Plot *);
+        ~LegendWidget();
 
 	void clone(LegendWidget* t);
 	QwtPlot *plot(){return d_plot;};

@@ -177,13 +177,12 @@ double ConvexPolygon::determinant() const {
   // that calling next() on the vertex takes us clockwise within
   // the polygon.
   double lhs(0.0), rhs(0.0);
-  const V2D *v_i(NULL), *v_ip1(NULL);
   for (size_t i = 0; i < npoints(); ++i) {
-    v_i = &(m_vertices[i]);
-    v_ip1 = &(m_vertices[(i + 1) % npoints()]);
+    const V2D &v_i = m_vertices[i];
+    const V2D &v_ip1 = m_vertices[(i + 1) % npoints()];
 
-    lhs += v_ip1->X() * v_i->Y();
-    rhs += v_i->X() * v_ip1->Y();
+    lhs += v_ip1.X() * v_i.Y();
+    rhs += v_i.X() * v_ip1.Y();
   }
   return lhs - rhs;
 }
