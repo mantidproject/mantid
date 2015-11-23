@@ -391,10 +391,9 @@ void GetAllEi::exec() {
 *                         to energy in elastic mode using instrument
 *                         parameters.
 */
-void GetAllEi::printDebugModeInfo(
-    const std::vector<double> &guess_opening,
-    const std::pair<double, double> &TOF_range,
-    boost::shared_ptr<Kernel::Unit> &destUnit) {
+void GetAllEi::printDebugModeInfo(const std::vector<double> &guess_opening,
+                                  const std::pair<double, double> &TOF_range,
+                                  boost::shared_ptr<Kernel::Unit> &destUnit) {
 
   g_log.debug() << "*Found : " << guess_opening.size()
                 << " chopper prospective opening within time frame: "
