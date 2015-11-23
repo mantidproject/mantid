@@ -1254,7 +1254,7 @@ def is_valid_user_file_extension(user_file):
 
     filename, file_extension = os.path.splitext(user_file)
     file_extension = file_extension.upper()
-    dummy_file = file_name
+    dummy_file = filename
     is_allowed = False
     if file_extension in allowed_values or re.match(pattern, file_extension):
         is_allowed = True
