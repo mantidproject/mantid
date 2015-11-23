@@ -1746,7 +1746,7 @@ def has_user_file_valid_extension(file_name):
     @param file_name: the name of the user file
     @returns true if it is valid else false
     '''
-    return su.is_valid_user_file_extension(user_file)
+    return su.is_valid_user_file_extension(file_name)
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################
