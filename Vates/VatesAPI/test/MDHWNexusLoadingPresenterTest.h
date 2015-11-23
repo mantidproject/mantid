@@ -52,13 +52,13 @@ private:
 
   vtkDataSet *doExecute(std::string filename, bool performAsserts = true) {
     // Setup view
-    MockMDLoadingView view;
-    EXPECT_CALL(view, getTime()).WillRepeatedly(Return(0));
-    EXPECT_CALL(view, getRecursionDepth()).Times(AtLeast(0));
-    EXPECT_CALL(view, getLoadInMemory())
+    MockMDLoadingView *view = new MockMDLoadingView();
+    EXPECT_CALL(*view, getTime()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(0));
+    EXPECT_CALL(*view, getLoadInMemory())
         .Times(AtLeast(1))
         .WillRepeatedly(testing::Return(true));
-    EXPECT_CALL(view, updateAlgorithmProgress(_, _)).Times(AnyNumber());
+    EXPECT_CALL(*view, updateAlgorithmProgress(_, _)).Times(AnyNumber());
 
     // Setup rendering factory
     MockvtkDataSetFactory factory;
@@ -71,8 +71,9 @@ private:
     MockProgressAction mockDrawingProgressAction;
 
     // Create the presenter and runit!
-    MDHWNexusLoadingPresenter presenter(std::unique_ptr<MDLoadingView>(&view),
-                                        filename);
+    std::unique_ptr<MDLoadingView> uniqueView(
+        dynamic_cast<MDLoadingView *>(view));
+    MDHWNexusLoadingPresenter presenter(std::move(uniqueView), filename);
     presenter.executeLoadMetadata();
     vtkDataSet *product = presenter.execute(&factory, mockLoadingProgressAction,
                                             mockDrawingProgressAction);
@@ -89,7 +90,7 @@ private:
       TS_ASSERT_THROWS_NOTHING(presenter.getGeometryXML());
       TS_ASSERT(!presenter.getWorkspaceTypeName().empty());
 
-      TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+      TS_ASSERT(Mock::VerifyAndClearExpectations(view));
       TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
     }
     return product;
@@ -263,13 +264,13 @@ public:
 
   void testTimeLabel() {
     // Setup view
-    MockMDLoadingView view;
-    EXPECT_CALL(view, getTime()).WillRepeatedly(Return(0));
-    EXPECT_CALL(view, getRecursionDepth()).Times(AtLeast(0));
-    EXPECT_CALL(view, getLoadInMemory())
+    MockMDLoadingView *view = new MockMDLoadingView();
+    EXPECT_CALL(*view, getTime()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(0));
+    EXPECT_CALL(*view, getLoadInMemory())
         .Times(AtLeast(1))
         .WillRepeatedly(testing::Return(true));
-    EXPECT_CALL(view, updateAlgorithmProgress(_, _)).Times(AnyNumber());
+    EXPECT_CALL(*view, updateAlgorithmProgress(_, _)).Times(AnyNumber());
 
     // Setup rendering factory
     MockvtkDataSetFactory factory;
@@ -282,7 +283,9 @@ public:
     MockProgressAction mockDrawingProgressAction;
 
     // Create the presenter and runit!
-    MDHWNexusLoadingPresenter presenter(std::unique_ptr<MDLoadingView>(&view),
+    std::unique_ptr<MDLoadingView> uniqueView(
+        dynamic_cast<MDLoadingView *>(view));
+    MDHWNexusLoadingPresenter presenter(std::move(uniqueView),
                                         getSuitableFile());
     presenter.executeLoadMetadata();
     auto product = vtkSmartPointer<vtkDataSet>::Take(presenter.execute(
@@ -290,19 +293,19 @@ public:
     TSM_ASSERT_EQUALS("Time label should be exact.",
                       presenter.getTimeStepLabel(), "DeltaE (DeltaE)");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
   }
 
   void testAxisLabels() {
     // Setup view
-    MockMDLoadingView view;
-    EXPECT_CALL(view, getTime()).WillRepeatedly(Return(0));
-    EXPECT_CALL(view, getRecursionDepth()).Times(AtLeast(0));
-    EXPECT_CALL(view, getLoadInMemory())
+    MockMDLoadingView *view = new MockMDLoadingView();
+    EXPECT_CALL(*view, getTime()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(0));
+    EXPECT_CALL(*view, getLoadInMemory())
         .Times(AtLeast(1))
         .WillRepeatedly(testing::Return(true));
-    EXPECT_CALL(view, updateAlgorithmProgress(_, _)).Times(AnyNumber());
+    EXPECT_CALL(*view, updateAlgorithmProgress(_, _)).Times(AnyNumber());
 
     // Setup rendering factory
     MockvtkDataSetFactory factory;
@@ -315,7 +318,9 @@ public:
     MockProgressAction mockDrawingProgressAction;
 
     // Create the presenter and runit!
-    MDHWNexusLoadingPresenter presenter(std::unique_ptr<MDLoadingView>(&view),
+    std::unique_ptr<MDLoadingView> uniqueView(
+        dynamic_cast<MDLoadingView *>(view));
+    MDHWNexusLoadingPresenter presenter(std::move(uniqueView),
                                         getSuitableFile());
     presenter.executeLoadMetadata();
     auto product = vtkSmartPointer<vtkDataSet>::Take(presenter.execute(
@@ -332,7 +337,7 @@ public:
                       getStringFieldDataValue(product, "AxisTitleForZ"),
                       "[0,0,L] ($in$ $1.087$ $\\AA^{-1}$)");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
   }
 };

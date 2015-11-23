@@ -155,11 +155,11 @@ public:
   void testExecution()
   {
     //Setup view
-    MockMDLoadingView view;
-    EXPECT_CALL(view, getRecursionDepth()).Times(1);
-    EXPECT_CALL(view, getLoadInMemory())
+    MockMDLoadingView *view = new MockMDLoadingView();
+    EXPECT_CALL(*view, getRecursionDepth()).Times(1);
+    EXPECT_CALL(*view, getLoadInMemory())
         .Times(0); // Not a question that needs asking for this presenter type.
-    EXPECT_CALL(view, updateAlgorithmProgress(_, _)).Times(AnyNumber());
+    EXPECT_CALL(*view, updateAlgorithmProgress(_, _)).Times(AnyNumber());
 
     //Setup rendering factory
     MockvtkDataSetFactory factory;
@@ -176,8 +176,10 @@ public:
     MockProgressAction mockDrawingProgressAction;
 
     //Create the presenter and run it!
-    MDEWInMemoryLoadingPresenter presenter(
-        std::unique_ptr<MDLoadingView>(&view), repository, "_");
+    std::unique_ptr<MDLoadingView> uniqueView(
+        dynamic_cast<MDLoadingView *>(view));
+    MDEWInMemoryLoadingPresenter presenter(std::move(uniqueView), repository,
+                                           "_");
     presenter.executeLoadMetadata();
     vtkSmartPointer<vtkDataSet> product = presenter.execute(
         &factory, mockLoadingProgressAction, mockDrawingProgressAction);
@@ -190,7 +192,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(presenter.getGeometryXML());
     TS_ASSERT(!presenter.getWorkspaceTypeName().empty());
     TSM_ASSERT("Special coordinate metadata failed.", -1 < presenter.getSpecialCoordinates());
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
   }
 
