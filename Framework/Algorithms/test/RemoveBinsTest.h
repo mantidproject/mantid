@@ -154,6 +154,35 @@ public:
     AnalysisDataService::Instance().remove("output4");
   }
 
+  void testSingleSpectrumNotWS0() {
+    RemoveBins rb;
+    Workspace2D_sptr inputWS = makeDummyWorkspace2D();
+    std::string outputWSName = "output44";
+    TS_ASSERT_THROWS_NOTHING(rb.initialize())
+    TS_ASSERT(rb.isInitialized())
+    rb.setPropertyValue("InputWorkspace", inputWS->getName());
+    rb.setPropertyValue("OutputWorkspace", outputWSName);
+    rb.setPropertyValue("XMin", "0");
+    rb.setPropertyValue("XMax", "40");
+    rb.setPropertyValue("WorkspaceIndex", "1");
+
+    TS_ASSERT(rb.execute())
+
+    MatrixWorkspace_const_sptr outputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outputWSName);
+    TS_ASSERT_EQUALS(inputWS->readX(1), outputWS->readX(1))
+    TS_ASSERT_EQUALS(inputWS->readX(0), outputWS->readX(0))
+    TS_ASSERT_EQUALS(inputWS->readY(0), outputWS->readY(0))
+    TS_ASSERT_EQUALS(inputWS->readE(0), outputWS->readE(0))
+    for (int i = 0; i < 4; ++i) {
+      TS_ASSERT_EQUALS(outputWS->readY(1)[i], 0.0)
+      TS_ASSERT_EQUALS(outputWS->readE(1)[i], 0.0)
+    }
+
+    AnalysisDataService::Instance().remove(outputWSName);
+  }
+
   void xtestRealData() {
     Mantid::DataHandling::LoadMuonNexus2 loader;
     loader.initialize();
@@ -183,7 +212,7 @@ public:
     TS_ASSERT_EQUALS(outputWS->dataX(0).size(), 1994);
   }
 
-  void makeDummyWorkspace2D() {
+  Workspace2D_sptr makeDummyWorkspace2D() {
     Workspace2D_sptr testWorkspace(new Workspace2D);
 
     testWorkspace->setTitle("input2D");
@@ -214,7 +243,9 @@ public:
     testWorkspace->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
-    AnalysisDataService::Instance().add("input2D", testWorkspace);
+    AnalysisDataService::Instance().addOrReplace("input2D", testWorkspace);
+
+    return testWorkspace;
   }
 
 private:

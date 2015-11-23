@@ -125,12 +125,6 @@ class LoadTests(unittest.TestCase):
         self.cleanup_names = []
 
     # ============================ Success ==============================
-    def runTestTwo(self):
-        expt = cry_ini.Files('POLARIS', RawDir=(DIRS[0] + "POLARIS"), Analysisdir='test',
-                             forceRootDirFromScripts=False, inputInstDir=DIRS[0])
-        expt.initialize('Cycle_15_2', user='Mantid_tester', prefFile='UserPrefFile_15_2.pref')
-        expt.tell()
-        cry_focus.focus_all(expt, "79514", Write_ExtV=False)
 
     def test_calfile_with_workspace(self):
         self.wsname = "CalWorkspace1"
