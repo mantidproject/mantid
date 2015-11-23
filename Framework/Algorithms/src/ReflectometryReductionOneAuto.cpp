@@ -544,13 +544,21 @@ ReflectometryReductionOneAuto::sumOverTransmissionGroup(
 }
 
 bool ReflectometryReductionOneAuto::processGroups() {
-
+  // isPolarizationCorrectionOn is used to decide whether
+  // we should process our Transmission WorkspaceGroup members
+  // as individuals (not multiperiod) when PolarizationCorrection is off,
+  // or sum over all of the workspaces in the group
+  // and used that sum as our TransmissionWorkspace when PolarizationCorrection
+  // is on.
   const bool isPolarizationCorrectionOn =
       this->getPropertyValue("PolarizationAnalysis") !=
       noPolarizationCorrectionMode();
+  // Get our input workspace group
   auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
       getPropertyValue("InputWorkspace"));
+  // Get name of IvsQ workspace
   const std::string outputIvsQ = this->getPropertyValue("OutputWorkspace");
+  // Get name of IvsLam workspace
   const std::string outputIvsLam =
       this->getPropertyValue("OutputWorkspaceWavelength");
 
@@ -595,8 +603,7 @@ bool ReflectometryReductionOneAuto::processGroups() {
     secondTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(secondTransWS);
 
     if (!secondTransG && !isPolarizationCorrectionOn)
-      alg->setProperty("SecondTransmissionRun",
-                       secondTrans); // sum over transmission workspaces here?
+      alg->setProperty("SecondTransmissionRun", secondTrans);
     else if (group->size() != secondTransG->size())
       throw std::runtime_error("SecondTransmissionRun WorkspaceGroup must be "
                                "the same size as the InputWorkspace "
@@ -605,7 +612,13 @@ bool ReflectometryReductionOneAuto::processGroups() {
 
   std::vector<std::string> IvsQGroup, IvsLamGroup;
 
-  // Handle transmission runs before processing InputWorkspace group members.
+  // If our transmission run is a group then we can assume
+  // that it was intended to be multiperiod. So we sum over
+  // the workspaces in the group to collapse them down to
+  // one transmission workspace if Polarizaiton Correction is on.
+  //
+  // Otherwise, if polarization correction is off, we process them
+  // using one transmission group member at a time.
 
   if (firstTransG && isPolarizationCorrectionOn) {
     auto firstTransmissionSum = sumOverTransmissionGroup(firstTransG);
@@ -624,9 +637,9 @@ bool ReflectometryReductionOneAuto::processGroups() {
         outputIvsQ + "_" + boost::lexical_cast<std::string>(i + 1);
     const std::string IvsLamName =
         outputIvsLam + "_" + boost::lexical_cast<std::string>(i + 1);
-    if (firstTransG && !isPolarizationCorrectionOn)
+    if (firstTransG && !isPolarizationCorrectionOn) // polarization off
       alg->setProperty("FirstTransmissionRun", firstTransG->getItem(i)->name());
-    if (secondTransG && !isPolarizationCorrectionOn)
+    if (secondTransG && !isPolarizationCorrectionOn) // polarization off
       alg->setProperty("FirstTransmissionRun",
                        secondTransG->getItem(i)->name());
     alg->setProperty("InputWorkspace", group->getItem(i)->name());
@@ -657,8 +670,7 @@ bool ReflectometryReductionOneAuto::processGroups() {
 
   // If this is a multiperiod workspace and we have polarization corrections
   // enabled
-  if (this->getPropertyValue("PolarizationAnalysis") !=
-      noPolarizationCorrectionMode()) {
+  if (isPolarizationCorrectionOn) {
     if (group->isMultiperiod()) {
       // Perform polarization correction over the IvsLam group
       Algorithm_sptr polAlg =
