@@ -3,13 +3,19 @@
 //-----------------------------------------------------------------------------
 #include "MantidKernel/V2D.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/Tolerance.h"
 #include "MantidKernel/Exception.h"
+#include <limits>
 
 #include <ostream>
 
 namespace Mantid {
 namespace Kernel {
+
+namespace {
+// Smallest possible double value
+const double EPSILON = std::numeric_limits<double>::epsilon();
+}
+
 //-----------------------------------------------------------------------------
 // Public member functions
 //-----------------------------------------------------------------------------
@@ -82,8 +88,8 @@ V2D &V2D::operator*=(const double factor) {
  * @returns True if they are considered equal false otherwise
  */
 bool V2D::operator==(const V2D &rhs) const {
-  return (std::fabs(m_x - rhs.m_x) < Tolerance &&
-          std::fabs(m_y - rhs.m_y) < Tolerance);
+  return (std::fabs(m_x - rhs.m_x) < EPSILON &&
+          std::fabs(m_y - rhs.m_y) < EPSILON);
 }
 
 /**

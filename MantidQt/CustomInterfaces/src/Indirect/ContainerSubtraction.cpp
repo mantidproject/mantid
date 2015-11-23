@@ -77,6 +77,38 @@ void ContainerSubtraction::run() {
     rebin->execute();
   }
 
+  // Check for same binning across sample and container
+  if (m_uiForm.ckShiftCan->isChecked()) {
+	  addRebinStep(canCloneName, sampleWsName);
+  }
+  else {
+	  if (!checkWorkspaceBinningMatches(sampleWs, canCloneWs)) {
+		  QString text =
+			  "Binning on sample and container does not match."
+			  "Would you like to rebin the container to match the sample?";
+
+		  int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
+			  QMessageBox::Yes, QMessageBox::No,
+			  QMessageBox::NoButton);
+
+		  if (result == QMessageBox::Yes) {
+			  IAlgorithm_sptr rebin =
+				  AlgorithmManager::Instance().create("RebinToWorkspace");
+			  rebin->initialize();
+			  rebin->setProperty("WorkspaceToRebin", canCloneWs);
+			  rebin->setProperty("WorkspaceToMatch", sampleWs);
+			  rebin->setProperty("OutputWorkspace", canCloneName.toStdString());
+			  rebin->execute();
+		  }
+		  else {
+			  m_batchAlgoRunner->clearQueue();
+			  g_log.error("Cannot apply absorption corrections using a sample and "
+				  "container with different binning.");
+			  return;
+		  }
+	  }
+  }
+
   // If not in wavelength then do conversion
   std::string originalCanUnits = canCloneWs->getAxis(0)->unit()->unitID();
   if (originalCanUnits != "Wavelength") {
@@ -91,30 +123,6 @@ void ContainerSubtraction::run() {
   if (useCanScale) {
     double canScaleFactor = m_uiForm.spCanScale->value();
     applyCorrAlg->setProperty("CanScaleFactor", canScaleFactor);
-  }
-
-  // Check for same binning across sample and container
-  if (m_uiForm.ckShiftCan->isChecked()) {
-    addRebinStep(canCloneName, sampleWsName);
-  } else {
-    if (!checkWorkspaceBinningMatches(sampleWs, canCloneWs)) {
-      QString text =
-          "Binning on sample and container does not match."
-          "Would you like to rebin the sample to match the container?";
-
-      int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
-                                         QMessageBox::Yes, QMessageBox::No,
-                                         QMessageBox::NoButton);
-
-      if (result == QMessageBox::Yes) {
-        addRebinStep(canCloneName, sampleWsName);
-      } else {
-        m_batchAlgoRunner->clearQueue();
-        g_log.error("Cannot apply absorption corrections using a sample and "
-                    "container with different binning.");
-        return;
-      }
-    }
   }
 
   // Generate output workspace name
@@ -189,39 +197,43 @@ bool ContainerSubtraction::validate() {
   UserInputValidator uiv;
 
   // Check valid inputs
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
-  uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
+  const bool samValid = uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+  const bool canValid = uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
 
-  // Get Workspaces
-  MatrixWorkspace_sptr sampleWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          m_uiForm.dsSample->getCurrentDataName().toStdString());
-  MatrixWorkspace_sptr containerWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          m_uiForm.dsContainer->getCurrentDataName().toStdString());
+  if (samValid && canValid) {
+    // Get Workspaces
+    MatrixWorkspace_sptr sampleWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            m_uiForm.dsSample->getCurrentDataName().toStdString());
+    MatrixWorkspace_sptr containerWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            m_uiForm.dsContainer->getCurrentDataName().toStdString());
 
-  // Check Sample is of same type as container
-  QString sample = m_uiForm.dsSample->getCurrentDataName();
-  QString sampleType = sample.right(sample.length() - sample.lastIndexOf("_"));
-  QString container = m_uiForm.dsContainer->getCurrentDataName();
-  QString containerType =
-      container.right(sample.length() - container.lastIndexOf("_"));
+    // Check Sample is of same type as container
+    QString sample = m_uiForm.dsSample->getCurrentDataName();
+    QString sampleType =
+        sample.right(sample.length() - sample.lastIndexOf("_"));
+    QString container = m_uiForm.dsContainer->getCurrentDataName();
+    QString containerType =
+        container.right(sample.length() - container.lastIndexOf("_"));
 
-  g_log.debug() << "Sample type is: " << sampleType.toStdString() << std::endl;
-  g_log.debug() << "Container type is: " << containerType.toStdString()
-                << std::endl;
+    g_log.debug() << "Sample type is: " << sampleType.toStdString()
+                  << std::endl;
+    g_log.debug() << "Container type is: " << containerType.toStdString()
+                  << std::endl;
 
-  if (containerType != sampleType)
-    uiv.addErrorMessage(
-        "Sample and can workspaces must contain the same type of data.");
+    if (containerType != sampleType)
+      uiv.addErrorMessage(
+          "Sample and can workspaces must contain the same type of data.");
 
-  // Check sample has the same number of Histograms as the contianer
-  const size_t sampleHist = sampleWs->getNumberHistograms();
-  const size_t containerHist = containerWs->getNumberHistograms();
+    // Check sample has the same number of Histograms as the contianer
+    const size_t sampleHist = sampleWs->getNumberHistograms();
+    const size_t containerHist = containerWs->getNumberHistograms();
 
-  if (sampleHist != containerHist) {
-    uiv.addErrorMessage(
-        " Sample and Container do not have a matching number of Histograms.");
+    if (sampleHist != containerHist) {
+      uiv.addErrorMessage(
+          " Sample and Container do not have a matching number of Histograms.");
+    }
   }
 
   // Show errors if there are any

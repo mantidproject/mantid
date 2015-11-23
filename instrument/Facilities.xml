@@ -12,7 +12,7 @@
 
   <catalog name="ICat4Catalog">
     <soapendpoint url="https://icatisis.esc.rl.ac.uk/ICATService/ICAT"></soapendpoint>
-    <externaldownload url="https://isisicatds.stfc.ac.uk/idsbeta/"></externaldownload>
+    <externaldownload url="https://isisicatds.stfc.ac.uk/ids/"></externaldownload>
     <filelocation>
       <prefix regex="\\\\isis\\inst\$"></prefix>
       <windows replacement=""></windows>

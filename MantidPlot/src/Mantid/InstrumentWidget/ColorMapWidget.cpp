@@ -139,10 +139,11 @@ void ColorMapWidget::setupColorBarScaling(const MantidColorMap& colorMap)
   }
   m_scaleOptions->blockSignals(true);
   m_scaleOptions->setCurrentIndex(m_scaleOptions->findData(type));
-  m_dspnN->setEnabled(false);
   if (m_scaleOptions->findData(type) == 2) {
     m_dspnN->setEnabled(true);
-  }
+  } else {
+		m_dspnN->setEnabled(false);
+	}
   m_scaleOptions->blockSignals(false);
 }
 

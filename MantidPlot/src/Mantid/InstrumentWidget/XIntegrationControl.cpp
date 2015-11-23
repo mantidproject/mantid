@@ -236,16 +236,20 @@ m_maximum(1)
   m_maxText->setMaximumWidth(100);
   m_maxText->setToolTip("Maximum x value");
   m_units = new QLabel("TOF",this);
+  m_setWholeRange = new QPushButton("Reset");
+  m_setWholeRange->setToolTip("Reset integration range to maximum");
   
   layout->addWidget(m_units,0);
   layout->addWidget(m_minText,0);
   layout->addWidget(m_scrollBar,1);
-  layout->addWidget(m_maxText,0);
+  layout->addWidget(m_maxText, 0);
+  layout->addWidget(m_setWholeRange, 0);
   setLayout(layout);
   connect(m_scrollBar,SIGNAL(changed(double,double)),this,SLOT(sliderChanged(double,double)));
   connect(m_scrollBar,SIGNAL(running(double,double)),this,SLOT(sliderRunning(double,double)));
   connect(m_minText,SIGNAL(editingFinished()),this,SLOT(setMinimum()));
   connect(m_maxText,SIGNAL(editingFinished()),this,SLOT(setMaximum()));
+  connect(m_setWholeRange, SIGNAL(clicked()), this, SLOT(setWholeRange()));
   updateTextBoxes();
 }
 
@@ -254,6 +258,11 @@ void XIntegrationControl::sliderChanged(double minimum,double maximum)
   double w = m_totalMaximum - m_totalMinimum;
   m_minimum = m_totalMinimum + minimum * w;
   m_maximum = m_totalMinimum + maximum * w;
+  if (w > 0 && (m_maximum - m_minimum) / w >= 0.98)
+  {
+    m_minimum = m_totalMinimum;
+    m_maximum = m_totalMaximum;
+  }
   updateTextBoxes();
   emit changed(m_minimum,m_maximum);
 }
@@ -303,8 +312,7 @@ void XIntegrationControl::setRange(double minimum,double maximum)
 
 void XIntegrationControl::setWholeRange()
 {
-  m_minimum = m_totalMinimum;
-  m_maximum = m_totalMaximum;
+  setRange(m_totalMinimum, m_totalMaximum);
 }
 
 double XIntegrationControl::getMinimum()const
@@ -326,6 +334,7 @@ void XIntegrationControl::updateTextBoxes()
 {
   m_minText->setText(QString::number(m_minimum));
   m_maxText->setText(QString::number(m_maximum));
+  m_setWholeRange->setEnabled(m_minimum != m_totalMinimum || m_maximum != m_totalMaximum);
 }
 
 void XIntegrationControl::setMinimum()
