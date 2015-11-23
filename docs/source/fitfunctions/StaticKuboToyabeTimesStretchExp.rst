@@ -1,8 +1,8 @@
 .. _func-StaticKuboToyabeTimesStretchExp:
 
-=============================
+=================================
 StaticKuboToyabeTimesStretchExp
-=============================
+=================================
 
 .. index:: StaticKuboToyabeTimesStretchExp
 
