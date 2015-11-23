@@ -97,6 +97,10 @@ class EVSDiffractionReduction(DataProcessorAlgorithm):
         load_opts = dict()
         load_opts['Mode'] = 'FoilOut'
         load_opts['InstrumentParFile'] = self._par_filename
+        
+        prog_reporter = Progress(self, start=0.0, end=1.0, nreports=1)
+        
+        prog_reporter.report("Loading Files");
 
         self._workspace_names, self._chopped_data = load_files(self._data_files,
                                                                ipf_filename=self._ipf_filename,
@@ -105,6 +109,9 @@ class EVSDiffractionReduction(DataProcessorAlgorithm):
                                                                sum_files=self._sum_files,
                                                                load_opts=load_opts)
 
+
+        prog_reporter.resetNumSteps(self._workspace_names.__len__(), 0.0, 1.0)
+        
         for c_ws_name in self._workspace_names:
             is_multi_frame = isinstance(mtd[c_ws_name], WorkspaceGroup)
 
@@ -157,8 +164,11 @@ class EVSDiffractionReduction(DataProcessorAlgorithm):
                               masked_detectors,
                               self._grouping_method)
 
+
             if is_multi_frame:
                 fold_chopped(c_ws_name)
+
+            prog_reporter.report()
 
         # Rename output workspaces
         output_workspace_names = [rename_reduction(ws_name, self._sum_files) for ws_name in self._workspace_names]
