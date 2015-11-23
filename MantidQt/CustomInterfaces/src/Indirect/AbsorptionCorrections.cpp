@@ -64,7 +64,7 @@ void AbsorptionCorrections::run() {
     clone->setProperty("OutputWorkspace", shiftedCanName);
     clone->execute();
 
-    MatrixWorkspace_sptr shiftedCan = clone->getProperty("OuputWorkspace");
+    MatrixWorkspace_sptr shiftedCan = clone->getProperty("OutputWorkspace");
 
     IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
     scaleX->initialize();
@@ -77,7 +77,7 @@ void AbsorptionCorrections::run() {
         AlgorithmManager::Instance().create("RebinToWorkspace");
     rebin->initialize();
     rebin->setProperty("WorkspaceToRebin", shiftedCan);
-    rebin->setProperty("WorkspaceToMatch", sampleWsName);
+    rebin->setProperty("WorkspaceToMatch", sampleWsName.toStdString());
     rebin->setProperty("OutputWorkspace", shiftedCanName);
     rebin->execute();
 
