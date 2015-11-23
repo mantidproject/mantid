@@ -184,7 +184,7 @@ void BackgroundHelper::deleteUnitsConverters() {
 *@param pLog     -- pointer to the logger class which would report errors
 *@param nThreads -- number of threads to be used for background removal
 *@param inPlace  -- if the background removal occurs from the existing workspace
-*@param NullifyNegative -- if true, negative signals are nullified and error is
+*@param nullifyNegative -- if true, negative signals are nullified and error is
 *                          modified appropriately
 or target workspace has to be cloned.
 */
