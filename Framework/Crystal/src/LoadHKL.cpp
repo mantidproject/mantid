@@ -91,7 +91,7 @@ void LoadHKL::exec() {
     double tbar = atof(line.substr(40, 7).c_str()); // tbar
     int run = atoi(line.substr(47, 7).c_str());
     static_cast<void>(atoi(line.substr(54, 7).c_str())); // seqNum
-    double trans = atof(line.substr(61, 7).c_str()); // transmission
+    double trans = atof(line.substr(61, 7).c_str());     // transmission
     int bank = atoi(line.substr(68, 4).c_str());
     double scattering = atof(line.substr(72, 9).c_str());
     static_cast<void>(atof(line.substr(81, 9).c_str())); // dspace
