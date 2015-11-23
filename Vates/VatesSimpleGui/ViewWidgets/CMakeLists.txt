@@ -137,6 +137,7 @@ include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 target_link_libraries( VatesSimpleGuiViewWidgets LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
 pqApplicationComponents
 pqComponents
+${vtkjsoncpp_LIBRARIES}
 vtkPVServerManagerRendering
 vtkRenderingFreeType
 vtksys
@@ -151,7 +152,6 @@ ${PYTHON_LIBRARIES}
 MantidWidgets
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
-${JSONCPP_LIBRARIES}
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
@@ -171,6 +171,7 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
   
   target_link_libraries( VatesSimpleGuiViewWidgetsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
   VatesSimpleGuiViewWidgets 
+  ${vtkjsoncpp_LIBRARIES}
   DataHandling 
   Kernel 
   DataObjects 
@@ -179,8 +180,7 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
   ${POCO_LIBRARIES}
   ${Boost_LIBRARIES}
   ${GMOCK_LIBRARIES} 
-  ${GTEST_LIBRARIES}
-  ${JSONCPP_LIBRARIES})
+  ${GTEST_LIBRARIES})
 
   add_dependencies( AllTests VatesSimpleGuiViewWidgetsTest )
   # Add to the 'UnitTests' group in VS
