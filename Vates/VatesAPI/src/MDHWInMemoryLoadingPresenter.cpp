@@ -32,7 +32,7 @@ MDHWInMemoryLoadingPresenter::MDHWInMemoryLoadingPresenter(
   if (NULL == repository) {
     throw std::invalid_argument("The repository is NULL");
   }
-  if (NULL == m_view) {
+  if (nullptr == m_view) {
     throw std::invalid_argument("View is NULL.");
   }
 }
@@ -138,7 +138,7 @@ void MDHWInMemoryLoadingPresenter::executeLoadMetadata() {
 }
 
 /// Destructor
-MDHWInMemoryLoadingPresenter::~MDHWInMemoryLoadingPresenter() { delete m_view; }
+MDHWInMemoryLoadingPresenter::~MDHWInMemoryLoadingPresenter() {}
 
 /*
  * Getter for the workspace type name.

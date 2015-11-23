@@ -33,7 +33,7 @@ namespace Mantid
       {
         throw std::invalid_argument("The repository is NULL");
       }
-      if(NULL == m_view)
+      if(nullptr == m_view)
       {
         throw std::invalid_argument("View is NULL.");
       }
@@ -127,16 +127,13 @@ namespace Mantid
       this->extractMetadata(eventWs);
     }
 
-    ///Destructor
-    MDEWInMemoryLoadingPresenter::~MDEWInMemoryLoadingPresenter()
-    {
-      delete m_view;
-    }
+    /// Destructor
+    MDEWInMemoryLoadingPresenter::~MDEWInMemoryLoadingPresenter() {}
 
-     /*
-      Getter for the workspace type name.
-      @return Workspace Type Name
-    */
+    /*
+     Getter for the workspace type name.
+     @return Workspace Type Name
+   */
     std::string MDEWInMemoryLoadingPresenter::getWorkspaceTypeName()
     {
       return m_wsTypeName;

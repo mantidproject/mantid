@@ -30,7 +30,7 @@ namespace Mantid
       {
         throw std::invalid_argument("File name is an empty string.");
       }
-      if(NULL == this->m_view)
+      if(nullptr == this->m_view)
       {
         throw std::invalid_argument("View is NULL.");
       }
@@ -135,16 +135,13 @@ namespace Mantid
       AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
     }
 
-    ///Destructor
-    MDEWEventNexusLoadingPresenter::~MDEWEventNexusLoadingPresenter()
-    {
-      delete m_view;
-    }
+    /// Destructor
+    MDEWEventNexusLoadingPresenter::~MDEWEventNexusLoadingPresenter() {}
 
-        /*
-    Getter for the workspace type name.
-    @return Workspace Type Name
-    */
+    /*
+Getter for the workspace type name.
+@return Workspace Type Name
+*/
     std::string MDEWEventNexusLoadingPresenter::getWorkspaceTypeName()
     {
       return m_wsTypeName;

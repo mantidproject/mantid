@@ -33,7 +33,7 @@ namespace Mantid
       {
         throw std::invalid_argument("File name is an empty string.");
       }
-      if (NULL == this->m_view)
+      if (nullptr == this->m_view)
       {
         throw std::invalid_argument("View is NULL.");
       }
@@ -168,11 +168,8 @@ namespace Mantid
       throw std::runtime_error("Does not have a 4th Dimension, so can be no T-axis");
     }
 
-    ///Destructor
-    EventNexusLoadingPresenter::~EventNexusLoadingPresenter()
-    {
-      delete m_view;
-    }
+    /// Destructor
+    EventNexusLoadingPresenter::~EventNexusLoadingPresenter() {}
 
     /**
      Executes any meta-data loading required.

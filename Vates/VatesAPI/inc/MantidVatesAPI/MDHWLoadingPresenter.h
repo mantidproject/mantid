@@ -65,7 +65,7 @@ protected:
   /*---------------------------------------------------------------------------
   Common/shared operations and members for all MDHW file-type loading.
   ---------------------------------------------------------------------------*/
-  MDLoadingView *m_view;
+  std::unique_ptr<MDLoadingView> m_view;
 
   Mantid::Geometry::MDGeometryBuilderXML<Mantid::Geometry::NoDimensionPolicy>
       xmlBuilder;

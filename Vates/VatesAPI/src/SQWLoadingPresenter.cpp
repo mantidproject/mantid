@@ -27,7 +27,7 @@ namespace Mantid
       {
         throw std::invalid_argument("File name is an empty string.");
       }
-      if(NULL == this->m_view)
+      if(nullptr == this->m_view)
       {
         throw std::invalid_argument("View is NULL.");
       }
@@ -162,10 +162,7 @@ namespace Mantid
     }
 
     ///Destructor
-    SQWLoadingPresenter::~SQWLoadingPresenter()
-    {
-      delete m_view;
-    }
+    SQWLoadingPresenter::~SQWLoadingPresenter() {}
 
     /*
     Getter for the workspace type name.

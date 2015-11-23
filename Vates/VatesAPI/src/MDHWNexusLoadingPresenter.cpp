@@ -30,7 +30,7 @@ MDHWNexusLoadingPresenter::MDHWNexusLoadingPresenter(MDLoadingView* view, const 
   {
     throw std::invalid_argument("File name is an empty string.");
   }
-  if(NULL == this->m_view)
+  if(nullptr == this->m_view)
   {
     throw std::invalid_argument("View is NULL.");
   }
@@ -113,10 +113,7 @@ void MDHWNexusLoadingPresenter::executeLoadMetadata()
  * Destructor
  * @return
  */
-MDHWNexusLoadingPresenter::~MDHWNexusLoadingPresenter()
-{
-  delete m_view;
-}
+MDHWNexusLoadingPresenter::~MDHWNexusLoadingPresenter() {}
 
 /**
  * Getter for the workspace type name.
