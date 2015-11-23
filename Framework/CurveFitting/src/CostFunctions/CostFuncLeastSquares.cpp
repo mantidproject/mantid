@@ -404,36 +404,39 @@ void CostFuncLeastSquares::getParameters(GSLVector &params) const {
 void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix &covar,
                                                      double epsrel) {
   UNUSED_ARG(epsrel);
+
   if (m_hessian.isEmpty()) {
     valDerivHessian();
   }
+
   if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
-    g_log.debug() << "== Hessian (H) ==\n";
-    std::ios::fmtflags prevState = g_log.debug().flags();
-    g_log.debug() << std::left << std::fixed;
+    std::ostringstream osHess;
+    osHess << "== Hessian (H) ==\n";
+    osHess << std::left << std::fixed;
     for (size_t i = 0; i < m_hessian.size1(); ++i) {
       for (size_t j = 0; j < m_hessian.size2(); ++j) {
-        g_log.debug() << std::setw(10);
-        g_log.debug() << m_hessian.get(i, j) << "  ";
+        osHess << std::setw(10);
+        osHess << m_hessian.get(i, j) << "  ";
       }
-      g_log.debug() << "\n";
+      osHess << "\n";
     }
-    g_log.debug().flags(prevState);
+    g_log.debug() << osHess.str();
   }
+
   covar = m_hessian;
   covar.invert();
   if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
-    g_log.debug() << "== Covariance matrix (H^-1) ==\n";
-    std::ios::fmtflags prevState = g_log.debug().flags();
-    g_log.debug() << std::left << std::fixed;
+    std::ostringstream osCovar;
+    osCovar << "== Covariance matrix (H^-1) ==\n";
+    osCovar << std::left << std::fixed;
     for (size_t i = 0; i < covar.size1(); ++i) {
       for (size_t j = 0; j < covar.size2(); ++j) {
-        g_log.debug() << std::setw(10);
-        g_log.debug() << covar.get(i, j) << "  ";
+        osCovar << std::setw(10);
+        osCovar << covar.get(i, j) << "  ";
       }
-      g_log.debug() << "\n";
+      osCovar << "\n";
     }
-    g_log.debug().flags(prevState);
+    g_log.debug() << osCovar.str();
   }
 }
 
