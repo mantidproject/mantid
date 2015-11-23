@@ -223,6 +223,7 @@ void ConvFit::setup() {
 * algorithm
 */
 void ConvFit::run() {
+  extendResolutionWorkspace();
   if (m_cfInputWS == NULL) {
     g_log.error("No workspace loaded");
     return;
