@@ -60,16 +60,22 @@ namespace CustomInterfaces
 
     // Can details
     bool useCan = m_uiForm.ckUseCan->isChecked();
-    if(useCan)
-    {
-      QString canWsName = m_uiForm.dsCanInput->getCurrentDataName();
-      absCorAlgo->setProperty("CanWorkspace", canWsName.toStdString());
+    if (useCan) {
+      std::string canWsName = m_uiForm.dsCanInput->getCurrentDataName().toStdString();
+	  std::string shiftedCanName = canWsName + "_shifted";
+      IAlgorithm_sptr clone =
+          AlgorithmManager::Instance().create("CloneWorkspace");
+      clone->initialize();
+	  clone->setProperty("InputWorkspace", canWsName);
+	  clone->setProperty("OutputWorkspace", shiftedCanName);
+	  clone->execute();
+
+      absCorAlgo->setProperty("CanWorkspace", shiftedCanName);
 
       bool useCanCorrections = m_uiForm.ckUseCanCorrections->isChecked();
       absCorAlgo->setProperty("UseCanCorrections", useCanCorrections);
 
-      if(useCanCorrections)
-      {
+      if (useCanCorrections) {
         double canNumberDensity = m_uiForm.spCanNumberDensity->value();
         absCorAlgo->setProperty("CanNumberDensity", canNumberDensity);
 
