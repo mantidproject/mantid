@@ -88,7 +88,7 @@ void vtkMDHexFactory::doCreate(
 
   // To cache the signal
   std::vector<float> signalCache;
-  signalCache.reserve(numBoxes);
+  signalCache.assign(numBoxes, 0);
 
   // True for boxes that we will use
   std::unique_ptr<bool[]> useBox(new bool[numBoxes]);
@@ -116,7 +116,7 @@ void vtkMDHexFactory::doCreate(
       if (!isSpecial(signal_normalized) &&
           m_thresholdRange->inRange(signal_normalized)) {
         // Cache the signal and using of it
-        signalCache.push_back(float(signal_normalized));
+        signalCache[i] = float(signal_normalized);
         useBox[i] = true;
 
         // Get the coordinates.
@@ -145,7 +145,7 @@ void vtkMDHexFactory::doCreate(
         // Free memory
         delete[] coords;
       } else {
-        signalCache.push_back(0);
+        useBox[i] = false;
       }
     } // For each box
 
