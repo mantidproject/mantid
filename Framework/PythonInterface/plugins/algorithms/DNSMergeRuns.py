@@ -1,5 +1,5 @@
 import mantid.simpleapi as api
-from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty
+from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,  WorkspaceGroup
 from mantid.kernel import Direction, StringArrayProperty, StringListValidator, V3D, StringArrayLengthValidator
 import numpy as np
 
@@ -41,7 +41,7 @@ class DNSMergeRuns(PythonAlgorithm):
     def PyInit(self):
 
         validator = StringArrayLengthValidator()
-        validator.setLengthMin(2)
+        validator.setLengthMin(1)                               # group of workspaces may be given
 
         self.declareProperty(StringArrayProperty(name="WorkspaceNames", direction=Direction.Input, validator=validator),
                              doc="List of Workspace names to merge.")
@@ -52,13 +52,31 @@ class DNSMergeRuns(PythonAlgorithm):
                              doc="X axis in the merged workspace")
         return
 
+    def _expand_groups(self, input_list):
+        """
+            returns names of the grouped workspaces
+        """
+        workspaces = []
+        for wsname in input_list:
+            wks = api.AnalysisDataService.retrieve(wsname)
+            if isinstance(wks, WorkspaceGroup):
+                workspaces.extend(wks.getNames())
+            else:
+                workspaces.append(wsname)
+        self.log().notice("Workspaces: " + str(workspaces))
+        return workspaces
+
     def validateInputs(self):
         issues = dict()
-        workspace_names = self.getProperty("WorkspaceNames").value
+        input_list = self.getProperty("WorkspaceNames").value
 
-        if not api.AnalysisDataService.doesExist(workspace_names[0]):
-            issues["WorkspaceNames"] = "Workspace " + workspace_names[0] + " does not exist!"
-            return issues
+        for wsname in input_list:
+            if not api.AnalysisDataService.doesExist(wsname):
+                issues["WorkspaceNames"] = "Workspace " + wsname + " does not exist"
+
+        workspace_names = self._expand_groups(input_list)
+        if len(workspace_names) < 2:
+            issues["WorkspaceNames"] = "At least 2 workspaces required."
 
         ws0 = api.AnalysisDataService.retrieve(workspace_names[0])
         ndims = ws0.getNumDims()
@@ -66,19 +84,16 @@ class DNSMergeRuns(PythonAlgorithm):
         nblocks = ws0.blocksize()
         # workspaces must exist and have the same dimensions
         for wsname in workspace_names[1:]:
-            if not api.AnalysisDataService.doesExist(wsname):
-                issues["WorkspaceNames"] = "Workspace " + wsname + " does not exist"
-            else:
-                wks = api.AnalysisDataService.retrieve(wsname)
-                if wks.getNumDims() != ndims:
-                    issues["WorkspaceNames"] = "Number of dimensions for workspace " + wks.getName() + \
-                        " does not match to one for " + ws0.getName()
-                if wks.getNumberHistograms() != nhists:
-                    issues["WorkspaceNames"] = "Number of histohrams for workspace " + wks.getName() + \
-                        " does not match to one for " + ws0.getName()
-                if wks.blocksize() != nblocks:
-                    issues["WorkspaceNames"] = "Number of blocks for workspace " + wks.getName() + \
-                        " does not match to one for " + ws0.getName()
+            wks = api.AnalysisDataService.retrieve(wsname)
+            if wks.getNumDims() != ndims:
+                issues["WorkspaceNames"] = "Number of dimensions for workspace " + wks.getName() + \
+                    " does not match to one for " + ws0.getName()
+            if wks.getNumberHistograms() != nhists:
+                issues["WorkspaceNames"] = "Number of histohrams for workspace " + wks.getName() + \
+                    " does not match to one for " + ws0.getName()
+            if wks.blocksize() != nblocks:
+                issues["WorkspaceNames"] = "Number of blocks for workspace " + wks.getName() + \
+                    " does not match to one for " + ws0.getName()
         # workspaces must have the same wavelength and normalization
         result = api.CompareSampleLogs(workspace_names, 'wavelength,normalized', 0.01)
         if len(result) > 0:
@@ -152,10 +167,11 @@ class DNSMergeRuns(PythonAlgorithm):
 
     def PyExec(self):
         # Input
-        self.workspace_names = self.getProperty("WorkspaceNames").value
+        input_list = self.getProperty("WorkspaceNames").value
         self.outws_name = self.getProperty("OutputWorkspace").valueAsStr
         self.xaxis = self.getProperty("HorizontalAxis").value
 
+        self.workspace_names = self._expand_groups(input_list)
         self.log().information("Workspaces to merge: %i" % (len(self.workspace_names)))
         # produce warnings is some optional sample logs do not match
         result = api.CompareSampleLogs(self.workspace_names, self.properties_to_compare, 1e-2)

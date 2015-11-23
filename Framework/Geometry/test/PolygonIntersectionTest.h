@@ -191,6 +191,25 @@ public:
     TS_ASSERT(!intersection(squareTwo, squareOne, overlap));
     TS_ASSERT(!overlap.isValid());
   }
+
+  void test_Overlap_Small_Polygon() {
+
+    V2D ll1(-1.06675e-06, 0.010364);
+    V2D lr1(-9.335e-07, 0.010364);
+    V2D ur1(-9.335e-07, 0.010376);
+    V2D ul1(-1.06675e-06, 0.010376);
+    Quadrilateral squareOne(ll1, lr1, ur1, ul1);
+
+    V2D ll2(-1.4650627e-06, 0.010410755);
+    V2D lr2(-7.4121856e-07, 0.01034716581);
+    V2D ur2(-7.43843122e-07, 0.0103851998);
+    V2D ul2(-1.47044797837e-06, 0.010449023);
+    Quadrilateral squareTwo(ll2, lr2, ur2, ul2);
+
+    ConvexPolygon overlap;
+    TS_ASSERT(intersection(squareOne, squareTwo, overlap));
+    TS_ASSERT(overlap.isValid());
+  }
 };
 
 //------------------------------------------------------------------------

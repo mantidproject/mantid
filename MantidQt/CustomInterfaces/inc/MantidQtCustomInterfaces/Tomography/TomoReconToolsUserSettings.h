@@ -41,9 +41,12 @@ struct TomoReconToolsUserSettings {
   // similar. Waiting to see what happens with Savu and others.
   MantidQt::CustomInterfaces::ToolConfigTomoPy tomoPy;
   MantidQt::CustomInterfaces::ToolConfigAstraToolbox astra;
-  std::string CCPi;
-  std::string savu;
   MantidQt::CustomInterfaces::ToolConfigCustom custom;
+
+  // savu not ready
+  std::string savu;
+  // CCPi not ready
+  std::string CCPi;
 };
 
 } // namespace CustomInterfaces
