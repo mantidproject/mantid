@@ -68,7 +68,7 @@ Workspace is an abstract description of an specific workspace implementation. It
 Accessing Workspaces
 ####################
 
-You can access workspaces using the ``mtd["worskpace_name"]`` command for a specific workspace, or using the ``mtd.ImportAll()`` to create python variables for every workspace in Mantid.  More explanation can be found in `Accessing Workspaces From Python <http://www.mantidproject.org/Accessing_Workspaces_From_Python/>`_.
+You can access workspaces using the ``mtd["worskpace_name"]`` command for a specific workspace, or using the ``mtd.ImportAll()`` to create python variables for every workspace in Mantid.  More explanation can be found in `Accessing Workspaces From Python <http://www.mantidproject.org/Accessing_Workspaces_From_Python>`_.
 
 .. testcode:: AccessingWorkspaces
 
