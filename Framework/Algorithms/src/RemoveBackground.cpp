@@ -161,7 +161,7 @@ void RemoveBackground::exec() {
 BackgroundHelper::BackgroundHelper()
     : m_WSUnit(), m_bgWs(), m_wkWS(), m_pgLog(NULL), m_inPlace(true),
       m_singleValueBackground(false), m_NBg(0), m_dtBg(1), m_ErrSq(0),
-      m_Emode(0), m_L1(0), m_Efix(0), m_Sample(), m_NullifyNegative(false),
+      m_Emode(0), m_L1(0), m_Efix(0), m_Sample(), m_nullifyNegative(false),
       m_previouslyRemovedBkgMode(false) {}
 /// Destructor
 BackgroundHelper::~BackgroundHelper() { this->deleteUnitsConverters(); }
@@ -191,13 +191,13 @@ or target workspace has to be cloned.
 void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
                                   const API::MatrixWorkspace_sptr &sourceWS,
                                   int emode, Kernel::Logger *pLog, int nThreads,
-                                  bool inPlace, bool NullifyNegative) {
+                                  bool inPlace, bool nullifyNegative) {
   m_bgWs = bkgWS;
   m_wkWS = sourceWS;
   m_Emode = emode;
   m_pgLog = pLog;
   m_inPlace = inPlace;
-  m_NullifyNegative = NullifyNegative;
+  m_nullifyNegative = nullifyNegative;
 
   std::string bgUnits = bkgWS->getAxis(0)->unit()->unitID();
   if (bgUnits != "TOF")
@@ -317,7 +317,7 @@ void BackgroundHelper::removeBackground(int nHist, MantidVec &x_data,
         y_data[i] = YValues[i] - normBkgrnd;
         e_data[i] = std::sqrt((errBkgSq + YErrors[i] * YErrors[i]));
       }
-      if (m_NullifyNegative && y_data[i] < 0) {
+      if (m_nullifyNegative && y_data[i] < 0) {
         if (m_previouslyRemovedBkgMode) {
           // background have been removed
           // and not we remove negative signal and estimate errors

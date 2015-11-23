@@ -82,7 +82,7 @@ private:
   // shared pointer to the sample
   Geometry::IComponent_const_sptr m_Sample;
   // if true, negative signals are nullified
-  bool m_NullifyNegative;
+  bool m_nullifyNegative;
   // removing negative values from ws with background removed previously.
   bool m_previouslyRemovedBkgMode;
 
