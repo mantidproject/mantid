@@ -253,7 +253,7 @@ void GetAllEi::exec() {
     destUnit->initialize(mon1Distance, 0., 0.,
                          static_cast<int>(Kernel::DeltaEMode::Elastic), 0.,
                          unused);
-    print_debug_mode_info(guess_opening, TOF_range, destUnit);
+    printDebugModeInfo(guess_opening, TOF_range, destUnit);
   }
   std::pair<double, double> Mon1_Erange =
       monitorWS->getSpectrum(0)->getXDataRange();
@@ -391,7 +391,7 @@ void GetAllEi::exec() {
 *                         to energy in elastic mode using instrument
 *                         parameters.
 */
-void GetAllEi::print_debug_mode_info(
+void GetAllEi::printDebugModeInfo(
     const std::vector<double> &guess_opening,
     const std::pair<double, double> &TOF_range,
     boost::shared_ptr<Kernel::Unit> &destUnit) {
