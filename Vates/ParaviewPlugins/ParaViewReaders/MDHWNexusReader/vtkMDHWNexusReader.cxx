@@ -19,6 +19,7 @@
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
+#include "MantidKernel/make_unique.h"
 
 vtkStandardNewMacro(vtkMDHWNexusReader)
 
@@ -164,7 +165,10 @@ int vtkMDHWNexusReader::RequestInformation(
 {
   if(m_presenter == NULL)
   {
-    m_presenter = new MDHWNexusLoadingPresenter(new MDLoadingViewAdapter<vtkMDHWNexusReader>(this), FileName);
+    std::unique_ptr<MDLoadingView> view =
+        Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDHWNexusReader>>(
+            this);
+    m_presenter = new MDHWNexusLoadingPresenter(std::move(view), FileName);
   }
 
   if (m_presenter == NULL)
@@ -198,7 +202,10 @@ void vtkMDHWNexusReader::PrintSelf(ostream& os, vtkIndent indent)
 
 int vtkMDHWNexusReader::CanReadFile(const char* fname)
 {
-  MDHWNexusLoadingPresenter temp(new MDLoadingViewAdapter<vtkMDHWNexusReader>(this), fname);
+  std::unique_ptr<MDLoadingView> view =
+      Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDHWNexusReader>>(
+          this);
+  MDHWNexusLoadingPresenter temp(std::move(view), fname);
   return temp.canReadFile();
 }
 

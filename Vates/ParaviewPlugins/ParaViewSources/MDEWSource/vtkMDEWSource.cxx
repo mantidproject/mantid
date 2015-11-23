@@ -22,6 +22,7 @@
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/optional.hpp>
 
@@ -252,9 +253,12 @@ int vtkMDEWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkIn
 {
   if(m_presenter == NULL && !m_wsName.empty())
   {
-    m_presenter = new MDEWInMemoryLoadingPresenter(new MDLoadingViewAdapter<vtkMDEWSource>(this), new ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>, m_wsName);
-    if(!m_presenter->canReadFile())
-    {
+    std::unique_ptr<MDLoadingView> view =
+        Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDEWSource>>(this);
+    m_presenter = new MDEWInMemoryLoadingPresenter(
+        std::move(view),
+        new ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>, m_wsName);
+    if (!m_presenter->canReadFile()) {
       vtkErrorMacro(<<"Cannot fetch the specified workspace from Mantid ADS.");
     }
     else

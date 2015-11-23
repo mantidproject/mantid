@@ -19,6 +19,7 @@
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
+#include "MantidKernel/make_unique.h"
 
 #include <QtDebug>
 
@@ -172,7 +173,10 @@ int vtkMDEWNexusReader::RequestInformation(
 {
   if(m_presenter == NULL)
   {
-    m_presenter = new MDEWEventNexusLoadingPresenter(new MDLoadingViewAdapter<vtkMDEWNexusReader>(this), FileName);
+    std::unique_ptr<MDLoadingView> view =
+        Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDEWNexusReader>>(
+            this);
+    m_presenter = new MDEWEventNexusLoadingPresenter(std::move(view), FileName);
     m_presenter->executeLoadMetadata();
     setTimeRange(outputVector);
   }
@@ -186,7 +190,10 @@ void vtkMDEWNexusReader::PrintSelf(ostream& os, vtkIndent indent)
 
 int vtkMDEWNexusReader::CanReadFile(const char* fname)
 {
-  MDEWEventNexusLoadingPresenter temp(new MDLoadingViewAdapter<vtkMDEWNexusReader>(this), fname);
+  std::unique_ptr<MDLoadingView> view =
+      Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDEWNexusReader>>(
+          this);
+  MDEWEventNexusLoadingPresenter temp(std::move(view), fname);
   return temp.canReadFile();
 }
 

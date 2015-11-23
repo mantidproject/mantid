@@ -21,6 +21,7 @@
 #include "MantidVatesAPI/vtkMD0DFactory.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
+#include "MantidKernel/make_unique.h"
 
 using namespace Mantid::VATES;
 
@@ -226,9 +227,11 @@ int vtkMDHWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkIn
 {
   if(m_presenter == NULL && !m_wsName.empty())
   {
-    m_presenter = new MDHWInMemoryLoadingPresenter(new MDLoadingViewAdapter<vtkMDHWSource>(this),
-                                                   new ADSWorkspaceProvider<Mantid::API::IMDHistoWorkspace>,
-                                                   m_wsName);
+    std::unique_ptr<MDLoadingView> view =
+        Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDHWSource>>(this);
+    m_presenter = new MDHWInMemoryLoadingPresenter(
+        std::move(view),
+        new ADSWorkspaceProvider<Mantid::API::IMDHistoWorkspace>, m_wsName);
   }
   if (m_presenter) {
     if (!m_presenter->canReadFile()) {
