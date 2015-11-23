@@ -42,10 +42,9 @@ private:
     {
       return MDEWLoadingPresenter::extractMetadata(eventWs);
     }
-  
-    ConcreteMDEWLoadingPresenter(MockMDLoadingView* view) : MDEWLoadingPresenter(view)
-    {
-    }
+
+    ConcreteMDEWLoadingPresenter(MockMDLoadingView *view)
+        : MDEWLoadingPresenter(std::unique_ptr<MDLoadingView>(view)) {}
 
     virtual vtkDataSet* execute(vtkDataSetFactory*, ProgressAction&, ProgressAction&)
     {

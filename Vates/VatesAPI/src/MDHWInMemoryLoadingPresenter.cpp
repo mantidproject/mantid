@@ -23,9 +23,10 @@ Constructor
 @throw invalid_arument if view is null
 */
 MDHWInMemoryLoadingPresenter::MDHWInMemoryLoadingPresenter(
-    MDLoadingView *view, WorkspaceProvider *repository, std::string wsName)
-    : MDHWLoadingPresenter(view), m_repository(repository), m_wsName(wsName),
-      m_wsTypeName(""), m_specialCoords(-1) {
+    std::unique_ptr<MDLoadingView> view, WorkspaceProvider *repository,
+    std::string wsName)
+    : MDHWLoadingPresenter(std::move(view)), m_repository(repository),
+      m_wsName(wsName), m_wsTypeName(""), m_specialCoords(-1) {
   if (m_wsName.empty()) {
     throw std::invalid_argument("The workspace name is empty.");
   }

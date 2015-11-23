@@ -21,26 +21,28 @@ namespace Mantid
     @throw invalid_arument if view is null
     @throw logic_error if cannot use the reader-presenter for this filetype.
     */
-    SQWLoadingPresenter::SQWLoadingPresenter(MDLoadingView* view, const std::string filename) : MDEWLoadingPresenter(view), m_filename(filename), m_wsTypeName("")
-    {
-      if(this->m_filename.empty())
-      {
-        throw std::invalid_argument("File name is an empty string.");
-      }
-      if(nullptr == this->m_view)
-      {
-        throw std::invalid_argument("View is NULL.");
-      }
+  SQWLoadingPresenter::SQWLoadingPresenter(std::unique_ptr<MDLoadingView> view,
+                                           const std::string filename)
+      : MDEWLoadingPresenter(std::move(view)), m_filename(filename),
+        m_wsTypeName("") {
+    if (this->m_filename.empty()) {
+      throw std::invalid_argument("File name is an empty string.");
     }
+    if (nullptr == this->m_view) {
+      throw std::invalid_argument("View is NULL.");
+    }
+  }
 
-     /*
-    Indicates whether this presenter is capable of handling the type of file that is attempted to be loaded.
-    @return false if the file cannot be read.
-    */
-    bool SQWLoadingPresenter::canReadFile() const
-    {
-      boost::regex expression(".*sqw$", boost::regex_constants::icase); //check that the file ends with sqw.
-      return boost::regex_match(this->m_filename, expression);
+  /*
+ Indicates whether this presenter is capable of handling the type of file that
+ is attempted to be loaded.
+ @return false if the file cannot be read.
+ */
+  bool SQWLoadingPresenter::canReadFile() const {
+    boost::regex expression(
+        ".*sqw$",
+        boost::regex_constants::icase); // check that the file ends with sqw.
+    return boost::regex_match(this->m_filename, expression);
     }
 
 

@@ -44,7 +44,9 @@ namespace Mantid
     class DLLExport MDEWInMemoryLoadingPresenter : public MDEWLoadingPresenter
     {
     public:
-      MDEWInMemoryLoadingPresenter(MDLoadingView* view, WorkspaceProvider* repository, std::string wsName);
+      MDEWInMemoryLoadingPresenter(std::unique_ptr<MDLoadingView> view,
+                                   WorkspaceProvider *repository,
+                                   std::string wsName);
       virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& rebinningProgressUpdate, ProgressAction& drawingProgressUpdate);
       virtual void executeLoadMetadata();
       virtual ~MDEWInMemoryLoadingPresenter();

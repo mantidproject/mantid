@@ -25,67 +25,59 @@ namespace Mantid
      @throw invalid_arument if view is null
      @throw logic_error if cannot use the reader-presenter for this filetype.
      */
-    EventNexusLoadingPresenter::EventNexusLoadingPresenter(MDLoadingView* view,
-        const std::string filename) :
-        MDEWLoadingPresenter(view), m_filename(filename), m_wsTypeName("")
-    {
-      if (this->m_filename.empty())
-      {
-        throw std::invalid_argument("File name is an empty string.");
-      }
-      if (nullptr == this->m_view)
-      {
-        throw std::invalid_argument("View is NULL.");
-      }
+  EventNexusLoadingPresenter::EventNexusLoadingPresenter(
+      std::unique_ptr<MDLoadingView> view, const std::string filename)
+      : MDEWLoadingPresenter(std::move(view)), m_filename(filename),
+        m_wsTypeName("") {
+    if (this->m_filename.empty()) {
+      throw std::invalid_argument("File name is an empty string.");
+    }
+    if (nullptr == this->m_view) {
+      throw std::invalid_argument("View is NULL.");
+    }
+  }
+
+  /*
+   Indicates whether this presenter is capable of handling the type of file that
+   is attempted to be loaded.
+   @return false if the file cannot be read.
+   */
+  bool EventNexusLoadingPresenter::canReadFile() const {
+    if (!canLoadFileBasedOnExtension(m_filename, ".nxs")) {
+      return 0;
     }
 
-    /*
-     Indicates whether this presenter is capable of handling the type of file that is attempted to be loaded.
-     @return false if the file cannot be read.
-     */
-    bool EventNexusLoadingPresenter::canReadFile() const
-    {
-      if (!canLoadFileBasedOnExtension(m_filename, ".nxs"))
-      {
+    ::NeXus::File *file = NULL;
+    try {
+      file = new ::NeXus::File(this->m_filename);
+      // All SNS (event or histo) nxs files have an entry named "entry"
+      try {
+        file->openGroup("entry", "NXentry");
+      } catch (::NeXus::Exception &) {
+        file->close();
         return 0;
       }
-
-      ::NeXus::File * file = NULL;
-      try
-      {
-        file = new ::NeXus::File(this->m_filename);
-        // All SNS (event or histo) nxs files have an entry named "entry"
-        try
-        {
-          file->openGroup("entry", "NXentry");
-        } catch (::NeXus::Exception &)
-        {
-          file->close();
-          return 0;
+      // But only eventNexus files have bank123_events as a group name
+      std::map<std::string, std::string> entries = file->getEntries();
+      bool hasEvents = false;
+      std::map<std::string, std::string>::iterator it;
+      for (it = entries.begin(); it != entries.end(); ++it) {
+        if (it->first.find("_events") != std::string::npos) {
+          hasEvents = true;
+          break;
         }
-        // But only eventNexus files have bank123_events as a group name
-        std::map<std::string, std::string> entries = file->getEntries();
-        bool hasEvents = false;
-        std::map<std::string, std::string>::iterator it;
-        for (it = entries.begin(); it != entries.end(); ++it)
-        {
-          if (it->first.find("_events") != std::string::npos)
-          {
-            hasEvents = true;
-            break;
-          }
-        }
-        file->close();
-        return hasEvents ? 1 : 0;
-      } catch (std::exception & e)
-      {
-        std::cerr << "Could not open " << this->m_filename
-            << " as an EventNexus file because of exception: " << e.what() << std::endl;
-        // Clean up, if possible
-        if (file)
-          file->close();
       }
-      return 0;
+      file->close();
+      return hasEvents ? 1 : 0;
+    } catch (std::exception &e) {
+      std::cerr << "Could not open " << this->m_filename
+                << " as an EventNexus file because of exception: " << e.what()
+                << std::endl;
+      // Clean up, if possible
+      if (file)
+        file->close();
+    }
+    return 0;
     }
 
     /*

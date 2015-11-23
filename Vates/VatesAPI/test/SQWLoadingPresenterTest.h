@@ -13,6 +13,7 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidVatesAPI/SQWLoadingPresenter.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
+#include "MantidKernel/make_unique.h"
 
 using namespace Mantid::VATES;
 
@@ -52,38 +53,51 @@ void setUp()
 
 void testConstructWithEmptyFileThrows()
 {
-  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", SQWLoadingPresenter(new MockMDLoadingView, ""), std::invalid_argument);
+  std::unique_ptr<MDLoadingView> view =
+      Mantid::Kernel::make_unique<MockMDLoadingView>();
+  TSM_ASSERT_THROWS("Should throw if an empty file string is given.",
+                    SQWLoadingPresenter(std::move(view), ""),
+                    std::invalid_argument);
 }
 
 void testConstructWithNullViewThrows()
 {
-  MockMDLoadingView*  pView = NULL;
-  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", SQWLoadingPresenter(pView, "some_file"), std::invalid_argument);
+  TSM_ASSERT_THROWS("Should throw if an empty file string is given.",
+                    SQWLoadingPresenter(nullptr, "some_file"),
+                    std::invalid_argument);
 }
 
 void testConstruct()
 {
-  TSM_ASSERT_THROWS_NOTHING("Object should be created without exception.", SQWLoadingPresenter(new MockMDLoadingView, getSuitableFileNamePath()));
+  std::unique_ptr<MDLoadingView> view =
+    Mantid::Kernel::make_unique<MockMDLoadingView>();
+  TSM_ASSERT_THROWS_NOTHING(
+      "Object should be created without exception.",
+      SQWLoadingPresenter(std::move(view), getSuitableFileNamePath()));
 }
 
 void testCanReadFile()
 {
-  MockMDLoadingView view;
-
-  SQWLoadingPresenter presenter(new MockMDLoadingView, getSuitableFileNamePath());
+  std::unique_ptr<MDLoadingView> view =
+      Mantid::Kernel::make_unique<MockMDLoadingView>();
+  SQWLoadingPresenter presenter(std::move(view), getSuitableFileNamePath());
   TSM_ASSERT("Should be readable, valid SQW file.", presenter.canReadFile());
 }
 
 void testCanReadFileWithDifferentCaseExtension()
 {
-  SQWLoadingPresenter presenter(new MockMDLoadingView, "other.Sqw");
-  TSM_ASSERT("Should be readable, only different in case.", presenter.canReadFile());
+  auto view = Mantid::Kernel::make_unique<MockMDLoadingView>();
+  SQWLoadingPresenter presenter(std::move(view), "other.Sqw");
+  TSM_ASSERT("Should be readable, only different in case.",
+             presenter.canReadFile());
 }
 
 void testCannotReadFileWithWrongExtension()
 {
-  SQWLoadingPresenter presenter(new MockMDLoadingView, getUnhandledFileNamePath());
-  TSM_ASSERT("Should NOT be readable, completely wrong file type.", !presenter.canReadFile());
+  auto view = Mantid::Kernel::make_unique<MockMDLoadingView>();
+  SQWLoadingPresenter presenter(std::move(view), getUnhandledFileNamePath());
+  TSM_ASSERT("Should NOT be readable, completely wrong file type.",
+             !presenter.canReadFile());
 }
 
 void testExecutionInMemory()
@@ -111,7 +125,8 @@ void testExecutionInMemory()
   EXPECT_CALL(mockLoadingProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
 
   //Create the presenter and runit!
-  SQWLoadingPresenter presenter(view, getSuitableFileNamePath());
+  SQWLoadingPresenter presenter(std::unique_ptr<MDLoadingView>(view),
+                                getSuitableFileNamePath());
   presenter.executeLoadMetadata();
   auto product = vtkSmartPointer<vtkDataSet>::Take(presenter.execute(
       &factory, mockLoadingProgressAction, mockDrawingProgressAction));
@@ -136,25 +151,36 @@ void testExecutionInMemory()
 
 void testCallHasTDimThrows()
 {
-  SQWLoadingPresenter presenter(new MockMDLoadingView, getSuitableFileNamePath());
-  TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.hasTDimensionAvailable(), std::runtime_error);
+  SQWLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<MockMDLoadingView>(),
+      getSuitableFileNamePath());
+  TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
+                    presenter.hasTDimensionAvailable(), std::runtime_error);
 }
 
 void testCallGetTDimensionValuesThrows()
 {
-  SQWLoadingPresenter presenter(new MockMDLoadingView, getSuitableFileNamePath());
-  TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.getTimeStepValues(), std::runtime_error);
+  SQWLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<MockMDLoadingView>(),
+      getSuitableFileNamePath());
+  TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
+                    presenter.getTimeStepValues(), std::runtime_error);
 }
 
 void testCallGetGeometryThrows()
 {
-  SQWLoadingPresenter presenter(new MockMDLoadingView, getSuitableFileNamePath());
-  TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.getGeometryXML(), std::runtime_error);
+  SQWLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<MockMDLoadingView>(),
+      getSuitableFileNamePath());
+  TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
+                    presenter.getGeometryXML(), std::runtime_error);
 }
 
 void testExecuteLoadMetadata()
 {
-  SQWLoadingPresenter presenter(new MockMDLoadingView, getSuitableFileNamePath());
+  SQWLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<MockMDLoadingView>(),
+      getSuitableFileNamePath());
   presenter.executeLoadMetadata();
   TSM_ASSERT_THROWS_NOTHING("Should throw. Execute not yet run.", presenter.getTimeStepValues());
   TSM_ASSERT_THROWS_NOTHING("Should throw. Execute not yet run.", presenter.hasTDimensionAvailable());
@@ -163,8 +189,11 @@ void testExecuteLoadMetadata()
 
 void testGetWorkspaceTypeName()
 {
-  SQWLoadingPresenter presenter(new MockMDLoadingView, getSuitableFileNamePath());
-  TSM_ASSERT_EQUALS("Characterisation Test Failed", "", presenter.getWorkspaceTypeName());
+  SQWLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<MockMDLoadingView>(),
+      getSuitableFileNamePath());
+  TSM_ASSERT_EQUALS("Characterisation Test Failed", "",
+                    presenter.getWorkspaceTypeName());
 }
 
 void testTimeLabel()
@@ -192,7 +221,8 @@ void testTimeLabel()
   EXPECT_CALL(mockLoadingProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
 
   //Create the presenter and runit!
-  SQWLoadingPresenter presenter(view, getSuitableFileNamePath());
+  SQWLoadingPresenter presenter(std::unique_ptr<MDLoadingView>(view),
+                                getSuitableFileNamePath());
   presenter.executeLoadMetadata();
   auto product = vtkSmartPointer<vtkDataSet>::Take(presenter.execute(
       &factory, mockLoadingProgressAction, mockDrawingProgressAction));
@@ -230,7 +260,8 @@ void testAxisLabels()
   EXPECT_CALL(mockLoadingProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
 
   //Create the presenter and runit!
-  SQWLoadingPresenter presenter(view, getSuitableFileNamePath());
+  SQWLoadingPresenter presenter(std::unique_ptr<MDLoadingView>(view),
+                                getSuitableFileNamePath());
   presenter.executeLoadMetadata();
   auto product = vtkSmartPointer<vtkDataSet>::Take(presenter.execute(
       &factory, mockLoadingProgressAction, mockDrawingProgressAction));

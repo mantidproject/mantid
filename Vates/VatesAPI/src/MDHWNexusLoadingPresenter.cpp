@@ -24,14 +24,14 @@ namespace VATES
  * @throw invalid_arument if view is null
  * @throw logic_error if cannot use the reader-presenter for this filetype.
  */
-MDHWNexusLoadingPresenter::MDHWNexusLoadingPresenter(MDLoadingView* view, const std::string filename) : MDHWLoadingPresenter(view), m_filename(filename), m_wsTypeName("")
-{
-  if(this->m_filename.empty())
-  {
+MDHWNexusLoadingPresenter::MDHWNexusLoadingPresenter(
+    std::unique_ptr<MDLoadingView> view, const std::string filename)
+    : MDHWLoadingPresenter(std::move(view)), m_filename(filename),
+      m_wsTypeName("") {
+  if (this->m_filename.empty()) {
     throw std::invalid_argument("File name is an empty string.");
   }
-  if(nullptr == this->m_view)
-  {
+  if (nullptr == this->m_view) {
     throw std::invalid_argument("View is NULL.");
   }
 }

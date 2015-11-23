@@ -45,7 +45,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MDLoadingView;
 class DLLExport MDHWLoadingPresenter : public MDLoadingPresenter {
 public:
-  MDHWLoadingPresenter(MDLoadingView *view);
+  MDHWLoadingPresenter(std::unique_ptr<MDLoadingView> view);
   const std::string &getGeometryXML() const;
   virtual bool hasTDimensionAvailable() const;
   virtual std::vector<double> getTimeStepValues() const;

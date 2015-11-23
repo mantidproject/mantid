@@ -22,46 +22,43 @@ namespace Mantid
     @throw invalid_argument if the repository is null
     @throw invalid_arument if view is null
     */
-  MDEWInMemoryLoadingPresenter::MDEWInMemoryLoadingPresenter(MDLoadingView* view, WorkspaceProvider* repository, std::string wsName) : MDEWLoadingPresenter(view), 
-    m_repository(repository), m_wsName(wsName), m_wsTypeName(""), m_specialCoords(-1)
-    {
-      if(m_wsName.empty())
-      {
-        throw std::invalid_argument("The workspace name is empty.");
-      }
-      if(NULL == repository)
-      {
-        throw std::invalid_argument("The repository is NULL");
-      }
-      if(nullptr == m_view)
-      {
-        throw std::invalid_argument("View is NULL.");
-      }
+  MDEWInMemoryLoadingPresenter::MDEWInMemoryLoadingPresenter(
+      std::unique_ptr<MDLoadingView> view, WorkspaceProvider *repository,
+      std::string wsName)
+      : MDEWLoadingPresenter(std::move(view)), m_repository(repository),
+        m_wsName(wsName), m_wsTypeName(""), m_specialCoords(-1) {
+    if (m_wsName.empty()) {
+      throw std::invalid_argument("The workspace name is empty.");
     }
+    if (NULL == repository) {
+      throw std::invalid_argument("The repository is NULL");
+    }
+    if (nullptr == m_view) {
+      throw std::invalid_argument("View is NULL.");
+    }
+  }
 
-     /*
-    Indicates whether this presenter is capable of handling the type of file that is attempted to be loaded.
-    @return false if the file cannot be read.
-    */
-    bool MDEWInMemoryLoadingPresenter::canReadFile() const
-    {
-      bool bCanReadIt = true;
-      if(!m_repository->canProvideWorkspace(m_wsName))
-      {
-        //The workspace does not exist.
-        bCanReadIt = false;
-      }
-      else if(NULL == boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(m_repository->fetchWorkspace(m_wsName)).get())
-      {
-        //The workspace can be found, but is not an IMDEventWorkspace.
-        bCanReadIt = false;
-      }
-      else
-      {
-        //The workspace is present, and is of the correct type.
-        bCanReadIt = true;
-      }
-      return bCanReadIt;
+  /*
+ Indicates whether this presenter is capable of handling the type of file that
+ is attempted to be loaded.
+ @return false if the file cannot be read.
+ */
+  bool MDEWInMemoryLoadingPresenter::canReadFile() const {
+    bool bCanReadIt = true;
+    if (!m_repository->canProvideWorkspace(m_wsName)) {
+      // The workspace does not exist.
+      bCanReadIt = false;
+    } else if (NULL ==
+               boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
+                   m_repository->fetchWorkspace(m_wsName))
+                   .get()) {
+      // The workspace can be found, but is not an IMDEventWorkspace.
+      bCanReadIt = false;
+    } else {
+      // The workspace is present, and is of the correct type.
+      bCanReadIt = true;
+    }
+    return bCanReadIt;
     }
 
     /*

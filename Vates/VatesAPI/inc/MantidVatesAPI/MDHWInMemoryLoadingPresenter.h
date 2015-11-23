@@ -46,7 +46,7 @@ class vtkDataSetFactory;
 
 class DLLExport MDHWInMemoryLoadingPresenter : public MDHWLoadingPresenter {
 public:
-  MDHWInMemoryLoadingPresenter(MDLoadingView *view,
+  MDHWInMemoryLoadingPresenter(std::unique_ptr<MDLoadingView> view,
                                WorkspaceProvider *repository,
                                std::string wsName);
   virtual vtkDataSet *execute(vtkDataSetFactory *factory,

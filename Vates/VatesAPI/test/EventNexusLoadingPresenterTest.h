@@ -12,6 +12,7 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidVatesAPI/EventNexusLoadingPresenter.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
+#include "MantidKernel/make_unique.h"
 
 using namespace Mantid::VATES;
 using namespace testing;
@@ -39,35 +40,44 @@ public:
 
 void testConstructWithEmptyFileThrows()
 {
-  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", EventNexusLoadingPresenter(new MockMDLoadingView, ""), std::invalid_argument);
+  TSM_ASSERT_THROWS("Should throw if an empty file string is given.",
+                    EventNexusLoadingPresenter(
+                        Mantid::Kernel::make_unique<MockMDLoadingView>(), ""),
+                    std::invalid_argument);
 }
 
 void testConstructWithNullViewThrows()
 {
-  MockMDLoadingView*  pView = NULL;
-
-  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", EventNexusLoadingPresenter(pView, "some_file"), std::invalid_argument);
+  TSM_ASSERT_THROWS("Should throw if a null view is given.",
+                    EventNexusLoadingPresenter(nullptr, "some_file"),
+                    std::invalid_argument);
 }
 
 void testConstruct()
 {
-  TSM_ASSERT_THROWS_NOTHING("Object should be created without exception.", EventNexusLoadingPresenter(new MockMDLoadingView, getSuitableFile()));
+  TSM_ASSERT_THROWS_NOTHING(
+      "Object should be created without exception.",
+      EventNexusLoadingPresenter(
+          Mantid::Kernel::make_unique<MockMDLoadingView>(), getSuitableFile()));
 }
 
 void testCanReadFile()
 {
-  EventNexusLoadingPresenter presenter(new MockMDLoadingView, getUnhandledFile());
-  TSM_ASSERT("A file of this type cannot and should not be read by this presenter!.", !presenter.canReadFile());
+  EventNexusLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<MockMDLoadingView>(), getUnhandledFile());
+  TSM_ASSERT(
+      "A file of this type cannot and should not be read by this presenter!.",
+      !presenter.canReadFile());
 }
 
 void testExecution()
 {
   //Setup view
-  MockMDLoadingView* view = new MockMDLoadingView;
-  EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1)); 
-  EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1)); 
-  EXPECT_CALL(*view, getTime()).Times(AtLeast(1));
-  EXPECT_CALL(*view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
+  MockMDLoadingView view;
+  EXPECT_CALL(view, getRecursionDepth()).Times(AtLeast(1));
+  EXPECT_CALL(view, getLoadInMemory()).Times(AtLeast(1));
+  EXPECT_CALL(view, getTime()).Times(AtLeast(1));
+  EXPECT_CALL(view, updateAlgorithmProgress(_, _)).Times(AnyNumber());
 
   //Setup rendering factory
   MockvtkDataSetFactory factory;
@@ -79,7 +89,8 @@ void testExecution()
   MockProgressAction mockDrawingProgressUpdate;
 
   //Create the presenter and runit!
-  EventNexusLoadingPresenter presenter(view, getSuitableFile());
+  EventNexusLoadingPresenter presenter(std::unique_ptr<MDLoadingView>(&view),
+                                       getSuitableFile());
   presenter.executeLoadMetadata();
   vtkSmartPointer<vtkDataSet> product = presenter.execute(&factory, mockLoadingProgressUpdate, mockDrawingProgressUpdate);
 
@@ -91,31 +102,38 @@ void testExecution()
   TS_ASSERT_THROWS_NOTHING(presenter.getGeometryXML());
   TS_ASSERT(!presenter.getWorkspaceTypeName().empty());
 
-  TS_ASSERT(Mock::VerifyAndClearExpectations(view));
+  TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
 }
 
 void testGetTDimension()
 {
-  EventNexusLoadingPresenter presenter(new MockMDLoadingView, getSuitableFile());
-  TSM_ASSERT("EventNexus MDEW are created in fixed 3D.", !presenter.hasTDimensionAvailable());
+  EventNexusLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<MockMDLoadingView>(), getSuitableFile());
+  TSM_ASSERT("EventNexus MDEW are created in fixed 3D.",
+             !presenter.hasTDimensionAvailable());
 }
 
 void testCallGetTDimensionValuesThrows()
 {
-  EventNexusLoadingPresenter presenter(new MockMDLoadingView, getSuitableFile());
-  TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.getTimeStepValues(), std::runtime_error);
+  EventNexusLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<MockMDLoadingView>(), getSuitableFile());
+  TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
+                    presenter.getTimeStepValues(), std::runtime_error);
 }
 
 void testCallGetGeometryThrows()
 {
-  EventNexusLoadingPresenter presenter(new MockMDLoadingView, getSuitableFile());
-  TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.getGeometryXML(), std::runtime_error);
+  EventNexusLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<MockMDLoadingView>(), getSuitableFile());
+  TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
+                    presenter.getGeometryXML(), std::runtime_error);
 }
 
 void testExecuteLoadMetadata()
 {
-  EventNexusLoadingPresenter presenter(new MockMDLoadingView, getSuitableFile());
+  EventNexusLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<MockMDLoadingView>(), getSuitableFile());
   presenter.executeLoadMetadata();
   TSM_ASSERT_THROWS("Should always throw. Algorithm fixed to create 3 dimensions.", presenter.getTimeStepValues(), std::runtime_error);
   TSM_ASSERT_THROWS_NOTHING("Should throw. Execute not yet run.", presenter.hasTDimensionAvailable());
@@ -124,8 +142,10 @@ void testExecuteLoadMetadata()
 
 void testGetWorkspaceTypeName()
 {
-  EventNexusLoadingPresenter presenter(new MockMDLoadingView, getSuitableFile());
-  TSM_ASSERT_EQUALS("Characterisation Test Failed", "", presenter.getWorkspaceTypeName());
+  EventNexusLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<MockMDLoadingView>(), getSuitableFile());
+  TSM_ASSERT_EQUALS("Characterisation Test Failed", "",
+                    presenter.getWorkspaceTypeName());
 }
 
 

@@ -12,6 +12,7 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidVatesAPI/MDEWEventNexusLoadingPresenter.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
+#include "MantidKernel/make_unique.h"
 
 using namespace Mantid::VATES;
 using namespace testing;
@@ -41,34 +42,45 @@ public:
 
 void testConstructWithEmptyFileThrows()
 {
-  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", MDEWEventNexusLoadingPresenter(new MockMDLoadingView, ""), std::invalid_argument);
+  TSM_ASSERT_THROWS("Should throw if an empty file string is given.",
+                    MDEWEventNexusLoadingPresenter(
+                        Mantid::Kernel::make_unique<MockMDLoadingView>(), ""),
+                    std::invalid_argument);
 }
 
 void testConstructWithNullViewThrows()
 {
-  MockMDLoadingView*  pView = NULL;
-
-  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", MDEWEventNexusLoadingPresenter(pView, "some_file"), std::invalid_argument);
+  TSM_ASSERT_THROWS("Should throw if a null view is given.",
+                    MDEWEventNexusLoadingPresenter(nullptr, "some_file"),
+                    std::invalid_argument);
 }
 
 void testConstruct()
 {
-  TSM_ASSERT_THROWS_NOTHING("Object should be created without exception.", MDEWEventNexusLoadingPresenter(new MockMDLoadingView, getSuitableFile()));
+  TSM_ASSERT_THROWS_NOTHING(
+      "Object should be created without exception.",
+      MDEWEventNexusLoadingPresenter(
+          Mantid::Kernel::make_unique<MockMDLoadingView>(), getSuitableFile()));
 }
 
 void testCanReadFile()
 {
-  MDEWEventNexusLoadingPresenter presenter(new MockMDLoadingView, getUnhandledFile());
-  TSM_ASSERT("A file of this type cannot and should not be read by this presenter!.", !presenter.canReadFile());
+  MDEWEventNexusLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<MockMDLoadingView>(), getUnhandledFile());
+  TSM_ASSERT(
+      "A file of this type cannot and should not be read by this presenter!.",
+      !presenter.canReadFile());
 }
 
 void testExecution()
 {
   //Setup view
-  MockMDLoadingView* view = new MockMDLoadingView;
-  EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1)); 
-  EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1)).WillRepeatedly(testing::Return(true)); 
-  EXPECT_CALL(*view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
+  MockMDLoadingView view;
+  EXPECT_CALL(view, getRecursionDepth()).Times(AtLeast(1));
+  EXPECT_CALL(view, getLoadInMemory())
+      .Times(AtLeast(1))
+      .WillRepeatedly(testing::Return(true));
+  EXPECT_CALL(view, updateAlgorithmProgress(_, _)).Times(AnyNumber());
 
   //Setup rendering factory
   MockvtkDataSetFactory factory;
@@ -83,7 +95,8 @@ void testExecution()
   MockProgressAction mockDrawingProgressAction;
   
   //Create the presenter and runit!
-  MDEWEventNexusLoadingPresenter presenter(view, getSuitableFile());
+  MDEWEventNexusLoadingPresenter presenter(
+      std::unique_ptr<MDLoadingView>(&view), getSuitableFile());
   presenter.executeLoadMetadata();
   vtkSmartPointer<vtkDataSet> product = presenter.execute(
       &factory, mockLoadingProgressAction, mockDrawingProgressAction);
@@ -96,41 +109,51 @@ void testExecution()
   TS_ASSERT_THROWS_NOTHING(presenter.getGeometryXML());
   TS_ASSERT(!presenter.getWorkspaceTypeName().empty());
 
-  TS_ASSERT(Mock::VerifyAndClearExpectations(view));
+  TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
 }
 
 void testCallHasTDimThrows()
 {
-  MDEWEventNexusLoadingPresenter presenter(new MockMDLoadingView, getSuitableFile());
-  TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.hasTDimensionAvailable(), std::runtime_error);
+  MDEWEventNexusLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<MockMDLoadingView>(), getSuitableFile());
+  TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
+                    presenter.hasTDimensionAvailable(), std::runtime_error);
 }
 
 void testCallGetTDimensionValuesThrows()
 {
-  MDEWEventNexusLoadingPresenter presenter(new MockMDLoadingView, getSuitableFile());
-  TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.getTimeStepValues(), std::runtime_error);
+  MDEWEventNexusLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<MockMDLoadingView>(), getSuitableFile());
+  TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
+                    presenter.getTimeStepValues(), std::runtime_error);
 }
 
 void testCallGetGeometryThrows()
 {
-  MDEWEventNexusLoadingPresenter presenter(new MockMDLoadingView, getSuitableFile());
-  TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.getGeometryXML(), std::runtime_error);
+  MDEWEventNexusLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<MockMDLoadingView>(), getSuitableFile());
+  TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
+                    presenter.getGeometryXML(), std::runtime_error);
 }
 
 void testGetWorkspaceTypeName()
 {
-  MDEWEventNexusLoadingPresenter presenter(new MockMDLoadingView, getSuitableFile());
-  TSM_ASSERT_EQUALS("Characterisation Test Failed", "", presenter.getWorkspaceTypeName());
+  MDEWEventNexusLoadingPresenter presenter(
+      Mantid::Kernel::make_unique<MockMDLoadingView>(), getSuitableFile());
+  TSM_ASSERT_EQUALS("Characterisation Test Failed", "",
+                    presenter.getWorkspaceTypeName());
 }
 
 void testTimeLabel()
 {
   //Setup view
-  MockMDLoadingView* view = new MockMDLoadingView;
-  EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1));
-  EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1)).WillRepeatedly(testing::Return(true));
-  EXPECT_CALL(*view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
+  MockMDLoadingView view;
+  EXPECT_CALL(view, getRecursionDepth()).Times(AtLeast(1));
+  EXPECT_CALL(view, getLoadInMemory())
+      .Times(AtLeast(1))
+      .WillRepeatedly(testing::Return(true));
+  EXPECT_CALL(view, updateAlgorithmProgress(_, _)).Times(AnyNumber());
 
   //Setup rendering factory
   MockvtkDataSetFactory factory;
@@ -145,24 +168,27 @@ void testTimeLabel()
   MockProgressAction mockDrawingProgressAction;
 
   //Create the presenter and runit!
-  MDEWEventNexusLoadingPresenter presenter(view, getSuitableFile());
+  MDEWEventNexusLoadingPresenter presenter(std::unique_ptr<MDLoadingView>(&view),
+                                           getSuitableFile());
   presenter.executeLoadMetadata();
   vtkSmartPointer<vtkDataSet> product = presenter.execute(
       &factory, mockLoadingProgressAction, mockDrawingProgressAction);
   TSM_ASSERT_EQUALS("Time label should be exact.",
                     presenter.getTimeStepLabel(), "D (En)");
 
-  TS_ASSERT(Mock::VerifyAndClearExpectations(view));
+  TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
 }
 
 void testAxisLabels()
 {
   //Setup view
-  MockMDLoadingView* view = new MockMDLoadingView;
-  EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1));
-  EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1)).WillRepeatedly(testing::Return(true));
-  EXPECT_CALL(*view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
+  MockMDLoadingView view;
+  EXPECT_CALL(view, getRecursionDepth()).Times(AtLeast(1));
+  EXPECT_CALL(view, getLoadInMemory())
+      .Times(AtLeast(1))
+      .WillRepeatedly(testing::Return(true));
+  EXPECT_CALL(view, updateAlgorithmProgress(_, _)).Times(AnyNumber());
 
   //Setup rendering factory
   MockvtkDataSetFactory factory;
@@ -177,7 +203,8 @@ void testAxisLabels()
   MockProgressAction mockDrawingProgressAction;
 
   //Create the presenter and runit!
-  MDEWEventNexusLoadingPresenter presenter(view, getSuitableFile());
+  MDEWEventNexusLoadingPresenter presenter(std::unique_ptr<MDLoadingView>(&view),
+                                           getSuitableFile());
   presenter.executeLoadMetadata();
   vtkSmartPointer<vtkDataSet> product = presenter.execute(
       &factory, mockLoadingProgressAction, mockDrawingProgressAction);
@@ -192,7 +219,7 @@ void testAxisLabels()
                     getStringFieldDataValue(product, "AxisTitleForZ"),
                     "C ($\\AA$)");
 
-  TS_ASSERT(Mock::VerifyAndClearExpectations(view));
+  TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
 }
 

@@ -35,9 +35,8 @@ private:
   private:
     typedef MDHWLoadingPresenter BaseClass;
   public:
-    ConcreteMDHWLoadingPresenter(MockMDLoadingView* view) : MDHWLoadingPresenter(view)
-    {
-    }
+    ConcreteMDHWLoadingPresenter(MockMDLoadingView *view)
+        : MDHWLoadingPresenter(std::unique_ptr<MDLoadingView>(view)) {}
 
     virtual void extractMetadata(Mantid::API::IMDHistoWorkspace_sptr histoWs)
     {

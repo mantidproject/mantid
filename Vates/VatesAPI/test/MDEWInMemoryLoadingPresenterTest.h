@@ -10,6 +10,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDEWInMemoryLoadingPresenter.h"
+#include "MantidKernel/make_unique.h"
 #include <vtkUnstructuredGrid.h>
 #include <vtkSmartPointer.h>
 
@@ -57,25 +58,36 @@ public:
 
   void testConstructWithNullViewThrows()
   {
-    MockMDLoadingView* pNullView = NULL;
-    TSM_ASSERT_THROWS("Should throw with empty Workspace name.", MDEWInMemoryLoadingPresenter(pNullView, new MockWorkspaceProvider, "_"), std::invalid_argument);
+    TSM_ASSERT_THROWS(
+        "Should throw with null view.",
+        MDEWInMemoryLoadingPresenter(nullptr, new MockWorkspaceProvider, "_"),
+        std::invalid_argument);
   }
 
   void testConstructWithNullRepositoryThrows()
   {
-    MockWorkspaceProvider* pNullRepository = NULL;
-    TSM_ASSERT_THROWS("Should throw with empty Workspace name.", MDEWInMemoryLoadingPresenter(new MockMDLoadingView, pNullRepository, "_"), std::invalid_argument);
-  } 
+    TSM_ASSERT_THROWS(
+        "Should throw with null repository.",
+        MDEWInMemoryLoadingPresenter(
+            Mantid::Kernel::make_unique<MockMDLoadingView>(), nullptr, "_"),
+        std::invalid_argument);
+  }
 
   void testConstructWithEmptyWsNameThrows()
   {
     std::string emptyName = "";
-    TSM_ASSERT_THROWS("Should throw with empty Workspace name.", MDEWInMemoryLoadingPresenter(new MockMDLoadingView, new MockWorkspaceProvider, emptyName), std::invalid_argument);
+    TSM_ASSERT_THROWS("Should throw with empty Workspace name.",
+                      MDEWInMemoryLoadingPresenter(
+                          Mantid::Kernel::make_unique<MockMDLoadingView>(),
+                          new MockWorkspaceProvider, emptyName),
+                      std::invalid_argument);
   }
 
   void testConstruction()
   {
-    TS_ASSERT_THROWS_NOTHING(MDEWInMemoryLoadingPresenter(new MockMDLoadingView, new MockWorkspaceProvider, "_"));
+    TS_ASSERT_THROWS_NOTHING(MDEWInMemoryLoadingPresenter(
+        Mantid::Kernel::make_unique<MockMDLoadingView>(),
+        new MockWorkspaceProvider, "_"));
   }
 
   void testCanLoadWithInvalidName()
@@ -84,7 +96,8 @@ public:
     EXPECT_CALL(*repository, canProvideWorkspace(_)).WillOnce(Return(false)); //No matter what the argument, always returns false.
 
     //Give a dummy name corresponding to the workspace.
-    MDEWInMemoryLoadingPresenter presenter(new MockMDLoadingView, repository, "_");
+    MDEWInMemoryLoadingPresenter presenter(
+        Mantid::Kernel::make_unique<MockMDLoadingView>(), repository, "_");
 
     TSM_ASSERT("Should indicate that the workspace cannot be read-out since the name is not in the Repository.", !presenter.canReadFile());
   }
@@ -97,7 +110,8 @@ public:
     EXPECT_CALL(*repository, fetchWorkspace(_)).WillOnce(Return(badWs)); 
 
     //Give a dummy name corresponding to the workspace.
-    MDEWInMemoryLoadingPresenter presenter(new MockMDLoadingView, repository, "_");
+    MDEWInMemoryLoadingPresenter presenter(
+        Mantid::Kernel::make_unique<MockMDLoadingView>(), repository, "_");
 
     TSM_ASSERT("Should indicate that the workspace cannot be read-out since it is not of the right type.", !presenter.canReadFile());
   }
@@ -110,7 +124,8 @@ public:
     EXPECT_CALL(*repository, fetchWorkspace(_)).WillOnce(Return(goodWs)); 
 
     //Give a dummy name corresponding to the workspace.
-    MDEWInMemoryLoadingPresenter presenter(new MockMDLoadingView, repository, "_");
+    MDEWInMemoryLoadingPresenter presenter(
+        Mantid::Kernel::make_unique<MockMDLoadingView>(), repository, "_");
 
     TSM_ASSERT("Should have worked! Workspace is of correct type and repository says ws is present.!", presenter.canReadFile());
   }
@@ -118,14 +133,15 @@ public:
   void testExtractMetadata()
   {
     //Setup view
-    MockMDLoadingView* view = new MockMDLoadingView;
+    MockMDLoadingView view;
 
     MockWorkspaceProvider* repository = new MockWorkspaceProvider;
     Mantid::API::Workspace_sptr ws = getReal4DWorkspace();
     EXPECT_CALL(*repository, fetchWorkspace(_)).Times(1).WillRepeatedly(Return(ws));
 
-    MDEWInMemoryLoadingPresenter presenter(view, repository, "_");
-    
+    MDEWInMemoryLoadingPresenter presenter(
+        std::unique_ptr<MDLoadingView>(&view), repository, "_");
+
     //Test that it doesn't work when not setup.
     TSM_ASSERT_THROWS("::executeLoadMetadata is critical to setup, should throw if not run first.", presenter.getGeometryXML(), std::runtime_error);
     
@@ -139,10 +155,11 @@ public:
   void testExecution()
   {
     //Setup view
-    MockMDLoadingView* view = new MockMDLoadingView;
-    EXPECT_CALL(*view, getRecursionDepth()).Times(1); 
-    EXPECT_CALL(*view, getLoadInMemory()).Times(0); //Not a question that needs asking for this presenter type.
-    EXPECT_CALL(*view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
+    MockMDLoadingView view;
+    EXPECT_CALL(view, getRecursionDepth()).Times(1);
+    EXPECT_CALL(view, getLoadInMemory())
+        .Times(0); // Not a question that needs asking for this presenter type.
+    EXPECT_CALL(view, updateAlgorithmProgress(_, _)).Times(AnyNumber());
 
     //Setup rendering factory
     MockvtkDataSetFactory factory;
@@ -159,7 +176,8 @@ public:
     MockProgressAction mockDrawingProgressAction;
 
     //Create the presenter and run it!
-    MDEWInMemoryLoadingPresenter presenter(view, repository, "_");
+    MDEWInMemoryLoadingPresenter presenter(
+        std::unique_ptr<MDLoadingView>(&view), repository, "_");
     presenter.executeLoadMetadata();
     vtkSmartPointer<vtkDataSet> product = presenter.execute(
         &factory, mockLoadingProgressAction, mockDrawingProgressAction);
@@ -172,38 +190,52 @@ public:
     TS_ASSERT_THROWS_NOTHING(presenter.getGeometryXML());
     TS_ASSERT(!presenter.getWorkspaceTypeName().empty());
     TSM_ASSERT("Special coordinate metadata failed.", -1 < presenter.getSpecialCoordinates());
-    TS_ASSERT(Mock::VerifyAndClearExpectations(view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
   }
 
   void testCallHasTDimThrows()
   {
-    MDEWInMemoryLoadingPresenter presenter(new MockMDLoadingView, new MockWorkspaceProvider, "_");
-    TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.hasTDimensionAvailable(), std::runtime_error);
+    MDEWInMemoryLoadingPresenter presenter(
+        Mantid::Kernel::make_unique<MockMDLoadingView>(),
+        new MockWorkspaceProvider, "_");
+    TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
+                      presenter.hasTDimensionAvailable(), std::runtime_error);
   }
 
   void testCallGetTDimensionValuesThrows()
   {
-    MDEWInMemoryLoadingPresenter presenter(new MockMDLoadingView, new MockWorkspaceProvider, "_");
-    TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.getTimeStepValues(), std::runtime_error);
+    MDEWInMemoryLoadingPresenter presenter(
+        Mantid::Kernel::make_unique<MockMDLoadingView>(),
+        new MockWorkspaceProvider, "_");
+    TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
+                      presenter.getTimeStepValues(), std::runtime_error);
   }
 
   void testCallGetGeometryThrows()
   {
-    MDEWInMemoryLoadingPresenter presenter(new MockMDLoadingView, new MockWorkspaceProvider, "_");
-    TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.getGeometryXML(), std::runtime_error);
+    MDEWInMemoryLoadingPresenter presenter(
+        Mantid::Kernel::make_unique<MockMDLoadingView>(),
+        new MockWorkspaceProvider, "_");
+    TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
+                      presenter.getGeometryXML(), std::runtime_error);
   }
 
   void testGetWorkspaceTypeName()
   {
-    MDEWInMemoryLoadingPresenter presenter(new MockMDLoadingView, new MockWorkspaceProvider, "_");
+    MDEWInMemoryLoadingPresenter presenter(
+        Mantid::Kernel::make_unique<MockMDLoadingView>(),
+        new MockWorkspaceProvider, "_");
     TSM_ASSERT_EQUALS("Characterisation Test Failed", "", presenter.getWorkspaceTypeName());
   }
 
   void testGetSpecialCoordinates()
   {
-    MDEWInMemoryLoadingPresenter presenter(new MockMDLoadingView, new MockWorkspaceProvider, "_");
-    TSM_ASSERT_EQUALS("Characterisation Test Failed", -1, presenter.getSpecialCoordinates());
+    MDEWInMemoryLoadingPresenter presenter(
+        Mantid::Kernel::make_unique<MockMDLoadingView>(),
+        new MockWorkspaceProvider, "_");
+    TSM_ASSERT_EQUALS("Characterisation Test Failed", -1,
+                      presenter.getSpecialCoordinates());
   }
 
 

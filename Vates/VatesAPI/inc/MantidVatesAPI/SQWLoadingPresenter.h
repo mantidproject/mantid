@@ -37,7 +37,8 @@ namespace Mantid
     class DLLExport SQWLoadingPresenter : public MDEWLoadingPresenter
     {
     public:
-      SQWLoadingPresenter(MDLoadingView* view, const std::string fileName);
+      SQWLoadingPresenter(std::unique_ptr<MDLoadingView> view,
+                          const std::string fileName);
       virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& rebinningProgressUpdate, ProgressAction& drawingProgressUpdate);
       virtual void extractMetadata(Mantid::API::IMDEventWorkspace_sptr eventWs);
       virtual void executeLoadMetadata();
