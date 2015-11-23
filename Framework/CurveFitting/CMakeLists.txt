@@ -91,6 +91,7 @@ set ( SRC_FILES
 	src/Functions/StaticKuboToyabe.cpp
 	src/Functions/StaticKuboToyabeTimesExpDecay.cpp
 	src/Functions/StaticKuboToyabeTimesGausDecay.cpp
+	src/Functions/StaticKuboToyabeTimesStretchExp.cpp
 	src/Functions/StretchExp.cpp
 	src/Functions/StretchExpMuon.cpp
 	src/Functions/TabulatedFunction.cpp
@@ -214,6 +215,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/StaticKuboToyabe.h
 	inc/MantidCurveFitting/Functions/StaticKuboToyabeTimesExpDecay.h
 	inc/MantidCurveFitting/Functions/StaticKuboToyabeTimesGausDecay.h
+	inc/MantidCurveFitting/Functions/StaticKuboToyabeTimesStretchExp.h
 	inc/MantidCurveFitting/Functions/StretchExp.h
 	inc/MantidCurveFitting/Functions/StretchExpMuon.h
 	inc/MantidCurveFitting/Functions/TabulatedFunction.h
@@ -334,6 +336,7 @@ set ( TEST_FILES
 	Functions/StaticKuboToyabeTest.h
 	Functions/StaticKuboToyabeTimesExpDecayTest.h
 	Functions/StaticKuboToyabeTimesGausDecayTest.h
+	Functions/StaticKuboToyabeTimesStretchExpTest.h
 	Functions/StretchExpMuonTest.h
 	Functions/StretchExpTest.h
 	Functions/TabulatedFunctionTest.h
