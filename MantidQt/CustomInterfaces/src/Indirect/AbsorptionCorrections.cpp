@@ -61,14 +61,32 @@ namespace CustomInterfaces
     // Can details
     bool useCan = m_uiForm.ckUseCan->isChecked();
     if (useCan) {
-      std::string canWsName = m_uiForm.dsCanInput->getCurrentDataName().toStdString();
-	  std::string shiftedCanName = canWsName + "_shifted";
+      std::string canWsName =
+          m_uiForm.dsCanInput->getCurrentDataName().toStdString();
+      std::string shiftedCanName = canWsName + "_shifted";
       IAlgorithm_sptr clone =
           AlgorithmManager::Instance().create("CloneWorkspace");
       clone->initialize();
-	  clone->setProperty("InputWorkspace", canWsName);
-	  clone->setProperty("OutputWorkspace", shiftedCanName);
-	  clone->execute();
+      clone->setProperty("InputWorkspace", canWsName);
+      clone->setProperty("OutputWorkspace", shiftedCanName);
+      clone->execute();
+
+      MatrixWorkspace_sptr shiftedCan = clone->getProperty("OuputWorkspace");
+
+      IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
+      scaleX->initialize();
+      scaleX->setProperty("InputWorkspace", shiftedCan);
+      scaleX->setProperty("OutputWorkspace", shiftedCanName);
+      scaleX->setProperty("Factor", m_uiForm.spCanShift->value());
+      scaleX->setProperty("Operation", "Add");
+      scaleX->execute();
+      IAlgorithm_sptr rebin =
+          AlgorithmManager::Instance().create("RebinToWorkspace");
+      rebin->initialize();
+      rebin->setProperty("WorkspaceToRebin", shiftedCan);
+      rebin->setProperty("WorkspaceToMatch", sampleWsName);
+      rebin->setProperty("OutputWorkspace", shiftedCanName);
+      rebin->execute();
 
       absCorAlgo->setProperty("CanWorkspace", shiftedCanName);
 
