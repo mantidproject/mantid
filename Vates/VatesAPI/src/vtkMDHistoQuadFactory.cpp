@@ -16,6 +16,7 @@
 #include <vector>
 #include "MantidKernel/ReadLock.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/make_unique.h"
 
 using Mantid::API::IMDWorkspace;
 using Mantid::Kernel::CPUTimer;
@@ -118,10 +119,12 @@ namespace Mantid
         is set so that all required vertices are marked, and created in a second step. */
 
         // Array of the points that should be created, set to false
-        std::unique_ptr<bool[]> pointNeeded(new bool[nPointsX * nPointsY]);
-        memset(pointNeeded.get(), 0, nPointsX * nPointsY * sizeof(bool));
+        auto pointNeeded = Mantid::Kernel::make_unique<bool[]>(nPointsX * nPointsY);
+        for (int i = 0; i < nPointsX * nPointsY; i++) {
+          pointNeeded[i] = false;
+        }
         // Array with true where the voxel should be shown
-        std::unique_ptr<bool[]> voxelShown(new bool[nBinsX * nBinsY]);
+        auto voxelShown = Mantid::Kernel::make_unique<bool[]>(nBinsX * nBinsY);
 
         double progressFactor = 0.5/double(nBinsX);
         double progressOffset = 0.5;

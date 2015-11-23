@@ -14,6 +14,7 @@
 #include <vtkPoints.h>
 #include <vtkUnstructuredGrid.h>
 #include "MantidKernel/ReadLock.h"
+#include "MantidKernel/make_unique.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -91,7 +92,7 @@ void vtkMDHexFactory::doCreate(
   signalCache.assign(numBoxes, 0);
 
   // True for boxes that we will use
-  std::unique_ptr<bool[]> useBox(new bool[numBoxes]);
+  auto useBox = Mantid::Kernel::make_unique<bool[]>(numBoxes);
   memset(useBox.get(), 0, sizeof(bool) * numBoxes);
 
   // Create the data set (will outlive this object - output of create)
@@ -227,7 +228,7 @@ vtkDataSet *vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
     if (nd > 3) {
       // Slice from >3D down to 3D
       this->slice = true;
-      this->sliceMask = std::unique_ptr<bool[]>(new bool[nd]);
+      this->sliceMask = Mantid::Kernel::make_unique<bool[]>(nd);
       this->sliceImplicitFunction = boost::make_shared<MDImplicitFunction>();
 
       // Make the mask of dimensions

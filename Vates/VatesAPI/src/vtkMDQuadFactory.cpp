@@ -15,6 +15,7 @@
 #include <vtkNew.h>
 #include "MantidKernel/ReadLock.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/make_unique.h"
 
 using namespace Mantid::API;
 
@@ -63,7 +64,7 @@ namespace Mantid
         /*
         Write mask array with correct order for each internal dimension.
         */
-        std::unique_ptr<bool[]> masks(new bool[nDims]);
+        auto masks = Mantid::Kernel::make_unique<bool[]>(nDims);
         for(size_t i_dim = 0; i_dim < nDims; ++i_dim)
         {
           bool bIntegrated = imdws->getDimension(i_dim)->getIsIntegrated();
@@ -98,7 +99,7 @@ namespace Mantid
         }
 
         Mantid::coord_t out[2];
-        std::unique_ptr<bool[]> useBox(new bool[it->getDataSize()]);
+        auto useBox = Mantid::Kernel::make_unique<bool[]>(it->getDataSize());
 
         double progressFactor = 0.5/double(it->getDataSize());
         double progressOffset = 0.5;

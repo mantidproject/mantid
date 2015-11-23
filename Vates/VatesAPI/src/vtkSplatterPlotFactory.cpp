@@ -5,6 +5,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ReadLock.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidVatesAPI/ProgressAction.h"
@@ -510,7 +511,7 @@ namespace VATES
     {
       // Slice from >3D down to 3D
       this->slice = true;
-      this->sliceMask = std::unique_ptr<bool[]>(new bool[nd]);
+      this->sliceMask = Mantid::Kernel::make_unique<bool[]>(nd);
       this->sliceImplicitFunction = boost::make_shared<MDImplicitFunction>();
       // Make the mask of dimensions
       // TODO: Smarter mapping
