@@ -30,6 +30,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/make_unique.h"
 
 #include <cmath>
 #include <sstream>
@@ -883,9 +884,9 @@ void AddTSPEntry(Run &runInfo, std::string name, double val) {
  */
 void SetOrientedLattice(Mantid::API::MatrixWorkspace_sptr ws, double a,
                         double b, double c) {
-  OrientedLattice *latt = new OrientedLattice(a, b, c, 90., 90., 90.);
-  ws->mutableSample().setOrientedLattice(latt);
-  delete latt;
+  auto latt =
+      Mantid::Kernel::make_unique<OrientedLattice>(a, b, c, 90., 90., 90.);
+  ws->mutableSample().setOrientedLattice(latt.release());
 }
 
 // =====================================================================================
@@ -926,9 +927,9 @@ createProcessedWorkspaceWithCylComplexInstrument(size_t numPixels,
   pAxis0->setUnit("DeltaE");
   ws->replaceAxis(0, pAxis0);
   if (has_oriented_lattice) {
-    OrientedLattice *latt = new OrientedLattice(1, 1, 1, 90., 90., 90.);
-    ws->mutableSample().setOrientedLattice(latt);
-    delete latt;
+    auto latt =
+        Mantid::Kernel::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
+    ws->mutableSample().setOrientedLattice(latt.release());
 
     AddTSPEntry(ws->mutableRun(), "phi", 0);
     AddTSPEntry(ws->mutableRun(), "chi", 0);
@@ -1003,9 +1004,9 @@ createProcessedInelasticWS(const std::vector<double> &L2,
   ws->replaceAxis(0, pAxis0);
 
   // define oriented lattice which requested for processed ws
-  OrientedLattice *latt = new OrientedLattice(1, 1, 1, 90., 90., 90.);
-  ws->mutableSample().setOrientedLattice(latt);
-  delete latt;
+  auto latt =
+      Mantid::Kernel::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
+  ws->mutableSample().setOrientedLattice(latt.release());
 
   // TODO: clarify if this property indeed goes there;
   ws->mutableRun().addProperty(new PropertyWithValue<double>("Ei", Ei), true);

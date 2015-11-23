@@ -10,6 +10,7 @@
 #include "vtkCellType.h"
 #include "vtkUnstructuredGrid.h"
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
+#include "vtkSmartPointer.h"
 
 using namespace Mantid::VATES;
 using namespace Mantid::API;
@@ -104,14 +105,15 @@ public:
     vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
     factory.initialize(binned);
 
-    vtkDataSet* product = factory.create(mockProgressAction);
+    auto product =
+        vtkSmartPointer<vtkDataSet>::Take(factory.create(mockProgressAction));
 
-    TS_ASSERT(dynamic_cast<vtkUnstructuredGrid*>(product) != NULL);
+    TS_ASSERT(dynamic_cast<vtkUnstructuredGrid *>(product.GetPointer()) !=
+              NULL);
     TS_ASSERT_EQUALS(100, product->GetNumberOfCells());
     TS_ASSERT_EQUALS(200, product->GetNumberOfPoints());
     TS_ASSERT_EQUALS(VTK_LINE, product->GetCellType(0));
 
-    product->Delete();
     AnalysisDataService::Instance().remove("binned");
     TSM_ASSERT("Progress Updates not used as expected.", Mock::VerifyAndClearExpectations(&mockProgressAction));
   }
@@ -154,14 +156,13 @@ public:
     vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
     factory.initialize(binned);
 
-    vtkDataSet* product = factory.create(progressAction);
+    auto product =
+        vtkSmartPointer<vtkDataSet>::Take(factory.create(progressAction));
 
-    TS_ASSERT(dynamic_cast<vtkUnstructuredGrid*>(product) != NULL);
+    TS_ASSERT(dynamic_cast<vtkUnstructuredGrid *>(product.GetPointer()) !=
+              NULL);
     TS_ASSERT_EQUALS(200000, product->GetNumberOfCells());
-    TS_ASSERT_EQUALS(400000, product->GetNumberOfPoints());
-
-    product->Delete();
-    
+    TS_ASSERT_EQUALS(400000, product->GetNumberOfPoints());    
   }
 };
 

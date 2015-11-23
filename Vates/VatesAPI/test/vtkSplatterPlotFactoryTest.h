@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 #include <vtkCellData.h>
 #include <vtkDataArray.h>
+#include <vtkSmartPointer.h>
 
 using namespace Mantid;
 using namespace Mantid::VATES;
@@ -59,9 +60,10 @@ public:
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, binning);
     vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.initialize(ws);
-    vtkDataSet* product = NULL;
+    vtkSmartPointer<vtkDataSet> product;
 
-    TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
+    TS_ASSERT_THROWS_NOTHING(
+        product.TakeReference(factory.create(progressUpdate)));
 
     // Expecting 5x5x5 points; Signal equal for each box => 1/(10^3/5^3)
     const size_t expected_n_points = binning*binning*binning;
@@ -76,8 +78,6 @@ public:
     TSM_ASSERT_EQUALS("Should have signal flag", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
     TSM_ASSERT_EQUALS("Should have one signal per bin", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
     TSM_ASSERT_EQUALS("Should have a signal which is normalized to the 3D volume", expected_signal_value, range[0]);
-
-    product->Delete();
   }
 
   void test_4DHistoWorkspace()
@@ -89,9 +89,10 @@ public:
     IMDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 4, binning);
     vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.initialize(ws);
-    vtkDataSet* product = NULL;
+    vtkSmartPointer<vtkDataSet> product;
 
-    TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
+    TS_ASSERT_THROWS_NOTHING(
+        product.TakeReference(factory.create(progressUpdate)));
 
     // Expecting 5x5x5 points; Signal equal for each box => 1/(10^4/5^4)
     const size_t expected_n_points = binning*binning*binning;
@@ -106,8 +107,6 @@ public:
     TSM_ASSERT_EQUALS("Should have signal flag", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
     TSM_ASSERT_EQUALS("Should have one signal per bin", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
     TSM_ASSERT_EQUALS("Should have a signal which is normalized to the 4D volume", expected_signal_value, range[0]);
-
-    product->Delete();
   }
 
   void test_3DWorkspace()
@@ -117,9 +116,10 @@ public:
     MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
     vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.initialize(ws);
-    vtkDataSet* product = NULL;
+    vtkSmartPointer<vtkDataSet> product;
 
-    TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
+    TS_ASSERT_THROWS_NOTHING(
+        product.TakeReference(factory.create(progressUpdate)));
 
     /* original sizes for splatter plot test, before 5/28/2013
     const size_t expected_n_points = 1000;
@@ -137,8 +137,6 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of cells", expected_n_cells, product->GetNumberOfCells());
     TSM_ASSERT_EQUALS("No signal Array", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
     TSM_ASSERT_EQUALS("Wrong sized signal Array", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
-
-    product->Delete();
   }
 
   void test_4DWorkspace()
@@ -148,9 +146,9 @@ public:
     MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(5, -10.0, 10.0, 1);
     vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.initialize(ws);
-    vtkDataSet* product = NULL;
+    vtkSmartPointer<vtkDataSet> product;
 
-    TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
+    TS_ASSERT_THROWS_NOTHING(product.TakeReference(factory.create(progressUpdate)));
 
     // 6 is 5% of 125
     const size_t expected_n_points = 6;
@@ -161,8 +159,6 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of cells", expected_n_cells, product->GetNumberOfCells());
     TSM_ASSERT_EQUALS("No signal Array", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
     TSM_ASSERT_EQUALS("Wrong sized signal Array", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
-
-    product->Delete();
   }
 
   void test_MetadataIsAddedCorrectly() 

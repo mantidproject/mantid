@@ -11,6 +11,7 @@
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <vtkSmartPointer.h>
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
@@ -184,10 +185,10 @@ public:
     vtkMDHistoQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), Mantid::VATES::VolumeNormalization);
 
     factory.initialize(ws_sptr);
-    vtkDataSet* product= factory.create(mockProgressAction);
+    auto product =
+        vtkSmartPointer<vtkDataSet>::Take(factory.create(mockProgressAction));
 
     TSM_ASSERT("Progress Updates not used as expected.", Mock::VerifyAndClearExpectations(&mockProgressAction));
-    product->Delete();
   }
 
 };

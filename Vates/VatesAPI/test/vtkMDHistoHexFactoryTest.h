@@ -13,6 +13,7 @@
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 #include "vtkStructuredGrid.h"
 #include "vtkUnsignedCharArray.h"
+#include "vtkSmartPointer.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -81,13 +82,13 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
     vtkMDHistoHexFactory factory (ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), Mantid::VATES::VolumeNormalization);
     factory.initialize(ws_sptr);
 
-    vtkDataSet* product = factory.create(progressUpdate);
+    auto product =
+        vtkSmartPointer<vtkDataSet>::Take(factory.create(progressUpdate));
     TSM_ASSERT_EQUALS("A single array should be present on the product dataset.", 1, product->GetCellData()->GetNumberOfArrays());
     vtkDataArray* signalData = product->GetCellData()->GetArray(0);
     TSM_ASSERT_EQUALS("The obtained cell data has the wrong name.", std::string("signal"), std::string(signalData->GetName()));
     const int correctCellNumber = 10 * 10 * 10;
     TSM_ASSERT_EQUALS("The number of signal values generated is incorrect.", correctCellNumber, signalData->GetSize());
-    product->Delete();
   }
 
   void testProgressUpdating()
@@ -100,10 +101,10 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
     vtkMDHistoHexFactory factory(ThresholdRange_scptr(new NoThresholdRange), Mantid::VATES::VolumeNormalization);
 
     factory.initialize(ws_sptr);
-    vtkDataSet* product= factory.create(mockProgressAction);
+    auto product =
+        vtkSmartPointer<vtkDataSet>::Take(factory.create(mockProgressAction));
 
     TSM_ASSERT("Progress Updates not used as expected.", Mock::VerifyAndClearExpectations(&mockProgressAction));
-    product->Delete();
   }
 
   void testIsValidThrowsWhenNoWorkspace()
