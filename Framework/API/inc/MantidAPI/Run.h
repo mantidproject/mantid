@@ -3,11 +3,13 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/LogManager.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidKernel/Statistics.h"
 #include "MantidKernel/TimeSplitter.h"
-#include <nexus/NeXusFile.hpp>
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include <vector>
+
+namespace NeXus {
+class File;
+}
 
 namespace Mantid {
 
@@ -69,8 +71,10 @@ public:
   void setProtonCharge(const double charge);
   /// Get the proton charge
   double getProtonCharge() const;
-  /// Integrate the proton charge over the whole run time
-  double integrateProtonCharge();
+  /// Integrate the proton charge over the whole run time - default log
+  /// proton_charge
+  void
+  integrateProtonCharge(const std::string &logname = "proton_charge") const;
 
   /// Store the given values as a set of histogram bin boundaries
   void storeHistogramBinBoundaries(const std::vector<double> &energyBins);
