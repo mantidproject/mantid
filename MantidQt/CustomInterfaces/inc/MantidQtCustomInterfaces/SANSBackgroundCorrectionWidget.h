@@ -56,6 +56,8 @@ public:
   setDarkRunSettingForUampMonitors(SANSBackgroundCorrectionSettings setting);
   SANSBackgroundCorrectionSettings getDarkRunSettingForUampMonitors();
 
+  void resetEntries();
+
 private slots:
   void handleTimeDetectorsOnOff(int state);
   void handleUampDetectorsOnOff(int state);

@@ -1213,6 +1213,7 @@ class DarkRunSubtraction(object):
         if not isinstance(dark_run_setting, UserFileParser.DarkRunSettings):
             raise RuntimeError("DarkRunSubtraction: The provided settings "
                                "object is not of type DarkRunSettings")
+
         self._dark_run_settings.append(dark_run_setting)
 
     def execute(self, workspace):
@@ -1434,11 +1435,15 @@ class DarkRunSubtraction(object):
         monitor_mean = [use_mean[index] for index in indices]
         monitor_time = [use_time[index] for index in indices]
         monitor_mon_numbers  = []
-        for index in indices:
-            if isinstance(mon_numbers[index], list):
-                monitor_mon_numbers.extend(mon_numbers[index])
-            else:
-                monitor_mon_numbers.append(mon_numbers[index])
+
+        if len(mon_numbers) > 0 and None in mon_numbers:
+            monitor_mon_numbers = None
+        else:
+            for index in indices:
+                if isinstance(mon_numbers[index], list):
+                    monitor_mon_numbers.extend(mon_numbers[index])
+                else:
+                    monitor_mon_numbers.append(mon_numbers[index])
 
         # Check if the mean value is identical for all entries
         are_all_same = lambda a_list : all([a_list[0] == a_list[i] for i in range(0, len(a_list))])

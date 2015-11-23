@@ -44,6 +44,7 @@ SANSBackgroundCorrectionWidget::SANSBackgroundCorrectionWidget(QWidget *parent)
  */
 void SANSBackgroundCorrectionWidget::setDarkRunSettingForTimeDetectors(
     SANSBackgroundCorrectionSettings setting) {
+
   if (!hasRunNumber(setting)) {
     return;
   }
@@ -81,6 +82,7 @@ void SANSBackgroundCorrectionWidget::setDarkRunSettingForTimeMonitors(
   m_ui.bckgnd_cor_mon_time_use_check_box->setChecked(true);
   m_ui.bckgnd_cor_mon_time_run_line_edit->setText(setting.getRunNumber());
   m_ui.bckgnd_cor_mon_mean_check_box->setChecked(setting.getUseMean());
+  m_ui.bckgnd_cor_mon_time_mon_num_line_edit->setText(setting.getMonNumber());
 }
 
 
@@ -125,6 +127,7 @@ void SANSBackgroundCorrectionWidget::setDarkRunSettingForUampMonitors(
 
   m_ui.bckgnd_cor_mon_uamp_use_check_box->setChecked(true);
   m_ui.bckgnd_cor_mon_uamp_run_line_edit->setText(setting.getRunNumber());
+  m_ui.bckgnd_cor_mon_uamp_mon_num_line_edit->setText(setting.getMonNumber());
 }
 
 //---------------- GETTERS
@@ -163,6 +166,7 @@ SANSBackgroundCorrectionWidget::getDarkRunSettingForTimeMonitors() {
   if (m_ui.bckgnd_cor_mon_time_use_check_box->isChecked()) {
     runNumber = m_ui.bckgnd_cor_mon_time_run_line_edit->text();
     useMean = m_ui.bckgnd_cor_mon_mean_check_box->isChecked();
+    monNumber = m_ui.bckgnd_cor_mon_time_mon_num_line_edit->text();
   }
   return SANSBackgroundCorrectionSettings(runNumber, useMean, useMon,
     monNumber);
@@ -199,6 +203,7 @@ SANSBackgroundCorrectionWidget::getDarkRunSettingForUampMonitors() {
 
   if (m_ui.bckgnd_cor_mon_uamp_use_check_box->isChecked()) {
     runNumber = m_ui.bckgnd_cor_mon_uamp_run_line_edit->text();
+    monNumber = m_ui.bckgnd_cor_mon_uamp_mon_num_line_edit->text();
   }
   return SANSBackgroundCorrectionSettings(runNumber, useMean, useMon,
                                           monNumber);
@@ -242,6 +247,20 @@ void SANSBackgroundCorrectionWidget::handleUampMonitorsOnOff(int stateInt) {
   auto state = convertQtInt(stateInt);
   m_ui.bckgnd_cor_mon_uamp_run_line_edit->setEnabled(state);
   m_ui.bckgnd_cor_mon_uamp_mon_num_line_edit->setEnabled(state);
+}
+
+void SANSBackgroundCorrectionWidget::resetEntries() {
+  m_ui.bckgnd_cor_det_time_use_check_box->setChecked(false);
+  m_ui.bckgnd_cor_det_uamp_use_check_box->setChecked(false);
+  m_ui.bckgnd_cor_mon_time_use_check_box->setChecked(false);
+  m_ui.bckgnd_cor_mon_uamp_use_check_box->setChecked(false);
+
+  m_ui.bckgnd_cor_det_time_run_line_edit->setText("");
+  m_ui.bckgnd_cor_det_uamp_run_line_edit->setText("");
+  m_ui.bckgnd_cor_mon_time_run_line_edit->setText("");
+  m_ui.bckgnd_cor_mon_time_mon_num_line_edit->setText("");
+  m_ui.bckgnd_cor_mon_uamp_run_line_edit->setText("");
+  m_ui.bckgnd_cor_mon_uamp_mon_num_line_edit->setText("");
 }
 }
 }

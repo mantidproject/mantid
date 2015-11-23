@@ -19,6 +19,7 @@ import copy
 from SANSadd2 import *
 import SANSUtility as su
 from SANSUtility import deprecated
+import SANSUserFileParser as UserFileParser
 
 # disable plotting if running outside Mantidplot
 try:
@@ -1742,7 +1743,7 @@ def is_current_workspace_an_angle_workspace():
 
 
 ##################### Accesor functions for BackgroundCorrection
-def set_background_correction(run_number, is_time_based, is_mon, is_mean, mon_numbers=""):
+def set_background_correction(run_number, is_time_based, is_mon, is_mean, mon_numbers=None):
     '''
     Set a background correction setting.
     @param run_number: the run number
@@ -1758,7 +1759,11 @@ def set_background_correction(run_number, is_time_based, is_mon, is_mean, mon_nu
         @returns an integer list
         @raises RuntimeError: conversion form string to int is not possible
         '''
-        string_list = convert_to_string_list(input_string)
+        import time
+        time.sleep(15)
+        if input_string is None or len(input_string) == 0:
+            return None
+        string_list = su.convert_to_string_list(input_string)
         can_convert_to_int = all(is_convertible_to_int(element) for element in string_list)
         int_list = None
         if can_convert_to_int:
@@ -1767,11 +1772,12 @@ def set_background_correction(run_number, is_time_based, is_mon, is_mean, mon_nu
             raise RuntimeError("Cannot convert string list to integer list")
         return int_list
     mon_numbers_int = convert_from_comma_separated_string_to_int_list(mon_numbers)
-    setting = isis_reduction_steps.DarkRunSubtraction.DarkRunSubtractionSettings(run_number = run_number,
-                                                                                 time = is_time_based,
-                                                                                 mean = is_mean,
-                                                                                 mon = is_mon,
-                                                                                 mon_number = mon_numbers)
+
+    setting = UserFileParser.DarkRunSettings(run_number = run_number,
+                                             time = is_time_based,
+                                             mean = is_mean,
+                                             mon = is_mon,
+                                             mon_number = mon_numbers)
     ReductionSingleton().event2hist.add_dark_run_setting(setting)
 
 def get_background_correction(is_time, is_mon, component):
@@ -1809,6 +1815,7 @@ def get_background_correction(is_time, is_mon, component):
             value = convert_from_int_list_to_string(setting.mon_numbers)
         else:
             pass
+    print str(value)
     return value
 
 

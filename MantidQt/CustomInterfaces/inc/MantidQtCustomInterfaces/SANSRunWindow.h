@@ -497,8 +497,8 @@ private:
   void retrieveBackgroundCorrection();
   /// Get Background runner
   SANSBackgroundCorrectionSettings retrieveBackgroundCorrectionSetting(bool isTime, bool isMon);
-
-
+  /// Initialize the background correction
+  void initializeBackgroundCorrection();
   /// Sets the BackgroundCorrection settings
   void writeBackgroundCorrectionToPythonScript(QString &pythonCode);
   /// Generic addition of background correction to python script

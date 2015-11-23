@@ -1094,6 +1094,7 @@ bool SANSRunWindow::loadUserFile() {
   retrieveQResolutionSettings();
 
   // Setup the BackgroundCorrection
+  initializeBackgroundCorrection();
   retrieveBackgroundCorrection();
 
   if (runReduceScriptFunction("print i.ReductionSingleton().mask.phi_mirror")
@@ -4909,6 +4910,13 @@ void SANSRunWindow::initQResolutionSettings() {
 }
 
 /**
+ * Initialize the background corrections, ie reset all fields 
+ */
+void SANSRunWindow::initializeBackgroundCorrection() {
+  m_uiForm.sansBackgroundCorrectionWidget->resetEntries();
+}
+
+/**
  * Retrieve background correction settings and set them in the UI
  */
 void SANSRunWindow::retrieveBackgroundCorrection() {
@@ -4946,9 +4954,12 @@ SANSRunWindow::retrieveBackgroundCorrectionSetting(bool isTime, bool isMon) {
   };
 
   for (auto &command : commandMap) {
-    command.second =
+    auto element =
         runPythonCode(createPythonScript(isTime, isMon, command.first));
-    command.second = command.second.simplified();
+    element = element.simplified();
+    if (element != m_constants.getPythonEmptyKeyword()) {
+      command.second = element;
+    }
   }
 
   QString runNumber = commandMap["run_number"];
@@ -4962,6 +4973,7 @@ SANSRunWindow::retrieveBackgroundCorrectionSetting(bool isTime, bool isMon) {
 
 /**
  * Sends the background correction user setting
+ * @param pythonCode: the python code to attaceh the new commands
  */
 void SANSRunWindow::writeBackgroundCorrectionToPythonScript(
     QString &pythonCode) {
@@ -4983,6 +4995,12 @@ void SANSRunWindow::writeBackgroundCorrectionToPythonScript(
   addBackgroundCorrectionToPythonScript(pythonCode, uampMonitors, false);
 }
 
+/**
+ * Add specific background correction setting to python script
+ * @param pythonCode: the python code to attaceh the new commands
+ * @param setting: a background correction settings object
+ * @param isTimeBased: flag if it is time-based
+ */
 void SANSRunWindow::addBackgroundCorrectionToPythonScript(
     QString &pythonCode,
     MantidQt::CustomInterfaces::SANSBackgroundCorrectionSettings setting,
