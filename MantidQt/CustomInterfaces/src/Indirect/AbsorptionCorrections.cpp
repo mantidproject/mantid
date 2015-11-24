@@ -64,7 +64,9 @@ void AbsorptionCorrections::run() {
     clone->setProperty("OutputWorkspace", shiftedCanName);
     clone->execute();
 
-    MatrixWorkspace_sptr shiftedCan = clone->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr shiftedCan =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            shiftedCanName);
 
     IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
     scaleX->initialize();
@@ -108,7 +110,7 @@ void AbsorptionCorrections::run() {
 
   QString outputBaseName = sampleWsName.left(nameCutIndex);
 
-  QString outputWsName = outputBaseName + "_" + sampleShape + "_Corrected";
+  QString outputWsName = outputBaseName + "_" + sampleShape + "_red";
   absCorAlgo->setProperty("OutputWorkspace", outputWsName.toStdString());
 
   // Set the correction workspace to keep the factors if desired
