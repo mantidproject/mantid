@@ -30,7 +30,9 @@ public:
   double getValue(int i) const {return m_values[i];}
   bool isFixed(int i) const {return m_fixes[i];}
   QString getTie(int i) const {return m_ties[i];}
-private slots:
+  bool areOthersFixed(int i) const;
+  bool areAllOthersFixed(int i) const;
+  private slots:
   void valueChanged(int,int);
   void setAllValues(double);
   void fixParameter(int,bool);
@@ -43,6 +45,7 @@ private:
   bool eventFilter(QObject * obj, QEvent * ev);
   void showContextMenu();
   void redrawCells();
+  void updateRoleColumn(int index);
   Ui::EditLocalParameterDialog m_uiForm;
   /// Parameter name
   QString m_parName;
