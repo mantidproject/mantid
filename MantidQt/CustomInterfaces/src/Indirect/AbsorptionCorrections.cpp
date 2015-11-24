@@ -275,6 +275,17 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
     emit showMessageBox(
         "Could not run absorption corrections.\nSee Results Log for details.");
   }
+  if (m_uiForm.ckShiftCan->isChecked()) {
+    IAlgorithm_sptr shiftLog =
+        AlgorithmManager::Instance().create("AddSampleLog");
+    shiftLog->initialize();
+    shiftLog->setProperty("Workspace", m_pythonExportWsName);
+    shiftLog->setProperty("LogName", "container_shift");
+    shiftLog->setProperty("logType", "Number");
+    shiftLog->setProperty("LogText", boost::lexical_cast<std::string>(
+                                         m_uiForm.spCanShift->value()));
+    shiftLog->execute();
+  }
 }
 
 } // namespace CustomInterfaces
