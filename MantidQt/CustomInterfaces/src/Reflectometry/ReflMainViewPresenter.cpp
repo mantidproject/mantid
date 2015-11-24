@@ -1471,7 +1471,7 @@ void ReflMainViewPresenter::search() {
 void ReflMainViewPresenter::transfer() {
   // Build the input for the transfer strategy
   SearchResultMap runs;
-  auto selectedRows = m_view->getSelectedSearchRows();
+  auto selectedRows = m_view->getSelectedSearchRows();.
   for (auto rowIt = selectedRows.begin(); rowIt != selectedRows.end();
        ++rowIt) {
     const int row = *rowIt;
@@ -1495,7 +1495,8 @@ void ReflMainViewPresenter::transfer() {
                         static_cast<int64_t>(selectedRows.size()),
                         this->m_progressView);
 
-  auto newRows = getTransferStrategy()->transferRuns(runs, progress);
+  TransferResults results = getTransferStrategy()->transferRuns(runs, progress);
+  auto newRows = results.getTransferRuns();
 
   std::map<std::string, int> groups;
   // Loop over the rows (vector elements)

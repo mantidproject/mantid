@@ -10,17 +10,23 @@ namespace MantidQt {
 namespace CustomInterfaces {
 class MANTIDQT_CUSTOMINTERFACES_DLL TransferResults {
 public:
-    TransferResults(std::vector<std::map<std::string, std::string> > transferRuns,
-        std::vector<std::map<std::string, std::string> > errorRuns);
-    
-    std::vector<std::map<std::string, std::string> > getTransferRuns();
-    std::vector<std::map<std::string, std::string> > getErrorRuns();
 
-    void addTransferRow(const std::map<std::string, std::string>& row);
-    void addErrorRow(std::string id, std::string error);
-protected:
-    std::vector<std::map<std::string, std::string> > m_transferRuns;
-    std::vector<std::map<std::string, std::string> > m_errorRuns;
+    using COLUMN_NAME_TYPE = std::string;
+    using COLUMN_VALUE_TYPE = std::string;
+
+    using COLUMN_MAP_TYPE = std::map<COLUMN_NAME_TYPE, COLUMN_VALUE_TYPE>;
+
+    TransferResults(std::vector<COLUMN_MAP_TYPE> transferRuns,
+        std::vector<COLUMN_MAP_TYPE> errorRuns);
+    
+    std::vector<COLUMN_MAP_TYPE> getTransferRuns();
+    std::vector<COLUMN_MAP_TYPE> getErrorRuns();
+
+    void addTransferRow(const COLUMN_MAP_TYPE& row);
+    void addErrorRow(COLUMN_NAME_TYPE id, COLUMN_VALUE_TYPE error);
+
+    std::vector<COLUMN_MAP_TYPE> m_transferRuns;
+    std::vector<COLUMN_MAP_TYPE> m_errorRuns;
 };
 
 }

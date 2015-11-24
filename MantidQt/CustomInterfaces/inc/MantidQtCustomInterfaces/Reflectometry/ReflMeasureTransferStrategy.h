@@ -3,7 +3,6 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h"
-#include "MantidQtCustomInterfaces/Reflectometry/TransferResults.h"
 
 #include <vector>
 #include <map>
@@ -57,7 +56,7 @@ public:
 
   ReflMeasureTransferStrategy(const ReflMeasureTransferStrategy &other);
 
-  virtual std::vector<std::map<std::string, std::string>>
+  virtual TransferResults
   transferRuns(SearchResultMap &searchResults,
                Mantid::Kernel::ProgressBase &progress);
 

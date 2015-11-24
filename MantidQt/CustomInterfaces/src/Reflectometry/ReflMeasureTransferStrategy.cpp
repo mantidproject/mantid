@@ -39,7 +39,7 @@ ReflMeasureTransferStrategy::ReflMeasureTransferStrategy(
  */
 ReflMeasureTransferStrategy::~ReflMeasureTransferStrategy() {}
 
-std::vector<std::map<std::string, std::string>>
+TransferResults
 MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
     SearchResultMap &searchResults, Mantid::Kernel::ProgressBase &progress) {
 
@@ -74,7 +74,7 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
       }
     } else {
       it->second.issues = metaData.whyUnuseable();
-      results.addErrorRow(metaData.id(), metaData.whyUnuseable());
+      results.addErrorRow(metaData.run(), metaData.whyUnuseable());
     }
 
     // Obtaining metadata could take time.
@@ -93,11 +93,12 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
     for (size_t i = 0; i < group->second.size(); ++i) {
       const MeasurementItem &measurementItem = group->second[i];
       if (subIdMap.find(measurementItem.subId()) != subIdMap.end()) {
-        // We already have that subid.
-        const size_t rowIndex = subIdMap[measurementItem.subId()];
-        std::string currentRuns = output[rowIndex][ReflTableSchema::RUNS];
-        output[rowIndex][ReflTableSchema::RUNS] =
-            currentRuns + "+" + measurementItem.run();
+          // We already have that subid.
+          const size_t rowIndex = subIdMap[measurementItem.subId()];
+          std::string currentRuns = results.m_transferRuns[rowIndex][ReflTableSchema::RUNS];
+          results.m_transferRuns[rowIndex][ReflTableSchema::RUNS] =
+          currentRuns + "+" + measurementItem.run();
+
       } else {
         std::map<std::string, std::string> row;
         row[ReflTableSchema::RUNS] = measurementItem.run();
@@ -105,15 +106,16 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
         std::stringstream buffer;
         buffer << nextGroupId;
         row[ReflTableSchema::GROUP] = buffer.str();
-        //output.push_back(row);
+       // output.push_back(row);
         results.addTransferRow(row);
-        subIdMap.insert(std::make_pair(measurementItem.subId(), output.size()-1 /*Record actual row index*/));
+        auto transRuns = results.getTransferRuns();
+        subIdMap.insert(std::make_pair(measurementItem.subId(), transRuns.size()-1 /*Record actual row index*/));
       }
     }
     ++nextGroupId;
   }
 
-  return output;
+  return results;
 }
 
 ReflMeasureTransferStrategy *ReflMeasureTransferStrategy::clone() const {
