@@ -67,22 +67,22 @@ void AbsorptionCorrections::run() {
     MatrixWorkspace_sptr shiftedCan =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             shiftedCanName);
-
-    IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
-    scaleX->initialize();
-    scaleX->setProperty("InputWorkspace", shiftedCan);
-    scaleX->setProperty("OutputWorkspace", shiftedCanName);
-    scaleX->setProperty("Factor", m_uiForm.spCanShift->value());
-    scaleX->setProperty("Operation", "Add");
-    scaleX->execute();
-    IAlgorithm_sptr rebin =
-        AlgorithmManager::Instance().create("RebinToWorkspace");
-    rebin->initialize();
-    rebin->setProperty("WorkspaceToRebin", shiftedCan);
-    rebin->setProperty("WorkspaceToMatch", sampleWsName.toStdString());
-    rebin->setProperty("OutputWorkspace", shiftedCanName);
-    rebin->execute();
-
+    if (m_uiForm.ckShiftCan->isChecked()) {
+      IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
+      scaleX->initialize();
+      scaleX->setProperty("InputWorkspace", shiftedCan);
+      scaleX->setProperty("OutputWorkspace", shiftedCanName);
+      scaleX->setProperty("Factor", m_uiForm.spCanShift->value());
+      scaleX->setProperty("Operation", "Add");
+      scaleX->execute();
+      IAlgorithm_sptr rebin =
+          AlgorithmManager::Instance().create("RebinToWorkspace");
+      rebin->initialize();
+      rebin->setProperty("WorkspaceToRebin", shiftedCan);
+      rebin->setProperty("WorkspaceToMatch", sampleWsName.toStdString());
+      rebin->setProperty("OutputWorkspace", shiftedCanName);
+      rebin->execute();
+    }
     absCorAlgo->setProperty("CanWorkspace", shiftedCanName);
 
     bool useCanCorrections = m_uiForm.ckUseCanCorrections->isChecked();
