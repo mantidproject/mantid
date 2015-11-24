@@ -1471,7 +1471,8 @@ void ReflMainViewPresenter::search() {
 void ReflMainViewPresenter::transfer() {
   // Build the input for the transfer strategy
   SearchResultMap runs;
-  auto selectedRows = m_view->getSelectedSearchRows();.
+  auto selectedRows = m_view->getSelectedSearchRows();
+
   for (auto rowIt = selectedRows.begin(); rowIt != selectedRows.end();
        ++rowIt) {
     const int row = *rowIt;
@@ -1694,8 +1695,8 @@ ReflMainViewPresenter::getTransferStrategy() {
 
     // We are going to load from disk to pick up the meta data, so provide the
     // right repository to do this.
-    auto source =
-        std::unique_ptr<ReflMeasurementItemSource>(new ReflNexusMeasurementItemSource);
+    auto source = std::unique_ptr<ReflMeasurementItemSource>(
+        new ReflNexusMeasurementItemSource);
 
     // Finally make and return the Measure based transfer strategy.
     return std::unique_ptr<ReflTransferStrategy>(
