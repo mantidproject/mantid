@@ -403,7 +403,6 @@
    <value val="None"/>
 </parameter>
 
-
 <!-- List of the words which can be used as a command line arguments to define reducer keywords
      the form is reducer_keword1=synonim1=synonim2=synonim3;reducer_keword1=synonim1a, so, 
      the reducer keywords are the leftmost values of the keyword assignments below
@@ -448,6 +447,18 @@
        ei_mon_spectra=test_mon_spectra_composite"
     />
 </parameter>
+
+<!-- This parameters are used as corrections for instrument parameters loaded in IDF file -->
+<parameter name="TubePressure">
+      <value units="atm" val="10.0"/>
+</parameter>
+<parameter name="TubeThickness">
+      <value units="metre" val="0.0008"/>
+</parameter>
+<parameter name="DelayTime">
+      <value units="microseconds" val="-5.3"/>
+</parameter>
+
  
   <!-- -->
 </component-link>
