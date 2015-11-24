@@ -677,9 +677,8 @@ public:
       file.closeData();
 
       // determine the range of pixel ids
-      uint32_t temp;
       for (auto i = 0; i < m_loadSize[0]; ++i) {
-        temp = m_event_id[i];
+        uint32_t temp = m_event_id[i];
         if (temp < m_min_id)
           m_min_id = temp;
         if (temp > m_max_id)

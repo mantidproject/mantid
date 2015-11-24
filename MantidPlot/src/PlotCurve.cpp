@@ -112,7 +112,7 @@ QString PlotCurve::saveCurveLayout()
 void PlotCurve::restoreCurveLayout(const QStringList& lst)
 {
   QStringList::const_iterator line = lst.begin();
-  for (line++; line != lst.end(); ++line){
+  for (++line; line != lst.end(); ++line) {
     QString s = *line;
     if (s == "<Pen>"){
       QPen pen;
