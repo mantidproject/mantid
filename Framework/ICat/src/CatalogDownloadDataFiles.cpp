@@ -147,13 +147,11 @@ std::string CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(
     const std::string &URL, const std::string &fileName) {
   std::string pathToDownloadedDatafile;
 
-  clock_t start;
-
   try {
     Poco::URI uri(URL);
 
     std::string path(uri.getPathAndQuery());
-    start = clock();
+    clock_t start = clock();
 
     Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> certificateHandler =
         new Poco::Net::AcceptCertificateHandler(true);

@@ -46,7 +46,7 @@ class MatrixModel : public QAbstractTableModel
     Q_OBJECT
 
 protected:
-    MatrixModel(QObject *parent);
+  explicit MatrixModel(QObject *parent);
 
 public:
     MatrixModel(int rows = 32, int cols = 32, QObject *parent = 0);

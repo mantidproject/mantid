@@ -80,11 +80,15 @@ namespace IDA
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
   }
 
-  void Iqt::run()
-  {
+  void Iqt::run() {
     using namespace Mantid::API;
 
     calculateBinning();
+
+    // Construct the result workspace for Python script export
+    QString sampleName = m_uiForm.dsInput->getCurrentDataName();
+    m_pythonExportWsName =
+        sampleName.left(sampleName.lastIndexOf("_")).toStdString() + "_iqt";
 
     QString wsName = m_uiForm.dsInput->getCurrentDataName();
     QString resName = m_uiForm.dsResolution->getCurrentDataName();
@@ -93,7 +97,8 @@ namespace IDA
     double energyMax = m_dblManager->value(m_properties["EHigh"]);
     double numBins = m_dblManager->value(m_properties["SampleBinning"]);
 
-    IAlgorithm_sptr furyAlg = AlgorithmManager::Instance().create("TransformToIqt");
+    IAlgorithm_sptr furyAlg =
+        AlgorithmManager::Instance().create("TransformToIqt");
     furyAlg->initialize();
 
     furyAlg->setProperty("SampleWorkspace", wsName.toStdString());
@@ -102,17 +107,14 @@ namespace IDA
     furyAlg->setProperty("EnergyMin", energyMin);
     furyAlg->setProperty("EnergyMax", energyMax);
     furyAlg->setProperty("BinReductionFactor", numBins);
+    furyAlg->setProperty("OutputWorkspace", m_pythonExportWsName);
 
     furyAlg->setProperty("DryRun", false);
 
     m_batchAlgoRunner->addAlgorithm(furyAlg);
 
-    // Set the result workspace for Python script export
-    QString sampleName = m_uiForm.dsInput->getCurrentDataName();
-    m_pythonExportWsName = sampleName.left(sampleName.lastIndexOf("_")).toStdString() + "_iqt";
-
     // Add save step
-    if(m_uiForm.ckSave->isChecked())
+    if (m_uiForm.ckSave->isChecked())
       addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
 
     m_batchAlgoRunner->executeBatchAsync();

@@ -39,7 +39,7 @@ public:
   /// Constructor
   MantidCurve(const QString& wsName, bool error, bool allerror = false);
   /// Default constructor
-  MantidCurve(bool err);
+  explicit MantidCurve(bool err);
   /// Destructor
   virtual ~MantidCurve();
   /// Clone

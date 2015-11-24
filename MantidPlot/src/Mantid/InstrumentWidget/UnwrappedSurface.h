@@ -80,8 +80,7 @@ class UnwrappedSurface: public ProjectionSurface
 {
   Q_OBJECT
 public:
-
-  UnwrappedSurface(const InstrumentActor* rootActor);
+  explicit UnwrappedSurface(const InstrumentActor *rootActor);
 
   /** @name Implemented public virtual methods */
   //@{

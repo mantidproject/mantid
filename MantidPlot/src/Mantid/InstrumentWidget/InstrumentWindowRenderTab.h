@@ -26,7 +26,7 @@ class InstrumentWindowRenderTab: public InstrumentWindowTab
   Q_OBJECT
 
 public:
-  InstrumentWindowRenderTab(InstrumentWindow* instrWindow);
+  explicit InstrumentWindowRenderTab(InstrumentWindow *instrWindow);
   ~InstrumentWindowRenderTab();
   void initSurface();
   void saveSettings(QSettings&)const;
