@@ -63,8 +63,8 @@ Workspace2D::~Workspace2D() {
  * @param XLength :: The number of X data points/bin boundaries in each vector
  * (must all be the same)
  *
- * @param YLength :: The number of data/error points in each vector (must all be
- * the same)
+ * @param YLength :: The number of data/error points in each vector
+ * (must all be the same)
 */
 void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
                        const std::size_t &YLength) {
