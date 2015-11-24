@@ -29,7 +29,7 @@ private:
   IMDDimension_const_sptr _a;
 
 public:
-  CompareIMDDimension_const_sptr(IMDDimension_const_sptr a) : _a(a) {}
+  explicit CompareIMDDimension_const_sptr(IMDDimension_const_sptr a) : _a(a) {}
   bool operator()(IMDDimension_const_sptr b) {
     return _a->getDimensionId() == b->getDimensionId();
   }

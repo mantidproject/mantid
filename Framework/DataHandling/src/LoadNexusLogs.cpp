@@ -269,7 +269,7 @@ void LoadNexusLogs::exec() {
       // Try and integrate the proton logs
       try {
         // Use the DAS logs to integrate the proton charge (if any).
-        workspace->mutableRun().integrateProtonCharge();
+        workspace->mutableRun().getProtonCharge();
       } catch (Exception::NotFoundError &) {
         // Ignore not found property error.
       }

@@ -13,7 +13,8 @@ import cry_vana
 # ==========
 
 
-def focus_all(EXPR_FILE, samplelistTexte, scale=0, NoVabs=False, NoSAC=False, Eff=True, Norm=True):
+def focus_all(EXPR_FILE, samplelistTexte, scale=0, NoVabs=False, NoSAC=False, Eff=True, Norm=True,
+              Write_ExtV=True):
     if scale == 0:
         scale = float(EXPR_FILE.scale)
     # === Norm boolean flag used to Optionally correct to a Vana ===
@@ -29,7 +30,7 @@ def focus_all(EXPR_FILE, samplelistTexte, scale=0, NoVabs=False, NoSAC=False, Ef
                 # CORRECT
         elif EXPR_FILE.ExistV == "no" and EXPR_FILE.VGrpfocus == "van":
             print "was here?"
-            cry_vana.create_vana(EXPR_FILE, NoAbs=NoVabs)
+            cry_vana.create_vana(EXPR_FILE, NoAbs=NoVabs, write_existingv=Write_ExtV)
     else:
         load_sac_eff(EXPR_FILE, NoSAC=True)
     # === Construct a list of runs, sum of runs

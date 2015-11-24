@@ -15,7 +15,7 @@ namespace Kernel {
 ///@cond
 class ChebyshevPolyFitImpl {
 public:
-  ChebyshevPolyFitImpl(const size_t order) : m_order(order) {}
+  explicit ChebyshevPolyFitImpl(const size_t order) : m_order(order) {}
 
   std::vector<double> fit(const std::vector<double> &xs,
                           const std::vector<double> &ys,

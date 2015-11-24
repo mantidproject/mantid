@@ -457,11 +457,8 @@ void LoadISISNexus2::checkOptionalProperties(
     m_load_selected_spectra = true;
   }
 
-  int64_t spec_min(0);
-  int64_t spec_max(EMPTY_INT());
-  //
-  spec_min = getProperty("SpectrumMin");
-  spec_max = getProperty("SpectrumMax");
+  int64_t spec_min = getProperty("SpectrumMin");
+  int64_t spec_max = getProperty("SpectrumMax");
 
   // default spectra ID-s would not work if spectraID_min!=1
   if (m_loadBlockInfo.spectraID_min != 1) {
