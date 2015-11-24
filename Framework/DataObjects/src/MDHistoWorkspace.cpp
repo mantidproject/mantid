@@ -368,6 +368,9 @@ signal_t MDHistoWorkspace::getSignalAtCoord(
     const coord_t *coords,
     const Mantid::API::MDNormalization &normalization) const {
   size_t linearIndex = this->getLinearIndexAtCoord(coords);
+  if (this->getIsMaskedAt(linearIndex)) {
+    return std::numeric_limits<signal_t>::quiet_NaN();
+  }
   if (linearIndex < m_length) {
     // What is our normalization factor?
     switch (normalization) {
