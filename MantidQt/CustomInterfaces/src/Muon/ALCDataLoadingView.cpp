@@ -66,16 +66,24 @@ namespace CustomInterfaces
     }
   }
 
-  std::string ALCDataLoadingView::lastRun() const
-  {
-    if (m_ui.lastRun->isValid())
-    {
-      return m_ui.lastRun->getFirstFilename().toStdString();
+  /**
+   * If the last run is valid, return the filename.
+   * If user entered "Auto", return this.
+   * Otherwise, return an empty string.
+   */
+  std::string ALCDataLoadingView::lastRun() const {
+    std::string toReturn("");
+
+    if (m_ui.lastRun->isValid()) {
+      toReturn = m_ui.lastRun->getFirstFilename().toStdString();
+    } else {
+      static QString strAuto("Auto");
+      QString userInput = m_ui.lastRun->getText();
+      if (0 == userInput.compare(strAuto, Qt::CaseInsensitive)) {
+        toReturn = strAuto.toStdString();
+      }
     }
-    else
-    {
-      return "";
-    }
+    return toReturn;
   }
 
   std::string ALCDataLoadingView::log() const
