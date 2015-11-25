@@ -21,8 +21,7 @@ class MantidMatrixFunctionWorkspaceObserver: public QObject, public MantidQt::AP
 {
     Q_OBJECT
 public:
-
-    MantidMatrixFunctionWorkspaceObserver(MantidMatrixFunction *);
+  explicit MantidMatrixFunctionWorkspaceObserver(MantidMatrixFunction *);
 
 signals:
     void requestRedraw();
@@ -44,7 +43,7 @@ private:
 class MantidMatrixFunction: public Function2D
 {
 public:
-    MantidMatrixFunction(MantidMatrix &matrix);
+  explicit MantidMatrixFunction(MantidMatrix &matrix);
     ~MantidMatrixFunction();
 
   /* Base class virtual methods */

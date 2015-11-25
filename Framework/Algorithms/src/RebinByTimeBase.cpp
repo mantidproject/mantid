@@ -24,7 +24,7 @@ private:
   double m_offSet;
 
 public:
-  ConvertToRelativeTime(const DateAndTime &offSet)
+  explicit ConvertToRelativeTime(const DateAndTime &offSet)
       : m_offSet(static_cast<double>(offSet.totalNanoseconds()) * 1e-9) {}
   MantidVec::value_type operator()(const MantidVec::value_type &absTNanoSec) {
     return (absTNanoSec * 1e-9) - m_offSet;

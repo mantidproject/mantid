@@ -12,6 +12,7 @@
 
 #include "ui_ImageSelectCoRAndRegions.h"
 #include "ui_TomographyIfaceQtGUI.h"
+#include "ui_TomographyIfaceQtTabFiltersSettings.h"
 #include "ui_TomographyIfaceQtTabSetup.h"
 #include "ui_TomographyIfaceQtTabRun.h"
 
@@ -109,6 +110,8 @@ public:
     return m_toolsSettings;
   }
 
+  TomoReconFiltersSettings prePostProcSettings() const;
+
   std::string currentComputeResource() const { return m_currentComputeRes; }
   std::string currentReconTool() const { return m_currentReconTool; }
 
@@ -142,6 +145,9 @@ private slots:
   void flatPathBrowseClicked();
   void darkPathBrowseClicked();
 
+  /// For the filters tab
+  void resetPrePostFilters();
+
   /// open the MantidQT help window for this interface
   void openHelpWin();
 
@@ -163,7 +169,9 @@ private:
 
   void doSetupSectionSetup();
   void doSetupSectionRun();
+  void doSetupSectionFilters();
   void doSetupGeneralWidgets();
+
   void doSetupSavu();
 
   /// Load default interface settings for each tab, normally on startup
@@ -176,6 +184,10 @@ private:
   virtual void closeEvent(QCloseEvent *ev);
 
   void processPathBrowseClick(QLineEdit *le, std::string &data);
+
+  TomoReconFiltersSettings grabPrePostProcSettings() const;
+
+  void setPrePostProcSettings(TomoReconFiltersSettings &opts) const;
 
   // Begin of Savu related functionality. This will grow and will need
   // separation. They should find a better place to live.
@@ -215,6 +227,7 @@ private:
   // And its sections/tabs. Note that for compactness they're called simply
   // 'tabs'
   // but they could be separate dialogs, widgets, etc.
+  Ui::TomographyIfaceQtTabFiltersSettings m_uiTabFilters;
   Ui::TomographyIfaceQtTabSetup m_uiTabSetup;
   Ui::TomographyIfaceQtTabRun m_uiTabRun;
   Ui::ImageSelectCoRAndRegions m_uiTabCoR;

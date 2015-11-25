@@ -51,7 +51,7 @@ class CollapsibleStack: public QWidget
 {
   Q_OBJECT
 public:
-  CollapsibleStack(QWidget* parent);
+  explicit CollapsibleStack(QWidget *parent);
   CollapsiblePanel* addPanel(const QString& caption,QWidget* widget);
 private slots:
   void updateStretch();

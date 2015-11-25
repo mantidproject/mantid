@@ -562,7 +562,7 @@ void InstrumentWindowMaskTab::doubleChanged(QtProperty* prop)
   {
     QRectF rect(QPointF(m_doubleManager->value(m_left),m_doubleManager->value(m_top)),
                 QPointF(m_doubleManager->value(m_right),m_doubleManager->value(m_bottom)));
-    m_instrWindow->getSurface()->setCurrentBoundingRect(rect);
+    m_instrWindow->getSurface()->setCurrentBoundingRect(RectF(rect));
   }
   else
   {

@@ -123,9 +123,9 @@ fi
 ###############################################################################
 # RHEL6 setup steps - nodes must have a "rhel6" label set (in lowercase)
 ###############################################################################
+DIST_FLAGS="-DSTATIC_LIBSTDCXX=OFF"
 if [[ ${NODE_LABELS} == *rhel6* ]]; then
   SCL_ON_RHEL6="scl enable mantidlibs34 devtoolset-2"
-  DIST_FLAGS="-DSTATIC_LIBSTDCXX=ON"
   ON_RHEL6=true
 else
   SCL_ON_RHEL6="eval"

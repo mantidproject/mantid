@@ -8,6 +8,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
@@ -445,6 +446,78 @@ public:
     TS_ASSERT_DELTA(bbox.yMax(), 1.5, 1e-08);
     TS_ASSERT_DELTA(bbox.zMin(), -0.5, 1e-08);
     TS_ASSERT_DELTA(bbox.zMax(), 0.5, 1e-08);
+  }
+
+  void test_get_component_by_name_with_rect_detectors() {
+
+    CompAssembly *inst = new CompAssembly("inst");
+    CompAssembly *monitors = new CompAssembly("monitors", inst);
+    for (size_t i = 0; i < 5; i++) {
+      std::ostringstream sstr;
+      sstr << "monitor " << i;
+      Component *monitor = new Component(sstr.str());
+      monitors->add(monitor);
+    }
+    CompAssembly *detectors = new CompAssembly("detectors", inst);
+    CompAssembly *bank1 = new CompAssembly("bank 1", detectors);
+    CompAssembly *bank2 = new CompAssembly("bank 11", detectors);
+    CompAssembly *bank3 = new CompAssembly("bank 111", detectors);
+
+    // add some rectangular detectors
+    boost::shared_ptr<Object> cuboidShape =
+        ComponentCreationHelper::createCuboid(0.5);
+
+    for (size_t i = 0; i < 15; i++) {
+      std::ostringstream sstr;
+      sstr << "Rectangle bank " << i;
+      RectangularDetector *det = new RectangularDetector(sstr.str(), detectors);
+
+      // Initialize with these parameters
+      det->initialize(cuboidShape, 100, -50.0, 1.0, 200, -100.0, 1.0, 1000000,
+                      true, 1000);
+    }
+
+    // and a couple more assemblies
+    CompAssembly *bank4 = new CompAssembly("bank 12", detectors);
+    CompAssembly *bank5 = new CompAssembly("bank 121", detectors);
+
+    TS_ASSERT_EQUALS(inst->getComponentByName("bank 1")->getFullName(),
+                     bank1->getFullName());
+    TS_ASSERT_EQUALS(
+        inst->getComponentByName("inst/detectors/bank 1")->getFullName(),
+        bank1->getFullName());
+    TS_ASSERT_EQUALS(inst->getComponentByName("monitor 2")->getFullName(),
+                     "inst/monitors/monitor 2");
+    TS_ASSERT_EQUALS(
+        inst->getComponentByName("Rectangle bank 2")->getFullName(),
+        "inst/detectors/Rectangle bank 2");
+    TS_ASSERT_EQUALS(inst->getComponentByName("bank 12")->getFullName(),
+                     bank4->getFullName());
+    TS_ASSERT_EQUALS(inst->getComponentByName("bank 121")->getFullName(),
+                     bank5->getFullName());
+    TS_ASSERT_EQUALS(inst->getComponentByName("bank 11")->getFullName(),
+                     bank2->getFullName());
+    TS_ASSERT_EQUALS(inst->getComponentByName("bank 111")->getFullName(),
+                     bank3->getFullName());
+    TS_ASSERT_EQUALS(
+        inst->getComponentByName("Rectangle bank 1(1,1)")->getFullName(),
+        "inst/detectors/Rectangle bank 1/Rectangle bank 1(x=1)/Rectangle bank "
+        "1(1,1)");
+    TS_ASSERT_EQUALS(
+        inst->getComponentByName("Rectangle bank 11(1,1)")->getFullName(),
+        "inst/detectors/Rectangle bank 11/Rectangle bank 11(x=1)/Rectangle "
+        "bank 11(1,1)");
+    TS_ASSERT_EQUALS(
+        inst->getComponentByName(
+                  "inst/detectors/Rectangle bank 4/Rectangle bank 4(3,5)")
+            ->getFullName(),
+        "inst/detectors/Rectangle bank 4/Rectangle bank 4(x=3)/Rectangle bank "
+        "4(3,5)");
+    TS_ASSERT_EQUALS(
+        inst->getComponentByName("Rectangle bank 11")->getFullName(),
+        "inst/detectors/Rectangle bank 11");
+
+    delete (inst);
   }
 };
 

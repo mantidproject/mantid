@@ -22,7 +22,7 @@ DECLARE_ALGORITHM(SaveGSASInstrumentFile)
 
 class ChopperConfiguration {
 public:
-  ChopperConfiguration(vector<int> bankids);
+  explicit ChopperConfiguration(vector<int> bankids);
   ChopperConfiguration(const int freq, const std::string &bankidstr,
                        const std::string &cwlstr, const std::string &mndspstr,
                        const std::string &mxdspstr,
