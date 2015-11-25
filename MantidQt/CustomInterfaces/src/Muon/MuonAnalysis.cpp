@@ -2679,9 +2679,9 @@ void MuonAnalysis::connectAutoUpdate()
   connect(m_uiForm.timeZeroFront, SIGNAL(returnPressed()), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.firstGoodBinFront, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
 
-  connect(m_uiForm.homePeriodBox1, SIGNAL(textChanged(const QString &)), this,
+  connect(m_uiForm.homePeriodBox1, SIGNAL(editingFinished()), this,
           SLOT(homeTabUpdatePlot()));
-  connect(m_uiForm.homePeriodBox2, SIGNAL(textChanged(const QString &)), this,
+  connect(m_uiForm.homePeriodBox2, SIGNAL(editingFinished()), this,
           SLOT(homeTabUpdatePlot()));
 
   connect(m_uiForm.deadTimeType, SIGNAL( activated(int) ), this, SLOT( deadTimeTypeAutoUpdate(int) ));
