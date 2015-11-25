@@ -528,14 +528,13 @@ bool ReflectometryReductionOneAuto::checkGroups() {
  */
 Mantid::API::Workspace_sptr
 ReflectometryReductionOneAuto::sumOverTransmissionGroup(
-    WorkspaceGroup_sptr transGroup) {
+    WorkspaceGroup_sptr &transGroup) {
   // Handle transmission runs
   auto transmissionRunSum = transGroup->getItem(0);
   MatrixWorkspace_sptr total;
-  for (size_t item = 1; item < transGroup->size(); item++) {
+  for (size_t item = 1; item < transGroup->size(); ++item) {
     auto plusAlg = this->createChildAlgorithm("Plus");
     plusAlg->setChild(true);
-    // plusAlg->setRethrows(true);
     plusAlg->initialize();
     plusAlg->setProperty("LHSWorkspace", transmissionRunSum);
     plusAlg->setProperty("RHSWorkspace", transGroup->getItem(item));
@@ -593,12 +592,13 @@ bool ReflectometryReductionOneAuto::processGroups() {
       // we only have one transmission workspace, so we use it as it is.
       alg->setProperty("FirstTransmissionRun", firstTrans);
     } else if (group->size() != firstTransG->size() &&
-               !isPolarizationCorrectionOn)
+               !isPolarizationCorrectionOn) {
       // if they are not the same size then we cannot associate a transmission
       // group workspace member with every input group workpspace member.
       throw std::runtime_error("FirstTransmissionRun WorkspaceGroup must be "
                                "the same size as the InputWorkspace "
                                "WorkspaceGroup");
+    }
   }
 
   const std::string secondTrans =
@@ -614,12 +614,13 @@ bool ReflectometryReductionOneAuto::processGroups() {
       alg->setProperty("SecondTransmissionRun", secondTrans);
 
     else if (group->size() != secondTransG->size() &&
-             !isPolarizationCorrectionOn)
+             !isPolarizationCorrectionOn) {
       // if they are not the same size then we cannot associate a transmission
       // group workspace member with every input group workpspace member.
       throw std::runtime_error("SecondTransmissionRun WorkspaceGroup must be "
                                "the same size as the InputWorkspace "
                                "WorkspaceGroup");
+    }
   }
   // If our transmission run is a group and PolarizationCorrection is on
   // then we sum our transmission group members.
