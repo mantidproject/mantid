@@ -67,13 +67,16 @@ public:
                         const std::string &vanNo, const std::string &ceriaNo);
 
   /// the focusing hard work that a worker / thread will run
-  void doFocusRun(const std::string &dir,
-                  const std::vector<std::string> &outFilenames,
-                  const std::string &runNo, const std::vector<bool> &banks,
-                  const std::string &specNos, const std::string &dgFile);
+  void doFocusRun(const std::string &dir, const std::string &runNo,
+                  const std::vector<bool> &banks, const std::string &specNos,
+                  const std::string &dgFile);
 
-  /// checks if its a valid run number
+  /// checks if its a valid run number returns string
   std::string isValidRunNumber(std::vector<std::string> dir);
+
+  /// checks if its a valid run number inside vector and returns a vector;
+  /// used for mutli-run focusing
+  std::vector<std::string> isValidMultiRunNumber(std::vector<std::string> dir);
 
   /// pre-processing re-binning with Rebin, for a worker/thread
   void doRebinningTime(const std::string &runNo, double bin,
@@ -137,15 +140,16 @@ private:
   /// @name Focusing related private methods
   //@{
   /// this may also need to be mocked up in tests
-  void startFocusing(const std::string &runNo, const std::vector<bool> &banks,
+  void startFocusing(const std::vector<std::string> &runNo,
+                     const std::vector<bool> &banks,
                      const std::string &specNos = "",
                      const std::string &dgFile = "");
 
-  virtual void startAsyncFocusWorker(
-	  const std::string &dir, const std::vector<std::string> &outFilenames,
-	  const std::string &runNo, const std::vector<bool> &banks,
-	  const std::string &specNos, const std::string &dgFile);
-
+  virtual void startAsyncFocusWorker(const std::string &dir,
+                                     const std::vector<std::string> &runNo,
+                                     const std::vector<bool> &banks,
+                                     const std::string &specNos,
+                                     const std::string &dgFile);
 
   void inputChecksBeforeFocusBasic(const std::string &runNo,
                                    const std::vector<bool> &banks);

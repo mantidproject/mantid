@@ -63,7 +63,8 @@ void EnggDiffractionPresenter::cleanup() {
   if (m_workerThread) {
     if (m_workerThread->isRunning()) {
       g_log.notice() << "A calibration process is currently running, shutting "
-                        "it down immediately..." << std::endl;
+                        "it down immediately..."
+                     << std::endl;
       m_workerThread->wait(10);
     }
     delete m_workerThread;
@@ -164,7 +165,8 @@ void EnggDiffractionPresenter::processCalcCalib() {
     return;
   }
   g_log.notice() << "EnggDiffraction GUI: starting new calibration. This may "
-                    "take a few seconds... " << std::endl;
+                    "take a few seconds... "
+                 << std::endl;
 
   const std::string outFilename = outputCalibFilename(vanNo, ceriaNo);
 
@@ -176,51 +178,66 @@ void EnggDiffractionPresenter::processCalcCalib() {
 }
 
 void EnggDiffractionPresenter::processFocusBasic() {
-  const std::string runNo = isValidRunNumber(m_view->focusingRunNo());
+  const std::vector<std::string> multi_RunNo =
+      isValidMultiRunNumber(m_view->focusingRunNo());
   const std::vector<bool> banks = m_view->focusingBanks();
 
-  try {
-    inputChecksBeforeFocusBasic(runNo, banks);
-  } catch (std::invalid_argument &ia) {
-    m_view->userWarning("Error in the inputs required to focus a run",
-                        ia.what());
-    return;
-  }
+  std::string runNo;
 
-  startFocusing(runNo, banks, "", "");
+  for (int i = 0; i < multi_RunNo.size(); ++i) {
+    runNo = multi_RunNo[i];
+    try {
+      inputChecksBeforeFocusBasic(runNo, banks);
+    } catch (std::invalid_argument &ia) {
+      m_view->userWarning("Error in the inputs required to focus a run",
+                          ia.what());
+      return;
+    }
+  }
+  startFocusing(multi_RunNo, banks, "", "");
 }
 
 void EnggDiffractionPresenter::processFocusCropped() {
-  const std::string runNo = isValidRunNumber(m_view->focusingCroppedRunNo());
+  const std::vector<std::string> multi_RunNo =
+      isValidMultiRunNumber(m_view->focusingRunNo());
   const std::vector<bool> banks = m_view->focusingBanks();
   const std::string specNos = m_view->focusingCroppedSpectrumIDs();
 
-  try {
-    inputChecksBeforeFocusCropped(runNo, banks, specNos);
-  } catch (std::invalid_argument &ia) {
-    m_view->userWarning(
-        "Error in the inputs required to focus a run (in cropped mode)",
-        ia.what());
-    return;
+  std::string runNo;
+  for (int i = 0; i < multi_RunNo.size(); ++i) {
+    runNo = multi_RunNo[i];
+    try {
+      inputChecksBeforeFocusCropped(runNo, banks, specNos);
+    } catch (std::invalid_argument &ia) {
+      m_view->userWarning(
+          "Error in the inputs required to focus a run (in cropped mode)",
+          ia.what());
+      return;
+    }
   }
 
-  startFocusing(runNo, banks, specNos, "");
+  startFocusing(multi_RunNo, banks, specNos, "");
 }
 
 void EnggDiffractionPresenter::processFocusTexture() {
-  const std::string runNo = isValidRunNumber(m_view->focusingTextureRunNo());
+  const std::vector<std::string> multi_RunNo =
+      isValidMultiRunNumber(m_view->focusingRunNo());
   const std::string dgFile = m_view->focusingTextureGroupingFile();
 
-  try {
-    inputChecksBeforeFocusTexture(runNo, dgFile);
-  } catch (std::invalid_argument &ia) {
-    m_view->userWarning(
-        "Error in the inputs required to focus a run (in texture mode)",
-        ia.what());
-    return;
+  std::string runNo;
+  for (int i = 0; i < multi_RunNo.size(); ++i) {
+    runNo = multi_RunNo[i];
+    try {
+      inputChecksBeforeFocusTexture(runNo, dgFile);
+    } catch (std::invalid_argument &ia) {
+      m_view->userWarning(
+          "Error in the inputs required to focus a run (in texture mode)",
+          ia.what());
+      return;
+    }
   }
 
-  startFocusing(runNo, std::vector<bool>(), "", dgFile);
+  startFocusing(multi_RunNo, std::vector<bool>(), "", dgFile);
 }
 
 /**
@@ -238,10 +255,9 @@ void EnggDiffractionPresenter::processFocusTexture() {
  * @param dgFile detector grouping file to define banks (texture). If
  * not empty, this implies focusing in texture mode.
  */
-void EnggDiffractionPresenter::startFocusing(const std::string &runNo,
-                                             const std::vector<bool> &banks,
-                                             const std::string &specNos,
-                                             const std::string &dgFile) {
+void EnggDiffractionPresenter::startFocusing(
+    const std::vector<std::string> &runNo, const std::vector<bool> &banks,
+    const std::string &specNos, const std::string &dgFile) {
 
   std::string optMsg = "";
   if (!specNos.empty()) {
@@ -253,14 +269,13 @@ void EnggDiffractionPresenter::startFocusing(const std::string &runNo,
                  << ". This may take some seconds... " << std::endl;
 
   const std::string focusDir = m_view->focusingDir();
-  const std::vector<std::string> outFilenames =
-      outputFocusFilenames(runNo, banks);
 
   m_view->enableCalibrateAndFocusActions(false);
   // GUI-blocking alternative:
   // doFocusRun(focusDir, outFilenames, runNo, banks, specNos, dgFile)
   // focusingFinished()
-  startAsyncFocusWorker(focusDir, outFilenames, runNo, banks, specNos, dgFile);
+
+  startAsyncFocusWorker(focusDir, runNo, banks, specNos, dgFile);
 }
 
 void EnggDiffractionPresenter::processResetFocus() { m_view->resetFocus(); }
@@ -281,7 +296,8 @@ void EnggDiffractionPresenter::processRebinTime() {
   g_log.notice() << "EnggDiffraction GUI: starting new pre-processing "
                     "(re-binning) with a TOF bin into workspace '" +
                         outWSName + "'. This "
-                                    "may take some seconds... " << std::endl;
+                                    "may take some seconds... "
+                 << std::endl;
 
   m_view->enableCalibrateAndFocusActions(false);
   // GUI-blocking alternative:
@@ -307,7 +323,8 @@ void EnggDiffractionPresenter::processRebinMultiperiod() {
   g_log.notice() << "EnggDiffraction GUI: starting new pre-processing "
                     "(re-binning) by pulse times into workspace '" +
                         outWSName + "'. This "
-                                    "may take some seconds... " << std::endl;
+                                    "may take some seconds... "
+                 << std::endl;
 
   m_view->enableCalibrateAndFocusActions(false);
   // GUI-blocking alternative:
@@ -404,6 +421,65 @@ EnggDiffractionPresenter::isValidRunNumber(std::vector<std::string> dir) {
   g_log.debug() << "run number is: " << run_number << std::endl;
 
   return run_number;
+}
+
+/**
+* Checks if the provided run number is valid and if a direcotory is provided
+*
+* @param dir takes the input/directory of the user
+*
+* @return vector of string multi_run_number, 6 character string of a run number
+*/
+std::vector<std::string>
+EnggDiffractionPresenter::isValidMultiRunNumber(std::vector<std::string> dir) {
+
+  std::vector<std::string> run_vec = dir;
+  std::string run_number;
+  std::vector<std::string> multi_run_number;
+
+  // if empty string
+  size_t i = 0;
+  if (!dir.empty() && dir.at(i) != "") {
+
+    auto p = run_vec.begin();
+    int i = 0;
+    while (p != run_vec.end()) {
+      run_number = *p;
+      p++;
+      i++;
+
+      try {
+        if (Poco::File(run_number).exists()) {
+          Poco::Path inputDir = run_number;
+          run_number = "";
+          // get file name name via poco::path
+
+          std::string filename = inputDir.getFileName();
+
+          // convert to int or assign it to size_t
+          for (size_t i = 0; i < filename.size(); i++) {
+            char *str = &filename[i];
+            if (std::isdigit(*str)) {
+              run_number += filename[i];
+            }
+          }
+          run_number.erase(0, run_number.find_first_not_of('0'));
+        }
+      } catch (std::runtime_error &re) {
+        throw std::invalid_argument("Error browsing selected file: " +
+                                    static_cast<std::string>(re.what()));
+      } catch (...) {
+        throw std::invalid_argument("Error browsing selected file: ");
+      }
+
+      multi_run_number.push_back(run_number);
+    }
+  }
+
+  g_log.debug() << "run number selected for multi-run: " << run_number
+                << std::endl;
+
+  return multi_run_number;
 }
 
 /**
@@ -605,11 +681,13 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
   } catch (std::runtime_error &) {
     g_log.error() << "The calibration calculations failed. One of the "
                      "algorithms did not execute correctly. See log messages "
-                     "for details. " << std::endl;
+                     "for details. "
+                  << std::endl;
   } catch (std::invalid_argument &) {
     g_log.error()
         << "The calibration calculations failed. Some input properties "
-           "were not valid. See log messages for details. " << std::endl;
+           "were not valid. See log messages for details. "
+        << std::endl;
   }
   // restore normal data search paths
   conf.setDataSearchDirs(tmpDirs);
@@ -906,13 +984,11 @@ std::vector<std::string>
 EnggDiffractionPresenter::outputFocusFilenames(const std::string &runNo,
                                                const std::vector<bool> &banks) {
   const std::string instStr = m_view->currentInstrument();
-
   std::vector<std::string> res;
   for (size_t b = 1; b <= banks.size(); b++) {
     res.push_back(instStr + "_" + runNo + "_focused_bank_" +
                   boost::lexical_cast<std::string>(b) + ".nxs");
   }
-
   return res;
 }
 
@@ -950,16 +1026,15 @@ std::vector<std::string> EnggDiffractionPresenter::outputFocusTextureFilenames(
  * @param dgFile detector grouping file name
  */
 void EnggDiffractionPresenter::startAsyncFocusWorker(
-    const std::string &dir, const std::vector<std::string> &outFilenames,
-    const std::string &runNo, const std::vector<bool> &banks,
-    const std::string &specNos, const std::string &dgFile) {
+    const std::string &dir, const std::vector<std::string> &runNo,
+    const std::vector<bool> &banks, const std::string &specNos,
+    const std::string &dgFile) {
 
   delete m_workerThread;
   m_workerThread = new QThread(this);
-  EnggDiffWorker *worker = new EnggDiffWorker(this, dir, outFilenames, runNo,
-                                              banks, specNos, dgFile);
+  EnggDiffWorker *worker =
+      new EnggDiffWorker(this, dir, runNo, banks, specNos, dgFile);
   worker->moveToThread(m_workerThread);
-
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(focus()));
   connect(worker, SIGNAL(finished()), this, SLOT(focusingFinished()));
   // early delete of thread and worker
@@ -987,13 +1062,15 @@ void EnggDiffractionPresenter::startAsyncFocusWorker(
  * @param banks for every bank, (true/false) to consider it or not for
  * the focusing
  */
-void EnggDiffractionPresenter::doFocusRun(
-    const std::string &dir, const std::vector<std::string> &outFilenames,
-    const std::string &runNo, const std::vector<bool> &banks,
-    const std::string &specNos, const std::string &dgFile) {
+void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
+                                          const std::string &runNo,
+                                          const std::vector<bool> &banks,
+                                          const std::string &specNos,
+                                          const std::string &dgFile) {
 
   g_log.notice() << "Generating new focusing workspace(s) and file(s) into "
-                    "this directory: " << dir << std::endl;
+                    "this directory: "
+                 << dir << std::endl;
 
   // TODO: this is almost 100% common with doNewCalibrate() - refactor
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
@@ -1014,25 +1091,29 @@ void EnggDiffractionPresenter::doFocusRun(
   std::vector<std::string> effectiveFilenames;
   std::vector<std::string> specs;
   if (!specNos.empty()) {
+    // Cropped focusing
     // just to iterate once, but there's no real bank here
     bankIDs.push_back(0);
     specs.push_back(specNos); // one spectrum IDs list given by the user
     effectiveFilenames.push_back(outputFocusCroppedFilename(runNo));
   } else {
     if (dgFile.empty()) {
+      // Basic/normal focusing
       for (size_t bidx = 0; bidx < banks.size(); bidx++) {
         if (banks[bidx]) {
           bankIDs.push_back(bidx + 1);
           specs.push_back("");
-          effectiveFilenames.push_back(outFilenames[bidx]);
+          effectiveFilenames = outputFocusFilenames(runNo, banks);
         }
       }
     } else {
+      // texture focusing
       try {
         loadDetectorGroupingCSV(dgFile, bankIDs, specs);
       } catch (std::runtime_error &re) {
         g_log.error() << "Error loading detector grouping file: " + dgFile +
-                             ". Detailed error: " + re.what() << std::endl;
+                             ". Detailed error: " + re.what()
+                      << std::endl;
         bankIDs.clear();
         specs.clear();
       }
@@ -1048,8 +1129,8 @@ void EnggDiffractionPresenter::doFocusRun(
         fpath.append(effectiveFilenames[idx]).toString();
     g_log.notice() << "Generating new focused file (bank " +
                           boost::lexical_cast<std::string>(bankIDs[idx]) +
-                          ") for run " + runNo +
-                          " into: " << effectiveFilenames[idx] << std::endl;
+                          ") for run " + runNo + " into: "
+                   << effectiveFilenames[idx] << std::endl;
     try {
       m_focusFinishedOK = false;
       doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
@@ -1062,7 +1143,8 @@ void EnggDiffractionPresenter::doFocusRun(
     } catch (std::invalid_argument &ia) {
       g_log.error()
           << "The focusing failed. Some input properties were not valid. "
-             "See log messages for details. Error: " << ia.what() << std::endl;
+             "See log messages for details. Error: "
+          << ia.what() << std::endl;
     }
   }
 
@@ -1340,7 +1422,8 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                        "This is possibly because some of the settings are not "
                        "consistent. Please check the log messages for "
                        "details. Details: " +
-                           std::string(ia.what()) << std::endl;
+                           std::string(ia.what())
+                    << std::endl;
       throw;
     } catch (std::runtime_error &re) {
       g_log.error() << "Failed to calculate Vanadium corrections. "
@@ -1349,14 +1432,15 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                        "There was no obvious error in the input properties "
                        "but the algorithm failed. Please check the log "
                        "messages for details." +
-                           std::string(re.what()) << std::endl;
+                           std::string(re.what())
+                    << std::endl;
       throw;
     }
   } else {
     g_log.notice() << "Found precalculated Vanadium correction features for "
-                      "Vanadium run " << vanNo
-                   << ". Re-using these files: " << preIntegFilename << ", and "
-                   << preCurvesFilename << std::endl;
+                      "Vanadium run "
+                   << vanNo << ". Re-using these files: " << preIntegFilename
+                   << ", and " << preCurvesFilename << std::endl;
     try {
       loadVanadiumPrecalcWorkspaces(preIntegFilename, preCurvesFilename,
                                     vanIntegWS, vanCurvesWS);
@@ -1537,7 +1621,8 @@ EnggDiffractionPresenter::loadToPreproc(const std::string runNo) {
   } catch (std::runtime_error &re) {
     g_log.error()
         << "Error while loading run data to pre-process. "
-           "Could not run the algorithm Load succesfully for the run number: " +
+           "Could not run the algorithm Load succesfully for the run "
+           "number: " +
                runNo + "). Error description: " + re.what() +
                " Please check also the previous log messages for details.";
     throw;
@@ -1572,14 +1657,15 @@ void EnggDiffractionPresenter::doRebinningTime(const std::string &runNo,
   } catch (std::invalid_argument &ia) {
     g_log.error() << "Error when rebinning with a regular bin width in time. "
                      "There was an error in the inputs to the algorithm " +
-                         rebinName + ". Error description: " + ia.what() +
-                         "." << std::endl;
+                         rebinName + ". Error description: " + ia.what() + "."
+                  << std::endl;
     return;
   } catch (std::runtime_error &re) {
     g_log.error() << "Error when rebinning with a regular bin width in time. "
                      "Coult not run the algorithm " +
                          rebinName + " successfully. Error description: " +
-                         re.what() + "." << std::endl;
+                         re.what() + "."
+                  << std::endl;
     return;
   }
 
@@ -1675,14 +1761,15 @@ void EnggDiffractionPresenter::doRebinningPulses(const std::string &runNo,
   } catch (std::invalid_argument &ia) {
     g_log.error() << "Error when rebinning by pulse times. "
                      "There was an error in the inputs to the algorithm " +
-                         rebinName + ". Error description: " + ia.what() +
-                         "." << std::endl;
+                         rebinName + ". Error description: " + ia.what() + "."
+                  << std::endl;
     return;
   } catch (std::runtime_error &re) {
     g_log.error() << "Error when rebinning by pulse times. "
                      "Coult not run the algorithm " +
                          rebinName + " successfully. Error description: " +
-                         re.what() + "." << std::endl;
+                         re.what() + "."
+                  << std::endl;
     return;
   }
 
@@ -1736,7 +1823,8 @@ void EnggDiffractionPresenter::rebinningFinished() {
         << std::endl;
   } else {
     g_log.notice() << "Pre-processing (re-binning) finished - the output "
-                      "workspace is ready." << std::endl;
+                      "workspace is ready."
+                   << std::endl;
   }
   if (m_workerThread) {
     delete m_workerThread;

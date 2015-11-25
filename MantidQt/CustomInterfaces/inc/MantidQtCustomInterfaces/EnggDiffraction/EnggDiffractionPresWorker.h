@@ -112,7 +112,7 @@ private:
   const std::string m_outCalibFilename, m_vanNo, m_ceriaNo;
   /// sample run to process
   const std::string m_runNo;
-
+  // sample multi-run to process
   const std::vector<std::string> m_multiRunNo;
 
   /// Output directory
