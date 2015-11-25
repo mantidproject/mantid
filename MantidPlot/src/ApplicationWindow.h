@@ -129,7 +129,7 @@ class ApplicationWindow: public QMainWindow, public Scripted
   Q_OBJECT
 public:
   ApplicationWindow(bool factorySettings, const QStringList& args);
-  ApplicationWindow(bool factorySettings=false);
+  explicit ApplicationWindow(bool factorySettings = false);
   ~ApplicationWindow();
 
   enum ShowWindowsPolicy{HideAll, ActiveFolder, SubFolders};

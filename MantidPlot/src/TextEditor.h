@@ -39,7 +39,7 @@ class TextEditor: public QTextEdit
 	Q_OBJECT
 
 public:
-    TextEditor(Graph *g);
+  explicit TextEditor(Graph *g);
     ~TextEditor();
     void formatText(const QString & prefix, const QString & postfix);
 

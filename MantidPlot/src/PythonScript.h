@@ -105,9 +105,7 @@ private:
   struct PythonPathHolder
   {
     /// Update the path with the given entry
-    PythonPathHolder(const QString & entry)
-      : m_path(entry)
-    {
+    explicit PythonPathHolder(const QString &entry) : m_path(entry) {
       const QFileInfo filePath(m_path);
       if( filePath.exists() )
       {

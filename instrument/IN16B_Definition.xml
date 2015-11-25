@@ -67,22 +67,22 @@
 
   <type name="bank_uniq">
     <component type="standard_tube">
-      <location r="3.935600" t="128.000000" name="tube_1" />
-      <location r="3.935600" t="118.553333" name="tube_2" />
-      <location r="3.935600" t="109.106667" name="tube_3" />
-      <location r="3.935600" t="99.660000" name="tube_4" />
-      <location r="3.935600" t="90.213333" name="tube_5" />
-      <location r="3.935600" t="80.766667" name="tube_6" />
-      <location r="3.935600" t="71.320000" name="tube_7" />
-      <location r="3.935600" t="61.873333" name="tube_8" />
-      <location r="3.935600" t="52.426667" name="tube_9" />
-      <location r="3.935600" t="42.980000" name="tube_10" />
-      <location r="3.935600" t="33.533333" name="tube_11" />
-      <location r="3.935600" t="24.086667" name="tube_12" />
-      <location r="3.935600" t="14.640000" name="tube_13" />
-      <location r="3.935600" t="5.193333" name="tube_14" />
-      <location r="3.935600" t="-4.253333" name="tube_15" />
-      <location r="3.935600" t="-13.700000" name="tube_16" />
+      <location r="3.935600" t="25.1" name="tube_1" />
+      <location r="3.935600" t="32.9" name="tube_2" />
+      <location r="3.935600" t="40.7" name="tube_3" />
+      <location r="3.935600" t="48.5" name="tube_4" />
+      <location r="3.935600" t="56.3" name="tube_5" />
+      <location r="3.935600" t="64.1" name="tube_6" />
+      <location r="3.935600" t="71.9" name="tube_7" />
+      <location r="3.935600" t="79.7" name="tube_8" />
+      <location r="3.935600" t="87.5" name="tube_9" />
+      <location r="3.935600" t="95.3" name="tube_10" />
+      <location r="3.935600" t="103.1" name="tube_11" />
+      <location r="3.935600" t="110.9" name="tube_12" />
+      <location r="3.935600" t="118.7" name="tube_13" />
+      <location r="3.935600" t="126.5" name="tube_14" />
+      <location r="3.935600" t="134.3" name="tube_15" />
+      <location r="3.935600" t="142.1" name="tube_16" />
     </component>
   </type>
 

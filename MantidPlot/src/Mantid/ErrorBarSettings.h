@@ -28,7 +28,7 @@ class ErrorBarSettings : public QObject
 {
   Q_OBJECT
 public:
-  ErrorBarSettings(QObject * parent = 0);
+  explicit ErrorBarSettings(QObject *parent = 0);
 
   int capLength() const;
   void setCapLength(int t);

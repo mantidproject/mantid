@@ -166,6 +166,7 @@
 #include <QFontComboBox>
 #include <QSpinBox>
 #include <QMdiArea>
+#include <QMenuItem>
 #include <QMdiSubWindow>
 #include <QSignalMapper>
 #include <QDesktopWidget>
@@ -210,6 +211,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidQtAPI/ScriptRepositoryView.h"
@@ -4529,8 +4531,7 @@ ApplicationWindow *ApplicationWindow::open(const QString &fn,
 }
 
 void ApplicationWindow::openRecentFile(int index) {
-  QString fn = recentFilesMenu->text(index);
-
+  QString fn = recentFilesMenu->findItem(index)->data().asString();
   // if "," found in the QString
   if (fn.find(",", 0)) {
     try {
@@ -7314,7 +7315,7 @@ void ApplicationWindow::showAxisDialog() {
   QDialog *gd = showScaleDialog();
   if (gd && plot->isA("MultiLayer")) {
     MultiLayer *ml = dynamic_cast<MultiLayer *>(plot);
-    if (!ml || (ml && !ml->layers()))
+    if (!ml || !ml->layers())
       return;
 
     auto ad = dynamic_cast<AxesDialog *>(gd);
@@ -14041,9 +14042,39 @@ void ApplicationWindow::updateRecentFilesList(QString fname) {
     recentFiles.pop_back();
 
   recentFilesMenu->clear();
-  for (int i = 0; i < (int)recentFiles.size(); i++)
-    recentFilesMenu->insertItem("&" + QString::number(i + 1) + " " +
-                                recentFiles[i]);
+  int menuCount = 1;
+  for (int i = 0; i < (int)recentFiles.size(); i++) {
+    std::ostringstream ostr;
+    try {
+      Mantid::API::MultipleFileProperty mfp("tester");
+      mfp.setValue(recentFiles[i].toStdString());
+      const std::vector<std::string> files =
+          Mantid::API::MultipleFileProperty::flattenFileNames(mfp());
+      if (files.size() == 1) {
+        ostr << "&" << menuCount << " " << files[0];
+      } else if (files.size() > 1) {
+        ostr << "&" << menuCount << " " << files[0] << " && "
+             << files.size() - 1 << " more";
+      } else {
+        // mfp.setValue strips out any filenames that cannot be resolved.
+        // So if your recent file history contains a file that you have
+        // since deleted or renamed, files will be empty so do not
+        // register this entry and go on to the next one
+        continue;
+      }
+    } catch (Poco::PathSyntaxException &) {
+      // mfp could not find the file
+      continue;
+    } catch (std::exception &) {
+      // The file property could not parse the string, use as is
+      ostr << "&" << menuCount << " " << recentFiles[i].toStdString();
+    }
+    QMenuItem *mi = new QMenuItem;
+    mi->setText(QString::fromStdString(ostr.str()));
+    mi->setData(recentFiles[i]);
+    recentFilesMenu->insertItem(mi);
+    menuCount++;
+  }
 }
 
 void ApplicationWindow::translateCurveHor() {
@@ -15854,7 +15885,7 @@ void ApplicationWindow::executeScriptFile(
   runner->redirectStdOut(false);
   scriptingEnv()->redirectStdOut(false);
   if (execMode == Script::Asynchronous) {
-    QFuture<bool> job = runner->executeAsync(code);
+    QFuture<bool> job = runner->executeAsync(ScriptCode(code));
     while (job.isRunning()) {
       QCoreApplication::processEvents();
     }
@@ -15862,7 +15893,7 @@ void ApplicationWindow::executeScriptFile(
     QCoreApplication::processEvents();
     QCoreApplication::processEvents();
   } else {
-    runner->execute(code);
+    runner->execute(ScriptCode(code));
   }
   delete runner;
 }
@@ -15932,7 +15963,7 @@ bool ApplicationWindow::runPythonScript(const QString &code, bool async,
   }
   bool success(false);
   if (async) {
-    QFuture<bool> job = m_iface_script->executeAsync(code);
+    QFuture<bool> job = m_iface_script->executeAsync(ScriptCode(code));
     while (job.isRunning()) {
       QCoreApplication::instance()->processEvents();
     }
@@ -15940,7 +15971,7 @@ bool ApplicationWindow::runPythonScript(const QString &code, bool async,
     QCoreApplication::instance()->processEvents();
     success = job.result();
   } else {
-    success = m_iface_script->execute(code);
+    success = m_iface_script->execute(ScriptCode(code));
   }
   if (redirect) {
     m_iface_script->redirectStdOut(false);
