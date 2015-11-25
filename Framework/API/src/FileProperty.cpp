@@ -20,7 +20,44 @@ namespace Mantid {
 
 namespace API {
 
-using namespace Mantid::Kernel;
+using Mantid::Kernel::ConfigService;
+using Mantid::Kernel::DirectoryValidator;
+using Mantid::Kernel::FileValidator;
+using Mantid::Kernel::IValidator_sptr;
+
+namespace {
+/**
+  * Create the appropriate validator based on the parameters
+  * @param action The type of property that is being defined, @see FileAction
+  * @param exts A list of extensions, only use for File-type actions and are
+  *             passed to the validator
+  */
+IValidator_sptr createValidator(unsigned int action,
+                                const std::vector<std::string> &exts) {
+  if (action == FileProperty::Directory ||
+      action == FileProperty::OptionalDirectory) {
+    return boost::make_shared<DirectoryValidator>(action ==
+                                                  FileProperty::Directory);
+  } else {
+    return boost::make_shared<FileValidator>(
+        exts, (action == FileProperty::Load), (action == FileProperty::Save));
+  }
+}
+
+/**
+ * If the given extension doesn't exist in the list then add it
+ * @param extension A string listing the extension
+ * @param extensions The existing collection
+ */
+void addExtension(const std::string &extension,
+                  std::vector<std::string> &extensions) {
+  if (std::find(extensions.begin(), extensions.end(), extension) !=
+      extensions.end())
+    return;
+  else
+    extensions.push_back(extension);
+}
+}
 
 //-----------------------------------------------------------------
 // Public member functions
@@ -36,27 +73,14 @@ using namespace Mantid::Kernel;
  * @param direction ::     An optional direction (default=Input)
  */
 FileProperty::FileProperty(const std::string &name,
-                           const std::string &default_value,
-                           unsigned int action,
+                           const std::string &defaultValue, unsigned int action,
                            const std::vector<std::string> &exts,
                            unsigned int direction)
-    : PropertyWithValue<std::string>(
-          name, default_value,
-          /* Create either a FileValidator or a
-             DirectoryValidator, depending on Action
-             */
-          (action == FileProperty::Directory ||
-           action == FileProperty::OptionalDirectory)
-              ? boost::make_shared<DirectoryValidator>(action ==
-                                                       FileProperty::Directory)
-              : boost::make_shared<FileValidator>(
-                    exts, (action == FileProperty::Load),
-                    (action == FileProperty::Save)),
-          direction),
-      m_action(action), m_defaultExt(""), m_runFileProp(false),
-      m_oldLoadPropValue(""), m_oldLoadFoundFile("") {
-  setUp((exts.size() > 0) ? exts.front() : "");
-}
+    : PropertyWithValue<std::string>(name, defaultValue,
+                                     createValidator(action, exts), direction),
+      m_action(action), m_defaultExt((exts.size() > 0) ? exts.front() : ""),
+      m_runFileProp(isLoadProperty() && extsMatchRunFiles()),
+      m_oldLoadPropValue(""), m_oldLoadFoundFile("") {}
 
 /**
  * Constructor
@@ -71,24 +95,8 @@ FileProperty::FileProperty(const std::string &name,
                            const std::string &default_value,
                            unsigned int action, const std::string &ext,
                            unsigned int direction)
-    : PropertyWithValue<std::string>(
-          name, default_value,
-          /* Create either a FileValidator or a
-             DirectoryValidator, depending on Action
-             */
-          (action == FileProperty::Directory ||
-           action == FileProperty::OptionalDirectory)
-              ? boost::make_shared<DirectoryValidator>(action ==
-                                                       FileProperty::Directory)
-              : boost::make_shared<FileValidator>(
-                    std::vector<std::string>(1, ext),
-                    (action == FileProperty::Load),
-                    (action == FileProperty::Save)),
-          direction),
-      m_action(action), m_defaultExt(ext), m_runFileProp(false),
-      m_oldLoadPropValue(""), m_oldLoadFoundFile("") {
-  setUp(ext);
-}
+    : FileProperty(name, default_value, action,
+                   std::vector<std::string>(1, ext), direction) {}
 
 /**
  * Constructor
@@ -105,7 +113,8 @@ FileProperty::FileProperty(const std::string &name,
                            std::initializer_list<std::string> exts,
                            unsigned int direction)
     : FileProperty(name, default_value, action,
-                   std::vector<std::string>(std::move(exts)), direction) {}
+                   std::vector<std::string>(std::move(exts)),
+                   direction) {}
 
 /**
  * Check if this is a load property
@@ -208,19 +217,6 @@ std::string FileProperty::isEmptyValueValid() const {
 }
 
 /**
- * Set up the property
- * @param defExt :: The default extension
- */
-void FileProperty::setUp(const std::string &defExt) {
-  m_defaultExt = defExt;
-  if (isLoadProperty() && extsMatchRunFiles()) {
-    m_runFileProp = true;
-  } else {
-    m_runFileProp = false;
-  }
-}
-
-/**
  * Do the allowed values match the facility preference extensions for run files
  * @returns True if the extensions match those in the facility's preference list
  * for
@@ -250,17 +246,6 @@ bool FileProperty::extsMatchRunFiles() {
   // match of false
 
   return match;
-}
-
-namespace { // anonymous namespace keeps it here
-void addExtension(const std::string &extension,
-                  std::vector<std::string> &extensions) {
-  if (std::find(extensions.begin(), extensions.end(), extension) !=
-      extensions.end())
-    return;
-  else
-    extensions.push_back(extension);
-}
 }
 
 /**

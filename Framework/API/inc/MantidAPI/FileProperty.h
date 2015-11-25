@@ -53,7 +53,7 @@ public:
   };
 
   /// Constructor taking a list of extensions as a vector
-  FileProperty(const std::string &name, const std::string &default_value,
+  FileProperty(const std::string &name, const std::string &defaultValue,
                unsigned int action, const std::vector<std::string> &exts =
                                         std::vector<std::string>(),
                unsigned int direction = Kernel::Direction::Input);
@@ -92,8 +92,6 @@ public:
 private:
   /// Returns a string depending on whether an empty value is valid
   std::string isEmptyValueValid() const;
-  /// Setup based on the default extension
-  void setUp(const std::string &defExt);
   /// Do the allowed values match the facility preference extensions for run
   /// files
   bool extsMatchRunFiles();
