@@ -62,6 +62,9 @@ namespace MantidQt {
       const int group;
     };
 
+    std::vector<std::string> DLLExport
+    splitByCommas(const std::string &names_string);
+
     std::string DLLExport plot1DString(const std::vector<std::string> & ws_names,
                              const std::string & title);
 

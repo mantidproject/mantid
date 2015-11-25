@@ -14,6 +14,21 @@
 namespace MantidQt {
   namespace CustomInterfaces {
 
+  /*
+   * Split the input string on commas and trim leading and trailing whitespace
+   * from the results
+   */
+    std::vector<std::string> splitByCommas(const std::string &names_string) {
+      std::vector<std::string> names_split_by_commas;
+      boost::split(names_split_by_commas, names_string, boost::is_any_of(","));
+
+      // Remove leading/trailing whitespace from each resulting string
+      for (auto &name : names_split_by_commas) {
+        boost::trim(name);
+      }
+      return names_split_by_commas;
+    }
+
     ReflGenerateNotebook::ReflGenerateNotebook(std::string name, QReflTableModel_sptr model,
                                                const std::string instrument, const int runs_column,
                                                const int transmission_column, const int options_column,
@@ -443,22 +458,22 @@ namespace MantidQt {
     {
       const size_t maxTransWS = 2;
 
-      std::vector<std::string> transVec;
       std::ostringstream trans_string;
       std::vector<std::string> trans_ws_name;
 
-      //Take the first two run numbers
-      boost::split(transVec, trans_ws_str, boost::is_any_of(","));
-      if(transVec.size() > maxTransWS)
-        transVec.resize(maxTransWS);
+      std::vector<std::string> trans_vector = splitByCommas(trans_ws_str);
+      if(trans_vector.size() > maxTransWS)
+        trans_vector.resize(maxTransWS);
 
+      // Load the transmission runs
       boost::tuple<std::string, std::string> load_tuple;
-      for(auto it = transVec.begin(); it != transVec.end(); ++it)
-        load_tuple = loadWorkspaceString(*it, instrument);
+      for(const auto &trans_name : trans_vector) {
+        load_tuple = loadWorkspaceString(trans_name, instrument);
         trans_ws_name.push_back(boost::get<1>(load_tuple));
         trans_string << boost::get<0>(load_tuple);
+      }
 
-      //The runs are loaded, so we can create a TransWS
+      // The runs are loaded, so we can create a TransWS
       std::string wsName = "TRANS_" + getRunNumber(trans_ws_name[0]);
       if(trans_ws_name.size() > 1)
         wsName += "_" + getRunNumber(trans_ws_name[1]);
