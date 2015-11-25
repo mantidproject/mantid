@@ -121,8 +121,11 @@ class ImagingIMATTomoTests(unittest.TestCase):
     def test_correct_import_excepts(self):
         import IMAT.tomorec.tool_imports as tti
 
-        self.assertRaises(ImportError, astra_nope = tti.import_tomo_tool('astra'))
-        self.assertRaises(ImportError, tomopy_nope = tti.import_tomo_tool('tomopy'))
+        with self.assertRaises(ImportError):
+            tti.import_tomo_tool('astra')
+
+        with self.assertRaises(ImportError):
+            tti.import_tomo_tool('tomopy')
 
     def test_circular_mask_raises(self):
         import IMAT.prep as iprep
