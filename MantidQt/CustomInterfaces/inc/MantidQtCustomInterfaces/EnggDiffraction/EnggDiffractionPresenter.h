@@ -140,24 +140,26 @@ private:
   /// @name Focusing related private methods
   //@{
   /// this may also need to be mocked up in tests
-  void startFocusing(const std::vector<std::string> &runNo,
+  void startFocusing(const std::vector<std::string> &multi_runNo,
                      const std::vector<bool> &banks,
                      const std::string &specNos = "",
                      const std::string &dgFile = "");
 
-  virtual void startAsyncFocusWorker(const std::string &dir,
-                                     const std::vector<std::string> &runNo,
-                                     const std::vector<bool> &banks,
-                                     const std::string &specNos,
-                                     const std::string &dgFile);
+  virtual void
+  startAsyncFocusWorker(const std::string &dir,
+                        const std::vector<std::string> &multi_RunNo,
+                        const std::vector<bool> &banks,
+                        const std::string &specNos, const std::string &dgFile);
 
   void inputChecksBeforeFocusBasic(const std::vector<std::string> &multi_RunNo,
                                    const std::vector<bool> &banks);
-  void inputChecksBeforeFocusCropped(const std::vector<std::string> &multi_RunNo,
-                                     const std::vector<bool> &banks,
-                                     const std::string &specNos);
-  void inputChecksBeforeFocusTexture(const std::vector<std::string> &multi_RunNo,
-                                     const std::string &dgfile);
+  void
+  inputChecksBeforeFocusCropped(const std::vector<std::string> &multi_RunNo,
+                                const std::vector<bool> &banks,
+                                const std::string &specNos);
+  void
+  inputChecksBeforeFocusTexture(const std::vector<std::string> &multi_RunNo,
+                                const std::string &dgfile);
   void inputChecksBeforeFocus();
   void inputChecksBanks(const std::vector<bool> &banks);
 

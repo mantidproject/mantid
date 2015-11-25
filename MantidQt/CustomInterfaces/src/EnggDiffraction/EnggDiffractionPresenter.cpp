@@ -257,7 +257,7 @@ void EnggDiffractionPresenter::processFocusTexture() {
  * respective specific processFocus methods (for normal, cropped,
  * texture, etc. focusing).
  *
- * @param runNo run/file number to focus
+ * @param multi_RunNo vector of run/file number to focus
  * @param banks banks to include in the focusing, processed one at a time
  *
  * @param specNos list of spectra to use when focusing. If not empty
@@ -267,7 +267,7 @@ void EnggDiffractionPresenter::processFocusTexture() {
  * not empty, this implies focusing in texture mode.
  */
 void EnggDiffractionPresenter::startFocusing(
-    const std::vector<std::string> &runNo, const std::vector<bool> &banks,
+    const std::vector<std::string> &multi_RunNo, const std::vector<bool> &banks,
     const std::string &specNos, const std::string &dgFile) {
 
   std::string optMsg = "";
@@ -286,7 +286,7 @@ void EnggDiffractionPresenter::startFocusing(
   // doFocusRun(focusDir, outFilenames, runNo, banks, specNos, dgFile)
   // focusingFinished()
 
-  startAsyncFocusWorker(focusDir, runNo, banks, specNos, dgFile);
+  startAsyncFocusWorker(focusDir, multi_RunNo, banks, specNos, dgFile);
 }
 
 void EnggDiffractionPresenter::processResetFocus() { m_view->resetFocus(); }
