@@ -24,25 +24,6 @@ of paths, sample, flat, and dark images, file name prefixes, etc.
 
 """
 
-try:
-    import pyfits
-except ImportError:
-    # In Anaconda python, the pyfits package is in a different place, and this is what you frequently
-    # find on windows.
-    try:
-        import astropy.io.fits as pyfits
-    except ImportError:
-        raise ImportError("Cannot find the package 'pyfits' which is required to read/write FITS image files")
-
-try:
-    from skimage import io as skio
-    skio.use_plugin('freeimage')
-    from skimage import exposure
-except ImportError as exc:
-    raise ImportError("Could not find the package skimage and its subpackages "
-                      "io and exposure which are required to support several "
-                      "image formats. Error details: {0}".format(exc))
-
 import glob
 import os
 import re
@@ -50,6 +31,36 @@ import re
 import numpy as np
 
 __AGG_IMG_IDX = 0
+
+def _import_pyfits():
+    """
+    To import pyfits optionally only when it is/can be used
+    """
+    try:
+        import pyfits
+    except ImportError:
+        # In Anaconda python, the pyfits package is in a different place, and this is what you frequently
+        # find on windows.
+        try:
+            import astropy.io.fits as pyfits
+        except ImportError:
+            raise ImportError("Cannot find the package 'pyfits' which is required to read/write FITS image files")
+
+    return pyfits
+
+def _import_skimage_io():
+    """
+    To import skimage io only when it is/can be used
+    """
+    try:
+        from skimage import io as skio
+        skio.use_plugin('freeimage')
+        from skimage import exposure
+    except ImportError as exc:
+        raise ImportError("Could not find the package skimage and its subpackages "
+                          "io and exposure which are required to support several "
+                          "image formats. Error details: {0}".format(exc))
+    return skio
 
 def _make_dirs_if_needed(dirname):
     """
@@ -114,6 +125,7 @@ def _write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=No
     if rescale_intensity:
         img_data = exposure.rescale_intensity(img_data, out_range=dtype)#'uint16')
 
+    skio = _import_skimage_io()
     # Without this plugin tiff files don't seem to be generated correctly for some
     # bit depths (especially relevant for uint16), but you still need to load the
     # freeimage plugin with use_plugin!
@@ -147,6 +159,8 @@ def avg_image_files(path, base_path, file_extension=None, agg_method='average'):
 
     if len(img_files) <= 0:
         raise RuntimeError("No image files found in " + path)
+
+    pyfits = _import_pyfits()
 
     imgs = pyfits.open(img_files[0])
     if len(imgs) < 1:
@@ -227,6 +241,7 @@ def _read_img(filename, file_extension=None):
     @param file_extension :: extension and effectively format to use ('tiff', 'fits')
     """
     if file_extension in ['fits', 'fit']:
+        pyfits = _import_pyfits()
         imgs = pyfits.open(filename)
         if len(imgs) < 1:
             raise RuntimeError(
@@ -236,6 +251,7 @@ def _read_img(filename, file_extension=None):
         img_arr = imgs[0].data
 
     elif file_extension in ['tiff', 'tif', 'png']:
+        skio = _import_skimage_io()
         img_arr = skio.imread(filename)
 
     else:
