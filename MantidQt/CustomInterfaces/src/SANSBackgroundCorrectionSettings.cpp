@@ -15,12 +15,8 @@ SANSBackgroundCorrectionSettings::SANSBackgroundCorrectionSettings(
  */
 bool SANSBackgroundCorrectionSettings::hasValidSettings() {
   if (!m_hasValidSettings) {
-    auto isValid = true;
-
     // The run number must not be empty
-    isValid = m_runNumber.isEmpty() ? false : true;
-
-    m_hasValidSettings = isValid;
+    m_hasValidSettings = m_runNumber.isEmpty() ? false : true;
   }
 
   return m_hasValidSettings.get();

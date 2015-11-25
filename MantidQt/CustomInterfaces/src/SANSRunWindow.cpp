@@ -4939,7 +4939,9 @@ void SANSRunWindow::retrieveBackgroundCorrection() {
 
 /**
  * Get a single background correction setting
- * @param time: uses
+ * @param isTime: if is time or uamp
+ * @param isMon: if is monitor or detector
+ * @returns a settings object
  */
 SANSBackgroundCorrectionSettings
 SANSRunWindow::retrieveBackgroundCorrectionSetting(bool isTime, bool isMon) {

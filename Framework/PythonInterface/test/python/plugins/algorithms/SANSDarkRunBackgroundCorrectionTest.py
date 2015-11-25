@@ -198,8 +198,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
                                       out_ws_name, applyToMonitors, applyToDetectors, selected_monitor)
 
         # Assert
-        self.assertAlmostEquals(ws.getNumberHistograms(), scatter_ws.getNumberHistograms(),
-                         "Should have the same number of histograms", 5)
+        self.assertAlmostEquals(ws.getNumberHistograms(), scatter_ws.getNumberHistograms(), 5)
 
         comparison = lambda data, expected : all([self.assertAlmostEqual(data[i], expected, 5, "Should be equal")
                                                  for i in range(0, len(data))])
@@ -243,8 +242,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
                                       out_ws_name, applyToMonitors, applyToDetectors, selected_monitor)
 
         # Assert
-        self.assertAlmostEquals(ws.getNumberHistograms(), scatter_ws.getNumberHistograms(),
-                         "Should have the same number of histograms", 5)
+        self.assertAlmostEquals(ws.getNumberHistograms(), scatter_ws.getNumberHistograms(), 5)
 
         comparison = lambda data, expected : all([self.assertAlmostEqual(data[i], expected, 5, "Should be equal")
                                                   for i in range(0, len(data))])
@@ -291,8 +289,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
                                       out_ws_name, applyToMonitors, applyToDetectors, selected_monitor)
 
         # Assert
-        self.assertAlmostEquals(ws.getNumberHistograms(), scatter_ws.getNumberHistograms(),
-                         "Should have the same number of histograms", 5)
+        self.assertAlmostEquals(ws.getNumberHistograms(), scatter_ws.getNumberHistograms(),5)
 
         comparison = lambda data, expected : all([self.assertAlmostEqual(data[i], expected, 5, "Should be equal")
                                                   for i in range(0, len(data))])
@@ -335,8 +332,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
                                       out_ws_name, applyToMonitors, applyToDetectors, selected_monitor)
 
         # Assert
-        self.assertAlmostEquals(ws.getNumberHistograms(), scatter_ws.getNumberHistograms(),
-                         "Should have the same number of histograms", 5)
+        self.assertAlmostEquals(ws.getNumberHistograms(), scatter_ws.getNumberHistograms(), 5)
 
         comparison = lambda data, expected : all([self.assertAlmostEqual(data[i], expected, 5, "Should be equal")
                                                   for i in range(0, len(data))])
@@ -576,6 +572,11 @@ class DarkRunMonitorAndDetectorRemoverTest(unittest.TestCase):
             if AnalysisDataService.doesExist(ws):
                 AnalysisDataService.remove(ws)
 
+    def _assert_items_are_equal(self, list1, list2, message):
+        # This method is needed since RHEL6 cannot handle assertItemsEqual
+        for index in range(0, len(list1)):
+            self.assertEqual(list1[index], list1[index], message)
+
     def test_finds_all_monitor_indices_when_monitor_is_present(self):
         # Arrange
         test_ws = self._load_workspace_with_monitors()
@@ -631,21 +632,22 @@ class DarkRunMonitorAndDetectorRemoverTest(unittest.TestCase):
         self.assertEqual(dark_run_corrected.getNumberHistograms(), number_histograms_reference,
                          "The number of histograms should not have changed")
 
-        self.assertItemsEqual(dark_run_corrected.dataY(0), dataY0_reference,
-                         "First monitor Y data should not have changed")
-        self.assertItemsEqual(dark_run_corrected.dataE(0), dataE0_reference,
-                         "First monitor E data should not have changed")
+        self._assert_items_are_equal(dark_run_corrected.dataY(0), dataY0_reference,
+                                     "First monitor Y data should not have changed")
+        self._assert_items_are_equal(dark_run_corrected.dataE(0), dataE0_reference,
+                                     "First monitor E data should not have changed")
 
-        self.assertItemsEqual(dark_run_corrected.dataY(1), dataY1_reference,
-                         "Second monitor Y data should not have changed")
-        self.assertItemsEqual(dark_run_corrected.dataE(1), dataE1_reference,
-                         "Second monitor E data should not have changed")
+
+        self._assert_items_are_equal(dark_run_corrected.dataY(1), dataY1_reference,
+                                     "Second monitor Y data should not have changed")
+        self._assert_items_are_equal(dark_run_corrected.dataE(1), dataE1_reference,
+                                     "Second monitor E data should not have changed")
 
         for element in range(2, dark_run_corrected.getNumberHistograms()):
-            self.assertItemsEqual(dark_run_corrected.dataY(element), zero_reference,
-                             "The Y data of non-monitor detectors should be 0")
-            self.assertItemsEqual(dark_run_corrected.dataE(element), zero_reference,
-                             "The E data of non-monitor detectors should be 0")
+            self._assert_items_are_equal(dark_run_corrected.dataY(element), zero_reference,
+                                     "The Y data of non-monitor detectors should be 0")
+            self._assert_items_are_equal(dark_run_corrected.dataE(element), zero_reference,
+                                     "The E data of non-monitor detectors should be 0")
 
         # Clean up
         ws_to_clean = [test_ws]
@@ -668,21 +670,21 @@ class DarkRunMonitorAndDetectorRemoverTest(unittest.TestCase):
         self.assertEqual(dark_run_corrected.getNumberHistograms(), ref_ws.getNumberHistograms(),
                          "The number of histograms should not have changed")
 
-        self.assertItemsEqual(dark_run_corrected.dataY(0), zero_reference,
-                         "First monitor Y data should be 0")
-        self.assertItemsEqual(dark_run_corrected.dataE(0), zero_reference,
-                         "First monitor E data should be 0")
+        self._assert_items_are_equal(dark_run_corrected.dataY(0), zero_reference,
+                                     "First monitor Y data should be 0")
+        self._assert_items_are_equal(dark_run_corrected.dataE(0), zero_reference,
+                                     "First monitor E data should be 0")
 
-        self.assertItemsEqual(dark_run_corrected.dataY(1), zero_reference,
-                         "Second monitor Y data should be 0")
-        self.assertItemsEqual(dark_run_corrected.dataE(1), zero_reference,
-                         "Second monitor E data should be 0")
+        self._assert_items_are_equal(dark_run_corrected.dataY(1), zero_reference,
+                                     "Second monitor Y data should be 0")
+        self._assert_items_are_equal(dark_run_corrected.dataE(1),  zero_reference,
+                                     "Second monitor E data should be 0")
 
         for element in range(2, dark_run_corrected.getNumberHistograms()):
-            self.assertItemsEqual(dark_run_corrected.dataY(element), ref_ws.dataY(element),
-                             "The Y data of non-monitor detectors should not have changed")
-            self.assertItemsEqual(dark_run_corrected.dataE(element), ref_ws.dataE(element),
-                             "The E data of non-monitor detectors should not have changed")
+            self._assert_items_are_equal(dark_run_corrected.dataY(element), ref_ws.dataY(element),
+                                     "The Y data of non-monitor detectors should not have changed")
+            self._assert_items_are_equal(dark_run_corrected.dataE(element), ref_ws.dataE(element),
+                                     "The E data of non-monitor detectors should not have changed")
 
         # Clean up
         ws_to_clean = [test_ws, "ref_ws"]
@@ -708,21 +710,21 @@ class DarkRunMonitorAndDetectorRemoverTest(unittest.TestCase):
         self.assertEqual(dark_run_corrected.getNumberHistograms(), number_histograms_reference,
                          "The number of histograms should not have changed")
 
-        self.assertItemsEqual(dark_run_corrected.dataY(0), zero_reference,
-                         "First monitor Y data should be 0")
-        self.assertItemsEqual(dark_run_corrected.dataE(0), zero_reference,
-                         "First monitor E data should be 0")
+        self._assert_items_are_equal(dark_run_corrected.dataY(0), zero_reference,
+                                     "First monitor Y data should be 0")
+        self._assert_items_are_equal(dark_run_corrected.dataE(0), zero_reference,
+                                     "First monitor E data should be 0")
 
-        self.assertItemsEqual(dark_run_corrected.dataY(1), dataY1_reference,
-                         "Second monitor Y data should not have changed")
-        self.assertItemsEqual(dark_run_corrected.dataE(1), dataE1_reference,
-                         "Second monitor E data should not have changed")
+        self._assert_items_are_equal(dark_run_corrected.dataY(1), dataY1_reference,
+                                     "Second monitor Y data should not have changed")
+        self._assert_items_are_equal(dark_run_corrected.dataE(1),  dataE1_reference,
+                                     "Second monitor E data should not have changed")
 
         for element in range(2, dark_run_corrected.getNumberHistograms()):
-            self.assertItemsEqual(dark_run_corrected.dataY(element), zero_reference,
-                             "The Y data of non-monitor detectors should be 0")
-            self.assertItemsEqual(dark_run_corrected.dataE(element), zero_reference,
-                             "The E data of non-monitor detectors should be 0")
+            self._assert_items_are_equal(dark_run_corrected.dataY(element), zero_reference,
+                                     "The Y data of non-monitor detectors should be 0")
+            self._assert_items_are_equal(dark_run_corrected.dataE(element), zero_reference,
+                                     "The E data of non-monitor detectors should be 0")
 
         # Clean up
         ws_to_clean = [test_ws]

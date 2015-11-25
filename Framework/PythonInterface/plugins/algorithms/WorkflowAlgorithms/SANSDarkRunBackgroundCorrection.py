@@ -26,7 +26,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
                                                      "The corrected SANS workspace.")
         self.declareProperty("NormalizationRatio", 1.0, "Number to scale the dark run in order"
                                                        "to make it comparable to the SANS run")
-        self.declareProperty("Mean", False, "If True then a mean value of all spectra is used to" 
+        self.declareProperty("Mean", False, "If True then a mean value of all spectra is used to "
                                              "calculate the value to subtract")
         self.declareProperty("Uniform", True, "If True then we treat the treat the tim ebins a")
         self.declareProperty("ApplyToDetectors", True, "If True then we apply the correction to the detector pixels")
@@ -44,7 +44,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         # Get the workspaces
         workspace = self.getProperty("InputWorkspace").value
         dark_run = self.getProperty("DarkRun").value
-        output_ws_name = self.getPropertyValue("OutputWorkspace")
+        dummy_output_ws_name = self.getPropertyValue("OutputWorkspace")
 
         # Get other properties
         do_mean = self.getProperty("Mean").value
@@ -263,6 +263,7 @@ class DarkRunMonitorAndDetectorRemover(object):
         @returns a list of indices with monitors
         '''
         monitor_list = []
+        # pylint: disable=bare-except
         try:
             num_histograms = dark_run.getNumberHistograms()
             for index in range(0, num_histograms):
@@ -374,10 +375,10 @@ class DarkRunMonitorAndDetectorRemover(object):
         We reset all monitors back to the old values
         '''
         for i in range(0,len(monitor_list)):
-                dark_run.setY(monitor_list[i], list_dataY[i])
-                dark_run.setE(monitor_list[i], list_dataE[i])
+            dark_run.setY(monitor_list[i], list_dataY[i])
+            dark_run.setE(monitor_list[i], list_dataE[i])
         return dark_run
-
+    #pylint: disable=too-many-arguments
     def _set_only_selected_monitors(self, dark_run, list_dataY, list_dataE,
                                     monitor_list, selected_monitors):
         for i in range(0,len(monitor_list)):
