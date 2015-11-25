@@ -111,6 +111,83 @@ public:
     return;
   }
 
+  /** Test outpout Workspace2D with start and stop time
+    */
+  void test_Output2DWorkspaceTimeRange() {
+    DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
+    AnalysisDataService::Instance().addOrReplace("EventWorkspace", eventWS);
+
+    ExportTimeSeriesLog getalg;
+    getalg.initialize();
+
+    getalg.setProperty("InputWorkspace", eventWS);
+    getalg.setProperty("OutputWorkspace", "FastSineLog2DWS");
+    getalg.setProperty("LogName", "FastSineLog");
+    getalg.setProperty("StartTime", 0.1);
+    getalg.setProperty("StopTime", 5.0);
+    getalg.setProperty("UnitOfTime", "Seconds");
+    getalg.setProperty("IsEventWorkspace", false);
+
+    getalg.execute();
+    TS_ASSERT(getalg.isExecuted());
+
+    Workspace2D_sptr outws = boost::dynamic_pointer_cast<Workspace2D>(
+        AnalysisDataService::Instance().retrieve("FastSineLog2DWS"));
+    TS_ASSERT(outws);
+
+    TS_ASSERT_EQUALS(outws->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outws->dataX(0).size(), 40);
+
+    for (size_t i = 1; i < 40; ++i) {
+      TS_ASSERT(outws->dataX(0)[i - 1] < outws->dataX(0)[i]);
+    }
+
+    // -1 Clean
+    AnalysisDataService::Instance().remove("EventWorkspace");
+    AnalysisDataService::Instance().remove("FastSineLog2DWS");
+
+    return;
+  }
+
+
+  /** Test outpout Workspace2D with start and stop time
+    */
+  void test_Output2DWorkspaceNanosecond() {
+    DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
+    AnalysisDataService::Instance().addOrReplace("EventWorkspace", eventWS);
+
+    ExportTimeSeriesLog getalg;
+    getalg.initialize();
+
+    getalg.setProperty("InputWorkspace", eventWS);
+    getalg.setProperty("OutputWorkspace", "FastSineLog2DWS");
+    getalg.setProperty("LogName", "FastSineLog");
+    getalg.setProperty("StartTime", 0.1);
+    getalg.setProperty("StopTime", 5.0);
+    getalg.setProperty("UnitOfTime", "Nano Seconds");
+    getalg.setProperty("IsEventWorkspace", false);
+
+    getalg.execute();
+    TS_ASSERT(getalg.isExecuted());
+
+    Workspace2D_sptr outws = boost::dynamic_pointer_cast<Workspace2D>(
+        AnalysisDataService::Instance().retrieve("FastSineLog2DWS"));
+    TS_ASSERT(outws);
+
+    TS_ASSERT_EQUALS(outws->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outws->dataX(0).size(), 40);
+
+    for (size_t i = 1; i < 40; ++i) {
+      TS_ASSERT(outws->dataX(0)[i - 1] < outws->dataX(0)[i]);
+    }
+
+    // -1 Clean
+    AnalysisDataService::Instance().remove("EventWorkspace");
+    AnalysisDataService::Instance().remove("FastSineLog2DWS");
+
+    return;
+  }
+
   /** Test outpout Workspace2D with limited number
     */
   void test_Output2DWorkspacePartialLog() {
