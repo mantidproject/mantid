@@ -1027,15 +1027,14 @@ void Graph::setAutoScale()
 
   if (isWaterfallPlot() && n_curves > 1)
   {
-	  double xmin, xmax, ymin, ymax;
 	  QwtPlotCurve *c = curve(n_curves - 1);
 
 	  if (c)
 	  {
-		  xmin = c->minXValue();
-		  xmax = c->maxXValue();
-		  ymin = c->minYValue();
-		  ymax = c->maxYValue();
+		  double xmin = c->minXValue();
+		  double xmax = c->maxXValue();
+		  double ymin = c->minYValue();
+		  double ymax = c->maxYValue();
 
 		  for (auto i = 0; i < n_curves; i++)
 		  {
