@@ -35,6 +35,8 @@ public:
   /// Algorithm's category for identification
   virtual const std::string category() const { return "MDAlgorithms\\Peaks"; }
 
+  void simplePeakIntegration();
+
 private:
   /// Initialise the properties
   void init();

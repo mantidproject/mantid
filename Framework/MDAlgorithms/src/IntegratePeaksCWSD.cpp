@@ -95,7 +95,7 @@ void IntegratePeaksCWSD::exec()
 void IntegratePeaksCWSD::simplePeakIntegration()
 {
   // Go through to get value
-  IMDIterator *mditer = mdws->createIterator();
+  IMDIterator *mditer = m_inputWS->createIterator();
   size_t nextindex = 1;
   bool scancell = true;
   size_t currindex = 0;
