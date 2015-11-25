@@ -424,7 +424,8 @@ public:
   void test_groupAsymmetry_threePeriods_plus() {
 
     // Name of the output workspace.
-    const std::string outWSName = outputWorkspaceName("GroupAsymmetry_Multi_Plus");
+    const std::string outWSName =
+        outputWorkspaceName("GroupAsymmetry_Multi_Plus");
 
     MatrixWorkspace_sptr periodOne = createWorkspace();
     MatrixWorkspace_sptr periodTwo = createWorkspace(3);
@@ -446,7 +447,7 @@ public:
 
     // Retrieve the workspace from data service.
     auto ws =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
     TS_ASSERT(ws);
 
     if (ws) {
@@ -476,7 +477,8 @@ public:
   void test_groupAsymmetry_threePeriods_minus() {
 
     // Name of the output workspace.
-    const std::string outWSName = outputWorkspaceName("GroupAsymmetry_Multi_Minus");
+    const std::string outWSName =
+        outputWorkspaceName("GroupAsymmetry_Multi_Minus");
 
     MatrixWorkspace_sptr periodOne = createWorkspace();
     MatrixWorkspace_sptr periodTwo = createWorkspace(3);
@@ -499,7 +501,7 @@ public:
 
     // Retrieve the workspace from data service.
     auto ws =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
     TS_ASSERT(ws);
 
     if (ws) {
@@ -667,7 +669,8 @@ public:
 
   void test_pairAsymmetry_threePeriods_minus() {
     // Name of the output workspace.
-    const std::string outWSName = outputWorkspaceName("PairAsymmetry_three_minus");
+    const std::string outWSName =
+        outputWorkspaceName("PairAsymmetry_three_minus");
 
     MatrixWorkspace_sptr inWS = createWorkspace(3);
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
@@ -691,7 +694,7 @@ public:
 
     // Retrieve the workspace from data service.
     auto ws =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
     TS_ASSERT(ws);
 
     if (ws) {
@@ -717,7 +720,8 @@ public:
 
   void test_pairAsymmetry_threePeriods_plus() {
     // Name of the output workspace.
-    const std::string outWSName = outputWorkspaceName("PairAsymmetry_three_plus");
+    const std::string outWSName =
+        outputWorkspaceName("PairAsymmetry_three_plus");
 
     MatrixWorkspace_sptr inWS = createWorkspace(3);
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
@@ -740,7 +744,7 @@ public:
 
     // Retrieve the workspace from data service.
     auto ws =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
     TS_ASSERT(ws);
 
     if (ws) {
