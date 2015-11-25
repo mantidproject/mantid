@@ -117,8 +117,8 @@ public:
 
   void do_test_peaks(vtkUnstructuredGrid* in, vtkUnstructuredGrid* out, std::vector<PeaksFilterDataContainer> peakData)
   {
-    auto inPoints = vtkSmartPointer<vtkPoints>::Take(in->GetPoints());
-    auto outPoints = vtkSmartPointer<vtkPoints>::Take(out->GetPoints());
+    vtkPoints *inPoints = in->GetPoints();
+    vtkPoints *outPoints = out->GetPoints();
 
     int numberOfInPoints = static_cast<int>(inPoints->GetNumberOfPoints());
     int numberOfOutPoints = static_cast<int>(outPoints->GetNumberOfPoints());
@@ -176,7 +176,7 @@ public:
 
   void testThrowIfInputNull()
   {
-    vtkUnstructuredGrid *in = NULL;
+    vtkUnstructuredGrid *in = nullptr;
     vtkNew<vtkUnstructuredGrid> out;
     TS_ASSERT_THROWS(vtkDataSetToPeaksFilteredDataSet peaksFilter(in, out.GetPointer()), std::runtime_error);
   }
@@ -184,7 +184,7 @@ public:
   void testThrowIfOutputNull()
   {
     vtkNew<vtkUnstructuredGrid> in;
-    vtkUnstructuredGrid *out = NULL;
+    vtkUnstructuredGrid *out = nullptr;
     TS_ASSERT_THROWS(vtkDataSetToPeaksFilteredDataSet peaksFilter(in.GetPointer(), out), std::runtime_error);
   }
 
@@ -203,7 +203,7 @@ public:
     // Arrange
     vtkSmartPointer<vtkUnstructuredGrid> in;
     in.TakeReference(makeSplatterSourceGrid());
-    auto out = vtkUnstructuredGrid::New();
+    auto out = vtkSmartPointer<vtkUnstructuredGrid>::New();
     vtkDataSetToPeaksFilteredDataSet peaksFilter(in, out);
 
     Mantid::Kernel::V3D coordinate(0,0,0);
@@ -237,7 +237,7 @@ public:
     // Arrange
     vtkSmartPointer<vtkUnstructuredGrid> in;
     in.TakeReference(makeSplatterSourceGrid());
-    auto out = vtkUnstructuredGrid::New();
+    auto out = vtkSmartPointer<vtkUnstructuredGrid>::New();
     vtkDataSetToPeaksFilteredDataSet peaksFilter(in, out);
 
     Mantid::Kernel::V3D coordinate(0,0,0);
@@ -279,7 +279,7 @@ public:
     // Arrange
     vtkSmartPointer<vtkUnstructuredGrid> in;
     in.TakeReference(makeSplatterSourceGrid());
-    auto out = vtkUnstructuredGrid::New();
+    auto out = vtkSmartPointer<vtkUnstructuredGrid>::New();
     vtkDataSetToPeaksFilteredDataSet peaksFilter(in, out);
 
     Mantid::Kernel::V3D coordinate(0,0,0);
@@ -311,7 +311,7 @@ public:
      // Arrange
     vtkSmartPointer<vtkUnstructuredGrid> in;
     in.TakeReference(makeSplatterSourceGrid());
-    auto out = vtkUnstructuredGrid::New();
+    auto out = vtkSmartPointer<vtkUnstructuredGrid>::New();
     vtkDataSetToPeaksFilteredDataSet peaksFilter(in, out);
 
     // Peak 1
