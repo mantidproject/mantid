@@ -1024,16 +1024,43 @@ void Graph::enableAutoscaling(bool yes)
 void Graph::setAutoScale()
 {
   enableAutoscaling(true);
-  
-  updateScale();
-  
-  for (int i = 0; i < QwtPlot::axisCnt; i++)
+
+  if (isWaterfallPlot() && n_curves > 1)
   {
-    if ( isLog(QwtPlot::Axis(i)) )
-    {
-      niceLogScales(QwtPlot::Axis(i));
-    }
+	  double xmin, xmax, ymin, ymax;
+	  QwtPlotCurve *c = curve(n_curves - 1);
+
+	  if (c)
+	  {
+		  xmin = c->minXValue();
+		  xmax = c->maxXValue();
+		  ymin = c->minYValue();
+		  ymax = c->maxYValue();
+
+		  for (auto i = 0; i < n_curves; i++)
+		  {
+			  xmax += (xmax * d_waterfall_offset_x * 0.01)/ (n_curves-1);
+			  ymax += (ymax * d_waterfall_offset_y * 0.01)/ (n_curves-1);
+		  }
+
+		  d_plot->setAxisScale(QwtPlot::Axis::xBottom, xmin, xmax);
+		  d_plot->setAxisScale(QwtPlot::Axis::yLeft, ymin, ymax);
+		  d_plot->replot();
+	  }
   }
+  else
+  {
+	  updateScale();
+
+	  for (int i = 0; i < QwtPlot::axisCnt; i++)
+	  {
+		  if (isLog(QwtPlot::Axis(i)))
+		  {
+			  niceLogScales(QwtPlot::Axis(i));
+		  }
+	  }
+  }
+
   emit modifiedGraph();
 }
 
