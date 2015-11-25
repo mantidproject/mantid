@@ -30,12 +30,25 @@ namespace CustomInterfaces
   {
     m_view->initialize();
 
-    connect(m_view, SIGNAL(loadRequested()), SLOT(load()));
+    connect(m_view, SIGNAL(loadRequested()), SLOT(handleLoadRequested()));
     connect(m_view, SIGNAL(firstRunSelected()), SLOT(updateAvailableInfo()));
   }
 
-  void ALCDataLoadingPresenter::load()
-  {
+  /**
+   * Called when the Load button is clicked.
+   * Gets last run, passes it to load method if not "auto".
+   * If it was "auto", sets up a watcher to automatically reload on new files.
+   */
+  void ALCDataLoadingPresenter::handleLoadRequested() {
+    // TODO: check for auto, set up watcher etc
+    load(m_view->lastRun());
+  }
+
+  /**
+   * Load new data and update the view accordingly
+   * @param lastFile :: [input] Last file in range (user-specified or auto)
+   */
+  void ALCDataLoadingPresenter::load(const std::string &lastFile) {
     m_view->disableAll();
 
     try
@@ -43,7 +56,7 @@ namespace CustomInterfaces
       IAlgorithm_sptr alg = AlgorithmManager::Instance().create("PlotAsymmetryByLogValue");
       alg->setChild(true); // Don't want workspaces in the ADS
       alg->setProperty("FirstRun", m_view->firstRun());
-      alg->setProperty("LastRun", m_view->lastRun());
+      alg->setProperty("LastRun", lastFile);
       alg->setProperty("LogValue", m_view->log());
       alg->setProperty("Function", m_view->function());
       alg->setProperty("Type", m_view->calculationType());

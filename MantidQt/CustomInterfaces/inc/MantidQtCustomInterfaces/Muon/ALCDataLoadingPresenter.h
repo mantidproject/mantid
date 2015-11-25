@@ -54,8 +54,8 @@ namespace CustomInterfaces
     void setData (MatrixWorkspace_const_sptr data);
 
   private slots:
-    /// Load new data and update the view accordingly
-    void load();
+    /// Check file range and call method to load new data
+    void handleLoadRequested();
 
     /// Updates the list of logs and number of periods
     void updateAvailableInfo();
@@ -65,6 +65,9 @@ namespace CustomInterfaces
     void dataChanged();
 
   private:
+    /// Load new data and update the view accordingly
+    void load(const std::string &lastFile);
+
     /// View which the object works with
     IALCDataLoadingView* const m_view;
 
