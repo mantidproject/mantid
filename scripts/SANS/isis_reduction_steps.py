@@ -1181,11 +1181,11 @@ class LoadSample(LoadRun):
 
 class DarkRunSubtraction(object):
     '''
-    This class handles the subtraction of a dark run from the sample workspace. 
+    This class handles the subtraction of a dark run from the sample workspace.
     The dark run subtraction does not take place and just passes the workspace through
-    if the parameters are not fully specified. 
+    if the parameters are not fully specified.
     '''
-    # The named tuple contains the information for a dark run subtraction for a single run number ( of 
+    # The named tuple contains the information for a dark run subtraction for a single run number ( of
     # a dark run file)
     # The relevant inforamtion is the run number, if we use time or uamp, if we use mean or tof, if we
     # apply this to all detectors, if we apply this to monitors and if so to which monitors
@@ -3323,7 +3323,7 @@ class UserFile(ReductionStep):
         # else handle in a standard way
         back_parser = UserFileParser.BackCommandParser()
         if back_parser.can_attempt_to_parse(arguments):
-            dark_run_setting = back_parser.parse_and_set(arguments, reducer)
+            dark_run_setting = back_parser.parse_and_set(arguments)
             reducer.event2hist.add_dark_run_setting(dark_run_setting)
         else:
             #a list of the key words this function can read and the functions it calls in response

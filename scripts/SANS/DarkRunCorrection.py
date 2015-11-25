@@ -1,5 +1,4 @@
 ﻿#pylint: disable=invalid-name
-import mantid
 from mantid.simpleapi import *
 from mantid.kernel import time_duration
 
@@ -16,7 +15,7 @@ class DarkRunCorrection(object):
         self._use_mean = False
 
         # Should we use time logs or uamph logs to calculat the normalization ratio.
-        # In the former case we treat the dark run signal as uniform, ie constant 
+        # In the former case we treat the dark run signal as uniform, ie constant
         # (excpt for stat. fluctuations) over time. In the latter case it is treated
         # as non-uniform
         self._use_time = True
@@ -85,6 +84,7 @@ class DarkRunCorrection(object):
         self._reset_settings()
         return alg_dark.getProperty("OutputWorkspace").value
 
+# pylint: disable=too-few-public-methods
 class DarkRunNormalizationExtractor(object):
     '''
     Extrats the normalization ratio from the scatter workspace

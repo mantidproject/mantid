@@ -1,33 +1,14 @@
 ﻿#pylint: disable=invalid-name
-import mantid
-from mantid.kernel import Logger
 from collections import namedtuple
 import re
 
 # A settings tuple for dark runs.
 DarkRunSettings = namedtuple("DarkRunSettings", "run_number time mean mon mon_number")
 
-
+#pylint: disable=too-many-instance-attributes
 class BackCommandParser(object):
     def __init__(self):
         super(BackCommandParser, self).__init__()
-        self._set_parser_chain()
-
-        # Parse results
-        self._use_mean = None
-        self._use_time = None
-        self._mon = False # This is not being parsed by the standard chain
-        self._run_number = None
-        self._mon_number = None
-
-    def _reset_parse_results(self):
-        self._use_mean = None
-        self._use_time = None
-        self._mon = False # This is not being parsed by the standard chain
-        self._run_number = None
-        self._mon_number = None
-
-    def _set_parser_chain(self):
         self._uniform_key = ['TIME', 'UAMP']
         self._mean_key = ['MEAN', 'TOF']
         self._run_key = ['RUN=']
@@ -38,20 +19,31 @@ class BackCommandParser(object):
         # Special because they are not standard, eg MON/RUN=1234/MEAN/TIME or M4/RUN=1234/MEAN/TIME
         self._first_level_keys_special = ['MON', "^M[1-9][0-9]*$"]
 
-        # Evaluation chains 
+        # Evaluation chains
         self._standard_chain = [self._first_level_keys_standard, self._mean_key, self._run_key]
         self._special_chain = [self._first_level_keys_special, self._run_key, self._uniform_key, self._mean_key]
         self._evaluation_chain = None
 
-        # Key - method mapping
-        self._set_up_method_map()
+        # Parse results
+        self._use_mean = None
+        self._use_time = None
+        self._mon = False # This is not being parsed by the standard chain
+        self._run_number = None
+        self._mon_number = None
 
-    def _set_up_method_map(self):
-         self._method_map = {''.join(self._first_level_keys_standard): self._evaluate_uniform,
-                             ''.join(self._first_level_keys_special): self._evaluate_mon,
-                             ''.join(self._uniform_key): self._evaluate_uniform,
-                             ''.join(self._mean_key):self._evaluate_mean,
-                             ''.join(self._run_key):self._evaluate_run}
+        # Key - method mapping
+        self._method_map = {''.join(self._first_level_keys_standard): self._evaluate_uniform,
+                            ''.join(self._first_level_keys_special): self._evaluate_mon,
+                            ''.join(self._uniform_key): self._evaluate_uniform,
+                            ''.join(self._mean_key):self._evaluate_mean,
+                            ''.join(self._run_key):self._evaluate_run}
+
+    def _reset_parse_results(self):
+        self._use_mean = None
+        self._use_time = None
+        self._mon = False # This is not being parsed by the standard chain
+        self._run_number = None
+        self._mon_number = None
 
     def _get_method(self, key_list):
         return self._method_map[''.join(key_list)]
@@ -183,7 +175,7 @@ class BackCommandParser(object):
             if "=" in arg:
                 parts = arg.split("=")
                 # If there are not exactly two elements, then the input is invalid
-                # We need Run=XXXXXXX
+                # We need Run=somerun
                 if len(parts) != 2:
                     return []
                 new_arg = "RUN=" + parts[1].strip()
@@ -192,11 +184,10 @@ class BackCommandParser(object):
                 split_arguments[index] = arg.strip().upper()
         return [element.strip() for element in split_arguments]
 
-    def parse_and_set(self, arguments, reducer):
+    def parse_and_set(self, arguments):
         '''
         Parse the values of the parameter string and set them on the reducer
         @param arguments: the string containing the arguments
-        @param reducer: the reducer
         @returns an error message if something went wrong or else nothing
         '''
         # Parse the arguments.
