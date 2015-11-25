@@ -183,14 +183,23 @@ void EnggDiffractionPresenter::processFocusBasic() {
       isValidMultiRunNumber(m_view->focusingRunNo());
   const std::vector<bool> banks = m_view->focusingBanks();
 
-  try {
-    inputChecksBeforeFocusBasic(multi_RunNo, banks);
-  } catch (std::invalid_argument &ia) {
-    m_view->userWarning("Error in the inputs required to focus a run",
-                        ia.what());
-    return;
+  int focusMode = m_view->currentMultiRunMode();
+
+  if (focusMode == 0) {
+	  g_log.debug() << " focus mode selected Individual Run Files Separately " << std::endl;
+	  try {
+		  inputChecksBeforeFocusBasic(multi_RunNo, banks);
+	  }
+	  catch (std::invalid_argument &ia) {
+		  m_view->userWarning("Error in the inputs required to focus a run",
+			  ia.what());
+		  return;
+	  }
+	  startFocusing(multi_RunNo, banks, "", "");
   }
-  startFocusing(multi_RunNo, banks, "", "");
+  else if (focusMode == 1) {
+	  g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
+  }
 }
 
 void EnggDiffractionPresenter::processFocusCropped() {
@@ -199,15 +208,24 @@ void EnggDiffractionPresenter::processFocusCropped() {
   const std::vector<bool> banks = m_view->focusingBanks();
   const std::string specNos = m_view->focusingCroppedSpectrumIDs();
 
-  try {
-    inputChecksBeforeFocusCropped(multi_RunNo, banks, specNos);
-  } catch (std::invalid_argument &ia) {
-    m_view->userWarning(
-        "Error in the inputs required to focus a run (in cropped mode)",
-        ia.what());
-    return;
+  int focusMode = m_view->currentMultiRunMode();
+
+  if (focusMode == 0) {
+	  g_log.debug() << " focus mode selected Individual Run Files Separately " << std::endl;
+	  try {
+		  inputChecksBeforeFocusCropped(multi_RunNo, banks, specNos);
+	  }
+	  catch (std::invalid_argument &ia) {
+		  m_view->userWarning(
+			  "Error in the inputs required to focus a run (in cropped mode)",
+			  ia.what());
+		  return;
+	  }
+	  startFocusing(multi_RunNo, banks, specNos, "");
   }
-  startFocusing(multi_RunNo, banks, specNos, "");
+  else if (focusMode == 1) {
+		  g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
+  }
 }
 
 void EnggDiffractionPresenter::processFocusTexture() {
@@ -215,15 +233,24 @@ void EnggDiffractionPresenter::processFocusTexture() {
       isValidMultiRunNumber(m_view->focusingTextureRunNo());
   const std::string dgFile = m_view->focusingTextureGroupingFile();
 
-  try {
-    inputChecksBeforeFocusTexture(multi_RunNo, dgFile);
-  } catch (std::invalid_argument &ia) {
-    m_view->userWarning(
-        "Error in the inputs required to focus a run (in texture mode)",
-        ia.what());
-    return;
+  int focusMode = m_view->currentMultiRunMode();
+
+  if (focusMode == 0) {
+	  g_log.debug() << " focus mode selected Individual Run Files Separately " << std::endl;
+	  try {
+		  inputChecksBeforeFocusTexture(multi_RunNo, dgFile);
+	  }
+	  catch (std::invalid_argument &ia) {
+		  m_view->userWarning(
+			  "Error in the inputs required to focus a run (in texture mode)",
+			  ia.what());
+		  return;
+	  }
+	  startFocusing(multi_RunNo, std::vector<bool>(), "", dgFile);
   }
-  startFocusing(multi_RunNo, std::vector<bool>(), "", dgFile);
+  else if (focusMode == 1) {
+	  g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
+  }
 }
 
 /**
