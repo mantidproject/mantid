@@ -55,11 +55,10 @@ def _import_skimage_io():
     try:
         from skimage import io as skio
         skio.use_plugin('freeimage')
-        from skimage import exposure
     except ImportError as exc:
-        raise ImportError("Could not find the package skimage and its subpackages "
-                          "io and exposure which are required to support several "
-                          "image formats. Error details: {0}".format(exc))
+        raise ImportError("Could not find the package skimage, its subpackage "
+                          "io and the pluging freeimage which are required to support "
+                          "several image formats. Error details: {0}".format(exc))
     return skio
 
 def _make_dirs_if_needed(dirname):
@@ -106,8 +105,6 @@ def _write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=No
 
     # from bigger to smaller type, example: float32 => uint16
     if dtype and img_data.dtype != dtype:
-        #img_data = np.array(img_data, dtype=dtype)
-        #img_data.astype(dtype=dtype)
         old_img_data = img_data
         img_data = np.zeros(old_img_data.shape, dtype='float32')
         pix_range = max_pix - float(min_pix)
@@ -118,11 +115,15 @@ def _write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=No
             print "pix min: {0}, max: {1}, scale_factor: {2}".format(min_pix, max_pix, scale_factor)
         img_data = scale_factor * (old_img_data - min_pix)
         img_data = img_data.astype(dtype=dtype)
-        #print "re-scaled img_data, min, max: {0}, {1}".format(np.amin(img_data), np.amax(img_data))
 
     # this rescale intensity would ignore the range of other images in the stack
     # in addition, it clips if the original values are below/above the destination type limits
     if rescale_intensity:
+        try:
+            from skimage import exposure
+        except ImportError as exc:
+            raise ImportError("Could not find the exposure package (in skimage) "
+                              "Error details: {0}".format(exc))
         img_data = exposure.rescale_intensity(img_data, out_range=dtype)#'uint16')
 
     skio = _import_skimage_io()
