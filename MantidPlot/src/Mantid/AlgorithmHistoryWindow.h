@@ -57,8 +57,8 @@ signals:
 
 public:
   /// Constructor
-  AlgHistoryTreeWidget(QWidget *w):QTreeWidget(w),m_algName(""),m_nVersion(0) 
-  {
+  explicit AlgHistoryTreeWidget(QWidget *w)
+      : QTreeWidget(w), m_algName(""), m_nVersion(0) {
     connect(this, SIGNAL(itemChanged(QTreeWidgetItem*,int)),SLOT(onItemChanged(QTreeWidgetItem*,int)));
   }
   void populateAlgHistoryTreeWidget(const Mantid::API::WorkspaceHistory& wsHist);
@@ -88,7 +88,7 @@ class AlgExecSummaryGrpBox: public QGroupBox
 {
   Q_OBJECT
   public:
-  AlgExecSummaryGrpBox(QWidget*w);
+    explicit AlgExecSummaryGrpBox(QWidget *w);
   AlgExecSummaryGrpBox(QString,QWidget*w);
   ~AlgExecSummaryGrpBox();
   void setData(const double execDuration,const Mantid::Kernel::DateAndTime execDate);
@@ -109,7 +109,7 @@ class AlgEnvHistoryGrpBox: public QGroupBox
 {
   Q_OBJECT
   public:
-  AlgEnvHistoryGrpBox(QWidget*w);
+    explicit AlgEnvHistoryGrpBox(QWidget *w);
   AlgEnvHistoryGrpBox(QString,QWidget*w);
   ~AlgEnvHistoryGrpBox();
 

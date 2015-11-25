@@ -19,7 +19,7 @@ class OneCurvePlot: public QwtPlot
 {
   Q_OBJECT
 public:
-  OneCurvePlot(QWidget* parent);
+  explicit OneCurvePlot(QWidget *parent);
   ~OneCurvePlot();
   void setData(const double* x,const double* y,int dataSize,const std::string& xUnits = "");
   void setLabel(const QString& label);

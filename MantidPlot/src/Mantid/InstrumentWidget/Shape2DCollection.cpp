@@ -400,7 +400,7 @@ void Shape2DCollection::deselectAtXY(int x, int y)
  */
 bool Shape2DCollection::selectIn(const QRect& rect)
 {
-  RectF untransformedRect = QRectF(rect);
+  RectF untransformedRect = RectF(QRectF(rect));
   RectF r( m_transform.inverted().mapRect( QRectF(rect) ) );
   bool selected = false;
   deselectAll();
@@ -724,7 +724,7 @@ void Shape2DCollection::getMaskedPixels(QList<QPoint>& pixels)const
 void Shape2DCollection::setCurrentBoundingRectReal(const QRectF& rect)
 {
   if (!m_currentShape) return;
-  m_currentShape->setBoundingRect(rect);
+  m_currentShape->setBoundingRect(RectF(rect));
 }
 
 /**

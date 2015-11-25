@@ -5743,6 +5743,10 @@ void Graph::checkValuesInAxisRange(MantidMatrixCurve* mc)
   auto* data = mc->mantidData();
   double xMin(data->x(0)); // Needs to be min of current graph (x-axis)
   double xMax(data->x(data->size()-1)); // Needs to be max of current graph (x-axis)
+  if (xMin > xMax)
+  {
+    std::swap(xMin, xMax);
+  }
   bool changed(false);
   for (size_t i = 1; i<data->size(); ++i)
   {
@@ -6448,18 +6452,16 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     int lastCurveID = -1;
     for(auto lineIt = lineVec.begin(); lineIt != lineVec.end(); ++lineIt)
     {
-      const std::string line = *lineIt;
+      const std::string &line = *lineIt;
 
-      if(line.find("MantidMatrixCurve") == 0)
-      {
+      if (line.compare("MantidMatrixCurve") == 0) {
         //Moving onto the next MantidMatrixCurve.
         lastCurveID++;
         continue;
       }
 
       //Handle sections as appropriate.
-      if(line.find("<SkipPoints>") == 0)
-      {
+      if (line.compare("<SkipPoints>") == 0) {
         PlotCurve* c = dynamic_cast<PlotCurve*>(curve(lastCurveID));
         if(!c)
           continue;
@@ -6470,9 +6472,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
         int value = 0;
         Mantid::Kernel::Strings::convert<int>(contents, value);
         c->setSkipSymbolsCount(value);
-      }
-      else if(line.find("<CurveLabels>") == 0)
-      {
+      } else if (line.compare("<CurveLabels>") == 0) {
         //Start reading from next line
         lineIt++;
         if(lineIt == lineVec.end())
@@ -6489,9 +6489,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
 
         //We now have StringList of the lines we want.
         restoreCurveLabels(lastCurveID, lst);
-      }
-      else if(line.find("<MantidYErrors>") == 0)
-      {
+      } else if (line.compare("<MantidYErrors>") == 0) {
         MantidCurve *c = dynamic_cast<MantidCurve*>(curve(lastCurveID));
         if(!c)
           continue;

@@ -64,9 +64,9 @@ class ImageMarker : public QwtPlotMarker
 {
 public:
 	//! Construct an image marker from a file name.
-	ImageMarker(const QString& fn);
+  explicit ImageMarker(const QString &fn);
 
-	//! Return bounding rectangle in paint coordinates.
+        //! Return bounding rectangle in paint coordinates.
 	QRect rect() const;
 	//! Set value (position) and #d_size, giving everything in paint coordinates.
 	void setRect(int x, int y, int w, int h);

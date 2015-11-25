@@ -73,6 +73,7 @@ set ( TEST_PY_FILES
   SortXAxisTest.py
   StatisticsOfTableWorkspaceTest.py
   Stitch1DManyTest.py
+  StringToPngTest.py
   SuggestTibCNCSTest.py
   SuggestTibHYSPECTest.py
   SymmetriseTest.py

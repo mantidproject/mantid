@@ -208,8 +208,8 @@ class LRReflectivityOutput(PythonAlgorithm):
         content += '# Q[1/Angstrom] R delta_R Precision\n'
 
         for i in range(len(data_x)):
-            # Skip point where the error is much larger than the reflectivity value
-            if data_y[i] > data_e[i] / 100.0:
+            # Skip point where the error is larger than the reflectivity value
+            if data_y[i] > data_e[i]:
                 content += str(data_x[i])
                 content += ' ' + str(data_y[i])
                 content += ' ' + str(data_e[i])

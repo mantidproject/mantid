@@ -20,7 +20,7 @@ class InstrumentTreeWidget:public QTreeView
 {
   Q_OBJECT
 public:
-  InstrumentTreeWidget(QWidget *w);
+  explicit InstrumentTreeWidget(QWidget *w);
   void setInstrumentActor(InstrumentActor* instrActor);
   void getSelectedBoundingBox(const QModelIndex& index,double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin);
   //Mantid::Kernel::V3D getSamplePos()const;
