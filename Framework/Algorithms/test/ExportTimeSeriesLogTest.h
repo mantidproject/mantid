@@ -123,8 +123,8 @@ public:
     getalg.setProperty("InputWorkspace", eventWS);
     getalg.setProperty("OutputWorkspace", "FastSineLog2DWS");
     getalg.setProperty("LogName", "FastSineLog");
-    getalg.setProperty("StartTime", 0.1);
-    getalg.setProperty("StopTime", 5.0);
+    getalg.setProperty("StartTime", 200000.*1.E-9);
+    getalg.setProperty("StopTime", 700000.*1.E-9);
     getalg.setProperty("UnitOfTime", "Seconds");
     getalg.setProperty("IsEventWorkspace", false);
 
@@ -136,9 +136,11 @@ public:
     TS_ASSERT(outws);
 
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outws->dataX(0).size(), 40);
+    TS_ASSERT_EQUALS(outws->dataX(0).size(), 21);
 
-    for (size_t i = 1; i < 40; ++i) {
+    TS_ASSERT_DELTA(outws->dataX(0)[0], 200000.*1.E-9, 100000.*1.E-10);
+
+    for (size_t i = 1; i < 21; ++i) {
       TS_ASSERT(outws->dataX(0)[i - 1] < outws->dataX(0)[i]);
     }
 
@@ -162,8 +164,8 @@ public:
     getalg.setProperty("InputWorkspace", eventWS);
     getalg.setProperty("OutputWorkspace", "FastSineLog2DWS");
     getalg.setProperty("LogName", "FastSineLog");
-    getalg.setProperty("StartTime", 0.1);
-    getalg.setProperty("StopTime", 5.0);
+    getalg.setProperty("StartTime", 200000.);
+    getalg.setProperty("StopTime", 700000.);
     getalg.setProperty("UnitOfTime", "Nano Seconds");
     getalg.setProperty("IsEventWorkspace", false);
 
@@ -175,11 +177,13 @@ public:
     TS_ASSERT(outws);
 
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outws->dataX(0).size(), 40);
+    TS_ASSERT_EQUALS(outws->dataX(0).size(), 21);
 
-    for (size_t i = 1; i < 40; ++i) {
+    for (size_t i = 1; i < 21; ++i) {
       TS_ASSERT(outws->dataX(0)[i - 1] < outws->dataX(0)[i]);
     }
+
+    TS_ASSERT_DELTA(outws->dataX(0)[0], 200000, 10000);
 
     // -1 Clean
     AnalysisDataService::Instance().remove("EventWorkspace");

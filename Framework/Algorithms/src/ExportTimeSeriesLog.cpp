@@ -156,12 +156,28 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname, const std::strin
 
   // Get index for start time
   size_t i_start = 0;
-  size_t i_stop = times.size();
-  if (starttime != EMPTY_DBL() || stoptime != EMPTY_DBL())
+  size_t i_stop = times.size() - 1;
+  // Rule out the case that start time is behind last log entry
+  bool i_start_cal = false;
+  if (starttime != EMPTY_DBL())
+  {
+    int64_t timerangens = times.back().totalNanoseconds() - times.front().totalNanoseconds();
+    double timerange = static_cast<double>(timerangens) * timeunitfactor;
+    g_log.debug() << "Time range is " << timerange << ", Start time is "
+                  << starttime << "\n";
+    if (timerange < starttime)
+    {
+      i_start = times.size()-1;
+      i_start_cal = true;
+    }
+  }
+
+  if ((!i_start_cal) && (starttime != EMPTY_DBL() || stoptime != EMPTY_DBL()))
   {
     bool export_partial = calculateTimeSeriesRangeByTime(times, starttime, i_start, stoptime, i_stop, timeunitfactor);
     if (!export_partial)
-      throw std::runtime_error("Unable to find proton_charge for run start time.  Failed to get partial time series.");
+      throw std::runtime_error("Unable to find proton_charge for run start time. "
+                               "Failed to get partial time series.");
   }
 
   // Determine number of export log
@@ -230,7 +246,13 @@ void ExportTimeSeriesLog::setupWorkspace2D(const size_t &start_index,
     size_t i_time = index + start_index;
     // safety check
     if (i_time >= times.size())
-      throw std::runtime_error("It shouldn't happen that the index is out of boundary.");
+    {
+      std::stringstream errss;
+      errss << "It shouldn't happen that the index is out of boundary."
+            << "start index = " << start_index << ", output size = " << outsize
+            << ", index = " << index << "\n";
+      throw std::runtime_error(errss.str());
+    }
 
     int64_t dtns = times[i_time].totalNanoseconds() - timeshift;
     vecX[index] = static_cast<double>(dtns) * timeunitfactor;
@@ -254,7 +276,8 @@ void ExportTimeSeriesLog::setupEventWorkspace(const size_t &start_index,
                                               const size_t &stop_index,
                                               int numentries,
                                               vector<DateAndTime> &times,
-                                              vector<double> values, const bool &epochtime, const double &timeunitfactor) {
+                                              vector<double> values, const bool &epochtime,
+                                              const double &timeunitfactor) {
   Kernel::DateAndTime runstart(
       m_inputWS->run().getProperty("run_start")->value());
 
@@ -300,7 +323,7 @@ void ExportTimeSeriesLog::setupEventWorkspace(const size_t &start_index,
 
     // convert to microseconds
     double dtmsec = static_cast<double>(dt) / 1000.0;
-    outEL.addEventQuickly(WeightedEventNoTime(dtmsec, values[i+start_index], values[i]+start_index));
+    outEL.addEventQuickly(WeightedEventNoTime(dtmsec, values[i+start_index], values[i+start_index]));
   }
   // Ensure thread-safety
   outEventWS->sortAll(TOF_SORT, NULL);
@@ -332,10 +355,10 @@ bool ExportTimeSeriesLog::calculateTimeSeriesRangeByTime(std::vector<Kernel::Dat
                                                          const double &rel_start_time, size_t &i_start,
                                                          const double &rel_stop_time,size_t &i_stop,
                                                          const double &time_factor)
-{
+{ 
   // Initialize if there is something wrong.
   i_start = 0;
-  i_stop = vec_times.size();
+  i_stop = vec_times.size() - 1;
 
   // Check existence of proton_charge as run start
   Kernel::DateAndTime run_start(0);
