@@ -199,7 +199,7 @@ void EnggDiffractionPresenter::processFocusBasic() {
 
 void EnggDiffractionPresenter::processFocusCropped() {
   const std::vector<std::string> multi_RunNo =
-      isValidMultiRunNumber(m_view->focusingRunNo());
+      isValidMultiRunNumber(m_view->focusingCroppedRunNo());
   const std::vector<bool> banks = m_view->focusingBanks();
   const std::string specNos = m_view->focusingCroppedSpectrumIDs();
 
@@ -221,7 +221,7 @@ void EnggDiffractionPresenter::processFocusCropped() {
 
 void EnggDiffractionPresenter::processFocusTexture() {
   const std::vector<std::string> multi_RunNo =
-      isValidMultiRunNumber(m_view->focusingRunNo());
+      isValidMultiRunNumber(m_view->focusingTextureRunNo());
   const std::string dgFile = m_view->focusingTextureGroupingFile();
 
   std::string runNo;
