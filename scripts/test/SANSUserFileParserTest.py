@@ -104,8 +104,7 @@ class BackCommandParserTest(unittest.TestCase):
         # Arrange
         parser = UserFileParser.BackCommandParser()
         # Act
-        reducer = None
-        result = parser.parse_and_set(arguments,reducer)
+        result = parser.parse_and_set(arguments)
         # Assert
         self.assertEquals(result.mean, expected_mean)
         self.assertEquals(result.time, expected_uniform)
@@ -117,8 +116,7 @@ class BackCommandParserTest(unittest.TestCase):
         # Arrange
         parser = UserFileParser.BackCommandParser()
         # Act
-        reducer = None
-        args = [arguments,reducer]
+        args = [arguments]
         self.assertRaises(RuntimeError, parser.parse_and_set,*args)
 
 
