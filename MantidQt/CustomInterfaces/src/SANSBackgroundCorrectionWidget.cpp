@@ -160,7 +160,7 @@ SANSBackgroundCorrectionSettings
 SANSBackgroundCorrectionWidget::getDarkRunSettingForTimeMonitors() {
   QString runNumber("");
   bool useMean = false;
-  bool useMon = false;
+  bool useMon = true;
   QString monNumber("");
 
   if (m_ui.bckgnd_cor_mon_time_use_check_box->isChecked()) {
@@ -198,7 +198,7 @@ SANSBackgroundCorrectionSettings
 SANSBackgroundCorrectionWidget::getDarkRunSettingForUampMonitors() {
   QString runNumber("");
   bool useMean = false;
-  bool useMon = false;
+  bool useMon = true;
   QString monNumber("");
 
   if (m_ui.bckgnd_cor_mon_uamp_use_check_box->isChecked()) {

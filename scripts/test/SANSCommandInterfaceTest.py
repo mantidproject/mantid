@@ -8,7 +8,7 @@ from mantid.simpleapi import *
 from mantid.kernel import DateAndTime
 import random
 import math
-'''
+
 class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
     def test_that_gets_transmission_monitor(self):
         # Arrange
@@ -384,7 +384,7 @@ class SANSCommandInterfaceGetAndSetQResolutionSettings(unittest.TestCase):
         delta_r_expected = delta_r/1000.
         self.assertEqual(delta_r_stored, delta_r_expected)
 
-'''
+
 class SANSCommandInterfaceGetAndSetBackgroundCorrectionSettings(unittest.TestCase):
     def _do_test_correct_setting(self, run_number, is_time, is_mon, is_mean, mon_numbers):
         # Assert that settings were set

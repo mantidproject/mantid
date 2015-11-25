@@ -1020,6 +1020,15 @@ def convert_to_string_list(to_convert):
     output_string = "[" + ','.join("'"+element+"'" for element in string_list) + "]"
     return output_string
 
+def convert_to_list_of_strings(to_convert):
+    '''
+    Converts a string of comma-separted values to a list of strings
+    @param to_convert: the string to convert
+    @returns a list of strings
+    '''
+    values = to_convert.split(",")
+    return [element.strip() for element in values]
+
 def can_load_as_event_workspace(filename):
     '''
     Check if an file can be loaded into an event workspace

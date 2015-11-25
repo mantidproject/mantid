@@ -4977,6 +4977,9 @@ SANSRunWindow::retrieveBackgroundCorrectionSetting(bool isTime, bool isMon) {
  */
 void SANSRunWindow::writeBackgroundCorrectionToPythonScript(
     QString &pythonCode) {
+  // Clear the stored settings. Else we will overwrite settings
+  runPythonCode("i.clear_background_correction()");
+
   // Get the settings
   auto timeDetectors = m_uiForm.sansBackgroundCorrectionWidget
                            ->getDarkRunSettingForTimeDetectors();

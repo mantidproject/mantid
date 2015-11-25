@@ -175,7 +175,21 @@ class BackCommandParser(object):
         @returns a list
         '''
         # Convert to capital and split the string
-        split_arguments = argumentstring.upper().split('/')
+        split_arguments = argumentstring.split('/')
+
+        # Make everything to upper except for the file name
+        for index in range(0, len(split_arguments)):
+            arg = split_arguments[index]
+            if "=" in arg:
+                parts = arg.split("=")
+                # If there are not exactly two elements, then the input is invalid
+                # We need Run=XXXXXXX
+                if len(parts) != 2:
+                    return []
+                new_arg = "RUN=" + parts[1].strip()
+                split_arguments[index] = new_arg
+            else:
+                split_arguments[index] = arg.strip().upper()
         return [element.strip() for element in split_arguments]
 
     def parse_and_set(self, arguments, reducer):

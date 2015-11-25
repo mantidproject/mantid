@@ -1214,7 +1214,17 @@ class DarkRunSubtraction(object):
             raise RuntimeError("DarkRunSubtraction: The provided settings "
                                "object is not of type DarkRunSettings")
 
+        # We only add entries where the run number has been specified
+        if not dark_run_setting.run_number:
+            return
         self._dark_run_settings.append(dark_run_setting)
+
+    def clear_settings(self):
+        self._dark_run_settings = []
+        self._dark_run_time_detector_setting = None
+        self._dark_run_uamp_detector_setting = None
+        self._dark_run_time_monitor_setting = None
+        self._dark_run_uamp_monitor_setting = None
 
     def execute(self, workspace):
         '''
@@ -1262,10 +1272,64 @@ class DarkRunSubtraction(object):
         @param setting: a dark run settings tuple
         '''
         # Load the dark run workspace is it has not already been loaded
-        dark_run_ws = self._load_dark_run(setting)
+        dark_run_ws, dark_run_file_path = self._load_dark_run(setting)
 
-        # Subtract the dar run from the workspace
+        # If the dark run workspace is an event workspace we need to rebin it to the original
+        # input workspace
+        if isinstance(dark_run_ws, IEventWorkspace):
+            dark_run_ws = self._bin_to_workspace(workspace, dark_run_ws, dark_run_file_path)
+
+        # Subtract the dark run from the workspace
         return self._subtract_dark_run(workspace, dark_run_ws, setting)
+
+    def _bin_to_workspace(self, workspace, dark_run_ws, dark_run_file_path):
+        '''
+        We rebin the dark run workspace to the scatter workspace which at this point
+        is already a Workspace2D. For the operations to work they need to have the same form
+        @param workspace: the scatter workspace
+        @param dark_run_ws: the dark run workspace
+        @param dark_runfile_path: the path to the dark run file
+        @returns the rebinned dark run workspace
+        '''
+        rebinned_name = workspace.name()+"_rebinned"
+        alg_rebin = AlgorithmManager.create("RebinToWorkspace")
+        alg_rebin.initialize()
+        alg_rebin.setChild(True)
+        alg_rebin.setProperty("WorkspaceToRebin", dark_run_ws)
+        alg_rebin.setProperty("WorkspaceToMatch", workspace)
+        alg_rebin.setProperty("PreserveEvents", False)
+        alg_rebin.setProperty("OutputWorkspace", rebinned_name)
+        alg_rebin.execute()
+        event_rebinned_part = alg_rebin.getProperty("OutputWorkspace").value
+
+        # Load the Monitors of the event workspace
+        monitors_name = workspace.name() + "_monitors"
+        alg_load_monitors = AlgorithmManager.create("LoadNexusMonitors")
+        alg_load_monitors.initialize()
+        alg_load_monitors.setChild(True)
+        alg_load_monitors.setProperty("Filename", dark_run_file_path)
+        alg_load_monitors.setProperty("MonitorsAsEvents", False)
+        alg_load_monitors.setProperty("OutputWorkspace", monitors_name)
+        alg_load_monitors.execute()
+        monitors_part = alg_load_monitors.getProperty("OutputWorkspace").value
+
+        # Rebin the Monitors to scatter workspace
+        monitors_rebinned_name = workspace.name() + "_monitors_rebinned"
+        alg_rebin.setProperty("WorkspaceToRebin", monitors_part)
+        alg_rebin.setProperty("WorkspaceToMatch", workspace)
+        alg_rebin.setProperty("OutputWorkspace", monitors_rebinned_name)
+        alg_rebin.execute()
+        monitors_rebinned_part = alg_rebin.getProperty("OutputWorkspace").value
+
+        # Conjoin the monitors and the dark run workspace
+        alg_conjoin = AlgorithmManager.create("ConjoinWorkspaces")
+        alg_conjoin.initialize()
+        alg_conjoin.setChild(True)
+        alg_conjoin.setProperty("InputWorkspace1", event_rebinned_part)
+        alg_conjoin.setProperty("InputWorkspace2", monitors_rebinned_part)
+        alg_conjoin.setProperty("CheckOverlapping", True)
+        alg_conjoin.execute()
+        return alg_conjoin.getProperty("InputWorkspace1").value
 
     def _subtract_dark_run(self, workspace, dark_run, setting):
         '''
@@ -1287,14 +1351,14 @@ class DarkRunSubtraction(object):
         '''
         Loads a dark run workspace if it has not already been loaded
         @param settings: a dark run settings tuple
+        @returns the workspace and the file path
         @raise RuntimeError: If the dark run file cannot be found or loaded.
         '''
         dark_run_ws = None
         try:
             dark_run_file_path, dark_run_ws_name = getFileAndName(setting.run_number)
             dark_run_file_path = dark_run_file_path.replace("\\", "/")
-
-            alg_load = AlgorithmManager.create("LoadNexusProcessed")
+            alg_load = AlgorithmManager.create("Load")
             alg_load.initialize()
             alg_load.setChild(True)
             alg_load.setProperty("Filename", dark_run_file_path)
@@ -1304,7 +1368,7 @@ class DarkRunSubtraction(object):
         except:
             raise RuntimeError("DarkRunSubtration: The specified dark run file cannot be found or loaded. "
                                "Please make sure that that it exists in your search directory.")
-        return dark_run_ws
+        return dark_run_ws, dark_run_file_path
 
     def get_time_based_setting_detectors(self):
         '''
@@ -1434,9 +1498,12 @@ class DarkRunSubtraction(object):
         monitor_runs = [run_number[index] for index in indices]
         monitor_mean = [use_mean[index] for index in indices]
         monitor_time = [use_time[index] for index in indices]
+        monitor_numbers_to_check = [mon_numbers[index] for index in indices]
         monitor_mon_numbers  = []
 
-        if len(mon_numbers) > 0 and None in mon_numbers:
+        # If there is a pure MON setting then we take all Monitors into account, this
+        # overrides the Mx settings.
+        if len(monitor_numbers_to_check) > 0 and None in monitor_numbers_to_check:
             monitor_mon_numbers = None
         else:
             for index in indices:
@@ -2654,8 +2721,12 @@ class SliceEvent(ReductionStep):
             setting = self._dark_run_subtraction.get_uamp_based_setting_detectors()
         return setting
 
+    def clear_dark_run_settings(self):
+        self._dark_run_subtraction.clear_settings()
+
     def execute(self, reducer, workspace):
         ws_pointer = getWorkspaceReference(workspace)
+        ws_name = str(ws_pointer)
         ws_for_dark_run = ws_pointer
         # it applies only for event workspace
         if not isinstance(ws_pointer, IEventWorkspace):
@@ -2670,14 +2741,13 @@ class SliceEvent(ReductionStep):
             else:
                 binning = ""
             hist, (tot_t, tot_c, part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor, binning)
-            ws_for_dark_run = hist
             self.scale = part_c / tot_c
+            ws_for_dark_run = hist
 
         # If the user has selected a dark run subtraction then it will be performed here
         if self._dark_run_subtraction.has_dark_runs():
             ws_subtracted = self._dark_run_subtraction.execute(ws_for_dark_run)
             # We need to replace the workspace in the ADS
-            ws_name = str(ws_pointer)
             mtd.addOrReplace(ws_name, ws_subtracted)
 
 class BaseBeamFinder(ReductionStep):

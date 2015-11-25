@@ -13,7 +13,6 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
     def test_dark_run_correction_with_uniform_and_not_mean_for_workspace2D_input(self):
         # Arrange
         spectra = 4
-
         bin_boundaries_scatter = 5
         y_value_scatter_run = 4.
         e_value_scatter_run = 1.
@@ -576,7 +575,7 @@ class DarkRunMonitorAndDetectorRemoverTest(unittest.TestCase):
         for ws in ws_to_clean:
             if AnalysisDataService.doesExist(ws):
                 AnalysisDataService.remove(ws)
-    '''
+
     def test_finds_all_monitor_indices_when_monitor_is_present(self):
         # Arrange
         test_ws = self._load_workspace_with_monitors()
@@ -749,6 +748,6 @@ class DarkRunMonitorAndDetectorRemoverTest(unittest.TestCase):
         # Clean up
         ws_to_clean = [test_ws]
         self._clean_up(ws_to_clean)
-    '''
+
 if __name__ == '__main__':
     unittest.main()

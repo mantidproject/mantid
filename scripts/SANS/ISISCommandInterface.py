@@ -1759,12 +1759,10 @@ def set_background_correction(run_number, is_time_based, is_mon, is_mean, mon_nu
         @returns an integer list
         @raises RuntimeError: conversion form string to int is not possible
         '''
-        import time
-        time.sleep(15)
         if input_string is None or len(input_string) == 0:
             return None
-        string_list = su.convert_to_string_list(input_string)
-        can_convert_to_int = all(is_convertible_to_int(element) for element in string_list)
+        string_list = su.convert_to_list_of_strings(input_string)
+        can_convert_to_int = all(su.is_convertible_to_int(element) for element in string_list)
         int_list = None
         if can_convert_to_int:
             int_list = [int(element) for element in string_list]
@@ -1777,7 +1775,7 @@ def set_background_correction(run_number, is_time_based, is_mon, is_mean, mon_nu
                                              time = is_time_based,
                                              mean = is_mean,
                                              mon = is_mon,
-                                             mon_number = mon_numbers)
+                                             mon_number = mon_numbers_int)
     ReductionSingleton().event2hist.add_dark_run_setting(setting)
 
 def get_background_correction(is_time, is_mon, component):
@@ -1817,6 +1815,12 @@ def get_background_correction(is_time, is_mon, component):
             pass
     print str(value)
     return value
+
+def clear_background_correction():
+    '''
+    Clears the background correction settings
+    '''
+    ReductionSingleton().event2hist.clear_dark_run_settings()
 
 
 ###############################################################################
