@@ -185,20 +185,20 @@ void EnggDiffractionPresenter::processFocusBasic() {
 
   int focusMode = m_view->currentMultiRunMode();
 
-  if (focusMode == 0) {
-	  g_log.debug() << " focus mode selected Individual Run Files Separately " << std::endl;
-	  try {
-		  inputChecksBeforeFocusBasic(multi_RunNo, banks);
-	  }
-	  catch (std::invalid_argument &ia) {
-		  m_view->userWarning("Error in the inputs required to focus a run",
-			  ia.what());
-		  return;
-	  }
-	  startFocusing(multi_RunNo, banks, "", "");
+  try {
+    inputChecksBeforeFocusBasic(multi_RunNo, banks);
+  } catch (std::invalid_argument &ia) {
+    m_view->userWarning("Error in the inputs required to focus a run",
+                        ia.what());
+    return;
   }
-  else if (focusMode == 1) {
-	  g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
+
+  if (focusMode == 0) {
+    g_log.debug() << " focus mode selected Individual Run Files Separately "
+                  << std::endl;
+    startFocusing(multi_RunNo, banks, "", "");
+  } else if (focusMode == 1) {
+    g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
   }
 }
 
@@ -210,21 +210,20 @@ void EnggDiffractionPresenter::processFocusCropped() {
 
   int focusMode = m_view->currentMultiRunMode();
 
-  if (focusMode == 0) {
-	  g_log.debug() << " focus mode selected Individual Run Files Separately " << std::endl;
-	  try {
-		  inputChecksBeforeFocusCropped(multi_RunNo, banks, specNos);
-	  }
-	  catch (std::invalid_argument &ia) {
-		  m_view->userWarning(
-			  "Error in the inputs required to focus a run (in cropped mode)",
-			  ia.what());
-		  return;
-	  }
-	  startFocusing(multi_RunNo, banks, specNos, "");
+  try {
+    inputChecksBeforeFocusCropped(multi_RunNo, banks, specNos);
+  } catch (std::invalid_argument &ia) {
+    m_view->userWarning(
+        "Error in the inputs required to focus a run (in cropped mode)",
+        ia.what());
+    return;
   }
-  else if (focusMode == 1) {
-		  g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
+  if (focusMode == 0) {
+    g_log.debug() << " focus mode selected Individual Run Files Separately "
+                  << std::endl;
+    startFocusing(multi_RunNo, banks, specNos, "");
+  } else if (focusMode == 1) {
+    g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
   }
 }
 
@@ -235,21 +234,20 @@ void EnggDiffractionPresenter::processFocusTexture() {
 
   int focusMode = m_view->currentMultiRunMode();
 
-  if (focusMode == 0) {
-	  g_log.debug() << " focus mode selected Individual Run Files Separately " << std::endl;
-	  try {
-		  inputChecksBeforeFocusTexture(multi_RunNo, dgFile);
-	  }
-	  catch (std::invalid_argument &ia) {
-		  m_view->userWarning(
-			  "Error in the inputs required to focus a run (in texture mode)",
-			  ia.what());
-		  return;
-	  }
-	  startFocusing(multi_RunNo, std::vector<bool>(), "", dgFile);
+  try {
+    inputChecksBeforeFocusTexture(multi_RunNo, dgFile);
+  } catch (std::invalid_argument &ia) {
+    m_view->userWarning(
+        "Error in the inputs required to focus a run (in texture mode)",
+        ia.what());
+    return;
   }
-  else if (focusMode == 1) {
-	  g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
+  if (focusMode == 0) {
+    g_log.debug() << " focus mode selected Individual Run Files Separately "
+                  << std::endl;
+    startFocusing(multi_RunNo, std::vector<bool>(), "", dgFile);
+  } else if (focusMode == 1) {
+    g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
   }
 }
 
@@ -868,7 +866,7 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
  * inputChecksBeforeFocus() which is called from this method). Use
  * always before running 'Focus'
  *
- * @param runNo run number to focus
+ * @param multi_RunNo vector of run number to focus
  * @param banks which banks to consider in the focusing
  *
  * @throws std::invalid_argument with an informative message.
@@ -892,7 +890,7 @@ void EnggDiffractionPresenter::inputChecksBeforeFocusBasic(
  * inputChecksBeforeFocus() which is called from this method). Use
  * always before running 'FocusCropped'
  *
- * @param runNo run number to focus
+ * @param multi_RunNo vector of run number to focus
  * @param banks which banks to consider in the focusing
  * @param specNos list of spectra (as usual csv list of spectra in Mantid)
  *
@@ -922,7 +920,7 @@ void EnggDiffractionPresenter::inputChecksBeforeFocusCropped(
  * inputChecksBeforeFocus() which is called from this method). Use
  * always before running 'FocusCropped'
  *
- * @param runNo run number to focus
+ * @param multi_RunNo vector of run number to focus
  * @param dgFile file with detector grouping info
  *
  * @throws std::invalid_argument with an informative message.
@@ -1033,21 +1031,20 @@ std::vector<std::string> EnggDiffractionPresenter::outputFocusTextureFilenames(
  * Q_OBJECT.
  *
  * @param dir directory (full path) for the focused output files
- * @param outFilenames full names for the output focused runs
- * @param runNo input run number
+ * @param multi_RunNo input vector of run number
  * @param banks instrument bank to focus
  * @param specNos list of spectra (as usual csv list of spectra in Mantid)
  * @param dgFile detector grouping file name
  */
 void EnggDiffractionPresenter::startAsyncFocusWorker(
-    const std::string &dir, const std::vector<std::string> &runNo,
+    const std::string &dir, const std::vector<std::string> &multi_RunNo,
     const std::vector<bool> &banks, const std::string &specNos,
     const std::string &dgFile) {
 
   delete m_workerThread;
   m_workerThread = new QThread(this);
   EnggDiffWorker *worker =
-      new EnggDiffWorker(this, dir, runNo, banks, specNos, dgFile);
+      new EnggDiffWorker(this, dir, multi_RunNo, banks, specNos, dgFile);
   worker->moveToThread(m_workerThread);
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(focus()));
   connect(worker, SIGNAL(finished()), this, SLOT(focusingFinished()));
@@ -1064,7 +1061,6 @@ void EnggDiffractionPresenter::startAsyncFocusWorker(
  * push or similar from the user.
  *
  * @param dir directory (full path) for the output focused files
- * @param outFilenames names for the output focused files (one per bank)
  * @param runNo input run number
  *
  * @param specNos list of spectra to use when focusing. Not empty
