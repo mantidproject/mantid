@@ -31,7 +31,7 @@ ipython -- agg_energy_bands.py --input-path=~/test/LARMOR/test_few_angles/ --out
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
 
-import prep.energy_bands_aggregator as eba
+import IMAT.prep.energy_bands_aggregator as eba
 import argparse
 
 def _indices_to_tuple(indices):
