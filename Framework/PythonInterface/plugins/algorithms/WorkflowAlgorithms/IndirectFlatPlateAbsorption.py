@@ -131,7 +131,7 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
             ConvertUnits(InputWorkspace=self._can_ws_name, OutputWorkspace=can_wave_ws,
                          Target='Wavelength', EMode='Indirect', EFixed=efixed)
             if self._can_scale != 1.0:
-                logger.information('Scaling can by: ' + str(self._can_scale))
+                logger.information('Scaling container by: ' + str(self._can_scale))
                 Scale(InputWorkspace=can_wave_ws, OutputWorkspace=can_wave_ws, Factor=self._can_scale, Operation='Multiply')
 
             if self._use_can_corrections:
@@ -179,12 +179,12 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
                        ('element_size', self._element_size)]
 
         if self._can_ws_name is not None:
-            sample_logs.append(('can_filename', self._can_ws_name))
-            sample_logs.append(('can_scale', self._can_scale))
+            sample_logs.append(('container_filename', self._can_ws_name))
+            sample_logs.append(('container_scale', self._can_scale))
             if self._use_can_corrections:
                 sample_log_workspaces.append(self._acc_ws)
-                sample_logs.append(('can_front_thickness', self. _can_front_thickness))
-                sample_logs.append(('can_back_thickness', self. _can_back_thickness))
+                sample_logs.append(('container_front_thickness', self. _can_front_thickness))
+                sample_logs.append(('container_back_thickness', self. _can_back_thickness))
 
         log_names = [item[0] for item in sample_logs]
         log_values = [item[1] for item in sample_logs]
