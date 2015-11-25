@@ -21,7 +21,7 @@ class ImagingIMATTomoTests(unittest.TestCase):
                           'LARMOR00005330_Metals_000_SummedImg_3.fits',
                           'LARMOR00005331_Metals_000_SummedImg_4.fits',
                           'LARMOR00005332_Metals_000_SummedImg_5.fits'
-        ]
+                         ]
 
         # data volume from a 'stack' of images
         cls._data_wsname = 'small_img_stack'
@@ -73,6 +73,36 @@ class ImagingIMATTomoTests(unittest.TestCase):
         for wksp in img_workspaces:
             self.assertTrue(isinstance(wksp, MatrixWorkspace))
 
+    def test_scale_down_errors(self):
+        import IMAT.prep as iprep
+
+        with self.assertRaises(ValueError):
+            iprep.filters.scale_down(self._data_vol, 9)
+
+        with self.assertRaises(ValueError):
+            iprep.filters.scale_down(self._data_vol, 1000)
+
+        with self.assertRaises(ValueError):
+            iprep.filters.scale_down(self._data_vol, 513)
+
+        with self.assertRaises(ValueError):
+            iprep.filters.scale_down(self._data_vol, 2, method='fail-now')
+
+    def test_scale_down_ok(self):
+        import IMAT.prep as iprep
+
+        dummy_shape = (7, 256, 256)
+        dummy = np.ones(dummy_shape, dtype='float')
+        scaled = iprep.filters.scale_down(dummy, 2)
+        self.assertEquals(scaled.shape, (dummy_shape[0], dummy_shape[1]/2, dummy_shape[2]/2))
+
+        scaled = iprep.filters.scale_down(self._data_vol, 2)
+
+        self.assertEquals(len(scaled.shape), 3)
+        self.assertEquals(self._data_vol.shape[0], scaled.shape[0])
+        self.assertEquals(self._data_vol.shape[1]/2, scaled.shape[1])
+        self.assertEquals(self._data_vol.shape[2]/2, scaled.shape[2])
+
     def test_crop_ok(self):
         import IMAT.prep as iprep
 
@@ -93,6 +123,18 @@ class ImagingIMATTomoTests(unittest.TestCase):
 
         self.assertRaises(ImportError, astra_nope = tti.import_tomo_tool('astra'))
         self.assertRaises(ImportError, tomopy_nope = tti.import_tomo_tool('tomopy'))
+
+    def test_circular_mask_raises(self):
+        import IMAT.prep as iprep
+
+        with self.assertRaises(ValueError):
+            iprep.filters.circular_mask('fail!')
+
+        with self.assertRaises(ValueError):
+            iprep.filters.circular_mask(np.zeros((2,3)))
+
+        with self.assertRaises(ValueError):
+            iprep.filters.circular_mask(np.zeros((2,1,2,1)))
 
     def test_circular_mask_ok(self):
         import IMAT.prep as iprep
@@ -121,34 +163,11 @@ class ImagingIMATTomoTests(unittest.TestCase):
                               msg="Circular mask: wrong value found inside. Expected: {0}, found: {1}".
                               format(expected_val, peek_in))
 
-    def test_scale_down_errors(self):
+    def test_remove_stripes_raises(self):
         import IMAT.prep as iprep
 
         with self.assertRaises(ValueError):
-            iprep.filters.scale_down(self._data_vol, 9)
-
-        with self.assertRaises(ValueError):
-            iprep.filters.scale_down(self._data_vol, 1000)
-
-        with self.assertRaises(ValueError):
-            iprep.filters.scale_down(self._data_vol, 513)
-
-        with self.assertRaises(ValueError):
-            iprep.filters.scale_down(self._data_vol, 2, method='fail-now')
-
-
-    def test_scale_down_ok(self):
-        import IMAT.prep as iprep
-
-        scaled = iprep.filters.scale_down(self._data_vol, 2)
-
-        self.assertEquals(len(scaled.shape), 3)
-        self.assertEquals(self._data_vol.shape[0], scaled.shape[0])
-        self.assertEquals(self._data_vol.shape[1]/2, scaled.shape[1])
-        self.assertEquals(self._data_vol.shape[2]/2, scaled.shape[2])
-
-    def test_remove_sinogram_stripes_raises(self):
-        import IMAT.prep as iprep
+            iprep.filters.remove_stripes_ring_artifacts(self._data_vol, '')
 
         with self.assertRaises(ValueError):
             iprep.filters.remove_stripes_ring_artifacts(self._data_vol,
@@ -156,7 +175,7 @@ class ImagingIMATTomoTests(unittest.TestCase):
 
         with self.assertRaises(RuntimeError):
             iprep.filters.remove_stripes_ring_artifacts(self._data_vol,
-                                                        'wavelet-fourier')
+                                                        'fourier-wavelet')
 
 # Just run the unittest tests defined above
 class ImagingIMATScriptsTest(stresstesting.MantidStressTest):

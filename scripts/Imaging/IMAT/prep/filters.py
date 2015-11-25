@@ -27,6 +27,9 @@ def scale_down(data_vol, block_size, method='average'):
     @param data_vol :: 3d volume to downscale
     @param block_size :: make block_size X block_size blocks to downscale
     @param method :: either 'average' (default) or 'sum' to calculate average or sum of blocks
+
+    Returns :: downscaled volume, with the dimensions implied by block_size, and the
+    same data type as the input data volume.
     """
     if not isinstance(data_vol, np.ndarray) or 3 != len(data_vol.shape):
         raise ValueError("Wrong data volume when trying to crop (expected a 3d numpy array): {0}".
@@ -68,7 +71,6 @@ def crop_vol(data_vol, coords):
     box, as when cropping to the regions of interest). Given as list [x1, y1, x2, y2]
 
     Returns :: cropped data volume
-
     """
     cropped_data = None
     if not isinstance(coords, list) or 4 != len(coords):
@@ -94,7 +96,7 @@ def remove_stripes_ring_artifacts(data_vol, method='fourier-wavelet'):
 
     @param method :: 'fw': Fourier-Wavelet based method
 
-    @return filtered data hopefully without stripes which should dramatically decrease
+    Returns :: filtered data hopefully without stripes which should dramatically decrease
     ring artifacts after reconstruction and the effect of these on post-processing tasks
     such as segmentation of the reconstructed 3d data volume.
     """
@@ -112,26 +114,36 @@ def remove_stripes_ring_artifacts(data_vol, method='fourier-wavelet'):
 
 def circular_mask(data_vol, ratio=1.0, mask_out_val=0.0):
     """
-    @param data_vol ::
-    @param ratio ::
+    Applies a circular mask on a 3D volume. The mask is applied along the z axis (first
+    dimension of the numpy shape)
 
-    Returns ::
+    @param data_vol :: 3D data volume
+    @param ratio :: radius of the mask relative to the radius of the smallest from the
+    x and y dimensions/edges
+    @param mask_out_val :: value to use when masking out pixels outside of the mask radius
+
+    Returns :: masked volume
     """
+    if not isinstance(data_vol, np.ndarray) or 3 != len(data_vol.shape):
+        raise ValueError("Wrong data volume when trying to apply a circular mask: {0}".
+                         format(data_vol))
+
     edge_z, edge_y, edge_x = data_vol.shape
     mask_in = _calc_mask(edge_y, edge_x, ratio)
     for idx in range(edge_z):
         data_vol[idx, ~mask_in] = mask_out_val
-    #for vol_slice in data_vol:
-    #    vol_slize[~mask_in] = mask_out_val
+
     return data_vol
 
 def _calc_mask(ydim, xdim, ratio):
     """
+    Prepare a mask object.
+
     @param ydim :: size/length of the y dimension (image rows)
     @param xdim :: size/length of the x dimension (innermost, image columns)
     @param ratio :: ratio in [0,1] relative to the smaller dimension
 
-    Returns :: mask
+    Returns :: mask as a numpy array of boolean values (in/out-side mask)
     """
     radius_y = ydim/2.0
     radius_x = xdim/2.0

@@ -36,6 +36,7 @@ except ImportError:
 
 try:
     from skimage import io as skio
+    skio.use_plugin('freeimage')
     from skimage import exposure
 except ImportError as exc:
     raise ImportError("Could not find the package skimage and its subpackages "
@@ -62,18 +63,21 @@ def _make_dirs_if_needed(dirname):
     if not os.path.exists(absname):
         os.makedirs(absname)
 
-#pylint: disable=unused-argument
 #pylint: disable=too-many-arguments
 def _write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=None,
                  rescale_intensity=False):
     """
-    Output image data to a file, in a given image format.
-    Assumes that the output directory exists (must be checked before).
+    Output image data, given as a numpy array, to a file, in a given image format.
+    Assumes that the output directory exists (must be checked before). The pixel
+    values are rescaled in the range [min_pix, max_pix] which would normally be set
+    to the minimum/maximum values found in a stack of images.
 
     @param img_data :: image data in the usual numpy representation
 
-    @param min_pix ::
-    @param max_pix ::
+    @param min_pix :: minimum reference value to rescale data (may be local to an
+    image or global for a stack of images)
+    @param max_pix :: maximum reference value to rescale data (may be local to an
+    image or global for a stack of images)
 
     @param filename :: file name, including directory and extension
     @param img_format :: image file format
@@ -86,8 +90,8 @@ def _write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=No
         img_format = 'tiff'
     filename = filename + '.' + img_format
 
-    #dtype = 'uint8'
-    #img_data = scipy.misc.bytescale(img_data)
+    # The special case dtype = 'uint8' could be handled with bytescale:
+    # img_data = scipy.misc.bytescale(img_data)
 
     # from bigger to smaller type, example: float32 => uint16
     if dtype and img_data.dtype != dtype:
@@ -110,11 +114,14 @@ def _write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=No
     if rescale_intensity:
         img_data = exposure.rescale_intensity(img_data, out_range=dtype)#'uint16')
 
+    # Without this plugin tiff files don't seem to be generated correctly for some
+    # bit depths (especially relevant for uint16), but you still need to load the
+    # freeimage plugin with use_plugin!
     _USING_PLUGIN_TIFFFILE = True
     if img_format == 'tiff' and _USING_PLUGIN_TIFFFILE:
         skio.imsave(filename, img_data, plugin='tifffile')
     else:
-        skio.imsave(filename, img_data, plugin='freeimage') # freeimage / plugin='freeimage)
+        skio.imsave(filename, img_data, plugin='freeimage')
 
     return filename
 
@@ -228,18 +235,72 @@ def _read_img(filename, file_extension=None):
         # Input fits files always contain a single image
         img_arr = imgs[0].data
 
-    elif file_extension in ['tiff', 'tif']:
+    elif file_extension in ['tiff', 'tif', 'png']:
         img_arr = skio.imread(filename)
+
+    else:
+        raise ValueError("Don't know how to load a file with this extension: {0}".format(file_extension))
 
     return img_arr
 
-# TOD: add flat_files_prefix, dark_files_prefix logic
-#pylint: disable=unused-argument
-#pylint: disable=too-many-arguments
-def read_stack_of_images(sample_path, open_beam_path=None, dark_field_path=None,
+def _read_listed_files(files, slice_img_shape, dtype):
+    """
+    Read several images in a row into a 3d numpy array. Useful when reading all the sample
+    images, or all the flat or dark images.
+
+    @param files :: list of image file paths given as strings
+    @param slice_img_shape :: shape of every image
+    @param dtype :: data type for the output numpy array
+
+    Returns:: a 3d data volume with the size of the first (outermost) dimension equal
+    to the number of files, and the sizes of the second and third dimensions equal to
+    the sizes given in the input slice_img_shape
+    """
+    data = np.zeros((len(files), slice_img_shape[0], slice_img_shape[1]), dtype=dtype)
+    for idx, in_file in enumerate(files):
+        try:
+            data[idx, :, :] = _read_img(in_file, 'tiff')
+        except IOError as exc:
+            raise RuntimeError("Could not load file {0} from {1}. Error details: {2}".
+                               format(ifile, sample_path, str(exc)))
+
+    return data
+
+def get_flat_dark_stack(field_path, field_prefix, file_prefix, file_extension, img_shape, data_dtype):
+    """
+    Load the images of the flat/dark/other field and calculate an average of them.
+
+    @param field_path :: path to the images
+    @param field_prefix :: prefix for the images of the flat/dark/other field images (filter).
+    example: OB, DARK, WHITE, etc.
+
+    @param file_extension :: extension string to look for file names
+    @param img_shape :: shape that every image should have
+    @param data_dtype :: output data type
+
+    Returns :: numpy array with an average (pixel-by-pixel) of the flat/dark/other field images
+    """
+    avg = None
+    if field_prefix:
+        if not file_prefix:
+            file_prefix = ''
+        files_match = glob.glob(os.path.join(field_path,
+                                             "{0}*.{1}".format(field_prefix, file_extension)))
+        if len(files_match) <= 0:
+            print("Could not find any flat field / open beam image files in: {0}".
+                  format(flat_field_prefix))
+        else:
+            imgs_stack = _read_listed_files(files_match, img_shape, data_dtype)
+            avg = np.mean(imgs_stack, axis=0)
+
+    return avg
+
+# This could become a command class. There's already many parameters and it's
+# likely that there will be more.
+def read_stack_of_images(sample_path, flat_field_path=None, dark_field_path=None,
                          file_extension='tiff', file_prefix=None,
-                         flat_files_prefix=None, dark_files_prefix=None,
-                         minIdx=-1, maxIdx=-1, verbose=True):
+                         flat_field_prefix=None, dark_field_prefix=None,
+                         verbose=True):
     """
     Reads a stack of images into memory, assuming dark and flat images
     are in separate directories.
@@ -250,20 +311,35 @@ def read_stack_of_images(sample_path, open_beam_path=None, dark_field_path=None,
     in ImageJ and related imaging tools, using the last digits to sort
     the images in the stack.
 
-    @param file_extension ::  (not including the dot)
-
     @param sample_path :: path to sample images. Can be a file or directory
-    @param open_beam_path :: (optional) path to open beam / white image(s).
+
+    @param flat_field_path :: (optional) path to open beam / white image(s).
     Can be a file or directory
+
     @param dark_field_path :: (optional) path to dark field image(s).
     Can be a file or directory
-    @param minIdx :: enforce this minimum image index, lower indices will be ignored
-    @param maxIdx :: enforce this maximum image index, higher indices will be ignored
+
+    @param file_extension :: file extension (typically 'tiff', 'tif', 'fits',
+    or 'fit' (not including the dot)
+
+    @param file_prefix :: prefix for the image files (example: IMAT00), to filter
+    files that may be in the same directories but should not be loaded
+
+    @param flat_field_prefix :: prefix for the flat field image files
+
+    @param dark_field_prefix :: prefix for the dark field image files
+
+    @param verbose :: verbose (some) output
 
     Returns :: 3 numpy arrays: input data volume (3d), average of flatt images (2d),
     average of dark images(2d)
     """
-    # TOD: check file_extension
+    SUPPORTED_EXTS = ['tiff', 'tif', 'fits', 'fit', 'png']
+
+    if file_extension not in SUPPORTED_EXTS:
+        raise ValueError("File extension not supported: {0}. Supported extensions: {1}".
+                         format(file_extension, SUPPORTED_EXTS))
+
     sample_path = os.path.expanduser(sample_path)
 
     if verbose:
@@ -283,28 +359,26 @@ def read_stack_of_images(sample_path, open_beam_path=None, dark_field_path=None,
 
     # It is assumed that all images have the same size and properties as the first.
     try:
-        first_img = _read_img(files_match[0], 'tiff')
+        first_img = _read_img(files_match[0], file_extension)
     except RuntimeError as exc:
         raise RuntimeError(
             "Could not load at least one image file from: {0}. Details: {1}".
             format(sample_path, str(exc)))
-
 
     data_dtype = first_img.dtype
     # usual type in fits with 16-bit pixel depth
     if '>i2' == data_dtype:
         data_dtype = np.uint16
 
-    sample_data = np.zeros((len(files_match), first_img.shape[0], first_img.shape[1]), dtype=data_dtype)
+    img_shape = first_img.shape
+    sample_data = _read_listed_files(files_match, img_shape, data_dtype)
 
+    flat_avg = get_flat_dark_stack(flat_field_path, flat_field_prefix,
+                                   flat_field_prefix, file_extension,
+                                   img_shape, data_dtype)
 
-    for idx, in_file in enumerate(files_match):
-        try:
-            sample_data[idx, :, :] = _read_img(in_file, 'tiff')
-        except IOError as exc:
-            raise RuntimeError("Could not load file {0} from {1}".format(ifile, sample_path))
-
-    flat_avg = None # avg_flat_files()
-    dark_avg = None # avg_image_files()
+    dark_avg = get_flat_dark_stack(dark_field_path, flat_field_prefix,
+                                   dark_field_prefix, file_extension,
+                                   img_shape, data_dtype)
 
     return sample_data, flat_avg, dark_avg
