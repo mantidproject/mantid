@@ -7,6 +7,7 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 
 #include <Poco/ActiveResult.h>
+#include <Poco/DirectoryIterator.h>
 
 #include <QApplication>
 #include <QFileInfo>
@@ -17,6 +18,32 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 using namespace MantidQt::API;
+
+// free functions
+namespace {
+/**
+ * Gets the most recently modified Nexus file in the given directory
+ * @param path :: [input] Path to any file in the directory
+ * @returns Path to most recently modified file
+ */
+std::string getMostRecentFile(const std::string &path) {
+  Poco::Path latestPath(path);
+  Poco::File latestFile(latestPath);
+  Poco::Timestamp lastModified = latestFile.getLastModified();
+  Poco::DirectoryIterator iter(latestPath.parent());
+  Poco::DirectoryIterator end; // the end iterator
+  while (iter != end) {
+    if (Poco::Path(iter->path()).getExtension() == "nxs") {
+      if (iter->getLastModified() > lastModified) {
+        latestFile = *iter;
+        lastModified = iter->getLastModified();
+      }
+      ++iter;
+    }
+  }
+  return latestFile.path();
+}
+}
 
 namespace MantidQt
 {
@@ -40,13 +67,16 @@ namespace CustomInterfaces
    * If it was "auto", sets up a watcher to automatically reload on new files.
    */
   void ALCDataLoadingPresenter::handleLoadRequested() {
-    std::string lastFile(m_view->lastRun);
+    std::string lastFile(m_view->lastRun());
     // Check if it was "Auto"
     if (0 == lastFile.compare(m_view->autoString())) {
       // TODO: set up watcher etc
-    } else {
-      load(lastFile);
+
+      // and get the most recent file in the directory to be lastFile
+      lastFile = getMostRecentFile(m_view->firstRun());
     }
+    // Now perform the load
+    load(lastFile);
   }
 
   /**
@@ -55,13 +85,15 @@ namespace CustomInterfaces
    */
   void ALCDataLoadingPresenter::load(const std::string &lastFile) {
     m_view->disableAll();
-
+    // Use Path.toString() to ensure both are in same (native) format
+    Poco::Path firstRun(m_view->firstRun());
+    Poco::Path lastRun(lastFile);
     try
     {
       IAlgorithm_sptr alg = AlgorithmManager::Instance().create("PlotAsymmetryByLogValue");
       alg->setChild(true); // Don't want workspaces in the ADS
-      alg->setProperty("FirstRun", m_view->firstRun());
-      alg->setProperty("LastRun", lastFile);
+      alg->setProperty("FirstRun", firstRun.toString());
+      alg->setProperty("LastRun", lastRun.toString());
       alg->setProperty("LogValue", m_view->log());
       alg->setProperty("Function", m_view->function());
       alg->setProperty("Type", m_view->calculationType());
