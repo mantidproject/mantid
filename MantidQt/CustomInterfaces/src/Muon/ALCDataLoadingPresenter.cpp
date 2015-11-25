@@ -40,8 +40,13 @@ namespace CustomInterfaces
    * If it was "auto", sets up a watcher to automatically reload on new files.
    */
   void ALCDataLoadingPresenter::handleLoadRequested() {
-    // TODO: check for auto, set up watcher etc
-    load(m_view->lastRun());
+    std::string lastFile(m_view->lastRun);
+    // Check if it was "Auto"
+    if (0 == lastFile.compare(m_view->autoString())) {
+      // TODO: set up watcher etc
+    } else {
+      load(lastFile);
+    }
   }
 
   /**

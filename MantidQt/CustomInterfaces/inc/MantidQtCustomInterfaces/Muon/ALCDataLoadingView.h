@@ -84,6 +84,9 @@ namespace CustomInterfaces
     void disableAll();
     void enableAll();
 
+    /// returns the string "Auto"
+    std::string autoString() const { return g_autoString; }
+
     // -- End of IALCDataLoadingView interface -----------------------------------------------------
 
   private:
@@ -98,6 +101,9 @@ namespace CustomInterfaces
 
     /// Loaded errors
     MantidQt::MantidWidgets::ErrorCurve* m_dataErrorCurve;
+
+    /// the string "Auto"
+    static const std::string g_autoString;
 
   };
 

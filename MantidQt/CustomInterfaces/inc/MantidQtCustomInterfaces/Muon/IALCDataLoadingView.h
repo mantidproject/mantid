@@ -87,6 +87,9 @@ namespace CustomInterfaces
     /// @return Selected integration time range, or nothing if limiting is disabled
     virtual boost::optional< std::pair<double,double> > timeRange() const = 0;
 
+    /// @return The string "Auto"
+    virtual std::string autoString() const = 0;
+
   public slots:
     /// Performs any necessary initialization
     virtual void initialize() = 0;

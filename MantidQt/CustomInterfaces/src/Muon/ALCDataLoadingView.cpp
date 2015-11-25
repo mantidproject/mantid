@@ -11,17 +11,20 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  ALCDataLoadingView::ALCDataLoadingView(QWidget* widget)
-    : m_widget(widget), m_dataCurve(new QwtPlotCurve()), m_dataErrorCurve(NULL)
-  {}
+/// This is the string "Auto", used for last file
+const std::string ALCDataLoadingView::g_autoString = "Auto";
 
-  ALCDataLoadingView::~ALCDataLoadingView() {
-    m_dataCurve->detach();
-    delete m_dataCurve;
-    if (m_dataErrorCurve) {
-      m_dataErrorCurve->detach();
-      delete m_dataErrorCurve;
-    }
+ALCDataLoadingView::ALCDataLoadingView(QWidget *widget)
+    : m_widget(widget), m_dataCurve(new QwtPlotCurve()),
+      m_dataErrorCurve(NULL) {}
+
+ALCDataLoadingView::~ALCDataLoadingView() {
+  m_dataCurve->detach();
+  delete m_dataCurve;
+  if (m_dataErrorCurve) {
+    m_dataErrorCurve->detach();
+    delete m_dataErrorCurve;
+  }
   }
 
   void ALCDataLoadingView::initialize()
@@ -77,10 +80,11 @@ namespace CustomInterfaces
     if (m_ui.lastRun->isValid()) {
       toReturn = m_ui.lastRun->getFirstFilename().toStdString();
     } else {
-      static QString strAuto("Auto");
       QString userInput = m_ui.lastRun->getText();
-      if (0 == userInput.compare(strAuto, Qt::CaseInsensitive)) {
-        toReturn = strAuto.toStdString();
+      if (0 ==
+          userInput.compare(QString(autoString().c_str()),
+                            Qt::CaseInsensitive)) {
+        toReturn = autoString();
       }
     }
     return toReturn;
