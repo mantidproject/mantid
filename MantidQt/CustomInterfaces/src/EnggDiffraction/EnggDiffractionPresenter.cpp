@@ -28,8 +28,9 @@ Mantid::Kernel::Logger g_log("EngineeringDiffractionGUI");
 const std::string EnggDiffractionPresenter::g_enginxStr = "ENGINX";
 
 const std::string EnggDiffractionPresenter::g_runNumberErrorStr =
-    " cannot be empty, must be an integer number, a valid ENGINX run number or "
-    "a valid directory.";
+    " cannot be empty, must be an integer number, valid ENGINX run number/s "
+    "or "
+    "valid directory/directories.";
 
 // discouraged at the moment
 const bool EnggDiffractionPresenter::g_askUserCalibFilename = false;
@@ -182,17 +183,12 @@ void EnggDiffractionPresenter::processFocusBasic() {
       isValidMultiRunNumber(m_view->focusingRunNo());
   const std::vector<bool> banks = m_view->focusingBanks();
 
-  std::string runNo;
-
-  for (int i = 0; i < multi_RunNo.size(); ++i) {
-    runNo = multi_RunNo[i];
-    try {
-      inputChecksBeforeFocusBasic(runNo, banks);
-    } catch (std::invalid_argument &ia) {
-      m_view->userWarning("Error in the inputs required to focus a run",
-                          ia.what());
-      return;
-    }
+  try {
+    inputChecksBeforeFocusBasic(multi_RunNo, banks);
+  } catch (std::invalid_argument &ia) {
+    m_view->userWarning("Error in the inputs required to focus a run",
+                        ia.what());
+    return;
   }
   startFocusing(multi_RunNo, banks, "", "");
 }
@@ -203,19 +199,14 @@ void EnggDiffractionPresenter::processFocusCropped() {
   const std::vector<bool> banks = m_view->focusingBanks();
   const std::string specNos = m_view->focusingCroppedSpectrumIDs();
 
-  std::string runNo;
-  for (int i = 0; i < multi_RunNo.size(); ++i) {
-    runNo = multi_RunNo[i];
-    try {
-      inputChecksBeforeFocusCropped(runNo, banks, specNos);
-    } catch (std::invalid_argument &ia) {
-      m_view->userWarning(
-          "Error in the inputs required to focus a run (in cropped mode)",
-          ia.what());
-      return;
-    }
+  try {
+    inputChecksBeforeFocusCropped(multi_RunNo, banks, specNos);
+  } catch (std::invalid_argument &ia) {
+    m_view->userWarning(
+        "Error in the inputs required to focus a run (in cropped mode)",
+        ia.what());
+    return;
   }
-
   startFocusing(multi_RunNo, banks, specNos, "");
 }
 
@@ -224,19 +215,14 @@ void EnggDiffractionPresenter::processFocusTexture() {
       isValidMultiRunNumber(m_view->focusingTextureRunNo());
   const std::string dgFile = m_view->focusingTextureGroupingFile();
 
-  std::string runNo;
-  for (int i = 0; i < multi_RunNo.size(); ++i) {
-    runNo = multi_RunNo[i];
-    try {
-      inputChecksBeforeFocusTexture(runNo, dgFile);
-    } catch (std::invalid_argument &ia) {
-      m_view->userWarning(
-          "Error in the inputs required to focus a run (in texture mode)",
-          ia.what());
-      return;
-    }
+  try {
+    inputChecksBeforeFocusTexture(multi_RunNo, dgFile);
+  } catch (std::invalid_argument &ia) {
+    m_view->userWarning(
+        "Error in the inputs required to focus a run (in texture mode)",
+        ia.what());
+    return;
   }
-
   startFocusing(multi_RunNo, std::vector<bool>(), "", dgFile);
 }
 
@@ -861,8 +847,9 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
  * @throws std::invalid_argument with an informative message.
  */
 void EnggDiffractionPresenter::inputChecksBeforeFocusBasic(
-    const std::string &runNo, const std::vector<bool> &banks) {
-  if (runNo.empty()) {
+    const std::vector<std::string> &multi_RunNo,
+    const std::vector<bool> &banks) {
+  if (multi_RunNo.size() == 0) {
     const std::string msg = "The sample run number" + g_runNumberErrorStr;
     throw std::invalid_argument(msg);
   }
@@ -885,9 +872,9 @@ void EnggDiffractionPresenter::inputChecksBeforeFocusBasic(
  * @throws std::invalid_argument with an informative message.
  */
 void EnggDiffractionPresenter::inputChecksBeforeFocusCropped(
-    const std::string &runNo, const std::vector<bool> &banks,
+    const std::vector<std::string> &multi_RunNo, const std::vector<bool> &banks,
     const std::string &specNos) {
-  if (runNo.empty()) {
+  if (multi_RunNo.size() == 0) {
     throw std::invalid_argument("To focus cropped the sample run number" +
                                 g_runNumberErrorStr);
   }
@@ -914,8 +901,8 @@ void EnggDiffractionPresenter::inputChecksBeforeFocusCropped(
  * @throws std::invalid_argument with an informative message.
  */
 void EnggDiffractionPresenter::inputChecksBeforeFocusTexture(
-    const std::string &runNo, const std::string &dgFile) {
-  if (runNo.empty()) {
+    const std::vector<std::string> &multi_RunNo, const std::string &dgFile) {
+  if (multi_RunNo.size() == 0) {
     throw std::invalid_argument("To focus texture banks the sample run number" +
                                 g_runNumberErrorStr);
   }

@@ -151,12 +151,12 @@ private:
                                      const std::string &specNos,
                                      const std::string &dgFile);
 
-  void inputChecksBeforeFocusBasic(const std::string &runNo,
+  void inputChecksBeforeFocusBasic(const std::vector<std::string> &multi_RunNo,
                                    const std::vector<bool> &banks);
-  void inputChecksBeforeFocusCropped(const std::string &runNo,
+  void inputChecksBeforeFocusCropped(const std::vector<std::string> &multi_RunNo,
                                      const std::vector<bool> &banks,
                                      const std::string &specNos);
-  void inputChecksBeforeFocusTexture(const std::string &runNo,
+  void inputChecksBeforeFocusTexture(const std::vector<std::string> &multi_RunNo,
                                      const std::string &dgfile);
   void inputChecksBeforeFocus();
   void inputChecksBanks(const std::vector<bool> &banks);
