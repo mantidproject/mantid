@@ -156,7 +156,7 @@ public:
     auto out =
         vtkSmartPointer<vtkPointSet>::Take(scaler.execute(0.1, 0.5, 0.2, in));
 
-    auto fieldData = vtkSmartPointer<vtkFieldData>::Take(out->GetFieldData());
+    auto fieldData = out->GetFieldData();
     MetadataJsonManager manager;
     VatesConfigurations config;
     FieldDataToMetadata convert;

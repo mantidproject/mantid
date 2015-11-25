@@ -203,8 +203,8 @@ public:
     // Arrange
     vtkSmartPointer<vtkUnstructuredGrid> in;
     in.TakeReference(makeSplatterSourceGrid());
-    vtkNew<vtkUnstructuredGrid> out;
-    vtkDataSetToPeaksFilteredDataSet peaksFilter(in, out.GetPointer());
+    auto out = vtkUnstructuredGrid::New();
+    vtkDataSetToPeaksFilteredDataSet peaksFilter(in, out);
 
     Mantid::Kernel::V3D coordinate(0,0,0);
     // Note that the peak radius is not a 1-1 measure for which peaks will be culled and which not. 
@@ -229,7 +229,7 @@ public:
     do_test_execute(peaksFilter, fakeSinglePeakPeakWorkspaces, coordinateSystem);
 
     // Assert
-    do_test_peaks(in, out.GetPointer(), peakData);
+    do_test_peaks(in, out, peakData);
   }
 
   void testExecutionWithSingleEllipsoidPeakInQSample()
@@ -237,8 +237,8 @@ public:
     // Arrange
     vtkSmartPointer<vtkUnstructuredGrid> in;
     in.TakeReference(makeSplatterSourceGrid());
-    vtkNew<vtkUnstructuredGrid> out;
-    vtkDataSetToPeaksFilteredDataSet peaksFilter(in, out.GetPointer());
+    auto out = vtkUnstructuredGrid::New();
+    vtkDataSetToPeaksFilteredDataSet peaksFilter(in, out);
 
     Mantid::Kernel::V3D coordinate(0,0,0);
     double peakRadiusMax = 7;
@@ -271,7 +271,7 @@ public:
     do_test_execute(peaksFilter, fakeSinglePeakPeakWorkspaces, coordinateSystem);
 
     // Assert
-    do_test_peaks(in, out.GetPointer(), peakData);
+    do_test_peaks(in, out, peakData);
   }
 
   void testExecutionWithSingleNoShapePeakInQSample()
@@ -279,8 +279,8 @@ public:
     // Arrange
     vtkSmartPointer<vtkUnstructuredGrid> in;
     in.TakeReference(makeSplatterSourceGrid());
-    vtkNew<vtkUnstructuredGrid> out;
-    vtkDataSetToPeaksFilteredDataSet peaksFilter(in, out.GetPointer());
+    auto out = vtkUnstructuredGrid::New();
+    vtkDataSetToPeaksFilteredDataSet peaksFilter(in, out);
 
     Mantid::Kernel::V3D coordinate(0,0,0);
 
@@ -304,15 +304,15 @@ public:
     do_test_execute(peaksFilter, fakeSinglePeakPeakWorkspaces, coordinateSystem);
 
     // Assert
-    do_test_peaks(in, out.GetPointer(), peakData);
+    do_test_peaks(in, out, peakData);
   }
 
   void testExecutionWithTwoWorkspacesWithSingleSphericalShapesInQSample() {
      // Arrange
     vtkSmartPointer<vtkUnstructuredGrid> in;
     in.TakeReference(makeSplatterSourceGrid());
-    vtkNew<vtkUnstructuredGrid> out;
-    vtkDataSetToPeaksFilteredDataSet peaksFilter(in, out.GetPointer());
+    auto out = vtkUnstructuredGrid::New();
+    vtkDataSetToPeaksFilteredDataSet peaksFilter(in, out);
 
     // Peak 1
     Mantid::Kernel::V3D coordinate(0,0,0);
@@ -350,7 +350,7 @@ public:
     do_test_execute(peaksFilter, fakeSinglePeakPeakWorkspaces, coordinateSystem);
 
     // Assert
-    do_test_peaks(in, out.GetPointer(), peakData);
+    do_test_peaks(in, out, peakData);
   }
 };
 #endif

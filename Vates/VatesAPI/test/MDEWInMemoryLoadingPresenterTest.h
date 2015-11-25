@@ -132,15 +132,12 @@ public:
 
   void testExtractMetadata()
   {
-    //Setup view
-    MockMDLoadingView view;
-
     MockWorkspaceProvider* repository = new MockWorkspaceProvider;
     Mantid::API::Workspace_sptr ws = getReal4DWorkspace();
     EXPECT_CALL(*repository, fetchWorkspace(_)).Times(1).WillRepeatedly(Return(ws));
 
     MDEWInMemoryLoadingPresenter presenter(
-        std::unique_ptr<MDLoadingView>(&view), repository, "_");
+        Mantid::Kernel::make_unique<MockMDLoadingView>(), repository, "_");
 
     //Test that it doesn't work when not setup.
     TSM_ASSERT_THROWS("::executeLoadMetadata is critical to setup, should throw if not run first.", presenter.getGeometryXML(), std::runtime_error);
