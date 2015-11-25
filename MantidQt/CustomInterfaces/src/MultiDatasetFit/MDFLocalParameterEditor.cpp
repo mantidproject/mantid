@@ -24,10 +24,10 @@ namespace MDF
 LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index,
                                            double value, bool fixed,
                                            QString tie, bool othersFixed,
-                                           bool allOthersFixed)
-    : QWidget(parent), m_index(index), m_value(QString::number(value)),
+                                           bool allOthersFixed, bool othersTied)
+    : QWidget(parent), m_index(index), m_value(QString::number(value,'g',16)),
       m_fixed(fixed), m_tie(tie), m_othersFixed(othersFixed),
-      m_allOthersFixed(allOthersFixed) {
+      m_allOthersFixed(allOthersFixed), m_othersTied(othersTied) {
   auto layout = new QHBoxLayout(this);
   layout->setMargin(0);
   layout->setSpacing(0);
@@ -35,7 +35,6 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index,
 
   m_editor = new QLineEdit(parent);
   m_editor->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-  m_editor->setToolTip("Edit local parameter value. Press F to fix/unfix it.");
   this->setFocusPolicy(Qt::StrongFocus);
   this->setFocusProxy(m_editor);
 
@@ -137,11 +136,9 @@ void LocalParameterEditor::unfixAll()
 /// Send a signal to tie a parameter.
 void LocalParameterEditor::setTie()
 {
-  QInputDialog input;
-  input.setWindowTitle("Set a tie.");
-  input.setTextValue(m_tie);
-  if (input.exec() == QDialog::Accepted) {
-    m_tie = input.textValue();
+  auto tie = setTieDialog(m_tie);
+  if (!tie.isEmpty()) {
+    m_tie = tie;
     emit setTie(m_index, m_tie);
   }
   setEditorState();
@@ -158,13 +155,20 @@ void LocalParameterEditor::removeTie()
 /// Set all ties for all parameters
 void LocalParameterEditor::setTieAll()
 {
-  emit setTieAll(m_tie);
+  auto tie = setTieDialog(m_tie);
+  if (!tie.isEmpty()) {
+    m_tie = tie;
+    m_othersTied = true;
+    emit setTieAll(m_tie);
+  }
   setEditorState();
 }
 
 /// Remove ties form all parameters
 void LocalParameterEditor::removeAllTies()
 {
+  m_tie = "";
+  m_othersTied = false;
   emit setTieAll("");
   setEditorState();
 }
@@ -175,7 +179,8 @@ bool LocalParameterEditor::eventFilter(QObject *, QEvent *evn)
   if ( evn->type() == QEvent::KeyPress )
   {
     auto keyEvent = static_cast<QKeyEvent*>(evn);
-    if (keyEvent->key() == Qt::Key_F && keyEvent->modifiers() == Qt::ControlModifier)
+    if (keyEvent->key() == Qt::Key_F &&
+        keyEvent->modifiers() == Qt::ControlModifier && m_tie.isEmpty()) 
     {
       fixParameter();
       return true;
@@ -195,19 +200,41 @@ bool LocalParameterEditor::eventFilter(QObject *, QEvent *evn)
 /// according to the state of the parameter (fixed, tied, etc)
 void LocalParameterEditor::setEditorState()
 {
-  m_fixAction->setText(m_fixed ? "Unfix" : "Fix");
-  m_unfixAllAction->setEnabled(m_fixed || m_othersFixed);
-  m_fixAllAction->setEnabled((!m_fixed) || (!m_allOthersFixed));
+  bool isNumber = m_tie.isEmpty();
+  bool isTie = !isNumber;
 
-  if (m_tie.isEmpty()) {
+  m_setAllAction->setEnabled(isNumber);
+  m_fixAction->setText(m_fixed ? "Unfix" : "Fix");
+  m_fixAction->setEnabled(isNumber);
+  m_unfixAllAction->setEnabled(isNumber && (m_fixed || m_othersFixed));
+  m_fixAllAction->setEnabled(isNumber && (!m_fixed || !m_allOthersFixed));
+
+  m_removeTieAction->setEnabled(isTie);
+  m_removeAllTiesAction->setEnabled(isTie || m_othersTied);
+
+  if (isNumber) {
     auto validator = new QDoubleValidator(this);
     validator->setDecimals(16);
     m_editor->setValidator(validator);
     m_editor->setText(m_value);
+    m_editor->setToolTip("Edit local parameter value. Press Ctrl+F to fix/unfix it.");
   } else {
     m_editor->setValidator(nullptr);
     m_editor->setText(m_tie);
+    m_editor->setToolTip("Edit local parameter tie.");
   }
+}
+
+/// Open an input dialog to enter a tie expression.
+QString LocalParameterEditor::setTieDialog(QString tie)
+{
+  QInputDialog input;
+  input.setWindowTitle("Set a tie.");
+  input.setTextValue(tie);
+  if (input.exec() == QDialog::Accepted) {
+    return input.textValue();
+  }
+  return "";
 }
 
 } // MDF

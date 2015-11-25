@@ -32,6 +32,7 @@ public:
   QString getTie(int i) const {return m_ties[i];}
   bool areOthersFixed(int i) const;
   bool areAllOthersFixed(int i) const;
+  bool areOthersTied(int i) const;
   private slots:
   void valueChanged(int,int);
   void setAllValues(double);

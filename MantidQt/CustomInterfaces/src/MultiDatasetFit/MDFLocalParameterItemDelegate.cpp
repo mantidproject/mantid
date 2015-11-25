@@ -25,7 +25,8 @@ QWidget* LocalParameterItemDelegate::createEditor(QWidget * parent, const QStyle
   auto row = index.row();
   m_currentEditor = new LocalParameterEditor(
       parent, row, owner()->getValue(row), owner()->isFixed(row),
-      owner()->getTie(row), owner()->areOthersFixed(row), owner()->areAllOthersFixed(row));
+      owner()->getTie(row), owner()->areOthersFixed(row),
+      owner()->areAllOthersFixed(row), owner()->areOthersTied(row));
   connect(m_currentEditor, SIGNAL(setAllValues(double)), this,
           SIGNAL(setAllValues(double)));
   connect(m_currentEditor,SIGNAL(fixParameter(int,bool)),this,SIGNAL(fixParameter(int,bool)));

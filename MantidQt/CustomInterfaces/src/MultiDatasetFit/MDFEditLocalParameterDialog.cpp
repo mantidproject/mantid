@@ -269,7 +269,7 @@ void EditLocalParameterDialog::updateRoleColumn(int index)
   else
   {
     cell->setText("fitted");
-    cell->setForeground(QBrush(Qt::green));
+    cell->setForeground(QBrush(Qt::darkGreen));
   }
 }
 
@@ -291,6 +291,16 @@ bool EditLocalParameterDialog::areAllOthersFixed(int i) const
     if (j != i && !m_fixes[j]) return false;
   }
   return true;
+}
+
+/// Check if there are any other tied parameters
+bool EditLocalParameterDialog::areOthersTied(int i) const
+{
+  for (int j = 0; j < m_fixes.size(); ++j)
+  {
+    if (j != i && !m_ties[j].isEmpty()) return true;
+  }
+  return false;
 }
 
 } // MDF

@@ -23,7 +23,8 @@ class LocalParameterEditor: public QWidget
   Q_OBJECT
 public:
   LocalParameterEditor(QWidget *parent, int index, double value, bool fixed,
-                       QString tie, bool othersFixed, bool allOthersFixed);
+                       QString tie, bool othersFixed, bool allOthersFixed,
+                       bool othersTied);
 signals:
   void setAllValues(double);
   void fixParameter(int,bool);
@@ -42,6 +43,7 @@ private slots:
 private:
   bool eventFilter(QObject *widget, QEvent *evn);
   void setEditorState();
+  static QString setTieDialog(QString tie);
   QLineEdit* m_editor;
   QPushButton* m_button;
   QAction *m_setAllAction;
@@ -59,6 +61,7 @@ private:
   QString m_tie;
   bool m_othersFixed;
   bool m_allOthersFixed;
+  bool m_othersTied;
 };
 
 

@@ -239,6 +239,8 @@ protected:
   bool isTie(QtProperty* prop) const;
   /// Get a tie for a paramater
   std::string getTie(QtProperty* prop) const;
+  /// Remove all tie properties
+  void removeAllTieProperties();
 
   /// Add a constraint property
   QList<AProperty> addConstraintProperties(QtProperty* prop, QString constraint);
