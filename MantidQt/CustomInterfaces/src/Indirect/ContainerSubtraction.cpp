@@ -36,6 +36,10 @@ void ContainerSubtraction::run() {
           sampleWsName.toStdString());
   m_originalSampleUnits = sampleWs->getAxis(0)->unit()->unitID();
 
+  // Check if using shift / scale
+  const bool shift = m_uiForm.ckShiftCan->isChecked();
+  const bool scale = m_uiForm.ckScaleCan->isChecked();
+
   // If not in wavelength then do conversion
   if (m_originalSampleUnits != "Wavelength") {
     g_log.information(
@@ -46,11 +50,17 @@ void ContainerSubtraction::run() {
     absCorProps["SampleWorkspace"] = sampleWsName.toStdString();
   }
 
+  // Construct Can input name
   QString canWsName = m_uiForm.dsContainer->getCurrentDataName();
+  QString canCloneName = canWsName;
+  if (shift) {
+	canCloneName += "_Shifted";
+  }
+
+  // Clone can for use in algorithm
   MatrixWorkspace_sptr canWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           canWsName.toStdString());
-  QString canCloneName = canWsName + "_Shifted";
   IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
   clone->initialize();
   clone->setProperty("InputWorkspace", canWs);
@@ -60,7 +70,7 @@ void ContainerSubtraction::run() {
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           canCloneName.toStdString());
 
-  if (m_uiForm.ckShiftCan->isChecked()) {
+  if (shift) {
     IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
     scaleX->initialize();
     scaleX->setProperty("InputWorkspace", canCloneWs);
@@ -78,7 +88,7 @@ void ContainerSubtraction::run() {
   }
 
   // Check for same binning across sample and container
-  if (m_uiForm.ckShiftCan->isChecked()) {
+  if (shift) {
 	  addRebinStep(canCloneName, sampleWsName);
   }
   else {
@@ -119,8 +129,7 @@ void ContainerSubtraction::run() {
     absCorProps["CanWorkspace"] = canCloneName.toStdString();
   }
 
-  bool useCanScale = m_uiForm.ckScaleCan->isChecked();
-  if (useCanScale) {
+  if (scale) {
     double canScaleFactor = m_uiForm.spCanScale->value();
     applyCorrAlg->setProperty("CanScaleFactor", canScaleFactor);
   }
@@ -197,8 +206,10 @@ bool ContainerSubtraction::validate() {
   UserInputValidator uiv;
 
   // Check valid inputs
-  const bool samValid = uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
-  const bool canValid = uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
+  const bool samValid =
+      uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+  const bool canValid =
+      uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
 
   if (samValid && canValid) {
     // Get Workspaces
@@ -282,15 +293,18 @@ void ContainerSubtraction::plotPreview(int specIndex) {
         "Subtracted", QString::fromStdString(m_pythonExportWsName), specIndex,
         Qt::green);
 
+  const bool shift = m_uiForm.ckShiftCan->isChecked();
+  const bool scale = m_uiForm.ckScaleCan->isChecked();
+
  //Scale can
-  if (m_uiForm.ckScaleCan->isChecked()) {
+  if (scale) {
     auto canName = m_uiForm.dsContainer->getCurrentDataName();
-    if (m_uiForm.ckShiftCan->isChecked()) {
+    if (shift) {
       canName += "_Shifted";
     }
     IAlgorithm_sptr scaleCan = AlgorithmManager::Instance().create("Scale");
     scaleCan->initialize();
-	scaleCan->setProperty("InputWorkspace", canName.toStdString());
+    scaleCan->setProperty("InputWorkspace", canName.toStdString());
     scaleCan->setProperty("OutputWorkspace", "__container_corrected");
     scaleCan->setProperty("Factor", m_uiForm.spCanScale->value());
     scaleCan->setProperty("Operation", "Multiply");
@@ -298,11 +312,11 @@ void ContainerSubtraction::plotPreview(int specIndex) {
   }
 
   // Plot container
-  if (m_uiForm.ckScaleCan->isChecked()) {
+  if (scale) {
     m_uiForm.ppPreview->addSpectrum("Container", "__container_corrected",
                                     specIndex, Qt::red);
   } else {
-    if (m_uiForm.ckShiftCan->isChecked()) {
+    if (shift) {
       m_uiForm.ppPreview->addSpectrum(
           "Container",
           (m_uiForm.dsContainer->getCurrentDataName() + "_Shifted"), specIndex,
