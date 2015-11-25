@@ -422,7 +422,7 @@
        wb_scale_factor=wb-scale-factor;
        monovan_integr_range=abs_units_van_range;
        monovan_lo_value = monovan-integr-min;
-       monovan_hi_value = monovan-integr-max;       
+       monovan_hi_value = monovan-integr-max;
        bkgd_range = background_range;
        background_test_range = diag_background_test_range;
        hard_mask_file=hard_mask;
@@ -448,7 +448,10 @@
     />
 </parameter>
 
-<!-- This parameters are used as corrections for instrument parameters loaded in IDF file -->
+<!-- The same parameters are present in IDF file and here is their duplicate. 
+    These parameters are used as corrections for instrument parameters loaded from nexus IDF file.
+    Duplicate loading of the same parameters is acceptable and performance lose is negligible.
+-->
 <parameter name="TubePressure">
       <value units="atm" val="10.0"/>
 </parameter>
@@ -459,7 +462,7 @@
       <value units="microseconds" val="-5.3"/>
 </parameter>
 
- 
+
   <!-- -->
 </component-link>
 
