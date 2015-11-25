@@ -21,7 +21,10 @@ namespace MDF
 /// @param index :: Index of the spectrum which parameter is edited.
 /// @param fixed :: Is the parameter fixed initially?
 /// @param tie :: Parameter's current tie (or empty string).
-LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index,
+/// @param othersFixed :: True if some other local parameters are fixed.
+/// @param allOthersFixed :: True if all other local parameters are fixed.
+/// @param othersTied :: True if there are other tied parameters.
+  LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index,
                                            double value, bool fixed,
                                            QString tie, bool othersFixed,
                                            bool allOthersFixed, bool othersTied)

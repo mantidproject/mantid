@@ -2298,6 +2298,7 @@ void FunctionBrowser::updateLocalTie(const QString& parName)
     else if (!localParam.tie.isEmpty())
     {
       auto ap = addTieProperty(prop, localParam.tie);
+      (void)ap;
     }
 }
 

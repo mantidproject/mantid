@@ -46,7 +46,8 @@ class DoubleDialogEditorFactory : public QtAbstractEditorFactory<ParameterProper
   Q_OBJECT
 public:
   DoubleDialogEditorFactory(QObject *parent = 0) : QtAbstractEditorFactory<ParameterPropertyManager>(parent) {}
-  QWidget *createEditor(ParameterPropertyManager *manager, QtProperty *property, QWidget *parent)
+  using QtAbstractEditorFactoryBase::createEditor; // Avoid Intel compiler warning
+  QWidget *createEditor(ParameterPropertyManager *, QtProperty *property, QWidget *parent)
   {
     auto editor = new DoubleDialogEditor(property, parent);
     connect(editor, SIGNAL(buttonClicked(QtProperty*)), this, SIGNAL(buttonClicked(QtProperty*)));
@@ -57,8 +58,8 @@ signals:
   void buttonClicked(QtProperty*);
   void closeEditor();
 protected:
-  void connectPropertyManager(ParameterPropertyManager *manager) {}
-  void disconnectPropertyManager(ParameterPropertyManager *manager) {}
+  void connectPropertyManager(ParameterPropertyManager*) {}
+  void disconnectPropertyManager(ParameterPropertyManager*) {}
 };
 
 #endif // DOUBLEDIALOGEDITORFACTORY_H

@@ -38,9 +38,9 @@ QWidget* LocalParameterItemDelegate::createEditor(QWidget * parent, const QStyle
 }
 
 /// Initialize the editor with the current data in the cell.
-void LocalParameterItemDelegate::setEditorData(QWidget * editor, const QModelIndex & index) const
+void LocalParameterItemDelegate::setEditorData(QWidget*, const QModelIndex&) const
 {
-  //QStyledItemDelegate::setEditorData(editor->layout()->itemAt(0)->widget(), index);
+  // Needs to be empty to prevent Qt's default behaviour.
 }
 
 /// Update the data in the cell with the text in the editor.
