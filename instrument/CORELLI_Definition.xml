@@ -744,14 +744,6 @@
       <right-back-top-point x="-0.291933129728" y="0.239703150615" z="0.0"/>
     </hexahedron>
     <algebra val="body : hole0 : hole1 : hole2 : hole3 : hole4 : hole5 : hole6 : hole7 : hole8 : hole9 : hole10 : hole11 : hole12 : hole13 : hole14 : hole15 : hole16 : hole17 : hole18 : hole19 : hole20 : hole21 : hole22 : hole23 : hole24 : hole25 : hole26 : hole27 : hole28 : hole29 : hole30 : hole31 : hole32 : hole33 : hole34 : hole35 : hole36 : hole37 : hole38 : hole39 : hole40 : hole41 : hole42 : hole43 : hole44 : hole45 : hole46 : hole47 : hole48 : hole49 : hole50 : hole51 : hole52 : hole53 : hole54 : hole55 : hole56 : hole57 : hole58 : hole59 : hole60 : hole61 : hole62 : hole63"/>
-    <bounding-box>
-      <x-min val="-0.58"/>
-      <x-max val="0.02"/>
-      <y-min val="-0.3"/>
-      <y-max val="0.3"/>
-      <z-min val="0.0"/>
-      <z-max val="0.02"/>
-    </bounding-box>
   </type>
   <component-link name="correlation-chopper">
     <parameter name="sequence" type="string">
