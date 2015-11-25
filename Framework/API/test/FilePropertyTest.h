@@ -55,48 +55,47 @@ public:
     TS_ASSERT_DIFFERS(ConfigService::Instance().getDataSearchDirs().size(), 0);
   }
 
+  void testLoadPropertyWithEmptyValueIsInvalid() {
+    Mantid::API::FileProperty *fp = new Mantid::API::FileProperty(
+        "Filename", "", Mantid::API::FileProperty::Load);
+    doPropertyTraitTests(*fp, true, false, false);
+    std::string msg = fp->setValue("");
+    TS_ASSERT_DIFFERS("", msg);
+    delete fp;
+  }
+
   void testLoadPropertyNoExtension() {
     Mantid::API::FileProperty *fp = new Mantid::API::FileProperty(
         "Filename", "", Mantid::API::FileProperty::Load);
     doPropertyTraitTests(*fp, true, false, false);
-    TS_ASSERT_EQUALS(fp->getDefaultExt(), "");
-
-    /// Test a file in the test directory
-    const std::string test_file = "LOQ48127.raw";
-    std::string msg = fp->setValue(test_file);
-    TS_ASSERT_EQUALS(msg, "");
-
-    // Absolute path
-    msg = fp->setValue(fp->value());
-    TS_ASSERT_EQUALS(msg, "");
-
+    doExtensionCheck(*fp, "", "LOQ48127.raw", "48098.Q");
     delete fp;
   }
 
-  void testLoadPropertyWithExtension() {
-    std::vector<std::string> exts(1, "raw");
+  void testLoadPropertyWithExtensionAsVector() {
+    std::vector<std::string> exts(1, ".raw");
     Mantid::API::FileProperty *fp = new Mantid::API::FileProperty(
         "Filename", "", Mantid::API::FileProperty::Load, exts);
     doPropertyTraitTests(*fp, true, false, false);
-
-    TS_ASSERT_EQUALS(fp->getDefaultExt(), "raw");
-
-    /// Test a GEM file in the test directory
-    std::string msg = fp->setValue("LOQ48127.raw");
-    TS_ASSERT_EQUALS(msg, "");
-
-    // Check different extension
-    msg = fp->setValue("48098.Q");
-    TS_ASSERT_EQUALS(msg, "");
-
+    doExtensionCheck(*fp, ".raw", "LOQ48127.raw", "48098.Q");
     delete fp;
-    fp = new Mantid::API::FileProperty("Filename", "",
-                                       Mantid::API::FileProperty::Load, exts);
-    // Check empty value
-    msg = fp->setValue("");
-    TS_ASSERT_EQUALS(fp->value(), "");
-    TS_ASSERT_EQUALS(msg, "No file specified.");
+  }
+  
+  void testLoadPropertyWithExtensionAsString() {
+    std::string ext(".raw");
+    Mantid::API::FileProperty *fp = new Mantid::API::FileProperty(
+        "Filename", "", Mantid::API::FileProperty::Load, ext);
+    doPropertyTraitTests(*fp, true, false, false);
+    doExtensionCheck(*fp, ".raw", "LOQ48127.raw", "48098.Q");
+    delete fp;
+  }
 
+
+  void testLoadPropertyWithExtensionAsInitializerList() {
+    Mantid::API::FileProperty *fp = new Mantid::API::FileProperty(
+          "Filename", "", Mantid::API::FileProperty::Load, {".raw"});
+    doPropertyTraitTests(*fp, true, false, false);
+    doExtensionCheck(*fp, ".raw", "LOQ48127.raw", "48098.Q");
     delete fp;
   }
 
@@ -146,19 +145,6 @@ public:
     TS_ASSERT_EQUALS(msg, "");
 
     delete fp;
-  }
-
-  void doPropertyTraitTests(const Mantid::API::FileProperty &fileProp,
-                            const bool loadProp, const bool saveProp,
-                            const bool validByDefault) {
-    // Check type
-    TS_ASSERT_EQUALS(fileProp.isLoadProperty(), loadProp);
-    TS_ASSERT_EQUALS(fileProp.isSaveProperty(), saveProp);
-    if (validByDefault) {
-      TS_ASSERT_EQUALS(fileProp.isValid(), "");
-    } else {
-      TS_ASSERT_DIFFERS(fileProp.isValid(), "");
-    }
   }
 
   void testThatRunNumberReturnsFileWithCorrectPrefix() {
@@ -225,6 +211,40 @@ public:
     delete fp;
     dir.remove(); // clean up your folder
   }
+
+private:
+  
+  void doPropertyTraitTests(const Mantid::API::FileProperty &fileProp,
+                            const bool loadProp, const bool saveProp,
+                            const bool validByDefault) {
+    // Check type
+    TS_ASSERT_EQUALS(fileProp.isLoadProperty(), loadProp);
+    TS_ASSERT_EQUALS(fileProp.isSaveProperty(), saveProp);
+    if (validByDefault) {
+      TS_ASSERT_EQUALS(fileProp.isValid(), "");
+    } else {
+      TS_ASSERT_DIFFERS(fileProp.isValid(), "");
+    }
+  }
+  
+  void doExtensionCheck(Mantid::API::FileProperty &fileProp,
+                        const std::string &defaultExt,
+                        const std::string & match,
+                        const std::string & nomatch) {
+    TS_ASSERT_EQUALS(fileProp.getDefaultExt(), defaultExt);
+    // Filename as given
+    std::string msg = fileProp.setValue(match);
+    TS_ASSERT_EQUALS(msg, "");
+
+    // full path
+    msg = fileProp.setValue(fileProp.value());
+    TS_ASSERT_EQUALS(msg, "");
+
+    // Extension is not mandatory so different also passes
+    msg = fileProp.setValue(nomatch);
+    TS_ASSERT_EQUALS(msg, "");
+  }
+  
 };
 
 #endif

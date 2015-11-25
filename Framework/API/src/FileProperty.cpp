@@ -2,6 +2,7 @@
 // Includes
 //-----------------------------------------------------------------
 #include "MantidAPI/FileProperty.h"
+
 #include "MantidAPI/FileFinder.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DirectoryValidator.h"
@@ -9,10 +10,11 @@
 #include "MantidKernel/FileValidator.h"
 #include "MantidKernel/Strings.h"
 
-#include <Poco/Path.h>
 #include <Poco/File.h>
-#include <cctype>
+#include <Poco/Path.h>
+
 #include <algorithm>
+#include <cctype>
 
 namespace Mantid {
 
@@ -87,6 +89,23 @@ FileProperty::FileProperty(const std::string &name,
       m_oldLoadPropValue(""), m_oldLoadFoundFile("") {
   setUp(ext);
 }
+
+/**
+ * Constructor
+ * @param name ::          The name of the property
+ * @param default_value :: A default value for the property
+ * @param exts ::          The braced-list of allowed extensions
+ * @param action ::        An enum indicating whether this should be a load/save
+ * property
+ * @param direction ::     An optional direction (default=Input)
+ */
+FileProperty::FileProperty(const std::string &name,
+                           const std::string &default_value,
+                           unsigned int action,
+                           std::initializer_list<std::string> exts,
+                           unsigned int direction)
+    : FileProperty(name, default_value, action,
+                   std::vector<std::string>(std::move(exts)), direction) {}
 
 /**
  * Check if this is a load property
