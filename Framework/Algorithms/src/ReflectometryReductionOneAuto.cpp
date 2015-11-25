@@ -531,16 +531,19 @@ ReflectometryReductionOneAuto::sumOverTransmissionGroup(
     WorkspaceGroup_sptr transGroup) {
   // Handle transmission runs
   auto transmissionRunSum = transGroup->getItem(0);
+  MatrixWorkspace_sptr total;
   for (size_t item = 1; item < transGroup->size(); item++) {
     auto plusAlg = this->createChildAlgorithm("Plus");
     plusAlg->setChild(true);
+    // plusAlg->setRethrows(true);
     plusAlg->initialize();
     plusAlg->setProperty("LHSWorkspace", transmissionRunSum);
     plusAlg->setProperty("RHSWorkspace", transGroup->getItem(item));
     plusAlg->setProperty("OutputWorkspace", transmissionRunSum);
     plusAlg->execute();
+    total = plusAlg->getProperty("OutputWorkspace");
   }
-  return transmissionRunSum;
+  return total;
 }
 
 bool ReflectometryReductionOneAuto::processGroups() {
@@ -586,9 +589,13 @@ bool ReflectometryReductionOneAuto::processGroups() {
         AnalysisDataService::Instance().retrieveWS<Workspace>(firstTrans);
     firstTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(firstTransWS);
 
-    if (!firstTransG && !isPolarizationCorrectionOn)
+    if (!firstTransG) {
+      // we only have one transmission workspace, so we use it as it is.
       alg->setProperty("FirstTransmissionRun", firstTrans);
-    else if (group->size() != firstTransG->size())
+    } else if (group->size() != firstTransG->size() &&
+               !isPolarizationCorrectionOn)
+      // if they are not the same size then we cannot associate a transmission
+      // group workspace member with every input group workpspace member.
       throw std::runtime_error("FirstTransmissionRun WorkspaceGroup must be "
                                "the same size as the InputWorkspace "
                                "WorkspaceGroup");
@@ -602,20 +609,20 @@ bool ReflectometryReductionOneAuto::processGroups() {
         AnalysisDataService::Instance().retrieveWS<Workspace>(secondTrans);
     secondTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(secondTransWS);
 
-    if (!secondTransG && !isPolarizationCorrectionOn)
+    if (!secondTransG)
+      // we only have one transmission workspace, so we use it as it is.
       alg->setProperty("SecondTransmissionRun", secondTrans);
-    else if (group->size() != secondTransG->size())
+
+    else if (group->size() != secondTransG->size() &&
+             !isPolarizationCorrectionOn)
+      // if they are not the same size then we cannot associate a transmission
+      // group workspace member with every input group workpspace member.
       throw std::runtime_error("SecondTransmissionRun WorkspaceGroup must be "
                                "the same size as the InputWorkspace "
                                "WorkspaceGroup");
   }
-
-  std::vector<std::string> IvsQGroup, IvsLamGroup;
-
-  // If our transmission run is a group then we can assume
-  // that it was intended to be multiperiod. So we sum over
-  // the workspaces in the group to collapse them down to
-  // one transmission workspace if Polarizaiton Correction is on.
+  // If our transmission run is a group and PolarizationCorrection is on
+  // then we sum our transmission group members.
   //
   // Otherwise, if polarization correction is off, we process them
   // using one transmission group member at a time.
@@ -628,6 +635,7 @@ bool ReflectometryReductionOneAuto::processGroups() {
     auto secondTransmissionSum = sumOverTransmissionGroup(secondTransG);
     alg->setProperty("SecondTransmissionRun", secondTransmissionSum);
   }
+  std::vector<std::string> IvsQGroup, IvsLamGroup;
 
   // Execute algorithm over each group member (or period, if this is
   // multiperiod)
@@ -640,7 +648,7 @@ bool ReflectometryReductionOneAuto::processGroups() {
     if (firstTransG && !isPolarizationCorrectionOn) // polarization off
       alg->setProperty("FirstTransmissionRun", firstTransG->getItem(i)->name());
     if (secondTransG && !isPolarizationCorrectionOn) // polarization off
-      alg->setProperty("FirstTransmissionRun",
+      alg->setProperty("SecondTransmissionRun",
                        secondTransG->getItem(i)->name());
     alg->setProperty("InputWorkspace", group->getItem(i)->name());
     alg->setProperty("OutputWorkspace", IvsQName);
