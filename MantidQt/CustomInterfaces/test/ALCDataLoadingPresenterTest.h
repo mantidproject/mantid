@@ -43,6 +43,7 @@ public:
   MOCK_CONST_METHOD0(redPeriod, std::string());
   MOCK_CONST_METHOD0(greenPeriod, std::string());
   MOCK_CONST_METHOD0(subtractIsChecked, bool());
+  MOCK_CONST_METHOD0(autoString, std::string());
 
   MOCK_METHOD0(initialize, void());
   MOCK_METHOD2(setDataCurve, void(const QwtData&, const std::vector<double>&));
