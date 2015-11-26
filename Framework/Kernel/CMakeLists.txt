@@ -5,6 +5,7 @@ set ( SRC_FILES
 	src/ArrayProperty.cpp
 	src/Atom.cpp
 	src/BinFinder.cpp
+	src/BinaryStreamReader.cpp
 	src/CPUTimer.cpp
 	src/CatalogInfo.cpp
 	src/ChecksumHelper.cpp
@@ -134,6 +135,7 @@ set ( INC_FILES
 	inc/MantidKernel/Atom.h
 	inc/MantidKernel/BinFinder.h
 	inc/MantidKernel/BinaryFile.h
+	inc/MantidKernel/BinaryStreamReader.h
 	inc/MantidKernel/BoundedValidator.h
 	inc/MantidKernel/CPUTimer.h
 	inc/MantidKernel/Cache.h
@@ -192,7 +194,6 @@ set ( INC_FILES
 	inc/MantidKernel/MRUList.h
 	inc/MantidKernel/MagneticFormFactorTable.h
 	inc/MantidKernel/MagneticIon.h
-	inc/MantidKernel/make_unique.h
 	inc/MantidKernel/MandatoryValidator.h
 	inc/MantidKernel/MantidVersion.h
 	inc/MantidKernel/MaskedProperty.h
@@ -274,6 +275,7 @@ set ( INC_FILES
 	inc/MantidKernel/WriteLock.h
 	inc/MantidKernel/XMLInstantiator.h
 	inc/MantidKernel/cow_ptr.h
+	inc/MantidKernel/make_unique.h
 )
 
 set ( TEST_FILES
@@ -283,6 +285,7 @@ set ( TEST_FILES
 	AtomTest.h
 	BinFinderTest.h
 	BinaryFileTest.h
+	BinaryStreamReaderTest.h
 	BoseEinsteinDistributionTest.h
 	BoundedValidatorTest.h
 	CPUTimerTest.h
