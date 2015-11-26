@@ -183,8 +183,7 @@ void EnggDiffractionPresenter::processFocusBasic() {
       isValidMultiRunNumber(m_view->focusingRunNo());
   const std::vector<bool> banks = m_view->focusingBanks();
 
-  int focusMode = m_view->currentMultiRunMode();
-
+  // check if valid run number provided before focusin
   try {
     inputChecksBeforeFocusBasic(multi_RunNo, banks);
   } catch (std::invalid_argument &ia) {
@@ -193,12 +192,21 @@ void EnggDiffractionPresenter::processFocusBasic() {
     return;
   }
 
+  int focusMode = m_view->currentMultiRunMode();
   if (focusMode == 0) {
     g_log.debug() << " focus mode selected Individual Run Files Separately "
                   << std::endl;
+
+    // start focusing
     startFocusing(multi_RunNo, banks, "", "");
+
+    // counter resetted to prepare for the next focusing run
+    g_plottingCounter = 0;
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
+    /**
+    Todo
+    **/
   }
 }
 
@@ -208,8 +216,7 @@ void EnggDiffractionPresenter::processFocusCropped() {
   const std::vector<bool> banks = m_view->focusingBanks();
   const std::string specNos = m_view->focusingCroppedSpectrumIDs();
 
-  int focusMode = m_view->currentMultiRunMode();
-
+  // check if valid run number provided before focusin
   try {
     inputChecksBeforeFocusCropped(multi_RunNo, banks, specNos);
   } catch (std::invalid_argument &ia) {
@@ -218,10 +225,17 @@ void EnggDiffractionPresenter::processFocusCropped() {
         ia.what());
     return;
   }
+
+  int focusMode = m_view->currentMultiRunMode();
   if (focusMode == 0) {
     g_log.debug() << " focus mode selected Individual Run Files Separately "
                   << std::endl;
+
     startFocusing(multi_RunNo, banks, specNos, "");
+
+    // counter resetted to prepare for the next focusing run
+    g_plottingCounter = 0;
+
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
   }
@@ -232,8 +246,7 @@ void EnggDiffractionPresenter::processFocusTexture() {
       isValidMultiRunNumber(m_view->focusingTextureRunNo());
   const std::string dgFile = m_view->focusingTextureGroupingFile();
 
-  int focusMode = m_view->currentMultiRunMode();
-
+  // check if valid run number provided before focusing
   try {
     inputChecksBeforeFocusTexture(multi_RunNo, dgFile);
   } catch (std::invalid_argument &ia) {
@@ -242,10 +255,16 @@ void EnggDiffractionPresenter::processFocusTexture() {
         ia.what());
     return;
   }
+
+  int focusMode = m_view->currentMultiRunMode();
   if (focusMode == 0) {
     g_log.debug() << " focus mode selected Individual Run Files Separately "
                   << std::endl;
     startFocusing(multi_RunNo, std::vector<bool>(), "", dgFile);
+
+    // counter resetted to prepare for the next focusing run
+    g_plottingCounter = 0;
+
   } else if (focusMode == 1) {
     g_log.debug() << " focus mode selected Focus Sum Of Files " << std::endl;
   }
@@ -1850,24 +1869,31 @@ void EnggDiffractionPresenter::rebinningFinished() {
  * @param bank the number of bank
  */
 void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName,
-                                                    int bank) {
-  const bool plotFocusedWS = m_view->focusedOutWorkspace();
-  int plotType = m_view->currentPlotType();
-  if (plotFocusedWS) {
-    if (plotType == 0) {
-      if (bank == 1)
-        m_view->plotFocusedSpectrum(outWSName);
-      if (bank >= 2)
-        m_view->plotReplacingWindow(outWSName);
-    } else if (1 == plotType) {
-      if (bank == 1)
-        m_view->plotFocusedSpectrum(outWSName);
-      if (bank >= 2)
-        m_view->plotWaterfallSpectrum(outWSName);
-    } else if (2 == plotType) {
-      m_view->plotFocusedSpectrum(outWSName);
-    }
-  }
+	int bank) {
+	const bool plotFocusedWS = m_view->focusedOutWorkspace();
+	enum PlotMode { REPLACING = 0, WATERFALL = 1, MULTIPLE = 2 };
+
+	int plotType = m_view->currentPlotType();
+
+	if (plotFocusedWS) {
+		if (plotType == PlotMode::REPLACING) {
+			if (g_plottingCounter == 1)
+				m_view->plotFocusedSpectrum(outWSName);
+			else
+				m_view->plotReplacingWindow(outWSName);
+
+		}
+		else if (plotType == PlotMode::WATERFALL) {
+			if (g_plottingCounter == 1)
+				m_view->plotFocusedSpectrum(outWSName);
+			else
+				m_view->plotWaterfallSpectrum(outWSName);
+
+		}
+		else if (plotType == PlotMode::MULTIPLE) {
+			m_view->plotFocusedSpectrum(outWSName);
+		}
+	}
 }
 
 /**
