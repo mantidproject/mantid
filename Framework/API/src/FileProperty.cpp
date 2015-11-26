@@ -64,13 +64,13 @@ void addExtension(const std::string &extension,
 //-----------------------------------------------------------------
 /**
  * Constructor
- * @param name ::          The name of the property
- * @param default_value :: A default value for the property
- * @param exts ::          The allowed extensions, the front entry in the vector
- * will be the default extension
- * @param action ::        An enum indicating whether this should be a load/save
+ * @param name The name of the property
+ * @param defaultValue A default value for the property
+ * @param action Inndicate whether this should be a load/save
  * property
- * @param direction ::     An optional direction (default=Input)
+ * @param exts The allowed extensions. The front entry in the vector
+ * will be the default extension
+ * @param direction An optional direction (default=Input)
  */
 FileProperty::FileProperty(const std::string &name,
                            const std::string &defaultValue, unsigned int action,
