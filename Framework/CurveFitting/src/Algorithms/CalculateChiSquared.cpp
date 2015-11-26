@@ -250,7 +250,7 @@ public:
                               bool &ok) {
 
     auto base = ChebfunBase::bestFitAnyTolerance(lBound, rBound, *this, P, A,
-                                                 1.0, 1e-4, 129);
+                                                 1e-4, 129, 1.0);
     ok = bool(base);
     if (!base) {
       base = boost::make_shared<ChebfunBase>(10, lBound, rBound, 1e-4);

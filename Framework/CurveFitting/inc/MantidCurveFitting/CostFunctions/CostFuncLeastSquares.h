@@ -16,9 +16,6 @@
 
 namespace Mantid {
 namespace CurveFitting {
-class SeqDomain;
-class ParDomain;
-
 namespace CostFunctions {
 /** Cost function for least squares
 
@@ -36,26 +33,6 @@ public:
   /// Get short name of minimizer - useful for say labels in guis
   std::string shortName() const override { return "Chi-sq"; };
 
-  /// Calculate value of cost function
-  double val() const override;
-
-  /// Calculate the derivatives of the cost function
-  /// @param der :: Container to output the derivatives
-  void deriv(std::vector<double> &der) const override;
-
-  /// Calculate the value and the derivatives of the cost function
-  /// @param der :: Container to output the derivatives
-  /// @return :: The value of the function
-  double valAndDeriv(std::vector<double> &der) const override;
-
-  virtual double valDerivHessian(bool evalDeriv = true,
-                                 bool evalHessian = true) const;
-  const GSLVector &getDeriv() const;
-  const GSLMatrix &getHessian() const;
-  void push();
-  void pop();
-  void drop();
-
 protected:
   void calActiveCovarianceMatrix(GSLMatrix &covar,
                                  double epsrel = 1e-8) override;
@@ -70,20 +47,6 @@ protected:
   /// Get mapped weights from FunctionValues
   virtual std::vector<double>
   getFitWeights(API::FunctionValues_sptr values) const;
-
-  /// Flag to include constraint in cost function value
-  bool m_includePenalty;
-
-  mutable double m_value;
-  mutable GSLVector m_der;
-  mutable GSLMatrix m_hessian;
-
-  mutable bool m_pushed;
-  mutable double m_pushedValue;
-  mutable GSLVector m_pushedParams;
-
-  friend class CurveFitting::SeqDomain;
-  friend class CurveFitting::ParDomain;
 
   double m_factor;
 };

@@ -72,6 +72,9 @@ private:
   /// Calcualte sqrt(W). Final cost function = sum_i [ (obs_i - cal_i) / (sigma
   /// * sqrt(W))]**2
   double calSqrtW(API::FunctionValues_sptr values) const;
+
+  friend class CurveFitting::SeqDomain;
+  friend class CurveFitting::ParDomain;
 };
 
 } // namespace CostFunctions
