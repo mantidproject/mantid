@@ -4892,8 +4892,9 @@ bool SANSRunWindow::isUserFileValid() {
 
   if (!isValid) {
     QMessageBox::critical(this, "User File extension issue",
-                                "The specified user file does not\n"
-                                "seem to have a valid file extension.");
+                                "The specified user file does not seem to have a \n"
+				"valid file extension. Make sure that the user file \n" 
+				"has a .txt extension.");
   }
 
   return isValid;
