@@ -166,8 +166,31 @@ class ImagingIMATTomoTests(unittest.TestCase):
                               msg="Circular mask: wrong value found inside. Expected: {0}, found: {1}".
                               format(expected_val, peek_in))
 
+    def test_remove_stripes_ok(self):
+        import IMAT.prep as iprep
+
+        stripped = iprep.filters.remove_stripes_ring_artifacts(self._data_vol,
+                                                               'fourier-wavelet')
+
+        self.assertTrue(isinstance(self._data_vol, np.ndarray))
+        self.assertTrue(isinstance(stripped, np.ndarray))
+        self.assertEquals(stripped.shape, self._data_vol.shape)
+        self.assertAlmostEquals(stripped[0, 100, 123], 0.37813)
+
     def test_remove_stripes_raises(self):
         import IMAT.prep as iprep
+
+        with self.assertRaises(ValueError):
+            iprep.filters.circular_mask('fail!')
+
+        with self.assertRaises(ValueError):
+            iprep.filters.circular_mask(np.zeros((2,2,2)), 'fail-method')
+
+        with self.assertRaises(ValueError):
+            iprep.filters.circular_mask(np.zeros((3,3)))
+
+        with self.assertRaises(ValueError):
+            iprep.filters.circular_mask(np.zeros((1,1,2,2)))
 
         with self.assertRaises(ValueError):
             iprep.filters.remove_stripes_ring_artifacts(self._data_vol, '')
