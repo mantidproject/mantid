@@ -65,10 +65,10 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
                                                                        normalization_ratio = normalization_ratio)
 
         # Remove the detectors which are unwanted
-        dark_run_detector_and_monitor_corrected = self._remove_unwanted_detectors_and_monitors(dark_run_normalized)
+        dark_run_normalized = self._remove_unwanted_detectors_and_monitors(dark_run_normalized)
 
         # Subtract the normalizaed dark run from the SANS workspace
-        output_ws = self._subtract_dark_run_from_sans_data(workspace, dark_run_detector_and_monitor_corrected)
+        output_ws = self._subtract_dark_run_from_sans_data(workspace, dark_run_normalized)
 
         self.setProperty("OutputWorkspace", output_ws)
 
@@ -87,7 +87,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
     def _subtract_dark_run_from_sans_data(self, workspace, dark_run):
         # Subtract the dark_run from the workspace
         subtracted_ws_name = "_dark_run_corrected_ws"
-        alg_minus = AlgorithmManager.create("Minus")
+        alg_minus = AlgorithmManager.createUnmanaged("Minus")
         alg_minus.initialize()
         alg_minus.setChild(True)
         alg_minus.setProperty("LHSWorkspace", workspace)
@@ -98,27 +98,31 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
 
     def _prepare_non_uniform_correction(self, workspace, dark_run, normalization_ratio):
         # Make sure that the binning is the same for the scattering data and the dark run
+        dark_run = self._get_cloned(dark_run)
+        dark_run = self._rebin_dark_run(dark_run, workspace)
+        # Scale with the normalization factor
+        return self._scale_dark_run(dark_run, normalization_ratio)
+
+    def _rebin_dark_run(self, dark_run, workspace):
+        dark_run_rebin_name = "_dark_run_rebinned"
+        alg_rebin = AlgorithmManager.createUnmanaged("RebinToWorkspace")
+        alg_rebin.initialize()
+        alg_rebin.setChild(True)
+        alg_rebin.setProperty("WorkspaceToRebin", dark_run)
+        alg_rebin.setProperty("WorkspaceToMatch", workspace)
+        alg_rebin.setProperty("OutputWorkspace", dark_run_rebin_name)
+        alg_rebin.execute()
+        return alg_rebin.getProperty("OutputWorkspace").value
+
+    def _get_cloned(self, dark_run):
         dark_run_clone_name = dark_run.name() + "_cloned"
-        alg_clone = AlgorithmManager.create("CloneWorkspace")
+        alg_clone = AlgorithmManager.createUnmanaged("CloneWorkspace")
         alg_clone.initialize()
         alg_clone.setChild(True)
         alg_clone.setProperty("InputWorkspace", dark_run)
         alg_clone.setProperty("OutputWorkspace", dark_run_clone_name)
         alg_clone.execute()
-        dark_run_clone = alg_clone.getProperty("OutputWorkspace").value
-
-        dark_run_rebin_name = "_dark_run_rebinned"
-        alg_rebin = AlgorithmManager.create("RebinToWorkspace")
-        alg_rebin.initialize()
-        alg_rebin.setChild(True)
-        alg_rebin.setProperty("WorkspaceToRebin", dark_run_clone)
-        alg_rebin.setProperty("WorkspaceToMatch", workspace)
-        alg_rebin.setProperty("OutputWorkspace", dark_run_rebin_name)
-        alg_rebin.execute()
-        dark_run_rebinned = alg_rebin.getProperty("OutputWorkspace").value
-
-        # Scale with the normalization factor
-        return self._scale_dark_run(dark_run_rebinned, normalization_ratio)
+        return alg_clone.getProperty("OutputWorkspace").value
 
     def _prepare_uniform_correction(self, workspace, dark_run, normalization_ratio, do_mean):
         # First we need to integrate from the dark_run. This happens in each bin
@@ -143,7 +147,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         @returns an integrated dark run
         '''
         dark_run_integrated_name = "_dark_run_integrated"
-        alg_integrate = AlgorithmManager.create("Integration")
+        alg_integrate = AlgorithmManager.createUnmanaged("Integration")
         alg_integrate.initialize()
         alg_integrate.setChild(True)
         alg_integrate.setProperty("InputWorkspace", dark_run)
@@ -159,7 +163,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         @returns a scaled dark run
         '''
         dark_run_scaled_name = "_dark_run_scaled"
-        alg_scale  = AlgorithmManager.create("Scale")
+        alg_scale  = AlgorithmManager.createUnmanaged("Scale")
         alg_scale.initialize()
         alg_scale.setChild(True)
         alg_scale.setProperty("InputWorkspace", dark_run)
@@ -178,7 +182,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         @returns an averaged, integrated dark run
         '''
         dark_run_summed_name= "_summed_spectra"
-        alg_sum  = AlgorithmManager.create("SumSpectra")
+        alg_sum  = AlgorithmManager.createUnmanaged("SumSpectra")
         alg_sum.initialize()
         alg_sum.setChild(True)
         alg_sum.setProperty("InputWorkspace",  dark_run_integrated)
@@ -296,7 +300,7 @@ class DarkRunMonitorAndDetectorRemover(object):
         scale_factor = 0.0
         dark_run_scaled_name = "dark_run_scaled"
 
-        alg_scale  = AlgorithmManager.create("Scale")
+        alg_scale  = AlgorithmManager.createUnmanaged("Scale")
         alg_scale.initialize()
         alg_scale.setChild(True)
         alg_scale.setProperty("InputWorkspace", dark_run)

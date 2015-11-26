@@ -66,7 +66,7 @@ class DarkRunCorrection(object):
 
         # Run the correction algorithm with the user settings
         corrected_ws_name = scatter_workspace.name() + "_dark_workspace_corrected"
-        alg_dark = AlgorithmManager.create("SANSDarkRunBackgroundCorrection")
+        alg_dark = AlgorithmManager.createUnmanaged("SANSDarkRunBackgroundCorrection")
         alg_dark.initialize()
         alg_dark.setChild(True)
         alg_dark.setProperty("InputWorkspace", scatter_workspace)

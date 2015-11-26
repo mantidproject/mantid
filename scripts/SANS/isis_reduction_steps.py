@@ -1292,7 +1292,7 @@ class DarkRunSubtraction(object):
         @returns the rebinned dark run workspace
         '''
         rebinned_name = workspace.name()+"_rebinned"
-        alg_rebin = AlgorithmManager.create("RebinToWorkspace")
+        alg_rebin = AlgorithmManager.createUnmanaged("RebinToWorkspace")
         alg_rebin.initialize()
         alg_rebin.setChild(True)
         alg_rebin.setProperty("WorkspaceToRebin", dark_run_ws)
@@ -1304,7 +1304,7 @@ class DarkRunSubtraction(object):
 
         # Load the Monitors of the event workspace
         monitors_name = workspace.name() + "_monitors"
-        alg_load_monitors = AlgorithmManager.create("LoadNexusMonitors")
+        alg_load_monitors = AlgorithmManager.createUnmanaged("LoadNexusMonitors")
         alg_load_monitors.initialize()
         alg_load_monitors.setChild(True)
         alg_load_monitors.setProperty("Filename", dark_run_file_path)
@@ -1322,7 +1322,7 @@ class DarkRunSubtraction(object):
         monitors_rebinned_part = alg_rebin.getProperty("OutputWorkspace").value
 
         # Conjoin the monitors and the dark run workspace
-        alg_conjoin = AlgorithmManager.create("ConjoinWorkspaces")
+        alg_conjoin = AlgorithmManager.createUnmanaged("ConjoinWorkspaces")
         alg_conjoin.initialize()
         alg_conjoin.setChild(True)
         alg_conjoin.setProperty("InputWorkspace1", event_rebinned_part)
@@ -1358,7 +1358,7 @@ class DarkRunSubtraction(object):
         try:
             dark_run_file_path, dark_run_ws_name = getFileAndName(setting.run_number)
             dark_run_file_path = dark_run_file_path.replace("\\", "/")
-            alg_load = AlgorithmManager.create("Load")
+            alg_load = AlgorithmManager.createUnmanaged("Load")
             alg_load.initialize()
             alg_load.setChild(True)
             alg_load.setProperty("Filename", dark_run_file_path)
@@ -2746,7 +2746,8 @@ class SliceEvent(ReductionStep):
 
         # If the user has selected a dark run subtraction then it will be performed here
         if self._dark_run_subtraction.has_dark_runs():
-            ws_subtracted = self._dark_run_subtraction.execute(ws_for_dark_run)
+            rebinned_ws = getWorkspaceReference(workspace)
+            ws_subtracted = self._dark_run_subtraction.execute(rebinned_ws)
             # We need to replace the workspace in the ADS
             mtd.addOrReplace(ws_name, ws_subtracted)
 

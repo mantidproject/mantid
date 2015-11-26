@@ -467,7 +467,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
 
     def _do_run_dark_subtraction(self, scatter, dark_run, mean, uniform, normalization_ratio,
                                  out_ws_name, applyToMonitors, applyToDetectors, selected_monitor):
-        alg_dark  = AlgorithmManager.create("SANSDarkRunBackgroundCorrection")
+        alg_dark  = AlgorithmManager.createUnmanaged("SANSDarkRunBackgroundCorrection")
         alg_dark.initialize()
         alg_dark.setChild(True)
         alg_dark.setProperty("InputWorkspace", scatter)
@@ -517,7 +517,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
         if as_dark_run:
             out_ws_name = "dark_run_workspace_test"
         
-        alg_load  = AlgorithmManager.create("LoadNexusProcessed")
+        alg_load  = AlgorithmManager.createUnmanaged("LoadNexusProcessed")
         alg_load.initialize()
         alg_load.setChild(True)
         alg_load.setProperty("Filename", filename)
