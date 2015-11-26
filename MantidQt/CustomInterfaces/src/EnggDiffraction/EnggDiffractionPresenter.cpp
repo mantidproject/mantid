@@ -1356,9 +1356,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     // alg->setProperty(DetectorPositions, TableWorkspace)
     alg->execute();
     g_plottingCounter++;
-
-	// plot Focused workspace according to the data type selected
-    plotFocusedWorkspace(outWSName, g_plottingCounter);
+    plotFocusedWorkspace(outWSName);
 
   } catch (std::runtime_error &re) {
     g_log.error() << "Error in calibration. ",
@@ -1865,10 +1863,8 @@ void EnggDiffractionPresenter::rebinningFinished() {
 * python function to apply during first bank and second bank
 *
 * @param outWSName title of the focused workspace
-* @param plotCounter to check if it is first plot
 */
-void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName,
-                                                    int plotCounter) {
+void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName) {
   const bool plotFocusedWS = m_view->focusedOutWorkspace();
   enum PlotMode { REPLACING = 0, WATERFALL = 1, MULTIPLE = 2 };
 
@@ -1876,13 +1872,13 @@ void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName,
 
   if (plotFocusedWS) {
     if (plotType == PlotMode::REPLACING) {
-      if (plotCounter == 1)
+      if (g_plottingCounter == 1)
         m_view->plotFocusedSpectrum(outWSName);
       else
         m_view->plotReplacingWindow(outWSName);
 
     } else if (plotType == PlotMode::WATERFALL) {
-      if (plotCounter == 1)
+      if (g_plottingCounter == 1)
         m_view->plotFocusedSpectrum(outWSName);
       else
         m_view->plotWaterfallSpectrum(outWSName);
