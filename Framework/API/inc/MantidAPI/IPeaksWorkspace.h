@@ -54,9 +54,7 @@ public:
   virtual ~IPeaksWorkspace();
 
   /// Returns a clone of the workspace
-  IPeaksWorkspace_uptr clone() const {
-    return IPeaksWorkspace_uptr(doClone());
-  }
+  IPeaksWorkspace_uptr clone() const { return IPeaksWorkspace_uptr(doClone()); }
 
   //---------------------------------------------------------------------------------------------
   /** @return the number of peaks

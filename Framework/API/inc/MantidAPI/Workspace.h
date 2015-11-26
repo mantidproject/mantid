@@ -75,9 +75,7 @@ public:
    * - Covariant return types are in conflict with smart pointers, but if
    *   clone() is not virtual this is a non-issue.
    */
-  Workspace_uptr clone() const {
-    return Workspace_uptr(doClone());
-  }
+  Workspace_uptr clone() const { return Workspace_uptr(doClone()); }
 
   // DataItem interface
   /// Name

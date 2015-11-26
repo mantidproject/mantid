@@ -124,9 +124,7 @@ public:
   virtual ~ITableWorkspace() {}
 
   /// Returns a clone of the workspace
-  ITableWorkspace_uptr clone() const {
-    return ITableWorkspace_uptr(doClone());
-  }
+  ITableWorkspace_uptr clone() const { return ITableWorkspace_uptr(doClone()); }
 
   /// Return the workspace typeID
   virtual const std::string id() const { return "ITableWorkspace"; }
