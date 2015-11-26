@@ -54,8 +54,8 @@ public:
   virtual ~IPeaksWorkspace();
 
   /// Returns a clone of the workspace
-  std::unique_ptr<IPeaksWorkspace> clone() const {
-    return std::unique_ptr<IPeaksWorkspace>(doClone());
+  IPeaksWorkspace_uptr clone() const {
+    return IPeaksWorkspace_uptr(doClone());
   }
 
   //---------------------------------------------------------------------------------------------
