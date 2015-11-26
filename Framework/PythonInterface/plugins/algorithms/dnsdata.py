@@ -74,15 +74,19 @@ class DNSdata(object):
 
             # parse each block
             # parse block 0 (header)
+            # if header does not start with # DNS: raise Exception "wrong file format" else
+            if not blocks[0].startswith('# DNS'):
+                raise RuntimeError("The file %s does not contain valid DNS data format." % filename)
+
             res = parse_header(blocks[0])
-            # if not res: raise Exception "wrong file format" else
+            # try to parse parameters, perform nothing if not successfull: they may be empty
             try:
                 self.run_number = res['file']
                 self.experiment_number = res['exp']
                 self.sample_name = res['sample']
                 self.userid = res['userid']
             except:
-                raise RuntimeError("The file %s does not contain valid DNS data format." % filename)
+                pass
             # parse block 1 (general information)
             b1splitted = [s.strip() for s in blocks[1].split('#')]
             b1rest = [el for el in b1splitted]
